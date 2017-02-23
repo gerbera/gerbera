@@ -28,26 +28,26 @@
 */
 
 /// \file youtube_video_url.cc
-/// \brief Definitions of the Transcoding classes.
+/// \brief Definitions of the Transcoding classes. 
 
 #ifdef YOUTUBE
 
 #include <pthread.h>
 
+#include "youtube_video_url.h"
 #include "tools.h"
 #include "url.h"
-#include "youtube_video_url.h"
 
 using namespace zmm;
 
-#define YOUTUBE_URL_PARAMS_REGEXP "var swfHTML.*\\;"
+#define YOUTUBE_URL_PARAMS_REGEXP   "var swfHTML.*\\;"
 #define YOUTUBE_URL_LOCATION_REGEXP "\nLocation: (http://[^\n]+)\n"
-#define YOUTUBE_URL_WATCH "http://www.youtube.com/watch?v="
-#define YOUTUBE_URL_GET "http://www.youtube.com/get_video?"
-#define YOUTUBE_URL_PARAM_VIDEO_ID "video_id"
-#define YOUTUBE_URL_PARAM_T_REGEXP ".*&t=([^&]+)&"
-#define YOUTUBE_URL_PARAM_T "t"
-#define YOUTUBE_IS_HD_AVAILABLE_REGEXP "IS_HD_AVAILABLE[^:]*: *([^,]*)"
+#define YOUTUBE_URL_WATCH           "http://www.youtube.com/watch?v="
+#define YOUTUBE_URL_GET             "http://www.youtube.com/get_video?" 
+#define YOUTUBE_URL_PARAM_VIDEO_ID  "video_id"
+#define YOUTUBE_URL_PARAM_T_REGEXP  ".*&t=([^&]+)&"
+#define YOUTUBE_URL_PARAM_T         "t"
+#define YOUTUBE_IS_HD_AVAILABLE_REGEXP  "IS_HD_AVAILABLE[^:]*: *([^,]*)"
 YouTubeVideoURL::YouTubeVideoURL()
 {
     curl_handle = curl_easy_init();
@@ -69,7 +69,7 @@ YouTubeVideoURL::YouTubeVideoURL()
     // from multiple threads
     pid = pthread_self();
 }
-
+    
 YouTubeVideoURL::~YouTubeVideoURL()
 {
     if (curl_handle)
@@ -81,7 +81,7 @@ String YouTubeVideoURL::getVideoURL(String video_id, bool mp4, bool hd)
     String flv_location;
     String watch;
 
-    /*
+   /*
 // ###########################################################
 
     String swfargs = read_text_file("/home/jin/Work/UPnP/MediaTomb/YouTube/swf_args_new2.txt");
@@ -99,7 +99,8 @@ String YouTubeVideoURL::getVideoURL(String video_id, bool mp4, bool hd)
     throw _Exception(_("OVER"));
 */
 
-    // ###########################################################
+// ###########################################################
+
 
     if (!string_ok(video_id))
         throw _Exception(_("No video ID specified!"));
@@ -125,46 +126,50 @@ String YouTubeVideoURL::getVideoURL(String video_id, bool mp4, bool hd)
      * Suggestions / feedback  -> bas-patch@tcfaa.nl
      *
      * Regards, Bas Nedermeijer
-     */
+     */ 
 
     int pipefd[2];
     pipe(pipefd);
 
-    if (fork() == 0) {
+    if (fork() == 0)
+    {
         // close reading end in the child
         close(pipefd[0]);
 
         // send stdout to the pipe
-        dup2(pipefd[1], 1);
+        dup2(pipefd[1], 1); 
         // send stderr to the pipe
-        dup2(pipefd[1], 2);
+        dup2(pipefd[1], 2); 
 
         // this descriptor is no longer needed
-        close(pipefd[1]);
+        close(pipefd[1]); 
 
         // This code assumes youtube-dl is available for usage.
-        execl("/usr/bin/youtube-dl", "/usr/bin/youtube-dl", "-g", watch.c_str(), NULL);
+        execl("/usr/bin/youtube-dl", "/usr/bin/youtube-dl","-g",watch.c_str(),NULL);
         return String();
-    } else {
+    }
+    else
+    {
         // parent
         char buffery[8192];
         memset(&buffery[0], 0, sizeof(buffery));
 
-        close(pipefd[1]); // close the write end of the pipe in the parent
+        close(pipefd[1]);  // close the write end of the pipe in the parent
 
         // Hopefully the read is never called twice, otherwise the buffer will become corrupt.
-        while (read(pipefd[0], buffery, sizeof(buffery)) != 0) {
+        while (read(pipefd[0], buffery, sizeof(buffery)) != 0)
+        {
         }
 
-        log_debug("------> GOT BUFFER %s\n", buffery);
-        String result = _(buffery);
+       log_debug("------> GOT BUFFER %s\n", buffery);
+       String result = _(buffery);
 
-        result = trim_string(result);
+       result = trim_string(result);
 
-        log_debug("------> GOT BUFFER (after trimming) %s\n", result.c_str());
+       log_debug("------> GOT BUFFER (after trimming) %s\n", result.c_str());
 
-        return result;
+       return result;
     }
 }
 
-#endif //YOUTUBE
+#endif//YOUTUBE

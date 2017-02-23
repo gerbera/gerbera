@@ -32,17 +32,15 @@
 #ifndef __ATOMIC_H__
 #define __ATOMIC_H__
 
-typedef struct {
-    volatile int x;
-} mt_atomic_t;
+typedef struct { volatile int x; } mt_atomic_t;
 //#define ATOMIC_INIT(y) {(y)}
 
-static inline void atomic_set(mt_atomic_t* at, int val)
+static inline void atomic_set(mt_atomic_t *at, int val)
 {
     at->x = val;
 }
 
-static inline int atomic_get(mt_atomic_t* at)
+static inline int atomic_get(mt_atomic_t *at)
 {
     return (at->x);
 }
@@ -50,76 +48,78 @@ static inline int atomic_get(mt_atomic_t* at)
 #undef ATOMIC_DEFINED
 
 #ifdef ATOMIC_X86_SMP
-#ifdef ATOMIC_X86
-#error ATOMIC_X86_SMP and ATOMIC_X86 are defined at the same time!
-#endif
-#define ASM_LOCK "lock; "
+    #ifdef ATOMIC_X86
+        #error ATOMIC_X86_SMP and ATOMIC_X86 are defined at the same time!
+    #endif
+    #define ASM_LOCK "lock; "
 #endif
 
 #ifdef ATOMIC_X86
-#define ASM_LOCK
+    #define ASM_LOCK
 #endif
 
 #if defined(ATOMIC_X86_SMP) || defined(ATOMIC_X86)
-#define ATOMIC_DEFINED
-static inline void atomic_inc(mt_atomic_t* at)
-{
-    __asm__ __volatile__(
-        ASM_LOCK "incl %0"
-        : "=m"(at->x)
-        : "m"(at->x)
-        : "cc");
-}
-
-static inline bool atomic_dec(mt_atomic_t* at)
-{
-    unsigned char c;
-    __asm__ __volatile__(
-        ASM_LOCK "decl %0; sete %1"
-        : "=m"(at->x), "=g"(c)
-        : "m"(at->x)
-        : "cc");
-    return (c != 0);
-}
+    #define ATOMIC_DEFINED
+    static inline void atomic_inc(mt_atomic_t *at)
+    {
+        __asm__ __volatile__(
+            ASM_LOCK "incl %0"
+            :"=m" (at->x)
+            :"m" (at->x)
+            :"cc"
+        );
+    }
+    
+    static inline bool atomic_dec(mt_atomic_t *at)
+    {
+        unsigned char c;
+        __asm__ __volatile__(
+            ASM_LOCK "decl %0; sete %1"
+            :"=m" (at->x), "=g" (c)
+            :"m" (at->x)
+            :"cc"
+        );
+        return (c!=0);
+    }
 #endif
 
 #ifdef ATOMIC_TORTURE
-#ifdef ATOMIC_DEFINED
-#error ATOMIC_X86(_SMP) and ATOMIC_TORTURE are defined at the same time!
-#else
-#define ATOMIC_DEFINED
-#endif
+    #ifdef ATOMIC_DEFINED
+        #error ATOMIC_X86(_SMP) and ATOMIC_TORTURE are defined at the same time!
+    #else
+        #define ATOMIC_DEFINED
+    #endif
 
-// this is NOT atomic in most cases! Don't use ATOMIC_TORTURE!
-static inline void atomic_inc(mt_atomic_t* at)
-{
-    at->x++;
-}
-
-static inline bool atomic_dec(mt_atomic_t* at)
-{
-    return ((--at->x) == 0);
-}
+    // this is NOT atomic in most cases! Don't use ATOMIC_TORTURE!
+    static inline void atomic_inc(mt_atomic_t *at)
+    {
+        at->x++;
+    }
+    
+    static inline bool atomic_dec(mt_atomic_t *at)
+    {
+        return ((--at->x) == 0);
+    }
 #endif
 
 #ifndef ATOMIC_DEFINED
-#include <pthread.h>
-#define ATOMIC_NEED_MUTEX
-static inline void atomic_inc(mt_atomic_t* at, pthread_mutex_t* mutex)
-{
-    pthread_mutex_lock(mutex);
-    at->x++;
-    pthread_mutex_unlock(mutex);
-}
-static inline bool atomic_dec(mt_atomic_t* at, pthread_mutex_t* mutex)
-{
-    pthread_mutex_lock(mutex);
-    int newval = (--at->x);
-    pthread_mutex_unlock(mutex);
-    return (newval == 0);
-}
+    #include <pthread.h>
+    #define ATOMIC_NEED_MUTEX
+    static inline void atomic_inc(mt_atomic_t *at, pthread_mutex_t *mutex)
+    {
+        pthread_mutex_lock(mutex);
+        at->x++;
+        pthread_mutex_unlock(mutex);
+    }
+    static inline bool atomic_dec(mt_atomic_t *at, pthread_mutex_t *mutex)
+    {
+        pthread_mutex_lock(mutex);
+        int newval = (--at->x);
+        pthread_mutex_unlock(mutex);
+        return (newval == 0);
+    }
 #else
-#undef ATOMIC_DEFINED
+    #undef ATOMIC_DEFINED
 #endif
 
 #endif // __ATOMIC_H__

@@ -33,37 +33,36 @@
 
 #include <upnp-1.8/ixml.h>
 
-#include "common.h"
 #include "server.h"
+#include "common.h"
 #include "storage.h"
 
 #include "buffered_io_handler.h"
-#include "cds_objects.h"
 #include "dictionary.h"
-#include "play_hook.h"
 #include "url_request_handler.h"
+#include "cds_objects.h"
+#include "play_hook.h"
 
 #ifdef ONLINE_SERVICES
-#include "online_service_helper.h"
+    #include "online_service_helper.h"
 #endif
-#include "curl_io_handler.h"
 #include "url.h"
+#include "curl_io_handler.h"
 #ifdef EXTERNAL_TRANSCODING
-#include "transcoding/transcode_dispatcher.h"
+    #include "transcoding/transcode_dispatcher.h"
 #endif
 
 using namespace zmm;
 using namespace mxml;
 
-URLRequestHandler::URLRequestHandler()
-    : RequestHandler()
+URLRequestHandler::URLRequestHandler() : RequestHandler()
 {
 }
 
-void URLRequestHandler::get_info(IN const char* filename, OUT UpnpFileInfo* info)
+void URLRequestHandler::get_info(IN const char *filename, OUT UpnpFileInfo *info)
 {
     log_debug("start\n");
-
+        
     String header;
     String mimeType;
     int objectID;
@@ -73,18 +72,20 @@ void URLRequestHandler::get_info(IN const char* filename, OUT UpnpFileInfo* info
 
     String url, parameters;
     parameters = (filename + strlen(LINK_URL_REQUEST_HANDLER));
-
+    
     Ref<Dictionary> dict(new Dictionary());
     dict->decodeSimple(parameters);
 
     log_debug("full url (filename): %s, parameters: %s\n",
-        filename, parameters.c_str());
-
+               filename, parameters.c_str());
+    
     String objID = dict->get(_("object_id"));
-    if (objID == nullptr) {
+    if (objID == nullptr)
+    {
         //log_error("object_id not found in url\n");
         throw _Exception(_("get_info: object_id not found"));
-    } else
+    }
+    else
         objectID = objID.toInt();
 
     //log_debug("got ObjectID: [%s]\n", object_id.c_str());
@@ -95,35 +96,39 @@ void URLRequestHandler::get_info(IN const char* filename, OUT UpnpFileInfo* info
 
     int objectType = obj->getObjectType();
 
-    if (!IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
+    if (!IS_CDS_ITEM_EXTERNAL_URL(objectType))
+    {
         throw _Exception(_("get_info: object is not an external url item"));
     }
 
 #ifdef EXTERNAL_TRANSCODING
     tr_profile = dict->get(_(URL_PARAM_TRANSCODE_PROFILE_NAME));
 
-    if (string_ok(tr_profile)) {
+    if (string_ok(tr_profile))
+    {
         Ref<TranscodingProfile> tp = ConfigManager::getInstance()->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(tr_profile);
 
         if (tp == nullptr)
             throw _Exception(_("Transcoding requested but no profile "
-                               "matching the name ")
-                + tr_profile + " found");
+                               "matching the name ") + tr_profile + " found");
 
         mimeType = tp->getTargetMimeType();
         UpnpFileInfo_set_FileLength(info, -1);
-    } else
+    }
+    else
 #endif
     {
         Ref<CdsItemExternalURL> item = RefCast(obj, CdsItemExternalURL);
 
 #ifdef ONLINE_SERVICES
-        if (item->getFlag(OBJECT_FLAG_ONLINE_SERVICE)) {
+        if (item->getFlag(OBJECT_FLAG_ONLINE_SERVICE))
+        {
             /// \todo write a helper class that will handle various online
             /// services
-            Ref<OnlineServiceHelper> helper(new OnlineServiceHelper());
+            Ref<OnlineServiceHelper> helper (new OnlineServiceHelper());
             url = helper->resolveURL(item);
-        } else
+        }
+        else
 #endif
         {
             url = item->getLocation();
@@ -132,12 +137,15 @@ void URLRequestHandler::get_info(IN const char* filename, OUT UpnpFileInfo* info
         log_debug("Online content url: %s\n", url.c_str());
         Ref<URL> u(new URL(1024));
         Ref<URL::Stat> st;
-        try {
+        try
+        { 
             st = u->getInfo(url);
             UpnpFileInfo_set_FileLength(info, st->getSize());
             header = _("Accept-Ranges: bytes");
             log_debug("URL used for request: %s\n", st->getURL().c_str());
-        } catch (const Exception& ex) {
+        }
+        catch (const Exception & ex)
+        {
             log_warning("%s\n", ex.getMessage().c_str());
             UpnpFileInfo_set_FileLength(info, -1);
         }
@@ -151,7 +159,7 @@ void URLRequestHandler::get_info(IN const char* filename, OUT UpnpFileInfo* info
 
     if (string_ok(header)) {
         UpnpFileInfo_set_ExtraHeaders(info,
-            ixmlCloneDOMString(header.c_str()));
+                                      ixmlCloneDOMString(header.c_str()));
     }
 
     UpnpFileInfo_set_ContentType(info, ixmlCloneDOMString(mimeType.c_str()));
@@ -160,9 +168,9 @@ void URLRequestHandler::get_info(IN const char* filename, OUT UpnpFileInfo* info
     /// \todo transcoding for get_info
 }
 
-Ref<IOHandler> URLRequestHandler::open(IN const char* filename,
-    IN enum UpnpOpenFileMode mode,
-    IN String range)
+Ref<IOHandler> URLRequestHandler::open(IN const char *filename,
+                                       IN enum UpnpOpenFileMode mode,
+                                       IN String range)
 {
     int objectID;
     String mimeType;
@@ -184,12 +192,14 @@ Ref<IOHandler> URLRequestHandler::open(IN const char* filename,
     Ref<Dictionary> dict(new Dictionary());
     dict->decodeSimple(parameters);
     log_debug("full url (filename): %s, parameters: %s\n",
-        filename, parameters.c_str());
+               filename, parameters.c_str());
 
     String objID = dict->get(_("object_id"));
-    if (objID == nullptr) {
+    if (objID == nullptr)
+    {
         throw _Exception(_("object_id not found"));
-    } else
+    }
+    else
         objectID = objID.toInt();
 
     Ref<Storage> storage = Storage::getInstance();
@@ -198,56 +208,67 @@ Ref<IOHandler> URLRequestHandler::open(IN const char* filename,
 
     int objectType = obj->getObjectType();
 
-    if (!IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
+    if (!IS_CDS_ITEM_EXTERNAL_URL(objectType))
+    {
         throw _Exception(_("object is not an external url item"));
     }
 
     Ref<CdsItemExternalURL> item = RefCast(obj, CdsItemExternalURL);
 
 #ifdef ONLINE_SERVICES
-    if (item->getFlag(OBJECT_FLAG_ONLINE_SERVICE)) {
-        Ref<OnlineServiceHelper> helper(new OnlineServiceHelper());
+    if (item->getFlag(OBJECT_FLAG_ONLINE_SERVICE))
+    {
+        Ref<OnlineServiceHelper> helper (new OnlineServiceHelper());
         url = helper->resolveURL(item);
-    } else
+    }
+    else 
 #endif
     {
         url = item->getLocation();
     }
 
+
     log_debug("Online content url: %s\n", url.c_str());
 
-//info->is_readable = 1;
-//info->last_modified = 0;
-//info->is_directory = 0;
-//info->http_header = NULL;
+    //info->is_readable = 1;
+    //info->last_modified = 0;
+    //info->is_directory = 0;
+    //info->http_header = NULL;
 
 #ifdef EXTERNAL_TRANSCODING
     tr_profile = dict->get(_(URL_PARAM_TRANSCODE_PROFILE_NAME));
 
-    if (string_ok(tr_profile)) {
+    if (string_ok(tr_profile))
+    {
         Ref<TranscodingProfile> tp = ConfigManager::getInstance()->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(tr_profile);
 
         if (tp == nullptr)
-            throw _Exception(_("Transcoding of file ") + url + " but no profile matching the name " + tr_profile + " found");
+            throw _Exception(_("Transcoding of file ") + url +
+                    " but no profile matching the name " +
+                    tr_profile + " found");
 
         Ref<TranscodeDispatcher> tr_d(new TranscodeDispatcher());
         return tr_d->open(tp, url, RefCast(item, CdsObject), range);
-    } else
+    }
+    else
 #endif
     {
         Ref<URL> u(new URL(1024));
         Ref<URL::Stat> st;
-        try {
+        try
+        {
             st = u->getInfo(url);
-            // info->file_length = st->getSize();
+           // info->file_length = st->getSize();
             header = _("Accept-Ranges: bytes");
             log_debug("URL used for request: %s\n", st->getURL().c_str());
-        } catch (const Exception& ex) {
+        }
+        catch (const Exception & ex)
+        {
             log_warning("%s\n", ex.getMessage().c_str());
             //info->file_length = -1;
         }
         mimeType = item->getMimeType();
-        // info->content_type = ixmlCloneDOMString(mimeType.c_str());
+       // info->content_type = ixmlCloneDOMString(mimeType.c_str());
     }
 
     /* FIXME headers
@@ -256,10 +277,10 @@ Ref<IOHandler> URLRequestHandler::open(IN const char* filename,
     */
 
     ///\todo make curl io handler configurable for url request handler
-    Ref<IOHandler> io_handler(new CurlIOHandler(url, nullptr, 1024 * 1024, 0));
+    Ref<IOHandler> io_handler(new CurlIOHandler(url, nullptr, 1024*1024, 0));
 
     io_handler->open(mode);
-
+    
     PlayHook::getInstance()->trigger(obj);
     return io_handler;
 }

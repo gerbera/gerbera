@@ -35,11 +35,14 @@
 
 #include "metadata_handler.h"
 
-#define DVD_AUXDATA_TITLE_COUNT "DVD_TITLES"
-#define DVD_AUXDATA_CHAPTERS "DVD_CHAPTERS"
-#define DVD_AUXDATA_AUDIO_TRACKS "DVD_AUDIO_TRACKS"
+#define DVD_AUXDATA_TITLE_COUNT           "DVD_TITLES"
+#define DVD_AUXDATA_CHAPTERS              "DVD_CHAPTERS"
+#define DVD_AUXDATA_AUDIO_TRACKS          "DVD_AUDIO_TRACKS"
 
-typedef enum {
+
+
+typedef enum
+{
     DVD_Title,
     DVD_TitleDuration,
     DVD_TitleCount,
@@ -48,7 +51,7 @@ typedef enum {
     DVD_ChapterCount,
     DVD_ChapterDuration,
     DVD_ChapterRestDuration,
-
+   
     DVD_AudioStreamID,
     DVD_AudioTrack,
     DVD_AudioTrackCount,
@@ -59,16 +62,18 @@ typedef enum {
     DVD_AudioTrackLanguage,
 } dvd_aux_key_names_t;
 
+
 /// \brief This class is responsible for parsing DVDs and DVD ISO images
-class DVDHandler : public MetadataHandler {
+class DVDHandler : public MetadataHandler
+{
 public:
     DVDHandler();
     virtual void fillMetadata(zmm::Ref<CdsItem> item);
-    virtual zmm::Ref<IOHandler> serveContent(zmm::Ref<CdsItem> item, int resNum, off_t* data_size);
+    virtual zmm::Ref<IOHandler> serveContent(zmm::Ref<CdsItem> item, int resNum, off_t *data_size);
 
     /// \brief Helper function to construct the key names for DVD aux data
-    static zmm::String renderKey(dvd_aux_key_names_t name, int title_idx = 0,
-        int chapter_idx = 0, int audio_track_idx = 0);
+    static zmm::String renderKey(dvd_aux_key_names_t name, int title_idx = 0, 
+                                 int chapter_idx = 0, int audio_track_idx = 0);
 };
 
 #endif // __METADATA_DVD_H__

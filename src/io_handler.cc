@@ -37,17 +37,16 @@
 
 using namespace zmm;
 
-IOHandler::IOHandler()
-    : Object()
+IOHandler::IOHandler() : Object()
 {
 }
 
-/// \fn static UpnpWebFileHandle web_open(IN const char *filename,
+/// \fn static UpnpWebFileHandle web_open(IN const char *filename, 
 ///                                       IN enum UpnpOpenFileMode mode)
 /// \brief Opens a file for the web server.
 /// \param filename Name of the file to open.
 /// \param mode in which the file will be opened (we only support UPNP_READ)
-///
+/// 
 /// This function is called by the web server when it needs to open a file.
 ///
 /// \retval UpnpWebFileHandle A valid file handle.
@@ -64,16 +63,16 @@ void IOHandler::open(IN enum UpnpOpenFileMode mode)
 /// \param length Number of bytes to read.
 ///
 /// This function is called by the web server to perform a sequential
-/// read from an open file. It copies \b length bytes from the file
+/// read from an open file. It copies \b length bytes from the file 
 /// into the buffer.
 ///
 /// \retval 0   EOF encountered.
 /// \retval -1  Error.
-int IOHandler::read(OUT char* buf, IN size_t length)
+int IOHandler::read(OUT char *buf, IN size_t length)
 {
-    return -1;
+    return -1; 
 }
-
+                                                                                                                                                                         
 /// \fn static int web_write (IN UpnpWebFileHandle f,IN char *buf,
 ///                           IN size_t length)
 /// \brief Writes to a previously opened file sequentially.
@@ -90,12 +89,12 @@ int IOHandler::read(OUT char* buf, IN size_t length)
 /// \retval Actual number of bytes written.
 ///
 /// \warning Currently this function is not supported.
-int IOHandler::write(IN char* buf, IN size_t length)
+int IOHandler::write(IN char *buf, IN size_t length)
 {
     return 0;
 }
-
-/// \fn static int web_seek (IN UpnpWebFileHandle f, IN long offset,
+                                                                                                                                                                         
+/// \fn static int web_seek (IN UpnpWebFileHandle f, IN long offset, 
 ///                   IN int origin)
 /// \brief Performs a seek on an open file.
 /// \param f Handle of the file.
@@ -116,7 +115,7 @@ void IOHandler::seek(IN off_t offset, IN int whence)
 /// \fn static int web_close (IN UpnpWebFileHandle f)
 /// \brief Closes a previously opened file.
 /// \param f Handle of the file.
-///
+/// 
 /// Same as fclose()
 ///
 /// \retval 0 On success, non-zero on error.

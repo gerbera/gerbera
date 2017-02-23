@@ -42,8 +42,8 @@
 #endif
 
 #include "common.h"
-#include "content_manager.h"
 #include "server.h"
+#include "content_manager.h"
 
 #define OPTSTR "i:e:p:c:m:f:a:l:P:dhD"
 
@@ -242,17 +242,18 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
 
         if (pid_fd == nullptr) {
             log_error("Could not write pid file %s : %s\n", pid_file.c_str(),
-                strerror(errno));
+                      strerror(errno));
         } else {
             pid_t cur_pid = getpid();
             String pid = String::from(cur_pid);
 
-            size_t size = fwrite(pid.c_str(), sizeof(char), pid.length(), pid_fd);
+            size_t size =
+                fwrite(pid.c_str(), sizeof(char), pid.length(), pid_fd);
             fclose(pid_fd);
 
             if (static_cast<int>(size) < pid.length()) {
                 log_error("Error when writing pid file %s : %s\n",
-                    pid_file.c_str(), strerror(errno));
+                          pid_file.c_str(), strerror(errno));
             }
         }
     }

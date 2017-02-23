@@ -32,61 +32,47 @@
 #ifndef __CACHE_OBJECT_H__
 #define __CACHE_OBJECT_H__
 
-#include "cds_objects.h"
-#include "common.h"
 #include "zmm/zmmf.h"
+#include "common.h"
+#include "cds_objects.h"
 
-class CacheObject : public zmm::Object {
+class CacheObject : public zmm::Object
+{
 public:
     CacheObject();
-
+    
     void debug();
-
+    
     void setParentID(int parentID) { this->parentID = parentID; }
     int getParentID() { return parentID; }
     bool knowsParentID() { return parentID != INVALID_OBJECT_ID; }
-
-    void setRefID(int refID)
-    {
-        this->refID = refID;
-        knowRefID = true;
-    }
+    
+    void setRefID(int refID) { this->refID = refID; knowRefID = true; }
     int getRefID() { return refID; }
     bool knowsRefID() { return knowRefID; }
-
+    
     void setObject(zmm::Ref<CdsObject> obj);
     zmm::Ref<CdsObject> getObject() { return obj; }
     bool knowsObject() { return obj != nullptr; }
-
-    void setNumChildren(int numChildren)
-    {
-        this->numChildren = numChildren;
-        knowNumChildren = true;
-    }
+    
+    void setNumChildren(int numChildren) { this->numChildren = numChildren; knowNumChildren = true; }
     int getNumChildren() { return numChildren; }
     bool knowsNumChildren() { return knowNumChildren; }
-
-    void setObjectType(int objectType)
-    {
-        this->objectType = objectType;
-        knowObjectType = true;
-    }
+    
+    void setObjectType(int objectType) { this->objectType = objectType; knowObjectType = true; }
     int getObjectType() { return objectType; }
     bool knowsObjectType() { return knowObjectType; }
-
+    
     void setLocation(zmm::String location) { this->location = location; }
     zmm::String getLocation() { return location; }
     bool knowsLocation() { return location != nullptr; }
-
-    void setVirtual(bool virtualObj)
-    {
-        this->virtualObj = virtualObj;
-        knowVirtualObj = true;
-    }
+    
+    void setVirtual(bool virtualObj) { this->virtualObj = virtualObj; knowVirtualObj = true; }
     bool getVirtual() { return virtualObj; }
     bool knowsVirtual() { return knowVirtualObj; }
-
+    
 private:
+    
     int parentID;
     int refID;
     bool knowRefID;
@@ -97,7 +83,7 @@ private:
     bool knowObjectType;
     bool virtualObj;
     bool knowVirtualObj;
-
+    
     zmm::String location;
 };
 

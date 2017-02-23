@@ -35,30 +35,32 @@
 #ifndef __YOUTUBE_VIDEO_URL_H__
 #define __YOUTUBE_VIDEO_URL_H__
 
-#include "rexp.h"
-#include "zmm/zmm.h"
-#include "zmm/zmmf.h"
 #include <curl/curl.h>
+#include "zmm/zmmf.h"
+#include "zmm/zmm.h"
+#include "rexp.h"
+
 
 /// \brief this class keeps all data associated with one transcoding profile.
-class YouTubeVideoURL : public zmm::Object {
+class YouTubeVideoURL : public zmm::Object
+{
 public:
     YouTubeVideoURL();
     ~YouTubeVideoURL();
-
-    /// \brief Takes the usual YouTube style URL as argument
+    
+    /// \brief Takes the usual YouTube style URL as argument 
     /// and returns the URL to the associated video.
     ///
     /// \param video_id id of the video
     /// \param mp4 get video in mp4 format
-    /// \param hd if mp4 format is selected, get video in HD resolution if
+    /// \param hd if mp4 format is selected, get video in HD resolution if 
     /// available
-    /// \return the url to the .flv or .mp4 file
+    /// \return the url to the .flv or .mp4 file 
     zmm::String getVideoURL(zmm::String video_id, bool mp4, bool hd);
 
 protected:
     // the handle *must never be used from multiple threads*
-    CURL* curl_handle;
+    CURL *curl_handle;
     pthread_t pid;
     zmm::Ref<RExp> reVideoURLParams;
     zmm::Ref<RExp> redirectLocation;
@@ -66,6 +68,6 @@ protected:
     zmm::Ref<RExp> HD;
 };
 
-#endif //__YOUTUBE_VIDEO_URL_H__
+#endif//__YOUTUBE_VIDEO_URL_H__
 
-#endif //YOUTUBE
+#endif//YOUTUBE

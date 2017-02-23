@@ -35,25 +35,26 @@
 #include <mutex>
 #include <stdint.h>
 
-#include "common.h"
-#include <dvdnav/dvdnav.h>
 #include <sys/types.h>
+#include <dvdnav/dvdnav.h>
+#include "common.h"
 
 /// \brief Allows to read selected streams from a DVD image.
 ///
 /// There are some constraints on the usage of this class:
-/// First of all - you *must* call the selectPGC() function before you
+/// First of all - you *must* call the selectPGC() function before you 
 /// attempt to read data or get the stream length.
 ///
 /// You must call selectPGC() each time when you want to reset read; calling
 /// read consequently will return the stream data and advance further in the
 /// stream.
-///
+/// 
 /// The class is thread safe, meaning that locks are in place, however it's
-/// design does not suggest multithreaded usage. selectPGC(), read(),
+/// design does not suggest multithreaded usage. selectPGC(), read(), 
 /// getLength() will not work in parallel but block if one of the functions
 /// is running.
-class DVDNavReader : public zmm::Object {
+class DVDNavReader : public zmm::Object
+{
 public:
     /// \brief Sets the filename to work with. Can be an ISO, device or
     /// directory.
@@ -76,7 +77,7 @@ public:
     /// The DVD is divided into titles, each title is didvided into chapters
     /// and can have one or more angles. This function selects what data we
     /// want to retrieve from the DVD (i.e. what stream we want to watch),
-    /// and returns the size of the stream in bytes.
+    /// and returns the size of the stream in bytes. 
     /// Note, that we will always treat the chapter as "starting point", i.e.
     /// we will play from the given chapter to the very end, we will not stop
     /// at the end of the chapter.
@@ -91,7 +92,7 @@ public:
     /// \param length length of the buffer
     /// \return number of bytes read (can be shorter than buffer length), value
     ///  of 0 indicates end of stream.
-    size_t readSector(unsigned char* buffer, size_t length);
+    size_t readSector(unsigned char *buffer, size_t length);  
 
     /// \brief Returns a human readable language string of the audio stream
     zmm::String audioLanguage(int stream_idx);
@@ -113,7 +114,7 @@ protected:
     zmm::String dvd_path;
 
     /// \brief DVD handle
-    dvdnav_t* dvd;
+    dvdnav_t *dvd;
 
     /// \brief end of title flag
     bool EOT;
@@ -121,7 +122,8 @@ protected:
     std::recursive_mutex mutex;
     using AutoLock = std::lock_guard<decltype(mutex)>;
 
-    zmm::String getLanguage(char* code);
+    zmm::String getLanguage(char *code);
 };
+
 
 #endif // __DVDNAV_READ_H__

@@ -36,47 +36,46 @@
 
 #define DEFAULT_ARRAY_CAPACITY 16
 
-namespace zmm {
+namespace zmm
+{
 
-class ArrayBase {
+class ArrayBase
+{
 public:
     ArrayBase();
     ~ArrayBase();
     void init(int capacity);
-    void append(Object* el);
-    void set(Object* el, int index);
-    Object* get(int index);
+    void append(Object *el);
+    void set(Object *el, int index);
+    Object *get(int index);
     void remove(int index, int count);
     void removeUnordered(int index);
     void clear();
-    void insert(int index, Object* el);
+    void insert(int index, Object *el);
     inline int size() { return siz; }
     void optimize();
-
 protected:
     void resize(int requiredSize);
-
 public:
-    Object** arr;
-
+    Object **arr;
 protected:
     int siz;
     int capacity;
 };
 
+
 template <class T>
-class Array : public Object {
+class Array : public Object
+{
 protected:
     ArrayBase base;
 
 public:
-    inline Array()
-        : Object()
+    inline Array() : Object()
     {
         base.init(DEFAULT_ARRAY_CAPACITY);
     }
-    inline Array(int capacity)
-        : Object()
+    inline Array(int capacity) : Object()
     {
         base.init(capacity);
     }
@@ -91,9 +90,9 @@ public:
     }
     inline Ref<T> get(int index)
     {
-        return Ref<T>((T*)base.get(index));
+        return Ref<T>( (T *)base.get(index) );
     }
-    inline void remove(int index, int count = 1)
+    inline void remove(int index, int count=1)
     {
         base.remove(index, count);
     }
@@ -117,12 +116,13 @@ public:
     {
         base.optimize();
     }
-
-    inline Object** getObjectArray()
+    
+    inline Object **getObjectArray()
     {
         return base.arr;
     }
 };
+
 
 } // namespace
 

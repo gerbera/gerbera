@@ -31,17 +31,17 @@
 
 #include "stringbuffer.h"
 
-#include "exceptions.h"
+#include <cstring>
 #include "memory.h"
 #include "strings.h"
-#include <cstring>
+#include "exceptions.h"
 
 using namespace zmm;
 
 StringBuffer::StringBuffer()
 {
     capacity = DEFAULT_STRINGBUFFER_CAPACITY;
-    data = (char*)MALLOC((capacity + 1) * sizeof(char));
+    data = (char *)MALLOC((capacity + 1) * sizeof(char));
     len = 0;
     data[len] = 0;
 }
@@ -49,7 +49,7 @@ StringBuffer::StringBuffer()
 StringBuffer::StringBuffer(int capacity)
 {
     this->capacity = capacity;
-    data = (char*)MALLOC((capacity + 1) * sizeof(char));
+    data = (char *)MALLOC((capacity + 1) * sizeof(char));
     len = 0;
     data[len] = 0;
 }
@@ -59,10 +59,11 @@ StringBuffer::~StringBuffer()
     FREE(data);
 }
 
-StringBuffer& StringBuffer::operator<<(String other)
+StringBuffer &StringBuffer::operator<<(String other)
 {
     int otherLen = other.length();
-    if (otherLen > 0) {
+    if(otherLen > 0)
+    {
         addCapacity(otherLen);
         strcpy(data + len, other.base->data);
         len += otherLen;
@@ -70,18 +71,20 @@ StringBuffer& StringBuffer::operator<<(String other)
     return *this;
 }
 
-StringBuffer& StringBuffer::operator<<(Ref<StringBuffer> other)
+StringBuffer &StringBuffer::operator<<(Ref<StringBuffer> other)
 {
     concat(other, 0);
     return *this;
 }
 
-StringBuffer& StringBuffer::operator<<(const char* str)
+
+StringBuffer &StringBuffer::operator<<(const char *str)
 {
-    if (!str)
+    if(! str)
         return *this;
     int otherLen = (int)strlen(str);
-    if (otherLen) {
+    if(otherLen)
+    {
         addCapacity(otherLen);
         strcpy(data + len, str);
         len += otherLen;
@@ -89,12 +92,12 @@ StringBuffer& StringBuffer::operator<<(const char* str)
     return *this;
 }
 
-StringBuffer& StringBuffer::operator<<(signed char* str)
+StringBuffer &StringBuffer::operator<<(signed char *str)
 {
-    return operator<<((char*)str);
+    return operator<<((char *)str);
 }
 
-StringBuffer& StringBuffer::operator<<(char chr)
+StringBuffer &StringBuffer::operator<<(char chr)
 {
     addCapacity(1);
     data[len] = chr;
@@ -103,24 +106,24 @@ StringBuffer& StringBuffer::operator<<(char chr)
     return *this;
 }
 
-StringBuffer& StringBuffer::operator<<(signed char chr)
+StringBuffer &StringBuffer::operator<<(signed char chr)
 {
     return operator<<((char)chr);
 }
 
-StringBuffer& StringBuffer::operator<<(int x)
+StringBuffer &StringBuffer::operator<<(int x)
 {
     addCapacity(MAX_INT_STRING_LENGTH);
-    char* dest = data + len;
+    char *dest = data + len;
     sprintf(dest, "%d", x);
     len += (int)strlen(dest);
     return *this;
 }
 
-StringBuffer& StringBuffer::operator<<(unsigned int x)
+StringBuffer &StringBuffer::operator<<(unsigned int x)
 {
     addCapacity(MAX_INT_STRING_LENGTH);
-    char* dest = data + len;
+    char *dest = data + len;
     sprintf(dest, "%u", x);
     len += (int)strlen(dest);
     return *this;
@@ -129,7 +132,8 @@ StringBuffer& StringBuffer::operator<<(unsigned int x)
 void StringBuffer::concat(Ref<StringBuffer> other, int offset)
 {
     int otherLen = other->length();
-    if (otherLen > 0) {
+    if(otherLen > 0)
+    {
         if (offset >= otherLen)
             throw _Exception(_("illegal offset"));
         otherLen -= offset;
@@ -139,9 +143,10 @@ void StringBuffer::concat(Ref<StringBuffer> other, int offset)
     }
 }
 
-void StringBuffer::concat(char* str, int length)
+void StringBuffer::concat(char *str, int length)
 {
-    if (str && length) {
+    if(str && length)
+    {
         addCapacity(length);
         strncpy(data + len, str, length);
         len += length;
@@ -158,12 +163,12 @@ void StringBuffer::setLength(int newLength)
 {
     if (newLength > len)
         ensureCapacity(newLength);
-
+    
     this->len = newLength;
     data[len] = 0;
 }
 
-char* StringBuffer::c_str(int offset)
+char *StringBuffer::c_str(int offset)
 {
     if (offset > len || offset < 0)
         throw _Exception(_("illegal offset"));
@@ -197,11 +202,12 @@ void StringBuffer::clear()
 
 void StringBuffer::ensureCapacity(int neededCapacity)
 {
-    if (neededCapacity > capacity) {
+    if(neededCapacity > capacity)
+    {
         int newCapacity = (int)(capacity * STRINGBUFFER_CAPACITY_INCREMENT);
-        if (neededCapacity > newCapacity)
+        if(neededCapacity > newCapacity)
             newCapacity = neededCapacity;
         capacity = newCapacity;
-        data = (char*)REALLOC(data, (capacity + 1) * sizeof(char));
+        data = (char *)REALLOC(data, (capacity + 1) * sizeof(char));
     }
 }

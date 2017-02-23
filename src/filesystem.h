@@ -45,31 +45,31 @@
 #define FS_ROOT_DIRECTORY "/"
 #endif
 
-class FsObject : public zmm::Object {
+class FsObject : public zmm::Object
+{
 public:
-    inline FsObject()
-        : zmm::Object()
+    inline FsObject() : zmm::Object()
     {
         isDirectory = false;
         hasContent = false;
     }
-
 public:
     zmm::String filename;
     bool isDirectory;
     bool hasContent;
 };
 
-class Filesystem : public zmm::Object {
+class Filesystem : public zmm::Object
+{
 public:
     Filesystem();
 
     zmm::Ref<zmm::Array<FsObject> > readDirectory(zmm::String path, int mask,
-        int chldMask = 0);
+                                                  int chldMask = 0);
     bool haveFiles(zmm::String dir);
     bool haveDirectories(zmm::String dir);
     bool fileAllowed(zmm::String path);
-
+    
 protected:
     zmm::Ref<zmm::Array<RExp> > includeRules;
     bool have(zmm::String dir, int mask);

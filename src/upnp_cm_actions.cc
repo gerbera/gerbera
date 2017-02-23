@@ -29,9 +29,9 @@
 
 /// \file upnp_cm_actions.cc
 
-#include "storage.h"
 #include "tools.h"
 #include "upnp_cm.h"
+#include "storage.h"
 
 using namespace zmm;
 using namespace mxml;
@@ -44,9 +44,9 @@ void ConnectionManagerService::upnp_action_GetCurrentConnectionIDs(Ref<ActionReq
     response = UpnpXML_CreateResponse(request->getActionName(), serviceType);
     response->appendTextChild(_("ConnectionID"), _("0"));
 
-    request->setResponse(response);
-    request->setErrorCode(UPNP_E_SUCCESS);
-
+    request->setResponse(response); 
+    request->setErrorCode(UPNP_E_SUCCESS);    
+   
     log_debug("end\n");
 }
 
@@ -74,7 +74,8 @@ void ConnectionManagerService::upnp_action_GetProtocolInfo(Ref<ActionRequest> re
 
     request->setResponse(response);
     request->setErrorCode(UPNP_E_SUCCESS);
-
+        
+    
     log_debug("end\n");
 }
 
@@ -82,18 +83,28 @@ void ConnectionManagerService::process_action_request(Ref<ActionRequest> request
 {
     log_debug("start\n");
 
-    if (request->getActionName() == "GetCurrentConnectionIDs") {
+    if (request->getActionName() == "GetCurrentConnectionIDs")
+    {
         upnp_action_GetCurrentConnectionIDs(request);
-    } else if (request->getActionName() == "GetCurrentConnectionInfo") {
+    }
+    else if (request->getActionName() == "GetCurrentConnectionInfo")
+    {
         upnp_action_GetCurrentConnectionInfo(request);
-    } else if (request->getActionName() == "GetProtocolInfo") {
+    }
+    else if (request->getActionName() == "GetProtocolInfo")
+    {
         upnp_action_GetProtocolInfo(request);
-    } else {
+    }
+    else
+    {
         // invalid or unsupported action
         log_debug("unrecognized action %s\n", request->getActionName().c_str());
         request->setErrorCode(UPNP_E_INVALID_ACTION);
-        //        throw UpnpException(UPNP_E_INVALID_ACTION, _("unrecognized action"));
+//        throw UpnpException(UPNP_E_INVALID_ACTION, _("unrecognized action"));
     }
+    
 
+    
     log_debug("end\n");
+
 }

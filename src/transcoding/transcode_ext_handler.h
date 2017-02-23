@@ -37,13 +37,16 @@
 #include "common.h"
 #include "transcode_handler.h"
 
-class TranscodeExternalHandler : public TranscodeHandler {
+
+class TranscodeExternalHandler : public TranscodeHandler 
+{
 public:
     TranscodeExternalHandler();
-    virtual zmm::Ref<IOHandler> open(zmm::Ref<TranscodingProfile> profile,
-        zmm::String location,
-        zmm::Ref<CdsObject> obj,
-        zmm::String range);
+    virtual zmm::Ref<IOHandler> open(zmm::Ref<TranscodingProfile> profile, 
+                                     zmm::String location,
+                                     zmm::Ref<CdsObject> obj,
+                                     zmm::String range);
 };
+
 
 #endif // __TRANSCODE_EXTERNAL_HANDLER_H__

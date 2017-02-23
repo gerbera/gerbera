@@ -37,40 +37,41 @@
 #define DEFAULT_STRINGBUFFER_CAPACITY 16
 #define STRINGBUFFER_CAPACITY_INCREMENT (1.25)
 
-namespace zmm {
+namespace zmm
+{
 
-class StringBuffer : public Object {
+class StringBuffer : public Object
+{
 protected:
-    char* data;
+    char *data;
     int capacity;
     int len;
-
 public:
     StringBuffer();
     StringBuffer(int capacity);
     virtual ~StringBuffer();
-
-    StringBuffer& operator<<(String other);
-    StringBuffer& operator<<(Ref<StringBuffer> other);
-    StringBuffer& operator<<(const char* str);
-    StringBuffer& operator<<(signed char* str);
-    StringBuffer& operator<<(signed char chr);
-    StringBuffer& operator<<(char chr);
-    StringBuffer& operator<<(int x);
-    StringBuffer& operator<<(unsigned int x);
+    
+    StringBuffer &operator<<(String other);
+    StringBuffer &operator<<(Ref<StringBuffer> other);
+    StringBuffer &operator<<(const char *str);
+    StringBuffer &operator<<(signed char *str);
+    StringBuffer &operator<<(signed char chr);
+    StringBuffer &operator<<(char chr);
+    StringBuffer &operator<<(int x);
+    StringBuffer &operator<<(unsigned int x);
     void concat(Ref<StringBuffer> other, int offset = 0);
-    void concat(char* str, int length);
-
+    void concat(char *str, int length);
+    
     int length();
     int getCapacity() { return capacity; }
     void setLength(int newLength);
-    char* c_str(int offset = 0);
+    char *c_str(int offset = 0);
     String toString();
     String toString(int offset);
     void clear();
     void ensureCapacity(int neededCapacity);
     void setCharAt(int index, char c);
-
+    
 protected:
     inline void addCapacity(int increment) { ensureCapacity(len + increment); }
 };

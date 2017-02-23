@@ -32,31 +32,33 @@
 #ifndef __SCRIPTING_DVD_IMAGE_IMPORT_SCRIPT_H__
 #define __SCRIPTING_DVD_IMAGE_IMPORT_SCRIPT_H__
 
-#include "cds_objects.h"
 #include "common.h"
-#include "content_manager.h"
 #include "script.h"
+#include "cds_objects.h"
+#include "content_manager.h"
 
-class DVDImportScript : public Script {
+class DVDImportScript : public Script
+{
 public:
     DVDImportScript(zmm::Ref<Runtime> runtime);
     ~DVDImportScript();
     /// \brief Adds a DVD object to the database
-    ///
+    /// 
     /// \param title DVD title number
-    /// \param chapter DVD chapter
+    /// \param chapter DVD chapter 
     /// \param audio track DVD audio track
-    void addDVDObject(zmm::Ref<CdsObject> obj, int title, int chapter,
-        int audio_track, zmm::String chain,
-        zmm::String containerclass);
+    void addDVDObject(zmm::Ref<CdsObject> obj, int title, int chapter, 
+                      int audio_track, zmm::String chain, 
+                      zmm::String containerclass);
     void processDVDObject(zmm::Ref<CdsObject> obj);
     virtual script_class_t whoami() { return S_DVD; }
 
 private:
     int currentObjectID;
     zmm::Ref<GenericTask> currentTask;
-    JSObject* root;
+    JSObject *root;
     zmm::String mimetype;
+
 };
 
 #endif // __SCRIPTING_DVD_IMAGE_IMPORT_SCRIPT_H__

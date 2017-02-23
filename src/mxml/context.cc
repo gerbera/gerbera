@@ -34,8 +34,7 @@
 using namespace zmm;
 using namespace mxml;
 
-Context::Context(String location)
-    : Object()
+Context::Context(String location) : Object()
 {
     this->location = location;
     line = 1;

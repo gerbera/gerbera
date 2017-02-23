@@ -29,14 +29,13 @@
 
 /// \file comment.cc
 
-#include "comment.h"
 #include "mxml.h"
+#include "comment.h"
 
 using namespace zmm;
 using namespace mxml;
 
-Comment::Comment(String text, bool indentWithLFbefore)
-    : Node()
+Comment::Comment(String text, bool indentWithLFbefore) : Node()
 {
     type = mxml_node_comment;
     this->text = text;

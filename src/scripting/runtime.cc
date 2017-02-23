@@ -36,8 +36,7 @@
 using namespace zmm;
 using namespace std;
 
-Runtime::Runtime()
-{
+Runtime::Runtime() {
     /* initialize the JS run time, and return result in rt */
     rt = JS_NewRuntime(8L * 1024L * 1024L);
     if (!rt)

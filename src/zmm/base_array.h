@@ -32,58 +32,58 @@
 #ifndef __ZMMF_BASE_ARRAY_H__
 #define __ZMMF_BASE_ARRAY_H__
 
-#include "memory.h"
 #include "zmm.h"
+#include "memory.h"
 
 #define DEFAULT_ARRAY_CAPACITY 16
 
-namespace zmm {
+namespace zmm
+{
 
 template <class T>
-class BaseArray : public Object {
+class BaseArray : public Object
+{
 public:
-    BaseArray()
-        : Object()
+    BaseArray() : Object()
     {
         _init(DEFAULT_ARRAY_CAPACITY);
     }
-
-    BaseArray(int capacity)
-        : Object()
+    
+    BaseArray(int capacity) : Object()
     {
         _init(capacity);
     }
-
+    
     void _init(int capacity)
     {
         this->capacity = capacity;
         siz = 0;
-        arr = (T*)MALLOC(capacity * sizeof(T));
+        arr = (T *)MALLOC(capacity * sizeof(T));
     }
-
+    
     ~BaseArray()
     {
         if (arr)
             FREE(arr);
     }
-
+    
     void append(T el)
     {
-        resize(siz + 1);
+        resize(siz+1);
         arr[siz++] = el;
     }
-
+    
     void set(T el, int index)
     {
         arr[index] = el;
     }
-
+    
     T get(int index)
     {
         return arr[index];
     }
-
-    void remove(int index, int count = 1)
+    
+    void remove(int index, int count=1)
     {
         if (index < 0 || index >= siz) // index beyond size
             return;
@@ -96,47 +96,51 @@ public:
         if (move) // if there is anything to shift
         {
             memmove(
-                (void*)(arr + index),
-                (void*)(arr + index + count),
-                move * sizeof(T));
+                (void *)(arr + index),
+                (void *)(arr + index + count),
+                move * sizeof(T)
+            );
         }
         siz -= count;
     }
-
+    
     void removeUnordered(int index)
     {
         if (index < 0 || index >= siz) // index beyond size
             return;
         arr[index] = arr[--siz];
     }
-
+    
     void insert(int index, T el)
     {
         resize(siz + 1);
         memmove(
-            (void*)(arr + (index + 1)),
-            (void*)(arr + index),
-            (siz - index) * sizeof(T));
+            (void *)(arr + (index + 1)),
+            (void *)(arr + index),
+            (siz - index) * sizeof(T)
+        );
         arr[index] = el;
         siz++;
     }
-
+    
     int size()
     {
         return siz;
     }
-
+    
     void resize(int requiredSize)
     {
-        if (requiredSize > capacity) {
+        if(requiredSize > capacity)
+        {
             int newCapacity = siz + (siz / 2);
-            if (requiredSize > newCapacity)
+            if(requiredSize > newCapacity)
                 newCapacity = requiredSize;
             capacity = newCapacity;
-            arr = (T*)REALLOC(arr, capacity * sizeof(T));
+            arr = (T *)REALLOC(arr, capacity * sizeof(T));
         }
     }
-
+    
+    
     /*
     void optimize()
     {
@@ -148,14 +152,15 @@ public:
         return base.arr;
     }
     */
-
+    
 protected:
     T* arr;
     int siz;
     int capacity;
 };
 
-class IntArray : public BaseArray<int> {
+class IntArray : public BaseArray<int>
+{
 public:
     String toCSV(char sep = ',')
     {
@@ -166,13 +171,14 @@ public:
             return _("");
         return buf->toString(1);
     }
-
+    
     void addCSV(String csv, char sep = ',')
     {
-        const char* data = csv.c_str();
-        const char* dataEnd = data + csv.length();
-        while (data < dataEnd) {
-            char* endptr;
+        const char *data = csv.c_str();
+        const char *dataEnd = data + csv.length();
+        while (data < dataEnd)
+        {
+            char *endptr;
             int val = (int)strtol(data, &endptr, 10);
             if (endptr == data)
                 throw _Exception(_("illegal csv given to IntArray"));

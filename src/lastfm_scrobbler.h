@@ -35,14 +35,15 @@
 #ifndef __LASTFM_H__
 #define __LASTFM_H__
 
-#include "cds_objects.h"
-#include "singleton.h"
-#include "zmm/ref.h"
-#include "zmm/zmm.h"
-#include <lastfmlib/lastfmscrobblerc.h>
 #include <stdlib.h>
+#include "zmm/zmm.h"
+#include "zmm/ref.h"
+#include "singleton.h"
+#include "cds_objects.h"
+#include <lastfmlib/lastfmscrobblerc.h>
 
-class LastFm : public Singleton<LastFm, std::mutex> {
+class LastFm : public Singleton<LastFm, std::mutex>
+{
 public:
     LastFm();
     ~LastFm();
@@ -72,6 +73,6 @@ private:
     int currentTrackId;
 };
 
-#endif //__LASTFM_H__
+#endif//__LASTFM_H__
 
-#endif //HAVE_LASTFMLIB
+#endif//HAVE_LASTFMLIB

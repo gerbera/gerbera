@@ -40,17 +40,17 @@
 
 #include "cds_objects.h"
 
-class TranscodeHandler : public zmm::Object {
+class TranscodeHandler : public zmm::Object
+{
 public:
-    //    TranscodeHandler();
-    virtual zmm::Ref<IOHandler> open(zmm::Ref<TranscodingProfile> profile,
-        zmm::String location,
-        zmm::Ref<CdsObject> obj,
-        zmm::String range)
-        = 0;
-
+//    TranscodeHandler();
+    virtual zmm::Ref<IOHandler> open(zmm::Ref<TranscodingProfile> profile, 
+                                     zmm::String location,
+                                     zmm::Ref<CdsObject> obj,
+                                     zmm::String range) = 0;
 protected:
     enum { UNKNOWN_CONTENT_LENGTH = -1 };
 };
+
 
 #endif // __TRANSCODE_HANDLER_H__

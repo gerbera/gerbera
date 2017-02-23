@@ -29,22 +29,22 @@
 
 /// \file atrailers_service.cc
 
-#ifdef ATRAILERS
+#ifdef ATRAILERS 
 
+#include "zmm/zmm.h"
 #include "atrailers_service.h"
 #include "atrailers_content_handler.h"
+#include "content_manager.h"
+#include "string_converter.h"
 #include "config_manager.h"
 #include "config_options.h"
-#include "content_manager.h"
 #include "server.h"
-#include "string_converter.h"
-#include "zmm/zmm.h"
 
 using namespace zmm;
 using namespace mxml;
 
-#define ATRAILERS_SERVICE_URL_640 "http://www.apple.com/trailers/home/xml/current.xml"
-#define ATRAILERS_SERVICE_URL_720P "http://www.apple.com/trailers/home/xml/current_720p.xml"
+#define ATRAILERS_SERVICE_URL_640            "http://www.apple.com/trailers/home/xml/current.xml"
+#define ATRAILERS_SERVICE_URL_720P       "http://www.apple.com/trailers/home/xml/current_720p.xml"
 
 ATrailersService::ATrailersService()
 {
@@ -76,6 +76,7 @@ String ATrailersService::getServiceName()
     return _("Apple Trailers");
 }
 
+
 Ref<Object> ATrailersService::defineServiceTask(Ref<Element> xmlopt, Ref<Object> params)
 {
     // there are no configurable tasks here, we fetch an XML and parse it
@@ -88,14 +89,17 @@ Ref<Element> ATrailersService::getData()
     Ref<StringConverter> sc = StringConverter::i2i();
 
     Ref<StringBuffer> buffer;
-
-    try {
+    
+    try 
+    {
         log_debug("DOWNLOADING URL: %s\n", service_url.c_str());
-        buffer = url->download(service_url, &retcode,
-            curl_handle, false, true, true);
-    } catch (const Exception& ex) {
-        log_error("Failed to download Apple Trailers XML data: %s\n",
-            ex.getMessage().c_str());
+        buffer = url->download(service_url, &retcode, 
+                               curl_handle, false, true, true);
+    }
+    catch (const Exception & ex)
+    {
+        log_error("Failed to download Apple Trailers XML data: %s\n", 
+                  ex.getMessage().c_str());
         return nullptr;
     }
 
@@ -105,22 +109,27 @@ Ref<Element> ATrailersService::getData()
     if (retcode != 200)
         return nullptr;
 
-    log_debug("GOT BUFFER\n%s\n", buffer->toString().c_str());
+    log_debug("GOT BUFFER\n%s\n", buffer->toString().c_str()); 
     Ref<Parser> parser(new Parser());
-    try {
+    try
+    {
         return parser->parseString(sc->convert(buffer->toString()))->getRoot();
-    } catch (const ParseException& pe) {
+    }
+    catch (const ParseException & pe)
+    {
         log_error("Error parsing Apple Trailers XML %s line %d:\n%s\n",
-            pe.context->location.c_str(),
-            pe.context->line,
-            pe.getMessage().c_str());
-        return nullptr;
-    } catch (const Exception& ex) {
-        log_error("Error parsing Apple Trailers XML %s\n",
-            ex.getMessage().c_str());
+               pe.context->location.c_str(),
+               pe.context->line,
+               pe.getMessage().c_str());
         return nullptr;
     }
-
+    catch (const Exception & ex)
+    {
+        log_error("Error parsing Apple Trailers XML %s\n", 
+                  ex.getMessage().c_str());
+        return nullptr;
+    }
+    
     return nullptr;
 }
 
@@ -128,7 +137,7 @@ bool ATrailersService::refreshServiceData(Ref<Layout> layout)
 {
     log_debug("Refreshing Apple Trailers\n");
     // the layout is in full control of the service items
-
+    
     // this is a safeguard to ensure that this class is not called from
     // multiple threads - it is not allowed to use the same curl handle
     // from multiple threads
@@ -145,13 +154,15 @@ bool ATrailersService::refreshServiceData(Ref<Layout> layout)
     Ref<ATrailersContentHandler> sc(new ATrailersContentHandler());
     if (reply != nullptr)
         sc->setServiceContent(reply);
-    else {
+    else
+    {
         log_debug("Failed to get XML content from Trailers service\n");
         throw _Exception(_("Failed to get XML content from Trailers service"));
     }
 
     Ref<CdsObject> obj;
-    do {
+    do
+    {
         obj = sc->getNextObject();
         if (obj == nullptr)
             break;
@@ -159,12 +170,15 @@ bool ATrailersService::refreshServiceData(Ref<Layout> layout)
         obj->setVirtual(true);
 
         Ref<CdsObject> old = Storage::getInstance()->loadObjectByServiceID(RefCast(obj, CdsItem)->getServiceID());
-        if (old == nullptr) {
+        if (old == nullptr)
+        {
             log_debug("Adding new Trailers object\n");
-
+            
             if (layout != nullptr)
                 layout->processCdsObject(obj, nullptr);
-        } else {
+        }
+        else
+        {
             log_debug("Updating existing Trailers object\n");
             obj->setID(old->getID());
             obj->setParentID(old->getParentID());
@@ -179,9 +193,10 @@ bool ATrailersService::refreshServiceData(Ref<Layout> layout)
         if (Server::getInstance()->getShutdownStatus())
             return false;
 
-    } while (obj != nullptr);
+    }
+    while (obj != nullptr);
 
     return false;
 }
 
-#endif //ATRAILERS
+#endif//ATRAILERS

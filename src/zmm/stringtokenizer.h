@@ -34,13 +34,14 @@
 
 #include "zmm.h"
 
-namespace zmm {
+namespace zmm
+{
 
-class StringTokenizer : public Object {
+class StringTokenizer : public Object
+{
 public:
     StringTokenizer(String str);
     String nextToken(String seps);
-
 protected:
     String str;
     int len;

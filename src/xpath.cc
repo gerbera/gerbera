@@ -29,15 +29,14 @@
 
 /// \file xpath.cc
 
-#include "xpath.h"
 #include "common.h"
 #include "tools.h"
+#include "xpath.h"
 
 using namespace zmm;
 using namespace mxml;
 
-XPath::XPath(Ref<Element> context)
-    : Object()
+XPath::XPath(Ref<Element> context) : Object()
 {
     this->context = context;
 }
@@ -45,7 +44,8 @@ XPath::XPath(Ref<Element> context)
 Ref<Element> XPath::getElement(String xpath)
 {
     String axisPart = getAxisPart(xpath);
-    if (axisPart != nullptr) {
+    if (axisPart != nullptr)
+    {
         throw _Exception(_("XPath::getElement: unexpected axis in ") + xpath);
     }
     return elementAtPath(xpath);
@@ -55,21 +55,22 @@ String XPath::getText(String xpath)
 {
     String axisPart = getAxisPart(xpath);
     String pathPart = getPathPart(xpath);
-
+    
     Ref<Element> el = elementAtPath(pathPart);
     if (el == nullptr)
         return nullptr;
-
+    
     if (axisPart == nullptr)
         return el->getText();
-
+    
     String axis = getAxis(axisPart);
     String spec = getSpec(axisPart);
 
-    if (axis != "attribute") {
+    if (axis != "attribute")
+    {
         throw _Exception(_("XPath::getText: unexpected axis: ") + axis);
     }
-
+   
     return el->getAttribute(spec);
 }
 
@@ -78,7 +79,8 @@ String XPath::getPathPart(String xpath)
     int slashPos = xpath.rindex('/');
     if (slashPos < 0)
         return xpath;
-    if (strstr(xpath.c_str() + slashPos, "::")) {
+    if (strstr(xpath.c_str() + slashPos, "::"))
+    {
         return xpath.substring(0, slashPos);
     }
     return xpath;
@@ -88,8 +90,9 @@ Ref<Element> XPath::elementAtPath(String path)
 {
     Ref<Element> cur = context;
     Ref<Array<StringBase> > parts = split_string(path, '/');
-
-    for (int i = 0; i < parts->size(); i++) {
+   
+    for (int i = 0; i < parts->size(); i++)
+    {
         String part = parts->get(i);
         cur = cur->getChildByName(part);
         if (cur == nullptr)
@@ -103,7 +106,8 @@ String XPath::getAxisPart(String xpath)
     int slashPos = xpath.rindex('/');
     if (slashPos < 0)
         slashPos = 0;
-    if (strstr(xpath.c_str() + slashPos, "::")) {
+    if (strstr(xpath.c_str() + slashPos, "::"))
+    {
         return xpath.substring(slashPos + 1);
     }
     return nullptr;
@@ -111,12 +115,12 @@ String XPath::getAxisPart(String xpath)
 
 String XPath::getAxis(String axisPart)
 {
-    const char* pos = strstr(axisPart.c_str(), "::");
+    const char *pos = strstr(axisPart.c_str(), "::");
     return axisPart.substring(0, pos - axisPart.c_str());
 }
 
 String XPath::getSpec(String axisPart)
 {
-    const char* pos = strstr(axisPart.c_str(), "::");
+    const char *pos = strstr(axisPart.c_str(), "::");
     return pos + 2;
 }

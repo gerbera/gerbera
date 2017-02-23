@@ -38,9 +38,11 @@
 
 #include "node.h"
 
-namespace mxml {
+namespace mxml
+{
 
-class Text : public Node {
+class Text : public Node
+{
 protected:
     zmm::String text;
     enum mxml_value_type vtype;

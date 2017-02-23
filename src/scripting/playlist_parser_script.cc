@@ -35,67 +35,74 @@
 #include "config_manager.h"
 #include "js_functions.h"
 
-#define ONE_TEXTLINE_BYTES 1024
+#define ONE_TEXTLINE_BYTES  1024
 
 using namespace zmm;
 
 extern "C" {
 
 static JSBool
-js_readln(JSContext* cx, uintN argc, jsval* vp)
+js_readln(JSContext *cx, uintN argc, jsval *vp)
 {
-    PlaylistParserScript* self = (PlaylistParserScript*)JS_GetContextPrivate(cx);
+    PlaylistParserScript *self = (PlaylistParserScript *)JS_GetContextPrivate(cx);
 
     String line;
-
-    try {
+    
+    try
+    {
         line = self->readln();
-    } catch (const ServerShutdownException& se) {
+    }
+    catch (const ServerShutdownException & se)
+    {
         log_warning("Aborting script execution due to server shutdown.\n");
         return JS_FALSE;
-    } catch (const Exception& e) {
+    }
+    catch (const Exception & e)
+    {
         e.printStackTrace();
         return JS_TRUE;
     }
 
-    JSString* jsline = JS_NewStringCopyZ(cx, line.c_str());
+    JSString *jsline = JS_NewStringCopyZ(cx, line.c_str());
 
     JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(jsline));
-
+  
     return JS_TRUE;
 }
-
+    
 } // extern "C"
 
-PlaylistParserScript::PlaylistParserScript(Ref<Runtime> runtime)
-    : Script(runtime)
+PlaylistParserScript::PlaylistParserScript(Ref<Runtime> runtime) : Script(runtime)
 {
     currentHandle = nullptr;
     currentObjectID = INVALID_OBJECT_ID;
     currentLine = nullptr;
-
+ 
 #ifdef JS_THREADSAFE
     JS_SetContextThread(cx);
     JS_BeginRequest(cx);
 #endif
-
-    try {
+  
+    try
+    {
         defineFunction(_("readln"), js_readln, 0);
 
-        String scriptPath = ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT);
+        String scriptPath = ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT); 
         load(scriptPath);
         JS_AddNamedObjectRoot(cx, &script, "PlaylistScript");
-    } catch (const Exception& ex) {
+    }
+    catch (const Exception & ex)
+    {
 #ifdef JS_THREADSAFE
         JS_EndRequest(cx);
         JS_ClearContextThread(cx);
 #endif
         throw ex;
     }
-
+    
 #ifdef JS_THREADSAFE
-    JS_EndRequest(cx);
-    JS_ClearContextThread(cx);
+        JS_EndRequest(cx);
+        JS_ClearContextThread(cx);
 #endif
 }
 
@@ -108,8 +115,9 @@ String PlaylistParserScript::readln()
     if ((currentTask != nullptr) && (!currentTask->isValid()))
         return nullptr;
 
-    while (true) {
-        if (fgets(currentLine, ONE_TEXTLINE_BYTES, currentHandle) == nullptr)
+    while (true)
+    {
+        if(fgets(currentLine, ONE_TEXTLINE_BYTES, currentHandle) == nullptr)
             return nullptr;
 
         ret = trim_string(currentLine);
@@ -124,7 +132,9 @@ void PlaylistParserScript::processPlaylistObject(zmm::Ref<CdsObject> obj, Ref<Ge
     JS_SetContextThread(cx);
     JS_BeginRequest(cx);
 #endif
-    if ((currentObjectID != INVALID_OBJECT_ID) || (currentHandle != nullptr) || (currentLine != nullptr)) {
+    if ((currentObjectID != INVALID_OBJECT_ID) || (currentHandle != nullptr) ||
+            (currentLine != nullptr))
+    {
 #ifdef JS_THREADSAFE
         JS_EndRequest(cx);
         JS_ClearContextThread(cx);
@@ -132,7 +142,8 @@ void PlaylistParserScript::processPlaylistObject(zmm::Ref<CdsObject> obj, Ref<Ge
         throw _Exception(_("recursion not allowed!"));
     }
 
-    if (!IS_CDS_PURE_ITEM(obj->getObjectType())) {
+    if (!IS_CDS_PURE_ITEM(obj->getObjectType()))
+    {
 #ifdef JS_THREADSAFE
         JS_EndRequest(cx);
         JS_ClearContextThread(cx);
@@ -142,8 +153,9 @@ void PlaylistParserScript::processPlaylistObject(zmm::Ref<CdsObject> obj, Ref<Ge
 
     currentTask = task;
     currentObjectID = obj->getID();
-    currentLine = (char*)MALLOC(ONE_TEXTLINE_BYTES);
-    if (!currentLine) {
+    currentLine = (char *)MALLOC(ONE_TEXTLINE_BYTES);
+    if (!currentLine)
+    {
         currentObjectID = INVALID_OBJECT_ID;
         currentTask = nullptr;
 #ifdef JS_THREADSAFE
@@ -156,7 +168,8 @@ void PlaylistParserScript::processPlaylistObject(zmm::Ref<CdsObject> obj, Ref<Ge
     currentLine[0] = '\0';
 
     currentHandle = fopen(obj->getLocation().c_str(), "r");
-    if (!currentHandle) {
+    if (!currentHandle)
+    {
         currentObjectID = INVALID_OBJECT_ID;
         currentTask = nullptr;
         FREE(currentLine);
@@ -167,16 +180,18 @@ void PlaylistParserScript::processPlaylistObject(zmm::Ref<CdsObject> obj, Ref<Ge
         throw _Exception(_("failed to open file: ") + obj->getLocation());
     }
 
-    JSObject* playlist = JS_NewObject(cx, nullptr, nullptr, glob);
+    JSObject *playlist = JS_NewObject(cx, nullptr, nullptr, glob);
 
-    try {
+    try
+    {
         setObjectProperty(glob, _("playlist"), playlist);
         cdsObject2jsObject(obj, playlist);
 
         execute();
     }
 
-    catch (const Exception& e) {
+    catch (const Exception & e)
+    {
         fclose(currentHandle);
         currentHandle = nullptr;
 
@@ -203,7 +218,8 @@ void PlaylistParserScript::processPlaylistObject(zmm::Ref<CdsObject> obj, Ref<Ge
     currentTask = nullptr;
 
     gc_counter++;
-    if (gc_counter > JS_CALL_GC_AFTER_NUM) {
+    if (gc_counter > JS_CALL_GC_AFTER_NUM)
+    {
         JS_MaybeGC(cx);
         gc_counter = 0;
     }
@@ -212,7 +228,9 @@ void PlaylistParserScript::processPlaylistObject(zmm::Ref<CdsObject> obj, Ref<Ge
     JS_EndRequest(cx);
     JS_ClearContextThread(cx);
 #endif
+
 }
+
 
 PlaylistParserScript::~PlaylistParserScript()
 {
@@ -228,5 +246,6 @@ PlaylistParserScript::~PlaylistParserScript()
     JS_EndRequest(cx);
     JS_ClearContextThread(cx);
 #endif
+
 }
 #endif // HAVE_JS

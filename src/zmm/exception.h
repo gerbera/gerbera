@@ -34,21 +34,23 @@
 
 #include <stdio.h>
 
-#include "array.h"
 #include "zmm.h"
+#include "array.h"
 
 #include "../logger.h"
 
 #define _Exception(format) zmm::Exception(format, __FILE__, __LINE__, __func__)
 
-namespace zmm {
+namespace zmm
+{
 
-class Exception {
+class Exception
+{
 protected:
     String message;
     String file;
     String function;
-    int line;
+    int    line;
 
     Ref<Array<StringBase> > stackTrace;
 
@@ -59,11 +61,13 @@ public:
 
     Ref<Array<StringBase> > getStackTrace();
 #ifdef TOMBDEBUG
-    void printStackTrace(FILE* file = LOG_FILE) const;
+    void printStackTrace(FILE *file = LOG_FILE) const;
 #else
-    inline void printStackTrace(FILE* file = LOG_FILE) const {};
+    inline void printStackTrace(FILE *file = LOG_FILE) const {};
 #endif
+
 };
+
 }
 
 #endif // __ZMMF_EXCEPTION_H__

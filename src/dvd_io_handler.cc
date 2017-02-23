@@ -33,25 +33,24 @@
 
 #include <stdint.h>
 
+#include <sys/types.h>
+#include <dvdnav/dvdnav.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <string.h>
+#include <stdio.h>
+#include "server.h"
 #include "common.h"
 #include "dvd_io_handler.h"
-#include "server.h"
-#include <dvdnav/dvdnav.h>
-#include <stdio.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
 
 using namespace zmm;
 using namespace mxml;
 
-DVDIOHandler::DVDIOHandler(String dvdname, int track, int chapter,
-    int audio_stream_id)
-    : IOHandler()
+DVDIOHandler::DVDIOHandler(String dvdname, int track, int chapter, 
+                           int audio_stream_id) : IOHandler()
 {
     this->dvdname = dvdname;
-    small_buffer = (unsigned char*)MALLOC(DVD_VIDEO_LB_LEN);
+    small_buffer = (unsigned char *)MALLOC(DVD_VIDEO_LB_LEN);
     if (small_buffer == NULL)
         throw _Exception(_("Could not allocate memory for DVD small databuffer!"));
     small_buffer[0] = '\0';
@@ -67,10 +66,10 @@ void DVDIOHandler::open(IN enum UpnpOpenFileMode mode)
         throw _Exception(_("DVDIOHandler::open: write not supported!"));
 }
 
-int DVDIOHandler::read(OUT char* buf, IN size_t length)
+int DVDIOHandler::read(OUT char *buf, IN size_t length)
 {
 
-    char* pbuf = buf;
+    char *pbuf = buf;
     size_t count = 0;
 
     if (last_read)
@@ -80,9 +79,11 @@ int DVDIOHandler::read(OUT char* buf, IN size_t length)
     // for that
     //
     // rest buffer already has a remainder from the previous call
-    if (small_buffer_pos != NULL) {
+    if (small_buffer_pos != NULL)
+    {
         size_t rest = (small_buffer + DVD_VIDEO_LB_LEN) - small_buffer_pos;
-        if (rest >= length) {
+        if (rest >= length)
+        {
             memcpy(pbuf, small_buffer_pos, length);
             small_buffer_pos = small_buffer_pos + length;
 
@@ -90,7 +91,9 @@ int DVDIOHandler::read(OUT char* buf, IN size_t length)
                 small_buffer_pos = NULL;
 
             return (int)length;
-        } else if (rest < length) {
+        } 
+        else if (rest < length)
+        {
             memcpy(pbuf, small_buffer_pos, rest);
             pbuf = pbuf + rest;
             count = count + rest;
@@ -99,14 +102,18 @@ int DVDIOHandler::read(OUT char* buf, IN size_t length)
         }
     }
 
-    if ((length) < DVD_VIDEO_LB_LEN) {
-        size_t bytes = dvd->readSector((unsigned char*)small_buffer, DVD_VIDEO_LB_LEN);
-        if (bytes == 0) {
+    if ((length) < DVD_VIDEO_LB_LEN)
+    {
+        size_t bytes = dvd->readSector((unsigned char *)small_buffer, DVD_VIDEO_LB_LEN);
+        if (bytes == 0)
+        {
             last_read = true;
             return count;
-        } else if (bytes < 0)
+        }
+        else if (bytes < 0)
             return bytes;
-        else {
+        else
+        {
             small_buffer_pos = small_buffer;
 
             memcpy(pbuf, small_buffer_pos, length);
@@ -114,22 +121,25 @@ int DVDIOHandler::read(OUT char* buf, IN size_t length)
             small_buffer_pos = small_buffer_pos + length;
             return (int)count;
         }
-    } else {
-        int ret = dvd->readSector((unsigned char*)pbuf, length);
-        if (ret == 0) {
+    }
+    else
+    {
+        int ret = dvd->readSector((unsigned char *)pbuf, length);
+        if (ret == 0)
+        {
             last_read = true;
         }
 
         if (ret >= 0)
             ret = count + ret;
-
+       
         return ret;
     }
 
     return -1;
 }
 
-int DVDIOHandler::write(IN char* buf, IN size_t length)
+int DVDIOHandler::write(IN char *buf, IN size_t length)
 {
     throw _Exception(_("DVD write is not possible"));
 }
@@ -155,4 +165,4 @@ DVDIOHandler::~DVDIOHandler()
         FREE(small_buffer);
 }
 
-#endif //HAVE_LIBDVDNAV
+#endif//HAVE_LIBDVDNAV

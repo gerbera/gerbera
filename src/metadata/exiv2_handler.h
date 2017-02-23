@@ -35,7 +35,8 @@
 #include "metadata_handler.h"
 
 /// \brief This class is responsible for reading exif header metadata
-class Exiv2Handler : public MetadataHandler {
+class Exiv2Handler : public MetadataHandler
+{
 public:
     Exiv2Handler();
     virtual void fillMetadata(zmm::Ref<CdsItem> item);

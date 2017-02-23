@@ -33,36 +33,22 @@
 
 using namespace zmm;
 
-WebRequestHandler* create_web_request_handler(String page)
+WebRequestHandler *create_web_request_handler(String page)
 {
-    if (page == "add")
-        return new web::add();
-    if (page == "remove")
-        return new web::remove();
-    if (page == "add_object")
-        return new web::addObject();
-    if (page == "auth")
-        return new web::auth();
-    if (page == "containers")
-        return new web::containers();
-    if (page == "directories")
-        return new web::directories();
-    if (page == "files")
-        return new web::files();
-    if (page == "items")
-        return new web::items();
-    if (page == "edit_load")
-        return new web::edit_load();
-    if (page == "edit_save")
-        return new web::edit_save();
-    if (page == "autoscan")
-        return new web::autoscan();
-    if (page == "void")
-        return new web::voidType();
-    if (page == "tasks")
-        return new web::tasks();
-    if (page == "action")
-        return new web::action();
-
+    if (page == "add") return new web::add();
+    if (page == "remove") return new web::remove();
+    if (page == "add_object") return new web::addObject();
+    if (page == "auth") return new web::auth();
+    if (page == "containers") return new web::containers();
+    if (page == "directories") return new web::directories();
+    if (page == "files") return new web::files();
+    if (page == "items") return new web::items();
+    if (page == "edit_load") return new web::edit_load();
+    if (page == "edit_save") return new web::edit_save();
+    if (page == "autoscan") return new web::autoscan();
+    if (page == "void") return new web::voidType();
+    if (page == "tasks") return new web::tasks();
+    if (page == "action") return new web::action();
+    
     throw _Exception(_("Unknown page: ") + page);
 }

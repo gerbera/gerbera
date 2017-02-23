@@ -31,35 +31,38 @@
 
 #ifdef EXTERNAL_TRANSCODING
 
-#include "transcode_dispatcher.h"
-#include "cds_objects.h"
 #include "common.h"
-#include "tools.h"
-#include "transcode_ext_handler.h"
+#include "cds_objects.h"
 #include "transcoding.h"
+#include "transcode_dispatcher.h"
+#include "transcode_ext_handler.h"
+#include "tools.h"
 
 using namespace zmm;
 
-TranscodeDispatcher::TranscodeDispatcher()
-    : TranscodeHandler()
+TranscodeDispatcher::TranscodeDispatcher() : TranscodeHandler()
 {
 }
 
-Ref<IOHandler> TranscodeDispatcher::open(Ref<TranscodingProfile> profile,
-    String location,
-    Ref<CdsObject> obj,
-    String range)
+Ref<IOHandler> TranscodeDispatcher::open(Ref<TranscodingProfile> profile, 
+                                         String location, 
+                                         Ref<CdsObject> obj,
+                                         String range)
 {
     if (profile == nullptr)
-        throw _Exception(_("Transcoding of file ") + location + "requested but no profile given ");
+        throw _Exception(_("Transcoding of file ") + location +
+                           "requested but no profile given ");
+   
+//    check_path_ex(location);
 
-    //    check_path_ex(location);
-
-    if (profile->getType() == TR_External) {
+    if (profile->getType() == TR_External)
+    {
         Ref<TranscodeExternalHandler> tr_ext(new TranscodeExternalHandler());
         return tr_ext->open(profile, location, obj, range);
-    } else
-        throw _Exception(_("Unknown transcoding type for profile ") + profile->getName());
+    }
+    else
+        throw _Exception(_("Unknown transcoding type for profile ") + 
+                         profile->getName());
 }
 
-#endif //EXTERNAL_TRANSCODING
+#endif//EXTERNAL_TRANSCODING

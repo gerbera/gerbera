@@ -34,17 +34,19 @@
 
 #include "zmm/zmmf.h"
 
-namespace mxml {
+namespace mxml
+{
 
 class Context;
 
-class ParseException : public zmm::Exception {
+class ParseException : public zmm::Exception
+{
 public:
     zmm::Ref<Context> context;
-
 public:
     ParseException(zmm::String msg, zmm::Ref<Context> context);
 };
+
 }
 
 #endif // __MXML_PARSEEXCEPTION_H__

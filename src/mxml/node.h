@@ -36,9 +36,12 @@
 
 #include "mxml.h"
 
-namespace mxml {
 
-enum mxml_node_types {
+namespace mxml
+{
+
+enum mxml_node_types
+{
     mxml_node_all,
     mxml_node_element,
     mxml_node_text,
@@ -46,7 +49,8 @@ enum mxml_node_types {
     mxml_node_document
 };
 
-class Node : public zmm::Object {
+class Node : public zmm::Object
+{
 protected:
     zmm::Ref<zmm::Array<Node> > children;
     zmm::Ref<Context> context;
@@ -57,10 +61,10 @@ public:
     virtual zmm::String print();
 
     virtual void print_internal(zmm::Ref<zmm::StringBuffer> buf, int indent) = 0;
-
 protected:
     static zmm::String escape(zmm::String str);
 };
+
 
 } // namespace
 

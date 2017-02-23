@@ -32,22 +32,23 @@
 #ifndef __SCRIPTING_RUNTIME_H__
 #define __SCRIPTING_RUNTIME_H__
 
-#include "common.h"
-#include "singleton.h"
 #include <jsapi.h>
 #include <pthread.h>
+#include "common.h"
+#include "singleton.h"
 
 /// \brief Runtime class definition.
-class Runtime : public Singleton<Runtime, std::recursive_mutex> {
+class Runtime : public Singleton<Runtime, std::recursive_mutex>
+{
 protected:
-    JSRuntime* rt;
+    JSRuntime *rt;
 
 public:
     Runtime();
     virtual ~Runtime();
-
+    
     /// \brief Returns the runtime for script execution.
-    JSRuntime* getRT() { return rt; }
+    JSRuntime *getRT() { return rt; }
 };
 
 #endif // __SCRIPTING_RUNTIME_H__

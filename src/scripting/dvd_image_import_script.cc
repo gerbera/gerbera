@@ -33,19 +33,20 @@
 
 #include <js/jsscript.h>
 
-#include "config_manager.h"
 #include "dvd_image_import_script.h"
+#include "config_manager.h"
 #include "js_functions.h"
 #include "metadata/dvd_handler.h"
 using namespace zmm;
 
 extern "C" {
 
-static JSBool js_addDVDObject(JSContext* cx, uint32_t argc, jsval* vp)
+static JSBool js_addDVDObject(JSContext *cx, uint32_t argc, jsval *vp)
 {
-    try {
+    try
+    {
         jsval arg;
-        JSObject* js_cds_obj;
+        JSObject *js_cds_obj;
         Ref<CdsObject> cds_obj;
         Ref<CdsObject> processed;
         int title;
@@ -53,65 +54,73 @@ static JSBool js_addDVDObject(JSContext* cx, uint32_t argc, jsval* vp)
         int audio_track;
         String chain;
         String containerclass;
-        JSString* str;
+        JSString *str;
 
-        DVDImportScript* self = (DVDImportScript*)JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp));
 
-        if (self->whoami() != S_DVD) {
+        DVDImportScript *self = (DVDImportScript *)JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp));
+
+        if (self->whoami() != S_DVD)
+        {
             log_error("Function must be called from the DVD import script!\n");
             return JS_TRUE;
         }
 
         arg = JS_ARGV(cx, vp)[0];
-        if (!JSVAL_IS_OBJECT(arg)) {
+        if (!JSVAL_IS_OBJECT(arg))
+        {
             log_error("Invalid argument!");
             return JS_TRUE;
         }
 
-        if (!JS_ValueToObject(cx, arg, &js_cds_obj)) {
+        if (!JS_ValueToObject(cx, arg, &js_cds_obj))
+        {
             log_error("Could not convert object!");
             return JS_TRUE;
         }
 
         // root it
-        JS_ARGV(cx, vp)
-        [0] = OBJECT_TO_JSVAL(js_cds_obj);
+        JS_ARGV(cx, vp)[0] = OBJECT_TO_JSVAL(js_cds_obj);
 
-        if (!JS_ValueToInt32(cx, JS_ARGV(cx, vp)[1], &title)) {
+        if (!JS_ValueToInt32(cx, JS_ARGV(cx, vp)[1], &title))
+        {
             log_error("addDVDObject: Invalid DVD title number given!\n");
             return JS_TRUE;
         }
 
-        if (!JS_ValueToInt32(cx, JS_ARGV(cx, vp)[2], &chapter)) {
+        if (!JS_ValueToInt32(cx, JS_ARGV(cx, vp)[2], &chapter))
+        {
             log_error("addDVDObject: Invalid DVD chapter number given!\n");
             return JS_TRUE;
         }
 
-        if (!JS_ValueToInt32(cx, JS_ARGV(cx, vp)[3], &audio_track)) {
+        if (!JS_ValueToInt32(cx, JS_ARGV(cx, vp)[3], &audio_track))
+        {
             log_error("addDVDObject: Invalid DVD audio track number given!\n");
             return JS_TRUE;
         }
 
         str = JS_ValueToString(cx, JS_ARGV(cx, vp)[4]);
-        if (!str) {
+        if (!str)
+        {
             log_error("addDVDObject: Invalid DVD container chain given!\n");
             return JS_TRUE;
         }
 
-        char* ts = JS_EncodeString(cx, str);
+        char *ts = JS_EncodeString(cx, str);
         if (ts) {
             chain = ts;
             JS_free(cx, ts);
         }
 
-        if (!string_ok(chain) || chain == "undefined") {
+        if (!string_ok(chain) || chain == "undefined")
+        {
             log_error("addDVDObject: Invalid DVD container chain given!\n");
             return JS_TRUE;
         }
 
-        JSString* cont = JS_ValueToString(cx, JS_ARGV(cx, vp)[5]);
+        JSString *cont = JS_ValueToString(cx, JS_ARGV(cx, vp)[5]);
         if (cont) {
-            char* ts = JS_EncodeString(cx, cont);
+            char *ts = JS_EncodeString(cx, cont);
             if (ts) {
                 containerclass = ts;
                 JS_free(cx, ts);
@@ -122,25 +131,32 @@ static JSBool js_addDVDObject(JSContext* cx, uint32_t argc, jsval* vp)
         }
 
         processed = self->getProcessedObject();
-        if (processed == nullptr) {
+        if (processed == nullptr)
+        {
             log_error("addDVDObject: could not retrieve original object!\n");
             return JS_TRUE;
         }
 
+
         // convert incoming object
         cds_obj = self->jsObject2cdsObject(js_cds_obj, processed);
-        if (cds_obj == nullptr) {
+        if (cds_obj == nullptr)
+        {
             log_error("addDVDObject: could not convert js object!\n");
             return JS_TRUE;
         }
 
         self->addDVDObject(cds_obj, title, chapter, audio_track, chain,
-            containerclass);
+                           containerclass);
 
-    } catch (const ServerShutdownException& se) {
+    }
+    catch (const ServerShutdownException & se)
+    {
         log_warning("Aborting script execution due to server shutdown.\n");
         return JS_FALSE;
-    } catch (const Exception& ex) {
+    }
+    catch (const Exception & ex)
+    {
         log_error("%s\n", ex.getMessage().c_str());
         ex.printStackTrace();
     }
@@ -148,11 +164,11 @@ static JSBool js_addDVDObject(JSContext* cx, uint32_t argc, jsval* vp)
     return JS_TRUE;
 }
 
-} // extern "C"
+} // extern "C" 
 
 void DVDImportScript::addDVDObject(Ref<CdsObject> obj, int title,
-    int chapter, int audio_track, String chain,
-    String containerclass)
+                                  int chapter, int audio_track, String chain,
+                                  String containerclass)
 {
 
     if (processed == nullptr)
@@ -177,13 +193,14 @@ void DVDImportScript::addDVDObject(Ref<CdsObject> obj, int title,
     /// \todo this has to be changed once we add seeking
     obj->getResource(0)->removeAttribute(MetadataHandler::getResAttrName(R_SIZE));
     obj->getResource(0)->addParameter(DVDHandler::renderKey(DVD_AudioStreamID), processed->getAuxData(DVDHandler::renderKey(DVD_AudioTrackStreamID, title, 0,
-                                                                                    audio_track)));
+                    audio_track)));
 
     String tmp = processed->getAuxData(DVDHandler::renderKey(DVD_AudioTrackChannels, title, 0, audio_track));
-    if (string_ok(tmp)) {
+    if (string_ok(tmp))
+    {
         obj->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS), tmp);
         log_debug("Setting Audio Channels, object %s -  num: %s\n",
-            obj->getLocation().c_str(), tmp.c_str());
+                obj->getLocation().c_str(), tmp.c_str());
     }
 
     tmp = processed->getAuxData(DVDHandler::renderKey(DVD_AudioTrackSampleFreq, title, 0, audio_track));
@@ -191,21 +208,20 @@ void DVDImportScript::addDVDObject(Ref<CdsObject> obj, int title,
         obj->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY), tmp);
 
     obj->getResource(0)->addParameter(DVDHandler::renderKey(DVD_Chapter),
-        String::from(chapter));
+            String::from(chapter));
 
-    //    tmp = processed->getAuxData(DVDHandler::renderKey(DVD_ChapterRestDuration,
-    //                title, chapter));
-    //    if (string_ok(tmp))
-    //        obj->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_DURATION), tmp);
+//    tmp = processed->getAuxData(DVDHandler::renderKey(DVD_ChapterRestDuration,
+//                title, chapter));
+//    if (string_ok(tmp))
+//        obj->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_DURATION), tmp);
 
     obj->getResource(0)->addParameter(DVDHandler::renderKey(DVD_Title),
-        String::from(title));
+            String::from(title));
 
     cm->addObject(obj);
 }
 
-DVDImportScript::DVDImportScript(Ref<Runtime> runtime)
-    : Script(runtime)
+DVDImportScript::DVDImportScript(Ref<Runtime> runtime) : Script(runtime)
 {
 
 #ifdef JS_THREADSAFE
@@ -213,7 +229,8 @@ DVDImportScript::DVDImportScript(Ref<Runtime> runtime)
     JS_BeginRequest(cx);
 #endif
 
-    try {
+    try
+    {
         defineFunction(_("addDVDObject"), js_addDVDObject, 7);
 
         setProperty(glob, _("DVD"), _("DVD"));
@@ -223,13 +240,16 @@ DVDImportScript::DVDImportScript(Ref<Runtime> runtime)
         JS_AddNamedObjectRoot(cx, &root, "DVDImportScript");
         log_info("Loaded %s\n", scriptPath.c_str());
 
-        Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(
-            CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+         Ref<Dictionary> mappings =
+                         ConfigManager::getInstance()->getDictionaryOption(
+                              CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
 
-        mimetype = mappings->get(_(CONTENT_TYPE_MPEG));
-        if (!string_ok(mimetype))
-            mimetype = _("video/mpeg");
-    } catch (const Exception& ex) {
+         mimetype = mappings->get(_(CONTENT_TYPE_MPEG));
+         if (!string_ok(mimetype))
+             mimetype = _("video/mpeg");
+    }
+    catch (const Exception & ex)
+    {
 #ifdef JS_THREADSAFE
         JS_EndRequest(cx);
         JS_ClearContextThread(cx);
@@ -237,8 +257,8 @@ DVDImportScript::DVDImportScript(Ref<Runtime> runtime)
         throw ex;
     }
 #ifdef JS_THREADSAFE
-    JS_EndRequest(cx);
-    JS_ClearContextThread(cx);
+        JS_EndRequest(cx);
+        JS_ClearContextThread(cx);
 #endif
 }
 
@@ -249,12 +269,15 @@ void DVDImportScript::processDVDObject(Ref<CdsObject> obj)
     JS_BeginRequest(cx);
 #endif
     processed = obj;
-    try {
-        JSObject* orig = JS_NewObject(cx, NULL, NULL, glob);
+    try
+    {
+        JSObject *orig = JS_NewObject(cx, NULL, NULL, glob);
         setObjectProperty(glob, _("dvd"), orig);
         cdsObject2jsObject(obj, orig);
         execute();
-    } catch (const Exception& ex) {
+    }
+    catch (const Exception & ex)
+    {
         processed = nullptr;
 #ifdef JS_THREADSAFE
         JS_EndRequest(cx);
@@ -266,7 +289,8 @@ void DVDImportScript::processDVDObject(Ref<CdsObject> obj)
     processed = nullptr;
 
     gc_counter++;
-    if (gc_counter > JS_CALL_GC_AFTER_NUM) {
+    if (gc_counter > JS_CALL_GC_AFTER_NUM)
+    {
         JS_MaybeGC(cx);
         gc_counter = 0;
     }
@@ -290,6 +314,7 @@ DVDImportScript::~DVDImportScript()
     JS_EndRequest(cx);
     JS_ClearContextThread(cx);
 #endif
+
 }
 
 #endif // HAVE_JS

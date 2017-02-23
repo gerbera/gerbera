@@ -29,14 +29,13 @@
 
 /// \file document.cc
 
-#include "document.h"
 #include "mxml.h"
+#include "document.h"
 
 using namespace zmm;
 using namespace mxml;
 
-Document::Document()
-    : Node()
+Document::Document() : Node()
 {
     type = mxml_node_document;
     root = nullptr;
@@ -55,15 +54,17 @@ Ref<Element> Document::getRoot()
 
 void Document::appendChild(Ref<Node> child)
 {
-    if (children == nullptr)
+    if(children == nullptr)
         children = Ref<Array<Node> >(new Array<Node>());
     children->append(child);
 }
 
 void Document::print_internal(Ref<StringBuffer> buf, int indent)
 {
-    if (children != nullptr && children->size()) {
-        for (int i = 0; i < children->size(); i++) {
+    if (children != nullptr && children->size())
+    {
+        for(int i = 0; i < children->size(); i++)
+        {
             children->get(i)->print_internal(buf, indent + 1);
         }
     }

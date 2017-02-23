@@ -36,8 +36,7 @@
 
 using namespace zmm;
 
-MPEGRemuxProcessor::MPEGRemuxProcessor(int in_fd, int out_fd, unsigned char keep_audio_id)
-    : ThreadExecutor()
+MPEGRemuxProcessor::MPEGRemuxProcessor(int in_fd, int out_fd, unsigned char keep_audio_id) : ThreadExecutor()
 {
     if (in_fd < 0)
         throw _Exception(_("Got invalid input fd!"));
@@ -59,4 +58,4 @@ void MPEGRemuxProcessor::threadProc()
     log_debug("Done remuxing\n");
 }
 
-#endif //HAVE_LIBDVDNAV
+#endif//HAVE_LIBDVDNAV

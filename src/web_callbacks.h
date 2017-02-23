@@ -41,7 +41,7 @@
 /// \b web_write Sequentially write to a file (not supported).
 /// \b web_seek Perform a seek on a file.
 /// \b web_close Close file.
-///
+/// 
 /// \return UPNP_E_SUCCESS Callbacks registered successfully, else eror code.
 int register_web_callbacks();
 

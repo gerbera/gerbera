@@ -36,8 +36,7 @@
 
 using namespace zmm;
 
-JSLayout::JSLayout()
-    : Layout()
+JSLayout::JSLayout() : Layout()
 {
     import_script = Ref<ImportScript>(new ImportScript(Runtime::getInstance()));
 }
@@ -53,5 +52,6 @@ void JSLayout::processCdsObject(Ref<CdsObject> obj, String rootpath)
 
     import_script->processCdsObject(obj, rootpath);
 }
+
 
 #endif // HAVE_JS

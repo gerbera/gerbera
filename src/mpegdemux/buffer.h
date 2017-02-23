@@ -29,21 +29,26 @@
 #ifndef MPEGDEMUX_BUFFER_H
 #define MPEGDEMUX_BUFFER_H 1
 
+
 #include "mpeg_parse.h"
 
+
 typedef struct {
-    unsigned char* buf;
-    unsigned cnt;
-    unsigned max;
+  unsigned char *buf;
+  unsigned      cnt;
+  unsigned      max;
 } mpeg_buffer_t;
 
-void mpeg_buf_init(mpeg_buffer_t* buf);
-void mpeg_buf_free(mpeg_buffer_t* buf);
-void mpeg_buf_clear(mpeg_buffer_t* buf);
-int mpeg_buf_set_max(mpeg_buffer_t* buf, unsigned max);
-int mpeg_buf_set_cnt(mpeg_buffer_t* buf, unsigned cnt);
-int mpeg_buf_read(mpeg_buffer_t* buf, mpeg_demux_t* mpeg, unsigned cnt);
-int mpeg_buf_write(mpeg_buffer_t* buf, int fd);
-int mpeg_buf_write_clear(mpeg_buffer_t* buf, int fd);
+
+
+void mpeg_buf_init (mpeg_buffer_t *buf);
+void mpeg_buf_free (mpeg_buffer_t *buf);
+void mpeg_buf_clear (mpeg_buffer_t *buf);
+int mpeg_buf_set_max (mpeg_buffer_t *buf, unsigned max);
+int mpeg_buf_set_cnt (mpeg_buffer_t *buf, unsigned cnt);
+int mpeg_buf_read (mpeg_buffer_t *buf, mpeg_demux_t *mpeg, unsigned cnt);
+int mpeg_buf_write (mpeg_buffer_t *buf, int fd);
+int mpeg_buf_write_clear (mpeg_buffer_t *buf, int fd);
+
 
 #endif

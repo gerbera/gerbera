@@ -38,9 +38,11 @@
 
 #include "node.h"
 
-namespace mxml {
+namespace mxml
+{
 
-class Element : public Node {
+class Element : public Node
+{
 protected:
     zmm::String name;
     zmm::Ref<zmm::Array<Attribute> > attributes;
@@ -49,7 +51,7 @@ protected:
     bool arrayType; // for JSON support
     zmm::String arrayName; // for JSON support
     zmm::String textKey; // for JSON support
-
+    
 public:
     Element(zmm::String name);
     Element(zmm::String name, zmm::Ref<Context> context);
@@ -63,7 +65,7 @@ public:
 
     int attributeCount();
     zmm::Ref<Attribute> getAttribute(int index);
-
+        
     void setText(zmm::String text, enum mxml_value_type type = mxml_string_type);
 
     int childCount(enum mxml_node_types type = mxml_node_all);
@@ -72,42 +74,39 @@ public:
     void removeChild(int index, enum mxml_node_types type = mxml_node_all);
     void appendChild(zmm::Ref<Node> child);
     void insertChild(int index, zmm::Ref<Node> child);
-
+    
     void removeWhitespace();
     void indent(int level = 0);
-
+    
     zmm::Ref<Element> getFirstElementChild() { return getElementChild(0); }
     zmm::Ref<Element> getElementChild(int index) { return RefCast(getChild(index, mxml_node_element), Element); }
     int elementChildCount() { return childCount(mxml_node_element); }
-
+    
     void removeElementChild(int index) { removeChild(index, mxml_node_element); }
     bool removeElementChild(zmm::String name, bool removeAll);
-
+    
     void appendElementChild(zmm::Ref<Element> child) { appendChild(RefCast(child, Node)); };
     void appendTextChild(zmm::String name, zmm::String text, enum mxml_value_type type = mxml_string_type);
 
     int getChildIdByName(zmm::String name);
     zmm::Ref<Element> getChildByName(zmm::String name);
     zmm::String getChildText(zmm::String name);
-
+    
     bool isArrayType() { return arrayType; }
     //void setArrayType(bool arrayType) { this->arrayType = arrayType; }
-
+    
     zmm::String getArrayName() { return arrayName; }
-    void setArrayName(zmm::String arrayName)
-    {
-        arrayType = true;
-        this->arrayName = arrayName;
-    }
-
+    void setArrayName(zmm::String arrayName) { arrayType = true; this->arrayName = arrayName; }
+    
     zmm::String getTextKey() { return textKey; }
     void setTextKey(zmm::String textKey) { this->textKey = textKey; }
-
+    
 protected:
     virtual void print_internal(zmm::Ref<zmm::StringBuffer> buf, int indent);
-
+    
     friend class Parser;
 };
+
 
 } // namespace
 

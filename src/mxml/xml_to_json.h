@@ -36,15 +36,17 @@
 
 #include "mxml.h"
 
-namespace mxml {
+namespace mxml
+{
 
-class XML2JSON : public zmm::Object {
+class XML2JSON : public zmm::Object
+{
 protected:
     static void handleElement(zmm::Ref<zmm::StringBuffer> buf, zmm::Ref<Element> el);
     static zmm::String getValue(zmm::String text, enum mxml_value_type type);
-
 public:
     static zmm::String getJSON(zmm::Ref<Element> root);
+    
 };
 
 } // namespace

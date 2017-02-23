@@ -34,11 +34,12 @@
 #define __DVD_IO_HANDLER_H__
 
 #include "common.h"
-#include "dvdnav_read.h"
 #include "io_handler.h"
+#include "dvdnav_read.h"
 
 /// \brief Allows the web server to read from a dvd.
-class DVDIOHandler : public IOHandler {
+class DVDIOHandler : public IOHandler
+{
 protected:
     /// \brief Name of the DVD image.
     zmm::String dvdname;
@@ -48,14 +49,14 @@ protected:
 
     off_t total_size;
 
-    unsigned char* small_buffer;
-    unsigned char* small_buffer_pos;
+    unsigned char *small_buffer;
+    unsigned char *small_buffer_pos;
     bool last_read;
 
 public:
     /// \brief Sets the dvdname to work with.
-    DVDIOHandler(zmm::String dvdname, int track, int chapter,
-        int audio_stream_id);
+    DVDIOHandler(zmm::String dvdname, int track, int chapter, 
+                 int audio_stream_id);
 
     ~DVDIOHandler();
     /// \brief Opens dvd for reading (writing is not supported)
@@ -64,13 +65,13 @@ public:
     /// \brief Reads a previously opened dvd sequentially.
     /// \param buf Data from the dvd will be copied into this buffer.
     /// \param length Number of bytes to be copied into the buffer.
-    virtual int read(OUT char* buf, IN size_t length);
-
+    virtual int read(OUT char *buf, IN size_t length);
+   
     /// \brief Writes to a previously opened dvd.
     /// \param buf Data from the buffer will be written to the dvd.
     /// \param length Number of bytes to be written from the buffer.
     /// \return number of bytes written.
-    virtual int write(OUT char* buf, IN size_t length);
+    virtual int write(OUT char *buf, IN size_t length);
 
     /// \brief Performs seek on an open dvd.
     /// \param offset Number of bytes to move in the dvd. For seeking forwards
@@ -87,5 +88,6 @@ public:
     /// \brief Returns the length of the stream in bytes
     off_t length();
 };
+
 
 #endif // __DVD_IO_HANDLER_H__

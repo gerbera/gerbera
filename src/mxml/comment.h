@@ -38,9 +38,11 @@
 
 #include "node.h"
 
-namespace mxml {
+namespace mxml
+{
 
-class Comment : public Node {
+class Comment : public Node
+{
 protected:
     zmm::String name;
     zmm::String text;

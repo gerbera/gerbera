@@ -32,9 +32,9 @@
 #ifndef __UPNP_XML_H__
 #define __UPNP_XML_H__
 
-#include "cds_objects.h"
 #include "common.h"
 #include "mxml/mxml.h"
+#include "cds_objects.h"
 
 /// \brief Renders XML for the action response header.
 /// \param actionName Name of the action.
@@ -52,7 +52,7 @@ zmm::Ref<mxml::Element> UpnpXML_CreateResponse(zmm::String actionName, zmm::Stri
 /// \param renderActions If true, also render special elements of an active item.
 /// \return mxml::Element representing the newly created XML.
 ///
-/// This function looks at the object, and renders the DIDL-Lite representation of it -
+/// This function looks at the object, and renders the DIDL-Lite representation of it - 
 /// either a container or an item. The renderActions parameter tells us whether to also
 /// show the special fields of an active item in the XML. This is currently used when
 /// providing the XML representation of an active item to a trigger/toggle script.

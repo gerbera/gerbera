@@ -31,8 +31,8 @@
 /// \brief Implementeation of the MetadataHandler class.
 
 #include "metadata_handler.h"
-#include "config_manager.h"
 #include "tools.h"
+#include "config_manager.h"
 
 #ifdef HAVE_EXIV2
 #include "metadata/exiv2_handler.h"
@@ -66,15 +66,15 @@ mt_key MT_KEYS[] = {
     { "M_GENRE", "upnp:genre" },
     { "M_DESCRIPTION", "dc:description" },
     { "M_LONGDESCRIPTION", "upnp:longDescription" },
-    { "M_TRACKNUMBER", "upnp:originalTrackNumber" },
-    { "M_ALBUMARTURI", "upnp:albumArtURI" },
-    { "M_REGION", "upnp:region" },
-    { "M_AUTHOR", "upnp:author" },
-    { "M_DIRECTOR", "upnp:director" },
-    { "M_PUBLISHER", "dc:publisher" },
-    { "M_RATING", "upnp:rating" },
-    { "M_ACTOR", "upnp:actor" },
-    { "M_PRODUCER", "upnp:producer" },
+    { "M_TRACKNUMBER", "upnp:originalTrackNumber"},
+    { "M_ALBUMARTURI", "upnp:albumArtURI"},
+    { "M_REGION", "upnp:region"},
+    { "M_AUTHOR", "upnp:author"},
+    { "M_DIRECTOR", "upnp:director"},
+    { "M_PUBLISHER", "dc:publisher"},
+    { "M_RATING", "upnp:rating"},
+    { "M_ACTOR", "upnp:actor"},
+    { "M_PRODUCER", "upnp:producer"},
 };
 
 res_key RES_KEYS[] = {
@@ -88,11 +88,11 @@ res_key RES_KEYS[] = {
     { "R_PROTOCOLINFO", "protocolInfo" }
 };
 
-MetadataHandler::MetadataHandler()
-    : Object()
+
+MetadataHandler::MetadataHandler() : Object()
 {
 }
-
+       
 void MetadataHandler::setMetadata(Ref<CdsItem> item)
 {
     String location = item->getLocation();
@@ -106,17 +106,26 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
     Ref<CdsResource> resource(new CdsResource(CH_DEFAULT));
     resource->addAttribute(getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(mimetype));
     resource->addAttribute(getResAttrName(R_SIZE), String::from(filesize));
-
+    
     item->addResource(resource);
 
     Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
     String content_type = mappings->get(mimetype);
-
+   
     if ((content_type == CONTENT_TYPE_OGG) && (isTheora(item->getLocation())))
-        item->setFlag(OBJECT_FLAG_OGG_THEORA);
+            item->setFlag(OBJECT_FLAG_OGG_THEORA);
 
 #ifdef HAVE_TAGLIB
-    if ((content_type == CONTENT_TYPE_MP3) || ((content_type == CONTENT_TYPE_OGG) && (!item->getFlag(OBJECT_FLAG_OGG_THEORA))) || (content_type == CONTENT_TYPE_WMA) || (content_type == CONTENT_TYPE_WAVPACK) || (content_type == CONTENT_TYPE_FLAC) || (content_type == CONTENT_TYPE_PCM) || (content_type == CONTENT_TYPE_AIFF) || (content_type == CONTENT_TYPE_APE) || (content_type == CONTENT_TYPE_MP4)) {
+    if ((content_type == CONTENT_TYPE_MP3) || 
+        ((content_type == CONTENT_TYPE_OGG) && (!item->getFlag(OBJECT_FLAG_OGG_THEORA))) ||
+        (content_type == CONTENT_TYPE_WMA) ||
+        (content_type == CONTENT_TYPE_WAVPACK) ||
+        (content_type == CONTENT_TYPE_FLAC) ||
+        (content_type == CONTENT_TYPE_PCM) ||
+        (content_type == CONTENT_TYPE_AIFF) ||
+        (content_type == CONTENT_TYPE_APE) ||
+        (content_type == CONTENT_TYPE_MP4))
+    {
         TagLibHandler().fillMetadata(item);
     }
 #endif // HAVE_TAGLIB
@@ -131,28 +140,37 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
 #endif
 
 #ifdef HAVE_LIBEXIF
-    if (content_type == CONTENT_TYPE_JPG) {
+    if (content_type == CONTENT_TYPE_JPG)
+    {
         LibExifHandler().fillMetadata(item);
     }
 #endif // HAVE_LIBEXIF
 
 #ifdef HAVE_FFMPEG
-    if (content_type != CONTENT_TYPE_PLAYLIST && ((content_type == CONTENT_TYPE_OGG && item->getFlag(OBJECT_FLAG_OGG_THEORA)) || item->getMimeType().startsWith(_("video")) || item->getMimeType().startsWith(_("audio")))) {
+    if (content_type != CONTENT_TYPE_PLAYLIST &&
+        ((content_type == CONTENT_TYPE_OGG &&
+         item->getFlag(OBJECT_FLAG_OGG_THEORA)) ||
+        item->getMimeType().startsWith(_("video")) ||
+        item->getMimeType().startsWith(_("audio"))))
+    {
         FfmpegHandler().fillMetadata(item);
     }
 #else
-    if (content_type == CONTENT_TYPE_AVI) {
+    if (content_type == CONTENT_TYPE_AVI)
+    {
         String fourcc = getAVIFourCC(item->getLocation());
-        if (string_ok(fourcc)) {
+        if (string_ok(fourcc))
+        {
             item->getResource(0)->addOption(_(RESOURCE_OPTION_FOURCC),
-                fourcc);
+                                            fourcc);
         }
     }
 
 #endif // HAVE_FFMPEG
 
 #ifdef HAVE_LIBDVDNAV
-    if (content_type == CONTENT_TYPE_DVD) {
+    if (content_type == CONTENT_TYPE_DVD)
+    {
         DVDHandler().fillMetadata(item);
     }
 #endif
@@ -173,23 +191,24 @@ String MetadataHandler::getResAttrName(resource_attributes_t attr)
 
 Ref<MetadataHandler> MetadataHandler::createHandler(int handlerType)
 {
-    switch (handlerType) {
+    switch(handlerType)
+    {
 #ifdef HAVE_LIBEXIF
-    case CH_LIBEXIF:
-        return Ref<MetadataHandler>(new LibExifHandler());
+        case CH_LIBEXIF:
+            return Ref<MetadataHandler>(new LibExifHandler());
 #endif
 #ifdef HAVE_TAGLIB
-    case CH_ID3:
-        return Ref<MetadataHandler>(new TagLibHandler());
+        case CH_ID3:
+            return Ref<MetadataHandler>(new TagLibHandler());
 #endif
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
-    case CH_FFTH:
-        return Ref<MetadataHandler>(new FfmpegHandler());
+        case CH_FFTH:
+            return Ref<MetadataHandler>(new FfmpegHandler());
 #endif
-    case CH_FANART:
-        return Ref<MetadataHandler>(new FanArtHandler());
-    default:
-        throw _Exception(_("unknown content handler ID: ") + handlerType);
+        case CH_FANART:
+            return Ref<MetadataHandler>(new FanArtHandler());
+        default:
+            throw _Exception(_("unknown content handler ID: ") + handlerType);
     }
 }
 

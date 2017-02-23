@@ -35,32 +35,33 @@
 #ifndef __YOUTUBE_DATA_HANDLER_H__
 #define __YOUTUBE_DATA_HANDLER_H__
 
-#define YOUTUBE_SERVICE "YouTube"
-#define YOUTUBE_SERVICE_ID "Y"
+#define YOUTUBE_SERVICE                     "YouTube"
+#define YOUTUBE_SERVICE_ID                  "Y"
 
-#define YOUTUBE_AUXDATA_KEYWORDS YOUTUBE_SERVICE_ID "1"
-#define YOUTUBE_AUXDATA_AVG_RATING YOUTUBE_SERVICE_ID "2"
-#define YOUTUBE_AUXDATA_AUTHOR YOUTUBE_SERVICE_ID "3"
-#define YOUTUBE_AUXDATA_FAVORITE_COUNT YOUTUBE_SERVICE_ID "4"
-#define YOUTUBE_AUXDATA_VIEW_COUNT YOUTUBE_SERVICE_ID "5"
-#define YOUTUBE_AUXDATA_RATING_COUNT YOUTUBE_SERVICE_ID "6"
-#define YOUTUBE_AUXDATA_FEED YOUTUBE_SERVICE_ID "7"
-#define YOUTUBE_AUXDATA_SUBREQUEST_NAME YOUTUBE_SERVICE_ID "8"
-#define YOUTUBE_AUXDATA_REQUEST YOUTUBE_SERVICE_ID "9"
-#define YOUTUBE_AUXDATA_CATEGORY YOUTUBE_SERVICE_ID "10"
-#define YOUTUBE_AUXDATA_REGION YOUTUBE_SERVICE_ID "11"
+#define YOUTUBE_AUXDATA_KEYWORDS            YOUTUBE_SERVICE_ID "1"
+#define YOUTUBE_AUXDATA_AVG_RATING          YOUTUBE_SERVICE_ID "2"
+#define YOUTUBE_AUXDATA_AUTHOR              YOUTUBE_SERVICE_ID "3"
+#define YOUTUBE_AUXDATA_FAVORITE_COUNT      YOUTUBE_SERVICE_ID "4"
+#define YOUTUBE_AUXDATA_VIEW_COUNT          YOUTUBE_SERVICE_ID "5"
+#define YOUTUBE_AUXDATA_RATING_COUNT        YOUTUBE_SERVICE_ID "6"
+#define YOUTUBE_AUXDATA_FEED                YOUTUBE_SERVICE_ID "7"
+#define YOUTUBE_AUXDATA_SUBREQUEST_NAME     YOUTUBE_SERVICE_ID "8"
+#define YOUTUBE_AUXDATA_REQUEST             YOUTUBE_SERVICE_ID "9"
+#define YOUTUBE_AUXDATA_CATEGORY            YOUTUBE_SERVICE_ID "10"
+#define YOUTUBE_AUXDATA_REGION              YOUTUBE_SERVICE_ID "11"
 
-#include "cds_objects.h"
-#include "mxml/mxml.h"
 #include "zmm/zmmf.h"
+#include "mxml/mxml.h"
+#include "cds_objects.h"
 
 /// \brief This class holds the subfeed data for special requests
-class YouTubeSubFeed : public zmm::Object {
+class YouTubeSubFeed : public zmm::Object
+{
 public:
     YouTubeSubFeed();
-    /// \brief Some requests return a list of items which point to
-    /// further requests (i.e. subscriptions point to an XML which
-    /// only contains the links which have to be used in subsequent
+    /// \brief Some requests return a list of items which point to 
+    /// further requests (i.e. subscriptions point to an XML which 
+    /// only contains the links which have to be used in subsequent 
     /// requests before the actual video data can be retrieved
     zmm::Ref<zmm::Array<zmm::StringBase> > links;
     zmm::String title;
@@ -68,7 +69,8 @@ public:
 
 /// \brief this class is responsible for creating objects from the YouTube
 /// metadata XML.
-class YouTubeContentHandler : public zmm::Object {
+class YouTubeContentHandler : public zmm::Object
+{
 public:
     /// \brief Sets the service XML from which we will extract the objects.
     /// \return false if service XML contained an error status.
@@ -85,7 +87,7 @@ public:
 
     /// \brief Retrieves a list of feed URLs from a subscription request along
     /// with the feeds name.
-    ///
+    /// 
     /// Some requests, like subscriptions, do not return the video metadata,
     /// but return an XML which holds URLs to further requests, only these
     /// further requests give us the actual video data. So, we will gather
@@ -102,6 +104,6 @@ protected:
     zmm::String feed_name;
 };
 
-#endif //__YOUTUBE_CONTENT_HANDLER_H__
+#endif//__YOUTUBE_CONTENT_HANDLER_H__
 
-#endif //YOUTUBE
+#endif//YOUTUBE

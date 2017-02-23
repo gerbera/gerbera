@@ -38,10 +38,11 @@ std::mutex SingletonManager::mutex{};
 
 Ref<SingletonManager> SingletonManager::getInstance()
 {
-    if (instance == nullptr) {
+    if (instance == nullptr)
+    {
         AutoLock lock(mutex);
         if (instance == nullptr) // check again, because there is a very small chance
-        // that 2 threads tried to lock() concurrently
+                             // that 2 threads tried to lock() concurrently
         {
             instance = zmm::Ref<SingletonManager>(new SingletonManager());
         }
@@ -49,8 +50,7 @@ Ref<SingletonManager> SingletonManager::getInstance()
     return instance;
 }
 
-SingletonManager::SingletonManager()
-    : Object()
+SingletonManager::SingletonManager() : Object()
 {
     singletonStack = Ref<ObjectStack<Singleton<Object> > >(new ObjectStack<Singleton<Object> >(SINGLETON_CUR_MAX));
 }
@@ -59,7 +59,8 @@ void SingletonManager::registerSingleton(Ref<Singleton<Object> > object)
 {
     AutoLock lock(mutex);
 #ifdef TOMBDEBUG
-    if (singletonStack->size() >= SINGLETON_CUR_MAX) {
+    if (singletonStack->size() >= SINGLETON_CUR_MAX)
+    {
         printf("%d singletons are active (SINGLETON_CUR_MAX=%d) and tried to add another singleton - check this!\n", singletonStack->size(), SINGLETON_CUR_MAX);
         print_backtrace();
         abort();
@@ -73,11 +74,12 @@ void SingletonManager::shutdown(bool complete)
 {
     log_debug("start (%d objects)\n", singletonStack->size());
     AutoLock lock(mutex);
-
+    
     Ref<ObjectStack<Singleton<Object> > > singletonStackReactivate(new ObjectStack<Singleton<Object> >(SINGLETON_CUR_MAX));
-
+    
     Ref<Singleton<Object> > object;
-    while ((object = singletonStack->pop()) != nullptr) {
+    while((object = singletonStack->pop()) != nullptr)
+    {
         //log_debug("destoying... \n");
         //_print_backtrace(stdout);
         object->shutdown();
@@ -85,7 +87,7 @@ void SingletonManager::shutdown(bool complete)
         singletonStackReactivate->push(object);
         //object->destroyMutex();
     }
-    while ((object = singletonStackReactivate->pop()) != nullptr)
+    while((object = singletonStackReactivate->pop()) != nullptr)
         object->reactivateSingleton();
     if (complete && instance != nullptr)
         instance = nullptr;

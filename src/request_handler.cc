@@ -34,7 +34,7 @@
 
 using namespace zmm;
 
-void RequestHandler::split_url(const char* url, char separator, String& path, String& parameters)
+void RequestHandler::split_url(const char *url, char separator, String &path, String &parameters)
 {
     int i1;
 
@@ -47,10 +47,13 @@ void RequestHandler::split_url(const char* url, char separator, String& path, St
     else
         throw _Exception(String("Forbidden separator: ") + separator);
 
-    if (i1 < 0) {
+    if (i1 < 0)
+    {
         path = url_s;
         parameters = _("");
-    } else {
+    }
+    else
+    {
         parameters = url_s.substring(i1 + 1);
         path = url_s.substring(0, i1);
     }

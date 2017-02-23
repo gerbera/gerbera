@@ -56,44 +56,44 @@
 
 #define MAX_INT64_T_STRING_LENGTH 24
 
-namespace zmm {
+namespace zmm
+{
 
-class StringBase : public Object {
+class StringBase : public Object
+{
 public:
-    char* data;
+    char *data;
     int len;
     bool store; // if true, the object is responsible for freeing data
 
     StringBase(int capacity);
-    StringBase(const char* str);
-    StringBase(const char* str, int len);
-    bool startsWith(StringBase* other);
+    StringBase(const char *str);
+    StringBase(const char *str, int len);
+    bool startsWith(StringBase *other);
     virtual ~StringBase();
-
 protected:
-    inline StringBase()
-        : Object()
-    {
-    }
+    inline StringBase() : Object() {}
     friend class String;
 };
 
+
 class StringBuffer;
 
-class String {
-protected:
-    StringBase* base;
 
+class String
+{
+protected:
+    StringBase *base;
 public:
     String();
-    String(const char* str);
+    String(const char *str);
     explicit String(char ch);
-    String(const char* str, int len);
-    String(const String& other);
-    String(StringBase* other);
+    String(const char *str, int len);
+    String(const String &other);
+    String(StringBase *other);
     String(Ref<StringBase> other);
 
-    inline StringBase* getBase()
+    inline StringBase *getBase()
     {
         return base;
     }
@@ -105,40 +105,40 @@ public:
 
     ~String();
 
-    String& operator=(const char* str);
+    String &operator=(const char *str);
 
-    String& operator=(String other);
+    String &operator=(String other);
 
-    inline String& operator=(std::nullptr_t)
+    inline String &operator=(std::nullptr_t)
     {
-        if (base)
+        if(base)
             base->release();
         base = NULL;
         return *this;
     }
 
     String operator+(String other);
-    String operator+(const char* str);
+    String operator+(const char *str);
     String operator+(char chr);
     String operator+(int x);
     String operator+(unsigned int x);
     String operator+(double x);
 
     int operator==(String other) const;
-    int operator==(const char* str) const;
+    int operator==(const char *str) const;
     int operator==(char c) const;
 
     inline int operator!=(String other) const
     {
-        return !operator==(other);
+        return ! operator==(other);
     }
-    inline int operator!=(const char* str) const
+    inline int operator!=(const char *str) const
     {
-        return !operator==(str);
+        return ! operator==(str);
     }
     inline int operator!=(char c) const
     {
-        return !operator==(c);
+        return ! operator==(c);
     }
 
     inline int operator==(std::nullptr_t) const
@@ -149,6 +149,7 @@ public:
     {
         return (base != nullptr);
     }
+
 
     inline operator Ref<StringBase>()
     {
@@ -168,9 +169,9 @@ public:
     /// \return the new string, with ch reduced
     String reduce(char ch);
 
-    inline char charAt(int index) { return base->data[index]; }
+    inline char charAt(int index) {  return base->data[index]; }
     inline char operator[](int index) { return base->data[index]; }
-    inline char* charPtrAt(int index) { return base->data + index; }
+    inline char *charPtrAt(int index) { return base->data + index; }
     inline int index(char ch) { return index(0, ch); }
     int index(int start, char ch);
     int rindex(char ch);
@@ -187,7 +188,7 @@ public:
     {
         base->len = length;
     }
-    const char* c_str() const;
+    const char *c_str() const;
     inline void updateLength()
     {
         base->len = strlen(base->data);
@@ -198,10 +199,10 @@ public:
         return base->startsWith(str.base);
     }
 
-    int find(const char* needle);
+    int find(const char *needle);
     int find(String needle);
     String replace(String needle, String replacement);
-    String replaceChar(char needle, char replacement);
+    String replaceChar(char needle , char replacement);
 
     static String from(int x);
     static String from(unsigned int x);
@@ -211,12 +212,11 @@ public:
     static String from(long long x);
 
     static String allocate(int size);
-    static String take(const char* data, int length);
-    static String take(const char* data);
-    static String refer(const char* str);
-    static String refer(const char* str, int len);
-    static String copy(const char* str);
-
+    static String take(const char *data, int length);
+    static String take(const char *data);
+    static String refer(const char *str);
+    static String refer(const char *str, int len);
+    static String copy(const char *str);
 protected:
     String(int capacity);
     friend class StringBuffer;
@@ -225,9 +225,11 @@ protected:
 }; // namespace
 
 // custom specialization of std::hash so we can be used in std::hash'd maps/sets
-namespace std {
-template <>
-struct hash<zmm::String> {
+namespace std
+{
+template<>
+struct hash<zmm::String>
+{
     typedef zmm::String argument_type;
     typedef std::size_t value_type;
 

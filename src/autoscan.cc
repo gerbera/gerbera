@@ -30,8 +30,8 @@
 /// \file autoscan.cc
 
 #include "autoscan.h"
-#include "content_manager.h"
 #include "storage.h"
+#include "content_manager.h"
 
 using namespace zmm;
 using namespace std;
@@ -43,12 +43,12 @@ AutoscanDirectory::AutoscanDirectory()
     storageID = INVALID_OBJECT_ID;
     last_mod_previous_scan = 0;
     last_mod_current_scan = 0;
-    timer_parameter = Ref<Object>((Object*)new ContentManager::TimerParameter(ContentManager::TimerParameter::IDAutoscan, INVALID_SCAN_ID));
+    timer_parameter = Ref<Object> ((Object *)new ContentManager::TimerParameter(ContentManager::TimerParameter::IDAutoscan, INVALID_SCAN_ID));
 }
 
 AutoscanDirectory::AutoscanDirectory(String location, scan_mode_t mode,
-    scan_level_t level, bool recursive, bool persistent,
-    int id, unsigned int interval, bool hidden)
+        scan_level_t level, bool recursive, bool persistent,
+        int id, unsigned int interval, bool hidden)
 {
     this->location = location;
     this->mode = mode;
@@ -63,10 +63,10 @@ AutoscanDirectory::AutoscanDirectory(String location, scan_mode_t mode,
     storageID = INVALID_OBJECT_ID;
     last_mod_previous_scan = 0;
     last_mod_current_scan = 0;
-    timer_parameter = Ref<Object>((Object*)new ContentManager::TimerParameter(ContentManager::TimerParameter::IDAutoscan, INVALID_SCAN_ID));
+    timer_parameter = Ref<Object> ((Object *)new ContentManager::TimerParameter(ContentManager::TimerParameter::IDAutoscan, INVALID_SCAN_ID));
 }
 
-void AutoscanDirectory::setCurrentLMT(time_t lmt)
+void AutoscanDirectory::setCurrentLMT(time_t lmt) 
 {
     if (lmt > last_mod_current_scan)
         last_mod_current_scan = lmt;
@@ -74,13 +74,14 @@ void AutoscanDirectory::setCurrentLMT(time_t lmt)
 
 AutoscanList::AutoscanList()
 {
-    list = Ref<Array<AutoscanDirectory> >(new Array<AutoscanDirectory>());
+    list = Ref<Array<AutoscanDirectory> > (new Array<AutoscanDirectory>());
 }
 
 void AutoscanList::updateLMinDB()
 {
     AutoLock lock(mutex);
-    for (int i = 0; i < list->size(); i++) {
+    for (int i = 0; i < list->size(); i++)
+    {
         log_debug("i: %d\n", i);
         Ref<AutoscanDirectory> ad = list->get(i);
         if (ad != nullptr)
@@ -99,22 +100,28 @@ int AutoscanList::_add(Ref<AutoscanDirectory> dir)
 
     String loc = dir->getLocation();
     int nil_index = -1;
-
-    for (int i = 0; i < list->size(); i++) {
-        if (list->get(i) == nullptr) {
+    
+    for (int i = 0; i < list->size(); i++)
+    {
+        if (list->get(i) == nullptr)
+        {
             nil_index = i;
             continue;
         }
-
-        if (loc == list->get(i)->getLocation()) {
+        
+        if (loc == list->get(i)->getLocation())
+        {
             throw _Exception(_("Attempted to add same autoscan path twice"));
         }
     }
-
-    if (nil_index != -1) {
+    
+    if (nil_index != -1)
+    {
         dir->setScanID(nil_index);
         list->set(dir, nil_index);
-    } else {
+    }
+    else
+    {
         dir->setScanID(list->size());
         list->append(dir);
     }
@@ -125,8 +132,9 @@ int AutoscanList::_add(Ref<AutoscanDirectory> dir)
 void AutoscanList::addList(zmm::Ref<AutoscanList> list)
 {
     AutoLock lock(mutex);
-
-    for (int i = 0; i < list->list->size(); i++) {
+    
+    for (int i = 0; i < list->list->size(); i++)
+    {
         if (list->list->get(i) == nullptr)
             continue;
 
@@ -158,7 +166,8 @@ Ref<AutoscanDirectory> AutoscanList::getByObjectID(int objectID)
 {
     AutoLock lock(mutex);
 
-    for (int i = 0; i < list->size(); i++) {
+    for (int i = 0; i < list->size(); i++)
+    {
         if (list->get(i) != nullptr && objectID == list->get(i)->getObjectID())
             return list->get(i);
     }
@@ -168,28 +177,34 @@ Ref<AutoscanDirectory> AutoscanList::getByObjectID(int objectID)
 Ref<AutoscanDirectory> AutoscanList::get(String location)
 {
     AutoLock lock(mutex);
-    for (int i = 0; i < list->size(); i++) {
+    for (int i = 0; i < list->size(); i++)
+    {
         if (list->get(i) != nullptr && (location == list->get(i)->getLocation()))
             return list->get(i);
     }
     return nullptr;
+
 }
 
 void AutoscanList::remove(int id)
 {
     AutoLock lock(mutex);
-
-    if ((id < 0) || (id >= list->size())) {
+    
+    if ((id < 0) || (id >= list->size()))
+    {
         log_debug("No such ID %d!\n", id);
         return;
     }
-
+   
     Ref<AutoscanDirectory> dir = list->get(id);
     dir->setScanID(INVALID_SCAN_ID);
 
-    if (id == list->size() - 1) {
+    if (id == list->size()-1)
+    {
         list->removeUnordered(id);
-    } else {
+    }
+    else
+    {
         list->set(nullptr, id);
     }
 
@@ -200,13 +215,18 @@ int AutoscanList::removeByObjectID(int objectID)
 {
     AutoLock lock(mutex);
 
-    for (int i = 0; i < list->size(); i++) {
-        if (list->get(i) != nullptr && objectID == list->get(i)->getObjectID()) {
+    for (int i = 0; i < list->size(); i++)
+    {
+        if (list->get(i) != nullptr && objectID == list->get(i)->getObjectID())
+        {
             Ref<AutoscanDirectory> dir = list->get(i);
             dir->setScanID(INVALID_SCAN_ID);
-            if (i == list->size() - 1) {
+            if (i == list->size()-1)
+            {
                 list->removeUnordered(i);
-            } else {
+            }
+            else
+            {
                 list->set(nullptr, i);
             }
             return i;
@@ -218,14 +238,19 @@ int AutoscanList::removeByObjectID(int objectID)
 int AutoscanList::remove(String location)
 {
     AutoLock lock(mutex);
-
-    for (int i = 0; i < list->size(); i++) {
-        if (list->get(i) != nullptr && location == list->get(i)->getLocation()) {
+    
+    for (int i = 0; i < list->size(); i++)
+    {
+        if (list->get(i) != nullptr && location == list->get(i)->getLocation())
+        {
             Ref<AutoscanDirectory> dir = list->get(i);
             dir->setScanID(INVALID_SCAN_ID);
-            if (i == list->size() - 1) {
+            if (i == list->size()-1)
+            {
                 list->removeUnordered(i);
-            } else {
+            }
+            else
+            {
                 list->set(nullptr, i);
             }
             return i;
@@ -240,12 +265,15 @@ Ref<AutoscanList> AutoscanList::removeIfSubdir(String parent, bool persistent)
 
     Ref<AutoscanList> rm_id_list(new AutoscanList());
 
-    for (int i = 0; i < list->size(); i++) {
-        if (list->get(i) != nullptr && (list->get(i)->getLocation().startsWith(parent))) {
+    for (int i = 0; i < list->size(); i++)
+    {
+        if (list->get(i) != nullptr && (list->get(i)->getLocation().startsWith(parent)))
+        {
             Ref<AutoscanDirectory> dir = list->get(i);
             if (dir == nullptr)
                 continue;
-            if (dir->persistent() && !persistent) {
+            if (dir->persistent() && !persistent)
+            {
                 continue;
             }
             Ref<AutoscanDirectory> copy(new AutoscanDirectory());
@@ -253,9 +281,12 @@ Ref<AutoscanList> AutoscanList::removeIfSubdir(String parent, bool persistent)
             rm_id_list->add(copy);
             copy->setScanID(dir->getScanID());
             dir->setScanID(INVALID_SCAN_ID);
-            if (i == list->size() - 1) {
+            if (i == list->size()-1)
+            {
                 list->removeUnordered(i);
-            } else {
+            }
+            else
+            {
                 list->set(nullptr, i);
             }
         }
@@ -264,14 +295,14 @@ Ref<AutoscanList> AutoscanList::removeIfSubdir(String parent, bool persistent)
     return rm_id_list;
 }
 
-void AutoscanList::notifyAll(TimerSubscriber* sub)
+void AutoscanList::notifyAll(TimerSubscriber *sub)
 {
-    if (sub == nullptr)
-        return;
+    if (sub == nullptr) return;
     AutoLock lock(mutex);
-
+    
     Ref<Timer> timer = Timer::getInstance();
-    for (int i = 0; i < list->size(); i++) {
+    for (int i = 0; i < list->size(); i++)
+    {
         if (list->get(i) == nullptr)
             continue;
         sub->timerNotify(list->get(i)->getTimerParameter());
@@ -284,24 +315,23 @@ void AutoscanDirectory::setLocation(String location)
         this->location = location;
     else
         throw _Exception(_("UNALLOWED LOCATION CHANGE!"));
+
 }
 
-void AutoscanDirectory::setScanID(int id)
+void AutoscanDirectory::setScanID(int id) 
 {
-    scanID = id;
-    RefCast(timer_parameter, ContentManager::TimerParameter)->setID(id);
-}
+    scanID = id; 
+    RefCast(timer_parameter, ContentManager::TimerParameter)->setID(id); 
+} 
+
 
 String AutoscanDirectory::mapScanmode(scan_mode_t scanmode)
 {
     String scanmode_str = nullptr;
-    switch (scanmode) {
-    case TimedScanMode:
-        scanmode_str = _("timed");
-        break;
-    case InotifyScanMode:
-        scanmode_str = _("inotify");
-        break;
+    switch (scanmode)
+    {
+        case TimedScanMode: scanmode_str = _("timed"); break;
+        case InotifyScanMode: scanmode_str = _("inotify"); break;
     }
     if (scanmode_str == nullptr)
         throw Exception(_("illegal scanmode given to mapScanmode(): ") + scanmode);
@@ -321,13 +351,10 @@ scan_mode_t AutoscanDirectory::remapScanmode(String scanmode)
 String AutoscanDirectory::mapScanlevel(scan_level_t scanlevel)
 {
     String scanlevel_str = nullptr;
-    switch (scanlevel) {
-    case BasicScanLevel:
-        scanlevel_str = _("basic");
-        break;
-    case FullScanLevel:
-        scanlevel_str = _("full");
-        break;
+    switch (scanlevel)
+    {
+        case BasicScanLevel: scanlevel_str = _("basic"); break;
+        case FullScanLevel: scanlevel_str = _("full"); break;
     }
     if (scanlevel_str == nullptr)
         throw Exception(_("illegal scanlevel given to mapScanlevel(): ") + scanlevel);
@@ -364,5 +391,5 @@ void AutoscanDirectory::copyTo(Ref<AutoscanDirectory> copy)
 
 Ref<Object> AutoscanDirectory::getTimerParameter()
 {
-    return timer_parameter;
+    return timer_parameter; 
 }

@@ -31,12 +31,12 @@
 
 #if defined(ENABLE_MRREG)
 
-#include "ixml.h"
-#include "server.h"
-#include "storage.h"
 #include "tools.h"
 #include "upnp_mrreg.h"
+#include "server.h"
 #include "upnp_xml.h"
+#include "ixml.h"
+#include "storage.h"
 
 using namespace zmm;
 using namespace mxml;
@@ -44,7 +44,7 @@ using namespace mxml;
 void MRRegistrarService::process_subscription_request(zmm::Ref<SubscriptionRequest> request)
 {
     int err;
-    IXML_Document* event = NULL;
+    IXML_Document *event = NULL;
 
     Ref<Element> propset, property;
 
@@ -57,13 +57,14 @@ void MRRegistrarService::process_subscription_request(zmm::Ref<SubscriptionReque
 
     String xml = propset->print();
     err = ixmlParseBufferEx(xml.c_str(), &event);
-    if (err != IXML_SUCCESS) {
+    if (err != IXML_SUCCESS)
+    {
         throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, _("Could not convert property set to ixml"));
     }
 
     UpnpAcceptSubscriptionExt(Server::getInstance()->getDeviceHandle(),
-        ConfigManager::getInstance()->getOption(CFG_SERVER_UDN).c_str(),
-        serviceID.c_str(), event, request->getSubscriptionID().c_str());
+            ConfigManager::getInstance()->getOption(CFG_SERVER_UDN).c_str(),
+            serviceID.c_str(), event, request->getSubscriptionID().c_str());
 
     ixmlDocument_free(event);
 }

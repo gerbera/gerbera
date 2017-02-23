@@ -32,52 +32,54 @@
 #ifndef __ZMMF_OBJECT_QUEUE_H__
 #define __ZMMF_OBJECT_QUEUE_H__
 
-#include "base_queue.h"
 #include "zmm.h"
+#include "base_queue.h"
 
-namespace zmm {
-/// \brief a simple stack for a base type. NOT thread safe!
-template <class T>
-class ObjectQueue : public BaseQueue<Object*> {
-public:
-    ObjectQueue(int initialCapacity)
-        : BaseQueue<Object*>(initialCapacity, NULL)
+namespace zmm
+{
+    /// \brief a simple stack for a base type. NOT thread safe!
+    template <class T>
+    class ObjectQueue : public BaseQueue<Object *>
     {
-    }
-
-    ~ObjectQueue()
-    {
-        Object* obj;
-        while (NULL != (obj = BaseQueue<Object*>::dequeue())) {
-            obj->release();
+    public:
+        ObjectQueue(int initialCapacity) : BaseQueue<Object *>(initialCapacity, NULL)
+        {
         }
-    }
-
-    inline void enqueue(Ref<T> element)
-    {
-        Object* obj = element.getPtr();
-        obj->retain();
-        BaseQueue<Object*>::enqueue(obj);
-    }
-
-    inline Ref<T> dequeue()
-    {
-        Object* obj = BaseQueue<Object*>::dequeue();
-        if (obj == NULL)
-            return nullptr;
-        Ref<T> ret((T*)obj);
-        obj->release();
-        return ret;
-    }
-
-    inline Ref<T> get(int index)
-    {
-        Object* obj = BaseQueue<Object*>::get(index);
-        if (obj == NULL)
-            return nullptr;
-        return Ref<T>((T*)obj);
-    }
-};
+        
+        ~ObjectQueue()
+        {
+            Object *obj;
+            while(NULL != (obj = BaseQueue<Object *>::dequeue()))
+            {
+                obj->release();
+            }
+        }
+        
+        inline void enqueue(Ref<T> element)
+        {
+            Object *obj = element.getPtr();
+            obj->retain();
+            BaseQueue<Object *>::enqueue(obj);
+        }
+        
+        inline Ref<T> dequeue()
+        {
+            Object *obj = BaseQueue<Object *>::dequeue();
+            if (obj == NULL)
+                return nullptr;
+            Ref<T> ret((T *)obj);
+            obj->release();
+            return ret;
+        }
+        
+        inline Ref<T> get(int index)
+        {
+            Object *obj = BaseQueue<Object *>::get(index);
+            if (obj == NULL)
+                return nullptr;
+            return Ref<T>((T *)obj);
+        }
+    };
 }
 
 #endif // __ZMMF_OBJECT_QUEUE_H__

@@ -36,21 +36,23 @@
 
 #include "mxml.h"
 
-namespace mxml {
-
+namespace mxml
+{
+    
 class Element;
 
-class Document : public Node {
+class Document : public Node
+{
 protected:
     zmm::Ref<Element> root;
-
+    
 public:
     Document();
-
+    
     zmm::Ref<Element> getRoot();
     void setRoot(zmm::Ref<Element> root);
     void appendChild(zmm::Ref<Node> child);
-
+    
 protected:
     virtual void print_internal(zmm::Ref<zmm::StringBuffer> buf, int indent);
 };

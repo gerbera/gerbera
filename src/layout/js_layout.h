@@ -35,7 +35,8 @@
 #include "layout.h"
 #include "scripting/import_script.h"
 
-class JSLayout : public Layout {
+class JSLayout : public Layout
+{
 protected:
     zmm::Ref<ImportScript> import_script;
 

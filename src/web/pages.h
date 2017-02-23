@@ -32,86 +32,95 @@
 #ifndef __WEB_PAGES_H__
 #define __WEB_PAGES_H__
 
-#include "cds_objects.h"
 #include "common.h"
 #include "dictionary.h"
 #include "request_handler.h"
 #include "web_request_handler.h"
+#include "cds_objects.h"
 
-namespace web {
+namespace web
+{
 
 /// \brief Authentication handler (used over AJAX)
-class auth : public WebRequestHandler {
+class auth : public WebRequestHandler
+{
 protected:
     int timeout;
-
 public:
     auth();
     virtual void process();
 };
 
 /// \brief Browser container tree
-class containers : public WebRequestHandler {
+class containers : public WebRequestHandler
+{
 public:
     containers();
     virtual void process();
 };
 
 /// \brief Browser directory tree
-class directories : public WebRequestHandler {
+class directories : public WebRequestHandler
+{
 public:
     directories();
     virtual void process();
 };
 
 /// \brief Browser file list
-class files : public WebRequestHandler {
+class files : public WebRequestHandler
+{
 public:
     files();
     virtual void process();
 };
 
 /// \brief Browser item list
-class items : public WebRequestHandler {
+class items : public WebRequestHandler
+{
 public:
     items();
     virtual void process();
 };
 
 /// \brief Browser add item
-class add : public WebRequestHandler {
+class add : public WebRequestHandler
+{
 public:
     add();
     virtual void process();
 };
 
 /// \brief Browser remove item
-class remove : public WebRequestHandler {
+class remove : public WebRequestHandler
+{
 public:
     remove();
     virtual void process();
 };
 
 /// \brief Browser remove item
-class edit_load : public WebRequestHandler {
+class edit_load : public WebRequestHandler
+{
 public:
     edit_load();
     virtual void process();
 };
 
 /// \brief Browser remove item
-class edit_save : public WebRequestHandler {
+class edit_save : public WebRequestHandler
+{
 public:
     edit_save();
     virtual void process();
 };
 
 /// \brief Browser add object.
-class addObject : public WebRequestHandler {
+class addObject : public WebRequestHandler
+{
 public:
     addObject();
     virtual void process();
-
 protected:
     void addContainer(int parentID);
     zmm::Ref<CdsObject> addItem(int parentID, zmm::Ref<CdsItem> item);
@@ -120,29 +129,32 @@ protected:
 };
 
 /// \brief autoscan add and remove
-class autoscan : public WebRequestHandler {
+class autoscan : public WebRequestHandler
+{
 public:
     autoscan();
     virtual void process();
-
 protected:
     void autoscan2XML(zmm::Ref<mxml::Element> element, zmm::Ref<AutoscanDirectory> adir);
 };
 
 /// \brief nothing :)
-class voidType : public WebRequestHandler {
+class voidType : public WebRequestHandler
+{
 public:
     virtual void process();
 };
 
 /// \brief task list and task cancel
-class tasks : public WebRequestHandler {
+class tasks : public WebRequestHandler
+{
 public:
     virtual void process();
 };
 
 /// \brief UI action button
-class action : public WebRequestHandler {
+class action : public WebRequestHandler
+{
 public:
     action();
     virtual void process();
@@ -153,6 +165,6 @@ public:
 /// \brief Chooses and creates the appropriate handler for processing the request.
 /// \param page identifies what type of the request we are dealing with.
 /// \return the appropriate request handler.
-WebRequestHandler* create_web_request_handler(zmm::String page);
+WebRequestHandler *create_web_request_handler(zmm::String page);
 
 #endif // __WEB_PAGES_H__

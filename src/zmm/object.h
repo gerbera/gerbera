@@ -32,14 +32,17 @@
 #ifndef __ZMM_OBJECT_H__
 #define __ZMM_OBJECT_H__
 
-#include <cstddef>
 #include <new> // for size_t
+#include <cstddef>
 
 #include "atomic.h"
 
-namespace zmm {
+namespace zmm
+{
 
-class Object {
+
+class Object
+{
 public:
     Object();
     virtual ~Object();
@@ -47,15 +50,15 @@ public:
     void release() const;
     int getRefCount() const;
 
-    static void* operator new(size_t size);
-    static void operator delete(void* ptr);
-
+    static void* operator new (size_t size); 
+    static void operator delete (void *ptr);
 protected:
     mutable mt_atomic_t _ref_count;
 #ifdef ATOMIC_NEED_MUTEX
     mutable pthread_mutex_t mutex;
 #endif
 };
+
 
 } // namespace
 
