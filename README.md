@@ -47,6 +47,14 @@ _MediaTomb is pretty much dead upstream, so this is my attempt to get kick it ba
 - IPv6 Support
 - Lots of other stuff.
 
+## Installing
+
+### Ubuntu
+Stephen Czetty maintains a [Ubuntu PPA].
+
+### Gentoo
+The [v00d00 overlay] contains a git live ebuild. It will get added to the main portage tree at some point.
+
 ## Building
 
 The project has been ported to [CMake].
@@ -127,3 +135,5 @@ make install
 [1]: https://sourceforge.net/p/mediatomb/discussion/440751/thread/258c3cf7/?limit=250
 [pupnp]: https://github.com/mrjimenez/pupnp.git
 [CMake]: https://cmake.org/
+[Ubuntu PPA]: https://launchpad.net/~stephenczetty/+archive/ubuntu/mediatomb-v00d00
+[v00d00 overlay]: https://github.com/v00d00/overlay
