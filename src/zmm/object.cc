@@ -32,55 +32,40 @@
 #include <cstdio>
 #include <cstdlib>
 
-#include "object.h"
 #include "memory.h"
+#include "object.h"
 
 using namespace zmm;
 
 Object::Object()
 {
-    atomic_set(&_ref_count, 0);
-#ifdef ATOMIC_NEED_MUTEX
-    pthread_mutex_init(&mutex, nullptr);
-#endif
+    _ref_count.store(0);
 }
 Object::~Object()
 {
-#ifdef ATOMIC_NEED_MUTEX
-    pthread_mutex_destroy(&mutex);
-#endif
 }
 
 void Object::retain() const
 {
-#ifdef ATOMIC_NEED_MUTEX
-    atomic_inc(&_ref_count, &mutex);
-#else
-    atomic_inc(&_ref_count);
-#endif
+    _ref_count++;
 }
 void Object::release() const
 {
-#ifdef ATOMIC_NEED_MUTEX
-    if(atomic_dec(&_ref_count, &mutex))
-#else
-    if(atomic_dec(&_ref_count))
-#endif
-    {
+    if (--_ref_count == 0) {
         delete this;
     }
 }
 
 int Object::getRefCount() const
 {
-    return atomic_get(&_ref_count);
+    return _ref_count.load();
 }
 
-void* Object::operator new (size_t size)
+void* Object::operator new(size_t size)
 {
     return MALLOC(size);
 }
-void Object::operator delete (void *ptr)
+void Object::operator delete(void* ptr)
 {
     FREE(ptr);
 }
