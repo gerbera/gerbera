@@ -36,8 +36,6 @@
 #include <cstddef>
 #include <new> // for size_t
 
-#include "atomic.h"
-
 namespace zmm {
 
 class Object {
