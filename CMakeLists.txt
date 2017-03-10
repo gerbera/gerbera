@@ -272,7 +272,6 @@ add_library(libmediatomb OBJECT
         src/youtube_service.h
         src/youtube_video_url.cc
         src/youtube_video_url.h
-        src/zmm/atomic.h
         src/zmm/array.cc
         src/zmm/array.h
         src/zmm/base_array.h
