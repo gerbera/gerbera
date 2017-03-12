@@ -274,13 +274,6 @@ long getDeltaMillis(struct timespec *first);
 long getDeltaMillis(struct timespec *first, struct timespec *second);
 
 void getTimespecAfterMillis(long delta, struct timespec *ret, struct timespec *start = NULL);
-int compareTimespecs(struct timespec *a,  struct timespec *b);
-/*
-/// \bried Returns the current milliseconds since the "epoch" or since startMillis (which are counted since the epoch).
-long getMillis(long startMillis = 0);
-
-void millisToTimespec(long millis, struct timespec *spec);
-*/
 
 /// \brief This function makes sure that there are no trailing slashes, no 
 /// consecutive slashes. If /../ or /..\0 is encountered an exception is 

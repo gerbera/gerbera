@@ -113,7 +113,7 @@ protected:
 };
 
 /// \brief This class offers ways to create new sessoins, stores all available sessions and provides access to them.
-class SessionManager : public TimerSubscriber, public Singleton<SessionManager>
+class SessionManager : public Timer::Subscriber, public Singleton<SessionManager>
 {
 protected:
     /// \brief This array is holding available sessions.
@@ -152,7 +152,7 @@ public:
     
     void containerChangedUI(zmm::Ref<zmm::IntArray> objectIDs);
     
-    virtual void timerNotify(zmm::Ref<zmm::Object> parameter);
+    virtual void timerNotify(zmm::Ref<Timer::Parameter> parameter);
 };
 
 #endif //  __SESSION_MANAGER_H__

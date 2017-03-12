@@ -1039,20 +1039,7 @@ void getTimespecAfterMillis(long delta, struct timespec *ret, struct timespec *s
         ret->tv_nsec -= 1000000000;
     }
     
-    //log_debug("timespec: sec: %ld, nsec: %ld\n", ret->tv_sec, ret->tv_nsec);
-}
-
-int compareTimespecs(struct timespec *a,  struct timespec *b)
-{
-    if (a->tv_sec < b->tv_sec)
-        return 1;
-    if (a->tv_sec > b->tv_sec)
-        return -1;
-    if (a->tv_nsec < b->tv_nsec)
-        return 1;
-    if (a->tv_nsec > b->tv_nsec)
-        return -1;
-    return 0;
+    // log_debug("timespec: sec: %ld, nsec: %ld\n", ret->tv_sec, ret->tv_nsec);
 }
 
 String normalizePath(String path)

@@ -241,7 +241,7 @@ void SessionManager::checkTimer()
     }
 }
 
-void SessionManager::timerNotify(Ref<Object> parameter)
+void SessionManager::timerNotify(Ref<Timer::Parameter> parameter)
 {
     log_debug("notified... %d sessions.\n", sessions->size());
     AutoLock lock(mutex);

@@ -177,47 +177,15 @@ public:
 };
 */
 
-class ContentManager : public TimerSubscriber, public Singleton<ContentManager, std::recursive_mutex>
+class ContentManager : public Timer::Subscriber, public Singleton<ContentManager, std::recursive_mutex>
 {
 public:
-    /// \brief This is the parameter class for timerNotify
-    class TimerParameter : public zmm::Object
-    {
-    public:
-        enum timer_param_t
-        {
-            IDAutoscan,
-#ifdef ONLINE_SERVICES
-            IDOnlineContent,
-#ifdef YOUTUBE
-            IDURLCache
-#endif
-
-#endif
-        };
-
-        TimerParameter(timer_param_t param, int id) 
-        { 
-            this->param = param; 
-            this->id = id;
-        }
-
-        timer_param_t whoami()  { return param;  }
-        void setID(int id)       { this->id = id; }
-        int getID()             { return id;     }
-
-    protected:
-        timer_param_t param;
-        int id;
-    };
-
-
     ContentManager();
     virtual void init();
     virtual ~ContentManager();
     void shutdown();
     
-    virtual void timerNotify(zmm::Ref<zmm::Object> parameter);
+    virtual void timerNotify(zmm::Ref<Timer::Parameter> parameter);
     
     bool isBusy() { return working; }
     

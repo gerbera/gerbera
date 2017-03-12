@@ -170,9 +170,10 @@ ContentManager::ContentManager()
         storage->updateAutoscanPersistentList(InotifyScanMode,
             config_inotify_list);
         autoscan_inotify = storage->getAutoscanList(InotifyScanMode);
-    } else
+    } else {
         // make an empty list so we do not have to do extra checks on shutdown
         autoscan_inotify = Ref<AutoscanList>(new AutoscanList());
+    }
 #endif
 /* init filemagic */
 #ifdef HAVE_MAGIC
@@ -213,8 +214,8 @@ ContentManager::ContentManager()
             if (cm->getBoolOption(CFG_ONLINE_CONTENT_YOUTUBE_UPDATE_AT_START))
                 i = CFG_DEFAULT_UPDATE_AT_START;
 
-            Ref<TimerParameter> yt_param(new TimerParameter(TimerParameter::IDOnlineContent, OS_YouTube));
-            yt->setTimerParameter(RefCast(yt_param, Object));
+            Ref<Timer::Parameter> yt_param(new Timer::Parameter(Timer::Parameter::IDOnlineContent, OS_YouTube));
+            yt->setTimerParameter(yt_param);
             online_services->registerService(yt);
 
             if (i > 0) {
@@ -245,7 +246,7 @@ ContentManager::ContentManager()
             if (cm->getBoolOption(CFG_ONLINE_CONTENT_SOPCAST_UPDATE_AT_START))
                 i = CFG_DEFAULT_UPDATE_AT_START;
 
-            Ref<TimerParameter> sc_param(new TimerParameter(TimerParameter::IDOnlineContent, OS_SopCast));
+            Ref<Parameter> sc_param(new Parameter(Parameter::IDOnlineContent, OS_SopCast));
             sc->setTimerParameter(RefCast(sc_param, Object));
             online_services->registerService(sc);
             if (i > 0) {
@@ -270,7 +271,7 @@ ContentManager::ContentManager()
             if (cm->getBoolOption(CFG_ONLINE_CONTENT_ATRAILERS_UPDATE_AT_START))
                 i = CFG_DEFAULT_UPDATE_AT_START;
 
-            Ref<TimerParameter> at_param(new TimerParameter(TimerParameter::IDOnlineContent, OS_ATrailers));
+            Ref<Parameter> at_param(new Parameter(Parameter::IDOnlineContent, OS_ATrailers));
             at->setTimerParameter(RefCast(at_param, Object));
             online_services->registerService(at);
             if (i > 0) {
@@ -293,23 +294,10 @@ ContentManager::~ContentManager()
 
 void ContentManager::init()
 {
-    int ret;
-
     reMimetype = Ref<RExp>(new RExp());
     reMimetype->compile(_(MIMETYPE_REGEXP));
 
-    /*
-    pthread_attr_t attr;
-    ret = pthread_attr_init(&attr);
-    if (ret != 0)
-    {
-        throw _Exception(_("Could not initialize attribute"));
-    }
-   
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-    */
-
-    ret = pthread_create(
+    int ret = pthread_create(
         &taskThread,
         nullptr, //&attr, // attr
         ContentManager::staticThreadProc,
@@ -317,10 +305,6 @@ void ContentManager::init()
     if (ret != 0) {
         throw _Exception(_("Could not start task thread"));
     }
-
-    //pthread_attr_destroy(&attr);
-
-    //loadAccounting(false);
 
     autoscan_timed->notifyAll(this);
 
@@ -335,6 +319,13 @@ void ContentManager::init()
         }
     }
 #endif
+
+    for (int i = 0; i < autoscan_timed->size(); i++) {
+        Ref<AutoscanDirectory> dir = autoscan_timed->get(i);
+        Ref<Timer::Parameter> param(new Timer::Parameter(Timer::Parameter::timer_param_t::IDAutoscan, dir->getScanID()));
+        log_debug("Adding timed scan with interval %d\n", dir->getInterval());
+        Timer::getInstance()->addTimerSubscriber(this, dir->getInterval(), param, false);
+    }
 
 #ifdef EXTERNAL_TRANSCODING
     process_list = Ref<Array<Executor> >(new Array<Executor>());
@@ -367,14 +358,13 @@ void ContentManager::unregisterExecutor(Ref<Executor> exec)
 }
 #endif
 
-void ContentManager::timerNotify(Ref<Object> parameter)
+void ContentManager::timerNotify(Ref<Timer::Parameter> parameter)
 {
     if (parameter == nullptr)
         return;
 
-    Ref<TimerParameter> tp = RefCast(parameter, TimerParameter);
-    if (tp->whoami() == TimerParameter::IDAutoscan) {
-        Ref<AutoscanDirectory> dir = autoscan_timed->get(tp->getID());
+    if (parameter->whoami() == Timer::Parameter::IDAutoscan) {
+        Ref<AutoscanDirectory> dir = autoscan_timed->get(parameter->getID());
         if (dir == nullptr)
             return;
 
@@ -382,11 +372,11 @@ void ContentManager::timerNotify(Ref<Object> parameter)
         rescanDirectory(objectID, dir->getScanID(), dir->getScanMode());
     }
 #ifdef ONLINE_SERVICES
-    else if (tp->whoami() == TimerParameter::IDOnlineContent) {
-        fetchOnlineContent((service_type_t)(tp->getID()));
+    else if (parameter->whoami() == Timer::Parameter::IDOnlineContent) {
+        fetchOnlineContent((service_type_t)(parameter->getID()));
     }
 #ifdef YOUTUBE
-    else if (tp->whoami() == TimerParameter::IDURLCache) {
+    else if (parameter->whoami() == Timer::Parameter::IDURLCache) {
         checkCachedURLs();
     }
 #endif
@@ -1319,6 +1309,7 @@ void ContentManager::reloadLayout()
 
 void ContentManager::threadProc()
 {
+    log_debug("THREAD PROC RUNNINNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNG\n");
     Ref<GenericTask> task;
     std::unique_lock<mutex_type> lock(mutex);
     working = true;
@@ -1335,7 +1326,7 @@ void ContentManager::threadProc()
         }
         lock.unlock();
 
-        //        log_debug(("Async START %s\n", task->getDescription().c_str()));
+        // log_debug("content manager Async START %s\n", task->getDescription().c_str());
         try {
             if (task->isValid())
                 task->run();
@@ -1345,9 +1336,11 @@ void ContentManager::threadProc()
             log_error("Exception caught: %s\n", e.getMessage().c_str());
             e.printStackTrace();
         }
-        //        log_debug(("ASYNC STOP  %s\n", task->getDescription().c_str()));
-        if (!shutdownFlag)
+        // log_debug("content manager ASYNC STOP  %s\n", task->getDescription().c_str());
+
+        if (!shutdownFlag) {
             lock.lock();
+        }
     }
 
     Storage::getInstance()->threadCleanup();
@@ -1604,6 +1597,7 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
 
 void ContentManager::rescanDirectory(int objectID, int scanID, scan_mode_t scanMode, String descPath, bool cancellable)
 {
+    log_debug("Rescanning!\n");
     // building container path for the description
     Ref<GenericTask> task(new CMRescanDirectoryTask(objectID, scanID, scanMode, cancellable));
     Ref<AutoscanDirectory> dir = getAutoscanDirectory(scanID, scanMode);
@@ -1621,6 +1615,7 @@ void ContentManager::rescanDirectory(int objectID, int scanID, scan_mode_t scanM
         descPath = dir->getLocation();
 
     task->setDescription(_("Performing ") + level + " scan: " + descPath);
+    log_debug("Queing rescan task!\n");
     addTask(task, true); // adding with low priority
 }
 
@@ -1923,12 +1918,12 @@ void ContentManager::checkCachedURLs()
         cached_urls->size());
 
     if (cached_urls->size() > 0) {
-        Ref<TimerParameter> url_cache_check(new TimerParameter(TimerParameter::IDURLCache, -1));
+        Ref<Timer::Parameter> url_cache_check(new Timer::Parameter(Timer::Parameter::IDURLCache, -1));
 
         Timer::getInstance()->addTimerSubscriber(
             this,
             URL_CACHE_CHECK_INTERVAL,
-            RefCast(url_cache_check, Object), true);
+            url_cache_check, true);
     }
 }
 
@@ -1980,12 +1975,12 @@ void ContentManager::cacheURL(zmm::Ref<CachedURL> url)
 
     if ((cached_urls->size() > 0) && (old_size == 0)) {
         log_debug("URL Cache is not empty, adding invalidation timer!\n");
-        Ref<TimerParameter> url_cache_check(new TimerParameter(TimerParameter::IDURLCache, -1));
+        Ref<Timer::Parameter> url_cache_check(new Timer::Parameter(Timer::Parameter::IDURLCache, -1));
 
         Timer::getInstance()->addTimerSubscriber(
             this,
             URL_CACHE_CHECK_INTERVAL,
-            RefCast(url_cache_check, Object), true);
+            url_cache_check, true);
     }
 }
 
@@ -2071,10 +2066,6 @@ void CMRescanDirectoryTask::run()
 
     if (dir->getTaskCount() == 0) {
         dir->updateLMT();
-        if (dir->getScanMode() == TimedScanMode) {
-            Timer::getInstance()->addTimerSubscriber(
-                cm.getPtr(), dir->getInterval(), dir->getTimerParameter(), true);
-        }
     }
 }
 

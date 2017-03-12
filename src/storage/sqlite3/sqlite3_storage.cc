@@ -227,7 +227,7 @@ void Sqlite3Storage::init()
     if (ConfigManager::getInstance()->getBoolOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED))
     {
         int backupInterval = ConfigManager::getInstance()->getIntOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_INTERVAL);
-        Timer::getInstance()->addTimerSubscriber(&backupTimerSubscriber, backupInterval, Ref<Object>(this));
+        Timer::getInstance()->addTimerSubscriber(this, backupInterval, nullptr);
         
         // do a backup now
         Ref<SLBackupTask> btask (new SLBackupTask(false));
@@ -363,7 +363,7 @@ void Sqlite3Storage::shutdownDriver()
     AutoLockU lock(sqliteMutex);
     shutdownFlag = true;
     if (ConfigManager::getInstance()->getBoolOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED)) {
-        Timer::getInstance()->removeTimerSubscriber(&backupTimerSubscriber, Ref<Object>(this));
+        Timer::getInstance()->removeTimerSubscriber(this, nullptr);
     }
     log_debug("signalling...\n");
     cond.notify_one();
@@ -657,12 +657,10 @@ Sqlite3Row::Sqlite3Row(char **row, Ref<SQLResult> sqlResult) : SQLRow(sqlResult)
 
 /* Sqlite3BackupTimerSubscriber */
 
-void Sqlite3BackupTimerSubscriber::timerNotify(Ref<Object> sqlite3storage)
+void Sqlite3Storage::timerNotify(Ref<Timer::Parameter> param)
 {
-    Sqlite3Storage *storage = (Sqlite3Storage*)(sqlite3storage.getPtr());
-    
     Ref<SLBackupTask> btask (new SLBackupTask(false));
-    storage->addTask(RefCast(btask, SLTask), true);
+    this->addTask(RefCast(btask, SLTask), true);
 }
 
 #endif // HAVE_SQLITE3

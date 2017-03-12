@@ -35,10 +35,12 @@
 #ifndef __ONLINE_SERVICE_H__
 #define __ONLINE_SERVICE_H__
 
+
 #include "zmm/zmm.h"
 #include "zmm/zmmf.h"
 #include "mxml/mxml.h"
 #include "layout/layout.h"
+#include "timer.h"
 
 #define ONLINE_SERVICE_AUX_ID "ols"
 #define ONLINE_SERVICE_LAST_UPDATE "lu"
@@ -108,10 +110,10 @@ public:
     void setTaskCount(int taskCount) { this->taskCount = taskCount; }
 
     /// Parameter that can be used by timerNotify
-    void setTimerParameter(zmm::Ref<zmm::Object> param) 
+    void setTimerParameter(zmm::Ref<Timer::Parameter> param)
                            { timer_parameter = param; }
 
-    zmm::Ref<Object> getTimerParameter() { return timer_parameter; }
+    zmm::Ref<Timer::Parameter> getTimerParameter() { return timer_parameter; }
 
     /// \brief Sets the service refresh interval in seconds
     void setRefreshInterval(int interval) {refresh_interval = interval; }
@@ -129,7 +131,7 @@ protected:
     int taskCount;
     int refresh_interval;
     int purge_interval;
-    zmm::Ref<zmm::Object> timer_parameter;
+    zmm::Ref<Timer::Parameter> timer_parameter;
 
     /// \brief retrieves a required attribute given by the name
     zmm::String getCheckAttr(zmm::Ref<mxml::Element> xml, zmm::String attrname);

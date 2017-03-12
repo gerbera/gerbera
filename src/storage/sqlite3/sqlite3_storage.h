@@ -146,15 +146,11 @@ protected:
     bool restore;
 };
 
-class Sqlite3BackupTimerSubscriber : public TimerSubscriber
-{
-    /// \brief for making backups in regulary intervals - see TimerSubscriber
-    virtual void timerNotify(zmm::Ref<zmm::Object> sqlite3storage);
-};
-
 /// \brief The Storage class for using SQLite3
-class Sqlite3Storage : private SQLStorage
+class Sqlite3Storage : public Timer::Subscriber, private SQLStorage
 {
+public:
+    virtual void timerNotify(zmm::Ref<Timer::Parameter> sqlite3storage);
 private:
     Sqlite3Storage();
     friend zmm::Ref<Storage> Storage::createInstance();
@@ -172,7 +168,7 @@ private:
     virtual zmm::Ref<SQLResult> select(const char *query, int length) override;
     virtual int exec(const char *query, int length, bool getLastInsertId = false) override;
     virtual void storeInternalSetting(zmm::String key, zmm::String value) override;
-    
+
     void _exec(const char *query);
     
     zmm::String startupError;
@@ -206,8 +202,6 @@ private:
     
     bool dirty;
 
-    Sqlite3BackupTimerSubscriber backupTimerSubscriber;
-    
     friend class SLSelectTask;
     friend class SLExecTask;
     friend class SLInitTask;

@@ -43,7 +43,7 @@ AutoscanDirectory::AutoscanDirectory()
     storageID = INVALID_OBJECT_ID;
     last_mod_previous_scan = 0;
     last_mod_current_scan = 0;
-    timer_parameter = Ref<Object> ((Object *)new ContentManager::TimerParameter(ContentManager::TimerParameter::IDAutoscan, INVALID_SCAN_ID));
+    timer_parameter = Ref<Timer::Parameter> (new Timer::Parameter(Timer::Parameter::IDAutoscan, INVALID_SCAN_ID));
 }
 
 AutoscanDirectory::AutoscanDirectory(String location, scan_mode_t mode,
@@ -63,7 +63,7 @@ AutoscanDirectory::AutoscanDirectory(String location, scan_mode_t mode,
     storageID = INVALID_OBJECT_ID;
     last_mod_previous_scan = 0;
     last_mod_current_scan = 0;
-    timer_parameter = Ref<Object> ((Object *)new ContentManager::TimerParameter(ContentManager::TimerParameter::IDAutoscan, INVALID_SCAN_ID));
+    timer_parameter = Ref<Timer::Parameter>(new Timer::Parameter(Timer::Parameter::IDAutoscan, INVALID_SCAN_ID));
 }
 
 void AutoscanDirectory::setCurrentLMT(time_t lmt) 
@@ -295,7 +295,7 @@ Ref<AutoscanList> AutoscanList::removeIfSubdir(String parent, bool persistent)
     return rm_id_list;
 }
 
-void AutoscanList::notifyAll(TimerSubscriber *sub)
+void AutoscanList::notifyAll(Timer::Subscriber *sub)
 {
     if (sub == nullptr) return;
     AutoLock lock(mutex);
@@ -321,9 +321,8 @@ void AutoscanDirectory::setLocation(String location)
 void AutoscanDirectory::setScanID(int id) 
 {
     scanID = id; 
-    RefCast(timer_parameter, ContentManager::TimerParameter)->setID(id); 
+    RefCast(timer_parameter, Timer::Parameter)->setID(id);
 } 
-
 
 String AutoscanDirectory::mapScanmode(scan_mode_t scanmode)
 {
@@ -389,7 +388,7 @@ void AutoscanDirectory::copyTo(Ref<AutoscanDirectory> copy)
     copy->timer_parameter = timer_parameter;
 }
 
-Ref<Object> AutoscanDirectory::getTimerParameter()
+Ref<Timer::Parameter> AutoscanDirectory::getTimerParameter()
 {
     return timer_parameter; 
 }

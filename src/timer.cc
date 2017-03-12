@@ -35,43 +35,107 @@
 using namespace zmm;
 using namespace std;
 
-void Timer::triggerWait()
+void Timer::addTimerSubscriber(Subscriber* timerSubscriber, unsigned int notifyInterval, zmm::Ref<Parameter> parameter, bool once)
 {
-    log_debug("triggerWait. - %d subscriber(s)\n", subscribers.size());
+    log_debug("Adding subscriber... interval: %d once: %d \n", notifyInterval, once);
+    if (notifyInterval == 0)
+        throw zmm::Exception(_("Tried to add timer with illegal notifyInterval: ") + notifyInterval);
 
-    unique_lock<decltype(mutex)> lock(mutex);
-    if (! subscribers.empty()) {
-        struct timespec *timeout = getNextNotifyTime();
-        struct timespec now;
-        getTimespecNow(&now);
-        if (compareTimespecs(timeout, &now) < 0) {
-            log_debug("sleeping...\n");
-            cv_status ret = cond.wait_for(lock,
-                    chrono::milliseconds(getDeltaMillis(timeout, &now)));
-            if (ret == cv_status::timeout) {
-                notify();
-            }
-        } else {
-            notify();
+    AutoLock lock(mutex);
+    TimerSubscriberElement element(timerSubscriber, notifyInterval, parameter, once);
+    for (auto& subscriber : subscribers) {
+        if (subscriber == element) {
+            throw zmm::Exception(_("Tried to add same timer twice"));
         }
-    } else {
-        log_debug("nothing to do, sleeping...\n");
-        cond.wait(lock);
+    }
+    subscribers.push_back(element);
+    signal();
+}
+
+void Timer::removeTimerSubscriber(Subscriber* timerSubscriber, zmm::Ref<Parameter> parameter, bool dontFail)
+{
+    log_debug("Removing subscriber...\n");
+    AutoLock lock(mutex);
+    TimerSubscriberElement element(timerSubscriber, 0, parameter);
+    std::list<TimerSubscriberElement>::const_iterator it = std::find(subscribers.cbegin(), subscribers.cend(), element);
+    if (it != subscribers.cend()) {
+        subscribers.erase(it);
+        signal();
+    } else if (!dontFail) {
+        throw zmm::Exception(_("Tried to remove nonexistent timer"));
     }
 }
 
-struct timespec * Timer::getNextNotifyTime() {
-    struct timespec *nextTime = nullptr;
+void Timer::triggerWait()
+{
+    unique_lock<std::mutex> lock(waitMutex);
+
+    while(!shutdownFlag) {
+        log_debug("triggerWait. - %d subscriber(s)\n", subscribers.size());
+
+        if (subscribers.empty()) {
+            log_debug("Nothing to do, sleeping...\n");
+            cond.wait(lock);
+        }
+
+        struct timespec *timeout = getNextNotifyTime();
+        struct timespec now;
+        getTimespecNow(&now);
+
+        long wait = getDeltaMillis(&now, timeout);
+        if (wait > 0) {
+            cv_status ret = cond.wait_for(lock, chrono::milliseconds(wait));
+            if (ret != cv_status::timeout) {
+                /*
+                 * Some rude thread woke us!
+                 * Now we have to wait all over again...
+                 */
+                continue;
+            }
+        }
+        notify();
+    }
+}
+
+void  Timer::notify()
+{
+    log_debug("Notify\n");
     AutoLock lock(mutex);
+    log_debug("Notify with lock\n");
+    for (auto& element : subscribers) {
+        struct timespec now;
+        getTimespecNow(&now);
+        long wait = getDeltaMillis(&now, element.getNextNotify());
+
+        if (wait <= 0) {
+            element.notify();
+            if (element.isOnce()) {
+                element.disabled = true;
+            } else {
+                element.updateNextNotify();
+            }
+        }
+    }
+    subscribers.remove_if([](const auto& e) { return e.disabled; });
+}
+
+struct timespec* Timer::getNextNotifyTime()
+{
+    log_debug("getNextNotifyTime\n");
+    AutoLock lock(mutex);
+    log_debug("getNextNotifyTime with lock\n");
+
+    struct timespec *nextTime = nullptr;
     for (auto & subscriber : subscribers) {
         struct timespec *nextNotify = subscriber.getNextNotify();
-        if (nextTime == nullptr || compareTimespecs(nextNotify, nextTime) > 0) {
+        if (nextTime == nullptr || getDeltaMillis(nextTime, nextNotify) < 0) {
             nextTime = nextNotify;
         }
     }
     return nextTime;
 }
 
-void Timer::shutdown() {
-    log_debug("finished.\n");
+void Timer::shutdown()
+{
+    shutdownFlag = true;
 }

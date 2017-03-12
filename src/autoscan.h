@@ -98,19 +98,19 @@ public:
     /*
     /// \brief Add timer for each directory in the list.
     /// \param obj instance of the class that will receive notifications.
-    void subscribeAll(zmm::Ref<TimerSubscriber> obj);
+    void subscribeAll(zmm::Ref<Subscriber> obj);
     */
 
     /// \brief Send notification for each directory that is stored in the list.
     /// 
     /// \param sub instance of the class that will receive the notifications.
-    void notifyAll(TimerSubscriber *sub);
+    void notifyAll(Timer::Subscriber *sub);
         
     /*
     /// \brief Add timer for given directory.
     /// \param obj instance of the class that will receive notifications.
     /// \param id dir id.
-    void subscribeDir(zmm::Ref<TimerSubscriber> obj, int id, bool once = true);
+    void subscribeDir(zmm::Ref<Subscriber> obj, int id, bool once = true);
     */
     
     /// \brief updates the last_modified data for all AutoscanDirectories.
@@ -234,7 +234,7 @@ public:
 //    void setTimerParamter(zmm::Ref<zmm::Object> parameter);
 
     /// \brief Get the timer notify parameter associated with this directory.
-    zmm::Ref<zmm::Object> getTimerParameter();
+    zmm::Ref<Timer::Parameter> getTimerParameter();
 
 //    bool equals(Ref<AutoscanDirectory> dir);
    
@@ -258,7 +258,7 @@ protected:
     int storageID;
     time_t  last_mod_previous_scan; 
     time_t  last_mod_current_scan;
-    zmm::Ref<zmm::Object> timer_parameter;
+    zmm::Ref<Timer::Parameter> timer_parameter;
 };
 
 #endif
