@@ -1596,7 +1596,6 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
 
 void ContentManager::rescanDirectory(int objectID, int scanID, scan_mode_t scanMode, String descPath, bool cancellable)
 {
-    log_debug("Rescanning!\n");
     // building container path for the description
     Ref<GenericTask> task(new CMRescanDirectoryTask(objectID, scanID, scanMode, cancellable));
     Ref<AutoscanDirectory> dir = getAutoscanDirectory(scanID, scanMode);
@@ -1614,7 +1613,6 @@ void ContentManager::rescanDirectory(int objectID, int scanID, scan_mode_t scanM
         descPath = dir->getLocation();
 
     task->setDescription(_("Performing ") + level + " scan: " + descPath);
-    log_debug("Queing rescan task!\n");
     addTask(task, true); // adding with low priority
 }
 
