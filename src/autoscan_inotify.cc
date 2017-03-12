@@ -120,7 +120,6 @@ void *AutoscanInotify::staticThreadProc(void *arg)
     Storage::getInstance()->threadCleanup();
     log_debug("exiting inotify thread...\n");
     pthread_exit(nullptr);
-    return nullptr;
 }
 
 void AutoscanInotify::threadProc()
@@ -870,9 +869,15 @@ Ref<AutoscanInotify::WatchAutoscan> AutoscanInotify::getStartPoint(Ref<Wd> wdObj
 void AutoscanInotify::addDescendant(int startPointWd, int addWd, Ref<AutoscanDirectory> adir)
 {
 //    log_debug("called for %d, (adir->path=%s); adding %d\n", startPointWd, adir->getLocation().c_str(), addWd);
-    Ref<Wd> wdObj = watches->at(startPointWd);
+    Ref<Wd> wdObj = nullptr;
+    try {
+        wdObj = watches->at(startPointWd);
+    } catch (const std::out_of_range& ex) {
+        return;
+    }
     if (wdObj == nullptr)
         return;
+
 //   log_debug("found wdObj\n");
     Ref<WatchAutoscan> watch = getAppropriateAutoscan(wdObj, adir);
     if (watch == nullptr)
