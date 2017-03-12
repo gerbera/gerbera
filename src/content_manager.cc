@@ -1309,7 +1309,6 @@ void ContentManager::reloadLayout()
 
 void ContentManager::threadProc()
 {
-    log_debug("THREAD PROC RUNNINNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNG\n");
     Ref<GenericTask> task;
     std::unique_lock<mutex_type> lock(mutex);
     working = true;

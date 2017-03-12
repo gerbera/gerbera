@@ -321,7 +321,7 @@ void AutoscanDirectory::setLocation(String location)
 void AutoscanDirectory::setScanID(int id) 
 {
     scanID = id; 
-    RefCast(timer_parameter, Timer::Parameter)->setID(id);
+    timer_parameter->setID(id);
 } 
 
 String AutoscanDirectory::mapScanmode(scan_mode_t scanmode)

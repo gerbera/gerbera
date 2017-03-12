@@ -99,9 +99,7 @@ void Timer::triggerWait()
 
 void  Timer::notify()
 {
-    log_debug("Notify\n");
     AutoLock lock(mutex);
-    log_debug("Notify with lock\n");
     for (auto& element : subscribers) {
         struct timespec now;
         getTimespecNow(&now);
@@ -121,10 +119,7 @@ void  Timer::notify()
 
 struct timespec* Timer::getNextNotifyTime()
 {
-    log_debug("getNextNotifyTime\n");
     AutoLock lock(mutex);
-    log_debug("getNextNotifyTime with lock\n");
-
     struct timespec *nextTime = nullptr;
     for (auto & subscriber : subscribers) {
         struct timespec *nextNotify = subscriber.getNextNotify();
