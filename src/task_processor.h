@@ -13,7 +13,7 @@
 class TPFetchOnlineContentTask : public GenericTask
 {
 public:
-    TPFetchOnlineContentTask(zmm::Ref<OnlineService> service, 
+    TPFetchOnlineContentTask(zmm::Ref<OnlineService> service,
                              zmm::Ref<Layout> layout, bool cancellable,
                              bool unscheduled_refresh);
     virtual void run();
@@ -27,7 +27,7 @@ protected:
 
 class TaskProcessor : public Singleton<TaskProcessor>
 {
-public:    
+public:
     TaskProcessor();
     virtual ~TaskProcessor();
     void addTask(zmm::Ref<GenericTask> task);

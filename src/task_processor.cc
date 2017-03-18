@@ -12,13 +12,9 @@
 using namespace zmm;
 using namespace std;
 
-TaskProcessor::TaskProcessor() : Singleton<TaskProcessor>()
+TaskProcessor::TaskProcessor() : Singleton<TaskProcessor>(),
+    taskThread(0), shutdownFlag(false), working(false), taskID(1)
 {
-    taskID = 1;
-    working = false;
-    shutdownFlag = false;
-    taskThread = 0;
-
     taskQueue = Ref<ObjectQueue<GenericTask> >(new ObjectQueue<GenericTask>(TP_INITIAL_QUEUE_SIZE));
 }
 

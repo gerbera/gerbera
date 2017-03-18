@@ -34,10 +34,8 @@
 using namespace zmm;
 using namespace std;
 
-ThreadExecutor::ThreadExecutor()
+ThreadExecutor::ThreadExecutor() : threadShutdown(false), thread(0)
 {
-    threadShutdown = false;
-    thread = 0;
 }
 
 ThreadExecutor::~ThreadExecutor()

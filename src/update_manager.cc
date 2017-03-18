@@ -49,12 +49,11 @@
 using namespace zmm;
 using namespace std;
 
-UpdateManager::UpdateManager() : Singleton<UpdateManager>()
+UpdateManager::UpdateManager() : Singleton<UpdateManager>(),
+    objectIDHash(make_shared<unordered_set<int>>()),
+    shutdownFlag(false), flushPolicy(FLUSH_SPEC),
+    lastContainerChanged(INVALID_OBJECT_ID)
 {
-    objectIDHash = make_shared<unordered_set<int>>();
-    shutdownFlag = false;
-    flushPolicy = FLUSH_SPEC;
-    lastContainerChanged = INVALID_OBJECT_ID;
 }
 
 void UpdateManager::init()
