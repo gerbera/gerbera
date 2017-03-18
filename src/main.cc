@@ -118,7 +118,7 @@ int main(int argc, char** argv, char** envp)
     }
 #endif
 
-    while (1) {
+    while (true) {
         o = getopt_long(argc, argv, OPTSTR, long_options, &opt_index);
         if (o == -1)
             break;

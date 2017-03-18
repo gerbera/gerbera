@@ -674,7 +674,7 @@ void FallbackLayout::processCdsObject(zmm::Ref<CdsObject> obj, String rootpath)
 #endif
     Ref<CdsObject> clone = CdsObject::createObject(obj->getObjectType());
     obj->copyTo(clone);
-    clone->setVirtual(1);
+    clone->setVirtual(true);
 
 #ifdef ONLINE_SERVICES
     if (clone->getFlag(OBJECT_FLAG_ONLINE_SERVICE))

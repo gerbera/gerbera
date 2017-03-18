@@ -251,7 +251,7 @@ js_error_reporter(JSContext *cx, const char *message, JSErrorReport *report)
             */
         }
     }
-    while (0);
+    while (false);
 
     String err = buf->toString();
     log_js("%s\n", err.c_str());
@@ -592,7 +592,7 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
     // by the create function
 
     // CdsObject
-    obj->setVirtual(1); // JS creates only virtual objects
+    obj->setVirtual(true); // JS creates only virtual objects
 
     i = getIntProperty(js, _("id"), INVALID_OBJECT_ID);
     if (i != INVALID_OBJECT_ID)

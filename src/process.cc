@@ -114,7 +114,7 @@ String run_simple_process(String prog, String param, String input)
 
     int bytesRead;
     char buf[BUF_SIZE];
-    while (1)
+    while (true)
     {
         bytesRead = fread(buf, 1, BUF_SIZE, file);
         if(bytesRead > 0)

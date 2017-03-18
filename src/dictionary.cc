@@ -231,9 +231,9 @@ bool Dictionary::isSubsetOf(Ref<Dictionary> other)
     {
         Ref<DictionaryElement> el = elements->get(i);
         if (el->getValue() != other->get(el->getKey()))
-            return 0;
+            return false;
     }
-    return 1;
+    return true;
 }
 bool Dictionary::equals(Ref<Dictionary> other)
 {
