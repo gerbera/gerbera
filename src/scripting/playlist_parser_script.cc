@@ -44,7 +44,7 @@ extern "C" {
 static JSBool
 js_readln(JSContext *cx, uintN argc, jsval *vp)
 {
-    PlaylistParserScript *self = (PlaylistParserScript *)JS_GetContextPrivate(cx);
+    auto *self = (PlaylistParserScript *)JS_GetContextPrivate(cx);
 
     String line;
     

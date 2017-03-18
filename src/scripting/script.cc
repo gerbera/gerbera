@@ -980,7 +980,7 @@ void Script::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
         tmp = obj->getAuxData(_(YOUTUBE_AUXDATA_REQUEST));
         if (string_ok(tmp))
         {
-            yt_requests_t req = (yt_requests_t)tmp.toInt();
+            auto req = (yt_requests_t)tmp.toInt();
 
             // since subrequests do not actually produce any items they
             // should not be visible to js
@@ -998,7 +998,7 @@ void Script::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
         tmp = obj->getAuxData(_(YOUTUBE_AUXDATA_REGION));
         if (string_ok(tmp))
         {
-            yt_regions_t reg = (yt_regions_t)tmp.toInt();
+            auto reg = (yt_regions_t)tmp.toInt();
             if (reg != YT_region_none)
             {
                 tmp = YouTubeService::getRegionName(reg);

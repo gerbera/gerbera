@@ -155,7 +155,7 @@ void CurlIOHandler::threadProc()
 
 size_t CurlIOHandler::curlCallback(void *ptr, size_t size, size_t nmemb, void *data)
 {
-    CurlIOHandler * ego = (CurlIOHandler *) data;
+    auto * ego = (CurlIOHandler *) data;
     size_t wantWrite = size * nmemb;
     
     assert(wantWrite <= ego->bufSize);

@@ -40,8 +40,8 @@ using namespace mxml;
 
 int WebAutoscanProcessListComparator(void *arg1, void *arg2)
 {
-    AutoscanDirectory *a1 = (AutoscanDirectory *)arg1;
-    AutoscanDirectory *a2 = (AutoscanDirectory *)arg2;
+    auto *a1 = (AutoscanDirectory *)arg1;
+    auto *a2 = (AutoscanDirectory *)arg2;
     return strcmp(a1->getLocation().c_str(), a2->getLocation().c_str());
 }
 

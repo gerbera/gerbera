@@ -71,7 +71,7 @@ void RExp::compile(String pattern, int flags)
 void RExp::compile(zmm::String pattern, const char *sflags)
 {
     int flags = 0;
-    char *p = (char *)sflags;
+    auto *p = (char *)sflags;
     char c;
     while ((c = *p) != 0)
     {

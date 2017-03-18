@@ -45,8 +45,8 @@ using namespace mxml;
 
 int FsObjectComparator(void *arg1, void *arg2)
 {
-    FsObject *o1 = (FsObject *)arg1;
-    FsObject *o2 = (FsObject *)arg2;
+    auto *o1 = (FsObject *)arg1;
+    auto *o2 = (FsObject *)arg2;
     if (o1->isDirectory)
     {
         if (o2->isDirectory)

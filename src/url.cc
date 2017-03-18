@@ -254,7 +254,7 @@ Ref<URL::Stat> URL::getInfo(String URL, CURL *curl_handle)
 
 size_t URL::dl(void *buf, size_t size, size_t nmemb, void *data)
 {
-    StringBuffer *buffer = (StringBuffer *)data;
+    auto *buffer = (StringBuffer *)data;
     if (buffer == nullptr)
         return 0;
 

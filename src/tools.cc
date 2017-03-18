@@ -298,7 +298,7 @@ String hex_encode(const void *data, int len)
 
 String hex_decode_string(String encoded)
 {
-    char *ptr = const_cast<char *>(encoded.c_str());
+    auto *ptr = const_cast<char *>(encoded.c_str());
     int len = encoded.length();
     
     Ref<StringBuffer> buf(new StringBuffer(len / 2));
@@ -317,7 +317,7 @@ String hex_decode_string(String encoded)
             lo = clo - HEX_CHARS;
         else
             lo = 0;
-        char ch = (char)(hi << 4 | lo);
+        auto ch = (char)(hi << 4 | lo);
         *buf << ch;
     }
     return buf->toString();
@@ -361,7 +361,7 @@ String url_escape(String str)
     Ref<StringBuffer> buf(new StringBuffer(len));
     for (int i = 0; i < len; i++)
     {
-        unsigned char c = (unsigned char)data[i];
+        auto c = (unsigned char)data[i];
         if ((c >= '0' && c <= '9') ||
             (c >= 'A' && c <= 'Z') ||
             (c >= 'a' && c <= 'z') ||
@@ -382,7 +382,7 @@ String url_escape(String str)
 
 String url_unescape(String str)
 {
-    char *data = const_cast<char *>(str.c_str());
+    auto *data = const_cast<char *>(str.c_str());
     int len = str.length();
     Ref<StringBuffer> buf(new StringBuffer(len));
 
@@ -473,7 +473,7 @@ String read_text_file(String path)
                         path + " : " + mt_strerror(errno));
     }
     Ref<StringBuffer> buf(new StringBuffer()); 
-    char *buffer = (char *)MALLOC(1024);
+    auto *buffer = (char *)MALLOC(1024);
     size_t bytesRead;    
     while((bytesRead = fread(buffer, 1, 1024, f)) > 0)
     {
@@ -522,7 +522,7 @@ void copy_file(String from, String to)
         throw _Exception(_("copy_file: could not open ") +
                         to + " for write: " + mt_strerror(errno));
     }
-    char *buffer = (char *)MALLOC(1024);
+    auto *buffer = (char *)MALLOC(1024);
     size_t bytesRead = 0;
     size_t bytesWritten = 0;
     while(bytesRead == bytesWritten && ! feof(f) && ! ferror(f) && ! ferror(t)
@@ -669,7 +669,7 @@ String secondsToHMS(int seconds)
     if (h > 999)
         h = 999;
 
-    char *str = (char *)malloc(10);
+    auto *str = (char *)malloc(10);
     sprintf(str, "%02d:%02d:%02d", h, m, s);
     return String::take(str);
 }
@@ -696,7 +696,7 @@ String get_mime_type(magic_set *ms, Ref<RExp> reMimetype, String file)
     if (ms == nullptr)
         return nullptr;
 
-    char *mt = (char *)magic_file(ms, file.c_str());
+    auto *mt = (char *)magic_file(ms, file.c_str());
     if (mt == nullptr)
     {
         log_error("magic_file: %s\n", magic_error(ms));
@@ -720,7 +720,7 @@ String get_mime_type_from_buffer(magic_set *ms, Ref<RExp> reMimetype,
     if (ms == nullptr)
         return nullptr;
 
-    char *mt = (char *)magic_buffer(ms, buffer, length);
+    auto *mt = (char *)magic_buffer(ms, buffer, length);
     if (mt == nullptr)
     {
         log_error("magic_file: %s\n", magic_error(ms));
@@ -982,7 +982,7 @@ String fallbackString(String first, String fallback)
 unsigned int stringHash(String str)
 {
     unsigned int hash = 5381;
-    unsigned char *data = (unsigned char *)str.c_str();
+    auto *data = (unsigned char *)str.c_str();
     int c;
     while ((c = *data++))
         hash = ((hash << 5) + hash) ^ c; /* (hash * 33) ^ c */

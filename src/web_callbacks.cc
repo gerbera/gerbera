@@ -181,7 +181,7 @@ static int web_read(IN UpnpWebFileHandle f, OUT char* buf, IN size_t length)
     if (Server::getInstance()->getShutdownStatus())
         return -1;
 
-    IOHandler* handler = (IOHandler*)f;
+    auto* handler = (IOHandler*)f;
     return handler->read(buf, length);
 }
 
@@ -220,7 +220,7 @@ static int web_write(IN UpnpWebFileHandle f, IN char* buf, IN size_t length)
 static int web_seek(IN UpnpWebFileHandle f, IN off_t offset, IN int whence)
 {
     try {
-        IOHandler* handler = (IOHandler*)f;
+        auto* handler = (IOHandler*)f;
         handler->seek(offset, whence);
     } catch (const Exception& e) {
         log_error("web_seek(): Exception during seek: %s\n", e.getMessage().c_str());

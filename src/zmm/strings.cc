@@ -164,7 +164,7 @@ String String::operator+(const char *other)
     if(! base)
         return String::copy(other);
     int len = base->len;
-    int otherLen = (int)strlen(other);
+    auto otherLen = (int)strlen(other);
     String res(len + otherLen);
     strcpy(res.base->data, base->data);
     strcpy(res.base->data + len, other);
@@ -193,37 +193,37 @@ String String::operator+(double x)
 
 String String::from(int x)
 {
-    StringBase *b = new StringBase(MAX_INT_STRING_LENGTH);
+    auto *b = new StringBase(MAX_INT_STRING_LENGTH);
     b->len = sprintf(b->data, "%d", x);
     return (String(b));
 }
 String String::from(unsigned int x)
 {
-    StringBase *b = new StringBase(MAX_INT_STRING_LENGTH);
+    auto *b = new StringBase(MAX_INT_STRING_LENGTH);
     b->len = sprintf(b->data, "%u", x);
     return (String(b));
 }
 String String::from(long x)
 {
-    StringBase *b = new StringBase(MAX_LONG_STRING_LENGTH);
+    auto *b = new StringBase(MAX_LONG_STRING_LENGTH);
     b->len = sprintf(b->data, "%ld", x);
     return (String(b));
 }
 String String::from(unsigned long x)
 {
-    StringBase *b = new StringBase(MAX_LONG_STRING_LENGTH);
+    auto *b = new StringBase(MAX_LONG_STRING_LENGTH);
     b->len = sprintf(b->data, "%ld", x);
     return (String(b));
 }
 String String::from(double x)
 {
-    StringBase *b = new StringBase(MAX_DOUBLE_STRING_LENGTH);
+    auto *b = new StringBase(MAX_DOUBLE_STRING_LENGTH);
     b->len = sprintf(b->data, "%lf", x);
     return (String(b));
 }
 String String::from(long long x)
 {
-    StringBase *b = new StringBase(MAX_LONG_LONG_STRING_LENGTH);
+    auto *b = new StringBase(MAX_LONG_LONG_STRING_LENGTH);
     b->len = sprintf(b->data, "%lld", x);
     return (String(b));
 }
@@ -241,7 +241,7 @@ String String::allocate(int size)
 }
 String String::take(const char *data)
 {
-    StringBase *base = new StringBase();
+    auto *base = new StringBase();
     base->data = (char *)data;
     base->len = strlen(data);
     base->store = true;
@@ -249,7 +249,7 @@ String String::take(const char *data)
 }
 String String::take(const char *data, int length)
 {
-    StringBase *base = new StringBase();
+    auto *base = new StringBase();
     base->data = (char *)data;
     base->len = length;
     base->store = true;
@@ -257,7 +257,7 @@ String String::take(const char *data, int length)
 }
 String String::refer(const char *data)
 {
-    StringBase *base = new StringBase();
+    auto *base = new StringBase();
     base->data = (char *)data;
     base->len = strlen(data);
     base->store = false;
@@ -265,7 +265,7 @@ String String::refer(const char *data)
 }
 String String::refer(const char *data, int len)
 {
-    StringBase *base = new StringBase();
+    auto *base = new StringBase();
     base->data = (char *)data;
     base->len = len;
     base->store = false;
@@ -275,7 +275,7 @@ String String::copy(const char *data)
 {
     if (data)
     {
-        StringBase *base = new StringBase(data);
+        auto *base = new StringBase(data);
         return String(base);
     }
     else

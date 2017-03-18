@@ -211,7 +211,7 @@ void MysqlStorage::init()
             throw _Exception(_("Error while uncompressing mysql create sql. returned: ") + ret);
         buf[MS_CREATE_SQL_INFLATED_SIZE] = '\0';
         
-        char *sql_start = (char *)buf;
+        auto *sql_start = (char *)buf;
         char *sql_end = strchr(sql_start, ';');
         if (sql_end == nullptr)
         {
@@ -301,7 +301,7 @@ String MysqlStorage::quote(String value)
      * the \0; then the string won't be null-terminated, but that doesn't matter,
      * because we give the correct length to String()
      */
-    char *q = (char *)MALLOC(value.length() * 2 + 2);
+    auto *q = (char *)MALLOC(value.length() * 2 + 2);
     *q = '\'';
     long size = mysql_real_escape_string(&db, q + 1, value.c_str(), value.length());
     q[size + 1] = '\'';

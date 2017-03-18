@@ -1347,7 +1347,7 @@ void ContentManager::threadProc()
 
 void* ContentManager::staticThreadProc(void* arg)
 {
-    ContentManager* inst = (ContentManager*)arg;
+    auto* inst = (ContentManager*)arg;
     inst->threadProc();
     pthread_exit(nullptr);
     return nullptr;

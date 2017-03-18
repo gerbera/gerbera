@@ -57,7 +57,7 @@ void Timer::removeTimerSubscriber(Subscriber* timerSubscriber, zmm::Ref<Paramete
     log_debug("Removing subscriber...\n");
     AutoLock lock(mutex);
     TimerSubscriberElement element(timerSubscriber, 0, parameter);
-    std::list<TimerSubscriberElement>::const_iterator it = std::find(subscribers.cbegin(), subscribers.cend(), element);
+    auto it = std::find(subscribers.cbegin(), subscribers.cend(), element);
     if (it != subscribers.cend()) {
         subscribers.erase(it);
         signal();

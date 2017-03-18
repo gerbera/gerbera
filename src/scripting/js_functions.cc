@@ -83,7 +83,7 @@ js_copyObject(JSContext *cx, uintN argc, jsval *argv)
     JSObject *js_cds_obj;
     JSObject *js_cds_clone_obj;
 
-    Script *self = (Script *)JS_GetContextPrivate(cx);
+    auto *self = (Script *)JS_GetContextPrivate(cx);
 
     try
     {
@@ -139,7 +139,7 @@ js_addCdsObject(JSContext *cx, uintN argc, jsval *argv)
         Ref<StringConverter> p2i;
         Ref<StringConverter> i2i;
 
-        Script *self = (Script *)JS_GetContextPrivate(cx);
+        auto *self = (Script *)JS_GetContextPrivate(cx);
 
         if (self == nullptr)
         {
@@ -362,7 +362,7 @@ static JSBool convert_charset_generic(JSContext *cx, uintN argc, jsval *argv, ch
         JSString *str;
         String result;
 
-        Script *self = (Script *)JS_GetContextPrivate(cx);
+        auto *self = (Script *)JS_GetContextPrivate(cx);
 
         if (self == nullptr)
         {

@@ -500,7 +500,7 @@ void FallbackLayout::addYouTube(zmm::Ref<CdsObject> obj)
     temp = obj->getAuxData(_(YOUTUBE_AUXDATA_AVG_RATING));
     if (string_ok(temp))
     {
-        int rating = (int)temp.toDouble();
+        auto rating = (int)temp.toDouble();
         if (rating > 3)
         {
             chain = _(YT_VPATH "/Rating/") + esc(String::from(rating));
@@ -517,7 +517,7 @@ void FallbackLayout::addYouTube(zmm::Ref<CdsObject> obj)
     temp = obj->getAuxData(_(YOUTUBE_AUXDATA_REQUEST));
     if (string_ok(temp))
     {
-        yt_requests_t req = (yt_requests_t)temp.toInt();
+        auto req = (yt_requests_t)temp.toInt();
         temp = YouTubeService::getRequestName(req);
 
         String subName = obj->getAuxData(_(YOUTUBE_AUXDATA_SUBREQUEST_NAME));
@@ -533,7 +533,7 @@ void FallbackLayout::addYouTube(zmm::Ref<CdsObject> obj)
             chain = chain + '/' + esc(feedName);
 
         if (string_ok(region))
-        {   yt_regions_t reg = (yt_regions_t)region.toInt();
+        {   auto reg = (yt_regions_t)region.toInt();
             if (reg != YT_region_none)
             {
                 region = YouTubeService::getRegionName(reg);

@@ -82,7 +82,7 @@ StringBuffer &StringBuffer::operator<<(const char *str)
 {
     if(! str)
         return *this;
-    int otherLen = (int)strlen(str);
+    auto otherLen = (int)strlen(str);
     if(otherLen)
     {
         addCapacity(otherLen);
@@ -204,7 +204,7 @@ void StringBuffer::ensureCapacity(int neededCapacity)
 {
     if(neededCapacity > capacity)
     {
-        int newCapacity = (int)(capacity * STRINGBUFFER_CAPACITY_INCREMENT);
+        auto newCapacity = (int)(capacity * STRINGBUFFER_CAPACITY_INCREMENT);
         if(neededCapacity > newCapacity)
             newCapacity = neededCapacity;
         capacity = newCapacity;

@@ -217,7 +217,7 @@ void IOHandlerBufferHelper::stopBufferThread()
 void *IOHandlerBufferHelper::staticThreadProc(void *arg)
 {
     log_debug("starting buffer thread... thread: %d\n", pthread_self());
-    IOHandlerBufferHelper *inst = (IOHandlerBufferHelper *)arg;
+    auto *inst = (IOHandlerBufferHelper *)arg;
     inst->threadProc();
     log_debug("buffer thread shut down. thread: %d\n", pthread_self());
     pthread_exit(nullptr);

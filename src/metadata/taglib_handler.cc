@@ -254,7 +254,7 @@ Ref<IOHandler> TagLibHandler::serveContent(IN Ref<CdsItem> item, IN int resNum, 
         if (list.isEmpty())
             throw _Exception(_("TagLibHandler: resource has no album information"));
 
-        TagLib::ID3v2::AttachedPictureFrame* art = static_cast<TagLib::ID3v2::AttachedPictureFrame*>(list.front());
+        auto* art = static_cast<TagLib::ID3v2::AttachedPictureFrame*>(list.front());
 
         Ref<IOHandler> h(new MemIOHandler((void*)art->picture().data(),
             art->picture().size()));

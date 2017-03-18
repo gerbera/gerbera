@@ -46,7 +46,7 @@ String Node::print()
 String Node::escape(String str)
 {
     Ref<StringBuffer> buf(new StringBuffer(str.length()));
-    signed char *ptr = (signed char *)str.c_str();
+    auto *ptr = (signed char *)str.c_str();
     while (ptr && *ptr)
     {
         switch (*ptr)

@@ -281,7 +281,7 @@ int Sqlite3Storage::exec(const char *query, int length, bool getLastInsertId)
 
 void *Sqlite3Storage::staticThreadProc(void *arg)
 {
-    Sqlite3Storage *inst = (Sqlite3Storage *)arg;
+    auto *inst = (Sqlite3Storage *)arg;
     inst->threadProc();
     log_debug("Sqlite3Storage::staticThreadProc - exiting thread\n");
     pthread_exit(nullptr);

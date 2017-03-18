@@ -76,7 +76,7 @@ bool ThreadExecutor::kill()
 
 void *ThreadExecutor::staticThreadProc(void *arg)
 {
-    ThreadExecutor *inst = (ThreadExecutor *)arg;
+    auto *inst = (ThreadExecutor *)arg;
     inst->threadProc();
     pthread_exit(nullptr);
     return nullptr;

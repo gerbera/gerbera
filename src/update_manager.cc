@@ -273,7 +273,7 @@ void UpdateManager::threadProc()
 void *UpdateManager::staticThreadProc(void *arg)
 {
     log_debug("starting update thread... thread: %d\n", pthread_self());
-    UpdateManager *inst = (UpdateManager *)arg;
+    auto *inst = (UpdateManager *)arg;
     inst->threadProc();
     Storage::getInstance()->threadCleanup();
     

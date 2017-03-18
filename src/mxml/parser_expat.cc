@@ -39,7 +39,7 @@ using namespace mxml;
 
 void XMLCALL Parser::element_start(void *userdata, const char *name, const char **attrs)
 {
-    Parser *parser = (Parser *)userdata;
+    auto *parser = (Parser *)userdata;
     Ref<Element> el(new Element(name));
     for (int i = 0; attrs[i]; i += 2) 
     {
@@ -66,13 +66,13 @@ void XMLCALL Parser::element_start(void *userdata, const char *name, const char 
 
 void XMLCALL Parser::element_end(void *userdata, const char *name)
 {
-    Parser *parser = (Parser *)userdata;
+    auto *parser = (Parser *)userdata;
     parser->curEl = parser->elements->pop();
 }
 
 void XMLCALL Parser::character_data(void *userdata, const XML_Char *s, int len)
 {
-    Parser *parser = (Parser *)userdata;
+    auto *parser = (Parser *)userdata;
     String text = String(s, len);
     
     if (text != nullptr)
@@ -87,7 +87,7 @@ void XMLCALL Parser::character_data(void *userdata, const XML_Char *s, int len)
 
 void XMLCALL Parser::comment_callback(void *userdata, const XML_Char *s)
 {
-    Parser *parser = (Parser *)userdata;
+    auto *parser = (Parser *)userdata;
     String text = s;
     if (text != nullptr)
     {
@@ -101,7 +101,7 @@ void XMLCALL Parser::comment_callback(void *userdata, const XML_Char *s)
 
 void XMLCALL Parser::default_callback(void *userdata, const XML_Char *s, int len)
 {
-    Parser *parser = (Parser *)userdata;
+    auto *parser = (Parser *)userdata;
     String text = String(s, len);
     
     if (text.charAt(0) == '<')
