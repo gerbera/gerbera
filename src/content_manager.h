@@ -93,7 +93,7 @@ public:
                   bool hidden=false, bool cancellable = true);
     zmm::String getPath();
     zmm::String getRootPath();
-    virtual void run();
+    virtual void run() override;
 };
 
 class CMRemoveObjectTask : public GenericTask
@@ -103,14 +103,14 @@ protected:
     bool all;
 public:
     CMRemoveObjectTask(int objectID, bool all);
-    virtual void run();
+    virtual void run() override;
 };
 
 class CMLoadAccountingTask : public GenericTask
 {
 public:
     CMLoadAccountingTask();
-    virtual void run();
+    virtual void run() override;
 };
 
 class CMRescanDirectoryTask : public GenericTask
@@ -122,7 +122,7 @@ protected:
 public:
     CMRescanDirectoryTask(int objectID, int scanID, scan_mode_t scanMode,
                           bool cancellable);
-    virtual void run();
+    virtual void run() override;
 };
 
 class CMAccounting : public zmm::Object
@@ -145,7 +145,7 @@ public:
     CMFetchOnlineContentTask(zmm::Ref<OnlineService> service, 
                              zmm::Ref<Layout> layout,
                              bool cancellable, bool unscheduled_refresh);
-    virtual void run();
+    virtual void run() override;
 };
 #endif
 
