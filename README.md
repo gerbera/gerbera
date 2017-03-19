@@ -1,6 +1,6 @@
 <img src="https://raw.githubusercontent.com/v00d00/mediatomb/master/web/icons/mt-icon48.png" align="right" />
 
-#MediaTomb-v00d00 - UPnP Media Server
+# MediaTomb-v00d00 - UPnP Media Server
 
 [![Build Status](https://travis-ci.org/v00d00/mediatomb.svg?branch=master)](https://travis-ci.org/v00d00/mediatomb)
 
@@ -10,7 +10,7 @@ _MediaTomb is pretty much dead upstream, so this is my attempt to get kick it ba
 
 **Pull requests are very welcome and reporting issues is encouraged.**
 
-##Features
+## Features
 
 * Browse and playback your media via UPnP
 * Metadata extraction from mp3, ogg, flac, jpeg, etc. files.
