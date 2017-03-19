@@ -48,10 +48,8 @@
 using namespace zmm;
 using namespace mxml;
 
-FileIOHandler::FileIOHandler(String filename) : IOHandler()
+FileIOHandler::FileIOHandler(String filename) : filename(filename), f(nullptr)
 {
-    this->filename = filename;
-    this->f = nullptr;
 }
 
 void FileIOHandler::open(IN enum UpnpOpenFileMode mode)

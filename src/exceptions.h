@@ -34,7 +34,7 @@
 
 #include "zmm/zmmf.h"
 
-#define EXCEPTION_DATA __FILE__, __LINE__, __func__
+#define EXCEPTION_DATA __FILENAME__, __LINE__, __func__
 #define _UpnpException(code, msg) UpnpException(code, msg, EXCEPTION_DATA)
 #define _StorageException(usermsg, debugmsg) StorageException(usermsg, debugmsg, EXCEPTION_DATA)
 #define _ObjectNotFoundException(msg) ObjectNotFoundException(msg, EXCEPTION_DATA)

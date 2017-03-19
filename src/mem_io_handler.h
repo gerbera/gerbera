@@ -45,7 +45,7 @@ protected:
 
     /// \brief current offset in the buffer
     off_t   pos;
-    
+
 public:
     /// \brief Initializes the internal buffer.
     /// \param buffer all operations will be done on this buffer.
@@ -56,7 +56,7 @@ public:
     /// 
     virtual void open(IN enum UpnpOpenFileMode mode);
     virtual int read(OUT char *buf, IN size_t length);
-                      
+
     virtual void seek(IN off_t offset, IN int whence);
 };
 

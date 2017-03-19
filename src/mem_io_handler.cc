@@ -49,20 +49,16 @@
 using namespace zmm;
 using namespace mxml;
 
-MemIOHandler::MemIOHandler(const void *buffer, int length) : IOHandler()
+MemIOHandler::MemIOHandler(const void *buffer, int length)
+    : buffer((char *)MALLOC(length)), length(length), pos(-1)
 {
-    this->buffer = (char *)MALLOC(length);
-    this->length = length;
     memcpy(this->buffer, buffer, length);
-    pos = -1;
 }
 
-MemIOHandler::MemIOHandler(String str) : IOHandler()
+MemIOHandler::MemIOHandler(String str)
+    : buffer((char *)MALLOC(str.length())), length(str.length()), pos(-1)
 {
-    this->length = str.length();
-    this->buffer = (char *)MALLOC(length);
     memcpy(this->buffer, str.c_str(), length);
-    pos = -1;
 }
 
 MemIOHandler::~MemIOHandler()

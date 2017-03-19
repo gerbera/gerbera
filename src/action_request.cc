@@ -34,19 +34,17 @@
 using namespace zmm;
 using namespace mxml;
 
-ActionRequest::ActionRequest(UpnpActionRequest *upnp_request) : Object()
+ActionRequest::ActionRequest(UpnpActionRequest *upnp_request) : Object(),
+    upnp_request(upnp_request),
+    errCode(UPNP_E_SUCCESS),
+    actionName(UpnpActionRequest_get_ActionName_cstr(upnp_request)),
+    UDN(UpnpActionRequest_get_DevUDN_cstr(upnp_request)),
+    serviceID(UpnpActionRequest_get_ServiceID_cstr(upnp_request))
 {
-    this->upnp_request = upnp_request;
-
-    errCode = UPNP_E_SUCCESS;
-    actionName = UpnpActionRequest_get_ActionName_cstr(upnp_request);
-    UDN = UpnpActionRequest_get_DevUDN_cstr(upnp_request);
-    serviceID = UpnpActionRequest_get_ServiceID_cstr(upnp_request);
-
     DOMString cxml = ixmlPrintDocument(UpnpActionRequest_get_ActionRequest(upnp_request));
     String xml = cxml;
     ixmlFreeDOMString(cxml);
-   
+
     Ref<Parser> parser(new Parser());
 
     request = parser->parseString(xml)->getRoot();

@@ -40,9 +40,8 @@
 
 using namespace zmm;
 
-URL::URL(size_t buffer_hint)
+URL::URL(size_t buffer_hint) : buffer_hint(buffer_hint)
 {
-    this->buffer_hint = buffer_hint;
 }
 
 Ref<StringBuffer> URL::download(String URL, long *HTTP_retcode, 

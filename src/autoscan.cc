@@ -48,21 +48,21 @@ AutoscanDirectory::AutoscanDirectory()
 
 AutoscanDirectory::AutoscanDirectory(String location, scan_mode_t mode,
         scan_level_t level, bool recursive, bool persistent,
-        int id, unsigned int interval, bool hidden)
+        int id, unsigned int interval, bool hidden) :
+    location(location),
+    mode(mode),
+    level(level),
+    recursive(recursive),
+    hidden(hidden),
+    persistent_flag(persistent),
+    interval(interval),
+    taskCount(0),
+    scanID(id),
+    objectID(INVALID_OBJECT_ID),
+    storageID(INVALID_OBJECT_ID),
+    last_mod_previous_scan(0),
+    last_mod_current_scan(0)
 {
-    this->location = location;
-    this->mode = mode;
-    this->level = level;
-    this->recursive = recursive;
-    this->hidden = hidden;
-    this->interval = interval;
-    this->persistent_flag = persistent;
-    scanID = id;
-    taskCount = 0;
-    objectID = INVALID_OBJECT_ID;
-    storageID = INVALID_OBJECT_ID;
-    last_mod_previous_scan = 0;
-    last_mod_current_scan = 0;
     timer_parameter = Ref<Timer::Parameter>(new Timer::Parameter(Timer::Parameter::IDAutoscan, INVALID_SCAN_ID));
 }
 
