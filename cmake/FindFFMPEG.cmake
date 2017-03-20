@@ -43,8 +43,6 @@
 FIND_PATH(FFMPEG_INCLUDE_DIR avformat.h
        PATHS
        $ENV{FFMPEG_DIR}/include
-       $ENV{OSGDIR}/include
-       $ENV{OSG_ROOT}/include
        ~/Library/Frameworks
        /Library/Frameworks
        /usr/local/include
@@ -54,7 +52,7 @@ FIND_PATH(FFMPEG_INCLUDE_DIR avformat.h
        /opt/csw/include # Blastwave
        /opt/include
        /usr/freeware/include
-       PATH_SUFFIXES ffmpeg
+       PATH_SUFFIXES ${CMAKE_LIBRARY_ARCHITECTURE} ffmpeg
        DOC "Location of FFMPEG Headers"
 )
 
@@ -63,8 +61,6 @@ IF( NOT FFMPEG_INCLUDE_DIR )
   FIND_PATH(FFMPEG_INCLUDE_DIR libavformat/avformat.h
        PATHS
        $ENV{FFMPEG_DIR}/include
-       $ENV{OSGDIR}/include
-       $ENV{OSG_ROOT}/include
        ~/Library/Frameworks
        /Library/Frameworks
        /usr/local/include
@@ -74,7 +70,7 @@ IF( NOT FFMPEG_INCLUDE_DIR )
        /opt/csw/include # Blastwave
        /opt/include
        /usr/freeware/include
-       PATH_SUFFIXES ffmpeg
+       PATH_SUFFIXES ${CMAKE_LIBRARY_ARCHITECTURE} ffmpeg
        DOC "Location of FFMPEG Headers"
 )
 
