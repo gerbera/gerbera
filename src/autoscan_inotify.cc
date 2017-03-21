@@ -763,8 +763,7 @@ void AutoscanInotify::removeDescendants(int wd)
         watch = wdWatches->get(i);
         if (watch->getType() == WatchType::Autoscan) {
             watchAs = RefCast(watch, WatchAutoscan);
-            auto descendants = watchAs->getDescendants();
-            for (int descWd : descendants) {
+            for (int descWd : watchAs->getDescendants()) {
                 inotify->removeWatch(descWd);
             }
         }
