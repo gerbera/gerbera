@@ -370,7 +370,6 @@ protected:
     zmm::Ref<AutoscanList> autoscan_timed;
 #ifdef HAVE_INOTIFY
     zmm::Ref<AutoscanList> autoscan_inotify;
-    zmm::Ref<AutoscanInotify> inotify;
 #endif
  
 #if defined(EXTERNAL_TRANSCODING) || defined(SOPCAST)
