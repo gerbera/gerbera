@@ -35,6 +35,32 @@
 using namespace zmm;
 using namespace std;
 
+void Timer::init() {
+    log_debug("Starting Timer thread...\n");
+    int ret = pthread_create(
+        &thread,
+        nullptr,
+        Timer::staticThreadProc,
+        this
+    );
+
+    if (ret)
+        throw _Exception(_("failed to start timer thread: ") + ret);
+}
+
+void *Timer::staticThreadProc(void *arg)
+{
+    log_debug("Started Timer thread.\n");
+    auto *inst = (Timer *)arg;
+    inst->threadProc();
+    log_debug("Exiting Timer thread...\n");
+    pthread_exit(nullptr);
+}
+
+void Timer::threadProc() {
+    triggerWait();
+}
+
 void Timer::addTimerSubscriber(Subscriber* timerSubscriber, unsigned int notifyInterval, zmm::Ref<Parameter> parameter, bool once)
 {
     log_debug("Adding subscriber... interval: %d once: %d \n", notifyInterval, once);

@@ -271,8 +271,6 @@ void Server::shutdown()
         static_cleanup_callback();
     }
     storage = nullptr;
-
-    log_debug("Bye!! Have a nice day.\n");
 }
 
 String Server::getVirtualURL()

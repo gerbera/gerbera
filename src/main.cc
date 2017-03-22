@@ -37,6 +37,7 @@
 #include <getopt.h>
 
 #include <csignal>
+#include <mutex>
 #ifdef SOLARIS
 #include <iso/limits_iso.h>
 #endif
@@ -52,7 +53,10 @@ using namespace zmm;
 int shutdown_flag = 0;
 int restart_flag = 0;
 pthread_t main_thread_id;
-Ref<Timer> timer = nullptr;
+
+std::mutex mutex;
+std::unique_lock<std::mutex> lock{mutex};
+std::condition_variable cond;
 
 void print_copyright()
 {
@@ -390,19 +394,12 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
 
     // wait until signalled to terminate
     while (!shutdown_flag) {
-        //pause();
-        //sleep(timer->getNotifyInterval());
-
-        if (timer == nullptr)
-            timer = Timer::getInstance();
-
-        timer->triggerWait();
+        cond.wait(lock);
 
         if (restart_flag != 0) {
             log_info("Restarting MediaTomb!\n");
             try {
                 server = nullptr;
-                timer = nullptr;
 
                 singletonManager->shutdown(true);
                 singletonManager = nullptr;
@@ -455,14 +452,13 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
         ret = EXIT_FAILURE;
     }
 
-    log_info("Server terminating\n");
+    log_info("MediaTomb exiting. Have a nice day.\n");
     log_close();
     exit(ret);
 }
 
 void signal_handler(int signum)
 {
-
     if (main_thread_id != pthread_self()) {
         return;
     }
@@ -477,13 +473,11 @@ void signal_handler(int signum)
             log_error("Clean shutdown failed, killing MediaTomb!\n");
             exit(1);
         }
-        if (timer != nullptr)
-            timer->signal();
     } else if (signum == SIGHUP) {
         restart_flag = 1;
-        if (timer != nullptr)
-            timer->signal();
     }
+
+    cond.notify_one();
 
     return;
 }

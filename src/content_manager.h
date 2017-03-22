@@ -181,9 +181,9 @@ class ContentManager : public Timer::Subscriber, public Singleton<ContentManager
 {
 public:
     ContentManager();
-    virtual void init();
+    void init() override;
     virtual ~ContentManager();
-    void shutdown();
+    void shutdown() override;
     
     virtual void timerNotify(zmm::Ref<Timer::Parameter> parameter);
     

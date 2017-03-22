@@ -77,8 +77,9 @@ public:
         virtual void timerNotify(zmm::Ref<Parameter> parameter) = 0;
     };
 
-    virtual ~Timer() { log_debug("Timer destroyed!\n"); }
-    virtual void shutdown();
+    ~Timer() { log_debug("Timer destroyed!\n"); }
+    void init() override;
+    void shutdown() override;
 
     /// \brief Add a subscriber
     ///
@@ -141,6 +142,11 @@ protected:
 
     void notify();
     struct timespec* getNextNotifyTime();
+
+private:
+    static void *staticThreadProc(void *arg);
+    void threadProc();
+    pthread_t thread;
 };
 
 #endif // __TIMER_H__
