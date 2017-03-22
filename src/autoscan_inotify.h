@@ -38,6 +38,7 @@
 #include "zmm/zmmf.h"
 #include "autoscan.h"
 #include "mt_inotify.h"
+#include "singleton.h"
 
 #define INOTIFY_ROOT -1
 #define INOTIFY_UNKNOWN_PARENT_WD -2
@@ -48,17 +49,17 @@ enum inotify_watch_type_t
     InotifyWatchTypeAutoscan
 };
 
-class AutoscanInotify : public zmm::Object
+class AutoscanInotify : public Singleton<AutoscanInotify, std::mutex>
 {
 public:
     AutoscanInotify();
     virtual ~AutoscanInotify();
-    void init();
+    void init() override;
     
     /// \brief shutdown the inotify thread
     /// 
     /// warning: currently doesn't remove all the remaining inotify watches!
-    void shutdown();
+    void shutdown() override;
     
     /// \brief Start monitoring a directory
     void monitor(zmm::Ref<AutoscanDirectory> dir);
