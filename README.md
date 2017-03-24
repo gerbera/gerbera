@@ -1,12 +1,12 @@
-<img src="https://raw.githubusercontent.com/v00d00/mediatomb/master/web/icons/mt-icon48.png" align="right" />
+<img src="https://github.com/v00d00/mediatomb/blob/master/artwork/logo-horiz.png?raw=true" />
 
-# MediaTomb-v00d00 - UPnP Media Server
+# Gerbera - UPnP Media Server
 
 [![Build Status](https://travis-ci.org/v00d00/mediatomb.svg?branch=master)](https://travis-ci.org/v00d00/mediatomb)
 
-MediaTomb is a UPnP media server which allows you to stream your digital media through your home network and consume it on a variety of UPnP compatible devices.
+Gerbera is a UPnP media server which allows you to stream your digital media through your home network and consume it on a variety of UPnP compatible devices.
 
-_MediaTomb is pretty much dead upstream, so this is my attempt to get kick it back into life._
+_Gerbera is based on MediaTomb 12.1 which is dead upstream, so this is my attempt to get kick it back into life._
 
 **Pull requests are very welcome and reporting issues is encouraged.**
 
@@ -29,7 +29,7 @@ _MediaTomb is pretty much dead upstream, so this is my attempt to get kick it ba
 * runs on Linux, FreeBSD, NetBSD, Mac OS X, eCS
 * runs on x86, Alpha, ARM, MIPS, Sparc, PowerPC
 
-## Differences to Vanilla (So far)
+## Differences to Mediatomb (So far)
 - Actively maintained/developed.
 - Removed bundled `libupnp` - Now requires upstream 1.8 version.
 - Removed bundled `libuuid`.
