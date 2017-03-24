@@ -122,7 +122,7 @@ make install
 
 **gentoo**: Pretty much as vanilla (shipped as net-misc/mediatomb).
 
-##Licence
+## Licence
 
     GPLv2
 
