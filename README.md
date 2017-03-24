@@ -1,8 +1,8 @@
-<img src="https://github.com/v00d00/mediatomb/blob/master/artwork/logo-horiz.png?raw=true" />
+<img src="https://github.com/v00d00/gerbera/blob/master/artwork/logo-horiz.png?raw=true" />
 
 # Gerbera - UPnP Media Server
 
-[![Build Status](https://travis-ci.org/v00d00/mediatomb.svg?branch=master)](https://travis-ci.org/v00d00/mediatomb)
+[![Build Status](https://travis-ci.org/v00d00/gerbera.svg?branch=master)](https://travis-ci.org/v00d00/gerbera)
 
 Gerbera is a UPnP media server which allows you to stream your digital media through your home network and consume it on a variety of UPnP compatible devices.
 
@@ -76,7 +76,7 @@ The following packages are too old in 16.04 and must be installed from source:
 ### Quick start build instructions:
 
 ```
-git clone https://github.com/v00d00/mediatomb.git
+git clone https://github.com/v00d00/gerbera.git
 mkdir build
 cd build
 cmake ../mediatomb -DWITH_MAGIC=1 -DWITH_MYSQL=1 -DWITH_CURL=1 -DWITH_JS=1 \
@@ -86,7 +86,7 @@ make install
 ```
 Alternatively, the options can be set using a GUI (make sure to press "c" to configure after toggling settings in the GUI):
 ```
-git clone https://github.com/v00d00/mediatomb.git
+git clone https://github.com/v00d00/gerbera.git
 mkdir build
 cd build
 cmake ../mediatomb
@@ -134,6 +134,9 @@ make install
        Gena Batyan <bgeradz at mediatomb dot cc>
        Sergey Bostandzhyan <jin at mediatomb dot cc>
        Leonhard Wimmer <leo at mediatomb dot cc>
+
+    Copyright (C) 2016-2017
+        Gerbera Contributors
 
 [1]: https://sourceforge.net/p/mediatomb/discussion/440751/thread/258c3cf7/?limit=250
 [pupnp]: https://github.com/mrjimenez/pupnp.git
