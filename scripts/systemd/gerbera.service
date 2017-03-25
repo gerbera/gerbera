@@ -1,12 +1,12 @@
 [Unit]
-Description=MediaTomb Daemon
+Description=Gerbera Media Server
 After=network.target
 
 [Service]
 Type=simple
-User=mediatomb
-Group=mediatomb
-ExecStart=/usr/bin/mediatomb -c /etc/mediatomb/config.xml
+User=gerbera
+Group=gerbera
+ExecStart=/usr/bin/gerbera -c /etc/gerbera/config.xml
 Restart=on-failure
 RestartSec=5
 
