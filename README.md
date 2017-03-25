@@ -79,7 +79,7 @@ The following packages are too old in 16.04 and must be installed from source:
 git clone https://github.com/v00d00/gerbera.git
 mkdir build
 cd build
-cmake ../mediatomb -DWITH_MAGIC=1 -DWITH_MYSQL=1 -DWITH_CURL=1 -DWITH_JS=1 \
+cmake ../gerbera -DWITH_MAGIC=1 -DWITH_MYSQL=1 -DWITH_CURL=1 -DWITH_JS=1 \
 -DWITH_TAGLIB=1 -DWITH_AVCODEC=1 -DWITH_DVDNAV=1 -DWITH_EXIF=1 -DWITH_LASTFM=1
 make -j4 VERBOSE=1
 make install
@@ -89,7 +89,7 @@ Alternatively, the options can be set using a GUI (make sure to press "c" to con
 git clone https://github.com/v00d00/gerbera.git
 mkdir build
 cd build
-cmake ../mediatomb
+cmake ../gerbera
 make edit_cache
 # Enable some of the WITH... options
 make -j4 VERBOSE=1
