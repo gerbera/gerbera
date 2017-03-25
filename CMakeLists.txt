@@ -22,11 +22,11 @@ set(WITH_LOGGING        1 CACHE BOOL "Enable file logging")
 set(WITH_DEBUG_LOGGING  1 CACHE BOOL "Enables debug logging")
 
 project("gerbera")
-set(gerbera_MAJOR_VERSION     0)
-set(gerbera_MINOR_VERSION     13)
+set(gerbera_MAJOR_VERSION     1)
+set(gerbera_MINOR_VERSION     0)
 set(gerbera_PATCH_VERSION     0)
 set(gerbera_RELEASE           "alpha")
-set(gerbera_SUFFIX            "v00d00")
+set(gerbera_SUFFIX            "")
 
 add_library(libgerbera OBJECT
         src/action_request.cc
@@ -332,8 +332,8 @@ if (SOLARIS)
     add_definitions(-DSOLARIS)
 endif()
 
-add_definitions(-DPACKAGE_NAME="gerbera-${gerbera_SUFFIX}")
-add_definitions(-DVERSION="${gerbera_MAJOR_VERSION}.${gerbera_MINOR_VERSION}.${gerbera_PATCH_VERSION}_${gerbera_RELEASE}-${gerbera_SUFFIX}")
+add_definitions(-DPACKAGE_NAME="gerbera${gerbera_SUFFIX}")
+add_definitions(-DVERSION="${gerbera_MAJOR_VERSION}.${gerbera_MINOR_VERSION}.${gerbera_PATCH_VERSION}_${gerbera_RELEASE}${gerbera_SUFFIX}")
 add_definitions(-DPACKAGE_DATADIR="${CMAKE_INSTALL_PREFIX}/share/gerbera")
 
 add_definitions(-DCOMPILE_INFO="")
