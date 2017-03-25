@@ -60,12 +60,22 @@ std::condition_variable cond;
 
 void print_copyright()
 {
-    printf("\nMediaTomb UPnP Server version %s - %s\n\n", VERSION,
-        DESC_MANUFACTURER_URL);
+    printf("\nGerbera UPnP Server version %s - %s\n\n", VERSION, DESC_MANUFACTURER_URL);
     printf("===============================================================================\n");
-    printf("Copyright 2005-2010 Gena Batsyan, Sergey Bostandzhyan, Leonhard Wimmer.\n");
-    printf("MediaTomb is free software, covered by the GNU General Public License version 2\n\n");
+    printf("Gerbera is free software, covered by the GNU General Public License version 2\n\n");
+    printf("Copyright 2016-2017 Gerbera Contributors.\n");
+    printf("Gerbera is based on MediaTomb: Copyright 2005-2010 Gena Batsyan, Sergey Bostandzhyan, Leonhard Wimmer.\n");
 }
+
+void log_copyright()
+{
+    log_info("Gerbera UPnP Server version %s - %s\n", VERSION, DESC_MANUFACTURER_URL);
+    log_info("===============================================================================\n");
+    log_info("Gerbera is free software, covered by the GNU General Public License version 2\n");
+    log_info("Copyright 2016-2017 Gerbera Contributors.\n");
+    log_info("Gerbera is based on MediaTomb: Copyright 2005-2010 Gena Batsyan, Sergey Bostandzhyan, Leonhard Wimmer.\n");
+}
+
 void signal_handler(int signum);
 
 int main(int argc, char** argv, char** envp)
@@ -196,7 +206,7 @@ int main(int argc, char** argv, char** envp)
         case '?':
         case 'h':
             print_copyright();
-            printf("Usage: mediatomb [options]\n\
+            printf("Usage: gerbera [options]\n\
                         \n\
 Supported options:\n\
     --ip or -i         ip address to bind to\n\
@@ -239,6 +249,8 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
         print_copyright();
         exit(EXIT_FAILURE);
     }
+
+    log_copyright();
 
     // create pid file
     if (pid_file != nullptr) {
@@ -353,7 +365,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
         log_error("main: upnp error %d\n", upnp_e.getErrorCode());
         if (upnp_e.getErrorCode() == UPNP_E_SOCKET_BIND) {
             log_error("Could not bind to socket.\n");
-            log_info("Please check if another instance of MediaTomb or\n");
+            log_info("Please check if another instance of Gerbera or\n");
             log_info("another application is running on port %d.\n", port);
         } else if (upnp_e.getErrorCode() == UPNP_E_SOCKET_ERROR) {
             log_error("Socket error.\n");
@@ -397,7 +409,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
         cond.wait(lock);
 
         if (restart_flag != 0) {
-            log_info("Restarting MediaTomb!\n");
+            log_info("Restarting Gerbera!\n");
             try {
                 server = nullptr;
 
@@ -414,7 +426,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
                         pe.context->location.c_str(),
                         pe.context->line,
                         pe.getMessage().c_str());
-                    log_error("Could not restart MediaTomb\n");
+                    log_error("Could not restart Gerbera\n");
                     // at this point upnp shutdown has already been called
                     // so it is safe to exit
                     exit(EXIT_FAILURE);
@@ -435,7 +447,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
                 shutdown_flag = 1;
                 sigemptyset(&mask_set);
                 pthread_sigmask(SIG_SETMASK, &mask_set, nullptr);
-                log_error("Could not restart MediaTomb\n");
+                log_error("Could not restart Gerbera\n");
             }
         }
     }
@@ -452,7 +464,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
         ret = EXIT_FAILURE;
     }
 
-    log_info("MediaTomb exiting. Have a nice day.\n");
+    log_info("Gerbera exiting. Have a nice day.\n");
     log_close();
     exit(ret);
 }
@@ -466,11 +478,11 @@ void signal_handler(int signum)
     if ((signum == SIGINT) || (signum == SIGTERM)) {
         shutdown_flag++;
         if (shutdown_flag == 1)
-            log_info("MediaTomb shutting down. Please wait...\n");
+            log_info("Gerbera shutting down. Please wait...\n");
         else if (shutdown_flag == 2)
-            log_info("Mediatomb still shutting down, signal again to kill.\n");
+            log_info("Gerbera still shutting down, signal again to kill.\n");
         else if (shutdown_flag > 2) {
-            log_error("Clean shutdown failed, killing MediaTomb!\n");
+            log_error("Clean shutdown failed, killing Gerbera!\n");
             exit(1);
         }
     } else if (signum == SIGHUP) {
