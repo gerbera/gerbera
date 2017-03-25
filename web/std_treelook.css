@@ -2,19 +2,19 @@
 .treetitle {
 	padding:2px;
 	cursor:default;
-	
-	font-family: Tahoma,Verdana,Arial, Helvetica, sans-serif;
-	font-size: 11px;
-	color: #000000;
+
+	font-family: "Helvetica", "Arial", "MS Sans Serif", sans-serif;
+	font-size: 13px;
+	color: #444444;
 }
 .editednode {
 	padding:2px;
 	cursor:default;
 	background-color: #FFFFFF;;
 	color: #000000;
-	
-	font-family: Tahoma,Verdana,Arial, Helvetica, sans-serif;
-	font-size: 11px;
+
+	font-family: "Helvetica", "Arial", "MS Sans Serif", sans-serif;
+	font-size: 13px;
 }
 .editednodeinput {
 	background-color: #FFFFFF;;
@@ -26,23 +26,23 @@
 	border-style: solid;
 	border-width: 1px;
 	border-color: #000000;
-	
-	font-family: Tahoma,Verdana,Arial, Helvetica, sans-serif;
-	font-size: 11px;
+
+	font-family: "Helvetica", "Arial", "MS Sans Serif", sans-serif;
+	font-size: 13px;
 }
 .treetitleselectedfocused {
 	padding:2px;
 	cursor:default;
-	background-color: #222222;
-	color: #ffffff;
-	font-family: Tahoma,Verdana,Arial, Helvetica, sans-serif;
-	font-size: 11px;
+	background-color: #ff8000;
+	color: #FFF;
+	font-family: "Helvetica", "Arial", "MS Sans Serif", sans-serif;
+	font-size: 13px;
 }
 .treetitleselectedblured {
 	padding:2px;
 	cursor:default;
-	background-color: #222222;
-	color: #ffffff;
-	font-family: Tahoma,Verdana,Arial, Helvetica, sans-serif;
-	font-size: 11px;
+	background-color: #ff8000;
+	color: #444;
+	font-family: "Helvetica", "Arial", "MS Sans Serif", sans-serif;
+	font-size: 13px;
 }

@@ -1,37 +1,10 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN"
-     "http://www.w3.org/TR/html4/frameset.dtd">
-<!--*MT*
-    
-    MediaTomb - http://www.mediatomb.cc/
-    
-    index.html - this file is part of MediaTomb.
-    
-    Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
-                       Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
-    Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
-                            Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
-                            Leonhard Wimmer <leo@mediatomb.cc>
-    
-    MediaTomb is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License version 2
-    as published by the Free Software Foundation.
-    
-    MediaTomb is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-    
-    You should have received a copy of the GNU General Public License
-    version 2 along with MediaTomb; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
-    $Id$
--->
+        "http://www.w3.org/TR/html4/frameset.dtd">
+<!-- This file is part of Gerbera, based on MediaTomb. GPLv2 Applies, see LICENCE.md -->
   <html>
     <head>
         <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-        <title>MediaTomb-v00d00</title>
+        <title>Gerbera</title>
         <link rel="shortcut icon" href="favicon.ico" type="image/ico">
         <script type="text/javascript" language="JavaScript" src="js/tools.js"></script>
         <script type="text/javascript" language="JavaScript" src="js/icons.js"></script>
@@ -58,7 +31,7 @@
                 if (msieWarn != "ok")
                 {
                     setCookie("MSIEwarn", "ok");
-                    alert('MediaTomb UI is very limited with Internet Explorer and some elements will be displayed incorrectly! Please see the section "Internet Explorer" in the README file.');
+                    alert('Gerbera UI is very limited with Internet Explorer and some elements will be displayed incorrectly! Please see the section "Internet Explorer" in the README file.');
                 }
             }
             function init() {
@@ -129,7 +102,7 @@
                     
                     onException: function()
                     {
-                        alert("MediaTomb cannot be reached! Please check if the server is still running.");
+                        alert("Gerbera cannot be reached! Please check if the server is still running.");
                         clearPollInterval();
                         if(Ajax.activeRequestCount < 0)
                             Ajax.activeRequestCount = 0;
@@ -183,14 +156,14 @@
         </script>
 
     </head>
-    <frameset frameborder="1" border="2" framespacing="2" bordercolor="#FFFFFF" rows="112px,*" onload="init();">
+    <frameset frameborder="1" border="2" framespacing="2" bordercolor="#000000" rows="112px,*" onload="init();">
         <frame src="top.html" name="topF" frameborder="0" noresize>
-        <frameset cols="30%,*" frameborder="1" border="2" framespacing="2" bordercolor="#FFFFFF">
-            <frameset rows="40px,*"  frameborder="1" border="2" framespacing="2" bordercolor="#FFFFFF">
+        <frameset cols="30%,*" frameborder="1" border="2" framespacing="2" bordercolor="#EEE">
+            <frameset rows="40px,*"  frameborder="1" border="2" framespacing="2" bordercolor="#EEE">
                 <frame src="topleft.html" name="topleftF" frameborder="0" noresize>
                 <frame src="left.html" name="leftF" frameborder="0" noresize>
             </frameset>
-            <frameset rows="40px,*" frameborder="1" border="2" framespacing="2" bordercolor="#FFFFFF">
+            <frameset rows="40px,*" frameborder="1" border="2" framespacing="2" bordercolor="#EEE">
                 <frame src="topright.html" name="toprightF" frameborder="0" noresize>
                 <frame src="right.html" name="rightF" frameborder="0" noresize>
             </frameset>
