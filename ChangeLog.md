@@ -1,6 +1,7 @@
 ## Gerbera - UPnP AV Mediaserver.
 
 ### v1.0.0
+- Rebranded as Gerbera, new Logo!
 - Ported to CMake
 - Removed bundled libupnp - Now requires upstream 1.8 version.
 - Removed bundled libuuid.
@@ -17,10 +18,10 @@
 - IPv6 Support
 - Lots of other stuff.
 
-### v0.12.2
+### MediaTomb v0.12.2
 - Added mtime and sizeOnDisk to JS objects
 
-### v0.12.1 08.04.2010
+### MediaTomb v0.12.1 08.04.2010
 - fixed YouTube service support (got broken after they updated their
   website)
 - fixed a problem in soap response http headers (solves "access error" 
@@ -29,7 +30,7 @@
   closed bugs were not mentioned)
 - fixed automatic id3lib detection when taglib is not available
 
-### v0.12.0 25.03.2010
+### MediaTomb v0.12.0 25.03.2010
 - added video thumbnail generation using libffmpegthumbnailer
 - added configure settings which allow to enable sqlite backups by 
   default
@@ -103,7 +104,7 @@
 - implemented feature request #1928580 better logging/tracing support
 - implemented feature request #1754010 m4a metadata extraction
 
-### v0.11.0 01.03.2008  External transcoding support
+### MediaTomb v0.11.0 01.03.2008  External transcoding support
 - implemented transcoding support that allows to plug in an arbitrary
   transcoding application
 - added fourcc detection for AVI files and transcoding options to 
@@ -170,7 +171,7 @@
 - implemented feature request #1771561, extension to mimetype mappings
   can now be case insensitive
 
-### v0.10.0	11.07.2007  Playlist and inotify autoscan support.
+### MediaTomb v0.10.0	11.07.2007  Playlist and inotify autoscan support.
 - MySQL database version pumped to 3 (MediaTomb will automatically
   update the database during the first launch)
 - Sqlite3 database version pumped to 2 (MediaTomb will automatically
@@ -188,7 +189,7 @@
 - added album art support, album art is extracted from ID3 tags
   and offered to UPnP devices
 
-### v0.9.1  28.05.2007  Playstation 3 support
+### MediaTomb v0.9.1  28.05.2007  Playstation 3 support
 - added support for Playstation 3
 - added command line option that allows to tell the server where to
   put the configuration upon first startup
@@ -205,7 +206,7 @@
 - MySQL database version pumped to 2 (MediaTomb will automatically
   update the database during the first launch)
 
-### v0.9.0  25.03.2007  Major rework
+### MediaTomb v0.9.0  25.03.2007  Major rework
 - the UI was completely rewritten from scratch; it uses AJAX for all
   requests
 - integrated libupnp (http://pupnp.sf.net/) into our source tree
@@ -296,7 +297,7 @@
   for NAS vendors to integrate the server into their web UI
 - made model number configurable
 
-### v0.8.1	07.09.2005
+### MediaTomb v0.8.1	07.09.2005
 - added "serve" directory, any files there can be downloaded 
   like from a normal webserver
 - implemented keyword extraction for auxdata from libexif
@@ -315,7 +316,7 @@
 - when an item is deleted all referenced items are deleted as well
 - added option to specify an alternative magic file
 
-### v0.8.0  15.06.2005  Scripting/Virtual Server Layout
+### MediaTomb v0.8.0  15.06.2005  Scripting/Virtual Server Layout
 - Server layout can now be defined using java script,
   default layout script is provided.
 - Added ID3 tag support.
@@ -334,7 +335,7 @@
 - Added target directory option to tomb-install, cleaned up a few
   things.
 
-### v0.7.1  17.04.2005  D-Link DSM-320 fix
+### MediaTomb v0.7.1  17.04.2005  D-Link DSM-320 fix
 - Mappings of mime-types to upnp classes are now configurable.
   Actually this is how we solved the DSM-320 problem - they
   crashed if upnp class of items was different than what the
@@ -347,6 +348,6 @@
 - Improved handling of configuration, if non critical options are
   missing we are now setting default values.
 
-### v0.7    14.04.2005  First release
+### MediaTomb v0.7    14.04.2005  First release
 - The changelog does not start at day 0, updates will be made
   starting from this release.
