@@ -537,3 +537,4 @@ INSTALL(FILES
         ${PROJECT_SOURCE_DIR}/config/mysql.sql
         ${PROJECT_SOURCE_DIR}/config/sqlite3.sql
         DESTINATION share/gerbera)
+INSTALL(FILES ${PROJECT_SOURCE_DIR}/doc/gerbera.1 DESTINATION share/man/man1)
