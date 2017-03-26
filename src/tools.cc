@@ -182,8 +182,8 @@ time_t check_path_ex(String path, bool needDir, bool existenceUnneeded,
     {
         if (existenceUnneeded && (errno == ENOENT))
             return 0;
-        
-        throw _Exception(path + " : " + errno + (int)existenceUnneeded+ " x " + mt_strerror(errno));
+        throw _Exception(mt_strerror(errno) + ": " +  path + " (errno: " +
+            errno + (int)existenceUnneeded + ")") ;
     }
 
     if (needDir && (!S_ISDIR(statbuf.st_mode)))
