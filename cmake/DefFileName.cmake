@@ -19,7 +19,7 @@ function(define_file_path_for_sources targetname)
             PROPERTY COMPILE_DEFINITIONS)
         # Add the __FILENAME__=filename compile definition to the list.
         string(REPLACE "${CMAKE_SOURCE_DIR}" "" NAME "${sourcefile}")
-        list(APPEND defs "__FILENAME__=\"${basename}\"")
+        list(APPEND defs "__FILENAME__=\"${NAME}\"")
         # Set the updated compile definitions on the source file.
         set_property(
             SOURCE "${sourcefile}"
