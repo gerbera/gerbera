@@ -206,9 +206,9 @@
 #if defined(__CYGWIN__)
     #define DEFAULT_CONFIG_HOME         "MediaTomb"
 #else
-    #define DEFAULT_CONFIG_HOME         ".mediatomb"
+    #define DEFAULT_CONFIG_HOME         ".gerbera"
 #endif
-#define DEFAULT_SYSTEM_HOME             "mediatomb"
+#define DEFAULT_SYSTEM_HOME             "gerbera"
 #define DEFAULT_ETC                     "etc"
 #define DEFAULT_TMPDIR                  "/tmp/"
 #define DEFAULT_CONFIG_NAME             "config.xml"

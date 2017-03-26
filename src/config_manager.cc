@@ -120,7 +120,7 @@ ConfigManager::ConfigManager()
     }
 
     if (filename == nullptr) {
-        throw _Exception(_("\nThe server configuration file could not be found in ~/.mediatomb\n") + "MediaTomb could not determine your home directory - automatic setup failed.\n" + "Try specifying an alternative configuration file on the command line.\n" + "For a list of options run: mediatomb -h\n");
+        throw _Exception(_("\nThe server configuration file could not be found in ~/.gerbera\n") + "Gerbera could not determine your home directory - automatic setup failed.\n" + "Try specifying an alternative configuration file on the command line.\n" + "For a list of options run: mediatomb -h\n");
     }
 
     log_info("Loading configuration from: %s\n", filename.c_str());
