@@ -1,0 +1,352 @@
+## Gerbera - UPnP AV Mediaserver.
+
+### v1.0.0
+- Ported to CMake
+- Removed bundled libupnp - Now requires upstream 1.8 version.
+- Removed bundled libuuid.
+- Enhanced cover art support for MP4, FLAC, Vorbis & WMA files (via TagLib).
+- TagLib handler opens files read only: stops inotify rescanning the dir on access causing "Object not found" see here.
+- Album folders have "creator" metadata (artist).
+- Album folders have artwork: either from external files or the tracks embedded artwork.
+- Per-track external art support: filename-of-track.jp\* (minus the audio file extension).
+- WIP port to "Modern C++" / tidying.
+- Removed libflac use/dep.
+- Remove libmp4v2 use/dep.
+- Remove id3lib use/dep.
+- Fixed dvd_image_import_script with spidermonkey 1.8.5.
+- IPv6 Support
+- Lots of other stuff.
+
+### v0.12.2
+- Added mtime and sizeOnDisk to JS objects
+
+### v0.12.1 08.04.2010
+- fixed YouTube service support (got broken after they updated their
+  website)
+- fixed a problem in soap response http headers (solves "access error" 
+  on Yamaha RX-V2065)
+- turned out the change log for 0.12.0 was not complete (various 
+  closed bugs were not mentioned)
+- fixed automatic id3lib detection when taglib is not available
+
+### v0.12.0 25.03.2010
+- added video thumbnail generation using libffmpegthumbnailer
+- added configure settings which allow to enable sqlite backups by 
+  default
+- added cross compile defaults for the inotify check to configure
+- added configure check for broken libmagic on Slackware
+- added libmp4v2 metadata handler to get tags and cover art from mp4
+  files
+- got rid of several compiler warnings
+- added storage cache
+- added storage insert buffering
+- fixed mysql "threads didn't exit" issue
+- implemented YouTube service support which allows to watch YouTube 
+  videos on your UPnP player (in combination with transcoding)
+- added fixes to allow PCM playback on the PS3 and other devices,
+  thanks to mru for his findings. This allows streaming transcoded
+  OGG and FLAC media to the PS3.
+- added option to enable tooltips for the web UI, thanks to cweiske
+  for the patch
+- fixed bug #1986789 - Error when renaming a playlist container
+- added parameter -D/--debug (enable debug output)
+- closed feature request #1934646 - added parameter --version 
+  (prints version information
+- added parameter --compile-info (prints compile information)
+- fixed problem "Negative duration in .m3u files" (SF forum)
+- fixed bug #2078017 - Playlist inital import fails in autoscan
+  directories
+- fixed bug #1890657 - transcoding tmp file using 2 //
+- fixed bug #1978210 - compile error with newer libcurl
+- fixed bug #1934649 - typo in --help text
+- fixed bugs #1986709 and #1996046 - cannot rename item with & in name
+- fixed bug #2122696 - build error with MySQL 5.1
+- fixed bug #1973930 - Incorrect UPnP class assigned to Vorbis and
+  Theora items
+- fixed bug #1934659 - unspecific error message when db is not available
+- fixed bug #2904448 - memset with number of bytes set to 0 in
+  array.cc
+- added a "Directories" view in the default layout for Photos and
+  Video, the feature is still somewhat experimental
+- added a feature that allows to mark played items
+- improved inotify check which was failing with 2.4 kernels
+- added support for lastfmlib, thanks to Dirk Vanden Boer vor the
+  patch
+- increased buffer length for the exif field following the request
+  from one of our users
+- fixed a problem where the upnp-string-limit function was not
+  correctly truncating UTF-8 strings
+- fixed a bug where --enable-id3lib did not turn off the automatic
+  enabling of taglib, which then resulted in an error message saying, 
+  that both libraries are enabled
+- implemented feature request #2833402 - ability to change
+  ffmpegthumbnailer param "image quallity"
+- fixed bug #2783557 - Mediatomb always flags file as chunked output,
+  thanks to Michael Guntsche
+- fixed bug #2804342 - wrong namespace in <serviceId>
+- added a fix for glibc 2.10, thanks to Honoome for the patch
+- added patches for NetBSD, thanks to Jared D. McNeill
+- fixed bug #2944701 Adding comment in config as last line yields
+  segfault
+- fixed bug #2779907 SQLITE3: (1) cannot start a transaction within a
+  transaction
+- fixed bug #2820213 build broken with libmp4v2-1.9.0
+- fixed bug #2161155 inotify thread aborts 
+- fixed bug #2011296 SVN rev 1844 doesn't show more than 10 files on
+  PS3
+- fixed bug #1988738 web ui docs miss note how to access web ui
+- fixed bug #1929230 invalid XML in UPNP messages
+- fixed bug #1865386 autoscan dir already exists error 
+- implemented feature request #2313953 support for forked libmp4v2
+  project
+- implemented feature request #1955192 flag/mark watched video files
+- implemented feature request #1928580 better logging/tracing support
+- implemented feature request #1754010 m4a metadata extraction
+
+### v0.11.0 01.03.2008  External transcoding support
+- implemented transcoding support that allows to plug in an arbitrary
+  transcoding application
+- added fourcc detection for AVI files and transcoding options to 
+  limit transcoding to certain fourcc's
+- added new metadata extractor using ffmpeg, patch submitted by 
+  Ingo Preiml
+- added vorbis / theora detection for ogg containers, so video files
+  should not end up in audio containers anymore
+- fixed bug where database-file option was still checked even when
+  MySQL was selected in the configuration
+- fixed a bug where check of the home directory was enforced even if 
+  the configuration file was specified on command line
+- UTF-8 fix suggested by piman - taglib should handle UTF-8 correctly, 
+  so we will request an UTF-8 string from taglib and do not do the 
+  conversion ourselves
+- UTF-8 fix for libextractor, basically same as with TagLib
+- added default mapping for flv files since they are not correctly
+  recognized by libmagic
+- fixed a bug where we could get crashed by a missing URL parameter
+  sent to the UI
+- fixed 64bit related issues in the UPnP SDK
+- fixed a problem where ID3 tags were not detected with id3lib
+- fixed off by one errors in StringBuffer class, thanks to stigpo for
+  the patch
+- fixed bug #1824216 - encoded URLs were not treated properly
+- made sure that log output is always flushed
+- made temporary directory configurable
+- using expat as XML parser
+- new XML generator - support for comments
+- changed layout of the storage configuration XML
+- added migration for old config.xml
+- speed up sqlite3 by setting synchronous=off by default
+- adding automatic database backup for sqlite3
+- adding automatic backup restore on sqlite3 database corruption
+- fix permission problem - supplementary groups weren't set by
+  initgroups()
+- fixed js (spidermonkey) related crashes
+- fix mysql reconnect issue - charset was lost after reconnect
+- added check to avoid coredump when max number of inotify watches
+  has been reached
+- made sure that range requests specified as "bytes=0-" do not trigger
+  a 416 response for media where the filesize is unknown
+- added fix for chunked encoding that was posted on the maemo forums
+- fixed configure to determine if iconv needs the const char cast or
+  not (fixes OSX compilation problem)
+- added album art support for the PS3
+- fixed a bug where path used by add container chain was not converted
+  to UTF-8
+- added patch for author and director extraction from id3 tags, 
+  submitted by Reinhard Enders
+- init script for fedora now uses the -e option instead of grepping
+  for the IP (old variant only worked on systems with english
+  language)
+- updated spec file with changes from Marc Wiriadisastra
+- we now are also providing the filesize along with the other metadata
+- added environment variables that can be used for additional server
+  configuration (useful for directory independent NAS setups)
+- added comments and examples to the config.xml that is generated by
+  the server
+- added patch from Gabriel Burca to extract keywords from id3 tags
+- added runtime inotify detection
+- added a workaround for the Noxon V1 which for some reasons sends 
+  us a double encoded ampersand XML sequences in the URL
+- implemented feature request #1771561, extension to mimetype mappings
+  can now be case insensitive
+
+### v0.10.0	11.07.2007  Playlist and inotify autoscan support.
+- MySQL database version pumped to 3 (MediaTomb will automatically
+  update the database during the first launch)
+- Sqlite3 database version pumped to 2 (MediaTomb will automatically
+  update the database during the first launch)
+- added support for inotify based autoscan
+- playlist support - parsing playlist via js is now possible
+- added network interface option
+- added workaround for a PS3 related problem, where sockets were left
+  open (bug #1732412)
+- improved iconv handling of illegal characters
+- added character conversion safeguards to make sure that non UTF-8
+  strings do not make it into the database from js scripts
+- made character conversion functions available to js
+- added option to hide PC Directory from UPnP renderers
+- added album art support, album art is extracted from ID3 tags
+  and offered to UPnP devices
+
+### v0.9.1  28.05.2007  Playstation 3 support
+- added support for Playstation 3
+- added command line option that allows to tell the server where to
+  put the configuration upon first startup
+- fixed a fseeko-check related bug in configure
+- the configure script now honors the LDFLAGS while checking for sqlite3
+- fixed wrong message printout in configure
+- PC Directory can now be renamed in the UI
+- fixed a bug in configure.ac, the --with-extractor-libs= parameter
+  didn't work
+- fixed a MySQL related bug, if the path or filename contained non-UTF8
+  characters, the inserted strings weren't complete
+- circumvented a bug/feature of older MySQL versions, that caused the
+  MySQL database creation script to fail
+- MySQL database version pumped to 2 (MediaTomb will automatically
+  update the database during the first launch)
+
+### v0.9.0  25.03.2007  Major rework
+- the UI was completely rewritten from scratch; it uses AJAX for all
+  requests
+- integrated libupnp (http://pupnp.sf.net/) into our source tree
+- added largefile support
+- code has undergone some performance optimizations
+- fixed a bug where server did not shutdown while http download
+  was in progress
+- all sqlite3 queries are now handled by a single, dedicated
+  thread to make MediaTomb work with SQLite3 compiled with
+  "--enable-threadsafe"
+- fixed a bug where setting -p 0 did not trigger automatic
+  port selection if it had to override the value in config.xml
+- fixed bug 1425424 - crash on a bad config.xml - we did not handle 
+  the case where the <udn> tag was not present.
+  Thanks to Nektarios K. Papadopoulos <npapadop@users.sourceforge.net>
+  for the report and patch.
+- added configure option and adapted the code to completely 
+  supress all log output
+- added configure option and adapted the code to supress
+  debug output
+- added taglib support, thanks to Benhur Stein <benhur.stein@gmail.com>
+  for the patch. 
+- bug 1524468 (startup in daemon mode fails) does no longer occur
+  after the integration of libupnp 1.4.x sources
+- fixed bug 1292295 (string conversion was failing on 64bit platforms)
+- fixed issue with ContainerUpdateIDs (were not sent out along with
+  accepted subscription)
+- fixed issue where some directories could not be browsed (filesystem 
+  browser). It turned out that we forgot to convert the filenames
+  to UTF-8, as the result invalid characters made their way into
+  the XML that was feeded to the browser.
+- improved illegal character conversion handling - in case iconv
+  fails we will pad the rest of the name string with "?" and print
+  out the failed name in the console.
+- we now try to determine the default import charsets by looking
+  at the system locale.
+- implemented track number metadata extraction (feature request
+  1430799). track numbers are now extracted via id3lib/taglib and
+  can also be used in the import script. import.js has been adapted
+  to add tracknumbers to song names in the Album container.
+- added option to supress hidden files when browsing the filesystem
+- added X_MS_MediaReceiverRegistrar Service to allow future Xbox 360 
+  support
+- added workarounds to enable Telegent TG100 avi playback
+- server can now be restarted by sending it a SIGHUP
+- the current configuration file will never be displayed in the UI and
+  will never be added to the database - we do not want the user to
+  accidentally share it on the network since it may contain
+  security sensitive data
+- tomb-install is no longer needed, the server will automatically create
+  a default ~/.mediatomb/config.xml file if there is none
+- the database tables will be created automatically if they don't
+  exist
+- adapted configure script to correctly set flags for linkers that
+  use the --as-needed option
+- the "PC Directory" isn't changeable via the UI anymore to ensure a
+  correct view of the "PC Directory"
+- lookups in the database are now done with hashes, which should make
+  many things faster, especially the adding
+- changed the database field "location" from varchar(255) to text to
+  allow urls and locations of unlimited size
+- created a new theme for the UI
+- added support for "blind" .srt requests - some renderers like the
+  DSM320 will blindly request the url provided via browse, replacing
+  and found file extension with .srt, we will look for the .srt file
+  in the directory where the original media is located, using the
+  same filename, but with the .srt extension
+- created XML schema for "config.xml" to provide the possiblity of
+  validating the configuration
+- added fallback if js is not available - there is a builtin feature
+  to create a default virtual layout now; config.xml has got an
+  option to select the virtual-layout type, it can be builting, js or
+  disabled.
+- added charset option to the import script, it is not possible to
+  specify the script encoding
+- we now validate filesystem, metadata and scripting charsets upon 
+  startup
+- added a special option that allows limiting title and description
+  lengths in UPnP browse replies to a specified length; this was
+  necessary to work around a bug in the TG100 that has problems
+  browsing items where title length exceeds 101 characters.
+- import.js can now specify the upnp class of the last container in the
+  chain
+- all items within a container which upnp class is set to 
+  object.container.album.musicAlbum will automatically be sorted by 
+  track number.
+- added option to configure the presentation URL to make it easier
+  for NAS vendors to integrate the server into their web UI
+- made model number configurable
+
+### v0.8.1	07.09.2005
+- added "serve" directory, any files there can be downloaded 
+  like from a normal webserver
+- implemented keyword extraction for auxdata from libexif
+- implemented keyword extraction for auxdata from libextractor
+- added Exif metadata support for images via libexif.
+- added resolution attribute to image res tag
+- added bitrate and duration attribute to mp3 res tag (via id3lib)
+- added auxdata field for items, auxilary data can be extracted
+  and used by import scripts.
+- added configuration options to specify which aux fields should 
+  be extracted and filled by the library.
+- added mysql support
+- refined configure script, almost all dependencies are now
+  optional.
+- changed database, (not backward compatible again)
+- when an item is deleted all referenced items are deleted as well
+- added option to specify an alternative magic file
+
+### v0.8.0  15.06.2005  Scripting/Virtual Server Layout
+- Server layout can now be defined using java script,
+  default layout script is provided.
+- Added ID3 tag support.
+- Fixed various memory leaks.
+- Files in the Filesystem Browser are now sorted alphabetically.
+- Added extension to mime-type mappings to the configuration.
+- Added option to limit import by file extensions.
+- Added daemon mode as well as setuid/setgid options, init.d
+  script included.
+- Fixed mime-type recognition when importing media (filemagic output
+  is now parsed using regular expressions)
+- Introduced new log system.
+- Adding/Browsing/Removing media in the UI is now handled
+  asynchroniously.
+- Added a command line option to import media upon server launch.
+- Added target directory option to tomb-install, cleaned up a few
+  things.
+
+### v0.7.1  17.04.2005  D-Link DSM-320 fix
+- Mappings of mime-types to upnp classes are now configurable.
+  Actually this is how we solved the DSM-320 problem - they
+  crashed if upnp class of items was different than what the
+  DSM expected.
+
+- tomb-install now creates the database and configuration file
+  from templates (was hardcoded); also sets the name of the server
+  individually for each user (host / username)
+
+- Improved handling of configuration, if non critical options are
+  missing we are now setting default values.
+
+### v0.7    14.04.2005  First release
+- The changelog does not start at day 0, updates will be made
+  starting from this release.
