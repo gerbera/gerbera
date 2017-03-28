@@ -151,7 +151,7 @@ function addVideo(obj)
     var chain = new Array('Video', 'All Video');
     addCdsObject(obj, createContainerChain(chain));
 
-    var dir = getRootPath(object_root_path, obj.location);
+    var dir = getRootPath(object_script_path, obj.location);
 
     if (dir.length > 0)
     {
@@ -184,7 +184,7 @@ function addImage(obj)
         addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER);
     }
 
-    var dir = getRootPath(object_root_path, obj.location);
+    var dir = getRootPath(object_script_path, obj.location);
 
     if (dir.length > 0)
     {
