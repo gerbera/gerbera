@@ -6,7 +6,7 @@
 
 Gerbera is a UPnP media server which allows you to stream your digital media through your home network and consume it on a variety of UPnP compatible devices.
 
-_Gerbera is based on [MediaTomb 12.1](http://mediatomb.cc) which is dead upstream, so this is my attempt to get kick it back into life._
+_Gerbera is based on [MediaTomb 12.1](http://mediatomb.cc) which is dead upstream, so this is my attempt to kick it back into life._
 
 **Pull requests are very welcome and reporting issues is encouraged.**
 
