@@ -36,18 +36,26 @@
 using namespace zmm;
 using namespace std;
 
+static void fatal_handler(void *udata, const char *msg)
+{
+    log_error("Fatal Duktape error: %s\n", msg ? msg : "no message");
+    abort();
+}
+
 Runtime::Runtime() {
-    /* initialize the JS run time, and return result in rt */
-    rt = JS_NewRuntime(8L * 1024L * 1024L);
-    if (!rt)
-        throw Exception(_("Scripting: could not initialize js runtime"));
+    ctx = duk_create_heap(nullptr, nullptr, nullptr, nullptr, fatal_handler);
 }
 Runtime::~Runtime()
 {
-    if (rt)
-        JS_DestroyRuntime(rt);
-    rt = nullptr;
-    JS_ShutDown();
+    duk_destroy_heap(ctx);
+}
+
+duk_context *Runtime::createContext()
+{
+    duk_idx_t thread_idx = duk_push_thread_new_globalenv(ctx);
+    return duk_get_context(ctx, thread_idx);
+    /* we're leaving the thread on the stack of the main context so
+       it stays alive */
 }
 
 #endif // HAVE_JS

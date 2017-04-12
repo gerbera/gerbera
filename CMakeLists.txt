@@ -160,6 +160,7 @@ add_library(libgerbera OBJECT
         src/scripting/runtime.h
         src/scripting/script.cc
         src/scripting/script.h
+        src/scripting/duktape/duktape.c
         src/server.cc
         src/serve_request_handler.cc
         src/serve_request_handler.h
@@ -434,14 +435,10 @@ if(WITH_CURL)
 endif()
 
 if(WITH_JS)
-    find_package (SpiderMonkey)
-    if (JS_FOUND)
-        include_directories(${JS_INCLUDE_DIRS})
-        target_link_libraries (gerbera ${JS_LIBRARIES})
-        add_definitions(-DHAVE_JS)
-    else()
-        message(FATAL_ERROR "SpiderMonkey (MozJS) not found")
-    endif()
+    add_definitions(-DHAVE_JS)
+    target_include_directories(libgerbera PRIVATE "${CMAKE_SOURCE_DIR}/src/scripting/duktape")
+    target_include_directories(gerbera PRIVATE "${CMAKE_SOURCE_DIR}/src/scripting/duktape")
+    SET_SOURCE_FILES_PROPERTIES(src/scripting/duktape/duktape.c PROPERTIES LANGUAGE CXX)
 endif()
 
 if(WITH_TAGLIB)

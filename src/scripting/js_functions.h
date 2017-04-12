@@ -33,28 +33,29 @@
 #ifndef __SCRIPTING_JS_FUNCTIONS_H__
 #define __SCRIPTING_JS_FUNCTIONS_H__
 
-#include <jsapi.h>
+#include "duktape.h"
 
 extern "C" {
 
 /// \brief Log output.
-JSBool js_print(JSContext *cx, uintN argc, jsval *argv);
+duk_ret_t js_print(duk_context *ctx);
 
 /// \brief Adds an object to the database.
-JSBool js_addCdsObject(JSContext *cx, uintN argc, jsval *argv);
+duk_ret_t js_addCdsObject(duk_context *ctx);
 
 /// \brief Makes a copy of an CDS object.
-JSBool js_copyObject(JSContext *cx, uintN argc, jsval *argv);
+duk_ret_t js_copyObject(duk_context *ctx);
 
 /// filesystem charset to internal
-JSBool js_f2i(JSContext *cx, uintN argc, jsval *argv);
+duk_ret_t js_f2i(duk_context *ctx);
 /// metadata charset to internal
-JSBool js_m2i(JSContext *cx, uintN argc, jsval *argv);
+duk_ret_t js_m2i(duk_context *ctx);
 /// playlist charset to internal
-JSBool js_p2i(JSContext *cx, uintN argc, jsval *argv);
+duk_ret_t js_p2i(duk_context *ctx);
 /// js charset to internal
-JSBool js_j2i(JSContext *cx, uintN argc, jsval *argv);
+duk_ret_t js_j2i(duk_context *ctx);
 
+#define log_debug_stack(ctx) do{duk_push_context_dump(ctx);log_debug("%s\n", duk_safe_to_string(ctx, -1));duk_pop(ctx);}while(0)
 } // extern "C"
 
 #endif//__SCRIPTING_JS_FUNCTIONS_H__

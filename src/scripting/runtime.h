@@ -32,7 +32,7 @@
 #ifndef __SCRIPTING_RUNTIME_H__
 #define __SCRIPTING_RUNTIME_H__
 
-#include <jsapi.h>
+#include "duktape.h"
 #include <pthread.h>
 #include "common.h"
 #include "singleton.h"
@@ -41,14 +41,14 @@
 class Runtime : public Singleton<Runtime, std::recursive_mutex>
 {
 protected:
-    JSRuntime *rt;
+    duk_context *ctx;
 
 public:
     Runtime();
     virtual ~Runtime();
     
-    /// \brief Returns the runtime for script execution.
-    JSRuntime *getRT() { return rt; }
+    /// \brief Returns a new (sub)context. !!! Not thread-safe !!!
+    duk_context *createContext();
 };
 
 #endif // __SCRIPTING_RUNTIME_H__
