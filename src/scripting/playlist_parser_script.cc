@@ -33,6 +33,7 @@
 
 #include "playlist_parser_script.h"
 #include "config_manager.h"
+#include "content_manager.h"
 #include "js_functions.h"
 
 #define ONE_TEXTLINE_BYTES  1024
@@ -66,7 +67,33 @@ js_readln(duk_context *ctx)
     duk_push_string(ctx, line.c_str());
     return 1;
 }
-    
+
+static duk_ret_t
+js_getCdsObject(duk_context *ctx)
+{
+    auto *self = (PlaylistParserScript *)Script::getContextScript(ctx);
+
+    if (!duk_is_string(ctx, 0))
+        return 0;
+
+    String path = duk_to_string(ctx, 0);
+    duk_pop(ctx);
+
+    if (!string_ok(path))
+        return 0;
+
+    Ref<Storage> storage = Storage::getInstance();
+    Ref<CdsObject> obj = storage->findObjectByPath(path);
+    if (obj == nullptr) {
+        Ref<ContentManager> cm = ContentManager::getInstance();
+        obj = cm->createObjectFromFile(path);
+        if (obj == nullptr) // object ignored
+            return 0;
+    }
+    self->cdsObject2dukObject(obj);
+    return 1;
+}
+
 } // extern "C"
 
 PlaylistParserScript::PlaylistParserScript(Ref<Runtime> runtime) : Script(runtime)
@@ -79,6 +106,7 @@ PlaylistParserScript::PlaylistParserScript(Ref<Runtime> runtime) : Script(runtim
     {
         AutoLock lock(mutex);
         defineFunction(_("readln"), js_readln, 0);
+        defineFunction(_("getCdsObject"), js_getCdsObject, 1);
 
         String scriptPath = ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT); 
         load(scriptPath);
