@@ -1336,20 +1336,20 @@ String SQLStorage::findFolderImage(int id, String trackArtBase)
     *q << "SELECT " << TQ("id") << " FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE ";
     *q << "( ";
     if (trackArtBase.length()>0) {
-        *q << "lower(" << TQ("dc_title") << ") " << "LIKE" << TQ(trackArtBase + ".jp%") << " OR ";
+        *q << "lower(" << TQ("dc_title") << ") " << "LIKE " << quote(trackArtBase + _(".jp%")) << " OR ";
     }
-    *q << "lower(" << TQ("dc_title") << ") " << "LIKE" << TQ("cover.jp%") << " OR ";
-    *q << "lower(" << TQ("dc_title") << ") " << "LIKE" << TQ("albumart%.jp%") << " OR ";
-    *q << "lower(" << TQ("dc_title") << ") " << "LIKE" << TQ("album.jp%") << " OR ";
-    *q << "lower(" << TQ("dc_title") << ") " << "LIKE" << TQ("front.jp%") << " OR ";
-    *q << "lower(" << TQ("dc_title") << ") " << "LIKE" << TQ("folder.jp%");
+    *q << "lower(" << TQ("dc_title") << ") " << "LIKE " << quote(_("cover.jp%")) << " OR ";
+    *q << "lower(" << TQ("dc_title") << ") " << "LIKE " << quote(_("albumart%.jp%")) << " OR ";
+    *q << "lower(" << TQ("dc_title") << ") " << "LIKE " << quote(_("album.jp%")) << " OR ";
+    *q << "lower(" << TQ("dc_title") << ") " << "LIKE " << quote(_("front.jp%")) << " OR ";
+    *q << "lower(" << TQ("dc_title") << ") " << "LIKE " << quote(_("folder.jp%"));
     *q << " ) AND ";
-    *q << TQ("upnp_class") << '=' << TQ(UPNP_DEFAULT_CLASS_IMAGE_ITEM) << " AND ";
+    *q << TQ("upnp_class") << '=' << quote(_(UPNP_DEFAULT_CLASS_IMAGE_ITEM)) << " AND ";
     *q << TQ("parent_id") << " IN ";
     *q << "(";
     *q << "SELECT " << TQ("parent_id") << " FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE ";
-    *q << TQ("parent_id") << '=' << TQ(String::from(id)) << " AND ";
-    *q << TQ("object_type") << '=' << TQ(OBJECT_TYPE_ITEM);
+    *q << TQ("parent_id") << '=' << quote(String::from(id)) << " AND ";
+    *q << TQ("object_type") << '=' << quote(OBJECT_TYPE_ITEM);
     *q << ")";
     *q << " ORDER BY " << TQ("dc_title") << " DESC";
 
