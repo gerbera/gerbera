@@ -107,7 +107,7 @@ make install
 | mysql        	|         	| Optional  	| Client Libs          	    |
 | curl         	|         	| Optional  	| Enables web services 	    |
 | spidermonkey 	| 1.8.5   	| Optional  	| Enables scripting         |
-| taglib       	| 1.11    	| Optional  	| Audio tag support         |
+| [taglib]      | 1.11    	| Optional  	| Audio tag support         |
 | libmagic     	|         	| Optional  	| File type detection  	    |
 | ffmpeg/libav 	|         	| Optional  	| File metadata             |
 | libdvdnav    	|         	| Optional  	| DVD import script         |
@@ -140,6 +140,7 @@ make install
 
 [1]: https://sourceforge.net/p/mediatomb/discussion/440751/thread/258c3cf7/?limit=250
 [pupnp]: https://github.com/mrjimenez/pupnp.git
+[taglib]: http://taglib.org/
 [CMake]: https://cmake.org/
 [Ubuntu PPA]: https://launchpad.net/~stephenczetty/+archive/ubuntu/mediatomb-v00d00
 [v00d00 overlay]: https://github.com/v00d00/overlay
