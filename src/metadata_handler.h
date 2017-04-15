@@ -93,6 +93,7 @@ typedef enum
     M_RATING,
     M_ACTOR,
     M_PRODUCER,
+    M_ALBUMARTIST,
 
     M_MAX
 } metadata_fields_t; 

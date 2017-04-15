@@ -355,7 +355,22 @@ void Element::setText(String str, enum mxml_value_type type)
 
 void Element::appendTextChild(String name, String text, enum mxml_value_type type)
 {
+    String attr;
+    String val;
+    int i, j;
+
+    // name@attr[val] => <name attr="val">
+    if (((i = name.index('@')) > 0)
+        && ((j = name.index(i + 1, '[')) > 0)
+        && (name[name.length() - 1] == ']'))
+    {
+        attr = name.substring(i + 1, j - i - 1);
+        val = name.substring(j + 1, name.length() - j - 2);
+        name = name.substring(0, i);
+    }
     Ref<Element> el = Ref<Element>(new Element(name));
+    if (attr.length() && val.length())
+        el->addAttribute(attr, val, type);
     el->setText(text, type);
     appendElementChild(el);
 }

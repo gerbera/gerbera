@@ -33,6 +33,7 @@
 #ifdef HAVE_TAGLIB
 
 
+#include <taglib/tpropertymap.h>
 #include <taglib/attachedpictureframe.h>
 #include <taglib/aifffile.h>
 #include <taglib/apefile.h>
@@ -60,7 +61,7 @@ TagLibHandler::TagLibHandler() : MetadataHandler()
 {
 }
 
-static void addField(metadata_fields_t field, const TagLib::Tag* tag, Ref<CdsItem> item)
+static void addField(metadata_fields_t field, const TagLib::File& file, const TagLib::Tag* tag, Ref<CdsItem> item)
 {
     if (tag == nullptr)
         return;
@@ -71,6 +72,7 @@ static void addField(metadata_fields_t field, const TagLib::Tag* tag, Ref<CdsIte
     Ref<StringConverter> sc = StringConverter::i2i(); // sure is sure
 
     TagLib::String val;
+    TagLib::StringList list;
     String value;
     unsigned int i;
 
@@ -108,6 +110,16 @@ static void addField(metadata_fields_t field, const TagLib::Tag* tag, Ref<CdsIte
         } else
             return;
         break;
+    case M_ALBUMARTIST:
+        // we have to use file.properties() instead of tag->properties()
+        // because the latter returns incomplete properties
+        // https://mail.kde.org/pipermail/taglib-devel/2015-May/002729.html
+        list = file.properties()["ALBUMARTIST"];
+        if (!list.isEmpty())
+            val = list[0];
+        else
+            return;
+        break;
     default:
         return;
     }
@@ -131,7 +143,7 @@ void TagLibHandler::populateGenericTags(Ref<CdsItem> item, const TagLib::File& f
     const TagLib::Tag* tag = file.tag();
 
     for (int i = 0; i < M_MAX; i++)
-        addField((metadata_fields_t)i, tag, item);
+        addField((metadata_fields_t)i, file, tag, item);
 
     int temp;
 
