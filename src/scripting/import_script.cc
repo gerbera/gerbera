@@ -37,7 +37,7 @@
 
 using namespace zmm;
 
-ImportScript::ImportScript(Ref<Runtime> runtime) : Script(runtime)
+ImportScript::ImportScript(Ref<Runtime> runtime) : Script(runtime, "import")
 {
     String scriptPath = ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT); 
 

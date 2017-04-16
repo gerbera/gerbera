@@ -50,12 +50,21 @@ Runtime::~Runtime()
     duk_destroy_heap(ctx);
 }
 
-duk_context *Runtime::createContext()
+duk_context *Runtime::createContext(std::string name)
 {
+    duk_push_heap_stash(ctx);
     duk_idx_t thread_idx = duk_push_thread_new_globalenv(ctx);
-    return duk_get_context(ctx, thread_idx);
-    /* we're leaving the thread on the stack of the main context so
-       it stays alive */
+    duk_context *newctx = duk_get_context(ctx, thread_idx);
+    duk_put_prop_string(ctx, -2, name.c_str());
+    duk_pop(ctx);
+    return newctx;
+}
+
+void Runtime::destroyContext(std::string name)
+{
+    duk_push_heap_stash(ctx);
+    duk_del_prop_string(ctx, -1, name.c_str());
+    duk_pop(ctx);
 }
 
 #endif // HAVE_JS

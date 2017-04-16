@@ -96,7 +96,7 @@ js_getCdsObject(duk_context *ctx)
 
 } // extern "C"
 
-PlaylistParserScript::PlaylistParserScript(Ref<Runtime> runtime) : Script(runtime)
+PlaylistParserScript::PlaylistParserScript(Ref<Runtime> runtime) : Script(runtime, "playlist")
 {
     currentHandle = nullptr;
     currentObjectID = INVALID_OBJECT_ID;

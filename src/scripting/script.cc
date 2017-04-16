@@ -125,7 +125,7 @@ void Script::setIntProperty(String name, int value)
 
 /* **************** */
 
-Script::Script(Ref<Runtime> runtime) : Object()
+Script::Script(Ref<Runtime> runtime, std::string name) : Object(), name(name)
 {
     gc_counter = 0;
 
@@ -133,7 +133,7 @@ Script::Script(Ref<Runtime> runtime) : Object()
 
     /* create a context and associate it with the JS run time */
     AutoLock lock(runtime->getMutex());
-    ctx = runtime->createContext();
+    ctx = runtime->createContext(name);
     if (!ctx)
         throw _Exception(_("Scripting: could not initialize js context"));
 
@@ -234,6 +234,7 @@ Script::Script(Ref<Runtime> runtime) : Object()
 
 Script::~Script()
 {
+    runtime->destroyContext(name);
 }
 
 Script *Script::getContextScript(duk_context *ctx)

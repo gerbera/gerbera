@@ -63,7 +63,6 @@ public:
     zmm::Ref<Runtime> runtime;
     
 public:
-    Script(zmm::Ref<Runtime> runtime);
     virtual ~Script();
     
     zmm::String getProperty(zmm::String name);
@@ -90,6 +89,7 @@ public:
     static Script *getContextScript(duk_context *ctx);
 
 protected:
+    Script(zmm::Ref<Runtime> runtime, std::string name);
     void execute();
     int gc_counter;
 
@@ -101,6 +101,7 @@ protected:
     duk_context *ctx;
 
 private:
+    std::string name;
     void _load(zmm::String scriptPath);
     void _execute();
     zmm::Ref<StringConverter> _p2i;
