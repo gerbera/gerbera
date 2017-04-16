@@ -49,6 +49,7 @@ public:
     
     /// \brief Returns a new (sub)context. !!! Not thread-safe !!!
     duk_context *createContext();
+    std::recursive_mutex& getMutex() { return mutex; }
 };
 
 #endif // __SCRIPTING_RUNTIME_H__

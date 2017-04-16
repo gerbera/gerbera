@@ -104,7 +104,7 @@ PlaylistParserScript::PlaylistParserScript(Ref<Runtime> runtime) : Script(runtim
  
     try
     {
-        AutoLock lock(mutex);
+        AutoLock lock(runtime->getMutex());
         defineFunction(_("readln"), js_readln, 0);
         defineFunction(_("getCdsObject"), js_getCdsObject, 1);
 
@@ -172,7 +172,7 @@ void PlaylistParserScript::processPlaylistObject(zmm::Ref<CdsObject> obj, Ref<Ge
         throw _Exception(_("failed to open file: ") + obj->getLocation());
     }
 
-    AutoLock lock(mutex);
+    AutoLock lock(runtime->getMutex());
 
     try
     {

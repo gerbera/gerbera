@@ -97,7 +97,6 @@ protected:
     // script)
     zmm::Ref<CdsObject> processed;
     
-    std::recursive_mutex mutex;
     using AutoLock = std::lock_guard<std::recursive_mutex>;
     duk_context *ctx;
 

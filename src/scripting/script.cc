@@ -132,7 +132,7 @@ Script::Script(Ref<Runtime> runtime) : Object()
     this->runtime = runtime;
 
     /* create a context and associate it with the JS run time */
-    AutoLock lock(mutex);
+    AutoLock lock(runtime->getMutex());
     ctx = runtime->createContext();
     if (!ctx)
         throw _Exception(_("Scripting: could not initialize js context"));
@@ -287,7 +287,7 @@ void Script::_load(zmm::String scriptPath)
 
 void Script::load(zmm::String scriptPath)
 {
-    AutoLock lock(mutex);
+    AutoLock lock(runtime->getMutex());
     duk_push_thread_stash(ctx, ctx);
     _load(scriptPath);
     duk_put_prop_string(ctx, -2, "script");
@@ -307,7 +307,7 @@ void Script::_execute()
 
 void Script::execute()
 {
-    AutoLock lock(mutex);
+    AutoLock lock(runtime->getMutex());
     duk_push_thread_stash(ctx, ctx);
     duk_get_prop_string(ctx, -1, "script");
     duk_remove(ctx, -2);
