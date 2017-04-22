@@ -203,11 +203,7 @@
 #define DEFAULT_FALLBACK_CHARSET        "US-ASCII"
 #define DEFAULT_JS_CHARSET              "UTF-8"
 
-#if defined(__CYGWIN__)
-    #define DEFAULT_CONFIG_HOME         "MediaTomb"
-#else
     #define DEFAULT_CONFIG_HOME         ".gerbera"
-#endif
 #define DEFAULT_SYSTEM_HOME             "gerbera"
 #define DEFAULT_ETC                     "etc"
 #define DEFAULT_TMPDIR                  "/tmp/"

@@ -277,18 +277,10 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
     try {
         // if home is not given by the user, get it from the environment
         if (!string_ok(home) && (!string_ok(config_file))) {
-#ifndef __CYGWIN__
             char* h = getenv("HOME");
             if (h != nullptr)
                 home = h;
 
-#else
-            char* h = getenv("HOMEPATH");
-            char* d = getenv("HOMEDRIVE");
-            if ((h != NULL) && (d != NULL))
-                home = d + h;
-
-#endif // __CYGWIN__
         }
 
         if (!string_ok(home) && (!string_ok(config_file))) {

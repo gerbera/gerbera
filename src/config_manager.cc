@@ -141,11 +141,6 @@ String ConfigManager::construct_path(String path)
 
     if (path.charAt(0) == '/')
         return path;
-#if defined(__CYGWIN__)
-
-    if ((path.length() > 1) && (path.charAt(1) == ':'))
-        return path;
-#endif
     if (home == "." && path.charAt(0) == '.')
         return path;
 

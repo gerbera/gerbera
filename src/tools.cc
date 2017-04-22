@@ -1057,15 +1057,7 @@ String normalizePath(String path)
     char *str = result->data;
     //int len = string.length();
 
-#ifndef __CYGWIN__
     if (path.charAt(0) != DIR_SEPARATOR)
-#else
-    #error !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! this function is not finished for Cygwin
-    for (int i = 0; i < 20; i++)
-        print_backtrace();
-    /// \todo this doesn't seem to be correct...
-    if ((!path.length() > 1) && (path.charAt(1) != ':'))
-#endif
         throw _Exception(_("Relative paths are not allowed!\n"));
     
     int next = 1;
@@ -1118,24 +1110,6 @@ String normalizePath(String path)
 
 String interfaceToIP(String interface)
 {
-#if defined(__CYGWIN__)
-    struct hostent *h=NULL;
-    struct sockaddr_in LocalAddr;
-    char *hostname = (char *)MALLOC(256);
-    if (!hostname)
-        return nullptr;
-
-    gethostname(hostname, 255);
-    hostname[255] = '\0';
-    h=gethostbyname(hostname);
-    free(hostname);
-    if (h != NULL)
-    {
-        memcpy(&LocalAddr.sin_addr, h->h_addr_list[0],4);
-        return String(inet_ntoa(LocalAddr.sin_addr));
-    }
-    return nullptr;
-#else
 
     struct if_nameindex *iflist = nullptr;
     struct if_nameindex *iflist_free = nullptr;
@@ -1189,7 +1163,6 @@ String interfaceToIP(String interface)
     close(local_socket);
     if_freenameindex(iflist_free);
     return nullptr;
-#endif
 }
 
 String ipToInterface(String ip) {
