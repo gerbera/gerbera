@@ -274,38 +274,47 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
         }
     }
 
-    try {
-        // if home is not given by the user, get it from the environment
-        if (!string_ok(home) && (!string_ok(config_file))) {
-            char* h = getenv("HOME");
-            if (h != nullptr)
-                home = h;
+    // If home is not given by the user, get it from the environment
+    if (!string_ok(config_file) && !string_ok(home)) {
 
+        if (!string_ok(confdir)) {
+            confdir = _(DEFAULT_CONFIG_HOME);
         }
 
-        if (!string_ok(home) && (!string_ok(config_file))) {
+        // Check XDG first
+        char *h = getenv("XDG_CONFIG_HOME");
+        if (h != nullptr) {
+            home = h;
+            confdir = "gerbera";
+        } else {
+            // Then look for home
+            h = getenv("HOME");
+            if (h != nullptr)
+                home = h;
+        }
+
+        if (!string_ok(home)) {
             log_error("Could not determine users home directory\n");
             exit(EXIT_FAILURE);
         }
+    }
 
-        if (!string_ok(confdir))
-            confdir = _(DEFAULT_CONFIG_HOME);
+    char* pref = getenv("MEDIATOMB_DATADIR");
+    if (pref != nullptr)
+        prefix = pref;
 
-        char* pref = getenv("MEDIATOMB_DATADIR");
-        if (pref != nullptr)
-            prefix = pref;
+    if (!string_ok(prefix))
+        prefix = _(PACKAGE_DATADIR);
 
-        if (!string_ok(prefix))
-            prefix = _(PACKAGE_DATADIR);
+    char* mgc = getenv("MEDIATOMB_MAGIC_FILE");
+    if (mgc != nullptr)
+        magic = mgc;
 
-        char* mgc = getenv("MEDIATOMB_MAGIC_FILE");
-        if (mgc != nullptr)
-            magic = mgc;
+    if (!string_ok(magic))
+        magic = nullptr;
 
-        if (!string_ok(magic))
-            magic = nullptr;
-
-        ConfigManager::setStaticArgs(config_file, home, confdir, prefix, magic, debug_logging, ip, interface, port);
+    ConfigManager::setStaticArgs(config_file, home, confdir, prefix, magic, debug_logging, ip, interface, port);
+    try {
         ConfigManager::getInstance();
     } catch (const mxml::ParseException& pe) {
         log_error("Error parsing config file: %s line %d:\n%s\n",

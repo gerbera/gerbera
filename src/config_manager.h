@@ -195,7 +195,9 @@ class ConfigManager : public Singleton<ConfigManager, std::mutex>
 {
 public:
     ConfigManager();
-    
+
+    void init() override;
+
     virtual ~ConfigManager();
     
     /// \brief Returns the name of the config file that was used to launch the server.
@@ -242,13 +244,13 @@ public:
 
     /// \brief sets static configuration parameters that will be used by
     /// when the ConfigManager class initializes
-    static void setStaticArgs(zmm::String _filename, zmm::String _userhome, 
+    static void setStaticArgs(zmm::String _filename, zmm::String _userhome,
                               zmm::String _config_dir = _(DEFAULT_CONFIG_HOME),
-                              zmm::String _prefix_dir = _(PACKAGE_DATADIR), 
+                              zmm::String _prefix_dir = _(PACKAGE_DATADIR),
                               zmm::String _magic = nullptr,
                               bool _debug_logging = false,
                               zmm::String _ip = nullptr, zmm::String _interface = nullptr, int _port = -1);
-    
+
     static bool isDebugLogging() { return debug_logging; };
 
     /// \brief Creates a html file that is a redirector to the current server i

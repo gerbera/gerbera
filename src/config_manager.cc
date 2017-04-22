@@ -99,6 +99,9 @@ void ConfigManager::setStaticArgs(String _filename, String _userhome,
 
 ConfigManager::ConfigManager()
     : Singleton<ConfigManager, std::mutex>()
+{}
+
+void ConfigManager::init()
 {
     options = Ref<Array<ConfigOption> >(new Array<ConfigOption>(CFG_MAX));
 
@@ -106,7 +109,7 @@ ConfigManager::ConfigManager()
     bool home_ok = true;
 
     if (filename == nullptr) {
-        // we are looking for ~/.mediatomb
+        // No config file path provided, so lets find one.
         if (home_ok && (!check_path(userhome + DIR_SEPARATOR + config_dir + DIR_SEPARATOR + DEFAULT_CONFIG_NAME))) {
             home_ok = false;
         } else {
@@ -385,7 +388,7 @@ String ConfigManager::createDefaultConfig(String userhome)
     config->setAttribute(_("xsi:schemaLocation"), _(XML_XMLNS) + CONFIG_XML_VERSION + " " + XML_XMLNS + CONFIG_XML_VERSION + ".xsd");
 
     Ref<Comment> docinfo(new Comment(_("\n\
-     Read /usr/share/doc/mediatomb-common/README.gz section 6 for more\n\
+     See http://gerbera.io or read the docs for more\n\
      information on creating and using config.xml configration files.\n\
     "),
         true));
@@ -2110,7 +2113,7 @@ void ConfigManager::prepare_udn()
         uuid_generate(uuid);
         uuid_unparse(uuid, uuid_str);
 
-        log_info("UUID generated: %s\n", uuid_str);
+        log_debug("UUID generated: %s\n", uuid_str);
 
         getOption(_("/server/udn"), _("uuid:") + uuid_str);
 
