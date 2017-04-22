@@ -5,6 +5,7 @@
 #  UPNP_LIBRARIES - The libraries needed to use LibUPnP
 #  UPNP_VERSION_STRING - The version of LinUPnP found
 #  UPNP_HAS_IPV6 - If LinUPnP was built with IPv6 support
+#  UPNP_HAS_REUSEADDR - If LinUPnP was built with SO_REUSEADDR support
 
 find_package(PkgConfig QUIET)
 pkg_check_modules (PC_UPNP QUIET libupnp-1.8)
@@ -26,12 +27,10 @@ if(EXISTS "${UPNP_INCLUDE_DIR}/upnp-1.8/upnpconfig.h")
     string (REGEX REPLACE ".*UPNP_VERSION_PATCH ([0-9]+).*" "\\1" UPNP_PATCH_VERSION "${_UPNP_DEFS}")
     set (UPNP_VERSION_STRING "${UPNP_MAJOR_VERSION}.${UPNP_MINOR_VERSION}.${UPNP_PATCH_VERSION}")
 
-    file (STRINGS ${UPNP_INCLUDE_DIR}/upnp-1.8/upnpconfig.h _UPNP_V6 REGEX "^[ \t]*#define[ \t]+UPNP_ENABLE_IPV6[ \t]+(1)$")
-    if(_UPNP_V6)
-        set (UPNP_HAS_IPV6 1)
-    else()
-        set (UPNP_HAS_IPV6 0)
-    endif()
+    # Check for IPv6
+    file (STRINGS ${UPNP_INCLUDE_DIR}/upnp-1.8/upnpconfig.h UPNP_HAS_IPV6 REGEX "^[ \t]*#define[ \t]+UPNP_ENABLE_IPV6[ \t]+(1)$")
+    # Check for SO_REUSEADDR
+    file (STRINGS ${UPNP_INCLUDE_DIR}/upnp-1.8/upnpconfig.h UPNP_HAS_REUSEADDR REGEX "^[ \t]*#define[ \t]+UPNP_MINISERVER_REUSEADDR[ \t]+(1)$")
 
 endif()
 

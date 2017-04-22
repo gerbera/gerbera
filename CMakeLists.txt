@@ -404,6 +404,9 @@ endif()
 if (NOT UPNP_HAS_IPV6)
     message(FATAL_ERROR "gerbera requires libupnp with IPv6 support.")
 endif()
+if (NOT UPNP_HAS_REUSEADDR)
+    message(WARNING "\n !! It is strongly recommended to build libupnp with --enable-reuseaddr !!\nWithout this option Gerbera will be unable to restart with the same port number.")
+endif()
 
 # Debian ships a snapshot from 2010: libupnp4 (1.8.0~svn20100507-1.2)
 # This is missing templated types so we need to ifdef
