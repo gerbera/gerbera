@@ -198,23 +198,20 @@
 
 // default values
 #define DEFAULT_INTERNAL_CHARSET        "UTF-8"
-#define DEFAULT_FILESYSTEM_CHARSET      "ISO-8859-1"
-#define DEFAULT_METADATA_CHARSET        "ISO-8859-1"
+#define DEFAULT_FILESYSTEM_CHARSET      "UTF-8"
 #define DEFAULT_FALLBACK_CHARSET        "US-ASCII"
 #define DEFAULT_JS_CHARSET              "UTF-8"
 
-    #define DEFAULT_CONFIG_HOME         ".gerbera"
-#define DEFAULT_SYSTEM_HOME             "gerbera"
-#define DEFAULT_ETC                     "etc"
+#define DEFAULT_CONFIG_HOME             ".config/gerbera"
 #define DEFAULT_TMPDIR                  "/tmp/"
 #define DEFAULT_CONFIG_NAME             "config.xml"
 #define DEFAULT_UI_EN_VALUE             YES
 #define DEFAULT_UI_SHOW_TOOLTIPS_VALUE  YES
 #define DEFAULT_POLL_WHEN_IDLE_VALUE    NO
-#define DEFAULT_POLL_INTERVAL           2 
+#define DEFAULT_POLL_INTERVAL           2
 #define DEFAULT_ACCOUNTS_EN_VALUE       NO
-#define DEFAULT_ACCOUNT_USER            "mediatomb"
-#define DEFAULT_ACCOUNT_PASSWORD        "mediatomb"
+#define DEFAULT_ACCOUNT_USER            "gerbera"
+#define DEFAULT_ACCOUNT_PASSWORD        "gerbera"
 #define DEFAULT_ALIVE_INTERVAL          1800 // seconds
 #define ALIVE_INTERVAL_MIN              62 // seconds
 #define DEFAULT_BOOKMARK_FILE           "mediatomb.html"
