@@ -522,9 +522,6 @@ String ConfigManager::createDefaultConfig(String userhome)
     layout->setAttribute(_("type"), _(DEFAULT_LAYOUT_TYPE));
 #ifdef HAVE_JS
     layout->appendTextChild(_("import-script"), prefix_dir + DIR_SEPARATOR + _(DEFAULT_JS_DIR) + DIR_SEPARATOR + _(DEFAULT_IMPORT_SCRIPT));
-#ifdef HAVE_LIBDVDNAV
-    layout->appendTextChild(_("dvd-script"), prefix_dir + DIR_SEPARATOR + _(DEFAULT_JS_DIR) + DIR_SEPARATOR + _(DEFAULT_DVD_SCRIPT));
-#endif
     scripting->appendTextChild(_("common-script"),
         prefix_dir + DIR_SEPARATOR + _(DEFAULT_JS_DIR) + DIR_SEPARATOR + _(DEFAULT_COMMON_SCRIPT));
 
@@ -612,10 +609,6 @@ String ConfigManager::createDefaultConfig(String userhome)
         _(CONTENT_TYPE_MP4)));
     mtcontent->appendElementChild(treat_as(_("audio/mp4"),
         _(CONTENT_TYPE_MP4)));
-    mtcontent->appendElementChild(treat_as(_("application/x-iso9660"),
-        _(CONTENT_TYPE_DVD)));
-    mtcontent->appendElementChild(treat_as(_("application/x-iso9660-image"),
-        _(CONTENT_TYPE_DVD)));
     mtcontent->appendElementChild(treat_as(_("video/x-matroska"),
         _(CONTENT_TYPE_MKV)));
     mtcontent->appendElementChild(treat_as(_("audio/x-matroska"),
@@ -1259,8 +1252,6 @@ void ConfigManager::validate(String serverhome)
         mime_content->put(_("audio/aiff"), _(CONTENT_TYPE_AIFF));
         mime_content->put(_("video/x-msvideo"), _(CONTENT_TYPE_AVI));
         mime_content->put(_("video/mpeg"), _(CONTENT_TYPE_MPEG));
-        mime_content->put(_("application/x-iso9660"), _(CONTENT_TYPE_DVD));
-        mime_content->put(_("application/x-iso9660-image"), _(CONTENT_TYPE_DVD));
     }
 
     NEW_DICT_OPTION(mime_content);
@@ -1514,25 +1505,6 @@ void ConfigManager::validate(String serverhome)
 
     NEW_OPTION(script_path);
     SET_OPTION(CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT);
-#ifdef HAVE_LIBDVDNAV
-    // add dvd script and make sure scripts can be enabled and disabled
-    script_path = getOption(_("/import/scripting/virtual-layout/dvd-script"),
-        prefix_dir + DIR_SEPARATOR + _(DEFAULT_JS_DIR) + DIR_SEPARATOR + _(DEFAULT_DVD_SCRIPT));
-
-    if (temp == "js") {
-        if (!string_ok(script_path))
-            throw _Exception(_("Error in config file: you specified \"js\" to "
-                               "be used for virtual layout, but dvd script "
-                               "location is invalid."));
-
-        prepare_path(_("/import/scripting/virtual-layout/dvd-script"));
-        script_path = getOption(
-            _("/import/scripting/virtual-layout/dvd-script"));
-    }
-
-    NEW_OPTION(script_path);
-    SET_OPTION(CFG_IMPORT_SCRIPTING_DVD_SCRIPT);
-#endif
 
 #endif
 
@@ -2497,28 +2469,6 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
                 prof->setHideOriginalResource(true);
             else
                 prof->setHideOriginalResource(false);
-        }
-
-        if (child->getChildByName(_("dvd-only")) != nullptr) {
-            param = child->getChildText(_("dvd-only"));
-            if (!validateYesNo(param))
-                throw _Exception(_("Error in config file: incorrect parameter "
-                                   "for <dvd-only> tag"));
-            if (param == "yes")
-                prof->setOnlyDVD(true);
-            else
-                prof->setOnlyDVD(false);
-        }
-
-        if (child->getChildByName(_("accept-dvd-mpeg")) != nullptr) {
-            param = child->getChildText(_("accept-dvd-mpeg"));
-            if (!validateYesNo(param))
-                throw _Exception(_("Error in config file: incorrect parameter "
-                                   "for <accept-dvd-mpeg> tag"));
-            if (param == "yes")
-                prof->setTheora(true);
-            else
-                prof->setTheora(false);
         }
 
         if (child->getChildByName(_("thumbnail")) != nullptr) {

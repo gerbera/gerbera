@@ -199,9 +199,6 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
                 }
             }
 
-            if (!item->getFlag(OBJECT_FLAG_DVD_IMAGE) && (tp->onlyDVD()))
-                continue;
-
             Ref<CdsResource> t_res(new CdsResource(CH_TRANSCODE));
             t_res->addParameter(_(URL_PARAM_TRANSCODE_PROFILE_NAME), tp->getName());
             // after transcoding resource was added we can not rely on
@@ -549,19 +546,6 @@ Ref<CdsResourceManager::UrlBase> CdsResourceManager::addResources_getUrlBase(Ref
         }
     }
 
-#ifdef HAVE_LIBDVDNAV_DISABLED
-    if (IS_CDS_ITEM(objectType) && (item->getFlag(OBJECT_FLAG_DVD_IMAGE)))
-    {
-        urlBase->urlBase = Server::getInstance()->getVirtualURL() +
-                          _(_URL_PARAM_SEPARATOR) +
-                           CONTENT_DVD_IMAGE_HANDLER + _(_URL_PARAM_SEPARATOR) +
-                           dict->encodeSimple() + _(_URL_PARAM_SEPARATOR) +
-                           _(URL_RESOURCE_ID) + _(_URL_PARAM_SEPARATOR);
-        urlBase->addResID = true;
-        return urlBase;
-    }
-#endif
-        
     urlBase->urlBase = Server::getInstance()->getVirtualURL() +
                        _(_URL_PARAM_SEPARATOR) +
                        CONTENT_MEDIA_HANDLER + _(_URL_PARAM_SEPARATOR) + 

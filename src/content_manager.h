@@ -49,10 +49,6 @@
     // vice versa
     class PlaylistParserScript;
     #include "scripting/playlist_parser_script.h"
-#ifdef HAVE_LIBDVDNAV
-    class DVDImportScript;
-    #include "scripting/dvd_image_import_script.h"
-#endif
 
 #endif
 #include "layout/layout.h"
@@ -421,9 +417,6 @@ protected:
 
 #ifdef HAVE_JS
     zmm::Ref<PlaylistParserScript> playlist_parser_script;
-#ifdef HAVE_LIBDVDNAV
-    zmm::Ref<DVDImportScript> dvd_import_script;
-#endif
 #endif
 
     bool layout_enabled;

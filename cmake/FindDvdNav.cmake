@@ -1,8 +1,0 @@
-INCLUDE (FindPackageHandleStandardArgs)
-
-find_package( PkgConfig REQUIRED )
-PKG_CHECK_MODULES( DVDNAV REQUIRED dvdnav )
-
-find_package_handle_standard_args(DVDNAV DEFAULT_MSG DVDNAV_FOUND)
-
-MARK_AS_ADVANCED( DVDNAV_LIBRARIES DVDNAV_INCLUDE_DIRS )

@@ -43,7 +43,7 @@ _Gerbera is based on [MediaTomb 12.1](http://mediatomb.cc) which is dead upstrea
 - Removed `libflac` use/dep.
 - Remove `libmp4v2` use/dep.
 - Remove `id3lib` use/dep.
-- Fixed `dvd_image_import_script` with spidermonkey 1.8.5.
+- Removed broken DVD support (dvdnav).
 - IPv6 Support
 - Lots of other stuff.
 
@@ -80,7 +80,7 @@ git clone https://github.com/v00d00/gerbera.git
 mkdir build
 cd build
 cmake ../gerbera -DWITH_MAGIC=1 -DWITH_MYSQL=1 -DWITH_CURL=1 -DWITH_JS=1 \
--DWITH_TAGLIB=1 -DWITH_AVCODEC=1 -DWITH_DVDNAV=1 -DWITH_EXIF=1 -DWITH_LASTFM=1
+-DWITH_TAGLIB=1 -DWITH_AVCODEC=1 -DWITH_EXIF=1 -DWITH_LASTFM=1
 make -j4 VERBOSE=1
 make install
 ```
@@ -110,7 +110,6 @@ make install
 | [taglib]      | 1.11    	| Optional  	| Audio tag support         |
 | libmagic     	|         	| Optional  	| File type detection  	    |
 | ffmpeg/libav 	|         	| Optional  	| File metadata             |
-| libdvdnav    	|         	| Optional  	| DVD import script         |
 | libexif      	|         	| Optional  	| JPEG Exif metadata        |
 | lastfmlib    	|         	| Optional  	| Enables scrobbling   	    |
 |              	|         	|           	|                      	    |

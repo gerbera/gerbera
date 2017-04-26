@@ -14,7 +14,7 @@
 - Removed libflac use/dep.
 - Remove libmp4v2 use/dep.
 - Remove id3lib use/dep.
-- Fixed dvd_image_import_script with spidermonkey 1.8.5.
+- Removed broken DVD support (dvdnav).
 - IPv6 Support
 - Lots of other stuff.
 

@@ -62,13 +62,6 @@
     #include "curl_io_handler.h"
 #endif
 
-#ifdef HAVE_LIBDVDNAV
-    #include "dvd_io_handler.h"
-    #include "metadata/dvd_handler.h"
-    #include "fd_io_handler.h"
-    #include "mpegremux_processor.h"
-#endif
-
 using namespace zmm;
 
 TranscodeExternalHandler::TranscodeExternalHandler() : TranscodeHandler()
@@ -207,92 +200,6 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
     }
 #endif
 
-#ifdef HAVE_LIBDVDNAV
-    if (obj->getFlag(OBJECT_FLAG_DVD_IMAGE))
-    {
-        strcpy(fifo_template, "mt_transcode_XXXXXX");
-        location = normalizePath(tempName(cfg->getOption(CFG_SERVER_TMPDIR), fifo_template));
-        log_debug("creating reader fifo: %s\n", location.c_str());
-        if (mkfifo(location.c_str(), O_RDWR) == -1)
-        {
-            log_error("Failed to create fifo for the DVD image "
-                    "reading thread: %s\n", strerror(errno));
-            throw _Exception(_("Could not create reader fifo!\n"));
-        }
-
-       
-        try
-        {
-            String tmp = obj->getResource(0)->getParameter(DVDHandler::renderKey(DVD_Title));
-            if (!string_ok(tmp))
-                throw _Exception(_("DVD Image requested but title parameter is missing!"));
-            int title = tmp.toInt();
-            if (title < 0)
-                throw _Exception(_("DVD Image - requested invalid title!"));
-
-            tmp = obj->getResource(0)->getParameter(DVDHandler::renderKey(DVD_Chapter));
-            if (!string_ok(tmp))
-                throw _Exception(_("DVD Image requested but chapter parameter is missing!"));
-            int chapter = tmp.toInt();
-            if (chapter < 0)
-                throw _Exception(_("DVD Image - requested invalid chapter!"));
-
-            // actually we are retrieving the audio stream id here
-            tmp = obj->getResource(0)->getParameter(DVDHandler::renderKey(DVD_AudioStreamID));
-            if (!string_ok(tmp))
-                throw _Exception(_("DVD Image requested but audio track parameter is missing!"));
-            int audio_track = tmp.toInt();
-            if (audio_track < 0)
-                throw _Exception(_("DVD Image - requested invalid audio stream ID!"));
-
-            chmod(location.c_str(), S_IWUSR | S_IRUSR);
-            
-            Ref<IOHandler> dvd_ioh(new DVDIOHandler(obj->getLocation(), title, chapter, audio_track));
-
-            int from_dvd_fd[2];
-            if (pipe(from_dvd_fd) == -1)
-                throw _Exception(_("Failed to create DVD input pipe!"));
-
-            int from_remux_fd[2];
-            if (pipe(from_remux_fd) == -1)
-            {
-                close(from_dvd_fd[0]);
-                close(from_dvd_fd[1]);
-                throw _Exception(_("Failed to create remux output pipe!"));
-            }
-
-            Ref<IOHandler> fd_writer(new FDIOHandler(from_dvd_fd[1]));
-            Ref<Executor> from_dvd(new IOHandlerChainer(dvd_ioh,
-                                                        fd_writer, 16384));
-
-            Ref<IOHandler> fd_reader(new FDIOHandler(from_remux_fd[0]));
-
-            Ref<MPEGRemuxProcessor> remux(new MPEGRemuxProcessor(from_dvd_fd[0],
-                                          from_remux_fd[1],
-                                          (unsigned char)audio_track));
-
-            RefCast(fd_reader, FDIOHandler)->addReference(RefCast(remux, Object));
-            RefCast(fd_reader, FDIOHandler)->addReference(RefCast(from_dvd, Object));
-            RefCast(fd_reader, FDIOHandler)->addReference(RefCast(fd_writer, Object));
-            RefCast(fd_reader, FDIOHandler)->closeOther(fd_writer);
-            
-
-            Ref<IOHandler> p_ioh(new ProcessIOHandler(location, nullptr));
-            Ref<Executor> ch(new IOHandlerChainer(fd_reader, p_ioh, 16384));
-            proc_list = Ref<Array<ProcListItem> >(new Array<ProcListItem>(2));
-            Ref<ProcListItem> pr_item(new ProcListItem(ch));
-            proc_list->append(pr_item);
-            Ref<ProcListItem> pr2_item(new ProcListItem(from_dvd));
-            proc_list->append(pr2_item);
-        }
-        catch (const Exception & ex)
-        {
-            unlink(location.c_str());
-            throw ex;
-        }
-    }
-#endif
-
     String check;
     if (profile->getCommand().startsWith(_(_DIR_SEPARATOR)))
     {
@@ -336,12 +243,6 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
     {
         main_proc->removeFile(location);
     }
-#ifdef HAVE_LIBDVDNAV
-    if (obj->getFlag(OBJECT_FLAG_DVD_IMAGE))
-    {
-        main_proc->removeFile(location);
-    }
-#endif    
     Ref<IOHandler> io_handler(new BufferedIOHandler(Ref<IOHandler> (new ProcessIOHandler(fifo_name, RefCast(main_proc, Executor), proc_list)), profile->getBufferSize(), profile->getBufferChunkSize(), profile->getBufferInitialFillSize()));
 
     io_handler->open(UPNP_READ);

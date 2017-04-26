@@ -49,10 +49,6 @@
     #include "atrailers_content_handler.h"
 #endif
 
-#ifdef HAVE_LIBDVDNAV
-    #include "metadata/dvd_handler.h"
-#endif
-
 using namespace zmm;
 
 static JSFunctionSpec js_global_functions[] =
@@ -877,68 +873,6 @@ void Script::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
         setObjectProperty(js, _("aux"), aux_js);
         Ref<Dictionary> aux = obj->getAuxData();
 
-#ifdef HAVE_LIBDVDNAV
-        if (obj->getFlag(OBJECT_FLAG_DVD_IMAGE))
-        {
-            JSObject *aux_dvd = JS_NewObject(cx, NULL, NULL, js);
-            setObjectProperty(aux_js, _("DVD"), aux_dvd);
-
-            int title_count = obj->getAuxData(
-                                DVDHandler::renderKey(DVD_TitleCount)).toInt();
-
-            JSObject *titles = JS_NewArrayObject(cx, 0, NULL);
-            setObjectProperty(aux_dvd, _("titles"), titles);
-
-            for (int t = 0; t < title_count; t++)
-            {
-                JSObject *title = JS_NewObject(cx, NULL, NULL, js);
-                jsval val = OBJECT_TO_JSVAL(title);
-                JS_SetElement(cx, titles, t, &val);
-
-                setProperty(title, _("duration"), 
-                        obj->getAuxData(DVDHandler::renderKey(DVD_TitleDuration,
-                                        t)));
-
-                JSObject *audio_tracks = JS_NewArrayObject(cx, 0, NULL);
-                setObjectProperty(title, _("audio_tracks"), audio_tracks);
-
-                int audio_track_count = obj->getAuxData(
-                        DVDHandler::renderKey(DVD_AudioTrackCount, t)).toInt();
-
-                for (int a = 0; a < audio_track_count; a++)
-                {
-                    JSObject *track = JS_NewObject(cx, NULL, NULL, js);
-                    jsval val = OBJECT_TO_JSVAL(track);
-                    JS_SetElement(cx, audio_tracks, a, &val);
-
-                    setProperty(track, _("language"), obj->getAuxData(
-                                DVDHandler::renderKey(DVD_AudioTrackLanguage,
-                                    t, 0, a)));
-
-                    setProperty(track, _("format"), obj->getAuxData(
-                                DVDHandler::renderKey(DVD_AudioTrackFormat, 
-                                    t, 0, a)));
-                }
-
-                JSObject *chapters = JS_NewArrayObject(cx, 0, NULL);
-                setObjectProperty(title, _("chapters"), chapters);
-
-                int chapter_count = obj->getAuxData(DVDHandler::renderKey(DVD_ChapterCount, t)).toInt();
-
-                for (int c = 0; c < chapter_count; c++)
-                {
-                    JSObject *chapter = JS_NewObject(cx, NULL, NULL, js);
-                    jsval val = OBJECT_TO_JSVAL(chapter);
-                    JS_SetElement(cx, chapters, c, &val);
-
-                    setProperty(chapter, _("duration"), obj->getAuxData(
-                                DVDHandler::renderKey(DVD_ChapterRestDuration,
-                                    t, c)));
-                }
-            }
-        }
-
-#endif
 #ifdef YOUTUBE
         // put in meaningful names for YouTube specific enum values
         String tmp = obj->getAuxData(_(YOUTUBE_AUXDATA_AVG_RATING));

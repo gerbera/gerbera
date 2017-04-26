@@ -558,13 +558,6 @@ int ContentManager::_addFile(String path, String rootpath, bool recursive, bool 
 #ifdef HAVE_JS
                     if ((playlist_parser_script != nullptr) && (content_type == CONTENT_TYPE_PLAYLIST))
                         playlist_parser_script->processPlaylistObject(obj, task);
-#ifdef HAVE_LIBDVDNAV
-                    if ((dvd_import_script != nullptr) && (content_type == CONTENT_TYPE_DVD))
-                        dvd_import_script->processDVDObject(obj);
-#else
-                    if (content_type == CONTENT_TYPE_DVD)
-                        log_warning("DVD Image %s will not be parsed: MediaTomb was compiled without libdvdnav  support!\n", obj->getLocation().c_str());
-#endif // DVD
 #else
                     if (content_type == CONTENT_TYPE_PLAYLIST)
                         log_warning("Playlist %s will not be parsed: MediaTomb was compiled without JS support!\n", obj->getLocation().c_str());
@@ -887,10 +880,6 @@ void ContentManager::addRecursive(String path, bool hidden, Ref<GenericTask> tas
 
                             if ((playlist_parser_script != nullptr) && (content_type == CONTENT_TYPE_PLAYLIST))
                                 playlist_parser_script->processPlaylistObject(obj, task);
-#ifdef HAVE_LIBDVDNAV
-                            if ((dvd_import_script != nullptr) && (content_type == CONTENT_TYPE_DVD))
-                                dvd_import_script->processDVDObject(obj);
-#endif // DVD
 
 #endif // JS
                         } catch (const Exception& e) {
@@ -1276,19 +1265,11 @@ void ContentManager::initJS()
     if (playlist_parser_script == nullptr)
         playlist_parser_script = Ref<PlaylistParserScript>(new PlaylistParserScript(Runtime::getInstance()));
 
-#ifdef HAVE_LIBDVDNAV
-    if ((ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE) == "js") && (dvd_import_script == nullptr)) {
-        dvd_import_script = Ref<DVDImportScript>(new DVDImportScript(Runtime::getInstance()));
-    }
-#endif
 }
 
 void ContentManager::destroyJS()
 {
     playlist_parser_script = nullptr;
-#ifdef HAVE_LIBDVDNAV
-    dvd_import_script = nullptr;
-#endif
 }
 
 #endif // HAVE_JS

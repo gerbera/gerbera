@@ -14,8 +14,7 @@ set(WITH_MYSQL          1 CACHE BOOL "MySQL is required if sqlite is not availab
 set(WITH_CURL           1 CACHE BOOL "CURL required for YouTube and/or SopCast")
 set(WITH_JS             1 CACHE BOOL "Enable JavaScript for custom import script")
 set(WITH_TAGLIB         1 CACHE BOOL "Use TagLib to extract audio file metadata")
-set(WITH_AVCODEC        0 CACHE BOOL "Enable libav")
-set(WITH_DVDNAV         0 CACHE BOOL "Enable DVD-Nav")
+set(WITH_AVCODEC        0 CACHE BOOL "Enable ffmpeg/libav")
 set(WITH_EXIF           1 CACHE BOOL "Use libexif to extract image metadata")
 set(WITH_LASTFM         0 CACHE BOOL "Enable LastFM")
 set(WITH_LOGGING        1 CACHE BOOL "Enable file logging")
@@ -61,10 +60,6 @@ add_library(libgerbera OBJECT
         src/destroyer.h
         src/dictionary.cc
         src/dictionary.h
-        src/dvd_io_handler.cc
-        src/dvd_io_handler.h
-        src/dvdnav_read.cc
-        src/dvdnav_read.h
         src/exceptions.cc
         src/exceptions.h
         src/executor.h
@@ -100,8 +95,6 @@ add_library(libgerbera OBJECT
         src/mem_io_handler.h
         src/memory.cc
         src/memory.h
-        src/metadata/dvd_handler.cc
-        src/metadata/dvd_handler.h
         src/metadata/exiv2_handler.cc
         src/metadata/exiv2_handler.h
         src/metadata/ffmpeg_handler.cc
@@ -114,14 +107,6 @@ add_library(libgerbera OBJECT
         src/metadata/taglib_handler.h
         src/metadata/fanart_handler.cc
         src/metadata/fanart_handler.h
-        src/mpegdemux/buffer.h
-        src/mpegdemux/buffer.c
-        src/mpegdemux/mpeg_parse.c
-        src/mpegdemux/mpeg_parse.h
-        src/mpegdemux/mpeg_remux.c
-        src/mpegdemux/mpeg_remux.h
-        src/mpegdemux/mpegdemux.c
-        src/mpegdemux/mpegdemux_internal.h
         src/mpegremux_processor.cc
         src/mpegremux_processor.h
         src/mt_inotify.cc
@@ -165,8 +150,6 @@ add_library(libgerbera OBJECT
         src/request_handler.h
         src/rexp.cc
         src/rexp.h
-        src/scripting/dvd_image_import_script.cc
-        src/scripting/dvd_image_import_script.h
         src/scripting/import_script.cc
         src/scripting/import_script.h
         src/scripting/js_functions.cc
@@ -496,17 +479,6 @@ if(WITH_AVCODEC)
     else()
         message(FATAL_ERROR "FFMpeg/LibAV not found")
     endif ()
-endif()
-
-if(WITH_DVDNAV)
-    find_package (DvdNav)
-    if (DVDNAV_FOUND)
-        include_directories(${DVDNAV_INCLUDE_DIRS})
-        target_link_libraries (gerbera ${DVDNAV_LIBRARIES})
-        add_definitions(-DHAVE_LIBDVDNAV)
-    else()
-        message(FATAL_ERROR "DVDNav not found")
-    endif()
 endif()
 
 if(WITH_EXIF)

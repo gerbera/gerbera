@@ -111,7 +111,6 @@
 #define CONTENT_SERVE_HANDLER           "serve"
 #define CONTENT_ONLINE_HANDLER          "online"
 #define CONTENT_UI_HANDLER              "interface"
-#define CONTENT_DVD_IMAGE_HANDLER       "dvd"
 // REQUEST TYPES
 #define REQ_TYPE_BROWSE                 "browse"
 #define REQ_TYPE_LOGIN                  "login"
@@ -218,7 +217,6 @@
 #define DEFAULT_IGNORE_UNKNOWN_EXTENSIONS NO
 #define DEFAULT_CASE_SENSITIVE_EXTENSION_MAPPINGS NO
 #define DEFAULT_IMPORT_SCRIPT           "import.js"
-#define DEFAULT_DVD_SCRIPT              "import-dvd.js"
 #define DEFAULT_PLAYLISTS_SCRIPT        "playlists.js"
 #define DEFAULT_PLAYLIST_CREATE_LINK    YES
 #define DEFAULT_COMMON_SCRIPT           "common.js"
@@ -382,6 +380,4 @@
                                           CONTENT_SERVE_HANDLER  "/"
 #define LINK_URL_REQUEST_HANDLER          "/" SERVER_VIRTUAL_DIR "/" \
                                           CONTENT_ONLINE_HANDLER "/"
-#define LINK_DVD_REQUEST_HANDLER          "/" SERVER_VIRTUAL_DIR "/" \
-                                          CONTENT_DVD_IMAGE_HANDLER "/"
 #endif // __COMMON_H__

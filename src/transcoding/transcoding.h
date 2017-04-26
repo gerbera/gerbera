@@ -179,10 +179,6 @@ public:
     void setNumChannels(int chans) { number_of_channels = chans; }
     int getNumChannels() { return number_of_channels; }
 
-    /// \brief transcode or ignore streams extracted from a DVD image
-    void setOnlyDVD(bool accept) { dvd_only = accept; }
-    bool onlyDVD() { return dvd_only; }
-
 protected:
     zmm::String name;
     zmm::String tm;
@@ -191,7 +187,6 @@ protected:
     bool first_resource;
     bool theora;
     bool accept_url;
-    bool dvd_only;
     bool hide_orig_res;
     bool thumbnail;
     bool force_chunked;

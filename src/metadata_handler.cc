@@ -50,10 +50,6 @@
 #include "metadata/libexif_handler.h"
 #endif
 
-#ifdef HAVE_LIBDVDNAV
-#include "metadata/dvd_handler.h"
-#endif
-
 #include "metadata/fanart_handler.h"
 
 using namespace zmm;
@@ -167,13 +163,6 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
     }
 
 #endif // HAVE_FFMPEG
-
-#ifdef HAVE_LIBDVDNAV
-    if (content_type == CONTENT_TYPE_DVD)
-    {
-        DVDHandler().fillMetadata(item);
-    }
-#endif
 
     // Fanart for all things!
     FanArtHandler().fillMetadata(item);

@@ -29,33 +29,3 @@
 
 /// \file mpegremux_processor.cc
 
-#ifdef HAVE_LIBDVDNAV
-
-#include "mpegremux_processor.h"
-#include "mpegdemux/mpegdemux.h"
-
-using namespace zmm;
-
-MPEGRemuxProcessor::MPEGRemuxProcessor(int in_fd, int out_fd, unsigned char keep_audio_id) : ThreadExecutor()
-{
-    if (in_fd < 0)
-        throw _Exception(_("Got invalid input fd!"));
-
-    if (out_fd < 0)
-        throw _Exception(_("Got invalid input fd!"));
-
-    this->in_fd = in_fd;
-    this->out_fd = out_fd;
-    this->keep_audio_id = keep_audio_id;
-    startThread();
-}
-
-void MPEGRemuxProcessor::threadProc()
-{
-    log_debug("Starting remux thread...\n");
-    status = remux_mpeg(in_fd, out_fd, 0xe0, keep_audio_id);
-    threadRunning = false;
-    log_debug("Done remuxing\n");
-}
-
-#endif//HAVE_LIBDVDNAV

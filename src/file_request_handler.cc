@@ -40,15 +40,6 @@
 #include "metadata_handler.h"
 #include "play_hook.h"
 
-#ifdef HAVE_LIBDVDNAV
-    #include "dvd_io_handler.h"
-    #include "fd_io_handler.h"
-    #include "metadata/dvd_handler.h"
-    #include "mpegremux_processor.h"
-    #include "thread_executor.h"
-    #include "io_handler_chainer.h"
-#endif
-
 #ifdef EXTERNAL_TRANSCODING
     #include "transcoding/transcode_dispatcher.h"
 #endif
@@ -242,37 +233,6 @@ void FileRequestHandler::get_info(IN const char *filename, OUT UpnpFileInfo *inf
 			}
 
             UpnpFileInfo_set_FileLength(info, -1);
-		}
-		else
-#endif
-#ifdef HAVE_LIBDVDNAV
-		if (!is_srt && item->getFlag(OBJECT_FLAG_DVD_IMAGE))
-		{
-			String tmp = dict->get(DVDHandler::renderKey(DVD_Title));
-			if (!string_ok(tmp))
-				throw _Exception(_("DVD Image requested but title parameter is missing!"));
-			int title = tmp.toInt();
-			if (title < 0)
-				throw _Exception(_("DVD Image - requested invalid title!"));
-
-			tmp = dict->get(DVDHandler::renderKey(DVD_Chapter));
-			if (!string_ok(tmp))
-				throw _Exception(_("DVD Image requested but chapter parameter is missing!"));
-			int chapter = tmp.toInt();
-			if (chapter < 0)
-				throw _Exception(_("DVD Image - requested invalid chapter!"));
-
-			// actually we are retrieving the stream id here
-			tmp = dict->get(DVDHandler::renderKey(DVD_AudioStreamID));
-			if (!string_ok(tmp))
-				throw _Exception(_("DVD Image requested but audio track parameter is missing!"));
-			int audio_track = tmp.toInt();
-			if (audio_track < 0)
-				throw _Exception(_("DVD Image - requested invalid audio stream ID!"));
-
-			/// \todo make sure we can seek in the streams
-			UpnpFileInfo_set_FileLength(info, -1);
-			header = nullptr;
 		}
 		else
 #endif
@@ -629,78 +589,6 @@ Ref<IOHandler> FileRequestHandler::open(IN const char *filename,
             Ref<TranscodeDispatcher> tr_d(new TranscodeDispatcher());
             Ref<TranscodingProfile> tp = ConfigManager::getInstance()->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(tr_profile);
             return tr_d->open(tp, path, RefCast(item, CdsObject), range);
-        }
-        else
-#endif
-#ifdef HAVE_LIBDVDNAV
-        if (!is_srt && item->getFlag(OBJECT_FLAG_DVD_IMAGE))
-        {
-            String tmp = dict->get(DVDHandler::renderKey(DVD_Title));
-            if (!string_ok(tmp))
-                throw _Exception(_("DVD Image requested but title parameter is missing!"));
-            int title = tmp.toInt();
-            if (title < 0)
-                throw _Exception(_("DVD Image - requested invalid title!"));
-
-            tmp = dict->get(DVDHandler::renderKey(DVD_Chapter));
-            if (!string_ok(tmp))
-                throw _Exception(_("DVD Image requested but chapter parameter is missing!"));
-            int chapter = tmp.toInt();
-            if (chapter < 0)
-                throw _Exception(_("DVD Image - requested invalid chapter!"));
-
-            // actually we are retrieving the audio stream id here
-            tmp = dict->get(DVDHandler::renderKey(DVD_AudioStreamID));
-            if (!string_ok(tmp))
-                throw _Exception(_("DVD Image requested but audio track parameter is missing!"));
-            int audio_track = tmp.toInt();
-            if (audio_track < 0)
-                throw _Exception(_("DVD Image - requested invalid audio stream ID!"));
-
-            /// \todo make sure we can seek in the streams
-            //info->file_length = -1;
-            //info->force_chunked = 1;
-            //header = nullptr;
-            if (mimeType == nullptr)
-                mimeType = item->getMimeType();
-
-            //info->content_type = ixmlCloneDOMString(mimeType.c_str());
-            log_debug("Serving dvd image %s Title: %d Chapter: %d\n",
-                    path.c_str(), title, chapter);
-            /// \todo add angle support
-            Ref<IOHandler> dvd_io_handler(new DVDIOHandler(path, title, chapter,
-                           audio_track));
-
-            int from_dvd_fd[2];
-            if (pipe(from_dvd_fd) == -1)
-                throw _Exception(_("Failed to create DVD input pipe!"));
-
-            int from_remux_fd[2];
-            if (pipe(from_remux_fd) == -1)
-            {
-                close(from_dvd_fd[0]);
-                close(from_dvd_fd[1]);
-                throw _Exception(_("Failed to create remux output pipe!"));
-            }
-
-            Ref<IOHandler> fd_writer(new FDIOHandler(from_dvd_fd[1]));
-            Ref<ThreadExecutor> from_dvd(new IOHandlerChainer(dvd_io_handler, 
-                                                        fd_writer, 16384));
-
-            Ref<IOHandler> fd_reader(new FDIOHandler(from_remux_fd[0]));
-            fd_reader->open(mode);
-            
-            Ref<MPEGRemuxProcessor> remux(new MPEGRemuxProcessor(from_dvd_fd[0],
-                                          from_remux_fd[1], 
-                                          (unsigned char)audio_track));
-
-            RefCast(fd_reader, FDIOHandler)->addReference(RefCast(remux, Object));
-            RefCast(fd_reader, FDIOHandler)->addReference(RefCast(from_dvd, Object));
-            RefCast(fd_reader, FDIOHandler)->addReference(RefCast(fd_writer, Object));
-            RefCast(fd_reader, FDIOHandler)->closeOther(fd_writer);
-
-            PlayHook::getInstance()->trigger(obj);
-            return fd_reader;
         }
         else
 #endif
