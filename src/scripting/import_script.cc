@@ -37,56 +37,41 @@
 
 using namespace zmm;
 
-ImportScript::ImportScript(Ref<Runtime> runtime) : Script(runtime)
+ImportScript::ImportScript(Ref<Runtime> runtime) : Script(runtime, "import")
 {
     String scriptPath = ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT); 
-
-#ifdef JS_THREADSAFE
-    JS_SetContextThread(cx);
-    JS_BeginRequest(cx);
-#endif
 
     try 
     {
         load(scriptPath);
-        JS_AddNamedObjectRoot(cx, &script, "ImportScript");
     }
     catch (const Exception & ex)
     {
-#ifdef JS_THREADSAFE
-        JS_EndRequest(cx);
-        JS_ClearContextThread(cx);
-#endif
         throw ex;
     }
-#ifdef JS_THREADSAFE
-        JS_EndRequest(cx);
-        JS_ClearContextThread(cx);
-#endif
 }
 
 void ImportScript::processCdsObject(Ref<CdsObject> obj, String scriptpath)
 {
-#ifdef JS_THREADSAFE
-    JS_SetContextThread(cx);
-    JS_BeginRequest(cx);
-#endif
     processed = obj;
     try 
     {
-        JSObject *orig = JS_NewObject(cx, nullptr, nullptr, glob);
-        setObjectProperty(glob, _("orig"), orig);
-        cdsObject2jsObject(obj, orig);
-        setProperty(glob, _("object_script_path"), scriptpath);
+        cdsObject2dukObject(obj);
+        duk_put_global_string(ctx, "orig");
+        duk_push_string(ctx, scriptpath.c_str());
+        duk_put_global_string(ctx, "object_script_path");
         execute();
+        duk_push_global_object(ctx);
+        duk_del_prop_string(ctx, -1, "orig");
+        duk_del_prop_string(ctx, -1, "object_script_path");
+        duk_pop(ctx);
     }
     catch (const Exception & ex)
     {
+        duk_push_global_object(ctx);
+        duk_del_prop_string(ctx, -1, "orig");
+        duk_del_prop_string(ctx, -1, "object_script_path");
         processed = nullptr;
-#ifdef JS_THREADSAFE
-        JS_EndRequest(cx);
-        JS_ClearContextThread(cx);
-#endif
         throw ex;
     }
 
@@ -95,30 +80,13 @@ void ImportScript::processCdsObject(Ref<CdsObject> obj, String scriptpath)
     gc_counter++;
     if (gc_counter > JS_CALL_GC_AFTER_NUM)
     {
-        JS_MaybeGC(cx);
+        duk_gc(ctx, 0);
         gc_counter = 0;
     }
-#ifdef JS_THREADSAFE
-    JS_EndRequest(cx);
-    JS_ClearContextThread(cx);
-#endif
 }
 
 ImportScript::~ImportScript()
 {
-#ifdef JS_THREADSAFE
-    JS_SetContextThread(cx);
-    JS_BeginRequest(cx);
-#endif
-    
-    if (script)
-        JS_RemoveObjectRoot(cx, &script);
-
-#ifdef JS_THREADSAFE
-    JS_EndRequest(cx);
-    JS_ClearContextThread(cx);
-#endif
-
 }
 
 #endif // HAVE_JS

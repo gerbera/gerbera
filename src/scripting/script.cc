@@ -51,230 +51,91 @@
 
 using namespace zmm;
 
-static JSFunctionSpec js_global_functions[] =
+static duk_function_list_entry js_global_functions[] =
 {
-    JS_FS("print",          js_print,          1, 0),
-    JS_FS("addCdsObject",   js_addCdsObject,   3, 0),
-    JS_FS("copyObject",     js_copyObject,     2, 0),
-    JS_FS("f2i",            js_f2i,            1, 0),
-    JS_FS("m2i",            js_m2i,            1, 0),
-    JS_FS("p2i",            js_m2i,            1, 0),
-    JS_FS("j2i",            js_m2i,            1, 0),
-    JS_FS_END 
+    { "print",          js_print,        DUK_VARARGS },
+    { "addCdsObject",   js_addCdsObject, 3 },
+    { "copyObject",     js_copyObject,   1 },
+    { "f2i",            js_f2i,          1 },
+    { "m2i",            js_m2i,          1 },
+    { "p2i",            js_p2i,          1 },
+    { "j2i",            js_j2i,          1 },
+    { nullptr,          nullptr,         0 },
 };
 
-String Script::getProperty(JSObject *obj, String name)
+String Script::getProperty(String name)
 {
-    jsval val;
-    JSString *str;
     String ret;
-    if (!JS_GetProperty(cx, obj, name.c_str(), &val))
+    if (!duk_is_object_coercible(ctx, -1))
         return nullptr;
-    if (val == JSVAL_VOID)
-        return nullptr;
-    str = JS_ValueToString(cx, val);
-    if (!str)
-        return nullptr;
-
-    char *ts = JS_EncodeString(cx, str);
-    if (!ts)
+    duk_get_prop_string(ctx, -1, name.c_str());
+    if (duk_is_null_or_undefined(ctx, -1) || !duk_to_string(ctx, -1))
     {
+        duk_pop(ctx);
         return nullptr;
     }
-    ret = ts;
-    JS_free(cx, ts);
+    ret = duk_get_string(ctx, -1);
+    duk_pop(ctx);
     return ret;
 }
 
-int Script::getBoolProperty(JSObject *obj, String name)
+int Script::getBoolProperty(String name)
 {
-    jsval val;
-    JSBool boolVal;
-
-    if (!JS_GetProperty(cx, obj, name.c_str(), &val))
+    int ret;
+    if (!duk_is_object_coercible(ctx, -1))
         return -1;
-    if (val == JSVAL_VOID)
-        return -1;
-    if (!JS_ValueToBoolean(cx, val, &boolVal))
-        return -1;
-    return (boolVal ? 1 : 0);
-}
-
-int Script::getIntProperty(JSObject *obj, String name, int def)
-{
-    jsval val;
-    int intVal;
-
-    if (!JS_GetProperty(cx, obj, name.c_str(), &val))
-        return def;
-    if (val == JSVAL_VOID)
-        return def;
-    if (!JS_ValueToInt32(cx, val, &intVal))
-        return def;
-    return intVal;
-}
-
-JSObject *Script::getObjectProperty(JSObject *obj, String name)
-{
-    jsval val;
-    JSObject *js_obj;
-
-    if (!JS_GetProperty(cx, obj, name.c_str(), &val))
-        return nullptr;
-    if (val == JSVAL_VOID)
-        return nullptr;
-    if (!JS_ValueToObject(cx, val, &js_obj))
-        return nullptr;
-    return js_obj;
-}
-
-void Script::setProperty(JSObject *obj, String name, String value)
-{
-    jsval val;
-    JSString *str = JS_NewStringCopyN(cx, value.c_str(), value.length());
-    if (!str)
-        return;
-    val = STRING_TO_JSVAL(str);
-    if (!JS_SetProperty(cx, obj, name.c_str(), &val)) {
-        log_error("Failed to set object property %s\n", name.c_str());
-    }
-}
-
-void Script::setIntProperty(JSObject *obj, String name, int value)
-{
-    jsval val;
-    if (!JS_NewNumberValue(cx, (jsdouble)value, &val))
-        return;
-    if (!JS_SetProperty(cx, obj, name.c_str(), &val)) {
-        log_error("Failed to set object property %s\n", name.c_str());
-    }
-}
-
-void Script::setObjectProperty(JSObject *parent, String name, JSObject *obj)
-{
-    jsval val;
-    val = OBJECT_TO_JSVAL(obj);
-    if (!JS_SetProperty(cx, parent, name.c_str(), &val)) {
-        log_error("Failed to set object property %s\n", name.c_str());
-    }
-}
-
-void Script::deleteProperty(JSObject *obj, String name)
-{
-    JS_DeleteProperty(cx, obj, name.c_str());
-}
-
-static void
-js_error_reporter(JSContext *cx, const char *message, JSErrorReport *report)
-{
-    int n;
-    const char *ctmp;
-
-    int reportWarnings = 1; // TODO move to object field
-
-    Ref<StringBuffer> buf(new StringBuffer());
-
-    do
+    duk_get_prop_string(ctx, -1, name.c_str());
+    if (duk_is_null_or_undefined(ctx, -1))
     {
-        if (!report)
-        {
-            *buf << (char *)message;
-            break;
-        }
-
-        // Conditionally ignore reported warnings.
-        if (JSREPORT_IS_WARNING(report->flags) && !reportWarnings)
-            return;
-
-        String prefix;
-        Ref<StringBuffer> prefix_buf(new StringBuffer());
-
-        if (report->filename)
-            *prefix_buf << (char *)report->filename << ":";
-
-        if (report->lineno)
-        {
-            *prefix_buf << (int)report->lineno << ": ";
-        }
-        if (JSREPORT_IS_WARNING(report->flags))
-        {
-            if (JSREPORT_IS_STRICT(report->flags))
-                *prefix_buf << "(STRICT WARN)";
-            else
-                *prefix_buf << "(WARN)";
-        }
-
-        prefix = prefix_buf->toString();
-
-        // embedded newlines
-        while ((ctmp = strchr(message, '\n')) != nullptr)
-        {
-            ctmp++;
-            if (prefix.length())
-                *buf << prefix;
-            *buf << String((char *)message, ctmp - message);
-            message = ctmp;
-        }
-
-        // If there were no filename or lineno, the prefix might be empty
-        if (prefix.length())
-            *buf << prefix;
-        *buf << (char *)message << "\n";
-
-        if (report->linebuf)
-        {
-            // report->linebuf usually ends with a newline.
-            n = strlen(report->linebuf);
-            *buf << prefix << (char *)report->linebuf;
-            *buf << (char *)((n > 0 && report->linebuf[n-1] == '\n') ? "" : "\n");
-            *buf << prefix;
-            /*
-            n = PTRDIFF(report->tokenptr, report->linebuf, char);
-            for (i = j = 0; i < n; i++)
-            {
-                if (report->linebuf[i] == '\t')
-                {
-                    for (k = (j + 8) & ~7; j < k; j++)
-                    {
-                        fputc('.', gErrFile);
-                    }
-                    continue;
-                }
-                fputc('.', stdout);
-                j++;
-            }
-            fputs("^\n", stdout);
-            */
-        }
+        duk_pop(ctx);
+        return -1;
     }
-    while (false);
+    ret = duk_to_boolean(ctx, -1);
+    duk_pop(ctx);
+    return ret;
+}
 
-    String err = buf->toString();
-    log_js("%s\n", err.c_str());
+int Script::getIntProperty(String name, int def)
+{
+    int ret;
+    if (!duk_is_object_coercible(ctx, -1))
+        return def;
+    duk_get_prop_string(ctx, -1, name.c_str());
+    if (duk_is_null_or_undefined(ctx, -1))
+    {
+        duk_pop(ctx);
+        return def;
+    }
+    ret = duk_to_int32(ctx, -1);
+    duk_pop(ctx);
+    return ret;
+}
+
+void Script::setProperty(String name, String value)
+{
+    duk_push_string(ctx, value.c_str());
+    duk_put_prop_string(ctx, -2, name.c_str());
+}
+
+void Script::setIntProperty(String name, int value)
+{
+    duk_push_int(ctx, value);
+    duk_put_prop_string(ctx, -2, name.c_str());
 }
 
 /* **************** */
 
-Script::Script(Ref<Runtime> runtime) : Object()
+Script::Script(Ref<Runtime> runtime, std::string name) : Object(), name(name)
 {
     gc_counter = 0;
 
     this->runtime = runtime;
-    rt = runtime->getRT();
 
     /* create a context and associate it with the JS run time */
-    cx = JS_NewContext(rt, 8192);
-    if (! cx)
+    AutoLock lock(runtime->getMutex());
+    ctx = runtime->createContext(name);
+    if (!ctx)
         throw _Exception(_("Scripting: could not initialize js context"));
-
-#ifdef JS_THREADSAFE
-    JS_SetContextThread(cx);
-    JS_BeginRequest(cx);
-#endif
-//    JS_SetGCZeal(cx, 2);
-
-    glob = nullptr;
-    script = nullptr;
 
     _p2i = StringConverter::p2i();
     _j2i = StringConverter::j2i();
@@ -282,110 +143,73 @@ Script::Script(Ref<Runtime> runtime) : Object()
     _f2i = StringConverter::f2i();
     _i2i = StringConverter::i2i();
 
-    JS_SetErrorReporter(cx, js_error_reporter);
-    initGlobalObject();
-
-    JS_SetContextPrivate(cx, this);
+    duk_push_thread_stash(ctx, ctx);
+    duk_push_pointer(ctx, this);
+    duk_put_prop_string(ctx, -2, "this");
+    duk_pop(ctx);
 
     /* initialize contstants */
-    setIntProperty(glob, _("OBJECT_TYPE_CONTAINER"),
-            OBJECT_TYPE_CONTAINER);
-    setIntProperty(glob, _("OBJECT_TYPE_ITEM"),
-            OBJECT_TYPE_ITEM);
-    setIntProperty(glob, _("OBJECT_TYPE_ACTIVE_ITEM"),
-            OBJECT_TYPE_ACTIVE_ITEM);
-    setIntProperty(glob, _("OBJECT_TYPE_ITEM_EXTERNAL_URL"),
-            OBJECT_TYPE_ITEM_EXTERNAL_URL);
-    setIntProperty(glob, _("OBJECT_TYPE_ITEM_INTERNAL_URL"),
-            OBJECT_TYPE_ITEM_INTERNAL_URL);
+    duk_push_int(ctx, OBJECT_TYPE_CONTAINER); duk_put_global_string(ctx, "OBJECT_TYPE_CONTAINER");
+    duk_push_int(ctx, OBJECT_TYPE_ITEM); duk_put_global_string(ctx, "OBJECT_TYPE_ITEM");
+    duk_push_int(ctx, OBJECT_TYPE_ACTIVE_ITEM); duk_put_global_string(ctx, "OBJECT_TYPE_ACTIVE_ITEM");
+    duk_push_int(ctx, OBJECT_TYPE_ITEM_EXTERNAL_URL); duk_put_global_string(ctx, "OBJECT_TYPE_ITEM_EXTERNAL_URL");
+    duk_push_int(ctx, OBJECT_TYPE_ITEM_INTERNAL_URL); duk_put_global_string(ctx, "OBJECT_TYPE_ITEM_INTERNAL_URL");
 #ifdef ONLINE_SERVICES 
-    setIntProperty(glob, _("ONLINE_SERVICE_NONE"), (int)OS_None);
+    duk_push_int(ctx, (int)OS_None); duk_put_global_string(ctx, "ONLINE_SERVICE_NONE");
 #ifdef YOUTUBE
-    setIntProperty(glob, _("ONLINE_SERVICE_YOUTUBE"), (int)OS_YouTube);
+    duk_push_int(ctx, (int)OS_YouTube); duk_put_global_string(ctx, "ONLINE_SERVICE_YOUTUBE");
 
-    setProperty(glob, _("YOUTUBE_AUXDATA_KEYWORDS"), 
-            _(YOUTUBE_AUXDATA_KEYWORDS));
-    setProperty(glob, _("YOUTUBE_AUXDATA_AVG_RATING"), 
-            _(YOUTUBE_AUXDATA_AVG_RATING));
-    setProperty(glob, _("YOUTUBE_AUXDATA_AUTHOR"), 
-            _(YOUTUBE_AUXDATA_AUTHOR));
-    setProperty(glob, _("YOUTUBE_AUXDATA_FEED"), 
-            _(YOUTUBE_AUXDATA_FEED));
-    setProperty(glob, _("YOUTUBE_AUXDATA_VIEW_COUNT"), 
-            _(YOUTUBE_AUXDATA_VIEW_COUNT));
-    setProperty(glob, _("YOUTUBE_AUXDATA_FAVORITE_COUNT"), 
-            _(YOUTUBE_AUXDATA_FAVORITE_COUNT));
-    setProperty(glob, _("YOUTUBE_AUXDATA_RATING_COUNT"), 
-            _(YOUTUBE_AUXDATA_RATING_COUNT));
-    setProperty(glob, _("YOUTUBE_AUXDATA_CATEGORY"), 
-            _(YOUTUBE_AUXDATA_CATEGORY));
-    setProperty(glob, _("YOUTUBE_AUXDATA_SUBREQUEST_NAME"), 
-            _(YOUTUBE_AUXDATA_SUBREQUEST_NAME));
-    setProperty(glob, _("YOUTUBE_AUXDATA_REQUEST"), 
-            _(YOUTUBE_AUXDATA_REQUEST));
-    setProperty(glob, _("YOUTUBE_AUXDATA_REGION"),
-            _(YOUTUBE_AUXDATA_REGION));
+    duk_push_string(ctx, YOUTUBE_AUXDATA_KEYWORDS); duk_put_global_string(ctx, "YOUTUBE_AUXDATA_KEYWORDS");
+    duk_push_string(ctx, YOUTUBE_AUXDATA_AVG_RATING); duk_put_global_string(ctx, "YOUTUBE_AUXDATA_AVG_RATING");
+    duk_push_string(ctx, YOUTUBE_AUXDATA_AUTHOR); duk_put_global_string(ctx, "YOUTUBE_AUXDATA_AUTHOR");
+    duk_push_string(ctx, YOUTUBE_AUXDATA_FEED); duk_put_global_string(ctx, "YOUTUBE_AUXDATA_FEED");
+    duk_push_string(ctx, YOUTUBE_AUXDATA_VIEW_COUNT); duk_put_global_string(ctx, "YOUTUBE_AUXDATA_VIEW_COUNT");
+    duk_push_string(ctx, YOUTUBE_AUXDATA_FAVORITE_COUNT); duk_put_global_string(ctx, "YOUTUBE_AUXDATA_FAVORITE_COUNT");
+    duk_push_string(ctx, YOUTUBE_AUXDATA_RATING_COUNT); duk_put_global_string(ctx, "YOUTUBE_AUXDATA_RATING_COUNT");
+    duk_push_string(ctx, YOUTUBE_AUXDATA_CATEGORY); duk_put_global_string(ctx, "YOUTUBE_AUXDATA_CATEGORY");
+    duk_push_string(ctx, YOUTUBE_AUXDATA_SUBREQUEST_NAME); duk_put_global_string(ctx, "YOUTUBE_AUXDATA_SUBREQUEST_NAME");
+    duk_push_string(ctx, YOUTUBE_AUXDATA_REQUEST); duk_put_global_string(ctx, "YOUTUBE_AUXDATA_REQUEST");
+    duk_push_string(ctx, YOUTUBE_AUXDATA_REGION); duk_put_global_string(ctx, "YOUTUBE_AUXDATA_REGION");
 
-    setIntProperty(glob, _("YOUTUBE_REQUEST_NONE"), (int)YT_request_none);
-    setIntProperty(glob, _("YOUTUBE_REQUEST_VIDEO_SEARCH"), 
-                  (int)YT_request_video_search);
-    setIntProperty(glob, _("YOUTUBE_REQUEST_STANDARD_FEED"), 
-                  (int)YT_request_stdfeed);
-    setIntProperty(glob, _("YOUTUBE_REQUEST_USER_FAVORITES"), 
-                  (int)YT_request_user_favorites);
-    setIntProperty(glob, _("YOUTUBE_REQUEST_USER_PLAYLISTS"), 
-                  (int)YT_request_user_playlists);
-    setIntProperty(glob, _("YOUTUBE_REQUEST_USER_SUBSCRIPTIONS"), 
-                   (int)YT_request_user_subscriptions);
-    setIntProperty(glob, _("YOUTUBE_REQUEST_USER_UPLOADS"), 
-                   (int)YT_request_user_uploads);
+    duk_push_int(ctx, (int)YT_request_user_uploads); duk_put_global_string(ctx, "YOUTUBE_REQUEST_USER_UPLOADS");
 #else
-    setIntProperty(glob, _("ONLINE_SERVICE_YOUTUBE"), -1);
+    duk_push_int(ctx, -1); duk_put_global_string(ctx, "ONLINE_SERVICE_YOUTUBE");
 #endif//YOUTUBE
 
 #ifdef ATRAILERS
-    setIntProperty(glob, _("ONLINE_SERVICE_APPLE_TRAILERS"), (int)OS_ATrailers);
-    setProperty(glob, _("APPLE_TRAILERS_AUXDATA_POST_DATE"),
-                      _(ATRAILERS_AUXDATA_POST_DATE));
+    duk_push_int(ctx, (int)OS_ATrailers); duk_put_global_string(ctx, "ONLINE_SERVICE_APPLE_TRAILERS");
+    duk_push_string(ctx, ATRAILERS_AUXDATA_POST_DATE); duk_put_global_string(ctx, "APPLE_TRAILERS_AUXDATA_POST_DATE");
 #else
-    setIntProperty(glob, _("ONLINE_SERVICE_APPLE_TRAILERS"), -1);
+    duk_push_int(ctx, -1); duk_put_global_string(ctx, "ONLINE_SERVICE_APPLE_TRAILERS");
 #endif//ATRAILERS
 
 #ifdef SOPCAST
-    setIntProperty(glob, _("ONLINE_SERVICE_SOPCAST"), (int)OS_SopCast);
+    duk_push_int(ctx, (int)OS_SopCast); duk_put_global_string(ctx, "ONLINE_SERVICE_SOPCAST");
 #else
-    setIntProperty(glob, _("ONLINE_SERVICE_SOPCAST"), -1);
+    duk_push_int(ctx, -1); duk_put_global_string(ctx, "ONLINE_SERVICE_SOPCAST");
 #endif//SOPCAST
 
 #else // ONLINE SERVICES
-    setIntProperty(glob, _("ONLINE_SERVICE_NONE"), 0);
-    setIntProperty(glob, _("ONLINE_SERVICE_YOUTUBE"), -1);
-    setIntProperty(glob, _("ONLINE_SERVICE_SOPCAST"), -1);
-    setIntProperty(glob, _("ONLINE_SERVICE_APPLE_TRAILERS"), -1);
+    duk_push_int(ctx, 0); duk_put_global_string(ctx, "ONLINE_SERVICE_NONE");
+    duk_push_int(ctx, -1); duk_put_global_string(ctx, "ONLINE_SERVICE_YOUTUBE");
+    duk_push_int(ctx, -1); duk_put_global_string(ctx, "ONLINE_SERVICE_APPLE_TRAILERS");
+    duk_push_int(ctx, -1); duk_put_global_string(ctx, "ONLINE_SERVICE_SOPCAST");
 #endif//ONLINE_SERVICES
 
     for (int i = 0; i < M_MAX; i++)
     {
-        setProperty(glob, _(MT_KEYS[i].sym), _(MT_KEYS[i].upnp));
+        duk_push_string(ctx, MT_KEYS[i].upnp); duk_put_global_string(ctx, MT_KEYS[i].sym);
     }
  
-    setProperty(glob, _("UPNP_CLASS_CONTAINER_MUSIC_ALBUM"),
-            _(UPNP_DEFAULT_CLASS_MUSIC_ALBUM));
-    setProperty(glob, _("UPNP_CLASS_CONTAINER_MUSIC_ARTIST"),
-            _(UPNP_DEFAULT_CLASS_MUSIC_ARTIST));
-    setProperty(glob, _("UPNP_CLASS_CONTAINER_MUSIC_GENRE"),
-            _(UPNP_DEFAULT_CLASS_MUSIC_GENRE));
-    setProperty(glob, _("UPNP_CLASS_CONTAINER"),
-            _(UPNP_DEFAULT_CLASS_CONTAINER));
-    setProperty(glob, _("UPNP_CLASS_ITEM"), _(UPNP_DEFAULT_CLASS_ITEM));
-    setProperty(glob, _("UPNP_CLASS_ITEM_MUSIC_TRACK"),
-            _(UPNP_DEFAULT_CLASS_MUSIC_TRACK));
-    setProperty(glob, _("UPNP_CLASS_ITEM_VIDEO"),
-            _(UPNP_DEFAULT_CLASS_VIDEO_ITEM));
-    setProperty(glob, _("UPNP_CLASS_ITEM_IMAGE"), 
-            _(UPNP_DEFAULT_CLASS_IMAGE_ITEM));
-    setProperty(glob, _("UPNP_CLASS_PLAYLIST_CONTAINER"),
-            _(UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER));
+    duk_push_string(ctx, UPNP_DEFAULT_CLASS_MUSIC_ALBUM); duk_put_global_string(ctx, "UPNP_CLASS_CONTAINER_MUSIC_ALBUM");
+    duk_push_string(ctx, UPNP_DEFAULT_CLASS_MUSIC_ARTIST); duk_put_global_string(ctx, "UPNP_CLASS_CONTAINER_MUSIC_ARTIST");
+    duk_push_string(ctx, UPNP_DEFAULT_CLASS_MUSIC_GENRE); duk_put_global_string(ctx, "UPNP_CLASS_CONTAINER_MUSIC_GENRE");
+    duk_push_string(ctx, UPNP_DEFAULT_CLASS_CONTAINER); duk_put_global_string(ctx, "UPNP_CLASS_CONTAINER");
+    duk_push_string(ctx, UPNP_DEFAULT_CLASS_ITEM); duk_put_global_string(ctx, "UPNP_CLASS_ITEM");
+    duk_push_string(ctx, UPNP_DEFAULT_CLASS_MUSIC_TRACK); duk_put_global_string(ctx, "UPNP_CLASS_ITEM_MUSIC_TRACK");
+    duk_push_string(ctx, UPNP_DEFAULT_CLASS_VIDEO_ITEM); duk_put_global_string(ctx, "UPNP_CLASS_CONTAINER_ITEM_VIDEO");
+    duk_push_string(ctx, UPNP_DEFAULT_CLASS_IMAGE_ITEM); duk_put_global_string(ctx, "UPNP_CLASS_CONTAINER_ITEM_IMAGE");
+    duk_push_string(ctx, UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER); duk_put_global_string(ctx, "UPNP_CLASS_PLAYLIST_CONTAINER");
 
     defineFunctions(js_global_functions);
 
@@ -397,127 +221,51 @@ Script::Script(Ref<Runtime> runtime) : Object()
     {
         try
         {
-            common_script = _load(common_scr_path);
-            JS_AddNamedObjectRoot(cx, &common_script, "common-script");
-            _execute(common_script);
+            _load(common_scr_path);
+            _execute();
         }
         catch (const Exception & e)
         {
-            if (common_script)
-            {
-                JS_RemoveObjectRoot(cx, &common_script);
-            }
-
             log_js("Unable to load %s: %s\n", common_scr_path.c_str(), 
                     e.getMessage().c_str());
         }
     }
-#ifdef JS_THREADSAFE
-    JS_EndRequest(cx);
-    JS_ClearContextThread(cx);
-#endif
 }
-
-/*
-static intN map(void *rp, const char *name, void *data)
-{
-    return JS_MAP_GCROOT_NEXT;
-}
-*/
 
 Script::~Script()
 {
-#ifdef JS_THREADSAFE
-    JS_SetContextThread(cx);
-    JS_BeginRequest(cx);
-#endif
-    if (common_script)
-        JS_RemoveObjectRoot(cx, &common_script);
+    runtime->destroyContext(name);
+}
 
-/*
- * scripts are unrooted and will be cleaned up by GC
-    if (common_script)
-        JS_DestroyScript(cx, common_script);
-
-    if (script)
-        JS_DestroyScript(cx, script);
-*/       
-//    JS_MapGCRoots(rt, &map, NULL); // debug stuff
-#ifdef JS_THREADSAFE
-    JS_EndRequest(cx);
-//    JS_ClearContextThread(cx);
-#endif
-    if (cx)
+Script *Script::getContextScript(duk_context *ctx)
+{
+    duk_push_thread_stash(ctx, ctx);
+    duk_get_prop_string(ctx, -1, "this");
+    auto *self = (Script *)duk_get_pointer(ctx, -1);
+    duk_pop_2(ctx);
+    if (self == nullptr)
     {
-        JS_DestroyContext(cx);
-        cx = nullptr;
+        log_debug("Could not retrieve class instance from global object\n");
+        duk_error(ctx, DUK_ERR_ERROR, "Could not retrieve current script from stash");
     }
+    return self;
 }
 
-void Script::setGlobalObject(JSObject *glob)
+void Script::defineFunction(String name, duk_c_function function, uint32_t numParams)
 {
-    this->glob = glob;
-    JS_SetGlobalObject(cx, glob);
+    duk_push_c_function(ctx, function, numParams);
+    duk_put_global_string(ctx, name.c_str());
 }
 
-JSObject *Script::getGlobalObject()
+void Script::defineFunctions(duk_function_list_entry *functions)
 {
-    return glob;
+    duk_push_global_object(ctx);
+    duk_put_function_list(ctx, -1, functions);
+    duk_pop(ctx);
 }
 
-JSContext *Script::getContext()
+void Script::_load(zmm::String scriptPath)
 {
-    return cx;
-}
-
-void Script::initGlobalObject()
-{
-    /* define characteristics of the global class */
-    static JSClass global_class =
-    {
-        "global",                                   /* name */
-        JSCLASS_HAS_PRIVATE | JSCLASS_GLOBAL_FLAGS, /* flags */
-        JS_PropertyStub,                            /* add property */
-        JS_PropertyStub,                            /* del property */
-        JS_PropertyStub,                            /* get property */
-        JS_StrictPropertyStub,                      /* set property */
-        JS_EnumerateStandardClasses,                /* enumerate */
-        JS_ResolveStub,                             /* resolve */
-        JS_ConvertStub,                             /* convert */
-        JS_FinalizeStub,                            /* finalize */
-        JSCLASS_NO_OPTIONAL_MEMBERS
-    };
-
-    /* create the global object here */
-    glob = JS_NewCompartmentAndGlobalObject(cx, &global_class, nullptr);
-    if (! glob)
-        throw _Exception(_("Scripting: could not initialize glboal class"));
-
-    /* initialize the built-in JS objects and the global object */
-    if (! JS_InitStandardClasses(cx, glob))
-        throw _Exception(_("Scripting: JS_InitStandardClasses failed"));
-
-}
-
-void Script::defineFunction(String name, JSNative function, uint32_t numParams)
-{
-    if (! JS_DefineFunction(cx, glob, name.c_str(), function, numParams, 0))
-        throw _Exception(_("Scripting: JS_DefineFunction failed"));
-}
-
-void Script::defineFunctions(JSFunctionSpec *functions)
-{
-    if (! JS_DefineFunctions(cx, glob, functions))
-        throw _Exception(_("Scripting: JS_DefineFunctions failed"));
-}
-
-JSObject *Script::_load(zmm::String scriptPath)
-{
-    if (glob == nullptr)
-        initGlobalObject();
-
-    JSObject *scr;
-
     String scriptText = read_text_file(scriptPath);
 
     if (!string_ok(scriptText))
@@ -533,34 +281,41 @@ JSObject *Script::_load(zmm::String scriptPath)
         throw _Exception(_("Failed to convert import script:") + e.getMessage().c_str());
     }
 
-    scr = JS_CompileScript(cx, glob, scriptText.c_str(), scriptText.length(),
-            scriptPath.c_str(), 1);
-    if (! scr)
+    duk_push_string(ctx, scriptPath.c_str());
+    if (duk_pcompile_lstring_filename(ctx, 0, scriptText.c_str(), scriptText.length()) != 0)
         throw _Exception(_("Scripting: failed to compile ") + scriptPath);
-
-    return scr;
 }
 
 void Script::load(zmm::String scriptPath)
 {
-    script = _load((scriptPath));
+    AutoLock lock(runtime->getMutex());
+    duk_push_thread_stash(ctx, ctx);
+    _load(scriptPath);
+    duk_put_prop_string(ctx, -2, "script");
+    duk_pop(ctx);
 }
 
 
-void Script::_execute(JSObject *scr)
+void Script::_execute()
 {
-    jsval ret_val;
-
-    if (!JS_ExecuteScript(cx, glob, scr, &ret_val))
+    if (duk_pcall(ctx, 0) != DUK_EXEC_SUCCESS)
+    {
+        log_debug("Failed to execute script: %s\n", duk_safe_to_string(ctx, -1));
         throw _Exception(_("Script: failed to execute script"));
+    }
+    duk_pop(ctx);
 }
 
 void Script::execute()
 {
-    _execute(script);
+    AutoLock lock(runtime->getMutex());
+    duk_push_thread_stash(ctx, ctx);
+    duk_get_prop_string(ctx, -1, "script");
+    duk_remove(ctx, -2);
+    _execute();
 }
 
-Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
+Ref<CdsObject> Script::dukObject2cdsObject(zmm::Ref<CdsObject> pcd)
 {
     String val;
     int objectType;
@@ -575,7 +330,7 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
     else
         sc = StringConverter::i2i();
 
-    objectType = getIntProperty(js, _("objectType"), -1);
+    objectType = getIntProperty(_("objectType"), -1);
     if (objectType == -1)
     {
         log_error("missing objectType property\n");
@@ -590,17 +345,17 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
     // CdsObject
     obj->setVirtual(true); // JS creates only virtual objects
 
-    i = getIntProperty(js, _("id"), INVALID_OBJECT_ID);
+    i = getIntProperty(_("id"), INVALID_OBJECT_ID);
     if (i != INVALID_OBJECT_ID)
         obj->setID(i);
-    i = getIntProperty(js, _("refID"), INVALID_OBJECT_ID);
+    i = getIntProperty(_("refID"), INVALID_OBJECT_ID);
     if (i != INVALID_OBJECT_ID)
         obj->setRefID(i);
-    i = getIntProperty(js, _("parentID"), INVALID_OBJECT_ID);
+    i = getIntProperty(_("parentID"), INVALID_OBJECT_ID);
     if (i != INVALID_OBJECT_ID)
         obj->setParentID(i);
 
-    val = getProperty(js, _("title"));
+    val = getProperty(_("title"));
     if (val != nullptr)
     {
         val = sc->convert(val);
@@ -612,7 +367,7 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
             obj->setTitle(pcd->getTitle());
     }
 
-    val = getProperty(js, _("upnpclass"));
+    val = getProperty(_("upnpclass"));
     if (val != nullptr)
     {
         val = sc->convert(val);
@@ -624,18 +379,18 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
             obj->setClass(pcd->getClass());
     }
 
-    b = getBoolProperty(js, _("restricted"));
+    b = getBoolProperty(_("restricted"));
     if (b >= 0)
         obj->setRestricted(b);
-   
-    JSObject *js_meta = getObjectProperty(js, _("meta"));
-    if (js_meta)
+
+    duk_get_prop_string(ctx, -1, "meta");
+    if (duk_is_object(ctx, -1))
     {
-        JS_AddNamedObjectRoot(cx, &js_meta, "meta");
+        duk_to_object(ctx, -1);
         /// \todo: only metadata enumerated in MT_KEYS is taken
         for (int i = 0; i < M_MAX; i++)
         {
-            val = getProperty(js_meta, _(MT_KEYS[i].upnp));
+            val = getProperty(_(MT_KEYS[i].upnp));
             if (val != nullptr)
             {
                 if (i == M_TRACKNUMBER)
@@ -656,9 +411,9 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
                 }
             }
         }
-        JS_RemoveObjectRoot(cx, &js_meta);
     }
-    
+    duk_pop(ctx);
+
     // stuff that has not been exported to js
     if (pcd != nullptr)
     {
@@ -676,7 +431,7 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
         if (pcd != nullptr)
             pcd_item = RefCast(pcd, CdsItem);
 
-        val = getProperty(js, _("mimetype"));
+        val = getProperty(_("mimetype"));
         if (val != nullptr)
         {
             val = sc->convert(val);
@@ -688,7 +443,7 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
                 item->setMimeType(pcd_item->getMimeType());
         }
 
-        val = getProperty(js, _("serviceID"));
+        val = getProperty(_("serviceID"));
         if (val != nullptr)
         {
             val = sc->convert(val);
@@ -697,7 +452,7 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
 
         /// \todo check what this is doing here, wasn't it already handled
         /// in the MT_KEYS loop?
-        val = getProperty(js, _("description"));
+        val = getProperty(_("description"));
         if (val != nullptr)
         {
             val = sc->convert(val);
@@ -711,14 +466,14 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
         }
         if (this->whoami() == S_PLAYLIST)
         {
-            item->setTrackNumber(getIntProperty(js, _("playlistOrder"), 0));
+            item->setTrackNumber(getIntProperty(_("playlistOrder"), 0));
         }
 
         // location must not be touched by character conversion!
-        val = getProperty(js, _("location"));
+        val = getProperty(_("location"));
         if ((val != nullptr) && (IS_CDS_PURE_ITEM(objectType) || IS_CDS_ACTIVE_ITEM(objectType)))
             val = normalizePath(val);
-        
+
         if (string_ok(val))
             obj->setLocation(val);
         else
@@ -734,7 +489,7 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
             if (pcd != nullptr)
                 pcd_aitem = RefCast(pcd, CdsActiveItem);
           /// \todo what about character conversion for action and state fields?
-            val = getProperty(js, _("action"));
+            val = getProperty(_("action"));
             if (val != nullptr)
                 aitem->setAction(val);
             else
@@ -743,7 +498,7 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
                     aitem->setAction(pcd_aitem->getAction());
             }
 
-            val = getProperty(js, _("state"));
+            val = getProperty(_("state"));
             if (val != nullptr)
                 aitem->setState(val);
             else
@@ -759,7 +514,7 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
 
             obj->setRestricted(true);
             Ref<CdsItemExternalURL> item = RefCast(obj, CdsItemExternalURL);
-            val = getProperty(js, _("protocol"));
+            val = getProperty(_("protocol"));
             if (val != nullptr)
             {
                 val = sc->convert(val);
@@ -785,11 +540,11 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
     if (IS_CDS_CONTAINER(objectType))
     {
         Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
-        i = getIntProperty(js, _("updateID"), -1);
+        i = getIntProperty(_("updateID"), -1);
         if (i >= 0)
             cont->setUpdateID(i);
 
-        b = getBoolProperty(js, _("searchable"));
+        b = getBoolProperty(_("searchable"));
         if (b >= 0)
             cont->setSearchable(b);
     }
@@ -797,80 +552,87 @@ Ref<CdsObject> Script::jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd)
     return obj;
 }
 
-void Script::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
+void Script::cdsObject2dukObject(Ref<CdsObject> obj)
 {
     String val;
     int i;
 
+    duk_push_object(ctx);
+
     int objectType = obj->getObjectType();
 
     // CdsObject
-    setIntProperty(js, _("objectType"), objectType);
+    setIntProperty(_("objectType"), objectType);
 
     i = obj->getID();
 
     if (i != INVALID_OBJECT_ID)
-        setIntProperty(js, _("id"), i);
+        setIntProperty(_("id"), i);
 
     i = obj->getParentID();
     if (i != INVALID_OBJECT_ID)
-        setIntProperty(js, _("parentID"), i);
+        setIntProperty(_("parentID"), i);
 
     val = obj->getTitle();
     if (val != nullptr)
-        setProperty(js, _("title"), val);
+        setProperty(_("title"), val);
 
     val = obj->getClass();
     if (val != nullptr)
-        setProperty(js, _("upnpclass"), val);
+        setProperty(_("upnpclass"), val);
 
     val = obj->getLocation();
     if (val != nullptr)
-        setProperty(js, _("location"), val);
+        setProperty(_("location"), val);
 
-    setIntProperty(js, _("mtime"), (int)obj->getMTime());
-    setIntProperty(js, _("sizeOnDisk"), (int)obj->getSizeOnDisk());
+    setIntProperty(_("mtime"), (int)obj->getMTime());
+    setIntProperty(_("sizeOnDisk"), (int)obj->getSizeOnDisk());
 
     // TODO: boolean type
     i = obj->isRestricted();
-    setIntProperty(js, _("restricted"), i);
+    setIntProperty(_("restricted"), i);
 
     if (obj->getFlag(OBJECT_FLAG_OGG_THEORA))
-        setIntProperty(js, _("theora"), 1);
+        setIntProperty(_("theora"), 1);
     else
-        setIntProperty(js, _("theora"), 0);
+        setIntProperty(_("theora"), 0);
 
 #ifdef ONLINE_SERVICES
     if (obj->getFlag(OBJECT_FLAG_ONLINE_SERVICE))
     {
          service_type_t service = (service_type_t)(obj->getAuxData(_(ONLINE_SERVICE_AUX_ID)).toInt());
-        setIntProperty(js, _("onlineservice"), (int)service);
+        setIntProperty(_("onlineservice"), (int)service);
     }
     else
 #endif
-        setIntProperty(js, _("onlineservice"), 0);
+        setIntProperty(_("onlineservice"), 0);
 
     // setting metadata
     {
-        JSObject *meta_js = JS_NewObject(cx, nullptr, nullptr, js);
-        setObjectProperty(js, _("meta"), meta_js);
+        duk_push_object(ctx);
+        // stack: js meta_js
+
         Ref<Dictionary> meta = obj->getMetadata();
         Ref<Array<DictionaryElement> > elements = meta->getElements();
         int len = elements->size();
         for (int i = 0; i < len; i++)
         {
             Ref<DictionaryElement> el = elements->get(i);
-            setProperty(meta_js, el->getKey(), el->getValue());
+            setProperty(el->getKey(), el->getValue());
         }
 
         if (RefCast(obj, CdsItem)->getTrackNumber() > 0)
-            setProperty(meta_js, MetadataHandler::getMetaFieldName(M_TRACKNUMBER), String::from(RefCast(obj, CdsItem)->getTrackNumber())); 
+            setProperty(MetadataHandler::getMetaFieldName(M_TRACKNUMBER), String::from(RefCast(obj, CdsItem)->getTrackNumber()));
+
+        duk_put_prop_string(ctx, -2, "meta");
+        // stack: js
     }
 
     // setting auxdata
     {
-        JSObject *aux_js = JS_NewObject(cx, nullptr, nullptr, js);
-        setObjectProperty(js, _("aux"), aux_js);
+        duk_push_object(ctx);
+        // stack: js aux_js
+
         Ref<Dictionary> aux = obj->getAuxData();
 
 #ifdef YOUTUBE
@@ -923,7 +685,9 @@ void Script::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
             else if (req == YT_subrequest_subscriptions)
                 req = YT_request_user_subscriptions;
 
-            setIntProperty(js, _("yt_request"), (int)req);
+            duk_swap_top(ctx, -2);
+            setIntProperty(_("yt_request"), (int)req);
+            duk_swap_top(ctx, -2);
             tmp = YouTubeService::getRequestName(req);
             if (string_ok(tmp))
                 aux->put(_(YOUTUBE_AUXDATA_REQUEST), tmp);
@@ -941,7 +705,7 @@ void Script::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
             }
         }
 #endif // YouTube
-#ifdef HAVE_ATRAILERSSSS
+#ifdef HAVE_ATRAILERS
         tmp = obj->getAuxData(_(ATRAILERS_AUXDATA_POST_DATE));
         if (string_ok(tmp))
             aux->put(_(ATRAILERS_AUXDATA_POST_DATE), tmp);
@@ -952,8 +716,11 @@ void Script::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
         for (int i = 0; i < len; i++)
         {
             Ref<DictionaryElement> el = elements->get(i);
-            setProperty(aux_js, el->getKey(), el->getValue());
+            setProperty(el->getKey(), el->getValue());
         }
+
+        duk_put_prop_string(ctx, -2, "aux");
+        // stack: js
     }
 
 
@@ -965,21 +732,21 @@ void Script::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
         Ref<CdsItem> item = RefCast(obj, CdsItem);
         val = item->getMimeType();
         if (val != nullptr)
-            setProperty(js, _("mimetype"), val);
+            setProperty(_("mimetype"), val);
 
         val = item->getServiceID();
         if (val != nullptr)
-            setProperty(js, _("serviceID"), val);
+            setProperty(_("serviceID"), val);
 
         if (IS_CDS_ACTIVE_ITEM(objectType))
         {
             Ref<CdsActiveItem> aitem = RefCast(obj, CdsActiveItem);
             val = aitem->getAction();
             if (val != nullptr)
-                setProperty(js, _("action"), val);
+                setProperty(_("action"), val);
             val = aitem->getState();
             if (val != nullptr)
-                setProperty(js, _("state"), val);
+                setProperty(_("state"), val);
         }
     }
 
@@ -989,10 +756,10 @@ void Script::cdsObject2jsObject(Ref<CdsObject> obj, JSObject *js)
         Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
         // TODO: boolean type, hide updateID
         i = cont->getUpdateID();
-        setIntProperty(js, _("updateID"), i);
+        setIntProperty(_("updateID"), i);
 
         i = cont->isSearchable();
-        setIntProperty(js, _("searchable"), i);
+        setIntProperty(_("searchable"), i);
     }
 }
 

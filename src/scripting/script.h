@@ -32,7 +32,8 @@
 #ifndef __SCRIPTING_SCRIPT_H__
 #define __SCRIPTING_SCRIPT_H__
 
-#include <jsapi.h>
+#include <mutex>
+#include "duktape.h"
 #include "common.h"
 #include "runtime.h"
 #include "cds_objects.h"
@@ -60,39 +61,24 @@ class Script : public zmm::Object
 {
 public:
     zmm::Ref<Runtime> runtime;
-    JSRuntime *rt;
-    JSContext *cx;
-    JSObject  *glob;
-    JSObject *script;
-    JSObject *common_script;
     
 public:
-    Script(zmm::Ref<Runtime> runtime);
     virtual ~Script();
     
-    zmm::String getProperty(JSObject *obj, zmm::String name);
-    int getBoolProperty(JSObject *obj, zmm::String name);
-    int getIntProperty(JSObject *obj, zmm::String name, int def);
-    JSObject *getObjectProperty(JSObject *obj, zmm::String name);
+    zmm::String getProperty(zmm::String name);
+    int getBoolProperty(zmm::String name);
+    int getIntProperty(zmm::String name, int def);
     
-    void setProperty(JSObject *obj, zmm::String name, zmm::String value);
-    void setIntProperty(JSObject *obj, zmm::String name, int value);
-    void setObjectProperty(JSObject *parent, zmm::String name, JSObject *obj);
+    void setProperty(zmm::String name, zmm::String value);
+    void setIntProperty(zmm::String name, int value);
     
-    void deleteProperty(JSObject *obj, zmm::String name);
-    
-    JSObject *getGlobalObject();
-    void setGlobalObject(JSObject *glob);
-    
-    JSContext *getContext();
-    
-    void defineFunction(zmm::String name, JSNative function, uint32_t numParams);
-    void defineFunctions(JSFunctionSpec *functions);
+    void defineFunction(zmm::String name, duk_c_function function, uint32_t numParams);
+    void defineFunctions(duk_function_list_entry *functions);
     void load(zmm::String scriptPath);
     void load(zmm::String scriptText, zmm::String scriptPath);
     
-    zmm::Ref<CdsObject> jsObject2cdsObject(JSObject *js, zmm::Ref<CdsObject> pcd);
-    void cdsObject2jsObject(zmm::Ref<CdsObject> obj, JSObject *js);
+    zmm::Ref<CdsObject> dukObject2cdsObject(zmm::Ref<CdsObject> pcd);
+    void cdsObject2dukObject(zmm::Ref<CdsObject> obj);
     
     virtual script_class_t whoami() = 0;
 
@@ -100,7 +86,10 @@ public:
 
     zmm::String convertToCharset(zmm::String str, charset_convert_t chr);
     
+    static Script *getContextScript(duk_context *ctx);
+
 protected:
+    Script(zmm::Ref<Runtime> runtime, std::string name);
     void execute();
     int gc_counter;
 
@@ -108,12 +97,13 @@ protected:
     // script)
     zmm::Ref<CdsObject> processed;
     
-private:
-    JSObject *common_root;
+    using AutoLock = std::lock_guard<std::recursive_mutex>;
+    duk_context *ctx;
 
-    void initGlobalObject();
-    JSObject *_load(zmm::String scriptPath);
-    void _execute(JSObject *scr);
+private:
+    std::string name;
+    void _load(zmm::String scriptPath);
+    void _execute();
     zmm::Ref<StringConverter> _p2i;
     zmm::Ref<StringConverter> _j2i;
     zmm::Ref<StringConverter> _f2i;

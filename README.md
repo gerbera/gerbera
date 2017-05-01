@@ -106,7 +106,6 @@ make install
 | sqlite3      	|         	| Required  	|                      	    |
 | mysql        	|         	| Optional  	| Client Libs          	    |
 | curl         	|         	| Optional  	| Enables web services 	    |
-| spidermonkey 	| 1.8.5   	| Optional  	| Enables scripting         |
 | [taglib]      | 1.11    	| Optional  	| Audio tag support         |
 | libmagic     	|         	| Optional  	| File type detection  	    |
 | ffmpeg/libav 	|         	| Optional  	| File metadata             |
