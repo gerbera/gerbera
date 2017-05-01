@@ -40,15 +40,15 @@
 #define INVALID_SCAN_ID -1
 
 ///\brief Scan level - the way how exactly directories should be scanned.
-enum scan_level_t {
-    BasicScanLevel, // file was added or removed from the directory
-    FullScanLevel // file was modified/added/removed
+enum class ScanLevel {
+    Basic, // file was added or removed from the directory
+    Full // file was modified/added/removed
 };
 
 ///\brief Scan mode - type of scan (timed, inotify, fam, etc.)
-enum scan_mode_t {
-    TimedScanMode,
-    InotifyScanMode
+enum class ScanMode {
+    Timed,
+    INotify
 };
 
 class AutoscanDirectory;
@@ -141,8 +141,8 @@ public:
     /// \param interval rescan interval in seconds (only for timed scan mode)
     /// \param hidden include hidden files
     /// zero means none.
-    AutoscanDirectory(zmm::String location, scan_mode_t mode,
-        scan_level_t level, bool recursive,
+    AutoscanDirectory(zmm::String location, ScanMode mode,
+        ScanLevel level, bool recursive,
         bool persistent,
         int id = INVALID_SCAN_ID, unsigned int interval = 0, bool hidden = false);
 
@@ -155,13 +155,13 @@ public:
 
     zmm::String getLocation() { return location; }
 
-    scan_mode_t getScanMode() { return mode; }
+    ScanMode getScanMode() { return mode; }
 
-    void setScanMode(scan_mode_t mode) { this->mode = mode; }
+    void setScanMode(ScanMode mode) { this->mode = mode; }
 
-    scan_level_t getScanLevel() { return level; }
+    ScanLevel getScanLevel() { return level; }
 
-    void setScanLevel(scan_level_t level) { this->level = level; }
+    void setScanLevel(ScanLevel level) { this->level = level; }
 
     bool getRecursive() { return recursive; }
 
@@ -239,15 +239,15 @@ public:
     //    bool equals(Ref<AutoscanDirectory> dir);
 
     /* helpers for autoscan stuff */
-    static zmm::String mapScanmode(scan_mode_t scanmode);
-    static scan_mode_t remapScanmode(zmm::String scanmode);
-    static zmm::String mapScanlevel(scan_level_t scanlevel);
-    static scan_level_t remapScanlevel(zmm::String scanlevel);
+    static zmm::String mapScanmode(ScanMode scanmode);
+    static ScanMode remapScanmode(zmm::String scanmode);
+    static zmm::String mapScanlevel(ScanLevel scanlevel);
+    static ScanLevel remapScanlevel(zmm::String scanlevel);
 
 protected:
     zmm::String location;
-    scan_mode_t mode;
-    scan_level_t level;
+    ScanMode mode;
+    ScanLevel level;
     bool recursive;
     bool hidden;
     bool persistent_flag;

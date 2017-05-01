@@ -291,7 +291,7 @@ void AutoscanInotify::threadProc()
                                 if (adir->persistent())
                                 {
                                     monitorNonexisting(path, watch->getAutoscanDirectory(), watch->getNormalizedAutoscanPath());
-                                    cm->handlePeristentAutoscanRemove(adir->getScanID(), InotifyScanMode);
+                                    cm->handlePeristentAutoscanRemove(adir->getScanID(), ScanMode::INotify);
                                 }
                             }
                         }
@@ -330,7 +330,7 @@ void AutoscanInotify::monitor(zmm::Ref<AutoscanDirectory> dir)
 {
     if (shutdownFlag)
         init();
-    assert(dir->getScanMode() == InotifyScanMode);
+    assert(dir->getScanMode() == ScanMode::INotify);
     log_debug("---> INCOMING REQUEST TO MONITOR [%s]\n", 
             dir->getLocation().c_str());
     AutoLock lock(mutex);
@@ -494,7 +494,7 @@ void AutoscanInotify::checkMoveWatches(int wd, Ref<Wd> wdObj)
                     if (adir->persistent())
                     {
                         monitorNonexisting(path, adir, watch->getNormalizedAutoscanPath());
-                        cm->handlePeristentAutoscanRemove(adir->getScanID(), InotifyScanMode);
+                        cm->handlePeristentAutoscanRemove(adir->getScanID(), ScanMode::INotify);
                     }
 
                     int objectID = Storage::getInstance()->findObjectIDByPath(path);

@@ -1723,7 +1723,7 @@ void SQLStorage::storeInternalSetting(String key, String value)
 overwritten due to different SQL syntax for MySQL and SQLite3
 */
 
-void SQLStorage::updateAutoscanPersistentList(scan_mode_t scanmode, Ref<AutoscanList> list)
+void SQLStorage::updateAutoscanPersistentList(ScanMode scanmode, Ref<AutoscanList> list)
 {
 
     log_debug("setting persistent autoscans untouched - scanmode: %s;\n", AutoscanDirectory::mapScanmode(scanmode).c_str());
@@ -1782,7 +1782,7 @@ void SQLStorage::updateAutoscanPersistentList(scan_mode_t scanmode, Ref<Autoscan
     exec(q);
 }
 
-Ref<AutoscanList> SQLStorage::getAutoscanList(scan_mode_t scanmode)
+Ref<AutoscanList> SQLStorage::getAutoscanList(ScanMode scanmode)
 {
 #define FLD(field) << TQD('a', field) <<
     Ref<StringBuffer> q(new StringBuffer());
@@ -1844,13 +1844,13 @@ Ref<AutoscanDirectory> SQLStorage::_fillAutoscanDirectory(Ref<SQLRow> row)
             return nullptr;
     }
 
-    scan_level_t level = AutoscanDirectory::remapScanlevel(row->col(2));
-    scan_mode_t mode = AutoscanDirectory::remapScanmode(row->col(3));
+    ScanLevel level = AutoscanDirectory::remapScanlevel(row->col(2));
+    ScanMode mode = AutoscanDirectory::remapScanmode(row->col(3));
     bool recursive = remapBool(row->col(4));
     bool hidden = remapBool(row->col(5));
     bool persistent = remapBool(row->col(8));
     int interval = 0;
-    if (mode == TimedScanMode)
+    if (mode == ScanMode::Timed)
         interval = row->col(6).toInt();
     time_t last_modified = row->col(7).toLong();
 

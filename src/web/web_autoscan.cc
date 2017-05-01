@@ -117,11 +117,11 @@ void web::autoscan::process()
             bool hidden = boolParam(_("hidden"));
             //bool persistent = boolParam(_("persistent"));
             
-            scan_mode_t scan_mode = AutoscanDirectory::remapScanmode(scan_mode_str);
-            scan_level_t scan_level;
+            ScanMode scan_mode = AutoscanDirectory::remapScanmode(scan_mode_str);
+            ScanLevel scan_level;
             scan_level = AutoscanDirectory::remapScanlevel(param(_("scan_level")));
             int interval = intParam(_("interval"), 0);
-            if (scan_mode == TimedScanMode && interval <= 0)
+            if (scan_mode == ScanMode::Timed && interval <= 0)
                 throw _Exception(_("illegal interval given"));
             
             int objectID = INVALID_OBJECT_ID;

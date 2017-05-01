@@ -1540,7 +1540,7 @@ void ConfigManager::validate(String serverhome)
 
     el = getElement(_("/import/autoscan"));
 
-    NEW_AUTOSCANLIST_OPTION(createAutoscanListFromNodeset(el, TimedScanMode));
+    NEW_AUTOSCANLIST_OPTION(createAutoscanListFromNodeset(el, ScanMode::Timed));
     SET_AUTOSCANLIST_OPTION(CFG_IMPORT_AUTOSCAN_TIMED_LIST);
 
 #ifdef HAVE_INOTIFY
@@ -1566,7 +1566,7 @@ void ConfigManager::validate(String serverhome)
 #ifdef HAVE_INOTIFY
     if (temp == _("auto") || (temp == _(YES))) {
         if (inotify_supported) {
-            NEW_AUTOSCANLIST_OPTION(createAutoscanListFromNodeset(el, InotifyScanMode));
+            NEW_AUTOSCANLIST_OPTION(createAutoscanListFromNodeset(el, ScanMode::INotify));
             SET_AUTOSCANLIST_OPTION(CFG_IMPORT_AUTOSCAN_INOTIFY_LIST);
 
             NEW_BOOL_OPTION(true);
@@ -1868,8 +1868,8 @@ void ConfigManager::validate(String serverhome)
 
 #ifdef HAVE_INOTIFY
     tmpEl = getElement(_("/import/autoscan"));
-    Ref<AutoscanList> config_timed_list = createAutoscanListFromNodeset(tmpEl, TimedScanMode);
-    Ref<AutoscanList> config_inotify_list = createAutoscanListFromNodeset(tmpEl, InotifyScanMode);
+    Ref<AutoscanList> config_timed_list = createAutoscanListFromNodeset(tmpEl, ScanMode::Timed);
+    Ref<AutoscanList> config_inotify_list = createAutoscanListFromNodeset(tmpEl, ScanMode::INotify);
 
     for (int i = 0; i < config_inotify_list->size(); i++) {
         Ref<AutoscanDirectory> i_dir = config_inotify_list->get(i);
@@ -2630,7 +2630,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
 }
 #endif //TRANSCODING
 
-Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::Element> element, scan_mode_t scanmode)
+Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::Element> element, ScanMode scanmode)
 {
     Ref<AutoscanList> list(new AutoscanList());
 
@@ -2660,14 +2660,14 @@ Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::El
             throw _Exception(_("autoscan ") + location + " - not a directory!");
         }
 
-        scan_mode_t mode;
+        ScanMode mode;
         String temp = child->getAttribute(_("mode"));
         if (!string_ok(temp) || ((temp != "timed") && (temp != "inotify"))) {
             throw _Exception(_("autoscan directory ") + location + ": mode attribute is missing or invalid");
         } else if (temp == "timed") {
-            mode = TimedScanMode;
+            mode = ScanMode::Timed;
         } else {
-            mode = InotifyScanMode;
+            mode = ScanMode::INotify;
         }
 
         if (mode != scanmode) {
@@ -2675,18 +2675,18 @@ Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::El
         }
 
         unsigned int interval = 0;
-        scan_level_t level;
+        ScanLevel level;
 
 
-        if (mode == TimedScanMode) {
+        if (mode == ScanMode::Timed) {
             temp = child->getAttribute(_("level"));
             if (!string_ok(temp)) {
                 throw _Exception(_("autoscan directory ") + location + ": level attribute is missing or invalid");
             } else {
                 if (temp == "basic")
-                    level = BasicScanLevel;
+                    level = ScanLevel::Basic;
                 else if (temp == "full")
-                    level = FullScanLevel;
+                    level = ScanLevel::Full;
                 else {
                     throw _Exception(_("autoscan directory ")
                         + location + ": level attribute " + temp + "is invalid");
@@ -2708,7 +2708,7 @@ Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::El
         } else {
             // level is irrelevant for inotify scan, nevertheless we will set
             // it to something valid
-            level = FullScanLevel;
+            level = ScanLevel::Full;
         }
 
         temp = child->getAttribute(_("recursive"));

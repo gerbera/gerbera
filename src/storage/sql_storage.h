@@ -128,8 +128,8 @@ public:
     virtual zmm::String getInternalSetting(zmm::String key) override;
     virtual void storeInternalSetting(zmm::String key, zmm::String value) override = 0;
     
-    virtual void updateAutoscanPersistentList(scan_mode_t scanmode, zmm::Ref<AutoscanList> list) override;
-    virtual zmm::Ref<AutoscanList> getAutoscanList(scan_mode_t scanmode) override;
+    virtual void updateAutoscanPersistentList(ScanMode scanmode, zmm::Ref<AutoscanList> list) override;
+    virtual zmm::Ref<AutoscanList> getAutoscanList(ScanMode scanmode) override;
     virtual void addAutoscanDirectory(zmm::Ref<AutoscanDirectory> adir) override;
     virtual void updateAutoscanDirectory(zmm::Ref<AutoscanDirectory> adir) override;
     virtual void removeAutoscanDirectoryByObjectID(int objectID) override;

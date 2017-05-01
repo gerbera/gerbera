@@ -346,7 +346,7 @@ protected:
     /// \brief Creates an array of AutoscanDirectory objects from a XML nodeset.
     /// \param element starting element of the nodeset.
     /// \param scanmode add only directories with the specified scanmode to the array
-    zmm::Ref<AutoscanList> createAutoscanListFromNodeset(zmm::Ref<mxml::Element> element, scan_mode_t scanmode);
+    zmm::Ref<AutoscanList> createAutoscanListFromNodeset(zmm::Ref<mxml::Element> element, ScanMode scanmode);
   
 #ifdef EXTERNAL_TRANSCODING
     /// \brief Creates ab aray of TranscodingProfile objects from an XML 

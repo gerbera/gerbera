@@ -46,8 +46,8 @@ AutoscanDirectory::AutoscanDirectory()
     timer_parameter = Ref<Timer::Parameter>(new Timer::Parameter(Timer::Parameter::IDAutoscan, INVALID_SCAN_ID));
 }
 
-AutoscanDirectory::AutoscanDirectory(String location, scan_mode_t mode,
-    scan_level_t level, bool recursive, bool persistent,
+AutoscanDirectory::AutoscanDirectory(String location, ScanMode mode,
+    ScanLevel level, bool recursive, bool persistent,
     int id, unsigned int interval, bool hidden)
     : location(location)
     , mode(mode)
@@ -292,54 +292,54 @@ void AutoscanDirectory::setScanID(int id)
     timer_parameter->setID(id);
 }
 
-String AutoscanDirectory::mapScanmode(scan_mode_t scanmode)
+String AutoscanDirectory::mapScanmode(ScanMode scanmode)
 {
     String scanmode_str = nullptr;
     switch (scanmode) {
-    case TimedScanMode:
+        case ScanMode::Timed:
         scanmode_str = _("timed");
         break;
-    case InotifyScanMode:
+    case ScanMode::INotify:
         scanmode_str = _("inotify");
         break;
     }
     if (scanmode_str == nullptr)
-        throw Exception(_("illegal scanmode given to mapScanmode(): ") + scanmode);
+        throw Exception(_("illegal scanmode given to mapScanmode()"));
     return scanmode_str;
 }
 
-scan_mode_t AutoscanDirectory::remapScanmode(String scanmode)
+ScanMode AutoscanDirectory::remapScanmode(String scanmode)
 {
     if (scanmode == "timed")
-        return TimedScanMode;
+        return ScanMode::Timed;
     if (scanmode == "inotify")
-        return InotifyScanMode;
+        return ScanMode::INotify;
     else
         throw _Exception(_("illegal scanmode (") + scanmode + ") given to remapScanmode()");
 }
 
-String AutoscanDirectory::mapScanlevel(scan_level_t scanlevel)
+String AutoscanDirectory::mapScanlevel(ScanLevel scanlevel)
 {
     String scanlevel_str = nullptr;
     switch (scanlevel) {
-    case BasicScanLevel:
+    case ScanLevel::Basic:
         scanlevel_str = _("basic");
         break;
-    case FullScanLevel:
+    case ScanLevel::Full:
         scanlevel_str = _("full");
         break;
     }
     if (scanlevel_str == nullptr)
-        throw Exception(_("illegal scanlevel given to mapScanlevel(): ") + scanlevel);
+        throw Exception(_("illegal scanlevel given to mapScanlevel()"));
     return scanlevel_str;
 }
 
-scan_level_t AutoscanDirectory::remapScanlevel(String scanlevel)
+ScanLevel AutoscanDirectory::remapScanlevel(String scanlevel)
 {
     if (scanlevel == "basic")
-        return BasicScanLevel;
+        return ScanLevel::Basic;
     else if (scanlevel == "full")
-        return FullScanLevel;
+        return ScanLevel::Full;
     else
         throw _Exception(_("illegal scanlevel (") + scanlevel + ") given to remapScanlevel()");
 }

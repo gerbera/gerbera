@@ -114,9 +114,9 @@ class CMRescanDirectoryTask : public GenericTask
 protected: 
     int objectID;
     int scanID;
-    scan_mode_t scanMode;
+    ScanMode scanMode;
 public:
-    CMRescanDirectoryTask(int objectID, int scanID, scan_mode_t scanMode,
+    CMRescanDirectoryTask(int objectID, int scanID, ScanMode scanMode,
                           bool cancellable);
     virtual void run() override;
 };
@@ -215,7 +215,7 @@ public:
 
     int ensurePathExistence(zmm::String path);
     void removeObject(int objectID, bool async=true, bool all=false);
-    void rescanDirectory(int objectID, int scanID, scan_mode_t scanMode,
+    void rescanDirectory(int objectID, int scanID, ScanMode scanMode,
                          zmm::String descPath = nullptr, bool cancellable = true);
 
     /// \brief Updates an object in the database using the given parameters.
@@ -291,12 +291,12 @@ public:
     zmm::Ref<CdsObject> convertObject(zmm::Ref<CdsObject> obj, int objectType);
 
     /// \brief Gets an AutocsanDirectrory from the watch list.
-    zmm::Ref<AutoscanDirectory> getAutoscanDirectory(int scanID, scan_mode_t scanMode);
+    zmm::Ref<AutoscanDirectory> getAutoscanDirectory(int scanID, ScanMode scanMode);
 
     /// \brief Get an AutoscanDirectory given by location on disk from the watch list.
     zmm::Ref<AutoscanDirectory> getAutoscanDirectory(zmm::String location);
     /// \brief Removes an AutoscanDirectrory (found by scanID) from the watch list.
-    void removeAutoscanDirectory(int scanID, scan_mode_t scanMode);
+    void removeAutoscanDirectory(int scanID, ScanMode scanMode);
 
     /// \brief Removes an AutoscanDirectrory (found by location) from the watch list.
     void removeAutoscanDirectory(zmm::String location);
@@ -309,13 +309,13 @@ public:
     void setAutoscanDirectory(zmm::Ref<AutoscanDirectory> dir);
 
     /// \brief handles the removal of a persistent autoscan directory
-    void handlePeristentAutoscanRemove(int scanID, scan_mode_t scanMode);
+    void handlePeristentAutoscanRemove(int scanID, ScanMode scanMode);
 
     /// \brief handles the recreation of a persistent autoscan directory
-    void handlePersistentAutoscanRecreate(int scanID, scan_mode_t scanMode);
+    void handlePersistentAutoscanRecreate(int scanID, ScanMode scanMode);
 
     /// \brief returns an array of autoscan directories for the given scan mode
-    zmm::Ref<zmm::Array<AutoscanDirectory> > getAutoscanDirectories(scan_mode_t scanMode);
+    zmm::Ref<zmm::Array<AutoscanDirectory> > getAutoscanDirectories(ScanMode scanMode);
 
     /// \brief returns an array of all autoscan directories 
     zmm::Ref<zmm::Array<AutoscanDirectory> > getAutoscanDirectories();
@@ -384,7 +384,7 @@ protected:
     //void _addFile2(zmm::String path, bool recursive=0);
     void _removeObject(int objectID, bool all);
     
-    void _rescanDirectory(int containerID, int scanID, scan_mode_t scanMode, scan_level_t scanLevel, zmm::Ref<GenericTask> task=nullptr);
+    void _rescanDirectory(int containerID, int scanID, ScanMode scanMode, ScanLevel scanLevel, zmm::Ref<GenericTask> task=nullptr);
     /* for recursive addition */
     void addRecursive(zmm::String path, bool hidden, zmm::Ref<GenericTask> task);
     //void addRecursive2(zmm::Ref<DirCache> dirCache, zmm::String filename, bool recursive);

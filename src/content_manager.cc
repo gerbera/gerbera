@@ -150,8 +150,8 @@ ContentManager::ContentManager()
     }
 
     Ref<Storage> storage = Storage::getInstance();
-    storage->updateAutoscanPersistentList(TimedScanMode, config_timed_list);
-    autoscan_timed = storage->getAutoscanList(TimedScanMode);
+    storage->updateAutoscanPersistentList(ScanMode::Timed, config_timed_list);
+    autoscan_timed = storage->getAutoscanList(ScanMode::Timed);
 
 #ifdef HAVE_INOTIFY
     if (cm->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
@@ -167,9 +167,9 @@ ContentManager::ContentManager()
             }
         }
 
-        storage->updateAutoscanPersistentList(InotifyScanMode,
+        storage->updateAutoscanPersistentList(ScanMode::INotify,
             config_inotify_list);
-        autoscan_inotify = storage->getAutoscanList(InotifyScanMode);
+        autoscan_inotify = storage->getAutoscanList(ScanMode::INotify);
     } else {
         // make an empty list so we do not have to do extra checks on shutdown
         autoscan_inotify = Ref<AutoscanList>(new AutoscanList());
@@ -608,7 +608,7 @@ int ContentManager::ensurePathExistence(zmm::String path)
     return containerID;
 }
 
-void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t scanMode, scan_level_t scanLevel, Ref<GenericTask> task)
+void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scanMode, ScanLevel scanLevel, Ref<GenericTask> task)
 {
     log_debug("start\n");
     int ret;
@@ -738,7 +738,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
                 if (list != nullptr)
                     list->erase(objectID);
 
-                if (scanLevel == FullScanLevel) {
+                if (scanLevel == ScanLevel::Full) {
                     // check modification time and update file if chagned
                     if (last_modified_current_max < statbuf.st_mtime) {
                         // readd object - we have to do this in order to trigger
@@ -748,7 +748,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, scan_mode_t s
                         // update time variable
                         last_modified_current_max = statbuf.st_mtime;
                     }
-                } else if (scanLevel == BasicScanLevel)
+                } else if (scanLevel == ScanLevel::Basic)
                     continue;
                 else
                     throw _Exception(_("Unsupported scan level!"));
@@ -1572,7 +1572,7 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
     }
 }
 
-void ContentManager::rescanDirectory(int objectID, int scanID, scan_mode_t scanMode, String descPath, bool cancellable)
+void ContentManager::rescanDirectory(int objectID, int scanID, ScanMode scanMode, String descPath, bool cancellable)
 {
     // building container path for the description
     Ref<GenericTask> task(new CMRescanDirectoryTask(objectID, scanID, scanMode, cancellable));
@@ -1582,7 +1582,7 @@ void ContentManager::rescanDirectory(int objectID, int scanID, scan_mode_t scanM
 
     dir->incTaskCount();
     String level;
-    if (dir->getScanLevel() == BasicScanLevel)
+    if (dir->getScanLevel() == ScanLevel::Basic)
         level = _("basic");
     else
         level = _("full");
@@ -1594,28 +1594,28 @@ void ContentManager::rescanDirectory(int objectID, int scanID, scan_mode_t scanM
     addTask(task, true); // adding with low priority
 }
 
-Ref<AutoscanDirectory> ContentManager::getAutoscanDirectory(int scanID, scan_mode_t scanMode)
+Ref<AutoscanDirectory> ContentManager::getAutoscanDirectory(int scanID, ScanMode scanMode)
 {
-    if (scanMode == TimedScanMode) {
+    if (scanMode == ScanMode::Timed) {
         return autoscan_timed->get(scanID);
     }
 
 #if HAVE_INOTIFY
-    else if (scanMode == InotifyScanMode) {
+    else if (scanMode == ScanMode::INotify) {
         return autoscan_inotify->get(scanID);
     }
 #endif
     return nullptr;
 }
 
-Ref<Array<AutoscanDirectory> > ContentManager::getAutoscanDirectories(scan_mode_t scanMode)
+Ref<Array<AutoscanDirectory> > ContentManager::getAutoscanDirectories(ScanMode scanMode)
 {
-    if (scanMode == TimedScanMode) {
+    if (scanMode == ScanMode::Timed) {
         return autoscan_timed->getArrayCopy();
     }
 
 #if HAVE_INOTIFY
-    else if (scanMode == InotifyScanMode) {
+    else if (scanMode == ScanMode::INotify) {
         return autoscan_inotify->getArrayCopy();
     }
 #endif
@@ -1646,9 +1646,9 @@ Ref<AutoscanDirectory> ContentManager::getAutoscanDirectory(String location)
     return dir;
 }
 
-void ContentManager::removeAutoscanDirectory(int scanID, scan_mode_t scanMode)
+void ContentManager::removeAutoscanDirectory(int scanID, ScanMode scanMode)
 {
-    if (scanMode == TimedScanMode) {
+    if (scanMode == ScanMode::Timed) {
         Ref<Storage> storage = Storage::getInstance();
         Ref<AutoscanDirectory> adir = autoscan_timed->get(scanID);
         if (adir == nullptr)
@@ -1663,7 +1663,7 @@ void ContentManager::removeAutoscanDirectory(int scanID, scan_mode_t scanMode)
     }
 #ifdef HAVE_INOTIFY
     if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
-        if (scanMode == InotifyScanMode) {
+        if (scanMode == ScanMode::INotify) {
             Ref<Storage> storage = Storage::getInstance();
             Ref<AutoscanDirectory> adir = autoscan_inotify->get(scanID);
             if (adir == nullptr)
@@ -1684,7 +1684,7 @@ void ContentManager::removeAutoscanDirectory(int objectID)
     if (adir == nullptr)
         throw _Exception(_("can not remove autoscan directory - was not an autoscan"));
 
-    if (adir->getScanMode() == TimedScanMode) {
+    if (adir->getScanMode() == ScanMode::Timed) {
         autoscan_timed->remove(adir->getLocation());
         storage->removeAutoscanDirectoryByObjectID(objectID);
         SessionManager::getInstance()->containerChangedUI(objectID);
@@ -1692,7 +1692,7 @@ void ContentManager::removeAutoscanDirectory(int objectID)
     }
 #ifdef HAVE_INOTIFY
     if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
-        if (adir->getScanMode() == InotifyScanMode) {
+        if (adir->getScanMode() == ScanMode::INotify) {
             autoscan_inotify->remove(adir->getLocation());
             storage->removeAutoscanDirectoryByObjectID(objectID);
             SessionManager::getInstance()->containerChangedUI(objectID);
@@ -1718,7 +1718,7 @@ void ContentManager::removeAutoscanDirectory(String location)
     removeAutoscanDirectory(adir->getObjectID());
 }
 
-void ContentManager::handlePeristentAutoscanRemove(int scanID, scan_mode_t scanMode)
+void ContentManager::handlePeristentAutoscanRemove(int scanID, ScanMode scanMode)
 {
     Ref<AutoscanDirectory> adir = getAutoscanDirectory(scanID, scanMode);
     Ref<Storage> st = Storage::getInstance();
@@ -1731,7 +1731,7 @@ void ContentManager::handlePeristentAutoscanRemove(int scanID, scan_mode_t scanM
     }
 }
 
-void ContentManager::handlePersistentAutoscanRecreate(int scanID, scan_mode_t scanMode)
+void ContentManager::handlePersistentAutoscanRecreate(int scanID, ScanMode scanMode)
 {
     Ref<AutoscanDirectory> adir = getAutoscanDirectory(scanID, scanMode);
     int id = ensurePathExistence(adir->getLocation());
@@ -1779,13 +1779,13 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
         }
         dir->resetLMT();
         storage->addAutoscanDirectory(dir);
-        if (dir->getScanMode() == TimedScanMode) {
+        if (dir->getScanMode() == ScanMode::Timed) {
             autoscan_timed->add(dir);
             timerNotify(dir->getTimerParameter());
         }
 #ifdef HAVE_INOTIFY
         if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
-            if (dir->getScanMode() == InotifyScanMode) {
+            if (dir->getScanMode() == ScanMode::INotify) {
                 autoscan_inotify->add(dir);
                 AutoscanInotify::getInstance()->monitor(dir);
             }
@@ -1795,11 +1795,11 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
         return;
     }
 
-    if (original->getScanMode() == TimedScanMode)
+    if (original->getScanMode() == ScanMode::Timed)
         Timer::getInstance()->removeTimerSubscriber(this, original->getTimerParameter(), true);
 #ifdef HAVE_INOTIFY
     if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
-        if (original->getScanMode() == InotifyScanMode) {
+        if (original->getScanMode() == ScanMode::INotify) {
             AutoscanInotify::getInstance()->unmonitor(original);
         }
     }
@@ -1809,10 +1809,10 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
     original->copyTo(copy);
 
     // changing from full scan to basic scan need to reset last modification time
-    if ((copy->getScanLevel() == FullScanLevel) && (dir->getScanLevel() == BasicScanLevel)) {
-        copy->setScanLevel(BasicScanLevel);
+    if ((copy->getScanLevel() == ScanLevel::Full) && (dir->getScanLevel() == ScanLevel::Basic)) {
+        copy->setScanLevel(ScanLevel::Basic);
         copy->resetLMT();
-    } else if (((copy->getScanLevel() == FullScanLevel) && (dir->getScanLevel() == FullScanLevel)) && (!copy->getRecursive() && dir->getRecursive())) {
+    } else if (((copy->getScanLevel() == ScanLevel::Full) && (dir->getScanLevel() == ScanLevel::Full)) && (!copy->getRecursive() && dir->getRecursive())) {
         copy->resetLMT();
     }
 
@@ -1821,12 +1821,12 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
     copy->setRecursive(dir->getRecursive());
     copy->setInterval(dir->getInterval());
 
-    if (copy->getScanMode() == TimedScanMode) {
+    if (copy->getScanMode() == ScanMode::Timed) {
         autoscan_timed->remove(copy->getScanID());
     }
 #ifdef HAVE_INOTIFY
     if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
-        if (copy->getScanMode() == InotifyScanMode) {
+        if (copy->getScanMode() == ScanMode::INotify) {
             autoscan_inotify->remove(copy->getScanID());
         }
     }
@@ -1834,13 +1834,13 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
 
     copy->setScanMode(dir->getScanMode());
 
-    if (dir->getScanMode() == TimedScanMode) {
+    if (dir->getScanMode() == ScanMode::Timed) {
         autoscan_timed->add(copy);
         timerNotify(copy->getTimerParameter());
     }
 #ifdef HAVE_INOTIFY
     if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
-        if (dir->getScanMode() == InotifyScanMode) {
+        if (dir->getScanMode() == ScanMode::INotify) {
             autoscan_inotify->add(copy);
             AutoscanInotify::getInstance()->monitor(copy);
         }
@@ -2019,7 +2019,7 @@ void CMRemoveObjectTask::run()
     cm->_removeObject(objectID, all);
 }
 
-CMRescanDirectoryTask::CMRescanDirectoryTask(int objectID, int scanID, scan_mode_t scanMode, bool cancellable)
+CMRescanDirectoryTask::CMRescanDirectoryTask(int objectID, int scanID, ScanMode scanMode, bool cancellable)
     : GenericTask(ContentManagerTask)
 {
     this->scanID = scanID;
