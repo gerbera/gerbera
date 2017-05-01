@@ -16,7 +16,7 @@ _Gerbera is based on [MediaTomb 12.1](http://mediatomb.cc) which is dead upstrea
 * Metadata extraction from mp3, ogg, flac, jpeg, etc. files.
 * Exif thumbnail support
 * User defined server layout based on extracted metadata (scriptable virtual containers)
-* Automatic directory rescans
+* Automatic directory rescans (timed, inotify)
 * Web UI with a tree view of the database and the file system, allowing to add/remove/edit/browse your media
 * Highly flexible media format transcoding via plugins / scripts
 * Allows to watch YouTube(tm) videos on your UPnP player device [Broken]
@@ -30,6 +30,7 @@ _Gerbera is based on [MediaTomb 12.1](http://mediatomb.cc) which is dead upstrea
 * runs on x86, Alpha, ARM, MIPS, Sparc, PowerPC
 
 ## Differences to Mediatomb (So far)
+- Rebranded as Gerbera, new Logo!
 - Actively maintained/developed.
 - Removed bundled `libupnp` - Now requires upstream 1.8 version.
 - Removed bundled `libuuid`.
@@ -39,12 +40,13 @@ _Gerbera is based on [MediaTomb 12.1](http://mediatomb.cc) which is dead upstrea
 - Album folders have "creator" metadata (artist).
 - Album folders have artwork: either from external files or the tracks embedded artwork.
 - Per-track external art support: `filename-of-track.jp\*` (minus the audio file extension).
-- WIP port to "Modern C++" / tidying.
 - Removed `libflac` use/dep.
 - Remove `libmp4v2` use/dep.
 - Remove `id3lib` use/dep.
-- Removed broken DVD support (dvdnav).
+- Removed broken DVD image support (dvdnav).
 - IPv6 Support
+- Replaced SpiderMonkey (mozjs) dependency with embedded [duktape] engine.
+- WIP port to "Modern C++" / tidying.
 - Lots of other stuff.
 
 ## Installing
@@ -142,3 +144,4 @@ make install
 [CMake]: https://cmake.org/
 [Ubuntu PPA]: https://launchpad.net/~stephenczetty/+archive/ubuntu/mediatomb-v00d00
 [v00d00 overlay]: https://github.com/v00d00/overlay
+[duktape]: http://duktape.org
