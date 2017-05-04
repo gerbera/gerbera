@@ -488,6 +488,35 @@ void TagLibHandler::extractFLAC(TagLib::IOStream *roStream, zmm::Ref<CdsItem> it
     }
     populateGenericTags(item, flac);
 
+    Ref<StringConverter> sc = StringConverter::i2i();
+
+    Ref<Array<StringBase> > aux_tags_list = ConfigManager::getInstance()->getStringArrayOption(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
+    if (aux_tags_list != nullptr) {
+        for (int j = 0; j < aux_tags_list->size(); j++) {
+
+            String desiredTag = aux_tags_list->get(j);
+            if (!string_ok(desiredTag)) {
+                continue;
+            }
+
+            auto propertyMap = flac.properties();
+
+            if (propertyMap.contains(desiredTag.c_str())) {
+                const auto property = propertyMap[desiredTag.c_str()];
+                if (property.isEmpty())
+                    continue;
+
+                auto val = property[0];
+                String value(val.toCString(true), val.size());
+                value = sc->convert(value);
+                log_debug(
+                    "Adding auxdata: %s with value %s\n", desiredTag.c_str(),
+                    value.c_str());
+                item->setAuxData(desiredTag, value);
+            }
+        }
+    }
+
     if (flac.pictureList().isEmpty()) {
         log_debug("TagLibHandler: flac resource has no picture information\n");
         return;
@@ -495,7 +524,6 @@ void TagLibHandler::extractFLAC(TagLib::IOStream *roStream, zmm::Ref<CdsItem> it
     const TagLib::FLAC::Picture *pic = flac.pictureList().front();
     const TagLib::ByteVector& data = pic->data();
 
-    Ref<StringConverter> sc = StringConverter::i2i();
     String art_mimetype = sc->convert(pic->mimeType().toCString(true));
     if (!isValidArtworkContentType(art_mimetype)) {
         art_mimetype = getContentTypeFromByteVector(data);
