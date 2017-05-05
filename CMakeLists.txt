@@ -27,7 +27,7 @@ set(gerbera_PATCH_VERSION     0)
 set(gerbera_RELEASE           "alpha")
 set(gerbera_SUFFIX            "")
 
-add_library(libgerbera OBJECT
+set(libgerberaFILES
         src/action_request.cc
         src/action_request.h
         src/atrailers_content_handler.cc
@@ -160,7 +160,6 @@ add_library(libgerbera OBJECT
         src/scripting/runtime.h
         src/scripting/script.cc
         src/scripting/script.h
-        src/scripting/duktape/duktape.c
         src/server.cc
         src/serve_request_handler.cc
         src/serve_request_handler.h
@@ -276,6 +275,10 @@ add_library(libgerbera OBJECT
         src/zmm/strings.cc
         src/zmm/strings.h
         src/zmm/zmm.h)
+if(WITH_JS)
+    set(libgerberaFILES ${libgerberaFILES} src/scripting/duktape/duktape.c)
+endif()
+add_library(libgerbera OBJECT ${libgerberaFILES})
 
 target_include_directories(libgerbera PRIVATE "${CMAKE_SOURCE_DIR}/src")
 
