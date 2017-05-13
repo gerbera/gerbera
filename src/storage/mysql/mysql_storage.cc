@@ -29,10 +29,6 @@
 
 /// \file mysql_storage.cc
 
-#ifdef HAVE_CONFIG_H
-    #include "autoconfig.h"
-#endif
-
 #ifdef HAVE_MYSQL
 
 //#define MYSQL_SET_NAMES "/*!40101 SET NAMES utf8 */"
@@ -44,8 +40,8 @@
 #include "config_manager.h"
 
 #ifdef AUTO_CREATE_DATABASE
-    #include "mysql_create_sql.h"
-    #include <zlib.h>
+#include "mysql_create_sql.h"
+#include <zlib.h>
 #endif
 
 // updates 1->2
@@ -67,12 +63,12 @@
 #define MYSQL_UPDATE_3_4_2 "ALTER TABLE `mt_cds_object` ADD KEY `cds_object_service_id` (`service_id`)"
 #define MYSQL_UPDATE_3_4_3 "UPDATE `mt_internal_setting` SET `value`='4' WHERE `key`='db_version' AND `value`='3'"
 
-
 using namespace zmm;
 using namespace mxml;
 using namespace std;
 
-MysqlStorage::MysqlStorage() : SQLStorage()
+MysqlStorage::MysqlStorage()
+    : SQLStorage()
 {
     mysql_init_key_initialized = false;
     mysql_connection = false;
@@ -82,11 +78,10 @@ MysqlStorage::MysqlStorage() : SQLStorage()
 }
 MysqlStorage::~MysqlStorage()
 {
-    AutoLock lock(mysqlMutex);    // just to ensure, that we don't close while another thread 
-                    // is executing a query
-    
-    if(mysql_connection)
-    {
+    AutoLock lock(mysqlMutex); // just to ensure, that we don't close while another thread
+    // is executing a query
+
+    if (mysql_connection) {
         mysql_close(&db);
         mysql_connection = false;
     }
@@ -97,22 +92,22 @@ MysqlStorage::~MysqlStorage()
 
 void MysqlStorage::checkMysqlThreadInit()
 {
-    if (! mysql_connection)
+    if (!mysql_connection)
         throw _Exception(_("mysql connection is not open or already closed"));
     //log_debug("checkMysqlThreadInit; thread_id=%d\n", pthread_self());
-    if (pthread_getspecific(mysql_init_key) == nullptr)
-    {
+    if (pthread_getspecific(mysql_init_key) == nullptr) {
         log_debug("running mysql_thread_init(); thread_id=%d\n", pthread_self());
-        if (mysql_thread_init()) throw _Exception(_("error while calling mysql_thread_init()"));
-        if (pthread_setspecific(mysql_init_key, (void *) 1)) throw _Exception(_("error while calling pthread_setspecific()"));
+        if (mysql_thread_init())
+            throw _Exception(_("error while calling mysql_thread_init()"));
+        if (pthread_setspecific(mysql_init_key, (void*)1))
+            throw _Exception(_("error while calling pthread_setspecific()"));
     }
 }
 
 void MysqlStorage::threadCleanup()
 {
     log_debug("thread cleanup; thread_id=%d\n", pthread_self());
-    if (pthread_getspecific(mysql_init_key) != nullptr)
-    {
+    if (pthread_getspecific(mysql_init_key) != nullptr) {
         mysql_thread_end();
     }
 }
@@ -121,50 +116,45 @@ void MysqlStorage::init()
 {
     log_debug("start\n");
     SQLStorage::init();
-    
+
     unique_lock<decltype(mysqlMutex)> lock(mysqlMutex);
     int ret;
-    
-    if (! mysql_thread_safe())
-    {
+
+    if (!mysql_thread_safe()) {
         throw _Exception(_("mysql library is not thread safe!"));
     }
-    
+
     /// \todo write destructor function
     ret = pthread_key_create(&mysql_init_key, nullptr);
-    if (ret)
-    {
+    if (ret) {
         throw _Exception(_("could not create pthread_key"));
     }
     mysql_server_init(0, nullptr, nullptr);
-    pthread_setspecific(mysql_init_key, (void *) 1);
-    
+    pthread_setspecific(mysql_init_key, (void*)1);
+
     Ref<ConfigManager> config = ConfigManager::getInstance();
-    
+
     String dbHost = config->getOption(CFG_SERVER_STORAGE_MYSQL_HOST);
     String dbName = config->getOption(CFG_SERVER_STORAGE_MYSQL_DATABASE);
     String dbUser = config->getOption(CFG_SERVER_STORAGE_MYSQL_USERNAME);
     int dbPort = config->getIntOption(CFG_SERVER_STORAGE_MYSQL_PORT);
     String dbPass = config->getOption(CFG_SERVER_STORAGE_MYSQL_PASSWORD);
     String dbSock = config->getOption(CFG_SERVER_STORAGE_MYSQL_SOCKET);
-    
-    MYSQL *res_mysql;
-    
+
+    MYSQL* res_mysql;
+
     res_mysql = mysql_init(&db);
-    if(! res_mysql)
-    {
+    if (!res_mysql) {
         throw _Exception(_("mysql_init failed"));
     }
-    
+
     mysql_init_key_initialized = true;
-    
+
     mysql_options(&db, MYSQL_SET_CHARSET_NAME, "utf8");
-    
-    #ifdef HAVE_MYSQL_OPT_RECONNECT
-        my_bool my_bool_var = true;
-        mysql_options(&db, MYSQL_OPT_RECONNECT, &my_bool_var);
-    #endif
-    
+
+    my_bool my_bool_var = true;
+    mysql_options(&db, MYSQL_OPT_RECONNECT, &my_bool_var);
+
     res_mysql = mysql_real_connect(&db,
         dbHost.c_str(),
         dbUser.c_str(),
@@ -173,12 +163,11 @@ void MysqlStorage::init()
         dbPort, // port
         (dbSock == nullptr ? nullptr : dbSock.c_str()), // socket
         0 // flags
-    );
-    if(! res_mysql)
-    {
+        );
+    if (!res_mysql) {
         throw _Exception(_("The connection to the MySQL database has failed: ") + getError(&db));
     }
-    
+
     /*
     int res = mysql_real_query(&db, MYSQL_SET_NAMES, strlen(MYSQL_SET_NAMES));
     if(res)
@@ -187,21 +176,16 @@ void MysqlStorage::init()
         throw _StorageException(nullptr, _("MySQL query 'SET NAMES' failed!"));
     }
     */
-    
-    
+
     mysql_connection = true;
-    
+
     String dbVersion = nullptr;
-    try
-    {
+    try {
         dbVersion = getInternalSetting(_("db_version"));
+    } catch (Exception) {
     }
-    catch (Exception)
-    {
-    }
-    
-    if (dbVersion == nullptr)
-    {
+
+    if (dbVersion == nullptr) {
 #ifdef AUTO_CREATE_DATABASE
         log_info("database doesn't seem to exist. automatically creating database...\n");
         unsigned char buf[MS_CREATE_SQL_INFLATED_SIZE + 1]; // + 1 for '\0' at the end of the string
@@ -210,31 +194,26 @@ void MysqlStorage::init()
         if (ret != Z_OK || uncompressed_size != MS_CREATE_SQL_INFLATED_SIZE)
             throw _Exception(_("Error while uncompressing mysql create sql. returned: ") + ret);
         buf[MS_CREATE_SQL_INFLATED_SIZE] = '\0';
-        
-        auto *sql_start = (char *)buf;
-        char *sql_end = strchr(sql_start, ';');
-        if (sql_end == nullptr)
-        {
+
+        auto* sql_start = (char*)buf;
+        char* sql_end = strchr(sql_start, ';');
+        if (sql_end == nullptr) {
             throw _Exception(_("';' not found in mysql create sql"));
         }
-        do
-        {
+        do {
             ret = mysql_real_query(&db, sql_start, sql_end - sql_start);
-            if (ret)
-            {
+            if (ret) {
                 String myError = getError(&db);
                 throw _StorageException(myError, _("Mysql: error while creating db: ") + myError);
             }
             sql_start = sql_end + 1; // skip ';'
-            if (*sql_start == '\n')  // skip newline
+            if (*sql_start == '\n') // skip newline
                 sql_start++;
-            
+
             sql_end = strchr(sql_start, ';');
-        }
-        while(sql_end != nullptr);
+        } while (sql_end != nullptr);
         dbVersion = getInternalSetting(_("db_version"));
-        if (dbVersion == nullptr)
-        {
+        if (dbVersion == nullptr) {
             shutdown();
             throw _Exception(_("error while creating database"));
         }
@@ -243,13 +222,11 @@ void MysqlStorage::init()
         shutdown();
         throw _Exception(_("database doesn't seem to exist yet and autocreation wasn't compiled in"));
 #endif
-        
     }
     log_debug("db_version: %s\n", dbVersion.c_str());
-    
+
     /* --- database upgrades --- */
-    if (dbVersion == "1")
-    {
+    if (dbVersion == "1") {
         log_info("Doing an automatic database upgrade from database version 1 to version 2...\n");
         _exec(MYSQL_UPDATE_1_2_1);
         _exec(MYSQL_UPDATE_1_2_2);
@@ -260,9 +237,8 @@ void MysqlStorage::init()
         log_info("database upgrade successful.\n");
         dbVersion = _("2");
     }
-    
-    if (dbVersion == "2")
-    {
+
+    if (dbVersion == "2") {
         log_info("Doing an automatic database upgrade from database version 2 to version 3...\n");
         _exec(MYSQL_UPDATE_2_3_1);
         _exec(MYSQL_UPDATE_2_3_2);
@@ -271,9 +247,8 @@ void MysqlStorage::init()
         log_info("database upgrade successful.\n");
         dbVersion = _("3");
     }
-    
-    if (dbVersion == "3")
-    {
+
+    if (dbVersion == "3") {
         log_info("Doing an automatic database upgrade from database version 3 to version 4...\n");
         _exec(MYSQL_UPDATE_3_4_1);
         _exec(MYSQL_UPDATE_3_4_2);
@@ -281,16 +256,16 @@ void MysqlStorage::init()
         log_info("database upgrade successful.\n");
         dbVersion = _("4");
     }
-    
+
     /* --- --- ---*/
-    
-    if (! string_ok(dbVersion) || dbVersion != "4")
+
+    if (!string_ok(dbVersion) || dbVersion != "4")
         throw _Exception(_("The database seems to be from a newer version (database version ") + dbVersion + ")!");
-    
+
     lock.unlock();
-    
+
     log_debug("end\n");
-    
+
     dbReady();
 }
 
@@ -301,7 +276,7 @@ String MysqlStorage::quote(String value)
      * the \0; then the string won't be null-terminated, but that doesn't matter,
      * because we give the correct length to String()
      */
-    auto *q = (char *)MALLOC(value.length() * 2 + 2);
+    auto* q = (char*)MALLOC(value.length() * 2 + 2);
     *q = '\'';
     long size = mysql_real_escape_string(&db, q + 1, value.c_str(), value.length());
     q[size + 1] = '\'';
@@ -310,7 +285,7 @@ String MysqlStorage::quote(String value)
     return ret;
 }
 
-String MysqlStorage::getError(MYSQL *db)
+String MysqlStorage::getError(MYSQL* db)
 {
     Ref<StringBuffer> err_buf(new StringBuffer());
     *err_buf << "mysql_error (" << String::from(mysql_errno(db));
@@ -319,35 +294,33 @@ String MysqlStorage::getError(MYSQL *db)
     return err_buf->toString();
 }
 
-Ref<SQLResult> MysqlStorage::select(const char *query, int length)
+Ref<SQLResult> MysqlStorage::select(const char* query, int length)
 {
 #ifdef MYSQL_SELECT_DEBUG
     log_debug("%s\n", query);
     print_backtrace();
 #endif
-    
+
     int res;
-    
+
     checkMysqlThreadInit();
     AutoLock lock(mysqlMutex);
     res = mysql_real_query(&db, query, length);
-    if (res)
-    {
+    if (res) {
         String myError = getError(&db);
         throw _StorageException(myError, _("Mysql: mysql_real_query() failed: ") + myError + "; query: " + query);
     }
-    
-    MYSQL_RES *mysql_res;
+
+    MYSQL_RES* mysql_res;
     mysql_res = mysql_store_result(&db);
-    if(! mysql_res)
-    {
+    if (!mysql_res) {
         String myError = getError(&db);
         throw _StorageException(myError, _("Mysql: mysql_store_result() failed: ") + myError + "; query: " + query);
     }
-    return Ref<SQLResult> (new MysqlResult(mysql_res));
+    return Ref<SQLResult>(new MysqlResult(mysql_res));
 }
 
-int MysqlStorage::exec(const char *query, int length, bool getLastInsertId)
+int MysqlStorage::exec(const char* query, int length, bool getLastInsertId)
 {
 #ifdef MYSQL_EXEC_DEBUG
     log_debug("%s\n", query);
@@ -355,19 +328,18 @@ int MysqlStorage::exec(const char *query, int length, bool getLastInsertId)
 #endif
 
     int res;
-    
+
     checkMysqlThreadInit();
     AutoLock lock(mysqlMutex);
     res = mysql_real_query(&db, query, length);
-    if(res)
-    {
+    if (res) {
         String myError = getError(&db);
         throw _StorageException(myError, _("Mysql: mysql_real_query() failed: ") + myError + "; query: " + query);
     }
-    int insert_id=-1;
-    if (getLastInsertId) insert_id = mysql_insert_id(&db);
+    int insert_id = -1;
+    if (getLastInsertId)
+        insert_id = mysql_insert_id(&db);
     return insert_id;
-    
 }
 
 void MysqlStorage::shutdownDriver()
@@ -379,15 +351,16 @@ void MysqlStorage::storeInternalSetting(String key, String value)
     String quotedValue = quote(value);
     Ref<StringBuffer> q(new StringBuffer());
     *q << "INSERT INTO " << QTB << INTERNAL_SETTINGS_TABLE << QTE << " (`key`, `value`) "
-    "VALUES (" << quote(key) << ", "<< quotedValue << ") "
-    "ON DUPLICATE KEY UPDATE `value` = " << quotedValue;
+                                                                     "VALUES ("
+       << quote(key) << ", " << quotedValue << ") "
+                                               "ON DUPLICATE KEY UPDATE `value` = "
+       << quotedValue;
     SQLStorage::exec(q);
 }
 
-void MysqlStorage::_exec(const char *query, int length)
+void MysqlStorage::_exec(const char* query, int length)
 {
-    if (mysql_real_query(&db, query, (length > 0 ? length : strlen(query))))
-    {
+    if (mysql_real_query(&db, query, (length > 0 ? length : strlen(query)))) {
         String myError = getError(&db);
         throw _StorageException(myError, _("Mysql: error while updating db: ") + myError);
     }
@@ -395,12 +368,11 @@ void MysqlStorage::_exec(const char *query, int length)
 
 void MysqlStorage::_addToInsertBuffer(Ref<StringBuffer> query)
 {
-    if (insertBuffer == nullptr)
-    {
-        insertBuffer = Ref<Array<StringBase> >(new Array<StringBase>());
+    if (insertBuffer == nullptr) {
+        insertBuffer = Ref<Array<StringBase>>(new Array<StringBase>());
         insertBuffer->append(_("BEGIN"));
     }
-    Ref<StringBase> sb (new StringBase(query->c_str()));
+    Ref<StringBase> sb(new StringBase(query->c_str()));
     insertBuffer->append(sb);
 }
 
@@ -409,11 +381,10 @@ void MysqlStorage::_flushInsertBuffer()
     if (insertBuffer == nullptr)
         return;
     insertBuffer->append(_("COMMIT"));
-    
+
     checkMysqlThreadInit();
     unique_lock<decltype(mysqlMutex)> lock(mysqlMutex);
-    for (int i=0; i < insertBuffer->size(); i++)
-    {
+    for (int i = 0; i < insertBuffer->size(); i++) {
         _exec(insertBuffer->get(i)->data, insertBuffer->get(i)->len);
     }
     lock.unlock();
@@ -421,10 +392,10 @@ void MysqlStorage::_flushInsertBuffer()
     insertBuffer->append(_("BEGIN"));
 }
 
-
 /* MysqlResult */
 
-MysqlResult::MysqlResult(MYSQL_RES *mysql_res) : SQLResult()
+MysqlResult::MysqlResult(MYSQL_RES* mysql_res)
+    : SQLResult()
 {
     this->mysql_res = mysql_res;
     nullRead = false;
@@ -432,12 +403,11 @@ MysqlResult::MysqlResult(MYSQL_RES *mysql_res) : SQLResult()
 
 MysqlResult::~MysqlResult()
 {
-    if(mysql_res)
-    {
-        if (! nullRead)
-        {
+    if (mysql_res) {
+        if (!nullRead) {
             MYSQL_ROW mysql_row;
-            while((mysql_row = mysql_fetch_row(mysql_res)) != nullptr); // read out data
+            while ((mysql_row = mysql_fetch_row(mysql_res)) != nullptr)
+                ; // read out data
         }
         mysql_free_result(mysql_res);
         mysql_res = nullptr;
@@ -445,11 +415,10 @@ MysqlResult::~MysqlResult()
 }
 
 Ref<SQLRow> MysqlResult::nextRow()
-{   
+{
     MYSQL_ROW mysql_row;
     mysql_row = mysql_fetch_row(mysql_res);
-    if(mysql_row)
-    {
+    if (mysql_row) {
         return Ref<SQLRow>(new MysqlRow(mysql_row, Ref<SQLResult>(this)));
     }
     nullRead = true;
@@ -460,7 +429,8 @@ Ref<SQLRow> MysqlResult::nextRow()
 
 /* MysqlRow */
 
-MysqlRow::MysqlRow(MYSQL_ROW mysql_row, Ref<SQLResult> sqlResult) : SQLRow(sqlResult)
+MysqlRow::MysqlRow(MYSQL_ROW mysql_row, Ref<SQLResult> sqlResult)
+    : SQLRow(sqlResult)
 {
     this->mysql_row = mysql_row;
 }
