@@ -30,7 +30,7 @@
 /// \file memory.cc
 
 #if defined(TOMBDEBUG) && ! defined (MEMPROF)
-#include <malloc.h>
+#include <cstdlib>
 #include "logger.h"
 #endif
 
