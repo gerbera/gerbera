@@ -45,6 +45,7 @@
 // ffmpeg needs the following sources
 // INT64_C is not defined in ffmpeg/avformat.h but is needed
 // macro defines included via autoconfig.h
+#include <cinttypes>
 #include <errno.h>
 #include <stdint.h>
 #include <string.h>
@@ -61,14 +62,9 @@ extern "C" {
 #include <libffmpegthumbnailer/videothumbnailerc.h>
 #endif
 
-#include "common.h"
 #include "config_manager.h"
 #include "ffmpeg_handler.h"
-#include "rexp.h"
 #include "string_converter.h"
-#include "tools.h"
-//#include "mxml/mxml.h"
-#include "mem_io_handler.h"
 
 #ifdef HAVE_AVSTREAM_CODECPAR
 #define as_codecpar(s) s->codecpar
@@ -77,7 +73,6 @@ extern "C" {
 #endif
 
 using namespace zmm;
-//using namespace mxml;
 
 // Default constructor
 FfmpegHandler::FfmpegHandler()
@@ -151,7 +146,7 @@ static void addFfmpegResourceFields(Ref<CdsItem> item, AVFormatContext* pFormatC
     hours = mins / 60;
     mins %= 60;
     if ((hours + mins + secs) > 0) {
-        sprintf(duration, "%02ld:%02ld:%02ld.%01ld", hours, mins, secs, (10 * us) / AV_TIME_BASE);
+        sprintf(duration, "%02" PRId64 ":%02" PRId64 ":%02" PRId64 ".%01" PRId64, hours, mins, secs, (10 * us) / AV_TIME_BASE);
         log_debug("Added duration: %s\n", duration);
         item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_DURATION), duration);
     }
@@ -213,11 +208,7 @@ static void addFfmpegResourceFields(Ref<CdsItem> item, AVFormatContext* pFormatC
         }
     }
 
-} // addFfmpegResourceFields
-
-/*double time_to_double(struct timeval time) {
-        return time.tv_sec + (time.tv_usec / 1000000.0);
-}*/
+}
 
 // Stub for suppressing ffmpeg error messages during matadata extraction
 void FfmpegNoOutputStub(void* ptr, int level, const char* fmt, va_list vl)
