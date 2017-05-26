@@ -206,21 +206,17 @@ Ref<CdsObject> SQLStorage::checkRefID(Ref<CdsObject> obj)
 
     if (refID > 0) {
         try {
-            Ref<CdsObject> refObj;
-            refObj = loadObject(refID);
+            Ref<CdsObject> refObj = loadObject(refID);
             if (refObj != nullptr && refObj->getLocation() == location)
                 return refObj;
         } catch (const Exception& e) {
-            // this should never happen - but fail softly if compiled without debugging
-            assert(0);
             throw _Exception(_("illegal refID was set"));
         }
     }
 
-    // this should never happen - but fail softly if compiled without debugging
-    // we do this assert to find code while debugging, that doesn't set the
-    // refID correctly
-    assert(0);
+    // This should never happen - but fail softly
+    // It means that something doesn't set the refID correctly
+    log_warning("Failed to loadObject with refid: %d\n", refID);
 
     return findObjectByPath(location);
 }
