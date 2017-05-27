@@ -41,7 +41,7 @@
 #include <condition_variable>
 #include <list>
 
-class Timer : public Singleton<Timer, std::mutex> {
+class Timer : public Singleton<Timer, std::recursive_mutex> {
 public:
     /// \brief This is the parameter class for timerNotify
     class Parameter : public zmm::Object {
