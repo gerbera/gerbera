@@ -97,8 +97,7 @@ protected:
     class TimerSubscriberElement {
     public:
         TimerSubscriberElement(Subscriber* subscriber, unsigned int notifyInterval, zmm::Ref<Parameter> parameter, bool once = false)
-            : disabled(false)
-            , subscriber(subscriber)
+            : subscriber(subscriber)
             , notifyInterval(notifyInterval)
             , parameter(parameter)
             , once(once)
@@ -125,7 +124,6 @@ protected:
             return subscriber == other.subscriber && parameter == other.parameter;
         }
         bool isOnce() const { return once; }
-        bool disabled;
 
     protected:
         Subscriber* subscriber;
