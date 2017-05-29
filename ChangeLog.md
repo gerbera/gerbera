@@ -16,7 +16,7 @@
 - Remove id3lib use/dep.
 - Removed broken DVD support (dvdnav).
 - IPv6 Support
-- Replaced SpiderMonkey (mozjs) dependency with embedded duktape engine.
+- Replaced SpiderMonkey (mozjs) dependency with the duktape engine.
 - Lots of other stuff.
 
 ### MediaTomb v0.12.2
