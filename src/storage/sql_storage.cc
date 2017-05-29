@@ -1236,7 +1236,28 @@ String SQLStorage::findFolderImage(int id, String trackArtBase)
        << "LIKE " << quote(_("folder.jp%"));
     *q << " ) AND ";
     *q << TQ("upnp_class") << '=' << quote(_(UPNP_DEFAULT_CLASS_IMAGE_ITEM)) << " AND ";
+#ifndef ONLY_REAL_FOLDER_ART
+    *q << "( ";
+    *q <<       "( ";
+        // virtual listing via Album, Artist etc
+    *q << TQ("parent_id") << " IN ";
+    *q <<       "(";
+    *q << "SELECT " << TQ("parent_id") << " FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE ";
+    *q << TQ("upnp_class") << '=' << quote(_(UPNP_DEFAULT_CLASS_MUSIC_TRACK)) << " AND ";
+    *q << TQ("id") << " IN ";
+    *q <<               "(";
+    *q << "SELECT " << TQ("ref_id") << " FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE ";
+    *q << TQ("parent_id") << '=' << quote(String::from(id)) << " AND ";
+    *q << TQ("object_type") << '=' << quote(OBJECT_TYPE_ITEM);
+    *q <<               ")";
+    *q <<       ")";
+    *q << "     ) OR ";
+#endif
+        // straightforward folder listing of real filesystem
     *q << TQ("parent_id") << '=' << quote(String::from(id));
+#ifndef ONLY_REAL_FOLDER_ART
+    *q << ")";
+#endif
     *q << " ORDER BY " << TQ("dc_title") << " DESC";
 
     //log_debug("findFolderImage %d, %s\n", id, q->c_str());
