@@ -65,8 +65,11 @@ The project has been ported to [CMake].
 
 #### On Ubuntu 16.04
 ```
-apt-get install uuid-dev libexpat1-dev libsqlite3-dev libmysqlclient-dev
-apt-get install libmozjs185-dev libmagic-dev libexif-dev libcurl4-openssl-dev
+apt-get install uuid-dev libexpat1-dev libsqlite3-dev libmysqlclient-dev \
+libmagic-dev libexif-dev libcurl4-openssl-dev
+# If building with LibAV/FFmpeg (-DWITH_AVCODEC=1)
+apt-get install libavutil-dev libavcodec-dev libavformat-dev libavdevice-dev \
+libavfilter-dev libavresample-dev libswscale-dev libswresample-dev libpostproc-dev
 ```
 
 The following packages are too old in 16.04 and must be installed from source:
@@ -83,8 +86,8 @@ mkdir build
 cd build
 cmake ../gerbera -DWITH_MAGIC=1 -DWITH_MYSQL=1 -DWITH_CURL=1 -DWITH_JS=1 \
 -DWITH_TAGLIB=1 -DWITH_AVCODEC=1 -DWITH_EXIF=1 -DWITH_LASTFM=1
-make -j4 VERBOSE=1
-make install
+make -j4
+sudo make install
 ```
 Alternatively, the options can be set using a GUI (make sure to press "c" to configure after toggling settings in the GUI):
 ```
@@ -94,8 +97,8 @@ cd build
 cmake ../gerbera
 make edit_cache
 # Enable some of the WITH... options
-make -j4 VERBOSE=1
-make install
+make -j4
+sudo make install
 ```
 
 ## Dependencies
@@ -119,7 +122,7 @@ make install
 ## Branches
 **master**: Where the action happens
 
-**vanilla**: Sourceforge mediatomb with patches to build in 2016
+**vanilla**: Sourceforge mediatomb with patches to build on more modern systems
 
 **gentoo**: Pretty much as vanilla (shipped as net-misc/mediatomb).
 
