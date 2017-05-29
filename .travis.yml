@@ -8,6 +8,7 @@ dist: trusty
 before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -y uuid-dev libexpat1-dev libsqlite3-dev libmysqlclient-dev libmagic-dev libexif-dev libcurl4-openssl-dev
+  - ./scripts/install-duktape.sh
   - ./scripts/install-pupnp18.sh
   - ./scripts/install-taglib111.sh
 
