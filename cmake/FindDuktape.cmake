@@ -7,11 +7,27 @@
 #  DUKTAPE_DEFINITIONS - Compiler switches required for using Duktape
 #
 
-INCLUDE (FindPackageHandleStandardArgs)
+find_package(PkgConfig QUIET)
+pkg_check_modules(PC_DUK QUIET duktape libduktape)
 
-find_package( PkgConfig REQUIRED )
-PKG_SEARCH_MODULE( DUKTAPE REQUIRED duktape libduktape )
+find_path(DUKTAPE_INCLUDE_DIR duktape.h
+    HINTS ${PC_DUK_INCLUDEDIR} ${PC_DUK_INCLUDE_DIRS}
+    PATH_SUFFIXES duktape)
 
-find_package_handle_standard_args(DUKTAPE DEFAULT_MSG DUKTAPE_FOUND)
+find_library(DUKTAPE_LIBARY
+    NAMES duktape libduktape
+    HINTS ${PC_DUK_LIBDIR} ${PC_DUK_LIBRARY_DIRS})
 
-MARK_AS_ADVANCED( DUKTAPE_LIBRARIES DUKTAPE_INCLUDE_DIRS )
+include(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Duktape
+        REQUIRED_VARS DUKTAPE_LIBARY DUKTAPE_INCLUDE_DIR)
+
+if (DUKTAPE_FOUND)
+    set (DUKTAPE_LIBRARIES ${DUKTAPE_LIBARY})
+    set (DUKTAPE_INCLUDE_DIRS ${DUKTAPE_INCLUDE_DIR} )
+endif ()
+
+MARK_AS_ADVANCED(
+    DUKTAPE_INCLUDE_DIR
+    DUKTAPE_LIBARY
+)
