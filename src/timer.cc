@@ -126,21 +126,34 @@ void Timer::triggerWait()
 void  Timer::notify()
 {
     AutoLock lock(mutex);
-    for (auto& element : subscribers) {
+
+    std::list<TimerSubscriberElement> toNotify;
+
+    for (auto it = subscribers.begin(); it != subscribers.end(); ) {
+        TimerSubscriberElement& element = *it;
+
         struct timespec now;
         getTimespecNow(&now);
         long wait = getDeltaMillis(&now, element.getNextNotify());
 
         if (wait <= 0) {
-            element.notify();
-            if (element.isOnce()) {
-                element.disabled = true;
+            toNotify.push_back(element);
+            if(element.isOnce()){
+                it = subscribers.erase(it);
             } else {
                 element.updateNextNotify();
+                ++it;
             }
+        } else {
+            ++it;
         }
     }
-    subscribers.remove_if([](const auto& e) { return e.disabled; });
+
+    mutex.unlock();
+
+    for(auto& element : toNotify){
+        element.notify();
+    }
 }
 
 struct timespec* Timer::getNextNotifyTime()
