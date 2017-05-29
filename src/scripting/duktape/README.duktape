@@ -1,5 +1,0 @@
-To update the embedded Duktape distribution, grab a Duktape tarball or git
-clone it into <DUKTAPE_SRC>, then simply launch the following command
-from Gerbera top directory:
-
-python2 <DUKTAPE_SRC>/tools/config.py --output-directory src/scripting/duktape -DDUK_USE_CPP_EXCEPTIONS

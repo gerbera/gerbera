@@ -106,6 +106,7 @@ make install
 | libuuid      	|         	| Required  	|                      	    |
 | expat        	|         	| Required  	|                      	    |
 | sqlite3      	|         	| Required  	|                      	    |
+| duktape      	|         	| Optional  	| Scripting Support    	    |
 | mysql        	|         	| Optional  	| Client Libs          	    |
 | curl         	|         	| Optional  	| Enables web services 	    |
 | [taglib]      | 1.11    	| Optional  	| Audio tag support         |

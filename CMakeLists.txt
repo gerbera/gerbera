@@ -275,9 +275,7 @@ set(libgerberaFILES
         src/zmm/strings.cc
         src/zmm/strings.h
         src/zmm/zmm.h)
-if(WITH_JS)
-    set(libgerberaFILES ${libgerberaFILES} src/scripting/duktape/duktape.c)
-endif()
+
 add_library(libgerbera OBJECT ${libgerberaFILES})
 
 target_include_directories(libgerbera PRIVATE "${CMAKE_SOURCE_DIR}/src")
@@ -342,37 +340,6 @@ endif()
 find_package(Threads REQUIRED)
 target_link_libraries (gerbera ${CMAKE_THREAD_LIBS_INIT})
 
-check_function_exists(nl_langinfo HAVE_NL_LANGINFO)
-if (HAVE_NL_LANGINFO)
-    add_definitions("-DHAVE_NL_LANGINFO")
-endif()
-
-check_function_exists(setlocale HAVE_SETLOCALE)
-if (HAVE_SETLOCALE)
-    add_definitions("-DHAVE_SETLOCALE")
-endif()
-
-# Link to the socket library if it exists. This is something you need on Solaris/OmniOS/Joyent
-find_library(SOCKET_LIBRARY socket)
-if(SOCKET_LIBRARY)
-    set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${SOCKET_LIBRARY})
-    target_link_libraries(gerbera ${SOCKET_LIBRARY})
-endif()
-
-# Link to libnsl (Network services library) if it exists. This is something you need on Solaris/OmniOS/Joyent
-find_library(NSL_LIBRARY nsl)
-if(NSL_LIBRARY)
-    set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${NSL_LIBRARY})
-    target_link_libraries(gerbera ${NSL_LIBRARY})
-endif()
-
-find_package(INotify)
-IF (INOTIFY_FOUND)
-    include_directories(${INOTIFY_INCLUDE_DIRS})
-    target_link_libraries (gerbera ${INOTIFY_LIBRARY})
-    add_definitions(-DHAVE_INOTIFY)
-endif ()
-
 find_package(Iconv REQUIRED)
 include_directories(${ICONV_INCLUDE_DIR})
 target_link_libraries (gerbera ${ICONV_LIBRARIES})
@@ -412,6 +379,46 @@ include_directories(${SQLITE3_INCLUDE_DIRS})
 target_link_libraries (gerbera ${SQLITE3_LIBRARIES})
 add_definitions(-DHAVE_SQLITE3)
 
+check_function_exists(nl_langinfo HAVE_NL_LANGINFO)
+if (HAVE_NL_LANGINFO)
+    add_definitions("-DHAVE_NL_LANGINFO")
+endif()
+
+check_function_exists(setlocale HAVE_SETLOCALE)
+if (HAVE_SETLOCALE)
+    add_definitions("-DHAVE_SETLOCALE")
+endif()
+
+# Link to the socket library if it exists. This is something you need on Solaris/OmniOS/Joyent
+find_library(SOCKET_LIBRARY socket)
+if(SOCKET_LIBRARY)
+    set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${SOCKET_LIBRARY})
+    target_link_libraries(gerbera ${SOCKET_LIBRARY})
+endif()
+
+# Link to libnsl (Network services library) if it exists. This is something you need on Solaris/OmniOS/Joyent
+find_library(NSL_LIBRARY nsl)
+if(NSL_LIBRARY)
+    set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${NSL_LIBRARY})
+    target_link_libraries(gerbera ${NSL_LIBRARY})
+endif()
+
+find_package(INotify)
+IF (INOTIFY_FOUND)
+    include_directories(${INOTIFY_INCLUDE_DIRS})
+    target_link_libraries (gerbera ${INOTIFY_LIBRARY})
+    add_definitions(-DHAVE_INOTIFY)
+endif ()
+
+if(WITH_JS)
+    find_package(Duktape)
+    IF (DUKTAPE_FOUND)
+        include_directories(${DUKTAPE_INCLUDE_DIRS})
+        target_link_libraries (gerbera ${DUKTAPE_LIBRARIES})
+        add_definitions(-DHAVE_JS)
+    endif ()
+endif()
+
 if(WITH_MYSQL)
     find_package(MySQL REQUIRED)
     if (MYSQL_FOUND)
@@ -435,13 +442,6 @@ if(WITH_CURL)
     else()
         message(FATAL_ERROR "cURL not found")
     endif()
-endif()
-
-if(WITH_JS)
-    add_definitions(-DHAVE_JS)
-    target_include_directories(libgerbera PRIVATE "${CMAKE_SOURCE_DIR}/src/scripting/duktape")
-    target_include_directories(gerbera PRIVATE "${CMAKE_SOURCE_DIR}/src/scripting/duktape")
-    SET_SOURCE_FILES_PROPERTIES(src/scripting/duktape/duktape.c PROPERTIES LANGUAGE CXX)
 endif()
 
 if(WITH_TAGLIB)
