@@ -1,5 +1,8 @@
 ## Gerbera - UPnP AV Mediaserver.
 
+### v1.1.0
+
+
 ### v1.0.0
 - Rebranded as Gerbera, new Logo!
 - Ported to CMake

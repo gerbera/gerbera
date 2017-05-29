@@ -22,9 +22,9 @@ set(WITH_DEBUG_LOGGING  1 CACHE BOOL "Enables debug logging")
 
 project("gerbera")
 set(gerbera_MAJOR_VERSION     1)
-set(gerbera_MINOR_VERSION     0)
+set(gerbera_MINOR_VERSION     1)
 set(gerbera_PATCH_VERSION     0)
-set(gerbera_RELEASE           "")
+set(gerbera_RELEASE           "alpha")
 set(gerbera_SUFFIX            "")
 
 set(libgerberaFILES
