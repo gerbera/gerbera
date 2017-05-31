@@ -150,7 +150,7 @@ protected:
 class Sqlite3Storage : public Timer::Subscriber, private SQLStorage
 {
 public:
-    virtual void timerNotify(zmm::Ref<Timer::Parameter> sqlite3storage);
+    virtual void timerNotify(zmm::Ref<Timer::Parameter> sqlite3storage) override ;
 private:
     Sqlite3Storage();
     friend zmm::Ref<Storage> Storage::createInstance();

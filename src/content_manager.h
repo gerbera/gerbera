@@ -180,11 +180,11 @@ public:
     void init() override;
     virtual ~ContentManager();
     void shutdown() override;
-    
-    virtual void timerNotify(zmm::Ref<Timer::Parameter> parameter);
-    
+
+    virtual void timerNotify(zmm::Ref<Timer::Parameter> parameter) override;
+
     bool isBusy() { return working; }
-    
+
     zmm::Ref<CMAccounting> getAccounting();
 
     /// \brief Returns the task that is currently being executed.
