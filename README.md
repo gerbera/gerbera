@@ -55,7 +55,13 @@ _Gerbera is based on [MediaTomb 12.1](http://mediatomb.cc) which is dead upstrea
 Stephen Czetty maintains a [Ubuntu PPA].
 
 ### Gentoo
-The [v00d00 overlay] contains a git live ebuild. It will get added to the main portage tree at some point.
+The latest version and git ebuild are in [the main portage tree](https://packages.gentoo.org/packages/net-misc/gerbera).
+
+### Arch
+Gerbera is available in [AUR](https://aur.archlinux.org/packages/gerbera/).
+
+### OpenSUSE
+Gerbera is avaiable on [software.opensuse.org](https://software.opensuse.org/package/gerbera).
 
 ## Building
 
