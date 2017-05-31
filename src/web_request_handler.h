@@ -149,7 +149,7 @@ public:
                                      IN enum UpnpOpenFileMode mode,
                                      IN zmm::String range);
     
-    /// \brief This method must be overriden by the subclasses that actually process the given request.
+    /// \brief This method must be overridden by the subclasses that actually process the given request.
     virtual void process() = 0;
     
     /// \brief builds full path to a script for the given relative filename
