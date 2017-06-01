@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>Disabled</key>
+        <false/>
+        <key>Label</key>
+        <string>gerbera.io</string>
+        <key>ProgramArguments</key>
+        <array>
+            <string>/usr/bin/gerbera</string>
+            <string>-c</string>
+            <string>/etc/gerbera/config.xml</string>
+            <string>-l</string>
+            <string>/var/log/gerbera.log</string>
+        </array>
+        <key>RunAtLoad</key>
+        <true/>
+    </dict>
+</plist>
