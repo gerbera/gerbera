@@ -63,6 +63,9 @@ Gerbera is available in [AUR](https://aur.archlinux.org/packages/gerbera/).
 ### OpenSUSE
 Gerbera is avaiable on [software.opensuse.org](https://software.opensuse.org/package/gerbera).
 
+### Entware (Optware)
+Gerbera is available in [Entware-ng](https://github.com/Entware-ng/rtndev/tree/master/gerbera) for your embedded device/router!
+
 ## Building
 
 The project has been ported to [CMake].
