@@ -60,7 +60,7 @@ The latest version and git ebuild are in [the main portage tree](https://package
 ### Arch
 Gerbera is available in [AUR](https://aur.archlinux.org/packages/gerbera/).
 
-### OpenSUSE
+### openSUSE
 Gerbera is avaiable on [software.opensuse.org](https://software.opensuse.org/package/gerbera).
 
 ### Entware (Optware)
