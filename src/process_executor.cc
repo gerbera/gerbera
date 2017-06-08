@@ -47,7 +47,7 @@ ProcessExecutor::ProcessExecutor(String command, Ref<Array<StringBase> > arglist
     for (int i = 0; i < arglist->size(); i++)
     {
         argv[++apos] = arglist->get(i)->data;
-        if (apos >= MAX_ARGS-1)
+        if (apos >= MAX_ARGS-2)
             break;
     }
     argv[++apos] = nullptr;
