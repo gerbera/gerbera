@@ -107,8 +107,6 @@ set(libgerberaFILES
         src/metadata/taglib_handler.h
         src/metadata/fanart_handler.cc
         src/metadata/fanart_handler.h
-        src/mpegremux_processor.cc
-        src/mpegremux_processor.h
         src/mt_inotify.cc
         src/mt_inotify.h
         src/mxml/attribute.cc
