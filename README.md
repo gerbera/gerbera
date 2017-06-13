@@ -155,6 +155,6 @@ sudo make install
 [pupnp]: https://github.com/mrjimenez/pupnp.git
 [taglib]: http://taglib.org/
 [CMake]: https://cmake.org/
-[Ubuntu PPA]: https://launchpad.net/~stephenczetty/+archive/ubuntu/mediatomb-v00d00
+[Ubuntu PPA]: https://launchpad.net/~stephenczetty/+archive/ubuntu/gerbera
 [v00d00 overlay]: https://github.com/v00d00/overlay
 [duktape]: http://duktape.org
