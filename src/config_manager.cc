@@ -629,7 +629,7 @@ String ConfigManager::createDefaultConfig(String userhome)
 
     config->indent();
     save_text(config_filename, config->print());
-    log_info("MediaTomb configuration was created in: %s\n",
+    log_info("Gerbera configuration was created in: %s\n",
         config_filename.c_str());
 
     if (mysql_flag) {
