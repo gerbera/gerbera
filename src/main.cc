@@ -65,6 +65,7 @@ void print_copyright()
     printf("Gerbera is free software, covered by the GNU General Public License version 2\n\n");
     printf("Copyright 2016-2017 Gerbera Contributors.\n");
     printf("Gerbera is based on MediaTomb: Copyright 2005-2010 Gena Batsyan, Sergey Bostandzhyan, Leonhard Wimmer.\n");
+    printf("===============================================================================\n");
 }
 
 void log_copyright()
@@ -74,6 +75,7 @@ void log_copyright()
     log_info("Gerbera is free software, covered by the GNU General Public License version 2\n");
     log_info("Copyright 2016-2017 Gerbera Contributors.\n");
     log_info("Gerbera is based on MediaTomb: Copyright 2005-2010 Gena Batsyan, Sergey Bostandzhyan, Leonhard Wimmer.\n");
+    log_info("===============================================================================\n");
 }
 
 void signal_handler(int signum);
@@ -108,7 +110,6 @@ int main(int argc, char** argv, char** envp)
     String home;
     String confdir;
     String pid_file;
-    FILE* pid_fd = nullptr;
     String interface;
     String ip;
     String prefix;
@@ -254,23 +255,26 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
 
     // create pid file
     if (pid_file != nullptr) {
-        pid_fd = fopen(pid_file.c_str(), "w");
+        log_debug("Writing PID to %s\n", pid_file.c_str());
+        FILE* pid_fd = fopen(pid_file.c_str(), "w");
 
         if (pid_fd == nullptr) {
             log_error("Could not write pid file %s : %s\n", pid_file.c_str(),
                       strerror(errno));
-        } else {
-            pid_t cur_pid = getpid();
-            String pid = String::from(cur_pid);
+            exit(EXIT_FAILURE);
+        }
 
-            size_t size =
-                fwrite(pid.c_str(), sizeof(char), pid.length(), pid_fd);
-            fclose(pid_fd);
+        pid_t cur_pid = getpid();
+        String pid = String::from(cur_pid);
 
-            if (static_cast<int>(size) < pid.length()) {
-                log_error("Error when writing pid file %s : %s\n",
-                          pid_file.c_str(), strerror(errno));
-            }
+        size_t size =
+            fwrite(pid.c_str(), sizeof(char), pid.length(), pid_fd);
+        fclose(pid_fd);
+
+        if (static_cast<int>(size) < pid.length()) {
+            log_error("Error when writing pid file %s : %s\n",
+                      pid_file.c_str(), strerror(errno));
+            exit(EXIT_FAILURE);
         }
     }
 
