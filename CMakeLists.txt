@@ -457,7 +457,7 @@ if(WITH_TAGLIB)
         target_link_libraries (gerbera ${TAGLIB_LIBRARIES})
         add_definitions(-DHAVE_TAGLIB)
     else()
-        message(FATAL_ERROR "SpiderMonkey (MozJS) not found")
+        message(FATAL_ERROR "Taglib not found!")
     endif()
 endif()
 
