@@ -199,6 +199,7 @@ int main(int argc, char** argv, char** envp)
 #ifndef TOMBDEBUG
             print_copyright();
             printf("ERROR: MediaTomb wasn't compiled with debug output, but was run with -D/--debug.\n");
+            log_error("ERROR: MediaTomb wasn't compiled with debug output, but was run with -D/--debug.\n");
             exit(EXIT_FAILURE);
 #endif
             log_debug("enabling debug output\n");
@@ -227,7 +228,6 @@ Supported options:\n\
 For more information visit " DESC_MANUFACTURER_URL "\n\n");
 
             exit(EXIT_FAILURE);
-            break;
         case 0:
             switch (opt_index) {
             case 13: // --compile-info
