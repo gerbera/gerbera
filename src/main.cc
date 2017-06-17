@@ -267,8 +267,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
         pid_t cur_pid = getpid();
         String pid = String::from(cur_pid);
 
-        size_t size =
-            fwrite(pid.c_str(), sizeof(char), pid.length(), pid_fd);
+        size_t size = fwrite(pid.c_str(), sizeof(char), pid.length(), pid_fd);
         fclose(pid_fd);
 
         if (static_cast<int>(size) < pid.length()) {

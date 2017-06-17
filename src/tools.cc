@@ -1167,7 +1167,6 @@ String interfaceToIP(String interface)
 
 String ipToInterface(String ip) {
     if (!string_ok(ip)) {
-        log_warning("IP is null\n");
         return nullptr;
     } else {
         log_debug("Looking for '%s'\n", ip.c_str());
