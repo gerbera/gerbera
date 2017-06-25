@@ -10,7 +10,7 @@ include(CheckFunctionExists)
 
 set(CMAKE_VERBOSE_MAKEFILE off CACHE BOOL "Show verbose build commands")
 set(WITH_MAGIC          1 CACHE BOOL "Use libmagic to identify file mime types")
-set(WITH_MYSQL          1 CACHE BOOL "MySQL is required if sqlite is not available")
+set(WITH_MYSQL          0 CACHE BOOL "Store media information in MySQL DB")
 set(WITH_CURL           1 CACHE BOOL "CURL required for YouTube and/or SopCast")
 set(WITH_INOTIFY        1 CACHE BOOL "Enable Inotify file monitoring support")
 set(WITH_JS             1 CACHE BOOL "Enable JavaScript for custom import script")
