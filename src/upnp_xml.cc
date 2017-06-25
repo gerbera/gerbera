@@ -150,21 +150,14 @@ Ref<Element> UpnpXML_DIDLRenderObject(Ref<CdsObject> obj, bool renderActions, in
         log_debug("container is class: %s\n", upnp_class.c_str());
         if (upnp_class == UPNP_DEFAULT_CLASS_MUSIC_ALBUM) {
             Ref<Dictionary> meta = obj->getMetadata();
-            Ref<Array<DictionaryElement> > elements = meta->getElements();
-            int len = elements->size();
-            String key;
 
-            //log_debug("Album has %d metadata(s)\n", len);
+            String creator = meta->get(MetadataHandler::getMetaFieldName(M_ALBUMARTIST));
+            if (!string_ok(creator)) {
+                creator = meta->get(MetadataHandler::getMetaFieldName(M_ARTIST));
+            }
 
-            for (int i = 0; i < len; i++)
-            {
-                Ref<DictionaryElement> el = elements->get(i);
-                key = el->getKey();
-                //log_debug("Container %s\n", key.c_str());
-
-                if (key == MetadataHandler::getMetaFieldName(M_ARTIST)) {
-                    result->appendElementChild(UpnpXML_DIDLRenderCreator(el->getValue()));
-                }
+            if (string_ok(creator)) {
+                result->appendElementChild(UpnpXML_DIDLRenderCreator(creator));
             }
         }
         if (upnp_class == UPNP_DEFAULT_CLASS_MUSIC_ALBUM || upnp_class == UPNP_DEFAULT_CLASS_CONTAINER) {
