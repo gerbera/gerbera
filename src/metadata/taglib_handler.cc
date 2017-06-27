@@ -571,19 +571,23 @@ void TagLibHandler::extractMP4(TagLib::IOStream *roStream, zmm::Ref<CdsItem> ite
     String art_mimetype;
 
     TagLib::MP4::ItemListMap itemsListMap = mp4.tag()->itemListMap();
-    TagLib::MP4::Item coverItem = itemsListMap["covr"];
-    TagLib::MP4::CoverArtList coverArtList = coverItem.toCoverArtList();
-    if (coverArtList.isEmpty()) {
-        log_debug("TagLibHandler: mp4 file has no coverart");
-        return;
+    if (itemsListMap.contains("covr")) {
+        TagLib::MP4::Item coverItem = itemsListMap["covr"];
+        TagLib::MP4::CoverArtList coverArtList = coverItem.toCoverArtList();
+        if (coverArtList.isEmpty()) {
+            log_debug("TagLibHandler: mp4 file has no coverart");
+            return;
+        }
+
+        TagLib::MP4::CoverArt coverArt = coverArtList.front();
+        TagLib::ByteVector data = coverArt.data();
+        art_mimetype = getContentTypeFromByteVector(data);
+
+        if (string_ok(art_mimetype))
+            addArtworkResource(item, art_mimetype);
+    } else {
+        log_debug("TagLibHandler: mp4 file has no 'covr' item");
     }
-
-    TagLib::MP4::CoverArt coverArt = coverArtList.front();
-    TagLib::ByteVector data = coverArt.data();
-    art_mimetype = getContentTypeFromByteVector(data);
-
-    if (string_ok(art_mimetype))
-        addArtworkResource(item, art_mimetype);
 }
 
 void TagLibHandler::extractAiff(TagLib::IOStream *roStream, zmm::Ref<CdsItem> item) {
