@@ -1641,7 +1641,7 @@ void ConfigManager::validate(String serverhome)
 
 #endif // HAVE_LIBEXIF
 
-#if defined(HAVE_ID3LIB) || defined(HAVE_TAGLIB)
+#if defined(HAVE_TAGLIB)
     el = getElement(_("/import/library-options/id3/auxdata"));
     if (el == nullptr) {
         getOption(_("/import/library-options/id3/auxdata"), _(""));
