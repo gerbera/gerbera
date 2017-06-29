@@ -1757,7 +1757,8 @@ void ConfigManager::validate(String serverhome)
                            "invalid \"enabled\" attribute value in "
                            "<mark-played-items> tag"));
 
-    NEW_BOOL_OPTION(temp == YES ? true : false);
+    bool markingEnabled = temp == YES ? true : false;
+    NEW_BOOL_OPTION(markingEnabled);
     SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED);
 
     temp = getOption(_("/server/extended-runtime-options/mark-played-items/"
@@ -1796,11 +1797,14 @@ void ConfigManager::validate(String serverhome)
     Ref<Array<StringBase> > mark_content_list(new Array<StringBase>());
     tmpEl = getElement(_("/server/extended-runtime-options/mark-played-items/mark"));
 
+    int contentElementCount = 0;
     if (tmpEl != nullptr) {
         for (int m = 0; m < tmpEl->elementChildCount(); m++) {
             Ref<Element> content = tmpEl->getElementChild(m);
             if (content->getName() != "content")
                 continue;
+
+            contentElementCount++;
 
             String mark_content = content->getText();
             if (!string_ok(mark_content))
@@ -1813,6 +1817,10 @@ void ConfigManager::validate(String serverhome)
             NEW_STRARR_OPTION(mark_content_list);
             SET_STRARR_OPTION(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST);
         }
+    }
+
+    if (markingEnabled && contentElementCount == 0) {
+        throw _Exception(_("Error in config file: <mark-played-items>/<mark> tag must contain at least one <content> tag!"));
     }
 
 #if defined(HAVE_LASTFMLIB)
