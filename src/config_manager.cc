@@ -2256,6 +2256,8 @@ void ConfigManager::writeBookmark(String ip, String port)
     filename = getOption(CFG_SERVER_BOOKMARK_FILE);
     path = construct_path(filename);
 
+    log_debug("Writing bookmark file to: %s\n", path.c_str());
+
     f = fopen(path.c_str(), "w");
     if (f == nullptr) {
         throw _Exception(_("writeBookmark: failed to open: ") + path);

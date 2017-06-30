@@ -307,8 +307,8 @@
 
 #ifdef HAVE_MYSQL
     #define DEFAULT_MYSQL_HOST          "localhost"
-    #define DEFAULT_MYSQL_DB            "mediatomb"
-    #define DEFAULT_MYSQL_USER          "mediatomb"
+    #define DEFAULT_MYSQL_DB            "gerbera"
+    #define DEFAULT_MYSQL_USER          "gerbera"
 #ifdef HAVE_SQLITE3
     #define DEFAULT_MYSQL_ENABLED       NO
 #else
@@ -319,7 +319,7 @@
     #define DEFAULT_MYSQL_ENABLED       NO
 #endif
 
-#define DEFAULT_SQLITE3_DB_FILENAME     "mediatomb.db"
+#define DEFAULT_SQLITE3_DB_FILENAME     "gerbera.db"
 
 #define CONFIG_MAPPINGS_TEMPLATE        "mappings.xml"
 // misc
