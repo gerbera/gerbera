@@ -213,7 +213,7 @@
 #define DEFAULT_ACCOUNT_PASSWORD        "gerbera"
 #define DEFAULT_ALIVE_INTERVAL          1800 // seconds
 #define ALIVE_INTERVAL_MIN              62 // seconds
-#define DEFAULT_BOOKMARK_FILE           "mediatomb.html"
+#define DEFAULT_BOOKMARK_FILE           "gerbera.html"
 #define DEFAULT_IGNORE_UNKNOWN_EXTENSIONS NO
 #define DEFAULT_CASE_SENSITIVE_EXTENSION_MAPPINGS NO
 #define DEFAULT_IMPORT_SCRIPT           "import.js"
