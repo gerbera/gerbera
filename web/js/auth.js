@@ -54,7 +54,7 @@ function gotToken(ajaxRequest)
     var password = frames["rightF"].document.login_form.password.value;
     
     // create authentication password
-    password = hex_md5(token + password);
+    password = md5(token + password);
     // try to login
     var url = link('auth', {action: 'login', username: username, password: password});
     var myAjax = new Ajax.Request(
