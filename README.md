@@ -94,7 +94,7 @@ git clone https://github.com/v00d00/gerbera.git
 mkdir build
 cd build
 cmake ../gerbera -DWITH_MAGIC=1 -DWITH_MYSQL=1 -DWITH_CURL=1 -DWITH_JS=1 \
--DWITH_TAGLIB=1 -DWITH_AVCODEC=1 -DWITH_EXIF=1 -DWITH_LASTFM=1
+-DWITH_TAGLIB=1 -DWITH_AVCODEC=1 -DWITH_FFMPEGTHUMBNAILER=1 -DWITH_EXIF=1 -DWITH_LASTFM=1
 make -j4
 sudo make install
 ```
@@ -126,7 +126,7 @@ sudo make install
 | ffmpeg/libav 	|         	| Optional  	| File metadata             |
 | libexif      	|         	| Optional  	| JPEG Exif metadata        |
 | lastfmlib    	|         	| Optional  	| Enables scrobbling   	    |
-|              	|         	|           	|                      	    |
+| ffmpegthumbnailer |      	| Optional   	| Generate video thumbnails |
 
 ## Branches
 **master**: Where the action happens
