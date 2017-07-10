@@ -45,6 +45,7 @@
 
 #ifndef SOLARIS
     #include <net/if.h>
+#include <uuid.h>
 #else
     #include <fcntl.h>
     #include <net/if.h>
@@ -323,11 +324,6 @@ String hex_decode_string(String encoded)
     return buf->toString();
 }
 
-struct randomizer
-{
-    struct timeval tv;
-    int salt;
-};
 String hex_md5(const void *data, int length)
 {
     char md5buf[16];
@@ -345,12 +341,16 @@ String hex_string_md5(String str)
 }
 String generate_random_id()
 {
-    struct randomizer st;
-    gettimeofday(&st.tv, nullptr);
-    st.salt = rand();
-    return hex_md5(&st, sizeof(st));
-}
+    char uuid_str[37];
+    uuid_t uuid;
 
+    uuid_generate(uuid);
+    uuid_unparse(uuid, uuid_str);
+
+    log_debug("Generated: %s\n", uuid_str);
+
+    return String(uuid_str);
+}
 
 static const char *hex = "0123456789ABCDEF";
 
