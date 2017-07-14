@@ -45,7 +45,7 @@
 
 #ifndef SOLARIS
     #include <net/if.h>
-#include <uuid.h>
+#include <uuid/uuid.h>
 #else
     #include <fcntl.h>
     #include <net/if.h>
