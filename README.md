@@ -115,7 +115,7 @@ sudo make install
 | Lib          	| Version 	| Required? 	| Note                 	    |
 |--------------	|---------	|-----------	|-------------------------- |
 | libupnp      	| 1.8     	| Required  	| [pupnp] with IPv6 support |
-| libuuid      	|         	| Required  	|                      	    |
+| libuuid      	|         	| Depends on OS | On \*BSD native libuuid is used, others require e2fsprogs-libuuid |
 | expat        	|         	| Required  	|                      	    |
 | sqlite3      	|         	| Required  	|                      	    |
 | duktape      	|         	| Optional  	| Scripting Support    	    |

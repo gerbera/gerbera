@@ -45,7 +45,11 @@
 
 #ifndef SOLARIS
     #include <net/if.h>
+#ifdef BSD
+#include <uuid.h>
+#else
 #include <uuid/uuid.h>
+#endif
 #else
     #include <fcntl.h>
     #include <net/if.h>
@@ -341,15 +345,29 @@ String hex_string_md5(String str)
 }
 String generate_random_id()
 {
+#ifdef BSD
+    char *uuid_str;
+    uint32_t status;
+#else
     char uuid_str[37];
+#endif
     uuid_t uuid;
 
+#ifdef BSD
+    uuid_create(&uuid, &status);
+    uuid_to_string(&uuid, &uuid_str, &status);
+#else
     uuid_generate(uuid);
     uuid_unparse(uuid, uuid_str);
+#endif
 
     log_debug("Generated: %s\n", uuid_str);
+    String uuid_String = String(uuid_str);
+#ifdef BSD
+    free(uuid_str);
+#endif
 
-    return String(uuid_str);
+    return uuid_String;
 }
 
 static const char *hex = "0123456789ABCDEF";
