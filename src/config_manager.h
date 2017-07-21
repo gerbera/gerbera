@@ -246,7 +246,7 @@ public:
                               zmm::String _prefix_dir = _(PACKAGE_DATADIR),
                               zmm::String _magic = nullptr,
                               bool _debug_logging = false,
-                              zmm::String _ip = nullptr, zmm::String _interface = nullptr, int _port = -1);
+                              zmm::String _ip = nullptr, zmm::String _interface = nullptr, int _port = 0);
 
     static bool isDebugLogging() { return debug_logging; };
 
