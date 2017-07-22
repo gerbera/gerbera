@@ -83,7 +83,7 @@ void signal_handler(int signum);
 int main(int argc, char** argv, char** envp)
 {
     char* err = nullptr;
-    int port = -1;
+    int port = 0;
     struct sigaction action;
     sigset_t mask_set;
 
@@ -319,6 +319,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
     ConfigManager::setStaticArgs(config_file, home, confdir, prefix, magic, debug_logging, ip, interface, port);
     try {
         ConfigManager::getInstance();
+        port = ConfigManager::getInstance()->getIntOption(CFG_SERVER_PORT);
     } catch (const mxml::ParseException& pe) {
         log_error("Error parsing config file: %s line %d:\n%s\n",
             pe.context->location.c_str(),

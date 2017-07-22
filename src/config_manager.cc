@@ -68,7 +68,7 @@ String ConfigManager::magic = nullptr;
 bool ConfigManager::debug_logging = false;
 String ConfigManager::ip = nullptr;
 String ConfigManager::interface = nullptr;
-int ConfigManager::port = -1;
+int ConfigManager::port = 0;
 
 ConfigManager::~ConfigManager()
 {
@@ -678,7 +678,7 @@ void ConfigManager::migrate()
             String host = getOption(_("/server/storage/host"));
             String db = getOption(_("/server/storage/database"));
             String username = getOption(_("/server/storage/username"));
-            int port = -1;
+            int port = 0
 
             if (server->getChildByName(_("storage"))->getChildByName(_("port")) != nullptr)
                 port = getIntOption(_("/server/storage/port"));
@@ -697,7 +697,7 @@ void ConfigManager::migrate()
 
             mysql->appendTextChild(_("host"), host);
 
-            if (port != -1)
+            if (port > 0)
                 mysql->appendTextChild(_("port"), String::from(port));
 
             if (socket != nullptr)
@@ -1509,7 +1509,7 @@ void ConfigManager::validate(String serverhome)
 #endif
 
     // 0 means, that the SDK will any free port itself
-    if (port < 0) {
+    if (port <= 0) {
         temp_int = getIntOption(_("/server/port"), 0);
     } else {
         temp_int = port;
