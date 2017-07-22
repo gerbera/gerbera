@@ -682,13 +682,12 @@ void ConfigManager::migrate()
             String host = getOption(_("/server/storage/host"));
             String db = getOption(_("/server/storage/database"));
             String username = getOption(_("/server/storage/username"));
-            int port = 0
+            int port = 0;
 
             if (server->getChildByName(_("storage"))->getChildByName(_("port")) != nullptr)
                 port = getIntOption(_("/server/storage/port"));
 
             String socket = nullptr;
-            ;
             if (server->getChildByName(_("storage"))->getChildByName(_("socket")) != nullptr)
                 socket = getOption(_("/server/storage/socket"));
 
