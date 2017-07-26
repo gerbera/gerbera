@@ -128,12 +128,12 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
 #endif // HAVE_TAGLIB
 
 #ifdef HAVE_EXIV2
-/*        
+        
     if (content_type == CONTENT_TYPE_JPG)
     {
-        handlers->append(Ref<MetadataHandler>(new Exiv2Handler()));
+        Exiv2Handler().fillMetadata(item);
     } 
-*/
+
 #endif
 
 #ifdef HAVE_LIBEXIF
