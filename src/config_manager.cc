@@ -1644,6 +1644,18 @@ void ConfigManager::validate(String serverhome)
 
 #endif // HAVE_LIBEXIF
 
+#ifdef HAVE_EXIV2
+
+    el = getElement(_("/import/library-options/exiv2/auxdata"));
+    if (el == nullptr) {
+        getOption(_("/import/library-options/exiv2/auxdata"),
+            _(""));
+    }
+    NEW_STRARR_OPTION(createArrayFromNodeset(el, _("add-data"), _("tag")));
+    SET_STRARR_OPTION(CFG_IMPORT_LIBOPTS_EXIV2_AUXDATA_TAGS_LIST);
+
+#endif // HAVE_EXIV2
+
 #if defined(HAVE_TAGLIB)
     el = getElement(_("/import/library-options/id3/auxdata"));
     if (el == nullptr) {

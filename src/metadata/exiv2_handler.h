@@ -40,7 +40,7 @@ class Exiv2Handler : public MetadataHandler
 public:
     Exiv2Handler();
     virtual void fillMetadata(zmm::Ref<CdsItem> item);
-    virtual zmm::Ref<IOHandler> serveContent(zmm::Ref<CdsItem> item, int resNum);
+    virtual zmm::Ref<IOHandler> serveContent(zmm::Ref<CdsItem> item, int resNum,off_t *data_size);
 };
 
 #endif // __METADATA_EXIV2_H__
