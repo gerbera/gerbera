@@ -29,6 +29,7 @@
 
 /// \file timer.cc
 
+#include <cassert>
 #include "singleton.h"
 #include "timer.h"
 
@@ -125,7 +126,8 @@ void Timer::triggerWait()
 
 void  Timer::notify()
 {
-    AutoLock lock(mutex);
+    unique_lock<std::mutex> lock(mutex);
+    assert(lock.owns_lock());
 
     std::list<TimerSubscriberElement> toNotify;
 
@@ -149,9 +151,9 @@ void  Timer::notify()
         }
     }
 
-    mutex.unlock();
-
-    for(auto& element : toNotify){
+    // Unlock before we notify so that other threads can modify the subscribers
+    lock.unlock();
+    for (auto& element : toNotify) {
         element.notify();
     }
 }
