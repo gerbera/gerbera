@@ -106,7 +106,8 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
         }
     }
 
-    //info->content_type = ixmlCloneDOMString(mimeType.c_str());
+    /* Upstream, move to getinfo?
+    info->content_type = ixmlCloneDOMString(mimeType.c_str());
 #ifdef EXTEND_PROTOCOLINFO
     String header;
     header = header + _("TimeSeekRange.dlna.org: npt=") + range;
@@ -116,9 +117,10 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
     if (string_ok(header))
         info->http_header = ixmlCloneDOMString(header.c_str());
 #endif
-   
-    //info->file_length = UNKNOWN_CONTENT_LENGTH;
-    //info->force_chunked = (int)profile->getChunked();
+
+    info->file_length = UNKNOWN_CONTENT_LENGTH;
+    info->force_chunked = (int)profile->getChunked();
+    */
 
     Ref<ConfigManager> cfg = ConfigManager::getInstance();
    
