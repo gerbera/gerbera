@@ -58,7 +58,7 @@ Stephen Czetty maintains a [Ubuntu PPA].
 The latest version and git ebuild are in [the main portage tree](https://packages.gentoo.org/packages/net-misc/gerbera).
 
 ### Arch
-Gerbera is available in [AUR](https://aur.archlinux.org/packages/gerbera/).
+Gerbera is available in AUR [stable](https://aur.archlinux.org/packages/gerbera/) or [git version](https://aur.archlinux.org/packages/gerbera-git/).
 
 ### openSUSE
 Gerbera is avaiable on [software.opensuse.org](https://software.opensuse.org/package/gerbera).
