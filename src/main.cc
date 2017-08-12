@@ -234,10 +234,12 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
                 print_copyright();
                 printf("Compile info:\n");
                 printf("-------------\n");
-                printf("%s\n\n",COMPILE_INFO);
-                printf("Git info:\n");
-                printf("-------------\n");
-                printf("Git Branch: %s\nGit Commit: %s\n\n", GIT_BRANCH, GIT_COMMIT_HASH);
+                printf("%s\n\n", COMPILE_INFO);
+                if(strlen(GIT_BRANCH) > 0 || strlen(GIT_COMMIT_HASH) > 0) {
+                    printf("Git info:\n");
+                    printf("-------------\n");
+                    printf("Git Branch: %s\nGit Commit: %s\n\n", GIT_BRANCH, GIT_COMMIT_HASH);
+                }
                 exit(EXIT_SUCCESS);
             case 11: // --version
                 print_version = true;
