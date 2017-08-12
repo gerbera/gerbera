@@ -333,7 +333,13 @@ add_definitions(-DPACKAGE_NAME="gerbera${gerbera_SUFFIX}")
 add_definitions(-DVERSION="${gerbera_MAJOR_VERSION}.${gerbera_MINOR_VERSION}.${gerbera_PATCH_VERSION}${gerbera_RELEASE}${gerbera_SUFFIX}")
 add_definitions(-DPACKAGE_DATADIR="${CMAKE_INSTALL_PREFIX}/share/gerbera")
 
-add_definitions(-DCOMPILE_INFO="")
+# Generate Compile Information
+include("GenCompileInfo")
+generate_compile_info()
+add_definitions(-DCOMPILE_INFO="${COMPILE_INFO}")
+add_definitions(-DGIT_BRANCH="${GIT_BRANCH}")
+add_definitions(-DGIT_COMMIT_HASH="${GIT_COMMIT_HASH}")
+
 add_definitions(-DEXTERNAL_TRANSCODING -DAUTO_CREATE_DATABASE)
 
 if (WITH_LOGGING OR WITH_DEBUG_LOGGING)
