@@ -96,13 +96,13 @@ int main(int argc, char** argv, char** envp)
         { (char*)"config", 1, nullptr, 'c' }, // 3
         { (char*)"home", 1, nullptr, 'm' }, // 4
         { (char*)"cfgdir", 1, nullptr, 'f' }, // 5
-        { (char*)"pidfile", 1, nullptr, 'P' }, // 8
-        { (char*)"add", 1, nullptr, 'a' }, // 9
-        { (char*)"logfile", 1, nullptr, 'l' }, // 10
-        { (char*)"debug", 0, nullptr, 'D' }, // 11
-        { (char*)"compile-info", 0, nullptr, 0 }, // 12
-        { (char*)"version", 0, nullptr, 0 }, // 13
-        { (char*)"help", 0, nullptr, 'h' }, // 14
+        { (char*)"pidfile", 1, nullptr, 'P' }, // 6
+        { (char*)"add", 1, nullptr, 'a' }, // 7
+        { (char*)"logfile", 1, nullptr, 'l' }, // 8
+        { (char*)"debug", 0, nullptr, 'D' }, // 9
+        { (char*)"compile-info", 0, nullptr, 0 }, // 10
+        { (char*)"version", 0, nullptr, 0 }, // 11
+        { (char*)"help", 0, nullptr, 'h' }, // 12
         { (char*)nullptr, 0, nullptr, 0 }
     };
 
@@ -230,11 +230,16 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
             exit(EXIT_FAILURE);
         case 0:
             switch (opt_index) {
-            case 13: // --compile-info
+            case 10: // --compile-info
                 print_copyright();
                 printf("Compile info:\n");
                 printf("-------------\n");
                 printf("%s\n\n", COMPILE_INFO);
+                if(strlen(GIT_BRANCH) > 0 || strlen(GIT_COMMIT_HASH) > 0) {
+                    printf("Git info:\n");
+                    printf("-------------\n");
+                    printf("Git Branch: %s\nGit Commit: %s\n\n", GIT_BRANCH, GIT_COMMIT_HASH);
+                }
                 exit(EXIT_SUCCESS);
             case 11: // --version
                 print_version = true;
