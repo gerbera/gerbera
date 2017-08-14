@@ -54,6 +54,7 @@
     #include <fcntl.h>
     #include <net/if.h>
     #include <sys/sockio.h>
+    #include <uuid/uuid.h>
 #endif
 
 #include "md5/md5.h"
