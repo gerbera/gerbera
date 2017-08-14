@@ -25,7 +25,7 @@ else (SQLITE3_LIBRARIES AND SQLITE3_INCLUDE_DIRS)
   else (${CMAKE_MAJOR_VERSION} EQUAL 2 AND ${CMAKE_MINOR_VERSION} EQUAL 4)
     find_package(PkgConfig)
     if (PKG_CONFIG_FOUND)
-      pkg_check_modules(_SQLITE3 sqlite3)
+      pkg_check_modules(_SQLITE3 sqlite3 QUIET)
     endif (PKG_CONFIG_FOUND)
   endif (${CMAKE_MAJOR_VERSION} EQUAL 2 AND ${CMAKE_MINOR_VERSION} EQUAL 4)
   find_path(SQLITE3_INCLUDE_DIR
