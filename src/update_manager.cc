@@ -277,6 +277,5 @@ void *UpdateManager::staticThreadProc(void *arg)
     Storage::getInstance()->threadCleanup();
     
     log_debug("update thread shut down. thread: %d\n", pthread_self());
-    pthread_exit(nullptr);
     return nullptr;
 }

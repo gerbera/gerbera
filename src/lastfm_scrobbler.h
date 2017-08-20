@@ -46,19 +46,20 @@ class LastFm : public Singleton<LastFm, std::mutex>
 {
 public:
     LastFm();
+    zmm::String getName() override { return _("LastFM Scrobbler"); }
     ~LastFm();
 
     /// \brief Initializes the LastFm client.
     ///
     /// This function reads information from the config and initializes
     /// various variables (like username and password).
-    void init();
+    void init() override;
 
     /// \brief Destroys the LastFm client.
     ///
     /// This function destroys the LastFm client after submitting the
     /// last Track info
-    void shutdown();
+    void shutdown() override;
 
     /// \brief indicates that a new file has started playing.
     ///

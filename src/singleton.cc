@@ -74,22 +74,18 @@ void SingletonManager::shutdown(bool complete)
 {
     log_debug("start (%d objects)\n", singletonStack->size());
     AutoLock lock(mutex);
-    
-    Ref<ObjectStack<Singleton<Object> > > singletonStackReactivate(new ObjectStack<Singleton<Object> >(SINGLETON_CUR_MAX));
-    
+
     Ref<Singleton<Object> > object;
     while((object = singletonStack->pop()) != nullptr)
     {
-        //log_debug("destoying... \n");
-        //_print_backtrace(stdout);
+        log_debug("destoying %s... \n", object->getName().c_str());
         object->shutdown();
+        log_debug("invalidating %s... \n", object->getName().c_str());
         object->inactivateSingleton();
-        singletonStackReactivate->push(object);
-        //object->destroyMutex();
     }
-    while((object = singletonStackReactivate->pop()) != nullptr)
-        object->reactivateSingleton();
+
     if (complete && instance != nullptr)
         instance = nullptr;
+
     log_debug("end\n");
 }

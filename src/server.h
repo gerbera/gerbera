@@ -49,12 +49,14 @@ class Server : public Singleton<Server>
 public:
     
     Server();
+
+    zmm::String getName() override { return _("Server"); }
     
     /// \brief Initializes the server.
     /// 
     /// This function reads information from the config and initializes
     /// various variables (like server UDN and so forth).
-    virtual void init();
+    virtual void init() override;
     
     
     /// \brief Initializes UPnP portion, only ip or interface can be given
@@ -69,7 +71,7 @@ public:
     ///
     /// Unregisters the device with the SDK, shuts down the
     /// update manager task, storage task, content manager.
-    virtual void shutdown();
+    virtual void shutdown() override;
     
     /// \brief Returns the virtual web server URL.
     ///

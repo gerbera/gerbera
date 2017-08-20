@@ -48,7 +48,7 @@ public:
     
     void registerSingleton(zmm::Ref<Singleton<zmm::Object> > object);
     virtual void shutdown(bool complete = false);
-    
+
 protected:
     static zmm::Ref<SingletonManager> instance;
     static std::mutex mutex;
@@ -83,6 +83,7 @@ public:
         }
         return instance;
     }
+    virtual zmm::String getName() =0;
     
 protected:
     

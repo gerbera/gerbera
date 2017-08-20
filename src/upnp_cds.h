@@ -88,6 +88,8 @@ protected:
     static zmm::String serviceID;
 
 public:
+    zmm::String getName() override { return _("CDS"); }
+
     /// \brief Constructor for the CDS, saves the service type and service id
     /// in internal variables.
     /// \todo Check if it makes sense to use it as it is done now...why not define them as constants?

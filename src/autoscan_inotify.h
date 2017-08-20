@@ -66,6 +66,8 @@ public:
     
     /// \brief Stop monitoring a directory
     void unmonitor(zmm::Ref<AutoscanDirectory> dir);
+
+    zmm::String getName() override { return _("AutoScan INotify"); }
     
 private:
     static void *staticThreadProc(void *arg);

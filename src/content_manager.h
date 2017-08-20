@@ -178,6 +178,7 @@ class ContentManager : public Timer::Subscriber, public Singleton<ContentManager
 public:
     ContentManager();
     void init() override;
+    zmm::String getName() override { return _("Content Manager"); }
     virtual ~ContentManager();
     void shutdown() override;
 

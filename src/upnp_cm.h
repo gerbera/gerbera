@@ -76,6 +76,8 @@ protected:
     void upnp_action_GetProtocolInfo(zmm::Ref<ActionRequest> request);
     
 public:
+    zmm::String getName() override { return _("CM"); }
+
     /// \brief Constructor for the CMS, saves the service type and service id
     /// in internal variables.
     /// \todo Check if it makes sense to use it as it is done now...why not define them as constants?

@@ -80,6 +80,7 @@ public:
     ~Timer() { log_debug("Timer destroyed!\n"); }
     void init() override;
     void shutdown() override;
+    zmm::String getName() override { return _("Timer"); }
 
     /// \brief Add a subscriber
     ///

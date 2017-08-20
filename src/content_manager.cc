@@ -392,6 +392,7 @@ void ContentManager::shutdown()
 
 #ifdef HAVE_INOTIFY
     for (int i = 0; i < autoscan_inotify->size(); i++) {
+        log_debug("AutoDir %d\n", i);
         Ref<AutoscanDirectory> dir = autoscan_inotify->get(i);
         if (dir != nullptr) {
             try {

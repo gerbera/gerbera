@@ -31,11 +31,12 @@ public:
     TaskProcessor();
     virtual ~TaskProcessor();
     void addTask(zmm::Ref<GenericTask> task);
-    virtual void init();
-    virtual void shutdown();
+    virtual void init() override;
+    virtual void shutdown() override;
     zmm::Ref<zmm::Array<GenericTask> > getTasklist();
     zmm::Ref<GenericTask> getCurrentTask();
     void invalidateTask(unsigned int taskID);
+    zmm::String getName() override { return _("Task Processor"); }
 
 protected:
     pthread_t taskThread;

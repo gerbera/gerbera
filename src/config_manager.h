@@ -197,6 +197,7 @@ public:
     ConfigManager();
 
     void init() override;
+    zmm::String getName() override { return _("Config Manager"); }
 
     virtual ~ConfigManager();
     

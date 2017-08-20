@@ -46,8 +46,9 @@ class UpdateManager : public Singleton<UpdateManager>
 {
 public:
     UpdateManager();
-    virtual void shutdown();
-    virtual void init();
+    virtual void shutdown() override;
+    virtual void init() override;
+    zmm::String getName() override { return _("Update Manager"); }
 
     void containerChanged(int objectID, int flushPolicy = FLUSH_SPEC);
     void containersChanged(zmm::Ref<zmm::IntArray> objectIDs, int flushPolicy = FLUSH_SPEC);

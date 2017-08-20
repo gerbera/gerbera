@@ -103,8 +103,10 @@ class Storage : public Singleton<Storage, std::mutex>
 {
 public:
     static zmm::Ref<Storage> getInstance();
+
+    zmm::String getName() override { return _("Storage"); }
     
-    virtual void init() = 0;
+    virtual void init() override = 0;
     virtual void addObject(zmm::Ref<CdsObject> object, int *changedContainer) = 0;
 
     /// \brief Adds a virtual container chain specified by path.
@@ -262,7 +264,7 @@ public:
     virtual zmm::Ref<zmm::IntArray> getPathIDs(int objectID) = 0;
     
     /// \brief shutdown the Storage with its possible threads
-    virtual void shutdown() = 0;
+    virtual void shutdown() override = 0;
     
     /// \brief Ensures that a container given by it's location on disk is
     /// present in the database. If it does not exist it will be created, but

@@ -55,7 +55,7 @@ void *Timer::staticThreadProc(void *arg)
     auto *inst = (Timer *)arg;
     inst->threadProc();
     log_debug("Exiting Timer thread...\n");
-    pthread_exit(nullptr);
+    return nullptr;
 }
 
 void Timer::threadProc() {
@@ -103,6 +103,7 @@ void Timer::triggerWait()
         if (subscribers.empty()) {
             log_debug("Nothing to do, sleeping...\n");
             cond.wait(lock);
+            continue;
         }
 
         struct timespec *timeout = getNextNotifyTime();
@@ -174,4 +175,6 @@ struct timespec* Timer::getNextNotifyTime()
 void Timer::shutdown()
 {
     shutdownFlag = true;
+    cond.notify_all();
+    pthread_join(thread, nullptr);
 }

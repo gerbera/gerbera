@@ -127,8 +127,10 @@ protected:
 public:
     /// \brief Constructor, initializes the array.
     SessionManager();
+
+    zmm::String getName() override { return _("Session Manager"); }
     
-    virtual ~SessionManager() { log_debug("SessionManager destroyed\n"); }
+    virtual ~SessionManager() override { log_debug("SessionManager destroyed\n"); }
     
     /// \brief Creates a Session with a given timeout.
     /// \param timeout Session timeout in milliseconds.
@@ -152,7 +154,7 @@ public:
     
     void containerChangedUI(zmm::Ref<zmm::IntArray> objectIDs);
     
-    virtual void timerNotify(zmm::Ref<Timer::Parameter> parameter);
+    virtual void timerNotify(zmm::Ref<Timer::Parameter> parameter) override;
 };
 
 #endif //  __SESSION_MANAGER_H__
