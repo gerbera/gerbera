@@ -33,7 +33,7 @@
 #ifndef __ACTION_REQUEST_H__
 #define __ACTION_REQUEST_H__
 
-#include <upnp-1.8/upnp.h>
+#include <upnp/upnp.h>
 
 #include "common.h"
 #include "mxml/mxml.h"

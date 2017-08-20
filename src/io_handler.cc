@@ -31,7 +31,7 @@
 /// This handles the VirtualDirCallbacks that come from the web server.
 
 #include <unistd.h>
-#include <upnp-1.8/ixml.h>
+#include <upnp/ixml.h>
 
 #include "server.h"
 

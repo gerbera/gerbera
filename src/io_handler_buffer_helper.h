@@ -33,7 +33,7 @@
 #define __IO_HANDLER_BUFFER_HELPER_H__
 
 #include <pthread.h>
-#include <upnp-1.8/upnp.h>
+#include <upnp/upnp.h>
 #include <mutex>
 #include <condition_variable>
 
