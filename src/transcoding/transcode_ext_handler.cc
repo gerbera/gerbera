@@ -36,7 +36,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <upnp-1.8/ixml.h>
+#include <ixml.h>
 #include <unistd.h>
 #include <cstring>
 #include <cstdio>

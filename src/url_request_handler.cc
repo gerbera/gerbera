@@ -31,7 +31,7 @@
 
 #ifdef HAVE_CURL
 
-#include <upnp-1.8/ixml.h>
+#include <ixml.h>
 
 #include "server.h"
 #include "common.h"
