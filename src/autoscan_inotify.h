@@ -43,12 +43,6 @@
 #define INOTIFY_ROOT -1
 #define INOTIFY_UNKNOWN_PARENT_WD -2
 
-enum inotify_watch_type_t
-{
-    InotifyWatchTypeNonexisting,
-    InotifyWatchTypeAutoscan
-};
-
 class AutoscanInotify : public Singleton<AutoscanInotify, std::mutex>
 {
 public:
@@ -86,28 +80,28 @@ private:
     // event mask with events to watch for (set by constructor);
     int events;
     
-    enum watch_type_t
+    enum class WatchType
     {
-        WatchAutoscanType,
-        WatchMoveType
+        Autoscan,
+        Move
     };
     
     class Watch : public zmm::Object
     {
     public:
-        Watch(watch_type_t type)
+        Watch(WatchType type)
         {
             this->type = type;
         }
-        watch_type_t getType() { return type; }
+        WatchType getType() { return type; }
     private:
-        watch_type_t type;
+        WatchType type;
     };
     
     class WatchAutoscan : public Watch
     {
     public:
-        WatchAutoscan(bool startPoint, zmm::Ref<AutoscanDirectory> adir, zmm::String normalizedAutoscanPath) : Watch(WatchAutoscanType)
+        WatchAutoscan(bool startPoint, zmm::Ref<AutoscanDirectory> adir, zmm::String normalizedAutoscanPath) : Watch(WatchType::Autoscan)
         {
             setAutoscanDirectory(adir);
             setNormalizedAutoscanPath(normalizedAutoscanPath);
@@ -140,7 +134,7 @@ private:
     class WatchMove : public Watch
     {
     public:
-        WatchMove(int removeWd) : Watch(WatchMoveType)
+        WatchMove(int removeWd) : Watch(WatchType::Move)
         {
             this->removeWd = removeWd;
         }

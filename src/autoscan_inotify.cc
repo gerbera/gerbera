@@ -408,7 +408,7 @@ void AutoscanInotify::checkMoveWatches(int wd, Ref<Wd> wdObj)
     Ref<Array<Watch>> wdWatches = wdObj->getWdWatches();
     for (int i = 0; i < wdWatches->size(); i++) {
         watch = wdWatches->get(i);
-        if (watch->getType() == WatchMoveType) {
+        if (watch->getType() == WatchType::Move) {
             if (wdWatches->size() == 1) {
                 inotify->removeWatch(wd);
             } else {
@@ -452,7 +452,7 @@ void AutoscanInotify::recheckNonexistingMonitors(int wd, Ref<Wd> wdObj)
     Ref<Array<Watch>> wdWatches = wdObj->getWdWatches();
     for (int i = 0; i < wdWatches->size(); i++) {
         watch = wdWatches->get(i);
-        if (watch->getType() == WatchAutoscanType) {
+        if (watch->getType() == WatchType::Autoscan) {
             watchAs = RefCast(watch, WatchAutoscan);
             Ref<Array<StringBase>> pathAr = watchAs->getNonexistingPathArray();
             if (pathAr != nullptr) {
@@ -469,7 +469,7 @@ void AutoscanInotify::removeNonexistingMonitor(int wd, Ref<Wd> wdObj, Ref<Array<
     Ref<Array<Watch>> wdWatches = wdObj->getWdWatches();
     for (int i = 0; i < wdWatches->size(); i++) {
         watch = wdWatches->get(i);
-        if (watch->getType() == WatchAutoscanType) {
+        if (watch->getType() == WatchType::Autoscan) {
             watchAs = RefCast(watch, WatchAutoscan);
             if (watchAs->getNonexistingPathArray() == pathAr) {
                 if (wdWatches->size() == 1) {
@@ -626,7 +626,7 @@ Ref<AutoscanInotify::WatchAutoscan> AutoscanInotify::getAppropriateAutoscan(Ref<
     Ref<Array<Watch>> wdWatches = wdObj->getWdWatches();
     for (int i = 0; i < wdWatches->size(); i++) {
         watch = wdWatches->get(i);
-        if (watch->getType() == WatchAutoscanType) {
+        if (watch->getType() == WatchType::Autoscan) {
             watchAs = RefCast(watch, WatchAutoscan);
             if (watchAs->getNonexistingPathArray() == nullptr) {
                 if (watchAs->getAutoscanDirectory()->getLocation() == adir->getLocation()) {
@@ -647,7 +647,7 @@ Ref<AutoscanInotify::WatchAutoscan> AutoscanInotify::getAppropriateAutoscan(Ref<
     Ref<Array<Watch>> wdWatches = wdObj->getWdWatches();
     for (int i = 0; i < wdWatches->size(); i++) {
         watch = wdWatches->get(i);
-        if (watch->getType() == WatchAutoscanType) {
+        if (watch->getType() == WatchType::Autoscan) {
             watchAs = RefCast(watch, WatchAutoscan);
             if (watchAs->getNonexistingPathArray() == nullptr) {
                 String testLocation = watchAs->getNormalizedAutoscanPath();
@@ -693,7 +693,7 @@ void AutoscanInotify::removeWatchMoves(int wd)
         } else {
             for (int i = 0; i < wdWatches->size(); i++) {
                 watch = wdWatches->get(i);
-                if (watch->getType() == WatchMoveType) {
+                if (watch->getType() == WatchType::Move) {
                     watchMv = RefCast(watch, WatchMove);
                     if (watchMv->getRemoveWd() == wd) {
                         log_debug("removing watch move\n");
@@ -743,7 +743,7 @@ Ref<AutoscanInotify::WatchAutoscan> AutoscanInotify::getStartPoint(Ref<Wd> wdObj
     Ref<Array<Watch>> wdWatches = wdObj->getWdWatches();
     for (int i = 0; i < wdWatches->size(); i++) {
         watch = wdWatches->get(i);
-        if (watch->getType() == WatchAutoscanType) {
+        if (watch->getType() == WatchType::Autoscan) {
             watchAs = RefCast(watch, WatchAutoscan);
             if (watchAs->isStartPoint())
                 return watchAs;
@@ -790,7 +790,7 @@ void AutoscanInotify::removeDescendants(int wd)
     Ref<WatchAutoscan> watchAs;
     for (int i = 0; i < wdWatches->size(); i++) {
         watch = wdWatches->get(i);
-        if (watch->getType() == WatchAutoscanType) {
+        if (watch->getType() == WatchType::Autoscan) {
             watchAs = RefCast(watch, WatchAutoscan);
             Ref<IntArray> descendants = watchAs->getDescendants();
             if (descendants != nullptr) {
