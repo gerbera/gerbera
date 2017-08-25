@@ -346,6 +346,8 @@ public:
 #ifdef HAVE_MAGIC
     zmm::String getMimeTypeFromBuffer(const void *buffer, size_t length);
 #endif
+
+
 protected:
     void initLayout();
     void destroyLayout();
@@ -366,6 +368,7 @@ protected:
 
     zmm::Ref<AutoscanList> autoscan_timed;
 #ifdef HAVE_INOTIFY
+    AutoscanInotify inotify;
     zmm::Ref<AutoscanList> autoscan_inotify;
 #endif
  

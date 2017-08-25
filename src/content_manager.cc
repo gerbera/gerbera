@@ -114,8 +114,8 @@ ContentManager::ContentManager()
     layout_enabled = false;
 
     acct = Ref<CMAccounting>(new CMAccounting());
-    taskQueue1 = Ref<ObjectQueue<GenericTask> >(new ObjectQueue<GenericTask>(CM_INITIAL_QUEUE_SIZE));
-    taskQueue2 = Ref<ObjectQueue<GenericTask> >(new ObjectQueue<GenericTask>(CM_INITIAL_QUEUE_SIZE));
+    taskQueue1 = Ref<ObjectQueue<GenericTask>>(new ObjectQueue<GenericTask>(CM_INITIAL_QUEUE_SIZE));
+    taskQueue2 = Ref<ObjectQueue<GenericTask>>(new ObjectQueue<GenericTask>(CM_INITIAL_QUEUE_SIZE));
 
     Ref<ConfigManager> cm = ConfigManager::getInstance();
     Ref<Element> tmpEl;
@@ -174,6 +174,9 @@ ContentManager::ContentManager()
         // make an empty list so we do not have to do extra checks on shutdown
         autoscan_inotify = Ref<AutoscanList>(new AutoscanList());
     }
+
+    // Start INotify thread
+    inotify.run();
 #endif
 /* init filemagic */
 #ifdef HAVE_MAGIC
@@ -228,7 +231,7 @@ ContentManager::ContentManager()
     }
     // if YT is disabled in the configuration it is still possible that the DB
     // is populated with YT objects, so we need to allow playing them
-    cached_urls = Ref<ReentrantArray<CachedURL> >(new ReentrantArray<CachedURL>(MAX_CACHED_URLS));
+    cached_urls = Ref<ReentrantArray<CachedURL>>(new ReentrantArray<CachedURL>(MAX_CACHED_URLS));
 
 #endif //YOUTUBE
 
@@ -311,11 +314,10 @@ void ContentManager::init()
 #ifdef HAVE_INOTIFY
     if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
         /// \todo change this (we need a new autoscan architecture)
-        Ref<AutoscanInotify> inotify = AutoscanInotify::getInstance();
         for (int i = 0; i < autoscan_inotify->size(); i++) {
             Ref<AutoscanDirectory> dir = autoscan_inotify->get(i);
             if (dir != nullptr)
-                inotify->monitor(dir);
+                inotify.monitor(dir);
         }
     }
 #endif
@@ -328,7 +330,7 @@ void ContentManager::init()
     }
 
 #ifdef EXTERNAL_TRANSCODING
-    process_list = Ref<Array<Executor> >(new Array<Executor>());
+    process_list = Ref<Array<Executor>>(new Array<Executor>());
 #endif
 }
 
@@ -448,13 +450,13 @@ Ref<GenericTask> ContentManager::getCurrentTask()
     return task;
 }
 
-Ref<Array<GenericTask> > ContentManager::getTasklist()
+Ref<Array<GenericTask>> ContentManager::getTasklist()
 {
     int i;
 
     AutoLock lock(mutex);
 
-    Ref<Array<GenericTask> > taskList = nullptr;
+    Ref<Array<GenericTask>> taskList = nullptr;
 #ifdef ONLINE_SERVICES
     taskList = TaskProcessor::getInstance()->getTasklist();
 #endif
@@ -466,7 +468,7 @@ Ref<Array<GenericTask> > ContentManager::getTasklist()
         return nullptr;
 
     if (taskList == nullptr)
-        taskList = Ref<Array<GenericTask> >(new Array<GenericTask>());
+        taskList = Ref<Array<GenericTask>>(new Array<GenericTask>());
 
     if (t != nullptr)
         taskList->append(t);
@@ -483,7 +485,7 @@ Ref<Array<GenericTask> > ContentManager::getTasklist()
     for (i = 0; i < qsize; i++) {
         Ref<GenericTask> t = taskQueue2->get(i);
         if (t->isValid())
-            taskList = Ref<Array<GenericTask> >(new Array<GenericTask>());
+            taskList = Ref<Array<GenericTask>>(new Array<GenericTask>());
     }
 
     return taskList;
@@ -699,7 +701,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
     }
 
     // request only items if non-recursive scan is wanted
-    shared_ptr<unordered_set<int> > list = storage->getObjects(containerID, !adir->getRecursive());
+    shared_ptr<unordered_set<int>> list = storage->getObjects(containerID, !adir->getRecursive());
 
     unsigned int thisTaskID;
     if (task != nullptr) {
@@ -945,7 +947,7 @@ void ContentManager::updateObject(int objectID, Ref<Dictionary> parameters)
         } else if (string_ok(mimetype) && (!string_ok(protocol))) {
             cloned_item->setMimeType(mimetype);
             Ref<CdsResource> resource = cloned_item->getResource(0);
-            Ref<Array<StringBase> > parts = split_string(resource->getAttribute(_("protocolInfo")), ':');
+            Ref<Array<StringBase>> parts = split_string(resource->getAttribute(_("protocolInfo")), ':');
             protocol = parts->get(0);
             resource->addAttribute(_("protocolInfo"), renderProtocolInfo(mimetype, protocol));
         }
@@ -1230,7 +1232,7 @@ String ContentManager::mimetype2upnpclass(String mimeType)
     if (upnpClass != nullptr)
         return upnpClass;
     // try to match foo
-    Ref<Array<StringBase> > parts = split_string(mimeType, '/');
+    Ref<Array<StringBase>> parts = split_string(mimeType, '/');
     if (parts->size() != 2)
         return nullptr;
     return mimetype_upnpclass_map->get((String)parts->get(0) + "/*");
@@ -1265,7 +1267,6 @@ void ContentManager::initJS()
 {
     if (playlist_parser_script == nullptr)
         playlist_parser_script = Ref<PlaylistParserScript>(new PlaylistParserScript(Runtime::getInstance()));
-
 }
 
 void ContentManager::destroyJS()
@@ -1540,7 +1541,7 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
                 rm_list = autoscan_inotify->removeIfSubdir(path);
                 for (i = 0; i < rm_list->size(); i++) {
                     Ref<AutoscanDirectory> dir = rm_list->get(i);
-                    AutoscanInotify::getInstance()->unmonitor(dir);
+                    inotify.unmonitor(dir);
                 }
             }
 #endif
@@ -1609,7 +1610,7 @@ Ref<AutoscanDirectory> ContentManager::getAutoscanDirectory(int scanID, ScanMode
     return nullptr;
 }
 
-Ref<Array<AutoscanDirectory> > ContentManager::getAutoscanDirectories(ScanMode scanMode)
+Ref<Array<AutoscanDirectory>> ContentManager::getAutoscanDirectories(ScanMode scanMode)
 {
     if (scanMode == ScanMode::Timed) {
         return autoscan_timed->getArrayCopy();
@@ -1623,12 +1624,12 @@ Ref<Array<AutoscanDirectory> > ContentManager::getAutoscanDirectories(ScanMode s
     return nullptr;
 }
 
-Ref<Array<AutoscanDirectory> > ContentManager::getAutoscanDirectories()
+Ref<Array<AutoscanDirectory>> ContentManager::getAutoscanDirectories()
 {
-    Ref<Array<AutoscanDirectory> > all = autoscan_timed->getArrayCopy();
+    Ref<Array<AutoscanDirectory>> all = autoscan_timed->getArrayCopy();
 
 #if HAVE_INOTIFY
-    Ref<Array<AutoscanDirectory> > ino = autoscan_inotify->getArrayCopy();
+    Ref<Array<AutoscanDirectory>> ino = autoscan_inotify->getArrayCopy();
     if (ino != nullptr)
         for (int i = 0; i < ino->size(); i++)
             all->append(ino->get(i));
@@ -1672,7 +1673,7 @@ void ContentManager::removeAutoscanDirectory(int scanID, ScanMode scanMode)
             autoscan_inotify->remove(scanID);
             storage->removeAutoscanDirectory(adir->getStorageID());
             SessionManager::getInstance()->containerChangedUI(adir->getObjectID());
-            AutoscanInotify::getInstance()->unmonitor(adir);
+            inotify.unmonitor(adir);
         }
     }
 #endif
@@ -1697,7 +1698,7 @@ void ContentManager::removeAutoscanDirectory(int objectID)
             autoscan_inotify->remove(adir->getLocation());
             storage->removeAutoscanDirectoryByObjectID(objectID);
             SessionManager::getInstance()->containerChangedUI(objectID);
-            AutoscanInotify::getInstance()->unmonitor(adir);
+            inotify.unmonitor(adir);
         }
     }
 #endif
@@ -1788,7 +1789,7 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
         if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
             if (dir->getScanMode() == ScanMode::INotify) {
                 autoscan_inotify->add(dir);
-                AutoscanInotify::getInstance()->monitor(dir);
+                inotify.monitor(dir);
             }
         }
 #endif
@@ -1801,7 +1802,7 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
 #ifdef HAVE_INOTIFY
     if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
         if (original->getScanMode() == ScanMode::INotify) {
-            AutoscanInotify::getInstance()->unmonitor(original);
+            inotify.unmonitor(original);
         }
     }
 #endif
@@ -1843,7 +1844,7 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
     if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
         if (dir->getScanMode() == ScanMode::INotify) {
             autoscan_inotify->add(copy);
-            AutoscanInotify::getInstance()->monitor(copy);
+            inotify.monitor(copy);
         }
     }
 #endif

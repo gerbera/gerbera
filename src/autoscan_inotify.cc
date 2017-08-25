@@ -64,30 +64,7 @@ AutoscanInotify::AutoscanInotify()
     events = IN_CLOSE_WRITE | IN_CREATE | IN_MOVED_FROM | IN_MOVED_TO | IN_DELETE | IN_DELETE_SELF | IN_MOVE_SELF | IN_UNMOUNT;
 }
 
-void AutoscanInotify::init()
-{
-    AutoLock lock(mutex);
-    if (shutdownFlag) {
-        shutdownFlag = false;
-        inotify = Ref<Inotify>(new Inotify());
-        log_debug("starting inotify thread...\n");
-        int ret = pthread_create(
-            &thread,
-            nullptr,
-            AutoscanInotify::staticThreadProc,
-            this);
-
-        if (ret)
-            throw _Exception(_("failed to start inotify thread: ") + ret);
-    }
-}
-
 AutoscanInotify::~AutoscanInotify()
-{
-    shutdown();
-}
-
-void AutoscanInotify::shutdown()
 {
     unique_lock<std::mutex> lock(mutex);
     if (!shutdownFlag) {
@@ -95,23 +72,21 @@ void AutoscanInotify::shutdown()
         shutdownFlag = true;
         inotify->stop();
         lock.unlock();
-        if (thread)
-            pthread_join(thread, nullptr);
-        thread = 0;
+        thread_.join();
         log_debug("inotify thread died.\n");
         inotify = nullptr;
         watches->clear();
     }
 }
 
-void* AutoscanInotify::staticThreadProc(void* arg)
+void AutoscanInotify::run()
 {
-    log_debug("started inotify thread.\n");
-    auto* inst = (AutoscanInotify*)arg;
-    inst->threadProc();
-    Storage::getInstance()->threadCleanup();
-    log_debug("exiting inotify thread...\n");
-    return nullptr;
+    AutoLock lock(mutex);
+    if (shutdownFlag) {
+        shutdownFlag = false;
+        inotify = Ref<Inotify>(new Inotify());
+        thread_ = thread{ &AutoscanInotify::threadProc, this };
+    }
 }
 
 void AutoscanInotify::threadProc()
@@ -286,11 +261,8 @@ void AutoscanInotify::threadProc()
 
 void AutoscanInotify::monitor(zmm::Ref<AutoscanDirectory> dir)
 {
-    if (shutdownFlag)
-        init();
     assert(dir->getScanMode() == ScanMode::INotify);
-    log_debug("---> INCOMING REQUEST TO MONITOR [%s]\n",
-        dir->getLocation().c_str());
+    log_debug("Requested to monitor \"%s\"\n", dir->getLocation().c_str());
     AutoLock lock(mutex);
     monitorQueue->enqueue(dir);
     inotify->stop();
@@ -301,8 +273,7 @@ void AutoscanInotify::unmonitor(zmm::Ref<AutoscanDirectory> dir)
     // must not be persistent
     assert(!dir->persistent());
 
-    log_debug("---> INCOMING REQUEST TO UNMONITOR [%s]\n",
-        dir->getLocation().c_str());
+    log_debug("Requested to stop monitoring \"%s\"\n", dir->getLocation().c_str());
     AutoLock lock(mutex);
     unmonitorQueue->enqueue(dir);
     inotify->stop();

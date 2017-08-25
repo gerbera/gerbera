@@ -34,6 +34,7 @@
 #include <memory>
 #include <mutex>
 #include <unordered_map>
+#include <thread>
 
 #include "zmm/zmmf.h"
 #include "autoscan.h"
@@ -43,31 +44,24 @@
 #define INOTIFY_ROOT -1
 #define INOTIFY_UNKNOWN_PARENT_WD -2
 
-class AutoscanInotify : public Singleton<AutoscanInotify, std::mutex>
+class AutoscanInotify
 {
 public:
     AutoscanInotify();
-    virtual ~AutoscanInotify();
-    void init() override;
-    
-    /// \brief shutdown the inotify thread
-    /// 
-    /// warning: currently doesn't remove all the remaining inotify watches!
-    void shutdown() override;
-    
+    ~AutoscanInotify();
+
+    void run();
+
     /// \brief Start monitoring a directory
     void monitor(zmm::Ref<AutoscanDirectory> dir);
     
     /// \brief Stop monitoring a directory
     void unmonitor(zmm::Ref<AutoscanDirectory> dir);
 
-    zmm::String getName() override { return _("AutoScan INotify"); }
-    
 private:
-    static void *staticThreadProc(void *arg);
     void threadProc();
     
-    pthread_t thread;
+    std::thread thread_;
     
     zmm::Ref<Inotify> inotify;
 
