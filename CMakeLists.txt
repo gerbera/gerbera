@@ -93,8 +93,8 @@ set(libgerberaFILES
         src/layout/layout.h
         src/logger.cc
         src/logger.h
-        src/md5/md5.c
-        src/md5/md5.h
+        src/contrib/md5.c
+        src/contrib/md5.h
         src/mem_io_handler.cc
         src/mem_io_handler.h
         src/memory.cc
