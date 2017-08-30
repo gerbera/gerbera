@@ -57,7 +57,7 @@
     #include <uuid/uuid.h>
 #endif
 
-#include "md5/md5.h"
+#include "contrib/md5.h"
 #include "file_io_handler.h"
 #include "metadata_handler.h"
 #include "config_manager.h"
