@@ -21,8 +21,7 @@ set(WITH_EXIF           1 CACHE BOOL "Use libexif to extract image metadata")
 set(WITH_EXIV2          0 CACHE BOOL "Use libexiv2 to extract image metadata")
 set(WITH_PROTOCOL_EXTENSIONS 1 CACHE BOOL "Add incomplete DLNA protocol extensions to resposnses")
 set(WITH_LASTFM         0 CACHE BOOL "Enable LastFM")
-set(WITH_LOGGING        1 CACHE BOOL "Enable file logging")
-set(WITH_DEBUG_LOGGING  1 CACHE BOOL "Enables debug logging")
+set(WITH_DEBUG          1 CACHE BOOL "Enables debug logging")
 
 project("gerbera")
 set(gerbera_MAJOR_VERSION     1)
@@ -58,6 +57,8 @@ set(libgerberaFILES
         src/config_options.h
         src/content_manager.cc
         src/content_manager.h
+        src/contrib/md5.c
+        src/contrib/md5.h
         src/curl_io_handler.cc
         src/curl_io_handler.h
         src/destroyer.cc
@@ -93,8 +94,6 @@ set(libgerberaFILES
         src/layout/layout.h
         src/logger.cc
         src/logger.h
-        src/contrib/md5.c
-        src/contrib/md5.h
         src/mem_io_handler.cc
         src/mem_io_handler.h
         src/memory.cc
@@ -342,10 +341,7 @@ add_definitions(-DGIT_COMMIT_HASH="${GIT_COMMIT_HASH}")
 
 add_definitions(-DEXTERNAL_TRANSCODING -DAUTO_CREATE_DATABASE)
 
-if (WITH_LOGGING OR WITH_DEBUG_LOGGING)
-    add_definitions(-DLOG_ENABLED)
-endif()
-if (WITH_DEBUG_LOGGING)
+if (WITH_DEBUG)
     add_definitions(-DTOMBDEBUG)
 endif()
 
