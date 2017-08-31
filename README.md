@@ -87,6 +87,28 @@ The following packages are too old in 16.04 and must be installed from source:
 `libupnp` must be configured/built with `--enable-ipv6`. See
 `scripts/install-pupnp18.sh` for details.
 
+#### On FreeBSD
+
+_The following has bee tested on FreeBSD 11.0 using a clean jail environment._ 
+
+1. Install the required prerequisites as root using either ports or packages. This can be done via Package manager or ports. (pkg manager is used here.)  Include mysql if you wish to use that instead of SQLite3.
+```
+pkg install wget git autoconf automake libtool taglib cmake gcc libav ffmpeg libexif pkgconf liblastfm gmake
+````
+
+2. Clone repository, build depdences in current in ports and then build gerbera.
+````
+git clone https://github.com/v00d00/gerbera.git 
+mkdir build
+cd build
+sh ../gerbera/scripts/install-pupnp18.sh
+sh ../gerbera/scripts/install-duktape.sh
+cmake ../gerbera -DWITH_MAGIC=1 -DWITH_MYSQL=0 -DWITH_CURL=1 -DWITH_JS=1 -DWITH_TAGLIB=1 -DWITH_AVCODEC=1 -DWITH_EXIF=1 -DWITH_LASTFM=0
+make -j4
+sudo make install
+````
+
+
 ### Quick start build instructions:
 
 ```
