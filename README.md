@@ -71,6 +71,7 @@ Gerbera is available in [Entware-ng](https://github.com/Entware-ng/rtndev/tree/m
 The project has been ported to [CMake].
 
 ### Install prerequisites.
+#### [On FreeBSD 11.0](./README_FreeBSD.md)
 
 #### On Ubuntu 16.04
 ```
