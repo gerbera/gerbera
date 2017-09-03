@@ -1,0 +1,100 @@
+{
+  "success": true,
+  "containers": {
+    "parent_id": "0",
+    "type": "filesystem",
+    "container": [
+      {
+        "id": "2f62696e",
+        "child_count": 0,
+        "title": "bin"
+      },
+      {
+        "id": "2f626f6f74",
+        "child_count": 1,
+        "title": "boot"
+      },
+      {
+        "id": "2f646576",
+        "child_count": 1,
+        "title": "dev"
+      },
+      {
+        "id": "2f657463",
+        "child_count": 1,
+        "title": "etc"
+      },
+
+      {
+        "id": "2f6c6962",
+        "child_count": 1,
+        "title": "lib"
+      },
+      {
+        "id": "2f6c69623634",
+        "child_count": 1,
+        "title": "lib64"
+      },
+      {
+        "id": "2f6c6f73742b666f756e64",
+        "child_count": 0,
+        "title": "lost+found"
+      },
+      {
+        "id": "2f6d6e74",
+        "child_count": 1,
+        "title": "mnt"
+      },
+      {
+        "id": "2f6f7074",
+        "child_count": 1,
+        "title": "opt"
+      },
+      {
+        "id": "2f70726f63",
+        "child_count": 1,
+        "title": "proc"
+      },
+      {
+        "id": "2f726f6f74",
+        "child_count": 0,
+        "title": "root"
+      },
+      {
+        "id": "2f72756e",
+        "child_count": 1,
+        "title": "run"
+      },
+      {
+        "id": "2f7362696e",
+        "child_count": 0,
+        "title": "sbin"
+      },
+      {
+        "id": "2f737276",
+        "child_count": 0,
+        "title": "srv"
+      },
+      {
+        "id": "2f737973",
+        "child_count": 1,
+        "title": "sys"
+      },
+      {
+        "id": "2f746d70",
+        "child_count": 1,
+        "title": "tmp"
+      },
+      {
+        "id": "2f757372",
+        "child_count": 1,
+        "title": "usr"
+      },
+      {
+        "id": "2f766172",
+        "child_count": 1,
+        "title": "var"
+      }
+    ]
+  }
+}

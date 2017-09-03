@@ -1,0 +1,44 @@
+{
+  "success": true,
+  "containers": {
+    "parent_id": 0,
+    "type": "database",
+    "container": [
+      {
+        "id": 8,
+        "child_count": 6,
+        "autoscan_type": "none",
+        "autoscan_mode": "none",
+        "title": "Audio"
+      },
+      {
+        "id": 1,
+        "child_count": 1,
+        "autoscan_type": "none",
+        "autoscan_mode": "none",
+        "title": "PC Directory"
+      },
+      {
+        "id": 2779,
+        "child_count": 2,
+        "autoscan_type": "none",
+        "autoscan_mode": "none",
+        "title": "Photos"
+      },
+      {
+        "id": 3808,
+        "child_count": 2,
+        "autoscan_type": "none",
+        "autoscan_mode": "none",
+        "title": "Playlists"
+      },
+      {
+        "id": 7443,
+        "child_count": 2,
+        "autoscan_type": "none",
+        "autoscan_mode": "none",
+        "title": "Video"
+      }
+    ]
+  }
+}

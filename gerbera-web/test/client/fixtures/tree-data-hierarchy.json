@@ -1,0 +1,49 @@
+[
+  {
+    "title": "Folder 1",
+    "badge": [
+      "test",
+      "test1"
+    ],
+    "nodes": [
+      {
+        "title": "Folder 2",
+        "gerbera" : {
+          "id": 2222,
+          "childCount": 1
+        },
+        "nodes" : [
+          {
+            "title": "Folder 3",
+            "gerbera" : {
+              "id": 3333,
+              "childCount": 1
+            },
+            "nodes": [
+              {
+                "title": "Folder 4",
+                "gerbera" : {
+                  "id": 4444,
+                  "childCount": 1
+                },
+                "nodes": [
+                  {
+                    "title": "Folder 5",
+                    "gerbera" : {
+                      "id": 5555,
+                      "childCount": 0
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "gerbera" : {
+      "id": 1111,
+      "childCount": 1
+    }
+  }
+]

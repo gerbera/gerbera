@@ -1,0 +1,54 @@
+.navbar-brand {
+    padding: 5px;
+}
+.navbar-brand > img {
+    padding: 0px;
+    width: auto;
+}
+html, body {
+    min-height: 100%;
+    height: 100%;
+}
+
+body { padding-top: 70px; }
+
+#container {
+    min-height: 100%;
+    height: 100%;
+    overflow-y: auto;
+}
+
+#datagrid {
+    overflow-y: auto;
+}
+
+#tree {
+    overflow: auto;
+}
+
+.list-group-item {
+    padding-right: 0px;
+    padding-bottom: 0px;
+    border: 0px;
+}
+
+.list-group {
+    border: 0px;
+    padding-right: 0px;
+    padding-bottom: 0px;
+    margin-bottom: 0px;
+    box-shadow: none;
+}
+
+.folder-title {
+    padding-left: 10px;
+    cursor: pointer;
+}
+
+.expandable {
+    cursor: copy;
+}
+
+.selected-item {
+    background-color: #ff8000;
+}

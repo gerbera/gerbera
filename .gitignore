@@ -9,3 +9,6 @@ CMakeFiles
 cmake_install.cmake
 Makefile
 mediatomb
+**/node_modules/
+**/.idea/
+**/coverage/

@@ -1,0 +1,57 @@
+[
+  {
+    "title": "database",
+    "badge": [5],
+    "gerbera": {
+      "id": 0,
+      "childCount": 5
+    },
+    "nodes": [
+      {
+        "title": "Audio",
+        "badge": [6],
+        "nodes": [],
+        "gerbera": {
+          "id": 8,
+          "childCount": 6
+        }
+      },
+      {
+        "title": "PC Directory",
+        "badge": [1],
+        "nodes": [],
+        "gerbera": {
+          "id": 1,
+          "childCount": 1
+        }
+      },
+      {
+        "title": "Photos",
+        "badge": [2],
+        "nodes": [],
+        "gerbera": {
+          "id": 2779,
+          "childCount": 2
+        }
+      },
+      {
+        "title": "Playlists",
+        "badge": [2],
+        "nodes": [],
+        "gerbera": {
+          "id": 3808,
+          "childCount": 2
+        }
+      },
+      {
+        "title": "Video",
+        "badge": [2],
+        "nodes": [],
+        "gerbera": {
+          "id": 7443,
+          "childCount": 2
+        }
+      }
+    ]
+  }
+]

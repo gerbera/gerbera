@@ -1,0 +1,52 @@
+[
+  {
+    "id": 11111,
+    "text": "Item Number 1",
+    "url": "http://localhost/item-number-1"
+  },
+  {
+    "id": 22222,
+    "text": "Item Number 2",
+    "url": "http://localhost/item-number-2"
+  },
+  {
+    "id": 33333,
+    "text": "Item Number 3",
+    "url": "http://localhost/item-number-3"
+  },
+  {
+    "id": 44444,
+    "text": "Item Number 4",
+    "url": "http://localhost/item-number-4"
+  },
+  {
+    "id": 55555,
+    "text": "Item Number 5",
+    "url": "http://localhost/item-number-5"
+  },
+  {
+    "id": 66666,
+    "text": "Item Number 6",
+    "url": "http://localhost/item-number-6"
+  },
+  {
+    "id": 77777,
+    "text": "Item Number 7",
+    "url": "http://localhost/item-number-7"
+  },
+  {
+    "id": 88888,
+    "text": "Item Number 8",
+    "url": "http://localhost/item-number-8"
+  },
+  {
+    "id": 99999,
+    "text": "Item Number 9",
+    "url": "http://localhost/item-number-9"
+  },
+  {
+    "id": 101010,
+    "text": "Item Number 10",
+    "url": "http://localhost/item-number-10"
+  }
+]

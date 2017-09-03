@@ -1,0 +1,32 @@
+{
+  "get_config" : {
+    "count" : 0,
+    "responses" : {
+      "default" : "./auth/config.json"
+    }
+  },
+  "get_sid" : {
+    "count" : 0,
+    "responses" : {
+      "default" : "./auth/get_sid.not.logged_in.json"
+    }
+  },
+  "get_token" : {
+    "count" : 0,
+    "responses" : {
+      "default" : "./auth/get_token.success.json"
+    }
+  },
+  "login" : {
+    "count" : 0,
+    "responses" : {
+      "default" : "./auth/login.success.json"
+    }
+  },
+  "logout" : {
+    "count" : 0,
+    "responses" : {
+      "default" : "./auth/logout.success.json"
+    }
+  }
+}
