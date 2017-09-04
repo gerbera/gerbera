@@ -116,8 +116,12 @@ describe('Gerbera Tree', function () {
       var response = getJSONFixture('parent_id-0-select_it-0.json')
       spyOn(GERBERA.Items, 'treeItemSelected')
       spyOn($, 'ajax')
+      var onExpandSpy = jasmine.createSpy('onExpand')
+      var treeViewConfig = {
+        onExpand: onExpandSpy
+      }
 
-      GERBERA.Tree.loadTree(response)
+      GERBERA.Tree.loadTree(response, treeViewConfig)
 
       // click an item
       var item = $($('#tree li').get(3))
@@ -134,8 +138,12 @@ describe('Gerbera Tree', function () {
       var response = getJSONFixture('parent_id-0-select_it-0.json')
       spyOn(GERBERA.Items, 'treeItemSelected')
       spyOn($, 'ajax')
+      var onExpandSpy = jasmine.createSpy('onExpand')
+      var treeViewConfig = {
+          onExpand: onExpandSpy
+      }
 
-      GERBERA.Tree.loadTree(response)
+      GERBERA.Tree.loadTree(response, treeViewConfig)
 
       // click an item
       var item = $($('#tree li').get(3))
@@ -151,8 +159,12 @@ describe('Gerbera Tree', function () {
       var response = getJSONFixture('parent_id-0-select_it-0.json')
       spyOn(GERBERA.Items, 'treeItemSelected')
       spyOn($, 'ajax')
+      var onExpandSpy = jasmine.createSpy('onExpand')
+      var treeViewConfig = {
+          onExpand: onExpandSpy
+      }
 
-      GERBERA.Tree.loadTree(response)
+      GERBERA.Tree.loadTree(response, treeViewConfig)
 
       // click an item
       var item = $($('#tree li').get(3))
@@ -173,12 +185,16 @@ describe('Gerbera Tree', function () {
         d.resolve(childResponse)
         return d.promise()
       })
+      var onSelectionSpy = jasmine.createSpy('onSelection')
+      var treeViewConfig = {
+          onSelection: onSelectionSpy
+      }
 
-      GERBERA.Tree.loadTree(parentResponse)
+      GERBERA.Tree.loadTree(parentResponse, treeViewConfig)
 
       // click an item
       var item = $($('#tree li').get(4))
-      item.children('span.folder-icon').click()
+      item.children('span.folder-title').click()
 
       expect(ajaxSpy.calls.count()).toBe(1)
       expect(ajaxSpy.calls.mostRecent().args[0].data.req_type).toBe('containers')

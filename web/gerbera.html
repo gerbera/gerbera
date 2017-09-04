@@ -23,9 +23,9 @@
         </div>
         <div class="collapse navbar-collapse">
             <ul class="nav navbar-nav navbar-left">
-                <li><a id="nav-home" class="navbar-link" data-gerbera-menu-cmd="HOME">Home <span class="sr-only">(current)</span></a></li>
-                <li><a id="nav-db" class="navbar-link disabled" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="db">Database</a></li>
-                <li><a id="nav-fs" class="navbar-link disabled" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="fs">File System</a></li>
+                <li><a id="nav-home" class="btn navbar-link" data-gerbera-menu-cmd="HOME">Home <span class="sr-only">(current)</span></a></li>
+                <li><a id="nav-db" class="btn navbar-link disabled" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="db">Database</a></li>
+                <li><a id="nav-fs" class="btn navbar-link disabled" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="fs">File System</a></li>
                 <li><a id="report-issue" href="http://github.com/v00d00/gerbera/issues">Report an Issue</a></li>
             </ul>
             <form id="login-form" class="navbar-form navbar-right">
@@ -57,6 +57,15 @@
   })
 </script>
 
+<div class="container-fluid">
+    <div id="warning" class="alert alert-warning" style="display: none;">
+        <span>Warning</span>
+        <button type="button" class="close" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+</div>
+
 <div id="container" class="container-fluid">
     <div class="row">
         <div class="col-md-12">
@@ -68,33 +77,14 @@
     <div class="row">
         <div class="col-md-5">
             <div id="tree">
-                <div class="jumbotron">The Gerbera Tree</div>
-                <p>The Gerbera Tree displays the list of items stored in the database or filesystem</p>
-                <h3>Feature List</h3>
-                <ul>
-                    <li>Database Items</li>
-                    <li>Filesystem Items</li>
-                    <li>Expand/Collapse Tree</li>
-                </ul>
             </div>
         </div>
         <div class="col-md-7">
             <div id="datagrid">
-                <div class="jumbotron">The Gerbera Items</div>
-                <p>The Gerbera Items displays the list of items for a selected <span style="font-weight:bold;">tree</span></p>
-                <h3>Feature List</h3>
-                <ul>
-                    <li>List items</li>
-                    <li>Download resource</li>
-                    <li title="Requires code changes to enable">Show Thumbnails for movie (experimental)</li>
-                    <li title="Requires code changes to enable">Play movie in browser (experimental)</li>
-                </ul>
             </div>
         </div>
     </div>
 </div>
-
-<div id="warning" class="alert alert-warning" style="display: none;"></div>
 
 <div id="video" style="display: none;"></div>
 

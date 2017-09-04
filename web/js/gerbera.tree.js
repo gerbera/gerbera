@@ -56,6 +56,7 @@ GERBERA.Tree = (function () {
 
   var initialize = function () {
     $('#tree').html('')
+    $('#item-breadcrumb').html('<li>Select a type to begin</li>')
     return $.Deferred().resolve().promise()
   }
 
@@ -76,8 +77,9 @@ GERBERA.Tree = (function () {
       .fail(GERBERA.App.error)
   }
 
-  var loadTree = function (response) {
+  var loadTree = function (response, config) {
     var tree = $('#tree')
+    config = $.extend({}, treeViewConfig, config)
     if (response.success) {
       if (tree.hasClass('grb-tree')) {
         tree.tree('destroy')
@@ -87,7 +89,7 @@ GERBERA.Tree = (function () {
       currentTree = transformContainers(response)
       tree.tree({
         data: currentTree,
-        config: treeViewConfig
+        config: config
       })
 
       generateBreadCrumb($('#tree span.folder-title').first())
@@ -158,9 +160,9 @@ GERBERA.Tree = (function () {
   var destroy = function () {
     currentTree = []
     currentType = 'db'
-
-    $('#tree').tree('destroy')
-
+    if($('#tree').hasClass('grb-tree')) {
+      $('#tree').tree('destroy')
+    }
     return $.Deferred().resolve().promise()
   }
 
@@ -169,6 +171,7 @@ GERBERA.Tree = (function () {
     selectType: selectType,
     destroy: destroy,
     transformContainers: transformContainers,
+    treeViewConfig: treeViewConfig,
     loadTree: loadTree
   }
 })()

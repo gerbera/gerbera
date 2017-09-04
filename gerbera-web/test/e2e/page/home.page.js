@@ -26,8 +26,8 @@ module.exports = function (driver) {
   }
   this.expandTree = function (text) {
     return driver.findElements(By.xpath('//li[.//span[contains(text(),\'' + text + '\')]]')).then(function (items) {
-      var folderIcon = items[1].findElement(By.className('folder-icon'))
-      folderIcon.click()
+      var folderTitle = items[1].findElement(By.className('folder-title'))
+        folderTitle.click()
       return driver.sleep(500) // todo use wait...
     })
   }

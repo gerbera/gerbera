@@ -11,6 +11,7 @@ GERBERA.Menu = (function () {
     if (GERBERA.Auth.isLoggedIn()) {
       allLinks.click(GERBERA.Menu.click)
       allLinks.removeClass('disabled')
+      $('#nav-home').click()
     } else {
       $('.nav li').removeClass('active')
       allLinks.addClass('disabled')

@@ -61,7 +61,12 @@ GERBERA.Auth = (function () {
           .done(submitLogin)
           .fail(GERBERA.App.error)
     } else {
-      $('#warning').html('Please enter username and password').show()
+      var warning = $('#warning')
+      warning.children('span').html('Please enter username and password')
+      warning.show()
+      warning.children('button').click(function () {
+        warning.hide()
+      })
       promise = $.Deferred().resolve().promise()
     }
     return promise

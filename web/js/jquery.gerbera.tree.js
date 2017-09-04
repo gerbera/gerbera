@@ -34,14 +34,12 @@ $.widget('grb.tree', {
       item.addClass('list-group-item')
 
       var icon = $('<span></span>').addClass(config.closedIcon).addClass('folder-icon')
-      if (config.onExpand) {
-        icon.click(data[i], config.onExpand)
-        icon.addClass('expandable')
-      }
-
       var title = $('<span></span>').addClass(config.titleClass).text(data[i].title)
       if (config.onSelection) {
         title.click(data[i], config.onSelection)
+      }
+      if (config.onExpand) {
+        title.click(data[i], config.onExpand)
       }
 
       var badges = []
@@ -73,7 +71,7 @@ $.widget('grb.tree', {
   },
 
   closed: function (element) {
-    return $(element).hasClass(this.options.config.closedIcon)
+    return $(element).prev('span.folder-icon').hasClass(this.options.config.closedIcon)
   },
 
   collapse: function (element) {

@@ -58,7 +58,7 @@ describe('The jQuery Tree', function () {
     expect(onSelectSpy.calls.count()).toBe(1)
   })
 
-  it('binds the folder icon to a onExpand method', function () {
+  it('binds the folder title to a onExpand method', function () {
     var onExpand = jasmine.createSpy('onExpand')
 
     $('#tree').tree({
@@ -70,7 +70,7 @@ describe('The jQuery Tree', function () {
       }
     })
 
-    var icons = $('#tree').find('.folder-icon')
+    var icons = $('#tree').find('.folder-title')
     $(icons.get(0)).click()
 
     expect(onExpand.calls.count()).toBe(1)
@@ -192,8 +192,8 @@ describe('The jQuery Tree', function () {
       })
 
       var item = $('#tree').find('li').get(0)
-      var folder = $(item).children('span').first()
-      expect($('#tree').tree('closed', folder)).toBeTruthy()
+      var title = $(item).children('span').get(1)
+      expect($('#tree').tree('closed', title)).toBeTruthy()
     })
   })
 
@@ -225,10 +225,10 @@ describe('The jQuery Tree', function () {
       ]
       $('#tree').tree('append', parent, children)
 
-      var folder = parent.children('span').first()
+      var title = parent.children('span').get(1)
       $('#tree').tree('collapse', parent)
 
-      expect($('#tree').tree('closed', folder)).toBeTruthy()
+      expect($('#tree').tree('closed', title)).toBeTruthy()
       expect(parent.children('ul.list-group').css('display')).toBe('none')
     })
   })

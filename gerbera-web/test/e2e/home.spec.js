@@ -35,13 +35,13 @@ test.describe('The home page', function () {
   test.it('without logging in the database and filetype menus are disabled', function () {
     homePage.getDatabaseMenu().then(function (menu) {
       menu.getAttribute('class').then(function (value) {
-        assert.equal(value, 'navbar-link disabled')
+        assert.equal(value, 'btn navbar-link disabled')
       })
     })
 
     homePage.getFileSystemMenu().then(function (menu) {
       menu.getAttribute('class').then(function (value) {
-        assert.equal(value, 'navbar-link disabled')
+        assert.equal(value, 'btn navbar-link disabled')
       })
     })
   })
@@ -53,13 +53,13 @@ test.describe('The home page', function () {
 
     homePage.getDatabaseMenu().then(function (menu) {
       menu.getAttribute('class').then(function (value) {
-        assert.equal(value, 'navbar-link')
+        assert.equal(value, 'btn navbar-link')
       })
     })
 
     homePage.getFileSystemMenu().then(function (menu) {
       menu.getAttribute('class').then(function (value) {
-        assert.equal(value, 'navbar-link')
+        assert.equal(value, 'btn navbar-link')
       })
     })
   })
@@ -69,13 +69,13 @@ test.describe('The home page', function () {
 
     homePage.getDatabaseMenu().then(function (menu) {
       menu.getAttribute('class').then(function (value) {
-        assert.equal(value, 'navbar-link disabled')
+        assert.equal(value, 'btn navbar-link disabled')
       })
     })
 
     homePage.getFileSystemMenu().then(function (menu) {
       menu.getAttribute('class').then(function (value) {
-        assert.equal(value, 'navbar-link disabled')
+        assert.equal(value, 'btn navbar-link disabled')
       })
     })
   })

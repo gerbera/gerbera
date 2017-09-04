@@ -54,7 +54,7 @@ test.describe('The login page', function () {
     loginPage.username('')
     loginPage.submitLogin()
     loginPage.warning().then(function (warning) {
-      assert.equal(warning, 'Please enter username and password')
+      assert.ok(warning.includes('Please enter username and password'))
     })
   })
 
