@@ -1,0 +1,24 @@
+{
+  "success": true,
+  "containers": {
+    "parent_id": 7443,
+    "type": "database",
+    "select_it": "0",
+    "container": [
+      {
+        "id": 7444,
+        "child_count": 0,
+        "autoscan_type": "none",
+        "autoscan_mode": "none",
+        "title": "All Video"
+      },
+      {
+        "id": 7446,
+        "child_count": 5,
+        "autoscan_type": "none",
+        "autoscan_mode": "none",
+        "title": "Directories"
+      }
+    ]
+  }
+}

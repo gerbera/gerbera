@@ -1,0 +1,24 @@
+{
+  "success": true,
+  "config": {
+    "accounts": true,
+    "enableThumbnail": false,
+    "enableVideo": false,
+    "show-tooltips": true,
+    "poll-when-idle": false,
+    "poll-interval": 2,
+    "have-inotify": true,
+    "items-per-page": {
+      "default": 25,
+      "option": [
+        10,
+        25,
+        50,
+        100
+      ]
+    },
+    "actions": {
+      "action": []
+    }
+  }
+}

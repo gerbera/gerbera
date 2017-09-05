@@ -1,0 +1,37 @@
+{
+  "name": "gerbera-web",
+  "version": "0.0.1",
+  "scripts": {
+    "start": "node index.js",
+    "test": "./node_modules/.bin/karma start karma.conf.js",
+    "test:e2e": "concurrently --success first --kill-others \"npm start\" \"npm run e2e\"",
+    "e2e": "./node_modules/.bin/mocha \"test/e2e\"",
+    "lint": "./node_modules/.bin/eslint -c .eslintrc ../web/js/gerbera*.js"
+  },
+  "config": {
+    "webserver": {
+      "port": 3000,
+      "host": "localhost"
+    }
+  },
+  "devDependencies": {
+    "chromedriver": "^2.29.0",
+    "concurrently": "^3.4.0",
+    "eslint": "^3.19.0",
+    "eslint-config-standard": "^10.2.1",
+    "eslint-plugin-import": "^2.3.0",
+    "eslint-plugin-node": "^5.0.0",
+    "eslint-plugin-promise": "^3.5.0",
+    "eslint-plugin-standard": "^3.0.1",
+    "express": "^4.15.3",
+    "jasmine": "^2.6.0",
+    "jasmine-jquery": "^2.1.1",
+    "karma": "^1.6.0",
+    "karma-coverage": "^1.1.1",
+    "karma-jasmine": "^1.1.0",
+    "karma-phantomjs-launcher": "^1.0.4",
+    "karma-spec-reporter": "0.0.31",
+    "mocha": "^3.4.1",
+    "selenium-webdriver": "^3.4.0"
+  }
+}

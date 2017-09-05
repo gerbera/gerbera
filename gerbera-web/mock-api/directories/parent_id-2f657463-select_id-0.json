@@ -1,0 +1,100 @@
+{
+  "success": true,
+  "containers": {
+    "parent_id": "2f657463",
+    "select_it": "0",
+    "type": "filesystem",
+    "container": [
+      {
+        "id": "2f6574632f4e6574776f726b4d616e61676572",
+        "child_count": 1,
+        "title": "NetworkManager"
+      },
+      {
+        "id": "2f6574632f4f70656e434c",
+        "child_count": 1,
+        "title": "OpenCL"
+      },
+      {
+        "id": "2f6574632f5061636b6167654b6974",
+        "child_count": 0,
+        "title": "PackageKit"
+      },
+      {
+        "id": "2f6574632f55506f776572",
+        "child_count": 0,
+        "title": "UPower"
+      },
+      {
+        "id": "2f6574632f583131",
+        "child_count": 1,
+        "title": "X11"
+      },
+      {
+        "id": "2f6574632f61627274",
+        "child_count": 1,
+        "title": "abrt"
+      },
+      {
+        "id": "2f6574632f616c7361",
+        "child_count": 0,
+        "title": "alsa"
+      },
+      {
+        "id": "2f6574632f616c7465726e617469766573",
+        "child_count": 1,
+        "title": "alternatives"
+      },
+      {
+        "id": "2f6574632f617564697370",
+        "child_count": 0,
+        "title": "audisp"
+      },
+      {
+        "id": "2f6574632f6175646974",
+        "child_count": 0,
+        "title": "audit"
+      },
+      {
+        "id": "2f6574632f6176616869",
+        "child_count": 1,
+        "title": "avahi"
+      },
+      {
+        "id": "2f6574632f63726f6e2e64",
+        "child_count": 0,
+        "title": "cron.d"
+      },
+      {
+        "id": "2f6574632f63726f6e2e6461696c79",
+        "child_count": 0,
+        "title": "cron.daily"
+      },
+      {
+        "id": "2f6574632f63726f6e2e686f75726c79",
+        "child_count": 0,
+        "title": "cron.hourly"
+      },
+      {
+        "id": "2f6574632f63726f6e2e6d6f6e74686c79",
+        "child_count": 0,
+        "title": "cron.monthly"
+      },
+      {
+        "id": "2f6574632f63726f6e2e7765656b6c79",
+        "child_count": 0,
+        "title": "cron.weekly"
+      },
+      {
+        "id": "2f6574632f63727970746f2d706f6c6963696573",
+        "child_count": 1,
+        "title": "crypto-policies"
+      },
+      {
+        "id": "2f6574632f63757073",
+        "child_count": 1,
+        "title": "cups"
+      }
+    ]
+  }
+}
