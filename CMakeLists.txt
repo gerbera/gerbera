@@ -359,11 +359,13 @@ if (ICONV_SECOND_ARGUMENT_IS_CONST)
     add_definitions(-DICONV_CONST)
 endif()
 
-if (NOT BSD)
-    find_package(LibUUID REQUIRED)
-    include_directories(${LIBUUID_INCLUDE_DIRS})
-    target_link_libraries(gerbera ${LIBUUID_LIBRARIES})
+find_package(UUID REQUIRED)
+include_directories(${UUID_INCLUDE_DIRS})
+target_link_libraries(gerbera ${UUID_LIBRARIES})
+if (FOUND_BSD_UUID)
+    add_definitions(-DBSD_NATIVE_UUID)
 endif()
+
 
 find_package(LFS REQUIRED)
 if (LFS_FOUND)

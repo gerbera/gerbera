@@ -35,7 +35,7 @@
 #include "storage.h"
 #include "string_converter.h"
 #include "tools.h"
-#ifdef BSD
+#ifdef BSD_NATIVE_UUID
 #include <uuid.h>
 #else
 #include <uuid/uuid.h>
@@ -2102,18 +2102,15 @@ void ConfigManager::prepare_udn()
 
     Ref<Element> element = server->getChildByName(_("udn"));
     if (element == nullptr || element->getText() == nullptr || element->getText() == "") {
-#ifdef BSD
+
+        uuid_t uuid;
+#ifdef BSD_NATIVE_UUID
         char *uuid_str;
         uint32_t status;
-#else
-        char uuid_str[37];
-#endif
-        uuid_t uuid;
-
-#ifdef BSD
         uuid_create(&uuid, &status);
         uuid_to_string(&uuid, &uuid_str, &status);
 #else
+        char uuid_str[37];
         uuid_generate(uuid);
         uuid_unparse(uuid, uuid_str);
 #endif
@@ -2121,7 +2118,7 @@ void ConfigManager::prepare_udn()
         log_debug("UUID generated: %s\n", uuid_str);
 
         getOption(_("/server/udn"), _("uuid:") + uuid_str);
-#ifdef BSD
+#ifdef BSD_NATIVE_UUID
         free(uuid_str);
 #endif
 

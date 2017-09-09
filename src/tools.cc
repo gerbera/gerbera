@@ -42,19 +42,17 @@
 #include <cstring>
 
 #include <ifaddrs.h>
+#include <net/if.h>
 
-#ifndef SOLARIS
-    #include <net/if.h>
-#ifdef BSD
-#include <uuid.h>
+#ifdef BSD_NATIVE_UUID
+    #include <uuid.h>
 #else
-#include <uuid/uuid.h>
-#endif
-#else
-    #include <fcntl.h>
-    #include <net/if.h>
-    #include <sys/sockio.h>
     #include <uuid/uuid.h>
+#endif
+
+#ifdef SOLARIS
+    #include <fcntl.h>
+    #include <sys/sockio.h>
 #endif
 
 #include "contrib/md5.h"
@@ -346,7 +344,7 @@ String hex_string_md5(String str)
 }
 String generate_random_id()
 {
-#ifdef BSD
+#ifdef BSD_NATIVE_UUID
     char *uuid_str;
     uint32_t status;
 #else
@@ -354,7 +352,7 @@ String generate_random_id()
 #endif
     uuid_t uuid;
 
-#ifdef BSD
+#ifdef BSD_NATIVE_UUID
     uuid_create(&uuid, &status);
     uuid_to_string(&uuid, &uuid_str, &status);
 #else
@@ -364,7 +362,7 @@ String generate_random_id()
 
     log_debug("Generated: %s\n", uuid_str);
     String uuid_String = String(uuid_str);
-#ifdef BSD
+#ifdef BSD_NATIVE_UUID
     free(uuid_str);
 #endif
 
