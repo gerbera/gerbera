@@ -47,11 +47,7 @@ using namespace mxml;
 
 Ref<Storage> Server::storage = nullptr;
 
-#ifdef UPNP_OLD_SNAPSHOT
-static int static_upnp_callback(Upnp_EventType eventtype, void* event, void* cookie)
-#else
 static int static_upnp_callback(Upnp_EventType eventtype, const void* event, void* cookie)
-#endif
 {
     return Server::getInstance()->upnp_callback(eventtype, event, cookie);
 }

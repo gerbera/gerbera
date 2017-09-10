@@ -99,12 +99,7 @@ void WebRequestHandler::get_info(IN const char* filename, OUT UpnpFileInfo* info
 
     UpnpFileInfo_set_FileLength(info, -1); // length is unknown
 
-#ifdef UPNP_OLD_SNAPSHOT
-    time_t time = 0;
-    UpnpFileInfo_set_LastModified(info, &time);
-#else
     UpnpFileInfo_set_LastModified(info, 0);
-#endif
     UpnpFileInfo_set_IsDirectory(info, 0);
     UpnpFileInfo_set_IsReadable(info, 1);
 
