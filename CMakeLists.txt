@@ -317,7 +317,7 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
 endif()
 if(NOT HOST_OS)
     message(FATAL_ERROR 
-                "gerbera was unable to deterimine the host OS. Please report this. Value of CMAKE_SYSTEM_NAME: ${CMAKE_SYSTEM_NAME}")
+                "Gerbera was unable to deterimine the host OS. Please report this. Value of CMAKE_SYSTEM_NAME: ${CMAKE_SYSTEM_NAME}")
 endif()
 
 if (SOLARIS)
@@ -335,9 +335,9 @@ add_definitions(-DPACKAGE_DATADIR="${CMAKE_INSTALL_PREFIX}/share/gerbera")
 # Generate Compile Information
 include("GenCompileInfo")
 generate_compile_info()
-add_definitions(-DCOMPILE_INFO="${COMPILE_INFO}")
-add_definitions(-DGIT_BRANCH="${GIT_BRANCH}")
-add_definitions(-DGIT_COMMIT_HASH="${GIT_COMMIT_HASH}")
+target_compile_definitions(gerbera PRIVATE -DCOMPILE_INFO="${COMPILE_INFO}")
+target_compile_definitions(gerbera PRIVATE -DGIT_BRANCH="${GIT_BRANCH}")
+target_compile_definitions(gerbera PRIVATE -DGIT_COMMIT_HASH="${GIT_COMMIT_HASH}")
 
 add_definitions(-DEXTERNAL_TRANSCODING -DAUTO_CREATE_DATABASE)
 
