@@ -563,7 +563,7 @@ int ContentManager::_addFile(String path, String rootpath, bool recursive, bool 
                         playlist_parser_script->processPlaylistObject(obj, task);
 #else
                     if (content_type == CONTENT_TYPE_PLAYLIST)
-                        log_warning("Playlist %s will not be parsed: MediaTomb was compiled without JS support!\n", obj->getLocation().c_str());
+                        log_warning("Playlist %s will not be parsed: Gerbera was compiled without JS support!\n", obj->getLocation().c_str());
 #endif // JS
                 } catch (const Exception& e) {
                     throw e;
@@ -1250,7 +1250,7 @@ void ContentManager::initLayout()
 #ifdef HAVE_JS
                     layout = Ref<Layout>((Layout*)new JSLayout());
 #else
-                    log_error("Cannot init layout: MediaTomb compiled without js support but js script was requested.");
+                    log_error("Cannot init layout: Gerbera compiled without JS support, but JS was requested.");
 #endif
                 } else if (layout_type == "builtin") {
                     layout = Ref<Layout>((FallbackLayout*)new FallbackLayout());

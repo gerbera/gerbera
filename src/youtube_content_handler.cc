@@ -320,7 +320,7 @@ Ref<CdsObject> YouTubeContentHandler::getNextObject()
 
                 if (temp.substring(temp.length()-3) != "jpg")
                 {
-                    log_warning("Found new YouTube thumbnail image type, please report this to contact at mediatomb dot cc! [%s]\n", temp.c_str());
+                    log_warning("Found new YouTube thumbnail image type, please report this to https://github.com/gerbera/gerbera/issues! [%s]\n", temp.c_str());
                     continue;
                 }
 
