@@ -13,7 +13,7 @@ INCLUDE(FindPkgConfig)
 INCLUDE(CheckCXXSourceRuns)
 INCLUDE(FindPackageHandleStandardArgs)
 
-message(STATUS "Looking BSD native UUID")
+message(STATUS "Looking for BSD native UUID")
 set(CMAKE_REQUIRED_QUIET 1)
 check_cxx_source_runs("
 			#include <uuid.h>
@@ -25,7 +25,7 @@ check_cxx_source_runs("
 			}" FOUND_BSD_UUID)
 
 if (FOUND_BSD_UUID)
-	message(STATUS "Looking BSD native UUID - found")
+	message(STATUS "Looking for BSD native UUID - found")
 	set(UUID_FOUND 1)
 endif()
 
