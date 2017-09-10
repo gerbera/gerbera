@@ -127,7 +127,7 @@ void ConfigManager::init()
     }
 
     if (filename == nullptr) {
-        throw _Exception(_("\nThe server configuration file could not be found in ~/.gerbera\n") + "Gerbera could not determine your home directory - automatic setup failed.\n" + "Try specifying an alternative configuration file on the command line.\n" + "For a list of options run: mediatomb -h\n");
+        throw _Exception(_("\nThe server configuration file could not be found in ~/.gerbera\n") + "Gerbera could not determine your home directory - automatic setup failed.\n" + "Try specifying an alternative configuration file on the command line.\n" + "For a list of options run: gerbera -h\n");
     }
 
     log_info("Loading configuration from: %s\n", filename.c_str());
@@ -334,7 +334,7 @@ Ref<Element> ConfigManager::renderOnlineSection()
     yt->setAttribute(_("hd"), _(DEFAULT_YOUTUBE_HD));
 
     Ref<Element> favs(new Element(_("favorites")));
-    favs->setAttribute(_("user"), _("mediatomb"));
+    favs->setAttribute(_("user"), _("gerbera"));
     yt->appendElementChild(favs);
 
     Ref<Element> most_viewed(new Element(_("standardfeed")));
@@ -343,11 +343,11 @@ Ref<Element> ConfigManager::renderOnlineSection()
     yt->appendElementChild(most_viewed);
 
     Ref<Element> playlist(new Element(_("playlists")));
-    playlist->setAttribute(_("user"), _("mediatomb"));
+    playlist->setAttribute(_("user"), _("gerbera"));
     yt->appendElementChild(playlist);
 
     Ref<Element> ytuser(new Element(_("uploads")));
-    ytuser->setAttribute(_("user"), _("mediatomb"));
+    ytuser->setAttribute(_("user"), _("gerbera"));
     yt->appendElementChild(ytuser);
 
     Ref<Element> ytfeatured(new Element(_("standardfeed")));
@@ -989,7 +989,7 @@ void ConfigManager::validate(String serverhome)
 #else
     if (mysql_en == "yes") {
         throw _Exception(_("You enabled MySQL storage in configuration, "
-                           "however this version of MediaTomb was compiled "
+                           "however this version of Gerbera was compiled "
                            "without MySQL support!"));
     }
 #endif // HAVE_MYSQL
@@ -1058,7 +1058,7 @@ void ConfigManager::validate(String serverhome)
 #else
     if (sqlite3_en == "yes") {
         throw _Exception(_("You enabled sqlite3 storage in configuration, "
-                           "however this version of MediaTomb was compiled "
+                           "however this version of Gerbera was compiled "
                            "without sqlite3 support!"));
     }
 
@@ -1474,7 +1474,7 @@ void ConfigManager::validate(String serverhome)
 
 #ifndef HAVE_JS
     if (temp == "js")
-        throw _Exception(_("MediaTomb was compiled without js support, "
+        throw _Exception(_("Gerbera was compiled without JS support, "
                            "however you specified \"js\" to be used for the "
                            "virtual-layout."));
 #else
@@ -1561,7 +1561,7 @@ void ConfigManager::validate(String serverhome)
 #else
         throw _Exception(_("You specified"
                            " \"yes\" in \"<autoscan use-inotify=\"\">"
-                           " however this version of MediaTomb was compiled "
+                           " however this version of Gerbera was compiled "
                            "without inotify support"));
 #endif
     }
