@@ -108,6 +108,15 @@ make -j4
 sudo make install
 ````
 
+#### On macOS
+
+_The following has been tested on macOS Sierra 10.12.6_
+
+1. Install prerequisites using homebrew
+1. Install `ossp-uuid` using homebrew
+1. Install `pupnp18` and `duktape` using the scripts provided.
+1. Use the cmake option `-DCMAKE_FIND_FRAMEWORK=LAST` to avoid Clang linkage errors
+
 
 ### Quick start build instructions:
 

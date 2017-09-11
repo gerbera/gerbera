@@ -1,11 +1,13 @@
 #!/bin/sh
 set -ex
 
-extraFlags="--prefix=/usr"
-
 unamestr=`uname`
 if [ "$unamestr" == 'FreeBSD' ]; then
    extraFlags=""
+elif [ "$unamestr" == 'Darwin' ]; then
+   extraFlags="--prefix=/usr/local"
+else
+   extraFlags="--prefix=/usr"
 fi
 
 wget https://github.com/mrjimenez/pupnp/archive/release-1.8.1.tar.gz -O pupnp-1.8.1.tgz
