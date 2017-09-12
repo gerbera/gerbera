@@ -49,7 +49,7 @@ Ref<Storage> Server::storage = nullptr;
 
 static int static_upnp_callback(Upnp_EventType eventtype, const void* event, void* cookie)
 {
-    return Server::getInstance()->upnp_callback(eventtype, event, cookie);
+    return static_cast<Server *>(cookie)->upnp_callback(eventtype, event);
 }
 
 void Server::static_cleanup_callback()
@@ -208,7 +208,7 @@ void Server::upnp_init()
         device_description.length() + 1,
         true,
         static_upnp_callback,
-        &device_handle,
+        this,
         &device_handle);
     if (ret != UPNP_E_SUCCESS) {
         throw _UpnpException(ret, _("upnp_init: UpnpRegisterRootDevice failed"));
@@ -273,7 +273,7 @@ String Server::getVirtualURL()
     return virtual_url;
 }
 
-int Server::upnp_callback(Upnp_EventType eventtype, const void* event, void* cookie)
+int Server::upnp_callback(Upnp_EventType eventtype, const void* event)
 {
     int ret = UPNP_E_SUCCESS; // general purpose return code
 

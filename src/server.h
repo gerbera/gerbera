@@ -51,28 +51,28 @@ public:
     Server();
 
     zmm::String getName() override { return _("Server"); }
-    
+
     /// \brief Initializes the server.
-    /// 
+    ///
     /// This function reads information from the config and initializes
     /// various variables (like server UDN and so forth).
     virtual void init() override;
-    
-    
+
+
     /// \brief Initializes UPnP portion, only ip or interface can be given
     ///
-    /// Reads information from the config and creates a 
+    /// Reads information from the config and creates a
     /// device description document. Initializes the UPnP SDK,
     /// sets up the virutal web server directories and registers
     /// web callbacks. Starts the update manager task.
     void upnp_init();
-    
+
     /// \brief Cleanup routine to shutdown the server.
     ///
     /// Unregisters the device with the SDK, shuts down the
     /// update manager task, storage task, content manager.
     virtual void shutdown() override;
-    
+
     /// \brief Returns the virtual web server URL.
     ///
     /// A special virtual URL is registered with the internal web server,
@@ -83,7 +83,6 @@ public:
     /// \brief Dispatch incoming UPnP events.
     /// \param eventtype Upnp_EventType, identifying what kind of event came in.
     /// \param event Pointer to the event.
-    /// \param cookie Unused.
     ///
     /// This function is called when a UPnP event is received,
     /// it then looks at the event type (either an action invocation or 
@@ -92,7 +91,7 @@ public:
     /// data structures (ActionRequest or SubscriptionRequest) and is then
     /// passed on to the appropriate request handler - to upnp_actions() or
     /// upnp_subscriptions()
-    int upnp_callback(Upnp_EventType eventtype, const void *event, void *cookie);
+    int upnp_callback(Upnp_EventType eventtype, const void *event);
   
     /// \brief Returns the device handle.
     ///
