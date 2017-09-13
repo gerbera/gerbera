@@ -30,6 +30,8 @@
 /// \file upnp_cm.cc
 
 #include "upnp_cm.h"
+#include "server.h"
+#include "tools.h"
 
 using namespace zmm;
 using namespace mxml;
@@ -40,4 +42,123 @@ ConnectionManagerService::ConnectionManagerService()
 
 ConnectionManagerService::~ConnectionManagerService()
 {
+}
+
+using namespace mxml;
+
+void ConnectionManagerService::upnp_action_GetCurrentConnectionIDs(Ref<ActionRequest> request)
+{
+    log_debug("start\n");
+
+    Ref<Element> response;
+    response = UpnpXML_CreateResponse(request->getActionName(), _(DESC_CM_SERVICE_TYPE));
+    response->appendTextChild(_("ConnectionID"), _("0"));
+
+    request->setResponse(response);
+    request->setErrorCode(UPNP_E_SUCCESS);
+
+    log_debug("end\n");
+}
+
+void ConnectionManagerService::upnp_action_GetCurrentConnectionInfo(Ref<ActionRequest> request)
+{
+    log_debug("start\n");
+
+    request->setErrorCode(UPNP_E_NOT_EXIST);
+
+    log_debug("upnp_action_GetCurrentConnectionInfo: end\n");
+}
+
+void ConnectionManagerService::upnp_action_GetProtocolInfo(Ref<ActionRequest> request)
+{
+    log_debug("start\n");
+
+    Ref<Element> response;
+    response = UpnpXML_CreateResponse(request->getActionName(), _(DESC_CM_SERVICE_TYPE));
+
+    Ref<Array<StringBase>> mimeTypes = Storage::getInstance()->getMimeTypes();
+    String CSV = mime_types_to_CSV(mimeTypes);
+
+    response->appendTextChild(_("Source"), CSV);
+    response->appendTextChild(_("Sink"), _(""));
+
+    request->setResponse(response);
+    request->setErrorCode(UPNP_E_SUCCESS);
+
+    log_debug("end\n");
+}
+
+void ConnectionManagerService::process_action_request(Ref<ActionRequest> request)
+{
+    log_debug("start\n");
+
+    if (request->getActionName() == "GetCurrentConnectionIDs") {
+        upnp_action_GetCurrentConnectionIDs(request);
+    } else if (request->getActionName() == "GetCurrentConnectionInfo") {
+        upnp_action_GetCurrentConnectionInfo(request);
+    } else if (request->getActionName() == "GetProtocolInfo") {
+        upnp_action_GetProtocolInfo(request);
+    } else {
+        // invalid or unsupported action
+        log_debug("unrecognized action %s\n", request->getActionName().c_str());
+        request->setErrorCode(UPNP_E_INVALID_ACTION);
+        //        throw UpnpException(UPNP_E_INVALID_ACTION, _("unrecognized action"));
+    }
+
+    log_debug("end\n");
+}
+
+void ConnectionManagerService::process_subscription_request(zmm::Ref<SubscriptionRequest> request)
+{
+    int err;
+    IXML_Document* event = nullptr;
+
+    Ref<Element> propset, property;
+
+    Ref<Array<StringBase>> mimeTypes = Storage::getInstance()->getMimeTypes();
+    String CSV = mime_types_to_CSV(mimeTypes);
+
+    propset = UpnpXML_CreateEventPropertySet();
+    property = propset->getFirstElementChild();
+    property->appendTextChild(_("CurrentConnectionIDs"), _("0"));
+    property->appendTextChild(_("SinkProtocolInfo"), _(""));
+    property->appendTextChild(_("SourceProtocolInfo"), CSV);
+
+    String xml = propset->print();
+    err = ixmlParseBufferEx(xml.c_str(), &event);
+    if (err != IXML_SUCCESS) {
+        throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, _("Could not convert property set to ixml"));
+    }
+
+    UpnpAcceptSubscriptionExt(Server::getInstance()->getDeviceHandle(),
+        ConfigManager::getInstance()->getOption(CFG_SERVER_UDN).c_str(),
+        DESC_CM_SERVICE_ID, event, request->getSubscriptionID().c_str());
+
+    ixmlDocument_free(event);
+}
+
+void ConnectionManagerService::subscription_update(String sourceProtocol_CSV)
+{
+    int err;
+    IXML_Document* event = nullptr;
+
+    Ref<Element> propset, property;
+
+    propset = UpnpXML_CreateEventPropertySet();
+    property = propset->getFirstElementChild();
+    property->appendTextChild(_("SourceProtocolInfo"), sourceProtocol_CSV);
+
+    String xml = propset->print();
+
+    err = ixmlParseBufferEx(xml.c_str(), &event);
+    if (err != IXML_SUCCESS) {
+        /// \todo add another error code
+        throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, _("Could not convert property set to ixml"));
+    }
+
+    UpnpNotifyExt(Server::getInstance()->getDeviceHandle(),
+        ConfigManager::getInstance()->getOption(CFG_SERVER_UDN).c_str(),
+        DESC_CM_SERVICE_ID, event);
+
+    ixmlDocument_free(event);
 }

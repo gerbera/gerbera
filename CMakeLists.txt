@@ -212,10 +212,8 @@ set(libgerberaFILES
         src/update_manager.h
         src/upnp_cds.cc
         src/upnp_cds.h
-        src/upnp_cm_actions.cc
         src/upnp_cm.cc
         src/upnp_cm.h
-        src/upnp_cm_subscriptions.cc
         src/upnp_mrreg_actions.cc
         src/upnp_mrreg.cc
         src/upnp_mrreg.h
