@@ -44,8 +44,6 @@ ConnectionManagerService::~ConnectionManagerService()
 {
 }
 
-using namespace mxml;
-
 void ConnectionManagerService::upnp_action_GetCurrentConnectionIDs(Ref<ActionRequest> request)
 {
     log_debug("start\n");
