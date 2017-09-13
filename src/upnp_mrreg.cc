@@ -29,33 +29,135 @@
 
 /// \file upnp_mrreg.cc
 
-#if defined(ENABLE_MRREG)
-
 #include "upnp_mrreg.h"
+#include "ixml.h"
+#include "server.h"
+#include "storage.h"
+#include "tools.h"
+#include "upnp_xml.h"
 
 using namespace zmm;
 using namespace mxml;
 
-
-String MRRegistrarService::serviceType = nullptr;
-String MRRegistrarService::serviceID = nullptr;
-
-MRRegistrarService::MRRegistrarService() : Singleton<MRRegistrarService>()
+MRRegistrarService::MRRegistrarService()
 {
-    if (serviceType == nullptr || serviceID == nullptr)
-        throw _Exception(_("serviceType or serviceID not set!"));
 }
 
 MRRegistrarService::~MRRegistrarService()
 {
-    serviceType = nullptr;
-    serviceID = nullptr;
 }
 
-void MRRegistrarService::setStaticArgs(String _serviceType, String _serviceID)
+void MRRegistrarService::upnp_action_IsAuthorized(Ref<ActionRequest> request)
 {
-    serviceType = _serviceType;
-    serviceID = _serviceID;
+    log_debug("start\n");
+
+    Ref<Element> response;
+    response = UpnpXML_CreateResponse(request->getActionName(), DESC_MRREG_SERVICE_TYPE);
+    response->appendTextChild(_("Result"), _("1"));
+
+    request->setResponse(response);
+    request->setErrorCode(UPNP_E_SUCCESS);
+
+    log_debug("end\n");
 }
 
-#endif // ENABLE_MRREG
+void MRRegistrarService::upnp_action_RegisterDevice(Ref<ActionRequest> request)
+{
+    log_debug("start\n");
+
+    request->setErrorCode(UPNP_E_NOT_EXIST);
+
+    log_debug("upnp_action_GetCurrentConnectionInfo: end\n");
+}
+
+void MRRegistrarService::upnp_action_IsValidated(Ref<ActionRequest> request)
+{
+    log_debug("start\n");
+
+    Ref<Element> response;
+    response = UpnpXML_CreateResponse(request->getActionName(), DESC_MRREG_SERVICE_TYPE);
+    response->appendTextChild(_("Result"), _("1"));
+
+    request->setResponse(response);
+    request->setErrorCode(UPNP_E_SUCCESS);
+
+    log_debug("end\n");
+}
+
+void MRRegistrarService::process_action_request(Ref<ActionRequest> request)
+{
+    log_debug("start\n");
+
+    if (request->getActionName() == "IsAuthorized") {
+        upnp_action_IsAuthorized(request);
+    } else if (request->getActionName() == "RegisterDevice") {
+        upnp_action_RegisterDevice(request);
+    } else if (request->getActionName() == "IsValidated") {
+        upnp_action_IsValidated(request);
+    } else {
+        // invalid or unsupported action
+        log_debug("unrecognized action %s\n", request->getActionName().c_str());
+        request->setErrorCode(UPNP_E_INVALID_ACTION);
+        //throw UpnpException(UPNP_E_INVALID_ACTION, _("unrecognized action"));
+    }
+
+    log_debug("end\n");
+}
+
+void MRRegistrarService::process_subscription_request(zmm::Ref<SubscriptionRequest> request)
+{
+    int err;
+    IXML_Document* event = NULL;
+
+    Ref<Element> propset, property;
+
+    propset = UpnpXML_CreateEventPropertySet();
+    property = propset->getFirstElementChild();
+    property->appendTextChild(_("ValidationRevokedUpdateID"), _("0"));
+    property->appendTextChild(_("ValidationSucceededUpdateID"), _("0"));
+    property->appendTextChild(_("AuthorizationDeniedUpdateID"), _("0"));
+    property->appendTextChild(_("AuthorizationGrantedUpdateID"), _("0"));
+
+    String xml = propset->print();
+    err = ixmlParseBufferEx(xml.c_str(), &event);
+    if (err != IXML_SUCCESS) {
+        throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, _("Could not convert property set to ixml"));
+    }
+
+    UpnpAcceptSubscriptionExt(Server::getInstance()->getDeviceHandle(),
+        ConfigManager::getInstance()->getOption(CFG_SERVER_UDN).c_str(),
+        DESC_MRREG_SERVICE_ID, event, request->getSubscriptionID().c_str());
+
+    ixmlDocument_free(event);
+}
+
+// TODO: FIXME
+#if 0
+void MRRegistrarService::subscription_update(String sourceProtocol_CSV)
+{
+    int err;
+    IXML_Document *event = NULL;
+
+    Ref<Element> propset, property;
+
+    propset = UpnpXML_CreateEventPropertySet();
+    property = propset->getFirstChild();
+    property->appendTextChild(_("SourceProtocolInfo"), sourceProtocol_CSV);
+
+    String xml = propset->print();
+
+    err = ixmlParseBufferEx(xml.c_str(), &event);
+    if (err != IXML_SUCCESS)
+    {
+        /// \todo add another error code
+        throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, _("Could not convert property set to ixml"));
+
+    }
+
+    UpnpNotifyExt(Server::getInstance()->getDeviceHandle(),
+            ConfigManager::getInstance()->getOption(CFG_SERVER_UDN).c_str(),
+            serviceID.c_str(), event);
+
+    ixmlDocument_free(event);
+}
+#endif

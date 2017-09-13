@@ -176,14 +176,12 @@
 #define DESC_ICON120_BMP                "/icons/mt-icon120.bmp"
 
 
-#if defined(ENABLE_MRREG)
     // media receiver registrar (xbox 360)
     #define DESC_MRREG_SERVICE_TYPE     "urn:microsoft.com:service:X_MS_MediaReceiverRegistrar:1"
     #define DESC_MRREG_SERVICE_ID       "urn:microsoft.com:serviceId:X_MS_MediaReceiverRegistrar"
     #define DESC_MRREG_SCPD_URL         "mr_reg.xml"
     #define DESC_MRREG_CONTROL_URL      "/upnp/control/mr_reg"
     #define DESC_MRREG_EVENT_URL        "/upnp/event/mr_reg"
-#endif
 
 // xml namespaces
 #define XML_NAMESPACE_ATTR              "xmlns"

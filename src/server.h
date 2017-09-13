@@ -183,14 +183,12 @@ protected:
     /// an ActionRequest or a SubscriptionRequest.
     ConnectionManagerService cmgr;
 
-#if defined(ENABLE_MRREG)    
     /// \brief MediaReceiverRegistrarService instance.
     /// 
     /// This class is not fully functional, it always returns "true"
     /// on IsAuthorized and IsValidated requests. It added to ensure
     /// Xbos360 compatibility.
-    zmm::Ref<MRRegistrarService> mrreg;
-#endif
+    MRRegistrarService mrreg;
 
     /// \brief Dispatched an ActionRequest between the services.
     /// \param request Incoming ActionRequest.
