@@ -60,7 +60,7 @@ void ContentDirectoryService::process_subscription_request(zmm::Ref<Subscription
 
     UpnpAcceptSubscriptionExt(Server::getInstance()->getDeviceHandle(),
                               ConfigManager::getInstance()->getOption(CFG_SERVER_UDN).c_str(),
-                              serviceID.c_str(), event, request->getSubscriptionID().c_str());
+                              DESC_CDS_SERVICE_ID, event, request->getSubscriptionID().c_str());
 
     ixmlDocument_free(event);
     log_debug("end\n");
@@ -93,7 +93,7 @@ void ContentDirectoryService::subscription_update(String containerUpdateIDs_CSV)
 
     UpnpNotifyExt(Server::getInstance()->getDeviceHandle(),
                   ConfigManager::getInstance()->getOption(CFG_SERVER_UDN).c_str(),
-                  serviceID.c_str(), event);
+                  DESC_CDS_SERVICE_ID, event);
 
     ixmlDocument_free(event);
 

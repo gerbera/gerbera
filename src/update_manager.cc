@@ -31,9 +31,11 @@
 
 #include "update_manager.h"
 
+#include "server.h"
 #include "upnp_cds.h"
 #include "storage.h"
 #include "tools.h"
+#include "singleton.h"
 #include <sys/types.h>
 #include <csignal>
 #include <chrono>
@@ -243,7 +245,7 @@ void UpdateManager::threadProc()
                 {
                     try
                     {
-                    ContentDirectoryService::getInstance()->subscription_update(updateString);
+                    Server::getInstance()->send_subscription_update(updateString);
                     log_debug("updates sent.\n");
                     getTimespecNow(&lastUpdate);
                     }

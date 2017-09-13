@@ -41,7 +41,7 @@ void ConnectionManagerService::upnp_action_GetCurrentConnectionIDs(Ref<ActionReq
     log_debug("start\n");
 
     Ref<Element> response;
-    response = UpnpXML_CreateResponse(request->getActionName(), serviceType);
+    response = UpnpXML_CreateResponse(request->getActionName(), _(DESC_CM_SERVICE_TYPE));
     response->appendTextChild(_("ConnectionID"), _("0"));
 
     request->setResponse(response); 
@@ -64,7 +64,7 @@ void ConnectionManagerService::upnp_action_GetProtocolInfo(Ref<ActionRequest> re
     log_debug("start\n");
 
     Ref<Element> response;
-    response = UpnpXML_CreateResponse(request->getActionName(), serviceType);
+    response = UpnpXML_CreateResponse(request->getActionName(), _(DESC_CM_SERVICE_TYPE));
 
     Ref<Array<StringBase> > mimeTypes = Storage::getInstance()->getMimeTypes();
     String CSV = mime_types_to_CSV(mimeTypes);

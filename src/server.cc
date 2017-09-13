@@ -71,13 +71,9 @@ void Server::init()
 {
     virtual_directory = _(SERVER_VIRTUAL_DIR);
 
-    ContentDirectoryService::setStaticArgs(_(DESC_CDS_SERVICE_TYPE),
-        _(DESC_CDS_SERVICE_ID));
-    cds = ContentDirectoryService::getInstance();
+    cds = ContentDirectoryService{};
 
-    ConnectionManagerService::setStaticArgs(_(DESC_CM_SERVICE_TYPE),
-        _(DESC_CM_SERVICE_ID));
-    cmgr = ConnectionManagerService::getInstance();
+    cmgr = ConnectionManagerService{};
 
 #if defined(ENABLE_MRREG)
     MRRegistrarService::setStaticArgs(_(DESC_MRREG_SERVICE_TYPE),
@@ -365,11 +361,11 @@ void Server::upnp_actions(Ref<ActionRequest> request)
     if (request->getServiceID() == DESC_CM_SERVICE_ID) {
         // this call is for the lifetime stats service
         // log_debug("request for connection manager service\n");
-        cmgr->process_action_request(request);
+        cmgr.process_action_request(request);
     } else if (request->getServiceID() == DESC_CDS_SERVICE_ID) {
         // this call is for the toaster control service
         //log_debug("upnp_actions: request for content directory service\n");
-        cds->process_action_request(request);
+        cds.process_action_request(request);
     }
 #if defined(ENABLE_MRREG)
     else if (request->getServiceID() == DESC_MRREG_SERVICE_ID) {
@@ -400,11 +396,11 @@ void Server::upnp_subscriptions(Ref<SubscriptionRequest> request)
     if (request->getServiceID() == DESC_CDS_SERVICE_ID) {
         // this call is for the content directory service
         //log_debug("upnp_subscriptions: request for content directory service\n");
-        cds->process_subscription_request(request);
+        cds.process_subscription_request(request);
     } else if (request->getServiceID() == DESC_CM_SERVICE_ID) {
         // this call is for the connection manager service
         //log_debug("upnp_subscriptions: request for connection manager service\n");
-        cmgr->process_subscription_request(request);
+        cmgr.process_subscription_request(request);
     }
 #if defined(ENABLE_MRREG)
     else if (request->getServiceID() == DESC_MRREG_SERVICE_ID) {
@@ -417,4 +413,10 @@ void Server::upnp_subscriptions(Ref<SubscriptionRequest> request)
         throw _UpnpException(UPNP_E_BAD_REQUEST,
             _("Service does not exist or subscriptions not supported"));
     }
+}
+
+// Temp
+void Server::send_subscription_update(zmm::String updateString)
+{
+    cmgr.subscription_update(updateString);
 }

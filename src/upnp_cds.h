@@ -40,7 +40,7 @@
 /// \brief This class is responsible for the UPnP Content Directory Service operations.
 ///
 /// Handles subscription and action invocation requests for the CDS.
-class ContentDirectoryService : public Singleton<ContentDirectoryService>
+class ContentDirectoryService
 {
 protected:
     /// \brief The system update ID indicates changes in the content directory.
@@ -81,22 +81,11 @@ protected:
     /// GetSystemUpdateID(ui4 Id)
     void upnp_action_GetSystemUpdateID(zmm::Ref<ActionRequest> request);
 
-    /// \brief UPnP standard defined service type
-    /// \todo Check if it makes sense to use it as it is done now...why not define constants here?
-    static zmm::String serviceType;
-    /// \brief ID of the service.
-    static zmm::String serviceID;
-
 public:
-    zmm::String getName() override { return _("CDS"); }
-
     /// \brief Constructor for the CDS, saves the service type and service id
     /// in internal variables.
-    /// \todo Check if it makes sense to use it as it is done now...why not define them as constants?
     ContentDirectoryService();
-    virtual ~ContentDirectoryService();
-
-    static void setStaticArgs(zmm::String serviceType, zmm::String serviceID);
+    ~ContentDirectoryService();
 
     /// \brief Dispatches the ActionRequest between the available actions.
     /// \param request ActionRequest to be processed by the function.

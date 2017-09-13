@@ -34,24 +34,10 @@
 using namespace zmm;
 using namespace mxml;
 
-
-String ConnectionManagerService::serviceType = nullptr;
-String ConnectionManagerService::serviceID = nullptr;
-
 ConnectionManagerService::ConnectionManagerService()
 {
-    if (serviceType == nullptr || serviceID == nullptr)
-        throw _Exception(_("serviceType or serviceID not set!"));
 }
 
 ConnectionManagerService::~ConnectionManagerService()
 {
-    serviceType = nullptr;
-    serviceID = nullptr;
-}
-
-void ConnectionManagerService::setStaticArgs(String _serviceType, String _serviceID)
-{
-    serviceType = _serviceType;
-    serviceID = _serviceID;
 }

@@ -131,7 +131,7 @@ void ContentDirectoryService::upnp_action_Browse(Ref<ActionRequest> request)
     }
 
     Ref<Element> response;
-    response = UpnpXML_CreateResponse(request->getActionName(), serviceType);
+    response = UpnpXML_CreateResponse(request->getActionName(), _(DESC_CDS_SERVICE_TYPE));
 
     response->appendTextChild(_("Result"), didl_lite->print());
     response->appendTextChild(_("NumberReturned"), String::from(arr->size()));
@@ -147,7 +147,7 @@ void ContentDirectoryService::upnp_action_GetSearchCapabilities(Ref<ActionReques
     log_debug("start\n");
 
     Ref<Element> response;
-    response = UpnpXML_CreateResponse(request->getActionName(), serviceType);
+    response = UpnpXML_CreateResponse(request->getActionName(), _(DESC_CDS_SERVICE_TYPE));
     response->appendTextChild(_("SearchCaps"), _(""));
             
     request->setResponse(response);
@@ -160,7 +160,7 @@ void ContentDirectoryService::upnp_action_GetSortCapabilities(Ref<ActionRequest>
     log_debug("start\n");
 
     Ref<Element> response;
-    response = UpnpXML_CreateResponse(request->getActionName(), serviceType);
+    response = UpnpXML_CreateResponse(request->getActionName(), _(DESC_CDS_SERVICE_TYPE));
     response->appendTextChild(_("SortCaps"), _(""));
             
     request->setResponse(response);
@@ -173,7 +173,7 @@ void ContentDirectoryService::upnp_action_GetSystemUpdateID(Ref<ActionRequest> r
     log_debug("start\n");
 
     Ref<Element> response;
-    response = UpnpXML_CreateResponse(request->getActionName(), serviceType);
+    response = UpnpXML_CreateResponse(request->getActionName(), _(DESC_CDS_SERVICE_TYPE));
     response->appendTextChild(_("Id"), String::from(systemUpdateID));
 
     request->setResponse(response);

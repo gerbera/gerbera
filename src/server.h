@@ -121,6 +121,8 @@ public:
     bool getShutdownStatus();
 
     static void static_cleanup_callback();
+
+    void send_subscription_update(zmm::String updateString);
  
 protected:
     static zmm::Ref<Storage> storage;
@@ -172,14 +174,14 @@ protected:
     /// The ContentDirectoryService class is instantiated in the
     /// constructor. The class is responsible for processing
     /// an ActionRequest or a SubscriptionRequest.
-    zmm::Ref<ContentDirectoryService> cds;
+    ContentDirectoryService cds;
     
     /// \brief ConnectionManagerService instance.
     /// 
     /// The ConnectionManagerService class is instantiated in the
     /// constructor. The class is responsible for processing
     /// an ActionRequest or a SubscriptionRequest.
-    zmm::Ref<ConnectionManagerService> cmgr;
+    ConnectionManagerService cmgr;
 
 #if defined(ENABLE_MRREG)    
     /// \brief MediaReceiverRegistrarService instance.

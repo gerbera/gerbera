@@ -34,25 +34,12 @@
 
 using namespace zmm;
 
-String ContentDirectoryService::serviceType = nullptr;
-String ContentDirectoryService::serviceID = nullptr;
-
-ContentDirectoryService::ContentDirectoryService() : Singleton<ContentDirectoryService>(),
+ContentDirectoryService::ContentDirectoryService():
     systemUpdateID(0),
     stringLimit(ConfigManager::getInstance()->getIntOption(CFG_SERVER_UPNP_TITLE_AND_DESC_STRING_LIMIT))
 {
-    if (serviceType == nullptr || serviceID == nullptr)
-        throw _Exception(_("serviceType or serviceID not set!"));
 }
 
 ContentDirectoryService::~ContentDirectoryService()
 {
-    serviceType = nullptr;
-    serviceID = nullptr;
-}
-
-void ContentDirectoryService::setStaticArgs(String _serviceType, String _serviceID)
-{
-    serviceType = _serviceType;
-    serviceID = _serviceID;
 }
