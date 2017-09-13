@@ -32,16 +32,15 @@
 #ifndef __UPNP_CDS_H__
 #define __UPNP_CDS_H__
 
+#include "action_request.h"
 #include "common.h"
 #include "singleton.h"
-#include "action_request.h"
 #include "subscription_request.h"
 
 /// \brief This class is responsible for the UPnP Content Directory Service operations.
 ///
 /// Handles subscription and action invocation requests for the CDS.
-class ContentDirectoryService
-{
+class ContentDirectoryService {
 protected:
     /// \brief The system update ID indicates changes in the content directory.
     ///

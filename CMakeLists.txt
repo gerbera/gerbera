@@ -210,10 +210,8 @@ set(libgerberaFILES
         src/transcoding/transcoding_process_executor.h
         src/update_manager.cc
         src/update_manager.h
-        src/upnp_cds_actions.cc
         src/upnp_cds.cc
         src/upnp_cds.h
-        src/upnp_cds_subscriptions.cc
         src/upnp_cm_actions.cc
         src/upnp_cm.cc
         src/upnp_cm.h
