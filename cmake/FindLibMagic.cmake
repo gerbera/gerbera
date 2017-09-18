@@ -4,7 +4,7 @@ FIND_PATH(MAGIC_INCLUDE_DIR magic.h)
 FIND_LIBRARY(MAGIC_LIBRARIES NAMES magic)
 
 # handle the QUIETLY and REQUIRED arguments and set MAGIC_FOUND to TRUE
-find_package_handle_standard_args(MAGIC DEFAULT_MSG MAGIC_INCLUDE_DIR)
+find_package_handle_standard_args(MAGIC DEFAULT_MSG MAGIC_LIBRARIES)
 
 MARK_AS_ADVANCED(
     MAGIC_LIBRARIES
