@@ -96,20 +96,18 @@ int main(int argc, char** argv, char** envp)
         { (char*)"config", 1, nullptr, 'c' }, // 3
         { (char*)"home", 1, nullptr, 'm' }, // 4
         { (char*)"cfgdir", 1, nullptr, 'f' }, // 5
-        { (char*)"pidfile", 1, nullptr, 'P' }, // 6
-        { (char*)"add", 1, nullptr, 'a' }, // 7
-        { (char*)"logfile", 1, nullptr, 'l' }, // 8
-        { (char*)"debug", 0, nullptr, 'D' }, // 9
-        { (char*)"compile-info", 0, nullptr, 0 }, // 10
-        { (char*)"version", 0, nullptr, 0 }, // 11
-        { (char*)"help", 0, nullptr, 'h' }, // 12
+        { (char*)"add", 1, nullptr, 'a' }, // 6
+        { (char*)"logfile", 1, nullptr, 'l' }, // 7
+        { (char*)"debug", 0, nullptr, 'D' }, // 8
+        { (char*)"compile-info", 0, nullptr, 0 }, // 9
+        { (char*)"version", 0, nullptr, 0 }, // 10
+        { (char*)"help", 0, nullptr, 'h' }, // 11
         { (char*)nullptr, 0, nullptr, 0 }
     };
 
     String config_file;
     String home;
     String confdir;
-    String pid_file;
     String interface;
     String ip;
     String prefix;
@@ -174,11 +172,6 @@ int main(int argc, char** argv, char** envp)
             addFile->append(String::copy(optarg));
             break;
 
-        case 'P':
-            log_debug("Pid file: %s\n", optarg);
-            pid_file = optarg;
-            break;
-
         case 'l':
             log_debug("Log file: %s\n", optarg);
             log_open(optarg);
@@ -217,7 +210,6 @@ Supported options:\n\
     --config or -c     configuration file to use\n\
     --home or -m       define the home directory\n\
     --cfgdir or -f     name of the directory that is holding the configuration\n\
-    --pidfile or -P    file to hold the process id\n\
     --add or -a        add the given file/directory\n\
     --logfile or -l    log to specified file\n\
     --debug or -D      enable debug output\n\
@@ -257,30 +249,6 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
     }
 
     log_copyright();
-
-    // create pid file
-    if (pid_file != nullptr) {
-        log_debug("Writing PID to %s\n", pid_file.c_str());
-        FILE* pid_fd = fopen(pid_file.c_str(), "w");
-
-        if (pid_fd == nullptr) {
-            log_error("Could not write pid file %s : %s\n", pid_file.c_str(),
-                      strerror(errno));
-            exit(EXIT_FAILURE);
-        }
-
-        pid_t cur_pid = getpid();
-        String pid = String::from(cur_pid);
-
-        size_t size = fwrite(pid.c_str(), sizeof(char), pid.length(), pid_fd);
-        fclose(pid_fd);
-
-        if (static_cast<int>(size) < pid.length()) {
-            log_error("Error when writing pid file %s : %s\n",
-                      pid_file.c_str(), strerror(errno));
-            exit(EXIT_FAILURE);
-        }
-    }
 
     // If home is not given by the user, get it from the environment
     if (!string_ok(config_file) && !string_ok(home)) {
