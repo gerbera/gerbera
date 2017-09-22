@@ -16,6 +16,6 @@ find_library(LIBINOTIFY_LIBRARY inotify)
 # all listed variables are TRUE
 # handle the QUIETLY and REQUIRED arguments and set INOTIFY_FOUND to TRUE if
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(INOTIFY DEFAULT_MSG INOTIFY_INCLUDE_DIR)
+find_package_handle_standard_args(INOTIFY DEFAULT_MSG LIBINOTIFY_LIBRARY)
 
 mark_as_advanced(INOTIFY_LIBRARY INOTIFY_INCLUDE_DIR)
