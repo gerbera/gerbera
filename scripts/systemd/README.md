@@ -3,16 +3,15 @@
 This readme outlines how to add the Gerbera runtime
 as a system daemon using the `systemd`.
 
-### Prerequisites
+The gerbera installation uses cmake to configure and install
+the systemd daemon for gerbera
 
-You installed `gerbera` to `/usr/local/bin/gerbera`
-
-> If you don't know the path try `which gerbera`
+Default install path is `/etc/systemd/system/gerbera.service`
 
 
 ### Create a Gerbera System User
 
-We should run Gerbera as a separate user to avoid vulnerabilities in
+You should run Gerbera as a separate user to avoid vulnerabilities in
 exposing root access.
 
 Here is a way to create a system user in linux command line
@@ -31,10 +30,8 @@ $ id -u gerbera
 
 ### Create a Gerbera Configuration File
 
-Create a valid Gerbera `config.xml` in the destination
-of your choice.  Store this file accessible to the gerbera user
-
-Here we will use the default location `/etc/gerbera`.
+Create a valid Gerbera `config.xml` in the destination `/etc/gerbera/config.xml`
+This file must be accessible to the gerbera user.
 
 ```
 $ sudo mkdir /etc/gerbera
@@ -44,46 +41,16 @@ $ sudo chown -Rv gerbera:gerbera /etc/gerbera
 
 ### Enable Systemd Daemon
 
-1. Copy the `systemd` script to `/etc/systemd/system`
+The cmake installation adds *gerbera.service* to `/etc/systemd/system` by default.  
 
-     ```
-     $ sudo cp /gerbera/scripts/systemd/gerbera.service /etc/systemd/system/
-     ```
-2. Set the proper run permissions on the daemon file
+> The installation does not *enable* the service daemon.
 
-     ```
-     $ sudo chmod 664 /etc/systemd/system/gerbera.service
-     ```
-3. Modify the `gerbera.service` file to suit your system setup
-
-     - Change the path of the `gerbera` binary to match your system
-
-     For Example
-
-     ```
-     [Unit]
-     Description=Gerbera Media Server
-     After=network.target
-
-     [Service]
-     Type=simple
-     User=gerbera
-     Group=gerbera
-     ExecStart=/usr/local/bin/gerbera -c /etc/gerbera/config.xml
-     Restart=on-failure
-     RestartSec=5
-
-     [Install]
-     WantedBy=multi-user.target
-     ```
-     > Ensure the `User` and `Group` value exist within your system
-
-4. Notify `systemd` that a new gerbera.service file exists by executing the following command:
+1. Notify `systemd` that a new gerbera.service file exists by executing the following command:
 
      ```
      $ sudo systemctl daemon-reload
      ```
-5. Start up the daemon
+2. Start up the daemon
 
     ```
     $ sudo systemctl start gerbera
