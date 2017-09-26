@@ -59,7 +59,7 @@ String run_simple_process(String prog, String param, String input)
         
     Ref<ConfigManager> cfg = ConfigManager::getInstance();
     String input_file = tempName(cfg->getOption(CFG_SERVER_TMPDIR), temp_in);
-    fd = open(input_file.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+    fd = open(input_file.c_str(), O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
     if (fd == -1)
     {
         log_debug("Failed to open input file %s: %s\n", input_file.c_str(),
@@ -80,7 +80,7 @@ String run_simple_process(String prog, String param, String input)
     
     /* touching output file */
     String output_file = tempName(cfg->getOption(CFG_SERVER_TMPDIR), temp_out);
-    fd = open(output_file.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+    fd = open(output_file.c_str(), O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
     if (fd == -1)
     {
         log_debug("Failed to open output file %s: %s\n", output_file.c_str(),
