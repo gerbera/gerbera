@@ -28,7 +28,7 @@ project("gerbera")
 set(gerbera_MAJOR_VERSION     1)
 set(gerbera_MINOR_VERSION     1)
 set(gerbera_PATCH_VERSION     0)
-set(gerbera_RELEASE           "_alpha")
+set(gerbera_RELEASE           "")
 set(gerbera_SUFFIX            "")
 
 set(libgerberaFILES
