@@ -282,8 +282,8 @@ void FileRequestHandler::get_info(IN const char* filename, OUT UpnpFileInfo* inf
                     header = header + "CaptionInfo.sec: " + url;
                 }
             }
-#endif
         }
+#endif
     }
 
     if (!string_ok(mimeType))
