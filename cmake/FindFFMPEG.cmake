@@ -97,6 +97,11 @@ FIND_LIBRARY(FFMPEG_avutil_LIBRARY avutil
         /usr/lib
         )
 
+FIND_LIBRARY(FFMPEG_swresample_LIBRARY swresample
+        /usr/local/lib
+        /usr/lib
+        )
+
 FIND_LIBRARY(FFMPEG_vorbis_LIBRARY vorbis
         /usr/local/lib
         /usr/lib
@@ -154,6 +159,11 @@ IF (FFMPEG_INCLUDE_DIR)
                         ${FFMPEG_avcodec_LIBRARY}
                         ${FFMPEG_avutil_LIBRARY}
                         )
+
+                # swresample is a dependency of avformat and avcodec
+                IF (FFMPEG_swresample_LIBRARY)
+                    LIST(APPEND FFMPEG_BASIC_LIBRARIES ${FFMPEG_swresample_LIBRARY})
+                ENDIF (FFMPEG_swresample_LIBRARY)
 
                 # swscale is always a part of newer ffmpeg distros
                 IF (FFMPEG_swscale_LIBRARY)
