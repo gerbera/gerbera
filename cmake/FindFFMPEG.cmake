@@ -150,8 +150,8 @@ IF (FFMPEG_INCLUDE_DIR)
                 SET(FFMPEG_FOUND TRUE)
                 SET(FFMPEG_INCLUDE_DIRS ${FFMPEG_INCLUDE_DIR})
                 SET(FFMPEG_BASIC_LIBRARIES
-                        ${FFMPEG_avcodec_LIBRARY}
                         ${FFMPEG_avformat_LIBRARY}
+                        ${FFMPEG_avcodec_LIBRARY}
                         ${FFMPEG_avutil_LIBRARY}
                         )
 
