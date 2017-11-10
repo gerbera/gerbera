@@ -10,7 +10,7 @@ else
    extraFlags="--prefix=/usr"
 fi
 
-wget https://github.com/mrjimenez/pupnp/archive/release-1.8.1.tar.gz -O pupnp-1.8.1.tgz
-tar -xzvf pupnp-1.8.1.tgz
-cd pupnp-release-1.8.1
+wget https://github.com/mrjimenez/pupnp/archive/release-1.8.2.tar.gz -O pupnp-1.8.2.tgz
+tar -xzvf pupnp-1.8.2.tgz
+cd pupnp-release-1.8.2
 ./bootstrap && ./configure $extraFlags --enable-ipv6 --enable-reuseaddr && make && sudo make install
