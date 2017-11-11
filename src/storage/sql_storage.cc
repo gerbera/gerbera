@@ -1212,7 +1212,7 @@ String SQLStorage::incrementUpdateIDs(shared_ptr<unordered_set<int>> ids)
 }
 
 // id is the parent_id for cover media to find, and if set, trackArtBase is the case-folded
-// name of the track to try as artwork
+// name of the track to try as artwork; we rely on LIKE being case-insensitive
 String SQLStorage::findFolderImage(int id, String trackArtBase)
 {
     Ref<StringBuffer> q(new StringBuffer());
@@ -1221,19 +1221,13 @@ String SQLStorage::findFolderImage(int id, String trackArtBase)
     *q << "SELECT " << TQ("id") << " FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE ";
     *q << "( ";
     if (trackArtBase.length() > 0) {
-        *q << "lower(" << TQ("dc_title") << ") "
-           << "LIKE " << quote(trackArtBase + _(".jp%")) << " OR ";
+        *q << TQ("dc_title") << "LIKE " << quote(trackArtBase + _(".jp%")) << " OR ";
     }
-    *q << "lower(" << TQ("dc_title") << ") "
-       << "LIKE " << quote(_("cover.jp%")) << " OR ";
-    *q << "lower(" << TQ("dc_title") << ") "
-       << "LIKE " << quote(_("albumart%.jp%")) << " OR ";
-    *q << "lower(" << TQ("dc_title") << ") "
-       << "LIKE " << quote(_("album.jp%")) << " OR ";
-    *q << "lower(" << TQ("dc_title") << ") "
-       << "LIKE " << quote(_("front.jp%")) << " OR ";
-    *q << "lower(" << TQ("dc_title") << ") "
-       << "LIKE " << quote(_("folder.jp%"));
+    *q << TQ("dc_title") << "LIKE " << quote(_("cover.jp%")) << " OR ";
+    *q << TQ("dc_title") << "LIKE " << quote(_("albumart%.jp%")) << " OR ";
+    *q << TQ("dc_title") << "LIKE " << quote(_("album.jp%")) << " OR ";
+    *q << TQ("dc_title") << "LIKE " << quote(_("front.jp%")) << " OR ";
+    *q << TQ("dc_title") << "LIKE " << quote(_("folder.jp%"));
     *q << " ) AND ";
     *q << TQ("upnp_class") << '=' << quote(_(UPNP_DEFAULT_CLASS_IMAGE_ITEM)) << " AND ";
 #ifndef ONLY_REAL_FOLDER_ART
