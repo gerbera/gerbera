@@ -13,7 +13,9 @@
         "nodes": [],
         "gerbera": {
           "id": 8,
-          "childCount": 6
+          "childCount": 6,
+          "autoScanMode": "none",
+          "autoScanType": "none"
         }
       },
       {
@@ -22,7 +24,9 @@
         "nodes": [],
         "gerbera": {
           "id": 1,
-          "childCount": 1
+          "childCount": 1,
+          "autoScanMode": "none",
+          "autoScanType": "none"
         }
       },
       {
@@ -31,25 +35,31 @@
         "nodes": [],
         "gerbera": {
           "id": 2779,
-          "childCount": 2
+          "childCount": 2,
+          "autoScanMode": "none",
+          "autoScanType": "none"
         }
       },
       {
         "title": "Playlists",
-        "badge": [2],
+        "badge": [2, "a"],
         "nodes": [],
         "gerbera": {
           "id": 3808,
-          "childCount": 2
+          "childCount": 2,
+          "autoScanMode": "none",
+          "autoScanType": "ui"
         }
       },
       {
         "title": "Video",
-        "badge": [2],
+        "badge": [2, "a"],
         "nodes": [],
         "gerbera": {
           "id": 7443,
-          "childCount": 2
+          "childCount": 2,
+          "autoScanMode": "none",
+          "autoScanType": "persistent"
         }
       }
     ]

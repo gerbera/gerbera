@@ -7,9 +7,14 @@ module.exports = {
     if (resp === undefined) {
       resp = requests[action].responses['default']
     }
+    //console.log('Auth Mock serving for [' + action + '] --> ' + resp)
     return resp
   },
   reset: function (testName) {
-    requests = require('./tests/' + testName)
+    try {
+      requests = require('./tests/' + testName)
+    } catch (error) {
+      requests = require('./tests/default.json')
+    }
   }
 }

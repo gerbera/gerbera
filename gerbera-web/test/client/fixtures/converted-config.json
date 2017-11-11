@@ -1,0 +1,22 @@
+{
+  "success": true,
+  "config": {
+    "accounts": true,
+    "show-tooltips": true,
+    "poll-when-idle": false,
+    "poll-interval": 2000,
+    "have-inotify": true,
+    "items-per-page": {
+      "default": 50,
+      "option": [
+        10,
+        25,
+        50,
+        100
+      ]
+    },
+    "actions": {
+      "action": []
+    }
+  }
+}

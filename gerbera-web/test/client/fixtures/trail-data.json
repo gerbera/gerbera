@@ -1,0 +1,26 @@
+[
+  {
+    "text": "database",
+    "gerbera": {
+      "id": 0
+    }
+  },
+  {
+    "text": "Video",
+    "gerbera": {
+      "id": 1
+    }
+  },
+  {
+    "text": "Directories",
+    "gerbera": {
+      "id": 2
+    }
+  },
+  {
+    "text": "video",
+    "gerbera": {
+      "id": 3
+    }
+  }
+]

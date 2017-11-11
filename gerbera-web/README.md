@@ -5,12 +5,12 @@ The Gerbera Web UI is written with the following tools:
 ### Client-side
 
 - JQuery v3.2.1
-- Bootstrap v3.3.7
+- Bootstrap v4.0.0-beta.2
 
 
 ### Development
 
-- Node JS v6.10.3
+- Node JS v6.11.4
 - Jasmine
 - Karma
 - Mocha

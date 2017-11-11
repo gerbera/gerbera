@@ -1,0 +1,31 @@
+{
+  "success": true,
+  "item": {
+    "object_id": 1470,
+    "title": {
+      "editable": true,
+      "value": "title"
+    },
+    "class": {
+      "editable": true,
+      "value": "object.item"
+    },
+    "obj_type": "internal_url",
+    "description": {
+      "editable": true,
+      "value": "description"
+    },
+    "location": {
+      "editable": true,
+      "value": "./test"
+    },
+    "mime-type": {
+      "editable": true,
+      "value": "text/plain"
+    },
+    "protocol": {
+      "editable": true,
+      "value": "http-get"
+    }
+  }
+}

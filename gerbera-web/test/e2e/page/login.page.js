@@ -32,18 +32,29 @@ module.exports = function (driver) {
   this.logout = function () {
     var logoutBtn = driver.findElement(By.id('logout'))
     driver.wait(until.elementIsVisible(logoutBtn), 5000)
-    return logoutBtn.click()
+    logoutBtn.click()
+    var loginBtn = driver.findElement(By.id('login-submit'))
+    return driver.wait(until.elementIsVisible(loginBtn), 5000)
   }
 
   this.submitLogin = function () {
-    return driver.findElement(By.id('login-submit')).click()
+    driver.findElement(By.id('login-submit')).click()
+    return driver.wait(until.elementLocated(By.id('logout')), 5000)
   }
 
-  this.warning = function () {
-    return driver.findElement(By.id('warning')).getText()
+  this.getToastMessage = function () {
+    driver.wait(until.elementIsVisible(driver.findElement(By.id('toast'))), 5000)
+    return driver.findElement(By.css('.grb-toast-msg')).getText()
+  }
+
+  this.waitForToastClose = function () {
+    driver.wait(until.elementIsNotVisible(driver.findElement(By.id('toast'))), 6000)
+    return driver.findElement(By.css('.grb-toast-msg')).isDisplayed()
   }
 
   this.get = function (url) {
-    return driver.get(url)
+    driver.get(url)
+    var loginForm = driver.findElement(By.id('login-form'))
+    return driver.wait(until.elementIsEnabled(loginForm), 5000)
   }
 }

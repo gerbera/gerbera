@@ -1,3 +1,32 @@
+/*GRB*
+
+    Gerbera - https://gerbera.io/
+
+    jquery.gerbera.tree.js - this file is part of Gerbera.
+
+    Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
+                       Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
+
+    Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
+                            Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
+                            Leonhard Wimmer <leo@mediatomb.cc>
+
+    Copyright (C) 2016-2017 Gerbera Contributors
+
+    Gerbera is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License version 2
+    as published by the Free Software Foundation.
+
+    Gerbera is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
+
+    $Id$
+*/
 /* global $ */
 
 $.widget('grb.tree', {
@@ -32,6 +61,9 @@ $.widget('grb.tree', {
     for (var i = 0; i < data.length; i++) {
       var item = $('<li></li>')
       item.addClass('list-group-item')
+      item.data('grb-id', data[i].gerbera.id)
+      item.data('grb-item', data[i])
+      item.prop('id', 'grb-tree-' + data[i].gerbera.id)
 
       var icon = $('<span></span>').addClass(config.closedIcon).addClass('folder-icon')
       var title = $('<span></span>').addClass(config.titleClass).text(data[i].title)
@@ -46,8 +78,17 @@ $.widget('grb.tree', {
       var badgeData = data[i].badge
       if (badgeData && badgeData.length > 0) {
         for (var x = 0; x < badgeData.length; x++) {
-          var aBadge = $('<span></span>').addClass('badge').text(badgeData[x])
+          var aBadge = $('<span></span>').addClass('badge badge-pill badge-secondary').text(badgeData[x])
           aBadge.addClass('pull-right')
+
+          if (badgeData[x] === 'a') {
+            aBadge.addClass('autoscan')
+            aBadge.click({id: data[i].gerbera.id}, config.onAutoscanEdit)
+            aBadge.prop('title', 'Autoscan: ' + data[i].gerbera.autoScanType)
+          } else if (!isNaN(badgeData[x])) {
+            aBadge.prop('title', badgeData[x] + ' - children')
+          }
+
           badges.push(aBadge)
         }
       }
@@ -79,9 +120,24 @@ $.widget('grb.tree', {
     element.parent().find('ul.list-group').css('display', 'none')
   },
 
-  select: function (element) {
+  select: function (folderList) {
     this.element.find('li').removeClass('selected-item')
-    $(element).parent().addClass('selected-item')
+    $(folderList).addClass('selected-item')
+  },
+
+  getItem: function (id) {
+    var gerberaItem
+    var treeElement = this.getElement(id)
+    if (treeElement.length === 1) {
+      gerberaItem = treeElement.data('grb-item')
+    } else {
+      gerberaItem = false
+    }
+    return gerberaItem
+  },
+
+  getElement: function (id) {
+    return this.element.find('#grb-tree-' + id)
   }
 
 })

@@ -1,0 +1,26 @@
+{
+  "2f657463_as_edit_load" : {
+    "count" : 0,
+    "responses" : {
+      "default" : "./autoscan/autoscan-2f6d.json"
+    }
+  },
+  "2f6d_as_edit_save" : {
+    "count" : 0,
+    "responses" : {
+      "default" : "./autoscan/submit-complete-2f6d.json"
+    }
+  },
+  "3808_as_edit_load" : {
+    "count" : 0,
+    "responses" : {
+      "default" : "./autoscan/autoscan-3808.json"
+    }
+  },
+  "7443_as_edit_load" : {
+    "count" : 0,
+    "responses" : {
+      "default" : "./autoscan/autoscan-3808.json"
+    }
+  }
+}

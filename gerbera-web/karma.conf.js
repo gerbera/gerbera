@@ -7,6 +7,8 @@ module.exports = function (config) {
       '../web/vendor/jquery/jquery-3.2.1.min.js',
       '../web/vendor/jquery/jquery.cookie.js',
       '../web/vendor/jquery/jquery-ui.min.js',
+      '../web/vendor/popper/popper.js',
+      '../web/vendor/tether/tether.min.js',
       '../web/vendor/bootstrap/js/bootstrap.js',
       // Unit Test
       'node_modules/jasmine-jquery/lib/jasmine-jquery.js',
@@ -17,8 +19,15 @@ module.exports = function (config) {
       '../web/js/gerbera.items.js',
       '../web/js/gerbera.tree.js',
       '../web/js/gerbera.menu.js',
+      '../web/js/jquery.gerbera.toast.js',
+      '../web/js/gerbera.trail.js',
+      '../web/js/gerbera.autoscan.js',
+      '../web/js/gerbera.updates.js',
       '../web/js/jquery.gerbera.items.js',
       '../web/js/jquery.gerbera.tree.js',
+      '../web/js/jquery.gerbera.trail.js',
+      '../web/js/jquery.gerbera.editor.js',
+      '../web/js/jquery.gerbera.autoscan.js',
       // Tests
       'test/client/*.spec.js',
       {
@@ -36,9 +45,9 @@ module.exports = function (config) {
     ],
     exclude: [],
     preprocessors: {
-      'js/*.js': 'coverage'
+      '../web/js/*.js': 'coverage'
     },
-    reporters: ['spec', 'coverage'],
+    reporters: ['mocha', 'coverage'],
     coverageReporter: {
       type: 'html',
       dir: 'coverage/'

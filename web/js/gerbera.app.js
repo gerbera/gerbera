@@ -1,3 +1,32 @@
+/*GRB*
+
+    Gerbera - https://gerbera.io/
+
+    gerbera.app.js - this file is part of Gerbera.
+
+    Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
+                       Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
+
+    Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
+                            Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
+                            Leonhard Wimmer <leo@mediatomb.cc>
+
+    Copyright (C) 2016-2017 Gerbera Contributors
+
+    Gerbera is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License version 2
+    as published by the Free Software Foundation.
+
+    Gerbera is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
+
+    $Id$
+*/
 var GERBERA
 if (typeof (GERBERA) === 'undefined') {
   GERBERA = {}
@@ -21,11 +50,19 @@ GERBERA.App = (function () {
     $.cookie('TYPE', type)
   }
 
-  var error = function (status) {
-    console.log('failure: ' + status)
+  var error = function (event) {
+    var message
+    if (typeof event === 'string') {
+      message = event
+    } else if (event && event.responseText) {
+      message = event.responseText
+    }
+    GERBERA.Updates.showMessage(message)
   }
 
   var initialize = function () {
+    GERBERA.Updates.initialize()
+
     return configureDefaults()
       .then(getConfig)
       .then(loadConfig)
@@ -33,6 +70,7 @@ GERBERA.App = (function () {
       .then(displayLogin)
       .then(GERBERA.Menu.initialize)
       .done()
+      .fail(GERBERA.App.error)
   }
 
   var configureDefaults = function () {
@@ -58,6 +96,8 @@ GERBERA.App = (function () {
   var loadConfig = function (response) {
     if (response.success) {
       GERBERA.App.serverConfig = response.config
+      var pollingInterval = response.config['poll-interval']
+      GERBERA.App.serverConfig['poll-interval'] = parseInt(pollingInterval) * 1000
     }
     return $.Deferred().resolve().promise()
   }
@@ -71,9 +111,11 @@ GERBERA.App = (function () {
       }
       GERBERA.Items.initialize()
       GERBERA.Tree.initialize()
+      GERBERA.Trail.initialize()
+      GERBERA.Autoscan.initialize()
+      GERBERA.Updates.initialize()
     } else {
       $('.login-field').show()
-      $('#login-submit').click(GERBERA.Auth.authenticate)
       $('#login-form').submit(function (event) {
         GERBERA.Auth.authenticate(event)
         event.preventDefault()

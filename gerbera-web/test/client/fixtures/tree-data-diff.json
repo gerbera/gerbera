@@ -1,0 +1,41 @@
+[
+  {
+    "title": "Folder 1",
+    "badge": [
+      "test",
+      "test1"
+    ],
+    "gerbera" : {
+      "id": 9999,
+      "childCount": 0
+    }
+  },
+  {
+    "title": "Folder 2",
+    "gerbera" : {
+      "id": 8888,
+      "childCount": 0
+    }
+  },
+  {
+    "title": "Folder 3",
+    "gerbera" : {
+      "id": 7777,
+      "childCount": 0
+    }
+  },
+  {
+    "title": "Folder 4",
+    "gerbera" : {
+      "id": 6666,
+      "childCount": 0
+    }
+  },
+  {
+    "title": "Folder 5",
+    "gerbera" : {
+      "id": 5555,
+      "childCount": 0
+    }
+  }
+]

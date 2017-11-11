@@ -1,3 +1,32 @@
+/*GRB*
+
+    Gerbera - https://gerbera.io/
+
+    gerbera.auth.js - this file is part of Gerbera.
+
+    Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
+                       Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
+
+    Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
+                            Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
+                            Leonhard Wimmer <leo@mediatomb.cc>
+
+    Copyright (C) 2016-2017 Gerbera Contributors
+
+    Gerbera is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License version 2
+    as published by the Free Software Foundation.
+
+    Gerbera is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
+
+    $Id$
+*/
 /* global md5 */
 'use strict'
 
@@ -61,12 +90,7 @@ GERBERA.Auth = (function () {
           .done(submitLogin)
           .fail(GERBERA.App.error)
     } else {
-      var warning = $('#warning')
-      warning.children('span').html('Please enter username and password')
-      warning.show()
-      warning.children('button').click(function () {
-        warning.hide()
-      })
+      GERBERA.Updates.showMessage('Please enter username and password')
       promise = $.Deferred().resolve().promise()
     }
     return promise
@@ -91,6 +115,8 @@ GERBERA.Auth = (function () {
       })
         .done(checkLogin)
         .fail(GERBERA.App.error)
+    } else {
+      GERBERA.Updates.showMessage(response.error.text)
     }
   }
 
@@ -104,7 +130,10 @@ GERBERA.Auth = (function () {
       LOGGED_IN = true
       GERBERA.Tree.initialize()
       GERBERA.Items.initialize()
+      GERBERA.Trail.initialize()
       GERBERA.Menu.initialize()
+      GERBERA.Autoscan.initialize()
+      GERBERA.Updates.initialize()
     }
   }
 

@@ -4,9 +4,13 @@
     "commonjs": true,
     "jquery": true
   },
-  "extends": "standard",
+  "extends": "eslint:recommended",
   "plugins": [
     "standard",
     "promise"
-  ]
+  ],
+  "rules" : {
+    "no-unused-expressions": "off",
+    "no-unused-vars": "off"
+  }
 }

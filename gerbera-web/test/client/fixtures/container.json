@@ -1,0 +1,12 @@
+{
+  "object_id": 1471,
+  "title": {
+    "editable": false,
+    "value": "container title"
+  },
+  "class": {
+    "editable": false,
+    "value": "object.container"
+  },
+  "obj_type": "container"
+}

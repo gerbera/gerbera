@@ -3,39 +3,50 @@
     "title": "Folder 1",
     "badge": [
       "test",
-      "test1"
+      "test1",
+      "a"
     ],
     "gerbera" : {
       "id": 1111,
-      "childCount": 0
+      "childCount": 0,
+      "autoScanMode": "none",
+      "autoScanType": "ui"
     }
   },
   {
     "title": "Folder 2",
     "gerbera" : {
       "id": 2222,
-      "childCount": 0
+      "childCount": 0,
+      "autoScanMode": "none",
+      "autoScanType": "ui"
     }
   },
   {
     "title": "Folder 3",
     "gerbera" : {
       "id": 3333,
-      "childCount": 0
+      "childCount": 0,
+      "autoScanMode": "none",
+      "autoScanType": "ui"
     }
   },
   {
     "title": "Folder 4",
     "gerbera" : {
       "id": 4444,
-      "childCount": 0
+      "childCount": 0,
+      "autoScanMode": "none",
+      "autoScanType": "ui"
     }
   },
   {
     "title": "Folder 5",
     "gerbera" : {
       "id": 5555,
-      "childCount": 0
+      "childCount": 0,
+      "autoScanMode": "none",
+      "autoScanType": "ui"
     }
   }
 ]

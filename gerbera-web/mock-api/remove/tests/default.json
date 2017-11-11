@@ -1,0 +1,14 @@
+{
+  "39479_0" : {
+    "count" : 0,
+    "responses" : {
+      "default" : "./remove/object_id-39479_all-0.json"
+    }
+  },
+  "39467_0" : {
+    "count" : 0,
+    "responses" : {
+      "default" : "./remove/object_id-39467_all-0.json"
+    }
+  }
+}

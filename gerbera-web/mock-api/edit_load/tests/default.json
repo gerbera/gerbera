@@ -1,0 +1,38 @@
+{
+  "39479" : {
+    "count" : 0,
+    "responses" : {
+      "default" : "./edit_load/object_id-39479.json"
+    }
+  },
+  "39467" : {
+    "count" : 0,
+    "responses" : {
+      "default" : "./edit_load/object_id-39467.json"
+    }
+  },
+  "1306" : {
+    "count" : 0,
+    "responses" : {
+      "default" : "./edit_load/object_id-1306.json"
+    }
+  },
+  "1469" : {
+    "count" : 0,
+    "responses" : {
+      "default" : "./edit_load/object_id-1469.json"
+    }
+  },
+  "1470" : {
+    "count" : 0,
+    "responses" : {
+      "default" : "./edit_load/object_id-1470.json"
+    }
+  },
+  "7443" : {
+    "count" : 0,
+    "responses" : {
+      "default" : "./edit_load/object_id-7443.json"
+    }
+  }
+}
