@@ -89,7 +89,6 @@ protected:
     zmm::String error;
 };
 
-#ifdef AUTO_CREATE_DATABASE
 /// \brief A task for the sqlite3 thread to inititally create the database.
 class SLInitTask : public SLTask {
 public:
@@ -100,7 +99,6 @@ public:
     }
     virtual void run(sqlite3** db, Sqlite3Storage* sl);
 };
-#endif
 
 /// \brief A task for the sqlite3 thread to do a SQL select.
 class SLSelectTask : public SLTask {

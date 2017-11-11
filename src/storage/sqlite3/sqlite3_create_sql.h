@@ -29,7 +29,6 @@
 
 /// \file sqlite3_create_sql.h
 
-#ifdef AUTO_CREATE_DATABASE
 #ifdef HAVE_SQLITE3
 
 #ifndef __SQLITE3_CREATE_SQL_H__
@@ -95,4 +94,3 @@ const unsigned char sqlite3_create_sql[] = /* 760 */
 #endif // __SQLITE3_CREATE_SQL_H__
 
 #endif // HAVE_SQLITE3
-#endif // AUTO_CREATE_DATABASE

@@ -40,10 +40,8 @@
 #include "common.h"
 #include "config_manager.h"
 
-#ifdef AUTO_CREATE_DATABASE
 #include "sqlite3_create_sql.h"
 #include <zlib.h>
-#endif
 
 // updates 1->2
 #define SQLITE3_UPDATE_1_2_1 "DROP INDEX mt_autoscan_obj_id"
@@ -134,7 +132,6 @@ void Sqlite3Storage::init()
             }
 
             if (dbVersion == nullptr) {
-#ifdef AUTO_CREATE_DATABASE
                 log_info("no sqlite3 backup is available or backup is corrupt. automatically creating database...\n");
                 Ref<SLInitTask> ptask(new SLInitTask());
                 addTask(RefCast(ptask, SLTask));
@@ -146,10 +143,6 @@ void Sqlite3Storage::init()
                     throw _Exception(_("error while creating database: ") + e.getMessage());
                 }
                 log_info("database created successfully.\n");
-#else
-                shutdown();
-                throw _Exception(_("database doesn't seem to exist yet and autocreation wasn't compiled in"));
-#endif
             }
         } else {
             // fail because restore option is false
@@ -412,7 +405,6 @@ void SLTask::waitForTask()
     }
 }
 
-#ifdef AUTO_CREATE_DATABASE
 /* SLInitTask */
 
 void SLInitTask::run(sqlite3** db, Sqlite3Storage* sl)
@@ -452,8 +444,6 @@ void SLInitTask::run(sqlite3** db, Sqlite3Storage* sl)
     }
     contamination = true;
 }
-
-#endif
 
 /* SLSelectTask */
 

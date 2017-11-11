@@ -39,10 +39,8 @@
 #include "mysql_storage.h"
 #include "config_manager.h"
 
-#ifdef AUTO_CREATE_DATABASE
 #include "mysql_create_sql.h"
 #include <zlib.h>
-#endif
 
 // updates 1->2
 #define MYSQL_UPDATE_1_2_1 "ALTER TABLE `mt_cds_object` CHANGE `location` `location` BLOB NULL DEFAULT NULL"
@@ -186,7 +184,6 @@ void MysqlStorage::init()
     }
 
     if (dbVersion == nullptr) {
-#ifdef AUTO_CREATE_DATABASE
         log_info("database doesn't seem to exist. automatically creating database...\n");
         unsigned char buf[MS_CREATE_SQL_INFLATED_SIZE + 1]; // + 1 for '\0' at the end of the string
         unsigned long uncompressed_size = MS_CREATE_SQL_INFLATED_SIZE;
@@ -218,10 +215,6 @@ void MysqlStorage::init()
             throw _Exception(_("error while creating database"));
         }
         log_info("database created successfully.\n");
-#else
-        shutdown();
-        throw _Exception(_("database doesn't seem to exist yet and autocreation wasn't compiled in"));
-#endif
     }
     log_debug("db_version: %s\n", dbVersion.c_str());
 

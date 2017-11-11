@@ -29,7 +29,6 @@
 
 /// \file mysql_create_sql.h
 
-#ifdef AUTO_CREATE_DATABASE
 #ifdef HAVE_MYSQL
 
 #ifndef __MYSQL_CREATE_SQL_H__
@@ -113,4 +112,3 @@ const unsigned char mysql_create_sql[] = /* 1031 */
 #endif // __MYSQL_CREATE_SQL_H__
 
 #endif // HAVE_MYSQL
-#endif // AUTO_CREATE_DATABASE
