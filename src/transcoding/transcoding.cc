@@ -30,8 +30,6 @@
 /// \file transcoding.cc
 /// \brief Definitions of the Transcoding classes. 
 
-#ifdef EXTERNAL_TRANSCODING
-
 #include "transcoding.h"
 #include "tools.h"
 
@@ -146,4 +144,3 @@ Ref<TranscodingProfile> TranscodingProfileList::getByName(zmm::String name)
     return nullptr;
 }
 
-#endif//EXTERNAL_TRANSCODING

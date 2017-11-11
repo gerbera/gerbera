@@ -29,8 +29,6 @@
 
 /// \file transcode_ext_handler.cc
 
-#ifdef EXTERNAL_TRANSCODING
-
 #include "transcode_ext_handler.h"
 #include "server.h"
 #include <sys/types.h>
@@ -252,4 +250,3 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
     return io_handler;
 }
 
-#endif//EXTERNAL_TRANSCODING

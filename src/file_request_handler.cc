@@ -40,9 +40,7 @@
 #include "session_manager.h"
 #include "update_manager.h"
 
-#ifdef EXTERNAL_TRANSCODING
 #include "transcoding/transcode_dispatcher.h"
-#endif
 
 using namespace zmm;
 using namespace mxml;
@@ -58,9 +56,7 @@ void FileRequestHandler::get_info(IN const char* filename, OUT UpnpFileInfo* inf
 
     String mimeType;
     int objectID;
-#ifdef EXTERNAL_TRANSCODING
     String tr_profile;
-#endif
 
     struct stat statbuf;
     int ret = 0;
@@ -100,11 +96,7 @@ void FileRequestHandler::get_info(IN const char* filename, OUT UpnpFileInfo* inf
     // determining which resource to serve
     int res_id = 0;
     String s_res_id = dict->get(_(URL_RESOURCE_ID));
-#ifdef EXTERNAL_TRANSCODING
     if (string_ok(s_res_id) && (s_res_id != _(URL_VALUE_TRANSCODE_NO_RES_ID)))
-#else
-    if (string_ok(s_res_id))
-#endif
         res_id = s_res_id.toInt();
     else
         res_id = -1;
@@ -156,9 +148,7 @@ void FileRequestHandler::get_info(IN const char* filename, OUT UpnpFileInfo* inf
         }
     }
 
-#ifdef EXTERNAL_TRANSCODING
     tr_profile = dict->get(_(URL_PARAM_TRANSCODE_PROFILE_NAME));
-#endif
 
     // for transcoded resourecs res_id will always be negative
     log_debug("fetching resource id %d\n", res_id);
@@ -193,7 +183,6 @@ void FileRequestHandler::get_info(IN const char* filename, OUT UpnpFileInfo* inf
             ->serveContent(item, res_id, &(size));
 
     } else
-#ifdef EXTERNAL_TRANSCODING
         if (!is_srt && string_ok(tr_profile)) {
 
         Ref<TranscodingProfile> tp = ConfigManager::getInstance()
@@ -226,7 +215,6 @@ void FileRequestHandler::get_info(IN const char* filename, OUT UpnpFileInfo* inf
 
         UpnpFileInfo_set_FileLength(info, -1);
     } else
-#endif
     {
         UpnpFileInfo_set_FileLength(info, statbuf.st_size);
         // if we are dealing with a regular file we should add the
@@ -319,9 +307,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char* filename,
     String mimeType;
     int ret;
     bool is_srt = false;
-#ifdef EXTERNAL_TRANSCODING
     String tr_profile;
-#endif
 
     log_debug("start\n");
     struct stat statbuf;
@@ -359,11 +345,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char* filename,
     // determining which resource to serve
     int res_id = 0;
     String s_res_id = dict->get(_(URL_RESOURCE_ID));
-#ifdef EXTERNAL_TRANSCODING
     if (string_ok(s_res_id) && (s_res_id != _(URL_VALUE_TRANSCODE_NO_RES_ID)))
-#else
-    if (string_ok(s_res_id))
-#endif
         res_id = s_res_id.toInt();
     else
         res_id = -1;
@@ -487,7 +469,6 @@ Ref<IOHandler> FileRequestHandler::open(IN const char* filename,
 
     log_debug("fetching resource id %d\n", res_id);
 
-#ifdef EXTERNAL_TRANSCODING
     tr_profile = dict->get(_(URL_PARAM_TRANSCODE_PROFILE_NAME));
     if (string_ok(tr_profile)) {
         if (res_id != (-1))
@@ -496,7 +477,6 @@ Ref<IOHandler> FileRequestHandler::open(IN const char* filename,
         if (res_id == -1)
             throw _Exception(_("Invalid resource ID given!"));
     }
-#endif
 
     // FIXME upstream upnp
     //info->http_header = NULL;
@@ -546,7 +526,6 @@ Ref<IOHandler> FileRequestHandler::open(IN const char* filename,
         return io_handler;
 
     } else {
-#ifdef EXTERNAL_TRANSCODING
         if (!is_srt && string_ok(tr_profile)) {
             String range = dict->get(_("range"));
 
@@ -554,7 +533,6 @@ Ref<IOHandler> FileRequestHandler::open(IN const char* filename,
             Ref<TranscodingProfile> tp = ConfigManager::getInstance()->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(tr_profile);
             return tr_d->open(tp, path, RefCast(item, CdsObject), range);
         } else
-#endif
 
         {
             if (mimeType == nullptr)

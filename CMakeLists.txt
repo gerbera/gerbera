@@ -334,8 +334,6 @@ target_compile_definitions(gerbera PRIVATE -DCOMPILE_INFO="${COMPILE_INFO}")
 target_compile_definitions(gerbera PRIVATE -DGIT_BRANCH="${GIT_BRANCH}")
 target_compile_definitions(gerbera PRIVATE -DGIT_COMMIT_HASH="${GIT_COMMIT_HASH}")
 
-add_definitions(-DEXTERNAL_TRANSCODING -DAUTO_CREATE_DATABASE)
-
 if (WITH_DEBUG)
     add_definitions(-DTOMBDEBUG)
 endif()

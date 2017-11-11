@@ -42,9 +42,7 @@
 #include "autoscan.h"
 #include "config_options.h"
 
-#ifdef EXTERNAL_TRANSCODING
     #include "transcoding/transcoding.h"
-#endif
 #ifdef ONLINE_SERVICES
     #include "online_service.h"
 #endif
@@ -69,9 +67,7 @@ typedef enum
     CFG_SERVER_ALIVE_INTERVAL,
 #ifdef EXTEND_PROTOCOLINFO 
     CFG_SERVER_EXTEND_PROTOCOLINFO,
-#ifdef EXTERNAL_TRANSCODING
     CFG_SERVER_EXTEND_PROTOCOLINFO_CL_HACK,
-#endif
     CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK,
 #endif//EXTEND_PROTOCOLINFO
     CFG_SERVER_HIDE_PC_DIRECTORY,
@@ -158,13 +154,11 @@ typedef enum
 #if defined(HAVE_TAGLIB)
     CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST,
 #endif
-#ifdef EXTERNAL_TRANSCODING
     CFG_TRANSCODING_PROFILE_LIST,
 #ifdef HAVE_CURL
     CFG_EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE,
     CFG_EXTERNAL_TRANSCODING_CURL_FILL_SIZE,
 #endif//HAVE_CURL
-#endif//EXTERNAL_TRANSCODING
 #ifdef YOUTUBE
     CFG_ONLINE_CONTENT_YOUTUBE_ENABLED,
     CFG_ONLINE_CONTENT_YOUTUBE_FORMAT_MP4,
@@ -237,11 +231,9 @@ public:
     /// \param option to retrieve
     zmm::Ref<AutoscanList> getAutoscanListOption(config_option_t option);
 
-#ifdef EXTERNAL_TRANSCODING
     /// \brief returns a config option of type TranscodingProfileList
     /// \param option to retrieve
     zmm::Ref<TranscodingProfileList> getTranscodingProfileListOption(config_option_t option);
-#endif
 
     /// \brief sets static configuration parameters that will be used by
     /// when the ConfigManager class initializes
@@ -352,12 +344,10 @@ protected:
     /// \param scanmode add only directories with the specified scanmode to the array
     zmm::Ref<AutoscanList> createAutoscanListFromNodeset(zmm::Ref<mxml::Element> element, ScanMode scanmode);
   
-#ifdef EXTERNAL_TRANSCODING
     /// \brief Creates ab aray of TranscodingProfile objects from an XML 
     /// nodeset.
     /// \param element starting element of the nodeset.
     zmm::Ref<TranscodingProfileList> createTranscodingProfileListFromNodeset(zmm::Ref<mxml::Element> element);
-#endif
 
     /// \brief Creates an array of strings from an XML nodeset.
     /// \param element starting element of the nodeset.

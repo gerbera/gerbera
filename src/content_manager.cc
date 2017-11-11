@@ -52,9 +52,7 @@
 #include "layout/js_layout.h"
 #endif
 
-#ifdef EXTERNAL_TRANSCODING
 #include "process.h"
-#endif
 
 #ifdef YOUTUBE
 #include "youtube_service.h"
@@ -329,12 +327,9 @@ void ContentManager::init()
         Timer::getInstance()->addTimerSubscriber(this, dir->getInterval(), param, false);
     }
 
-#ifdef EXTERNAL_TRANSCODING
     process_list = Ref<Array<Executor>>(new Array<Executor>());
-#endif
 }
 
-#if defined(EXTERNAL_TRANSCODING) || defined(SOPCAST)
 void ContentManager::registerExecutor(Ref<Executor> exec)
 {
     AutoLock lock(mutex);
@@ -358,7 +353,6 @@ void ContentManager::unregisterExecutor(Ref<Executor> exec)
             process_list->remove(i);
     }
 }
-#endif
 
 void ContentManager::timerNotify(Ref<Timer::Parameter> parameter)
 {
@@ -412,13 +406,11 @@ void ContentManager::shutdown()
 
     shutdownFlag = true;
 
-#ifdef EXTERNAL_TRANSCODING
     for (int i = 0; i < process_list->size(); i++) {
         Ref<Executor> exec = process_list->get(i);
         if (exec != nullptr)
             exec->kill();
     }
-#endif
 
     log_debug("signalling...\n");
     signal();

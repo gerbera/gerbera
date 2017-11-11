@@ -29,8 +29,6 @@
 
 /// \file process_io_handler.cc
 
-#ifdef EXTERNAL_TRANSCODING
-
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -460,4 +458,3 @@ ProcessIOHandler::~ProcessIOHandler()
     catch (const Exception & ex) {}
 }
 
-#endif // EXTERNAL_TRANSCODING

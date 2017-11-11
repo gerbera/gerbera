@@ -30,8 +30,6 @@
 /// \file transcoding.h
 /// \brief Definitions of the Transcoding classes. 
 
-#ifdef EXTERNAL_TRANSCODING
-
 #ifndef __TRANSCODING_H__
 #define __TRANSCODING_H__
 
@@ -237,4 +235,3 @@ protected:
 
 #endif//__TRANSCODING_H__
 
-#endif//TRANSCODING

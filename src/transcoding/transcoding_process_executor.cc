@@ -29,8 +29,6 @@
 
 /// \file transcoding_process_executor.cc
 
-#ifdef EXTERNAL_TRANSCODING
-
 #include <unistd.h>
 #include "transcoding_process_executor.h"
 
@@ -63,4 +61,3 @@ TranscodingProcessExecutor::~TranscodingProcessExecutor()
     }
 }
 
-#endif//EXTERNAL TRANSCODING

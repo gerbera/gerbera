@@ -173,7 +173,6 @@ Ref<Element> ConfigManager::treat_as(String mimetype, String as)
     return treat;
 }
 
-#ifdef EXTERNAL_TRANSCODING
 Ref<Element> ConfigManager::renderTranscodingSection()
 {
     Ref<Element> transcoding(new Element(_("transcoding")));
@@ -262,7 +261,6 @@ Ref<Element> ConfigManager::renderTranscodingSection()
 
     return transcoding;
 }
-#endif
 
 Ref<Element> ConfigManager::renderExtendedRuntimeSection()
 {
@@ -627,9 +625,7 @@ String ConfigManager::createDefaultConfig(String userhome)
 
     config->appendElementChild(import);
 
-#ifdef EXTERNAL_TRANSCODING
     config->appendElementChild(renderTranscodingSection());
-#endif
 
     config->indent();
     save_text(config_filename, config->print());
@@ -717,10 +713,8 @@ void ConfigManager::migrate()
         server->removeElementChild(_("storage"), true);
 
         server->appendElementChild(storage);
-#ifdef EXTERNAL_TRANSCODING
         if (root->getChildByName(_("transcoding")) == nullptr)
             root->appendElementChild(renderTranscodingSection());
-#endif
 
         Ref<Element> import = root->getChildByName(_("import"));
         if (import != nullptr) {
@@ -826,11 +820,9 @@ void ConfigManager::migrate()
 #define NEW_AUTOSCANLIST_OPTION(optval) alist_opt = Ref<AutoscanListOption>(new AutoscanListOption(optval));
 #define SET_AUTOSCANLIST_OPTION(opttype) \
     options->set(RefCast(alist_opt, ConfigOption), opttype);
-#ifdef EXTERNAL_TRANSCODING
 #define NEW_TRANSCODING_PROFILELIST_OPTION(optval) trlist_opt = Ref<TranscodingProfileListOption>(new TranscodingProfileListOption(optval));
 #define SET_TRANSCODING_PROFILELIST_OPTION(opttype) \
     options->set(RefCast(trlist_opt, ConfigOption), opttype);
-#endif //TRANSCODING
 #ifdef ONLINE_SERVICES
 #define NEW_OBJARR_OPTION(optval) obj_array_opt = Ref<ObjectArrayOption>(new ObjectArrayOption(optval));
 #define SET_OBJARR_OPTION(opttype) \
@@ -853,9 +845,7 @@ void ConfigManager::validate(String serverhome)
     Ref<DictionaryOption> dict_opt;
     Ref<StringArrayOption> str_array_opt;
     Ref<AutoscanListOption> alist_opt;
-#ifdef EXTERNAL_TRANSCODING
     Ref<TranscodingProfileListOption> trlist_opt;
-#endif
 #ifdef ONLINE_SERVICES
     Ref<ObjectArrayOption> obj_array_opt;
 #endif
@@ -1584,7 +1574,6 @@ void ConfigManager::validate(String serverhome)
     }
 #endif
 
-#ifdef EXTERNAL_TRANSCODING
     temp = getOption(
         _("/transcoding/attribute::enabled"),
         _(DEFAULT_TRANSCODING_ENABLED));
@@ -1626,7 +1615,6 @@ void ConfigManager::validate(String serverhome)
     }
 
 #endif //HAVE_CURL
-#endif //EXTERNAL_TRANSCODING
 
     el = getElement(_("/server/custom-http-headers"));
     NEW_STRARR_OPTION(createArrayFromNodeset(el, _("add"), _("header")));
@@ -2330,7 +2318,6 @@ Ref<Dictionary> ConfigManager::createDictionaryFromNodeset(Ref<Element> element,
     return dict;
 }
 
-#ifdef EXTERNAL_TRANSCODING
 Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodeset(Ref<Element> element)
 {
     size_t bs;
@@ -2663,7 +2650,6 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
 
     return list;
 }
-#endif //TRANSCODING
 
 Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::Element> element, ScanMode scanmode)
 {
@@ -2884,12 +2870,10 @@ Ref<AutoscanList> ConfigManager::getAutoscanListOption(config_option_t option)
     return options->get(option)->getAutoscanListOption();
 }
 
-#ifdef EXTERNAL_TRANSCODING
 Ref<TranscodingProfileList> ConfigManager::getTranscodingProfileListOption(config_option_t option)
 {
     return options->get(option)->getTranscodingProfileListOption();
 }
-#endif
 
 #ifdef ONLINE_SERVICES
 Ref<Array<Object> > ConfigManager::createServiceTaskList(service_type_t service,

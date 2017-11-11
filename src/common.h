@@ -270,7 +270,6 @@
 #ifdef ONLINE_SERVICES
     #define CFG_DEFAULT_UPDATE_AT_START 10 // seconds
 #endif
-#ifdef EXTERNAL_TRANSCODING
     #define DEFAULT_TRANSCODING_ENABLED NO
     #define DEFAULT_AUDIO_BUFFER_SIZE   1048576
     #define DEFAULT_AUDIO_CHUNK_SIZE    131072
@@ -286,7 +285,6 @@
     #define URL_VALUE_TRANSCODE_NO_RES_ID   "none"
 
     #define URL_VALUE_TRANSCODE              "1"
-#endif
 #define DEFAULT_STORAGE_CACHING_ENABLED YES
 #ifdef HAVE_SQLITE3
     #define MT_SQLITE_SYNC_FULL            2

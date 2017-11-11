@@ -119,7 +119,6 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
     }
 #endif // FFMPEGTHUMBNAILER
 
-#ifdef EXTERNAL_TRANSCODING
     // this will be used to count only the "real" resources, omitting the
     // transcoded ones
     int realCount = 0;
@@ -279,8 +278,6 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
             urlBase_tr = addResources_getUrlBase(item, true);
     }
 
-#endif // EXTERNAL_TRANSCODING
-
     int resCount = item->getResourceCount();
     for (int i = 0; i < resCount; i++) {
 
@@ -317,7 +314,6 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
         // file request handler will be getting.
         // for transcoded resources the res_id can be safely ignored,
         // because a transcoded resource is identified by the profile name
-#ifdef EXTERNAL_TRANSCODING
         // flag if we are dealing with the transcoded resource
         bool transcoded = (res_params->get(_(URL_PARAM_TRANSCODE)) == URL_VALUE_TRANSCODE);
         if (!transcoded)
@@ -341,12 +337,6 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
                 url = urlBase_tr->urlBase + _(URL_VALUE_TRANSCODE_NO_RES_ID);
             }
         }
-#else
-        if (urlBase->addResID)
-            url = urlBase->urlBase + i;
-        else
-            url = urlBase->urlBase;
-#endif
         if ((res_params != nullptr) && (res_params->size() > 0))
         {
             url = url + _(_URL_PARAM_SEPARATOR);
@@ -401,7 +391,6 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
 
         if (!isExtThumbnail)
         {
-#ifdef EXTERNAL_TRANSCODING
             // when transcoding is enabled the first (zero) resource can be the
             // transcoded stream, that means that we can only go with the
             // content type here and that we will not limit ourselves to the
@@ -413,17 +402,6 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
                 else
                     url = url + renderExtension(contentType, item->getLocation()); 
             }
-#else
-        // for non transcoded item we will only do this for the first
-        // resource, that seemed to be sufficient so far (mostly this paramter
-        // is implemented for the TG100 renderer that will not play .avi files
-        // otherwise
-        if ((i == 0) && (!skipURL))
-        {
-            url = url + renderExtension(contentType, item->getLocation());
-        }
-
-#endif
         }
 #ifdef EXTEND_PROTOCOLINFO
         if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO))
@@ -461,7 +439,6 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
                 }
             }
 
-#ifdef EXTERNAL_TRANSCODING
         // we do not support seeking at all, so 00
         // and the media is converted, so set CI to 1
         if (!isExtThumbnail && transcoded)
@@ -474,7 +451,6 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
                 extend = extend + ";" D_FLAGS "=" D_TR_FLAGS_AV;
         }
         else
-#endif
         extend = extend + D_OP + "=01;" + 
                  D_CONVERSION_INDICATOR + "=" + D_NO_CONVERSION;
 
@@ -494,10 +470,8 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
         log_debug("extended protocolInfo: %s\n", protocolInfo.c_str());
         }
 #endif
-#ifdef EXTERNAL_TRANSCODING
         if (!hide_original_resource || transcoded || 
            (hide_original_resource && (original_resource != i)))
-#endif
             element->appendElementChild(UpnpXML_DIDLRenderResource(url, res_attrs));
     }
 }

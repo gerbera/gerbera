@@ -29,8 +29,6 @@
 
 /// \file transcode_dispatcher.cc
 
-#ifdef EXTERNAL_TRANSCODING
-
 #include "common.h"
 #include "cds_objects.h"
 #include "transcoding.h"
@@ -65,4 +63,3 @@ Ref<IOHandler> TranscodeDispatcher::open(Ref<TranscodingProfile> profile,
                          profile->getName());
 }
 
-#endif//EXTERNAL_TRANSCODING

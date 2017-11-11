@@ -39,9 +39,7 @@
 #include "autoscan.h"
 #include "object_dictionary.h"
 
-#ifdef EXTERNAL_TRANSCODING
     #include "transcoding/transcoding.h"
-#endif
 
 class ConfigOption : public zmm::Object
 {
@@ -76,12 +74,10 @@ public:
     {
         throw _Exception(_("Wrong option type"));
     };
-#ifdef EXTERNAL_TRANSCODING
     virtual zmm::Ref<TranscodingProfileList> getTranscodingProfileListOption()
     {
         throw _Exception(_("Wrong option type"));
     };
-#endif
 #ifdef ONLINE_SERVICES
     virtual zmm::Ref<zmm::Array<zmm::Object> > getObjectArrayOption()
     {
@@ -171,7 +167,6 @@ protected:
     zmm::Ref<AutoscanList> option;
 };
 
-#ifdef EXTERNAL_TRANSCODING
 class TranscodingProfileListOption : public ConfigOption
 {
 public:
@@ -187,7 +182,6 @@ public:
 protected:
     zmm::Ref<TranscodingProfileList> option;
 };
-#endif//EXTERNAL_TRANSCODING
 
 #ifdef ONLINE_SERVICES
 class ObjectArrayOption : public ConfigOption

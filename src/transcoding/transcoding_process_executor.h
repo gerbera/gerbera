@@ -29,8 +29,6 @@
 
 /// \file transcoding_process_executor.h
 
-#ifdef EXTERNAL_TRANSCODING
-
 #ifndef __TRANSCODING_PROCESS_EXECUTOR_H__
 #define __TRANSCODING_PROCESS_EXECUTOR_H__
 
@@ -55,4 +53,3 @@ protected:
 
 #endif // __TRANSCODING_PROCESS_EXECUTOR_H__
 
-#endif//EXTERNAL_TRANSCODING

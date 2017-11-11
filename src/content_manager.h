@@ -56,9 +56,7 @@
     #include "autoscan_inotify.h"
 #endif
 
-#ifdef EXTERNAL_TRANSCODING
     #include "transcoding/transcoding.h"
-#endif
 
 #ifdef ONLINE_SERVICES 
     #include "online_service.h"
@@ -73,9 +71,7 @@
 #endif
 #endif//ONLINE_SERVICES
 
-#if defined (EXTERNAL_TRANSCODING) || defined(SOPCAST)
     #include "executor.h"
-#endif
 
 class CMAddFileTask : public GenericTask
 {
@@ -325,7 +321,6 @@ public:
     /// \brief instructs ContentManager to reload scripting environment
     void reloadLayout();
 
-#if defined(EXTERNAL_TRANSCODING) || defined(SOPCAST)
     /// \brief register executor
     ///
     /// When an external process is launched we will register the executor
@@ -341,7 +336,6 @@ public:
     /// currently being processed by an external process, it will kill it.
     /// The handler will then remove the executor from the list.
     void unregisterExecutor(zmm::Ref<Executor> exec);
-#endif
 
 #ifdef HAVE_MAGIC
     zmm::String getMimeTypeFromBuffer(const void *buffer, size_t length);
@@ -372,9 +366,7 @@ protected:
     zmm::Ref<AutoscanList> autoscan_inotify;
 #endif
  
-#if defined(EXTERNAL_TRANSCODING) || defined(SOPCAST)
     zmm::Ref<zmm::Array<Executor> > process_list;
-#endif
 
     void _loadAccounting();
 

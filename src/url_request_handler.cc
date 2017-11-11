@@ -48,9 +48,7 @@
 #endif
 #include "url.h"
 #include "curl_io_handler.h"
-#ifdef EXTERNAL_TRANSCODING
     #include "transcoding/transcode_dispatcher.h"
-#endif
 
 using namespace zmm;
 using namespace mxml;
@@ -66,9 +64,7 @@ void URLRequestHandler::get_info(IN const char *filename, OUT UpnpFileInfo *info
     String header;
     String mimeType;
     int objectID;
-#ifdef EXTERNAL_TRANSCODING
     String tr_profile;
-#endif
 
     String url, parameters;
     parameters = (filename + strlen(LINK_URL_REQUEST_HANDLER));
@@ -101,7 +97,6 @@ void URLRequestHandler::get_info(IN const char *filename, OUT UpnpFileInfo *info
         throw _Exception(_("get_info: object is not an external url item"));
     }
 
-#ifdef EXTERNAL_TRANSCODING
     tr_profile = dict->get(_(URL_PARAM_TRANSCODE_PROFILE_NAME));
 
     if (string_ok(tr_profile))
@@ -116,7 +111,6 @@ void URLRequestHandler::get_info(IN const char *filename, OUT UpnpFileInfo *info
         UpnpFileInfo_set_FileLength(info, -1);
     }
     else
-#endif
     {
         Ref<CdsItemExternalURL> item = RefCast(obj, CdsItemExternalURL);
 
@@ -175,9 +169,7 @@ Ref<IOHandler> URLRequestHandler::open(IN const char *filename,
     int objectID;
     String mimeType;
     String header;
-#ifdef EXTERNAL_TRANSCODING
     String tr_profile;
-#endif
 
     log_debug("start\n");
 
@@ -235,7 +227,6 @@ Ref<IOHandler> URLRequestHandler::open(IN const char *filename,
     //info->is_directory = 0;
     //info->http_header = NULL;
 
-#ifdef EXTERNAL_TRANSCODING
     tr_profile = dict->get(_(URL_PARAM_TRANSCODE_PROFILE_NAME));
 
     if (string_ok(tr_profile))
@@ -251,7 +242,6 @@ Ref<IOHandler> URLRequestHandler::open(IN const char *filename,
         return tr_d->open(tp, url, RefCast(item, CdsObject), range);
     }
     else
-#endif
     {
         Ref<URL> u(new URL(1024));
         Ref<URL::Stat> st;
