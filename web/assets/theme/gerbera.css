@@ -54,8 +54,8 @@ thead, tbody tr {
 
 tbody {
     display:block;
-    min-height: 70vh;
-    max-height: 70vh;
+    max-height: calc(100vh - 16vh - 35px - 49px);
+    min-height: calc(100vh - 16vh - 35px - 49px);
     overflow:auto;
 }
 
@@ -72,23 +72,40 @@ ul.pagination {
     min-height: 7vh;
 }
 
+/*********************
+ * Page Layout Elements
+ *
+ * Menu             = 5vh
+ * Trail            = 7vh + ~2vh padding-top,bottom
+ * Tree             = fullHeight - (menu + trail)
+ * Items datagrid   = fullHeight - (menu + trail)
+ * Items table head = 35px
+ * Items table foot = 49px
+ * Items table body = fullHeight - (menu + trail) - header - footer
+ *********************/
+
 #container {
-    height: 82vh;
-    max-height: 82vh;
-    min-height: 82vh;
+    height: calc(100vh - 16vh);
+    max-height: calc(100vh - 16vh);
+    min-height: calc(100vh - 16vh);
 }
 
 #tree {
-    height: 80vh;
-    min-height: 80vh;
-    max-height: 80vh;
+    height: calc(100vh - 16vh);
+    max-height: calc(100vh - 16vh);
+    min-height: calc(100vh - 16vh);
     overflow: auto;
 }
 
 #datagrid {
-    min-height: 80vh;
-    max-height: 80vh;
+    height: calc(100vh - 16vh);
+    max-height: calc(100vh - 16vh);
+    min-height: calc(100vh - 16vh);
     overflow: auto;
+}
+
+#datagrid thead {
+    height: 35px;
 }
 
 #datagrid tfoot {
@@ -96,7 +113,7 @@ ul.pagination {
 }
 
 #datagrid tfoot td {
-    height: 35px;
+    height: 49px;
 }
 
 
