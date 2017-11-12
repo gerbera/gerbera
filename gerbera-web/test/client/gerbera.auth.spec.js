@@ -11,9 +11,7 @@ describe('Gerbera Auth', function () {
       mockGetSid = getJSONFixture('get_sid.not.logged_in.json')
 
       ajaxSpy = spyOn($, 'ajax').and.callFake(function (options) {
-        var d = $.Deferred()
-        d.resolve(mockGetSid)
-        return d.promise()
+        return $.Deferred().resolve(mockGetSid).promise()
       })
     })
 
@@ -28,9 +26,7 @@ describe('Gerbera Auth', function () {
     it('calls GERBERA.App.error when the server call fails', function (done) {
       spyOn(GERBERA.App, 'error')
       ajaxSpy.and.callFake(function (options) {
-        var d = $.Deferred()
-        d.reject({})
-        return d.promise()
+        return $.Deferred().reject({}).promise()
       })
       GERBERA.Auth.checkSID().fail(function () {
         expect(GERBERA.App.error).toHaveBeenCalled()
@@ -70,10 +66,22 @@ describe('Gerbera Auth', function () {
       GERBERA.App.serverConfig = {
         accounts: true
       }
+      spyOn(GERBERA.Tree, 'initialize')
+      spyOn(GERBERA.Items, 'initialize')
+      spyOn(GERBERA.Menu, 'initialize')
+      spyOn(GERBERA.Trail, 'initialize')
+      spyOn(GERBERA.Autoscan, 'initialize')
+      spyOn(GERBERA.Updates, 'initialize')
 
       GERBERA.Auth.authenticate().then(function () {
         expect(GERBERA.Auth.isLoggedIn()).toBeTruthy()
         expect(ajaxSpy.calls.count()).toBe(2)
+        expect(GERBERA.Tree.initialize).toHaveBeenCalled()
+        expect(GERBERA.Items.initialize).toHaveBeenCalled()
+        expect(GERBERA.Menu.initialize).toHaveBeenCalled()
+        expect(GERBERA.Trail.initialize).toHaveBeenCalled()
+        expect(GERBERA.Autoscan.initialize).toHaveBeenCalled()
+        expect(GERBERA.Updates.initialize).toHaveBeenCalled()
         done()
       })
     })
@@ -82,9 +90,7 @@ describe('Gerbera Auth', function () {
   describe('logout()', function () {
     beforeEach(function () {
       spyOn($, 'ajax').and.callFake(function (options) {
-        var d = $.Deferred()
-        d.resolve({success: true})
-        return d.promise()
+        return $.Deferred().resolve({success: true}).promise()
       })
       loadFixtures('index.html')
       $.cookie('SID', '12345')
@@ -95,8 +101,8 @@ describe('Gerbera Auth', function () {
       GERBERA.Auth.logout().then(function () {
         expect(GERBERA.Auth.isLoggedIn()).toBeFalsy()
         expect(GERBERA.Auth.getSessionId()).toBeUndefined()
-        expect($('#nav-db').attr('class')).toBe('navbar-link disabled')
-        expect($('#nav-fs').attr('class')).toBe('navbar-link disabled')
+        expect($('#nav-db').attr('class')).toBe('nav-link disabled')
+        expect($('#nav-fs').attr('class')).toBe('nav-link disabled')
         expect(GERBERA.App.reload).toHaveBeenCalledWith('/gerbera.html')
         done()
       })

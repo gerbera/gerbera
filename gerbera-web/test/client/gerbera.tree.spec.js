@@ -9,7 +9,9 @@ describe('Gerbera Tree', function () {
   beforeEach(function () {
     loadFixtures('index.html')
     loadJSONFixtures('parent_id-0-select_it-0.json')
+    loadJSONFixtures('child-tree-response.json')
     loadJSONFixtures('tree-data.json')
+    loadJSONFixtures('trail-data.json')
   })
 
   describe('initialize()', function () {
@@ -22,10 +24,12 @@ describe('Gerbera Tree', function () {
   })
 
   describe('loadTree()', function () {
-    var response
+    var response, trailData, trailConfig
 
     beforeEach(function () {
       response = getJSONFixture('parent_id-0-select_it-0.json')
+      trailData = getJSONFixture('trail-data.json')
+      trailConfig = {}
     })
 
     it('renders the tree with parent and children', function () {
@@ -43,11 +47,14 @@ describe('Gerbera Tree', function () {
     })
 
     it('clears the breadcrumb and loads the first item on load of a new tree', function () {
-      $('#item-breadcrumb').html('').append('<li>test</li>')
+      $('#trail').html('').trail({
+        data: trailData,
+        config: trailConfig
+      })
 
       GERBERA.Tree.loadTree(response)
 
-      expect($('#item-breadcrumb').children('li').length).toBe(1)
+      expect($('#trail').trail('length')).toBe(1)
     })
   })
 
@@ -57,7 +64,9 @@ describe('Gerbera Tree', function () {
       loadJSONFixtures('container-data-astree.json')
       var containersResponse = getJSONFixture('parent_id-0-select_it-0.json')
       var treeData = getJSONFixture('container-data-astree.json')
+
       var result = GERBERA.Tree.transformContainers(containersResponse, true)
+
       expect(result[0].title).toBe('database')
       expect(result).toEqual(treeData)
     })
@@ -66,48 +75,95 @@ describe('Gerbera Tree', function () {
       loadJSONFixtures('parent_id-0-select_it-0.json')
       loadJSONFixtures('container-data-astree.json')
       var containersResponse = getJSONFixture('parent_id-0-select_it-0.json')
+
       var result = GERBERA.Tree.transformContainers(containersResponse, false)
+
       expect(result[0].title).toBe('Audio')
+    })
+
+    it('creates badges for autoscan containers', function () {
+      loadJSONFixtures('parent_id-0-select_it-0.json')
+      loadJSONFixtures('container-data-astree.json')
+      var containersResponse = getJSONFixture('parent_id-0-select_it-0.json')
+
+      var result = GERBERA.Tree.transformContainers(containersResponse, false)
+
+      expect(result[3].badge.length).toBe(2)
+      expect(result[4].badge.length).toBe(2)
     })
   })
 
   describe('selectType()', function () {
     var ajaxSpy
 
-    it('calls the server for containers when type is db', function () {
+    it('calls the server for containers when type is db', function (done) {
+      var isDone = done
       ajaxSpy = spyOn($, 'ajax').and.callFake(function (options) {
-        var d = $.Deferred()
-        return d.promise({})
+        return $.Deferred().resolve({}).promise()
       })
 
-      GERBERA.Tree.selectType('db', 0)
-
-      expect(ajaxSpy.calls.count()).toBe(1)
-      expect(ajaxSpy.calls.mostRecent().args[0].data.req_type).toBe('containers')
+      GERBERA.Tree.selectType('db', 0).then(function () {
+        expect(ajaxSpy.calls.count()).toBe(1)
+        expect(ajaxSpy.calls.mostRecent().args[0].data.req_type).toBe('containers')
+        isDone()
+      })
     })
 
-    it('calls the server for containers when type is db', function () {
+    it('calls the server for containers when type is db', function (done) {
+      var isDone = done
       ajaxSpy = spyOn($, 'ajax').and.callFake(function (options) {
-        var d = $.Deferred()
-        return d.promise({})
+        return $.Deferred().resolve({}).promise()
       })
 
-      GERBERA.Tree.selectType('fs', 0)
-
-      expect(ajaxSpy.calls.count()).toBe(1)
-      expect(ajaxSpy.calls.mostRecent().args[0].data.req_type).toBe('directories')
+      GERBERA.Tree.selectType('fs', 0).then(function () {
+        expect(ajaxSpy.calls.count()).toBe(1)
+        expect(ajaxSpy.calls.mostRecent().args[0].data.req_type).toBe('directories')
+        isDone()
+      })
     })
 
-    it('on failure calls the app error handler', function () {
+    it('on failure calls the app error handler', function (done) {
+      var isDone = done
       ajaxSpy = spyOn($, 'ajax').and.callFake(function (options) {
-        var d = $.Deferred()
-        return d.reject()
+        return $.Deferred().reject()
       })
       spyOn(GERBERA.App, 'error')
+      spyOn(GERBERA.Updates, 'getUpdates').and.callFake(function () {
+        return $.Deferred.resolve().promise()
+      })
 
-      GERBERA.Tree.selectType('db', 0)
+      GERBERA.Tree.selectType('db', 0).fail(function () {
+        expect(GERBERA.App.error).toHaveBeenCalled()
+        isDone()
+      })
+    })
 
-      expect(GERBERA.App.error).toHaveBeenCalled()
+    it('when type is db, checks for updates', function (done) {
+      var isDone = done
+      ajaxSpy = spyOn($, 'ajax').and.callFake(function (options) {
+        return $.Deferred().resolve({}).promise()
+      })
+      spyOn(GERBERA.Updates, 'getUpdates')
+      spyOn(GERBERA.App, 'getType').and.returnValue('db')
+
+      GERBERA.Tree.selectType('db', 0).then(function () {
+        expect(GERBERA.Updates.getUpdates).toHaveBeenCalledWith(true)
+        isDone()
+      })
+    })
+
+    it('when type is fs, does not check for updates', function (done) {
+      var isDone = done
+      ajaxSpy = spyOn($, 'ajax').and.callFake(function (options) {
+        return $.Deferred().resolve({}).promise()
+      })
+      spyOn(GERBERA.Updates, 'getUpdates')
+      spyOn(GERBERA.App, 'getType').and.returnValue('fs')
+
+      GERBERA.Tree.selectType('fs', 0).then(function () {
+        expect(GERBERA.Updates.getUpdates).not.toHaveBeenCalled()
+        isDone()
+      })
     })
   })
 
@@ -127,10 +183,9 @@ describe('Gerbera Tree', function () {
       var item = $($('#tree li').get(3))
       item.children('span.folder-title').click()
 
-      expect($('#item-breadcrumb').children('li').length).toBe(2)
       expect(GERBERA.Items.treeItemSelected).toHaveBeenCalled()
       expect(GERBERA.Items.treeItemSelected.calls.mostRecent().args[0]).toEqual(
-        {title: 'Photos', badge: [2], nodes: [], gerbera: {id: 2779, childCount: 2}}
+        {title: 'Photos', badge: [2], nodes: [], gerbera: {id: 2779, childCount: 2, autoScanMode: 'none', autoScanType: 'none'}}
       )
     })
 
@@ -140,7 +195,7 @@ describe('Gerbera Tree', function () {
       spyOn($, 'ajax')
       var onExpandSpy = jasmine.createSpy('onExpand')
       var treeViewConfig = {
-          onExpand: onExpandSpy
+        onExpand: onExpandSpy
       }
 
       GERBERA.Tree.loadTree(response, treeViewConfig)
@@ -151,7 +206,7 @@ describe('Gerbera Tree', function () {
 
       expect(GERBERA.Items.treeItemSelected).toHaveBeenCalled()
       expect(GERBERA.Items.treeItemSelected.calls.mostRecent().args[0]).toEqual(
-        {title: 'Photos', badge: [2], nodes: [], gerbera: {id: 2779, childCount: 2}}
+        {title: 'Photos', badge: [2], nodes: [], gerbera: {id: 2779, childCount: 2, autoScanMode: 'none', autoScanType: 'none'}}
       )
     })
 
@@ -161,7 +216,7 @@ describe('Gerbera Tree', function () {
       spyOn($, 'ajax')
       var onExpandSpy = jasmine.createSpy('onExpand')
       var treeViewConfig = {
-          onExpand: onExpandSpy
+        onExpand: onExpandSpy
       }
 
       GERBERA.Tree.loadTree(response, treeViewConfig)
@@ -181,13 +236,11 @@ describe('Gerbera Tree', function () {
       var parentResponse = getJSONFixture('parent_id-0-select_it-0.json')
       var childResponse = getJSONFixture('parent_id-7443-select_it-0.json')
       ajaxSpy = spyOn($, 'ajax').and.callFake(function (options) {
-        var d = $.Deferred()
-        d.resolve(childResponse)
-        return d.promise()
+        return $.Deferred().resolve(childResponse).promise()
       })
       var onSelectionSpy = jasmine.createSpy('onSelection')
       var treeViewConfig = {
-          onSelection: onSelectionSpy
+        onSelection: onSelectionSpy
       }
 
       GERBERA.Tree.loadTree(parentResponse, treeViewConfig)
@@ -198,6 +251,117 @@ describe('Gerbera Tree', function () {
 
       expect(ajaxSpy.calls.count()).toBe(1)
       expect(ajaxSpy.calls.mostRecent().args[0].data.req_type).toBe('containers')
+    })
+  })
+
+  describe('reloadTreeItem()', function () {
+    var response, childResponse, ajaxSpy
+    beforeEach(function () {
+      response = getJSONFixture('parent_id-0-select_it-0.json')
+      childResponse = getJSONFixture('parent_id-7443-select_it-0.json')
+    })
+
+    it('calls the server to reload tree and generate trail and selects item', function (done) {
+      GERBERA.Tree.loadTree(response)
+
+      var treeElement = $('#tree').tree('getElement', 0)
+
+      spyOn(GERBERA.Items, 'treeItemSelected')
+      ajaxSpy = spyOn($, 'ajax').and.callFake(function (options) {
+        return $.Deferred().resolve(childResponse).promise()
+      })
+
+      GERBERA.Tree.reloadTreeItem(treeElement).then(function () {
+        expect(ajaxSpy).toHaveBeenCalled()
+        expect(GERBERA.Items.treeItemSelected).toHaveBeenCalled()
+        done()
+      })
+    })
+  })
+
+  describe('reloadTreeItemById()', function () {
+    var response, childResponse, ajaxSpy
+    beforeEach(function () {
+      response = getJSONFixture('parent_id-0-select_it-0.json')
+      childResponse = getJSONFixture('parent_id-7443-select_it-0.json')
+    })
+
+    it('finds the selected item given only gerbera id and reloads it', function (done) {
+      GERBERA.Tree.loadTree(response)
+
+      spyOn(GERBERA.Items, 'treeItemSelected')
+      ajaxSpy = spyOn($, 'ajax').and.callFake(function (options) {
+        return $.Deferred().resolve(childResponse).promise()
+      })
+
+      GERBERA.Tree.reloadTreeItemById(0).then(function () {
+        expect(ajaxSpy).toHaveBeenCalled()
+        expect(GERBERA.Items.treeItemSelected).toHaveBeenCalled()
+        done()
+      })
+    })
+  })
+
+  describe('reloadParentTreeItem()', function () {
+    var response, childResponse, ajaxSpy
+    beforeEach(function () {
+      response = getJSONFixture('parent_id-0-select_it-0.json')
+      childResponse = getJSONFixture('parent_id-7443-select_it-0.json')
+    })
+
+    it('reloads the parent item', function (done) {
+      GERBERA.Tree.loadTree(response)
+
+      spyOn(GERBERA.Items, 'treeItemSelected')
+      spyOn(GERBERA.Trail, 'makeTrail')
+      ajaxSpy = spyOn($, 'ajax').and.callFake(function (options) {
+        return $.Deferred().resolve(childResponse).promise()
+      })
+
+      GERBERA.Tree.reloadParentTreeItem(8).then(function () {
+        expect(ajaxSpy.calls.mostRecent().args[0].data.parent_id).toBe(0)
+        done()
+      })
+    })
+  })
+
+  describe('getTreeElementById()', function () {
+    var response
+    beforeEach(function () {
+      response = getJSONFixture('parent_id-0-select_it-0.json')
+    })
+
+    it('finds the HTML element given the gerbera id', function () {
+      GERBERA.Tree.loadTree(response)
+
+      var result = GERBERA.Tree.getTreeElementById(8)
+
+      expect(result.length).toBe(1)
+      expect(result.data('grb-item')).toEqual({
+        title: 'Audio',
+        badge: [6],
+        nodes: [],
+        gerbera: { id: 8, childCount: 6, autoScanMode: 'none', autoScanType: 'none' }
+      })
+    })
+  })
+
+  describe('onAutoscanEdit()', function () {
+    var event
+    beforeEach(function () {
+      event = {
+        data: {
+          id: 1111
+        }
+      }
+    })
+
+    it('calls the GERBERA.Autoscan add method with the event', function () {
+      spyOn(GERBERA.Autoscan, 'addAutoscan')
+
+      GERBERA.Tree.onAutoscanEdit(event)
+
+      expect(GERBERA.Autoscan.addAutoscan).toHaveBeenCalledWith(event)
     })
   })
 })

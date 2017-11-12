@@ -1,0 +1,13 @@
+{
+  "success": true,
+  "autoscan": {
+    "from_fs": true,
+    "object_id": "2f6d6",
+    "scan_mode": "timed",
+    "scan_level": "full",
+    "recursive": true,
+    "hidden": false,
+    "interval": 1800,
+    "persistent": false
+  }
+}

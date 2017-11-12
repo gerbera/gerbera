@@ -1,0 +1,8 @@
+{
+  "0_0" : {
+    "count" : 0,
+    "responses" : {
+      "default" : "./containers/invalid-session.json"
+    }
+  }
+}

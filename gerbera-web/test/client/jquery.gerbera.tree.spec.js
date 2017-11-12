@@ -87,7 +87,36 @@ describe('The jQuery Tree', function () {
 
     var items = $('#tree').find('li')
     var firstBadges = $(items.get(0)).find('span.badge')
-    expect(firstBadges.length).toBe(2)
+    expect(firstBadges.length).toBe(3)
+  })
+
+  it('binds autoscan edit to the autoscan badge', function () {
+    var onAutoscanEdit = jasmine.createSpy('onAutoscanEdit')
+
+    $('#tree').tree({
+      data: treeData,
+      config: {
+        titleClass: 'folder-title',
+        closedIcon: 'folder-closed',
+        onAutoscanEdit: onAutoscanEdit
+      }
+    })
+
+    var autoscanBadge = $('#tree').find('.autoscan')
+    $(autoscanBadge.get(0)).click()
+
+    expect(onAutoscanEdit.calls.count()).toBe(1)
+  })
+
+  it('appends the gerbera ID as a data item', function () {
+    $('#tree').tree({
+      data: treeData,
+      config: {}
+    })
+
+    var items = $('#tree').find('li')
+    var gerberaId = $(items.get(0)).data('grb-id')
+    expect(gerberaId).toEqual(1111)
   })
 
   it('recursively appends children based on data lineage', function () {
@@ -132,10 +161,10 @@ describe('The jQuery Tree', function () {
 
       var parent = $($('#tree').find('li').get(4))
       var children = [
-        {'title': 'Folder 6'},
-        {'title': 'Folder 7'},
-        {'title': 'Folder 8'},
-        {'title': 'Folder 9'}
+        {'title': 'Folder 6', 'gerbera': {id: 6}},
+        {'title': 'Folder 7', 'gerbera': {id: 7}},
+        {'title': 'Folder 8', 'gerbera': {id: 8}},
+        {'title': 'Folder 9', 'gerbera': {id: 9}}
       ]
 
       $('#tree').tree('append', parent, children)
@@ -218,10 +247,10 @@ describe('The jQuery Tree', function () {
 
       var parent = $($('#tree').find('li').get(4))
       var children = [
-        {'title': 'Folder 6'},
-        {'title': 'Folder 7'},
-        {'title': 'Folder 8'},
-        {'title': 'Folder 9'}
+        {'title': 'Folder 6', 'gerbera': {id: 6}},
+        {'title': 'Folder 7', 'gerbera': {id: 7}},
+        {'title': 'Folder 8', 'gerbera': {id: 8}},
+        {'title': 'Folder 9', 'gerbera': {id: 9}}
       ]
       $('#tree').tree('append', parent, children)
 
@@ -254,9 +283,114 @@ describe('The jQuery Tree', function () {
 
       var item = $($('#tree').find('li').get(4))
 
-      $('#tree').tree('select', item.children('span.folder-title'))
+      $('#tree').tree('select', item)
 
       expect(item.hasClass('selected-item')).toBeTruthy()
+    })
+  })
+
+  describe('getItem()', function () {
+    var treeData
+    var tree
+    var treeDataDiff
+
+    beforeEach(function () {
+      loadFixtures('tree.html')
+      loadJSONFixtures('tree-data.json')
+      loadJSONFixtures('tree-data-diff.json')
+      treeData = getJSONFixture('tree-data.json')
+      treeDataDiff = getJSONFixture('tree-data-diff.json')
+      tree = $('#tree')
+      tree.tree({
+        data: treeData,
+        config: {
+          titleClass: 'folder-title',
+          closedIcon: 'folder-closed'
+        }
+      })
+    })
+
+    it('stores the item data and finds given id', function () {
+      var folderData = {
+        title: 'Folder 1',
+        badge: [
+          'test',
+          'test1',
+          'a'
+        ],
+        gerbera: {
+          id: 1111,
+          childCount: 0,
+          autoScanMode: 'none',
+          autoScanType: 'ui'
+        }
+      }
+
+      var folderItem = tree.tree('getItem', 1111)
+      expect(folderItem).toEqual(folderData)
+    })
+
+    it('clears data after regenerating the tree and loads the new data', function () {
+      var folderData = {
+        title: 'Folder 1',
+        badge: [
+          'test',
+          'test1',
+          'a'
+        ],
+        gerbera: {
+          id: 1111,
+          childCount: 0,
+          autoScanMode: 'none',
+          autoScanType: 'ui'
+        }
+      }
+
+      var treeItem = tree.tree('getItem', 1111)
+      expect(treeItem).toEqual(folderData)
+
+      tree.tree('destroy')
+
+      tree.tree({
+        data: treeDataDiff,
+        config: {
+          titleClass: 'folder-title',
+          closedIcon: 'folder-closed'
+        }
+      })
+
+      treeItem = tree.tree('getItem', 1111)
+      expect(treeItem).toBeFalsy()
+
+      treeItem = tree.tree('getItem', 9999)
+      expect(treeItem).toBeDefined()
+    })
+  })
+
+  describe('getElement()', function () {
+    var treeData
+    var tree
+
+    beforeEach(function () {
+      loadFixtures('tree.html')
+      loadJSONFixtures('tree-data.json')
+      loadJSONFixtures('tree-data-diff.json')
+      treeData = getJSONFixture('tree-data.json')
+      tree = $('#tree')
+      tree.tree({
+        data: treeData,
+        config: {
+          titleClass: 'folder-title',
+          closedIcon: 'folder-closed'
+        }
+      })
+    })
+
+    it('finds the HTML element given gerbera data item', function () {
+      var treeElement = tree.tree('getElement', 1111)
+
+      expect(treeElement.length).toBe(1)
+      expect(treeElement.prop('id')).toBe('grb-tree-1111')
     })
   })
 })

@@ -1,4 +1,5 @@
-var assert = require('assert')
+var chai = require('chai')
+var expect = chai.expect
 var webdriver = require('selenium-webdriver')
 var test = require('selenium-webdriver/testing')
 var driver
@@ -8,9 +9,10 @@ require('chromedriver')
 
 var LoginPage = require('./page/login.page')
 
-test.describe('The login page', function () {
+test.describe('The login action', function () {
   var loginPage
 
+  this.slow(5000)
   this.timeout(15000)
 
   test.before(function () {
@@ -22,6 +24,12 @@ test.describe('The login page', function () {
     driver.get(mockWebServer + '/reset?testName=login.test.requests.json')
 
     loginPage = new LoginPage(driver)
+  })
+
+  test.beforeEach(function () {
+    driver.get(mockWebServer + '/disabled.html')
+    driver.manage().deleteAllCookies()
+
     loginPage.get(mockWebServer + '/gerbera.html')
   })
 
@@ -34,17 +42,16 @@ test.describe('The login page', function () {
       for (var i = 0; i < fields.length; i++) {
         var field = fields[i]
         field.getAttribute('style').then(function (value) {
-          assert.equal(value, 'display: none;')
+          expect(value).to.equal('display: none;')
         })
       }
     })
   })
 
   test.it('shows the login form when no session exists yet and accounts is required', function () {
-    loginPage.get(mockWebServer + '/gerbera.html')
     loginPage.loginForm().then(function (form) {
       form.getAttribute('style').then(function (value) {
-        assert.equal(value, '')
+        expect(value).to.equal('')
       })
     })
   })
@@ -53,8 +60,12 @@ test.describe('The login page', function () {
     loginPage.password('')
     loginPage.username('')
     loginPage.submitLogin()
-    loginPage.warning().then(function (warning) {
-      assert.ok(warning.includes('Please enter username and password'))
+    driver.sleep(4000)
+    loginPage.getToastMessage().then(function (message) {
+      expect(message).to.equal('Please enter username and password')
+    })
+    loginPage.waitForToastClose().then(function (displayed) {
+      expect(displayed).to.be.false
     })
   })
 
@@ -65,7 +76,7 @@ test.describe('The login page', function () {
     loginPage.logout()
     loginPage.loginForm().then(function (form) {
       form.getAttribute('style').then(function (value) {
-        assert.equal(value, '')
+        expect(value).to.equal('')
       })
     })
   })

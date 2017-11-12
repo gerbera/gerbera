@@ -1,35 +1,115 @@
-.navbar-brand {
-    padding: 5px;
-}
-.navbar-brand > img {
-    padding: 0px;
-    width: auto;
-}
-html, body {
-    min-height: 100%;
+/*GRB*
+
+    Gerbera - https://gerbera.io/
+
+    gerbera.css - this file is part of Gerbera.
+
+    Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
+                       Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
+
+    Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
+                            Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
+                            Leonhard Wimmer <leo@mediatomb.cc>
+
+    Copyright (C) 2016-2017 Gerbera Contributors
+
+    Gerbera is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License version 2
+    as published by the Free Software Foundation.
+
+    Gerbera is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
+
+    $Id$
+*/
+html {
     height: 100%;
 }
 
-body { padding-top: 70px; }
+body {
+    min-height:100%;
+}
+
+.table {
+    margin-bottom: 0px;
+}
+
+.table th,
+.table td {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    vertical-align: middle;
+}
+
+thead, tbody tr {
+    display:table;
+    width:100%;
+    table-layout:fixed;
+}
+
+tbody {
+    display:block;
+    min-height: 70vh;
+    max-height: 70vh;
+    overflow:auto;
+}
+
+ul.pagination {
+    margin-bottom: 0px;
+}
+
+#nav {
+    min-height: 5vh;
+    box-shadow: 0px 2px 5px #888888
+}
+
+#trail {
+    min-height: 7vh;
+}
 
 #container {
-    min-height: 100%;
-    height: 100%;
-    overflow-y: auto;
-}
-
-#datagrid {
-    overflow-y: auto;
+    height: 82vh;
+    max-height: 82vh;
+    min-height: 82vh;
 }
 
 #tree {
+    height: 80vh;
+    min-height: 80vh;
+    max-height: 80vh;
     overflow: auto;
 }
 
+#datagrid {
+    min-height: 80vh;
+    max-height: 80vh;
+    overflow: auto;
+}
+
+#datagrid tfoot {
+    background-color: #eee;
+}
+
+#datagrid tfoot td {
+    height: 35px;
+}
+
+
 .list-group-item {
+    padding-top: 0px;
     padding-right: 0px;
     padding-bottom: 0px;
     border: 0px;
+}
+
+.list-group-item:first-child,
+.list-group-item:last-child {
+    border-radius: 0px;
 }
 
 .list-group {
@@ -50,5 +130,75 @@ body { padding-top: 70px; }
 }
 
 .selected-item {
-    background-color: #ff8000;
+    /*-webkit-box-shadow: 0 0 10px #888888;*/
+    /*box-shadow: 0 0 10px #888888;*/
+    border-top: 1px solid lightgray;
+    border-bottom: 1px solid lightgray;
+}
+
+.grb-item-delete,
+.grb-item-edit,
+.grb-item-download,
+.grb-item-add {
+    cursor: pointer;
+    font-size: 1.5em;
+    margin: 5px 10px 5px 10px;
+}
+.grb-item-buttons {
+    margin: 0px 10px 0px 10px;
+}
+
+.grb-trail-buttons {
+    list-style: none;
+    padding: 8px 15px;
+    margin-bottom: 20px;
+}
+.grb-trail-buttons li {
+    display: inline-block;
+    margin: 0px 10px 0px 10px;
+}
+.grb-trail-add,
+.grb-trail-add-autoscan,
+.grb-trail-edit-autoscan,
+.grb-trail-edit,
+.grb-trail-delete,
+.grb-trail-delete-all {
+    cursor: pointer;
+}
+
+.overflow {
+    overflow: hidden;
+    -ms-text-overflow: ellipsis;
+    -o-text-overflow: ellipsis;
+    text-overflow: ellipsis;
+    display: block;
+}
+
+.grb-toast {
+    bottom: 30px;
+    min-width: 500px;
+    margin-left: -250px;
+    z-index: 1000;
+    left: 50%;
+    position: fixed;
+    box-shadow: 0px 2px 5px #888888;
+}
+
+.grb-task {
+    top: 15vh;
+    min-width: 500px;
+    margin-left: -250px;
+    z-index: 1000;
+    left: 50%;
+    position: fixed;
+}
+
+.autoscan {
+    cursor: pointer;
+    background-color: darkorange;
+}
+
+.badge {
+    margin-left: 5px;
+    margin-right: 5px;
 }

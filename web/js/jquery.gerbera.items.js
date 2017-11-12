@@ -1,3 +1,32 @@
+/*GRB*
+
+    Gerbera - https://gerbera.io/
+
+    jquery.gerbera.items.js - this file is part of Gerbera.
+
+    Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
+                       Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
+
+    Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
+                            Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
+                            Leonhard Wimmer <leo@mediatomb.cc>
+
+    Copyright (C) 2016-2017 Gerbera Contributors
+
+    Gerbera is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License version 2
+    as published by the Free Software Foundation.
+
+    Gerbera is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
+
+    $Id$
+*/
 /* global $ GERBERA */
 
 $.widget('grb.dataitems', {
@@ -5,11 +34,17 @@ $.widget('grb.dataitems', {
   _create: function () {
     this.element.html('')
     this.element.addClass('grb-dataitems')
-    var table = $('<table></table>').addClass('table')
-    var tbody = $('<tbody></tbody>').addClass('table-striped table-hover').appendTo(table)
+    var table = $('<table></table>').addClass('table table-hover table-striped')
+    var tbody = $('<tbody></tbody>')
     var data = this.options.data
-    var thead = $('<tr><th>Item</th></tr>')
-    thead.appendTo(tbody)
+    var onDelete = this.options.onDelete
+    var onEdit = this.options.onEdit
+    var onDownload = this.options.onDownload
+    var onAdd = this.options.onAdd
+    var itemType = this.options.itemType
+    var pager = this.options.pager
+    var thead = $('<thead><tr><td>Item</td></tr></thead>')
+    thead.appendTo(table)
     var row, content, text
 
     if (data.length > 0) {
@@ -25,6 +60,7 @@ $.widget('grb.dataitems', {
           text = $('<span></span>')
           text.text(item.text).appendTo(content)
         }
+        text.addClass('grb-item-url')
 
         if (item.img) {
           var img = $('<img/>')
@@ -41,10 +77,56 @@ $.widget('grb.dataitems', {
           button.click({item: item}, GERBERA.Items.playVideo)
         }
 
+        var buttons
+        if (itemType === 'db') {
+          buttons = $('<div></div>')
+          buttons.addClass('grb-item-buttons pull-right')
+
+          var downloadIcon = $('<span></span>')
+          downloadIcon.prop('title', 'Download item')
+          downloadIcon.addClass('grb-item-download fa fa-download')
+          downloadIcon.appendTo(buttons)
+          if (onDownload) {
+            downloadIcon.click(item, onDownload)
+          }
+
+          var editIcon = $('<span></span>')
+          editIcon.prop('title', 'Edit item')
+          editIcon.addClass('grb-item-edit fa fa-pencil')
+          editIcon.appendTo(buttons)
+          if (onEdit) {
+            editIcon.click(item, onEdit)
+          }
+
+          var deleteIcon = $('<span></span>')
+          deleteIcon.prop('title', 'Delete item')
+          deleteIcon.addClass('grb-item-delete fa fa-trash-o')
+          deleteIcon.appendTo(buttons)
+          if (onDelete) {
+            deleteIcon.click(item, onDelete)
+          }
+          buttons.appendTo(content)
+        } else if (itemType === 'fs') {
+          buttons = $('<div></div>')
+          buttons.addClass('grb-item-buttons pull-right')
+
+          var addIcon = $('<span></span>')
+          addIcon.prop('title', 'Add item')
+          addIcon.addClass('grb-item-add fa fa-plus')
+          addIcon.appendTo(buttons)
+          if (onAdd) {
+            addIcon.click(item, onAdd)
+          }
+          buttons.appendTo(content)
+        }
+
         row.addClass('grb-item')
         row.append(content)
         tbody.append(row)
       }
+
+      var tfoot = this.buildFooter(pager)
+      table.append(tfoot)
     } else {
       row = $('<tr></tr>')
       content = $('<td></td>')
@@ -52,8 +134,79 @@ $.widget('grb.dataitems', {
       row.append(content)
       tbody.append(row)
     }
+    tbody.appendTo(table)
 
     this.element.append(table)
+  },
+
+  buildFooter: function (pager) {
+    var tfoot = $('<tfoot><tr><td></td></tr></tfoot>')
+    var grbPager = $('<nav class="grb-pager"></nav>')
+    var list = $('<ul class="pagination"></ul>')
+    var previous = $('<li class="page-item">' +
+        '<a class="page-link" href="#" aria-label="Previous">' +
+        '<span aria-hidden="true">&laquo;</span>' +
+        '<span class="sr-only">Previous</span></a>' +
+        '</li>')
+    var next = $('<li class="page-item">' +
+      '<a class="page-link" href="#" aria-label="Next">' +
+      '<span aria-hidden="true">&raquo;</span>' +
+      '<span class="sr-only">Next</span></a>' +
+      '</li>')
+    var maxPages
+    var pageItem
+    var pageLink
+    var pageParams
+
+    list.append(previous)
+
+    if (pager && pager.pageCount) {
+      maxPages = Math.ceil(pager.totalMatches / pager.itemsPerPage)
+
+      if (pager.onNext) {
+        pageParams = {
+          itemsPerPage: pager.itemsPerPage,
+          totalMatches: pager.totalMatches,
+          parentId: pager.parentId
+        }
+        next.find('a').click(pageParams, pager.onNext)
+      }
+
+      if (pager.onPrevious) {
+        pageParams = {
+          itemsPerPage: pager.itemsPerPage,
+          totalMatches: pager.totalMatches,
+          parentId: pager.parentId
+        }
+        previous.find('a').click(pageParams, pager.onPrevious)
+      }
+
+      for (var page = 1; page <= maxPages; page++) {
+        pageItem = $('<li class="page-item"></li>')
+        pageLink = $('<a class="page-link" href="#">' + page + '</a>')
+        pageLink.appendTo(pageItem)
+
+        if (pager.onClick) {
+          pageParams = {
+            pageNumber: page,
+            itemsPerPage: pager.itemsPerPage,
+            parentId: pager.parentId
+          }
+          pageLink.click(pageParams, pager.onClick)
+        }
+
+        if (page === pager.currentPage) {
+          pageItem.addClass('active')
+        }
+
+        list.append(pageItem)
+      }
+      list.append(next)
+      grbPager.append(list)
+      tfoot.find('td').append(grbPager)
+    }
+
+    return tfoot
   },
 
   _destroy: function () {

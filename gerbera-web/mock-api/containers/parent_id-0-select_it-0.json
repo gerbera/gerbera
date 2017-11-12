@@ -28,14 +28,14 @@
       {
         "id": 3808,
         "child_count": 2,
-        "autoscan_type": "none",
+        "autoscan_type": "ui",
         "autoscan_mode": "none",
         "title": "Playlists"
       },
       {
         "id": 7443,
         "child_count": 2,
-        "autoscan_type": "none",
+        "autoscan_type": "persistent",
         "autoscan_mode": "none",
         "title": "Video"
       }

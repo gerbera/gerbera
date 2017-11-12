@@ -1,0 +1,24 @@
+{
+  "object_id": 39479,
+  "title": {
+    "editable": false,
+    "value": "Test.mp4"
+  },
+  "class": {
+    "editable": false,
+    "value": "object.item.videoItem"
+  },
+  "obj_type": "item",
+  "description": {
+    "editable": false,
+    "value": "A description"
+  },
+  "location": {
+    "editable": false,
+    "value": "/folder/location/Test.mp4"
+  },
+  "mime-type": {
+    "editable": false,
+    "value": "video/mp4"
+  }
+}

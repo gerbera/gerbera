@@ -38,13 +38,16 @@ http://localhost:49152/gerbera.html
 
 ### Feature List
 
-The Gerbera Web UI contains the list of initial features below.
+The Gerbera Web UI contains the list of features below.
 
 - Login/Logout of Gerbera
 - Database Items View
 - Filesystem Items View
 - Gerbera Tree Expand/Collapse
 - Gerbera Items Download
+- Create/Edit/Delete Items
+- Create/Edit/Delete Autoscan
+- Download Items
 
 
 ### Reporting an Issue

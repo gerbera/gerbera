@@ -1,34 +1,42 @@
-<nav class="navbar navbar-default">
-    <div class="container-fluid">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="#">Gerbera</a>
-        </div>
-        <div class="collapse navbar-collapse">
-            <ul class="nav navbar-nav navbar-left">
-                <li><a id="nav-home" class="navbar-link" href="#" data-gerbera-menu-cmd="HOME">Home <span class="sr-only">(current)</span></a></li>
-                <li><a id="nav-db" class="navbar-link disabled" href="#" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="db">Database</a></li>
-                <li><a id="nav-fs" class="navbar-link disabled" href="#" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="fs">File System</a></li>
-            </ul>
-            <form id="login-form" class="navbar-form navbar-right">
-                <input id="username" type="text" class="form-control login-field" placeholder="Username" style="display:none;">
-                <input id="password" type="password" class="form-control login-field" placeholder="Password" style="display:none;">
-                <button id="login-submit" type="button" class="btn btn-success">Login</button>
-                <button id='logout' type="button" class="btn btn-danger" style="display:none;">Logout</button>
-            </form>
-        </div>
+<nav class="navbar navbar-expand-md navbar-light bg-light" id="nav">
+    <button type="button" class="navbar-toggler navbar-toggler-right"
+            data-toggle="collapse" data-target="#navbarContent" aria-controls="navbarContent"
+            aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <a class="navbar-brand" href="#" title="Gerbera"><img src="" class="d-inline-block align-top" alt=""></a>
+    <div class="collapse navbar-collapse" id="navbarContent">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+                <a id="nav-home" class="nav-link" data-gerbera-menu-cmd="HOME">Home <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+                <a id="nav-db" class="nav-link disabled" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="db">Database</a>
+            </li>
+            <li class="nav-item">
+                <a id="nav-fs" class="nav-link disabled" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="fs">File System</a>
+            </li>
+            <li class="nav-item">
+                <a id="report-issue" class="nav-link" href="http://github.com/v00d00/gerbera/issues">Report an Issue</a>
+            </li>
+            <li class="nav-item">
+                <a id="leave-beta" class="btn nav-link disabled" data-gerbera-menu-cmd="LEAVE_BETA">Leave Beta</a>
+            </li>
+        </ul>
+        <form id="login-form" class="form-inline my-2 my-lg-0">
+            <input id="username" class="form-control mr-sm-2 login-field" placeholder="Username" style="display:none;">
+            <input id="password" type="password" class="form-control mr-sm-2 login-field" placeholder="Password"
+                   style="display:none;">
+            <button id="login-submit" class="btn btn-success my-2 my-sm-0">Login</button>
+            <button id='logout' type="button" class="btn btn-danger my-2 my-sm-0" style="display:none;">Logout</button>
+        </form>
     </div>
 </nav>
 
 <div id="container" class="container">
     <div class="row">
         <div class="col-md-12">
-            <div id="item-breadcrumb">/bread/crumb/</div>
+            <div id="trail">/bread/crumb/</div>
         </div>
     </div>
     <div class="row">
@@ -42,3 +50,134 @@
 </div>
 
 <div id="warning" class="alert alert-warning" style="display: none;"></div>
+
+<div id="editModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Edit Item</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group" id="objectIdGroup">
+                        <label for="editdObjectIdTxt">ID</label>
+                        <span id="editdObjectIdTxt" class="h3"></span><input type="hidden" class="form-control" id="objectId" readonly disabled>
+                    </div>
+                    <div class="form-group" id="parentIdGroup">
+                        <label for="addParentId">Parent ID</label>
+                        <span id="addParentIdTxt" class="h3"></span><input type="hidden" class="form-control" id="addParentId" readonly disabled>
+                    </div>
+                    <div class="form-group">
+                        <label for="editObjectType">Type</label>
+                        <select id="editObjectType" class="form-control">
+                            <option value="container">Container</option>
+                            <option value="item">Item</option>
+                            <option value="active_item">Active Item</option>
+                            <option value="external_url">External Link (URL)</option>
+                            <option value="internal_url">Internal Link (Local URL)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editTitle">Title</label>
+                        <input type="text" class="form-control" id="editTitle">
+                    </div>
+                    <div class="form-group">
+                        <label for="editTitle">Location</label>
+                        <input type="text" class="form-control" id="editLocation">
+                    </div>
+                    <div class="form-group">
+                        <label for="editClass">Class</label>
+                        <input type="text" class="form-control" id="editClass">
+                    </div>
+                    <div class="form-group">
+                        <label for="editDesc">Description</label>
+                        <input type="text" class="form-control" id="editDesc">
+                    </div>
+                    <div class="form-group">
+                        <label for="editMime">Mimetype</label>
+                        <input type="text" class="form-control" id="editMime">
+                    </div>
+                    <div class="form-group">
+                        <label for="editActionScript">ActionScript</label>
+                        <input type="text" class="form-control" id="editActionScript">
+                    </div>
+                    <div class="form-group">
+                        <label for="editState">State</label>
+                        <input type="text" class="form-control" id="editState">
+                    </div>
+                    <div class="form-group">
+                        <label for="editProtocol">Protocol</label>
+                        <input type="text" class="form-control" id="editProtocol">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id="editCancel" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button id="editSave" type="submit" class="btn btn-primary">Save Item</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+<div id="autoscanModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Save Autoscan</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group" id="autoscan-persistent-msg">
+                        <span>This is a persistent autoscan directory (defined in config), it can not be modified via the web UI.</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="autoscanId">ID:</label>
+                        <span id="autoscanIdTxt"></span>
+                        <input type="hidden" id="autoscanId"/>
+                        <input type="checkbox" class="hidden" id="autoscanFromFs"/>
+                        <input type="checkbox" class="hidden" id="autoscanPersistent"/>
+                    </div>
+                    <div class="form-group">
+                        <input type="radio" name="autoscanMode" id="autoscanModeNone" class="form-control" value="none"/>
+                        <label for="autoscanModeNone">None</label>
+                        <input type="radio" name="autoscanMode" id="autoscanModeTimed" class="form-control" value="timed"/>
+                        <label for="autoscanModeTimed">Timed</label>
+                        <input type="radio" name="autoscanMode" id="autoscanModeInotify" class="form-control" value="inotify"/>
+                        <label for="autoscanModeInotify">INotify</label>
+                    </div>
+                    <div class="form-group">
+                        <input type="radio" name="autoscanLevel" id="autoscanLevelBasic" class="form-control" value="basic"/>
+                        <label for="autoscanModeNone">Basic</label>
+                        <input type="radio" name="autoscanLevel" id="autoscanLevelFull" class="form-control" value="full"/>
+                        <label for="autoscanModeTimed">Full</label>
+                    </div>
+                    <div class="form-group">
+                        <label for="autoscanRecursive">Recursive:</label>
+                        <input type="checkbox" name="autoscanRecursive" id="autoscanRecursive" class="form-control"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="autoscanHidden">Include hidden files/directories:</label>
+                        <input type="checkbox" name="autoscanHidden" id="autoscanHidden" class="form-control"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="autoscanInterval">Scan Interval (in seconds):</label>
+                        <input type="text" id="autoscanInterval" class="form-control"/>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id="autoscanCancel" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button id="autoscanSave" type="submit" class="btn btn-primary">Save Item</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+<div id="toast" class="alert alert-warning">
+    <span class="grb-toast-msg"></span>
+    <button type="button" class="close" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>

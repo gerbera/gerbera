@@ -1,0 +1,14 @@
+{
+  "get" : {
+    "count" : 0,
+    "responses" : {
+      "default" : "./void/default-get.json"
+    }
+  },
+  "" : {
+    "count" : 0,
+    "responses" : {
+      "default" : "./void/default-check.json"
+    }
+  }
+}

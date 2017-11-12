@@ -10,6 +10,10 @@ module.exports = {
     return resp
   },
   reset: function (testName) {
-    requests = require('./tests/' + testName)
+    try {
+      requests = require('./tests/' + testName)
+    } catch (error) {
+      requests = require('./tests/default.json')
+    }
   }
 }

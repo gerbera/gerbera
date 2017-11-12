@@ -2,6 +2,7 @@
   "get_config" : {
     "count" : 0,
     "responses" : {
+      "1" : "./auth/no-accounts-config.json",
       "default" : "./auth/config.json"
     }
   },

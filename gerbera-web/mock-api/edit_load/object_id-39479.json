@@ -1,0 +1,30 @@
+{
+  "success": true,
+  "item": {
+    "object_id": 39479,
+    "title": {
+      "editable": true,
+      "value": "Test.mp4"
+    },
+    "class": {
+      "editable": true,
+      "value": "object.item.videoItem"
+    },
+    "obj_type": "item",
+    "description": {
+      "editable": true,
+      "value": "A description"
+    },
+    "location": {
+      "editable": false,
+      "value": "/folder/location/Test.mp4"
+    },
+    "mime-type": {
+      "editable": true,
+      "value": "video/mp4"
+    }
+  },
+  "update_ids": {
+    "pending": false
+  }
+}
