@@ -1252,7 +1252,7 @@ String SQLStorage::findFolderImage(int id, String trackArtBase)
 #ifndef ONLY_REAL_FOLDER_ART
     *q << ")";
 #endif
-    *q << " ORDER BY " << TQ("dc_title") << " DESC limit 1";
+    *q << " LIMIT 1";
 
     //log_debug("findFolderImage %d, %s\n", id, q->c_str());
     Ref<SQLResult> res = select(q);
