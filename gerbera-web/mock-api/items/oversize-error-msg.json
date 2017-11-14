@@ -1,0 +1,6 @@
+{
+  "success": false,
+  "error": {
+    "text": "This text should take up more space than 500 px and then be wrapped and cut off by the CSS for toast error message when the error message is too big."
+  }
+}
