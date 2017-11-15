@@ -1212,7 +1212,8 @@ String SQLStorage::incrementUpdateIDs(shared_ptr<unordered_set<int>> ids)
 }
 
 // id is the parent_id for cover media to find, and if set, trackArtBase is the case-folded
-// name of the track to try as artwork
+// name of the track to try as artwork; we rely on LIKE being case-insensitive
+#define MAX_ART_CONTAINERS 100
 String SQLStorage::findFolderImage(int id, String trackArtBase)
 {
     Ref<StringBuffer> q(new StringBuffer());
@@ -1221,19 +1222,13 @@ String SQLStorage::findFolderImage(int id, String trackArtBase)
     *q << "SELECT " << TQ("id") << " FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE ";
     *q << "( ";
     if (trackArtBase.length() > 0) {
-        *q << "lower(" << TQ("dc_title") << ") "
-           << "LIKE " << quote(trackArtBase + _(".jp%")) << " OR ";
+        *q << TQ("dc_title") << "LIKE " << quote(trackArtBase + _(".jp%")) << " OR ";
     }
-    *q << "lower(" << TQ("dc_title") << ") "
-       << "LIKE " << quote(_("cover.jp%")) << " OR ";
-    *q << "lower(" << TQ("dc_title") << ") "
-       << "LIKE " << quote(_("albumart%.jp%")) << " OR ";
-    *q << "lower(" << TQ("dc_title") << ") "
-       << "LIKE " << quote(_("album.jp%")) << " OR ";
-    *q << "lower(" << TQ("dc_title") << ") "
-       << "LIKE " << quote(_("front.jp%")) << " OR ";
-    *q << "lower(" << TQ("dc_title") << ") "
-       << "LIKE " << quote(_("folder.jp%"));
+    *q << TQ("dc_title") << "LIKE " << quote(_("cover.jp%")) << " OR ";
+    *q << TQ("dc_title") << "LIKE " << quote(_("albumart%.jp%")) << " OR ";
+    *q << TQ("dc_title") << "LIKE " << quote(_("album.jp%")) << " OR ";
+    *q << TQ("dc_title") << "LIKE " << quote(_("front.jp%")) << " OR ";
+    *q << TQ("dc_title") << "LIKE " << quote(_("folder.jp%"));
     *q << " ) AND ";
     *q << TQ("upnp_class") << '=' << quote(_(UPNP_DEFAULT_CLASS_IMAGE_ITEM)) << " AND ";
 #ifndef ONLY_REAL_FOLDER_ART
@@ -1249,7 +1244,7 @@ String SQLStorage::findFolderImage(int id, String trackArtBase)
     *q << "SELECT " << TQ("ref_id") << " FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE ";
     *q << TQ("parent_id") << '=' << quote(String::from(id)) << " AND ";
     *q << TQ("object_type") << '=' << quote(OBJECT_TYPE_ITEM);
-    *q <<               ")";
+    *q <<               " LIMIT " << MAX_ART_CONTAINERS << ")";
     *q <<       ")";
     *q << "     ) OR ";
 #endif
@@ -1258,7 +1253,7 @@ String SQLStorage::findFolderImage(int id, String trackArtBase)
 #ifndef ONLY_REAL_FOLDER_ART
     *q << ")";
 #endif
-    *q << " ORDER BY " << TQ("dc_title") << " DESC";
+    *q << " LIMIT 1";
 
     //log_debug("findFolderImage %d, %s\n", id, q->c_str());
     Ref<SQLResult> res = select(q);
