@@ -192,22 +192,32 @@ ul.pagination {
 }
 
 .grb-toast {
-    bottom: 30px;
-    min-width: 500px;
-    margin-left: -250px;
-    z-index: 1000;
-    left: 50%;
-    position: fixed;
+    bottom: 5vh;
     box-shadow: 0px 2px 5px #888888;
 }
 
 .grb-task {
     top: 15vh;
+}
+
+.grb-toast,
+.grb-task {
     min-width: 500px;
+    max-width: 500px;
     margin-left: -250px;
-    z-index: 1000;
     left: 50%;
+    z-index: 1000;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
     position: fixed;
+}
+
+.grb-toast-msg {
+    width: 425px;
+    display: inline-block;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 .autoscan {

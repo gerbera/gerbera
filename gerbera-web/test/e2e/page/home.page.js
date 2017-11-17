@@ -226,6 +226,12 @@ module.exports = function (driver) {
     })
   }
 
+  this.getToastElement = function () {
+    return driver.wait(until.elementIsVisible(driver.findElement(By.id('toast'))), 5000).then(function () {
+      return driver.findElement(By.id('toast'))
+    })
+  }
+
   this.waitForToastClose = function () {
     driver.wait(until.elementIsNotVisible(driver.findElement(By.id('toast'))), 6000)
     return driver.findElement(By.css('.grb-toast-msg')).isDisplayed()
