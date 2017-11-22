@@ -137,6 +137,7 @@ $.widget('grb.dataitems', {
     tbody.appendTo(table)
 
     this.element.append(table)
+    this.element.addClass('with-data')
   },
 
   buildFooter: function (pager) {
@@ -212,6 +213,7 @@ $.widget('grb.dataitems', {
   _destroy: function () {
     this.element.children('table').remove()
     this.element.removeClass('grb-dataitems')
+    this.element.removeClass('with-data')
   }
 
 })

@@ -35,6 +35,149 @@ body {
     min-height:100%;
 }
 
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: "Lato","Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+
+a {
+    color: #ff7f00;
+}
+
+a:hover {
+    color: #ff7f00;
+}
+
+.navbar {
+    font-size: 14px;
+    background-color: #222;
+    border-bottom: 1px solid #ff7f00;
+}
+
+.navbar {
+    box-shadow: 0 10px 10px rgba(0, 0, 0, 0.25);
+}
+
+.navbar-nav > li > a {
+    color: #bbb;
+}
+
+.navbar-nav > li:hover > a {
+    color: white;
+}
+
+.nav-item.active a {
+    color: white;
+    font-weight: bold;
+}
+
+.login-field {
+    background-color: #FFF;
+    box-shadow:inset 0px 3px 3px -1px #888;
+}
+
+.login-field:focus {
+    background-color: #FFF;
+    box-shadow:inset 0px 3px 3px -1px #888;
+    border: 1px solid #ff7f00;
+}
+
+.form-control:focus {
+    background-color: #FFF;
+    border: 1px solid #ff7f00;
+    box-shadow:inset 0px 3px 3px -1px #888;
+}
+
+.modal-header {
+    background-color: #222;
+    color: #FFF;
+    border: 1px solid #FFF;
+}
+
+.modal-footer {
+    background-color: #e9ecef;
+    border-bottom: 1px solid #FFF;
+    border-left: 1px solid #FFF;
+    border-right: 1px solid #FFF;
+}
+
+.modal-body {
+    background-color: #FFF;
+    border: 1px solid #FFF;
+}
+
+.modal-header .close {
+    opacity: 1;
+    color: white;
+}
+.close:hover {
+    color: #FFF;
+}
+
+.btn-danger {
+    background-color: #ff7f00;
+    border-color: #222;
+}
+
+.btn-danger:not([disabled]):not(.disabled):active,
+.btn-danger:not([disabled]):not(.disabled).active,
+.show > .btn-danger.dropdown-toggle,
+.btn-danger:hover,
+.btn-danger:active,
+.btn-danger:focus {
+    color: #fff;
+    background-color: #C66200;
+    border-color: #ff7f00;
+    box-shadow: none;
+}
+
+.btn-success {
+    background-color: #FF7F00;
+    border-color: #222;
+}
+
+.btn-success:not([disabled]):not(.disabled):active,
+.btn-success:not([disabled]):not(.disabled).active,
+.show > .btn-success.dropdown-toggle,
+.btn-success:hover,
+.btn-success:active,
+.btn-success:focus {
+    color: #fff;
+    background-color: #C66200;
+    border-color: #ff7f00;
+    box-shadow: none;
+}
+
+.btn-primary:not([disabled]):not(.disabled):active,
+.btn-primary:not([disabled]):not(.disabled).active,
+.show > .btn-primary.dropdown-toggle,
+.btn-primary:hover,
+.btn-primary:active,
+.btn-primary:focus {
+    color: #fff;
+    background-color: #1435AD;
+    border-color: #5A70C2;
+    box-shadow: none;
+}
+
+.btn-primary {
+    background-color: #04819E;
+    border-color: #4BA2B7;
+}
+
+.btn-default {
+    border: 1px solid #888;
+}
+
+.btn-default:focus {
+    box-shadow: 0 0 0 0.1rem #888
+}
+
 .table {
     margin-bottom: 0px;
 }
@@ -52,10 +195,14 @@ thead, tbody tr {
     table-layout:fixed;
 }
 
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: #e9ecef;
+}
+
 tbody {
     display:block;
-    max-height: calc(100vh - 16vh - 35px - 49px);
-    min-height: calc(100vh - 16vh - 35px - 49px);
+    max-height: calc(100vh - 16vh - 36px - 49px);
+    min-height: calc(100vh - 16vh - 36px - 49px);
     overflow:auto;
 }
 
@@ -65,7 +212,6 @@ ul.pagination {
 
 #nav {
     min-height: 5vh;
-    box-shadow: 0px 2px 5px #888888
 }
 
 #trail {
@@ -79,7 +225,7 @@ ul.pagination {
  * Trail            = 7vh + ~2vh padding-top,bottom
  * Tree             = fullHeight - (menu + trail)
  * Items datagrid   = fullHeight - (menu + trail)
- * Items table head = 35px
+ * Items table head = 36px
  * Items table foot = 49px
  * Items table body = fullHeight - (menu + trail) - header - footer
  *********************/
@@ -104,6 +250,10 @@ ul.pagination {
     overflow: auto;
 }
 
+.with-data {
+    box-shadow: -2px 2px 2px #888888;
+}
+
 #datagrid thead {
     height: 35px;
 }
@@ -116,12 +266,34 @@ ul.pagination {
     height: 49px;
 }
 
+.page-item.active .page-link {
+    background-color: #04819E;
+    border-color: #4BA2B7;
+    color: white;
+}
+
+.page-item.active .page-link:hover {
+    background-color: #1435AD;
+    border-color: #5A70C2;
+    font-weight: 700;
+}
+
+.page-link {
+    color: #04819E;
+}
+
+.page-link:focus,
+.page-link:hover {
+   color: #222;
+}
+
 
 .list-group-item {
     padding-top: 0px;
     padding-right: 0px;
     padding-bottom: 0px;
     border: 0px;
+    background-color: transparent;
 }
 
 .list-group-item:first-child,
@@ -146,13 +318,6 @@ ul.pagination {
     cursor: copy;
 }
 
-.selected-item {
-    /*-webkit-box-shadow: 0 0 10px #888888;*/
-    /*box-shadow: 0 0 10px #888888;*/
-    border-top: 1px solid lightgray;
-    border-bottom: 1px solid lightgray;
-}
-
 .grb-item-delete,
 .grb-item-edit,
 .grb-item-download,
@@ -161,10 +326,21 @@ ul.pagination {
     font-size: 1.5em;
     margin: 5px 10px 5px 10px;
 }
+
+.grb-item-delete:hover,
+.grb-item-edit:hover,
+.grb-item-download:hover,
+.grb-item-add:hover {
+    color: #ff7f00;
+}
+
 .grb-item-buttons {
     margin: 0px 10px 0px 10px;
 }
 
+.breadcrumb {
+    border: 1px solid #222;
+}
 .grb-trail-buttons {
     list-style: none;
     padding: 8px 15px;
@@ -183,6 +359,15 @@ ul.pagination {
     cursor: pointer;
 }
 
+.grb-trail-add:hover,
+.grb-trail-add-autoscan:hover,
+.grb-trail-edit-autoscan:hover,
+.grb-trail-edit:hover,
+.grb-trail-delete:hover,
+.grb-trail-delete-all:hover {
+    color: #ff7f00;
+}
+
 .overflow {
     overflow: hidden;
     -ms-text-overflow: ellipsis;
@@ -193,19 +378,40 @@ ul.pagination {
 
 .grb-toast {
     bottom: 5vh;
-    box-shadow: 0px 2px 5px #888888;
+    background-color: #ff7f00;
+    border-radius: 0;
+    border: 0;
 }
+
 
 .grb-task {
     top: 15vh;
+    border-radius: 0;
+    border: 0;
+    color: white;
+}
+
+.grb-task .close {
+    opacity: 1;
+    color: white;
+}
+
+.grb-task .grb-toast-msg {
+    color: white;
+    width: 95%;
+    display: inline-block;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    font-weight: 700;
+}
+
+.alert-success {
+    background-color: #4BA2B7;
 }
 
 .grb-toast,
 .grb-task {
-    min-width: 500px;
-    max-width: 500px;
-    margin-left: -250px;
-    left: 50%;
+    width: 100%;
     z-index: 1000;
     overflow: hidden;
     white-space: nowrap;
@@ -214,10 +420,16 @@ ul.pagination {
 }
 
 .grb-toast-msg {
-    width: 425px;
+    width: 95%;
+    color: #333;
     display: inline-block;
     text-overflow: ellipsis;
     overflow: hidden;
+    font-weight: 700;
+}
+.grb-toast .close {
+    opacity: 1;
+    color: black;
 }
 
 .autoscan {

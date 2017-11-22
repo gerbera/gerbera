@@ -240,4 +240,8 @@ module.exports = function (driver) {
   this.getPages = function () {
     return driver.findElements(By.css('.page-item'))
   }
+
+  this.getWindowSize = function () {
+    return driver.manage().window().getSize();
+  }
 }
