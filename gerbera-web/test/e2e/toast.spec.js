@@ -41,13 +41,13 @@ test.describe('The gerbera toast', function () {
     driver.quit()
   })
 
-  test.it('shows with max-width when error message is too big', function () {
+  test.it('shows with max-width of screen', function () {
     homePage.clickMenu('nav-db')
     homePage.clickTree('Video')
     homePage.clickTree('All Video')
     homePage.getToastElement().then(function (element) {
       element.getSize().then(function (size) {
-        expect(size.width).to.equal(500)
+        expect(size.width).to.equal(1270)
       })
     })
   })

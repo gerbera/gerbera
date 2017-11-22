@@ -10,8 +10,7 @@
     <link rel="stylesheet" href="assets/theme/gerbera.css"/>
 </head>
 <body>
-<div class="container-fluid">
-<nav class="navbar navbar-expand-md navbar-light bg-light" id="nav">
+<nav class="navbar navbar-expand-md" id="nav">
     <button type="button" class="navbar-toggler navbar-toggler-right"
             data-toggle="collapse" data-target="#navbarContent" aria-controls="navbarContent"
             aria-expanded="false" aria-label="Toggle navigation">
@@ -21,19 +20,19 @@
     <div class="collapse navbar-collapse" id="navbarContent">
         <ul class="navbar-nav mr-auto">
             <li class="nav-item">
-                <a id="nav-home" class="nav-link" data-gerbera-menu-cmd="HOME">Home <span class="sr-only">(current)</span></a>
+                <a id="nav-home" class="nav-link" href="#" data-gerbera-menu-cmd="HOME">Home <span class="sr-only">(current)</span></a>
             </li>
             <li class="nav-item">
-                <a id="nav-db" class="nav-link disabled" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="db">Database</a>
+                <a id="nav-db" class="nav-link disabled" href="#" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="db">Database</a>
             </li>
             <li class="nav-item">
-                <a id="nav-fs" class="nav-link disabled" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="fs">File System</a>
+                <a id="nav-fs" class="nav-link disabled" href="#" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="fs">File System</a>
             </li>
             <li class="nav-item">
                 <a id="report-issue" class="nav-link" href="http://github.com/v00d00/gerbera/issues">Report an Issue</a>
             </li>
             <li class="nav-item">
-                <a id="leave-beta" class="btn nav-link disabled" data-gerbera-menu-cmd="LEAVE_BETA">Leave Beta</a>
+                <a id="leave-beta" class="nav-link disabled" href="#" data-gerbera-menu-cmd="LEAVE_BETA">Leave Beta</a>
             </li>
         </ul>
         <form id="login-form" class="form-inline my-2 my-lg-0">
@@ -45,7 +44,6 @@
         </form>
     </div>
 </nav>
-</div>
 <script src="vendor/jquery/jquery-3.2.1.min.js" type="text/javascript"></script>
 <script src="vendor/jquery/jquery.cookie.js" type="text/javascript"></script>
 <script src="vendor/jquery/jquery-ui.min.js" type="text/javascript"></script>
@@ -268,7 +266,7 @@
     </div><!-- /.modal-dialog -->
 </div>
 
-<div id="toast" class="alert alert-warning">
+<div id="toast" class="alert">
     <span class="grb-toast-msg"></span>
     <button type="button" class="close" aria-label="Close">
         <span aria-hidden="true">&times;</span>
