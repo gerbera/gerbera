@@ -296,30 +296,10 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
 endif()
 
-# Host OS Check
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-    set(HOST_OS "linux")
-    set(LINUX 1)
-elseif(${CMAKE_SYSTEM_NAME} MATCHES ".*(SunOS|Solaris).*")
-    set(HOST_OS "solaris")
-    set(SOLARIS 1)
-elseif(${CMAKE_SYSTEM_NAME} MATCHES ".*BSD.*")
-    set(HOST_OS "bsd")
-    set(BSD 1)
-elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
-    set(HOST_OS "darwin")
-    set(DARWIN 1)
-endif()
-if(NOT HOST_OS)
-    message(FATAL_ERROR 
-                "Gerbera was unable to deterimine the host OS. Please report this. Value of CMAKE_SYSTEM_NAME: ${CMAKE_SYSTEM_NAME}")
-endif()
-
-if (SOLARIS)
+# System specific stuff
+if (${CMAKE_SYSTEM_NAME} MATCHES ".*(SunOS|Solaris).*")
     add_definitions(-DSOLARIS)
-endif()
-
-if (BSD)
+elseif (${CMAKE_SYSTEM_NAME} MATCHES ".*BSD.*")
     add_definitions(-DBSD)
 endif()
 
