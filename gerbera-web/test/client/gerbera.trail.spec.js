@@ -98,12 +98,43 @@ describe('Gerbera Trail', function () {
       })
       spyOn(GERBERA.App, 'error')
       spyOn(GERBERA.Updates, 'updateTreeByIds')
+      spyOn(GERBERA.Updates, 'showMessage')
 
       GERBERA.Trail.deleteItem(event).then(function () {
         expect(GERBERA.App.error).not.toHaveBeenCalled()
         expect(GERBERA.Items.deleteGerberaItem).toHaveBeenCalledWith(event.data)
         expect(GERBERA.Updates.updateTreeByIds).toHaveBeenCalled()
+        expect(GERBERA.Updates.showMessage).toHaveBeenCalledWith('Successfully deleted item')
         isDone()
+      })
+    })
+
+    describe('deleteAllItems()', function () {
+      var deleteResponse, event, treeResponse
+      beforeEach(function () {
+        deleteResponse = {success: true}
+        event = {data: {id: 8}}
+        loadJSONFixtures('parent_id-0-select_it-0.json')
+        treeResponse = getJSONFixture('parent_id-0-select_it-0.json')
+        loadFixtures('trail.html')
+      })
+      it('calls the server to delete the gerbera item', function (done) {
+        var isDone = done
+        GERBERA.Tree.loadTree(treeResponse)
+        spyOn(GERBERA.Items, 'deleteGerberaItem').and.callFake(function (options) {
+          return $.Deferred().resolve(deleteResponse).promise()
+        })
+        spyOn(GERBERA.App, 'error')
+        spyOn(GERBERA.Updates, 'updateTreeByIds')
+        spyOn(GERBERA.Updates, 'showMessage')
+
+        GERBERA.Trail.deleteAllItems(event).then(function () {
+          expect(GERBERA.App.error).not.toHaveBeenCalled()
+          expect(GERBERA.Items.deleteGerberaItem).toHaveBeenCalledWith(event.data, true)
+          expect(GERBERA.Updates.updateTreeByIds).toHaveBeenCalled()
+          expect(GERBERA.Updates.showMessage).toHaveBeenCalledWith('Successfully deleted all items')
+          isDone()
+        })
       })
     })
 
