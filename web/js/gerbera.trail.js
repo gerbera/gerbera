@@ -155,6 +155,7 @@ GERBERA.Trail = (function () {
     return GERBERA.Items.deleteGerberaItem(item)
       .done(function (response) {
         if (response.success) {
+          GERBERA.Updates.showMessage('Successfully deleted item')
           GERBERA.Updates.updateTreeByIds(response)
         } else {
           GERBERA.App.error('Failed to delete item')
@@ -167,9 +168,10 @@ GERBERA.Trail = (function () {
     return GERBERA.Items.deleteGerberaItem(item, true)
       .done(function (response) {
         if (response.success) {
+          GERBERA.Updates.showMessage('Successfully deleted all items')
           GERBERA.Updates.updateTreeByIds(response)
         } else {
-          GERBERA.App.error('Failed to delete all item')
+          GERBERA.App.error('Failed to delete all items')
         }
       })
   }
@@ -196,6 +198,7 @@ GERBERA.Trail = (function () {
     destroy: destroy,
     gatherTrail: gatherTrail,
     deleteItem: deleteItem,
+    deleteAllItems: deleteAllItems,
     makeTrail: makeTrail,
     makeTrailFromItem: makeTrailFromItem
   }
