@@ -23,16 +23,19 @@ describe('The jQuery Datagrid', function () {
     expect($('#datagrid').find('a').get(0).href).toBe(datagridData[0].url)
   })
 
-  it('binds the delete icon click to the method provided', function () {
+  it('binds the delete icon click to the method provided and removes the row on click', function () {
     var methodSpy = jasmine.createSpy('delete')
     $('#datagrid').dataitems({
       data: datagridData,
       onDelete: methodSpy,
       itemType: 'db'
     })
+    var beforeCount = $('#datagrid').find('.grb-item').length
 
     $('#datagrid').find('.grb-item span.grb-item-delete').first().click()
 
+    var afterCount = $('#datagrid').find('.grb-item').length
+    expect(afterCount).toEqual(beforeCount - 1)
     expect(methodSpy).toHaveBeenCalled()
   })
 

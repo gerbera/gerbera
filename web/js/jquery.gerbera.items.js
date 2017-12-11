@@ -103,7 +103,10 @@ $.widget('grb.dataitems', {
           deleteIcon.addClass('grb-item-delete fa fa-trash-o')
           deleteIcon.appendTo(buttons)
           if (onDelete) {
-            deleteIcon.click(item, onDelete)
+            deleteIcon.click(item, function (event) {
+              row.remove();
+              onDelete(event);
+            })
           }
           buttons.appendTo(content)
         } else if (itemType === 'fs') {
