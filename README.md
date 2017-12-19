@@ -143,21 +143,21 @@ sudo make install
 
 ## Dependencies
 
-| Lib          	| Version 	| Required? 	| Note                 	    |
-|--------------	|---------	|-----------	|-------------------------- |
-| libupnp      	| 1.8     	| Required  	| [pupnp] with IPv6 support |
-| libuuid      	|         	| Depends on OS | On \*BSD native libuuid is used, others require e2fsprogs-libuuid |
-| expat        	|         	| Required  	|                      	    |
-| sqlite3      	|         	| Required  	|                      	    |
-| duktape      	|         	| Optional  	| Scripting Support    	    |
-| mysql        	|         	| Optional  	| Client Libs          	    |
-| curl         	|         	| Optional  	| Enables web services 	    |
-| [taglib]      | 1.11    	| Optional  	| Audio tag support         |
-| libmagic     	|         	| Optional  	| File type detection  	    |
-| ffmpeg/libav 	|         	| Optional  	| File metadata             |
-| libexif      	|         	| Optional  	| JPEG Exif metadata        |
-| lastfmlib    	|         	| Optional  	| Enables scrobbling   	    |
-| ffmpegthumbnailer |      	| Optional   	| Generate video thumbnails |
+| Lib          	| Version 	| Required? 	| Note                 	     | Compile-time option | Default  |
+|--------------	|---------	|-----------	|--------------------------- | --------------------| -------- |
+| libupnp      	| 1.8.2   	| Required  	| [pupnp] with IPv6 support  |                     |          |
+| libuuid      	|         	| Depends on OS | On \*BSD native libuuid is used, others require e2fsprogs-libuuid | | |
+| expat        	|         	| Required  	|                      	     |                     |          |
+| sqlite3      	|         	| Required  	| Database storage     	     |                     |          |
+| duktape      	| 2.1.0   	| Optional  	| Scripting Support    	     | WITH_JS             | Enabled  |
+| mysql        	|         	| Optional  	| Alternate database storage | WITH_MYSQL          | Disabled |
+| curl         	|         	| Optional  	| Enables web services 	     | WITH_CURL           | Enabled  |
+| [taglib]      | 1.11.1  	| Optional  	| Audio tag support          | WITH_TAGLIB         | Enabled  |
+| libmagic     	|         	| Optional  	| File type detection  	     | WITH_MAGIC          | Enabled  |
+| ffmpeg/libav 	|         	| Optional  	| File metadata              | WITH_AVCODEC        | Disabled |
+| libexif      	|         	| Optional  	| JPEG Exif metadata         | WITH_EXIF           | Enabled  |
+| lastfmlib    	| 0.4.0   	| Optional  	| Enables scrobbling   	     | WITH_LASTFM         | Disabled |
+| ffmpegthumbnailer |      | Optional   | Generate video thumbnails  | WITH_FFMPEGTHUMBNAILER | Disabled |
 
 ## Branches
 **master**: Where the action happens
