@@ -47,7 +47,7 @@ test.describe('The gerbera toast', function () {
     homePage.clickTree('All Video')
     homePage.getToastElement().then(function (element) {
       element.getSize().then(function (size) {
-        expect(size.width).to.equal(1270)
+        expect(size.width).to.equal(1280)
       })
     })
   })
