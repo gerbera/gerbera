@@ -12,36 +12,49 @@ before_install:
   - ./scripts/install-pupnp18.sh
   - ./scripts/install-taglib111.sh
 
+install:
+  - if [[ "$RUN_UI_TESTS" == "true" ]]; then npm --prefix $TRAVIS_BUILD_DIR/gerbera-web/ install $TRAVIS_BUILD_DIR/gerbera-web/; fi
+
+before_script:
+  - if [[ "$RUN_UI_TESTS" == "true" ]]; then export DISPLAY=:99.0; fi
+  - if [[ "$RUN_UI_TESTS" == "true" ]]; then sh -e /etc/init.d/xvfb start; fi
+  - if [[ "$RUN_UI_TESTS" == "true" ]]; then sleep 3; fi # give xvfb some time to start
+
 # Build
 script:
   - mkdir build
   - cd build
   - cmake -DCMAKE_VERBOSE_MAKEFILE=ON -DWITH_SYSTEMD=0 .. && make
+  - if [[ "$RUN_UI_TESTS" == "true" ]]; then npm --prefix $TRAVIS_BUILD_DIR/gerbera-web run test; fi
+  - if [[ "$RUN_UI_TESTS" == "true" ]]; then npm --prefix $TRAVIS_BUILD_DIR/gerbera-web run test:e2e; fi
 
 matrix:
   include:
-    - env: CXX=g++-4.9 CC=gcc-4.9
+    - env: CXX=g++-4.9 CC=gcc-4.9 RUN_UI_TESTS=false
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
           packages:
             - g++-4.9
-    - env: CXX=g++-5 CC=gcc-5
+    - env: CXX=g++-5 CC=gcc-5 RUN_UI_TESTS=false
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
           packages:
             - g++-5
-    - env: CXX=g++-6 CC=gcc-6
+    - env: CXX=g++-6 CC=gcc-6 RUN_UI_TESTS=true
       addons:
+        chrome: stable
         apt:
           sources:
             - ubuntu-toolchain-r-test
           packages:
             - g++-6
-    - env: CXX=clang++-4.0 CC=clang-4.0
+            - nodejs
+            - xvfb
+    - env: CXX=clang++-4.0 CC=clang-4.0 RUN_UI_TESTS=false
       addons:
         apt:
           sources:
