@@ -41,6 +41,7 @@
 #include "upnp_mrreg.h"
 #include "config_manager.h"
 #include "storage.h"
+#include "request_handler.h"
 
 /// \brief Provides methods to initialize and shutdown
 /// and to retrieve various information about the server.
@@ -207,6 +208,25 @@ protected:
     /// of the request and calls the process_subscription_request() for the 
     /// appropriate service.
     void upnp_subscriptions(zmm::Ref<SubscriptionRequest> request);
+
+    /// \brief Registers callback functions for the internal web server.
+    /// \param filename Incoming filename.
+    ///
+    zmm::Ref<RequestHandler> create_request_handler(const char *filename);
+
+    /// \brief Registers callback functions for the internal web server.
+    ///
+    /// This function registers callbacks for the internal web server.
+    /// The callback functions are:
+    /// \b web_get_info Query information on a file.
+    /// \b web_open Open a file.
+    /// \b web_read Sequentially read from a file.
+    /// \b web_write Sequentially write to a file (not supported).
+    /// \b web_seek Perform a seek on a file.
+    /// \b web_close Close file.
+    ///
+    /// \return UPNP_E_SUCCESS Callbacks registered successfully, else error code.
+    int register_web_callbacks();
 };
 
 #endif // __SERVER_H__

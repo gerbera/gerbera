@@ -31,6 +31,7 @@
 
 #ifdef HAVE_CURL
 #include <curl/curl.h>
+#include <iostream>
 #endif
 
 #ifdef HAVE_LASTFMLIB
@@ -40,7 +41,12 @@
 #include "content_manager.h"
 #include "server.h"
 #include "update_manager.h"
-#include "web_callbacks.h"
+#include "file_request_handler.h"
+#ifdef HAVE_CURL
+#include "url_request_handler.h"
+#endif
+#include "serve_request_handler.h"
+#include "web/pages.h"
 
 using namespace zmm;
 using namespace mxml;
@@ -167,12 +173,13 @@ void Server::upnp_init()
     }
 
     log_debug("Setting virtual dir to: %s\n", virtual_directory.c_str());
-    ret = UpnpAddVirtualDir(virtual_directory.c_str());
+    ret = UpnpAddVirtualDir(virtual_directory.c_str(), this, nullptr);
     if (ret != UPNP_E_SUCCESS) {
         throw _UpnpException(ret, _("upnp_init: UpnpAddVirtualDir failed"));
     }
 
     ret = register_web_callbacks();
+
     if (ret != UPNP_E_SUCCESS) {
         throw _UpnpException(ret, _("upnp_init: UpnpSetVirtualDirCallbacks failed"));
     }
@@ -412,3 +419,136 @@ void Server::send_subscription_update(zmm::String updateString)
 {
     cmgr.subscription_update(updateString);
 }
+
+Ref<RequestHandler> Server::create_request_handler(const char* filename)
+{
+    String path;
+    String parameters;
+    String link = url_unescape((char*)filename);
+
+    log_debug("Filename: %s, Path: %s\n", filename, path.c_str());
+    // log_debug("create_handler: got url parameters: [%s]\n", parameters.c_str());
+
+    RequestHandler* ret = nullptr;
+
+    if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_MEDIA_HANDLER)) {
+        ret = new FileRequestHandler();
+    } else if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_UI_HANDLER)) {
+        RequestHandler::split_url(filename, URL_UI_PARAM_SEPARATOR, path, parameters);
+
+        Ref<Dictionary> dict(new Dictionary());
+        dict->decode(parameters);
+
+        String r_type = dict->get(_(URL_REQUEST_TYPE));
+        if (r_type != nullptr) {
+            ret = create_web_request_handler(r_type);
+        } else {
+            ret = create_web_request_handler(_("index"));
+        }
+    } else if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_SERVE_HANDLER)) {
+        if (string_ok(ConfigManager::getInstance()->getOption(CFG_SERVER_SERVEDIR)))
+            ret = new ServeRequestHandler();
+        else
+            throw _Exception(_("Serving directories is not enabled in configuration"));
+    }
+
+#if defined(HAVE_CURL)
+    else if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_ONLINE_HANDLER)) {
+        ret = new URLRequestHandler();
+    }
+#endif
+    else {
+        throw _Exception(_("no valid handler type in ") + filename);
+    }
+    return Ref<RequestHandler>(ret);
+}
+
+int Server::register_web_callbacks()
+{
+    log_debug("Setting UpnpVirtualDir GetInfoCallback\n");
+    int ret = UpnpVirtualDir_set_GetInfoCallback([](IN const char* filename, OUT UpnpFileInfo* info, const void *cookie) -> int {
+        try {
+            Ref<RequestHandler> reqHandler = const_cast<Server *>(static_cast<const Server *>(cookie))->create_request_handler(filename);
+            reqHandler->get_info(filename, info);
+        } catch (const ServerShutdownException& se) {
+            return -1;
+        } catch (const SubtitlesNotFoundException& sex) {
+            log_info("%s\n", sex.getMessage().c_str());
+            return -1;
+        } catch (const Exception& e) {
+            log_error("%s\n", e.getMessage().c_str());
+            return -1;
+        }
+        return 0;});
+    if (ret != 0) return ret;
+
+    log_debug("Setting UpnpVirtualDir OpenCallback\n");
+    ret = UpnpVirtualDir_set_OpenCallback([](IN const char* filename, IN enum UpnpOpenFileMode mode, IN const void *cookie) -> UpnpWebFileHandle {
+        log_debug("web_open(): %s\n", filename);
+        String link = url_unescape((char*)filename);
+
+        try {
+            Ref<RequestHandler> reqHandler = const_cast<Server *>(static_cast<const Server *>(cookie))->create_request_handler(filename);
+            Ref<IOHandler> ioHandler = reqHandler->open(link.c_str(), mode, nullptr);
+            ioHandler->retain();
+            return (UpnpWebFileHandle)ioHandler.getPtr();
+        } catch (const ServerShutdownException& se) {
+            return nullptr;
+        } catch (const SubtitlesNotFoundException& sex) {
+            log_info("SubtitlesNotFoundException: %s\n", sex.getMessage().c_str());
+            return nullptr;
+        } catch (const Exception& ex) {
+            log_error("Exception: %s\n", ex.getMessage().c_str());
+            return nullptr;
+        }
+    });
+    if (ret != UPNP_E_SUCCESS) return ret;
+
+    log_debug("Setting UpnpVirtualDir ReadCallback\n");
+    ret = UpnpVirtualDir_set_ReadCallback([](IN UpnpWebFileHandle f, OUT char* buf, IN size_t length, IN const void *cookie) -> int {
+        if (Server::getInstance()->getShutdownStatus())
+            return -1;
+
+        auto* handler = (IOHandler*)f;
+        return handler->read(buf, length);
+    });
+    if (ret != UPNP_E_SUCCESS) return ret;
+
+    log_debug("Setting UpnpVirtualDir WriteCallback\n");
+    ret = UpnpVirtualDir_set_WriteCallback([](IN UpnpWebFileHandle f, IN char* buf, IN size_t length, IN const void *cookie) -> int {
+        return 0;
+    });
+    if (ret != UPNP_E_SUCCESS) return ret;
+
+    log_debug("Setting UpnpVirtualDir SeekCallback\n");
+    ret = UpnpVirtualDir_set_SeekCallback([](IN UpnpWebFileHandle f, IN off_t offset, IN int whence, IN const void *cookie) -> int {
+        try {
+            auto* handler = (IOHandler*)f;
+            handler->seek(offset, whence);
+        } catch (const Exception& e) {
+            log_error("web_seek(): Exception during seek: %s\n", e.getMessage().c_str());
+            e.printStackTrace();
+            return -1;
+        }
+
+        return 0;
+    });
+    if (ret != UPNP_E_SUCCESS) return ret;
+
+    log_debug("Setting UpnpVirtualDir CloseCallback\n");
+    UpnpVirtualDir_set_CloseCallback([](IN UpnpWebFileHandle f, IN const void *cookie) -> int {
+        Ref<IOHandler> handler((IOHandler*)f);
+        handler->release();
+        try {
+            handler->close();
+        } catch (const Exception& e) {
+            log_error("web_close(): Exception during close: %s\n", e.getMessage().c_str());
+            e.printStackTrace();
+            return -1;
+        }
+        return 0;
+    });
+
+    return ret;
+}
+

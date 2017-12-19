@@ -227,8 +227,6 @@ set(libgerberaFILES
         src/web/add.cc
         src/web/add_object.cc
         src/web/auth.cc
-        src/web_callbacks.cc
-        src/web_callbacks.h
         src/web/containers.cc
         src/web/directories.cc
         src/web/edit_load.cc
@@ -351,9 +349,10 @@ find_package (LibUpnp REQUIRED)
 include_directories(${UPNP_INCLUDE_DIRS})
 target_link_libraries (gerbera ${UPNP_LIBRARIES})
 
-if (UPNP_VERSION_STRING VERSION_LESS "1.8.0")
-    message(FATAL_ERROR "gerbera requires libupnp 1.8.0 or above.")
+if (UPNP_VERSION_STRING VERSION_LESS "1.8.3")
+    message(FATAL_ERROR "gerbera requires libupnp 1.8.3 or above.")
 endif()
+
 if (NOT UPNP_HAS_IPV6)
     message(FATAL_ERROR "gerbera requires libupnp with IPv6 support.")
 endif()
