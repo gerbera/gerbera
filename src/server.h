@@ -79,7 +79,7 @@ public:
     /// A special virtual URL is registered with the internal web server,
     /// all content and all ui requests are server from there and are
     /// handled by the web callbacks.
-    zmm::String getVirtualURL();
+    zmm::String getVirtualURL() const;
     
     /// \brief Dispatch incoming UPnP events.
     /// \param eventtype Upnp_EventType, identifying what kind of event came in.
@@ -98,13 +98,13 @@ public:
     ///
     /// This function returns the handle for our device (it is needed to
     /// take care of subscriptions)
-    UpnpDevice_Handle getDeviceHandle();
+    UpnpDevice_Handle getDeviceHandle() const;
     
     /// \brief Returns the IP address of the server.
     ///
     /// Returns a string representation of the IP where the server is 
     /// running. This is useful for constructing URL's, etc.
-    zmm::String getIP();
+    zmm::String getIP() const;
     
     /// \brief Returns the port of the server.
     ///
@@ -112,14 +112,14 @@ public:
     /// the port is also specified in the config, we can never be sure
     /// that we actually get that port after startup. This function
     /// returns the port on which the server is actually running.
-    zmm::String getPort();
+    zmm::String getPort() const;
     
     
     /// \brief Tells if the server is about to be terminated.
     ///
     /// This function returns true if the server is about to be
     /// terminated. This is the case when upnp_clean() was called.
-    bool getShutdownStatus();
+    bool getShutdownStatus() const;
 
     static void static_cleanup_callback();
 

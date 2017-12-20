@@ -231,7 +231,7 @@ void Server::upnp_init()
     log_debug("end\n");
 }
 
-bool Server::getShutdownStatus()
+bool Server::getShutdownStatus() const
 {
     return server_shutdown_flag;
 }
@@ -267,7 +267,7 @@ void Server::shutdown()
     storage = nullptr;
 }
 
-String Server::getVirtualURL()
+String Server::getVirtualURL() const
 {
     return virtual_url;
 }
@@ -334,17 +334,17 @@ int Server::upnp_callback(Upnp_EventType eventtype, const void* event)
     return ret;
 }
 
-UpnpDevice_Handle Server::getDeviceHandle()
+UpnpDevice_Handle Server::getDeviceHandle() const
 {
     return device_handle;
 }
 
-zmm::String Server::getIP()
+zmm::String Server::getIP() const
 {
     return UpnpGetServerIpAddress();
 }
 
-zmm::String Server::getPort()
+zmm::String Server::getPort() const
 {
     return String::from(UpnpGetServerPort());
 }
@@ -506,7 +506,7 @@ int Server::register_web_callbacks()
 
     log_debug("Setting UpnpVirtualDir ReadCallback\n");
     ret = UpnpVirtualDir_set_ReadCallback([](IN UpnpWebFileHandle f, OUT char* buf, IN size_t length, IN const void *cookie) -> int {
-        if (Server::getInstance()->getShutdownStatus())
+        if (static_cast<const Server *>(cookie)->getShutdownStatus())
             return -1;
 
         auto* handler = (IOHandler*)f;
