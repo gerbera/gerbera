@@ -148,6 +148,7 @@ sudo make install
 | libupnp      	| 1.8.3   	| Required  	| [pupnp]                    |                     |          |
 | libuuid      	|         	| Depends on OS | On \*BSD native libuuid is used, others require e2fsprogs-libuuid | | |
 | expat        	|         	| Required  	|                      	     |                     |          |
+| libiconv     	|         	| Required  	|                      	     |                     |          |
 | sqlite3      	|         	| Required  	| Database storage     	     |                     |          |
 | duktape      	| 2.1.0   	| Optional  	| Scripting Support    	     | WITH_JS             | Enabled  |
 | mysql        	|         	| Optional  	| Alternate database storage | WITH_MYSQL          | Disabled |
@@ -156,8 +157,10 @@ sudo make install
 | libmagic     	|         	| Optional  	| File type detection  	     | WITH_MAGIC          | Enabled  |
 | ffmpeg/libav 	|         	| Optional  	| File metadata              | WITH_AVCODEC        | Disabled |
 | libexif      	|         	| Optional  	| JPEG Exif metadata         | WITH_EXIF           | Enabled  |
+| libexiv2    	|         	| Optional  	| Exif, IPTC, XMP metadata   | WITH_EXIV2          | Disabled |
 | lastfmlib    	| 0.4.0   	| Optional  	| Enables scrobbling   	     | WITH_LASTFM         | Disabled |
-| ffmpegthumbnailer |      | Optional   | Generate video thumbnails  | WITH_FFMPEGTHUMBNAILER | Disabled |
+| ffmpegthumbnailer |           | Optional      | Generate video thumbnails  | WITH_FFMPEGTHUMBNAILER | Disabled |
+| inotify       |               | Optional      | Efficient file monitoring  | WITH_INOTIFY      | Enabled |
 
 ## Branches
 **master**: Where the action happens
