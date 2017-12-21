@@ -1,4 +1,4 @@
-# Bash is a minimal toolchain
+# None as otherwise it clobbers our compiler choce
 language: none
 
 # Ubuntu 14.04 Trusty support
