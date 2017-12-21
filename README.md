@@ -63,6 +63,9 @@ Gerbera is available in AUR [stable](https://aur.archlinux.org/packages/gerbera/
 ### openSUSE
 Gerbera is avaiable on [software.opensuse.org](https://software.opensuse.org/package/gerbera).
 
+### Debian
+Gerbera is included in [Testing](https://packages.debian.org/buster/gerbera) and [Unstable](https://packages.debian.org/sid/gerbera).
+
 ### Entware (Optware)
 Gerbera is available in [Entware-ng](https://github.com/Entware-ng/rtndev/tree/master/gerbera) for your embedded device/router!
 
