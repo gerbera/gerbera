@@ -5,6 +5,15 @@ language: none
 sudo: required
 dist: trusty
 
+# The default build
+env: CXX=g++-6 CC=gcc-6
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-6
+
 before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -y uuid-dev libexpat1-dev libsqlite3-dev libmysqlclient-dev libmagic-dev libexif-dev libcurl4-openssl-dev
@@ -20,6 +29,7 @@ script:
 
 matrix:
   include:
+    - stage: Build Gerbera
     - env: CXX=g++-4.9 CC=gcc-4.9
       addons:
         apt:
@@ -34,13 +44,6 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - g++-5
-    - env: CXX=g++-6 CC=gcc-6
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-6
     - env: CXX=clang++-4.0 CC=clang-4.0
       addons:
         apt:
@@ -50,3 +53,21 @@ matrix:
           packages:
             - libc++-dev
             - clang-4.0
+    - stage: Test Gerbera UI
+      addons:
+        chrome: stable
+        apt:
+          packages:
+            - nodejs
+            - xvfb
+      before_install: skip
+      install:
+        - npm --prefix $TRAVIS_BUILD_DIR/gerbera-web/ install $TRAVIS_BUILD_DIR/gerbera-web/
+      before_script:
+        - export DISPLAY=:99.0
+        - sh -e /etc/init.d/xvfb start
+        - sleep 3 # give xvfb some time to start
+      script:
+        - npm --prefix $TRAVIS_BUILD_DIR/gerbera-web run lint
+        - npm --prefix $TRAVIS_BUILD_DIR/gerbera-web run test
+        - npm --prefix $TRAVIS_BUILD_DIR/gerbera-web run test:e2e
