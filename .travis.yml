@@ -1,5 +1,5 @@
 # Bash is a minimal toolchain
-language: bash
+language: none
 
 # Ubuntu 14.04 Trusty support
 sudo: required
@@ -60,7 +60,6 @@ matrix:
           packages:
             - nodejs
             - xvfb
-      before_install: skip
       install:
         - npm --prefix $TRAVIS_BUILD_DIR/gerbera-web/ install $TRAVIS_BUILD_DIR/gerbera-web/
       before_script:
