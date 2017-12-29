@@ -29,6 +29,10 @@ module.exports = function (driver) {
     return driver.findElements(By.css('.login-field'))
   }
 
+  this.menuList = function () {
+    return driver.findElement(By.css('ul.navbar-nav'))
+  }
+
   this.logout = function () {
     var logoutBtn = driver.findElement(By.id('logout'))
     driver.wait(until.elementIsVisible(logoutBtn), 5000)
@@ -50,6 +54,20 @@ module.exports = function (driver) {
   this.waitForToastClose = function () {
     driver.wait(until.elementIsNotVisible(driver.findElement(By.id('toast'))), 6000)
     return driver.findElement(By.css('.grb-toast-msg')).isDisplayed()
+  }
+
+  this.clickMenu = function (menuId) {
+    var tree = driver.findElement(By.id('tree'))
+    if (menuId === 'nav-home') {
+      return driver.findElement(By.id(menuId)).click()
+    } else {
+      driver.findElement(By.id(menuId)).click()
+      return driver.wait(until.elementIsVisible(tree), 5000)
+    }
+  }
+
+  this.getContentHTML = function () {
+    return driver.findElement(By.id('content')).getText()
   }
 
   this.get = function (url) {

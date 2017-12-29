@@ -42,12 +42,7 @@ GERBERA.Menu = (function () {
       allLinks.removeClass('disabled')
       $('#nav-home').click()
     } else {
-      $('.nav li').removeClass('active')
-      allLinks.addClass('disabled')
-      allLinks.click(function () {
-        return false
-      })
-      $('#report-issue').removeClass('disabled').off('click')
+     disable()
     }
     return $.Deferred().resolve().promise()
   }
@@ -92,8 +87,31 @@ GERBERA.Menu = (function () {
     GERBERA.Items.destroy()
   }
 
+  var disable = function () {
+    var allLinks = $('nav li a')
+    $('.nav li').removeClass('active')
+    allLinks.addClass('disabled')
+    allLinks.click(function () {
+      return false
+    })
+    $('#report-issue').removeClass('disabled').off('click')
+  }
+
+  var hideLogin = function () {
+    $('.login-field').hide()
+    $('#login-submit').hide()
+    $('#logout').hide()
+  }
+
+  var hideMenu = function () {
+    $('ul.navbar-nav').hide()
+  }
+
   return {
     initialize: initialize,
+    disable: disable,
+    hideLogin: hideLogin,
+    hideMenu: hideMenu,
     click: click
   }
 })()

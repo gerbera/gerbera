@@ -245,53 +245,49 @@ describe('Gerbera Updates', function () {
 
   describe('errorCheck()', function () {
     var response
-    var ajaxSpy
+    var uiDisabledResponse
+    var event
+    var xhr
     beforeEach(function () {
       loadJSONFixtures('invalid-session.json')
       response = getJSONFixture('invalid-session.json')
     })
 
-    it('shows a toast message when AJAX error returns failure', function (done) {
-      var isDone = done
-      ajaxSpy = spyOn($, 'ajax').and.callFake(function () {
-        return $.Deferred().resolve(response).promise()
-      })
-      GERBERA.Updates.initialize().then(function () {
-        $.ajax({
-          url: 'http://localhost:3000/content/interface',
-          type: 'get',
-          async: false,
-          data: {
-            req_type: 'void',
-            sid: 'SESSION_ID'
-          }
-        }).done(function () {
-          expect($('.grb-toast-msg').text()).toEqual('invalid session id')
-          isDone()
-        })
-      })
+    it('shows a toast message when AJAX error returns failure', function () {
+      event = {}
+      xhr = {
+        responseJSON : response
+      }
+
+      GERBERA.Updates.errorCheck(event, xhr)
+
+      expect($('.grb-toast-msg').text()).toEqual('invalid session id')
     })
 
-    it('ignores when response does not exist', function (done) {
-      var isDone = done
-      ajaxSpy.calls.reset()
-      ajaxSpy = spyOn($, 'ajax').and.callFake(function () {
-        return $.Deferred().resolve({}).promise()
-      })
-      GERBERA.Updates.initialize().then(function () {
-        $.ajax({
-          url: 'http://localhost:3000/content/interface',
-          type: 'get',
-          async: false,
-          data: {
-            req_type: 'void',
-            sid: 'SESSION_ID'
-          }
-        }).done(function () {
-          expect($('.grb-toast-msg').text()).toEqual('')
-          isDone()
-        })
-      })
+    it('ignores when response does not exist', function () {
+      event = {}
+      xhr = {
+        responseJSON : {}
+      }
+
+      GERBERA.Updates.errorCheck(event, xhr)
+
+      expect($('.grb-toast-msg').text()).toEqual('')
+    })
+
+    it('disables application when server returns 900 error code, albeit successful', function () {
+      loadJSONFixtures('ui-disabled.json')
+      uiDisabledResponse = getJSONFixture('ui-disabled.json')
+      spyOn(GERBERA.App, 'disable');
+      event = {}
+      xhr = {
+        responseJSON : uiDisabledResponse
+      }
+
+      GERBERA.Updates.errorCheck(event, xhr)
+
+      expect($('.grb-toast-msg').text()).toEqual('The UI is disabled in the configuration file. See README.')
+      expect(GERBERA.App.disable).toHaveBeenCalled()
     })
   })
 

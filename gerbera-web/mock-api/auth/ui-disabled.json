@@ -1,0 +1,7 @@
+{
+  "success": false,
+  "error": {
+    "code": "900",
+    "text": "The UI is disabled in the configuration file. See README."
+  }
+}
