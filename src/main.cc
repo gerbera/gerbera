@@ -340,15 +340,16 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
         pthread_sigmask(SIG_SETMASK, &mask_set, nullptr);
 
         upnp_e.printStackTrace();
-        log_error("main: upnp error %d\n", upnp_e.getErrorCode());
         if (upnp_e.getErrorCode() == UPNP_E_SOCKET_BIND) {
-            log_error("Could not bind to socket.\n");
+            log_error("LibUPnP could not bind to socket.\n");
             log_info("Please check if another instance of Gerbera or\n");
-            log_info("another application is running on port %d.\n", port);
+            log_info("another application is running on port TCP %d or UDP 1900.\n", port);
         } else if (upnp_e.getErrorCode() == UPNP_E_SOCKET_ERROR) {
-            log_error("Socket error.\n");
+            log_error("LibUPnP Socket error.\n");
             log_info("Please check if your network interface was configured for multicast!\n");
             log_info("Refer to the README file for more information.\n");
+        } else {
+            log_error("LibUPnP error code: %d\n", upnp_e.getErrorCode());
         }
 
         try {
