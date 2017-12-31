@@ -50,6 +50,9 @@ GERBERA.Updates = (function () {
     var response = xhr.responseJSON
     if (response && !response.success) {
       if (response.error) {
+        if(response.error.code === '900') {
+          GERBERA.App.disable()
+        }
         showMessage(response.error.text)
       }
     }
@@ -222,6 +225,7 @@ GERBERA.Updates = (function () {
     addTaskInterval: addTaskInterval,
     isPolling: isPolling,
     isTimer: isTimer,
-    updateTreeByIds: updateTreeByIds
+    updateTreeByIds: updateTreeByIds,
+    errorCheck: errorCheck
   }
 })()

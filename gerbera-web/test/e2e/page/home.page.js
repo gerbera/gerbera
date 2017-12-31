@@ -102,6 +102,7 @@ module.exports = function (driver) {
   }
 
   this.cancelEdit = function () {
+    driver.sleep(200) // slow down with animations
     driver.findElement(By.id('editCancel')).click()
     driver.sleep(1000)
     return driver.wait(until.elementIsNotVisible(driver.findElement(By.id('editModal'))), 5000)

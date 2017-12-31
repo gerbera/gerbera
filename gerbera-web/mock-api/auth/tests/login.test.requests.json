@@ -3,6 +3,7 @@
     "count" : 0,
     "responses" : {
       "1" : "./auth/no-accounts-config.json",
+      "6" : "./auth/ui-disabled.json",
       "default" : "./auth/config.json"
     }
   },
@@ -12,6 +13,7 @@
       "1": "./auth/get_sid.logged_in.json",
       "2": "./auth/get_sid.not.logged_in.json",
       "3": "./auth/get_sid.not.logged_in.json",
+      "6" : "./auth/ui-disabled.json",
       "default" : "./auth/get_sid.not.logged_in.json"
     }
   },

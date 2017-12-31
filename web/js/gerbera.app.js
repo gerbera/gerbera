@@ -56,6 +56,10 @@ GERBERA.App = (function () {
       message = event
     } else if (event && event.responseText) {
       message = event.responseText
+    } else if (event && event.error) {
+      message = event.error.text
+    } else {
+      message = 'The system encountered an error'
     }
     GERBERA.Updates.showMessage(message)
   }
@@ -94,12 +98,16 @@ GERBERA.App = (function () {
   }
 
   var loadConfig = function (response) {
+    var deferred;
     if (response.success) {
       GERBERA.App.serverConfig = response.config
       var pollingInterval = response.config['poll-interval']
       GERBERA.App.serverConfig['poll-interval'] = parseInt(pollingInterval) * 1000
+      deferred = $.Deferred().resolve().promise()
+    } else {
+      deferred = $.Deferred().reject(response).promise()
     }
-    return $.Deferred().resolve().promise()
+    return deferred
   }
 
   var displayLogin = function () {
@@ -129,6 +137,15 @@ GERBERA.App = (function () {
     window.location = path
   }
 
+  var disable = function () {
+    GERBERA.Menu.disable()
+    GERBERA.Menu.hideLogin()
+    GERBERA.Menu.hideMenu()
+    GERBERA.Tree.destroy()
+    GERBERA.Trail.destroy()
+    GERBERA.Items.destroy()
+  }
+
   return {
     getType: getType,
     setType: setType,
@@ -136,6 +153,7 @@ GERBERA.App = (function () {
     clientConfig: clientConfig,
     error: error,
     initialize: initialize,
-    reload: reload
+    reload: reload,
+    disable: disable
   }
 })()

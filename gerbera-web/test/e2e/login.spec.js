@@ -80,4 +80,26 @@ test.describe('The login action', function () {
       })
     })
   })
+
+  test.it('hides menu, hides login and shows message when UI is disabled', function () {
+    loginPage.getToastMessage().then(function (message) {
+      expect(message).to.equal('The UI is disabled in the configuration file. See README.')
+    })
+    loginPage.waitForToastClose().then(function (displayed) {
+      expect(displayed).to.be.false
+    })
+    loginPage.menuList().then(function (menuList) {
+      menuList.getAttribute('style').then(function (value) {
+        expect(value).to.equal('display: none;')
+      })
+    })
+    loginPage.loginFields().then(function (fields) {
+      for (var i = 0; i < fields.length; i++) {
+        var field = fields[i]
+        field.getAttribute('style').then(function (value) {
+          expect(value).to.equal('display: none;')
+        })
+      }
+    })
+  })
 })

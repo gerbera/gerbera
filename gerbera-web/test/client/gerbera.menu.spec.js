@@ -83,4 +83,40 @@ describe('Gerbera Menu', function () {
       })
     })
   })
+
+  describe('disable()', function () {
+
+    beforeEach(function () {
+      loadFixtures('index.html')
+      spyOn(GERBERA.Updates, 'getUpdates')
+    })
+
+    it('disables all menu items except the report issue link', function () {
+      GERBERA.Menu.disable()
+
+      var menuItems = ['nav-home', 'nav-db', 'nav-fs']
+
+      $.each(menuItems, function (index, value) {
+        var link = $('#'+ value)
+        expect(link.hasClass('disabled')).toBeTruthy()
+      })
+      expect( $('#report-issue').hasClass('disabled')).toBeFalsy()
+    })
+  })
+
+  describe('hideLogin()', function () {
+
+    beforeEach(function () {
+      loadFixtures('index.html')
+      spyOn(GERBERA.Updates, 'getUpdates')
+    })
+
+    it('hides login fields when called', function () {
+      GERBERA.Menu.hideLogin()
+
+      expect($('.login-field').is(':visible')).toBeFalsy()
+      expect($('#login-submit').is(':visible')).toBeFalsy()
+      expect($('#logout').is(':visible')).toBeFalsy()
+    })
+  })
 })
