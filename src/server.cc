@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     server.cc - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -293,7 +293,7 @@ int Server::upnp_callback(Upnp_EventType eventtype, const void* event)
 
     case UPNP_CONTROL_ACTION_REQUEST:
         // a CP is invoking an action
-        //log_info("UPNP_CONTROL_ACTION_REQUEST\n");
+        log_info("UPNP_CONTROL_ACTION_REQUEST\n");
         try {
             // https://github.com/mrjimenez/pupnp/blob/master/upnp/sample/common/tv_device.c
 
@@ -312,7 +312,7 @@ int Server::upnp_callback(Upnp_EventType eventtype, const void* event)
 
     case UPNP_EVENT_SUBSCRIPTION_REQUEST:
         // a cp wants a subscription
-        //log_info("UPNP_EVENT_SUBSCRIPTION_REQUEST\n");
+        log_info("UPNP_EVENT_SUBSCRIPTION_REQUEST\n");
         try {
             Ref<SubscriptionRequest> request(new SubscriptionRequest((UpnpSubscriptionRequest*)event));
             upnp_subscriptions(request);

@@ -33,6 +33,10 @@
 #include "config_manager.h"
 #include "server.h"
 #include "storage.h"
+#include "search_handler.h"
+#include <string>
+#include <memory>
+#include <vector>
 
 using namespace zmm;
 using namespace mxml;
@@ -144,13 +148,73 @@ void ContentDirectoryService::upnp_action_Browse(Ref<ActionRequest> request)
     log_debug("end\n");
 }
 
+void ContentDirectoryService::upnp_action_Search(Ref<ActionRequest> request) {
+    log_debug("start\n");
+
+    Ref<Element> req = request->getRequest();
+    std::string containerID(req->getChildText(_("ContainerID")).c_str());
+    std::string searchCriteria(req->getChildText(_("SearchCriteria")).c_str());
+    std::string startingIndex(req->getChildText(_("StartingIndex")).c_str());
+    std::string requestedCount(req->getChildText(_("RequestedCount")).c_str());
+    log_debug("Search received parameters: ContainerID [%s] SearchCriteria [%s] StartingIndex [%s] RequestedCount [%s]\n",
+              containerID.c_str(), searchCriteria.c_str(), startingIndex.c_str(), requestedCount.c_str());
+
+   Ref<Element> didl_lite(new Element(_("DIDL-Lite")));
+    didl_lite->setAttribute(_(XML_NAMESPACE_ATTR),
+        _(XML_DIDL_LITE_NAMESPACE));
+    didl_lite->setAttribute(_(XML_DC_NAMESPACE_ATTR),
+        _(XML_DC_NAMESPACE));
+    didl_lite->setAttribute(_(XML_UPNP_NAMESPACE_ATTR),
+        _(XML_UPNP_NAMESPACE));
+
+    Ref<ConfigManager> cfg = ConfigManager::getInstance();
+
+#ifdef EXTEND_PROTOCOLINFO
+    if (cfg->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK)) {
+        didl_lite->setAttribute(_(XML_SEC_NAMESPACE_ATTR),
+            _(XML_SEC_NAMESPACE));
+    }
+#endif
+
+    std::unique_ptr<SearchParam> searchParam = std::make_unique<SearchParam>(containerID, searchCriteria,
+        std::stoi(startingIndex.c_str(), nullptr), std::stoi(requestedCount.c_str(), nullptr));
+    std::unique_ptr<SearchHandler> searchHandler = std::make_unique<SearchHandler>();
+    std::unique_ptr<std::vector<CdsObject>> results = searchHandler->executeSearch(*searchParam);
+
+    for (const auto& cdsObject : *results) {
+        if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && cdsObject.getFlag(OBJECT_FLAG_PLAYED)) {
+            String title = cdsObject.getTitle();
+            if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND))
+                title = cfg->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING) + title;
+            else
+                title = title + cfg->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING);
+
+            cdsObject.setTitle(title);
+        }
+
+        Ref<Element> didl_object = UpnpXML_DIDLRenderObject(cdsObject, false, stringLimit);
+        didl_lite->appendElementChild(didl_object);
+    }
+
+    Ref<Element> response;
+    response = UpnpXML_CreateResponse(request->getActionName(), _(DESC_CDS_SERVICE_TYPE));
+
+    response->appendTextChild(_("Result"), didl_lite->print());
+    response->appendTextChild(_("NumberReturned"), String::from(0));
+    response->appendTextChild(_("TotalMatches"), String::from(0));
+    response->appendTextChild(_("UpdateID"), String::from(systemUpdateID));
+
+    request->setResponse(response);
+    log_debug("end\n");
+}
+
 void ContentDirectoryService::upnp_action_GetSearchCapabilities(Ref<ActionRequest> request)
 {
     log_debug("start\n");
 
     Ref<Element> response;
     response = UpnpXML_CreateResponse(request->getActionName(), _(DESC_CDS_SERVICE_TYPE));
-    response->appendTextChild(_("SearchCaps"), _(""));
+    response->appendTextChild(_("SearchCaps"), _("dc:title,upnp:class,dc:creator"));
 
     request->setResponse(response);
 
@@ -195,9 +259,11 @@ void ContentDirectoryService::process_action_request(Ref<ActionRequest> request)
         upnp_action_GetSortCapabilities(request);
     } else if (request->getActionName() == "GetSystemUpdateID") {
         upnp_action_GetSystemUpdateID(request);
+    } else if (request->getActionName() == "Search") {
+        upnp_action_Search(request);
     } else {
         // invalid or unsupported action
-        log_debug("unrecognized action %s\n",
+        log_info("unrecognized action %s\n",
             request->getActionName().c_str());
         request->setErrorCode(UPNP_E_INVALID_ACTION);
         //    throw UpnpException(UPNP_E_INVALID_ACTION, _("unrecognized action"));
