@@ -102,4 +102,19 @@ test.describe('The login action', function () {
       }
     })
   })
+
+  test.it('when session expires reloads the page and lets user login again.', function () {
+    loginPage.loginFields().then(function (fields) {
+      for (var i = 0; i < fields.length; i++) {
+        var field = fields[i]
+        field.getAttribute('style').then(function (value) {
+          expect(value).to.equal('')
+        })
+      }
+    })
+
+    loginPage.getCookie('SID').then(function (sid) {
+      expect(sid).to.be.null
+    })
+  })
 })

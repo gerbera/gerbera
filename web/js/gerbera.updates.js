@@ -50,10 +50,12 @@ GERBERA.Updates = (function () {
     var response = xhr.responseJSON
     if (response && !response.success) {
       if (response.error) {
+        showMessage(response.error.text)
         if(response.error.code === '900') {
           GERBERA.App.disable()
+        } else if(response.error.code === '400') {
+          GERBERA.Auth.handleLogout()
         }
-        showMessage(response.error.text)
       }
     }
   }
