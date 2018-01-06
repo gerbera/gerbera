@@ -40,7 +40,6 @@
 
 #define ATRAILERS_AUXDATA_POST_DATE       ATRAILERS_SERVICE_ID "0"
 
-#include "zmmf/zmmf.h"
 #include "mxml/mxml.h"
 #include "cds_objects.h"
 

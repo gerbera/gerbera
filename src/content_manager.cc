@@ -211,8 +211,8 @@ ContentManager::ContentManager()
             if (cm->getBoolOption(CFG_ONLINE_CONTENT_SOPCAST_UPDATE_AT_START))
                 i = CFG_DEFAULT_UPDATE_AT_START;
 
-            Ref<Parameter> sc_param(new Parameter(Parameter::IDOnlineContent, OS_SopCast));
-            sc->setTimerParameter(RefCast(sc_param, Object));
+            Ref<Timer::Parameter> sc_param(new Timer::Parameter(Timer::Parameter::IDOnlineContent, OS_SopCast));
+            sc->setTimerParameter(sc_param);
             online_services->registerService(sc);
             if (i > 0) {
                 Timer::getInstance()->addTimerSubscriber(this, i, sc->getTimerParameter(), true);
@@ -236,8 +236,8 @@ ContentManager::ContentManager()
             if (cm->getBoolOption(CFG_ONLINE_CONTENT_ATRAILERS_UPDATE_AT_START))
                 i = CFG_DEFAULT_UPDATE_AT_START;
 
-            Ref<Parameter> at_param(new Parameter(Parameter::IDOnlineContent, OS_ATrailers));
-            at->setTimerParameter(RefCast(at_param, Object));
+            Ref<Timer::Parameter> at_param(new Timer::Parameter(Timer::Parameter::IDOnlineContent, OS_ATrailers));
+            at->setTimerParameter(at_param);
             online_services->registerService(at);
             if (i > 0) {
                 Timer::getInstance()->addTimerSubscriber(this, i, at->getTimerParameter(), true);

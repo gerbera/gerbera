@@ -443,6 +443,8 @@ if(WITH_CURL)
 
         add_definitions(-DHAVE_CURL)
         add_definitions(-DONLINE_SERVICES)
+        add_definitions(-DATRAILERS)
+        add_definitions(-DSOPCAST)
     else()
         message(FATAL_ERROR "cURL not found")
     endif()
