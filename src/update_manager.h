@@ -35,6 +35,7 @@
 #include <memory>
 #include <unordered_set>
 #include <condition_variable>
+#include <vector>
 
 #include "common.h"
 #include "singleton.h"
@@ -51,7 +52,7 @@ public:
     zmm::String getName() override { return _("Update Manager"); }
 
     void containerChanged(int objectID, int flushPolicy = FLUSH_SPEC);
-    void containersChanged(zmm::Ref<zmm::IntArray> objectIDs, int flushPolicy = FLUSH_SPEC);
+    void containersChanged(const std::vector<int>& objectIDs, int flushPolicy = FLUSH_SPEC);
 
 protected:
 

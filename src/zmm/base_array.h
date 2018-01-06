@@ -48,41 +48,41 @@ public:
     {
         _init(DEFAULT_ARRAY_CAPACITY);
     }
-    
+
     BaseArray(int capacity) : Object()
     {
         _init(capacity);
     }
-    
+
     void _init(int capacity)
     {
         this->capacity = capacity;
         siz = 0;
         arr = (T *)MALLOC(capacity * sizeof(T));
     }
-    
+
     ~BaseArray()
     {
         if (arr)
             FREE(arr);
     }
-    
+
     void append(T el)
     {
         resize(siz+1);
         arr[siz++] = el;
     }
-    
+
     void set(T el, int index)
     {
         arr[index] = el;
     }
-    
+
     T get(int index)
     {
         return arr[index];
     }
-    
+
     void remove(int index, int count=1)
     {
         if (index < 0 || index >= siz) // index beyond size
@@ -103,14 +103,14 @@ public:
         }
         siz -= count;
     }
-    
+
     void removeUnordered(int index)
     {
         if (index < 0 || index >= siz) // index beyond size
             return;
         arr[index] = arr[--siz];
     }
-    
+
     void insert(int index, T el)
     {
         resize(siz + 1);
@@ -122,12 +122,12 @@ public:
         arr[index] = el;
         siz++;
     }
-    
+
     int size()
     {
         return siz;
     }
-    
+
     void resize(int requiredSize)
     {
         if(requiredSize > capacity)
@@ -139,20 +139,20 @@ public:
             arr = (T *)REALLOC(arr, capacity * sizeof(T));
         }
     }
-    
-    
+
+
     /*
     void optimize()
     {
-        
+
     }
-    
+
     Object **getObjectArray()
     {
         return base.arr;
     }
     */
-    
+
 protected:
     T* arr;
     int siz;

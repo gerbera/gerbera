@@ -213,7 +213,7 @@ void Server::upnp_init()
         throw _UpnpException(ret, _("upnp_init: UpnpRegisterRootDevice failed"));
     }
 
-    log_debug("Sending UPnP Alive advertisement\n");
+    log_debug("Sending UPnP Alive advertisements\n");
     ret = UpnpSendAdvertisement(device_handle, alive_advertisement);
     if (ret != UPNP_E_SUCCESS) {
         throw _UpnpException(ret, _("upnp_init: UpnpSendAdvertisement failed"));
