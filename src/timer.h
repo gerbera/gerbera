@@ -50,9 +50,6 @@ public:
             IDAutoscan,
 #ifdef ONLINE_SERVICES
             IDOnlineContent,
-#ifdef YOUTUBE
-            IDURLCache
-#endif
 #endif
         };
 

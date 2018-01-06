@@ -40,11 +40,6 @@
 
 #include "online_service.h"
 
-#ifdef YOUTUBE
-    #include "youtube_content_handler.h"
-    #include "youtube_service.h"
-#endif
-
 #ifdef SOPCAST
     #include "sopcast_content_handler.h"
 #endif
@@ -313,71 +308,6 @@ void FallbackLayout::addAudio(zmm::Ref<CdsObject> obj)
 
 
 }
-#ifdef YOUTUBE
-void FallbackLayout::addYouTube(zmm::Ref<CdsObject> obj)
-{
-    #define YT_VPATH "/Online Services/YouTube"
-    String chain;
-    String temp;
-    int id;
-    bool ref_set = false;
-
-    if (obj->getID() != INVALID_OBJECT_ID)
-    {
-        obj->setRefID(obj->getID());
-        ref_set = true;
-    }
-
-    temp = obj->getAuxData(_(YOUTUBE_AUXDATA_AVG_RATING));
-    if (string_ok(temp))
-    {
-        auto rating = (int)temp.toDouble();
-        if (rating > 3)
-        {
-            chain = _(YT_VPATH "/Rating/") + esc(String::from(rating));
-            id = ContentManager::getInstance()->addContainerChain(chain);
-            add(obj, id, ref_set);
-            if (!ref_set)
-            {
-                obj->setRefID(obj->getID());
-                ref_set = true;
-            }
-        }
-    }
-
-    temp = obj->getAuxData(_(YOUTUBE_AUXDATA_REQUEST));
-    if (string_ok(temp))
-    {
-        auto req = (yt_requests_t)temp.toInt();
-        temp = YouTubeService::getRequestName(req);
-
-        String subName = obj->getAuxData(_(YOUTUBE_AUXDATA_SUBREQUEST_NAME));
-        String feedName = obj->getAuxData(_(YOUTUBE_AUXDATA_FEED));
-        String region = obj->getAuxData(_(YOUTUBE_AUXDATA_REGION));
-
-        chain = _(YT_VPATH) + '/' + esc(temp);
-
-        if (string_ok(subName))
-            chain = chain + '/' + esc(subName);
-
-        if (string_ok(feedName))
-            chain = chain + '/' + esc(feedName);
-
-        if (string_ok(region))
-        {   auto reg = (yt_regions_t)region.toInt();
-            if (reg != YT_region_none)
-            {
-                region = YouTubeService::getRegionName(reg);
-                if (string_ok(region))
-                    chain = chain + '/' + esc(region);
-            }
-        }
-
-        id = ContentManager::getInstance()->addContainerChain(chain);
-        add(obj, id, ref_set);
-    }
-}
-#endif
 
 #ifdef SOPCAST
 void FallbackLayout::addSopCast(zmm::Ref<CdsObject> obj)
@@ -508,11 +438,6 @@ void FallbackLayout::processCdsObject(zmm::Ref<CdsObject> obj, String rootpath)
 
         switch (service)
         {
-#ifdef YOUTUBE
-            case OS_YouTube:
-                addYouTube(clone);
-                break;
-#endif
 #ifdef SOPCAST
             case OS_SopCast:
                 addSopCast(clone);

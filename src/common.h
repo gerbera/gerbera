@@ -234,29 +234,6 @@
 //#define DEFAULT_EXTEND_PROTOCOLINFO_CL_HACK     NO
 #define DEFAULT_EXTEND_PROTOCOLINFO_SM_HACK     NO
 #define DEFAULT_HIDE_PC_DIRECTORY       NO
-#ifdef YOUTUBE
-    #define YOUTUBE_PAGESIZE            106496
-    #define DEFAULT_YOUTUBE_ENABLED     NO
-    #define DEFAULT_YOUTUBE_UPDATE_AT_START NO
-    #define DEFAULT_YOUTUBE_REFRESH     28800
-    #define DEFAULT_YOUTUBE_PURGE_AFTER 604800
-    #define DEFAULT_YOUTUBE_PLAYLIST_START_INDEX 1
-    #define DEFAULT_YOUTUBE_PLAYLIST_AMOUNT     "all"
-
-    #define DEFAULT_YOUTUBE_CNT_CATEGORY        "music"
-    #define DEFAULT_YOUTUBE_CNT_TAG             "Six Feet Under"
-    #define DEFAULT_YOUTUBE_CNT_START_PAGE      1
-    #define DEFAULT_YOUTUBE_CNT_AMOUNT          10
-    
-    #define DEFAULT_YOUTUBE_TAG                 "Военное Дело"
-    #define DEFAULT_YOUTUBE_TAG_START_PAGE      1
-    #define DEFAULT_YOUTUBE_TAG_AMOUNT          "all"
-    #define DEFAULT_YOUTUBE_RACY_CONTENT        "exclude" 
-    #define DEFAULT_YOUTUBE_FORMAT              "mp4"
-    #define DEFAULT_YOUTUBE_HD                  "no"
-
-    #define UI_ACTION_REFRESH_YOUTUBE           "refresh_yt"
-#endif
 #ifdef SOPCAST
     #define DEFAULT_SOPCAST_ENABLED     NO
     #define DEFAULT_SOPCAST_UPDATE_AT_START NO

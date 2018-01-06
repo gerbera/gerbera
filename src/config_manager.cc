@@ -48,10 +48,6 @@
 #include "mt_inotify.h"
 #endif
 
-#ifdef YOUTUBE
-#include "youtube_service.h"
-#endif
-
 #if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE)
 #include <clocale>
 #include <langinfo.h>
@@ -315,46 +311,6 @@ Ref<Element> ConfigManager::renderExtendedRuntimeSection()
 Ref<Element> ConfigManager::renderOnlineSection()
 {
     Ref<Element> onlinecontent(new Element(_("online-content")));
-#ifdef YOUTUBE
-    //    Ref<Comment> ytinfo(new Comment(_(" Make sure to setup a transcoding profile for flv "), true));
-    //    onlinecontent->appendChild(RefCast(ytinfo, Node));
-
-    Ref<Element> yt(new Element(_("YouTube")));
-    yt->setAttribute(_("enabled"), _(DEFAULT_YOUTUBE_ENABLED));
-    // 8 hours refresh cycle
-    yt->setAttribute(_("refresh"), String::from(DEFAULT_YOUTUBE_REFRESH));
-    yt->setAttribute(_("update-at-start"), _(DEFAULT_YOUTUBE_UPDATE_AT_START));
-    // items that were not updated for 4 days will be purged
-    yt->setAttribute(_("purge-after"),
-        String::from(DEFAULT_YOUTUBE_PURGE_AFTER));
-    yt->setAttribute(_("racy-content"), _(DEFAULT_YOUTUBE_RACY_CONTENT));
-    yt->setAttribute(_("format"), _(DEFAULT_YOUTUBE_FORMAT));
-    yt->setAttribute(_("hd"), _(DEFAULT_YOUTUBE_HD));
-
-    Ref<Element> favs(new Element(_("favorites")));
-    favs->setAttribute(_("user"), _("gerbera"));
-    yt->appendElementChild(favs);
-
-    Ref<Element> most_viewed(new Element(_("standardfeed")));
-    most_viewed->setAttribute(_("feed"), _("most_viewed"));
-    most_viewed->setAttribute(_("time-range"), _("today"));
-    yt->appendElementChild(most_viewed);
-
-    Ref<Element> playlist(new Element(_("playlists")));
-    playlist->setAttribute(_("user"), _("gerbera"));
-    yt->appendElementChild(playlist);
-
-    Ref<Element> ytuser(new Element(_("uploads")));
-    ytuser->setAttribute(_("user"), _("gerbera"));
-    yt->appendElementChild(ytuser);
-
-    Ref<Element> ytfeatured(new Element(_("standardfeed")));
-    ytfeatured->setAttribute(_("feed"), _("recently_featured"));
-    ytfeatured->setAttribute(_("time-range"), _("today"));
-    yt->appendElementChild(ytfeatured);
-
-    onlinecontent->appendElementChild(yt);
-#endif
 
 #ifdef ATRAILERS
     Ref<Element> at(new Element(_("AppleTrailers")));
@@ -1892,106 +1848,6 @@ void ConfigManager::validate(String serverhome)
     }
 #endif
 
-#ifdef YOUTUBE
-    temp = getOption(_("/import/online-content/YouTube/attribute::enabled"),
-        _(DEFAULT_YOUTUBE_ENABLED));
-
-    if (!validateYesNo(temp))
-        throw _Exception(_("Error in config file: "
-                           "invalid \"enabled\" attribute value in "
-                           "<YouTube> tag"));
-
-    NEW_BOOL_OPTION(temp == "yes" ? true : false);
-    SET_BOOL_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_ENABLED);
-
-    /// \todo well, tough scenario: YT service is disabled, but the database
-    /// is populated with YT items from some time before. We still need to
-    /// support playing them, but that requires a valid YT section and thus
-    /// forces us to check the options eventhough the service is disabled.
-    // check other options only if the service is enabled
-    //    if (temp == "yes")
-    {
-        temp = getOption(_("/import/online-content/YouTube/attribute::racy-content"),
-            _(DEFAULT_YOUTUBE_RACY_CONTENT));
-
-        if ((temp != "include") && (temp != "exclude")) {
-            throw _Exception(_("Error in config file: "
-                               "invalid racy-content value in <YouTube> tag"));
-        }
-
-        NEW_OPTION(temp);
-        SET_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_RACY);
-
-        temp = getOption(_("/import/online-content/YouTube/attribute::format"),
-            _(DEFAULT_YOUTUBE_FORMAT));
-
-        if ((temp != "mp4") && (temp != "flv")) {
-            throw _Exception(_("Error in config file: "
-                               "invalid format value in <YouTube> tag"));
-        }
-        bool mp4 = (temp == "mp4" ? true : false);
-        NEW_BOOL_OPTION(mp4);
-        SET_BOOL_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_FORMAT_MP4);
-
-        temp = getOption(_("/import/online-content/YouTube/attribute::hd"),
-            _(DEFAULT_YOUTUBE_HD));
-
-        if (!validateYesNo(temp))
-            throw _Exception(_("Error in config file: "
-                               "invalid hd value in <YouTube> tag"));
-
-        if ((temp == "yes") && (!mp4))
-            log_warning("HD preference for YouTube content is only available for mp4 format selection!\n");
-
-        NEW_BOOL_OPTION(temp == "yes" ? true : false);
-        SET_BOOL_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_PREFER_HD);
-
-        temp_int = getIntOption(_("/import/online-content/YouTube/attribute::refresh"), DEFAULT_YOUTUBE_REFRESH);
-        NEW_INT_OPTION(temp_int);
-        SET_INT_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_REFRESH);
-
-        temp_int = getIntOption(_("/import/online-content/YouTube/attribute::purge-after"), DEFAULT_YOUTUBE_PURGE_AFTER);
-        if (getIntOption(_("/import/online-content/YouTube/attribute::refresh")) >= temp_int) {
-            if (temp_int != 0)
-                throw _Exception(_("Error in config file: YouTube purge-after value must be greater than refresh interval"));
-        }
-
-        NEW_INT_OPTION(temp_int);
-        SET_INT_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_PURGE_AFTER);
-
-        temp = getOption(_("/import/online-content/YouTube/attribute::update-at-start"),
-            _(DEFAULT_YOUTUBE_UPDATE_AT_START));
-
-        if (!validateYesNo(temp))
-            throw _Exception(_("Error in config file: "
-                               "invalid \"update-at-start\" attribute value in "
-                               "<YouTube> tag"));
-
-        NEW_BOOL_OPTION(temp == "yes" ? true : false);
-        SET_BOOL_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_UPDATE_AT_START);
-
-        el = getElement(_("/import/online-content/YouTube"));
-        if (el == nullptr) {
-            getOption(_("/import/online-content/YouTube"),
-                _(""));
-        }
-        Ref<Array<Object> > yt_opts = createServiceTaskList(OS_YouTube, el);
-        if (getBoolOption(CFG_ONLINE_CONTENT_YOUTUBE_ENABLED) && (yt_opts->size() == 0))
-            throw _Exception(_("Error in config file: "
-                               "YouTube service enabled but no imports "
-                               "specified."));
-
-        NEW_OBJARR_OPTION(yt_opts);
-        SET_OBJARR_OPTION(CFG_ONLINE_CONTENT_YOUTUBE_TASK_LIST);
-
-        log_warning("You enabled the YouTube feature, which allows you\n"
-                    "                             to watch YouTube videos on your UPnP device!\n"
-                    "                             Please check http://www.youtube.com/t/terms\n"
-                    "                             By using this feature you may be violating YouTube\n"
-                    "                             service terms and conditions!\n\n");
-    }
-#endif
-
 #ifdef SOPCAST
     temp = getOption(_("/import/online-content/SopCast/attribute::enabled"),
         _(DEFAULT_SOPCAST_ENABLED));
@@ -2883,15 +2739,6 @@ Ref<Array<Object> > ConfigManager::createServiceTaskList(service_type_t service,
 
     if (element == nullptr)
         return arr;
-#ifdef YOUTUBE
-    if (service == OS_YouTube) {
-        Ref<YouTubeService> yt(new YouTubeService());
-        for (int i = 0; i < element->elementChildCount(); i++) {
-            Ref<Object> option = yt->defineServiceTask(element->getElementChild(i), RefCast(options->get(CFG_ONLINE_CONTENT_YOUTUBE_RACY), Object));
-            arr->append(option);
-        }
-    }
-#endif
     return arr;
 }
 #endif

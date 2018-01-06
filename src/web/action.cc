@@ -50,12 +50,5 @@ void web::action::process()
             ;
     log_debug("action: %s\n", action.c_str());
 
-#ifdef YOUTUBE
-    if (action == UI_ACTION_REFRESH_YOUTUBE)
-    {
-        ContentManager::getInstance()->fetchOnlineContent(OS_YouTube, true, true, true);
-    }
-#endif
-
     log_debug("action: returning\n");
 }

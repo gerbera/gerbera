@@ -52,9 +52,6 @@ protected:
     void addVideo(zmm::Ref<CdsObject> obj, zmm::String rootpath);
     void addImage(zmm::Ref<CdsObject> obj, zmm::String rootpath);
     void addAudio(zmm::Ref<CdsObject> obj);
-#ifdef YOUTUBE
-    void addYouTube(zmm::Ref<CdsObject> obj);
-#endif
 #ifdef SOPCAST
     void addSopCast(zmm::Ref<CdsObject> obj);
 #endif

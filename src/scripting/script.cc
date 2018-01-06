@@ -40,11 +40,6 @@
     #include "online_service.h"
 #endif
 
-#ifdef YOUTUBE
-    #include "youtube_service.h"
-    #include "youtube_content_handler.h"
-#endif
-
 #ifdef ATRAILERS
     #include "atrailers_content_handler.h"
 #endif
@@ -156,25 +151,7 @@ Script::Script(Ref<Runtime> runtime, std::string name) : Object(), name(name)
     duk_push_int(ctx, OBJECT_TYPE_ITEM_INTERNAL_URL); duk_put_global_string(ctx, "OBJECT_TYPE_ITEM_INTERNAL_URL");
 #ifdef ONLINE_SERVICES 
     duk_push_int(ctx, (int)OS_None); duk_put_global_string(ctx, "ONLINE_SERVICE_NONE");
-#ifdef YOUTUBE
-    duk_push_int(ctx, (int)OS_YouTube); duk_put_global_string(ctx, "ONLINE_SERVICE_YOUTUBE");
-
-    duk_push_string(ctx, YOUTUBE_AUXDATA_KEYWORDS); duk_put_global_string(ctx, "YOUTUBE_AUXDATA_KEYWORDS");
-    duk_push_string(ctx, YOUTUBE_AUXDATA_AVG_RATING); duk_put_global_string(ctx, "YOUTUBE_AUXDATA_AVG_RATING");
-    duk_push_string(ctx, YOUTUBE_AUXDATA_AUTHOR); duk_put_global_string(ctx, "YOUTUBE_AUXDATA_AUTHOR");
-    duk_push_string(ctx, YOUTUBE_AUXDATA_FEED); duk_put_global_string(ctx, "YOUTUBE_AUXDATA_FEED");
-    duk_push_string(ctx, YOUTUBE_AUXDATA_VIEW_COUNT); duk_put_global_string(ctx, "YOUTUBE_AUXDATA_VIEW_COUNT");
-    duk_push_string(ctx, YOUTUBE_AUXDATA_FAVORITE_COUNT); duk_put_global_string(ctx, "YOUTUBE_AUXDATA_FAVORITE_COUNT");
-    duk_push_string(ctx, YOUTUBE_AUXDATA_RATING_COUNT); duk_put_global_string(ctx, "YOUTUBE_AUXDATA_RATING_COUNT");
-    duk_push_string(ctx, YOUTUBE_AUXDATA_CATEGORY); duk_put_global_string(ctx, "YOUTUBE_AUXDATA_CATEGORY");
-    duk_push_string(ctx, YOUTUBE_AUXDATA_SUBREQUEST_NAME); duk_put_global_string(ctx, "YOUTUBE_AUXDATA_SUBREQUEST_NAME");
-    duk_push_string(ctx, YOUTUBE_AUXDATA_REQUEST); duk_put_global_string(ctx, "YOUTUBE_AUXDATA_REQUEST");
-    duk_push_string(ctx, YOUTUBE_AUXDATA_REGION); duk_put_global_string(ctx, "YOUTUBE_AUXDATA_REGION");
-
-    duk_push_int(ctx, (int)YT_request_user_uploads); duk_put_global_string(ctx, "YOUTUBE_REQUEST_USER_UPLOADS");
-#else
     duk_push_int(ctx, -1); duk_put_global_string(ctx, "ONLINE_SERVICE_YOUTUBE");
-#endif//YOUTUBE
 
 #ifdef ATRAILERS
     duk_push_int(ctx, (int)OS_ATrailers); duk_put_global_string(ctx, "ONLINE_SERVICE_APPLE_TRAILERS");
@@ -635,76 +612,6 @@ void Script::cdsObject2dukObject(Ref<CdsObject> obj)
 
         Ref<Dictionary> aux = obj->getAuxData();
 
-#ifdef YOUTUBE
-        // put in meaningful names for YouTube specific enum values
-        String tmp = obj->getAuxData(_(YOUTUBE_AUXDATA_AVG_RATING));
-        if (string_ok(tmp))
-            aux->put(_(YOUTUBE_AUXDATA_AVG_RATING), tmp);
-
-        tmp = obj->getAuxData(_(YOUTUBE_AUXDATA_KEYWORDS));
-        if (string_ok(tmp))
-            aux->put(_(YOUTUBE_AUXDATA_KEYWORDS), tmp);
-
-        tmp = obj->getAuxData(_(YOUTUBE_AUXDATA_AUTHOR));
-        if (string_ok(tmp))
-            aux->put(_(YOUTUBE_AUXDATA_AUTHOR), tmp);
-
-        tmp = obj->getAuxData(_(YOUTUBE_AUXDATA_FAVORITE_COUNT));
-        if (string_ok(tmp))
-            aux->put(_(YOUTUBE_AUXDATA_FAVORITE_COUNT), tmp);
-
-        tmp = obj->getAuxData(_(YOUTUBE_AUXDATA_VIEW_COUNT));
-        if (string_ok(tmp))
-            aux->put(_(YOUTUBE_AUXDATA_VIEW_COUNT), tmp);
-
-        tmp = obj->getAuxData(_(YOUTUBE_AUXDATA_RATING_COUNT));
-        if (string_ok(tmp))
-            aux->put(_(YOUTUBE_AUXDATA_RATING_COUNT), tmp);
-
-        tmp = obj->getAuxData(_(YOUTUBE_AUXDATA_FEED));
-        if (string_ok(tmp))
-            aux->put(_(YOUTUBE_AUXDATA_FEED), tmp);
-
-        tmp = obj->getAuxData(_(YOUTUBE_AUXDATA_SUBREQUEST_NAME));
-        if (string_ok(tmp))
-            aux->put(_(YOUTUBE_AUXDATA_SUBREQUEST_NAME), tmp);
-
-        tmp = obj->getAuxData(_(YOUTUBE_AUXDATA_CATEGORY));
-        if (string_ok(tmp))
-            aux->put(_(YOUTUBE_AUXDATA_CATEGORY), tmp);
-
-        tmp = obj->getAuxData(_(YOUTUBE_AUXDATA_REQUEST));
-        if (string_ok(tmp))
-        {
-            auto req = (yt_requests_t)tmp.toInt();
-
-            // since subrequests do not actually produce any items they
-            // should not be visible to js
-            if (req == YT_subrequest_playlists)
-                req = YT_request_user_playlists;
-            else if (req == YT_subrequest_subscriptions)
-                req = YT_request_user_subscriptions;
-
-            duk_swap_top(ctx, -2);
-            setIntProperty(_("yt_request"), (int)req);
-            duk_swap_top(ctx, -2);
-            tmp = YouTubeService::getRequestName(req);
-            if (string_ok(tmp))
-                aux->put(_(YOUTUBE_AUXDATA_REQUEST), tmp);
-        }
-
-        tmp = obj->getAuxData(_(YOUTUBE_AUXDATA_REGION));
-        if (string_ok(tmp))
-        {
-            auto reg = (yt_regions_t)tmp.toInt();
-            if (reg != YT_region_none)
-            {
-                tmp = YouTubeService::getRegionName(reg);
-                if (string_ok(tmp))
-                    aux->put(_(YOUTUBE_AUXDATA_REGION), tmp);
-            }
-        }
-#endif // YouTube
 #ifdef HAVE_ATRAILERS
         tmp = obj->getAuxData(_(ATRAILERS_AUXDATA_POST_DATE));
         if (string_ok(tmp))

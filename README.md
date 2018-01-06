@@ -19,7 +19,6 @@ _Gerbera is based on [MediaTomb 12.1](http://mediatomb.cc) which is dead upstrea
 * Automatic directory rescans (timed, inotify)
 * Web UI with a tree view of the database and the file system, allowing to add/remove/edit/browse your media
 * Highly flexible media format transcoding via plugins / scripts
-* Allows to watch YouTube(tm) videos on your UPnP player device [Broken]
 * Supports last fm scrobbing using lastfmlib 
 * On the fly video thumbnail generation with libffmpegthumbnailer
 * Support for external URLs (create links to internet content and serve them via UPnP to your renderer)
@@ -48,6 +47,7 @@ _Gerbera is based on [MediaTomb 12.1](http://mediatomb.cc) which is dead upstrea
 - Replaced SpiderMonkey (mozjs) dependency with embedded [duktape] engine.
 - WIP port to "Modern C++" / tidying.
 - Lots of other stuff.
+- Dropped broken youtube support.
 
 ## Installing
 

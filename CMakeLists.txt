@@ -11,7 +11,7 @@ include(CheckFunctionExists)
 set(CMAKE_VERBOSE_MAKEFILE off CACHE BOOL "Show verbose build commands")
 set(WITH_MAGIC          1 CACHE BOOL "Use libmagic to identify file mime types")
 set(WITH_MYSQL          0 CACHE BOOL "Store media information in MySQL DB")
-set(WITH_CURL           1 CACHE BOOL "CURL required for YouTube and/or SopCast")
+set(WITH_CURL           1 CACHE BOOL "CURL required for online services")
 set(WITH_INOTIFY        1 CACHE BOOL "Enable Inotify file monitoring support")
 set(WITH_JS             1 CACHE BOOL "Enable JavaScript for custom import script")
 set(WITH_TAGLIB         1 CACHE BOOL "Use TagLib to extract audio file metadata")
@@ -243,12 +243,6 @@ set(libgerberaFILES
         src/web/web_update.cc
         src/xpath.cc
         src/xpath.h
-        src/youtube_content_handler.cc
-        src/youtube_content_handler.h
-        src/youtube_service.cc
-        src/youtube_service.h
-        src/youtube_video_url.cc
-        src/youtube_video_url.h
         src/zmm/array.cc
         src/zmm/array.h
         src/zmm/base_array.h
@@ -449,7 +443,6 @@ if(WITH_CURL)
 
         add_definitions(-DHAVE_CURL)
         add_definitions(-DONLINE_SERVICES)
-        add_definitions(-DYOUTUBE)
     else()
         message(FATAL_ERROR "cURL not found")
     endif()
