@@ -35,7 +35,6 @@
 #include "zmm.h"
 #include "exception.h"
 #include "array.h"
-#include "base_array.h"
 #include "stringtokenizer.h"
 #include "base_stack.h"
 #include "object_stack.h"

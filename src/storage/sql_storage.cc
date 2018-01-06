@@ -566,11 +566,12 @@ Ref<CdsObject> SQLStorage::loadObjectByServiceID(String serviceID)
     return nullptr;
 }
 
-Ref<IntArray> SQLStorage::getServiceObjectIDs(char servicePrefix)
+std::unique_ptr<std::vector<int>> SQLStorage::getServiceObjectIDs(char servicePrefix)
 {
     flushInsertBuffer();
 
-    Ref<IntArray> objectIDs(new IntArray());
+    auto objectIDs = std::make_unique<std::vector<int>>();
+
     Ref<StringBuffer> qb(new StringBuffer());
     *qb << "SELECT " << TQ("id")
         << " FROM " << TQ(CDS_OBJECT_TABLE)
@@ -583,7 +584,7 @@ Ref<IntArray> SQLStorage::getServiceObjectIDs(char servicePrefix)
 
     Ref<SQLRow> row;
     while ((row = res->nextRow()) != nullptr) {
-        objectIDs->append(row->col(0).toInt());
+        objectIDs->push_back(row->col(0).toInt());
     }
 
     return objectIDs;
@@ -1605,6 +1606,40 @@ Ref<SQLStorage::ChangedContainersStr> SQLStorage::_recursiveRemove(Ref<StringBuf
     return changedContainers;
 }
 
+void SQLStorage::addCSV(String csv, std::vector<int>& target)
+{
+    const char sep = ',';
+    const char *data = csv.c_str();
+    const char *dataEnd = data + csv.length();
+    while (data < dataEnd)
+    {
+        char *endptr;
+        int val = (int)strtol(data, &endptr, 10);
+        if (endptr == data)
+            throw _Exception(_("illegal csv given to IntArray"));
+        target.push_back(val);
+        if (endptr >= dataEnd)
+            break;
+        if (*endptr == sep)
+            data = endptr + 1;
+        else
+            throw _Exception(_("illegal csv given to IntArray"));
+    }
+}
+
+zmm::String SQLStorage::toCSV(const std::vector<int>& input)
+{
+    const char sep = ',';
+    Ref<StringBuffer> buf(new StringBuffer());
+    for (int i : input) {
+        *buf << sep << i;
+    }
+    if (buf->length() <= 0) {
+        return _("");
+    }
+    return buf->toString(1);
+}
+
 Ref<Storage::ChangedContainers> SQLStorage::_purgeEmptyContainers(Ref<ChangedContainersStr> changedContainersStr)
 {
     log_debug("start upnp: %s; ui: %s\n", changedContainersStr->upnp->c_str(), changedContainersStr->ui->c_str());
@@ -1651,7 +1686,7 @@ Ref<Storage::ChangedContainers> SQLStorage::_purgeEmptyContainers(Ref<ChangedCon
             while ((row = res->nextRow()) != nullptr) {
                 int flags = row->col(3).toInt();
                 if (flags & OBJECT_FLAG_PERSISTENT_CONTAINER)
-                    changedContainers->upnp->append(row->col(0).toInt());
+                    changedContainers->upnp.push_back(row->col(0).toInt());
                 else if (row->col(1) == "0") {
                     *bufDel << ',' << row->col_c_str(0);
                     *bufSelUI << ',' << row->col_c_str(2);
@@ -1672,8 +1707,8 @@ Ref<Storage::ChangedContainers> SQLStorage::_purgeEmptyContainers(Ref<ChangedCon
             while ((row = res->nextRow()) != nullptr) {
                 int flags = row->col(3).toInt();
                 if (flags & OBJECT_FLAG_PERSISTENT_CONTAINER) {
-                    changedContainers->ui->append(row->col(0).toInt());
-                    changedContainers->upnp->append(row->col(0).toInt());
+                    changedContainers->ui.push_back(row->col(0).toInt());
+                    changedContainers->upnp.push_back(row->col(0).toInt());
                 } else if (row->col(1) == "0") {
                     *bufDel << ',' << row->col_c_str(0);
                     *bufSelUI << ',' << row->col_c_str(2);
@@ -1695,14 +1730,16 @@ Ref<Storage::ChangedContainers> SQLStorage::_purgeEmptyContainers(Ref<ChangedCon
     } while (again);
 
     if (bufSelUI->length() > bufSelLen) {
-        changedContainers->ui->addCSV(bufSelUI->toString(bufSelLen + 1));
-        changedContainers->upnp->addCSV(bufSelUI->toString(bufSelLen + 1));
+        addCSV(bufSelUI->toString(bufSelLen + 1), changedContainers->ui);
+        addCSV(bufSelUI->toString(bufSelLen + 1), changedContainers->upnp);
     }
     if (bufSelUpnp->length() > bufSelLen) {
-        changedContainers->upnp->addCSV(bufSelUpnp->toString(bufSelLen + 1));
+        addCSV(bufSelUpnp->toString(bufSelLen + 1), changedContainers->upnp);
     }
-    log_debug("end; changedContainers (upnp): %s\n", changedContainers->upnp->toCSV().c_str());
-    log_debug("end; changedContainers (ui): %s\n", changedContainers->ui->toCSV().c_str());
+    // log_debug("end; changedContainers (upnp): %s\n", changedContainers.upnp->toCSV().c_str());
+    // log_debug("end; changedContainers (ui): %s\n", changedContainers.ui->toCSV().c_str());
+    log_debug("end; changedContainers (upnp): %d\n", changedContainers->upnp.size());
+    log_debug("end; changedContainers (ui): %d\n", changedContainers->ui.size());
 
     /* clear cache (for now) */
     if (cacheOn())
@@ -1885,7 +1922,7 @@ void SQLStorage::addAutoscanDirectory(Ref<AutoscanDirectory> adir)
     if (!adir->persistent() && objectID < 0)
         throw _Exception(_("tried to add non-persistent autoscan directory with an illegal objectID or location"));
 
-    Ref<IntArray> pathIds = _checkOverlappingAutoscans(adir);
+    auto pathIds = _checkOverlappingAutoscans(adir);
 
     _autoscanChangePersistentFlag(objectID, true);
 
@@ -1911,7 +1948,7 @@ void SQLStorage::addAutoscanDirectory(Ref<AutoscanDirectory> adir)
        << quote(adir->getPreviousLMT()) << ','
        << mapBool(adir->persistent()) << ','
        << (objectID >= 0 ? _(SQL_NULL) : quote(adir->getLocation())) << ','
-       << (pathIds == nullptr ? _(SQL_NULL) : quote(_(",") + pathIds->toCSV() + ','))
+       << (pathIds == nullptr ? _(SQL_NULL) : quote(_(",") + toCSV(*pathIds) + ','))
        << ')';
     adir->setStorageID(exec(q, true));
 }
@@ -1923,7 +1960,7 @@ void SQLStorage::updateAutoscanDirectory(Ref<AutoscanDirectory> adir)
     if (adir == nullptr)
         throw _Exception(_("updateAutoscanDirectory called with adir==nullptr"));
 
-    Ref<IntArray> pathIds = _checkOverlappingAutoscans(adir);
+    auto pathIds = _checkOverlappingAutoscans(adir);
 
     int objectID = adir->getObjectID();
     int objectIDold = _getAutoscanObjectID(adir->getStorageID());
@@ -1945,7 +1982,7 @@ void SQLStorage::updateAutoscanDirectory(Ref<AutoscanDirectory> adir)
         *q << ',' << TQ("last_modified") << '=' << quote(adir->getPreviousLMT());
     *q << ',' << TQ("persistent") << '=' << mapBool(adir->persistent())
        << ',' << TQ("location") << '=' << (objectID >= 0 ? _(SQL_NULL) : quote(adir->getLocation()))
-       << ',' << TQ("path_ids") << '=' << (pathIds == nullptr ? _(SQL_NULL) : quote(_(",") + pathIds->toCSV() + ','))
+       << ',' << TQ("path_ids") << '=' << (pathIds == nullptr ? _(SQL_NULL) : quote(_(",") + toCSV(*pathIds) + ','))
        << ',' << TQ("touched") << '=' << mapBool(true)
        << " WHERE " << TQ("id") << '=' << quote(adir->getStorageID());
     exec(q);
@@ -2053,13 +2090,14 @@ void SQLStorage::autoscanUpdateLM(Ref<AutoscanDirectory> adir)
 
 int SQLStorage::isAutoscanChild(int objectID)
 {
-    Ref<IntArray> pathIDs = getPathIDs(objectID);
+    auto pathIDs = getPathIDs(objectID);
     if (pathIDs == nullptr)
         return INVALID_OBJECT_ID;
-    for (int i = 0; i < pathIDs->size(); i++) {
-        int recursive = isAutoscanDirectoryRecursive(pathIDs->get(i));
+
+    for (int pathId : *pathIDs) {
+        int recursive = isAutoscanDirectoryRecursive(pathId);
         if (recursive == 2)
-            return pathIDs->get(i);
+            return pathId;
     }
     return INVALID_OBJECT_ID;
 }
@@ -2069,7 +2107,7 @@ void SQLStorage::checkOverlappingAutoscans(Ref<AutoscanDirectory> adir)
     _checkOverlappingAutoscans(adir);
 }
 
-Ref<IntArray> SQLStorage::_checkOverlappingAutoscans(Ref<AutoscanDirectory> adir)
+std::unique_ptr<std::vector<int>> SQLStorage::_checkOverlappingAutoscans(Ref<AutoscanDirectory> adir)
 {
     if (adir == nullptr)
         throw _Exception(_("_checkOverlappingAutoscans called with adir==nullptr"));
@@ -2128,14 +2166,14 @@ Ref<IntArray> SQLStorage::_checkOverlappingAutoscans(Ref<AutoscanDirectory> adir
         }
     }
 
-    Ref<IntArray> pathIDs = getPathIDs(checkObjectID);
+    auto pathIDs = getPathIDs(checkObjectID);
     if (pathIDs == nullptr)
         throw _Exception(_("getPathIDs returned nullptr"));
     q->clear();
     *q << "SELECT " << TQ("obj_id")
        << " FROM " << TQ(AUTOSCAN_TABLE)
        << " WHERE " << TQ("obj_id") << " IN ("
-       << pathIDs->toCSV()
+       << toCSV(*pathIDs)
        << ") AND " << TQ("recursive") << '=' << mapBool(true);
     if (storageID >= 0)
         *q << " AND " << TQ("id") << " != " << quote(storageID);
@@ -2156,13 +2194,15 @@ Ref<IntArray> SQLStorage::_checkOverlappingAutoscans(Ref<AutoscanDirectory> adir
     }
 }
 
-Ref<IntArray> SQLStorage::getPathIDs(int objectID)
+std::unique_ptr<std::vector<int>> SQLStorage::getPathIDs(int objectID)
 {
     flushInsertBuffer();
 
     if (objectID == INVALID_OBJECT_ID)
         return nullptr;
-    Ref<IntArray> pathIDs(new IntArray());
+
+    auto pathIDs = make_unique<std::vector<int>>();
+
     Ref<StringBuffer> q(new StringBuffer());
     *q << "SELECT " << TQ("parent_id") << " FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE ";
     *q << TQ("id") << '=';
@@ -2170,7 +2210,7 @@ Ref<IntArray> SQLStorage::getPathIDs(int objectID)
     Ref<SQLResult> res;
     Ref<SQLRow> row;
     while (objectID != CDS_ID_ROOT) {
-        pathIDs->append(objectID);
+        pathIDs->push_back(objectID);
         q->setLength(selBufLen);
         *q << quote(objectID) << " LIMIT 1";
         res = select(q);

@@ -1372,15 +1372,14 @@ void ContentManager::cleanupOnlineServiceObjects(zmm::Ref<OnlineService> service
 
     if (service->getItemPurgeInterval() > 0) {
         Ref<Storage> storage = Storage::getInstance();
-        Ref<IntArray> ids = storage->getServiceObjectIDs(service->getStoragePrefix());
+        auto ids = storage->getServiceObjectIDs(service->getStoragePrefix());
 
         struct timespec current, last;
         getTimespecNow(&current);
         last.tv_nsec = 0;
         String temp;
 
-        for (int i = 0; i < ids->size(); i++) {
-            int object_id = ids->get(i);
+        for (int object_id : *ids) {
             Ref<CdsObject> obj = storage->loadObject(object_id);
             if (obj == nullptr)
                 continue;
