@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
 
 # It is 2017 so lets leverage a modern C++
 set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
-set(CMAKE_CXX_EXTENSIONS False)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 include(CheckFunctionExists)
@@ -251,7 +251,6 @@ set(libgerberaFILES
         src/youtube_video_url.h
         src/zmm/array.cc
         src/zmm/array.h
-        src/zmm/base_array.h
         src/zmm/base_queue.h
         src/zmm/base_stack.h
         src/zmm/exception.cc

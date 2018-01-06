@@ -221,8 +221,8 @@ void UpdateManager::threadProc()
                 lock.unlock(); // we don't need to hold the lock during the sending of the updates
                 if (string_ok(updateString)) {
                     try {
+                        log_debug("updates sent: \"%s\"\n", updateString.c_str());
                         Server::getInstance()->send_subscription_update(updateString);
-                        log_debug("updates sent.\n");
                         getTimespecNow(&lastUpdate);
                     } catch (const Exception& e) {
                         log_error("Fatal error when sending updates: %s\n", e.getMessage().c_str());
