@@ -176,25 +176,25 @@ void ContentDirectoryService::upnp_action_Search(Ref<ActionRequest> request) {
     }
 #endif
 
-    std::unique_ptr<SearchParam> searchParam = std::make_unique<SearchParam>(containerID, searchCriteria,
-        std::stoi(startingIndex.c_str(), nullptr), std::stoi(requestedCount.c_str(), nullptr));
-    std::unique_ptr<SearchHandler> searchHandler = std::make_unique<SearchHandler>();
-    std::unique_ptr<std::vector<CdsObject>> results = searchHandler->executeSearch(*searchParam);
-
-    for (const auto& cdsObject : *results) {
-        if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && cdsObject.getFlag(OBJECT_FLAG_PLAYED)) {
-            String title = cdsObject.getTitle();
-            if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND))
-                title = cfg->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING) + title;
-            else
-                title = title + cfg->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING);
-
-            cdsObject.setTitle(title);
-        }
-
-        Ref<Element> didl_object = UpnpXML_DIDLRenderObject(cdsObject, false, stringLimit);
-        didl_lite->appendElementChild(didl_object);
-    }
+//    std::unique_ptr<SearchParam> searchParam = std::make_unique<SearchParam>(containerID, searchCriteria,
+//        std::stoi(startingIndex.c_str(), nullptr), std::stoi(requestedCount.c_str(), nullptr));
+//    std::unique_ptr<SearchHandler> searchHandler = std::make_unique<SearchHandler>();
+//    std::unique_ptr<std::vector<CdsObject>> results = searchHandler->executeSearch(*searchParam);
+//
+//    for (auto& cdsObject : *results) {
+//        if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && cdsObject.getFlag(OBJECT_FLAG_PLAYED)) {
+//            String title = cdsObject.getTitle();
+//            if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND))
+//                title = cfg->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING) + title;
+//            else
+//                title = title + cfg->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING);
+//
+//            cdsObject.setTitle(title);
+//        }
+//
+//        Ref<Element> didl_object = UpnpXML_DIDLRenderObject(cdsObject, false, stringLimit);
+//        didl_lite->appendElementChild(didl_object);
+//    }
 
     Ref<Element> response;
     response = UpnpXML_CreateResponse(request->getActionName(), _(DESC_CDS_SERVICE_TYPE));
