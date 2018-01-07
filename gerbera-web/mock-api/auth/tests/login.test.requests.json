@@ -4,6 +4,7 @@
     "responses" : {
       "1" : "./auth/no-accounts-config.json",
       "6" : "./auth/ui-disabled.json",
+      "7" : "./auth/session-expired.json",
       "default" : "./auth/config.json"
     }
   },
@@ -14,6 +15,7 @@
       "2": "./auth/get_sid.not.logged_in.json",
       "3": "./auth/get_sid.not.logged_in.json",
       "6" : "./auth/ui-disabled.json",
+      "7" : "./auth/session-expired.json",
       "default" : "./auth/get_sid.not.logged_in.json"
     }
   },

@@ -70,6 +70,10 @@ module.exports = function (driver) {
     return driver.findElement(By.id('content')).getText()
   }
 
+  this.getCookie = function (cookie) {
+    return driver.manage().getCookie(cookie);
+  }
+
   this.get = function (url) {
     driver.get(url)
     var loginForm = driver.findElement(By.id('login-form'))

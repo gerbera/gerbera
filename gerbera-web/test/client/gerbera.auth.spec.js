@@ -35,6 +35,22 @@ describe('Gerbera Auth', function () {
     })
   })
 
+  describe('handleLogout()', function () {
+    beforeEach(function () {
+      $.cookie('SID', '563806f88aea6b33429ebdb85ce14beb')
+    })
+
+    it('removes existing SID cookie and routes to the home page', function () {
+      spyOn(GERBERA.App, 'reload')
+
+      GERBERA.Auth.handleLogout();
+
+      expect(GERBERA.App.reload).toHaveBeenCalledWith('/gerbera.html')
+      expect(GERBERA.Auth.getSessionId()).toBeUndefined()
+      expect(GERBERA.Auth.isLoggedIn()).toBeFalsy()
+    })
+  });
+
   describe('SID()', function () {
     it('retrieves the session ID from the cookie', function () {
       spyOn($, 'cookie').and.returnValue('A_MOCK_SESSION_ID')
