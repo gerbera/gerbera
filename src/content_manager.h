@@ -60,15 +60,6 @@
 
 #ifdef ONLINE_SERVICES 
     #include "online_service.h"
-#ifdef YOUTUBE
-    #include "cached_url.h"
-    #include "reentrant_array.h"
-    #define  MAX_CACHED_URLS            20
-    #define URL_CACHE_CHECK_INTERVAL    300
-    //#define URL_CACHE_CHECK_INTERVAL 30
-    //#define URL_CACHE_LIFETIME          60
-    #define URL_CACHE_LIFETIME          600
-#endif
 #endif//ONLINE_SERVICES
 
     #include "executor.h"
@@ -233,12 +224,6 @@ public:
 
     void cleanupOnlineServiceObjects(zmm::Ref<OnlineService> service);
 
-#ifdef YOUTUBE
-    /// \brief Adds a URL to the cache.
-    void cacheURL(zmm::Ref<CachedURL> url);
-    /// \brief Retrieves an URL from the cache.
-    zmm::String getCachedURL(int objectID);
-#endif
 #endif//ONLINE_SERVICES
 
     /// \brief Adds a virtual item.
@@ -400,14 +385,6 @@ protected:
                                     bool cancellable=true,
                                     unsigned int parentTaskID = 0,
                                     bool unscheduled_refresh = false);
-
-#ifdef YOUTUBE
-    std::mutex urlcache_mutex;
-    using AutoLockYT = std::lock_guard<std::mutex>;
-    zmm::Ref<ReentrantArray<CachedURL> > cached_urls;
-    /// \brief Removes old URLs from the cache.
-    void checkCachedURLs();
-#endif
 
 #endif //ONLINE_SERVICES 
 

@@ -130,14 +130,6 @@ void web::items::process()
         item->appendTextChild(_("title"), obj->getTitle());
         /// \todo clean this up, should have more generic options for online
         /// services
-#ifdef YOUTUBE
-        if (IS_CDS_ITEM_EXTERNAL_URL(obj->getObjectType()) && 
-            obj->getFlag(OBJECT_FLAG_ONLINE_SERVICE))
-        {
-            item->appendTextChild(_("res"), RefCast(obj, CdsItemExternalURL)->getURL());
-        }
-        else
-#endif
             item->appendTextChild(_("res"), CdsResourceManager::getFirstResource(RefCast(obj, CdsItem)));
         //item->appendTextChild(_("virtual"), obj->isVirtual() ? _("1") : _("0"), mxml_bool_type);
         items->appendElementChild(item);

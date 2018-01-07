@@ -108,7 +108,7 @@ public:
     virtual zmm::Ref<ChangedContainers> removeObjects(std::shared_ptr<std::unordered_set<int> > list, bool all = false) override;
     
     virtual zmm::Ref<CdsObject> loadObjectByServiceID(zmm::String serviceID) override;
-    virtual zmm::Ref<zmm::IntArray> getServiceObjectIDs(char servicePrefix) override;
+    virtual std::unique_ptr<std::vector<int>> getServiceObjectIDs(char servicePrefix) override;
 
     virtual zmm::String findFolderImage(int id, zmm::String trackArtBase) override;
     
@@ -141,7 +141,7 @@ public:
     virtual int isAutoscanChild(int objectID) override;
     virtual void checkOverlappingAutoscans(zmm::Ref<AutoscanDirectory> adir) override;
     
-    virtual zmm::Ref<zmm::IntArray> getPathIDs(int objectID) override;
+    virtual std::unique_ptr<std::vector<int>> getPathIDs(int objectID) override;
     
     virtual void shutdown() override;
     virtual void shutdownDriver() = 0;
@@ -205,6 +205,10 @@ private:
     
     /* helper for removeObject(s) */
     void _removeObjects(zmm::Ref<zmm::StringBuffer> objectIDs, int offset);
+
+    void addCSV(zmm::String csv, std::vector<int>& target);
+    zmm::String toCSV(const std::vector<int>& input);
+
     zmm::Ref<ChangedContainersStr> _recursiveRemove(zmm::Ref<zmm::StringBuffer> items, zmm::Ref<zmm::StringBuffer> containers, bool all);
     
     virtual zmm::Ref<ChangedContainers> _purgeEmptyContainers(zmm::Ref<ChangedContainersStr> changedContainersStr);
@@ -214,7 +218,7 @@ private:
     void _autoscanChangePersistentFlag(int objectID, bool persistent);
     zmm::Ref<AutoscanDirectory> _fillAutoscanDirectory(zmm::Ref<SQLRow> row);
     int _getAutoscanDirectoryInfo(int objectID, zmm::String field);
-    zmm::Ref<zmm::IntArray> _checkOverlappingAutoscans(zmm::Ref<AutoscanDirectory> adir);
+    std::unique_ptr<std::vector<int>> _checkOverlappingAutoscans(zmm::Ref<AutoscanDirectory> adir);
     
     /* location hash helpers */
     zmm::String addLocationPrefix(char prefix, zmm::String path);

@@ -246,11 +246,12 @@ describe('Gerbera Updates', function () {
   describe('errorCheck()', function () {
     var response
     var uiDisabledResponse
+    var sessionExpiredResponse
     var event
     var xhr
     beforeEach(function () {
-      loadJSONFixtures('invalid-session.json')
-      response = getJSONFixture('invalid-session.json')
+      loadJSONFixtures('invalid-response.json')
+      response = getJSONFixture('invalid-response.json')
     })
 
     it('shows a toast message when AJAX error returns failure', function () {
@@ -261,7 +262,7 @@ describe('Gerbera Updates', function () {
 
       GERBERA.Updates.errorCheck(event, xhr)
 
-      expect($('.grb-toast-msg').text()).toEqual('invalid session id')
+      expect($('.grb-toast-msg').text()).toEqual('General Error')
     })
 
     it('ignores when response does not exist', function () {
@@ -288,6 +289,22 @@ describe('Gerbera Updates', function () {
 
       expect($('.grb-toast-msg').text()).toEqual('The UI is disabled in the configuration file. See README.')
       expect(GERBERA.App.disable).toHaveBeenCalled()
+    })
+
+    it('clears session cookie and redirects to home when server returns 400 error code session invalid.', function () {
+      spyOn(GERBERA.Auth, 'handleLogout')
+      // when calling for fixtures, ajaxComplete fires `errorCheck`
+      // so spies must be before to avoid full page refresh.
+      loadJSONFixtures('session-expired.json')
+      sessionExpiredResponse = getJSONFixture('session-expired.json')
+      event = {}
+      xhr = {
+        responseJSON : sessionExpiredResponse
+      }
+
+      GERBERA.Updates.errorCheck(event, xhr)
+
+      expect(GERBERA.Auth.handleLogout).toHaveBeenCalled()
     })
   })
 

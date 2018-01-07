@@ -34,6 +34,7 @@
 
 #include <memory>
 #include <unordered_set>
+#include <vector>
 
 #include "singleton.h"
 #include "dictionary.h"
@@ -90,7 +91,7 @@ protected:
     /// \param objectID the container that needs to be updated
     void containerChangedUI(int objectID);
     
-    void containerChangedUI(zmm::Ref<zmm::IntArray> objectIDs);
+    void containerChangedUI(const std::vector<int>& objectIDs);
     
     /// \brief True if the ui update id hash became to big and
     /// the UI shall update every container
@@ -152,7 +153,7 @@ public:
     /// \param objectID
     void containerChangedUI(int objectID);
     
-    void containerChangedUI(zmm::Ref<zmm::IntArray> objectIDs);
+    void containerChangedUI(const std::vector<int>& objectIDs);
     
     virtual void timerNotify(zmm::Ref<Timer::Parameter> parameter) override;
 };

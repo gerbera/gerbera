@@ -394,7 +394,7 @@ void TagLibHandler::extractMP3(TagLib::IOStream *roStream, zmm::Ref<CdsItem> ite
                 const auto textFrame = static_cast<const TagLib::ID3v2::TextIdentificationFrame*>(frame);
 
                 const TagLib::String frameContents = textFrame->toString();
-                String value(frameContents.toCString(true), frameContents.size());
+                String value(frameContents.toCString(true));
                 value = sc->convert(value);
                 log_debug(
                     "Adding frame: %s with value %s\n", desiredFrame.c_str(),

@@ -143,7 +143,7 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
         int p1 = find_local_port(45000,65500);
         int p2 = find_local_port(45000,65500);
         sop_args = parseCommandLine(location + " " + String::from(p1) + " " +
-                   String::from(p2), nullptr, nullptr);
+                   String::from(p2), nullptr, nullptr, nullptr);
         Ref<ProcessExecutor> spsc(new ProcessExecutor(_("sp-sc-auth"), 
                                                       sop_args));
         proc_list = Ref<Array<ProcListItem> >(new Array<ProcListItem>(1));

@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
 
 # It is 2017 so lets leverage a modern C++
 set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
-set(CMAKE_CXX_EXTENSIONS False)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 include(CheckFunctionExists)
@@ -11,7 +11,7 @@ include(CheckFunctionExists)
 set(CMAKE_VERBOSE_MAKEFILE off CACHE BOOL "Show verbose build commands")
 set(WITH_MAGIC          1 CACHE BOOL "Use libmagic to identify file mime types")
 set(WITH_MYSQL          0 CACHE BOOL "Store media information in MySQL DB")
-set(WITH_CURL           1 CACHE BOOL "CURL required for YouTube and/or SopCast")
+set(WITH_CURL           1 CACHE BOOL "CURL required for online services")
 set(WITH_INOTIFY        1 CACHE BOOL "Enable Inotify file monitoring support")
 set(WITH_JS             1 CACHE BOOL "Enable JavaScript for custom import script")
 set(WITH_TAGLIB         1 CACHE BOOL "Use TagLib to extract audio file metadata")
@@ -23,6 +23,7 @@ set(WITH_PROTOCOL_EXTENSIONS 1 CACHE BOOL "Add incomplete DLNA protocol extensio
 set(WITH_SYSTEMD        1 CACHE BOOL "Install Systemd unit file")
 set(WITH_LASTFM         0 CACHE BOOL "Enable LastFM")
 set(WITH_DEBUG          1 CACHE BOOL "Enables debug logging")
+set(WITH_GOOGLETEST     0 CACHE BOOL "Enables GoogleTest")
 
 project("gerbera")
 set(gerbera_MAJOR_VERSION     1)
@@ -245,15 +246,8 @@ set(libgerberaFILES
         src/web/web_update.cc
         src/xpath.cc
         src/xpath.h
-        src/youtube_content_handler.cc
-        src/youtube_content_handler.h
-        src/youtube_service.cc
-        src/youtube_service.h
-        src/youtube_video_url.cc
-        src/youtube_video_url.h
         src/zmm/array.cc
         src/zmm/array.h
-        src/zmm/base_array.h
         src/zmm/base_queue.h
         src/zmm/base_stack.h
         src/zmm/exception.cc
@@ -451,7 +445,8 @@ if(WITH_CURL)
 
         add_definitions(-DHAVE_CURL)
         add_definitions(-DONLINE_SERVICES)
-        add_definitions(-DYOUTUBE)
+        add_definitions(-DATRAILERS)
+        add_definitions(-DSOPCAST)
     else()
         message(FATAL_ERROR "cURL not found")
     endif()
@@ -561,6 +556,31 @@ endif()
 find_package (ZLIB REQUIRED)
 include_directories(${ZLIB_INCLUDE_DIRS})
 target_link_libraries (gerbera ${ZLIB_LIBRARIES})
+
+if(WITH_GOOGLETEST)
+    find_package(GTest)
+    if(GTEST_FOUND)
+        include(CTest)
+        set(gerberatestFILES
+            test/dictionary_test.cc
+            test/runtime_test.cc)
+
+        # Prevent GoogleTest from overriding our compiler/linker options
+        # when building with Visual Studio
+        set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+        include_directories(${GTEST_INCLUDE_DIRS})
+
+        # Trivial example using gtest and gmock
+        add_executable(gerberatest ${gerberatestFILES} $<TARGET_OBJECTS:libgerbera>)
+        target_include_directories(gerberatest PRIVATE "${CMAKE_SOURCE_DIR}/src")
+        target_include_directories(gerberatest PRIVATE "${CMAKE_SOURCE_DIR}/test")
+        define_file_path_for_sources(gerberatest)
+
+        get_target_property(configuredLibs gerbera INTERFACE_LINK_LIBRARIES)
+        target_link_libraries(gerberatest gtest gmock_main ${configuredLibs})
+        add_test(NAME example_test COMMAND gerberatest)
+    endif()
+endif()
 
 INSTALL(TARGETS gerbera DESTINATION bin)
 INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/scripts/js DESTINATION share/gerbera)

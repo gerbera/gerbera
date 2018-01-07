@@ -1,0 +1,7 @@
+{
+  "success": false,
+  "error": {
+    "code": "400",
+    "text": "invalid session id"
+  }
+}

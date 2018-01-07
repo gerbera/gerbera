@@ -34,6 +34,7 @@
 
 #include <memory>
 #include <unordered_set>
+#include <vector>
 
 #include "zmm/zmmf.h"
 #include "singleton.h"
@@ -177,11 +178,9 @@ public:
     public:
         ChangedContainers()
         {
-            upnp = zmm::Ref<zmm::IntArray>(new zmm::IntArray());
-            ui = zmm::Ref<zmm::IntArray>(new zmm::IntArray());
         }
-        zmm::Ref<zmm::IntArray> upnp;
-        zmm::Ref<zmm::IntArray> ui;
+        std::vector<int> upnp;
+        std::vector<int> ui;
     };
     
     /// \brief Removes the object identified by the objectID from the database.
@@ -214,7 +213,7 @@ public:
     /// \brief Return an array of object ID's for a particular service.
     ///
     /// In the database, the service is identified by a service id prefix.
-    virtual zmm::Ref<zmm::IntArray> getServiceObjectIDs(char servicePrefix) = 0;
+    virtual std::unique_ptr<std::vector<int>> getServiceObjectIDs(char servicePrefix) = 0;
     
     /* accounting methods */
     virtual int getTotalFiles() = 0;
@@ -260,8 +259,8 @@ public:
     virtual void autoscanUpdateLM(zmm::Ref<AutoscanDirectory> adir) = 0;
     
     virtual void checkOverlappingAutoscans(zmm::Ref<AutoscanDirectory> adir) = 0;
-    
-    virtual zmm::Ref<zmm::IntArray> getPathIDs(int objectID) = 0;
+
+    virtual std::unique_ptr<std::vector<int>> getPathIDs(int objectID) = 0;
     
     /// \brief shutdown the Storage with its possible threads
     virtual void shutdown() override = 0;

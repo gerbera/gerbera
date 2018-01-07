@@ -71,7 +71,7 @@ function getRootPath(rootpath, location)
 {
     var path = new Array();
 
-    if (rootpath.length != '')
+    if (rootpath && rootpath.length !== 0)
     {
         rootpath = rootpath.substring(0, rootpath.lastIndexOf('/'));
 

@@ -63,8 +63,7 @@ duk_ret_t js_copyObject(duk_context *ctx)
     return 1;
 }
 
-duk_ret_t
-js_addCdsObject(duk_context *ctx)
+duk_ret_t js_addCdsObject(duk_context *ctx)
 {
     auto *self = Script::getContextScript(ctx);
 

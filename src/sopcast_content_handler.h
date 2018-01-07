@@ -44,7 +44,6 @@
 #define SOPCAST_AUXDATA_LANGUAGE        SOPCAST_SERVICE_ID "1"
 #define SOPCAST_AUXDATA_GROUP           SOPCAST_SERVICE_ID "2"
 
-#include "zmmf/zmmf.h"
 #include "mxml/mxml.h"
 #include "cds_objects.h"
 

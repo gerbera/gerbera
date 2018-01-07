@@ -54,11 +54,6 @@
 
 #include "process.h"
 
-#ifdef YOUTUBE
-#include "youtube_service.h"
-#include <ctime>
-#endif
-
 #ifdef SOPCAST
 #include "sopcast_service.h"
 #endif
@@ -201,37 +196,6 @@ ContentManager::ContentManager()
 
 #ifdef ONLINE_SERVICES
     online_services = Ref<OnlineServiceList>(new OnlineServiceList());
-#ifdef YOUTUBE
-    if (cm->getBoolOption(CFG_ONLINE_CONTENT_YOUTUBE_ENABLED)) {
-        try {
-            Ref<OnlineService> yt((OnlineService*)new YouTubeService());
-
-            i = cm->getIntOption(CFG_ONLINE_CONTENT_YOUTUBE_REFRESH);
-            yt->setRefreshInterval(i);
-
-            i = cm->getIntOption(CFG_ONLINE_CONTENT_YOUTUBE_PURGE_AFTER);
-            yt->setItemPurgeInterval(i);
-
-            if (cm->getBoolOption(CFG_ONLINE_CONTENT_YOUTUBE_UPDATE_AT_START))
-                i = CFG_DEFAULT_UPDATE_AT_START;
-
-            Ref<Timer::Parameter> yt_param(new Timer::Parameter(Timer::Parameter::IDOnlineContent, OS_YouTube));
-            yt->setTimerParameter(yt_param);
-            online_services->registerService(yt);
-
-            if (i > 0) {
-                Timer::getInstance()->addTimerSubscriber(this, i, yt->getTimerParameter(), true);
-            }
-        } catch (const Exception& ex) {
-            log_error("Could not setup YouTube: %s\n",
-                ex.getMessage().c_str());
-        }
-    }
-    // if YT is disabled in the configuration it is still possible that the DB
-    // is populated with YT objects, so we need to allow playing them
-    cached_urls = Ref<ReentrantArray<CachedURL>>(new ReentrantArray<CachedURL>(MAX_CACHED_URLS));
-
-#endif //YOUTUBE
 
 #ifdef SOPCAST
     if (cm->getBoolOption(CFG_ONLINE_CONTENT_SOPCAST_ENABLED)) {
@@ -247,8 +211,8 @@ ContentManager::ContentManager()
             if (cm->getBoolOption(CFG_ONLINE_CONTENT_SOPCAST_UPDATE_AT_START))
                 i = CFG_DEFAULT_UPDATE_AT_START;
 
-            Ref<Parameter> sc_param(new Parameter(Parameter::IDOnlineContent, OS_SopCast));
-            sc->setTimerParameter(RefCast(sc_param, Object));
+            Ref<Timer::Parameter> sc_param(new Timer::Parameter(Timer::Parameter::IDOnlineContent, OS_SopCast));
+            sc->setTimerParameter(sc_param);
             online_services->registerService(sc);
             if (i > 0) {
                 Timer::getInstance()->addTimerSubscriber(this, i, sc->getTimerParameter(), true);
@@ -272,8 +236,8 @@ ContentManager::ContentManager()
             if (cm->getBoolOption(CFG_ONLINE_CONTENT_ATRAILERS_UPDATE_AT_START))
                 i = CFG_DEFAULT_UPDATE_AT_START;
 
-            Ref<Parameter> at_param(new Parameter(Parameter::IDOnlineContent, OS_ATrailers));
-            at->setTimerParameter(RefCast(at_param, Object));
+            Ref<Timer::Parameter> at_param(new Timer::Parameter(Timer::Parameter::IDOnlineContent, OS_ATrailers));
+            at->setTimerParameter(at_param);
             online_services->registerService(at);
             if (i > 0) {
                 Timer::getInstance()->addTimerSubscriber(this, i, at->getTimerParameter(), true);
@@ -371,11 +335,6 @@ void ContentManager::timerNotify(Ref<Timer::Parameter> parameter)
     else if (parameter->whoami() == Timer::Parameter::IDOnlineContent) {
         fetchOnlineContent((service_type_t)(parameter->getID()));
     }
-#ifdef YOUTUBE
-    else if (parameter->whoami() == Timer::Parameter::IDURLCache) {
-        checkCachedURLs();
-    }
-#endif
 #endif //ONLINE_SERVICES
 }
 
@@ -1413,15 +1372,14 @@ void ContentManager::cleanupOnlineServiceObjects(zmm::Ref<OnlineService> service
 
     if (service->getItemPurgeInterval() > 0) {
         Ref<Storage> storage = Storage::getInstance();
-        Ref<IntArray> ids = storage->getServiceObjectIDs(service->getStoragePrefix());
+        auto ids = storage->getServiceObjectIDs(service->getStoragePrefix());
 
         struct timespec current, last;
         getTimespecNow(&current);
         last.tv_nsec = 0;
         String temp;
 
-        for (int i = 0; i < ids->size(); i++) {
-            int object_id = ids->get(i);
+        for (int object_id : *ids) {
             Ref<CdsObject> obj = storage->loadObject(object_id);
             if (obj == nullptr)
                 continue;
@@ -1850,124 +1808,6 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
 zmm::String ContentManager::getMimeTypeFromBuffer(const void* buffer, size_t length)
 {
     return get_mime_type_from_buffer(ms, reMimetype, buffer, length);
-}
-#endif
-
-#ifdef YOUTUBE
-void ContentManager::checkCachedURLs()
-{
-    AutoLockYT lock(urlcache_mutex);
-
-    time_t now = time(nullptr);
-
-    log_debug("Checking cached URLs..stored: %d\n", cached_urls->size());
-    int count = 0;
-    int i = 0;
-
-    while (count < cached_urls->size()) {
-        Ref<CachedURL> cached = cached_urls->get(i);
-        if (cached != nullptr) {
-            // do not increment index because remove unordered places the
-            // last array element into the removed slot
-            if ((cached->getLastAccessTime() + URL_CACHE_LIFETIME) < now) {
-                log_debug("URL of object: %d, url: %s exceeds "
-                          "lifetime (%lld < %lld), purging...\n",
-                    cached_urls->get(i)->getObjectID(),
-                    cached_urls->get(i)->getURL().c_str(),
-                    (long long)(cached->getLastAccessTime() + URL_CACHE_LIFETIME),
-                    (long long)now);
-                cached_urls->removeUnordered(i);
-            } else
-                i++;
-        }
-        count++;
-    }
-
-    log_debug("URL Cache check complete, remaining items: %d\n",
-        cached_urls->size());
-
-    if (cached_urls->size() > 0) {
-        Ref<Timer::Parameter> url_cache_check(new Timer::Parameter(Timer::Parameter::IDURLCache, -1));
-
-        Timer::getInstance()->addTimerSubscriber(
-            this,
-            URL_CACHE_CHECK_INTERVAL,
-            url_cache_check, true);
-    }
-}
-
-void ContentManager::cacheURL(zmm::Ref<CachedURL> url)
-{
-    AutoLockYT lock(urlcache_mutex);
-    time_t oldest = time(nullptr);
-    int oldest_index = -1;
-    bool added = false;
-    int old_size = cached_urls->size();
-
-    log_debug("Request to cache id %d, URL %s\n", url->getObjectID(),
-        url->getURL().c_str());
-    for (int i = 0; i < cached_urls->size(); i++) {
-        Ref<CachedURL> cached = cached_urls->get(i);
-        if (cached != nullptr) {
-            // get time of the first replacement candidate
-            if (cached->getLastAccessTime() < oldest) {
-                oldest = cached->getLastAccessTime();
-                oldest_index = i;
-            }
-
-            // this is an update for the same object
-            if (url->getObjectID() == cached->getObjectID()) {
-                log_debug("Updating cache for object %d\n", url->getObjectID());
-                cached_urls->set(url, i);
-                added = true;
-                break;
-            }
-        }
-    }
-
-    if (!added) {
-        // if our storage capacity is exceeded, we will purge an existing item
-        if (cached_urls->size() >= MAX_CACHED_URLS) {
-            log_debug("Checking if we need to remove something old...");
-            if ((oldest_index > -1) && (oldest_index <= MAX_CACHED_URLS)) {
-                log_debug("Removing old url from cache of object %d\n",
-                    cached_urls->get(oldest_index)->getObjectID());
-                cached_urls->removeUnordered(oldest_index);
-            } else {
-                throw _Exception(_("Index exceeds URL cache size: ") + String::from(oldest_index));
-            }
-        }
-
-        log_debug("Appeinding url to the cache: %d\n", url->getObjectID());
-        cached_urls->append(url);
-    }
-
-    if ((cached_urls->size() > 0) && (old_size == 0)) {
-        log_debug("URL Cache is not empty, adding invalidation timer!\n");
-        Ref<Timer::Parameter> url_cache_check(new Timer::Parameter(Timer::Parameter::IDURLCache, -1));
-
-        Timer::getInstance()->addTimerSubscriber(
-            this,
-            URL_CACHE_CHECK_INTERVAL,
-            url_cache_check, true);
-    }
-}
-
-String ContentManager::getCachedURL(int objectID)
-{
-    AutoLockYT lock(urlcache_mutex);
-    log_debug("Asked for an url from cache...\n");
-    for (int i = 0; i < cached_urls->size(); i++) {
-        Ref<CachedURL> cached = cached_urls->get(i);
-        if (cached != nullptr) {
-            if (cached->getObjectID() == objectID) {
-                log_debug("Found URL in cache for object ID %d, URL: %s\n",
-                    objectID, cached->getURL().c_str());
-                return cached->getURL();
-            }
-        }
-    }
-    return nullptr;
 }
 #endif
 

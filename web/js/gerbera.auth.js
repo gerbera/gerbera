@@ -153,14 +153,12 @@ GERBERA.Auth = (function () {
   }
 
   var handleLogout = function (response) {
-    if (response.success) {
-      var now = new Date()
-      var expire = new Date()
-      LOGGED_IN = false
-      expire.setTime(now.getTime() - 3600000 * 24 * 360)
-      $.cookie('SID', null, {expires: expire})
-      GERBERA.App.reload('/gerbera.html')
-    }
+    var now = new Date()
+    var expire = new Date()
+    LOGGED_IN = false
+    expire.setTime(now.getTime() - 3600000 * 24 * 360)
+    $.cookie('SID', null, {expires: expire})
+    GERBERA.App.reload('/gerbera.html')
   }
 
   return {
@@ -168,6 +166,7 @@ GERBERA.Auth = (function () {
     checkSID: checkSID,
     isLoggedIn: isLoggedIn,
     authenticate: authenticate,
-    logout: logout
+    logout: logout,
+    handleLogout: handleLogout
   }
 })()
