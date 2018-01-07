@@ -277,7 +277,7 @@ void Script::_execute()
 {
     if (duk_pcall(ctx, 0) != DUK_EXEC_SUCCESS)
     {
-        log_debug("Failed to execute script: %s\n", duk_safe_to_string(ctx, -1));
+        log_error("Failed to execute script: %s\n", duk_safe_to_string(ctx, -1));
         throw _Exception(_("Script: failed to execute script"));
     }
     duk_pop(ctx);
