@@ -6,4 +6,5 @@ tar -xzvf "lastfmlib-${LASTFM_VERSION}.tar.gz"
 cd "lastfmlib-${LASTFM_VERSION}"
 ./configure --prefix=/usr/local
 make
-make install
+sudo make install
+sudo ldconfig

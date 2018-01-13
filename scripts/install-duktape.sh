@@ -17,4 +17,5 @@ if [ "$unamestr" == 'Darwin' ]; then
   sed -i -e 's/-soname/-install_name/g' Makefile.sharedlibrary
 fi
 
-$makeCMD -f Makefile.sharedlibrary && sudo $makeCMD -f Makefile.sharedlibrary install
+$makeCMD -f Makefile.sharedlibrary && sudo $makeCMD -f Makefile.sharedlibrary install\
+ && sudo ldconfig

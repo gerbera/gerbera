@@ -9,4 +9,4 @@ if [[ $CXX == clang++* ]]; then
 else
 	cmake ../taglib-1.11.1
 fi
-make && sudo make install
+make && sudo make install && sudo ldconfig
