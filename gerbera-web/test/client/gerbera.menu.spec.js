@@ -78,7 +78,7 @@ describe('Gerbera Menu', function () {
         expect(GERBERA.Tree.destroy).toHaveBeenCalled()
         expect(GERBERA.Trail.destroy).toHaveBeenCalled()
         expect(GERBERA.Items.destroy).toHaveBeenCalled()
-        expect(GERBERA.App.reload).toHaveBeenCalledWith('/index.html')
+        expect(GERBERA.App.reload).toHaveBeenCalledWith('/old.html')
         done()
       })
     })

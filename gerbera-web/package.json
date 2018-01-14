@@ -28,10 +28,10 @@
     "jasmine": "^2.6.0",
     "jasmine-jquery": "^2.1.1",
     "karma": "^1.6.0",
+    "karma-chrome-launcher": "^2.2.0",
     "karma-coverage": "^1.1.1",
     "karma-jasmine": "^1.1.0",
     "karma-mocha-reporter": "^2.2.4",
-    "karma-phantomjs-launcher": "^1.0.4",
     "karma-spec-reporter": "0.0.31",
     "mocha": "^3.4.1",
     "selenium-webdriver": "^3.4.0"
