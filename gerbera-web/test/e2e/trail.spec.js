@@ -30,7 +30,7 @@ test.describe('The gerbera trail', function () {
     driver.get(mockWebServer + '/disabled.html')
     driver.manage().deleteAllCookies()
 
-    loginPage.get(mockWebServer + '/gerbera.html')
+    loginPage.get(mockWebServer + '/index.html')
 
     loginPage.password('pwd')
     loginPage.username('user')

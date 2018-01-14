@@ -30,7 +30,7 @@ test.describe('The logout action', function () {
     driver.get(mockWebServer + '/disabled.html')
     driver.manage().deleteAllCookies()
 
-    loginPage.get(mockWebServer + '/gerbera.html')
+    loginPage.get(mockWebServer + '/index.html')
   })
 
   test.after(function () {

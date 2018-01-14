@@ -27,7 +27,7 @@ test.describe('The overlay page', function () {
     loginPage = new LoginPage(driver)
     homePage = new HomePage(driver)
 
-    loginPage.get(mockWebServer + '/gerbera.html')
+    loginPage.get(mockWebServer + '/index.html')
     loginPage.password('pwd')
     loginPage.username('user')
     loginPage.submitLogin()
@@ -122,7 +122,7 @@ test.describe('The overlay item type selection', function () {
     loginPage = new LoginPage(driver)
     homePage = new HomePage(driver)
 
-    loginPage.get(mockWebServer + '/gerbera.html')
+    loginPage.get(mockWebServer + '/index.html')
     loginPage.password('pwd')
     loginPage.username('user')
     loginPage.submitLogin()
@@ -367,7 +367,7 @@ test.describe('The overlay load item', function () {
     loginPage = new LoginPage(driver)
     homePage = new HomePage(driver)
 
-    loginPage.get(mockWebServer + '/gerbera.html')
+    loginPage.get(mockWebServer + '/index.html')
     loginPage.password('pwd')
     loginPage.username('user')
     loginPage.submitLogin()

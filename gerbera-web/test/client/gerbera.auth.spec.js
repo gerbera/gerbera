@@ -45,7 +45,7 @@ describe('Gerbera Auth', function () {
 
       GERBERA.Auth.handleLogout();
 
-      expect(GERBERA.App.reload).toHaveBeenCalledWith('/gerbera.html')
+      expect(GERBERA.App.reload).toHaveBeenCalledWith('/index.html')
       expect(GERBERA.Auth.getSessionId()).toBeUndefined()
       expect(GERBERA.Auth.isLoggedIn()).toBeFalsy()
     })
@@ -119,7 +119,7 @@ describe('Gerbera Auth', function () {
         expect(GERBERA.Auth.getSessionId()).toBeUndefined()
         expect($('#nav-db').attr('class')).toBe('nav-link disabled')
         expect($('#nav-fs').attr('class')).toBe('nav-link disabled')
-        expect(GERBERA.App.reload).toHaveBeenCalledWith('/gerbera.html')
+        expect(GERBERA.App.reload).toHaveBeenCalledWith('/index.html')
         done()
       })
     })

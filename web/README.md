@@ -13,47 +13,16 @@ is needed to work within the recent technologies of the web.  The Gerbera
 user interface leverages new conventions to improve the maintainability of the
 code and provide new user features.
 
-### Early Development
+### old.html
 
-The initial version of the Gerbera Web UI does not contain a complete feature
-set of the existing system.  Early availability allows for fixes and improvements to
-be made while additional features are in-progress.
-
-While features are in-progress, the new Gerbera Web UI will co-exist with the original user interface system.
-
-#### gerbera.html
-
-The `/web/gerbera.html` file is the new Gerbera Web User Interface.  A single page application
-that lives alongside the existing `/web/index.html`.  
-
-> You can continue to use the existing user interface, while Gerbera Web UI is under development
-
-##### Accessing the Gerbera Web UI
-
-Visit the `gerbera.html` page directly in a browser from a running instance of Gerbera.
-
-```
-http://localhost:49152/gerbera.html
-```
-
-### Feature List
-
-The Gerbera Web UI contains the list of features below.
-
-- Login/Logout of Gerbera
-- Database Items View
-- Filesystem Items View
-- Gerbera Tree Expand/Collapse
-- Gerbera Items Download
-- Create/Edit/Delete Items
-- Create/Edit/Delete Autoscan
-- Download Items
+The `/web/old.html` file is the old frameset user interface.  You can continue to access the old webpage
+by clicking the `Leave Beta` link on the Gerbera UI menu.
 
 
 ### Reporting an Issue
 
 If, while using Gerbera Web UI, you have suggestions for improvement
-or encounter a failure [please report an issue](https://github.com/v00d00/gerbera/issues).
+or encounter a failure [please report an issue](https://github.com/gerbera/gerbera/issues).
 
 Browser debug information is helpful to identify the root cause of an issue.
 
