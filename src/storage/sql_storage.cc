@@ -1214,9 +1214,12 @@ String SQLStorage::incrementUpdateIDs(shared_ptr<unordered_set<int>> ids)
 
 // id is the parent_id for cover media to find, and if set, trackArtBase is the case-folded
 // name of the track to try as artwork; we rely on LIKE being case-insensitive
-#ifndef MAX_ART_CONTAINERS
+
+// This limit massively improves performance, but is not currently usable on MySql and MariaDB, apparently
+// Since the actual driver in use is determined at runtime, not build time, we check for sqlite3 and
+// only run when that's what we are using.
 #define MAX_ART_CONTAINERS 100
-#endif
+
 String SQLStorage::findFolderImage(int id, String trackArtBase)
 {
     Ref<StringBuffer> q(new StringBuffer());
@@ -1247,12 +1250,13 @@ String SQLStorage::findFolderImage(int id, String trackArtBase)
     *q << "SELECT " << TQ("ref_id") << " FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE ";
     *q << TQ("parent_id") << '=' << quote(String::from(id)) << " AND ";
     *q << TQ("object_type") << '=' << quote(OBJECT_TYPE_ITEM);
-    // some db's apparently don't support LIMIT in subqueries, so allow this to be disabled; beware performance
-#if (MAX_ART_CONTAINERS > 0)
-    *q <<               " LIMIT " << MAX_ART_CONTAINERS << ")";
-#else
-    *q <<               ")";
-#endif
+
+    // only use this optimization on sqlite3
+    if (ConfigManager::getInstance()->getOption(CFG_SERVER_STORAGE_DRIVER) == "sqlite3") {
+        *q <<               " LIMIT " << MAX_ART_CONTAINERS << ")";
+    } else {
+        *q <<               ")";
+    }
     *q <<       ")";
     *q << "     ) OR ";
 #endif
