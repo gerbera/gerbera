@@ -1609,6 +1609,16 @@ void ConfigManager::validate(String serverhome)
     SET_STRARR_OPTION(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
 #endif
 
+#if defined(HAVE_FFMPEG)
+   el = getElement(_("/import/library-options/ffmpeg/auxdata"));
+   if (el == nullptr)
+   {
+       getOption(_("/import/library-options/ffmpeg/auxdata"), _(""));
+   }
+   NEW_STRARR_OPTION(createArrayFromNodeset(el, _("add-data"), _("tag")));
+   SET_STRARR_OPTION(CFG_IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST);
+#endif
+
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
     temp = getOption(_("/server/extended-runtime-options/ffmpegthumbnailer/"
                        "attribute::enabled"),

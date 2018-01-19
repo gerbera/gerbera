@@ -81,6 +81,36 @@ FfmpegHandler::FfmpegHandler()
 {
 }
 
+static void addFfmpegAuxdataFields(Ref<CdsItem> item, AVFormatContext *pFormatCtx)
+{
+   if (!pFormatCtx->metadata)
+   {
+       log_debug("no metadata\n");
+       return;
+   }
+
+   Ref<StringConverter> sc = StringConverter::m2i();
+   Ref<ConfigManager> cm = ConfigManager::getInstance();
+   Ref<Array<StringBase> > aux = cm->getStringArrayOption(CFG_IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST);
+   if (aux != nullptr)
+   {
+       for (int j = 0; j < aux->size(); j++)
+       {
+           String desiredTag(aux->get(j));
+           if (string_ok(desiredTag))
+           {
+               AVDictionaryEntry *tag = NULL;
+               tag = av_dict_get(pFormatCtx->metadata, desiredTag.c_str(), NULL, AV_DICT_IGNORE_SUFFIX);
+               if (tag && tag->value && tag->value[0])
+               {
+                   log_debug("Added %s: %s\n", desiredTag.c_str(), tag->value);
+                   item->setAuxData(desiredTag, sc->convert(tag->value));
+               }
+           }
+       }
+   }
+} //addFfmpegAuxdataFields
+
 static void addFfmpegMetadataFields(Ref<CdsItem> item, AVFormatContext* pFormatCtx)
 {
     AVDictionaryEntry* e = NULL;
@@ -110,8 +140,8 @@ static void addFfmpegMetadataFields(Ref<CdsItem> item, AVFormatContext* pFormatC
         } else if (strcmp(e->key, "genre") == 0) {
             log_debug("Identified metadata genre: %s\n", e->value);
             field = M_GENRE;
-        } else if (strcmp(e->key, "comment") == 0) {
-            log_debug("Identified metadata comment: %s\n", e->value);
+        } else if (strcmp(e->key, "description") == 0) {
+            log_debug("Identified metadata description: %s\n", e->value);
             field = M_DESCRIPTION;
         } else if (strcmp(e->key, "track") == 0) {
             log_debug("Identified metadata track: %d\n", e->value);
@@ -245,6 +275,8 @@ void FfmpegHandler::fillMetadata(Ref<CdsItem> item)
     }
     // Add metadata using ffmpeg library calls
     addFfmpegMetadataFields(item, pFormatCtx);
+    // Add auxdata
+    addFfmpegAuxdataFields(item, pFormatCtx);
     // Add resources using ffmpeg library calls
     addFfmpegResourceFields(item, pFormatCtx, &x, &y);
 
