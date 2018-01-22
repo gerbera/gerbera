@@ -563,7 +563,8 @@ if(WITH_GOOGLETEST)
         include(CTest)
         set(gerberatestFILES
             test/dictionary_test.cc
-            test/runtime_test.cc)
+            test/runtime_test.cc
+            test/search_handler_test.cc)
 
         # Prevent GoogleTest from overriding our compiler/linker options
         # when building with Visual Studio
