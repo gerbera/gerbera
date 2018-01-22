@@ -16,17 +16,6 @@ The Gerbera Web UI is written with the following tools:
 - Mocha
 
 
-## Running the UI
-
-The gerbera-web UI is placed alongside the existing web server root location.  This allows you to test the Gerbera Web
-by visiting the home page directly from a running server:
-```
-http://localhost:49152/gerbera.html
-```
-While features are being built, the file will be `gerbera.html`.  Once primary features are available, this file will become the
-defacto `index.html` file for the Web UI.
-
-
 ## Developing the UI
 
 ### Setup the enviornment

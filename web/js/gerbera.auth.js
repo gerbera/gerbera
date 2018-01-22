@@ -158,7 +158,7 @@ GERBERA.Auth = (function () {
     LOGGED_IN = false
     expire.setTime(now.getTime() - 3600000 * 24 * 360)
     $.cookie('SID', null, {expires: expire})
-    GERBERA.App.reload('/gerbera.html')
+    GERBERA.App.reload('/index.html')
   }
 
   return {

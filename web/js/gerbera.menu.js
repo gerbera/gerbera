@@ -77,7 +77,7 @@ GERBERA.Menu = (function () {
     GERBERA.Tree.destroy()
     GERBERA.Trail.destroy()
     GERBERA.Items.destroy()
-    GERBERA.App.reload('/index.html')
+    GERBERA.App.reload('/old.html')
   }
 
   var selectType = function (menuItem) {
