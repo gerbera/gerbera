@@ -20,8 +20,8 @@ static std::unordered_map<std::string, TokenType> tokenTypes {
     {"<=", TokenType::COMPAREOP},
     {">", TokenType::COMPAREOP},
     {">=", TokenType::COMPAREOP},
-    {"and", TokenType::ANDOR},
-    {"or", TokenType::ANDOR}
+    {"and", TokenType::AND},
+    {"or", TokenType::OR}
 };
 
 std::unique_ptr<std::string> aslowercase(const std::string& src)
@@ -153,7 +153,7 @@ void SearchParser::getNextToken()
     currentToken = lexer->nextToken();
 }
 
-std::unique_ptr<ASTNode> SearchParser::parseSearchCriteria()
+std::unique_ptr<ASTNode> SearchParser::parse()
 {
     getNextToken();
     if (currentToken->getType()==TokenType::ASTERISK)
@@ -164,39 +164,106 @@ std::unique_ptr<ASTNode> SearchParser::parseSearchCriteria()
 
 std::unique_ptr<ASTNode> SearchParser::parseSearchExpression()
 {
-    // TODO need to handle and/or, parentheses
     std::unique_ptr<ASTNode> root = nullptr;
-    if (currentToken->getType()==TokenType::PROPERTY)
-        root = parseRelationshipExpression();
-    else
-        throw _Exception(_("Failed to parse search criteria"));
+    std::unique_ptr<ASTNode> currentNode = nullptr;
+    std::unique_ptr<ASTNode> expressionNode = nullptr;
+    std::unique_ptr<ASTNode> lhsNode = nullptr;
+    std::unique_ptr<ASTNode> rhsNode = nullptr;
+    TokenType currentOperator = TokenType::INVALID;
+    while (currentToken) {
+        if (currentToken->getType() == TokenType::PROPERTY) {
+            expressionNode = parseRelationshipExpression();
+            if (currentOperator == TokenType::AND) {
+                currentNode = std::make_unique<ASTAndOperator>(std::move(lhsNode), std::move(expressionNode));
+            } else if (currentOperator == TokenType::OR) {
+                currentNode = std::make_unique<ASTOrOperator>(std::move(lhsNode), std::move(expressionNode));
+            } else {
+                currentNode = std::move(expressionNode);
+            }
+            currentOperator = TokenType::INVALID;
+            getNextToken();
+        } else if (currentToken->getType() == TokenType::LPAREN) {
+            currentNode = parseParenthesis();
+            getNextToken();
+        } else if (currentToken->getType() == TokenType::AND || currentToken->getType() == TokenType::OR) {
+            currentOperator = currentToken->getType();
+            lhsNode = std::move(expressionNode);
+            getNextToken();
+        }
+    }
 
+    if (root == nullptr)
+        root = std::move(currentNode);
     return root;
+}
+
+std::unique_ptr<ASTNode> SearchParser::parseParenthesis()
+{
+    if (currentToken->getType() != TokenType::LPAREN)
+        throw _Exception(_("Failed to parse search criteria - expecting a ')'"));
+
+    std::unique_ptr<ASTNode> currentNode = nullptr;
+    std::unique_ptr<ASTNode> lhsNode = nullptr;
+    std::unique_ptr<ASTNode> rhsNode = nullptr;
+    getNextToken();
+    while (currentToken != nullptr && currentToken->getType() != TokenType::RPAREN) {
+        if (currentToken->getType() == TokenType::PROPERTY) {
+            currentNode = parseRelationshipExpression();
+            getNextToken();
+        } else if (currentToken->getType() == TokenType::AND || currentToken->getType() == TokenType::OR) {
+            auto tokenType = currentToken->getType();
+            lhsNode = std::move(currentNode);
+
+            getNextToken();
+            if (currentToken->getType() == TokenType::LPAREN)
+                rhsNode = parseParenthesis();
+            else
+                rhsNode = parseRelationshipExpression();
+
+            if (tokenType == TokenType::AND)
+                currentNode = std::make_unique<ASTAndOperator>(std::move(lhsNode), std::move(rhsNode));
+            else
+                currentNode = std::make_unique<ASTOrOperator>(std::move(lhsNode), std::move(rhsNode));
+
+            getNextToken();
+        } else if (currentToken->getType() == TokenType::LPAREN) {
+            currentNode = parseParenthesis();
+            getNextToken();
+        }
+    }
+    if (currentNode == nullptr)
+        throw _Exception(_("Failed to parse search criteria - bad expression between parenthesis"));
+        
+    return std::make_unique<ASTParenthesis>(std::move(currentNode));
 }
 
 std::unique_ptr<ASTNode> SearchParser::parseRelationshipExpression()
 {
-    if (currentToken->getType()!=TokenType::PROPERTY)
+    if (currentToken->getType() != TokenType::PROPERTY)
         throw _Exception(_("Failed to parse search criteria - expecting a property name"));
 
     std::unique_ptr<ASTNode> relationshipExpr = nullptr;
     std::unique_ptr<ASTProperty> property = std::make_unique<ASTProperty>(currentToken->getValue());
+
     getNextToken();
-    if (currentToken->getType()==TokenType::COMPAREOP) {
+    if (currentToken->getType() == TokenType::COMPAREOP) {
         std::unique_ptr<ASTCompareOperator> operatr = std::make_unique<ASTCompareOperator>(currentToken->getValue());
         getNextToken();
         std::unique_ptr<ASTQuotedString> quotedString = parseQuotedString();
-        relationshipExpr = std::make_unique<ASTCompareExpression>(std::move(property), std::move(operatr), std::move(quotedString));
-    } else if (currentToken->getType()==TokenType::STRINGOP) {
+        relationshipExpr = std::make_unique<ASTCompareExpression>(std::move(property), std::move(operatr),
+            std::move(quotedString));
+    } else if (currentToken->getType() == TokenType::STRINGOP) {
         std::unique_ptr<ASTStringOperator> operatr = std::make_unique<ASTStringOperator>(currentToken->getValue());
         getNextToken();
         std::unique_ptr<ASTQuotedString> quotedString = parseQuotedString();
-        relationshipExpr = std::make_unique<ASTStringExpression>(std::move(property), std::move(operatr), std::move(quotedString));
-    } else if (currentToken->getType()==TokenType::EXISTS) {
+        relationshipExpr = std::make_unique<ASTStringExpression>(std::move(property), std::move(operatr),
+            std::move(quotedString));
+    } else if (currentToken->getType() == TokenType::EXISTS) {
         std::unique_ptr<ASTExistsOperator> operatr = std::make_unique<ASTExistsOperator>(currentToken->getValue());
         getNextToken();
         std::unique_ptr<ASTBoolean> booleanValue = std::make_unique<ASTBoolean>(currentToken->getValue());
-        relationshipExpr = std::make_unique<ASTExistsExpression>(std::move(property), std::move(operatr), std::move(booleanValue));
+        relationshipExpr = std::make_unique<ASTExistsExpression>(std::move(property), std::move(operatr),
+            std::move(booleanValue));
     } else
         throw _Exception(_("Failed to parse search criteria - expecting a comparison, exists, or string operator"));
 
@@ -205,17 +272,17 @@ std::unique_ptr<ASTNode> SearchParser::parseRelationshipExpression()
 
 std::unique_ptr<ASTQuotedString> SearchParser::parseQuotedString()
 {
-    if (currentToken->getType()!=TokenType::DQUOTE)
+    if (currentToken->getType() != TokenType::DQUOTE)
         throw _Exception(_("Failed to parse search criteria - expecting a double-quote"));
     std::unique_ptr<ASTDQuote> openQuote = std::make_unique<ASTDQuote>(currentToken->getValue());
     getNextToken();
 
-    if (currentToken->getType()!=TokenType::ESCAPEDSTRING)
+    if (currentToken->getType() != TokenType::ESCAPEDSTRING)
         throw _Exception(_("Failed to parse search criteria - expecting an escaped string value")); 
     std::unique_ptr<ASTEscapedString> escapedString = std::make_unique<ASTEscapedString>(currentToken->getValue());
     getNextToken();
     
-    if (currentToken->getType()!=TokenType::DQUOTE)
+    if (currentToken->getType() != TokenType::DQUOTE)
         throw _Exception(_("Failed to parse search criteria - expecting a double-quote"));
     std::unique_ptr<ASTDQuote> closeQuote = std::make_unique<ASTDQuote>(currentToken->getValue());
     getNextToken();
@@ -230,6 +297,7 @@ void SearchParser::checkIsExpected(TokenType tokenType, const std::string& token
         throw _Exception(_(errorMsg.c_str()));
     }
 }
+
 uvCdsObject SearchHandler::executeSearch(SearchParam& searchParam)
 {
     return nullptr;

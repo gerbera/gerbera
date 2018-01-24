@@ -14,6 +14,32 @@
 #include <vector>
 #include <unordered_map>
 
+class Namee
+{
+public:
+    //! Default constructor
+    Namee() = default;
+
+    //! Copy constructor
+    Namee(const Namee &other) = default;
+
+    //! Move constructor
+    Namee(Namee &&other) noexcept = default;
+
+    //! Destructor
+    virtual ~Namee() noexcept = default;
+
+    //! Copy assignment operator
+    Namee& operator=(const Namee &other) = default;
+
+    //! Move assignment operator
+    Namee& operator=(Namee &&other) noexcept = default;
+
+
+
+protected:
+private:
+};
 class SearchParam {
 protected:
     const std::string& containerID;
@@ -32,7 +58,7 @@ public:
 
 enum class TokenType
 {
-    ASTERISK, DQUOTE, ESCAPEDSTRING, PROPERTY, BOOLVAL, EXISTS, STRINGOP, COMPAREOP, ANDOR, LPAREN, RPAREN
+    ASTERISK, DQUOTE, ESCAPEDSTRING, PROPERTY, BOOLVAL, EXISTS, STRINGOP, COMPAREOP, AND, OR, LPAREN, RPAREN, INVALID
 };
 
 class SearchToken {
@@ -83,7 +109,14 @@ protected:
 //
 class ASTNode {
 public:
+    ASTNode(std::unique_ptr<SQLEmitter> emitter)
+        : sqlEmitter(std:move(emitter))
+    {};
     virtual ~ASTNode() = default;
+
+protected:
+    virtual std::string emit() = 0;
+    std::unique_ptr<SQLEmitter> sqlEmitter;
 };
 
 class ASTAsterisk : public ASTNode {
@@ -107,18 +140,13 @@ protected:
     std::string value;
 };
 
-class ASTLParen : public ASTNode {
+class ASTParenthesis : public ASTNode {
 public:
-    ASTLParen(std::string value) : value(std::move(value)){};
+    ASTParenthesis(std::unique_ptr<ASTNode> node)
+        : node(std::move(node))
+    {};
 protected:
-    std::string value;
-};
-
-class ASTRParen : public ASTNode {
-public:
-    ASTRParen(std::string value) : value(std::move(value)){};
-protected:
-    std::string value;
+    std::unique_ptr<ASTNode> node;
 };
 
 class ASTDQuote : public ASTNode {
@@ -213,6 +241,28 @@ protected:
     std::unique_ptr<ASTBoolean> rhs;
 };
 
+class ASTAndOperator : public ASTNode {
+public:
+    ASTAndOperator(std::unique_ptr<ASTNode> lhs, std::unique_ptr<ASTNode> rhs)
+        : lhs(std::move(lhs))
+        , rhs(std::move(rhs))
+    {};
+protected:
+    std::unique_ptr<ASTNode> lhs;
+    std::unique_ptr<ASTNode> rhs;
+};
+
+class ASTOrOperator : public ASTNode {
+public:
+    ASTOrOperator(std::unique_ptr<ASTNode> lhs, std::unique_ptr<ASTNode> rhs)
+        : lhs(std::move(lhs))
+        , rhs(std::move(rhs))
+    {};
+protected:
+    std::unique_ptr<ASTNode> lhs;
+    std::unique_ptr<ASTNode> rhs;
+};
+
 class SearchParser {
 public:
     SearchParser(const std::string& input);
@@ -220,9 +270,9 @@ public:
 
 protected:
     void getNextToken();
-    std::unique_ptr<ASTNode> parseSearchCriteria();
     std::unique_ptr<ASTNode> parseSearchExpression();
     std::unique_ptr<ASTNode> parseRelationshipExpression();
+    std::unique_ptr<ASTNode> parseParenthesis();
     std::unique_ptr<ASTQuotedString> parseQuotedString();
     void checkIsExpected(TokenType tokenType, const std::string& tokenTypeDescription);
 

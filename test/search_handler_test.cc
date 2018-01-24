@@ -17,7 +17,7 @@ decltype(auto) getAllTokens(const std::string& input)
     return searchTokens;
 }
 
-::testing::AssertionResult executeTest(const std::string& input,
+::testing::AssertionResult executeSearchLexerTest(const std::string& input,
     const std::vector<std::pair<std::string, TokenType>>& expectedTokens)
 {
     auto tokens = getAllTokens(input);
@@ -77,11 +77,11 @@ TEST(SearchLexer,OneComplexTokenRecognized)
 
     tokens = getAllTokens("and");
     EXPECT_EQ(1, tokens->size());
-    EXPECT_EQ(SearchToken(TokenType::ANDOR, "and"), *(tokens->at(0)));
+    EXPECT_EQ(SearchToken(TokenType::AND, "and"), *(tokens->at(0)));
 
     tokens = getAllTokens("OR");
     EXPECT_EQ(1, tokens->size());
-    EXPECT_EQ(SearchToken(TokenType::ANDOR, "OR"), *(tokens->at(0)));
+    EXPECT_EQ(SearchToken(TokenType::OR, "OR"), *(tokens->at(0)));
 
     tokens = getAllTokens("exists");
     EXPECT_EQ(1, tokens->size());
@@ -111,7 +111,7 @@ TEST(SearchLexer, MultipleTokens)
         {"=", TokenType::COMPAREOP},
         {"a", TokenType::PROPERTY}
     };
-    EXPECT_TRUE(executeTest(input, expectedTokens));
+    EXPECT_TRUE(executeSearchLexerTest(input, expectedTokens));
 
     input = "x = a";
     expectedTokens = {
@@ -119,7 +119,7 @@ TEST(SearchLexer, MultipleTokens)
         {"=", TokenType::COMPAREOP},
         {"a", TokenType::PROPERTY}
     };
-    EXPECT_TRUE(executeTest(input, expectedTokens));
+    EXPECT_TRUE(executeSearchLexerTest(input, expectedTokens));
 
     input = "xyz=abc";
     expectedTokens = {
@@ -127,7 +127,7 @@ TEST(SearchLexer, MultipleTokens)
         {"=", TokenType::COMPAREOP},
         {"abc", TokenType::PROPERTY}
     };
-    EXPECT_TRUE(executeTest(input, expectedTokens));
+    EXPECT_TRUE(executeSearchLexerTest(input, expectedTokens));
 
     input = "xyz=abc fg >= hi";
     expectedTokens = {
@@ -138,7 +138,7 @@ TEST(SearchLexer, MultipleTokens)
         {">=", TokenType::COMPAREOP},
         {"hi", TokenType::PROPERTY}
     };
-    EXPECT_TRUE(executeTest(input, expectedTokens));
+    EXPECT_TRUE(executeSearchLexerTest(input, expectedTokens));
 
     input = "x=\"a\"";
     expectedTokens = {
@@ -148,7 +148,7 @@ TEST(SearchLexer, MultipleTokens)
         {"a", TokenType::ESCAPEDSTRING},
         {"\"", TokenType::DQUOTE}
     };
-    EXPECT_TRUE(executeTest(input, expectedTokens));
+    EXPECT_TRUE(executeSearchLexerTest(input, expectedTokens));
 
     input = "dc:creator = \"Kyuss\"";
     expectedTokens = {
@@ -158,7 +158,7 @@ TEST(SearchLexer, MultipleTokens)
         {"Kyuss", TokenType::ESCAPEDSTRING},
         {"\"", TokenType::DQUOTE}
     };
-    EXPECT_TRUE(executeTest(input, expectedTokens));
+    EXPECT_TRUE(executeSearchLexerTest(input, expectedTokens));
 
     input = "dc:creator = \"some band with \\\"a double-quote\"";
     expectedTokens = {
@@ -168,7 +168,7 @@ TEST(SearchLexer, MultipleTokens)
         {"some band with \"a double-quote", TokenType::ESCAPEDSTRING},
         {"\"", TokenType::DQUOTE}
     };
-    EXPECT_TRUE(executeTest(input, expectedTokens));
+    EXPECT_TRUE(executeSearchLexerTest(input, expectedTokens));
 
     input = "dc:creator = \"some band with \\\"a double-quote\\\"\"";
     expectedTokens = {
@@ -178,7 +178,7 @@ TEST(SearchLexer, MultipleTokens)
         {"some band with \"a double-quote\"", TokenType::ESCAPEDSTRING},
         {"\"", TokenType::DQUOTE}
     };
-    EXPECT_TRUE(executeTest(input, expectedTokens));
+    EXPECT_TRUE(executeSearchLexerTest(input, expectedTokens));
 
     input = "upnp:class derivedfrom \"object.item.audioItem\" and upnp:artist=\"King Krule\"";
     expectedTokens = {
@@ -187,14 +187,14 @@ TEST(SearchLexer, MultipleTokens)
         {"\"", TokenType::DQUOTE},
         {"object.item.audioItem", TokenType::ESCAPEDSTRING},
         {"\"", TokenType::DQUOTE},
-        {"and", TokenType::ANDOR},
+        {"and", TokenType::AND},
         {"upnp:artist", TokenType::PROPERTY},
         {"=", TokenType::COMPAREOP},
         {"\"", TokenType::DQUOTE},
         {"King Krule", TokenType::ESCAPEDSTRING},
         {"\"", TokenType::DQUOTE},
     };
-    EXPECT_TRUE(executeTest(input, expectedTokens));
+    EXPECT_TRUE(executeSearchLexerTest(input, expectedTokens));
 
     input = "upnp:class derivedfrom \"object.item.audioItem\" and (upnp:artist=\"King Krule\" or dc:title=\"Heartattack and Vine\")";
     expectedTokens = {
@@ -203,14 +203,14 @@ TEST(SearchLexer, MultipleTokens)
         {"\"", TokenType::DQUOTE},
         {"object.item.audioItem", TokenType::ESCAPEDSTRING},
         {"\"", TokenType::DQUOTE},
-        {"and", TokenType::ANDOR},
+        {"and", TokenType::AND},
         {"(", TokenType::LPAREN},
         {"upnp:artist", TokenType::PROPERTY},
         {"=", TokenType::COMPAREOP},
         {"\"", TokenType::DQUOTE},
         {"King Krule", TokenType::ESCAPEDSTRING},
         {"\"", TokenType::DQUOTE},
-        {"or", TokenType::ANDOR},
+        {"or", TokenType::OR},
         {"dc:title", TokenType::PROPERTY},
         {"=", TokenType::COMPAREOP},
         {"\"", TokenType::DQUOTE},
@@ -218,6 +218,12 @@ TEST(SearchLexer, MultipleTokens)
         {"\"", TokenType::DQUOTE},
         {")", TokenType::RPAREN},
     };
-    EXPECT_TRUE(executeTest(input, expectedTokens));
+    EXPECT_TRUE(executeSearchLexerTest(input, expectedTokens));
 }
 
+TEST(SearchParser, SimpleSearchCriteria)
+{
+    SearchParser parser("x=\"a\"");
+    auto rootNode = parser.parse();
+    ASSERT_TRUE(rootNode != nullptr);
+}
