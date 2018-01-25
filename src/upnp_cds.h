@@ -80,10 +80,12 @@ protected:
     /// GetSystemUpdateID(ui4 Id)
     void upnp_action_GetSystemUpdateID(zmm::Ref<ActionRequest> request);
 
+    UpnpDevice_Handle deviceHandle;
+
 public:
     /// \brief Constructor for the CDS, saves the service type and service id
     /// in internal variables.
-    ContentDirectoryService();
+    explicit ContentDirectoryService(UpnpDevice_Handle deviceHandle);
     ~ContentDirectoryService();
 
     /// \brief Dispatches the ActionRequest between the available actions.

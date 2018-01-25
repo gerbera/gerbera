@@ -490,9 +490,6 @@ int ContentManager::_addFile(String path, String rootpath, bool recursive, bool 
 
     Ref<Storage> storage = Storage::getInstance();
 
-    Ref<UpdateManager> um = UpdateManager::getInstance();
-    //Ref<StringConverter> f2i = StringConverter::f2i();
-
     Ref<CdsObject> obj = storage->findObjectByPath(path);
     if (obj == nullptr) {
         obj = createObjectFromFile(path);
@@ -985,7 +982,7 @@ void ContentManager::updateObject(int objectID, Ref<Dictionary> parameters)
 void ContentManager::addObject(zmm::Ref<CdsObject> obj)
 {
     obj->validate();
-    int parent_id;
+
     Ref<Storage> storage = Storage::getInstance();
     Ref<UpdateManager> um = UpdateManager::getInstance();
     Ref<SessionManager> sm = SessionManager::getInstance();
@@ -1000,7 +997,7 @@ void ContentManager::addObject(zmm::Ref<CdsObject> obj)
     um->containerChanged(containerChanged);
     sm->containerChangedUI(containerChanged);
 
-    parent_id = obj->getParentID();
+    int parent_id = obj->getParentID();
     if ((parent_id != -1) && (storage->getChildCount(parent_id) == 1)) {
         Ref<CdsObject> parent; //(new CdsObject());
         parent = storage->loadObject(parent_id);

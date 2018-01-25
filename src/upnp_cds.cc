@@ -37,9 +37,10 @@
 using namespace zmm;
 using namespace mxml;
 
-ContentDirectoryService::ContentDirectoryService()
+ContentDirectoryService::ContentDirectoryService(UpnpDevice_Handle deviceHandle)
     : systemUpdateID(0)
     , stringLimit(ConfigManager::getInstance()->getIntOption(CFG_SERVER_UPNP_TITLE_AND_DESC_STRING_LIMIT))
+    , deviceHandle(deviceHandle)
 {
 }
 
@@ -62,8 +63,8 @@ void ContentDirectoryService::upnp_action_Browse(Ref<ActionRequest> request)
     String RequestedCount = req->getChildText(_("RequestedCount"));
     // String SortCriteria; // not yet supported
 
-    //log_debug("Browse received parameters: ObjectID [%s] BrowseFlag [%s] StartingIndex [%s] RequestedCount [%s]\n",
-    //            ObjectID.c_str(), BrowseFlag.c_str(), StartingIndex.c_str(), RequestedCount.c_str());
+    log_debug("Browse received parameters: ObjectID [%s] BrowseFlag [%s] StartingIndex [%s] RequestedCount [%s]\n",
+              objID.c_str(), BrowseFlag.c_str(), StartingIndex.c_str(), RequestedCount.c_str());
 
     if (objID == nullptr)
         throw UpnpException(UPNP_E_NO_SUCH_ID, _("empty object id"));
@@ -227,7 +228,7 @@ void ContentDirectoryService::process_subscription_request(zmm::Ref<Subscription
         throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, _("Could not convert property set to ixml"));
     }
 
-    UpnpAcceptSubscriptionExt(Server::getInstance()->getDeviceHandle(),
+    UpnpAcceptSubscriptionExt(deviceHandle,
         ConfigManager::getInstance()->getOption(CFG_SERVER_UDN).c_str(),
         DESC_CDS_SERVICE_ID, event, request->getSubscriptionID().c_str());
 
@@ -259,7 +260,7 @@ void ContentDirectoryService::subscription_update(String containerUpdateIDs_CSV)
         throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, _("Could not convert property set to ixml"));
     }
 
-    UpnpNotifyExt(Server::getInstance()->getDeviceHandle(),
+    UpnpNotifyExt(deviceHandle,
         ConfigManager::getInstance()->getOption(CFG_SERVER_UDN).c_str(),
         DESC_CDS_SERVICE_ID, event);
 

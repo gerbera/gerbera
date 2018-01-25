@@ -46,7 +46,6 @@
 /// These functions were only implemented to enable Xbox360 support.
 /// \todo the whole service class should be rewritten with the use of inheritance
 class MRRegistrarService {
-
 protected:
     /// \brief UPnP standard defined service type
     /// \todo Check if it makes sense to use it as it is done now...why not define constants here?
@@ -77,10 +76,12 @@ protected:
     /// IsValidated(string DeviceID, i4 Result)
     void upnp_action_IsValidated(zmm::Ref<ActionRequest> request);
 
+    UpnpDevice_Handle deviceHandle;
+
 public:
     /// \brief Constructor for MRReg
     /// in internal variables.
-    MRRegistrarService();
+    MRRegistrarService(UpnpDevice_Handle deviceHandle);
     ~MRRegistrarService();
 
     /// \brief Dispatches the ActionRequest between the available actions.
