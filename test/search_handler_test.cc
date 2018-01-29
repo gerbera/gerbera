@@ -1,5 +1,7 @@
 #include "gtest/gtest.h"
 #include "search_handler.h"
+#include "zmm/exception.h"
+#include <iostream>
 
 using upVecUpST = std::unique_ptr<std::vector<std::unique_ptr<SearchToken>>>;
 decltype(auto) getAllTokens(const std::string& input)
@@ -37,6 +39,27 @@ decltype(auto) getAllTokens(const std::string& input)
                 << static_cast<int>(tokens->at(i)->getType()) << "]";
     }
     return ::testing::AssertionSuccess();
+}
+
+::testing::AssertionResult executeSearchParserTest(const SQLEmitter& emitter, const std::string& input,
+    const std::string expectedOutput)
+{
+    std::cout << "Testing with input [" << input << "]" << std::endl;
+
+    try {
+        auto parser = SearchParser(emitter, input);
+        auto rootNode = parser.parse();
+        if (rootNode == nullptr)
+            return ::testing::AssertionFailure() << "Failed to create AST";
+
+        auto output = rootNode->emit();
+        if (output != expectedOutput)
+            return ::testing::AssertionFailure() << "\nExpected [" << expectedOutput << "]\nActual   [" << output << "]\n";
+
+        return ::testing::AssertionSuccess();
+    } catch (const zmm::Exception& e) {
+        return ::testing::AssertionFailure() << e.getMessage().c_str();
+    }
 }
 
 TEST(SearchLexer, OneSimpleTokenRecognized)
@@ -221,9 +244,51 @@ TEST(SearchLexer, MultipleTokens)
     EXPECT_TRUE(executeSearchLexerTest(input, expectedTokens));
 }
 
-TEST(SearchParser, SimpleSearchCriteria)
+TEST(SearchParser, SimpleSearchCriteriaForSqlite)
 {
-    SearchParser parser("x=\"a\"");
-    auto rootNode = parser.parse();
-    ASSERT_TRUE(rootNode != nullptr);
+    SqliteEmitter sqlEmitter;
+    // relExp
+    EXPECT_TRUE(executeSearchParserTest(sqlEmitter,
+            "dc:title=\"Hospital Roll Call\"",
+            "(instr(lower(metadata), lower('dc%3Atitle=Hospital%20Roll%20Call')) > 0 and upnp_class is not null)"));
+
+    // relExp
+    EXPECT_TRUE(executeSearchParserTest(sqlEmitter,
+            "upnp:album=\"Scraps At Midnight\"",
+            "(instr(lower(metadata), lower('upnp%3Aalbum=Scraps%20At%20Midnight')) > 0 and upnp_class is not null)"));
+
+    // relExp or relExp
+    EXPECT_TRUE(executeSearchParserTest(sqlEmitter,
+            "upnp:album=\"Scraps At Midnight\" or dc:title=\"Hospital Roll Call\"",
+            "(instr(lower(metadata), lower('upnp%3Aalbum=Scraps%20At%20Midnight')) > 0 and upnp_class is not null) or (instr(lower(metadata), lower('dc%3Atitle=Hospital%20Roll%20Call')) > 0 and upnp_class is not null)"));
+
+    // relExp or relExp or relExp
+    EXPECT_TRUE(executeSearchParserTest(sqlEmitter,
+            "upnp:album=\"Scraps At Midnight\" or dc:title=\"Hospital Roll Call\" or upnp:artist=\"Deafheaven\"",
+            "(instr(lower(metadata), lower('upnp%3Aalbum=Scraps%20At%20Midnight')) > 0 and upnp_class is not null) or (instr(lower(metadata), lower('dc%3Atitle=Hospital%20Roll%20Call')) > 0 and upnp_class is not null) or (instr(lower(metadata), lower('upnp%3Aartist=Deafheaven')) > 0 and upnp_class is not null)"));
+
+    // (relExp)
+    EXPECT_TRUE(executeSearchParserTest(sqlEmitter,
+            "(upnp:album=\"Scraps At Midnight\")",
+            "((instr(lower(metadata), lower('upnp%3Aalbum=Scraps%20At%20Midnight')) > 0 and upnp_class is not null))"));
+
+    // (relExp or relExp)
+    EXPECT_TRUE(executeSearchParserTest(sqlEmitter,
+            "(upnp:album=\"Scraps At Midnight\" or dc:title=\"Hospital Roll Call\")",
+            "((instr(lower(metadata), lower('upnp%3Aalbum=Scraps%20At%20Midnight')) > 0 and upnp_class is not null) or (instr(lower(metadata), lower('dc%3Atitle=Hospital%20Roll%20Call')) > 0 and upnp_class is not null))"));
+
+    // (relExp or relExp) or relExp
+    EXPECT_TRUE(executeSearchParserTest(sqlEmitter,
+            "(upnp:album=\"Scraps At Midnight\" or dc:title=\"Hospital Roll Call\") or upnp:artist=\"Deafheaven\"",
+            "((instr(lower(metadata), lower('upnp%3Aalbum=Scraps%20At%20Midnight')) > 0 and upnp_class is not null) or (instr(lower(metadata), lower('dc%3Atitle=Hospital%20Roll%20Call')) > 0 and upnp_class is not null)) or (instr(lower(metadata), lower('upnp%3Aartist=Deafheaven')) > 0 and upnp_class is not null)"));
+
+    // relExp or (relExp or relExp)
+    EXPECT_TRUE(executeSearchParserTest(sqlEmitter,
+            "upnp:album=\"Scraps At Midnight\" or (dc:title=\"Hospital Roll Call\" or upnp:artist=\"Deafheaven\")",
+            "(instr(lower(metadata), lower('upnp%3Aalbum=Scraps%20At%20Midnight')) > 0 and upnp_class is not null) or ((instr(lower(metadata), lower('dc%3Atitle=Hospital%20Roll%20Call')) > 0 and upnp_class is not null) or (instr(lower(metadata), lower('upnp%3Aartist=Deafheaven')) > 0 and upnp_class is not null))"));
 }
+
+
+// select * from mt_cds_object where id=215291 or dc_title = 'Thong Song' or id in (194099,214889,215237,215239,215241,202037)
+// select * from mt_cds_object where (upnp_class is null and dc_title='Hospital Roll Call') or id=204320 or id in (194099,203869,204303,204305,194717,194114)
+// 194099,203869,204303,204305,194717,194114
