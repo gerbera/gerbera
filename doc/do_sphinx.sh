@@ -5,24 +5,34 @@ DOC_DIST_DIR=$DOC_BUILD_DIR/dist
 VENV_NAME=gerbera-env
 SPHINX_THEME=sphinx_rtd_theme
 SPHINX_BUILDER=html
+CLOBBER=$1
 
 function create {
-    if [ -d "$DOC_BUILD_DIR" ]
+    if [ -d "$DOC_BUILD_DIR" ] && [ "$CLOBBER" == "--clobber" ]
     then
       printf "\nRemoving $DOC_BUILD_DIR \n\n"
       rm -Rf $DOC_BUILD_DIR
     fi
 
-    printf "\nCreating Gerbera documentation build directory $DOC_BUILD_DIR\n\n"
-    mkdir $DOC_BUILD_DIR
-    mkdir $DOC_DIST_DIR
+    if [ ! -d "$DOC_BUILD_DIR" ]
+    then
+      printf "\nCreating Gerbera documentation build directory $DOC_BUILD_DIR\n\n"
+      mkdir $DOC_BUILD_DIR
+      mkdir $DOC_DIST_DIR
+    fi
+
     cd $DOC_BUILD_DIR
 }
 
 function setup {
     hash virtualenv 2>/dev/null || { echo >&2 "Script requires Python virtualenv but it's not installed.  Aborting."; exit 1; }
-    printf "\nCreating Gerbera Python virtualenv\n\n"
-    python3 -m virtualenv $VENV_NAME
+
+    if [ ! -d "$DOC_BUILD_DIR/$VENV_NAME" ]
+    then
+      printf "\nCreating Gerbera Python virtualenv\n\n"
+      python3 -m virtualenv $VENV_NAME
+    fi
+
     source $VENV_NAME/bin/activate
 }
 

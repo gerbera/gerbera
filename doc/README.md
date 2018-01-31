@@ -23,6 +23,12 @@ $ chmod u+x ./do_sphinx.sh
 $ ./do_sphinx.sh
 ```
 
+> To clear an existing `_build` directory
+
+```bash
+$ ./do_sphinx.sh --clobber
+```
+
 The script does the following activities:
 
 * Creates a Python **virtualenv** under `doc/_build/gerbera-env`
@@ -34,7 +40,7 @@ Output looks similar to below:
 > Example run using `macOS High Sierra`
 
 ```bash
-bash-3.2$ ./do_sphinx.sh 
+bash-3.2$ ./do_sphinx.sh --clobber
 
 Removing _build directory
 
