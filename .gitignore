@@ -12,3 +12,4 @@ mediatomb
 **/node_modules/
 **/.idea/
 **/coverage/
+**/_build
