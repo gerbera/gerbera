@@ -131,13 +131,13 @@ protected:
 
 class ASTParenthesis : public ASTNode {
 public:
-    ASTParenthesis(const SQLEmitter& sqlEmitter, std::unique_ptr<ASTNode> node)
+    ASTParenthesis(const SQLEmitter& sqlEmitter, std::shared_ptr<ASTNode> node)
         : ASTNode(sqlEmitter), bracketedNode(std::move(node))
     {};
     virtual std::string emit();
     virtual ~ASTParenthesis() = default;
 protected:
-    std::unique_ptr<ASTNode> bracketedNode;
+    std::shared_ptr<ASTNode> bracketedNode;
 };
 
 class ASTDQuote : public ASTNode {
@@ -164,8 +164,8 @@ protected:
 
 class ASTQuotedString : public ASTNode {
 public:
-    ASTQuotedString(const SQLEmitter& sqlEmitter, std::unique_ptr<ASTDQuote> openQuote,
-        std::unique_ptr<ASTEscapedString> escapedString, std::unique_ptr<ASTDQuote> closeQuote)
+    ASTQuotedString(const SQLEmitter& sqlEmitter, std::shared_ptr<ASTDQuote> openQuote,
+        std::shared_ptr<ASTEscapedString> escapedString, std::shared_ptr<ASTDQuote> closeQuote)
         : ASTNode(sqlEmitter)
         , openQuote(std::move(openQuote))
         , escapedString(std::move(escapedString))
@@ -174,9 +174,9 @@ public:
     virtual std::string emit();
     virtual ~ASTQuotedString() = default;
 protected:
-    std::unique_ptr<ASTDQuote> openQuote;
-    std::unique_ptr<ASTEscapedString> escapedString;
-    std::unique_ptr<ASTDQuote> closeQuote;
+    std::shared_ptr<ASTDQuote> openQuote;
+    std::shared_ptr<ASTEscapedString> escapedString;
+    std::shared_ptr<ASTDQuote> closeQuote;
 };
 
 /// \brief Represents a comparison operator such as =, >=, <
@@ -196,8 +196,8 @@ protected:
 /// \brief Represents an expression using a comparison operator
 class ASTCompareExpression : public ASTNode {
 public:
-    ASTCompareExpression(const SQLEmitter& sqlEmitter, std::unique_ptr<ASTProperty> lhs,
-        std::unique_ptr<ASTCompareOperator> operatr, std::unique_ptr<ASTQuotedString> rhs)
+    ASTCompareExpression(const SQLEmitter& sqlEmitter, std::shared_ptr<ASTProperty> lhs,
+        std::shared_ptr<ASTCompareOperator> operatr, std::shared_ptr<ASTQuotedString> rhs)
         : ASTNode(sqlEmitter)
         , lhs(std::move(lhs))
         , operatr(std::move(operatr))
@@ -206,9 +206,9 @@ public:
     virtual std::string emit();
     virtual ~ASTCompareExpression() = default;
 protected:
-    std::unique_ptr<ASTProperty> lhs;
-    std::unique_ptr<ASTCompareOperator> operatr;
-    std::unique_ptr<ASTQuotedString> rhs;
+    std::shared_ptr<ASTProperty> lhs;
+    std::shared_ptr<ASTCompareOperator> operatr;
+    std::shared_ptr<ASTQuotedString> rhs;
 };
 
 /// \brief Represents an operator defined by a string such as contains, derivedFrom
@@ -218,6 +218,8 @@ public:
         : ASTNode(sqlEmitter)
         , value(std::move(value)){};
     virtual std::string emit();
+    std::string emit(const std::string& property, const std::string& value);
+    std::string getValue() const { return value; }
     virtual ~ASTStringOperator() = default;
 protected:
     std::string value;
@@ -226,8 +228,8 @@ protected:
 /// \brief Represents an expression using an operator defined by a string
 class ASTStringExpression : public ASTNode {
 public:
-    ASTStringExpression(const SQLEmitter& sqlEmitter, std::unique_ptr<ASTProperty> lhs,
-        std::unique_ptr<ASTStringOperator> operatr, std::unique_ptr<ASTQuotedString> rhs)
+    ASTStringExpression(const SQLEmitter& sqlEmitter, std::shared_ptr<ASTProperty> lhs,
+        std::shared_ptr<ASTStringOperator> operatr, std::shared_ptr<ASTQuotedString> rhs)
         : ASTNode(sqlEmitter)
         , lhs(std::move(lhs))
         , operatr(std::move(operatr))
@@ -236,9 +238,9 @@ public:
     virtual std::string emit();
     virtual ~ASTStringExpression() = default;
 protected:
-    std::unique_ptr<ASTProperty> lhs;
-    std::unique_ptr<ASTStringOperator> operatr;
-    std::unique_ptr<ASTQuotedString> rhs;
+    std::shared_ptr<ASTProperty> lhs;
+    std::shared_ptr<ASTStringOperator> operatr;
+    std::shared_ptr<ASTQuotedString> rhs;
 };
 
 class ASTExistsOperator : public ASTNode {
@@ -255,8 +257,8 @@ protected:
 /// \brief Represents an expression using the exists operator
 class ASTExistsExpression : public ASTNode {
 public:
-    ASTExistsExpression(const SQLEmitter& sqlEmitter, std::unique_ptr<ASTProperty> lhs,
-        std::unique_ptr<ASTExistsOperator> operatr, std::unique_ptr<ASTBoolean> rhs)
+    ASTExistsExpression(const SQLEmitter& sqlEmitter, std::shared_ptr<ASTProperty> lhs,
+        std::shared_ptr<ASTExistsOperator> operatr, std::shared_ptr<ASTBoolean> rhs)
         : ASTNode(sqlEmitter)
         , lhs(std::move(lhs))
         , operatr(std::move(operatr))
@@ -265,15 +267,15 @@ public:
     virtual std::string emit();
     virtual ~ASTExistsExpression() = default;
 protected:
-    std::unique_ptr<ASTProperty> lhs;
-    std::unique_ptr<ASTExistsOperator> operatr;
-    std::unique_ptr<ASTBoolean> rhs;
+    std::shared_ptr<ASTProperty> lhs;
+    std::shared_ptr<ASTExistsOperator> operatr;
+    std::shared_ptr<ASTBoolean> rhs;
 };
 
 class ASTAndOperator : public ASTNode {
 public:
-    ASTAndOperator(const SQLEmitter& sqlEmitter, std::unique_ptr<ASTNode> lhs,
-        std::unique_ptr<ASTNode> rhs)
+    ASTAndOperator(const SQLEmitter& sqlEmitter, std::shared_ptr<ASTNode> lhs,
+        std::shared_ptr<ASTNode> rhs)
         : ASTNode(sqlEmitter)
         , lhs(std::move(lhs))
         , rhs(std::move(rhs))
@@ -281,14 +283,14 @@ public:
     virtual std::string emit();
     virtual ~ASTAndOperator() = default;
 protected:
-    std::unique_ptr<ASTNode> lhs;
-    std::unique_ptr<ASTNode> rhs;
+    std::shared_ptr<ASTNode> lhs;
+    std::shared_ptr<ASTNode> rhs;
 };
 
 class ASTOrOperator : public ASTNode {
 public:
-    ASTOrOperator(const SQLEmitter& sqlEmitter, std::unique_ptr<ASTNode> lhs,
-        std::unique_ptr<ASTNode> rhs)
+    ASTOrOperator(const SQLEmitter& sqlEmitter, std::shared_ptr<ASTNode> lhs,
+        std::shared_ptr<ASTNode> rhs)
         : ASTNode(sqlEmitter)
         , lhs(std::move(lhs))
         , rhs(std::move(rhs))
@@ -296,26 +298,8 @@ public:
     virtual std::string emit();
     virtual ~ASTOrOperator() = default;
 protected:
-    std::unique_ptr<ASTNode> lhs;
-    std::unique_ptr<ASTNode> rhs;
-};
-
-
-class ASTFactory
-{
-public:
-    ASTFactory(const SQLEmitter& sqlEmitter)
-        : sqlEmitter(sqlEmitter)
-    {};
-
-    std::unique_ptr<ASTNode> makeASTAsterisk(std::string value);
-    std::unique_ptr<ASTNode> makeASTBoolean(std::string value);
-    std::unique_ptr<ASTNode> makeASTParenthesis(std::unique_ptr<ASTNode> node);
-    std::unique_ptr<ASTNode> makeASTDQuote(std::string value);
-    std::unique_ptr<ASTNode> makeASTEscapedString(std::string value);
-            
-protected:
-    const SQLEmitter& sqlEmitter;
+    std::shared_ptr<ASTNode> lhs;
+    std::shared_ptr<ASTNode> rhs;
 };
 
 class SQLEmitter
@@ -331,7 +315,8 @@ public:
     virtual std::string emit(const ASTCompareOperator& node,
         const std::string& property, const std::string& value) const = 0;
     virtual std::string emit(const ASTCompareExpression& node) const = 0;
-    virtual std::string emit(const ASTStringOperator& node) const = 0;
+    virtual std::string emit(const ASTStringOperator& node,
+        const std::string& property, const std::string& value) const = 0;
     virtual std::string emit(const ASTStringExpression& node) const = 0;
     virtual std::string emit(const ASTExistsOperator& node) const = 0;
     virtual std::string emit(const ASTExistsExpression& node) const = 0;
@@ -355,7 +340,8 @@ class SqliteEmitter : public SQLEmitter
     std::string emit(const ASTCompareOperator& node,
         const std::string& property, const std::string& value) const override;
     std::string emit(const ASTCompareExpression& node) const override { return "a >= b"; };
-    std::string emit(const ASTStringOperator& node) const override { return "contains"; };
+    std::string emit(const ASTStringOperator& node,
+        const std::string& property, const std::string& value) const override;
     std::string emit(const ASTStringExpression& node) const override { return "a contains b"; };
     std::string emit(const ASTExistsOperator& node) const override { return "exists"; };
     std::string emit(const ASTExistsExpression& node) const override { return "a exists true"; };
@@ -366,19 +352,19 @@ class SqliteEmitter : public SQLEmitter
 class SearchParser {
 public:
     SearchParser(const SQLEmitter& sqlEmitter, const std::string& input);
-    std::unique_ptr<ASTNode> parse();
+    std::shared_ptr<ASTNode> parse();
 
 protected:
     void getNextToken();
-    std::unique_ptr<ASTNode> parseSearchExpression();
-    std::unique_ptr<ASTNode> parseRelationshipExpression();
-    std::unique_ptr<ASTNode> parseParenthesis();
-    std::unique_ptr<ASTQuotedString> parseQuotedString();
+    std::shared_ptr<ASTNode> parseSearchExpression();
+    std::shared_ptr<ASTNode> parseRelationshipExpression();
+    std::shared_ptr<ASTNode> parseParenthesis();
+    std::shared_ptr<ASTQuotedString> parseQuotedString();
     void checkIsExpected(TokenType tokenType, const std::string& tokenTypeDescription);
 
 private:
-    std::unique_ptr<SearchToken> currentToken;
-    std::unique_ptr<SearchLexer> lexer;
+    std::shared_ptr<SearchToken> currentToken;
+    std::shared_ptr<SearchLexer> lexer;
     const SQLEmitter& sqlEmitter;
 };
 
