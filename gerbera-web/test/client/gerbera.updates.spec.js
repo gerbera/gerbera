@@ -345,7 +345,7 @@ describe('Gerbera Updates', function () {
       var startTime = new Date().getTime()
       updateSpy.and.callFake(function () {
         var currentTime = new Date().getTime()
-        expect((currentTime - startTime) >= 200).toBeTruthy('Actual value was ' + (currentTime - startTime))
+        expect((currentTime - startTime) >= 195).toBeTruthy('Actual value was ' + (currentTime - startTime))
         expect((currentTime - startTime) <= 210).toBeTruthy('Actual value was ' + (currentTime - startTime))
         isDone()
       })
