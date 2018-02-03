@@ -24,6 +24,7 @@ set(WITH_SYSTEMD        1 CACHE BOOL "Install Systemd unit file")
 set(WITH_LASTFM         0 CACHE BOOL "Enable LastFM")
 set(WITH_DEBUG          1 CACHE BOOL "Enables debug logging")
 set(WITH_GOOGLETEST     0 CACHE BOOL "Enables GoogleTest")
+set(WITH_METADATA_TABLE 0 CACHE BOOL "Enables use of mt_metadata table in order to support search")
 
 project("gerbera")
 set(gerbera_MAJOR_VERSION     1)
@@ -581,6 +582,10 @@ if(WITH_GOOGLETEST)
         target_link_libraries(gerberatest gtest gmock_main ${configuredLibs})
         add_test(NAME example_test COMMAND gerberatest)
     endif()
+endif()
+
+if(WITH_METADATA_TABLE)
+    add_definitions(-DUSE_METADATA_TABLE)
 endif()
 
 INSTALL(TARGETS gerbera DESTINATION bin)

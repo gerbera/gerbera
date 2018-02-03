@@ -36,6 +36,7 @@
 #include "tools.h"
 #include "update_manager.h"
 #include <climits>
+#include <stdlib.h>
 
 using namespace zmm;
 using namespace std;
@@ -253,7 +254,12 @@ Ref<Array<SQLStorage::AddUpdateTable>> SQLStorage::_addUpdateObject(Ref<CdsObjec
             throw _Exception(_("refId set, but it makes no sense"));
     }
 
-    Ref<Array<AddUpdateTable>> returnVal(new Array<AddUpdateTable>(2));
+    int returnValSize = 2;
+#ifdef USE_METADATA_TABLE
+    // +1 for the encoded property which may not yet be present
+    returnValSize += (obj->getMetadata() == nullptr) ? 0 : obj->getMetadata()->size() + 1; 
+#endif // USE_METADATA_TABLE    
+    Ref<Array<AddUpdateTable>> returnVal(new Array<AddUpdateTable>(returnValSize));
     Ref<Dictionary> cdsObjectSql(new Dictionary());
     returnVal->append(Ref<AddUpdateTable>(new AddUpdateTable(_(CDS_OBJECT_TABLE), cdsObjectSql)));
 
@@ -274,15 +280,28 @@ Ref<Array<SQLStorage::AddUpdateTable>> SQLStorage::_addUpdateObject(Ref<CdsObjec
     //else if (isUpdate)
     //    cdsObjectSql->put(_("dc_title"), _(SQL_NULL));
 
+    Ref<Dictionary> dict = obj->getMetadata();
+#ifndef USE_METADATA_TABLE  
     if (isUpdate)
         cdsObjectSql->put(_("metadata"), _(SQL_NULL));
-    Ref<Dictionary> dict = obj->getMetadata();
     if (dict->size() > 0) {
         if (!hasReference || !refObj->getMetadata()->equals(obj->getMetadata())) {
             cdsObjectSql->put(_("metadata"), quote(dict->encode()));
         }
     }
-
+#else
+    if (dict != nullptr && dict->size() > 0) {
+        Ref<Array<DictionaryElement>> metadataElements = dict->getElements();
+        for (int  i = 0; i < metadataElements->size(); i++) {
+            Ref<Dictionary> metadataSql(new Dictionary());
+            returnVal->append(Ref<AddUpdateTable>(new AddUpdateTable(_(METADATA_TABLE), metadataSql)));
+            Ref<DictionaryElement> property = metadataElements->get(i);
+            metadataSql->put(_("property_name"), property->getKey());
+            metadataSql->put(_("property_value"), property->getValue());
+        }
+    }
+#endif // USE_METADATA_TABLE
+    
     if (isUpdate)
         cdsObjectSql->put(_("auxdata"), _(SQL_NULL));
     dict = obj->getAuxData();
@@ -408,6 +427,9 @@ void SQLStorage::addObject(Ref<CdsObject> obj, int* changedContainer)
     if (data == nullptr)
         return;
     int lastInsertID = INVALID_OBJECT_ID;
+#ifdef USE_METADATA_TABLE
+    int lastMetadataInsertID = INVALID_OBJECT_ID;
+#endif // USE_METADATA_TABLE
     for (int i = 0; i < data->size(); i++) {
         Ref<AddUpdateTable> addUpdateTable = data->get(i);
         String tableName = addUpdateTable->getTable();
@@ -423,9 +445,14 @@ void SQLStorage::addObject(Ref<CdsObject> obj, int* changedContainer)
                 *values << ',';
             }
             *fields << TQ(element->getKey());
-            if (lastInsertID != INVALID_OBJECT_ID && element->getKey() == "id" && element->getValue().toInt() == INVALID_OBJECT_ID)
+            if (lastInsertID != INVALID_OBJECT_ID && element->getKey() == "id" && element->getValue().toInt() == INVALID_OBJECT_ID) {
+#ifdef USE_METADATA_TABLE
+                if (tableName == _(METADATA_TABLE))
+                    *values << lastMetadataInsertID;
+                else
+#endif // USE_METADATA_TABLE
                 *values << lastInsertID;
-            else
+            } else
                 *values << element->getValue();
         }
 
@@ -436,6 +463,15 @@ void SQLStorage::addObject(Ref<CdsObject> obj, int* changedContainer)
             *fields << ',' << TQ("id");
             *values << ',' << quote(lastInsertID);
         }
+#ifdef USE_METADATA_TABLE
+        if (lastMetadataInsertID == INVALID_OBJECT_ID && tableName == _(METADATA_TABLE)) {
+            lastMetadataInsertID = getNextMetadataID();
+            *fields << ',' << TQ("id");
+            *values << ',' << quote(lastMetadataInsertID);
+            *fields << ',' << TQ("item_id");
+            *values << ',' << quote(obj->getID());
+        }
+#endif // USE_METADATA_TABLE
         /* -------------------- */
 
         Ref<StringBuffer> qb(new StringBuffer(256));
@@ -2267,6 +2303,40 @@ void SQLStorage::loadLastID()
     if (lastID < CDS_ID_FS_ROOT)
         throw _Exception(_("could not load correct lastID (db not initialized?)"));
 }
+
+#ifdef USE_METADATA_TABLE
+int SQLStorage::getNextMetadataID()
+{
+    if (lastMetadataID < CDS_ID_FS_ROOT)
+        throw _Exception(_("SQLStorage::getNextMetadataID() called, but lastMetadataID hasn't been loaded correctly yet"));
+    AutoLock lock(nextIDMutex);
+    return ++lastMetadataID;
+}
+
+// if metadata table becomes first-class then should have a parameterized loadLastID()
+// to be called for either mt_cds_object or mt_metadata
+void SQLStorage::loadLastMetadataID()
+{
+    AutoLock lock(nextIDMutex);
+
+    // we don't rely on automatic db generated ids, because of our caching
+    Ref<StringBuffer> qb(new StringBuffer());
+    *qb << "SELECT MAX(" << TQ("id") << ')'
+        << " FROM " << TQ(CDS_OBJECT_TABLE);
+    Ref<SQLResult> res = select(qb);
+    if (res == nullptr)
+        throw _Exception(_("could not load lastID (res==nullptr)"));
+
+    Ref<SQLRow> row = res->nextRow();
+    if (row == nullptr)
+        throw _Exception(_("could not load lastID (row==nullptr)"));
+
+    lastID = row->col(0).toInt();
+    if (lastID < CDS_ID_FS_ROOT)
+        throw _Exception(_("could not load correct lastID (db not initialized?)"));
+}
+
+#endif // USE_METADATA_TABLE
 
 void SQLStorage::addObjectToCache(Ref<CdsObject> object, bool dontLock)
 {

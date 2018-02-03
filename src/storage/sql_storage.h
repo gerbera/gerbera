@@ -48,6 +48,7 @@
 #define CDS_ACTIVE_ITEM_TABLE       "mt_cds_active_item"
 #define INTERNAL_SETTINGS_TABLE     "mt_internal_setting"
 #define AUTOSCAN_TABLE              "mt_autoscan"
+#define METADATA_TABLE              "mt_metadata"
 
 class SQLResult;
 
@@ -239,6 +240,14 @@ private:
     
     int getNextID();
     void loadLastID();
+
+#ifdef USE_METADATA_TABLE
+    int lastMetadataID;
+
+    int getNextMetadataID();
+    void loadLastMetadataID();
+#endif // USE_METADATA_TABLE    
+
     std::mutex nextIDMutex;
     
     zmm::Ref<StorageCache> cache;
