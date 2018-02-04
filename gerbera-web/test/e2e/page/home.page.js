@@ -55,7 +55,9 @@ module.exports = function (driver) {
 
   this.deleteItemFromList = function (idx) {
     return driver.findElements(By.css('.grb-item span.grb-item-delete')).then(function (items) {
-      return items[idx].click()
+      var item = items[idx]
+      item.click()
+      return driver.wait(until.stalenessOf(item))
     })
   }
 

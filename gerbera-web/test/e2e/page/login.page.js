@@ -76,8 +76,7 @@ module.exports = function (driver) {
 
   this.get = function (url) {
     driver.get(url)
-    var loginForm = driver.findElement(By.id('login-form'))
-    driver.wait(until.elementIsEnabled(loginForm), 5000)
+    driver.wait(until.elementIsEnabled(driver.findElement(By.id('login-form'))), 5000)
     return driver.executeScript('$(\'body\').toggleClass(\'notransition\');')
   }
 }

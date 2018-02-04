@@ -14,7 +14,7 @@ test.describe('The gerbera delete item', function () {
   var loginPage, homePage
 
   this.slow(8000)
-  this.timeout(15000)
+  this.timeout(60000)
 
   test.before(function () {
     driver = new webdriver.Builder()

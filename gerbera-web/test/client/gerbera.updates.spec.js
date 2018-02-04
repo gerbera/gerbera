@@ -330,7 +330,7 @@ describe('Gerbera Updates', function () {
       var startTime = new Date().getTime()
       updateSpy.and.callFake(function () {
         var currentTime = new Date().getTime()
-        expect((currentTime - startTime) >= 100).toBeTruthy('Actual value was ' + (currentTime - startTime))
+        expect((currentTime - startTime) >= 95).toBeTruthy('Actual value was ' + (currentTime - startTime))
         expect((currentTime - startTime) <= 110).toBeTruthy('Actual value was ' + (currentTime - startTime))
         isDone()
       })
@@ -375,7 +375,7 @@ describe('Gerbera Updates', function () {
         totalCount++
         var currentTime = new Date().getTime()
         if (totalCount >= 2) {
-          expect((currentTime - startTime) >= 200).toBeTruthy('Interval should accumulate time from start but was ' + (currentTime - startTime))
+          expect((currentTime - startTime) >= 195).toBeTruthy('Interval should accumulate time from start but was ' + (currentTime - startTime))
           expect((currentTime - startTime) <= 210).toBeTruthy('Interval should accumulate time from start but was ' + (currentTime - startTime))
           isDone()
         }
