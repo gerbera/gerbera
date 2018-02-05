@@ -130,6 +130,10 @@ SQLStorage::SQLStorage()
     table_quote_begin = '\0';
     table_quote_end = '\0';
     lastID = INVALID_OBJECT_ID;
+
+#ifdef USE_METADATA_TABLE
+    lastMetadataID = INVALID_OBJECT_ID;
+#endif // USE_METADATA_TABLE    
 }
 
 void SQLStorage::init()
@@ -180,6 +184,10 @@ void SQLStorage::init()
 void SQLStorage::dbReady()
 {
     loadLastID();
+
+#ifdef USE_METADATA_TABLE
+    loadLastMetadataID();
+#endif // USE_METADATA_TABLE
 }
 
 void SQLStorage::shutdown()
@@ -2308,8 +2316,9 @@ void SQLStorage::loadLastID()
 #ifdef USE_METADATA_TABLE
 int SQLStorage::getNextMetadataID()
 {
-    if (lastMetadataID < CDS_ID_FS_ROOT)
+    if (lastMetadataID < CDS_ID_ROOT)
         throw _Exception(_("SQLStorage::getNextMetadataID() called, but lastMetadataID hasn't been loaded correctly yet"));
+
     AutoLock lock(nextIDMutex);
     return ++lastMetadataID;
 }
@@ -2323,20 +2332,19 @@ void SQLStorage::loadLastMetadataID()
     // we don't rely on automatic db generated ids, because of our caching
     Ref<StringBuffer> qb(new StringBuffer());
     *qb << "SELECT MAX(" << TQ("id") << ')'
-        << " FROM " << TQ(CDS_OBJECT_TABLE);
+        << " FROM " << TQ(METADATA_TABLE);
     Ref<SQLResult> res = select(qb);
     if (res == nullptr)
-        throw _Exception(_("could not load lastID (res==nullptr)"));
+        throw _Exception(_("could not load lastMetadataID (res==nullptr)"));
 
     Ref<SQLRow> row = res->nextRow();
     if (row == nullptr)
-        throw _Exception(_("could not load lastID (row==nullptr)"));
+        throw _Exception(_("could not load lastMetadataID (row==nullptr)"));
 
-    lastID = row->col(0).toInt();
-    if (lastID < CDS_ID_FS_ROOT)
-        throw _Exception(_("could not load correct lastID (db not initialized?)"));
+    lastMetadataID = row->col(0).toInt();
+    if (lastMetadataID < CDS_ID_ROOT)
+        throw _Exception(_("could not load correct lastMetadataID (db not initialized?)"));
 }
-
 #endif // USE_METADATA_TABLE
 
 void SQLStorage::addObjectToCache(Ref<CdsObject> object, bool dontLock)

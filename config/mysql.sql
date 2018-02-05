@@ -67,6 +67,15 @@ CREATE TABLE `mt_autoscan` (
   UNIQUE KEY `mt_autoscan_obj_id` (`obj_id`),
   CONSTRAINT `mt_autoscan_ibfk_1` FOREIGN KEY (`obj_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=MyISAM CHARSET=utf8;
+CREATE TABLE `mt_metadata` (
+  `id` int(11) NOT NULL auto_increment,
+  `item_id` int(11) NOT NULL,
+  `property_name` varchar(255) NOT NULL,
+  `property_value` varchar(255) NOT NULL,
+  PRIMARY KEY `id` (`id`),
+  KEY `metadata_item_id` (`item_id`),
+  CONSTRAINT `mt_metadata_idfk1` FOREIGN KEY (`item_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=MyISAM CHARSET=utf8;
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 /*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
