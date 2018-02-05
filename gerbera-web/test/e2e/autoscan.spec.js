@@ -14,7 +14,7 @@ test.describe('The autoscan overlay', function () {
   var loginPage, homePage
 
   this.slow(7000)
-  this.timeout(15000)
+  this.timeout(60000)
 
   test.before(function () {
     driver = new webdriver.Builder()

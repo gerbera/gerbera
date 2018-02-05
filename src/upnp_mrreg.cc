@@ -39,13 +39,12 @@
 using namespace zmm;
 using namespace mxml;
 
-MRRegistrarService::MRRegistrarService()
+MRRegistrarService::MRRegistrarService(UpnpDevice_Handle deviceHandle)
+    : deviceHandle(deviceHandle)
 {
 }
 
-MRRegistrarService::~MRRegistrarService()
-{
-}
+MRRegistrarService::~MRRegistrarService() = default;
 
 void MRRegistrarService::upnp_action_IsAuthorized(Ref<ActionRequest> request)
 {
@@ -124,7 +123,7 @@ void MRRegistrarService::process_subscription_request(zmm::Ref<SubscriptionReque
         throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, _("Could not convert property set to ixml"));
     }
 
-    UpnpAcceptSubscriptionExt(Server::getInstance()->getDeviceHandle(),
+    UpnpAcceptSubscriptionExt(deviceHandle,
         ConfigManager::getInstance()->getOption(CFG_SERVER_UDN).c_str(),
         DESC_MRREG_SERVICE_ID, event, request->getSubscriptionID().c_str());
 

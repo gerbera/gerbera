@@ -13,7 +13,7 @@ test.describe('The login action', function () {
   var loginPage
 
   this.slow(5000)
-  this.timeout(15000)
+  this.timeout(60000)
 
   test.before(function () {
     driver = new webdriver.Builder()
@@ -104,6 +104,7 @@ test.describe('The login action', function () {
   })
 
   test.it('when session expires reloads the page and lets user login again.', function () {
+    driver.sleep(1000) // allow fields to load
     loginPage.loginFields().then(function (fields) {
       for (var i = 0; i < fields.length; i++) {
         var field = fields[i]

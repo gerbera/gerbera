@@ -67,11 +67,13 @@ protected:
     /// GetProtocolInfo(string Source, string Sink)
     void upnp_action_GetProtocolInfo(zmm::Ref<ActionRequest> request);
 
+    UpnpDevice_Handle deviceHandle;
+
 public:
     /// \brief Constructor for the CMS, saves the service type and service id
     /// in internal variables.
     /// \todo Check if it makes sense to use it as it is done now...why not define them as constants?
-    ConnectionManagerService();
+    ConnectionManagerService(UpnpDevice_Handle handle);
     ~ConnectionManagerService();
 
     static void setStaticArgs(zmm::String serviceType, zmm::String serviceID);

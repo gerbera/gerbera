@@ -93,13 +93,7 @@ public:
     /// passed on to the appropriate request handler - to upnp_actions() or
     /// upnp_subscriptions()
     int upnp_callback(Upnp_EventType eventtype, const void *event);
-  
-    /// \brief Returns the device handle.
-    ///
-    /// This function returns the handle for our device (it is needed to
-    /// take care of subscriptions)
-    UpnpDevice_Handle getDeviceHandle() const;
-    
+
     /// \brief Returns the IP address of the server.
     ///
     /// Returns a string representation of the IP where the server is 
@@ -124,24 +118,24 @@ public:
     static void static_cleanup_callback();
 
     void send_subscription_update(zmm::String updateString);
- 
+
 protected:
     static zmm::Ref<Storage> storage;
 
     /// \brief This flag is set to true by the upnp_cleanup() function.
     bool server_shutdown_flag;
-    
+
     /// \brief Handle for our upnp device.
     ///
     /// This variable is returned by the getDeviceHandle() function.
-    UpnpDevice_Handle device_handle;
-    
+    UpnpDevice_Handle deviceHandle;
+
     /// \brief Unique Device Number of the server.
     ///
     /// The UDN is read from the config, it must be unique and
     /// persistent over reboots.
     zmm::String serverUDN;
-    
+
     /// \brief Name of the virtual web server directory.
     ///
     /// All requests going to /content/ will be handled by our web
@@ -149,14 +143,14 @@ protected:
     /// \todo Is there any need that this is a variable? A constant
     /// should be sufficient here.
     zmm::String virtual_directory;
-    
+
     /// \brief Full virtual web server url.
     /// 
     /// The URL is constructed upon server initialization, since
     /// the real port is not known before. The value of this variable
     /// is returned by the getVirtualURL() function.
     zmm::String virtual_url;
-    
+
     /// \brief Device description document is created on the fly and 
     /// stored here.
     ///
@@ -164,7 +158,7 @@ protected:
     /// read from the configuration and the device desc doc is created
     /// on the fly.
     zmm::String device_description_document;
-    
+
     /// \brief Time interval to send ssdp:alive advertisements.
     ///
     /// The value is read from the configuration.
@@ -175,21 +169,21 @@ protected:
     /// The ContentDirectoryService class is instantiated in the
     /// constructor. The class is responsible for processing
     /// an ActionRequest or a SubscriptionRequest.
-    ContentDirectoryService cds;
-    
+    std::unique_ptr<ContentDirectoryService> cds;
+
     /// \brief ConnectionManagerService instance.
     /// 
     /// The ConnectionManagerService class is instantiated in the
     /// constructor. The class is responsible for processing
     /// an ActionRequest or a SubscriptionRequest.
-    ConnectionManagerService cmgr;
+    std::unique_ptr<ConnectionManagerService> cmgr;
 
     /// \brief MediaReceiverRegistrarService instance.
     /// 
     /// This class is not fully functional, it always returns "true"
     /// on IsAuthorized and IsValidated requests. It added to ensure
-    /// Xbos360 compatibility.
-    MRRegistrarService mrreg;
+    /// Xbox360 compatibility.
+    std::unique_ptr<MRRegistrarService> mrreg;
 
     /// \brief Dispatched an ActionRequest between the services.
     /// \param request Incoming ActionRequest.

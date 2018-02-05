@@ -36,7 +36,7 @@
 using namespace zmm;
 using namespace mxml;
 
-ConnectionManagerService::ConnectionManagerService()
+ConnectionManagerService::ConnectionManagerService(UpnpDevice_Handle _deviceHandle) : deviceHandle(_deviceHandle)
 {
 }
 
@@ -128,7 +128,7 @@ void ConnectionManagerService::process_subscription_request(zmm::Ref<Subscriptio
         throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, _("Could not convert property set to ixml"));
     }
 
-    UpnpAcceptSubscriptionExt(Server::getInstance()->getDeviceHandle(),
+    UpnpAcceptSubscriptionExt(deviceHandle,
         ConfigManager::getInstance()->getOption(CFG_SERVER_UDN).c_str(),
         DESC_CM_SERVICE_ID, event, request->getSubscriptionID().c_str());
 
@@ -154,7 +154,7 @@ void ConnectionManagerService::subscription_update(String sourceProtocol_CSV)
         throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, _("Could not convert property set to ixml"));
     }
 
-    UpnpNotifyExt(Server::getInstance()->getDeviceHandle(),
+    UpnpNotifyExt(deviceHandle,
         ConfigManager::getInstance()->getOption(CFG_SERVER_UDN).c_str(),
         DESC_CM_SERVICE_ID, event);
 

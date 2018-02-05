@@ -77,12 +77,6 @@ void Server::init()
 {
     virtual_directory = _(SERVER_VIRTUAL_DIR);
 
-    cds = ContentDirectoryService{};
-
-    cmgr = ConnectionManagerService{};
-
-    mrreg = MRRegistrarService{};
-
     Ref<ConfigManager> config = ConfigManager::getInstance();
 
     serverUDN = config->getOption(CFG_SERVER_UDN);
@@ -208,13 +202,22 @@ void Server::upnp_init()
         true,
         static_upnp_callback,
         this,
-        &device_handle);
+        &deviceHandle);
     if (ret != UPNP_E_SUCCESS) {
         throw _UpnpException(ret, _("upnp_init: UpnpRegisterRootDevice failed"));
     }
 
+    log_debug("Creating ContentDirectoryService\n");
+    cds = std::make_unique<ContentDirectoryService>(deviceHandle);
+
+    log_debug("Creating ConnectionManagerService\n");
+    cmgr = std::make_unique<ConnectionManagerService>(deviceHandle);
+
+    log_debug("Creating MRRegistrarService\n");
+    mrreg = std::make_unique<MRRegistrarService>(deviceHandle);
+
     log_debug("Sending UPnP Alive advertisements\n");
-    ret = UpnpSendAdvertisement(device_handle, alive_advertisement);
+    ret = UpnpSendAdvertisement(deviceHandle, alive_advertisement);
     if (ret != UPNP_E_SUCCESS) {
         throw _UpnpException(ret, _("upnp_init: UpnpSendAdvertisement failed"));
     }
@@ -250,7 +253,7 @@ void Server::shutdown()
 
     log_debug("Server shutting down\n");
 
-    ret = UpnpUnRegisterRootDevice(device_handle);
+    ret = UpnpUnRegisterRootDevice(deviceHandle);
     if (ret != UPNP_E_SUCCESS) {
         throw _UpnpException(ret, _("upnp_cleanup: UpnpUnRegisterRootDevice failed"));
     }
@@ -334,11 +337,6 @@ int Server::upnp_callback(Upnp_EventType eventtype, const void* event)
     return ret;
 }
 
-UpnpDevice_Handle Server::getDeviceHandle() const
-{
-    return device_handle;
-}
-
 zmm::String Server::getIP() const
 {
     return UpnpGetServerIpAddress();
@@ -364,14 +362,14 @@ void Server::upnp_actions(Ref<ActionRequest> request)
     if (request->getServiceID() == DESC_CM_SERVICE_ID) {
         // this call is for the lifetime stats service
         // log_debug("request for connection manager service\n");
-        cmgr.process_action_request(request);
+        cmgr->process_action_request(request);
     } else if (request->getServiceID() == DESC_CDS_SERVICE_ID) {
         // this call is for the toaster control service
         //log_debug("upnp_actions: request for content directory service\n");
-        cds.process_action_request(request);
+        cds->process_action_request(request);
     }
     else if (request->getServiceID() == DESC_MRREG_SERVICE_ID) {
-        mrreg.process_action_request(request);
+        mrreg->process_action_request(request);
     }
     else {
         // cp is asking for a nonexistent service, or for a service
@@ -397,14 +395,14 @@ void Server::upnp_subscriptions(Ref<SubscriptionRequest> request)
     if (request->getServiceID() == DESC_CDS_SERVICE_ID) {
         // this call is for the content directory service
         //log_debug("upnp_subscriptions: request for content directory service\n");
-        cds.process_subscription_request(request);
+        cds->process_subscription_request(request);
     } else if (request->getServiceID() == DESC_CM_SERVICE_ID) {
         // this call is for the connection manager service
         //log_debug("upnp_subscriptions: request for connection manager service\n");
-        cmgr.process_subscription_request(request);
+        cmgr->process_subscription_request(request);
     }
     else if (request->getServiceID() == DESC_MRREG_SERVICE_ID) {
-        mrreg.process_subscription_request(request);
+        mrreg->process_subscription_request(request);
     }
     else {
         // cp asks for a nonexistent service or for a service that
@@ -417,7 +415,7 @@ void Server::upnp_subscriptions(Ref<SubscriptionRequest> request)
 // Temp
 void Server::send_subscription_update(zmm::String updateString)
 {
-    cmgr.subscription_update(updateString);
+    cmgr->subscription_update(updateString);
 }
 
 Ref<RequestHandler> Server::create_request_handler(const char* filename)
