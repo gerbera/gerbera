@@ -14,7 +14,7 @@ test.describe('The overlay page', function () {
   var loginPage, homePage
 
   this.slow(5000)
-  this.timeout(15000)
+  this.timeout(60000)
 
   test.before(function () {
     driver = new webdriver.Builder()
@@ -109,7 +109,7 @@ test.describe('The overlay item type selection', function () {
   var loginPage, homePage
 
   this.slow(5000)
-  this.timeout(15000)
+  this.timeout(60000)
 
   test.before(function () {
     driver = new webdriver.Builder()
@@ -354,7 +354,7 @@ test.describe('The overlay load item', function () {
   var loginPage, homePage
 
   this.slow(5000)
-  this.timeout(15000)
+  this.timeout(60000)
 
   test.before(function () {
     driver = new webdriver.Builder()

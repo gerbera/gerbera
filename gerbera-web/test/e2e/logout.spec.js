@@ -14,7 +14,7 @@ test.describe('The logout action', function () {
   var loginPage, homePage
 
   this.slow(5000)
-  this.timeout(15000)
+  this.timeout(60000)
 
   test.before(function () {
     driver = new webdriver.Builder()
