@@ -281,7 +281,6 @@ Ref<Array<SQLStorage::AddUpdateTable>> SQLStorage::_addUpdateObject(Ref<CdsObjec
     //    cdsObjectSql->put(_("dc_title"), _(SQL_NULL));
 
     Ref<Dictionary> dict = obj->getMetadata();
-#ifndef USE_METADATA_TABLE  
     if (isUpdate)
         cdsObjectSql->put(_("metadata"), _(SQL_NULL));
     if (dict->size() > 0) {
@@ -289,15 +288,17 @@ Ref<Array<SQLStorage::AddUpdateTable>> SQLStorage::_addUpdateObject(Ref<CdsObjec
             cdsObjectSql->put(_("metadata"), quote(dict->encode()));
         }
     }
-#else
-    if (dict != nullptr && dict->size() > 0) {
+#ifdef USE_METADATA_TABLE
+    // metadata always stored in mt_cds_object, but also store in mt_metadata if the cds_object
+    // is a 'non-virtual' item
+    if (!hasReference && IS_CDS_PURE_ITEM(objectType) && dict != nullptr && dict->size() > 0) {
         Ref<Array<DictionaryElement>> metadataElements = dict->getElements();
         for (int  i = 0; i < metadataElements->size(); i++) {
             Ref<Dictionary> metadataSql(new Dictionary());
             returnVal->append(Ref<AddUpdateTable>(new AddUpdateTable(_(METADATA_TABLE), metadataSql)));
             Ref<DictionaryElement> property = metadataElements->get(i);
-            metadataSql->put(_("property_name"), property->getKey());
-            metadataSql->put(_("property_value"), property->getValue());
+            metadataSql->put(_("property_name"), quote(property->getKey()));
+            metadataSql->put(_("property_value"), quote(property->getValue()));
         }
     }
 #endif // USE_METADATA_TABLE
@@ -464,7 +465,7 @@ void SQLStorage::addObject(Ref<CdsObject> obj, int* changedContainer)
             *values << ',' << quote(lastInsertID);
         }
 #ifdef USE_METADATA_TABLE
-        if (lastMetadataInsertID == INVALID_OBJECT_ID && tableName == _(METADATA_TABLE)) {
+        if (tableName == _(METADATA_TABLE)) {
             lastMetadataInsertID = getNextMetadataID();
             *fields << ',' << TQ("id");
             *values << ',' << quote(lastMetadataInsertID);
