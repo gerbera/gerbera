@@ -77,7 +77,7 @@ IOHandlerBufferHelper::~IOHandlerBufferHelper()
         close();
 }
 
-int IOHandlerBufferHelper::read(OUT char *buf, IN size_t length)
+size_t IOHandlerBufferHelper::read(OUT char *buf, IN size_t length)
 {
     // check read on closed BufferedIOHandler
     assert(isOpen);

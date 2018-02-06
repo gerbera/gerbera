@@ -49,12 +49,12 @@ public:
     /// \brief Reads previously opened/initialized data sequentially.
     /// \param buf This buffer will be filled by our read functions.
     /// \param length Number of bytes to read.
-    virtual int read(char *buf, size_t length);
+    virtual size_t read(char *buf, size_t length);
 
     /// \brief Writes to previously opened/initialized data sequentially.
     /// \param buf Data to be written.
     /// \param length Number of bytes to write.
-    virtual int write(char *buf, size_t length);
+    virtual size_t write(char *buf, size_t length);
                       
     /// \brief Performs a seek on an open/initialized data.
     /// \param offset Number of bytes to move in the buffer. 

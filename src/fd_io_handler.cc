@@ -102,18 +102,18 @@ void FDIOHandler::open(IN enum UpnpOpenFileMode mode)
 
 }
 
-int FDIOHandler::read(OUT char *buf, IN size_t length)
+size_t FDIOHandler::read(OUT char *buf, IN size_t length)
 {
-    int ret = 0;
+    size_t ret = 0;
 
     ret = ::read(fd, buf, length);
 
     return ret;
 }
 
-int FDIOHandler::write(IN char *buf, IN size_t length)
+size_t FDIOHandler::write(IN char *buf, IN size_t length)
 {
-    int ret = 0;
+    size_t ret = 0;
 
     ret = ::write(fd, buf, length);
 

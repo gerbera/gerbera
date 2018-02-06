@@ -46,21 +46,21 @@ protected:
     FILE *f;
 public:
     /// \brief Sets the filename to work with.
-    FileIOHandler(zmm::String filename);
+    explicit FileIOHandler(zmm::String filename);
 
     /// \brief Opens file for reading (writing is not supported)
-    virtual void open(IN enum UpnpOpenFileMode mode);
+    void open(IN enum UpnpOpenFileMode mode) override;
 
     /// \brief Reads a previously opened file sequentially.
     /// \param buf Data from the file will be copied into this buffer.
     /// \param length Number of bytes to be copied into the buffer.
-    virtual int read(OUT char *buf, IN size_t length);
+    size_t read(OUT char *buf, IN size_t length) override;
    
     /// \brief Writes to a previously opened file.
     /// \param buf Data from the buffer will be written to the file.
     /// \param length Number of bytes to be written from the buffer.
     /// \return number of bytes written.
-    virtual int write(OUT char *buf, IN size_t length);
+    size_t write(OUT char *buf, IN size_t length) override;
 
     /// \brief Performs seek on an open file.
     /// \param offset Number of bytes to move in the file. For seeking forwards
@@ -69,10 +69,10 @@ public:
     /// \param whence The position to move relative to. SEEK_CUR to move relative
     /// to current position, SEEK_END to move relative to the end of file,
     /// SEEK_SET to specify an absolute offset.
-    virtual void seek(IN off_t offset, IN int whence);
+    void seek(IN off_t offset, IN int whence) override;
 
     /// \brief Close a previously opened file.
-    virtual void close();
+    void close() override;
 };
 
 

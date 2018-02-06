@@ -58,7 +58,7 @@ public:
     
     // inherited from IOHandler
     virtual void open(enum UpnpOpenFileMode mode);
-    virtual int read(char *buf, size_t length);
+    virtual size_t read(char *buf, size_t length);
     virtual void seek(off_t offset, int whence);
     virtual void close();
     

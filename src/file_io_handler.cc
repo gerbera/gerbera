@@ -29,69 +29,57 @@
 
 /// \file file_io_handler.cc
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <cstring>
 #include <cstdio>
 #include <ixml.h>
 
-#include "server.h"
-#include "common.h"
-#include "storage.h"
 #include "cds_objects.h"
-#include "process.h"
-#include "update_manager.h"
 #include "file_io_handler.h"
-#include "dictionary.h"
+#include "server.h"
 
 using namespace zmm;
 using namespace mxml;
 
-FileIOHandler::FileIOHandler(String filename) : filename(filename), f(nullptr)
+FileIOHandler::FileIOHandler(String filename)
+    : filename(filename)
+    , f(nullptr)
 {
 }
 
 void FileIOHandler::open(IN enum UpnpOpenFileMode mode)
 {
-    if (mode == UPNP_READ)
-    {
+    if (mode == UPNP_READ) {
         f = fopen(filename.c_str(), "rb");
-    }
-    else if (mode == UPNP_WRITE)
-    {
-        f = fopen(filename.c_str(), "wb");
-    }
-    else
-    {
-        throw _Exception(_("FileIOHandler::open: invdalid read/write mode"));
+    } else if (mode == UPNP_WRITE) {
+        throw _Exception(_("FileIOHandler::open: Write mode not supported"));
+        ;
+    } else {
+        throw _Exception(_("FileIOHandler::open: invalid UpnpOpenFileMode mode"));
     }
 
-    if (f == nullptr)
-    {
+    if (f == nullptr) {
         throw _Exception(_("FileIOHandler::open: failed to open: ") + filename.c_str());
     }
-
 }
 
-int FileIOHandler::read(OUT char *buf, IN size_t length)
+size_t FileIOHandler::read(OUT char* buf, IN size_t length)
 {
-    int ret = 0;
+    size_t ret = 0;
 
     ret = fread(buf, sizeof(char), length, f);
 
-    if (ret <= 0)
-    {
-        if (feof(f)) return 0;
-        if (ferror(f)) return -1;
+    if (ret <= 0) {
+        if (feof(f))
+            return 0;
+        if (ferror(f))
+            return -1;
     }
 
     return ret;
 }
 
-int FileIOHandler::write(IN char *buf, IN size_t length)
+size_t FileIOHandler::write(IN char* buf, IN size_t length)
 {
-    int ret = 0;
+    size_t ret = 0;
 
     ret = fwrite(buf, sizeof(char), length, f);
 
@@ -100,16 +88,14 @@ int FileIOHandler::write(IN char *buf, IN size_t length)
 
 void FileIOHandler::seek(IN off_t offset, IN int whence)
 {
-    if (fseeko(f, offset, whence) != 0)
-    {
+    if (fseeko(f, offset, whence) != 0) {
         throw _Exception(_("fseek failed"));
     }
 }
 
 void FileIOHandler::close()
 {
-    if (fclose(f) != 0)
-    {
+    if (fclose(f) != 0) {
         throw _Exception(_("fclose failed"));
     }
     f = nullptr;
