@@ -1,5 +1,6 @@
 var By = require('selenium-webdriver').By
 var until = require('selenium-webdriver').until
+var fs = require('fs')
 
 module.exports = function (driver) {
 
@@ -78,5 +79,11 @@ module.exports = function (driver) {
     driver.get(url)
     driver.wait(until.elementIsEnabled(driver.findElement(By.id('login-form'))), 5000)
     return driver.executeScript('$(\'body\').toggleClass(\'notransition\');')
+  }
+
+  this.takeScreenshot = function (filename) {
+    return driver.takeScreenshot().then(function(data) {
+      fs.writeFileSync(filename, data, 'base64');
+    })
   }
 }

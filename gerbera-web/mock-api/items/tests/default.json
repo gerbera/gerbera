@@ -16,5 +16,11 @@
     "responses" : {
       "default" : "./items/parent_id-3808-start-25.json"
     }
+  },
+  "7444_0" : {
+    "count" : 0,
+    "responses" : {
+      "default" : "./items/friendly-error-msg.json"
+    }
   }
 }
