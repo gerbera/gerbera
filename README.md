@@ -1,4 +1,4 @@
-<img src="https://github.com/v00d00/gerbera/blob/master/artwork/logo-horiz.png?raw=true" />
+<img src="https://github.com/gerbera/gerbera/blob/master/artwork/logo-horiz.png?raw=true" />
 
 # Gerbera - UPnP Media Server
 
@@ -6,9 +6,13 @@
 
 Gerbera is a UPnP media server which allows you to stream your digital media through your home network and consume it on a variety of UPnP compatible devices.
 
-_Gerbera is based on [MediaTomb 12.1](http://mediatomb.cc) which is dead upstream, so this is my attempt to kick it back into life._
+_Gerbera is based on [MediaTomb](http://mediatomb.cc) which is dead upstream, so this is a community attempt to kick it back into life._
 
 **Pull requests are very welcome and reporting issues is encouraged.**
+
+## Documentation
+
+Documentation is provided at [http://docs.gerbera.io]()
 
 ## Features
 
@@ -99,9 +103,9 @@ _The following has bee tested on FreeBSD 11.0 using a clean jail environment._
 pkg install wget git autoconf automake libtool taglib cmake gcc libav ffmpeg libexif pkgconf liblastfm gmake
 ````
 
-2. Clone repository, build depdences in current in ports and then build gerbera.
+2. Clone repository, build dependencies in current in ports and then build gerbera.
 ````
-git clone https://github.com/v00d00/gerbera.git 
+git clone https://github.com/gerbera/gerbera.git 
 mkdir build
 cd build
 sh ../gerbera/scripts/install-pupnp18.sh
@@ -124,7 +128,7 @@ _The following has been tested on macOS Sierra 10.12.6_
 ### Quick start build instructions:
 
 ```
-git clone https://github.com/v00d00/gerbera.git
+git clone https://github.com/gerbera/gerbera.git
 mkdir build
 cd build
 cmake ../gerbera -DWITH_MAGIC=1 -DWITH_MYSQL=1 -DWITH_CURL=1 -DWITH_JS=1 \
@@ -164,13 +168,6 @@ sudo make install
 | lastfmlib    	| 0.4.0   	| Optional  	| Enables scrobbling   	     | WITH_LASTFM         | Disabled |
 | ffmpegthumbnailer |           | Optional      | Generate video thumbnails  | WITH_FFMPEGTHUMBNAILER | Disabled |
 | inotify       |               | Optional      | Efficient file monitoring  | WITH_INOTIFY      | Enabled |
-
-## Branches
-**master**: Where the action happens
-
-**vanilla**: Sourceforge mediatomb with patches to build on more modern systems
-
-**gentoo**: Pretty much as vanilla (shipped as net-misc/mediatomb).
 
 ## Licence
 
