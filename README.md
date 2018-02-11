@@ -2,7 +2,7 @@
 
 # Gerbera - UPnP Media Server
 
- [![Current Release](https://img.shields.io/github/release/gerbera/gerbera.svg)](https://github.com/gerbera/gerbera/releases/latest) [![Build Status](https://travis-ci.org/gerbera/gerbera.svg?branch=master)](https://travis-ci.org/gerbera/gerbera) [![IRC](https://img.shields.io/badge/chat-on%20freenode-blue.svg)](https://webchat.freenode.net/?channels=#gerbera)
+ [![Current Release](https://img.shields.io/github/release/gerbera/gerbera.svg)](https://github.com/gerbera/gerbera/releases/latest) [![Build Status](https://travis-ci.org/gerbera/gerbera.svg?branch=master)](https://travis-ci.org/gerbera/gerbera) [![Documentation Status](https://readthedocs.org/projects/gerbera/badge/?version=latest)](http://docs.gerbera.io/en/latest/?badge=latest) [![IRC](https://img.shields.io/badge/IRC-on%20freenode-orange.svg)](https://webchat.freenode.net/?channels=#gerbera)
 
 Gerbera is a UPnP media server which allows you to stream your digital media through your home network and consume it on a variety of UPnP compatible devices.
 
@@ -12,7 +12,7 @@ _Gerbera is based on [MediaTomb](http://mediatomb.cc) which is dead upstream, so
 
 ## Documentation
 
-Documentation is provided at [http://docs.gerbera.io]()
+View our documentation online at [http://docs.gerbera.io](http://docs.gerbera.io).
 
 ## Features
 
