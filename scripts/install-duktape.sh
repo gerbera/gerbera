@@ -7,9 +7,9 @@ if [ "$unamestr" == 'FreeBSD' ]; then
    makeCMD="gmake"
 fi
 
-wget http://duktape.org/duktape-2.1.0.tar.xz
-tar -xJvf duktape-2.1.0.tar.xz
-cd duktape-2.1.0
+wget http://duktape.org/duktape-2.2.0.tar.xz
+tar -xJvf duktape-2.2.0.tar.xz
+cd duktape-2.2.0
 
 if [ "$unamestr" == 'Darwin' ]; then
   # Patch Makefile to install on macOS
