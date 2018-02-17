@@ -1,5 +1,9 @@
 #include "search_handler.h"
+#include "config_manager.h"
+#include "storage.h"
+#include "zmm/strings.h"
 #include "tools.h"
+
 #include <cctype>
 #include <algorithm>
 #include <iostream>
@@ -144,17 +148,6 @@ std::unique_ptr<SearchToken> SearchLexer::makeToken(const std::string& tokenStr)
     } else {
         return std::make_unique<SearchToken>(TokenType::PROPERTY, tokenStr);
     }
-}
-
-
-
-
-
-SearchParser::SearchParser(const SQLEmitter& sqlEmitter, const std::string& searchCriteria)
-    : lexer(std::make_unique<SearchLexer>(searchCriteria))
-    , sqlEmitter(sqlEmitter)
-{
-    
 }
 
 void SearchParser::getNextToken()
@@ -342,156 +335,170 @@ void SearchParser::checkIsExpected(TokenType tokenType, const std::string& token
     }
 }
 
-uvCdsObject SearchHandler::executeSearch(SearchParam& searchParam)
+std::string ASTNode::emitSQL()
 {
-    return nullptr;
+    return sqlEmitter.emitSQL(this);
 }
 
-std::string ASTAsterisk::emit()
+std::string ASTAsterisk::emit() const
 {
-    std::cout << "Emitting for ASTAsterisk "    << std::endl;
-    return sqlEmitter.emit(*this);
+    std::cout << "Emitting for ASTAsterisk " << std::endl;
+    return sqlEmitter.emit(this);
 }
 
-std::string ASTProperty::emit()
+std::string ASTProperty::emit() const
 {
-    std::cout << "Emitting for ASTProperty "    << std::endl;
+    std::cout << "Emitting for ASTProperty " << std::endl;
     return value;
 }
 
-std::string ASTBoolean::emit()
+std::string ASTBoolean::emit() const
 {
-    std::cout << "Emitting for ASTBoolean "    << std::endl;
-    return sqlEmitter.emit(*this);
+    std::cout << "Emitting for ASTBoolean " << std::endl;
+    return sqlEmitter.emit(this);
 }
 
-std::string ASTParenthesis::emit()
+std::string ASTParenthesis::emit() const
 {
-    std::cout << "Emitting for ASTParenthesis "    << std::endl;
-    return sqlEmitter.emit(*this, bracketedNode->emit());
+    std::cout << "Emitting for ASTParenthesis " << std::endl;
+    return sqlEmitter.emit(this, bracketedNode->emit());
 }
 
-std::string ASTDQuote::emit()
+std::string ASTDQuote::emit() const
 {
-    std::cout << "Emitting for ASTDQuote "    << std::endl;
-    return sqlEmitter.emit(*this);
+    std::cout << "Emitting for ASTDQuote " << std::endl;
+    return sqlEmitter.emit(this);
 }
 
-std::string ASTEscapedString::emit()
+std::string ASTEscapedString::emit() const
 {
-    std::cout << "Emitting for ASTEscapedString "    << std::endl;
+    std::cout << "Emitting for ASTEscapedString " << std::endl;
     return value;
 }
 
-std::string ASTQuotedString::emit()
+std::string ASTQuotedString::emit() const
 {
-    std::cout << "Emitting for ASTQuotedString "    << std::endl;
+    std::cout << "Emitting for ASTQuotedString " << std::endl;
     return openQuote->emit() + escapedString->emit() + closeQuote->emit();
 }
 
-std::string ASTCompareOperator::emit()
-{
-    std::cout << "Emitting for ASTCompareOperator "    << std::endl;
-    throw _Exception(_("Should not get here"));
-}
-
-std::string ASTCompareOperator::emit(const std::string& property, const std::string& value)
+std::string ASTCompareOperator::emit() const
 {
     std::cout << "Emitting for ASTCompareOperator " << std::endl;
-    return sqlEmitter.emit(*this, property, value);
-}
-
-std::string ASTCompareExpression::emit()
-{
-    std::cout << "Emitting for ASTCompareExpression "    << std::endl;
-    std::string property = lhs->emit();
-    std::string value = rhs->emit();
-    return operatr->emit(property, value);
-}
-
-std::string ASTStringOperator::emit()
-{
-    std::cout << "Emitting for ASTStringOperator "    << std::endl;
     throw _Exception(_("Should not get here"));
 }
 
-std::string ASTStringOperator::emit(const std::string& property, const std::string& value)
+std::string ASTCompareOperator::emit(const std::string& property, const std::string& value) const
 {
-    std::cout << "Emitting for ASTContainsOperator " << std::endl;
-    return sqlEmitter.emit(*this, property, value);
+    std::cout << "Emitting for ASTCompareOperator " << std::endl;
+    return sqlEmitter.emit(this, property, value);
 }
 
-std::string ASTStringExpression::emit()
+std::string ASTCompareExpression::emit() const
 {
-    std::cout << "Emitting for ASTStringExpression "    << std::endl;
+    std::cout << "Emitting for ASTCompareExpression " << std::endl;
     std::string property = lhs->emit();
     std::string value = rhs->emit();
     return operatr->emit(property, value);
 }
 
-std::string ASTExistsOperator::emit()
+std::string ASTStringOperator::emit() const
 {
-    std::cout << "Emitting for ASTExistsOperator "    << std::endl;
-    return sqlEmitter.emit(*this);
+    std::cout << "Emitting for ASTStringOperator " << std::endl;
+    throw _Exception(_("Should not get here"));
 }
 
-std::string ASTExistsExpression::emit()
+std::string ASTStringOperator::emit(const std::string& property, const std::string& value) const
 {
-    std::cout << "Emitting for ASTExistsExpression "    << std::endl;
-    return sqlEmitter.emit(*this);
+    std::cout << "Emitting for ASTStringOperator (" << this->getValue() << ")" << std::endl;
+    return sqlEmitter.emit(this, property, value);
 }
 
-std::string ASTAndOperator::emit()
+std::string ASTStringExpression::emit() const
 {
-    std::cout << "Emitting for ASTAndOperator "    << std::endl;
-    return sqlEmitter.emit(*this, lhs->emit(), rhs->emit());
+    std::cout << "Emitting for ASTStringExpression " << std::endl;
+    std::string property = lhs->emit();
+    std::string value = rhs->emit();
+    return operatr->emit(property, value);
 }
 
-std::string ASTOrOperator::emit()
+std::string ASTExistsOperator::emit() const
 {
-    std::cout << "Emitting for ASTOrOperator "    << std::endl;
-    return sqlEmitter.emit(*this, lhs->emit(), rhs->emit());
+    std::cout << "Emitting for ASTExistsOperator " << std::endl;
+    return sqlEmitter.emit(this);
 }
 
-std::string SqliteEmitter::emit(const ASTParenthesis& node, const std::string& bracketedNode) const {
+std::string ASTExistsExpression::emit() const
+{
+    std::cout << "Emitting for ASTExistsExpression " << std::endl;
+    return sqlEmitter.emit(this);
+}
+
+std::string ASTAndOperator::emit() const
+{
+    std::cout << "Emitting for ASTAndOperator " << std::endl;
+    return sqlEmitter.emit(this, lhs->emit(), rhs->emit());
+}
+
+std::string ASTOrOperator::emit() const
+{
+    std::cout << "Emitting for ASTOrOperator " << std::endl;
+    return sqlEmitter.emit(this, lhs->emit(), rhs->emit());
+}
+
+std::string SqliteEmitter::emitSQL(const ASTNode* node) const
+{
+    std::string predicates = node->emit();
+    if (predicates.length() > 0) {
+        std::stringstream sql;
+        sql << "from mt_cds_object c "
+                << "inner join mt_metadata m on c.id = m.item_id "
+                << "where "
+                << predicates << ";";
+        return sql.str();
+    } else
+        throw _Exception(_("No SQL generated from AST"));
+}
+    
+std::string SqliteEmitter::emit(const ASTParenthesis* node, const std::string& bracketedNode) const
+{
     std::stringstream sqlFragment;
     sqlFragment << "(" << bracketedNode << ")";
     return sqlFragment.str();
 }
 
-std::string SqliteEmitter::emit(const ASTCompareOperator& node, const std::string& property,
+std::string SqliteEmitter::emit(const ASTCompareOperator* node, const std::string& property,
     const std::string& value) const
 {
-    auto operatr = node.getValue();
+    auto operatr = node->getValue();
     if (operatr != "=")
         throw _Exception(_("operator not yet supported"));
 
     std::stringstream sqlFragment;
-    sqlFragment << "(instr(lower(metadata), lower('"
-                << url_escape(property.c_str()).c_str()
-                << operatr
-                << url_escape(value.c_str()).c_str()
-                << "')) > 0 and upnp_class is not null)";
+    sqlFragment << "(m.property_name='" << property << "' and lower(m.property_value)"
+                << operatr << "lower('" << value << "') and c.upnp_class is not null)";
     return sqlFragment.str();
 }
 
-std::string SqliteEmitter::emit(const ASTStringOperator& node, const std::string& property,
+std::string SqliteEmitter::emit(const ASTStringOperator* node, const std::string& property,
     const std::string& value) const
 {
-    auto operatr = node.getValue();
-    if (operatr != "contains")
+    auto lcOperator = *aslowercase(node->getValue());
+    if (lcOperator != "contains" && lcOperator != "derivedfrom")
         throw _Exception(_("operator not yet supported"));
 
     std::stringstream sqlFragment;
-    if (*aslowercase(operatr)=="contains") {
-        sqlFragment << "(lower(metadata) contains '"
-                    << *aslowercase(value)
-                    << "' and upnp_class is not null)";
+    if (lcOperator == "contains") {
+        sqlFragment << "(m.property_name='" << property << "' and lower(m.property_value) "
+                    << "like" << " lower('%" << value << "%') and c.upnp_class is not null)";
+    }
+    else if (lcOperator == "derivedfrom") {
+        sqlFragment << "c.upnp_class " << "like" << " lower('" << value << ".%')";
     }
     return sqlFragment.str();
 }
 
-std::string SqliteEmitter::emit(const ASTAndOperator& node, const std::string& lhs,
+std::string SqliteEmitter::emit(const ASTAndOperator* node, const std::string& lhs,
     const std::string& rhs) const
 {
     std::stringstream sqlFragment;
@@ -499,11 +506,10 @@ std::string SqliteEmitter::emit(const ASTAndOperator& node, const std::string& l
     return sqlFragment.str();
 }
 
-std::string SqliteEmitter::emit(const ASTOrOperator& node, const std::string& lhs,
+std::string SqliteEmitter::emit(const ASTOrOperator* node, const std::string& lhs,
     const std::string& rhs) const
 {
     std::stringstream sqlFragment;
     sqlFragment << lhs << " or " << rhs;
     return sqlFragment.str();
 }
-

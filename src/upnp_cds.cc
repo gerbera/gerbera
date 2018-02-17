@@ -177,12 +177,19 @@ void ContentDirectoryService::upnp_action_Search(Ref<ActionRequest> request) {
     }
 #endif
 
-    std::unique_ptr<SearchParam> searchParam = std::make_unique<SearchParam>(containerID, searchCriteria,
-        std::stoi(startingIndex.c_str(), nullptr), std::stoi(requestedCount.c_str(), nullptr));
-    std::unique_ptr<SearchHandler> searchHandler = std::make_unique<SearchHandler>();
-    std::unique_ptr<std::vector<Ref<CdsObject>>> results = searchHandler->executeSearch(*searchParam);
+    zmm::Ref<SearchParam> searchParam = zmm::Ref<SearchParam>(new SearchParam(containerID, searchCriteria,
+            std::stoi(startingIndex.c_str(), nullptr), std::stoi(requestedCount.c_str(), nullptr)));
 
-    for (auto& cdsObject : *results) {
+    Ref<Array<CdsObject>> results;
+    try {
+        Ref<Storage> storage = Storage::getInstance();
+        results = storage->search(searchParam);
+    } catch (const Exception& e) {
+        throw UpnpException(UPNP_E_NO_SUCH_ID, _("no such object"));
+    }
+
+    for (int i = 0; i < results->size(); i++) {
+        Ref<CdsObject> cdsObject = results->get(i);
         if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && cdsObject->getFlag(OBJECT_FLAG_PLAYED)) {
             String title = cdsObject->getTitle();
             if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND))
@@ -201,8 +208,8 @@ void ContentDirectoryService::upnp_action_Search(Ref<ActionRequest> request) {
     response = UpnpXML_CreateResponse(request->getActionName(), _(DESC_CDS_SERVICE_TYPE));
 
     response->appendTextChild(_("Result"), didl_lite->print());
-    response->appendTextChild(_("NumberReturned"), String::from(0));
-    response->appendTextChild(_("TotalMatches"), String::from(0));
+    response->appendTextChild(_("NumberReturned"), String::from(results->size()));
+    response->appendTextChild(_("TotalMatches"), String::from(results->size()));
     response->appendTextChild(_("UpdateID"), String::from(systemUpdateID));
 
     request->setResponse(response);
@@ -215,7 +222,7 @@ void ContentDirectoryService::upnp_action_GetSearchCapabilities(Ref<ActionReques
 
     Ref<Element> response;
     response = UpnpXML_CreateResponse(request->getActionName(), _(DESC_CDS_SERVICE_TYPE));
-    response->appendTextChild(_("SearchCaps"), _("dc:title,upnp:class,dc:creator"));
+    response->appendTextChild(_("SearchCaps"), _("dc:title,upnp:class,upnp:artist,upnp:album"));
 
     request->setResponse(response);
 

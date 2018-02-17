@@ -35,8 +35,10 @@
 #include "string_converter.h"
 #include "tools.h"
 #include "update_manager.h"
+#include "search_handler.h"
 #include <climits>
 #include <stdlib.h>
+#include <sstream>
 
 using namespace zmm;
 using namespace std;
@@ -119,10 +121,30 @@ enum {
     << '=' << TQD("rf","id") << " LEFT JOIN " << TQ(AUTOSCAN_TABLE) << ' ' \
     << TQ("as") << " ON " << TQD("as","obj_id") << '=' << TQD('f',"id") << ' '
 
+enum SearchCol
+{
+    id = 0,
+    ref_id,
+    parent_id,
+    object_type,
+    upnp_class,
+    dc_title,
+    metadata,
+    resources,
+    mime_type,
+    track_number,
+    location
+};
+
+#define SELECT_DATA_FOR_SEARCH "SELECT distinct c.id, c.ref_id, c.parent_id," \
+    << " c.object_type, c.upnp_class, c.dc_title, c.metadata,"       \
+    << " c.resources, c.mime_type, c.track_number, c.location"
+
 #define SQL_QUERY       sql_query
 #define SQL_QUERY sql_query
 
 /* enum for createObjectFromRow's mode parameter */
+
 
 SQLStorage::SQLStorage()
     : Storage()
@@ -156,6 +178,32 @@ void SQLStorage::init()
     insertBufferEmpty = true;
     insertBufferStatementCount = 0;
     insertBufferByteCount = 0;
+
+#ifdef USE_METADATA_TABLE
+    zmm::Ref<ConfigManager> config = ConfigManager::getInstance();
+    zmm::String storageType(ConfigManager::getInstance()->getOption(CFG_SERVER_STORAGE_DRIVER));
+    do
+    {
+#ifdef HAVE_SQLITE3
+        if (storageType == "sqlite3")
+        {
+            sqlEmitter = std::make_shared<SqliteEmitter>();
+            break;
+        }
+#endif
+
+#ifdef HAVE_MYSQL
+        if (storageType == "mysql")
+        {
+            sqlEmitter = std::make_shared<MySqlEmitter>();
+            break;
+        }
+#endif
+        // other database types...
+        throw _Exception(_("Unknown storage type: ") + storageType);
+    }
+    while (false);
+#endif // USE_METADATA_TABLE
 
     //log_debug("using SQL: %s\n", this->sql_query.c_str());
 
@@ -771,6 +819,39 @@ Ref<Array<CdsObject>> SQLStorage::browse(Ref<BrowseParam> param)
     return arr;
 }
 
+zmm::Ref<zmm::Array<CdsObject>> SQLStorage::search(zmm::Ref<SearchParam> param)
+{
+#ifdef USE_METADATA_TABLE
+    std::unique_ptr<SearchParser> searchParser = std::make_unique<SearchParser>(*sqlEmitter, param->searchCriteria());
+    std::shared_ptr<ASTNode> rootNode = searchParser->parse();
+    std::stringstream selectCols;
+    selectCols << SELECT_DATA_FOR_SEARCH << " ";
+    std::string sql(selectCols.str() + rootNode->emitSQL());
+
+    log_debug("Search resolves to SQL [%s]\n", sql.c_str());
+    zmm::Ref<SQLResult> sqlResult;
+    if (sql.length() > 0) {
+        zmm::Ref<zmm::StringBuffer> buf = Ref<zmm::StringBuffer>(new zmm::StringBuffer(sql.length()));
+        *buf << sql.c_str();
+        sqlResult = select(buf);
+    }
+
+    zmm::Ref<zmm::Array<CdsObject>> arr(new Array<CdsObject>()); 
+    zmm::Ref<SQLRow> sqlRow;
+    while ((sqlRow = sqlResult->nextRow()) != nullptr) {
+        Ref<CdsObject> obj = createObjectFromSearchRow(sqlRow);
+        arr->append(obj);
+        sqlRow = nullptr;
+    }
+    sqlRow = nullptr;
+    sqlResult = nullptr;
+
+    return arr;
+#else
+    return nullptr;
+#endif // USE_METADATA_TABLE
+}
+
 int SQLStorage::getChildCount(int contId, bool containers, bool items, bool hideFsRoot)
 {
     if (!containers && !items)
@@ -1201,6 +1282,55 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
     }
 
     addObjectToCache(obj);
+    return obj;
+}
+
+Ref<CdsObject> SQLStorage::createObjectFromSearchRow(Ref<SQLRow> row)
+{
+    int objectType = row->col(_object_type).toInt();
+    Ref<CdsObject> obj = CdsObject::createObject(objectType);
+
+    /* set common properties */
+    obj->setID(row->col(SearchCol::id).toInt());
+    obj->setRefID(row->col(SearchCol::ref_id).toInt());
+
+    obj->setParentID(row->col(SearchCol::parent_id).toInt());
+    obj->setTitle(row->col(SearchCol::dc_title));
+    obj->setClass(row->col(SearchCol::upnp_class));
+
+    String metadataStr = row->col(SearchCol::metadata);
+    Ref<Dictionary> meta(new Dictionary());
+    meta->decode(metadataStr);
+    obj->setMetadata(meta);
+
+    String resources_str = row->col(SearchCol::resources);
+    bool resource_zero_ok = false;
+    if (string_ok(resources_str)) {
+        Ref<Array<StringBase>> resources = split_string(resources_str, RESOURCE_SEP);
+        for (int i = 0; i < resources->size(); i++) {
+            if (i == 0)
+                resource_zero_ok = true;
+            obj->addResource(CdsResource::decode(resources->get(i)));
+        }
+    }
+
+    if (IS_CDS_ITEM(objectType)) {
+        if (!resource_zero_ok)
+            throw _Exception(_("tried to create object without at least one resource"));
+
+        Ref<CdsItem> item = RefCast(obj, CdsItem);
+        item->setMimeType(row->col(SearchCol::mime_type));
+        if (IS_CDS_PURE_ITEM(objectType)) {
+            item->setLocation(stripLocationPrefix(row->col(SearchCol::location)));
+        } else { // URLs and active items
+            item->setLocation(row->col(SearchCol::location));
+        }
+
+        item->setTrackNumber(row->col(SearchCol::track_number).toInt());
+    } else {
+        throw _StorageException(nullptr, _("unknown object type: ") + objectType);
+    }
+
     return obj;
 }
 

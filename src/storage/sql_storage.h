@@ -51,6 +51,7 @@
 #define METADATA_TABLE              "mt_metadata"
 
 class SQLResult;
+class SQLEmitter;
 
 class SQLRow : public zmm::Object
 {
@@ -117,13 +118,16 @@ public:
     virtual int getTotalFiles() override;
     
     virtual zmm::Ref<zmm::Array<CdsObject> > browse(zmm::Ref<BrowseParam> param) override;
+    // virtual _and_ override for consistency!
+    virtual zmm::Ref<zmm::Array<CdsObject> > search(zmm::Ref<SearchParam> param) override;
+    
     virtual zmm::Ref<zmm::Array<zmm::StringBase> > getMimeTypes() override;
     
     //virtual zmm::Ref<CdsObject> findObjectByTitle(zmm::String title, int parentID);
     virtual zmm::Ref<CdsObject> findObjectByPath(zmm::String fullpath) override;
     virtual int findObjectIDByPath(zmm::String fullpath) override;
     virtual zmm::String incrementUpdateIDs(std::shared_ptr<std::unordered_set<int> > ids) override;
-    
+
     virtual zmm::String buildContainerPath(int parentID, zmm::String title) override;
     virtual void addContainerChain(zmm::String path, zmm::String lastClass, int lastRefID, int *containerID, int *updateID, zmm::Ref<Dictionary> lastMetadata) override;
     virtual zmm::String getInternalSetting(zmm::String key) override;
@@ -181,6 +185,7 @@ private:
     zmm::String getRealLocation(int parentID, zmm::String location);
     
     zmm::Ref<CdsObject> createObjectFromRow(zmm::Ref<SQLRow> row);
+    zmm::Ref<CdsObject> createObjectFromSearchRow(zmm::Ref<SQLRow> row);
     
     /* helper for findObjectByPath and findObjectIDByPath */ 
     zmm::Ref<CdsObject> _findObjectByPath(zmm::String fullpath);
@@ -246,6 +251,8 @@ private:
 
     int getNextMetadataID();
     void loadLastMetadataID();
+
+    std::shared_ptr<SQLEmitter> sqlEmitter;
 #endif // USE_METADATA_TABLE    
 
     std::mutex nextIDMutex;

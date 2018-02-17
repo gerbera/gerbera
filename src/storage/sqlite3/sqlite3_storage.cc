@@ -455,10 +455,9 @@ SLSelectTask::SLSelectTask(const char* query)
 
 void SLSelectTask::run(sqlite3** db, Sqlite3Storage* sl)
 {
-
     pres = Ref<Sqlite3Result>(new Sqlite3Result());
 
-    char* err;
+    char* err = nullptr;;
     int ret = sqlite3_get_table(
         *db,
         query,
@@ -468,6 +467,7 @@ void SLSelectTask::run(sqlite3** db, Sqlite3Storage* sl)
         &err);
     String error = nullptr;
     if (err != nullptr) {
+        log_debug(err);
         error = err;
         sqlite3_free(err);
     }
@@ -477,6 +477,7 @@ void SLSelectTask::run(sqlite3** db, Sqlite3Storage* sl)
 
     pres->row = pres->table;
     pres->cur_row = 0;
+    log_debug("rows: %d, columns: %d\n", pres->nrow, pres->ncolumn);
 }
 
 /* SLExecTask */
