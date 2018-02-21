@@ -237,6 +237,7 @@ public:
         : ASTNode(sqlEmitter)
         , value(std::move(value)){};
     std::string emit() const override;
+    std::string emit(const std::string& property, const std::string& value) const;
     virtual ~ASTExistsOperator() = default;
 protected:
     std::string value;
@@ -290,105 +291,19 @@ protected:
     std::shared_ptr<ASTNode> rhs;
 };
 
-// class SQLEmitter
-// {
-// public:
-//     virtual std::string emitSQL(const ASTNode& node) const = 0;
-//     // virtual std::string emit(const ASTNode& node) const = 0;
-//     virtual std::string emit(const ASTAsterisk& node) const = 0;
-//     virtual std::string emit(const ASTProperty& node) const = 0;
-//     virtual std::string emit(const ASTBoolean& node) const = 0;
-//     virtual std::string emit(const ASTParenthesis& node, const std::string& bracketedNode) const = 0;
-//     virtual std::string emit(const ASTDQuote& node) const = 0;
-//     virtual std::string emit(const ASTEscapedString& node) const = 0;
-//     virtual std::string emit(const ASTQuotedString& node) const = 0;
-//     virtual std::string emit(const ASTCompareOperator& node,
-//         const std::string& property, const std::string& value) const = 0;
-//     virtual std::string emit(const ASTCompareExpression& node) const = 0;
-//     virtual std::string emit(const ASTStringOperator& node,
-//         const std::string& property, const std::string& value) const = 0;
-//     virtual std::string emit(const ASTStringExpression& node) const = 0;
-//     virtual std::string emit(const ASTExistsOperator& node) const = 0;
-//     virtual std::string emit(const ASTExistsExpression& node) const = 0;
-//     virtual std::string emit(const ASTAndOperator& node,
-//         const std::string& lhs, const std::string& rhs) const = 0;
-//     virtual std::string emit(const ASTOrOperator& node,
-//         const std::string& lhs, const std::string& rhs) const = 0;
-
-//     virtual ~SQLEmitter() = default;
-//     virtual char tableQuote() const = 0;
-// };
-
-// class SqliteEmitter : public SQLEmitter
-// {
-//     std::string emitSQL(const ASTNode& node) const override;
-//     // std::string emit(const ASTNode& node) const override { return "XXXX"; };
-//     std::string emit(const ASTAsterisk& node) const override { return "*"; };
-//     std::string emit(const ASTProperty& node) const override { return "property"; };
-//     std::string emit(const ASTBoolean& node) const override { return "boolean"; };
-//     std::string emit(const ASTParenthesis& node, const std::string& bracketedNode) const override;
-//     std::string emit(const ASTDQuote& node) const override { return ""; };
-//     std::string emit(const ASTEscapedString& node) const override { return "escaped string"; };
-//     std::string emit(const ASTQuotedString& node) const override { return "quoted string"; };
-//     std::string emit(const ASTCompareOperator& node,
-//         const std::string& property, const std::string& value) const override;
-//     std::string emit(const ASTCompareExpression& node) const override { return "a >= b"; };
-//     std::string emit(const ASTStringOperator& node,
-//         const std::string& property, const std::string& value) const override;
-//     std::string emit(const ASTStringExpression& node) const override { return "a contains b"; };
-//     std::string emit(const ASTExistsOperator& node) const override { return "exists"; };
-//     std::string emit(const ASTExistsExpression& node) const override { return "a exists true"; };
-//     std::string emit(const ASTAndOperator& node, const std::string& lhs, const std::string& rhs) const override;
-//     std::string emit(const ASTOrOperator& node, const std::string& lhs, const std::string& rhs) const override;
-
-//     inline char tableQuote() const override { return '"'; };
-// };
-
-// class MySqlEmitter : public SQLEmitter
-// {
-//     std::string emitSQL(const ASTNode& node) const override { return nullptr; };
-//     // std::string emit(const ASTNode& node) const override { return "XXXX"; };
-//     std::string emit(const ASTAsterisk& node) const override { return "*"; };
-//     std::string emit(const ASTProperty& node) const override { return "property"; };
-//     std::string emit(const ASTBoolean& node) const override { return "boolean"; };
-//     std::string emit(const ASTParenthesis& node, const std::string& bracketedNode) const override { return "()"; };
-//     std::string emit(const ASTDQuote& node) const override { return ""; };
-//     std::string emit(const ASTEscapedString& node) const override { return "escaped string"; };
-//     std::string emit(const ASTQuotedString& node) const override { return "quoted string"; };
-//     std::string emit(const ASTCompareOperator& node,
-//         const std::string& property, const std::string& value) const override { return "="; };
-//     std::string emit(const ASTCompareExpression& node) const override { return "a >= b"; };
-//     std::string emit(const ASTStringOperator& node,
-//         const std::string& property, const std::string& value) const override { return "contains"; };
-//     std::string emit(const ASTStringExpression& node) const override { return "a contains b"; };
-//     std::string emit(const ASTExistsOperator& node) const override { return "exists"; };
-//     std::string emit(const ASTExistsExpression& node) const override { return "a exists true"; };
-//     std::string emit(const ASTAndOperator& node, const std::string& lhs, const std::string& rhs) const override { return "and"; };
-//     std::string emit(const ASTOrOperator& node, const std::string& lhs, const std::string& rhs) const override { return "or"; };
-
-//     inline char tableQuote() const override { return '`'; };
-// };
-
 class SQLEmitter
 {
 public:
     virtual std::string emitSQL(const ASTNode* node) const = 0;
-    // virtual std::string emit(const ASTNode* node) const = 0;
     virtual std::string emit(const ASTAsterisk* node) const = 0;
-    virtual std::string emit(const ASTProperty* node) const = 0;
-    virtual std::string emit(const ASTBoolean* node) const = 0;
     virtual std::string emit(const ASTParenthesis* node, const std::string& bracketedNode) const = 0;
     virtual std::string emit(const ASTDQuote* node) const = 0;
-    virtual std::string emit(const ASTEscapedString* node) const = 0;
-    virtual std::string emit(const ASTQuotedString* node) const = 0;
     virtual std::string emit(const ASTCompareOperator* node,
         const std::string& property, const std::string& value) const = 0;
-    virtual std::string emit(const ASTCompareExpression* node) const = 0;
     virtual std::string emit(const ASTStringOperator* node,
         const std::string& property, const std::string& value) const = 0;
-    virtual std::string emit(const ASTStringExpression* node) const = 0;
-    virtual std::string emit(const ASTExistsOperator* node) const = 0;
-    virtual std::string emit(const ASTExistsExpression* node) const = 0;
+    virtual std::string emit(const ASTExistsOperator* node,
+        const std::string& property, const std::string& value) const = 0;
     virtual std::string emit(const ASTAndOperator* node,
         const std::string& lhs, const std::string& rhs) const = 0;
     virtual std::string emit(const ASTOrOperator* node,
@@ -401,22 +316,15 @@ public:
 class SqliteEmitter : public SQLEmitter
 {
     std::string emitSQL(const ASTNode* node) const override;
-    // std::string emit(const ASTNode* node) const override { return "XXXX"; };
     std::string emit(const ASTAsterisk* node) const override { return "*"; };
-    std::string emit(const ASTProperty* node) const override { return "property"; };
-    std::string emit(const ASTBoolean* node) const override { return "boolean"; };
     std::string emit(const ASTParenthesis* node, const std::string& bracketedNode) const override;
     std::string emit(const ASTDQuote* node) const override { return ""; };
-    std::string emit(const ASTEscapedString* node) const override { return "escaped string"; };
-    std::string emit(const ASTQuotedString* node) const override { return "quoted string"; };
     std::string emit(const ASTCompareOperator* node,
         const std::string& property, const std::string& value) const override;
-    std::string emit(const ASTCompareExpression* node) const override { return "a >= b"; };
     std::string emit(const ASTStringOperator* node,
         const std::string& property, const std::string& value) const override;
-    std::string emit(const ASTStringExpression* node) const override { return "a contains b"; };
-    std::string emit(const ASTExistsOperator* node) const override { return "exists"; };
-    std::string emit(const ASTExistsExpression* node) const override { return "a exists true"; };
+    std::string emit(const ASTExistsOperator* node,
+        const std::string& property, const std::string& value) const override;
     std::string emit(const ASTAndOperator* node, const std::string& lhs, const std::string& rhs) const override;
     std::string emit(const ASTOrOperator* node, const std::string& lhs, const std::string& rhs) const override;
 
@@ -426,22 +334,15 @@ class SqliteEmitter : public SQLEmitter
 class MySqlEmitter : public SQLEmitter
 {
     std::string emitSQL(const ASTNode* node) const override { return nullptr; };
-    // std::string emit(const ASTNode* node) const override { return "XXXX"; };
     std::string emit(const ASTAsterisk* node) const override { return "*"; };
-    std::string emit(const ASTProperty* node) const override { return "property"; };
-    std::string emit(const ASTBoolean* node) const override { return "boolean"; };
     std::string emit(const ASTParenthesis* node, const std::string& bracketedNode) const override { return "()"; };
     std::string emit(const ASTDQuote* node) const override { return ""; };
-    std::string emit(const ASTEscapedString* node) const override { return "escaped string"; };
-    std::string emit(const ASTQuotedString* node) const override { return "quoted string"; };
     std::string emit(const ASTCompareOperator* node,
         const std::string& property, const std::string& value) const override { return "="; };
-    std::string emit(const ASTCompareExpression* node) const override { return "a >= b"; };
     std::string emit(const ASTStringOperator* node,
         const std::string& property, const std::string& value) const override { return "contains"; };
-    std::string emit(const ASTStringExpression* node) const override { return "a contains b"; };
-    std::string emit(const ASTExistsOperator* node) const override { return "exists"; };
-    std::string emit(const ASTExistsExpression* node) const override { return "a exists true"; };
+    std::string emit(const ASTExistsOperator* node,
+        const std::string& property, const std::string& value) const override { return "exists"; };
     std::string emit(const ASTAndOperator* node, const std::string& lhs, const std::string& rhs) const override { return "and"; };
     std::string emit(const ASTOrOperator* node, const std::string& lhs, const std::string& rhs) const override { return "or"; };
 

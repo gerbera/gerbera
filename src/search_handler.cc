@@ -342,61 +342,51 @@ std::string ASTNode::emitSQL()
 
 std::string ASTAsterisk::emit() const
 {
-    std::cout << "Emitting for ASTAsterisk " << std::endl;
     return sqlEmitter.emit(this);
 }
 
 std::string ASTProperty::emit() const
 {
-    std::cout << "Emitting for ASTProperty " << std::endl;
     return value;
 }
 
 std::string ASTBoolean::emit() const
 {
-    std::cout << "Emitting for ASTBoolean " << std::endl;
-    return sqlEmitter.emit(this);
+    return value;
 }
 
 std::string ASTParenthesis::emit() const
 {
-    std::cout << "Emitting for ASTParenthesis " << std::endl;
     return sqlEmitter.emit(this, bracketedNode->emit());
 }
 
 std::string ASTDQuote::emit() const
 {
-    std::cout << "Emitting for ASTDQuote " << std::endl;
     return sqlEmitter.emit(this);
 }
 
 std::string ASTEscapedString::emit() const
 {
-    std::cout << "Emitting for ASTEscapedString " << std::endl;
     return value;
 }
 
 std::string ASTQuotedString::emit() const
 {
-    std::cout << "Emitting for ASTQuotedString " << std::endl;
     return openQuote->emit() + escapedString->emit() + closeQuote->emit();
 }
 
 std::string ASTCompareOperator::emit() const
 {
-    std::cout << "Emitting for ASTCompareOperator " << std::endl;
     throw _Exception(_("Should not get here"));
 }
 
 std::string ASTCompareOperator::emit(const std::string& property, const std::string& value) const
 {
-    std::cout << "Emitting for ASTCompareOperator " << std::endl;
     return sqlEmitter.emit(this, property, value);
 }
 
 std::string ASTCompareExpression::emit() const
 {
-    std::cout << "Emitting for ASTCompareExpression " << std::endl;
     std::string property = lhs->emit();
     std::string value = rhs->emit();
     return operatr->emit(property, value);
@@ -404,19 +394,16 @@ std::string ASTCompareExpression::emit() const
 
 std::string ASTStringOperator::emit() const
 {
-    std::cout << "Emitting for ASTStringOperator " << std::endl;
     throw _Exception(_("Should not get here"));
 }
 
 std::string ASTStringOperator::emit(const std::string& property, const std::string& value) const
 {
-    std::cout << "Emitting for ASTStringOperator (" << this->getValue() << ")" << std::endl;
     return sqlEmitter.emit(this, property, value);
 }
 
 std::string ASTStringExpression::emit() const
 {
-    std::cout << "Emitting for ASTStringExpression " << std::endl;
     std::string property = lhs->emit();
     std::string value = rhs->emit();
     return operatr->emit(property, value);
@@ -425,24 +412,28 @@ std::string ASTStringExpression::emit() const
 std::string ASTExistsOperator::emit() const
 {
     std::cout << "Emitting for ASTExistsOperator " << std::endl;
-    return sqlEmitter.emit(this);
+    throw _Exception(_("Should not get here"));
+}
+
+std::string ASTExistsOperator::emit(const std::string& property, const std::string& value) const
+{
+    return sqlEmitter.emit(this, property, value);
 }
 
 std::string ASTExistsExpression::emit() const
 {
-    std::cout << "Emitting for ASTExistsExpression " << std::endl;
-    return sqlEmitter.emit(this);
+    std::string property = lhs->emit();
+    std::string value = rhs->emit();
+    return operatr->emit(property, value);
 }
 
 std::string ASTAndOperator::emit() const
 {
-    std::cout << "Emitting for ASTAndOperator " << std::endl;
     return sqlEmitter.emit(this, lhs->emit(), rhs->emit());
 }
 
 std::string ASTOrOperator::emit() const
 {
-    std::cout << "Emitting for ASTOrOperator " << std::endl;
     return sqlEmitter.emit(this, lhs->emit(), rhs->emit());
 }
 
@@ -484,17 +475,42 @@ std::string SqliteEmitter::emit(const ASTStringOperator* node, const std::string
     const std::string& value) const
 {
     auto lcOperator = *aslowercase(node->getValue());
-    if (lcOperator != "contains" && lcOperator != "derivedfrom")
-        throw _Exception(_("operator not yet supported"));
+    if (lcOperator != "contains" && lcOperator != "doesnotcontain" && lcOperator != "derivedfrom"
+        && lcOperator != "startswith")
+        throw _Exception(_("operator not supported"));
 
     std::stringstream sqlFragment;
     if (lcOperator == "contains") {
         sqlFragment << "(m.property_name='" << property << "' and lower(m.property_value) "
                     << "like" << " lower('%" << value << "%') and c.upnp_class is not null)";
     }
+    else if (lcOperator == "doesnotcontain") {
+        sqlFragment << "(m.property_name='" << property << "' and lower(m.property_value) "
+                    << "not like" << " lower('%" << value << "%') and c.upnp_class is not null)";
+    }
+    else if (lcOperator == "startswith") {
+        sqlFragment << "(m.property_name='" << property << "' and lower(m.property_value) "
+                    << "like" << " lower('" << value << "%') and c.upnp_class is not null)";
+    }
     else if (lcOperator == "derivedfrom") {
         sqlFragment << "c.upnp_class " << "like" << " lower('" << value << ".%')";
     }
+    return sqlFragment.str();
+}
+
+std::string SqliteEmitter::emit(const ASTExistsOperator* node, const std::string& property,
+    const std::string& value) const
+{
+    std::stringstream sqlFragment;
+    std::string exists;
+    if (value == "true") {
+        exists = "not null";
+    } else if (value == "false") {
+        exists = "null";
+    } else {
+        throw _Exception(_("invalid value on rhs of exists operator"));
+    }
+    sqlFragment << "(m.property_name='" << property << "' and m.property_value is " << exists << " and c.upnp_class is not null)";
     return sqlFragment.str();
 }
 

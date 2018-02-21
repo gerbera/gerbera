@@ -347,7 +347,8 @@ Ref<Array<SQLStorage::AddUpdateTable>> SQLStorage::_addUpdateObject(Ref<CdsObjec
 #ifdef USE_METADATA_TABLE
     // metadata always stored in mt_cds_object, but also store in mt_metadata if the cds_object
     // is a 'non-virtual' item
-    if (!hasReference && IS_CDS_PURE_ITEM(objectType) && dict != nullptr && dict->size() > 0) {
+    // if (!hasReference && IS_CDS_PURE_ITEM(objectType) && dict != nullptr && dict->size() > 0) {
+    if (dict != nullptr && dict->size() > 0) {
         Ref<Array<DictionaryElement>> metadataElements = dict->getElements();
         for (int  i = 0; i < metadataElements->size(); i++) {
             Ref<Dictionary> metadataSql(new Dictionary());

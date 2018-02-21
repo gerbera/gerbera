@@ -318,6 +318,36 @@ TEST(SearchParser, SearchCriteriaUsingContainsOperator)
     EXPECT_TRUE(executeSearchParserTest(sqlEmitter, "upnp:album contains \"Midnight\" or upnp:artist contains \"HEAVE\"", "(m.property_name='upnp:album' and lower(m.property_value) like lower('%Midnight%') and c.upnp_class is not null) or (m.property_name='upnp:artist' and lower(m.property_value) like lower('%HEAVE%') and c.upnp_class is not null)"));
 }
 
+TEST(SearchParser, SearchCriteriaUsingDoesNotContainOperator)
+{
+    SqliteEmitter sqlEmitter;
+    // (containsOpExpr)
+    EXPECT_TRUE(executeSearchParserTest(sqlEmitter, "upnp:album doesnotcontain \"Midnight\"", "(m.property_name='upnp:album' and lower(m.property_value) not like lower('%Midnight%') and c.upnp_class is not null)"));
+
+    // (containsOpExpr or containsOpExpr)
+    EXPECT_TRUE(executeSearchParserTest(sqlEmitter, "upnp:album doesNotContain \"Midnight\" or upnp:artist doesnotcontain \"HEAVE\"", "(m.property_name='upnp:album' and lower(m.property_value) not like lower('%Midnight%') and c.upnp_class is not null) or (m.property_name='upnp:artist' and lower(m.property_value) not like lower('%HEAVE%') and c.upnp_class is not null)"));
+}
+
+TEST(SearchParser, SearchCriteriaUsingStartsWithOperator)
+{
+    SqliteEmitter sqlEmitter;
+    // (containsOpExpr)
+    EXPECT_TRUE(executeSearchParserTest(sqlEmitter, "upnp:album startswith \"Midnight\"", "(m.property_name='upnp:album' and lower(m.property_value) like lower('Midnight%') and c.upnp_class is not null)"));
+
+    // (containsOpExpr or containsOpExpr)
+    EXPECT_TRUE(executeSearchParserTest(sqlEmitter, "upnp:album startsWith \"Midnight\" or upnp:artist startswith \"HEAVE\"", "(m.property_name='upnp:album' and lower(m.property_value) like lower('Midnight%') and c.upnp_class is not null) or (m.property_name='upnp:artist' and lower(m.property_value) like lower('HEAVE%') and c.upnp_class is not null)"));
+}
+
+TEST(SearchParser, SearchCriteriaUsingExistsOperator)
+{
+    SqliteEmitter sqlEmitter;
+    // (containsOpExpr)
+    EXPECT_TRUE(executeSearchParserTest(sqlEmitter, "upnp:album exists true", "(m.property_name='upnp:album' and m.property_value is not null and c.upnp_class is not null)"));
+
+    // (containsOpExpr or containsOpExpr)
+    EXPECT_TRUE(executeSearchParserTest(sqlEmitter, "upnp:album exists true or upnp:artist exists false", "(m.property_name='upnp:album' and m.property_value is not null and c.upnp_class is not null) or (m.property_name='upnp:artist' and m.property_value is null and c.upnp_class is not null)"));
+}
+
 TEST(SearchParser, SearchCriteriaWithExtendsOperator)
 {
     SqliteEmitter sqlEmitter;
@@ -327,6 +357,9 @@ TEST(SearchParser, SearchCriteriaWithExtendsOperator)
 
     // derivedfromOpExpr and (containsOpExpr or containsOpExpr)
     EXPECT_TRUE(executeSearchParserTest(sqlEmitter, "upnp:class derivedfrom \"object.item.audioItem\" and (dc:title contains \"britain\" or dc:creator contains \"britain\"", "c.upnp_class like lower('object.item.audioItem.%') and ((m.property_name='dc:title' and lower(m.property_value) like lower('%britain%') and c.upnp_class is not null) or (m.property_name='dc:creator' and lower(m.property_value) like lower('%britain%') and c.upnp_class is not null))"));    
+
+    // derivedFromOpExpr and (containsOpExpr or containsOpExpr)
+    EXPECT_TRUE(executeSearchParserTest(sqlEmitter, "upnp:class derivedFrom \"object.item.audioItem\" and (dc:title contains \"britain\" or dc:creator contains \"britain\"", "c.upnp_class like lower('object.item.audioItem.%') and ((m.property_name='dc:title' and lower(m.property_value) like lower('%britain%') and c.upnp_class is not null) or (m.property_name='dc:creator' and lower(m.property_value) like lower('%britain%') and c.upnp_class is not null))"));    
 }
 
 // select * from mt_cds_object where id=215291 or dc_title = 'Thong Song' or id in (194099,214889,215237,215239,215241,202037)

@@ -185,6 +185,7 @@ void ContentDirectoryService::upnp_action_Search(Ref<ActionRequest> request) {
         Ref<Storage> storage = Storage::getInstance();
         results = storage->search(searchParam);
     } catch (const Exception& e) {
+        log_debug(e.getMessage().c_str());
         throw UpnpException(UPNP_E_NO_SUCH_ID, _("no such object"));
     }
 
