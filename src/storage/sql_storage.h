@@ -186,6 +186,7 @@ private:
     
     zmm::Ref<CdsObject> createObjectFromRow(zmm::Ref<SQLRow> row);
     zmm::Ref<CdsObject> createObjectFromSearchRow(zmm::Ref<SQLRow> row);
+    zmm::Ref<Dictionary> retrieveMetadataForObject(int objectId);
     
     /* helper for findObjectByPath and findObjectIDByPath */ 
     zmm::Ref<CdsObject> _findObjectByPath(zmm::String fullpath);

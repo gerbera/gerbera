@@ -140,6 +140,16 @@ enum SearchCol
     << " c.object_type, c.upnp_class, c.dc_title, c.metadata,"       \
     << " c.resources, c.mime_type, c.track_number, c.location"
 
+enum MetadataCol
+{
+    m_id = 0,
+    m_item_id,
+    m_property_name,
+    m_property_value
+};
+
+#define SELECT_METADATA "SELECT id, item_id, property_name, property_value "
+
 #define SQL_QUERY       sql_query
 #define SQL_QUERY sql_query
 
@@ -195,7 +205,8 @@ void SQLStorage::init()
 #ifdef HAVE_MYSQL
         if (storageType == "mysql")
         {
-            sqlEmitter = std::make_shared<MySqlEmitter>();
+            // sqlEmitter = std::make_shared<MySqlEmitter>();
+            sqlEmitter = std::make_shared<SqliteEmitter>();
             break;
         }
 #endif
@@ -337,6 +348,7 @@ Ref<Array<SQLStorage::AddUpdateTable>> SQLStorage::_addUpdateObject(Ref<CdsObjec
     //    cdsObjectSql->put(_("dc_title"), _(SQL_NULL));
 
     Ref<Dictionary> dict = obj->getMetadata();
+#ifndef USE_METADATA_TABLE
     if (isUpdate)
         cdsObjectSql->put(_("metadata"), _(SQL_NULL));
     if (dict->size() > 0) {
@@ -344,10 +356,7 @@ Ref<Array<SQLStorage::AddUpdateTable>> SQLStorage::_addUpdateObject(Ref<CdsObjec
             cdsObjectSql->put(_("metadata"), quote(dict->encode()));
         }
     }
-#ifdef USE_METADATA_TABLE
-    // metadata always stored in mt_cds_object, but also store in mt_metadata if the cds_object
-    // is a 'non-virtual' item
-    // if (!hasReference && IS_CDS_PURE_ITEM(objectType) && dict != nullptr && dict->size() > 0) {
+#else
     if (dict != nullptr && dict->size() > 0) {
         Ref<Array<DictionaryElement>> metadataElements = dict->getElements();
         for (int  i = 0; i < metadataElements->size(); i++) {
@@ -1055,7 +1064,9 @@ int SQLStorage::createContainer(int parentID, String name, String path, bool isV
         << TQ("dc_title") << ','
         << TQ("location") << ','
         << TQ("location_hash") << ','
+#ifndef USE_METADATA_TABLE            
         << TQ("metadata") << ','
+#endif // USE_METADATA_TABLE
         << TQ("ref_id") << ") VALUES ("
         << newID << ','
         << parentID << ','
@@ -1064,12 +1075,39 @@ int SQLStorage::createContainer(int parentID, String name, String path, bool isV
         << quote(name) << ','
         << quote(dbLocation) << ','
         << quote(stringHash(dbLocation)) << ','
+#ifndef USE_METADATA_TABLE            
         << (metadata == nullptr ? _(SQL_NULL) : metadata->encode()) << ','
+#endif // USE_METADATA_TABLE
         << (refID > 0 ? quote(refID) : _(SQL_NULL))
         << ')';
 
     exec(qb);
 
+#ifdef USE_METADATA_TABLE            
+    if (itemMetadata != nullptr) {
+        Ref<Array<DictionaryElement>> metadataElements = itemMetadata->getElements();
+        for (int i = 0; i < metadataElements->size(); i++) {
+            Ref<DictionaryElement> property = metadataElements->get(i);
+            int newMetadataID = getNextMetadataID();
+            Ref<StringBuffer> ib(new StringBuffer());
+            *ib << "INSERT INTO"
+                << TQ(METADATA_TABLE)
+                << " ("
+                << TQ("id") << ','
+                << TQ("item_id") << ','
+                << TQ("property_name") << ','
+                << TQ("property_value") << ") VALUES ("
+                << newMetadataID << ','
+                << newID << ","
+                << quote(property->getKey()) << ","
+                << quote(property->getValue())
+                << ")";
+            exec(ib);
+        }
+        log_debug("Wrote metadata for cds_object %s", newID);
+    }
+#endif // USE_METADATA_TABLE
+    
     /* inform cache */
     if (cacheOn()) {
         AutoLock lock(cache->getMutex());
@@ -1186,11 +1224,23 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
     obj->setClass(fallbackString(row->col(_upnp_class), row->col(_ref_upnp_class)));
     obj->setFlags(row->col(_flags).toUInt());
 
+#ifndef USE_METADATA_TABLE
     String metadataStr = fallbackString(row->col(_metadata), row->col(_ref_metadata));
     Ref<Dictionary> meta(new Dictionary());
     meta->decode(metadataStr);
     obj->setMetadata(meta);
+#else
+    Ref<Dictionary> meta = retrieveMetadataForObject(obj->getID());
+    if (meta != nullptr)
+        obj->setMetadata(meta);
+    else {
+        meta = retrieveMetadataForObject(obj->getRefID());
+        if (meta != nullptr)
+            obj->setMetadata(meta);
+    }
 
+#endif //USE_METADATA_TABLE
+    
     String auxdataStr = fallbackString(row->col(_auxdata), row->col(_ref_auxdata));
     Ref<Dictionary> aux(new Dictionary());
     aux->decode(auxdataStr);
@@ -1299,10 +1349,9 @@ Ref<CdsObject> SQLStorage::createObjectFromSearchRow(Ref<SQLRow> row)
     obj->setTitle(row->col(SearchCol::dc_title));
     obj->setClass(row->col(SearchCol::upnp_class));
 
-    String metadataStr = row->col(SearchCol::metadata);
-    Ref<Dictionary> meta(new Dictionary());
-    meta->decode(metadataStr);
-    obj->setMetadata(meta);
+    Ref<Dictionary> meta = retrieveMetadataForObject(obj->getID());
+    if (meta != nullptr)
+        obj->setMetadata(meta);
 
     String resources_str = row->col(SearchCol::resources);
     bool resource_zero_ok = false;
@@ -1334,6 +1383,30 @@ Ref<CdsObject> SQLStorage::createObjectFromSearchRow(Ref<SQLRow> row)
 
     return obj;
 }
+
+Ref<Dictionary> SQLStorage::retrieveMetadataForObject(int objectId)
+{
+#ifdef USE_METADATA_TABLE
+    Ref<StringBuffer> qb(new StringBuffer());
+    *qb << SELECT_METADATA
+        << " FROM " << TQ(METADATA_TABLE)
+        << " WHERE " << TQ("item_id")
+        << " = " << objectId;
+    Ref<SQLResult> res = select(qb);
+
+    if (res == nullptr)
+        return nullptr;
+
+    Ref<Dictionary> metadata(new Dictionary);
+    Ref<SQLRow> row;
+    while ((row = res->nextRow()) != nullptr) {
+        metadata->put(row->col(m_property_name), row->col(m_property_value));
+    }
+    return metadata;
+#endif
+    return nullptr;
+}
+
 
 int SQLStorage::getTotalFiles()
 {
