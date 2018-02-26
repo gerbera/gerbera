@@ -5,7 +5,9 @@
     "start": "node index.js",
     "test": "./node_modules/.bin/karma start karma.conf.js",
     "test:e2e": "concurrently --success first --kill-others \"npm start\" \"npm run e2e\"",
-    "e2e": "./node_modules/.bin/mocha \"test/e2e\"",
+    "e2e": "./node_modules/.bin/mocha \"test/e2e/**.spec.js\"",
+    "screenshot": "rimraf _build && mkdirp _build/doc && ./node_modules/.bin/mocha \"test/e2e/screenshot.doc.js\" --folderPath=/_build/doc/",
+    "doc:screenshot": "concurrently --success first --kill-others \"npm start\" \"npm run screenshot\"",
     "lint": "./node_modules/.bin/eslint -c .eslintrc ../web/js/*gerbera*.js"
   },
   "config": {
@@ -27,13 +29,17 @@
     "express": "^4.15.3",
     "jasmine": "^2.6.0",
     "jasmine-jquery": "^2.1.1",
+    "jimp": "^0.2.28",
     "karma": "^1.6.0",
     "karma-chrome-launcher": "^2.2.0",
     "karma-coverage": "^1.1.1",
     "karma-jasmine": "^1.1.0",
     "karma-mocha-reporter": "^2.2.4",
     "karma-spec-reporter": "0.0.31",
+    "mkdirp": "^0.5.1",
     "mocha": "^3.4.1",
-    "selenium-webdriver": "^3.4.0"
+    "rimraf": "^2.6.2",
+    "selenium-webdriver": "^3.4.0",
+    "yargs": "^11.0.0"
   }
 }

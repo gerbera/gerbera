@@ -287,19 +287,13 @@ int Server::upnp_callback(Upnp_EventType eventtype, const void* event)
         return UPNP_E_BAD_REQUEST;
     }
 
-    //log_info("event is ok\n");
-    // get device wide mutex (have to figure out what the hell that is)
-    AutoLock lock(mutex);
-
     // dispatch event based on event type
     switch (eventtype) {
 
     case UPNP_CONTROL_ACTION_REQUEST:
         // a CP is invoking an action
-        log_info("UPNP_CONTROL_ACTION_REQUEST\n");
+        log_debug("UPNP_CONTROL_ACTION_REQUEST\n");
         try {
-            // https://github.com/mrjimenez/pupnp/blob/master/upnp/sample/common/tv_device.c
-
             Ref<ActionRequest> request(new ActionRequest((UpnpActionRequest*)event));
             upnp_actions(request);
             request->update();
@@ -315,7 +309,7 @@ int Server::upnp_callback(Upnp_EventType eventtype, const void* event)
 
     case UPNP_EVENT_SUBSCRIPTION_REQUEST:
         // a cp wants a subscription
-        log_info("UPNP_EVENT_SUBSCRIPTION_REQUEST\n");
+        log_debug("UPNP_EVENT_SUBSCRIPTION_REQUEST\n");
         try {
             Ref<SubscriptionRequest> request(new SubscriptionRequest((UpnpSubscriptionRequest*)event));
             upnp_subscriptions(request);
@@ -482,13 +476,14 @@ int Server::register_web_callbacks()
 
     log_debug("Setting UpnpVirtualDir OpenCallback\n");
     ret = UpnpVirtualDir_set_OpenCallback([](IN const char* filename, IN enum UpnpOpenFileMode mode, IN const void *cookie) -> UpnpWebFileHandle {
-        log_debug("web_open(): %s\n", filename);
+
         String link = url_unescape((char*)filename);
 
         try {
             Ref<RequestHandler> reqHandler = const_cast<Server *>(static_cast<const Server *>(cookie))->create_request_handler(filename);
             Ref<IOHandler> ioHandler = reqHandler->open(link.c_str(), mode, nullptr);
             ioHandler->retain();
+            log_debug("%p open(%s)\n", ioHandler.getPtr(), filename);
             return (UpnpWebFileHandle)ioHandler.getPtr();
         } catch (const ServerShutdownException& se) {
             return nullptr;
@@ -504,6 +499,7 @@ int Server::register_web_callbacks()
 
     log_debug("Setting UpnpVirtualDir ReadCallback\n");
     ret = UpnpVirtualDir_set_ReadCallback([](IN UpnpWebFileHandle f, OUT char* buf, IN size_t length, IN const void *cookie) -> int {
+        log_debug("%p read(%d)\n", f, length);
         if (static_cast<const Server *>(cookie)->getShutdownStatus())
             return -1;
 
@@ -514,12 +510,14 @@ int Server::register_web_callbacks()
 
     log_debug("Setting UpnpVirtualDir WriteCallback\n");
     ret = UpnpVirtualDir_set_WriteCallback([](IN UpnpWebFileHandle f, IN char* buf, IN size_t length, IN const void *cookie) -> int {
+        log_debug("%p write(%d)\n", f, length);
         return 0;
     });
     if (ret != UPNP_E_SUCCESS) return ret;
 
     log_debug("Setting UpnpVirtualDir SeekCallback\n");
     ret = UpnpVirtualDir_set_SeekCallback([](IN UpnpWebFileHandle f, IN off_t offset, IN int whence, IN const void *cookie) -> int {
+        log_debug("%p seek(%d, %d)\n", f, offset, whence);
         try {
             auto* handler = (IOHandler*)f;
             handler->seek(offset, whence);
@@ -535,6 +533,7 @@ int Server::register_web_callbacks()
 
     log_debug("Setting UpnpVirtualDir CloseCallback\n");
     UpnpVirtualDir_set_CloseCallback([](IN UpnpWebFileHandle f, IN const void *cookie) -> int {
+        log_debug("%p close()\n", f);
         Ref<IOHandler> handler((IOHandler*)f);
         handler->release();
         try {

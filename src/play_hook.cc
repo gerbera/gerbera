@@ -44,6 +44,7 @@ using namespace zmm;
 
 void PlayHook::trigger(zmm::Ref<CdsObject> obj)
 {
+    log_debug("start\n");
     Ref<ConfigManager> cfg = ConfigManager::getInstance();
 
     if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && !obj->getFlag(OBJECT_FLAG_PLAYED))
@@ -71,5 +72,5 @@ void PlayHook::trigger(zmm::Ref<CdsObject> obj)
         (RefCast(obj, CdsItem)->getMimeType().startsWith("audio")))
         LastFm::getInstance()->startedPlaying(RefCast(obj, CdsItem));
 #endif
-    
+    log_debug("end\n");
 }

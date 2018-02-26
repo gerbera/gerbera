@@ -144,6 +144,30 @@ to the available **mock** responses stored in `/gerbara-web/mock-api`.
 3. Visit the website at `http://localhost:3000`
 4. Step through scenario as per `test/e2e/home.spec.js`
 
+# Gerbera UI Documentation
+
+This folder contains scripts to generate documentation for the Gerbera UI.
+
+### Screenshot Script
+
+The screenshot script is a mocha end-to-end that captures screenshots using Selenium. The screenshot script runs the mock-server and iterates through common scenarios to
+generate screenshots for use in the **Gerbera Docs**.
+
+#### Running the Screenshot Script
+
+You can launch the script from NPM.
+
+```shell
+npm run doc:screenshot
+```
+
+The script stores the images captured in the `gerbera-web/doc/*.png` folder
+
+#### Adding New Screenshots
+
+If you want to add to the screenshot collection spec, take a look
+at the `gerbera-web/test/e2e/screenshot.doc.js` spec file.  The spec
+captures a picture and manipulates it to generate for web use.
 
 
 

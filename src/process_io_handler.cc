@@ -188,12 +188,12 @@ void ProcessIOHandler::open(IN enum UpnpOpenFileMode mode)
     }
 }
 
-int ProcessIOHandler::read(OUT char *buf, IN size_t length)
+size_t ProcessIOHandler::read(OUT char *buf, IN size_t length)
 {
     fd_set readSet;
     struct timeval timeout;
     ssize_t bytes_read = 0;
-    int num_bytes = 0;
+    size_t num_bytes = 0;
     char* p_buffer = buf;
     int exit_status = EXIT_SUCCESS;
     int ret = 0;
@@ -306,12 +306,12 @@ int ProcessIOHandler::read(OUT char *buf, IN size_t length)
     return num_bytes;
 }
 
-int ProcessIOHandler::write(IN char *buf, IN size_t length)
+size_t ProcessIOHandler::write(IN char *buf, IN size_t length)
 {
     fd_set writeSet;
     struct timeval timeout;
     ssize_t bytes_written = 0;
-    int num_bytes = 0;
+    size_t num_bytes = 0;
     char* p_buffer = buf;
     int exit_status = EXIT_SUCCESS;
     int ret = 0;

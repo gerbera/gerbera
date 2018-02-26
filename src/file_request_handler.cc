@@ -523,6 +523,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char* filename,
         off_t filelength = -1;
         Ref<IOHandler> io_handler = h->serveContent(item, res_id, &filelength);
         io_handler->open(mode);
+        log_debug("end\n");
         return io_handler;
 
     } else {
@@ -532,9 +533,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char* filename,
             Ref<TranscodeDispatcher> tr_d(new TranscodeDispatcher());
             Ref<TranscodingProfile> tp = ConfigManager::getInstance()->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(tr_profile);
             return tr_d->open(tp, path, RefCast(item, CdsObject), range);
-        } else
-
-        {
+        } else {
             if (mimeType == nullptr)
                 mimeType = item->getMimeType();
 
@@ -566,6 +565,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char* filename,
             Ref<IOHandler> io_handler(new FileIOHandler(path));
             io_handler->open(mode);
             PlayHook::getInstance()->trigger(obj);
+            log_debug("end\n");
             return io_handler;
         }
     }

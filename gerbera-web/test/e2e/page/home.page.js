@@ -1,6 +1,7 @@
 var webdriver = require('selenium-webdriver')
 var By = webdriver.By
 var until = webdriver.until
+var fs = require('fs')
 
 module.exports = function (driver) {
   this.getDatabaseMenu = function () {
@@ -246,5 +247,21 @@ module.exports = function (driver) {
 
   this.getWindowSize = function () {
     return driver.manage().window().getSize();
+  }
+
+  this.takeScreenshot = function (filename) {
+    return driver.takeScreenshot().then(function(data) {
+      fs.writeFileSync(filename, data, 'base64');
+    })
+  }
+
+  this.hover = function (selector) {
+    var elem = driver.findElement(By.css(selector))
+    driver.actions().mouseMove(elem).perform();
+    driver.sleep(1000);
+  }
+
+  this.mockTaskMessage = function (msg) {
+    return driver.executeScript('return $(\'#toast\').toast(\'showTask\', {message: "'+ msg +'"});')
   }
 }

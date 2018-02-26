@@ -50,14 +50,13 @@ public:
     /// \brief Initializes the internal buffer.
     /// \param buffer all operations will be done on this buffer.
     MemIOHandler(const void *buffer, int length);
-    MemIOHandler(zmm::String str);
+    explicit MemIOHandler(zmm::String str);
     virtual ~MemIOHandler();
 
     /// 
-    virtual void open(IN enum UpnpOpenFileMode mode);
-    virtual int read(OUT char *buf, IN size_t length);
-
-    virtual void seek(IN off_t offset, IN int whence);
+    void open(IN enum UpnpOpenFileMode mode) override;
+    size_t read(OUT char *buf, IN size_t length) override;
+    void seek(IN off_t offset, IN int whence) override ;
 };
 
 
