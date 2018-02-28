@@ -76,7 +76,7 @@ public:
         : sqlEmitter(emitter)
     {};
 
-    std::string emitSQL();
+    std::string emitSQL(int startingIndex, int requestedCount);
     virtual std::string emit() const = 0;
 
     virtual ~ASTNode() = default;
@@ -294,7 +294,7 @@ protected:
 class SQLEmitter
 {
 public:
-    virtual std::string emitSQL(const ASTNode* node) const = 0;
+    virtual std::string emitSQL(const ASTNode* node, int startingIndex, int requestedCount) const = 0;
     virtual std::string emit(const ASTAsterisk* node) const = 0;
     virtual std::string emit(const ASTParenthesis* node, const std::string& bracketedNode) const = 0;
     virtual std::string emit(const ASTDQuote* node) const = 0;
@@ -313,9 +313,9 @@ public:
     virtual char tableQuote() const = 0;
 };
 
-class SqliteEmitter : public SQLEmitter
+class DefaultSQLEmitter : public SQLEmitter
 {
-    std::string emitSQL(const ASTNode* node) const override;
+    std::string emitSQL(const ASTNode* node, int startingIndex, int requestedCount) const override;
     std::string emit(const ASTAsterisk* node) const override { return "*"; };
     std::string emit(const ASTParenthesis* node, const std::string& bracketedNode) const override;
     std::string emit(const ASTDQuote* node) const override { return ""; };
@@ -329,24 +329,6 @@ class SqliteEmitter : public SQLEmitter
     std::string emit(const ASTOrOperator* node, const std::string& lhs, const std::string& rhs) const override;
 
     inline char tableQuote() const override { return '"'; };
-};
-
-class MySqlEmitter : public SQLEmitter
-{
-    std::string emitSQL(const ASTNode* node) const override { return nullptr; };
-    std::string emit(const ASTAsterisk* node) const override { return "*"; };
-    std::string emit(const ASTParenthesis* node, const std::string& bracketedNode) const override { return "()"; };
-    std::string emit(const ASTDQuote* node) const override { return ""; };
-    std::string emit(const ASTCompareOperator* node,
-        const std::string& property, const std::string& value) const override { return "="; };
-    std::string emit(const ASTStringOperator* node,
-        const std::string& property, const std::string& value) const override { return "contains"; };
-    std::string emit(const ASTExistsOperator* node,
-        const std::string& property, const std::string& value) const override { return "exists"; };
-    std::string emit(const ASTAndOperator* node, const std::string& lhs, const std::string& rhs) const override { return "and"; };
-    std::string emit(const ASTOrOperator* node, const std::string& lhs, const std::string& rhs) const override { return "or"; };
-
-    inline char tableQuote() const override { return '`'; };
 };
 
 class SearchParser {

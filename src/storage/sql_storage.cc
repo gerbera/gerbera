@@ -190,30 +190,7 @@ void SQLStorage::init()
     insertBufferByteCount = 0;
 
 #ifdef USE_METADATA_TABLE
-    zmm::Ref<ConfigManager> config = ConfigManager::getInstance();
-    zmm::String storageType(ConfigManager::getInstance()->getOption(CFG_SERVER_STORAGE_DRIVER));
-    do
-    {
-#ifdef HAVE_SQLITE3
-        if (storageType == "sqlite3")
-        {
-            sqlEmitter = std::make_shared<SqliteEmitter>();
-            break;
-        }
-#endif
-
-#ifdef HAVE_MYSQL
-        if (storageType == "mysql")
-        {
-            // sqlEmitter = std::make_shared<MySqlEmitter>();
-            sqlEmitter = std::make_shared<SqliteEmitter>();
-            break;
-        }
-#endif
-        // other database types...
-        throw _Exception(_("Unknown storage type: ") + storageType);
-    }
-    while (false);
+    sqlEmitter = std::make_shared<DefaultSQLEmitter>();
 #endif // USE_METADATA_TABLE
 
     //log_debug("using SQL: %s\n", this->sql_query.c_str());
@@ -836,7 +813,7 @@ zmm::Ref<zmm::Array<CdsObject>> SQLStorage::search(zmm::Ref<SearchParam> param)
     std::shared_ptr<ASTNode> rootNode = searchParser->parse();
     std::stringstream selectCols;
     selectCols << SELECT_DATA_FOR_SEARCH << " ";
-    std::string sql(selectCols.str() + rootNode->emitSQL());
+    std::string sql(selectCols.str() + rootNode->emitSQL(param->getStartingIndex(), param->getRequestedCount()));
 
     log_debug("Search resolves to SQL [%s]\n", sql.c_str());
     zmm::Ref<SQLResult> sqlResult;

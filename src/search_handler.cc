@@ -166,8 +166,6 @@ std::shared_ptr<ASTNode> SearchParser::parse()
 
 std::shared_ptr<ASTNode> SearchParser::parseSearchExpression()
 {
-    std::cout << "entered SearchParser::parseExpression()" << std::endl;
-    
     std::stack<std::shared_ptr<ASTNode>> nodeStack;
     std::stack<TokenType> operatorStack;
     std::shared_ptr<ASTNode> root = nullptr;
@@ -335,9 +333,9 @@ void SearchParser::checkIsExpected(TokenType tokenType, const std::string& token
     }
 }
 
-std::string ASTNode::emitSQL()
+std::string ASTNode::emitSQL(int startingIndex, int requestedCount)
 {
-    return sqlEmitter.emitSQL(this);
+    return sqlEmitter.emitSQL(this, startingIndex, requestedCount);
 }
 
 std::string ASTAsterisk::emit() const
@@ -437,7 +435,7 @@ std::string ASTOrOperator::emit() const
     return sqlEmitter.emit(this, lhs->emit(), rhs->emit());
 }
 
-std::string SqliteEmitter::emitSQL(const ASTNode* node) const
+std::string DefaultSQLEmitter::emitSQL(const ASTNode* node, int startingIndex, int requestedCount) const
 {
     std::string predicates = node->emit();
     if (predicates.length() > 0) {
@@ -445,20 +443,26 @@ std::string SqliteEmitter::emitSQL(const ASTNode* node) const
         sql << "from mt_cds_object c "
                 << "inner join mt_metadata m on c.id = m.item_id "
                 << "where "
-                << predicates << ";";
+            << predicates;
+        if (startingIndex > 0 || requestedCount > 0) {
+            sql << " order by c.id"
+                << " limit " << (requestedCount == 0 ? 10000000000 : requestedCount)
+                << " offset " << startingIndex;
+        }
+        sql << ';';
         return sql.str();
     } else
         throw _Exception(_("No SQL generated from AST"));
 }
     
-std::string SqliteEmitter::emit(const ASTParenthesis* node, const std::string& bracketedNode) const
+std::string DefaultSQLEmitter::emit(const ASTParenthesis* node, const std::string& bracketedNode) const
 {
     std::stringstream sqlFragment;
     sqlFragment << "(" << bracketedNode << ")";
     return sqlFragment.str();
 }
 
-std::string SqliteEmitter::emit(const ASTCompareOperator* node, const std::string& property,
+std::string DefaultSQLEmitter::emit(const ASTCompareOperator* node, const std::string& property,
     const std::string& value) const
 {
     auto operatr = node->getValue();
@@ -471,7 +475,7 @@ std::string SqliteEmitter::emit(const ASTCompareOperator* node, const std::strin
     return sqlFragment.str();
 }
 
-std::string SqliteEmitter::emit(const ASTStringOperator* node, const std::string& property,
+std::string DefaultSQLEmitter::emit(const ASTStringOperator* node, const std::string& property,
     const std::string& value) const
 {
     auto lcOperator = *aslowercase(node->getValue());
@@ -498,7 +502,7 @@ std::string SqliteEmitter::emit(const ASTStringOperator* node, const std::string
     return sqlFragment.str();
 }
 
-std::string SqliteEmitter::emit(const ASTExistsOperator* node, const std::string& property,
+std::string DefaultSQLEmitter::emit(const ASTExistsOperator* node, const std::string& property,
     const std::string& value) const
 {
     std::stringstream sqlFragment;
@@ -514,7 +518,7 @@ std::string SqliteEmitter::emit(const ASTExistsOperator* node, const std::string
     return sqlFragment.str();
 }
 
-std::string SqliteEmitter::emit(const ASTAndOperator* node, const std::string& lhs,
+std::string DefaultSQLEmitter::emit(const ASTAndOperator* node, const std::string& lhs,
     const std::string& rhs) const
 {
     std::stringstream sqlFragment;
@@ -522,7 +526,7 @@ std::string SqliteEmitter::emit(const ASTAndOperator* node, const std::string& l
     return sqlFragment.str();
 }
 
-std::string SqliteEmitter::emit(const ASTOrOperator* node, const std::string& lhs,
+std::string DefaultSQLEmitter::emit(const ASTOrOperator* node, const std::string& lhs,
     const std::string& rhs) const
 {
     std::stringstream sqlFragment;

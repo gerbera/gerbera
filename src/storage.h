@@ -118,6 +118,8 @@ public:
         , requestedCount(requestedCount)
     {}
     const std::string& searchCriteria() const { return searchCrit; };
+    int getStartingIndex() { return startingIndex; };
+    int getRequestedCount() { return requestedCount; };
 };
 
 class Storage : public Singleton<Storage, std::mutex>

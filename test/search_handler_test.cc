@@ -45,8 +45,6 @@ decltype(auto) getAllTokens(const std::string& input)
 ::testing::AssertionResult executeSearchParserTest(const SQLEmitter& emitter, const std::string& input,
     const std::string expectedOutput)
 {
-    std::cout << "Testing with input [" << input << "]" << std::endl;
-
     try {
         auto parser = SearchParser(emitter, input);
         auto rootNode = parser.parse();
@@ -245,9 +243,9 @@ TEST(SearchLexer, MultipleTokens)
     EXPECT_TRUE(executeSearchLexerTest(input, expectedTokens));
 }
 
-TEST(SearchParser, SimpleSearchCriteriaUsingEqualsOperatorForSqlite)
+TEST(SearchParser, SimpleSearchCriteriaUsingEqualsOperator)
 {
-    SqliteEmitter sqlEmitter;
+    DefaultSQLEmitter sqlEmitter;
     // equalsOpExpr
     EXPECT_TRUE(executeSearchParserTest(sqlEmitter,
             "dc:title=\"Hospital Roll Call\"",
@@ -271,7 +269,7 @@ TEST(SearchParser, SimpleSearchCriteriaUsingEqualsOperatorForSqlite)
 
 TEST(SearchParser, SearchCriteriaUsingEqualsOperatorParenthesesForSqlite)
 {
-    SqliteEmitter sqlEmitter;
+    DefaultSQLEmitter sqlEmitter;
     // (equalsOpExpr)
     EXPECT_TRUE(executeSearchParserTest(sqlEmitter,
             "(upnp:album=\"Scraps At Midnight\")",
@@ -310,7 +308,7 @@ TEST(SearchParser, SearchCriteriaUsingEqualsOperatorParenthesesForSqlite)
 
 TEST(SearchParser, SearchCriteriaUsingContainsOperator)
 {
-    SqliteEmitter sqlEmitter;
+    DefaultSQLEmitter sqlEmitter;
     // (containsOpExpr)
     EXPECT_TRUE(executeSearchParserTest(sqlEmitter, "upnp:album contains \"Midnight\"", "(m.property_name='upnp:album' and lower(m.property_value) like lower('%Midnight%') and c.upnp_class is not null)"));
 
@@ -320,7 +318,7 @@ TEST(SearchParser, SearchCriteriaUsingContainsOperator)
 
 TEST(SearchParser, SearchCriteriaUsingDoesNotContainOperator)
 {
-    SqliteEmitter sqlEmitter;
+    DefaultSQLEmitter sqlEmitter;
     // (containsOpExpr)
     EXPECT_TRUE(executeSearchParserTest(sqlEmitter, "upnp:album doesnotcontain \"Midnight\"", "(m.property_name='upnp:album' and lower(m.property_value) not like lower('%Midnight%') and c.upnp_class is not null)"));
 
@@ -330,7 +328,7 @@ TEST(SearchParser, SearchCriteriaUsingDoesNotContainOperator)
 
 TEST(SearchParser, SearchCriteriaUsingStartsWithOperator)
 {
-    SqliteEmitter sqlEmitter;
+    DefaultSQLEmitter sqlEmitter;
     // (containsOpExpr)
     EXPECT_TRUE(executeSearchParserTest(sqlEmitter, "upnp:album startswith \"Midnight\"", "(m.property_name='upnp:album' and lower(m.property_value) like lower('Midnight%') and c.upnp_class is not null)"));
 
@@ -340,7 +338,7 @@ TEST(SearchParser, SearchCriteriaUsingStartsWithOperator)
 
 TEST(SearchParser, SearchCriteriaUsingExistsOperator)
 {
-    SqliteEmitter sqlEmitter;
+    DefaultSQLEmitter sqlEmitter;
     // (containsOpExpr)
     EXPECT_TRUE(executeSearchParserTest(sqlEmitter, "upnp:album exists true", "(m.property_name='upnp:album' and m.property_value is not null and c.upnp_class is not null)"));
 
@@ -350,7 +348,7 @@ TEST(SearchParser, SearchCriteriaUsingExistsOperator)
 
 TEST(SearchParser, SearchCriteriaWithExtendsOperator)
 {
-    SqliteEmitter sqlEmitter;
+    DefaultSQLEmitter sqlEmitter;
     // derivedfromOpExpr
     EXPECT_TRUE(executeSearchParserTest(sqlEmitter, "upnp:class derivedfrom \"object.item.audioItem\"",
             "c.upnp_class like lower('object.item.audioItem.%')"));
