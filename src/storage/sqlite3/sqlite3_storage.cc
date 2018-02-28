@@ -477,7 +477,6 @@ void SLSelectTask::run(sqlite3** db, Sqlite3Storage* sl)
 
     pres->row = pres->table;
     pres->cur_row = 0;
-    log_debug("rows: %d, columns: %d\n", pres->nrow, pres->ncolumn);
 }
 
 /* SLExecTask */

@@ -181,9 +181,10 @@ void ContentDirectoryService::upnp_action_Search(Ref<ActionRequest> request) {
             std::stoi(startingIndex.c_str(), nullptr), std::stoi(requestedCount.c_str(), nullptr)));
 
     Ref<Array<CdsObject>> results;
+    int numMatches = 0;
     try {
         Ref<Storage> storage = Storage::getInstance();
-        results = storage->search(searchParam);
+        results = storage->search(searchParam, &numMatches);
     } catch (const Exception& e) {
         log_debug(e.getMessage().c_str());
         throw UpnpException(UPNP_E_NO_SUCH_ID, _("no such object"));
@@ -210,7 +211,7 @@ void ContentDirectoryService::upnp_action_Search(Ref<ActionRequest> request) {
 
     response->appendTextChild(_("Result"), didl_lite->print());
     response->appendTextChild(_("NumberReturned"), String::from(results->size()));
-    response->appendTextChild(_("TotalMatches"), String::from(results->size()));
+    response->appendTextChild(_("TotalMatches"), String::from(numMatches));
     response->appendTextChild(_("UpdateID"), String::from(systemUpdateID));
 
     request->setResponse(response);

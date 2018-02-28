@@ -119,7 +119,7 @@ public:
     
     virtual zmm::Ref<zmm::Array<CdsObject> > browse(zmm::Ref<BrowseParam> param) override;
     // virtual _and_ override for consistency!
-    virtual zmm::Ref<zmm::Array<CdsObject> > search(zmm::Ref<SearchParam> param) override;
+    virtual zmm::Ref<zmm::Array<CdsObject> > search(zmm::Ref<SearchParam> param, int* numMatches) override;
     
     virtual zmm::Ref<zmm::Array<zmm::StringBase> > getMimeTypes() override;
     

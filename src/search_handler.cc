@@ -354,9 +354,9 @@ void SearchParser::checkIsExpected(TokenType tokenType, const std::string& token
     }
 }
 
-std::string ASTNode::emitSQL(int startingIndex, int requestedCount)
+std::string ASTNode::emitSQL()
 {
-    return sqlEmitter.emitSQL(this, startingIndex, requestedCount);
+    return sqlEmitter.emitSQL(this);
 }
 
 std::string ASTAsterisk::emit() const
@@ -456,7 +456,7 @@ std::string ASTOrOperator::emit() const
     return sqlEmitter.emit(this, lhs->emit(), rhs->emit());
 }
 
-std::string DefaultSQLEmitter::emitSQL(const ASTNode* node, int startingIndex, int requestedCount) const
+std::string DefaultSQLEmitter::emitSQL(const ASTNode* node) const
 {
     std::string predicates = node->emit();
     if (predicates.length() > 0) {
@@ -465,12 +465,6 @@ std::string DefaultSQLEmitter::emitSQL(const ASTNode* node, int startingIndex, i
                 << "inner join mt_metadata m on c.id = m.item_id "
                 << "where "
             << predicates;
-        if (startingIndex > 0 || requestedCount > 0) {
-            sql << " order by c.id"
-                << " limit " << (requestedCount == 0 ? 10000000000 : requestedCount)
-                << " offset " << startingIndex;
-        }
-        sql << ';';
         return sql.str();
     } else
         throw _Exception(_("No SQL generated from AST"));

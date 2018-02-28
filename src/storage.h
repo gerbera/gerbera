@@ -194,7 +194,7 @@ public:
 
     virtual zmm::String findFolderImage(int id, zmm::String trackArtBase) = 0;
 
-    virtual zmm::Ref<zmm::Array<CdsObject>> search(zmm::Ref<SearchParam> param) = 0;
+    virtual zmm::Ref<zmm::Array<CdsObject>> search(zmm::Ref<SearchParam> param, int* numMatches) = 0;
     
     class ChangedContainers : public Object
     {

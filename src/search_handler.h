@@ -98,7 +98,7 @@ public:
         : sqlEmitter(emitter)
     {};
 
-    std::string emitSQL(int startingIndex, int requestedCount);
+    std::string emitSQL();
     virtual std::string emit() const = 0;
 
     virtual ~ASTNode() = default;
@@ -316,7 +316,7 @@ protected:
 class SQLEmitter
 {
 public:
-    virtual std::string emitSQL(const ASTNode* node, int startingIndex, int requestedCount) const = 0;
+    virtual std::string emitSQL(const ASTNode* node) const = 0;
     virtual std::string emit(const ASTAsterisk* node) const = 0;
     virtual std::string emit(const ASTParenthesis* node, const std::string& bracketedNode) const = 0;
     virtual std::string emit(const ASTDQuote* node) const = 0;
@@ -337,7 +337,7 @@ public:
 
 class DefaultSQLEmitter : public SQLEmitter
 {
-    std::string emitSQL(const ASTNode* node, int startingIndex, int requestedCount) const override;
+    std::string emitSQL(const ASTNode* node) const override;
     std::string emit(const ASTAsterisk* node) const override { return "*"; };
     std::string emit(const ASTParenthesis* node, const std::string& bracketedNode) const override;
     std::string emit(const ASTDQuote* node) const override { return ""; };

@@ -806,22 +806,40 @@ Ref<Array<CdsObject>> SQLStorage::browse(Ref<BrowseParam> param)
     return arr;
 }
 
-zmm::Ref<zmm::Array<CdsObject>> SQLStorage::search(zmm::Ref<SearchParam> param)
+zmm::Ref<zmm::Array<CdsObject>> SQLStorage::search(zmm::Ref<SearchParam> param, int* numMatches)
 {
 #ifdef USE_METADATA_TABLE
     std::unique_ptr<SearchParser> searchParser = std::make_unique<SearchParser>(*sqlEmitter, param->searchCriteria());
     std::shared_ptr<ASTNode> rootNode = searchParser->parse();
-    std::stringstream selectCols;
-    selectCols << SELECT_DATA_FOR_SEARCH << " ";
-    std::string sql(selectCols.str() + rootNode->emitSQL(param->getStartingIndex(), param->getRequestedCount()));
+    string searchSQL(rootNode->emitSQL());
+    if (!searchSQL.length())
+        throw _Exception(_("failed to generate SQL for search"));
 
-    log_debug("Search resolves to SQL [%s]\n", sql.c_str());
+    std::stringstream countSQL;
+    countSQL << "select count(*) " << searchSQL << ';';
     zmm::Ref<SQLResult> sqlResult;
-    if (sql.length() > 0) {
-        zmm::Ref<zmm::StringBuffer> buf = Ref<zmm::StringBuffer>(new zmm::StringBuffer(sql.length()));
-        *buf << sql.c_str();
-        sqlResult = select(buf);
+    zmm::Ref<zmm::StringBuffer> buf = Ref<zmm::StringBuffer>(new zmm::StringBuffer(countSQL.str().length()));
+    *buf << countSQL.str().c_str();
+    sqlResult = select(buf);
+    zmm::Ref<SQLRow> countRow = sqlResult->nextRow();
+    if (countRow != nullptr) {
+        *numMatches = countRow->col(0).toInt();
     }
+    
+    std::stringstream retrievalSQL;
+    retrievalSQL << SELECT_DATA_FOR_SEARCH << " " << searchSQL;
+    int startingIndex = param->getStartingIndex(), requestedCount = param->getRequestedCount();
+    if (startingIndex > 0 || requestedCount > 0) {
+        retrievalSQL << " order by c.id"
+                     << " limit " << (requestedCount == 0 ? 10000000000 : requestedCount)
+                     << " offset " << startingIndex;
+    }
+    retrievalSQL << ';';
+
+    log_debug("Search resolves to SQL [%s]\n", retrievalSQL.str().c_str());
+    buf = Ref<zmm::StringBuffer>(new zmm::StringBuffer(retrievalSQL.str().length()));
+    *buf << retrievalSQL.str().c_str();
+    sqlResult = select(buf);
 
     zmm::Ref<zmm::Array<CdsObject>> arr(new Array<CdsObject>()); 
     zmm::Ref<SQLRow> sqlRow;
