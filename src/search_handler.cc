@@ -53,9 +53,9 @@ static std::unordered_map<std::string, TokenType> tokenTypes {
     {"or", TokenType::OR}
 };
 
-std::unique_ptr<std::string> aslowercase(const std::string& src)
+std::shared_ptr<std::string> aslowercase(const std::string& src)
 {
-    auto copy = std::make_unique<std::string>(src);
+    auto copy = std::make_shared<std::string>(src);
     std::transform(copy->begin(), copy->end(), copy->begin(), ::tolower);
     return copy;
 }
@@ -71,54 +71,56 @@ std::unique_ptr<SearchToken> SearchLexer::nextToken()
         case '*':
         case '=':
 	    {
-                std::string token = std::string(&ch, 1);
-                TokenType tokenType = tokenTypes.at(token);
+                auto token = std::make_shared<std::string>(&ch, 1);
+                TokenType tokenType = tokenTypes.at(*token);
                 currentPos++;
-                return std::make_unique<SearchToken>(tokenType, token);
+                return std::make_unique<SearchToken>(tokenType, std::move(token));
             }
             break;
         case '>':
         case '<':
         case '!':
             if (input[currentPos+1]=='=') {
-                std::string token = std::string(&ch, 1);
-                token.push_back('=');
-                TokenType tokenType = tokenTypes.at(token);
+                auto token = std::make_shared<std::string>(&ch, 1);
+                // std::string token = std::string(&ch, 1);
+                token->push_back('=');
+                TokenType tokenType = tokenTypes.at(*token);
                 currentPos += 2;
-                return std::make_unique<SearchToken>(tokenType, token);
+                return std::make_unique<SearchToken>(tokenType, std::move(token));
             } else {
-                std::string token = std::string(&ch, 1);
-                TokenType tokenType = tokenTypes.at(token);
+                auto token = std::make_shared<std::string>(&ch, 1);
+                // std::string token = std::string(&ch, 1);
+                TokenType tokenType = tokenTypes.at(*token);
                 currentPos++;
-                return std::make_unique<SearchToken>(tokenType, token);
+                return std::make_unique<SearchToken>(tokenType, std::move(token));
             }
             break;
         case '"':
             if (!inQuotes) {
-                std::string token = std::string(&ch, 1);
+                auto token = std::make_shared<std::string>(&ch, 1);
                 currentPos++;
                 inQuotes = true;
-                return std::make_unique<SearchToken>(TokenType::DQUOTE, token);
+                return std::make_unique<SearchToken>(TokenType::DQUOTE, std::move(token));
             } else {
-                std::string token = std::string(&ch, 1);
+                auto token = std::make_shared<std::string>(&ch, 1);
                 currentPos++;
                 inQuotes = false;
-                return std::make_unique<SearchToken>(TokenType::DQUOTE, token);
+                return std::make_unique<SearchToken>(TokenType::DQUOTE, std::move(token));
             }
             break;
         default:
             if (inQuotes) {
-                std::string quotedStr = getQuotedValue(input);
-                if (quotedStr.length())
-                    return std::make_unique<SearchToken>(TokenType::ESCAPEDSTRING, quotedStr);
+                auto quotedStr = getQuotedValue(input);
+                if (quotedStr->length())
+                    return std::make_unique<SearchToken>(TokenType::ESCAPEDSTRING, std::move(quotedStr));
             }
             if (std::isspace(ch)) {
                 currentPos++;
             } else {
                 auto tokenStr = nextStringToken(input);
-                if (tokenStr.length()) {
-                    std::unique_ptr<SearchToken> token = makeToken(tokenStr);
-                    if (token->getValue().length())
+                if (tokenStr->length()) {
+                    std::unique_ptr<SearchToken> token = makeToken(std::move(tokenStr));
+                    if (token->getValue()->length())
                         return token;
                 }
             }
@@ -127,7 +129,7 @@ std::unique_ptr<SearchToken> SearchLexer::nextToken()
     return nullptr;
 }
 
-std::string SearchLexer::getQuotedValue(const std::string& input)
+std::shared_ptr<std::string> SearchLexer::getQuotedValue(const std::string& input)
 {
     std::string token;
     bool escaping = false;
@@ -145,10 +147,10 @@ std::string SearchLexer::getQuotedValue(const std::string& input)
         }
         currentPos++;
     }
-    return token;
+    return std::make_shared<std::string>(token);
 }
 
-std::string SearchLexer::nextStringToken(const std::string& input)
+std::shared_ptr<std::string> SearchLexer::nextStringToken(const std::string& input)
 {
     auto startPos = currentPos;
     for (; currentPos < input.length(); ) {
@@ -158,16 +160,16 @@ std::string SearchLexer::nextStringToken(const std::string& input)
         else
             break;
     }
-    return input.substr(startPos, currentPos - startPos);
+    return std::make_shared<std::string>(input.substr(startPos, currentPos - startPos));
 }
 
-std::unique_ptr<SearchToken> SearchLexer::makeToken(const std::string& tokenStr)
+std::unique_ptr<SearchToken> SearchLexer::makeToken(std::shared_ptr<std::string> tokenStr)
 {
-    auto itr = tokenTypes.find(*(aslowercase(tokenStr)));
+    auto itr = tokenTypes.find(*(aslowercase(*tokenStr)));
     if (itr!=tokenTypes.end()) {
-        return std::make_unique<SearchToken>(itr->second, tokenStr);
+        return std::make_unique<SearchToken>(itr->second, std::move(tokenStr));
     } else {
-        return std::make_unique<SearchToken>(TokenType::PROPERTY, tokenStr);
+        return std::make_unique<SearchToken>(TokenType::PROPERTY, std::move(tokenStr));
     }
 }
 
@@ -180,7 +182,7 @@ std::shared_ptr<ASTNode> SearchParser::parse()
 {
     getNextToken();
     if (currentToken->getType()==TokenType::ASTERISK)
-        return std::make_unique<ASTAsterisk>(sqlEmitter, currentToken->getValue());
+        return std::make_shared<ASTAsterisk>(sqlEmitter, currentToken->getValue());
     else
         return parseSearchExpression();
 }
@@ -301,22 +303,19 @@ std::shared_ptr<ASTNode> SearchParser::parseRelationshipExpression()
 
     getNextToken();
     if (currentToken->getType() == TokenType::COMPAREOP) {
-        std::shared_ptr<ASTCompareOperator> operatr = std::make_shared<ASTCompareOperator>(sqlEmitter,
-            currentToken->getValue());
+        auto operatr = std::make_shared<ASTCompareOperator>(sqlEmitter, currentToken->getValue());
         getNextToken();
-        std::shared_ptr<ASTQuotedString> quotedString = parseQuotedString();
+        auto quotedString = parseQuotedString();
         relationshipExpr = std::make_shared<ASTCompareExpression>(sqlEmitter, property, operatr, quotedString);
     } else if (currentToken->getType() == TokenType::STRINGOP) {
-        std::shared_ptr<ASTStringOperator> operatr = std::make_shared<ASTStringOperator>(sqlEmitter,
-            currentToken->getValue());
+        auto operatr = std::make_shared<ASTStringOperator>(sqlEmitter, currentToken->getValue());
         getNextToken();
-        std::shared_ptr<ASTQuotedString> quotedString = parseQuotedString();
+        auto quotedString = parseQuotedString();
         relationshipExpr = std::make_shared<ASTStringExpression>(sqlEmitter, property, operatr, quotedString);
     } else if (currentToken->getType() == TokenType::EXISTS) {
-        std::shared_ptr<ASTExistsOperator> operatr = std::make_shared<ASTExistsOperator>(sqlEmitter,
-            currentToken->getValue());
+        auto operatr = std::make_shared<ASTExistsOperator>(sqlEmitter, currentToken->getValue());
         getNextToken();
-        std::shared_ptr<ASTBoolean> booleanValue = std::make_shared<ASTBoolean>(sqlEmitter, currentToken->getValue());
+        auto booleanValue = std::make_shared<ASTBoolean>(sqlEmitter, currentToken->getValue());
         relationshipExpr = std::make_shared<ASTExistsExpression>(sqlEmitter, property, operatr, booleanValue);
     } else
         throw _Exception(_("Failed to parse search criteria - expecting a comparison, exists, or string operator"));
@@ -328,20 +327,18 @@ std::shared_ptr<ASTQuotedString> SearchParser::parseQuotedString()
 {
     if (currentToken->getType() != TokenType::DQUOTE)
         throw _Exception(_("Failed to parse search criteria - expecting a double-quote"));
-    std::shared_ptr<ASTDQuote> openQuote = std::make_shared<ASTDQuote>(sqlEmitter, currentToken->getValue());
+    auto openQuote = std::make_shared<ASTDQuote>(sqlEmitter, currentToken->getValue());
     getNextToken();
 
     if (currentToken->getType() != TokenType::ESCAPEDSTRING)
         throw _Exception(_("Failed to parse search criteria - expecting an escaped string value"));
 
-    std::shared_ptr<ASTEscapedString> escapedString = std::make_shared<ASTEscapedString>(sqlEmitter,
-        currentToken->getValue());
+    auto escapedString = std::make_shared<ASTEscapedString>(sqlEmitter, currentToken->getValue());
     getNextToken();
 
     if (currentToken->getType() != TokenType::DQUOTE)
         throw _Exception(_("Failed to parse search criteria - expecting a double-quote"));
-    std::shared_ptr<ASTDQuote> closeQuote = std::make_shared<ASTDQuote>(sqlEmitter, currentToken->getValue());
-    // getNextToken();
+    auto closeQuote = std::make_shared<ASTDQuote>(sqlEmitter, currentToken->getValue());
 
     return std::make_shared<ASTQuotedString>(sqlEmitter, openQuote, escapedString, closeQuote);
 }
@@ -354,146 +351,140 @@ void SearchParser::checkIsExpected(TokenType tokenType, const std::string& token
     }
 }
 
-std::string ASTNode::emitSQL()
+std::shared_ptr<std::string> ASTNode::emitSQL()
 {
     return sqlEmitter.emitSQL(this);
 }
 
-std::string ASTAsterisk::emit() const
+std::shared_ptr<std::string> ASTAsterisk::emit() const
 {
     return sqlEmitter.emit(this);
 }
 
-std::string ASTProperty::emit() const
+std::shared_ptr<std::string> ASTProperty::emit() const
 {
     return value;
 }
 
-std::string ASTBoolean::emit() const
+std::shared_ptr<std::string> ASTBoolean::emit() const
 {
     return value;
 }
 
-std::string ASTParenthesis::emit() const
+std::shared_ptr<std::string> ASTParenthesis::emit() const
 {
-    return sqlEmitter.emit(this, bracketedNode->emit());
+    return sqlEmitter.emit(this, *bracketedNode->emit());
 }
 
-std::string ASTDQuote::emit() const
+std::shared_ptr<std::string> ASTDQuote::emit() const
 {
     return sqlEmitter.emit(this);
 }
 
-std::string ASTEscapedString::emit() const
+std::shared_ptr<std::string> ASTEscapedString::emit() const
 {
     return value;
 }
 
-std::string ASTQuotedString::emit() const
+std::shared_ptr<std::string> ASTQuotedString::emit() const
 {
-    return openQuote->emit() + escapedString->emit() + closeQuote->emit();
+    return std::make_shared<std::string>(*openQuote->emit() + *escapedString->emit() + *closeQuote->emit());
 }
 
-std::string ASTCompareOperator::emit() const
-{
-    throw _Exception(_("Should not get here"));
-}
-
-std::string ASTCompareOperator::emit(const std::string& property, const std::string& value) const
-{
-    return sqlEmitter.emit(this, property, value);
-}
-
-std::string ASTCompareExpression::emit() const
-{
-    std::string property = lhs->emit();
-    std::string value = rhs->emit();
-    return operatr->emit(property, value);
-}
-
-std::string ASTStringOperator::emit() const
+std::shared_ptr<std::string> ASTCompareOperator::emit() const
 {
     throw _Exception(_("Should not get here"));
 }
 
-std::string ASTStringOperator::emit(const std::string& property, const std::string& value) const
+std::shared_ptr<std::string> ASTCompareOperator::emit(const std::string& property, const std::string& value) const
 {
     return sqlEmitter.emit(this, property, value);
 }
 
-std::string ASTStringExpression::emit() const
+std::shared_ptr<std::string> ASTCompareExpression::emit() const
 {
-    std::string property = lhs->emit();
-    std::string value = rhs->emit();
-    return operatr->emit(property, value);
+    return operatr->emit(*lhs->emit(), *rhs->emit());
 }
 
-std::string ASTExistsOperator::emit() const
+std::shared_ptr<std::string> ASTStringOperator::emit() const
+{
+    throw _Exception(_("Should not get here"));
+}
+
+std::shared_ptr<std::string> ASTStringOperator::emit(const std::string& property, const std::string& value) const
+{
+    return sqlEmitter.emit(this, property, value);
+}
+
+std::shared_ptr<std::string> ASTStringExpression::emit() const
+{
+    return operatr->emit(*lhs->emit(), *rhs->emit());
+}
+
+std::shared_ptr<std::string> ASTExistsOperator::emit() const
 {
     std::cout << "Emitting for ASTExistsOperator " << std::endl;
     throw _Exception(_("Should not get here"));
 }
 
-std::string ASTExistsOperator::emit(const std::string& property, const std::string& value) const
+std::shared_ptr<std::string> ASTExistsOperator::emit(const std::string& property, const std::string& value) const
 {
     return sqlEmitter.emit(this, property, value);
 }
 
-std::string ASTExistsExpression::emit() const
+std::shared_ptr<std::string> ASTExistsExpression::emit() const
 {
-    std::string property = lhs->emit();
-    std::string value = rhs->emit();
-    return operatr->emit(property, value);
+    return operatr->emit(*lhs->emit(), *rhs->emit());
 }
 
-std::string ASTAndOperator::emit() const
+std::shared_ptr<std::string> ASTAndOperator::emit() const
 {
-    return sqlEmitter.emit(this, lhs->emit(), rhs->emit());
+    return sqlEmitter.emit(this, *lhs->emit(), *rhs->emit());
 }
 
-std::string ASTOrOperator::emit() const
+std::shared_ptr<std::string> ASTOrOperator::emit() const
 {
-    return sqlEmitter.emit(this, lhs->emit(), rhs->emit());
+    return sqlEmitter.emit(this, *lhs->emit(), *rhs->emit());
 }
 
-std::string DefaultSQLEmitter::emitSQL(const ASTNode* node) const
+std::shared_ptr<std::string> DefaultSQLEmitter::emitSQL(const ASTNode* node) const
 {
-    std::string predicates = node->emit();
+    std::string predicates = *node->emit();
     if (predicates.length() > 0) {
         std::stringstream sql;
         sql << "from mt_cds_object c "
                 << "inner join mt_metadata m on c.id = m.item_id "
                 << "where "
             << predicates;
-        return sql.str();
+        return std::make_shared<std::string>(sql.str());
     } else
         throw _Exception(_("No SQL generated from AST"));
 }
     
-std::string DefaultSQLEmitter::emit(const ASTParenthesis* node, const std::string& bracketedNode) const
+std::shared_ptr<std::string> DefaultSQLEmitter::emit(const ASTParenthesis* node, const std::string& bracketedNode) const
 {
     std::stringstream sqlFragment;
     sqlFragment << "(" << bracketedNode << ")";
-    return sqlFragment.str();
+    return std::make_shared<std::string>(sqlFragment.str());
 }
 
-std::string DefaultSQLEmitter::emit(const ASTCompareOperator* node, const std::string& property,
+std::shared_ptr<std::string> DefaultSQLEmitter::emit(const ASTCompareOperator* node, const std::string& property,
     const std::string& value) const
 {
-    auto operatr = node->getValue();
+    auto operatr = *node->getValue();
     if (operatr != "=")
         throw _Exception(_("operator not yet supported"));
 
     std::stringstream sqlFragment;
     sqlFragment << "(m.property_name='" << property << "' and lower(m.property_value)"
                 << operatr << "lower('" << value << "') and c.upnp_class is not null)";
-    return sqlFragment.str();
+    return std::make_shared<std::string>(sqlFragment.str());
 }
 
-std::string DefaultSQLEmitter::emit(const ASTStringOperator* node, const std::string& property,
+std::shared_ptr<std::string> DefaultSQLEmitter::emit(const ASTStringOperator* node, const std::string& property,
     const std::string& value) const
 {
-    auto lcOperator = *aslowercase(node->getValue());
+    auto lcOperator = *aslowercase(*node->getValue());
     if (lcOperator != "contains" && lcOperator != "doesnotcontain" && lcOperator != "derivedfrom"
         && lcOperator != "startswith")
         throw _Exception(_("operator not supported"));
@@ -514,10 +505,10 @@ std::string DefaultSQLEmitter::emit(const ASTStringOperator* node, const std::st
     else if (lcOperator == "derivedfrom") {
         sqlFragment << "c.upnp_class " << "like" << " lower('" << value << ".%')";
     }
-    return sqlFragment.str();
+    return std::make_shared<std::string>(sqlFragment.str());
 }
 
-std::string DefaultSQLEmitter::emit(const ASTExistsOperator* node, const std::string& property,
+std::shared_ptr<std::string> DefaultSQLEmitter::emit(const ASTExistsOperator* node, const std::string& property,
     const std::string& value) const
 {
     std::stringstream sqlFragment;
@@ -530,21 +521,21 @@ std::string DefaultSQLEmitter::emit(const ASTExistsOperator* node, const std::st
         throw _Exception(_("invalid value on rhs of exists operator"));
     }
     sqlFragment << "(m.property_name='" << property << "' and m.property_value is " << exists << " and c.upnp_class is not null)";
-    return sqlFragment.str();
+    return std::make_shared<std::string>(sqlFragment.str());
 }
 
-std::string DefaultSQLEmitter::emit(const ASTAndOperator* node, const std::string& lhs,
+std::shared_ptr<std::string> DefaultSQLEmitter::emit(const ASTAndOperator* node, const std::string& lhs,
     const std::string& rhs) const
 {
     std::stringstream sqlFragment;
     sqlFragment << lhs << " and " << rhs;
-    return sqlFragment.str();
+    return std::make_shared<std::string>(sqlFragment.str());
 }
 
-std::string DefaultSQLEmitter::emit(const ASTOrOperator* node, const std::string& lhs,
+std::shared_ptr<std::string> DefaultSQLEmitter::emit(const ASTOrOperator* node, const std::string& lhs,
     const std::string& rhs) const
 {
     std::stringstream sqlFragment;
     sqlFragment << lhs << " or " << rhs;
-    return sqlFragment.str();
+    return std::make_shared<std::string>(sqlFragment.str());
 }

@@ -48,7 +48,7 @@ decltype(auto) getAllTokens(const std::string& input)
     if (expectedTokens.size() != tokens->size())
         return ::testing::AssertionFailure() << "Expected " << expectedTokens.size() << " tokens, got " << tokens->size();
     for (unsigned i = 0; i < tokens->size(); i++) {
-        if (expectedTokens.at(i).first != tokens->at(i)->getValue())
+        if (expectedTokens.at(i).first != *(tokens->at(i)->getValue()))
             return ::testing::AssertionFailure() << "Token " << i << ": expected ["
                                                  << expectedTokens.at(i).first
                                                  << "], got ["
@@ -73,7 +73,7 @@ decltype(auto) getAllTokens(const std::string& input)
             return ::testing::AssertionFailure() << "Failed to create AST";
 
         auto output = rootNode->emit();
-        if (output != expectedOutput)
+        if (*output != expectedOutput)
             return ::testing::AssertionFailure() << "\nExpected [" << expectedOutput << "]\nActual   [" << output << "]\n";
 
         return ::testing::AssertionSuccess();
@@ -86,63 +86,62 @@ TEST(SearchLexer, OneSimpleTokenRecognized)
 {
     auto tokens = getAllTokens("=");
     EXPECT_EQ(1, tokens->size());
-    EXPECT_EQ(SearchToken(TokenType::COMPAREOP,"="), *(tokens->at(0)));
+    EXPECT_EQ(SearchToken(TokenType::COMPAREOP, std::move(std::make_unique<std::string>("="))), *(tokens->at(0)));
 
     tokens = getAllTokens("!=");
     EXPECT_EQ(1, tokens->size());
-    EXPECT_EQ(SearchToken(TokenType::COMPAREOP,"!="), *(tokens->at(0)));
+    EXPECT_EQ(SearchToken(TokenType::COMPAREOP, std::move(std::make_unique<std::string>("!="))), *(tokens->at(0)));
 
     tokens = getAllTokens(">");
     EXPECT_EQ(1, tokens->size());
-    EXPECT_EQ(SearchToken(TokenType::COMPAREOP,">"), *(tokens->at(0)));
+    EXPECT_EQ(SearchToken(TokenType::COMPAREOP, std::move(std::make_unique<std::string>(">"))), *(tokens->at(0)));
 
     tokens = getAllTokens("(");
     EXPECT_EQ(1, tokens->size());
-    EXPECT_EQ(SearchToken(TokenType::LPAREN,"("), *(tokens->at(0)));
+    EXPECT_EQ(SearchToken(TokenType::LPAREN, std::move(std::make_unique<std::string>("("))), *(tokens->at(0)));
 }
-
 
 TEST(SearchLexer,OneComplexTokenRecognized)
 {
     auto tokens = getAllTokens("\"");
     EXPECT_EQ(1, tokens->size());
-    EXPECT_STREQ("\"", tokens->at(0)->getValue().c_str());
-    EXPECT_EQ(1, tokens->at(0)->getValue().length());
+    EXPECT_STREQ("\"", tokens->at(0)->getValue()->c_str());
+    EXPECT_EQ(1, tokens->at(0)->getValue()->length());
     EXPECT_EQ(TokenType::DQUOTE, tokens->at(0)->getType());
 
     tokens = getAllTokens("true");
     EXPECT_EQ(1, tokens->size());
-    EXPECT_EQ(SearchToken(TokenType::BOOLVAL, "true"), *(tokens->at(0)));
+    EXPECT_EQ(SearchToken(TokenType::BOOLVAL, std::move(std::make_unique<std::string>("true"))), *(tokens->at(0)));
 
     tokens = getAllTokens("FALSE");
     EXPECT_EQ(1, tokens->size());
-    EXPECT_EQ(SearchToken(TokenType::BOOLVAL, "FALSE"), *(tokens->at(0)));
+    EXPECT_EQ(SearchToken(TokenType::BOOLVAL, std::move(std::make_unique<std::string>("FALSE"))), *(tokens->at(0)));
 
     tokens = getAllTokens("and");
     EXPECT_EQ(1, tokens->size());
-    EXPECT_EQ(SearchToken(TokenType::AND, "and"), *(tokens->at(0)));
+    EXPECT_EQ(SearchToken(TokenType::AND, std::move(std::make_unique<std::string>("and"))), *(tokens->at(0)));
 
     tokens = getAllTokens("OR");
     EXPECT_EQ(1, tokens->size());
-    EXPECT_EQ(SearchToken(TokenType::OR, "OR"), *(tokens->at(0)));
+    EXPECT_EQ(SearchToken(TokenType::OR, std::move(std::make_unique<std::string>("OR"))), *(tokens->at(0)));
 
     tokens = getAllTokens("exists");
     EXPECT_EQ(1, tokens->size());
-    EXPECT_EQ(SearchToken(TokenType::EXISTS, "exists"), *(tokens->at(0)));
+    EXPECT_EQ(SearchToken(TokenType::EXISTS, std::move(std::make_unique<std::string>("exists"))), *(tokens->at(0)));
 
     tokens = getAllTokens("@id");
     EXPECT_EQ(1, tokens->size());
-    EXPECT_STREQ("@id", tokens->at(0)->getValue().c_str());
+    EXPECT_STREQ("@id", tokens->at(0)->getValue()->c_str());
     EXPECT_EQ(TokenType::PROPERTY, tokens->at(0)->getType());
 
     tokens = getAllTokens("res@size");
     EXPECT_EQ(1, tokens->size());
-    EXPECT_STREQ("res@size", tokens->at(0)->getValue().c_str());
+    EXPECT_STREQ("res@size", tokens->at(0)->getValue()->c_str());
     EXPECT_EQ(TokenType::PROPERTY, tokens->at(0)->getType());
 
     tokens = getAllTokens("dc:title");
     EXPECT_EQ(1, tokens->size());
-    EXPECT_STREQ("dc:title", tokens->at(0)->getValue().c_str());
+    EXPECT_STREQ("dc:title", tokens->at(0)->getValue()->c_str());
     EXPECT_EQ(TokenType::PROPERTY, tokens->at(0)->getType());
 }
 

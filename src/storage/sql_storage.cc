@@ -811,12 +811,12 @@ zmm::Ref<zmm::Array<CdsObject>> SQLStorage::search(zmm::Ref<SearchParam> param, 
 #ifdef USE_METADATA_TABLE
     std::unique_ptr<SearchParser> searchParser = std::make_unique<SearchParser>(*sqlEmitter, param->searchCriteria());
     std::shared_ptr<ASTNode> rootNode = searchParser->parse();
-    string searchSQL(rootNode->emitSQL());
-    if (!searchSQL.length())
+    std::shared_ptr<std::string> searchSQL(rootNode->emitSQL());
+    if (!searchSQL->length())
         throw _Exception(_("failed to generate SQL for search"));
 
     std::stringstream countSQL;
-    countSQL << "select count(*) " << searchSQL << ';';
+    countSQL << "select count(*) " << *searchSQL << ';';
     zmm::Ref<SQLResult> sqlResult;
     zmm::Ref<zmm::StringBuffer> buf = Ref<zmm::StringBuffer>(new zmm::StringBuffer(countSQL.str().length()));
     *buf << countSQL.str().c_str();
@@ -827,7 +827,7 @@ zmm::Ref<zmm::Array<CdsObject>> SQLStorage::search(zmm::Ref<SearchParam> param, 
     }
     
     std::stringstream retrievalSQL;
-    retrievalSQL << SELECT_DATA_FOR_SEARCH << " " << searchSQL;
+    retrievalSQL << SELECT_DATA_FOR_SEARCH << " " << *searchSQL;
     int startingIndex = param->getStartingIndex(), requestedCount = param->getRequestedCount();
     if (startingIndex > 0 || requestedCount > 0) {
         retrievalSQL << " order by c.id"
