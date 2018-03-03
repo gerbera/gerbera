@@ -222,7 +222,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
             exit(EXIT_FAILURE);
         case 0:
             switch (opt_index) {
-            case 10: // --compile-info
+            case 9: // --compile-info
                 print_copyright();
                 printf("Compile info:\n");
                 printf("-------------\n");
@@ -233,7 +233,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
                     printf("Git Branch: %s\nGit Commit: %s\n\n", GIT_BRANCH, GIT_COMMIT_HASH);
                 }
                 exit(EXIT_SUCCESS);
-            case 11: // --version
+            case 10: // --version
                 print_version = true;
                 break;
             }
