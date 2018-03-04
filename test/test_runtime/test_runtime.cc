@@ -19,7 +19,7 @@
 
     $Id$
 */
-#include "runtime_test.h"
+#include "test_runtime.h"
 #include "scripting/runtime.h"
 
 TEST_F(RuntimeTest, CheckTestCodeLinksAgainstDependencies)

@@ -23,7 +23,7 @@ set(WITH_PROTOCOL_EXTENSIONS 1 CACHE BOOL "Add incomplete DLNA protocol extensio
 set(WITH_SYSTEMD        1 CACHE BOOL "Install Systemd unit file")
 set(WITH_LASTFM         0 CACHE BOOL "Enable LastFM")
 set(WITH_DEBUG          1 CACHE BOOL "Enables debug logging")
-set(WITH_GOOGLETEST     0 CACHE BOOL "Enables GoogleTest")
+set(WITH_TESTS          0 CACHE BOOL "Enables Unit Tests")
 
 project("gerbera")
 set(gerbera_MAJOR_VERSION     1)
@@ -555,29 +555,10 @@ find_package (ZLIB REQUIRED)
 include_directories(${ZLIB_INCLUDE_DIRS})
 target_link_libraries (gerbera ${ZLIB_LIBRARIES})
 
-if(WITH_GOOGLETEST)
-    find_package(GTest)
-    if(GTEST_FOUND)
-        include(CTest)
-        set(gerberatestFILES
-            test/dictionary_test.cc
-            test/runtime_test.cc)
-
-        # Prevent GoogleTest from overriding our compiler/linker options
-        # when building with Visual Studio
-        set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-        include_directories(${GTEST_INCLUDE_DIRS})
-
-        # Trivial example using gtest and gmock
-        add_executable(gerberatest ${gerberatestFILES} $<TARGET_OBJECTS:libgerbera>)
-        target_include_directories(gerberatest PRIVATE "${CMAKE_SOURCE_DIR}/src")
-        target_include_directories(gerberatest PRIVATE "${CMAKE_SOURCE_DIR}/test")
-        define_file_path_for_sources(gerberatest)
-
-        get_target_property(configuredLibs gerbera INTERFACE_LINK_LIBRARIES)
-        target_link_libraries(gerberatest gtest gmock_main ${configuredLibs})
-        add_test(NAME example_test COMMAND gerberatest)
-    endif()
+if(WITH_TESTS)
+    message(STATUS "Configuring unit tests" )
+    enable_testing()
+    add_subdirectory(test)
 endif()
 
 INSTALL(TARGETS gerbera DESTINATION bin)
