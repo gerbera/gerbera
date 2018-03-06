@@ -13,7 +13,6 @@ addons:
       - ubuntu-toolchain-r-test
     packages:
       - g++-6
-      - libboost-all-dev
 
 before_install:
   - sudo apt-get update -qq
@@ -38,7 +37,6 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - g++-4.9
-            - libboost-all-dev
     - env: CXX=g++-5 CC=gcc-5
       addons:
         apt:
@@ -46,7 +44,6 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - g++-5
-            - libboost-all-dev
     - env: CXX=clang++-4.0 CC=clang-4.0 CXXFLAGS=-stdlib=libc++
       addons:
         apt:
@@ -56,7 +53,6 @@ matrix:
           packages:
             - libc++-dev
             - clang-4.0
-            - libboost-all-dev
     - stage: Test Gerbera UI
       addons:
         chrome: stable

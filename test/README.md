@@ -5,8 +5,7 @@ framework to provide unit testing for the C++ code-base.
 
 ## Required Software
 
-- CMake ^3.9 (_required for Boost libraries_)
-- Boost ^1.65.1
+- CMake ^3.9
 - GoogleTest (_downloaded and compiled automatically_)
 
 ## Enable Testing
