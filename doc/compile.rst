@@ -74,7 +74,7 @@ Build On FreeBSD
 2. Clone repository, build depdences in current in ports and then build gerbera.
 ::
 
-  git clone https://github.com/v00d00/gerbera.git
+  git clone https://github.com/gerbera/gerbera.git
   mkdir build
   cd build
   sh ../gerbera/scripts/install-pupnp18.sh
