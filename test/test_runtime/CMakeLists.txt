@@ -24,6 +24,7 @@ include_directories(
         ${MYSQL_INCLUDE_DIRS}
         ${SQLITE3_INCLUDE_DIRS}
         ${ICONV_INCLUDE_DIR}
+        ${GTEST_INCLUDE_DIRS}
 )
 
 target_link_libraries(testruntime PRIVATE
@@ -42,11 +43,9 @@ target_link_libraries(testruntime PRIVATE
         ${MYSQL_CLIENT_LIBS}
         ${SQLITE3_LIBRARIES}
         ${ICONV_LIBRARIES}
-        )
-
-target_link_libraries(testruntime PRIVATE
-        libgtest
-        libgmock)
+        ${GTEST_LIBRARIES}
+        ${GERBERA_INTERFACE_LIBRARIES}
+)
 
 add_test(NAME testruntime
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}

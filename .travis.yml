@@ -44,7 +44,7 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - g++-5
-    - env: CXX=clang++-4.0 CC=clang-4.0 CXXFLAGS=-stdlib=libc++
+    - env: CXX=clang++-4.0 CC=clang-4.0
       addons:
         apt:
           sources:
