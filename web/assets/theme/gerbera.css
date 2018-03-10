@@ -35,6 +35,16 @@ body {
     min-height:100%;
 }
 
+/* lato-regular - latin-ext_latin */
+@font-face {
+    font-family: 'Lato';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Lato Regular'), local('Lato-Regular'),
+    url('/vendor/lato/lato-v14-latin-ext_latin-regular.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
+    url('/vendor/lato/lato-v14-latin-ext_latin-regular.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
+
 body,
 h1,
 h2,
@@ -59,14 +69,11 @@ a:hover {
     border-bottom: 1px solid #ff7f00;
 }
 
-.navbar {
-    box-shadow: 0 10px 10px rgba(0, 0, 0, 0.25);
-}
-
 .navbar-nav > li > a {
     color: #bbb;
 }
 
+.navbar-brand,
 .navbar-nav > li:hover > a {
     color: white;
 }
