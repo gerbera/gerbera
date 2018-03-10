@@ -1,3 +1,5 @@
+find_package(Threads REQUIRED)
+
 add_executable(testdictionary
         $<TARGET_OBJECTS:libgerbera>
         main.cc
@@ -45,6 +47,7 @@ target_link_libraries(testdictionary PRIVATE
         ${ICONV_LIBRARIES}
         ${GTEST_LIBRARIES}
         ${GERBERA_INTERFACE_LIBRARIES}
+        ${CMAKE_THREAD_LIBS_INIT}
         )
 
 add_test(NAME testdictionary

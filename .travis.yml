@@ -13,10 +13,16 @@ addons:
       - ubuntu-toolchain-r-test
     packages:
       - g++-6
+      - libgtest-dev
 
 before_install:
   - sudo apt-get update -qq
-  - sudo apt-get install -y uuid-dev libexpat1-dev libsqlite3-dev libmysqlclient-dev libmagic-dev libexif-dev libcurl4-openssl-dev
+  - sudo apt-get install -y uuid-dev libexpat1-dev libsqlite3-dev libmysqlclient-dev libmagic-dev libexif-dev libcurl4-openssl-dev cmake
+  - cd /usr/src/gtest
+  - sudo cmake CMakeLists.txt
+  - sudo make
+  - sudo cp *.a /usr/lib
+  - cd $TRAVIS_BUILD_DIR
   - ./scripts/install-duktape.sh
   - ./scripts/install-pupnp18.sh
   - ./scripts/install-taglib111.sh
@@ -37,6 +43,7 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - g++-4.9
+            - libgtest-dev
     - env: CXX=g++-5 CC=gcc-5
       addons:
         apt:
@@ -44,6 +51,7 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - g++-5
+            - libgtest-dev
     - env: CXX=clang++-4.0 CC=clang-4.0
       addons:
         apt:
@@ -53,6 +61,7 @@ matrix:
           packages:
             - libc++-dev
             - clang-4.0
+            - libgtest-dev
     - stage: Test Gerbera UI
       addons:
         chrome: stable
