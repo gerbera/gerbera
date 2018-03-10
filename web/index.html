@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="assets/theme/gerbera.css"/>
 </head>
 <body>
-<nav class="navbar navbar-expand-md" id="nav">
+<nav class="navbar navbar-expand-md navbar-dark" id="nav">
     <button type="button" class="navbar-toggler navbar-toggler-right"
             data-toggle="collapse" data-target="#navbarContent" aria-controls="navbarContent"
             aria-expanded="false" aria-label="Toggle navigation">
@@ -20,7 +20,7 @@
     <div class="collapse navbar-collapse" id="navbarContent">
         <ul class="navbar-nav mr-auto">
             <li class="nav-item">
-                <a id="nav-home" class="nav-link" href="#" data-gerbera-menu-cmd="HOME">Home <span class="sr-only">(current)</span></a>
+                <a id="nav-home" class="nav-link" href="#" data-gerbera-menu-cmd="HOME"><i class="fa fa-home"></i> Home <span class="sr-only">(current)</span></a>
             </li>
             <li class="nav-item">
                 <a id="nav-db" class="nav-link disabled" href="#" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="db"><i class="fa fa-database"></i> Database</a>
@@ -29,10 +29,10 @@
                 <a id="nav-fs" class="nav-link disabled" href="#" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="fs"><i class="fa fa-folder-open"></i> File System</a>
             </li>
             <li class="nav-item">
-                <a id="report-issue" class="nav-link" href="http://github.com/gerbera/gerbera/issues"><i class="fa fa-bug"></i> Report an Issue <i class="fa fa-external-link" aria-hidden="true"></i></a>
+                <a id="report-issue" class="nav-link noactive" href="http://github.com/gerbera/gerbera/issues" target="_blank"><i class="fa fa-bug"></i> Report an Issue <i class="fa fa-external-link" aria-hidden="true"></i></a>
             </li>
             <li class="nav-item">
-                <a id="leave-beta" class="nav-link disabled" href="#" data-gerbera-menu-cmd="LEAVE_BETA"><i class="fa fa-undo"></i> Leave Beta</a>
+                <a id="leave-beta" class="nav-link disabled noactive" href="#" data-gerbera-menu-cmd="LEAVE_BETA"><i class="fa fa-undo"></i> Leave Beta</a>
             </li>
         </ul>
         <form id="login-form" class="form-inline my-2 my-lg-0">
@@ -73,7 +73,7 @@
 </script>
 
 <div class="container-fluid">
-    <div id="trail" class="row py-2"></div>
+    <div id="trail" class="row"></div>
     <div class="row" id="content">
         <div class="col-md-5">
             <div id="tree">

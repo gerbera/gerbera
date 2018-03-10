@@ -50,8 +50,10 @@ GERBERA.Menu = (function () {
   var click = function (event) {
     var menuItem = $(event.target)
 
-    $('.nav-item').removeClass('active')
-    menuItem.parent().addClass('active')
+    if (!menuItem.hasClass("noactive")) {
+        $('.nav-item').removeClass('active')
+        menuItem.parent().addClass('active')
+    }
 
     var menuCommand = menuItem.data('gerbera-menu-cmd')
     switch (menuCommand) {
