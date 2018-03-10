@@ -3,6 +3,7 @@
 ## Install the latest version of GoogleTest
 ##
 pwd=$(pwd)
+unamestr=`uname`
 if [ -f "$pwd/master.zip" ]; then rm -f $pwd/master.zip; fi
 if [ -d "$pwd/googletest-master" ]; then rm -Rf $pwd/googletest-master; fi
 
@@ -18,6 +19,10 @@ if [[ $CXX == clang++* ]]; then
 else
 	cmake ../
 fi
-make && sudo make install && sudo ldconfig
+make && sudo make install
+
+if [ "$unamestr" != 'Darwin' ]; then
+    sudo ldconfig
+fi
 
 cd $pwd
