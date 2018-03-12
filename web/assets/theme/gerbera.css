@@ -359,13 +359,16 @@ ul.pagination {
     display: inline-block;
     margin: 0px 10px 0px 10px;
 }
+.grb-trail-buttons li a {
+    color: black;
+}
 .grb-trail-add,
 .grb-trail-add-autoscan,
 .grb-trail-edit-autoscan,
 .grb-trail-edit,
 .grb-trail-delete,
 .grb-trail-delete-all {
-    cursor: pointer;
+    text-decoration: none;
 }
 
 .grb-trail-add:hover,
@@ -374,7 +377,7 @@ ul.pagination {
 .grb-trail-edit:hover,
 .grb-trail-delete:hover,
 .grb-trail-delete-all:hover {
-    color: #ff7f00;
+    text-decoration: underline;
 }
 
 .overflow {
