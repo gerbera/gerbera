@@ -62,7 +62,7 @@ $.widget('grb.trail', {
     itemBreadcrumb.appendTo(trailContainer)
 
     var buttonContainer = $('<div></div>')
-    buttonContainer.addClass('col-md-2 col-sm-2 col-xs-3 my-auto')
+    buttonContainer.addClass('col-md-4 col-sm-4 col-xs-5 my-auto')
     var buttons
 
     buttons = $('<ol></ol>')
@@ -71,7 +71,8 @@ $.widget('grb.trail', {
     if (config.enableAdd && config.onAdd) {
       var addItemIcon = this.generateItemButton(item, {
         title: 'Add item',
-        class: 'grb-trail-add fa fa-plus',
+        class: 'grb-trail-add',
+        iconClass: 'fa-plus',
         click: config.onAdd ? config.onAdd : noOp
       })
       addItemIcon.appendTo(buttons)
@@ -80,7 +81,8 @@ $.widget('grb.trail', {
     if (config.enableEdit && config.onEdit) {
       var editItemIcon = this.generateItemButton(item, {
         title: 'Edit item',
-        class: 'grb-trail-edit fa fa-pencil',
+        class: 'grb-trail-edit',
+        iconClass: 'fa-pencil',
         click: config.onEdit ? config.onEdit : noOp
       })
       editItemIcon.appendTo(buttons)
@@ -90,14 +92,16 @@ $.widget('grb.trail', {
     if (config.enableAddAutoscan && config.onAddAutoscan) {
       autoscanItemIcon = this.generateItemButton(item, {
         title: 'Add autoscan item',
-        class: 'grb-trail-add-autoscan fa fa-history',
+        class: 'grb-trail-add-autoscan',
+        iconClass: 'fa-history',
         click: config.onAddAutoscan ? config.onAddAutoscan : noOp
       })
       autoscanItemIcon.appendTo(buttons)
     } else if (config.enableEditAutoscan && config.onEditAutoscan) {
       autoscanItemIcon = this.generateItemButton(item, {
         title: 'Edit autoscan item',
-        class: 'grb-trail-edit-autoscan fa fa-history',
+        class: 'grb-trail-edit-autoscan',
+        iconClass: 'fa-history',
         click: config.onEditAutoscan ? config.onEditAutoscan : noOp
       })
       autoscanItemIcon.appendTo(buttons)
@@ -106,7 +110,8 @@ $.widget('grb.trail', {
     if (config.enableDelete && config.onDelete) {
       var deleteItemIcon = this.generateItemButton(item, {
         title: 'Delete item',
-        class: 'grb-trail-delete fa fa-trash-o',
+        class: 'grb-trail-delete',
+        iconClass: 'fa-trash-o',
         click: config.onDelete ? config.onDelete : noOp
       })
       deleteItemIcon.appendTo(buttons)
@@ -115,24 +120,28 @@ $.widget('grb.trail', {
     if (config.enableDeleteAll && config.onDeleteAll) {
       var deleteAllIcon = this.generateItemButton(item, {
         title: 'Delete all items',
-        class: 'grb-trail-delete-all fa fa-remove',
+        class: 'grb-trail-delete-all',
+        iconClass: 'fa-remove',
         click: config.onDeleteAll ? config.onDeleteAll : noOp
       })
       deleteAllIcon.appendTo(buttons)
     }
 
     buttons.appendTo(buttonContainer)
-    trailContainer.addClass('col-md-10 col-sm-10 col-xs-9')
+    trailContainer.addClass('col-md-8 col-sm-8 col-xs-7')
 
     parent.append(trailContainer)
     parent.append(buttonContainer)
   },
 
   generateItemButton: function (item, config) {
-    var button = $('<li><span></span></li>')
-    button.prop('title', config.title)
-    button.children('span').addClass(config.class)
-    button.children('span').click(item, config.click)
+    var button = $('<li>');
+    var link = $('<a>', {"title": config.title, "class": config.class, "href": "javascript:;"});
+    var icon = $('<i></i>', {"class": "fa " + config.iconClass })
+    link.append(icon)
+    link.append(" " + config.title)
+    button.append(link)
+    link.click(item, config.click)
     return button
   },
 
