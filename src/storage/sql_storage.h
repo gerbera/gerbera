@@ -161,6 +161,9 @@ protected:
     SQLStorage();
     //virtual ~SQLStorage();
     virtual void init() override;
+
+    void doMetadataMigration() override;
+    void migrateMetadata(zmm::Ref<CdsObject> object);
     
     char table_quote_begin;
     char table_quote_end;

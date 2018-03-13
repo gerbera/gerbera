@@ -561,6 +561,9 @@ int ContentManager::ensurePathExistence(zmm::String path)
 
 void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scanMode, ScanLevel scanLevel, Ref<GenericTask> task)
 {
+    log_info("REMOVE THIS RETURN STMT IN ContentManager::_rescanDirectory()\n");
+    return;
+    
     log_debug("start\n");
     int ret;
     struct dirent* dent;
