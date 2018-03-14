@@ -52,7 +52,7 @@ CREATE TABLE "mt_metadata" (
   "id" integer primary key,
   "item_id" integer NOT NULL,
   "property_name" varchar(255) NOT NULL,
-  "property_value" varchar(255) NOT NULL,
+  "property_value" text NOT NULL,
   CONSTRAINT "mt_metadata_idfk1" FOREIGN KEY ("item_id") REFERENCES "mt_cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 CREATE INDEX mt_cds_object_ref_id ON mt_cds_object(ref_id);

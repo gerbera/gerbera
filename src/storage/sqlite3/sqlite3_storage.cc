@@ -59,7 +59,7 @@
   \"id\" integer primary key, \
   \"item_id\" integer NOT NULL, \
   \"property_name\" varchar(255) NOT NULL, \
-  \"property_value\" varchar(255) NOT NULL, \
+  \"property_value\" text NOT NULL, \
   CONSTRAINT \"mt_metadata_idfk1\" FOREIGN KEY (\"item_id\") REFERENCES \"mt_cds_object\" (\"id\") \
   ON DELETE CASCADE ON UPDATE CASCADE )"
 #define SQLITE3_UPDATE_3_4_2 "CREATE INDEX mt_metadata_item_id ON mt_metadata(item_id)"
