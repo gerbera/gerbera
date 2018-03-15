@@ -71,7 +71,7 @@ CREATE TABLE `mt_metadata` (
   `id` int(11) NOT NULL auto_increment,
   `item_id` int(11) NOT NULL,
   `property_name` varchar(255) NOT NULL,
-  `property_value` varchar(255) NOT NULL,
+  `property_value` text NOT NULL,
   PRIMARY KEY `id` (`id`),
   KEY `metadata_item_id` (`item_id`),
   CONSTRAINT `mt_metadata_idfk1` FOREIGN KEY (`item_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE

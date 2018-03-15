@@ -1226,12 +1226,19 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
     obj->setMetadata(meta);
 #else
     Ref<Dictionary> meta = retrieveMetadataForObject(obj->getID());
-    if (meta != nullptr)
+    if (meta != nullptr && meta->size())
         obj->setMetadata(meta);
     else {
         meta = retrieveMetadataForObject(obj->getRefID());
-        if (meta != nullptr)
+        if (meta != nullptr && meta->size())
             obj->setMetadata(meta);
+    }
+    if (meta == nullptr || meta->size() == 0) {
+        // fallback to metadata that might be in mt_cds_object, which
+        // will be useful if retrieving for schema upgrade
+        String metadataStr = row->col(_metadata);
+        meta->decode(metadataStr);
+        obj->setMetadata(meta);
     }
 
 #endif //USE_METADATA_TABLE
@@ -2617,4 +2624,91 @@ void SQLStorage::clearFlagInDB(int flag)
         << TQ("flags")
         << "&" << flag;
     exec(qb);
+}
+
+void SQLStorage::doMetadataMigration()
+{
+    log_debug("Checking if metadata migration is required\n");
+    Ref<StringBuffer> qb(new StringBuffer());
+    *qb << "SELECT COUNT(*)"
+        << " FROM " << TQ(CDS_OBJECT_TABLE)
+        << " WHERE " << TQ("metadata")
+        << " is not null";
+    Ref<SQLResult> res = select(qb);
+    int expectedConversionCount = res->nextRow()->col(0).toInt();
+    log_debug("mt_cds_object rows having metadata: %d\n", expectedConversionCount);
+
+    qb->clear();
+    *qb << "SELECT COUNT(*)"
+        << " FROM " << TQ(METADATA_TABLE);
+    res = select(qb);
+    int metadataRowCount = res->nextRow()->col(0).toInt();
+    log_debug("mt_metadata rows having metadata: %d\n", metadataRowCount);
+
+    if (expectedConversionCount > 0 && metadataRowCount > 0) {
+        log_info("No metadata migration required\n");
+        return;
+    }
+
+    log_info("About to migrate metadata from mt_cds_object to mt_metadata\n");
+    log_info("No data will be removed from mt_cds_object\n");
+        
+    qb->clear();
+    *qb << "SELECT " << TQ("id")
+        << " FROM " << TQ(CDS_OBJECT_TABLE)
+        << " WHERE " << TQ("metadata")
+        << " is not null";
+    Ref<SQLResult> resIds = select(qb);
+    Ref<SQLRow> row;
+
+    int objectsUpdated = 0;
+    while ((row = resIds->nextRow()) != nullptr) {
+        Ref<CdsObject> cdsObject = loadObject(row->col(0).toInt());
+        migrateMetadata(cdsObject);
+        ++objectsUpdated;
+    }
+    log_info("Migrated metadata - object count: %d\n", objectsUpdated);
+}
+
+void SQLStorage::migrateMetadata(Ref<CdsObject> object)
+{
+    if (object == nullptr)
+        return;
+ 
+    Ref<Dictionary> dict = object->getMetadata();
+    if (dict != nullptr && dict->size()) {
+        log_debug("Migrating metadata for cds object %d\n", object->getID());
+        Ref<Dictionary> metadataSQLVals(new Dictionary());
+        Ref<Array<DictionaryElement>> metadataElements = dict->getElements();
+        for (int i = 0; i < metadataElements->size(); i++) {
+            Ref<DictionaryElement> property = metadataElements->get(i);
+            metadataSQLVals->put(quote(property->getKey()), quote(property->getValue()));
+        }
+
+        Ref<Array<DictionaryElement>> dataElements = metadataSQLVals->getElements();
+        for (int j = 0; j < dataElements->size(); j++) {
+            Ref<StringBuffer> fields(new StringBuffer(128));
+            Ref<StringBuffer> values(new StringBuffer(128));
+            Ref<DictionaryElement> element = dataElements->get(j);
+            *fields << TQ("id") << ','
+                    << TQ("item_id") << ','
+                    << TQ("property_name") << ','
+                    << TQ("property_value");
+            *values << getNextMetadataID() << ','
+                    << object->getID() << ','
+                    << element->getKey() << ','
+                    << element->getValue();
+            Ref<StringBuffer> qb(new StringBuffer(256));
+            *qb << "INSERT INTO " << TQ(_(METADATA_TABLE))
+                << " (" << fields->toString()
+                << ") VALUES (" << values->toString() << ')';
+
+            if (!doInsertBuffering())
+                exec(qb);
+            else
+                addToInsertBuffer(qb);
+        }
+    } else {
+        log_debug("Skipping migration - no metadata for cds object %d\n", object->getID());
+    }
 }
