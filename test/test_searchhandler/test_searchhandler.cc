@@ -1,7 +1,7 @@
 /*GRB*
   Gerbera - https://gerbera.io/
 
-  search_handler_test.cc - this file is part of Gerbera.
+  test_searchhandler.cc - this file is part of Gerbera.
 
   Copyright (C) 2018 Gerbera Contributors
 
@@ -379,7 +379,3 @@ TEST(SearchParser, SearchCriteriaWithExtendsOperator)
     // derivedFromOpExpr and (containsOpExpr or containsOpExpr)
     EXPECT_TRUE(executeSearchParserTest(sqlEmitter, "upnp:class derivedFrom \"object.item.audioItem\" and (dc:title contains \"britain\" or dc:creator contains \"britain\"", "c.upnp_class like lower('object.item.audioItem.%') and ((m.property_name='dc:title' and lower(m.property_value) like lower('%britain%') and c.upnp_class is not null) or (m.property_name='dc:creator' and lower(m.property_value) like lower('%britain%') and c.upnp_class is not null))"));    
 }
-
-// select * from mt_cds_object where id=215291 or dc_title = 'Thong Song' or id in (194099,214889,215237,215239,215241,202037)
-// select * from mt_cds_object where (upnp_class is null and dc_title='Hospital Roll Call') or id=204320 or id in (194099,203869,204303,204305,194717,194114)
-// 194099,203869,204303,204305,194717,194114
