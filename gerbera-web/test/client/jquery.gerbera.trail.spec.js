@@ -116,7 +116,7 @@ describe('The jQuery Trail', function () {
       config: trailConfig
     })
 
-    $('#trail').find('span.grb-trail-delete').click()
+    $('#trail').find('a.grb-trail-delete').click()
 
     expect(methodSpy).toHaveBeenCalled()
   })
@@ -133,7 +133,7 @@ describe('The jQuery Trail', function () {
       config: trailConfig
     })
 
-    $('#trail').find('span.grb-trail-delete-all').click()
+    $('#trail').find('a.grb-trail-delete-all').click()
 
     expect(methodSpy).toHaveBeenCalled()
   })
@@ -165,7 +165,7 @@ describe('The jQuery Trail', function () {
       config: trailConfig
     })
 
-    $('#trail').find('span.grb-trail-add').click()
+    $('#trail').find('a.grb-trail-add').click()
 
     expect(methodSpy).toHaveBeenCalled()
   })
@@ -182,7 +182,7 @@ describe('The jQuery Trail', function () {
       config: trailConfig
     })
 
-    $('#trail').find('span.grb-trail-add-autoscan').click()
+    $('#trail').find('a.grb-trail-add-autoscan').click()
 
     expect(methodSpy).toHaveBeenCalled()
   })

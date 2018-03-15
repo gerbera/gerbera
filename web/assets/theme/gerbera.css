@@ -35,6 +35,16 @@ body {
     min-height:100%;
 }
 
+/* lato-regular - latin-ext_latin */
+@font-face {
+    font-family: 'Lato';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Lato Regular'), local('Lato-Regular'),
+    url('/vendor/lato/lato-v14-latin-ext_latin-regular.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
+    url('/vendor/lato/lato-v14-latin-ext_latin-regular.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
+
 body,
 h1,
 h2,
@@ -43,6 +53,10 @@ h4,
 h5,
 h6 {
     font-family: "Lato","Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+
+body {
+    background-color: #f8f8f8;
 }
 
 a {
@@ -59,21 +73,17 @@ a:hover {
     border-bottom: 1px solid #ff7f00;
 }
 
-.navbar {
-    box-shadow: 0 10px 10px rgba(0, 0, 0, 0.25);
-}
-
-.navbar-nav > li > a {
+li.nav-item > a {
     color: #bbb;
 }
 
-.navbar-nav > li:hover > a {
+.navbar-brand,
+li.nav-item:hover > a {
     color: white;
 }
 
-.nav-item.active a {
+li.nav-item.active a {
     color: white;
-    font-weight: bold;
 }
 
 .login-field {
@@ -211,11 +221,7 @@ ul.pagination {
 }
 
 #nav {
-    min-height: 5vh;
-}
-
-#trail {
-    min-height: 7vh;
+    min-height: 4vh;
 }
 
 /*********************
@@ -338,9 +344,15 @@ ul.pagination {
     margin: 0px 10px 0px 10px;
 }
 
-.breadcrumb {
-    border: 1px solid #222;
+.grb-trail {
+    margin-bottom: .5em;
+    background-color: rgb(255, 127, 0);
 }
+
+.grb-trail ol.breadcrumb {
+    background-color: unset;
+}
+
 .grb-trail-buttons {
     list-style: none;
     padding: 8px 15px;
@@ -350,13 +362,16 @@ ul.pagination {
     display: inline-block;
     margin: 0px 10px 0px 10px;
 }
+.grb-trail-buttons li a {
+    color: black;
+}
 .grb-trail-add,
 .grb-trail-add-autoscan,
 .grb-trail-edit-autoscan,
 .grb-trail-edit,
 .grb-trail-delete,
 .grb-trail-delete-all {
-    cursor: pointer;
+    text-decoration: none;
 }
 
 .grb-trail-add:hover,
@@ -365,7 +380,7 @@ ul.pagination {
 .grb-trail-edit:hover,
 .grb-trail-delete:hover,
 .grb-trail-delete-all:hover {
-    color: #ff7f00;
+    text-decoration: underline;
 }
 
 .overflow {
@@ -449,3 +464,4 @@ ul.pagination {
     -ms-transition: none !important;
     transition: none !important;
 }
+

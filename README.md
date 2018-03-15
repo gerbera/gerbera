@@ -138,7 +138,7 @@ sudo make install
 ```
 Alternatively, the options can be set using a GUI (make sure to press "c" to configure after toggling settings in the GUI):
 ```
-git clone https://github.com/v00d00/gerbera.git
+git clone https://github.com/gerbera/gerbera.git
 mkdir build
 cd build
 cmake ../gerbera

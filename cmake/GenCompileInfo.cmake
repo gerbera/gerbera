@@ -18,9 +18,10 @@ function(generate_compile_info)
             "WITH_EXIF=${WITH_EXIF}"
             "WITH_EXIV2=${WITH_EXIV2}"
             "WITH_PROTOCOL_EXTENSIONS=${WITH_PROTOCOL_EXTENSIONS}"
+            "WITH_SYSTEMD=${WITH_SYSTEMD}"
             "WITH_LASTFM=${WITH_LASTFM}"
-            "WITH_LOGGING=${WITH_LOGGING}"
-            "WITH_DEBUG_LOGGING=${WITH_DEBUG_LOGGING}")
+            "WITH_DEBUG=${WITH_DEBUG}"
+            "WITH_TESTS=${WITH_TESTS}")
 
     string (REPLACE ";" "\\n" COMPILE_INFO_STR "${COMPILE_INFO_LIST}")
     set(COMPILE_INFO "${COMPILE_INFO_STR}" PARENT_SCOPE)

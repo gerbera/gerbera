@@ -4,13 +4,6 @@
 
     jquery.gerbera.items.js - this file is part of Gerbera.
 
-    Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
-                       Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-
-    Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
-                            Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
-                            Leonhard Wimmer <leo@mediatomb.cc>
-
     Copyright (C) 2016-2018 Gerbera Contributors
 
     Gerbera is free software; you can redistribute it and/or modify

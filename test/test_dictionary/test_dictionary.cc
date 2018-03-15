@@ -19,7 +19,7 @@
 
   $Id$
 */
-#include "dictionary_test.h"
+#include "test_dictionary.h"
 #include "dictionary.h"
 #include "strings.h"
 

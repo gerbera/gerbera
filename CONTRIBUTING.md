@@ -16,7 +16,7 @@ For new code please use modern C++ (up to 14) constructs where possible, and avo
 
 3. Push to your fork
 
-4. [Submit a pull request](https://github.com/v00d00/mediatomb/compare).
+4. [Submit a pull request](https://github.com/gerbera/gerbera/compare).
 
 Some things that will increase the chance that your pull request is accepted:
 
