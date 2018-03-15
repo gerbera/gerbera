@@ -2703,7 +2703,6 @@ void SQLStorage::migrateMetadata(Ref<CdsObject> object)
                 << " (" << fields->toString()
                 << ") VALUES (" << values->toString() << ')';
 
-            log_debug("insert_query: %s\n", qb->toString().c_str());
             if (!doInsertBuffering())
                 exec(qb);
             else
