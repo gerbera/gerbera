@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     content_manager.cc - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -1147,7 +1147,7 @@ Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic, boo
          * this exists only to inform the caller that
          * this is a container
          */
-        /* 
+        /*
         cont->setLocation(path);
         Ref<StringConverter> f2i = StringConverter::f2i();
         obj->setTitle(f2i->convert(filename));
@@ -1310,6 +1310,14 @@ int ContentManager::addFile(zmm::String path, bool recursive, bool async,
     bool hidden, bool lowPriority, bool cancellable)
 {
     String rootpath;
+    if (check_path(path, true))
+        rootpath = path;
+    return addFileInternal(path, rootpath, recursive, async, hidden, lowPriority, 0, cancellable);
+}
+
+int ContentManager::addFile(zmm::String path, zmm::String rootpath, bool recursive, bool async,
+    bool hidden, bool lowPriority, bool cancellable)
+{
     if (check_path(path, true))
         rootpath = path;
     return addFileInternal(path, rootpath, recursive, async, hidden, lowPriority, 0, cancellable);
