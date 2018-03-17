@@ -214,7 +214,7 @@ private:
     zmm::Ref<zmm::Array<AddUpdateTable> > _addUpdateObject(zmm::Ref<CdsObject> obj, bool isUpdate, int *changedContainer);
     
     /* helper for removeObject(s) */
-    void _removeObjects(zmm::Ref<zmm::StringBuffer> objectIDs, int offset);
+    void _removeObjects(std::string objectIDs, int offset);
 
     void addCSV(zmm::String csv, std::vector<int>& target);
     zmm::String toCSV(const std::vector<int>& input);

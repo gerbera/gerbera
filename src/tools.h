@@ -33,6 +33,7 @@
 
 #include <memory>
 #include <unordered_set>
+#include <sstream>
 
 #include <sys/time.h>
 

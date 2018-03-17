@@ -1396,64 +1396,66 @@ Ref<Storage::ChangedContainers> SQLStorage::removeObjects(shared_ptr<unordered_s
     return _purgeEmptyContainers(_recursiveRemove(items.str(), containers.str(), all));
 }
 
-void SQLStorage::_removeObjects(Ref<StringBuffer> objectIDs, int offset)
-{
-    Ref<StringBuffer> q(new StringBuffer());
-    *q << "SELECT " << TQD('a', "id") << ',' << TQD('a', "persistent")
-       << ',' << TQD('o', "location")
-       << " FROM " << TQ(AUTOSCAN_TABLE) << " a"
+void SQLStorage::_removeObjects(std::string objectIDs, int offset) {
+    std::ostringstream sel;
+    sel << "SELECT " << TQD('a', "id") << ',' << TQD('a', "persistent")
+        << ',' << TQD('o', "location")
+        << " FROM " << TQ(AUTOSCAN_TABLE) << " a"
                                             " JOIN "
-       << TQ(CDS_OBJECT_TABLE) << " o"
+        << TQ(CDS_OBJECT_TABLE) << " o"
                                   " ON "
-       << TQD('o', "id") << '=' << TQD('a', "obj_id")
-       << " WHERE " << TQD('o', "id") << " IN (";
-    q->concat(objectIDs, offset);
-    *q << ')';
+        << TQD('o', "id") << '=' << TQD('a', "obj_id")
+        << " WHERE " << TQD('o', "id") << " IN ("
+        << objectIDs.substr(offset)
+        << ')';
 
-    log_debug("%s\n", q->c_str());
+    log_debug("%s\n", sel.str().c_str());
 
-    Ref<SQLResult> res = select(q);
+    Ref<SQLResult> res = select(sel);
     if (res != nullptr) {
         log_debug("relevant autoscans!\n");
-        Ref<StringBuffer> delete_as(new StringBuffer());
+        std::vector<std::string> delete_as;
         Ref<SQLRow> row;
         while ((row = res->nextRow()) != nullptr) {
             bool persistent = remapBool(row->col(1));
             if (persistent) {
                 String location = stripLocationPrefix(row->col(2));
-                *q << "UPDATE " << TQ(AUTOSCAN_TABLE)
-                   << " SET " << TQ("obj_id") << "=" SQL_NULL
-                   << ',' << TQ("location") << '=' << quote(location)
-                   << " WHERE " << TQ("id") << '=' << quote(row->col(0));
-            } else
-                *delete_as << ',' << row->col_c_str(0);
+                std::ostringstream u;
+                u << "UPDATE " << TQ(AUTOSCAN_TABLE)
+                  << " SET " << TQ("obj_id") << "=" SQL_NULL
+                  << ',' << TQ("location") << '=' << quote(location)
+                  << " WHERE " << TQ("id") << '=' << quote(row->col(0));
+                exec(u);
+            } else {
+                delete_as.emplace_back(row->col_c_str(0));
+            }
             log_debug("relevant autoscan: %d; persistent: %d\n", row->col_c_str(0), persistent);
         }
 
-        if (delete_as->length() > 0) {
-            q->clear();
-            *q << "DELETE FROM " << TQ(AUTOSCAN_TABLE)
-               << " WHERE " << TQ("id") << " IN (";
-            q->concat(delete_as, 1);
-            *q << ')';
-            exec(q);
-            log_debug("deleting autoscans: %s\n", delete_as->c_str());
+        if (!delete_as.empty()) {
+            std::ostringstream delAutoscan;
+            delAutoscan << "DELETE FROM " << TQ(AUTOSCAN_TABLE)
+                        << " WHERE " << TQ("id") << " IN ("
+                        << join(delete_as, ',')
+                        << ')';
+            exec(delAutoscan);
+            log_debug("deleting autoscans: %s\n", delAutoscan.str().c_str());
         }
     }
 
-    q->clear();
-    *q << "DELETE FROM " << TQ(CDS_ACTIVE_ITEM_TABLE)
-       << " WHERE " << TQ("id") << " IN (";
-    q->concat(objectIDs, offset);
-    *q << ')';
-    exec(q);
+    std::ostringstream qActiveItem;
+    qActiveItem << "DELETE FROM " << TQ(CDS_ACTIVE_ITEM_TABLE)
+                << " WHERE " << TQ("id") << " IN ("
+                << objectIDs.substr(offset)
+                << ')';
+    exec(qActiveItem);
 
-    q->clear();
-    *q << "DELETE FROM " << TQ(CDS_OBJECT_TABLE)
-       << " WHERE " << TQ("id") << " IN (";
-    q->concat(objectIDs, offset);
-    *q << ')';
-    exec(q);
+    std::ostringstream qObject;
+    qObject << "DELETE FROM " << TQ(CDS_OBJECT_TABLE)
+            << " WHERE " << TQ("id") << " IN ("
+            << objectIDs.substr(offset)
+            << ')';
+    exec(qObject);
 }
 
 Ref<Storage::ChangedContainers> SQLStorage::removeObject(int objectID, bool all)
@@ -1517,7 +1519,7 @@ Ref<SQLStorage::ChangedContainersStr> SQLStorage::_recursiveRemove(
                       << " WHERE " << TQ("id") << " IN (";
     int removeAddParentsLen = removeAddParents->length();
 
-    Ref<StringBuffer> remove(new StringBuffer());
+    auto remove = make_unique<std::ostringstream>();
     Ref<ChangedContainersStr> changedContainers(new ChangedContainersStr());
 
     Ref<SQLResult> res;
@@ -1610,18 +1612,17 @@ Ref<SQLStorage::ChangedContainersStr> SQLStorage::_recursiveRemove(
             }
         }
 
-        if (remove->length() > MAX_REMOVE_SIZE) // remove->length() > 0) // )
-        {
-            _removeObjects(remove, 1);
-            remove->clear();
+        if (remove->str().length() > MAX_REMOVE_SIZE) {
+            _removeObjects(remove->str(), 1);
+            remove.reset(new std::ostringstream);
         }
 
         if (count++ > MAX_REMOVE_RECURSION)
             throw _Exception(_("there seems to be an infinite loop..."));
     }
 
-    if (remove->length() > 0)
-        _removeObjects(remove, 1);
+    if (!remove->str().empty())
+        _removeObjects(remove->str(), 1);
     log_debug("end\n");
     return changedContainers;
 }
@@ -1674,7 +1675,7 @@ Ref<Storage::ChangedContainers> SQLStorage::_purgeEmptyContainers(Ref<ChangedCon
     Ref<StringBuffer> bufSelUpnp(new StringBuffer());
     *bufSelUpnp << bufSelUI;
 
-    Ref<StringBuffer> bufDel(new StringBuffer());
+    auto bufDel = make_unique<std::ostringstream>();
 
     Ref<SQLResult> res;
     Ref<SQLRow> row;
@@ -1731,9 +1732,9 @@ Ref<Storage::ChangedContainers> SQLStorage::_purgeEmptyContainers(Ref<ChangedCon
         }
 
         //log_debug("selecting: %s; removing: %s\n", bufSel->c_str(), bufDel->c_str());
-        if (bufDel->length() > 0) {
-            _removeObjects(bufDel, 1);
-            bufDel->clear();
+        if (!bufDel->str().empty()) {
+            _removeObjects(bufDel->str(), 1);
+            bufDel.reset(new std::ostringstream);
             if (bufSelUI->length() > bufSelLen || bufSelUpnp->length() > bufSelLen)
                 again = true;
         }
@@ -1783,7 +1784,6 @@ void SQLStorage::updateAutoscanPersistentList(ScanMode scanmode, Ref<AutoscanLis
 {
 
     log_debug("setting persistent autoscans untouched - scanmode: %s;\n", AutoscanDirectory::mapScanmode(scanmode).c_str());
-    Ref<StringBuffer> q(new StringBuffer());
     std::ostringstream update;
     update << "UPDATE " << TQ(AUTOSCAN_TABLE)
        << " SET " << TQ("touched") << '=' << mapBool(false)
@@ -2215,16 +2215,16 @@ std::unique_ptr<std::vector<int>> SQLStorage::getPathIDs(int objectID)
 
     auto pathIDs = make_unique<std::vector<int>>();
 
-    Ref<StringBuffer> q(new StringBuffer());
-    *q << "SELECT " << TQ("parent_id") << " FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE ";
-    *q << TQ("id") << '=';
-    int selBufLen = q->length();
+    std::ostringstream sel;
+    sel << "SELECT " << TQ("parent_id") << " FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE ";
+    sel << TQ("id") << '=';
+    
     Ref<SQLResult> res;
     Ref<SQLRow> row;
     while (objectID != CDS_ID_ROOT) {
         pathIDs->push_back(objectID);
-        q->setLength(selBufLen);
-        *q << quote(objectID) << " LIMIT 1";
+        std::ostringstream q;
+        q << sel.str() << quote(objectID) << " LIMIT 1";
         res = select(q);
         if (res == nullptr || (row = res->nextRow()) == nullptr)
             break;

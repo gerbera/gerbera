@@ -35,7 +35,6 @@
 #include "memory.h"
 #include "strings.h"
 #include "exceptions.h"
-#include "atrailers_content_handler.h"
 
 using namespace zmm;
 
