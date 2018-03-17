@@ -47,10 +47,6 @@ h6 {
     font-family: "Lato","Helvetica Neue",Helvetica,Arial,sans-serif;
 }
 
-body {
-    background-color: #f8f8f8;
-}
-
 a {
     color: #ff7f00;
 }
@@ -219,6 +215,7 @@ body,
     flex: 1;
     overflow-y: scroll;
     flex-grow: 2;
+    background-color: #f8f8f8;
     border-right: 1px solid #e9ecef;
 }
 
@@ -460,3 +457,14 @@ body,
     transition: none !important;
 }
 
+#homeintro {
+    margin: 3em 0;
+}
+
+#home a {
+    text-decoration: none;
+}
+
+#home a > h4 {
+    margin-top: 2em;
+}

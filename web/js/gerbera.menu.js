@@ -63,6 +63,8 @@ GERBERA.Menu = (function () {
   }
 
   var home = function () {
+    $('#home').show();
+    $('#content').hide();
     GERBERA.Tree.destroy()
     GERBERA.Trail.destroy()
     GERBERA.Items.destroy()
@@ -76,6 +78,8 @@ GERBERA.Menu = (function () {
   }
 
   var selectType = function (menuItem) {
+    $('#home').hide();
+    $('#content').show();
     var type = menuItem.data('gerbera-type')
     GERBERA.Tree.selectType(type, 0)
     GERBERA.App.setType(type)
