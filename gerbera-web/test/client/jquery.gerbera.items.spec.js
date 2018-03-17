@@ -18,7 +18,7 @@ describe('The jQuery Datagrid', function () {
       data: datagridData
     })
 
-    expect($('#datagrid').find('tr').length).toBe(12)
+    expect($('#datagrid').find('tr').length).toBe(11)
     expect($('#datagrid').find('tr.grb-item').get(0).innerText).toContain(datagridData[0].text) // skip the header row
     expect($('#datagrid').find('a').get(0).href).toBe(datagridData[0].url)
   })

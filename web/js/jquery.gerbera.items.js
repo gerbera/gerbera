@@ -27,7 +27,7 @@ $.widget('grb.dataitems', {
   _create: function () {
     this.element.html('')
     this.element.addClass('grb-dataitems')
-    var table = $('<table></table>').addClass('table table-hover table-striped')
+    var table = $('<table></table>').addClass('table')
     var tbody = $('<tbody></tbody>')
     var data = this.options.data
     var onDelete = this.options.onDelete
@@ -36,8 +36,6 @@ $.widget('grb.dataitems', {
     var onAdd = this.options.onAdd
     var itemType = this.options.itemType
     var pager = this.options.pager
-    var thead = $('<thead><tr><td>Item</td></tr></thead>')
-    thead.appendTo(table)
     var row, content, text
 
     if (data.length > 0) {
@@ -120,9 +118,6 @@ $.widget('grb.dataitems', {
         row.append(content)
         tbody.append(row)
       }
-
-      var tfoot = this.buildFooter(pager)
-      table.append(tfoot)
     } else {
       row = $('<tr></tr>')
       content = $('<td></td>')
@@ -131,6 +126,9 @@ $.widget('grb.dataitems', {
       tbody.append(row)
     }
     tbody.appendTo(table)
+
+    var tfoot = this.buildFooter(pager)
+    table.append(tfoot)
 
     this.element.append(table)
     this.element.addClass('with-data')
