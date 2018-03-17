@@ -72,7 +72,6 @@ MysqlStorage::MysqlStorage()
     mysql_connection = false;
     table_quote_begin = '`';
     table_quote_end = '`';
-    insertBuffer = nullptr;
 }
 MysqlStorage::~MysqlStorage()
 {
@@ -280,11 +279,11 @@ String MysqlStorage::quote(String value)
 
 String MysqlStorage::getError(MYSQL* db)
 {
-    Ref<StringBuffer> err_buf(new StringBuffer());
-    *err_buf << "mysql_error (" << String::from(mysql_errno(db));
-    *err_buf << "): \"" << mysql_error(db) << "\"";
-    log_debug("%s\n", err_buf->c_str());
-    return err_buf->toString();
+    std::ostringstream err_buf;
+    err_buf << "mysql_error (" << mysql_errno(db);
+    err_buf << "): \"" << mysql_error(db) << "\"";
+    log_debug("%s\n", err_buf.str().c_str());
+    return err_buf.str();
 }
 
 Ref<SQLResult> MysqlStorage::select(const char* query, int length)
@@ -342,8 +341,8 @@ void MysqlStorage::shutdownDriver()
 void MysqlStorage::storeInternalSetting(String key, String value)
 {
     String quotedValue = quote(value);
-    Ref<StringBuffer> q(new StringBuffer());
-    *q << "INSERT INTO " << QTB << INTERNAL_SETTINGS_TABLE << QTE << " (`key`, `value`) "
+    std::ostringstream q;
+    q << "INSERT INTO " << QTB << INTERNAL_SETTINGS_TABLE << QTE << " (`key`, `value`) "
                                                                      "VALUES ("
        << quote(key) << ", " << quotedValue << ") "
                                                "ON DUPLICATE KEY UPDATE `value` = "
@@ -359,30 +358,26 @@ void MysqlStorage::_exec(const char* query, int length)
     }
 }
 
-void MysqlStorage::_addToInsertBuffer(Ref<StringBuffer> query)
+void MysqlStorage::_addToInsertBuffer(const std::string &query)
 {
-    if (insertBuffer == nullptr) {
-        insertBuffer = Ref<Array<StringBase>>(new Array<StringBase>());
-        insertBuffer->append(_("BEGIN"));
+    if (insertBuffer.empty()) {
+        insertBuffer.emplace_back("BEGIN");
     }
-    Ref<StringBase> sb(new StringBase(query->c_str()));
-    insertBuffer->append(sb);
+    insertBuffer.emplace_back(query);
 }
 
 void MysqlStorage::_flushInsertBuffer()
 {
-    if (insertBuffer == nullptr)
-        return;
-    insertBuffer->append(_("COMMIT"));
+    if (insertBuffer.empty()) return;
+    insertBuffer.emplace_back("COMMIT");
 
     checkMysqlThreadInit();
     unique_lock<decltype(mysqlMutex)> lock(mysqlMutex);
-    for (int i = 0; i < insertBuffer->size(); i++) {
-        _exec(insertBuffer->get(i)->data, insertBuffer->get(i)->len);
+    for (const auto &q : insertBuffer) {
+        _exec(q.c_str(), q.length());
     }
     lock.unlock();
-    insertBuffer->clear();
-    insertBuffer->append(_("BEGIN"));
+    insertBuffer.clear();
 }
 
 /* MysqlResult */

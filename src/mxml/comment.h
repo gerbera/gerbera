@@ -57,7 +57,7 @@ public:
     inline void setIndentWithLFbefore(bool indentWithLFbefore) { this->indentWithLFbefore = indentWithLFbefore; }
 
 protected:
-    virtual void print_internal(zmm::Ref<zmm::StringBuffer> buf, int indent);
+    virtual void print_internal(std::ostringstream &buf, int indent);
 };
 
 } // namespace

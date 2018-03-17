@@ -123,6 +123,9 @@ String::String(Ref<StringBase> other)
     if(base)
         base->retain();
 }
+String::String(const std::string &other) : String(other.c_str(), other.length())
+{}
+
 String::~String()
 {
     if(base)
@@ -325,6 +328,12 @@ String& String::operator=(String other)
     base = other.base;
     if(base)
         base->retain();
+    return *this;
+}
+
+String &String::operator=(const std::string &other) {
+    base = new StringBase(other.c_str(), other.length());
+    base->retain();
     return *this;
 }
 

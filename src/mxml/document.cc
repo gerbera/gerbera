@@ -59,12 +59,9 @@ void Document::appendChild(Ref<Node> child)
     children->append(child);
 }
 
-void Document::print_internal(Ref<StringBuffer> buf, int indent)
-{
-    if (children != nullptr && children->size())
-    {
-        for(int i = 0; i < children->size(); i++)
-        {
+void Document::print_internal(std::ostringstream &buf, int indent) {
+    if (children != nullptr && children->size()) {
+        for(int i = 0; i < children->size(); i++) {
             children->get(i)->print_internal(buf, indent + 1);
         }
     }

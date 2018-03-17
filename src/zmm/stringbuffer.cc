@@ -35,6 +35,7 @@
 #include "memory.h"
 #include "strings.h"
 #include "exceptions.h"
+#include "atrailers_content_handler.h"
 
 using namespace zmm;
 
@@ -69,6 +70,10 @@ StringBuffer &StringBuffer::operator<<(String other)
         len += otherLen;
     }
     return *this;
+}
+
+StringBuffer &StringBuffer::operator<<(const std::string &other) {
+    return operator<<(String(other));
 }
 
 StringBuffer &StringBuffer::operator<<(Ref<StringBuffer> other)

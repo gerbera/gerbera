@@ -36,6 +36,7 @@
 #define __URL_H__
 
 #include <curl/curl.h>
+#include <string>
 
 #include "zmm/zmmf.h"
 #include "zmm/zmm.h"
@@ -48,7 +49,7 @@ public:
     class Stat : public zmm::Object
     {
     public:
-        /// \brief Iinitalizes the class with given values, the values
+        /// \brief Initalizes the class with given values, the values
         /// can not be changed afterwards.
         ///
         /// \param size size of the media in bytes
@@ -67,10 +68,6 @@ public:
         off_t size;
         zmm::String mimetype;
     };
-    /// \brief Constructor allowing to hint the buffer size.
-    /// \param buffer_hint size of the buffer that will be preallocated
-    /// for the download, if too small it will be realloced.
-    URL(size_t buffer_hint = 1024*1024);
 
     /// \brief downloads either the content or the headers to the buffer.
     ///
@@ -83,7 +80,7 @@ public:
     /// \param only_header set true if you only want the header and not the
     /// body
     /// \param vebose enable curl verbose option
-    zmm::Ref<zmm::StringBuffer> download(zmm::String URL,
+    std::string download(zmm::String URL,
                                          long *HTTP_retcode, 
                                          CURL *curl_handle = NULL,
                                          bool only_header=false,
@@ -91,10 +88,8 @@ public:
                                          bool redirect=false);
 
     zmm::Ref<Stat> getInfo(zmm::String URL, CURL *curl_handle = NULL );
-protected:
-    size_t buffer_hint;
-    pthread_t pid;
 
+protected:
     /// \brief This function is installed as a callback for libcurl, when
     /// we download data from a remote site.
     static size_t dl(void *buf, size_t size, size_t nmemb, void *data);
