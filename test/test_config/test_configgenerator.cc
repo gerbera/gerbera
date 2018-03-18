@@ -19,7 +19,6 @@ class ConfigGeneratorTest : public ::testing::Test {
     configDir = ".config/gerbera";
     prefixDir = "/usr/local/share/gerbera";
     magicFile = "magic.file";
-    mockConfig = mockConfigXml("fixtures/mock-config-all.xml");
   }
 
   virtual void TearDown() {
@@ -37,118 +36,171 @@ class ConfigGeneratorTest : public ::testing::Test {
   std::string configDir;
   std::string prefixDir;
   std::string magicFile;
-  std::string mockConfig;
 };
 
-TEST_F(ConfigGeneratorTest, GeneratesStringForConfiguration) {
-  std::string defaultConfig = subject->generate(homePath, configDir, prefixDir, magicFile);
+#if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER) && defined(HAVE_MYSQL) && defined(HAVE_MAGIC) && defined(HAVE_JS) && defined(ONLINE_SERVICES)
+TEST_F(ConfigGeneratorTest, GeneratesFullConfigXmlWithAllDefinitions) {
+  std::string mockXml = mockConfigXml("fixtures/mock-config-all.xml");
 
-  ASSERT_NE(nullptr, defaultConfig.c_str());
-  EXPECT_THAT(defaultConfig.c_str(), HasSubstr("<home>/tmp/.config/gerbera</home>"));
-  EXPECT_THAT(defaultConfig.c_str(), HasSubstr("<webroot>/usr/local/share/gerbera/web</webroot>"));
-  EXPECT_THAT(defaultConfig.c_str(), HasSubstr("<protocolInfo extend=\"no\"/>"));
-  EXPECT_THAT(defaultConfig.c_str(), HasSubstr("<extended-runtime-options>"));
-  EXPECT_THAT(defaultConfig.c_str(), HasSubstr("<import hidden-files=\"no\">"));
-  EXPECT_THAT(defaultConfig.c_str(), HasSubstr("<scripting script-charset=\"UTF-8\">"));
-  EXPECT_THAT(defaultConfig.c_str(), HasSubstr("<import-script>/usr/local/share/gerbera/js/import.js</import-script>"));
-  EXPECT_THAT(defaultConfig.c_str(), HasSubstr("<common-script>/usr/local/share/gerbera/js/common.js</common-script>"));
-  EXPECT_THAT(defaultConfig.c_str(), HasSubstr("<playlist-script>/usr/local/share/gerbera/js/playlists.js</playlist-script>"));
-  EXPECT_THAT(defaultConfig.c_str(), HasSubstr("<mappings>"));
-  EXPECT_THAT(defaultConfig.c_str(), HasSubstr("<extension-mimetype ignore-unknown=\"no\">"));
-  EXPECT_THAT(defaultConfig.c_str(), HasSubstr("<mimetype-upnpclass>"));
-  EXPECT_THAT(defaultConfig.c_str(), HasSubstr("<mimetype-contenttype>"));
-  EXPECT_THAT(defaultConfig.c_str(), HasSubstr("<online-content>"));
-  EXPECT_STREQ(mockConfig.c_str(), defaultConfig.c_str());
-}
+  std::string result = subject->generate(homePath, configDir, prefixDir, magicFile);
 
-#ifdef HAVE_SQLITE3
-TEST_F(ConfigGeneratorTest, GeneratesSqlLiteWhenEnabled) {
-  std::string defaultConfig = subject->generate(homePath, configDir, prefixDir, magicFile);
-
-  EXPECT_THAT(defaultConfig.c_str(), HasSubstr("<sqlite3 enabled=\"yes\">\n        <database-file>gerbera.db</database-file>\n      </sqlite3>"));
+  EXPECT_STREQ(mockXml.c_str(), result.c_str());
 }
 #endif
 
-#ifdef HAVE_MYSQL
-TEST_F(ConfigGeneratorTest, GeneratesMySqlWhenEnabled) {
-  std::string defaultConfig = subject->generate(homePath, configDir, prefixDir, magicFile);
+#if !defined(HAVE_FFMPEG) && !defined(HAVE_FFMPEGTHUMBNAILER) && !defined(HAVE_MYSQL) && defined(HAVE_MAGIC) && defined(HAVE_JS) && defined(ONLINE_SERVICES)
+TEST_F(ConfigGeneratorTest, GeneratesConfigXmlWithDefaultDefinitions) {
+  std::string mockXml = mockConfigXml("fixtures/mock-config-minimal.xml");
 
-  EXPECT_THAT(defaultConfig.c_str(), HasSubstr("<mysql enabled=\"no\">\n        <host>localhost</host>\n        <username>gerbera</username>\n        <database>gerbera</database>\n      </mysql>"));
+  std::string result = subject->generate(homePath, configDir, prefixDir, magicFile);
+
+  EXPECT_STREQ(mockXml.c_str(), result.c_str());
 }
 #endif
 
+#if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER) && defined(HAVE_MYSQL)
+TEST_F(ConfigGeneratorTest, GeneratesFullServerXmlWithAllDefinitions) {
+  std::string mockXml = mockConfigXml("fixtures/mock-server-all.xml");
+
+  zmm::Ref<mxml::Element> result = subject->generateServer(homePath, configDir, prefixDir);
+  result->indent();
+
+  EXPECT_STREQ(mockXml.c_str(), result->print().c_str());
+}
+#endif
+
+TEST_F(ConfigGeneratorTest, GeneratesUiAllTheTime) {
+  std::string mockXml = mockConfigXml("fixtures/mock-ui.xml");
+
+  zmm::Ref<mxml::Element> result = subject->generateUi();
+  result->indent();
+
+  EXPECT_STREQ(mockXml.c_str(), result->print().c_str());
+}
+
+TEST_F(ConfigGeneratorTest, GeneratesImportMappingsAllTheTime) {
+  std::string mockXml = mockConfigXml("fixtures/mock-import-mappings.xml");
+
+  zmm::Ref<mxml::Element> result = subject->generateMappings();
+  result->indent();
+
+  EXPECT_STREQ(mockXml.c_str(), result->print().c_str());
+}
 
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
-TEST_F(ConfigGeneratorTest, GeneratesFFMPEGThumbnailer) {
-  std::string defaultConfig = subject->generate(homePath, configDir, prefixDir, magicFile);
+TEST_F(ConfigGeneratorTest, GeneratesExtendedRuntimeXmlWithFFMPEG) {
+  std::string mockXml = mockConfigXml("fixtures/mock-extended-ffmpeg.xml");
 
-  EXPECT_THAT(defaultConfig.c_str(), HasSubstr("<ffmpegthumbnailer enabled=\"no\">"));
+  zmm::Ref<mxml::Element> result = subject->generateExtendedRuntime();
+  result->indent();
+
+  EXPECT_STREQ(mockXml.c_str(), result->print().c_str());
 }
 #endif
 
-#ifdef HAVE_MAGIC
-TEST_F(ConfigGeneratorTest, GeneratesMagicFile) {
-  std::string defaultConfig = subject->generate(homePath, configDir, prefixDir, magicFile);
+#if !defined(HAVE_FFMPEG) || !defined(HAVE_FFMPEGTHUMBNAILER)
+TEST_F(ConfigGeneratorTest, GeneratesExtendedRuntimeXmlWithoutFFMPEG) {
+  std::string mockXml = mockConfigXml("fixtures/mock-extended.xml");
 
-  EXPECT_THAT(defaultConfig.c_str(), HasSubstr("<magic-file>magic.file</magic-file>"));
-}
+  zmm::Ref<mxml::Element> result = subject->generateExtendedRuntime();
+  result->indent();
 
-TEST_F(ConfigGeneratorTest, DoesNotGenerateMagicIfNotPresent) {
-  magicFile = "";
-  mockConfig = mockConfigXml("fixtures/mock-config-no-magic.xml");
-  std::string defaultConfig = subject->generate(homePath, configDir, prefixDir, magicFile);
-
-  EXPECT_THAT(defaultConfig.c_str(), Not(HasSubstr("<magic-file>magic.file</magic-file>")));
+  EXPECT_STREQ(mockXml.c_str(), result->print().c_str());
 }
 #endif
 
-#ifndef HAVE_JS
-TEST_F(ConfigGeneratorTest, GeneratesBuiltInScriptImportWhenJSdisabled) {
-  mockConfig = mockConfigXml("fixtures/mock-config-import-builtin.xml");
-  std::string defaultConfig = subject->generate(homePath, configDir, prefixDir, magicFile);
+#if defined(HAVE_MYSQL)
+TEST_F(ConfigGeneratorTest, GeneratesStorageXmlWithMySQLAndSqlLite) {
+  std::string mockXml = mockConfigXml("fixtures/mock-storage-mysql.xml");
 
-  EXPECT_THAT(defaultConfig.c_str(), HasSubstr("<scripting script-charset=\"UTF-8\">\n      <virtual-layout type=\"builtin\"/>\n    </scripting>"));
+  zmm::Ref<mxml::Element> result = subject->generateStorage();
+  result->indent();
+
+  EXPECT_STREQ(mockXml.c_str(), result->print().c_str());
 }
 #endif
 
-#ifdef HAVE_JS
-TEST_F(ConfigGeneratorTest, GeneratesImportWhenJSenabled) {
-  mockConfig = mockConfigXml("fixtures/mock-config-import-js.xml");
-  std::string defaultConfig = subject->generate(homePath, configDir, prefixDir, magicFile);
+#if !defined(HAVE_MYSQL)
+TEST_F(ConfigGeneratorTest, GeneratesStorageXmlWithSqlLiteOnly) {
+  std::string mockXml = mockConfigXml("fixtures/mock-storage-sqlite.xml");
 
-  EXPECT_THAT(defaultConfig.c_str(), HasSubstr("<import-script>/usr/local/share/gerbera/js/import.js</import-script>"));
-}
+  zmm::Ref<mxml::Element> result = subject->generateStorage();
+  result->indent();
 
-TEST_F(ConfigGeneratorTest, GeneratesScriptCommonWhenJSenabled) {
-  mockConfig = mockConfigXml("fixtures/mock-config-import-js.xml");
-  std::string defaultConfig = subject->generate(homePath, configDir, prefixDir, magicFile);
-
-  EXPECT_THAT(defaultConfig.c_str(), HasSubstr("<common-script>/usr/local/share/gerbera/js/common.js</common-script>"));
-}
-
-TEST_F(ConfigGeneratorTest, GeneratesScriptPlaylistWhenJSenabled) {
-  mockConfig = mockConfigXml("fixtures/mock-config-import-js.xml");
-  std::string defaultConfig = subject->generate(homePath, configDir, prefixDir, magicFile);
-
-  EXPECT_THAT(defaultConfig.c_str(), HasSubstr("<playlist-script>/usr/local/share/gerbera/js/playlists.js</playlist-script>"));
+  EXPECT_STREQ(mockXml.c_str(), result->print().c_str());
 }
 #endif
 
-#ifdef ONLINE_SERVICES
-TEST_F(ConfigGeneratorTest, GeneratesOnlineContent) {
-  mockConfig = mockConfigXml("fixtures/mock-config-import-online.xml");
-  std::string defaultConfig = subject->generate(homePath, configDir, prefixDir, magicFile);
 
-  EXPECT_THAT(defaultConfig.c_str(), HasSubstr("<online-content>"));
+
+#if defined(HAVE_MAGIC) && !defined(HAVE_JS) && !defined(ONLINE_SERVICES)
+TEST_F(ConfigGeneratorTest, GeneratesImportWithMagicFile) {
+  std::string mockXml = mockConfigXml("fixtures/mock-import-magic.xml");
+
+  zmm::Ref<mxml::Element> result = subject->generateImport(prefixDir, magicFile);
+  result->indent();
+
+  EXPECT_STREQ(mockXml.c_str(), result->print().c_str());
 }
 
-#ifdef ATRAILERS
-TEST_F(ConfigGeneratorTest, GeneratesOnlineContentAppleTrailers) {
-  mockConfig = mockConfigXml("fixtures/mock-config-import-online.xml");
-  std::string defaultConfig = subject->generate(homePath, configDir, prefixDir, magicFile);
+#elif defined(HAVE_MAGIC) && defined(HAVE_JS) && !defined(ONLINE_SERVICES)
+TEST_F(ConfigGeneratorTest, GeneratesImportWithMagicAndJS) {
+  std::string mockXml = mockConfigXml("fixtures/mock-import-magic-js.xml");
 
-  EXPECT_THAT(defaultConfig.c_str(), HasSubstr("<AppleTrailers enabled=\"no\" refresh=\"43200\" update-at-start=\"no\" resolution=\"640\"/>"));
+  zmm::Ref<mxml::Element> result = subject->generateImport(prefixDir, magicFile);
+  result->indent();
+
+  EXPECT_STREQ(mockXml.c_str(), result->print().c_str());
+}
+
+#elif defined(HAVE_MAGIC) && defined(HAVE_JS) && defined(ONLINE_SERVICES)
+TEST_F(ConfigGeneratorTest, GeneratesImportWithMagicJSandOnline) {
+  std::string mockXml = mockConfigXml("fixtures/mock-import-magic-js-online.xml");
+
+  zmm::Ref<mxml::Element> result = subject->generateImport(prefixDir, magicFile);
+  result->indent();
+
+  EXPECT_STREQ(mockXml.c_str(), result->print().c_str());
+}
+
+#elif !defined(HAVE_MAGIC) && !defined(HAVE_JS) && !defined(ONLINE_SERVICES)
+TEST_F(ConfigGeneratorTest, GeneratesImportNoMagicJSorOnline) {
+  std::string mockXml = mockConfigXml("fixtures/mock-import-none.xml");
+
+  zmm::Ref<mxml::Element> result = subject->generateImport(prefixDir, magicFile);
+  result->indent();
+
+  EXPECT_STREQ(mockXml.c_str(), result->print().c_str());
 }
 #endif
 
+#if defined(ATRAILERS)
+TEST_F(ConfigGeneratorTest, GeneratesOnlineContentWithAppleTrailers) {
+  std::string mockXml = mockConfigXml("fixtures/mock-online-atrailers.xml");
+
+  zmm::Ref<mxml::Element> result = subject->generateOnlineContent();
+  result->indent();
+
+  EXPECT_STREQ(mockXml.c_str(), result->print().c_str());
+}
+#else
+TEST_F(ConfigGeneratorTest, GeneratesOnlineContentEmpty) {
+  std::string mockXml = "<online-content/>";
+
+  zmm::Ref<mxml::Element> result = subject->generateOnlineContent();
+  result->indent();
+
+  EXPECT_STREQ(mockXml.c_str(), result->print().c_str());
+}
 #endif
+
+TEST_F(ConfigGeneratorTest, GeneratesTranscodingProfilesAlways) {
+  std::string mockXml = mockConfigXml("fixtures/mock-transcoding.xml");
+
+  zmm::Ref<mxml::Element> result = subject->generateTranscoding();
+  result->indent();
+
+  EXPECT_STREQ(mockXml.c_str(), result->print().c_str());
+}
+
+

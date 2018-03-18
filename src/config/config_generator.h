@@ -34,13 +34,15 @@ class ConfigGenerator : public IConfigGenerator {
   ~ConfigGenerator();
 
   std::string generate(std::string userHome, std::string configDir, std::string prefixDir, std::string magicFile) override;
- protected:
-  zmm::Ref<mxml::Element> generateExtendedRuntime();
   zmm::Ref<mxml::Element> generateServer(std::string userHome, std::string configDir, std::string prefixDir);
+  zmm::Ref<mxml::Element> generateUi();
+  zmm::Ref<mxml::Element> generateExtendedRuntime();
   zmm::Ref<mxml::Element> generateStorage();
   zmm::Ref<mxml::Element> generateImport(std::string prefixDir, std::string magicFile);
   zmm::Ref<mxml::Element> generateMappings();
-  zmm::Ref<mxml::Element> generateOnlineSection();
+  zmm::Ref<mxml::Element> generateOnlineContent();
+  zmm::Ref<mxml::Element> generateTranscoding();
+ protected:
   zmm::Ref<mxml::Element> map_from_to(std::string from, std::string to);
   zmm::Ref<mxml::Element> treat_as(std::string mimetype, std::string as);
 };

@@ -1,0 +1,10 @@
+<storage>
+  <sqlite3 enabled="yes">
+    <database-file>gerbera.db</database-file>
+  </sqlite3>
+  <mysql enabled="no">
+    <host>localhost</host>
+    <username>gerbera</username>
+    <database>gerbera</database>
+  </mysql>
+</storage>

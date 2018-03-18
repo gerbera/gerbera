@@ -49,13 +49,15 @@ std::string ConfigGenerator::generate(std::string userHome, std::string configDi
   Ref<Comment> docinfo(new Comment(_("\n\
      See http://gerbera.io or read the docs for more\n\
      information on creating and using config.xml configration files.\n\
-    "),
-                                   true));
+    "),true));
+
   config->appendChild(RefCast(docinfo, Node));
 
   config->appendElementChild(generateServer(userHome, configDir, prefixDir));
 
   config->appendElementChild(generateImport(prefixDir, magicFile));
+
+  config->appendElementChild(generateTranscoding());
 
   config->indent();
   std::string configAsString(config->print().c_str());
@@ -65,19 +67,7 @@ std::string ConfigGenerator::generate(std::string userHome, std::string configDi
 Ref<Element> ConfigGenerator::generateServer(std::string userHome, std::string configDir, std::string prefixDir) {
   Ref<Element> server(new Element(_("server")));
 
-  Ref<Element> ui(new Element(_("ui")));
-  ui->setAttribute(_("enabled"), _(DEFAULT_UI_EN_VALUE));
-  ui->setAttribute(_("show-tooltips"), _(DEFAULT_UI_SHOW_TOOLTIPS_VALUE));
-  Ref<Element> accounts(new Element(_("accounts")));
-  accounts->setAttribute(_("enabled"), _(DEFAULT_ACCOUNTS_EN_VALUE));
-  accounts->setAttribute(_("session-timeout"), String::from(DEFAULT_SESSION_TIMEOUT));
-  Ref<Element> account(new Element(_("account")));
-  account->setAttribute(_("user"), _(DEFAULT_ACCOUNT_USER));
-  account->setAttribute(_("password"), _(DEFAULT_ACCOUNT_PASSWORD));
-  accounts->appendElementChild(account);
-  ui->appendElementChild(accounts);
-  server->appendElementChild(ui);
-
+  server->appendElementChild(generateUi());
   server->appendTextChild(_("name"), _(PACKAGE_NAME));
 
   Ref<Element> udn(new Element(_("udn")));
@@ -139,6 +129,21 @@ Ref<Element> ConfigGenerator::generateServer(std::string userHome, std::string c
   server->appendElementChild(generateExtendedRuntime());
 
   return server;
+}
+
+Ref<Element> ConfigGenerator::generateUi() {
+  Ref<Element> ui(new Element(_("ui")));
+  ui->setAttribute(_("enabled"), _(DEFAULT_UI_EN_VALUE));
+  ui->setAttribute(_("show-tooltips"), _(DEFAULT_UI_SHOW_TOOLTIPS_VALUE));
+  Ref<Element> accounts(new Element(_("accounts")));
+  accounts->setAttribute(_("enabled"), _(DEFAULT_ACCOUNTS_EN_VALUE));
+  accounts->setAttribute(_("session-timeout"), String::from(DEFAULT_SESSION_TIMEOUT));
+  Ref<Element> account(new Element(_("account")));
+  account->setAttribute(_("user"), _(DEFAULT_ACCOUNT_USER));
+  account->setAttribute(_("password"), _(DEFAULT_ACCOUNT_PASSWORD));
+  accounts->appendElementChild(account);
+  ui->appendElementChild(accounts);
+  return ui;
 }
 
 Ref<Element> ConfigGenerator::generateStorage() {
@@ -243,7 +248,7 @@ Ref<Element> ConfigGenerator::generateImport(std::string prefixDir, std::string 
   import->appendElementChild(scripting);
   import->appendElementChild(generateMappings());
 #ifdef ONLINE_SERVICES
-  import->appendElementChild(generateOnlineSection());
+  import->appendElementChild(generateOnlineContent());
 #endif
 
   return import;
@@ -314,7 +319,7 @@ Ref<Element> ConfigGenerator::generateMappings() {
   return mappings;
 }
 
-Ref<Element> ConfigGenerator::generateOnlineSection() {
+Ref<Element> ConfigGenerator::generateOnlineContent() {
   Ref<Element> onlinecontent(new Element(_("online-content")));
 #ifdef ATRAILERS
   Ref<Element> at(new Element(_("AppleTrailers")));
@@ -327,16 +332,96 @@ Ref<Element> ConfigGenerator::generateOnlineSection() {
   return onlinecontent;
 }
 
-Ref<Element> ConfigGenerator::map_from_to(std::string from, std::string to)
-{
+Ref<Element> ConfigGenerator::generateTranscoding() {
+  Ref<Element> transcoding(new Element(_("transcoding")));
+  transcoding->setAttribute(_("enabled"), _(DEFAULT_TRANSCODING_ENABLED));
+
+  Ref<Element> mt_prof_map(new Element(_("mimetype-profile-mappings")));
+
+  Ref<Element> prof_flv(new Element(_("transcode")));
+  prof_flv->setAttribute(_("mimetype"), _("video/x-flv"));
+  prof_flv->setAttribute(_("using"), _("vlcmpeg"));
+
+  mt_prof_map->appendElementChild(prof_flv);
+
+  Ref<Element> prof_theora(new Element(_("transcode")));
+  prof_theora->setAttribute(_("mimetype"), _("application/ogg"));
+  prof_theora->setAttribute(_("using"), _("vlcmpeg"));
+  mt_prof_map->appendElementChild(prof_theora);
+
+  Ref<Element> prof_ogg(new Element(_("transcode")));
+  prof_ogg->setAttribute(_("mimetype"), _("application/ogg"));
+  prof_ogg->setAttribute(_("using"), _("oggflac2raw"));
+  mt_prof_map->appendElementChild(prof_ogg);
+
+  Ref<Element> prof_flac(new Element(_("transcode")));
+  prof_flac->setAttribute(_("mimetype"), _("audio/x-flac"));
+  prof_flac->setAttribute(_("using"), _("oggflac2raw"));
+  mt_prof_map->appendElementChild(prof_flac);
+
+  transcoding->appendElementChild(mt_prof_map);
+
+  Ref<Element> profiles(new Element(_("profiles")));
+
+  Ref<Element> oggflac(new Element(_("profile")));
+  oggflac->setAttribute(_("name"), _("oggflac2raw"));
+  oggflac->setAttribute(_("enabled"), _(NO));
+  oggflac->setAttribute(_("type"), _("external"));
+
+  oggflac->appendTextChild(_("mimetype"), _("audio/L16"));
+  oggflac->appendTextChild(_("accept-url"), _(NO));
+  oggflac->appendTextChild(_("first-resource"), _(YES));
+  oggflac->appendTextChild(_("accept-ogg-theora"), _(NO));
+
+  Ref<Element> oggflac_agent(new Element(_("agent")));
+  oggflac_agent->setAttribute(_("command"), _("ogg123"));
+  oggflac_agent->setAttribute(_("arguments"), _("-d raw -o byteorder:big -f %out %in"));
+  oggflac->appendElementChild(oggflac_agent);
+
+  Ref<Element> oggflac_buffer(new Element(_("buffer")));
+  oggflac_buffer->setAttribute(_("size"), String::from(DEFAULT_AUDIO_BUFFER_SIZE));
+  oggflac_buffer->setAttribute(_("chunk-size"), String::from(DEFAULT_AUDIO_CHUNK_SIZE));
+  oggflac_buffer->setAttribute(_("fill-size"), String::from(DEFAULT_AUDIO_FILL_SIZE));
+  oggflac->appendElementChild(oggflac_buffer);
+
+  profiles->appendElementChild(oggflac);
+
+  Ref<Element> vlcmpeg(new Element(_("profile")));
+  vlcmpeg->setAttribute(_("name"), _("vlcmpeg"));
+  vlcmpeg->setAttribute(_("enabled"), _(NO));
+  vlcmpeg->setAttribute(_("type"), _("external"));
+
+  vlcmpeg->appendTextChild(_("mimetype"), _("video/mpeg"));
+  vlcmpeg->appendTextChild(_("accept-url"), _(YES));
+  vlcmpeg->appendTextChild(_("first-resource"), _(YES));
+  vlcmpeg->appendTextChild(_("accept-ogg-theora"), _(YES));
+
+  Ref<Element> vlcmpeg_agent(new Element(_("agent")));
+  vlcmpeg_agent->setAttribute(_("command"), _("vlc"));
+  vlcmpeg_agent->setAttribute(_("arguments"), _("-I dummy %in --sout #transcode{venc=ffmpeg,vcodec=mp2v,vb=4096,fps=25,aenc=ffmpeg,acodec=mpga,ab=192,samplerate=44100,channels=2}:standard{access=file,mux=ps,dst=%out} vlc:quit"));
+  vlcmpeg->appendElementChild(vlcmpeg_agent);
+
+  Ref<Element> vlcmpeg_buffer(new Element(_("buffer")));
+  vlcmpeg_buffer->setAttribute(_("size"), String::from(DEFAULT_VIDEO_BUFFER_SIZE));
+  vlcmpeg_buffer->setAttribute(_("chunk-size"), String::from(DEFAULT_VIDEO_CHUNK_SIZE));
+  vlcmpeg_buffer->setAttribute(_("fill-size"), String::from(DEFAULT_VIDEO_FILL_SIZE));
+  vlcmpeg->appendElementChild(vlcmpeg_buffer);
+
+  profiles->appendElementChild(vlcmpeg);
+
+  transcoding->appendElementChild(profiles);
+
+  return transcoding;
+}
+
+Ref<Element> ConfigGenerator::map_from_to(std::string from, std::string to) {
   Ref<Element> map(new Element(_("map")));
   map->setAttribute(_("from"), _(strdup(from.c_str())));
   map->setAttribute(_("to"), _(strdup(to.c_str())));
   return map;
 }
 
-Ref<Element> ConfigGenerator::treat_as(std::string mimetype, std::string as)
-{
+Ref<Element> ConfigGenerator::treat_as(std::string mimetype, std::string as) {
   Ref<Element> treat(new Element(_("treat")));
   treat->setAttribute(_("mimetype"), _(strdup(mimetype.c_str())));
   treat->setAttribute(_("as"), _(strdup(as.c_str())));
