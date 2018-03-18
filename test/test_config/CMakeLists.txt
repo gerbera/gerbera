@@ -53,7 +53,6 @@ add_custom_command(TARGET testconfiggenerator POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/fixtures $<TARGET_FILE_DIR:testconfiggenerator>/fixtures
 )
 
-
 add_test(NAME testconfiggenerator
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-        COMMAND ./test/test_config/testconfiggenerator)
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/test/test_config
+        COMMAND ./testconfiggenerator)
