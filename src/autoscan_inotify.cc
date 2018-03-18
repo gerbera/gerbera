@@ -240,7 +240,7 @@ void AutoscanInotify::threadProc()
                     if (mask & (IN_CLOSE_WRITE | IN_MOVED_TO | IN_CREATE)) {
                         log_debug("adding %s\n", path.c_str());
                         // path, recursive, async, hidden, low priority, cancellable
-                        cm->addFile(fullPath, adir->getRecursive(), true, adir->getHidden(), true, false);
+                        cm->addFile(fullPath, adir->getLocation(), adir->getRecursive(), true, adir->getHidden(), true, false);
 
                         if (mask & IN_ISDIR)
                             monitorUnmonitorRecursive(path, false, adir, watchAs->getNormalizedAutoscanPath(), false);
