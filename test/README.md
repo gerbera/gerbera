@@ -6,7 +6,7 @@ framework to provide unit testing for the C++ code-base.
 ## Required Software
 
 - CMake ^3.9
-- GoogleTest (_downloaded and compiled automatically_)
+- GoogleTest
 
 ## Enable Testing
 

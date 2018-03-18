@@ -27,6 +27,11 @@
       <sqlite3 enabled="yes">
         <database-file>gerbera.db</database-file>
       </sqlite3>
+      <mysql enabled="no">
+        <host>localhost</host>
+        <username>gerbera</username>
+        <database>gerbera</database>
+      </mysql>
     </storage>
     <protocolInfo extend="no"/><!-- For PS3 support change to "yes" -->
     <!--
@@ -46,6 +51,13 @@
        <upnp-string-limit>101</upnp-string-limit>
     -->
     <extended-runtime-options>
+      <ffmpegthumbnailer enabled="no">
+        <thumbnail-size>128</thumbnail-size>
+        <seek-percentage>5</seek-percentage>
+        <filmstrip-overlay>yes</filmstrip-overlay>
+        <workaround-bugs>no</workaround-bugs>
+        <image-quality>8</image-quality>
+      </ffmpegthumbnailer>
       <mark-played-items enabled="no" suppress-cds-updates="yes">
         <string mode="prepend">*</string>
         <mark>
@@ -54,5 +66,10 @@
       </mark-played-items>
     </extended-runtime-options>
   </server>
-  <import hidden-files="no"/>
+  <import hidden-files="no">
+    <magic-file>magic.file</magic-file>
+    <scripting script-charset="UTF-8">
+      <virtual-layout type="builtin"/>
+    </scripting>
+  </import>
 </config>

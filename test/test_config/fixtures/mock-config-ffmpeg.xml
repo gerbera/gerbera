@@ -46,6 +46,13 @@
        <upnp-string-limit>101</upnp-string-limit>
     -->
     <extended-runtime-options>
+      <ffmpegthumbnailer enabled="yes">
+        <thumbnail-size>128</thumbnail-size>
+        <seek-percentage>5</seek-percentage>
+        <filmstrip-overlay>yes</filmstrip-overlay>
+        <workaround-bugs>no</workaround-bugs>
+        <image-quality>8</image-quality>
+      </ffmpegthumbnailer>
       <mark-played-items enabled="no" suppress-cds-updates="yes">
         <string mode="prepend">*</string>
         <mark>

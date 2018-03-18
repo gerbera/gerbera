@@ -26,16 +26,23 @@ Gerbera - https://gerbera.io/
 #ifndef GERBERA_CONFIG_GENERATOR_H
 #define GERBERA_CONFIG_GENERATOR_H
 
-
 #include "IConfigGenerator.h"
 
-class ConfigGenerator: public IConfigGenerator {
-public:
-    ConfigGenerator();
-    ~ConfigGenerator();
+class ConfigGenerator : public IConfigGenerator {
+ public:
+  ConfigGenerator();
+  ~ConfigGenerator();
 
-    std::string generate() override;
+  std::string generate(std::string userHome, std::string configDir, std::string prefixDir, std::string magicFile) override;
+ protected:
+  zmm::Ref<mxml::Element> generateExtendedRuntime();
+  zmm::Ref<mxml::Element> generateServer(std::string userHome, std::string configDir, std::string prefixDir);
+  zmm::Ref<mxml::Element> generateStorage();
+  zmm::Ref<mxml::Element> generateImport(std::string prefixDir, std::string magicFile);
+  zmm::Ref<mxml::Element> generateMappings();
+  zmm::Ref<mxml::Element> generateOnlineSection();
+  zmm::Ref<mxml::Element> map_from_to(std::string from, std::string to);
+  zmm::Ref<mxml::Element> treat_as(std::string mimetype, std::string as);
 };
-
 
 #endif //GERBERA_CONFIG_GENERATOR_H

@@ -27,6 +27,11 @@
       <sqlite3 enabled="yes">
         <database-file>gerbera.db</database-file>
       </sqlite3>
+      <mysql enabled="no">
+        <host>localhost</host>
+        <username>gerbera</username>
+        <database>gerbera</database>
+      </mysql>
     </storage>
     <protocolInfo extend="no"/><!-- For PS3 support change to "yes" -->
     <!--
