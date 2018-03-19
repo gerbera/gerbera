@@ -70,7 +70,7 @@ $.widget('grb.trail', {
 
     if (config.enableAdd && config.onAdd) {
       var addItemIcon = this.generateItemButton(item, {
-        title: 'Add item',
+        title: 'Add Item',
         class: 'grb-trail-add',
         iconClass: 'fa-plus',
         click: config.onAdd ? config.onAdd : noOp
@@ -80,7 +80,7 @@ $.widget('grb.trail', {
 
     if (config.enableEdit && config.onEdit) {
       var editItemIcon = this.generateItemButton(item, {
-        title: 'Edit item',
+        title: 'Edit Item',
         class: 'grb-trail-edit',
         iconClass: 'fa-pencil',
         click: config.onEdit ? config.onEdit : noOp
@@ -91,7 +91,7 @@ $.widget('grb.trail', {
     var autoscanItemIcon
     if (config.enableAddAutoscan && config.onAddAutoscan) {
       autoscanItemIcon = this.generateItemButton(item, {
-        title: 'Add autoscan item',
+        title: 'Add Autoscan Item',
         class: 'grb-trail-add-autoscan',
         iconClass: 'fa-history',
         click: config.onAddAutoscan ? config.onAddAutoscan : noOp
@@ -99,7 +99,7 @@ $.widget('grb.trail', {
       autoscanItemIcon.appendTo(buttons)
     } else if (config.enableEditAutoscan && config.onEditAutoscan) {
       autoscanItemIcon = this.generateItemButton(item, {
-        title: 'Edit autoscan item',
+        title: 'Edit Autoscan Item',
         class: 'grb-trail-edit-autoscan',
         iconClass: 'fa-history',
         click: config.onEditAutoscan ? config.onEditAutoscan : noOp
@@ -109,7 +109,7 @@ $.widget('grb.trail', {
 
     if (config.enableDelete && config.onDelete) {
       var deleteItemIcon = this.generateItemButton(item, {
-        title: 'Delete item',
+        title: 'Delete Item',
         class: 'grb-trail-delete',
         iconClass: 'fa-trash-o',
         click: config.onDelete ? config.onDelete : noOp
@@ -119,7 +119,7 @@ $.widget('grb.trail', {
 
     if (config.enableDeleteAll && config.onDeleteAll) {
       var deleteAllIcon = this.generateItemButton(item, {
-        title: 'Delete all items',
+        title: 'Delete All',
         class: 'grb-trail-delete-all',
         iconClass: 'fa-remove',
         click: config.onDeleteAll ? config.onDeleteAll : noOp

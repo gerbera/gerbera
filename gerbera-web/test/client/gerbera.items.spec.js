@@ -102,7 +102,7 @@ describe('Gerbera Items', function () {
     it('loads the response as items in the datagrid', function () {
       response.success = true
       GERBERA.Items.loadItems(response)
-      expect($('#datagrid').find('tr').length).toEqual(13)
+      expect($('#datagrid').find('tr').length).toEqual(12)
       response.success = true
     })
 
@@ -162,7 +162,7 @@ describe('Gerbera Items', function () {
 
     it('loads file items by transforming them', function () {
       GERBERA.Items.loadItems(response)
-      expect($('#datagrid').find('tr').length).toEqual(34)
+      expect($('#datagrid').find('tr').length).toEqual(33)
     })
   })
 
