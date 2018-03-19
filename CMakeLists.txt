@@ -566,10 +566,6 @@ if(WITH_TESTS)
     endif()
 endif()
 
-if(WITH_METADATA_TABLE)
-    add_definitions(-DUSE_METADATA_TABLE)
-endif()
-
 INSTALL(TARGETS gerbera DESTINATION bin)
 INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/scripts/js DESTINATION share/gerbera)
 INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/web DESTINATION share/gerbera)

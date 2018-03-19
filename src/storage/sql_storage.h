@@ -200,18 +200,27 @@ private:
     class AddUpdateTable : public Object
     {
     public:
-        AddUpdateTable(zmm::String table, zmm::Ref<Dictionary> dict)
+        AddUpdateTable(zmm::String table, zmm::Ref<Dictionary> dict, zmm::String operation)
         {
             this->table = table;
             this->dict = dict;
+            this->operation = operation;
         }
         zmm::String getTable() { return table; }
         zmm::Ref<Dictionary> getDict() { return dict; }
+        zmm::String getOperation() { return operation; }
     protected:
         zmm::String table;
         zmm::Ref<Dictionary> dict;
+        zmm::String operation;
     };
     zmm::Ref<zmm::Array<AddUpdateTable> > _addUpdateObject(zmm::Ref<CdsObject> obj, bool isUpdate, int *changedContainer);
+
+    void generateMetadataDBOperations(zmm::Ref<CdsObject> obj, bool isUpdate,
+        zmm::Ref<zmm::Array<AddUpdateTable>> operations);
+    zmm::Ref<zmm::StringBuffer> sqlForInsert(zmm::Ref<CdsObject> obj, zmm::Ref<AddUpdateTable> addUpdateTable);
+    zmm::Ref<zmm::StringBuffer> sqlForUpdate(zmm::Ref<CdsObject> obj, zmm::Ref<AddUpdateTable> addUpdateTable);
+    zmm::Ref<zmm::StringBuffer> sqlForDelete(zmm::Ref<CdsObject> obj, zmm::Ref<AddUpdateTable> addUpdateTable);
     
     /* helper for removeObject(s) */
     void _removeObjects(zmm::Ref<zmm::StringBuffer> objectIDs, int offset);
@@ -250,14 +259,12 @@ private:
     int getNextID();
     void loadLastID();
 
-#ifdef USE_METADATA_TABLE
     int lastMetadataID;
 
     int getNextMetadataID();
     void loadLastMetadataID();
 
     std::shared_ptr<SQLEmitter> sqlEmitter;
-#endif // USE_METADATA_TABLE    
 
     std::mutex nextIDMutex;
     

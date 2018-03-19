@@ -119,10 +119,8 @@ protected:
     zmm::Ref<Dictionary> auxdata;
     zmm::Ref<zmm::Array<CdsResource> > resources;
 
-#ifdef USE_METADATA_TABLE
     /// \ brief IDs of the metadata attributes in the metadata table
-    zmm::Ref<Dictionary> metadataIDs;  // unfortunately IDs will be stored as Strings...
-#endif // USE_METADATA_TABLE    
+    zmm::Ref<Dictionary> metadataIDs;
 
 public:
     /// \brief Constructor. Sets the default values.
@@ -243,27 +241,6 @@ public:
     /// \brief Removes metadata with the given key
     inline void removeMetadata(zmm::String key)
     { metadata->remove(key); }
-    
-#ifdef USE_METADATA_TABLE
-    /// \brief Query single metadata attribute ID.
-    inline zmm::String getMetadataID(zmm::String key)
-    { return metadataIDs->get(key); }
-
-    /// \brief Query entire metadata attribute ID dictionary.
-    inline zmm::Ref<Dictionary> getMetadataIDs() { return metadataIDs; }
-    
-    /// \brief Set entire metadata attribute ID dictionary.
-    inline void setMetadataIDs(zmm::Ref<Dictionary> metadataIDs)
-    { this->metadataIDs = metadataIDs; }
-
-    /// \brief Set a single metadata attribute ID.
-    inline void setMetadataID(zmm::String key, zmm::String value)
-    { metadataIDs->put(key, value); }
-
-    /// \brief Removes metadata attribute ID with the given key
-    inline void removeMetadataID(zmm::String key)
-    { metadataIDs->remove(key); }
-#endif // USE_METADATA_TABLE
     
     /// \brief Query single auxdata value.
     inline zmm::String getAuxData(zmm::String key)

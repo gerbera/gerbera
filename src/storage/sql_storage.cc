@@ -162,10 +162,7 @@ SQLStorage::SQLStorage()
     table_quote_begin = '\0';
     table_quote_end = '\0';
     lastID = INVALID_OBJECT_ID;
-
-#ifdef USE_METADATA_TABLE
     lastMetadataID = INVALID_OBJECT_ID;
-#endif // USE_METADATA_TABLE    
 }
 
 void SQLStorage::init()
@@ -189,9 +186,7 @@ void SQLStorage::init()
     insertBufferStatementCount = 0;
     insertBufferByteCount = 0;
 
-#ifdef USE_METADATA_TABLE
     sqlEmitter = std::make_shared<DefaultSQLEmitter>();
-#endif // USE_METADATA_TABLE
 
     //log_debug("using SQL: %s\n", this->sql_query.c_str());
 
@@ -220,10 +215,7 @@ void SQLStorage::init()
 void SQLStorage::dbReady()
 {
     loadLastID();
-
-#ifdef USE_METADATA_TABLE
     loadLastMetadataID();
-#endif // USE_METADATA_TABLE
 }
 
 void SQLStorage::shutdown()
@@ -299,13 +291,11 @@ Ref<Array<SQLStorage::AddUpdateTable>> SQLStorage::_addUpdateObject(Ref<CdsObjec
     }
 
     int returnValSize = 2;
-#ifdef USE_METADATA_TABLE
-    // +1 for the encoded property which may not yet be present
-    returnValSize += (obj->getMetadata() == nullptr) ? 0 : obj->getMetadata()->size() + 1; 
-#endif // USE_METADATA_TABLE    
+    returnValSize += (obj->getMetadata() == nullptr) ? 0 : obj->getMetadata()->size(); 
     Ref<Array<AddUpdateTable>> returnVal(new Array<AddUpdateTable>(returnValSize));
     Ref<Dictionary> cdsObjectSql(new Dictionary());
-    returnVal->append(Ref<AddUpdateTable>(new AddUpdateTable(_(CDS_OBJECT_TABLE), cdsObjectSql)));
+    returnVal->append(Ref<AddUpdateTable>(
+        new AddUpdateTable(_(CDS_OBJECT_TABLE), cdsObjectSql, isUpdate ? "update" : "insert")));
 
     cdsObjectSql->put(_("object_type"), quote(objectType));
 
@@ -324,31 +314,14 @@ Ref<Array<SQLStorage::AddUpdateTable>> SQLStorage::_addUpdateObject(Ref<CdsObjec
     //else if (isUpdate)
     //    cdsObjectSql->put(_("dc_title"), _(SQL_NULL));
 
-    Ref<Dictionary> dict = obj->getMetadata();
-#ifndef USE_METADATA_TABLE
-    if (isUpdate)
-        cdsObjectSql->put(_("metadata"), _(SQL_NULL));
-    if (dict->size() > 0) {
-        if (!hasReference || !refObj->getMetadata()->equals(obj->getMetadata())) {
-            cdsObjectSql->put(_("metadata"), quote(dict->encode()));
-        }
+
+    if (!hasReference || !refObj->getMetadata()->equals(obj->getMetadata())) {
+        generateMetadataDBOperations(obj, isUpdate, returnVal);
     }
-#else
-    if (dict != nullptr && dict->size() > 0) {
-        Ref<Array<DictionaryElement>> metadataElements = dict->getElements();
-        for (int  i = 0; i < metadataElements->size(); i++) {
-            Ref<Dictionary> metadataSql(new Dictionary());
-            returnVal->append(Ref<AddUpdateTable>(new AddUpdateTable(_(METADATA_TABLE), metadataSql)));
-            Ref<DictionaryElement> property = metadataElements->get(i);
-            metadataSql->put(_("property_name"), quote(property->getKey()));
-            metadataSql->put(_("property_value"), quote(property->getValue()));
-        }
-    }
-#endif // USE_METADATA_TABLE
     
     if (isUpdate)
         cdsObjectSql->put(_("auxdata"), _(SQL_NULL));
-    dict = obj->getAuxData();
+    Ref<Dictionary> dict = obj->getAuxData();
     if (dict->size() > 0 && (!hasReference || !refObj->getAuxData()->equals(obj->getAuxData()))) {
         cdsObjectSql->put(_("auxdata"), quote(obj->getAuxData()->encode()));
     }
@@ -429,7 +402,8 @@ Ref<Array<SQLStorage::AddUpdateTable>> SQLStorage::_addUpdateObject(Ref<CdsObjec
     }
     if (IS_CDS_ACTIVE_ITEM(objectType)) {
         Ref<Dictionary> cdsActiveItemSql(new Dictionary());
-        returnVal->append(Ref<AddUpdateTable>(new AddUpdateTable(_(CDS_ACTIVE_ITEM_TABLE), cdsActiveItemSql)));
+        returnVal->append(Ref<AddUpdateTable>(new AddUpdateTable(_(CDS_ACTIVE_ITEM_TABLE), cdsActiveItemSql,
+                    isUpdate ? "update" : "insert")));
         Ref<CdsActiveItem> aitem = RefCast(obj, CdsActiveItem);
 
         cdsActiveItemSql->put(_("id"), String::from(aitem->getID()));
@@ -470,57 +444,11 @@ void SQLStorage::addObject(Ref<CdsObject> obj, int* changedContainer)
     Ref<Array<AddUpdateTable>> data = _addUpdateObject(obj, false, changedContainer);
     if (data == nullptr)
         return;
-    int lastInsertID = INVALID_OBJECT_ID;
-#ifdef USE_METADATA_TABLE
-    int lastMetadataInsertID = INVALID_OBJECT_ID;
-#endif // USE_METADATA_TABLE
+    // int lastInsertID = INVALID_OBJECT_ID;
+    // int lastMetadataInsertID = INVALID_OBJECT_ID;
     for (int i = 0; i < data->size(); i++) {
         Ref<AddUpdateTable> addUpdateTable = data->get(i);
-        String tableName = addUpdateTable->getTable();
-        Ref<Array<DictionaryElement>> dataElements = addUpdateTable->getDict()->getElements();
-
-        Ref<StringBuffer> fields(new StringBuffer(128));
-        Ref<StringBuffer> values(new StringBuffer(128));
-
-        for (int j = 0; j < dataElements->size(); j++) {
-            Ref<DictionaryElement> element = dataElements->get(j);
-            if (j != 0) {
-                *fields << ',';
-                *values << ',';
-            }
-            *fields << TQ(element->getKey());
-            if (lastInsertID != INVALID_OBJECT_ID && element->getKey() == "id" && element->getValue().toInt() == INVALID_OBJECT_ID) {
-#ifdef USE_METADATA_TABLE
-                if (tableName == _(METADATA_TABLE))
-                    *values << lastMetadataInsertID;
-                else
-#endif // USE_METADATA_TABLE
-                *values << lastInsertID;
-            } else
-                *values << element->getValue();
-        }
-
-        /* manually generate ID */
-        if (lastInsertID == INVALID_OBJECT_ID && tableName == _(CDS_OBJECT_TABLE)) {
-            lastInsertID = getNextID();
-            obj->setID(lastInsertID);
-            *fields << ',' << TQ("id");
-            *values << ',' << quote(lastInsertID);
-        }
-#ifdef USE_METADATA_TABLE
-        if (tableName == _(METADATA_TABLE)) {
-            lastMetadataInsertID = getNextMetadataID();
-            *fields << ',' << TQ("id");
-            *values << ',' << quote(lastMetadataInsertID);
-            *fields << ',' << TQ("item_id");
-            *values << ',' << quote(obj->getID());
-        }
-#endif // USE_METADATA_TABLE
-        /* -------------------- */
-
-        Ref<StringBuffer> qb(new StringBuffer(256));
-        *qb << "INSERT INTO " << TQ(tableName) << " (" << fields->toString() << ") VALUES (" << values->toString() << ')';
-
+        Ref<StringBuffer> qb = sqlForInsert(obj, addUpdateTable);
         log_debug("insert_query: %s\n", qb->toString().c_str());
 
         /*
@@ -558,7 +486,7 @@ void SQLStorage::updateObject(zmm::Ref<CdsObject> obj, int* changedContainer)
     if (obj->getID() == CDS_ID_FS_ROOT) {
         data = Ref<Array<AddUpdateTable>>(new Array<AddUpdateTable>(1));
         Ref<Dictionary> cdsObjectSql(new Dictionary());
-        data->append(Ref<AddUpdateTable>(new AddUpdateTable(_(CDS_OBJECT_TABLE), cdsObjectSql)));
+        data->append(Ref<AddUpdateTable>(new AddUpdateTable(_(CDS_OBJECT_TABLE), cdsObjectSql, "update")));
         cdsObjectSql->put(_("dc_title"), quote(obj->getTitle()));
         setFsRootName(obj->getTitle());
         cdsObjectSql->put(_("upnp_class"), quote(obj->getClass()));
@@ -571,25 +499,17 @@ void SQLStorage::updateObject(zmm::Ref<CdsObject> obj, int* changedContainer)
     }
     for (int i = 0; i < data->size(); i++) {
         Ref<AddUpdateTable> addUpdateTable = data->get(i);
-        String tableName = addUpdateTable->getTable();
-        Ref<Array<DictionaryElement>> dataElements = addUpdateTable->getDict()->getElements();
-
-        Ref<StringBuffer> qb(new StringBuffer(256));
-        *qb << "UPDATE " << TQ(tableName) << " SET ";
-
-        for (int j = 0; j < dataElements->size(); j++) {
-            Ref<DictionaryElement> element = dataElements->get(j);
-            if (j != 0) {
-                *qb << ',';
-            }
-            *qb << TQ(element->getKey()) << '='
-                << element->getValue();
+        String operation = addUpdateTable->getOperation();
+        Ref<StringBuffer> qb;
+        if (operation == "update") {
+            qb = sqlForUpdate(obj, addUpdateTable);
+        } else if (operation == "insert") {
+            qb = sqlForInsert(obj, addUpdateTable);
+        } else if (operation == "delete") {
+            qb = sqlForDelete(obj, addUpdateTable);
         }
 
-        *qb << " WHERE id = " << obj->getID();
-
         log_debug("upd_query: %s\n", qb->toString().c_str());
-
         exec(qb);
     }
     /* add to cache */
@@ -808,7 +728,6 @@ Ref<Array<CdsObject>> SQLStorage::browse(Ref<BrowseParam> param)
 
 zmm::Ref<zmm::Array<CdsObject>> SQLStorage::search(zmm::Ref<SearchParam> param, int* numMatches)
 {
-#ifdef USE_METADATA_TABLE
     std::unique_ptr<SearchParser> searchParser = std::make_unique<SearchParser>(*sqlEmitter, param->searchCriteria());
     std::shared_ptr<ASTNode> rootNode = searchParser->parse();
     std::shared_ptr<std::string> searchSQL(rootNode->emitSQL());
@@ -852,9 +771,6 @@ zmm::Ref<zmm::Array<CdsObject>> SQLStorage::search(zmm::Ref<SearchParam> param, 
     sqlResult = nullptr;
 
     return arr;
-#else
-    return nullptr;
-#endif // USE_METADATA_TABLE
 }
 
 int SQLStorage::getChildCount(int contId, bool containers, bool items, bool hideFsRoot)
@@ -1059,9 +975,6 @@ int SQLStorage::createContainer(int parentID, String name, String path, bool isV
         << TQ("dc_title") << ','
         << TQ("location") << ','
         << TQ("location_hash") << ','
-#ifndef USE_METADATA_TABLE            
-        << TQ("metadata") << ','
-#endif // USE_METADATA_TABLE
         << TQ("ref_id") << ") VALUES ("
         << newID << ','
         << parentID << ','
@@ -1070,15 +983,11 @@ int SQLStorage::createContainer(int parentID, String name, String path, bool isV
         << quote(name) << ','
         << quote(dbLocation) << ','
         << quote(stringHash(dbLocation)) << ','
-#ifndef USE_METADATA_TABLE            
-        << (metadata == nullptr ? _(SQL_NULL) : metadata->encode()) << ','
-#endif // USE_METADATA_TABLE
         << (refID > 0 ? quote(refID) : _(SQL_NULL))
         << ')';
 
     exec(qb);
 
-#ifdef USE_METADATA_TABLE            
     if (itemMetadata != nullptr) {
         Ref<Array<DictionaryElement>> metadataElements = itemMetadata->getElements();
         for (int i = 0; i < metadataElements->size(); i++) {
@@ -1101,7 +1010,6 @@ int SQLStorage::createContainer(int parentID, String name, String path, bool isV
         }
         log_debug("Wrote metadata for cds_object %s", newID);
     }
-#endif // USE_METADATA_TABLE
     
     /* inform cache */
     if (cacheOn()) {
@@ -1219,12 +1127,6 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
     obj->setClass(fallbackString(row->col(_upnp_class), row->col(_ref_upnp_class)));
     obj->setFlags(row->col(_flags).toUInt());
 
-#ifndef USE_METADATA_TABLE
-    String metadataStr = fallbackString(row->col(_metadata), row->col(_ref_metadata));
-    Ref<Dictionary> meta(new Dictionary());
-    meta->decode(metadataStr);
-    obj->setMetadata(meta);
-#else
     Ref<Dictionary> meta = retrieveMetadataForObject(obj->getID());
     if (meta != nullptr && meta->size())
         obj->setMetadata(meta);
@@ -1241,8 +1143,6 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
         obj->setMetadata(meta);
     }
 
-#endif //USE_METADATA_TABLE
-    
     String auxdataStr = fallbackString(row->col(_auxdata), row->col(_ref_auxdata));
     Ref<Dictionary> aux(new Dictionary());
     aux->decode(auxdataStr);
@@ -1388,7 +1288,6 @@ Ref<CdsObject> SQLStorage::createObjectFromSearchRow(Ref<SQLRow> row)
 
 Ref<Dictionary> SQLStorage::retrieveMetadataForObject(int objectId)
 {
-#ifdef USE_METADATA_TABLE
     Ref<StringBuffer> qb(new StringBuffer());
     *qb << SELECT_METADATA
         << " FROM " << TQ(METADATA_TABLE)
@@ -1405,8 +1304,6 @@ Ref<Dictionary> SQLStorage::retrieveMetadataForObject(int objectId)
         metadata->put(row->col(m_property_name), row->col(m_property_value));
     }
     return metadata;
-#endif
-    return nullptr;
 }
 
 
@@ -2530,7 +2427,6 @@ void SQLStorage::loadLastID()
         throw _Exception(_("could not load correct lastID (db not initialized?)"));
 }
 
-#ifdef USE_METADATA_TABLE
 int SQLStorage::getNextMetadataID()
 {
     if (lastMetadataID < CDS_ID_ROOT)
@@ -2562,7 +2458,6 @@ void SQLStorage::loadLastMetadataID()
     if (lastMetadataID < CDS_ID_ROOT)
         throw _Exception(_("could not load correct lastMetadataID (db not initialized?)"));
 }
-#endif // USE_METADATA_TABLE
 
 void SQLStorage::addObjectToCache(Ref<CdsObject> object, bool dontLock)
 {
@@ -2624,6 +2519,141 @@ void SQLStorage::clearFlagInDB(int flag)
         << TQ("flags")
         << "&" << flag;
     exec(qb);
+}
+
+void SQLStorage::generateMetadataDBOperations(Ref<CdsObject> obj, bool isUpdate,
+    Ref<Array<AddUpdateTable>> operations)
+{
+    Ref<Dictionary> dict = obj->getMetadata();
+    int objMetadataSize = dict->size();
+    if (!isUpdate) {
+        Ref<Array<DictionaryElement>> metadataElements = dict->getElements();
+        for (int  i = 0; i < objMetadataSize; i++) {
+            Ref<Dictionary> metadataSql(new Dictionary());
+            operations->append(Ref<AddUpdateTable>(new AddUpdateTable(_(METADATA_TABLE), metadataSql, "insert")));
+            Ref<DictionaryElement> property = metadataElements->get(i);
+            metadataSql->put(_("property_name"), quote(property->getKey()));
+            metadataSql->put(_("property_value"), quote(property->getValue()));
+        }
+    } else {
+        // get current metadata from DB: if only it really was a dictionary...
+        Ref<Dictionary> dbMetadata = retrieveMetadataForObject(obj->getID());
+        Ref<Array<DictionaryElement>> el = dict->getElements();
+        for (int i = 0; i < objMetadataSize; i++) {
+            Ref<DictionaryElement> property = el->get(i);
+            String operation = dbMetadata->get(property->getKey()).length() == 0 ? "insert" : "update";
+            Ref<Dictionary> metadataSql(new Dictionary());
+            operations->append(Ref<AddUpdateTable>(new AddUpdateTable(_(METADATA_TABLE), metadataSql, operation)));
+            metadataSql->put(_("property_name"), quote(property->getKey()));
+            metadataSql->put(_("property_value"), quote(property->getValue()));
+        }
+        el = dbMetadata->getElements();
+        int dbMetadataSize = dbMetadata->size();
+        for (int i = 0; i < dbMetadataSize; i++) {
+            Ref<DictionaryElement> property = el->get(i);
+            if (dict->get(property->getKey()).length() == 0) {
+                // key in db metadata but not obj metadata, so needs a delete
+                Ref<Dictionary> metadataSql(new Dictionary());
+                operations->append(Ref<AddUpdateTable>(new AddUpdateTable(_(METADATA_TABLE), metadataSql, "delete")));
+                metadataSql->put(_("property_name"), quote(property->getKey()));
+                metadataSql->put(_("property_value"), quote(property->getValue()));
+            }
+        }
+    }
+}
+
+Ref<StringBuffer> SQLStorage::sqlForInsert(Ref<CdsObject> obj, Ref<AddUpdateTable> addUpdateTable)
+{
+    int lastInsertID = INVALID_OBJECT_ID;
+    int lastMetadataInsertID = INVALID_OBJECT_ID;
+
+    String tableName = addUpdateTable->getTable();
+    Ref<Array<DictionaryElement>> dataElements = addUpdateTable->getDict()->getElements();
+
+    Ref<StringBuffer> fields(new StringBuffer(128));
+    Ref<StringBuffer> values(new StringBuffer(128));
+
+    for (int j = 0; j < dataElements->size(); j++) {
+        Ref<DictionaryElement> element = dataElements->get(j);
+        if (j != 0) {
+            *fields << ',';
+            *values << ',';
+        }
+        *fields << TQ(element->getKey());
+        if (lastInsertID != INVALID_OBJECT_ID && element->getKey() == "id" && element->getValue().toInt() == INVALID_OBJECT_ID) {
+            if (tableName == _(METADATA_TABLE))
+                *values << lastMetadataInsertID;
+            else
+                *values << lastInsertID;
+        } else
+            *values << element->getValue();
+    }
+
+    /* manually generate ID */
+    if (lastInsertID == INVALID_OBJECT_ID && tableName == _(CDS_OBJECT_TABLE)) {
+        lastInsertID = getNextID();
+        obj->setID(lastInsertID);
+        *fields << ',' << TQ("id");
+        *values << ',' << quote(lastInsertID);
+    }
+    if (tableName == _(METADATA_TABLE)) {
+        lastMetadataInsertID = getNextMetadataID();
+        *fields << ',' << TQ("id");
+        *values << ',' << quote(lastMetadataInsertID);
+        *fields << ',' << TQ("item_id");
+        *values << ',' << quote(obj->getID());
+    }
+
+    Ref<StringBuffer> qb(new StringBuffer(256));
+    *qb << "INSERT INTO " << TQ(tableName) << " (" << fields->toString() << ") VALUES (" << values->toString() << ')';
+
+    return qb;
+}
+
+Ref<StringBuffer> SQLStorage::sqlForUpdate(Ref<CdsObject> obj, Ref<AddUpdateTable> addUpdateTable)
+{
+    if (addUpdateTable == nullptr || addUpdateTable->getDict() == nullptr
+        || (addUpdateTable->getTable() == _(METADATA_TABLE) && addUpdateTable->getDict()->size() != 1))
+        throw _Exception(_("sqlForDelete called with invalid arguments"));
+
+    String tableName = addUpdateTable->getTable();
+    Ref<Array<DictionaryElement>> dataElements = addUpdateTable->getDict()->getElements();
+
+    Ref<StringBuffer> qb(new StringBuffer(256));
+    *qb << "UPDATE " << TQ(tableName) << " SET ";
+    for (int j = 0; j < dataElements->size(); j++) {
+        Ref<DictionaryElement> element = dataElements->get(j);
+        if (j != 0)
+            *qb << ',';
+        *qb << TQ(element->getKey()) << '='
+            << element->getValue();
+    }
+    *qb << " WHERE " << TQ("id") << " = " << obj->getID();
+
+    // relying on only one element when table is mt_metadata
+    if (tableName == _(METADATA_TABLE))
+        *qb << " AND " << TQ("property_name") << " = " <<  dataElements->get(0)->getKey();
+
+    return qb;
+}
+
+Ref<StringBuffer> SQLStorage::sqlForDelete(Ref<CdsObject> obj, Ref<AddUpdateTable> addUpdateTable)
+{
+    if (addUpdateTable == nullptr || addUpdateTable->getDict() == nullptr
+        || (addUpdateTable->getTable() == _(METADATA_TABLE) && addUpdateTable->getDict()->size() != 1))
+        throw _Exception(_("sqlForDelete called with invalid arguments"));
+
+    Ref<Array<DictionaryElement>> dataElements = addUpdateTable->getDict()->getElements();
+    String tableName = addUpdateTable->getTable();
+    Ref<StringBuffer> qb(new StringBuffer(256));
+    *qb << "DELETE FROM " << TQ(tableName)
+        << " WHERE " << TQ("id") << " = " << obj->getID();
+    
+    // relying on only one element when table is mt_metadata
+    if (tableName == _(METADATA_TABLE))
+        *qb << " AND " << TQ("property_name") << " = " <<  dataElements->get(0)->getKey();
+    
+    return qb;
 }
 
 void SQLStorage::doMetadataMigration()
