@@ -1,0 +1,27 @@
+
+Gerbera UPnP Server version 1.2.0_alpha - http://gerbera.io/
+
+===============================================================================
+Gerbera is free software, covered by the GNU General Public License version 2
+
+Copyright 2016-2018 Gerbera Contributors.
+Gerbera is based on MediaTomb: Copyright 2005-2010 Gena Batsyan, Sergey Bostandzhyan, Leonhard Wimmer.
+===============================================================================
+Usage: gerbera [options]
+
+Supported options:
+    --ip or -i         ip address to bind to
+    --interface or -e  network interface to bind to
+    --port or -p       server port (the SDK only permits values >= 49152)
+    --config or -c     configuration file to use
+    --home or -m       define the home directory
+    --cfgdir or -f     name of the directory that is holding the configuration
+    --add or -a        add the given file/directory
+    --logfile or -l    log to specified file
+    --debug or -D      enable debug output
+    --compile-info     print configuration summary and exit
+    --version          print version information and exit
+    --help or -h       this help message
+
+For more information visit http://gerbera.io/
+

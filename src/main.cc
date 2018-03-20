@@ -45,6 +45,7 @@
 #include "common.h"
 #include "server.h"
 #include "content_manager.h"
+#include <config/config_generator.h>
 
 #define OPTSTR "i:e:p:c:m:f:a:l:P:dhD"
 
@@ -102,6 +103,7 @@ int main(int argc, char** argv, char** envp)
         { (char*)"compile-info", 0, nullptr, 0 }, // 9
         { (char*)"version", 0, nullptr, 0 }, // 10
         { (char*)"help", 0, nullptr, 'h' }, // 11
+        { (char*)"create-config", 0, nullptr, 0 }, // 12
         { (char*)nullptr, 0, nullptr, 0 }
     };
 
@@ -114,6 +116,7 @@ int main(int argc, char** argv, char** envp)
     String magic;
     bool debug_logging = false;
     bool print_version = false;
+    bool create_config = false;
 
     Ref<Array<StringBase> > addFile(new Array<StringBase>());
 
@@ -202,7 +205,7 @@ int main(int argc, char** argv, char** envp)
         case 'h':
             print_copyright();
             printf("Usage: gerbera [options]\n\
-                        \n\
+\n\
 Supported options:\n\
     --ip or -i         ip address to bind to\n\
     --interface or -e  network interface to bind to\n\
@@ -236,19 +239,15 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
             case 10: // --version
                 print_version = true;
                 break;
+            case 12: // --create-config
+                create_config = true;
+                break;
             }
             break;
         default:
             break;
         }
     }
-
-    if (print_version) {
-        print_copyright();
-        exit(EXIT_FAILURE);
-    }
-
-    log_copyright();
 
     // If home is not given by the user, get it from the environment
     if (!string_ok(config_file) && !string_ok(home)) {
@@ -288,6 +287,27 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
 
     if (!string_ok(magic))
         magic = nullptr;
+
+    if(create_config) {
+        ConfigGenerator configGenerator;
+        std::string magicStr;
+        if(magic == nullptr) {
+          magicStr = "";
+        } else {
+          magicStr = std::string(magic.c_str());
+        }
+        std::string config = configGenerator.generate(std::string(home.c_str()), std::string(confdir.c_str()), std::string(prefix.c_str()), magicStr);
+        printf(config.c_str());
+        exit(EXIT_SUCCESS);
+    }
+
+    if (print_version) {
+        print_copyright();
+        exit(EXIT_FAILURE);
+    }
+
+    log_copyright();
+
 
     ConfigManager::setStaticArgs(config_file, home, confdir, prefix, magic, debug_logging, ip, interface, port);
     try {
