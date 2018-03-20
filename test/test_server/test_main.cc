@@ -1,3 +1,4 @@
+#include <array>
 #include <memory>
 #include <fstream>
 #include "gtest/gtest.h"
