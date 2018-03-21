@@ -113,6 +113,6 @@ void ActionRequest::update()
             UpnpActionRequest_set_ErrCode(upnp_request, UPNP_E_ACTION_FAILED);
         }
         
-        log_error("ActionRequest::update(): response is nullptr, code %d\n", errCode);
+        log_error("ActionRequest::update(): response is nullptr, code %d for %s\n", errCode, actionName.c_str());
     }
 }

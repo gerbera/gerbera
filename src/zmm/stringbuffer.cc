@@ -71,6 +71,10 @@ StringBuffer &StringBuffer::operator<<(String other)
     return *this;
 }
 
+StringBuffer &StringBuffer::operator<<(const std::string &other) {
+    return operator<<(String(other));
+}
+
 StringBuffer &StringBuffer::operator<<(Ref<StringBuffer> other)
 {
     concat(other, 0);

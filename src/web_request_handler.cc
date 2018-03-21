@@ -122,7 +122,6 @@ void WebRequestHandler::get_info(IN const char* filename, OUT UpnpFileInfo* info
 Ref<IOHandler> WebRequestHandler::open(IN enum UpnpOpenFileMode mode)
 {
     root = Ref<Element>(new Element(_("root")));
-    out = Ref<StringBuffer>(new StringBuffer());
 
     String error = nullptr;
     int error_code = 0;

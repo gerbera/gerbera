@@ -40,6 +40,8 @@
 #include <climits>
 #include <netdb.h>
 #include <cstring>
+#include <iterator>
+#include <sstream>
 
 #include <ifaddrs.h>
 #include <net/if.h>
@@ -286,7 +288,7 @@ String hex_encode(const void *data, int len)
     int i;
     unsigned char hi, lo;
 
-    Ref<StringBuffer> buf(new StringBuffer(len * 2));
+    std::ostringstream buf;
     
     chars = (unsigned char *)data;
     for (i = 0; i < len; i++)
@@ -294,9 +296,9 @@ String hex_encode(const void *data, int len)
         unsigned char c = chars[i];
         hi = c >> 4;
         lo = c & 0xF;
-        *buf << HEX_CHARS[hi] << HEX_CHARS[lo];
+        buf << HEX_CHARS[hi] << HEX_CHARS[lo];
     }
-    return buf->toString();
+    return buf.str();
     
 }
 
@@ -305,7 +307,7 @@ String hex_decode_string(String encoded)
     auto *ptr = const_cast<char *>(encoded.c_str());
     int len = encoded.length();
     
-    Ref<StringBuffer> buf(new StringBuffer(len / 2));
+    std::ostringstream buf;
     for (int i = 0; i < len; i += 2)
     {
         const char *chi = strchr(const_cast<char *>(HEX_CHARS), ptr[i]);
@@ -322,9 +324,9 @@ String hex_decode_string(String encoded)
         else
             lo = 0;
         auto ch = (char)(hi << 4 | lo);
-        *buf << ch;
+        buf << ch;
     }
-    return buf->toString();
+    return buf.str();
 }
 
 String hex_md5(const void *data, int length)
@@ -369,13 +371,13 @@ String generate_random_id()
     return uuid_String;
 }
 
-static const char *hex = "0123456789ABCDEF";
+static const char *HEX_CHARS2 = "0123456789ABCDEF";
 
 String url_escape(String str)
 {
     const char *data = str.c_str();
     int len = str.length();
-    Ref<StringBuffer> buf(new StringBuffer(len));
+    std::ostringstream buf;
     for (int i = 0; i < len; i++)
     {
         auto c = (unsigned char)data[i];
@@ -385,23 +387,23 @@ String url_escape(String str)
             c == '_' ||
             c == '-')
         {
-            *buf << (char)c;
+            buf << (char)c;
         }
         else
         {
             int hi = c >> 4;
             int lo = c & 15;
-            *buf << '%' << hex[hi] << hex[lo];
+            buf << '%' << HEX_CHARS2[hi] << HEX_CHARS2[lo];
         }
     }
-    return buf->toString();
+    return buf.str();
 }
 
 String url_unescape(String str)
 {
     auto *data = const_cast<char *>(str.c_str());
     int len = str.length();
-    Ref<StringBuffer> buf(new StringBuffer(len));
+    std::ostringstream buf;
 
     int i = 0;
     while (i < len)
@@ -417,45 +419,45 @@ String url_unescape(String str)
 
             const char *pos;
 
-            pos = strchr(const_cast<char *>(hex), chi);
+            pos = strchr(const_cast<char *>(HEX_CHARS2), chi);
             if (!pos)
                 hi = 0;
             else
-                hi = pos - hex;
+                hi = pos - HEX_CHARS2;
 
-            pos = strchr(const_cast<char *>(hex), clo);
+            pos = strchr(const_cast<char *>(HEX_CHARS2), clo);
             if (!pos)
                 lo = 0;
             else
-                lo = pos - hex;
+                lo = pos - HEX_CHARS2;
 
             int ascii = (hi << 4) | lo;
-            *buf << (char)ascii;
+            buf << (char)ascii;
         }
         else if (c == '+')
         {
-            *buf << ' ';
+            buf << ' ';
         }
         else
         {
-            *buf << c;
+            buf << c;
         }
     }
-    return buf->toString();
+    return buf.str();
 }
 
 String mime_types_to_CSV(Ref<Array<StringBase> > mimeTypes)
 {
-    Ref<StringBuffer> buf(new StringBuffer());
+    std::ostringstream buf;
     for (int i = 0; i < mimeTypes->size(); i++)
     {
         if (i > 0)
-            *buf << ",";
+            buf << ",";
         String mimeType = mimeTypes->get(i);
-        *buf << "http-get:*:" << mimeType << ":*";
+        buf << "http-get:*:" << mimeType << ":*";
     }
 
-    return buf->toString();
+    return buf.str();
 }
 
 String mt_strerror(int mt_errno)
@@ -489,16 +491,14 @@ String read_text_file(String path)
         throw _Exception(_("read_text_file: could not open ") +
                         path + " : " + mt_strerror(errno));
     }
-    Ref<StringBuffer> buf(new StringBuffer()); 
-    auto *buffer = (char *)MALLOC(1024);
+    std::ostringstream buf;
+    char buffer[1024];
     size_t bytesRead;    
-    while((bytesRead = fread(buffer, 1, 1024, f)) > 0)
-    {
-        buf->concat(buffer, bytesRead);
+    while((bytesRead = fread(buffer, 1, sizeof(buffer), f)) > 0) {
+        buf << std::string(buffer, bytesRead);
     }
     fclose(f);
-    FREE(buffer);
-    return buf->toString();
+    return buf.str();
 }
 void write_text_file(String path, String contents)
 {
@@ -1010,11 +1010,7 @@ String toCSV(shared_ptr<unordered_set<int> > array)
 {
     if (array->empty())
         return nullptr;
-    Ref<StringBuffer> buf(new StringBuffer());
-    for (const auto &i: *array) {
-        *buf << ',' << i;
-    }
-    return buf->toString(1);
+    return join(*array, ",");
 }
 
 void getTimespecNow(struct timespec *ts)

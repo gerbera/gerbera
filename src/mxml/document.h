@@ -54,7 +54,7 @@ public:
     void appendChild(zmm::Ref<Node> child);
     
 protected:
-    virtual void print_internal(zmm::Ref<zmm::StringBuffer> buf, int indent);
+    void print_internal(std::ostringstream &buf, int indent) override;
 };
 
 } // namespace

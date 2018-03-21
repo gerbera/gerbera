@@ -102,7 +102,7 @@ public:
     void setTextKey(zmm::String textKey) { this->textKey = textKey; }
     
 protected:
-    virtual void print_internal(zmm::Ref<zmm::StringBuffer> buf, int indent);
+    void print_internal(std::ostringstream &buf, int indent) override;
     
     friend class Parser;
 };

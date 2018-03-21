@@ -42,7 +42,6 @@ Comment::Comment(String text, bool indentWithLFbefore) : Node()
     this->indentWithLFbefore = indentWithLFbefore;
 }
 
-void Comment::print_internal(Ref<StringBuffer> buf, int indent)
-{
-    *buf << "<!--" << text << "-->";
+void Comment::print_internal(std::ostringstream &buf, int indent) {
+    buf << "<!--" << text << "-->";
 }

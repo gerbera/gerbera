@@ -56,7 +56,7 @@ public:
     inline void setVType(enum mxml_value_type vtype) { this->vtype = vtype; }
 
 protected:
-    virtual void print_internal(zmm::Ref<zmm::StringBuffer> buf, int indent);
+    void print_internal(std::ostringstream &buf, int indent) override;
 };
 
 } // namespace

@@ -38,6 +38,8 @@
 #include "storage/sql_storage.h"
 #include <mutex>
 #include <mysql.h>
+#include <string>
+#include <vector>
 
 class MysqlStorage : private SQLStorage {
 private:
@@ -78,8 +80,8 @@ private:
 
     void checkMysqlThreadInit();
 
-    zmm::Ref<zmm::Array<zmm::StringBase>> insertBuffer;
-    virtual void _addToInsertBuffer(zmm::Ref<zmm::StringBuffer> query);
+    std::vector<std::string> insertBuffer;
+    void _addToInsertBuffer(const std::string &query) override;
     virtual void _flushInsertBuffer();
 };
 

@@ -110,7 +110,7 @@ String run_simple_process(String prog, String param, String input)
         throw _Exception(_("Failed to open output file ")+output_file +_(" ") + 
                 strerror(errno));
     }
-    Ref<StringBuffer> output(new StringBuffer());
+    std::ostringstream output;
 
     int bytesRead;
     char buf[BUF_SIZE];
@@ -118,7 +118,7 @@ String run_simple_process(String prog, String param, String input)
     {
         bytesRead = fread(buf, 1, BUF_SIZE, file);
         if(bytesRead > 0)
-            *output << String(buf, bytesRead);
+            output << std::string(buf, bytesRead);
         else
             break;
     }
@@ -128,7 +128,7 @@ String run_simple_process(String prog, String param, String input)
     unlink(input_file.c_str());
     unlink(output_file.c_str());
 
-    return output->toString();
+    return output.str();
 }
 
 

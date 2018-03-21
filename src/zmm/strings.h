@@ -92,6 +92,7 @@ public:
     String(const String &other);
     String(StringBase *other);
     String(Ref<StringBase> other);
+    String(const std::string &other);
 
     inline StringBase *getBase()
     {
@@ -108,6 +109,8 @@ public:
     String &operator=(const char *str);
 
     String &operator=(String other);
+
+    String &operator=(const std::string &other);
 
     inline String &operator=(std::nullptr_t)
     {

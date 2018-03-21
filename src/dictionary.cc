@@ -32,6 +32,7 @@
 #include "dictionary.h"
 
 #include <cstring>
+#include <sstream>
 #include "tools.h"
 
 using namespace zmm;
@@ -117,17 +118,17 @@ void Dictionary::remove(String key)
 
 String Dictionary::_encode(char sep1, char sep2)
 {
-    Ref<StringBuffer> buf(new StringBuffer());
+    std::ostringstream buf;
     int len = elements->size();
     for (int i = 0; i < len; i++)
     {
         if(i > 0)
-            *buf << sep1;
+            buf << sep1;
         Ref<DictionaryElement> el = elements->get(i);
-        *buf << url_escape(el->getKey()) << sep2
+        buf << url_escape(el->getKey()) << sep2
              << url_escape(el->getValue());
     }
-    return buf->toString();
+    return buf.str();
 }
 
 String Dictionary::encode()
