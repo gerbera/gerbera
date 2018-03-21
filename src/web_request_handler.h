@@ -67,12 +67,6 @@ protected:
     /// \brief We can also always see what mode was requested.
     enum UpnpOpenFileMode mode;
     
-    /// \brief This is filled during request processing and holds the output.
-    ///
-    /// The XML or HTML that is the result of a request is put in this buffer,
-    /// this is what is being served to the web browser.
-    zmm::Ref<zmm::StringBuffer> out;
-    
     /// \brief This is the root xml element to be populated by process() method.
     zmm::Ref<mxml::Element> root;
     

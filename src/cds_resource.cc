@@ -32,6 +32,8 @@
 #include "tools.h"
 #include "cds_resource.h"
 
+#include <sstream>
+
 #define RESOURCE_PART_SEP '~'
 
 using namespace zmm;
@@ -136,15 +138,15 @@ Ref<CdsResource> CdsResource::clone()
 String CdsResource::encode()
 {
     // encode resources
-    Ref<StringBuffer> buf(new StringBuffer());
-    *buf << handlerType;
-    *buf << RESOURCE_PART_SEP;
-    *buf << attributes->encode();
-    *buf << RESOURCE_PART_SEP;
-    *buf << parameters->encode();
-    *buf << RESOURCE_PART_SEP;
-    *buf << options->encode();
-    return buf->toString();
+    std::ostringstream buf;
+    buf << handlerType;
+    buf << RESOURCE_PART_SEP;
+    buf << attributes->encode();
+    buf << RESOURCE_PART_SEP;
+    buf << parameters->encode();
+    buf << RESOURCE_PART_SEP;
+    buf << options->encode();
+    return buf.str().c_str();
 }
 
 Ref<CdsResource> CdsResource::decode(String serial)

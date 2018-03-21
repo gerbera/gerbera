@@ -39,15 +39,15 @@ using namespace mxml;
 
 String XML2JSON::getJSON(Ref<Element> root)
 {
-    Ref<StringBuffer> buf(new StringBuffer());
-    *buf << '{';
+    std::ostringstream buf;
+    buf << '{';
     handleElement(buf, root);
-    *buf << '}';
-    return buf->toString();
+    buf << '}';
+    return buf.str();
 }
 
 
-void XML2JSON::handleElement(Ref<StringBuffer> buf, Ref<Element> el)
+void XML2JSON::handleElement(std::ostringstream &buf, Ref<Element> el)
 {
     bool firstChild = true;
     int attributeCount = el->attributeCount();
@@ -57,10 +57,10 @@ void XML2JSON::handleElement(Ref<StringBuffer> buf, Ref<Element> el)
         {
             Ref<Attribute> at = el->getAttribute(i);
             if (! firstChild)
-                *buf << ',';
+                buf << ',';
             else
                 firstChild = false;
-            *buf << '"' << escape(at->name, '\\', '"') << "\":" << getValue(at->value, at->getVType());
+            buf << '"' << escape(at->name, '\\', '"') << "\":" << getValue(at->value, at->getVType());
         }
     }
     
@@ -74,9 +74,9 @@ void XML2JSON::handleElement(Ref<StringBuffer> buf, Ref<Element> el)
             throw _Exception(_("XML2JSON: Element ") + el->getName() + " was of arrayType, but had no arrayName set");
         
         if (! firstChild)
-            *buf << ',';
-        *buf << '"' << escape(nodeName, '\\', '"') << "\":";
-        *buf << '[';
+            buf << ',';
+        buf << '"' << escape(nodeName, '\\', '"') << "\":";
+        buf << '[';
         firstChild = true;
     }
     
@@ -91,7 +91,7 @@ void XML2JSON::handleElement(Ref<StringBuffer> buf, Ref<Element> el)
             if (childCount == 1 && type == mxml_node_text)
             {
                 if (! firstChild)
-                    *buf << ',';
+                    buf << ',';
                 else
                     firstChild = false;
                 String key = el->getTextKey();
@@ -99,7 +99,7 @@ void XML2JSON::handleElement(Ref<StringBuffer> buf, Ref<Element> el)
                     throw _Exception(_("XML2JSON: Element ") + el->getName() + " had a text child, but had no textKey set");
                     //key = _("value");
                 
-                *buf << '"' << key << "\":" << getValue(el->getText(), el->getVTypeText());
+                buf << '"' << key << "\":" << getValue(el->getText(), el->getVTypeText());
             }
             else
                 throw _Exception(_("XML2JSON cannot handle an element which consists of text AND element children - element: ") + el->getName() + "; has type: " + type);
@@ -107,7 +107,7 @@ void XML2JSON::handleElement(Ref<StringBuffer> buf, Ref<Element> el)
         else
         {
             if (! firstChild)
-                *buf << ',';
+                buf << ',';
             else
                 firstChild = false;
             
@@ -149,23 +149,23 @@ void XML2JSON::handleElement(Ref<StringBuffer> buf, Ref<Element> el)
                     throw _Exception(_("XML2JSON: if an element is of arrayType, all children have to have the same name"));
             }
             else
-                *buf << '"' << escape(childEl->getName(), '\\', '"') << "\":";
+                buf << '"' << escape(childEl->getName(), '\\', '"') << "\":";
             
             if (childAttributeCount > 0 || childElementCount > 0 || childEl->isArrayType())
             {
-                *buf << '{';
+                buf << '{';
                 handleElement(buf, childEl);
-                *buf << '}';
+                buf << '}';
             }
             else
             {
-                *buf << getValue(childEl->getText(), childEl->getVTypeText());
+                buf << getValue(childEl->getText(), childEl->getVTypeText());
             }
         }
     }
     
     if (array)
-        *buf << ']';
+        buf << ']';
     
 }
 

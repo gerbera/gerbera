@@ -33,9 +33,19 @@
 #define __ZMM_STRINGBUFFER_H__
 
 #include "strings.h"
+#include <string>
 
 #define DEFAULT_STRINGBUFFER_CAPACITY 16
 #define STRINGBUFFER_CAPACITY_INCREMENT (1.25)
+
+#include <sstream>
+
+template <typename T>
+std::basic_ostream<T> &operator<<(std::basic_ostream<T> &oss, const zmm::String &s) {
+    oss << s.c_str();
+    return oss;
+}
+
 
 namespace zmm
 {
@@ -52,6 +62,7 @@ public:
     virtual ~StringBuffer();
     
     StringBuffer &operator<<(String other);
+    StringBuffer &operator<<(const std::string &other);
     StringBuffer &operator<<(Ref<StringBuffer> other);
     StringBuffer &operator<<(const char *str);
     StringBuffer &operator<<(signed char *str);
@@ -68,6 +79,9 @@ public:
     char *c_str(int offset = 0);
     String toString();
     String toString(int offset);
+    operator std::string() {
+        return std::string(data, len);
+    }
     void clear();
     void ensureCapacity(int neededCapacity);
     void setCharAt(int index, char c);

@@ -40,6 +40,7 @@
 
 #include <unordered_set>
 #include <mutex>
+#include <sstream>
 
 #define QTB                 table_quote_begin
 #define QTE                 table_quote_end
@@ -93,8 +94,18 @@ public:
     /* wrapper functions for select and exec */
     zmm::Ref<SQLResult> select(zmm::Ref<zmm::StringBuffer> buf)
         { return select(buf->c_str(), buf->length()); }
+    zmm::Ref<SQLResult> select(const std::string &buf)
+        { return select(buf.c_str(), buf.length()); }
+    zmm::Ref<SQLResult> select(const std::ostringstream &buf) {
+        auto s = buf.str();
+        return select(s.c_str(), s.length());
+    }
     int exec(zmm::Ref<zmm::StringBuffer> buf, bool getLastInsertId = false)
         { return exec(buf->c_str(), buf->length(), getLastInsertId); }
+    int exec(const std::ostringstream &buf, bool getLastInsertId = false) {
+        auto s = buf.str();
+        return exec(s.c_str(), s.length(), getLastInsertId);
+    }
     
     virtual void addObject(zmm::Ref<CdsObject> object, int *changedContainer) override;
     virtual void updateObject(zmm::Ref<CdsObject> object, int *changedContainer) override;
@@ -218,17 +229,18 @@ private:
 
     void generateMetadataDBOperations(zmm::Ref<CdsObject> obj, bool isUpdate,
         zmm::Ref<zmm::Array<AddUpdateTable>> operations);
-    zmm::Ref<zmm::StringBuffer> sqlForInsert(zmm::Ref<CdsObject> obj, zmm::Ref<AddUpdateTable> addUpdateTable);
-    zmm::Ref<zmm::StringBuffer> sqlForUpdate(zmm::Ref<CdsObject> obj, zmm::Ref<AddUpdateTable> addUpdateTable);
-    zmm::Ref<zmm::StringBuffer> sqlForDelete(zmm::Ref<CdsObject> obj, zmm::Ref<AddUpdateTable> addUpdateTable);
+    std::shared_ptr<std::ostringstream> sqlForInsert(zmm::Ref<CdsObject> obj, zmm::Ref<AddUpdateTable> addUpdateTable);
+    std::shared_ptr<std::ostringstream> sqlForUpdate(zmm::Ref<CdsObject> obj, zmm::Ref<AddUpdateTable> addUpdateTable);
+    std::shared_ptr<std::ostringstream> sqlForDelete(zmm::Ref<CdsObject> obj, zmm::Ref<AddUpdateTable> addUpdateTable);
     
     /* helper for removeObject(s) */
-    void _removeObjects(zmm::Ref<zmm::StringBuffer> objectIDs, int offset);
+    void _removeObjects(std::string objectIDs, int offset);
 
     void addCSV(zmm::String csv, std::vector<int>& target);
     zmm::String toCSV(const std::vector<int>& input);
 
-    zmm::Ref<ChangedContainersStr> _recursiveRemove(zmm::Ref<zmm::StringBuffer> items, zmm::Ref<zmm::StringBuffer> containers, bool all);
+    zmm::Ref<ChangedContainersStr> _recursiveRemove(const std::string &items,
+            const std::string &containers, bool all);
     
     virtual zmm::Ref<ChangedContainers> _purgeEmptyContainers(zmm::Ref<ChangedContainersStr> changedContainersStr);
     
@@ -273,11 +285,11 @@ private:
     void addObjectToCache(zmm::Ref<CdsObject> object, bool dontLock = false);
     
     inline bool doInsertBuffering() { return insertBufferOn; }
-    void addToInsertBuffer(zmm::Ref<zmm::StringBuffer> query);
+    void addToInsertBuffer(const std::string &query);
     void flushInsertBuffer(bool dontLock = false);
     
     /* insert buffer functions to be overridden by implementing classes */
-    virtual void _addToInsertBuffer(zmm::Ref<zmm::StringBuffer> query) = 0;
+    virtual void _addToInsertBuffer(const std::string &query) = 0;
     virtual void _flushInsertBuffer() = 0;
     
     bool insertBufferOn;

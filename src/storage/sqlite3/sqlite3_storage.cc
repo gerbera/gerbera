@@ -78,7 +78,6 @@ Sqlite3Storage::Sqlite3Storage()
     table_quote_begin = '"';
     table_quote_end = '"';
     startupError = nullptr;
-    insertBuffer = nullptr;
     dirty = false;
 }
 
@@ -169,8 +168,8 @@ void Sqlite3Storage::init()
 
     _exec("PRAGMA locking_mode = EXCLUSIVE");
     int synchronousOption = ConfigManager::getInstance()->getIntOption(CFG_SERVER_STORAGE_SQLITE_SYNCHRONOUS);
-    Ref<StringBuffer> buf(new StringBuffer());
-    *buf << "PRAGMA synchronous = " << synchronousOption;
+    std::ostringstream buf;
+    buf << "PRAGMA synchronous = " << synchronousOption;
     SQLStorage::exec(buf);
 
     log_debug("db_version: %s\n", dbVersion.c_str());
@@ -355,31 +354,29 @@ void Sqlite3Storage::shutdownDriver()
 
 void Sqlite3Storage::storeInternalSetting(String key, String value)
 {
-    Ref<StringBuffer> q(new StringBuffer());
-    *q << "INSERT OR REPLACE INTO " << QTB << INTERNAL_SETTINGS_TABLE << QTE << " (" << QTB << "key" << QTE << ", " << QTB << "value" << QTE << ") "
+    std::ostringstream q;
+    q << "INSERT OR REPLACE INTO " << QTB << INTERNAL_SETTINGS_TABLE << QTE << " (" << QTB << "key" << QTE << ", " << QTB << "value" << QTE << ") "
                                                                                                                                                 "VALUES ("
        << quote(key) << ", " << quote(value) << ") ";
     SQLStorage::exec(q);
 }
 
-void Sqlite3Storage::_addToInsertBuffer(Ref<StringBuffer> query)
+void Sqlite3Storage::_addToInsertBuffer(const std::string &query)
 {
-    if (insertBuffer == nullptr) {
-        insertBuffer = Ref<StringBuffer>(new StringBuffer());
-        *insertBuffer << "BEGIN TRANSACTION;";
+    if (insertBuffer.str().length() == 0) {
+        insertBuffer << "BEGIN TRANSACTION;";
     }
 
-    *insertBuffer << query << ';';
+    insertBuffer << query << ';';
 }
 
 void Sqlite3Storage::_flushInsertBuffer()
 {
-    if (insertBuffer == nullptr)
+    if (insertBuffer.str().length() == 0)
         return;
-    *insertBuffer << "COMMIT;";
+    insertBuffer << "COMMIT;";
     SQLStorage::exec(insertBuffer);
-    insertBuffer->clear();
-    *insertBuffer << "BEGIN TRANSACTION;";
+    insertBuffer.str("");
 }
 
 /* SLTask */

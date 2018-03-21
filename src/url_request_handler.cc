@@ -129,7 +129,7 @@ void URLRequestHandler::get_info(IN const char *filename, OUT UpnpFileInfo *info
         }
 
         log_debug("Online content url: %s\n", url.c_str());
-        Ref<URL> u(new URL(1024));
+        Ref<URL> u(new URL());
         Ref<URL::Stat> st;
         try
         { 
@@ -243,7 +243,7 @@ Ref<IOHandler> URLRequestHandler::open(IN const char *filename,
     }
     else
     {
-        Ref<URL> u(new URL(1024));
+        Ref<URL> u(new URL());
         Ref<URL::Stat> st;
         try
         {

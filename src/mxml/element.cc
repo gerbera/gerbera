@@ -34,6 +34,8 @@
 #include "element.h"
 #include "tools.h"
 
+#include <sstream>
+
 using namespace zmm;
 using namespace mxml;
 
@@ -280,17 +282,17 @@ void Element::indent(int level)
 
 String Element::getText()
 {
-    Ref<StringBuffer> buf(new StringBuffer());
+    std::ostringstream buf;
     Ref<Text> text;
     int i = 0;
     bool someText = false;
     while ((text = RefCast(getChild(i++, mxml_node_text), Text)) != nullptr)
     {
         someText = true;
-        *buf << text->getText();
+        buf << text->getText();
     }
     if (someText)
-        return buf->toString();
+        return buf.str();
     else
         return nullptr;
 }
@@ -410,41 +412,25 @@ String Element::getChildText(String name)
     return el->getText();
 }
 
-void Element::print_internal(Ref<StringBuffer> buf, int indent)
-{
-    /*
-    static char *ind_str = "                                                               ";
-    static char *ind = ind_str + strlen(ind_str);
-    char *ptr = ind - indent * 2;
-    *buf << ptr;
-    */
-    
-    int i;
-    
-    *buf << "<" << name;
-    if (attributes != nullptr)
-    {
-        for(i = 0; i < attributes->size(); i++)
-        {
-            *buf << ' ';
+void Element::print_internal(std::ostringstream &buf, int indent) {
+    buf << "<" << name;
+    if (attributes != nullptr) {
+        for(int i = 0; i < attributes->size(); i++) {
+            buf << ' ';
             Ref<Attribute> attr = attributes->get(i);
-            *buf << attr->name << "=\"" << escape(attr->value) << '"';
+            buf << attr->name << "=\"" << escape(attr->value) << '"';
         }
     }
     
-    if (children != nullptr && children->size())
-    {
-        *buf << ">";
+    if (children != nullptr && children->size()) {
+        buf << ">";
         
-        for(i = 0; i < children->size(); i++)
-        {
+        for(int i = 0; i < children->size(); i++) {
             children->get(i)->print_internal(buf, indent + 1);
         }
         
-        *buf << "</" << name << ">";
-    }
-    else
-    {
-        *buf << "/>";
+        buf << "</" << name << ">";
+    } else {
+        buf << "/>";
     }
 }

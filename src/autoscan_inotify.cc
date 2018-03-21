@@ -96,8 +96,6 @@ void AutoscanInotify::threadProc()
 
     inotify_event* event;
 
-    Ref<StringBuffer> pathBuf(new StringBuffer());
-
     try {
         cm = ContentManager::getInstance();
         st = Storage::getInstance();
@@ -173,11 +171,11 @@ void AutoscanInotify::threadProc()
                     continue;
                 }
 
-                pathBuf->clear();
-                *pathBuf << wdObj->getPath();
+                std::ostringstream pathBuf;
+                pathBuf << wdObj->getPath();
                 if (!(mask & (IN_DELETE_SELF | IN_MOVE_SELF | IN_UNMOUNT)))
-                    *pathBuf << name;
-                String path = pathBuf->toString();
+                    pathBuf << name;
+                String path(pathBuf.str());
 
                 Ref<AutoscanDirectory> adir;
                 Ref<WatchAutoscan> watchAs = getAppropriateAutoscan(wdObj, path);
@@ -282,15 +280,15 @@ void AutoscanInotify::unmonitor(zmm::Ref<AutoscanDirectory> dir)
 int AutoscanInotify::watchPathForMoves(String path, int wd)
 {
     Ref<Array<StringBase>> pathAr = split_string(path, DIR_SEPARATOR);
-    Ref<StringBuffer> buf(new StringBuffer());
+    std::ostringstream buf;
     int parentWd = INOTIFY_ROOT;
     for (int i = -1; i < pathAr->size() - 1; i++) {
         if (i != 0)
-            *buf << DIR_SEPARATOR;
+            buf << DIR_SEPARATOR;
         if (i >= 0)
-            *buf << pathAr->get(i);
-        log_debug("adding move watch: %s\n", buf->c_str());
-        parentWd = addMoveWatch(buf->toString(), wd, parentWd);
+            buf << pathAr->get(i);
+        log_debug("adding move watch: %s\n", buf.str().c_str());
+        parentWd = addMoveWatch(buf.str(), wd, parentWd);
     }
     return parentWd;
 }
@@ -340,25 +338,24 @@ void AutoscanInotify::monitorNonexisting(String path, Ref<AutoscanDirectory> adi
 
 void AutoscanInotify::recheckNonexistingMonitor(int curWd, Ref<Array<StringBase>> pathAr, Ref<AutoscanDirectory> adir, String normalizedAutoscanPath)
 {
-    Ref<StringBuffer> buf(new StringBuffer());
     bool first = true;
     for (int i = pathAr->size(); i >= 0; i--) {
-        buf->clear();
+        std::ostringstream buf;
         if (i == 0)
-            *buf << DIR_SEPARATOR;
+            buf << DIR_SEPARATOR;
         else {
             for (int j = 0; j < i; j++) {
-                *buf << DIR_SEPARATOR << pathAr->get(j);
+                buf << DIR_SEPARATOR << pathAr->get(j);
                 //                log_debug("adding: %s\n", pathAr->get(j)->data);
             }
         }
-        bool pathExists = check_path(buf->toString(), true);
+        bool pathExists = check_path(buf.str(), true);
         //        log_debug("checking %s: %d\n", buf->c_str(), pathExists);
         if (pathExists) {
             if (curWd != -1)
                 removeNonexistingMonitor(curWd, watches->at(curWd), pathAr);
 
-            String path = buf->toString() + DIR_SEPARATOR;
+            String path = buf.str() + DIR_SEPARATOR;
             if (first) {
                 monitorDirectory(path, adir, normalizedAutoscanPath, true);
                 ContentManager::getInstance()->handlePersistentAutoscanRecreate(adir->getScanID(), adir->getScanMode());
@@ -763,8 +760,7 @@ void AutoscanInotify::removeDescendants(int wd)
         watch = wdWatches->get(i);
         if (watch->getType() == WatchType::Autoscan) {
             watchAs = RefCast(watch, WatchAutoscan);
-            auto descendants = watchAs->getDescendants();
-            for (int descWd : descendants) {
+            for (int descWd : watchAs->getDescendants()) {
                 inotify->removeWatch(descWd);
             }
         }
