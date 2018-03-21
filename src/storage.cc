@@ -48,16 +48,22 @@ Ref<Storage> Storage::getInstance()
             throw _Exception(_("singleton is currently inactive!"));
     if(instance == nullptr)
     {
-        AutoLock lock(mutex);
-        if (! instance->singletonActive)
-                throw _Exception(_("singleton is currently inactive!"));
-        if (instance == nullptr)
+        // extra scope added so that lock can be released prior to metadata upgrade
+        // when flushInsertBuffer() will try taking this lock
         {
-            Ref<Storage> tmpInstance = createInstance();
-            tmpInstance->init();
-            tmpInstance->registerSingleton();
-            instance = tmpInstance;
+            AutoLock lock(mutex);
+            if (! instance->singletonActive)
+                throw _Exception(_("singleton is currently inactive!"));
+            if (instance == nullptr)
+            {
+                Ref<Storage> tmpInstance = createInstance();
+                tmpInstance->init();
+                tmpInstance->registerSingleton();
+                instance = tmpInstance;
+            }
         }
+        if (instance != nullptr)
+            instance->doMetadataMigration();
     }
     return instance;
 }

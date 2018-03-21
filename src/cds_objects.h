@@ -118,7 +118,9 @@ protected:
     zmm::Ref<Dictionary> metadata;
     zmm::Ref<Dictionary> auxdata;
     zmm::Ref<zmm::Array<CdsResource> > resources;
-    
+
+    /// \ brief IDs of the metadata attributes in the metadata table
+    zmm::Ref<Dictionary> metadataIDs;
 
 public:
     /// \brief Constructor. Sets the default values.
@@ -240,7 +242,6 @@ public:
     inline void removeMetadata(zmm::String key)
     { metadata->remove(key); }
     
-
     /// \brief Query single auxdata value.
     inline zmm::String getAuxData(zmm::String key)
     { return auxdata->get(key); }
