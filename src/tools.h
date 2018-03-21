@@ -107,8 +107,6 @@ zmm::String find_in_path(zmm::String exec);
 /// Checks if str is nullptr or ""
 bool string_ok(zmm::String str);
 
-bool string_ok(zmm::Ref<zmm::StringBuffer> str);
-
 /// \brief Checks if the string contains any data.
 /// \param str String to be checked.
 /// 

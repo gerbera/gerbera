@@ -256,8 +256,6 @@ set(libgerberaFILES
         src/zmm/object.cc
         src/zmm/object.h
         src/zmm/ref.h
-        src/zmm/stringbuffer.cc
-        src/zmm/stringbuffer.h
         src/zmm/strings.cc
         src/zmm/strings.h
         src/zmm/zmm.h)

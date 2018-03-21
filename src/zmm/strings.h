@@ -77,9 +77,6 @@ protected:
 };
 
 
-class StringBuffer;
-
-
 class String
 {
 protected:
@@ -222,7 +219,6 @@ public:
     static String copy(const char *str);
 protected:
     String(int capacity);
-    friend class StringBuffer;
 };
 
 }; // namespace
@@ -241,6 +237,12 @@ struct hash<zmm::String>
         return std::hash<std::string>{}(s.c_str());
     }
 };
+}
+
+template <typename T>
+std::basic_ostream<T> &operator<<(std::basic_ostream<T> &oss, const zmm::String &s) {
+    oss << s.c_str();
+    return oss;
 }
 
 #endif // __STRINGS_H__

@@ -262,15 +262,6 @@ bool string_ok(String str)
     return true;
 }
 
-bool string_ok(Ref<StringBuffer> str)
-{
-    
-    if ((str == nullptr) || (str->length()<=0))
-        return false;
-    else
-        return true;
-}
-
 void string_ok_ex(String str)
 {
     if ((str == nullptr) || (str == ""))

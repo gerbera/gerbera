@@ -89,16 +89,12 @@ public:
     void dbReady();
     
     /* wrapper functions for select and exec */
-    zmm::Ref<SQLResult> select(zmm::Ref<zmm::StringBuffer> buf)
-        { return select(buf->c_str(), buf->length()); }
     zmm::Ref<SQLResult> select(const std::string &buf)
         { return select(buf.c_str(), buf.length()); }
     zmm::Ref<SQLResult> select(const std::ostringstream &buf) {
         auto s = buf.str();
         return select(s.c_str(), s.length());
     }
-    int exec(zmm::Ref<zmm::StringBuffer> buf, bool getLastInsertId = false)
-        { return exec(buf->c_str(), buf->length(), getLastInsertId); }
     int exec(const std::ostringstream &buf, bool getLastInsertId = false) {
         auto s = buf.str();
         return exec(s.c_str(), s.length(), getLastInsertId);
@@ -171,19 +167,6 @@ protected:
     char table_quote_end;
     
 private:
-    
-    class ChangedContainersStr : public Object
-    {
-    public:
-        ChangedContainersStr()
-        {
-            upnp = zmm::Ref<zmm::StringBuffer>(new zmm::StringBuffer());
-            ui = zmm::Ref<zmm::StringBuffer>(new zmm::StringBuffer());
-        }
-        zmm::Ref<zmm::StringBuffer> upnp;
-        zmm::Ref<zmm::StringBuffer> ui;
-    };
-    
     zmm::String sql_query;
     
     /* helper for createObjectFromRow() */
@@ -214,15 +197,15 @@ private:
     zmm::Ref<zmm::Array<AddUpdateTable> > _addUpdateObject(zmm::Ref<CdsObject> obj, bool isUpdate, int *changedContainer);
     
     /* helper for removeObject(s) */
-    void _removeObjects(std::string objectIDs, int offset);
+    void _removeObjects(const std::vector<int32_t> &objectIDs);
 
-    void addCSV(zmm::String csv, std::vector<int>& target);
     zmm::String toCSV(const std::vector<int>& input);
 
-    zmm::Ref<ChangedContainersStr> _recursiveRemove(const std::string &items,
-            const std::string &containers, bool all);
+    zmm::Ref<ChangedContainers> _recursiveRemove(
+        const std::vector<int32_t> &items,
+        const std::vector<int32_t> &containers, bool all);
     
-    virtual zmm::Ref<ChangedContainers> _purgeEmptyContainers(zmm::Ref<ChangedContainersStr> changedContainersStr);
+    virtual zmm::Ref<ChangedContainers> _purgeEmptyContainers(zmm::Ref<ChangedContainers> maybeEmpty);
     
     /* helpers for autoscan */
     int _getAutoscanObjectID(int autoscanID);

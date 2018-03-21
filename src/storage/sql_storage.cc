@@ -39,11 +39,12 @@
 #include <algorithm>
 #include <sstream>
 #include <string>
+#include <vector>
 
 using namespace zmm;
 using namespace std;
 
-#define MAX_REMOVE_SIZE 10000
+#define MAX_REMOVE_SIZE 1000
 #define MAX_REMOVE_RECURSION 500
 
 #define SQL_NULL "NULL"
@@ -1383,20 +1384,21 @@ Ref<Storage::ChangedContainers> SQLStorage::removeObjects(shared_ptr<unordered_s
     if (res == nullptr)
         throw _Exception(_("sql error"));
 
-    std::ostringstream items;
-    std::ostringstream containers;
+    std::vector<int32_t> items;
+    std::vector<int32_t> containers;
     Ref<SQLRow> row;
     while ((row = res->nextRow()) != nullptr) {
         int objectType = row->col(1).toInt();
         if (IS_CDS_CONTAINER(objectType))
-            containers << ',' << row->col_c_str(0);
+            containers.push_back(row->col(0).toLong());
         else
-            items << ',' << row->col_c_str(0);
+            items.push_back(row->col(0).toLong());
     }
-    return _purgeEmptyContainers(_recursiveRemove(items.str(), containers.str(), all));
+    return _purgeEmptyContainers(_recursiveRemove(items, containers, all));
 }
 
-void SQLStorage::_removeObjects(std::string objectIDs, int offset) {
+void SQLStorage::_removeObjects(const std::vector<int32_t> &objectIDs) {
+    auto objectIdsStr = join(objectIDs, ',');
     std::ostringstream sel;
     sel << "SELECT " << TQD('a', "id") << ',' << TQD('a', "persistent")
         << ',' << TQD('o', "location")
@@ -1405,9 +1407,8 @@ void SQLStorage::_removeObjects(std::string objectIDs, int offset) {
         << TQ(CDS_OBJECT_TABLE) << " o"
                                   " ON "
         << TQD('o', "id") << '=' << TQD('a', "obj_id")
-        << " WHERE " << TQD('o', "id") << " IN ("
-        << objectIDs.substr(offset)
-        << ')';
+        << " WHERE " << TQD('o', "id")
+        << " IN (" << objectIdsStr << ')';
 
     log_debug("%s\n", sel.str().c_str());
 
@@ -1445,16 +1446,14 @@ void SQLStorage::_removeObjects(std::string objectIDs, int offset) {
 
     std::ostringstream qActiveItem;
     qActiveItem << "DELETE FROM " << TQ(CDS_ACTIVE_ITEM_TABLE)
-                << " WHERE " << TQ("id") << " IN ("
-                << objectIDs.substr(offset)
-                << ')';
+                << " WHERE " << TQ("id")
+                << " IN (" << objectIdsStr << ')';
     exec(qActiveItem);
 
     std::ostringstream qObject;
     qObject << "DELETE FROM " << TQ(CDS_OBJECT_TABLE)
-            << " WHERE " << TQ("id") << " IN ("
-            << objectIDs.substr(offset)
-            << ')';
+            << " WHERE " << TQ("id")
+            << " IN (" << objectIdsStr << ')';
     exec(qObject);
 }
 
@@ -1486,166 +1485,134 @@ Ref<Storage::ChangedContainers> SQLStorage::removeObject(int objectID, bool all)
     }
     if (IS_FORBIDDEN_CDS_ID(objectID))
         throw _Exception(_("tried to delete a forbidden ID (") + objectID + ")!");
-    std::ostringstream idsBuf;
-    idsBuf << ',' << objectID;
-    Ref<ChangedContainersStr> changedContainers = nullptr;
-    if (isContainer)
-        changedContainers = _recursiveRemove(std::string(), idsBuf.str(), all);
-    else
-        changedContainers = _recursiveRemove(idsBuf.str(), std::string(), all);
+    std::vector<int32_t> itemIds;
+    std::vector<int32_t> containerIds;
+    if (isContainer) {
+        containerIds.push_back(objectID);
+    } else {
+        itemIds.push_back(objectID);
+    }
+    auto changedContainers = _recursiveRemove(itemIds, containerIds, all);
     return _purgeEmptyContainers(changedContainers);
 }
 
-Ref<SQLStorage::ChangedContainersStr> SQLStorage::_recursiveRemove(
-    const std::string &items, const std::string &containers, bool all)
+Ref<Storage::ChangedContainers> SQLStorage::_recursiveRemove(
+    const std::vector<int32_t> &items, const std::vector<int32_t> &containers,
+    bool all)
 {
     log_debug("start\n");
-    Ref<StringBuffer> recurseItems(new StringBuffer());
-    *recurseItems << "SELECT DISTINCT " << TQ("id") << ',' << TQ("parent_id")
-                  << " FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE " << TQ("ref_id") << " IN (";
-    int recurseItemsLen = recurseItems->length();
+    std::ostringstream itemsSql;
+    itemsSql << "SELECT DISTINCT " << TQ("id") << ',' << TQ("parent_id")
+                 << " FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE " << TQ("ref_id") << " IN (";
 
-    Ref<StringBuffer> recurseContainers(new StringBuffer());
-    *recurseContainers << "SELECT DISTINCT " << TQ("id")
-                       << ',' << TQ("object_type");
+    std::ostringstream containersSql;
+    containersSql << "SELECT DISTINCT " << TQ("id")
+                      << ',' << TQ("object_type");
     if (all)
-        *recurseContainers << ',' << TQ("ref_id");
-    *recurseContainers << " FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE " << TQ("parent_id") << " IN (";
-    int recurseContainersLen = recurseContainers->length();
+        containersSql << ',' << TQ("ref_id");
+    containersSql << " FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE " << TQ("parent_id") << " IN (";
 
-    Ref<StringBuffer> removeAddParents(new StringBuffer());
-    *removeAddParents << "SELECT DISTINCT " << TQ("parent_id")
+    std::ostringstream parentsSql;
+    parentsSql << "SELECT DISTINCT " << TQ("parent_id")
                       << " FROM " << TQ(CDS_OBJECT_TABLE)
                       << " WHERE " << TQ("id") << " IN (";
-    int removeAddParentsLen = removeAddParents->length();
 
-    auto remove = make_unique<std::ostringstream>();
-    Ref<ChangedContainersStr> changedContainers(new ChangedContainersStr());
+    Ref<ChangedContainers> changedContainers(new ChangedContainers());
 
     Ref<SQLResult> res;
     Ref<SQLRow> row;
 
-    if (items.length() > 1) {
-        *recurseItems << items;
-        *removeAddParents << items;
-    }
+    std::vector<int32_t> itemIds(items);
+    std::vector<int32_t> containerIds(containers);
+    std::vector<int32_t> parentIds(items);
+    std::vector<int32_t> removeIds(containers);
 
-    if (containers.length() > 1) {
-        *recurseContainers << containers;
-
-        *remove << containers;
-        *removeAddParents << containers;
-        removeAddParents->setCharAt(removeAddParentsLen, ' ');
-        *removeAddParents << ')';
-        res = select(removeAddParents);
+    if (!containers.empty()) {
+        parentIds.insert(parentIds.end(), containers.begin(), containers.end());
+        std::ostringstream sql;
+        sql << parentsSql.str() << join(parentIds, ',') << ')';
+        res = select(sql);
         if (res == nullptr)
             throw _StorageException(nullptr, _("sql error"));
-        removeAddParents->setLength(removeAddParentsLen);
-        while ((row = res->nextRow()) != nullptr)
-            *changedContainers->ui << ',' << row->col_c_str(0);
+        parentIds.clear();
+        while ((row = res->nextRow()) != nullptr) {
+            changedContainers->ui.push_back(row->col(0).toInt());
+        }
     }
 
     int count = 0;
-    while (recurseItems->length() > recurseItemsLen
-        || removeAddParents->length() > removeAddParentsLen
-        || recurseContainers->length() > recurseContainersLen) {
-        if (removeAddParents->length() > removeAddParentsLen) {
+    while (!itemIds.empty() || !parentIds.empty() || !containerIds.empty()) {
+        if (!parentIds.empty()) {
             // add ids to remove
-            *remove << removeAddParents->c_str(removeAddParentsLen);
-            // get rid of first ','
-            removeAddParents->setCharAt(removeAddParentsLen, ' ');
-            *removeAddParents << ')';
-            res = select(removeAddParents);
+            removeIds.insert(removeIds.end(), parentIds.begin(), parentIds.end());
+            std::ostringstream sql;
+            sql << parentsSql.str() << join(parentIds, ',') << ')';
+            res = select(sql);
             if (res == nullptr)
-                throw _StorageException(nullptr, _("sql error"));
-            // reset length
-            removeAddParents->setLength(removeAddParentsLen);
-            while ((row = res->nextRow()) != nullptr)
-                *changedContainers->upnp << ',' << row->col_c_str(0);
-        }
-
-        if (recurseItems->length() > recurseItemsLen) {
-            recurseItems->setCharAt(recurseItemsLen, ' ');
-            *recurseItems << ')';
-            res = select(recurseItems);
-            if (res == nullptr)
-                throw _StorageException(nullptr, _("sql error"));
-            recurseItems->setLength(recurseItemsLen);
+                throw _StorageException(nullptr, std::string("sql error: ") + sql.str());
+            parentIds.clear();
             while ((row = res->nextRow()) != nullptr) {
-                *remove << ',' << row->col_c_str(0);
-                *changedContainers->upnp << ',' << row->col_c_str(1);
-                //log_debug("refs-add id: %s; parent_id: %s\n", id.c_str(), parentId.c_str());
+                changedContainers->upnp.push_back(row->col(0).toInt());
             }
         }
 
-        if (recurseContainers->length() > recurseContainersLen) {
-            recurseContainers->setCharAt(recurseContainersLen, ' ');
-            *recurseContainers << ')';
-            res = select(recurseContainers);
+        if (!itemIds.empty()) {
+            std::ostringstream sql;
+            sql << itemsSql.str() << join(itemIds, ',') << ')';
+            res = select(sql);
             if (res == nullptr)
-                throw _StorageException(nullptr, _("sql error"));
-            recurseContainers->setLength(recurseContainersLen);
+                throw _StorageException(nullptr, std::string("sql error: ") + sql.str());
+            itemIds.clear();
             while ((row = res->nextRow()) != nullptr) {
-                //containers->append(row->col(1).toInt());
+                removeIds.push_back(row->col(0).toInt());
+                changedContainers->upnp.push_back(row->col(1).toInt());
+            }
+        }
 
+        if (!containerIds.empty()) {
+            std::ostringstream sql;
+            sql << containersSql.str() << join(containerIds, ',') << ')';
+            res = select(sql);
+            if (res == nullptr)
+                throw _StorageException(nullptr, std::string("sql error: ") + sql.str());
+            containerIds.clear();
+            while ((row = res->nextRow()) != nullptr) {
                 int objectType = row->col(1).toInt();
                 if (IS_CDS_CONTAINER(objectType)) {
-                    *recurseContainers << ',' << row->col_c_str(0);
-                    *remove << ',' << row->col_c_str(0);
+                    containerIds.push_back(row->col(0).toInt());
+                    removeIds.push_back(row->col(0).toInt());
                 } else {
                     if (all) {
                         String refId = row->col(2);
                         if (string_ok(refId)) {
-                            *removeAddParents << ',' << refId;
-                            *recurseItems << ',' << refId;
-                            //*remove << ',' << refId;
+                            parentIds.push_back(row->col(2).toInt());
+                            itemIds.push_back(row->col(2).toInt());
+                            removeIds.push_back(row->col(2).toInt());
                         } else {
-                            *remove << ',' << row->col_c_str(0);
-                            *recurseItems << ',' << row->col_c_str(0);
+                            removeIds.push_back(row->col(0).toInt());
+                            itemIds.push_back(row->col(0).toInt());
                         }
                     } else {
-                        *remove << ',' << row->col_c_str(0);
-                        *recurseItems << ',' << row->col_c_str(0);
+                        removeIds.push_back(row->col(0).toInt());
+                        itemIds.push_back(row->col(0).toInt());
                     }
                 }
-                //log_debug("id: %s; parent_id: %s\n", id.c_str(), parentId.c_str());
             }
         }
 
-        if (remove->str().length() > MAX_REMOVE_SIZE) {
-            _removeObjects(remove->str(), 1);
-            remove.reset(new std::ostringstream);
+        if (removeIds.size() > MAX_REMOVE_SIZE) {
+            _removeObjects(removeIds);
+            removeIds.clear();
         }
 
         if (count++ > MAX_REMOVE_RECURSION)
             throw _Exception(_("there seems to be an infinite loop..."));
     }
 
-    if (!remove->str().empty())
-        _removeObjects(remove->str(), 1);
+    if (!removeIds.empty())
+        _removeObjects(removeIds);
     log_debug("end\n");
     return changedContainers;
-}
-
-void SQLStorage::addCSV(String csv, std::vector<int>& target)
-{
-    const char sep = ',';
-    const char *data = csv.c_str();
-    const char *dataEnd = data + csv.length();
-    while (data < dataEnd)
-    {
-        char *endptr;
-        int val = (int)strtol(data, &endptr, 10);
-        if (endptr == data)
-            throw _Exception(_("illegal csv given to IntArray"));
-        target.push_back(val);
-        if (endptr >= dataEnd)
-            break;
-        if (*endptr == sep)
-            data = endptr + 1;
-        else
-            throw _Exception(_("illegal csv given to IntArray"));
-    }
 }
 
 zmm::String SQLStorage::toCSV(const std::vector<int>& input)
@@ -1653,15 +1620,17 @@ zmm::String SQLStorage::toCSV(const std::vector<int>& input)
     return join(input, ",");
 }
 
-Ref<Storage::ChangedContainers> SQLStorage::_purgeEmptyContainers(Ref<ChangedContainersStr> changedContainersStr)
+Ref<Storage::ChangedContainers> SQLStorage::_purgeEmptyContainers(Ref<ChangedContainers> maybeEmpty)
 {
-    log_debug("start upnp: %s; ui: %s\n", changedContainersStr->upnp->c_str(), changedContainersStr->ui->c_str());
+    log_debug("start upnp: %s; ui: %s\n",
+            join(maybeEmpty->upnp, ',').c_str(),
+            join(maybeEmpty->ui, ',').c_str());
     Ref<ChangedContainers> changedContainers(new ChangedContainers());
-    if (!string_ok(changedContainersStr->upnp) && !string_ok(changedContainersStr->ui))
+    if (maybeEmpty->upnp.empty() && maybeEmpty->ui.empty())
         return changedContainers;
 
-    Ref<StringBuffer> bufSelUI(new StringBuffer());
-    *bufSelUI << "SELECT " << TQD('a', "id")
+    std::ostringstream selectSql;
+    selectSql << "SELECT " << TQD('a', "id")
               << ", COUNT(" << TQD('b', "parent_id")
               << ")," << TQD('a', "parent_id") << ',' << TQD('a', "flags")
               << " FROM " << TQ(CDS_OBJECT_TABLE) << ' ' << TQ('a')
@@ -1669,31 +1638,34 @@ Ref<Storage::ChangedContainers> SQLStorage::_purgeEmptyContainers(Ref<ChangedCon
               << " ON " << TQD('a', "id") << '=' << TQD('b', "parent_id")
               << " WHERE " << TQD('a', "object_type") << '=' << quote(1)
               << " AND " << TQD('a', "id") << " IN ("; //(a.flags & " << OBJECT_FLAG_PERSISTENT_CONTAINER << ") = 0 AND
-    int bufSelLen = bufSelUI->length();
-    String strSel2 = _(") GROUP BY a.id"); // HAVING COUNT(b.parent_id)=0");
+    std::string strSel2(") GROUP BY a.id"); // HAVING COUNT(b.parent_id)=0");
 
-    Ref<StringBuffer> bufSelUpnp(new StringBuffer());
-    *bufSelUpnp << bufSelUI;
+    std::ostringstream bufSelUpnp;
+    bufSelUpnp << selectSql.str();
 
-    auto bufDel = make_unique<std::ostringstream>();
+    std::vector<int32_t> del;
 
     Ref<SQLResult> res;
     Ref<SQLRow> row;
+    std::vector<int32_t> selUi;
+    std::vector<int32_t> selUpnp;
 
-    *bufSelUI << changedContainersStr->ui;
-    *bufSelUpnp << changedContainersStr->upnp;
+    auto &uiV = maybeEmpty->ui;
+    selUi.insert(selUi.end(), uiV.begin(), uiV.end());
+    auto &upnpV = maybeEmpty->upnp;
+    selUpnp.insert(selUpnp.end(), upnpV.begin(), upnpV.end());
 
     bool again;
     int count = 0;
     do {
         again = false;
 
-        if (bufSelUpnp->length() > bufSelLen) {
-            bufSelUpnp->setCharAt(bufSelLen, ' ');
-            *bufSelUpnp << strSel2;
-            log_debug("upnp-sql: %s\n", bufSelUpnp->c_str());
-            res = select(bufSelUpnp);
-            bufSelUpnp->setLength(bufSelLen);
+        if (!selUpnp.empty()) {
+            std::ostringstream sql;
+            sql << selectSql.str() << join(selUpnp, ',') << strSel2;
+            log_debug("upnp-sql: %s\n", sql.str().c_str());
+            res = select(sql.str());
+            selUpnp.clear();
             if (res == nullptr)
                 throw _Exception(_("db error"));
             while ((row = res->nextRow()) != nullptr) {
@@ -1701,20 +1673,20 @@ Ref<Storage::ChangedContainers> SQLStorage::_purgeEmptyContainers(Ref<ChangedCon
                 if (flags & OBJECT_FLAG_PERSISTENT_CONTAINER)
                     changedContainers->upnp.push_back(row->col(0).toInt());
                 else if (row->col(1) == "0") {
-                    *bufDel << ',' << row->col_c_str(0);
-                    *bufSelUI << ',' << row->col_c_str(2);
+                    del.push_back(row->col(0).toInt());
+                    selUi.push_back(row->col(2).toInt());
                 } else {
-                    *bufSelUpnp << ',' << row->col_c_str(0);
+                    selUpnp.push_back(row->col(0).toInt());
                 }
             }
         }
 
-        if (bufSelUI->length() > bufSelLen) {
-            bufSelUI->setCharAt(bufSelLen, ' ');
-            *bufSelUI << strSel2;
-            log_debug("ui-sql: %s\n", bufSelUI->c_str());
-            res = select(bufSelUI);
-            bufSelUI->setLength(bufSelLen);
+        if (!selUi.empty()) {
+            std::ostringstream sql;
+            sql << selectSql.str() << join(selUi, ',') << strSel2;
+            log_debug("ui-sql: %s\n", sql.str().c_str());
+            res = select(sql.str());
+            selUi.clear();
             if (res == nullptr)
                 throw _Exception(_("db error"));
             while ((row = res->nextRow()) != nullptr) {
@@ -1723,36 +1695,38 @@ Ref<Storage::ChangedContainers> SQLStorage::_purgeEmptyContainers(Ref<ChangedCon
                     changedContainers->ui.push_back(row->col(0).toInt());
                     changedContainers->upnp.push_back(row->col(0).toInt());
                 } else if (row->col(1) == "0") {
-                    *bufDel << ',' << row->col_c_str(0);
-                    *bufSelUI << ',' << row->col_c_str(2);
+                    del.push_back(row->col(0).toInt());
+                    selUi.push_back(row->col(2).toInt());
                 } else {
-                    *bufSelUI << ',' << row->col_c_str(0);
+                    selUi.push_back(row->col(0).toInt());
                 }
             }
         }
 
-        //log_debug("selecting: %s; removing: %s\n", bufSel->c_str(), bufDel->c_str());
-        if (!bufDel->str().empty()) {
-            _removeObjects(bufDel->str(), 1);
-            bufDel.reset(new std::ostringstream);
-            if (bufSelUI->length() > bufSelLen || bufSelUpnp->length() > bufSelLen)
+        //log_debug("selecting: %s; removing: %s\n", bufSel->c_str(), join(del, ',').c_str());
+        if (!del.empty()) {
+            _removeObjects(del);
+            del.clear();
+            if (!selUi.empty() || !selUpnp.empty())
                 again = true;
         }
         if (count++ >= MAX_REMOVE_RECURSION)
             throw _Exception(_("there seems to be an infinite loop..."));
     } while (again);
 
-    if (bufSelUI->length() > bufSelLen) {
-        addCSV(bufSelUI->toString(bufSelLen + 1), changedContainers->ui);
-        addCSV(bufSelUI->toString(bufSelLen + 1), changedContainers->upnp);
+    auto &changedUi = changedContainers->ui;
+    auto &changedUpnp = changedContainers->upnp;
+    if (!selUi.empty()) {
+        changedUi.insert(changedUi.end(), selUi.begin(), selUi.end());
+        changedUpnp.insert(changedUpnp.end(), selUi.begin(), selUi.end());
     }
-    if (bufSelUpnp->length() > bufSelLen) {
-        addCSV(bufSelUpnp->toString(bufSelLen + 1), changedContainers->upnp);
+    if (!selUpnp.empty()) {
+        changedUpnp.insert(changedUpnp.end(), selUpnp.begin(), selUpnp.end());
     }
-    // log_debug("end; changedContainers (upnp): %s\n", changedContainers.upnp->toCSV().c_str());
-    // log_debug("end; changedContainers (ui): %s\n", changedContainers.ui->toCSV().c_str());
-    log_debug("end; changedContainers (upnp): %d\n", changedContainers->upnp.size());
-    log_debug("end; changedContainers (ui): %d\n", changedContainers->ui.size());
+    // log_debug("end; changedContainers (upnp): %s\n", join(changedUpnp, ',').c_str());
+    // log_debug("end; changedContainers (ui): %s\n", join(changedUi, ',').c_str());
+    log_debug("end; changedContainers (upnp): %d\n", changedUpnp.size());
+    log_debug("end; changedContainers (ui): %d\n", changedUi.size());
 
     /* clear cache (for now) */
     if (cacheOn())
