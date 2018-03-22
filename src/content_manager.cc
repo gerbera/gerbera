@@ -1840,7 +1840,7 @@ void CMAddFileTask::run()
 {
     log_debug("running add file task with path %s recursive: %d\n", path.c_str(), recursive);
     Ref<ContentManager> cm = ContentManager::getInstance();
-    cm->_addFile(path, nullptr, recursive, hidden, Ref<GenericTask>(this));
+    cm->_addFile(path, rootpath, recursive, hidden, Ref<GenericTask>(this));
 }
 
 CMRemoveObjectTask::CMRemoveObjectTask(int objectID, bool all)
