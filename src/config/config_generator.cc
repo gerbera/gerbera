@@ -60,8 +60,7 @@ std::string ConfigGenerator::generate(std::string userHome, std::string configDi
   config->appendElementChild(generateTranscoding());
 
   config->indent();
-  std::string configAsString(config->print().c_str());
-  return configAsString;
+  return std::string(config->print().c_str());
 }
 
 Ref<Element> ConfigGenerator::generateServer(std::string userHome, std::string configDir, std::string prefixDir) {

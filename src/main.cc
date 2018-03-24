@@ -297,7 +297,7 @@ For more information visit " DESC_MANUFACTURER_URL "\n\n");
           magicStr = std::string(magic.c_str());
         }
         std::string config = configGenerator.generate(std::string(home.c_str()), std::string(confdir.c_str()), std::string(prefix.c_str()), magicStr);
-        printf(config.c_str());
+        printf("%s", config.c_str());
         exit(EXIT_SUCCESS);
     }
 
