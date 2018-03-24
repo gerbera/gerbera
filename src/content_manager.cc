@@ -1318,8 +1318,6 @@ int ContentManager::addFile(zmm::String path, bool recursive, bool async,
 int ContentManager::addFile(zmm::String path, zmm::String rootpath, bool recursive, bool async,
     bool hidden, bool lowPriority, bool cancellable)
 {
-    //if (check_path(path, true))
-    //    rootpath = path;
     return addFileInternal(path, rootpath, recursive, async, hidden, lowPriority, 0, cancellable);
 }
 
