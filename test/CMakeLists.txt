@@ -8,3 +8,4 @@ get_target_property(GERBERA_INTERFACE_LIBRARIES gerbera INTERFACE_LINK_LIBRARIES
 ## Add tests below
 add_subdirectory(test_dictionary)
 add_subdirectory(test_runtime)
+add_subdirectory(test_searchhandler)

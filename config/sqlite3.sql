@@ -32,7 +32,7 @@ CREATE TABLE "mt_internal_setting" (
   "key" varchar(40) primary key NOT NULL,
   "value" varchar(255) NOT NULL
 );
-INSERT INTO "mt_internal_setting" VALUES('db_version', '3');
+INSERT INTO "mt_internal_setting" VALUES('db_version', '4');
 CREATE TABLE "mt_autoscan" (
   "id" integer primary key,
   "obj_id" integer default NULL,
@@ -48,6 +48,13 @@ CREATE TABLE "mt_autoscan" (
   "touched" tinyint unsigned NOT NULL default '1',
   CONSTRAINT "mt_autoscan_id" FOREIGN KEY ("obj_id") REFERENCES "mt_cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
+CREATE TABLE "mt_metadata" (
+  "id" integer primary key,
+  "item_id" integer NOT NULL,
+  "property_name" varchar(255) NOT NULL,
+  "property_value" text NOT NULL,
+  CONSTRAINT "mt_metadata_idfk1" FOREIGN KEY ("item_id") REFERENCES "mt_cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
 CREATE INDEX mt_cds_object_ref_id ON mt_cds_object(ref_id);
 CREATE INDEX mt_cds_object_parent_id ON mt_cds_object(parent_id,object_type,dc_title);
 CREATE INDEX mt_object_type ON mt_cds_object(object_type);
@@ -56,4 +63,5 @@ CREATE INDEX mt_track_number ON mt_cds_object(track_number);
 CREATE INDEX mt_internal_setting_key ON mt_internal_setting(key);
 CREATE UNIQUE INDEX mt_autoscan_obj_id ON mt_autoscan(obj_id);
 CREATE INDEX mt_cds_object_service_id ON mt_cds_object(service_id);
+CREATE INDEX mt_metadata_item_id ON mt_metadata(item_id);
 COMMIT;

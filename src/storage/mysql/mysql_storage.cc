@@ -61,6 +61,18 @@
 #define MYSQL_UPDATE_3_4_2 "ALTER TABLE `mt_cds_object` ADD KEY `cds_object_service_id` (`service_id`)"
 #define MYSQL_UPDATE_3_4_3 "UPDATE `mt_internal_setting` SET `value`='4' WHERE `key`='db_version' AND `value`='3'"
 
+#define MYSQL_UPDATE_4_5_1 "CREATE TABLE `mt_metadata` ( \
+  `id` int(11) NOT NULL auto_increment, \
+  `item_id` int(11) NOT NULL, \
+  `property_name` varchar(255) NOT NULL, \
+  `property_value` text NOT NULL, \
+  PRIMARY KEY `id` (`id`), \
+  KEY `metadata_item_id` (`item_id`), \
+  CONSTRAINT `mt_metadata_idfk1` FOREIGN KEY (`item_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE \
+) ENGINE=MyISAM CHARSET=utf8"
+#define MYSQL_UPDATE_4_5_2 "UPDATE `mt_internal_setting` SET `value`='5' WHERE `key`='db_version' AND `value`='4'"
+  
+
 using namespace zmm;
 using namespace mxml;
 using namespace std;
@@ -249,9 +261,17 @@ void MysqlStorage::init()
         dbVersion = _("4");
     }
 
+    if (dbVersion == "4") {
+        log_info("Doing an automatic database upgrade from database version 4 to version 5...\n");
+        _exec(MYSQL_UPDATE_4_5_1);
+        _exec(MYSQL_UPDATE_4_5_2);
+        log_info("database upgrade successful.\n");
+        dbVersion = _("5");
+    }
+
     /* --- --- ---*/
 
-    if (!string_ok(dbVersion) || dbVersion != "4")
+    if (!string_ok(dbVersion) || dbVersion != "5")
         throw _Exception(_("The database seems to be from a newer version (database version ") + dbVersion + ")!");
 
     lock.unlock();

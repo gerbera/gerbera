@@ -49,7 +49,7 @@ CREATE TABLE `mt_internal_setting` (
   `value` varchar(255) NOT NULL,
   PRIMARY KEY  (`key`)
 ) ENGINE=MyISAM CHARSET=utf8;
-INSERT INTO `mt_internal_setting` VALUES ('db_version','4');
+INSERT INTO `mt_internal_setting` VALUES ('db_version','5');
 CREATE TABLE `mt_autoscan` (
   `id` int(11) NOT NULL auto_increment,
   `obj_id` int(11) default NULL,
@@ -66,6 +66,15 @@ CREATE TABLE `mt_autoscan` (
   PRIMARY KEY `id` (`id`),
   UNIQUE KEY `mt_autoscan_obj_id` (`obj_id`),
   CONSTRAINT `mt_autoscan_ibfk_1` FOREIGN KEY (`obj_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=MyISAM CHARSET=utf8;
+CREATE TABLE `mt_metadata` (
+  `id` int(11) NOT NULL auto_increment,
+  `item_id` int(11) NOT NULL,
+  `property_name` varchar(255) NOT NULL,
+  `property_value` text NOT NULL,
+  PRIMARY KEY `id` (`id`),
+  KEY `metadata_item_id` (`item_id`),
+  CONSTRAINT `mt_metadata_idfk1` FOREIGN KEY (`item_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=MyISAM CHARSET=utf8;
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;

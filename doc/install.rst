@@ -32,5 +32,5 @@ Gerbera is included in `Testing <https://packages.debian.org/buster/gerbera>`_ a
 .. index:: Optware
 
 **Entware (Optware)** -
-Gerbera is available in `Entware-ng <https://github.com/Entware-ng/rtndev/tree/master/gerbera>`_ for your embedded device/router!
+Gerbera is available in `Entware <https://github.com/Entware/rtndev/tree/master/gerbera>`_ for your embedded device/router!
 
