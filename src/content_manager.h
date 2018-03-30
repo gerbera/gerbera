@@ -145,7 +145,7 @@ public:
 class DirCache : public zmm::Object
 {
 protected:
-    zmm::Ref<zmm::StringBuffer> buffer;
+    std;:ostringstream buffer;
     int size; // number of entries
     int capacity; // capacity of entries
     zmm::Ref<zmm::Array<DirCacheEntry> > entries;

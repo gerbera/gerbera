@@ -738,18 +738,16 @@ zmm::Ref<zmm::Array<CdsObject>> SQLStorage::search(zmm::Ref<SearchParam> param, 
     if (!searchSQL->length())
         throw _Exception(_("failed to generate SQL for search"));
 
-    std::stringstream countSQL;
+    std::ostringstream countSQL;
     countSQL << "select count(*) " << *searchSQL << ';';
     zmm::Ref<SQLResult> sqlResult;
-    zmm::Ref<zmm::StringBuffer> buf = Ref<zmm::StringBuffer>(new zmm::StringBuffer(countSQL.str().length()));
-    *buf << countSQL.str().c_str();
-    sqlResult = select(buf);
+    sqlResult = select(countSQL);
     zmm::Ref<SQLRow> countRow = sqlResult->nextRow();
     if (countRow != nullptr) {
         *numMatches = countRow->col(0).toInt();
     }
     
-    std::stringstream retrievalSQL;
+    std::ostringstream retrievalSQL;
     retrievalSQL << SELECT_DATA_FOR_SEARCH << " " << *searchSQL;
     int startingIndex = param->getStartingIndex(), requestedCount = param->getRequestedCount();
     if (startingIndex > 0 || requestedCount > 0) {
@@ -760,9 +758,7 @@ zmm::Ref<zmm::Array<CdsObject>> SQLStorage::search(zmm::Ref<SearchParam> param, 
     retrievalSQL << ';';
 
     log_debug("Search resolves to SQL [%s]\n", retrievalSQL.str().c_str());
-    buf = Ref<zmm::StringBuffer>(new zmm::StringBuffer(retrievalSQL.str().length()));
-    *buf << retrievalSQL.str().c_str();
-    sqlResult = select(buf);
+    sqlResult = select(retrievalSQL);
 
     zmm::Ref<zmm::Array<CdsObject>> arr(new Array<CdsObject>()); 
     zmm::Ref<SQLRow> sqlRow;
@@ -997,8 +993,8 @@ int SQLStorage::createContainer(int parentID, String name, String path, bool isV
         for (int i = 0; i < metadataElements->size(); i++) {
             Ref<DictionaryElement> property = metadataElements->get(i);
             int newMetadataID = getNextMetadataID();
-            Ref<StringBuffer> ib(new StringBuffer());
-            *ib << "INSERT INTO"
+            std::ostringstream ib;
+            ib << "INSERT INTO"
                 << TQ(METADATA_TABLE)
                 << " ("
                 << TQ("id") << ','
@@ -1293,8 +1289,8 @@ Ref<CdsObject> SQLStorage::createObjectFromSearchRow(Ref<SQLRow> row)
 
 Ref<Dictionary> SQLStorage::retrieveMetadataForObject(int objectId)
 {
-    Ref<StringBuffer> qb(new StringBuffer());
-    *qb << SELECT_METADATA
+    std::ostringstream qb;
+    qb << SELECT_METADATA
         << " FROM " << TQ(METADATA_TABLE)
         << " WHERE " << TQ("item_id")
         << " = " << objectId;
@@ -1441,30 +1437,30 @@ String SQLStorage::findFolderImage(int id, String trackArtBase)
 /*
 Ref<Array<CdsObject> > SQLStorage::selectObjects(Ref<SelectParam> param)
 {
-    Ref<StringBuffer> q(new StringBuffer());
-    *q << SQL_QUERY << " WHERE ";
+    std::ostringstream q;
+    q << SQL_QUERY << " WHERE ";
     switch (param->flags)
     {
         case FILTER_PARENT_ID:
-            *q << "f.parent_id = " << param->iArg1;
+            q << "f.parent_id = " << param->iArg1;
             break;
         case FILTER_REF_ID:
-            *q << "f.ref_id = " << param->iArg1;
+            q << "f.ref_id = " << param->iArg1;
             break;
         case FILTER_PARENT_ID_ITEMS:
-            *q << "f.parent_id = " << param->iArg1 << " AND "
+            q << "f.parent_id = " << param->iArg1 << " AND "
                << "f.object_type & " << OBJECT_TYPE_ITEM << " <> 0";
             break;
         case FILTER_PARENT_ID_CONTAINERS:
-            *q << "f.parent_id = " << param->iArg1 << " AND "
+            q << "f.parent_id = " << param->iArg1 << " AND "
                << "f.object_type & " << OBJECT_TYPE_CONTAINER << " <> 0";
             break;
         default:
             throw _StorageException(_("selectObjects: invalid operation: ") +
                                    param->flags);
     }
-    *q << " ORDER BY f.object_type, f.dc_title";
-    Ref<SQLResult> res = select(q->toString());
+    q << " ORDER BY f.object_type, f.dc_title";
+    Ref<SQLResult> res = select(q);
     Ref<SQLRow> row;
     Ref<Array<CdsObject> > arr(new Array<CdsObject>());
 
@@ -2415,8 +2411,8 @@ void SQLStorage::loadLastMetadataID()
     AutoLock lock(nextIDMutex);
 
     // we don't rely on automatic db generated ids, because of our caching
-    Ref<StringBuffer> qb(new StringBuffer());
-    *qb << "SELECT MAX(" << TQ("id") << ')'
+    std::ostringstream qb;
+    qb << "SELECT MAX(" << TQ("id") << ')'
         << " FROM " << TQ(METADATA_TABLE);
     Ref<SQLResult> res = select(qb);
     if (res == nullptr)
@@ -2689,21 +2685,20 @@ void SQLStorage::migrateMetadata(Ref<CdsObject> object)
 
         Ref<Array<DictionaryElement>> dataElements = metadataSQLVals->getElements();
         for (int j = 0; j < dataElements->size(); j++) {
-            Ref<StringBuffer> fields(new StringBuffer(128));
-            Ref<StringBuffer> values(new StringBuffer(128));
+            std::ostringstream fields, values;
             Ref<DictionaryElement> element = dataElements->get(j);
-            *fields << TQ("id") << ','
+            fields << TQ("id") << ','
                     << TQ("item_id") << ','
                     << TQ("property_name") << ','
                     << TQ("property_value");
-            *values << getNextMetadataID() << ','
+            values << getNextMetadataID() << ','
                     << object->getID() << ','
                     << element->getKey() << ','
                     << element->getValue();
             std::ostringstream qb;
             qb << "INSERT INTO " << TQ(_(METADATA_TABLE))
-               << " (" << fields->toString()
-               << ") VALUES (" << values->toString() << ')';
+               << " (" << fields.str()
+               << ") VALUES (" << values.str() << ')';
 
             if (!doInsertBuffering())
                 exec(qb);

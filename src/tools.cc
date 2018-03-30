@@ -884,10 +884,10 @@ String unescape(String string, char escape)
 }
 
 /*
-String xml_unescape(String string)
+std::string xml_unescape(std::string_view sv)
 {
-    Ref<StringBuffer> buf(new StringBuffer(string.length()));
-    signed char *ptr = (signed char *)string.c_str();
+    std::ostringstream buf;
+    signed char *ptr = (signed char *)sv.data();
     while (*ptr)
     {
         if (*ptr == '&')
@@ -895,20 +895,20 @@ String xml_unescape(String string)
             if ((*(ptr + 1) == 'l') && (*(ptr + 2) == 't') && 
                 (*(ptr + 3) == ';'))
             {
-                *buf << '<';
+                buf << '<';
                 ptr = ptr + 3;
             }
             else if ((*(ptr + 1) == 'g') && (*(ptr + 2) == 't') && 
                      (*(ptr + 3) == ';'))
             {
-                *buf << '>';
+                buf << '>';
                 ptr = ptr + 3;
             }
             else if ((*(ptr + 1) == 'q') && (*(ptr + 2) == 'u') && 
                      (*(ptr + 3) == 'o') && (*(ptr + 4) == 't') &&
                      (*(ptr + 5) == ';'))
             {
-                *buf << '"';
+                buf << '"';
                 ptr = ptr + 5;
             }
             else if (*(ptr + 1) == 'a')
@@ -916,26 +916,26 @@ String xml_unescape(String string)
                 if ((*(ptr + 2) == 'm') && (*(ptr + 3) == 'p') && 
                     (*(ptr + 4) == ';'))
                     {
-                        *buf << '&';
+                        buf << '&';
                         ptr = ptr + 4;
                     }
                 else if ((*(ptr + 2) == 'p') && (*(ptr + 3) == 'o') &&
                          (*(ptr + 4) == 's') && (*(ptr + 5) == ';'))
                 {
-                    *buf << '\'';
+                    buf << '\'';
                     ptr = ptr + 5;
                 }
             }
             else
-                *buf << *ptr;
+                buf << *ptr;
         }
         else
-            *buf << *ptr;
+            buf << *ptr;
 
         ptr++;
     }
 
-    return buf->toString();
+    return buf.str();
 }
 */
 
