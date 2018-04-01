@@ -49,12 +49,12 @@ module.exports = function (driver) {
 
   this.getToastMessage = function () {
     driver.wait(until.elementIsVisible(driver.findElement(By.id('toast'))), 5000)
-    return driver.findElement(By.css('.grb-toast-msg')).getText()
+    return driver.findElement(By.css('#grb-toast-msg')).getText()
   }
 
   this.waitForToastClose = function () {
     driver.wait(until.elementIsNotVisible(driver.findElement(By.id('toast'))), 6000)
-    return driver.findElement(By.css('.grb-toast-msg')).isDisplayed()
+    return driver.findElement(By.css('#grb-toast-msg')).isDisplayed()
   }
 
   this.clickMenu = function (menuId) {

@@ -27,7 +27,8 @@ $.widget('grb.toast', {
   _create: function () {
     var element = this.element
     element.addClass('grb-toast')
-    this.span = element.find('span.grb-toast-msg')
+    this.span = element.find('span#grb-toast-msg')
+    this.icon = element.find('i#grb-toast-icon')
     element.find('button.close').off('click').on('click', function () {
       element.hide()
     })
@@ -41,11 +42,11 @@ $.widget('grb.toast', {
 
   show: function (toast) {
     var element = this.element
-    element.removeClass('grb-task')
-    element.removeClass('alert-success')
-    element.addClass('grb-toast')
-    element.addClass('alert-warning')
+    element.removeClass()
+    element.addClass('grb-toast alert alert-' + toast.type)
     this.span.text(toast.message)
+    this.icon.removeClass()
+    this.icon.addClass("fa " + toast.icon)
     var callback = toast.callback || function () { return false }
     if (!element.is(':visible')) {
       element.slideDown(callback)
@@ -60,12 +61,11 @@ $.widget('grb.toast', {
 
   showTask: function (toast) {
     var element = this.element
-    element.removeClass('grb-toast')
-    element.removeClass('alert-warning')
-    element.addClass('grb-task')
-    element.addClass('alert-success')
-
+    element.removeClass()
+    element.addClass('grb-task alert alert-' + toast.type)
     this.span.text(toast.message)
+    this.icon.removeClass()
+    this.icon.addClass("fa " + toast.icon)
     var callback = toast.callback || function () { return false }
     element.show(callback)
     if (this.close) {

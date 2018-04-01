@@ -83,7 +83,7 @@ GERBERA.Auth = (function () {
           .done(submitLogin)
           .fail(GERBERA.App.error)
     } else {
-      GERBERA.Updates.showMessage('Please enter username and password')
+      GERBERA.Updates.showMessage('Please enter username and password', undefined, 'warning', 'fa-sign-in')
       promise = $.Deferred().resolve().promise()
     }
     return promise
@@ -109,7 +109,7 @@ GERBERA.Auth = (function () {
         .done(checkLogin)
         .fail(GERBERA.App.error)
     } else {
-      GERBERA.Updates.showMessage(response.error.text)
+      GERBERA.Updates.showMessage(response.error.text, undefined, 'warning', 'fa-exclamation-circle')
     }
   }
 

@@ -397,9 +397,12 @@ body,
     margin-bottom: 0;
 }
 
-.grb-toast-msg {
+#grb-toast-wrapper {
     float: left;
     width: 80%;
+}
+
+#grb-toast-msg {
     text-overflow: ellipsis;
     overflow: hidden;
 }

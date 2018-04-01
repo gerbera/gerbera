@@ -94,7 +94,7 @@ GERBERA.Autoscan = (function () {
       } else {
         msg = 'Successfully submitted autoscan'
       }
-      GERBERA.Updates.showMessage(msg)
+      GERBERA.Updates.showMessage(msg, undefined, 'success', 'fa-check')
       GERBERA.Updates.getUpdates(false)
     } else {
       GERBERA.App.error('Failed to submit autoscan')

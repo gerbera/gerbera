@@ -14,7 +14,7 @@ describe('The jQuery Gerbera Toast Message', function () {
   describe('show()', function () {
     it('displays the toast message and invokes callback after animation', function (done) {
       var testExpects = function () {
-        expect($('.grb-toast-msg').text()).toEqual('This is a message')
+        expect($('#grb-toast-msg').text()).toEqual('This is a message')
         expect($('#toast').css('display')).toEqual('block')
         done()
       }
@@ -26,7 +26,7 @@ describe('The jQuery Gerbera Toast Message', function () {
   describe('showTask()', function () {
     it('displays the task message', function (done) {
       var testExpects = function () {
-        expect($('.grb-toast-msg').text()).toEqual('This is a message')
+        expect($('#grb-toast-msg').text()).toEqual('This is a message')
         expect($('#toast').css('display')).toEqual('block')
         done()
       }
