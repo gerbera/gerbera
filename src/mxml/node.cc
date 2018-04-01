@@ -71,13 +71,3 @@ String Node::escape(String str)
     }
     return buf.str();
 }
-
-/*
-void Node::print_internal(Ref<StringBuffer> buf, int indent)
-{
-    static char *ind_str = "                                                               ";
-    static char *ind = ind_str + strlen(ind_str);
-    char *ptr = ind - indent * 2;
-    *buf << ptr;
-}
-*/

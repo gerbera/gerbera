@@ -58,7 +58,6 @@ std::string URL::download(String URL, long *HTTP_retcode,
             throw _Exception(_("Invalid curl handle!\n"));
     }
 
-    //Ref<StringBuffer> buffer(new StringBuffer(buffer_hint));
     std::ostringstream buffer;
 
     curl_easy_reset(curl_handle);

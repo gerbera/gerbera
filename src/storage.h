@@ -196,14 +196,11 @@ public:
 
     virtual zmm::Ref<zmm::Array<CdsObject>> search(zmm::Ref<SearchParam> param, int* numMatches) = 0;
     
-    class ChangedContainers : public Object
-    {
+    class ChangedContainers : public Object {
     public:
-        ChangedContainers()
-        {
-        }
-        std::vector<int> upnp;
-        std::vector<int> ui;
+        // Signed because IDs start at -1.
+        std::vector<int32_t> upnp;
+        std::vector<int32_t> ui;
     };
     
     /// \brief Removes the object identified by the objectID from the database.

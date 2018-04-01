@@ -1460,11 +1460,11 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
         // building container path for the description
         Ref<Storage> storage = Storage::getInstance();
         Ref<Array<CdsObject> > objectPath = storage->getObjectPath(objectID);
-        Ref<StringBuffer> desc(new StringBuffer(objectPath->size() * 10));
-        *desc << "Removing ";
+        std::ostringstream desc;
+        desc << "Removing ";
         // skip root container, start from 1
         for (int i = 1; i < objectPath->size(); i++)
-            *desc << '/' << objectPath->get(i)->getTitle();
+            desc << '/' << objectPath->get(i)->getTitle();
         */
         Ref<GenericTask> task(new CMRemoveObjectTask(objectID, all));
         Ref<Storage> storage = Storage::getInstance();
