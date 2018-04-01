@@ -31,7 +31,12 @@ describe('The jQuery Gerbera Toast Message', function () {
         done()
       }
 
-      toaster.toast('showTask', {message: 'This is a message', callback: testExpects})
+      toaster.toast('showTask', {
+        message: 'This is a message',
+        callback: testExpects,
+        type: 'success',
+        icon: 'fa-check'
+      })
     })
 
     it('has specific task style', function (done) {
@@ -41,7 +46,12 @@ describe('The jQuery Gerbera Toast Message', function () {
         done()
       }
 
-      toaster.toast('showTask', {message: 'This is a message', callback: testExpects})
+      toaster.toast('showTask', {
+        message: 'This is a message',
+        callback: testExpects,
+        type: 'success',
+        icon: 'fa-check'
+      })
     })
   })
 })
