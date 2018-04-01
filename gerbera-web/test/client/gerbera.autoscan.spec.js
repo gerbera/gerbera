@@ -211,7 +211,7 @@ describe('Gerbera Autoscan', function () {
         success: true
       })
 
-      expect(GERBERA.Updates.showMessage).toHaveBeenCalledWith('Successfully submitted autoscan')
+      expect(GERBERA.Updates.showMessage).toHaveBeenCalledWith('Successfully submitted autoscan', undefined, 'success', 'fa-check')
     })
 
     it('when fails reports to application error', function () {

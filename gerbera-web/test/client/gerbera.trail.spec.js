@@ -104,7 +104,7 @@ describe('Gerbera Trail', function () {
         expect(GERBERA.App.error).not.toHaveBeenCalled()
         expect(GERBERA.Items.deleteGerberaItem).toHaveBeenCalledWith(event.data)
         expect(GERBERA.Updates.updateTreeByIds).toHaveBeenCalled()
-        expect(GERBERA.Updates.showMessage).toHaveBeenCalledWith('Successfully deleted item')
+        expect(GERBERA.Updates.showMessage).toHaveBeenCalledWith('Successfully removed item')
         isDone()
       })
     })
