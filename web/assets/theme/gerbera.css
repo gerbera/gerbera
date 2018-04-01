@@ -383,60 +383,25 @@ body,
     display: block;
 }
 
-.grb-toast {
-    bottom: 5vh;
-    background-color: #eee;
-    border-radius: 0;
-    border: 0;
-}
-
-
-.grb-task {
-    top: 15vh;
-    border-radius: 0;
-    border: 0;
-    color: white;
-}
-
-.grb-task .close {
-    opacity: 1;
-    color: white;
-}
-
-.grb-task .grb-toast-msg {
-    color: white;
-    width: 95%;
-    display: inline-block;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    font-weight: 700;
-}
-
-.alert-success {
-    background-color: #4BA2B7;
-}
-
 .grb-toast,
 .grb-task {
+    bottom: 0;
+    border-radius: 0;
+    border: 0;
     width: 100%;
     z-index: 1000;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
     position: fixed;
+    margin-bottom: 0;
 }
 
 .grb-toast-msg {
-    width: 95%;
-    color: #333;
-    display: inline-block;
+    float: left;
+    width: 80%;
     text-overflow: ellipsis;
     overflow: hidden;
-    font-weight: 700;
-}
-.grb-toast .close {
-    opacity: 1;
-    color: black;
 }
 
 .autoscan {
