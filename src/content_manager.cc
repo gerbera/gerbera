@@ -1331,7 +1331,7 @@ int ContentManager::addFileInternal(String path, String rootpath,
 {
     if (async) {
         Ref<GenericTask> task(new CMAddFileTask(path, rootpath, recursive, hidden, cancellable));
-        task->setDescription(_("Adding: ") + path);
+        task->setDescription(_("Importing: ") + path);
         task->setParentID(parentTaskID);
         addTask(task, lowPriority);
         return INVALID_OBJECT_ID;
