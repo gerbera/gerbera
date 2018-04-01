@@ -150,10 +150,11 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
         Ref<ProcListItem> pr_item(new ProcListItem(RefCast(spsc, Executor)));
         proc_list->append(pr_item);
         location = _("http://localhost:") + String::from(p2) + "/tv.asf";
-#warning check if socket is ready 
+
+//FIXME: #warning check if socket is ready
         sleep(15); 
     }
-#warning check if we can use "accept url" with sopcast
+//FIXME: #warning check if we can use "accept url" with sopcast
     else
     {
 #endif
