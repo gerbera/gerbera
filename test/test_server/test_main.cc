@@ -62,10 +62,10 @@ TEST_F(ServerTest, ServerOutputsCompileInformationIncludingGit) {
   ss << CMAKE_BINARY_DIR << "/gerbera --compile-info 2>&1";
   std::string cmd = ss.str();
   std::string output = exec(cmd.c_str());
-  ASSERT_THAT(output.c_str(), HasSubstr("Compile info:\n-------------\nWITH_"));
-  ASSERT_THAT(output.c_str(), HasSubstr("Git info:\n-------------\n"));
-  ASSERT_THAT(output.c_str(), HasSubstr("Git Branch: "));
-  ASSERT_THAT(output.c_str(), HasSubstr("Git Commit: "));
+  ASSERT_THAT(output, HasSubstr("Compile info:\n-------------\nWITH_"));
+  ASSERT_THAT(output, HasSubstr("Git info:\n-------------\n"));
+  ASSERT_THAT(output, HasSubstr("Git Branch: "));
+  ASSERT_THAT(output, HasSubstr("Git Commit: "));
 }
 
 TEST_F(ServerTest, GeneratesFullConfigFromServerCommand) {
@@ -79,6 +79,6 @@ TEST_F(ServerTest, GeneratesFullConfigFromServerCommand) {
   std::string cmd = ss.str();
   std::string output = exec(cmd.c_str());
 
-  ASSERT_THAT(output.c_str(), HasSubstr(topOutput.c_str()));
-  ASSERT_THAT(output.c_str(), HasSubstr(bottomOutput.c_str()));
+  ASSERT_THAT(output, HasSubstr(topOutput));
+  ASSERT_THAT(output, HasSubstr(bottomOutput));
 }
