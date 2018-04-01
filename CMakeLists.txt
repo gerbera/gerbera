@@ -1,12 +1,20 @@
 cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
 
-# It is 2017 so lets leverage a modern C++
+set(GERBERA_MAJOR_VERSION 1)
+set(GERBERA_MINOR_VERSION 2)
+set(GERBERA_PATCH_VERSION 0)
+set(GERBERA_RELEASE _alpha)
+set(GERBERA_VERSION "${GERBERA_MAJOR_VERSION}.${GERBERA_MINOR_VERSION}.${GERBERA_PATCH_VERSION}${GERBERA_RELEASE}")
+
+project(Gerbera
+        VERSION "${GERBERA_MAJOR_VERSION}.${GERBERA_MINOR_VERSION}.${GERBERA_PATCH_VERSION}")
+
+# Leverage a modern C++
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
-include(CheckFunctionExists)
 
 set(CMAKE_VERBOSE_MAKEFILE off CACHE BOOL "Show verbose build commands")
 set(WITH_MAGIC          1 CACHE BOOL "Use libmagic to identify file mime types")
@@ -25,12 +33,6 @@ set(WITH_LASTFM         0 CACHE BOOL "Enable LastFM")
 set(WITH_DEBUG          0 CACHE BOOL "Enables debug logging")
 set(WITH_TESTS          0 CACHE BOOL "Enables Unit Tests")
 
-project("gerbera")
-set(gerbera_MAJOR_VERSION     1)
-set(gerbera_MINOR_VERSION     2)
-set(gerbera_PATCH_VERSION     0)
-set(gerbera_RELEASE           "_alpha")
-set(gerbera_SUFFIX            "")
 
 set(libgerberaFILES
         src/action_request.cc
@@ -293,8 +295,8 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES ".*BSD.*")
     add_definitions(-DBSD)
 endif()
 
-add_definitions(-DPACKAGE_NAME="gerbera${gerbera_SUFFIX}")
-add_definitions(-DVERSION="${gerbera_MAJOR_VERSION}.${gerbera_MINOR_VERSION}.${gerbera_PATCH_VERSION}${gerbera_RELEASE}${gerbera_SUFFIX}")
+add_definitions(-DPACKAGE_NAME="${PROJECT_NAME}")
+add_definitions(-DVERSION="${GERBERA_VERSION}")
 add_definitions(-DPACKAGE_DATADIR="${CMAKE_INSTALL_PREFIX}/share/gerbera")
 
 # Generate Compile Information
@@ -375,11 +377,12 @@ else()
     message(FATAL_ERROR "SQLite3 not found!")
 endif()
 
+# We should probably move these two out to their own FindLocale
+include(CheckFunctionExists)
 check_function_exists(nl_langinfo HAVE_NL_LANGINFO)
 if (HAVE_NL_LANGINFO)
     add_definitions("-DHAVE_NL_LANGINFO")
 endif()
-
 check_function_exists(setlocale HAVE_SETLOCALE)
 if (HAVE_SETLOCALE)
     add_definitions("-DHAVE_SETLOCALE")
