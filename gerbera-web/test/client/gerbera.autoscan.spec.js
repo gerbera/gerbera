@@ -201,7 +201,7 @@ describe('Gerbera Autoscan', function () {
       spyOn(GERBERA.Updates, 'showMessage')
       GERBERA.Autoscan.submitComplete(response)
 
-      expect(GERBERA.Updates.showMessage).toHaveBeenCalledWith('Performing full scan: /Movies')
+      expect(GERBERA.Updates.showMessage).toHaveBeenCalledWith('Performing full scan: /Movies', undefined, 'success', 'fa-check')
     })
 
     it('when successful for one-time scan reports message to user', function () {

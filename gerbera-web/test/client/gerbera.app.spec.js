@@ -58,7 +58,7 @@ describe('Gerbera UI App', function () {
       })
 
       GERBERA.App.initialize().fail(function () {
-        expect(GERBERA.Updates.showMessage).toHaveBeenCalledWith('Internal Server Error')
+        expect(GERBERA.Updates.showMessage).toHaveBeenCalledWith('Internal Server Error', undefined, 'info', 'fa-exclamation-triangle')
         isDone()
       })
     })
@@ -71,7 +71,7 @@ describe('Gerbera UI App', function () {
       })
 
       GERBERA.App.initialize().fail(function () {
-        expect(GERBERA.Updates.showMessage).toHaveBeenCalledWith('The UI is disabled in the configuration file. See README.')
+        expect(GERBERA.Updates.showMessage).toHaveBeenCalledWith('The UI is disabled in the configuration file. See README.', undefined, 'warning', 'fa-exclamation-triangle')
         isDone()
       })
     })
@@ -160,7 +160,7 @@ describe('Gerbera UI App', function () {
       var event = 'Error Message'
       GERBERA.App.error(event)
 
-      expect(GERBERA.Updates.showMessage).toHaveBeenCalledWith('Error Message')
+      expect(GERBERA.Updates.showMessage).toHaveBeenCalledWith('Error Message', undefined, 'warning', 'fa-exclamation-triangle')
     })
 
     it('shows the event as error message when event has responseText', function () {
@@ -168,7 +168,7 @@ describe('Gerbera UI App', function () {
       var event = {responseText : 'Response Text Error'}
       GERBERA.App.error(event)
 
-      expect(GERBERA.Updates.showMessage).toHaveBeenCalledWith('Response Text Error')
+      expect(GERBERA.Updates.showMessage).toHaveBeenCalledWith('Response Text Error', undefined, 'info', 'fa-exclamation-triangle')
     })
 
     it('shows the event error taken from the response error', function () {
@@ -177,7 +177,7 @@ describe('Gerbera UI App', function () {
 
       GERBERA.App.error(event)
 
-      expect(GERBERA.Updates.showMessage).toHaveBeenCalledWith('The UI is disabled in the configuration file. See README.')
+      expect(GERBERA.Updates.showMessage).toHaveBeenCalledWith('The UI is disabled in the configuration file. See README.', undefined, 'warning', 'fa-exclamation-triangle')
     })
 
     it('shows unspecified error when event is invalid', function () {
@@ -186,7 +186,7 @@ describe('Gerbera UI App', function () {
 
       GERBERA.App.error(event)
 
-      expect(GERBERA.Updates.showMessage).toHaveBeenCalledWith('The system encountered an error')
+      expect(GERBERA.Updates.showMessage).toHaveBeenCalledWith('The system encountered an error', undefined, 'danger', 'fa-frown-o')
     })
   });
 })

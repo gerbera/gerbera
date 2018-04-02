@@ -50,7 +50,7 @@ test.describe('The gerbera delete item', function () {
       })
 
       homePage.getToastMessage().then(function (message) {
-        expect(message).to.equal('Successfully deleted item')
+        expect(message).to.equal('Successfully removed item')
       })
 
       homePage.waitForToastClose().then(function (displayed) {

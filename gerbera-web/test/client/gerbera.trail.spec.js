@@ -104,7 +104,7 @@ describe('Gerbera Trail', function () {
         expect(GERBERA.App.error).not.toHaveBeenCalled()
         expect(GERBERA.Items.deleteGerberaItem).toHaveBeenCalledWith(event.data)
         expect(GERBERA.Updates.updateTreeByIds).toHaveBeenCalled()
-        expect(GERBERA.Updates.showMessage).toHaveBeenCalledWith('Successfully removed item')
+        expect(GERBERA.Updates.showMessage).toHaveBeenCalledWith('Successfully removed item', undefined, 'success', 'fa-check')
         isDone()
       })
     })
@@ -132,7 +132,7 @@ describe('Gerbera Trail', function () {
           expect(GERBERA.App.error).not.toHaveBeenCalled()
           expect(GERBERA.Items.deleteGerberaItem).toHaveBeenCalledWith(event.data, true)
           expect(GERBERA.Updates.updateTreeByIds).toHaveBeenCalled()
-          expect(GERBERA.Updates.showMessage).toHaveBeenCalledWith('Successfully deleted all items')
+          expect(GERBERA.Updates.showMessage).toHaveBeenCalledWith('Successfully removed all items', undefined, 'success', 'fa-check')
           isDone()
         })
       })
@@ -149,7 +149,7 @@ describe('Gerbera Trail', function () {
 
       GERBERA.Trail.deleteItem(event)
 
-      expect(GERBERA.App.error).toHaveBeenCalledWith('Failed to delete item')
+      expect(GERBERA.App.error).toHaveBeenCalledWith('Failed to remove item')
       expect(GERBERA.Updates.updateTreeByIds).not.toHaveBeenCalled()
     })
   })

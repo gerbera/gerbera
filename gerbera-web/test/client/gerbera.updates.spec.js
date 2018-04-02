@@ -17,7 +17,7 @@ describe('Gerbera Updates', function () {
 
       GERBERA.Updates.showMessage('a message')
 
-      expect($.fn.toast).toHaveBeenCalledWith('show', {message: 'a message'})
+      expect($.fn.toast).toHaveBeenCalledWith('show', {message: 'a message', type: undefined, icon: undefined})
     })
   })
 
