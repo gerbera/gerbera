@@ -55,6 +55,8 @@
 
 #ifdef HAVE_CURL
 #include <curl/curl.h>
+#include <config/config_generator.h>
+
 #endif
 
 using namespace zmm;
@@ -339,254 +341,22 @@ String ConfigManager::createDefaultConfig(String userhome)
 
     String config_filename = homepath + DIR_SEPARATOR + DEFAULT_CONFIG_NAME;
 
-    Ref<Element> config(new Element(_("config")));
-    config->setAttribute(_("version"), String::from(CONFIG_XML_VERSION));
-    config->setAttribute(_("xmlns"), _(XML_XMLNS) + CONFIG_XML_VERSION);
-    config->setAttribute(_("xmlns:xsi"), _(XML_XMLNS_XSI));
-    config->setAttribute(_("xsi:schemaLocation"), _(XML_XMLNS) + CONFIG_XML_VERSION + " " + XML_XMLNS + CONFIG_XML_VERSION + ".xsd");
-
-    Ref<Comment> docinfo(new Comment(_("\n\
-     See http://gerbera.io or read the docs for more\n\
-     information on creating and using config.xml configration files.\n\
-    "),
-        true));
-    config->appendChild(RefCast(docinfo, Node));
-
-    Ref<Element> server(new Element(_("server")));
-
-    Ref<Element> ui(new Element(_("ui")));
-    ui->setAttribute(_("enabled"), _(DEFAULT_UI_EN_VALUE));
-    ui->setAttribute(_("show-tooltips"), _(DEFAULT_UI_SHOW_TOOLTIPS_VALUE));
-
-    Ref<Element> accounts(new Element(_("accounts")));
-    accounts->setAttribute(_("enabled"), _(DEFAULT_ACCOUNTS_EN_VALUE));
-    accounts->setAttribute(_("session-timeout"), String::from(DEFAULT_SESSION_TIMEOUT));
-
-    Ref<Element> account(new Element(_("account")));
-    account->setAttribute(_("user"), _(DEFAULT_ACCOUNT_USER));
-    account->setAttribute(_("password"), _(DEFAULT_ACCOUNT_PASSWORD));
-    accounts->appendElementChild(account);
-
-    ui->appendElementChild(accounts);
-
-    server->appendElementChild(ui);
-    server->appendTextChild(_("name"), _(PACKAGE_NAME));
-
-    Ref<Element> udn(new Element(_("udn")));
-    server->appendElementChild(udn);
-
-    server->appendTextChild(_("home"), homepath);
-    server->appendTextChild(_("webroot"), prefix_dir + DIR_SEPARATOR + _(DEFAULT_WEB_DIR));
-    Ref<Comment> aliveinfo(new Comment(
-        _("\n\
-        How frequently (in seconds) to send ssdp:alive advertisements.\n\
-        Minimum alive value accepted is: ")
-            + String::from(ALIVE_INTERVAL_MIN) + _("\n\n\
-        The advertisement will be sent every (A/2)-30 seconds,\n\
-        and will have a cache-control max-age of A where A is\n\
-        the value configured here. Ex: A value of 62 will result\n\
-        in an SSDP advertisement being sent every second.\n\
-    "),
-        true));
-    server->appendChild(RefCast(aliveinfo, Node));
-    server->appendTextChild(_("alive"), String::from(DEFAULT_ALIVE_INTERVAL));
-
-    Ref<Element> storage(new Element(_("storage")));
-#ifdef HAVE_SQLITE3
-    Ref<Element> sqlite3(new Element(_("sqlite3")));
-    sqlite3->setAttribute(_("enabled"), _(DEFAULT_SQLITE_ENABLED));
-    sqlite3->appendTextChild(_("database-file"), _(DEFAULT_SQLITE3_DB_FILENAME));
-#ifdef SQLITE_BACKUP_ENABLED
-    //    <backup enabled="no" interval="6000"/>
-    Ref<Element> backup(new Element(_("backup")));
-    backup->setAttribute(_("enabled"), _(YES));
-    backup->setAttribute(_("interval"), String::from(DEFAULT_SQLITE_BACKUP_INTERVAL));
-    sqlite3->appendElementChild(backup);
-#endif
-    storage->appendElementChild(sqlite3);
-#endif
-#ifdef HAVE_MYSQL
-    Ref<Element> mysql(new Element(_("mysql")));
-#ifndef HAVE_SQLITE3
-    mysql->setAttribute(_("enabled"), _(DEFAULT_MYSQL_ENABLED));
-    mysql_flag = true;
-#else
-    mysql->setAttribute(_("enabled"), _("no"));
-#endif
-    mysql->appendTextChild(_("host"), _(DEFAULT_MYSQL_HOST));
-    mysql->appendTextChild(_("username"), _(DEFAULT_MYSQL_USER));
-    //    storage->appendTextChild(_("password"), _(DEFAULT_MYSQL_PASSWORD));
-    mysql->appendTextChild(_("database"), _(DEFAULT_MYSQL_DB));
-
-    storage->appendElementChild(mysql);
-#endif
-    server->appendElementChild(storage);
-
-    Ref<Element> protocolinfo(new Element(_("protocolInfo")));
-    protocolinfo->setAttribute(_("extend"), _(DEFAULT_EXTEND_PROTOCOLINFO));
-
-    server->appendElementChild(protocolinfo);
-
-    Ref<Comment> ps3protinfo(new Comment(_(" For PS3 support change to \"yes\" ")));
-    server->appendChild(RefCast(ps3protinfo, Node));
-
-    Ref<Comment> redinfo(new Comment(_("\n\
-       Uncomment the lines below to get rid of jerky avi playback on the\n\
-       DSM320 or to enable subtitles support on the DSM units\n\
-    "),
-        true));
-
-    Ref<Comment> redsonic(new Comment(_("\n\
-    <custom-http-headers>\n\
-      <add header=\"X-User-Agent: redsonic\"/>\n\
-    </custom-http-headers>\n\
-\n\
-    <manufacturerURL>redsonic.com</manufacturerURL>\n\
-    <modelNumber>105</modelNumber>\n\
-    "),
-        true));
-
-    Ref<Comment> tg100info(new Comment(_(" Uncomment the line below if you have a Telegent TG100 "), true));
-    Ref<Comment> tg100(new Comment(_("\n\
-       <upnp-string-limit>101</upnp-string-limit>\n\
-    "),
-        true));
-
-    server->appendChild(RefCast(redinfo, Node));
-    server->appendChild(RefCast(redsonic, Node));
-    server->appendChild(RefCast(tg100info, Node));
-    server->appendChild(RefCast(tg100, Node));
-
-    server->appendElementChild(renderExtendedRuntimeSection());
-
-    config->appendElementChild(server);
-
-    Ref<Element> import(new Element(_("import")));
-    import->setAttribute(_("hidden-files"), _(DEFAULT_HIDDEN_FILES_VALUE));
-
-#ifdef HAVE_MAGIC
-    if (string_ok(magic)) {
-        Ref<Element> magicfile(new Element(_("magic-file")));
-        magicfile->setText(magic);
-        import->appendElementChild(magicfile);
+    ConfigGenerator configGenerator;
+    std::string magicStr;
+    if(magic == nullptr) {
+        magicStr = "";
+    } else {
+        magicStr = std::string(magic.c_str());
     }
+
+    std::string config = configGenerator.generate(std::string(userhome.c_str()), std::string(config_dir.c_str()), std::string(prefix_dir.c_str()), magicStr);
+
+    save_text(config_filename, config.c_str());
+    log_info("Gerbera configuration was created in: %s\n", config_filename.c_str());
+
+#if defined(HAVE_MYSQL) && !defined(HAVE_SQLITE3)
+    mysql_flag = true;
 #endif
-
-    Ref<Element> scripting(new Element(_("scripting")));
-    scripting->setAttribute(_("script-charset"), _(DEFAULT_JS_CHARSET));
-    import->appendElementChild(scripting);
-
-    Ref<Element> layout(new Element(_("virtual-layout")));
-    layout->setAttribute(_("type"), _(DEFAULT_LAYOUT_TYPE));
-#ifdef HAVE_JS
-    layout->appendTextChild(_("import-script"), prefix_dir + DIR_SEPARATOR + _(DEFAULT_JS_DIR) + DIR_SEPARATOR + _(DEFAULT_IMPORT_SCRIPT));
-    scripting->appendTextChild(_("common-script"),
-        prefix_dir + DIR_SEPARATOR + _(DEFAULT_JS_DIR) + DIR_SEPARATOR + _(DEFAULT_COMMON_SCRIPT));
-
-    scripting->appendTextChild(_("playlist-script"),
-        prefix_dir + DIR_SEPARATOR + _(DEFAULT_JS_DIR) + DIR_SEPARATOR + _(DEFAULT_PLAYLISTS_SCRIPT));
-
-#endif
-    scripting->appendElementChild(layout);
-
-    String map_file = prefix_dir + DIR_SEPARATOR + CONFIG_MAPPINGS_TEMPLATE;
-
-    Ref<Element> mappings(new Element(_("mappings")));
-    Ref<Element> ext2mt(new Element(_("extension-mimetype")));
-    ext2mt->setAttribute(_("ignore-unknown"), _(DEFAULT_IGNORE_UNKNOWN_EXTENSIONS));
-    ext2mt->appendElementChild(map_from_to(_("mp3"), _("audio/mpeg")));
-    ext2mt->appendElementChild(map_from_to(_("ogx"), _("application/ogg")));
-    ext2mt->appendElementChild(map_from_to(_("ogv"), _("video/ogg")));
-    ext2mt->appendElementChild(map_from_to(_("oga"), _("audio/ogg")));
-    ext2mt->appendElementChild(map_from_to(_("ogg"), _("audio/ogg")));
-    ext2mt->appendElementChild(map_from_to(_("ogm"), _("video/ogg")));
-    ext2mt->appendElementChild(map_from_to(_("asf"), _("video/x-ms-asf")));
-    ext2mt->appendElementChild(map_from_to(_("asx"), _("video/x-ms-asf")));
-    ext2mt->appendElementChild(map_from_to(_("wma"), _("audio/x-ms-wma")));
-    ext2mt->appendElementChild(map_from_to(_("wax"), _("audio/x-ms-wax")));
-    ext2mt->appendElementChild(map_from_to(_("wmv"), _("video/x-ms-wmv")));
-    ext2mt->appendElementChild(map_from_to(_("wvx"), _("video/x-ms-wvx")));
-    ext2mt->appendElementChild(map_from_to(_("wm"), _("video/x-ms-wm")));
-    ext2mt->appendElementChild(map_from_to(_("wmx"), _("video/x-ms-wmx")));
-    ext2mt->appendElementChild(map_from_to(_("m3u"), _("audio/x-mpegurl")));
-    ext2mt->appendElementChild(map_from_to(_("pls"), _("audio/x-scpls")));
-    ext2mt->appendElementChild(map_from_to(_("flv"), _("video/x-flv")));
-    ext2mt->appendElementChild(map_from_to(_("mkv"), _("video/x-matroska")));
-    ext2mt->appendElementChild(map_from_to(_("mka"), _("audio/x-matroska")));
-
-    Ref<Comment> ps3info(new Comment(_(" Uncomment the line below for PS3 divx support "), true));
-    Ref<Comment> ps3avi(new Comment(_(" <map from=\"avi\" to=\"video/divx\"/> "), true));
-    ext2mt->appendChild(RefCast(ps3info, Node));
-    ext2mt->appendChild(RefCast(ps3avi, Node));
-
-    Ref<Comment> dsmzinfo(new Comment(_(" Uncomment the line below for D-Link DSM / ZyXEL DMA-1000 "), true));
-    Ref<Comment> dsmzavi(new Comment(_(" <map from=\"avi\" to=\"video/avi\"/> "), true));
-    ext2mt->appendChild(RefCast(dsmzinfo, Node));
-    ext2mt->appendChild(RefCast(dsmzavi, Node));
-
-    mappings->appendElementChild(ext2mt);
-
-    Ref<Element> mtupnp(new Element(_("mimetype-upnpclass")));
-    mtupnp->appendElementChild(map_from_to(_("audio/*"),
-        _(UPNP_DEFAULT_CLASS_MUSIC_TRACK)));
-    mtupnp->appendElementChild(map_from_to(_("video/*"),
-        _(UPNP_DEFAULT_CLASS_VIDEO_ITEM)));
-    mtupnp->appendElementChild(map_from_to(_("image/*"),
-        _("object.item.imageItem")));
-    mtupnp->appendElementChild(map_from_to(_("application/ogg"),
-        _(UPNP_DEFAULT_CLASS_MUSIC_TRACK)));
-
-    mappings->appendElementChild(mtupnp);
-
-    Ref<Element> mtcontent(new Element(_("mimetype-contenttype")));
-    mtcontent->appendElementChild(treat_as(_("audio/mpeg"),
-        _(CONTENT_TYPE_MP3)));
-    mtcontent->appendElementChild(treat_as(_("application/ogg"),
-        _(CONTENT_TYPE_OGG)));
-    mtcontent->appendElementChild(treat_as(_("audio/ogg"),
-        _(CONTENT_TYPE_OGG)));
-    mtcontent->appendElementChild(treat_as(_("audio/x-flac"),
-        _(CONTENT_TYPE_FLAC)));
-    mtcontent->appendElementChild(treat_as(_("audio/x-ms-wma"),
-        _(CONTENT_TYPE_WMA)));
-    mtcontent->appendElementChild(treat_as(_("audio/x-wavpack"),
-        _(CONTENT_TYPE_WAVPACK)));
-    mtcontent->appendElementChild(treat_as(_("image/jpeg"),
-        _(CONTENT_TYPE_JPG)));
-    mtcontent->appendElementChild(treat_as(_("audio/x-mpegurl"),
-        _(CONTENT_TYPE_PLAYLIST)));
-    mtcontent->appendElementChild(treat_as(_("audio/x-scpls"),
-        _(CONTENT_TYPE_PLAYLIST)));
-    mtcontent->appendElementChild(treat_as(_("audio/x-wav"),
-        _(CONTENT_TYPE_PCM)));
-    mtcontent->appendElementChild(treat_as(_("audio/L16"),
-        _(CONTENT_TYPE_PCM)));
-    mtcontent->appendElementChild(treat_as(_("video/x-msvideo"),
-        _(CONTENT_TYPE_AVI)));
-    mtcontent->appendElementChild(treat_as(_("video/mp4"),
-        _(CONTENT_TYPE_MP4)));
-    mtcontent->appendElementChild(treat_as(_("audio/mp4"),
-        _(CONTENT_TYPE_MP4)));
-    mtcontent->appendElementChild(treat_as(_("video/x-matroska"),
-        _(CONTENT_TYPE_MKV)));
-    mtcontent->appendElementChild(treat_as(_("audio/x-matroska"),
-        _(CONTENT_TYPE_MKA)));
-
-    mappings->appendElementChild(mtcontent);
-    import->appendElementChild(mappings);
-
-#ifdef ONLINE_SERVICES
-    import->appendElementChild(renderOnlineSection());
-#endif
-
-    config->appendElementChild(import);
-
-    config->appendElementChild(renderTranscodingSection());
-
-    config->indent();
-    save_text(config_filename, config->print());
-    log_info("Gerbera configuration was created in: %s\n",
-        config_filename.c_str());
 
     if (mysql_flag) {
         throw _Exception(_("You are using MySQL! Please edit ") + config_filename + " and enter your MySQL host/username/password!");

@@ -1,6 +1,7 @@
 #include <array>
 #include <memory>
 #include <fstream>
+#include <common.h>
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
@@ -41,7 +42,7 @@ TEST_F(ServerTest, ServerOutputsHelpInformation) {
   std::string expectedOutput = mockText("fixtures/mock-help.out");
 
   std::stringstream ss;
-  ss << CMAKE_BINARY_DIR << "/gerbera --help 2>&1";
+  ss << CMAKE_BINARY_DIR <<  DIR_SEPARATOR << "gerbera --help 2>&1";
   std::string cmd = ss.str();
   std::string output = exec(cmd.c_str());
   ASSERT_STREQ(output.c_str(), expectedOutput.c_str());
@@ -51,7 +52,7 @@ TEST_F(ServerTest, ServerOutputsVersionInformation) {
   std::string expectedOutput = mockText("fixtures/mock-version.out");
 
   std::stringstream ss;
-  ss << CMAKE_BINARY_DIR << "/gerbera --version 2>&1";
+  ss << CMAKE_BINARY_DIR << DIR_SEPARATOR << "gerbera --version 2>&1";
   std::string cmd = ss.str();
   std::string output = exec(cmd.c_str());
   ASSERT_STREQ(output.c_str(), expectedOutput.c_str());
@@ -59,7 +60,7 @@ TEST_F(ServerTest, ServerOutputsVersionInformation) {
 
 TEST_F(ServerTest, ServerOutputsCompileInformationIncludingGit) {
   std::stringstream ss;
-  ss << CMAKE_BINARY_DIR << "/gerbera --compile-info 2>&1";
+  ss << CMAKE_BINARY_DIR << DIR_SEPARATOR << "gerbera --compile-info 2>&1";
   std::string cmd = ss.str();
   std::string output = exec(cmd.c_str());
   ASSERT_THAT(output, HasSubstr("Compile info:\n-------------\nWITH_"));
@@ -75,7 +76,7 @@ TEST_F(ServerTest, GeneratesFullConfigFromServerCommand) {
   std::string bottomOutput = "</profile>\n    </profiles>\n  </transcoding>\n</config>";
 
   std::stringstream ss;
-  ss << CMAKE_BINARY_DIR << "/gerbera --create-config 2>&1";
+  ss << CMAKE_BINARY_DIR << DIR_SEPARATOR << "gerbera --create-config 2>&1";
   std::string cmd = ss.str();
   std::string output = exec(cmd.c_str());
 
