@@ -217,6 +217,7 @@ Supported options:\n\
     --logfile or -l    log to specified file\n\
     --debug or -D      enable debug output\n\
     --compile-info     print configuration summary and exit\n\
+    --create-config    generate default config.xml\n\
     --version          print version information and exit\n\
     --help or -h       this help message\n\
 \n\
