@@ -54,7 +54,6 @@ class ConfigManagerTest : public ::testing::Test {
     file << cfgContent;
     file.close();
 
-    printf("\ntest_config temporary path --> %s\n", gerberaDir.c_str());
     subject = new ConfigManager();
   };
 
@@ -82,18 +81,6 @@ class ConfigManagerTest : public ::testing::Test {
     if (mkdir(dir.c_str(), 0777) < 0) {
       throw std::runtime_error("Failed to create test_config temporary directory for testing");
     };
-  }
-
-  std::string exec(const char* cmd) {
-    std::array<char, 128> buffer;
-    std::string result;
-    std::shared_ptr<FILE> pipe(popen(cmd, "r"), pclose);
-    if (!pipe) throw std::runtime_error("popen() failed!");
-    while (!feof(pipe.get())) {
-      if (fgets(buffer.data(), 128, pipe.get()) != nullptr)
-        result += buffer.data();
-    }
-    return result;
   }
 
   std::string createConfig() {
