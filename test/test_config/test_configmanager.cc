@@ -43,6 +43,7 @@ class ConfigManagerTest : public ::testing::Test {
 
     // Create config using generator
     std::string cfgContent = createConfig();
+    printf("\nGenerated configuration: %s", cfgContent.c_str());
     file.open(configDir + DIR_SEPARATOR + "config.xml");
     file << cfgContent;
     file.close();

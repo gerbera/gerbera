@@ -20,6 +20,7 @@ Supported options:
     --logfile or -l    log to specified file
     --debug or -D      enable debug output
     --compile-info     print configuration summary and exit
+    --create-config    generate default config.xml
     --version          print version information and exit
     --help or -h       this help message
 
