@@ -1318,8 +1318,6 @@ int ContentManager::addFile(zmm::String path, bool recursive, bool async,
 int ContentManager::addFile(zmm::String path, zmm::String rootpath, bool recursive, bool async,
     bool hidden, bool lowPriority, bool cancellable)
 {
-    if (check_path(path, true))
-        rootpath = path;
     return addFileInternal(path, rootpath, recursive, async, hidden, lowPriority, 0, cancellable);
 }
 
@@ -1840,7 +1838,7 @@ void CMAddFileTask::run()
 {
     log_debug("running add file task with path %s recursive: %d\n", path.c_str(), recursive);
     Ref<ContentManager> cm = ContentManager::getInstance();
-    cm->_addFile(path, nullptr, recursive, hidden, Ref<GenericTask>(this));
+    cm->_addFile(path, rootpath, recursive, hidden, Ref<GenericTask>(this));
 }
 
 CMRemoveObjectTask::CMRemoveObjectTask(int objectID, bool all)
