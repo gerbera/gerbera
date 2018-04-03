@@ -252,8 +252,6 @@ protected:
     zmm::Ref<mxml::Element> renderExtendedRuntimeSection();
     zmm::Ref<mxml::Element> renderOnlineSection();
 
-    // creates a default config.xml file with the most necessary entries and returns the path
-    zmm::String createDefaultConfig(zmm::String userhome);
     void save();
     void save_text(zmm::String filename, zmm::String content);
     void migrate();

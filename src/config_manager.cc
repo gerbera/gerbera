@@ -108,24 +108,14 @@ void ConfigManager::init()
     options = Ref<Array<ConfigOption> >(new Array<ConfigOption>(CFG_MAX));
 
     String home = userhome + DIR_SEPARATOR + config_dir;
-    bool home_ok = true;
 
     if (filename == nullptr) {
         // No config file path provided, so lets find one.
-        if (home_ok && (!check_path(userhome + DIR_SEPARATOR + config_dir + DIR_SEPARATOR + DEFAULT_CONFIG_NAME))) {
-            home_ok = false;
-        } else {
+        if (check_path(home + DIR_SEPARATOR + DEFAULT_CONFIG_NAME)) {
             filename = home + DIR_SEPARATOR + DEFAULT_CONFIG_NAME;
+        } else {
+            throw _Exception(_("\nThe server configuration file could not be found in ~/.config/gerbera\n") + "Gerbera could not find a default configuration file.\n" + "Try specifying an alternative configuration file on the command line.\n" + "For a list of options run: gerbera -h\n");
         }
-
-        if ((!home_ok) && (string_ok(userhome))) {
-            userhome = normalizePath(userhome);
-            filename = createDefaultConfig(userhome);
-        }
-    }
-
-    if (filename == nullptr) {
-        throw _Exception(_("\nThe server configuration file could not be found in ~/.gerbera\n") + "Gerbera could not determine your home directory - automatic setup failed.\n" + "Try specifying an alternative configuration file on the command line.\n" + "For a list of options run: gerbera -h\n");
     }
 
     log_info("Loading configuration from: %s\n", filename.c_str());
@@ -326,44 +316,6 @@ Ref<Element> ConfigManager::renderOnlineSection()
 }
 
 #endif
-
-String ConfigManager::createDefaultConfig(String userhome)
-{
-    bool mysql_flag = false;
-
-    String homepath = userhome + DIR_SEPARATOR + config_dir;
-
-    if (!check_path(homepath, true)) {
-        if (mkdir(homepath.c_str(), 0777) < 0) {
-            throw _Exception(_("Could not create directory ") + homepath + " : " + strerror(errno));
-        }
-    }
-
-    String config_filename = homepath + DIR_SEPARATOR + DEFAULT_CONFIG_NAME;
-
-    ConfigGenerator configGenerator;
-    std::string magicStr;
-    if(magic == nullptr) {
-        magicStr = "";
-    } else {
-        magicStr = std::string(magic.c_str());
-    }
-
-    std::string config = configGenerator.generate(std::string(userhome.c_str()), std::string(config_dir.c_str()), std::string(prefix_dir.c_str()), magicStr);
-
-    save_text(config_filename, config.c_str());
-    log_info("Gerbera configuration was created in: %s\n", config_filename.c_str());
-
-#if defined(HAVE_MYSQL) && !defined(HAVE_SQLITE3)
-    mysql_flag = true;
-#endif
-
-    if (mysql_flag) {
-        throw _Exception(_("You are using MySQL! Please edit ") + config_filename + " and enter your MySQL host/username/password!");
-    }
-
-    return config_filename;
-}
 
 void ConfigManager::migrate()
 {
