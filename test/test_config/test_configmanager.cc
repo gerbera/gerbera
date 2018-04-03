@@ -5,6 +5,7 @@
 #include <fstream>
 
 #include <config_manager.h>
+#include <config/config_generator.h>
 
 using namespace zmm;
 using namespace mxml;
@@ -41,18 +42,17 @@ class ConfigManagerTest : public ::testing::Test {
       file.close();
     }
 
-    // Create config using generator
-    std::string cfgContent = createConfig();
-    printf("\nGenerated configuration: %s", cfgContent.c_str());
-    file.open(configDir + DIR_SEPARATOR + "config.xml");
-    file << cfgContent;
-    file.close();
-
     config_file = _(configDir.c_str()) + DIR_SEPARATOR + "config.xml";
     home = gerberaDir;
     prefix = gerberaDir;
     magic = "";
     confdir = ".config";
+
+    // Create config using generator
+    std::string cfgContent = createConfig();
+    file.open(configDir + DIR_SEPARATOR + "config.xml");
+    file << cfgContent;
+    file.close();
 
     printf("\ntest_config temporary path --> %s\n", gerberaDir.c_str());
     subject = new ConfigManager();
@@ -97,10 +97,8 @@ class ConfigManagerTest : public ::testing::Test {
   }
 
   std::string createConfig() {
-    std::stringstream ss;
-    ss << CMAKE_BINARY_DIR << DIR_SEPARATOR << "gerbera --create-config 2>&1";
-    std::string cmd = ss.str();
-    return exec(cmd.c_str());
+    ConfigGenerator configGenerator;
+    return configGenerator.generate(std::string(home.c_str()), std::string(confdir.c_str()), std::string(prefix.c_str()), magic);
   }
 
   virtual void TearDown() {
