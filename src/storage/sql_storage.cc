@@ -1008,7 +1008,7 @@ int SQLStorage::createContainer(int parentID, String name, String path, bool isV
                 << ")";
             exec(ib);
         }
-        log_debug("Wrote metadata for cds_object %s", newID);
+        log_debug("Wrote metadata for cds_object %d", newID);
     }
     
     /* inform cache */
