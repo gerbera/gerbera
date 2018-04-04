@@ -796,6 +796,11 @@ void ContentManager::addRecursive(String path, bool hidden, Ref<GenericTask> tas
         if (ConfigManager::getInstance()->getConfigFilename() == newPath)
             continue;
 
+        // For the Web UI
+        if (task != nullptr) {
+            task->setDescription(_("Importing: ") + newPath);
+        }
+
         try {
             Ref<CdsObject> obj = nullptr;
             if (parentID > 0)
