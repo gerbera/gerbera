@@ -42,6 +42,7 @@ class ConfigGenerator : public IConfigGenerator {
   zmm::Ref<mxml::Element> generateMappings();
   zmm::Ref<mxml::Element> generateOnlineContent();
   zmm::Ref<mxml::Element> generateTranscoding();
+  zmm::Ref<mxml::Element> generateUdn();
  protected:
   zmm::Ref<mxml::Element> map_from_to(std::string from, std::string to);
   zmm::Ref<mxml::Element> treat_as(std::string mimetype, std::string as);

@@ -4,6 +4,7 @@
 #include <config_manager.h>
 #include <config/config_generator.h>
 #include <fstream>
+#include <regex>
 
 using namespace ::testing;
 
@@ -54,6 +55,9 @@ TEST_F(ConfigGeneratorTest, GeneratesConfigXmlWithDefaultDefinitions) {
 
   std::string result = subject->generate(homePath, configDir, prefixDir, magicFile);
 
+  // remove UUID, for simple compare...TODO: mock UUID?
+  std::regex reg("<udn>uuid:[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}</udn>");
+  result = std::regex_replace(result, reg, "<udn/>");
   EXPECT_STREQ(mockXml.c_str(), result.c_str());
 }
 #endif
@@ -201,6 +205,13 @@ TEST_F(ConfigGeneratorTest, GeneratesTranscodingProfilesAlways) {
   result->indent();
 
   EXPECT_STREQ(mockXml.c_str(), result->print().c_str());
+}
+
+TEST_F(ConfigGeneratorTest, GeneratesUdnWithUUID) {
+
+  zmm::Ref<mxml::Element> result = subject->generateUdn();
+
+  EXPECT_THAT(result->getText().c_str(), MatchesRegex("^uuid:[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}"));
 }
 
 

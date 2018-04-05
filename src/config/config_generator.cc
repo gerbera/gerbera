@@ -29,6 +29,7 @@ Gerbera - https://gerbera.io/
 #include <common.h>
 #include <tools.h>
 #include <metadata_handler.h>
+#include <uuid/uuid.h>
 #include "config_generator.h"
 
 using namespace zmm;
@@ -69,8 +70,7 @@ Ref<Element> ConfigGenerator::generateServer(std::string userHome, std::string c
   server->appendElementChild(generateUi());
   server->appendTextChild(_("name"), _(PACKAGE_NAME));
 
-  Ref<Element> udn(new Element(_("udn")));
-  server->appendElementChild(udn);
+  server->appendElementChild(generateUdn());
 
   std::string homepath = userHome + DIR_SEPARATOR + configDir;
   server->appendTextChild(_("home"), _(strdup(homepath.c_str())));
@@ -411,6 +411,28 @@ Ref<Element> ConfigGenerator::generateTranscoding() {
   transcoding->appendElementChild(profiles);
 
   return transcoding;
+}
+
+Ref<Element> ConfigGenerator::generateUdn() {
+  uuid_t uuid;
+#ifdef BSD_NATIVE_UUID
+  char *uuid_str;
+  uint32_t status;
+  uuid_create(&uuid, &status);
+  uuid_to_string(&uuid, &uuid_str, &status);
+#else
+  char uuid_str[37];
+  uuid_generate(uuid);
+  uuid_unparse(uuid, uuid_str);
+#endif
+
+  log_debug("UUID generated: %s\n", uuid_str);
+  Ref<Element> udn(new Element(_("udn")));
+  udn->setText(_("uuid:") + uuid_str, mxml_string_type);
+#ifdef BSD_NATIVE_UUID
+  free(uuid_str);
+#endif
+  return udn;
 }
 
 Ref<Element> ConfigGenerator::map_from_to(std::string from, std::string to) {
