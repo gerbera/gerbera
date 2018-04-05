@@ -30,7 +30,7 @@ set(WITH_EXIV2          0 CACHE BOOL "Use libexiv2 to extract image metadata")
 set(WITH_PROTOCOL_EXTENSIONS 1 CACHE BOOL "Add incomplete DLNA protocol extensions to resposnses")
 set(WITH_SYSTEMD        1 CACHE BOOL "Install Systemd unit file")
 set(WITH_LASTFM         0 CACHE BOOL "Enable LastFM")
-set(WITH_DEBUG          0 CACHE BOOL "Enables debug logging")
+set(WITH_DEBUG          1 CACHE BOOL "Enables debug logging")
 set(WITH_TESTS          0 CACHE BOOL "Enables Unit Tests")
 
 
