@@ -55,7 +55,6 @@
 
 #ifdef HAVE_CURL
 #include <curl/curl.h>
-#include <config/config_generator.h>
 
 #endif
 
