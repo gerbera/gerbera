@@ -314,7 +314,6 @@ Ref<Element> ConfigGenerator::generateMappings() {
   mtcontent->appendElementChild(treat_as("audio/x-matroska", CONTENT_TYPE_MKA));
   mappings->appendElementChild(mtcontent);
 
-  mappings->indent();
   return mappings;
 }
 
