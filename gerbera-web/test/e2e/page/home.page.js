@@ -262,6 +262,6 @@ module.exports = function (driver) {
   }
 
   this.mockTaskMessage = function (msg) {
-    return driver.executeScript('return $(\'#toast\').toast(\'showTask\', {message: "'+ msg +'"});')
+      return driver.executeScript('return $(\'#toast\').toast(\'showTask\', {message: "'+ msg +'", type: "info", icon: "fa-refresh fa-spin fa-fw"});')
   }
 }
