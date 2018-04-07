@@ -73,10 +73,10 @@ Ref<Element> ConfigGenerator::generateServer(std::string userHome, std::string c
   server->appendElementChild(generateUdn());
 
   std::string homepath = userHome + DIR_SEPARATOR + configDir;
-  server->appendTextChild(_("home"), _(strdup(homepath.c_str())));
+  server->appendTextChild(_("home"), String::copy(homepath.c_str()));
 
   std::string webRoot = prefixDir + DIR_SEPARATOR + DEFAULT_WEB_DIR;
-  server->appendTextChild(_("webroot"), _(strdup(webRoot.c_str())));
+  server->appendTextChild(_("webroot"), String::copy(webRoot.c_str()));
 
   Ref<Comment> aliveinfo(new Comment(
       _("\n\
@@ -234,13 +234,13 @@ Ref<Element> ConfigGenerator::generateImport(std::string prefixDir, std::string 
 #ifdef HAVE_JS
   std::string script;
   script = prefixDir + DIR_SEPARATOR + DEFAULT_JS_DIR + DIR_SEPARATOR + DEFAULT_IMPORT_SCRIPT;
-  layout->appendTextChild(_("import-script"), (strdup(script.c_str())));
+  layout->appendTextChild(_("import-script"), String::copy(script.c_str()));
 
   script = prefixDir + DIR_SEPARATOR + DEFAULT_JS_DIR + DIR_SEPARATOR + DEFAULT_COMMON_SCRIPT;
-  scripting->appendTextChild(_("common-script"), _(strdup(script.c_str())));
+  scripting->appendTextChild(_("common-script"), String::copy(script.c_str()));
 
   script = prefixDir + DIR_SEPARATOR + DEFAULT_JS_DIR + DIR_SEPARATOR + DEFAULT_PLAYLISTS_SCRIPT;
-  scripting->appendTextChild(_("playlist-script"), _(strdup(script.c_str())));
+  scripting->appendTextChild(_("playlist-script"), String::copy(script.c_str()));
 #endif
 
   scripting->appendElementChild(layout);
@@ -437,14 +437,14 @@ Ref<Element> ConfigGenerator::generateUdn() {
 
 Ref<Element> ConfigGenerator::map_from_to(std::string from, std::string to) {
   Ref<Element> map(new Element(_("map")));
-  map->setAttribute(_("from"), _(strdup(from.c_str())));
-  map->setAttribute(_("to"), _(strdup(to.c_str())));
+  map->setAttribute(_("from"), String::copy(from.c_str()));
+  map->setAttribute(_("to"), String::copy(to.c_str()));
   return map;
 }
 
 Ref<Element> ConfigGenerator::treat_as(std::string mimetype, std::string as) {
   Ref<Element> treat(new Element(_("treat")));
-  treat->setAttribute(_("mimetype"), _(strdup(mimetype.c_str())));
-  treat->setAttribute(_("as"), _(strdup(as.c_str())));
+  treat->setAttribute(_("mimetype"), String::copy(mimetype.c_str()));
+  treat->setAttribute(_("as"), String::copy(as.c_str()));
   return treat;
 }
