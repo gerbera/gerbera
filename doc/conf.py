@@ -88,12 +88,24 @@ html_theme = 'sphinx_rtd_theme'
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-# html_theme_options = {}
+# Theme options
+html_theme_options = {
+    # 'typekit_id': 'hiw1hhg',
+    # 'analytics_id': '',
+    # 'sticky_navigation': True  # Set to False to disable the sticky nav while scrolling.
+    'logo_only': True,  # if we have a html_logo below, this shows /only/ the logo with no title text
+    # 'collapse_navigation': False,  # Collapse navigation (False makes it tree-like)
+    # 'display_version': True,  # Display the docs version
+    # 'navigation_depth': 4,  # Depth of the headers shown in the navigation bar
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+
+html_logo = '_static/gerbera-logo-white.png'
 
 
 # -- Options for HTMLHelp output ------------------------------------------
