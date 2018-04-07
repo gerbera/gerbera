@@ -38,46 +38,36 @@ using namespace mxml;
 
 String Node::print()
 {
-    Ref<StringBuffer> buf(new StringBuffer());
+    std::ostringstream buf;
     print_internal(buf, 0);
-    return buf->toString();
+    return buf.str();
 }
 
 String Node::escape(String str)
 {
-    Ref<StringBuffer> buf(new StringBuffer(str.length()));
+    std::ostringstream buf;
     auto *ptr = (signed char *)str.c_str();
     while (ptr && *ptr)
     {
         switch (*ptr)
         {
-            case '<' : *buf << "&lt;"; break;
-            case '>' : *buf << "&gt;"; break;
-            case '&' : *buf << "&amp;"; break;
-            case '"' : *buf << "&quot;"; break;
-            case '\'' : *buf << "&apos;"; break;
+            case '<' : buf << "&lt;"; break;
+            case '>' : buf << "&gt;"; break;
+            case '&' : buf << "&amp;"; break;
+            case '"' : buf << "&quot;"; break;
+            case '\'' : buf << "&apos;"; break;
                        // handle control codes
             default  : if (((*ptr >= 0x00) && (*ptr <= 0x1f) && 
                             (*ptr != 0x09) && (*ptr != 0x0d) && 
                             (*ptr != 0x0a)) || (*ptr == 0x7f))
                        {
-                           *buf << '.';
+                           buf << '.';
                        }
                        else
-                           *buf << *ptr;
+                           buf << *ptr;
                        break;
         }
         ptr++;
     }
-    return buf->toString();
+    return buf.str();
 }
-
-/*
-void Node::print_internal(Ref<StringBuffer> buf, int indent)
-{
-    static char *ind_str = "                                                               ";
-    static char *ind = ind_str + strlen(ind_str);
-    char *ptr = ind - indent * 2;
-    *buf << ptr;
-}
-*/

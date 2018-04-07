@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     content_manager.cc - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -796,6 +796,11 @@ void ContentManager::addRecursive(String path, bool hidden, Ref<GenericTask> tas
         if (ConfigManager::getInstance()->getConfigFilename() == newPath)
             continue;
 
+        // For the Web UI
+        if (task != nullptr) {
+            task->setDescription(_("Importing: ") + newPath);
+        }
+
         try {
             Ref<CdsObject> obj = nullptr;
             if (parentID > 0)
@@ -1028,7 +1033,7 @@ int ContentManager::addContainerChain(String chain, String lastClass, int lastRe
     if (!string_ok(chain))
         throw _Exception(_("addContainerChain() called with empty chain parameter"));
 
-    log_debug("received chain: %s\n", chain.c_str());
+    log_debug("received chain: %s (%s) [%s]\n", chain.c_str(), lastClass.c_str(), lastMetadata != nullptr ? lastMetadata->encodeSimple().c_str(): "null");
     storage->addContainerChain(chain, lastClass, lastRefID, &containerID, &updateID, lastMetadata);
 
     // if (updateID != INVALID_OBJECT_ID)
@@ -1147,7 +1152,7 @@ Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic, boo
          * this exists only to inform the caller that
          * this is a container
          */
-        /* 
+        /*
         cont->setLocation(path);
         Ref<StringConverter> f2i = StringConverter::f2i();
         obj->setTitle(f2i->convert(filename));
@@ -1315,6 +1320,12 @@ int ContentManager::addFile(zmm::String path, bool recursive, bool async,
     return addFileInternal(path, rootpath, recursive, async, hidden, lowPriority, 0, cancellable);
 }
 
+int ContentManager::addFile(zmm::String path, zmm::String rootpath, bool recursive, bool async,
+    bool hidden, bool lowPriority, bool cancellable)
+{
+    return addFileInternal(path, rootpath, recursive, async, hidden, lowPriority, 0, cancellable);
+}
+
 int ContentManager::addFileInternal(String path, String rootpath,
     bool recursive,
     bool async, bool hidden, bool lowPriority,
@@ -1323,7 +1334,7 @@ int ContentManager::addFileInternal(String path, String rootpath,
 {
     if (async) {
         Ref<GenericTask> task(new CMAddFileTask(path, rootpath, recursive, hidden, cancellable));
-        task->setDescription(_("Adding: ") + path);
+        task->setDescription(_("Importing: ") + path);
         task->setParentID(parentTaskID);
         addTask(task, lowPriority);
         return INVALID_OBJECT_ID;
@@ -1452,11 +1463,11 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
         // building container path for the description
         Ref<Storage> storage = Storage::getInstance();
         Ref<Array<CdsObject> > objectPath = storage->getObjectPath(objectID);
-        Ref<StringBuffer> desc(new StringBuffer(objectPath->size() * 10));
-        *desc << "Removing ";
+        std::ostringstream desc;
+        desc << "Removing ";
         // skip root container, start from 1
         for (int i = 1; i < objectPath->size(); i++)
-            *desc << '/' << objectPath->get(i)->getTitle();
+            desc << '/' << objectPath->get(i)->getTitle();
         */
         Ref<GenericTask> task(new CMRemoveObjectTask(objectID, all));
         Ref<Storage> storage = Storage::getInstance();
@@ -1832,7 +1843,7 @@ void CMAddFileTask::run()
 {
     log_debug("running add file task with path %s recursive: %d\n", path.c_str(), recursive);
     Ref<ContentManager> cm = ContentManager::getInstance();
-    cm->_addFile(path, nullptr, recursive, hidden, Ref<GenericTask>(this));
+    cm->_addFile(path, rootpath, recursive, hidden, Ref<GenericTask>(this));
 }
 
 CMRemoveObjectTask::CMRemoveObjectTask(int objectID, bool all)

@@ -38,6 +38,7 @@
 #include <condition_variable>
 #include <mutex>
 #include <sqlite3.h>
+#include <sstream>
 
 #include "storage/sql_storage.h"
 #include "timer.h"
@@ -194,8 +195,8 @@ private:
     virtual void threadCleanup() override {}
     virtual bool threadCleanupRequired() override { return false; }
 
-    zmm::Ref<zmm::StringBuffer> insertBuffer;
-    virtual void _addToInsertBuffer(zmm::Ref<zmm::StringBuffer> query) override;
+    std::ostringstream insertBuffer;
+    void _addToInsertBuffer(const std::string &query) override;
     virtual void _flushInsertBuffer() override;
 
     bool dirty;

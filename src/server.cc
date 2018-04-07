@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     server.cc - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -483,7 +483,7 @@ int Server::register_web_callbacks()
             Ref<RequestHandler> reqHandler = const_cast<Server *>(static_cast<const Server *>(cookie))->create_request_handler(filename);
             Ref<IOHandler> ioHandler = reqHandler->open(link.c_str(), mode, nullptr);
             ioHandler->retain();
-            log_debug("%p open(%s)\n", ioHandler.getPtr(), filename);
+            //log_debug("%p open(%s)\n", ioHandler.getPtr(), filename);
             return (UpnpWebFileHandle)ioHandler.getPtr();
         } catch (const ServerShutdownException& se) {
             return nullptr;
@@ -499,7 +499,7 @@ int Server::register_web_callbacks()
 
     log_debug("Setting UpnpVirtualDir ReadCallback\n");
     ret = UpnpVirtualDir_set_ReadCallback([](IN UpnpWebFileHandle f, OUT char* buf, IN size_t length, IN const void *cookie) -> int {
-        log_debug("%p read(%d)\n", f, length);
+        //log_debug("%p read(%d)\n", f, length);
         if (static_cast<const Server *>(cookie)->getShutdownStatus())
             return -1;
 
@@ -510,14 +510,14 @@ int Server::register_web_callbacks()
 
     log_debug("Setting UpnpVirtualDir WriteCallback\n");
     ret = UpnpVirtualDir_set_WriteCallback([](IN UpnpWebFileHandle f, IN char* buf, IN size_t length, IN const void *cookie) -> int {
-        log_debug("%p write(%d)\n", f, length);
+        //log_debug("%p write(%d)\n", f, length);
         return 0;
     });
     if (ret != UPNP_E_SUCCESS) return ret;
 
     log_debug("Setting UpnpVirtualDir SeekCallback\n");
     ret = UpnpVirtualDir_set_SeekCallback([](IN UpnpWebFileHandle f, IN off_t offset, IN int whence, IN const void *cookie) -> int {
-        log_debug("%p seek(%d, %d)\n", f, offset, whence);
+        //log_debug("%p seek(%d, %d)\n", f, offset, whence);
         try {
             auto* handler = (IOHandler*)f;
             handler->seek(offset, whence);
@@ -533,7 +533,7 @@ int Server::register_web_callbacks()
 
     log_debug("Setting UpnpVirtualDir CloseCallback\n");
     UpnpVirtualDir_set_CloseCallback([](IN UpnpWebFileHandle f, IN const void *cookie) -> int {
-        log_debug("%p close()\n", f);
+        //log_debug("%p close()\n", f);
         Ref<IOHandler> handler((IOHandler*)f);
         handler->release();
         try {

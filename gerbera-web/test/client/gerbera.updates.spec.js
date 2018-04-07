@@ -17,7 +17,7 @@ describe('Gerbera Updates', function () {
 
       GERBERA.Updates.showMessage('a message')
 
-      expect($.fn.toast).toHaveBeenCalledWith('show', {message: 'a message'})
+      expect($.fn.toast).toHaveBeenCalledWith('show', {message: 'a message', type: undefined, icon: undefined})
     })
   })
 
@@ -157,7 +157,7 @@ describe('Gerbera Updates', function () {
       spyOn(GERBERA.Updates, 'addTaskInterval')
 
       GERBERA.Updates.updateTask(response).then(function (promisedResponse) {
-        expect($('.grb-toast-msg').text()).toEqual('Performing full scan: /Movies')
+        expect($('#grb-toast-msg').text()).toEqual('Performing full scan: /Movies')
         expect(promisedResponse).toEqual(response)
         isDone()
       })
@@ -262,7 +262,7 @@ describe('Gerbera Updates', function () {
 
       GERBERA.Updates.errorCheck(event, xhr)
 
-      expect($('.grb-toast-msg').text()).toEqual('General Error')
+      expect($('#grb-toast-msg').text()).toEqual('General Error')
     })
 
     it('ignores when response does not exist', function () {
@@ -273,7 +273,7 @@ describe('Gerbera Updates', function () {
 
       GERBERA.Updates.errorCheck(event, xhr)
 
-      expect($('.grb-toast-msg').text()).toEqual('')
+      expect($('#grb-toast-msg').text()).toEqual('')
     })
 
     it('disables application when server returns 900 error code, albeit successful', function () {
@@ -287,7 +287,7 @@ describe('Gerbera Updates', function () {
 
       GERBERA.Updates.errorCheck(event, xhr)
 
-      expect($('.grb-toast-msg').text()).toEqual('The UI is disabled in the configuration file. See README.')
+      expect($('#grb-toast-msg').text()).toEqual('The UI is disabled in the configuration file. See README.')
       expect(GERBERA.App.disable).toHaveBeenCalled()
     })
 

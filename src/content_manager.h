@@ -145,7 +145,7 @@ public:
 class DirCache : public zmm::Object
 {
 protected:
-    zmm::Ref<zmm::StringBuffer> buffer;
+    std::ostringstream buffer;
     int size; // number of entries
     int capacity; // capacity of entries
     zmm::Ref<zmm::Array<DirCacheEntry> > entries;
@@ -199,6 +199,18 @@ public:
     /// \return object ID of the added file - only in blockign mode, when used in async mode this function will return INVALID_OBJECT_ID
     int addFile(zmm::String path, bool recursive=true, bool async=true, 
                 bool hidden=false, bool lowPriority=false, 
+                bool cancellable=true);
+
+    /// \brief Adds a file or directory to the database.
+    /// \param path absolute path to the file
+    /// \param rootpath absolute path to the container root
+    /// \param recursive recursive add (process subdirecotories)
+    /// \param async queue task or perform a blocking call
+    /// \param hidden true allows to import hidden files, false ignores them
+    /// \param queue for immediate processing or in normal order
+    /// \return object ID of the added file - only in blockign mode, when used in async mode this function will return INVALID_OBJECT_ID
+    int addFile(zmm::String path, zmm::String rootpath, bool recursive=true, bool async=true,
+                bool hidden=false, bool lowPriority=false,
                 bool cancellable=true);
 
     int ensurePathExistence(zmm::String path);

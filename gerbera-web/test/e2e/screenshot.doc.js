@@ -26,7 +26,7 @@ test.describe('The screenshot documentation spec takes screenshots', function ()
       .forBrowser('chrome')
       .build()
 
-    driver.manage().window().setSize(1280, 1024)
+    driver.manage().window().setSize(1440, 1080)
     driver.get(mockWebServer + '/reset?testName=default.json')
 
     loginPage = new LoginPage(driver)
@@ -49,8 +49,8 @@ test.describe('The screenshot documentation spec takes screenshots', function ()
     loginPage.username('gerbera')
     loginPage.takeScreenshot(fileName).then(function () {
       Jimp.read(fileName).then(function (image) {
-        image.resize(1280, 1024)
-        image.crop(0, 0, 1270, 100).write(fileName)
+        image.resize(1440, 1080)
+        image.crop(0, 0, 1430, 100).write(fileName)
         done()
       });
     })
@@ -63,8 +63,8 @@ test.describe('The screenshot documentation spec takes screenshots', function ()
     loginPage.submitLogin()
     loginPage.takeScreenshot(fileName).then(function () {
       Jimp.read(fileName).then(function (image) {
-        image.resize(1280, 1024)
-        image.crop(0, 0, 1270, 100).write(fileName)
+        image.resize(1440, 1080)
+        image.crop(0, 0, 1430, 100).write(fileName)
         done()
       });
     })
@@ -80,7 +80,7 @@ test.describe('The screenshot documentation spec takes screenshots', function ()
     homePage.clickTree('Video').then(function () {
       homePage.takeScreenshot(fileName).then(function () {
         Jimp.read(fileName).then(function (image) {
-          image.resize(1024, Jimp.AUTO).write(fileName)
+          image.resize(1280, Jimp.AUTO).write(fileName)
           done()
         });
       })
@@ -97,7 +97,7 @@ test.describe('The screenshot documentation spec takes screenshots', function ()
     homePage.clickTree('etc').then(function () {
       homePage.takeScreenshot(fileName).then(function () {
         Jimp.read(fileName).then(function (image) {
-          image.resize(1024, Jimp.AUTO).write(fileName)
+          image.resize(1280, Jimp.AUTO).write(fileName)
           done()
         });
       })
@@ -114,7 +114,7 @@ test.describe('The screenshot documentation spec takes screenshots', function ()
     homePage.clickTree('Video').then(function () {
       homePage.takeScreenshot(fileName).then(function () {
         Jimp.read(fileName).then(function (image) {
-          image.resize(1024, Jimp.AUTO).write(fileName)
+          image.resize(1280, Jimp.AUTO).write(fileName)
           done()
         });
       })
@@ -133,8 +133,8 @@ test.describe('The screenshot documentation spec takes screenshots', function ()
       driver.sleep(1000)
       homePage.takeScreenshot(fileName).then(function () {
         Jimp.read(fileName).then(function (image) {
-          image.resize(1280, 1024)
-          image.crop(300, 0, 656, 899).write(fileName)
+          image.resize(1440, 1080)
+          image.crop(390, 0, 656, 899).write(fileName)
           done()
         });
       })
@@ -152,8 +152,8 @@ test.describe('The screenshot documentation spec takes screenshots', function ()
       homePage.hover('.grb-trail-edit')
       homePage.takeScreenshot(fileName).then(function () {
         Jimp.read(fileName).then(function (image) {
-          image.resize(1280, 1024)
-          image.crop(700,0, 570, 130).write(fileName)
+          image.resize(1440, 1080)
+          image.crop(860, 0, 570, 140).write(fileName)
           done()
         });
       })
@@ -172,8 +172,8 @@ test.describe('The screenshot documentation spec takes screenshots', function ()
       homePage.hover('.grb-item-edit')
       homePage.takeScreenshot(fileName).then(function () {
         Jimp.read(fileName).then(function (image) {
-          image.resize(1280, 1024)
-          image.crop(525, 125, 745, 125).write(fileName)
+          image.resize(1440, 1080)
+          image.crop(325, 125, 1135, 125).write(fileName)
           done()
         });
       })
@@ -192,7 +192,7 @@ test.describe('The screenshot documentation spec takes screenshots', function ()
     homePage.getToastElement().then(function (element) {
       homePage.takeScreenshot(fileName).then(function () {
         Jimp.read(fileName).then(function (image) {
-          image.resize(1024, Jimp.AUTO).write(fileName)
+          image.resize(1280, Jimp.AUTO).write(fileName)
           done()
         });
       })
@@ -211,7 +211,7 @@ test.describe('The screenshot documentation spec takes screenshots', function ()
       driver.sleep(1000)
       homePage.takeScreenshot(fileName).then(function () {
         Jimp.read(fileName).then(function (image) {
-          image.resize(1024, Jimp.AUTO).write(fileName)
+          image.resize(1280, Jimp.AUTO).write(fileName)
           done()
         });
       })

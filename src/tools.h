@@ -33,6 +33,7 @@
 
 #include <memory>
 #include <unordered_set>
+#include <sstream>
 
 #include <sys/time.h>
 
@@ -105,8 +106,6 @@ zmm::String find_in_path(zmm::String exec);
 /// 
 /// Checks if str is nullptr or ""
 bool string_ok(zmm::String str);
-
-bool string_ok(zmm::Ref<zmm::StringBuffer> str);
 
 /// \brief Checks if the string contains any data.
 /// \param str String to be checked.
@@ -263,6 +262,17 @@ zmm::String fallbackString(zmm::String first, zmm::String fallback);
 /// \param str the string to compute the hash for
 /// \return return the (unsigned int) hash value
 unsigned int stringHash(zmm::String str);
+
+template <typename C, typename D>
+std::string join(const C &container, const D &delimiter) {
+    std::ostringstream buf;
+    auto it = container.begin();
+    while (it != container.end()) {
+        buf << *it;
+        if (std::next(it++) != container.end()) buf << delimiter;
+    }
+    return buf.str();
+}
 
 zmm::String toCSV(std::shared_ptr<std::unordered_set<int> > array);
 

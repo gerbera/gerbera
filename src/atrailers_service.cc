@@ -40,6 +40,8 @@
 #include "config_options.h"
 #include "server.h"
 
+#include <string>
+
 using namespace zmm;
 using namespace mxml;
 
@@ -88,7 +90,7 @@ Ref<Element> ATrailersService::getData()
     long retcode;
     Ref<StringConverter> sc = StringConverter::i2i();
 
-    Ref<StringBuffer> buffer;
+    std::string buffer;
     
     try 
     {
@@ -103,17 +105,17 @@ Ref<Element> ATrailersService::getData()
         return nullptr;
     }
 
-    if (buffer == nullptr)
+    if (buffer.empty())
         return nullptr;
 
     if (retcode != 200)
         return nullptr;
 
-    log_debug("GOT BUFFER\n%s\n", buffer->toString().c_str()); 
+    log_debug("GOT BUFFER\n%s\n", buffer.c_str());
     Ref<Parser> parser(new Parser());
     try
     {
-        return parser->parseString(sc->convert(buffer->toString()))->getRoot();
+        return parser->parseString(sc->convert(buffer))->getRoot();
     }
     catch (const ParseException & pe)
     {
@@ -182,11 +184,11 @@ bool ATrailersService::refreshServiceData(Ref<Layout> layout)
             log_debug("Updating existing Trailers object\n");
             obj->setID(old->getID());
             obj->setParentID(old->getParentID());
-            struct timespec oldt, newt;
-            oldt.tv_nsec = 0;
-            oldt.tv_sec = old->getAuxData(_(ONLINE_SERVICE_LAST_UPDATE)).toLong();
-            newt.tv_nsec = 0;
-            newt.tv_sec = obj->getAuxData(_(ONLINE_SERVICE_LAST_UPDATE)).toLong();
+//            struct timespec oldt, newt;
+//            oldt.tv_nsec = 0;
+//            oldt.tv_sec = old->getAuxData(_(ONLINE_SERVICE_LAST_UPDATE)).toLong();
+//            newt.tv_nsec = 0;
+//            newt.tv_sec = obj->getAuxData(_(ONLINE_SERVICE_LAST_UPDATE)).toLong();
             ContentManager::getInstance()->updateObject(obj);
         }
 

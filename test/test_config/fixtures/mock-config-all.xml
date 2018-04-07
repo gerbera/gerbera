@@ -9,7 +9,7 @@
         <account user="gerbera" password="gerbera"/>
       </accounts>
     </ui>
-    <name>gerbera</name>
+    <name>Gerbera</name>
     <udn/>
     <home>/tmp/.config/gerbera</home>
     <webroot>/usr/local/share/gerbera/web</webroot>

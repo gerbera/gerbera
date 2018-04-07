@@ -508,7 +508,7 @@ describe('Gerbera Items', function () {
 
       GERBERA.Items.addFileItemComplete(response)
 
-      expect(GERBERA.Updates.showMessage).toHaveBeenCalledWith('Successfully added item')
+      expect(GERBERA.Updates.showMessage).toHaveBeenCalledWith('Successfully added item', undefined, 'success', 'fa-check')
     })
 
     it('adds a UI timer to check for updates when successful', function () {

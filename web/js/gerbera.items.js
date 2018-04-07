@@ -171,7 +171,7 @@ GERBERA.Items = (function () {
       var editModal = $('#editModal')
       editModal.editmodal('hide')
       editModal.editmodal('reset')
-      GERBERA.Updates.showMessage('Successfully saved item')
+      GERBERA.Updates.showMessage('Successfully saved item', undefined, 'success', 'fa-check')
       GERBERA.Updates.updateTreeByIds(response)
     } else {
       GERBERA.App.error('Failed to save item')
@@ -205,7 +205,7 @@ GERBERA.Items = (function () {
   var deleteComplete = function (response) {
     if (response.success && GERBERA.Items.currentTreeItem) {
       // TODO: better served as an event to refresh
-      GERBERA.Updates.showMessage('Successfully deleted item')
+      GERBERA.Updates.showMessage('Successfully removed item', undefined, 'success', 'fa-check')
       GERBERA.Items.treeItemSelected(GERBERA.Items.currentTreeItem)
       GERBERA.Updates.updateTreeByIds(response)
     } else {
@@ -239,7 +239,7 @@ GERBERA.Items = (function () {
 
   var addFileItemComplete = function (response) {
     if (response.success) {
-      GERBERA.Updates.showMessage('Successfully added item')
+      GERBERA.Updates.showMessage('Successfully added item', undefined, 'success', 'fa-check')
       GERBERA.Updates.addUiTimer()
     } else {
       GERBERA.App.error('Failed to add item')
@@ -281,7 +281,7 @@ GERBERA.Items = (function () {
       var editModal = $('#editModal')
       editModal.editmodal('hide')
       editModal.editmodal('reset')
-      GERBERA.Updates.showMessage('Successfully added object')
+      GERBERA.Updates.showMessage('Successfully added object', undefined, 'success', 'fa-check')
       GERBERA.Items.treeItemSelected(GERBERA.Items.currentTreeItem)
       GERBERA.Updates.updateTreeByIds(response)
     } else {

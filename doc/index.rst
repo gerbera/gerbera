@@ -1,39 +1,7 @@
-.. gerbera documentation master file, created by
-   sphinx-quickstart on Sat Dec 23 17:22:17 2017.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+Gerbera Docs
+----------------------------
 
-Welcome to gerbera's documentation!
-===================================
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Contents:
-
-   Install Gerbera            <install>
-   Compile Gerbera            <compile>
-   Run Gerbera                <run>
-   Gerbera Daemon             <daemon>
-   Configuration Overview     <config-overview>
-   Configure Server           <config-server>
-   Configure Extended Options <config-extended>
-   Configure Content Import   <config-import>
-   Configure Online Content   <config-online>
-   Configure Transcoding      <config-transcode>
-   Gerbera UI                 <ui>
-   Scripting                  <scripting>
-   Transcoding                <transcoding>
-   Supported Devices          <supported-devices>
-
-Indices and Tables
-==================
-
-* :ref:`genindex`
-
-Introduction
-============
-
-Gerbera is an open source (GPL) UPnP MediaServer with a nice web user interface, it allows you to stream your digital
+Gerbera is an open source (GPL) UPnP MediaServer. It allows you to stream your digital
 media through your home network and listen to/watch it on a variety of UPnP compatible devices.
 
 Gerbera implements the UPnP MediaServer V 1.0 specification that can be found on http://www.upnp.org/.
@@ -205,3 +173,26 @@ Contributions
 -  NetBSD patches were contributed by Jared D. McNeill <jmcneill at NetBSD dot org>
 
 
+.. toctree::
+   :maxdepth: 1
+   :caption: Contents:
+
+   Install Gerbera            <install>
+   Compile Gerbera            <compile>
+   Run Gerbera                <run>
+   Gerbera Daemon             <daemon>
+   Configuration Overview     <config-overview>
+   Configure Server           <config-server>
+   Configure Extended Options <config-extended>
+   Configure Content Import   <config-import>
+   Configure Online Content   <config-online>
+   Configure Transcoding      <config-transcode>
+   Gerbera UI                 <ui>
+   Scripting                  <scripting>
+   Transcoding                <transcoding>
+   Supported Devices          <supported-devices>
+
+Indices and Tables
+==================
+
+* :ref:`genindex`

@@ -77,9 +77,6 @@ protected:
 };
 
 
-class StringBuffer;
-
-
 class String
 {
 protected:
@@ -92,6 +89,7 @@ public:
     String(const String &other);
     String(StringBase *other);
     String(Ref<StringBase> other);
+    String(const std::string &other);
 
     inline StringBase *getBase()
     {
@@ -108,6 +106,8 @@ public:
     String &operator=(const char *str);
 
     String &operator=(String other);
+
+    String &operator=(const std::string &other);
 
     inline String &operator=(std::nullptr_t)
     {
@@ -219,7 +219,6 @@ public:
     static String copy(const char *str);
 protected:
     String(int capacity);
-    friend class StringBuffer;
 };
 
 }; // namespace
@@ -238,6 +237,12 @@ struct hash<zmm::String>
         return std::hash<std::string>{}(s.c_str());
     }
 };
+}
+
+template <typename T>
+std::basic_ostream<T> &operator<<(std::basic_ostream<T> &oss, const zmm::String &s) {
+    oss << s.c_str();
+    return oss;
 }
 
 #endif // __STRINGS_H__

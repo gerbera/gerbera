@@ -44,17 +44,25 @@ GERBERA.App = (function () {
   }
 
   var error = function (event) {
-    var message
+    var message, type, icon
     if (typeof event === 'string') {
       message = event
+      type = 'warning'
+      icon = 'fa-exclamation-triangle'
     } else if (event && event.responseText) {
       message = event.responseText
+      type = 'info'
+      icon = 'fa-exclamation-triangle'
     } else if (event && event.error) {
       message = event.error.text
+      type = 'warning'
+      icon = 'fa-exclamation-triangle'
     } else {
-      message = 'The system encountered an error'
+      message = 'The system encountered an error';
+      type = 'danger';
+      icon = 'fa-frown-o'
     }
-    GERBERA.Updates.showMessage(message)
+    GERBERA.Updates.showMessage(message, undefined, type, icon)
   }
 
   var initialize = function () {
@@ -107,7 +115,7 @@ GERBERA.App = (function () {
     if (GERBERA.Auth.isLoggedIn()) {
       $('.login-field').hide()
       $('#login-submit').hide()
-      if (GERBERA.App.serverConfig.accounts) {
+      if (GERBERA.App.accounts) {
         $('#logout').show().click(GERBERA.Auth.logout)
       }
       GERBERA.Items.initialize()

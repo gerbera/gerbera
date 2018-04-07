@@ -35,6 +35,7 @@
 #include <memory>
 #include <unordered_set>
 #include <vector>
+#include <string>
 
 #include "zmm/zmmf.h"
 #include "singleton.h"
@@ -98,6 +99,27 @@ public:
     inline void setTotalMatches(int totalMatches)
     { this->totalMatches = totalMatches; }
     
+};
+
+class SearchParam : public zmm::Object
+{
+protected:
+    std::string containerID;
+    std::string searchCrit;
+    int startingIndex;
+    int requestedCount;
+    
+public:
+    SearchParam(const std::string& containerID, const std::string& searchCriteria, int startingIndex,
+        int requestedCount)
+        : containerID(containerID)
+        , searchCrit(searchCriteria)
+        , startingIndex(startingIndex)
+        , requestedCount(requestedCount)
+    {}
+    const std::string& searchCriteria() const { return searchCrit; };
+    int getStartingIndex() { return startingIndex; };
+    int getRequestedCount() { return requestedCount; };
 };
 
 class Storage : public Singleton<Storage, std::mutex>
@@ -172,15 +194,13 @@ public:
 
     virtual zmm::String findFolderImage(int id, zmm::String trackArtBase) = 0;
 
+    virtual zmm::Ref<zmm::Array<CdsObject>> search(zmm::Ref<SearchParam> param, int* numMatches) = 0;
     
-    class ChangedContainers : public Object
-    {
+    class ChangedContainers : public Object {
     public:
-        ChangedContainers()
-        {
-        }
-        std::vector<int> upnp;
-        std::vector<int> ui;
+        // Signed because IDs start at -1.
+        std::vector<int32_t> upnp;
+        std::vector<int32_t> ui;
     };
     
     /// \brief Removes the object identified by the objectID from the database.
@@ -280,7 +300,9 @@ public:
     
     virtual void threadCleanup() = 0;
     virtual bool threadCleanupRequired() = 0;
-    
+
+    virtual void doMetadataMigration() = 0;
+
 protected:
     /* helper for addContainerChain */
     static void stripAndUnescapeVirtualContainerFromPath(zmm::String path, zmm::String &first, zmm::String &last);

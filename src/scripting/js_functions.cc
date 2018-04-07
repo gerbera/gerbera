@@ -179,7 +179,7 @@ duk_ret_t js_addCdsObject(duk_context *ctx)
             else
                 path = i2i->convert(path);
 
-            id = cm->addContainerChain(path, containerclass);
+            id = cm->addContainerChain(path, containerclass, INVALID_OBJECT_ID, orig_object->getMetadata());
         }
 
         cds_obj->setParentID(id);

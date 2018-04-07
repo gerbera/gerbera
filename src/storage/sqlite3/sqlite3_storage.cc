@@ -54,6 +54,17 @@
 #define SQLITE3_UPDATE_2_3_2 "CREATE INDEX mt_cds_object_service_id ON mt_cds_object(service_id)"
 #define SQLITE3_UPDATE_2_3_3 "UPDATE \"mt_internal_setting\" SET \"value\"='3' WHERE \"key\"='db_version' AND \"value\"='2'"
 
+// updates 3->4
+#define SQLITE3_UPDATE_3_4_1 "CREATE TABLE \"mt_metadata\" ( \
+  \"id\" integer primary key, \
+  \"item_id\" integer NOT NULL, \
+  \"property_name\" varchar(255) NOT NULL, \
+  \"property_value\" text NOT NULL, \
+  CONSTRAINT \"mt_metadata_idfk1\" FOREIGN KEY (\"item_id\") REFERENCES \"mt_cds_object\" (\"id\") \
+  ON DELETE CASCADE ON UPDATE CASCADE )"
+#define SQLITE3_UPDATE_3_4_2 "CREATE INDEX mt_metadata_item_id ON mt_metadata(item_id)"
+#define SQLITE3_UPDATE_3_4_3 "UPDATE \"mt_internal_setting\" SET \"value\"='4' WHERE \"key\"='db_version' AND \"value\"='3'"
+  
 #define SL3_INITITAL_QUEUE_SIZE 20
 
 using namespace zmm;
@@ -67,7 +78,6 @@ Sqlite3Storage::Sqlite3Storage()
     table_quote_begin = '"';
     table_quote_end = '"';
     startupError = nullptr;
-    insertBuffer = nullptr;
     dirty = false;
 }
 
@@ -158,8 +168,8 @@ void Sqlite3Storage::init()
 
     _exec("PRAGMA locking_mode = EXCLUSIVE");
     int synchronousOption = ConfigManager::getInstance()->getIntOption(CFG_SERVER_STORAGE_SQLITE_SYNCHRONOUS);
-    Ref<StringBuffer> buf(new StringBuffer());
-    *buf << "PRAGMA synchronous = " << synchronousOption;
+    std::ostringstream buf;
+    buf << "PRAGMA synchronous = " << synchronousOption;
     SQLStorage::exec(buf);
 
     log_debug("db_version: %s\n", dbVersion.c_str());
@@ -185,9 +195,18 @@ void Sqlite3Storage::init()
         dbVersion = _("3");
     }
 
+    if (dbVersion == "3") {
+        log_info("Doing an automatic database upgrade from database version 3 to version 4...\n");
+        _exec(SQLITE3_UPDATE_3_4_1);
+        _exec(SQLITE3_UPDATE_3_4_2);
+        _exec(SQLITE3_UPDATE_3_4_3);
+        log_info("database upgrade successful.\n");
+        dbVersion = _("4");
+    }
+
     /* --- --- ---*/
 
-    if (!string_ok(dbVersion) || dbVersion != "3")
+    if (!string_ok(dbVersion) || dbVersion != "4")
         throw _Exception(_("The database seems to be from a newer version!"));
 
     // add timer for backups
@@ -335,31 +354,29 @@ void Sqlite3Storage::shutdownDriver()
 
 void Sqlite3Storage::storeInternalSetting(String key, String value)
 {
-    Ref<StringBuffer> q(new StringBuffer());
-    *q << "INSERT OR REPLACE INTO " << QTB << INTERNAL_SETTINGS_TABLE << QTE << " (" << QTB << "key" << QTE << ", " << QTB << "value" << QTE << ") "
+    std::ostringstream q;
+    q << "INSERT OR REPLACE INTO " << QTB << INTERNAL_SETTINGS_TABLE << QTE << " (" << QTB << "key" << QTE << ", " << QTB << "value" << QTE << ") "
                                                                                                                                                 "VALUES ("
        << quote(key) << ", " << quote(value) << ") ";
     SQLStorage::exec(q);
 }
 
-void Sqlite3Storage::_addToInsertBuffer(Ref<StringBuffer> query)
+void Sqlite3Storage::_addToInsertBuffer(const std::string &query)
 {
-    if (insertBuffer == nullptr) {
-        insertBuffer = Ref<StringBuffer>(new StringBuffer());
-        *insertBuffer << "BEGIN TRANSACTION;";
+    if (insertBuffer.str().length() == 0) {
+        insertBuffer << "BEGIN TRANSACTION;";
     }
 
-    *insertBuffer << query << ';';
+    insertBuffer << query << ';';
 }
 
 void Sqlite3Storage::_flushInsertBuffer()
 {
-    if (insertBuffer == nullptr)
+    if (insertBuffer.str().length() == 0)
         return;
-    *insertBuffer << "COMMIT;";
+    insertBuffer << "COMMIT;";
     SQLStorage::exec(insertBuffer);
-    insertBuffer->clear();
-    *insertBuffer << "BEGIN TRANSACTION;";
+    insertBuffer.str("");
 }
 
 /* SLTask */
@@ -455,10 +472,9 @@ SLSelectTask::SLSelectTask(const char* query)
 
 void SLSelectTask::run(sqlite3** db, Sqlite3Storage* sl)
 {
-
     pres = Ref<Sqlite3Result>(new Sqlite3Result());
 
-    char* err;
+    char* err = nullptr;;
     int ret = sqlite3_get_table(
         *db,
         query,
@@ -468,6 +484,7 @@ void SLSelectTask::run(sqlite3** db, Sqlite3Storage* sl)
         &err);
     String error = nullptr;
     if (err != nullptr) {
+        log_debug(err);
         error = err;
         sqlite3_free(err);
     }

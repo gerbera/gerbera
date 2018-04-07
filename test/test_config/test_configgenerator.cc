@@ -45,6 +45,10 @@ TEST_F(ConfigGeneratorTest, GeneratesFullConfigXmlWithAllDefinitions) {
 
   std::string result = subject->generate(homePath, configDir, prefixDir, magicFile);
 
+  // remove UUID, for simple compare...TODO: mock UUID?
+  std::regex reg("<udn>uuid:[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}</udn>");
+  result = std::regex_replace(result, reg, "<udn/>");
+
   EXPECT_STREQ(mockXml.c_str(), result.c_str());
 }
 #endif
@@ -69,7 +73,12 @@ TEST_F(ConfigGeneratorTest, GeneratesFullServerXmlWithAllDefinitions) {
   zmm::Ref<mxml::Element> result = subject->generateServer(homePath, configDir, prefixDir);
   result->indent();
 
-  EXPECT_STREQ(mockXml.c_str(), result->print().c_str());
+  // remove UUID, for simple compare...TODO: mock UUID?
+  std::string resultStr = result->print().c_str();
+  std::regex reg("<udn>uuid:[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}</udn>");
+  resultStr = std::regex_replace(resultStr, reg, "<udn/>");
+
+  EXPECT_STREQ(mockXml.c_str(), resultStr.c_str());
 }
 #endif
 

@@ -43,7 +43,7 @@ GERBERA.Updates = (function () {
     var response = xhr.responseJSON
     if (response && !response.success) {
       if (response.error) {
-        showMessage(response.error.text)
+        showMessage(response.error.text, undefined, 'danger', 'fa-exclamation-triangle')
         if(response.error.code === '900') {
           GERBERA.App.disable()
         } else if(response.error.code === '400') {
@@ -53,16 +53,16 @@ GERBERA.Updates = (function () {
     }
   }
 
-  var showMessage = function (message, callback) {
-    var toast = {message: message}
+  var showMessage = function (message, callback, type, icon) {
+    var toast = {message: message, type: type, icon: icon}
     if (callback) {
       toast.callback = callback
     }
     $('#toast').toast('show', toast)
   }
 
-  var showTask = function (message, callback) {
-    var toast = {message: message}
+  var showTask = function (message, callback, type, icon) {
+    var toast = {message: message, type: type, icon: icon}
     if (callback) {
       toast.callback = callback
     }
@@ -107,7 +107,7 @@ GERBERA.Updates = (function () {
         if (taskId === -1) {
           promise = GERBERA.Updates.clearTaskInterval(response)
         } else {
-          showTask(response.task.text)
+          showTask(response.task.text, undefined, 'info', 'fa-refresh fa-spin fa-fw')
           GERBERA.Updates.addTaskInterval()
           promise = $.Deferred().resolve(response).promise()
         }

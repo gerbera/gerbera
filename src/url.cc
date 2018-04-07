@@ -38,13 +38,11 @@
 #include "tools.h"
 #include "config_manager.h"
 
+#include <sstream>
+
 using namespace zmm;
 
-URL::URL(size_t buffer_hint) : buffer_hint(buffer_hint)
-{
-}
-
-Ref<StringBuffer> URL::download(String URL, long *HTTP_retcode, 
+std::string URL::download(String URL, long *HTTP_retcode,
                                 CURL *curl_handle, bool only_header, 
                                 bool verbose, bool redirect)
 {
@@ -60,7 +58,7 @@ Ref<StringBuffer> URL::download(String URL, long *HTTP_retcode,
             throw _Exception(_("Invalid curl handle!\n"));
     }
 
-    Ref<StringBuffer> buffer(new StringBuffer(buffer_hint));
+    std::ostringstream buffer;
 
     curl_easy_reset(curl_handle);
     
@@ -89,14 +87,12 @@ Ref<StringBuffer> URL::download(String URL, long *HTTP_retcode,
     {
         curl_easy_setopt(curl_handle, CURLOPT_NOBODY, 1);
         curl_easy_setopt(curl_handle, CURLOPT_HEADERFUNCTION, URL::dl);
-        curl_easy_setopt(curl_handle, CURLOPT_HEADERDATA, 
-                         (void *)buffer.getPtr());
+        curl_easy_setopt(curl_handle, CURLOPT_HEADERDATA, &buffer);
     }
     else
     {
         curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, URL::dl);
-        curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, 
-                         (void *)buffer.getPtr());
+        curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, &buffer);
     }
 
     if (redirect)
@@ -126,7 +122,7 @@ Ref<StringBuffer> URL::download(String URL, long *HTTP_retcode,
     if (cleanup)
         curl_easy_cleanup(curl_handle);
 
-    return buffer;
+    return buffer.str();
 }
 
 Ref<URL::Stat> URL::getInfo(String URL, CURL *curl_handle)
@@ -149,7 +145,7 @@ Ref<URL::Stat> URL::getInfo(String URL, CURL *curl_handle)
             throw _Exception(_("Invalid curl handle!\n"));
     }
 
-    Ref<StringBuffer> buffer = download(URL, &retcode, curl_handle, true, true, true);
+    download(URL, &retcode, curl_handle, true, true, true);
     if (retcode != 200)
     {
         if (cleanup)
@@ -253,12 +249,10 @@ Ref<URL::Stat> URL::getInfo(String URL, CURL *curl_handle)
 
 size_t URL::dl(void *buf, size_t size, size_t nmemb, void *data)
 {
-    auto *buffer = (StringBuffer *)data;
-    if (buffer == nullptr)
-        return 0;
+    auto &oss = *reinterpret_cast<std::ostringstream *>(data);
 
     size_t s = size * nmemb;
-    *buffer << String((char *)buf, s);
+    oss << std::string(reinterpret_cast<const char *>(buf), s);
 
     return s;
 }

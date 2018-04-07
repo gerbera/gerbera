@@ -19,9 +19,9 @@ ELSE()
 	endif(NOT TAGLIB_MIN_VERSION)
 
 	if(NOT WIN32)
-		find_program(TAGLIBCONFIG_EXECUTABLE NAMES taglib-config PATHS
+            find_program(TAGLIBCONFIG_EXECUTABLE NAMES taglib-config PATHS
 		   ${BIN_INSTALL_DIR}
-		)
+            )
 	endif(NOT WIN32)
 
 	#reset vars

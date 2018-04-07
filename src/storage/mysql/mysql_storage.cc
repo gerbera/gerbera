@@ -61,6 +61,18 @@
 #define MYSQL_UPDATE_3_4_2 "ALTER TABLE `mt_cds_object` ADD KEY `cds_object_service_id` (`service_id`)"
 #define MYSQL_UPDATE_3_4_3 "UPDATE `mt_internal_setting` SET `value`='4' WHERE `key`='db_version' AND `value`='3'"
 
+#define MYSQL_UPDATE_4_5_1 "CREATE TABLE `mt_metadata` ( \
+  `id` int(11) NOT NULL auto_increment, \
+  `item_id` int(11) NOT NULL, \
+  `property_name` varchar(255) NOT NULL, \
+  `property_value` text NOT NULL, \
+  PRIMARY KEY `id` (`id`), \
+  KEY `metadata_item_id` (`item_id`), \
+  CONSTRAINT `mt_metadata_idfk1` FOREIGN KEY (`item_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE \
+) ENGINE=MyISAM CHARSET=utf8"
+#define MYSQL_UPDATE_4_5_2 "UPDATE `mt_internal_setting` SET `value`='5' WHERE `key`='db_version' AND `value`='4'"
+  
+
 using namespace zmm;
 using namespace mxml;
 using namespace std;
@@ -72,7 +84,6 @@ MysqlStorage::MysqlStorage()
     mysql_connection = false;
     table_quote_begin = '`';
     table_quote_end = '`';
-    insertBuffer = nullptr;
 }
 MysqlStorage::~MysqlStorage()
 {
@@ -250,9 +261,17 @@ void MysqlStorage::init()
         dbVersion = _("4");
     }
 
+    if (dbVersion == "4") {
+        log_info("Doing an automatic database upgrade from database version 4 to version 5...\n");
+        _exec(MYSQL_UPDATE_4_5_1);
+        _exec(MYSQL_UPDATE_4_5_2);
+        log_info("database upgrade successful.\n");
+        dbVersion = _("5");
+    }
+
     /* --- --- ---*/
 
-    if (!string_ok(dbVersion) || dbVersion != "4")
+    if (!string_ok(dbVersion) || dbVersion != "5")
         throw _Exception(_("The database seems to be from a newer version (database version ") + dbVersion + ")!");
 
     lock.unlock();
@@ -280,11 +299,11 @@ String MysqlStorage::quote(String value)
 
 String MysqlStorage::getError(MYSQL* db)
 {
-    Ref<StringBuffer> err_buf(new StringBuffer());
-    *err_buf << "mysql_error (" << String::from(mysql_errno(db));
-    *err_buf << "): \"" << mysql_error(db) << "\"";
-    log_debug("%s\n", err_buf->c_str());
-    return err_buf->toString();
+    std::ostringstream err_buf;
+    err_buf << "mysql_error (" << mysql_errno(db);
+    err_buf << "): \"" << mysql_error(db) << "\"";
+    log_debug("%s\n", err_buf.str().c_str());
+    return err_buf.str();
 }
 
 Ref<SQLResult> MysqlStorage::select(const char* query, int length)
@@ -342,8 +361,8 @@ void MysqlStorage::shutdownDriver()
 void MysqlStorage::storeInternalSetting(String key, String value)
 {
     String quotedValue = quote(value);
-    Ref<StringBuffer> q(new StringBuffer());
-    *q << "INSERT INTO " << QTB << INTERNAL_SETTINGS_TABLE << QTE << " (`key`, `value`) "
+    std::ostringstream q;
+    q << "INSERT INTO " << QTB << INTERNAL_SETTINGS_TABLE << QTE << " (`key`, `value`) "
                                                                      "VALUES ("
        << quote(key) << ", " << quotedValue << ") "
                                                "ON DUPLICATE KEY UPDATE `value` = "
@@ -359,30 +378,26 @@ void MysqlStorage::_exec(const char* query, int length)
     }
 }
 
-void MysqlStorage::_addToInsertBuffer(Ref<StringBuffer> query)
+void MysqlStorage::_addToInsertBuffer(const std::string &query)
 {
-    if (insertBuffer == nullptr) {
-        insertBuffer = Ref<Array<StringBase>>(new Array<StringBase>());
-        insertBuffer->append(_("BEGIN"));
+    if (insertBuffer.empty()) {
+        insertBuffer.emplace_back("BEGIN");
     }
-    Ref<StringBase> sb(new StringBase(query->c_str()));
-    insertBuffer->append(sb);
+    insertBuffer.emplace_back(query);
 }
 
 void MysqlStorage::_flushInsertBuffer()
 {
-    if (insertBuffer == nullptr)
-        return;
-    insertBuffer->append(_("COMMIT"));
+    if (insertBuffer.empty()) return;
+    insertBuffer.emplace_back("COMMIT");
 
     checkMysqlThreadInit();
     unique_lock<decltype(mysqlMutex)> lock(mysqlMutex);
-    for (int i = 0; i < insertBuffer->size(); i++) {
-        _exec(insertBuffer->get(i)->data, insertBuffer->get(i)->len);
+    for (const auto &q : insertBuffer) {
+        _exec(q.c_str(), q.length());
     }
     lock.unlock();
-    insertBuffer->clear();
-    insertBuffer->append(_("BEGIN"));
+    insertBuffer.clear();
 }
 
 /* MysqlResult */

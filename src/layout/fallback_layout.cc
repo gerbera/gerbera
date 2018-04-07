@@ -282,11 +282,11 @@ void FallbackLayout::addAudio(zmm::Ref<CdsObject> obj)
 
     album = esc(album);
     chain = _("/Audio/Artists/") +  artist + _("/") + album;
-    id = ContentManager::getInstance()->addContainerChain(chain, _(UPNP_DEFAULT_CLASS_MUSIC_ALBUM), obj->getID());
+    id = ContentManager::getInstance()->addContainerChain(chain, _(UPNP_DEFAULT_CLASS_MUSIC_ALBUM), obj->getID(), obj->getMetadata());
     add(obj, id);
 
     chain = _("/Audio/Albums/") + album;
-    id = ContentManager::getInstance()->addContainerChain(chain, _(UPNP_DEFAULT_CLASS_MUSIC_ALBUM), obj->getID());
+    id = ContentManager::getInstance()->addContainerChain(chain, _(UPNP_DEFAULT_CLASS_MUSIC_ALBUM), obj->getID(), obj->getMetadata());
     add(obj, id);
 
     chain = _("/Audio/Genres/") + esc(genre);
