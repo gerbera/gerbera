@@ -138,7 +138,8 @@ describe('Gerbera Menu', function () {
 
       fsMenu.click();
 
-      expect(fsMenu.parent().hasClass('active')).toBeTruthy();
+      expect(fsMenu.parent().hasClass('active')).toBeTruthy()
+      expect(GERBERA.Tree.selectType).toHaveBeenCalled()
     })
 
     it('sets the correct active menu item parent when icon is clicked', function () {
@@ -148,6 +149,7 @@ describe('Gerbera Menu', function () {
       fsIcon.click();
 
       expect(fsMenu.parent().hasClass('active')).toBeTruthy();
+      expect(GERBERA.Tree.selectType).toHaveBeenCalled()
     })
   })
 })

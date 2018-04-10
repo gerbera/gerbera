@@ -41,7 +41,7 @@ GERBERA.Menu = (function () {
   }
 
   var click = function (event) {
-    var menuItem = $(event.target)
+    var menuItem = $(event.target).closest('.nav-link')
 
     if (!menuItem.hasClass("noactive")) {
         $('.nav-item').removeClass('active')
