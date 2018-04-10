@@ -45,7 +45,7 @@ GERBERA.Menu = (function () {
 
     if (!menuItem.hasClass("noactive")) {
         $('.nav-item').removeClass('active')
-        menuItem.parent().addClass('active')
+        menuItem.closest('li').addClass('active')
     }
 
     var menuCommand = menuItem.data('gerbera-menu-cmd')

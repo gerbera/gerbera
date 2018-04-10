@@ -119,4 +119,35 @@ describe('Gerbera Menu', function () {
       expect($('#logout').is(':visible')).toBeFalsy()
     })
   })
+
+  describe('click()', function () {
+
+    beforeEach(function () {
+      loadFixtures('index.html')
+      spyOn(GERBERA.Tree, 'selectType')
+      spyOn(GERBERA.App, 'setType')
+      spyOn(GERBERA.Auth, 'isLoggedIn').and.returnValue(true)
+      spyOn(GERBERA.Items, 'destroy')
+      spyOn(GERBERA.Tree, 'destroy')
+      spyOn(GERBERA.Trail, 'destroy')
+      GERBERA.Menu.initialize()
+    })
+
+    it('sets the active menu item when clicked', function () {
+      var fsMenu = $('#nav-fs')
+
+      fsMenu.click();
+
+      expect(fsMenu.parent().hasClass('active')).toBeTruthy();
+    })
+
+    it('sets the correct active menu item parent when icon is clicked', function () {
+      var fsMenu = $('#nav-fs')
+      var fsIcon = fsMenu.children('i.fa-folder-open')
+
+      fsIcon.click();
+
+      expect(fsMenu.parent().hasClass('active')).toBeTruthy();
+    })
+  })
 })
