@@ -149,10 +149,45 @@
     <xs:element name="extended-runtime-options">
         <xs:complexType>
             <xs:all>
+                <xs:element ref="ffmpegthumbnailer" minOccurs="0"/>
                 <xs:element ref="mark-played-items" minOccurs="0"/>
             </xs:all>
         </xs:complexType>
     </xs:element>
+
+    <xs:element name="ffmpegthumbnailer">
+        <xs:complexType>
+            <xs:all>
+                <xs:element ref="thumbnail-size" minOccurs="1"/>
+                <xs:element ref="seek-percentage" minOccurs="1"/>
+                <xs:element ref="filmstrip-overlay" minOccurs="0"/>
+                <xs:element ref="workaround-bugs" minOccurs="0"/>
+                <xs:element ref="image-quality" minOccurs="1"/>
+            </xs:all>
+            <xs:attribute name="enabled" type="boolean" default="no"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="filmstrip-overlay" default="no">
+        <xs:simpleType>
+            <xs:restriction base="xs:string">
+                <xs:enumeration value="no"/>
+                <xs:enumeration value="yes"/>
+            </xs:restriction>
+        </xs:simpleType>
+    </xs:element>
+
+    <xs:element name="thumbnail-size" type="xs:positiveInteger" default="128"/>
+    <xs:element name="seek-percentage" type="xs:positiveInteger" default="5"/>
+    <xs:element name="workaround-bugs" default="no">
+        <xs:simpleType>
+            <xs:restriction base="xs:string">
+                <xs:enumeration value="no"/>
+                <xs:enumeration value="yes"/>
+            </xs:restriction>
+        </xs:simpleType>
+    </xs:element>
+    <xs:element name="image-quality" type="xs:positiveInteger" default="8"/>
 
     <xs:element name="mark-played-items">
         <xs:complexType>
@@ -634,79 +669,33 @@
     <xs:element name="online-content">
         <xs:complexType>
             <xs:all>
-                <xs:element ref="YouTube" minOccurs="0"/>
+                <xs:element ref="AppleTrailers" minOccurs="0"/>
             </xs:all>
             <xs:attribute name="fetch-buffer-size" type="xs:positiveInteger" default="262144"/>
             <xs:attribute name="fetch-buffer-fill-size" type="xs:nonNegativeInteger" default="0"/>
         </xs:complexType>
     </xs:element>
 
-    <xs:element name="YouTube">
+    <xs:element name="AppleTrailers">
         <xs:complexType>
-            <xs:choice minOccurs="0" maxOccurs="unbounded">
-                <xs:element ref="standardfeed"/>
-                <xs:element ref="favorites"/>
-                <xs:element ref="subscriptions"/>
-                <xs:element ref="playlists"/>
-                <xs:element ref="uploads"/>
-            </xs:choice>
-            <xs:attribute name="enabled" type="boolean" default="no"/>
-            <xs:attribute name="refresh" type="xs:nonNegativeInteger" default="0"/>
-            <xs:attribute name="purge-after" type="xs:nonNegativeInteger" default="0"/>
-            <xs:attribute name="update-at-start" type="boolean" default="no"/>
-            <xs:attribute name="format" default="mp4">
+            <xs:attribute name="enabled" default="no">
                 <xs:simpleType>
                     <xs:restriction base="xs:string">
-                        <xs:enumeration value="flv"/>
-                        <xs:enumeration value="mp4"/>
+                        <xs:enumeration value="yes"/>
+                        <xs:enumeration value="no"/>
                     </xs:restriction>
                 </xs:simpleType>
             </xs:attribute>
-            <xs:attribute name="hd" type="boolean" default="no"/>
-            <xs:attribute name="racy-content" default="exclude">
+            <xs:attribute name="refresh" type="xs:nonNegativeInteger" default="43200"/>
+            <xs:attribute name="update-at-start" default="no">
                 <xs:simpleType>
                     <xs:restriction base="xs:string">
-                        <xs:enumeration value="exclude"/>
-                        <xs:enumeration value="include"/>
+                        <xs:enumeration value="yes"/>
+                        <xs:enumeration value="no"/>
                     </xs:restriction>
                 </xs:simpleType>
             </xs:attribute>
-        </xs:complexType>
-    </xs:element>
-
-    <xs:element name="standardfeed">
-        <xs:complexType>
-            <xs:attribute name="feed" type="xs:string" use="required"/>
-            <xs:attribute name="region-id" type="xs:string"/>
-            <xs:attribute name="time-range" type="xs:string"/>
-            <xs:attribute name="start-index" type="xs:nonNegativeInteger"/>
-            <xs:attribute name="amount" type="xs:string"/>
-        </xs:complexType>
-    </xs:element>
-
-    <xs:element name="favorites">
-        <xs:complexType>
-            <xs:attribute name="user" type="xs:string" use="required"/>
-        </xs:complexType>
-    </xs:element>
-
-    <xs:element name="subscriptions">
-        <xs:complexType>
-            <xs:attribute name="user" type="xs:string" use="required"/>
-        </xs:complexType>
-    </xs:element>
-
-    <xs:element name="playlists">
-        <xs:complexType>
-            <xs:attribute name="user" type="xs:string" use="required"/>
-        </xs:complexType>
-    </xs:element>
-
-    <xs:element name="uploads">
-        <xs:complexType>
-            <xs:attribute name="user" type="xs:string" use="required"/>
-            <xs:attribute name="start-index" type="xs:nonNegativeInteger"/>
-            <xs:attribute name="amount" type="xs:string"/>
+            <xs:attribute name="resolution" type="xs:nonNegativeInteger" default="640"/>
         </xs:complexType>
     </xs:element>
 
