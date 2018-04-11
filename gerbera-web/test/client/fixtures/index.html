@@ -1,26 +1,31 @@
-<nav class="navbar navbar-expand-md navbar-light bg-light" id="nav">
+<nav class="navbar navbar-expand-md navbar-dark" id="nav">
     <button type="button" class="navbar-toggler navbar-toggler-right"
             data-toggle="collapse" data-target="#navbarContent" aria-controls="navbarContent"
             aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
-    <a class="navbar-brand" href="#" title="Gerbera"><img src="" class="d-inline-block align-top" alt=""></a>
+    <a class="navbar-brand" href="https://github.com/gerbera/gerbera" title="Gerbera"><img src="" class="d-inline-block align-top" alt="Gerbera Logo"></a>
     <div class="collapse navbar-collapse" id="navbarContent">
         <ul class="navbar-nav mr-auto">
             <li class="nav-item">
-                <a id="nav-home" class="nav-link" data-gerbera-menu-cmd="HOME">Home <span class="sr-only">(current)</span></a>
+                <a id="nav-home" class="nav-link" href="#" data-gerbera-menu-cmd="HOME"><i class="fa fa-home"></i> Home <span class="sr-only">(current)</span></a>
             </li>
             <li class="nav-item">
-                <a id="nav-db" class="nav-link disabled" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="db">Database</a>
+                <a id="nav-db" class="nav-link disabled" href="#database" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="db"><i class="fa fa-database"></i> Database</a>
             </li>
             <li class="nav-item">
-                <a id="nav-fs" class="nav-link disabled" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="fs">File System</a>
+                <a id="nav-fs" class="nav-link disabled" href="#filesystem" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="fs"><i class="fa fa-folder-open"></i> File System</a>
+            </li>
+        </ul>
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a id="docs" class="nav-link disabled noactive" href="http://docs.gerbera.io/en/latest/" target="_blank"><i class="fa fa-question-circle"></i> Documentation</a>
             </li>
             <li class="nav-item">
-                <a id="report-issue" class="nav-link" href="http://github.com/gerbera/gerbera/issues">Report an Issue</a>
+                <a id="report-issue" class="nav-link noactive" href="http://github.com/gerbera/gerbera/issues" target="_blank"><i class="fa fa-bug"></i> Report an Issue <i class="fa fa-external-link" aria-hidden="true"></i></a>
             </li>
             <li class="nav-item">
-                <a id="leave-beta" class="btn nav-link disabled" data-gerbera-menu-cmd="LEAVE_BETA">Leave Beta</a>
+                <a id="leave-beta" class="nav-link disabled noactive" href="#" data-gerbera-menu-cmd="LEAVE_BETA"><i class="fa fa-undo"></i> Revert to Old UI</a>
             </li>
         </ul>
         <form id="login-form" class="form-inline my-2 my-lg-0">

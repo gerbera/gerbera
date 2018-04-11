@@ -41,11 +41,11 @@ GERBERA.Menu = (function () {
   }
 
   var click = function (event) {
-    var menuItem = $(event.target)
+    var menuItem = $(event.target).closest('.nav-link')
 
     if (!menuItem.hasClass("noactive")) {
         $('.nav-item').removeClass('active')
-        menuItem.parent().addClass('active')
+        menuItem.closest('li').addClass('active')
     }
 
     var menuCommand = menuItem.data('gerbera-menu-cmd')

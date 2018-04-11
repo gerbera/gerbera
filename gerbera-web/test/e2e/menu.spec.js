@@ -88,4 +88,12 @@ test.describe('The menu bar', function () {
       })
     })
   })
+
+  test.it('loads the parent database container list when clicking Database Icon', function () {
+    homePage.clickMenuIcon('nav-db').then(function () {
+      homePage.treeItems().then(function (tree) {
+        expect(tree.length).to.equal(6)
+      })
+    })
+  })
 })
