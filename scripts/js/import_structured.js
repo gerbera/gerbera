@@ -1,4 +1,4 @@
-// Default MediaTomb import script.
+// Extended MediaTomb import script.
 // see MediaTomb scripting documentation for more information
 
 /*MT_F*
@@ -28,6 +28,8 @@ function addAudio(obj)
     var desc = '';
     var artist_full;
     var album_full;
+
+    var decade = null;
     
     // first gather data
     var title = obj.meta[M_TITLE];
@@ -65,12 +67,14 @@ function addAudio(obj)
     var date = obj.meta[M_DATE];
     if (!date)
     {
-        date = 'Unknown';
+        date = '-Unknown-';
+	decade = '-Unknown-';
     }
     else
     {
         date = getYear(date);
         desc = desc + ', ' + date;
+	decade = date.substring(0,3) + '0 - ' + String(10 * (parseInt(date.substring(0,3))) + 9) ;
     }
     
     var genre = obj.meta[M_GENRE];
@@ -108,42 +112,88 @@ function addAudio(obj)
     // comment the following line out if you uncomment the stuff above  :)
     var track = '';
 
-    var chain = new Array('Audio', 'All Audio');
-    obj.title = title;
-    addCdsObject(obj, createContainerChain(chain));
     
-    chain = new Array('Audio', 'Artists', artist, 'All Songs');
-    addCdsObject(obj, createContainerChain(chain));
+    // Album
     
-    chain = new Array('Audio', 'All - full name');
-    var temp = '';
-    if (artist_full)
-        temp = artist_full;
-    
-    if (album_full)
-        temp = temp + ' - ' + album_full + ' - ';
+    // Extra code for correct display of albums with various artists (usually collections)
+    if (!description)
+    {
+	album_artist = album + ' - ' + artist;
+	tracktitle = track + title;
+    }
     else
-        temp = temp + ' - ';
-   
-    obj.title = temp + title;
-    addCdsObject(obj, createContainerChain(chain));
-    
-    chain = new Array('Audio', 'Artists', artist, 'All - full name');
-    addCdsObject(obj, createContainerChain(chain));
-    
-    chain = new Array('Audio', 'Artists', artist, album);
-    obj.title = track + title;
+    {
+	if (description.toUpperCase() == 'VARIOUS')
+	{
+	    album_artist = album + ' - Various';
+	    tracktitle = track + title + ' - ' + artist;
+	}
+	else
+	{
+	    album_artist = album + ' - ' + artist;
+	    tracktitle = track + title;
+	}
+    }
+      
+    chain = new Array('-Album-', abcbox(album, 6, '-'), album.charAt(0).toUpperCase(), album_artist);
+    obj.title = tracktitle;
+    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_ALBUM);
+    chain = new Array('-Album-', abcbox(album, 6, '-'), '-all-', album_artist);
+    obj.title = tracktitle;
+    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_ALBUM);
+    chain = new Array('-Album-', '--all--', album_artist);
+    obj.title = tracktitle;
     addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_ALBUM);
     
-    chain = new Array('Audio', 'Albums', album);
-    obj.title = track + title; 
-    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_ALBUM);
+    // // Artist
+
+    chain = new Array('-Artist-',  '--all--', artist);
+    obj.title = title + ' (' + album + ', ' + date + ')'; 
+    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_ARTIST);
+    chain = new Array('-Artist-', abcbox(artist, 9, '-'), '-all-', artist);
+    obj.title = title + ' (' + album + ', ' + date + ')'; 
+    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_ARTIST);
+    chain = new Array('-Artist-', abcbox(artist, 9, '-'), artist.charAt(0).toUpperCase(), artist, '-all-');
+    obj.title = title + ' (' + album + ', ' + date + ')'; 
+    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_ARTIST);
     
-    chain = new Array('Audio', 'Genres', genre);
+    obj.title = tracktitle;    
+    chain = new Array('-Artist-', abcbox(artist, 9, '-'), artist.charAt(0).toUpperCase(), artist, album + ' (' + date + ')');
+    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_ALBUM);
+
+    
+    // Genre
+
+    chain = new Array('-Genre-', genre, '--all--');
+    obj.title = title + ' - ' + artist_full;
     addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_GENRE);
     
-    chain = new Array('Audio', 'Year', date);
+    chain = new Array('-Genre-', genre, abcbox(artist, 6, '-'), artist.charAt(0).toUpperCase(), album_artist);
+    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_ALBUM);
+
+
+    // Tracks
+
+    chain = new Array('-Track-', abcbox(title, 6, '-'), title.charAt(0).toUpperCase());
+    obj.title = title + ' - ' + artist + ' (' + album + ', ' + date + ')';
+    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_ARTIST);
+      
+    chain = new Array('-Track-', '--all--');
+    obj.title = title + ' - ' + artist_full;
     addCdsObject(obj, createContainerChain(chain));
+
+    
+    // Sort years into decades
+    
+    chain = new Array('-Year-', decade, '-all-');
+    addCdsObject(obj, createContainerChain(chain));
+    
+    chain = new Array('-Year-', decade, date, '-all-');
+    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_ARTIST);
+
+    chain = new Array('-Year-', decade, date, artist, album);
+    obj.title = tracktitle;
+    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_ALBUM);
 }
 
 function addVideo(obj)
