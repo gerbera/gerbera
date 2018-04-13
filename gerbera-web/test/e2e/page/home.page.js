@@ -19,6 +19,15 @@ module.exports = function (driver) {
       return driver.wait(until.elementIsVisible(tree), 5000)
     }
   }
+  this.clickMenuIcon = function (menuId) {
+    var tree = driver.findElement(By.id('tree'))
+    if (menuId === 'nav-home') {
+      return driver.findElement(By.css('#'+ menuId + ' i')).click()
+    } else {
+      driver.findElement(By.css('#'+ menuId + ' i')).click()
+      return driver.wait(until.elementIsVisible(tree), 5000)
+    }
+  }
   this.isDisabled = function (id) {
     return driver.wait(until.elementLocated(By.css('#' + id + '.disabled')), 5000).then(function (el) {
       return true
