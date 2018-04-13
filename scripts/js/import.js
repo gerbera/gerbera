@@ -22,12 +22,17 @@
     $Id$
 */
 
+var structure_decades = true;
+
+
 function addAudio(obj)
 {
  
     var desc = '';
     var artist_full;
     var album_full;
+
+    var decade = null;
     
     // first gather data
     var title = obj.meta[M_TITLE];
@@ -66,11 +71,13 @@ function addAudio(obj)
     if (!date)
     {
         date = 'Unknown';
+	decade = null;
     }
     else
     {
         date = getYear(date);
         desc = desc + ', ' + date;
+	decade = date.substring(0,3) + '0 - ' + String(10 * (parseInt(date.substring(0,3))) + 9) ;
     }
     
     var genre = obj.meta[M_GENRE];
@@ -141,9 +148,26 @@ function addAudio(obj)
     
     chain = new Array('Audio', 'Genres', genre);
     addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_GENRE);
+
+    // sort years into decades
     
-    chain = new Array('Audio', 'Year', date);
-    addCdsObject(obj, createContainerChain(chain));
+    if (!structure_decade)
+    {
+	chain = new Array('Audio', 'Year', date);
+	addCdsObject(obj, createContainerChain(chain));
+    }
+    else
+    {
+	chain = new Array('-Year-', decade, '-all-');
+	addCdsObject(obj, createContainerChain(chain));
+	
+	chain = new Array('-Year-', decade, date, '-all-');
+	addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_ARTIST);
+      
+	chain = new Array('-Year-', decade, date, artist, album);
+	obj.title = disctitle;
+	addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_ALBUM);
+    }
 }
 
 function addVideo(obj)
