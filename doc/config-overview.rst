@@ -36,3 +36,43 @@ The server configuration file has several options.  Below are links to the confi
 * :doc:`Transcode Content </config-transcode>`
 
 
+Generating Configuration
+========================
+
+The gerbera runtime requires a configuration file to launch the application. Gerbera provides a command line utility
+``--create-config`` to generate a standard ``config.xml`` file with defaults.  You will need to generate
+the configuration file when running Gerbera for the first time.  Gerbera reports the missing configuration upon startup
+similar to the message below
+
+::
+
+  The server configuration file could not be found in ~/.config/gerbera
+  Gerbera could not find a default configuration file.
+  Try specifying an alternative configuration file on the command line.
+  For a list of options run: gerbera -h
+
+* Run command to create configuration
+
+::
+
+  $ gerbera --create-config
+
+This command outputs the ``config.xml`` to the standard output.
+
+* Run command to create configuration, storing in the ``/etc/gerbera`` directory.
+
+::
+
+  $ gerbera --create-config | sudo tee /etc/gerbera/config.xml
+
+You can start Gerbera with similar command as below:
+
+::
+
+  $ gerbera -c /etc/gerbera/config.xml
+
+
+**NOTE**
+
+* Gerbera sets the ``<home>`` to the runtime user's home by default.  Be sure to update accordingly.
+* Ensure the **gerbera** user has proper permissions to the ``config.xml`` file.

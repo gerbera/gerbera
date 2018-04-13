@@ -1,0 +1,5 @@
+<ui enabled="yes" show-tooltips="yes">
+  <accounts enabled="no" session-timeout="30">
+    <account user="gerbera" password="gerbera"/>
+  </accounts>
+</ui>

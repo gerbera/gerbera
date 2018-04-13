@@ -9,3 +9,5 @@ get_target_property(GERBERA_INTERFACE_LIBRARIES gerbera INTERFACE_LINK_LIBRARIES
 add_subdirectory(test_dictionary)
 add_subdirectory(test_runtime)
 add_subdirectory(test_searchhandler)
+add_subdirectory(test_config)
+add_subdirectory(test_server)

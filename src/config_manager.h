@@ -245,20 +245,7 @@ public:
 
 
 protected:
-    // helper for extension to mimetype kind of mappings
-    zmm::Ref<mxml::Element> map_from_to(zmm::String from, zmm::String to);
-    zmm::Ref<mxml::Element> treat_as(zmm::String mimetype, zmm::String as);
-    zmm::Ref<mxml::Element> renderTranscodingSection();
-    zmm::Ref<mxml::Element> renderExtendedRuntimeSection();
-    zmm::Ref<mxml::Element> renderOnlineSection();
-
-    // creates a default config.xml file with the most necessary entries and returns the path
-    zmm::String createDefaultConfig(zmm::String userhome);
-    void save();
-    void save_text(zmm::String filename, zmm::String content);
-    void migrate();
     void validate(zmm::String serverhome);
-    void prepare_udn();
     zmm::String construct_path(zmm::String path);
     void prepare_path(zmm::String path, bool needDir = false, bool existenceUnneeded = false);
     
