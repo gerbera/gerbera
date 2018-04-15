@@ -298,40 +298,30 @@ void FileRequestHandler::get_info(IN const char* filename, OUT UpnpFileInfo* inf
 }
 
 Ref<IOHandler> FileRequestHandler::open(IN const char* filename,
-    IN enum UpnpOpenFileMode mode,
-    IN zmm::String range)
+    IN enum UpnpOpenFileMode mode, IN zmm::String range)
 {
-    int objectID;
-    String mimeType;
-    int ret;
-    bool is_srt = false;
-    String tr_profile;
-
     log_debug("start\n");
-    struct stat statbuf;
 
-    // Currently we explicitly do not support UPNP_WRITE
-    // due to security reasons.
-    if (mode != UPNP_READ)
+    // We explicitly do not support UPNP_WRITE due to security reasons.
+    if (mode != UPNP_READ) {
         throw _Exception(_("UPNP_WRITE unsupported"));
+    }
 
-    String url_path, parameters;
+    String parameters = (filename + strlen(LINK_FILE_REQUEST_HANDLER));
 
-    parameters = (filename + strlen(LINK_FILE_REQUEST_HANDLER));
-
-    Ref<Dictionary> dict(new Dictionary());
-    dict->decodeSimple(parameters);
+    Dictionary params;
+    params.decodeSimple(parameters);
     log_debug("full url (filename): %s, parameters: %s\n", filename, parameters.c_str());
 
-    String objID = dict->get(_("object_id"));
+    String objID = params.get(_("object_id"));
     if (objID == nullptr) {
-        throw _Exception(_("object_id not found"));
-    } else
-        objectID = objID.toInt();
+        throw _Exception(_("object_id not found in parameters"));
+    }
+
+    int objectID = objID.toInt();
 
     log_debug("Opening media file with object id %d\n", objectID);
     Ref<Storage> storage = Storage::getInstance();
-
     Ref<CdsObject> obj = storage->loadObject(objectID);
 
     int objectType = obj->getObjectType();
@@ -342,15 +332,15 @@ Ref<IOHandler> FileRequestHandler::open(IN const char* filename,
 
     // determining which resource to serve
     int res_id = 0;
-    String s_res_id = dict->get(_(URL_RESOURCE_ID));
-    if (string_ok(s_res_id) && (s_res_id != _(URL_VALUE_TRANSCODE_NO_RES_ID)))
+    String s_res_id = params.get(_(URL_RESOURCE_ID));
+    if (string_ok(s_res_id) && (s_res_id != _(URL_VALUE_TRANSCODE_NO_RES_ID))) {
         res_id = s_res_id.toInt();
-    else
+    } else {
         res_id = -1;
+    }
 
     // update item info by running action
-    if (IS_CDS_ACTIVE_ITEM(objectType) && (res_id == 0)) // check - if thumbnails, then no action, just show
-    {
+    if (IS_CDS_ACTIVE_ITEM(objectType) && (res_id == 0)) { // check - if thumbnails, then no action, just show
         Ref<CdsActiveItem> aitem = RefCast(obj, CdsActiveItem);
 
         Ref<Element> inputElement = UpnpXML_DIDLRenderObject(obj, true);
@@ -409,8 +399,10 @@ Ref<IOHandler> FileRequestHandler::open(IN const char* filename,
     Ref<CdsItem> item = RefCast(obj, CdsItem);
 
     String path = item->getLocation();
+    bool is_srt = false;
 
-    String ext = dict->get(_("ext"));
+    String mimeType;
+    String ext = params.get(_("ext"));
     int edot = ext.rindex('.');
     if (edot > -1)
         ext = ext.substring(edot);
@@ -427,7 +419,8 @@ Ref<IOHandler> FileRequestHandler::open(IN const char* filename,
         is_srt = true;
     }
 
-    ret = stat(path.c_str(), &statbuf);
+    struct stat statbuf;
+    int ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
         if (is_srt)
             throw SubtitlesNotFoundException(_("Subtitle file ") + path + " is not available.");
@@ -435,56 +428,23 @@ Ref<IOHandler> FileRequestHandler::open(IN const char* filename,
             throw _Exception(_("Failed to open ") + path + " - " + strerror(errno));
     }
 
-    /* TODO Is this needed? Info should be gotten by get_info()?
-    if (access(path.c_str(), R_OK) == 0)
-    {
-        info->is_readable = 1;
-    }
-    else
-    {
-        info->is_readable = 0;
-    }
-
-    String header;
-
-    info->last_modified = statbuf.st_mtime;
-    info->is_directory = S_ISDIR(statbuf.st_mode);
-
-    log_debug("path: %s\n", path.c_str());
-    int slash_pos = path.rindex(DIR_SEPARATOR);
-    if (slash_pos >= 0)
-    {
-        if (slash_pos < path.length()-1)
-        {
-            slash_pos++;
-
-
-            header = _("Content-Disposition: attachment; filename=\"") + 
-                path.substring(slash_pos) + _("\"");
-        }
-    }
-    */
-
     log_debug("fetching resource id %d\n", res_id);
 
-    tr_profile = dict->get(_(URL_PARAM_TRANSCODE_PROFILE_NAME));
+    String tr_profile = params.get(_(URL_PARAM_TRANSCODE_PROFILE_NAME));
     if (string_ok(tr_profile)) {
-        if (res_id != (-1))
+        if (res_id != (-1)) {
             throw _Exception(_("Invalid resource ID given!"));
+        }
     } else {
-        if (res_id == -1)
+        if (res_id == -1) {
             throw _Exception(_("Invalid resource ID given!"));
+        }
     }
-
-    // FIXME upstream upnp
-    //info->http_header = NULL;
-    // Per default and in case of a bad resource ID, serve the file
-    // itself
 
     // some resources are created dynamically and not saved in the database,
     // so we can not load such a resource for a particular item, we will have
     // to trust the resource handler parameter
-    String rh = dict->get(_(RESOURCE_HANDLER));
+    String rh = params.get(_(RESOURCE_HANDLER));
     if (((res_id > 0) && (res_id < item->getResourceCount())) || ((res_id > 0) && string_ok(rh))) {
         //info->file_length = -1;
 
@@ -526,7 +486,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char* filename,
 
     } else {
         if (!is_srt && string_ok(tr_profile)) {
-            String range = dict->get(_("range"));
+            String range = params.get(_("range"));
 
             Ref<TranscodeDispatcher> tr_d(new TranscodeDispatcher());
             Ref<TranscodingProfile> tp = ConfigManager::getInstance()->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(tr_profile);
