@@ -182,8 +182,7 @@ void FileRequestHandler::get_info(IN const char* filename, OUT UpnpFileInfo* inf
         /*        Ref<IOHandler> io_handler = */ h
             ->serveContent(item, res_id, &(size));
 
-    } else
-        if (!is_srt && string_ok(tr_profile)) {
+    } else if (!is_srt && string_ok(tr_profile)) {
 
         Ref<TranscodingProfile> tp = ConfigManager::getInstance()
                                          ->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)
@@ -214,8 +213,7 @@ void FileRequestHandler::get_info(IN const char* filename, OUT UpnpFileInfo* inf
         }
 
         UpnpFileInfo_set_FileLength(info, -1);
-    } else
-    {
+    } else {
         UpnpFileInfo_set_FileLength(info, statbuf.st_size);
         // if we are dealing with a regular file we should add the
         // Accept-Ranges: bytes header, in order to indicate that we support
@@ -277,8 +275,8 @@ void FileRequestHandler::get_info(IN const char* filename, OUT UpnpFileInfo* inf
     if (!string_ok(mimeType))
         mimeType = item->getMimeType();
 
-//log_debug("sizeof off_t %d, statbuf.st_size %d\n", sizeof(off_t), sizeof(statbuf.st_size));
-//log_debug("get_info: file_length: " OFF_T_SPRINTF "\n", statbuf.st_size);
+        //log_debug("sizeof off_t %d, statbuf.st_size %d\n", sizeof(off_t), sizeof(statbuf.st_size));
+        //log_debug("get_info: file_length: " OFF_T_SPRINTF "\n", statbuf.st_size);
 
 #ifdef EXTEND_PROTOCOLINFO
     header = getDLNAtransferHeader(mimeType, header);
