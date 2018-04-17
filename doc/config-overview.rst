@@ -35,9 +35,10 @@ The server configuration file has several options.  Below are links to the confi
 * :doc:`Online Content </config-online>`
 * :doc:`Transcode Content </config-transcode>`
 
+.. _generateConfig:
 
 Generating Configuration
-========================
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 The gerbera runtime requires a configuration file to launch the application. Gerbera provides a command line utility
 ``--create-config`` to generate a standard ``config.xml`` file with defaults.  You will need to generate
