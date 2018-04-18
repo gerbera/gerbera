@@ -46,7 +46,8 @@ First Time Launch
 ~~~~~~~~~~~~~~~~~
 
 First time startup of Gerbera creates a folder called ``~/.config/gerbera`` in your home directory.
-Gerbera also generates a default server configuration file, called ``config.xml`` in the directory.
+You must generate a ``config.xml`` file for Gerbera to use.  Review the :ref:`Generating Configuration <generateConfig>`
+section of the documentation to see how to use ``gerbera`` to create a default configuration file.
 
 .. index:: Sqlite
 
