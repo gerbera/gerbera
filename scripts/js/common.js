@@ -1,26 +1,23 @@
-// This script will be run once before each other script is loaded. Here you
-// can define any functions you want to have available in the other scripts,
-// or initialisation code you want to have executed only once for each script.
+/*GRB*
+  Gerbera - https://gerbera.io/
 
-/*MT_F*
-    
-    MediaTomb - http://www.mediatomb.cc/
-    
-    common.js - this file is part of MediaTomb.
-    
-    Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
-                            Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
-                            Leonhard Wimmer <leo@mediatomb.cc>
-    
-    This file is free software; the copyright owners give unlimited permission
-    to copy and/or redistribute it; with or without modifications, as long as
-    this notice is preserved.
-    
-    This file is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    
-    $Id$
+  common.js - this file is part of Gerbera.
+
+  Copyright (C) 2018 Gerbera Contributors
+
+  Gerbera is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License version 2
+  as published by the Free Software Foundation.
+
+  Gerbera is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
+
+  $Id$
 */
 
 function escapeSlash(name)
