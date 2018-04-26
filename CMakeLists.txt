@@ -568,7 +568,6 @@ if(WITH_TESTS)
     else()
         message(FATAL_ERROR "Google Test not found")
     endif()
-    find_package(GMock)
 endif()
 
 INSTALL(TARGETS gerbera DESTINATION bin)
