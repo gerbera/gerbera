@@ -45,17 +45,7 @@ TEST_F(ServerTest, ServerOutputsHelpInformation) {
   ss << CMAKE_BINARY_DIR <<  DIR_SEPARATOR << "gerbera --help 2>&1";
   std::string cmd = ss.str();
   std::string output = exec(cmd.c_str());
-  ASSERT_STREQ(output.c_str(), expectedOutput.c_str());
-}
-
-TEST_F(ServerTest, ServerOutputsVersionInformation) {
-  std::string expectedOutput = mockText("fixtures/mock-version.out");
-
-  std::stringstream ss;
-  ss << CMAKE_BINARY_DIR << DIR_SEPARATOR << "gerbera --version 2>&1";
-  std::string cmd = ss.str();
-  std::string output = exec(cmd.c_str());
-  ASSERT_STREQ(output.c_str(), expectedOutput.c_str());
+  ASSERT_THAT(output.c_str(), HasSubstr(expectedOutput.c_str()));
 }
 
 TEST_F(ServerTest, ServerOutputsCompileInformationIncludingGit) {
