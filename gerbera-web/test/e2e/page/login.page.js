@@ -1,89 +1,84 @@
-var By = require('selenium-webdriver').By
-var until = require('selenium-webdriver').until
-var fs = require('fs')
+const {By, until} = require('selenium-webdriver');
+const fs = require('fs');
 
 module.exports = function (driver) {
 
-  this.username = function (value) {
-    var field = driver.findElement(By.id('username'))
+  this.username = async (value) => {
+    const field = await driver.findElement(By.id('username'));
     if (value) {
-      field.clear()
-      field.sendKeys(value)
+      await field.clear();
+      await field.sendKeys(value);
     }
-    return field
-  }
+    return field;
+  };
 
-  this.password = function (value) {
-    var field = driver.findElement(By.id('password'))
+  this.password = async (value) => {
+    const field = await driver.findElement(By.id('password'));
     if (value) {
-      field.clear()
-      field.sendKeys(value)
+      await field.clear();
+      await field.sendKeys(value);
     }
-    return field
-  }
+    return field;
+  };
 
-  this.loginForm = function () {
-    return driver.findElement(By.id('login-form'))
-  }
+  this.loginForm = async () => {
+    return await driver.findElement(By.id('login-form'));
+  };
 
-  this.loginFields = function () {
-    return driver.findElements(By.css('.login-field'))
-  }
+  this.loginFields = async () => {
+    return await driver.findElements(By.css('.login-field'));
+  };
 
-  this.menuList = function () {
-    return driver.findElement(By.css('ul.navbar-nav'))
-  }
+  this.loginButtonIsDisplayed = async () => {
+    return await driver.findElement(By.id('login-submit')).isDisplayed();
+  };
 
-  this.logout = function () {
-    var logoutBtn = driver.findElement(By.id('logout'))
-    driver.wait(until.elementIsVisible(logoutBtn), 5000)
-    logoutBtn.click()
-    var loginBtn = driver.findElement(By.id('login-submit'))
-    return driver.wait(until.elementIsVisible(loginBtn), 5000)
-  }
+  this.menuList = async () => {
+    return await driver.findElement(By.css('ul.navbar-nav'));
+  };
 
-  this.submitLogin = function () {
-    driver.findElement(By.id('login-submit')).click()
-    return driver.wait(until.elementLocated(By.id('logout')), 5000)
-  }
+  this.logout = async () => {
+    const logoutBtn = driver.findElement(By.id('logout'));
+    await driver.wait(until.elementIsVisible(logoutBtn), 5000);
+    await logoutBtn.click();
+    const loginBtn = driver.findElement(By.id('login-submit'));
+    return await driver.wait(until.elementIsVisible(loginBtn), 5000);
+  };
 
-  this.getToastMessage = function () {
-    driver.wait(until.elementIsVisible(driver.findElement(By.id('toast'))), 5000)
-    return driver.findElement(By.css('#grb-toast-msg')).getText()
-  }
+  this.submitLogin = async () => {
+    await driver.findElement(By.id('login-submit')).click();
+    return await driver.wait(until.elementLocated(By.id('logout')), 5000);
+  };
 
-  this.waitForToastClose = function () {
-    driver.wait(until.elementIsNotVisible(driver.findElement(By.id('toast'))), 6000)
-    return driver.findElement(By.css('#grb-toast-msg')).isDisplayed()
-  }
+  this.getToastMessage = async () => {
+    await driver.wait(until.elementIsVisible(driver.findElement(By.id('toast'))), 5000);
+    return await driver.findElement(By.css('#grb-toast-msg')).getText();
+  };
 
-  this.clickMenu = function (menuId) {
-    var tree = driver.findElement(By.id('tree'))
-    if (menuId === 'nav-home') {
-      return driver.findElement(By.id(menuId)).click()
-    } else {
-      driver.findElement(By.id(menuId)).click()
-      return driver.wait(until.elementIsVisible(tree), 5000)
+  this.waitForToastClose = async () => {
+    await driver.wait(until.elementIsNotVisible(driver.findElement(By.id('toast'))), 6000);
+    return await driver.findElement(By.css('#grb-toast-msg')).isDisplayed();
+  };
+
+  this.getCookie = async (cookie) => {
+    return await driver.manage().getCookie(cookie);
+  };
+
+  this.get = async (url) => {
+    await driver.get(url);
+    try {
+      // when reloading session, errorCheck refreshes via JS here....check for staleness first
+      await driver.wait(until.stalenessOf(driver.findElement(By.id('navbarContent'))), 2000);
+    } catch (e) {
+      // the default `page is ready` check...
+      await driver.wait(until.elementIsVisible(driver.findElement(By.id('login-form'))), 5000);
     }
-  }
+    await driver.executeScript('$(\'body\').toggleClass(\'notransition\');');
+    return await driver.wait(until.elementIsVisible(driver.findElement(By.id('navbarContent'))), 2000);
+  };
 
-  this.getContentHTML = function () {
-    return driver.findElement(By.id('content')).getText()
-  }
-
-  this.getCookie = function (cookie) {
-    return driver.manage().getCookie(cookie);
-  }
-
-  this.get = function (url) {
-    driver.get(url)
-    driver.wait(until.elementIsEnabled(driver.findElement(By.id('login-form'))), 5000)
-    return driver.executeScript('$(\'body\').toggleClass(\'notransition\');')
-  }
-
-  this.takeScreenshot = function (filename) {
-    return driver.takeScreenshot().then(function(data) {
-      fs.writeFileSync(filename, data, 'base64');
-    })
-  }
-}
+  this.takeScreenshot = async (filename) => {
+    const data = await driver.takeScreenshot();
+    fs.writeFileSync(filename, data, 'base64');
+  };
+};

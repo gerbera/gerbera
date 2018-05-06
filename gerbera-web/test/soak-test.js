@@ -1,8 +1,6 @@
 #!/usr/bin/env node
-
-var fs = require('fs');
-var execSync = require('child_process').execSync;
-var TOTAL_ITERATIONS = 50;
+const execSync = require('child_process').execSync;
+const TOTAL_ITERATIONS = 50;
 
 for(var i = 0; i < TOTAL_ITERATIONS; i++) {
   console.log('\nRunning Test Scenario # ' + i +'\n');

@@ -1,76 +1,71 @@
-var chai = require('chai')
-var expect = chai.expect
-var webdriver = require('selenium-webdriver')
-var test = require('selenium-webdriver/testing')
-var driver
-var mockWebServer = 'http://' + process.env.npm_package_config_webserver_host + ':' + process.env.npm_package_config_webserver_port
+const {expect} = require('chai');
+const {Builder} = require('selenium-webdriver');
+const {suite} = require('selenium-webdriver/testing');
+let chrome = require('selenium-webdriver/chrome');
+const mockWebServer = 'http://' + process.env.npm_package_config_webserver_host + ':' + process.env.npm_package_config_webserver_port;
+let driver;
 
-require('chromedriver')
+const HomePage = require('./page/home.page');
+const LoginPage = require('./page/login.page');
 
-var HomePage = require('./page/home.page')
-var LoginPage = require('./page/login.page')
+suite(() => {
+  let loginPage, homePage;
 
-test.describe('The add new object', function () {
-  var loginPage, homePage
-
-  this.slow(8000)
-  this.timeout(60000)
-
-  test.before(function () {
-    driver = new webdriver.Builder()
+  before(async () => {
+    const chromeOptions = new chrome.Options();
+    chromeOptions.addArguments(['--window-size=1280,1024']);
+    driver = new Builder()
       .forBrowser('chrome')
-      .build()
+      .setChromeOptions(chromeOptions)
+      .build();
 
-    driver.manage().window().setSize(1280, 1024)
-    driver.get(mockWebServer + '/reset?testName=add.object.spec.json')
+    await driver.get(mockWebServer + '/reset?testName=add.object.spec.json');
 
-    loginPage = new LoginPage(driver)
-    homePage = new HomePage(driver)
+    loginPage = new LoginPage(driver);
+    homePage = new HomePage(driver);
 
-    driver.get(mockWebServer + '/disabled.html')
-    driver.manage().deleteAllCookies()
+    await driver.get(mockWebServer + '/disabled.html');
+    await driver.manage().deleteAllCookies();
 
-    loginPage.get(mockWebServer + '/index.html')
+    await loginPage.get(mockWebServer + '/index.html');
 
-    loginPage.password('pwd')
-    loginPage.username('user')
-    loginPage.submitLogin()
-  })
+    await loginPage.password('pwd');
+    await loginPage.username('user');
+    await loginPage.submitLogin();
+  });
 
-  test.after(function () {
-    driver.quit()
-  })
+  after(() => driver && driver.quit());
 
-  test.it('a gerbera tree db item container adds new object with parent id', function () {
-    var itemCountBefore = 13
-    homePage.clickMenu('nav-db')
-    homePage.clickTree('Video')
-    homePage.items().then(function (items) {
-      expect(items.length).to.equal(itemCountBefore)
-    })
-    homePage.clickTrailAdd().then(function () {
-      homePage.editOverlayDisplayed().then(function (displayed) {
-        expect(displayed).to.be.true
-        homePage.editOverlayFieldValue('addParentId').then(function (value) {
-          expect(value).to.equal('7443')
-        })
-        homePage.editOverlayTitle().then(function (title) {
-          expect(title).to.equal('Add Item')
-        })
-        homePage.setEditorOverlayField('editTitle', 'A Container')
-        homePage.submitEditor()
-        homePage.items().then(function (items) {
-          expect(items.length).to.equal(itemCountBefore + 1)
-        })
+  describe('The add new object', () => {
+    it('a gerbera tree db item container adds new object with parent id', async () => {
+      const itemCountBefore = 13;
+      await homePage.clickMenu('nav-db');
+      await homePage.clickTree('Video');
+      let result = await homePage.items();
+      expect(result.length).to.equal(itemCountBefore);
 
-        homePage.getToastMessage().then(function (message) {
-          expect(message).to.equal('Successfully added object')
-        })
+      await homePage.clickTrailAdd();
 
-        homePage.waitForToastClose().then(function (displayed) {
-          expect(displayed).to.be.false
-        })
-      })
-    })
-  })
-})
+      result = await homePage.editOverlayDisplayed();
+      expect(result).to.be.true;
+
+      result = await homePage.editOverlayFieldValue('addParentId');
+      expect(result).to.equal('7443');
+
+      result = await homePage.editOverlayTitle();
+      expect(result).to.equal('Add Item');
+
+      await homePage.setEditorOverlayField('editTitle', 'A Container');
+      await homePage.submitEditor();
+
+      result = await homePage.items();
+      expect(result.length).to.equal(itemCountBefore + 1);
+
+      result = await homePage.getToastMessage();
+      expect(result).to.equal('Successfully added object');
+
+      result = await homePage.waitForToastClose();
+      expect(result).to.be.false;
+    });
+  });
+});

@@ -145,7 +145,7 @@ GERBERA.Auth = (function () {
       .fail(GERBERA.App.error)
   }
 
-  var handleLogout = function (response) {
+  var handleLogout = function () {
     var now = new Date()
     var expire = new Date()
     LOGGED_IN = false

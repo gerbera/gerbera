@@ -1,68 +1,64 @@
-var chai = require('chai')
-var expect = chai.expect
-var webdriver = require('selenium-webdriver')
-var test = require('selenium-webdriver/testing')
-var driver
-var mockWebServer = 'http://' + process.env.npm_package_config_webserver_host + ':' + process.env.npm_package_config_webserver_port
+const {expect} = require('chai');
+const {Builder} = require('selenium-webdriver');
+const {suite} = require('selenium-webdriver/testing');
+let chrome = require('selenium-webdriver/chrome');
+const mockWebServer = 'http://' + process.env.npm_package_config_webserver_host + ':' + process.env.npm_package_config_webserver_port;
+let driver;
 
-require('chromedriver')
+const HomePage = require('./page/home.page');
+const LoginPage = require('./page/login.page');
 
-var HomePage = require('./page/home.page')
-var LoginPage = require('./page/login.page')
+suite(() => {
+  let loginPage, homePage;
 
-test.describe('The gerbera trail', function () {
-  var loginPage, homePage
-
-  this.slow(5000)
-  this.timeout(60000)
-
-  test.before(function () {
-    driver = new webdriver.Builder()
+  before(async () => {
+    const chromeOptions = new chrome.Options();
+    chromeOptions.addArguments(['--window-size=1280,1024']);
+    driver = new Builder()
       .forBrowser('chrome')
-      .build()
+      .setChromeOptions(chromeOptions)
+      .build();
+    await driver.get(mockWebServer + '/reset?testName=trail.spec.json');
 
-    driver.manage().window().setSize(1280, 1024)
-    driver.get(mockWebServer + '/reset?testName=trail.spec.json')
+    loginPage = new LoginPage(driver);
+    homePage = new HomePage(driver);
 
-    loginPage = new LoginPage(driver)
-    homePage = new HomePage(driver)
+    await driver.get(mockWebServer + '/disabled.html');
+    await driver.manage().deleteAllCookies();
+    await loginPage.get(mockWebServer + '/index.html');
+    await loginPage.password('pwd');
+    await loginPage.username('user');
+    await loginPage.submitLogin();
+  });
 
-    driver.get(mockWebServer + '/disabled.html')
-    driver.manage().deleteAllCookies()
+  after(() => driver && driver.quit());
 
-    loginPage.get(mockWebServer + '/index.html')
+  describe('The gerbera trail', () => {
 
-    loginPage.password('pwd')
-    loginPage.username('user')
-    loginPage.submitLogin()
-  })
+    it('a gerbera tree item shows an add icon in the trail but not delete item', async () => {
+      await homePage.clickMenu('nav-fs');
+      await homePage.clickTree('etc');
 
-  test.after(function () {
-    driver.quit()
-  })
+      let result = await homePage.hasTrailAddIcon();
+      expect(result).to.be.true;
 
-  test.it('a gerbera tree item shows an add icon in the trail but not delete item', function () {
-    homePage.clickMenu('nav-fs')
-    homePage.clickTree('etc')
-    homePage.hasTrailAddIcon().then(function (hasAdd) {
-      expect(hasAdd).to.be.true
-    })
-    homePage.hasTrailAddAutoscanIcon().then(function (hasAdd) {
-      expect(hasAdd).to.be.true
-    })
-    homePage.hasTrailDeleteIcon().then(function (hasDelete) {
-      expect(hasDelete).to.be.false
-    })
-  })
+      result = await homePage.hasTrailAddAutoscanIcon();
+      expect(result).to.be.true;
 
-  test.it('a gerbera tree db item container shows delete icon and add icon in the trail', function () {
-    homePage.clickMenu('nav-db')
-    homePage.clickTree('Video')
-    homePage.hasTrailDeleteIcon().then(function (hasDelete) {
-      expect(hasDelete).to.be.true
-    })
-    homePage.hasTrailAddIcon().then(function (has) {
-      expect(has).to.be.true
-    })
-  })
-})
+      result = await homePage.hasTrailDeleteIcon();
+      expect(result).to.be.false;
+    });
+
+    it('a gerbera tree db item container shows delete icon and add icon in the trail', async () =>{
+      await homePage.clickMenu('nav-db');
+      await homePage.clickTree('Video');
+
+      let result = await homePage.hasTrailDeleteIcon();
+      expect(result).to.be.true;
+
+      result = await homePage.hasTrailAddIcon();
+      expect(result).to.be.true;
+    });
+  });
+});
+

@@ -2,7 +2,10 @@
   "env": {
     "browser": true,
     "commonjs": true,
-    "jquery": true
+    "jquery": true,
+    "es6": true,
+    "mocha": true,
+    "node": true
   },
   "extends": "eslint:recommended",
   "plugins": [
@@ -11,6 +14,14 @@
   ],
   "rules" : {
     "no-unused-expressions": "off",
-    "no-unused-vars": "off"
+    "no-unused-vars": [
+      "error",
+      {
+        "varsIgnorePattern": "should|expect"
+      }
+    ]
+  },
+  "parserOptions": {
+    "ecmaVersion": 2017
   }
 }

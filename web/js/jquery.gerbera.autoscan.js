@@ -185,7 +185,7 @@
   var _super = $.fn.modal
 
   // create a new constructor
-  var GerberaAutoscanModal = function (element, options) {
+  var GerberaAutoscanModal = function (element, options) { // eslint-disable-line
     _super.Constructor.apply(this, arguments)
   }
 

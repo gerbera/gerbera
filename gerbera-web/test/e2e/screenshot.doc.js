@@ -1,220 +1,188 @@
 /* global process */
-var chai = require('chai')
-var expect = chai.expect
-var webdriver = require('selenium-webdriver')
-var test = require('selenium-webdriver/testing')
-var argv = require('yargs').argv
-var driver
-var mockWebServer = 'http://' + process.env.npm_package_config_webserver_host + ':' + process.env.npm_package_config_webserver_port
+const {expect} = require('chai');
+const {Builder} = require('selenium-webdriver');
+const {suite} = require('selenium-webdriver/testing');
+let chrome = require('selenium-webdriver/chrome');
+const mockWebServer = 'http://' + process.env.npm_package_config_webserver_host + ':' + process.env.npm_package_config_webserver_port;
+const {argv} = require('yargs');
+const Jimp = require('jimp');
+let driver;
 
-require('chromedriver')
+const HomePage = require('./page/home.page');
+const LoginPage = require('./page/login.page');
 
-var LoginPage = require('./page/login.page')
-var HomePage = require('./page/home.page')
+suite(() => {
+  let loginPage, homePage;
+  const DEFAULT_FOLDER_STORE = process.cwd() + argv.folderPath;
+  console.log('Save path --> ' + DEFAULT_FOLDER_STORE);
 
-test.describe('The screenshot documentation spec takes screenshots', function () {
-  var loginPage, homePage
-  var DEFAULT_FOLDER_STORE = process.cwd() + argv.folderPath
-  console.log('Save path ---> ' + DEFAULT_FOLDER_STORE)
-  var Jimp = require("jimp")
-
-  this.slow(5000)
-  this.timeout(15000)
-
-  test.before(function () {
-    driver = new webdriver.Builder()
+  before(async () => {
+    const chromeOptions = new chrome.Options();
+    chromeOptions.addArguments(['--window-size=1440,1080']);
+    driver = new Builder()
       .forBrowser('chrome')
-      .build()
+      .setChromeOptions(chromeOptions)
+      .build();
+    await driver.get(mockWebServer + '/reset?testName=default.json');
 
-    driver.manage().window().setSize(1440, 1080)
-    driver.get(mockWebServer + '/reset?testName=default.json')
+    loginPage = new LoginPage(driver);
+    homePage = new HomePage(driver);
+  });
 
-    loginPage = new LoginPage(driver)
-    homePage = new HomePage(driver)
-  })
+  describe('The screenshot documentation spec takes screenshots', () => {
 
-  test.beforeEach(function () {
-    driver.get(mockWebServer + '/disabled.html')
-    driver.manage().deleteAllCookies()
+    beforeEach(async() => {
+      await driver.get(mockWebServer + '/disabled.html');
+      await driver.manage().deleteAllCookies();
+      await loginPage.get(mockWebServer + '/index.html');
+    });
 
-    loginPage.get(mockWebServer + '/index.html')
-  })
+    after(() => driver && driver.quit());
 
-  test.after(function () {
-    driver.quit()
-  })
+    it('for [login] field entry', async () => {
+      const fileName = DEFAULT_FOLDER_STORE + 'login-field-entry.png';
+      await loginPage.username('gerbera');
+      await loginPage.takeScreenshot(fileName);
 
-  test.it('for [login] field entry', function (done) {
-    var fileName = DEFAULT_FOLDER_STORE + 'login-field-entry.png'
-    loginPage.username('gerbera')
-    loginPage.takeScreenshot(fileName).then(function () {
-      Jimp.read(fileName).then(function (image) {
-        image.resize(1440, 1080)
-        image.crop(0, 0, 1430, 100).write(fileName)
-        done()
-      });
-    })
-  })
+      const image = await Jimp.read(fileName);
+      image.resize(1440, 1080);
+      image.crop(0, 0, 1430, 100).write(fileName);
+    });
 
-  test.it('for [menu bar]', function (done) {
-    var fileName = DEFAULT_FOLDER_STORE + 'menubar.png'
-    loginPage.username('user')
-    loginPage.password('pwd')
-    loginPage.submitLogin()
-    loginPage.takeScreenshot(fileName).then(function () {
-      Jimp.read(fileName).then(function (image) {
-        image.resize(1440, 1080)
-        image.crop(0, 0, 1430, 100).write(fileName)
-        done()
-      });
-    })
-  })
+    it('for [menu bar]', async () => {
+      const fileName = DEFAULT_FOLDER_STORE + 'menubar.png';
+      await loginPage.username('user');
+      await loginPage.password('pwd');
+      await loginPage.submitLogin();
 
-  test.it('for [database view]', function (done) {
-    var fileName = DEFAULT_FOLDER_STORE + 'database-view.png'
-    loginPage.username('user')
-    loginPage.password('pwd')
-    loginPage.submitLogin()
+      await loginPage.takeScreenshot(fileName);
 
-    homePage.clickMenu('nav-db')
-    homePage.clickTree('Video').then(function () {
-      homePage.takeScreenshot(fileName).then(function () {
-        Jimp.read(fileName).then(function (image) {
-          image.resize(1280, Jimp.AUTO).write(fileName)
-          done()
-        });
-      })
-    })
-  })
+      const image = await Jimp.read(fileName);
+      image.resize(1440, 1080);
+      image.crop(0, 0, 1430, 100).write(fileName);
+    });
 
-  test.it('for [filesystem view]', function (done) {
-    var fileName = DEFAULT_FOLDER_STORE + 'filesystem-view.png'
-    loginPage.username('user')
-    loginPage.password('pwd')
-    loginPage.submitLogin()
+    it('for [database view]', async () => {
+      const fileName = DEFAULT_FOLDER_STORE + 'database-view.png';
+      await loginPage.username('user');
+      await loginPage.password('pwd');
+      await loginPage.submitLogin();
+      await homePage.clickMenu('nav-db');
+      await homePage.clickTree('Video');
 
-    homePage.clickMenu('nav-fs')
-    homePage.clickTree('etc').then(function () {
-      homePage.takeScreenshot(fileName).then(function () {
-        Jimp.read(fileName).then(function (image) {
-          image.resize(1280, Jimp.AUTO).write(fileName)
-          done()
-        });
-      })
-    })
-  })
+      await homePage.takeScreenshot(fileName);
 
-  test.it('for [items view]', function (done) {
-    var fileName = DEFAULT_FOLDER_STORE + 'items-view.png'
-    loginPage.username('user')
-    loginPage.password('pwd')
-    loginPage.submitLogin()
+      const image = await Jimp.read(fileName);
+      image.resize(1280, Jimp.AUTO).write(fileName);
+    });
 
-    homePage.clickMenu('nav-db')
-    homePage.clickTree('Video').then(function () {
-      homePage.takeScreenshot(fileName).then(function () {
-        Jimp.read(fileName).then(function (image) {
-          image.resize(1280, Jimp.AUTO).write(fileName)
-          done()
-        });
-      })
-    })
-  })
+    it('for [filesystem view]', async () => {
+      const fileName = DEFAULT_FOLDER_STORE + 'filesystem-view.png';
+      await loginPage.username('user');
+      await loginPage.password('pwd');
+      await loginPage.submitLogin();
+      await homePage.clickMenu('nav-fs');
+      await homePage.clickTree('etc');
 
-  test.it('for [edit item] from item list', function (done) {
-    var fileName = DEFAULT_FOLDER_STORE + 'edit-item.png'
-    loginPage.username('user')
-    loginPage.password('pwd')
-    loginPage.submitLogin()
+      await homePage.takeScreenshot(fileName);
 
-    homePage.clickMenu('nav-db')
-    homePage.clickTree('Video')
-    homePage.editItem(0).then(function () {
-      driver.sleep(1000)
-      homePage.takeScreenshot(fileName).then(function () {
-        Jimp.read(fileName).then(function (image) {
-          image.resize(1440, 1080)
-          image.crop(390, 0, 656, 899).write(fileName)
-          done()
-        });
-      })
-    })
-  })
+      const image = await Jimp.read(fileName);
+      image.resize(1280, Jimp.AUTO).write(fileName);
+    });
 
-  test.it('for [trail operations]', function (done) {
-    var fileName = DEFAULT_FOLDER_STORE + 'trail-operations.png'
-    loginPage.username('user')
-    loginPage.password('pwd')
-    loginPage.submitLogin()
+    it('for [items view]', async () => {
+      const fileName = DEFAULT_FOLDER_STORE + 'items-view.png';
+      await loginPage.username('user');
+      await loginPage.password('pwd');
+      await loginPage.submitLogin();
+      await homePage.clickMenu('nav-db');
+      await homePage.clickTree('Video');
 
-    homePage.clickMenu('nav-db')
-    homePage.clickTree('Video').then(function () {
-      homePage.hover('.grb-trail-edit')
-      homePage.takeScreenshot(fileName).then(function () {
-        Jimp.read(fileName).then(function (image) {
-          image.resize(1440, 1080)
-          image.crop(860, 0, 570, 140).write(fileName)
-          done()
-        });
-      })
-    })
-  })
+      await homePage.takeScreenshot(fileName);
 
-  test.it('for [item edit operations]', function (done) {
-    var fileName = DEFAULT_FOLDER_STORE + 'item-operations.png'
-    loginPage.username('user')
-    loginPage.password('pwd')
-    loginPage.submitLogin()
+      const image = await Jimp.read(fileName);
+      image.resize(1280, Jimp.AUTO).write(fileName);
+    });
 
-    homePage.clickMenu('nav-db')
-    homePage.clickTree('Video')
-    homePage.getItem(0).then(function (item) {
-      homePage.hover('.grb-item-edit')
-      homePage.takeScreenshot(fileName).then(function () {
-        Jimp.read(fileName).then(function (image) {
-          image.resize(1440, 1080)
-          image.crop(325, 125, 1135, 125).write(fileName)
-          done()
-        });
-      })
-    })
-  })
+    it('for [edit item] from item list', async () => {
+      const fileName = DEFAULT_FOLDER_STORE + 'edit-item.png';
+      await loginPage.username('user');
+      await loginPage.password('pwd');
+      await loginPage.submitLogin();
+      await homePage.clickMenu('nav-db');
+      await homePage.clickTree('Video');
+      await homePage.editItem(0);
+      await driver.sleep(1000);
 
-  test.it('for [toast message]', function (done) {
-    var fileName = DEFAULT_FOLDER_STORE + 'toast-message.png'
-    loginPage.username('user')
-    loginPage.password('pwd')
-    loginPage.submitLogin()
+      await homePage.takeScreenshot(fileName);
 
-    homePage.clickMenu('nav-db')
-    homePage.clickTree('Video')
-    homePage.clickTree('All Video')
-    homePage.getToastElement().then(function (element) {
-      homePage.takeScreenshot(fileName).then(function () {
-        Jimp.read(fileName).then(function (image) {
-          image.resize(1280, Jimp.AUTO).write(fileName)
-          done()
-        });
-      })
-    })
-  })
+      const image = await Jimp.read(fileName);
+      image.resize(1440, 1080);
+      image.crop(390, 0, 656, 899).write(fileName);
+    });
 
-  test.it('for [task message]', function (done) {
-    var fileName = DEFAULT_FOLDER_STORE + 'task-message.png'
-    loginPage.username('user')
-    loginPage.password('pwd')
-    loginPage.submitLogin()
+    it('for [trail operations]', async () => {
+      const fileName = DEFAULT_FOLDER_STORE + 'trail-operations.png';
+      await loginPage.username('user');
+      await loginPage.password('pwd');
+      await loginPage.submitLogin();
+      await homePage.clickMenu('nav-db');
+      await homePage.clickTree('Video');
 
-    homePage.clickMenu('nav-fs')
-    homePage.clickTree('etc')
-    homePage.mockTaskMessage('Performing scan of /movies').then(function () {
-      driver.sleep(1000)
-      homePage.takeScreenshot(fileName).then(function () {
-        Jimp.read(fileName).then(function (image) {
-          image.resize(1280, Jimp.AUTO).write(fileName)
-          done()
-        });
-      })
-    })
-  })
-})
+      await homePage.takeScreenshot(fileName);
+
+      const image = await Jimp.read(fileName);
+      image.resize(1440, 1080);
+      image.crop(860, 0, 570, 140).write(fileName);
+    });
+
+    it('for [item edit operations]', async () => {
+      const fileName = DEFAULT_FOLDER_STORE + 'item-operations.png';
+      await loginPage.username('user');
+      await loginPage.password('pwd');
+      await loginPage.submitLogin();
+      await homePage.clickMenu('nav-db');
+      await homePage.clickTree('Video');
+
+      await homePage.getItem(0);
+      await homePage.takeScreenshot(fileName);
+
+      const image = await Jimp.read(fileName);
+      image.resize(1440, 1080);
+      image.crop(325, 125, 1135, 125).write(fileName);
+    });
+
+    it('for [toast message]', async () => {
+      const fileName = DEFAULT_FOLDER_STORE + 'toast-message.png';
+      await loginPage.username('user');
+      await loginPage.password('pwd');
+      await loginPage.submitLogin();
+      await homePage.clickMenu('nav-db');
+      await homePage.clickTree('Video');
+      await homePage.clickTree('All Video');
+
+      await homePage.getToastElement();
+      await homePage.takeScreenshot(fileName);
+
+      const image = await Jimp.read(fileName);
+      image.resize(1280, Jimp.AUTO).write(fileName);
+    });
+
+    it('for [task message]', async () => {
+      const fileName = DEFAULT_FOLDER_STORE + 'task-message.png';
+      await loginPage.username('user');
+      await loginPage.password('pwd');
+      await loginPage.submitLogin();
+      await homePage.clickMenu('nav-fs');
+      await homePage.clickTree('etc');
+
+      await homePage.mockTaskMessage('Performing scan of /movies');
+      await driver.sleep(1000);
+      await homePage.takeScreenshot(fileName);
+
+      const image = await Jimp.read(fileName);
+      image.resize(1280, Jimp.AUTO).write(fileName);
+    });
+  });
+});
+

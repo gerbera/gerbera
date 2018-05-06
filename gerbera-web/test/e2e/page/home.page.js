@@ -1,276 +1,270 @@
-var webdriver = require('selenium-webdriver')
-var By = webdriver.By
-var until = webdriver.until
-var fs = require('fs')
+const {By, until} = require('selenium-webdriver');
+const fs = require('fs');
 
 module.exports = function (driver) {
-  this.getDatabaseMenu = function () {
-    return driver.findElement(By.id('nav-db'))
-  }
-  this.getFileSystemMenu = function () {
-    return driver.findElement(By.id('nav-fs'))
-  }
-  this.clickMenu = function (menuId) {
-    var tree = driver.findElement(By.id('tree'))
+  this.getDatabaseMenu = async () => {
+    return await driver.findElement(By.id('nav-db'));
+  };
+
+  this.getFileSystemMenu = async () => {
+    return await driver.findElement(By.id('nav-fs'));
+  };
+
+  this.clickMenu = async (menuId) => {
+    const tree = await driver.findElement(By.id('tree'));
     if (menuId === 'nav-home') {
-      return driver.findElement(By.id(menuId)).click()
+      return await driver.findElement(By.id(menuId)).click()
     } else {
-      driver.findElement(By.id(menuId)).click()
-      return driver.wait(until.elementIsVisible(tree), 5000)
+      await driver.findElement(By.id(menuId)).click();
+      return await driver.wait(until.elementIsVisible(tree), 5000)
     }
-  }
-  this.clickMenuIcon = function (menuId) {
-    var tree = driver.findElement(By.id('tree'))
+  };
+
+  this.clickMenuIcon = async (menuId) => {
+    const tree = await driver.findElement(By.id('tree'));
     if (menuId === 'nav-home') {
-      return driver.findElement(By.css('#'+ menuId + ' i')).click()
+      return await driver.findElement(By.css('#'+ menuId + ' i')).click();
     } else {
-      driver.findElement(By.css('#'+ menuId + ' i')).click()
-      return driver.wait(until.elementIsVisible(tree), 5000)
+      await driver.findElement(By.css('#'+ menuId + ' i')).click();
+      return await driver.wait(until.elementIsVisible(tree), 5000);
     }
-  }
-  this.isDisabled = function (id) {
-    return driver.wait(until.elementLocated(By.css('#' + id + '.disabled')), 5000).then(function (el) {
-      return true
-    })
-  }
-  this.treeItems = function () {
-    return driver.findElements(By.css('#tree li'))
-  }
-  this.treeItemChildItems = function (text) {
-    return driver.findElements(By.xpath('//li[.//span[contains(text(),\'' + text + '\')]]')).then(function (items) {
+  };
+  this.isDisabled = async (id) => {
+    await driver.wait(until.elementLocated(By.css('#' + id + '.disabled')), 5000);
+    return true;
+  };
+  this.treeItems = async () => {
+    return await driver.findElements(By.css('#tree li'));
+  };
+  this.treeItemChildItems = async (text) => {
+    const items = await driver.findElements(By.xpath('//li[.//span[contains(text(),\'' + text + '\')]]'));
       // the xpath finds both <database> and <Video>  TODO: needs work
-      return items[1].findElements(By.css('li.list-group-item'))
-    })
-  }
-  this.clickTree = function (text) {
-    var elem = driver.findElement(By.xpath('//span[contains(text(),\'' + text + '\')]'))
-    driver.wait(until.elementIsVisible(elem), 5000)
-    elem.click()
-    return driver.sleep(500) // todo use wait...
-  }
-  this.expandTree = function (text) {
-    return driver.findElements(By.xpath('//li[.//span[contains(text(),\'' + text + '\')]]')).then(function (items) {
-      var folderTitle = items[1].findElement(By.className('folder-title'))
-      folderTitle.click()
-      return driver.sleep(500) // todo use wait...
-    })
-  }
+    return await items[1].findElements(By.css('li.list-group-item'));
+  };
+  this.clickTree = async (text) => {
+    const elem = await driver.findElement(By.xpath('//span[contains(text(),\'' + text + '\')]'));
+    await driver.wait(until.elementIsVisible(elem), 5000);
+    await elem.click();
+    return await driver.sleep(500); // todo use wait...
+  };
+  this.expandTree = async (text) => {
+    const items = await driver.findElements(By.xpath('//li[.//span[contains(text(),\'' + text + '\')]]'));
+    const folderTitle = await items[1].findElement(By.className('folder-title'));
+    await folderTitle.click();
+    return await driver.sleep(500); // todo use wait...
+  };
 
-  this.getItem = function (idx) {
-    driver.wait(until.elementLocated(By.id('datagrid'), 5000))
-    return driver.findElements(By.className('grb-item')).then(function (items) {
-      return items[idx]
-    })
-  }
+  this.getItem = async (idx) => {
+    await driver.wait(until.elementLocated(By.id('datagrid'), 5000));
+    const items = await driver.findElements(By.className('grb-item'));
+    return items[idx];
+  };
 
-  this.deleteItemFromList = function (idx) {
-    return driver.findElements(By.css('.grb-item span.grb-item-delete')).then(function (items) {
-      var item = items[idx]
-      item.click()
-      return driver.wait(until.stalenessOf(item))
-    })
-  }
+  this.deleteItemFromList = async (idx) => {
+    const items = await driver.findElements(By.css('.grb-item span.grb-item-delete'));
+    const item = items[idx];
+    await item.click();
+    return await driver.wait(until.stalenessOf(item));
+  };
 
-  this.editItem = function (idx) {
-    return driver.findElements(By.css('.grb-item span.grb-item-edit')).then(function (items) {
-      items[idx].click()
-      return driver.wait(until.elementIsVisible(driver.findElement(By.id('editModal'))), 5000)
-    })
-  }
+  this.editItem = async (idx) => {
+    const items = await driver.findElements(By.css('.grb-item span.grb-item-edit'));
+    await items[idx].click();
+    return await driver.wait(until.elementIsVisible(driver.findElement(By.id('editModal'))), 5000);
+  };
 
-  this.editOverlayDisplayed = function () {
-    driver.sleep(1000) // allow for animation
-    return driver.findElement(By.id('editModal')).isDisplayed()
-  }
+  this.editOverlayDisplayed = async () => {
+    await driver.sleep(1000); // allow for animation
+    return await driver.findElement(By.id('editModal')).isDisplayed();
+  };
 
-  this.editOverlayFieldValue = function (fieldName) {
-    return driver.findElement(By.id(fieldName)).then(function (element) {
-      return element.getAttribute('value')
-    })
-  }
+  this.editOverlayFieldValue = async (fieldName) => {
+    const el = await driver.findElement(By.id(fieldName));
+    return await el.getAttribute('value');
+  };
 
-  this.editorOverlayField = function (fieldName) {
-    return driver.findElement(By.id(fieldName))
-  }
+  this.editorOverlayField = async (fieldName) => {
+    return await driver.findElement(By.id(fieldName));
+  };
 
-  this.setEditorOverlayField = function (fieldName, value) {
-    return this.editorOverlayField(fieldName).then(function (field) {
-      field.clear()
-      return field.sendKeys(value)
-    })
-  }
+  this.editorOverlayFieldDisplayed = async(fieldName) => {
+    return await driver.findElement(By.id(fieldName)).isDisplayed();
+  };
 
-  this.editOverlaySubmitText = function () {
-    return driver.findElement(By.id('editSave')).getText()
-  }
+  this.setEditorOverlayField = async (fieldName, value) => {
+    const field = await this.editorOverlayField(fieldName);
+    await field.clear();
+    return await field.sendKeys(value);
+  };
 
-  this.editOverlayParentId = function () {
-    return driver.findElement(By.id('addParentIdTxt')).getText()
-  }
+  this.editOverlaySubmitText = async () => {
+    return await driver.findElement(By.id('editSave')).getText();
+  };
 
-  this.autoscanOverlayDisplayed = function () {
-    driver.sleep(1000) // await animation
-    return driver.findElement(By.id('autoscanModal')).isDisplayed()
-  }
+  this.autoscanOverlayDisplayed = async () => {
+    await driver.sleep(1000); // await animation
+    return await driver.findElement(By.id('autoscanModal')).isDisplayed();
+  };
 
-  this.cancelEdit = function () {
-    driver.sleep(200) // slow down with animations
-    driver.findElement(By.id('editCancel')).click()
-    driver.sleep(1000)
-    return driver.wait(until.elementIsNotVisible(driver.findElement(By.id('editModal'))), 5000)
-  }
+  this.cancelEdit = async () => {
+    await driver.sleep(200); // slow down with animations
+    await driver.findElement(By.id('editCancel')).click();
+    await driver.sleep(1000);
+    return await driver.wait(until.elementIsNotVisible(driver.findElement(By.id('editModal'))), 5000);
+  };
 
-  this.submitEditor = function () {
-    driver.findElement(By.id('editSave')).click()
-    return driver.wait(until.elementIsNotVisible(driver.findElement(By.id('editModal'))), 5000)
-  }
+  this.submitEditor = async () => {
+    await driver.findElement(By.id('editSave')).click();
+    return await driver.wait(until.elementIsNotVisible(driver.findElement(By.id('editModal'))), 5000);
+  };
 
-  this.items = function () {
-    driver.wait(until.elementLocated(By.id('datagrid')), 1000)
-    return driver.findElements(By.className('grb-item'))
-  }
+  this.items = async () => {
+    await driver.wait(until.elementLocated(By.id('datagrid')), 1000);
+    return await driver.findElements(By.className('grb-item'));
+  };
 
-  this.hasDeleteIcon = function (grbItem) {
-    return grbItem.findElement(By.css('.grb-item-delete')).isDisplayed()
-  }
+  this.hasDeleteIcon = async (grbItem) => {
+    try {
+      return await grbItem.findElement(By.css('.grb-item-delete')).isDisplayed();
+    } catch(e) {
+      return false;
+    }
+  };
 
-  this.hasEditIcon = function (grbItem) {
-    return grbItem.findElement(By.css('.grb-item-edit')).isDisplayed()
-  }
+  this.hasEditIcon = async (grbItem) => {
+    try {
+      return await grbItem.findElement(By.css('.grb-item-edit')).isDisplayed();
+    } catch (e) {
+      return false;
+    }
+  };
 
-  this.hasDownloadIcon = function (grbItem) {
-    return grbItem.findElement(By.css('.grb-item-download')).isDisplayed()
-  }
+  this.hasDownloadIcon = async (grbItem) => {
+    try {
+      return await grbItem.findElement(By.css('.grb-item-download')).isDisplayed();
+    } catch (e) {
+      return false;
+    }
+  };
 
-  this.hasAddIcon = function (grbItem) {
-    return grbItem.findElement(By.css('.grb-item-add')).isDisplayed()
-  }
+  this.hasAddIcon = async (grbItem) => {
+    try {
+      return grbItem.findElement(By.css('.grb-item-add')).isDisplayed();
+    } catch (e) {
+      return false;
+    }
+  };
 
-  this.hasTrailAddIcon = function () {
-    return driver.findElement(By.css('.grb-trail-add')).isDisplayed().then(function (displayed) {
-      return displayed
-    }, function () {
-      return false
-    })
-  }
+  this.hasTrailAddIcon = async () => {
+    return await driver.findElement(By.css('.grb-trail-add')).isDisplayed();
+  };
 
-  this.hasTrailAddAutoscanIcon = function () {
-    return driver.findElement(By.css('.grb-trail-add-autoscan')).isDisplayed()
-  }
+  this.hasTrailAddAutoscanIcon = async () => {
+    return await driver.findElement(By.css('.grb-trail-add-autoscan')).isDisplayed();
+  };
 
-  this.hasTrailDeleteIcon = function () {
-    return driver.wait(until.elementLocated(By.css('.grb-trail-delete')), 1000).then(function (elem) {
-      return elem.isDisplayed()
-    }, function () {
-      return false
-    })
-  }
+  this.hasTrailDeleteIcon = async () => {
+    try {
+      await driver.wait(until.elementLocated(By.css('.grb-trail-delete')), 1000);
+      return driver.findElement(By.css('.grb-trail-delete')).isDisplayed();
+    } catch (e) {
+      return false;
+    }
+  };
 
-  this.clickTrailAdd = function () {
-    return driver.findElement(By.css('.grb-trail-add')).then(function (addEl) {
-      addEl.click()
-      return driver.wait(until.elementIsVisible(driver.findElement(By.id('editModal'))), 5000)
-    })
-  }
+  this.clickTrailAdd = async () => {
+    const addEl = await driver.findElement(By.css('.grb-trail-add'));
+    await addEl.click();
+    return await driver.wait(until.elementIsVisible(driver.findElement(By.id('editModal'))), 5000);
+  };
 
-  this.clickTrailAddAutoscan = function () {
-    return driver.findElement(By.css('.grb-trail-add-autoscan')).then(function (addEl) {
-      addEl.click()
-      return driver.wait(until.elementIsVisible(driver.findElement(By.id('autoscanModal'))), 5000)
-    })
-  }
+  this.clickTrailAddAutoscan = async () => {
+    const el = await driver.findElement(By.css('.grb-trail-add-autoscan'));
+    await el.click();
+    return await driver.wait(until.elementIsVisible(driver.findElement(By.id('autoscanModal'))), 5000);
+  };
 
-  this.clickTrailEdit = function () {
-    return driver.findElement(By.css('.grb-trail-edit')).then(function (el) {
-      el.click()
-      return driver.wait(until.elementIsVisible(driver.findElement(By.id('editModal'))), 5000)
-    })
-  }
+  this.clickTrailEdit = async () => {
+    const el = await driver.findElement(By.css('.grb-trail-edit'));
+    await el.click();
+    return await driver.wait(until.elementIsVisible(driver.findElement(By.id('editModal'))), 5000);
+  };
 
-  this.editOverlayTitle = function () {
-    driver.wait(until.elementIsVisible(driver.findElement(By.css('.modal-title'))), 5000)
-    return driver.findElement(By.css('.modal-title')).getText()
-  }
+  this.editOverlayTitle = async () => {
+    await driver.wait(until.elementIsVisible(driver.findElement(By.css('.modal-title'))), 5000);
+    return await driver.findElement(By.css('.modal-title')).getText();
+  };
 
-  this.selectObjectType = function (objectType) {
-    return driver.findElement(By.css('#editObjectType>option[value=\'' + objectType + '\']')).click()
-  }
+  this.selectObjectType = async (objectType) => {
+    return await driver.findElement(By.css('#editObjectType>option[value=\'' + objectType + '\']')).click();
+  };
 
-  this.getAutoscanModeTimed = function () {
-    return driver.findElement(By.id('autoscanModeTimed')).getAttribute('checked')
-  }
+  this.getAutoscanModeTimed = async () => {
+    return await driver.findElement(By.id('autoscanModeTimed')).getAttribute('checked');
+  };
 
-  this.getAutoscanLevelBasic = function () {
-    return driver.findElement(By.id('autoscanLevelBasic')).getAttribute('checked')
-  }
+  this.getAutoscanLevelBasic = async () => {
+    return await driver.findElement(By.id('autoscanLevelBasic')).getAttribute('checked');
+  };
 
-  this.getAutoscanRecursive = function () {
-    return driver.findElement(By.id('autoscanRecursive')).getAttribute('checked')
-  }
+  this.getAutoscanRecursive = async () => {
+    return await driver.findElement(By.id('autoscanRecursive')).getAttribute('checked');
+  };
 
-  this.getAutoscanHidden = function () {
-    return driver.findElement(By.id('autoscanHidden')).getAttribute('checked')
-  }
+  this.getAutoscanHidden = async () => {
+    return await driver.findElement(By.id('autoscanHidden')).getAttribute('checked');
+  };
 
-  this.getAutoscanIntervalValue = function () {
-    return driver.findElement(By.id('autoscanInterval')).getAttribute('value')
-  }
+  this.getAutoscanIntervalValue = async () => {
+    return await driver.findElement(By.id('autoscanInterval')).getAttribute('value');
+  };
 
-  this.cancelAutoscan = function () {
-    driver.findElement(By.id('autoscanCancel')).click()
-    driver.sleep(1000)
-    return driver.wait(until.elementIsNotVisible(driver.findElement(By.id('autoscanModal'))), 5000)
-  }
+  this.cancelAutoscan = async () => {
+    await driver.findElement(By.id('autoscanCancel')).click();
+    await driver.sleep(1000);
+    return await driver.wait(until.elementIsNotVisible(driver.findElement(By.id('autoscanModal'))), 5000);
+  };
 
-  this.submitAutoscan = function () {
-    driver.findElement(By.id('autoscanSave')).click()
-    return driver.wait(until.elementIsNotVisible(driver.findElement(By.id('autoscanModal'))), 5000)
-  }
+  this.submitAutoscan = async () => {
+    await driver.findElement(By.id('autoscanSave')).click();
+    return await driver.wait(until.elementIsNotVisible(driver.findElement(By.id('autoscanModal'))), 5000);
+  };
 
-  this.clickAutoscanEdit = function (idx) {
-    return driver.findElements(By.css('.autoscan')).then(function (items) {
-      return items[idx].click()
-    })
-  }
+  this.clickAutoscanEdit = async (idx) => {
+    const items = await driver.findElements(By.css('.autoscan'));
+    return await items[idx].click();
+  };
 
-  this.getToastMessage = function () {
-    return driver.wait(until.elementIsVisible(driver.findElement(By.id('toast'))), 5000).then(function () {
-      return driver.findElement(By.css('#grb-toast-msg')).getText()
-    })
-  }
+  this.getToastMessage = async () => {
+    await driver.wait(until.elementIsVisible(driver.findElement(By.id('toast'))), 5000);
+    return await driver.findElement(By.css('#grb-toast-msg')).getText();
+  };
 
-  this.getToastElement = function () {
-    return driver.wait(until.elementIsVisible(driver.findElement(By.id('toast'))), 5000).then(function () {
-      return driver.findElement(By.id('toast'))
-    })
-  }
+  this.getToastElement = async () => {
+    await driver.wait(until.elementIsVisible(driver.findElement(By.id('toast'))), 5000);
+    return await driver.findElement(By.id('toast'));
+  };
 
-  this.waitForToastClose = function () {
-    driver.wait(until.elementIsNotVisible(driver.findElement(By.id('toast'))), 6000)
-    return driver.findElement(By.css('#grb-toast-msg')).isDisplayed()
-  }
+  this.getToastElementWidth = async () => {
+    await driver.wait(until.elementIsVisible(driver.findElement(By.id('toast'))), 5000);
+    return await driver.executeScript('return $(\'#toast\').width()');
+  };
 
-  this.getPages = function () {
-    return driver.findElements(By.css('.page-item'))
-  }
+  this.waitForToastClose = async () => {
+    await driver.wait(until.elementIsNotVisible(driver.findElement(By.id('toast'))), 6000);
+    return await driver.findElement(By.css('#grb-toast-msg')).isDisplayed();
+  };
 
-  this.getWindowSize = function () {
-    return driver.manage().window().getSize();
-  }
+  this.getPages = async () => {
+    return await driver.findElements(By.css('.page-item'));
+  };
 
-  this.takeScreenshot = function (filename) {
-    return driver.takeScreenshot().then(function(data) {
-      fs.writeFileSync(filename, data, 'base64');
-    })
-  }
+  this.takeScreenshot = async (filename) => {
+    const data = await driver.takeScreenshot();
+    fs.writeFileSync(filename, data, 'base64');
+  };
 
-  this.hover = function (selector) {
-    var elem = driver.findElement(By.css(selector))
-    driver.actions().mouseMove(elem).perform();
-    driver.sleep(1000);
-  }
-
-  this.mockTaskMessage = function (msg) {
-      return driver.executeScript('return $(\'#toast\').toast(\'showTask\', {message: "'+ msg +'", type: "info", icon: "fa-refresh fa-spin fa-fw"});')
-  }
-}
+  this.mockTaskMessage = async (msg) => {
+    return await driver.executeScript('return $(\'#toast\').toast(\'showTask\', {message: "'+ msg +'", type: "info", icon: "fa-refresh fa-spin fa-fw"});')
+  };
+};

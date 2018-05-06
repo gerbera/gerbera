@@ -1,121 +1,109 @@
-var chai = require('chai')
-var expect = chai.expect
-var webdriver = require('selenium-webdriver')
-var test = require('selenium-webdriver/testing')
-var driver
-var mockWebServer = 'http://' + process.env.npm_package_config_webserver_host + ':' + process.env.npm_package_config_webserver_port
+const {expect} = require('chai');
+const {Builder} = require('selenium-webdriver');
+const {suite} = require('selenium-webdriver/testing');
+let chrome = require('selenium-webdriver/chrome');
+const mockWebServer = 'http://' + process.env.npm_package_config_webserver_host + ':' + process.env.npm_package_config_webserver_port;
+let driver;
 
-require('chromedriver')
+const LoginPage = require('./page/login.page');
 
-var LoginPage = require('./page/login.page')
+suite(() => {
+  let loginPage;
 
-test.describe('The login action', function () {
-  var loginPage
-
-  this.slow(5000)
-  this.timeout(60000)
-
-  test.before(function () {
-    driver = new webdriver.Builder()
+  before(async () => {
+    const chromeOptions = new chrome.Options();
+    chromeOptions.addArguments(['--window-size=1280,1024']);
+    driver = new Builder()
       .forBrowser('chrome')
-      .build()
+      .setChromeOptions(chromeOptions)
+      .build();
+    await driver.get(mockWebServer + '/reset?testName=login.test.requests.json');
+    loginPage = new LoginPage(driver);
+  });
 
-    driver.manage().window().setSize(1280, 1024)
-    driver.get(mockWebServer + '/reset?testName=login.test.requests.json')
+  after(() => driver && driver.quit());
 
-    loginPage = new LoginPage(driver)
-  })
+  describe('The login action', () => {
 
-  test.beforeEach(function () {
-    driver.get(mockWebServer + '/disabled.html')
-    driver.manage().deleteAllCookies()
+    beforeEach(async () => {
+      await driver.get(mockWebServer + '/disabled.html');
+      await driver.manage().deleteAllCookies();
+      await loginPage.get(mockWebServer + '/index.html');
+    });
 
-    loginPage.get(mockWebServer + '/index.html')
-  })
-
-  test.after(function () {
-    driver.quit()
-  })
-
-  test.it('hides the login form when no authentication is required', function () {
-    loginPage.loginFields().then(function (fields) {
-      for (var i = 0; i < fields.length; i++) {
-        var field = fields[i]
-        field.getAttribute('style').then(function (value) {
-          expect(value).to.equal('display: none;')
-        })
+    it('hides the login form when no authentication is required', async () => {
+      const fields = await loginPage.loginFields();
+      for (let i = 0; i < fields.length; i++) {
+        const field = fields[i];
+        const style = await field.getAttribute('style');
+        expect(style).to.equal('display: none;');
       }
-    })
-  })
+    });
 
-  test.it('shows the login form when no session exists yet and accounts is required', function () {
-    loginPage.loginForm().then(function (form) {
-      form.getAttribute('style').then(function (value) {
-        expect(value).to.equal('')
-      })
-    })
-  })
+    it('shows the login form when no session exists yet and accounts is required', async () => {
+      const form = await loginPage.loginForm();
+      const style = await form.getAttribute('style');
+      expect(style).to.equal('');
+    });
 
-  test.it('requires user name and password to submit the login form', function () {
-    loginPage.password('')
-    loginPage.username('')
-    loginPage.submitLogin()
-    driver.sleep(4000)
-    loginPage.getToastMessage().then(function (message) {
-      expect(message).to.equal('Please enter username and password')
-    })
-    loginPage.waitForToastClose().then(function (displayed) {
-      expect(displayed).to.be.false
-    })
-  })
+    it('requires user name and password to submit the login form', async () => {
+      await loginPage.password('');
+      await loginPage.username('');
+      await loginPage.submitLogin();
+      await driver.sleep(4000);
 
-  test.it('when successful login show logout button, and show form on logout', function () {
-    loginPage.password('pwd')
-    loginPage.username('user')
-    loginPage.submitLogin()
-    loginPage.logout()
-    loginPage.loginForm().then(function (form) {
-      form.getAttribute('style').then(function (value) {
-        expect(value).to.equal('')
-      })
-    })
-  })
+      let result = await loginPage.getToastMessage();
+      expect(result).to.equal('Please enter username and password');
 
-  test.it('hides menu, hides login and shows message when UI is disabled', function () {
-    loginPage.getToastMessage().then(function (message) {
-      expect(message).to.equal('The UI is disabled in the configuration file. See README.')
-    })
-    loginPage.waitForToastClose().then(function (displayed) {
-      expect(displayed).to.be.false
-    })
-    loginPage.menuList().then(function (menuList) {
-      menuList.getAttribute('style').then(function (value) {
-        expect(value).to.equal('display: none;')
-      })
-    })
-    loginPage.loginFields().then(function (fields) {
-      for (var i = 0; i < fields.length; i++) {
-        var field = fields[i]
-        field.getAttribute('style').then(function (value) {
-          expect(value).to.equal('display: none;')
-        })
+      result = await loginPage.waitForToastClose();
+      expect(result).to.be.false;
+    });
+
+    it('when successful login show logout button, and show form on logout', async () => {
+      await loginPage.password('pwd');
+      await loginPage.username('user');
+      await loginPage.submitLogin();
+      await loginPage.logout();
+
+      const form = await loginPage.loginForm();
+      const style = await form.getAttribute('style');
+      expect(style).to.equal('');
+    });
+
+    it('hides menu, hides login and shows message when UI is disabled', async () => {
+      let result = await loginPage.getToastMessage();
+      expect(result).to.equal('The UI is disabled in the configuration file. See README.');
+
+      result = await loginPage.waitForToastClose();
+      expect(result).to.be.false;
+
+      result = await loginPage.menuList();
+      const style = await result.getAttribute('style');
+      expect(style).to.equal('display: none;');
+
+      const fields = await loginPage.loginFields();
+      for (let i = 0; i < fields.length; i++) {
+        const field = fields[i];
+        const style = await field.getAttribute('style');
+        expect(style).to.equal('display: none;');
       }
-    })
-  })
 
-  test.it('when session expires reloads the page and lets user login again.', function () {
-    driver.sleep(1000) // allow fields to load
-    loginPage.loginFields().then(function (fields) {
-      for (var i = 0; i < fields.length; i++) {
-        var field = fields[i]
-        field.getAttribute('style').then(function (value) {
-          expect(value).to.equal('')
-        })
-      }
-    })
-
-    loginPage.getCookie('SID').then(function (sid) {
+      const sid = await loginPage.getCookie('SID');
       expect(sid).to.be.null
-    })
-  })
-})
+    });
+
+    it('when session expires reloads the page and lets user login again.', async () => {
+      await driver.sleep(1000); // allow fields to load
+
+      const fields = await loginPage.loginFields();
+      for (let i = 0; i < fields.length; i++) {
+        const field = fields[i];
+        const style = await field.getAttribute('style');
+        expect(style).to.equal('');
+      }
+
+      const result = await loginPage.loginButtonIsDisplayed();
+      expect(result, 'Login Button should be displayed').to.be.true;
+    });
+  });
+});
