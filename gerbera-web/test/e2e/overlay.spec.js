@@ -1,646 +1,303 @@
-var chai = require('chai')
-var expect = chai.expect
-var webdriver = require('selenium-webdriver')
-var test = require('selenium-webdriver/testing')
-var driver
-var mockWebServer = 'http://' + process.env.npm_package_config_webserver_host + ':' + process.env.npm_package_config_webserver_port
+const {expect} = require('chai');
+const {Builder} = require('selenium-webdriver');
+const {suite} = require('selenium-webdriver/testing');
+let chrome = require('selenium-webdriver/chrome');
+const mockWebServer = 'http://' + process.env.npm_package_config_webserver_host + ':' + process.env.npm_package_config_webserver_port;
+let driver;
 
-require('chromedriver')
+const HomePage = require('./page/home.page');
+const LoginPage = require('./page/login.page');
 
-var HomePage = require('./page/home.page')
-var LoginPage = require('./page/login.page')
+suite(() => {
+  let loginPage, homePage;
 
-test.describe('The overlay page', function () {
-  var loginPage, homePage
-
-  this.slow(5000)
-  this.timeout(60000)
-
-  test.before(function () {
-    driver = new webdriver.Builder()
+  before(async () => {
+    const chromeOptions = new chrome.Options();
+    chromeOptions.addArguments(['--window-size=1280,1024']);
+    driver = new Builder()
       .forBrowser('chrome')
-      .build()
+      .setChromeOptions(chromeOptions)
+      .build();
+    await driver.get(mockWebServer + '/reset?testName=overlay.test.json');
 
-    driver.manage().window().setSize(1280, 1024)
-    driver.get(mockWebServer + '/reset?testName=overlay.test.json')
+    loginPage = new LoginPage(driver);
+    homePage = new HomePage(driver);
 
-    loginPage = new LoginPage(driver)
-    homePage = new HomePage(driver)
+    await driver.get(mockWebServer + '/disabled.html');
+    await driver.manage().deleteAllCookies();
+    await loginPage.get(mockWebServer + '/index.html');
+    await loginPage.password('pwd');
+    await loginPage.username('user');
+    await loginPage.submitLogin();
+  });
 
-    loginPage.get(mockWebServer + '/index.html')
-    loginPage.password('pwd')
-    loginPage.username('user')
-    loginPage.submitLogin()
-  })
+  after(() => driver && driver.quit());
 
-  test.after(function () {
-    driver.quit()
-  })
+  describe('The overlay page', () => {
 
-  test.afterEach(function () {
-    homePage.cancelEdit()
-  })
+    afterEach(async () => {
+      await homePage.cancelEdit();
+    });
 
-  test.it('shows the edit overlay when edit is clicked and contains details', function () {
-    homePage.clickMenu('nav-db')
-    homePage.clickTree('Video')
-    homePage.editItem(0).then(function (item) {
-      homePage.editOverlayDisplayed().then(function (displayed) {
-        expect(displayed).to.be.true
-        homePage.editOverlayFieldValue('editObjectType').then(function (value) {
-          expect(value).to.equal('item')
-        })
-        homePage.editOverlayFieldValue('editLocation').then(function (value) {
-          expect(value).to.equal('/folder/location/Test.mp4')
-        })
-        homePage.editOverlayFieldValue('editClass').then(function (value) {
-          expect(value).to.equal('object.item.videoItem')
-        })
-        homePage.editOverlayFieldValue('editDesc').then(function (value) {
-          expect(value).to.equal('A description')
-        })
-        homePage.editOverlayFieldValue('editMime').then(function (value) {
-          expect(value).to.equal('video/mp4')
-        })
-        homePage.editOverlayFieldValue('objectId').then(function (value) {
-          expect(value).to.equal('39479')
-        })
-        homePage.editOverlaySubmitText().then(function (text) {
-          expect(text).to.equal('Save Item')
-        })
-      })
-    })
-  })
+    it('shows the edit overlay when edit is clicked and contains details', async () => {
+      await homePage.clickMenu('nav-db');
+      await homePage.clickTree('Video');
 
-  test.it('on click of db add item, shows the modal', function () {
-    homePage.clickMenu('nav-db')
-    homePage.clickTree('Video')
-    homePage.clickTrailAdd().then(function () {
-      homePage.editOverlayDisplayed().then(function (displayed) {
-        expect(displayed).to.be.true
+      await homePage.editItem(0);
 
-        homePage.editOverlayTitle().then(function (title) {
-          expect(title).to.equal('Add Item')
-        })
-        homePage.editOverlaySubmitText().then(function (text) {
-          expect(text).to.equal('Add Item')
-        })
-      })
-    })
-  })
+      const isDisplayed = await homePage.editOverlayDisplayed();
+      expect(isDisplayed).to.be.true;
 
-  test.it('selected object defaults class when selected', function () {
-    homePage.clickMenu('nav-db')
-    homePage.clickTree('Video')
-    homePage.clickTrailAdd().then(function () {
-      homePage.editOverlayDisplayed().then(function (displayed) {
-        expect(displayed).to.be.true
-        homePage.selectObjectType('item').then(function () {
-          homePage.editOverlayFieldValue('editClass').then(function (value) {
-            expect(value).to.equal('object.item')
-          })
-        })
-      })
-    })
-  })
-})
+      let value = await homePage.editOverlayFieldValue('editObjectType');
+      expect(value).to.equal('item');
 
-test.describe('The overlay item type selection', function () {
-  var loginPage, homePage
+      value = await homePage.editOverlayFieldValue('editLocation');
+      expect(value).to.equal('/folder/location/Test.mp4');
 
-  this.slow(5000)
-  this.timeout(60000)
+      value = await homePage.editOverlayFieldValue('editClass');
+      expect(value).to.equal('object.item.videoItem');
 
-  test.before(function () {
-    driver = new webdriver.Builder()
-      .forBrowser('chrome')
-      .build()
+      value = await homePage.editOverlayFieldValue('editDesc');
+      expect(value).to.equal('A description');
 
-    driver.manage().window().setSize(1280, 1024)
-    driver.get(mockWebServer + '/reset?testName=overlay.test.json')
+      value = await homePage.editOverlayFieldValue('editMime');
+      expect(value).to.equal('video/mp4');
 
-    loginPage = new LoginPage(driver)
-    homePage = new HomePage(driver)
+      value = await homePage.editOverlayFieldValue('objectId');
+      expect(value).to.equal('39479');
 
-    loginPage.get(mockWebServer + '/index.html')
-    loginPage.password('pwd')
-    loginPage.username('user')
-    loginPage.submitLogin()
-  })
+      const text = await homePage.editOverlaySubmitText();
+      expect(text).to.equal('Save Item');
+    });
 
-  test.after(function () {
-    driver.quit()
-  })
+    it('on click of db add item, shows the modal', async () => {
+      await homePage.clickMenu('nav-db');
+      await homePage.clickTree('Video');
 
-  test.afterEach(function () {
-    homePage.cancelEdit()
-  })
+      await homePage.clickTrailAdd();
 
-  test.it('only shows type, title and class when adding container type', function () {
-    homePage.clickMenu('nav-db')
-    homePage.clickTree('Video')
-    homePage.clickTrailAdd().then(function () {
-      homePage.editOverlayDisplayed().then(function (displayed) {
-        expect(displayed).to.be.true
-        homePage.selectObjectType('container').then(function () {
-          homePage.editOverlayFieldValue('editClass').then(function (value) {
-            expect(value).to.equal('object.container')
-          })
-          homePage.editorOverlayField('editObjectType').isDisplayed().then(function (value) {
-            expect(value).to.be.true
-          })
-          homePage.editorOverlayField('editTitle').isDisplayed().then(function (value) {
-            expect(value).to.be.true
-          })
-          homePage.editorOverlayField('editClass').isDisplayed().then(function (value) {
-            expect(value).to.be.true
-          })
-          homePage.editorOverlayField('editLocation').isDisplayed().then(function (value) {
-            expect(value).to.be.false
-          })
-          homePage.editorOverlayField('editDesc').isDisplayed().then(function (value) {
-            expect(value).to.be.false
-          })
-          homePage.editorOverlayField('editMime').isDisplayed().then(function (value) {
-            expect(value).to.be.false
-          })
-          homePage.editorOverlayField('editActionScript').isDisplayed().then(function (value) {
-            expect(value).to.be.false
-          })
-          homePage.editorOverlayField('editState').isDisplayed().then(function (value) {
-            expect(value).to.be.false
-          })
-          homePage.editorOverlayField('editProtocol').isDisplayed().then(function (value) {
-            expect(value).to.be.false
-          })
-        })
-      })
-    })
-  })
+      let result = await homePage.editOverlayDisplayed();
+      expect(result).to.be.true;
 
-  test.it('only shows title, location, class, desc, mime when adding item type', function () {
-    homePage.clickMenu('nav-db')
-    homePage.clickTree('Video')
-    homePage.clickTrailAdd().then(function () {
-      homePage.editOverlayDisplayed().then(function (displayed) {
-        expect(displayed).to.be.true
-        homePage.selectObjectType('item').then(function () {
-          homePage.editOverlayFieldValue('editClass').then(function (value) {
-            expect(value).to.equal('object.item')
-          })
-          homePage.editorOverlayField('editObjectType').isDisplayed().then(function (value) {
-            expect(value).to.be.true
-          })
-          homePage.editorOverlayField('editTitle').isDisplayed().then(function (value) {
-            expect(value).to.be.true
-          })
-          homePage.editorOverlayField('editLocation').isDisplayed().then(function (value) {
-            expect(value).to.be.true
-          })
-          homePage.editorOverlayField('editClass').isDisplayed().then(function (value) {
-            expect(value).to.be.true
-          })
-          homePage.editorOverlayField('editDesc').isDisplayed().then(function (value) {
-            expect(value).to.be.true
-          })
-          homePage.editorOverlayField('editMime').isDisplayed().then(function (value) {
-            expect(value).to.be.true
-          })
-          homePage.editorOverlayField('editActionScript').isDisplayed().then(function (value) {
-            expect(value).to.be.false
-          })
-          homePage.editorOverlayField('editState').isDisplayed().then(function (value) {
-            expect(value).to.be.false
-          })
-          homePage.editorOverlayField('editProtocol').isDisplayed().then(function (value) {
-            expect(value).to.be.false
-          })
-        })
-      })
-    })
-  })
+      result = await homePage.editOverlayTitle();
+      expect(result).to.equal('Add Item');
 
-  test.it('only shows title, location, class, desc, mime, actionScript, state when adding activeItem type', function () {
-    homePage.clickMenu('nav-db')
-    homePage.clickTree('Video')
-    homePage.clickTrailAdd().then(function () {
-      homePage.editOverlayDisplayed().then(function (displayed) {
-        expect(displayed).to.be.true
-        homePage.selectObjectType('active_item').then(function () {
-          homePage.editOverlayFieldValue('editClass').then(function (value) {
-            expect(value).to.equal('object.item.activeItem')
-          })
-          homePage.editorOverlayField('editObjectType').isDisplayed().then(function (value) {
-            expect(value).to.be.true
-          })
-          homePage.editorOverlayField('editTitle').isDisplayed().then(function (value) {
-            expect(value).to.be.true
-          })
-          homePage.editorOverlayField('editLocation').isDisplayed().then(function (value) {
-            expect(value).to.be.true
-          })
-          homePage.editorOverlayField('editClass').isDisplayed().then(function (value) {
-            expect(value).to.be.true
-          })
-          homePage.editorOverlayField('editDesc').isDisplayed().then(function (value) {
-            expect(value).to.be.true
-          })
-          homePage.editorOverlayField('editMime').isDisplayed().then(function (value) {
-            expect(value).to.be.true
-          })
-          homePage.editorOverlayField('editActionScript').isDisplayed().then(function (value) {
-            expect(value).to.be.true
-          })
-          homePage.editorOverlayField('editState').isDisplayed().then(function (value) {
-            expect(value).to.be.true
-          })
-          homePage.editorOverlayField('editProtocol').isDisplayed().then(function (value) {
-            expect(value).to.be.false
-          })
-        })
-      })
-    })
-  })
+      result = await homePage.editOverlaySubmitText();
+      expect(result).to.equal('Add Item');
+    });
 
-  test.it('only shows title, location, class, desc, mime, protocol when adding external_url type', function () {
-    homePage.clickMenu('nav-db')
-    homePage.clickTree('Video')
-    homePage.clickTrailAdd().then(function () {
-      homePage.editOverlayDisplayed().then(function (displayed) {
-        expect(displayed).to.be.true
-        homePage.selectObjectType('external_url').then(function () {
-          homePage.editOverlayFieldValue('editClass').then(function (value) {
-            expect(value).to.equal('object.item')
-          })
-          homePage.editOverlayFieldValue('editProtocol').then(function (value) {
-            expect(value).to.equal('http-get')
-          })
-          homePage.editorOverlayField('editObjectType').isDisplayed().then(function (value) {
-            expect(value).to.be.true
-          })
-          homePage.editorOverlayField('editTitle').isDisplayed().then(function (value) {
-            expect(value).to.be.true
-          })
-          homePage.editorOverlayField('editLocation').isDisplayed().then(function (value) {
-            expect(value).to.be.true
-          })
-          homePage.editorOverlayField('editClass').isDisplayed().then(function (value) {
-            expect(value).to.be.true
-          })
-          homePage.editorOverlayField('editDesc').isDisplayed().then(function (value) {
-            expect(value).to.be.true
-          })
-          homePage.editorOverlayField('editMime').isDisplayed().then(function (value) {
-            expect(value).to.be.true
-          })
-          homePage.editorOverlayField('editActionScript').isDisplayed().then(function (value) {
-            expect(value).to.be.false
-          })
-          homePage.editorOverlayField('editState').isDisplayed().then(function (value) {
-            expect(value).to.be.false
-          })
-          homePage.editorOverlayField('editProtocol').isDisplayed().then(function (value) {
-            expect(value).to.be.true
-          })
-        })
-      })
-    })
-  })
+    it('selected object defaults class when selected', async () => {
+      await homePage.clickMenu('nav-db');
+      await homePage.clickTree('Video');
+      await homePage.clickTrailAdd();
 
-  test.it('only shows title, location, class, desc, mime when adding internal_url type', function () {
-    homePage.clickMenu('nav-db')
-    homePage.clickTree('Video')
-    homePage.clickTrailAdd().then(function () {
-      homePage.editOverlayDisplayed().then(function (displayed) {
-        expect(displayed).to.be.true
-        homePage.selectObjectType('internal_url').then(function () {
-          homePage.editOverlayFieldValue('editClass').then(function (value) {
-            expect(value).to.equal('object.item')
-          })
-          homePage.editorOverlayField('editObjectType').isDisplayed().then(function (value) {
-            expect(value).to.be.true
-          })
-          homePage.editorOverlayField('editTitle').isDisplayed().then(function (value) {
-            expect(value).to.be.true
-          })
-          homePage.editorOverlayField('editLocation').isDisplayed().then(function (value) {
-            expect(value).to.be.true
-          })
-          homePage.editorOverlayField('editClass').isDisplayed().then(function (value) {
-            expect(value).to.be.true
-          })
-          homePage.editorOverlayField('editDesc').isDisplayed().then(function (value) {
-            expect(value).to.be.true
-          })
-          homePage.editorOverlayField('editMime').isDisplayed().then(function (value) {
-            expect(value).to.be.true
-          })
-          homePage.editorOverlayField('editActionScript').isDisplayed().then(function (value) {
-            expect(value).to.be.false
-          })
-          homePage.editorOverlayField('editState').isDisplayed().then(function (value) {
-            expect(value).to.be.false
-          })
-          homePage.editorOverlayField('editProtocol').isDisplayed().then(function (value) {
-            expect(value).to.be.false
-          })
-        })
-      })
-    })
-  })
-})
+      let result = await homePage.editOverlayDisplayed();
+      expect(result).to.be.true;
 
-test.describe('The overlay load item', function () {
-  var loginPage, homePage
+      await homePage.selectObjectType('item');
 
-  this.slow(5000)
-  this.timeout(60000)
+      result = await homePage.editOverlayFieldValue('editClass');
+      expect(result).to.equal('object.item');
+    });
+  });
 
-  test.before(function () {
-    driver = new webdriver.Builder()
-      .forBrowser('chrome')
-      .build()
+  describe('The overlay item type selection', () => {
 
-    driver.manage().window().setSize(1280, 1024)
-    driver.get(mockWebServer + '/reset?testName=overlay.test.json')
+    afterEach(async () => {
+      await homePage.cancelEdit();
+    });
 
-    loginPage = new LoginPage(driver)
-    homePage = new HomePage(driver)
+    const itemSelectionTest = async (itemType, assertClass, fieldAssertions) => {
+      await homePage.clickMenu('nav-db');
+      await homePage.clickTree('Video');
+      await homePage.clickTrailAdd();
 
-    loginPage.get(mockWebServer + '/index.html')
-    loginPage.password('pwd')
-    loginPage.username('user')
-    loginPage.submitLogin()
-  })
+      let result = await homePage.editOverlayDisplayed();
+      expect(result).to.be.true;
 
-  test.after(function () {
-    driver.quit()
-  })
+      await homePage.selectObjectType(itemType);
 
-  test.afterEach(function () {
-    homePage.cancelEdit()
-  })
+      const objectClass = await homePage.editOverlayFieldValue('editClass');
+      expect(objectClass, 'Object Class').to.equal(assertClass);
 
-  test.it('loads a container item to edit with correct fields populated', function () {
-    homePage.clickMenu('nav-db')
-    homePage.clickTree('Video')
-    homePage.clickTrailEdit().then(function () {
-      homePage.editOverlayFieldValue('editObjectType').then(function (value) {
-        expect(value).to.equal('container')
-      })
-      homePage.editorOverlayField('editObjectType').isDisplayed().then(function (value) {
-        expect(value).to.be.true
-      })
-      homePage.editOverlayFieldValue('editTitle').then(function (value) {
-        expect(value).to.equal('container title')
-      })
-      homePage.editorOverlayField('editTitle').isDisplayed().then(function (value) {
-        expect(value).to.be.true
-      })
-      homePage.editOverlayFieldValue('editClass').then(function (value) {
-        expect(value).to.equal('object.container')
-      })
-      homePage.editorOverlayField('editClass').isDisplayed().then(function (value) {
-        expect(value).to.be.true
-      })
-      homePage.editorOverlayField('editDesc').isDisplayed().then(function (value) {
-        expect(value).to.be.false
-      })
-      homePage.editorOverlayField('editMime').isDisplayed().then(function (value) {
-        expect(value).to.be.false
-      })
-      homePage.editorOverlayField('editLocation').isDisplayed().then(function (value) {
-        expect(value).to.be.false
-      })
-      homePage.editorOverlayField('editActionScript').isDisplayed().then(function (value) {
-        expect(value).to.be.false
-      })
-      homePage.editorOverlayField('editState').isDisplayed().then(function (value) {
-        expect(value).to.be.false
-      })
-      homePage.editorOverlayField('editProtocol').isDisplayed().then(function (value) {
-        expect(value).to.be.false
-      })
-    })
-  })
+      for (let i = 0; i < fieldAssertions.length; i++) {
+        const fieldAssert = fieldAssertions[i];
+        const isDisplayed = await homePage.editorOverlayFieldDisplayed(fieldAssert.id);
+        expect(isDisplayed, 'Field: ' + fieldAssert.id).to.equal(fieldAssert.visible);
+      }
+    };
 
-  test.it('loads an active item to edit with correct fields populated', function () {
-    homePage.clickMenu('nav-db')
-    homePage.clickTree('Video')
-    homePage.editItem(10).then(function () {
-      homePage.editOverlayFieldValue('editObjectType').then(function (value) {
-        expect(value).to.equal('active_item')
-      })
-      homePage.editorOverlayField('editObjectType').isDisplayed().then(function (value) {
-        expect(value).to.be.true
-      })
-      homePage.editOverlayFieldValue('editTitle').then(function (value) {
-        expect(value).to.equal('Test Active Item')
-      })
-      homePage.editorOverlayField('editTitle').isDisplayed().then(function (value) {
-        expect(value).to.be.true
-      })
-      homePage.editOverlayFieldValue('editClass').then(function (value) {
-        expect(value).to.equal('object.item.activeItem')
-      })
-      homePage.editorOverlayField('editClass').isDisplayed().then(function (value) {
-        expect(value).to.be.true
-      })
-      homePage.editOverlayFieldValue('editDesc').then(function (value) {
-        expect(value).to.equal('test')
-      })
-      homePage.editorOverlayField('editDesc').isDisplayed().then(function (value) {
-        expect(value).to.be.true
-      })
-      homePage.editOverlayFieldValue('editMime').then(function (value) {
-        expect(value).to.equal('text/plain')
-      })
-      homePage.editorOverlayField('editMime').isDisplayed().then(function (value) {
-        expect(value).to.be.true
-      })
-      homePage.editOverlayFieldValue('editLocation').then(function (value) {
-        expect(value).to.equal('/home/test.txt')
-      })
-      homePage.editorOverlayField('editLocation').isDisplayed().then(function (value) {
-        expect(value).to.be.true
-      })
-      homePage.editOverlayFieldValue('editActionScript').then(function (value) {
-        expect(value).to.equal('/home/echoText.sh')
-      })
-      homePage.editorOverlayField('editActionScript').isDisplayed().then(function (value) {
-        expect(value).to.be.true
-      })
-      homePage.editOverlayFieldValue('editState').then(function (value) {
-        expect(value).to.equal('test-state')
-      })
-      homePage.editorOverlayField('editState').isDisplayed().then(function (value) {
-        expect(value).to.be.true
-      })
-      homePage.editorOverlayField('editProtocol').isDisplayed().then(function (value) {
-        expect(value).to.be.false
-      })
-    })
-  })
+    it('only shows type, title and class when adding container type', async () => {
+      await itemSelectionTest('container', 'object.container', [
+        { id : 'editObjectType',   visible : true},
+        { id : 'editTitle',        visible : true},
+        { id : 'editClass',        visible : true},
+        { id : 'editLocation',     visible : false},
+        { id : 'editDesc',         visible : false},
+        { id : 'editMime',         visible : false},
+        { id : 'editActionScript', visible : false},
+        { id : 'editState',        visible : false},
+        { id : 'editProtocol',     visible : false}
+      ]);
+    });
 
-  test.it('loads an external url to edit with correct fields populated', function () {
-    homePage.clickMenu('nav-db')
-    homePage.clickTree('Video')
-    homePage.editItem(11).then(function () {
-      homePage.editOverlayFieldValue('editObjectType').then(function (value) {
-        expect(value).to.equal('external_url')
-      })
-      homePage.editorOverlayField('editObjectType').isDisplayed().then(function (value) {
-        expect(value).to.be.true
-      })
-      homePage.editOverlayFieldValue('editTitle').then(function (value) {
-        expect(value).to.equal('title')
-      })
-      homePage.editorOverlayField('editTitle').isDisplayed().then(function (value) {
-        expect(value).to.be.true
-      })
-      homePage.editOverlayFieldValue('editClass').then(function (value) {
-        expect(value).to.equal('object.item')
-      })
-      homePage.editorOverlayField('editClass').isDisplayed().then(function (value) {
-        expect(value).to.be.true
-      })
-      homePage.editOverlayFieldValue('editDesc').then(function (value) {
-        expect(value).to.equal('description')
-      })
-      homePage.editorOverlayField('editDesc').isDisplayed().then(function (value) {
-        expect(value).to.be.true
-      })
-      homePage.editOverlayFieldValue('editMime').then(function (value) {
-        expect(value).to.equal('text/plain')
-      })
-      homePage.editorOverlayField('editMime').isDisplayed().then(function (value) {
-        expect(value).to.be.true
-      })
-      homePage.editOverlayFieldValue('editLocation').then(function (value) {
-        expect(value).to.equal('http://localhost')
-      })
-      homePage.editorOverlayField('editLocation').isDisplayed().then(function (value) {
-        expect(value).to.be.true
-      })
-      homePage.editorOverlayField('editActionScript').isDisplayed().then(function (value) {
-        expect(value).to.be.false
-      })
-      homePage.editorOverlayField('editState').isDisplayed().then(function (value) {
-        expect(value).to.be.false
-      })
-      homePage.editorOverlayField('editProtocol').isDisplayed().then(function (value) {
-        expect(value).to.be.true
-      })
-      homePage.editOverlayFieldValue('editProtocol').then(function (value) {
-        expect(value).to.equal('http-get')
-      })
-    })
-  })
+    it('only shows title, location, class, desc, mime when adding item type', async () => {
+      await itemSelectionTest('item', 'object.item', [
+        { id : 'editObjectType',   visible : true},
+        { id : 'editTitle',        visible : true},
+        { id : 'editClass',        visible : true},
+        { id : 'editLocation',     visible : true},
+        { id : 'editDesc',         visible : true},
+        { id : 'editMime',         visible : true},
+        { id : 'editActionScript', visible : false},
+        { id : 'editState',        visible : false},
+        { id : 'editProtocol',     visible : false}
+      ]);
+    });
 
-  test.it('loads an simple item to edit with correct fields populated', function () {
-    homePage.clickMenu('nav-db')
-    homePage.clickTree('Video')
-    homePage.editItem(0).then(function () {
-      homePage.editOverlayFieldValue('editObjectType').then(function (value) {
-        expect(value).to.equal('item')
-      })
-      homePage.editorOverlayField('editObjectType').isDisplayed().then(function (value) {
-        expect(value).to.be.true
-      })
-      homePage.editOverlayFieldValue('editTitle').then(function (value) {
-        expect(value).to.equal('Test.mp4')
-      })
-      homePage.editorOverlayField('editTitle').isDisplayed().then(function (value) {
-        expect(value).to.be.true
-      })
-      homePage.editOverlayFieldValue('editClass').then(function (value) {
-        expect(value).to.equal('object.item.videoItem')
-      })
-      homePage.editorOverlayField('editClass').isDisplayed().then(function (value) {
-        expect(value).to.be.true
-      })
-      homePage.editOverlayFieldValue('editDesc').then(function (value) {
-        expect(value).to.equal('A description')
-      })
-      homePage.editorOverlayField('editDesc').isDisplayed().then(function (value) {
-        expect(value).to.be.true
-      })
-      homePage.editOverlayFieldValue('editMime').then(function (value) {
-        expect(value).to.equal('video/mp4')
-      })
-      homePage.editorOverlayField('editMime').isDisplayed().then(function (value) {
-        expect(value).to.be.true
-      })
-      homePage.editOverlayFieldValue('editLocation').then(function (value) {
-        expect(value).to.equal('/folder/location/Test.mp4')
-      })
-      homePage.editorOverlayField('editLocation').isDisplayed().then(function (value) {
-        expect(value).to.be.true
-      })
-      homePage.editorOverlayField('editActionScript').isDisplayed().then(function (value) {
-        expect(value).to.be.false
-      })
-      homePage.editorOverlayField('editState').isDisplayed().then(function (value) {
-        expect(value).to.be.false
-      })
-      homePage.editorOverlayField('editProtocol').isDisplayed().then(function (value) {
-        expect(value).to.be.false
-      })
-    })
-  })
+    it('only shows title, location, class, desc, mime, actionScript, state when adding activeItem type', async () => {
+      await itemSelectionTest('active_item', 'object.item.activeItem', [
+        { id : 'editObjectType',   visible : true},
+        { id : 'editTitle',        visible : true},
+        { id : 'editClass',        visible : true},
+        { id : 'editLocation',     visible : true},
+        { id : 'editDesc',         visible : true},
+        { id : 'editMime',         visible : true},
+        { id : 'editActionScript', visible : true},
+        { id : 'editState',        visible : true},
+        { id : 'editProtocol',     visible : false}
+      ]);
+    });
 
-  test.it('loads an internal url to edit with correct fields populated', function () {
-    homePage.clickMenu('nav-db')
-    homePage.clickTree('Video')
-    homePage.editItem(12).then(function () {
-      homePage.editOverlayFieldValue('editObjectType').then(function (value) {
-        expect(value).to.equal('internal_url')
-      })
-      homePage.editorOverlayField('editObjectType').isDisplayed().then(function (value) {
-        expect(value).to.be.true
-      })
-      homePage.editOverlayFieldValue('editTitle').then(function (value) {
-        expect(value).to.equal('title')
-      })
-      homePage.editorOverlayField('editTitle').isDisplayed().then(function (value) {
-        expect(value).to.be.true
-      })
-      homePage.editOverlayFieldValue('editClass').then(function (value) {
-        expect(value).to.equal('object.item')
-      })
-      homePage.editorOverlayField('editClass').isDisplayed().then(function (value) {
-        expect(value).to.be.true
-      })
-      homePage.editOverlayFieldValue('editDesc').then(function (value) {
-        expect(value).to.equal('description')
-      })
-      homePage.editorOverlayField('editDesc').isDisplayed().then(function (value) {
-        expect(value).to.be.true
-      })
-      homePage.editOverlayFieldValue('editMime').then(function (value) {
-        expect(value).to.equal('text/plain')
-      })
-      homePage.editorOverlayField('editMime').isDisplayed().then(function (value) {
-        expect(value).to.be.true
-      })
-      homePage.editOverlayFieldValue('editLocation').then(function (value) {
-        expect(value).to.equal('./test')
-      })
-      homePage.editorOverlayField('editLocation').isDisplayed().then(function (value) {
-        expect(value).to.be.true
-      })
-      homePage.editorOverlayField('editActionScript').isDisplayed().then(function (value) {
-        expect(value).to.be.false
-      })
-      homePage.editorOverlayField('editState').isDisplayed().then(function (value) {
-        expect(value).to.be.false
-      })
-      homePage.editorOverlayField('editProtocol').isDisplayed().then(function (value) {
-        expect(value).to.be.true
-      })
-      homePage.editOverlayFieldValue('editProtocol').then(function (value) {
-        expect(value).to.equal('http-get')
-      })
-    })
-  })
-})
+    it('only shows title, location, class, desc, mime, protocol when adding external_url type', async () => {
+      await itemSelectionTest('external_url', 'object.item', [
+        { id : 'editObjectType',   visible : true},
+        { id : 'editTitle',        visible : true},
+        { id : 'editClass',        visible : true},
+        { id : 'editLocation',     visible : true},
+        { id : 'editDesc',         visible : true},
+        { id : 'editMime',         visible : true},
+        { id : 'editActionScript', visible : false},
+        { id : 'editState',        visible : false},
+        { id : 'editProtocol',     visible : true}
+      ]);
+      const editProtocol = await homePage.editOverlayFieldValue('editProtocol');
+      expect(editProtocol).to.equal('http-get');
+    });
+
+    it('only shows title, location, class, desc, mime when adding internal_url type', async () => {
+      await itemSelectionTest('internal_url', 'object.item', [
+        { id : 'editObjectType',   visible : true},
+        { id : 'editTitle',        visible : true},
+        { id : 'editClass',        visible : true},
+        { id : 'editLocation',     visible : true},
+        { id : 'editDesc',         visible : true},
+        { id : 'editMime',         visible : true},
+        { id : 'editActionScript', visible : false},
+        { id : 'editState',        visible : false},
+        { id : 'editProtocol',     visible : false}
+      ]);
+    });
+  });
+
+  describe('The overlay load item', () => {
+
+    afterEach(async () => {
+      await homePage.cancelEdit();
+    });
+
+    const itemLoadTest = async (itemNumber, fieldAssertions) => {
+      await homePage.clickMenu('nav-db');
+      await homePage.clickTree('Video');
+
+      if (itemNumber === undefined) {
+        await homePage.clickTrailEdit();
+      } else {
+        await homePage.editItem(itemNumber);
+      }
+
+      let result = await homePage.editOverlayDisplayed();
+      expect(result).to.be.true;
+
+      for (let i = 0; i < fieldAssertions.length; i++) {
+        const fieldAssert = fieldAssertions[i];
+        const isDisplayed = await homePage.editorOverlayFieldDisplayed(fieldAssert.id);
+        expect(isDisplayed, 'Field: ' + fieldAssert.id).to.equal(fieldAssert.visible);
+        if(fieldAssert.value){
+          const value = await homePage.editOverlayFieldValue(fieldAssert.id);
+          expect(value, 'Value: ' + fieldAssert.id).to.equal(fieldAssert.value);
+        }
+      }
+    };
+
+    it('loads a container item to edit with correct fields populated', async () => {
+      await itemLoadTest(undefined, [
+        { id : 'editObjectType',   visible : true, value : 'container'},
+        { id : 'editTitle',        visible : true, value : 'container title'},
+        { id : 'editClass',        visible : true, value : 'object.container'},
+        { id : 'editLocation',     visible : false},
+        { id : 'editDesc',         visible : false},
+        { id : 'editMime',         visible : false},
+        { id : 'editActionScript', visible : false},
+        { id : 'editState',        visible : false},
+        { id : 'editProtocol',     visible : false}
+      ]);
+    });
+
+    it('loads an active item to edit with correct fields populated', async () => {
+      await itemLoadTest(10, [
+        { id : 'editObjectType',   visible : true, value : 'active_item'},
+        { id : 'editTitle',        visible : true, value : 'Test Active Item'},
+        { id : 'editClass',        visible : true, value : 'object.item.activeItem'},
+        { id : 'editLocation',     visible : true, value : '/home/test.txt'},
+        { id : 'editDesc',         visible : true, value : 'test'},
+        { id : 'editMime',         visible : true, value : 'text/plain'},
+        { id : 'editActionScript', visible : true, value : '/home/echoText.sh'},
+        { id : 'editState',        visible : true, value : 'test-state'},
+        { id : 'editProtocol',     visible : false}
+      ]);
+    });
+
+    it('loads an external url to edit with correct fields populated', async () => {
+      await itemLoadTest(11, [
+        { id : 'editObjectType',   visible : true, value : 'external_url'},
+        { id : 'editTitle',        visible : true, value : 'title'},
+        { id : 'editClass',        visible : true, value : 'object.item'},
+        { id : 'editLocation',     visible : true, value : 'http://localhost'},
+        { id : 'editDesc',         visible : true, value : 'description'},
+        { id : 'editMime',         visible : true, value : 'text/plain'},
+        { id : 'editActionScript', visible : false},
+        { id : 'editState',        visible : false},
+        { id : 'editProtocol',     visible : true, value : 'http-get'}
+      ]);
+    });
+
+    it('loads an simple item to edit with correct fields populated', async () => {
+      await itemLoadTest(0, [
+        { id : 'editObjectType',   visible : true, value : 'item'},
+        { id : 'editTitle',        visible : true, value : 'Test.mp4'},
+        { id : 'editClass',        visible : true, value : 'object.item.videoItem'},
+        { id : 'editLocation',     visible : true, value : '/folder/location/Test.mp4'},
+        { id : 'editDesc',         visible : true, value : 'A description'},
+        { id : 'editMime',         visible : true, value : 'video/mp4'},
+        { id : 'editActionScript', visible : false},
+        { id : 'editState',        visible : false},
+        { id : 'editProtocol',     visible : false}
+      ]);
+    });
+
+    it('loads an internal url to edit with correct fields populated', async () => {
+      await itemLoadTest(12, [
+        { id : 'editObjectType',   visible : true, value : 'internal_url'},
+        { id : 'editTitle',        visible : true, value : 'title'},
+        { id : 'editClass',        visible : true, value : 'object.item'},
+        { id : 'editLocation',     visible : true, value : './test'},
+        { id : 'editDesc',         visible : true, value : 'description'},
+        { id : 'editMime',         visible : true, value : 'text/plain'},
+        { id : 'editActionScript', visible : false},
+        { id : 'editState',        visible : false},
+        { id : 'editProtocol',     visible : true, value : 'http-get'}
+      ]);
+    });
+  });
+});

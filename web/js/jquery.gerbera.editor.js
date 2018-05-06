@@ -463,7 +463,7 @@
   var _super = $.fn.modal
 
   // create a new constructor
-  var GerberaEditorModal = function (element, options) {
+  var GerberaEditorModal = function (element, options) { // eslint-disable-line
     _super.Constructor.apply(this, arguments)
   }
 

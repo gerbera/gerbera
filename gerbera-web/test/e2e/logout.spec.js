@@ -1,55 +1,49 @@
-var chai = require('chai')
-var expect = chai.expect
-var webdriver = require('selenium-webdriver')
-var test = require('selenium-webdriver/testing')
-var driver
-var mockWebServer = 'http://' + process.env.npm_package_config_webserver_host + ':' + process.env.npm_package_config_webserver_port
+const {expect} = require('chai');
+const {Builder} = require('selenium-webdriver');
+const {suite} = require('selenium-webdriver/testing');
+let chrome = require('selenium-webdriver/chrome');
+const mockWebServer = 'http://' + process.env.npm_package_config_webserver_host + ':' + process.env.npm_package_config_webserver_port;
+let driver;
 
-require('chromedriver')
+const HomePage = require('./page/home.page');
+const LoginPage = require('./page/login.page');
 
-var HomePage = require('./page/home.page')
-var LoginPage = require('./page/login.page')
+suite(() => {
+  let loginPage, homePage;
 
-test.describe('The logout action', function () {
-  var loginPage, homePage
-
-  this.slow(5000)
-  this.timeout(60000)
-
-  test.before(function () {
-    driver = new webdriver.Builder()
+  before(async () => {
+    const chromeOptions = new chrome.Options();
+    chromeOptions.addArguments(['--window-size=1280,1024']);
+    driver = new Builder()
       .forBrowser('chrome')
-      .build()
+      .setChromeOptions(chromeOptions)
+      .build();
+    await driver.get(mockWebServer + '/reset?testName=logout.spec.json');
 
-    driver.manage().window().setSize(1280, 1024)
-    driver.get(mockWebServer + '/reset?testName=logout.spec.json')
+    loginPage = new LoginPage(driver);
+    homePage = new HomePage(driver);
 
-    loginPage = new LoginPage(driver)
-    homePage = new HomePage(driver)
+    await driver.get(mockWebServer + '/disabled.html');
+    await driver.manage().deleteAllCookies();
+    await loginPage.get(mockWebServer + '/index.html');
+  });
 
-    driver.get(mockWebServer + '/disabled.html')
-    driver.manage().deleteAllCookies()
+  after(() => driver && driver.quit());
 
-    loginPage.get(mockWebServer + '/index.html')
-  })
+  describe('The logout action', () => {
 
-  test.after(function () {
-    driver.quit()
-  })
+    it('disables the database and filetype menus upon logout', async () => {
+      await loginPage.password('pwd');
+      await loginPage.username('user');
+      await loginPage.submitLogin();
 
-  test.it('disables the database and filetype menus upon logout', function () {
-    loginPage.password('pwd')
-    loginPage.username('user')
-    loginPage.submitLogin()
+      await loginPage.logout();
 
-    loginPage.logout()
-
-    homePage.isDisabled('nav-db').then(function (disabled) {
+      let disabled = await homePage.isDisabled('nav-db');
       expect(disabled).to.be.true
-    })
 
-    homePage.isDisabled('nav-fs').then(function (disabled) {
+      disabled = await homePage.isDisabled('nav-fs');
       expect(disabled).to.be.true
-    })
-  })
-})
+    });
+  });
+});

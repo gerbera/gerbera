@@ -7,7 +7,7 @@ module.exports = {
     if (resp === undefined) {
       resp = requests[action].responses['default']
     }
-    //console.log('Auth Mock serving for [' + action + '] --> ' + resp)
+    //console.log('Auth Mock serving for ' + count + ' [' + action + '] --> ' + resp)
     return resp
   },
   reset: function (testName) {

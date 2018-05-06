@@ -1,102 +1,95 @@
-var chai = require('chai')
-var expect = chai.expect
-var webdriver = require('selenium-webdriver')
-var test = require('selenium-webdriver/testing')
-var driver
-var mockWebServer = 'http://' + process.env.npm_package_config_webserver_host + ':' + process.env.npm_package_config_webserver_port
+const {expect} = require('chai');
+const {Builder} = require('selenium-webdriver');
+const {suite} = require('selenium-webdriver/testing');
+let chrome = require('selenium-webdriver/chrome');
+const mockWebServer = 'http://' + process.env.npm_package_config_webserver_host + ':' + process.env.npm_package_config_webserver_port;
+let driver;
 
-require('chromedriver')
+const HomePage = require('./page/home.page');
+const LoginPage = require('./page/login.page');
 
-var HomePage = require('./page/home.page')
-var LoginPage = require('./page/login.page')
+suite(() => {
+  let loginPage, homePage;
 
-test.describe('The autoscan overlay', function () {
-  var loginPage, homePage
-
-  this.slow(7000)
-  this.timeout(60000)
-
-  test.before(function () {
-    driver = new webdriver.Builder()
+  before(async () => {
+    const chromeOptions = new chrome.Options();
+    chromeOptions.addArguments(['--window-size=1280,1024']);
+    driver = new Builder()
       .forBrowser('chrome')
-      .build()
+      .setChromeOptions(chromeOptions)
+      .build();
+    await driver.get(mockWebServer + '/reset?testName=autoscan.spec.json');
 
-    driver.manage().window().setSize(1280, 1024)
-    driver.get(mockWebServer + '/reset?testName=autoscan.spec.json')
+    loginPage = new LoginPage(driver);
+    homePage = new HomePage(driver);
 
-    loginPage = new LoginPage(driver)
-    homePage = new HomePage(driver)
+    await driver.get(mockWebServer + '/disabled.html');
+    await driver.manage().deleteAllCookies();
+    await loginPage.get(mockWebServer + '/index.html');
+    await loginPage.password('pwd');
+    await loginPage.username('user');
+    await loginPage.submitLogin();
+  });
 
-    driver.get(mockWebServer + '/disabled.html')
-    driver.manage().deleteAllCookies()
+  after(() => driver && driver.quit());
 
-    loginPage.get(mockWebServer + '/index.html')
+  describe('The autoscan overlay', () => {
 
-    loginPage.password('pwd')
-    loginPage.username('user')
-    loginPage.submitLogin()
-  })
+    it('a gerbera tree fs item container opens autoscan overlay when trail add autoscan is clicked', async () => {
+      await homePage.clickMenu('nav-fs');
+      await homePage.clickTree('etc');
 
-  test.after(function () {
-    driver.quit()
-  })
+      await homePage.clickTrailAddAutoscan();
 
-  test.it('a gerbera tree fs item container opens autoscan overlay when trail add autoscan is clicked', function () {
-    homePage.clickMenu('nav-fs')
-    homePage.clickTree('etc')
-    homePage.clickTrailAddAutoscan().then(function () {
-      homePage.autoscanOverlayDisplayed().then(function (displayed) {
-        expect(displayed).to.be.true
-        homePage.getAutoscanModeTimed().then(function (checked) {
-          expect(checked).to.equal('true')
-        })
-        homePage.getAutoscanLevelBasic().then(function (checked) {
-          expect(checked).to.equal('true')
-        })
-        homePage.getAutoscanRecursive().then(function (checked) {
-          expect(checked).to.equal('true')
-        })
-        homePage.getAutoscanHidden().then(function (checked) {
-          expect(checked).to.equal('true')
-        })
-        homePage.getAutoscanIntervalValue().then(function (value) {
-          expect(value).to.equal('1800')
-        })
-        homePage.cancelAutoscan()
-      })
-    })
-  })
+      let result = await homePage.autoscanOverlayDisplayed();
+      expect(result).to.be.true;
 
-  test.it('autoscan displays message when properly submitted to server', function () {
-    homePage.clickMenu('nav-fs')
-    homePage.clickTree('etc')
-    homePage.clickTrailAddAutoscan().then(function () {
-      homePage.autoscanOverlayDisplayed().then(function (displayed) {
-        expect(displayed).to.be.true
-        homePage.submitAutoscan()
+      result = await homePage.getAutoscanModeTimed();
+      expect(result).to.equal('true');
 
-        homePage.autoscanOverlayDisplayed().then(function (displayed) {
-          expect(displayed).to.be.false
-        })
+      result = await homePage.getAutoscanLevelBasic();
+      expect(result).to.equal('true');
 
-        homePage.getToastMessage().then(function (message) {
-          expect(message).to.equal('Performing full scan: /Movies')
-        })
+      result = await homePage.getAutoscanRecursive();
+      expect(result).to.equal('true');
 
-        homePage.waitForToastClose().then(function (displayed) {
-          expect(displayed).to.be.false
-        })
-      })
-    })
-  })
+      result = await homePage.getAutoscanHidden();
+      expect(result).to.equal('true');
 
-  test.it('an existing autoscan item loads edit overlay', function () {
-    homePage.clickMenu('nav-db')
-    homePage.clickTree('Playlists')
-    homePage.clickAutoscanEdit(1).then(function () {
-      homePage.autoscanOverlayDisplayed().then(function (displayed) {
-        expect(displayed).to.be.true
-      })
-    })
-  })
-})
+      result = await homePage.getAutoscanIntervalValue();
+      expect(result).to.equal('1800');
+
+      await homePage.cancelAutoscan();
+    });
+
+    it('autoscan displays message when properly submitted to server', async () => {
+      await homePage.clickMenu('nav-fs');
+      await homePage.clickTree('etc');
+      await homePage.clickTrailAddAutoscan();
+
+      let result = await homePage.autoscanOverlayDisplayed();
+      expect(result).to.be.true;
+
+      await homePage.submitAutoscan();
+
+      result = await homePage.autoscanOverlayDisplayed();
+      expect(result).to.be.false;
+
+      result = await homePage.getToastMessage();
+      expect(result).to.equal('Performing full scan: /Movies');
+
+      result = await homePage.waitForToastClose();
+      expect(result).to.be.false;
+    });
+
+    it('an existing autoscan item loads edit overlay', async () => {
+      await homePage.clickMenu('nav-db');
+      await homePage.clickTree('Playlists');
+      await homePage.clickAutoscanEdit(1);
+
+      let result = await homePage.autoscanOverlayDisplayed();
+      expect(result).to.be.true;
+    });
+  });
+});
+
