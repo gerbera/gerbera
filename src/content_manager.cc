@@ -1033,7 +1033,7 @@ int ContentManager::addContainerChain(String chain, String lastClass, int lastRe
     if (!string_ok(chain))
         throw _Exception(_("addContainerChain() called with empty chain parameter"));
 
-    log_debug("received chain: %s (%s) [%s]\n", chain.c_str(), lastClass.c_str(), lastMetadata != nullptr ? lastMetadata->encodeSimple().c_str(): "null");
+    log_debug("received chain: %s (%s) [%s]\n", chain.c_str(), lastClass.c_str(), lastMetadata != nullptr ? lastMetadata->encodeSimple().c_str() : "null");
     storage->addContainerChain(chain, lastClass, lastRefID, &containerID, &updateID, lastMetadata);
 
     // if (updateID != INVALID_OBJECT_ID)
