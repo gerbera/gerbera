@@ -226,7 +226,7 @@ Ref<StringConverter> StringConverter::p2i()
 }
 #endif
 
-#if defined (HAVE_JS) || defined(HAVE_TAGLIB) || defined(YOUTUBE) || defined(HAVE_LIBMP4V2)
+#if defined (HAVE_JS) || defined(HAVE_TAGLIB) || defined(ATRAILERS)
 
 Ref<StringConverter> StringConverter::i2i()
 {
