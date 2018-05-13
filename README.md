@@ -157,6 +157,7 @@ sudo make install
 | expat        	|         	| Required  	|                      	     |                     |          |
 | libiconv     	|         	| Required  	|                      	     |                     |          |
 | sqlite3      	|         	| Required  	| Database storage     	     |                     |          |
+| zlib          |        	| Required  	|                            |                     |          |
 | duktape      	| 2.1.0   	| Optional  	| Scripting Support    	     | WITH_JS             | Enabled  |
 | mysql        	|         	| Optional  	| Alternate database storage | WITH_MYSQL          | Disabled |
 | curl         	|         	| Optional  	| Enables web services 	     | WITH_CURL           | Enabled  |
