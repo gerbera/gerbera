@@ -2581,8 +2581,8 @@ std::shared_ptr<std::ostringstream> SQLStorage::sqlForInsert(Ref<CdsObject> obj,
 std::shared_ptr<std::ostringstream> SQLStorage::sqlForUpdate(Ref<CdsObject> obj, Ref<AddUpdateTable> addUpdateTable)
 {
     if (addUpdateTable == nullptr || addUpdateTable->getDict() == nullptr
-        || (addUpdateTable->getTable() == _(METADATA_TABLE) && addUpdateTable->getDict()->size() != 1))
-        throw _Exception(_("sqlForDelete called with invalid arguments"));
+        || (addUpdateTable->getTable() == _(METADATA_TABLE) && addUpdateTable->getDict()->size() != 2))
+        throw _Exception(_("sqlForUpdate called with invalid arguments"));
 
     String tableName = addUpdateTable->getTable();
     Ref<Array<DictionaryElement>> dataElements = addUpdateTable->getDict()->getElements();
@@ -2608,7 +2608,7 @@ std::shared_ptr<std::ostringstream> SQLStorage::sqlForUpdate(Ref<CdsObject> obj,
 std::shared_ptr<std::ostringstream> SQLStorage::sqlForDelete(Ref<CdsObject> obj, Ref<AddUpdateTable> addUpdateTable)
 {
     if (addUpdateTable == nullptr || addUpdateTable->getDict() == nullptr
-        || (addUpdateTable->getTable() == _(METADATA_TABLE) && addUpdateTable->getDict()->size() != 1))
+        || (addUpdateTable->getTable() == _(METADATA_TABLE) && addUpdateTable->getDict()->size() != 2))
         throw _Exception(_("sqlForDelete called with invalid arguments"));
 
     Ref<Array<DictionaryElement>> dataElements = addUpdateTable->getDict()->getElements();
