@@ -407,11 +407,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
         if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO))
         {
             String extend;
-            if (contentType == CONTENT_TYPE_MP3)
-                extend = _(D_PROFILE) + "=" + D_MP3 + ";";
-            else if (contentType == CONTENT_TYPE_PCM)
-                extend = _(D_PROFILE) + "=" + D_LPCM + ";";
-            else if (contentType == CONTENT_TYPE_JPG)
+            if (contentType == CONTENT_TYPE_JPG)
             {
                 String resolution = res_attrs->get(MetadataHandler::getResAttrName(R_RESOLUTION));
                 int x;
@@ -437,6 +433,11 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
                     else if ((x <= 4096) && (y <=4096))
                         extend = _(D_PROFILE) + "=" + D_JPEG_LRG+";";
                 }
+            } else {
+                /* handle audio/video content */
+                extend = getDLNAprofileString(contentType);
+                if (string_ok(extend))
+                    extend = extend + ";";
             }
 
         // we do not support seeking at all, so 00

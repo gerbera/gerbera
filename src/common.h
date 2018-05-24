@@ -66,6 +66,7 @@
     #define D_HTTP_TRANSFER_MODE_HEADER         "transferMode.dlna.org: "
     #define D_HTTP_TRANSFER_MODE_STREAMING      "Streaming"
     #define D_HTTP_TRANSFER_MODE_INTERACTIVE    "Interactive"
+    #define D_HTTP_CONTENT_FEATURES_HEADER      "contentFeatures.dlna.org: "
 
     #define D_PROFILE                   "DLNA.ORG_PN"
     #define D_CONVERSION_INDICATOR      "DLNA.ORG_CI"
@@ -73,8 +74,8 @@
     #define D_FLAGS                     "DLNA.ORG_FLAGS"
     #define D_NO_CONVERSION             "0"
     #define D_CONVERSION                "1"
-    #define D_TR_FLAGS_AV               "012000000000000000000000000000000"
-    #define D_TR_FLAGS_IMAGE            "008000000000000000000000000000000"
+    #define D_TR_FLAGS_AV               "01200000000000000000000000000000"
+    #define D_TR_FLAGS_IMAGE            "00800000000000000000000000000000"
     #define D_MP3                       "MP3"
     #define D_LPCM                      "LPCM"
     #define D_JPEG_SM                   "JPEG_SM"
@@ -83,6 +84,10 @@
     #define D_JPEG_TN                   "JPEG_TN"
     #define D_JPEG_SM_ICO               "JPEG_SM_ICO"
     #define D_JPEG_LRG_ICO              "JPEG_LRG_ICO"
+    #define D_PN_MPEG_PS_PAL            "MPEG_PS_PAL"
+    #define D_PN_MKV                    "MKV"
+    #define D_PN_AVC_MP4_EU             "AVC_MP4_EU"
+    #define D_PN_AVI                    "AVI"
 #endif
 // fixed CdsObjectIDs
 #define CDS_ID_BLACKHOLE                -1
