@@ -122,6 +122,18 @@ This command launches 2 simultaneous processes.
 1. A **mock** web server for the server side `/content/interface` API data
 2. A Selenium suite to exercise the user interface
 
+### Debugging the Mock API
+
+In a scenario where you need to monitor the mock api response sequence, you can add the `NODE_ENV` variable
+to the `npm start` command.
+
+```
+$ NODE_ENV=development npm start
+```
+
+When in **development** the mock api will output `console.log` statements.
+
+
 ### Run the UI Manually
 
 You can also run the Gerbera UI using the **mock server**.  This capability is limited
