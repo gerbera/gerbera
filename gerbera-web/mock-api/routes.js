@@ -1,15 +1,15 @@
-const MockReponder = require('./mock.responder');
-const addMock = new MockReponder('add');
-const addObjectMock = new MockReponder('add_object');
-const authMock = new MockReponder('auth');
-const autoscanMock = new MockReponder('autoscan');
-const containersMock = new MockReponder('containers');
-const directoriesMock = new MockReponder('directories');
-const editLoadMock = new MockReponder('edit_load');
-const filesMock = new MockReponder('files');
-const itemsMock = new MockReponder('items');
-const removeMock = new MockReponder('remove');
-const voidMock = new MockReponder('void');
+const MockResponder = require('./mock.responder');
+const addMock = new MockResponder('add');
+const addObjectMock = new MockResponder('add_object');
+const authMock = new MockResponder('auth');
+const autoscanMock = new MockResponder('autoscan');
+const containersMock = new MockResponder('containers');
+const directoriesMock = new MockResponder('directories');
+const editLoadMock = new MockResponder('edit_load');
+const filesMock = new MockResponder('files');
+const itemsMock = new MockResponder('items');
+const removeMock = new MockResponder('remove');
+const voidMock = new MockResponder('void');
 
 module.exports = function (app) {
   app.get('/content/interface', (req, res) => {
