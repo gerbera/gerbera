@@ -339,6 +339,8 @@ ssize_t getValidUTF8CutPosition(zmm::String str, ssize_t cutpos);
 
 #ifdef EXTEND_PROTOCOLINFO
 zmm::String getDLNAtransferHeader(zmm::String mimeType, zmm::String header);
+zmm::String getDLNAprofileString(zmm::String contentType);
+zmm::String getDLNAcontentHeader(zmm::String contentType, zmm::String header);
 #endif
 
 #ifndef HAVE_FFMPEG

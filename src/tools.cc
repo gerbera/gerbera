@@ -1431,6 +1431,48 @@ ssize_t getValidUTF8CutPosition(zmm::String str, ssize_t cutpos)
 }
 
 #ifdef EXTEND_PROTOCOLINFO
+String getDLNAprofileString(String contentType)
+{
+	String profile;
+	if (contentType == CONTENT_TYPE_MP4)
+		profile = _(D_PN_AVC_MP4_EU);
+	else if (contentType == CONTENT_TYPE_MKV)
+		profile = _(D_PN_MKV);
+	else if (contentType == CONTENT_TYPE_AVI)
+		profile = _(D_PN_AVI);
+	else if (contentType == CONTENT_TYPE_MPEG)
+		profile = _(D_PN_MPEG_PS_PAL);
+	else if (contentType == CONTENT_TYPE_MP3)
+		profile = _(D_MP3);
+	else if (contentType == CONTENT_TYPE_PCM)
+		profile = _(D_LPCM);
+	else
+		profile = _("");   
+
+	if (string_ok(profile))
+		profile = _(D_PROFILE) + "=" + profile;
+	return profile;
+}
+
+String getDLNAcontentHeader(String contentType, String header)
+{
+	if (ConfigManager::getInstance()->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO))
+	{
+		String content_parameter;
+		content_parameter = getDLNAprofileString(contentType);
+		if (string_ok(content_parameter))
+			content_parameter = _(D_PROFILE) + _("=") + content_parameter + ";";
+		content_parameter = content_parameter + D_OP + "=01;";
+		content_parameter = content_parameter + D_CONVERSION_INDICATOR + "=" + D_NO_CONVERSION + ";";
+		content_parameter = content_parameter + D_FLAGS "=" D_TR_FLAGS_AV;
+		if (string_ok(header))
+			header = header + _("\r\n");
+		header = header + D_HTTP_CONTENT_FEATURES_HEADER +
+					content_parameter;
+	}
+	return header;
+}
+
 String getDLNAtransferHeader(String mimeType, String header)
 {
         if (ConfigManager::getInstance()->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO))

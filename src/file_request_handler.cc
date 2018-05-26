@@ -269,6 +269,9 @@ void FileRequestHandler::get_info(IN const char* filename, OUT UpnpFileInfo* inf
                 }
             }
         }
+	    Ref<Dictionary> mappings = cfg->getDictionaryOption(
+	                        CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+		header = getDLNAcontentHeader(mappings->get(item->getMimeType()), header);
 #endif
     }
 
