@@ -29,7 +29,11 @@ Gerbera - https://gerbera.io/
 #include <common.h>
 #include <tools.h>
 #include <metadata_handler.h>
+#ifdef BSD_NATIVE_UUID
+#include <uuid.h>
+#else
 #include <uuid/uuid.h>
+#endif
 #include "config_generator.h"
 
 using namespace zmm;
