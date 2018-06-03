@@ -82,6 +82,8 @@ set(libgerberaFILES
         src/filesystem.h
         src/generic_task.cc
         src/generic_task.h
+        src/handler/http_protocol_helper.h
+        src/handler/http_protocol_helper.cc
         src/io_handler_buffer_helper.cc
         src/io_handler_buffer_helper.h
         src/io_handler.cc

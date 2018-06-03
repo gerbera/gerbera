@@ -353,41 +353,36 @@ Ref<Element> ConfigGenerator::generateTranscoding() {
   mt_prof_map->appendElementChild(prof_theora);
 
   Ref<Element> prof_ogg(new Element(_("transcode")));
-  prof_ogg->setAttribute(_("mimetype"), _("application/ogg"));
-  prof_ogg->setAttribute(_("using"), _("oggflac2raw"));
+  prof_ogg->setAttribute(_("mimetype"), _("audio/ogg"));
+  prof_ogg->setAttribute(_("using"), _("ogg2mp3"));
   mt_prof_map->appendElementChild(prof_ogg);
-
-  Ref<Element> prof_flac(new Element(_("transcode")));
-  prof_flac->setAttribute(_("mimetype"), _("audio/x-flac"));
-  prof_flac->setAttribute(_("using"), _("oggflac2raw"));
-  mt_prof_map->appendElementChild(prof_flac);
 
   transcoding->appendElementChild(mt_prof_map);
 
   Ref<Element> profiles(new Element(_("profiles")));
 
-  Ref<Element> oggflac(new Element(_("profile")));
-  oggflac->setAttribute(_("name"), _("oggflac2raw"));
-  oggflac->setAttribute(_("enabled"), _(NO));
-  oggflac->setAttribute(_("type"), _("external"));
+  Ref<Element> oggmp3(new Element(_("profile")));
+  oggmp3->setAttribute(_("name"), _("ogg2mp3"));
+  oggmp3->setAttribute(_("enabled"), _(NO));
+  oggmp3->setAttribute(_("type"), _("external"));
 
-  oggflac->appendTextChild(_("mimetype"), _("audio/L16"));
-  oggflac->appendTextChild(_("accept-url"), _(NO));
-  oggflac->appendTextChild(_("first-resource"), _(YES));
-  oggflac->appendTextChild(_("accept-ogg-theora"), _(NO));
+  oggmp3->appendTextChild(_("mimetype"), _("audio/mpeg"));
+  oggmp3->appendTextChild(_("accept-url"), _(NO));
+  oggmp3->appendTextChild(_("first-resource"), _(YES));
+  oggmp3->appendTextChild(_("accept-ogg-theora"), _(NO));
 
-  Ref<Element> oggflac_agent(new Element(_("agent")));
-  oggflac_agent->setAttribute(_("command"), _("ogg123"));
-  oggflac_agent->setAttribute(_("arguments"), _("-d raw -o byteorder:big -f %out %in"));
-  oggflac->appendElementChild(oggflac_agent);
+  Ref<Element> oggmp3_agent(new Element(_("agent")));
+  oggmp3_agent->setAttribute(_("command"), _("ffmpeg"));
+  oggmp3_agent->setAttribute(_("arguments"), _("-y -i %in -f mp3 %out"));
+  oggmp3->appendElementChild(oggmp3_agent);
 
-  Ref<Element> oggflac_buffer(new Element(_("buffer")));
-  oggflac_buffer->setAttribute(_("size"), String::from(DEFAULT_AUDIO_BUFFER_SIZE));
-  oggflac_buffer->setAttribute(_("chunk-size"), String::from(DEFAULT_AUDIO_CHUNK_SIZE));
-  oggflac_buffer->setAttribute(_("fill-size"), String::from(DEFAULT_AUDIO_FILL_SIZE));
-  oggflac->appendElementChild(oggflac_buffer);
+  Ref<Element> oggmp3_buffer(new Element(_("buffer")));
+  oggmp3_buffer->setAttribute(_("size"), String::from(DEFAULT_AUDIO_BUFFER_SIZE));
+  oggmp3_buffer->setAttribute(_("chunk-size"), String::from(DEFAULT_AUDIO_CHUNK_SIZE));
+  oggmp3_buffer->setAttribute(_("fill-size"), String::from(DEFAULT_AUDIO_FILL_SIZE));
+  oggmp3->appendElementChild(oggmp3_buffer);
 
-  profiles->appendElementChild(oggflac);
+  profiles->appendElementChild(oggmp3);
 
   Ref<Element> vlcmpeg(new Element(_("profile")));
   vlcmpeg->setAttribute(_("name"), _("vlcmpeg"));
