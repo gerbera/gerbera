@@ -117,13 +117,9 @@ sudo make install
 
 #### On macOS
 
-_The following has been tested on macOS Sierra 10.12.6_
+The Gerbera Team maintains a Homebrew Tap to allow for easy installation of Gerbera Media Server on macOS.
 
-1. Install prerequisites using homebrew
-1. Install `ossp-uuid` using homebrew
-1. Install `pupnp18` and `duktape` using the scripts provided.
-1. Use the cmake option `-DCMAKE_FIND_FRAMEWORK=LAST` to avoid Clang linkage errors
-
+[https://github.com/gerbera/homebrew-gerbera](https://github.com/gerbera/homebrew-gerbera)
 
 ### Quick start build instructions:
 
