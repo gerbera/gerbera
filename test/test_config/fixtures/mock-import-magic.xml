@@ -40,6 +40,7 @@
       <treat mimetype="application/ogg" as="ogg"/>
       <treat mimetype="audio/ogg" as="ogg"/>
       <treat mimetype="audio/x-flac" as="flac"/>
+      <treat mimetype="audio/flac" as="flac"/>
       <treat mimetype="audio/x-ms-wma" as="wma"/>
       <treat mimetype="audio/x-wavpack" as="wv"/>
       <treat mimetype="image/jpeg" as="jpg"/>

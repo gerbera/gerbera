@@ -304,6 +304,7 @@ Ref<Element> ConfigGenerator::generateMappings() {
   mtcontent->appendElementChild(treat_as("application/ogg", CONTENT_TYPE_OGG));
   mtcontent->appendElementChild(treat_as("audio/ogg", CONTENT_TYPE_OGG));
   mtcontent->appendElementChild(treat_as("audio/x-flac", CONTENT_TYPE_FLAC));
+  mtcontent->appendElementChild(treat_as("audio/flac", CONTENT_TYPE_FLAC));
   mtcontent->appendElementChild(treat_as("audio/x-ms-wma", CONTENT_TYPE_WMA));
   mtcontent->appendElementChild(treat_as("audio/x-wavpack", CONTENT_TYPE_WAVPACK));
   mtcontent->appendElementChild(treat_as("image/jpeg", CONTENT_TYPE_JPG));

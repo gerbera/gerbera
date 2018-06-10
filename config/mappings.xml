@@ -24,6 +24,7 @@
         <treat mimetype="audio/mpeg" as="mp3"/>
         <treat mimetype="application/ogg" as="ogg"/>
         <treat mimetype="audio/x-flac" as="flac"/>
+	<treat mimetype="audio/flac" as="flac"/>
         <treat mimetype="image/jpeg" as="jpg"/>
         <treat mimetype="audio/x-mpegurl" as="playlist"/>
         <treat mimetype="audio/x-scpls" as="playlist"/>
