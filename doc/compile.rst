@@ -90,9 +90,9 @@ Build On FreeBSD
 Build On macOS
 ~~~~~~~~~~~~~~
 
-`The following has been tested on macOS Sierra 10.12.6`
+`The following has been tested on macOS High Sierra 10.13.4`
 
-1. Install :ref:`prerequisites <gerbera-requirements>` using homebrew
-2. Install **ossp-uuid** using homebrew
-3. Install **pupnp** and **duktape** using the scripts provided.
-4. Use the cmake option ``-DCMAKE_FIND_FRAMEWORK=LAST`` to avoid Clang linkage errors
+The Gerbera Team maintains a Homebrew Tap to build and install Gerbera Media Server.  Take a look
+at the Homebrew formula to see an example of how to compile Gerbera on macOS.
+
+`homebrew-gerbera/gerbera.rb <https://github.com/gerbera/homebrew-gerbera/blob/master/gerbera.rb>`_

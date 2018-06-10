@@ -62,3 +62,10 @@ Entware (Optware)
 
 Gerbera is available in `Entware <https://github.com/Entware/rtndev/tree/master/gerbera>`_ for your embedded device/router!
 
+
+macOS
+~~~~~
+.. index:: macOS
+
+Gerbera is available as the `Gerbera Homebrew Tap <https://github.com/gerbera/homebrew-gerbera/>`_ on macOS.
+
