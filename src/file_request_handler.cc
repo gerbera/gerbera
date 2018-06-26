@@ -285,10 +285,11 @@ void FileRequestHandler::get_info(IN const char* filename, OUT UpnpFileInfo* inf
     header = getDLNAtransferHeader(mimeType, header);
 #endif
 
-    if (string_ok(header))
+    if (string_ok(header)) {
+        header = header + _("\r\n");
         UpnpFileInfo_set_ExtraHeaders(info,
-            ixmlCloneDOMString(header.c_str()));
-
+                ixmlCloneDOMString(header.c_str()));
+    }
     UpnpFileInfo_set_LastModified(info, statbuf.st_mtime);
     UpnpFileInfo_set_IsDirectory(info, S_ISDIR(statbuf.st_mode));
     UpnpFileInfo_set_ContentType(info,
