@@ -40,6 +40,7 @@
 #include "session_manager.h"
 #include "update_manager.h"
 
+#include "handler/http_protocol_helper.h"
 #include "transcoding/transcode_dispatcher.h"
 
 using namespace zmm;
@@ -52,6 +53,7 @@ FileRequestHandler::FileRequestHandler()
 
 void FileRequestHandler::get_info(IN const char* filename, OUT UpnpFileInfo* info)
 {
+    HttpProtocolHelper httpProtocolHelper;
     log_debug("start\n");
 
     String mimeType;
@@ -285,9 +287,10 @@ void FileRequestHandler::get_info(IN const char* filename, OUT UpnpFileInfo* inf
     header = getDLNAtransferHeader(mimeType, header);
 #endif
 
-    if (string_ok(header))
-        UpnpFileInfo_set_ExtraHeaders(info,
-            ixmlCloneDOMString(header.c_str()));
+    if (string_ok(header)) {
+        std::string finalHeader = httpProtocolHelper.finalizeHttpHeader(header.c_str());
+        UpnpFileInfo_set_ExtraHeaders(info, ixmlCloneDOMString(finalHeader.c_str()));
+    }
 
     UpnpFileInfo_set_LastModified(info, statbuf.st_mtime);
     UpnpFileInfo_set_IsDirectory(info, S_ISDIR(statbuf.st_mode));

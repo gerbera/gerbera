@@ -2,16 +2,15 @@
   <mimetype-profile-mappings>
     <transcode mimetype="video/x-flv" using="vlcmpeg"/>
     <transcode mimetype="application/ogg" using="vlcmpeg"/>
-    <transcode mimetype="application/ogg" using="oggflac2raw"/>
-    <transcode mimetype="audio/x-flac" using="oggflac2raw"/>
+    <transcode mimetype="audio/ogg" using="ogg2mp3"/>
   </mimetype-profile-mappings>
   <profiles>
-    <profile name="oggflac2raw" enabled="no" type="external">
-      <mimetype>audio/L16</mimetype>
+    <profile name="ogg2mp3" enabled="no" type="external">
+      <mimetype>audio/mpeg</mimetype>
       <accept-url>no</accept-url>
       <first-resource>yes</first-resource>
       <accept-ogg-theora>no</accept-ogg-theora>
-      <agent command="ogg123" arguments="-d raw -o byteorder:big -f %out %in"/>
+      <agent command="ffmpeg" arguments="-y -i %in -f mp3 %out"/>
       <buffer size="1048576" chunk-size="131072" fill-size="262144"/>
     </profile>
     <profile name="vlcmpeg" enabled="no" type="external">
