@@ -12,7 +12,7 @@ suite(() => {
 
   before(async () => {
     const chromeOptions = new chrome.Options();
-    chromeOptions.addArguments(['--window-size=1280,1024']);
+    chromeOptions.addArguments(['--headless', '--window-size=1280,1024']);
     driver = new Builder()
       .forBrowser('chrome')
       .setChromeOptions(chromeOptions)
