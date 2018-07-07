@@ -1,37 +1,38 @@
 /* global jasmine it expect describe beforeEach afterEach loadJSONFixtures getJSONFixture loadFixtures */
 
-jasmine.getFixtures().fixturesPath = 'base/test/client/fixtures'
-jasmine.getJSONFixtures().fixturesPath = 'base/test/client/fixtures'
+jasmine.getFixtures().fixturesPath = 'base/test/client/fixtures';
+jasmine.getJSONFixtures().fixturesPath = 'base/test/client/fixtures';
 
-describe('The jQuery Trail', function () {
-  'use strict'
-  var trailData
+describe('The jQuery Trail', () => {
+  'use strict';
+  let trailData, trail;
 
-  beforeEach(function () {
-    loadFixtures('trail.html')
-    loadJSONFixtures('trail-data.json')
-    trailData = getJSONFixture('trail-data.json')
-  })
+  beforeEach(() => {
+    loadFixtures('trail.html');
+    loadJSONFixtures('trail-data.json');
+    trailData = getJSONFixture('trail-data.json');
+    trail = $('#trail');
+  });
 
-  afterEach(function () {
-    if ($('#trail').hasClass('grb-trail')) {
-      $('#trail').trail('destroy')
+  afterEach(() => {
+    if (trail.hasClass('grb-trail')) {
+      trail.trail('destroy')
     }
-  })
+  });
 
-  it('Uses an array of items to build the breadcrumb', function () {
-    var trailConfig = {}
+  it('Uses an array of items to build the breadcrumb', () => {
+    const trailConfig = {};
 
-    $('#trail').trail({
+    trail.trail({
       data: trailData,
       config: trailConfig
-    })
+    });
 
-    expect($('#trail').trail('length')).toBe(4)
-  })
+    expect(trail.trail('length')).toBe(4)
+  });
 
-  it('should display in the proper order', function () {
-    var trailConfig = {}
+  it('should display in the proper order', () => {
+    const trailConfig = {};
     trailData = [
       { text: 'First Item',
         gerbera: {
@@ -43,191 +44,191 @@ describe('The jQuery Trail', function () {
           id: 0
         }
       }
-    ]
+    ];
 
-    $('#trail').trail({
+    trail.trail({
       data: trailData,
       config: trailConfig
-    })
+    });
 
-    var items = $('#trail').trail('items')
-    expect(items.first().text()).toBe('First Item')
-    expect(items.last().text()).toBe('Second Item')
-  })
+    const items = trail.trail('items');
+    expect(items.first().text()).toBe('First Item');
+    expect(items.last().text()).toBe('Second Item');
+  });
 
-  it('generates add icons when configured', function () {
-    var trailConfig = {
+  it('generates add icons when configured', () => {
+    const trailConfig = {
       enableAdd: true,
-      onAdd: function () { return false },
+      onAdd: () => { return false },
       enableAddAutoscan: true,
-      onAddAutoscan: function () { return false }
-    }
+      onAddAutoscan: () => { return false }
+    };
 
-    $('#trail').trail({
+    trail.trail({
       data: trailData,
       config: trailConfig
-    })
+    });
 
-    expect($('#trail .grb-trail-add').length).toBe(1)
-    expect($('#trail .grb-trail-add-autoscan').length).toBe(1)
-  })
+    expect($('#trail .grb-trail-add').length).toBe(1);
+    expect($('#trail .grb-trail-add-autoscan').length).toBe(1);
+  });
 
-  it('does not generate add icons when not enabled by configuration', function () {
-    var trailConfig = {
+  it('does not generate add icons when not enabled by configuration', () => {
+    const trailConfig = {
       enableAdd: false,
       enableAddAutoscan: false
-    }
+    };
 
-    $('#trail').trail({
+    trail.trail({
       data: trailData,
       config: trailConfig
-    })
+    });
 
-    expect($('#trail .grb-trail-add').length).toBe(0)
-    expect($('#trail .grb-trail-add-autoscan').length).toBe(0)
-  })
+    expect($('#trail .grb-trail-add').length).toBe(0);
+    expect($('#trail .grb-trail-add-autoscan').length).toBe(0);
+  });
 
-  it('generates delete icon when enabled by configuration', function () {
-    var trailConfig = {
+  it('generates delete icon when enabled by configuration', () => {
+    const trailConfig = {
       enableDelete: true,
-      onDelete: function () { return false },
+      onDelete: () => { return false },
       enableDeleteAll: true,
-      onDeleteAll: function () { return false },
-    }
+      onDeleteAll: () => { return false },
+    };
 
-    $('#trail').trail({
+    trail.trail({
       data: trailData,
       config: trailConfig
-    })
+    });
 
-    expect($('#trail .grb-trail-delete').length).toBe(1)
-    expect($('#trail .grb-trail-delete-all').length).toBe(1)
-  })
+    expect($('#trail .grb-trail-delete').length).toBe(1);
+    expect($('#trail .grb-trail-delete-all').length).toBe(1);
+  });
 
-  it('binds the delete icon click to the method provided', function () {
-    var methodSpy = jasmine.createSpy('delete')
-    var trailConfig = {
+  it('binds the delete icon click to the method provided', () => {
+    const methodSpy = jasmine.createSpy('delete');
+    const trailConfig = {
       enableDelete: true,
       onDelete: methodSpy
-    }
+    };
 
-    $('#trail').trail({
+    trail.trail({
       data: trailData,
       config: trailConfig
-    })
+    });
 
-    $('#trail').find('a.grb-trail-delete').click()
+    trail.find('a.grb-trail-delete').click();
 
-    expect(methodSpy).toHaveBeenCalled()
-  })
+    expect(methodSpy).toHaveBeenCalled();
+  });
 
-  it('binds the delete all icon click to the method provided', function () {
-    var methodSpy = jasmine.createSpy('deleteAll')
-    var trailConfig = {
+  it('binds the delete all icon click to the method provided', () => {
+    const methodSpy = jasmine.createSpy('deleteAll');
+    const trailConfig = {
       enableDeleteAll: true,
       onDeleteAll: methodSpy
-    }
+    };
 
-    $('#trail').trail({
+    trail.trail({
       data: trailData,
       config: trailConfig
-    })
+    });
 
-    $('#trail').find('a.grb-trail-delete-all').click()
+    trail.find('a.grb-trail-delete-all').click();
 
-    expect(methodSpy).toHaveBeenCalled()
-  })
+    expect(methodSpy).toHaveBeenCalled();
+  });
 
-  it('does not generate delete icons when not configured', function () {
-    var trailConfig = {
+  it('does not generate delete icons when not configured', () => {
+    const trailConfig = {
       enableDelete: false,
       enableDeleteAll: false
-    }
+    };
 
-    $('#trail').trail({
+    trail.trail({
       data: trailData,
       config: trailConfig
-    })
+    });
 
-    expect($('#trail .grb-trail-delete').length).toBe(0)
-    expect($('#trail .grb-trail-delete-all').length).toBe(0)
-  })
+    expect($('#trail .grb-trail-delete').length).toBe(0);
+    expect($('#trail .grb-trail-delete-all').length).toBe(0);
+  });
 
-  it('binds the add icon click to the method provided', function () {
-    var methodSpy = jasmine.createSpy('add')
-    var trailConfig = {
+  it('binds the add icon click to the method provided', () => {
+    const methodSpy = jasmine.createSpy('add');
+    const trailConfig = {
       enableAdd: true,
       onAdd: methodSpy
-    }
+    };
 
-    $('#trail').trail({
+    trail.trail({
       data: trailData,
       config: trailConfig
-    })
+    });
 
-    $('#trail').find('a.grb-trail-add').click()
+    trail.find('a.grb-trail-add').click();
 
-    expect(methodSpy).toHaveBeenCalled()
-  })
+    expect(methodSpy).toHaveBeenCalled();
+  });
 
-  it('binds the add autoscan icon click to the method provided', function () {
-    var methodSpy = jasmine.createSpy('addAutoscan')
-    var trailConfig = {
+  it('binds the add autoscan icon click to the method provided', () => {
+    const methodSpy = jasmine.createSpy('addAutoscan');
+    const trailConfig = {
       enableAddAutoscan: true,
       onAddAutoscan: methodSpy
-    }
+    };
 
-    $('#trail').trail({
+    trail.trail({
       data: trailData,
       config: trailConfig
-    })
+    });
 
-    $('#trail').find('a.grb-trail-add-autoscan').click()
+    trail.find('a.grb-trail-add-autoscan').click();
 
-    expect(methodSpy).toHaveBeenCalled()
-  })
+    expect(methodSpy).toHaveBeenCalled();
+  });
 
-  describe('length()', function () {
-    it('reports the length of the trail of items', function () {
-      var trailConfig = {}
+  describe('length()', () => {
+    it('reports the length of the trail of items', () => {
+      const trailConfig = {};
 
-      $('#trail').trail({
+      trail.trail({
         data: trailData,
         config: trailConfig
-      })
-      expect($('#trail').trail('length')).toBe(4)
+      });
+      expect(trail.trail('length')).toBe(4);
     })
-  })
+  });
 
-  describe('items()', function () {
-    it('returns the list of items', function () {
-      var trailConfig = {}
+  describe('items()', () => {
+    it('returns the list of items', () => {
+      const trailConfig = {};
 
-      $('#trail').trail({
+      trail.trail({
         data: trailData,
         config: trailConfig
-      })
+      });
 
-      var items = $('#trail').trail('items')
-      expect(items.length).toBe(4)
-      expect(items.first().text()).toBe('database')
-    })
-  })
+      const items = trail.trail('items');
+      expect(items.length).toBe(4);
+      expect(items.first().text()).toBe('database');
+    });
+  });
 
-  describe('destroy()', function () {
-    it('removes all contents of the parent', function () {
-      var trailConfig = {}
+  describe('destroy()', () => {
+    it('removes all contents of the parent', () => {
+      const trailConfig = {};
 
-      $('#trail').trail({
+      trail.trail({
         data: trailData,
         config: trailConfig
-      })
-      expect($('#trail').trail('length')).toBe(4)
+      });
+      expect(trail.trail('length')).toBe(4);
 
-      $('#trail').trail('destroy')
+      trail.trail('destroy');
 
-      expect($('#trail').children().length).toBe(0)
-      expect($('#trail').hasClass('grb-trail')).toBeFalsy()
-    })
-  })
-})
+      expect(trail.children().length).toBe(0);
+      expect(trail.hasClass('grb-trail')).toBeFalsy();
+    });
+  });
+});
