@@ -1,471 +1,451 @@
 /* global GERBERA jasmine it expect describe beforeEach beforeAll afterAll getJSONFixture loadFixtures loadJSONFixtures spyOn */
 
-jasmine.getFixtures().fixturesPath = 'base/test/client/fixtures'
-jasmine.getJSONFixtures().fixturesPath = 'base/test/client/fixtures'
+jasmine.getFixtures().fixturesPath = 'base/test/client/fixtures';
+jasmine.getJSONFixtures().fixturesPath = 'base/test/client/fixtures';
 
 describe('Gerbera Updates', function () {
-  'use strict'
+  'use strict';
 
   beforeEach(function () {
-    loadFixtures('index.html')
-    GERBERA.Updates.initialize()
-  })
+    loadFixtures('index.html');
+    GERBERA.Updates.initialize();
+  });
 
   describe('showMessage()', function () {
     it('uses toast to display a message to the user', function () {
-      spyOn($.fn, 'toast')
+      spyOn($.fn, 'toast');
 
-      GERBERA.Updates.showMessage('a message')
+      GERBERA.Updates.showMessage('a message');
 
-      expect($.fn.toast).toHaveBeenCalledWith('show', {message: 'a message', type: undefined, icon: undefined})
-    })
-  })
+      expect($.fn.toast).toHaveBeenCalledWith('show', {message: 'a message', type: undefined, icon: undefined});
+    });
+  });
 
   describe('getUpdates()', function () {
-    var ajaxSpy
+    let ajaxSpy;
 
     beforeEach(function () {
-      ajaxSpy = spyOn($, 'ajax').and.callFake(function (options) {
-        return $.Deferred().resolve({}).promise()
-      })
-    })
+      ajaxSpy = spyOn($, 'ajax').and.callFake(function () {
+        return $.Deferred().resolve({}).promise();
+      });
+    });
 
-    it('calls the server check for updates', function (done) {
-      var isDone = done
-      spyOn(GERBERA.Auth, 'getSessionId').and.returnValue('SESSION_ID')
-      spyOn(GERBERA.Auth, 'isLoggedIn').and.returnValue(true)
-      spyOn(GERBERA.App, 'getType').and.returnValue('db')
+    it('calls the server check for updates', async () => {
+      spyOn(GERBERA.Auth, 'getSessionId').and.returnValue('SESSION_ID');
+      spyOn(GERBERA.Auth, 'isLoggedIn').and.returnValue(true);
+      spyOn(GERBERA.App, 'getType').and.returnValue('db');
 
-      spyOn(GERBERA.Updates, 'updateTask').and.callFake(function () {
-        return $.Deferred().resolve({}).promise()
-      })
+      spyOn(GERBERA.Updates, 'updateTask').and.callFake(() => {
+        return $.Deferred().resolve({}).promise();
+      });
 
-      GERBERA.Updates.getUpdates().then(function () {
-        expect(ajaxSpy.calls.mostRecent().args[0]['url']).toEqual('content/interface')
-        expect(ajaxSpy.calls.mostRecent().args[0]['data']).toEqual({
-          req_type: 'void',
-          sid: 'SESSION_ID',
-          updates: 'check'
-        })
-        isDone()
-      })
-    })
+      await GERBERA.Updates.getUpdates();
 
-    it('calls the server get for updates when forced', function (done) {
-      var isDone = done
-      spyOn(GERBERA.Auth, 'getSessionId').and.returnValue('SESSION_ID')
-      spyOn(GERBERA.Auth, 'isLoggedIn').and.returnValue(true)
-      spyOn(GERBERA.App, 'getType').and.returnValue('db')
-      spyOn(GERBERA.Updates, 'updateTask').and.callFake(function () {
-        return $.Deferred().resolve({}).promise()
-      })
+      expect(ajaxSpy.calls.mostRecent().args[0]['url']).toEqual('content/interface');
+      expect(ajaxSpy.calls.mostRecent().args[0]['data']).toEqual({
+        req_type: 'void',
+        sid: 'SESSION_ID',
+        updates: 'check'
+      });
+    });
 
-      var force = true
-      GERBERA.Updates.getUpdates(force).then(function () {
-        expect(ajaxSpy.calls.mostRecent().args[0]['url']).toEqual('content/interface')
-        expect(ajaxSpy.calls.mostRecent().args[0]['data']).toEqual({
-          req_type: 'void',
-          sid: 'SESSION_ID',
-          updates: 'get'
-        })
-        isDone()
-      })
-    })
+    it('calls the server get for updates when forced', async () => {
+      spyOn(GERBERA.Auth, 'getSessionId').and.returnValue('SESSION_ID');
+      spyOn(GERBERA.Auth, 'isLoggedIn').and.returnValue(true);
+      spyOn(GERBERA.App, 'getType').and.returnValue('db');
+      spyOn(GERBERA.Updates, 'updateTask').and.callFake(() => {
+        return $.Deferred().resolve({}).promise();
+      });
 
-    it('updates the current task when response from server', function (done) {
-      var isDone = done
-      spyOn(GERBERA.Auth, 'getSessionId').and.returnValue('SESSION_ID')
-      spyOn(GERBERA.Auth, 'isLoggedIn').and.returnValue(true)
+      const force = true;
+      GERBERA.Updates.getUpdates(force);
 
-      spyOn(GERBERA.Updates, 'updateTask').and.callFake(function () {
-        return $.Deferred().resolve({}).promise()
-      })
+      expect(ajaxSpy.calls.mostRecent().args[0]['url']).toEqual('content/interface');
+      expect(ajaxSpy.calls.mostRecent().args[0]['data']).toEqual({
+        req_type: 'void',
+        sid: 'SESSION_ID',
+        updates: 'get'
+      });
+    });
 
-      GERBERA.Updates.getUpdates().then(function () {
-        expect(GERBERA.Updates.updateTask).toHaveBeenCalled()
-        isDone()
-      })
-    })
+    it('updates the current task when response from server', async () => {
+      spyOn(GERBERA.Auth, 'getSessionId').and.returnValue('SESSION_ID');
+      spyOn(GERBERA.Auth, 'isLoggedIn').and.returnValue(true);
 
-    it('updates the timer to call back to the server', function (done) {
-      var isDone = done
-      spyOn(GERBERA.Auth, 'getSessionId').and.returnValue('SESSION_ID')
-      spyOn(GERBERA.Auth, 'isLoggedIn').and.returnValue(true)
+      spyOn(GERBERA.Updates, 'updateTask').and.callFake(() => {
+        return $.Deferred().resolve({}).promise();
+      });
 
-      spyOn(GERBERA.Updates, 'updateTask').and.callFake(function () {
-        return $.Deferred().resolve({}).promise()
-      })
+      await GERBERA.Updates.getUpdates();
 
-      spyOn(GERBERA.Updates, 'updateUi').and.callFake(function () {
-        return $.Deferred().resolve({}).promise()
-      })
+      expect(GERBERA.Updates.updateTask).toHaveBeenCalled();
+    });
 
-      GERBERA.Updates.getUpdates().then(function () {
-        expect(GERBERA.Updates.updateUi).toHaveBeenCalled()
-        isDone()
-      })
-    })
+    it('updates the timer to call back to the server', async () => {
+      spyOn(GERBERA.Auth, 'getSessionId').and.returnValue('SESSION_ID');
+      spyOn(GERBERA.Auth, 'isLoggedIn').and.returnValue(true);
+      spyOn(GERBERA.Updates, 'updateTask').and.callFake(() => {
+        return $.Deferred().resolve({}).promise();
+      });
+      spyOn(GERBERA.Updates, 'updateUi').and.callFake(() => {
+        return $.Deferred().resolve({}).promise();
+      });
 
-    it('clears the timer if the call to server fails', function (done) {
-      var isDone = done
-      $.ajax.calls.reset()
-      ajaxSpy.and.callFake(function (options) {
-        return $.Deferred().reject()
-      })
+      await GERBERA.Updates.getUpdates();
 
-      spyOn(GERBERA.Auth, 'getSessionId').and.returnValue('SESSION_ID')
-      spyOn(GERBERA.Auth, 'isLoggedIn').and.returnValue(true)
-      spyOn(GERBERA.Updates, 'updateTask')
-      spyOn(GERBERA.Updates, 'updateUi')
-      spyOn(GERBERA.Updates, 'clearAll').and.callFake(function () {
-        return $.Deferred().resolve({}).promise()
-      })
+      expect(GERBERA.Updates.updateUi).toHaveBeenCalled();
+    });
 
-      GERBERA.Updates.getUpdates().fail(function () {
-        expect(GERBERA.Updates.updateTask).not.toHaveBeenCalled()
-        expect(GERBERA.Updates.updateUi).not.toHaveBeenCalled()
-        expect(GERBERA.Updates.clearAll).toHaveBeenCalled()
-        isDone()
-      })
-    })
-  })
+    it('clears the timer if the call to server fails', async () => {
+      $.ajax.calls.reset();
+      ajaxSpy.and.callFake(() => {
+        return $.Deferred().reject();
+      });
 
-  describe('updateTask()', function () {
-    var response
+      spyOn(GERBERA.Auth, 'getSessionId').and.returnValue('SESSION_ID');
+      spyOn(GERBERA.Auth, 'isLoggedIn').and.returnValue(true);
+      spyOn(GERBERA.Updates, 'updateTask');
+      spyOn(GERBERA.Updates, 'updateUi');
+      spyOn(GERBERA.Updates, 'clearAll').and.callFake(() => {
+        return $.Deferred().resolve({}).promise();
+      });
 
-    beforeEach(function () {
-      loadJSONFixtures('updates-no-taskId.json')
-      loadJSONFixtures('updates-with-task.json')
-      loadJSONFixtures('updates-with-no-task.json')
-    })
-
-    it('clears the polling interval when task ID is negative', function (done) {
-      var isDone = done
-      response = getJSONFixture('updates-no-taskId.json')
-      spyOn(GERBERA.Updates, 'clearTaskInterval').and.returnValue($.Deferred().resolve(response).promise())
-
-      GERBERA.Updates.updateTask(response).then(function (promisedResponse) {
-        expect(GERBERA.Updates.clearTaskInterval).toHaveBeenCalled()
-        expect(promisedResponse).toEqual(response)
-        isDone()
-      })
-    })
-
-    it('updates the task information if task exists', function (done) {
-      var isDone = done
-      response = getJSONFixture('updates-with-task.json')
-      spyOn(GERBERA.Updates, 'addTaskInterval')
-
-      GERBERA.Updates.updateTask(response).then(function (promisedResponse) {
-        expect($('#grb-toast-msg').text()).toEqual('Performing full scan: /Movies')
-        expect(promisedResponse).toEqual(response)
-        isDone()
-      })
-    })
-
-    it('creates a polling interval when tasks still exist', function (done) {
-      var isDone = done
-      response = getJSONFixture('updates-with-task.json')
-      spyOn(GERBERA.Updates, 'addTaskInterval')
-
-      GERBERA.Updates.updateTask(response).then(function (promisedResponse) {
-        expect(GERBERA.Updates.addTaskInterval).toHaveBeenCalled()
-        expect(promisedResponse).toEqual(response)
-        isDone()
-      })
-    })
-
-    it('passes the response onto the next method', function (done) {
-      var isDone = done
-      response = getJSONFixture('updates-with-task.json')
-      spyOn(GERBERA.Updates, 'addTaskInterval')
-
-      GERBERA.Updates.updateTask(response).then(function (promisedResponse) {
-        expect(promisedResponse).toEqual(response)
-        isDone()
-      })
-    })
-
-    it('passes the response onto the next method when no task exists', function (done) {
-      var isDone = done
-      response = getJSONFixture('updates-with-no-task.json')
-
-      GERBERA.Updates.updateTask(response).then(function (promisedResponse) {
-        expect(promisedResponse).toEqual(response)
-        isDone()
-      })
-    })
-  })
-
-  describe('updateUi()', function () {
-    var response
-
-    beforeEach(function () {
-      loadJSONFixtures('updates-with-pending-updates.json')
-      loadJSONFixtures('updates-with-no-ui-updates.json')
-      loadJSONFixtures('updates-with-no-pending-updates.json')
-    })
-
-    it('when pending UI updates, sets a timeout to be called later', function (done) {
-      var isDone = done
-      response = getJSONFixture('updates-with-pending-updates.json')
-      spyOn(GERBERA.Updates, 'addUiTimer').and.returnValue($.Deferred().resolve(response).promise())
-
-      GERBERA.Updates.updateUi(response).then(function (promisedResponse) {
-        expect(GERBERA.Updates.addUiTimer).toHaveBeenCalled()
-        expect(promisedResponse).toEqual(response)
-        isDone()
-      })
-    })
-
-    it('when no UI updates, clears the UI timeout', function (done) {
-      var isDone = done
-      response = getJSONFixture('updates-with-no-ui-updates.json')
-      spyOn(GERBERA.Updates, 'clearUiTimer').and.returnValue($.Deferred().resolve(response).promise())
-
-      GERBERA.Updates.updateUi(response).then(function (promisedResponse) {
-        expect(GERBERA.Updates.clearUiTimer).toHaveBeenCalled()
-        expect(promisedResponse).toEqual(response)
-        isDone()
-      })
-    })
-
-    it('when no pending updates, clears the UI timeout', function (done) {
-      var isDone = done
-      response = getJSONFixture('updates-with-no-pending-updates.json')
-      spyOn(GERBERA.Updates, 'clearUiTimer').and.returnValue($.Deferred().resolve(response).promise())
-
-      GERBERA.Updates.updateUi(response).then(function (promisedResponse) {
-        expect(GERBERA.Updates.clearUiTimer).toHaveBeenCalled()
-        expect(promisedResponse).toEqual(response)
-        isDone()
-      })
-    })
-  })
-
-  describe('errorCheck()', function () {
-    var response
-    var uiDisabledResponse
-    var sessionExpiredResponse
-    var event
-    var xhr
-    beforeEach(function () {
-      loadJSONFixtures('invalid-response.json')
-      response = getJSONFixture('invalid-response.json')
-    })
-
-    it('shows a toast message when AJAX error returns failure', function () {
-      event = {}
-      xhr = {
-        responseJSON : response
+      try {
+        await GERBERA.Updates.getUpdates();
+      } catch (err) {
+        expect(GERBERA.Updates.updateTask).not.toHaveBeenCalled();
+        expect(GERBERA.Updates.updateUi).not.toHaveBeenCalled();
+        expect(GERBERA.Updates.clearAll).toHaveBeenCalled();
       }
+    });
+  });
 
-      GERBERA.Updates.errorCheck(event, xhr)
+  describe('updateTask()', () => {
+    let response;
 
-      expect($('#grb-toast-msg').text()).toEqual('General Error')
-    })
+    beforeEach(function () {
+      loadJSONFixtures('updates-no-taskId.json');
+      loadJSONFixtures('updates-with-task.json');
+      loadJSONFixtures('updates-with-no-task.json');
+    });
 
-    it('ignores when response does not exist', function () {
-      event = {}
+    it('clears the polling interval when task ID is negative', async () => {
+      response = getJSONFixture('updates-no-taskId.json');
+      spyOn(GERBERA.Updates, 'clearTaskInterval').and.returnValue($.Deferred().resolve(response).promise());
+
+      const promisedResponse = await GERBERA.Updates.updateTask(response);
+
+      expect(GERBERA.Updates.clearTaskInterval).toHaveBeenCalled();
+      expect(promisedResponse).toEqual(response);
+    });
+
+    it('updates the task information if task exists', async () => {
+      response = getJSONFixture('updates-with-task.json');
+      spyOn(GERBERA.Updates, 'addTaskInterval');
+
+      const promisedResponse = await GERBERA.Updates.updateTask(response);
+
+      expect($('#grb-toast-msg').text()).toEqual('Performing full scan: /Movies');
+      expect(promisedResponse).toEqual(response);
+    });
+
+    it('creates a polling interval when tasks still exist', async () => {
+      response = getJSONFixture('updates-with-task.json');
+      spyOn(GERBERA.Updates, 'addTaskInterval');
+
+      const promisedResponse = await GERBERA.Updates.updateTask(response);
+
+      expect(GERBERA.Updates.addTaskInterval).toHaveBeenCalled();
+      expect(promisedResponse).toEqual(response);
+    });
+
+    it('passes the response onto the next method', async () => {
+      response = getJSONFixture('updates-with-task.json');
+      spyOn(GERBERA.Updates, 'addTaskInterval');
+
+      const promisedResponse = await GERBERA.Updates.updateTask(response);
+
+      expect(promisedResponse).toEqual(response);
+    });
+
+    it('passes the response onto the next method when no task exists', async () => {
+      response = getJSONFixture('updates-with-no-task.json');
+
+      const promisedResponse = await GERBERA.Updates.updateTask(response);
+
+      expect(promisedResponse).toEqual(response);
+    });
+  });
+
+  describe('updateUi()', () => {
+    let response;
+
+    beforeEach(function () {
+      loadJSONFixtures('updates-with-pending-updates.json');
+      loadJSONFixtures('updates-with-no-ui-updates.json');
+      loadJSONFixtures('updates-with-no-pending-updates.json');
+    });
+
+    it('when pending UI updates, sets a timeout to be called later', async () => {
+      response = getJSONFixture('updates-with-pending-updates.json');
+      spyOn(GERBERA.Updates, 'addUiTimer').and.returnValue($.Deferred().resolve(response).promise());
+
+      const promisedResponse = await GERBERA.Updates.updateUi(response);
+
+      expect(GERBERA.Updates.addUiTimer).toHaveBeenCalled();
+      expect(promisedResponse).toEqual(response);
+    });
+
+    it('when no UI updates, clears the UI timeout', async () => {
+      response = getJSONFixture('updates-with-no-ui-updates.json');
+      spyOn(GERBERA.Updates, 'clearUiTimer').and.returnValue($.Deferred().resolve(response).promise());
+
+      const promisedResponse = await GERBERA.Updates.updateUi(response);
+
+      expect(GERBERA.Updates.clearUiTimer).toHaveBeenCalled();
+      expect(promisedResponse).toEqual(response);
+    });
+
+    it('when no pending updates, clears the UI timeout', async () => {
+      response = getJSONFixture('updates-with-no-pending-updates.json');
+      spyOn(GERBERA.Updates, 'clearUiTimer').and.returnValue($.Deferred().resolve(response).promise());
+
+      const promisedResponse = await GERBERA.Updates.updateUi(response);
+
+      expect(GERBERA.Updates.clearUiTimer).toHaveBeenCalled();
+      expect(promisedResponse).toEqual(response);
+    });
+  });
+
+  describe('errorCheck()', () => {
+    let response;
+    let uiDisabledResponse;
+    let sessionExpiredResponse;
+    let event;
+    let xhr;
+    let toastMsg;
+
+    beforeEach(() => {
+      loadJSONFixtures('invalid-response.json');
+      response = getJSONFixture('invalid-response.json');
+      toastMsg = $('#grb-toast-msg');
+    });
+
+    it('shows a toast message when AJAX error returns failure', () => {
+      event = {};
       xhr = {
-        responseJSON : {}
-      }
+        responseJSON: response
+      };
 
-      GERBERA.Updates.errorCheck(event, xhr)
+      GERBERA.Updates.errorCheck(event, xhr);
 
-      expect($('#grb-toast-msg').text()).toEqual('')
-    })
+      expect(toastMsg.text()).toEqual('General Error');
+    });
 
-    it('disables application when server returns 900 error code, albeit successful', function () {
-      loadJSONFixtures('ui-disabled.json')
-      uiDisabledResponse = getJSONFixture('ui-disabled.json')
+    it('ignores when response does not exist', () => {
+      event = {};
+      xhr = {
+        responseJSON: {}
+      };
+
+      GERBERA.Updates.errorCheck(event, xhr);
+
+      expect(toastMsg.text()).toEqual('');
+    });
+
+    it('disables application when server returns 900 error code, albeit successful', () => {
+      loadJSONFixtures('ui-disabled.json');
+      uiDisabledResponse = getJSONFixture('ui-disabled.json');
       spyOn(GERBERA.App, 'disable');
-      event = {}
+      event = {};
       xhr = {
-        responseJSON : uiDisabledResponse
-      }
+        responseJSON: uiDisabledResponse
+      };
 
-      GERBERA.Updates.errorCheck(event, xhr)
+      GERBERA.Updates.errorCheck(event, xhr);
 
-      expect($('#grb-toast-msg').text()).toEqual('The UI is disabled in the configuration file. See README.')
-      expect(GERBERA.App.disable).toHaveBeenCalled()
-    })
+      expect(toastMsg.text()).toEqual('The UI is disabled in the configuration file. See README.');
+      expect(GERBERA.App.disable).toHaveBeenCalled();
+    });
 
-    it('clears session cookie and redirects to home when server returns 400 error code session invalid.', function () {
-      spyOn(GERBERA.Auth, 'handleLogout')
+    it('clears session cookie and redirects to home when server returns 400 error code session invalid.', () => {
+      spyOn(GERBERA.Auth, 'handleLogout');
       // when calling for fixtures, ajaxComplete fires `errorCheck`
       // so spies must be before to avoid full page refresh.
-      loadJSONFixtures('session-expired.json')
-      sessionExpiredResponse = getJSONFixture('session-expired.json')
-      event = {}
+      loadJSONFixtures('session-expired.json');
+      sessionExpiredResponse = getJSONFixture('session-expired.json');
+      event = {};
       xhr = {
-        responseJSON : sessionExpiredResponse
-      }
+        responseJSON: sessionExpiredResponse
+      };
 
-      GERBERA.Updates.errorCheck(event, xhr)
+      GERBERA.Updates.errorCheck(event, xhr);
 
-      expect(GERBERA.Auth.handleLogout).toHaveBeenCalled()
-    })
-  })
+      expect(GERBERA.Auth.handleLogout).toHaveBeenCalled();
+    });
+  });
 
-  describe('addUiTimer()', function () {
-    var updateSpy
+  describe('addUiTimer()', () => {
+    let updateSpy;
+
     beforeAll(function () {
-      updateSpy = spyOn(GERBERA.Updates, 'getUpdates')
-    })
+      updateSpy = spyOn(GERBERA.Updates, 'getUpdates');
+    });
 
-    beforeEach(function () {
-      updateSpy.calls.reset()
-      GERBERA.Updates.clearAll()
-    })
+    beforeEach(() => {
+      updateSpy.calls.reset();
+      GERBERA.Updates.clearAll();
+    });
 
-    afterAll(function () {
-      GERBERA.Updates.clearAll()
-    })
+    afterAll(() => {
+      GERBERA.Updates.clearAll();
+    });
 
-    it('uses the default interval to set a timeout', function (done) {
-      var isDone = done
-      GERBERA.App.serverConfig = {}
-      GERBERA.App.serverConfig['poll-interval'] = 100
-      var startTime = new Date().getTime()
-      updateSpy.and.callFake(function () {
-        var currentTime = new Date().getTime()
-        expect((currentTime - startTime) >= 95).toBeTruthy('Actual value was ' + (currentTime - startTime))
-        expect((currentTime - startTime) <= 110).toBeTruthy('Actual value was ' + (currentTime - startTime))
-        isDone()
-      })
+    it('uses the default interval to set a timeout', (done) => {
+      GERBERA.App.serverConfig = {};
+      GERBERA.App.serverConfig['poll-interval'] = 100;
+      const startTime = new Date().getTime();
+      updateSpy.and.callFake(() => {
+        const currentTime = new Date().getTime();
+        expect((currentTime - startTime) >= 95).toBeTruthy('Actual value was ' + (currentTime - startTime));
+        expect((currentTime - startTime) <= 110).toBeTruthy('Actual value was ' + (currentTime - startTime));
+        done();
+      });
 
-      GERBERA.Updates.addUiTimer()
-    })
+      GERBERA.Updates.addUiTimer();
+    });
 
-    it('overrides the default when passed in', function (done) {
-      var isDone = done
-      GERBERA.App.serverConfig = {}
-      GERBERA.App.serverConfig['poll-interval'] = 200
-      var startTime = new Date().getTime()
-      updateSpy.and.callFake(function () {
-        var currentTime = new Date().getTime()
-        expect((currentTime - startTime) >= 195).toBeTruthy('Actual value was ' + (currentTime - startTime))
-        expect((currentTime - startTime) <= 210).toBeTruthy('Actual value was ' + (currentTime - startTime))
-        isDone()
-      })
+    it('overrides the default when passed in', (done) => {
+      GERBERA.App.serverConfig = {};
+      GERBERA.App.serverConfig['poll-interval'] = 200;
+      const startTime = new Date().getTime();
+      updateSpy.and.callFake(() => {
+        const currentTime = new Date().getTime();
+        expect((currentTime - startTime) >= 195).toBeTruthy('Actual value was ' + (currentTime - startTime));
+        expect((currentTime - startTime) <= 210).toBeTruthy('Actual value was ' + (currentTime - startTime));
+        done();
+      });
 
-      GERBERA.Updates.addUiTimer()
-    })
-  })
+      GERBERA.Updates.addUiTimer();
+    });
+  });
 
-  describe('addTaskInterval()', function () {
-    var updateSpy
+  describe('addTaskInterval()', () => {
+    let updateSpy;
     beforeAll(function () {
-      updateSpy = spyOn(GERBERA.Updates, 'getUpdates')
-    })
+      updateSpy = spyOn(GERBERA.Updates, 'getUpdates');
+    });
 
-    beforeEach(function () {
-      updateSpy.calls.reset()
-      GERBERA.Updates.clearAll()
-    })
+    beforeEach(() => {
+      updateSpy.calls.reset();
+      GERBERA.Updates.clearAll();
+    });
 
-    it('sets a recurring interval based on the poll-interval configuration', function (done) {
-      var isDone = done
-      GERBERA.App.serverConfig = {}
-      GERBERA.App.serverConfig['poll-interval'] = 100
-      var startTime = new Date().getTime()
-      var totalCount = 0
-      updateSpy.and.callFake(function () {
-        totalCount++
-        var currentTime = new Date().getTime()
+    it('sets a recurring interval based on the poll-interval configuration', (done) => {
+      GERBERA.App.serverConfig = {};
+      GERBERA.App.serverConfig['poll-interval'] = 100;
+      const startTime = new Date().getTime();
+      let totalCount = 0;
+      updateSpy.and.callFake(() => {
+        totalCount++;
+        let currentTime = new Date().getTime();
         if (totalCount >= 2) {
-          expect((currentTime - startTime) >= 195).toBeTruthy('Interval should accumulate time from start but was ' + (currentTime - startTime))
-          expect((currentTime - startTime) <= 210).toBeTruthy('Interval should accumulate time from start but was ' + (currentTime - startTime))
-          isDone()
+          expect((currentTime - startTime) >= 195).toBeTruthy('Interval should accumulate time from start but was ' + (currentTime - startTime));
+          expect((currentTime - startTime) <= 210).toBeTruthy('Interval should accumulate time from start but was ' + (currentTime - startTime));
+          done();
         }
-      })
+      });
 
-      GERBERA.Updates.addTaskInterval()
-    })
-  })
+      GERBERA.Updates.addTaskInterval();
+    });
+  });
 
-  describe('updateTreeByIds()', function () {
-    var response
+  describe('updateTreeByIds()', () => {
+    let response;
 
-    beforeEach(function () {
-      loadJSONFixtures('update_ids.json')
-      response = getJSONFixture('update_ids.json')
-    })
-    it('given a failed response does nothing', function () {
-      spyOn(GERBERA.Tree, 'reloadTreeItemById')
+    beforeEach(() => {
+      loadJSONFixtures('update_ids.json');
+      response = getJSONFixture('update_ids.json');
+    });
+
+    it('given a failed response does nothing', () => {
+      spyOn(GERBERA.Tree, 'reloadTreeItemById');
       response = {
         success: false,
         update_ids: {
           updates: true,
           ids: 'all'
         }
-      }
-      GERBERA.Updates.updateTreeByIds(response)
+      };
 
-      expect(GERBERA.Tree.reloadTreeItemById).not.toHaveBeenCalledWith()
-    })
+      GERBERA.Updates.updateTreeByIds(response);
 
-    it('given a response with `all` update ID reloads the whole tree', function () {
-      spyOn(GERBERA.Tree, 'reloadTreeItemById')
+      expect(GERBERA.Tree.reloadTreeItemById).not.toHaveBeenCalledWith();
+    });
+
+    it('given a response with `all` update ID reloads the whole tree', () => {
+      spyOn(GERBERA.Tree, 'reloadTreeItemById');
       response = {
         success: true,
         update_ids: {
           updates: true,
           ids: 'all'
         }
-      }
-      GERBERA.Updates.updateTreeByIds(response)
+      };
+      GERBERA.Updates.updateTreeByIds(response);
 
-      expect(GERBERA.Tree.reloadTreeItemById).toHaveBeenCalledWith('0')
-    })
+      expect(GERBERA.Tree.reloadTreeItemById).toHaveBeenCalledWith('0');
+    });
 
-    it('given a response with 1 update ID reloads the parent item of the id', function () {
-      spyOn(GERBERA.Tree, 'reloadParentTreeItem')
+    it('given a response with 1 update ID reloads the parent item of the id', () => {
+      spyOn(GERBERA.Tree, 'reloadParentTreeItem');
 
-      GERBERA.Updates.updateTreeByIds(response)
+      GERBERA.Updates.updateTreeByIds(response);
 
-      expect(GERBERA.Tree.reloadParentTreeItem).toHaveBeenCalledWith('8')
-    })
+      expect(GERBERA.Tree.reloadParentTreeItem).toHaveBeenCalledWith('8');
+    });
 
-    it('given a response with several update ID reloads the parent item for each id', function () {
-      spyOn(GERBERA.Tree, 'reloadParentTreeItem')
+    it('given a response with several update ID reloads the parent item for each id', () => {
+      spyOn(GERBERA.Tree, 'reloadParentTreeItem');
       response = {
         success: true,
         update_ids: {
           updates: true,
           ids: '2,4,5,6'
         }
-      }
-      GERBERA.Updates.updateTreeByIds(response)
+      };
 
-      expect(GERBERA.Tree.reloadParentTreeItem.calls.count()).toBe(4)
-    })
+      GERBERA.Updates.updateTreeByIds(response);
 
-    it('clears the update timer when updates are false', function () {
-      spyOn(GERBERA.Updates, 'clearUiTimer')
+      expect(GERBERA.Tree.reloadParentTreeItem.calls.count()).toBe(4);
+    });
+
+    it('clears the update timer when updates are false', () => {
+      spyOn(GERBERA.Updates, 'clearUiTimer');
       response = {
         success: true,
         update_ids: {
           updates: false
         }
-      }
-      GERBERA.Updates.updateTreeByIds(response)
+      };
 
-      expect(GERBERA.Updates.clearUiTimer).toHaveBeenCalled()
-    })
+      GERBERA.Updates.updateTreeByIds(response);
 
-    it('starts the update timer when updates are pending', function () {
-      spyOn(GERBERA.Updates, 'addUiTimer')
+      expect(GERBERA.Updates.clearUiTimer).toHaveBeenCalled();
+    });
+
+    it('starts the update timer when updates are pending', () => {
+      spyOn(GERBERA.Updates, 'addUiTimer');
       response = {
         success: true,
         update_ids: {
           pending: true
         }
-      }
-      GERBERA.Updates.updateTreeByIds(response)
+      };
 
-      expect(GERBERA.Updates.addUiTimer).toHaveBeenCalled()
-    })
-  })
-})
+      GERBERA.Updates.updateTreeByIds(response);
+
+      expect(GERBERA.Updates.addUiTimer).toHaveBeenCalled();
+    });
+  });
+});

@@ -1,317 +1,323 @@
 /* global jasmine it expect describe beforeEach loadJSONFixtures getJSONFixture loadFixtures */
 
-jasmine.getFixtures().fixturesPath = 'base/test/client/fixtures'
-jasmine.getJSONFixtures().fixturesPath = 'base/test/client/fixtures'
+jasmine.getFixtures().fixturesPath = 'base/test/client/fixtures';
+jasmine.getJSONFixtures().fixturesPath = 'base/test/client/fixtures';
 
-describe('The jQuery Tree', function () {
-  'use strict'
-  var treeData
-  var treeConfig = {
+describe('The jQuery Tree', () => {
+  'use strict';
+
+  let treeData, tree;
+  const treeConfig = {
     titleClass: 'folder-title',
     closedIcon: 'folder-closed',
     openIcon: 'folder-open'
-  }
+  };
 
-  beforeEach(function () {
-    loadFixtures('tree.html')
-    loadJSONFixtures('tree-data.json')
-    treeData = getJSONFixture('tree-data.json')
-  })
+  beforeEach(() => {
+    loadFixtures('tree.html');
+    loadJSONFixtures('tree-data.json');
+    treeData = getJSONFixture('tree-data.json');
+    tree = $('#tree');
+  });
 
-  it('creates a list the same size as the data', function () {
+  it('creates a list the same size as the data', () => {
 
-    $('#tree').tree({
+    tree.tree({
       data: treeData,
       config: treeConfig
-    })
+    });
 
-    expect($('#tree').find('li').length).toBe(5)
-  })
+    expect(tree.find('li').length).toBe(5);
+  });
 
-  it('items are loaded in folder closed state', function () {
-    $('#tree').tree({
+  it('items are loaded in folder closed state', () => {
+    tree.tree({
       data: treeData,
       config: treeConfig
-    })
+    });
 
-    var items = $('#tree').find('li')
-    var folder = items.children('span')
+    const items = $('#tree').find('li');
+    const folder = items.children('span');
 
-    expect(folder.hasClass('folder-closed')).toBeTruthy()
-  })
+    expect(folder.hasClass('folder-closed')).toBeTruthy();
+  });
 
-  it('binds the item title text to a onSelection method', function () {
-    var onSelectSpy = jasmine.createSpy('onSelection')
+  it('binds the item title text to a onSelection method', () => {
+    const onSelectSpy = jasmine.createSpy('onSelection');
 
-    $('#tree').tree({
+    tree.tree({
       data: treeData,
       config: {
         titleClass: 'folder-title',
         closedIcon: 'folder-closed',
         onSelection: onSelectSpy
       }
-    })
+    });
 
-    var titles = $('#tree').find('.folder-title')
-    $(titles.get(0)).click()
+    const titles = tree.find('.folder-title');
+    $(titles.get(0)).click();
 
-    expect(onSelectSpy.calls.count()).toBe(1)
-  })
+    expect(onSelectSpy.calls.count()).toBe(1);
+  });
 
-  it('binds the folder title to a onExpand method', function () {
-    var onExpand = jasmine.createSpy('onExpand')
+  it('binds the folder title to a onExpand method', () => {
+    const onExpand = jasmine.createSpy('onExpand');
 
-    $('#tree').tree({
+    tree.tree({
       data: treeData,
       config: {
         titleClass: 'folder-title',
         closedIcon: 'folder-closed',
         onExpand: onExpand
       }
-    })
+    });
 
-    var icons = $('#tree').find('.folder-title')
-    $(icons.get(0)).click()
+    const icons = tree.find('.folder-title');
+    $(icons.get(0)).click();
 
-    expect(onExpand.calls.count()).toBe(1)
-  })
+    expect(onExpand.calls.count()).toBe(1);
+  });
 
-  it('appends badges to the item', function () {
-    $('#tree').tree({
+  it('appends badges to the item', () => {
+    tree.tree({
       data: treeData,
       config: {
         titleClass: 'folder-title',
         closedIcon: 'folder-closed'
       }
-    })
+    });
 
-    var items = $('#tree').find('li')
-    var firstBadges = $(items.get(0)).find('span.badge')
-    expect(firstBadges.length).toBe(3)
-  })
+    const items = $('#tree').find('li');
+    const firstBadges = $(items.get(0)).find('span.badge');
+    expect(firstBadges.length).toBe(3);
+  });
 
-  it('binds autoscan edit to the autoscan badge', function () {
-    var onAutoscanEdit = jasmine.createSpy('onAutoscanEdit')
+  it('binds autoscan edit to the autoscan badge', () => {
+    const onAutoscanEdit = jasmine.createSpy('onAutoscanEdit');
 
-    $('#tree').tree({
+    tree.tree({
       data: treeData,
       config: {
         titleClass: 'folder-title',
         closedIcon: 'folder-closed',
         onAutoscanEdit: onAutoscanEdit
       }
-    })
+    });
 
-    var autoscanBadge = $('#tree').find('.autoscan')
-    $(autoscanBadge.get(0)).click()
+    const autoscanBadge = tree.find('.autoscan');
+    $(autoscanBadge.get(0)).click();
 
-    expect(onAutoscanEdit.calls.count()).toBe(1)
-  })
+    expect(onAutoscanEdit.calls.count()).toBe(1);
+  });
 
-  it('appends the gerbera ID as a data item', function () {
-    $('#tree').tree({
+  it('appends the gerbera ID as a data item', () => {
+    tree.tree({
       data: treeData,
       config: {}
-    })
+    });
 
-    var items = $('#tree').find('li')
-    var gerberaId = $(items.get(0)).data('grb-id')
-    expect(gerberaId).toEqual(1111)
-  })
+    const items = $('#tree').find('li');
+    const gerberaId = $(items.get(0)).data('grb-id');
+    expect(gerberaId).toEqual(1111);
+  });
 
-  it('recursively appends children based on data lineage', function () {
-    loadJSONFixtures('tree-data-hierarchy.json')
-    var treeHierarchyData = getJSONFixture('tree-data-hierarchy.json')
+  it('recursively appends children based on data lineage', () => {
+    loadJSONFixtures('tree-data-hierarchy.json');
+    const treeHierarchyData = getJSONFixture('tree-data-hierarchy.json');
 
-    $('#tree').tree({
+    tree.tree({
       data: treeHierarchyData,
       config: {
         titleClass: 'folder-title',
         closedIcon: 'folder-closed'
       }
-    })
-    var firstChild = $('#tree').children('ul').children('li')
+    });
+    const firstChild = $('#tree').children('ul').children('li');
 
-    expect(firstChild.length).toBe(1)
+    expect(firstChild.length).toBe(1);
 
-    var secondChild = firstChild.children('ul')
-    var secondChildChild = secondChild.children('li')
-    expect(secondChild.length).toBe(1)
-    expect(secondChildChild.length).toBe(1)
-  })
+    const secondChild = firstChild.children('ul');
+    const secondChildChild = secondChild.children('li');
+    expect(secondChild.length).toBe(1);
+    expect(secondChildChild.length).toBe(1);
+  });
 
-  describe('appendItems()', function () {
-    var treeData
+  describe('appendItems()', () => {
+    let treeData;
 
-    beforeEach(function () {
-      loadFixtures('tree.html')
-      loadJSONFixtures('tree-data.json')
-      treeData = getJSONFixture('tree-data.json')
-    })
+    beforeEach(() => {
+      loadFixtures('tree.html');
+      loadJSONFixtures('tree-data.json');
+      treeData = getJSONFixture('tree-data.json');
+      tree = $('#tree');
+    });
 
-    it('given a parent item append children as list', function () {
-      $('#tree').tree({
+    it('given a parent item append children as list', () => {
+      tree.tree({
         data: treeData,
         config: {
           titleClass: 'folder-title',
           closedIcon: 'folder-closed',
           openIcon: 'folder-open'
         }
-      })
+      });
 
-      var parent = $($('#tree').find('li').get(4))
-      var children = [
+      const parent = $(tree.find('li').get(4));
+      const children = [
         {'title': 'Folder 6', 'gerbera': {id: 6}},
         {'title': 'Folder 7', 'gerbera': {id: 7}},
         {'title': 'Folder 8', 'gerbera': {id: 8}},
         {'title': 'Folder 9', 'gerbera': {id: 9}}
-      ]
+      ];
 
-      $('#tree').tree('append', parent, children)
+      tree.tree('append', parent, children);
 
-      var newList = parent.children('ul')
-      expect(newList.length).toBe(1)
-      expect(newList.children('li').length).toBe(4)
-      expect($('#tree').tree('closed', parent.children('span').first())).toBeFalsy()
-    })
-  })
+      const newList = parent.children('ul');
+      expect(newList.length).toBe(1);
+      expect(newList.children('li').length).toBe(4);
+      expect(tree.tree('closed', parent.children('span').first())).toBeFalsy();
+    });
+  });
 
-  describe('clear()', function () {
-    var treeData
+  describe('clear()', () => {
+    let treeData;
 
-    beforeEach(function () {
-      loadFixtures('tree.html')
-      loadJSONFixtures('tree-data.json')
-      treeData = getJSONFixture('tree-data.json')
-    })
+    beforeEach(() => {
+      loadFixtures('tree.html');
+      loadJSONFixtures('tree-data.json');
+      treeData = getJSONFixture('tree-data.json');
+      tree = $('#tree');
+    });
 
-    it('removes all contents of the tree', function () {
-      $('#tree').tree({
-        data: treeData,
-        config: {
-          titleClass: 'folder-title',
-          closedIcon: 'folder-closed'
-        }
-      })
-
-      expect($('#tree').find('li').length).toBe(5)
-
-      $('#tree').tree('clear')
-
-      expect($('#tree').find('li').length).toBe(0)
-    })
-  })
-
-  describe('closed()', function () {
-    var treeData
-
-    beforeEach(function () {
-      loadFixtures('tree.html')
-      loadJSONFixtures('tree-data.json')
-      treeData = getJSONFixture('tree-data.json')
-    })
-
-    it('determines whether a node is closed', function () {
-      $('#tree').tree({
-        data: treeData,
-        config: {
-          titleClass: 'folder-title',
-          closedIcon: 'folder-closed'
-        }
-      })
-
-      var item = $('#tree').find('li').get(0)
-      var title = $(item).children('span').get(1)
-      expect($('#tree').tree('closed', title)).toBeTruthy()
-    })
-  })
-
-  describe('collapse()', function () {
-    var treeData
-
-    beforeEach(function () {
-      loadFixtures('tree.html')
-      loadJSONFixtures('tree-data.json')
-      treeData = getJSONFixture('tree-data.json')
-    })
-
-    it('given a parent item append children as list', function () {
-      $('#tree').tree({
-        data: treeData,
-        config: {
-          titleClass: 'folder-title',
-          closedIcon: 'folder-closed',
-          openIcon: 'folder-open'
-        }
-      })
-
-      var parent = $($('#tree').find('li').get(4))
-      var children = [
-        {'title': 'Folder 6', 'gerbera': {id: 6}},
-        {'title': 'Folder 7', 'gerbera': {id: 7}},
-        {'title': 'Folder 8', 'gerbera': {id: 8}},
-        {'title': 'Folder 9', 'gerbera': {id: 9}}
-      ]
-      $('#tree').tree('append', parent, children)
-
-      var title = parent.children('span').get(1)
-      $('#tree').tree('collapse', parent)
-
-      expect($('#tree').tree('closed', title)).toBeTruthy()
-      expect(parent.children('ul.list-group').css('display')).toBe('none')
-    })
-  })
-
-  describe('select()', function () {
-    var treeData
-
-    beforeEach(function () {
-      loadFixtures('tree.html')
-      loadJSONFixtures('tree-data.json')
-      treeData = getJSONFixture('tree-data.json')
-    })
-
-    it('selects an item by changing the style', function () {
-      $('#tree').tree({
-        data: treeData,
-        config: {
-          titleClass: 'folder-title',
-          closedIcon: 'folder-closed',
-          openIcon: 'folder-open'
-        }
-      })
-
-      var item = $($('#tree').find('li').get(4))
-
-      $('#tree').tree('select', item)
-
-      expect(item.hasClass('selected-item')).toBeTruthy()
-    })
-  })
-
-  describe('getItem()', function () {
-    var treeData
-    var tree
-    var treeDataDiff
-
-    beforeEach(function () {
-      loadFixtures('tree.html')
-      loadJSONFixtures('tree-data.json')
-      loadJSONFixtures('tree-data-diff.json')
-      treeData = getJSONFixture('tree-data.json')
-      treeDataDiff = getJSONFixture('tree-data-diff.json')
-      tree = $('#tree')
+    it('removes all contents of the tree', () => {
       tree.tree({
         data: treeData,
         config: {
           titleClass: 'folder-title',
           closedIcon: 'folder-closed'
         }
-      })
+      });
+
+      expect(tree.find('li').length).toBe(5);
+
+      tree.tree('clear');
+
+      expect(tree.find('li').length).toBe(0);
+    });
+  });
+
+  describe('closed()', () => {
+    let treeData;
+
+    beforeEach(() => {
+      loadFixtures('tree.html');
+      loadJSONFixtures('tree-data.json');
+      treeData = getJSONFixture('tree-data.json');
+      tree = $('#tree');
+    });
+
+    it('determines whether a node is closed', () => {
+      tree.tree({
+        data: treeData,
+        config: {
+          titleClass: 'folder-title',
+          closedIcon: 'folder-closed'
+        }
+      });
+
+      const item = tree.find('li').get(0);
+      const title = $(item).children('span').get(1);
+      expect(tree.tree('closed', title)).toBeTruthy();
+    });
+  });
+
+  describe('collapse()', () => {
+    let treeData;
+
+    beforeEach(() => {
+      loadFixtures('tree.html');
+      loadJSONFixtures('tree-data.json');
+      treeData = getJSONFixture('tree-data.json');
+      tree = $('#tree');
+    });
+
+    it('given a parent item append children as list', () => {
+      tree.tree({
+        data: treeData,
+        config: {
+          titleClass: 'folder-title',
+          closedIcon: 'folder-closed',
+          openIcon: 'folder-open'
+        }
+      });
+
+      const parent = $($('#tree').find('li').get(4));
+      const children = [
+        {'title': 'Folder 6', 'gerbera': {id: 6}},
+        {'title': 'Folder 7', 'gerbera': {id: 7}},
+        {'title': 'Folder 8', 'gerbera': {id: 8}},
+        {'title': 'Folder 9', 'gerbera': {id: 9}}
+      ];
+      tree.tree('append', parent, children);
+
+      const title = parent.children('span').get(1);
+      tree.tree('collapse', parent);
+
+      expect(tree.tree('closed', title)).toBeTruthy();
+      expect(parent.children('ul.list-group').css('display')).toBe('none');
+    });
+  });
+
+  describe('select()', () => {
+    let treeData;
+
+    beforeEach(() => {
+      loadFixtures('tree.html');
+      loadJSONFixtures('tree-data.json');
+      treeData = getJSONFixture('tree-data.json');
+      tree = $('#tree');
     })
 
-    it('stores the item data and finds given id', function () {
-      var folderData = {
+    it('selects an item by changing the style', () => {
+      tree.tree({
+        data: treeData,
+        config: {
+          titleClass: 'folder-title',
+          closedIcon: 'folder-closed',
+          openIcon: 'folder-open'
+        }
+      });
+
+      const item = $($('#tree').find('li').get(4));
+
+      tree.tree('select', item);
+
+      expect(item.hasClass('selected-item')).toBeTruthy();
+    });
+  });
+
+  describe('getItem()', () => {
+    let treeData;
+    let treeDataDiff;
+
+    beforeEach(() => {
+      loadFixtures('tree.html');
+      loadJSONFixtures('tree-data.json');
+      loadJSONFixtures('tree-data-diff.json');
+      treeData = getJSONFixture('tree-data.json');
+      treeDataDiff = getJSONFixture('tree-data-diff.json');
+      tree = $('#tree');
+      tree.tree({
+        data: treeData,
+        config: {
+          titleClass: 'folder-title',
+          closedIcon: 'folder-closed'
+        }
+      });
+    });
+
+    it('stores the item data and finds given id', () => {
+      const folderData = {
         title: 'Folder 1',
         badge: [
           'test',
@@ -324,14 +330,14 @@ describe('The jQuery Tree', function () {
           autoScanMode: 'none',
           autoScanType: 'ui'
         }
-      }
+      };
 
-      var folderItem = tree.tree('getItem', 1111)
-      expect(folderItem).toEqual(folderData)
-    })
+      const folderItem = tree.tree('getItem', 1111);
+      expect(folderItem).toEqual(folderData);
+    });
 
-    it('clears data after regenerating the tree and loads the new data', function () {
-      var folderData = {
+    it('clears data after regenerating the tree and loads the new data', () => {
+      const folderData = {
         title: 'Folder 1',
         badge: [
           'test',
@@ -344,12 +350,12 @@ describe('The jQuery Tree', function () {
           autoScanMode: 'none',
           autoScanType: 'ui'
         }
-      }
+      };
 
-      var treeItem = tree.tree('getItem', 1111)
-      expect(treeItem).toEqual(folderData)
+      let treeItem = tree.tree('getItem', 1111);
+      expect(treeItem).toEqual(folderData);
 
-      tree.tree('destroy')
+      tree.tree('destroy');
 
       tree.tree({
         data: treeDataDiff,
@@ -357,40 +363,40 @@ describe('The jQuery Tree', function () {
           titleClass: 'folder-title',
           closedIcon: 'folder-closed'
         }
-      })
+      });
 
-      treeItem = tree.tree('getItem', 1111)
-      expect(treeItem).toBeFalsy()
+      treeItem = tree.tree('getItem', 1111);
+      expect(treeItem).toBeFalsy();
 
-      treeItem = tree.tree('getItem', 9999)
-      expect(treeItem).toBeDefined()
-    })
-  })
+      treeItem = tree.tree('getItem', 9999);
+      expect(treeItem).toBeDefined();
+    });
+  });
 
-  describe('getElement()', function () {
-    var treeData
-    var tree
+  describe('getElement()', () => {
+    let treeData;
+    let tree;
 
-    beforeEach(function () {
-      loadFixtures('tree.html')
-      loadJSONFixtures('tree-data.json')
-      loadJSONFixtures('tree-data-diff.json')
-      treeData = getJSONFixture('tree-data.json')
-      tree = $('#tree')
+    beforeEach(() => {
+      loadFixtures('tree.html');
+      loadJSONFixtures('tree-data.json');
+      loadJSONFixtures('tree-data-diff.json');
+      treeData = getJSONFixture('tree-data.json');
+      tree = $('#tree');
       tree.tree({
         data: treeData,
         config: {
           titleClass: 'folder-title',
           closedIcon: 'folder-closed'
         }
-      })
-    })
+      });
+    });
 
-    it('finds the HTML element given gerbera data item', function () {
-      var treeElement = tree.tree('getElement', 1111)
+    it('finds the HTML element given gerbera data item', () => {
+      const treeElement = tree.tree('getElement', 1111);
 
-      expect(treeElement.length).toBe(1)
-      expect(treeElement.prop('id')).toBe('grb-tree-1111')
-    })
-  })
-})
+      expect(treeElement.length).toBe(1);
+      expect(treeElement.prop('id')).toBe('grb-tree-1111');
+    });
+  });
+});
