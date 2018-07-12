@@ -280,6 +280,8 @@ Ref<Element> ConfigGenerator::generateMappings() {
   ext2mt->appendElementChild(map_from_to("flv", "video/x-flv"));
   ext2mt->appendElementChild(map_from_to("mkv", "video/x-matroska"));
   ext2mt->appendElementChild(map_from_to("mka", "audio/x-matroska"));
+  ext2mt->appendElementChild(map_from_to("dsf", "audio/x-dsd"));
+  ext2mt->appendElementChild(map_from_to("dff", "audio/x-dsd"));
 
   Ref<Comment> ps3info(new Comment(_(" Uncomment the line below for PS3 divx support "), true));
   Ref<Comment> ps3avi(new Comment(_(" <map from=\"avi\" to=\"video/divx\"/> "), true));
@@ -317,6 +319,7 @@ Ref<Element> ConfigGenerator::generateMappings() {
   mtcontent->appendElementChild(treat_as("audio/mp4", CONTENT_TYPE_MP4));
   mtcontent->appendElementChild(treat_as("video/x-matroska", CONTENT_TYPE_MKV));
   mtcontent->appendElementChild(treat_as("audio/x-matroska", CONTENT_TYPE_MKA));
+  mtcontent->appendElementChild(treat_as("audio/x-dsd", CONTENT_TYPE_DSD));
   mappings->appendElementChild(mtcontent);
 
   return mappings;
