@@ -64,6 +64,7 @@
 #define CONTENT_TYPE_MKV        "mkv"
 #define CONTENT_TYPE_MKA        "mka"
 #define CONTENT_TYPE_AIFF       "aiff"
+#define CONTENT_TYPE_DSD        "dsd"
 
 #define OGG_THEORA              "t"
 
