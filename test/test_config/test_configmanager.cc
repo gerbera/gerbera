@@ -113,11 +113,24 @@ TEST_F(ConfigManagerTest, LoadsWebUIDefaultValues) {
 }
 
 TEST_F(ConfigManagerTest, ThrowsExceptionWhenMissingConfigFileAndNoDefault) {
-  config_file = nullptr;
+  std::ostringstream expErrMsg;
   std::string notExistsDir = home + DIR_SEPARATOR + "not_exists";
+
+  expErrMsg << "\nThe server configuration file could not be found in: ";
+  expErrMsg << notExistsDir << DIR_SEPARATOR << confdir << "\n";
+  expErrMsg << "Gerbera could not find a default configuration file.\n";
+  expErrMsg << "Try specifying an alternative configuration file on the command line.\n";
+  expErrMsg << "For a list of options run: gerbera -h\n";
+
+  config_file = nullptr;
+
   subject->setStaticArgs(config_file, _(notExistsDir.c_str()), _(confdir.c_str()), _(prefix.c_str()), _(magic.c_str()));
 
-  ASSERT_THROW(subject->init(), zmm::Exception);
+  try {
+    subject->init();
+  }catch(zmm::Exception const & err) {
+    EXPECT_EQ(err.getMessage(), expErrMsg.str());
+  }
 }
 
 TEST_F(ConfigManagerTest, LoadsConfigFromDefaultHomeWhenExistsButNotSpecified) {

@@ -113,7 +113,14 @@ void ConfigManager::init()
         if (check_path(home + DIR_SEPARATOR + DEFAULT_CONFIG_NAME)) {
             filename = home + DIR_SEPARATOR + DEFAULT_CONFIG_NAME;
         } else {
-            throw _Exception(_("\nThe server configuration file could not be found in ~/.config/gerbera\n") + "Gerbera could not find a default configuration file.\n" + "Try specifying an alternative configuration file on the command line.\n" + "For a list of options run: gerbera -h\n");
+            std::ostringstream expErrMsg;
+            expErrMsg << "\nThe server configuration file could not be found in: ";
+            expErrMsg << home << "\n";
+            expErrMsg << "Gerbera could not find a default configuration file.\n";
+            expErrMsg << "Try specifying an alternative configuration file on the command line.\n";
+            expErrMsg << "For a list of options run: gerbera -h\n";
+
+            throw _Exception(expErrMsg.str());
         }
     }
 
