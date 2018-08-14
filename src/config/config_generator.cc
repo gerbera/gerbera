@@ -282,6 +282,7 @@ Ref<Element> ConfigGenerator::generateMappings() {
   ext2mt->appendElementChild(map_from_to("mka", "audio/x-matroska"));
   ext2mt->appendElementChild(map_from_to("dsf", "audio/x-dsd"));
   ext2mt->appendElementChild(map_from_to("dff", "audio/x-dsd"));
+  ext2mt->appendElementChild(map_from_to("wv", "audio/x-wavpack"));
 
   Ref<Comment> ps3info(new Comment(_(" Uncomment the line below for PS3 divx support "), true));
   Ref<Comment> ps3avi(new Comment(_(" <map from=\"avi\" to=\"video/divx\"/> "), true));
