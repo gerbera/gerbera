@@ -96,6 +96,11 @@ typedef enum
     M_PRODUCER,
     M_ALBUMARTIST,
 
+    // Classical Music Related Fields
+    M_COMPOSER,
+    M_CONDUCTOR,
+    M_ORCHESTRA,
+
     M_MAX
 } metadata_fields_t; 
 

@@ -74,6 +74,21 @@ function addAudio(obj) {
         obj.meta[M_DESCRIPTION] = desc;
     }
 
+    var composer = obj.meta[M_COMPOSER];
+    if (!composer) {
+        composer = 'None';
+    }
+
+    var conductor = obj.meta[M_CONDUCTOR];
+    if (!conductor) {
+        conductor = 'None';
+    }
+
+    var orchestra = obj.meta[M_ORCHESTRA];
+    if (!orchestra) {
+        orchestra = 'None';
+    }
+
 // uncomment this if you want to have track numbers in front of the title
 // in album view
     
@@ -129,6 +144,9 @@ function addAudio(obj) {
     
     chain = ['Audio', 'Year', date];
     addCdsObject(obj, createContainerChain(chain));
+
+    chain = ['Audio', 'Composers', composer];
+    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_COMPOSER);
 }
 
 function addVideo(obj) {

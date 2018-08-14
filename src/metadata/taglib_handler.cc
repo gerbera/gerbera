@@ -120,6 +120,27 @@ static void addField(metadata_fields_t field, const TagLib::File& file, const Ta
         else
             return;
         break;
+    case M_COMPOSER:
+        list = file.properties()["COMPOSER"];
+        if (!list.isEmpty())
+            val = list[0];
+        else
+            return;
+        break;
+    case M_CONDUCTOR:
+        list = file.properties()["CONDUCTOR"];
+        if (!list.isEmpty())
+          val = list[0];
+        else
+          return;
+        break;
+    case M_ORCHESTRA:
+        list = file.properties()["ORCHESTRA"];
+        if (!list.isEmpty())
+          val = list[0];
+        else
+          return;
+        break;
     default:
         return;
     }

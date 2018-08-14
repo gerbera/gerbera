@@ -159,6 +159,33 @@ Ref<Element> UpnpXML_DIDLRenderObject(Ref<CdsObject> obj, bool renderActions, in
             if (string_ok(creator)) {
                 result->appendElementChild(UpnpXML_DIDLRenderCreator(creator));
             }
+
+            String composer = meta->get(MetadataHandler::getMetaFieldName(M_COMPOSER));
+            if (!string_ok(composer)) {
+                composer = _("None");
+            }
+
+            if (string_ok(composer)) {
+                result->appendElementChild(UpnpXML_DIDLRenderComposer(composer));
+            }
+
+            String conductor = meta->get(MetadataHandler::getMetaFieldName(M_CONDUCTOR));
+            if (!string_ok(conductor)) {
+                conductor = _("None");
+            }
+
+            if (string_ok(conductor)) {
+                result->appendElementChild(UpnpXML_DIDLRenderConductor(conductor));
+            }
+
+            String orchestra = meta->get(MetadataHandler::getMetaFieldName(M_ORCHESTRA));
+            if (!string_ok(orchestra)) {
+                orchestra = _("None");
+            }
+
+            if (string_ok(orchestra)) {
+                result->appendElementChild(UpnpXML_DIDLRenderOrchestra(orchestra));
+            }
         }
         if (upnp_class == UPNP_DEFAULT_CLASS_MUSIC_ALBUM || upnp_class == UPNP_DEFAULT_CLASS_CONTAINER) {
             Ref<Storage> storage = Storage::getInstance();
@@ -501,5 +528,23 @@ Ref<Element> UpnpXML_DIDLRenderCreator(String creator) {
 Ref<Element> UpnpXML_DIDLRenderAlbumArtURI(String uri) {
     Ref<Element> out(new Element(_("upnp:albumArtURI")));
     out->setText(uri);
+    return out;
+}
+
+Ref<Element> UpnpXML_DIDLRenderComposer(String composer) {
+    Ref<Element> out(new Element(_("upnp:composer")));
+    out->setText(composer);
+    return out;
+}
+
+Ref<Element> UpnpXML_DIDLRenderConductor(String Conductor) {
+    Ref<Element> out(new Element(_("upnp:Conductor")));
+    out->setText(Conductor);
+    return out;
+}
+
+Ref<Element> UpnpXML_DIDLRenderOrchestra(String orchestra) {
+    Ref<Element> out(new Element(_("upnp:orchestra")));
+    out->setText(orchestra);
     return out;
 }

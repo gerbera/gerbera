@@ -72,6 +72,9 @@ mt_key MT_KEYS[] = {
     { "M_ACTOR", "upnp:actor"},
     { "M_PRODUCER", "upnp:producer"},
     { "M_ALBUMARTIST", "upnp:artist@role[AlbumArtist]"},
+    { "M_COMPOSER", "upnp:composer"},
+    { "M_CONDUCTOR", "upnp:conductor"},
+    { "M_ORCHESTRA", "upnp:orchestra"},
 };
 
 res_key RES_KEYS[] = {

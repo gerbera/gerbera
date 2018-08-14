@@ -84,4 +84,11 @@ zmm::Ref<mxml::Element> UpnpXML_DIDLRenderCaptionInfo(zmm::String URL);
 zmm::Ref<mxml::Element> UpnpXML_DIDLRenderCreator(zmm::String creator);
 
 zmm::Ref<mxml::Element> UpnpXML_DIDLRenderAlbumArtURI(zmm::String uri);
+
+zmm::Ref<mxml::Element> UpnpXML_DIDLRenderComposer(zmm::String composer);
+
+zmm::Ref<mxml::Element> UpnpXML_DIDLRenderConductor(zmm::String conductor);
+
+zmm::Ref<mxml::Element> UpnpXML_DIDLRenderOrchestra(zmm::String orchestra);
+
 #endif // __UPNP_XML_H__
