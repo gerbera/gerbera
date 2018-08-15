@@ -116,6 +116,7 @@ TEST_F(ImportScriptTest, AddsAudioItemToVariousCdsContainerChains) {
   string desc = "Description";
   string id = "2";
   string location = "/home/gerbera/audio.mp3";
+  string channels = "2";
   int online_service = 0;
   int theora = 0;
   map<string, string> aux;
@@ -127,6 +128,10 @@ TEST_F(ImportScriptTest, AddsAudioItemToVariousCdsContainerChains) {
       make_pair("dc:date", date),
       make_pair("upnp:genre", genre),
       make_pair("dc:description", desc)
+  };
+
+  map<string, string> res = {
+      make_pair("res['nrAudioChannels']", channels)
   };
 
   // Represents the values passed to `addCdsObject`, extracted from keys defined there.
@@ -190,7 +195,7 @@ TEST_F(ImportScriptTest, AddsAudioItemToVariousCdsContainerChains) {
       "\\/Audio\\/Year\\/2018", "undefined")).WillOnce(Return(0));
 
   addGlobalFunctions(ctx, js_global_functions);
-  dukMockItem(ctx, mimetype, id, theora, title, meta, aux, location, online_service);
+  dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, online_service);
   executeScript(ctx);
 }
 
@@ -203,6 +208,7 @@ TEST_F(ImportScriptTest, AddsVideoItemToCdsContainerChainWithDirs) {
   int theora = 0;
   map<string, string> aux;
   map<string, string> meta;
+  map<string, string> res;
 
   // Represents the values passed to `addCdsObject`, extracted from keys defined there.
   map<string, string> asVideoAllVideo = {
@@ -225,7 +231,7 @@ TEST_F(ImportScriptTest, AddsVideoItemToCdsContainerChainWithDirs) {
     "\\/Video\\/Directories\\/home\\/gerbera", "undefined")).WillOnce(Return(0));
 
   addGlobalFunctions(ctx, js_global_functions);
-  dukMockItem(ctx, mimetype, id, theora, title, meta, aux, location, online_service);
+  dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, online_service);
   executeScript(ctx);
 }
 
@@ -238,6 +244,7 @@ TEST_F(ImportScriptTest, AddsAppleTrailerVideoItemToCdsContainerChains) {
   string location = "/home/gerbera/video.mp4";
   int online_service = (int)OS_ATrailers;
   int theora = 0;
+  map<string, string> res;
 
   map<string, string> meta = {
     make_pair("dc:date", date),
@@ -277,7 +284,7 @@ TEST_F(ImportScriptTest, AddsAppleTrailerVideoItemToCdsContainerChains) {
     "\\/Online Services\\/Apple Trailers\\/Post Date\\/2018-01", "undefined")).WillOnce(Return(0));
 
   addGlobalFunctions(ctx, js_global_functions);
-  dukMockItem(ctx, mimetype, id, theora, title, meta, aux, location, online_service);
+  dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, online_service);
   executeScript(ctx);
 }
 
@@ -295,6 +302,7 @@ TEST_F(ImportScriptTest, AddsImageItemToCdsContainerChains) {
   };
 
   map<string, string> aux;
+  map<string, string> res;
 
   // Represents the values passed to `addCdsObject`, extracted from keys defined there.
   map<string, string> asImagePhotos = {
@@ -326,7 +334,7 @@ TEST_F(ImportScriptTest, AddsImageItemToCdsContainerChains) {
     "\\/Photos\\/Directories\\/home\\/gerbera", "undefined")).WillOnce(Return(0));
 
   addGlobalFunctions(ctx, js_global_functions);
-  dukMockItem(ctx, mimetype, id, theora, title, meta, aux, location, online_service);
+  dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, online_service);
   executeScript(ctx);
 }
 
@@ -339,6 +347,7 @@ TEST_F(ImportScriptTest, AddsOggTheoraVideoItemToCdsContainerChainWithDirs) {
   int theora = 1;
   map<string, string> aux;
   map<string, string> meta;
+  map<string, string> res;
 
   // Represents the values passed to `addCdsObject`, extracted from keys defined there.
   map<string, string> asVideoAllVideo = {
@@ -361,7 +370,7 @@ TEST_F(ImportScriptTest, AddsOggTheoraVideoItemToCdsContainerChainWithDirs) {
     "\\/Video\\/Directories\\/home\\/gerbera", "undefined")).WillOnce(Return(0));
 
   addGlobalFunctions(ctx, js_global_functions);
-  dukMockItem(ctx, mimetype, id, theora, title, meta, aux, location, online_service);
+  dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, online_service);
   executeScript(ctx);
 }
 
@@ -375,6 +384,7 @@ TEST_F(ImportScriptTest, AddsOggTheoraAudioItemToVariousCdsContainerChains) {
   string desc = "Description";
   string id = "2";
   string location = "/home/gerbera/audio.mp3";
+  string channels = "2";
   int online_service = 0;
   int theora = 0;
   map<string, string> aux;
@@ -386,6 +396,10 @@ TEST_F(ImportScriptTest, AddsOggTheoraAudioItemToVariousCdsContainerChains) {
     make_pair("dc:date", date),
     make_pair("upnp:genre", genre),
     make_pair("dc:description", desc)
+  };
+
+  map<string, string> res = {
+    make_pair("res['nrAudioChannels']", channels)
   };
 
   // Represents the values passed to `addCdsObject`, extracted from keys defined there.
@@ -448,7 +462,7 @@ TEST_F(ImportScriptTest, AddsOggTheoraAudioItemToVariousCdsContainerChains) {
     "\\/Audio\\/Year\\/2018", "undefined")).WillOnce(Return(0));
 
   addGlobalFunctions(ctx, js_global_functions);
-  dukMockItem(ctx, mimetype, id, theora, title, meta, aux, location, online_service);
+  dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, online_service);
   executeScript(ctx);
 }
 

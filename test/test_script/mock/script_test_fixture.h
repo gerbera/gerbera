@@ -49,7 +49,8 @@ class ScriptTestFixture : public ::testing::Test {
 
   // Creates a mock item(orig) global object in Duktape context
   duk_ret_t dukMockItem(duk_context *ctx, string mimetype, string id, int theora, string title,
-                        map<string, string> meta, map<string, string> aux, string location, int online_service);
+                        map<string, string> meta, map<string, string> aux, map<string, string> res,
+                        string location, int online_service);
 
   // Creates a mock playlist global object in Duktape context
   duk_ret_t dukMockPlaylist(duk_context* ctx, string title, string location, string mimetype);
