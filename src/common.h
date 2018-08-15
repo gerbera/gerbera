@@ -59,6 +59,9 @@
 #define UPNP_DEFAULT_CLASS_MUSIC_TRACK  "object.item.audioItem.musicTrack"
 #define UPNP_DEFAULT_CLASS_MUSIC_GENRE  "object.container.genre.musicGenre"
 #define UPNP_DEFAULT_CLASS_MUSIC_ARTIST "object.container.person.musicArtist"
+#define UPNP_DEFAULT_CLASS_MUSIC_COMPOSER "object.container.person.musicComposer"
+#define UPNP_DEFAULT_CLASS_MUSIC_CONDUCTOR "object.container.person.musicConductor"
+#define UPNP_DEFAULT_CLASS_MUSIC_ORCHESTRA "object.container.person.musicOrchestra"
 #define UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER "object.container.playlistContainer"
 #define UPNP_DEFAULT_CLASS_VIDEO_BROADCAST "object.item.videoItem.videoBroadcast"
 

@@ -61,7 +61,10 @@ static duk_ret_t addCdsObject(duk_context *ctx) {
     "meta['upnp:album']",
     "meta['dc:date']",
     "meta['upnp:genre']",
-    "meta['dc:description']"
+    "meta['dc:description']",
+    "meta['upnp:composer']",
+    "meta['upnp:conductor']",
+    "meta['upnp:orchestra']"
   };
   addCdsObjectParams params = ScriptTestFixture::addCdsObject(ctx, keys);
   return ImportScriptTest::commonScriptMock->addCdsObject(params.objectValues, params.containerChain, params.objectType);
@@ -111,6 +114,9 @@ TEST_F(ImportScriptTest, AddsAudioItemToVariousCdsContainerChains) {
   string mimetype = "audio/mpeg";
   string artist = "Artist";
   string album = "Album";
+  string composer = "Composer";
+  string conductor = "Conductor";
+  string orchestra = "Orchestra";
   string date = "2018-01-01";
   string genre = "Genre";
   string desc = "Description";
@@ -126,7 +132,10 @@ TEST_F(ImportScriptTest, AddsAudioItemToVariousCdsContainerChains) {
       make_pair("upnp:album", album),
       make_pair("dc:date", date),
       make_pair("upnp:genre", genre),
-      make_pair("dc:description", desc)
+      make_pair("dc:description", desc),
+      make_pair("upnp:composer", composer),
+      make_pair("upnp:conductor", conductor),
+      make_pair("upnp:orchestra", orchestra)
   };
 
   // Represents the values passed to `addCdsObject`, extracted from keys defined there.
@@ -137,7 +146,10 @@ TEST_F(ImportScriptTest, AddsAudioItemToVariousCdsContainerChains) {
       make_pair("meta['upnp:album']", album),
       make_pair("meta['dc:date']", date),
       make_pair("meta['upnp:genre']", genre),
-      make_pair("meta['dc:description']", desc)
+      make_pair("meta['dc:description']", desc),
+      make_pair("meta['upnp:composer']", composer),
+      make_pair("meta['upnp:conductor']", conductor),
+      make_pair("meta['upnp:orchestra']", orchestra)
   };
 
   map<string, string> asAudioAllFullName = {
@@ -147,7 +159,10 @@ TEST_F(ImportScriptTest, AddsAudioItemToVariousCdsContainerChains) {
       make_pair("meta['upnp:album']", album),
       make_pair("meta['dc:date']", date),
       make_pair("meta['upnp:genre']", genre),
-      make_pair("meta['dc:description']", desc)
+      make_pair("meta['dc:description']", desc),
+      make_pair("meta['upnp:composer']", composer),
+      make_pair("meta['upnp:conductor']", conductor),
+      make_pair("meta['upnp:orchestra']", orchestra)
   };
 
   // Expecting the common script calls
@@ -183,6 +198,11 @@ TEST_F(ImportScriptTest, AddsAudioItemToVariousCdsContainerChains) {
   EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Audio", "Genres", "Genre"))).WillOnce(Return(1));
   EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio),
       "\\/Audio\\/Genres\\/Genre", UPNP_DEFAULT_CLASS_MUSIC_GENRE)).WillOnce(Return(0));
+
+  EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Audio", "Composers", "Composer"))).WillOnce(Return(1));
+  EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio),
+                                              "\\/Audio\\/Composers\\/Composer", UPNP_DEFAULT_CLASS_MUSIC_COMPOSER)).WillOnce(Return(0));
+
 
   EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Audio", "Year", "2018"))).WillOnce(Return(1));
   EXPECT_CALL(*commonScriptMock, addCdsObject(
@@ -373,6 +393,9 @@ TEST_F(ImportScriptTest, AddsOggTheoraAudioItemToVariousCdsContainerChains) {
   string date = "2018-01-01";
   string genre = "Genre";
   string desc = "Description";
+  string composer = "Composer";
+  string conductor = "Conductor";
+  string orchestra = "Orchestra";
   string id = "2";
   string location = "/home/gerbera/audio.mp3";
   int online_service = 0;
@@ -385,7 +408,10 @@ TEST_F(ImportScriptTest, AddsOggTheoraAudioItemToVariousCdsContainerChains) {
     make_pair("upnp:album", album),
     make_pair("dc:date", date),
     make_pair("upnp:genre", genre),
-    make_pair("dc:description", desc)
+    make_pair("dc:description", desc),
+    make_pair("upnp:composer", composer),
+    make_pair("upnp:conductor", conductor),
+    make_pair("upnp:orchestra", orchestra)
   };
 
   // Represents the values passed to `addCdsObject`, extracted from keys defined there.
@@ -396,7 +422,10 @@ TEST_F(ImportScriptTest, AddsOggTheoraAudioItemToVariousCdsContainerChains) {
     make_pair("meta['upnp:album']", album),
     make_pair("meta['dc:date']", date),
     make_pair("meta['upnp:genre']", genre),
-    make_pair("meta['dc:description']", desc)
+    make_pair("meta['dc:description']", desc),
+    make_pair("meta['upnp:composer']", composer),
+    make_pair("meta['upnp:conductor']", conductor),
+    make_pair("meta['upnp:orchestra']", orchestra)
   };
 
   map<string, string> asAudioAllFullName = {
@@ -406,7 +435,10 @@ TEST_F(ImportScriptTest, AddsOggTheoraAudioItemToVariousCdsContainerChains) {
     make_pair("meta['upnp:album']", album),
     make_pair("meta['dc:date']", date),
     make_pair("meta['upnp:genre']", genre),
-    make_pair("meta['dc:description']", desc)
+    make_pair("meta['dc:description']", desc),
+    make_pair("meta['upnp:composer']", composer),
+    make_pair("meta['upnp:conductor']", conductor),
+    make_pair("meta['upnp:orchestra']", orchestra)
   };
 
   // Expecting the common script calls
@@ -442,6 +474,11 @@ TEST_F(ImportScriptTest, AddsOggTheoraAudioItemToVariousCdsContainerChains) {
   EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Audio", "Genres", "Genre"))).WillOnce(Return(1));
   EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio),
     "\\/Audio\\/Genres\\/Genre", UPNP_DEFAULT_CLASS_MUSIC_GENRE)).WillOnce(Return(0));
+
+  EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Audio", "Composers", "Composer"))).WillOnce(Return(1));
+  EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio),
+                                              "\\/Audio\\/Composers\\/Composer", UPNP_DEFAULT_CLASS_MUSIC_COMPOSER)).WillOnce(Return(0));
+
 
   EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Audio", "Year", "2018"))).WillOnce(Return(1));
   EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio),

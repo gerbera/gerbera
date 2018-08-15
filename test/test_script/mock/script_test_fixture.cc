@@ -111,6 +111,9 @@ void ScriptTestFixture::addGlobalFunctions(duk_context *ctx, const duk_function_
   duk_push_string(ctx, UPNP_DEFAULT_CLASS_MUSIC_ALBUM); duk_put_global_string(ctx, "UPNP_CLASS_CONTAINER_MUSIC_ALBUM");
   duk_push_string(ctx, UPNP_DEFAULT_CLASS_MUSIC_ARTIST); duk_put_global_string(ctx, "UPNP_CLASS_CONTAINER_MUSIC_ARTIST");
   duk_push_string(ctx, UPNP_DEFAULT_CLASS_MUSIC_GENRE); duk_put_global_string(ctx, "UPNP_CLASS_CONTAINER_MUSIC_GENRE");
+  duk_push_string(ctx, UPNP_DEFAULT_CLASS_MUSIC_COMPOSER); duk_put_global_string(ctx, "UPNP_CLASS_CONTAINER_MUSIC_COMPOSER");
+  duk_push_string(ctx, UPNP_DEFAULT_CLASS_MUSIC_CONDUCTOR); duk_put_global_string(ctx, "UPNP_CLASS_CONTAINER_MUSIC_CONDUCTOR");
+  duk_push_string(ctx, UPNP_DEFAULT_CLASS_MUSIC_ORCHESTRA); duk_put_global_string(ctx, "UPNP_CLASS_CONTAINER_MUSIC_ORCHESTRA");
   duk_push_string(ctx, UPNP_DEFAULT_CLASS_CONTAINER); duk_put_global_string(ctx, "UPNP_CLASS_CONTAINER");
 
   duk_push_int(ctx, 0); duk_put_global_string(ctx, "ONLINE_SERVICE_NONE");
