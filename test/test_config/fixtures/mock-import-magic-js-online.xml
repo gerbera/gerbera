@@ -30,6 +30,7 @@
       <map from="mka" to="audio/x-matroska"/>
       <map from="dsf" to="audio/x-dsd"/>
       <map from="dff" to="audio/x-dsd"/>
+      <map from="wv" to="audio/x-wavpack"/>
       <!-- Uncomment the line below for PS3 divx support -->
       <!-- <map from="avi" to="video/divx"/> -->
       <!-- Uncomment the line below for D-Link DSM / ZyXEL DMA-1000 -->
