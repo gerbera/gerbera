@@ -186,6 +186,6 @@ sudo make install
 [pupnp]: https://github.com/mrjimenez/pupnp.git
 [taglib]: http://taglib.org/
 [CMake]: https://cmake.org/
-[Ubuntu PPA]: https://launchpad.net/~stephenczetty/+archive/ubuntu/gerbera
+[Ubuntu PPA]: https://launchpad.net/~stephenczetty/+archive/ubuntu/gerbera-updates
 [v00d00 overlay]: https://github.com/v00d00/overlay
 [duktape]: http://duktape.org
