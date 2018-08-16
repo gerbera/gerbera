@@ -12,11 +12,11 @@ Ubuntu/Mint
 .. index:: Ubuntu Linux
 .. index:: Mint
 
-Stephen Czetty maintains a `Ubuntu PPA <https://launchpad.net/%7Estephenczetty/+archive/ubuntu/gerbera>`_.
+Stephen Czetty maintains a `Ubuntu PPA <https://launchpad.net/~stephenczetty/+archive/ubuntu/gerbera-updates>`_.
 
 .. code-block:: sh
 
-    sudo add-apt-repository ppa:stephenczetty/gerbera
+    sudo add-apt-repository ppa:stephenczetty/gerbera-updates
     sudo apt-get update
     sudo apt install gerbera
 
