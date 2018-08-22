@@ -106,6 +106,19 @@ function addAudio(obj) {
     // comment the following line out if you uncomment the stuff above  :)
     var track = '';
 
+// uncomment this if you want to have channel numbers in front of the title
+/*
+    var channels = obj.res[R_NRAUDIOCHANNELS];
+    if (channels) {
+        if (channels === "1") {
+            track = track + '[MONO]';
+        } else if (channels === "2") {
+            track = track + '[STEREO]';
+        } else {
+            track = track + '[MULTI]';
+        }
+    }
+*/
     var chain = ['Audio', 'All Audio'];
     obj.title = title;
     addCdsObject(obj, createContainerChain(chain));

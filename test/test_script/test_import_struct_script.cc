@@ -125,6 +125,7 @@ TEST_F(ImportStructuredScriptTest, AddsAudioItemWithABCBoxFormat) {
   int online_service = 0;
   int theora = 0;
   map<string, string> aux;
+  map<string, string> res;
 
   map<string, string> meta = {
     make_pair("dc:title", title),
@@ -255,7 +256,7 @@ TEST_F(ImportStructuredScriptTest, AddsAudioItemWithABCBoxFormat) {
      "\\/-Year-\\/2010 - 2019\\/2018\\/Artist\\/Album", "object.container.album.musicAlbum")).WillOnce(Return(0));
 
   addGlobalFunctions(ctx, js_global_functions);
-  dukMockItem(ctx, mimetype, id, theora, title, meta, aux, location, online_service);
+  dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, online_service);
   executeScript(ctx);
 }
 

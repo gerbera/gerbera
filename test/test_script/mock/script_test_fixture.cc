@@ -34,10 +34,12 @@ void ScriptTestFixture::TearDown() {
 }
 
 duk_ret_t ScriptTestFixture::dukMockItem(duk_context *ctx, string mimetype, string id, int theora, string title,
-  map<string, string> meta, map<string, string> aux, string location, int online_service) {
+map<string, string> meta, map<string, string> aux, map<string, string> res,
+                                         string location, int online_service) {
   duk_idx_t orig_idx;
   duk_idx_t meta_idx;
   duk_idx_t aux_idx;
+  duk_idx_t res_idx;
   const string OBJECT_NAME = "orig";
   orig_idx = duk_push_object(ctx);
   duk_push_string(ctx, mimetype.c_str()); duk_put_prop_string(ctx, orig_idx, "mimetype");
@@ -54,6 +56,16 @@ duk_ret_t ScriptTestFixture::dukMockItem(duk_context *ctx, string mimetype, stri
     duk_put_prop_string(ctx, meta_idx, val.first.c_str());
   }
   duk_put_prop_string(ctx, orig_idx, "meta");
+
+  // obj.res
+  if(!res.empty()) {
+    res_idx = duk_push_object(ctx);
+    for (auto const &val: res) {
+      duk_push_string(ctx, val.second.c_str());
+      duk_put_prop_string(ctx, res_idx, val.first.c_str());
+    }
+    duk_put_prop_string(ctx, orig_idx, "res");
+  }
 
   // obj.aux
   if(!aux.empty()) {
@@ -101,6 +113,11 @@ void ScriptTestFixture::addGlobalFunctions(duk_context *ctx, const duk_function_
   for (int i = 0; i < M_MAX; i++)
   {
     duk_push_string(ctx, MT_KEYS[i].upnp); duk_put_global_string(ctx, MT_KEYS[i].sym);
+  }
+
+  for (int i = 0; i < R_MAX; i++)
+  {
+    duk_push_string(ctx, RES_KEYS[i].upnp); duk_put_global_string(ctx, RES_KEYS[i].sym);
   }
 
   duk_push_int(ctx, OBJECT_TYPE_ITEM_EXTERNAL_URL); duk_put_global_string(ctx, "OBJECT_TYPE_ITEM_EXTERNAL_URL");
