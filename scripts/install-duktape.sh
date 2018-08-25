@@ -1,8 +1,12 @@
 #!/bin/sh
+if ! [ "$(id -u)" = 0 ]; then
+    echo "Please run this script with superuser access!"
+    exit 1
+fi
 set -ex
 
 makeCMD="make"
-unamestr=`uname`
+unamestr=$(uname)
 if [ "$unamestr" == 'FreeBSD' ]; then
    makeCMD="gmake"
 fi
@@ -17,5 +21,5 @@ if [ "$unamestr" == 'Darwin' ]; then
   sed -i -e 's/-soname/-install_name/g' Makefile.sharedlibrary
 fi
 
-$makeCMD -f Makefile.sharedlibrary && sudo $makeCMD -f Makefile.sharedlibrary install\
- && sudo ldconfig
+$makeCMD -f Makefile.sharedlibrary && $makeCMD -f Makefile.sharedlibrary install\
+ && ldconfig
