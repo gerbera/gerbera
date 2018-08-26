@@ -15,7 +15,7 @@ Example of online content XML configuration
             <AppleTrailers enabled="[yes,no]" refresh="[seconds]"
                 purge-after="[seconds]"
                 update-at-start="[yes,no]"
-                resolution="[640,720p]"/>
+                resolution="[640,720]"/>
             <SopCast enabled="[yes,no]" refresh="<int>"
                 purge-after="<int>"
                 update-at-start="[yes,no]"/>
