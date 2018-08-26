@@ -16,8 +16,8 @@ Example of online content XML configuration
                 purge-after="[seconds]"
                 update-at-start="[yes,no]"
                 resolution="[640,720]"/>
-            <SopCast enabled="[yes,no]" refresh="<int>"
-                purge-after="<int>"
+            <SopCast enabled="[yes,no]" refresh="[seconds]"
+                purge-after="[seconds]"
                 update-at-start="[yes,no]"/>
         </online-content>
     </import>
