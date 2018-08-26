@@ -6,6 +6,23 @@ Configure Online Content
 
 This section resides under import and defines options for various supported online services.
 
+Example of online content XML configuration
+
+::
+
+    <import>
+        <online-content>
+            <AppleTrailers enabled="[yes,no]" refresh="[seconds]"
+                purge-after="[seconds]"
+                update-at-start="[yes,no]"
+                resolution="[640,720]"/>
+            <SopCast enabled="[yes,no]" refresh="[seconds]"
+                purge-after="[seconds]"
+                update-at-start="[yes,no]"/>
+        </online-content>
+    </import>
+
+
 ``online-content``
 ~~~~~~~~~~~~~~~~~~
 
@@ -41,4 +58,92 @@ This tag defines the online content section.
     should ensure a constant data flow in case of slow connections. Usually this setting is not needed, because most
     players will anyway have some kind of buffering, however if the connection is particularly slow you may want to try enable this setting.
 
-    Below are the settings for supported services.
+
+``AppleTrailers``
+~~~~~~~~~~~~~~~~~
+
+.. code-block:: xml
+
+    <AppleTrailers enabled="[yes,no]"
+        refresh="[seconds]" update-at-start="[yes,no]" resolution="[640,720]"/>
+
+* Optional
+
+This tag defines the online content for `Apple Trailers <https://trailers.apple.com/>`_
+
+    **Attributes**
+
+    .. code-block:: xml
+
+        enabled=...
+
+    * Default: **no**
+
+    .. code-block:: xml
+
+        refresh=...
+
+    * Default: **43200**
+
+    The amount of time to wait before refreshing the online content
+
+    .. code-block:: xml
+
+        update-at-start=...
+
+    * Default: **no**
+
+    Upon starting Gerbera, the Apple Trailers content will be refreshed.
+
+    .. code-block:: xml
+
+        resolution=...
+
+    * Default: **720**
+
+    Sets the Apple Trailers URL to retrieve the content, affecting the resolution size that is downloaded.
+
+``SopCast``
+~~~~~~~~~~~
+
+.. code-block:: xml
+
+    <SopCast enabled="[yes,no]" refresh="<int>" purge-after="<int>" update-at-start="[yes,no]"/>
+
+* Optional
+
+This tag defines the online content for `SopCast <http://www.sopcast.com/>`_
+
+    **Attributes**
+
+    .. code-block:: xml
+
+        enabled=...
+
+    * Default: **no**
+
+    .. code-block:: xml
+
+        refresh=...
+
+    * Default: **43200**
+
+    The amount of time to wait before refreshing the online content
+
+    .. code-block:: xml
+
+        update-at-start=...
+
+    * Default: **no**
+
+    Upon starting Gerbera, the SopCast content will be refreshed.
+
+    .. code-block:: xml
+
+        purge-after=...
+
+    * Default: **0**
+
+    Sets the expiration time of downloaded content in seconds.
+
+
