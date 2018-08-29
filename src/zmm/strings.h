@@ -241,7 +241,7 @@ struct hash<zmm::String>
 
 template <typename T>
 std::basic_ostream<T> &operator<<(std::basic_ostream<T> &oss, const zmm::String &s) {
-    oss << s.c_str();
+    oss << (s.c_str() == nullptr ? "" : s.c_str());
     return oss;
 }
 
