@@ -16,7 +16,7 @@ addons:
 
 before_install:
   - sudo apt-get update -qq
-  - sudo apt-get install -y uuid-dev libexpat1-dev libsqlite3-dev libmysqlclient-dev libmagic-dev libexif-dev libcurl4-openssl-dev cmake
+  - sudo apt-get install -y uuid-dev libexpat1-dev libsqlite3-dev libmysqlclient-dev libmagic-dev libexif-dev libcurl4-openssl-dev cmake3
   - sudo ./scripts/install-duktape.sh
   - sudo ./scripts/install-pupnp18.sh
   - sudo ./scripts/install-taglib111.sh
