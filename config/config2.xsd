@@ -158,6 +158,7 @@
     <xs:element name="ffmpegthumbnailer">
         <xs:complexType>
             <xs:all>
+                <xs:element ref="cache-dir" minOccurs="0"/>
                 <xs:element ref="thumbnail-size" minOccurs="1"/>
                 <xs:element ref="seek-percentage" minOccurs="1"/>
                 <xs:element ref="filmstrip-overlay" minOccurs="0"/>
@@ -177,6 +178,11 @@
         </xs:simpleType>
     </xs:element>
 
+    <xs:element name="cache-dir">
+        <xs:complexType>
+            <xs:attribute name="enabled" type="boolean" default="yes"/>
+        </xs:complexType>
+    </xs:element>
     <xs:element name="thumbnail-size" type="xs:positiveInteger" default="128"/>
     <xs:element name="seek-percentage" type="xs:positiveInteger" default="5"/>
     <xs:element name="workaround-bugs" default="no">

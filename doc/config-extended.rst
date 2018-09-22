@@ -41,6 +41,27 @@ ones offered by the ffmpegthumbnailer command line application). All tags below 
 
     ::
 
+        <cache-dir enabled="yes">/home/gerbera/cache-dir</cache-dir>
+
+    * Optional
+    * Default: **<gerbera-home>/cache-dir**
+
+    Storage location for the thumbnail cache when FFMPEGThumbnailer is enabled.  Defaults to Gerbera Home.
+    Creates a thumbnail with file format as: ``<movie-filename>-thumb.jpg``
+
+    The attributes of the tag have the following meaning:
+
+    ::
+
+            enabled=...
+
+    * Optional
+    * Default: **yes**
+
+    Enables or disables the use of cache directory for thumbnails, set to ``yes`` to enable the feature.
+
+    ::
+
         <thumbnail-size>128</thumbnail-size>
 
     * Optional
