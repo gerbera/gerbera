@@ -36,6 +36,17 @@ Arch
 
 Gerbera is available in AUR with both `stable <https://aur.archlinux.org/packages/gerbera/>`_ or `git versions <https://aur.archlinux.org/packages/gerbera-git/>`_.
 
+CentOS
+~~~~~~~~~~~~~~~~~
+Gerbera 1.2 for centos x86/64 is available via GitHub https://github.com/lukesoft76/CENTOS_7.
+Gerbera 1.2 only installs correctly if some dependencies are satisfied:
+Duktape
+libupnp
+taglib
+All neccessary rpm files are listed in the provided github project https://github.com/lukesoft76/CENTOS_7 .
+
+Attention! Sofar, Gerbera is not part of any repository that is mantained in CentOS 7 due to the fact that Gerbera is only 
+availalbe for Fedora 28 which is not the base for CentOS 7!
 
 Debian
 ~~~~~~~~~~~~~~~~~
