@@ -171,11 +171,11 @@ page of the device.
     <udn/>
 
 * Required
-* Default: **automatically generated if the tag is empty**
+* Default: **none**
 
 Unique Device Name, according to the UPnP spec it must be consistent throughout reboots. You can fill in something
-yourself, but we suggest that you leave this tag empty - it will be filled out and saved automatically after the
-first launch of the server.
+yourself.  Review the :ref:`Generating Configuration <generateConfig>` section of the documentation to see how to use
+``gerbera`` to create a default configuration file.
 
 ``home``
 ~~~~~~~~
