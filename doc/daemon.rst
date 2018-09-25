@@ -41,7 +41,7 @@ Verify that the ``gerbera`` user was created
 Set Gerbera Permissions
 -----------------------
 
-Gerbera creates a default ``config.xml`` file on startup.  The **gerbera** user must have access to this file and
+The **gerbera** user must have access to ``config.xml`` file and
 to the directory referenced as the gerbera home.  For example ``/etc/gerbera``
 
 ::
