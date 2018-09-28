@@ -168,7 +168,7 @@ page of the device.
 
 .. code-block:: xml
 
-    <udn/>
+    <udn>uuid:[generated-uuid]</udn>
 
 * Required
 * Default: **none**
