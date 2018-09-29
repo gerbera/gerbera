@@ -8,13 +8,13 @@ fi
 ##
 pwd=$(pwd)
 unamestr=$(uname)
-if [ -f "$pwd/master.zip" ]; then rm -f "$pwd/master.zip"; fi
-if [ -d "$pwd/googletest-master" ]; then rm -Rf "$pwd/googletest-master"; fi
+if [ -f "$pwd/release-1.8.1.zip" ]; then rm -f "$pwd/release-1.8.1.zip"; fi
+if [ -d "$pwd/googletest-release-1.8.1" ]; then rm -Rf "$pwd/googletest-release-1.8.1"; fi
 
 ## Download GoogleTest from GitHub
-wget https://github.com/google/googletest/archive/master.zip
-unzip master.zip
-cd googletest-master || exit 1
+wget https://github.com/google/googletest/archive/release-1.8.1.zip
+unzip release-1.8.1.zip
+cd googletest-release-1.8.1 || exit 1
 
 ## Build GoogleTest using CMake
 mkdir build && cd build || exit 1
