@@ -19,9 +19,9 @@ cd googletest-master || exit 1
 ## Build GoogleTest using CMake
 mkdir build && cd build || exit 1
 if [[ $CXX == clang++* ]]; then
-	cmake -DCMAKE_CXX_FLAGS="-stdlib=libc++" ../
+	cmake -DCMAKE_CXX_FLAGS="-stdlib=libc++ -std=c++14" ../
 else
-	cmake ../
+	cmake -DCMAKE_CXX_FLAGS="-std=c++14" ../
 fi
 make && make install
 
