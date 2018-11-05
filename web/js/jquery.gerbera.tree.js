@@ -110,7 +110,7 @@ $.widget('grb.tree', {
 
   collapse: function (element) {
     element.children('span').first().removeClass(this.options.config.openIcon).addClass(this.options.config.closedIcon)
-    element.parent().find('ul.list-group').css('display', 'none')
+    element.find('ul.list-group').remove()
   },
 
   select: function (folderList) {

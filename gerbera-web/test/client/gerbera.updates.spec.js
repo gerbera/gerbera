@@ -30,6 +30,10 @@ describe('Gerbera Updates', function () {
       });
     });
 
+    afterEach(() => {
+      ajaxSpy.and.callThrough();
+    });
+
     it('calls the server check for updates', async () => {
       spyOn(GERBERA.Auth, 'getSessionId').and.returnValue('SESSION_ID');
       spyOn(GERBERA.Auth, 'isLoggedIn').and.returnValue(true);
@@ -97,7 +101,7 @@ describe('Gerbera Updates', function () {
     });
 
     it('clears the timer if the call to server fails', async () => {
-      $.ajax.calls.reset();
+      ajaxSpy.calls.reset();
       ajaxSpy.and.callFake(() => {
         return $.Deferred().reject();
       });
@@ -229,6 +233,7 @@ describe('Gerbera Updates', function () {
       loadJSONFixtures('invalid-response.json');
       response = getJSONFixture('invalid-response.json');
       toastMsg = $('#grb-toast-msg');
+      toastMsg.text('');
     });
 
     it('shows a toast message when AJAX error returns failure', () => {
@@ -309,6 +314,7 @@ describe('Gerbera Updates', function () {
         const currentTime = new Date().getTime();
         expect((currentTime - startTime) >= 95).toBeTruthy('Actual value was ' + (currentTime - startTime));
         expect((currentTime - startTime) <= 110).toBeTruthy('Actual value was ' + (currentTime - startTime));
+        GERBERA.Updates.clearAll();
         done();
       });
 
@@ -323,6 +329,7 @@ describe('Gerbera Updates', function () {
         const currentTime = new Date().getTime();
         expect((currentTime - startTime) >= 195).toBeTruthy('Actual value was ' + (currentTime - startTime));
         expect((currentTime - startTime) <= 210).toBeTruthy('Actual value was ' + (currentTime - startTime));
+        GERBERA.Updates.clearAll();
         done();
       });
 
@@ -352,6 +359,7 @@ describe('Gerbera Updates', function () {
         if (totalCount >= 2) {
           expect((currentTime - startTime) >= 195).toBeTruthy('Interval should accumulate time from start but was ' + (currentTime - startTime));
           expect((currentTime - startTime) <= 210).toBeTruthy('Interval should accumulate time from start but was ' + (currentTime - startTime));
+          GERBERA.Updates.clearAll();
           done();
         }
       });

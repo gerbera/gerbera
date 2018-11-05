@@ -101,7 +101,7 @@ GERBERA.App = (function () {
   var loadConfig = function (response) {
     var deferred;
     if (response.success) {
-      GERBERA.App.serverConfig = response.config
+      GERBERA.App.serverConfig = $.extend({}, response.config)
       var pollingInterval = response.config['poll-interval']
       GERBERA.App.serverConfig['poll-interval'] = parseInt(pollingInterval) * 1000
       deferred = $.Deferred().resolve().promise()

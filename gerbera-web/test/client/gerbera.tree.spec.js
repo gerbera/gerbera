@@ -97,12 +97,30 @@ describe('Gerbera Tree', () => {
   });
 
   describe('selectType()', () => {
-    let ajaxSpy;
+    let ajaxSpy, getUpdatesSpy, getTypeSpy;
+
+    beforeEach(() => {
+      ajaxSpy = spyOn($, 'ajax');
+      getUpdatesSpy = spyOn(GERBERA.Updates, 'getUpdates');
+      getTypeSpy = spyOn(GERBERA.App, 'getType');
+      getUpdatesSpy.calls.reset();
+      getTypeSpy.calls.reset();
+    });
+
+    afterEach(() => {
+      getUpdatesSpy.calls.reset();
+      getTypeSpy.calls.reset();
+      ajaxSpy.and.callThrough();
+    });
 
     it('calls the server for containers when type is db', async () => {
-      ajaxSpy = spyOn($, 'ajax').and.callFake(() => {
+      ajaxSpy.and.callFake(() => {
         return $.Deferred().resolve({}).promise();
       });
+      getUpdatesSpy.and.callFake(() => {
+        return $.Deferred().resolve().promise();
+      });
+      getTypeSpy.and.returnValue('db');
 
       await GERBERA.Tree.selectType('db', 0);
 
@@ -111,10 +129,11 @@ describe('Gerbera Tree', () => {
     });
 
 
-    it('calls the server for containers when type is db', async () => {
-      ajaxSpy = spyOn($, 'ajax').and.callFake(() => {
+    it('calls the server for directories when type is fs', async () => {
+      ajaxSpy.and.callFake(() => {
         return $.Deferred().resolve({}).promise();
       });
+      getTypeSpy.and.returnValue('fs');
 
       await GERBERA.Tree.selectType('fs', 0);
 
@@ -123,13 +142,15 @@ describe('Gerbera Tree', () => {
     });
 
     it('on failure calls the app error handler', async () => {
-      ajaxSpy = spyOn($, 'ajax').and.callFake(() => {
+      ajaxSpy.and.callFake(() => {
         return $.Deferred().reject();
       });
       spyOn(GERBERA.App, 'error');
-      spyOn(GERBERA.Updates, 'getUpdates').and.callFake(() => {
-        return $.Deferred.resolve().promise();
+      getUpdatesSpy.and.callFake(() => {
+        return $.Deferred().resolve().promise();
       });
+      getTypeSpy.and.returnValue('db');
+
 
       try {
         await GERBERA.Tree.selectType('db', 0);
@@ -139,11 +160,10 @@ describe('Gerbera Tree', () => {
     });
 
     it('when type is db, checks for updates', async () => {
-      ajaxSpy = spyOn($, 'ajax').and.callFake(() => {
+      ajaxSpy.and.callFake(() => {
         return $.Deferred().resolve({}).promise();
       });
-      spyOn(GERBERA.Updates, 'getUpdates');
-      spyOn(GERBERA.App, 'getType').and.returnValue('db');
+      getTypeSpy.and.returnValue('db');
 
       await GERBERA.Tree.selectType('db', 0);
 
@@ -151,11 +171,10 @@ describe('Gerbera Tree', () => {
     });
 
     it('when type is fs, does not check for updates', async () => {
-      ajaxSpy = spyOn($, 'ajax').and.callFake(() => {
+      ajaxSpy.and.callFake(() => {
         return $.Deferred().resolve({}).promise();
       });
-      spyOn(GERBERA.Updates, 'getUpdates');
-      spyOn(GERBERA.App, 'getType').and.returnValue('fs');
+      getTypeSpy.and.returnValue('fs');
 
       await GERBERA.Tree.selectType('fs', 0);
 
@@ -164,12 +183,19 @@ describe('Gerbera Tree', () => {
   });
 
   describe('onItemSelected()', () => {
-    let response, onExpandSpy, treeViewConfig;
+    let response, onExpandSpy, treeViewConfig, ajaxSpy;
+
+    beforeEach(() => {
+      response = getJSONFixture('parent_id-0-select_it-0.json');
+      ajaxSpy = spyOn($, 'ajax');
+    });
+
+    afterEach(() => {
+      ajaxSpy.and.callThrough();
+    });
 
     it('updates the breadcrumb based on the click of a item', () => {
-      response = getJSONFixture('parent_id-0-select_it-0.json');
       spyOn(GERBERA.Items, 'treeItemSelected');
-      spyOn($, 'ajax');
       onExpandSpy = jasmine.createSpy('onExpand');
       treeViewConfig = {
         onExpand: onExpandSpy
@@ -188,9 +214,7 @@ describe('Gerbera Tree', () => {
     });
 
     it('passes gerbera data to the items plugin', () => {
-      response = getJSONFixture('parent_id-0-select_it-0.json');
       spyOn(GERBERA.Items, 'treeItemSelected');
-      spyOn($, 'ajax');
       onExpandSpy = jasmine.createSpy('onExpand');
       treeViewConfig = {
         onExpand: onExpandSpy
@@ -209,9 +233,7 @@ describe('Gerbera Tree', () => {
     });
 
     it('changes the color of the selected row', () => {
-      response = getJSONFixture('parent_id-0-select_it-0.json');
       spyOn(GERBERA.Items, 'treeItemSelected');
-      spyOn($, 'ajax');
       onExpandSpy = jasmine.createSpy('onExpand');
       treeViewConfig = {
         onExpand: onExpandSpy
@@ -228,19 +250,27 @@ describe('Gerbera Tree', () => {
   });
 
   describe('onItemExpanded()', () => {
-    let ajaxSpy;
+    let ajaxSpy, parentResponse, childResponse;
+
+    beforeEach(() => {
+      parentResponse = getJSONFixture('parent_id-0-select_it-0.json');
+      childResponse = getJSONFixture('parent_id-7443-select_it-0.json');
+      ajaxSpy = spyOn($, 'ajax');
+    });
+
+    afterEach(() => {
+      ajaxSpy.and.callThrough();
+    });
 
     it('calls for child items based on the response', () => {
-      GERBERA.App.setType('db');
-      const parentResponse = getJSONFixture('parent_id-0-select_it-0.json');
-      const childResponse = getJSONFixture('parent_id-7443-select_it-0.json');
-      ajaxSpy = spyOn($, 'ajax').and.callFake(() => {
+      ajaxSpy.and.callFake(() => {
         return $.Deferred().resolve(childResponse).promise();
       });
       const onSelectionSpy = jasmine.createSpy('onSelection');
       const treeViewConfig = {
         onSelection: onSelectionSpy
       };
+      spyOn(GERBERA.App, 'getType').and.returnValue('db');
 
       GERBERA.Tree.loadTree(parentResponse, treeViewConfig);
 
@@ -259,6 +289,11 @@ describe('Gerbera Tree', () => {
     beforeEach(() => {
       response = getJSONFixture('parent_id-0-select_it-0.json');
       childResponse = getJSONFixture('parent_id-7443-select_it-0.json');
+      ajaxSpy = spyOn($, 'ajax');
+    });
+
+    afterEach(() => {
+      ajaxSpy.and.callThrough();
     });
 
     it('calls the server to reload tree and generate trail and selects item', async () => {
@@ -267,7 +302,7 @@ describe('Gerbera Tree', () => {
       const treeElement = $('#tree').tree('getElement', 0);
 
       spyOn(GERBERA.Items, 'treeItemSelected');
-      ajaxSpy = spyOn($, 'ajax').and.callFake(() => {
+      ajaxSpy.and.callFake(() => {
         return $.Deferred().resolve(childResponse).promise();
       });
 
@@ -283,13 +318,18 @@ describe('Gerbera Tree', () => {
     beforeEach(() => {
       response = getJSONFixture('parent_id-0-select_it-0.json');
       childResponse = getJSONFixture('parent_id-7443-select_it-0.json');
+      ajaxSpy = spyOn($, 'ajax');
+    });
+
+    afterEach(() => {
+      ajaxSpy.and.callThrough();
     });
 
     it('finds the selected item given only gerbera id and reloads it', async () => {
       GERBERA.Tree.loadTree(response);
 
       spyOn(GERBERA.Items, 'treeItemSelected');
-      ajaxSpy = spyOn($, 'ajax').and.callFake(() => {
+      ajaxSpy.and.callFake(() => {
         return $.Deferred().resolve(childResponse).promise();
       });
 
@@ -305,6 +345,11 @@ describe('Gerbera Tree', () => {
     beforeEach(() => {
       response = getJSONFixture('parent_id-0-select_it-0.json');
       childResponse = getJSONFixture('parent_id-7443-select_it-0.json');
+      ajaxSpy = spyOn($, 'ajax');
+    });
+
+    afterEach(() => {
+      ajaxSpy.and.callThrough();
     });
 
     it('reloads the parent item', async () => {
@@ -312,7 +357,7 @@ describe('Gerbera Tree', () => {
 
       spyOn(GERBERA.Items, 'treeItemSelected');
       spyOn(GERBERA.Trail, 'makeTrail');
-      ajaxSpy = spyOn($, 'ajax').and.callFake(() => {
+      ajaxSpy.and.callFake(() => {
         return $.Deferred().resolve(childResponse).promise()
       });
 

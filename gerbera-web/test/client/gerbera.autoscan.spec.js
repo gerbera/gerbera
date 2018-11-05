@@ -65,6 +65,10 @@ describe('Gerbera Autoscan', () => {
       spyOn(GERBERA.Auth, 'getSessionId').and.returnValue('SESSION_ID');
     });
 
+    afterEach(() => {
+      ajaxSpy.and.callThrough();
+    });
+
     it('calls the server to obtain autoscan edit load', () => {
       spyOn(GERBERA.App, 'getType').and.returnValue('fs');
       const data = {
@@ -163,9 +167,14 @@ describe('Gerbera Autoscan', () => {
       spyOn(GERBERA.Updates, 'getUpdates');
     });
 
+    afterEach(() => {
+      ajaxSpy.and.callThrough();
+    });
+
     it('collects all the form data from the autoscan modal to call the server', () => {
       response = getJSONFixture('autoscan-add-response.json');
       spyOn(GERBERA.Updates, 'updateTreeByIds');
+      spyOn(GERBERA.Updates, 'addUiTimer');
 
       GERBERA.Autoscan.loadNewAutoscan(response);
 
@@ -198,6 +207,8 @@ describe('Gerbera Autoscan', () => {
     it('when successful reports a message to the user and starts task interval', () => {
       GERBERA.Autoscan.initialize();
       spyOn(GERBERA.Updates, 'showMessage');
+      spyOn(GERBERA.Updates, 'getUpdates');
+
       GERBERA.Autoscan.submitComplete(response);
 
       expect(GERBERA.Updates.showMessage).toHaveBeenCalledWith('Performing full scan: /Movies', undefined, 'success', 'fa-check');
@@ -206,6 +217,8 @@ describe('Gerbera Autoscan', () => {
     it('when successful for one-time scan reports message to user', () => {
       GERBERA.Autoscan.initialize();
       spyOn(GERBERA.Updates, 'showMessage');
+      spyOn(GERBERA.Updates, 'getUpdates');
+
       GERBERA.Autoscan.submitComplete({
         success: true
       });
