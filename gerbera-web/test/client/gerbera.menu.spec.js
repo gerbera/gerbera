@@ -6,10 +6,16 @@ jasmine.getJSONFixtures().fixturesPath = 'base/test/client/fixtures';
 describe('Gerbera Menu', () => {
   'use strict';
   describe('initialize()', () => {
+    let ajaxSpy;
 
     beforeEach(() => {
       loadFixtures('index.html');
       spyOn(GERBERA.Updates, 'getUpdates');
+      ajaxSpy = spyOn($, 'ajax');
+    });
+
+    afterEach(() => {
+      ajaxSpy.and.callThrough();
     });
 
     it('binds all menu items with the click event', async () => {
@@ -33,12 +39,13 @@ describe('Gerbera Menu', () => {
     });
 
     it('on click of menu, clears items', async () => {
-      spyOn(GERBERA.Items, 'destroy');
       spyOn(GERBERA.Auth, 'isLoggedIn').and.returnValue(true);
+      spyOn(GERBERA.Items, 'destroy');
+      spyOn(GERBERA.Tree, 'selectType');
 
       loadJSONFixtures('parent_id-0-select_it-0.json');
       const response = getJSONFixture('parent_id-0-select_it-0.json');
-      spyOn($, 'ajax').and.callFake(() => {
+      ajaxSpy.and.callFake(() => {
         return $.Deferred().resolve(response).promise();
       });
 

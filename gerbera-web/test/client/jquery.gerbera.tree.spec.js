@@ -264,7 +264,7 @@ describe('The jQuery Tree', () => {
       tree.tree('collapse', parent);
 
       expect(tree.tree('closed', title)).toBeTruthy();
-      expect(parent.children('ul.list-group').css('display')).toBe('none');
+      expect(parent.children('ul.list-group').length).toBe(0);
     });
   });
 

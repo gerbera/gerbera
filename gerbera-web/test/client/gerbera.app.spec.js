@@ -27,7 +27,7 @@ describe('Gerbera UI App', () => {
     });
 
     afterEach(() => {
-      ajaxSpy.calls.reset();
+      ajaxSpy.and.callThrough();
     });
 
     it('retrieves the configuration from the server using AJAX', async () => {
