@@ -6,12 +6,15 @@ jasmine.getJSONFixtures().fixturesPath = 'base/test/client/fixtures';
 describe('Gerbera Menu', () => {
   'use strict';
   describe('initialize()', () => {
-    let ajaxSpy;
+    let ajaxSpy, mockConfig;
 
     beforeEach(() => {
+      loadJSONFixtures('config.json');
       loadFixtures('index.html');
+      mockConfig = getJSONFixture('config.json');
       spyOn(GERBERA.Updates, 'getUpdates');
       ajaxSpy = spyOn($, 'ajax');
+      GERBERA.App.serverConfig = mockConfig.config;
     });
 
     afterEach(() => {
