@@ -45,6 +45,7 @@ describe('Gerbera UI App', () => {
 
       expect(GERBERA.App.serverConfig).toEqual(convertedConfig.config);
       expect(GERBERA.Auth.checkSID).toHaveBeenCalled();
+      expect($(document).attr('title')).toBe('Gerbera Media Server');
     });
 
     it('reports an error when the ajax calls fails', async () => {

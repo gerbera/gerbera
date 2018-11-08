@@ -10,6 +10,14 @@ module.exports = function (driver) {
     return await driver.findElement(By.id('nav-fs'));
   };
 
+  this.getHomeMenu = async () => {
+    return await driver.findElement(By.id('nav-home'));
+  };
+
+  this.getTitle = async () => {
+    return await driver.getTitle();
+  };
+
   this.clickMenu = async (menuId) => {
     const tree = await driver.findElement(By.id('tree'));
     if (menuId === 'nav-home') {

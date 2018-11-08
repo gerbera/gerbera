@@ -19,6 +19,7 @@
     },
     "actions": {
       "action": []
-    }
+    },
+    "friendlyName" : "Gerbera Media Server"
   }
 }
