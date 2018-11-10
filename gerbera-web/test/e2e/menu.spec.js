@@ -71,6 +71,17 @@ suite(() => {
       expect(tree.length).to.equal(0);
     });
 
+    it('shows the friendly name in the Home menu', async () => {
+      const homeMenu = await homePage.getHomeMenu();
+      const text = await homeMenu.getText();
+      expect(text).to.equal('Home [Gerbera Media Server]')
+    });
+
+    it('shows the friendly name in the document title', async () => {
+      const title = await homePage.getTitle();
+      expect(title).to.equal('Gerbera Media Server')
+    });
+
     it('loads the parent database container list when clicking Database Icon', async () => {
       await homePage.clickMenuIcon('nav-db');
       const tree = await homePage.treeItems();

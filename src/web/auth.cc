@@ -125,6 +125,10 @@ void web::auth::process()
         //actions->appendTextChild(_("action"), _("fokel2"));
         
         config->appendElementChild(actions);
+
+        Ref<Element> friendlyName (new Element(_("friendlyName")));
+        friendlyName->setText(cm->getOption(CFG_SERVER_NAME));
+        config->appendElementChild(friendlyName);
     }
     else if (action == "get_sid")
     {

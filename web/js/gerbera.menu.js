@@ -34,6 +34,9 @@ GERBERA.Menu = (function () {
       allLinks.click(GERBERA.Menu.click)
       allLinks.removeClass('disabled')
       $('#nav-home').click()
+      if(GERBERA.App.serverConfig.friendlyName) {
+        $('#nav-home').text('Home [' + GERBERA.App.serverConfig.friendlyName +']');
+      }
     } else {
      disable()
     }
