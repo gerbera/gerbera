@@ -60,6 +60,12 @@ module.exports = function (driver) {
     return await driver.findElement(By.css('#grb-toast-msg')).isDisplayed();
   };
 
+  this.closeToast = async () => {
+    await driver.wait(until.elementIsNotVisible(driver.findElement(By.id('editModal'))), 5000);
+    await driver.findElement(By.css('#toast button.close')).click();
+    return await driver.wait(until.elementIsNotVisible(driver.findElement(By.id('toast'))), 2000);
+  };
+
   this.getCookie = async (cookie) => {
     return await driver.manage().getCookie(cookie);
   };

@@ -55,8 +55,7 @@ suite(() => {
       let result = await loginPage.getToastMessage();
       expect(result).to.equal('Please enter username and password');
 
-      result = await loginPage.waitForToastClose();
-      expect(result).to.be.false;
+      await loginPage.closeToast();
     });
 
     it('when successful login show logout button, and show form on logout', async () => {
@@ -73,9 +72,7 @@ suite(() => {
     it('hides menu, hides login and shows message when UI is disabled', async () => {
       let result = await loginPage.getToastMessage();
       expect(result).to.equal('The UI is disabled in the configuration file. See README.');
-
-      result = await loginPage.waitForToastClose();
-      expect(result).to.be.false;
+      await loginPage.closeToast();
 
       result = await loginPage.menuList();
       const style = await result.getAttribute('style');

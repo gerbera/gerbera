@@ -123,6 +123,7 @@ module.exports = function (driver) {
 
   this.submitEditor = async () => {
     await driver.findElement(By.id('editSave')).click();
+    await driver.sleep(500); // todo: wait on .modal-backdrop somehow
     return await driver.wait(until.elementIsNotVisible(driver.findElement(By.id('editModal'))), 5000);
   };
 
@@ -261,6 +262,12 @@ module.exports = function (driver) {
   this.waitForToastClose = async () => {
     await driver.wait(until.elementIsNotVisible(driver.findElement(By.id('toast'))), 6000);
     return await driver.findElement(By.css('#grb-toast-msg')).isDisplayed();
+  };
+
+  this.closeToast = async () => {
+    await driver.wait(until.elementIsNotVisible(driver.findElement(By.id('editModal'))), 5000);
+    await driver.findElement(By.css('#toast button.close')).click();
+    return await driver.wait(until.elementIsNotVisible(driver.findElement(By.id('toast'))), 2000);
   };
 
   this.getPages = async () => {

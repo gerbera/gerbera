@@ -78,8 +78,7 @@ suite(() => {
       result = await homePage.getToastMessage();
       expect(result).to.equal('Performing full scan: /Movies');
 
-      result = await homePage.waitForToastClose();
-      expect(result).to.be.false;
+      await homePage.closeToast();
     });
 
     it('an existing autoscan item loads edit overlay', async () => {
