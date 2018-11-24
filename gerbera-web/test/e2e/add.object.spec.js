@@ -63,9 +63,7 @@ suite(() => {
 
       result = await homePage.getToastMessage();
       expect(result).to.equal('Successfully added object');
-
-      result = await homePage.waitForToastClose();
-      expect(result).to.be.false;
+      await homePage.closeToast();
     });
   });
 });
