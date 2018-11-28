@@ -57,10 +57,6 @@ matrix:
     - stage: Test Gerbera UI
       addons:
         chrome: stable
-        apt:
-          packages:
-            - nodejs
-            - xvfb
       before_install: skip
       install:
         - npm --prefix $TRAVIS_BUILD_DIR/gerbera-web/ install $TRAVIS_BUILD_DIR/gerbera-web/
