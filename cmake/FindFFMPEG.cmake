@@ -206,6 +206,7 @@ IF (FFMPEG_INCLUDE_DIR)
 
                 SET(FFMPEG_LIBRARIES ${FFMPEG_LIBRARIES} CACHE INTERNAL "All presently found FFMPEG libraries.")
 
+		LIST(APPEND CMAKE_REQUIRED_INCLUDES ${FFMPEG_INCLUDE_DIR})
                 CHECK_STRUCT_HAS_MEMBER("struct AVStream" codecpar libavformat/avformat.h HAVE_AVSTREAM_CODECPAR LANGUAGE C)
 
             ENDIF (FFMPEG_avutil_LIBRARY)
