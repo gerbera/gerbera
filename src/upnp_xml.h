@@ -91,4 +91,6 @@ zmm::Ref<mxml::Element> UpnpXML_DIDLRenderConductor(zmm::String conductor);
 
 zmm::Ref<mxml::Element> UpnpXML_DIDLRenderOrchestra(zmm::String orchestra);
 
+zmm::Ref<mxml::Element> UpnpXML_DIDLRenderAlbumDate(zmm::String date);
+
 #endif // __UPNP_XML_H__

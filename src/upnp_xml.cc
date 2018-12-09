@@ -186,6 +186,16 @@ Ref<Element> UpnpXML_DIDLRenderObject(Ref<CdsObject> obj, bool renderActions, in
             if (string_ok(orchestra)) {
                 result->appendElementChild(UpnpXML_DIDLRenderOrchestra(orchestra));
             }
+
+            String date = meta->get(MetadataHandler::getMetaFieldName(M_UPNP_DATE));
+            if (!string_ok(date)) {
+                date = _("None");
+            }
+
+            if (string_ok(date)) {
+                result->appendElementChild(UpnpXML_DIDLRenderAlbumDate(date));
+            }
+
         }
         if (upnp_class == UPNP_DEFAULT_CLASS_MUSIC_ALBUM || upnp_class == UPNP_DEFAULT_CLASS_CONTAINER) {
             Ref<Storage> storage = Storage::getInstance();
@@ -546,5 +556,11 @@ Ref<Element> UpnpXML_DIDLRenderConductor(String Conductor) {
 Ref<Element> UpnpXML_DIDLRenderOrchestra(String orchestra) {
     Ref<Element> out(new Element(_("upnp:orchestra")));
     out->setText(orchestra);
+    return out;
+}
+
+Ref<Element> UpnpXML_DIDLRenderAlbumDate(String date) {
+    Ref<Element> out(new Element(_("upnp:date")));
+    out->setText(date);
     return out;
 }
