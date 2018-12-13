@@ -31,29 +31,29 @@ script:
 matrix:
   include:
     - stage: Build Gerbera
-    - env: CXX=g++-4.9 CC=gcc-4.9
+    - env: CXX=g++-8 CC=gcc-8
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - g++-4.9
-    - env: CXX=g++-5 CC=gcc-5
+            - g++-8
+    - env: CXX=g++-7 CC=gcc-7
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - g++-5
-    - env: CXX=clang++-4.0 CC=clang-4.0
+            - g++-7
+    - env: CXX=clang++-7.0 CC=clang-7.0
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-4.0
+            - llvm-toolchain-xenial-7.0
           packages:
             - libc++-dev
-            - clang-4.0
+            - clang-7.0
     - stage: Test Gerbera UI
       addons:
         chrome: stable
