@@ -48,9 +48,6 @@ matrix:
     - env: CXX=clang++-7.0 CC=clang-7.0
       addons:
         apt:
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-xenial-7.0
           packages:
             - libc++-dev
             - clang-7.0
