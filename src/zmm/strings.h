@@ -32,6 +32,7 @@
 #ifndef __ZMM_STRINGS_H__
 #define __ZMM_STRINGS_H__
 
+#include <optional>
 #include <string>
 
 #include <stdio.h>
@@ -216,6 +217,7 @@ public:
     static String take(const char *data);
     static String refer(const char *str);
     static String refer(const char *str, int len);
+    static String refer(const std::optional<std::string> &str);
     static String copy(const char *str);
 protected:
     String(int capacity);

@@ -28,8 +28,6 @@
 */
 
 /// \file strings.cc
-
-#include <string>
 #include <cctype>
 
 #include "memory.h"
@@ -273,6 +271,15 @@ String String::refer(const char *data, int len)
     base->len = len;
     base->store = false;
     return String(base);
+}
+String String::refer(const std::optional<std::string> &str)
+{
+    if (str.has_value()) {
+        auto base = new StringBase(str.value().c_str(), str.value().length());
+        base->retain();
+        return String(base);
+    }
+    return nullptr;
 }
 String String::copy(const char *data)
 {
@@ -580,3 +587,4 @@ String String::replaceChar(char needle, char replacement)
     res.base->data[res.base->len] = 0;
     return res;
 }
+
