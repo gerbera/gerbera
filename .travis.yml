@@ -45,6 +45,7 @@ matrix:
             - ubuntu-toolchain-r-test
             - llvm-toolchain-xenial-6.0
           packages:
+            - libjsoncpp1
             - libc++-dev
             - clang-6.0
     - stage: Test Gerbera UI
