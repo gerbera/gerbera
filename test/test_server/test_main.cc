@@ -53,7 +53,7 @@ TEST_F(ServerTest, ServerOutputsCompileInformationIncludingGit) {
   ss << CMAKE_BINARY_DIR << DIR_SEPARATOR << "gerbera --compile-info 2>&1";
   std::string cmd = ss.str();
   std::string output = exec(cmd.c_str());
-  ASSERT_THAT(output, HasSubstr("Compile info:\n-------------\nWITH_"));
+  ASSERT_THAT(output, HasSubstr("Compile info\n-------------\nWITH_"));
   ASSERT_THAT(output, HasSubstr("Git info:\n-------------\n"));
   ASSERT_THAT(output, HasSubstr("Git Branch: "));
   ASSERT_THAT(output, HasSubstr("Git Commit: "));

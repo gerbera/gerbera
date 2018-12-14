@@ -579,7 +579,7 @@ void ConfigManager::validate(String serverhome)
         mime_content->put(_("video/mp4"), _(CONTENT_TYPE_MP4));
         mime_content->put(_("application/ogg"), _(CONTENT_TYPE_OGG));
         mime_content->put(_("audio/x-flac"), _(CONTENT_TYPE_FLAC));
-	mime_content->put(_("audio/flac"), _(CONTENT_TYPE_FLAC));
+        mime_content->put(_("audio/flac"), _(CONTENT_TYPE_FLAC));
         mime_content->put(_("image/jpeg"), _(CONTENT_TYPE_JPG));
         mime_content->put(_("audio/x-mpegurl"), _(CONTENT_TYPE_PLAYLIST));
         mime_content->put(_("audio/x-scpls"), _(CONTENT_TYPE_PLAYLIST));
