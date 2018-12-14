@@ -108,10 +108,12 @@ private:
         bool isStartPoint() { return startPoint; }
         zmm::Ref<zmm::Array<zmm::StringBase>> getNonexistingPathArray() { return nonexistingPathArray; }
         void setNonexistingPathArray(zmm::Ref<zmm::Array<zmm::StringBase>> nonexistingPathArray) { this->nonexistingPathArray = nonexistingPathArray; }
-        void addDescendant(int wd) {
+        void addDescendant(int wd)
+        {
             descendants.push_back(wd);
         }
         const std::vector<int>& getDescendants() const { return descendants; }
+
     private:
         zmm::Ref<AutoscanDirectory> adir;
         bool startPoint;

@@ -36,8 +36,7 @@
 
 #include "common.h"
 
-class IOHandler : public zmm::Object
-{
+class IOHandler : public zmm::Object {
 public:
     IOHandler();
 
@@ -49,16 +48,16 @@ public:
     /// \brief Reads previously opened/initialized data sequentially.
     /// \param buf This buffer will be filled by our read functions.
     /// \param length Number of bytes to read.
-    virtual size_t read(char *buf, size_t length);
+    virtual size_t read(char* buf, size_t length);
 
     /// \brief Writes to previously opened/initialized data sequentially.
     /// \param buf Data to be written.
     /// \param length Number of bytes to write.
-    virtual size_t write(char *buf, size_t length);
-                      
+    virtual size_t write(char* buf, size_t length);
+
     /// \brief Performs a seek on an open/initialized data.
-    /// \param offset Number of bytes to move in the buffer. 
-    
+    /// \param offset Number of bytes to move in the buffer.
+
     /// For seeking forwards
     /// positive values are used, for seeking backwards - negative. \b Offset must
     /// be positive if \b origin is set to \b SEEK_SET
@@ -70,6 +69,5 @@ public:
     /// \brief Close/free previously opened/initialized data.
     virtual void close();
 };
-
 
 #endif // __IO_HANDLER_H__

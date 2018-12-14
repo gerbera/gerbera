@@ -37,11 +37,10 @@
 #include "tools.h"
 using namespace zmm;
 
-
 LastFm::LastFm()
-: Singleton<LastFm, std::mutex>()
-, scrobbler(NULL)
-, currentTrackId(-1)
+    : Singleton<LastFm, std::mutex>()
+    , scrobbler(NULL)
+    , currentTrackId(-1)
 {
 }
 
@@ -54,7 +53,7 @@ LastFm::~LastFm()
 void LastFm::init()
 {
     Ref<ConfigManager> config = ConfigManager::getInstance();
-    
+
     if (!config->getBoolOption(CFG_SERVER_EXTOPTS_LASTFM_ENABLED))
         return;
 
@@ -70,7 +69,7 @@ void LastFm::shutdown()
 {
     if (!scrobbler)
         return;
-    
+
     finished_playing(scrobbler);
     destroy_scrobbler(scrobbler);
     scrobbler = NULL;
@@ -83,46 +82,41 @@ void LastFm::startedPlaying(Ref<CdsItem> item)
 
     currentTrackId = item->getID();
 
-    log_debug("Artist:\t%s\n", 
+    log_debug("Artist:\t%s\n",
         item->getMetadata(MetadataHandler::getMetaFieldName(M_ARTIST)).c_str());
-    log_debug("Title:\t%s\n", 
-         item->getMetadata(MetadataHandler::getMetaFieldName(M_TITLE)).c_str());
+    log_debug("Title:\t%s\n",
+        item->getMetadata(MetadataHandler::getMetaFieldName(M_TITLE)).c_str());
 
-    String artist = 
-        item->getMetadata(MetadataHandler::getMetaFieldName(M_ARTIST));
-    String title = 
-        item->getMetadata(MetadataHandler::getMetaFieldName(M_TITLE));
-    
-    if (!string_ok(artist) || !string_ok(title))
-    {
+    String artist = item->getMetadata(MetadataHandler::getMetaFieldName(M_ARTIST));
+    String title = item->getMetadata(MetadataHandler::getMetaFieldName(M_TITLE));
+
+    if (!string_ok(artist) || !string_ok(title)) {
         finished_playing(scrobbler);
         currentTrackId = -1;
         return;
     }
 
     submission_info* info = create_submission_info();
-    info->artist = const_cast<char *>(artist.c_str());
-    info->track = const_cast<char *>(title.c_str());
+    info->artist = const_cast<char*>(artist.c_str());
+    info->track = const_cast<char*>(title.c_str());
 
     String album = item->getMetadata(MetadataHandler::getMetaFieldName(M_ALBUM));
     if (string_ok(album))
-        info->album = const_cast<char *>(album.c_str());
+        info->album = const_cast<char*>(album.c_str());
 
-    String trackNr = 
-        item->getMetadata(MetadataHandler::getMetaFieldName(M_TRACKNUMBER));
+    String trackNr = item->getMetadata(MetadataHandler::getMetaFieldName(M_TRACKNUMBER));
     if (string_ok(trackNr))
         info->track_nr = atoi(trackNr.c_str());
 
-    if (item->getResourceCount() > 0)
-    {
+    if (item->getResourceCount() > 0) {
         Ref<CdsResource> resource = item->getResource(0);
         String duration = resource->getAttribute(MetadataHandler::getResAttrName(R_DURATION));
         info->track_length_in_secs = HMSToSeconds(duration.c_str());
     }
 
     started_playing(scrobbler, info);
-    
+
     destroy_submission_info(info);
 }
 
-#endif//HAVE_LASTFMLIB
+#endif //HAVE_LASTFMLIB

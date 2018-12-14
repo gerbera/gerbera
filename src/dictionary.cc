@@ -31,13 +31,14 @@
 
 #include "dictionary.h"
 
+#include "tools.h"
 #include <cstring>
 #include <sstream>
-#include "tools.h"
 
 using namespace zmm;
 
-DictionaryElement::DictionaryElement(String key, String value) : Object()
+DictionaryElement::DictionaryElement(String key, String value)
+    : Object()
 {
     this->key = key;
     this->value = value;
@@ -63,20 +64,17 @@ String DictionaryElement::getValue()
     return value;
 }
 
-
-
-Dictionary::Dictionary() : Object()
+Dictionary::Dictionary()
+    : Object()
 {
-    elements = Ref<Array<DictionaryElement> >(new Array<DictionaryElement>());
+    elements = Ref<Array<DictionaryElement>>(new Array<DictionaryElement>());
 }
 
 void Dictionary::put(String key, String value)
 {
-    for (int i = 0; i < elements->size(); i++)
-    {
+    for (int i = 0; i < elements->size(); i++) {
         Ref<DictionaryElement> el = elements->get(i);
-        if(el->getKey() == key)
-        {
+        if (el->getKey() == key) {
             el->setValue(value);
             return;
         }
@@ -87,11 +85,9 @@ void Dictionary::put(String key, String value)
 
 String Dictionary::get(String key)
 {
-    for (int i = 0; i < elements->size(); i++)
-    {
+    for (int i = 0; i < elements->size(); i++) {
         Ref<DictionaryElement> el = elements->get(i);
-        if (el->getKey() == key)
-        {
+        if (el->getKey() == key) {
             return el->getValue();
         }
     }
@@ -105,11 +101,9 @@ int Dictionary::size()
 
 void Dictionary::remove(String key)
 {
-    for (int i = 0; i < elements->size(); i++)
-    {
+    for (int i = 0; i < elements->size(); i++) {
         Ref<DictionaryElement> el = elements->get(i);
-        if (el->getKey() == key)
-        {
+        if (el->getKey() == key) {
             elements->remove(i, 1);
             return;
         }
@@ -120,13 +114,12 @@ String Dictionary::_encode(char sep1, char sep2)
 {
     std::ostringstream buf;
     int len = elements->size();
-    for (int i = 0; i < len; i++)
-    {
-        if(i > 0)
+    for (int i = 0; i < len; i++) {
+        if (i > 0)
             buf << sep1;
         Ref<DictionaryElement> el = elements->get(i);
         buf << url_escape(el->getKey()) << sep2
-             << url_escape(el->getValue());
+            << url_escape(el->getValue());
     }
     return buf.str();
 }
@@ -143,18 +136,15 @@ String Dictionary::encodeSimple()
 
 void Dictionary::decode(String url)
 {
-    const char *data = url.c_str();
-    const char *dataEnd = data + url.length();
-    while (data < dataEnd)
-    {
-        const char *ampPos = strchr(data, '&');
-        if (!ampPos)
-        {
+    const char* data = url.c_str();
+    const char* dataEnd = data + url.length();
+    while (data < dataEnd) {
+        const char* ampPos = strchr(data, '&');
+        if (!ampPos) {
             ampPos = dataEnd;
         }
-        const char *eqPos = strchr(data, '=');
-        if(eqPos && eqPos < ampPos)
-        {
+        const char* eqPos = strchr(data, '=');
+        if (eqPos && eqPos < ampPos) {
             String key(data, eqPos - data);
             String value(eqPos + 1, ampPos - eqPos - 1);
             key = url_unescape(key);
@@ -173,8 +163,7 @@ void Dictionary::decodeSimple(String url)
     String encoded;
     int pos;
     int last_pos = 0;
-    do
-    {
+    do {
         pos = url.index(last_pos, '/');
         if (pos < last_pos + 1)
             break;
@@ -190,8 +179,7 @@ void Dictionary::decodeSimple(String url)
         String value = url_unescape(url.substring(last_pos, pos - last_pos));
         last_pos = pos + 1;
         put(key, value);
-    }
-    while (last_pos < url.length());
+    } while (last_pos < url.length());
 }
 
 void Dictionary::clear()
@@ -203,8 +191,7 @@ Ref<Dictionary> Dictionary::clone()
 {
     Ref<Dictionary> ret(new Dictionary());
     int len = elements->size();
-    for (int i = 0; i < len; i++)
-    {
+    for (int i = 0; i < len; i++) {
         Ref<DictionaryElement> el = elements->get(i);
         ret->put(el->getKey(), el->getValue());
     }
@@ -216,10 +203,9 @@ void Dictionary::merge(Ref<Dictionary> other)
     if (other == nullptr)
         return;
 
-    Ref<Array<DictionaryElement> > other_el = other->getElements();
+    Ref<Array<DictionaryElement>> other_el = other->getElements();
     int len = other_el->size();
-    for (int i = 0; i < len; i++)
-    {
+    for (int i = 0; i < len; i++) {
         Ref<DictionaryElement> el = other_el->get(i);
         this->put(el->getKey(), el->getValue());
     }
@@ -228,8 +214,7 @@ void Dictionary::merge(Ref<Dictionary> other)
 bool Dictionary::isSubsetOf(Ref<Dictionary> other)
 {
     int len = elements->size();
-    for (int i = 0; i < len; i++)
-    {
+    for (int i = 0; i < len; i++) {
         Ref<DictionaryElement> el = elements->get(i);
         if (el->getValue() != other->get(el->getKey()))
             return false;
@@ -241,7 +226,7 @@ bool Dictionary::equals(Ref<Dictionary> other)
     return (isSubsetOf(other) && other->isSubsetOf(Ref<Dictionary>(this)));
 }
 
-Ref<Array<DictionaryElement> > Dictionary::getElements()
+Ref<Array<DictionaryElement>> Dictionary::getElements()
 {
     return elements;
 }

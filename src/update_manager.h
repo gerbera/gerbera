@@ -32,9 +32,9 @@
 #ifndef __UPDATE_MANAGER_H__
 #define __UPDATE_MANAGER_H__
 
+#include <condition_variable>
 #include <memory>
 #include <unordered_set>
-#include <condition_variable>
 #include <vector>
 
 #include "common.h"
@@ -43,8 +43,7 @@
 #define FLUSH_ASAP 2
 #define FLUSH_SPEC 1
 
-class UpdateManager : public Singleton<UpdateManager>
-{
+class UpdateManager : public Singleton<UpdateManager> {
 public:
     UpdateManager();
     virtual void shutdown() override;
@@ -55,18 +54,17 @@ public:
     void containersChanged(const std::vector<int>& objectIDs, int flushPolicy = FLUSH_SPEC);
 
 protected:
-
     pthread_t updateThread;
     std::condition_variable cond;
 
-    std::shared_ptr<std::unordered_set<int> > objectIDHash;
+    std::shared_ptr<std::unordered_set<int>> objectIDHash;
 
     bool shutdownFlag;
     int flushPolicy;
 
     int lastContainerChanged;
 
-    static void *staticThreadProc(void *arg);
+    static void* staticThreadProc(void* arg);
     void threadProc();
 
     inline bool haveUpdates() { return (objectIDHash->size() > 0); }

@@ -35,18 +35,17 @@
 #ifndef __ATRAILERS_CONTENT_HANDLER_H__
 #define __ATRAILERS_CONTENT_HANDLER_H__
 
-#define ATRAILERS_SERVICE                 "Apple Trailers"
-#define ATRAILERS_SERVICE_ID              "T"
+#define ATRAILERS_SERVICE "Apple Trailers"
+#define ATRAILERS_SERVICE_ID "T"
 
-#define ATRAILERS_AUXDATA_POST_DATE       ATRAILERS_SERVICE_ID "0"
+#define ATRAILERS_AUXDATA_POST_DATE ATRAILERS_SERVICE_ID "0"
 
-#include "mxml/mxml.h"
 #include "cds_objects.h"
+#include "mxml/mxml.h"
 
 /// \brief this class is responsible for creating objects from the ATrailers
 /// metadata XML.
-class ATrailersContentHandler : public zmm::Object
-{
+class ATrailersContentHandler : public zmm::Object {
 public:
     /// \brief Sets the service XML from which we will extract the objects.
     /// \return false if service XML contained an error status.
@@ -61,15 +60,14 @@ public:
     /// \return CdsObject or nullptr if there are no more objects to parse.
     zmm::Ref<CdsObject> getNextObject();
 
-
 protected:
     zmm::Ref<mxml::Element> service_xml;
     int current_trailer_index;
     int trailer_count;
- 
+
     zmm::String trailer_mimetype;
 };
 
-#endif//__ATRAILERS_CONTENT_HANDLER_H__
+#endif //__ATRAILERS_CONTENT_HANDLER_H__
 
-#endif//ATRAILERS
+#endif //ATRAILERS

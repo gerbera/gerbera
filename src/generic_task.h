@@ -6,8 +6,7 @@
 #ifndef __GENERIC_TASK_H__
 #define __GENERIC_TASK_H__
 
-enum task_type_t
-{
+enum task_type_t {
     Invalid,
     AddFile,
     RemoveObject,
@@ -16,14 +15,12 @@ enum task_type_t
     FetchOnlineContent
 };
 
-enum task_owner_t
-{
+enum task_owner_t {
     ContentManagerTask,
     TaskProcessorTask
 };
 
-class GenericTask : public zmm::Object
-{
+class GenericTask : public zmm::Object {
 protected:
     zmm::String description;
     task_type_t taskType;
@@ -49,5 +46,4 @@ public:
     inline task_owner_t getOwner() { return taskOwner; };
 };
 
-#endif//__GENERIC_TASK_H__
-
+#endif //__GENERIC_TASK_H__

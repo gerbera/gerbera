@@ -35,13 +35,12 @@
 #ifndef __ONLINE_SERVICE_HELPER_H__
 #define __ONLINE_SERVICE_HELPER_H__
 
+#include "cds_objects.h"
 #include "zmm/zmm.h"
 #include "zmm/zmmf.h"
-#include "cds_objects.h"
 
 /// \brief This class will handle things that are specific to various services
-class OnlineServiceHelper : public zmm::Object
-{
+class OnlineServiceHelper : public zmm::Object {
 public:
     OnlineServiceHelper();
 
@@ -50,6 +49,6 @@ public:
     zmm::String resolveURL(zmm::Ref<CdsItemExternalURL> item);
 };
 
-#endif//__ONLINE_SERVICE_HELPER_H__
+#endif //__ONLINE_SERVICE_HELPER_H__
 
-#endif//ONLINE_SERVICES
+#endif //ONLINE_SERVICES

@@ -140,7 +140,7 @@ protected:
     struct timespec* getNextNotifyTime();
 
 private:
-    static void *staticThreadProc(void *arg);
+    static void* staticThreadProc(void* arg);
     void threadProc();
     pthread_t thread;
 };

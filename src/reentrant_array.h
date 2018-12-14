@@ -32,18 +32,21 @@
 #ifndef __REENTRANT_ARRAY_H__
 #define __REENTRANT_ARRAY_H__
 
-#include <mutex>
 #include "zmm/zmmf.h"
+#include <mutex>
 
 /// \brief Reentrant version of the object array
 template <class T>
-class ReentrantArray : public zmm::Array<T>
-{
+class ReentrantArray : public zmm::Array<T> {
 public:
-    ReentrantArray() : zmm::Array<T>()
-    { }
-    ReentrantArray(int capacity) : zmm::Array<T>(capacity)
-    { }
+    ReentrantArray()
+        : zmm::Array<T>()
+    {
+    }
+    ReentrantArray(int capacity)
+        : zmm::Array<T>(capacity)
+    {
+    }
     inline void append(zmm::Ref<T> el)
     {
         AutoLock lock(mutex);
@@ -59,7 +62,7 @@ public:
         AutoLock lock(mutex);
         return zmm::Array<T>::get(index);
     }
-    inline void remove(int index, int count=1)
+    inline void remove(int index, int count = 1)
     {
         AutoLock lock(mutex);
         zmm::Array<T>::set(index, count);
@@ -89,10 +92,10 @@ public:
         AutoLock lock(mutex);
         zmm::Array<T>::optimize();
     }
+
 protected:
     std::mutex mutex;
     using AutoLock = std::lock_guard<decltype(mutex)>;
 };
-
 
 #endif // __REENTRANT_ARRAY_H__

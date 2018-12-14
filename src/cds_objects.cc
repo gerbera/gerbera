@@ -30,18 +30,19 @@
 /// \file cds_objects.cc
 
 #include "cds_objects.h"
-#include "tools.h"
-#include "storage.h"
 #include "mxml/mxml.h"
+#include "storage.h"
+#include "tools.h"
 
 using namespace zmm;
 using namespace mxml;
 
-CdsObject::CdsObject() : Object()
+CdsObject::CdsObject()
+    : Object()
 {
     metadata = Ref<Dictionary>(new Dictionary());
     auxdata = Ref<Dictionary>(new Dictionary());
-    resources = Ref<Array<CdsResource> >(new Array<CdsResource>);
+    resources = Ref<Array<CdsResource>>(new Array<CdsResource>);
     id = INVALID_OBJECT_ID;
     parentID = INVALID_OBJECT_ID;
     refID = INVALID_OBJECT_ID;
@@ -73,29 +74,16 @@ void CdsObject::copyTo(Ref<CdsObject> obj)
 int CdsObject::equals(Ref<CdsObject> obj, bool exactly)
 {
     if (!(
-        id == obj->getID() &&
-        parentID == obj->getParentID() &&
-        isRestricted() == obj->isRestricted() &&
-        title == obj->getTitle() &&
-        upnpClass == obj->getClass() &&
-        sortPriority == obj->getSortPriority()
-       ))
+            id == obj->getID() && parentID == obj->getParentID() && isRestricted() == obj->isRestricted() && title == obj->getTitle() && upnpClass == obj->getClass() && sortPriority == obj->getSortPriority()))
         return 0;
-        
-    if (! resourcesEqual(obj))
+
+    if (!resourcesEqual(obj))
         return 0;
-    
-    if (! metadata->equals(obj->getMetadata()))
+
+    if (!metadata->equals(obj->getMetadata()))
         return 0;
-    
-    if (exactly && !
-        (location == obj->getLocation() &&
-         mtime == obj->getMTime() &&
-         sizeOnDisk == obj->getSizeOnDisk() &&
-         virt == obj->isVirtual() &&
-         auxdata->equals(obj->auxdata) &&
-         objectFlags == obj->getFlags()
-        ))
+
+    if (exactly && !(location == obj->getLocation() && mtime == obj->getMTime() && sizeOnDisk == obj->getSizeOnDisk() && virt == obj->isVirtual() && auxdata->equals(obj->auxdata) && objectFlags == obj->getFlags()))
         return 0;
     return 1;
 }
@@ -104,11 +92,10 @@ int CdsObject::resourcesEqual(Ref<CdsObject> obj)
 {
     if (resources->size() != obj->resources->size())
         return 0;
-    
+
     // compare all resources
-    for (int i = 0; i < resources->size(); i++)
-    {
-        if (! resources->get(i)->equals(obj->resources->get(i)))
+    for (int i = 0; i < resources->size(); i++) {
+        if (!resources->get(i)->equals(obj->resources->get(i)))
             return 0;
     }
     return 1;
@@ -121,44 +108,32 @@ void CdsObject::validate()
 
     if (!string_ok(this->upnpClass))
         throw _Exception(_("Object validation failed: missing upnp class\n"));
-
 }
 
 Ref<CdsObject> CdsObject::createObject(unsigned int objectType)
 {
-    CdsObject *pobj;
-    
-    if(IS_CDS_CONTAINER(objectType))
-    {
+    CdsObject* pobj;
+
+    if (IS_CDS_CONTAINER(objectType)) {
         pobj = new CdsContainer();
-    }
-    else if(IS_CDS_ITEM_INTERNAL_URL(objectType))
-    {
+    } else if (IS_CDS_ITEM_INTERNAL_URL(objectType)) {
         pobj = new CdsItemInternalURL();
-    }
-    else if(IS_CDS_ITEM_EXTERNAL_URL(objectType))
-    {
+    } else if (IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
         pobj = new CdsItemExternalURL();
-    }
-    else if(IS_CDS_ACTIVE_ITEM(objectType))
-    {
+    } else if (IS_CDS_ACTIVE_ITEM(objectType)) {
         pobj = new CdsActiveItem();
-    }
-    else if(IS_CDS_ITEM(objectType))
-    {
+    } else if (IS_CDS_ITEM(objectType)) {
         pobj = new CdsItem();
-    }
-    else
-    {
+    } else {
         throw _Exception(_("invalid object type: ") + objectType);
     }
     return Ref<CdsObject>(pobj);
 }
 
-
 /* CdsItem */
 
-CdsItem::CdsItem() : CdsObject()
+CdsItem::CdsItem()
+    : CdsObject()
 {
     objectType = OBJECT_TYPE_ITEM;
     upnpClass = _("object.item");
@@ -170,10 +145,10 @@ CdsItem::CdsItem() : CdsObject()
 void CdsItem::copyTo(Ref<CdsObject> obj)
 {
     CdsObject::copyTo(obj);
-    if (! IS_CDS_ITEM(obj->getObjectType()))
+    if (!IS_CDS_ITEM(obj->getObjectType()))
         return;
     Ref<CdsItem> item = RefCast(obj, CdsItem);
-//    item->setDescription(description);
+    //    item->setDescription(description);
     item->setMimeType(mimeType);
     item->setTrackNumber(trackNumber);
     item->setServiceID(serviceID);
@@ -181,17 +156,15 @@ void CdsItem::copyTo(Ref<CdsObject> obj)
 int CdsItem::equals(Ref<CdsObject> obj, bool exactly)
 {
     Ref<CdsItem> item = RefCast(obj, CdsItem);
-    if (! CdsObject::equals(obj, exactly))
+    if (!CdsObject::equals(obj, exactly))
         return 0;
-    return (mimeType == item->getMimeType() && 
-            trackNumber == item->getTrackNumber() && 
-            serviceID == item->getServiceID());
+    return (mimeType == item->getMimeType() && trackNumber == item->getTrackNumber() && serviceID == item->getServiceID());
 }
 
 void CdsItem::validate()
 {
     CdsObject::validate();
-//    log_info("mime: [%s] loc [%s]\n", this->mimeType.c_str(), this->location.c_str());
+    //    log_info("mime: [%s] loc [%s]\n", this->mimeType.c_str(), this->location.c_str());
     if (!string_ok(this->mimeType))
         throw _Exception(_("Item validation failed: missing mimetype"));
 
@@ -199,11 +172,11 @@ void CdsItem::validate()
         throw _Exception(_("Item validation failed: missing location"));
 
     if (!check_path(this->location))
-        throw _Exception(_("Item validation failed: file ") + 
-                this->location + " not found");
+        throw _Exception(_("Item validation failed: file ") + this->location + " not found");
 }
 
-CdsActiveItem::CdsActiveItem() : CdsItem()
+CdsActiveItem::CdsActiveItem()
+    : CdsItem()
 {
     objectType |= OBJECT_TYPE_ACTIVE_ITEM;
 
@@ -214,7 +187,7 @@ CdsActiveItem::CdsActiveItem() : CdsItem()
 void CdsActiveItem::copyTo(Ref<CdsObject> obj)
 {
     CdsItem::copyTo(obj);
-    if (! IS_CDS_ACTIVE_ITEM(obj->getObjectType()))
+    if (!IS_CDS_ACTIVE_ITEM(obj->getObjectType()))
         return;
     Ref<CdsActiveItem> item = RefCast(obj, CdsActiveItem);
     item->setAction(action);
@@ -223,12 +196,9 @@ void CdsActiveItem::copyTo(Ref<CdsObject> obj)
 int CdsActiveItem::equals(Ref<CdsObject> obj, bool exactly)
 {
     Ref<CdsActiveItem> item = RefCast(obj, CdsActiveItem);
-    if (! CdsItem::equals(obj, exactly))
+    if (!CdsItem::equals(obj, exactly))
         return 0;
-    if (exactly &&
-       (action != item->getAction() ||
-        state != item->getState())
-    )
+    if (exactly && (action != item->getAction() || state != item->getState()))
         return 0;
     return 1;
 }
@@ -238,14 +208,14 @@ void CdsActiveItem::validate()
     CdsItem::validate();
     if (!string_ok(this->action))
         throw _Exception(_("Active Item validation failed: missing action\n"));
-       
+
     if (!check_path(this->action))
-        throw _Exception(_("ctive Item validation failed: action script ") +
-                this->action + " not found\n");
+        throw _Exception(_("ctive Item validation failed: action script ") + this->action + " not found\n");
 }
 //---------
 
-CdsItemExternalURL::CdsItemExternalURL() : CdsItem()
+CdsItemExternalURL::CdsItemExternalURL()
+    : CdsItem()
 {
     objectType |= OBJECT_TYPE_ITEM_EXTERNAL_URL;
 
@@ -258,13 +228,14 @@ void CdsItemExternalURL::validate()
     CdsObject::validate();
     if (!string_ok(this->mimeType))
         throw _Exception(_("URL Item validation failed: missing mimetype\n"));
-      
+
     if (!string_ok(this->location))
         throw _Exception(_("URL Item validation failed: missing URL\n"));
 }
 //---------
 
-CdsItemInternalURL::CdsItemInternalURL() : CdsItemExternalURL()
+CdsItemInternalURL::CdsItemInternalURL()
+    : CdsItemExternalURL()
 {
     objectType |= OBJECT_TYPE_ITEM_INTERNAL_URL;
 
@@ -280,7 +251,8 @@ void CdsItemInternalURL::validate()
         throw _Exception(_("Internal URL item validation failed: only realative URLs allowd\n"));
 }
 
-CdsContainer::CdsContainer() : CdsObject()
+CdsContainer::CdsContainer()
+    : CdsObject()
 {
     objectType = OBJECT_TYPE_CONTAINER;
     updateID = 0;
@@ -293,7 +265,7 @@ CdsContainer::CdsContainer() : CdsObject()
 void CdsContainer::copyTo(Ref<CdsObject> obj)
 {
     CdsObject::copyTo(obj);
-    if (! IS_CDS_CONTAINER(obj->getObjectType()))
+    if (!IS_CDS_CONTAINER(obj->getObjectType()))
         return;
     Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
     cont->setUpdateID(updateID);
@@ -302,16 +274,14 @@ int CdsContainer::equals(Ref<CdsObject> obj, bool exactly)
 {
     Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
     return (
-        CdsObject::equals(obj, exactly) &&
-        isSearchable() == cont->isSearchable()
-    );
+        CdsObject::equals(obj, exactly) && isSearchable() == cont->isSearchable());
 }
 
 void CdsContainer::validate()
 {
     CdsObject::validate();
     /// \todo well.. we have to know if a container is a real directory or just a virtual container in the database
-/*    if (!check_path(this->location, true))
+    /*    if (!check_path(this->location, true))
         throw _Exception(_("CdsContainer: validation failed")); */
 }
 void CdsObject::optimize()
@@ -321,30 +291,24 @@ void CdsObject::optimize()
     resources->optimize();
 }
 
-int CdsObjectTitleComparator(void *arg1, void *arg2)
+int CdsObjectTitleComparator(void* arg1, void* arg2)
 {
     /// \todo get rid of getTitle() to avod unnecessary reference counting ops
-    return strcmp(((CdsObject *)arg1)->title.c_str(),
-                ((CdsObject *)arg2)->title.c_str());
+    return strcmp(((CdsObject*)arg1)->title.c_str(),
+        ((CdsObject*)arg2)->title.c_str());
 }
 
 String CdsContainer::getVirtualPath()
 {
     String location;
-    if (getID() == CDS_ID_ROOT)
-    {
+    if (getID() == CDS_ID_ROOT) {
         location = _("/");
-    }
-    else if (getID() == CDS_ID_FS_ROOT)
-    {
+    } else if (getID() == CDS_ID_FS_ROOT) {
         Ref<Storage> storage = Storage::getInstance();
         location = _("/") + storage->getFsRootName();
-    }
-    else if (string_ok(getLocation()))
-    {
+    } else if (string_ok(getLocation())) {
         location = getLocation();
-        if (! isVirtual())
-        {
+        if (!isVirtual()) {
             Ref<Storage> storage = Storage::getInstance();
             location = _("/") + storage->getFsRootName() + location;
         }

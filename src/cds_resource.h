@@ -37,16 +37,15 @@
 
 /// \brief name for external urls that can appear in object resources (i.e.
 /// a YouTube thumbnail)
-#define RESOURCE_OPTION_URL         "url"
+#define RESOURCE_OPTION_URL "url"
 
 /// \brief if set, overrides the OBJECT_FLAG_PROXY_URL setting for the given
 /// resource
-#define RESOURCE_OPTION_PROXY_URL   "prx"
+#define RESOURCE_OPTION_PROXY_URL "prx"
 
-#define RESOURCE_OPTION_FOURCC      "4cc"
+#define RESOURCE_OPTION_FOURCC "4cc"
 
-class CdsResource : public zmm::Object
-{
+class CdsResource : public zmm::Object {
 protected:
     int handlerType;
     zmm::Ref<Dictionary> attributes;
@@ -61,20 +60,20 @@ public:
     /// \param handler_type id of the associated handler
     CdsResource(int handlerType);
     CdsResource(int handlerType,
-                zmm::Ref<Dictionary> attributes,
-                zmm::Ref<Dictionary> parameters,
-                zmm::Ref<Dictionary> options);
-   
+        zmm::Ref<Dictionary> attributes,
+        zmm::Ref<Dictionary> parameters,
+        zmm::Ref<Dictionary> options);
+
     /// \brief Adds a resource attribute.
     ///
     /// This maps to an attribute of the <res> tag in the DIDL-Lite XML.
     ///
-    /// \param name attribute name 
+    /// \param name attribute name
     /// \param value attribute value
     void addAttribute(zmm::String name, zmm::String value);
 
     /// \brief Removes a resource attribute.
-    /// 
+    ///
     /// \param name attribute name
     void removeAttribute(zmm::String name);
 
@@ -82,7 +81,7 @@ public:
     void mergeAttributes(zmm::Ref<Dictionary> additional);
 
     /// \brief Adds a parameter (will be appended to the URL)
-    /// 
+    ///
     /// The parameters will be appended to the object URL in the DIDL-Lite XML.
     /// This is useful for cases, where you need to identify specific options,
     /// i.e. something that is only relevant to a particular metadata handler
@@ -93,7 +92,7 @@ public:
     void addParameter(zmm::String name, zmm::String value);
 
     /// \brief Add an option to the resource.
-    /// 
+    ///
     /// The options are internal, they do not appear in the URL or in the
     /// XML but can be used for any purpose.
     void addOption(zmm::String name, zmm::String value);

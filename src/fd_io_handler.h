@@ -36,8 +36,7 @@
 #include "io_handler.h"
 
 /// \brief Allows the web server to read from a file, operation is blocking.
-class FDIOHandler : public IOHandler
-{
+class FDIOHandler : public IOHandler {
 protected:
     /// \brief Name of the file.
     zmm::String filename;
@@ -46,7 +45,8 @@ protected:
     int fd;
     bool closed;
     zmm::Ref<IOHandler> other;
-    zmm::Ref<zmm::Array<zmm::Object> > reference_list;
+    zmm::Ref<zmm::Array<zmm::Object>> reference_list;
+
 public:
     /// \brief Sets the filename to work with.
     explicit FDIOHandler(zmm::String filename);
@@ -64,13 +64,13 @@ public:
     /// \brief Reads a previously opened file sequentially.
     /// \param buf Data from the file will be copied into this buffer.
     /// \param length Number of bytes to be copied into the buffer.
-    size_t read(OUT char *buf, IN size_t length) override;
-   
+    size_t read(OUT char* buf, IN size_t length) override;
+
     /// \brief Writes to a previously opened file.
     /// \param buf Data from the buffer will be written to the file.
     /// \param length Number of bytes to be written from the buffer.
     /// \return number of bytes written.
-    size_t write(OUT char *buf, IN size_t length) override;
+    size_t write(OUT char* buf, IN size_t length) override;
 
     /// \brief Performs seek on an open file.
     /// \param offset Number of bytes to move in the file. For seeking forwards
@@ -84,6 +84,5 @@ public:
     /// \brief Close a previously opened file.
     virtual void close();
 };
-
 
 #endif // __FD_IO_HANDLER_H__

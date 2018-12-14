@@ -32,51 +32,50 @@
 #ifndef __METADATA_HANDLER_H__
 #define __METADATA_HANDLER_H__
 
+#include "cds_objects.h"
 #include "common.h"
 #include "dictionary.h"
-#include "cds_objects.h"
 #include "io_handler.h"
 
 // content handler Id's
-#define CH_DEFAULT   0
-#define CH_LIBEXIF   1
-#define CH_ID3       2
+#define CH_DEFAULT 0
+#define CH_LIBEXIF 1
+#define CH_ID3 2
 #define CH_TRANSCODE 3
-#define CH_EXTURL    4
-#define CH_MP4       5
-#define CH_FFTH      6
-#define CH_FLAC      7
-#define CH_FANART    8
+#define CH_EXTURL 4
+#define CH_MP4 5
+#define CH_FFTH 6
+#define CH_FLAC 7
+#define CH_FANART 8
 
-#define CONTENT_TYPE_MP3        "mp3"
-#define CONTENT_TYPE_OGG        "ogg"
-#define CONTENT_TYPE_FLAC       "flac"
-#define CONTENT_TYPE_WMA        "wma"
-#define CONTENT_TYPE_WAVPACK    "wv"
-#define CONTENT_TYPE_APE        "ape"
-#define CONTENT_TYPE_JPG        "jpg"
-#define CONTENT_TYPE_PLAYLIST   "playlist"
-#define CONTENT_TYPE_MP4        "mp4"
-#define CONTENT_TYPE_PCM        "pcm"
-#define CONTENT_TYPE_AVI        "avi"
-#define CONTENT_TYPE_MPEG       "mpeg"
-#define CONTENT_TYPE_QUICKTIME  "quicktime"
-#define CONTENT_TYPE_MKV        "mkv"
-#define CONTENT_TYPE_MKA        "mka"
-#define CONTENT_TYPE_AIFF       "aiff"
-#define CONTENT_TYPE_DSD        "dsd"
+#define CONTENT_TYPE_MP3 "mp3"
+#define CONTENT_TYPE_OGG "ogg"
+#define CONTENT_TYPE_FLAC "flac"
+#define CONTENT_TYPE_WMA "wma"
+#define CONTENT_TYPE_WAVPACK "wv"
+#define CONTENT_TYPE_APE "ape"
+#define CONTENT_TYPE_JPG "jpg"
+#define CONTENT_TYPE_PLAYLIST "playlist"
+#define CONTENT_TYPE_MP4 "mp4"
+#define CONTENT_TYPE_PCM "pcm"
+#define CONTENT_TYPE_AVI "avi"
+#define CONTENT_TYPE_MPEG "mpeg"
+#define CONTENT_TYPE_QUICKTIME "quicktime"
+#define CONTENT_TYPE_MKV "mkv"
+#define CONTENT_TYPE_MKA "mka"
+#define CONTENT_TYPE_AIFF "aiff"
+#define CONTENT_TYPE_DSD "dsd"
 
-#define OGG_THEORA              "t"
+#define OGG_THEORA "t"
 
-#define RESOURCE_CONTENT_TYPE   "rct"
-#define RESOURCE_HANDLER        "rh"
+#define RESOURCE_CONTENT_TYPE "rct"
+#define RESOURCE_HANDLER "rh"
 
-#define ID3_ALBUM_ART           "aa"
-#define EXIF_THUMBNAIL          "EX_TH"
-#define THUMBNAIL               "th" // thumbnail without need for special handling
+#define ID3_ALBUM_ART "aa"
+#define EXIF_THUMBNAIL "EX_TH"
+#define THUMBNAIL "th" // thumbnail without need for special handling
 
-typedef enum
-{
+typedef enum {
     M_TITLE = 0,
     M_ARTIST,
     M_ALBUM,
@@ -102,20 +101,18 @@ typedef enum
     M_ORCHESTRA,
 
     M_MAX
-} metadata_fields_t; 
+} metadata_fields_t;
 
 typedef struct mt_key mt_key;
-struct mt_key
-{
-    const char *sym;
-    const char *upnp;
+struct mt_key {
+    const char* sym;
+    const char* upnp;
 };
 
 extern mt_key MT_KEYS[];
 
 // res tag attributes
-typedef enum
-{
+typedef enum {
     R_SIZE = 0,
     R_DURATION,
     R_BITRATE,
@@ -128,32 +125,29 @@ typedef enum
 } resource_attributes_t;
 
 typedef struct res_key res_key;
-struct res_key
-{   
-    const char *sym;
-    const char *upnp;
+struct res_key {
+    const char* sym;
+    const char* upnp;
 };
 
 extern res_key RES_KEYS[];
 
-
 /// \brief This class is responsible for providing access to metadata information
-/// of various media. 
-class MetadataHandler : public zmm::Object
-{
+/// of various media.
+class MetadataHandler : public zmm::Object {
 public:
-/// \brief Definition of the supported metadata fields.
+    /// \brief Definition of the supported metadata fields.
 
     MetadataHandler();
-       
+
     static void setMetadata(zmm::Ref<CdsItem> item);
     static zmm::String getMetaFieldName(metadata_fields_t field);
     static zmm::String getResAttrName(resource_attributes_t attr);
 
     static zmm::Ref<MetadataHandler> createHandler(int handlerType);
-    
+
     virtual void fillMetadata(zmm::Ref<CdsItem> item) = 0;
-    virtual zmm::Ref<IOHandler> serveContent(zmm::Ref<CdsItem> item, int resNum, off_t *data_size) = 0;
+    virtual zmm::Ref<IOHandler> serveContent(zmm::Ref<CdsItem> item, int resNum, off_t* data_size) = 0;
     virtual zmm::String getMimeType();
 };
 

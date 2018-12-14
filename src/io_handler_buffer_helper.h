@@ -32,10 +32,10 @@
 #ifndef __IO_HANDLER_BUFFER_HELPER_H__
 #define __IO_HANDLER_BUFFER_HELPER_H__
 
+#include <condition_variable>
+#include <mutex>
 #include <pthread.h>
 #include <upnp.h>
-#include <mutex>
-#include <condition_variable>
 
 #include "common.h"
 #include "io_handler.h"
@@ -43,10 +43,8 @@
 /// \brief a IOHandler with buffer support
 /// the buffer is only for read(). write() is not supported
 /// the public functions of this class are *not* thread safe!
-class IOHandlerBufferHelper : public IOHandler
-{
+class IOHandlerBufferHelper : public IOHandler {
 public:
-    
     /// \brief get an instance of a IOHandlerBufferHelper
     /// \param bufSize the size of the buffer in bytes
     /// \param maxChunkSize the maximum size of the chunks which are read by the buffer
@@ -55,13 +53,13 @@ public:
     /// 0 disables the delay
     IOHandlerBufferHelper(size_t bufSize, size_t initialFillSize);
     virtual ~IOHandlerBufferHelper();
-    
+
     // inherited from IOHandler
     virtual void open(enum UpnpOpenFileMode mode);
-    virtual size_t read(char *buf, size_t length);
+    virtual size_t read(char* buf, size_t length);
     virtual void seek(off_t offset, int whence);
     virtual void close();
-    
+
 protected:
     size_t bufSize;
     size_t initialFillSize;
@@ -72,25 +70,25 @@ protected:
     bool waitForInitialFillSize;
     bool signalAfterEveryRead;
     bool checkSocket;
-    
+
     // buffer stuff..
     bool empty;
     size_t a;
     size_t b;
     off_t posRead;
-    
+
     // seek stuff...
     bool seekEnabled;
     bool doSeek;
     off_t seekOffset;
     int seekWhence;
-    
+
     // thread stuff..
     void startBufferThread();
     void stopBufferThread();
-    static void *staticThreadProc(void *arg);
+    static void* staticThreadProc(void* arg);
     virtual void threadProc() = 0;
-    
+
     pthread_t bufferThread;
     bool threadShutdown;
 

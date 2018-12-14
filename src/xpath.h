@@ -32,13 +32,13 @@
 #ifndef __XPATH_H__
 #define __XPATH_H__
 
-#include "zmm/zmmf.h"
 #include "mxml/mxml.h"
+#include "zmm/zmmf.h"
 
-class XPath : public zmm::Object
-{
+class XPath : public zmm::Object {
 protected:
     zmm::Ref<mxml::Element> context;
+
 public:
     XPath(zmm::Ref<mxml::Element> context);
     zmm::String getText(zmm::String xpath);
@@ -48,6 +48,7 @@ public:
     static zmm::String getAxisPart(zmm::String xpath);
     static zmm::String getAxis(zmm::String axisPart);
     static zmm::String getSpec(zmm::String axisPart);
+
 protected:
     zmm::Ref<mxml::Element> elementAtPath(zmm::String path);
 };

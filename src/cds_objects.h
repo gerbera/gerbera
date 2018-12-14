@@ -34,20 +34,20 @@
 
 #include <sys/types.h>
 
+#include "cds_resource.h"
 #include "common.h"
 #include "dictionary.h"
-#include "cds_resource.h"
 
 // ATTENTION: These values need to be changed in web/js/items.js too.
-#define OBJECT_TYPE_CONTAINER           0x00000001
-#define OBJECT_TYPE_ITEM                0x00000002
-#define OBJECT_TYPE_ACTIVE_ITEM         0x00000004
-#define OBJECT_TYPE_ITEM_EXTERNAL_URL   0x00000008
-#define OBJECT_TYPE_ITEM_INTERNAL_URL   0x00000010
+#define OBJECT_TYPE_CONTAINER 0x00000001
+#define OBJECT_TYPE_ITEM 0x00000002
+#define OBJECT_TYPE_ACTIVE_ITEM 0x00000004
+#define OBJECT_TYPE_ITEM_EXTERNAL_URL 0x00000008
+#define OBJECT_TYPE_ITEM_INTERNAL_URL 0x00000010
 
-#define STRING_OBJECT_TYPE_CONTAINER    "container"
-#define STRING_OBJECT_TYPE_ITEM         "item"
-#define STRING_OBJECT_TYPE_ACTIVE_ITEM  "active_item"
+#define STRING_OBJECT_TYPE_CONTAINER "container"
+#define STRING_OBJECT_TYPE_ITEM "item"
+#define STRING_OBJECT_TYPE_ACTIVE_ITEM "active_item"
 #define STRING_OBJECT_TYPE_EXTERNAL_URL "external_url"
 #define STRING_OBJECT_TYPE_INTERNAL_URL "internal_url"
 
@@ -58,25 +58,24 @@
 #define IS_CDS_ITEM_INTERNAL_URL(type) (type & OBJECT_TYPE_ITEM_INTERNAL_URL)
 #define IS_CDS_PURE_ITEM(type) (type == OBJECT_TYPE_ITEM)
 
-#define OBJECT_FLAG_RESTRICTED            0x00000001
-#define OBJECT_FLAG_SEARCHABLE            0x00000002
-#define OBJECT_FLAG_USE_RESOURCE_REF      0x00000004
-#define OBJECT_FLAG_PERSISTENT_CONTAINER  0x00000008
-#define OBJECT_FLAG_PLAYLIST_REF          0x00000010
-#define OBJECT_FLAG_PROXY_URL             0x00000020
-#define OBJECT_FLAG_ONLINE_SERVICE        0x00000040
-#define OBJECT_FLAG_OGG_THEORA            0x00000080
-#define OBJECT_FLAG_PLAYED                0x00000200
+#define OBJECT_FLAG_RESTRICTED 0x00000001
+#define OBJECT_FLAG_SEARCHABLE 0x00000002
+#define OBJECT_FLAG_USE_RESOURCE_REF 0x00000004
+#define OBJECT_FLAG_PERSISTENT_CONTAINER 0x00000008
+#define OBJECT_FLAG_PLAYLIST_REF 0x00000010
+#define OBJECT_FLAG_PROXY_URL 0x00000020
+#define OBJECT_FLAG_ONLINE_SERVICE 0x00000040
+#define OBJECT_FLAG_OGG_THEORA 0x00000080
+#define OBJECT_FLAG_PLAYED 0x00000200
 
-#define OBJECT_AUTOSCAN_NONE    0
-#define OBJECT_AUTOSCAN_UI      1
-#define OBJECT_AUTOSCAN_CFG     2
+#define OBJECT_AUTOSCAN_NONE 0
+#define OBJECT_AUTOSCAN_UI 1
+#define OBJECT_AUTOSCAN_CFG 2
 
-int CdsObjectTitleComparator(void *arg1, void *arg2);
+int CdsObjectTitleComparator(void* arg1, void* arg2);
 
 /// \brief Generic object in the Content Directory.
-class CdsObject : public zmm::Object
-{
+class CdsObject : public zmm::Object {
 protected:
     /// \brief ID of the object in the content directory
     int id;
@@ -109,15 +108,15 @@ protected:
     /// \brief type of the object: item, container, etc.
     unsigned int objectType;
 
-    /// \brief field which can hold various flags for the object 
-    unsigned int objectFlags; 
+    /// \brief field which can hold various flags for the object
+    unsigned int objectFlags;
 
     /// \brief flag that allows to sort objects within a container
     int sortPriority;
 
     zmm::Ref<Dictionary> metadata;
     zmm::Ref<Dictionary> auxdata;
-    zmm::Ref<zmm::Array<CdsResource> > resources;
+    zmm::Ref<zmm::Array<CdsResource>> resources;
 
     /// \ brief IDs of the metadata attributes in the metadata table
     zmm::Ref<Dictionary> metadataIDs;
@@ -207,88 +206,119 @@ public:
 
     /// \brief Get flags of an object.
     inline unsigned int getFlags() { return objectFlags; }
-    
+
     /// \brief Get a flag of an object.
     inline unsigned int getFlag(unsigned int mask) { return objectFlags & mask; }
 
     /// \brief Set flags for the object.
     inline void setFlags(unsigned int objectFlags) { this->objectFlags = objectFlags; }
-    
+
     /// \biref Set a flag of the object.
     inline void setFlag(unsigned int mask) { objectFlags |= mask; }
-    
+
     /// \biref Set a flag of the object.
-    inline void changeFlag(unsigned int mask, bool value) { if (value) setFlag(mask); else clearFlag(mask); }
-    
+    inline void changeFlag(unsigned int mask, bool value)
+    {
+        if (value)
+            setFlag(mask);
+        else
+            clearFlag(mask);
+    }
+
     /// \biref Clears a flag of the object.
     inline void clearFlag(unsigned int mask) { objectFlags &= ~mask; }
-    
+
     /// \brief Query single metadata value.
     inline zmm::String getMetadata(zmm::String key)
-    { return metadata->get(key); }
+    {
+        return metadata->get(key);
+    }
 
     /// \brief Query entire metadata dictionary.
     inline zmm::Ref<Dictionary> getMetadata() { return metadata; }
-    
+
     /// \brief Set entire metadata dictionary.
     inline void setMetadata(zmm::Ref<Dictionary> metadata)
-    { this->metadata = metadata; }
+    {
+        this->metadata = metadata;
+    }
 
     /// \brief Set a single metadata value.
     inline void setMetadata(zmm::String key, zmm::String value)
-    { metadata->put(key, value); }
+    {
+        metadata->put(key, value);
+    }
 
     /// \brief Removes metadata with the given key
     inline void removeMetadata(zmm::String key)
-    { metadata->remove(key); }
-    
+    {
+        metadata->remove(key);
+    }
+
     /// \brief Query single auxdata value.
     inline zmm::String getAuxData(zmm::String key)
-    { return auxdata->get(key); }
+    {
+        return auxdata->get(key);
+    }
 
     /// \brief Query entire auxdata dictionary.
     inline zmm::Ref<Dictionary> getAuxData() { return auxdata; }
 
     /// \brief Set a single auxdata value.
     inline void setAuxData(zmm::String key, zmm::String value)
-    { auxdata->put(key, value); }
-    
+    {
+        auxdata->put(key, value);
+    }
+
     /// \brief Set entire auxdata dictionary.
     inline void setAuxData(zmm::Ref<Dictionary> auxdata)
-    { this->auxdata = auxdata; }
+    {
+        this->auxdata = auxdata;
+    }
 
     /// \brief Removes auxdata with the given key
     inline void removeAuxData(zmm::String key)
-    { auxdata->remove(key); }
-    
-    
+    {
+        auxdata->remove(key);
+    }
+
     /// \brief Get number of resource tags
     inline int getResourceCount() { return resources->size(); }
 
     /// \brief Query resources
-    inline zmm::Ref<zmm::Array<CdsResource> > getResources()
-    { return resources; }
- 
+    inline zmm::Ref<zmm::Array<CdsResource>> getResources()
+    {
+        return resources;
+    }
+
     /// \brief Set resources
-    inline void setResources(zmm::Ref<zmm::Array<CdsResource> > res) 
-    { resources = res; }
-    
+    inline void setResources(zmm::Ref<zmm::Array<CdsResource>> res)
+    {
+        resources = res;
+    }
+
     /// \brief Query resource tag with the given index
     inline zmm::Ref<CdsResource> getResource(int index)
-    { return resources->get(index); }
-    
+    {
+        return resources->get(index);
+    }
+
     /// \brief Add resource tag
     inline void addResource(zmm::Ref<CdsResource> resource)
-    { resources->append(resource); } 
-  
+    {
+        resources->append(resource);
+    }
+
     /// \brief Insert resource tag at index
     inline void insertResource(int index, zmm::Ref<CdsResource> resource)
-    { resources->insert(index, resource); }
+    {
+        resources->insert(index, resource);
+    }
 
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)
     virtual void copyTo(zmm::Ref<CdsObject> obj);
-    
+
     /// \brief Checks if current object is equal to obj.
     /// \param obj object to check against
     /// \param exactly tells to check really everything or only the "public" version
@@ -296,38 +326,37 @@ public:
     /// The difference between setting this flag to true or false is following:
     /// exactly=true checks all fields, also internal ones, exactly=false checks
     /// only the fields that will be visible in DIDL-Lite
-    virtual int equals(zmm::Ref<CdsObject> obj, bool exactly=false);
-    
+    virtual int equals(zmm::Ref<CdsObject> obj, bool exactly = false);
+
     /// \brief Checks if current object has the same resources as obj
     /// \param obj object to check against
     int resourcesEqual(zmm::Ref<CdsObject> obj);
-    
+
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
     virtual void validate();
-    
+
     /// \brief Frees unnecessary memory
     void optimize();
-    
+
     static zmm::Ref<CdsObject> createObject(unsigned int objectType);
 
     /// \brief Returns the path to the object as it appears in the database tree.
-    virtual zmm::String getVirtualPath() = 0; 
-    
+    virtual zmm::String getVirtualPath() = 0;
+
     static zmm::String mapObjectType(int objectType);
     static int remapObjectType(zmm::String objectType);
-    
-    friend int CdsObjectTitleComparator(void *arg1, void *arg2);
+
+    friend int CdsObjectTitleComparator(void* arg1, void* arg2);
 };
 
 /// \brief An Item in the content directory.
-class CdsItem : public CdsObject
-{
+class CdsItem : public CdsObject {
 protected:
     /// \brief mime-type of the media.
     zmm::String mimeType;
 
     int trackNumber;
-    
+
     /// \brief unique service ID
     zmm::String serviceID;
 
@@ -343,7 +372,7 @@ public:
 
     /// \brief Sets the upnp:originalTrackNumber property
     inline void setTrackNumber(int trackNumber) { this->trackNumber = trackNumber; }
-    
+
     inline int getTrackNumber() { return trackNumber; }
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)
@@ -352,17 +381,17 @@ public:
     /// \brief Checks if current object is equal to obj.
     ///
     /// See description for CdsObject::equals() for details.
-    virtual int equals(zmm::Ref<CdsObject> obj, bool exactly=false);
+    virtual int equals(zmm::Ref<CdsObject> obj, bool exactly = false);
 
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
     virtual void validate();
 
     /// \brief Returns the path to the object as it appears in the database tree.
     virtual zmm::String getVirtualPath();
-    
+
     /// \brief Set the unique service ID.
     inline void setServiceID(zmm::String serviceID) { this->serviceID = serviceID; }
-    
+
     /// \brief Retrieve the unique service ID.
     inline zmm::String getServiceID() { return serviceID; }
 };
@@ -389,16 +418,15 @@ public:
 /// We plan to extend the ActiveItem functionality, allowing to control
 /// various server settings, and also being more flexible on the time
 /// of script execution (execute script before or after serving the media, etc.)
-class CdsActiveItem : public CdsItem
-{
+class CdsActiveItem : public CdsItem {
 protected:
     /// \brief action to be executed (an absolute path to a script that will process the XML)
     zmm::String action;
 
     /// \brief a field where you can save any string you wnat.
     zmm::String state;
-public:
 
+public:
     /// \brief Constructor, sets the object type.
     CdsActiveItem();
 
@@ -426,17 +454,15 @@ public:
     /// \brief Checks if current object is equal to obj.
     ///
     /// See description for CdsObject::equals() for details.
-    virtual int equals(zmm::Ref<CdsObject> obj, bool exactly=false);
+    virtual int equals(zmm::Ref<CdsObject> obj, bool exactly = false);
 
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
     virtual void validate();
 };
 
 /// \brief An item that is accessible via a URL.
-class CdsItemExternalURL : public CdsItem
-{
+class CdsItemExternalURL : public CdsItem {
 public:
-
     /// \brief Constructor, sets the object type.
     CdsItemExternalURL();
 
@@ -464,14 +490,12 @@ public:
 ///
 /// This implementation will alow to easily launch Java games on the
 /// Streamium media renderer. Why "internal URL"? The port of the server
-/// can change upon restarts, I have seen that the SDK often binds to 
+/// can change upon restarts, I have seen that the SDK often binds to
 /// a new port (no matter what is configured). The location of an
 /// internal URL will be specified as /mystuff/myfile.txt and will
 /// resolve to http://serverip:serverport/content/serve/mystuff/myfile.txt
-class CdsItemInternalURL : public CdsItemExternalURL
-{
+class CdsItemInternalURL : public CdsItemExternalURL {
 public:
-
     /// \brief Constructor, sets the object type.
     CdsItemInternalURL();
 
@@ -531,18 +555,17 @@ public:
 */
 
 /// \brief A container in the content directory.
-class CdsContainer : public CdsObject
-{
+class CdsContainer : public CdsObject {
 protected:
     /// \brief container update id.
     int updateID;
 
     /// \brief childCount attribute
     int childCount;
-    
+
     /// \brief wheather this container is an autoscan start point.
     int autoscanType;
-    
+
 public:
     /// \brief Constructor, initializes default values for the flags and sets the object type.
     CdsContainer();
@@ -564,13 +587,13 @@ public:
 
     /// \brief Retrieve number of children
     inline int getChildCount() { return childCount; }
-    
+
     /// \brief returns wheather this container is an autoscan start point.
     inline int getAutoscanType() { return autoscanType; }
-    
+
     /// \brief sets wheather this container is an autoscan start point.
     inline void setAutoscanType(int type) { autoscanType = type; }
-    
+
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)
     virtual void copyTo(zmm::Ref<CdsObject> obj);
@@ -578,11 +601,11 @@ public:
     /// \brief Checks if current object is equal to obj.
     ///
     /// See description for CdsObject::equals() for details.
-    virtual int equals(zmm::Ref<CdsObject> obj, bool exactly=false);
+    virtual int equals(zmm::Ref<CdsObject> obj, bool exactly = false);
 
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
     virtual void validate();
-    
+
     /// \brief Returns the path to the object as it appears in the database tree.
     virtual zmm::String getVirtualPath();
 };

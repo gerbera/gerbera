@@ -29,36 +29,37 @@
 
 /// \file timer.cc
 
-#include <cassert>
-#include "singleton.h"
 #include "timer.h"
+#include "singleton.h"
+#include <cassert>
 
 using namespace zmm;
 using namespace std;
 
-void Timer::init() {
+void Timer::init()
+{
     log_debug("Starting Timer thread...\n");
     int ret = pthread_create(
         &thread,
         nullptr,
         Timer::staticThreadProc,
-        this
-    );
+        this);
 
     if (ret)
         throw _Exception(_("failed to start timer thread: ") + ret);
 }
 
-void *Timer::staticThreadProc(void *arg)
+void* Timer::staticThreadProc(void* arg)
 {
     log_debug("Started Timer thread.\n");
-    auto *inst = (Timer *)arg;
+    auto* inst = (Timer*)arg;
     inst->threadProc();
     log_debug("Exiting Timer thread...\n");
     return nullptr;
 }
 
-void Timer::threadProc() {
+void Timer::threadProc()
+{
     triggerWait();
 }
 
@@ -97,7 +98,7 @@ void Timer::triggerWait()
 {
     unique_lock<std::mutex> lock(waitMutex);
 
-    while(!shutdownFlag) {
+    while (!shutdownFlag) {
         log_debug("triggerWait. - %d subscriber(s)\n", subscribers.size());
 
         if (subscribers.empty()) {
@@ -106,7 +107,7 @@ void Timer::triggerWait()
             continue;
         }
 
-        struct timespec *timeout = getNextNotifyTime();
+        struct timespec* timeout = getNextNotifyTime();
         struct timespec now;
         getTimespecNow(&now);
 
@@ -125,14 +126,14 @@ void Timer::triggerWait()
     }
 }
 
-void  Timer::notify()
+void Timer::notify()
 {
     unique_lock<std::mutex> lock(mutex);
     assert(lock.owns_lock());
 
     std::list<TimerSubscriberElement> toNotify;
 
-    for (auto it = subscribers.begin(); it != subscribers.end(); ) {
+    for (auto it = subscribers.begin(); it != subscribers.end();) {
         TimerSubscriberElement& element = *it;
 
         struct timespec now;
@@ -141,7 +142,7 @@ void  Timer::notify()
 
         if (wait <= 0) {
             toNotify.push_back(element);
-            if(element.isOnce()){
+            if (element.isOnce()) {
                 it = subscribers.erase(it);
             } else {
                 element.updateNextNotify();
@@ -162,9 +163,9 @@ void  Timer::notify()
 struct timespec* Timer::getNextNotifyTime()
 {
     AutoLock lock(mutex);
-    struct timespec *nextTime = nullptr;
-    for (auto & subscriber : subscribers) {
-        struct timespec *nextNotify = subscriber.getNextNotify();
+    struct timespec* nextTime = nullptr;
+    for (auto& subscriber : subscribers) {
+        struct timespec* nextNotify = subscriber.getNextNotify();
         if (nextTime == nullptr || getDeltaMillis(nextTime, nextNotify) < 0) {
             nextTime = nextNotify;
         }

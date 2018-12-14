@@ -35,31 +35,28 @@
 #ifndef __ONLINE_SERVICE_H__
 #define __ONLINE_SERVICE_H__
 
-
+#include "layout/layout.h"
+#include "mxml/mxml.h"
+#include "timer.h"
 #include "zmm/zmm.h"
 #include "zmm/zmmf.h"
-#include "mxml/mxml.h"
-#include "layout/layout.h"
-#include "timer.h"
 
 #define ONLINE_SERVICE_AUX_ID "ols"
 #define ONLINE_SERVICE_LAST_UPDATE "lu"
 
 // make sure to add the storage prefixes when adding new services
-typedef enum 
-{
-    OS_None         = 0,
-    OS_YouTube      = 1,
-    OS_SopCast      = 2,
+typedef enum {
+    OS_None = 0,
+    OS_YouTube = 1,
+    OS_SopCast = 2,
 
-    OS_ATrailers    = 4,
+    OS_ATrailers = 4,
     OS_Max
 } service_type_t;
 
 /// \brief This is an interface for all online services, the function
 /// handles adding/refreshing content in the database.
-class OnlineService : public zmm::Object
-{
+class OnlineService : public zmm::Object {
 public:
     OnlineService();
 
@@ -84,22 +81,22 @@ public:
 
     /// \brief Get the storage service prefix for a particular service
     char getStoragePrefix();
-    
+
     /// \brief Get the storage prefix for a given service type
     static char getStoragePrefix(service_type_t service);
-    
+
     /// \brief Parses the service related line from config.xml and creates
     /// a task object, which can be anything that helps the service to
     /// identify what data it has to fetch.
     virtual zmm::Ref<zmm::Object> defineServiceTask(zmm::Ref<mxml::Element> xmlopt, zmm::Ref<zmm::Object> params) = 0;
 
-    /// \brief Increments the task count. 
+    /// \brief Increments the task count.
     ///
     /// When recursive autoscan is in progress, we only want to subcribe to
     /// a timer event when the scan is finished. However, recursive scans
-    /// spawn tasks for each directory. When adding a rescan task for 
+    /// spawn tasks for each directory. When adding a rescan task for
     /// subdirectories, the taskCount will be incremented. When a task is
-    /// done the count will be decremented. When timer gets to zero, 
+    /// done the count will be decremented. When timer gets to zero,
     /// we will resubscribe.
     void incTaskCount() { taskCount++; }
 
@@ -111,12 +108,14 @@ public:
 
     /// Parameter that can be used by timerNotify
     void setTimerParameter(zmm::Ref<Timer::Parameter> param)
-                           { timer_parameter = param; }
+    {
+        timer_parameter = param;
+    }
 
     zmm::Ref<Timer::Parameter> getTimerParameter() { return timer_parameter; }
 
     /// \brief Sets the service refresh interval in seconds
-    void setRefreshInterval(int interval) {refresh_interval = interval; }
+    void setRefreshInterval(int interval) { refresh_interval = interval; }
 
     /// \brief Retrieves the service refresh interval in seconds
     int getRefreshInterval() { return refresh_interval; }
@@ -139,8 +138,7 @@ protected:
     int getCheckPosIntAttr(zmm::Ref<mxml::Element> xml, zmm::String attrname);
 };
 
-class OnlineServiceList : public zmm::Object
-{
+class OnlineServiceList : public zmm::Object {
 public:
     OnlineServiceList();
 
@@ -151,9 +149,9 @@ public:
     zmm::Ref<OnlineService> getService(service_type_t service);
 
 protected:
-    zmm::Ref<zmm::Array<OnlineService> > service_list;
+    zmm::Ref<zmm::Array<OnlineService>> service_list;
 };
 
-#endif//__ONLINE_SERVICE_H__
+#endif //__ONLINE_SERVICE_H__
 
-#endif//ONLINE_SERVICE
+#endif //ONLINE_SERVICE

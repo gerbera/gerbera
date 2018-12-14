@@ -31,23 +31,22 @@
 
 #include "process_executor.h"
 #include "process.h"
-#include <pthread.h>
 #include <csignal>
+#include <pthread.h>
 
 using namespace zmm;
 
-ProcessExecutor::ProcessExecutor(String command, Ref<Array<StringBase> > arglist)
+ProcessExecutor::ProcessExecutor(String command, Ref<Array<StringBase>> arglist)
 {
 #define MAX_ARGS 255
-    const char *argv[MAX_ARGS];
-    
+    const char* argv[MAX_ARGS];
+
     argv[0] = command.c_str();
     int apos = 0;
 
-    for (int i = 0; i < arglist->size(); i++)
-    {
+    for (int i = 0; i < arglist->size(); i++) {
         argv[++apos] = arglist->get(i)->data;
-        if (apos >= MAX_ARGS-2)
+        if (apos >= MAX_ARGS - 2)
             break;
     }
     argv[++apos] = nullptr;
@@ -55,19 +54,18 @@ ProcessExecutor::ProcessExecutor(String command, Ref<Array<StringBase> > arglist
     exit_status = 0;
 
     process_id = fork();
-    
-    switch (process_id)
-    {
-        case -1:
-            throw _Exception(_("Failed to launch process ") + command);
-        
-        case 0:
-            sigset_t mask_set;
-            pthread_sigmask(SIG_SETMASK, &mask_set, nullptr);
-            log_debug("Launching process: %s\n", command.c_str());
-            execvp(command.c_str(), const_cast<char **const>(argv));
-        default:
-            break;
+
+    switch (process_id) {
+    case -1:
+        throw _Exception(_("Failed to launch process ") + command);
+
+    case 0:
+        sigset_t mask_set;
+        pthread_sigmask(SIG_SETMASK, &mask_set, nullptr);
+        log_debug("Launching process: %s\n", command.c_str());
+        execvp(command.c_str(), const_cast<char** const>(argv));
+    default:
+        break;
     }
 
     log_debug("Launched process %s, pid: %d\n", command.c_str(), process_id);
@@ -77,7 +75,7 @@ bool ProcessExecutor::isAlive()
 {
     return is_alive(process_id, &exit_status);
 }
-    
+
 bool ProcessExecutor::kill()
 {
     return kill_proc(process_id);

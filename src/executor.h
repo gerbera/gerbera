@@ -35,21 +35,19 @@
 #include "zmm/zmmf.h"
 
 /// \brief wraps something executable e.g. a thread or a process
-class Executor : public zmm::Object
-{
+class Executor : public zmm::Object {
 public:
-    
     /// \brief destructor of the executor, has to make sure that the executor is dead
     virtual ~Executor() {};
-    
+
     /// \brief method to check if the executor is still running
     /// \return true if the executor is still running, false otherwise
     virtual bool isAlive() = 0;
-    
+
     /// \brief kill the executor
     /// \return true if the executor was killed successfully, false otherwise
     virtual bool kill() = 0;
-    
+
     /// \brief get the status, exit or return code of the executor
     /// \return the status, exit or return code. 0 for normal shutdown
     virtual int getStatus() = 0;

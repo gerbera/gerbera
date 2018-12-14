@@ -32,15 +32,15 @@
 #define __TOOLS_H__
 
 #include <memory>
-#include <unordered_set>
 #include <sstream>
+#include <unordered_set>
 
 #include <sys/time.h>
 
-#include "common.h"
-#include "rexp.h"
-#include "io_handler.h"
 #include "cds_objects.h"
+#include "common.h"
+#include "io_handler.h"
+#include "rexp.h"
 
 #ifdef HAVE_MAGIC
 // for older versions of filemagic
@@ -55,13 +55,13 @@ extern "C" {
 /// \param sep separator character
 /// \param treat subsequent separators as empty array elements
 /// \return array of strings
-zmm::Ref<zmm::Array<zmm::StringBase> > split_string(zmm::String str, char sep, 
-                                                    bool empty = false);
+zmm::Ref<zmm::Array<zmm::StringBase>> split_string(zmm::String str, char sep,
+    bool empty = false);
 
 /// \brief splits the given file path into the path to the file and the filename.
 /// \param str the path to split
 /// \return an array with the path at position 0 and the filename at position 1.
-zmm::Ref<zmm::Array<zmm::StringBase> > split_path(zmm::String str);
+zmm::Ref<zmm::Array<zmm::StringBase>> split_path(zmm::String str);
 
 /// \brief returns str with leading and trailing whitespace removed
 zmm::String trim_string(zmm::String str);
@@ -70,7 +70,7 @@ zmm::String trim_string(zmm::String str);
 /// \param path file or directory to be checked.
 /// \param needDir true when checked item has to be a directory.
 /// \return true path or file exists
-/// \return false path of file not found 
+/// \return false path of file not found
 bool check_path(zmm::String path, bool needDir = false);
 
 /// \brief Checks existance of the specified file or path.
@@ -83,16 +83,16 @@ bool check_path(zmm::String path, bool needDir = false);
 /// More or less the same as check_path, the only difference is,
 /// that this function throws an exception if a path or directory
 /// was not found or was not the desired type. Additionally this function
-/// returns the last modification time of the file or directory and, if 
+/// returns the last modification time of the file or directory and, if
 /// needed, also the filesize.
-time_t check_path_ex(zmm::String path, bool needDir = false, bool existenceUnneeded = false, off_t *filesize = NULL);
+time_t check_path_ex(zmm::String path, bool needDir = false, bool existenceUnneeded = false, off_t* filesize = NULL);
 
 /// \brief Checks if the given binary is executable by our process
 /// \param path absolute path of the binary
 /// \param err if not NULL err will contain the errno result of the check
 /// \return true if the given binary is executable by our process, otherwise
 /// false
-bool is_executable(zmm::String path, int *err = NULL);
+bool is_executable(zmm::String path, int* err = NULL);
 
 /// \brief Checks if the given executable exists in $PATH
 /// \param exec filename of the executable that needs to be checked
@@ -103,13 +103,13 @@ zmm::String find_in_path(zmm::String exec);
 /// \param str String to be checked.
 /// \return true if ok
 /// \return false if string was either nullptr or empty
-/// 
+///
 /// Checks if str is nullptr or ""
 bool string_ok(zmm::String str);
 
 /// \brief Checks if the string contains any data.
 /// \param str String to be checked.
-/// 
+///
 /// Checks if str is nullptr or "" and throws an exception if that is the case.
 void string_ok_ex(zmm::String str);
 
@@ -124,20 +124,19 @@ zmm::String http_redirect_to(zmm::String ip, zmm::String port, zmm::String page 
 /// \param data Buffer that is holding the data
 /// \param len Length of the buffer.
 /// \return string of the data in hex representation.
-zmm::String hex_encode(const void *data, int len);
+zmm::String hex_encode(const void* data, int len);
 
 /// \brief Decodes hex encoded string.
 /// \param encoded hex-encoded string.
 /// \return decoded string
 zmm::String hex_decode_string(zmm::String encoded);
 
-
 /// \brief Generates random id.
 /// \return String representing the newly created id.
 zmm::String generate_random_id();
 
 /// \brief Generates hex md5 sum of the given data.
-zmm::String hex_md5(const void *data, int length);
+zmm::String hex_md5(const void* data, int length);
 
 /// \brief Generates hex md5 sum of the given string.
 zmm::String hex_string_md5(zmm::String str);
@@ -146,14 +145,14 @@ zmm::String hex_string_md5(zmm::String str);
 /// \param str String to be converted.
 /// \return string that contains the url-escaped representation of the original string.
 zmm::String url_escape(zmm::String str);
- 
-/// \brief Opposite of url_escape :) 
+
+/// \brief Opposite of url_escape :)
 zmm::String url_unescape(zmm::String str);
 
 /// \brief Convert an array of strings to a CSV list, with additional protocol information
 /// \param array that needs to be converted
 /// \return string containing the CSV list
-zmm::String mime_types_to_CSV(zmm::Ref<zmm::Array<zmm::StringBase> > mimeTypes);
+zmm::String mime_types_to_CSV(zmm::Ref<zmm::Array<zmm::StringBase>> mimeTypes);
 
 /// \brief a wrapper for the reentrant strerror_r() function
 /// \param mt_errno the errno to get the error string from
@@ -167,20 +166,20 @@ zmm::String read_text_file(zmm::String path);
 void write_text_file(zmm::String path, zmm::String contents);
 
 /// \brief copies a file
-/// \param from the path to the file to copy from 
+/// \param from the path to the file to copy from
 /// \param to the path to the file to copy to
 void copy_file(zmm::String from, zmm::String to);
 
-typedef int (*COMPARATOR) (void *, void *);
-typedef void * COMPARABLE;
+typedef int (*COMPARATOR)(void*, void*);
+typedef void* COMPARABLE;
 
-int StringBaseComparatorAsc(void *, void *);
+int StringBaseComparatorAsc(void*, void*);
 
-void quicksort(COMPARABLE *arr, int size, COMPARATOR comparator);
+void quicksort(COMPARABLE* arr, int size, COMPARATOR comparator);
 
-/// \brief Renders a string that can be used as the protocolInfo resource 
+/// \brief Renders a string that can be used as the protocolInfo resource
 /// attribute: "http-get:*:mimetype:*"
-/// 
+///
 /// \param mimetype the mimetype that should be inserted
 /// \param protocol the protocol which should be inserted (default: "http-get")
 /// \return The rendered protocolInfo String
@@ -191,11 +190,10 @@ zmm::String renderProtocolInfo(zmm::String mimetype, zmm::String protocol = _(PR
 zmm::String getMTFromProtocolInfo(zmm::String protocol);
 
 /// \brief Parses a protocolInfo string (see renderProtocolInfo).
-/// 
+///
 /// \param protocolInfoStr the String from renderProtocolInfo.
 /// \return Protocol (i.e. http-get).
 zmm::String getProtocol(zmm::String protocolInfo);
-
 
 /// \brief Converts a number of seconds to H+:MM:SS representation as required by
 /// the UPnP spec
@@ -206,17 +204,17 @@ int HMSToSeconds(zmm::String time);
 
 #ifdef HAVE_MAGIC
 /// \brief Extracts mimetype from a file using filemagic
-zmm::String get_mime_type(magic_set *ms, zmm::Ref<RExp> reMimetype, zmm::String file);
+zmm::String get_mime_type(magic_set* ms, zmm::Ref<RExp> reMimetype, zmm::String file);
 /// \brief Extracts mimetype from a buffer using filemagic
-zmm::String get_mime_type_from_buffer(magic_set *ms, zmm::Ref<RExp> reMimetype,
-                                         const void *buffer, size_t length);
+zmm::String get_mime_type_from_buffer(magic_set* ms, zmm::Ref<RExp> reMimetype,
+    const void* buffer, size_t length);
 
 #endif // HAVE_MAGIC
 
 #ifdef SOPCAST
 /// \brief Finds a free port between range_min and range_max on localhost.
-int find_local_port(unsigned short range_min, 
-                              unsigned short range_max);
+int find_local_port(unsigned short range_min,
+    unsigned short range_max);
 #endif
 /// \brief Extracts resolution from a JPEG image
 zmm::String get_jpeg_resolution(zmm::Ref<IOHandler> ioh);
@@ -225,7 +223,7 @@ zmm::String get_jpeg_resolution(zmm::Ref<IOHandler> ioh);
 void set_jpeg_resolution_resource(zmm::Ref<CdsItem> item, int res_num);
 
 /// \brief checks if the given string has the format xr x yr (i.e. 320x200 etc.)
-bool check_resolution(zmm::String resolution, int *x = NULL, int *y = NULL);
+bool check_resolution(zmm::String resolution, int* x = NULL, int* y = NULL);
 
 zmm::String escape(zmm::String string, char escape_char, char to_escape);
 
@@ -264,29 +262,31 @@ zmm::String fallbackString(zmm::String first, zmm::String fallback);
 unsigned int stringHash(zmm::String str);
 
 template <typename C, typename D>
-std::string join(const C &container, const D &delimiter) {
+std::string join(const C& container, const D& delimiter)
+{
     std::ostringstream buf;
     auto it = container.begin();
     while (it != container.end()) {
         buf << *it;
-        if (std::next(it++) != container.end()) buf << delimiter;
+        if (std::next(it++) != container.end())
+            buf << delimiter;
     }
     return buf.str();
 }
 
-zmm::String toCSV(std::shared_ptr<std::unordered_set<int> > array);
+zmm::String toCSV(std::shared_ptr<std::unordered_set<int>> array);
 
 //inline void getTimeval(struct timeval *now) { gettimeofday(now, NULL); }
 
-void getTimespecNow(struct timespec *ts);
+void getTimespecNow(struct timespec* ts);
 
-long getDeltaMillis(struct timespec *first);
-long getDeltaMillis(struct timespec *first, struct timespec *second);
+long getDeltaMillis(struct timespec* first);
+long getDeltaMillis(struct timespec* first, struct timespec* second);
 
-void getTimespecAfterMillis(long delta, struct timespec *ret, struct timespec *start = NULL);
+void getTimespecAfterMillis(long delta, struct timespec* ret, struct timespec* start = NULL);
 
-/// \brief This function makes sure that there are no trailing slashes, no 
-/// consecutive slashes. If /../ or /..\0 is encountered an exception is 
+/// \brief This function makes sure that there are no trailing slashes, no
+/// consecutive slashes. If /../ or /..\0 is encountered an exception is
 /// thrown.
 zmm::String normalizePath(zmm::String path);
 
@@ -300,30 +300,28 @@ zmm::String interfaceToIP(zmm::String interface);
 /// \return Interface name or nullptr if IP was not found.
 zmm::String ipToInterface(zmm::String interface);
 
-
 /// \brief Returns true if the given string is eitehr "yes" or "no", otherwise
 /// returns false.
 bool validateYesNo(zmm::String value);
 
-
 /// \brief Parses a command line, splitting the arguments into an array and
 /// substitutes %in and %out tokens with given strings.
 ///
-/// This function splits a string into array parts, where space is used as the 
+/// This function splits a string into array parts, where space is used as the
 /// separator. In addition special %in and %out tokens are replaced by given
 /// strings.
 /// \todo add escaping
-zmm::Ref<zmm::Array<zmm::StringBase> > parseCommandLine(zmm::String line,
-                                                        zmm::String in,
-                                                        zmm::String out,
-                                                        zmm::String range);
+zmm::Ref<zmm::Array<zmm::StringBase>> parseCommandLine(zmm::String line,
+    zmm::String in,
+    zmm::String out,
+    zmm::String range);
 
 /// \brief this is the mkstemp routine from glibc, the only difference is that
 /// it does not return an fd but just the name that we could use.
 ///
 /// The reason behind this is, that we need to open a pipe, while mkstemp will
 /// open a regular file.
-zmm::String tempName(zmm::String leadPath, char *tmpl);
+zmm::String tempName(zmm::String leadPath, char* tmpl);
 
 /// \brief Determines if the particular ogg file contains a video (theora)
 bool isTheora(zmm::String ogg_filename);
@@ -353,19 +351,21 @@ zmm::String getAVIFourCC(zmm::String avi_filename);
 
 #ifdef TOMBDEBUG
 
-struct profiling_t
-{
+struct profiling_t {
     struct timespec sum;
     struct timespec last_start;
     bool running;
     pthread_t thread;
 };
 
-#define PROFILING_T_INIT {{0,0},{0,0},false, pthread_self()}
+#define PROFILING_T_INIT                          \
+    {                                             \
+        { 0, 0 }, { 0, 0 }, false, pthread_self() \
+    }
 
-void profiling_start(struct profiling_t *data);
-void profiling_end(struct profiling_t *data);
-void profiling_print(struct profiling_t *data);
+void profiling_start(struct profiling_t* data);
+void profiling_end(struct profiling_t* data);
+void profiling_print(struct profiling_t* data);
 
 #define PROF_INIT(var) profiling_t var = PROFILING_T_INIT
 #define PROF_START(var) profiling_start(var)

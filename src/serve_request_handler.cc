@@ -31,27 +31,27 @@
 
 #include <sys/stat.h>
 
-#include "server.h"
 #include "file_io_handler.h"
 #include "serve_request_handler.h"
-
+#include "server.h"
 
 using namespace zmm;
 using namespace mxml;
 
-ServeRequestHandler::ServeRequestHandler() : RequestHandler()
+ServeRequestHandler::ServeRequestHandler()
+    : RequestHandler()
 {
 }
 
 /// \todo clean up the fix for internal items
-void ServeRequestHandler::get_info(IN const char *filename, OUT UpnpFileInfo *info)
+void ServeRequestHandler::get_info(IN const char* filename, OUT UpnpFileInfo* info)
 {
     struct stat statbuf;
     int ret = 0;
     int len = 0;
 
     log_debug("got filename: %s\n", filename);
-    
+
     String url_path, parameters;
     split_url(filename, URL_PARAM_SEPARATOR, url_path, parameters);
 
@@ -59,22 +59,19 @@ void ServeRequestHandler::get_info(IN const char *filename, OUT UpnpFileInfo *in
 
     len = (_("/") + SERVER_VIRTUAL_DIR + _("/") + CONTENT_SERVE_HANDLER).length();
 
-    if (len > url_path.length())
-    {
+    if (len > url_path.length()) {
         throw _Exception(_("There is something wrong with the link ") + url_path);
     }
 
     url_path = url_unescape(url_path);
 
-    String path = ConfigManager::getInstance()->getOption(CFG_SERVER_SERVEDIR) 
-                    + url_path.substring(len, url_path.length()) + 
-                    _("/") + parameters;
-   
+    String path = ConfigManager::getInstance()->getOption(CFG_SERVER_SERVEDIR)
+        + url_path.substring(len, url_path.length()) + _("/") + parameters;
+
     log_debug("Constructed new path: %s\n", path.c_str());
-    
+
     ret = stat(path.c_str(), &statbuf);
-    if (ret != 0)
-    {
+    if (ret != 0) {
         throw _Exception(_("Failed to stat ") + path);
     }
 
@@ -82,18 +79,14 @@ void ServeRequestHandler::get_info(IN const char *filename, OUT UpnpFileInfo *in
     {
         String mimetype = _(MIMETYPE_DEFAULT);
 #ifdef HAVE_MAGIC
-        magic_set *ms = nullptr;
+        magic_set* ms = nullptr;
         ms = magic_open(MAGIC_MIME);
-        if (ms != nullptr)
-        {
-            if (magic_load(ms, nullptr) == -1)
-            {
+        if (ms != nullptr) {
+            if (magic_load(ms, nullptr) == -1) {
                 log_warning("magic_load: %s\n", magic_error(ms));
                 magic_close(ms);
                 ms = nullptr;
-            } 
-            else
-            {
+            } else {
                 /// \TODO we could request the mimetype rex from content manager
                 Ref<RExp> reMimetype;
                 reMimetype = Ref<RExp>(new RExp());
@@ -112,26 +105,21 @@ void ServeRequestHandler::get_info(IN const char *filename, OUT UpnpFileInfo *in
         UpnpFileInfo_set_LastModified(info, statbuf.st_mtime);
         UpnpFileInfo_set_IsDirectory(info, S_ISDIR(statbuf.st_mode));
 
-        if (access(path.c_str(), R_OK) == 0)
-        {
+        if (access(path.c_str(), R_OK) == 0) {
             UpnpFileInfo_set_IsReadable(info, 1);
-        }
-        else
-        {
+        } else {
             UpnpFileInfo_set_IsReadable(info, 0);
         }
 
         UpnpFileInfo_set_ContentType(info, ixmlCloneDOMString(mimetype.c_str()));
-    }
-    else
-    {
-         throw _Exception(_("Not a regular file: ") + path);
+    } else {
+        throw _Exception(_("Not a regular file: ") + path);
     }
 }
 
-Ref<IOHandler> ServeRequestHandler::open(IN const char *filename,
-                                         IN enum UpnpOpenFileMode mode,
-                                         IN zmm::String range)
+Ref<IOHandler> ServeRequestHandler::open(IN const char* filename,
+    IN enum UpnpOpenFileMode mode,
+    IN zmm::String range)
 {
     struct stat statbuf;
     int ret = 0;
@@ -141,7 +129,7 @@ Ref<IOHandler> ServeRequestHandler::open(IN const char *filename,
     // due to security reasons.
     if (mode != UPNP_READ)
         throw _Exception(_("UPNP_WRITE unsupported"));
-    
+
     len = (_("/") + SERVER_VIRTUAL_DIR + _("/") + CONTENT_SERVE_HANDLER).length();
     String url_path, parameters;
     split_url(filename, URL_PARAM_SEPARATOR, url_path, parameters);
@@ -150,20 +138,16 @@ Ref<IOHandler> ServeRequestHandler::open(IN const char *filename,
 
     len = (_("/") + SERVER_VIRTUAL_DIR + _("/") + CONTENT_SERVE_HANDLER).length();
 
-    if (len > url_path.length())
-    {
-        throw _Exception(_("There is something wrong with the link ") +
-                        url_path);
+    if (len > url_path.length()) {
+        throw _Exception(_("There is something wrong with the link ") + url_path);
     }
 
-    String path = ConfigManager::getInstance()->getOption(CFG_SERVER_SERVEDIR) 
-                  + url_path.substring(len, url_path.length()) + 
-                    _("/") + parameters;
+    String path = ConfigManager::getInstance()->getOption(CFG_SERVER_SERVEDIR)
+        + url_path.substring(len, url_path.length()) + _("/") + parameters;
 
     log_debug("Constructed new path: %s\n", path.c_str());
     ret = stat(path.c_str(), &statbuf);
-    if (ret != 0)
-    {
+    if (ret != 0) {
         throw _Exception(_("Failed to stat ") + path);
     }
 
@@ -171,18 +155,14 @@ Ref<IOHandler> ServeRequestHandler::open(IN const char *filename,
     {
         String mimetype = _(MIMETYPE_DEFAULT);
 #ifdef HAVE_MAGIC
-        magic_set *ms = nullptr;
+        magic_set* ms = nullptr;
         ms = magic_open(MAGIC_MIME);
-        if (ms != nullptr)
-        {
-            if (magic_load(ms, nullptr) == -1)
-            {
+        if (ms != nullptr) {
+            if (magic_load(ms, nullptr) == -1) {
                 log_warning("magic_load: %s\n", magic_error(ms));
                 magic_close(ms);
                 ms = nullptr;
-            }
-            else
-            {
+            } else {
                 /// \TODO we could request the mimetype rex from content manager
                 Ref<RExp> reMimetype;
                 reMimetype = Ref<RExp>(new RExp());
@@ -197,8 +177,8 @@ Ref<IOHandler> ServeRequestHandler::open(IN const char *filename,
         }
 #endif // HAVE_MAGIC
 
-		// FIXME upstream headers
-		/*
+        // FIXME upstream headers
+        /*
         info->file_length = statbuf.st_size;
         info->last_modified = statbuf.st_mtime;
         info->is_directory = S_ISDIR(statbuf.st_mode);
@@ -215,10 +195,8 @@ Ref<IOHandler> ServeRequestHandler::open(IN const char *filename,
 
         info->content_type = ixmlCloneDOMString(mimetype.c_str());
         */
-    }
-    else
-    {
-         throw _Exception(_("Not a regular file: ") + path);
+    } else {
+        throw _Exception(_("Not a regular file: ") + path);
     }
     Ref<IOHandler> io_handler(new FileIOHandler(path));
     io_handler->open(mode);

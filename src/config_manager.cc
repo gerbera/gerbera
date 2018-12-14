@@ -100,11 +100,12 @@ void ConfigManager::setStaticArgs(String _filename, String _userhome,
 
 ConfigManager::ConfigManager()
     : Singleton<ConfigManager, std::mutex>()
-{}
+{
+}
 
 void ConfigManager::init()
 {
-    options = Ref<Array<ConfigOption> >(new Array<ConfigOption>(CFG_MAX));
+    options = Ref<Array<ConfigOption>>(new Array<ConfigOption>(CFG_MAX));
 
     String home = userhome + DIR_SEPARATOR + config_dir;
 
@@ -497,7 +498,7 @@ void ConfigManager::validate(String serverhome)
     }
 
     // create the array from either user or default settings
-    Ref<Array<StringBase> > menu_opts(new Array<StringBase>());
+    Ref<Array<StringBase>> menu_opts(new Array<StringBase>());
     for (int j = 0; j < element->elementChildCount(); j++) {
         Ref<Element> child = element->getElementChild(j);
         if (child->getName() == "option")
@@ -1001,13 +1002,12 @@ void ConfigManager::validate(String serverhome)
 #endif
 
 #if defined(HAVE_FFMPEG)
-   el = getElement(_("/import/library-options/ffmpeg/auxdata"));
-   if (el == nullptr)
-   {
-       getOption(_("/import/library-options/ffmpeg/auxdata"), _(""));
-   }
-   NEW_STRARR_OPTION(createArrayFromNodeset(el, _("add-data"), _("tag")));
-   SET_STRARR_OPTION(CFG_IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST);
+    el = getElement(_("/import/library-options/ffmpeg/auxdata"));
+    if (el == nullptr) {
+        getOption(_("/import/library-options/ffmpeg/auxdata"), _(""));
+    }
+    NEW_STRARR_OPTION(createArrayFromNodeset(el, _("add-data"), _("tag")));
+    SET_STRARR_OPTION(CFG_IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST);
 #endif
 
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
@@ -1154,7 +1154,7 @@ void ConfigManager::validate(String serverhome)
     NEW_OPTION(temp);
     SET_OPTION(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING);
 
-    Ref<Array<StringBase> > mark_content_list(new Array<StringBase>());
+    Ref<Array<StringBase>> mark_content_list(new Array<StringBase>());
     tmpEl = getElement(_("/server/extended-runtime-options/mark-played-items/mark"));
 
     int contentElementCount = 0;
@@ -1374,7 +1374,7 @@ String ConfigManager::getOption(String xpath, String def)
     String pathPart = XPath::getPathPart(xpath);
     String axisPart = XPath::getAxisPart(xpath);
 
-    Ref<Array<StringBase> > parts = split_string(pathPart, '/');
+    Ref<Array<StringBase>> parts = split_string(pathPart, '/');
 
     Ref<Element> cur = root;
     String attr = nullptr;
@@ -1526,7 +1526,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
     if (element == nullptr)
         return list;
 
-    Ref<Array<DictionaryElement> > mt_mappings(new Array<DictionaryElement>());
+    Ref<Array<DictionaryElement>> mt_mappings(new Array<DictionaryElement>());
 
     String mt;
     String pname;
@@ -1615,7 +1615,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
                 throw _Exception(_("error in configuration: invalid mode given for avi-fourcc-list: \"") + mode + _("\""));
 
             if (fcc_mode != FCC_None) {
-                Ref<Array<StringBase> > fcc_list(new Array<StringBase>());
+                Ref<Array<StringBase>> fcc_list(new Array<StringBase>());
                 for (int f = 0; f < avi_fcc->elementChildCount(); f++) {
                     Ref<Element> fourcc = avi_fcc->getElementChild(f);
                     if (fourcc->getName() != "fourcc")
@@ -1891,7 +1891,6 @@ Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::El
         unsigned int interval = 0;
         ScanLevel level;
 
-
         if (mode == ScanMode::Timed) {
             temp = child->getAttribute(_("level"));
             if (!string_ok(temp)) {
@@ -1987,10 +1986,10 @@ void ConfigManager::dumpOptions()
 #endif
 }
 
-Ref<Array<StringBase> > ConfigManager::createArrayFromNodeset(Ref<mxml::Element> element, String nodeName, String attrName)
+Ref<Array<StringBase>> ConfigManager::createArrayFromNodeset(Ref<mxml::Element> element, String nodeName, String attrName)
 {
     String attrValue;
-    Ref<Array<StringBase> > arr(new Array<StringBase>());
+    Ref<Array<StringBase>> arr(new Array<StringBase>());
 
     if (element != nullptr) {
         for (int i = 0; i < element->elementChildCount(); i++) {
@@ -2041,18 +2040,18 @@ Ref<Dictionary> ConfigManager::getDictionaryOption(config_option_t option)
     return options->get(option)->getDictionaryOption();
 }
 
-Ref<Array<StringBase> > ConfigManager::getStringArrayOption(config_option_t option)
+Ref<Array<StringBase>> ConfigManager::getStringArrayOption(config_option_t option)
 {
     return options->get(option)->getStringArrayOption();
 }
 
-Ref<ObjectDictionary<zmm::Object> > ConfigManager::getObjectDictionaryOption(config_option_t option)
+Ref<ObjectDictionary<zmm::Object>> ConfigManager::getObjectDictionaryOption(config_option_t option)
 {
     return options->get(option)->getObjectDictionaryOption();
 }
 
 #ifdef ONLINE_SERVICES
-Ref<Array<Object> > ConfigManager::getObjectArrayOption(config_option_t option)
+Ref<Array<Object>> ConfigManager::getObjectArrayOption(config_option_t option)
 {
     return options->get(option)->getObjectArrayOption();
 }
@@ -2069,10 +2068,10 @@ Ref<TranscodingProfileList> ConfigManager::getTranscodingProfileListOption(confi
 }
 
 #ifdef ONLINE_SERVICES
-Ref<Array<Object> > ConfigManager::createServiceTaskList(service_type_t service,
+Ref<Array<Object>> ConfigManager::createServiceTaskList(service_type_t service,
     Ref<Element> element)
 {
-    Ref<Array<Object> > arr(new Array<Object>());
+    Ref<Array<Object>> arr(new Array<Object>());
 
     if (element == nullptr)
         return arr;

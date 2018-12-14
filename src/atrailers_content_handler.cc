@@ -33,11 +33,11 @@
 #if defined(ATRAILERS)
 
 #include "atrailers_content_handler.h"
-#include "online_service.h"
-#include "tools.h"
-#include "metadata_handler.h"
 #include "cds_objects.h"
 #include "config_manager.h"
+#include "metadata_handler.h"
+#include "online_service.h"
+#include "tools.h"
 
 using namespace zmm;
 using namespace mxml;
@@ -52,7 +52,7 @@ bool ATrailersContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
     this->service_xml = service;
 
     trailer_count = service_xml->childCount();
-    
+
     if (trailer_count == 0)
         return false;
 
@@ -71,12 +71,11 @@ Ref<CdsObject> ATrailersContentHandler::getNextObject()
     String temp;
     struct timespec ts;
 
-    while (current_trailer_index < trailer_count)
-    {
+    while (current_trailer_index < trailer_count) {
         Ref<Node> n = service_xml->getChild(current_trailer_index);
 
         current_trailer_index++;
-      
+
         if (n == nullptr)
             return nullptr;
 
@@ -108,10 +107,10 @@ Ref<CdsObject> ATrailersContentHandler::getNextObject()
         item->setAuxData(_(ONLINE_SERVICE_AUX_ID), String::from(OS_ATrailers));
 
         temp = trailer->getAttribute(_("id"));
-        if (!string_ok(temp))
-        {
+        if (!string_ok(temp)) {
             log_warning("Failed to retrieve Trailer ID for \"%s\", "
-                        "skipping...\n", item->getTitle().c_str());
+                        "skipping...\n",
+                item->getTitle().c_str());
             continue;
         }
 
@@ -119,22 +118,20 @@ Ref<CdsObject> ATrailersContentHandler::getNextObject()
         item->setServiceID(temp);
 
         Ref<Element> preview = trailer->getChildByName(_("preview"));
-        if (preview == nullptr)
-        {
+        if (preview == nullptr) {
             log_warning("Failed to retrieve Trailer location for \"%s\", "
-                        "skipping...\n", item->getTitle().c_str());
+                        "skipping...\n",
+                item->getTitle().c_str());
             continue;
         }
 
-        temp = preview->getChildText(_("large")); 
-        if (string_ok(temp))
-        {
+        temp = preview->getChildText(_("large"));
+        if (string_ok(temp)) {
             item->setURL(temp);
-        }
-        else
-        {
+        } else {
             log_error("Could not get location for Trailers item %s, "
-                      "skipping.\n", item->getTitle().c_str());
+                      "skipping.\n",
+                item->getTitle().c_str());
             continue;
         }
 
@@ -142,18 +139,18 @@ Ref<CdsObject> ATrailersContentHandler::getNextObject()
 
         temp = info->getChildText(_("rating"));
         if (string_ok(temp))
-            item->setMetadata(MetadataHandler::getMetaFieldName(M_RATING), 
-                              temp);
-       
+            item->setMetadata(MetadataHandler::getMetaFieldName(M_RATING),
+                temp);
+
         temp = info->getChildText(_("studio"));
         if (string_ok(temp))
-            item->setMetadata(MetadataHandler::getMetaFieldName(M_PRODUCER), 
-                              temp);
+            item->setMetadata(MetadataHandler::getMetaFieldName(M_PRODUCER),
+                temp);
 
         temp = info->getChildText(_("director"));
         if (string_ok(temp))
-            item->setMetadata(MetadataHandler::getMetaFieldName(M_DIRECTOR), 
-                              temp);
+            item->setMetadata(MetadataHandler::getMetaFieldName(M_DIRECTOR),
+                temp);
 
         temp = info->getChildText(_("postdate"));
         if (string_ok(temp))
@@ -161,22 +158,19 @@ Ref<CdsObject> ATrailersContentHandler::getNextObject()
 
         temp = info->getChildText(_("releasedate"));
         if (string_ok(temp))
-            item->setMetadata(MetadataHandler::getMetaFieldName(M_DATE), 
-                              temp);
+            item->setMetadata(MetadataHandler::getMetaFieldName(M_DATE),
+                temp);
 
         temp = info->getChildText(_("description"));
-        if (string_ok(temp))
-        {
+        if (string_ok(temp)) {
             /// \todo cut out a small part for the usual description
             item->setMetadata(MetadataHandler::getMetaFieldName(M_LONGDESCRIPTION), temp);
         }
 
         Ref<Element> cast = trailer->getChildByName(_("cast"));
-        if (cast != nullptr)
-        {
+        if (cast != nullptr) {
             String actors;
-            for (int i = 0; i < cast->childCount(); i++)
-            {
+            for (int i = 0; i < cast->childCount(); i++) {
                 Ref<Node> cn = cast->getChild(i);
                 if (cn->getType() != mxml_node_element)
                     continue;
@@ -186,8 +180,7 @@ Ref<CdsObject> ATrailersContentHandler::getNextObject()
                     continue;
 
                 temp = actor->getText();
-                if (string_ok(temp))
-                {
+                if (string_ok(temp)) {
                     if (string_ok(actors))
                         actors = actors + _(", ");
 
@@ -196,16 +189,14 @@ Ref<CdsObject> ATrailersContentHandler::getNextObject()
             }
 
             if (string_ok(actors))
-                item->setMetadata(MetadataHandler::getMetaFieldName(M_GENRE), 
-                                  temp);
+                item->setMetadata(MetadataHandler::getMetaFieldName(M_GENRE),
+                    temp);
         }
 
         Ref<Element> genre = trailer->getChildByName(_("genre"));
-        if (genre != nullptr)
-        {
+        if (genre != nullptr) {
             String genres;
-            for (int i = 0; i < genre->childCount(); i++)
-            {
+            for (int i = 0; i < genre->childCount(); i++) {
                 Ref<Node> gn = genre->getChild(i);
                 if (gn->getType() != mxml_node_element)
                     continue;
@@ -215,8 +206,7 @@ Ref<CdsObject> ATrailersContentHandler::getNextObject()
                     continue;
 
                 temp = genre->getText();
-                if (string_ok(temp))
-                {
+                if (string_ok(temp)) {
                     if (string_ok(genres))
                         genres = genres + _(", ");
 
@@ -225,10 +215,10 @@ Ref<CdsObject> ATrailersContentHandler::getNextObject()
             }
 
             if (string_ok(genres))
-                item->setMetadata(MetadataHandler::getMetaFieldName(M_GENRE), 
-                                  temp);
+                item->setMetadata(MetadataHandler::getMetaFieldName(M_GENRE),
+                    temp);
         }
-       
+
         /*
          
             we do not know the resolution, check if they use a fixed size
@@ -242,23 +232,20 @@ Ref<CdsObject> ATrailersContentHandler::getNextObject()
         */
 
         getTimespecNow(&ts);
-        item->setAuxData(_(ONLINE_SERVICE_LAST_UPDATE), 
-                         String::from(ts.tv_sec));
+        item->setAuxData(_(ONLINE_SERVICE_LAST_UPDATE),
+            String::from(ts.tv_sec));
 
         item->setFlag(OBJECT_FLAG_ONLINE_SERVICE);
-        try
-        {
+        try {
             item->validate();
             return RefCast(item, CdsObject);
-        }
-        catch (const Exception & ex)
-        {
+        } catch (const Exception& ex) {
             log_warning("Failed to validate newly created Trailer item: %s\n",
-                        ex.getMessage().c_str());
+                ex.getMessage().c_str());
             continue;
         }
     } // while
     return nullptr;
 }
 
-#endif//ATRAILERS
+#endif //ATRAILERS

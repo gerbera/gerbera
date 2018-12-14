@@ -85,7 +85,7 @@ void AutoscanInotify::run()
     if (shutdownFlag) {
         shutdownFlag = false;
         inotify = Ref<Inotify>(new Inotify());
-        thread_ = thread{ &AutoscanInotify::threadProc, this };
+        thread_ = thread { &AutoscanInotify::threadProc, this };
     }
 }
 

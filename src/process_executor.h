@@ -34,11 +34,10 @@
 
 #include "executor.h"
 
-class ProcessExecutor : public Executor
-{
+class ProcessExecutor : public Executor {
 public:
-    ProcessExecutor(zmm::String command, 
-                    zmm::Ref<zmm::Array<zmm::StringBase> > arglist);
+    ProcessExecutor(zmm::String command,
+        zmm::Ref<zmm::Array<zmm::StringBase>> arglist);
     virtual bool isAlive();
     virtual bool kill();
     virtual int getStatus();

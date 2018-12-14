@@ -32,12 +32,12 @@
 
 #ifdef ONLINE_SERVICES
 
-#include "zmm/zmm.h"
-#include "zmm/zmmf.h"
-#include "mxml/mxml.h"
-#include "online_service.h"
 #include "online_service_helper.h"
 #include "config_manager.h"
+#include "mxml/mxml.h"
+#include "online_service.h"
+#include "zmm/zmm.h"
+#include "zmm/zmmf.h"
 
 using namespace zmm;
 
@@ -55,25 +55,24 @@ String OnlineServiceHelper::resolveURL(Ref<CdsItemExternalURL> item)
         throw _Exception(_("Invalid service id!"));
 
     String url;
-    
-    switch (service)
-    {
+
+    switch (service) {
 #ifdef SOPCAST
-        case OS_SopCast:
-            url = item->getLocation();
-            break;
+    case OS_SopCast:
+        url = item->getLocation();
+        break;
 #endif
 #ifdef ATRAILERS
-        case OS_ATrailers:
-            url = item->getLocation();
-            break;
+    case OS_ATrailers:
+        url = item->getLocation();
+        break;
 #endif
-        case OS_Max:
-        default:
-            throw _Exception(_("No handler for this service!"));
+    case OS_Max:
+    default:
+        throw _Exception(_("No handler for this service!"));
     }
 
-    return url; 
+    return url;
 }
 
-#endif//ONLINE_SERVICES
+#endif //ONLINE_SERVICES
