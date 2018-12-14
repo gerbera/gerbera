@@ -32,15 +32,15 @@
 #ifndef __CDS_RESOURCE_MANAGER_H__
 #define __CDS_RESOURCE_MANAGER_H__
 
-#include "singleton.h"
-#include "mxml/mxml.h"
-#include "common.h"
 #include "cds_objects.h"
+#include "common.h"
+#include "mxml/mxml.h"
+#include "singleton.h"
 #include "strings.h"
+#include "upnp_xml.h"
 
 /// \brief This class is responsible for handling the DIDL-Lite res tags.
-class CdsResourceManager : public zmm::Object
-{
+class CdsResourceManager : public zmm::Object {
 public:
     /// \brief Constructor, currently empty.
     CdsResourceManager();
@@ -54,8 +54,8 @@ public:
     /// if you want to add another mime/type alias for an existing mime/type, this
     /// function would do it. Also, when transcoding will be implemented, the
     /// various transcoded streams will be identified here.
-    static void addResources(zmm::Ref<CdsItem> item, zmm::Ref<mxml::Element> element);
-    
+    static void addResources(UpnpXMLBuilder* xmlBuilder, zmm::Ref<CdsItem> item, zmm::Ref<mxml::Element> element);
+
     /// \brief Gets the URL of the first resource of the CfsItem.
     /// \param item Item for which the resources should be built.
     /// \return The URL
@@ -67,9 +67,8 @@ public:
     static zmm::String getArtworkUrl(zmm::Ref<CdsItem> item);
 
 protected:
-    class UrlBase : public zmm::Object
-    {
-        public:
+    class UrlBase : public zmm::Object {
+    public:
         zmm::String urlBase;
         bool addResID;
     };
@@ -80,11 +79,11 @@ protected:
     /// This function gets the baseUrl for the CdsItem and sets addResID
     /// to true if the resource id needs to be added to the URL.
     static zmm::Ref<UrlBase> addResources_getUrlBase(zmm::Ref<CdsItem> item,
-            bool forceLocal = false);
-   
-    /// \brief renders an ext=.extension string, where the extension is 
+        bool forceLocal = false);
+
+    /// \brief renders an ext=.extension string, where the extension is
     /// determined either from content type or from the filename
-    static zmm::String renderExtension(zmm::String contentType, zmm::String location);
+    static zmm::String renderExtension(UpnpXMLBuilder* xmlBuilder, zmm::String contentType, zmm::String location);
 };
 
 #endif // __CDS_RESOURCE_MANAGER_H__

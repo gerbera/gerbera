@@ -36,7 +36,9 @@
 using namespace zmm;
 using namespace mxml;
 
-ConnectionManagerService::ConnectionManagerService(UpnpDevice_Handle _deviceHandle) : deviceHandle(_deviceHandle)
+ConnectionManagerService::ConnectionManagerService(UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle)
+    : xmlBuilder(xmlBuilder)
+    , deviceHandle(deviceHandle)
 {
 }
 
@@ -49,7 +51,7 @@ void ConnectionManagerService::upnp_action_GetCurrentConnectionIDs(Ref<ActionReq
     log_debug("start\n");
 
     Ref<Element> response;
-    response = UpnpXML_CreateResponse(request->getActionName(), _(DESC_CM_SERVICE_TYPE));
+    response = xmlBuilder->createResponse(request->getActionName(), _(DESC_CM_SERVICE_TYPE));
     response->appendTextChild(_("ConnectionID"), _("0"));
 
     request->setResponse(response);
@@ -72,7 +74,7 @@ void ConnectionManagerService::upnp_action_GetProtocolInfo(Ref<ActionRequest> re
     log_debug("start\n");
 
     Ref<Element> response;
-    response = UpnpXML_CreateResponse(request->getActionName(), _(DESC_CM_SERVICE_TYPE));
+    response = xmlBuilder->createResponse(request->getActionName(), _(DESC_CM_SERVICE_TYPE));
 
     Ref<Array<StringBase>> mimeTypes = Storage::getInstance()->getMimeTypes();
     String CSV = mime_types_to_CSV(mimeTypes);
@@ -116,7 +118,7 @@ void ConnectionManagerService::process_subscription_request(zmm::Ref<Subscriptio
     Ref<Array<StringBase>> mimeTypes = Storage::getInstance()->getMimeTypes();
     String CSV = mime_types_to_CSV(mimeTypes);
 
-    propset = UpnpXML_CreateEventPropertySet();
+    propset = xmlBuilder->createEventPropertySet();
     property = propset->getFirstElementChild();
     property->appendTextChild(_("CurrentConnectionIDs"), _("0"));
     property->appendTextChild(_("SinkProtocolInfo"), _(""));
@@ -142,7 +144,7 @@ void ConnectionManagerService::subscription_update(String sourceProtocol_CSV)
 
     Ref<Element> propset, property;
 
-    propset = UpnpXML_CreateEventPropertySet();
+    propset = xmlBuilder->createEventPropertySet();
     property = propset->getFirstElementChild();
     property->appendTextChild(_("SourceProtocolInfo"), sourceProtocol_CSV);
 

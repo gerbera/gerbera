@@ -46,8 +46,9 @@
 using namespace zmm;
 using namespace mxml;
 
-FileRequestHandler::FileRequestHandler()
+FileRequestHandler::FileRequestHandler(UpnpXMLBuilder* xmlBuilder)
     : RequestHandler()
+    , xmlBuilder(xmlBuilder)
 {
 }
 
@@ -271,9 +272,9 @@ void FileRequestHandler::get_info(IN const char* filename, OUT UpnpFileInfo* inf
                 }
             }
         }
-	    Ref<Dictionary> mappings = cfg->getDictionaryOption(
-	                        CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-		header = getDLNAcontentHeader(mappings->get(item->getMimeType()), header);
+        Ref<Dictionary> mappings = cfg->getDictionaryOption(
+            CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+        header = getDLNAcontentHeader(mappings->get(item->getMimeType()), header);
 #endif
     }
 
@@ -349,7 +350,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char* filename,
     if (IS_CDS_ACTIVE_ITEM(objectType) && (res_id == 0)) { // check - if thumbnails, then no action, just show
         Ref<CdsActiveItem> aitem = RefCast(obj, CdsActiveItem);
 
-        Ref<Element> inputElement = UpnpXML_DIDLRenderObject(obj, true);
+        Ref<Element> inputElement = xmlBuilder->renderObject(obj, true);
 
         inputElement->setAttribute(_(XML_DC_NAMESPACE_ATTR), _(XML_DC_NAMESPACE));
         inputElement->setAttribute(_(XML_UPNP_NAMESPACE_ATTR), _(XML_UPNP_NAMESPACE));
@@ -378,7 +379,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char* filename,
         Ref<CdsObject> clone = CdsObject::createObject(objectType);
         aitem->copyTo(clone);
 
-        UpnpXML_DIDLUpdateObject(clone, output);
+        xmlBuilder->updateObject(clone, output);
 
         if (!aitem->equals(clone, true)) // check for all differences
         {

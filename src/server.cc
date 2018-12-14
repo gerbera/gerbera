@@ -39,9 +39,9 @@
 #endif
 
 #include "content_manager.h"
+#include "file_request_handler.h"
 #include "server.h"
 #include "update_manager.h"
-#include "file_request_handler.h"
 #ifdef HAVE_CURL
 #include "url_request_handler.h"
 #endif
@@ -55,7 +55,7 @@ Ref<Storage> Server::storage = nullptr;
 
 static int static_upnp_callback(Upnp_EventType eventtype, const void* event, void* cookie)
 {
-    return static_cast<Server *>(cookie)->upnp_callback(eventtype, event);
+    return static_cast<Server*>(cookie)->upnp_callback(eventtype, event);
 }
 
 void Server::static_cleanup_callback()
@@ -148,7 +148,7 @@ void Server::upnp_init()
 
     log_debug("webroot: %s\n", web_root.c_str());
 
-    Ref<Array<StringBase> > arr = config->getStringArrayOption(CFG_SERVER_CUSTOM_HTTP_HEADERS);
+    Ref<Array<StringBase>> arr = config->getStringArrayOption(CFG_SERVER_CUSTOM_HTTP_HEADERS);
 
     if (arr != nullptr) {
         String tmp;
@@ -190,8 +190,11 @@ void Server::upnp_init()
         } // else appendto is none and we take the URL as it entered by user
     }
 
+    log_debug("Creating UpnpXMLBuilder\n");
+    xmlbuilder = std::make_unique<UpnpXMLBuilder>();
+
     // register root device with the library
-    String device_description = _("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n") + UpnpXML_RenderDeviceDescription(presentationURL)->print();
+    String device_description = _("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n") + xmlbuilder->renderDeviceDescription(presentationURL)->print();
 
     //log_debug("Device Description: \n%s\n", device_description.c_str());
 
@@ -208,13 +211,14 @@ void Server::upnp_init()
     }
 
     log_debug("Creating ContentDirectoryService\n");
-    cds = std::make_unique<ContentDirectoryService>(deviceHandle);
+    cds = std::make_unique<ContentDirectoryService>(xmlbuilder.get(), deviceHandle,
+        ConfigManager::getInstance()->getIntOption(CFG_SERVER_UPNP_TITLE_AND_DESC_STRING_LIMIT));
 
     log_debug("Creating ConnectionManagerService\n");
-    cmgr = std::make_unique<ConnectionManagerService>(deviceHandle);
+    cmgr = std::make_unique<ConnectionManagerService>(xmlbuilder.get(), deviceHandle);
 
     log_debug("Creating MRRegistrarService\n");
-    mrreg = std::make_unique<MRRegistrarService>(deviceHandle);
+    mrreg = std::make_unique<MRRegistrarService>(xmlbuilder.get(), deviceHandle);
 
     log_debug("Sending UPnP Alive advertisements\n");
     ret = UpnpSendAdvertisement(deviceHandle, alive_advertisement);
@@ -361,11 +365,9 @@ void Server::upnp_actions(Ref<ActionRequest> request)
         // this call is for the toaster control service
         //log_debug("upnp_actions: request for content directory service\n");
         cds->process_action_request(request);
-    }
-    else if (request->getServiceID() == DESC_MRREG_SERVICE_ID) {
+    } else if (request->getServiceID() == DESC_MRREG_SERVICE_ID) {
         mrreg->process_action_request(request);
-    }
-    else {
+    } else {
         // cp is asking for a nonexistent service, or for a service
         // that does not support any actions
         throw _UpnpException(UPNP_E_BAD_REQUEST,
@@ -394,11 +396,9 @@ void Server::upnp_subscriptions(Ref<SubscriptionRequest> request)
         // this call is for the connection manager service
         //log_debug("upnp_subscriptions: request for connection manager service\n");
         cmgr->process_subscription_request(request);
-    }
-    else if (request->getServiceID() == DESC_MRREG_SERVICE_ID) {
+    } else if (request->getServiceID() == DESC_MRREG_SERVICE_ID) {
         mrreg->process_subscription_request(request);
-    }
-    else {
+    } else {
         // cp asks for a nonexistent service or for a service that
         // does not support subscriptions
         throw _UpnpException(UPNP_E_BAD_REQUEST,
@@ -424,7 +424,7 @@ Ref<RequestHandler> Server::create_request_handler(const char* filename)
     RequestHandler* ret = nullptr;
 
     if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_MEDIA_HANDLER)) {
-        ret = new FileRequestHandler();
+        ret = new FileRequestHandler(xmlbuilder.get());
     } else if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_UI_HANDLER)) {
         RequestHandler::split_url(filename, URL_UI_PARAM_SEPARATOR, path, parameters);
 
@@ -458,7 +458,7 @@ Ref<RequestHandler> Server::create_request_handler(const char* filename)
 int Server::register_web_callbacks()
 {
     log_debug("Setting UpnpVirtualDir GetInfoCallback\n");
-    int ret = UpnpVirtualDir_set_GetInfoCallback([](IN const char* filename, OUT UpnpFileInfo* info, const void *cookie) -> int {
+    int ret = UpnpVirtualDir_set_GetInfoCallback([](IN const char* filename, OUT UpnpFileInfo* info, const void* cookie) -> int {
         try {
             Ref<RequestHandler> reqHandler = const_cast<Server *>(static_cast<const Server *>(cookie))->create_request_handler(filename);
             reqHandler->get_info(filename, info);
@@ -471,16 +471,16 @@ int Server::register_web_callbacks()
             log_error("%s\n", e.getMessage().c_str());
             return -1;
         }
-        return 0;});
-    if (ret != 0) return ret;
+        return 0; });
+    if (ret != 0)
+        return ret;
 
     log_debug("Setting UpnpVirtualDir OpenCallback\n");
-    ret = UpnpVirtualDir_set_OpenCallback([](IN const char* filename, IN enum UpnpOpenFileMode mode, IN const void *cookie) -> UpnpWebFileHandle {
-
+    ret = UpnpVirtualDir_set_OpenCallback([](IN const char* filename, IN enum UpnpOpenFileMode mode, IN const void* cookie) -> UpnpWebFileHandle {
         String link = url_unescape((char*)filename);
 
         try {
-            Ref<RequestHandler> reqHandler = const_cast<Server *>(static_cast<const Server *>(cookie))->create_request_handler(filename);
+            Ref<RequestHandler> reqHandler = const_cast<Server*>(static_cast<const Server*>(cookie))->create_request_handler(filename);
             Ref<IOHandler> ioHandler = reqHandler->open(link.c_str(), mode, nullptr);
             ioHandler->retain();
             //log_debug("%p open(%s)\n", ioHandler.getPtr(), filename);
@@ -495,28 +495,31 @@ int Server::register_web_callbacks()
             return nullptr;
         }
     });
-    if (ret != UPNP_E_SUCCESS) return ret;
+    if (ret != UPNP_E_SUCCESS)
+        return ret;
 
     log_debug("Setting UpnpVirtualDir ReadCallback\n");
-    ret = UpnpVirtualDir_set_ReadCallback([](IN UpnpWebFileHandle f, OUT char* buf, IN size_t length, IN const void *cookie) -> int {
+    ret = UpnpVirtualDir_set_ReadCallback([](IN UpnpWebFileHandle f, OUT char* buf, IN size_t length, IN const void* cookie) -> int {
         //log_debug("%p read(%d)\n", f, length);
-        if (static_cast<const Server *>(cookie)->getShutdownStatus())
+        if (static_cast<const Server*>(cookie)->getShutdownStatus())
             return -1;
 
         auto* handler = (IOHandler*)f;
         return handler->read(buf, length);
     });
-    if (ret != UPNP_E_SUCCESS) return ret;
+    if (ret != UPNP_E_SUCCESS)
+        return ret;
 
     log_debug("Setting UpnpVirtualDir WriteCallback\n");
-    ret = UpnpVirtualDir_set_WriteCallback([](IN UpnpWebFileHandle f, IN char* buf, IN size_t length, IN const void *cookie) -> int {
+    ret = UpnpVirtualDir_set_WriteCallback([](IN UpnpWebFileHandle f, IN char* buf, IN size_t length, IN const void* cookie) -> int {
         //log_debug("%p write(%d)\n", f, length);
         return 0;
     });
-    if (ret != UPNP_E_SUCCESS) return ret;
+    if (ret != UPNP_E_SUCCESS)
+        return ret;
 
     log_debug("Setting UpnpVirtualDir SeekCallback\n");
-    ret = UpnpVirtualDir_set_SeekCallback([](IN UpnpWebFileHandle f, IN off_t offset, IN int whence, IN const void *cookie) -> int {
+    ret = UpnpVirtualDir_set_SeekCallback([](IN UpnpWebFileHandle f, IN off_t offset, IN int whence, IN const void* cookie) -> int {
         //log_debug("%p seek(%d, %d)\n", f, offset, whence);
         try {
             auto* handler = (IOHandler*)f;
@@ -529,10 +532,11 @@ int Server::register_web_callbacks()
 
         return 0;
     });
-    if (ret != UPNP_E_SUCCESS) return ret;
+    if (ret != UPNP_E_SUCCESS)
+        return ret;
 
     log_debug("Setting UpnpVirtualDir CloseCallback\n");
-    UpnpVirtualDir_set_CloseCallback([](IN UpnpWebFileHandle f, IN const void *cookie) -> int {
+    UpnpVirtualDir_set_CloseCallback([](IN UpnpWebFileHandle f, IN const void* cookie) -> int {
         //log_debug("%p close()\n", f);
         Ref<IOHandler> handler((IOHandler*)f);
         handler->release();
@@ -548,4 +552,3 @@ int Server::register_web_callbacks()
 
     return ret;
 }
-

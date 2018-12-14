@@ -39,8 +39,9 @@
 using namespace zmm;
 using namespace mxml;
 
-MRRegistrarService::MRRegistrarService(UpnpDevice_Handle deviceHandle)
-    : deviceHandle(deviceHandle)
+MRRegistrarService::MRRegistrarService(UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle)
+    : xmlBuilder(xmlBuilder)
+    , deviceHandle(deviceHandle)
 {
 }
 
@@ -51,7 +52,7 @@ void MRRegistrarService::upnp_action_IsAuthorized(Ref<ActionRequest> request)
     log_debug("start\n");
 
     Ref<Element> response;
-    response = UpnpXML_CreateResponse(request->getActionName(), DESC_MRREG_SERVICE_TYPE);
+    response = xmlBuilder->createResponse(request->getActionName(), DESC_MRREG_SERVICE_TYPE);
     response->appendTextChild(_("Result"), _("1"));
 
     request->setResponse(response);
@@ -74,7 +75,7 @@ void MRRegistrarService::upnp_action_IsValidated(Ref<ActionRequest> request)
     log_debug("start\n");
 
     Ref<Element> response;
-    response = UpnpXML_CreateResponse(request->getActionName(), DESC_MRREG_SERVICE_TYPE);
+    response = xmlBuilder->createResponse(request->getActionName(), DESC_MRREG_SERVICE_TYPE);
     response->appendTextChild(_("Result"), _("1"));
 
     request->setResponse(response);
@@ -110,7 +111,7 @@ void MRRegistrarService::process_subscription_request(zmm::Ref<SubscriptionReque
 
     Ref<Element> propset, property;
 
-    propset = UpnpXML_CreateEventPropertySet();
+    propset = xmlBuilder->createEventPropertySet();
     property = propset->getFirstElementChild();
     property->appendTextChild(_("ValidationRevokedUpdateID"), _("0"));
     property->appendTextChild(_("ValidationSucceededUpdateID"), _("0"));

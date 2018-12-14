@@ -36,20 +36,17 @@
 
 #include <getopt.h>
 
-
 #include <csignal>
 #include <mutex>
 #ifdef SOLARIS
 #include <iso/limits_iso.h>
 #endif
 
-#include "contrib/cxxopts.hpp"
 #include "common.h"
-#include "server.h"
-#include "content_manager.h"
 #include "config/config_generator.h"
-
-#define OPTSTR "i:e:p:c:m:f:a:l:P:dhD"
+#include "content_manager.h"
+#include "contrib/cxxopts.hpp"
+#include "server.h"
 
 using namespace zmm;
 
@@ -58,7 +55,7 @@ int restart_flag = 0;
 pthread_t main_thread_id;
 
 std::mutex mutex;
-std::unique_lock<std::mutex> lock{mutex};
+std::unique_lock<std::mutex> lock { mutex };
 std::condition_variable cond;
 
 void print_copyright()
@@ -101,26 +98,13 @@ int main(int argc, char** argv, char** envp)
 
     cxxopts::Options options("gerbera", "Gerbera UPnP Media Server - https://gerbera.io");
 
-    options.add_options()
-        ("D,debug", "Enable debugging", cxxopts::value<bool>()->default_value("false"))
-        ("e,interface", "Interface to bind with")
-        ("p,port", "Port to bind with, must be >=49152", cxxopts::value<int>())
-        ("i,ip", "IP to bind with")
-        ("c,config", "Path to config file")
-        ("m,home", "Search this directory for a .gerbera folder containing a config file")
-        ("f,cfgdir", "Override name of config folder (.config/gerbera) by default. -h must also be set.")
-        ("l,logfile", "Set log location")
-        ("compile-info", "Print compile info and exit")
-        ("v,version", "Print version info and exit")
-        ("h,help", "Print this help and exit")
-        ("create-config", "Print a default config.xml file and exit")
-        ("add-file", "Scan a file into the DB on startup, can be specified multiple times", cxxopts::value<std::vector<std::string>>(), "FILE");
+    options.add_options()("D,debug", "Enable debugging", cxxopts::value<bool>()->default_value("false"))("e,interface", "Interface to bind with")("p,port", "Port to bind with, must be >=49152", cxxopts::value<int>())("i,ip", "IP to bind with")("c,config", "Path to config file")("m,home", "Search this directory for a .gerbera folder containing a config file")("f,cfgdir", "Override name of config folder (.config/gerbera) by default. -h must also be set.")("l,logfile", "Set log location")("compile-info", "Print compile info and exit")("v,version", "Print version info and exit")("h,help", "Print this help and exit")("create-config", "Print a default config.xml file and exit")("add-file", "Scan a file into the DB on startup, can be specified multiple times", cxxopts::value<std::vector<std::string>>(), "FILE");
 
     try {
         cxxopts::ParseResult opts = options.parse(argc, argv);
 
         if (opts.count("help") > 0) {
-            std::cout << options.help({"", "Group"}) << std::endl;
+            std::cout << options.help({ "", "Group" }) << std::endl;
             exit(EXIT_SUCCESS);
         }
 
@@ -133,7 +117,8 @@ int main(int argc, char** argv, char** envp)
             print_copyright();
             std::cout << "Compile info" << std::endl
                       << "-------------" << std::endl
-                      << COMPILE_INFO << std::endl << std::endl;
+                      << COMPILE_INFO << std::endl
+                      << std::endl;
             if (strlen(GIT_BRANCH) > 0 || strlen(GIT_COMMIT_HASH) > 0) {
                 std::cout << "Git info:" << std::endl
                           << "-------------" << std::endl
@@ -169,12 +154,11 @@ int main(int argc, char** argv, char** envp)
             }
 
             // Check XDG first
-            const char *h = std::getenv("XDG_CONFIG_HOME");
+            const char* h = std::getenv("XDG_CONFIG_HOME");
             if (h != nullptr) {
                 home = h;
                 confdir = "gerbera";
-            }
-            else {
+            } else {
                 // Then look for home
                 h = std::getenv("HOME");
                 if (h != nullptr)
@@ -189,7 +173,7 @@ int main(int argc, char** argv, char** envp)
         }
 
         std::optional<std::string> prefix;
-        char *pref = std::getenv("GERBERA_DATADIR");
+        char* pref = std::getenv("GERBERA_DATADIR");
         if (pref != nullptr) {
             prefix = pref;
         } else {
@@ -212,7 +196,7 @@ int main(int argc, char** argv, char** envp)
 
         if (opts.count("create-config") > 0) {
             std::string magicStr;
-            if(!magic.has_value()) {
+            if (!magic.has_value()) {
                 magicStr = "";
             } else {
                 magicStr = magic.value().c_str();
@@ -410,7 +394,7 @@ int main(int argc, char** argv, char** envp)
         log_close();
         exit(ret);
 
-    } catch (const cxxopts::OptionException &e) {
+    } catch (const cxxopts::OptionException& e) {
         std::cerr << "Failed to parse arguments: " << e.what() << std::endl;
         exit(EXIT_FAILURE);
     }

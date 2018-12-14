@@ -31,26 +31,25 @@
 
 #include "upnp_cds.h"
 #include "config_manager.h"
+#include "search_handler.h"
 #include "server.h"
 #include "storage.h"
-#include "search_handler.h"
-#include <string>
 #include <memory>
+#include <string>
 #include <vector>
 
 using namespace zmm;
 using namespace mxml;
 
-ContentDirectoryService::ContentDirectoryService(UpnpDevice_Handle deviceHandle)
+ContentDirectoryService::ContentDirectoryService(UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle, int stringLimit)
     : systemUpdateID(0)
-    , stringLimit(ConfigManager::getInstance()->getIntOption(CFG_SERVER_UPNP_TITLE_AND_DESC_STRING_LIMIT))
+    , stringLimit(stringLimit)
     , deviceHandle(deviceHandle)
+    , xmlBuilder(xmlBuilder)
 {
 }
 
-ContentDirectoryService::~ContentDirectoryService()
-{
-}
+ContentDirectoryService::~ContentDirectoryService() = default;
 
 void ContentDirectoryService::upnp_action_Browse(Ref<ActionRequest> request)
 {
@@ -68,7 +67,7 @@ void ContentDirectoryService::upnp_action_Browse(Ref<ActionRequest> request)
     // String SortCriteria; // not yet supported
 
     log_debug("Browse received parameters: ObjectID [%s] BrowseFlag [%s] StartingIndex [%s] RequestedCount [%s]\n",
-              objID.c_str(), BrowseFlag.c_str(), StartingIndex.c_str(), RequestedCount.c_str());
+        objID.c_str(), BrowseFlag.c_str(), StartingIndex.c_str(), RequestedCount.c_str());
 
     if (objID == nullptr)
         throw UpnpException(UPNP_E_NO_SUCH_ID, _("empty object id"));
@@ -132,13 +131,12 @@ void ContentDirectoryService::upnp_action_Browse(Ref<ActionRequest> request)
             obj->setTitle(title);
         }
 
-        Ref<Element> didl_object = UpnpXML_DIDLRenderObject(obj, false, stringLimit);
+        Ref<Element> didl_object = xmlBuilder->renderObject(obj, false, stringLimit);
 
         didl_lite->appendElementChild(didl_object);
     }
 
-    Ref<Element> response;
-    response = UpnpXML_CreateResponse(request->getActionName(), _(DESC_CDS_SERVICE_TYPE));
+    Ref<Element> response = xmlBuilder->createResponse(request->getActionName(), _(DESC_CDS_SERVICE_TYPE));
 
     response->appendTextChild(_("Result"), didl_lite->print());
     response->appendTextChild(_("NumberReturned"), String::from(arr->size()));
@@ -149,7 +147,8 @@ void ContentDirectoryService::upnp_action_Browse(Ref<ActionRequest> request)
     log_debug("end\n");
 }
 
-void ContentDirectoryService::upnp_action_Search(Ref<ActionRequest> request) {
+void ContentDirectoryService::upnp_action_Search(Ref<ActionRequest> request)
+{
     log_debug("start\n");
 
     Ref<Element> req = request->getRequest();
@@ -158,9 +157,9 @@ void ContentDirectoryService::upnp_action_Search(Ref<ActionRequest> request) {
     std::string startingIndex(req->getChildText(_("StartingIndex")).c_str());
     std::string requestedCount(req->getChildText(_("RequestedCount")).c_str());
     log_debug("Search received parameters: ContainerID [%s] SearchCriteria [%s] StartingIndex [%s] RequestedCount [%s]\n",
-              containerID.c_str(), searchCriteria.c_str(), startingIndex.c_str(), requestedCount.c_str());
+        containerID.c_str(), searchCriteria.c_str(), startingIndex.c_str(), requestedCount.c_str());
 
-   Ref<Element> didl_lite(new Element(_("DIDL-Lite")));
+    Ref<Element> didl_lite(new Element(_("DIDL-Lite")));
     didl_lite->setAttribute(_(XML_NAMESPACE_ATTR),
         _(XML_DIDL_LITE_NAMESPACE));
     didl_lite->setAttribute(_(XML_DC_NAMESPACE_ATTR),
@@ -178,7 +177,7 @@ void ContentDirectoryService::upnp_action_Search(Ref<ActionRequest> request) {
 #endif
 
     zmm::Ref<SearchParam> searchParam = zmm::Ref<SearchParam>(new SearchParam(containerID, searchCriteria,
-            std::stoi(startingIndex.c_str(), nullptr), std::stoi(requestedCount.c_str(), nullptr)));
+        std::stoi(startingIndex.c_str(), nullptr), std::stoi(requestedCount.c_str(), nullptr)));
 
     Ref<Array<CdsObject>> results;
     int numMatches = 0;
@@ -202,12 +201,11 @@ void ContentDirectoryService::upnp_action_Search(Ref<ActionRequest> request) {
             cdsObject->setTitle(title);
         }
 
-        Ref<Element> didl_object = UpnpXML_DIDLRenderObject(cdsObject, false, stringLimit);
+        Ref<Element> didl_object = xmlBuilder->renderObject(cdsObject, false, stringLimit);
         didl_lite->appendElementChild(didl_object);
     }
 
-    Ref<Element> response;
-    response = UpnpXML_CreateResponse(request->getActionName(), _(DESC_CDS_SERVICE_TYPE));
+    Ref<Element> response = xmlBuilder->createResponse(request->getActionName(), _(DESC_CDS_SERVICE_TYPE));
 
     response->appendTextChild(_("Result"), didl_lite->print());
     response->appendTextChild(_("NumberReturned"), String::from(results->size()));
@@ -223,7 +221,7 @@ void ContentDirectoryService::upnp_action_GetSearchCapabilities(Ref<ActionReques
     log_debug("start\n");
 
     Ref<Element> response;
-    response = UpnpXML_CreateResponse(request->getActionName(), _(DESC_CDS_SERVICE_TYPE));
+    response = xmlBuilder->createResponse(request->getActionName(), _(DESC_CDS_SERVICE_TYPE));
     response->appendTextChild(_("SearchCaps"), _("dc:title,upnp:class,upnp:artist,upnp:album"));
 
     request->setResponse(response);
@@ -236,7 +234,7 @@ void ContentDirectoryService::upnp_action_GetSortCapabilities(Ref<ActionRequest>
     log_debug("start\n");
 
     Ref<Element> response;
-    response = UpnpXML_CreateResponse(request->getActionName(), _(DESC_CDS_SERVICE_TYPE));
+    response = xmlBuilder->createResponse(request->getActionName(), _(DESC_CDS_SERVICE_TYPE));
     response->appendTextChild(_("SortCaps"), _(""));
 
     request->setResponse(response);
@@ -249,7 +247,7 @@ void ContentDirectoryService::upnp_action_GetSystemUpdateID(Ref<ActionRequest> r
     log_debug("start\n");
 
     Ref<Element> response;
-    response = UpnpXML_CreateResponse(request->getActionName(), _(DESC_CDS_SERVICE_TYPE));
+    response = xmlBuilder->createResponse(request->getActionName(), _(DESC_CDS_SERVICE_TYPE));
     response->appendTextChild(_("Id"), String::from(systemUpdateID));
 
     request->setResponse(response);
@@ -291,7 +289,7 @@ void ContentDirectoryService::process_subscription_request(zmm::Ref<Subscription
 
     log_debug("start\n");
 
-    propset = UpnpXML_CreateEventPropertySet();
+    propset = xmlBuilder->createEventPropertySet();
     property = propset->getFirstElementChild();
     property->appendTextChild(_("SystemUpdateID"), _("") + systemUpdateID);
     Ref<CdsObject> obj = Storage::getInstance()->loadObject(0);
@@ -322,7 +320,7 @@ void ContentDirectoryService::subscription_update(String containerUpdateIDs_CSV)
 
     systemUpdateID++;
 
-    propset = UpnpXML_CreateEventPropertySet();
+    propset = xmlBuilder->createEventPropertySet();
     property = propset->getFirstElementChild();
     property->appendTextChild(_("ContainerUpdateIDs"), containerUpdateIDs_CSV);
     property->appendTextChild(_("SystemUpdateID"), _("") + systemUpdateID);

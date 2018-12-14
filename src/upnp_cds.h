@@ -36,6 +36,7 @@
 #include "common.h"
 #include "singleton.h"
 #include "subscription_request.h"
+#include "upnp_xml.h"
 
 /// \brief This class is responsible for the UPnP Content Directory Service operations.
 ///
@@ -70,7 +71,6 @@ protected:
     /// ui4 TotalMatches, ui4 UpdateID)
     void upnp_action_Search(zmm::Ref<ActionRequest> request);
 
-
     /// \brief UPnP standard defined action: GetSearchCapabilities()
     /// \param request Incoming ActionRequest.
     ///
@@ -91,10 +91,12 @@ protected:
 
     UpnpDevice_Handle deviceHandle;
 
+    UpnpXMLBuilder* xmlBuilder;
+
 public:
     /// \brief Constructor for the CDS, saves the service type and service id
     /// in internal variables.
-    explicit ContentDirectoryService(UpnpDevice_Handle deviceHandle);
+    explicit ContentDirectoryService(UpnpXMLBuilder* builder, UpnpDevice_Handle deviceHandle, int stringLimit);
     ~ContentDirectoryService();
 
     /// \brief Dispatches the ActionRequest between the available actions.
