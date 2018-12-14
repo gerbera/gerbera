@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
 
 set(GERBERA_MAJOR_VERSION 1)
 set(GERBERA_MINOR_VERSION 3)
