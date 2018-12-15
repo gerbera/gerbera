@@ -60,6 +60,7 @@ static duk_ret_t addCdsObject(duk_context *ctx) {
     "meta['upnp:artist']",
     "meta['upnp:album']",
     "meta['dc:date']",
+    "meta['upnp:date']",
     "meta['upnp:genre']",
     "meta['dc:description']",
     "meta['upnp:composer']",
@@ -118,6 +119,7 @@ TEST_F(ImportScriptTest, AddsAudioItemToVariousCdsContainerChains) {
   string conductor = "Conductor";
   string orchestra = "Orchestra";
   string date = "2018-01-01";
+  string year = "2018";
   string genre = "Genre";
   string desc = "Description";
   string id = "2";
@@ -132,6 +134,7 @@ TEST_F(ImportScriptTest, AddsAudioItemToVariousCdsContainerChains) {
       make_pair("upnp:artist", artist),
       make_pair("upnp:album", album),
       make_pair("dc:date", date),
+      make_pair("upnp:date", year),
       make_pair("upnp:genre", genre),
       make_pair("dc:description", desc),
       make_pair("upnp:composer", composer),
@@ -150,6 +153,7 @@ TEST_F(ImportScriptTest, AddsAudioItemToVariousCdsContainerChains) {
       make_pair("meta['upnp:artist']", artist),
       make_pair("meta['upnp:album']", album),
       make_pair("meta['dc:date']", date),
+      make_pair("meta['upnp:date']", year),
       make_pair("meta['upnp:genre']", genre),
       make_pair("meta['dc:description']", desc),
       make_pair("meta['upnp:composer']", composer),
@@ -157,18 +161,9 @@ TEST_F(ImportScriptTest, AddsAudioItemToVariousCdsContainerChains) {
       make_pair("meta['upnp:orchestra']", orchestra)
   };
 
-  map<string, string> asAudioAllFullName = {
-      make_pair("title", "Artist - Album - Audio Title"),
-      make_pair("meta['dc:title']", title),
-      make_pair("meta['upnp:artist']", artist),
-      make_pair("meta['upnp:album']", album),
-      make_pair("meta['dc:date']", date),
-      make_pair("meta['upnp:genre']", genre),
-      make_pair("meta['dc:description']", desc),
-      make_pair("meta['upnp:composer']", composer),
-      make_pair("meta['upnp:conductor']", conductor),
-      make_pair("meta['upnp:orchestra']", orchestra)
-  };
+  map<string, string> asAudioAllFullName;
+  asAudioAllFullName.insert(asAudioAllAudio.begin(), asAudioAllAudio.end());
+  asAudioAllFullName["title"] =  "Artist - Album - Audio Title";
 
   // Expecting the common script calls
   // and will proxy through the mock objects
@@ -400,6 +395,7 @@ TEST_F(ImportScriptTest, AddsOggTheoraAudioItemToVariousCdsContainerChains) {
   string artist = "Artist";
   string album = "Album";
   string date = "2018-01-01";
+  string year = "2018";
   string genre = "Genre";
   string desc = "Description";
   string composer = "Composer";
@@ -417,6 +413,7 @@ TEST_F(ImportScriptTest, AddsOggTheoraAudioItemToVariousCdsContainerChains) {
     make_pair("upnp:artist", artist),
     make_pair("upnp:album", album),
     make_pair("dc:date", date),
+    make_pair("upnp:date", year),
     make_pair("upnp:genre", genre),
     make_pair("dc:description", desc),
     make_pair("upnp:composer", composer),
@@ -435,6 +432,7 @@ TEST_F(ImportScriptTest, AddsOggTheoraAudioItemToVariousCdsContainerChains) {
     make_pair("meta['upnp:artist']", artist),
     make_pair("meta['upnp:album']", album),
     make_pair("meta['dc:date']", date),
+    make_pair("meta['upnp:date']", year),
     make_pair("meta['upnp:genre']", genre),
     make_pair("meta['dc:description']", desc),
     make_pair("meta['upnp:composer']", composer),
@@ -442,18 +440,9 @@ TEST_F(ImportScriptTest, AddsOggTheoraAudioItemToVariousCdsContainerChains) {
     make_pair("meta['upnp:orchestra']", orchestra)
   };
 
-  map<string, string> asAudioAllFullName = {
-    make_pair("title", "Artist - Album - Audio Title"),
-    make_pair("meta['dc:title']", title),
-    make_pair("meta['upnp:artist']", artist),
-    make_pair("meta['upnp:album']", album),
-    make_pair("meta['dc:date']", date),
-    make_pair("meta['upnp:genre']", genre),
-    make_pair("meta['dc:description']", desc),
-    make_pair("meta['upnp:composer']", composer),
-    make_pair("meta['upnp:conductor']", conductor),
-    make_pair("meta['upnp:orchestra']", orchestra)
-  };
+  map<string, string> asAudioAllFullName;
+  asAudioAllFullName.insert(asAudioAllAudio.begin(), asAudioAllAudio.end());
+  asAudioAllFullName["title"] =  "Artist - Album - Audio Title";
 
   // Expecting the common script calls
   // and will proxy through the mock objects
