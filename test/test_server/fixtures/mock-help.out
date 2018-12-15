@@ -3,15 +3,15 @@ Usage:
   gerbera [OPTION...]
 
   -D, --debug          Enable debugging
-  -e, --interface      Interface to bind with
+  -e, --interface arg  Interface to bind with
   -p, --port arg       Port to bind with, must be >=49152
-  -i, --ip             IP to bind with
-  -c, --config         Path to config file
-  -m, --home           Search this directory for a .gerbera folder containing
+  -i, --ip arg         IP to bind with
+  -c, --config arg     Path to config file
+  -m, --home arg       Search this directory for a .gerbera folder containing
                        a config file
-  -f, --cfgdir         Override name of config folder (.config/gerbera) by
+  -f, --cfgdir arg     Override name of config folder (.config/gerbera) by
                        default. -h must also be set.
-  -l, --logfile        Set log location
+  -l, --logfile arg    Set log location
       --compile-info   Print compile info and exit
   -v, --version        Print version info and exit
   -h, --help           Print this help and exit
