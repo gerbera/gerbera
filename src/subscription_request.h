@@ -37,17 +37,15 @@
 
 #include "common.h"
 
-
 /// \brief This class represents the Upnp_Subscription_Request type from the SDK.
 ///
 /// When we get a Upnp_Subscription_Request from the SDK we convert it to our
-/// structure. We then have the possibility to easily access various 
+/// structure. We then have the possibility to easily access various
 /// information inside it.
-class SubscriptionRequest : public zmm::Object
-{
+class SubscriptionRequest : public zmm::Object {
 protected:
     /// \brief Upnp_Subscription_Request that comes from the SDK.
-    UpnpSubscriptionRequest *upnp_request;
+    UpnpSubscriptionRequest* upnp_request;
 
     /// \brief ID of the service.
     ///
@@ -67,7 +65,7 @@ protected:
 public:
     /// \brief The Constructor takes the values from the upnp_request and fills in internal variables.
     /// \param *upnp_request Pointer to the Upnp_Subscription_Request structure.
-    SubscriptionRequest(UpnpSubscriptionRequest *upnp_request);
+    SubscriptionRequest(UpnpSubscriptionRequest* upnp_request);
 
     /// \brief Returns the service ID (should be one of the services that we support).
     zmm::String getServiceID();

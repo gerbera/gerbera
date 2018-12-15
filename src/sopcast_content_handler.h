@@ -35,22 +35,21 @@
 #ifndef __SOPCAST_CONTENT_HANDLER_H__
 #define __SOPCAST_CONTENT_HANDLER_H__
 
-#define SOPCAST_SERVICE                 "SopCast"
-#define SOPCAST_SERVICE_ID              "S"
-#define SOPCAST_CHANNEL_ID              "cid"
+#define SOPCAST_SERVICE "SopCast"
+#define SOPCAST_SERVICE_ID "S"
+#define SOPCAST_CHANNEL_ID "cid"
 
-#define SOPCAST_PROTOCOL                "sop"
+#define SOPCAST_PROTOCOL "sop"
 
-#define SOPCAST_AUXDATA_LANGUAGE        SOPCAST_SERVICE_ID "1"
-#define SOPCAST_AUXDATA_GROUP           SOPCAST_SERVICE_ID "2"
+#define SOPCAST_AUXDATA_LANGUAGE SOPCAST_SERVICE_ID "1"
+#define SOPCAST_AUXDATA_GROUP SOPCAST_SERVICE_ID "2"
 
-#include "mxml/mxml.h"
 #include "cds_objects.h"
+#include "mxml/mxml.h"
 
 /// \brief this class is responsible for creating objects from the SopCast
 /// metadata XML.
-class SopCastContentHandler : public zmm::Object
-{
+class SopCastContentHandler : public zmm::Object {
 public:
     /// \brief Sets the service XML from which we will extract the objects.
     /// \return false if service XML contained an error status.
@@ -65,7 +64,6 @@ public:
     /// \return CdsObject or nullptr if there are no more objects to parse.
     zmm::Ref<CdsObject> getNextObject();
 
-
 protected:
     zmm::Ref<mxml::Element> channels;
     int current_group_node_index;
@@ -78,6 +76,6 @@ protected:
     zmm::Ref<Dictionary> extension_mimetype_map;
 };
 
-#endif//__SOPCAST_CONTENT_HANDLER_H__
+#endif //__SOPCAST_CONTENT_HANDLER_H__
 
-#endif//SOPCAST
+#endif //SOPCAST

@@ -29,45 +29,62 @@
 #define __SEARCH_HANDLER_H__
 
 #include "cds_objects.h"
-#include "zmm/ref.h"
 #include "memory.h"
 #include "storage.h"
+#include "zmm/ref.h"
 
 #include <memory>
 #include <string>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 class SearchParam;
 
-enum class TokenType
-{
-    ASTERISK, DQUOTE, ESCAPEDSTRING, PROPERTY, BOOLVAL, EXISTS, STRINGOP, COMPAREOP, AND, OR, LPAREN, RPAREN, INVALID
+enum class TokenType {
+    ASTERISK,
+    DQUOTE,
+    ESCAPEDSTRING,
+    PROPERTY,
+    BOOLVAL,
+    EXISTS,
+    STRINGOP,
+    COMPAREOP,
+    AND,
+    OR,
+    LPAREN,
+    RPAREN,
+    INVALID
 };
 
 class SearchToken {
 public:
     SearchToken(TokenType type, std::shared_ptr<std::string> value)
-        : type(type), value(std::move(value)) {}
-    virtual ~SearchToken(){};
-    
+        : type(type)
+        , value(std::move(value))
+    {
+    }
+    virtual ~SearchToken() {};
+
     const TokenType& getType() const { return type; }
     std::shared_ptr<std::string> getValue() const { return value; }
 
-    friend bool operator==(const SearchToken& lhs, const SearchToken& rhs) {
+    friend bool operator==(const SearchToken& lhs, const SearchToken& rhs)
+    {
         return lhs.type == rhs.type && *(lhs.value) == *(rhs.value);
     }
-    
+
 protected:
     const TokenType type;
     std::shared_ptr<std::string> value;
 };
 
-
 class SearchLexer {
 public:
-    explicit SearchLexer(const std::string& input) : input(input), currentPos(0), inQuotes(false) {};
-    virtual ~SearchLexer(){};
+    explicit SearchLexer(const std::string& input)
+        : input(input)
+        , currentPos(0)
+        , inQuotes(false) {};
+    virtual ~SearchLexer() {};
 
     std::unique_ptr<SearchToken> nextToken();
 
@@ -75,6 +92,7 @@ public:
     SearchLexer(const SearchLexer&) = delete;
     SearchLexer& operator=(const SearchLexer&&) = delete;
     SearchLexer(const SearchLexer&&) = delete;
+
 protected:
     std::shared_ptr<std::string> nextStringToken(const std::string& input);
     std::unique_ptr<SearchToken> makeToken(std::shared_ptr<std::string> tokenStr);
@@ -98,10 +116,10 @@ public:
     virtual std::shared_ptr<std::string> emit() const = 0;
 
     virtual ~ASTNode() = default;
+
 protected:
     explicit ASTNode(const SQLEmitter& emitter)
-        : sqlEmitter(emitter)
-    {};
+        : sqlEmitter(emitter) {};
 
     const SQLEmitter& sqlEmitter;
 };
@@ -110,9 +128,10 @@ class ASTAsterisk : public ASTNode {
 public:
     ASTAsterisk(const SQLEmitter& sqlEmitter, std::shared_ptr<std::string> value)
         : ASTNode(sqlEmitter)
-        , value(std::move(value)){};
+        , value(std::move(value)) {};
     std::shared_ptr<std::string> emit() const override;
     virtual ~ASTAsterisk() = default;
+
 protected:
     std::shared_ptr<std::string> value;
 };
@@ -121,9 +140,10 @@ class ASTProperty : public ASTNode {
 public:
     ASTProperty(const SQLEmitter& sqlEmitter, std::shared_ptr<std::string> value)
         : ASTNode(sqlEmitter)
-        , value(std::move(value)){};
+        , value(std::move(value)) {};
     std::shared_ptr<std::string> emit() const override;
     virtual ~ASTProperty() = default;
+
 protected:
     std::shared_ptr<std::string> value;
 };
@@ -132,9 +152,10 @@ class ASTBoolean : public ASTNode {
 public:
     ASTBoolean(const SQLEmitter& sqlEmitter, std::shared_ptr<std::string> value)
         : ASTNode(sqlEmitter)
-        , value(std::move(value)){};
+        , value(std::move(value)) {};
     std::shared_ptr<std::string> emit() const override;
     virtual ~ASTBoolean() = default;
+
 protected:
     std::shared_ptr<std::string> value;
 };
@@ -142,10 +163,11 @@ protected:
 class ASTParenthesis : public ASTNode {
 public:
     ASTParenthesis(const SQLEmitter& sqlEmitter, std::shared_ptr<ASTNode> node)
-        : ASTNode(sqlEmitter), bracketedNode(std::move(node))
-    {};
+        : ASTNode(sqlEmitter)
+        , bracketedNode(std::move(node)) {};
     std::shared_ptr<std::string> emit() const override;
     virtual ~ASTParenthesis() = default;
+
 protected:
     std::shared_ptr<ASTNode> bracketedNode;
 };
@@ -154,9 +176,10 @@ class ASTDQuote : public ASTNode {
 public:
     ASTDQuote(const SQLEmitter& sqlEmitter, std::shared_ptr<std::string> value)
         : ASTNode(sqlEmitter)
-        , value(std::move(value)){};
+        , value(std::move(value)) {};
     std::shared_ptr<std::string> emit() const override;
     virtual ~ASTDQuote() = default;
+
 protected:
     std::shared_ptr<std::string> value;
 };
@@ -165,9 +188,10 @@ class ASTEscapedString : public ASTNode {
 public:
     ASTEscapedString(const SQLEmitter& sqlEmitter, std::shared_ptr<std::string> value)
         : ASTNode(sqlEmitter)
-        , value(std::move(value)){};
+        , value(std::move(value)) {};
     std::shared_ptr<std::string> emit() const override;
     virtual ~ASTEscapedString() = default;
+
 protected:
     std::shared_ptr<std::string> value;
 };
@@ -179,10 +203,10 @@ public:
         : ASTNode(sqlEmitter)
         , openQuote(std::move(openQuote))
         , escapedString(std::move(escapedString))
-        , closeQuote(std::move(closeQuote))
-    {};
+        , closeQuote(std::move(closeQuote)) {};
     std::shared_ptr<std::string> emit() const override;
     virtual ~ASTQuotedString() = default;
+
 protected:
     std::shared_ptr<ASTDQuote> openQuote;
     std::shared_ptr<ASTEscapedString> escapedString;
@@ -194,11 +218,12 @@ class ASTCompareOperator : public ASTNode {
 public:
     ASTCompareOperator(const SQLEmitter& sqlEmitter, std::shared_ptr<std::string> value)
         : ASTNode(sqlEmitter)
-        , value(std::move(value)){};
+        , value(std::move(value)) {};
     std::shared_ptr<std::string> emit() const override;
     std::shared_ptr<std::string> emit(const std::string& property, const std::string& value) const;
     std::shared_ptr<std::string> getValue() const { return value; }
     virtual ~ASTCompareOperator() = default;
+
 protected:
     std::shared_ptr<std::string> value;
 };
@@ -211,10 +236,10 @@ public:
         : ASTNode(sqlEmitter)
         , lhs(std::move(lhs))
         , operatr(std::move(operatr))
-        , rhs(std::move(rhs))
-    {};
+        , rhs(std::move(rhs)) {};
     std::shared_ptr<std::string> emit() const override;
     virtual ~ASTCompareExpression() = default;
+
 protected:
     std::shared_ptr<ASTProperty> lhs;
     std::shared_ptr<ASTCompareOperator> operatr;
@@ -226,11 +251,12 @@ class ASTStringOperator : public ASTNode {
 public:
     ASTStringOperator(const SQLEmitter& sqlEmitter, std::shared_ptr<std::string> value)
         : ASTNode(sqlEmitter)
-        , value(std::move(value)){};
+        , value(std::move(value)) {};
     std::shared_ptr<std::string> emit() const override;
     std::shared_ptr<std::string> emit(const std::string& property, const std::string& value) const;
     std::shared_ptr<std::string> getValue() const { return value; }
     virtual ~ASTStringOperator() = default;
+
 protected:
     std::shared_ptr<std::string> value;
 };
@@ -243,10 +269,10 @@ public:
         : ASTNode(sqlEmitter)
         , lhs(std::move(lhs))
         , operatr(std::move(operatr))
-        , rhs(std::move(rhs))
-    {};
+        , rhs(std::move(rhs)) {};
     std::shared_ptr<std::string> emit() const override;
     virtual ~ASTStringExpression() = default;
+
 protected:
     std::shared_ptr<ASTProperty> lhs;
     std::shared_ptr<ASTStringOperator> operatr;
@@ -257,10 +283,11 @@ class ASTExistsOperator : public ASTNode {
 public:
     ASTExistsOperator(const SQLEmitter& sqlEmitter, std::shared_ptr<std::string> value)
         : ASTNode(sqlEmitter)
-        , value(std::move(value)){};
+        , value(std::move(value)) {};
     std::shared_ptr<std::string> emit() const override;
     std::shared_ptr<std::string> emit(const std::string& property, const std::string& value) const;
     virtual ~ASTExistsOperator() = default;
+
 protected:
     std::shared_ptr<std::string> value;
 };
@@ -273,10 +300,10 @@ public:
         : ASTNode(sqlEmitter)
         , lhs(std::move(lhs))
         , operatr(std::move(operatr))
-        , rhs(std::move(rhs))
-    {};
+        , rhs(std::move(rhs)) {};
     std::shared_ptr<std::string> emit() const override;
     virtual ~ASTExistsExpression() = default;
+
 protected:
     std::shared_ptr<ASTProperty> lhs;
     std::shared_ptr<ASTExistsOperator> operatr;
@@ -289,10 +316,10 @@ public:
         std::shared_ptr<ASTNode> rhs)
         : ASTNode(sqlEmitter)
         , lhs(std::move(lhs))
-        , rhs(std::move(rhs))
-    {};
+        , rhs(std::move(rhs)) {};
     std::shared_ptr<std::string> emit() const override;
     virtual ~ASTAndOperator() = default;
+
 protected:
     std::shared_ptr<ASTNode> lhs;
     std::shared_ptr<ASTNode> rhs;
@@ -304,17 +331,16 @@ public:
         std::shared_ptr<ASTNode> rhs)
         : ASTNode(sqlEmitter)
         , lhs(std::move(lhs))
-        , rhs(std::move(rhs))
-    {};
+        , rhs(std::move(rhs)) {};
     std::shared_ptr<std::string> emit() const override;
     virtual ~ASTOrOperator() = default;
+
 protected:
     std::shared_ptr<ASTNode> lhs;
     std::shared_ptr<ASTNode> rhs;
 };
 
-class SQLEmitter
-{
+class SQLEmitter {
 public:
     virtual std::shared_ptr<std::string> emitSQL(const ASTNode* node) const = 0;
     virtual std::shared_ptr<std::string> emit(const ASTAsterisk* node) const = 0;
@@ -335,8 +361,7 @@ public:
     virtual char tableQuote() const = 0;
 };
 
-class DefaultSQLEmitter : public SQLEmitter
-{
+class DefaultSQLEmitter : public SQLEmitter {
     std::shared_ptr<std::string> emitSQL(const ASTNode* node) const override;
     std::shared_ptr<std::string> emit(const ASTAsterisk* node) const override { return std::make_shared<std::string>("*"); };
     std::shared_ptr<std::string> emit(const ASTParenthesis* node, const std::string& bracketedNode) const override;
@@ -357,8 +382,7 @@ class SearchParser {
 public:
     SearchParser(const SQLEmitter& sqlEmitter, const std::string& searchCriteria)
         : lexer(std::make_unique<SearchLexer>(searchCriteria))
-        , sqlEmitter(sqlEmitter)
-    {};
+        , sqlEmitter(sqlEmitter) {};
     std::shared_ptr<ASTNode> parse();
 
 protected:

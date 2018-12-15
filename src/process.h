@@ -39,9 +39,8 @@ zmm::String run_simple_process(zmm::String prog, zmm::String param, zmm::String 
 
 void run_process(zmm::String prog, zmm::String param);
 
-bool is_alive(pid_t pid, int *exit_status = NULL);
+bool is_alive(pid_t pid, int* exit_status = NULL);
 
 bool kill_proc(pid_t kill_pid);
-
 
 #endif // __PROCESS_H__

@@ -29,34 +29,36 @@
 
 /// \file fd_io_handler.cc
 
-#include "server.h"
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <cstring>
-#include <cstdio>
-#include "common.h"
 #include "fd_io_handler.h"
+#include "common.h"
+#include "server.h"
+#include <cstdio>
+#include <cstring>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 using namespace zmm;
 using namespace mxml;
 
-FDIOHandler::FDIOHandler(String filename) : IOHandler()
+FDIOHandler::FDIOHandler(String filename)
+    : IOHandler()
 {
     this->filename = filename;
     this->fd = -1;
     this->other = nullptr;
-    this->reference_list = Ref<Array<Object> >(new Array<Object >(4));
+    this->reference_list = Ref<Array<Object>>(new Array<Object>(4));
     this->closed = false;
 }
 
-FDIOHandler::FDIOHandler(int fd) : IOHandler()
+FDIOHandler::FDIOHandler(int fd)
+    : IOHandler()
 {
     this->filename = nullptr;
     this->fd = fd;
     this->other = nullptr;
-    this->reference_list = Ref<Array<Object> >(new Array<Object >(4));
+    this->reference_list = Ref<Array<Object>>(new Array<Object>(4));
     this->closed = false;
 }
 
@@ -73,8 +75,7 @@ void FDIOHandler::closeOther(Ref<IOHandler> other)
 void FDIOHandler::open(IN enum UpnpOpenFileMode mode)
 {
 
-    if (fd != -1)
-    {
+    if (fd != -1) {
         log_debug("Assuming valid fd %d\n", fd);
         return;
     }
@@ -82,27 +83,20 @@ void FDIOHandler::open(IN enum UpnpOpenFileMode mode)
     if (!string_ok(filename))
         throw _Exception(_("Missing filename!"));
 
-    if (mode == UPNP_READ)
-    {
+    if (mode == UPNP_READ) {
         fd = ::open(filename.c_str(), O_RDONLY);
-    }
-    else if (mode == UPNP_WRITE)
-    {
+    } else if (mode == UPNP_WRITE) {
         fd = ::open(filename.c_str(), O_WRONLY | O_CREAT, S_IWUSR | S_IRUSR);
-    }
-    else
-    {
+    } else {
         throw _Exception(_("FDIOHandler::open: invdalid read/write mode"));
     }
 
-    if (fd == -1)
-    {
+    if (fd == -1) {
         throw _Exception(_("FDIOHandler::open: failed to open: ") + filename.c_str());
     }
-
 }
 
-size_t FDIOHandler::read(OUT char *buf, IN size_t length)
+size_t FDIOHandler::read(OUT char* buf, IN size_t length)
 {
     size_t ret = 0;
 
@@ -111,7 +105,7 @@ size_t FDIOHandler::read(OUT char *buf, IN size_t length)
     return ret;
 }
 
-size_t FDIOHandler::write(IN char *buf, IN size_t length)
+size_t FDIOHandler::write(IN char* buf, IN size_t length)
 {
     size_t ret = 0;
 
@@ -122,32 +116,27 @@ size_t FDIOHandler::write(IN char *buf, IN size_t length)
 
 void FDIOHandler::seek(IN off_t offset, IN int whence)
 {
-    if (lseek(fd, offset, whence) != 0)
-    {
+    if (lseek(fd, offset, whence) != 0) {
         throw _Exception(_("fseek failed"));
     }
 }
 
 void FDIOHandler::close()
 {
-    
+
     if (closed)
         return;
 
     log_debug("Closing...\n");
-    try
-    {
+    try {
         if (other != nullptr)
             other->close();
-    }
-    catch (const Exception & ex)
-    {
+    } catch (const Exception& ex) {
         log_debug("Error closing \"other\" handler: %s\n", ex.getMessage().c_str());
     }
 
     // protect from multiple close calls
-    if (::close(fd) != 0)
-    {
+    if (::close(fd) != 0) {
         throw _Exception(_("fclose failed"));
     }
     fd = -1;

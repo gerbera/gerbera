@@ -57,15 +57,12 @@ std::string ConfigGenerator::generate(std::string userHome, std::string configDi
     "),true));
 
   config->appendChild(RefCast(docinfo, Node));
-
   config->appendElementChild(generateServer(userHome, configDir, prefixDir));
-
   config->appendElementChild(generateImport(prefixDir, magicFile));
-
   config->appendElementChild(generateTranscoding());
-
   config->indent();
-  return std::string(config->print().c_str());
+
+  return std::string((config->print() + "\n").c_str());
 }
 
 Ref<Element> ConfigGenerator::generateServer(std::string userHome, std::string configDir, std::string prefixDir) {

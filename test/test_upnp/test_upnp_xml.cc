@@ -5,48 +5,65 @@
 
 using namespace ::testing;
 
-TEST(UpnpXmlTest, CreatesUpnpDateElement) {
-  zmm::Ref<mxml::Element> result = UpnpXML_DIDLRenderAlbumDate(_("2001-01-01"));
+class UpnpXmlTest : public ::testing::Test {
+
+ public:
+  UpnpXmlTest() {};
+  virtual ~UpnpXmlTest() {};
+
+  virtual void SetUp() {
+    subject = new UpnpXMLBuilder();
+  }
+
+  virtual void TearDown() {
+    delete subject;
+  };
+
+  UpnpXMLBuilder *subject;
+};
+
+TEST_F(UpnpXmlTest, CreatesUpnpDateElement) {
+  zmm::Ref<mxml::Element> result = subject->renderAlbumDate(_("2001-01-01"));
 
   EXPECT_NE(result, nullptr);
   EXPECT_STREQ(result->getText().c_str(), "2001-01-01");
   EXPECT_STREQ(result->getName().c_str(), "upnp:date");
 }
 
-TEST(UpnpXmlTest, CreatesUpnpOrchestraElement) {
-  zmm::Ref<mxml::Element> result = UpnpXML_DIDLRenderOrchestra(_("Orchestra"));
+TEST_F(UpnpXmlTest, CreatesUpnpOrchestraElement) {
+  zmm::Ref<mxml::Element> result = subject->renderOrchestra(_("Orchestra"));
 
   EXPECT_NE(result, nullptr);
   EXPECT_STREQ(result->getText().c_str(), "Orchestra");
   EXPECT_STREQ(result->getName().c_str(), "upnp:orchestra");
 }
 
-TEST(UpnpXmlTest, CreatesUpnpConductorElement) {
-  zmm::Ref<mxml::Element> result = UpnpXML_DIDLRenderConductor(_("Conductor"));
+TEST_F(UpnpXmlTest, CreatesUpnpConductorElement) {
+  zmm::Ref<mxml::Element> result = subject->renderConductor(_("Conductor"));
 
   EXPECT_NE(result, nullptr);
   EXPECT_STREQ(result->getText().c_str(), "Conductor");
   EXPECT_STREQ(result->getName().c_str(), "upnp:Conductor");
 }
 
-TEST(UpnpXmlTest, CreatesUpnpAlbumArtUriElement) {
-  zmm::Ref<mxml::Element> result = UpnpXML_DIDLRenderAlbumArtURI(_("/some/uri"));
+TEST_F(UpnpXmlTest, CreatesUpnpAlbumArtUriElement) {
+  zmm::Ref<mxml::Element> result = subject->renderAlbumArtURI(_("/some/uri"));
 
   EXPECT_NE(result, nullptr);
   EXPECT_STREQ(result->getText().c_str(), "/some/uri");
   EXPECT_STREQ(result->getName().c_str(), "upnp:albumArtURI");
 }
 
-TEST(UpnpXmlTest, CreatesDcCreatorElement) {
-  zmm::Ref<mxml::Element> result = UpnpXML_DIDLRenderCreator(_("Creator"));
+TEST_F(UpnpXmlTest, CreatesDcCreatorElement) {
+  zmm::Ref<mxml::Element> result = subject->renderCreator(_("Creator"));
 
   EXPECT_NE(result, nullptr);
   EXPECT_STREQ(result->getText().c_str(), "Creator");
   EXPECT_STREQ(result->getName().c_str(), "dc:creator");
 }
 
-TEST(UpnpXmlTest, CreatesSecCaptionInfoElement) {
-  zmm::Ref<mxml::Element> result = UpnpXML_DIDLRenderCaptionInfo(_("file.srt"));
+TEST_F(UpnpXmlTest, CreatesSecCaptionInfoElement) {
+  zmm::Ref<mxml::Element> result = subject->renderCaptionInfo(_("file.srt"));
 
   EXPECT_NE(result, nullptr);
   EXPECT_STREQ(result->getText().c_str(), "file.srt");
@@ -54,8 +71,8 @@ TEST(UpnpXmlTest, CreatesSecCaptionInfoElement) {
   EXPECT_STREQ(result->getAttribute("sec:type").c_str(), "srt");
 }
 
-TEST(UpnpXmlTest, CreatesEventPropertySet) {
-  zmm::Ref<mxml::Element> result = UpnpXML_CreateEventPropertySet();
+TEST_F(UpnpXmlTest, CreatesEventPropertySet) {
+  zmm::Ref<mxml::Element> result = subject->createEventPropertySet();
 
   EXPECT_NE(result, nullptr);
   EXPECT_STREQ(result->getName().c_str(), "e:propertyset");
@@ -63,7 +80,7 @@ TEST(UpnpXmlTest, CreatesEventPropertySet) {
   EXPECT_NE(result->getChildByName("e:property"), nullptr);
 }
 
-TEST(UpnpXmlTest, UpdatesObjectActiveItem) {
+TEST_F(UpnpXmlTest, UpdatesObjectActiveItem) {
   zmm::Ref<CdsObject> obj(new CdsActiveItem());
   std::ostringstream inputXml;
   inputXml << "<item>";  // this is not valid UPNP, but just enough to test with
@@ -75,7 +92,7 @@ TEST(UpnpXmlTest, UpdatesObjectActiveItem) {
   inputXml << "<state>state</state>";
   inputXml << "</item>";
 
-  UpnpXML_DIDLUpdateObject(obj, inputXml.str());
+  subject->updateObject(obj, inputXml.str());
 
   zmm::Ref<CdsActiveItem> aitem = RefCast(obj, CdsActiveItem);
   EXPECT_NE(aitem, nullptr);
@@ -87,11 +104,11 @@ TEST(UpnpXmlTest, UpdatesObjectActiveItem) {
   EXPECT_STREQ(aitem->getState().c_str(), "state");
 }
 
-TEST(UpnpXmlTest, CreateResponse) {
+TEST_F(UpnpXmlTest, CreateResponse) {
   zmm::String actionName = "action";
   zmm::String serviceType = "urn:schemas-upnp-org:service:ContentDirectory:1";
 
-  zmm::Ref<mxml::Element> result = UpnpXML_CreateResponse(actionName, serviceType);
+  zmm::Ref<mxml::Element> result = subject->createResponse(actionName, serviceType);
 
   EXPECT_NE(result, nullptr);
   EXPECT_STREQ(result->getName().c_str(), "u:actionResponse");

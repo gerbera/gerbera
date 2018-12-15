@@ -34,9 +34,10 @@
 
 using namespace zmm;
 
-IOHandlerChainer::IOHandlerChainer(Ref<IOHandler> readFrom, Ref<IOHandler> writeTo, int chunkSize) : ThreadExecutor()
+IOHandlerChainer::IOHandlerChainer(Ref<IOHandler> readFrom, Ref<IOHandler> writeTo, int chunkSize)
+    : ThreadExecutor()
 {
-    if (chunkSize <=0)
+    if (chunkSize <= 0)
         throw _Exception(_("chunkSize must be positive"));
     if (readFrom == nullptr || writeTo == nullptr)
         throw _Exception(_("readFrom and writeTo need to be set"));
@@ -45,73 +46,54 @@ IOHandlerChainer::IOHandlerChainer(Ref<IOHandler> readFrom, Ref<IOHandler> write
     this->readFrom = readFrom;
     this->writeTo = writeTo;
     readFrom->open(UPNP_READ);
-    buf = (char *)MALLOC(chunkSize);
+    buf = (char*)MALLOC(chunkSize);
     startThread();
 }
 
 void IOHandlerChainer::threadProc()
 {
-    try
-    {
+    try {
         bool again = false;
-        do
-        {
-            try
-            {
+        do {
+            try {
                 writeTo->open(UPNP_WRITE);
                 again = false;
-            }
-            catch (const TryAgainException & e)
-            {
+            } catch (const TryAgainException& e) {
                 again = true;
                 sleep(1);
             }
-        }
-        while (! threadShutdownCheck() && again);
-        
+        } while (!threadShutdownCheck() && again);
+
         bool stopLoop = false;
-        while (! threadShutdownCheck() && ! stopLoop)
-        {
+        while (!threadShutdownCheck() && !stopLoop) {
             int numRead = readFrom->read(buf, chunkSize);
-            if (numRead == 0)
-            {
+            if (numRead == 0) {
                 status = IOHC_NORMAL_SHUTDOWN;
                 stopLoop = true;
-            }
-            else if (numRead < 0)
-            {
+            } else if (numRead < 0) {
                 status = IOHC_READ_ERROR;
                 stopLoop = true;
-            }
-            else
-            {
+            } else {
                 int numWritten = 0;
-                while (! threadShutdownCheck() && numWritten == 0 && ! stopLoop)
-                {
+                while (!threadShutdownCheck() && numWritten == 0 && !stopLoop) {
                     numWritten = writeTo->write(buf, numRead);
-                    if (numWritten != 0 && numWritten != numRead)
-                    {
+                    if (numWritten != 0 && numWritten != numRead) {
                         status = IOHC_WRITE_ERROR;
                         stopLoop = true;
                     }
                 }
             }
         }
-    }
-    catch (const Exception & e)
-    {
+    } catch (const Exception& e) {
         log_debug("%s", e.getMessage().c_str());
         status = IOHC_EXCEPTION;
     }
-    try
-    {
+    try {
         if (threadShutdownCheck())
             status = IOHC_FORCED_SHUTDOWN;
         readFrom->close();
         writeTo->close();
-    }
-    catch (const Exception & e)
-    {
+    } catch (const Exception& e) {
         log_debug("%s", e.getMessage().c_str());
         status = IOHC_EXCEPTION;
     }

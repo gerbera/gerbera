@@ -296,7 +296,7 @@ String AutoscanDirectory::mapScanmode(ScanMode scanmode)
 {
     String scanmode_str = nullptr;
     switch (scanmode) {
-        case ScanMode::Timed:
+    case ScanMode::Timed:
         scanmode_str = _("timed");
         break;
     case ScanMode::INotify:

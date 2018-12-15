@@ -38,14 +38,12 @@
 #define IOHC_WRITE_ERROR 4
 #define IOHC_EXCEPTION 5
 
-
-#include "thread_executor.h"
 #include "io_handler.h"
+#include "thread_executor.h"
 
 /// \brief gets two IOHandler, starts a thread which reads from one IOHandler
 /// and writes the data to the other IOHandler
-class IOHandlerChainer : public ThreadExecutor
-{
+class IOHandlerChainer : public ThreadExecutor {
 public:
     /// \brief initialize the IOHandlerChainer
     /// \param readFrom the IOHandler to read from
@@ -54,8 +52,10 @@ public:
     /// this size will be allocated
     IOHandlerChainer(zmm::Ref<IOHandler> readFrom, zmm::Ref<IOHandler> writeTo, int chunkSize);
     virtual int getStatus() { return status; }
+
 protected:
     virtual void threadProc();
+
 private:
     int status;
     char* buf;

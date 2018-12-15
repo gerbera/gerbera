@@ -22,35 +22,35 @@
 #include "search_handler.h"
 #include "config_manager.h"
 #include "storage.h"
-#include "zmm/strings.h"
 #include "tools.h"
+#include "zmm/strings.h"
 
-#include <cctype>
 #include <algorithm>
+#include <cctype>
 #include <iostream>
 #include <sstream>
 #include <stack>
 
 static std::unordered_map<std::string, TokenType> tokenTypes {
-    {"(", TokenType::LPAREN},
-    {")", TokenType::RPAREN},
-    {"*", TokenType::ASTERISK},
-    {"\"", TokenType::DQUOTE},
-    {"true", TokenType::BOOLVAL},
-    {"false", TokenType::BOOLVAL},
-    {"exists", TokenType::EXISTS},
-    {"contains", TokenType::STRINGOP},
-    {"doesnotcontain", TokenType::STRINGOP},
-    {"derivedfrom", TokenType::STRINGOP},
-    {"startswith", TokenType::STRINGOP},
-    {"=", TokenType::COMPAREOP},
-    {"!=", TokenType::COMPAREOP},
-    {"<", TokenType::COMPAREOP},
-    {"<=", TokenType::COMPAREOP},
-    {">", TokenType::COMPAREOP},
-    {">=", TokenType::COMPAREOP},
-    {"and", TokenType::AND},
-    {"or", TokenType::OR}
+    { "(", TokenType::LPAREN },
+    { ")", TokenType::RPAREN },
+    { "*", TokenType::ASTERISK },
+    { "\"", TokenType::DQUOTE },
+    { "true", TokenType::BOOLVAL },
+    { "false", TokenType::BOOLVAL },
+    { "exists", TokenType::EXISTS },
+    { "contains", TokenType::STRINGOP },
+    { "doesnotcontain", TokenType::STRINGOP },
+    { "derivedfrom", TokenType::STRINGOP },
+    { "startswith", TokenType::STRINGOP },
+    { "=", TokenType::COMPAREOP },
+    { "!=", TokenType::COMPAREOP },
+    { "<", TokenType::COMPAREOP },
+    { "<=", TokenType::COMPAREOP },
+    { ">", TokenType::COMPAREOP },
+    { ">=", TokenType::COMPAREOP },
+    { "and", TokenType::AND },
+    { "or", TokenType::OR }
 };
 
 std::shared_ptr<std::string> aslowercase(const std::string& src)
@@ -62,25 +62,23 @@ std::shared_ptr<std::string> aslowercase(const std::string& src)
 
 std::unique_ptr<SearchToken> SearchLexer::nextToken()
 {
-    for (; currentPos < input.length(); ) {
+    for (; currentPos < input.length();) {
         char ch = input[currentPos];
 
         switch (ch) {
         case '(':
         case ')':
         case '*':
-        case '=':
-	    {
-                auto token = std::make_shared<std::string>(&ch, 1);
-                TokenType tokenType = tokenTypes.at(*token);
-                currentPos++;
-                return std::make_unique<SearchToken>(tokenType, std::move(token));
-            }
-            break;
+        case '=': {
+            auto token = std::make_shared<std::string>(&ch, 1);
+            TokenType tokenType = tokenTypes.at(*token);
+            currentPos++;
+            return std::make_unique<SearchToken>(tokenType, std::move(token));
+        } break;
         case '>':
         case '<':
         case '!':
-            if (input[currentPos+1]=='=') {
+            if (input[currentPos + 1] == '=') {
                 auto token = std::make_shared<std::string>(&ch, 1);
                 // std::string token = std::string(&ch, 1);
                 token->push_back('=');
@@ -133,16 +131,16 @@ std::shared_ptr<std::string> SearchLexer::getQuotedValue(const std::string& inpu
 {
     std::string token;
     bool escaping = false;
-    for (; currentPos < input.length(); ) {
+    for (; currentPos < input.length();) {
         auto ch = input[currentPos];
-        if (ch=='"' && !escaping) {
+        if (ch == '"' && !escaping) {
             break;
         }
-        if (!escaping && ch=='\\') {
+        if (!escaping && ch == '\\') {
             escaping = true;
         } else {
             token.push_back(ch);
-            if (ch!='\\')
+            if (ch != '\\')
                 escaping = false;
         }
         currentPos++;
@@ -153,9 +151,9 @@ std::shared_ptr<std::string> SearchLexer::getQuotedValue(const std::string& inpu
 std::shared_ptr<std::string> SearchLexer::nextStringToken(const std::string& input)
 {
     auto startPos = currentPos;
-    for (; currentPos < input.length(); ) {
+    for (; currentPos < input.length();) {
         auto ch = input[currentPos];
-        if (std::isalnum(ch) || ch==':' || ch=='@' || ch=='.')
+        if (std::isalnum(ch) || ch == ':' || ch == '@' || ch == '.')
             currentPos++;
         else
             break;
@@ -166,7 +164,7 @@ std::shared_ptr<std::string> SearchLexer::nextStringToken(const std::string& inp
 std::unique_ptr<SearchToken> SearchLexer::makeToken(std::shared_ptr<std::string> tokenStr)
 {
     auto itr = tokenTypes.find(*(aslowercase(*tokenStr)));
-    if (itr!=tokenTypes.end()) {
+    if (itr != tokenTypes.end()) {
         return std::make_unique<SearchToken>(itr->second, std::move(tokenStr));
     } else {
         return std::make_unique<SearchToken>(TokenType::PROPERTY, std::move(tokenStr));
@@ -181,7 +179,7 @@ void SearchParser::getNextToken()
 std::shared_ptr<ASTNode> SearchParser::parse()
 {
     getNextToken();
-    if (currentToken->getType()==TokenType::ASTERISK)
+    if (currentToken->getType() == TokenType::ASTERISK)
         return std::make_shared<ASTAsterisk>(sqlEmitter, currentToken->getValue());
     else
         return parseSearchExpression();
@@ -210,7 +208,7 @@ std::shared_ptr<ASTNode> SearchParser::parseSearchExpression()
                 if (nodeStack.top() == nullptr)
                     throw _Exception(_("Cannot construct ASTOrOperator without lhs"));
                 if (expressionNode == nullptr)
-                     throw _Exception(_("Cannot construct ASTOrOperator without rhs"));
+                    throw _Exception(_("Cannot construct ASTOrOperator without rhs"));
                 std::shared_ptr<ASTNode> lhs(nodeStack.top());
                 nodeStack.pop();
                 nodeStack.push(std::make_shared<ASTOrOperator>(sqlEmitter, lhs, expressionNode));
@@ -280,7 +278,7 @@ std::shared_ptr<ASTNode> SearchParser::parseParenthesis()
                 currentNode = std::make_shared<ASTOrOperator>(sqlEmitter, lhsNode, rhsNode);
             else
                 throw _Exception(_("Failed to parse search criteria - expected and/or"));
-            
+
             getNextToken();
         } else if (currentToken->getType() == TokenType::LPAREN) {
             currentNode = parseParenthesis();
@@ -289,7 +287,7 @@ std::shared_ptr<ASTNode> SearchParser::parseParenthesis()
     }
     if (currentNode == nullptr)
         throw _Exception(_("Failed to parse search criteria - bad expression between parenthesis"));
-        
+
     return std::make_shared<ASTParenthesis>(sqlEmitter, currentNode);
 }
 
@@ -453,14 +451,14 @@ std::shared_ptr<std::string> DefaultSQLEmitter::emitSQL(const ASTNode* node) con
     if (predicates.length() > 0) {
         std::stringstream sql;
         sql << "from mt_cds_object c "
-                << "inner join mt_metadata m on c.id = m.item_id "
-                << "where "
+            << "inner join mt_metadata m on c.id = m.item_id "
+            << "where "
             << predicates;
         return std::make_shared<std::string>(sql.str());
     } else
         throw _Exception(_("No SQL generated from AST"));
 }
-    
+
 std::shared_ptr<std::string> DefaultSQLEmitter::emit(const ASTParenthesis* node, const std::string& bracketedNode) const
 {
     std::stringstream sqlFragment;
@@ -492,18 +490,20 @@ std::shared_ptr<std::string> DefaultSQLEmitter::emit(const ASTStringOperator* no
     std::stringstream sqlFragment;
     if (lcOperator == "contains") {
         sqlFragment << "(m.property_name='" << property << "' and lower(m.property_value) "
-                    << "like" << " lower('%" << value << "%') and c.upnp_class is not null)";
-    }
-    else if (lcOperator == "doesnotcontain") {
+                    << "like"
+                    << " lower('%" << value << "%') and c.upnp_class is not null)";
+    } else if (lcOperator == "doesnotcontain") {
         sqlFragment << "(m.property_name='" << property << "' and lower(m.property_value) "
-                    << "not like" << " lower('%" << value << "%') and c.upnp_class is not null)";
-    }
-    else if (lcOperator == "startswith") {
+                    << "not like"
+                    << " lower('%" << value << "%') and c.upnp_class is not null)";
+    } else if (lcOperator == "startswith") {
         sqlFragment << "(m.property_name='" << property << "' and lower(m.property_value) "
-                    << "like" << " lower('" << value << "%') and c.upnp_class is not null)";
-    }
-    else if (lcOperator == "derivedfrom") {
-        sqlFragment << "c.upnp_class " << "like" << " lower('" << value << ".%')";
+                    << "like"
+                    << " lower('" << value << "%') and c.upnp_class is not null)";
+    } else if (lcOperator == "derivedfrom") {
+        sqlFragment << "c.upnp_class "
+                    << "like"
+                    << " lower('" << value << ".%')";
     }
     return std::make_shared<std::string>(sqlFragment.str());
 }

@@ -39,28 +39,27 @@
 #include "zmm/zmmf.h"
 
 /// \brief Inotify interface.
-class Inotify : public zmm::Object
-{
+class Inotify : public zmm::Object {
 public:
     Inotify();
     virtual ~Inotify();
-    
+
     /// \brief Puts a file or directory on the inotify watch list.
     /// \param path file or directory to monitor.
     /// \param events inotify event mask
     /// \return watch descriptor or a negative value on error
     int addWatch(zmm::String path, int events);
-    
+
     /// \brief Removes a previously added file or directory from the watch list
     /// \param wd watch descriptor that was returned by the add_watch function
     void removeWatch(int wd);
-    
+
     /// \brief Returns the next inotify event.
     ///
     /// This function will return the next inotify event that occurs, in case
     /// that there are no events the function will block indefinetely. It can
     /// be unblocked by the stop function.
-    struct inotify_event * nextEvent();
+    struct inotify_event* nextEvent();
 
     /// \brief Unblock the next_event function.
     void stop();

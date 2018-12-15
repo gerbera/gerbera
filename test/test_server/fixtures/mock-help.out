@@ -1,19 +1,21 @@
-Usage: gerbera [options]
+Gerbera UPnP Media Server - https://gerbera.io
+Usage:
+  gerbera [OPTION...]
 
-Supported options:
-    --ip or -i         ip address to bind to
-    --interface or -e  network interface to bind to
-    --port or -p       server port (the SDK only permits values >= 49152)
-    --config or -c     configuration file to use
-    --home or -m       define the home directory
-    --cfgdir or -f     name of the directory that is holding the configuration
-    --add or -a        add the given file/directory
-    --logfile or -l    log to specified file
-    --debug or -D      enable debug output
-    --compile-info     print configuration summary and exit
-    --create-config    generate default config.xml
-    --version          print version information and exit
-    --help or -h       this help message
-
-For more information visit http://gerbera.io/
+  -D, --debug          Enable debugging
+  -e, --interface      Interface to bind with
+  -p, --port arg       Port to bind with, must be >=49152
+  -i, --ip             IP to bind with
+  -c, --config         Path to config file
+  -m, --home           Search this directory for a .gerbera folder containing
+                       a config file
+  -f, --cfgdir         Override name of config folder (.config/gerbera) by
+                       default. -h must also be set.
+  -l, --logfile        Set log location
+      --compile-info   Print compile info and exit
+  -v, --version        Print version info and exit
+  -h, --help           Print this help and exit
+      --create-config  Print a default config.xml file and exit
+      --add-file FILE  Scan a file into the DB on startup, can be specified
+                       multiple times
 

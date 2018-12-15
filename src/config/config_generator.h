@@ -26,6 +26,8 @@ Gerbera - https://gerbera.io/
 #ifndef GERBERA_CONFIG_GENERATOR_H
 #define GERBERA_CONFIG_GENERATOR_H
 
+#include <mxml/element.h>
+
 class ConfigGenerator {
  public:
   ConfigGenerator();

@@ -44,11 +44,10 @@
 /// structure. The idea is to get the XML of the request, process it outside
 /// of the class, create a response XML and put it back in. Before passing
 /// *upnp_request back to the SDK the update() function MUST be called.
-class ActionRequest : public zmm::Object
-{
+class ActionRequest : public zmm::Object {
 protected:
     /// \brief Upnp_Action_Request that comes from the SDK.
-    UpnpActionRequest *upnp_request;
+    UpnpActionRequest* upnp_request;
 
     /// \brief Error code that is returned to the SDK.
     int errCode;
@@ -81,9 +80,9 @@ protected:
 public:
     /// \brief The Constructor takes the values from the upnp_request and fills in internal variables.
     /// \param *upnp_request Pointer to the Upnp_Action_Request structure.
-    ActionRequest(UpnpActionRequest *upnp_request);
+    ActionRequest(UpnpActionRequest* upnp_request);
 
-    /// \brief Returns the name of the action. 
+    /// \brief Returns the name of the action.
     zmm::String getActionName();
 
     /// \brief Returns the UDN of the recipient device (should be ours)
@@ -105,13 +104,12 @@ public:
     /// In case there was an error processing the request, we can return the
     /// appropriate error code to the SDK.
     void setErrorCode(int errCode);
-   
+
     /// \brief Updates the upnp_request structure.
-    /// 
+    ///
     /// This function writes all changed values into the upnp_request structure, and
     /// must be called at the very end before giving *upnp_request back to the SDK.
     void update();
 };
-
 
 #endif // __ACTION_REQUEST_H__

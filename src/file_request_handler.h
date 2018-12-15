@@ -35,10 +35,14 @@
 #include "common.h"
 #include "dictionary.h"
 #include "request_handler.h"
+#include "upnp_xml.h"
 
 class FileRequestHandler : public RequestHandler {
+protected:
+    UpnpXMLBuilder* xmlBuilder;
+
 public:
-    FileRequestHandler();
+    explicit FileRequestHandler(UpnpXMLBuilder* xmlBuilder);
 
     virtual void get_info(IN const char* filename, OUT UpnpFileInfo* info);
     virtual zmm::Ref<IOHandler> open(

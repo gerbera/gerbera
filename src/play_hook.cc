@@ -30,14 +30,14 @@
 /// \file play_hook.cc
 /// \brief Definition of the PlayHook class.
 //
-// \todo this should be solved via an observer model 
+// \todo this should be solved via an observer model
 
 #include "play_hook.h"
 #include "config_manager.h"
 #include "content_manager.h"
 
 #ifdef HAVE_LASTFMLIB
-    #include "lastfm_scrobbler.h"
+#include "lastfm_scrobbler.h"
 #endif
 
 using namespace zmm;
@@ -47,16 +47,13 @@ void PlayHook::trigger(zmm::Ref<CdsObject> obj)
     log_debug("start\n");
     Ref<ConfigManager> cfg = ConfigManager::getInstance();
 
-    if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && !obj->getFlag(OBJECT_FLAG_PLAYED))
-    {
-        Ref<Array<StringBase> > mark_list = cfg->getStringArrayOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST);
+    if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && !obj->getFlag(OBJECT_FLAG_PLAYED)) {
+        Ref<Array<StringBase>> mark_list = cfg->getStringArrayOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST);
 
-        for (int i = 0; i < mark_list->size(); i++)
-        {
-            if (RefCast(obj, CdsItem)->getMimeType().startsWith(mark_list->get(i)))
-            {
+        for (int i = 0; i < mark_list->size(); i++) {
+            if (RefCast(obj, CdsItem)->getMimeType().startsWith(mark_list->get(i))) {
                 obj->setFlag(OBJECT_FLAG_PLAYED);
-        
+
                 bool supress = cfg->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES);
 
                 Ref<ContentManager> cm = ContentManager::getInstance();
@@ -68,8 +65,7 @@ void PlayHook::trigger(zmm::Ref<CdsObject> obj)
     }
 
 #ifdef HAVE_LASTFMLIB
-    if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_LASTFM_ENABLED) &&
-        (RefCast(obj, CdsItem)->getMimeType().startsWith("audio")))
+    if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_LASTFM_ENABLED) && (RefCast(obj, CdsItem)->getMimeType().startsWith("audio")))
         LastFm::getInstance()->startedPlaying(RefCast(obj, CdsItem));
 #endif
     log_debug("end\n");

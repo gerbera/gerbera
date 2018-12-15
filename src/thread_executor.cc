@@ -34,7 +34,9 @@
 using namespace zmm;
 using namespace std;
 
-ThreadExecutor::ThreadExecutor() : threadShutdown(false), thread(0)
+ThreadExecutor::ThreadExecutor()
+    : threadShutdown(false)
+    , thread(0)
 {
 }
 
@@ -50,13 +52,12 @@ void ThreadExecutor::startThread()
         &thread,
         nullptr, // attr
         ThreadExecutor::staticThreadProc,
-        this
-    );
+        this);
 }
 
 bool ThreadExecutor::kill()
 {
-    if (! threadRunning)
+    if (!threadRunning)
         return true;
 
     unique_lock<std::mutex> lock(mutex);
@@ -64,17 +65,16 @@ bool ThreadExecutor::kill()
     cond.notify_one();
     lock.unlock();
 
-    if (thread)
-    {
+    if (thread) {
         threadRunning = false;
         pthread_join(thread, nullptr);
     }
     return true;
 }
 
-void *ThreadExecutor::staticThreadProc(void *arg)
+void* ThreadExecutor::staticThreadProc(void* arg)
 {
-    auto *inst = (ThreadExecutor *)arg;
+    auto* inst = (ThreadExecutor*)arg;
     inst->threadProc();
     pthread_exit(nullptr);
     return nullptr;

@@ -30,42 +30,36 @@
 /// \file cds_resource_manager.cc
 
 #include "cds_resource_manager.h"
+#include "common.h"
 #include "dictionary.h"
+#include "metadata_handler.h"
 #include "object_dictionary.h"
 #include "server.h"
-#include "common.h"
 #include "tools.h"
-#include "metadata_handler.h"
 
 using namespace zmm;
 using namespace mxml;
 
-CdsResourceManager::CdsResourceManager() : Object()
+CdsResourceManager::CdsResourceManager()
+    : Object()
 {
 }
 
-String CdsResourceManager::renderExtension(String contentType, String location)
+String CdsResourceManager::renderExtension(UpnpXMLBuilder* xmlBuilder, String contentType, String location)
 {
-    String ext = _(_URL_PARAM_SEPARATOR) + URL_FILE_EXTENSION + 
-                _URL_PARAM_SEPARATOR + "file";
+    String ext = _(_URL_PARAM_SEPARATOR) + URL_FILE_EXTENSION + _URL_PARAM_SEPARATOR + "file";
 
-    if (string_ok(contentType) && (contentType != CONTENT_TYPE_PLAYLIST))
-    {
+    if (string_ok(contentType) && (contentType != CONTENT_TYPE_PLAYLIST)) {
         ext = ext + _(".") + contentType;
         return ext;
     }
 
-    if (string_ok(location))
-    {
+    if (string_ok(location)) {
         int dot = location.rindex('.');
-        if (dot > -1)
-        {
+        if (dot > -1) {
             String extension = location.substring(dot);
             // make sure that the extension does not contain the separator character
-            if (string_ok(extension) && 
-               (extension.index(URL_PARAM_SEPARATOR) == -1) &&
-               (extension.index(URL_PARAM_SEPARATOR) == -1))
-            {
+            if (string_ok(extension) && (extension.index(URL_PARAM_SEPARATOR) == -1) && (extension.index(URL_PARAM_SEPARATOR) == -1)) {
                 ext = ext + extension;
                 return ext;
             }
@@ -74,30 +68,23 @@ String CdsResourceManager::renderExtension(String contentType, String location)
     return nullptr;
 }
 
-void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
+void CdsResourceManager::addResources(UpnpXMLBuilder* xmlBuilder, Ref<CdsItem> item, Ref<Element> element)
 {
     Ref<UrlBase> urlBase = addResources_getUrlBase(item);
     Ref<ConfigManager> config = ConfigManager::getInstance();
-    bool skipURL = ((IS_CDS_ITEM_INTERNAL_URL(item->getObjectType()) || 
-                    IS_CDS_ITEM_EXTERNAL_URL(item->getObjectType())) &&
-                    (!item->getFlag(OBJECT_FLAG_PROXY_URL)));
+    bool skipURL = ((IS_CDS_ITEM_INTERNAL_URL(item->getObjectType()) || IS_CDS_ITEM_EXTERNAL_URL(item->getObjectType())) && (!item->getFlag(OBJECT_FLAG_PROXY_URL)));
 
     bool isExtThumbnail = false; // this sucks
     Ref<Dictionary> mappings = config->getDictionaryOption(
-                        CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+        CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
 
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
-    if (config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED) && 
-       (item->getMimeType().startsWith(_("video")) || 
-        item->getFlag(OBJECT_FLAG_OGG_THEORA)))
-    {
+    if (config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED) && (item->getMimeType().startsWith(_("video")) || item->getFlag(OBJECT_FLAG_OGG_THEORA))) {
         String videoresolution = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_RESOLUTION));
         int x;
         int y;
 
-        if (string_ok(videoresolution) && 
-            check_resolution(videoresolution, &x, &y))
-        {
+        if (string_ok(videoresolution) && check_resolution(videoresolution, &x, &y)) {
             String thumb_mimetype = mappings->get(_(CONTENT_TYPE_JPG));
             if (!string_ok(thumb_mimetype))
                 thumb_mimetype = _("image/jpeg");
@@ -105,14 +92,14 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
             Ref<CdsResource> ffres(new CdsResource(CH_FFTH));
             ffres->addParameter(_(RESOURCE_HANDLER), String::from(CH_FFTH));
             ffres->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
-                    renderProtocolInfo(thumb_mimetype));
+                renderProtocolInfo(thumb_mimetype));
             ffres->addOption(_(RESOURCE_CONTENT_TYPE), _(THUMBNAIL));
 
             y = config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE) * y / x;
             x = config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE);
             String resolution = String::from(x) + "x" + String::from(y);
             ffres->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION),
-                    resolution);
+                resolution);
             item->addResource(ffres);
             log_debug("Adding resource for video thumbnail\n");
         }
@@ -124,54 +111,44 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
     int realCount = 0;
     bool hide_original_resource = false;
     int original_resource = 0;
-    
+
     Ref<UrlBase> urlBase_tr;
 
     // once proxying is a feature that can be turned off or on in
-    // config manager we should use that setting 
+    // config manager we should use that setting
     //
     // TODO: allow transcoding for URLs
-        
+
     // now get the profile
     Ref<TranscodingProfileList> tlist = config->getTranscodingProfileListOption(
-            CFG_TRANSCODING_PROFILE_LIST);
-    Ref<ObjectDictionary<TranscodingProfile> > tp_mt = tlist->get(item->getMimeType());
-    if (tp_mt != nullptr)
-    {
-        Ref<Array<ObjectDictionaryElement<TranscodingProfile> > > profiles = tp_mt->getElements();
-        for (int p = 0; p < profiles->size(); p++)
-        {
+        CFG_TRANSCODING_PROFILE_LIST);
+    Ref<ObjectDictionary<TranscodingProfile>> tp_mt = tlist->get(item->getMimeType());
+    if (tp_mt != nullptr) {
+        Ref<Array<ObjectDictionaryElement<TranscodingProfile>>> profiles = tp_mt->getElements();
+        for (int p = 0; p < profiles->size(); p++) {
             Ref<TranscodingProfile> tp = profiles->get(p)->getValue();
 
             if (tp == nullptr)
                 throw _Exception(_("Invalid profile encountered!"));
 
             String ct = mappings->get(item->getMimeType());
-            if (ct == CONTENT_TYPE_OGG) 
-            {
-                if (((item->getFlag(OBJECT_FLAG_OGG_THEORA)) && 
-                     (!tp->isTheora())) ||
-                    (!item->getFlag(OBJECT_FLAG_OGG_THEORA) && 
-                    (tp->isTheora())))
-                     {
-                         continue;
-                     }
+            if (ct == CONTENT_TYPE_OGG) {
+                if (((item->getFlag(OBJECT_FLAG_OGG_THEORA)) && (!tp->isTheora())) || (!item->getFlag(OBJECT_FLAG_OGG_THEORA) && (tp->isTheora()))) {
+                    continue;
+                }
             }
             // check user fourcc settings
-            else if (ct == CONTENT_TYPE_AVI)
-            {
+            else if (ct == CONTENT_TYPE_AVI) {
                 avi_fourcc_listmode_t fcc_mode = tp->getAVIFourCCListMode();
 
-                Ref<Array<StringBase> > fcc_list = tp->getAVIFourCCList();
+                Ref<Array<StringBase>> fcc_list = tp->getAVIFourCCList();
                 // mode is either process or ignore, so we will have to take a
                 // look at the settings
-                if (fcc_mode != FCC_None)
-                {
+                if (fcc_mode != FCC_None) {
                     String current_fcc = item->getResource(0)->getOption(_(RESOURCE_OPTION_FOURCC));
                     // we can not do much if the item has no fourcc info,
                     // so we will transcode it anyway
-                    if (!string_ok(current_fcc))
-                    {
+                    if (!string_ok(current_fcc)) {
                         // the process mode specifies that we will transcode
                         // ONLY if the fourcc matches the list; since an invalid
                         // fourcc can not match anything we will skip the item
@@ -180,15 +157,13 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
                     }
                     // we have the current and hopefully valid fcc string
                     // let's have a look if it matches the list
-                    else
-                    {
+                    else {
                         bool fcc_match = false;
-                        for (int f = 0; f < fcc_list->size(); f++)
-                        {
+                        for (int f = 0; f < fcc_list->size(); f++) {
                             if (current_fcc == fcc_list->get(f)->data)
                                 fcc_match = true;
                         }
-                       
+
                         if (!fcc_match && (fcc_mode == FCC_Process))
                             continue;
 
@@ -202,60 +177,47 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
             t_res->addParameter(_(URL_PARAM_TRANSCODE_PROFILE_NAME), tp->getName());
             // after transcoding resource was added we can not rely on
             // index 0, so we will make sure the ogg option is there
-            t_res->addOption(_(CONTENT_TYPE_OGG), 
-                         item->getResource(0)->getOption(_(CONTENT_TYPE_OGG)));
+            t_res->addOption(_(CONTENT_TYPE_OGG),
+                item->getResource(0)->getOption(_(CONTENT_TYPE_OGG)));
             t_res->addParameter(_(URL_PARAM_TRANSCODE), _(URL_VALUE_TRANSCODE));
 
             String targetMimeType = tp->getTargetMimeType();
 
-            if (!tp->isThumbnail())
-            {
-                // duration should be the same for transcoded media, so we can 
+            if (!tp->isThumbnail()) {
+                // duration should be the same for transcoded media, so we can
                 // take the value from the original resource
                 String duration = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_DURATION));
                 if (string_ok(duration))
                     t_res->addAttribute(MetadataHandler::getResAttrName(R_DURATION),
-                            duration);
+                        duration);
 
                 int freq = tp->getSampleFreq();
-                if (freq == SOURCE)
-                {
+                if (freq == SOURCE) {
                     String frequency = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY));
-                    if (string_ok(frequency))
-                    {
+                    if (string_ok(frequency)) {
                         t_res->addAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY), frequency);
-                        targetMimeType = targetMimeType + _(";rate=") + 
-                                         frequency;
+                        targetMimeType = targetMimeType + _(";rate=") + frequency;
                     }
-                }
-                else if (freq != OFF)
-                {
+                } else if (freq != OFF) {
                     t_res->addAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY), String::from(freq));
-                    targetMimeType = targetMimeType + _(";rate=") + 
-                                     String::from(freq);
+                    targetMimeType = targetMimeType + _(";rate=") + String::from(freq);
                 }
 
                 int chan = tp->getNumChannels();
-                if (chan == SOURCE)
-                {
+                if (chan == SOURCE) {
                     String nchannels = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS));
-                    if (string_ok(nchannels))
-                    {
+                    if (string_ok(nchannels)) {
                         t_res->addAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS), nchannels);
-                        targetMimeType = targetMimeType + _(";channels=") + 
-                                         nchannels;
+                        targetMimeType = targetMimeType + _(";channels=") + nchannels;
                     }
-                }
-                else if (chan != OFF)
-                {
+                } else if (chan != OFF) {
                     t_res->addAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS), String::from(chan));
-                    targetMimeType = targetMimeType + _(";channels=") + 
-                                     String::from(chan);
+                    targetMimeType = targetMimeType + _(";channels=") + String::from(chan);
                 }
             }
 
             t_res->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
-                    renderProtocolInfo(targetMimeType));
+                renderProtocolInfo(targetMimeType));
 
             if (tp->isThumbnail())
                 t_res->addOption(_(RESOURCE_CONTENT_TYPE), _(EXIF_THUMBNAIL));
@@ -265,12 +227,10 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
             if (tp->hideOriginalResource())
                 hide_original_resource = true;
 
-            if (tp->firstResource())
-            {
+            if (tp->firstResource()) {
                 item->insertResource(0, t_res);
                 original_resource++;
-            }
-            else
+            } else
                 item->addResource(t_res);
         }
 
@@ -292,8 +252,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
         String mimeType = getMTFromProtocolInfo(protocolInfo);
 
         int pos = mimeType.find(";");
-        if (pos != -1)
-        {
+        if (pos != -1) {
             mimeType = mimeType.substring(0, pos);
         }
 
@@ -306,7 +265,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
         /// resource tags?
 
         // ok, here is the tricky part:
-        // we add transcoded resources dynamically, that means that when 
+        // we add transcoded resources dynamically, that means that when
         // the object is loaded from storage those resources are not there;
         // this again means, that we have to add the res_id parameter
         // accounting for those dynamic resources: i.e. the parameter should
@@ -316,39 +275,29 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
         // because a transcoded resource is identified by the profile name
         // flag if we are dealing with the transcoded resource
         bool transcoded = (res_params->get(_(URL_PARAM_TRANSCODE)) == URL_VALUE_TRANSCODE);
-        if (!transcoded)
-        {
-            if (urlBase->addResID)
-            {
+        if (!transcoded) {
+            if (urlBase->addResID) {
                 url = urlBase->urlBase + realCount;
-            }
-            else
+            } else
                 url = urlBase->urlBase;
 
             realCount++;
-        }
-        else
-        {
+        } else {
             if (!skipURL)
                 url = urlBase->urlBase + _(URL_VALUE_TRANSCODE_NO_RES_ID);
-            else
-            {
+            else {
                 assert(urlBase_tr != nullptr);
                 url = urlBase_tr->urlBase + _(URL_VALUE_TRANSCODE_NO_RES_ID);
             }
         }
-        if ((res_params != nullptr) && (res_params->size() > 0))
-        {
+        if ((res_params != nullptr) && (res_params->size() > 0)) {
             url = url + _(_URL_PARAM_SEPARATOR);
             url = url + res_params->encodeSimple();
         }
 
         // ok this really sucks, I guess another rewrite of the resource manager
         // is necessary
-        if ((i > 0) && (res->getHandlerType() == CH_EXTURL) &&
-           ((res->getOption(_(RESOURCE_CONTENT_TYPE)) == THUMBNAIL) ||
-            (res->getOption(_(RESOURCE_CONTENT_TYPE)) == ID3_ALBUM_ART)))
-        {
+        if ((i > 0) && (res->getHandlerType() == CH_EXTURL) && ((res->getOption(_(RESOURCE_CONTENT_TYPE)) == THUMBNAIL) || (res->getOption(_(RESOURCE_CONTENT_TYPE)) == ID3_ALBUM_ART))) {
             url = res->getOption(_(RESOURCE_OPTION_URL));
             if (!string_ok(url))
                 throw _Exception(_("missing thumbnail URL!"));
@@ -362,9 +311,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
         if (i > 0) {
             int handlerType = res->getHandlerType();
 
-            if (handlerType == CH_ID3 || (handlerType == CH_MP4) ||
-                handlerType == CH_FLAC || handlerType == CH_FANART ||
-                handlerType == CH_EXTURL) {
+            if (handlerType == CH_ID3 || (handlerType == CH_MP4) || handlerType == CH_FLAC || handlerType == CH_FANART || handlerType == CH_EXTURL) {
 
                 String rct;
                 if (res->getHandlerType() == CH_EXTURL)
@@ -379,7 +326,7 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
                         /// \todo clean this up, make sure to check the mimetype and
                         /// provide the profile correctly
                         aa->setAttribute(_("xmlns:dlna"),
-                                         _("urn:schemas-dlna-org:metadata-1-0"));
+                            _("urn:schemas-dlna-org:metadata-1-0"));
                         aa->setAttribute(_("dlna:profileID"), _("JPEG_TN"));
                     }
 #endif
@@ -389,49 +336,35 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
             }
         }
 
-        if (!isExtThumbnail)
-        {
+        if (!isExtThumbnail) {
             // when transcoding is enabled the first (zero) resource can be the
             // transcoded stream, that means that we can only go with the
             // content type here and that we will not limit ourselves to the
             // first resource
-            if (!skipURL)
-            {
+            if (!skipURL) {
                 if (transcoded)
-                    url = url + renderExtension(contentType, nullptr);
+                    url = url + renderExtension(xmlBuilder, contentType, nullptr);
                 else
-                    url = url + renderExtension(contentType, item->getLocation()); 
+                    url = url + renderExtension(xmlBuilder, contentType, item->getLocation());
             }
         }
 #ifdef EXTEND_PROTOCOLINFO
-        if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO))
-        {
+        if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO)) {
             String extend;
-            if (contentType == CONTENT_TYPE_JPG)
-            {
+            if (contentType == CONTENT_TYPE_JPG) {
                 String resolution = res_attrs->get(MetadataHandler::getResAttrName(R_RESOLUTION));
                 int x;
                 int y;
-                if (string_ok(resolution) && 
-                    check_resolution(resolution, &x, &y))
-                {
+                if (string_ok(resolution) && check_resolution(resolution, &x, &y)) {
 
-          if ((i > 0) && 
-              (((item->getResource(i)->getHandlerType() == CH_LIBEXIF) && 
-               (item->getResource(i)->getParameter(_(RESOURCE_CONTENT_TYPE)) 
-                     == EXIF_THUMBNAIL)) || 
-               (item->getResource(i)->getOption(_(RESOURCE_CONTENT_TYPE)) 
-                     == EXIF_THUMBNAIL) || 
-               (item->getResource(i)->getOption(_(RESOURCE_CONTENT_TYPE))
-                                              == THUMBNAIL)) &&
-              (x <= 160) && (y <= 160))
-                        extend = _(D_PROFILE) + "=" + D_JPEG_TN+";";
+                    if ((i > 0) && (((item->getResource(i)->getHandlerType() == CH_LIBEXIF) && (item->getResource(i)->getParameter(_(RESOURCE_CONTENT_TYPE)) == EXIF_THUMBNAIL)) || (item->getResource(i)->getOption(_(RESOURCE_CONTENT_TYPE)) == EXIF_THUMBNAIL) || (item->getResource(i)->getOption(_(RESOURCE_CONTENT_TYPE)) == THUMBNAIL)) && (x <= 160) && (y <= 160))
+                        extend = _(D_PROFILE) + "=" + D_JPEG_TN + ";";
                     else if ((x <= 640) && (y <= 420))
-                        extend = _(D_PROFILE) + "=" + D_JPEG_SM+";";
-                    else if ((x <= 1024) && (y <=768))
-                        extend = _(D_PROFILE) + "=" + D_JPEG_MED+";";
-                    else if ((x <= 4096) && (y <=4096))
-                        extend = _(D_PROFILE) + "=" + D_JPEG_LRG+";";
+                        extend = _(D_PROFILE) + "=" + D_JPEG_SM + ";";
+                    else if ((x <= 1024) && (y <= 768))
+                        extend = _(D_PROFILE) + "=" + D_JPEG_MED + ";";
+                    else if ((x <= 4096) && (y <= 4096))
+                        extend = _(D_PROFILE) + "=" + D_JPEG_LRG + ";";
                 }
             } else {
                 /* handle audio/video content */
@@ -440,40 +373,31 @@ void CdsResourceManager::addResources(Ref<CdsItem> item, Ref<Element> element)
                     extend = extend + ";";
             }
 
-        // we do not support seeking at all, so 00
-        // and the media is converted, so set CI to 1
-        if (!isExtThumbnail && transcoded)
-        {
-            extend = extend + D_OP + "=10;" +
-                     D_CONVERSION_INDICATOR + "=" D_CONVERSION;
+            // we do not support seeking at all, so 00
+            // and the media is converted, so set CI to 1
+            if (!isExtThumbnail && transcoded) {
+                extend = extend + D_OP + "=10;" + D_CONVERSION_INDICATOR + "=" D_CONVERSION;
 
-            if (mimeType.startsWith(_("audio")) || 
-                mimeType.startsWith(_("video")))
-                extend = extend + ";" D_FLAGS "=" D_TR_FLAGS_AV;
-        }
-        else
-        extend = extend + D_OP + "=01;" + 
-                 D_CONVERSION_INDICATOR + "=" + D_NO_CONVERSION;
+                if (mimeType.startsWith(_("audio")) || mimeType.startsWith(_("video")))
+                    extend = extend + ";" D_FLAGS "=" D_TR_FLAGS_AV;
+            } else
+                extend = extend + D_OP + "=01;" + D_CONVERSION_INDICATOR + "=" + D_NO_CONVERSION;
 
-        protocolInfo = protocolInfo.substring(0, protocolInfo.rindex(':')+1) +
-                       extend;
-        res_attrs->put(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
-                       protocolInfo);
+            protocolInfo = protocolInfo.substring(0, protocolInfo.rindex(':') + 1) + extend;
+            res_attrs->put(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
+                protocolInfo);
 
-        if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK))
-        {
-            if (mimeType.startsWith(_("video")))
-            {
-                element->appendElementChild(UpnpXML_DIDLRenderCaptionInfo(url));
+            if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK)) {
+                if (mimeType.startsWith(_("video"))) {
+                    element->appendElementChild(xmlBuilder->renderCaptionInfo(url));
+                }
             }
-        }
 
-        log_debug("extended protocolInfo: %s\n", protocolInfo.c_str());
+            log_debug("extended protocolInfo: %s\n", protocolInfo.c_str());
         }
 #endif
-        if (!hide_original_resource || transcoded || 
-           (hide_original_resource && (original_resource != i)))
-            element->appendElementChild(UpnpXML_DIDLRenderResource(url, res_attrs));
+        if (!hide_original_resource || transcoded || (hide_original_resource && (original_resource != i)))
+            element->appendElementChild(xmlBuilder->renderResource(url, res_attrs));
     }
 }
 
@@ -488,44 +412,28 @@ Ref<CdsResourceManager::UrlBase> CdsResourceManager::addResources_getUrlBase(Ref
     dict->put(_(URL_OBJECT_ID), String::from(item->getID()));
 
     urlBase->addResID = false;
-    /// \todo move this down into the "for" loop and create different urls 
+    /// \todo move this down into the "for" loop and create different urls
     /// for each resource once the io handlers are ready
     int objectType = item->getObjectType();
-    if (IS_CDS_ITEM_INTERNAL_URL(objectType))
-    {
-        urlBase->urlBase = Server::getInstance()->getVirtualURL() + 
-                           _(_URL_PARAM_SEPARATOR) + 
-                           CONTENT_SERVE_HANDLER + 
-                           _(_URL_PARAM_SEPARATOR) + item->getLocation();
+    if (IS_CDS_ITEM_INTERNAL_URL(objectType)) {
+        urlBase->urlBase = Server::getInstance()->getVirtualURL() + _(_URL_PARAM_SEPARATOR) + CONTENT_SERVE_HANDLER + _(_URL_PARAM_SEPARATOR) + item->getLocation();
         return urlBase;
     }
 
-    if (IS_CDS_ITEM_EXTERNAL_URL(objectType))
-    {
-        if (!item->getFlag(OBJECT_FLAG_PROXY_URL) && (!forceLocal))
-        {
+    if (IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
+        if (!item->getFlag(OBJECT_FLAG_PROXY_URL) && (!forceLocal)) {
             urlBase->urlBase = item->getLocation();
             return urlBase;
         }
 
-        if ((item->getFlag(OBJECT_FLAG_ONLINE_SERVICE) && 
-                item->getFlag(OBJECT_FLAG_PROXY_URL)) || forceLocal)
-        {
-            urlBase->urlBase = Server::getInstance()->getVirtualURL() + 
-                _(_URL_PARAM_SEPARATOR) +
-                CONTENT_ONLINE_HANDLER + _(_URL_PARAM_SEPARATOR) +
-                dict->encodeSimple() + _(_URL_PARAM_SEPARATOR) +
-                _(URL_RESOURCE_ID) + _(_URL_PARAM_SEPARATOR);
+        if ((item->getFlag(OBJECT_FLAG_ONLINE_SERVICE) && item->getFlag(OBJECT_FLAG_PROXY_URL)) || forceLocal) {
+            urlBase->urlBase = Server::getInstance()->getVirtualURL() + _(_URL_PARAM_SEPARATOR) + CONTENT_ONLINE_HANDLER + _(_URL_PARAM_SEPARATOR) + dict->encodeSimple() + _(_URL_PARAM_SEPARATOR) + _(URL_RESOURCE_ID) + _(_URL_PARAM_SEPARATOR);
             urlBase->addResID = true;
             return urlBase;
         }
     }
 
-    urlBase->urlBase = Server::getInstance()->getVirtualURL() +
-                       _(_URL_PARAM_SEPARATOR) +
-                       CONTENT_MEDIA_HANDLER + _(_URL_PARAM_SEPARATOR) + 
-                       dict->encodeSimple() + _(_URL_PARAM_SEPARATOR) + 
-                       _(URL_RESOURCE_ID) + _(_URL_PARAM_SEPARATOR);
+    urlBase->urlBase = Server::getInstance()->getVirtualURL() + _(_URL_PARAM_SEPARATOR) + CONTENT_MEDIA_HANDLER + _(_URL_PARAM_SEPARATOR) + dict->encodeSimple() + _(_URL_PARAM_SEPARATOR) + _(URL_RESOURCE_ID) + _(_URL_PARAM_SEPARATOR);
     urlBase->addResID = true;
     return urlBase;
 }
@@ -540,7 +448,8 @@ String CdsResourceManager::getFirstResource(Ref<CdsItem> item)
         return urlBase->urlBase;
 }
 
-String CdsResourceManager::getArtworkUrl(zmm::Ref<CdsItem> item) {
+String CdsResourceManager::getArtworkUrl(zmm::Ref<CdsItem> item)
+{
     // FIXME: This is temporary until we do artwork properly.
     log_debug("Building Art url for %d\n", item->getID());
 

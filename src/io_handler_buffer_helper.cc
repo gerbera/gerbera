@@ -35,13 +35,14 @@
 using namespace zmm;
 using namespace std;
 
-IOHandlerBufferHelper::IOHandlerBufferHelper(size_t bufSize, size_t initialFillSize) : IOHandler()
+IOHandlerBufferHelper::IOHandlerBufferHelper(size_t bufSize, size_t initialFillSize)
+    : IOHandler()
 {
-    if (bufSize <=0)
+    if (bufSize <= 0)
         throw _Exception(_("bufSize must be positive"));
     if (initialFillSize > bufSize)
         throw _Exception(_("initialFillSize must be lesser than or equal to the size of the buffer"));
-    
+
     this->bufSize = bufSize;
     this->initialFillSize = initialFillSize;
     waitForInitialFillSize = (initialFillSize > 0);
@@ -54,7 +55,7 @@ IOHandlerBufferHelper::IOHandlerBufferHelper(size_t bufSize, size_t initialFillS
     empty = true;
     signalAfterEveryRead = false;
     checkSocket = false;
-    
+
     seekEnabled = false;
     doSeek = false;
 }
@@ -63,7 +64,7 @@ void IOHandlerBufferHelper::open(IN enum UpnpOpenFileMode mode)
 {
     if (isOpen)
         throw _Exception(_("tried to reopen an open IOHandlerBufferHelper"));
-    buffer = (char *)MALLOC(bufSize);
+    buffer = (char*)MALLOC(bufSize);
     if (buffer == nullptr)
         throw _Exception(_("Failed to allocate memory for transcoding buffer!"));
 
@@ -77,34 +78,31 @@ IOHandlerBufferHelper::~IOHandlerBufferHelper()
         close();
 }
 
-size_t IOHandlerBufferHelper::read(OUT char *buf, IN size_t length)
+size_t IOHandlerBufferHelper::read(OUT char* buf, IN size_t length)
 {
     // check read on closed BufferedIOHandler
     assert(isOpen);
     // length must be positive
     assert(length > 0);
-    
+
     unique_lock<std::mutex> lock(mutex);
-    
-    while ((empty || waitForInitialFillSize) && ! (threadShutdown || eof || readError))
-    {
-        if (checkSocket)
-        {
+
+    while ((empty || waitForInitialFillSize) && !(threadShutdown || eof || readError)) {
+        if (checkSocket) {
             checkSocket = false;
             return CHECK_SOCKET;
-        }
-        else
+        } else
             cond.wait(lock);
     }
-    
+
     if (readError || threadShutdown)
         return -1;
     if (empty && eof)
         return 0;
-    
+
     size_t bLocal = b;
     lock.unlock();
-    
+
     // we ensured with the while above that the buffer isn't empty
     int currentFillSize = bLocal - a;
     if (currentFillSize <= 0)
@@ -115,33 +113,31 @@ size_t IOHandlerBufferHelper::read(OUT char *buf, IN size_t length)
     size_t read2 = (read1 < length ? length - read1 : 0);
     if (read2 > maxRead2)
         read2 = maxRead2;
-    
+
     memcpy(buf, buffer + a, read1);
     if (read2)
         memcpy(buf + read1, buffer, read2);
-    
-    size_t didRead = read1+read2;
-    
+
+    size_t didRead = read1 + read2;
+
     lock.lock();
-    
+
     bool signalled = false;
     // was the buffer full or became it "full" while we read?
-    if (signalAfterEveryRead || a == b)
-    {
+    if (signalAfterEveryRead || a == b) {
         cond.notify_one();
         signalled = true;
     }
-    
+
     a += didRead;
     if (a >= bufSize)
         a -= bufSize;
-    if (a == b)
-    {
+    if (a == b) {
         empty = true;
-        if (! signalled)
+        if (!signalled)
             cond.notify_one();
     }
-    
+
     posRead += didRead;
     return didRead;
 }
@@ -149,40 +145,40 @@ size_t IOHandlerBufferHelper::read(OUT char *buf, IN size_t length)
 void IOHandlerBufferHelper::seek(IN off_t offset, IN int whence)
 {
     log_debug("seek called: %lld %d\n", offset, whence);
-    if (! seekEnabled)
+    if (!seekEnabled)
         throw _Exception(_("seek currently disabled in this IOHandlerBufferHelper"));
-    
+
     assert(isOpen);
-    
+
     // check for valid input
     assert(whence == SEEK_SET || whence == SEEK_CUR || whence == SEEK_END);
     assert(whence != SEEK_SET || offset >= 0);
     assert(whence != SEEK_END || offset <= 0);
-    
+
     // do nothing in this case
     if (whence == SEEK_CUR && offset == 0)
         return;
-    
+
     unique_lock<std::mutex> lock(mutex);
-    
+
     // if another seek isn't processed yet - well we don't care as this new seek
     // will change the position anyway
     doSeek = true;
     seekOffset = offset;
     seekWhence = whence;
-    
+
     // tell the probably sleeping thread to process our seek
     cond.notify_one();
-    
+
     // wait until the seek has been processed
-    cond.wait(lock, [&](){
-            return !doSeek || threadShutdown || eof || readError;
+    cond.wait(lock, [&]() {
+        return !doSeek || threadShutdown || eof || readError;
     });
 }
 
 void IOHandlerBufferHelper::close()
 {
-    if (! isOpen)
+    if (!isOpen)
         throw _Exception(_("close called on closed IOHandlerBufferHelper"));
     isOpen = false;
     stopBufferThread();
@@ -198,8 +194,7 @@ void IOHandlerBufferHelper::startBufferThread()
         &bufferThread,
         nullptr, // attr
         IOHandlerBufferHelper::staticThreadProc,
-        this
-    );
+        this);
 }
 
 void IOHandlerBufferHelper::stopBufferThread()
@@ -214,10 +209,10 @@ void IOHandlerBufferHelper::stopBufferThread()
     bufferThread = 0;
 }
 
-void *IOHandlerBufferHelper::staticThreadProc(void *arg)
+void* IOHandlerBufferHelper::staticThreadProc(void* arg)
 {
     log_debug("starting buffer thread... thread: %d\n", pthread_self());
-    auto *inst = (IOHandlerBufferHelper *)arg;
+    auto* inst = (IOHandlerBufferHelper*)arg;
     inst->threadProc();
     log_debug("buffer thread shut down. thread: %d\n", pthread_self());
     pthread_exit(nullptr);

@@ -76,12 +76,13 @@ protected:
     /// IsValidated(string DeviceID, i4 Result)
     void upnp_action_IsValidated(zmm::Ref<ActionRequest> request);
 
+    UpnpXMLBuilder* xmlBuilder;
     UpnpDevice_Handle deviceHandle;
 
 public:
     /// \brief Constructor for MRReg
     /// in internal variables.
-    MRRegistrarService(UpnpDevice_Handle deviceHandle);
+    MRRegistrarService(UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle);
     ~MRRegistrarService();
 
     /// \brief Dispatches the ActionRequest between the available actions.

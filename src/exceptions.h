@@ -41,62 +41,92 @@
 #define _ServerShutdownException(msg) ServerShutdownException(msg, EXCEPTION_DATA)
 #define _TryAgainException(msg) TryAgainException(msg, EXCEPTION_DATA)
 
-class UpnpException : public zmm::Exception
-{
+class UpnpException : public zmm::Exception {
 protected:
     int errCode;
+
 public:
     UpnpException(int errCode, zmm::String message);
-    UpnpException(int errCode, zmm::String message, const char *file, int line, const char *function);
+    UpnpException(int errCode, zmm::String message, const char* file, int line, const char* function);
     inline int getErrorCode() const { return errCode; }
 };
 
-class StorageException : public zmm::Exception
-{
+class StorageException : public zmm::Exception {
 protected:
     zmm::String userMessage;
+
 public:
-    inline StorageException(zmm::String _userMessage, zmm::String message) : zmm::Exception(message) { userMessage = _userMessage; }
-    inline StorageException(zmm::String _userMessage, zmm::String message, const char *file, int line, const char* function) : 
-        zmm::Exception(message, file, line, function) { userMessage = _userMessage;  }
+    inline StorageException(zmm::String _userMessage, zmm::String message)
+        : zmm::Exception(message)
+    {
+        userMessage = _userMessage;
+    }
+    inline StorageException(zmm::String _userMessage, zmm::String message, const char* file, int line, const char* function)
+        : zmm::Exception(message, file, line, function)
+    {
+        userMessage = _userMessage;
+    }
     zmm::String getUserMessage() const { return (userMessage != nullptr ? userMessage : message); }
 };
 
-class ObjectNotFoundException : public StorageException
-{
+class ObjectNotFoundException : public StorageException {
 public:
-    inline ObjectNotFoundException(zmm::String message) : StorageException(message, message) {}
-    inline ObjectNotFoundException(zmm::String message, const char *file, int line, const char* function) :
-        StorageException(message, message, file, line, function) {}
+    inline ObjectNotFoundException(zmm::String message)
+        : StorageException(message, message)
+    {
+    }
+    inline ObjectNotFoundException(zmm::String message, const char* file, int line, const char* function)
+        : StorageException(message, message, file, line, function)
+    {
+    }
 };
 
-class SubtitlesNotFoundException : public zmm::Exception
-{
+class SubtitlesNotFoundException : public zmm::Exception {
 public:
-    inline SubtitlesNotFoundException(zmm::String message) : zmm::Exception(message) {}
-    inline SubtitlesNotFoundException(zmm::String message, const char *file, int line, const char* function) : zmm::Exception(message, file, line, function) {}
+    inline SubtitlesNotFoundException(zmm::String message)
+        : zmm::Exception(message)
+    {
+    }
+    inline SubtitlesNotFoundException(zmm::String message, const char* file, int line, const char* function)
+        : zmm::Exception(message, file, line, function)
+    {
+    }
 };
 
-class ServerShutdownException : public zmm::Exception
-{
+class ServerShutdownException : public zmm::Exception {
 public:
-    inline ServerShutdownException(zmm::String message) : zmm::Exception(message) {}
-    inline ServerShutdownException(zmm::String message, const char *file, int line, const char* function) : zmm::Exception(message, file, line, function) {}
+    inline ServerShutdownException(zmm::String message)
+        : zmm::Exception(message)
+    {
+    }
+    inline ServerShutdownException(zmm::String message, const char* file, int line, const char* function)
+        : zmm::Exception(message, file, line, function)
+    {
+    }
 };
 
-class TryAgainException : public zmm::Exception
-{
+class TryAgainException : public zmm::Exception {
 public:
-    inline TryAgainException(zmm::String message) : zmm::Exception(message) {}
-    inline TryAgainException(zmm::String message, const char *file, int line, const char* function) : zmm::Exception(message, file, line, function) {}
+    inline TryAgainException(zmm::String message)
+        : zmm::Exception(message)
+    {
+    }
+    inline TryAgainException(zmm::String message, const char* file, int line, const char* function)
+        : zmm::Exception(message, file, line, function)
+    {
+    }
 };
 
-class SingletonException : public zmm::Exception
-{
+class SingletonException : public zmm::Exception {
 public:
-    inline SingletonException(zmm::String message) : zmm::Exception(message) {}
-    inline SingletonException(zmm::String message, const char *file, int line, const char* function) : zmm::Exception(message, file, line, function) {}
+    inline SingletonException(zmm::String message)
+        : zmm::Exception(message)
+    {
+    }
+    inline SingletonException(zmm::String message, const char* file, int line, const char* function)
+        : zmm::Exception(message, file, line, function)
+    {
+    }
 };
-
 
 #endif // __EXCEPTIONS_H__

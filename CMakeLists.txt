@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
 
 set(GERBERA_MAJOR_VERSION 1)
 set(GERBERA_MINOR_VERSION 3)
@@ -10,7 +10,7 @@ project(Gerbera
         VERSION "${GERBERA_MAJOR_VERSION}.${GERBERA_MINOR_VERSION}.${GERBERA_PATCH_VERSION}")
 
 # Leverage a modern C++
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -274,6 +274,9 @@ target_include_directories(libgerbera PRIVATE "${CMAKE_SOURCE_DIR}/src")
 
 add_executable(gerbera src/main.cc $<TARGET_OBJECTS:libgerbera>)
 target_include_directories(gerbera PRIVATE "${CMAKE_SOURCE_DIR}/src")
+
+target_compile_features(gerbera PUBLIC cxx_std_17)
+target_compile_features(libgerbera PUBLIC cxx_std_17)
 
 # Warnings are nice
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")

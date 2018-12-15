@@ -29,21 +29,21 @@
 
 /// \file process_io_handler.cc
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <csignal>
-#include <unistd.h>
-#include "common.h"
 #include "process_io_handler.h"
-#include "process.h"
+#include "common.h"
 #include "content_manager.h"
+#include "process.h"
+#include <csignal>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 // after MAX_TIMEOUTS we will tell libupnp to check the socket,
 // this will make sure that we do not block the read and allow libupnp to
 // call our close() callback
 
-#define MAX_TIMEOUTS    2  // maximum allowe consecutive timeouts
+#define MAX_TIMEOUTS 2 // maximum allowe consecutive timeouts
 
 using namespace zmm;
 
@@ -68,13 +68,11 @@ bool ProcessIOHandler::abort()
     bool abort = false;
 
     if (proclist == nullptr)
-        return abort; 
+        return abort;
 
-    for (int i = 0; i < proclist->size(); i++)
-    {
+    for (int i = 0; i < proclist->size(); i++) {
         Ref<Executor> exec = proclist->get(i)->getExecutor();
-        if ((exec != nullptr) && (!exec->isAlive()))
-        {
+        if ((exec != nullptr) && (!exec->isAlive())) {
             if (proclist->get(i)->abortOnDeath())
                 abort = true;
             break;
@@ -89,8 +87,7 @@ void ProcessIOHandler::killall()
     if (proclist == nullptr)
         return;
 
-    for (int i = 0; i < proclist->size(); i++)
-    {
+    for (int i = 0; i < proclist->size(); i++) {
         Ref<Executor> exec = proclist->get(i)->getExecutor();
         if (exec != nullptr)
             exec->kill();
@@ -105,8 +102,7 @@ void ProcessIOHandler::registerAll()
     if (proclist == nullptr)
         return;
 
-    for (int i = 0; i < proclist->size(); i++)
-    {
+    for (int i = 0; i < proclist->size(); i++) {
         Ref<Executor> exec = proclist->get(i)->getExecutor();
         if (exec != nullptr)
             ContentManager::getInstance()->registerExecutor(exec);
@@ -121,30 +117,29 @@ void ProcessIOHandler::unregisterAll()
     if (proclist == nullptr)
         return;
 
-    for (int i = 0; i < proclist->size(); i++)
-    {
+    for (int i = 0; i < proclist->size(); i++) {
         Ref<Executor> exec = proclist->get(i)->getExecutor();
         if (exec != nullptr)
             ContentManager::getInstance()->unregisterExecutor(exec);
     }
 }
 
-ProcessIOHandler::ProcessIOHandler(String filename, 
-                        zmm::Ref<Executor> main_proc,
-                        zmm::Ref<zmm::Array<ProcListItem> > proclist,
-                        bool ignoreSeek) : IOHandler()
+ProcessIOHandler::ProcessIOHandler(String filename,
+    zmm::Ref<Executor> main_proc,
+    zmm::Ref<zmm::Array<ProcListItem>> proclist,
+    bool ignoreSeek)
+    : IOHandler()
 {
     this->filename = filename;
     this->proclist = proclist;
     this->main_proc = main_proc;
     this->ignore_seek = ignoreSeek;
 
-    if ((main_proc != nullptr) && ((!main_proc->isAlive() || abort())))
-    {
+    if ((main_proc != nullptr) && ((!main_proc->isAlive() || abort()))) {
         killall();
         throw _Exception(_("process terminated early"));
     }
-/*
+    /*
     if (mkfifo(filename.c_str(), O_RDWR) == -1)
     {
         log_error("Failed to create fifo: %s\n", strerror(errno));
@@ -160,8 +155,7 @@ ProcessIOHandler::ProcessIOHandler(String filename,
 
 void ProcessIOHandler::open(IN enum UpnpOpenFileMode mode)
 {
-    if ((main_proc != nullptr) && ((!main_proc->isAlive() || abort())))
-    {
+    if ((main_proc != nullptr) && ((!main_proc->isAlive() || abort()))) {
         killall();
         throw _Exception(_("process terminated early"));
     }
@@ -170,13 +164,11 @@ void ProcessIOHandler::open(IN enum UpnpOpenFileMode mode)
         fd = ::open(filename.c_str(), O_RDONLY | O_NONBLOCK);
     else if (mode == UPNP_WRITE)
         fd = ::open(filename.c_str(), O_WRONLY | O_NONBLOCK);
-    else 
+    else
         fd = -1;
 
-    if (fd == -1)
-    {
-        if (errno == ENXIO)
-        {
+    if (fd == -1) {
+        if (errno == ENXIO) {
             throw _TryAgainException(_("open failed: ") + strerror(errno));
         }
 
@@ -188,7 +180,7 @@ void ProcessIOHandler::open(IN enum UpnpOpenFileMode mode)
     }
 }
 
-size_t ProcessIOHandler::read(OUT char *buf, IN size_t length)
+size_t ProcessIOHandler::read(OUT char* buf, IN size_t length)
 {
     fd_set readSet;
     struct timeval timeout;
@@ -199,8 +191,7 @@ size_t ProcessIOHandler::read(OUT char *buf, IN size_t length)
     int ret = 0;
     int timeout_count = 0;
 
-    while (true)
-    {
+    while (true) {
         FD_ZERO(&readSet);
         FD_SET(fd, &readSet);
 
@@ -208,61 +199,49 @@ size_t ProcessIOHandler::read(OUT char *buf, IN size_t length)
         timeout.tv_usec = 0;
 
         ret = select(fd + 1, &readSet, nullptr, nullptr, &timeout);
-        if (ret == -1)
-        {
+        if (ret == -1) {
             if (errno == EINTR)
                 continue;
         }
 
         // timeout
-        if (ret == 0)
-        {
-            if (main_proc != nullptr)
-            {
+        if (ret == 0) {
+            if (main_proc != nullptr) {
                 bool main_ok = main_proc->isAlive();
-                if (!main_ok || abort())
-                {
-                    if (!main_ok)
-                    {
+                if (!main_ok || abort()) {
+                    if (!main_ok) {
                         exit_status = main_proc->getStatus();
                         log_debug("process exited with status %d\n", exit_status);
                         killall();
                         if (exit_status == EXIT_SUCCESS)
-                            return 0; 
+                            return 0;
                         else
                             return -1;
-                    }
-                    else
-                    {
+                    } else {
                         main_proc->kill();
                         killall();
                         return -1;
                     }
                 }
-            }
-            else
-            {
+            } else {
                 killall();
                 return 0;
             }
 
             timeout_count++;
-            if (timeout_count > MAX_TIMEOUTS)
-            {
+            if (timeout_count > MAX_TIMEOUTS) {
                 log_debug("max timeouts, checking socket!\n");
                 return CHECK_SOCKET;
             }
         }
 
-        if (FD_ISSET(fd, &readSet))
-        {
+        if (FD_ISSET(fd, &readSet)) {
             timeout_count = 0;
             bytes_read = ::read(fd, p_buffer, length);
             if (bytes_read == 0)
                 break;
 
-            if (bytes_read < 0)
-            {
+            if (bytes_read < 0) {
                 log_debug("aborting read!!!\n");
                 return -1;
             }
@@ -277,26 +256,20 @@ size_t ProcessIOHandler::read(OUT char *buf, IN size_t length)
         }
     }
 
-    if (num_bytes < 0)
-    {
+    if (num_bytes < 0) {
         // not sure what we return here since no way of knowing about feof
         // actually that will depend on the ret code of the process
         ret = -1;
 
-        if (main_proc != nullptr)
-        {
-            if (!main_proc->isAlive())
-            {
+        if (main_proc != nullptr) {
+            if (!main_proc->isAlive()) {
                 if (main_proc->getStatus() == EXIT_SUCCESS)
                     ret = 0;
 
-            }
-            else
-            {
+            } else {
                 main_proc->kill();
             }
-        }
-        else
+        } else
             ret = 0;
 
         killall();
@@ -306,7 +279,7 @@ size_t ProcessIOHandler::read(OUT char *buf, IN size_t length)
     return num_bytes;
 }
 
-size_t ProcessIOHandler::write(IN char *buf, IN size_t length)
+size_t ProcessIOHandler::write(IN char* buf, IN size_t length)
 {
     fd_set writeSet;
     struct timeval timeout;
@@ -316,8 +289,7 @@ size_t ProcessIOHandler::write(IN char *buf, IN size_t length)
     int exit_status = EXIT_SUCCESS;
     int ret = 0;
 
-    while (true)
-    {
+    while (true) {
         FD_ZERO(&writeSet);
         FD_SET(fd, &writeSet);
 
@@ -325,55 +297,43 @@ size_t ProcessIOHandler::write(IN char *buf, IN size_t length)
         timeout.tv_usec = 0;
 
         ret = select(fd + 1, nullptr, &writeSet, nullptr, &timeout);
-        if (ret == -1)
-        {
-            if (errno == EINTR)
-            {
+        if (ret == -1) {
+            if (errno == EINTR) {
                 continue;
             }
         }
 
         // timeout
-        if (ret == 0)
-        {
-            if (main_proc != nullptr)
-            {
+        if (ret == 0) {
+            if (main_proc != nullptr) {
                 bool main_ok = main_proc->isAlive();
-                if (!main_ok || abort())
-                {
-                    if (!main_ok)
-                    {
+                if (!main_ok || abort()) {
+                    if (!main_ok) {
                         exit_status = main_proc->getStatus();
                         log_debug("process exited with status %d\n", exit_status);
                         killall();
                         if (exit_status == EXIT_SUCCESS)
-                            return 0; 
+                            return 0;
                         else
                             return -1;
-                    }
-                    else
-                    {
+                    } else {
                         main_proc->kill();
                         killall();
                         return -1;
                     }
                 }
-            }
-            else
-            {
+            } else {
                 killall();
                 return 0;
             }
         }
 
-        if (FD_ISSET(fd, &writeSet))
-        {
-            bytes_written= ::write(fd, p_buffer, length);
+        if (FD_ISSET(fd, &writeSet)) {
+            bytes_written = ::write(fd, p_buffer, length);
             if (bytes_written == 0)
                 break;
 
-            if (bytes_written < 0)
-            {
+            if (bytes_written < 0) {
                 log_debug("aborting write!!!\n");
                 return -1;
             }
@@ -387,26 +347,20 @@ size_t ProcessIOHandler::write(IN char *buf, IN size_t length)
         }
     }
 
-    if (num_bytes < 0)
-    {
+    if (num_bytes < 0) {
         // not sure what we return here since no way of knowing about feof
         // actually that will depend on the ret code of the process
         ret = -1;
 
-        if (main_proc != nullptr)
-        {
-            if (!main_proc->isAlive())
-            {
+        if (main_proc != nullptr) {
+            if (!main_proc->isAlive()) {
                 if (main_proc->getStatus() == EXIT_SUCCESS)
                     ret = 0;
 
-            }
-            else
-            {
+            } else {
                 main_proc->kill();
             }
-        }
-        else
+        } else
             ret = 0;
 
         killall();
@@ -416,9 +370,8 @@ size_t ProcessIOHandler::write(IN char *buf, IN size_t length)
     return num_bytes;
 }
 
-
 void ProcessIOHandler::seek(IN off_t offset, IN int whence)
-{   
+{
     // we know we can not seek in a fifo, but the PS3 asks for a hack...
     if (!ignore_seek)
         throw _Exception(_("fseek failed"));
@@ -427,22 +380,19 @@ void ProcessIOHandler::seek(IN off_t offset, IN int whence)
 void ProcessIOHandler::close()
 {
     bool ret;
-   
 
     log_debug("terminating process, closing %s\n", this->filename.c_str());
     unregisterAll();
 
-    if (main_proc != nullptr)
-    {
+    if (main_proc != nullptr) {
         ret = main_proc->kill();
-    }
-    else 
+    } else
         ret = true;
 
     killall();
-    
+
     ::close(fd);
-    
+
     unlink(filename.c_str());
 
     if (!ret)
@@ -451,10 +401,8 @@ void ProcessIOHandler::close()
 
 ProcessIOHandler::~ProcessIOHandler()
 {
-    try
-    {
+    try {
         close();
+    } catch (const Exception& ex) {
     }
-    catch (const Exception & ex) {}
 }
-

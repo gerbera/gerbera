@@ -29,9 +29,9 @@
 
 /// \file memory.cc
 
-#if defined(TOMBDEBUG) && ! defined (MEMPROF)
-#include <cstdlib>
+#if defined(TOMBDEBUG) && !defined(MEMPROF)
 #include "logger.h"
+#include <cstdlib>
 #endif
 
 #ifdef MEMPROF
@@ -45,64 +45,63 @@ static int maxAlloc = 0;
 static void print_stats()
 {
     printf("MAL:%d FRE:%d CUR:%d TOT:%d MAX:%d\n",
-           mallocCount, freeCount, curAlloc, totalAlloc, maxAlloc);
+        mallocCount, freeCount, curAlloc, totalAlloc, maxAlloc);
 }
 
-void *MALLOC(size_t size)
+void* MALLOC(size_t size)
 {
     mallocCount++;
     totalAlloc += size;
     curAlloc += size;
     if (curAlloc > maxAlloc)
         maxAlloc = curAlloc;
-    void *ptr = malloc(size + sizeof(int));
-    *((int *)ptr) = size;
+    void* ptr = malloc(size + sizeof(int));
+    *((int*)ptr) = size;
     print_stats();
-    return ( (void *)((int *)ptr + 1) );
+    return ((void*)((int*)ptr + 1));
 }
-void *CALLOC(size_t nmemb, size_t size)
+void* CALLOC(size_t nmemb, size_t size)
 {
     mallocCount++;
     totalAlloc += size * nmemb;
     curAlloc += size * nmemb;
     if (curAlloc > maxAlloc)
         maxAlloc = curAlloc;
-    void *ptr = calloc(nmemb, size + sizeof(int));
-    *((int *)ptr) = size;
+    void* ptr = calloc(nmemb, size + sizeof(int));
+    *((int*)ptr) = size;
     print_stats();
-    return ( (void *)((int *)ptr + 1) );
+    return ((void*)((int*)ptr + 1));
 }
-void *REALLOC(void *ptr, size_t size)
+void* REALLOC(void* ptr, size_t size)
 {
     freeCount++;
     mallocCount++;
-    int previous = *((int *)ptr - 1);
+    int previous = *((int*)ptr - 1);
     totalAlloc += size - previous;
     curAlloc += size - previous;
     if (curAlloc > maxAlloc)
         maxAlloc = curAlloc;
-    ptr = realloc((void *)((int *)ptr - 1), size + sizeof(int));
-    *((int *)ptr) = size;
+    ptr = realloc((void*)((int*)ptr - 1), size + sizeof(int));
+    *((int*)ptr) = size;
     print_stats();
-    return ( (void *)((int *)ptr + 1) );
+    return ((void*)((int*)ptr + 1));
 }
-void FREE(void *ptr)
+void FREE(void* ptr)
 {
     freeCount++;
-    int size = *((int *)ptr - 1);
+    int size = *((int*)ptr - 1);
     curAlloc -= size;
     print_stats();
-    return free( (void *)((int *)ptr - 1) );
+    return free((void*)((int*)ptr - 1));
 }
 
 #else
 
 #ifdef TOMBDEBUG
-void *MALLOC(size_t size)
+void* MALLOC(size_t size)
 {
-#ifdef DEBUG_MALLOC_0    
-    if (size <= 0)
-    {
+#ifdef DEBUG_MALLOC_0
+    if (size <= 0) {
         printf("malloc called with 0! aborting...\n");
         _print_backtrace(stderr);
         abort();
@@ -110,11 +109,10 @@ void *MALLOC(size_t size)
 #endif
     return malloc(size);
 }
-void *REALLOC(void *ptr, size_t size)
+void* REALLOC(void* ptr, size_t size)
 {
 #ifdef DEBUG_MALLOC_0
-    if (size <= 0)
-    {
+    if (size <= 0) {
         printf("realloc called with 0! aborting...\n");
         _print_backtrace(stderr);
         abort();

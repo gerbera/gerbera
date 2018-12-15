@@ -41,7 +41,8 @@ using namespace zmm;
 using namespace mxml;
 
 WebRequestHandler::WebRequestHandler()
-    : RequestHandler(), checkRequestCalled(false)
+    : RequestHandler()
+    , checkRequestCalled(false)
 {
     params = Ref<Dictionary>(new Dictionary());
 }

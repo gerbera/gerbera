@@ -32,12 +32,11 @@
 #ifndef __DICTIONARY_H__
 #define __DICTIONARY_H__
 
-#include <mutex>
 #include "zmm/zmmf.h"
+#include <mutex>
 
 /// \brief This class should never be used directly, it is being used by the Dictionary class.
-class DictionaryElement : public zmm::Object
-{
+class DictionaryElement : public zmm::Object {
 public:
     /// \brief Constructor, stores the key and the value.
     DictionaryElement(zmm::String key, zmm::String value);
@@ -62,15 +61,14 @@ protected:
 };
 
 /// \brief This class stores key:value pairs of String data and provides functions to access them.
-class Dictionary : public zmm::Object
-{
+class Dictionary : public zmm::Object {
 protected:
     /// \brief Array of DictionaryElements, representing our Dictionary.
-    zmm::Ref<zmm::Array<DictionaryElement> > elements;
+    zmm::Ref<zmm::Array<DictionaryElement>> elements;
     /// \brief Allow to specify encoding separators
     zmm::String _encode(char sep1, char sep2);
-public:
 
+public:
     /// \brief Constructor, initializes the dictionary.
     Dictionary();
 
@@ -82,10 +80,10 @@ public:
 
     /// \brief Returns the number of elements in the dictinary.
     int size();
-    
+
     /// \brief Deletes a key value pair
     void remove(zmm::String key);
-    
+
     /// \brief Returns an url encoded version of the whole dictionary.
     zmm::String encode();
 
@@ -95,7 +93,7 @@ public:
 
     /// \brief Removes all elements from the dictionary.
     void clear();
-    
+
     /// \brief Makes a dictionary out of url encoded data.
     void decode(zmm::String url);
 
@@ -115,73 +113,82 @@ public:
     /// \brief checks two dictionaries for equality
     bool equals(zmm::Ref<Dictionary> other);
 
-    zmm::Ref<zmm::Array<DictionaryElement> > getElements();
+    zmm::Ref<zmm::Array<DictionaryElement>> getElements();
 
     /// \brief Frees unnecessary memory
     inline void optimize() { elements->optimize(); }
 };
 
-
 /// \brief Reentrant version of the dictionary
-class Dictionary_r : public Dictionary
-{
+class Dictionary_r : public Dictionary {
 public:
-    inline void put(zmm::String key, zmm::String value) {
+    inline void put(zmm::String key, zmm::String value)
+    {
         AutoLock lock(mutex);
         Dictionary::put(key, value);
     }
-    
-    inline zmm::String get(zmm::String key) {
+
+    inline zmm::String get(zmm::String key)
+    {
         AutoLock lock(mutex);
         return Dictionary::get(key);
     }
-    
-    inline void remove(zmm::String key) {
+
+    inline void remove(zmm::String key)
+    {
         AutoLock lock(mutex);
         Dictionary::remove(key);
     }
-    
-    inline zmm::String encode() {
+
+    inline zmm::String encode()
+    {
         AutoLock lock(mutex);
         return Dictionary::encode();
     }
-    
-    inline void clear() {
+
+    inline void clear()
+    {
         AutoLock lock(mutex);
         Dictionary::clear();
     }
-    
-    inline void decode(zmm::String url) {
+
+    inline void decode(zmm::String url)
+    {
         AutoLock lock(mutex);
         Dictionary::decode(url);
     }
-    
-    inline zmm::Ref<Dictionary_r> clone() {
+
+    inline zmm::Ref<Dictionary_r> clone()
+    {
         AutoLock lock(mutex);
         zmm::Ref<Dictionary_r> ret = RefCast(Dictionary::clone(), Dictionary_r);
         return ret;
     }
-    
-    inline bool isSubsetOf(zmm::Ref<Dictionary> other) {
+
+    inline bool isSubsetOf(zmm::Ref<Dictionary> other)
+    {
         AutoLock lock(mutex);
         return Dictionary::isSubsetOf(other);
     }
-    
-    inline bool equals(zmm::Ref<Dictionary> other) {
+
+    inline bool equals(zmm::Ref<Dictionary> other)
+    {
         AutoLock lock(mutex);
         return Dictionary::equals(other);
     }
-    
-    inline zmm::Ref<zmm::Array<DictionaryElement> > getElements() {
+
+    inline zmm::Ref<zmm::Array<DictionaryElement>> getElements()
+    {
         AutoLock lock(mutex);
         return Dictionary::getElements();
     }
-    
-    inline void optimize() {
+
+    inline void optimize()
+    {
         AutoLock lock(mutex);
         Dictionary::optimize();
     }
-    
+
 protected:
     std::recursive_mutex mutex;
     using AutoLock = std::lock_guard<decltype(mutex)>;

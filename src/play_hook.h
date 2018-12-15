@@ -30,20 +30,19 @@
 /// \file play_hook.h
 /// \brief Definition of the PlayHook class.
 //
-// \todo this should be solved via an observer model 
+// \todo this should be solved via an observer model
 
 #ifndef __PLAY_HOOK_H__
 #define __PLAY_HOOK_H__
 
-#include "singleton.h"
-#include "common.h"
 #include "cds_objects.h"
+#include "common.h"
+#include "singleton.h"
 
-class PlayHook : public Singleton<PlayHook, std::mutex>
-{
+class PlayHook : public Singleton<PlayHook, std::mutex> {
 public:
     void trigger(zmm::Ref<CdsObject> obj);
     zmm::String getName() override { return _("PlayHook"); }
 };
 
-#endif//__PLAY_HOOK_H__
+#endif //__PLAY_HOOK_H__

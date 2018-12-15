@@ -36,14 +36,14 @@
 #include "io_handler.h"
 
 /// \brief Allows the web server to read from a file.
-class FileIOHandler : public IOHandler
-{
+class FileIOHandler : public IOHandler {
 protected:
     /// \brief Name of the file.
     zmm::String filename;
 
     /// \brief Handle of the file.
-    FILE *f;
+    FILE* f;
+
 public:
     /// \brief Sets the filename to work with.
     explicit FileIOHandler(zmm::String filename);
@@ -54,13 +54,13 @@ public:
     /// \brief Reads a previously opened file sequentially.
     /// \param buf Data from the file will be copied into this buffer.
     /// \param length Number of bytes to be copied into the buffer.
-    size_t read(OUT char *buf, IN size_t length) override;
-   
+    size_t read(OUT char* buf, IN size_t length) override;
+
     /// \brief Writes to a previously opened file.
     /// \param buf Data from the buffer will be written to the file.
     /// \param length Number of bytes to be written from the buffer.
     /// \return number of bytes written.
-    size_t write(OUT char *buf, IN size_t length) override;
+    size_t write(OUT char* buf, IN size_t length) override;
 
     /// \brief Performs seek on an open file.
     /// \param offset Number of bytes to move in the file. For seeking forwards
@@ -74,6 +74,5 @@ public:
     /// \brief Close a previously opened file.
     void close() override;
 };
-
 
 #endif // __FILE_IO_HANDLER_H__

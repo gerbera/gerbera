@@ -43,7 +43,7 @@ char service_prefixes[] = { '\0', 'Y', 'S', 'W', 'T', '\0' };
 
 OnlineServiceList::OnlineServiceList()
 {
-    service_list = Ref<Array<OnlineService> > (new Array<OnlineService>(OS_Max));
+    service_list = Ref<Array<OnlineService>>(new Array<OnlineService>(OS_Max));
 }
 
 void OnlineServiceList::registerService(Ref<OnlineService> service)
@@ -51,8 +51,7 @@ void OnlineServiceList::registerService(Ref<OnlineService> service)
     if (service == nullptr)
         return;
 
-    if (service->getServiceType() >= OS_Max)
-    {
+    if (service->getServiceType() >= OS_Max) {
         throw _Exception(_("Requested service with illegal type!"));
     }
 
@@ -82,10 +81,10 @@ char OnlineService::getStoragePrefix(service_type_t service)
     return service_prefixes[service];
 }
 
-char OnlineService::getStoragePrefix() 
-{ 
-    return getStoragePrefix(getServiceType()); 
-} 
+char OnlineService::getStoragePrefix()
+{
+    return getStoragePrefix(getServiceType());
+}
 
 String OnlineService::getCheckAttr(Ref<Element> xml, String attrname)
 {
@@ -93,9 +92,7 @@ String OnlineService::getCheckAttr(Ref<Element> xml, String attrname)
     if (string_ok(temp))
         return temp;
     else
-        throw _Exception(getServiceName() + _(": Tag <") + xml->getName() +
-                _("> is missing the required \"") + attrname +
-                _("\" attribute!"));
+        throw _Exception(getServiceName() + _(": Tag <") + xml->getName() + _("> is missing the required \"") + attrname + _("\" attribute!"));
     return nullptr;
 }
 
@@ -106,16 +103,12 @@ int OnlineService::getCheckPosIntAttr(Ref<Element> xml, String attrname)
     if (string_ok(temp))
         itmp = temp.toInt();
     else
-        throw _Exception(getServiceName() + _(": Tag <") + xml->getName() +
-                _("> is missing the required \"") + attrname +
-                _("\" attribute!"));
+        throw _Exception(getServiceName() + _(": Tag <") + xml->getName() + _("> is missing the required \"") + attrname + _("\" attribute!"));
 
     if (itmp < 1)
-        throw _Exception(_("Invalid value in ") + attrname + _(" for <") +
-                xml->getName() + _("> tag"));
+        throw _Exception(_("Invalid value in ") + attrname + _(" for <") + xml->getName() + _("> tag"));
 
     return itmp;
 }
 
-
-#endif//ONLINE_SERVICES
+#endif //ONLINE_SERVICES
