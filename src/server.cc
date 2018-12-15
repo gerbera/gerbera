@@ -191,7 +191,7 @@ void Server::upnp_init()
     }
 
     log_debug("Creating UpnpXMLBuilder\n");
-    xmlbuilder = std::make_unique<UpnpXMLBuilder>();
+    xmlbuilder = std::make_unique<UpnpXMLBuilder>(virtual_url);
 
     // register root device with the library
     String device_description = _("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n") + xmlbuilder->renderDeviceDescription(presentationURL)->print();

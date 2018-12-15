@@ -38,7 +38,7 @@
 
 class UpnpXMLBuilder {
 public:
-    UpnpXMLBuilder() = default;
+    explicit UpnpXMLBuilder(zmm::String virtualUrl);
 
     /// \brief Renders XML for the action response header.
     /// \param actionName Name of the action.
@@ -96,5 +96,8 @@ public:
     zmm::Ref<mxml::Element> renderOrchestra(zmm::String orchestra);
 
     zmm::Ref<mxml::Element> renderAlbumDate(zmm::String date);
+
+protected:
+    zmm::String virtualUrl;
 };
 #endif // __UPNP_XML_H__

@@ -12,7 +12,8 @@ class UpnpXmlTest : public ::testing::Test {
   virtual ~UpnpXmlTest() {};
 
   virtual void SetUp() {
-    subject = new UpnpXMLBuilder();
+    zmm::String virtualDir = "/dir/virtual";
+    subject = new UpnpXMLBuilder(virtualDir);
   }
 
   virtual void TearDown() {

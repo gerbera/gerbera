@@ -39,6 +39,8 @@
 using namespace zmm;
 using namespace mxml;
 
+UpnpXMLBuilder::UpnpXMLBuilder(String virtualUrl): virtualUrl(virtualUrl) {};
+
 Ref<Element> UpnpXMLBuilder::createResponse(String actionName, String serviceType)
 {
     Ref<Element> response(new Element(_("u:") + actionName + "Response"));
@@ -113,7 +115,7 @@ Ref<Element> UpnpXMLBuilder::renderObject(Ref<CdsObject> obj, bool renderActions
                 Ref<Dictionary> dict(new Dictionary());
                 dict->put(_(URL_OBJECT_ID), aa_id);
 
-                url = Server::getInstance()->getVirtualURL() + _(_URL_PARAM_SEPARATOR) + CONTENT_MEDIA_HANDLER + _(_URL_PARAM_SEPARATOR) + dict->encodeSimple() + _(_URL_PARAM_SEPARATOR) + _(URL_RESOURCE_ID) + _(_URL_PARAM_SEPARATOR) + "0";
+                url = virtualUrl + _(_URL_PARAM_SEPARATOR) + CONTENT_MEDIA_HANDLER + _(_URL_PARAM_SEPARATOR) + dict->encodeSimple() + _(_URL_PARAM_SEPARATOR) + _(URL_RESOURCE_ID) + _(_URL_PARAM_SEPARATOR) + "0";
                 log_debug("UpnpXMLRenderer::DIDLRenderObject: url: %s\n", url.c_str());
                 Ref<Element> aa(new Element(MetadataHandler::getMetaFieldName(M_ALBUMARTURI)));
                 aa->setText(url);
@@ -191,7 +193,7 @@ Ref<Element> UpnpXMLBuilder::renderObject(Ref<CdsObject> obj, bool renderActions
                 Ref<Dictionary> dict(new Dictionary());
                 dict->put(_(URL_OBJECT_ID), aa_id);
 
-                url = Server::getInstance()->getVirtualURL() + _(_URL_PARAM_SEPARATOR) + CONTENT_MEDIA_HANDLER + _(_URL_PARAM_SEPARATOR) + dict->encodeSimple() + _(_URL_PARAM_SEPARATOR) + _(URL_RESOURCE_ID) + _(_URL_PARAM_SEPARATOR) + "0";
+                url = virtualUrl + _(_URL_PARAM_SEPARATOR) + CONTENT_MEDIA_HANDLER + _(_URL_PARAM_SEPARATOR) + dict->encodeSimple() + _(_URL_PARAM_SEPARATOR) + _(URL_RESOURCE_ID) + _(_URL_PARAM_SEPARATOR) + "0";
 
                 result->appendElementChild(renderAlbumArtURI(url));
 

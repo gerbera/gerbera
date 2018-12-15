@@ -154,7 +154,7 @@ void MRRegistrarService::subscription_update(String sourceProtocol_CSV)
 
     }
 
-    UpnpNotifyExt(Server::getInstance()->getDeviceHandle(),
+    UpnpNotifyExt(deviceHandle,
             ConfigManager::getInstance()->getOption(CFG_SERVER_UDN).c_str(),
             serviceID.c_str(), event);
 
