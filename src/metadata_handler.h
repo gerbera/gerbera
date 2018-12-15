@@ -80,6 +80,7 @@ typedef enum {
     M_ARTIST,
     M_ALBUM,
     M_DATE,
+    M_UPNP_DATE,
     M_GENRE,
     M_DESCRIPTION,
     M_LONGDESCRIPTION,

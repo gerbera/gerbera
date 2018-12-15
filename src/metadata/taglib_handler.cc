@@ -96,6 +96,16 @@ static void addField(metadata_fields_t field, const TagLib::File& file, const Ta
         } else
             return;
         break;
+    case M_UPNP_DATE:
+        i = tag->year();
+        if (i > 0) {
+            value = String::from(i);
+
+            if (string_ok(value))
+                value = value + _("-01-01");
+        } else
+            return;
+        break;
     case M_GENRE:
         val = tag->genre();
         break;

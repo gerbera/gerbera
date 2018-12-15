@@ -59,6 +59,7 @@ function addAudio(obj) {
         date = 'Unknown';
     } else {
         date = getYear(date);
+        obj.meta[M_UPNP_DATE] = date;
         desc = desc + ', ' + date;
     }
     

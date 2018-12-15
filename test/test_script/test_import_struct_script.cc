@@ -60,6 +60,7 @@ static duk_ret_t addCdsObject(duk_context *ctx) {
     "meta['upnp:artist']",
     "meta['upnp:album']",
     "meta['dc:date']",
+    "meta['upnp:date']",
     "meta['upnp:genre']",
     "meta['dc:description']"
   };
@@ -118,6 +119,7 @@ TEST_F(ImportStructuredScriptTest, AddsAudioItemWithABCBoxFormat) {
   string artist = "Artist";
   string album = "Album";
   string date = "2018-01-01";
+  string year = "2018";
   string genre = "Genre";
   string desc = "Description";
   string id = "2";
@@ -132,6 +134,7 @@ TEST_F(ImportStructuredScriptTest, AddsAudioItemWithABCBoxFormat) {
     make_pair("upnp:artist", artist),
     make_pair("upnp:album", album),
     make_pair("dc:date", date),
+    make_pair("upnp:date", year),
     make_pair("upnp:genre", genre),
     make_pair("dc:description", desc)
   };
@@ -143,47 +146,26 @@ TEST_F(ImportStructuredScriptTest, AddsAudioItemWithABCBoxFormat) {
     make_pair("meta['upnp:artist']", artist),
     make_pair("meta['upnp:album']", album),
     make_pair("meta['dc:date']", date),
+    make_pair("meta['upnp:date']", year),
     make_pair("meta['upnp:genre']", genre),
     make_pair("meta['dc:description']", desc)
   };
 
-  map<string, string> asAudioAllFullName = {
-    make_pair("title", "Artist - Album - Audio Title"),
-    make_pair("meta['dc:title']", title),
-    make_pair("meta['upnp:artist']", artist),
-    make_pair("meta['upnp:album']", album),
-    make_pair("meta['dc:date']", date),
-    make_pair("meta['upnp:genre']", genre),
-    make_pair("meta['dc:description']", desc)
-  };
+  map<string, string> asAudioAllFullName;
+  asAudioAllFullName.insert(asAudioAllAudio.begin(), asAudioAllAudio.end());
+  asAudioAllFullName["title"] = "Artist - Album - Audio Title";
 
-  map<string, string> asAudioAllArtistTitle = {
-    make_pair("title", "Audio Title (Album, 2018)"),
-    make_pair("meta['dc:title']", title),
-    make_pair("meta['upnp:artist']", artist),
-    make_pair("meta['upnp:album']", album),
-    make_pair("meta['dc:date']", date),
-    make_pair("meta['upnp:genre']", genre),
-    make_pair("meta['dc:description']", desc)
-  };
-  map<string, string> asAudioAllAudioTitleArtist = {
-    make_pair("title", "Audio Title - Artist"),
-    make_pair("meta['dc:title']", title),
-    make_pair("meta['upnp:artist']", artist),
-    make_pair("meta['upnp:album']", album),
-    make_pair("meta['dc:date']", date),
-    make_pair("meta['upnp:genre']", genre),
-    make_pair("meta['dc:description']", desc)
-  };
-  map<string, string> asAudioTrackArtistTitle = {
-    make_pair("title", "Audio Title - Artist (Album, 2018)"),
-    make_pair("meta['dc:title']", title),
-    make_pair("meta['upnp:artist']", artist),
-    make_pair("meta['upnp:album']", album),
-    make_pair("meta['dc:date']", date),
-    make_pair("meta['upnp:genre']", genre),
-    make_pair("meta['dc:description']", desc)
-  };
+  map<string, string> asAudioAllArtistTitle;
+  asAudioAllArtistTitle.insert(asAudioAllAudio.begin(), asAudioAllAudio.end());
+  asAudioAllArtistTitle["title"] = "Audio Title (Album, 2018)";
+
+  map<string, string> asAudioAllAudioTitleArtist;
+  asAudioAllAudioTitleArtist.insert(asAudioAllAudio.begin(), asAudioAllAudio.end());
+  asAudioAllAudioTitleArtist["title"] = "Audio Title - Artist";
+
+  map<string, string> asAudioTrackArtistTitle;
+  asAudioTrackArtistTitle.insert(asAudioAllAudio.begin(), asAudioAllAudio.end());
+  asAudioTrackArtistTitle["title"] = "Audio Title - Artist (Album, 2018)";
 
   // Expecting the common script calls
   // and will proxy through the mock objects

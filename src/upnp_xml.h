@@ -95,6 +95,8 @@ public:
 
     zmm::Ref<mxml::Element> renderOrchestra(zmm::String orchestra);
 
+    zmm::Ref<mxml::Element> renderAlbumDate(zmm::String date);
+
 protected:
     zmm::String virtualUrl;
 };

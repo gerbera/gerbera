@@ -59,6 +59,7 @@ mt_key MT_KEYS[] = {
     { "M_ARTIST", "upnp:artist" },
     { "M_ALBUM", "upnp:album" },
     { "M_DATE", "dc:date" },
+    { "M_UPNP_DATE", "upnp:date" },
     { "M_GENRE", "upnp:genre" },
     { "M_DESCRIPTION", "dc:description" },
     { "M_LONGDESCRIPTION", "upnp:longDescription" },
