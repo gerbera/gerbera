@@ -259,9 +259,10 @@ void FfmpegHandler::fillMetadata(Ref<CdsItem> item)
     // Suppress all log messages
     av_log_set_callback(FfmpegNoOutputStub);
 
+#if ( LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(58,9,100) )
     // Register all formats and codecs
     av_register_all();
-
+#endif
     // Open video file
     if (avformat_open_input(&pFormatCtx,
             item->getLocation().c_str(), NULL, NULL)
