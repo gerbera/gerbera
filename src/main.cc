@@ -182,7 +182,7 @@ int main(int argc, char** argv, char** envp)
                 log_error("Could not determine users home directory\n");
                 exit(EXIT_FAILURE);
             }
-            log_debug("Home detected as: %s\n", home.value());
+            log_debug("Home detected as: %s\n", home->c_str());
         }
 
         std::optional<std::string> prefix;
