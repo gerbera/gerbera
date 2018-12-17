@@ -120,8 +120,7 @@ void CdsResourceManager::addResources(UpnpXMLBuilder* xmlBuilder, Ref<CdsItem> i
     // TODO: allow transcoding for URLs
 
     // now get the profile
-    Ref<TranscodingProfileList> tlist = config->getTranscodingProfileListOption(
-        CFG_TRANSCODING_PROFILE_LIST);
+    Ref<TranscodingProfileList> tlist = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST);
     Ref<ObjectDictionary<TranscodingProfile>> tp_mt = tlist->get(item->getMimeType());
     if (tp_mt != nullptr) {
         Ref<Array<ObjectDictionaryElement<TranscodingProfile>>> profiles = tp_mt->getElements();
@@ -318,6 +317,7 @@ void CdsResourceManager::addResources(UpnpXMLBuilder* xmlBuilder, Ref<CdsItem> i
                     rct = res->getOption(_(RESOURCE_CONTENT_TYPE));
                 else
                     rct = res->getParameter(_(RESOURCE_CONTENT_TYPE));
+
                 if (rct == ID3_ALBUM_ART) {
                     Ref<Element> aa(new Element(MetadataHandler::getMetaFieldName(M_ALBUMARTURI)));
                     aa->setText(url);
@@ -325,8 +325,7 @@ void CdsResourceManager::addResources(UpnpXMLBuilder* xmlBuilder, Ref<CdsItem> i
                     if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO)) {
                         /// \todo clean this up, make sure to check the mimetype and
                         /// provide the profile correctly
-                        aa->setAttribute(_("xmlns:dlna"),
-                            _("urn:schemas-dlna-org:metadata-1-0"));
+                        aa->setAttribute(_("xmlns:dlna"), _("urn:schemas-dlna-org:metadata-1-0"));
                         aa->setAttribute(_("dlna:profileID"), _("JPEG_TN"));
                     }
 #endif
@@ -444,8 +443,7 @@ String CdsResourceManager::getFirstResource(Ref<CdsItem> item)
 
     if (urlBase->addResID)
         return urlBase->urlBase + 0;
-    else
-        return urlBase->urlBase;
+    return urlBase->urlBase;
 }
 
 String CdsResourceManager::getArtworkUrl(zmm::Ref<CdsItem> item)

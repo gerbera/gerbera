@@ -85,8 +85,7 @@ Ref<Element> UpnpXMLBuilder::renderObject(Ref<CdsObject> obj, bool renderActions
             if (key == MetadataHandler::getMetaFieldName(M_DESCRIPTION)) {
                 tmp = el->getValue();
                 if ((stringLimit > 0) && (tmp.length() > stringLimit)) {
-                    tmp = tmp.substring(0,
-                        getValidUTF8CutPosition(tmp, stringLimit - 3));
+                    tmp = tmp.substring(0, getValidUTF8CutPosition(tmp, stringLimit - 3));
                     tmp = tmp + _("...");
                 }
                 result->appendTextChild(key, tmp);
