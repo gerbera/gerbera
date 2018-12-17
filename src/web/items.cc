@@ -33,7 +33,7 @@
 #include "common.h"
 #include "storage.h"
 #include "cds_objects.h"
-#include "cds_resource_manager.h"
+#include "upnp_xml.h"
 
 using namespace zmm;
 using namespace mxml;
@@ -130,7 +130,8 @@ void web::items::process()
         item->appendTextChild(_("title"), obj->getTitle());
         /// \todo clean this up, should have more generic options for online
         /// services
-            item->appendTextChild(_("res"), CdsResourceManager::getFirstResource(RefCast(obj, CdsItem)));
+        // FIXME
+        item->appendTextChild(_("res"), UpnpXMLBuilder::getFirstResource(RefCast(obj, CdsItem)));
         //item->appendTextChild(_("virtual"), obj->isVirtual() ? _("1") : _("0"), mxml_bool_type);
         items->appendElementChild(item);
         //}

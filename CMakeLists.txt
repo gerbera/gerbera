@@ -53,8 +53,6 @@ set(libgerberaFILES
         src/cds_objects.h
         src/cds_resource.cc
         src/cds_resource.h
-        src/cds_resource_manager.cc
-        src/cds_resource_manager.h
         src/common.h
         src/config/config_generator.h
         src/config/config_generator.cc

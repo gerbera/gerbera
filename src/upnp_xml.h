@@ -97,7 +97,22 @@ public:
 
     zmm::Ref<mxml::Element> renderAlbumDate(zmm::String date);
 
+    void addResources(zmm::Ref<CdsItem> item, zmm::Ref<mxml::Element> element);
+
+    // FIXME: This needs to go, once we sort a nicer way for the webui code to access this
+    static zmm::String getFirstResource(zmm::Ref<CdsItem> item);
+
 protected:
     zmm::String virtualUrl;
+
+    class UrlBase : public zmm::Object {
+    public:
+        zmm::String urlBase;
+        bool addResID;
+    };
+
+    static zmm::Ref<UrlBase> getUrlBase(zmm::Ref<CdsItem> item, bool forceLocal = false);
+    static zmm::String renderExtension(zmm::String contentType, zmm::String location);
+    zmm::String getArtworkUrl(zmm::Ref<CdsItem> item);
 };
 #endif // __UPNP_XML_H__
