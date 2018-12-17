@@ -281,13 +281,3 @@ String WebRequestHandler::mapAutoscanType(int type)
     else
         return _("none");
 }
-
-int WebRequestHandler::remapAutoscanType(String type)
-{
-    if (type == "ui")
-        return 1;
-    else if (type == "persistent")
-        return 2;
-    else
-        return 0;
-}

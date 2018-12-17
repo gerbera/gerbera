@@ -123,7 +123,6 @@ protected:
     bool accountsEnabled() { return (ConfigManager::getInstance()->getBoolOption(CFG_SERVER_UI_ACCOUNTS_ENABLED)); }
 
     zmm::String mapAutoscanType(int type);
-    int remapAutoscanType(zmm::String type);
 
 public:
     /// \brief Constructor, currently empty.
@@ -136,21 +135,18 @@ public:
     /// dynamic XML) we do not know the size of the data. This is of course different
     /// for the FileRequestHandler, where we can check the file and return all
     /// information about it.
-    virtual void get_info(IN const char* filename, OUT UpnpFileInfo* info);
+    void get_info(IN const char* filename, OUT UpnpFileInfo* info) override;
 
     /// \brief Decodes the parameters from the filename (URL) and calls the internal open() function.
     /// \param filename The requested URL
     /// \param mode either UPNP_READ or UPNP_WRITE
     /// \return the appropriate IOHandler for the request.
-    virtual zmm::Ref<IOHandler> open(IN const char* filename,
+    zmm::Ref<IOHandler> open(IN const char* filename,
         IN enum UpnpOpenFileMode mode,
-        IN zmm::String range);
+        IN zmm::String range) override;
 
     /// \brief This method must be overridden by the subclasses that actually process the given request.
     virtual void process() = 0;
-
-    /// \brief builds full path to a script for the given relative filename
-    static zmm::String buildScriptPath(zmm::String filename);
 };
 
 #endif // __WEB_REQUEST_HANDLER_H__
