@@ -29,15 +29,16 @@
 
 /// \file containers.cc
 
+#include "cds_objects.h"
 #include "common.h"
 #include "pages.h"
 #include "storage.h"
-#include "cds_objects.h"
 
 using namespace zmm;
 using namespace mxml;
 
-web::containers::containers() : WebRequestHandler()
+web::containers::containers()
+    : WebRequestHandler()
 {
 }
 
@@ -45,15 +46,14 @@ void web::containers::process()
 {
     log_debug(("containers.cc: containers::process()\n"));
     check_request();
-    
+
     int parentID = intParam(_("parent_id"), INVALID_OBJECT_ID);
     if (parentID == INVALID_OBJECT_ID)
         throw _Exception(_("web::containers: no parent_id given"));
-    
+
     Ref<Storage> storage = Storage::getInstance();
 
-        
-    Ref<Element> containers (new Element(_("containers")));
+    Ref<Element> containers(new Element(_("containers")));
     containers->setArrayName(_("container"));
     containers->setAttribute(_("parent_id"), String::from(parentID), mxml_int_type);
     containers->setAttribute(_("type"), _("database"));
@@ -61,13 +61,12 @@ void web::containers::process()
     if (string_ok(param(_("select_it"))))
         containers->setAttribute(_("select_it"), param(_("select_it")));
     root->appendElementChild(containers);
-    
+
     Ref<BrowseParam> param(new BrowseParam(parentID, BROWSE_DIRECT_CHILDREN | BROWSE_CONTAINERS));
-    Ref<Array<CdsObject> > arr;
+    Ref<Array<CdsObject>> arr;
     arr = storage->browse(param);
-    
-    for (int i = 0; i < arr->size(); i++)
-    {
+
+    for (int i = 0; i < arr->size(); i++) {
         Ref<CdsObject> obj = arr->get(i);
         //if (IS_CDS_CONTAINER(obj->getObjectType()))
         //{
@@ -78,14 +77,12 @@ void web::containers::process()
         ce->setAttribute(_("child_count"), String::from(childCount), mxml_int_type);
         int autoscanType = cont->getAutoscanType();
         ce->setAttribute(_("autoscan_type"), mapAutoscanType(autoscanType));
-        
+
         String autoscanMode = _("none");
-        if (autoscanType > 0)
-        {
+        if (autoscanType > 0) {
             autoscanMode = _("timed");
 #ifdef HAVE_INOTIFY
-            if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY))
-            {
+            if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
                 Ref<AutoscanDirectory> adir = storage->getAutoscanDirectory(cont->getID());
                 if ((adir != nullptr) && (adir->getScanMode() == ScanMode::INotify))
                     autoscanMode = _("inotify");

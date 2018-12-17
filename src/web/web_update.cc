@@ -29,10 +29,10 @@
 
 /// \file web_update.cc
 
-#include "pages.h"
-#include "storage.h"
 #include "autoscan.h"
 #include "content_manager.h"
+#include "pages.h"
+#include "storage.h"
 
 using namespace zmm;
 using namespace mxml;

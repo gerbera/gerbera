@@ -29,9 +29,9 @@
 
 /// \file tasks.cc
 
-#include "pages.h"
 #include "common.h"
 #include "content_manager.h"
+#include "pages.h"
 
 using namespace zmm;
 using namespace mxml;
@@ -40,29 +40,24 @@ void web::tasks::process()
 {
     check_request();
     String action = param(_("action"));
-    if (! string_ok(action))
+    if (!string_ok(action))
         throw _Exception(_("web:tasks called with illegal action"));
     Ref<ContentManager> cm = ContentManager::getInstance();
-    
-    if (action == "list")
-    {
-        Ref<Element> tasksEl (new Element(_("tasks")));
+
+    if (action == "list") {
+        Ref<Element> tasksEl(new Element(_("tasks")));
         tasksEl->setArrayName(_("task"));
         root->appendElementChild(tasksEl); // inherited from WebRequestHandler
-        Ref<Array<GenericTask> > taskList = cm->getTasklist();
+        Ref<Array<GenericTask>> taskList = cm->getTasklist();
         if (taskList == nullptr)
             return;
         int count = taskList->size();
-        for (int i = 0; i < count; i++)
-        {
+        for (int i = 0; i < count; i++) {
             appendTask(tasksEl, taskList->get(i));
         }
-    }
-    else if (action == "cancel")
-    {
+    } else if (action == "cancel") {
         int taskID = intParam(_("task_id"));
         cm->invalidateTask(taskID);
-    }
-    else
+    } else
         throw _Exception(_("web:tasks called with illegal action"));
 }

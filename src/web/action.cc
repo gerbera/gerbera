@@ -29,13 +29,14 @@
 
 /// \file action.cc
 
-#include "pages.h"
 #include "content_manager.h"
+#include "pages.h"
 
 using namespace zmm;
 using namespace mxml;
 
-web::action::action() : WebRequestHandler()
+web::action::action()
+    : WebRequestHandler()
 {
 }
 
@@ -43,11 +44,10 @@ void web::action::process()
 {
     log_debug("action: start\n");
     check_request();
-    
+
     String action = param(_("action"));
     if (!string_ok(action))
-        throw _Exception(_("No action given!"))
-            ;
+        throw _Exception(_("No action given!"));
     log_debug("action: %s\n", action.c_str());
 
     log_debug("action: returning\n");

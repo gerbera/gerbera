@@ -30,16 +30,17 @@
 /// \file directories.cc
 
 #include "common.h"
-#include "pages.h"
-#include "tools.h"
-#include "storage.h"
 #include "filesystem.h"
+#include "pages.h"
+#include "storage.h"
 #include "string_converter.h"
+#include "tools.h"
 
 using namespace zmm;
 using namespace mxml;
 
-web::directories::directories() : WebRequestHandler()
+web::directories::directories()
+    : WebRequestHandler()
 {
 }
 
@@ -53,23 +54,22 @@ void web::directories::process()
         path = _(FS_ROOT_DIRECTORY);
     else
         path = hex_decode_string(parentID);
-    
-    Ref<Element> containers (new Element(_("containers")));
+
+    Ref<Element> containers(new Element(_("containers")));
     containers->setArrayName(_("container"));
     containers->setAttribute(_("parent_id"), parentID);
     if (string_ok(param(_("select_it"))))
         containers->setAttribute(_("select_it"), param(_("select_it")));
     containers->setAttribute(_("type"), _("filesystem"));
     root->appendElementChild(containers);
-    
+
     Ref<Filesystem> fs(new Filesystem());
-    
-    Ref<Array<FsObject> > arr;
+
+    Ref<Array<FsObject>> arr;
     arr = fs->readDirectory(path, FS_MASK_DIRECTORIES,
-                                                      FS_MASK_DIRECTORIES);
-    
-    for (int i = 0; i < arr->size(); i++)
-    {
+        FS_MASK_DIRECTORIES);
+
+    for (int i = 0; i < arr->size(); i++) {
         Ref<FsObject> obj = arr->get(i);
 
         Ref<Element> ce(new Element(_("container")));
@@ -79,7 +79,7 @@ void web::directories::process()
             filepath = path + filename;
         else
             filepath = path + '/' + filename;
-        
+
         /// \todo replace hex_encode with base64_encode?
         String id = hex_encode(filepath.c_str(), filepath.length());
         ce->setAttribute(_("id"), id);
