@@ -218,16 +218,20 @@ void FallbackLayout::addAudio(zmm::Ref<CdsObject> obj)
     desc = desc + title;
 
     String date = meta->get(MetadataHandler::getMetaFieldName(M_DATE));
-    if (string_ok(date))
-    {
+    String albumDate;
+    if (string_ok(date)) {
         int i = date.index('-');
         if (i > 0)
             date = date.substring(0, i);
 
         desc = desc + _(", ") + date;
-    }
-    else
+        albumDate = esc(date);
+    } else {
         date = _("Unknown");
+        albumDate = _("Unknown");
+    }
+
+    meta->put(MetadataHandler::getMetaFieldName(M_UPNP_DATE), albumDate);
 
     String genre = meta->get(MetadataHandler::getMetaFieldName(M_GENRE));
     if (string_ok(genre))
