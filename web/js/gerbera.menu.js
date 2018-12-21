@@ -56,9 +56,6 @@ GERBERA.Menu = (function () {
       case 'SELECT_TYPE':
         selectType(menuItem)
         break
-      case 'LEAVE_BETA':
-        leaveBeta()
-        break
       case 'HOME':
         home()
         break
@@ -71,13 +68,6 @@ GERBERA.Menu = (function () {
     GERBERA.Tree.destroy()
     GERBERA.Trail.destroy()
     GERBERA.Items.destroy()
-  }
-
-  var leaveBeta = function () {
-    GERBERA.Tree.destroy()
-    GERBERA.Trail.destroy()
-    GERBERA.Items.destroy()
-    GERBERA.App.reload('/old.html')
   }
 
   var selectType = function (menuItem) {

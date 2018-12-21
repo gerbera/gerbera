@@ -71,22 +71,6 @@ describe('Gerbera Menu', () => {
       expect(GERBERA.Tree.destroy).toHaveBeenCalled();
       expect(GERBERA.Trail.destroy).toHaveBeenCalled();
     });
-
-    it('on click of leave beta destroys elements, and navigates to index.html page', async () => {
-      spyOn(GERBERA.Items, 'destroy');
-      spyOn(GERBERA.Tree, 'destroy');
-      spyOn(GERBERA.Trail, 'destroy');
-      spyOn(GERBERA.App, 'reload');
-      spyOn(GERBERA.Auth, 'isLoggedIn').and.returnValue(true);
-
-      await GERBERA.Menu.initialize();
-      $('#leave-beta').click();
-
-      expect(GERBERA.Tree.destroy).toHaveBeenCalled();
-      expect(GERBERA.Trail.destroy).toHaveBeenCalled();
-      expect(GERBERA.Items.destroy).toHaveBeenCalled();
-      expect(GERBERA.App.reload).toHaveBeenCalledWith('/old.html');
-    });
   });
 
   describe('disable()', () => {
