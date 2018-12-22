@@ -91,7 +91,6 @@ String WebRequestHandler::renderXMLHeader()
 void WebRequestHandler::get_info(IN const char* filename, OUT UpnpFileInfo* info)
 {
     this->filename = filename;
-    this->mode = mode;
 
     String path, parameters;
     split_url(filename, URL_UI_PARAM_SEPARATOR, path, parameters);
