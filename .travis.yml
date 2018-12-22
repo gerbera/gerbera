@@ -5,56 +5,27 @@ language: none
 sudo: required
 dist: xenial
 
-# The default build
-env: CXX=g++-7 CC=gcc-7
-addons:
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
-    packages:
-      - g++-7
-
-before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get install -y uuid-dev libexpat1-dev libsqlite3-dev libmysqlclient-dev libmagic-dev libexif-dev libcurl4-openssl-dev cmake3
-  - sudo ./scripts/install-duktape.sh
-  - sudo ./scripts/install-pupnp18.sh
-  - sudo ./scripts/install-taglib111.sh
-  - sudo ./scripts/install-googletest.sh
+services:
+  - docker
 
 # Build
 script:
-  - mkdir build
-  - cd build
-  - cmake -DCMAKE_VERBOSE_MAKEFILE=ON -DWITH_SYSTEMD=0 -DWITH_TESTS=1 .. && make && make test ARGS=-V
+  - docker run -v $PWD:/tmp/gerbera-src -w /tmp/build -e CXX=$CXX -e CC=$CC -e CXXFLAGS=$CXXFLAGS gerbera/gerbera-ci-base:latest bash -c "bash ../gerbera-src/scripts/install-googletest.sh && cmake ../gerbera-src -DCMAKE_VERBOSE_MAKEFILE=ON -DWITH_SYSTEMD=0 -DWITH_TESTS=1 && make install && make test"
 
-matrix:
+env:
+  - CXX=g++-7 CC=gcc-7
+  - CXX=g++-8 CC=gcc-8
+  - CXX=clang++-7 CC=clang-7 CXXFLAGS=-stdlib=libc++
+
+jobs:
   include:
-    - stage: Build Gerbera
-    - env: CXX=g++-8 CC=gcc-8
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-8
-#    - env: CXX=clang++-6.0 CC=clang-6.0
-#      addons:
-#        apt:
-#          sources:
-#            - ubuntu-toolchain-r-test
-#            - llvm-toolchain-xenial-6.0
-#          packages:
-#            - libjsoncpp1
-#            - libc++-dev
-#            - clang-6.0
-    - stage: Test Gerbera UI
-      addons:
-        chrome: stable
-      before_install: skip
-      install:
-        - npm --prefix $TRAVIS_BUILD_DIR/gerbera-web/ install $TRAVIS_BUILD_DIR/gerbera-web/
-      script:
-        - npm --prefix $TRAVIS_BUILD_DIR/gerbera-web run lint
-        - npm --prefix $TRAVIS_BUILD_DIR/gerbera-web run test
-        - npm --prefix $TRAVIS_BUILD_DIR/gerbera-web run test:e2e
+  - stage: Test Gerbera UI
+    addons:
+      chrome: stable
+    before_install: skip
+    install:
+      - npm --prefix $TRAVIS_BUILD_DIR/gerbera-web/ install $TRAVIS_BUILD_DIR/gerbera-web/
+    script:
+      - npm --prefix $TRAVIS_BUILD_DIR/gerbera-web run lint
+      - npm --prefix $TRAVIS_BUILD_DIR/gerbera-web run test
+      - npm --prefix $TRAVIS_BUILD_DIR/gerbera-web run test:e2e
