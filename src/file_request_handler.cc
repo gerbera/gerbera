@@ -290,7 +290,7 @@ void FileRequestHandler::get_info(IN const char* filename, OUT UpnpFileInfo* inf
 
     if (string_ok(header)) {
         std::string finalHeader = httpProtocolHelper.finalizeHttpHeader(header.c_str());
-        UpnpFileInfo_set_ExtraHeaders(info, ixmlCloneDOMString(finalHeader.c_str()));
+//        UpnpFileInfo_set_ExtraHeaders(info, ixmlCloneDOMString(finalHeader.c_str()));
     }
 
     UpnpFileInfo_set_LastModified(info, statbuf.st_mtime);
