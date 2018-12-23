@@ -142,10 +142,11 @@ void URLRequestHandler::get_info(IN const char* filename, OUT UpnpFileInfo* info
     UpnpFileInfo_set_LastModified(info, 0);
     UpnpFileInfo_set_IsDirectory(info, 0);
 
-    if (string_ok(header)) {
-        UpnpFileInfo_set_ExtraHeaders(info,
-            ixmlCloneDOMString(header.c_str()));
-    }
+    // FIX EXTRA HEADERS
+//    if (string_ok(header)) {
+//        UpnpFileInfo_set_ExtraHeaders(info,
+//            ixmlCloneDOMString(header.c_str()));
+//    }
 
     UpnpFileInfo_set_ContentType(info, ixmlCloneDOMString(mimeType.c_str()));
     log_debug("web_get_info(): end\n");

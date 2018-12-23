@@ -116,7 +116,9 @@ void WebRequestHandler::get_info(IN const char* filename, OUT UpnpFileInfo* info
     contentType = mimetype + "; charset=" + DEFAULT_INTERNAL_CHARSET;
 
     UpnpFileInfo_set_ContentType(info, ixmlCloneDOMString(contentType.c_str()));
-    UpnpFileInfo_set_ExtraHeaders(info, ixmlCloneDOMString("Cache-Control: no-cache, must-revalidate\n"));
+
+    // FIXME Extra Headers
+    //UpnpFileInfo_set_ExtraHeaders(info, ixmlCloneDOMString("Cache-Control: no-cache, must-revalidate\n"));
 }
 
 Ref<IOHandler> WebRequestHandler::open(IN enum UpnpOpenFileMode mode)
