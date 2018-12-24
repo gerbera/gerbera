@@ -190,7 +190,7 @@ protected:
     /// and ConnectionManagerService), this function looks at the service id
     /// of the request and calls the process_action_request() for the
     /// appropriate service.
-    void upnp_actions(zmm::Ref<ActionRequest> request);
+    void routeActionRequest(zmm::Ref<ActionRequest> request);
 
     /// \brief Dispatched a SubscriptionRequest between the services.
     /// \param request Incoming SubscriptionRequest.
@@ -199,12 +199,12 @@ protected:
     /// and ConnectionManagerService), this function looks at the service id
     /// of the request and calls the process_subscription_request() for the
     /// appropriate service.
-    void upnp_subscriptions(zmm::Ref<SubscriptionRequest> request);
+    void routeSubscriptionRequest(zmm::Ref<SubscriptionRequest> request);
 
     /// \brief Registers callback functions for the internal web server.
     /// \param filename Incoming filename.
     ///
-    zmm::Ref<RequestHandler> create_request_handler(const char* filename);
+    zmm::Ref<RequestHandler> createRequestHandler(const char *filename);
 
     /// \brief Registers callback functions for the internal web server.
     ///
@@ -218,7 +218,7 @@ protected:
     /// \b web_close Close file.
     ///
     /// \return UPNP_E_SUCCESS Callbacks registered successfully, else error code.
-    int register_web_callbacks();
+    int registerVirtualDirCallbacks();
 };
 
 #endif // __SERVER_H__

@@ -629,8 +629,7 @@ void UpnpXMLBuilder::addResources(Ref<CdsItem> item, Ref<Element> element)
     bool skipURL = ((IS_CDS_ITEM_INTERNAL_URL(item->getObjectType()) || IS_CDS_ITEM_EXTERNAL_URL(item->getObjectType())) && (!item->getFlag(OBJECT_FLAG_PROXY_URL)));
 
     bool isExtThumbnail = false; // this sucks
-    Ref<Dictionary> mappings = config->getDictionaryOption(
-        CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+    Ref<Dictionary> mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
 
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
     if (config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED) && (item->getMimeType().startsWith(_("video")) || item->getFlag(OBJECT_FLAG_OGG_THEORA))) {
