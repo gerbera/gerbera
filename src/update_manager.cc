@@ -222,7 +222,7 @@ void UpdateManager::threadProc()
                 if (string_ok(updateString)) {
                     try {
                         log_debug("updates sent: \"%s\"\n", updateString.c_str());
-                        Server::getInstance()->send_subscription_update(updateString);
+                        Server::getInstance()->sendCDSSubscriptionUpdate(updateString);
                         getTimespecNow(&lastUpdate);
                     } catch (const Exception& e) {
                         log_error("Fatal error when sending updates: %s\n", e.getMessage().c_str());

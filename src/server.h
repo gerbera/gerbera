@@ -113,7 +113,7 @@ public:
 
     static void static_cleanup_callback();
 
-    void send_subscription_update(zmm::String updateString);
+    void sendCDSSubscriptionUpdate(zmm::String updateString);
 
 protected:
     static zmm::Ref<Storage> storage;

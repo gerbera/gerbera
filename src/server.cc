@@ -407,9 +407,9 @@ void Server::routeSubscriptionRequest(Ref<SubscriptionRequest> request)
 }
 
 // Temp
-void Server::send_subscription_update(zmm::String updateString)
+void Server::sendCDSSubscriptionUpdate(zmm::String updateString)
 {
-    cmgr->subscription_update(updateString);
+    cds->subscription_update(updateString);
 }
 
 Ref<RequestHandler> Server::createRequestHandler(const char *filename)
