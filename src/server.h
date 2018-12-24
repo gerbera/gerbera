@@ -89,7 +89,7 @@ public:
     /// data structures (ActionRequest or SubscriptionRequest) and is then
     /// passed on to the appropriate request handler - to routeActionEvent() or
     /// upnp_subscriptions()
-    int routeUpnpEvent(Upnp_EventType eventtype, const void *event);
+    int handleUpnpEvent(Upnp_EventType eventtype, const void *event);
 
     /// \brief Returns the IP address of the server.
     ///

@@ -51,7 +51,7 @@ ContentDirectoryService::ContentDirectoryService(UpnpXMLBuilder* xmlBuilder, Upn
 
 ContentDirectoryService::~ContentDirectoryService() = default;
 
-void ContentDirectoryService::upnp_action_Browse(Ref<ActionRequest> request)
+void ContentDirectoryService::doBrowse(Ref<ActionRequest> request)
 {
     log_debug("start\n");
     Ref<Storage> storage = Storage::getInstance();
@@ -147,7 +147,7 @@ void ContentDirectoryService::upnp_action_Browse(Ref<ActionRequest> request)
     log_debug("end\n");
 }
 
-void ContentDirectoryService::upnp_action_Search(Ref<ActionRequest> request)
+void ContentDirectoryService::doSearch(Ref<ActionRequest> request)
 {
     log_debug("start\n");
 
@@ -216,7 +216,7 @@ void ContentDirectoryService::upnp_action_Search(Ref<ActionRequest> request)
     log_debug("end\n");
 }
 
-void ContentDirectoryService::upnp_action_GetSearchCapabilities(Ref<ActionRequest> request)
+void ContentDirectoryService::doGetSearchCapabilities(Ref<ActionRequest> request)
 {
     log_debug("start\n");
 
@@ -229,7 +229,7 @@ void ContentDirectoryService::upnp_action_GetSearchCapabilities(Ref<ActionReques
     log_debug("end\n");
 }
 
-void ContentDirectoryService::upnp_action_GetSortCapabilities(Ref<ActionRequest> request)
+void ContentDirectoryService::doGetSortCapabilities(Ref<ActionRequest> request)
 {
     log_debug("start\n");
 
@@ -242,7 +242,7 @@ void ContentDirectoryService::upnp_action_GetSortCapabilities(Ref<ActionRequest>
     log_debug("end\n");
 }
 
-void ContentDirectoryService::upnp_action_GetSystemUpdateID(Ref<ActionRequest> request)
+void ContentDirectoryService::doGetSystemUpdateID(Ref<ActionRequest> request)
 {
     log_debug("start\n");
 
@@ -260,21 +260,20 @@ void ContentDirectoryService::processActionRequest(Ref<ActionRequest> request)
     log_debug("start\n");
 
     if (request->getActionName() == "Browse") {
-        upnp_action_Browse(request);
+        doBrowse(request);
     } else if (request->getActionName() == "GetSearchCapabilities") {
-        upnp_action_GetSearchCapabilities(request);
+        doGetSearchCapabilities(request);
     } else if (request->getActionName() == "GetSortCapabilities") {
-        upnp_action_GetSortCapabilities(request);
+        doGetSortCapabilities(request);
     } else if (request->getActionName() == "GetSystemUpdateID") {
-        upnp_action_GetSystemUpdateID(request);
+        doGetSystemUpdateID(request);
     } else if (request->getActionName() == "Search") {
-        upnp_action_Search(request);
+        doSearch(request);
     } else {
         // invalid or unsupported action
-        log_info("unrecognized action %s\n",
-            request->getActionName().c_str());
+        log_info("unrecognized action %s\n", request->getActionName().c_str());
         request->setErrorCode(UPNP_E_INVALID_ACTION);
-        //    throw UpnpException(UPNP_E_INVALID_ACTION, _("unrecognized action"));
+        // throw UpnpException(UPNP_E_INVALID_ACTION, _("unrecognized action"));
     }
 
     log_debug("ContentDirectoryService::processActionRequest: end\n");
@@ -309,7 +308,7 @@ void ContentDirectoryService::processSubscriptionRequest(zmm::Ref<SubscriptionRe
     log_debug("end\n");
 }
 
-void ContentDirectoryService::subscription_update(String containerUpdateIDs_CSV)
+void ContentDirectoryService::sendSubscriptionUpdate(String containerUpdateIDs_CSV)
 {
     int err;
     IXML_Document* event = nullptr;

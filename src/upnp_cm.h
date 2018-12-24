@@ -50,7 +50,7 @@ protected:
     /// GetCurrentConnectionIDs(string ConnectionIDs)
     ///
     /// This is currently unsupported (returns empty string)
-    void upnp_action_GetCurrentConnectionIDs(zmm::Ref<ActionRequest> request);
+    void doGetCurrentConnectionIDs(zmm::Ref<ActionRequest> request);
 
     /// \brief UPnP standard defined action: GetCurrentConnectionInfo()
     /// \param request Incoming ActionRequest.
@@ -59,13 +59,13 @@ protected:
     /// string PeerConnectionManager, i4 PeerConnectionID, string Direction, string Status)
     ///
     /// This action is currently unsupported.
-    void upnp_action_GetCurrentConnectionInfo(zmm::Ref<ActionRequest> request);
+    void doGetCurrentConnectionInfo(zmm::Ref<ActionRequest> request);
 
     /// \brief UPnP standard defined action: GetProtocolInfo()
     /// \param request Incoming ActionRequest.
     ///
     /// GetProtocolInfo(string Source, string Sink)
-    void upnp_action_GetProtocolInfo(zmm::Ref<ActionRequest> request);
+    void doGetProtocolInfo(zmm::Ref<ActionRequest> request);
 
     UpnpXMLBuilder* xmlBuilder;
     UpnpDevice_Handle deviceHandle;
@@ -97,7 +97,7 @@ public:
     /// \param sourceProtocol_CSV Comma Separated Value list of protocol information
     ///
     /// Sends out an update with protocol information to all subscribed devices
-    void subscription_update(zmm::String sourceProtocol_CSV);
+    void sendSubscriptionUpdate(zmm::String sourceProtocol_CSV);
 };
 
 #endif // __UPNP_CM_H__

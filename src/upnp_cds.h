@@ -61,7 +61,7 @@ protected:
     /// Browse(string ObjectID, string BrowseFlag, string Filter, ui4 StartingIndex,
     /// ui4 RequestedCount, string SortCriteria, string Result, ui4 NumberReturned,
     /// ui4 TotalMatches, ui4 UpdateID)
-    void upnp_action_Browse(zmm::Ref<ActionRequest> request);
+    void doBrowse(zmm::Ref<ActionRequest> request);
 
     /// \brief UPnP standard defined action: Search()
     /// \param request Incoming ActionRequest.
@@ -69,25 +69,25 @@ protected:
     /// Search(string ContainerID, string SearchCriteria, string Filter, ui4 StartingIndex,
     /// ui4 RequestedCount, string SortCriteria, string Result, ui4 NumberReturned,
     /// ui4 TotalMatches, ui4 UpdateID)
-    void upnp_action_Search(zmm::Ref<ActionRequest> request);
+    void doSearch(zmm::Ref<ActionRequest> request);
 
     /// \brief UPnP standard defined action: GetSearchCapabilities()
     /// \param request Incoming ActionRequest.
     ///
     /// GetSearchCapabilities(string SearchCaps)
-    void upnp_action_GetSearchCapabilities(zmm::Ref<ActionRequest> request);
+    void doGetSearchCapabilities(zmm::Ref<ActionRequest> request);
 
     /// \brief UPnP standard defined action: GetSortCapabilities()
     /// \param request Incoming ActionRequest.
     ///
     /// GetSortCapabilities(string SortCaps)
-    void upnp_action_GetSortCapabilities(zmm::Ref<ActionRequest> request);
+    void doGetSortCapabilities(zmm::Ref<ActionRequest> request);
 
     /// \brief UPnP standard defined action: GetSystemUpdateID()
     /// \param request Incoming ActionRequest.
     ///
     /// GetSystemUpdateID(ui4 Id)
-    void upnp_action_GetSystemUpdateID(zmm::Ref<ActionRequest> request);
+    void doGetSystemUpdateID(zmm::Ref<ActionRequest> request);
 
     UpnpDevice_Handle deviceHandle;
 
@@ -119,7 +119,7 @@ public:
     /// When something in the content directory chagnes, we will send out
     /// an event to all subscribed devices. Container updates are supported,
     /// and of course the mimimum required - systemUpdateID.
-    void subscription_update(zmm::String containerUpdateIDs_CSV);
+    void sendSubscriptionUpdate(zmm::String containerUpdateIDs_CSV);
 };
 
 #endif // __UPNP_CDS_H__

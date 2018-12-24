@@ -55,7 +55,7 @@ Ref<Storage> Server::storage = nullptr;
 
 static int static_upnp_callback(Upnp_EventType eventtype, const void* event, void* cookie)
 {
-    return static_cast<Server *>(cookie)->routeUpnpEvent(eventtype, event);
+    return static_cast<Server *>(cookie)->handleUpnpEvent(eventtype, event);
 }
 
 void Server::static_cleanup_callback()
@@ -195,13 +195,12 @@ void Server::run()
 
     // register root device with the library
     String deviceDescription = _("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n") + xmlbuilder->renderDeviceDescription(presentationURL)->print();
-
     //log_debug("Device Description: \n%s\n", deviceDescription.c_str());
 
     log_debug("Registering with UPnP...\n");
     ret = UpnpRegisterRootDevice2(UPNPREG_BUF_DESC,
         deviceDescription.c_str(),
-        deviceDescription.length() + 1,
+        (size_t) deviceDescription.length() + 1,
         true,
         static_upnp_callback,
         this,
@@ -280,7 +279,7 @@ String Server::getVirtualURL() const
     return virtual_url;
 }
 
-int Server::routeUpnpEvent(Upnp_EventType eventtype, const void *event)
+int Server::handleUpnpEvent(Upnp_EventType eventtype, const void *event)
 {
     int ret = UPNP_E_SUCCESS; // general purpose return code
 
@@ -288,7 +287,7 @@ int Server::routeUpnpEvent(Upnp_EventType eventtype, const void *event)
 
     // check parameters
     if (event == nullptr) {
-        log_debug("routeUpnpEvent: NULL event structure\n");
+        log_debug("handleUpnpEvent: NULL event structure\n");
         return UPNP_E_BAD_REQUEST;
     }
 
@@ -364,7 +363,7 @@ void Server::routeActionRequest(Ref<ActionRequest> request)
         //log_debug("routeActionRequest: request for content directory service\n");
         cds->processActionRequest(request);
     } else if (request->getServiceID() == DESC_MRREG_SERVICE_ID) {
-        mrreg->process_action_request(request);
+        mrreg->processActionRequest(request);
     } else {
         // cp is asking for a nonexistent service, or for a service
         // that does not support any actions
@@ -403,7 +402,7 @@ void Server::routeSubscriptionRequest(Ref<SubscriptionRequest> request)
 // Temp
 void Server::sendCDSSubscriptionUpdate(zmm::String updateString)
 {
-    cds->subscription_update(updateString);
+    cds->sendSubscriptionUpdate(updateString);
 }
 
 Ref<RequestHandler> Server::createRequestHandler(const char *filename)

@@ -42,11 +42,9 @@ ConnectionManagerService::ConnectionManagerService(UpnpXMLBuilder* xmlBuilder, U
 {
 }
 
-ConnectionManagerService::~ConnectionManagerService()
-{
-}
+ConnectionManagerService::~ConnectionManagerService() = default;
 
-void ConnectionManagerService::upnp_action_GetCurrentConnectionIDs(Ref<ActionRequest> request)
+void ConnectionManagerService::doGetCurrentConnectionIDs(Ref<ActionRequest> request)
 {
     log_debug("start\n");
 
@@ -60,16 +58,16 @@ void ConnectionManagerService::upnp_action_GetCurrentConnectionIDs(Ref<ActionReq
     log_debug("end\n");
 }
 
-void ConnectionManagerService::upnp_action_GetCurrentConnectionInfo(Ref<ActionRequest> request)
+void ConnectionManagerService::doGetCurrentConnectionInfo(Ref<ActionRequest> request)
 {
     log_debug("start\n");
 
     request->setErrorCode(UPNP_E_NOT_EXIST);
 
-    log_debug("upnp_action_GetCurrentConnectionInfo: end\n");
+    log_debug("doGetCurrentConnectionInfo: end\n");
 }
 
-void ConnectionManagerService::upnp_action_GetProtocolInfo(Ref<ActionRequest> request)
+void ConnectionManagerService::doGetProtocolInfo(Ref<ActionRequest> request)
 {
     log_debug("start\n");
 
@@ -93,11 +91,11 @@ void ConnectionManagerService::processActionRequest(Ref<ActionRequest> request)
     log_debug("start\n");
 
     if (request->getActionName() == "GetCurrentConnectionIDs") {
-        upnp_action_GetCurrentConnectionIDs(request);
+        doGetCurrentConnectionIDs(request);
     } else if (request->getActionName() == "GetCurrentConnectionInfo") {
-        upnp_action_GetCurrentConnectionInfo(request);
+        doGetCurrentConnectionInfo(request);
     } else if (request->getActionName() == "GetProtocolInfo") {
-        upnp_action_GetProtocolInfo(request);
+        doGetProtocolInfo(request);
     } else {
         // invalid or unsupported action
         log_debug("unrecognized action %s\n", request->getActionName().c_str());
@@ -137,7 +135,7 @@ void ConnectionManagerService::processSubscriptionRequest(zmm::Ref<SubscriptionR
     ixmlDocument_free(event);
 }
 
-void ConnectionManagerService::subscription_update(String sourceProtocol_CSV)
+void ConnectionManagerService::sendSubscriptionUpdate(String sourceProtocol_CSV)
 {
     int err;
     IXML_Document* event = nullptr;

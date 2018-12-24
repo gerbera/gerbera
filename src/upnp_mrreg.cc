@@ -47,7 +47,7 @@ MRRegistrarService::MRRegistrarService(UpnpXMLBuilder* xmlBuilder, UpnpDevice_Ha
 
 MRRegistrarService::~MRRegistrarService() = default;
 
-void MRRegistrarService::upnp_action_IsAuthorized(Ref<ActionRequest> request)
+void MRRegistrarService::doIsAuthorized(Ref<ActionRequest> request)
 {
     log_debug("start\n");
 
@@ -61,16 +61,16 @@ void MRRegistrarService::upnp_action_IsAuthorized(Ref<ActionRequest> request)
     log_debug("end\n");
 }
 
-void MRRegistrarService::upnp_action_RegisterDevice(Ref<ActionRequest> request)
+void MRRegistrarService::doRegisterDevice(Ref<ActionRequest> request)
 {
     log_debug("start\n");
 
     request->setErrorCode(UPNP_E_NOT_EXIST);
 
-    log_debug("upnp_action_GetCurrentConnectionInfo: end\n");
+    log_debug("upnpActionGetCurrentConnectionInfo: end\n");
 }
 
-void MRRegistrarService::upnp_action_IsValidated(Ref<ActionRequest> request)
+void MRRegistrarService::doIsValidated(Ref<ActionRequest> request)
 {
     log_debug("start\n");
 
@@ -84,16 +84,16 @@ void MRRegistrarService::upnp_action_IsValidated(Ref<ActionRequest> request)
     log_debug("end\n");
 }
 
-void MRRegistrarService::process_action_request(Ref<ActionRequest> request)
+void MRRegistrarService::processActionRequest(Ref<ActionRequest> request)
 {
     log_debug("start\n");
 
     if (request->getActionName() == "IsAuthorized") {
-        upnp_action_IsAuthorized(request);
+        doIsAuthorized(request);
     } else if (request->getActionName() == "RegisterDevice") {
-        upnp_action_RegisterDevice(request);
+        doRegisterDevice(request);
     } else if (request->getActionName() == "IsValidated") {
-        upnp_action_IsValidated(request);
+        doIsValidated(request);
     } else {
         // invalid or unsupported action
         log_debug("unrecognized action %s\n", request->getActionName().c_str());
