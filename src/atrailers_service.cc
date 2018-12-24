@@ -178,8 +178,8 @@ bool ATrailersService::refreshServiceData(Ref<Layout> layout)
             ContentManager::getInstance()->updateObject(obj);
         }
 
-        if (Server::getInstance()->getShutdownStatus())
-            return false;
+//        if (Server::getInstance()->getShutdownStatus())
+//            return false;
 
     } while (obj != nullptr);
 
