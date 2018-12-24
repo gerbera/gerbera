@@ -55,7 +55,7 @@ Ref<Storage> Server::storage = nullptr;
 
 static int static_upnp_callback(Upnp_EventType eventtype, const void* event, void* cookie)
 {
-    return static_cast<Server*>(cookie)->upnp_callback(eventtype, event);
+    return static_cast<Server *>(cookie)->routeUpnpEvent(eventtype, event);
 }
 
 void Server::static_cleanup_callback()
@@ -279,7 +279,7 @@ String Server::getVirtualURL() const
     return virtual_url;
 }
 
-int Server::upnp_callback(Upnp_EventType eventtype, const void* event)
+int Server::routeUpnpEvent(Upnp_EventType eventtype, const void *event)
 {
     int ret = UPNP_E_SUCCESS; // general purpose return code
 
@@ -287,7 +287,7 @@ int Server::upnp_callback(Upnp_EventType eventtype, const void* event)
 
     // check parameters
     if (event == nullptr) {
-        log_debug("upnp_callback: NULL event structure\n");
+        log_debug("routeUpnpEvent: NULL event structure\n");
         return UPNP_E_BAD_REQUEST;
     }
 

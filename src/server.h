@@ -69,7 +69,7 @@ public:
     ///
     /// Unregisters the device with the SDK, shuts down the
     /// update manager task, storage task, content manager.
-    virtual void shutdown() override;
+    void shutdown() override;
 
     /// \brief Returns the virtual web server URL.
     ///
@@ -87,9 +87,9 @@ public:
     /// a subscription request) and dispatches the event accordingly.
     /// The event that is coming from the SDK is converted to our internal
     /// data structures (ActionRequest or SubscriptionRequest) and is then
-    /// passed on to the appropriate request handler - to upnp_actions() or
+    /// passed on to the appropriate request handler - to routeActionEvent() or
     /// upnp_subscriptions()
-    int upnp_callback(Upnp_EventType eventtype, const void* event);
+    int routeUpnpEvent(Upnp_EventType eventtype, const void *event);
 
     /// \brief Returns the IP address of the server.
     ///
