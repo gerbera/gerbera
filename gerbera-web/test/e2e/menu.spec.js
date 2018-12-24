@@ -79,7 +79,7 @@ suite(() => {
 
     it('shows the friendly name in the document title', async () => {
       const title = await homePage.getTitle();
-      expect(title).to.equal('Gerbera Media Server')
+      expect(title).to.equal('Gerbera Media Server | Gerbera Media Server')
     });
 
     it('loads the parent database container list when clicking Database Icon', async () => {
