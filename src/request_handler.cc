@@ -34,7 +34,7 @@
 
 using namespace zmm;
 
-void RequestHandler::split_url(const char* url, char separator, String& path, String& parameters)
+void RequestHandler::splitUrl(const char *url, char separator, String &path, String &parameters)
 {
     int i1;
 

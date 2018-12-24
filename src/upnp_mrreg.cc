@@ -104,7 +104,7 @@ void MRRegistrarService::process_action_request(Ref<ActionRequest> request)
     log_debug("end\n");
 }
 
-void MRRegistrarService::process_subscription_request(zmm::Ref<SubscriptionRequest> request)
+void MRRegistrarService::processSubscriptionRequest(zmm::Ref<SubscriptionRequest> request)
 {
     int err;
     IXML_Document* event = NULL;

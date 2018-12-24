@@ -33,7 +33,7 @@
 
 using namespace zmm;
 
-WebRequestHandler* create_web_request_handler(String page)
+WebRequestHandler* createWebRequestHandler(String page)
 {
     if (page == "add")
         return new web::add();

@@ -361,7 +361,7 @@ String url_escape(String str)
     return buf.str();
 }
 
-String url_unescape(String str)
+String urlUnescape(String str)
 {
     auto* data = const_cast<char*>(str.c_str());
     int len = str.length();

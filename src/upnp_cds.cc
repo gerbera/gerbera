@@ -280,7 +280,7 @@ void ContentDirectoryService::processActionRequest(Ref<ActionRequest> request)
     log_debug("ContentDirectoryService::processActionRequest: end\n");
 }
 
-void ContentDirectoryService::process_subscription_request(zmm::Ref<SubscriptionRequest> request)
+void ContentDirectoryService::processSubscriptionRequest(zmm::Ref<SubscriptionRequest> request)
 {
     int err;
     IXML_Document* event = nullptr;

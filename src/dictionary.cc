@@ -147,8 +147,8 @@ void Dictionary::decode(String url)
         if (eqPos && eqPos < ampPos) {
             String key(data, eqPos - data);
             String value(eqPos + 1, ampPos - eqPos - 1);
-            key = url_unescape(key);
-            value = url_unescape(value);
+            key = urlUnescape(key);
+            value = urlUnescape(value);
 
             put(key, value);
         }
@@ -168,7 +168,7 @@ void Dictionary::decodeSimple(String url)
         if (pos < last_pos + 1)
             break;
 
-        String key = url_unescape(url.substring(last_pos, pos - last_pos));
+        String key = urlUnescape(url.substring(last_pos, pos - last_pos));
         last_pos = pos + 1;
         pos = url.index(last_pos, '/');
         if (pos == -1)
@@ -176,7 +176,7 @@ void Dictionary::decodeSimple(String url)
         if (pos < last_pos + 1)
             break;
 
-        String value = url_unescape(url.substring(last_pos, pos - last_pos));
+        String value = urlUnescape(url.substring(last_pos, pos - last_pos));
         last_pos = pos + 1;
         put(key, value);
     } while (last_pos < url.length());

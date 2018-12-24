@@ -108,7 +108,7 @@ void ConnectionManagerService::processActionRequest(Ref<ActionRequest> request)
     log_debug("end\n");
 }
 
-void ConnectionManagerService::process_subscription_request(zmm::Ref<SubscriptionRequest> request)
+void ConnectionManagerService::processSubscriptionRequest(zmm::Ref<SubscriptionRequest> request)
 {
     int err;
     IXML_Document* event = nullptr;

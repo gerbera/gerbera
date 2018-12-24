@@ -111,7 +111,7 @@ public:
     ///
     /// Looks at the incoming SubscriptionRequest and accepts the subscription
     /// if everything is ok.
-    void process_subscription_request(zmm::Ref<SubscriptionRequest> request);
+    void processSubscriptionRequest(zmm::Ref<SubscriptionRequest> request);
 
     /// \brief Sends out an event to all subscribed devices.
     /// \param containerUpdateIDs_CSV Comma Separated Value list of container update ID's (as defined in the UPnP CDS specs)

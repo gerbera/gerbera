@@ -147,7 +147,7 @@ zmm::String hex_string_md5(zmm::String str);
 zmm::String url_escape(zmm::String str);
 
 /// \brief Opposite of url_escape :)
-zmm::String url_unescape(zmm::String str);
+zmm::String urlUnescape(zmm::String str);
 
 /// \brief Convert an array of strings to a CSV list, with additional protocol information
 /// \param array that needs to be converted

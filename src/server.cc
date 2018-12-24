@@ -388,13 +388,13 @@ void Server::routeSubscriptionRequest(Ref<SubscriptionRequest> request)
     if (request->getServiceID() == DESC_CDS_SERVICE_ID) {
         // this call is for the content directory service
         //log_debug("routeSubscriptionRequest: request for content directory service\n");
-        cds->process_subscription_request(request);
+        cds->processSubscriptionRequest(request);
     } else if (request->getServiceID() == DESC_CM_SERVICE_ID) {
         // this call is for the connection manager service
         //log_debug("routeSubscriptionRequest: request for connection manager service\n");
-        cmgr->process_subscription_request(request);
+        cmgr->processSubscriptionRequest(request);
     } else if (request->getServiceID() == DESC_MRREG_SERVICE_ID) {
-        mrreg->process_subscription_request(request);
+        mrreg->processSubscriptionRequest(request);
     } else {
         // cp asks for a nonexistent service or for a service that
         // does not support subscriptions
@@ -412,7 +412,7 @@ Ref<RequestHandler> Server::createRequestHandler(const char *filename)
 {
     String path;
     String parameters;
-    String link = url_unescape((char*)filename);
+    String link = urlUnescape((char *) filename);
 
     log_debug("Filename: %s, Path: %s\n", filename, path.c_str());
     // log_debug("create_handler: got url parameters: [%s]\n", parameters.c_str());
@@ -422,16 +422,16 @@ Ref<RequestHandler> Server::createRequestHandler(const char *filename)
     if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_MEDIA_HANDLER)) {
         ret = new FileRequestHandler(xmlbuilder.get());
     } else if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_UI_HANDLER)) {
-        RequestHandler::split_url(filename, URL_UI_PARAM_SEPARATOR, path, parameters);
+        RequestHandler::splitUrl(filename, URL_UI_PARAM_SEPARATOR, path, parameters);
 
         Ref<Dictionary> dict(new Dictionary());
         dict->decode(parameters);
 
         String r_type = dict->get(_(URL_REQUEST_TYPE));
         if (r_type != nullptr) {
-            ret = create_web_request_handler(r_type);
+            ret = createWebRequestHandler(r_type);
         } else {
-            ret = create_web_request_handler(_("index"));
+            ret = createWebRequestHandler(_("index"));
         }
     } else if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_SERVE_HANDLER)) {
         if (string_ok(ConfigManager::getInstance()->getOption(CFG_SERVER_SERVEDIR)))
@@ -474,11 +474,10 @@ int Server::registerVirtualDirCallbacks()
 
     log_debug("Setting UpnpVirtualDir OpenCallback\n");
     ret = UpnpVirtualDir_set_OpenCallback([](IN const char* filename, IN enum UpnpOpenFileMode mode, IN const void* cookie) -> UpnpWebFileHandle {
-        String link = url_unescape((char*)filename);
+        String link = urlUnescape((char *) filename);
 
         try {
-            Ref<RequestHandler> reqHandler = const_cast<Server *>(static_cast<const Server *>(cookie))->createRequestHandler(
-                    filename);
+            Ref<RequestHandler> reqHandler = const_cast<Server *>(static_cast<const Server *>(cookie))->createRequestHandler(filename);
             Ref<IOHandler> ioHandler = reqHandler->open(link.c_str(), mode, nullptr);
             ioHandler->retain();
             //log_debug("%p open(%s)\n", ioHandler.getPtr(), filename);
@@ -523,7 +522,7 @@ int Server::registerVirtualDirCallbacks()
             auto* handler = (IOHandler*)f;
             handler->seek(offset, whence);
         } catch (const Exception& e) {
-            log_error("web_seek(): Exception during seek: %s\n", e.getMessage().c_str());
+            log_error("Exception during seek: %s\n", e.getMessage().c_str());
             e.printStackTrace();
             return -1;
         }
@@ -541,7 +540,7 @@ int Server::registerVirtualDirCallbacks()
         try {
             handler->close();
         } catch (const Exception& e) {
-            log_error("web_close(): Exception during close: %s\n", e.getMessage().c_str());
+            log_error("Exception during close: %s\n", e.getMessage().c_str());
             e.printStackTrace();
             return -1;
         }

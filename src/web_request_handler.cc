@@ -93,7 +93,7 @@ void WebRequestHandler::getInfo(IN const char *filename, OUT UpnpFileInfo *info)
     this->filename = filename;
 
     String path, parameters;
-    split_url(filename, URL_UI_PARAM_SEPARATOR, path, parameters);
+    splitUrl(filename, URL_UI_PARAM_SEPARATOR, path, parameters);
 
     params->decode(parameters);
 
@@ -227,7 +227,7 @@ Ref<IOHandler> WebRequestHandler::open(IN const char* filename,
     this->mode = mode;
 
     String path, parameters;
-    split_url(filename, URL_UI_PARAM_SEPARATOR, path, parameters);
+    splitUrl(filename, URL_UI_PARAM_SEPARATOR, path, parameters);
 
     params->decode(parameters);
 

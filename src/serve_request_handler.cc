@@ -53,7 +53,7 @@ void ServeRequestHandler::getInfo(IN const char *filename, OUT UpnpFileInfo *inf
     log_debug("got filename: %s\n", filename);
 
     String url_path, parameters;
-    split_url(filename, URL_PARAM_SEPARATOR, url_path, parameters);
+    splitUrl(filename, URL_PARAM_SEPARATOR, url_path, parameters);
 
     log_debug("url_path: %s, parameters: %s\n", url_path.c_str(), parameters.c_str());
 
@@ -63,7 +63,7 @@ void ServeRequestHandler::getInfo(IN const char *filename, OUT UpnpFileInfo *inf
         throw _Exception(_("There is something wrong with the link ") + url_path);
     }
 
-    url_path = url_unescape(url_path);
+    url_path = urlUnescape(url_path);
 
     String path = ConfigManager::getInstance()->getOption(CFG_SERVER_SERVEDIR)
         + url_path.substring(len, url_path.length()) + _("/") + parameters;
@@ -132,7 +132,7 @@ Ref<IOHandler> ServeRequestHandler::open(IN const char* filename,
 
     len = (_("/") + SERVER_VIRTUAL_DIR + _("/") + CONTENT_SERVE_HANDLER).length();
     String url_path, parameters;
-    split_url(filename, URL_PARAM_SEPARATOR, url_path, parameters);
+    splitUrl(filename, URL_PARAM_SEPARATOR, url_path, parameters);
 
     log_debug("url_path: %s, parameters: %s\n", url_path.c_str(), parameters.c_str());
 

@@ -53,7 +53,7 @@ public:
     /// content/media SEPARATOR object_id=12345&transcode=wav would be transformed to:
     /// path = "content/media"
     /// parameters = "object_id=12345&transcode=wav"
-    static void split_url(const char* url, char separator, zmm::String& path, zmm::String& parameters);
+    static void splitUrl(const char *url, char separator, zmm::String &path, zmm::String &parameters);
 };
 
 #endif // __REQUEST_HANDLER_H__
