@@ -255,7 +255,7 @@ void ContentDirectoryService::upnp_action_GetSystemUpdateID(Ref<ActionRequest> r
     log_debug("end\n");
 }
 
-void ContentDirectoryService::process_action_request(Ref<ActionRequest> request)
+void ContentDirectoryService::processActionRequest(Ref<ActionRequest> request)
 {
     log_debug("start\n");
 
@@ -277,7 +277,7 @@ void ContentDirectoryService::process_action_request(Ref<ActionRequest> request)
         //    throw UpnpException(UPNP_E_INVALID_ACTION, _("unrecognized action"));
     }
 
-    log_debug("ContentDirectoryService::process_action_request: end\n");
+    log_debug("ContentDirectoryService::processActionRequest: end\n");
 }
 
 void ContentDirectoryService::process_subscription_request(zmm::Ref<SubscriptionRequest> request)

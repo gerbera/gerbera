@@ -63,7 +63,7 @@ public:
     /// device description document. Initializes the UPnP SDK,
     /// sets up the virutal web server directories and registers
     /// web callbacks. Starts the update manager task.
-    void upnp_init();
+    void run();
 
     /// \brief Cleanup routine to shutdown the server.
     ///

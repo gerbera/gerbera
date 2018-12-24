@@ -294,7 +294,7 @@ int main(int argc, char** argv, char** envp)
         Ref<Server> server;
         try {
             server = Server::getInstance();
-            server->upnp_init();
+            server->run();
         } catch (const UpnpException& upnp_e) {
 
             sigemptyset(&mask_set);
@@ -378,7 +378,7 @@ int main(int argc, char** argv, char** envp)
 
                     ///  \todo fix this for SIGHUP
                     server = Server::getInstance();
-                    server->upnp_init();
+                    server->run();
 
                     restart_flag = 0;
                 } catch (const Exception& e) {

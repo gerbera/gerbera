@@ -135,7 +135,7 @@ public:
     /// dynamic XML) we do not know the size of the data. This is of course different
     /// for the FileRequestHandler, where we can check the file and return all
     /// information about it.
-    void get_info(IN const char* filename, OUT UpnpFileInfo* info) override;
+    void getInfo(IN const char *filename, OUT UpnpFileInfo *info) override;
 
     /// \brief Decodes the parameters from the filename (URL) and calls the internal open() function.
     /// \param filename The requested URL

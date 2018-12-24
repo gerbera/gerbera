@@ -88,7 +88,7 @@ String WebRequestHandler::renderXMLHeader()
     return _("<?xml version=\"1.0\" encoding=\"") + DEFAULT_INTERNAL_CHARSET + "\"?>\n";
 }
 
-void WebRequestHandler::get_info(IN const char* filename, OUT UpnpFileInfo* info)
+void WebRequestHandler::getInfo(IN const char *filename, OUT UpnpFileInfo *info)
 {
     this->filename = filename;
 

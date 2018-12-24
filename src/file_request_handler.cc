@@ -52,7 +52,7 @@ FileRequestHandler::FileRequestHandler(UpnpXMLBuilder* xmlBuilder)
 {
 }
 
-void FileRequestHandler::get_info(IN const char* filename, OUT UpnpFileInfo* info)
+void FileRequestHandler::getInfo(IN const char *filename, OUT UpnpFileInfo *info)
 {
     HttpProtocolHelper httpProtocolHelper;
     log_debug("start\n");
@@ -76,7 +76,7 @@ void FileRequestHandler::get_info(IN const char* filename, OUT UpnpFileInfo* inf
     String objID = dict->get(_("object_id"));
     if (objID == nullptr) {
         //log_error("object_id not found in url\n");
-        throw _Exception(_("get_info: object_id not found"));
+        throw _Exception(_("getInfo: object_id not found"));
     } else
         objectID = objID.toInt();
 
@@ -282,7 +282,7 @@ void FileRequestHandler::get_info(IN const char* filename, OUT UpnpFileInfo* inf
         mimeType = item->getMimeType();
 
         //log_debug("sizeof off_t %d, statbuf.st_size %d\n", sizeof(off_t), sizeof(statbuf.st_size));
-        //log_debug("get_info: file_length: " OFF_T_SPRINTF "\n", statbuf.st_size);
+        //log_debug("getInfo: file_length: " OFF_T_SPRINTF "\n", statbuf.st_size);
 
 #ifdef EXTEND_PROTOCOLINFO
     header = getDLNAtransferHeader(mimeType, header);
@@ -298,7 +298,7 @@ void FileRequestHandler::get_info(IN const char* filename, OUT UpnpFileInfo* inf
     UpnpFileInfo_set_ContentType(info,
         ixmlCloneDOMString(mimeType.c_str()));
 
-    // log_debug("get_info: Requested %s, ObjectID: %s, Location: %s\n, MimeType: %s\n",
+    // log_debug("getInfo: Requested %s, ObjectID: %s, Location: %s\n, MimeType: %s\n",
     //      filename, object_id.c_str(), path.c_str(), info->content_type);
 
     log_debug("web_get_info(): end\n");

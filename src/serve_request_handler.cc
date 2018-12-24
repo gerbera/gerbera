@@ -44,7 +44,7 @@ ServeRequestHandler::ServeRequestHandler()
 }
 
 /// \todo clean up the fix for internal items
-void ServeRequestHandler::get_info(IN const char* filename, OUT UpnpFileInfo* info)
+void ServeRequestHandler::getInfo(IN const char *filename, OUT UpnpFileInfo *info)
 {
     struct stat statbuf;
     int ret = 0;

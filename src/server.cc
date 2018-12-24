@@ -91,7 +91,7 @@ void Server::init()
 #endif
 }
 
-void Server::upnp_init()
+void Server::run()
 {
     int ret = 0; // general purpose error code
     log_debug("start\n");
@@ -120,7 +120,7 @@ void Server::upnp_init()
     log_debug("Initialising libupnp with interface: %s, port: %d\n", iface.c_str(), port);
     ret = UpnpInit2(iface.c_str(), port);
     if (ret != UPNP_E_SUCCESS) {
-        throw _UpnpException(ret, _("upnp_init: UpnpInit failed"));
+        throw _UpnpException(ret, _("run: UpnpInit failed"));
     }
 
     port = UpnpGetServerPort();
@@ -143,7 +143,7 @@ void Server::upnp_init()
 
     ret = UpnpSetWebServerRootDir(web_root.c_str());
     if (ret != UPNP_E_SUCCESS) {
-        throw _UpnpException(ret, _("upnp_init: UpnpSetWebServerRootDir failed"));
+        throw _UpnpException(ret, _("run: UpnpSetWebServerRootDir failed"));
     }
 
     log_debug("webroot: %s\n", web_root.c_str());
@@ -160,7 +160,7 @@ void Server::upnp_init()
                 //ret = UpnpAddCustomHTTPHeader(tmp.c_str());
                 //if (ret != UPNP_E_SUCCESS)
                 //{
-                //    throw _UpnpException(ret, _("upnp_init: UpnpAddCustomHTTPHeader failed"));
+                //    throw _UpnpException(ret, _("run: UpnpAddCustomHTTPHeader failed"));
                 //}
             }
         }
@@ -169,13 +169,13 @@ void Server::upnp_init()
     log_debug("Setting virtual dir to: %s\n", virtual_directory.c_str());
     ret = UpnpAddVirtualDir(virtual_directory.c_str(), this, nullptr);
     if (ret != UPNP_E_SUCCESS) {
-        throw _UpnpException(ret, _("upnp_init: UpnpAddVirtualDir failed"));
+        throw _UpnpException(ret, _("run: UpnpAddVirtualDir failed"));
     }
 
     ret = registerVirtualDirCallbacks();
 
     if (ret != UPNP_E_SUCCESS) {
-        throw _UpnpException(ret, _("upnp_init: UpnpSetVirtualDirCallbacks failed"));
+        throw _UpnpException(ret, _("run: UpnpSetVirtualDirCallbacks failed"));
     }
 
     String presentationURL = config->getOption(CFG_SERVER_PRESENTATION_URL);
@@ -194,20 +194,20 @@ void Server::upnp_init()
     xmlbuilder = std::make_unique<UpnpXMLBuilder>(virtual_url);
 
     // register root device with the library
-    String device_description = _("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n") + xmlbuilder->renderDeviceDescription(presentationURL)->print();
+    String deviceDescription = _("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n") + xmlbuilder->renderDeviceDescription(presentationURL)->print();
 
-    //log_debug("Device Description: \n%s\n", device_description.c_str());
+    //log_debug("Device Description: \n%s\n", deviceDescription.c_str());
 
     log_debug("Registering with UPnP...\n");
     ret = UpnpRegisterRootDevice2(UPNPREG_BUF_DESC,
-        device_description.c_str(),
-        device_description.length() + 1,
+        deviceDescription.c_str(),
+        deviceDescription.length() + 1,
         true,
         static_upnp_callback,
         this,
         &deviceHandle);
     if (ret != UPNP_E_SUCCESS) {
-        throw _UpnpException(ret, _("upnp_init: UpnpRegisterRootDevice failed"));
+        throw _UpnpException(ret, _("run: UpnpRegisterRootDevice failed"));
     }
 
     log_debug("Creating ContentDirectoryService\n");
@@ -223,7 +223,7 @@ void Server::upnp_init()
     log_debug("Sending UPnP Alive advertisements\n");
     ret = UpnpSendAdvertisement(deviceHandle, alive_advertisement);
     if (ret != UPNP_E_SUCCESS) {
-        throw _UpnpException(ret, _("upnp_init: UpnpSendAdvertisement failed"));
+        throw _UpnpException(ret, _("run: UpnpSendAdvertisement failed"));
     }
 
     // initializing UpdateManager
@@ -352,26 +352,24 @@ void Server::routeActionRequest(Ref<ActionRequest> request)
     // make sure the request is for our device
     if (request->getUDN() != serverUDN) {
         // not for us
-        throw _UpnpException(UPNP_E_BAD_REQUEST,
-            _("routeActionRequest: request not for this device"));
+        throw _UpnpException(UPNP_E_BAD_REQUEST, _("routeActionRequest: request not for this device"));
     }
 
     // we need to match the serviceID to one of our services
     if (request->getServiceID() == DESC_CM_SERVICE_ID) {
         // this call is for the lifetime stats service
         // log_debug("request for connection manager service\n");
-        cmgr->process_action_request(request);
+        cmgr->processActionRequest(request);
     } else if (request->getServiceID() == DESC_CDS_SERVICE_ID) {
         // this call is for the toaster control service
         //log_debug("routeActionRequest: request for content directory service\n");
-        cds->process_action_request(request);
+        cds->processActionRequest(request);
     } else if (request->getServiceID() == DESC_MRREG_SERVICE_ID) {
         mrreg->process_action_request(request);
     } else {
         // cp is asking for a nonexistent service, or for a service
         // that does not support any actions
-        throw _UpnpException(UPNP_E_BAD_REQUEST,
-            _("Service does not exist or action not supported"));
+        throw _UpnpException(UPNP_E_BAD_REQUEST, _("Service does not exist or action not supported"));
     }
 }
 
@@ -382,8 +380,7 @@ void Server::routeSubscriptionRequest(Ref<SubscriptionRequest> request)
         // not for us
         log_debug("routeSubscriptionRequest: request not for this device: %s vs %s\n",
             request->getUDN().c_str(), serverUDN.c_str());
-        throw _UpnpException(UPNP_E_BAD_REQUEST,
-            _("routeActionRequest: request not for this device"));
+        throw _UpnpException(UPNP_E_BAD_REQUEST, _("routeActionRequest: request not for this device"));
     }
 
     // we need to match the serviceID to one of our services
@@ -401,8 +398,7 @@ void Server::routeSubscriptionRequest(Ref<SubscriptionRequest> request)
     } else {
         // cp asks for a nonexistent service or for a service that
         // does not support subscriptions
-        throw _UpnpException(UPNP_E_BAD_REQUEST,
-            _("Service does not exist or subscriptions not supported"));
+        throw _UpnpException(UPNP_E_BAD_REQUEST, _("Service does not exist or subscriptions not supported"));
     }
 }
 
@@ -462,7 +458,7 @@ int Server::registerVirtualDirCallbacks()
         try {
             Ref<RequestHandler> reqHandler = const_cast<Server *>(static_cast<const Server *>(cookie))->createRequestHandler(
                     filename);
-            reqHandler->get_info(filename, info);
+            reqHandler->getInfo(filename, info);
         } catch (const ServerShutdownException& se) {
             return -1;
         } catch (const SubtitlesNotFoundException& sex) {

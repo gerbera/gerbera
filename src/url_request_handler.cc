@@ -58,7 +58,7 @@ URLRequestHandler::URLRequestHandler()
 {
 }
 
-void URLRequestHandler::get_info(IN const char* filename, OUT UpnpFileInfo* info)
+void URLRequestHandler::getInfo(IN const char *filename, OUT UpnpFileInfo *info)
 {
     log_debug("start\n");
 
@@ -79,7 +79,7 @@ void URLRequestHandler::get_info(IN const char* filename, OUT UpnpFileInfo* info
     String objID = dict->get(_("object_id"));
     if (objID == nullptr) {
         //log_error("object_id not found in url\n");
-        throw _Exception(_("get_info: object_id not found"));
+        throw _Exception(_("getInfo: object_id not found"));
     } else
         objectID = objID.toInt();
 
@@ -92,7 +92,7 @@ void URLRequestHandler::get_info(IN const char* filename, OUT UpnpFileInfo* info
     int objectType = obj->getObjectType();
 
     if (!IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
-        throw _Exception(_("get_info: object is not an external url item"));
+        throw _Exception(_("getInfo: object is not an external url item"));
     }
 
     tr_profile = dict->get(_(URL_PARAM_TRANSCODE_PROFILE_NAME));

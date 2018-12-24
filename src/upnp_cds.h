@@ -104,7 +104,7 @@ public:
     ///
     /// This function looks at the incoming ActionRequest and passes it on
     /// to the appropriate action for processing.
-    void process_action_request(zmm::Ref<ActionRequest> request);
+    void processActionRequest(zmm::Ref<ActionRequest> request);
 
     /// \brief Processes an incoming SubscriptionRequest.
     /// \param request SubscriptionRequest to be processed by the function.

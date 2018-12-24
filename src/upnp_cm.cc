@@ -88,7 +88,7 @@ void ConnectionManagerService::upnp_action_GetProtocolInfo(Ref<ActionRequest> re
     log_debug("end\n");
 }
 
-void ConnectionManagerService::process_action_request(Ref<ActionRequest> request)
+void ConnectionManagerService::processActionRequest(Ref<ActionRequest> request)
 {
     log_debug("start\n");
 

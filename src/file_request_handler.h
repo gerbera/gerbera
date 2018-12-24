@@ -44,7 +44,7 @@ protected:
 public:
     explicit FileRequestHandler(UpnpXMLBuilder* xmlBuilder);
 
-    virtual void get_info(IN const char* filename, OUT UpnpFileInfo* info);
+    virtual void getInfo(IN const char *filename, OUT UpnpFileInfo *info);
     virtual zmm::Ref<IOHandler> open(
         IN const char* filename,
         IN enum UpnpOpenFileMode mode,
