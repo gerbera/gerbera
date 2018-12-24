@@ -80,7 +80,7 @@ GERBERA.App = (function () {
 
   var configureDefaults = function () {
     if (getType() === undefined) {
-      setType('db')
+      setType('db');
     }
     return $.Deferred().resolve().promise()
   }
@@ -104,8 +104,8 @@ GERBERA.App = (function () {
       GERBERA.App.serverConfig = $.extend({}, response.config)
       var pollingInterval = response.config['poll-interval']
       GERBERA.App.serverConfig['poll-interval'] = parseInt(pollingInterval) * 1000
-      if(GERBERA.App.serverConfig.friendlyName) {
-        $(document).attr('title', GERBERA.App.serverConfig.friendlyName)
+      if(GERBERA.App.serverConfig.friendlyName && GERBERA.App.serverConfig.friendlyName !== "Gerbera") {
+        $(document).attr('title', GERBERA.App.serverConfig.friendlyName  + " | Gerbera Media Server")
       }
       deferred = $.Deferred().resolve().promise()
     } else {
