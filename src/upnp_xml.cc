@@ -297,8 +297,6 @@ Ref<Element> UpnpXMLBuilder::createEventPropertySet()
 
 Ref<Element> UpnpXMLBuilder::renderDeviceDescription(String presentationURL)
 {
-
-    log_debug("start\n");
     Ref<ConfigManager> config = ConfigManager::getInstance();
 
     Ref<Element> root(new Element(_("root")));
@@ -318,8 +316,7 @@ Ref<Element> UpnpXMLBuilder::renderDeviceDescription(String presentationURL)
         Ref<Element> DLNADOC(new Element(_("dlna:X_DLNADOC")));
         DLNADOC->setText(_("DMS-1.50"));
         //      DLNADOC->setText(_("M-DMS-1.50"));
-        DLNADOC->setAttribute(_("xmlns:dlna"),
-            _("urn:schemas-dlna-org:device-1-0"));
+        DLNADOC->setAttribute(_("xmlns:dlna"), _("urn:schemas-dlna-org:device-1-0"));
         device->appendElementChild(DLNADOC);
     }
 #endif
@@ -330,20 +327,13 @@ Ref<Element> UpnpXMLBuilder::renderDeviceDescription(String presentationURL)
     else
         device->appendTextChild(_("presentationURL"), presentationURL);
 
-    device->appendTextChild(_("friendlyName"),
-        config->getOption(CFG_SERVER_NAME));
-
+    device->appendTextChild(_("friendlyName"), config->getOption(CFG_SERVER_NAME));
     device->appendTextChild(_("manufacturer"), _(DESC_MANUFACTURER));
-    device->appendTextChild(_("manufacturerURL"),
-        config->getOption(CFG_SERVER_MANUFACTURER_URL));
-    device->appendTextChild(_("modelDescription"),
-        config->getOption(CFG_SERVER_MODEL_DESCRIPTION));
-    device->appendTextChild(_("modelName"),
-        config->getOption(CFG_SERVER_MODEL_NAME));
-    device->appendTextChild(_("modelNumber"),
-        config->getOption(CFG_SERVER_MODEL_NUMBER));
-    device->appendTextChild(_("serialNumber"),
-        config->getOption(CFG_SERVER_SERIAL_NUMBER));
+    device->appendTextChild(_("manufacturerURL"), config->getOption(CFG_SERVER_MANUFACTURER_URL));
+    device->appendTextChild(_("modelDescription"), config->getOption(CFG_SERVER_MODEL_DESCRIPTION));
+    device->appendTextChild(_("modelName"), config->getOption(CFG_SERVER_MODEL_NAME));
+    device->appendTextChild(_("modelNumber"), config->getOption(CFG_SERVER_MODEL_NUMBER));
+    device->appendTextChild(_("serialNumber"), config->getOption(CFG_SERVER_SERIAL_NUMBER));
     device->appendTextChild(_("UDN"), config->getOption(CFG_SERVER_UDN));
 
     Ref<Element> iconList(new Element(_("iconList")));

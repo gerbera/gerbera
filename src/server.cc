@@ -206,6 +206,7 @@ void Server::run()
         static_upnp_callback,
         this,
         &deviceHandle);
+
     if (ret != UPNP_E_SUCCESS) {
         throw _UpnpException(ret, _("run: UpnpRegisterRootDevice failed"));
     }
@@ -308,7 +309,6 @@ int Server::routeUpnpEvent(Upnp_EventType eventtype, const void *event)
         } catch (const Exception& e) {
             log_info("Exception: %s\n", e.getMessage().c_str());
         }
-
         break;
 
     case UPNP_EVENT_SUBSCRIPTION_REQUEST:
@@ -321,7 +321,6 @@ int Server::routeUpnpEvent(Upnp_EventType eventtype, const void *event)
             log_warning("Subscription exception: %s\n", upnp_e.getMessage().c_str());
             ret = upnp_e.getErrorCode();
         }
-
         break;
 
     default:
@@ -384,7 +383,6 @@ void Server::routeSubscriptionRequest(Ref<SubscriptionRequest> request)
     }
 
     // we need to match the serviceID to one of our services
-
     if (request->getServiceID() == DESC_CDS_SERVICE_ID) {
         // this call is for the content directory service
         //log_debug("routeSubscriptionRequest: request for content directory service\n");
