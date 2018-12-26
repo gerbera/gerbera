@@ -545,24 +545,24 @@ Ref<UpnpXMLBuilder::PathBase> UpnpXMLBuilder::getPathBase(Ref<CdsItem> item, boo
     /// for each resource once the io handlers are ready
     int objectType = item->getObjectType();
     if (IS_CDS_ITEM_INTERNAL_URL(objectType)) {
-        pathBase->urlBase = _(_URL_PARAM_SEPARATOR) + CONTENT_SERVE_HANDLER + _(_URL_PARAM_SEPARATOR) + item->getLocation();
+        pathBase->pathBase = _(_URL_PARAM_SEPARATOR) + CONTENT_SERVE_HANDLER + _(_URL_PARAM_SEPARATOR) + item->getLocation();
         return pathBase;
     }
 
     if (IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
         if (!item->getFlag(OBJECT_FLAG_PROXY_URL) && (!forceLocal)) {
-            pathBase->urlBase = item->getLocation();
+            pathBase->pathBase = item->getLocation();
             return pathBase;
         }
 
         if ((item->getFlag(OBJECT_FLAG_ONLINE_SERVICE) && item->getFlag(OBJECT_FLAG_PROXY_URL)) || forceLocal) {
-            pathBase->urlBase = _(_URL_PARAM_SEPARATOR) + CONTENT_ONLINE_HANDLER + _(_URL_PARAM_SEPARATOR) + dict->encodeSimple() + _(_URL_PARAM_SEPARATOR) + _(URL_RESOURCE_ID) + _(_URL_PARAM_SEPARATOR);
+            pathBase->pathBase = _(_URL_PARAM_SEPARATOR) + CONTENT_ONLINE_HANDLER + _(_URL_PARAM_SEPARATOR) + dict->encodeSimple() + _(_URL_PARAM_SEPARATOR) + _(URL_RESOURCE_ID) + _(_URL_PARAM_SEPARATOR);
             pathBase->addResID = true;
             return pathBase;
         }
     }
 
-    pathBase->urlBase = _(_URL_PARAM_SEPARATOR) + CONTENT_MEDIA_HANDLER + _(_URL_PARAM_SEPARATOR) + dict->encodeSimple() + _(_URL_PARAM_SEPARATOR) + _(URL_RESOURCE_ID) + _(_URL_PARAM_SEPARATOR);
+    pathBase->pathBase = _(_URL_PARAM_SEPARATOR) + CONTENT_MEDIA_HANDLER + _(_URL_PARAM_SEPARATOR) + dict->encodeSimple() + _(_URL_PARAM_SEPARATOR) + _(URL_RESOURCE_ID) + _(_URL_PARAM_SEPARATOR);
     pathBase->addResID = true;
     return pathBase;
 }
@@ -571,9 +571,9 @@ String UpnpXMLBuilder::getFirstResourcePath(Ref<CdsItem> item)
 {
     Ref<PathBase> urlBase = getPathBase(item);
     if (urlBase->addResID) {
-        return _(SERVER_VIRTUAL_DIR) + urlBase->urlBase + 0;
+        return _(SERVER_VIRTUAL_DIR) + urlBase->pathBase + 0;
     }
-    return _(SERVER_VIRTUAL_DIR) + urlBase->urlBase;
+    return _(SERVER_VIRTUAL_DIR) + urlBase->pathBase;
 }
 
 String UpnpXMLBuilder::getArtworkUrl(zmm::Ref<CdsItem> item) {
@@ -582,9 +582,9 @@ String UpnpXMLBuilder::getArtworkUrl(zmm::Ref<CdsItem> item) {
 
     Ref<PathBase> urlBase = getPathBase(item);
     if (urlBase->addResID) {
-        return virtualUrl + urlBase->urlBase + 1 + "/rct/aa";
+        return virtualUrl + urlBase->pathBase + 1 + "/rct/aa";
     }
-    return virtualUrl + urlBase->urlBase;
+    return virtualUrl + urlBase->pathBase;
 }
 
 String UpnpXMLBuilder::renderExtension(String contentType, String location)
@@ -817,17 +817,17 @@ void UpnpXMLBuilder::addResources(Ref<CdsItem> item, Ref<Element> element)
         bool transcoded = (res_params->get(_(URL_PARAM_TRANSCODE)) == URL_VALUE_TRANSCODE);
         if (!transcoded) {
             if (urlBase->addResID) {
-                url = urlBase->urlBase + realCount;
+                url = urlBase->pathBase + realCount;
             } else
-                url = urlBase->urlBase;
+                url = urlBase->pathBase;
 
             realCount++;
         } else {
             if (!skipURL)
-                url = urlBase->urlBase + _(URL_VALUE_TRANSCODE_NO_RES_ID);
+                url = urlBase->pathBase + _(URL_VALUE_TRANSCODE_NO_RES_ID);
             else {
                 assert(urlBase_tr != nullptr);
-                url = urlBase_tr->urlBase + _(URL_VALUE_TRANSCODE_NO_RES_ID);
+                url = urlBase_tr->pathBase + _(URL_VALUE_TRANSCODE_NO_RES_ID);
             }
         }
         if ((res_params != nullptr) && (res_params->size() > 0)) {
