@@ -81,12 +81,10 @@ void ActionRequest::update()
 {
     if (response != nullptr) {
         String xml = response->print();
-        int ret;
-
-        log_debug("ActionRequest::update(): \n%s\n\n", xml.c_str());
+        log_debug("ActionRequest::update(): %s\n", xml.c_str());
 
         IXML_Document* result = ixmlDocument_createDocument();
-        ret = ixmlParseBufferEx(xml.c_str(), &result);
+        int ret = ixmlParseBufferEx(xml.c_str(), &result);
 
         if (ret != IXML_SUCCESS) {
             log_error("ActionRequest::update(): could not convert to iXML\n");

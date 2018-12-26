@@ -100,19 +100,21 @@ public:
     void addResources(zmm::Ref<CdsItem> item, zmm::Ref<mxml::Element> element);
 
     // FIXME: This needs to go, once we sort a nicer way for the webui code to access this
-    static zmm::String getFirstResource(zmm::Ref<CdsItem> item);
+    static zmm::String getFirstResourcePath(zmm::Ref<CdsItem> item);
 
 protected:
     zmm::String virtualUrl;
 
-    class UrlBase : public zmm::Object {
+    // Holds a part of path and bool which says if we need to append the resource
+    // TODO: Remove this and use centralised routing instead of building URLs all over the place
+    class PathBase : public zmm::Object {
     public:
-        zmm::String urlBase;
+        zmm::String pathBase;
         bool addResID;
     };
 
-    static zmm::Ref<UrlBase> getUrlBase(zmm::Ref<CdsItem> item, bool forceLocal = false);
-    static zmm::String renderExtension(zmm::String contentType, zmm::String location);
+    static zmm::Ref<PathBase> getPathBase(zmm::Ref<CdsItem> item, bool forceLocal = false);
+    zmm::String renderExtension(zmm::String contentType, zmm::String location);
     zmm::String getArtworkUrl(zmm::Ref<CdsItem> item);
 };
 #endif // __UPNP_XML_H__

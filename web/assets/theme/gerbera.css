@@ -313,6 +313,13 @@ body,
     cursor: copy;
 }
 
+.grb-item > td > img {
+    margin-left: -0.5rem; /* Counter BS style */
+    margin-top: -0.25rem;
+    margin-bottom: -0.25rem;
+    margin-right: .5rem;
+}
+
 .grb-item-delete,
 .grb-item-edit,
 .grb-item-download,

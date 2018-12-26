@@ -44,6 +44,14 @@ $.widget('grb.dataitems', {
         row = $('<tr></tr>')
         content = $('<td></td>')
 
+        if (item.img) {
+          var img = $('<img/>')
+          img.attr('src', item.img)
+          img.attr('style', 'height: 25px')
+          img.addClass('rounded float-left')
+          img.appendTo(content)
+        }
+
         if (item.url) {
           text = $('<a></a>')
           text.attr('href', item.url).text(item.text).appendTo(content)
@@ -52,13 +60,6 @@ $.widget('grb.dataitems', {
           text.text(item.text).appendTo(content)
         }
         text.addClass('grb-item-url')
-
-        if (item.img) {
-          var img = $('<img/>')
-          img.attr('src', item.img)
-          img.addClass('pull-right')
-          img.appendTo(content)
-        }
 
         if (item.video) {
           var button = $('<button></button>')

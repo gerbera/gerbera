@@ -124,7 +124,8 @@ void web::items::process()
         /// \todo clean this up, should have more generic options for online
         /// services
         // FIXME
-        item->appendTextChild(_("res"), UpnpXMLBuilder::getFirstResource(RefCast(obj, CdsItem)));
+        item->appendTextChild(_("res"), UpnpXMLBuilder::getFirstResourcePath(RefCast(obj, CdsItem)));
+
         //item->appendTextChild(_("virtual"), obj->isVirtual() ? _("1") : _("0"), mxml_bool_type);
         items->appendElementChild(item);
         //}

@@ -530,63 +530,61 @@ Ref<Element> UpnpXMLBuilder::renderAlbumDate(String date) {
     return out;
 }
 
-Ref<UpnpXMLBuilder::UrlBase> UpnpXMLBuilder::getUrlBase(Ref<CdsItem> item, bool forceLocal)
+Ref<UpnpXMLBuilder::PathBase> UpnpXMLBuilder::getPathBase(Ref<CdsItem> item, bool forceLocal)
 {
     Ref<Element> res;
 
-    Ref<UrlBase> urlBase(new UrlBase);
+    Ref<PathBase> pathBase(new PathBase);
     /// \todo resource options must be read from configuration files
 
     Ref<Dictionary> dict(new Dictionary());
     dict->put(_(URL_OBJECT_ID), String::from(item->getID()));
 
-    urlBase->addResID = false;
+    pathBase->addResID = false;
     /// \todo move this down into the "for" loop and create different urls
     /// for each resource once the io handlers are ready
     int objectType = item->getObjectType();
     if (IS_CDS_ITEM_INTERNAL_URL(objectType)) {
-        urlBase->urlBase = Server::getInstance()->getVirtualURL() + _(_URL_PARAM_SEPARATOR) + CONTENT_SERVE_HANDLER + _(_URL_PARAM_SEPARATOR) + item->getLocation();
-        return urlBase;
+        pathBase->urlBase = _(_URL_PARAM_SEPARATOR) + CONTENT_SERVE_HANDLER + _(_URL_PARAM_SEPARATOR) + item->getLocation();
+        return pathBase;
     }
 
     if (IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
         if (!item->getFlag(OBJECT_FLAG_PROXY_URL) && (!forceLocal)) {
-            urlBase->urlBase = item->getLocation();
-            return urlBase;
+            pathBase->urlBase = item->getLocation();
+            return pathBase;
         }
 
         if ((item->getFlag(OBJECT_FLAG_ONLINE_SERVICE) && item->getFlag(OBJECT_FLAG_PROXY_URL)) || forceLocal) {
-            urlBase->urlBase = Server::getInstance()->getVirtualURL() + _(_URL_PARAM_SEPARATOR) + CONTENT_ONLINE_HANDLER + _(_URL_PARAM_SEPARATOR) + dict->encodeSimple() + _(_URL_PARAM_SEPARATOR) + _(URL_RESOURCE_ID) + _(_URL_PARAM_SEPARATOR);
-            urlBase->addResID = true;
-            return urlBase;
+            pathBase->urlBase = _(_URL_PARAM_SEPARATOR) + CONTENT_ONLINE_HANDLER + _(_URL_PARAM_SEPARATOR) + dict->encodeSimple() + _(_URL_PARAM_SEPARATOR) + _(URL_RESOURCE_ID) + _(_URL_PARAM_SEPARATOR);
+            pathBase->addResID = true;
+            return pathBase;
         }
     }
 
-    urlBase->urlBase = Server::getInstance()->getVirtualURL() + _(_URL_PARAM_SEPARATOR) + CONTENT_MEDIA_HANDLER + _(_URL_PARAM_SEPARATOR) + dict->encodeSimple() + _(_URL_PARAM_SEPARATOR) + _(URL_RESOURCE_ID) + _(_URL_PARAM_SEPARATOR);
-    urlBase->addResID = true;
-    return urlBase;
+    pathBase->urlBase = _(_URL_PARAM_SEPARATOR) + CONTENT_MEDIA_HANDLER + _(_URL_PARAM_SEPARATOR) + dict->encodeSimple() + _(_URL_PARAM_SEPARATOR) + _(URL_RESOURCE_ID) + _(_URL_PARAM_SEPARATOR);
+    pathBase->addResID = true;
+    return pathBase;
 }
 
-String UpnpXMLBuilder::getFirstResource(Ref<CdsItem> item)
+String UpnpXMLBuilder::getFirstResourcePath(Ref<CdsItem> item)
 {
-    Ref<UrlBase> urlBase = getUrlBase(item);
-
-    if (urlBase->addResID)
-        return urlBase->urlBase + 0;
-    return urlBase->urlBase;
+    Ref<PathBase> urlBase = getPathBase(item);
+    if (urlBase->addResID) {
+        return _(SERVER_VIRTUAL_DIR) + urlBase->urlBase + 0;
+    }
+    return _(SERVER_VIRTUAL_DIR) + urlBase->urlBase;
 }
 
-String UpnpXMLBuilder::getArtworkUrl(zmm::Ref<CdsItem> item)
-{
+String UpnpXMLBuilder::getArtworkUrl(zmm::Ref<CdsItem> item) {
     // FIXME: This is temporary until we do artwork properly.
     log_debug("Building Art url for %d\n", item->getID());
 
-    Ref<UrlBase> urlBase = getUrlBase(item);
-
-    if (urlBase->addResID)
-        return urlBase->urlBase + 1 + "/rct/aa";
-    else
-        return urlBase->urlBase;
+    Ref<PathBase> urlBase = getPathBase(item);
+    if (urlBase->addResID) {
+        return virtualUrl + urlBase->urlBase + 1 + "/rct/aa";
+    }
+    return virtualUrl + urlBase->urlBase;
 }
 
 String UpnpXMLBuilder::renderExtension(String contentType, String location)
@@ -614,7 +612,7 @@ String UpnpXMLBuilder::renderExtension(String contentType, String location)
 
 void UpnpXMLBuilder::addResources(Ref<CdsItem> item, Ref<Element> element)
 {
-    Ref<UrlBase> urlBase = getUrlBase(item);
+    Ref<PathBase> urlBase = getPathBase(item);
     Ref<ConfigManager> config = ConfigManager::getInstance();
     bool skipURL = ((IS_CDS_ITEM_INTERNAL_URL(item->getObjectType()) || IS_CDS_ITEM_EXTERNAL_URL(item->getObjectType())) && (!item->getFlag(OBJECT_FLAG_PROXY_URL)));
 
@@ -655,7 +653,7 @@ void UpnpXMLBuilder::addResources(Ref<CdsItem> item, Ref<Element> element)
     bool hide_original_resource = false;
     int original_resource = 0;
 
-    Ref<UrlBase> urlBase_tr;
+    Ref<PathBase> urlBase_tr;
 
     // once proxying is a feature that can be turned off or on in
     // config manager we should use that setting
@@ -777,7 +775,7 @@ void UpnpXMLBuilder::addResources(Ref<CdsItem> item, Ref<Element> element)
         }
 
         if (skipURL)
-            urlBase_tr = getUrlBase(item, true);
+            urlBase_tr = getPathBase(item, true);
     }
 
     int resCount = item->getResourceCount();
@@ -938,6 +936,9 @@ void UpnpXMLBuilder::addResources(Ref<CdsItem> item, Ref<Element> element)
             log_debug("extended protocolInfo: %s\n", protocolInfo.c_str());
         }
 #endif
+        // URL is path until now
+        url = virtualUrl + url;
+
         if (!hide_original_resource || transcoded || (hide_original_resource && (original_resource != i)))
             element->appendElementChild(renderResource(url, res_attrs));
     }
