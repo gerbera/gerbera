@@ -274,11 +274,6 @@ void Server::shutdown()
     storage = nullptr;
 }
 
-String Server::getVirtualURL() const
-{
-    return virtual_url;
-}
-
 int Server::handleUpnpEvent(Upnp_EventType eventtype, const void *event)
 {
     int ret = UPNP_E_SUCCESS; // general purpose return code

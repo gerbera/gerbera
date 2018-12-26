@@ -71,13 +71,6 @@ public:
     /// update manager task, storage task, content manager.
     void shutdown() override;
 
-    /// \brief Returns the virtual web server URL.
-    ///
-    /// A special virtual URL is registered with the internal web server,
-    /// all content and all ui requests are server from there and are
-    /// handled by the web callbacks.
-    zmm::String getVirtualURL() const;
-
     /// \brief Dispatch incoming UPnP events.
     /// \param eventtype Upnp_EventType, identifying what kind of event came in.
     /// \param event Pointer to the event.
