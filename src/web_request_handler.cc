@@ -150,7 +150,6 @@ Ref<IOHandler> WebRequestHandler::open(IN enum UpnpOpenFileMode mode)
         error_code = 300;
     } catch (const ObjectNotFoundException& e) {
         error = e.getMessage();
-        ;
         error_code = 200;
     } catch (const SessionException& e) {
         error = e.getMessage();
@@ -186,7 +185,7 @@ Ref<IOHandler> WebRequestHandler::open(IN enum UpnpOpenFileMode mode)
             // make sure we can generate JSON w/o exceptions
             XML2JSON::getJSON(root);
             //log_debug("JSON-----------------------\n\n\n%s\n\n\n\n", XML2JSON::getJSON(root).c_str());
-        } catch (const Exception e) {
+        } catch (const Exception& e) {
             e.printStackTrace();
         }
 #endif
@@ -194,7 +193,7 @@ Ref<IOHandler> WebRequestHandler::open(IN enum UpnpOpenFileMode mode)
     } else {
         try {
             output = XML2JSON::getJSON(root);
-        } catch (const Exception e) {
+        } catch (const Exception& e) {
             e.printStackTrace();
         }
     }

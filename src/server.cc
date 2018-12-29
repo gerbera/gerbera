@@ -402,18 +402,16 @@ void Server::sendCDSSubscriptionUpdate(zmm::String updateString)
 
 Ref<RequestHandler> Server::createRequestHandler(const char *filename)
 {
-    String path;
-    String parameters;
     String link = urlUnescape((char *) filename);
-
-    log_debug("Filename: %s, Path: %s\n", filename, path.c_str());
-    // log_debug("create_handler: got url parameters: [%s]\n", parameters.c_str());
+    log_debug("Filename: %s\n", filename);
 
     RequestHandler* ret = nullptr;
 
     if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_MEDIA_HANDLER)) {
         ret = new FileRequestHandler(xmlbuilder.get());
     } else if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_UI_HANDLER)) {
+        String parameters;
+        String path;
         RequestHandler::splitUrl(filename, URL_UI_PARAM_SEPARATOR, path, parameters);
 
         Ref<Dictionary> dict(new Dictionary());
