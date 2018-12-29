@@ -111,15 +111,19 @@ describe('Gerbera Menu', () => {
 
   describe('click()', () => {
     let fsMenu;
+    let mockConfig;
 
     beforeEach(async () => {
       loadFixtures('index.html');
+      loadJSONFixtures('config.json');
       spyOn(GERBERA.Tree, 'selectType');
       spyOn(GERBERA.App, 'setType');
       spyOn(GERBERA.Auth, 'isLoggedIn').and.returnValue(true);
       spyOn(GERBERA.Items, 'destroy');
       spyOn(GERBERA.Tree, 'destroy');
       spyOn(GERBERA.Trail, 'destroy');
+      mockConfig = getJSONFixture('config.json');
+      GERBERA.App.serverConfig = mockConfig.config;
       await GERBERA.Menu.initialize();
       fsMenu = $('#nav-fs');
     });

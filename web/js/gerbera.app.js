@@ -82,6 +82,11 @@ GERBERA.App = (function () {
     if (getType() === undefined) {
       setType('db');
     }
+    $.ajaxSetup({
+      beforeSend: function (xhr) {
+        xhr.setRequestHeader('Cache-Control', 'no-cache, must-revalidate');
+      }
+    });
     return $.Deferred().resolve().promise()
   }
 
