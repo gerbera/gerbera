@@ -5,7 +5,7 @@ jasmine.getJSONFixtures().fixturesPath = 'base/test/client/fixtures';
 
 describe('Gerbera UI App', () => {
   describe('initialize()', () => {
-    let mockConfig, convertedConfig, ajaxSpy, cookieSpy, uiDisabled;
+    let mockConfig, convertedConfig, ajaxSpy, cookieSpy, uiDisabled, ajaxSetupSpy;
 
     beforeAll(() => {
       loadJSONFixtures('converted-config.json');
@@ -15,6 +15,7 @@ describe('Gerbera UI App', () => {
       convertedConfig = getJSONFixture('converted-config.json');
       uiDisabled = getJSONFixture('ui-disabled.json');
       ajaxSpy = spyOn($, 'ajax');
+      ajaxSetupSpy = spyOn($, 'ajaxSetup');
       spyOn(GERBERA.Auth, 'checkSID');
     });
 
@@ -28,6 +29,7 @@ describe('Gerbera UI App', () => {
 
     afterEach(() => {
       ajaxSpy.and.callThrough();
+      ajaxSetupSpy.and.callThrough();
     });
 
     it('retrieves the configuration from the server using AJAX', async () => {
@@ -115,6 +117,18 @@ describe('Gerbera UI App', () => {
       expect(GERBERA.Trail.initialize).toHaveBeenCalled();
       expect(GERBERA.Autoscan.initialize).toHaveBeenCalled();
       expect(GERBERA.Updates.initialize).toHaveBeenCalled();
+    });
+
+    it('sets up Cache-Control headers for all AJAX requests', async () => {
+      ajaxSpy.and.callFake(() => {
+        return $.Deferred().resolve(mockConfig).promise();
+      });
+
+      await GERBERA.App.initialize();
+
+      expect(ajaxSetupSpy).toHaveBeenCalledWith({
+        beforeSend: jasmine.any(Function)
+      });
     });
   });
 
