@@ -311,6 +311,13 @@ target_compile_definitions(gerbera PRIVATE -DCOMPILE_INFO="${COMPILE_INFO}")
 target_compile_definitions(gerbera PRIVATE -DGIT_BRANCH="${GIT_BRANCH}")
 target_compile_definitions(gerbera PRIVATE -DGIT_COMMIT_HASH="${GIT_COMMIT_HASH}")
 
+# Check for C++17 STL Optional
+include(CheckIncludeFileCXX)
+check_include_file_cxx(optional HAS_STL_OPTIONAL)
+if (NOT HAS_STL_OPTIONAL)
+    message(FATAL_ERROR "gerbera requires C++17 Optional to be available. Check your compiler is >=GCC 7.1 or >=libc++ 5")
+endif()
+
 if (WITH_DEBUG)
     add_definitions(-DTOMBDEBUG)
 endif()
