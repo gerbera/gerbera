@@ -121,7 +121,7 @@ GPLv2
       | Sergey Bostandzhyan <jin at mediatomb dot cc>
       | Leonhard Wimmer <leo at mediatomb dot cc>
 
-   Copyright (C) 2016-2018
+   Copyright (C) 2016-2019
       | Gerbera Contributors
 
 License

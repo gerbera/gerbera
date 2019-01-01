@@ -179,7 +179,7 @@ sudo make install
        Sergey Bostandzhyan <jin at mediatomb dot cc>
        Leonhard Wimmer <leo at mediatomb dot cc>
 
-    Copyright (C) 2016-2018
+    Copyright (C) 2016-2019
         Gerbera Contributors
 
 [1]: https://sourceforge.net/p/mediatomb/discussion/440751/thread/258c3cf7/?limit=250
