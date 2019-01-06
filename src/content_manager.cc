@@ -1095,10 +1095,8 @@ Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic, boo
     }
 
     Ref<CdsObject> obj;
-    if (S_ISREG(statbuf.st_mode) || (allow_fifo && S_ISFIFO(statbuf.st_mode))) // item
-    {
-        /* retrieve information about item and decide
-           if it should be included */
+    if (S_ISREG(statbuf.st_mode) || (allow_fifo && S_ISFIFO(statbuf.st_mode))) { // item
+        /* retrieve information about item and decide if it should be included */
         String mimetype;
         String upnp_class;
         String extension;
@@ -1108,16 +1106,18 @@ Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic, boo
         if (dotIndex > 0)
             extension = filename.substring(dotIndex + 1);
 
-        if (magic)
+        if (magic) {
             mimetype = extension2mimetype(extension);
 
-        if (mimetype == nullptr && magic) {
-            if (ignore_unknown_extensions)
-                return nullptr; // item should be ignored
+            if (!string_ok(mimetype)) {
+                if (ignore_unknown_extensions)
+                    return nullptr; // item should be ignored
 #ifdef HAVE_MAGIC
-            mimetype = get_mime_type(ms, reMimetype, path);
+                mimetype = getMIMETypeFromFile(path);
 #endif
+            }
         }
+
         if (mimetype != nullptr) {
             upnp_class = mimetype2upnpclass(mimetype);
         }
@@ -1137,14 +1137,20 @@ Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic, boo
         item->setLocation(path);
         item->setMTime(statbuf.st_mtime);
         item->setSizeOnDisk(statbuf.st_size);
-        if (mimetype != nullptr)
+
+        if (mimetype != nullptr) {
             item->setMimeType(mimetype);
-        if (upnp_class != nullptr)
+        }
+        if (upnp_class != nullptr) {
             item->setClass(upnp_class);
+        }
+
         Ref<StringConverter> f2i = StringConverter::f2i();
         obj->setTitle(f2i->convert(filename));
-        if (magic)
+
+        if (magic) {
             MetadataHandler::setMetadata(item);
+        }
     } else if (S_ISDIR(statbuf.st_mode)) {
         Ref<CdsContainer> cont(new CdsContainer());
         obj = RefCast(cont, CdsObject);
@@ -1815,7 +1821,7 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
 #ifdef HAVE_MAGIC
 zmm::String ContentManager::getMimeTypeFromBuffer(const void* buffer, size_t length)
 {
-    return get_mime_type_from_buffer(ms, reMimetype, buffer, length);
+    return getMIMETypeFromBuffer(buffer, length);
 }
 #endif
 

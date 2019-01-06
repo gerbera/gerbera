@@ -204,10 +204,11 @@ int HMSToSeconds(zmm::String time);
 
 #ifdef HAVE_MAGIC
 /// \brief Extracts mimetype from a file using filemagic
-zmm::String get_mime_type(magic_set* ms, zmm::Ref<RExp> reMimetype, zmm::String file);
+zmm::String getMIMETypeFromFile(zmm::String file);
 /// \brief Extracts mimetype from a buffer using filemagic
-zmm::String get_mime_type_from_buffer(magic_set* ms, zmm::Ref<RExp> reMimetype,
-    const void* buffer, size_t length);
+zmm::String getMIMETypeFromBuffer(const void *buffer, size_t length);
+/// \brief Extracts mimetype from a filepath OR buffer using filemagic
+zmm::String getMIME(zmm::String filepath, const void *buffer, size_t length);
 
 #endif // HAVE_MAGIC
 

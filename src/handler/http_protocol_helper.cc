@@ -26,8 +26,8 @@ Gerbera - https://gerbera.io/
 #include <string>
 #include "http_protocol_helper.h"
 
-HttpProtocolHelper::HttpProtocolHelper() {}
-HttpProtocolHelper::~HttpProtocolHelper() {}
+HttpProtocolHelper::HttpProtocolHelper() = default;
+HttpProtocolHelper::~HttpProtocolHelper() = default;
 
 std::string HttpProtocolHelper::finalizeHttpHeader(std::string header) {
   std::string result = header;

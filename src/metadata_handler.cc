@@ -94,8 +94,7 @@ MetadataHandler::MetadataHandler()
 {
 }
 
-void MetadataHandler::setMetadata(Ref<CdsItem> item)
-{
+void MetadataHandler::setMetadata(Ref<CdsItem> item) {
     String location = item->getLocation();
     off_t filesize;
 
@@ -113,8 +112,9 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item)
     Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
     String content_type = mappings->get(mimetype);
 
-    if ((content_type == CONTENT_TYPE_OGG) && (isTheora(item->getLocation())))
+    if ((content_type == CONTENT_TYPE_OGG) && (isTheora(item->getLocation()))) {
         item->setFlag(OBJECT_FLAG_OGG_THEORA);
+    }
 
 #ifdef HAVE_TAGLIB
     if ((content_type == CONTENT_TYPE_MP3) || ((content_type == CONTENT_TYPE_OGG) && (!item->getFlag(OBJECT_FLAG_OGG_THEORA))) || (content_type == CONTENT_TYPE_WMA) || (content_type == CONTENT_TYPE_WAVPACK) || (content_type == CONTENT_TYPE_FLAC) || (content_type == CONTENT_TYPE_PCM) || (content_type == CONTENT_TYPE_AIFF) || (content_type == CONTENT_TYPE_APE) || (content_type == CONTENT_TYPE_MP4)) {

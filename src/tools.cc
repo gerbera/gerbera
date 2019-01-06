@@ -640,48 +640,42 @@ int HMSToSeconds(String time)
 }
 
 #ifdef HAVE_MAGIC
-String get_mime_type(magic_set* ms, Ref<RExp> reMimetype, String file)
+String getMIMETypeFromFile(String file)
 {
-    if (ms == nullptr)
-        return nullptr;
-
-    auto* mt = (char*)magic_file(ms, file.c_str());
-    if (mt == nullptr) {
-        log_error("magic_file: %s\n", magic_error(ms));
-        return nullptr;
-    }
-
-    String mime_type = mt;
-
-    Ref<Matcher> matcher = reMimetype->matcher(mime_type, 2);
-    if (matcher->next())
-        return matcher->group(1);
-
-    log_warning("filemagic returned invalid mimetype for %s\n%s\n",
-        file.c_str(), mt);
-    return nullptr;
+    return getMIME(file, nullptr, -1);
 }
 
-String get_mime_type_from_buffer(magic_set* ms, Ref<RExp> reMimetype,
-    const void* buffer, size_t length)
+String getMIMETypeFromBuffer(const void *buffer, size_t length)
 {
-    if (ms == nullptr)
-        return nullptr;
+    return getMIME(nullptr, buffer, length);
+}
 
-    auto* mt = (char*)magic_buffer(ms, buffer, length);
-    if (mt == nullptr) {
-        log_error("magic_file: %s\n", magic_error(ms));
+String getMIME(String filepath, const void *buffer, size_t length)
+{
+    /* MAGIC_MIME_TYPE tells magic to return ONLY the mimetype */
+    magic_t magic_cookie = magic_open(MAGIC_MIME_TYPE);
+
+    if (magic_cookie == NULL) {
+        log_warning("Failed to initialize libmagic\n");
         return nullptr;
     }
 
-    String mime_type = mt;
+    if (magic_load(magic_cookie, NULL) != 0) {
+        log_warning("Failed to load magic database: %s\n", magic_error(magic_cookie));
+        magic_close(magic_cookie);
+        return nullptr;
+    }
 
-    Ref<Matcher> matcher = reMimetype->matcher(mime_type, 2);
-    if (matcher->next())
-        return matcher->group(1);
+    const char* mime;
+    if (!string_ok(filepath)) {
+        mime = magic_buffer(magic_cookie, buffer, length);
+    } else {
+        mime = magic_file(magic_cookie, filepath.c_str());
+    }
 
-    log_warning("filemagic returned invalid mimetype for the given buffer%s\n", mt);
-    return nullptr;
+    String out = String::copy(mime);
+    magic_close(magic_cookie);
+    return out;
 }
 #endif
 

@@ -79,26 +79,9 @@ void ServeRequestHandler::getInfo(IN const char *filename, OUT UpnpFileInfo *inf
     {
         String mimetype = _(MIMETYPE_DEFAULT);
 #ifdef HAVE_MAGIC
-        magic_set* ms = nullptr;
-        ms = magic_open(MAGIC_MIME);
-        if (ms != nullptr) {
-            if (magic_load(ms, nullptr) == -1) {
-                log_warning("magic_load: %s\n", magic_error(ms));
-                magic_close(ms);
-                ms = nullptr;
-            } else {
-                /// \TODO we could request the mimetype rex from content manager
-                Ref<RExp> reMimetype;
-                reMimetype = Ref<RExp>(new RExp());
-                reMimetype->compile(_(MIMETYPE_REGEXP));
-
-                String mime = get_mime_type(ms, reMimetype, path);
-                if (string_ok(mime))
-                    mimetype = mime;
-
-                magic_close(ms);
-            }
-        }
+        String mime = getMIMETypeFromFile(path);
+        if (string_ok(mime))
+            mimetype = mime;
 #endif // HAVE_MAGIC
 
         UpnpFileInfo_set_FileLength(info, statbuf.st_size);
@@ -155,26 +138,9 @@ Ref<IOHandler> ServeRequestHandler::open(IN const char* filename,
     {
         String mimetype = _(MIMETYPE_DEFAULT);
 #ifdef HAVE_MAGIC
-        magic_set* ms = nullptr;
-        ms = magic_open(MAGIC_MIME);
-        if (ms != nullptr) {
-            if (magic_load(ms, nullptr) == -1) {
-                log_warning("magic_load: %s\n", magic_error(ms));
-                magic_close(ms);
-                ms = nullptr;
-            } else {
-                /// \TODO we could request the mimetype rex from content manager
-                Ref<RExp> reMimetype;
-                reMimetype = Ref<RExp>(new RExp());
-                reMimetype->compile(_(MIMETYPE_REGEXP));
-
-                String mime = get_mime_type(ms, reMimetype, path);
-                if (string_ok(mime))
-                    mimetype = mime;
-
-                magic_close(ms);
-            }
-        }
+        String mime = getMIMETypeFromFile(path);
+        if (string_ok(mime))
+            mimetype = mime;
 #endif // HAVE_MAGIC
 
         // FIXME upstream headers
