@@ -75,5 +75,8 @@ You can start Gerbera with similar command as below:
 
 **NOTE**
 
+* You might need to create the directory gerbera inside the `~/.config/` folder and change the owner to gerbera
+    - `mkdir ~/.config/gerbera`
+    - `sudo chown gerbera:gerbera gerbera`
 * Gerbera sets the ``<home>`` to the runtime user's home by default.  Be sure to update accordingly.
 * Ensure the **gerbera** user has proper permissions to the ``config.xml`` file.
