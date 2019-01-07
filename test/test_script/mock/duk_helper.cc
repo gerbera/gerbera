@@ -87,4 +87,24 @@ tuple<string, string> DukTestHelper::extractObjectValues(duk_context *ctx, strin
   return make_tuple(key, string(""));
 }
 
+void DukTestHelper::createObject(duk_context *ctx, map<string, string> objectProps, map<string, string> metaProps) {
+  // obj
+  {
+    duk_push_object(ctx);
+    for (const auto &x : objectProps) {
+      duk_push_string(ctx, x.second.c_str());
+      duk_put_prop_string(ctx, -2, x.first.c_str());
+    }
+  }
+
+  // obj.meta
+  {
+    duk_push_object(ctx);
+    for (const auto &x : metaProps) {
+      duk_push_string(ctx, x.second.c_str());
+      duk_put_prop_string(ctx, -2, x.first.c_str());
+    }
+    duk_put_prop_string(ctx, -2, "meta");
+  }
+}
 #endif //HAVE_JS

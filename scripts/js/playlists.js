@@ -38,21 +38,15 @@ function addPlaylistItem(location, title, playlistChain, order) {
         exturl.playlistOrder = (order ? order : playlistOrder++);
         addCdsObject(exturl, playlistChain,  UPNP_CLASS_PLAYLIST_CONTAINER);
     } else {
-        if (location.substr(0,1) !== '/')
+        if (location.substr(0,1) !== '/') {
             location = playlistLocation + location;
-        var item  = {};
-        item.location = location;
-        if (title)
-            item.title = title;
-        else
-        {
-            var locationParts = location.split('/');
-            item.title = locationParts[locationParts.length - 1];
-            if (! item.title)
-                item.title = location;
         }
-        item.objectType = OBJECT_TYPE_ITEM;
+
+        var cds = getCdsObject(location);
+        var item = copyObject(cds);
+
         item.playlistOrder = (order ? order : playlistOrder++);
+        item.title = item.meta[M_TITLE];
         addCdsObject(item, playlistChain,  UPNP_CLASS_PLAYLIST_CONTAINER);
     }
 }

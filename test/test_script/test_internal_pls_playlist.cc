@@ -87,6 +87,40 @@ static duk_ret_t addCdsObject(duk_context *ctx) {
   return InternalUrlPLSPlaylistTest::commonScriptMock->addCdsObject(params.objectValues, params.containerChain, params.objectType);
 }
 
+static duk_ret_t copyObject(duk_context *ctx) {
+  map<string, string> obj = {
+          make_pair("title", "Song from Playlist Title"),
+          make_pair("objectType", "2"),
+          make_pair("location", "/home/gerbera/example.mp3"),
+          make_pair("playlistOrder", "1")
+  };
+  map<string, string> meta = {
+          make_pair("dc:title", "Song from Playlist Title"),
+          make_pair("upnp:artist", "Artist"),
+          make_pair("upnp:album", "Album"),
+          make_pair("dc:date", "2018")
+  };
+  copyObjectParams params = ScriptTestFixture::copyObject(ctx, obj, meta);
+  return InternalUrlPLSPlaylistTest::commonScriptMock->copyObject(params.isObject);
+}
+
+static duk_ret_t getCdsObject(duk_context *ctx) {
+  map<string, string> obj = {
+          make_pair("title", "Song from Playlist Title"),
+          make_pair("objectType", "2"),
+          make_pair("location", "/home/gerbera/example.mp3"),
+          make_pair("playlistOrder", "1")
+  };
+  map<string, string> meta = {
+          make_pair("dc:title", "Song from Playlist Title"),
+          make_pair("upnp:artist", "Artist"),
+          make_pair("upnp:album", "Album"),
+          make_pair("dc:date", "2018")
+  };
+  getCdsObjectParams params = ScriptTestFixture::getCdsObject(ctx, obj, meta);
+  return InternalUrlPLSPlaylistTest::commonScriptMock->getCdsObject(params.location);
+}
+
 // Mock the Duktape C methods
 // that are called from the playlists.js script
 // * These are static methods, which makes mocking difficult.
@@ -98,6 +132,8 @@ static  duk_function_list_entry js_global_functions[] =
   { "getLastPath",           getLastPath,          1 },
   { "readln",                readln,               1 },
   { "addCdsObject",          addCdsObject,         3 },
+  { "copyObject",            copyObject,           1 },
+  { "getCdsObject",          getCdsObject,         1 },
   { nullptr,                 nullptr,              0 },
 };
 
@@ -145,6 +181,8 @@ TEST_F(InternalUrlPLSPlaylistTest, AddsCdsObjectFromM3UPlaylistWithInternalUrlPl
   EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistChain),
       "\\/Playlists\\/Directories\\/of\\/Playlist Title",
       "object.container.playlistContainer")).WillOnce(Return(0));
+  EXPECT_CALL(*commonScriptMock, getCdsObject(Eq("/home/gerbera/example.mp3"))).WillRepeatedly(Return(1));
+  EXPECT_CALL(*commonScriptMock, copyObject(Eq(true))).WillRepeatedly(Return(1));
 
   addGlobalFunctions(ctx, js_global_functions);
   dukMockPlaylist(ctx, "Playlist Title", "/location/of/playlist.pls", "audio/x-scpls");
