@@ -24,11 +24,16 @@ RUN mkdir build &&\
     make install
 
 RUN mkdir -p /root/.config/gerbera &&\
-    gerbera --create-config > /root/.config/gerbera/config.xml
+    gerbera --create-config > /root/.config/gerbera/config.xml &&\
+    sed 's/<import hidden-files="no">/<import hidden-files="no">\n\
+<autoscan use-inotify="yes">\n\
+<directory location="\/root" mode="inotify" level="full"\
+recursive="yes" hidden-files="no"\/>\n\
+<\/autoscan>/' -i /root/.config/gerbera/config.xml
 
-ARG PORT=49555
-EXPOSE ${PORT}
+ENV PORT=49555
 
-ENV PORT=${PORT}
+EXPOSE $PORT
+EXPOSE 1900
 
-ENTRYPOINT /bin/gerbera -p ${PORT} 
+CMD /bin/gerbera -m /root -p $PORT
