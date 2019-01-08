@@ -36,4 +36,4 @@ ENV PORT=49555
 EXPOSE $PORT
 EXPOSE 1900
 
-CMD /bin/gerbera -m /root -p $PORT
+CMD /bin/gerbera -p $PORT
