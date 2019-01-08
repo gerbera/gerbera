@@ -31,9 +31,7 @@ RUN mkdir -p /root/.config/gerbera &&\
 recursive="yes" hidden-files="no"\/>\n\
 <\/autoscan>/' -i /root/.config/gerbera/config.xml
 
-ENV PORT=49555
-
-EXPOSE $PORT
+EXPOSE 49152
 EXPOSE 1900
 
-CMD /bin/gerbera -p $PORT
+ENTRYPOINT [ "gerbera","-p", "49152" ]
