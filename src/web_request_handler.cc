@@ -36,6 +36,7 @@
 #include "tools.h"
 #include "web/pages.h"
 #include <ctime>
+#include <handler/headers.h>
 
 using namespace zmm;
 using namespace mxml;
@@ -116,9 +117,9 @@ void WebRequestHandler::getInfo(IN const char *filename, OUT UpnpFileInfo *info)
     contentType = mimetype + "; charset=" + DEFAULT_INTERNAL_CHARSET;
 
     UpnpFileInfo_set_ContentType(info, ixmlCloneDOMString(contentType.c_str()));
-
-    // FIXME Extra Headers
-    //UpnpFileInfo_set_ExtraHeaders(info, ixmlCloneDOMString("Cache-Control: no-cache, must-revalidate\n"));
+    Headers headers;
+    headers.addHeader(std::string{"Cache-Control: no-cache, must-revalidate"});
+    headers.writeHeaders(info);
 }
 
 Ref<IOHandler> WebRequestHandler::open(IN enum UpnpOpenFileMode mode)

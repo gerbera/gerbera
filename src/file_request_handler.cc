@@ -40,7 +40,7 @@
 #include "session_manager.h"
 #include "update_manager.h"
 
-#include "handler/http_protocol_helper.h"
+#include "handler/headers.h"
 #include "transcoding/transcode_dispatcher.h"
 
 using namespace zmm;
@@ -54,7 +54,7 @@ FileRequestHandler::FileRequestHandler(UpnpXMLBuilder* xmlBuilder)
 
 void FileRequestHandler::getInfo(IN const char *filename, OUT UpnpFileInfo *info)
 {
-    HttpProtocolHelper httpProtocolHelper;
+    Headers headers;
     log_debug("start\n");
 
     String mimeType;
@@ -217,18 +217,6 @@ void FileRequestHandler::getInfo(IN const char *filename, OUT UpnpFileInfo *info
         UpnpFileInfo_set_FileLength(info, -1);
     } else {
         UpnpFileInfo_set_FileLength(info, statbuf.st_size);
-        // if we are dealing with a regular file we should add the
-        // Accept-Ranges: bytes header, in order to indicate that we support
-        // seeking
-        if (S_ISREG(statbuf.st_mode)) {
-            if (string_ok(header))
-                header = header + _("\r\n");
-
-            header = header + _("Accept-Ranges: bytes");
-            /// \todo turned out that we are not always allowed to add this
-            /// header, since chunked encoding may be active and we do not
-            /// know that here
-        }
 
         Ref<ConfigManager> cfg = ConfigManager::getInstance();
         if (cfg->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK)) {
@@ -259,39 +247,30 @@ void FileRequestHandler::getInfo(IN const char *filename, OUT UpnpFileInfo *info
                 if (validext.length() > 0) {
                     String burlpath = _(filename);
                     burlpath = burlpath.substring(0, burlpath.rindex('.'));
-                    Ref<Server> server = Server::getInstance();
-                    String url = _("http://")
-                        + server->getIP() + ":" + server->getPort()
-                        + burlpath + validext;
-
-                    if (string_ok(header))
-                        header = header + _("\r\n");
-                    header = header + "CaptionInfo.sec: " + url;
+                    Ref<Server> server = Server::getInstance(); // FIXME server sigleton usage
+                    String url = _("http://") + server->getIP() + ":" + server->getPort() + burlpath + validext;
+                    headers.addHeader(_("CaptionInfo.sec: ") + url);
                 }
             }
         }
         Ref<Dictionary> mappings = cfg->getDictionaryOption(
             CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-        header = getDLNAcontentHeader(mappings->get(item->getMimeType()), header);
+        headers.addHeader(getDLNAcontentHeader(mappings->get(item->getMimeType()), header));
     }
 
     if (!string_ok(mimeType))
         mimeType = item->getMimeType();
-
-        //log_debug("sizeof off_t %d, statbuf.st_size %d\n", sizeof(off_t), sizeof(statbuf.st_size));
-        //log_debug("getInfo: file_length: " OFF_T_SPRINTF "\n", statbuf.st_size);
-
     header = getDLNAtransferHeader(mimeType, header);
+    headers.addHeader(header);
 
-    if (string_ok(header)) {
-        std::string finalHeader = httpProtocolHelper.finalizeHttpHeader(header.c_str());
-//        UpnpFileInfo_set_ExtraHeaders(info, ixmlCloneDOMString(finalHeader.c_str()));
-    }
+    //log_debug("sizeof off_t %d, statbuf.st_size %d\n", sizeof(off_t), sizeof(statbuf.st_size));
+    //log_debug("getInfo: file_length: " OFF_T_SPRINTF "\n", statbuf.st_size);
 
     UpnpFileInfo_set_LastModified(info, statbuf.st_mtime);
     UpnpFileInfo_set_IsDirectory(info, S_ISDIR(statbuf.st_mode));
-    UpnpFileInfo_set_ContentType(info,
-        ixmlCloneDOMString(mimeType.c_str()));
+    UpnpFileInfo_set_ContentType(info, ixmlCloneDOMString(mimeType.c_str()));
+
+    headers.writeHeaders(info);
 
     // log_debug("getInfo: Requested %s, ObjectID: %s, Location: %s\n, MimeType: %s\n",
     //      filename, object_id.c_str(), path.c_str(), info->content_type);
@@ -514,10 +493,8 @@ Ref<IOHandler> FileRequestHandler::open(IN const char* filename,
                 header = header + _("Accept-Ranges: bytes");
             }
 
-
-#ifdef EXTEND_PROTOCOLINFO
             header = getDLNAtransferHeader(mimeType, header);
-#endif
+
             if (string_ok(header))
                 info->http_header = ixmlCloneDOMString(header.c_str());
             */

@@ -21,19 +21,23 @@ Gerbera - https://gerbera.io/
     $Id$
 */
 
-/// \file http_protocol_helper.h
+/// \file headers.h
 
-#ifndef GERBERA_HTTP_PROTOCOL_HELPER_H
-#define GERBERA_HTTP_PROTOCOL_HELPER_H
+#ifndef GERBERA_HEADERS_H
+#define GERBERA_HEADERS_H
 
-class HttpProtocolHelper {
- public:
-  HttpProtocolHelper();
-  ~HttpProtocolHelper();
+#include <action_request.h>
+#include <memory>
+#include <vector>
 
-  /// \brief Adds carriage-return + line-feed [ \r\n ] to end of header (if needed).
-  /// \return string representing finalized header with `/r/n`
-  std::string finalizeHttpHeader(std::string header);
+class Headers {
+public:
+    void addHeader(zmm::String header);
+    void addHeader(const std::string& header);
+    const void writeHeaders(IN UpnpFileInfo *fileInfo);
+
+private:
+    std::unique_ptr<std::vector<std::string>> headers;
 };
 
-#endif //GERBERA_HTTP_PROTOCOL_HELPER_H
+#endif //GERBERA_HEADERS_H
