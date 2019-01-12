@@ -183,7 +183,7 @@ protected:
     /// and ConnectionManagerService), this function looks at the service id
     /// of the request and calls the process_action_request() for the
     /// appropriate service.
-    void routeActionRequest(zmm::Ref<ActionRequest> request);
+    void routeActionRequest(zmm::Ref<ActionRequest> request) const;
 
     /// \brief Dispatched a SubscriptionRequest between the services.
     /// \param request Incoming SubscriptionRequest.
@@ -192,12 +192,12 @@ protected:
     /// and ConnectionManagerService), this function looks at the service id
     /// of the request and calls the process_subscription_request() for the
     /// appropriate service.
-    void routeSubscriptionRequest(zmm::Ref<SubscriptionRequest> request);
+    void routeSubscriptionRequest(zmm::Ref<SubscriptionRequest> request) const;
 
     /// \brief Registers callback functions for the internal web server.
     /// \param filename Incoming filename.
     ///
-    zmm::Ref<RequestHandler> createRequestHandler(const char *filename);
+    zmm::Ref<RequestHandler> createRequestHandler(const char *filename) const;
 
     /// \brief Registers callback functions for the internal web server.
     ///

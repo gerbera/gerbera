@@ -55,7 +55,7 @@ Ref<Storage> Server::storage = nullptr;
 
 static int static_upnp_callback(Upnp_EventType eventtype, const void* event, void* cookie)
 {
-    return static_cast<Server *>(cookie)->handleUpnpEvent(eventtype, event);
+    return static_cast<Server*>(cookie)->handleUpnpEvent(eventtype, event);
 }
 
 void Server::static_cleanup_callback()
@@ -200,7 +200,7 @@ void Server::run()
     log_debug("Registering with UPnP...\n");
     ret = UpnpRegisterRootDevice2(UPNPREG_BUF_DESC,
         deviceDescription.c_str(),
-        (size_t) deviceDescription.length() + 1,
+        (size_t)deviceDescription.length() + 1,
         true,
         static_upnp_callback,
         this,
@@ -222,7 +222,7 @@ void Server::run()
 
     // The advertisement will be sent by LibUPnP every (A/2)-30 seconds, and will have a cache-control max-age of A where A is
     // the value configured here. Ex: A value of 62 will result in an SSDP advertisement being sent every second.
-    log_debug("Sending UPnP Alive advertisements every %d seconds\n", (aliveAdvertisementInterval / 2)-30);
+    log_debug("Sending UPnP Alive advertisements every %d seconds\n", (aliveAdvertisementInterval / 2) - 30);
     ret = UpnpSendAdvertisement(deviceHandle, aliveAdvertisementInterval);
     if (ret != UPNP_E_SUCCESS) {
         throw _UpnpException(ret, _("run: UpnpSendAdvertisement failed"));
@@ -276,7 +276,7 @@ void Server::shutdown()
     storage = nullptr;
 }
 
-int Server::handleUpnpEvent(Upnp_EventType eventtype, const void *event)
+int Server::handleUpnpEvent(Upnp_EventType eventtype, const void* event)
 {
     int ret = UPNP_E_SUCCESS; // general purpose return code
 
@@ -340,7 +340,7 @@ zmm::String Server::getPort() const
     return String::from(UpnpGetServerPort());
 }
 
-void Server::routeActionRequest(Ref<ActionRequest> request)
+void Server::routeActionRequest(Ref<ActionRequest> request) const
 {
     log_debug("start\n");
 
@@ -368,7 +368,7 @@ void Server::routeActionRequest(Ref<ActionRequest> request)
     }
 }
 
-void Server::routeSubscriptionRequest(Ref<SubscriptionRequest> request)
+void Server::routeSubscriptionRequest(Ref<SubscriptionRequest> request) const
 {
     // make sure that the request is for our device
     if (request->getUDN() != serverUDN) {
@@ -402,9 +402,9 @@ void Server::sendCDSSubscriptionUpdate(zmm::String updateString)
     cds->sendSubscriptionUpdate(updateString);
 }
 
-Ref<RequestHandler> Server::createRequestHandler(const char *filename)
+Ref<RequestHandler> Server::createRequestHandler(const char* filename) const
 {
-    String link = urlUnescape((char *) filename);
+    String link = urlUnescape(String::copy(filename));
     log_debug("Filename: %s\n", filename);
 
     RequestHandler* ret = nullptr;
@@ -448,13 +448,12 @@ int Server::registerVirtualDirCallbacks()
     log_debug("Setting UpnpVirtualDir GetInfoCallback\n");
     int ret = UpnpVirtualDir_set_GetInfoCallback([](IN const char* filename, OUT UpnpFileInfo* info, const void* cookie) -> int {
         try {
-            Ref<RequestHandler> reqHandler = const_cast<Server *>(static_cast<const Server *>(cookie))->createRequestHandler(
-                    filename);
+            Ref<RequestHandler> reqHandler = static_cast<const Server *>(cookie)->createRequestHandler(filename);
             reqHandler->getInfo(filename, info);
         } catch (const ServerShutdownException& se) {
             return -1;
         } catch (const SubtitlesNotFoundException& sex) {
-            log_info("%s\n", sex.getMessage().c_str());
+            log_warning("%s\n", sex.getMessage().c_str());
             return -1;
         } catch (const Exception& e) {
             log_error("%s\n", e.getMessage().c_str());
@@ -466,10 +465,10 @@ int Server::registerVirtualDirCallbacks()
 
     log_debug("Setting UpnpVirtualDir OpenCallback\n");
     ret = UpnpVirtualDir_set_OpenCallback([](IN const char* filename, IN enum UpnpOpenFileMode mode, IN const void* cookie) -> UpnpWebFileHandle {
-        String link = urlUnescape((char *) filename);
+        String link = urlUnescape(zmm::String::copy(filename));
 
         try {
-            Ref<RequestHandler> reqHandler = const_cast<Server *>(static_cast<const Server *>(cookie))->createRequestHandler(filename);
+            Ref<RequestHandler> reqHandler = static_cast<const Server*>(cookie)->createRequestHandler(filename);
             Ref<IOHandler> ioHandler = reqHandler->open(link.c_str(), mode, nullptr);
             ioHandler->retain();
             //log_debug("%p open(%s)\n", ioHandler.getPtr(), filename);
@@ -511,7 +510,7 @@ int Server::registerVirtualDirCallbacks()
     ret = UpnpVirtualDir_set_SeekCallback([](IN UpnpWebFileHandle f, IN off_t offset, IN int whence, IN const void* cookie) -> int {
         //log_debug("%p seek(%d, %d)\n", f, offset, whence);
         try {
-            auto* handler = (IOHandler*)f;
+            auto* handler = static_cast<IOHandler*>(f);
             handler->seek(offset, whence);
         } catch (const Exception& e) {
             log_error("Exception during seek: %s\n", e.getMessage().c_str());

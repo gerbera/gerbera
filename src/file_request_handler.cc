@@ -48,11 +48,9 @@ using namespace mxml;
 
 FileRequestHandler::FileRequestHandler(UpnpXMLBuilder* xmlBuilder)
     : RequestHandler()
-    , xmlBuilder(xmlBuilder)
-{
-}
+    , xmlBuilder(xmlBuilder) {};
 
-void FileRequestHandler::getInfo(IN const char *filename, OUT UpnpFileInfo *info)
+void FileRequestHandler::getInfo(IN const char* filename, OUT UpnpFileInfo* info)
 {
     Headers headers;
     log_debug("start\n");
