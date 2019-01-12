@@ -151,7 +151,7 @@ protected:
     /// \brief Time interval to send ssdp:alive advertisements.
     ///
     /// The value is read from the configuration.
-    int alive_advertisement;
+    int aliveAdvertisementInterval;
 
     std::unique_ptr<UpnpXMLBuilder> xmlbuilder;
 

@@ -80,7 +80,7 @@ void Server::init()
     Ref<ConfigManager> config = ConfigManager::getInstance();
 
     serverUDN = config->getOption(CFG_SERVER_UDN);
-    alive_advertisement = config->getIntOption(CFG_SERVER_ALIVE_INTERVAL);
+    aliveAdvertisementInterval = config->getIntOption(CFG_SERVER_ALIVE_INTERVAL);
 
 #ifdef HAVE_CURL
     curl_global_init(CURL_GLOBAL_ALL);
@@ -220,8 +220,10 @@ void Server::run()
     log_debug("Creating MRRegistrarService\n");
     mrreg = std::make_unique<MRRegistrarService>(xmlbuilder.get(), deviceHandle);
 
-    log_debug("Sending UPnP Alive advertisements\n");
-    ret = UpnpSendAdvertisement(deviceHandle, alive_advertisement);
+    // The advertisement will be sent by LibUPnP every (A/2)-30 seconds, and will have a cache-control max-age of A where A is
+    // the value configured here. Ex: A value of 62 will result in an SSDP advertisement being sent every second.
+    log_debug("Sending UPnP Alive advertisements every %d seconds\n", (aliveAdvertisementInterval / 2)-30);
+    ret = UpnpSendAdvertisement(deviceHandle, aliveAdvertisementInterval);
     if (ret != UPNP_E_SUCCESS) {
         throw _UpnpException(ret, _("run: UpnpSendAdvertisement failed"));
     }

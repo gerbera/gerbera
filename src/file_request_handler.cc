@@ -70,15 +70,14 @@ void FileRequestHandler::getInfo(IN const char *filename, OUT UpnpFileInfo *info
     Ref<Dictionary> dict(new Dictionary());
     dict->decodeSimple(parameters);
 
-    log_debug("full url (filename): %s, parameters: %s\n",
-        filename, parameters.c_str());
+    log_debug("full url (filename): %s, parameters: %s\n", filename, parameters.c_str());
 
     String objID = dict->get(_("object_id"));
     if (objID == nullptr) {
         //log_error("object_id not found in url\n");
         throw _Exception(_("getInfo: object_id not found"));
-    } else
-        objectID = objID.toInt();
+    }
+    objectID = objID.toInt();
 
     //log_debug("got ObjectID: [%s]\n", object_id.c_str());
 
