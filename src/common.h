@@ -65,7 +65,6 @@
 #define UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER "object.container.playlistContainer"
 #define UPNP_DEFAULT_CLASS_VIDEO_BROADCAST "object.item.videoItem.videoBroadcast"
 
-#ifdef EXTEND_PROTOCOLINFO
 #define D_HTTP_TRANSFER_MODE_HEADER "transferMode.dlna.org: "
 #define D_HTTP_TRANSFER_MODE_STREAMING "Streaming"
 #define D_HTTP_TRANSFER_MODE_INTERACTIVE "Interactive"
@@ -91,7 +90,6 @@
 #define D_PN_MKV "MKV"
 #define D_PN_AVC_MP4_EU "AVC_MP4_EU"
 #define D_PN_AVI "AVI"
-#endif
 // fixed CdsObjectIDs
 #define CDS_ID_BLACKHOLE -1
 #define CDS_ID_ROOT 0

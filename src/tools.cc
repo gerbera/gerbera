@@ -1300,7 +1300,6 @@ ssize_t getValidUTF8CutPosition(zmm::String str, ssize_t cutpos)
     return pos;
 }
 
-#ifdef EXTEND_PROTOCOLINFO
 String getDLNAprofileString(String contentType)
 {
     String profile;
@@ -1360,7 +1359,6 @@ String getDLNAtransferHeader(String mimeType, String header)
 
     return header;
 }
-#endif
 
 #ifndef HAVE_FFMPEG
 String getAVIFourCC(zmm::String avi_filename)

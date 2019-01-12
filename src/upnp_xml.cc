@@ -310,7 +310,6 @@ Ref<Element> UpnpXMLBuilder::renderDeviceDescription(String presentationURL)
 
     Ref<Element> device(new Element(_("device")));
 
-#ifdef EXTEND_PROTOCOLINFO
     if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO)) {
         //we do not do DLNA yet but this is needed for bravia tv (v5500)
         Ref<Element> DLNADOC(new Element(_("dlna:X_DLNADOC")));
@@ -319,7 +318,6 @@ Ref<Element> UpnpXMLBuilder::renderDeviceDescription(String presentationURL)
         DLNADOC->setAttribute(_("xmlns:dlna"), _("urn:schemas-dlna-org:device-1-0"));
         device->appendElementChild(DLNADOC);
     }
-#endif
 
     device->appendTextChild(_("deviceType"), _(DESC_DEVICE_TYPE));
     if (!string_ok(presentationURL))
@@ -862,14 +860,12 @@ void UpnpXMLBuilder::addResources(Ref<CdsItem> item, Ref<Element> element)
                 if (rct == ID3_ALBUM_ART) {
                     Ref<Element> aa(new Element(MetadataHandler::getMetaFieldName(M_ALBUMARTURI)));
                     aa->setText(url);
-#ifdef EXTEND_PROTOCOLINFO
                     if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO)) {
                         /// \todo clean this up, make sure to check the mimetype and
                         /// provide the profile correctly
                         aa->setAttribute(_("xmlns:dlna"), _("urn:schemas-dlna-org:metadata-1-0"));
                         aa->setAttribute(_("dlna:profileID"), _("JPEG_TN"));
                     }
-#endif
                     element->appendElementChild(aa);
                     continue;
                 }
@@ -888,7 +884,6 @@ void UpnpXMLBuilder::addResources(Ref<CdsItem> item, Ref<Element> element)
                     url = url + renderExtension(contentType, item->getLocation());
             }
         }
-#ifdef EXTEND_PROTOCOLINFO
         if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO)) {
             String extend;
             if (contentType == CONTENT_TYPE_JPG) {
@@ -935,7 +930,6 @@ void UpnpXMLBuilder::addResources(Ref<CdsItem> item, Ref<Element> element)
 
             log_debug("extended protocolInfo: %s\n", protocolInfo.c_str());
         }
-#endif
         // URL is path until now
         url = virtualUrl + url;
 

@@ -112,12 +112,10 @@ void ContentDirectoryService::doBrowse(Ref<ActionRequest> request)
 
     Ref<ConfigManager> cfg = ConfigManager::getInstance();
 
-#ifdef EXTEND_PROTOCOLINFO
     if (cfg->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK)) {
         didl_lite->setAttribute(_(XML_SEC_NAMESPACE_ATTR),
             _(XML_SEC_NAMESPACE));
     }
-#endif
 
     for (int i = 0; i < arr->size(); i++) {
         Ref<CdsObject> obj = arr->get(i);
@@ -169,12 +167,10 @@ void ContentDirectoryService::doSearch(Ref<ActionRequest> request)
 
     Ref<ConfigManager> cfg = ConfigManager::getInstance();
 
-#ifdef EXTEND_PROTOCOLINFO
     if (cfg->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK)) {
         didl_lite->setAttribute(_(XML_SEC_NAMESPACE_ATTR),
             _(XML_SEC_NAMESPACE));
     }
-#endif
 
     zmm::Ref<SearchParam> searchParam = zmm::Ref<SearchParam>(new SearchParam(containerID, searchCriteria,
         std::stoi(startingIndex.c_str(), nullptr), std::stoi(requestedCount.c_str(), nullptr)));

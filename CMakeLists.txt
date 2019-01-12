@@ -27,12 +27,10 @@ set(WITH_AVCODEC        0 CACHE BOOL "Enable ffmpeg/libav")
 set(WITH_FFMPEGTHUMBNAILER 0 CACHE BOOL "Enable Thumbnail generation")
 set(WITH_EXIF           1 CACHE BOOL "Use libexif to extract image metadata")
 set(WITH_EXIV2          0 CACHE BOOL "Use libexiv2 to extract image metadata")
-set(WITH_PROTOCOL_EXTENSIONS 1 CACHE BOOL "Add incomplete DLNA protocol extensions to resposnses")
 set(WITH_SYSTEMD        1 CACHE BOOL "Install Systemd unit file")
 set(WITH_LASTFM         0 CACHE BOOL "Enable LastFM")
 set(WITH_DEBUG          1 CACHE BOOL "Enables debug logging")
 set(WITH_TESTS          0 CACHE BOOL "Enables Unit Tests")
-
 
 set(libgerberaFILES
         src/action_request.cc
@@ -320,10 +318,6 @@ endif()
 
 if (WITH_DEBUG)
     add_definitions(-DTOMBDEBUG)
-endif()
-
-if (WITH_PROTOCOL_EXTENSIONS)
-    add_definitions(-DEXTEND_PROTOCOLINFO)
 endif()
 
 find_package(Threads REQUIRED)

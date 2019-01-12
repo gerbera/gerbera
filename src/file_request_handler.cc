@@ -231,7 +231,6 @@ void FileRequestHandler::getInfo(IN const char *filename, OUT UpnpFileInfo *info
             /// know that here
         }
 
-#ifdef EXTEND_PROTOCOLINFO
         Ref<ConfigManager> cfg = ConfigManager::getInstance();
         if (cfg->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK)) {
             if (item->getMimeType().startsWith(_("video"))) {
@@ -275,7 +274,6 @@ void FileRequestHandler::getInfo(IN const char *filename, OUT UpnpFileInfo *info
         Ref<Dictionary> mappings = cfg->getDictionaryOption(
             CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
         header = getDLNAcontentHeader(mappings->get(item->getMimeType()), header);
-#endif
     }
 
     if (!string_ok(mimeType))
@@ -284,9 +282,7 @@ void FileRequestHandler::getInfo(IN const char *filename, OUT UpnpFileInfo *info
         //log_debug("sizeof off_t %d, statbuf.st_size %d\n", sizeof(off_t), sizeof(statbuf.st_size));
         //log_debug("getInfo: file_length: " OFF_T_SPRINTF "\n", statbuf.st_size);
 
-#ifdef EXTEND_PROTOCOLINFO
     header = getDLNAtransferHeader(mimeType, header);
-#endif
 
     if (string_ok(header)) {
         std::string finalHeader = httpProtocolHelper.finalizeHttpHeader(header.c_str());

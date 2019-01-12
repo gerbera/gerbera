@@ -656,7 +656,6 @@ void ConfigManager::validate(String serverhome)
     NEW_OPTION(charset);
     SET_OPTION(CFG_IMPORT_PLAYLIST_CHARSET);
 
-#ifdef EXTEND_PROTOCOLINFO
     temp = getOption(_("/server/protocolInfo/attribute::extend"),
         _(DEFAULT_EXTEND_PROTOCOLINFO));
     if (!validateYesNo(temp))
@@ -684,7 +683,6 @@ void ConfigManager::validate(String serverhome)
 
     NEW_BOOL_OPTION(temp == "yes" ? true : false);
     SET_BOOL_OPTION(CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK);
-#endif
 
     temp = getOption(_("/server/pc-directory/attribute::upnp-hide"),
         _(DEFAULT_HIDE_PC_DIRECTORY));
