@@ -1,0 +1,30 @@
+@import url('https://fonts.googleapis.com/css?family=Lato');
+
+body {
+    font-family: 'Lato', sans-serif;
+}
+
+h1, h2, .rst-content .toctree-wrapper p.caption, h3, h4, h5, h6, legend {
+    font-family: 'Lato', sans-serif;
+}
+
+a {
+    color: #ff7f00;
+}
+
+.wy-side-nav-search {
+    background-color: #ff7f00;
+}
+
+.wy-side-nav-search > div.version {
+    color: #333;
+}
+
+.wy-side-nav-search input[type="text"] {
+    border-color: #BF5F00;
+}
+
+.highlight {
+    background-color: #333;
+    color: white;
+}
