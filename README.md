@@ -16,19 +16,16 @@ View our documentation online at [http://docs.gerbera.io](http://docs.gerbera.io
 
 ## Features
 
-* Browse and playback your media via UPnP
-* Metadata extraction from mp3, ogg, flac, jpeg, etc. files.
-* Exif thumbnail support
-* User defined server layout based on extracted metadata (scriptable virtual containers)
-* Automatic directory rescans (timed, inotify)
+* Browse and playback your media via your network on all kinds of devices.
+* Metadata extraction from MP3, OGG, AAC, M4A, FLAC, JPG (and many more!) files.
+* Media thumbnail support
 * Web UI with a tree view of the database and the file system, allowing to add/remove/edit/browse your media
 * Highly flexible media format transcoding via plugins / scripts
-* Supports last fm scrobbing using lastfmlib 
+* Automatic directory rescans (timed, inotify)
+* User defined server layout based on extracted metadata
+* Supports last fm scrobbing using lastfmlib
 * On the fly video thumbnail generation with libffmpegthumbnailer
 * Support for external URLs (create links to internet content and serve them via UPnP to your renderer)
-* Support for ContentDirectoryService container updates
-* Active Items (experimental feature), allows execution of server side scripts upon HTTP GET requests to certain items
-* Highly flexible configuration, allowing you to control the behavior of various features of the server
 * runs on Linux, FreeBSD, NetBSD, Mac OS X, eCS
 * runs on x86, Alpha, ARM, MIPS, Sparc, PowerPC
 
