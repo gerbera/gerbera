@@ -24,7 +24,11 @@ a {
     border-color: #BF5F00;
 }
 
-.highlight {
-    background-color: #333;
-    color: white;
+.wy-menu-vertical a:active {
+    background-color: #ff7f00;
+}
+
+.rst-content dl:not(.docutils) dt {
+    background: #faf4ec;
+    border-top: solid 3px #ff7f00;
 }
