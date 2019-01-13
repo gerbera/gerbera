@@ -93,7 +93,7 @@ Contributions
 
 .. toctree::
    :maxdepth: 1
-   :caption: Contents:
+   :hidden:
 
    Install Gerbera            <install>
    Run Gerbera                <run>
@@ -102,15 +102,10 @@ Contributions
    Supported Devices          <supported-devices>
    Transcoding                <transcoding>
    Scripting                  <scripting>
-   Configuration Overview     <config-overview>
-   Configure Server           <config-server>
-   Configure Extended Options <config-extended>
-   Configure Content Import   <config-import>
-   Configure Online Content   <config-online>
-   Configure Transcoding      <config-transcode>
+   Configuration              <config-overview>
    Compile Gerbera            <compile>
 
-Indices and Tables
+Index
 ==================
 
 * :ref:`genindex`

@@ -1,7 +1,8 @@
-.. index:: Configuration Overview
 
-Configuration Overview
-======================
+Configuration
+=============
+
+.. index:: Configuration Overview
 
 Gerbera is highly configurable and allows the user to set various options and preferences that define the server's
 behavior. Rather than enforcing certain features upon the user, we prefer to offer a number of choices where possible.
@@ -35,48 +36,13 @@ The server configuration file has several options.  Below are links to the confi
 * :doc:`Online Content </config-online>`
 * :doc:`Transcode Content </config-transcode>`
 
-.. _generateConfig:
+.. toctree::
+   :maxdepth: 1
+   :hidden:
 
-Generating Configuration
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-The gerbera runtime requires a configuration file to launch the application. Gerbera provides a command line utility
-``--create-config`` to generate a standard ``config.xml`` file with defaults.  You will need to generate
-the configuration file when running Gerbera for the first time.  Gerbera reports the missing configuration upon startup
-similar to the message below
-
-::
-
-  The server configuration file could not be found in ~/.config/gerbera
-  Gerbera could not find a default configuration file.
-  Try specifying an alternative configuration file on the command line.
-  For a list of options run: gerbera -h
-
-* Run command to create configuration
-
-::
-
-  $ gerbera --create-config
-
-This command outputs the ``config.xml`` to the standard output.
-
-* Run command to create configuration, storing in the ``/etc/gerbera`` directory.
-
-::
-
-  $ gerbera --create-config | sudo tee /etc/gerbera/config.xml
-
-You can start Gerbera with similar command as below:
-
-::
-
-  $ gerbera -c /etc/gerbera/config.xml
-
-
-**NOTE**
-
-* You might need to create the directory gerbera inside the `~/.config/` folder and change the owner to gerbera
-    - `mkdir ~/.config/gerbera`
-    - `sudo chown gerbera:gerbera gerbera`
-* Gerbera sets the ``<home>`` to the runtime user's home by default.  Be sure to update accordingly.
-* Ensure the **gerbera** user has proper permissions to the ``config.xml`` file.
+   Config Generation        <config-generate>
+   Server Options           <config-server>
+   Extended Options         <config-extended>
+   Content Import Options   <config-import>
+   Online Content Options   <config-online>
+   Transcoding Options      <config-transcode>

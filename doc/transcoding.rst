@@ -58,7 +58,7 @@ profile configuration. The special command line tokes %in and %out that are used
 input file name or input URL and the output FIFO name.
 
 So, the parameters tell the transcoding application: read content from this file, transcode it, and write the output to
-this FIFO. MediaTomb will read the output from the FIFO and serve the transcoded stream to the player device.
+this FIFO. Gerbera will read the output from the FIFO and serve the transcoded stream to the player device.
 
 Buffering is implemented to allow smooth playback and compensate for high bitrate scenes that may require more CPU
 power in the transcoding process.
@@ -70,11 +70,8 @@ The chosen approach is extremely flexible and gives you maximum freedom of choic
 and rtp streams even if this is originally not supported by your player, blend in subtitles or even listen to text
 documents using a text to speech processor.
 
-**Note:**
-  it is possible and may be more convenient to call a wrapper script and not the transcoding application
-  directly, however, in this case make sure that your shell script uses exec when calling the transcoder.
-  Otherwise we will not be able to kill it.
-
+.. Warning:: If using a wrapper script make sure that your script uses ``exec`` when calling the transcoder otherwise Gerbera
+    will not be able to kill it.
 
 Sample Configuration
 ~~~~~~~~~~~~~~~~~~~~
@@ -95,8 +92,8 @@ Profile Selection
 -----------------
 
 What do we want to transcode? Let's assume that you have some .flv files on your drive or that you want to watch YouTube
-videos on your device using MediaTomb. I have not yet heard of a UPnP player device that natively supports flash video, so
-let's tell MediaTomb what we want to transcode all .flv content to something that our device understands.
+videos on your device using Gerbera. I have not yet heard of a UPnP player device that natively supports flash video, so
+let's tell Gerbera what we want to transcode all .flv content to something that our device understands.
 
 This can be done in the mimetype-profile section under transcoding, mappings:
 
@@ -104,7 +101,7 @@ This can be done in the mimetype-profile section under transcoding, mappings:
 
     <transcode mimetype="video/x-flv" using="vlcprof"/>
 
-So, we told MediaTomb to transcode all video/x-flv content
+So, we told Gerbera to transcode all video/x-flv content
 using the profile named ``vlcprof``.
 
 
@@ -169,8 +166,8 @@ command line options for it:
 
 In the above example the command to be executed is "vlc, it will be called with parameter specified in the arguments
 attribute. Note the special %in and %out tokens - they are not part of the vlc command line but have a special meaning in
-MediaTomb. The %in token will be replaced by the input file name (i.e. the file that needs to be transcoded) and the %out
-token will be replaced by the output FIFO name, from where the transcoded content will be read by MediaTomb and sent to the
+Gerbera. The %in token will be replaced by the input file name (i.e. the file that needs to be transcoded) and the %out
+token will be replaced by the output FIFO name, from where the transcoded content will be read by Gerbera and sent to the
 player.
 
 Just to make it clearer:
@@ -220,7 +217,7 @@ too big chunk at the same time you may empty the buffer.
 Accepting Or Proxying Online Content
 ------------------------------------
 
-With MediaTomb it is possible to add items that are not pointing to local content, but to online resources. It can be
+With Gerbera it is possible to add items that are not pointing to local content, but to online resources. It can be
 an mp3 stream, a YouTube video or some photos stored on the web. In case that the online media is stored in a format that
 is not supported by your player, you can use transcoding to convert it. Some transcoding applications, like VLC, handle
 online content pretty well, so you can give a URL directly to the transcoder and it will handle the data download itself. You
@@ -232,7 +229,7 @@ special option:
 
     <accept-url>no</accept-url>
 
-If this option is set to "no" MediaTomb will handle the download of the content and will feed the input to the
+If this option is set to "no" Gerbera will handle the download of the content and will feed the input to the
 transcoder via a FIFO. Of course the transcoding application must be capable of handling input from a FIFO. This only works
 for the HTTP protocol, we do not handle RTSP or MMS streams, use VLC is you want to handle those. When this option is set to
 "yes" we will give the URL to the transcoder.
@@ -269,7 +266,7 @@ Advanced Settings
 -----------------
 
 Sometimes you encounter a container format but want to transcode it only if it has a specific codec inside. Provided
-that MediaTomb was compiled with ffmpeg support we offer fourcc based transcoding settings for AVI files. A sample
+that Gerbera was compiled with ffmpeg support we offer fourcc based transcoding settings for AVI files. A sample
 configuration for a profile with fourcc specific settings would look like that:
 
 .. code-block:: xml
@@ -301,7 +298,7 @@ Testing And Troubleshooting
 
 The external transcoding feature is very flexible, however there is a price for flexibility: a lot of things can go wrong.
 This section will try to cover the most common problems and present some methods on how things can be tested outside of
-MediaTomb.
+Gerbera.
 
 
 Testing the Transcoder
@@ -366,7 +363,7 @@ Most common cases are:
  * wrong output mime type: make sure that the mime type specified in the profile matches the media format that is
    produced by your transcoder.
 
- * no permissions to execute the transcoding application: check that the user under which MediaTomb is running has
+ * no permissions to execute the transcoding application: check that the user under which Gerbera is running has
    sufficient permissions to run the transcoding script or application.
 
  * transcoding script is not executable or is not in ``$PATH``: if you use a wrapper script around your transcoder, make sure
@@ -377,6 +374,6 @@ Problem Transcoding Online Streams
 ----------------------------------
 
 Some transcoding applications do not accept online content directly or have problems transcoding online media. If this is
-the case, set the ``<accept-url>`` option appropriately (currently MediaTomb only supports proxying of HTTP streams). This will
-put the transcoder between two FIFOs, the online content will be downloaded by MediaTomb and fed to the transcoder via a
+the case, set the ``<accept-url>`` option appropriately (currently Gerbera only supports proxying of HTTP streams). This will
+put the transcoder between two FIFOs, the online content will be downloaded by Gerbera and fed to the transcoder via a
 FIFO.
