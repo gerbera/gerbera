@@ -113,10 +113,10 @@ class ScriptTestFixture : public ::testing::Test {
   // Proxy the Duktape script with `getRootPath` common.js function
   static getRootPathParams getRootPath(duk_context *ctx);
 
-  // Porxy the Duktape script with `copyObject` global function
+  // Proxy the Duktape script with `copyObject` global function
   static copyObjectParams copyObject(duk_context *ctx, map<string, string> obj, map<string, string> meta);
 
-  // Porxy the Duktape script with `copyObject` global function
+  // Proxy the Duktape script with `copyObject` global function
   static getCdsObjectParams getCdsObject(duk_context *ctx, map<string, string> obj, map<string, string> meta);
 
   // Script file name under test
