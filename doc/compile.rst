@@ -3,8 +3,55 @@
 Compile Gerbera
 ===============
 
-The project has been ported to `CMake <https://cmake.org/>`_.
+Gerbera uses the excellent `CMake <https://cmake.org/>`_ build system.
 
+
+.. _gerbera-requirements:
+
+Dependencies
+~~~~~~~~~~~~
+
+.. Note:: Remember to install associated development packages, because development headers are needed for compilation!
+
+In order to compile Gerbera you will have to install the following packages:
+
++-------------------+-----------+---------------+----------------------------+------------------------+----------+
+| Library           | Version   | Required?     | Note                       | Compile-time option    | Default  |
++===================+===========+===============+============================+========================+==========+
+| libupnp           | 1.8.3     | Required      | `pupnp <https://github.com/mrjimenez/pupnp>`_       |          |
++-------------------+-----------+---------------+----------------------------+------------------------+----------+
+| libuuid           |           | Depends on OS | On BSD native libuuid is   |                        |          |
+|                   |           |               | used others require        |                        |          |
+|                   |           |               | e2fsprogs-libuuid          |                        |          |
++-------------------+-----------+---------------+----------------------------+------------------------+----------+
+| expat             |           | Required      |                            |                        |          |
++-------------------+-----------+---------------+----------------------------+------------------------+----------+
+| libiconv          |           | Required      |                            |                        |          |
++-------------------+-----------+---------------+----------------------------+------------------------+----------+
+| sqlite3           |           | Required      | Database storage           |                        |          |
++-------------------+-----------+---------------+----------------------------+------------------------+----------+
+| duktape           | 2.1.0     | Optional      | Scripting Support          | WITH_JS                | Enabled  |
++-------------------+-----------+---------------+----------------------------+------------------------+----------+
+| mysql             |           | Optional      | Alternate database storage | WITH_MYSQL             | Disabled |
++-------------------+-----------+---------------+----------------------------+------------------------+----------+
+| curl              |           | Optional      | Enables web services       | WITH_CURL              | Enabled  |
++-------------------+-----------+---------------+----------------------------+------------------------+----------+
+| taglib            | 1.11.1    | Optional      | Audio tag support          | WITH_TAGLIB            | Enabled  |
++-------------------+-----------+---------------+----------------------------+------------------------+----------+
+| libmagic          |           | Optional      | File type detection        | WITH_MAGIC             | Enabled  |
++-------------------+-----------+---------------+----------------------------+------------------------+----------+
+| ffmpeg/libav      |           | Optional      | File metadata              | WITH_AVCODEC           | Disabled |
++-------------------+-----------+---------------+----------------------------+------------------------+----------+
+| libexif           |           | Optional      | JPEG Exif metadata         | WITH_EXIF              | Enabled  |
++-------------------+-----------+---------------+----------------------------+------------------------+----------+
+| libexiv2          |           | Optional      | Exif, IPTC, XMP metadata   | WITH_EXIV2             | Disabled |
++-------------------+-----------+---------------+----------------------------+------------------------+----------+
+| lastfmlib         | 0.4.0     | Optional      | Enables scrobbling         | WITH_LASTFM            | Disabled |
++-------------------+-----------+---------------+----------------------------+------------------------+----------+
+| ffmpegthumbnailer |           | Optional      | Generate video thumbnails  | WITH_FFMPEGTHUMBNAILER | Disabled |
++-------------------+-----------+---------------+----------------------------+------------------------+----------+
+| inotify           |           | Optional      | Efficient file monitoring  | WITH_INOTIFY           | Enabled  |
++-------------------+-----------+---------------+----------------------------+------------------------+----------+
 
 .. index:: Quick Start Build
 

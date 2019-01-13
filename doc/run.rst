@@ -3,25 +3,38 @@
 Run Gerbera
 ===========
 
-When you run Gerbera for the first time a default configuration is created in
-the ``~/.config/gerbera`` directory. If you are using the sqlite database no further intervention is necessary,
-if you are using MySQL you will have to make some adjustments (see :ref:`Configuration <storage>` section for more details).
-To start the server simply run "gerbera" from the console, to shutdown cleanly press Ctrl-C. At start up Gerbera
-will print a link to the web UI.
+.. Note:: Whilst you can run Gerbera as a "regular" application. It is strongly recommended to run it as a :ref:`system service <daemon>` instead.
 
-If you want to run a second server from the same PC, make sure to use a different
-configuration file with a different udn and a different database.
+.. Warning::
+    The server has an integrated :ref:`file system browser <filesystem-view>` in the UI, that means that anyone who has access to the UI can browse
+    your file system (with user permissions under which the server is running) and also download your files! If you want maximum security - disable
+    the UI. :ref:`Account authentication <ui>` offers simple protection that might hold back your kids, but it is not secure enough for use
+    in an untrusted environment!
 
-After server launch the bookmark file is created in the ``~/.config/gerbera`` directory.
-You now can manually add the bookmark ``~/.config/gerbera/gerbera.html`` in your browser.
-This will redirect you to the UI if the server is running.
+.. Note::
+    Since the server is meant to be used in a home LAN environment the UI is enabled by default and accounts are
+    deactivated, thus allowing anyone on your network to connect to the user interface.
+
+First Time Launch
+~~~~~~~~~~~~~~~~~
+
+If you decide against running as a system service for whatever reason, then when run by a user the first time startup of Gerbera creates a folder
+called ``~/.config/gerbera`` in your home directory.
+
+You must generate a ``config.xml`` file for Gerbera to use.
+
+Review the :ref:`Generating Configuration <generateConfig>` section of the documentation to see how to use ``gerbera`` to create a
+default configuration file.
+
+Multiple Instances
+~~~~~~~~~~~~~~~~~~
+
+If you want to run a second server from the same PC, make sure to use a different configuration file with a different udn and a different database.
+
+After server launch the bookmark file is created in the ``~/.config/gerbera`` directory. You now can manually add the bookmark
+``~/.config/gerbera/gerbera.html`` in your browser. This will redirect you to the UI if the server is running.
 
 Assuming that you enabled the UI, you should now be able to get around quite easily.
-
-We also support the :ref:`daemon mode <daemon>` which allows to start the server in background, the --user and --group
-parameters should be used to run the server under an unprivileged account.
-A script for starting/stopping the server is provided.
-
 
 Network Setup
 ~~~~~~~~~~~~~
@@ -31,7 +44,7 @@ respond to M-SEARCH requests from the renderer (i.e. Gerbera is running, but you
 you should try the following settings
 (the lines below assume that Gerbera is running on a Linux machine, on network interface eth1):
 
-::
+.. code-block:: console
 
     # route add -net 239.0.0.0 netmask 255.0.0.0 eth1
     # ifconfig eth1 allmulti
@@ -42,20 +55,13 @@ You should also make sure that your firewall is not blocking port UDP port ``190
 port of Gerbera. By default Gerbera will select a free port starting with ``49152``, however you can specify a port
 of your choice in the configuration file.
 
-First Time Launch
-~~~~~~~~~~~~~~~~~
-
-First time startup of Gerbera creates a folder called ``~/.config/gerbera`` in your home directory.
-You must generate a ``config.xml`` file for Gerbera to use.  Review the :ref:`Generating Configuration <generateConfig>`
-section of the documentation to see how to use ``gerbera`` to create a default configuration file.
-
 .. index:: Sqlite
 
-Using Sqlite Database
-~~~~~~~~~~~~~~~~~~~~~
+Using Sqlite Database (Default)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If you are using sqlite - you are ready to go, the database file will be created automatically and will be
-located ``~/.config/gerbera/gerbera.db`` If needed you can adjust the database file name and location in the
+By default Gerbera will use an SQLite database, it requires no configuration - you are ready to go! The database file will be created
+automatically and will be located ``~/.config/gerbera/gerbera.db`` If needed you can adjust the database file name and location in the
 server configuration file.
 
 .. index:: MySQL
@@ -125,15 +131,14 @@ launch the server, and everything should work.
 Command Line Options
 ~~~~~~~~~~~~~~~~~~~~
 
+.. Note:: Command line options override settings in the configuration file
+
 There is a number of options that can be passed via command line upon server start up, for a short summary you can
 invoke Gerbera with the following parameter:
 
 ::
 
     $ gerbera --help
-
-Note:
-    the command line options override settings in the configuration file!
 
 IP Address
 ----------
@@ -143,7 +148,7 @@ IP Address
     --ip or -i
 
 The server will bind to the given IP address, currently we can not bind to multiple interfaces so binding to ``0.0.0.0``
-will not be possible.
+is not be possible.
 
 Interface
 ---------
@@ -152,7 +157,7 @@ Interface
 
     --interface or -e
 
-Interface to bind to, for example eth0, this can be specified instead of the ip address.
+Interface to bind to, for example eth0, this can be specified instead of the IP address.
 
 Port
 ----
@@ -175,15 +180,6 @@ Configuration File
 By default Gerbera will search for a file named **config.xml** in the ``~/.config/gerbera`` directory.
 This option allows you to specify a config file by the name and location of your choice.
 The file name must be absolute.
-
-Daemon Mode
------------
-
-::
-
-    --daemon or -d
-
-Run the server in background, Gerbera will shutdown on SIGTERM, SIGINT and restart on SIGHUP.
 
 Home Directory
 --------------
@@ -211,33 +207,6 @@ Config Directory
 The default configuration directory is combined out of the users home and the default that equals to ``.config/gerbera``,
 this option allows you to override the default directory naming. This is useful when you want to setup the server in a
 nonstandard location, but want that the default configuration to be written by the server.
-
-Write PID File
---------------
-
-::
-
-    --pidfile or -P
-
-Specify a file that will hold the server process ID, the filename must be absolute.
-
-Run Under Different User Name
------------------------------
-
-::
-
-    --user or -u
-
-Run Gerbera under the specified user name, this is especially useful in combination with the daemon mode.
-
-Run Under Different Group
--------------------------
-
-::
-
-    --group or -g
-
-Run Gerbera under the specified group, this is especially useful in combination with the daemon mode.
 
 Add Content
 -----------
