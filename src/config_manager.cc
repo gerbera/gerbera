@@ -1474,6 +1474,27 @@ void ConfigManager::writeBookmark(String ip, String port)
         throw _Exception(_("write_Bookmark: failed to write to: ") + path);
 }
 
+void ConfigManager::emptyBookmark()
+{
+    String data = _("<html><body><h1>Gerbera Media Server is not running.</h1><p>Please start it and try again.</p></body></html>");
+
+    String filename = getOption(CFG_SERVER_BOOKMARK_FILE);
+    String path = construct_path(filename);
+
+    log_debug("Clearing bookmark file at: %s\n", path.c_str());
+
+    FILE* f = fopen(path.c_str(), "w");
+    if (f == nullptr) {
+        throw _Exception(_("emptyBookmark: failed to open: ") + path);
+    }
+
+    int size = fwrite(data.c_str(), sizeof(char), data.length(), f);
+    fclose(f);
+
+    if (size < data.length())
+        throw _Exception(_("emptyBookmark: failed to write to: ") + path);
+}
+
 String ConfigManager::checkOptionString(String xpath)
 {
     String temp = getOption(xpath);

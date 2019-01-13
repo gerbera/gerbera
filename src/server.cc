@@ -255,6 +255,7 @@ void Server::shutdown()
     Storage::getInstance()->shutdown();
     */
 
+    ConfigManager::getInstance()->emptyBookmark();
     server_shutdown_flag = true;
 
     log_debug("Server shutting down\n");
@@ -274,6 +275,8 @@ void Server::shutdown()
         static_cleanup_callback();
     }
     storage = nullptr;
+
+
 }
 
 int Server::handleUpnpEvent(Upnp_EventType eventtype, const void* event)

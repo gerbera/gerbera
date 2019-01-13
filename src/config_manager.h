@@ -238,6 +238,7 @@ public:
     /// \brief Creates a html file that is a redirector to the current server i
     /// instance
     void writeBookmark(zmm::String ip, zmm::String port);
+    void emptyBookmark();
 
 protected:
     void validate(zmm::String serverhome);
