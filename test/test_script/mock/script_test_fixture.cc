@@ -226,6 +226,28 @@ addCdsObjectParams ScriptTestFixture::addCdsObject(duk_context *ctx, vector<stri
   return params;
 }
 
+copyObjectParams ScriptTestFixture::copyObject(duk_context *ctx, map<string, string> obj, map<string, string> meta) {
+  duk_bool_t isObjectParam = duk_is_object(ctx, 0);
+  copyObjectParams params;
+  params.isObject = isObjectParam;
+
+  DukTestHelper dukHelper;
+  dukHelper.createObject(ctx, std::move(obj), std::move(meta));
+
+  return params;
+}
+
+getCdsObjectParams ScriptTestFixture::getCdsObject(duk_context *ctx, map<string, string> obj, map<string, string> meta) {
+  string location = duk_get_string(ctx, 0);
+  getCdsObjectParams params;
+  params.location = location;
+
+  DukTestHelper dukHelper;
+  dukHelper.createObject(ctx, std::move(obj), std::move(meta));
+
+  return params;
+}
+
 abcBoxParams ScriptTestFixture::abcBox(duk_context *ctx) {
   string inputValue;
   int boxType;

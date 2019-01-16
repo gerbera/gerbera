@@ -24,6 +24,9 @@ class DukTestHelper {
   // to a map of its properties using the property keys passed into
   // the method
   map<string, string> extractValues(duk_context *ctx, vector<string> keys, duk_idx_t idx);
+
+  // Adds a new object to the duk_context with meta data
+  void createObject(duk_context *ctx, map<string, string> objectProps, map<string, string> metaProps);
  private:
 
   // Extracts the property value given a complex associative array key
