@@ -36,7 +36,7 @@
 
 extern FILE* LOG_FILE;
 
-void log_open(char* filename);
+void log_open(const char* filename);
 void log_close();
 
 #define log_info(format, ...) _log_info(format, ##__VA_ARGS__)

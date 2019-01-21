@@ -34,8 +34,6 @@
 /// This documentation was generated using doxygen, you can reproduce it by
 /// running "doxygen doxygen.conf" from the mediatomb/doc/ directory.
 
-#include <getopt.h>
-
 #include <csignal>
 #include <mutex>
 #ifdef SOLARIS
@@ -106,10 +104,8 @@ int main(int argc, char** argv, char** envp)
     ("c,config", "Path to config file", cxxopts::value<std::string>())
     ("m,home", "Search this directory for a .gerbera folder containing a config file", cxxopts::value<std::string>())
     ("f,cfgdir", "Override name of config folder (.config/gerbera) by default. -h must also be set.", cxxopts::value<std::string>())
-    ("l,logfile", "Set log location", cxxopts::value<std::string>())
-    ("compile-info", "Print compile info and exit")
-    ("v,version", "Print version info and exit")
-    ("h,help", "Print this help and exit")
+    ("l,logfile", "Set log location", cxxopts::value<std::string>())("compile-info", "Print compile info and exit")
+    ("v,version", "Print version info and exit")("h,help", "Print this help and exit")
     ("create-config", "Print a default config.xml file and exit")
     ("add-file", "Scan a file into the DB on startup, can be specified multiple times", cxxopts::value<std::vector<std::string>>(), "FILE");
 
@@ -139,6 +135,11 @@ int main(int argc, char** argv, char** envp)
                           << "Git Commit: " << GIT_COMMIT_HASH << std::endl;
             }
             exit(EXIT_SUCCESS);
+        }
+
+        std::optional<std::string> logfile;
+        if (opts.count("logfile") > 0) {
+            log_open(opts["logfile"].as<std::string>().c_str());
         }
 
         // Action starts here

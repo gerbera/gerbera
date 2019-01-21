@@ -51,7 +51,7 @@ FILE* LOG_FILE = stderr;
     if (!LOG_FILE) \
         return;
 
-void log_open(char* filename)
+void log_open(const char* filename)
 {
     LOG_FILE = fopen(filename, "a");
     if (!LOG_FILE) {
