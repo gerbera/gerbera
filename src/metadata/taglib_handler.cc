@@ -32,19 +32,18 @@
 
 #ifdef HAVE_TAGLIB
 
-
-#include <taglib/tpropertymap.h>
-#include <taglib/attachedpictureframe.h>
 #include <taglib/aifffile.h>
 #include <taglib/apefile.h>
 #include <taglib/asffile.h>
+#include <taglib/attachedpictureframe.h>
 #include <taglib/flacfile.h>
-#include <taglib/tfilestream.h>
-#include <taglib/tiostream.h>
 #include <taglib/id3v2tag.h>
 #include <taglib/mp4file.h>
 #include <taglib/mpegfile.h>
 #include <taglib/textidentificationframe.h>
+#include <taglib/tfilestream.h>
+#include <taglib/tiostream.h>
+#include <taglib/tpropertymap.h>
 #include <taglib/vorbisfile.h>
 #include <taglib/wavpackfile.h>
 
@@ -57,7 +56,8 @@
 
 using namespace zmm;
 
-TagLibHandler::TagLibHandler() : MetadataHandler()
+TagLibHandler::TagLibHandler()
+    : MetadataHandler()
 {
 }
 
@@ -140,16 +140,16 @@ static void addField(metadata_fields_t field, const TagLib::File& file, const Ta
     case M_CONDUCTOR:
         list = file.properties()["CONDUCTOR"];
         if (!list.isEmpty())
-          val = list[0];
+            val = list[0];
         else
-          return;
+            return;
         break;
     case M_ORCHESTRA:
         list = file.properties()["ORCHESTRA"];
         if (!list.isEmpty())
-          val = list[0];
+            val = list[0];
         else
-          return;
+            return;
         break;
     default:
         return;
@@ -222,7 +222,7 @@ void TagLibHandler::fillMetadata(Ref<CdsItem> item)
     if (content_type == CONTENT_TYPE_MP3) {
         extractMP3(&fs, item);
     } else if (content_type == CONTENT_TYPE_FLAC) {
-       extractFLAC(&fs, item);
+        extractFLAC(&fs, item);
     } else if (content_type == CONTENT_TYPE_MP4) {
         extractMP4(&fs, item);
     } else if (content_type == CONTENT_TYPE_OGG) {
@@ -378,11 +378,11 @@ Ref<IOHandler> TagLibHandler::serveContent(IN Ref<CdsItem> item, IN int resNum, 
         if (!f.isValid() || !f.tag())
             throw _Exception(_("TagLibHandler: could not open vorbis file: ") + item->getLocation());
 
-        const TagLib::List<TagLib::FLAC::Picture *> picList = f.tag()->pictureList();
+        const TagLib::List<TagLib::FLAC::Picture*> picList = f.tag()->pictureList();
         if (picList.isEmpty())
             throw _Exception(_("TagLibHandler: vorbis file has no picture information"));
 
-        const TagLib::FLAC::Picture *pic = picList.front();
+        const TagLib::FLAC::Picture* pic = picList.front();
         const TagLib::ByteVector& data = pic->data();
 
         Ref<IOHandler> h(new MemIOHandler(data.data(), data.size()));
@@ -393,19 +393,20 @@ Ref<IOHandler> TagLibHandler::serveContent(IN Ref<CdsItem> item, IN int resNum, 
     throw _Exception(_("TagLibHandler: Unsupported content_type: ") + content_type);
 }
 
-void TagLibHandler::extractMP3(TagLib::IOStream *roStream, zmm::Ref<CdsItem> item) {
+void TagLibHandler::extractMP3(TagLib::IOStream* roStream, zmm::Ref<CdsItem> item)
+{
     TagLib::MPEG::File mp3(roStream, TagLib::ID3v2::FrameFactory::instance());
 
     if (!mp3.isValid() || !mp3.hasID3v2Tag()) {
         log_debug("TagLibHandler: could not open mp3 file: %s\n",
-                  item->getLocation().c_str());
+            item->getLocation().c_str());
         return;
     }
     populateGenericTags(item, mp3);
 
     Ref<StringConverter> sc = StringConverter::i2i();
 
-    Ref<Array<StringBase> > aux_tags_list = ConfigManager::getInstance()->getStringArrayOption(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
+    Ref<Array<StringBase>> aux_tags_list = ConfigManager::getInstance()->getStringArrayOption(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
     if (aux_tags_list != nullptr) {
         for (int j = 0; j < aux_tags_list->size(); j++) {
 
@@ -421,7 +422,7 @@ void TagLibHandler::extractMP3(TagLib::IOStream *roStream, zmm::Ref<CdsItem> ite
                 if (frameList.isEmpty())
                     continue;
 
-                const TagLib::ID3v2::Frame *frame = frameList.front();
+                const TagLib::ID3v2::Frame* frame = frameList.front();
                 const auto textFrame = static_cast<const TagLib::ID3v2::TextIdentificationFrame*>(frame);
 
                 const TagLib::String frameContents = textFrame->toString();
@@ -449,12 +450,13 @@ void TagLibHandler::extractMP3(TagLib::IOStream *roStream, zmm::Ref<CdsItem> ite
     }
 }
 
-void TagLibHandler::extractOgg(TagLib::IOStream *roStream, zmm::Ref<CdsItem> item) {
+void TagLibHandler::extractOgg(TagLib::IOStream* roStream, zmm::Ref<CdsItem> item)
+{
     TagLib::Ogg::Vorbis::File vorbis(item->getLocation().c_str());
 
     if (!vorbis.isValid()) {
         log_debug("TagLibHandler: could not open ogg file: %s\n",
-                  item->getLocation().c_str());
+            item->getLocation().c_str());
         return;
     }
     populateGenericTags(item, vorbis);
@@ -465,11 +467,11 @@ void TagLibHandler::extractOgg(TagLib::IOStream *roStream, zmm::Ref<CdsItem> ite
     // Vorbis uses the FLAC binary picture structure...
     // https://wiki.xiph.org/VorbisComment#Cover_art
     // The unofficial COVERART field is not supported.
-    const TagLib::List<TagLib::FLAC::Picture *> picList = vorbis.tag()->pictureList();
+    const TagLib::List<TagLib::FLAC::Picture*> picList = vorbis.tag()->pictureList();
     if (picList.isEmpty())
         return;
 
-    const TagLib::FLAC::Picture *pic = picList.front();
+    const TagLib::FLAC::Picture* pic = picList.front();
     const TagLib::ByteVector& data = pic->data();
 
     Ref<StringConverter> sc = StringConverter::i2i();
@@ -480,12 +482,13 @@ void TagLibHandler::extractOgg(TagLib::IOStream *roStream, zmm::Ref<CdsItem> ite
     addArtworkResource(item, art_mimetype);
 }
 
-void TagLibHandler::extractASF(TagLib::IOStream *roStream, zmm::Ref<CdsItem> item) {
+void TagLibHandler::extractASF(TagLib::IOStream* roStream, zmm::Ref<CdsItem> item)
+{
     TagLib::ASF::File asf(roStream);
 
     if (!asf.isValid()) {
         log_debug("TagLibHandler: could not open asf/wma file: %s\n",
-                  item->getLocation().c_str());
+            item->getLocation().c_str());
         return;
     }
     populateGenericTags(item, asf);
@@ -509,19 +512,20 @@ void TagLibHandler::extractASF(TagLib::IOStream *roStream, zmm::Ref<CdsItem> ite
     }
 }
 
-void TagLibHandler::extractFLAC(TagLib::IOStream *roStream, zmm::Ref<CdsItem> item) {
+void TagLibHandler::extractFLAC(TagLib::IOStream* roStream, zmm::Ref<CdsItem> item)
+{
     TagLib::FLAC::File flac(roStream, TagLib::ID3v2::FrameFactory::instance());
 
     if (!flac.isValid()) {
         log_debug("TagLibHandler: could not open flac file: %s\n",
-                  item->getLocation().c_str());
+            item->getLocation().c_str());
         return;
     }
     populateGenericTags(item, flac);
 
     Ref<StringConverter> sc = StringConverter::i2i();
 
-    Ref<Array<StringBase> > aux_tags_list = ConfigManager::getInstance()->getStringArrayOption(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
+    Ref<Array<StringBase>> aux_tags_list = ConfigManager::getInstance()->getStringArrayOption(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
     if (aux_tags_list != nullptr) {
         for (int j = 0; j < aux_tags_list->size(); j++) {
 
@@ -552,7 +556,7 @@ void TagLibHandler::extractFLAC(TagLib::IOStream *roStream, zmm::Ref<CdsItem> it
         log_debug("TagLibHandler: flac resource has no picture information\n");
         return;
     }
-    const TagLib::FLAC::Picture *pic = flac.pictureList().front();
+    const TagLib::FLAC::Picture* pic = flac.pictureList().front();
     const TagLib::ByteVector& data = pic->data();
 
     String art_mimetype = sc->convert(pic->mimeType().toCString(true));
@@ -562,35 +566,38 @@ void TagLibHandler::extractFLAC(TagLib::IOStream *roStream, zmm::Ref<CdsItem> it
     addArtworkResource(item, art_mimetype);
 }
 
-void TagLibHandler::extractAPE(TagLib::IOStream *roStream, zmm::Ref<CdsItem> item) {
+void TagLibHandler::extractAPE(TagLib::IOStream* roStream, zmm::Ref<CdsItem> item)
+{
     TagLib::APE::File ape(roStream);
 
     if (!ape.isValid()) {
         log_debug("TagLibHandler: could not open APE file: %s\n",
-                  item->getLocation().c_str());
+            item->getLocation().c_str());
         return;
     }
     populateGenericTags(item, ape);
 }
 
-void TagLibHandler::extractWavPack(TagLib::IOStream *roStream, zmm::Ref<CdsItem> item) {
+void TagLibHandler::extractWavPack(TagLib::IOStream* roStream, zmm::Ref<CdsItem> item)
+{
     TagLib::WavPack::File wavpack(roStream);
 
     if (!wavpack.isValid()) {
         log_debug("TagLibHandler: could not open WavPack file: %s\n",
-                  item->getLocation().c_str());
+            item->getLocation().c_str());
         return;
     }
     populateGenericTags(item, wavpack);
 }
 
-void TagLibHandler::extractMP4(TagLib::IOStream *roStream, zmm::Ref<CdsItem> item) {
+void TagLibHandler::extractMP4(TagLib::IOStream* roStream, zmm::Ref<CdsItem> item)
+{
     TagLib::MP4::File mp4(roStream);
     populateGenericTags(item, mp4);
 
     if (!mp4.isValid()) {
         log_debug("TagLibHandler: could not open mp4 file: %s\n",
-                  item->getLocation().c_str());
+            item->getLocation().c_str());
         return;
     }
 
@@ -621,12 +628,13 @@ void TagLibHandler::extractMP4(TagLib::IOStream *roStream, zmm::Ref<CdsItem> ite
     }
 }
 
-void TagLibHandler::extractAiff(TagLib::IOStream *roStream, zmm::Ref<CdsItem> item) {
+void TagLibHandler::extractAiff(TagLib::IOStream* roStream, zmm::Ref<CdsItem> item)
+{
     TagLib::RIFF::AIFF::File aiff(roStream);
 
     if (!aiff.isValid()) {
         log_debug("TagLibHandler: could not open AIFF file: %s\n",
-                  item->getLocation().c_str());
+            item->getLocation().c_str());
         return;
     }
     populateGenericTags(item, aiff);

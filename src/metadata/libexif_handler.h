@@ -33,30 +33,28 @@
 #define __METADATA_LIBEXIF_H__
 
 #include "metadata_handler.h"
-#include <libexif/exif-data.h>
-#include <libexif/exif-content.h>
 #include "string_converter.h"
-
+#include <libexif/exif-content.h>
+#include <libexif/exif-data.h>
 
 /// \brief This class is responsible for reading exif header metadata via the
 /// libefix library
-class LibExifHandler : public MetadataHandler
-{
+class LibExifHandler : public MetadataHandler {
 protected:
     // image resolution in pixels
     // the problem is that I do not know when I encounter the
-    // tags for X and Y, so I have to save the information 
+    // tags for X and Y, so I have to save the information
     // and in the very end - when I have both values - add the
     // appropriate resource
     zmm::String imageX;
     zmm::String imageY;
 
-    void process_ifd (ExifContent *content, zmm::Ref<CdsItem> item, zmm::Ref<StringConverter> sc, zmm::Ref<zmm::Array<zmm::StringBase> > auxtags);
-    
+    void process_ifd(ExifContent* content, zmm::Ref<CdsItem> item, zmm::Ref<StringConverter> sc, zmm::Ref<zmm::Array<zmm::StringBase>> auxtags);
+
 public:
     LibExifHandler();
     virtual void fillMetadata(zmm::Ref<CdsItem> item);
-    virtual zmm::Ref<IOHandler> serveContent(zmm::Ref<CdsItem> item, int resNum, off_t *data_size);
+    virtual zmm::Ref<IOHandler> serveContent(zmm::Ref<CdsItem> item, int resNum, off_t* data_size);
 };
 
 #endif // __METADATA_LIBEXIF_H__

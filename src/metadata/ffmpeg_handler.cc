@@ -59,8 +59,8 @@ extern "C" {
 } // extern "C"
 
 #ifdef HAVE_FFMPEGTHUMBNAILER
-#include <libffmpegthumbnailer/videothumbnailerc.h>
 #include "mem_io_handler.h"
+#include <libffmpegthumbnailer/videothumbnailerc.h>
 #endif
 
 #include "config_manager.h"
@@ -81,34 +81,29 @@ FfmpegHandler::FfmpegHandler()
 {
 }
 
-static void addFfmpegAuxdataFields(Ref<CdsItem> item, AVFormatContext *pFormatCtx)
+static void addFfmpegAuxdataFields(Ref<CdsItem> item, AVFormatContext* pFormatCtx)
 {
-   if (!pFormatCtx->metadata)
-   {
-       log_debug("no metadata\n");
-       return;
-   }
+    if (!pFormatCtx->metadata) {
+        log_debug("no metadata\n");
+        return;
+    }
 
-   Ref<StringConverter> sc = StringConverter::m2i();
-   Ref<ConfigManager> cm = ConfigManager::getInstance();
-   Ref<Array<StringBase> > aux = cm->getStringArrayOption(CFG_IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST);
-   if (aux != nullptr)
-   {
-       for (int j = 0; j < aux->size(); j++)
-       {
-           String desiredTag(aux->get(j));
-           if (string_ok(desiredTag))
-           {
-               AVDictionaryEntry *tag = NULL;
-               tag = av_dict_get(pFormatCtx->metadata, desiredTag.c_str(), NULL, AV_DICT_IGNORE_SUFFIX);
-               if (tag && tag->value && tag->value[0])
-               {
-                   log_debug("Added %s: %s\n", desiredTag.c_str(), tag->value);
-                   item->setAuxData(desiredTag, sc->convert(tag->value));
-               }
-           }
-       }
-   }
+    Ref<StringConverter> sc = StringConverter::m2i();
+    Ref<ConfigManager> cm = ConfigManager::getInstance();
+    Ref<Array<StringBase>> aux = cm->getStringArrayOption(CFG_IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST);
+    if (aux != nullptr) {
+        for (int j = 0; j < aux->size(); j++) {
+            String desiredTag(aux->get(j));
+            if (string_ok(desiredTag)) {
+                AVDictionaryEntry* tag = NULL;
+                tag = av_dict_get(pFormatCtx->metadata, desiredTag.c_str(), NULL, AV_DICT_IGNORE_SUFFIX);
+                if (tag && tag->value && tag->value[0]) {
+                    log_debug("Added %s: %s\n", desiredTag.c_str(), tag->value);
+                    item->setAuxData(desiredTag, sc->convert(tag->value));
+                }
+            }
+        }
+    }
 } //addFfmpegAuxdataFields
 
 static void addFfmpegMetadataFields(Ref<CdsItem> item, AVFormatContext* pFormatCtx)
@@ -238,7 +233,6 @@ static void addFfmpegResourceFields(Ref<CdsItem> item, AVFormatContext* pFormatC
             }
         }
     }
-
 }
 
 // Stub for suppressing ffmpeg error messages during matadata extraction
@@ -259,7 +253,7 @@ void FfmpegHandler::fillMetadata(Ref<CdsItem> item)
     // Suppress all log messages
     av_log_set_callback(FfmpegNoOutputStub);
 
-#if ( LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(58,9,100) )
+#if (LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(58, 9, 100))
     // Register all formats and codecs
     av_register_all();
 #endif
