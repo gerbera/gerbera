@@ -538,7 +538,7 @@ void TagLibHandler::extractFLAC(TagLib::IOStream *roStream, zmm::Ref<CdsItem> it
                     continue;
 
                 auto val = property[0];
-                String value(val.toCString(true), val.size());
+                String value(val.toCString(true));
                 value = sc->convert(value);
                 log_debug(
                     "Adding auxdata: %s with value %s\n", desiredTag.c_str(),
