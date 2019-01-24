@@ -70,10 +70,10 @@ Server friendly name, you will see this on your devices that you use to access t
 
 .. code-block:: xml
 
-    <manufacturerURL>http://mediatomb.org/</manufacturerURL>
+    <manufacturerURL>http://gerbera.io/</manufacturerURL>
 
 * Optional
-* Default: **http://mediatomb.cc/**
+* Default: **http://gerbera.io/**
 
 This tag sets the manufacturer URL of a UPnP device, a custom setting may be necessary to trick some renderers in order
 to enable special features that otherwise are only active with the vendor implemented server.
