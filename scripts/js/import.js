@@ -72,7 +72,7 @@ function addAudio(obj) {
     
     var description = obj.meta[M_DESCRIPTION];
     if (!description) {
-        obj.meta[M_DESCRIPTION] = desc;
+        obj.description = desc;
     }
 
     var composer = obj.meta[M_COMPOSER];
