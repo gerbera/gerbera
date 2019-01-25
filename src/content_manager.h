@@ -367,7 +367,7 @@ protected:
         bool lowPriority = false,
         unsigned int parentTaskID = 0,
         bool cancellable = true);
-    int _addFile(zmm::String path, zmm::String rootpath, bool recursive = false, bool hidden = false, zmm::Ref<GenericTask> task = nullptr);
+    int _addFile(zmm::String path, zmm::String rootPath, bool recursive = false, bool hidden = false, zmm::Ref<GenericTask> task = nullptr);
     //void _addFile2(zmm::String path, bool recursive=0);
     void _removeObject(int objectID, bool all);
 
