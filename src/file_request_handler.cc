@@ -253,13 +253,12 @@ void FileRequestHandler::getInfo(IN const char* filename, OUT UpnpFileInfo* info
         }
         Ref<Dictionary> mappings = cfg->getDictionaryOption(
             CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-        headers.addHeader(getDLNAcontentHeader(mappings->get(item->getMimeType()), header));
+        headers.addHeader(getDLNAcontentHeader(mappings->get(item->getMimeType())));
     }
 
     if (!string_ok(mimeType))
         mimeType = item->getMimeType();
-    header = getDLNAtransferHeader(mimeType, header);
-    headers.addHeader(header);
+    headers.addHeader(getDLNAtransferHeader(mimeType));
 
     //log_debug("sizeof off_t %d, statbuf.st_size %d\n", sizeof(off_t), sizeof(statbuf.st_size));
     //log_debug("getInfo: file_length: " OFF_T_SPRINTF "\n", statbuf.st_size);

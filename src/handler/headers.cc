@@ -54,7 +54,7 @@ void Headers::addHeader(const std::string& header)
     if (result.size() == 0) {
         return;
     }
-    //log_debug("Adding header: %s\n", header.c_str());
+    log_debug("Adding header: '%s'\n", header.c_str());
 
     headers->push_back(result);
 }
@@ -70,7 +70,7 @@ const void Headers::writeHeaders(UpnpFileInfo *fileInfo)
         }
     }
 
-    //log_debug("Generated Headers: %s\n", result.c_str());
+    log_debug("Generated Headers: %s\n", result.c_str());
     UpnpFileInfo_set_ExtraHeaders(fileInfo, ixmlCloneDOMString(result.c_str()));
 }
 

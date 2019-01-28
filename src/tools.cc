@@ -1323,7 +1323,7 @@ String getDLNAprofileString(String contentType)
     return profile;
 }
 
-String getDLNAcontentHeader(String contentType, String header)
+String getDLNAcontentHeader(String contentType)
 {
     if (ConfigManager::getInstance()->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO)) {
         String content_parameter;
@@ -1333,14 +1333,12 @@ String getDLNAcontentHeader(String contentType, String header)
         content_parameter = content_parameter + D_OP + "=01;";
         content_parameter = content_parameter + D_CONVERSION_INDICATOR + "=" + D_NO_CONVERSION + ";";
         content_parameter = content_parameter + D_FLAGS "=" D_TR_FLAGS_AV;
-        if (string_ok(header))
-            header = header + _("\r\n");
-        header = header + D_HTTP_CONTENT_FEATURES_HEADER + content_parameter;
+        return _(D_HTTP_CONTENT_FEATURES_HEADER) + content_parameter;
     }
-    return header;
+    return nullptr;
 }
 
-String getDLNAtransferHeader(String mimeType, String header)
+String getDLNAtransferHeader(String mimeType)
 {
     if (ConfigManager::getInstance()->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO)) {
         String transfer_parameter;
@@ -1350,14 +1348,11 @@ String getDLNAtransferHeader(String mimeType, String header)
             transfer_parameter = _(D_HTTP_TRANSFER_MODE_STREAMING);
 
         if (string_ok(transfer_parameter)) {
-            if (string_ok(header))
-                header = header + _("\r\n");
-
-            header = header + D_HTTP_TRANSFER_MODE_HEADER + transfer_parameter;
+            return _(D_HTTP_TRANSFER_MODE_HEADER) + transfer_parameter;
         }
     }
 
-    return header;
+    return nullptr;
 }
 
 #ifndef HAVE_FFMPEG
