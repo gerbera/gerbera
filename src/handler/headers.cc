@@ -25,10 +25,12 @@ Gerbera - https://gerbera.io/
 
 #include "headers.h"
 #include <string>
+#include <tools.h>
 
 void Headers::addHeader(zmm::String header)
 {
-    addHeader(std::string(header.c_str()));
+    if (string_ok(header))
+        addHeader(std::string(header.c_str()));
 }
 
 void Headers::addHeader(const std::string& header)
@@ -37,16 +39,16 @@ void Headers::addHeader(const std::string& header)
         headers = std::make_unique<std::vector<std::string>>();
     }
 
-    if (header.size() == 0) {
+    if (header.empty()) {
         return;
     }
 
     std::string result = header;
-    std::size_t found = header.find_last_of('\r');
+    std::size_t found = header.find_first_of('\r');
     if (found != std::string::npos) {
         result = header.substr(0, found);
     }
-    found = result.find_last_of('\n');
+    found = result.find_first_of('\n');
     if (found != std::string::npos) {
         result = header.substr(0, found);
     }

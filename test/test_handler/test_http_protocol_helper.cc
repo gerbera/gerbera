@@ -125,3 +125,30 @@ TEST_F(HeadersHelperTest, AddsCarriageLineBreakWithSingleChar) {
 
   EXPECT_STREQ(UpnpFileInfo_get_ExtraHeaders_cstr(info), "a\r\n");
 }
+
+TEST_F(HeadersHelperTest, HandlesNullZmmString) {
+  zmm::String header;
+
+  subject->addHeader(header);
+  subject->writeHeaders(info);
+
+  EXPECT_STREQ(UpnpFileInfo_get_ExtraHeaders_cstr(info), "");
+}
+
+TEST_F(HeadersHelperTest, HandlesExtraContent) {
+  std::string header = "foo: bar\r\nzoo: wombat\r\n";
+
+  subject->addHeader(header);
+  subject->writeHeaders(info);
+
+  EXPECT_STREQ(UpnpFileInfo_get_ExtraHeaders_cstr(info), "foo: bar\r\n");
+}
+
+TEST_F(HeadersHelperTest, HandlesExtraContentTwo) {
+  std::string header = "foo: bar\r\nzoo: wombat\r\nwhere: somewhere";
+
+  subject->addHeader(header);
+  subject->writeHeaders(info);
+
+  EXPECT_STREQ(UpnpFileInfo_get_ExtraHeaders_cstr(info), "foo: bar\r\n");
+}
