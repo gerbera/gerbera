@@ -25,10 +25,12 @@ Gerbera - https://gerbera.io/
 
 #include "headers.h"
 #include <string>
+#include <tools.h>
 
 void Headers::addHeader(zmm::String header)
 {
-    addHeader(std::string(header.c_str()));
+    if (string_ok(header))
+        addHeader(std::string(header.c_str()));
 }
 
 void Headers::addHeader(const std::string& header)
@@ -37,16 +39,16 @@ void Headers::addHeader(const std::string& header)
         headers = std::make_unique<std::vector<std::string>>();
     }
 
-    if (header.size() == 0) {
+    if (header.empty()) {
         return;
     }
 
     std::string result = header;
-    std::size_t found = header.find_last_of('\r');
+    std::size_t found = header.find_first_of('\r');
     if (found != std::string::npos) {
         result = header.substr(0, found);
     }
-    found = result.find_last_of('\n');
+    found = result.find_first_of('\n');
     if (found != std::string::npos) {
         result = header.substr(0, found);
     }
@@ -54,7 +56,7 @@ void Headers::addHeader(const std::string& header)
     if (result.size() == 0) {
         return;
     }
-    //log_debug("Adding header: %s\n", header.c_str());
+    log_debug("Adding header: '%s'\n", header.c_str());
 
     headers->push_back(result);
 }
@@ -70,7 +72,7 @@ const void Headers::writeHeaders(UpnpFileInfo *fileInfo)
         }
     }
 
-    //log_debug("Generated Headers: %s\n", result.c_str());
+    log_debug("Generated Headers: %s\n", result.c_str());
     UpnpFileInfo_set_ExtraHeaders(fileInfo, ixmlCloneDOMString(result.c_str()));
 }
 
