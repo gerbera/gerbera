@@ -115,3 +115,56 @@ TEST_F(UpnpXmlTest, CreateResponse) {
   EXPECT_STREQ(result->getName().c_str(), "u:actionResponse");
   EXPECT_STREQ(result->getAttribute("xmlns:u").c_str(), "urn:schemas-upnp-org:service:ContentDirectory:1");
 }
+
+TEST_F(UpnpXmlTest, FirstResourceRendersPureWhenExternalUrl) {
+  zmm::Ref<CdsObject> obj(new CdsItemExternalURL());
+  obj->setLocation(_("http://localhost/external/url"));
+
+  zmm::Ref<CdsItem> item = RefCast(obj, CdsItem);
+
+  zmm::String result = subject->getFirstResourcePath(item);
+
+  EXPECT_NE(result, nullptr);
+  EXPECT_STREQ(result.c_str(), "http://localhost/external/url");
+}
+
+TEST_F(UpnpXmlTest, FirstResourceAddsLocalResourceIdToExternalUrlWhenOnlineWithProxy) {
+  zmm::Ref<CdsObject> obj(new CdsItemExternalURL());
+  obj->setLocation(_("http://localhost/external/url"));
+  obj->setID(12345);
+  obj->setFlag(OBJECT_FLAG_ONLINE_SERVICE);
+  obj->setFlag(OBJECT_FLAG_PROXY_URL);
+
+  zmm::Ref<CdsItem> item = RefCast(obj, CdsItem);
+
+  zmm::String result = subject->getFirstResourcePath(item);
+
+  EXPECT_NE(result, nullptr);
+  EXPECT_STREQ(result.c_str(), "content/online/object_id/12345/res_id/0");
+}
+
+TEST_F(UpnpXmlTest, FirstResourceAddsLocalResourceIdToItem) {
+  zmm::Ref<CdsObject> obj(new CdsItem());
+  obj->setLocation(_("local/content"));
+  obj->setID(12345);
+
+  zmm::Ref<CdsItem> item = RefCast(obj, CdsItem);
+
+  zmm::String result = subject->getFirstResourcePath(item);
+
+  EXPECT_NE(result, nullptr);
+  EXPECT_STREQ(result.c_str(), "content/media/object_id/12345/res_id/0");
+}
+
+TEST_F(UpnpXmlTest, FirstResourceAddsContentServeToInternalUrlItem) {
+  zmm::Ref<CdsObject> obj(new CdsItemInternalURL());
+  obj->setLocation(_("local/content"));
+  obj->setID(12345);
+
+  zmm::Ref<CdsItem> item = RefCast(obj, CdsItem);
+
+  zmm::String result = subject->getFirstResourcePath(item);
+
+  EXPECT_NE(result, nullptr);
+  EXPECT_STREQ(result.c_str(), "/serve/local/content");
+}
