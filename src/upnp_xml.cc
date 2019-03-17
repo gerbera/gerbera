@@ -567,11 +567,18 @@ Ref<UpnpXMLBuilder::PathBase> UpnpXMLBuilder::getPathBase(Ref<CdsItem> item, boo
 
 String UpnpXMLBuilder::getFirstResourcePath(Ref<CdsItem> item)
 {
+    zmm::String result;
     Ref<PathBase> urlBase = getPathBase(item);
-    if (urlBase->addResID) {
-        return _(SERVER_VIRTUAL_DIR) + urlBase->pathBase + 0;
+    int objectType = item->getObjectType();
+
+    if (IS_CDS_ITEM_EXTERNAL_URL(objectType) && !urlBase->addResID) { // a remote resource
+      result = urlBase->pathBase;
+    } else if (urlBase->addResID){                                    // a proxy, remote, resource
+      result = _(SERVER_VIRTUAL_DIR) + urlBase->pathBase + 0;
+    } else {                                                          // a local resource
+      result = _(SERVER_VIRTUAL_DIR) + urlBase->pathBase;
     }
-    return _(SERVER_VIRTUAL_DIR) + urlBase->pathBase;
+    return result;
 }
 
 String UpnpXMLBuilder::getArtworkUrl(zmm::Ref<CdsItem> item) {
@@ -931,7 +938,10 @@ void UpnpXMLBuilder::addResources(Ref<CdsItem> item, Ref<Element> element)
             log_debug("extended protocolInfo: %s\n", protocolInfo.c_str());
         }
         // URL is path until now
-        url = virtualUrl + url;
+        int objectType = item->getObjectType();
+        if(!IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
+            url = virtualUrl + url;
+        }
 
         if (!hide_original_resource || transcoded || (hide_original_resource && (original_resource != i)))
             element->appendElementChild(renderResource(url, res_attrs));
