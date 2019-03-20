@@ -107,6 +107,11 @@ FIND_LIBRARY(FFMPEG_vorbis_LIBRARY vorbis
         /usr/lib
         )
 
+FIND_LIBRARY(FFMPEG_ogg_LIBRARY ogg
+        /usr/local/lib
+        /usr/lib
+        )
+
 FIND_LIBRARY(FFMPEG_dc1394_LIBRARY dc1394_control
         /usr/local/lib
         /usr/lib
@@ -175,6 +180,11 @@ IF (FFMPEG_INCLUDE_DIR)
                 IF (FFMPEG_vorbis_LIBRARY)
                     LIST(APPEND FFMPEG_LIBRARIES ${FFMPEG_vorbis_LIBRARY})
                 ENDIF (FFMPEG_vorbis_LIBRARY)
+
+                # ogg is a dependency of vorbis 
+                IF (FFMPEG_ogg_LIBRARY)
+                    LIST(APPEND FFMPEG_LIBRARIES ${FFMPEG_ogg_LIBRARY})
+                ENDIF (FFMPEG_ogg_LIBRARY)
 
                 IF (FFMPEG_dc1394_LIBRARY)
                     LIST(APPEND FFMPEG_LIBRARIES ${FFMPEG_dc1394_LIBRARY})
