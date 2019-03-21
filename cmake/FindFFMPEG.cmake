@@ -82,75 +82,81 @@ ENDIF (NOT FFMPEG_INCLUDE_DIR)
 # ffmpeg uses relative includes such as <ffmpeg/avformat.h> or <libavcodec/avformat.h>
 get_filename_component(FFMPEG_INCLUDE_DIR ${FFMPEG_INCLUDE_DIR} ABSOLUTE)
 
-FIND_LIBRARY(FFMPEG_avformat_LIBRARY avformat
-        /usr/local/lib
-        /usr/lib
-        )
+CHECK_STRUCT_HAS_MEMBER("struct AVStream" codecpar libavformat/avformat.h HAVE_AVSTREAM_CODECPAR LANGUAGE C)
 
-FIND_LIBRARY(FFMPEG_avcodec_LIBRARY avcodec
-        /usr/local/lib
-        /usr/lib
-        )
+FIND_PACKAGE(PkgConfig QUIET)
+PKG_CHECK_MODULES(FFMPEG QUIET libavformat)
+IF (NOT FFMPEG_FOUND)
+	FIND_LIBRARY(FFMPEG_avformat_LIBRARY avformat
+		/usr/local/lib
+		/usr/lib
+		)
 
-FIND_LIBRARY(FFMPEG_avutil_LIBRARY avutil
-        /usr/local/lib
-        /usr/lib
-        )
+	FIND_LIBRARY(FFMPEG_avcodec_LIBRARY avcodec
+		/usr/local/lib
+		/usr/lib
+		)
 
-FIND_LIBRARY(FFMPEG_swresample_LIBRARY swresample
-        /usr/local/lib
-        /usr/lib
-        )
+	FIND_LIBRARY(FFMPEG_avutil_LIBRARY avutil
+		/usr/local/lib
+		/usr/lib
+		)
 
-FIND_LIBRARY(FFMPEG_vorbis_LIBRARY vorbis
-        /usr/local/lib
-        /usr/lib
-        )
+	FIND_LIBRARY(FFMPEG_swresample_LIBRARY swresample
+		/usr/local/lib
+		/usr/lib
+		)
 
-FIND_LIBRARY(FFMPEG_ogg_LIBRARY ogg
-        /usr/local/lib
-        /usr/lib
-        )
+	FIND_LIBRARY(FFMPEG_vorbis_LIBRARY vorbis
+		/usr/local/lib
+		/usr/lib
+		)
 
-FIND_LIBRARY(FFMPEG_dc1394_LIBRARY dc1394_control
-        /usr/local/lib
-        /usr/lib
-        )
+	FIND_LIBRARY(FFMPEG_ogg_LIBRARY ogg
+		/usr/local/lib
+		/usr/lib
+		)
 
-FIND_LIBRARY(FFMPEG_vorbisenc_LIBRARY vorbisenc
-        /usr/local/lib
-        /usr/lib
-        )
+	FIND_LIBRARY(FFMPEG_dc1394_LIBRARY dc1394_control
+		/usr/local/lib
+		/usr/lib
+		)
 
-FIND_LIBRARY(FFMPEG_theora_LIBRARY theora
-        /usr/local/lib
-        /usr/lib
-        )
+	FIND_LIBRARY(FFMPEG_vorbisenc_LIBRARY vorbisenc
+		/usr/local/lib
+		/usr/lib
+		)
 
-FIND_LIBRARY(FFMPEG_dts_LIBRARY dts
-        /usr/local/lib
-        /usr/lib
-        )
+	FIND_LIBRARY(FFMPEG_theora_LIBRARY theora
+		/usr/local/lib
+		/usr/lib
+		)
 
-FIND_LIBRARY(FFMPEG_gsm_LIBRARY gsm
-        /usr/local/lib
-        /usr/lib
-        )
+	FIND_LIBRARY(FFMPEG_dts_LIBRARY dts
+		/usr/local/lib
+		/usr/lib
+		)
 
-FIND_LIBRARY(FFMPEG_swscale_LIBRARY swscale
-        /usr/local/lib
-        /usr/lib
-        )
+	FIND_LIBRARY(FFMPEG_gsm_LIBRARY gsm
+		/usr/local/lib
+		/usr/lib
+		)
 
-FIND_LIBRARY(FFMPEG_z_LIBRARY z
-        /usr/local/lib
-        /usr/lib
-        )
+	FIND_LIBRARY(FFMPEG_swscale_LIBRARY swscale
+		/usr/local/lib
+		/usr/lib
+		)
 
-FIND_LIBRARY(FFMPEG_bz2_LIBRARY bz2
-        /usr/local/lib
-        /usr/lib
-        )
+	FIND_LIBRARY(FFMPEG_z_LIBRARY z
+		/usr/local/lib
+		/usr/lib
+		)
+
+	FIND_LIBRARY(FFMPEG_bz2_LIBRARY bz2
+		/usr/local/lib
+		/usr/lib
+		)
+ENDIF(NOT FFMPEG_FOUND)
 
 SET(FFMPEG_LIBRARIES)
 IF (FFMPEG_INCLUDE_DIR)
@@ -215,9 +221,6 @@ IF (FFMPEG_INCLUDE_DIR)
                 ENDIF (FFMPEG_bz2_LIBRARY)
 
                 SET(FFMPEG_LIBRARIES ${FFMPEG_LIBRARIES} CACHE INTERNAL "All presently found FFMPEG libraries.")
-
-                CHECK_STRUCT_HAS_MEMBER("struct AVStream" codecpar libavformat/avformat.h HAVE_AVSTREAM_CODECPAR LANGUAGE C)
-
             ENDIF (FFMPEG_avutil_LIBRARY)
         ENDIF (FFMPEG_avcodec_LIBRARY)
     ENDIF (FFMPEG_avformat_LIBRARY)
