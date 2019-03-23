@@ -157,10 +157,6 @@ void FileRequestHandler::getInfo(IN const char* filename, OUT UpnpFileInfo* info
     if (((res_id > 0) && (res_id < item->getResourceCount()))
         || ((res_id > 0) && string_ok(rh))) {
 
-        log_debug("setting content length to unknown\n");
-        /// \todo we could figure out the content length...
-        UpnpFileInfo_set_FileLength(info, -1);
-
         int res_handler;
         if (string_ok(rh))
             res_handler = rh.toInt();
@@ -178,10 +174,9 @@ void FileRequestHandler::getInfo(IN const char* filename, OUT UpnpFileInfo* info
         if (!string_ok(mimeType))
             mimeType = h->getMimeType();
 
-        off_t size = UpnpFileInfo_get_FileLength(info);
-        /*        Ref<IOHandler> io_handler = */ h
-            ->serveContent(item, res_id, &(size));
-
+        off_t size = -1;
+        h->serveContent(item, res_id, &(size));
+        UpnpFileInfo_set_FileLength(info, size);
     } else if (!is_srt && string_ok(tr_profile)) {
 
         Ref<TranscodingProfile> tp = ConfigManager::getInstance()
