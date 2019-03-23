@@ -174,7 +174,7 @@ void FileRequestHandler::getInfo(IN const char* filename, OUT UpnpFileInfo* info
         if (!string_ok(mimeType))
             mimeType = h->getMimeType();
 
-        off_t size = 0;
+        off_t size = -1;
         h->serveContent(item, res_id, &(size));
         UpnpFileInfo_set_FileLength(info, size);
     } else if (!is_srt && string_ok(tr_profile)) {
