@@ -406,16 +406,18 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, zmm::Ref<CdsItem> ite
 
     Ref<StringConverter> sc = StringConverter::i2i();
 
+    auto frameListMap = mp3.ID3v2Tag()->frameListMap();
+    // http://id3.org/id3v2.4.0-frames "4.2.6. User defined text information frame"
+    bool hasTXXXFrames = frameListMap.contains("TXXX");
+
     Ref<Array<StringBase>> aux_tags_list = ConfigManager::getInstance()->getStringArrayOption(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
     if (aux_tags_list != nullptr) {
-        for (int j = 0; j < aux_tags_list->size(); j++) {
+        for (int i = 0; i < aux_tags_list->size(); i++) {
 
-            String desiredFrame = aux_tags_list->get(j);
+            String desiredFrame = aux_tags_list->get(i);
             if (!string_ok(desiredFrame)) {
                 continue;
             }
-
-            auto frameListMap = mp3.ID3v2Tag()->frameListMap();
 
             if (frameListMap.contains(desiredFrame.c_str())) {
                 const auto frameList = frameListMap[desiredFrame.c_str()];
@@ -423,15 +425,40 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, zmm::Ref<CdsItem> ite
                     continue;
 
                 const TagLib::ID3v2::Frame* frame = frameList.front();
-                const auto textFrame = static_cast<const TagLib::ID3v2::TextIdentificationFrame*>(frame);
+                const auto textFrame = dynamic_cast<const TagLib::ID3v2::TextIdentificationFrame*>(frame);
 
                 const TagLib::String frameContents = textFrame->toString();
                 String value(frameContents.toCString(true));
                 value = sc->convert(value);
-                log_debug(
-                    "Adding frame: %s with value %s\n", desiredFrame.c_str(),
-                    value.c_str());
+                log_debug("Adding auxdata: %s with value %s\n", desiredFrame.c_str(), value.c_str());
                 item->setAuxData(desiredFrame, value);
+                continue;
+            }
+
+            if (hasTXXXFrames && desiredFrame.startsWith("TXXX:")) {
+                const auto frameList = frameListMap["TXXX"];
+                //log_debug("TXXX Frame list has %d elements\n", frameList.size());
+
+                String desiredSubTag = desiredFrame.substring(5);
+                if (!string_ok(desiredSubTag))
+                    continue;
+
+                for (auto frame : frameList) {
+                    const auto textFrame = dynamic_cast<const TagLib::ID3v2::TextIdentificationFrame*>(frame);
+                    const TagLib::String frameContents = textFrame->toString();
+                    String value(frameContents.toCString(true));
+
+                    int subTagEnd = value.find("]");
+                    String subTag = value.substring(1, subTagEnd - 1); // Cut out brackets
+                    String content = value.substring(subTagEnd + 2); // Skip bracket and space
+                    // log_debug("TXXX Tag: %s\n", subTag.c_str());
+
+                    if (desiredSubTag.equals(subTag)) {
+                        log_debug("Adding auxdata: %s with value %s\n", desiredFrame.c_str(), content.c_str());
+                        item->setAuxData(desiredFrame, content);
+                        break;
+                    }
+                }
             }
         }
     }
