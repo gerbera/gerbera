@@ -8,7 +8,7 @@
 #  UPNP_HAS_REUSEADDR - If LinUPnP was built with SO_REUSEADDR support
 
 find_package(PkgConfig QUIET)
-pkg_check_modules (PC_UPNP QUIET libupnp-1.8 libupnp)
+pkg_search_module (PC_UPNP QUIET libupnp-1.8 libupnp)
 
 find_path(UPNP_INCLUDE_DIR upnp.h
     HINTS ${PC_UPNP_INCLUDEDIR} ${PC_UPNP_INCLUDE_DIRS}
@@ -41,7 +41,7 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(UPnP
     VERSION_VAR UPNP_VERSION_STRING)
 
 if (UPNP_FOUND)
-    set (UPNP_LIBRARIES ${UPNP_UPNP_LIBRARY} ${UPNP_IXML_LIBRARY})
+    set (UPNP_LIBRARIES ${UPNP_UPNP_LIBRARY} ${UPNP_IXML_LIBRARY} ${PC_UPNP_LIBRARIES})
     set (UPNP_INCLUDE_DIRS ${UPNP_INCLUDE_DIR} )
 endif ()
 
