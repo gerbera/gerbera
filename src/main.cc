@@ -237,7 +237,7 @@ int main(int argc, char** argv, char** envp)
 
         std::optional<std::string> interface;
         if (opts.count("interface") > 0) {
-            ip = opts["interface"].as<std::string>();
+            interface = opts["interface"].as<std::string>();
         }
 
         // FIXME: We will remove the singletons at some point.. and this compat
