@@ -918,12 +918,17 @@ void UpnpXMLBuilder::addResources(Ref<CdsItem> item, Ref<Element> element)
             // we do not support seeking at all, so 00
             // and the media is converted, so set CI to 1
             if (!isExtThumbnail && transcoded) {
-                extend = extend + D_OP + "=10;" + D_CONVERSION_INDICATOR + "=" D_CONVERSION;
+                extend = extend + D_OP + "=" + D_OP_SEEK_DISABLED + ";" + D_CONVERSION_INDICATOR + "=" D_CONVERSION;
 
                 if (mimeType.startsWith(_("audio")) || mimeType.startsWith(_("video")))
                     extend = extend + ";" D_FLAGS "=" D_TR_FLAGS_AV;
-            } else
-                extend = extend + D_OP + "=01;" + D_CONVERSION_INDICATOR + "=" + D_NO_CONVERSION;
+            } else {
+                if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_DLNA_SEEK))
+                    extend = extend + D_OP + "=" + D_OP_SEEK_ENABLED + ";";
+                else
+                    extend = extend + D_OP + "=" + D_OP_SEEK_DISABLED + ";";
+                extend = extend + D_CONVERSION_INDICATOR + "=" + D_NO_CONVERSION;
+            }
 
             protocolInfo = protocolInfo.substring(0, protocolInfo.rindex(':') + 1) + extend;
             res_attrs->put(MetadataHandler::getResAttrName(R_PROTOCOLINFO),

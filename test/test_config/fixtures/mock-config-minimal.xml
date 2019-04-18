@@ -29,7 +29,7 @@
         <database-file>gerbera.db</database-file>
       </sqlite3>
     </storage>
-    <protocolInfo extend="no"/><!-- For PS3 support change to "yes" -->
+    <protocolInfo extend="no" dlna-seek="yes"/><!-- For PS3 support change to "yes" -->
     <!--
        Uncomment the lines below to get rid of jerky avi playback on the
        DSM320 or to enable subtitles support on the DSM units

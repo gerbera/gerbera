@@ -684,6 +684,15 @@ void ConfigManager::validate(String serverhome)
     NEW_BOOL_OPTION(temp == "yes" ? true : false);
     SET_BOOL_OPTION(CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK);
 
+    temp = getOption(_("/server/protocolInfo/attribute::dlna-seek"),
+        _(DEFAULT_EXTEND_PROTOCOLINFO_DLNA_SEEK));
+    if (!validateYesNo(temp))
+        throw _Exception(_("Error in config file: dlna-seek attribute of the "
+                           "protocolInfo tag must be either \"yes\" or \"no\""));
+
+    NEW_BOOL_OPTION(temp == "yes" ? true : false);
+    SET_BOOL_OPTION(CFG_SERVER_EXTEND_PROTOCOLINFO_DLNA_SEEK);
+
     temp = getOption(_("/server/pc-directory/attribute::upnp-hide"),
         _(DEFAULT_HIDE_PC_DIRECTORY));
     if (!validateYesNo(temp))

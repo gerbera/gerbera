@@ -1325,12 +1325,17 @@ String getDLNAprofileString(String contentType)
 
 String getDLNAcontentHeader(String contentType)
 {
-    if (ConfigManager::getInstance()->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO)) {
+    Ref<ConfigManager> config = ConfigManager::getInstance();
+    if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO)) {
         String content_parameter;
         content_parameter = getDLNAprofileString(contentType);
         if (string_ok(content_parameter))
             content_parameter = _(D_PROFILE) + _("=") + content_parameter + ";";
-        content_parameter = content_parameter + D_OP + "=01;";
+        // enabling or disabling seek
+        if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_DLNA_SEEK))
+            content_parameter = content_parameter + D_OP + "=" + D_OP_SEEK_ENABLED + ";";
+        else
+            content_parameter = content_parameter + D_OP + "=" + D_OP_SEEK_DISABLED + ";";
         content_parameter = content_parameter + D_CONVERSION_INDICATOR + "=" + D_NO_CONVERSION + ";";
         content_parameter = content_parameter + D_FLAGS "=" D_TR_FLAGS_AV;
         return _(D_HTTP_CONTENT_FEATURES_HEADER) + content_parameter;
