@@ -97,6 +97,7 @@ Ref<Element> ConfigGenerator::generateServer(std::string userHome, std::string c
 
   Ref<Element> protocolinfo(new Element(_("protocolInfo")));
   protocolinfo->setAttribute(_("extend"), _(DEFAULT_EXTEND_PROTOCOLINFO));
+  protocolinfo->setAttribute(_("dlna-seek"), _(DEFAULT_EXTEND_PROTOCOLINFO_DLNA_SEEK));
   server->appendElementChild(protocolinfo);
 
   Ref<Comment> ps3protinfo(new Comment(_(" For PS3 support change to \"yes\" ")));
