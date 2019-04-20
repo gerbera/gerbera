@@ -1,0 +1,20 @@
+name-template: Gerbera v$NEXT_PATCH_VERSION 🌈
+tag-template: v$NEXT_PATCH_VERSION
+categories:
+  - title: 🆕 New
+    label: enhancement
+  - title: 🐞 Fixed Bugs
+    label: bug
+  - title: 🔧 Maintenance
+    label: maintenance
+exclude-lables:
+  - ignore
+  - release
+change-template: ' * $TITLE (#$NUMBER), thanks @$AUTHOR'
+no-changes-template: ' * Nothing'
+template: |
+  We are happy to announce that Gerbera Media Server $NEXT_PATCH_VERSION is now available.
+
+  ## Changes
+
+  $CHANGES
