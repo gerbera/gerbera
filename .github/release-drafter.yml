@@ -1,11 +1,11 @@
-name-template: Gerbera v$NEXT_PATCH_VERSION 🌈
+name-template: Gerbera v$NEXT_PATCH_VERSION
 tag-template: v$NEXT_PATCH_VERSION
 categories:
-  - title: 🆕 New
+  - title: New
     label: enhancement
-  - title: 🐞 Fixed Bugs
+  - title: Fixed Bugs
     label: bug
-  - title: 🔧 Maintenance
+  - title: Maintenance
     label: maintenance
 exclude-lables:
   - ignore
