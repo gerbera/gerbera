@@ -4,7 +4,7 @@ module.exports = function (config) {
     frameworks: ['jasmine'],
     files: [
       // Vendor
-      '../web/vendor/jquery/jquery-3.2.1.min.js',
+      '../web/vendor/jquery/jquery-3.4.0.min.js',
       '../web/vendor/jquery/jquery.cookie.js',
       '../web/vendor/jquery/jquery-ui.min.js',
       '../web/vendor/popper/popper.js',
