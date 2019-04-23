@@ -7,7 +7,7 @@ categories:
     label: bug
   - title: Maintenance
     label: maintenance
-exclude-lables:
+exclude-labels:
   - ignore
   - release
 change-template: ' * $TITLE (#$NUMBER), thanks @$AUTHOR'
