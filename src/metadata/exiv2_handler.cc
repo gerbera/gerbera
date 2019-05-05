@@ -31,8 +31,7 @@
 /// \brief Implementeation of the Exiv2Handler class.
 
 #ifdef HAVE_EXIV2
-#include <exiv2/exif.hpp>
-#include <exiv2/image.hpp>
+#include <exiv2/exiv2.hpp>
 
 #include "config_manager.h"
 #include "exiv2_handler.h"
