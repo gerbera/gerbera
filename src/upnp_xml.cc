@@ -866,7 +866,7 @@ void UpnpXMLBuilder::addResources(Ref<CdsItem> item, Ref<Element> element)
 
                 if (rct == ID3_ALBUM_ART) {
                     Ref<Element> aa(new Element(MetadataHandler::getMetaFieldName(M_ALBUMARTURI)));
-                    aa->setText(url);
+                    aa->setText(virtualUrl + url);
                     if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO)) {
                         /// \todo clean this up, make sure to check the mimetype and
                         /// provide the profile correctly
