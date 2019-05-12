@@ -47,12 +47,12 @@ GERBERA.Auth = (function () {
   }
 
   var getSessionId = function () {
-    return $.cookie('SID')
+    return Cookies.get('SID')
   }
 
   var loadSession = function (response) {
     if (!response.sid_was_valid && response.sid && response.sid !== null) {
-      $.cookie('SID', response.sid)
+      Cookies.set('SID', response.sid)
       LOGGED_IN = response.logged_in
     } else {
       LOGGED_IN = response.logged_in
@@ -150,7 +150,7 @@ GERBERA.Auth = (function () {
     var expire = new Date()
     LOGGED_IN = false
     expire.setTime(now.getTime() - 3600000 * 24 * 360)
-    $.cookie('SID', null, {expires: expire})
+    Cookies.set('SID', null, {expires: expire})
     GERBERA.App.reload('/index.html')
   }
 

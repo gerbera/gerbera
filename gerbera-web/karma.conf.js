@@ -5,7 +5,7 @@ module.exports = function (config) {
     files: [
       // Vendor
       '../web/vendor/jquery/jquery-3.4.0.min.js',
-      '../web/vendor/jquery/jquery.cookie.js',
+      '../web/vendor/js-cookie.js',
       '../web/vendor/jquery/jquery-ui.min.js',
       '../web/vendor/popper/popper.js',
       '../web/vendor/tether/tether.min.js',

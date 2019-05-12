@@ -21,7 +21,7 @@ describe('Gerbera Auth', () => {
 
     it('calls the server for a new SID and sets the cookie for SID', async () => {
       await GERBERA.Auth.checkSID();
-      expect($.cookie('SID')).toBe('563806f88aea6b33429ebdb85ce14beb');
+      expect(Cookies.get('SID')).toBe('563806f88aea6b33429ebdb85ce14beb');
       expect(GERBERA.Auth.isLoggedIn()).toBeFalsy();
     });
 
@@ -40,7 +40,7 @@ describe('Gerbera Auth', () => {
 
   describe('handleLogout()', () => {
     beforeEach(() => {
-      $.cookie('SID', '563806f88aea6b33429ebdb85ce14beb');
+      Cookies.set('SID', '563806f88aea6b33429ebdb85ce14beb');
     });
 
     it('removes existing SID cookie and routes to the home page', () => {
@@ -56,7 +56,7 @@ describe('Gerbera Auth', () => {
 
   describe('SID()', () => {
     it('retrieves the session ID from the cookie', () => {
-      spyOn($, 'cookie').and.returnValue('A_MOCK_SESSION_ID');
+      spyOn(Cookies, 'get').and.returnValue('A_MOCK_SESSION_ID');
       expect(GERBERA.Auth.getSessionId()).toEqual('A_MOCK_SESSION_ID');
     });
   });
@@ -117,7 +117,7 @@ describe('Gerbera Auth', () => {
       ajaxSpy = spyOn($, 'ajax').and.callFake(() => {
         return $.Deferred().resolve({success: true}).promise();
       });
-      $.cookie('SID', '12345');
+      Cookies.set('SID', '12345');
     });
 
     afterEach(() => {
