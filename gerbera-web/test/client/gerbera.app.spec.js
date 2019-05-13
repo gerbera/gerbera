@@ -20,7 +20,7 @@ describe('Gerbera UI App', () => {
     });
 
     beforeEach(() => {
-      cookieSpy = spyOn($, 'cookie').and.callFake((name) => {
+      cookieSpy = spyOn(Cookies, 'get').and.callFake((name) => {
         if (name === 'TYPE') return 'db';
         if (name === 'SID') return 'A_MOCK_SID';
         return 'A_MOCK_COOKIE';

@@ -9,6 +9,9 @@
     "node": true
   },
   "extends": "eslint:recommended",
+  "globals": {
+    "Cookies": "readonly"
+  },
   "plugins": [
     "standard",
     "promise"

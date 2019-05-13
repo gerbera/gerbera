@@ -36,11 +36,11 @@ GERBERA.App = (function () {
   }
 
   var getType = function () {
-    return $.cookie('TYPE')
+    return Cookies.get('TYPE')
   }
 
   var setType = function (type) {
-    $.cookie('TYPE', type)
+    Cookies.set('TYPE', type)
   }
 
   var error = function (event) {

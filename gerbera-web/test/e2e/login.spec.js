@@ -1,23 +1,15 @@
 const {expect} = require('chai');
-const {Builder} = require('selenium-webdriver');
-const {suite} = require('selenium-webdriver/testing');
-let chrome = require('selenium-webdriver/chrome');
-const mockWebServer = 'http://' + process.env.npm_package_config_webserver_host + ':' + process.env.npm_package_config_webserver_port;
+const TestUtils = require('./page/test-utils');
 let driver;
 
 const LoginPage = require('./page/login.page');
 
-suite(() => {
+describe('Login Suite', () => {
   let loginPage;
 
   before(async () => {
-    const chromeOptions = new chrome.Options();
-    chromeOptions.addArguments(['--headless', '--window-size=1280,1024']);
-    driver = new Builder()
-      .forBrowser('chrome')
-      .setChromeOptions(chromeOptions)
-      .build();
-    await driver.get(mockWebServer + '/reset?testName=login.test.requests.json');
+    driver = await TestUtils.newChromeDriver();
+    await TestUtils.resetSuite('login.test.requests.json', driver);
     loginPage = new LoginPage(driver);
   });
 
@@ -26,9 +18,8 @@ suite(() => {
   describe('The login action', () => {
 
     beforeEach(async () => {
-      await driver.get(mockWebServer + '/disabled.html');
-      await driver.manage().deleteAllCookies();
-      await loginPage.get(mockWebServer + '/index.html');
+      await TestUtils.resetCookies(driver);
+      await loginPage.get(TestUtils.home());
     });
 
     it('hides the login form when no authentication is required', async () => {
