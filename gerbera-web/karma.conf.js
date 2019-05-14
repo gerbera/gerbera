@@ -1,63 +1,42 @@
-module.exports = function (config) {
+module.exports = function(config) {
   config.set({
-    basePath: '',
-    frameworks: ['jasmine'],
-    files: [
-      // Vendor
-      '../web/vendor/jquery/jquery-3.4.0.min.js',
-      '../web/vendor/js-cookie.js',
-      '../web/vendor/jquery/jquery-ui.min.js',
-      '../web/vendor/popper/popper.js',
-      '../web/vendor/tether/tether.min.js',
-      '../web/vendor/bootstrap/js/bootstrap.js',
-      // Unit Test
-      'node_modules/jasmine-jquery/lib/jasmine-jquery.js',
-      // Application
-      '../web/js/md5.js',
-      '../web/js/gerbera.app.js',
-      '../web/js/gerbera.auth.js',
-      '../web/js/gerbera.items.js',
-      '../web/js/gerbera.tree.js',
-      '../web/js/gerbera.menu.js',
-      '../web/js/jquery.gerbera.toast.js',
-      '../web/js/gerbera.trail.js',
-      '../web/js/gerbera.autoscan.js',
-      '../web/js/gerbera.updates.js',
-      '../web/js/jquery.gerbera.items.js',
-      '../web/js/jquery.gerbera.tree.js',
-      '../web/js/jquery.gerbera.trail.js',
-      '../web/js/jquery.gerbera.editor.js',
-      '../web/js/jquery.gerbera.autoscan.js',
-      // Tests
-      'test/client/*.spec.js',
-      {
-        pattern: 'test/client/fixtures/**/*.json',
-        watched: true,
-        included: false,
-        served: true
-      },
-      {
-        pattern: 'test/client/fixtures/**/*.html',
-        watched: true,
-        included: false,
-        served: true
-      }
-    ],
-    exclude: [],
+      files: [
+        {
+          pattern: 'test/client/fixtures/**/*',
+        },
+        {
+          pattern: '../web/js/md5.js',
+        },
+        {
+          pattern: 'test-context.js', watched: false
+        },
+        '../web/js/gerbera.app.js',
+        '../web/js/gerbera.auth.js',
+        '../web/js/gerbera.items.js',
+        '../web/js/gerbera.tree.js',
+        '../web/js/gerbera.menu.js',
+        '../web/js/gerbera.trail.js',
+        '../web/js/gerbera.autoscan.js',
+        '../web/js/gerbera.updates.js',
+        {
+          pattern: 'spec-context.js', watched: false
+        },
+      ],
+    frameworks : ['jasmine', 'fixture'],
     preprocessors: {
-      '../web/js/*.js': 'coverage'
+      'test-context.js': ['webpack', 'sourcemap'],
+      'spec-context.js': ['webpack', 'sourcemap'],
+      '**/*.html'   : ['html2js'],
+      '**/*.json'   : ['json_fixtures']
     },
-    reporters: ['mocha', 'coverage'],
-    coverageReporter: {
-      type: 'html',
-      dir: 'coverage/'
+    webpack: {
+      mode: 'development',
+      devtool: 'inline-source-map',
+      watch: true,
     },
-    port: 9876,
-    colors: true,
-    logLevel: config.LOG_INFO,
-    autoWatch: false,
     browsers: ['ChromeHeadless'],
+    reporters: ['mocha'],
     concurrency: Infinity,
     singleRun: true
-  })
+  });
 };

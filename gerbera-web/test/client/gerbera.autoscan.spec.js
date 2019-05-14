@@ -1,12 +1,10 @@
-/* global GERBERA jasmine it expect describe beforeEach loadJSONFixtures getJSONFixture loadFixtures spyOn */
-
-jasmine.getFixtures().fixturesPath = 'base/test/client/fixtures';
-jasmine.getJSONFixtures().fixturesPath = 'base/test/client/fixtures';
+import item from './fixtures/autoscan-item';
+import autoscanResponse from './fixtures/autoscan-add-response';
+import submitCompleteResponse from './fixtures/submit-complete-2f6d';
 
 describe('Gerbera Autoscan', () => {
   'use strict';
   describe('initialize()', () => {
-    let item;
     let autoscanId;
     let autoscanFromFs;
     let autoscanMode;
@@ -19,9 +17,8 @@ describe('Gerbera Autoscan', () => {
     let autoscanSave;
 
     beforeEach(() => {
-      loadFixtures('index.html');
-      loadJSONFixtures('autoscan-item.json');
-      item = getJSONFixture('autoscan-item.json');
+      fixture.setBase('test/client/fixtures');
+      fixture.load('index.html');
       autoscanId = $('#autoscanId');
       autoscanMode = $('input[name=autoscanMode]');
       autoscanLevel = $('input[name=autoscanLevel]');
@@ -33,7 +30,10 @@ describe('Gerbera Autoscan', () => {
       autoscanPersistentMsg = $('#autoscan-persistent-msg');
       autoscanSave = $('#autoscanSave');
     });
-
+    afterEach(() => {
+      fixture.cleanup();
+      $('#autoscanModal').remove();
+    });
     it('clears all fields in the autoscan modal', () => {
       $('#autoscanModal').autoscanmodal('loadItem', {item: item});
 
@@ -56,6 +56,8 @@ describe('Gerbera Autoscan', () => {
     let ajaxSpy, event;
 
     beforeEach(() => {
+      fixture.setBase('test/client/fixtures');
+      fixture.load('index.html');
       ajaxSpy = spyOn($, 'ajax').and.callFake(() => {
         return $.Deferred().resolve({}).promise();
       });
@@ -66,6 +68,7 @@ describe('Gerbera Autoscan', () => {
     });
 
     afterEach(() => {
+      fixture.cleanup();
       ajaxSpy.and.callThrough();
     });
 
@@ -102,7 +105,6 @@ describe('Gerbera Autoscan', () => {
       expect(ajaxSpy.calls.mostRecent().args[0].data).toEqual(data);
     });
   });
-
   describe('loadNewAutoscan()', () => {
     let autoscanId;
     let autoscanFromFs;
@@ -116,8 +118,8 @@ describe('Gerbera Autoscan', () => {
     let autoscanSave;
 
     beforeEach(() => {
-      loadFixtures('index.html');
-      loadJSONFixtures('autoscan-add-response.json');
+      fixture.setBase('test/client/fixtures');
+      fixture.load('index.html');
       autoscanId = $('#autoscanId');
       autoscanFromFs = $('#autoscanFromFs');
       autoscanMode = $('input[name=autoscanMode]');
@@ -130,11 +132,18 @@ describe('Gerbera Autoscan', () => {
       autoscanSave = $('#autoscanSave');
     });
 
+    afterEach((done) => {
+      $("body").on('transitionend', function(event){
+        fixture.cleanup();
+        $('#autoscanModal').remove();
+        done();
+      });
+    });
+
     it('using the response loads the autoscan overlay', () => {
-      const response = getJSONFixture('autoscan-add-response.json');
       spyOn(GERBERA.Updates, 'updateTreeByIds');
 
-      GERBERA.Autoscan.loadNewAutoscan(response);
+      GERBERA.Autoscan.loadNewAutoscan(autoscanResponse);
 
       autoscanMode = $('input[name=autoscanMode][value=timed]');
       autoscanLevel = $('input[name=autoscanLevel][value=full]');
@@ -157,8 +166,8 @@ describe('Gerbera Autoscan', () => {
     let response, ajaxSpy;
 
     beforeEach(() => {
-      loadFixtures('index.html');
-      loadJSONFixtures('autoscan-add-response.json');
+      fixture.setBase('test/client/fixtures');
+      fixture.load('index.html');
       ajaxSpy = spyOn($, 'ajax').and.callFake(() => {
         return $.Deferred().resolve({}).promise();
       });
@@ -167,16 +176,20 @@ describe('Gerbera Autoscan', () => {
       spyOn(GERBERA.Updates, 'getUpdates');
     });
 
-    afterEach(() => {
-      ajaxSpy.and.callThrough();
+    afterEach((done) => {
+      $("body").on('transitionend', function(event){
+        fixture.cleanup();
+        $('#autoscanModal').remove();
+        ajaxSpy.and.callThrough();
+        done();
+      });
     });
 
     it('collects all the form data from the autoscan modal to call the server', () => {
-      response = getJSONFixture('autoscan-add-response.json');
       spyOn(GERBERA.Updates, 'updateTreeByIds');
       spyOn(GERBERA.Updates, 'addUiTimer');
 
-      GERBERA.Autoscan.loadNewAutoscan(response);
+      GERBERA.Autoscan.loadNewAutoscan(autoscanResponse);
 
       GERBERA.Autoscan.submitAutoscan();
 
@@ -197,11 +210,14 @@ describe('Gerbera Autoscan', () => {
   });
 
   describe('submitComplete()', () => {
-    let response;
+
     beforeEach(() => {
-      loadFixtures('index.html');
-      loadJSONFixtures('submit-complete-2f6d.json');
-      response = getJSONFixture('submit-complete-2f6d.json');
+      fixture.setBase('test/client/fixtures');
+      fixture.load('index.html');
+    });
+
+    afterEach(() => {
+      fixture.cleanup();
     });
 
     it('when successful reports a message to the user and starts task interval', () => {
@@ -209,7 +225,7 @@ describe('Gerbera Autoscan', () => {
       spyOn(GERBERA.Updates, 'showMessage');
       spyOn(GERBERA.Updates, 'getUpdates');
 
-      GERBERA.Autoscan.submitComplete(response);
+      GERBERA.Autoscan.submitComplete(submitCompleteResponse);
 
       expect(GERBERA.Updates.showMessage).toHaveBeenCalledWith('Performing full scan: /Movies', undefined, 'success', 'fa-check');
     });
@@ -228,13 +244,13 @@ describe('Gerbera Autoscan', () => {
 
     it('when fails reports to application error', () => {
       GERBERA.Autoscan.initialize();
-      response.success = false;
+      submitCompleteResponse.success = false;
       spyOn(GERBERA.App, 'error');
 
-      GERBERA.Autoscan.submitComplete(response);
+      GERBERA.Autoscan.submitComplete(submitCompleteResponse);
 
       expect(GERBERA.App.error).toHaveBeenCalledWith('Failed to submit autoscan');
-      response.success = true;
+      submitCompleteResponse.success = true;
     });
   });
 });

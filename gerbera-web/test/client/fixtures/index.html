@@ -1,72 +1,94 @@
-<nav class="navbar navbar-expand-md navbar-dark" id="nav">
-    <button type="button" class="navbar-toggler navbar-toggler-right"
-            data-toggle="collapse" data-target="#navbarContent" aria-controls="navbarContent"
-            aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-    <a class="navbar-brand" href="https://github.com/gerbera/gerbera" title="Gerbera"><img src="" class="d-inline-block align-top" alt="Gerbera Logo"></a>
-    <div class="collapse navbar-collapse" id="navbarContent">
-        <ul class="navbar-nav mr-auto">
-            <li class="nav-item">
-                <a id="nav-home" class="nav-link" href="#" data-gerbera-menu-cmd="HOME"><i class="fa fa-home"></i> Home <span class="sr-only">(current)</span></a>
-            </li>
-            <li class="nav-item">
-                <a id="nav-db" class="nav-link disabled" href="#database" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="db"><i class="fa fa-database"></i> Database</a>
-            </li>
-            <li class="nav-item">
-                <a id="nav-fs" class="nav-link disabled" href="#filesystem" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="fs"><i class="fa fa-folder-open"></i> File System</a>
-            </li>
-        </ul>
-        <ul class="navbar-nav">
-            <li class="nav-item">
-                <a id="docs" class="nav-link disabled noactive" href="http://docs.gerbera.io/en/latest/" target="_blank"><i class="fa fa-question-circle"></i> Documentation</a>
-            </li>
-            <li class="nav-item">
-                <a id="report-issue" class="nav-link noactive" href="http://github.com/gerbera/gerbera/issues" target="_blank"><i class="fa fa-bug"></i> Report an Issue <i class="fa fa-external-link" aria-hidden="true"></i></a>
-            </li>
-        </ul>
-        <form id="login-form" class="form-inline my-2 my-lg-0">
-            <input id="username" class="form-control mr-sm-2 login-field" placeholder="Username" style="display:none;">
-            <input id="password" type="password" class="form-control mr-sm-2 login-field" placeholder="Password"
-                   style="display:none;">
-            <button id="login-submit" class="btn btn-success my-2 my-sm-0">Login</button>
-            <button id='logout' type="button" class="btn btn-danger my-2 my-sm-0" style="display:none;">Logout</button>
-        </form>
+<div id="container">
+    <div id="header">
+        <nav class="navbar navbar-expand-md navbar-dark" id="nav">
+            <button type="button" class="navbar-toggler navbar-toggler-right"
+                    data-toggle="collapse" data-target="#navbarContent" aria-controls="navbarContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <a class="navbar-brand" href="https://github.com/gerbera/gerbera" title="Gerbera"><img src="" class="d-inline-block align-top" alt="Gerbera Logo"></a>
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a id="nav-home" class="nav-link" href="#" data-gerbera-menu-cmd="HOME"><i class="fa fa-home"></i> Home <span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item">
+                        <a id="nav-db" class="nav-link disabled" href="#database" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="db"><i class="fa fa-database"></i> Database</a>
+                    </li>
+                    <li class="nav-item">
+                        <a id="nav-fs" class="nav-link disabled" href="#filesystem" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="fs"><i class="fa fa-folder-open"></i> File System</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a id="docs" class="nav-link disabled noactive" href="http://docs.gerbera.io/en/latest/" target="_blank"><i class="fa fa-question-circle"></i> Documentation</a>
+                    </li>
+                    <li class="nav-item">
+                        <a id="report-issue" class="nav-link noactive" href="http://github.com/gerbera/gerbera/issues" target="_blank"><i class="fa fa-bug"></i> Report an Issue <i class="fa fa-external-link" aria-hidden="true"></i></a>
+                    </li>
+                </ul>
+                <form id="login-form" class="form-inline my-2 my-lg-0">
+                    <input id="username" class="form-control mr-sm-2 login-field" placeholder="Username" style="display:none;">
+                    <input id="password" type="password" class="form-control mr-sm-2 login-field" placeholder="Password"
+                           style="display:none;">
+                    <button id="login-submit" class="btn btn-success my-2 my-sm-0">Login</button>
+                    <button id='logout' type="button" class="btn btn-danger my-2 my-sm-0" style="display:none;">Logout</button>
+                </form>
+            </div>
+        </nav>
+        <div id="trail" class="row no-gutters"></div>
     </div>
-</nav>
 
-<div id="container" class="container">
-    <div class="row">
-        <div class="col-md-12">
-            <div id="trail">/bread/crumb/</div>
+    <div id="home" class="row">
+        <div class="col-sm offset-sm-2">
+            <div id="homeintro">
+                <h2>Welcome to Gerbera</h2>
+                <p>Gerbera is an open source UPnP-AV media server.</p>
+            </div>
+
+            <a id="addlink" href="javascript:;" onclick="$('#nav-fs').click(); // Replace with hashchange handling">
+                <h4><i class="fa fa-plus"></i> Add some files</h4>
+                <p>Browse and import your multimedia files into Gerbera.</p>
+            </a>
+
+            <a id="viewlink" href="javascript:;" onclick="$('#nav-db').click(); // Replace with hashchange handling">
+                <h4><i class="fa fa-files-o"></i> View indexed files</h4>
+                <p>View, update and remove files from Gerbera.</p>
+            </a>
         </div>
     </div>
-    <div class="row">
-        <div class="col-md-5">
-            <div id="tree">tree to be shown</div>
+
+    <div id="content" style="display: none">
+        <div id="left">
+            <div id="tree">
+            </div>
         </div>
-        <div class="col-md-7">
-            <div id="items">Items to be shown</div>
+        <div id="right">
+            <div id="datagrid">
+            </div>
         </div>
     </div>
 </div>
 
-<div id="warning" class="alert alert-warning" style="display: none;"></div>
+<div id="video" style="display: none;"></div>
+
 
 <div id="editModal" class="modal fade" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <h4 class="modal-title">Edit Item</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
             <div class="modal-body">
                 <form>
-                    <div class="form-group" id="objectIdGroup">
+                    <div class="form-group" id="objectIdGroup" hidden>
                         <label for="editdObjectIdTxt">ID</label>
                         <span id="editdObjectIdTxt" class="h3"></span><input type="hidden" class="form-control" id="objectId" readonly disabled>
                     </div>
-                    <div class="form-group" id="parentIdGroup">
+                    <div class="form-group" id="parentIdGroup" hidden>
                         <label for="addParentId">Parent ID</label>
                         <span id="addParentIdTxt" class="h3"></span><input type="hidden" class="form-control" id="addParentId" readonly disabled>
                     </div>
@@ -90,7 +112,7 @@
                     </div>
                     <div class="form-group">
                         <label for="editClass">Class</label>
-                        <input type="text" class="form-control" id="editClass">
+                        <input type="text" class="form-control" id="editClass" value="default">
                     </div>
                     <div class="form-group">
                         <label for="editDesc">Description</label>
@@ -123,55 +145,102 @@
 </div>
 
 <div id="autoscanModal" class="modal fade" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">Save Autoscan</h4>
+                <h4 class="modal-title">Add Autoscan</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
             <div class="modal-body">
+                <div class="container-fluid">
                 <form>
                     <div class="form-group" id="autoscan-persistent-msg">
                         <span>This is a persistent autoscan directory (defined in config), it can not be modified via the web UI.</span>
                     </div>
-                    <div class="form-group">
-                        <label for="autoscanId">ID:</label>
-                        <span id="autoscanIdTxt"></span>
-                        <input type="hidden" id="autoscanId"/>
-                        <input type="checkbox" class="hidden" id="autoscanFromFs"/>
-                        <input type="checkbox" class="hidden" id="autoscanPersistent"/>
+                    <div class="form-group row " hidden>
+                        <div class="col-md-6">
+                            <label for="autoscanId">ID:</label>
+                        </div>
+                        <div class="col-md-6">
+                            <span id="autoscanIdTxt" class="overflow"></span>
+                            <input type="hidden" id="autoscanId"/>
+                            <input type="checkbox" class="hidden" id="autoscanFromFs"/>
+                            <input type="checkbox" class="hidden" id="autoscanPersistent"/>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <input type="radio" name="autoscanMode" id="autoscanModeNone" class="form-control" value="none"/>
-                        <label for="autoscanModeNone">None</label>
-                        <input type="radio" name="autoscanMode" id="autoscanModeTimed" class="form-control" value="timed"/>
-                        <label for="autoscanModeTimed">Timed</label>
-                        <input type="radio" name="autoscanMode" id="autoscanModeInotify" class="form-control" value="inotify"/>
-                        <label for="autoscanModeInotify">INotify</label>
+                    <div class="form-check row">
+                        <div class="col-md-6">
+                            <label>Autoscan Mode:</label>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-check-inline">
+                                <label for="autoscanModeNone" class="form-check-label">
+                                    <input type="radio" name="autoscanMode" id="autoscanModeNone" class="form-check-input" value="none"/> None
+                                </label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <label for="autoscanModeTimed" class="form-check-label">
+                                    <input type="radio" name="autoscanMode" id="autoscanModeTimed" class="form-check-input" value="timed"/> Timed
+                                </label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <label for="autoscanModeInotify" class="form-check-label">
+                                    <input type="radio" name="autoscanMode" id="autoscanModeInotify" class="form-check-input" value="inotify"/> INotify
+                                </label>
+                            </div>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <input type="radio" name="autoscanLevel" id="autoscanLevelBasic" class="form-control" value="basic"/>
-                        <label for="autoscanModeNone">Basic</label>
-                        <input type="radio" name="autoscanLevel" id="autoscanLevelFull" class="form-control" value="full"/>
-                        <label for="autoscanModeTimed">Full</label>
+                    <div class="form-check row">
+                        <div class="col-md-6">
+                            <label>Autoscan Level:</label>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-check-inline">
+                                <label for="autoscanLevelBasic" class="form-check-label">
+                                    <input type="radio" name="autoscanLevel" id="autoscanLevelBasic" class="form-check-input" value="basic"/> Basic
+                                </label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <label for="autoscanLevelFull" class="form-check-label">
+                                    <input type="radio" name="autoscanLevel" id="autoscanLevelFull" class="form-check-input" value="full"/> Full
+                                </label>
+                            </div>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="autoscanRecursive">Recursive:</label>
-                        <input type="checkbox" name="autoscanRecursive" id="autoscanRecursive" class="form-control"/>
+                    <div class="form-check form-check-inline row">
+                        <div class="col-md-6 offset-md-6">
+                            <div class="form-check form-check-inline">
+                                <label for="autoscanRecursive" class="form-check-label">
+                                    <input type="checkbox" name="autoscanRecursive" id="autoscanRecursive" class="form-check-input"/> Recursive
+                                </label>
+                            </div>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="autoscanHidden">Include hidden files/directories:</label>
-                        <input type="checkbox" name="autoscanHidden" id="autoscanHidden" class="form-control"/>
+                    <div class="form-check form-check-inline row">
+                        <div class="col-md-6 offset-md-6">
+                            <div class="form-check form-check-inline">
+                                <label for="autoscanHidden" class="form-check-label">
+                                    <input type="checkbox" name="autoscanHidden" id="autoscanHidden" class="form-check-input"/> Include hidden files/directories
+                                </label>
+                            </div>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="autoscanInterval">Scan Interval (in seconds):</label>
-                        <input type="text" id="autoscanInterval" class="form-control"/>
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                            <label for="autoscanInterval">Scan Interval (in seconds):</label>
+                        </div>
+                        <div class="col-md-4">
+                            <input type="text" id="autoscanInterval" class="form-control"/>
+                        </div>
                     </div>
                 </form>
+                </div>
             </div>
             <div class="modal-footer">
                 <button id="autoscanCancel" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button id="autoscanSave" type="submit" class="btn btn-primary">Save Item</button>
+                <button id="autoscanSave" type="submit" class="btn btn-primary" data-dismiss="modal">Save Autoscan</button>
             </div>
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->

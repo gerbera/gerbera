@@ -1,7 +1,4 @@
-/* global jasmine it expect describe beforeEach loadJSONFixtures getJSONFixture loadFixtures */
-
-jasmine.getFixtures().fixturesPath = 'base/test/client/fixtures';
-jasmine.getJSONFixtures().fixturesPath = 'base/test/client/fixtures';
+import autoScanItem from './fixtures/autoscan-item';
 
 describe('The jQuery Gerbera Autoscan Overlay', () => {
   'use strict';
@@ -19,9 +16,9 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
   let autoScanModal;
 
   beforeEach(() => {
-    loadFixtures('autoscan-modal.html');
-    loadJSONFixtures('autoscan-item.json');
-    item = getJSONFixture('autoscan-item.json');
+    fixture.setBase('test/client/fixtures');
+    fixture.load('index.html');
+    item = autoScanItem;
     autoscanId = $('#autoscanId');
     autoscanFromFs = $('#autoscanFromFs');
     autoscanMode = $('input[name=autoscanMode]');
@@ -33,6 +30,10 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
     autoscanPersistentMsg = $('#autoscan-persistent-msg');
     autoscanSave = $('#autoscanSave');
     autoScanModal = $('#autoscanModal');
+  });
+
+  afterEach(() => {
+    fixture.cleanup();
   });
 
   describe('loadItem()', () => {

@@ -1,15 +1,11 @@
-/* global GERBERA jasmine it expect spyOn describe beforeEach loadJSONFixtures getJSONFixture loadFixtures */
-
-jasmine.getFixtures().fixturesPath = 'base/test/client/fixtures';
-jasmine.getJSONFixtures().fixturesPath = 'base/test/client/fixtures';
+import mockGetSid from './fixtures/get_sid.not.logged_in';
+import mockToken from './fixtures/get_token.success';
+import mockLogin from './fixtures/login.success';
 
 describe('Gerbera Auth', () => {
   describe('checkSID()', () => {
-    let ajaxSpy, mockGetSid;
+    let ajaxSpy;
     beforeEach(() => {
-      loadJSONFixtures('get_sid.not.logged_in.json');
-      mockGetSid = getJSONFixture('get_sid.not.logged_in.json');
-
       ajaxSpy = spyOn($, 'ajax').and.callFake(() => {
         return $.Deferred().resolve(mockGetSid).promise();
       });
@@ -62,12 +58,10 @@ describe('Gerbera Auth', () => {
   });
 
   describe('authenticate()', () => {
-    let mockToken, mockLogin, ajaxSpy;
+    let ajaxSpy;
     beforeEach(() => {
-      loadJSONFixtures('get_token.success.json');
-      mockToken = getJSONFixture('get_token.success.json');
-      mockLogin = getJSONFixture('login.success.json');
-      loadFixtures('index.html');
+      fixture.setBase('test/client/fixtures');
+      fixture.load('index.html');
       ajaxSpy = spyOn($, 'ajax').and.callFake((options) => {
         const d = $.Deferred();
         if (options.data.action === 'get_token') {
@@ -81,6 +75,7 @@ describe('Gerbera Auth', () => {
     });
 
     afterEach(() => {
+      fixture.cleanup();
       ajaxSpy.calls.reset();
       ajaxSpy.and.callThrough();
     });
@@ -113,7 +108,8 @@ describe('Gerbera Auth', () => {
   describe('logout()', () => {
     let ajaxSpy;
     beforeEach(() => {
-      loadFixtures('index.html');
+      fixture.setBase('test/client/fixtures');
+      fixture.load('index.html');
       ajaxSpy = spyOn($, 'ajax').and.callFake(() => {
         return $.Deferred().resolve({success: true}).promise();
       });
@@ -121,6 +117,7 @@ describe('Gerbera Auth', () => {
     });
 
     afterEach(() => {
+      fixture.cleanup();
       ajaxSpy.and.callThrough();
     });
 

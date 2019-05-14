@@ -1,18 +1,34 @@
-/* global GERBERA jasmine it expect describe beforeEach loadJSONFixtures getJSONFixture loadFixtures spyOn */
-
-jasmine.getFixtures().fixturesPath = 'base/test/client/fixtures';
-jasmine.getJSONFixtures().fixturesPath = 'base/test/client/fixtures';
+import mockConfig from './fixtures/config';
+import itemsResponse from './fixtures/parent_id-7443-start-0';
+import gerberaItems from './fixtures/gerbera-items';
+import dataGridData from './fixtures/datagrid-data';
+import fileItems from './fixtures/items-for-files';
+import editItemResponse from './fixtures/object_id-39479';
+import editDisabled from './fixtures/edit_load_disabled';
+import itemMock from './fixtures/item';
+import activeItemMock from './fixtures/active-item';
+import externalUrl from './fixtures/external-url';
+import internalUrl from './fixtures/internal-url';
+import containerMock from './fixtures/container';
+import treeDataJson from './fixtures/tree-data';
 
 describe('Gerbera Items', () => {
-  'use strict';
+  beforeEach(() => {
+    fixture.setBase('test/client/fixtures');
+    fixture.load('index.html');
+  });
+  afterEach((done) => {
+    $("body").on('transitionend', function(event){
+      fixture.cleanup();
+      $('#editModal').remove();
+      $('.modal-backdrop').remove();
+      done();
+    });
+    fixture.cleanup();
+    done();
+  });
   describe('initialize()', () => {
-
-    let mockConfig;
-
     beforeEach(() => {
-      loadJSONFixtures('config.json');
-      loadFixtures('index.html');
-      mockConfig = getJSONFixture('config.json');
       GERBERA.App.serverConfig = mockConfig.config;
     });
 
@@ -29,13 +45,18 @@ describe('Gerbera Items', () => {
   });
 
   describe('treeItemSelected()', () => {
-    let response, ajaxSpy;
+    let ajaxSpy;
 
     beforeEach(() => {
-      loadJSONFixtures('parent_id-7443-start-0.json');
-      response = getJSONFixture('parent_id-7443-start-0.json');
       ajaxSpy = spyOn($, 'ajax').and.callFake(() => {
-        return $.Deferred().resolve(response).promise();
+        return $.Deferred().resolve(itemsResponse).promise();
+      });
+      $('#tree').tree({
+        data: treeDataJson,
+        config: {
+          titleClass: 'folder-title',
+          closedIcon: 'folder-closed'
+        }
       });
     });
 
@@ -62,65 +83,60 @@ describe('Gerbera Items', () => {
       expect(ajaxSpy.calls.mostRecent().args[0].data.count).toBe(25);
     });
   });
-
   describe('transformItems()', () => {
-    let gerberaList;
     let widgetList;
 
     beforeEach(() => {
-      loadJSONFixtures('gerbera-items.json');
-      loadJSONFixtures('datagrid-data.json');
-      gerberaList = getJSONFixture('gerbera-items.json');
-      widgetList = getJSONFixture('datagrid-data.json');
       GERBERA.App.serverConfig = {};
     });
 
     it('converts a gerbera list of items to the widget accepted list', () => {
-      const result = GERBERA.Items.transformItems(gerberaList);
-      expect(result).toEqual(widgetList);
+      const result = GERBERA.Items.transformItems(gerberaItems);
+      expect(result).toEqual(dataGridData);
     });
   });
-
   describe('loadItems()', () => {
-    let response;
-
     beforeEach(() => {
-      loadJSONFixtures('parent_id-7443-start-0.json');
-      response = getJSONFixture('parent_id-7443-start-0.json');
-      loadFixtures('datagrid.html');
       GERBERA.App.serverConfig = {};
       spyOn(GERBERA.App, 'getType').and.returnValue('db')
+      $('#tree').tree({
+        data: treeDataJson,
+        config: {
+          titleClass: 'folder-title',
+          closedIcon: 'folder-closed'
+        }
+      });
     });
 
     it('does not load items if response is failure', () => {
-      response.success = false;
-      GERBERA.Items.loadItems(response);
+      itemsResponse.success = false;
+      GERBERA.Items.loadItems(itemsResponse);
       expect($('#items').find('tr').length).toEqual(0);
-      response.success = true;
+      itemsResponse.success = true;
     });
 
     it('loads the response as items in the datagrid', () => {
-      response.success = true;
-      GERBERA.Items.loadItems(response);
+      itemsResponse.success = true;
+      GERBERA.Items.loadItems(itemsResponse);
       expect($('#datagrid').find('tr').length).toEqual(12);
-      response.success = true;
+      itemsResponse.success = true;
     });
 
     it('loads a pager for items', () => {
-      response.success = true;
-      GERBERA.Items.loadItems(response);
+      itemsResponse.success = true;
+      GERBERA.Items.loadItems(itemsResponse);
 
       expect($('#datagrid nav.grb-pager').length).toBe(1);
 
-      response.success = true;
+      itemsResponse.success = true;
     });
 
     it('sets pager click to the callback method', () => {
-      response.success = true;
+      itemsResponse.success = true;
       spyOn(GERBERA.Items, 'retrieveItemsForPage');
       spyOn(GERBERA.Items, 'viewItems').and.returnValue(25);
 
-      GERBERA.Items.loadItems(response);
+      GERBERA.Items.loadItems(itemsResponse);
       $($('#datagrid nav.grb-pager > ul > li').get(1)).find('a').click();
 
       expect(GERBERA.Items.retrieveItemsForPage).toHaveBeenCalled();
@@ -129,25 +145,28 @@ describe('Gerbera Items', () => {
     it('refreshes the trail using the response items', () => {
       spyOn(GERBERA.Trail, 'makeTrailFromItem');
 
-      GERBERA.Items.loadItems(response);
+      GERBERA.Items.loadItems(itemsResponse);
 
-      expect(GERBERA.Trail.makeTrailFromItem).toHaveBeenCalledWith(response.items);
+      expect(GERBERA.Trail.makeTrailFromItem).toHaveBeenCalledWith(itemsResponse.items);
     });
   });
-
   describe('loadItems() for files', () => {
     let response;
 
     beforeEach(() => {
-      loadJSONFixtures('items-for-files.json');
-      response = getJSONFixture('items-for-files.json');
-      loadFixtures('datagrid.html');
       GERBERA.App.serverConfig = {};
       spyOn(GERBERA.App, 'getType').and.returnValue('fs');
+      $('#tree').tree({
+        data: treeDataJson,
+        config: {
+          titleClass: 'folder-title',
+          closedIcon: 'folder-closed'
+        }
+      });
     });
 
     it('loads file items by transforming them', () => {
-      GERBERA.Items.loadItems(response);
+      GERBERA.Items.loadItems(fileItems);
       expect($('#datagrid').find('tr').length).toEqual(33);
     });
   });
@@ -162,6 +181,7 @@ describe('Gerbera Items', () => {
       event = {
         data: { id: 913 }
       };
+      spyOn($.fn, 'toast');
     });
 
     afterEach(() => {
@@ -177,7 +197,6 @@ describe('Gerbera Items', () => {
       expect(ajaxSpy.calls.mostRecent().args[0].data.all).toBe(0);
     });
   });
-
   describe('deleteGerberaItem()', () => {
     let ajaxSpy, item;
 
@@ -281,15 +300,11 @@ describe('Gerbera Items', () => {
       expect(ajaxSpy.calls.mostRecent().args[0].data.updates).toBe('check');
     });
   });
-
   describe('loadEditItem()', () => {
-    let response, editObjectType, editTitle,
-        editLocation, editClass, editDesc, editMime;
+    let editObjectType, editTitle,
+      editLocation, editClass, editDesc, editMime;
 
     beforeEach(() => {
-      loadJSONFixtures('object_id-39479.json');
-      loadJSONFixtures('edit_load_disabled.json');
-      loadFixtures('index.html');
       editObjectType = $('#editObjectType');
       editTitle = $('#editTitle');
       editLocation = $('#editLocation');
@@ -299,10 +314,9 @@ describe('Gerbera Items', () => {
     });
 
     it('loads the item details into the fields', () => {
-      response = getJSONFixture('object_id-39479.json');
       spyOn(GERBERA.Updates, 'updateTreeByIds');
 
-      GERBERA.Items.loadEditItem(response);
+      GERBERA.Items.loadEditItem(editItemResponse);
 
       expect(editObjectType.val()).toBe('item');
       expect(editTitle.val()).toBe('Test.mp4');
@@ -323,10 +337,9 @@ describe('Gerbera Items', () => {
     });
 
     it('disables the fields based on the server status', () => {
-      response = getJSONFixture('edit_load_disabled.json');
       spyOn(GERBERA.Updates, 'updateTreeByIds');
 
-      GERBERA.Items.loadEditItem(response);
+      GERBERA.Items.loadEditItem(editDisabled);
 
       expect(editObjectType.is(':disabled')).toBeTruthy();
       expect(editTitle.is(':disabled')).toBeTruthy();
@@ -341,12 +354,6 @@ describe('Gerbera Items', () => {
     let ajaxSpy, editModal;
 
     beforeEach(() => {
-      loadFixtures('index.html');
-      loadJSONFixtures('item.json');
-      loadJSONFixtures('active-item.json');
-      loadJSONFixtures('external-url.json');
-      loadJSONFixtures('internal-url.json');
-      loadJSONFixtures('container.json');
       spyOn(GERBERA.Auth, 'getSessionId').and.returnValue('SESSION_ID');
       spyOn(GERBERA.Items, 'treeItemSelected');
       spyOn(GERBERA.Updates, 'showMessage');
@@ -361,7 +368,9 @@ describe('Gerbera Items', () => {
     });
 
     it('calls the server with the item details', () => {
-      const itemData = { item: getJSONFixture('item.json') };
+      const itemData = {
+        item: itemMock
+      };
       editModal.editmodal('loadItem', itemData);
 
       GERBERA.Items.saveItem();
@@ -379,7 +388,7 @@ describe('Gerbera Items', () => {
 
     it('calls the server with the `container` details', () => {
       const itemData = {
-        item: getJSONFixture('container.json')
+        item: containerMock
       };
 
       editModal.editmodal('loadItem', itemData);
@@ -398,7 +407,7 @@ describe('Gerbera Items', () => {
 
     it('calls the server with the `external_url` details', () => {
       const itemData = {
-        item: getJSONFixture('external-url.json')
+        item: externalUrl
       };
 
       editModal.editmodal('loadItem', itemData);
@@ -420,7 +429,7 @@ describe('Gerbera Items', () => {
 
     it('calls the server with the `internal_url` details', () => {
       const itemData = {
-        item: getJSONFixture('internal-url.json')
+        item: internalUrl
       };
 
       editModal.editmodal('loadItem', itemData);
@@ -442,7 +451,7 @@ describe('Gerbera Items', () => {
 
     it('calls the server with the `active_item` details', () => {
       const itemData = {
-        item: getJSONFixture('active-item.json')
+        item: activeItemMock
       };
 
       editModal.editmodal('loadItem', itemData);
@@ -464,12 +473,10 @@ describe('Gerbera Items', () => {
       });
     });
   });
-
   describe('saveItemComplete()', () => {
     let response;
 
     beforeEach(() => {
-      loadFixtures('index.html');
       GERBERA.Items.currentTreeItem = {};
     });
 
@@ -503,6 +510,7 @@ describe('Gerbera Items', () => {
       event = {
         data: { id: 913 }
       };
+      spyOn($.fn, 'toast');
 
       GERBERA.Items.addFileItem(event);
 
@@ -547,13 +555,8 @@ describe('Gerbera Items', () => {
       expect(GERBERA.Updates.addUiTimer).toHaveBeenCalled();
     });
   });
-
   describe('addVirtualItem()', () => {
     let event;
-
-    beforeEach(() => {
-      loadFixtures('index.html');
-    });
 
     it('should show parent id on form when adding new item but no object id', () => {
       event = {
@@ -592,17 +595,10 @@ describe('Gerbera Items', () => {
       expect($('#editModal .modal-title').text()).toBe('Add Item');
     });
   });
-
   describe('addObject()', () => {
     let ajaxSpy, item, editModal;
 
     beforeEach(() => {
-      loadFixtures('index.html');
-      loadJSONFixtures('item.json');
-      loadJSONFixtures('active-item.json');
-      loadJSONFixtures('external-url.json');
-      loadJSONFixtures('internal-url.json');
-      loadJSONFixtures('container.json');
       spyOn(GERBERA.Auth, 'getSessionId').and.returnValue('SESSION_ID');
       spyOn(GERBERA.Items, 'treeItemSelected');
       spyOn(GERBERA.Updates, 'updateTreeByIds');
@@ -777,12 +773,9 @@ describe('Gerbera Items', () => {
   });
 
   describe('retrieveItemsForPage()', () => {
-      let mockConfig, ajaxSpy;
+      let ajaxSpy;
 
       beforeEach(async () => {
-        loadJSONFixtures('config.json');
-        loadFixtures('index.html');
-        mockConfig = getJSONFixture('config.json');
         GERBERA.App.serverConfig = mockConfig.config;
 
         GERBERA.App.serverConfig = {};
@@ -850,11 +843,9 @@ describe('Gerbera Items', () => {
   });
 
   describe('nextPage()', () => {
-    let mockConfig, ajaxSpy;
+    let ajaxSpy;
 
     beforeEach(async () => {
-      loadJSONFixtures('config.json');
-      mockConfig = getJSONFixture('config.json');
       GERBERA.App.serverConfig = mockConfig.config;
       await GERBERA.Items.initialize();
       ajaxSpy = spyOn($, 'ajax').and.callFake(() => {
@@ -893,11 +884,9 @@ describe('Gerbera Items', () => {
   });
 
   describe('previousPage()', () => {
-    let mockConfig, ajaxSpy;
+    let ajaxSpy;
 
     beforeEach(async () => {
-      loadJSONFixtures('config.json');
-      mockConfig = getJSONFixture('config.json');
       GERBERA.App.serverConfig = mockConfig.config;
       await GERBERA.Items.initialize();
       ajaxSpy = spyOn($, 'ajax').and.callFake(() => {

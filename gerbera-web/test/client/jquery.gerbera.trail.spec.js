@@ -1,23 +1,21 @@
-/* global jasmine it expect describe beforeEach afterEach loadJSONFixtures getJSONFixture loadFixtures */
-
-jasmine.getFixtures().fixturesPath = 'base/test/client/fixtures';
-jasmine.getJSONFixtures().fixturesPath = 'base/test/client/fixtures';
+import trailDataJson from './fixtures/trail-data';
 
 describe('The jQuery Trail', () => {
   'use strict';
   let trailData, trail;
 
   beforeEach(() => {
-    loadFixtures('trail.html');
-    loadJSONFixtures('trail-data.json');
-    trailData = getJSONFixture('trail-data.json');
+    fixture.setBase('test/client/fixtures');
+    fixture.load('trail.html');
     trail = $('#trail');
+    trailData = trailDataJson;
   });
 
   afterEach(() => {
     if (trail.hasClass('grb-trail')) {
       trail.trail('destroy')
     }
+    fixture.cleanup();
   });
 
   it('Uses an array of items to build the breadcrumb', () => {
