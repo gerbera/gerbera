@@ -1,19 +1,13 @@
-/* global GERBERA jasmine it expect spyOn describe beforeEach beforeAll afterEach loadJSONFixtures getJSONFixture */
-
-jasmine.getFixtures().fixturesPath = 'base/test/client/fixtures';
-jasmine.getJSONFixtures().fixturesPath = 'base/test/client/fixtures';
+import convertedConfig from './fixtures/converted-config';
+import mockConfig from './fixtures/config';
+import uiDisabled from './fixtures/ui-disabled';
 
 describe('Gerbera UI App', () => {
+
   describe('initialize()', () => {
-    let mockConfig, convertedConfig, ajaxSpy, cookieSpy, uiDisabled, ajaxSetupSpy;
+    let ajaxSpy, ajaxSetupSpy, cookieSpy;
 
     beforeAll(() => {
-      loadJSONFixtures('converted-config.json');
-      loadJSONFixtures('config.json');
-      loadJSONFixtures('ui-disabled.json');
-      mockConfig = getJSONFixture('config.json');
-      convertedConfig = getJSONFixture('converted-config.json');
-      uiDisabled = getJSONFixture('ui-disabled.json');
       ajaxSpy = spyOn($, 'ajax');
       ajaxSetupSpy = spyOn($, 'ajaxSetup');
       spyOn(GERBERA.Auth, 'checkSID');
@@ -153,13 +147,6 @@ describe('Gerbera UI App', () => {
   });
 
   describe('error()', () => {
-    let uiDisabled;
-
-    beforeEach(() => {
-      loadJSONFixtures('ui-disabled.json');
-      uiDisabled = getJSONFixture('ui-disabled.json');
-    });
-
     it('shows the event as the error message when event is a string', () => {
       spyOn(GERBERA.Updates, 'showMessage');
       const event = 'Error Message';

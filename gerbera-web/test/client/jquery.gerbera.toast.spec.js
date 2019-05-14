@@ -1,14 +1,14 @@
-/* global jasmine it expect describe beforeEach loadFixtures */
-
-jasmine.getFixtures().fixturesPath = 'base/test/client/fixtures'
-jasmine.getJSONFixtures().fixturesPath = 'base/test/client/fixtures'
-
 describe('The jQuery Gerbera Toast Message', () => {
   let toaster;
 
   beforeEach(() => {
-    loadFixtures('toast.html');
+    fixture.setBase('test/client/fixtures');
+    fixture.load('index.html');
     toaster = $('#toast').toast();
+  });
+
+  afterEach(() => {
+    fixture.cleanup();
   });
 
   describe('show()', () => {

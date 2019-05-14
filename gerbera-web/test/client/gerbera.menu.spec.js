@@ -1,23 +1,21 @@
-/* global GERBERA spyOn jasmine it expect describe beforeEach loadFixtures loadJSONFixtures getJSONFixture */
-
-jasmine.getFixtures().fixturesPath = 'base/test/client/fixtures';
-jasmine.getJSONFixtures().fixturesPath = 'base/test/client/fixtures';
+import mockConfig from './fixtures/config';
+import treeMock from './fixtures/parent_id-0-select_it-0';
 
 describe('Gerbera Menu', () => {
   'use strict';
   describe('initialize()', () => {
-    let ajaxSpy, mockConfig;
+    let ajaxSpy;
 
     beforeEach(() => {
-      loadJSONFixtures('config.json');
-      loadFixtures('index.html');
-      mockConfig = getJSONFixture('config.json');
+      fixture.setBase('test/client/fixtures');
+      fixture.load('index.html');
       spyOn(GERBERA.Updates, 'getUpdates');
       ajaxSpy = spyOn($, 'ajax');
       GERBERA.App.serverConfig = mockConfig.config;
     });
 
     afterEach(() => {
+      fixture.cleanup();
       ajaxSpy.and.callThrough();
     });
 
@@ -45,11 +43,8 @@ describe('Gerbera Menu', () => {
       spyOn(GERBERA.Auth, 'isLoggedIn').and.returnValue(true);
       spyOn(GERBERA.Items, 'destroy');
       spyOn(GERBERA.Tree, 'selectType');
-
-      loadJSONFixtures('parent_id-0-select_it-0.json');
-      const response = getJSONFixture('parent_id-0-select_it-0.json');
       ajaxSpy.and.callFake(() => {
-        return $.Deferred().resolve(response).promise();
+        return $.Deferred().resolve(treeMock).promise();
       });
 
       await GERBERA.Menu.initialize();
@@ -76,10 +71,13 @@ describe('Gerbera Menu', () => {
   describe('disable()', () => {
 
     beforeEach(() => {
-      loadFixtures('index.html');
+      fixture.setBase('test/client/fixtures');
+      fixture.load('index.html');
       spyOn(GERBERA.Updates, 'getUpdates');
     });
-
+    afterEach(() => {
+      fixture.cleanup();
+    });
     it('disables all menu items except the report issue link', () => {
       GERBERA.Menu.disable();
 
@@ -96,8 +94,12 @@ describe('Gerbera Menu', () => {
   describe('hideLogin()', () => {
 
     beforeEach(() => {
-      loadFixtures('index.html');
+      fixture.setBase('test/client/fixtures');
+      fixture.load('index.html');
       spyOn(GERBERA.Updates, 'getUpdates');
+    });
+    afterEach(() => {
+      fixture.cleanup();
     });
 
     it('hides login fields when called', () => {
@@ -111,21 +113,22 @@ describe('Gerbera Menu', () => {
 
   describe('click()', () => {
     let fsMenu;
-    let mockConfig;
 
     beforeEach(async () => {
-      loadFixtures('index.html');
-      loadJSONFixtures('config.json');
+      fixture.setBase('test/client/fixtures');
+      fixture.load('index.html');
       spyOn(GERBERA.Tree, 'selectType');
       spyOn(GERBERA.App, 'setType');
       spyOn(GERBERA.Auth, 'isLoggedIn').and.returnValue(true);
       spyOn(GERBERA.Items, 'destroy');
       spyOn(GERBERA.Tree, 'destroy');
       spyOn(GERBERA.Trail, 'destroy');
-      mockConfig = getJSONFixture('config.json');
       GERBERA.App.serverConfig = mockConfig.config;
       await GERBERA.Menu.initialize();
       fsMenu = $('#nav-fs');
+    });
+    afterEach(() => {
+      fixture.cleanup();
     });
 
     it('sets the active menu item when clicked', () => {

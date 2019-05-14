@@ -1,14 +1,15 @@
-/* global GERBERA jasmine it expect describe beforeEach loadJSONFixtures loadFixtures getJSONFixture spyOn */
-
-jasmine.getFixtures().fixturesPath = 'base/test/client/fixtures';
-jasmine.getJSONFixtures().fixturesPath = 'base/test/client/fixtures';
+import treeResponse from './fixtures/parent_id-0-select_it-0';
 
 describe('Gerbera Trail', () => {
   'use strict';
 
   describe('initialize()', () => {
     beforeEach(() => {
-      loadFixtures('trail.html');
+      fixture.setBase('test/client/fixtures');
+      fixture.load('trail.html');
+    });
+    afterEach(() => {
+      fixture.cleanup();
     });
     it('clears any data associated with the trail', () => {
       const trail = $('#trail');
@@ -21,7 +22,11 @@ describe('Gerbera Trail', () => {
 
   describe('makeTrail()', () => {
     beforeEach(() => {
-      loadFixtures('trail.html');
+      fixture.setBase('test/client/fixtures');
+      fixture.load('trail.html');
+    });
+    afterEach(() => {
+      fixture.cleanup();
     });
     it('creates a trail of elements given a selected item in the tree', () => {
       const treeElement = $('#first-child-one-one');
@@ -38,10 +43,14 @@ describe('Gerbera Trail', () => {
     let treeElement, trail;
 
     beforeEach(() => {
+      fixture.setBase('test/client/fixtures');
+      fixture.load('trail.html');
       treeElement = $('#first-child-one-one');
       trail = $('#trail');
-      loadFixtures('trail.html');
       GERBERA.Trail.makeTrail(treeElement);
+    });
+    afterEach(() => {
+      fixture.cleanup();
     });
 
     it('removes contents of the trail', () => {
@@ -52,8 +61,14 @@ describe('Gerbera Trail', () => {
   });
 
   describe('gatherTrail()', () => {
+    beforeEach(() => {
+      fixture.setBase('test/client/fixtures');
+    });
+    afterEach(() => {
+      fixture.cleanup();
+    });
     it('collects trail data from the tree', () => {
-      loadFixtures('trail.html');
+      fixture.load('trail.html');
       const treeElement = $('#first-child-one-one');
       const expected = [
         { id: 111, text: 'first' },
@@ -67,7 +82,7 @@ describe('Gerbera Trail', () => {
     });
 
     it('collects trail data from the tree that has non-numeric IDs', () => {
-      loadFixtures('trail-fs.html');
+      fixture.load('trail-fs.html');
       const treeElement = $('#first-child-one-one');
       const expected = [
         { id: 'aaa', text: 'first' },
@@ -82,13 +97,16 @@ describe('Gerbera Trail', () => {
   });
 
   describe('deleteItem()', () => {
-    let deleteResponse, event, treeResponse;
+    let deleteResponse, event;
     beforeEach(() => {
+      fixture.setBase('test/client/fixtures');
+      fixture.load('trail.html');
       deleteResponse = { success: true };
       event = {data: { id: 8 }};
-      loadJSONFixtures('parent_id-0-select_it-0.json');
-      treeResponse = getJSONFixture('parent_id-0-select_it-0.json');
-      loadFixtures('trail.html');
+
+    });
+    afterEach(() => {
+      fixture.cleanup();
     });
     it('calls the server to delete the gerbera item', async () => {
       GERBERA.Tree.loadTree(treeResponse);
@@ -108,13 +126,15 @@ describe('Gerbera Trail', () => {
     });
 
     describe('deleteAllItems()', () => {
-      let deleteResponse, event, treeResponse;
+      let event;
       beforeEach(() => {
+        fixture.setBase('test/client/fixtures');
+        fixture.load('trail.html');
         deleteResponse = {success: true};
         event = {data: {id: 8}};
-        loadJSONFixtures('parent_id-0-select_it-0.json');
-        treeResponse = getJSONFixture('parent_id-0-select_it-0.json');
-        loadFixtures('trail.html');
+      });
+      afterEach(() => {
+        fixture.cleanup();
       });
       it('calls the server to delete the gerbera item', async () => {
         GERBERA.Tree.loadTree(treeResponse);
@@ -164,8 +184,13 @@ describe('Gerbera Trail', () => {
         'protect_items': false,
         'item': []
       };
-      loadFixtures('trail.html');
+      fixture.setBase('test/client/fixtures');
+      fixture.load('trail.html');
       trail = $('#trail');
+    });
+
+    afterEach(() => {
+      fixture.cleanup();
     });
 
     it('uses and item response to make the trail', () => {
@@ -226,9 +251,13 @@ describe('Gerbera Trail', () => {
         'protect_items': false,
         'item': []
       };
-      loadFixtures('trail.html');
+      fixture.setBase('test/client/fixtures');
+      fixture.load('trail.html');
       const treeElement = $('#first-child-one-one');
       spyOn(GERBERA.Tree, 'getTreeElementById').and.returnValue(treeElement);
+    });
+    afterEach(() => {
+      fixture.cleanup();
     });
 
     it('when click delete calls Gerbera Item delete', () => {

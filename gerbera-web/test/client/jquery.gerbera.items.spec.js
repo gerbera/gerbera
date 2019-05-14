@@ -1,17 +1,17 @@
-/* global jasmine it expect describe beforeEach loadJSONFixtures getJSONFixture loadFixtures */
-
-jasmine.getFixtures().fixturesPath = 'base/test/client/fixtures'
-jasmine.getJSONFixtures().fixturesPath = 'base/test/client/fixtures'
+import datagridData from './fixtures/datagrid-data';
 
 describe('The jQuery Datagrid', () => {
   'use strict';
-  let datagridData, dataGrid;
+  let dataGrid;
 
   beforeEach(() => {
-    loadFixtures('datagrid.html');
-    loadJSONFixtures('datagrid-data.json');
-    datagridData = getJSONFixture('datagrid-data.json');
+    fixture.setBase('test/client/fixtures');
+    fixture.load('index.html');
     dataGrid = $('#datagrid');
+  });
+
+  afterEach(() => {
+    fixture.cleanup();
   });
 
   it('creates a table based on the dataset provided', () => {

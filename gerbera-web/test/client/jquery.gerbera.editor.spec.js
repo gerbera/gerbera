@@ -1,7 +1,8 @@
-/* global jasmine it expect describe beforeEach loadJSONFixtures getJSONFixture loadFixtures */
-
-jasmine.getFixtures().fixturesPath = 'base/test/client/fixtures';
-jasmine.getJSONFixtures().fixturesPath = 'base/test/client/fixtures';
+import activeItem from './fixtures/active-item';
+import container from './fixtures/container';
+import externalUrl from './fixtures/external-url';
+import internalUrl from './fixtures/internal-url';
+import itemJson from './fixtures/item';
 
 describe('The jQuery Gerbera Editor Overlay', () => {
   'use strict';
@@ -22,7 +23,8 @@ describe('The jQuery Gerbera Editor Overlay', () => {
   let item;
 
   beforeEach(() => {
-    loadFixtures('edit-modal.html');
+    fixture.setBase('test/client/fixtures');
+    fixture.load('index.html');
     editObjectType = $('#editObjectType');
     editTitle = $('#editTitle');
     editTitle.val('TEST');
@@ -48,6 +50,10 @@ describe('The jQuery Gerbera Editor Overlay', () => {
     item = {
       id: 12345
     };
+  });
+
+  afterEach(() => {
+    fixture.cleanup();
   });
 
   describe('addNewItem()', () => {
@@ -172,17 +178,12 @@ describe('The jQuery Gerbera Editor Overlay', () => {
     let editModal;
 
     beforeEach(() => {
-      loadJSONFixtures('active-item.json');
-      loadJSONFixtures('container.json');
-      loadJSONFixtures('external-url.json');
-      loadJSONFixtures('internal-url.json');
-      loadJSONFixtures('item.json');
       editModal = $('#editModal');
     });
 
     it('should set fields in editor for `container`', () => {
       const itemData = {
-        item: getJSONFixture('container.json')
+        item: container
       };
 
       editModal.editmodal('loadItem', itemData);
@@ -205,7 +206,7 @@ describe('The jQuery Gerbera Editor Overlay', () => {
 
     it('should set fields in editor for `item`', () => {
       const itemData = {
-        item: getJSONFixture('item.json')
+        item: itemJson
       };
 
       editModal.editmodal('loadItem', itemData);
@@ -228,7 +229,7 @@ describe('The jQuery Gerbera Editor Overlay', () => {
 
     it('should set fields in editor for `active_item`', () => {
       const itemData = {
-        item: getJSONFixture('active-item.json')
+        item: activeItem
       };
 
       editModal.editmodal('loadItem', itemData);
@@ -251,7 +252,7 @@ describe('The jQuery Gerbera Editor Overlay', () => {
 
     it('should set fields in editor for `external_url`', () => {
       const itemData = {
-        item: getJSONFixture('external-url.json')
+        item: externalUrl
       };
 
       editModal.editmodal('loadItem', itemData);
@@ -274,7 +275,7 @@ describe('The jQuery Gerbera Editor Overlay', () => {
 
     it('should set fields in editor for `internal_url`', () => {
       const itemData = {
-        item: getJSONFixture('internal-url.json')
+        item: internalUrl
       };
 
       editModal.editmodal('loadItem', itemData);
@@ -298,7 +299,7 @@ describe('The jQuery Gerbera Editor Overlay', () => {
     it('binds the onSave event to the save button', () => {
       const saveSpy = jasmine.createSpy('save');
       const itemData = {
-        item: getJSONFixture('internal-url.json'),
+        item: internalUrl,
         onSave: saveSpy
       };
 
@@ -317,7 +318,7 @@ describe('The jQuery Gerbera Editor Overlay', () => {
     });
 
     it('gives proper data for `item` object to save', () => {
-      const itemData = { item: getJSONFixture('item.json') };
+      const itemData = { item: itemJson };
       editModal.editmodal('loadItem', itemData);
 
       const result = editModal.editmodal('saveItem');
@@ -330,7 +331,7 @@ describe('The jQuery Gerbera Editor Overlay', () => {
     });
 
     it('gives proper data for `container` object to save', () => {
-      const itemData = { item: getJSONFixture('container.json') };
+      const itemData = { item: container };
       editModal.editmodal('loadItem', itemData);
 
       const result = editModal.editmodal('saveItem');
@@ -342,7 +343,7 @@ describe('The jQuery Gerbera Editor Overlay', () => {
     });
 
     it('gives proper data for `external_url` object to save', () => {
-      const itemData = { item: getJSONFixture('external-url.json') };
+      const itemData = { item: externalUrl };
       editModal.editmodal('loadItem', itemData);
 
       const result = editModal.editmodal('saveItem');
@@ -357,7 +358,7 @@ describe('The jQuery Gerbera Editor Overlay', () => {
     });
 
     it('gives proper data for `internal_url` object to save', () => {
-      const itemData = { item: getJSONFixture('internal-url.json') };
+      const itemData = { item: internalUrl };
       editModal.editmodal('loadItem', itemData);
 
       const result = editModal.editmodal('saveItem');
@@ -372,7 +373,7 @@ describe('The jQuery Gerbera Editor Overlay', () => {
     });
 
     it('gives proper data for `active_item` object to save', () => {
-      const itemData = { item: getJSONFixture('active-item.json') };
+      const itemData = { item: activeItem };
       editModal.editmodal('loadItem', itemData);
 
       const result = editModal.editmodal('saveItem');

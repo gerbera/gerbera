@@ -1,14 +1,14 @@
 {
   "name": "gerbera-web",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "scripts": {
     "start": "node index.js",
-    "test": "./node_modules/.bin/karma start karma.conf.js",
+    "test": "karma start karma.conf.js",
     "test:e2e": "concurrently --success first --kill-others \"npm start\" \"npm run e2e\"",
-    "e2e": "SELENIUM_BROWSER=chrome ./node_modules/.bin/mocha --require babel-polyfill --require babel-register \"test/e2e/**.spec.js\"",
-    "screenshot": "rimraf _build && mkdirp _build/doc && ./node_modules/.bin/mocha --require babel-polyfill --require babel-register \"test/e2e/screenshot.doc.js\" --folderPath=/_build/doc/",
+    "e2e": "SELENIUM_BROWSER=chrome mocha \"test/e2e/**.spec.js\"",
+    "screenshot": "rimraf _build && mkdirp _build/doc && mocha \"test/e2e/screenshot.doc.js\" --folderPath=/_build/doc/",
     "doc:screenshot": "concurrently --success first --kill-others \"npm start\" \"npm run screenshot\"",
-    "lint": "./node_modules/.bin/eslint -c .eslintrc ../web/js/*gerbera*.js"
+    "lint": "eslint -c .eslintrc ../web/js/*gerbera*.js"
   },
   "config": {
     "webserver": {
@@ -17,9 +17,12 @@
     }
   },
   "devDependencies": {
-    "babel-polyfill": "^6.26.0",
-    "babel-preset-env": "^1.7.0",
+    "@babel/core": "^7.4.0",
+    "@babel/polyfill": "^7.4.0",
+    "@babel/preset-env": "^7.4.2",
+    "babel-loader": "^8.0.5",
     "babel-register": "^6.26.0",
+    "bootstrap": "^4.3.1",
     "braces": "^2.3.1",
     "chai": "^4.1.2",
     "chromedriver": "^2.46.0",
@@ -32,18 +35,28 @@
     "eslint-plugin-standard": "^3.1.0",
     "express": "^4.16.3",
     "jasmine-core": "^3.2.1",
-    "jasmine-jquery": "^2.1.1",
     "jimp": "^0.2.28",
+    "jquery": "^3.4.1",
+    "jquery-ui": "^1.12.1",
+    "js-cookie": "^2.2.0",
     "karma": "^4.1.0",
+    "karma-babel-preprocessor": "^8.0.0",
     "karma-chrome-launcher": "^2.2.0",
     "karma-coverage": "^1.1.2",
+    "karma-fixture": "^0.2.6",
+    "karma-html2js-preprocessor": "^1.1.0",
     "karma-jasmine": "^1.1.2",
+    "karma-json-fixtures-preprocessor": "0.0.6",
     "karma-mocha-reporter": "^2.2.5",
+    "karma-sourcemap-loader": "^0.3.7",
     "karma-spec-reporter": "0.0.31",
+    "karma-webpack": "^3.0.5",
     "mkdirp": "^0.5.1",
     "mocha": "^5.2.0",
+    "popper.js": "^1.14.7",
     "rimraf": "^2.6.3",
     "selenium-webdriver": "^4.0.0-alpha.1",
+    "webpack": "^4.29.6",
     "yargs": "^12.0.1"
   }
 }

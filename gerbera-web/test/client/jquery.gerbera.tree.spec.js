@@ -1,7 +1,6 @@
-/* global jasmine it expect describe beforeEach loadJSONFixtures getJSONFixture loadFixtures */
-
-jasmine.getFixtures().fixturesPath = 'base/test/client/fixtures';
-jasmine.getJSONFixtures().fixturesPath = 'base/test/client/fixtures';
+import treeDataJson from './fixtures/tree-data';
+import treeDataHierarchy from './fixtures/tree-data-hierarchy';
+import treeDataDiffJson from './fixtures/tree-data-diff';
 
 describe('The jQuery Tree', () => {
   'use strict';
@@ -14,10 +13,14 @@ describe('The jQuery Tree', () => {
   };
 
   beforeEach(() => {
-    loadFixtures('tree.html');
-    loadJSONFixtures('tree-data.json');
-    treeData = getJSONFixture('tree-data.json');
+    fixture.setBase('test/client/fixtures');
+    fixture.load('index.html');
+    treeData = treeDataJson;
     tree = $('#tree');
+  });
+
+  afterEach(() => {
+    fixture.cleanup();
   });
 
   it('creates a list the same size as the data', () => {
@@ -122,8 +125,7 @@ describe('The jQuery Tree', () => {
   });
 
   it('recursively appends children based on data lineage', () => {
-    loadJSONFixtures('tree-data-hierarchy.json');
-    const treeHierarchyData = getJSONFixture('tree-data-hierarchy.json');
+    const treeHierarchyData = treeDataHierarchy;
 
     tree.tree({
       data: treeHierarchyData,
@@ -143,14 +145,6 @@ describe('The jQuery Tree', () => {
   });
 
   describe('appendItems()', () => {
-    let treeData;
-
-    beforeEach(() => {
-      loadFixtures('tree.html');
-      loadJSONFixtures('tree-data.json');
-      treeData = getJSONFixture('tree-data.json');
-      tree = $('#tree');
-    });
 
     it('given a parent item append children as list', () => {
       tree.tree({
@@ -180,14 +174,6 @@ describe('The jQuery Tree', () => {
   });
 
   describe('clear()', () => {
-    let treeData;
-
-    beforeEach(() => {
-      loadFixtures('tree.html');
-      loadJSONFixtures('tree-data.json');
-      treeData = getJSONFixture('tree-data.json');
-      tree = $('#tree');
-    });
 
     it('removes all contents of the tree', () => {
       tree.tree({
@@ -207,14 +193,6 @@ describe('The jQuery Tree', () => {
   });
 
   describe('closed()', () => {
-    let treeData;
-
-    beforeEach(() => {
-      loadFixtures('tree.html');
-      loadJSONFixtures('tree-data.json');
-      treeData = getJSONFixture('tree-data.json');
-      tree = $('#tree');
-    });
 
     it('determines whether a node is closed', () => {
       tree.tree({
@@ -232,14 +210,6 @@ describe('The jQuery Tree', () => {
   });
 
   describe('collapse()', () => {
-    let treeData;
-
-    beforeEach(() => {
-      loadFixtures('tree.html');
-      loadJSONFixtures('tree-data.json');
-      treeData = getJSONFixture('tree-data.json');
-      tree = $('#tree');
-    });
 
     it('given a parent item append children as list', () => {
       tree.tree({
@@ -269,14 +239,6 @@ describe('The jQuery Tree', () => {
   });
 
   describe('select()', () => {
-    let treeData;
-
-    beforeEach(() => {
-      loadFixtures('tree.html');
-      loadJSONFixtures('tree-data.json');
-      treeData = getJSONFixture('tree-data.json');
-      tree = $('#tree');
-    })
 
     it('selects an item by changing the style', () => {
       tree.tree({
@@ -297,15 +259,10 @@ describe('The jQuery Tree', () => {
   });
 
   describe('getItem()', () => {
-    let treeData;
     let treeDataDiff;
 
     beforeEach(() => {
-      loadFixtures('tree.html');
-      loadJSONFixtures('tree-data.json');
-      loadJSONFixtures('tree-data-diff.json');
-      treeData = getJSONFixture('tree-data.json');
-      treeDataDiff = getJSONFixture('tree-data-diff.json');
+      treeDataDiff = treeDataDiffJson;
       tree = $('#tree');
       tree.tree({
         data: treeData,
@@ -374,14 +331,8 @@ describe('The jQuery Tree', () => {
   });
 
   describe('getElement()', () => {
-    let treeData;
-    let tree;
 
     beforeEach(() => {
-      loadFixtures('tree.html');
-      loadJSONFixtures('tree-data.json');
-      loadJSONFixtures('tree-data-diff.json');
-      treeData = getJSONFixture('tree-data.json');
       tree = $('#tree');
       tree.tree({
         data: treeData,
