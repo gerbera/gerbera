@@ -85,7 +85,7 @@ get_filename_component(FFMPEG_INCLUDE_DIR ${FFMPEG_INCLUDE_DIR} ABSOLUTE)
 CHECK_STRUCT_HAS_MEMBER("struct AVStream" codecpar libavformat/avformat.h HAVE_AVSTREAM_CODECPAR LANGUAGE C)
 
 FIND_PACKAGE(PkgConfig QUIET)
-PKG_CHECK_MODULES(FFMPEG QUIET libavformat libavutil)
+PKG_CHECK_MODULES(FFMPEG libavformat libavutil)
 IF (NOT FFMPEG_FOUND)
 	FIND_LIBRARY(FFMPEG_avformat_LIBRARY avformat
 		/usr/local/lib
