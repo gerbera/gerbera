@@ -282,4 +282,8 @@ module.exports = function (driver) {
   this.mockTaskMessage = async (msg) => {
     return await driver.executeScript('return $(\'#toast\').toast(\'showTask\', {message: "'+ msg +'", type: "info", icon: "fa-refresh fa-spin fa-fw"});')
   };
+
+  this.getVersion = async () => {
+    return await driver.findElement(By.css('#gerbera-version span'));
+  }
 };
