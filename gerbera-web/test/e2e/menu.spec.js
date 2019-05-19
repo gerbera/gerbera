@@ -73,6 +73,12 @@ describe('Menu Suite', () => {
       expect(title).to.equal('Gerbera Media Server | Gerbera Media Server')
     });
 
+    it('shows the version in the menu', async () => {
+      const version = await homePage.getVersion();
+      const text = await version.getText();
+      expect(text).to.equal('1.4.0alpha');
+    });
+
     it('loads the parent database container list when clicking Database Icon', async () => {
       await homePage.clickMenuIcon('nav-db');
       const tree = await homePage.treeItems();

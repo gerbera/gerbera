@@ -20,6 +20,7 @@
     "actions": {
       "action": []
     },
-    "friendlyName" : "Gerbera Media Server"
+    "friendlyName" : "Gerbera Media Server",
+    "version": "1.4.0alpha"
   }
 }

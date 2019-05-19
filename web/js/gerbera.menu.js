@@ -37,6 +37,13 @@ GERBERA.Menu = (function () {
       if(GERBERA.App.serverConfig.friendlyName) {
         $('#nav-home').text('Home [' + GERBERA.App.serverConfig.friendlyName +']');
       }
+      var version = $('#gerbera-version');
+      if(GERBERA.App.serverConfig.version) {
+        version.children('span').text(GERBERA.App.serverConfig.version);
+        version.parent('li').removeAttr('hidden');
+      } else {
+        version.parent('li').attr('hidden');
+      }
     } else {
      disable()
     }

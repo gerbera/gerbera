@@ -131,6 +131,10 @@ void web::auth::process()
         Ref<Element> friendlyName(new Element(_("friendlyName")));
         friendlyName->setText(cm->getOption(CFG_SERVER_NAME));
         config->appendElementChild(friendlyName);
+
+        Ref<Element> gerberaVersion(new Element(_("version")));
+        gerberaVersion->setText(VERSION);
+        config->appendElementChild(gerberaVersion);
     } else if (action == "get_sid") {
         log_debug("checking/getting sid...\n");
         Ref<Session> session = nullptr;
