@@ -745,6 +745,10 @@ void ConfigManager::validate(String serverhome)
     NEW_OPTION(temp);
     SET_OPTION(CFG_SERVER_SERIAL_NUMBER);
 
+    temp = getOption(_("/server/manufacturer"), _(DESC_MANUFACTURER));
+    NEW_OPTION(temp);
+    SET_OPTION(CFG_SERVER_MANUFACTURER);
+
     temp = getOption(_("/server/manufacturerURL"), _(DESC_MANUFACTURER_URL));
     NEW_OPTION(temp);
     SET_OPTION(CFG_SERVER_MANUFACTURER_URL);
