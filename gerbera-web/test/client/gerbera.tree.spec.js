@@ -1,10 +1,16 @@
+import {Autoscan} from "../../../web/js/gerbera-autoscan.module";
+import {GerberaApp} from "../../../web/js/gerbera-app.module";
+import {Tree} from '../../../web/js/gerbera-tree.module';
+import {Items} from "../../../web/js/gerbera-items.module";
+import {Updates} from "../../../web/js/gerbera-updates.module";
+import {Trail} from "../../../web/js/gerbera-trail.module";
 import treeResponse from './fixtures/parent_id-0-select_it-0';
 import childTreeResponse from './fixtures/parent_id-7443-select_it-0';
 import trailData from './fixtures/trail-data';
 import containerAsTree from './fixtures/container-data-astree';
 
+
 describe('Gerbera Tree', () => {
-  'use strict';
   let tree;
 
   beforeEach(() => {
@@ -17,13 +23,12 @@ describe('Gerbera Tree', () => {
   });
   describe('initialize()', () => {
     it('loads the tree view', async () => {
-      await GERBERA.Tree.initialize();
+      await Tree.initialize();
       expect(tree.html()).toBe('');
     });
   });
-
   describe('loadTree()', () => {
-    let trailConfig, trail;
+    let response, trailConfig, trail;
 
     beforeEach(() => {
       trailConfig = {};
@@ -31,14 +36,14 @@ describe('Gerbera Tree', () => {
     });
 
     it('renders the tree with parent and children', () => {
-      GERBERA.Tree.loadTree(treeResponse);
+      Tree.loadTree(treeResponse);
       expect($('#tree li').length).toBe(6);
     });
 
     it('does not render the tree when response is not successful', () => {
       treeResponse.success = false;
 
-      GERBERA.Tree.loadTree(treeResponse);
+      Tree.loadTree(treeResponse);
 
       expect($('#tree li').length).toBe(0);
       treeResponse.success = true;
@@ -50,28 +55,27 @@ describe('Gerbera Tree', () => {
         config: trailConfig
       });
 
-      GERBERA.Tree.loadTree(treeResponse);
+      Tree.loadTree(treeResponse);
 
       expect(trail.trail('length')).toBe(1);
     });
   });
-
   describe('transformContainers', () => {
     let result;
 
     it('transforms containers response suitable for treeview load', () => {
-      result = GERBERA.Tree.transformContainers(treeResponse, true);
+      result = Tree.transformContainers(treeResponse, true);
       expect(result[0].title).toBe('database');
       expect(result).toEqual(containerAsTree);
     });
 
     it('only creates parent when boolean is passed', () => {
-      result = GERBERA.Tree.transformContainers(treeResponse, false);
+      result = Tree.transformContainers(treeResponse, false);
       expect(result[0].title).toBe('Audio');
     });
 
     it('creates badges for autoscan containers', () => {
-      result = GERBERA.Tree.transformContainers(treeResponse, false);
+      result = Tree.transformContainers(treeResponse, false);
       expect(result[3].badge.length).toBe(2);
       expect(result[4].badge.length).toBe(2);
     });
@@ -81,8 +85,8 @@ describe('Gerbera Tree', () => {
 
     beforeEach(() => {
       ajaxSpy = spyOn($, 'ajax');
-      getUpdatesSpy = spyOn(GERBERA.Updates, 'getUpdates');
-      getTypeSpy = spyOn(GERBERA.App, 'getType');
+      getUpdatesSpy = spyOn(Updates, 'getUpdates');
+      getTypeSpy = spyOn(GerberaApp, 'getType');
       getUpdatesSpy.calls.reset();
       getTypeSpy.calls.reset();
     });
@@ -95,27 +99,26 @@ describe('Gerbera Tree', () => {
 
     it('calls the server for containers when type is db', async () => {
       ajaxSpy.and.callFake(() => {
-        return $.Deferred().resolve({}).promise();
+        return Promise.resolve({});
       });
       getUpdatesSpy.and.callFake(() => {
-        return $.Deferred().resolve().promise();
+        return Promise.resolve();
       });
       getTypeSpy.and.returnValue('db');
 
-      await GERBERA.Tree.selectType('db', 0);
+      await Tree.selectType('db', 0);
 
       expect(ajaxSpy.calls.count()).toBe(1);
       expect(ajaxSpy.calls.mostRecent().args[0].data.req_type).toBe('containers');
     });
 
-
     it('calls the server for directories when type is fs', async () => {
       ajaxSpy.and.callFake(() => {
-        return $.Deferred().resolve({}).promise();
+        return Promise.resolve({});
       });
       getTypeSpy.and.returnValue('fs');
 
-      await GERBERA.Tree.selectType('fs', 0);
+      await Tree.selectType('fs', 0);
 
       expect(ajaxSpy.calls.count()).toBe(1);
       expect(ajaxSpy.calls.mostRecent().args[0].data.req_type).toBe('directories');
@@ -123,45 +126,44 @@ describe('Gerbera Tree', () => {
 
     it('on failure calls the app error handler', async () => {
       ajaxSpy.and.callFake(() => {
-        return $.Deferred().reject();
+        return Promise.reject();
       });
-      spyOn(GERBERA.App, 'error');
+      spyOn(GerberaApp, 'error');
       getUpdatesSpy.and.callFake(() => {
-        return $.Deferred().resolve().promise();
+        return Promise.resolve();
       });
       getTypeSpy.and.returnValue('db');
 
 
       try {
-        await GERBERA.Tree.selectType('db', 0);
+        await Tree.selectType('db', 0);
       } catch (err) {
-        expect(GERBERA.App.error).toHaveBeenCalled();
+        expect(GerberaApp.error).toHaveBeenCalled();
       }
     });
 
     it('when type is db, checks for updates', async () => {
       ajaxSpy.and.callFake(() => {
-        return $.Deferred().resolve({}).promise();
+        return Promise.resolve({});
       });
       getTypeSpy.and.returnValue('db');
 
-      await GERBERA.Tree.selectType('db', 0);
+      await Tree.selectType('db', 0);
 
-      expect(GERBERA.Updates.getUpdates).toHaveBeenCalledWith(true);
+      expect(Updates.getUpdates).toHaveBeenCalledWith(true);
     });
 
     it('when type is fs, does not check for updates', async () => {
       ajaxSpy.and.callFake(() => {
-        return $.Deferred().resolve({}).promise();
+        return Promise.resolve({});
       });
       getTypeSpy.and.returnValue('fs');
 
-      await GERBERA.Tree.selectType('fs', 0);
+      await Tree.selectType('fs', 0);
 
-      expect(GERBERA.Updates.getUpdates).not.toHaveBeenCalled();
+      expect(Updates.getUpdates).not.toHaveBeenCalled();
     });
   });
-
   describe('onItemSelected()', () => {
     let onExpandSpy, treeViewConfig, ajaxSpy;
 
@@ -174,51 +176,51 @@ describe('Gerbera Tree', () => {
     });
 
     it('updates the breadcrumb based on the click of a item', () => {
-      spyOn(GERBERA.Items, 'treeItemSelected');
+      spyOn(Items, 'treeItemSelected');
       onExpandSpy = jasmine.createSpy('onExpand');
       treeViewConfig = {
         onExpand: onExpandSpy
       };
 
-      GERBERA.Tree.loadTree(treeResponse, treeViewConfig);
+      Tree.loadTree(treeResponse, treeViewConfig);
 
       // click an item
       const item = $($('#tree li').get(3));
       item.children('span.folder-title').click();
 
-      expect(GERBERA.Items.treeItemSelected).toHaveBeenCalled();
-      expect(GERBERA.Items.treeItemSelected.calls.mostRecent().args[0]).toEqual(
+      expect(Items.treeItemSelected).toHaveBeenCalled();
+      expect(Items.treeItemSelected.calls.mostRecent().args[0]).toEqual(
         {title: 'Photos', badge: [2], nodes: [], gerbera: {id: 2779, childCount: 2, autoScanMode: 'none', autoScanType: 'none'}}
       );
     });
 
     it('passes gerbera data to the items plugin', () => {
-      spyOn(GERBERA.Items, 'treeItemSelected');
+      spyOn(Items, 'treeItemSelected');
       onExpandSpy = jasmine.createSpy('onExpand');
       treeViewConfig = {
         onExpand: onExpandSpy
       };
 
-      GERBERA.Tree.loadTree(treeResponse, treeViewConfig);
+      Tree.loadTree(treeResponse, treeViewConfig);
 
       // click an item
       const item = $($('#tree li').get(3));
       item.children('span.folder-title').click();
 
-      expect(GERBERA.Items.treeItemSelected).toHaveBeenCalled();
-      expect(GERBERA.Items.treeItemSelected.calls.mostRecent().args[0]).toEqual(
+      expect(Items.treeItemSelected).toHaveBeenCalled();
+      expect(Items.treeItemSelected.calls.mostRecent().args[0]).toEqual(
         {title: 'Photos', badge: [2], nodes: [], gerbera: {id: 2779, childCount: 2, autoScanMode: 'none', autoScanType: 'none'}}
       );
     });
 
     it('changes the color of the selected row', () => {
-      spyOn(GERBERA.Items, 'treeItemSelected');
+      spyOn(Items, 'treeItemSelected');
       onExpandSpy = jasmine.createSpy('onExpand');
       treeViewConfig = {
         onExpand: onExpandSpy
       };
 
-      GERBERA.Tree.loadTree(treeResponse, treeViewConfig);
+      Tree.loadTree(treeResponse, treeViewConfig);
 
       // click an item
       const item = $($('#tree li').get(3));
@@ -240,15 +242,15 @@ describe('Gerbera Tree', () => {
 
     it('calls for child items based on the response', () => {
       ajaxSpy.and.callFake(() => {
-        return $.Deferred().resolve(childTreeResponse).promise();
+        return Promise.resolve(childTreeResponse);
       });
       const onSelectionSpy = jasmine.createSpy('onSelection');
       const treeViewConfig = {
         onSelection: onSelectionSpy
       };
-      spyOn(GERBERA.App, 'getType').and.returnValue('db');
+      spyOn(GerberaApp, 'getType').and.returnValue('db');
 
-      GERBERA.Tree.loadTree(treeResponse, treeViewConfig);
+      Tree.loadTree(treeResponse, treeViewConfig);
 
       // click an item
       const item = $($('#tree li').get(4));
@@ -270,18 +272,18 @@ describe('Gerbera Tree', () => {
     });
 
     it('calls the server to reload tree and generate trail and selects item', async () => {
-      GERBERA.Tree.loadTree(treeResponse);
+      Tree.loadTree(treeResponse);
 
       const treeElement = $('#tree').tree('getElement', 0);
 
-      spyOn(GERBERA.Items, 'treeItemSelected');
+      spyOn(Items, 'treeItemSelected');
       ajaxSpy.and.callFake(() => {
-        return $.Deferred().resolve(childTreeResponse).promise();
+        return Promise.resolve(childTreeResponse);
       });
 
-      await GERBERA.Tree.reloadTreeItem(treeElement);
+      await Tree.reloadTreeItem(treeElement);
       expect(ajaxSpy).toHaveBeenCalled();
-      expect(GERBERA.Items.treeItemSelected).toHaveBeenCalled();
+      expect(Items.treeItemSelected).toHaveBeenCalled();
     });
   });
   describe('reloadTreeItemById()', () => {
@@ -296,19 +298,18 @@ describe('Gerbera Tree', () => {
     });
 
     it('finds the selected item given only gerbera id and reloads it', async () => {
-      GERBERA.Tree.loadTree(treeResponse);
+      Tree.loadTree(treeResponse);
 
-      spyOn(GERBERA.Items, 'treeItemSelected');
+      spyOn(Items, 'treeItemSelected');
       ajaxSpy.and.callFake(() => {
-        return $.Deferred().resolve(childTreeResponse).promise();
+        return Promise.resolve(childTreeResponse);
       });
 
-      await GERBERA.Tree.reloadTreeItemById(0);
+      await Tree.reloadTreeItemById(0);
       expect(ajaxSpy).toHaveBeenCalled();
-      expect(GERBERA.Items.treeItemSelected).toHaveBeenCalled();
+      expect(Items.treeItemSelected).toHaveBeenCalled();
     });
   });
-
   describe('reloadParentTreeItem()', () => {
     let ajaxSpy;
 
@@ -321,24 +322,24 @@ describe('Gerbera Tree', () => {
     });
 
     it('reloads the parent item', async () => {
-      GERBERA.Tree.loadTree(treeResponse);
+      Tree.loadTree(treeResponse);
 
-      spyOn(GERBERA.Items, 'treeItemSelected');
-      spyOn(GERBERA.Trail, 'makeTrail');
+      spyOn(Items, 'treeItemSelected');
+      spyOn(Trail, 'makeTrail');
       ajaxSpy.and.callFake(() => {
-        return $.Deferred().resolve(childTreeResponse).promise()
+        return Promise.resolve(childTreeResponse);
       });
 
-      await GERBERA.Tree.reloadParentTreeItem(8);
+      await Tree.reloadParentTreeItem(8);
 
       expect(ajaxSpy.calls.mostRecent().args[0].data.parent_id).toBe(0);
     });
   });
   describe('getTreeElementById()', () => {
     it('finds the HTML element given the gerbera id', () => {
-      GERBERA.Tree.loadTree(treeResponse);
+      Tree.loadTree(treeResponse);
 
-      const result = GERBERA.Tree.getTreeElementById(8);
+      const result = Tree.getTreeElementById(8);
 
       expect(result.length).toBe(1);
       expect(result.data('grb-item')).toEqual({
@@ -360,11 +361,11 @@ describe('Gerbera Tree', () => {
     });
 
     it('calls the GERBERA.Autoscan add method with the event', () => {
-      spyOn(GERBERA.Autoscan, 'addAutoscan');
+      spyOn(Autoscan, 'addAutoscan');
 
-      GERBERA.Tree.onAutoscanEdit(event);
+      Tree.onAutoscanEdit(event);
 
-      expect(GERBERA.Autoscan.addAutoscan).toHaveBeenCalledWith(event);
+      expect(Autoscan.addAutoscan).toHaveBeenCalledWith(event);
     });
   });
 });

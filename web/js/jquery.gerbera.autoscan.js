@@ -21,143 +21,143 @@
     $Id$
 */
 (function ($) {
-  var loadItem = function (modal, itemData) {
-    var item = itemData.item
-    var autoscanId = modal.find('#autoscanId')
-    var autoscanIdTxt = modal.find('#autoscanIdTxt')
-    var autoscanFromFs = modal.find('#autoscanFromFs')
-    var autoscanMode = modal.find('input[name=autoscanMode]')
-    var autoscanLevel = modal.find('input[name=autoscanLevel]')
-    var autoscanPersistent = modal.find('#autoscanPersistent')
-    var autoscanRecursive = modal.find('#autoscanRecursive')
-    var autoscanHidden = modal.find('#autoscanHidden')
-    var autoscanInterval = modal.find('#autoscanInterval')
-    var autoscanSave = modal.find('#autoscanSave')
-    var autoscanPersistentMsg = modal.find('#autoscan-persistent-msg')
+  const loadItem = function (modal, itemData) {
+    const item = itemData.item;
+    const autoscanId = modal.find('#autoscanId');
+    const autoscanIdTxt = modal.find('#autoscanIdTxt');
+    const autoscanFromFs = modal.find('#autoscanFromFs');
+    const autoscanMode = modal.find('input[name=autoscanMode]');
+    const autoscanLevel = modal.find('input[name=autoscanLevel]');
+    const autoscanPersistent = modal.find('#autoscanPersistent');
+    const autoscanRecursive = modal.find('#autoscanRecursive');
+    const autoscanHidden = modal.find('#autoscanHidden');
+    const autoscanInterval = modal.find('#autoscanInterval');
+    const autoscanSave = modal.find('#autoscanSave');
+    const autoscanPersistentMsg = modal.find('#autoscan-persistent-msg');
 
-    reset(modal)
+    reset(modal);
     if (item) {
       if (item.persistent) {
         modal.find('form :input').each(function () {
           $(this).prop('disabled', true)
-        })
-        autoscanSave.prop('disabled', true).off('click')
-        autoscanPersistentMsg.show()
+        });
+        autoscanSave.prop('disabled', true).off('click');
+        autoscanPersistentMsg.show();
       } else {
-        autoscanSave.off('click').on('click', itemData.onSave)
+        autoscanSave.off('click').on('click', itemData.onSave);
       }
 
-      autoscanId.val(item.object_id)
-      autoscanIdTxt.text(item.object_id)
-      autoscanIdTxt.prop('title', item.object_id)
-      autoscanFromFs.prop('checked', item.from_fs)
-      autoscanMode.val([item.scan_mode])
-      autoscanLevel.val([item.scan_level])
-      autoscanPersistent.prop('checked', item.persistent)
-      autoscanRecursive.prop('checked', item.recursive)
-      autoscanHidden.prop('checked', item.hidden)
-      autoscanInterval.val(item.interval)
+      autoscanId.val(item.object_id);
+      autoscanIdTxt.text(item.object_id);
+      autoscanIdTxt.prop('title', item.object_id);
+      autoscanFromFs.prop('checked', item.from_fs);
+      autoscanMode.val([item.scan_mode]);
+      autoscanLevel.val([item.scan_level]);
+      autoscanPersistent.prop('checked', item.persistent);
+      autoscanRecursive.prop('checked', item.recursive);
+      autoscanHidden.prop('checked', item.hidden);
+      autoscanInterval.val(item.interval);
 
       autoscanMode.off('click').on('click', function () {
-        adjustFieldApplicability(modal)
-      })
+        adjustFieldApplicability(modal);
+      });
 
-      adjustFieldApplicability(modal)
+      adjustFieldApplicability(modal);
     }
-  }
+  };
 
-  var adjustFieldApplicability = function (modal) {
-    var autoscanMode = modal.find('input[name=autoscanMode]:checked')
-    var autoscanLevel = modal.find('input[name=autoscanLevel]')
-    var autoscanRecursive = modal.find('#autoscanRecursive')
-    var autoscanHidden = modal.find('#autoscanHidden')
-    var autoscanInterval = modal.find('#autoscanInterval')
-    var autoscanPersistent = modal.find('#autoscanPersistent')
+  const adjustFieldApplicability = function (modal) {
+    const autoscanMode = modal.find('input[name=autoscanMode]:checked');
+    const autoscanLevel = modal.find('input[name=autoscanLevel]');
+    const autoscanRecursive = modal.find('#autoscanRecursive');
+    const autoscanHidden = modal.find('#autoscanHidden');
+    const autoscanInterval = modal.find('#autoscanInterval');
+    const autoscanPersistent = modal.find('#autoscanPersistent');
 
     if (autoscanPersistent.is(':checked')) {
       modal.find('form :input').each(function () {
-        $(this).prop('disabled', true)
-      })
+        $(this).prop('disabled', true);
+      });
     } else {
       switch (autoscanMode.val()) {
         case 'timed':
-          autoscanLevel.closest('.form-check').removeClass('disabled').show()
-          autoscanLevel.prop('disabled', false)
-          autoscanRecursive.closest('.form-check').removeClass('disabled').show()
-          autoscanRecursive.prop('disabled', false)
-          autoscanHidden.closest('.form-check').removeClass('disabled').show()
-          autoscanHidden.prop('disabled', false)
-          autoscanInterval.closest('.form-group').removeClass('disabled').show()
-          autoscanInterval.prop('disabled', false)
-          break
+          autoscanLevel.closest('.form-check').removeClass('disabled').show();
+          autoscanLevel.prop('disabled', false);
+          autoscanRecursive.closest('.form-check').removeClass('disabled').show();
+          autoscanRecursive.prop('disabled', false);
+          autoscanHidden.closest('.form-check').removeClass('disabled').show();
+          autoscanHidden.prop('disabled', false);
+          autoscanInterval.closest('.form-group').removeClass('disabled').show();
+          autoscanInterval.prop('disabled', false);
+          break;
         case 'inotify':
-          autoscanLevel.closest('.form-check').removeClass('disabled').show()
-          autoscanLevel.prop('disabled', false)
-          autoscanRecursive.closest('.form-check').removeClass('disabled').show()
-          autoscanRecursive.prop('disabled', false)
-          autoscanHidden.closest('.form-check').removeClass('disabled').show()
-          autoscanHidden.prop('disabled', false)
-          autoscanInterval.closest('.form-group').hide()
-          autoscanInterval.prop('disabled', true)
-          break
+          autoscanLevel.closest('.form-check').removeClass('disabled').show();
+          autoscanLevel.prop('disabled', false);
+          autoscanRecursive.closest('.form-check').removeClass('disabled').show();
+          autoscanRecursive.prop('disabled', false);
+          autoscanHidden.closest('.form-check').removeClass('disabled').show();
+          autoscanHidden.prop('disabled', false);
+          autoscanInterval.closest('.form-group').hide();
+          autoscanInterval.prop('disabled', true);
+          break;
         case 'none':
-          autoscanLevel.closest('.form-check').addClass('disabled').show()
-          autoscanLevel.prop('disabled', true)
-          autoscanRecursive.closest('.form-check').addClass('disabled').show()
-          autoscanRecursive.prop('disabled', true)
-          autoscanHidden.closest('.form-check').addClass('disabled').show()
-          autoscanHidden.prop('disabled', true)
-          autoscanInterval.closest('.form-group').addClass('disabled').show()
-          autoscanInterval.prop('disabled', true)
-          break
+          autoscanLevel.closest('.form-check').addClass('disabled').show();
+          autoscanLevel.prop('disabled', true);
+          autoscanRecursive.closest('.form-check').addClass('disabled').show();
+          autoscanRecursive.prop('disabled', true);
+          autoscanHidden.closest('.form-check').addClass('disabled').show();
+          autoscanHidden.prop('disabled', true);
+          autoscanInterval.closest('.form-group').addClass('disabled').show();
+          autoscanInterval.prop('disabled', true);
+          break;
       }
     }
-  }
+  };
 
-  var reset = function (modal) {
-    var autoscanId = modal.find('#autoscanId')
-    var autoscanIdTxt = modal.find('#autoscanIdTxt')
-    var autoscanFromFs = modal.find('#autoscanFromFs')
-    var autoscanMode = modal.find('input[name=autoscanMode]')
-    var autoscanLevel = modal.find('input[name=autoscanLevel]')
-    var autoscanPersistent = modal.find('#autoscanPersistent')
-    var autoscanRecursive = modal.find('#autoscanRecursive')
-    var autoscanHidden = modal.find('#autoscanHidden')
-    var autoscanInterval = modal.find('#autoscanInterval')
-    var autoscanSave = modal.find('#autoscanSave')
-    var autoscanPersistentMsg = modal.find('#autoscan-persistent-msg')
+  const reset = function (modal) {
+    const autoscanId = modal.find('#autoscanId');
+    const autoscanIdTxt = modal.find('#autoscanIdTxt');
+    const autoscanFromFs = modal.find('#autoscanFromFs');
+    const autoscanMode = modal.find('input[name=autoscanMode]');
+    const autoscanLevel = modal.find('input[name=autoscanLevel]');
+    const autoscanPersistent = modal.find('#autoscanPersistent');
+    const autoscanRecursive = modal.find('#autoscanRecursive');
+    const autoscanHidden = modal.find('#autoscanHidden');
+    const autoscanInterval = modal.find('#autoscanInterval');
+    const autoscanSave = modal.find('#autoscanSave');
+    const autoscanPersistentMsg = modal.find('#autoscan-persistent-msg');
 
     modal.find('form :input').each(function () {
-      $(this).prop('disabled', false)
-    })
+      $(this).prop('disabled', false);
+    });
 
-    autoscanId.val('')
-    autoscanIdTxt.text('')
-    autoscanFromFs.prop('checked', false)
-    autoscanMode.val([''])
-    autoscanLevel.val([''])
-    autoscanPersistent.prop('checked', false)
-    autoscanRecursive.prop('checked', false)
-    autoscanHidden.prop('checked', false)
-    autoscanInterval.val('')
-    autoscanSave.prop('disabled', false)
-    autoscanPersistentMsg.hide()
-  }
+    autoscanId.val('');
+    autoscanIdTxt.text('');
+    autoscanFromFs.prop('checked', false);
+    autoscanMode.val(['']);
+    autoscanLevel.val(['']);
+    autoscanPersistent.prop('checked', false);
+    autoscanRecursive.prop('checked', false);
+    autoscanHidden.prop('checked', false);
+    autoscanInterval.val('');
+    autoscanSave.prop('disabled', false);
+    autoscanPersistentMsg.hide();
+  };
 
   function saveItem (modal) {
-    var objectId = modal.find('#autoscanId')
-    var fromFs = modal.find('#autoscanFromFs')
-    var autoscanMode = modal.find('input:radio[name=autoscanMode]:checked')
-    var autoscanLevel = modal.find('input:radio[name=autoscanLevel]:checked')
-    var autoscanRecursive = modal.find('#autoscanRecursive')
-    var autoscanHidden = modal.find('#autoscanHidden')
-    var autoscanInterval = modal.find('#autoscanInterval')
+    const objectId = modal.find('#autoscanId');
+    const fromFs = modal.find('#autoscanFromFs');
+    const autoscanMode = modal.find('input:radio[name=autoscanMode]:checked');
+    const autoscanLevel = modal.find('input:radio[name=autoscanLevel]:checked');
+    const autoscanRecursive = modal.find('#autoscanRecursive');
+    const autoscanHidden = modal.find('#autoscanHidden');
+    const autoscanInterval = modal.find('#autoscanInterval');
 
-    var item = {
+    let item = {
       object_id: objectId.val(),
       from_fs: fromFs.is(':checked'),
       scan_mode: autoscanMode.val()
-    }
+    };
 
     switch (autoscanMode.val()) {
       case 'timed':
@@ -166,71 +166,71 @@
           recursive: autoscanRecursive.is(':checked'),
           hidden: autoscanHidden.is(':checked'),
           interval: autoscanInterval.val()
-        })
-        break
+        });
+        break;
       case 'inotify':
         item = $.extend({}, item, {
           scan_level: autoscanLevel.val(),
           recursive: autoscanRecursive.is(':checked'),
           hidden: autoscanHidden.is(':checked')
-        })
-        break
+        });
+        break;
       case 'none':
-        break
+        break;
     }
 
-    return item
+    return item;
   }
 
-  var _super = $.fn.modal
+  let _super = $.fn.modal;
 
   // create a new constructor
-  var GerberaAutoscanModal = function (element, options) { // eslint-disable-line
-    _super.Constructor.apply(this, arguments)
-  }
+  let GerberaAutoscanModal = function (element, options) { // eslint-disable-line
+    _super.Constructor.apply(this, arguments);
+  };
 
   GerberaAutoscanModal.prototype = $.extend({}, _super.Constructor.prototype, {
     constructor: GerberaAutoscanModal,
     _super: function () {
-      var args = $.makeArray(arguments)
-      _super.Constructor.prototype[args.shift()].apply(this, args)
+      let args = $.makeArray(arguments);
+      _super.Constructor.prototype[args.shift()].apply(this, args);
     },
     loadItem: function (itemData) {
-      return loadItem($(this._element), itemData)
+      return loadItem($(this._element), itemData);
     },
     reset: function () {
-      return reset($(this._element))
+      return reset($(this._element));
     },
     saveItem: function () {
-      return saveItem($(this._element))
+      return saveItem($(this._element));
     }
-  })
+  });
 
   // override the old initialization with the new constructor
   $.fn.autoscanmodal = $.extend(function (option) {
-    var args = $.makeArray(arguments)
-    var retval = null
-    option = args.shift()
+    let args = $.makeArray(arguments);
+    let retval = null;
+    option = args.shift();
 
     this.each(function () {
-      var $this = $(this)
-      var data = $this.data('modal')
-      var options = $.extend({}, _super.defaults, $this.data(), typeof option === 'object' && option)
+      let $this = $(this);
+      let data = $this.data('modal');
+      let options = $.extend({}, _super.defaults, $this.data(), typeof option === 'object' && option);
 
       if (!data) {
-        $this.data('modal', (data = new GerberaAutoscanModal(this, options)))
+        $this.data('modal', (data = new GerberaAutoscanModal(this, options)));
       }
       if (typeof option === 'string') {
         // for custom methods return the method value, not the selector
-        retval = data[option].apply(data, args)
+        retval = data[option].apply(data, args);
       } else if (options.show) {
-        data.show.apply(data, args)
+        data.show.apply(data, args);
       }
-    })
+    });
 
     if (!retval) {
-      retval = this
+      retval = this;
     }
-    return retval
-  }, $.fn.autoscanmodal)
-})(jQuery)
+    return retval;
+  }, $.fn.autoscanmodal);
+})(jQuery);

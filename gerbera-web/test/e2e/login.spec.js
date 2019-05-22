@@ -41,7 +41,7 @@ describe('Login Suite', () => {
       await loginPage.password('');
       await loginPage.username('');
       await loginPage.submitLogin();
-      await driver.sleep(4000);
+      await driver.sleep(1000);
 
       let result = await loginPage.getToastMessage();
       expect(result).to.equal('Please enter username and password');

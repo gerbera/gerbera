@@ -281,14 +281,14 @@
 <script src="vendor/popper/popper.js" type="text/javascript"></script>
 <script src="vendor/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
 <script src="js/md5.js" type="text/javascript"></script>
-<script src="js/gerbera.app.js" type="text/javascript"></script>
-<script src="js/gerbera.auth.js" type="text/javascript"></script>
-<script src="js/gerbera.items.js" type="text/javascript"></script>
-<script src="js/gerbera.tree.js" type="text/javascript"></script>
-<script src="js/gerbera.menu.js" type="text/javascript"></script>
-<script src="js/gerbera.trail.js" type="text/javascript"></script>
-<script src="js/gerbera.autoscan.js" type="text/javascript"></script>
-<script src="js/gerbera.updates.js" type="text/javascript"></script>
+<script src="js/gerbera-app.module.js" type="module"></script>
+<script src="js/gerbera-auth.module.js" type="module"></script>
+<script src="js/gerbera-items.module.js" type="module"></script>
+<script src="js/gerbera-tree.module.js" type="module"></script>
+<script src="js/gerbera-menu.module.js" type="module"></script>
+<script src="js/gerbera-trail.module.js" type="module"></script>
+<script src="js/gerbera-autoscan.module.js" type="module"></script>
+<script src="js/gerbera-updates.module.js" type="module"></script>
 <script src="js/jquery.gerbera.items.js" type="text/javascript"></script>
 <script src="js/jquery.gerbera.toast.js" type="text/javascript"></script>
 <script src="js/jquery.gerbera.tree.js" type="text/javascript"></script>
@@ -296,9 +296,11 @@
 <script src="js/jquery.gerbera.editor.js" type="text/javascript"></script>
 <script src="js/jquery.gerbera.autoscan.js" type="text/javascript"></script>
 
-<script type="text/javascript">
+<script type="module">
+    import {GerberaApp} from "./js/gerbera-app.module.js";
+
     $(document).ready(function () {
-        GERBERA.App.initialize()
-    })
+        GerberaApp.initialize();
+    });
 </script>
 </html>

@@ -25,132 +25,133 @@
 $.widget('grb.trail', {
 
   _create: function () {
-    this.element.addClass('grb-trail')
-    var data = this.options.data
+    this.element.addClass('grb-trail');
+    const data = this.options.data;
     if (data.length > 0) {
-      this.render(data, this.options.config)
+      this.render(data, this.options.config);
     }
   },
 
   _destroy: function () {
-    this.element.children('div').remove()
-    this.element.removeClass('grb-trail')
+    this.element.children('div').remove();
+    this.element.removeClass('grb-trail');
   },
 
   clear: function () {
-    this.element.children('div').remove()
+    this.element.children('div').remove();
   },
 
   render: function (data, config) {
-    this.element.html('')
-    this.generate(this.element, data, config)
+    this.element.html('');
+    this.generate(this.element, data, config);
   },
 
   generate: function (parent, data, config) {
-    var noOp = function () { return false }
-    var trailContainer = $('<div></div>')
-    var itemBreadcrumb = $('<ol></ol>')
-    itemBreadcrumb.addClass('breadcrumb my-auto')
+    const noOp = function () { return false };
+    const trailContainer = $('<div></div>');
+    const itemBreadcrumb = $('<ol></ol>');
+    itemBreadcrumb.addClass('breadcrumb my-auto');
 
-    for (var i = 0; i < data.length; i++) {
-      var item = data[i]
-      var crumb = $('<li><a></a></li>')
-      crumb.addClass('breadcrumb-item')
-      crumb.children('a').text(item.text)
-      itemBreadcrumb.append(crumb)
+    let item;
+    for (let i = 0; i < data.length; i++) {
+      item = data[i];
+      const crumb = $('<li><a></a></li>');
+      crumb.addClass('breadcrumb-item');
+      crumb.children('a').text(item.text);
+      itemBreadcrumb.append(crumb);
     }
-    itemBreadcrumb.appendTo(trailContainer)
+    itemBreadcrumb.appendTo(trailContainer);
 
-    var buttonContainer = $('<div></div>')
-    buttonContainer.addClass('col-md-5 col-sm-5 col-xs-5 my-auto')
-    var buttons
+    const buttonContainer = $('<div></div>');
+    buttonContainer.addClass('col-md-5 col-sm-5 col-xs-5 my-auto');
+    let buttons;
 
-    buttons = $('<ol></ol>')
-    buttons.addClass('grb-trail-buttons pull-right my-auto')
+    buttons = $('<ol></ol>');
+    buttons.addClass('grb-trail-buttons pull-right my-auto');
 
     if (config.enableAdd && config.onAdd) {
-      var addItemIcon = this.generateItemButton(item, {
+      const addItemIcon = this.generateItemButton(item, {
         title: 'Add Item',
         class: 'grb-trail-add',
         iconClass: 'fa-plus',
         click: config.onAdd ? config.onAdd : noOp
-      })
-      addItemIcon.appendTo(buttons)
+      });
+      addItemIcon.appendTo(buttons);
     }
 
     if (config.enableEdit && config.onEdit) {
-      var editItemIcon = this.generateItemButton(item, {
+      const editItemIcon = this.generateItemButton(item, {
         title: 'Edit Item',
         class: 'grb-trail-edit',
         iconClass: 'fa-pencil',
         click: config.onEdit ? config.onEdit : noOp
-      })
-      editItemIcon.appendTo(buttons)
+      });
+      editItemIcon.appendTo(buttons);
     }
 
-    var autoscanItemIcon
+    let autoscanItemIcon;
     if (config.enableAddAutoscan && config.onAddAutoscan) {
       autoscanItemIcon = this.generateItemButton(item, {
         title: 'Add Autoscan Item',
         class: 'grb-trail-add-autoscan',
         iconClass: 'fa-history',
         click: config.onAddAutoscan ? config.onAddAutoscan : noOp
-      })
-      autoscanItemIcon.appendTo(buttons)
+      });
+      autoscanItemIcon.appendTo(buttons);
     } else if (config.enableEditAutoscan && config.onEditAutoscan) {
       autoscanItemIcon = this.generateItemButton(item, {
         title: 'Edit Autoscan Item',
         class: 'grb-trail-edit-autoscan',
         iconClass: 'fa-history',
         click: config.onEditAutoscan ? config.onEditAutoscan : noOp
-      })
-      autoscanItemIcon.appendTo(buttons)
+      });
+      autoscanItemIcon.appendTo(buttons);
     }
 
     if (config.enableDelete && config.onDelete) {
-      var deleteItemIcon = this.generateItemButton(item, {
+      const deleteItemIcon = this.generateItemButton(item, {
         title: 'Delete Item',
         class: 'grb-trail-delete',
         iconClass: 'fa-trash-o',
         click: config.onDelete ? config.onDelete : noOp
-      })
-      deleteItemIcon.appendTo(buttons)
+      });
+      deleteItemIcon.appendTo(buttons);
     }
 
     if (config.enableDeleteAll && config.onDeleteAll) {
-      var deleteAllIcon = this.generateItemButton(item, {
+      const deleteAllIcon = this.generateItemButton(item, {
         title: 'Delete All',
         class: 'grb-trail-delete-all',
         iconClass: 'fa-remove',
         click: config.onDeleteAll ? config.onDeleteAll : noOp
-      })
-      deleteAllIcon.appendTo(buttons)
+      });
+      deleteAllIcon.appendTo(buttons);
     }
 
-    buttons.appendTo(buttonContainer)
-    trailContainer.addClass('col-md-7 col-sm-7 col-xs-7')
+    buttons.appendTo(buttonContainer);
+    trailContainer.addClass('col-md-7 col-sm-7 col-xs-7');
 
-    parent.append(trailContainer)
-    parent.append(buttonContainer)
+    parent.append(trailContainer);
+    parent.append(buttonContainer);
   },
 
   generateItemButton: function (item, config) {
-    var button = $('<li>');
-    var link = $('<a>', {"title": config.title, "class": config.class, "href": "javascript:;"});
-    var icon = $('<i></i>', {"class": "fa " + config.iconClass })
-    link.append(icon)
-    link.append(" " + config.title)
-    button.append(link)
-    link.click(item, config.click)
+    const button = $('<li>');
+    const link = $('<a>', {"title": config.title, "class": config.class, "href": "javascript:;"});
+    const icon = $('<i></i>', {"class": "fa " + config.iconClass });
+    link.append(icon);
+    link.append(" " + config.title);
+    button.append(link);
+    link.click(item, config.click);
     return button
   },
 
   length: function () {
-    return this.element.find('.breadcrumb li').length
+    return this.element.find('.breadcrumb li').length;
   },
 
   items: function () {
-    return this.element.find('li')
+    return this.element.find('li');
   }
 
-})
+});

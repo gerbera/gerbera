@@ -20,152 +20,144 @@
 
     $Id$
 */
-/* global $ GERBERA */
+/* global $ */
 
 $.widget('grb.dataitems', {
 
   _create: function () {
-    this.element.html('')
-    this.element.addClass('grb-dataitems')
-    var table = $('<table></table>').addClass('table')
-    var tbody = $('<tbody></tbody>')
-    var data = this.options.data
-    var onDelete = this.options.onDelete
-    var onEdit = this.options.onEdit
-    var onDownload = this.options.onDownload
-    var onAdd = this.options.onAdd
-    var itemType = this.options.itemType
-    var pager = this.options.pager
-    var row, content, text
+    this.element.html('');
+    this.element.addClass('grb-dataitems');
+    const table = $('<table></table>').addClass('table');
+    const tbody = $('<tbody></tbody>');
+    const data = this.options.data;
+    const onDelete = this.options.onDelete;
+    const onEdit = this.options.onEdit;
+    const onDownload = this.options.onDownload;
+    const onAdd = this.options.onAdd;
+    const itemType = this.options.itemType;
+    const pager = this.options.pager;
+    let row, content, text;
 
     if (data.length > 0) {
-      for (var i = 0; i < data.length; i++) {
-        var item = data[i]
-        row = $('<tr></tr>')
-        content = $('<td></td>')
+      for (let i = 0; i < data.length; i++) {
+        const item = data[i];
+        row = $('<tr></tr>');
+        content = $('<td></td>');
 
         if (item.img) {
-          var img = $('<img/>')
-          img.attr('src', item.img)
-          img.attr('style', 'height: 25px')
-          img.addClass('rounded float-left')
+          const img = $('<img src=""/>');
+          img.attr('src', item.img);
+          img.attr('style', 'height: 25px');
+          img.addClass('rounded float-left');
           img.appendTo(content)
         }
 
         if (item.url) {
-          text = $('<a></a>')
-          text.attr('href', item.url).text(item.text).appendTo(content)
+          text = $('<a></a>');
+          text.attr('href', item.url).text(item.text).appendTo(content);
         } else {
-          text = $('<span></span>')
-          text.text(item.text).appendTo(content)
+          text = $('<span></span>');
+          text.text(item.text).appendTo(content);
         }
-        text.addClass('grb-item-url')
+        text.addClass('grb-item-url');
 
-        if (item.video) {
-          var button = $('<button></button>')
-          button.text('Play Video')
-          button.addClass('pull-right')
-          button.appendTo(content)
-          button.click({item: item}, GERBERA.Items.playVideo)
-        }
-
-        var buttons
+        let buttons;
         if (itemType === 'db') {
-          buttons = $('<div></div>')
-          buttons.addClass('grb-item-buttons pull-right')
+          buttons = $('<div></div>');
+          buttons.addClass('grb-item-buttons pull-right');
 
-          var downloadIcon = $('<span></span>')
-          downloadIcon.prop('title', 'Download item')
-          downloadIcon.addClass('grb-item-download fa fa-download')
-          downloadIcon.appendTo(buttons)
+          const downloadIcon = $('<span></span>');
+          downloadIcon.prop('title', 'Download item');
+          downloadIcon.addClass('grb-item-download fa fa-download');
+          downloadIcon.appendTo(buttons);
           if (onDownload) {
-            downloadIcon.click(item, onDownload)
+            downloadIcon.click(item, onDownload);
           }
 
-          var editIcon = $('<span></span>')
-          editIcon.prop('title', 'Edit item')
-          editIcon.addClass('grb-item-edit fa fa-pencil')
-          editIcon.appendTo(buttons)
+          const editIcon = $('<span></span>');
+          editIcon.prop('title', 'Edit item');
+          editIcon.addClass('grb-item-edit fa fa-pencil');
+          editIcon.appendTo(buttons);
           if (onEdit) {
-            editIcon.click(item, onEdit)
+            editIcon.click(item, onEdit);
           }
 
-          var deleteIcon = $('<span></span>')
-          deleteIcon.prop('title', 'Delete item')
-          deleteIcon.addClass('grb-item-delete fa fa-trash-o')
-          deleteIcon.appendTo(buttons)
+          const deleteIcon = $('<span></span>');
+          deleteIcon.prop('title', 'Delete item');
+          deleteIcon.addClass('grb-item-delete fa fa-trash-o');
+          deleteIcon.appendTo(buttons);
           if (onDelete) {
             deleteIcon.click(item, function (event) {
               row.remove();
               onDelete(event);
-            })
+            });
           }
-          buttons.appendTo(content)
+          buttons.appendTo(content);
         } else if (itemType === 'fs') {
-          buttons = $('<div></div>')
-          buttons.addClass('grb-item-buttons pull-right')
+          buttons = $('<div></div>');
+          buttons.addClass('grb-item-buttons pull-right');
 
-          var addIcon = $('<span></span>')
-          addIcon.prop('title', 'Add item')
-          addIcon.addClass('grb-item-add fa fa-plus')
-          addIcon.appendTo(buttons)
+          const addIcon = $('<span></span>');
+          addIcon.prop('title', 'Add item');
+          addIcon.addClass('grb-item-add fa fa-plus');
+          addIcon.appendTo(buttons);
           if (onAdd) {
-            addIcon.click(item, onAdd)
+            addIcon.click(item, onAdd);
           }
-          buttons.appendTo(content)
+          buttons.appendTo(content);
         }
 
-        row.addClass('grb-item')
-        row.append(content)
-        tbody.append(row)
+        row.addClass('grb-item');
+        row.append(content);
+        tbody.append(row);
       }
     } else {
-      row = $('<tr></tr>')
-      content = $('<td></td>')
-      text = $('<span>No Items found</span>').appendTo(content)
-      row.append(content)
-      tbody.append(row)
+      row = $('<tr></tr>');
+      content = $('<td></td>');
+      $('<span>No Items found</span>').appendTo(content);
+      row.append(content);
+      tbody.append(row);
     }
-    tbody.appendTo(table)
+    tbody.appendTo(table);
 
-    var tfoot = this.buildFooter(pager)
-    table.append(tfoot)
+    const tfoot = this.buildFooter(pager);
+    table.append(tfoot);
 
-    this.element.append(table)
-    this.element.addClass('with-data')
+    this.element.append(table);
+    this.element.addClass('with-data');
   },
 
   buildFooter: function (pager) {
-    var tfoot = $('<tfoot><tr><td></td></tr></tfoot>')
-    var grbPager = $('<nav class="grb-pager"></nav>')
-    var list = $('<ul class="pagination"></ul>')
-    var previous = $('<li class="page-item">' +
+    const tfoot = $('<tfoot><tr><td></td></tr></tfoot>');
+    const grbPager = $('<nav class="grb-pager"></nav>');
+    const list = $('<ul class="pagination"></ul>');
+    const previous = $('<li class="page-item">' +
         '<a class="page-link" href="#" aria-label="Previous">' +
         '<span aria-hidden="true">&laquo;</span>' +
         '<span class="sr-only">Previous</span></a>' +
-        '</li>')
-    var next = $('<li class="page-item">' +
+        '</li>');
+    const next = $('<li class="page-item">' +
       '<a class="page-link" href="#" aria-label="Next">' +
       '<span aria-hidden="true">&raquo;</span>' +
       '<span class="sr-only">Next</span></a>' +
-      '</li>')
-    var maxPages
-    var pageItem
-    var pageLink
-    var pageParams
+      '</li>');
+    let maxPages;
+    let pageItem;
+    let pageLink;
+    let pageParams;
 
-    list.append(previous)
+    list.append(previous);
 
     if (pager && pager.pageCount) {
-      maxPages = Math.ceil(pager.totalMatches / pager.itemsPerPage)
+      maxPages = Math.ceil(pager.totalMatches / pager.itemsPerPage);
 
       if (pager.onNext) {
         pageParams = {
           itemsPerPage: pager.itemsPerPage,
           totalMatches: pager.totalMatches,
           parentId: pager.parentId
-        }
-        next.find('a').click(pageParams, pager.onNext)
+        };
+        next.find('a').click(pageParams, pager.onNext);
       }
 
       if (pager.onPrevious) {
@@ -173,42 +165,42 @@ $.widget('grb.dataitems', {
           itemsPerPage: pager.itemsPerPage,
           totalMatches: pager.totalMatches,
           parentId: pager.parentId
-        }
-        previous.find('a').click(pageParams, pager.onPrevious)
+        };
+        previous.find('a').click(pageParams, pager.onPrevious);
       }
 
-      for (var page = 1; page <= maxPages; page++) {
-        pageItem = $('<li class="page-item"></li>')
-        pageLink = $('<a class="page-link" href="#">' + page + '</a>')
-        pageLink.appendTo(pageItem)
+      for (let page = 1; page <= maxPages; page++) {
+        pageItem = $('<li class="page-item"></li>');
+        pageLink = $('<a class="page-link" href="#">' + page + '</a>');
+        pageLink.appendTo(pageItem);
 
         if (pager.onClick) {
           pageParams = {
             pageNumber: page,
             itemsPerPage: pager.itemsPerPage,
             parentId: pager.parentId
-          }
-          pageLink.click(pageParams, pager.onClick)
+          };
+          pageLink.click(pageParams, pager.onClick);
         }
 
         if (page === pager.currentPage) {
-          pageItem.addClass('active')
+          pageItem.addClass('active');
         }
 
-        list.append(pageItem)
+        list.append(pageItem);
       }
-      list.append(next)
-      grbPager.append(list)
-      tfoot.find('td').append(grbPager)
+      list.append(next);
+      grbPager.append(list);
+      tfoot.find('td').append(grbPager);
     }
 
-    return tfoot
+    return tfoot;
   },
 
   _destroy: function () {
-    this.element.children('table').remove()
-    this.element.removeClass('grb-dataitems')
-    this.element.removeClass('with-data')
+    this.element.children('table').remove();
+    this.element.removeClass('grb-dataitems');
+    this.element.removeClass('with-data');
   }
 
-})
+});
