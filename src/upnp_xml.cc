@@ -331,6 +331,7 @@ Ref<Element> UpnpXMLBuilder::renderDeviceDescription(String presentationURL)
     device->appendTextChild(_("modelDescription"), config->getOption(CFG_SERVER_MODEL_DESCRIPTION));
     device->appendTextChild(_("modelName"), config->getOption(CFG_SERVER_MODEL_NAME));
     device->appendTextChild(_("modelNumber"), config->getOption(CFG_SERVER_MODEL_NUMBER));
+    device->appendTextChild(_("modelURL"), config->getOption(CFG_SERVER_MODEL_URL));
     device->appendTextChild(_("serialNumber"), config->getOption(CFG_SERVER_SERIAL_NUMBER));
     device->appendTextChild(_("UDN"), config->getOption(CFG_SERVER_UDN));
 
