@@ -543,10 +543,19 @@ These options apply to id3lib or taglib libraries.
 Currently only adding keywords to auxdata is supported. The keywords are those defined in the id3 specification,
 we do not perform any extra checking, so you could try to use any string as a keyword - if it does not exist in the tag nothing bad will happen.
 
-Here is a list of possible keywords:
+Here is a list of some possible keywords:
+
+* ID3v2 / MP3
 
 TALB, TBPM, TCOM, TCON, TCOP, TDAT, TDLY, TENC, TEXT, TFLT, TIME, TIT1, TIT2, TIT3, TKEY, TLAN, TLEN, TMED, TOAL,
-TOFN, TOLY, TOPE, TORY, TOWN, TPE1, TPE2, TPE3, TPE4, TPOS, TPUB, TRCK, TRDA, TRSN, TRSO, TSIZ, TSRC, TSSE, TYER, TXXX
+TOFN, TOLY, TOPE, TORY, TOWN, TPE1, TPE2, TPE3, TPE4, TPOS, TPUB, TRCK, TRDA, TRSN, TRSO, TSIZ, TSRC, TSSE, TYER, 
+TXXX:CATALOGNUMBER, TXXX:MusicBrainz Album Type, ...
+
+* Vorbis / FLAC
+
+ALBUMSORT, COMPOSER, ENCODEDBY, MUSICBRAINZ_ARTISTID, CATALOGNUMBER, RELEASETYPE, ...
+
+* any other user defined keyword, e.g. for APEv2 or iTunes MP4
 
  **Child tags:**
 
@@ -556,7 +565,9 @@ TOFN, TOLY, TOPE, TORY, TOWN, TPE1, TPE2, TPE3, TPE4, TPOS, TPUB, TRCK, TRDA, TR
 .. code-block:: xml
 
     <add-data tag="TCOM"/>
+    <add-data tag="COMPOSER"/>
     <add-data tag="TENC"/>
+    <add-data tag="ENCODEDBY"/>
     ...
 
 * Optional
@@ -570,7 +581,10 @@ A sample configuration for the example described above would be:
 
   <id3>
       <auxdata>
+          <add-data tag="TCOM"/>
+          <add-data tag="COMPOSER"/>
           <add-data tag="TENC"/>
+          <add-data tag="ENCODEDBY"/>
       </auxdata>
   </id3>
 
