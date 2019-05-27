@@ -19,6 +19,9 @@ ELSE()
 	endif(NOT TAGLIB_MIN_VERSION)
 
 	if(NOT WIN32)
+            if (CMAKE_CROSSCOMPILING)
+              set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM ONLY)
+            endif(CMAKE_CROSSCOMPILING)
             find_program(TAGLIBCONFIG_EXECUTABLE NAMES taglib-config PATHS
 		   ${BIN_INSTALL_DIR}
             )
