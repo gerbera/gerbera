@@ -1,9 +1,12 @@
+import {Autoscan} from '../../../web/js/gerbera-autoscan.module';
+import {Auth} from '../../../web/js/gerbera-auth.module';
+import {GerberaApp} from '../../../web/js/gerbera-app.module';
+import {Updates} from '../../../web/js/gerbera-updates.module';
 import item from './fixtures/autoscan-item';
 import autoscanResponse from './fixtures/autoscan-add-response';
 import submitCompleteResponse from './fixtures/submit-complete-2f6d';
 
 describe('Gerbera Autoscan', () => {
-  'use strict';
   describe('initialize()', () => {
     let autoscanId;
     let autoscanFromFs;
@@ -37,7 +40,7 @@ describe('Gerbera Autoscan', () => {
     it('clears all fields in the autoscan modal', () => {
       $('#autoscanModal').autoscanmodal('loadItem', {item: item});
 
-      GERBERA.Autoscan.initialize();
+      Autoscan.initialize();
 
       expect(autoscanId.val()).toBe('');
       expect(autoscanFromFs.is(':checked')).toBeFalsy();
@@ -51,7 +54,6 @@ describe('Gerbera Autoscan', () => {
       expect(autoscanSave.is(':disabled')).toBeFalsy();
     });
   });
-
   describe('addAutoscan()', () => {
     let ajaxSpy, event;
 
@@ -64,16 +66,15 @@ describe('Gerbera Autoscan', () => {
       event = {
         data: { id: '26fd6' }
       };
-      spyOn(GERBERA.Auth, 'getSessionId').and.returnValue('SESSION_ID');
+      spyOn(Auth, 'getSessionId').and.returnValue('SESSION_ID');
     });
 
     afterEach(() => {
       fixture.cleanup();
-      ajaxSpy.and.callThrough();
     });
 
     it('calls the server to obtain autoscan edit load', () => {
-      spyOn(GERBERA.App, 'getType').and.returnValue('fs');
+      spyOn(GerberaApp, 'getType').and.returnValue('fs');
       const data = {
         req_type: 'autoscan',
         action: 'as_edit_load',
@@ -82,14 +83,14 @@ describe('Gerbera Autoscan', () => {
         from_fs: true
       };
 
-      GERBERA.Autoscan.addAutoscan(event);
+      Autoscan.addAutoscan(event);
 
       expect(ajaxSpy.calls.count()).toBe(1);
       expect(ajaxSpy.calls.mostRecent().args[0].data).toEqual(data);
     });
 
     it('when calling from DB checks for updates', () => {
-      spyOn(GERBERA.App, 'getType').and.returnValue('db');
+      spyOn(GerberaApp, 'getType').and.returnValue('db');
       const data = {
         req_type: 'autoscan',
         action: 'as_edit_load',
@@ -99,7 +100,7 @@ describe('Gerbera Autoscan', () => {
         updates: 'check'
       };
 
-      GERBERA.Autoscan.addAutoscan(event);
+      Autoscan.addAutoscan(event);
 
       expect(ajaxSpy.calls.count()).toBe(1);
       expect(ajaxSpy.calls.mostRecent().args[0].data).toEqual(data);
@@ -141,9 +142,9 @@ describe('Gerbera Autoscan', () => {
     });
 
     it('using the response loads the autoscan overlay', () => {
-      spyOn(GERBERA.Updates, 'updateTreeByIds');
+      spyOn(Updates, 'updateTreeByIds');
 
-      GERBERA.Autoscan.loadNewAutoscan(autoscanResponse);
+      Autoscan.loadNewAutoscan(autoscanResponse);
 
       autoscanMode = $('input[name=autoscanMode][value=timed]');
       autoscanLevel = $('input[name=autoscanLevel][value=full]');
@@ -158,22 +159,22 @@ describe('Gerbera Autoscan', () => {
       expect(autoscanPersistentMsg.css('display')).toBe('none');
       expect(autoscanSave.is(':disabled')).toBeFalsy();
 
-      expect(GERBERA.Updates.updateTreeByIds).toHaveBeenCalled();
+      expect(Updates.updateTreeByIds).toHaveBeenCalled();
+      $('#autoscanModal').remove();
     });
   });
-
   describe('submit()', () => {
-    let response, ajaxSpy;
+    let ajaxSpy;
 
     beforeEach(() => {
       fixture.setBase('test/client/fixtures');
       fixture.load('index.html');
       ajaxSpy = spyOn($, 'ajax').and.callFake(() => {
-        return $.Deferred().resolve({}).promise();
+        return Promise.resolve({});
       });
-      spyOn(GERBERA.Auth, 'getSessionId').and.returnValue('SESSION_ID');
-      spyOn(GERBERA.Updates, 'showMessage');
-      spyOn(GERBERA.Updates, 'getUpdates');
+      spyOn(Auth, 'getSessionId').and.returnValue('SESSION_ID');
+      spyOn(Updates, 'showMessage');
+      spyOn(Updates, 'getUpdates');
     });
 
     afterEach((done) => {
@@ -186,12 +187,12 @@ describe('Gerbera Autoscan', () => {
     });
 
     it('collects all the form data from the autoscan modal to call the server', () => {
-      spyOn(GERBERA.Updates, 'updateTreeByIds');
-      spyOn(GERBERA.Updates, 'addUiTimer');
+      spyOn(Updates, 'updateTreeByIds');
+      spyOn(Updates, 'addUiTimer');
 
-      GERBERA.Autoscan.loadNewAutoscan(autoscanResponse);
+      Autoscan.loadNewAutoscan(autoscanResponse);
 
-      GERBERA.Autoscan.submitAutoscan();
+      Autoscan.submitAutoscan();
 
       expect(ajaxSpy.calls.count()).toBe(1);
       expect(ajaxSpy.calls.mostRecent().args[0].data).toEqual({
@@ -208,7 +209,6 @@ describe('Gerbera Autoscan', () => {
       });
     });
   });
-
   describe('submitComplete()', () => {
 
     beforeEach(() => {
@@ -221,35 +221,35 @@ describe('Gerbera Autoscan', () => {
     });
 
     it('when successful reports a message to the user and starts task interval', () => {
-      GERBERA.Autoscan.initialize();
-      spyOn(GERBERA.Updates, 'showMessage');
-      spyOn(GERBERA.Updates, 'getUpdates');
+      Autoscan.initialize();
+      spyOn(Updates, 'showMessage');
+      spyOn(Updates, 'getUpdates');
 
-      GERBERA.Autoscan.submitComplete(submitCompleteResponse);
+      Autoscan.submitComplete(submitCompleteResponse);
 
-      expect(GERBERA.Updates.showMessage).toHaveBeenCalledWith('Performing full scan: /Movies', undefined, 'success', 'fa-check');
+      expect(Updates.showMessage).toHaveBeenCalledWith('Performing full scan: /Movies', undefined, 'success', 'fa-check');
     });
 
     it('when successful for one-time scan reports message to user', () => {
-      GERBERA.Autoscan.initialize();
-      spyOn(GERBERA.Updates, 'showMessage');
-      spyOn(GERBERA.Updates, 'getUpdates');
+      Autoscan.initialize();
+      spyOn(Updates, 'showMessage');
+      spyOn(Updates, 'getUpdates');
 
-      GERBERA.Autoscan.submitComplete({
+      Autoscan.submitComplete({
         success: true
       });
 
-      expect(GERBERA.Updates.showMessage).toHaveBeenCalledWith('Successfully submitted autoscan', undefined, 'success', 'fa-check');
+      expect(Updates.showMessage).toHaveBeenCalledWith('Successfully submitted autoscan', undefined, 'success', 'fa-check');
     });
 
     it('when fails reports to application error', () => {
-      GERBERA.Autoscan.initialize();
+      Autoscan.initialize();
       submitCompleteResponse.success = false;
-      spyOn(GERBERA.App, 'error');
+      spyOn(GerberaApp, 'error');
 
-      GERBERA.Autoscan.submitComplete(submitCompleteResponse);
+      Autoscan.submitComplete(submitCompleteResponse);
 
-      expect(GERBERA.App.error).toHaveBeenCalledWith('Failed to submit autoscan');
+      expect(GerberaApp.error).toHaveBeenCalledWith('Failed to submit autoscan');
       submitCompleteResponse.success = true;
     });
   });

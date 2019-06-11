@@ -1,8 +1,12 @@
+import {Autoscan} from "../../../web/js/gerbera-autoscan.module";
+import {GerberaApp} from "../../../web/js/gerbera-app.module";
+import {Items} from "../../../web/js/gerbera-items.module";
+import {Trail} from "../../../web/js/gerbera-trail.module";
+import {Tree} from "../../../web/js/gerbera-tree.module";
+import {Updates} from "../../../web/js/gerbera-updates.module";
 import treeResponse from './fixtures/parent_id-0-select_it-0';
 
 describe('Gerbera Trail', () => {
-  'use strict';
-
   describe('initialize()', () => {
     beforeEach(() => {
       fixture.setBase('test/client/fixtures');
@@ -11,15 +15,14 @@ describe('Gerbera Trail', () => {
     afterEach(() => {
       fixture.cleanup();
     });
-    it('clears any data associated with the trail', () => {
+    it('clears any data associated with the trail', async () => {
       const trail = $('#trail');
 
-      GERBERA.Trail.initialize();
+      await Trail.initialize();
 
       expect(trail.children().length).toBe(0)
     });
   });
-
   describe('makeTrail()', () => {
     beforeEach(() => {
       fixture.setBase('test/client/fixtures');
@@ -32,13 +35,12 @@ describe('Gerbera Trail', () => {
       const treeElement = $('#first-child-one-one');
       const trail = $('#trail');
 
-      GERBERA.Trail.makeTrail(treeElement);
+      Trail.makeTrail(treeElement);
 
       expect(trail.hasClass('grb-trail')).toBeTruthy();
       expect($('#trail ol.breadcrumb').length).toBe(1);
     });
   });
-
   describe('destroy()', () => {
     let treeElement, trail;
 
@@ -47,19 +49,17 @@ describe('Gerbera Trail', () => {
       fixture.load('trail.html');
       treeElement = $('#first-child-one-one');
       trail = $('#trail');
-      GERBERA.Trail.makeTrail(treeElement);
+      Trail.makeTrail(treeElement);
     });
     afterEach(() => {
       fixture.cleanup();
     });
 
     it('removes contents of the trail', () => {
-      GERBERA.Trail.destroy();
-
+      Trail.destroy();
       expect(trail.children().length).toBe(0);
     });
   });
-
   describe('gatherTrail()', () => {
     beforeEach(() => {
       fixture.setBase('test/client/fixtures');
@@ -76,7 +76,7 @@ describe('Gerbera Trail', () => {
         { id: 11111, text: 'first.child.one.one' }
       ];
 
-      const result = GERBERA.Trail.gatherTrail(treeElement);
+      const result = Trail.gatherTrail(treeElement);
 
       expect(result).toEqual(expected);
     });
@@ -90,14 +90,13 @@ describe('Gerbera Trail', () => {
         { id: 'aaaaa', text: 'first.child.one.one' }
       ];
 
-      const result = GERBERA.Trail.gatherTrail(treeElement);
+      const result = Trail.gatherTrail(treeElement);
 
       expect(result).toEqual(expected);
     });
   });
-
   describe('deleteItem()', () => {
-    let deleteResponse, event;
+    let deleteResponse, event, appErrorSpy;
     beforeEach(() => {
       fixture.setBase('test/client/fixtures');
       fixture.load('trail.html');
@@ -106,69 +105,69 @@ describe('Gerbera Trail', () => {
 
     });
     afterEach(() => {
+      appErrorSpy.calls.reset();
       fixture.cleanup();
     });
     it('calls the server to delete the gerbera item', async () => {
-      GERBERA.Tree.loadTree(treeResponse);
-      spyOn(GERBERA.Items, 'deleteGerberaItem').and.callFake(() => {
-        return $.Deferred().resolve(deleteResponse).promise();
+      appErrorSpy = spyOn(GerberaApp, 'error');
+      Tree.loadTree(treeResponse);
+      spyOn(Items, 'deleteGerberaItem').and.callFake(() => {
+        return Promise.resolve(deleteResponse);
       });
-      spyOn(GERBERA.App, 'error');
-      spyOn(GERBERA.Updates, 'updateTreeByIds');
-      spyOn(GERBERA.Updates, 'showMessage');
+      spyOn(Updates, 'updateTreeByIds');
+      spyOn(Updates, 'showMessage');
 
-      await GERBERA.Trail.deleteItem(event);
+      await Trail.deleteItem(event);
 
-      expect(GERBERA.App.error).not.toHaveBeenCalled();
-      expect(GERBERA.Items.deleteGerberaItem).toHaveBeenCalledWith(event.data);
-      expect(GERBERA.Updates.updateTreeByIds).toHaveBeenCalled();
-      expect(GERBERA.Updates.showMessage).toHaveBeenCalledWith('Successfully removed item', undefined, 'success', 'fa-check');
+      expect(appErrorSpy).not.toHaveBeenCalled();
+      expect(Items.deleteGerberaItem).toHaveBeenCalledWith(event.data);
+      expect(Updates.updateTreeByIds).toHaveBeenCalled();
+      expect(Updates.showMessage).toHaveBeenCalledWith('Successfully removed item', undefined, 'success', 'fa-check');
     });
 
-    describe('deleteAllItems()', () => {
-      let event;
-      beforeEach(() => {
-        fixture.setBase('test/client/fixtures');
-        fixture.load('trail.html');
-        deleteResponse = {success: true};
-        event = {data: {id: 8}};
-      });
-      afterEach(() => {
-        fixture.cleanup();
-      });
-      it('calls the server to delete the gerbera item', async () => {
-        GERBERA.Tree.loadTree(treeResponse);
-        spyOn(GERBERA.Items, 'deleteGerberaItem').and.callFake(() => {
-          return $.Deferred().resolve(deleteResponse).promise();
-        });
-        spyOn(GERBERA.App, 'error');
-        spyOn(GERBERA.Updates, 'updateTreeByIds');
-        spyOn(GERBERA.Updates, 'showMessage');
-
-        await GERBERA.Trail.deleteAllItems(event);
-        expect(GERBERA.App.error).not.toHaveBeenCalled();
-        expect(GERBERA.Items.deleteGerberaItem).toHaveBeenCalledWith(event.data, true);
-        expect(GERBERA.Updates.updateTreeByIds).toHaveBeenCalled();
-        expect(GERBERA.Updates.showMessage).toHaveBeenCalledWith('Successfully removed all items', undefined, 'success', 'fa-check');
-      });
-    });
-
-    it('reports an error if the delete fails', () => {
-      GERBERA.Tree.loadTree(treeResponse);
+    it('reports an error if the delete fails', async () => {
+      appErrorSpy = spyOn(GerberaApp, 'error');
+      Tree.loadTree(treeResponse);
       deleteResponse = { success: false };
-      spyOn(GERBERA.Items, 'deleteGerberaItem').and.callFake(() => {
-        return $.Deferred().resolve(deleteResponse).promise();
+      spyOn(Items, 'deleteGerberaItem').and.callFake(() => {
+        return Promise.resolve(deleteResponse);
       });
-      spyOn(GERBERA.App, 'error');
-      spyOn(GERBERA.Updates, 'updateTreeByIds');
+      spyOn(Updates, 'updateTreeByIds');
 
-      GERBERA.Trail.deleteItem(event);
+      await Trail.deleteItem(event);
 
-      expect(GERBERA.App.error).toHaveBeenCalledWith('Failed to remove item');
-      expect(GERBERA.Updates.updateTreeByIds).not.toHaveBeenCalled();
+      expect(appErrorSpy).toHaveBeenCalledWith('Failed to remove item');
+      expect(Updates.updateTreeByIds).not.toHaveBeenCalled();
     });
   });
+  describe('deleteAllItems()', () => {
+    let deleteResponse, event, appErrorSpy;
+    beforeEach(() => {
+      fixture.setBase('test/client/fixtures');
+      fixture.load('trail.html');
+      deleteResponse = {success: true};
+      event = {data: {id: 8}};
+      appErrorSpy = spyOn(GerberaApp, 'error');
+    });
+    afterEach(() => {
+      appErrorSpy.calls.reset();
+      fixture.cleanup();
+    });
+    it('calls the server to delete the gerbera item', async () => {
+      Tree.loadTree(treeResponse);
+      spyOn(Items, 'deleteGerberaItem').and.callFake(() => {
+        return Promise.resolve(deleteResponse);
+      });
+      spyOn(Updates, 'updateTreeByIds');
+      spyOn(Updates, 'showMessage');
 
+      await Trail.deleteAllItems(event);
+      expect(appErrorSpy).not.toHaveBeenCalled();
+      expect(Items.deleteGerberaItem).toHaveBeenCalledWith(event.data, true);
+      expect(Updates.updateTreeByIds).toHaveBeenCalled();
+      expect(Updates.showMessage).toHaveBeenCalledWith('Successfully removed all items', undefined, 'success', 'fa-check');
+    });
+  });
   describe('makeTrailFromItem()', () => {
     let items, trail;
     beforeEach(() => {
@@ -195,32 +194,32 @@ describe('Gerbera Trail', () => {
 
     it('uses and item response to make the trail', () => {
       const treeElement = $('#first-child-one-one');
-      spyOn(GERBERA.Tree, 'getTreeElementById').and.returnValue(treeElement);
+      spyOn(Tree, 'getTreeElementById').and.returnValue(treeElement);
 
-      GERBERA.Trail.makeTrailFromItem(items);
+      Trail.makeTrailFromItem(items);
 
-      expect(GERBERA.Tree.getTreeElementById).toHaveBeenCalledWith(467);
+      expect(Tree.getTreeElementById).toHaveBeenCalledWith(467);
       expect(trail.hasClass('grb-trail')).toBeTruthy();
       expect($('#trail ol.breadcrumb').length).toBe(1);
     });
 
     it('includes add and edit if item is virtual', () => {
-      spyOn(GERBERA.App, 'getType').and.returnValue('db');
+      spyOn(GerberaApp, 'getType').and.returnValue('db');
       const treeElement = $('#first-child-one-one');
       items = {
         'parent_id': 467,
         'virtual': true
       };
-      spyOn(GERBERA.Tree, 'getTreeElementById').and.returnValue(treeElement);
+      spyOn(Tree, 'getTreeElementById').and.returnValue(treeElement);
 
-      GERBERA.Trail.makeTrailFromItem(items);
+      Trail.makeTrailFromItem(items);
 
       expect($('#trail .grb-trail-add').length).toBe(1);
       expect($('#trail .grb-trail-edit').length).toBe(1);
     });
 
     it('includes edit autoscan if the item is db and autoscan', () => {
-      spyOn(GERBERA.App, 'getType').and.returnValue('db');
+      spyOn(GerberaApp, 'getType').and.returnValue('db');
       const treeElement = $('#first-child-one-one');
       items = {
         'parent_id': 467,
@@ -228,14 +227,13 @@ describe('Gerbera Trail', () => {
         'autoscan_type': 'ui',
         'protect_container': false
       };
-      spyOn(GERBERA.Tree, 'getTreeElementById').and.returnValue(treeElement);
+      spyOn(Tree, 'getTreeElementById').and.returnValue(treeElement);
 
-      GERBERA.Trail.makeTrailFromItem(items);
+      Trail.makeTrailFromItem(items);
 
       expect($('#trail .grb-trail-edit-autoscan').length).toBe(1);
     });
   });
-
   describe('trail click operations', () => {
     let items;
     beforeEach(() => {
@@ -254,95 +252,95 @@ describe('Gerbera Trail', () => {
       fixture.setBase('test/client/fixtures');
       fixture.load('trail.html');
       const treeElement = $('#first-child-one-one');
-      spyOn(GERBERA.Tree, 'getTreeElementById').and.returnValue(treeElement);
+      spyOn(Tree, 'getTreeElementById').and.returnValue(treeElement);
     });
     afterEach(() => {
       fixture.cleanup();
     });
 
     it('when click delete calls Gerbera Item delete', () => {
-      spyOn(GERBERA.App, 'getType').and.returnValue('db');
-      spyOn(GERBERA.Tree, 'reloadParentTreeItem');
-      spyOn(GERBERA.Items, 'deleteGerberaItem').and.callFake(() => {
-        return $.Deferred().resolve({success: true}).promise();
+      spyOn(GerberaApp, 'getType').and.returnValue('db');
+      spyOn(Tree, 'reloadParentTreeItem');
+      spyOn(Items, 'deleteGerberaItem').and.callFake(() => {
+        return Promise.resolve({success: true});
       });
 
-      GERBERA.Trail.makeTrailFromItem(items);
+      Trail.makeTrailFromItem(items);
       $('#trail .grb-trail-delete').click();
 
-      expect(GERBERA.Items.deleteGerberaItem).toHaveBeenCalled();
+      expect(Items.deleteGerberaItem).toHaveBeenCalled();
     });
 
     it('when click delete ALL calls Gerbera Item delete with ALL parameter set', () => {
-      spyOn(GERBERA.App, 'getType').and.returnValue('db');
-      spyOn(GERBERA.Tree, 'reloadParentTreeItem');
-      spyOn(GERBERA.Items, 'deleteGerberaItem').and.callFake(() => {
-        return $.Deferred().resolve({success: true}).promise();
+      spyOn(GerberaApp, 'getType').and.returnValue('db');
+      spyOn(Tree, 'reloadParentTreeItem');
+      spyOn(Items, 'deleteGerberaItem').and.callFake(() => {
+        return Promise.resolve({success: true});
       });
 
-      GERBERA.Trail.makeTrailFromItem(items);
+      Trail.makeTrailFromItem(items);
       $('#trail .grb-trail-delete-all').click();
 
-      expect(GERBERA.Items.deleteGerberaItem).toHaveBeenCalledWith({ id: 11111, text: 'first.child.one.one' }, true);
+      expect(Items.deleteGerberaItem).toHaveBeenCalledWith({ id: 11111, text: 'first.child.one.one' }, true);
     });
 
     it('when click add for fs type calls Gerbera Item add', () => {
-      spyOn(GERBERA.App, 'getType').and.returnValue('fs');
-      spyOn(GERBERA.Items, 'addFileItem');
+      spyOn(GerberaApp, 'getType').and.returnValue('fs');
+      spyOn(Items, 'addFileItem');
       items = {
         'parent_id': 467,
         'virtual': false
       };
-      GERBERA.Trail.makeTrailFromItem(items);
+      Trail.makeTrailFromItem(items);
 
       $('#trail .grb-trail-add').click();
 
-      expect(GERBERA.Items.addFileItem).toHaveBeenCalled();
+      expect(Items.addFileItem).toHaveBeenCalled();
     });
 
     it('when click add autoscan for fs type calls Gerbera Autoscan add', () => {
-      spyOn(GERBERA.App, 'getType').and.returnValue('fs');
-      spyOn(GERBERA.Autoscan, 'addAutoscan');
+      spyOn(GerberaApp, 'getType').and.returnValue('fs');
+      spyOn(Autoscan, 'addAutoscan');
       items = {
         'parent_id': 467,
         'virtual': false
       };
-      GERBERA.Trail.makeTrailFromItem(items);
+      Trail.makeTrailFromItem(items);
 
       $('#trail .grb-trail-add-autoscan').click();
 
-      expect(GERBERA.Autoscan.addAutoscan).toHaveBeenCalled();
+      expect(Autoscan.addAutoscan).toHaveBeenCalled();
     });
 
     it('when click add for db type calls Gerbera Items to add virtual', () => {
-      spyOn(GERBERA.App, 'getType').and.returnValue('db');
-      spyOn(GERBERA.Items, 'addVirtualItem');
+      spyOn(GerberaApp, 'getType').and.returnValue('db');
+      spyOn(Items, 'addVirtualItem');
       items = {
         'parent_id': 467,
         'virtual': true
       };
-      GERBERA.Trail.makeTrailFromItem(items);
+      Trail.makeTrailFromItem(items);
 
       $('#trail .grb-trail-add').click();
 
-      expect(GERBERA.Items.addVirtualItem).toHaveBeenCalled();
+      expect(Items.addVirtualItem).toHaveBeenCalled();
     });
 
     it('when click edit calls Gerbera Item edit', () => {
-      spyOn(GERBERA.App, 'getType').and.returnValue('db');
-      spyOn(GERBERA.Items, 'editItem').and.callFake(() => {
+      spyOn(GerberaApp, 'getType').and.returnValue('db');
+      spyOn(Items, 'editItem').and.callFake(() => {
         return $.Deferred().resolve({success: true}).promise();
       });
 
-      GERBERA.Trail.makeTrailFromItem(items);
+      Trail.makeTrailFromItem(items);
       $('#trail .grb-trail-edit').click();
 
-      expect(GERBERA.Items.editItem).toHaveBeenCalled();
+      expect(Items.editItem).toHaveBeenCalled();
     });
 
     it('when click add autoscan for fs type calls Gerbera Autoscan add', () => {
-      spyOn(GERBERA.App, 'getType').and.returnValue('db');
-      spyOn(GERBERA.Autoscan, 'addAutoscan');
+      spyOn(GerberaApp, 'getType').and.returnValue('db');
+      spyOn(Autoscan, 'addAutoscan');
       items = {
         'parent_id': 467,
         'location': '/Video',
@@ -355,11 +353,11 @@ describe('Gerbera Trail', () => {
         'protect_items': false,
         'item': []
       };
-      GERBERA.Trail.makeTrailFromItem(items);
+      Trail.makeTrailFromItem(items);
 
       $('#trail .grb-trail-edit-autoscan').click();
 
-      expect(GERBERA.Autoscan.addAutoscan).toHaveBeenCalled();
+      expect(Autoscan.addAutoscan).toHaveBeenCalled();
     });
   });
 });

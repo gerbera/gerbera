@@ -21,11 +21,12 @@
     "no-unused-vars": [
       "error",
       {
-        "varsIgnorePattern": "should|expect"
+        "varsIgnorePattern": "should|expect|fixture|Cookies"
       }
     ]
   },
   "parserOptions": {
-    "ecmaVersion": 2017
+    "ecmaVersion": 2017,
+    "sourceType": "module"
   }
 }

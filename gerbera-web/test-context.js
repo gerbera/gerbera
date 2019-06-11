@@ -19,3 +19,9 @@ require('bootstrap');
  *****************************/
 const plugins = require.context('../web/js', true, /jquery.gerbera.*.js$/);
 plugins.keys().forEach(plugins);
+
+/*****************************
+ * Gerbera Client Test Suite
+ *****************************/
+const tests = require.context('./test/client', true, /gerbera.*spec.js$/);
+tests.keys().forEach(tests);

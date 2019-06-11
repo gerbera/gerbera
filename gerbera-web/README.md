@@ -1,16 +1,20 @@
-# Gerbera Web UI
+# Gerbera Web Architecture
+
+![component-arch](./images/gerbera-web.png)
+
+# Gerbera Web UI Tooling
 
 The Gerbera Web UI is written with the following tools:
 
 ### Client-side
 
-- JQuery v3.2.1
-- Bootstrap v4.0.0-beta.2
+- JQuery v3.4.1
+- Bootstrap v4.0.0
 
 
 ### Development
 
-- Node JS v6.11.4
+- Node JS
 - Jasmine
 - Karma
 - Mocha
@@ -85,8 +89,13 @@ Test output looks similar to below:
       onItemSelected()
         ✓ updates the breadcrumb based on the selected item
   
-  PhantomJS 2.1.1 (Linux 0.0.0): Executed 25 of 25 SUCCESS (0.371 secs / 0.367 secs)
-  TOTAL: 25 SUCCESS
+    ...
+    ...
+    
+  Finished in 4.201 secs / 3.943 secs @ 20:32:59 GMT-0400 (Eastern Daylight Time)
+  
+  SUMMARY:
+  ✔ 237 tests completed
 
 ```
 
