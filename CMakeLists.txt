@@ -78,8 +78,8 @@ set(libgerberaFILES
         src/filesystem.h
         src/generic_task.cc
         src/generic_task.h
-        src/handler/headers.h
-        src/handler/headers.cc
+        src/util/headers.h
+        src/util/headers.cc
         src/io_handler_buffer_helper.cc
         src/io_handler_buffer_helper.h
         src/io_handler.cc
