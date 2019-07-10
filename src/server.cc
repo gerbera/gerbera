@@ -429,7 +429,7 @@ Ref<RequestHandler> Server::createRequestHandler(const char* filename) const
         } else {
             ret = createWebRequestHandler(_("index"));
         }
-    } else if (link.startsWith(_("/") + DEVICE_DESCRIPTION_PATH)) {
+    } else if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" + DEVICE_DESCRIPTION_PATH)) {
         ret = new DeviceDescriptionHandler(xmlbuilder.get());
     } else if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_SERVE_HANDLER)) {
         if (string_ok(ConfigManager::getInstance()->getOption(CFG_SERVER_SERVEDIR)))

@@ -31,10 +31,8 @@ DeviceDescriptionHandler::DeviceDescriptionHandler(UpnpXMLBuilder* xmlBuilder)
 
 void DeviceDescriptionHandler::getInfo(const char* filename, UpnpFileInfo* info)
 {
-    if (!string_ok(deviceDescription)) {
-        deviceDescription = _("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n") + xmlBuilder->renderDeviceDescription()->print();
-    }
-    UpnpFileInfo_set_FileLength(info, deviceDescription.length());
+    // We should be able to do the generation here, but libupnp doesnt support the request cookies yet
+    UpnpFileInfo_set_FileLength(info, -1);
     UpnpFileInfo_set_ContentType(info, "application/xml");
     UpnpFileInfo_set_IsReadable(info, 1);
     UpnpFileInfo_set_IsDirectory(info, 0);
@@ -42,6 +40,11 @@ void DeviceDescriptionHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
 zmm::Ref<IOHandler> DeviceDescriptionHandler::open(const char* filename, enum UpnpOpenFileMode mode, zmm::String range)
 {
-    log_debug("Device description requested!");
-    return zmm::Ref<IOHandler>(new MemIOHandler(deviceDescription.c_str(), deviceDescription.length()));
+    log_debug("Device description requested\n");
+    if (!string_ok(deviceDescription)) { // This always true for now
+        deviceDescription = _("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n") + xmlBuilder->renderDeviceDescription()->print();
+    }
+    auto t = zmm::Ref<IOHandler>(new MemIOHandler(deviceDescription));
+    t->open(mode);
+    return t;
 }
