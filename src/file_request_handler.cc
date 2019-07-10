@@ -31,6 +31,7 @@
 
 #include <sys/stat.h>
 
+
 #include "file_io_handler.h"
 #include "file_request_handler.h"
 #include "metadata_handler.h"
@@ -40,7 +41,8 @@
 #include "session_manager.h"
 #include "update_manager.h"
 
-#include "handler/headers.h"
+#include "util/headers.h"
+
 #include "transcoding/transcode_dispatcher.h"
 
 using namespace zmm;
