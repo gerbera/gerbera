@@ -38,7 +38,11 @@
 using namespace zmm;
 using namespace mxml;
 
-UpnpXMLBuilder::UpnpXMLBuilder(String virtualUrl): virtualUrl(virtualUrl) {};
+UpnpXMLBuilder::UpnpXMLBuilder(String virtualUrl, String presentationURL)
+    : virtualURL(virtualUrl)
+    , presentationURL(presentationURL)
+{
+}
 
 Ref<Element> UpnpXMLBuilder::createResponse(String actionName, String serviceType)
 {
@@ -113,7 +117,7 @@ Ref<Element> UpnpXMLBuilder::renderObject(Ref<CdsObject> obj, bool renderActions
                 Ref<Dictionary> dict(new Dictionary());
                 dict->put(_(URL_OBJECT_ID), aa_id);
 
-                url = virtualUrl + _(_URL_PARAM_SEPARATOR) + CONTENT_MEDIA_HANDLER + _(_URL_PARAM_SEPARATOR) + dict->encodeSimple() + _(_URL_PARAM_SEPARATOR) + _(URL_RESOURCE_ID) + _(_URL_PARAM_SEPARATOR) + "0";
+                url = virtualURL + _(_URL_PARAM_SEPARATOR) + CONTENT_MEDIA_HANDLER + _(_URL_PARAM_SEPARATOR) + dict->encodeSimple() + _(_URL_PARAM_SEPARATOR) + _(URL_RESOURCE_ID) + _(_URL_PARAM_SEPARATOR) + "0";
                 log_debug("UpnpXMLRenderer::DIDLRenderObject: url: %s\n", url.c_str());
                 Ref<Element> aa(new Element(MetadataHandler::getMetaFieldName(M_ALBUMARTURI)));
                 aa->setText(url);
@@ -191,7 +195,7 @@ Ref<Element> UpnpXMLBuilder::renderObject(Ref<CdsObject> obj, bool renderActions
                 Ref<Dictionary> dict(new Dictionary());
                 dict->put(_(URL_OBJECT_ID), aa_id);
 
-                url = virtualUrl + _(_URL_PARAM_SEPARATOR) + CONTENT_MEDIA_HANDLER + _(_URL_PARAM_SEPARATOR) + dict->encodeSimple() + _(_URL_PARAM_SEPARATOR) + _(URL_RESOURCE_ID) + _(_URL_PARAM_SEPARATOR) + "0";
+                url = virtualURL + _(_URL_PARAM_SEPARATOR) + CONTENT_MEDIA_HANDLER + _(_URL_PARAM_SEPARATOR) + dict->encodeSimple() + _(_URL_PARAM_SEPARATOR) + _(URL_RESOURCE_ID) + _(_URL_PARAM_SEPARATOR) + "0";
 
                 result->appendElementChild(renderAlbumArtURI(url));
 
@@ -295,7 +299,7 @@ Ref<Element> UpnpXMLBuilder::createEventPropertySet()
     return propset;
 }
 
-Ref<Element> UpnpXMLBuilder::renderDeviceDescription(String presentationURL)
+Ref<Element> UpnpXMLBuilder::renderDeviceDescription()
 {
     Ref<ConfigManager> config = ConfigManager::getInstance();
 
@@ -588,9 +592,9 @@ String UpnpXMLBuilder::getArtworkUrl(zmm::Ref<CdsItem> item) {
 
     Ref<PathBase> urlBase = getPathBase(item);
     if (urlBase->addResID) {
-        return virtualUrl + urlBase->pathBase + 1 + "/rct/aa";
+        return virtualURL + urlBase->pathBase + 1 + "/rct/aa";
     }
-    return virtualUrl + urlBase->pathBase;
+    return virtualURL + urlBase->pathBase;
 }
 
 String UpnpXMLBuilder::renderExtension(String contentType, String location)
@@ -867,7 +871,7 @@ void UpnpXMLBuilder::addResources(Ref<CdsItem> item, Ref<Element> element)
 
                 if (rct == ID3_ALBUM_ART) {
                     Ref<Element> aa(new Element(MetadataHandler::getMetaFieldName(M_ALBUMARTURI)));
-                    aa->setText(virtualUrl + url);
+                    aa->setText(virtualURL + url);
                     if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO)) {
                         /// \todo clean this up, make sure to check the mimetype and
                         /// provide the profile correctly
@@ -946,7 +950,7 @@ void UpnpXMLBuilder::addResources(Ref<CdsItem> item, Ref<Element> element)
         // URL is path until now
         int objectType = item->getObjectType();
         if(!IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
-            url = virtualUrl + url;
+            url = virtualURL + url;
         }
 
         if (!hide_original_resource || transcoded || (hide_original_resource && (original_resource != i)))

@@ -124,6 +124,8 @@
 #define CONTENT_SERVE_HANDLER "serve"
 #define CONTENT_ONLINE_HANDLER "online"
 #define CONTENT_UI_HANDLER "interface"
+#define DEVICE_DESCRIPTION_PATH "description.xml"
+
 // REQUEST TYPES
 #define REQ_TYPE_BROWSE "browse"
 #define REQ_TYPE_LOGIN "login"

@@ -138,7 +138,7 @@ protected:
     /// The URL is constructed upon server initialization, since
     /// the real port is not known before. The value of this variable
     /// is returned by the getVirtualURL() function.
-    zmm::String virtual_url;
+    zmm::String virtualUrl;
 
     /// \brief Device description document is created on the fly and
     /// stored here.
