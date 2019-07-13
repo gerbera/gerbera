@@ -45,6 +45,7 @@
 #ifdef HAVE_CURL
 #include "url_request_handler.h"
 #endif
+#include "device_description_handler.h"
 #include "serve_request_handler.h"
 #include "web/pages.h"
 
@@ -132,7 +133,7 @@ void Server::run()
 
     log_info("Server bound to: %s\n", ip.c_str());
 
-    virtual_url = _("http://") + ip + ":" + port + "/" + virtual_directory;
+    virtualUrl = _("http://") + ip + ":" + port + "/" + virtual_directory;
 
     // next set webroot directory
     String web_root = config->getOption(CFG_SERVER_WEBROOT);
@@ -191,10 +192,10 @@ void Server::run()
     }
 
     log_debug("Creating UpnpXMLBuilder\n");
-    xmlbuilder = std::make_unique<UpnpXMLBuilder>(virtual_url);
+    xmlbuilder = std::make_unique<UpnpXMLBuilder>(virtualUrl, presentationURL);
 
     // register root device with the library
-    String deviceDescription = _("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n") + xmlbuilder->renderDeviceDescription(presentationURL)->print();
+    String deviceDescription = _("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n") + xmlbuilder->renderDeviceDescription()->print();
     //log_debug("Device Description: \n%s\n", deviceDescription.c_str());
 
     log_debug("Registering with UPnP...\n");
@@ -428,6 +429,8 @@ Ref<RequestHandler> Server::createRequestHandler(const char* filename) const
         } else {
             ret = createWebRequestHandler(_("index"));
         }
+    } else if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" + DEVICE_DESCRIPTION_PATH)) {
+        ret = new DeviceDescriptionHandler(xmlbuilder.get());
     } else if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_SERVE_HANDLER)) {
         if (string_ok(ConfigManager::getInstance()->getOption(CFG_SERVER_SERVEDIR)))
             ret = new ServeRequestHandler();

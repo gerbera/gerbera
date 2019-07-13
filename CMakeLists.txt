@@ -63,6 +63,8 @@ set(libgerberaFILES
         src/contrib/md5.h
         src/curl_io_handler.cc
         src/curl_io_handler.h
+        src/device_description_handler.cc
+        src/device_description_handler.h
         src/dictionary.cc
         src/dictionary.h
         src/exceptions.cc

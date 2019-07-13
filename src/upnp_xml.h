@@ -38,7 +38,7 @@
 
 class UpnpXMLBuilder {
 public:
-    explicit UpnpXMLBuilder(zmm::String virtualUrl);
+    explicit UpnpXMLBuilder(zmm::String virtualUrl, zmm::String presentationURL);
 
     /// \brief Renders XML for the action response header.
     /// \param actionName Name of the action.
@@ -74,7 +74,7 @@ public:
     ///
     /// Some elements are statically defined in common.h, others are loaded
     /// from the config with the help of the ConfigManager.
-    zmm::Ref<mxml::Element> renderDeviceDescription(zmm::String presentationUTL = nullptr);
+    zmm::Ref<mxml::Element> renderDeviceDescription();
 
     /// \brief Renders a resource tag (part of DIDL-Lite XML)
     /// \param URL download location of the item (will be child element of the <res> tag)
@@ -103,7 +103,8 @@ public:
     static zmm::String getFirstResourcePath(zmm::Ref<CdsItem> item);
 
 protected:
-    zmm::String virtualUrl;
+    zmm::String virtualURL;
+    zmm::String presentationURL;
 
     // Holds a part of path and bool which says if we need to append the resource
     // TODO: Remove this and use centralised routing instead of building URLs all over the place
