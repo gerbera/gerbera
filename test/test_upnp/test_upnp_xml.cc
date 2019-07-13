@@ -13,7 +13,8 @@ class UpnpXmlTest : public ::testing::Test {
 
   virtual void SetUp() {
     zmm::String virtualDir = "/dir/virtual";
-    subject = new UpnpXMLBuilder(virtualDir);
+    zmm::String presentationURl = "http://someurl/";
+    subject = new UpnpXMLBuilder(virtualDir, presentationURl);
   }
 
   virtual void TearDown() {
