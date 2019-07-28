@@ -52,6 +52,9 @@ View our documentation online at [http://docs.gerbera.io](http://docs.gerbera.io
 
 ## Installing
 
+### Docker
+Docker images are provided on [Docker Hub], we recommend running a tagged version.
+
 ### Ubuntu
 Stephen Czetty maintains a [Ubuntu PPA].
 
@@ -186,3 +189,4 @@ sudo make install
 [Ubuntu PPA]: https://launchpad.net/~stephenczetty/+archive/ubuntu/gerbera-updates
 [v00d00 overlay]: https://github.com/v00d00/overlay
 [duktape]: http://duktape.org
+[Docker Hub]: https://hub.docker.com/r/gerbera/gerbera
