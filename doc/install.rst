@@ -6,6 +6,15 @@ Installing Gerbera
 We strongly advise using the packages provided by your distribution where provided.
 Please see below for guides on how to install Gerbera on various distributions.
 
+Docker
+~~~~~~~~~~~~~~~~~
+.. index:: Docker
+
+Docker images are provided on `Docker Hub <https://hub.docker.com/r/gerbera/gerbera>`_, we recommend running a tagged version.
+
+.. code-block:: sh
+
+    docker pull gerbera/gerbera
 
 Ubuntu/Mint
 ~~~~~~~~~~~~~~~~~
