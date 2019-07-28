@@ -29,7 +29,6 @@
 
 /// \file pgsql_create_sql.h
 
-#ifdef AUTO_CREATE_DATABASE
 #ifdef HAVE_PGSQL
 
 #ifndef __PGSQL_CREATE_SQL_H__

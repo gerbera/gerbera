@@ -16,8 +16,8 @@ CREATE TABLE "mt_cds_object" (
   "flags" integer unsigned NOT NULL default '1',
   "track_number" integer default NULL,
   "service_id" varchar(255) default NULL,
-  CONSTRAINT "cds_object_ibfk_1" FOREIGN KEY ("ref_id") REFERENCES "cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT "cds_object_ibfk_2" FOREIGN KEY ("parent_id") REFERENCES "cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT "cds_object_ibfk_1" FOREIGN KEY ("ref_id") REFERENCES "mt_cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT "cds_object_ibfk_2" FOREIGN KEY ("parent_id") REFERENCES "mt_cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 INSERT INTO "mt_cds_object" VALUES(-1, NULL, -1, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, 9, NULL, NULL);
 INSERT INTO "mt_cds_object" VALUES(0, NULL, -1, 1, 'object.container', 'Root', NULL, NULL, NULL, NULL, NULL, 0, NULL, 9, NULL, NULL);
