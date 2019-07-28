@@ -167,6 +167,7 @@ void Sqlite3Storage::init()
     }
 
     _exec("PRAGMA locking_mode = EXCLUSIVE");
+    _exec("PRAGMA foreign_keys = ON");
     int synchronousOption = ConfigManager::getInstance()->getIntOption(CFG_SERVER_STORAGE_SQLITE_SYNCHRONOUS);
     std::ostringstream buf;
     buf << "PRAGMA synchronous = " << synchronousOption;
