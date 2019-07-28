@@ -29,7 +29,6 @@
 
 /// \file mysql_create_sql.h
 
-#ifdef AUTO_CREATE_DATABASE
 #ifdef HAVE_MYSQL
 
 #ifndef __MYSQL_CREATE_SQL_H__
