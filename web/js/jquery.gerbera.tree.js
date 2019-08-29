@@ -20,8 +20,6 @@
 
     $Id$
 */
-/* global $ */
-
 $.widget('grb.tree', {
 
   _create: function () {

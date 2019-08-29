@@ -20,8 +20,6 @@
 
     $Id$
 */
-/* global $ */
-
 $.widget('grb.dataitems', {
 
   _create: function () {

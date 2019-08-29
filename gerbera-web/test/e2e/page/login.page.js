@@ -67,7 +67,13 @@ module.exports = function (driver) {
   };
 
   this.getCookie = async (cookie) => {
-    return await driver.manage().getCookie(cookie);
+    let result;
+    try {
+      result = await driver.manage().getCookie(cookie);
+    } catch(err) {
+      result = null;
+    }
+    return Promise.resolve(result);
   };
 
   this.get = async (url) => {
