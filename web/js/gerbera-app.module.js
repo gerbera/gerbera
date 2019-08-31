@@ -20,7 +20,6 @@
 
     $Id$
 */
-/* global Cookies */
 import {Auth} from './gerbera-auth.module.js';
 import {Autoscan} from './gerbera-autoscan.module.js';
 import {Items} from './gerbera-items.module.js';

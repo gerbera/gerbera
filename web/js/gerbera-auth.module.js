@@ -20,7 +20,7 @@
 
     $Id$
 */
-/* global md5 Cookies */
+/* global md5 */
 import {GerberaApp} from './gerbera-app.module.js';
 import {Tree} from './gerbera-tree.module.js';
 import {Items} from './gerbera-items.module.js';

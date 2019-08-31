@@ -20,8 +20,6 @@
 
     $Id$
 */
-/* global $ */
-
 $.widget('grb.toast', {
 
   _create: function () {
