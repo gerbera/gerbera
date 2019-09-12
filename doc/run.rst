@@ -213,10 +213,11 @@ Add Content
 
 ::
 
-    --add or -a
+    --add-file /path/to/file [--add-file /path/to/other/file]
 
 Add the specified directory or file name to the database without UI interaction. The path must be absolute, if
 path is a directory then it will be added recursively. If path is a file, then only the given file will be imported.
+Can be supplied multiple times to add multiple paths
 
 Log To File
 -----------
