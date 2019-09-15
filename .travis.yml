@@ -1,5 +1,5 @@
 # None as otherwise it clobbers our compiler choce
-language: none
+language: cpp
 
 # Ubuntu 16.04 Xenial support
 sudo: required
