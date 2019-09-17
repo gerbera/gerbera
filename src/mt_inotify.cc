@@ -42,6 +42,9 @@
 #include <cerrno>
 #include <sys/ioctl.h>
 #include <unistd.h>
+#ifdef SOLARIS
+#include <sys/filio.h>  // FIONREAD
+#endif
 
 #include "mt_inotify.h"
 #include "tools.h"
