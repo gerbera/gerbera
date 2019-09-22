@@ -161,7 +161,7 @@ void MysqlStorage::init()
 
     mysql_options(&db, MYSQL_SET_CHARSET_NAME, "utf8");
 
-    my_bool my_bool_var = true;
+    bool my_bool_var = true;
     mysql_options(&db, MYSQL_OPT_RECONNECT, &my_bool_var);
 
     res_mysql = mysql_real_connect(&db,
