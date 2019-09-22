@@ -153,20 +153,20 @@ public:
 private:
     Sqlite3Storage();
     friend zmm::Ref<Storage> Storage::createInstance();
-    virtual void init() override;
-    virtual void shutdownDriver() override;
+    void init() override;
+    void shutdownDriver() override;
 
-    virtual zmm::String quote(zmm::String str) override;
-    virtual inline zmm::String quote(int val) override { return zmm::String::from(val); }
-    virtual inline zmm::String quote(unsigned int val) override { return zmm::String::from(val); }
-    virtual inline zmm::String quote(long val) override { return zmm::String::from(val); }
-    virtual inline zmm::String quote(unsigned long val) override { return zmm::String::from(val); }
-    virtual inline zmm::String quote(bool val) override { return zmm::String(val ? '1' : '0'); }
-    virtual inline zmm::String quote(char val) override { return quote(zmm::String(val)); }
-    virtual inline zmm::String quote(long long val) override { return zmm::String::from(val); }
-    virtual zmm::Ref<SQLResult> select(const char* query, int length) override;
-    virtual int exec(const char* query, int length, bool getLastInsertId = false) override;
-    virtual void storeInternalSetting(zmm::String key, zmm::String value) override;
+    zmm::String quote(zmm::String str) override;
+    inline zmm::String quote(int val) override { return zmm::String::from(val); }
+    inline zmm::String quote(unsigned int val) override { return zmm::String::from(val); }
+    inline zmm::String quote(long val) override { return zmm::String::from(val); }
+    inline zmm::String quote(unsigned long val) override { return zmm::String::from(val); }
+    inline zmm::String quote(bool val) override { return zmm::String(val ? '1' : '0'); }
+    inline zmm::String quote(char val) override { return quote(zmm::String(val)); }
+    inline zmm::String quote(long long val) override { return zmm::String::from(val); }
+    zmm::Ref<SQLResult> select(const char* query, int length) override;
+    int exec(const char* query, int length, bool getLastInsertId = false) override;
+    void storeInternalSetting(zmm::String key, zmm::String value) override;
 
     void _exec(const char* query);
 
@@ -194,10 +194,6 @@ private:
 
     virtual void threadCleanup() override {}
     virtual bool threadCleanupRequired() override { return false; }
-
-    std::ostringstream insertBuffer;
-    void _addToInsertBuffer(const std::string &query) override;
-    virtual void _flushInsertBuffer() override;
 
     bool dirty;
 

@@ -79,10 +79,6 @@ private:
     bool mysql_init_key_initialized;
 
     void checkMysqlThreadInit();
-
-    std::vector<std::string> insertBuffer;
-    void _addToInsertBuffer(const std::string &query) override;
-    virtual void _flushInsertBuffer();
 };
 
 class MysqlResult : private SQLResult {

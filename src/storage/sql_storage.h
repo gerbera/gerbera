@@ -36,7 +36,6 @@
 #include "cds_objects.h"
 #include "dictionary.h"
 #include "storage.h"
-#include "storage_cache.h"
 
 #include <unordered_set>
 #include <mutex>
@@ -262,23 +261,7 @@ private:
     std::shared_ptr<SQLEmitter> sqlEmitter;
 
     std::mutex nextIDMutex;
-    
-    zmm::Ref<StorageCache> cache;
-    inline bool cacheOn() { return cache != nullptr; }
-    void addObjectToCache(zmm::Ref<CdsObject> object, bool dontLock = false);
-    
-    inline bool doInsertBuffering() { return insertBufferOn; }
-    void addToInsertBuffer(const std::string &query);
-    void flushInsertBuffer(bool dontLock = false);
-    
-    /* insert buffer functions to be overridden by implementing classes */
-    virtual void _addToInsertBuffer(const std::string &query) = 0;
-    virtual void _flushInsertBuffer() = 0;
-    
-    bool insertBufferOn;
-    bool insertBufferEmpty;
-    int insertBufferStatementCount;
-    int insertBufferByteCount;
+
     using AutoLock = std::lock_guard<std::mutex>;
 };
 

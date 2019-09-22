@@ -378,28 +378,6 @@ void MysqlStorage::_exec(const char* query, int length)
     }
 }
 
-void MysqlStorage::_addToInsertBuffer(const std::string &query)
-{
-    if (insertBuffer.empty()) {
-        insertBuffer.emplace_back("BEGIN");
-    }
-    insertBuffer.emplace_back(query);
-}
-
-void MysqlStorage::_flushInsertBuffer()
-{
-    if (insertBuffer.empty()) return;
-    insertBuffer.emplace_back("COMMIT");
-
-    checkMysqlThreadInit();
-    unique_lock<decltype(mysqlMutex)> lock(mysqlMutex);
-    for (const auto &q : insertBuffer) {
-        _exec(q.c_str(), q.length());
-    }
-    lock.unlock();
-    insertBuffer.clear();
-}
-
 /* MysqlResult */
 
 MysqlResult::MysqlResult(MYSQL_RES* mysql_res)

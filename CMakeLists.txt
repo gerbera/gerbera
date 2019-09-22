@@ -179,8 +179,6 @@ set(libgerberaFILES
         src/sopcast_content_handler.h
         src/sopcast_service.cc
         src/sopcast_service.h
-        src/storage/cache_object.cc
-        src/storage/cache_object.h
         src/storage.cc
         src/storage.h
         src/storage/mysql/mysql_create_sql.h
@@ -191,8 +189,6 @@ set(libgerberaFILES
         src/storage/sqlite3/sqlite3_storage.h
         src/storage/sql_storage.cc
         src/storage/sql_storage.h
-        src/storage/storage_cache.cc
-        src/storage/storage_cache.h
         src/string_converter.cc
         src/string_converter.h
         src/subscription_request.cc
