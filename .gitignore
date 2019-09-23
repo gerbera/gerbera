@@ -12,4 +12,8 @@ mediatomb
 **/node_modules/
 **/.idea/
 **/coverage/
-**/_build
+**/_buildconfig/sqlite3.sql.Z
+config/zpipe
+doc/_build
+config/*.sql.Z
+config/*.sql.Z.c

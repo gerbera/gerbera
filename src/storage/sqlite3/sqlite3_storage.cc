@@ -28,20 +28,15 @@
 */
 
 /// \file sqlite3_storage.cc
-
-#ifdef HAVE_CONFIG_H
-#include "autoconfig.h"
-#endif
-
 #ifdef HAVE_SQLITE3
 
-#include "sqlite3_storage.h"
+#include <zlib.h>
 
+#include "sqlite3_storage.h"
 #include "common.h"
 #include "config_manager.h"
-
 #include "sqlite3_create_sql.h"
-#include <zlib.h>
+
 
 // updates 1->2
 #define SQLITE3_UPDATE_1_2_1 "DROP INDEX mt_autoscan_obj_id"
@@ -85,8 +80,6 @@ void Sqlite3Storage::init()
 {
     SQLStorage::init();
 
-    int ret;
-
     AutoLockU lock(sqliteMutex);
     /*
     pthread_attr_t attr;
@@ -103,7 +96,7 @@ void Sqlite3Storage::init()
     taskQueue = Ref<ObjectQueue<SLTask>>(new ObjectQueue<SLTask>(SL3_INITITAL_QUEUE_SIZE));
     taskQueueOpen = true;
 
-    ret = pthread_create(
+    int ret = pthread_create(
         &sqliteThread,
         nullptr, //&attr,
         Sqlite3Storage::staticThreadProc,
@@ -231,8 +224,7 @@ void Sqlite3Storage::_exec(const char* query)
 
 String Sqlite3Storage::quote(String value)
 {
-    char* q = sqlite3_mprintf("'%q'",
-        (value == nullptr ? "" : value.c_str()));
+    char* q = sqlite3_mprintf("'%q'", (value == nullptr ? "" : value.c_str()));
     String ret = q;
     sqlite3_free(q);
     return ret;
@@ -240,7 +232,7 @@ String Sqlite3Storage::quote(String value)
 
 String Sqlite3Storage::getError(String query, String error, sqlite3* db)
 {
-    return _("SQLITE3: (") + sqlite3_errcode(db) + ") "
+    return _("SQLITE3: (") + sqlite3_errcode(db) + " : " + sqlite3_extended_errcode(db) + ") "
         + sqlite3_errmsg(db) + "\nQuery:" + (query == nullptr ? _("unknown") : query) + "\nerror: " + (error == nullptr ? _("unknown") : error);
 }
 
@@ -256,8 +248,7 @@ Ref<SQLResult> Sqlite3Storage::select(const char* query, int length)
 
 int Sqlite3Storage::exec(const char* query, int length, bool getLastInsertId)
 {
-    //fprintf(stdout, "%s\n",query);
-    //fflush(stdout);
+    log_debug("Adding query to Queue: %s\n", query);
     Ref<SLExecTask> ptask(new SLExecTask(query, getLastInsertId));
     addTask(RefCast(ptask, SLTask));
     ptask->waitForTask();
@@ -273,7 +264,6 @@ void* Sqlite3Storage::staticThreadProc(void* arg)
     inst->threadProc();
     log_debug("Sqlite3Storage::staticThreadProc - exiting thread\n");
     pthread_exit(nullptr);
-    return nullptr;
 }
 
 void Sqlite3Storage::threadProc()
@@ -357,31 +347,11 @@ void Sqlite3Storage::storeInternalSetting(String key, String value)
 {
     std::ostringstream q;
     q << "INSERT OR REPLACE INTO " << QTB << INTERNAL_SETTINGS_TABLE << QTE << " (" << QTB << "key" << QTE << ", " << QTB << "value" << QTE << ") "
-                                                                                                                                                "VALUES ("
-       << quote(key) << ", " << quote(value) << ") ";
+         "VALUES ("  << quote(key) << ", " << quote(value) << ") ";
     SQLStorage::exec(q);
 }
 
-void Sqlite3Storage::_addToInsertBuffer(const std::string &query)
-{
-    if (insertBuffer.str().length() == 0) {
-        insertBuffer << "BEGIN TRANSACTION;";
-    }
-
-    insertBuffer << query << ';';
-}
-
-void Sqlite3Storage::_flushInsertBuffer()
-{
-    if (insertBuffer.str().length() == 0)
-        return;
-    insertBuffer << "COMMIT;";
-    SQLStorage::exec(insertBuffer);
-    insertBuffer.str("");
-}
-
 /* SLTask */
-
 SLTask::SLTask()
     : Object()
 {
@@ -508,7 +478,7 @@ SLExecTask::SLExecTask(const char* query, bool getLastInsertId)
 
 void SLExecTask::run(sqlite3** db, Sqlite3Storage* sl)
 {
-    //log_debug("%s\n", query);
+    log_debug("%s\n", query);
     char* err;
     int res = sqlite3_exec(
         *db,

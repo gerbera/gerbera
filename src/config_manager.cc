@@ -258,14 +258,6 @@ void ConfigManager::validate(String serverhome)
     if (tmpEl == nullptr)
         throw _Exception(_("Error in config file: <storage> tag not found"));
 
-    temp = getOption(_("/server/storage/attribute::caching"),
-        _(DEFAULT_STORAGE_CACHING_ENABLED));
-    if (!validateYesNo(temp))
-        throw _Exception(_("Error in config file: incorrect parameter "
-                           "for <storage caching=\"\" /> attribute"));
-    NEW_BOOL_OPTION(temp == "yes" ? true : false);
-    SET_BOOL_OPTION(CFG_SERVER_STORAGE_CACHING_ENABLED);
-
     tmpEl = getElement(_("/server/storage/mysql"));
     if (tmpEl != nullptr) {
         mysql_en = getOption(_("/server/storage/mysql/attribute::enabled"),

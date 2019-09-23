@@ -176,42 +176,7 @@ void SQLStorage::init()
     buf << SQL_QUERY_FOR_STRINGBUFFER;
     this->sql_query = buf.str();
 
-    if (ConfigManager::getInstance()->getBoolOption(CFG_SERVER_STORAGE_CACHING_ENABLED)) {
-        cache = Ref<StorageCache>(new StorageCache());
-        insertBufferOn = true;
-    } else {
-        cache = nullptr;
-        insertBufferOn = false;
-    }
-
-    insertBufferEmpty = true;
-    insertBufferStatementCount = 0;
-    insertBufferByteCount = 0;
-
     sqlEmitter = std::make_shared<DefaultSQLEmitter>();
-
-    //log_debug("using SQL: %s\n", this->sql_query.c_str());
-
-    //objectTitleCache = Ref<DSOHash<CdsObject> >(new DSOHash<CdsObject>(OBJECT_CACHE_CAPACITY));
-    //objectIDCache = Ref<DBOHash<int, CdsObject> >(new DBOHash<int, CdsObject>(OBJECT_CACHE_CAPACITY, -100));
-
-    /*
-    Ref<SQLResult> res = select(_("SELECT MAX(id) + 1 FROM cds_objects"));
-    Ref<SQLRow> row = res->nextRow();
-    nextObjectID = row->col(0).toInt();
-
-    log_debug(("PRELOADING OBJECTS...\n"));
-    res = select(getSelectQuery(SELECT_FULL));
-    Ref<Array<CdsObject> > arr(new Array<CdsObject>());
-    while((row = res->nextRow()) != nullptr)
-    {
-        Ref<CdsObject> obj = createObjectFromRow(row, SELECT_FULL);
-        obj->optimize();
-        objectTitleCache->put(String::from(obj->getParentID()) + '|' + obj->getTitle(), obj);
-        objectIDCache->put(obj->getID(), obj);
-    }
-    log_debug(("PRELOADING OBJECTS DONE\n"));
-*/
 }
 
 void SQLStorage::dbReady()
@@ -222,15 +187,8 @@ void SQLStorage::dbReady()
 
 void SQLStorage::shutdown()
 {
-    flushInsertBuffer();
     shutdownDriver();
 }
-
-/*
-SQLStorage::~SQLStorage()
-{
-}
-*/
 
 Ref<CdsObject> SQLStorage::checkRefID(Ref<CdsObject> obj)
 {
@@ -452,38 +410,12 @@ void SQLStorage::addObject(Ref<CdsObject> obj, int* changedContainer)
         Ref<AddUpdateTable> addUpdateTable = data->get(i);
         std::shared_ptr<std::ostringstream> qb = sqlForInsert(obj, addUpdateTable);
         log_debug("insert_query: %s\n", qb->str().c_str());
-
-        /*
-        if (lastInsertID == INVALID_OBJECT_ID && tableName == _(CDS_OBJECT_TABLE))
-        {
-            lastInsertID = exec(qb, true);
-            obj->setID(lastInsertID);
-        }
-        else
-            exec(qb);
-        */
-
-        if (!doInsertBuffering())
-            exec(*qb);
-        else
-            addToInsertBuffer(qb->str());
+        exec(*qb);
     }
-
-    /* add to cache */
-    if (cacheOn()) {
-        AutoLock lock(cache->getMutex());
-        cache->addChild(obj->getParentID());
-        if (cache->flushed())
-            flushInsertBuffer();
-        addObjectToCache(obj, true);
-    }
-    /* ------------ */
 }
 
 void SQLStorage::updateObject(zmm::Ref<CdsObject> obj, int* changedContainer)
 {
-    flushInsertBuffer();
-
     Ref<Array<AddUpdateTable>> data;
     if (obj->getID() == CDS_ID_FS_ROOT) {
         data = Ref<Array<AddUpdateTable>>(new Array<AddUpdateTable>(1));
@@ -514,33 +446,11 @@ void SQLStorage::updateObject(zmm::Ref<CdsObject> obj, int* changedContainer)
         log_debug("upd_query: %s\n", qb->str().c_str());
         exec(*qb);
     }
-    /* add to cache */
-    addObjectToCache(obj);
-    /* ------------ */
 }
 
 Ref<CdsObject> SQLStorage::loadObject(int objectID)
 {
-
-    /* check cache */
-    if (cacheOn()) {
-        AutoLock lock(cache->getMutex());
-        Ref<CacheObject> cObj = cache->getObject(objectID);
-        if (cObj != nullptr) {
-            if (cObj->knowsObject())
-                return cObj->getObject();
-        }
-    }
-    /* ----------- */
-
-    /*
-    Ref<CdsObject> obj = objectIDCache->get(objectID);
-    if (obj != nullptr)
-        return obj;
-    throw _Exception(_("Object not found: ") + objectID);
-*/
-    std::ostringstream qb;
-
+     std::ostringstream qb;
     //log_debug("sql_query = %s\n",sql_query.c_str());
 
     qb << SQL_QUERY << " WHERE " << TQD('f', "id") << '=' << objectID;
@@ -555,8 +465,6 @@ Ref<CdsObject> SQLStorage::loadObject(int objectID)
 
 Ref<CdsObject> SQLStorage::loadObjectByServiceID(String serviceID)
 {
-    flushInsertBuffer();
-
     std::ostringstream qb;
     qb << SQL_QUERY << " WHERE " << TQD('f', "service_id") << '=' << quote(serviceID);
     Ref<SQLResult> res = select(qb);
@@ -570,8 +478,6 @@ Ref<CdsObject> SQLStorage::loadObjectByServiceID(String serviceID)
 
 std::unique_ptr<std::vector<int>> SQLStorage::getServiceObjectIDs(char servicePrefix)
 {
-    flushInsertBuffer();
-
     auto objectIDs = std::make_unique<std::vector<int>>();
 
     std::ostringstream qb;
@@ -594,8 +500,6 @@ std::unique_ptr<std::vector<int>> SQLStorage::getServiceObjectIDs(char servicePr
 
 Ref<Array<CdsObject>> SQLStorage::browse(Ref<BrowseParam> param)
 {
-    flushInsertBuffer();
-
     int objectID;
     int objectType = 0;
 
@@ -609,17 +513,6 @@ Ref<Array<CdsObject>> SQLStorage::browse(Ref<BrowseParam> param)
 
     bool haveObjectType = false;
 
-    /* check cache */
-    if (cacheOn()) {
-        AutoLock lock(cache->getMutex());
-        Ref<CacheObject> cObj = cache->getObject(objectID);
-        if (cObj != nullptr && cObj->knowsObjectType()) {
-            objectType = cObj->getObjectType();
-            haveObjectType = true;
-        }
-    }
-    /* ----------- */
-
     if (!haveObjectType) {
         std::ostringstream qb;
         qb << "SELECT " << TQ("object_type")
@@ -629,15 +522,6 @@ Ref<Array<CdsObject>> SQLStorage::browse(Ref<BrowseParam> param)
         if (res != nullptr && (row = res->nextRow()) != nullptr) {
             objectType = row->col(0).toInt();
             haveObjectType = true;
-
-            /* add to cache */
-            if (cacheOn()) {
-                AutoLock lock(cache->getMutex());
-                cache->getObjectDefinitely(objectID)->setObjectType(objectType);
-                if (cache->flushed())
-                    flushInsertBuffer();
-            }
-            /* ------------ */
         } else {
             throw _ObjectNotFoundException(_("Object not found: ") + objectID);
         }
@@ -778,20 +662,6 @@ int SQLStorage::getChildCount(int contId, bool containers, bool items, bool hide
     if (!containers && !items)
         return 0;
 
-    /* check cache */
-    if (cacheOn() && containers && items && !(contId == CDS_ID_ROOT && hideFsRoot)) {
-        AutoLock lock(cache->getMutex());
-        Ref<CacheObject> cObj = cache->getObject(contId);
-        if (cObj != nullptr) {
-            if (cObj->knowsNumChildren())
-                return cObj->getNumChildren();
-            //cObj->debug();
-        }
-    }
-    /* ----------- */
-
-    flushInsertBuffer();
-
     Ref<SQLRow> row;
     Ref<SQLResult> res;
     std::ostringstream qb;
@@ -808,16 +678,6 @@ int SQLStorage::getChildCount(int contId, bool containers, bool items, bool hide
     res = select(qb);
     if (res != nullptr && (row = res->nextRow()) != nullptr) {
         int childCount = row->col(0).toInt();
-
-        /* add to cache */
-        if (cacheOn() && containers && items && !(contId == CDS_ID_ROOT && hideFsRoot)) {
-            AutoLock lock(cache->getMutex());
-            cache->getObjectDefinitely(contId)->setNumChildren(childCount);
-            if (cache->flushed())
-                flushInsertBuffer();
-        }
-        /* ------------ */
-
         return childCount;
     }
     return 0;
@@ -825,8 +685,6 @@ int SQLStorage::getChildCount(int contId, bool containers, bool items, bool hide
 
 Ref<Array<StringBase>> SQLStorage::getMimeTypes()
 {
-    flushInsertBuffer();
-
     Ref<Array<StringBase>> arr(new Array<StringBase>());
 
     std::ostringstream qb;
@@ -864,20 +722,6 @@ Ref<CdsObject> SQLStorage::_findObjectByPath(String fullpath)
         dbLocation = addLocationPrefix(LOC_FILE_PREFIX, fullpath);
     } else
         dbLocation = addLocationPrefix(LOC_DIR_PREFIX, path);
-
-    /* check cache */
-    if (cacheOn()) {
-        AutoLock lock(cache->getMutex());
-        Ref<Array<CacheObject>> objects = cache->getObjects(dbLocation);
-        if (objects != nullptr) {
-            for (int i = 0; i < objects->size(); i++) {
-                Ref<CacheObject> cObj = objects->get(i);
-                if (cObj->knowsObject() && cObj->knowsVirtual() && !cObj->getVirtual())
-                    return cObj->getObject();
-            }
-        }
-    }
-    /* ----------- */
 
     std::ostringstream qb;
     qb << SQL_QUERY
@@ -946,6 +790,8 @@ int SQLStorage::_ensurePathExistence(String path, int* changedContainer)
 
 int SQLStorage::createContainer(int parentID, String name, String path, bool isVirtual, String upnpClass, int refID, Ref<Dictionary> itemMetadata)
 {
+    // log_debug("Creating Container: parent: %d, name: %s, path %s, isVirt: %d, upnpClass: %s, refId: %d\n",
+    // parentID, name.c_str(), path.c_str(), isVirtual, upnpClass.c_str(), refID);
     if (refID > 0) {
         Ref<CdsObject> refObj = loadObject(refID);
         if (refObj == nullptr)
@@ -982,9 +828,13 @@ int SQLStorage::createContainer(int parentID, String name, String path, bool isV
         << (string_ok(upnpClass) ? quote(upnpClass) : quote(_(UPNP_DEFAULT_CLASS_CONTAINER))) << ','
         << quote(name) << ','
         << quote(dbLocation) << ','
-        << quote(stringHash(dbLocation)) << ','
-        << (refID > 0 ? quote(refID) : _(SQL_NULL))
-        << ')';
+        << quote(stringHash(dbLocation)) << ',';
+        if (refID > 0) {
+            qb << refID;
+        } else {
+            qb << SQL_NULL;
+        }
+        qb << ')';
 
     exec(qb);
 
@@ -1010,26 +860,8 @@ int SQLStorage::createContainer(int parentID, String name, String path, bool isV
         }
         log_debug("Wrote metadata for cds_object %d", newID);
     }
-    
-    /* inform cache */
-    if (cacheOn()) {
-        AutoLock lock(cache->getMutex());
-        cache->addChild(parentID);
-        if (cache->flushed())
-            flushInsertBuffer();
-        Ref<CacheObject> cObj = cache->getObjectDefinitely(newID);
-        if (cache->flushed())
-            flushInsertBuffer();
-        cObj->setParentID(parentID);
-        cObj->setNumChildren(0);
-        cObj->setObjectType(OBJECT_TYPE_CONTAINER);
-        cObj->setLocation(path);
-    }
-    /* ------------ */
 
     return newID;
-
-    //return exec(qb, true);
 }
 
 String SQLStorage::buildContainerPath(int parentID, String title)
@@ -1060,6 +892,7 @@ String SQLStorage::buildContainerPath(int parentID, String title)
 
 void SQLStorage::addContainerChain(String path, String lastClass, int lastRefID, int* containerID, int* updateID, Ref<Dictionary> lastMetadata)
 {
+    log_debug("Adding container Chain for path: %s, lastRefId: %d, containerId: %d\n", path.c_str(), lastRefID, *containerID);
     path = path.reduce(VIRTUAL_CONTAINER_SEPARATOR);
     if (path == VIRTUAL_CONTAINER_SEPARATOR) {
         *containerID = CDS_ID_ROOT;
@@ -1235,7 +1068,6 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
         throw _StorageException(nullptr, _("unknown object type: ") + objectType);
     }
 
-    addObjectToCache(obj);
     return obj;
 }
 
@@ -1310,8 +1142,6 @@ Ref<Dictionary> SQLStorage::retrieveMetadataForObject(int objectId)
 
 int SQLStorage::getTotalFiles()
 {
-    flushInsertBuffer();
-
     std::ostringstream query;
     query << "SELECT COUNT(*) FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE "
            << TQ("object_type") << " != " << quote(OBJECT_TYPE_CONTAINER);
@@ -1434,49 +1264,9 @@ String SQLStorage::findFolderImage(int id, String trackArtBase)
     return nullptr;
 }
 
-/*
-Ref<Array<CdsObject> > SQLStorage::selectObjects(Ref<SelectParam> param)
-{
-    std::ostringstream q;
-    q << SQL_QUERY << " WHERE ";
-    switch (param->flags)
-    {
-        case FILTER_PARENT_ID:
-            q << "f.parent_id = " << param->iArg1;
-            break;
-        case FILTER_REF_ID:
-            q << "f.ref_id = " << param->iArg1;
-            break;
-        case FILTER_PARENT_ID_ITEMS:
-            q << "f.parent_id = " << param->iArg1 << " AND "
-               << "f.object_type & " << OBJECT_TYPE_ITEM << " <> 0";
-            break;
-        case FILTER_PARENT_ID_CONTAINERS:
-            q << "f.parent_id = " << param->iArg1 << " AND "
-               << "f.object_type & " << OBJECT_TYPE_CONTAINER << " <> 0";
-            break;
-        default:
-            throw _StorageException(_("selectObjects: invalid operation: ") +
-                                   param->flags);
-    }
-    q << " ORDER BY f.object_type, f.dc_title";
-    Ref<SQLResult> res = select(q);
-    Ref<SQLRow> row;
-    Ref<Array<CdsObject> > arr(new Array<CdsObject>());
-
-    while((row = res->nextRow()) != nullptr)
-    {
-        Ref<CdsObject> obj = createObjectFromRow(row);
-        arr->append(obj);
-    }
-    return arr;
-}
-*/
 
 shared_ptr<unordered_set<int>> SQLStorage::getObjects(int parentID, bool withoutContainer)
 {
-    flushInsertBuffer();
-
     std::ostringstream q;
     q << "SELECT " << TQ("id") << " FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE ";
     if (withoutContainer)
@@ -1505,8 +1295,6 @@ shared_ptr<unordered_set<int>> SQLStorage::getObjects(int parentID, bool without
 
 Ref<Storage::ChangedContainers> SQLStorage::removeObjects(shared_ptr<unordered_set<int>> list, bool all)
 {
-    flushInsertBuffer();
-
     int count = list->size();
     if (count <= 0)
         return nullptr;
@@ -1600,8 +1388,6 @@ void SQLStorage::_removeObjects(const std::vector<int32_t> &objectIDs) {
 
 Ref<Storage::ChangedContainers> SQLStorage::removeObject(int objectID, bool all)
 {
-    flushInsertBuffer();
-
     std::ostringstream q;
     q << "SELECT " << TQ("object_type") << ',' << TQ("ref_id")
        << " FROM " << TQ(CDS_OBJECT_TABLE)
@@ -1869,11 +1655,6 @@ Ref<Storage::ChangedContainers> SQLStorage::_purgeEmptyContainers(Ref<ChangedCon
     log_debug("end; changedContainers (upnp): %d\n", changedUpnp.size());
     log_debug("end; changedContainers (ui): %d\n", changedUi.size());
 
-    /* clear cache (for now) */
-    if (cacheOn())
-        cache->clear();
-    /* --------------------- */
-
     return changedContainers;
 }
 
@@ -1890,10 +1671,6 @@ String SQLStorage::getInternalSetting(String key)
         return nullptr;
     return row->col(0);
 }
-/*
-void SQLStorage::storeInternalSetting(String key, String value)
-overwritten due to different SQL syntax for MySQL and SQLite3
-*/
 
 void SQLStorage::updateAutoscanPersistentList(ScanMode scanmode, Ref<AutoscanList> list)
 {
@@ -2323,8 +2100,6 @@ std::unique_ptr<std::vector<int>> SQLStorage::_checkOverlappingAutoscans(Ref<Aut
 
 std::unique_ptr<std::vector<int>> SQLStorage::getPathIDs(int objectID)
 {
-    flushInsertBuffer();
-
     if (objectID == INVALID_OBJECT_ID)
         return nullptr;
 
@@ -2368,6 +2143,7 @@ void SQLStorage::setFsRootName(String rootName)
 
 int SQLStorage::getNextID()
 {
+    log_debug("NextId: %d\n", lastID + 1);
     if (lastID < CDS_ID_FS_ROOT)
         throw _Exception(_("SQLStorage::getNextID() called, but lastID hasn't been loaded correctly yet"));
     AutoLock lock(nextIDMutex);
@@ -2393,6 +2169,8 @@ void SQLStorage::loadLastID()
     lastID = row->col(0).toInt();
     if (lastID < CDS_ID_FS_ROOT)
         throw _Exception(_("could not load correct lastID (db not initialized?)"));
+
+    log_debug("LoadedId: %d\n", lastID);
 }
 
 int SQLStorage::getNextMetadataID()
@@ -2425,52 +2203,6 @@ void SQLStorage::loadLastMetadataID()
     lastMetadataID = row->col(0).toInt();
     if (lastMetadataID < CDS_ID_ROOT)
         throw _Exception(_("could not load correct lastMetadataID (db not initialized?)"));
-}
-
-void SQLStorage::addObjectToCache(Ref<CdsObject> object, bool dontLock)
-{
-    if (cacheOn() && object != nullptr) {
-        unique_lock<std::mutex> lock(cache->getMutex(), std::defer_lock);
-        if (!dontLock)
-            lock.lock();
-        Ref<CacheObject> cObj = cache->getObjectDefinitely(object->getID());
-        if (cache->flushed())
-            flushInsertBuffer();
-        cObj->setObject(object);
-        cache->checkLocation(cObj);
-    }
-}
-
-void SQLStorage::addToInsertBuffer(const std::string &query)
-{
-    assert(doInsertBuffering());
-
-    AutoLock lock(mutex);
-    _addToInsertBuffer(query);
-
-    insertBufferEmpty = false;
-    insertBufferStatementCount++;
-    insertBufferByteCount += query.length();
-
-    if (insertBufferByteCount > 102400)
-        flushInsertBuffer(true);
-}
-
-void SQLStorage::flushInsertBuffer(bool dontLock)
-{
-    if (!doInsertBuffering())
-        return;
-    //print_backtrace();
-    unique_lock<decltype(mutex)> lock(mutex, std::defer_lock);
-    if (!dontLock)
-        lock.lock();
-    if (insertBufferEmpty)
-        return;
-    _flushInsertBuffer();
-    log_debug("flushing insert buffer (%d statements)\n", insertBufferStatementCount);
-    insertBufferEmpty = true;
-    insertBufferStatementCount = 0;
-    insertBufferByteCount = 0;
 }
 
 void SQLStorage::clearFlagInDB(int flag)
@@ -2700,10 +2432,8 @@ void SQLStorage::migrateMetadata(Ref<CdsObject> object)
                << " (" << fields.str()
                << ") VALUES (" << values.str() << ')';
 
-            if (!doInsertBuffering())
-                exec(qb);
-            else
-                addToInsertBuffer(qb.str());
+
+            exec(qb);
         }
     } else {
         log_debug("Skipping migration - no metadata for cds object %d\n", object->getID());
