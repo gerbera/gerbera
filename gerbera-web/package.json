@@ -27,7 +27,7 @@
     "bootstrap": "^4.3.1",
     "braces": "^3.0.2",
     "chai": "^4.2.0",
-    "chromedriver": "^76.0.1",
+    "chromedriver": "^78.0.1",
     "concurrently": "^4.1.2",
     "eslint": "^6.2.2",
     "eslint-config-standard": "^14.1.0",
