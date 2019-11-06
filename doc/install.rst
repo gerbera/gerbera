@@ -45,6 +45,16 @@ Arch
 
 Gerbera is available in AUR with both `stable <https://aur.archlinux.org/packages/gerbera/>`_ or `git versions <https://aur.archlinux.org/packages/gerbera-git/>`_.
 
+Fedora
+~~~~~~~~~~~~~~~~~
+.. index:: Fedora
+
+Gerbera is available in Fedora 29 or later.
+
+.. code-block:: sh
+
+    sudo dnf install gerbera
+
 CentOS
 ~~~~~~~~~~~~~~~~~
 Gerbera 1.2 for centos x86/64 is available via GitHub https://github.com/lukesoft76/CENTOS_7.
