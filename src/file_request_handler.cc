@@ -244,18 +244,24 @@ void FileRequestHandler::getInfo(IN const char* filename, OUT UpnpFileInfo* info
                     burlpath = burlpath.substring(0, burlpath.rindex('.'));
                     Ref<Server> server = Server::getInstance(); // FIXME server sigleton usage
                     String url = _("http://") + server->getIP() + ":" + server->getPort() + burlpath + validext;
-                    headers.addHeader(_("CaptionInfo.sec: ") + url);
+                    headers.addHeader(_("CaptionInfo.sec:"), url);
                 }
             }
         }
         Ref<Dictionary> mappings = cfg->getDictionaryOption(
             CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-        headers.addHeader(getDLNAcontentHeader(mappings->get(item->getMimeType())));
+        String dlnaContentHeader = getDLNAContentHeader(mappings->get(item->getMimeType()));
+        if (string_ok(dlnaContentHeader)) {
+            headers.addHeader(_(D_HTTP_CONTENT_FEATURES_HEADER), dlnaContentHeader);
+        }
     }
 
     if (!string_ok(mimeType))
         mimeType = item->getMimeType();
-    headers.addHeader(getDLNAtransferHeader(mimeType));
+    String dlnaTransferHeader = getDLNATransferHeader(mimeType);
+    if (string_ok(dlnaTransferHeader)) {
+        headers.addHeader(_(D_HTTP_TRANSFER_MODE_HEADER), dlnaTransferHeader);
+    }
 
     //log_debug("sizeof off_t %d, statbuf.st_size %d\n", sizeof(off_t), sizeof(statbuf.st_size));
     //log_debug("getInfo: file_length: " OFF_T_SPRINTF "\n", statbuf.st_size);

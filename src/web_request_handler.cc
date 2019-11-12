@@ -118,7 +118,7 @@ void WebRequestHandler::getInfo(IN const char *filename, OUT UpnpFileInfo *info)
 
     UpnpFileInfo_set_ContentType(info, ixmlCloneDOMString(contentType.c_str()));
     Headers headers;
-    headers.addHeader(std::string{"Cache-Control: no-cache, must-revalidate"});
+    headers.addHeader(std::string{"Cache-Control"}, std::string{"no-cache, must-revalidate"});
     headers.writeHeaders(info);
 }
 

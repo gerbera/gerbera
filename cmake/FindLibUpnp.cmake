@@ -6,7 +6,6 @@
 #  UPNP_VERSION_STRING - The version of LinUPnP found
 #  UPNP_HAS_IPV6 - If LinUPnP was built with IPv6 support
 #  UPNP_HAS_REUSEADDR - If LinUPnP was built with SO_REUSEADDR support
-
 find_package(PkgConfig QUIET)
 pkg_search_module (PC_UPNP QUIET libupnp-1.8 libupnp)
 

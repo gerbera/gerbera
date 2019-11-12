@@ -14,6 +14,7 @@ class HeadersHelperTest : public ::testing::Test {
   };
   virtual ~HeadersHelperTest() override {
     UpnpFileInfo_delete(info);
+
     delete subject;
   };
 
@@ -21,134 +22,166 @@ class HeadersHelperTest : public ::testing::Test {
   Headers* subject;
 };
 
-TEST_F(HeadersHelperTest, TerminatesTheHeaderWithCarriageNewLine) {
-  std::string header = "Content-Disposition: attachment; filename=\"file.mp3\"";
+#ifdef UPNP_HAS_EXTRA_HEADERS_LIST
+  std::string headers_as_string(UpnpFileInfo* info) {
+      std::string out;
 
-  subject->addHeader(header);
+      UpnpExtraHeaders* extra;
+      list_head* pos;
+      auto head = const_cast<list_head*>(UpnpFileInfo_get_ExtraHeadersList(info));
+      list_for_each(pos, head) {
+          extra = (UpnpExtraHeaders *)pos;
+          out += UpnpExtraHeaders_get_resp(extra);
+          out += "\r\n";
+      }
+      return out;
+  }
+#define GET_HEADERS(x) headers_as_string(x).c_str()
+#else
+#define GET_HEADERS UpnpFileInfo_get_ExtraHeaders_cstr
+#endif
+
+TEST_F(HeadersHelperTest, TerminatesTheHeaderWithCarriageNewLine) {
+  std::string header = "Content-Disposition";
+  std::string value = "attachment; filename=\"file.mp3\"";
+
+  subject->addHeader(header, value);
   subject->writeHeaders(info);
 
-  EXPECT_STREQ(UpnpFileInfo_get_ExtraHeaders_cstr(info), "Content-Disposition: attachment; filename=\"file.mp3\"\r\n");
+  EXPECT_STREQ(GET_HEADERS(info), "Content-Disposition: attachment; filename=\"file.mp3\"\r\n");
 }
 
 TEST_F(HeadersHelperTest, DoesNotAddTerminationCarriageNewLineWhenAlreadyExists) {
-  std::string header = "Content-Disposition: attachment; filename=\"file.mp3\"\r\n";
+  std::string header = "Content-Disposition";
+  std::string value = "attachment; filename=\"file.mp3\"\r\n";
 
-  subject->addHeader(header);
+  subject->addHeader(header, value);
   subject->writeHeaders(info);
 
-  EXPECT_STREQ(UpnpFileInfo_get_ExtraHeaders_cstr(info), "Content-Disposition: attachment; filename=\"file.mp3\"\r\n");
+  EXPECT_STREQ(GET_HEADERS(info), "Content-Disposition: attachment; filename=\"file.mp3\"\r\n");
 }
 
 TEST_F(HeadersHelperTest, MultipleHeaders) {
-  std::string header = "Content-Disposition: attachment; filename=\"file.mp3\"";
-  std::string header2 = "Accept-Ranges: bytes";
+  std::string header = "Content-Disposition";
+  std::string value = "attachment; filename=\"file.mp3\"";
+  std::string header2 = "Accept-Ranges";
+  std::string value2 = "bytes";
 
-  subject->addHeader(header);
-  subject->addHeader(header2);
+  subject->addHeader(header, value);
+  subject->addHeader(header2, value2);
   subject->writeHeaders(info);
 
-  EXPECT_STREQ(UpnpFileInfo_get_ExtraHeaders_cstr(info), "Content-Disposition: attachment; filename=\"file.mp3\"\r\nAccept-Ranges: bytes\r\n");
+  EXPECT_STREQ(GET_HEADERS(info), "Content-Disposition: attachment; filename=\"file.mp3\"\r\nAccept-Ranges: bytes\r\n");
 }
 
 TEST_F(HeadersHelperTest, MultipleHeadersSingleCarriageNewLine) {
-  std::string header = "Content-Disposition: attachment; filename=\"file.mp3\"";
-  std::string header2 = "Accept-Ranges: bytes\r\n";
+  std::string header = "Content-Disposition";
+  std::string value = "attachment; filename=\"file.mp3\"";
+  std::string header2 = "Accept-Ranges";
+  std::string value2 = "bytes\r\n";
 
-  subject->addHeader(header);
-  subject->addHeader(header2);
+  subject->addHeader(header, value);
+  subject->addHeader(header2, value2);
   subject->writeHeaders(info);
 
-  EXPECT_STREQ(UpnpFileInfo_get_ExtraHeaders_cstr(info), "Content-Disposition: attachment; filename=\"file.mp3\"\r\nAccept-Ranges: bytes\r\n");
+  EXPECT_STREQ(GET_HEADERS(info), "Content-Disposition: attachment; filename=\"file.mp3\"\r\nAccept-Ranges: bytes\r\n");
 }
 
 TEST_F(HeadersHelperTest, MultiBothCarriageNewLine) {
-  std::string header = "Content-Disposition: attachment; filename=\"file.mp3\"\r\n";
-  std::string header2 = "Accept-Ranges: bytes\r\n";
+    std::string header = "Content-Disposition";
+    std::string value = "attachment; filename=\"file.mp3\"\r\n";
+    std::string header2 = "Accept-Ranges";
+    std::string value2 = "bytes\r\n";
 
-  subject->addHeader(header);
-  subject->addHeader(header2);
+  subject->addHeader(header, value);
+  subject->addHeader(header2, value2);
   subject->writeHeaders(info);
 
-  EXPECT_STREQ(UpnpFileInfo_get_ExtraHeaders_cstr(info), "Content-Disposition: attachment; filename=\"file.mp3\"\r\nAccept-Ranges: bytes\r\n");
+  EXPECT_STREQ(GET_HEADERS(info), "Content-Disposition: attachment; filename=\"file.mp3\"\r\nAccept-Ranges: bytes\r\n");
 }
 
 TEST_F(HeadersHelperTest, IgnoresDataAfterFirstCarriageNewLine) {
-  std::string header = "Content-Disposition: attachment; filename=\"file.mp3\"\r\nAccept-Ranges: bytes";
+  std::string header = "Content-Disposition";
+  std::string value = "attachment; filename=\"file.mp3\"\r\nAccept-Ranges: bytes";
 
-  subject->addHeader(header);
+  subject->addHeader(header, value);
   subject->writeHeaders(info);
 
-  EXPECT_STREQ(UpnpFileInfo_get_ExtraHeaders_cstr(info), "Content-Disposition: attachment; filename=\"file.mp3\"\r\n");
+  EXPECT_STREQ(GET_HEADERS(info), "Content-Disposition: attachment; filename=\"file.mp3\"\r\n");
 }
 
 TEST_F(HeadersHelperTest, HeaderIsOnlyLinebreakReturnsEmpty) {
   std::string header = "\r\n";
 
-  subject->addHeader(header);
+  subject->addHeader(header, header);
   subject->writeHeaders(info);
 
-  EXPECT_STREQ(UpnpFileInfo_get_ExtraHeaders_cstr(info), "");
+  EXPECT_STREQ(GET_HEADERS(info), "");
 }
 
 TEST_F(HeadersHelperTest, HeaderIsEmptyReturnsEmpty) {
   std::string header = "";
 
-  subject->addHeader(header);
+  subject->addHeader(header, header);
   subject->writeHeaders(info);
 
-  EXPECT_STREQ(UpnpFileInfo_get_ExtraHeaders_cstr(info), "");
+  EXPECT_STREQ(GET_HEADERS(info), "");
 }
 
 TEST_F(HeadersHelperTest, HandlesSingleCarriageReturn) {
-  std::string header = "Content-Disposition: attachment; filename=\"file.mp3\"\r";
+  std::string header = "Content-Disposition";
+  std::string value = "attachment; filename=\"file.mp3\"\r";
 
-  subject->addHeader(header);
+  subject->addHeader(header, value);
   subject->writeHeaders(info);
 
-  EXPECT_STREQ(UpnpFileInfo_get_ExtraHeaders_cstr(info), "Content-Disposition: attachment; filename=\"file.mp3\"\r\n");
+  EXPECT_STREQ(GET_HEADERS(info), "Content-Disposition: attachment; filename=\"file.mp3\"\r\n");
 }
 
 TEST_F(HeadersHelperTest, HandlesSingleNewLine) {
-  std::string header = "Content-Disposition: attachment; filename=\"file.mp3\"\n";
+  std::string header = "Content-Disposition";
+  std::string value = "attachment; filename=\"file.mp3\"\n";
 
-  subject->addHeader(header);
+  subject->addHeader(header, value);
   subject->writeHeaders(info);
 
-  EXPECT_STREQ(UpnpFileInfo_get_ExtraHeaders_cstr(info), "Content-Disposition: attachment; filename=\"file.mp3\"\r\n");
+  EXPECT_STREQ(GET_HEADERS(info), "Content-Disposition: attachment; filename=\"file.mp3\"\r\n");
 }
 
-TEST_F(HeadersHelperTest, AddsCarriageLineBreakWithSingleChar) {
+TEST_F(HeadersHelperTest, EmptyValueNotAdded) {
   std::string header = "a";
 
-  subject->addHeader(header);
+  subject->addHeader(header, "");
   subject->writeHeaders(info);
 
-  EXPECT_STREQ(UpnpFileInfo_get_ExtraHeaders_cstr(info), "a\r\n");
+  EXPECT_STREQ(GET_HEADERS(info), "");
 }
 
 TEST_F(HeadersHelperTest, HandlesNullZmmString) {
   zmm::String header;
 
-  subject->addHeader(header);
+  subject->addHeader(header, header);
   subject->writeHeaders(info);
 
-  EXPECT_STREQ(UpnpFileInfo_get_ExtraHeaders_cstr(info), "");
+  EXPECT_STREQ(GET_HEADERS(info), "");
 }
 
 TEST_F(HeadersHelperTest, HandlesExtraContent) {
-  std::string header = "foo: bar\r\nzoo: wombat\r\n";
+  std::string header = "foo";
+  std::string value = "bar\r\nzoo: wombat\r\n";
 
-  subject->addHeader(header);
+  subject->addHeader(header, value);
   subject->writeHeaders(info);
 
-  EXPECT_STREQ(UpnpFileInfo_get_ExtraHeaders_cstr(info), "foo: bar\r\n");
+  EXPECT_STREQ(GET_HEADERS(info), "foo: bar\r\n");
 }
 
 TEST_F(HeadersHelperTest, HandlesExtraContentTwo) {
-  std::string header = "foo: bar\r\nzoo: wombat\r\nwhere: somewhere";
+  std::string header = "foo";
+  std::string value = "bar\r\nzoo: wombat\r\nwhere: somewhere";
 
-  subject->addHeader(header);
+  subject->addHeader(header, value);
   subject->writeHeaders(info);
 
-  EXPECT_STREQ(UpnpFileInfo_get_ExtraHeaders_cstr(info), "foo: bar\r\n");
+  EXPECT_STREQ(GET_HEADERS(info), "foo: bar\r\n");
 }
