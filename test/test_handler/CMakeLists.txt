@@ -2,7 +2,6 @@ find_package(Threads REQUIRED)
 
 add_executable(testhandler
         $<TARGET_OBJECTS:libgerbera>
-        main.cc
         test_http_protocol_helper.cc
         )
 

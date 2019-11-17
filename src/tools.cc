@@ -1323,7 +1323,7 @@ String getDLNAprofileString(String contentType)
     return profile;
 }
 
-String getDLNAcontentHeader(String contentType)
+String getDLNAContentHeader(String contentType)
 {
     Ref<ConfigManager> config = ConfigManager::getInstance();
     if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO)) {
@@ -1338,12 +1338,12 @@ String getDLNAcontentHeader(String contentType)
             content_parameter = content_parameter + D_OP + "=" + D_OP_SEEK_DISABLED + ";";
         content_parameter = content_parameter + D_CONVERSION_INDICATOR + "=" + D_NO_CONVERSION + ";";
         content_parameter = content_parameter + D_FLAGS "=" D_TR_FLAGS_AV;
-        return _(D_HTTP_CONTENT_FEATURES_HEADER) + content_parameter;
+        return content_parameter;
     }
     return nullptr;
 }
 
-String getDLNAtransferHeader(String mimeType)
+String getDLNATransferHeader(String mimeType)
 {
     if (ConfigManager::getInstance()->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO)) {
         String transfer_parameter;
@@ -1353,10 +1353,9 @@ String getDLNAtransferHeader(String mimeType)
             transfer_parameter = _(D_HTTP_TRANSFER_MODE_STREAMING);
 
         if (string_ok(transfer_parameter)) {
-            return _(D_HTTP_TRANSFER_MODE_HEADER) + transfer_parameter;
+            return transfer_parameter;
         }
     }
-
     return nullptr;
 }
 

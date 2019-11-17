@@ -351,8 +351,12 @@ if (UPNP_VERSION_STRING VERSION_LESS "1.8.3")
     message(FATAL_ERROR "gerbera requires libupnp 1.8.3 or above.")
 endif()
 
+if (UPNP_VERSION_STRING VERSION_GREATER_EQUAL "1.8.5")
+    add_definitions(-DUPNP_HAS_EXTRA_HEADERS_LIST)
+endif()
+
 if (NOT UPNP_HAS_IPV6)
-    message(FATAL_ERROR "gerbera requires libupnp with IPv6 support.")
+    message(FATAL_ERROR "Gerbera requires libupnp with IPv6 support.")
 endif()
 if (NOT UPNP_HAS_REUSEADDR)
     message(WARNING "\n !! It is strongly recommended to build libupnp with --enable-reuseaddr !!\nWithout this option Gerbera will be unable to restart with the same port number.")

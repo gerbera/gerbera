@@ -28,16 +28,21 @@ Gerbera - https://gerbera.io/
 
 #include <action_request.h>
 #include <memory>
-#include <vector>
+#include <map>
+#ifdef UPNP_HAS_EXTRA_HEADERS_LIST
+#include <ExtraHeaders.h>
+#endif
 
 class Headers {
 public:
-    void addHeader(zmm::String header);
-    void addHeader(const std::string& header);
-    const void writeHeaders(IN UpnpFileInfo *fileInfo);
+    void addHeader(zmm::String header, zmm::String value);
+    void addHeader(const std::string& header, const std::string& value);
+    void writeHeaders(IN UpnpFileInfo *fileInfo) const;
 
 private:
-    std::unique_ptr<std::vector<std::string>> headers;
+    std::unique_ptr<std::map<std::string, std::string>> headers;
+    static std::string formatHeader(const std::pair<std::string, std::string>& header, bool crlf);
+    static std::string stripInvalid(std::string value);
 };
 
 #endif //GERBERA_HEADERS_H

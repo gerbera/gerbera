@@ -65,10 +65,10 @@
 #define UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER "object.container.playlistContainer"
 #define UPNP_DEFAULT_CLASS_VIDEO_BROADCAST "object.item.videoItem.videoBroadcast"
 
-#define D_HTTP_TRANSFER_MODE_HEADER "transferMode.dlna.org: "
+#define D_HTTP_TRANSFER_MODE_HEADER "transferMode.dlna.org"
 #define D_HTTP_TRANSFER_MODE_STREAMING "Streaming"
 #define D_HTTP_TRANSFER_MODE_INTERACTIVE "Interactive"
-#define D_HTTP_CONTENT_FEATURES_HEADER "contentFeatures.dlna.org: "
+#define D_HTTP_CONTENT_FEATURES_HEADER "contentFeatures.dlna.org"
 
 #define D_PROFILE "DLNA.ORG_PN"
 #define D_CONVERSION_INDICATOR "DLNA.ORG_CI"
