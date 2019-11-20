@@ -7,18 +7,18 @@
 #  UPNP_HAS_IPV6 - If LinUPnP was built with IPv6 support
 #  UPNP_HAS_REUSEADDR - If LinUPnP was built with SO_REUSEADDR support
 find_package(PkgConfig QUIET)
-pkg_search_module (PC_UPNP QUIET libupnp-1.8 libupnp)
+pkg_search_module (PC_UPNP QUIET libupnp libupnp-1.8)
 
 find_path(UPNP_INCLUDE_DIR upnp.h
     HINTS ${PC_UPNP_INCLUDEDIR} ${PC_UPNP_INCLUDE_DIRS}
-    PATH_SUFFIXES upnp-1.8 upnp)
+    PATH_SUFFIXES upnp upnp-1.8)
 
 find_library(UPNP_UPNP_LIBRARY
-    NAMES libupnp-1.8 upnp-1.8 libupnp upnp upnp4
+    NAMES libupnp upnp libupnp-1.8 upnp-1.8 upnp4
     HINTS ${PC_UPNP_LIBDIR} ${PC_UPNP_LIBRARY_DIRS})
 
 find_library(UPNP_IXML_LIBRARY
-    NAMES libixml-1.8 ixml-1.8 libixml ixml ixml4
+    NAMES libixml ixml libixml-1.8 ixml-1.8
     HINTS ${PC_UPNP_LIBDIR} ${PC_UPNP_LIBRARY_DIRS})
 
 if(EXISTS ${UPNP_INCLUDE_DIR}/upnpconfig.h)
