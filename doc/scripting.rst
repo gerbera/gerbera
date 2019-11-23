@@ -9,18 +9,18 @@ important features introduced since the version 0.8 (`mediatomb`) are the virtua
 
 Let's think of possible scenarios:
 
- * you may want to separate your content by music, photo, video, maybe create a special container with all non
+ * You may want to separate your content by music, photo, video, maybe create a special container with all non
    playable stuff
 
- * you may want your music to be sorted by genre, year, artist, album, or maybe by starting letters, so you can
+ * You may want your music to be sorted by genre, year, artist, album, or maybe by starting letters, so you can
    more easily find your favorite song when browsing the server
 
- * you want to have your photos that you took with your favorite digital camera to appear in a special folder, or
+ * You want to have your photos that you took with your favorite digital camera to appear in a special folder, or
    maybe you even want to separate the photos that you took with flash-on from the ones that you made without flash
 
- * your media player does not support video, so you do not even want to see the Video container
+ * Your media player does not support video, so you do not even want to see the Video container
 
- * it's up to your imagination :)
+ * It's up to your imagination :)
 
 The scenarios described above and much more can be achieved with the help of an import script.
 
@@ -33,10 +33,10 @@ How It Works
 
 This section will give you some overview on how virtual objects work and on how they are related to scripting.
 
-  NOTE:
+.. Note::
       In order to use the import scripting feature you have to change the layout type from builtin to js in ``config.xml``
 
-  NOTE:
+.. Note::
       The sorting of Video and Photo items using the ``rootpath`` object is still somewhat experimental and not
       described here.
 
@@ -103,7 +103,7 @@ made available in the form of the global variable 'orig'. Additionally, when the
 is made available to the playlist parser script in the form of the global variable 'playlist'. It is usually a good idea to
 only read from these variables and to create and only modify local copies.
 
-Note:
+.. Note::
    modifying the properties of the orig object will not
    propagate the changes to the database, only a call to
    the ``addCdsObject()`` will permanently add the object.
@@ -313,105 +313,6 @@ object.
        number, but is used to set the position of the newly created object inside a parsed playlist container. Usually
        you will increment the number for each new object that you create while parsing the playlist, thus ensuring that the
        resulting order is the same as in the original playlist.
-
-Weborama Properties
--------------------
-
-When the ``obj.onlineservice`` variable equals ``ONLINE_SERVICE_WEBORAMA`` the item has
-the following additional aux property:
-
-.. js:attribute:: orig.aux[WEBORAMA_AUXDATA_REQUEST_NAME]
-
-This property holds the name of the request that generated this object, it is the name that you specify in the
-config.xml file, i.e. in the below example the value of ``orig.aux[WEBORAMA_AUXDATA_REQUEST_NAME]`` will be 'My Playlist':
-::
-
-  <playlist name="My Playlist" type="playlist" mood="dark"/>
-
-
-Apple Trailer Properties
-------------------------
-
-When the ``obj.onlineservice`` variable equals ``ONLINE_SERVICE_APPLE_TRAILERS`` the item has the following
-additional aux property:
-
-.. js:attribute:: orig.aux[APPLE_TRAILERS_AUXDATA_POST_DATE]
-
-This property holds the date when the trailer was posted, the
-date format is **YYYY-MM-DD**.
-
-Note:
-   the ``orig.meta[M_DATE]`` property holds the release date of the movie.
-
-
-DVD Properties
---------------
-
-Gerbera has an additional import script for DVD images. The DVD image is parsed with the help of **libdvdread**,
-the information about the available titles, chapters, languages, etc. is gathered and provided to the DVD import
-script. The usual object properties apply here as well, however the dvd object offers several extensions that can be accessed
-via the aux property:
-
-.. js:attribute:: dvd.aux[DVD]
-
-|
-
-    .. js:attribute:: dvd.aux[DVD].titles
-
-       **RO**
-
-       This is an array that contains information about titles that are found on the DVD. The length of the array (and
-       thus the number of available titles can be retrieved by:
-
-    .. js:attribute:: dvd.aux[DVD].titles.length
-
-       Further, being a normal JavaScript array it supports all associated JS functions.
-
-    .. js:attribute:: dvd.aux[DVD].titles[t_index].audio_tracks
-
-       **RO**
-
-       Each title object in the titles array provides information about available audio tracks, the audio_tracks is an array
-       as well. The t_index variable is only used as an example in this case and represents an integer index value in the
-       range:
-
-       ::
-
-         dvd.aux[DVD].titles.length > t_index >= 0
-
-    .. js:attribute:: dvd.aux[DVD].titles[t_index].audio_tracks[a_index].format
-
-       **RO**
-
-       A string, containing the format name of the audio track (i.e. ac3, dts, etc.). The a_index variable is only used as
-       an example, it represents an integer index value in the range:
-       ::
-
-         dvd.aux[DVD].titles[t_index].audio_tracks.length > a_index >= 0
-
-    .. js:attribute:: dvd.aux[DVD].titles[t_index].audio_tracks[a_index].language
-
-       **RO**
-
-       A string, containing the name of the language of the audio track.
-
-    .. js:attribute:: dvd.aux[DVD].titles[t_index].chapters
-
-       **RO**
-
-       This property is an array which contains chapter information for the particular title.
-
-    .. js:attribute:: dvd.aux[DVD].titles[t_index].chapters[c_index].duration
-
-       **RO**
-
-       Duration from the start of the chapter to the end of the movie. Chapter at index 0 will always have the duration of
-       the whole title. The c_index variable is only used as an example, it represents an integer index value in the range:
-
-       ::
-
-         dvd.aux[DVD].titles[t_index].chapters.length > c_index >= 0
-
 
 Constants
 ---------
@@ -666,7 +567,7 @@ Walkthrough
 Now it is time to take a closer look at the default scripts that are supplied with Gerbera. Usually it is installed in
 the ``/usr/share/gerbera/js/`` directory, but you will also find it in ``scripts/js/`` in the Gerbera source tree.
 
-Note:
+.. Note::
   this is not a JavaScript tutorial, if you are new to JS you should probably make yourself familiar with the
   language.
 
@@ -838,7 +739,7 @@ This function takes care of images. Currently it does very little sorting, but c
 digital cameras provide lots of information in the Exif tag, so you could easily add code to sort your pictures by camera model
 or anything Exif field you might be interested in.
 
-Note:
+.. Note::
   if you want to use those additional Exif fields you need to compile MediaTomb with libexif support and also
   specify the fields of interest in the import section of your configuration file
   (See documentation about library-options).
