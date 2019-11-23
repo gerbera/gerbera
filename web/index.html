@@ -54,22 +54,27 @@
         <div id="trail" class="row no-gutters"></div>
     </div>
 
-    <div id="home" class="row">
-        <div class="col-sm offset-sm-2">
-            <div id="homeintro">
-                <h2>Welcome to Gerbera</h2>
-                <p>Gerbera is an open source UPnP-AV media server.</p>
+    <div id="home">
+        <div id="homeintro">
+            <div class="row">
+                <div class="col-sm offset-sm-2">
+                    <h2>Welcome to Gerbera</h2>
+                    <p>Gerbera is an open source UPnP-AV media server.</p>
+                </div>
             </div>
+        </div>
+        <div class="row">
+            <div class="col-sm offset-sm-2">
+                <a id="addlink" href="javascript:;" onclick="$('#nav-fs').click(); // Replace with hashchange handling">
+                    <h4><i class="fa fa-plus"></i> Add some files</h4>
+                    <p>Browse and import your multimedia files into Gerbera.</p>
+                </a>
 
-            <a id="addlink" href="javascript:;" onclick="$('#nav-fs').click(); // Replace with hashchange handling">
-                <h4><i class="fa fa-plus"></i> Add some files</h4>
-                <p>Browse and import your multimedia files into Gerbera.</p>
-            </a>
-
-            <a id="viewlink" href="javascript:;" onclick="$('#nav-db').click(); // Replace with hashchange handling">
-                <h4><i class="fa fa-files-o"></i> View indexed files</h4>
-                <p>View, update and remove files from Gerbera.</p>
-            </a>
+                <a id="viewlink" href="javascript:;" onclick="$('#nav-db').click(); // Replace with hashchange handling">
+                    <h4><i class="fa fa-files-o"></i> View indexed files</h4>
+                    <span>View, update and remove files from Gerbera.</span>
+                </a>
+            </div>
         </div>
     </div>
 
