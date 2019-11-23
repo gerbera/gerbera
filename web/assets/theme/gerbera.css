@@ -56,9 +56,11 @@ a:hover {
 }
 
 .navbar {
-    font-size: 14px;
+    font-size: 1rem;
     background-color: #222;
     border-bottom: 1px solid #ff7f00;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
 }
 
 li.nav-item > a {
@@ -197,6 +199,7 @@ body,
 #container {
     height: 100vh;
     overflow: hidden;
+    color: rgb(51, 51, 51);
 }
 
 #container {
@@ -213,10 +216,14 @@ body,
 #left {
     height: 100%;
     flex: 1;
-    overflow-y: scroll;
+    overflow-y: auto;
     flex-grow: 2;
-    background-color: #f8f8f8;
+    background-color: rgb(248, 248, 248);
     border-right: 1px solid #e9ecef;
+}
+
+#tree {
+    padding: 0.5rem;
 }
 
 #right {
@@ -228,7 +235,7 @@ body,
 #datagrid {
     height: 100%;
     overflow: auto;
-    background-color: white;
+    background-color: #fefefe;
 }
 
 #datagrid table {
@@ -282,6 +289,10 @@ body,
    color: #222;
 }
 
+/* Cancel top level padding */
+*#tree > .list-group > .list-group-item {
+    padding: 0;
+}
 
 .list-group-item {
     padding-top: 0px;
@@ -302,6 +313,7 @@ body,
     padding-bottom: 0px;
     margin-bottom: 0px;
     box-shadow: none;
+
 }
 
 .folder-title {
@@ -341,11 +353,12 @@ body,
 .grb-trail  .breadcrumb > li + li:before {
     content: ">";
     padding: 0 5px;
-    color: rgba(33, 37, 41, 0.6);
+    color: rgba(255, 255, 255, 0.5);
 }
 
 .grb-trail {
-    background-color: #ff7f00;
+    background-color: #3c3c3c;
+    color: #ededed;
 }
 
 .grb-trail ol.breadcrumb {
@@ -362,7 +375,7 @@ body,
     margin: 0px 10px 0px 10px;
 }
 .grb-trail-buttons li a {
-    color: black;
+    color: #ededed;
 }
 .grb-trail-add,
 .grb-trail-add-autoscan,
@@ -432,8 +445,16 @@ body,
     transition: none !important;
 }
 
+#home {
+    height: 100%;
+    width: 100%;
+}
+
 #homeintro {
-    margin: 3em 0;
+    padding-top: 6rem;
+    padding-bottom: 3rem;
+    background-color: rgb(248, 248, 248);
+    border-bottom: rgb(231, 231, 231) 1px solid;
 }
 
 #home a {
