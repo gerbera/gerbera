@@ -24,8 +24,7 @@ Let's think of possible scenarios:
 
 The scenarios described above and much more can be achieved with the help of an import script.
 
-Gerbera supports a playlist parsing feature, which is also handled by scripting and version 0.12.0 (`mediatomb`)
-adds a script for creating a virtual layout out of a DVD iso image.
+Gerbera supports a playlist parsing feature, which is also handled by scripting.
 
 
 How It Works
@@ -80,9 +79,13 @@ properties of the item. The object is introduced to the script environment and b
 way a variable orig is always defined for every script invocation and represents the original data of the added item.
 Then the script is invoked.
 
-In the current implementation, if you modify the script then you will have to restart the server for the new logic to take
-effect. Note, that the script is only triggered when new objects are added to the database, also note that the script
+.. Note::
+   In the current implementation, if you modify the script then you will have to restart the server for the new logic to take
+   effect.
+
+The script is only triggered when new objects are added to the database, also note that the script
 does not modify any objects that already exist in the database - it only processes new objects that are being added.
+
 When a playlist item is encountered, it is automatically fed as input to the playlist script. The playlist script
 attempts to parse the playlist and adds new item to the database, the item is then processed by the import script.
 
@@ -301,7 +304,9 @@ object.
 
        Array holding the so called auxiliary data. Aux data is metadata that is not part of UPnP, for example -
        this can be a camera model that was used to make a photo, or the information if the photo was taken with or without flash.
-       Currently aux data can be gathered from **libexif** and **libextractor** (see the Import section in the main
+
+
+       Currently aux data can be gathered from **libexif** (see the Import section in the main
        documentation for more details). So, this array will hold the tags that you specified in your config.xml, allowing
        you to create your virtual structure according to your liking.
 
@@ -929,6 +934,7 @@ Below is the complete function with some comments:
        if (location.match(/^.*:\/\//))
        {
          var exturl = new Object();
+         var exturl = new Object();
 
          // Setting the mimetype is crucial and tricky... if you get it
          // wrong your renderer may show the item as unsupported and refuse
@@ -1025,138 +1031,6 @@ probably the time to take a closer look.
 
       // We will exit the loop when end of the playlist file is reached.
       while (line);
-   }
-
-
-DVD Import Script
------------------
-
-The DVD import script receives an object that represents a DVD image. The object provides information about the number of
-titles, chapters, audio tracks and about languages that are available in the image. You can not play the ISO directly (most
-players will not support this), so we weill create special virtual DVD objects, which will deliver an MPEG PES stream for
-the selected Title/Audio Track/Chapter.
-
-The DVD import script is separated from the main script, the script that is shipped with the default installation is called
-import-dvd.js.
-
-Let's have a closer look!
-
-.. code-block:: js
-
-   // The title of the DVD will be set to the file name of the ISO
-   // image, we want to get rid of the .iso extension:
-   var title = dvd.title;
-   var index = title.lastIndexOf('.');
-   if (index > 1)
-       title = title.substring(0, index);
-
-
-   // Since the object that we receive is the original ISO it will
-   // not have the correct video UPnP class, so we have to set it
-   // ourselves:
-   dvd.upnpclass = UPNP_CLASS_ITEM_VIDEO;
-
-   // Now we will get the number of titles and loop through them,
-   // creating a virtual structure for the chapters, languages and audio formats:
-   var title_count = dvd.aux[DVD].titles.length;
-   for (var t = 0; t < title_count; t++)
-   {
-       var title_name = 'Title';
-
-      // Since the sorting is based on the titles we need a leading
-      // zero. Also note the (t + 1) part, the very first position in
-      // the array has an index of zero, however we want that the title
-      // count starts with one in the UI:
-      if (t < 9)
-         title_name = title_name + ' 0' + (t + 1);
-      else
-         title_name = title_name + ' ' + (t + 1);
-
-      // Get the number of chapters and audio tracks for this title and
-      // loop through them:
-      var chapter_count = dvd.aux[DVD].titles[t].chapters.length;
-      var audio_track_count = dvd.aux[DVD].titles[t].audio_tracks.length;
-      for (var a = 0; a < audio_track_count; a++)
-      {
-         var chain;
-
-         // Again, note the (a + 1) part, we want the first track in the UI
-         // to show as Track 01 and not Track 00:
-         var audio_name = ' - Audio Track ' + (a + 1);
-
-         // We will create a structure, sorting the media by audio
-         // languages and formats:
-         var audio_language = dvd.aux[DVD].titles[t].audio_tracks[a].language;
-         var audio_format = dvd.aux[DVD].titles[t].audio_tracks[a].format;
-         if (audio_format != '')
-         {
-            if (audio_language != '')
-                audio_name = audio_name + ' - ' + audio_language;
-
-            chain = new Array('Video', 'DVD', title, 'Audio Formats',
-                              audio_format, title_name + audio_name);
-
-            // The code above was only dealing with containers, this loop will
-            // create the actual playable items:
-            for (var c = 0; c < chapter_count; c++)
-            {
-               if (c < 9)
-                 dvd.title = "Chapter 0" + (c + 1);
-               else
-                 dvd.title = "Chapter " + (c + 1);
-
-               // When attempted to play, the item created below will deliver the
-               // MPEG PES with title index t, chapter index c and audio track
-               // index a - we created the chain appropriately so that the audio
-               // index matches the language and audio format that we used in the
-               // container names:
-               addDVDObject(dvd, t, c, a, createContainerChain(chain));
-            }
-         }
-
-         // Same for the language:
-         if (audio_language != '')
-         {
-            chain = new Array('Video', 'DVD', title, 'Languages',
-                              audio_language);
-            if (audio_format != '')
-                chain.push(title_name + audio_name + ' - ' + audio_format);
-            else
-                chain.push(title_name + audio_name);
-
-            for (var c = 0; c < chapter_count; c++)
-            {
-                if (c < 9)
-                    dvd.title = "Chapter 0" + (c + 1);
-                else
-                    dvd.title = "Chapter " + (c + 1);
-
-                addDVDObject(dvd, t, c, a, createContainerChain(chain));
-            }
-         }
-
-         // And we also want a list of titles with appropriate format and
-         // language information:
-         chain = new Array('Video', 'DVD', title, 'Titles');
-         var titles = title_name + ' - Audio Track ' + (a + 1);
-         if (audio_format != '')
-            titles = titles + ' - ' + audio_format;
-
-         if (audio_language != '')
-            titles = titles + ' - ' + audio_language;
-
-         chain.push(titles);
-
-         for (var c = 0; c < chapter_count; c++)
-         {
-            if (c < 9)
-                dvd.title = "Chapter 0" + (c + 1);
-            else
-                dvd.title = "Chapter " + (c + 1);
-
-            addDVDObject(dvd, t, c, a, createContainerChain(chain));
-         }
-      }
    }
 
 **Happy scripting!**
