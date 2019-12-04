@@ -37,10 +37,10 @@ This tag defines the import section.
 
 ::
 
-    <filesystem-charset>ISO-8859-1</filesystem-charset>
+    <filesystem-charset>UTF-8</filesystem-charset>
 
 * Optional
-* Default: **if ``nl\_langinfo()`` function is present, this setting will be auto detected based on your system locale, else set to ISO-8859-1**
+* Default: **if ``nl\_langinfo()`` function is present, this setting will be auto detected based on your system locale, else set to UTF-8**
 
 Defines the charset of the filesystem. For example, if you have file names in Cyrillic KOI8-R encoding, then you
 should specify that here. The server uses UTF-8 internally, this import parameter will help you to correctly import your data.
@@ -51,10 +51,10 @@ should specify that here. The server uses UTF-8 internally, this import paramete
 
 ::
 
-    <metadata-charset>ISO-8859-1</metadata-charset>
+    <metadata-charset>UTF-8</metadata-charset>
 
 * Optional
-* Default: **if ``nl\_langinfo()`` function is present, this setting will be auto detected based on your system locale, else set to ISO-8859-1**
+* Default: **if ``nl\_langinfo()`` function is present, this setting will be auto detected based on your system locale, else set to UTF-8**
 
 Same as above, but defines the charset of the metadata (i.e. id3 tags, Exif information, etc.)
 
@@ -112,15 +112,6 @@ Below are the available scripting options:
         * Default: ``${prefix}/share/gerbera/js/import.js``, **where ${prefix} is your installation prefix directory.**
 
         Points to the script invoked upon media import. For more details read about :ref:`scripting <scripting>`
-
-        ::
-
-            <dvd-script>/path/to/my/import-dvd.js</dvd-script>
-
-        * Optional: **only has effect when layout type is ”js\ ”\ and if Gerbera was compiled with libdvdread support.**
-        * Default: ``${prefix}/share/gerbera/js/import-dvd.js``, **where ${prefix} is your installation prefix directory.**
-
-        Points to the script invoked upon import of DVD iso images. For more details read :ref:`scripting <scripting>`
 
 ``common-script``
 ~~~~~~~~~~~~~~~~~

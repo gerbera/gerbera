@@ -6,9 +6,9 @@
 
 Gerbera is a UPnP media server which allows you to stream your digital media through your home network and consume it on a variety of UPnP compatible devices.
 
-_Gerbera is based on [MediaTomb](http://mediatomb.cc) which is dead upstream, so this is a community attempt to kick it back into life._
-
 **Pull requests are very welcome and reporting issues is encouraged.**
+
+Gerbera was originally based on [MediaTomb](http://web.archive.org/web/20170911172945/http://mediatomb.cc/)
 
 ## Documentation
 
@@ -17,38 +17,17 @@ View our documentation online at [http://docs.gerbera.io](http://docs.gerbera.io
 ## Features
 
 * Browse and playback your media via your network on all kinds of devices.
+* Web UI with a tree view of the database and the file system, allowing to add/remove/edit/browse your media
 * Metadata extraction from MP3, OGG, AAC, M4A, FLAC, JPG (and many more!) files.
 * Media thumbnail support
-* Web UI with a tree view of the database and the file system, allowing to add/remove/edit/browse your media
 * Highly flexible media format transcoding via plugins / scripts
 * Automatic directory rescans (timed, inotify)
 * User defined server layout based on extracted metadata
-* Supports last fm scrobbing using lastfmlib
-* On the fly video thumbnail generation with libffmpegthumbnailer
+* Supports last.fm scrobbing
+* On the fly video thumbnail generation
 * Support for external URLs (create links to internet content and serve them via UPnP to your renderer)
-* runs on Linux, FreeBSD, NetBSD, Mac OS X, eCS
-* runs on x86, Alpha, ARM, MIPS, Sparc, PowerPC
-
-## Differences to Mediatomb (So far)
-- Rebranded as Gerbera, new Logo!
-- Actively maintained/developed.
-- Removed bundled `libupnp` - Now requires upstream 1.8 version.
-- Removed bundled `libuuid`.
-- Ported to CMake.
-- Enhanced cover art support for MP4, FLAC, Vorbis & WMA files (via TagLib).
-- TagLib handler opens files read only: stops inotify rescanning the dir on access causing "Object not found" [see here][1].
-- Album folders have "creator" metadata (artist).
-- Album folders have artwork: either from external files or the tracks embedded artwork.
-- Per-track external art support: `filename-of-track.jp\*` (minus the audio file extension).
-- Removed `libflac` use/dep.
-- Remove `libmp4v2` use/dep.
-- Remove `id3lib` use/dep.
-- Removed broken DVD image support (dvdnav).
-- IPv6 Support
-- Replaced SpiderMonkey (mozjs) dependency with embedded [duktape] engine.
-- WIP port to "Modern C++" / tidying.
-- Lots of other stuff.
-- Dropped broken youtube support.
+* Runs on Linux, BSD, Mac OS X, and more!
+* Runs on x86, ARM, MIPS, and more!
 
 ## Installing
 
@@ -75,7 +54,31 @@ Gerbera is available in [Entware](https://github.com/Entware/rtndev/tree/master/
 
 ## Building
 
-The project has been ported to [CMake].
+Gerbera uses [CMake].
+
+### Quick start build instructions:
+
+```
+# Assuming Ubuntu base
+git clone https://github.com/gerbera/gerbera.git
+mkdir build
+cd build
+cmake ../gerbera -DWITH_MAGIC=1 -DWITH_MYSQL=1 -DWITH_CURL=1 -DWITH_JS=1 \
+-DWITH_TAGLIB=1 -DWITH_AVCODEC=1 -DWITH_FFMPEGTHUMBNAILER=1 -DWITH_EXIF=1 -DWITH_LASTFM=1
+make -j4
+sudo make install
+```
+Alternatively, the options can be set using a GUI (make sure to press "c" to configure after toggling settings in the GUI):
+```
+git clone https://github.com/gerbera/gerbera.git
+mkdir build
+cd build
+cmake ../gerbera
+make edit_cache
+# Enable some of the WITH... options
+make -j4
+sudo make install
+```
 
 ### Install prerequisites.
 
@@ -120,29 +123,6 @@ sudo make install
 The Gerbera Team maintains a Homebrew Tap to allow for easy installation of Gerbera Media Server on macOS.
 
 [https://github.com/gerbera/homebrew-gerbera](https://github.com/gerbera/homebrew-gerbera)
-
-### Quick start build instructions:
-
-```
-git clone https://github.com/gerbera/gerbera.git
-mkdir build
-cd build
-cmake ../gerbera -DWITH_MAGIC=1 -DWITH_MYSQL=1 -DWITH_CURL=1 -DWITH_JS=1 \
--DWITH_TAGLIB=1 -DWITH_AVCODEC=1 -DWITH_FFMPEGTHUMBNAILER=1 -DWITH_EXIF=1 -DWITH_LASTFM=1
-make -j4
-sudo make install
-```
-Alternatively, the options can be set using a GUI (make sure to press "c" to configure after toggling settings in the GUI):
-```
-git clone https://github.com/gerbera/gerbera.git
-mkdir build
-cd build
-cmake ../gerbera
-make edit_cache
-# Enable some of the WITH... options
-make -j4
-sudo make install
-```
 
 ## Dependencies
 
