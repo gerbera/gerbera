@@ -81,6 +81,9 @@ public:
     /// SEEK_SET to specify an absolute offset.
     void seek(IN off_t offset, IN int whence) override;
 
+    /// \brief Return the current stream position.
+    off_t tell() override;
+
     /// \brief Close a previously opened file.
     void close() override;
 };

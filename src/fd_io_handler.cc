@@ -121,6 +121,11 @@ void FDIOHandler::seek(IN off_t offset, IN int whence)
     }
 }
 
+off_t FDIOHandler::tell()
+{
+    return lseek(fd, 0, SEEK_CUR);
+}
+
 void FDIOHandler::close()
 {
 

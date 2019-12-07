@@ -93,6 +93,11 @@ void FileIOHandler::seek(IN off_t offset, IN int whence)
     }
 }
 
+off_t FileIOHandler::tell()
+{
+    return ftell(f);
+}
+
 void FileIOHandler::close()
 {
     if (fclose(f) != 0) {
