@@ -27,6 +27,7 @@ set(WITH_AVCODEC        0 CACHE BOOL "Enable ffmpeg/libav")
 set(WITH_FFMPEGTHUMBNAILER 0 CACHE BOOL "Enable Thumbnail generation")
 set(WITH_EXIF           1 CACHE BOOL "Use libexif to extract image metadata")
 set(WITH_EXIV2          0 CACHE BOOL "Use libexiv2 to extract image metadata")
+set(WITH_MATROSKA       1 CACHE BOOL "Use libmatroska to extract video/mkv metadata")
 set(WITH_SYSTEMD        1 CACHE BOOL "Install Systemd unit file")
 set(WITH_LASTFM         0 CACHE BOOL "Enable LastFM")
 set(WITH_DEBUG          1 CACHE BOOL "Enables debug logging")
@@ -114,6 +115,8 @@ set(libgerberaFILES
         src/metadata/taglib_handler.h
         src/metadata/fanart_handler.cc
         src/metadata/fanart_handler.h
+        src/metadata/matroska_handler.cc
+        src/metadata/matroska_handler.h
         src/mt_inotify.cc
         src/mt_inotify.h
         src/mxml/attribute.cc
@@ -534,6 +537,19 @@ if(WITH_EXIV2)
         add_definitions(-DHAVE_EXIV2)
     else()
         message(FATAL_ERROR "Exiv2 not found")
+    endif()
+endif()
+
+if(WITH_MATROSKA)
+    find_package (Matroska)
+    if (MATROSKA_FOUND AND EBML_FOUND)
+        include_directories(${EBML_INCLUDE_DIRS})
+        target_link_libraries (gerbera ${EBML_LIBRARIES})
+        include_directories(${MATROSKA_INCLUDE_DIRS})
+        target_link_libraries (gerbera ${MATROSKA_LIBRARIES})
+        add_definitions(-DHAVE_MATROSKA)
+    else()
+        message(FATAL_ERROR "Matroska not found")
     endif()
 endif()
 
