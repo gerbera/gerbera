@@ -49,7 +49,7 @@
 #define SQLITE3_UPDATE_2_3_2 "CREATE INDEX mt_cds_object_service_id ON mt_cds_object(service_id)"
 #define SQLITE3_UPDATE_2_3_3 "UPDATE \"mt_internal_setting\" SET \"value\"='3' WHERE \"key\"='db_version' AND \"value\"='2'"
 
-// updates 3->4
+// updates 3->4: Move to Metadata table
 #define SQLITE3_UPDATE_3_4_1 "CREATE TABLE \"mt_metadata\" ( \
   \"id\" integer primary key, \
   \"item_id\" integer NOT NULL, \
@@ -59,7 +59,46 @@
   ON DELETE CASCADE ON UPDATE CASCADE )"
 #define SQLITE3_UPDATE_3_4_2 "CREATE INDEX mt_metadata_item_id ON mt_metadata(item_id)"
 #define SQLITE3_UPDATE_3_4_3 "UPDATE \"mt_internal_setting\" SET \"value\"='4' WHERE \"key\"='db_version' AND \"value\"='3'"
-  
+
+// updates 4->5: Fix incorrect SQLite foreign key
+#define SQLITE3_UPDATE_4_5_1 "PRAGMA foreign_keys = OFF;  \
+CREATE TABLE mt_cds_object_new \
+( \
+    id integer primary key, \
+    ref_id integer default NULL \
+    constraint cds_object_ibfk_1 \
+        references mt_cds_object (id) \
+            ON update cascade on delete cascade, \
+            parent_id integer default '0' not null \
+    constraint cds_object_ibfk_2 \
+        references mt_cds_object (id) \
+            ON update cascade on delete cascade, \
+            object_type tinyint unsigned not null, \
+    upnp_class varchar(80) default NULL, \
+    dc_title varchar(255) default NULL, \
+    location text default NULL, \
+    location_hash integer unsigned default NULL, \
+    metadata text default NULL, \
+    auxdata text default NULL, \
+    resources text default NULL, \
+    update_id integer default '0' not null, \
+    mime_type varchar(40) default NULL, \
+    flags integer unsigned default '1' not null, \
+    track_number integer default NULL, \
+    service_id varchar(255) default NULL \
+); \
+INSERT INTO mt_cds_object_new(id, ref_id, parent_id, object_type, upnp_class, dc_title, location, location_hash, metadata, auxdata, resources, update_id, mime_type, flags, track_number, service_id) SELECT id, ref_id, parent_id, object_type, upnp_class, dc_title, location, location_hash, metadata, auxdata, resources, update_id, mime_type, flags, track_number, service_id FROM mt_cds_object; \
+DROP TABLE mt_cds_object; \
+ALTER TABLE mt_cds_object_new RENAME TO mt_cds_object; \
+CREATE INDEX mt_cds_object_parent_id ON mt_cds_object (parent_id, object_type, dc_title); \
+CREATE INDEX mt_cds_object_ref_id ON mt_cds_object (ref_id); \
+CREATE INDEX mt_cds_object_service_id ON mt_cds_object (service_id); \
+CREATE INDEX mt_location_parent ON mt_cds_object (location_hash, parent_id); \
+CREATE INDEX mt_object_type ON mt_cds_object (object_type); \
+CREATE INDEX mt_track_number on mt_cds_object (track_number); \
+PRAGMA foreign_keys = ON;"
+#define SQLITE3_UPDATE_4_5_2 "UPDATE mt_internal_setting SET value='5' WHERE key='db_version' AND value='4'"
+
 #define SL3_INITITAL_QUEUE_SIZE 20
 
 using namespace zmm;
@@ -171,36 +210,44 @@ void Sqlite3Storage::init()
     /* --- database upgrades --- */
 
     if (dbVersion == "1") {
-        log_info("Doing an automatic database upgrade from database version 1 to version 2...\n");
+        log_info("Running an automatic database upgrade from database version 1 to version 2...\n");
         _exec(SQLITE3_UPDATE_1_2_1);
         _exec(SQLITE3_UPDATE_1_2_2);
         _exec(SQLITE3_UPDATE_1_2_3);
         _exec(SQLITE3_UPDATE_1_2_4);
-        log_info("database upgrade successful.\n");
+        log_info("Database upgrade successful.\n");
         dbVersion = _("2");
     }
 
     if (dbVersion == "2") {
-        log_info("Doing an automatic database upgrade from database version 2 to version 3...\n");
+        log_info("Running an automatic database upgrade from database version 2 to version 3...\n");
         _exec(SQLITE3_UPDATE_2_3_1);
         _exec(SQLITE3_UPDATE_2_3_2);
         _exec(SQLITE3_UPDATE_2_3_3);
-        log_info("database upgrade successful.\n");
+        log_info("Database upgrade successful.\n");
         dbVersion = _("3");
     }
 
     if (dbVersion == "3") {
-        log_info("Doing an automatic database upgrade from database version 3 to version 4...\n");
+        log_info("Running an automatic database upgrade from database version 3 to version 4...\n");
         _exec(SQLITE3_UPDATE_3_4_1);
         _exec(SQLITE3_UPDATE_3_4_2);
         _exec(SQLITE3_UPDATE_3_4_3);
-        log_info("database upgrade successful.\n");
+        log_info("Database upgrade successful.\n");
         dbVersion = _("4");
+    }
+
+    if (dbVersion == "4") {
+        log_info("Running an automatic database upgrade from database version 4 to version 5...\n");
+        _exec(SQLITE3_UPDATE_4_5_1);
+        _exec(SQLITE3_UPDATE_4_5_2);
+        log_info("Database upgrade successful.\n");
+        dbVersion = _("5");
     }
 
     /* --- --- ---*/
 
-    if (!string_ok(dbVersion) || dbVersion != "4")
+    if (!string_ok(dbVersion) || dbVersion != "5")
         throw _Exception(_("The database seems to be from a newer version!"));
 
     // add timer for backups
