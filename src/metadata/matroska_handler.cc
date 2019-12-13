@@ -60,21 +60,19 @@ MatroskaHandler::MatroskaHandler()
 
 void MatroskaHandler::fillMetadata(Ref<CdsItem> item)
 {
-    parseMKV(item, NULL, NULL);
+    parseMKV(item, NULL);
 }
 
-Ref<IOHandler> MatroskaHandler::serveContent(Ref<CdsItem> item, int resNum, off_t* data_size)
+Ref<IOHandler> MatroskaHandler::serveContent(Ref<CdsItem> item, int resNum)
 {
-    *data_size = -1;
-
     MemIOHandler* io_handler;
-    parseMKV(item, &io_handler, &data_size);
+    parseMKV(item, &io_handler);
 
     Ref<IOHandler> h(io_handler);
     return h;
 }
 
-void MatroskaHandler::parseMKV(Ref<CdsItem> item, MemIOHandler** p_io_handler, off_t** p_data_size)
+void MatroskaHandler::parseMKV(Ref<CdsItem> item, MemIOHandler** p_io_handler)
 {
     StdIOCallback ebml_file(item->getLocation().c_str(), ::MODE_READ);
     EbmlStream ebml_stream(ebml_file);
@@ -84,7 +82,7 @@ void MatroskaHandler::parseMKV(Ref<CdsItem> item, MemIOHandler** p_io_handler, o
         int i_upper_level = 0;
         EbmlElement * el_l1 = ebml_stream.FindNextElement(el_l0->Generic().Context, i_upper_level, ~0, true);
         while (el_l1 != NULL) {
-            parseLevel1Element(item, ebml_stream, el_l1, p_io_handler, p_data_size);
+            parseLevel1Element(item, ebml_stream, el_l1, p_io_handler);
 
             el_l1->SkipData(ebml_stream, KaxAttachments_Context);
             delete el_l1;
@@ -101,12 +99,12 @@ void MatroskaHandler::parseMKV(Ref<CdsItem> item, MemIOHandler** p_io_handler, o
     ebml_file.close();
 }
 
-void MatroskaHandler::parseLevel1Element(zmm::Ref<CdsItem> item, EbmlStream & ebml_stream, EbmlElement * el_l1, MemIOHandler** p_io_handler, off_t** p_data_size)
+void MatroskaHandler::parseLevel1Element(zmm::Ref<CdsItem> item, EbmlStream & ebml_stream, EbmlElement * el_l1, MemIOHandler** p_io_handler)
 {
     if (EbmlId(*el_l1) == KaxInfo::ClassInfos.GlobalId) {
         parseInfo(item, ebml_stream, static_cast<KaxInfo *>(el_l1));
     } else if (EbmlId(*el_l1) == KaxAttachments::ClassInfos.GlobalId) {
-        parseAttachments(item, ebml_stream, static_cast<KaxAttachments *>(el_l1), p_io_handler, p_data_size);
+        parseAttachments(item, ebml_stream, static_cast<KaxAttachments *>(el_l1), p_io_handler);
     }
 }
 
@@ -145,7 +143,7 @@ void MatroskaHandler::parseInfo(Ref<CdsItem> item, EbmlStream & ebml_stream, Kax
     }
 }
 
-void MatroskaHandler::parseAttachments(Ref<CdsItem> item, EbmlStream & ebml_stream, KaxAttachments *attachments, MemIOHandler** p_io_handler, off_t** p_data_size)
+void MatroskaHandler::parseAttachments(Ref<CdsItem> item, EbmlStream & ebml_stream, KaxAttachments *attachments, MemIOHandler** p_io_handler)
 {
     EbmlElement* dummy_el;
     int i_upper_level = 0;
@@ -169,7 +167,6 @@ void MatroskaHandler::parseAttachments(Ref<CdsItem> item, EbmlStream & ebml_stre
             if (p_io_handler != NULL) {
                 // serveContent
                 *p_io_handler = new MemIOHandler(fileData.GetBuffer(), fileData.GetSize());
-                **p_data_size = fileData.GetSize();
             } else {
                 // fillMetadata
                 String art_mimetype = getContentTypeFromByteVector(&fileData);

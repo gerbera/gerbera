@@ -42,13 +42,13 @@ class MatroskaHandler : public MetadataHandler {
 public:
     MatroskaHandler();
     virtual void fillMetadata(zmm::Ref<CdsItem> item);
-    virtual zmm::Ref<IOHandler> serveContent(zmm::Ref<CdsItem> item, int resNum, off_t* data_size);
+    virtual zmm::Ref<IOHandler> serveContent(zmm::Ref<CdsItem> item, int resNum);
 
 private:
-    void parseMKV(zmm::Ref<CdsItem> item, MemIOHandler** p_io_handler, off_t** p_data_size);
-    void parseLevel1Element(zmm::Ref<CdsItem> item, LIBEBML_NAMESPACE::EbmlStream & ebml_stream, LIBEBML_NAMESPACE::EbmlElement* el_l1, MemIOHandler** p_io_handler, off_t** p_data_size);
+    void parseMKV(zmm::Ref<CdsItem> item, MemIOHandler** p_io_handler);
+    void parseLevel1Element(zmm::Ref<CdsItem> item, LIBEBML_NAMESPACE::EbmlStream & ebml_stream, LIBEBML_NAMESPACE::EbmlElement* el_l1, MemIOHandler** p_io_handler);
     void parseInfo(zmm::Ref<CdsItem> item, EbmlStream & ebml_stream, LIBMATROSKA_NAMESPACE::KaxInfo *info);
-    void parseAttachments(zmm::Ref<CdsItem> item, LIBEBML_NAMESPACE::EbmlStream & ebml_stream, LIBMATROSKA_NAMESPACE::KaxAttachments *attachments, MemIOHandler** io_handler, off_t** p_data_size);
+    void parseAttachments(zmm::Ref<CdsItem> item, LIBEBML_NAMESPACE::EbmlStream & ebml_stream, LIBMATROSKA_NAMESPACE::KaxAttachments *attachments, MemIOHandler** io_handler);
     zmm::String getContentTypeFromByteVector(const LIBMATROSKA_NAMESPACE::KaxFileData* data) const;
     void addArtworkResource(zmm::Ref<CdsItem> item, zmm::String content_type);
 };
