@@ -5,7 +5,7 @@ RUN apt-get update &&\
     libmagic-dev libexif-dev libcurl4-openssl-dev libavutil-dev libavcodec-dev \
     libavformat-dev libavdevice-dev libavfilter-dev libavresample-dev \
     libswscale-dev libswresample-dev libpostproc-dev g++ cmake \
-    wget autoconf libtool xz-utils &&\
+    wget autoconf pkg-config libtool xz-utils libmatroska-dev libebml-dev && \
     rm -rf /var/lib/{apt,dpkg,cache,log}/
 
 WORKDIR /app

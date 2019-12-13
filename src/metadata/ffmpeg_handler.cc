@@ -150,7 +150,7 @@ static void addFfmpegMetadataFields(Ref<CdsItem> item, AVFormatContext* pFormatC
 }
 
 // ffmpeg library calls
-static void addFfmpegResourceFields(Ref<CdsItem> item, AVFormatContext* pFormatCtx, int* x, int* y)
+static void addFfmpegResourceFields(Ref<CdsItem> item, AVFormatContext* pFormatCtx)
 {
     int64_t hours, mins, secs, us;
     int audioch = 0, samplefreq = 0;
@@ -160,9 +160,6 @@ static void addFfmpegResourceFields(Ref<CdsItem> item, AVFormatContext* pFormatC
 
     // Initialize the buffers
     duration[0] = 0;
-
-    *x = 0;
-    *y = 0;
 
     // duration
     secs = pFormatCtx->duration / AV_TIME_BASE;
@@ -213,8 +210,6 @@ static void addFfmpegResourceFields(Ref<CdsItem> item, AVFormatContext* pFormatC
                 log_debug("Added resolution: %s pixel\n", resolution.c_str());
                 item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), resolution);
                 videoset = true;
-                *x = as_codecpar(st)->width;
-                *y = as_codecpar(st)->height;
             }
         }
         if ((st != NULL) && (audioset == false) && (as_codecpar(st)->codec_type == AVMEDIA_TYPE_AUDIO)) {
@@ -245,9 +240,6 @@ void FfmpegHandler::fillMetadata(Ref<CdsItem> item)
 {
     log_debug("Running ffmpeg handler on %s\n", item->getLocation().c_str());
 
-    int x = 0;
-    int y = 0;
-
     AVFormatContext* pFormatCtx = NULL;
 
     // Suppress all log messages
@@ -273,7 +265,7 @@ void FfmpegHandler::fillMetadata(Ref<CdsItem> item)
     // Add auxdata
     addFfmpegAuxdataFields(item, pFormatCtx);
     // Add resources using ffmpeg library calls
-    addFfmpegResourceFields(item, pFormatCtx, &x, &y);
+    addFfmpegResourceFields(item, pFormatCtx);
 
     // Close the video file
     avformat_close_input(&pFormatCtx);

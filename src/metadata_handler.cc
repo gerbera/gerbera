@@ -50,6 +50,10 @@
 #include "metadata/libexif_handler.h"
 #endif
 
+#ifdef HAVE_MATROSKA
+#include "metadata/matroska_handler.h"
+#endif
+
 #include "metadata/fanart_handler.h"
 
 using namespace zmm;
@@ -136,6 +140,12 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item) {
     }
 #endif // HAVE_LIBEXIF
 
+#ifdef HAVE_MATROSKA
+    if (content_type == CONTENT_TYPE_MKV) {
+        MatroskaHandler().fillMetadata(item);
+    }
+#endif
+
 #ifdef HAVE_FFMPEG
     if (content_type != CONTENT_TYPE_PLAYLIST && ((content_type == CONTENT_TYPE_OGG && item->getFlag(OBJECT_FLAG_OGG_THEORA)) || item->getMimeType().startsWith(_("video")) || item->getMimeType().startsWith(_("audio")))) {
         FfmpegHandler().fillMetadata(item);
@@ -175,6 +185,10 @@ Ref<MetadataHandler> MetadataHandler::createHandler(int handlerType)
 #ifdef HAVE_TAGLIB
     case CH_ID3:
         return Ref<MetadataHandler>(new TagLibHandler());
+#endif
+#ifdef HAVE_MATROSKA
+    case CH_MATROSKA:
+        return Ref<MetadataHandler>(new MatroskaHandler());
 #endif
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
     case CH_FFTH:

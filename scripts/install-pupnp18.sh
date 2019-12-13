@@ -1,11 +1,11 @@
-#!/bin/sh
+#!/bin/bash
 if ! [ "$(id -u)" = 0 ]; then
     echo "Please run this script with superuser access!"
     exit 1
 fi
 set -ex
 
-VERSION="1.8.4"
+VERSION="1.8.6"
 
 unamestr=$(uname)
 if [ "$unamestr" == 'FreeBSD' ]; then
