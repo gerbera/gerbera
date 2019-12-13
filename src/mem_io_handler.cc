@@ -141,3 +141,8 @@ off_t MemIOHandler::tell()
 {
     return pos;
 }
+
+void MemIOHandler::close()
+{
+    pos = -1;
+}

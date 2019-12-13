@@ -57,6 +57,7 @@ public:
     size_t read(OUT char* buf, IN size_t length) override;
     void seek(IN off_t offset, IN int whence) override;
     off_t tell() override;
+    void close() override;
 };
 
 #endif // __MEM_IO_HANDLER_H__
