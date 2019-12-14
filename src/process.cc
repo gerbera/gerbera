@@ -48,7 +48,7 @@ using namespace zmm;
 
 #define BUF_SIZE 256
 
-String run_simple_process(String prog, String param, String input)
+std::string run_simple_process(std::string prog, std::string param, std::string input)
 {
     FILE* file;
     int fd;
@@ -58,14 +58,14 @@ String run_simple_process(String prog, String param, String input)
     char temp_out[] = "mt_out_XXXXXX";
 
     Ref<ConfigManager> cfg = ConfigManager::getInstance();
-    String input_file = tempName(cfg->getOption(CFG_SERVER_TMPDIR), temp_in);
+    std::string input_file = tempName(cfg->getOption(CFG_SERVER_TMPDIR), temp_in);
     fd = open(input_file.c_str(), O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
     if (fd == -1) {
         log_debug("Failed to open input file %s: %s\n", input_file.c_str(),
             strerror(errno));
         throw _Exception(_("Failed to open input file ") + input_file + _(" ") + strerror(errno));
     }
-    ssize_t ret = write(fd, input.c_str(), input.length());
+    size_t ret = write(fd, input.c_str(), input.length());
     close(fd);
     if (ret < input.length()) {
 
@@ -75,7 +75,7 @@ String run_simple_process(String prog, String param, String input)
     }
 
     /* touching output file */
-    String output_file = tempName(cfg->getOption(CFG_SERVER_TMPDIR), temp_out);
+    std::string output_file = tempName(cfg->getOption(CFG_SERVER_TMPDIR), temp_out);
     fd = open(output_file.c_str(), O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
     if (fd == -1) {
         log_debug("Failed to open output file %s: %s\n", output_file.c_str(),
@@ -85,7 +85,7 @@ String run_simple_process(String prog, String param, String input)
     close(fd);
 
     /* executing script */
-    String command = prog + " " + param + " < " + input_file + " > " + output_file;
+    std::string command = prog + " " + param + " < " + input_file + " > " + output_file;
     log_debug("running %s\n", command.c_str());
     int sysret = system(command.c_str());
     if (sysret == -1) {

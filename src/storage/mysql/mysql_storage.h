@@ -49,17 +49,17 @@ private:
     virtual void init();
     virtual void shutdownDriver();
 
-    virtual zmm::String quote(zmm::String str);
-    virtual inline zmm::String quote(int val) { return zmm::String::from(val); }
-    virtual inline zmm::String quote(unsigned int val) { return zmm::String::from(val); }
-    virtual inline zmm::String quote(long val) { return zmm::String::from(val); }
-    virtual inline zmm::String quote(unsigned long val) { return zmm::String::from(val); }
-    virtual inline zmm::String quote(bool val) { return zmm::String(val ? '1' : '0'); }
-    virtual inline zmm::String quote(char val) { return quote(zmm::String(val)); }
-    virtual inline zmm::String quote(long long val) { return zmm::String::from(val); }
+    virtual std::string quote(std::string str);
+    virtual inline std::string quote(int val) { return std::string::from(val); }
+    virtual inline std::string quote(unsigned int val) { return std::string::from(val); }
+    virtual inline std::string quote(long val) { return std::string::from(val); }
+    virtual inline std::string quote(unsigned long val) { return std::string::from(val); }
+    virtual inline std::string quote(bool val) { return std::string(val ? '1' : '0'); }
+    virtual inline std::string quote(char val) { return quote(std::string(val)); }
+    virtual inline std::string quote(long long val) { return std::string::from(val); }
     virtual zmm::Ref<SQLResult> select(const char* query, int length);
     virtual int exec(const char* query, int length, bool getLastInsertId = false);
-    virtual void storeInternalSetting(zmm::String key, zmm::String value);
+    virtual void storeInternalSetting(std::string key, std::string value);
 
     void _exec(const char* query, int lenth = -1);
 
@@ -67,7 +67,7 @@ private:
 
     bool mysql_connection;
 
-    zmm::String getError(MYSQL* db);
+    std::string getError(MYSQL* db);
 
     std::recursive_mutex mysqlMutex;
     using AutoLock = std::lock_guard<decltype(mysqlMutex)>;

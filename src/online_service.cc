@@ -86,9 +86,9 @@ char OnlineService::getStoragePrefix()
     return getStoragePrefix(getServiceType());
 }
 
-String OnlineService::getCheckAttr(Ref<Element> xml, String attrname)
+std::string OnlineService::getCheckAttr(Ref<Element> xml, std::string attrname)
 {
-    String temp = xml->getAttribute(attrname);
+    std::string temp = xml->getAttribute(attrname);
     if (string_ok(temp))
         return temp;
     else
@@ -96,12 +96,12 @@ String OnlineService::getCheckAttr(Ref<Element> xml, String attrname)
     return nullptr;
 }
 
-int OnlineService::getCheckPosIntAttr(Ref<Element> xml, String attrname)
+int OnlineService::getCheckPosIntAttr(Ref<Element> xml, std::string attrname)
 {
     int itmp;
-    String temp = xml->getAttribute(attrname);
+    std::string temp = xml->getAttribute(attrname);
     if (string_ok(temp))
-        itmp = temp.toInt();
+        itmp = std::stoi(temp);
     else
         throw _Exception(getServiceName() + _(": Tag <") + xml->getName() + _("> is missing the required \"") + attrname + _("\" attribute!"));
 

@@ -42,7 +42,7 @@ class ConfigManagerTest : public ::testing::Test {
       file.close();
     }
 
-    config_file = _(configDir.c_str()) + DIR_SEPARATOR + "config.xml";
+    config_file = configDir + DIR_SEPARATOR + "config.xml";
     home = gerberaDir;
     prefix = gerberaDir;
     magic = "";
@@ -93,7 +93,7 @@ class ConfigManagerTest : public ::testing::Test {
   };
 
   std::string gerberaDir;
-  String config_file;
+  std::string config_file;
   std::string home;
   std::string confdir;
   std::string prefix;
@@ -122,7 +122,7 @@ TEST_F(ConfigManagerTest, ThrowsExceptionWhenMissingConfigFileAndNoDefault) {
   expErrMsg << "Try specifying an alternative configuration file on the command line.\n";
   expErrMsg << "For a list of options run: gerbera -h\n";
 
-  config_file = nullptr;
+  config_file = "";
 
   subject->setStaticArgs(config_file, _(notExistsDir.c_str()), _(confdir.c_str()), _(prefix.c_str()), _(magic.c_str()));
 
@@ -134,7 +134,7 @@ TEST_F(ConfigManagerTest, ThrowsExceptionWhenMissingConfigFileAndNoDefault) {
 }
 
 TEST_F(ConfigManagerTest, LoadsConfigFromDefaultHomeWhenExistsButNotSpecified) {
-  config_file = nullptr;
+  config_file = "";
   subject->setStaticArgs(config_file, _(home.c_str()), _(confdir.c_str()), _(prefix.c_str()), _(magic.c_str()));
 
   subject->init();

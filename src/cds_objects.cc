@@ -139,7 +139,7 @@ CdsItem::CdsItem()
     upnpClass = _("object.item");
     mimeType = _(MIMETYPE_DEFAULT);
     trackNumber = 0;
-    serviceID = nullptr;
+    serviceID = "";
 }
 
 void CdsItem::copyTo(Ref<CdsObject> obj)
@@ -247,7 +247,7 @@ void CdsItemInternalURL::validate()
 {
     CdsItemExternalURL::validate();
 
-    if (this->location.startsWith(_("http://")))
+    if (startswith_string(this->location, _("http://")))
         throw _Exception(_("Internal URL item validation failed: only realative URLs allowd\n"));
 }
 
@@ -298,9 +298,9 @@ int CdsObjectTitleComparator(void* arg1, void* arg2)
         ((CdsObject*)arg2)->title.c_str());
 }
 
-String CdsContainer::getVirtualPath()
+std::string CdsContainer::getVirtualPath()
 {
-    String location;
+    std::string location;
     if (getID() == CDS_ID_ROOT) {
         location = _("/");
     } else if (getID() == CDS_ID_FS_ROOT) {
@@ -320,11 +320,11 @@ String CdsContainer::getVirtualPath()
     return location;
 }
 
-String CdsItem::getVirtualPath()
+std::string CdsItem::getVirtualPath()
 {
     Ref<Storage> storage = Storage::getInstance();
     Ref<CdsObject> cont = storage->loadObject(getParentID());
-    String location = cont->getVirtualPath();
+    std::string location = cont->getVirtualPath();
     location = location + '/' + getTitle();
 
     if (!string_ok(location))
@@ -333,7 +333,7 @@ String CdsItem::getVirtualPath()
     return location;
 }
 
-String CdsObject::mapObjectType(int type)
+std::string CdsObject::mapObjectType(int type)
 {
     if (IS_CDS_CONTAINER(type))
         return _(STRING_OBJECT_TYPE_CONTAINER);
@@ -348,7 +348,7 @@ String CdsObject::mapObjectType(int type)
     throw Exception(_("illegal objectType: ") + type);
 }
 
-int CdsObject::remapObjectType(String objectType)
+int CdsObject::remapObjectType(std::string objectType)
 {
     if (objectType == STRING_OBJECT_TYPE_CONTAINER)
         return OBJECT_TYPE_CONTAINER;

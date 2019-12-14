@@ -33,6 +33,8 @@
 #define __ZMMF_EXCEPTION_H__
 
 #include <stdio.h>
+#include <vector>
+#include <string>
 
 #include "zmm.h"
 #include "array.h"
@@ -47,19 +49,18 @@ namespace zmm
 class Exception
 {
 protected:
-    String message;
-    String file;
-    String function;
-    int    line;
-
-    Ref<Array<StringBase> > stackTrace;
+    std::string message;
+    std::string file;
+    std::string function;
+    int line;
+    std::vector<std::string> stackTrace;
 
 public:
-    Exception(String message, const char* file, int line, const char* function);
-    Exception(String message);
-    String getMessage() const;
+    Exception(std::string message, const char* file, int line, const char* function);
+    Exception(std::string message);
+    std::string getMessage() const;
 
-    Ref<Array<StringBase> > getStackTrace();
+    std::vector<std::string> getStackTrace();
 #ifdef TOMBDEBUG
     void printStackTrace(FILE *file = LOG_FILE) const;
 #else

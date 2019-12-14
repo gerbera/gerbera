@@ -44,7 +44,7 @@ using namespace mxml;
 
 bool ATrailersContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
 {
-    String temp;
+    std::string temp;
 
     if (service->getName() != "records")
         throw _Exception(_("Recieved invalid XML for Apple Trailers service"));
@@ -68,7 +68,7 @@ bool ATrailersContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
 
 Ref<CdsObject> ATrailersContentHandler::getNextObject()
 {
-    String temp;
+    std::string temp;
     struct timespec ts;
 
     while (current_trailer_index < trailer_count) {
@@ -104,7 +104,7 @@ Ref<CdsObject> ATrailersContentHandler::getNextObject()
         item->setMimeType(trailer_mimetype);
         resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(trailer_mimetype));
 
-        item->setAuxData(_(ONLINE_SERVICE_AUX_ID), String::from(OS_ATrailers));
+        item->setAuxData(_(ONLINE_SERVICE_AUX_ID), std::to_string(OS_ATrailers));
 
         temp = trailer->getAttribute(_("id"));
         if (!string_ok(temp)) {
@@ -114,7 +114,7 @@ Ref<CdsObject> ATrailersContentHandler::getNextObject()
             continue;
         }
 
-        temp = String(OnlineService::getStoragePrefix(OS_ATrailers)) + temp;
+        temp = std::to_string(OnlineService::getStoragePrefix(OS_ATrailers)) + temp;
         item->setServiceID(temp);
 
         Ref<Element> preview = trailer->getChildByName(_("preview"));
@@ -169,7 +169,7 @@ Ref<CdsObject> ATrailersContentHandler::getNextObject()
 
         Ref<Element> cast = trailer->getChildByName(_("cast"));
         if (cast != nullptr) {
-            String actors;
+            std::string actors;
             for (int i = 0; i < cast->childCount(); i++) {
                 Ref<Node> cn = cast->getChild(i);
                 if (cn->getType() != mxml_node_element)
@@ -195,7 +195,7 @@ Ref<CdsObject> ATrailersContentHandler::getNextObject()
 
         Ref<Element> genre = trailer->getChildByName(_("genre"));
         if (genre != nullptr) {
-            String genres;
+            std::string genres;
             for (int i = 0; i < genre->childCount(); i++) {
                 Ref<Node> gn = genre->getChild(i);
                 if (gn->getType() != mxml_node_element)
@@ -232,8 +232,7 @@ Ref<CdsObject> ATrailersContentHandler::getNextObject()
         */
 
         getTimespecNow(&ts);
-        item->setAuxData(_(ONLINE_SERVICE_LAST_UPDATE),
-            String::from(ts.tv_sec));
+        item->setAuxData(_(ONLINE_SERVICE_LAST_UPDATE), std::to_string(ts.tv_sec));
 
         item->setFlag(OBJECT_FLAG_ONLINE_SERVICE);
         try {

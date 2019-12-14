@@ -196,7 +196,7 @@ Ref<CdsObject> SQLStorage::checkRefID(Ref<CdsObject> obj)
         throw _Exception(_("checkRefID called for a non-virtual object"));
 
     int refID = obj->getRefID();
-    String location = obj->getLocation();
+    std::string location = obj->getLocation();
 
     if (!string_ok(location))
         throw _Exception(_("tried to check refID without a location set"));
@@ -294,7 +294,7 @@ Ref<Array<SQLStorage::AddUpdateTable>> SQLStorage::_addUpdateObject(Ref<CdsObjec
                 resBuf << RESOURCE_SEP;
             resBuf << obj->getResource(i)->encode();
         }
-        String resStr = resBuf.str();
+        std::string resStr = resBuf.str();
         if (string_ok(resStr))
             cdsObjectSql->put(_("resources"), quote(resStr));
         else
@@ -309,7 +309,7 @@ Ref<Array<SQLStorage::AddUpdateTable>> SQLStorage::_addUpdateObject(Ref<CdsObjec
     if (IS_CDS_CONTAINER(objectType)) {
         if (!(isUpdate && obj->isVirtual()))
             throw _Exception(_("tried to add a container or tried to update a non-virtual container via _addUpdateObject; is this correct?"));
-        String dbLocation = addLocationPrefix(LOC_VIRT_PREFIX, obj->getLocation());
+        std::string dbLocation = addLocationPrefix(LOC_VIRT_PREFIX, obj->getLocation());
         cdsObjectSql->put(_("location"), quote(dbLocation));
         cdsObjectSql->put(_("location_hash"), quote(stringHash(dbLocation)));
     }
@@ -318,15 +318,15 @@ Ref<Array<SQLStorage::AddUpdateTable>> SQLStorage::_addUpdateObject(Ref<CdsObjec
         Ref<CdsItem> item = RefCast(obj, CdsItem);
 
         if (!hasReference) {
-            String loc = item->getLocation();
+            std::string loc = item->getLocation();
             if (!string_ok(loc))
                 throw _Exception(_("tried to create or update a non-referenced item without a location set"));
             if (IS_CDS_PURE_ITEM(objectType)) {
-                Ref<Array<StringBase>> pathAr = split_path(loc);
-                String path = pathAr->get(0);
+                std::vector<std::string> pathAr = split_path(loc);
+                std::string path = pathAr[0];
                 int parentID = ensurePathExistence(path, changedContainer);
                 item->setParentID(parentID);
-                String dbLocation = addLocationPrefix(LOC_FILE_PREFIX, loc);
+                std::string dbLocation = addLocationPrefix(LOC_FILE_PREFIX, loc);
                 cdsObjectSql->put(_("location"), quote(dbLocation));
                 cdsObjectSql->put(_("location_hash"), quote(stringHash(dbLocation)));
             } else {
@@ -366,7 +366,7 @@ Ref<Array<SQLStorage::AddUpdateTable>> SQLStorage::_addUpdateObject(Ref<CdsObjec
                     isUpdate ? "update" : "insert")));
         Ref<CdsActiveItem> aitem = RefCast(obj, CdsActiveItem);
 
-        cdsActiveItemSql->put(_("id"), String::from(aitem->getID()));
+        cdsActiveItemSql->put(_("id"), std::to_string(aitem->getID()));
         cdsActiveItemSql->put(_("action"), quote(aitem->getAction()));
         cdsActiveItemSql->put(_("state"), quote(aitem->getState()));
     }
@@ -391,7 +391,7 @@ Ref<Array<SQLStorage::AddUpdateTable>> SQLStorage::_addUpdateObject(Ref<CdsObjec
 
     if (obj->getParentID() == INVALID_OBJECT_ID)
         throw _Exception(_("tried to create or update an object with an illegal parent id"));
-    cdsObjectSql->put(_("parent_id"), String::from(obj->getParentID()));
+    cdsObjectSql->put(_("parent_id"), std::to_string(obj->getParentID()));
 
     return returnVal;
 }
@@ -426,14 +426,14 @@ void SQLStorage::updateObject(zmm::Ref<CdsObject> obj, int* changedContainer)
         cdsObjectSql->put(_("upnp_class"), quote(obj->getClass()));
     } else {
         if (IS_FORBIDDEN_CDS_ID(obj->getID()))
-            throw _Exception(_("tried to update an object with a forbidden ID (") + obj->getID() + ")!");
+            throw _Exception(_("tried to update an object with a forbidden ID (") + std::to_string(obj->getID()) + ")!");
         data = _addUpdateObject(obj, true, changedContainer);
         if (data == nullptr)
             return;
     }
     for (int i = 0; i < data->size(); i++) {
         Ref<AddUpdateTable> addUpdateTable = data->get(i);
-        String operation = addUpdateTable->getOperation();
+        std::string operation = addUpdateTable->getOperation();
         std::shared_ptr<std::ostringstream> qb;
         if (operation == "update") {
             qb = sqlForUpdate(obj, addUpdateTable);
@@ -463,7 +463,7 @@ Ref<CdsObject> SQLStorage::loadObject(int objectID)
     throw _ObjectNotFoundException(_("Object not found: ") + objectID);
 }
 
-Ref<CdsObject> SQLStorage::loadObjectByServiceID(String serviceID)
+Ref<CdsObject> SQLStorage::loadObjectByServiceID(std::string serviceID)
 {
     std::ostringstream qb;
     qb << SQL_QUERY << " WHERE " << TQD('f', "service_id") << '=' << quote(serviceID);
@@ -484,7 +484,7 @@ std::unique_ptr<std::vector<int>> SQLStorage::getServiceObjectIDs(char servicePr
     qb << "SELECT " << TQ("id")
         << " FROM " << TQ(CDS_OBJECT_TABLE)
         << " WHERE " << TQ("service_id")
-        << " LIKE " << quote(String(servicePrefix) + '%');
+        << " LIKE " << quote(std::string(1, servicePrefix) + '%');
 
     Ref<SQLResult> res = select(qb);
     if (res == nullptr)
@@ -492,7 +492,7 @@ std::unique_ptr<std::vector<int>> SQLStorage::getServiceObjectIDs(char servicePr
 
     Ref<SQLRow> row;
     while ((row = res->nextRow()) != nullptr) {
-        objectIDs->push_back(row->col(0).toInt());
+        objectIDs->push_back(std::stoi(row->col(0)));
     }
 
     return objectIDs;
@@ -520,7 +520,7 @@ Ref<Array<CdsObject>> SQLStorage::browse(Ref<BrowseParam> param)
             << " WHERE " << TQ("id") << '=' << objectID;
         res = select(qb);
         if (res != nullptr && (row = res->nextRow()) != nullptr) {
-            objectType = row->col(0).toInt();
+            objectType = std::stoi(row->col(0));
             haveObjectType = true;
         } else {
             throw _ObjectNotFoundException(_("Object not found: ") + objectID);
@@ -628,7 +628,7 @@ zmm::Ref<zmm::Array<CdsObject>> SQLStorage::search(zmm::Ref<SearchParam> param, 
     sqlResult = select(countSQL);
     zmm::Ref<SQLRow> countRow = sqlResult->nextRow();
     if (countRow != nullptr) {
-        *numMatches = countRow->col(0).toInt();
+        *numMatches = std::stoi(countRow->col(0));
     }
     
     std::ostringstream retrievalSQL;
@@ -677,15 +677,15 @@ int SQLStorage::getChildCount(int contId, bool containers, bool items, bool hide
     }
     res = select(qb);
     if (res != nullptr && (row = res->nextRow()) != nullptr) {
-        int childCount = row->col(0).toInt();
+        int childCount = std::stoi(row->col(0));
         return childCount;
     }
     return 0;
 }
 
-Ref<Array<StringBase>> SQLStorage::getMimeTypes()
+std::vector<std::string> SQLStorage::getMimeTypes()
 {
-    Ref<Array<StringBase>> arr(new Array<StringBase>());
+    std::vector<std::string> arr;
 
     std::ostringstream qb;
     qb << "SELECT DISTINCT " << TQ("mime_type")
@@ -699,24 +699,24 @@ Ref<Array<StringBase>> SQLStorage::getMimeTypes()
     Ref<SQLRow> row;
 
     while ((row = res->nextRow()) != nullptr) {
-        arr->append(String(row->col(0)));
+        arr.push_back(std::string(row->col(0)));
     }
 
     return arr;
 }
 
-Ref<CdsObject> SQLStorage::_findObjectByPath(String fullpath)
+Ref<CdsObject> SQLStorage::_findObjectByPath(std::string fullpath)
 {
     //log_debug("fullpath: %s\n", fullpath.c_str());
-    fullpath = fullpath.reduce(DIR_SEPARATOR);
+    fullpath = reduce_string(fullpath, DIR_SEPARATOR);
     //log_debug("fullpath after reduce: %s\n", fullpath.c_str());
-    Ref<Array<StringBase>> pathAr = split_path(fullpath);
-    String path = pathAr->get(0);
-    String filename = pathAr->get(1);
+    std::vector<std::string> pathAr = split_path(fullpath);
+    std::string path = pathAr[0];
+    std::string filename = pathAr[1];
 
     bool file = string_ok(filename);
 
-    String dbLocation;
+    std::string dbLocation;
     if (file) {
         //flushInsertBuffer(); - not needed if correctly in cache (see below)
         dbLocation = addLocationPrefix(LOC_FILE_PREFIX, fullpath);
@@ -740,12 +740,12 @@ Ref<CdsObject> SQLStorage::_findObjectByPath(String fullpath)
     return createObjectFromRow(row);
 }
 
-Ref<CdsObject> SQLStorage::findObjectByPath(String fullpath)
+Ref<CdsObject> SQLStorage::findObjectByPath(std::string fullpath)
 {
     return _findObjectByPath(fullpath);
 }
 
-int SQLStorage::findObjectIDByPath(String fullpath)
+int SQLStorage::findObjectIDByPath(std::string fullpath)
 {
     Ref<CdsObject> obj = _findObjectByPath(fullpath);
     if (obj == nullptr)
@@ -753,31 +753,31 @@ int SQLStorage::findObjectIDByPath(String fullpath)
     return obj->getID();
 }
 
-int SQLStorage::ensurePathExistence(String path, int* changedContainer)
+int SQLStorage::ensurePathExistence(std::string path, int* changedContainer)
 {
     *changedContainer = INVALID_OBJECT_ID;
-    String cleanPath = path.reduce(DIR_SEPARATOR);
-    if (cleanPath == DIR_SEPARATOR)
+    std::string cleanPath = reduce_string(path, DIR_SEPARATOR);
+    if (cleanPath == std::string(1, DIR_SEPARATOR))
         return CDS_ID_FS_ROOT;
 
-    if (cleanPath.charAt(cleanPath.length() - 1) == DIR_SEPARATOR) // cut off trailing slash
-        cleanPath = cleanPath.substring(0, cleanPath.length() - 1);
+    if (cleanPath.at(cleanPath.length() - 1) == DIR_SEPARATOR) // cut off trailing slash
+        cleanPath = cleanPath.substr(0, cleanPath.length() - 1);
 
     return _ensurePathExistence(cleanPath, changedContainer);
 }
 
-int SQLStorage::_ensurePathExistence(String path, int* changedContainer)
+int SQLStorage::_ensurePathExistence(std::string path, int* changedContainer)
 {
-    if (path == DIR_SEPARATOR)
+    if (path == std::string(1, DIR_SEPARATOR))
         return CDS_ID_FS_ROOT;
 
     Ref<CdsObject> obj = findObjectByPath(path + DIR_SEPARATOR);
     if (obj != nullptr)
         return obj->getID();
 
-    Ref<Array<StringBase>> pathAr = split_path(path);
-    String parent = pathAr->get(0);
-    String folder = pathAr->get(1);
+    std::vector<std::string> pathAr = split_path(path);
+    std::string parent = pathAr[0];
+    std::string folder = pathAr[1];
 
     int parentID = ensurePathExistence(parent, changedContainer);
 
@@ -785,10 +785,10 @@ int SQLStorage::_ensurePathExistence(String path, int* changedContainer)
     if (changedContainer != nullptr && *changedContainer == INVALID_OBJECT_ID)
         *changedContainer = parentID;
 
-    return createContainer(parentID, f2i->convert(folder), path, false, nullptr, INVALID_OBJECT_ID, nullptr);
+    return createContainer(parentID, f2i->convert(folder), path, false, "", INVALID_OBJECT_ID, nullptr);
 }
 
-int SQLStorage::createContainer(int parentID, String name, String path, bool isVirtual, String upnpClass, int refID, Ref<Dictionary> itemMetadata)
+int SQLStorage::createContainer(int parentID, std::string name, std::string path, bool isVirtual, std::string upnpClass, int refID, Ref<Dictionary> itemMetadata)
 {
     // log_debug("Creating Container: parent: %d, name: %s, path %s, isVirt: %d, upnpClass: %s, refId: %d\n",
     // parentID, name.c_str(), path.c_str(), isVirtual, upnpClass.c_str(), refID);
@@ -797,7 +797,7 @@ int SQLStorage::createContainer(int parentID, String name, String path, bool isV
         if (refObj == nullptr)
             throw _Exception(_("tried to create container with refID set, but refID doesn't point to an existing object"));
     }
-    String dbLocation = addLocationPrefix((isVirtual ? LOC_VIRT_PREFIX : LOC_DIR_PREFIX), path);
+    std::string dbLocation = addLocationPrefix((isVirtual ? LOC_VIRT_PREFIX : LOC_DIR_PREFIX), path);
 
     Ref<Dictionary> metadata = NULL;
     if (itemMetadata != nullptr) {
@@ -864,11 +864,11 @@ int SQLStorage::createContainer(int parentID, String name, String path, bool isV
     return newID;
 }
 
-String SQLStorage::buildContainerPath(int parentID, String title)
+std::string SQLStorage::buildContainerPath(int parentID, std::string title)
 {
     //title = escape(title, xxx);
     if (parentID == CDS_ID_ROOT)
-        return String(VIRTUAL_CONTAINER_SEPARATOR) + title;
+        return std::string(1, VIRTUAL_CONTAINER_SEPARATOR) + title;
 
     std::ostringstream qb;
     qb << "SELECT " << TQ("location") << " FROM " << TQ(CDS_OBJECT_TABLE)
@@ -883,23 +883,23 @@ String SQLStorage::buildContainerPath(int parentID, String title)
         return nullptr;
 
     char prefix;
-    String path = stripLocationPrefix(&prefix, row->col(0)) + VIRTUAL_CONTAINER_SEPARATOR + title;
+    std::string path = stripLocationPrefix(&prefix, row->col(0)) + VIRTUAL_CONTAINER_SEPARATOR + title;
     if (prefix != LOC_VIRT_PREFIX)
         throw _Exception(_("tried to build a virtual container path with an non-virtual parentID"));
 
     return path;
 }
 
-void SQLStorage::addContainerChain(String path, String lastClass, int lastRefID, int* containerID, int* updateID, Ref<Dictionary> lastMetadata)
+void SQLStorage::addContainerChain(std::string path, std::string lastClass, int lastRefID, int* containerID, int* updateID, Ref<Dictionary> lastMetadata)
 {
     log_debug("Adding container Chain for path: %s, lastRefId: %d, containerId: %d\n", path.c_str(), lastRefID, *containerID);
-    path = path.reduce(VIRTUAL_CONTAINER_SEPARATOR);
-    if (path == VIRTUAL_CONTAINER_SEPARATOR) {
+    path = reduce_string(path, VIRTUAL_CONTAINER_SEPARATOR);
+    if (path == std::string(1, VIRTUAL_CONTAINER_SEPARATOR)) {
         *containerID = CDS_ID_ROOT;
         return;
     }
     std::ostringstream qb;
-    String dbLocation = addLocationPrefix(LOC_VIRT_PREFIX, path);
+    std::string dbLocation = addLocationPrefix(LOC_VIRT_PREFIX, path);
     qb << "SELECT " << TQ("id") << " FROM " << TQ(CDS_OBJECT_TABLE)
         << " WHERE " << TQ("location_hash") << '=' << quote(stringHash(dbLocation))
         << " AND " << TQ("location") << '=' << quote(dbLocation)
@@ -910,56 +910,56 @@ void SQLStorage::addContainerChain(String path, String lastClass, int lastRefID,
         Ref<SQLRow> row = res->nextRow();
         if (row != nullptr) {
             if (containerID != nullptr)
-                *containerID = row->col(0).toInt();
+                *containerID = std::stoi(row->col(0));
             return;
         }
     }
 
     int parentContainerID;
-    String newpath, container;
+    std::string newpath, container;
     stripAndUnescapeVirtualContainerFromPath(path, newpath, container);
 
-    addContainerChain(newpath, nullptr, INVALID_OBJECT_ID, &parentContainerID, updateID, nullptr);
+    addContainerChain(newpath, "", INVALID_OBJECT_ID, &parentContainerID, updateID, nullptr);
     if (updateID != nullptr && *updateID == INVALID_OBJECT_ID)
         *updateID = parentContainerID;
     *containerID = createContainer(parentContainerID, container, path, true, lastClass, lastRefID, lastMetadata);
 }
 
-String SQLStorage::addLocationPrefix(char prefix, String path)
+std::string SQLStorage::addLocationPrefix(char prefix, std::string path)
 {
-    return String(prefix) + path;
+    return std::string(1, prefix) + path;
 }
 
-String SQLStorage::stripLocationPrefix(char* prefix, String path)
+std::string SQLStorage::stripLocationPrefix(char* prefix, std::string path)
 {
-    if (path == nullptr) {
+    if (path.empty()) {
         *prefix = LOC_ILLEGAL_PREFIX;
-        return nullptr;
+        return "";
     }
-    *prefix = path.charAt(0);
-    return path.substring(1);
+    *prefix = path.at(0);
+    return path.substr(1);
 }
 
-String SQLStorage::stripLocationPrefix(String path)
+std::string SQLStorage::stripLocationPrefix(std::string path)
 {
-    if (path == nullptr)
-        return nullptr;
-    return path.substring(1);
+    if (path.empty())
+        return "";
+    return path.substr(1);
 }
 
 Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
 {
-    int objectType = row->col(_object_type).toInt();
+    int objectType = std::stoi(row->col(_object_type));
     Ref<CdsObject> obj = CdsObject::createObject(objectType);
 
     /* set common properties */
-    obj->setID(row->col(_id).toInt());
-    obj->setRefID(row->col(_ref_id).toInt());
+    obj->setID(std::stoi(row->col(_id)));
+    obj->setRefID(stoi_string(row->col(_ref_id)));
 
-    obj->setParentID(row->col(_parent_id).toInt());
+    obj->setParentID(std::stoi(row->col(_parent_id)));
     obj->setTitle(row->col(_dc_title));
     obj->setClass(fallbackString(row->col(_upnp_class), row->col(_ref_upnp_class)));
-    obj->setFlags(row->col(_flags).toUInt());
+    obj->setFlags(std::stoi(row->col(_flags)));
 
     Ref<Dictionary> meta = retrieveMetadataForObject(obj->getID());
     if (meta != nullptr && meta->size())
@@ -972,25 +972,25 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
     if (meta == nullptr || meta->size() == 0) {
         // fallback to metadata that might be in mt_cds_object, which
         // will be useful if retrieving for schema upgrade
-        String metadataStr = row->col(_metadata);
+        std::string metadataStr = row->col(_metadata);
         meta->decode(metadataStr);
         obj->setMetadata(meta);
     }
 
-    String auxdataStr = fallbackString(row->col(_auxdata), row->col(_ref_auxdata));
+    std::string auxdataStr = fallbackString(row->col(_auxdata), row->col(_ref_auxdata));
     Ref<Dictionary> aux(new Dictionary());
     aux->decode(auxdataStr);
     obj->setAuxData(aux);
 
-    String resources_str = fallbackString(row->col(_resources), row->col(_ref_resources));
+    std::string resources_str = fallbackString(row->col(_resources), row->col(_ref_resources));
     bool resource_zero_ok = false;
     if (string_ok(resources_str)) {
-        Ref<Array<StringBase>> resources = split_string(resources_str,
+        std::vector<std::string> resources = split_string(resources_str,
             RESOURCE_SEP);
-        for (int i = 0; i < resources->size(); i++) {
+        for (size_t i = 0; i < resources.size(); i++) {
             if (i == 0)
                 resource_zero_ok = true;
-            obj->addResource(CdsResource::decode(resources->get(i)));
+            obj->addResource(CdsResource::decode(resources[i]));
         }
     }
 
@@ -1003,13 +1003,13 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
 
     if (IS_CDS_CONTAINER(objectType)) {
         Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
-        cont->setUpdateID(row->col(_update_id).toInt());
+        cont->setUpdateID(std::stoi(row->col(_update_id)));
         char locationPrefix;
         cont->setLocation(stripLocationPrefix(&locationPrefix, row->col(_location)));
         if (locationPrefix == LOC_VIRT_PREFIX)
             cont->setVirtual(true);
 
-        String autoscanPersistent = row->col(_as_persistent);
+        std::string autoscanPersistent = row->col(_as_persistent);
         if (string_ok(autoscanPersistent)) {
             if (remapBool(autoscanPersistent))
                 cont->setAutoscanType(OBJECT_AUTOSCAN_CFG);
@@ -1036,7 +1036,7 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
             item->setLocation(fallbackString(row->col(_location), row->col(_ref_location)));
         }
 
-        item->setTrackNumber(row->col(_track_number).toInt());
+        item->setTrackNumber(stoi_string(row->col(_track_number)));
 
         if (string_ok(row->col(_ref_service_id)))
             item->setServiceID(row->col(_ref_service_id));
@@ -1073,14 +1073,14 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
 
 Ref<CdsObject> SQLStorage::createObjectFromSearchRow(Ref<SQLRow> row)
 {
-    int objectType = row->col(_object_type).toInt();
+    int objectType = std::stoi(row->col(_object_type));
     Ref<CdsObject> obj = CdsObject::createObject(objectType);
 
     /* set common properties */
-    obj->setID(row->col(SearchCol::id).toInt());
-    obj->setRefID(row->col(SearchCol::ref_id).toInt());
+    obj->setID(std::stoi(row->col(SearchCol::id)));
+    obj->setRefID(std::stoi(row->col(SearchCol::ref_id)));
 
-    obj->setParentID(row->col(SearchCol::parent_id).toInt());
+    obj->setParentID(std::stoi(row->col(SearchCol::parent_id)));
     obj->setTitle(row->col(SearchCol::dc_title));
     obj->setClass(row->col(SearchCol::upnp_class));
 
@@ -1088,14 +1088,14 @@ Ref<CdsObject> SQLStorage::createObjectFromSearchRow(Ref<SQLRow> row)
     if (meta != nullptr)
         obj->setMetadata(meta);
 
-    String resources_str = row->col(SearchCol::resources);
+    std::string resources_str = row->col(SearchCol::resources);
     bool resource_zero_ok = false;
     if (string_ok(resources_str)) {
-        Ref<Array<StringBase>> resources = split_string(resources_str, RESOURCE_SEP);
-        for (int i = 0; i < resources->size(); i++) {
+        std::vector<std::string> resources = split_string(resources_str, RESOURCE_SEP);
+        for (size_t i = 0; i < resources.size(); i++) {
             if (i == 0)
                 resource_zero_ok = true;
-            obj->addResource(CdsResource::decode(resources->get(i)));
+            obj->addResource(CdsResource::decode(resources[i]));
         }
     }
 
@@ -1111,7 +1111,7 @@ Ref<CdsObject> SQLStorage::createObjectFromSearchRow(Ref<SQLRow> row)
             item->setLocation(row->col(SearchCol::location));
         }
 
-        item->setTrackNumber(row->col(SearchCol::track_number).toInt());
+        item->setTrackNumber(std::stoi(row->col(SearchCol::track_number)));
     } else {
         throw _StorageException(nullptr, _("unknown object type: ") + objectType);
     }
@@ -1149,12 +1149,12 @@ int SQLStorage::getTotalFiles()
     Ref<SQLResult> res = select(query);
     Ref<SQLRow> row;
     if (res != nullptr && (row = res->nextRow()) != nullptr) {
-        return row->col(0).toInt();
+        return std::stoi(row->col(0));
     }
     return 0;
 }
 
-String SQLStorage::incrementUpdateIDs(shared_ptr<unordered_set<int>> ids)
+std::string SQLStorage::incrementUpdateIDs(shared_ptr<unordered_set<int>> ids)
 {
     if (ids->empty())
         return nullptr;
@@ -1204,7 +1204,7 @@ String SQLStorage::incrementUpdateIDs(shared_ptr<unordered_set<int>> ids)
 // only run when that's what we are using.
 #define MAX_ART_CONTAINERS 100
 
-String SQLStorage::findFolderImage(int id, String trackArtBase)
+std::string SQLStorage::findFolderImage(int id, std::string trackArtBase)
 {
     std::ostringstream q;
     // folder.jpg or cover.jpg [and variants]
@@ -1232,7 +1232,7 @@ String SQLStorage::findFolderImage(int id, String trackArtBase)
     q << TQ("id") << " IN ";
     q <<               "(";
     q << "SELECT " << TQ("ref_id") << " FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE ";
-    q << TQ("parent_id") << '=' << quote(String::from(id)) << " AND ";
+    q << TQ("parent_id") << '=' << quote(std::to_string(id)) << " AND ";
     q << TQ("object_type") << '=' << quote(OBJECT_TYPE_ITEM);
 
     // only use this optimization on sqlite3
@@ -1245,7 +1245,7 @@ String SQLStorage::findFolderImage(int id, String trackArtBase)
     q << "     ) OR ";
 #endif
         // straightforward folder listing of real filesystem
-    q << TQ("parent_id") << '=' << quote(String::from(id));
+    q << TQ("parent_id") << '=' << quote(std::to_string(id));
 #ifndef ONLY_REAL_FOLDER_ART
     q << ")";
 #endif
@@ -1261,7 +1261,7 @@ String SQLStorage::findFolderImage(int id, String trackArtBase)
         log_debug("findFolderImage result: %s\n", row->col(0).c_str());
         return row->col(0);
     }
-    return nullptr;
+    return "";
 }
 
 
@@ -1288,7 +1288,7 @@ shared_ptr<unordered_set<int>> SQLStorage::getObjects(int parentID, bool without
     shared_ptr<unordered_set<int>> ret = make_shared<unordered_set<int>>();
 
     while ((row = res->nextRow()) != nullptr) {
-        ret->insert(row->col(0).toInt());
+        ret->insert(std::stoi(row->col(0)));
     }
     return ret;
 }
@@ -1301,7 +1301,7 @@ Ref<Storage::ChangedContainers> SQLStorage::removeObjects(shared_ptr<unordered_s
 
     for (const auto& id : *list) {
         if (IS_FORBIDDEN_CDS_ID(id))
-            throw _Exception(_("tried to delete a forbidden ID (") + id + ")!");
+            throw _Exception(_("tried to delete a forbidden ID (") + std::to_string(id) + ")!");
     }
 
     std::ostringstream idsBuf;
@@ -1317,11 +1317,11 @@ Ref<Storage::ChangedContainers> SQLStorage::removeObjects(shared_ptr<unordered_s
     std::vector<int32_t> containers;
     Ref<SQLRow> row;
     while ((row = res->nextRow()) != nullptr) {
-        int objectType = row->col(1).toInt();
+        int objectType = std::stoi(row->col(1));
         if (IS_CDS_CONTAINER(objectType))
-            containers.push_back(row->col(0).toLong());
+            containers.push_back(std::stol(row->col(0)));
         else
-            items.push_back(row->col(0).toLong());
+            items.push_back(std::stol(row->col(0)));
     }
     return _purgeEmptyContainers(_recursiveRemove(items, containers, all));
 }
@@ -1349,7 +1349,7 @@ void SQLStorage::_removeObjects(const std::vector<int32_t> &objectIDs) {
         while ((row = res->nextRow()) != nullptr) {
             bool persistent = remapBool(row->col(1));
             if (persistent) {
-                String location = stripLocationPrefix(row->col(2));
+                std::string location = stripLocationPrefix(row->col(2));
                 std::ostringstream u;
                 u << "UPDATE " << TQ(AUTOSCAN_TABLE)
                   << " SET " << TQ("obj_id") << "=" SQL_NULL
@@ -1399,19 +1399,19 @@ Ref<Storage::ChangedContainers> SQLStorage::removeObject(int objectID, bool all)
     if (row == nullptr)
         return nullptr;
 
-    int objectType = row->col(0).toInt();
+    int objectType = std::stoi(row->col(0));
     bool isContainer = IS_CDS_CONTAINER(objectType);
     if (all && !isContainer) {
-        String ref_id_str = row->col(1);
+        std::string ref_id_str = row->col(1);
         int ref_id;
         if (string_ok(ref_id_str)) {
-            ref_id = ref_id_str.toInt();
+            ref_id = std::stoi(ref_id_str);
             if (!IS_FORBIDDEN_CDS_ID(ref_id))
                 objectID = ref_id;
         }
     }
     if (IS_FORBIDDEN_CDS_ID(objectID))
-        throw _Exception(_("tried to delete a forbidden ID (") + objectID + ")!");
+        throw _Exception(_("tried to delete a forbidden ID (") + std::to_string(objectID) + ")!");
     std::vector<int32_t> itemIds;
     std::vector<int32_t> containerIds;
     if (isContainer) {
@@ -1463,7 +1463,7 @@ Ref<Storage::ChangedContainers> SQLStorage::_recursiveRemove(
             throw _StorageException(nullptr, _("sql error"));
         parentIds.clear();
         while ((row = res->nextRow()) != nullptr) {
-            changedContainers->ui.push_back(row->col(0).toInt());
+            changedContainers->ui.push_back(std::stoi(row->col(0)));
         }
     }
 
@@ -1479,7 +1479,7 @@ Ref<Storage::ChangedContainers> SQLStorage::_recursiveRemove(
                 throw _StorageException(nullptr, std::string("sql error: ") + sql.str());
             parentIds.clear();
             while ((row = res->nextRow()) != nullptr) {
-                changedContainers->upnp.push_back(row->col(0).toInt());
+                changedContainers->upnp.push_back(std::stoi(row->col(0)));
             }
         }
 
@@ -1491,8 +1491,8 @@ Ref<Storage::ChangedContainers> SQLStorage::_recursiveRemove(
                 throw _StorageException(nullptr, std::string("sql error: ") + sql.str());
             itemIds.clear();
             while ((row = res->nextRow()) != nullptr) {
-                removeIds.push_back(row->col(0).toInt());
-                changedContainers->upnp.push_back(row->col(1).toInt());
+                removeIds.push_back(std::stoi(row->col(0)));
+                changedContainers->upnp.push_back(std::stoi(row->col(1)));
             }
         }
 
@@ -1504,24 +1504,24 @@ Ref<Storage::ChangedContainers> SQLStorage::_recursiveRemove(
                 throw _StorageException(nullptr, std::string("sql error: ") + sql.str());
             containerIds.clear();
             while ((row = res->nextRow()) != nullptr) {
-                int objectType = row->col(1).toInt();
+                int objectType = std::stoi(row->col(1));
                 if (IS_CDS_CONTAINER(objectType)) {
-                    containerIds.push_back(row->col(0).toInt());
-                    removeIds.push_back(row->col(0).toInt());
+                    containerIds.push_back(std::stoi(row->col(0)));
+                    removeIds.push_back(std::stoi(row->col(0)));
                 } else {
                     if (all) {
-                        String refId = row->col(2);
+                        std::string refId = row->col(2);
                         if (string_ok(refId)) {
-                            parentIds.push_back(row->col(2).toInt());
-                            itemIds.push_back(row->col(2).toInt());
-                            removeIds.push_back(row->col(2).toInt());
+                            parentIds.push_back(std::stoi(row->col(2)));
+                            itemIds.push_back(std::stoi(row->col(2)));
+                            removeIds.push_back(std::stoi(row->col(2)));
                         } else {
-                            removeIds.push_back(row->col(0).toInt());
-                            itemIds.push_back(row->col(0).toInt());
+                            removeIds.push_back(std::stoi(row->col(0)));
+                            itemIds.push_back(std::stoi(row->col(0)));
                         }
                     } else {
-                        removeIds.push_back(row->col(0).toInt());
-                        itemIds.push_back(row->col(0).toInt());
+                        removeIds.push_back(std::stoi(row->col(0)));
+                        itemIds.push_back(std::stoi(row->col(0)));
                     }
                 }
             }
@@ -1542,7 +1542,7 @@ Ref<Storage::ChangedContainers> SQLStorage::_recursiveRemove(
     return changedContainers;
 }
 
-zmm::String SQLStorage::toCSV(const std::vector<int>& input)
+std::string SQLStorage::toCSV(const std::vector<int>& input)
 {
     return join(input, ",");
 }
@@ -1596,14 +1596,14 @@ Ref<Storage::ChangedContainers> SQLStorage::_purgeEmptyContainers(Ref<ChangedCon
             if (res == nullptr)
                 throw _Exception(_("db error"));
             while ((row = res->nextRow()) != nullptr) {
-                int flags = row->col(3).toInt();
+                int flags = std::stoi(row->col(3));
                 if (flags & OBJECT_FLAG_PERSISTENT_CONTAINER)
-                    changedContainers->upnp.push_back(row->col(0).toInt());
+                    changedContainers->upnp.push_back(std::stoi(row->col(0)));
                 else if (row->col(1) == "0") {
-                    del.push_back(row->col(0).toInt());
-                    selUi.push_back(row->col(2).toInt());
+                    del.push_back(std::stoi(row->col(0)));
+                    selUi.push_back(std::stoi(row->col(2)));
                 } else {
-                    selUpnp.push_back(row->col(0).toInt());
+                    selUpnp.push_back(std::stoi(row->col(0)));
                 }
             }
         }
@@ -1617,15 +1617,15 @@ Ref<Storage::ChangedContainers> SQLStorage::_purgeEmptyContainers(Ref<ChangedCon
             if (res == nullptr)
                 throw _Exception(_("db error"));
             while ((row = res->nextRow()) != nullptr) {
-                int flags = row->col(3).toInt();
+                int flags = std::stoi(row->col(3));
                 if (flags & OBJECT_FLAG_PERSISTENT_CONTAINER) {
-                    changedContainers->ui.push_back(row->col(0).toInt());
-                    changedContainers->upnp.push_back(row->col(0).toInt());
+                    changedContainers->ui.push_back(std::stoi(row->col(0)));
+                    changedContainers->upnp.push_back(std::stoi(row->col(0)));
                 } else if (row->col(1) == "0") {
-                    del.push_back(row->col(0).toInt());
-                    selUi.push_back(row->col(2).toInt());
+                    del.push_back(std::stoi(row->col(0)));
+                    selUi.push_back(std::stoi(row->col(2)));
                 } else {
-                    selUi.push_back(row->col(0).toInt());
+                    selUi.push_back(std::stoi(row->col(0)));
                 }
             }
         }
@@ -1658,7 +1658,7 @@ Ref<Storage::ChangedContainers> SQLStorage::_purgeEmptyContainers(Ref<ChangedCon
     return changedContainers;
 }
 
-String SQLStorage::getInternalSetting(String key)
+std::string SQLStorage::getInternalSetting(std::string key)
 {
     std::ostringstream q;
     q << "SELECT " << TQ("value") << " FROM " << TQ(INTERNAL_SETTINGS_TABLE) << " WHERE " << TQ("key") << '='
@@ -1698,7 +1698,7 @@ void SQLStorage::updateAutoscanPersistentList(ScanMode scanmode, Ref<AutoscanLis
         // the scanmode should match the given parameter
         assert(ad->getScanMode() == scanmode);
 
-        String location = ad->getLocation();
+        std::string location = ad->getLocation();
         if (!string_ok(location))
             throw _Exception(_("AutoscanDirectoy with illegal location given to SQLStorage::updateAutoscanPersistentList"));
 
@@ -1717,7 +1717,7 @@ void SQLStorage::updateAutoscanPersistentList(ScanMode scanmode, Ref<AutoscanLis
             throw _StorageException(nullptr, _("query error while selecting from autoscan list"));
         Ref<SQLRow> row;
         if ((row = res->nextRow()) != nullptr) {
-            ad->setStorageID(row->col(0).toInt());
+            ad->setStorageID(std::stoi(row->col(0)));
             updateAutoscanDirectory(ad);
         } else
             addAutoscanDirectory(ad);
@@ -1748,7 +1748,7 @@ Ref<AutoscanList> SQLStorage::getAutoscanList(ScanMode scanmode)
     while ((row = res->nextRow()) != nullptr) {
         Ref<AutoscanDirectory> dir = _fillAutoscanDirectory(row);
         if (dir == nullptr)
-            removeAutoscanDirectory(row->col(0).toInt());
+            removeAutoscanDirectory(std::stoi(row->col(0)));
         else
             ret->add(dir);
     }
@@ -1778,12 +1778,12 @@ Ref<AutoscanDirectory> SQLStorage::getAutoscanDirectory(int objectID)
 Ref<AutoscanDirectory> SQLStorage::_fillAutoscanDirectory(Ref<SQLRow> row)
 {
     int objectID = INVALID_OBJECT_ID;
-    String objectIDstr = row->col(1);
+    std::string objectIDstr = row->col(1);
     if (string_ok(objectIDstr))
-        objectID = objectIDstr.toInt();
-    int storageID = row->col(0).toInt();
+        objectID = std::stoi(objectIDstr);
+    int storageID = std::stoi(row->col(0));
 
-    String location;
+    std::string location;
     if (objectID == INVALID_OBJECT_ID) {
         location = row->col(9);
     } else {
@@ -1800,8 +1800,8 @@ Ref<AutoscanDirectory> SQLStorage::_fillAutoscanDirectory(Ref<SQLRow> row)
     bool persistent = remapBool(row->col(8));
     int interval = 0;
     if (mode == ScanMode::Timed)
-        interval = row->col(6).toInt();
-    time_t last_modified = row->col(7).toLong();
+        interval = std::stoi(row->col(6));
+    time_t last_modified = std::stol(row->col(7));
 
     //log_debug("adding autoscan location: %s; recursive: %d\n", location.c_str(), recursive);
 
@@ -1928,7 +1928,7 @@ int SQLStorage::isAutoscanDirectoryRecursive(int objectID)
     return _getAutoscanDirectoryInfo(objectID, _("recursive"));
 }
 
-int SQLStorage::_getAutoscanDirectoryInfo(int objectID, String field)
+int SQLStorage::_getAutoscanDirectoryInfo(int objectID, std::string field)
 {
     if (objectID == INVALID_OBJECT_ID)
         return 0;
@@ -1956,7 +1956,7 @@ int SQLStorage::_getAutoscanObjectID(int autoscanID)
         throw _StorageException(nullptr, _("error while doing select on "));
     Ref<SQLRow> row;
     if ((row = res->nextRow()) != nullptr && string_ok(row->col(0)))
-        return row->col(0).toInt();
+        return std::stoi(row->col(0));
     return INVALID_OBJECT_ID;
 }
 
@@ -2049,7 +2049,7 @@ std::unique_ptr<std::vector<int>> SQLStorage::_checkOverlappingAutoscans(Ref<Aut
         q << "SELECT " << TQ("obj_id")
            << " FROM " << TQ(AUTOSCAN_TABLE)
            << " WHERE " << TQ("path_ids") << " LIKE "
-           << quote(_("%,") + checkObjectID + ",%");
+           << quote(_("%,") + std::to_string(checkObjectID) + ",%");
         if (storageID >= 0)
             q << " AND " << TQ("id") << " != " << quote(storageID);
         q << " LIMIT 1";
@@ -2060,7 +2060,7 @@ std::unique_ptr<std::vector<int>> SQLStorage::_checkOverlappingAutoscans(Ref<Aut
         if (res == nullptr)
             throw _Exception(_("SQL error"));
         if ((row = res->nextRow()) != nullptr) {
-            int objectID = row->col(0).toInt();
+            int objectID = std::stoi(row->col(0));
             log_debug("-------------- %d\n", objectID);
             Ref<CdsObject> obj = loadObject(objectID);
             if (obj == nullptr)
@@ -2089,7 +2089,7 @@ std::unique_ptr<std::vector<int>> SQLStorage::_checkOverlappingAutoscans(Ref<Aut
     if ((row = res->nextRow()) == nullptr)
         return pathIDs;
     else {
-        int objectID = row->col(0).toInt();
+        int objectID = std::stoi(row->col(0));
         Ref<CdsObject> obj = loadObject(objectID);
         if (obj == nullptr)
             throw _Exception(_("Referenced object (by Autoscan) not found."));
@@ -2118,12 +2118,12 @@ std::unique_ptr<std::vector<int>> SQLStorage::getPathIDs(int objectID)
         res = select(q);
         if (res == nullptr || (row = res->nextRow()) == nullptr)
             break;
-        objectID = row->col(0).toInt();
+        objectID = std::stoi(row->col(0));
     }
     return pathIDs;
 }
 
-String SQLStorage::getFsRootName()
+std::string SQLStorage::getFsRootName()
 {
     if (string_ok(fsRootName))
         return fsRootName;
@@ -2131,7 +2131,7 @@ String SQLStorage::getFsRootName()
     return fsRootName;
 }
 
-void SQLStorage::setFsRootName(String rootName)
+void SQLStorage::setFsRootName(std::string rootName)
 {
     if (string_ok(rootName)) {
         fsRootName = rootName;
@@ -2166,7 +2166,7 @@ void SQLStorage::loadLastID()
     if (row == nullptr)
         throw _Exception(_("could not load lastID (row==nullptr)"));
 
-    lastID = row->col(0).toInt();
+    lastID = std::stoi(row->col(0));
     if (lastID < CDS_ID_FS_ROOT)
         throw _Exception(_("could not load correct lastID (db not initialized?)"));
 
@@ -2200,7 +2200,7 @@ void SQLStorage::loadLastMetadataID()
     if (row == nullptr)
         throw _Exception(_("could not load lastMetadataID (row==nullptr)"));
 
-    lastMetadataID = row->col(0).toInt();
+    lastMetadataID = stoi_string(row->col(0));
     if (lastMetadataID < CDS_ID_ROOT)
         throw _Exception(_("could not load correct lastMetadataID (db not initialized?)"));
 }
@@ -2241,7 +2241,7 @@ void SQLStorage::generateMetadataDBOperations(Ref<CdsObject> obj, bool isUpdate,
         Ref<Array<DictionaryElement>> el = dict->getElements();
         for (int i = 0; i < objMetadataSize; i++) {
             Ref<DictionaryElement> property = el->get(i);
-            String operation = dbMetadata->get(property->getKey()).length() == 0 ? "insert" : "update";
+            std::string operation = dbMetadata->get(property->getKey()).length() == 0 ? "insert" : "update";
             Ref<Dictionary> metadataSql(new Dictionary());
             operations->append(Ref<AddUpdateTable>(new AddUpdateTable(_(METADATA_TABLE), metadataSql, operation)));
             metadataSql->put(_("property_name"), quote(property->getKey()));
@@ -2267,7 +2267,7 @@ std::shared_ptr<std::ostringstream> SQLStorage::sqlForInsert(Ref<CdsObject> obj,
     int lastInsertID = INVALID_OBJECT_ID;
     int lastMetadataInsertID = INVALID_OBJECT_ID;
 
-    String tableName = addUpdateTable->getTable();
+    std::string tableName = addUpdateTable->getTable();
     Ref<Array<DictionaryElement>> dataElements = addUpdateTable->getDict()->getElements();
 
     std::ostringstream fields;
@@ -2280,7 +2280,7 @@ std::shared_ptr<std::ostringstream> SQLStorage::sqlForInsert(Ref<CdsObject> obj,
             values << ',';
         }
         fields << TQ(element->getKey());
-        if (lastInsertID != INVALID_OBJECT_ID && element->getKey() == "id" && element->getValue().toInt() == INVALID_OBJECT_ID) {
+        if (lastInsertID != INVALID_OBJECT_ID && element->getKey() == "id" && std::stoi(element->getValue()) == INVALID_OBJECT_ID) {
             if (tableName == _(METADATA_TABLE))
                 values << lastMetadataInsertID;
             else
@@ -2316,7 +2316,7 @@ std::shared_ptr<std::ostringstream> SQLStorage::sqlForUpdate(Ref<CdsObject> obj,
         || (addUpdateTable->getTable() == _(METADATA_TABLE) && addUpdateTable->getDict()->size() != 2))
         throw _Exception(_("sqlForUpdate called with invalid arguments"));
 
-    String tableName = addUpdateTable->getTable();
+    std::string tableName = addUpdateTable->getTable();
     Ref<Array<DictionaryElement>> dataElements = addUpdateTable->getDict()->getElements();
 
     std::shared_ptr<std::ostringstream> qb = std::make_shared<std::ostringstream>();
@@ -2344,7 +2344,7 @@ std::shared_ptr<std::ostringstream> SQLStorage::sqlForDelete(Ref<CdsObject> obj,
         throw _Exception(_("sqlForDelete called with invalid arguments"));
 
     Ref<Array<DictionaryElement>> dataElements = addUpdateTable->getDict()->getElements();
-    String tableName = addUpdateTable->getTable();
+    std::string tableName = addUpdateTable->getTable();
     std::shared_ptr<std::ostringstream> qb = std::make_shared<std::ostringstream>();
     *qb << "DELETE FROM " << TQ(tableName)
         << " WHERE " << TQ("id") << " = " << obj->getID();
@@ -2365,14 +2365,14 @@ void SQLStorage::doMetadataMigration()
        << " WHERE " << TQ("metadata")
        << " is not null";
     Ref<SQLResult> res = select(qbCountNotNull);
-    int expectedConversionCount = res->nextRow()->col(0).toInt();
+    int expectedConversionCount = std::stoi(res->nextRow()->col(0));
     log_debug("mt_cds_object rows having metadata: %d\n", expectedConversionCount);
 
     std::ostringstream qbCountMetadata;
     qbCountMetadata << "SELECT COUNT(*)"
        << " FROM " << TQ(METADATA_TABLE);
     res = select(qbCountMetadata);
-    int metadataRowCount = res->nextRow()->col(0).toInt();
+    int metadataRowCount = std::stoi(res->nextRow()->col(0));
     log_debug("mt_metadata rows having metadata: %d\n", metadataRowCount);
 
     if (expectedConversionCount > 0 && metadataRowCount > 0) {
@@ -2393,7 +2393,7 @@ void SQLStorage::doMetadataMigration()
 
     int objectsUpdated = 0;
     while ((row = resIds->nextRow()) != nullptr) {
-        Ref<CdsObject> cdsObject = loadObject(row->col(0).toInt());
+        Ref<CdsObject> cdsObject = loadObject(std::stoi(row->col(0)));
         migrateMetadata(cdsObject);
         ++objectsUpdated;
     }

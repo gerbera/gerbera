@@ -47,7 +47,7 @@ js_readln(duk_context *ctx)
 {
     auto *self = (PlaylistParserScript *)Script::getContextScript(ctx);
 
-    String line;
+    std::string line;
     
     try
     {
@@ -76,7 +76,7 @@ js_getCdsObject(duk_context *ctx)
     if (!duk_is_string(ctx, 0))
         return 0;
 
-    String path = duk_to_string(ctx, 0);
+    std::string path = duk_to_string(ctx, 0);
     duk_pop(ctx);
 
     if (!string_ok(path))
@@ -108,7 +108,7 @@ PlaylistParserScript::PlaylistParserScript(Ref<Runtime> runtime) : Script(runtim
         defineFunction(_("readln"), js_readln, 0);
         defineFunction(_("getCdsObject"), js_getCdsObject, 1);
 
-        String scriptPath = ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT); 
+        std::string scriptPath = ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT); 
         load(scriptPath);
     }
     catch (const Exception & ex)
@@ -118,9 +118,9 @@ PlaylistParserScript::PlaylistParserScript(Ref<Runtime> runtime) : Script(runtim
     
 }
 
-String PlaylistParserScript::readln()
+std::string PlaylistParserScript::readln()
 {
-    String ret;
+    std::string ret;
     if (!currentHandle)
         throw _Exception(_("Readline not yet setup for use"));
 

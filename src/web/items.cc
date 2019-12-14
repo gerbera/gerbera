@@ -58,7 +58,7 @@ void web::items::process()
     Ref<Storage> storage = Storage::getInstance();
     Ref<Element> items(new Element(_("items")));
     items->setArrayName(_("item"));
-    items->setAttribute(_("parent_id"), String::from(parentID), mxml_int_type);
+    items->setAttribute(_("parent_id"), std::to_string(parentID), mxml_int_type);
     root->appendElementChild(items);
     Ref<CdsObject> obj;
     obj = storage->loadObject(parentID);
@@ -71,18 +71,18 @@ void web::items::process()
     Ref<Array<CdsObject>> arr;
     arr = storage->browse(param);
 
-    String location = obj->getVirtualPath();
+    std::string location = obj->getVirtualPath();
     if (string_ok(location))
         items->setAttribute(_("location"), location);
     items->setAttribute(_("virtual"), (obj->isVirtual() ? _("1") : _("0")), mxml_bool_type);
 
-    items->setAttribute(_("start"), String::from(start), mxml_int_type);
-    //items->setAttribute(_("returned"), String::from(arr->size()));
-    items->setAttribute(_("total_matches"), String::from(param->getTotalMatches()), mxml_int_type);
+    items->setAttribute(_("start"), std::to_string(start), mxml_int_type);
+    //items->setAttribute(_("returned"), std::to_string(arr->size()));
+    items->setAttribute(_("total_matches"), std::to_string(param->getTotalMatches()), mxml_int_type);
 
     int protectContainer = 0;
     int protectItems = 0;
-    String autoscanMode = _("none");
+    std::string autoscanMode = _("none");
 
     int autoscanType = storage->getAutoscanDirectoryType(parentID);
     if (autoscanType > 0)
@@ -111,15 +111,15 @@ void web::items::process()
 #endif
     items->setAttribute(_("autoscan_mode"), autoscanMode);
     items->setAttribute(_("autoscan_type"), mapAutoscanType(autoscanType));
-    items->setAttribute(_("protect_container"), String::from(protectContainer), mxml_bool_type);
-    items->setAttribute(_("protect_items"), String::from(protectItems), mxml_bool_type);
+    items->setAttribute(_("protect_container"), std::to_string(protectContainer), mxml_bool_type);
+    items->setAttribute(_("protect_items"), std::to_string(protectItems), mxml_bool_type);
 
     for (int i = 0; i < arr->size(); i++) {
         Ref<CdsObject> obj = arr->get(i);
         //if (IS_CDS_ITEM(obj->getObjectType()))
         //{
         Ref<Element> item(new Element(_("item")));
-        item->setAttribute(_("id"), String::from(obj->getID()), mxml_int_type);
+        item->setAttribute(_("id"), std::to_string(obj->getID()), mxml_int_type);
         item->appendTextChild(_("title"), obj->getTitle());
         /// \todo clean this up, should have more generic options for online
         /// services

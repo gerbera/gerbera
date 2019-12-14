@@ -61,31 +61,31 @@
 using namespace zmm;
 using namespace mxml;
 
-String ConfigManager::filename = nullptr;
-String ConfigManager::userhome = nullptr;
-String ConfigManager::config_dir = _(DEFAULT_CONFIG_HOME);
-String ConfigManager::prefix_dir = _(PACKAGE_DATADIR);
-String ConfigManager::magic = nullptr;
+std::string ConfigManager::filename = "";
+std::string ConfigManager::userhome = "";
+std::string ConfigManager::config_dir = _(DEFAULT_CONFIG_HOME);
+std::string ConfigManager::prefix_dir = _(PACKAGE_DATADIR);
+std::string ConfigManager::magic = "";
 bool ConfigManager::debug_logging = false;
-String ConfigManager::ip = nullptr;
-String ConfigManager::interface = nullptr;
+std::string ConfigManager::ip = "";
+std::string ConfigManager::interface = "";
 int ConfigManager::port = 0;
 
 ConfigManager::~ConfigManager()
 {
-    filename = nullptr;
-    userhome = nullptr;
+    filename = "";
+    userhome = "";
     config_dir = _(DEFAULT_CONFIG_HOME);
     prefix_dir = _(PACKAGE_DATADIR);
-    magic = nullptr;
-    ip = nullptr;
-    interface = nullptr;
+    magic = "";
+    ip = "";
+    interface = "";
 }
 
-void ConfigManager::setStaticArgs(String _filename, String _userhome,
-    String _config_dir, String _prefix_dir,
-    String _magic, bool _debug_logging,
-    String _ip, String _interface, int _port)
+void ConfigManager::setStaticArgs(std::string _filename, std::string _userhome,
+    std::string _config_dir, std::string _prefix_dir,
+    std::string _magic, bool _debug_logging,
+    std::string _ip, std::string _interface, int _port)
 {
     filename = _filename;
     userhome = _userhome;
@@ -107,9 +107,9 @@ void ConfigManager::init()
 {
     options = Ref<Array<ConfigOption>>(new Array<ConfigOption>(CFG_MAX));
 
-    String home = userhome + DIR_SEPARATOR + config_dir;
+    std::string home = userhome + DIR_SEPARATOR + config_dir;
 
-    if (filename == nullptr) {
+    if (filename.empty()) {
         // No config file path provided, so lets find one.
         if (check_path(home + DIR_SEPARATOR + DEFAULT_CONFIG_NAME)) {
             filename = home + DIR_SEPARATOR + DEFAULT_CONFIG_NAME;
@@ -135,13 +135,13 @@ void ConfigManager::init()
     root = nullptr;
 }
 
-String ConfigManager::construct_path(String path)
+std::string ConfigManager::construct_path(std::string path)
 {
-    String home = getOption(CFG_SERVER_HOME);
+    std::string home = getOption(CFG_SERVER_HOME);
 
-    if (path.charAt(0) == '/')
+    if (path.at(0) == '/')
         return path;
-    if (home == "." && path.charAt(0) == '.')
+    if (home == "." && path.at(0) == '.')
         return path;
 
     if (home == "")
@@ -185,9 +185,9 @@ String ConfigManager::construct_path(String path)
 #define SET_OBJDICT_OPTION(opttype) \
     options->set(RefCast(obj_dict_opt, ConfigOption), opttype);
 
-void ConfigManager::validate(String serverhome)
+void ConfigManager::validate(std::string serverhome)
 {
-    String temp;
+    std::string temp;
     int temp_int;
     Ref<Element> tmpEl;
 
@@ -212,8 +212,8 @@ void ConfigManager::validate(String serverhome)
     if (root->getChildByName(_("server")) == nullptr)
         throw _Exception(_("Error in config file: <server> tag not found"));
 
-    String version = root->getAttribute(_("version"));
-    if (version.toInt() > CONFIG_XML_VERSION)
+    std::string version = root->getAttribute(_("version"));
+    if (std::stoi(version) > CONFIG_XML_VERSION)
         throw _Exception(_("Config version \"") + version + "\" does not yet exist!");
 
     // now go through the mandatory parameters, if something is missing
@@ -251,8 +251,8 @@ void ConfigManager::validate(String serverhome)
     SET_OPTION(CFG_SERVER_UDN);
 
     // checking database driver options
-    String mysql_en = _("no");
-    String sqlite3_en = _("no");
+    std::string mysql_en = _("no");
+    std::string sqlite3_en = _("no");
 
     tmpEl = getElement(_("/server/storage"));
     if (tmpEl == nullptr)
@@ -393,7 +393,7 @@ void ConfigManager::validate(String serverhome)
 
 #endif // SQLITE3
 
-    String dbDriver;
+    std::string dbDriver;
     if (sqlite3_en == "yes")
         dbDriver = _("sqlite3");
 
@@ -459,13 +459,13 @@ void ConfigManager::validate(String serverhome)
         }
 
         element->appendTextChild(_("option"),
-            String::from(DEFAULT_ITEMS_PER_PAGE_1));
+            std::to_string(DEFAULT_ITEMS_PER_PAGE_1));
         element->appendTextChild(_("option"),
-            String::from(DEFAULT_ITEMS_PER_PAGE_2));
+            std::to_string(DEFAULT_ITEMS_PER_PAGE_2));
         element->appendTextChild(_("option"),
-            String::from(DEFAULT_ITEMS_PER_PAGE_3));
+            std::to_string(DEFAULT_ITEMS_PER_PAGE_3));
         element->appendTextChild(_("option"),
-            String::from(DEFAULT_ITEMS_PER_PAGE_4));
+            std::to_string(DEFAULT_ITEMS_PER_PAGE_4));
     } else // validate user settings
     {
         int i;
@@ -473,7 +473,7 @@ void ConfigManager::validate(String serverhome)
         for (int j = 0; j < element->elementChildCount(); j++) {
             Ref<Element> child = element->getElementChild(j);
             if (child->getName() == "option") {
-                i = child->getText().toInt();
+                i = std::stoi(child->getText());
                 if (i < 1)
                     throw _Exception(_("Error in config file: incorrect "
                                        "<option> value for <items-per-page>"));
@@ -490,11 +490,11 @@ void ConfigManager::validate(String serverhome)
     }
 
     // create the array from either user or default settings
-    Ref<Array<StringBase>> menu_opts(new Array<StringBase>());
+    std::vector<std::string> menu_opts(element->elementChildCount());
     for (int j = 0; j < element->elementChildCount(); j++) {
         Ref<Element> child = element->getElementChild(j);
         if (child->getName() == "option")
-            menu_opts->append(child->getText());
+            menu_opts.push_back(child->getText());
     }
     NEW_STRARR_OPTION(menu_opts);
     SET_STRARR_OPTION(CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN);
@@ -608,7 +608,7 @@ void ConfigManager::validate(String serverhome)
     } catch (const Exception& e) {
         temp = _(DEFAULT_FALLBACK_CHARSET);
     }
-    String charset = getOption(_("/import/filesystem-charset"), temp);
+    std::string charset = getOption(_("/import/filesystem-charset"), temp);
     try {
         Ref<StringConverter> conv(new StringConverter(charset,
             _(DEFAULT_INTERNAL_CHARSET)));
@@ -837,7 +837,7 @@ void ConfigManager::validate(String serverhome)
     NEW_OPTION(charset);
     SET_OPTION(CFG_IMPORT_SCRIPTING_CHARSET);
 
-    String script_path = getOption(
+    std::string script_path = getOption(
         _("/import/scripting/virtual-layout/import-script"),
         prefix_dir + DIR_SEPARATOR + _(DEFAULT_JS_DIR) + DIR_SEPARATOR + _(DEFAULT_IMPORT_SCRIPT));
     if (temp == "js") {
@@ -1161,7 +1161,7 @@ void ConfigManager::validate(String serverhome)
     NEW_OPTION(temp);
     SET_OPTION(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING);
 
-    Ref<Array<StringBase>> mark_content_list(new Array<StringBase>());
+    std::vector<std::string> mark_content_list(element->elementChildCount());
     tmpEl = getElement(_("/server/extended-runtime-options/mark-played-items/mark"));
 
     int contentElementCount = 0;
@@ -1173,14 +1173,14 @@ void ConfigManager::validate(String serverhome)
 
             contentElementCount++;
 
-            String mark_content = content->getText();
+            std::string mark_content = content->getText();
             if (!string_ok(mark_content))
                 throw _Exception(_("error in configuration, <mark-played-items>, empty <content> parameter!"));
 
             if ((mark_content != DEFAULT_MARK_PLAYED_CONTENT_VIDEO) && (mark_content != DEFAULT_MARK_PLAYED_CONTENT_AUDIO) && (mark_content != DEFAULT_MARK_PLAYED_CONTENT_IMAGE))
                 throw _Exception(_("error in configuration, <mark-played-items>, invalid <content> parameter! Allowed values are \"video\", \"audio\", \"image\""));
 
-            mark_content_list->append(mark_content);
+            mark_content_list.push_back(mark_content);
             NEW_STRARR_OPTION(mark_content_list);
             SET_STRARR_OPTION(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST);
         }
@@ -1227,7 +1227,7 @@ void ConfigManager::validate(String serverhome)
 #endif
 
 #ifdef HAVE_MAGIC
-    String magic_file;
+    std::string magic_file;
     if (!string_ok(magic)) {
         if (string_ok(getOption(_("/import/magic-file"), _("")))) {
             prepare_path(_("/import/magic-file"));
@@ -1243,7 +1243,7 @@ void ConfigManager::validate(String serverhome)
 
 #ifdef HAVE_INOTIFY
     tmpEl = getElement(_("/import/autoscan"));
-    Ref<AutoscanList> config_timed_list = createAutoscanListFromNodeset(tmpEl, ScanMode::Timed);
+    Ref<AutoscanList> config_timed_list = createAutoscanListFromNodeset(tmpEl, ScanMode::Timed);  
     Ref<AutoscanList> config_inotify_list = createAutoscanListFromNodeset(tmpEl, ScanMode::INotify);
 
     for (int i = 0; i < config_inotify_list->size(); i++) {
@@ -1322,7 +1322,7 @@ void ConfigManager::validate(String serverhome)
     SET_BOOL_OPTION(CFG_ONLINE_CONTENT_ATRAILERS_UPDATE_AT_START);
 
     temp = getOption(_("/import/online-content/AppleTrailers/attribute::resolution"),
-        String::from(DEFAULT_ATRAILERS_RESOLUTION));
+        std::to_string(DEFAULT_ATRAILERS_RESOLUTION));
     if ((temp != "640") && (temp != "720p")) {
         throw _Exception(_("Error in config file: "
                            "invalid \"resolution\" attribute value in "
@@ -1341,9 +1341,9 @@ void ConfigManager::validate(String serverhome)
     log_debug("Config file dump after validation: \n%s\n", rootDoc->print().c_str());
 }
 
-void ConfigManager::prepare_path(String xpath, bool needDir, bool existenceUnneeded)
+void ConfigManager::prepare_path(std::string xpath, bool needDir, bool existenceUnneeded)
 {
-    String temp;
+    std::string temp;
 
     temp = checkOptionString(xpath);
 
@@ -1356,7 +1356,7 @@ void ConfigManager::prepare_path(String xpath, bool needDir, bool existenceUnnee
         script->setText(temp);
 }
 
-void ConfigManager::load(String filename)
+void ConfigManager::load(std::string filename)
 {
     this->filename = filename;
     Ref<Parser> parser(new Parser());
@@ -1368,44 +1368,42 @@ void ConfigManager::load(String filename)
     }
 }
 
-String ConfigManager::getOption(String xpath, String def)
+std::string ConfigManager::getOption(std::string xpath, std::string def)
 {
     Ref<XPath> rootXPath(new XPath(root));
-    String value = rootXPath->getText(xpath);
+    std::string value = rootXPath->getText(xpath);
     if (string_ok(value))
         return trim_string(value);
 
-    log_debug("Config: option not found: %s using default value: %s\n",
+    log_debug("Config: option not found: '%s' using default value: '%s'\n",
         xpath.c_str(), def.c_str());
 
-    String pathPart = XPath::getPathPart(xpath);
-    String axisPart = XPath::getAxisPart(xpath);
+    std::string pathPart = XPath::getPathPart(xpath);
+    std::string axisPart = XPath::getAxisPart(xpath);
 
-    Ref<Array<StringBase>> parts = split_string(pathPart, '/');
+    std::vector<std::string> parts = split_string(pathPart, '/');
 
     Ref<Element> cur = root;
-    String attr = nullptr;
+    std::string attr = "";
 
-    int i;
+    size_t i;
     Ref<Element> child;
-    for (i = 0; i < parts->size(); i++) {
-        String part = parts->get(i);
-        child = cur->getChildByName(part);
+    for (i = 0; i < parts.size(); i++) {
+        child = cur->getChildByName(parts[i]);
         if (child == nullptr)
             break;
         cur = child;
     }
     // here cur is the last existing element in the path
-    for (; i < parts->size(); i++) {
-        String part = parts->get(i);
-        child = Ref<Element>(new Element(part));
+    for (; i < parts.size(); i++) {
+        child = Ref<Element>(new Element(parts[i]));
         cur->appendElementChild(child);
         cur = child;
     }
 
-    if (axisPart != nullptr) {
-        String axis = XPath::getAxis(axisPart);
-        String spec = XPath::getSpec(axisPart);
+    if (!axisPart.empty()) {
+        std::string axis = XPath::getAxis(axisPart);
+        std::string spec = XPath::getSpec(axisPart);
         if (axis != "attribute") {
             throw _Exception(_("ConfigManager::getOption: only attribute:: axis supported"));
         }
@@ -1416,49 +1414,41 @@ String ConfigManager::getOption(String xpath, String def)
     return def;
 }
 
-int ConfigManager::getIntOption(String xpath, int def)
+int ConfigManager::getIntOption(std::string xpath, int def)
 {
-    String sDef;
-
-    sDef = String::from(def);
-
-    String sVal = getOption(xpath, sDef);
-    return sVal.toInt();
+    std::string sDef;
+    sDef = std::to_string(def);
+    std::string sVal = getOption(xpath, sDef);
+    return std::stoi(sVal);
 }
 
-String ConfigManager::getOption(String xpath)
+std::string ConfigManager::getOption(std::string xpath)
 {
     Ref<XPath> rootXPath(new XPath(root));
-    String value = rootXPath->getText(xpath);
-
-    /// \todo is this ok?
-    //    if (string_ok(value))
-    //        return value;
-    if (value != nullptr)
-        return trim_string(value);
-    throw _Exception(_("Config: option not found: ") + xpath);
+    std::string value = rootXPath->getText(xpath);
+    return trim_string(value);
 }
 
-int ConfigManager::getIntOption(String xpath)
+int ConfigManager::getIntOption(std::string xpath)
 {
-    String sVal = getOption(xpath);
-    int val = sVal.toInt();
+    std::string sVal = getOption(xpath);
+    int val = std::stoi(sVal);
     return val;
 }
 
-Ref<Element> ConfigManager::getElement(String xpath)
+Ref<Element> ConfigManager::getElement(std::string xpath)
 {
     Ref<XPath> rootXPath(new XPath(root));
     return rootXPath->getElement(xpath);
 }
 
-void ConfigManager::writeBookmark(String ip, String port)
+void ConfigManager::writeBookmark(std::string ip, std::string port)
 {
     FILE* f;
-    String filename;
-    String path;
-    String data;
-    int size;
+    std::string filename;
+    std::string path;
+    std::string data;
+    size_t size;
 
     if (!getBoolOption(CFG_SERVER_UI_ENABLED)) {
         data = http_redirect_to(ip, port, _("disabled.html"));
@@ -1485,10 +1475,10 @@ void ConfigManager::writeBookmark(String ip, String port)
 
 void ConfigManager::emptyBookmark()
 {
-    String data = _("<html><body><h1>Gerbera Media Server is not running.</h1><p>Please start it and try again.</p></body></html>");
+    std::string data = _("<html><body><h1>Gerbera Media Server is not running.</h1><p>Please start it and try again.</p></body></html>");
 
-    String filename = getOption(CFG_SERVER_BOOKMARK_FILE);
-    String path = construct_path(filename);
+    std::string filename = getOption(CFG_SERVER_BOOKMARK_FILE);
+    std::string path = construct_path(filename);
 
     log_debug("Clearing bookmark file at: %s\n", path.c_str());
 
@@ -1497,27 +1487,27 @@ void ConfigManager::emptyBookmark()
         throw _Exception(_("emptyBookmark: failed to open: ") + path);
     }
 
-    int size = fwrite(data.c_str(), sizeof(char), data.length(), f);
+    size_t size = fwrite(data.c_str(), sizeof(char), data.length(), f);
     fclose(f);
 
     if (size < data.length())
         throw _Exception(_("emptyBookmark: failed to write to: ") + path);
 }
 
-String ConfigManager::checkOptionString(String xpath)
+std::string ConfigManager::checkOptionString(std::string xpath)
 {
-    String temp = getOption(xpath);
+    std::string temp = getOption(xpath);
     if (!string_ok(temp))
         throw _Exception(_("Config: value of ") + xpath + " tag is invalid");
 
     return temp;
 }
 
-Ref<Dictionary> ConfigManager::createDictionaryFromNodeset(Ref<Element> element, String nodeName, String keyAttr, String valAttr, bool tolower)
+Ref<Dictionary> ConfigManager::createDictionaryFromNodeset(Ref<Element> element, std::string nodeName, std::string keyAttr, std::string valAttr, bool tolower)
 {
     Ref<Dictionary> dict(new Dictionary());
-    String key;
-    String value;
+    std::string key;
+    std::string value;
 
     if (element != nullptr) {
         for (int i = 0; i < element->elementChildCount(); i++) {
@@ -1528,7 +1518,7 @@ Ref<Dictionary> ConfigManager::createDictionaryFromNodeset(Ref<Element> element,
 
                 if (string_ok(key) && string_ok(value)) {
                     if (tolower) {
-                        key = key.toLower();
+                        key = tolower_string(key);
                     }
                     dict->put(key, value);
                 }
@@ -1548,7 +1538,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
     transcoding_type_t tr_type;
     Ref<Element> mtype_profile;
     bool set = false;
-    zmm::String param;
+    std::string param;
 
     Ref<TranscodingProfileList> list(new TranscodingProfileList());
     if (element == nullptr)
@@ -1556,8 +1546,8 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
 
     Ref<Array<DictionaryElement>> mt_mappings(new Array<DictionaryElement>());
 
-    String mt;
-    String pname;
+    std::string mt;
+    std::string pname;
 
     mtype_profile = element->getChildByName(_("mimetype-profile-mappings"));
     if (mtype_profile != nullptr) {
@@ -1628,7 +1618,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
 
         Ref<Element> avi_fcc = child->getChildByName(_("avi-fourcc-list"));
         if (avi_fcc != nullptr) {
-            String mode = avi_fcc->getAttribute(_("mode"));
+            std::string mode = avi_fcc->getAttribute(_("mode"));
             if (!string_ok(mode))
                 throw _Exception(_("error in configuration: avi-fourcc-list requires a valid \"mode\" attribute"));
 
@@ -1643,16 +1633,16 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
                 throw _Exception(_("error in configuration: invalid mode given for avi-fourcc-list: \"") + mode + _("\""));
 
             if (fcc_mode != FCC_None) {
-                Ref<Array<StringBase>> fcc_list(new Array<StringBase>());
+                std::vector<std::string> fcc_list(avi_fcc->elementChildCount());
                 for (int f = 0; f < avi_fcc->elementChildCount(); f++) {
                     Ref<Element> fourcc = avi_fcc->getElementChild(f);
                     if (fourcc->getName() != "fourcc")
                         continue;
 
-                    String fcc = fourcc->getText();
+                    std::string fcc = fourcc->getText();
                     if (!string_ok(fcc))
                         throw _Exception(_("error in configuration: empty fourcc specified!"));
-                    fcc_list->append(fcc);
+                    fcc_list.push_back(fcc);
                 }
 
                 prof->setAVIFourCCList(fcc_list, fcc_mode);
@@ -1677,7 +1667,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
             else if (param == "off")
                 prof->setSampleFreq(OFF);
             else {
-                int freq = param.toInt();
+                int freq = std::stoi(param);
                 if (freq <= 0)
                     throw _Exception(_("Error in config file: incorrect "
                                        "parameter for <sample-frequency> "
@@ -1694,7 +1684,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
             else if (param == "off")
                 prof->setNumChannels(OFF);
             else {
-                int chan = param.toInt();
+                int chan = std::stoi(param);
                 if (chan <= 0)
                     throw _Exception(_("Error in config file: incorrect "
                                        "parameter for <number-of-channels> "
@@ -1762,8 +1752,8 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
                 + prof->getName() + "\" has an invalid command setting");
         prof->setCommand(param);
 
-        String tmp_path;
-        if (param.startsWith(_(_DIR_SEPARATOR))) {
+        std::string tmp_path;
+        if (startswith_string(param, _DIR_SEPARATOR)) {
             if (!check_path(param))
                 throw _Exception(_("error in configuration, transcoding "
                                    "profile \"")
@@ -1800,7 +1790,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
             throw _Exception(_("error in configuration: transcoding "
                                "profile \"")
                 + prof->getName() + "\" <buffer> tag is missing the size attribute");
-        itmp = param.toInt();
+        itmp = std::stoi(param);
         if (itmp < 0)
             throw _Exception(_("error in configuration: transcoding "
                                "profile \"")
@@ -1813,7 +1803,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
                                "profile \"")
                 + prof->getName() + "\" <buffer> tag is missing the chunk-size "
                                     "attribute");
-        itmp = param.toInt();
+        itmp = std::stoi(param);
         if (itmp < 0)
             throw _Exception(_("error in configuration: transcoding "
                                "profile \"")
@@ -1832,7 +1822,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
                                "profile \"")
                 + prof->getName() + "\" <buffer> tag is missing the fill-size "
                                     "attribute");
-        itmp = param.toInt();
+        itmp = std::stoi(param);
         if (i < 0)
             throw _Exception(_("error in configuration: transcoding "
                                "profile \"")
@@ -1887,7 +1877,7 @@ Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::El
         if (child->getName() != "directory")
             continue;
 
-        String location = child->getAttribute(_("location"));
+        std::string location = child->getAttribute(_("location"));
         if (!string_ok(location)) {
             throw _Exception(_("autoscan directory with invalid location!\n"));
         }
@@ -1903,7 +1893,7 @@ Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::El
         }
 
         ScanMode mode;
-        String temp = child->getAttribute(_("mode"));
+        std::string temp = child->getAttribute(_("mode"));
         if (!string_ok(temp) || ((temp != "timed") && (temp != "inotify"))) {
             throw _Exception(_("autoscan directory ") + location + ": mode attribute is missing or invalid");
         } else if (temp == "timed") {
@@ -1940,7 +1930,7 @@ Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::El
                     + location + ": interval attribute is required for timed mode");
             }
 
-            interval = temp.toUInt();
+            interval = std::stoi(temp);
 
             if (interval == 0) {
                 throw _Exception(_("autoscan directory ") + location + ": invalid interval attribute");
@@ -2014,19 +2004,18 @@ void ConfigManager::dumpOptions()
 #endif
 }
 
-Ref<Array<StringBase>> ConfigManager::createArrayFromNodeset(Ref<mxml::Element> element, String nodeName, String attrName)
+std::vector<std::string> ConfigManager::createArrayFromNodeset(Ref<mxml::Element> element, std::string nodeName, std::string attrName)
 {
-    String attrValue;
-    Ref<Array<StringBase>> arr(new Array<StringBase>());
+    std::vector<std::string> arr;
 
     if (element != nullptr) {
         for (int i = 0; i < element->elementChildCount(); i++) {
             Ref<Element> child = element->getElementChild(i);
             if (child->getName() == nodeName) {
-                attrValue = child->getAttribute(attrName);
+                std::string attrValue = child->getAttribute(attrName);
 
                 if (string_ok(attrValue))
-                    arr->append(attrValue);
+                    arr.push_back(attrValue);
             }
         }
     }
@@ -2036,7 +2025,7 @@ Ref<Array<StringBase>> ConfigManager::createArrayFromNodeset(Ref<mxml::Element> 
 
 // The validate function ensures that the array is completely filled!
 // None of the options->get() calls will ever return nullptr!
-String ConfigManager::getOption(config_option_t option)
+std::string ConfigManager::getOption(config_option_t option)
 {
     Ref<ConfigOption> r = options->get(option);
     if (r.getPtr() == nullptr) {
@@ -2068,7 +2057,7 @@ Ref<Dictionary> ConfigManager::getDictionaryOption(config_option_t option)
     return options->get(option)->getDictionaryOption();
 }
 
-Ref<Array<StringBase>> ConfigManager::getStringArrayOption(config_option_t option)
+std::vector<std::string> ConfigManager::getStringArrayOption(config_option_t option)
 {
     return options->get(option)->getStringArrayOption();
 }

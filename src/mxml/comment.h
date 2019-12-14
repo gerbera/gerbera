@@ -44,15 +44,15 @@ namespace mxml
 class Comment : public Node
 {
 protected:
-    zmm::String name;
-    zmm::String text;
+    std::string name;
+    std::string text;
     zmm::Ref<zmm::Array<Attribute> > attributes;
     bool indentWithLFbefore;
 
 public:
-    Comment(zmm::String text, bool indentWithLFbefore = false);
-    inline zmm::String getText() { return text; }
-    inline void setText(zmm::String text) { this->text = text; }
+    Comment(std::string text, bool indentWithLFbefore = false);
+    inline std::string getText() { return text; }
+    inline void setText(std::string text) { this->text = text; }
     inline bool getIndentWithLFbefore() { return indentWithLFbefore; }
     inline void setIndentWithLFbefore(bool indentWithLFbefore) { this->indentWithLFbefore = indentWithLFbefore; }
 

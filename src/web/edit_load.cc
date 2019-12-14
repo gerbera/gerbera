@@ -54,12 +54,12 @@ void web::edit_load::process()
 
     Ref<Storage> storage;
 
-    String objID = param(_("object_id"));
+    std::string objID = param(_("object_id"));
     int objectID;
-    if (objID == nullptr)
+    if (objID.empty())
         throw _Exception(_("invalid object id"));
     else
-        objectID = objID.toInt();
+        objectID = std::stoi(objID);
 
     storage = Storage::getInstance();
     Ref<CdsObject> obj = storage->loadObject(objectID);

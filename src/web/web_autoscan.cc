@@ -55,7 +55,7 @@ void web::autoscan::process()
 
     check_request();
 
-    String action = param(_("action"));
+    std::string action = param(_("action"));
     if (!string_ok(action))
         throw _Exception(_("web:autoscan called with illegal action"));
 
@@ -63,8 +63,8 @@ void web::autoscan::process()
     Ref<Storage> storage = Storage::getInstance();
 
     bool fromFs = boolParam(_("from_fs"));
-    String path;
-    String objID = param(_("object_id"));
+    std::string path;
+    std::string objID = param(_("object_id"));
     if (fromFs) {
         if (!string_ok(objID) || objID == "0")
             path = _(FS_ROOT_DIRECTORY);
@@ -87,7 +87,7 @@ void web::autoscan::process()
             autoscan2XML(autoscan, adir);
         }
     } else if (action == "as_edit_save") {
-        String scan_mode_str = param(_("scan_mode"));
+        std::string scan_mode_str = param(_("scan_mode"));
         if (scan_mode_str == "none") {
             // remove...
             try {
@@ -149,7 +149,7 @@ void web::autoscan::process()
         for (int i = 0; i < size; i++) {
             Ref<AutoscanDirectory> autoscanDir = autoscanList->get(i);
             Ref<Element> autoscanEl(new Element(_("autoscan")));
-            autoscanEl->setAttribute(_("objectID"), String::from(autoscanDir->getObjectID()));
+            autoscanEl->setAttribute(_("objectID"), std::to_string(autoscanDir->getObjectID()));
             autoscanEl->appendTextChild(_("location"), autoscanDir->getLocation());
             autoscanEl->appendTextChild(_("scan_mode"), AutoscanDirectory::mapScanmode(autoscanDir->getScanMode()));
             autoscanEl->appendTextChild(_("from_config"), autoscanDir->persistent() ? _("1") : _("0"), mxml_bool_type);
@@ -175,7 +175,7 @@ void web::autoscan::autoscan2XML(Ref<Element> element, Ref<AutoscanDirectory> ad
         element->appendTextChild(_("scan_level"), AutoscanDirectory::mapScanlevel(adir->getScanLevel()));
         element->appendTextChild(_("recursive"), (adir->getRecursive() ? _("1") : _("0")), mxml_bool_type);
         element->appendTextChild(_("hidden"), (adir->getHidden() ? _("1") : _("0")), mxml_bool_type);
-        element->appendTextChild(_("interval"), String::from(adir->getInterval()), mxml_int_type);
+        element->appendTextChild(_("interval"), std::to_string(adir->getInterval()), mxml_int_type);
         element->appendTextChild(_("persistent"), (adir->persistent() ? _("1") : _("0")), mxml_bool_type);
     }
 }

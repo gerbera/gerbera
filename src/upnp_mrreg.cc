@@ -118,7 +118,7 @@ void MRRegistrarService::processSubscriptionRequest(zmm::Ref<SubscriptionRequest
     property->appendTextChild(_("AuthorizationDeniedUpdateID"), _("0"));
     property->appendTextChild(_("AuthorizationGrantedUpdateID"), _("0"));
 
-    String xml = propset->print();
+    std::string xml = propset->print();
     err = ixmlParseBufferEx(xml.c_str(), &event);
     if (err != IXML_SUCCESS) {
         throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, _("Could not convert property set to ixml"));
@@ -133,7 +133,7 @@ void MRRegistrarService::processSubscriptionRequest(zmm::Ref<SubscriptionRequest
 
 // TODO: FIXME
 #if 0
-void MRRegistrarService::subscription_update(String sourceProtocol_CSV)
+void MRRegistrarService::subscription_update(std::string sourceProtocol_CSV)
 {
     int err;
     IXML_Document *event = NULL;
@@ -144,7 +144,7 @@ void MRRegistrarService::subscription_update(String sourceProtocol_CSV)
     property = propset->getFirstChild();
     property->appendTextChild(_("SourceProtocolInfo"), sourceProtocol_CSV);
 
-    String xml = propset->print();
+    std::string xml = propset->print();
 
     err = ixmlParseBufferEx(xml.c_str(), &event);
     if (err != IXML_SUCCESS)

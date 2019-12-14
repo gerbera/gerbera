@@ -22,7 +22,7 @@ enum task_owner_t {
 
 class GenericTask : public zmm::Object {
 protected:
-    zmm::String description;
+    std::string description;
     task_type_t taskType;
     task_owner_t taskOwner;
     unsigned int parentTaskID;
@@ -33,8 +33,8 @@ protected:
 public:
     GenericTask(task_owner_t taskOwner);
     virtual void run() = 0;
-    inline void setDescription(zmm::String description) { this->description = description; };
-    inline zmm::String getDescription() { return description; };
+    inline void setDescription(std::string description) { this->description = description; };
+    inline std::string getDescription() { return description; };
     inline task_type_t getType() { return taskType; };
     inline unsigned int getID() { return taskID; };
     inline unsigned int getParentID() { return parentTaskID; };

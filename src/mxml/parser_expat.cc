@@ -73,9 +73,9 @@ void XMLCALL Parser::element_end(void *userdata, const char *name)
 void XMLCALL Parser::character_data(void *userdata, const XML_Char *s, int len)
 {
     auto *parser = (Parser *)userdata;
-    String text = String(s, len);
+    std::string text = std::string(s, len);
     
-    if (text != nullptr)
+    if (!text.empty())
     {
         Ref<Text> textEl(new Text(text));
         if (parser->curEl == nullptr)
@@ -88,8 +88,8 @@ void XMLCALL Parser::character_data(void *userdata, const XML_Char *s, int len)
 void XMLCALL Parser::comment_callback(void *userdata, const XML_Char *s)
 {
     auto *parser = (Parser *)userdata;
-    String text = s;
-    if (text != nullptr)
+    std::string text = s;
+    if (!text.empty())
     {
         Ref<Comment> cm(new Comment(text));
         if (parser->curEl == nullptr)
@@ -102,9 +102,9 @@ void XMLCALL Parser::comment_callback(void *userdata, const XML_Char *s)
 void XMLCALL Parser::default_callback(void *userdata, const XML_Char *s, int len)
 {
     auto *parser = (Parser *)userdata;
-    String text = String(s, len);
+    std::string text = std::string(s, len);
     
-    if (text.charAt(0) == '<')
+    if (text.at(0) == '<')
         parser->ignoreNextDefaultNewline = true;
     else
     {
@@ -126,19 +126,19 @@ Parser::Parser()
     ignoreNextDefaultNewline = false;
 }
 
-Ref<Document> Parser::parseFile(String filename)
+Ref<Document> Parser::parseFile(std::string filename)
 {
     Ref<Context> ctx(new Context(filename));
     return parse(ctx, read_text_file(filename));
 }
 
-Ref<Document> Parser::parseString(String str)
+Ref<Document> Parser::parseString(std::string str)
 {
     Ref<Context> ctx(new Context(_("")));
     return parse(ctx, str);
 }
 
-Ref<Document> Parser::parse(Ref<Context> ctx, String input)
+Ref<Document> Parser::parse(Ref<Context> ctx, std::string input)
 {
     XML_Parser parser = XML_ParserCreate(nullptr);
     if (!parser)
@@ -157,7 +157,7 @@ Ref<Document> Parser::parse(Ref<Context> ctx, String input)
     {
         ctx->line = XML_GetCurrentLineNumber(parser);
         ctx->col = XML_GetCurrentColumnNumber(parser);
-        String message = XML_ErrorString(XML_GetErrorCode(parser));
+        std::string message = XML_ErrorString(XML_GetErrorCode(parser));
         XML_ParserFree(parser);
         throw ParseException(message, ctx);
     }

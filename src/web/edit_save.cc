@@ -48,12 +48,12 @@ void web::edit_save::process()
 {
     check_request();
 
-    String objID = param(_("object_id"));
+    std::string objID = param(_("object_id"));
     int objectID;
     if (!string_ok(objID))
         throw _Exception(_("invalid object id"));
     else
-        objectID = objID.toInt();
+        objectID = std::stoi(objID);
 
     ContentManager::getInstance()->updateObject(objectID, params);
 }

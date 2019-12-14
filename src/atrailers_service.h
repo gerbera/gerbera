@@ -55,7 +55,7 @@ public:
     virtual service_type_t getServiceType();
 
     /// \brief Get the human readable name for the service
-    virtual zmm::String getServiceName();
+    virtual std::string getServiceName();
 
     /// \brief Parse the xml fragment from the configuration and gather
     /// the user settings in a service task structure.
@@ -67,7 +67,7 @@ protected:
     // safeguard to ensure the above
     pthread_t pid;
 
-    zmm::String service_url;
+    std::string service_url;
 
     // url retriever class
     zmm::Ref<URL> url;

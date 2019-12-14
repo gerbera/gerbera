@@ -158,7 +158,7 @@ void MatroskaHandler::parseAttachments(Ref<CdsItem> item, EbmlStream & ebml_stre
         // printf("KaxFileName = %s\n", fileName.c_str());
 
         bool isCoverArt = false;
-        if (fileName.rfind("cover", 0) == 0) {
+        if (startswith_string(fileName, "cover")) {
             isCoverArt = true;
         }
 
@@ -172,7 +172,7 @@ void MatroskaHandler::parseAttachments(Ref<CdsItem> item, EbmlStream & ebml_stre
                 **p_data_size = fileData.GetSize();
             } else {
                 // fillMetadata
-                String art_mimetype = getContentTypeFromByteVector(&fileData);
+                std::string art_mimetype = getContentTypeFromByteVector(&fileData);
                 if (string_ok(art_mimetype))
                     addArtworkResource(item, art_mimetype);
             }
@@ -182,9 +182,9 @@ void MatroskaHandler::parseAttachments(Ref<CdsItem> item, EbmlStream & ebml_stre
     }
 }
 
-String MatroskaHandler::getContentTypeFromByteVector(const KaxFileData* data) const
+std::string MatroskaHandler::getContentTypeFromByteVector(const KaxFileData* data) const
 {
-    String art_mimetype = _(MIMETYPE_DEFAULT);
+    std::string art_mimetype = _(MIMETYPE_DEFAULT);
 #ifdef HAVE_MAGIC
     art_mimetype = ContentManager::getInstance()->getMimeTypeFromBuffer(data->GetBuffer(), data->GetSize());
     if (!string_ok(art_mimetype)) {
@@ -194,7 +194,7 @@ String MatroskaHandler::getContentTypeFromByteVector(const KaxFileData* data) co
     return art_mimetype;
 }
 
-void MatroskaHandler::addArtworkResource(Ref<CdsItem> item, String art_mimetype)
+void MatroskaHandler::addArtworkResource(Ref<CdsItem> item, std::string art_mimetype)
 {
     // if we could not determine the mimetype, then there is no
     // point to add the resource - it's probably garbage

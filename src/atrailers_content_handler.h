@@ -65,7 +65,7 @@ protected:
     int current_trailer_index;
     int trailer_count;
 
-    zmm::String trailer_mimetype;
+    std::string trailer_mimetype;
 };
 
 #endif //__ATRAILERS_CONTENT_HANDLER_H__

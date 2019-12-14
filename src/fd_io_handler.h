@@ -39,7 +39,7 @@
 class FDIOHandler : public IOHandler {
 protected:
     /// \brief Name of the file.
-    zmm::String filename;
+    std::string filename;
 
     /// \brief Handle of the file.
     int fd;
@@ -49,7 +49,7 @@ protected:
 
 public:
     /// \brief Sets the filename to work with.
-    explicit FDIOHandler(zmm::String filename);
+    explicit FDIOHandler(std::string filename);
 
     /// \brief Sets an aleady opened file descriptor to work with, call to
     /// open() will be ignored.

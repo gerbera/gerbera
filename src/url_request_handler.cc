@@ -62,12 +62,12 @@ void URLRequestHandler::getInfo(IN const char *filename, OUT UpnpFileInfo *info)
 {
     log_debug("start\n");
 
-    String header;
-    String mimeType;
+    std::string header;
+    std::string mimeType;
     int objectID;
-    String tr_profile;
+    std::string tr_profile;
 
-    String url, parameters;
+    std::string url, parameters;
     parameters = (filename + strlen(LINK_URL_REQUEST_HANDLER));
 
     Ref<Dictionary> dict(new Dictionary());
@@ -76,12 +76,12 @@ void URLRequestHandler::getInfo(IN const char *filename, OUT UpnpFileInfo *info)
     log_debug("full url (filename): %s, parameters: %s\n",
         filename, parameters.c_str());
 
-    String objID = dict->get(_("object_id"));
-    if (objID == nullptr) {
+    std::string objID = dict->get(_("object_id"));
+    if (objID.empty()) {
         //log_error("object_id not found in url\n");
         throw _Exception(_("getInfo: object_id not found"));
     } else
-        objectID = objID.toInt();
+        objectID = std::stoi(objID);
 
     //log_debug("got ObjectID: [%s]\n", object_id.c_str());
 
@@ -156,12 +156,12 @@ void URLRequestHandler::getInfo(IN const char *filename, OUT UpnpFileInfo *info)
 
 Ref<IOHandler> URLRequestHandler::open(IN const char* filename,
     IN enum UpnpOpenFileMode mode,
-    IN String range)
+    IN std::string range)
 {
     int objectID;
-    String mimeType;
-    String header;
-    String tr_profile;
+    std::string mimeType;
+    std::string header;
+    std::string tr_profile;
 
     log_debug("start\n");
 
@@ -170,7 +170,7 @@ Ref<IOHandler> URLRequestHandler::open(IN const char* filename,
     if (mode != UPNP_READ)
         throw _Exception(_("UPNP_WRITE unsupported"));
 
-    String url, parameters;
+    std::string url, parameters;
     parameters = (filename + strlen(LINK_URL_REQUEST_HANDLER));
 
     Ref<Dictionary> dict(new Dictionary());
@@ -178,11 +178,11 @@ Ref<IOHandler> URLRequestHandler::open(IN const char* filename,
     log_debug("full url (filename): %s, parameters: %s\n",
         filename, parameters.c_str());
 
-    String objID = dict->get(_("object_id"));
-    if (objID == nullptr) {
+    std::string objID = dict->get(_("object_id"));
+    if (objID.empty()) {
         throw _Exception(_("object_id not found"));
     } else
-        objectID = objID.toInt();
+        objectID = std::stoi(objID);
 
     Ref<Storage> storage = Storage::getInstance();
 

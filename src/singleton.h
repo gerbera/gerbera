@@ -81,7 +81,7 @@ public:
         }
         return instance;
     }
-    virtual zmm::String getName() = 0;
+    virtual std::string getName() = 0;
 
 protected:
     virtual ~Singleton() {}

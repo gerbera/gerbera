@@ -74,9 +74,9 @@ duk_ret_t js_addCdsObject(duk_context *ctx)
     const char *ts = duk_to_string(ctx, 1);
     if (!ts)
         ts = "/";
-    String path = ts;
+    std::string path = ts;
     //stack: js_cds_obj path
-    String containerclass = nullptr;
+    std::string containerclass = nullptr;
     if (!duk_is_null_or_undefined(ctx, 2))
     {
         containerclass = duk_to_string(ctx, 2);
@@ -137,7 +137,7 @@ duk_ret_t js_addCdsObject(duk_context *ctx)
             if (!IS_CDS_ITEM_EXTERNAL_URL(otype) &&
                 !IS_CDS_ITEM_INTERNAL_URL(otype))
             {
-                String loc = self->getProperty(_("location"));
+                std::string loc = self->getProperty(_("location"));
                 if (string_ok(loc) &&
                    (IS_CDS_PURE_ITEM(otype) || IS_CDS_ACTIVE_ITEM(otype)))
                     loc = normalizePath(loc);
@@ -223,7 +223,7 @@ duk_ret_t js_addCdsObject(duk_context *ctx)
         cm->addObject(cds_obj);
 
         /* setting object ID as return value */
-        String tmp = String::from(id);
+        std::string tmp = std::to_string(id);
         duk_push_string(ctx, tmp.c_str());
         return 1;
     }
@@ -252,7 +252,7 @@ static duk_ret_t convert_charset_generic(duk_context *ctx, charset_convert_t chr
 
     try
     {
-        String result = self->convertToCharset(_(ts), chr);
+        std::string result = self->convertToCharset(_(ts), chr);
         duk_push_lstring(ctx, result.c_str(), result.length());
         return 1;
     }

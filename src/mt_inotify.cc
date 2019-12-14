@@ -84,7 +84,7 @@ bool Inotify::supported()
     }
 }
 
-int Inotify::addWatch(String path, int events)
+int Inotify::addWatch(std::string path, int events)
 {
     int wd = inotify_add_watch(inotify_fd, path.c_str(), events);
     if (wd < 0 && errno != ENOENT) {

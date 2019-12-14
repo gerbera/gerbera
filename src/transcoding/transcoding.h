@@ -33,6 +33,9 @@
 #ifndef __TRANSCODING_H__
 #define __TRANSCODING_H__
 
+#include <vector>
+#include <string>
+
 #include "zmm/zmmf.h"
 #include "dictionary.h"
 #include "object_dictionary.h"
@@ -58,32 +61,32 @@ typedef enum
 class TranscodingProfile : public zmm::Object
 {
 public:
-    TranscodingProfile(transcoding_type_t tr_type, zmm::String name);
+    TranscodingProfile(transcoding_type_t tr_type, std::string name);
 
     /// \brief returns the transcoding type.
     transcoding_type_t getType() { return tr_type; }
 
     /// \brief set name of the transcoding profile
-    void setName(zmm::String name) { this->name = name; }
+    void setName(std::string name) { this->name = name; }
 
     /// \brief get name of the transcoding profile
-    zmm::String getName() { return name; }
+    std::string getName() { return name; }
 
     /// \brief set target mimetype
     ///
     /// The so called "target mimetype" is the mimetype of the media that will
     /// be produced by the transcoder and identifies the target format.
-    void setTargetMimeType(zmm::String tm) { this->tm = tm; }
+    void setTargetMimeType(std::string tm) { this->tm = tm; }
 
     /// \brief get target mimetype
-    zmm::String getTargetMimeType() { return tm; }
+    std::string getTargetMimeType() { return tm; }
 
     /// \brief sets the program name, i.e. the command line name of the
     /// transcoder that will be executed.
-    void setCommand(zmm::String command) { this->command = command; }
+    void setCommand(std::string command) { this->command = command; }
 
     /// \brief gets the transcoders program name
-    zmm::String getCommand() { return command; }
+    std::string getCommand() { return command; }
 
     /// \brief set buffering options
     /// \param bs the size of the buffer in bytes
@@ -106,10 +109,10 @@ public:
     /// %out token is replaced by the fifo name that is generated when the
     /// transcoding process is launched. Transcoded data will be read by
     /// the server from the fifo and served via HTTP to the renderer.
-    void setArguments(zmm::String args) { this->args = args; }
+    void setArguments(std::string args) { this->args = args; }
 
     /// \brief retrieves the argument string
-    zmm::String getArguments() { return args; }
+    std::string getArguments() { return args; }
 
     /// \brief identifies if the profile should be set as the first resource
     void setFirstResource(bool fr) { first_resource = fr; }
@@ -121,7 +124,7 @@ public:
     ///
     /// \param name attribute name 
     /// \param value attribute value
-    void addAttribute(zmm::String name, zmm::String value);
+    void addAttribute(std::string name, std::string value);
 
     zmm::Ref<Dictionary> getAttributes();
 
@@ -157,11 +160,11 @@ public:
     ///
     /// \param list List of FourCC entries.
     /// \param mode Specifies if the FourCCs in the list are accepted or ignored
-    void setAVIFourCCList(zmm::Ref<zmm::Array<zmm::StringBase> > list,
+    void setAVIFourCCList(std::vector<std::string> list,
                           avi_fourcc_listmode_t mode = FCC_Ignore);
 
     /// \brief Retrieves the FourCC list
-    zmm::Ref<zmm::Array<zmm::StringBase> > getAVIFourCCList();
+    std::vector<std::string> getAVIFourCCList();
     /// \brief Provides information on the mode of the list
     avi_fourcc_listmode_t getAVIFourCCListMode() { return fourcc_mode; }
 
@@ -178,10 +181,10 @@ public:
     int getNumChannels() { return number_of_channels; }
 
 protected:
-    zmm::String name;
-    zmm::String tm;
-    zmm::String command;
-    zmm::String args;
+    std::string name;
+    std::string tm;
+    std::string command;
+    std::string args;
     bool first_resource;
     bool theora;
     bool accept_url;
@@ -195,7 +198,7 @@ protected:
     int number_of_channels;
     int sample_frequency;
     zmm::Ref<Dictionary> attributes;
-    zmm::Ref<zmm::Array<zmm::StringBase> > fourcc_list;
+    std::vector<std::string> fourcc_list;
     avi_fourcc_listmode_t fourcc_mode;
     TranscodingProfile();
 };
@@ -205,10 +208,10 @@ class TranscodingProfileList : public zmm::Object
 {
 public:
     TranscodingProfileList();
-    void add(zmm::String sourceMimeType, zmm::Ref<TranscodingProfile> prof);
-    zmm::Ref<ObjectDictionary<TranscodingProfile> > get(zmm::String sourceMimeType);
+    void add(std::string sourceMimeType, zmm::Ref<TranscodingProfile> prof);
+    zmm::Ref<ObjectDictionary<TranscodingProfile> > get(std::string sourceMimeType);
     zmm::Ref<ObjectDictionary<TranscodingProfile> > get(int index);
-    zmm::Ref<TranscodingProfile> getByName(zmm::String name);
+    zmm::Ref<TranscodingProfile> getByName(std::string name);
     inline int size() { return list->size(); }
 protected:
     // outer dictionary is keyed by the source mimetype, inner dictionary by 
@@ -220,15 +223,15 @@ protected:
 class TranscodingProcess : public zmm::Object
 {
 public:
-    TranscodingProcess(pid_t pid, zmm::String fname) 
+    TranscodingProcess(pid_t pid, std::string fname) 
                        { this->pid = pid; this->fname = fname; }
 
     pid_t getPID() { return pid; }
-    zmm::String getFName() { return fname; }
+    std::string getFName() { return fname; }
 
 protected:
     pid_t pid;
-    zmm::String fname;
+    std::string fname;
 };
 
 

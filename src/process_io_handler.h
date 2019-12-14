@@ -57,7 +57,7 @@ public:
     /// \param filename to read the data from
     /// \param proclist associated processes that will be terminated once
     /// they are no longer needed
-    ProcessIOHandler(zmm::String filename, zmm::Ref<Executor> main_proc,
+    ProcessIOHandler(std::string filename, zmm::Ref<Executor> main_proc,
         zmm::Ref<zmm::Array<ProcListItem>> proclist = nullptr,
         bool ignoreSeek = false);
 
@@ -97,7 +97,7 @@ protected:
     zmm::Ref<Executor> main_proc;
 
     /// \brief name of the file or fifo to read the data from
-    zmm::String filename;
+    std::string filename;
 
     /// \brief file descriptor
     int fd;

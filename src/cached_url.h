@@ -41,13 +41,13 @@
 class CachedURL : public zmm::Object {
 public:
     /// \brief Creates a cached url object.
-    CachedURL(int object_id, zmm::String url);
+    CachedURL(int object_id, std::string url);
 
     /// \brief Retrieves the object id.
     int getObjectID();
 
     /// \brief Retrieves the cached URL.
-    zmm::String getURL();
+    std::string getURL();
 
     /// \brief Retrieves the time when the object was created.
     time_t getCreationTime();
@@ -57,7 +57,7 @@ public:
 
 protected:
     int object_id;
-    zmm::String url;
+    std::string url;
     time_t creation_time;
     time_t last_access_time;
 

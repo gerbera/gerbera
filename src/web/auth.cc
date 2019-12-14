@@ -46,22 +46,22 @@ static long get_time()
     return tv.tv_sec;
 }
 
-static String generate_token()
+static std::string generate_token()
 {
     long expiration = get_time() + LOGIN_TIMEOUT;
-    String salt = generate_random_id();
-    return String::from(expiration) + '_' + salt;
+    std::string salt = generate_random_id();
+    return std::to_string(expiration) + '_' + salt;
 }
 
-static bool check_token(String token, String password, String encPassword)
+static bool check_token(std::string token, std::string password, std::string encPassword)
 {
-    Ref<Array<StringBase>> parts = split_string(token, '_');
-    if (parts->size() != 2)
+    std::vector<std::string> parts = split_string(token, '_');
+    if (parts.size() != 2)
         return false;
-    long expiration = String(parts->get(0)).toLong();
+    long expiration = std::stol(parts[0]);
     if (expiration < get_time())
         return false;
-    String checksum = hex_string_md5(token + password);
+    std::string checksum = hex_string_md5(token + password);
     return (checksum == encPassword);
 }
 
@@ -72,7 +72,7 @@ web::auth::auth()
 }
 void web::auth::process()
 {
-    String action = param(_("action"));
+    std::string action = param(_("action"));
     Ref<SessionManager> sessionManager = SessionManager::getInstance();
 
     if (!string_ok(action)) {
@@ -98,17 +98,17 @@ void web::auth::process()
                     : _("0")),
             mxml_bool_type);
         config->setAttribute(_("poll-interval"),
-            String::from(cm->getIntOption(CFG_SERVER_UI_POLL_INTERVAL)), mxml_int_type);
+            std::to_string(cm->getIntOption(CFG_SERVER_UI_POLL_INTERVAL)), mxml_int_type);
         /// CREATE XML FRAGMENT FOR ITEMS PER PAGE
         Ref<Element> ipp(new Element(_("items-per-page")));
         ipp->setArrayName(_("option"));
         ipp->setAttribute(_("default"),
-            String::from(cm->getIntOption(CFG_SERVER_UI_DEFAULT_ITEMS_PER_PAGE)), mxml_int_type);
+            std::to_string(cm->getIntOption(CFG_SERVER_UI_DEFAULT_ITEMS_PER_PAGE)), mxml_int_type);
 
-        Ref<Array<StringBase>> menu_opts = cm->getStringArrayOption(CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN);
+        std::vector<std::string> menu_opts = cm->getStringArrayOption(CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN);
 
-        for (int i = 0; i < menu_opts->size(); i++) {
-            ipp->appendTextChild(_("option"), menu_opts->get(i), mxml_int_type);
+        for (size_t i = 0; i < menu_opts.size(); i++) {
+            ipp->appendTextChild(_("option"), menu_opts[i], mxml_int_type);
         }
 
         config->appendElementChild(ipp);
@@ -138,9 +138,9 @@ void web::auth::process()
     } else if (action == "get_sid") {
         log_debug("checking/getting sid...\n");
         Ref<Session> session = nullptr;
-        String sid = param(_("sid"));
+        std::string sid = param(_("sid"));
 
-        if (sid == nullptr || (session = sessionManager->getSession(sid)) == nullptr) {
+        if (sid.empty() || (session = sessionManager->getSession(sid)) == nullptr) {
             session = sessionManager->createSession(timeout);
             root->setAttribute(_("sid_was_valid"), _("0"), mxml_bool_type);
         } else {
@@ -156,7 +156,7 @@ void web::auth::process()
         root->setAttribute(_("logged_in"), session->isLoggedIn() ? _("1") : _("0"), mxml_bool_type);
     } else if (action == "logout") {
         check_request();
-        String sid = param(_("sid"));
+        std::string sid = param(_("sid"));
         Ref<Session> session = SessionManager::getInstance()->getSession(sid);
         if (session == nullptr)
             throw _Exception(_("illegal session id"));
@@ -165,16 +165,16 @@ void web::auth::process()
         check_request(false);
 
         // sending token
-        String token = generate_token();
+        std::string token = generate_token();
         session->put(_("token"), token);
         root->appendTextChild(_("token"), token);
     } else if (action == "login") {
         check_request(false);
 
         // authentication
-        String username = param(_("username"));
-        String encPassword = param(_("password"));
-        String sid = param(_("sid"));
+        std::string username = param(_("username"));
+        std::string encPassword = param(_("password"));
+        std::string sid = param(_("sid"));
 
         if (!string_ok(username) || !string_ok(encPassword))
             throw LoginException(_("Missing username or password"));
@@ -183,7 +183,7 @@ void web::auth::process()
         if (session == nullptr)
             throw _Exception(_("illegal session id"));
 
-        String correctPassword = sessionManager->getUserPassword(username);
+        std::string correctPassword = sessionManager->getUserPassword(username);
 
         if (!string_ok(correctPassword) || !check_token(session->get(_("token")), correctPassword, encPassword))
             throw LoginException(_("Invalid username or password"));

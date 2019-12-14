@@ -12,8 +12,8 @@ class UpnpXmlTest : public ::testing::Test {
   virtual ~UpnpXmlTest() {};
 
   virtual void SetUp() {
-    zmm::String virtualDir = "/dir/virtual";
-    zmm::String presentationURl = "http://someurl/";
+    std::string virtualDir = "/dir/virtual";
+    std::string presentationURl = "http://someurl/";
     subject = new UpnpXMLBuilder(virtualDir, presentationURl);
   }
 
@@ -107,8 +107,8 @@ TEST_F(UpnpXmlTest, UpdatesObjectActiveItem) {
 }
 
 TEST_F(UpnpXmlTest, CreateResponse) {
-  zmm::String actionName = "action";
-  zmm::String serviceType = "urn:schemas-upnp-org:service:ContentDirectory:1";
+  std::string actionName = "action";
+  std::string serviceType = "urn:schemas-upnp-org:service:ContentDirectory:1";
 
   zmm::Ref<mxml::Element> result = subject->createResponse(actionName, serviceType);
 
@@ -123,9 +123,9 @@ TEST_F(UpnpXmlTest, FirstResourceRendersPureWhenExternalUrl) {
 
   zmm::Ref<CdsItem> item = RefCast(obj, CdsItem);
 
-  zmm::String result = subject->getFirstResourcePath(item);
+  std::string result = subject->getFirstResourcePath(item);
 
-  EXPECT_NE(result, nullptr);
+  EXPECT_NE(result, "");
   EXPECT_STREQ(result.c_str(), "http://localhost/external/url");
 }
 
@@ -138,9 +138,9 @@ TEST_F(UpnpXmlTest, FirstResourceAddsLocalResourceIdToExternalUrlWhenOnlineWithP
 
   zmm::Ref<CdsItem> item = RefCast(obj, CdsItem);
 
-  zmm::String result = subject->getFirstResourcePath(item);
+  std::string result = subject->getFirstResourcePath(item);
 
-  EXPECT_NE(result, nullptr);
+  EXPECT_NE(result, "");
   EXPECT_STREQ(result.c_str(), "content/online/object_id/12345/res_id/0");
 }
 
@@ -151,9 +151,9 @@ TEST_F(UpnpXmlTest, FirstResourceAddsLocalResourceIdToItem) {
 
   zmm::Ref<CdsItem> item = RefCast(obj, CdsItem);
 
-  zmm::String result = subject->getFirstResourcePath(item);
+  std::string result = subject->getFirstResourcePath(item);
 
-  EXPECT_NE(result, nullptr);
+  EXPECT_NE(result, "");
   EXPECT_STREQ(result.c_str(), "content/media/object_id/12345/res_id/0");
 }
 
@@ -164,8 +164,8 @@ TEST_F(UpnpXmlTest, FirstResourceAddsContentServeToInternalUrlItem) {
 
   zmm::Ref<CdsItem> item = RefCast(obj, CdsItem);
 
-  zmm::String result = subject->getFirstResourcePath(item);
+  std::string result = subject->getFirstResourcePath(item);
 
-  EXPECT_NE(result, nullptr);
+  EXPECT_NE(result, "");
   EXPECT_STREQ(result.c_str(), "/serve/local/content");
 }

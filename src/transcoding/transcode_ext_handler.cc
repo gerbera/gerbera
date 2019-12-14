@@ -67,9 +67,9 @@ TranscodeExternalHandler::TranscodeExternalHandler() : TranscodeHandler()
 }
 
 Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile, 
-                                              String location, 
+                                              std::string location, 
                                               Ref<CdsObject> obj,
-                                              String range)
+                                              std::string range)
 {
     bool isURL = false;
 //    bool is_srt = false;
@@ -84,7 +84,7 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
     isURL = (IS_CDS_ITEM_INTERNAL_URL(obj->getObjectType()) ||
             IS_CDS_ITEM_EXTERNAL_URL(obj->getObjectType()));
 
-    String mimeType = profile->getTargetMimeType();
+    std::string mimeType = profile->getTargetMimeType();
 
     if (IS_CDS_ITEM(obj->getObjectType()))
     {
@@ -94,8 +94,8 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
 
         if (mappings->get(mimeType) == CONTENT_TYPE_PCM)
         {
-            String freq = it->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY));
-            String nrch = it->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS));
+            std::string freq = it->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY));
+            std::string nrch = it->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS));
 
             if (string_ok(freq)) 
                 mimeType = mimeType + _(";rate=") + freq;
@@ -107,7 +107,7 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
     /* Upstream, move to getinfo?
     info->content_type = ixmlCloneDOMString(mimeType.c_str());
 #ifdef EXTEND_PROTOCOLINFO
-    String header;
+    std::string header;
     header = header + _("TimeSeekRange.dlna.org: npt=") + range;
 
     log_debug("Adding TimeSeekRange response HEADERS: %s\n", header.c_str());
@@ -122,34 +122,34 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
 
     Ref<ConfigManager> cfg = ConfigManager::getInstance();
    
-    String fifo_name = normalizePath(tempName(cfg->getOption(CFG_SERVER_TMPDIR),
+    std::string fifo_name = normalizePath(tempName(cfg->getOption(CFG_SERVER_TMPDIR),
                                      fifo_template));
-    String arguments;
-    String temp;
-    String command;
-    Ref<Array<StringBase> > arglist;
+    std::string arguments;
+    std::string temp;
+    std::string command;
+    std::vector<std::string> arglist;
     Ref<Array<ProcListItem> > proc_list = nullptr;
 
 #ifdef SOPCAST
     service_type_t service = OS_None;
     if (obj->getFlag(OBJECT_FLAG_ONLINE_SERVICE))
     {
-        service = (service_type_t)(obj->getAuxData(_(ONLINE_SERVICE_AUX_ID)).toInt());
+        service = (service_type_t)std::stoi(obj->getAuxData(_(ONLINE_SERVICE_AUX_ID)));
     }
     
     if (service == OS_SopCast)
     {
-        Ref<Array<StringBase> > sop_args;
+        std::vector<std::string> sop_args;
         int p1 = find_local_port(45000,65500);
         int p2 = find_local_port(45000,65500);
-        sop_args = parseCommandLine(location + " " + String::from(p1) + " " +
-                   String::from(p2), nullptr, nullptr, nullptr);
+        sop_args = parseCommandLine(location + " " + std::to_string(p1) + " " +
+                   std::to_string(p2), nullptr, nullptr, nullptr);
         Ref<ProcessExecutor> spsc(new ProcessExecutor(_("sp-sc-auth"), 
                                                       sop_args));
         proc_list = Ref<Array<ProcListItem> >(new Array<ProcListItem>(1));
         Ref<ProcListItem> pr_item(new ProcListItem(RefCast(spsc, Executor)));
         proc_list->append(pr_item);
-        location = _("http://localhost:") + String::from(p2) + "/tv.asf";
+        location = _("http://localhost:") + std::to_string(p2) + "/tv.asf";
 
 //FIXME: #warning check if socket is ready
         sleep(15); 
@@ -161,7 +161,7 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
         if (isURL && (!profile->acceptURL()))
         {
 #ifdef HAVE_CURL
-            String url = location;
+            std::string url = location;
             strcpy(fifo_template, "mt_transcode_XXXXXX");
             location = normalizePath(tempName(cfg->getOption(CFG_SERVER_TMPDIR), fifo_template));
             log_debug("creating reader fifo: %s\n", location.c_str());
@@ -201,8 +201,8 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
     }
 #endif
 
-    String check;
-    if (profile->getCommand().startsWith(_(_DIR_SEPARATOR)))
+    std::string check;
+    if (startswith_string(profile->getCommand(), _(_DIR_SEPARATOR)))
     {
         if (!check_path(profile->getCommand()))
             throw _Exception(_("Could not find transcoder: ") + 

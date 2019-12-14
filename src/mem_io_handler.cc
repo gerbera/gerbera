@@ -56,7 +56,7 @@ MemIOHandler::MemIOHandler(const void* buffer, int length)
     memcpy(this->buffer, buffer, length);
 }
 
-MemIOHandler::MemIOHandler(String str)
+MemIOHandler::MemIOHandler(std::string str)
     : buffer((char*)MALLOC(str.length()))
     , length(str.length())
     , pos(-1)

@@ -64,7 +64,7 @@ service_type_t SopCastService::getServiceType()
     return OS_SopCast;
 }
 
-String SopCastService::getServiceName()
+std::string SopCastService::getServiceName()
 {
     return _("SopCast");
 }
@@ -101,7 +101,7 @@ Ref<Element> SopCastService::getData()
     log_debug("GOT BUFFER\n%s\n", buffer.c_str());
     Ref<Parser> parser(new Parser());
     try {
-        return parser->parseString(sc->convert(String(buffer.c_str())))->getRoot();
+        return parser->parseString(sc->convert(std::string(buffer.c_str())))->getRoot();
     } catch (const ParseException& pe) {
         log_error("Error parsing SopCast XML %s line %d:\n%s\n",
             pe.context->location.c_str(),

@@ -40,10 +40,10 @@ namespace zmm
 class StringTokenizer : public Object
 {
 public:
-    StringTokenizer(String str);
-    String nextToken(String seps);
+    StringTokenizer(std::string str);
+    std::string nextToken(std::string seps);
 protected:
-    String str;
+    std::string str;
     int len;
     int pos;
 };

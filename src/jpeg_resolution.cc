@@ -163,7 +163,7 @@ static void get_jpeg_resolution(Ref<IOHandler> ioh, int* w, int* h)
 }
 
 // IOHandler must be opened
-String get_jpeg_resolution(Ref<IOHandler> ioh)
+std::string get_jpeg_resolution(Ref<IOHandler> ioh)
 {
     int w, h;
     try {
@@ -174,5 +174,5 @@ String get_jpeg_resolution(Ref<IOHandler> ioh)
     }
     ioh->close();
 
-    return String::from(w) + "x" + h;
+    return std::to_string(w) + "x" + std::to_string(h);
 }

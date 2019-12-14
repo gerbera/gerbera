@@ -58,21 +58,21 @@ void ContentDirectoryService::doBrowse(Ref<ActionRequest> request)
 
     Ref<Element> req = request->getRequest();
 
-    String objID = req->getChildText(_("ObjectID"));
+    std::string objID = req->getChildText(_("ObjectID"));
     int objectID;
-    String BrowseFlag = req->getChildText(_("BrowseFlag"));
-    //String Filter; // not yet supported
-    String StartingIndex = req->getChildText(_("StartingIndex"));
-    String RequestedCount = req->getChildText(_("RequestedCount"));
-    // String SortCriteria; // not yet supported
+    std::string BrowseFlag = req->getChildText(_("BrowseFlag"));
+    //std::string Filter; // not yet supported
+    std::string StartingIndex = req->getChildText(_("StartingIndex"));
+    std::string RequestedCount = req->getChildText(_("RequestedCount"));
+    // std::string SortCriteria; // not yet supported
 
     log_debug("Browse received parameters: ObjectID [%s] BrowseFlag [%s] StartingIndex [%s] RequestedCount [%s]\n",
         objID.c_str(), BrowseFlag.c_str(), StartingIndex.c_str(), RequestedCount.c_str());
 
-    if (objID == nullptr)
+    if (objID.empty())
         throw UpnpException(UPNP_E_NO_SUCH_ID, _("empty object id"));
     else
-        objectID = objID.toInt();
+        objectID = std::stoi(objID);
 
     unsigned int flag = BROWSE_ITEMS | BROWSE_CONTAINERS | BROWSE_EXACT_CHILDCOUNT;
 
@@ -91,8 +91,8 @@ void ContentDirectoryService::doBrowse(Ref<ActionRequest> request)
 
     Ref<BrowseParam> param(new BrowseParam(objectID, flag));
 
-    param->setStartingIndex(StartingIndex.toInt());
-    param->setRequestedCount(RequestedCount.toInt());
+    param->setStartingIndex(std::stoi(StartingIndex));
+    param->setRequestedCount(std::stoi(RequestedCount));
 
     Ref<Array<CdsObject>> arr;
 
@@ -120,7 +120,7 @@ void ContentDirectoryService::doBrowse(Ref<ActionRequest> request)
     for (int i = 0; i < arr->size(); i++) {
         Ref<CdsObject> obj = arr->get(i);
         if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && obj->getFlag(OBJECT_FLAG_PLAYED)) {
-            String title = obj->getTitle();
+            std::string title = obj->getTitle();
             if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND))
                 title = cfg->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING) + title;
             else
@@ -137,9 +137,9 @@ void ContentDirectoryService::doBrowse(Ref<ActionRequest> request)
     Ref<Element> response = xmlBuilder->createResponse(request->getActionName(), _(DESC_CDS_SERVICE_TYPE));
 
     response->appendTextChild(_("Result"), didl_lite->print());
-    response->appendTextChild(_("NumberReturned"), String::from(arr->size()));
-    response->appendTextChild(_("TotalMatches"), String::from(param->getTotalMatches()));
-    response->appendTextChild(_("UpdateID"), String::from(systemUpdateID));
+    response->appendTextChild(_("NumberReturned"), std::to_string(arr->size()));
+    response->appendTextChild(_("TotalMatches"), std::to_string(param->getTotalMatches()));
+    response->appendTextChild(_("UpdateID"), std::to_string(systemUpdateID));
 
     request->setResponse(response);
     log_debug("end\n");
@@ -188,7 +188,7 @@ void ContentDirectoryService::doSearch(Ref<ActionRequest> request)
     for (int i = 0; i < results->size(); i++) {
         Ref<CdsObject> cdsObject = results->get(i);
         if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && cdsObject->getFlag(OBJECT_FLAG_PLAYED)) {
-            String title = cdsObject->getTitle();
+            std::string title = cdsObject->getTitle();
             if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND))
                 title = cfg->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING) + title;
             else
@@ -204,9 +204,9 @@ void ContentDirectoryService::doSearch(Ref<ActionRequest> request)
     Ref<Element> response = xmlBuilder->createResponse(request->getActionName(), _(DESC_CDS_SERVICE_TYPE));
 
     response->appendTextChild(_("Result"), didl_lite->print());
-    response->appendTextChild(_("NumberReturned"), String::from(results->size()));
-    response->appendTextChild(_("TotalMatches"), String::from(numMatches));
-    response->appendTextChild(_("UpdateID"), String::from(systemUpdateID));
+    response->appendTextChild(_("NumberReturned"), std::to_string(results->size()));
+    response->appendTextChild(_("TotalMatches"), std::to_string(numMatches));
+    response->appendTextChild(_("UpdateID"), std::to_string(systemUpdateID));
 
     request->setResponse(response);
     log_debug("end\n");
@@ -244,7 +244,7 @@ void ContentDirectoryService::doGetSystemUpdateID(Ref<ActionRequest> request)
 
     Ref<Element> response;
     response = xmlBuilder->createResponse(request->getActionName(), _(DESC_CDS_SERVICE_TYPE));
-    response->appendTextChild(_("Id"), String::from(systemUpdateID));
+    response->appendTextChild(_("Id"), std::to_string(systemUpdateID));
 
     request->setResponse(response);
 
@@ -290,7 +290,7 @@ void ContentDirectoryService::processSubscriptionRequest(zmm::Ref<SubscriptionRe
     Ref<CdsObject> obj = Storage::getInstance()->loadObject(0);
     Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
     property->appendTextChild(_("ContainerUpdateIDs"), _("0,") + cont->getUpdateID());
-    String xml = propset->print();
+    std::string xml = propset->print();
     err = ixmlParseBufferEx(xml.c_str(), &event);
     if (err != IXML_SUCCESS) {
         throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, _("Could not convert property set to ixml"));
@@ -304,7 +304,7 @@ void ContentDirectoryService::processSubscriptionRequest(zmm::Ref<SubscriptionRe
     log_debug("end\n");
 }
 
-void ContentDirectoryService::sendSubscriptionUpdate(String containerUpdateIDs_CSV)
+void ContentDirectoryService::sendSubscriptionUpdate(std::string containerUpdateIDs_CSV)
 {
     int err;
     IXML_Document* event = nullptr;
@@ -320,7 +320,7 @@ void ContentDirectoryService::sendSubscriptionUpdate(String containerUpdateIDs_C
     property->appendTextChild(_("ContainerUpdateIDs"), containerUpdateIDs_CSV);
     property->appendTextChild(_("SystemUpdateID"), _("") + systemUpdateID);
 
-    String xml = propset->print();
+    std::string xml = propset->print();
 
     err = ixmlParseBufferEx(xml.c_str(), &event);
     if (err != IXML_SUCCESS) {

@@ -38,7 +38,7 @@ template <class T>
 class ObjectDictionaryElement : public zmm::Object {
 public:
     /// \brief Constructor, stores the key and the value.
-    ObjectDictionaryElement(zmm::String key, zmm::Ref<T> value)
+    ObjectDictionaryElement(std::string key, zmm::Ref<T> value)
         : zmm::Object()
     {
         this->key = key;
@@ -47,20 +47,20 @@ public:
 
     /// \brief Changes the name of the key.
     /// \param key new key name.
-    void setKey(zmm::String key) { this->key = key; }
+    void setKey(std::string key) { this->key = key; }
 
     /// \brief Changes the key value.
     /// \param value new value.
     void setValue(zmm::Ref<T> value) { this->value = value; }
 
     /// \brief Returns the key for this DictionaryElement.
-    zmm::String getKey() { return key; }
+    std::string getKey() { return key; }
 
     /// \brief Returns the value for this DictionaryElement.
     zmm::Ref<T> getValue() { return value; }
 
 protected:
-    zmm::String key;
+    std::string key;
     zmm::Ref<T> value;
 };
 
@@ -75,7 +75,7 @@ public:
     }
 
     /// \brief Adds a new key:value pair to the dictionary.
-    void put(zmm::String key, zmm::Ref<T> value)
+    void put(std::string key, zmm::Ref<T> value)
     {
         for (int i = 0; i < elements->size(); i++) {
             zmm::Ref<ObjectDictionaryElement<T>> el = elements->get(i);
@@ -89,7 +89,7 @@ public:
     }
 
     /// \brief Returns the value for a given key.
-    zmm::Ref<T> get(zmm::String key)
+    zmm::Ref<T> get(std::string key)
     {
         for (int i = 0; i < elements->size(); i++) {
             zmm::Ref<ObjectDictionaryElement<T>> el = elements->get(i);
@@ -104,7 +104,7 @@ public:
     int size() { return elements->size(); }
 
     /// \brief Deletes a key value pair
-    void remove(zmm::String key)
+    void remove(std::string key)
     {
         for (int i = 0; i < elements->size(); i++) {
             zmm::Ref<ObjectDictionaryElement<T>> el = elements->get(i);

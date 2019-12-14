@@ -50,12 +50,12 @@ class Parser : public zmm::Object
 {
 public:
     Parser();
-    zmm::Ref<Document> parseFile(zmm::String);
-    zmm::Ref<Document> parseString(zmm::String);
+    zmm::Ref<Document> parseFile(std::string);
+    zmm::Ref<Document> parseString(std::string);
 
 protected:
 
-    zmm::Ref<Document> parse(zmm::Ref<Context> ctx, zmm::String input);
+    zmm::Ref<Document> parse(zmm::Ref<Context> ctx, std::string input);
 
     zmm::Ref<zmm::ObjectStack<Element> > elements;
     zmm::Ref<Document> document;

@@ -62,12 +62,12 @@ void FallbackLayout::add(Ref<CdsObject> obj, int parentID, bool use_ref)
     ContentManager::getInstance()->addObject(obj);
 }
 
-zmm::String FallbackLayout::esc(zmm::String str)
+std::string FallbackLayout::esc(std::string str)
 {
     return escape(str, VIRTUAL_CONTAINER_ESCAPE, VIRTUAL_CONTAINER_SEPARATOR);
 }
 
-void FallbackLayout::addVideo(zmm::Ref<CdsObject> obj, String rootpath)
+void FallbackLayout::addVideo(zmm::Ref<CdsObject> obj, std::string rootpath)
 {
     Ref<StringConverter> f2i = StringConverter::f2i();
     int id = ContentManager::getInstance()->addContainerChain(_("/Video/All Video"));
@@ -83,16 +83,14 @@ void FallbackLayout::addVideo(zmm::Ref<CdsObject> obj, String rootpath)
         obj->setRefID(obj->getID());
     }
 
-    String dir;
+    std::string dir;
 
     if (string_ok(rootpath))
     {
-        rootpath = rootpath.substring(0, rootpath.rindex(DIR_SEPARATOR));
-
-        dir = obj->getLocation().substring(rootpath.length(), obj->getLocation().rindex(DIR_SEPARATOR)-rootpath.length());
-
-        if (dir.startsWith(_DIR_SEPARATOR))
-            dir = dir.substring(1);
+        rootpath = rootpath.substr(0, rootpath.rfind(DIR_SEPARATOR));
+        dir = obj->getLocation().substr(rootpath.length(), obj->getLocation().rfind(DIR_SEPARATOR)-rootpath.length());
+        if (startswith_string(dir, _DIR_SEPARATOR))
+            dir = dir.substr(1);
 
         dir = f2i->convert(dir);
     }
@@ -106,7 +104,7 @@ void FallbackLayout::addVideo(zmm::Ref<CdsObject> obj, String rootpath)
     }
 }
 
-void FallbackLayout::addImage(Ref<CdsObject> obj, String rootpath)
+void FallbackLayout::addImage(Ref<CdsObject> obj, std::string rootpath)
 {
     int id;
     Ref<StringConverter> f2i = StringConverter::f2i();
@@ -126,22 +124,22 @@ void FallbackLayout::addImage(Ref<CdsObject> obj, String rootpath)
 
     Ref<Dictionary> meta = obj->getMetadata();
 
-    String date = meta->get(MetadataHandler::getMetaFieldName(M_DATE));
+    std::string date = meta->get(MetadataHandler::getMetaFieldName(M_DATE));
     if (string_ok(date))
     {
-        String year, month;
-        int m = -1;
-        int y = date.index('-');
-        if (y > 0)
+        std::string year, month;
+        size_t m = -1;
+        size_t y = date.find('-');
+        if (y != std::string::npos)
         {
-            year = date.substring(0, y);
-            month = date.substring(y + 1);
-            m = month.index('-');
-            if (m > 0)
-              month = month.substring(0, m);
+            year = date.substr(0, y);
+            month = date.substr(y + 1);
+            m = month.find('-');
+            if (m != std::string::npos)
+              month = month.substr(0, m);
         }
 
-        String chain;
+        std::string chain;
         if ((y > 0) && (m > 0))
         {
             chain = _("/Photos/Year/") + esc(year) + "/" + esc(month);
@@ -154,16 +152,14 @@ void FallbackLayout::addImage(Ref<CdsObject> obj, String rootpath)
         add(obj, id);
     }
 
-    String dir;
+    std::string dir;
 
     if (string_ok(rootpath))
     {
-        rootpath = rootpath.substring(0, rootpath.rindex(DIR_SEPARATOR));
-
-        dir = obj->getLocation().substring(rootpath.length(), obj->getLocation().rindex(DIR_SEPARATOR)-rootpath.length());
-
-        if (dir.startsWith(_DIR_SEPARATOR))
-            dir = dir.substring(1);
+        rootpath = rootpath.substr(0, rootpath.rfind(DIR_SEPARATOR));
+        dir = obj->getLocation().substr(rootpath.length(), obj->getLocation().rfind(DIR_SEPARATOR)-rootpath.length());
+        if (startswith_string(dir, _DIR_SEPARATOR))
+            dir = dir.substr(1);
 
         dir = f2i->convert(dir);
     }
@@ -179,20 +175,20 @@ void FallbackLayout::addImage(Ref<CdsObject> obj, String rootpath)
 
 void FallbackLayout::addAudio(zmm::Ref<CdsObject> obj)
 {
-    String desc;
-    String chain;
-    String artist_full;
-    String album_full;
+    std::string desc;
+    std::string chain;
+    std::string artist_full;
+    std::string album_full;
 
     int id;
 
     Ref<Dictionary> meta = obj->getMetadata();
 
-    String title = meta->get(MetadataHandler::getMetaFieldName(M_TITLE));
+    std::string title = meta->get(MetadataHandler::getMetaFieldName(M_TITLE));
     if (!string_ok(title))
         title = obj->getTitle();
 
-    String artist = meta->get(MetadataHandler::getMetaFieldName(M_ARTIST));
+    std::string artist = meta->get(MetadataHandler::getMetaFieldName(M_ARTIST));
     if (string_ok(artist))
     {
         artist_full = artist;
@@ -201,7 +197,7 @@ void FallbackLayout::addAudio(zmm::Ref<CdsObject> obj)
     else
         artist = _("Unknown");
 
-    String album = meta->get(MetadataHandler::getMetaFieldName(M_ALBUM));
+    std::string album = meta->get(MetadataHandler::getMetaFieldName(M_ALBUM));
     if (string_ok(album))
     {
         desc = desc + _(", ") + album;
@@ -217,12 +213,12 @@ void FallbackLayout::addAudio(zmm::Ref<CdsObject> obj)
 
     desc = desc + title;
 
-    String date = meta->get(MetadataHandler::getMetaFieldName(M_DATE));
-    String albumDate;
+    std::string date = meta->get(MetadataHandler::getMetaFieldName(M_DATE));
+    std::string albumDate;
     if (string_ok(date)) {
-        int i = date.index('-');
-        if (i > 0)
-            date = date.substring(0, i);
+        size_t i = date.find('-');
+        if (i != std::string::npos)
+            date = date.substr(0, i);
 
         desc = desc + _(", ") + date;
         albumDate = esc(date);
@@ -233,32 +229,32 @@ void FallbackLayout::addAudio(zmm::Ref<CdsObject> obj)
 
     meta->put(MetadataHandler::getMetaFieldName(M_UPNP_DATE), albumDate);
 
-    String genre = meta->get(MetadataHandler::getMetaFieldName(M_GENRE));
+    std::string genre = meta->get(MetadataHandler::getMetaFieldName(M_GENRE));
     if (string_ok(genre))
         desc = desc + ", " + genre;
     else
         genre = _("Unknown");
 
 
-    String description = meta->get(MetadataHandler::getMetaFieldName(M_DESCRIPTION));
+    std::string description = meta->get(MetadataHandler::getMetaFieldName(M_DESCRIPTION));
     if (!string_ok(description))
     {
         meta->put(MetadataHandler::getMetaFieldName(M_DESCRIPTION), desc);
         obj->setMetadata(meta);
     }
 
-    String composer = meta->get(MetadataHandler::getMetaFieldName(M_COMPOSER));
+    std::string composer = meta->get(MetadataHandler::getMetaFieldName(M_COMPOSER));
     if (!string_ok(composer))
     {
         composer = _("None");
     }
 
-    String conductor = meta->get(MetadataHandler::getMetaFieldName(M_CONDUCTOR));
+    std::string conductor = meta->get(MetadataHandler::getMetaFieldName(M_CONDUCTOR));
     if (!string_ok(conductor)) {
         conductor = _("None");
     }
 
-    String orchestra = meta->get(MetadataHandler::getMetaFieldName(M_ORCHESTRA));
+    std::string orchestra = meta->get(MetadataHandler::getMetaFieldName(M_ORCHESTRA));
     if (!string_ok(orchestra)) {
         orchestra = _("None");
     }
@@ -291,7 +287,7 @@ void FallbackLayout::addAudio(zmm::Ref<CdsObject> obj)
     id = ContentManager::getInstance()->addContainerChain(chain);
     add(obj, id);
 
-    String temp;
+    std::string temp;
     if (string_ok(artist_full))
         temp = artist_full;
 
@@ -337,8 +333,8 @@ void FallbackLayout::addAudio(zmm::Ref<CdsObject> obj)
 void FallbackLayout::addSopCast(zmm::Ref<CdsObject> obj)
 {
     #define SP_VPATH "/Online Services/SopCast"
-    String chain;
-    String temp;
+    std::string chain;
+    std::string temp;
     int id;
     bool ref_set = false;
 
@@ -371,8 +367,8 @@ void FallbackLayout::addSopCast(zmm::Ref<CdsObject> obj)
 void FallbackLayout::addATrailers(zmm::Ref<CdsObject> obj)
 {
     #define AT_VPATH "/Online Services/Apple Trailers"
-    String chain;
-    String temp;
+    std::string chain;
+    std::string temp;
 
     int id = ContentManager::getInstance()->addContainerChain(_(AT_VPATH 
                                                               "/All Trailers"));
@@ -394,8 +390,8 @@ void FallbackLayout::addATrailers(zmm::Ref<CdsObject> obj)
     if (string_ok(temp))
     {
         Ref<StringTokenizer> st(new StringTokenizer(temp));
-        String genre;
-        String next;
+        std::string genre;
+        std::string next;
         do
         {
             if (!string_ok(genre))
@@ -414,16 +410,16 @@ void FallbackLayout::addATrailers(zmm::Ref<CdsObject> obj)
             if (string_ok(next))
                 genre = next;
             else
-                genre = nullptr;
+                genre = "";
                     
-        } while (genre != nullptr);
+        } while (!genre.empty());
     }
 
     temp = meta->get(MetadataHandler::getMetaFieldName(M_DATE));
     if (string_ok(temp) && temp.length() >= 7)
     {
         id = ContentManager::getInstance()->addContainerChain(_(AT_VPATH
-                    "/Release Date/") + esc(temp.substring(0, 7)));
+                    "/Release Date/") + esc(temp.substr(0, 7)));
         add(obj, id);
     }
 
@@ -431,7 +427,7 @@ void FallbackLayout::addATrailers(zmm::Ref<CdsObject> obj)
     if (string_ok(temp) && temp.length() >= 7)
     {
         id = ContentManager::getInstance()->addContainerChain(_(AT_VPATH
-                    "/Post Date/") + esc(temp.substring(0, 7)));
+                    "/Post Date/") + esc(temp.substr(0, 7)));
         add(obj, id);
     }
 }
@@ -445,7 +441,7 @@ FallbackLayout::FallbackLayout() : Layout()
 
 }
 
-void FallbackLayout::processCdsObject(zmm::Ref<CdsObject> obj, String rootpath)
+void FallbackLayout::processCdsObject(zmm::Ref<CdsObject> obj, std::string rootpath)
 {
     log_debug("Process CDS Object: %s\n", obj->getTitle().c_str());
 #ifdef ENABLE_PROFILING
@@ -458,7 +454,7 @@ void FallbackLayout::processCdsObject(zmm::Ref<CdsObject> obj, String rootpath)
 #ifdef ONLINE_SERVICES
     if (clone->getFlag(OBJECT_FLAG_ONLINE_SERVICE))
     {
-        service_type_t service = (service_type_t)(clone->getAuxData(_(ONLINE_SERVICE_AUX_ID)).toInt());
+        service_type_t service = (service_type_t)std::stoi(clone->getAuxData(_(ONLINE_SERVICE_AUX_ID)));
 
         switch (service)
         {
@@ -482,17 +478,17 @@ void FallbackLayout::processCdsObject(zmm::Ref<CdsObject> obj, String rootpath)
     {
 #endif
 
-        String mimetype = RefCast(obj, CdsItem)->getMimeType();
+        std::string mimetype = RefCast(obj, CdsItem)->getMimeType();
         Ref<Dictionary> mappings = 
             ConfigManager::getInstance()->getDictionaryOption(
                     CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-        String content_type = mappings->get(mimetype);
+        std::string content_type = mappings->get(mimetype);
 
-        if (mimetype.startsWith(_("video")))
+        if (startswith_string(mimetype, _("video")))
             addVideo(clone, rootpath);
-        else if (mimetype.startsWith(_("image")))
+        else if (startswith_string(mimetype, _("image")))
             addImage(clone, rootpath);
-        else if ((mimetype.startsWith(_("audio")) && 
+        else if ((startswith_string(mimetype, _("audio")) && 
                     (content_type != CONTENT_TYPE_PLAYLIST)))
             addAudio(clone);
         else if (content_type == CONTENT_TYPE_OGG)

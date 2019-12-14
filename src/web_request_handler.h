@@ -42,7 +42,7 @@
 
 class SessionException : public zmm::Exception {
 public:
-    SessionException(zmm::String message)
+    SessionException(std::string message)
         : zmm::Exception(message)
     {
     }
@@ -50,7 +50,7 @@ public:
 
 class LoginException : public zmm::Exception {
 public:
-    LoginException(zmm::String message)
+    LoginException(std::string message)
         : zmm::Exception(message)
     {
     }
@@ -65,7 +65,7 @@ protected:
     zmm::Ref<Dictionary> params;
 
     /// \brief The original filename from url if anyone needs it.
-    zmm::String filename;
+    std::string filename;
 
     /// \brief We can also always see what mode was requested.
     enum UpnpOpenFileMode mode;
@@ -81,10 +81,10 @@ protected:
     /// in an easier fashion.
     /// \param name of the parameter we are looking for.
     /// \return Value of the parameter with the given name or nullptr if not found.
-    inline zmm::String param(zmm::String name) { return params->get(name); }
+    inline std::string param(std::string name) { return params->get(name); }
 
-    int intParam(zmm::String name, int invalid = 0);
-    bool boolParam(zmm::String name);
+    int intParam(std::string name, int invalid = 0);
+    bool boolParam(std::string name);
 
     /// \brief Checks if the incoming request is valid.
     ///
@@ -96,7 +96,7 @@ protected:
     /// \brief Helper function to create a generic XML document header.
     /// \param xsl_link If not nullptr, also adds header information that is required for the XSL processor.
     /// \return The header as a string... because our parser does not yet understand <? ?> stuff :)
-    zmm::String renderXMLHeader();
+    std::string renderXMLHeader();
 
     /// \brief Prepares the output buffer and calls the process function.
     /// \return IOHandler
@@ -122,7 +122,7 @@ protected:
     /// \return true if accounts are enabled, false if not
     bool accountsEnabled() { return (ConfigManager::getInstance()->getBoolOption(CFG_SERVER_UI_ACCOUNTS_ENABLED)); }
 
-    zmm::String mapAutoscanType(int type);
+    std::string mapAutoscanType(int type);
 
 public:
     /// \brief Constructor, currently empty.
@@ -143,7 +143,7 @@ public:
     /// \return the appropriate IOHandler for the request.
     zmm::Ref<IOHandler> open(IN const char* filename,
         IN enum UpnpOpenFileMode mode,
-        IN zmm::String range) override;
+        IN std::string range) override;
 
     /// \brief This method must be overridden by the subclasses that actually process the given request.
     virtual void process() = 0;

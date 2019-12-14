@@ -35,7 +35,7 @@
 using namespace zmm;
 using namespace mxml;
 
-Comment::Comment(String text, bool indentWithLFbefore) : Node()
+Comment::Comment(std::string text, bool indentWithLFbefore) : Node()
 {
     type = mxml_node_comment;
     this->text = text;
