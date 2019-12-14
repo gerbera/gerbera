@@ -35,13 +35,13 @@
 
 using namespace zmm;
 
-StringTokenizer::StringTokenizer(String str)
+StringTokenizer::StringTokenizer(std::string str)
 {
     this->str = str;
     pos = 0;
     len = str.length();
 }
-String StringTokenizer::nextToken(String seps)
+std::string StringTokenizer::nextToken(std::string seps)
 {
     const char *cstr = str.c_str();
     const char *cseps = seps.c_str();
@@ -52,7 +52,7 @@ String StringTokenizer::nextToken(String seps)
         int start = pos;
         while(pos < len && ! strchr(cseps, cstr[pos]))
             pos++;
-        return str.substring(start, pos - start);
+        return str.substr(start, pos - start);
     }
     return nullptr;
 }

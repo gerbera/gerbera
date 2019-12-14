@@ -34,24 +34,24 @@
 
 using namespace zmm;
 
-void RequestHandler::splitUrl(const char *url, char separator, String &path, String &parameters)
+void RequestHandler::splitUrl(const char *url, char separator, std::string &path, std::string &parameters)
 {
-    int i1;
+    size_t i1;
 
-    String url_s = url;
+    std::string url_s = url;
 
     if (separator == '/')
-        i1 = url_s.rindex(separator);
+        i1 = url_s.rfind(separator);
     else if (separator == '?')
-        i1 = url_s.index(separator);
+        i1 = url_s.rfind(separator);
     else
-        throw _Exception(String("Forbidden separator: ") + separator);
+        throw _Exception(std::string("Forbidden separator: ") + separator);
 
-    if (i1 < 0) {
+    if (i1 == std::string::npos) {
         path = url_s;
-        parameters = _("");
+        parameters = "";
     } else {
-        parameters = url_s.substring(i1 + 1);
-        path = url_s.substring(0, i1);
+        parameters = url_s.substr(i1 + 1);
+        path = url_s.substr(0, i1);
     }
 }

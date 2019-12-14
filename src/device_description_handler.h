@@ -36,7 +36,7 @@ public:
 
 protected:
     UpnpXMLBuilder* xmlBuilder;
-    zmm::String deviceDescription;
+    std::string deviceDescription;
 };
 
 

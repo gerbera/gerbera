@@ -73,7 +73,7 @@ static void addField(metadata_fields_t field, const TagLib::File& file, const Ta
 
     TagLib::String val;
     TagLib::StringList list;
-    String value;
+    std::string value;
     unsigned int i;
 
     switch (field) {
@@ -89,20 +89,20 @@ static void addField(metadata_fields_t field, const TagLib::File& file, const Ta
     case M_DATE:
         i = tag->year();
         if (i > 0) {
-            value = String::from(i);
+            value = std::to_string(i);
 
             if (string_ok(value))
-                value = value + _("-01-01");
+                value = value + "-01-01";
         } else
             return;
         break;
     case M_UPNP_DATE:
         i = tag->year();
         if (i > 0) {
-            value = String::from(i);
+            value = std::to_string(i);
 
             if (string_ok(value))
-                value = value + _("-01-01");
+                value = value + "-01-01";
         } else
             return;
         break;
@@ -115,7 +115,7 @@ static void addField(metadata_fields_t field, const TagLib::File& file, const Ta
     case M_TRACKNUMBER:
         i = tag->track();
         if (i > 0) {
-            value = String::from(i);
+            value = std::to_string(i);
             item->setTrackNumber((int)i);
         } else
             return;
@@ -190,7 +190,7 @@ void TagLibHandler::populateGenericTags(Ref<CdsItem> item, const TagLib::File& f
 
     if (temp > 0) {
         res->addAttribute(MetadataHandler::getResAttrName(R_BITRATE),
-            String::from(temp));
+            std::to_string(temp));
     }
 
     temp = audioProps->length();
@@ -202,20 +202,20 @@ void TagLibHandler::populateGenericTags(Ref<CdsItem> item, const TagLib::File& f
     temp = audioProps->sampleRate();
     if (temp > 0) {
         res->addAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY),
-            String::from(temp));
+            std::to_string(temp));
     }
 
     temp = audioProps->channels();
     if (temp > 0) {
         res->addAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS),
-            String::from(temp));
+            std::to_string(temp));
     }
 }
 
 void TagLibHandler::fillMetadata(Ref<CdsItem> item)
 {
     Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-    String content_type = mappings->get(item->getMimeType());
+    std::string content_type = mappings->get(item->getMimeType());
 
     TagLib::FileStream fs(item->getLocation().c_str(), true); // true = Read only
 
@@ -241,37 +241,37 @@ void TagLibHandler::fillMetadata(Ref<CdsItem> item)
     log_debug("TagLib handler done.\n");
 }
 
-bool TagLibHandler::isValidArtworkContentType(zmm::String art_mimetype)
+bool TagLibHandler::isValidArtworkContentType(std::string art_mimetype)
 {
     // saw that simply "PNG" was used with some mp3's, so mimetype setting
     // was probably invalid
-    return (string_ok(art_mimetype) && (art_mimetype.index('/') != -1));
+    return (string_ok(art_mimetype) && (art_mimetype.find('/') != std::string::npos));
 }
 
-String TagLibHandler::getContentTypeFromByteVector(const TagLib::ByteVector& data) const
+std::string TagLibHandler::getContentTypeFromByteVector(const TagLib::ByteVector& data) const
 {
-    String art_mimetype = _(MIMETYPE_DEFAULT);
+    std::string art_mimetype = MIMETYPE_DEFAULT;
 #ifdef HAVE_MAGIC
     art_mimetype = ContentManager::getInstance()->getMimeTypeFromBuffer(data.data(), data.size());
     if (!string_ok(art_mimetype))
-        return _(MIMETYPE_DEFAULT);
+        return MIMETYPE_DEFAULT;
 #endif
     return art_mimetype;
 }
 
-void TagLibHandler::addArtworkResource(Ref<CdsItem> item, String art_mimetype)
+void TagLibHandler::addArtworkResource(Ref<CdsItem> item, std::string art_mimetype)
 {
     // if we could not determine the mimetype, then there is no
     // point to add the resource - it's probably garbage
     log_debug("Found artwork of type %s in file %s\n", art_mimetype.c_str(), item->getLocation().c_str());
 
-    if (art_mimetype != _(MIMETYPE_DEFAULT)) {
+    if (art_mimetype != MIMETYPE_DEFAULT) {
         Ref<CdsResource> resource(new CdsResource(CH_ID3));
         resource->addAttribute(MetadataHandler::getResAttrName(
                                    R_PROTOCOLINFO),
             renderProtocolInfo(art_mimetype));
-        resource->addParameter(_(RESOURCE_CONTENT_TYPE),
-            _(ID3_ALBUM_ART));
+        resource->addParameter(RESOURCE_CONTENT_TYPE,
+            ID3_ALBUM_ART);
         item->addResource(resource);
     }
 }
@@ -279,7 +279,7 @@ void TagLibHandler::addArtworkResource(Ref<CdsItem> item, String art_mimetype)
 Ref<IOHandler> TagLibHandler::serveContent(Ref<CdsItem> item, int resNum)
 {
     Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-    String content_type = mappings->get(item->getMimeType());
+    std::string content_type = mappings->get(item->getMimeType());
 
     TagLib::FileStream roStream(item->getLocation().c_str(), true); // Open read only
 
@@ -288,14 +288,14 @@ Ref<IOHandler> TagLibHandler::serveContent(Ref<CdsItem> item, int resNum)
         TagLib::MPEG::File f(&roStream, TagLib::ID3v2::FrameFactory::instance());
 
         if (!f.isValid())
-            throw _Exception(_("TagLibHandler: could not open file: ") + item->getLocation());
+            throw _Exception("TagLibHandler: could not open file: " + item->getLocation());
 
         if (!f.ID3v2Tag())
-            throw _Exception(_("TagLibHandler: resource has no album information"));
+            throw _Exception("TagLibHandler: resource has no album information");
 
         TagLib::ID3v2::FrameList list = f.ID3v2Tag()->frameList("APIC");
         if (list.isEmpty())
-            throw _Exception(_("TagLibHandler: resource has no album information"));
+            throw _Exception("TagLibHandler: resource has no album information");
 
         auto* art = static_cast<TagLib::ID3v2::AttachedPictureFrame*>(list.front());
 
@@ -306,10 +306,10 @@ Ref<IOHandler> TagLibHandler::serveContent(Ref<CdsItem> item, int resNum)
         TagLib::FLAC::File f(&roStream, TagLib::ID3v2::FrameFactory::instance());
 
         if (!f.isValid())
-            throw _Exception(_("TagLibHandler: could not open flac file: ") + item->getLocation());
+            throw _Exception("TagLibHandler: could not open flac file: " + item->getLocation());
 
         if (f.pictureList().isEmpty())
-            throw _Exception(_("TagLibHandler: flac resource has no picture information"));
+            throw _Exception("TagLibHandler: flac resource has no picture information");
 
         TagLib::FLAC::Picture* pic = f.pictureList().front();
         const TagLib::ByteVector& data = pic->data();
@@ -321,20 +321,20 @@ Ref<IOHandler> TagLibHandler::serveContent(Ref<CdsItem> item, int resNum)
         TagLib::MP4::File f(&roStream);
 
         if (!f.isValid()) {
-            throw _Exception(_("TagLibHandler: could not open mp4 file: ") + item->getLocation());
+            throw _Exception("TagLibHandler: could not open mp4 file: " + item->getLocation());
         }
 
         if (!f.hasMP4Tag()) {
-            throw _Exception(_("TagLibHandler: mp4 resource has no tag information"));
+            throw _Exception("TagLibHandler: mp4 resource has no tag information");
         }
 
-        String art_mimetype;
+        std::string art_mimetype;
 
         const TagLib::MP4::ItemListMap& itemsListMap = f.tag()->itemListMap();
         const TagLib::MP4::Item& coverItem = itemsListMap["covr"];
         const TagLib::MP4::CoverArtList& coverArtList = coverItem.toCoverArtList();
         if (coverArtList.isEmpty()) {
-            throw _Exception(_("TagLibHandler: mp4 resource has no picture information"));
+            throw _Exception("TagLibHandler: mp4 resource has no picture information");
         }
 
         const TagLib::MP4::CoverArt& coverArt = coverArtList.front();
@@ -346,19 +346,19 @@ Ref<IOHandler> TagLibHandler::serveContent(Ref<CdsItem> item, int resNum)
         TagLib::ASF::File f(&roStream);
 
         if (!f.isValid())
-            throw _Exception(_("TagLibHandler: could not open flac file: ") + item->getLocation());
+            throw _Exception("TagLibHandler: could not open flac file: " + item->getLocation());
 
         const TagLib::ASF::AttributeListMap& attrListMap = f.tag()->attributeListMap();
         if (!attrListMap.contains("WM/Picture"))
-            throw _Exception(_("TagLibHandler: wma file has no picture information"));
+            throw _Exception("TagLibHandler: wma file has no picture information");
 
         const TagLib::ASF::AttributeList& attrList = attrListMap["WM/Picture"];
         if (attrList.isEmpty())
-            throw _Exception(_("TagLibHandler: wma list has no picture information"));
+            throw _Exception("TagLibHandler: wma list has no picture information");
 
         const TagLib::ASF::Picture& wmpic = attrList[0].toPicture();
         if (!wmpic.isValid())
-            throw _Exception(_("TagLibHandler: wma pic not valid"));
+            throw _Exception("TagLibHandler: wma pic not valid");
 
         const TagLib::ByteVector& data = wmpic.picture();
 
@@ -368,11 +368,11 @@ Ref<IOHandler> TagLibHandler::serveContent(Ref<CdsItem> item, int resNum)
         TagLib::Ogg::Vorbis::File f(&roStream);
 
         if (!f.isValid() || !f.tag())
-            throw _Exception(_("TagLibHandler: could not open vorbis file: ") + item->getLocation());
+            throw _Exception("TagLibHandler: could not open vorbis file: " + item->getLocation());
 
         const TagLib::List<TagLib::FLAC::Picture*> picList = f.tag()->pictureList();
         if (picList.isEmpty())
-            throw _Exception(_("TagLibHandler: vorbis file has no picture information"));
+            throw _Exception("TagLibHandler: vorbis file has no picture information");
 
         const TagLib::FLAC::Picture* pic = picList.front();
         const TagLib::ByteVector& data = pic->data();
@@ -381,7 +381,7 @@ Ref<IOHandler> TagLibHandler::serveContent(Ref<CdsItem> item, int resNum)
         return h;
     }
 
-    throw _Exception(_("TagLibHandler: Unsupported content_type: ") + content_type);
+    throw _Exception("TagLibHandler: Unsupported content_type: " + content_type);
 }
 
 void TagLibHandler::extractMP3(TagLib::IOStream* roStream, zmm::Ref<CdsItem> item)
@@ -401,54 +401,52 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, zmm::Ref<CdsItem> ite
     // http://id3.org/id3v2.4.0-frames "4.2.6. User defined text information frame"
     bool hasTXXXFrames = frameListMap.contains("TXXX");
 
-    Ref<Array<StringBase>> aux_tags_list = ConfigManager::getInstance()->getStringArrayOption(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
-    if (aux_tags_list != nullptr) {
-        for (int i = 0; i < aux_tags_list->size(); i++) {
+    std::vector<std::string> aux_tags_list = ConfigManager::getInstance()->getStringArrayOption(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
+    for (size_t i = 0; i < aux_tags_list.size(); i++) {
 
-            String desiredFrame = aux_tags_list->get(i);
-            if (!string_ok(desiredFrame)) {
+        std::string desiredFrame = aux_tags_list[i];
+        if (!string_ok(desiredFrame)) {
+            continue;
+        }
+
+        if (frameListMap.contains(desiredFrame.c_str())) {
+            const auto frameList = frameListMap[desiredFrame.c_str()];
+            if (frameList.isEmpty())
                 continue;
-            }
 
-            if (frameListMap.contains(desiredFrame.c_str())) {
-                const auto frameList = frameListMap[desiredFrame.c_str()];
-                if (frameList.isEmpty())
-                    continue;
+            const TagLib::ID3v2::Frame* frame = frameList.front();
+            const auto textFrame = dynamic_cast<const TagLib::ID3v2::TextIdentificationFrame*>(frame);
 
-                const TagLib::ID3v2::Frame* frame = frameList.front();
+            const TagLib::String frameContents = textFrame->toString();
+            std::string value(frameContents.toCString(true));
+            value = sc->convert(value);
+            log_debug("Adding auxdata: %s with value %s\n", desiredFrame.c_str(), value.c_str());
+            item->setAuxData(desiredFrame, value);
+            continue;
+        }
+
+        if (hasTXXXFrames && startswith(desiredFrame, "TXXX:")) {
+            const auto frameList = frameListMap["TXXX"];
+            //log_debug("TXXX Frame list has %d elements\n", frameList.size());
+
+            std::string desiredSubTag = desiredFrame.substr(5);
+            if (!string_ok(desiredSubTag))
+                continue;
+
+            for (auto frame : frameList) {
                 const auto textFrame = dynamic_cast<const TagLib::ID3v2::TextIdentificationFrame*>(frame);
-
                 const TagLib::String frameContents = textFrame->toString();
-                String value(frameContents.toCString(true));
-                value = sc->convert(value);
-                log_debug("Adding auxdata: %s with value %s\n", desiredFrame.c_str(), value.c_str());
-                item->setAuxData(desiredFrame, value);
-                continue;
-            }
+                std::string value(frameContents.toCString(true));
 
-            if (hasTXXXFrames && desiredFrame.startsWith("TXXX:")) {
-                const auto frameList = frameListMap["TXXX"];
-                //log_debug("TXXX Frame list has %d elements\n", frameList.size());
+                size_t subTagEnd = value.find("]");
+                std::string subTag = value.substr(1, subTagEnd - 1); // Cut out brackets
+                std::string content = value.substr(subTagEnd + 2); // Skip bracket and space
+                // log_debug("TXXX Tag: %s\n", subTag.c_str());
 
-                String desiredSubTag = desiredFrame.substring(5);
-                if (!string_ok(desiredSubTag))
-                    continue;
-
-                for (auto frame : frameList) {
-                    const auto textFrame = dynamic_cast<const TagLib::ID3v2::TextIdentificationFrame*>(frame);
-                    const TagLib::String frameContents = textFrame->toString();
-                    String value(frameContents.toCString(true));
-
-                    int subTagEnd = value.find("]");
-                    String subTag = value.substring(1, subTagEnd - 1); // Cut out brackets
-                    String content = value.substring(subTagEnd + 2); // Skip bracket and space
-                    // log_debug("TXXX Tag: %s\n", subTag.c_str());
-
-                    if (desiredSubTag.equals(subTag)) {
-                        log_debug("Adding auxdata: %s with value %s\n", desiredFrame.c_str(), content.c_str());
-                        item->setAuxData(desiredFrame, content);
-                        break;
-                    }
+                if (desiredSubTag == subTag) {
+                    log_debug("Adding auxdata: %s with value %s\n", desiredFrame.c_str(), content.c_str());
+                    item->setAuxData(desiredFrame, content);
+                    break;
                 }
             }
         }
@@ -459,7 +457,7 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, zmm::Ref<CdsItem> ite
         auto art = static_cast<const TagLib::ID3v2::AttachedPictureFrame*>(apicFrameList.front());
 
         const TagLib::ByteVector pic = art->picture();
-        String art_mimetype = sc->convert(art->mimeType().toCString(true));
+        std::string art_mimetype = sc->convert(art->mimeType().toCString(true));
         if (!isValidArtworkContentType(art_mimetype)) {
             art_mimetype = getContentTypeFromByteVector(pic);
         }
@@ -493,7 +491,7 @@ void TagLibHandler::extractOgg(TagLib::IOStream* roStream, zmm::Ref<CdsItem> ite
     const TagLib::ByteVector& data = pic->data();
 
     Ref<StringConverter> sc = StringConverter::i2i();
-    String art_mimetype = sc->convert(pic->mimeType().toCString(true));
+    std::string art_mimetype = sc->convert(pic->mimeType().toCString(true));
     if (!isValidArtworkContentType(art_mimetype)) {
         art_mimetype = getContentTypeFromByteVector(data);
     }
@@ -522,7 +520,7 @@ void TagLibHandler::extractASF(TagLib::IOStream* roStream, zmm::Ref<CdsItem> ite
             return;
 
         Ref<StringConverter> sc = StringConverter::i2i();
-        String art_mimetype = sc->convert(wmpic.mimeType().toCString(true));
+        std::string art_mimetype = sc->convert(wmpic.mimeType().toCString(true));
         if (!isValidArtworkContentType(art_mimetype)) {
             art_mimetype = getContentTypeFromByteVector(wmpic.picture());
         }
@@ -543,30 +541,28 @@ void TagLibHandler::extractFLAC(TagLib::IOStream* roStream, zmm::Ref<CdsItem> it
 
     Ref<StringConverter> sc = StringConverter::i2i();
 
-    Ref<Array<StringBase>> aux_tags_list = ConfigManager::getInstance()->getStringArrayOption(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
-    if (aux_tags_list != nullptr) {
-        for (int j = 0; j < aux_tags_list->size(); j++) {
+    std::vector<std::string> aux_tags_list = ConfigManager::getInstance()->getStringArrayOption(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
+    for (size_t j = 0; j < aux_tags_list.size(); j++) {
 
-            String desiredTag = aux_tags_list->get(j);
-            if (!string_ok(desiredTag)) {
+        std::string desiredTag = aux_tags_list[j];
+        if (!string_ok(desiredTag)) {
+            continue;
+        }
+
+        auto propertyMap = flac.properties();
+
+        if (propertyMap.contains(desiredTag.c_str())) {
+            const auto property = propertyMap[desiredTag.c_str()];
+            if (property.isEmpty())
                 continue;
-            }
 
-            auto propertyMap = flac.properties();
-
-            if (propertyMap.contains(desiredTag.c_str())) {
-                const auto property = propertyMap[desiredTag.c_str()];
-                if (property.isEmpty())
-                    continue;
-
-                auto val = property[0];
-                String value(val.toCString(true));
-                value = sc->convert(value);
-                log_debug(
-                    "Adding auxdata: %s with value %s\n", desiredTag.c_str(),
-                    value.c_str());
-                item->setAuxData(desiredTag, value);
-            }
+            auto val = property[0];
+            std::string value(val.toCString(true));
+            value = sc->convert(value);
+            log_debug(
+                "Adding auxdata: %s with value %s\n", desiredTag.c_str(),
+                value.c_str());
+            item->setAuxData(desiredTag, value);
         }
     }
 
@@ -577,7 +573,7 @@ void TagLibHandler::extractFLAC(TagLib::IOStream* roStream, zmm::Ref<CdsItem> it
     const TagLib::FLAC::Picture* pic = flac.pictureList().front();
     const TagLib::ByteVector& data = pic->data();
 
-    String art_mimetype = sc->convert(pic->mimeType().toCString(true));
+    std::string art_mimetype = sc->convert(pic->mimeType().toCString(true));
     if (!isValidArtworkContentType(art_mimetype)) {
         art_mimetype = getContentTypeFromByteVector(data);
     }
@@ -624,7 +620,7 @@ void TagLibHandler::extractMP4(TagLib::IOStream* roStream, zmm::Ref<CdsItem> ite
         return;
     }
 
-    String art_mimetype;
+    std::string art_mimetype;
 
     TagLib::MP4::ItemListMap itemsListMap = mp4.tag()->itemListMap();
     if (itemsListMap.contains("covr")) {

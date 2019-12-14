@@ -45,9 +45,9 @@ void web::action::process()
     log_debug("action: start\n");
     check_request();
 
-    String action = param(_("action"));
+    std::string action = param("action");
     if (!string_ok(action))
-        throw _Exception(_("No action given!"));
+        throw _Exception("No action given!");
     log_debug("action: %s\n", action.c_str());
 
     log_debug("action: returning\n");

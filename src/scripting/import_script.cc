@@ -39,7 +39,7 @@ using namespace zmm;
 
 ImportScript::ImportScript(Ref<Runtime> runtime) : Script(runtime, "import")
 {
-    String scriptPath = ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT); 
+    std::string scriptPath = ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT); 
 
     try 
     {
@@ -51,7 +51,7 @@ ImportScript::ImportScript(Ref<Runtime> runtime) : Script(runtime, "import")
     }
 }
 
-void ImportScript::processCdsObject(Ref<CdsObject> obj, String scriptpath)
+void ImportScript::processCdsObject(Ref<CdsObject> obj, std::string scriptpath)
 {
     processed = obj;
     try 

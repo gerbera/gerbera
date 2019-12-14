@@ -42,7 +42,7 @@
 
 using namespace zmm;
 
-std::string URL::download(String URL, long* HTTP_retcode,
+std::string URL::download(std::string URL, long* HTTP_retcode,
     CURL* curl_handle, bool only_header,
     bool verbose, bool redirect)
 {
@@ -54,7 +54,7 @@ std::string URL::download(String URL, long* HTTP_retcode,
         curl_handle = curl_easy_init();
         cleanup = true;
         if (curl_handle == nullptr)
-            throw _Exception(_("Invalid curl handle!\n"));
+            throw _Exception("Invalid curl handle!\n");
     }
 
     std::ostringstream buffer;
@@ -117,7 +117,7 @@ std::string URL::download(String URL, long* HTTP_retcode,
     return buffer.str();
 }
 
-Ref<URL::Stat> URL::getInfo(String URL, CURL* curl_handle)
+Ref<URL::Stat> URL::getInfo(std::string URL, CURL* curl_handle)
 {
     long retcode;
     bool cleanup = false;
@@ -126,28 +126,28 @@ Ref<URL::Stat> URL::getInfo(String URL, CURL* curl_handle)
     char* ct;
     char* c_url;
     char error_buffer[CURL_ERROR_SIZE] = { '\0' };
-    String mt;
-    String used_url;
+    std::string mt;
+    std::string used_url;
 
     if (curl_handle == nullptr) {
         curl_handle = curl_easy_init();
         cleanup = true;
         if (curl_handle == nullptr)
-            throw _Exception(_("Invalid curl handle!\n"));
+            throw _Exception("Invalid curl handle!\n");
     }
 
     download(URL, &retcode, curl_handle, true, true, true);
     if (retcode != 200) {
         if (cleanup)
             curl_easy_cleanup(curl_handle);
-        throw _Exception(_("Error retrieving information from ") + URL + _(" HTTP return code: ") + String::from(retcode));
+        throw _Exception("Error retrieving information from " + URL + " HTTP return code: " + std::to_string(retcode));
     }
     /*    
     Ref<RExp> getMT(new RExp());
     
     try
     {
-        getMT->compile(_("\nContent-Type: ([^\n]+)\n"), REG_ICASE);
+        getMT->compile("\nContent-Type: ([^\n]+)\n", REG_ICASE);
     }
     catch (const Exception & ex)
     {
@@ -158,11 +158,11 @@ Ref<URL::Stat> URL::getInfo(String URL, CURL* curl_handle)
     }
 
     Ref<Matcher> matcher = getMT->matcher(buffer->toString());
-    String mt;
+    std::string mt;
     if (matcher->next())
         mt = trim_string(matcher->group(1));
     else
-        mt = _(MIMETYPE_DEFAULT);
+        mt = MIMETYPE_DEFAULT;
 
     log_debug("Extracted content type: %s\n", mt.c_str());
 
@@ -170,7 +170,7 @@ Ref<URL::Stat> URL::getInfo(String URL, CURL* curl_handle)
 
     try
     {
-        getCL->compile(_("\nContent-Length: ([^\n]+)\n"), REG_ICASE);
+        getCL->compile("\nContent-Length: ([^\n]+)\n", REG_ICASE);
     }
     catch (const Exception & ex)
     {
@@ -204,7 +204,7 @@ Ref<URL::Stat> URL::getInfo(String URL, CURL* curl_handle)
     }
 
     if (ct == nullptr)
-        mt = _(MIMETYPE_DEFAULT);
+        mt = MIMETYPE_DEFAULT;
     else
         mt = ct;
 

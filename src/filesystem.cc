@@ -66,13 +66,13 @@ Filesystem::Filesystem()
     includeRules = Ref<Array<RExp>>(new Array<RExp>());
     Ref<ConfigManager> cm = ConfigManager::getInstance();
     /*    
-    Ref<Element> rules = cm->getElement(_("filter"));
+    Ref<Element> rules = cm->getElement("filter");
     if (rules == nullptr)
         return;
     for (int i = 0; i < rules->childCount(); i++)
     {
         Ref<Element> rule = rules->getChild(i);
-        String pat = rule->getAttribute(_("pattern"));
+        std::string pat = rule->getAttribute("pattern");
         /// \todo make patterns from simple wildcards instead of
         /// taking the pattern attribute directly as regexp
         Ref<RExp> pattern(new RExp());
@@ -89,14 +89,14 @@ Filesystem::Filesystem()
     */
 }
 
-Ref<Array<FsObject>> Filesystem::readDirectory(String path, int mask,
+Ref<Array<FsObject>> Filesystem::readDirectory(std::string path, int mask,
     int childMask)
 {
-    if (path.charAt(0) != '/') {
-        throw _Exception(_("Filesystem: relative paths not allowed: ") + path);
+    if (path.at(0) != '/') {
+        throw _Exception("Filesystem: relative paths not allowed: " + path);
     }
     if (!fileAllowed(path))
-        throw _Exception(_("Filesystem: file blocked: ") + path);
+        throw _Exception("Filesystem: file blocked: " + path);
 
     struct stat statbuf;
     int ret;
@@ -108,7 +108,7 @@ Ref<Array<FsObject>> Filesystem::readDirectory(String path, int mask,
 
     dir = opendir(path.c_str());
     if (!dir) {
-        throw _Exception(_("could not list directory ") + path + " : " + strerror(errno));
+        throw _Exception("could not list directory " + path + " : " + strerror(errno));
     }
 
     while ((dent = readdir(dir)) != nullptr) {
@@ -121,7 +121,7 @@ Ref<Array<FsObject>> Filesystem::readDirectory(String path, int mask,
             } else if (!(mask & FS_MASK_HIDDEN))
                 continue;
         }
-        String childPath;
+        std::string childPath;
         if (path == FS_ROOT_DIRECTORY)
             childPath = path + name;
         else
@@ -164,12 +164,12 @@ Ref<Array<FsObject>> Filesystem::readDirectory(String path, int mask,
     return files;
 }
 
-bool Filesystem::have(String path, int mask)
+bool Filesystem::have(std::string path, int mask)
 {
     /*
     if (path.charAt(0) != '/')
     {
-        throw _Exception(_("Filesystem relative paths not allowed: ") +
+        throw _Exception("Filesystem relative paths not allowed: " +
                         path);
     }
     */
@@ -186,7 +186,7 @@ bool Filesystem::have(String path, int mask)
 
     dir = opendir(path.c_str());
     if (!dir) {
-        throw _Exception(_("could not list directory ") + path + " : " + strerror(errno));
+        throw _Exception("could not list directory " + path + " : " + strerror(errno));
     }
 
     bool result = false;
@@ -200,7 +200,7 @@ bool Filesystem::have(String path, int mask)
             } else if (!(mask & FS_MASK_HIDDEN))
                 continue;
         }
-        String childPath;
+        std::string childPath;
         if (path == FS_ROOT_DIRECTORY)
             childPath = path + name;
         else
@@ -223,16 +223,16 @@ bool Filesystem::have(String path, int mask)
     return result;
 }
 
-bool Filesystem::haveFiles(String dir)
+bool Filesystem::haveFiles(std::string dir)
 {
     return have(dir, FS_MASK_FILES);
 }
-bool Filesystem::haveDirectories(String dir)
+bool Filesystem::haveDirectories(std::string dir)
 {
     return have(dir, FS_MASK_DIRECTORIES);
 }
 
-bool Filesystem::fileAllowed(String path)
+bool Filesystem::fileAllowed(std::string path)
 {
     if (path == ConfigManager::getInstance()->getConfigFilename())
         return false;

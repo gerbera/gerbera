@@ -32,12 +32,15 @@
 #ifndef __PROCESS_EXECUTOR_H__
 #define __PROCESS_EXECUTOR_H__
 
+#include <string>
+#include <vector>
+
 #include "executor.h"
 
 class ProcessExecutor : public Executor {
 public:
-    ProcessExecutor(zmm::String command,
-        zmm::Ref<zmm::Array<zmm::StringBase>> arglist);
+    ProcessExecutor(std::string command,
+        std::vector<std::string> arglist);
     virtual bool isAlive();
     virtual bool kill();
     virtual int getStatus();

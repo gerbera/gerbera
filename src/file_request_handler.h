@@ -48,7 +48,7 @@ public:
     virtual zmm::Ref<IOHandler> open(
         const char* filename,
         enum UpnpOpenFileMode mode,
-        zmm::String range);
+        std::string range);
 };
 
 #endif // __FILE_REQUEST_HANDLER_H__

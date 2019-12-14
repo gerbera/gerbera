@@ -58,11 +58,11 @@ protected:
 
 public:
     enum mxml_node_types getType() { return type; }
-    virtual zmm::String print();
+    virtual std::string print();
 
     virtual void print_internal(std::ostringstream &buf, int indent) = 0;
 protected:
-    static zmm::String escape(zmm::String str);
+    static std::string escape(std::string str);
 };
 
 

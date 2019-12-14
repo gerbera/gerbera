@@ -44,7 +44,7 @@ class ParseException : public zmm::Exception
 public:
     zmm::Ref<Context> context;
 public:
-    ParseException(zmm::String msg, zmm::Ref<Context> context);
+    ParseException(std::string msg, zmm::Ref<Context> context);
 };
 
 }

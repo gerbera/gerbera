@@ -70,7 +70,7 @@ protected:
     int group_count;
     int current_channel_index;
     int channel_count;
-    zmm::String current_group_name;
+    std::string current_group_name;
 
     zmm::Ref<mxml::Element> current_group;
     zmm::Ref<Dictionary> extension_mimetype_map;

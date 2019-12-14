@@ -50,22 +50,22 @@ FanArtHandler::FanArtHandler()
 {
 }
 
-inline bool path_exists(String name)
+inline bool path_exists(std::string name)
 {
     struct stat buffer;
     return (stat(name.c_str(), &buffer) == 0);
 }
 
-String getFolderName(Ref<CdsItem> item)
+std::string getFolderName(Ref<CdsItem> item)
 {
-    String folder = item->getLocation().substring(0, item->getLocation().rindex('/'));
+    std::string folder = item->getLocation().substr(0, item->getLocation().rfind('/'));
     log_debug("Folder name: %s\n", folder.c_str());
     return folder;
 }
 
-String getFanArtPath(String folder)
+std::string getFanArtPath(std::string folder)
 {
-    String found;
+    std::string found;
     for (int i = 0; i < num_names; i++) {
         bool exists = path_exists(folder + names[i]);
         log_debug("%s: %s\n", names[i], exists ? "found" : "missing");
@@ -81,19 +81,18 @@ void FanArtHandler::fillMetadata(Ref<CdsItem> item)
 {
     log_debug("Running fanart handler on %s\n", item->getLocation().c_str());
 
-    String found = getFanArtPath(getFolderName(item));
-
-    if (found != nullptr) {
+    std::string found = getFanArtPath(getFolderName(item));
+    if (!found.empty()) {
         Ref<CdsResource> resource(new CdsResource(CH_FANART));
         resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo("jpg"));
-        resource->addParameter(_(RESOURCE_CONTENT_TYPE), _(ID3_ALBUM_ART));
+        resource->addParameter(RESOURCE_CONTENT_TYPE, ID3_ALBUM_ART);
         item->addResource(resource);
     }
 }
 
 Ref<IOHandler> FanArtHandler::serveContent(Ref<CdsItem> item, int resNum)
 {
-    String path = getFanArtPath(getFolderName(item));
+    std::string path = getFanArtPath(getFolderName(item));
 
     log_debug("FanArt: Opening name: %s\n", path.c_str());
 

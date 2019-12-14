@@ -46,7 +46,7 @@ public:
     FfmpegHandler();
     virtual void fillMetadata(zmm::Ref<CdsItem> item);
     virtual zmm::Ref<IOHandler> serveContent(zmm::Ref<CdsItem> item, int resNum);
-    virtual zmm::String getMimeType();
+    virtual std::string getMimeType();
 };
 
 #endif //__FFMPEG_HANDLER_H__

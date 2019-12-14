@@ -46,36 +46,36 @@ protected:
     int errCode;
 
 public:
-    UpnpException(int errCode, zmm::String message);
-    UpnpException(int errCode, zmm::String message, const char* file, int line, const char* function);
+    UpnpException(int errCode, std::string message);
+    UpnpException(int errCode, std::string message, const char* file, int line, const char* function);
     inline int getErrorCode() const { return errCode; }
 };
 
 class StorageException : public zmm::Exception {
 protected:
-    zmm::String userMessage;
+    std::string userMessage;
 
 public:
-    inline StorageException(zmm::String _userMessage, zmm::String message)
+    inline StorageException(std::string _userMessage, std::string message)
         : zmm::Exception(message)
     {
         userMessage = _userMessage;
     }
-    inline StorageException(zmm::String _userMessage, zmm::String message, const char* file, int line, const char* function)
+    inline StorageException(std::string _userMessage, std::string message, const char* file, int line, const char* function)
         : zmm::Exception(message, file, line, function)
     {
         userMessage = _userMessage;
     }
-    zmm::String getUserMessage() const { return (userMessage != nullptr ? userMessage : message); }
+    std::string getUserMessage() const { return (!userMessage.empty() ? userMessage : message); }
 };
 
 class ObjectNotFoundException : public StorageException {
 public:
-    inline ObjectNotFoundException(zmm::String message)
+    inline ObjectNotFoundException(std::string message)
         : StorageException(message, message)
     {
     }
-    inline ObjectNotFoundException(zmm::String message, const char* file, int line, const char* function)
+    inline ObjectNotFoundException(std::string message, const char* file, int line, const char* function)
         : StorageException(message, message, file, line, function)
     {
     }
@@ -83,11 +83,11 @@ public:
 
 class SubtitlesNotFoundException : public zmm::Exception {
 public:
-    inline SubtitlesNotFoundException(zmm::String message)
+    inline SubtitlesNotFoundException(std::string message)
         : zmm::Exception(message)
     {
     }
-    inline SubtitlesNotFoundException(zmm::String message, const char* file, int line, const char* function)
+    inline SubtitlesNotFoundException(std::string message, const char* file, int line, const char* function)
         : zmm::Exception(message, file, line, function)
     {
     }
@@ -95,11 +95,11 @@ public:
 
 class ServerShutdownException : public zmm::Exception {
 public:
-    inline ServerShutdownException(zmm::String message)
+    inline ServerShutdownException(std::string message)
         : zmm::Exception(message)
     {
     }
-    inline ServerShutdownException(zmm::String message, const char* file, int line, const char* function)
+    inline ServerShutdownException(std::string message, const char* file, int line, const char* function)
         : zmm::Exception(message, file, line, function)
     {
     }
@@ -107,11 +107,11 @@ public:
 
 class TryAgainException : public zmm::Exception {
 public:
-    inline TryAgainException(zmm::String message)
+    inline TryAgainException(std::string message)
         : zmm::Exception(message)
     {
     }
-    inline TryAgainException(zmm::String message, const char* file, int line, const char* function)
+    inline TryAgainException(std::string message, const char* file, int line, const char* function)
         : zmm::Exception(message, file, line, function)
     {
     }
@@ -119,11 +119,11 @@ public:
 
 class SingletonException : public zmm::Exception {
 public:
-    inline SingletonException(zmm::String message)
+    inline SingletonException(std::string message)
         : zmm::Exception(message)
     {
     }
-    inline SingletonException(zmm::String message, const char* file, int line, const char* function)
+    inline SingletonException(std::string message, const char* file, int line, const char* function)
         : zmm::Exception(message, file, line, function)
     {
     }

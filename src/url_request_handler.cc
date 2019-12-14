@@ -62,12 +62,12 @@ void URLRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
 {
     log_debug("start\n");
 
-    String header;
-    String mimeType;
+    std::string header;
+    std::string mimeType;
     int objectID;
-    String tr_profile;
+    std::string tr_profile;
 
-    String url, parameters;
+    std::string url, parameters;
     parameters = (filename + strlen(LINK_URL_REQUEST_HANDLER));
 
     Ref<Dictionary> dict(new Dictionary());
@@ -76,12 +76,12 @@ void URLRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
     log_debug("full url (filename): %s, parameters: %s\n",
         filename, parameters.c_str());
 
-    String objID = dict->get(_("object_id"));
-    if (objID == nullptr) {
+    std::string objID = dict->get("object_id");
+    if (objID.empty()) {
         //log_error("object_id not found in url\n");
-        throw _Exception(_("getInfo: object_id not found"));
+        throw _Exception("getInfo: object_id not found");
     } else
-        objectID = objID.toInt();
+        objectID = std::stoi(objID);
 
     //log_debug("got ObjectID: [%s]\n", object_id.c_str());
 
@@ -92,17 +92,17 @@ void URLRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
     int objectType = obj->getObjectType();
 
     if (!IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
-        throw _Exception(_("getInfo: object is not an external url item"));
+        throw _Exception("getInfo: object is not an external url item");
     }
 
-    tr_profile = dict->get(_(URL_PARAM_TRANSCODE_PROFILE_NAME));
+    tr_profile = dict->get(URL_PARAM_TRANSCODE_PROFILE_NAME);
 
     if (string_ok(tr_profile)) {
         Ref<TranscodingProfile> tp = ConfigManager::getInstance()->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(tr_profile);
 
         if (tp == nullptr)
-            throw _Exception(_("Transcoding requested but no profile "
-                               "matching the name ")
+            throw _Exception("Transcoding requested but no profile "
+                             "matching the name "
                 + tr_profile + " found");
 
         mimeType = tp->getTargetMimeType();
@@ -128,7 +128,7 @@ void URLRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
         try {
             st = u->getInfo(url);
             UpnpFileInfo_set_FileLength(info, st->getSize());
-            header = _("Accept-Ranges: bytes");
+            header = "Accept-Ranges: bytes";
             log_debug("URL used for request: %s\n", st->getURL().c_str());
         } catch (const Exception& ex) {
             log_warning("%s\n", ex.getMessage().c_str());
@@ -156,21 +156,21 @@ void URLRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
 
 Ref<IOHandler> URLRequestHandler::open(const char* filename,
     enum UpnpOpenFileMode mode,
-    String range)
+    std::string range)
 {
     int objectID;
-    String mimeType;
-    String header;
-    String tr_profile;
+    std::string mimeType;
+    std::string header;
+    std::string tr_profile;
 
     log_debug("start\n");
 
     // Currently we explicitly do not support UPNP_WRITE
     // due to security reasons.
     if (mode != UPNP_READ)
-        throw _Exception(_("UPNP_WRITE unsupported"));
+        throw _Exception("UPNP_WRITE unsupported");
 
-    String url, parameters;
+    std::string url, parameters;
     parameters = (filename + strlen(LINK_URL_REQUEST_HANDLER));
 
     Ref<Dictionary> dict(new Dictionary());
@@ -178,11 +178,11 @@ Ref<IOHandler> URLRequestHandler::open(const char* filename,
     log_debug("full url (filename): %s, parameters: %s\n",
         filename, parameters.c_str());
 
-    String objID = dict->get(_("object_id"));
-    if (objID == nullptr) {
-        throw _Exception(_("object_id not found"));
+    std::string objID = dict->get("object_id");
+    if (objID.empty()) {
+        throw _Exception("object_id not found");
     } else
-        objectID = objID.toInt();
+        objectID = std::stoi(objID);
 
     Ref<Storage> storage = Storage::getInstance();
 
@@ -191,7 +191,7 @@ Ref<IOHandler> URLRequestHandler::open(const char* filename,
     int objectType = obj->getObjectType();
 
     if (!IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
-        throw _Exception(_("object is not an external url item"));
+        throw _Exception("object is not an external url item");
     }
 
     Ref<CdsItemExternalURL> item = RefCast(obj, CdsItemExternalURL);
@@ -213,13 +213,13 @@ Ref<IOHandler> URLRequestHandler::open(const char* filename,
     //info->is_directory = 0;
     //info->http_header = NULL;
 
-    tr_profile = dict->get(_(URL_PARAM_TRANSCODE_PROFILE_NAME));
+    tr_profile = dict->get(URL_PARAM_TRANSCODE_PROFILE_NAME);
 
     if (string_ok(tr_profile)) {
         Ref<TranscodingProfile> tp = ConfigManager::getInstance()->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(tr_profile);
 
         if (tp == nullptr)
-            throw _Exception(_("Transcoding of file ") + url + " but no profile matching the name " + tr_profile + " found");
+            throw _Exception("Transcoding of file " + url + " but no profile matching the name " + tr_profile + " found");
 
         Ref<TranscodeDispatcher> tr_d(new TranscodeDispatcher());
         return tr_d->open(tp, url, RefCast(item, CdsObject), range);
@@ -229,7 +229,7 @@ Ref<IOHandler> URLRequestHandler::open(const char* filename,
         try {
             st = u->getInfo(url);
             // info->file_length = st->getSize();
-            header = _("Accept-Ranges: bytes");
+            header = "Accept-Ranges: bytes";
             log_debug("URL used for request: %s\n", st->getURL().c_str());
         } catch (const Exception& ex) {
             log_warning("%s\n", ex.getMessage().c_str());

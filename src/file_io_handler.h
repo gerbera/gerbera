@@ -39,14 +39,14 @@
 class FileIOHandler : public IOHandler {
 protected:
     /// \brief Name of the file.
-    zmm::String filename;
+    std::string filename;
 
     /// \brief Handle of the file.
     FILE* f;
 
 public:
     /// \brief Sets the filename to work with.
-    explicit FileIOHandler(zmm::String filename);
+    explicit FileIOHandler(std::string filename);
 
     /// \brief Opens file for reading (writing is not supported)
     void open(enum UpnpOpenFileMode mode) override;

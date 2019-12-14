@@ -45,14 +45,14 @@ using namespace zmm;
 Ref<Storage> Storage::getInstance()
 {
     if (!instance->singletonActive)
-        throw _Exception(_("singleton is currently inactive!"));
+        throw _Exception("singleton is currently inactive!");
     if (instance == nullptr) {
         // extra scope added so that lock can be released prior to metadata upgrade
         // when flushInsertBuffer() will try taking this lock
         {
             AutoLock lock(mutex);
             if (!instance->singletonActive)
-                throw _Exception(_("singleton is currently inactive!"));
+                throw _Exception("singleton is currently inactive!");
             if (instance == nullptr) {
                 Ref<Storage> tmpInstance = createInstance();
                 tmpInstance->init();
@@ -68,7 +68,7 @@ Ref<Storage> Storage::getInstance()
 
 Ref<Storage> Storage::createInstance()
 {
-    String type;
+    std::string type;
     Ref<Storage> storage;
 
     Ref<ConfigManager> config = ConfigManager::getInstance();
@@ -89,35 +89,35 @@ Ref<Storage> Storage::createInstance()
         }
 #endif
         // other database types...
-        throw _Exception(_("Unknown storage type: ") + type);
+        throw _Exception("Unknown storage type: " + type);
     } while (false);
 
     return storage;
 }
 
-void Storage::stripAndUnescapeVirtualContainerFromPath(String path, String& first, String& last)
+void Storage::stripAndUnescapeVirtualContainerFromPath(std::string path, std::string& first, std::string& last)
 {
-    if (path.charAt(0) != VIRTUAL_CONTAINER_SEPARATOR) {
-        throw _Exception(_("got non-absolute virtual path; needs to start with: ") + VIRTUAL_CONTAINER_SEPARATOR);
+    if (path.at(0) != VIRTUAL_CONTAINER_SEPARATOR) {
+        throw _Exception("got non-absolute virtual path; needs to start with: " + VIRTUAL_CONTAINER_SEPARATOR);
     }
-    int sep = path.rindex(VIRTUAL_CONTAINER_SEPARATOR);
+    size_t sep = path.rfind(VIRTUAL_CONTAINER_SEPARATOR);
     if (sep == 0) {
-        first = _("/");
-        last = path.substring(1);
+        first = "/";
+        last = path.substr(1);
     } else {
-        while (sep > 0) {
-            char beforeSep = path.charAt(sep - 1);
+        while (sep != std::string::npos) {
+            char beforeSep = path.at(sep - 1);
             if (beforeSep != VIRTUAL_CONTAINER_ESCAPE) {
                 break;
             }
-            sep = path.rindex(sep - 1, VIRTUAL_CONTAINER_SEPARATOR);
+            sep = path.rfind(VIRTUAL_CONTAINER_SEPARATOR, sep - 1);
         }
         if (sep == 0) {
-            first = _("/");
-            last = unescape(path.substring(sep + 1), VIRTUAL_CONTAINER_ESCAPE);
+            first = "/";
+            last = unescape(path.substr(sep + 1), VIRTUAL_CONTAINER_ESCAPE);
         } else {
-            first = path.substring(0, sep);
-            last = unescape(path.substring(sep + 1), VIRTUAL_CONTAINER_ESCAPE);
+            first = path.substr(0, sep);
+            last = unescape(path.substr(sep + 1), VIRTUAL_CONTAINER_ESCAPE);
         }
     }
 }

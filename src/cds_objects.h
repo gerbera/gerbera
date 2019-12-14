@@ -87,13 +87,13 @@ protected:
     int parentID;
 
     /// \brief dc:title
-    zmm::String title;
+    std::string title;
 
     /// \brief upnp:class
-    zmm::String upnpClass;
+    std::string upnpClass;
 
     /// \brief Physical location of the media.
-    zmm::String location;
+    std::string location;
 
     /// \brief Last modification time in the file system.
     /// In seconds since UNIX epoch.
@@ -160,22 +160,22 @@ public:
     inline bool isRestricted() { return getFlag(OBJECT_FLAG_RESTRICTED); }
 
     /// \brief Set the object title (dc:title)
-    inline void setTitle(zmm::String title) { this->title = title; }
+    inline void setTitle(std::string title) { this->title = title; }
 
     /// \brief Retrieve the title.
-    inline zmm::String getTitle() { return title; }
+    inline std::string getTitle() { return title; }
 
     /// \brief set the upnp:class
-    inline void setClass(zmm::String upnpClass) { this->upnpClass = upnpClass; }
+    inline void setClass(std::string upnpClass) { this->upnpClass = upnpClass; }
 
     /// \brief Retrieve class
-    inline zmm::String getClass() { return upnpClass; }
+    inline std::string getClass() { return upnpClass; }
 
     /// \brief Set the physical location of the media (usually an absolute path)
-    inline void setLocation(zmm::String location) { this->location = location; }
+    inline void setLocation(std::string location) { this->location = location; }
 
     /// \brief Retrieve media location.
-    inline zmm::String getLocation() { return location; }
+    inline std::string getLocation() { return location; }
 
     /// \brief Set modification time of the media file.
     inline void setMTime(time_t mtime) { this->mtime = mtime; }
@@ -229,7 +229,7 @@ public:
     inline void clearFlag(unsigned int mask) { objectFlags &= ~mask; }
 
     /// \brief Query single metadata value.
-    inline zmm::String getMetadata(zmm::String key)
+    inline std::string getMetadata(std::string key)
     {
         return metadata->get(key);
     }
@@ -244,19 +244,19 @@ public:
     }
 
     /// \brief Set a single metadata value.
-    inline void setMetadata(zmm::String key, zmm::String value)
+    inline void setMetadata(std::string key, std::string value)
     {
         metadata->put(key, value);
     }
 
     /// \brief Removes metadata with the given key
-    inline void removeMetadata(zmm::String key)
+    inline void removeMetadata(std::string key)
     {
         metadata->remove(key);
     }
 
     /// \brief Query single auxdata value.
-    inline zmm::String getAuxData(zmm::String key)
+    inline std::string getAuxData(std::string key)
     {
         return auxdata->get(key);
     }
@@ -265,7 +265,7 @@ public:
     inline zmm::Ref<Dictionary> getAuxData() { return auxdata; }
 
     /// \brief Set a single auxdata value.
-    inline void setAuxData(zmm::String key, zmm::String value)
+    inline void setAuxData(std::string key, std::string value)
     {
         auxdata->put(key, value);
     }
@@ -277,7 +277,7 @@ public:
     }
 
     /// \brief Removes auxdata with the given key
-    inline void removeAuxData(zmm::String key)
+    inline void removeAuxData(std::string key)
     {
         auxdata->remove(key);
     }
@@ -341,10 +341,10 @@ public:
     static zmm::Ref<CdsObject> createObject(unsigned int objectType);
 
     /// \brief Returns the path to the object as it appears in the database tree.
-    virtual zmm::String getVirtualPath() = 0;
+    virtual std::string getVirtualPath() = 0;
 
-    static zmm::String mapObjectType(int objectType);
-    static int remapObjectType(zmm::String objectType);
+    static std::string mapObjectType(int objectType);
+    static int remapObjectType(std::string objectType);
 
     friend int CdsObjectTitleComparator(void* arg1, void* arg2);
 };
@@ -353,22 +353,22 @@ public:
 class CdsItem : public CdsObject {
 protected:
     /// \brief mime-type of the media.
-    zmm::String mimeType;
+    std::string mimeType;
 
     int trackNumber;
 
     /// \brief unique service ID
-    zmm::String serviceID;
+    std::string serviceID;
 
 public:
     /// \brief Constructor, sets the object type and default upnp:class (object.item)
     CdsItem();
 
     /// \brief Set mime-type information of the media.
-    inline void setMimeType(zmm::String mimeType) { this->mimeType = mimeType; }
+    inline void setMimeType(std::string mimeType) { this->mimeType = mimeType; }
 
     /// \brief Query mime-type information.
-    inline zmm::String getMimeType() { return mimeType; }
+    inline std::string getMimeType() { return mimeType; }
 
     /// \brief Sets the upnp:originalTrackNumber property
     inline void setTrackNumber(int trackNumber) { this->trackNumber = trackNumber; }
@@ -387,13 +387,13 @@ public:
     virtual void validate();
 
     /// \brief Returns the path to the object as it appears in the database tree.
-    virtual zmm::String getVirtualPath();
+    virtual std::string getVirtualPath();
 
     /// \brief Set the unique service ID.
-    inline void setServiceID(zmm::String serviceID) { this->serviceID = serviceID; }
+    inline void setServiceID(std::string serviceID) { this->serviceID = serviceID; }
 
     /// \brief Retrieve the unique service ID.
-    inline zmm::String getServiceID() { return serviceID; }
+    inline std::string getServiceID() { return serviceID; }
 };
 
 /// \brief An Active Item in the content directory.
@@ -421,10 +421,10 @@ public:
 class CdsActiveItem : public CdsItem {
 protected:
     /// \brief action to be executed (an absolute path to a script that will process the XML)
-    zmm::String action;
+    std::string action;
 
     /// \brief a field where you can save any string you wnat.
-    zmm::String state;
+    std::string state;
 
 public:
     /// \brief Constructor, sets the object type.
@@ -432,20 +432,20 @@ public:
 
     /// \brief Sets the action for the item.
     /// \param action absolute path to the script that will process the XML data.
-    inline void setAction(zmm::String action) { this->action = action; }
+    inline void setAction(std::string action) { this->action = action; }
 
     /// \brief Get the path of the action script.
-    inline zmm::String getAction() { return action; }
+    inline std::string getAction() { return action; }
 
     /// \brief Set action state.
     /// \param state any string you want.
     ///
     /// This is quite useful to let the script identify what state the item is in.
     /// Think of it as a cookie (did I already mention that I hate web cookies?)
-    inline void setState(zmm::String state) { this->state = state; }
+    inline void setState(std::string state) { this->state = state; }
 
     /// \brief Retrieve the item state.
-    inline zmm::String getState() { return state; }
+    inline std::string getState() { return state; }
 
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)
@@ -468,10 +468,10 @@ public:
 
     /// \brief Sets the URL for the item.
     /// \param URL full url to the item: http://somewhere.com/something.mpg
-    inline void setURL(zmm::String URL) { this->location = URL; }
+    inline void setURL(std::string URL) { this->location = URL; }
 
     /// \brief Get the URL of the item.
-    inline zmm::String getURL() { return location; }
+    inline std::string getURL() { return location; }
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)
     //virtual void copyTo(zmm::Ref<CdsObject> obj);
@@ -513,10 +513,10 @@ class CdsDynamicItem : public CdsItem
 {
 protected:
     /// \brief action to be executed (an absolute path to a script that will process the XML)
-    zmm::String ;
+    std::string ;
 
     /// \brief a field where you can save any string you wnat.
-    zmm::String properties;
+    std::string properties;
 public:
 
     /// \brief Constructor, sets the object type.
@@ -524,20 +524,20 @@ public:
 
     /// \brief Sets the action for the item.
     /// \param action absolute path to the script that will process the XML data.
-    void setAction(zmm::String action);
+    void setAction(std::string action);
 
     /// \brief Get the path of the action script.
-    zmm::String getAction();
+    std::string getAction();
 
     /// \brief Set action state.
     /// \param state any string you want.
     ///
     /// This is quite useful to let the script identify what state the item is in.
     /// Think of it as a cookie (did I already mention that I hate web cookies?)
-    void setState(zmm::String state);
+    void setState(std::string state);
 
     /// \brief Retrieve the item state.
-    zmm::String getState();
+    std::string getState();
 
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)
@@ -607,7 +607,7 @@ public:
     virtual void validate();
 
     /// \brief Returns the path to the object as it appears in the database tree.
-    virtual zmm::String getVirtualPath();
+    virtual std::string getVirtualPath();
 };
 
 #endif // __CDS_OBJECTS_H__

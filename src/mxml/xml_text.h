@@ -44,14 +44,14 @@ namespace mxml
 class Text : public Node
 {
 protected:
-    zmm::String text;
+    std::string text;
     enum mxml_value_type vtype;
 
 public:
-    Text(zmm::String text);
-    Text(zmm::String text, enum mxml_value_type vtype);
-    inline zmm::String getText() { return text; }
-    inline void setText(zmm::String text) { this->text = text; }
+    Text(std::string text);
+    Text(std::string text, enum mxml_value_type vtype);
+    inline std::string getText() { return text; }
+    inline void setText(std::string text) { this->text = text; }
     inline enum mxml_value_type getVType() { return vtype; }
     inline void setVType(enum mxml_value_type vtype) { this->vtype = vtype; }
 

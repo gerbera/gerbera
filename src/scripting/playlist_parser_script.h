@@ -43,7 +43,7 @@ class PlaylistParserScript : public Script
 public:
     PlaylistParserScript(zmm::Ref<Runtime> runtime);
     ~PlaylistParserScript();
-    zmm::String readln();
+    std::string readln();
     void processPlaylistObject(zmm::Ref<CdsObject> obj, zmm::Ref<GenericTask> task);
     virtual script_class_t whoami() { return S_PLAYLIST; }
 

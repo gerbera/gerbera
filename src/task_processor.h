@@ -33,7 +33,7 @@ public:
     zmm::Ref<zmm::Array<GenericTask>> getTasklist();
     zmm::Ref<GenericTask> getCurrentTask();
     void invalidateTask(unsigned int taskID);
-    zmm::String getName() override { return _("Task Processor"); }
+    std::string getName() override { return "Task Processor"; }
 
 protected:
     pthread_t taskThread;

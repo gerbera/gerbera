@@ -32,6 +32,8 @@
 #ifndef __ZMMF_BASE_QUEUE_H__
 #define __ZMMF_BASE_QUEUE_H__
 
+#include <cstring>
+
 #include "zmm.h"
 
 namespace zmm

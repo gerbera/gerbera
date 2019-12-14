@@ -51,7 +51,7 @@ public:
     }
 
 public:
-    zmm::String filename;
+    std::string filename;
     bool isDirectory;
     bool hasContent;
 };
@@ -60,15 +60,15 @@ class Filesystem : public zmm::Object {
 public:
     Filesystem();
 
-    zmm::Ref<zmm::Array<FsObject>> readDirectory(zmm::String path, int mask,
+    zmm::Ref<zmm::Array<FsObject>> readDirectory(std::string path, int mask,
         int chldMask = 0);
-    bool haveFiles(zmm::String dir);
-    bool haveDirectories(zmm::String dir);
-    bool fileAllowed(zmm::String path);
+    bool haveFiles(std::string dir);
+    bool haveDirectories(std::string dir);
+    bool fileAllowed(std::string path);
 
 protected:
     zmm::Ref<zmm::Array<RExp>> includeRules;
-    bool have(zmm::String dir, int mask);
+    bool have(std::string dir, int mask);
 };
 
 #endif // __FILESYSTEM_H__

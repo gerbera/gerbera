@@ -76,7 +76,7 @@ Server::Server()
 
 void Server::init()
 {
-    virtual_directory = _(SERVER_VIRTUAL_DIR);
+    virtual_directory = SERVER_VIRTUAL_DIR;
 
     Ref<ConfigManager> config = ConfigManager::getInstance();
 
@@ -99,17 +99,17 @@ void Server::run()
 
     Ref<ConfigManager> config = ConfigManager::getInstance();
 
-    String iface = config->getOption(CFG_SERVER_NETWORK_INTERFACE);
-    String ip = config->getOption(CFG_SERVER_IP);
+    std::string iface = config->getOption(CFG_SERVER_NETWORK_INTERFACE);
+    std::string ip = config->getOption(CFG_SERVER_IP);
 
     if (string_ok(ip) && string_ok(iface))
-        throw _Exception(_("You can not specify interface and IP at the same time!"));
+        throw _Exception("You can not specify interface and IP at the same time!");
 
     if (!string_ok(iface))
         iface = ipToInterface(ip);
 
     if (string_ok(ip) && !string_ok(iface))
-        throw _Exception(_("Could not find ip: ") + ip);
+        throw _Exception("Could not find ip: " + ip);
 
     int port = config->getIntOption(CFG_SERVER_PORT);
 
@@ -118,10 +118,12 @@ void Server::run()
     // FIMXE: why?
     storage = Storage::getInstance();
 
-    log_debug("Initialising libupnp with interface: %s, port: %d\n", iface.c_str(), port);
-    ret = UpnpInit2(iface.c_str(), port);
+    log_debug("Initialising libupnp with interface: '%s', port: %d\n", iface.c_str(), port);
+    const char* IfName = NULL;
+    if (!iface.empty()) IfName = iface.c_str();
+    ret = UpnpInit2(IfName, port);
     if (ret != UPNP_E_SUCCESS) {
-        throw _UpnpException(ret, _("run: UpnpInit failed"));
+        throw _UpnpException(ret, "run: UpnpInit failed");
     }
 
     port = UpnpGetServerPort();
@@ -133,61 +135,57 @@ void Server::run()
 
     log_info("Server bound to: %s\n", ip.c_str());
 
-    virtualUrl = _("http://") + ip + ":" + port + "/" + virtual_directory;
+    virtualUrl = "http://" + ip + ":" + std::to_string(port) + "/" + virtual_directory;
 
     // next set webroot directory
-    String web_root = config->getOption(CFG_SERVER_WEBROOT);
+    std::string web_root = config->getOption(CFG_SERVER_WEBROOT);
 
     if (!string_ok(web_root)) {
-        throw _Exception(_("invalid web server root directory"));
+        throw _Exception("invalid web server root directory");
     }
 
     ret = UpnpSetWebServerRootDir(web_root.c_str());
     if (ret != UPNP_E_SUCCESS) {
-        throw _UpnpException(ret, _("run: UpnpSetWebServerRootDir failed"));
+        throw _UpnpException(ret, "run: UpnpSetWebServerRootDir failed");
     }
 
     log_debug("webroot: %s\n", web_root.c_str());
 
-    Ref<Array<StringBase>> arr = config->getStringArrayOption(CFG_SERVER_CUSTOM_HTTP_HEADERS);
-
-    if (arr != nullptr) {
-        String tmp;
-        for (int i = 0; i < arr->size(); i++) {
-            tmp = arr->get(i);
-            if (string_ok(tmp)) {
-                log_info("(NOT) Adding HTTP header \"%s\"\n", tmp.c_str());
-                // FIXME upstream upnp
-                //ret = UpnpAddCustomHTTPHeader(tmp.c_str());
-                //if (ret != UPNP_E_SUCCESS)
-                //{
-                //    throw _UpnpException(ret, _("run: UpnpAddCustomHTTPHeader failed"));
-                //}
-            }
+    std::vector<std::string> arr = config->getStringArrayOption(CFG_SERVER_CUSTOM_HTTP_HEADERS);
+    for (size_t i = 0; i < arr.size(); i++) {
+        std::string tmp = arr[i];
+        if (string_ok(tmp)) {
+            log_info("(NOT) Adding HTTP header \"%s\"\n", tmp.c_str());
+            // FIXME upstream upnp
+            //ret = UpnpAddCustomHTTPHeader(tmp.c_str());
+            //if (ret != UPNP_E_SUCCESS)
+            //{
+            //    throw _UpnpException(ret, "run: UpnpAddCustomHTTPHeader failed");
+            //}
         }
     }
 
     log_debug("Setting virtual dir to: %s\n", virtual_directory.c_str());
     ret = UpnpAddVirtualDir(virtual_directory.c_str(), this, nullptr);
     if (ret != UPNP_E_SUCCESS) {
-        throw _UpnpException(ret, _("run: UpnpAddVirtualDir failed"));
+        throw _UpnpException(ret, "run: UpnpAddVirtualDir failed");
     }
 
     ret = registerVirtualDirCallbacks();
 
     if (ret != UPNP_E_SUCCESS) {
-        throw _UpnpException(ret, _("run: UpnpSetVirtualDirCallbacks failed"));
+        throw _UpnpException(ret, "run: UpnpSetVirtualDirCallbacks failed");
     }
 
-    String presentationURL = config->getOption(CFG_SERVER_PRESENTATION_URL);
+    std::string presentationURL = config->getOption(CFG_SERVER_PRESENTATION_URL);
     if (!string_ok(presentationURL)) {
-        presentationURL = _("http://") + ip + ":" + port + "/";
+        presentationURL = "http://" + ip + ":" + std::to_string(port) + "/";
     } else {
-        String appendto = config->getOption(CFG_SERVER_APPEND_PRESENTATION_URL_TO);
+        std::string appendto = config->getOption(CFG_SERVER_APPEND_PRESENTATION_URL_TO);
         if (appendto == "ip") {
-            presentationURL = _("http://") + ip + ":" + presentationURL;
+            presentationURL = "http://" + ip + ":" + presentationURL;
         } else if (appendto == "port") {
-            presentationURL = _("http://") + ip + ":" + port + "/" + presentationURL;
+            presentationURL = "http://" + ip + ":" + std::to_string(port) + "/" + presentationURL;
         } // else appendto is none and we take the URL as it entered by user
     }
 
@@ -195,7 +193,7 @@ void Server::run()
     xmlbuilder = std::make_unique<UpnpXMLBuilder>(virtualUrl, presentationURL);
 
     // register root device with the library
-    String deviceDescription = _("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n") + xmlbuilder->renderDeviceDescription()->print();
+    std::string deviceDescription = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + xmlbuilder->renderDeviceDescription()->print();
     //log_debug("Device Description: \n%s\n", deviceDescription.c_str());
 
     log_debug("Registering with UPnP...\n");
@@ -208,7 +206,7 @@ void Server::run()
         &deviceHandle);
 
     if (ret != UPNP_E_SUCCESS) {
-        throw _UpnpException(ret, _("run: UpnpRegisterRootDevice failed"));
+        throw _UpnpException(ret, "run: UpnpRegisterRootDevice failed");
     }
 
     log_debug("Creating ContentDirectoryService\n");
@@ -226,7 +224,7 @@ void Server::run()
     log_debug("Sending UPnP Alive advertisements every %d seconds\n", (aliveAdvertisementInterval / 2) - 30);
     ret = UpnpSendAdvertisement(deviceHandle, aliveAdvertisementInterval);
     if (ret != UPNP_E_SUCCESS) {
-        throw _UpnpException(ret, _("run: UpnpSendAdvertisement failed"));
+        throw _UpnpException(ret, "run: UpnpSendAdvertisement failed");
     }
 
     // initializing UpdateManager
@@ -235,7 +233,7 @@ void Server::run()
     // initializing ContentManager
     ContentManager::getInstance();
 
-    config->writeBookmark(ip, String::from(port));
+    config->writeBookmark(ip, std::to_string(port));
     log_info("The Web UI can be reached by following this link: http://%s:%d/\n", ip.c_str(), port);
 
     log_debug("end\n");
@@ -263,7 +261,7 @@ void Server::shutdown()
 
     ret = UpnpUnRegisterRootDevice(deviceHandle);
     if (ret != UPNP_E_SUCCESS) {
-        throw _UpnpException(ret, _("upnp_cleanup: UpnpUnRegisterRootDevice failed"));
+        throw _UpnpException(ret, "upnp_cleanup: UpnpUnRegisterRootDevice failed");
     }
 
 #ifdef HAVE_CURL
@@ -334,14 +332,14 @@ int Server::handleUpnpEvent(Upnp_EventType eventtype, const void* event)
     return ret;
 }
 
-zmm::String Server::getIP() const
+std::string Server::getIP() const
 {
     return UpnpGetServerIpAddress();
 }
 
-zmm::String Server::getPort() const
+std::string Server::getPort() const
 {
-    return String::from(UpnpGetServerPort());
+    return std::to_string(UpnpGetServerPort());
 }
 
 void Server::routeActionRequest(Ref<ActionRequest> request) const
@@ -351,7 +349,7 @@ void Server::routeActionRequest(Ref<ActionRequest> request) const
     // make sure the request is for our device
     if (request->getUDN() != serverUDN) {
         // not for us
-        throw _UpnpException(UPNP_E_BAD_REQUEST, _("routeActionRequest: request not for this device"));
+        throw _UpnpException(UPNP_E_BAD_REQUEST, "routeActionRequest: request not for this device");
     }
 
     // we need to match the serviceID to one of our services
@@ -368,7 +366,7 @@ void Server::routeActionRequest(Ref<ActionRequest> request) const
     } else {
         // cp is asking for a nonexistent service, or for a service
         // that does not support any actions
-        throw _UpnpException(UPNP_E_BAD_REQUEST, _("Service does not exist or action not supported"));
+        throw _UpnpException(UPNP_E_BAD_REQUEST, "Service does not exist or action not supported");
     }
 }
 
@@ -379,7 +377,7 @@ void Server::routeSubscriptionRequest(Ref<SubscriptionRequest> request) const
         // not for us
         log_debug("routeSubscriptionRequest: request not for this device: %s vs %s\n",
             request->getUDN().c_str(), serverUDN.c_str());
-        throw _UpnpException(UPNP_E_BAD_REQUEST, _("routeActionRequest: request not for this device"));
+        throw _UpnpException(UPNP_E_BAD_REQUEST, "routeActionRequest: request not for this device");
     }
 
     // we need to match the serviceID to one of our services
@@ -396,55 +394,55 @@ void Server::routeSubscriptionRequest(Ref<SubscriptionRequest> request) const
     } else {
         // cp asks for a nonexistent service or for a service that
         // does not support subscriptions
-        throw _UpnpException(UPNP_E_BAD_REQUEST, _("Service does not exist or subscriptions not supported"));
+        throw _UpnpException(UPNP_E_BAD_REQUEST, "Service does not exist or subscriptions not supported");
     }
 }
 
 // Temp
-void Server::sendCDSSubscriptionUpdate(zmm::String updateString)
+void Server::sendCDSSubscriptionUpdate(std::string updateString)
 {
     cds->sendSubscriptionUpdate(updateString);
 }
 
 Ref<RequestHandler> Server::createRequestHandler(const char* filename) const
 {
-    String link = urlUnescape(String::copy(filename));
+    std::string link = urlUnescape(filename);
     log_debug("Filename: %s\n", filename);
 
     RequestHandler* ret = nullptr;
 
-    if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_MEDIA_HANDLER)) {
+    if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_MEDIA_HANDLER)) {
         ret = new FileRequestHandler(xmlbuilder.get());
-    } else if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_UI_HANDLER)) {
-        String parameters;
-        String path;
+    } else if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_UI_HANDLER)) {
+        std::string parameters;
+        std::string path;
         RequestHandler::splitUrl(filename, URL_UI_PARAM_SEPARATOR, path, parameters);
 
         Ref<Dictionary> dict(new Dictionary());
         dict->decode(parameters);
 
-        String r_type = dict->get(_(URL_REQUEST_TYPE));
-        if (r_type != nullptr) {
+        std::string r_type = dict->get(URL_REQUEST_TYPE);
+        if (!r_type.empty()) {
             ret = createWebRequestHandler(r_type);
         } else {
-            ret = createWebRequestHandler(_("index"));
+            ret = createWebRequestHandler("index");
         }
-    } else if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" + DEVICE_DESCRIPTION_PATH)) {
+    } else if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + DEVICE_DESCRIPTION_PATH)) {
         ret = new DeviceDescriptionHandler(xmlbuilder.get());
-    } else if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_SERVE_HANDLER)) {
+    } else if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_SERVE_HANDLER)) {
         if (string_ok(ConfigManager::getInstance()->getOption(CFG_SERVER_SERVEDIR)))
             ret = new ServeRequestHandler();
         else
-            throw _Exception(_("Serving directories is not enabled in configuration"));
+            throw _Exception("Serving directories is not enabled in configuration");
     }
 
 #if defined(HAVE_CURL)
-    else if (link.startsWith(_("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_ONLINE_HANDLER)) {
+    else if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_ONLINE_HANDLER)) {
         ret = new URLRequestHandler();
     }
 #endif
     else {
-        throw _Exception(_("no valid handler type in ") + filename);
+        throw _Exception(std::string("no valid handler type in ") + filename);
     }
     return Ref<RequestHandler>(ret);
 }
@@ -479,11 +477,11 @@ int Server::registerVirtualDirCallbacks()
 #else
     ret = UpnpVirtualDir_set_OpenCallback([](const char* filename, enum UpnpOpenFileMode mode, const void* cookie) -> UpnpWebFileHandle {
 #endif
-        String link = urlUnescape(zmm::String::copy(filename));
+        std::string link = urlUnescape(filename);
 
         try {
             Ref<RequestHandler> reqHandler = static_cast<const Server*>(cookie)->createRequestHandler(filename);
-            Ref<IOHandler> ioHandler = reqHandler->open(link.c_str(), mode, nullptr);
+            Ref<IOHandler> ioHandler = reqHandler->open(link.c_str(), mode, "");
             ioHandler->retain();
             //log_debug("%p open(%s)\n", ioHandler.getPtr(), filename);
             return (UpnpWebFileHandle)ioHandler.getPtr();

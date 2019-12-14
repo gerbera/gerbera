@@ -30,9 +30,9 @@
 /// \file array.cc
 
 #include "array.h"
-
-//#include <string.h>
 #include "memory.h"
+
+#include <cstring>
 
 using namespace zmm;
 
@@ -46,6 +46,7 @@ void ArrayBase::init(int capacity)
     arr = (Object **)MALLOC(capacity * sizeof(Object *));
     memset(arr, 0, capacity * sizeof(Object *));
 }
+
 ArrayBase::~ArrayBase()
 {
     for(int i = 0; i < siz; i++)

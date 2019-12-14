@@ -36,24 +36,24 @@ using namespace mxml;
 using namespace zmm;
 
 /* XmlAttr methods */
-Attribute::Attribute(String name, String value) : Object()
+Attribute::Attribute(std::string name, std::string value) : Object()
 {
     this->name = name;
     this->value = value;
     vtype = mxml_string_type;
 }
-Attribute::Attribute(String name) : Object()
+Attribute::Attribute(std::string name) : Object()
 {
     this->name = name;
     vtype = mxml_string_type;
 }
-Attribute::Attribute(String name, String value, enum mxml_value_type vtype) : Object()
+Attribute::Attribute(std::string name, std::string value, enum mxml_value_type vtype) : Object()
 {
     this->name = name;
     this->value = value;
     this->vtype = vtype;
 }
-void Attribute::setValue(String value)
+void Attribute::setValue(std::string value)
 {
     this->value = value;
 }
