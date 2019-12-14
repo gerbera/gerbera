@@ -48,7 +48,7 @@ Exiv2Handler::Exiv2Handler()
 void Exiv2Handler::fillMetadata(Ref<CdsItem> item)
 {
     try {
-        String value;
+        std::string value;
         Ref<StringConverter> sc = StringConverter::m2i();
 
         Exiv2::Image::AutoPtr image = Exiv2::ImageFactory::open(std::string(item->getLocation().c_str()));
@@ -57,7 +57,7 @@ void Exiv2Handler::fillMetadata(Ref<CdsItem> item)
         Exiv2::XmpData& xmpData = image->xmpData();
 
         // first retrieve jpeg comment
-        String comment = (char*)image->comment().c_str();
+        std::string comment = (char*)image->comment().c_str();
 
         if (exifData.empty()) {
             // no exiv2 record found in image
@@ -91,9 +91,9 @@ void Exiv2Handler::fillMetadata(Ref<CdsItem> item)
         // Not convinced that this is useful - comment it out for now ...
         /*    if (!string_ok(comment))
         {
-            String cam_model;
-            String flash;
-            String focal_length;
+            std::string cam_model;
+            std::string flash;
+            std::string focal_length;
 
             md = exifData.findKey(Exiv2::ExifKey("Exif.Image.Model"));
             if (md !=  exifData.end())
@@ -116,14 +116,14 @@ void Exiv2Handler::fillMetadata(Ref<CdsItem> item)
 
 
             if (string_ok(cam_model))
-                comment = _("Taken with ") + cam_model;
+                comment = "Taken with " + cam_model;
 
             if (string_ok(flash))
             {
                 if (string_ok(comment))
                     comment = comment + ", Flash setting:" + flash;
                 else
-                    comment = _("Flash setting: ") + flash;
+                    comment = "Flash setting: " + flash;
             }
 
             if (string_ok(focal_length))
@@ -131,7 +131,7 @@ void Exiv2Handler::fillMetadata(Ref<CdsItem> item)
                 if (string_ok(comment))
                     comment = comment + ", Focal length: " + focal_length;
                 else
-                    comment = _("Focal length: ") + focal_length;
+                    comment = "Focal length: " + focal_length;
             }
         log_debug("Fabricated Comment: %s\n", comment.c_str());
         }  */
@@ -145,8 +145,8 @@ void Exiv2Handler::fillMetadata(Ref<CdsItem> item)
 
         aux = cm->getStringArrayOption(CFG_IMPORT_LIBOPTS_EXIV2_AUXDATA_TAGS_LIST);
         if (aux != nullptr) {
-            String value;
-            String auxtag;
+            std::string value;
+            std::string auxtag;
 
             for (int j = 0; j < aux->size(); j++) {
                 value = "";

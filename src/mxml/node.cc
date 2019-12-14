@@ -36,14 +36,14 @@
 using namespace zmm;
 using namespace mxml;
 
-String Node::print()
+std::string Node::print()
 {
     std::ostringstream buf;
     print_internal(buf, 0);
     return buf.str();
 }
 
-String Node::escape(String str)
+std::string Node::escape(std::string str)
 {
     std::ostringstream buf;
     auto *ptr = (signed char *)str.c_str();

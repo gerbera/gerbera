@@ -58,7 +58,12 @@ class SQLRow : public zmm::Object
 public:
     SQLRow(zmm::Ref<SQLResult> sqlResult) { this->sqlResult = sqlResult; }
     //virtual ~SQLRow();
-    zmm::String col(int index) { return col_c_str(index); }
+    std::string col(int index)
+    {
+        char* c = col_c_str(index);
+        if (c == 0) return "";
+        return std::string(c);
+    }
     virtual char* col_c_str(int index) = 0;
 protected:
     zmm::Ref<SQLResult> sqlResult;
@@ -77,14 +82,15 @@ class SQLStorage : protected Storage
 {
 public:
     /* methods to override in subclasses */
-    virtual zmm::String quote(zmm::String str) = 0;
-    virtual zmm::String quote(int val) = 0;
-    virtual zmm::String quote(unsigned int val) = 0;
-    virtual zmm::String quote(long val) = 0;
-    virtual zmm::String quote(unsigned long val) = 0;
-    virtual zmm::String quote(bool val) = 0;
-    virtual zmm::String quote(char val) = 0;
-    virtual zmm::String quote(long long val) = 0;
+    virtual std::string quote(std::string str) = 0;
+    virtual std::string quote(const char* str) = 0;
+    virtual std::string quote(int val) = 0;
+    virtual std::string quote(unsigned int val) = 0;
+    virtual std::string quote(long val) = 0;
+    virtual std::string quote(unsigned long val) = 0;
+    virtual std::string quote(bool val) = 0;
+    virtual std::string quote(char val) = 0;
+    virtual std::string quote(long long val) = 0;
     virtual zmm::Ref<SQLResult> select(const char *query, int length) = 0;
     virtual int exec(const char *query, int length, bool getLastInsertId = false) = 0;
     
@@ -115,10 +121,10 @@ public:
     virtual zmm::Ref<ChangedContainers> removeObject(int objectID, bool all) override;
     virtual zmm::Ref<ChangedContainers> removeObjects(std::shared_ptr<std::unordered_set<int> > list, bool all = false) override;
     
-    virtual zmm::Ref<CdsObject> loadObjectByServiceID(zmm::String serviceID) override;
+    virtual zmm::Ref<CdsObject> loadObjectByServiceID(std::string serviceID) override;
     virtual std::unique_ptr<std::vector<int>> getServiceObjectIDs(char servicePrefix) override;
 
-    virtual zmm::String findFolderImage(int id, zmm::String trackArtBase) override;
+    virtual std::string findFolderImage(int id, std::string trackArtBase) override;
     
     /* accounting methods */
     virtual int getTotalFiles() override;
@@ -127,17 +133,17 @@ public:
     // virtual _and_ override for consistency!
     virtual zmm::Ref<zmm::Array<CdsObject> > search(zmm::Ref<SearchParam> param, int* numMatches) override;
     
-    virtual zmm::Ref<zmm::Array<zmm::StringBase> > getMimeTypes() override;
+    virtual std::vector<std::string> getMimeTypes() override;
     
-    //virtual zmm::Ref<CdsObject> findObjectByTitle(zmm::String title, int parentID);
-    virtual zmm::Ref<CdsObject> findObjectByPath(zmm::String fullpath) override;
-    virtual int findObjectIDByPath(zmm::String fullpath) override;
-    virtual zmm::String incrementUpdateIDs(std::shared_ptr<std::unordered_set<int> > ids) override;
+    //virtual zmm::Ref<CdsObject> findObjectByTitle(std::string title, int parentID);
+    virtual zmm::Ref<CdsObject> findObjectByPath(std::string fullpath) override;
+    virtual int findObjectIDByPath(std::string fullpath) override;
+    virtual std::string incrementUpdateIDs(std::shared_ptr<std::unordered_set<int> > ids) override;
 
-    virtual zmm::String buildContainerPath(int parentID, zmm::String title) override;
-    virtual void addContainerChain(zmm::String path, zmm::String lastClass, int lastRefID, int *containerID, int *updateID, zmm::Ref<Dictionary> lastMetadata) override;
-    virtual zmm::String getInternalSetting(zmm::String key) override;
-    virtual void storeInternalSetting(zmm::String key, zmm::String value) override = 0;
+    virtual std::string buildContainerPath(int parentID, std::string title) override;
+    virtual void addContainerChain(std::string path, std::string lastClass, int lastRefID, int *containerID, int *updateID, zmm::Ref<Dictionary> lastMetadata) override;
+    virtual std::string getInternalSetting(std::string key) override;
+    virtual void storeInternalSetting(std::string key, std::string value) override = 0;
     
     virtual void updateAutoscanPersistentList(ScanMode scanmode, zmm::Ref<AutoscanList> list) override;
     virtual zmm::Ref<AutoscanList> getAutoscanList(ScanMode scanmode) override;
@@ -157,9 +163,9 @@ public:
     virtual void shutdown() override;
     virtual void shutdownDriver() = 0;
     
-    virtual int ensurePathExistence(zmm::String path, int *changedContainer) override;
+    virtual int ensurePathExistence(std::string path, int *changedContainer) override;
     
-    virtual zmm::String getFsRootName() override;
+    virtual std::string getFsRootName() override;
     
     virtual void clearFlagInDB(int flag) override;
 
@@ -175,37 +181,37 @@ protected:
     char table_quote_end;
     
 private:
-    zmm::String sql_query;
+    std::string sql_query;
     
     /* helper for createObjectFromRow() */
-    zmm::String getRealLocation(int parentID, zmm::String location);
+    std::string getRealLocation(int parentID, std::string location);
     
     zmm::Ref<CdsObject> createObjectFromRow(zmm::Ref<SQLRow> row);
     zmm::Ref<CdsObject> createObjectFromSearchRow(zmm::Ref<SQLRow> row);
     zmm::Ref<Dictionary> retrieveMetadataForObject(int objectId);
     
     /* helper for findObjectByPath and findObjectIDByPath */ 
-    zmm::Ref<CdsObject> _findObjectByPath(zmm::String fullpath);
+    zmm::Ref<CdsObject> _findObjectByPath(std::string fullpath);
     
-    int _ensurePathExistence(zmm::String path, int *changedContainer);
+    int _ensurePathExistence(std::string path, int *changedContainer);
     
     /* helper class and helper function for addObject and updateObject */
     class AddUpdateTable : public Object
     {
     public:
-        AddUpdateTable(zmm::String table, zmm::Ref<Dictionary> dict, zmm::String operation)
+        AddUpdateTable(std::string table, zmm::Ref<Dictionary> dict, std::string operation)
         {
             this->table = table;
             this->dict = dict;
             this->operation = operation;
         }
-        zmm::String getTable() { return table; }
+        std::string getTable() { return table; }
         zmm::Ref<Dictionary> getDict() { return dict; }
-        zmm::String getOperation() { return operation; }
+        std::string getOperation() { return operation; }
     protected:
-        zmm::String table;
+        std::string table;
         zmm::Ref<Dictionary> dict;
-        zmm::String operation;
+        std::string operation;
     };
     zmm::Ref<zmm::Array<AddUpdateTable> > _addUpdateObject(zmm::Ref<CdsObject> obj, bool isUpdate, int *changedContainer);
 
@@ -218,7 +224,7 @@ private:
     /* helper for removeObject(s) */
     void _removeObjects(const std::vector<int32_t> &objectIDs);
 
-    zmm::String toCSV(const std::vector<int>& input);
+    std::string toCSV(const std::vector<int>& input);
 
     zmm::Ref<ChangedContainers> _recursiveRemove(
         const std::vector<int32_t> &items,
@@ -230,23 +236,23 @@ private:
     int _getAutoscanObjectID(int autoscanID);
     void _autoscanChangePersistentFlag(int objectID, bool persistent);
     zmm::Ref<AutoscanDirectory> _fillAutoscanDirectory(zmm::Ref<SQLRow> row);
-    int _getAutoscanDirectoryInfo(int objectID, zmm::String field);
+    int _getAutoscanDirectoryInfo(int objectID, std::string field);
     std::unique_ptr<std::vector<int>> _checkOverlappingAutoscans(zmm::Ref<AutoscanDirectory> adir);
     
     /* location hash helpers */
-    zmm::String addLocationPrefix(char prefix, zmm::String path);
-    zmm::String stripLocationPrefix(char* prefix, zmm::String path);
-    zmm::String stripLocationPrefix(zmm::String path);
+    std::string addLocationPrefix(char prefix, std::string path);
+    std::string stripLocationPrefix(char* prefix, std::string path);
+    std::string stripLocationPrefix(std::string path);
     
     zmm::Ref<CdsObject> checkRefID(zmm::Ref<CdsObject> obj);
-    int createContainer(int parentID, zmm::String name, zmm::String path, bool isVirtual, zmm::String upnpClass, int refID, zmm::Ref<Dictionary> lastMetadata);
+    int createContainer(int parentID, std::string name, std::string path, bool isVirtual, std::string upnpClass, int refID, zmm::Ref<Dictionary> lastMetadata);
 
-    zmm::String mapBool(bool val) { return quote((val ? 1 : 0)); }
-    bool remapBool(zmm::String field) { return (string_ok(field) && field == "1"); }
+    std::string mapBool(bool val) { return quote((val ? 1 : 0)); }
+    bool remapBool(std::string field) { return (string_ok(field) && field == "1"); }
     
-    void setFsRootName(zmm::String rootName = nullptr);
+    void setFsRootName(std::string rootName = nullptr);
     
-    zmm::String fsRootName;
+    std::string fsRootName;
     
     int lastID;
     

@@ -56,7 +56,7 @@ MemIOHandler::MemIOHandler(const void* buffer, int length)
     memcpy(this->buffer, buffer, length);
 }
 
-MemIOHandler::MemIOHandler(String str)
+MemIOHandler::MemIOHandler(std::string str)
     : buffer((char*)MALLOC(str.length()))
     , length(str.length())
     , pos(-1)
@@ -103,11 +103,11 @@ void MemIOHandler::seek(off_t offset, int whence)
     if (whence == SEEK_SET) {
         // offset must be positive when SEEK_SET is used
         if (offset < 0) {
-            throw _Exception(_("MemIOHandler seek failed: SEEK_SET used with negative offset"));
+            throw _Exception("MemIOHandler seek failed: SEEK_SET used with negative offset");
         }
 
         if (offset > length) {
-            throw _Exception(_("MemIOHandler seek failed: trying to seek past the end of file"));
+            throw _Exception("MemIOHandler seek failed: trying to seek past the end of file");
         }
 
         pos = offset;
@@ -121,19 +121,19 @@ void MemIOHandler::seek(off_t offset, int whence)
         }
 
         if (((temp + offset) > length) || ((temp + offset) < 0)) {
-            throw _Exception(_("MemIOHandler seek failed: trying to seek before the beginning/past end of file"));
+            throw _Exception("MemIOHandler seek failed: trying to seek before the beginning/past end of file");
         }
 
         pos = temp + offset;
     } else if (whence == SEEK_END) {
         long temp = length;
         if (((temp + offset) > length) || ((temp + offset) < 0)) {
-            throw _Exception(_("MemIOHandler seek failed: trying to seek before the beginning/past end of file"));
+            throw _Exception("MemIOHandler seek failed: trying to seek before the beginning/past end of file");
         }
 
         pos = temp + offset;
     } else {
-        throw _Exception(_("MemIOHandler seek failed: unrecognized whence"));
+        throw _Exception("MemIOHandler seek failed: unrecognized whence");
     }
 }
 

@@ -34,30 +34,23 @@
 
 using namespace zmm;
 
-TranscodingProcessExecutor::TranscodingProcessExecutor(String command, Ref<Array<StringBase> > arglist) : ProcessExecutor(command, arglist)
+TranscodingProcessExecutor::TranscodingProcessExecutor(std::string command, std::vector<std::string> arglist) : ProcessExecutor(command, arglist)
 {
 };
 
 
-void TranscodingProcessExecutor::removeFile(String filename)
+void TranscodingProcessExecutor::removeFile(std::string filename)
 {
-    if (file_list == nullptr)
-        file_list = Ref<Array<StringBase> >(new Array<StringBase>(2));
-
-    file_list->append(filename);
+    file_list.push_back(filename);
 }
 
 TranscodingProcessExecutor::~TranscodingProcessExecutor()
 {
     kill();
 
-    if (file_list != nullptr)
+    for (size_t i = 0; i < file_list.size(); i++)
     {
-        for (int i = 0; i < file_list->size(); i++)
-        {
-            String name = file_list->get(i);
-            unlink(name.c_str());
-        }
+        std::string name = file_list[i];
+        unlink(name.c_str());
     }
 }
-

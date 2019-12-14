@@ -93,17 +93,17 @@ void Session::containerChangedUI(const std::vector<int>& objectIDs)
     }
 }
 
-String Session::getUIUpdateIDs()
+std::string Session::getUIUpdateIDs()
 {
     if (!hasUIUpdateIDs())
         return nullptr;
     AutoLock lock(mutex);
     if (updateAll) {
         updateAll = false;
-        return _("all");
+        return "all";
     }
-    String ret = toCSV(uiUpdateIDs);
-    if (ret != nullptr)
+    std::string ret = toCSV(uiUpdateIDs);
+    if (!ret.empty())
         uiUpdateIDs->clear();
     return ret;
 }
@@ -139,11 +139,11 @@ Ref<Session> SessionManager::createSession(long timeout)
     AutoLock lock(mutex);
 
     int count = 0;
-    String sessionID;
+    std::string sessionID;
     do {
         sessionID = generate_random_id();
         if (count++ > 100)
-            throw _Exception(_("There seems to be something wrong with the random numbers. I tried to get a unique id 100 times and failed. last sessionID: ") + sessionID);
+            throw _Exception("There seems to be something wrong with the random numbers. I tried to get a unique id 100 times and failed. last sessionID: " + sessionID);
     } while (getSession(sessionID, false) != nullptr); // for the rare case, where we get a random id, that is already taken
 
     newSession->setID(sessionID);
@@ -152,7 +152,7 @@ Ref<Session> SessionManager::createSession(long timeout)
     return newSession;
 }
 
-Ref<Session> SessionManager::getSession(String sessionID, bool doLock)
+Ref<Session> SessionManager::getSession(std::string sessionID, bool doLock)
 {
     unique_lock<decltype(mutex)> lock(mutex, std::defer_lock);
     if (doLock)
@@ -165,7 +165,7 @@ Ref<Session> SessionManager::getSession(String sessionID, bool doLock)
     return nullptr;
 }
 
-void SessionManager::removeSession(String sessionID)
+void SessionManager::removeSession(std::string sessionID)
 {
     AutoLock lock(mutex);
     for (int i = 0; i < sessions->size(); i++) {
@@ -179,7 +179,7 @@ void SessionManager::removeSession(String sessionID)
     }
 }
 
-String SessionManager::getUserPassword(String user)
+std::string SessionManager::getUserPassword(std::string user)
 {
     if (accounts == nullptr) {
         return nullptr;

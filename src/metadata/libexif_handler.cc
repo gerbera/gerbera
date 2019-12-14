@@ -45,7 +45,7 @@ LibExifHandler::LibExifHandler()
 {
 }
 
-static int getTagFromString(String tag)
+static int getTagFromString(std::string tag)
 {
     if (tag == "EXIF_TAG_INTEROPERABILITY_INDEX")
         return EXIF_TAG_INTEROPERABILITY_INDEX;
@@ -262,12 +262,11 @@ static int getTagFromString(String tag)
 char exif_entry_buffer[BUFLEN];
 #define exif_egv(arg) exif_entry_get_value(arg, exif_entry_buffer, BUFLEN)
 
-void LibExifHandler::process_ifd(ExifContent* content, Ref<CdsItem> item, Ref<StringConverter> sc, Ref<Array<StringBase>> auxtags)
+void LibExifHandler::process_ifd(ExifContent* content, Ref<CdsItem> item, Ref<StringConverter> sc, std::vector<std::string> auxtags)
 {
     ExifEntry* e;
     unsigned int i;
-    String value;
-    String tmp;
+    std::string value;
 
     for (i = 0; i < content->count; i++) {
         e = content->entries[i];
@@ -284,7 +283,7 @@ void LibExifHandler::process_ifd(ExifContent* content, Ref<CdsItem> item, Ref<St
                 /// \todo convert date to ISO 8601 as required in the UPnP spec
                 // from YYYY:MM:DD to YYYY-MM-DD
                 if (value.length() >= 11) {
-                    value = value.substring(0, 4) + "-" + value.substring(5, 2) + "-" + value.substring(8, 2);
+                    value = value.substr(0, 4) + "-" + value.substr(5, 2) + "-" + value.substr(8, 2);
                     item->setMetadata(MetadataHandler::getMetaFieldName(M_DATE), value);
                 }
             }
@@ -321,19 +320,16 @@ void LibExifHandler::process_ifd(ExifContent* content, Ref<CdsItem> item, Ref<St
         }
 
         // if there are any auxilary tags that the user wants - add them
-        if (auxtags != nullptr) {
-            for (int j = 0; j < auxtags->size(); j++) {
-
-                tmp = auxtags->get(j);
-                if (string_ok(tmp)) {
-                    if (e->tag == getTagFromString(tmp)) {
-                        value = (char*)exif_egv(e);
-                        value = trim_string(value);
-                        if (string_ok(value)) {
-                            value = sc->convert(value);
-                            item->setAuxData(tmp, value);
-                            //                            log_debug(("Adding tag: %s with value %s\n", tmp.c_str(), value.c_str()));
-                        }
+        for (size_t j = 0; j < auxtags.size(); j++) {
+            std::string tmp = auxtags[j];
+            if (string_ok(tmp)) {
+                if (e->tag == getTagFromString(tmp)) {
+                    value = (char*)exif_egv(e);
+                    value = trim_string(value);
+                    if (string_ok(value)) {
+                        value = sc->convert(value);
+                        item->setAuxData(tmp, value);
+                        //                            log_debug(("Adding tag: %s with value %s\n", tmp.c_str(), value.c_str()));
                     }
                 }
             }
@@ -344,7 +340,6 @@ void LibExifHandler::process_ifd(ExifContent* content, Ref<CdsItem> item, Ref<St
 void LibExifHandler::fillMetadata(Ref<CdsItem> item)
 {
     ExifData* ed;
-    Ref<Array<StringBase>> aux;
 
     Ref<StringConverter> sc = StringConverter::m2i();
 
@@ -357,7 +352,7 @@ void LibExifHandler::fillMetadata(Ref<CdsItem> item)
     }
 
     Ref<ConfigManager> cm = ConfigManager::getInstance();
-    aux = cm->getStringArrayOption(CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST);
+    std::vector<std::string> aux = cm->getStringArrayOption(CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST);
     for (int i = 0; i < EXIF_IFD_COUNT; i++) {
         if (ed->ifd[i])
             process_ifd(ed->ifd[i], item, sc, aux);
@@ -375,13 +370,13 @@ void LibExifHandler::fillMetadata(Ref<CdsItem> item)
         try {
             Ref<IOHandler> io_h(new MemIOHandler(ed->data, ed->size));
             io_h->open(UPNP_READ);
-            String th_resolution = get_jpeg_resolution(io_h);
+            std::string th_resolution = get_jpeg_resolution(io_h);
             log_debug("RESOLUTION: %s\n", th_resolution.c_str());
 
             Ref<CdsResource> resource(new CdsResource(CH_LIBEXIF));
             resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(item->getMimeType()));
             resource->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), th_resolution);
-            resource->addParameter(_(RESOURCE_CONTENT_TYPE), _(EXIF_THUMBNAIL));
+            resource->addParameter(RESOURCE_CONTENT_TYPE, EXIF_THUMBNAIL);
             item->addResource(resource);
         } catch (const Exception& e) {
             e.printStackTrace();
@@ -396,16 +391,16 @@ Ref<IOHandler> LibExifHandler::serveContent(Ref<CdsItem> item, int resNum)
     ExifData* ed;
     Ref<CdsResource> res = item->getResource(resNum);
 
-    String ctype = res->getParameters()->get(_(RESOURCE_CONTENT_TYPE));
+    std::string ctype = res->getParameters()->get(RESOURCE_CONTENT_TYPE);
 
     if (ctype != EXIF_THUMBNAIL)
-        throw _Exception(_("LibExifHandler: got unknown content type: ") + ctype);
+        throw _Exception("LibExifHandler: got unknown content type: " + ctype);
     ed = exif_data_new_from_file(item->getLocation().c_str());
     if (!ed)
-        throw _Exception(_("LibExifHandler: resource has no exif information"));
+        throw _Exception("LibExifHandler: resource has no exif information");
 
     if (!(ed->size))
-        throw _Exception(_("LibExifHandler: resource has no exif thumbnail"));
+        throw _Exception("LibExifHandler: resource has no exif thumbnail");
 
     Ref<IOHandler> h(new MemIOHandler(ed->data, ed->size));
 

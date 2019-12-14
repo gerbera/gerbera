@@ -43,9 +43,9 @@ class TranscodeExternalHandler : public TranscodeHandler
 public:
     TranscodeExternalHandler();
     virtual zmm::Ref<IOHandler> open(zmm::Ref<TranscodingProfile> profile, 
-                                     zmm::String location,
+                                     std::string location,
                                      zmm::Ref<CdsObject> obj,
-                                     zmm::String range);
+                                     std::string range);
 };
 
 

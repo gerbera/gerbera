@@ -31,12 +31,15 @@
 
 #include "process_executor.h"
 #include "process.h"
+
 #include <csignal>
 #include <pthread.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 using namespace zmm;
 
-ProcessExecutor::ProcessExecutor(String command, Ref<Array<StringBase>> arglist)
+ProcessExecutor::ProcessExecutor(std::string command, std::vector<std::string> arglist)
 {
 #define MAX_ARGS 255
     const char* argv[MAX_ARGS];
@@ -44,8 +47,8 @@ ProcessExecutor::ProcessExecutor(String command, Ref<Array<StringBase>> arglist)
     argv[0] = command.c_str();
     int apos = 0;
 
-    for (int i = 0; i < arglist->size(); i++) {
-        argv[++apos] = arglist->get(i)->data;
+    for (size_t i = 0; i < arglist.size(); i++) {
+        argv[++apos] = arglist[i].c_str();
         if (apos >= MAX_ARGS - 2)
             break;
     }
@@ -57,7 +60,7 @@ ProcessExecutor::ProcessExecutor(String command, Ref<Array<StringBase>> arglist)
 
     switch (process_id) {
     case -1:
-        throw _Exception(_("Failed to launch process ") + command);
+        throw _Exception("Failed to launch process " + command);
 
     case 0:
         sigset_t mask_set;

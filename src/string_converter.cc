@@ -34,7 +34,7 @@
 
 using namespace zmm;
 
-StringConverter::StringConverter(String from, String to)
+StringConverter::StringConverter(std::string from, std::string to)
     : Object()
 {
     dirty = false;
@@ -42,7 +42,7 @@ StringConverter::StringConverter(String from, String to)
     cd = iconv_open(to.c_str(), from.c_str());
     if (cd == (iconv_t)(-1)) {
         cd = (iconv_t) nullptr;
-        throw _Exception(_("iconv: ") + strerror(errno));
+        throw _Exception(std::string("iconv: ") + strerror(errno));
     }
 }
 
@@ -52,10 +52,10 @@ StringConverter::~StringConverter()
         iconv_close(cd);
 }
 
-zmm::String StringConverter::convert(String str, bool validate)
+std::string StringConverter::convert(std::string str, bool validate)
 {
     size_t stoppedAt = 0;
-    String ret;
+    std::string ret;
 
     if (!string_ok(str))
         return str;
@@ -67,7 +67,7 @@ zmm::String StringConverter::convert(String str, bool validate)
 
         ret = ret + "?";
         if ((stoppedAt + 1) < (size_t)str.length())
-            str = str.substring(stoppedAt + 1);
+            str = str.substr (stoppedAt + 1);
         else
             break;
 
@@ -77,7 +77,7 @@ zmm::String StringConverter::convert(String str, bool validate)
     return ret;
 }
 
-bool StringConverter::validate(String str)
+bool StringConverter::validate(std::string str)
 {
     try {
         _convert(str, true);
@@ -87,10 +87,10 @@ bool StringConverter::validate(String str)
     }
 }
 
-zmm::String StringConverter::_convert(String str, bool validate,
+std::string StringConverter::_convert(std::string str, bool validate,
     size_t* stoppedAt)
 {
-    String ret_str;
+    std::string ret_str;
 
     int buf_size = str.length() * 4;
 
@@ -98,7 +98,7 @@ zmm::String StringConverter::_convert(String str, bool validate,
     auto* output = (char*)MALLOC(buf_size);
     if (!output) {
         log_debug("Could not allocate memory for string conversion!\n");
-        throw _Exception(_("Could not allocate memory for string conversion!"));
+        throw _Exception("Could not allocate memory for string conversion!");
     }
 
     const char* input_copy = input;
@@ -130,7 +130,7 @@ zmm::String StringConverter::_convert(String str, bool validate,
 
     if (ret == -1) {
         log_error("iconv: %s\n", strerror(errno));
-        String err;
+        std::string err;
         switch (errno) {
         case EILSEQ:
         case EINVAL:
@@ -143,7 +143,7 @@ zmm::String StringConverter::_convert(String str, bool validate,
 
             if (stoppedAt)
                 *stoppedAt = (size_t)str.length() - input_bytes;
-            ret_str = String(output, output_copy - output);
+            ret_str = std::string(output, output_copy - output);
             dirty = true;
             *output_copy = 0;
             FREE(output);
@@ -151,10 +151,10 @@ zmm::String StringConverter::_convert(String str, bool validate,
             break;
         case E2BIG:
             /// \todo should encode the whole string anyway
-            err = _("iconv: Insufficient space in output buffer");
+            err = "iconv: Insufficient space in output buffer";
             break;
         default:
-            err = _("iconv: ") + strerror(errno);
+            err = std::string("iconv: ") + strerror(errno);
             break;
         }
         *output_copy = 0;
@@ -171,7 +171,7 @@ zmm::String StringConverter::_convert(String str, bool validate,
     //       input_bytes, output_bytes);
     //log_debug("iconv: returned %d\n", ret);
 
-    ret_str = String(output, output_copy - output);
+    ret_str = std::string(output, output_copy - output);
     FREE(output);
     if (stoppedAt)
         *stoppedAt = 0; // no error
@@ -182,21 +182,21 @@ zmm::String StringConverter::_convert(String str, bool validate,
 Ref<StringConverter> StringConverter::i2f()
 {
     Ref<StringConverter> conv(new StringConverter(
-        _(DEFAULT_INTERNAL_CHARSET), ConfigManager::getInstance()->getOption(CFG_IMPORT_FILESYSTEM_CHARSET)));
+        DEFAULT_INTERNAL_CHARSET, ConfigManager::getInstance()->getOption(CFG_IMPORT_FILESYSTEM_CHARSET)));
     //        INTERNAL_CHARSET, ConfigManager::getInstance()->getFilesystemCharset()));
     return conv;
 }
 Ref<StringConverter> StringConverter::f2i()
 {
     Ref<StringConverter> conv(new StringConverter(
-        ConfigManager::getInstance()->getOption(CFG_IMPORT_FILESYSTEM_CHARSET), _(DEFAULT_INTERNAL_CHARSET)));
+        ConfigManager::getInstance()->getOption(CFG_IMPORT_FILESYSTEM_CHARSET), DEFAULT_INTERNAL_CHARSET));
     return conv;
 }
 Ref<StringConverter> StringConverter::m2i()
 {
     Ref<StringConverter> conv(new StringConverter(
         ConfigManager::getInstance()->getOption(CFG_IMPORT_METADATA_CHARSET),
-        _(DEFAULT_INTERNAL_CHARSET)));
+        DEFAULT_INTERNAL_CHARSET));
     return conv;
 }
 
@@ -205,7 +205,7 @@ Ref<StringConverter> StringConverter::j2i()
 {
     Ref<StringConverter> conv(new StringConverter(
         ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_CHARSET),
-        _(DEFAULT_INTERNAL_CHARSET)));
+        DEFAULT_INTERNAL_CHARSET));
     return conv;
 }
 
@@ -213,7 +213,7 @@ Ref<StringConverter> StringConverter::p2i()
 {
     Ref<StringConverter> conv(new StringConverter(
         ConfigManager::getInstance()->getOption(CFG_IMPORT_PLAYLIST_CHARSET),
-        _(DEFAULT_INTERNAL_CHARSET)));
+        DEFAULT_INTERNAL_CHARSET));
     return conv;
 }
 #endif
@@ -222,8 +222,8 @@ Ref<StringConverter> StringConverter::p2i()
 
 Ref<StringConverter> StringConverter::i2i()
 {
-    Ref<StringConverter> conv(new StringConverter(_(DEFAULT_INTERNAL_CHARSET),
-        _(DEFAULT_INTERNAL_CHARSET)));
+    Ref<StringConverter> conv(new StringConverter(DEFAULT_INTERNAL_CHARSET,
+        DEFAULT_INTERNAL_CHARSET));
     return conv;
 }
 

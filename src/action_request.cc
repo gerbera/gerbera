@@ -43,7 +43,7 @@ ActionRequest::ActionRequest(UpnpActionRequest* upnp_request)
     , serviceID(UpnpActionRequest_get_ServiceID_cstr(upnp_request))
 {
     DOMString cxml = ixmlPrintDocument(UpnpActionRequest_get_ActionRequest(upnp_request));
-    String xml = cxml;
+    std::string xml = cxml;
     ixmlFreeDOMString(cxml);
 
     Ref<Parser> parser(new Parser());
@@ -51,15 +51,15 @@ ActionRequest::ActionRequest(UpnpActionRequest* upnp_request)
     request = parser->parseString(xml)->getRoot();
 }
 
-String ActionRequest::getActionName()
+std::string ActionRequest::getActionName()
 {
     return actionName;
 }
-String ActionRequest::getUDN()
+std::string ActionRequest::getUDN()
 {
     return UDN;
 }
-String ActionRequest::getServiceID()
+std::string ActionRequest::getServiceID()
 {
     return serviceID;
 }
@@ -80,7 +80,7 @@ void ActionRequest::setErrorCode(int errCode)
 void ActionRequest::update()
 {
     if (response != nullptr) {
-        String xml = response->print();
+        std::string xml = response->print();
         log_debug("ActionRequest::update(): %s\n", xml.c_str());
 
         IXML_Document* result = ixmlDocument_createDocument();

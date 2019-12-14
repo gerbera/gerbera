@@ -43,9 +43,9 @@ class XML2JSON : public zmm::Object
 {
 protected:
     static void handleElement(std::ostringstream &buf, zmm::Ref<Element> el);
-    static zmm::String getValue(zmm::String text, enum mxml_value_type type);
+    static std::string getValue(std::string text, enum mxml_value_type type);
 public:
-    static zmm::String getJSON(zmm::Ref<Element> root);
+    static std::string getJSON(zmm::Ref<Element> root);
     
 };
 

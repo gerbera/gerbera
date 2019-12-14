@@ -39,25 +39,25 @@
 class DictionaryElement : public zmm::Object {
 public:
     /// \brief Constructor, stores the key and the value.
-    DictionaryElement(zmm::String key, zmm::String value);
+    DictionaryElement(std::string key, std::string value);
 
     /// \brief Changes the name of the key.
     /// \param key new key name.
-    void setKey(zmm::String key);
+    void setKey(std::string key);
 
     /// \brief Changes the key value.
     /// \param value new value.
-    void setValue(zmm::String value);
+    void setValue(std::string value);
 
     /// \brief Returns the key for this DictionaryElement.
-    zmm::String getKey();
+    std::string getKey();
 
     /// \brief Returns the value for this DictionaryElement.
-    zmm::String getValue();
+    std::string getValue();
 
 protected:
-    zmm::String key;
-    zmm::String value;
+    std::string key;
+    std::string value;
 };
 
 /// \brief This class stores key:value pairs of String data and provides functions to access them.
@@ -66,39 +66,39 @@ protected:
     /// \brief Array of DictionaryElements, representing our Dictionary.
     zmm::Ref<zmm::Array<DictionaryElement>> elements;
     /// \brief Allow to specify encoding separators
-    zmm::String _encode(char sep1, char sep2);
+    std::string _encode(char sep1, char sep2);
 
 public:
     /// \brief Constructor, initializes the dictionary.
     Dictionary();
 
     /// \brief Adds a new key:value pair to the dictionary.
-    void put(zmm::String key, zmm::String value);
+    void put(std::string key, std::string value);
 
     /// \brief Returns the value for a given key.
-    zmm::String get(zmm::String key);
+    std::string get(std::string key);
 
     /// \brief Returns the number of elements in the dictinary.
     int size();
 
     /// \brief Deletes a key value pair
-    void remove(zmm::String key);
+    void remove(std::string key);
 
     /// \brief Returns an url encoded version of the whole dictionary.
-    zmm::String encode();
+    std::string encode();
 
     /// \brief It seems that a lot of devices can not cope with a param=value
     /// encoded URL, so we will use a simplified encoding scheme.
-    zmm::String encodeSimple();
+    std::string encodeSimple();
 
     /// \brief Removes all elements from the dictionary.
     void clear();
 
     /// \brief Makes a dictionary out of url encoded data.
-    void decode(zmm::String url);
+    void decode(std::string url);
 
     /// \brief Makes a dictionary out of simplified url encoded data.
-    void decodeSimple(zmm::String url);
+    void decodeSimple(std::string url);
 
     /// \brief Makes a shallow copy of the dictionary
     zmm::Ref<Dictionary> clone();
@@ -122,25 +122,25 @@ public:
 /// \brief Reentrant version of the dictionary
 class Dictionary_r : public Dictionary {
 public:
-    inline void put(zmm::String key, zmm::String value)
+    inline void put(std::string key, std::string value)
     {
         AutoLock lock(mutex);
         Dictionary::put(key, value);
     }
 
-    inline zmm::String get(zmm::String key)
+    inline std::string get(std::string key)
     {
         AutoLock lock(mutex);
         return Dictionary::get(key);
     }
 
-    inline void remove(zmm::String key)
+    inline void remove(std::string key)
     {
         AutoLock lock(mutex);
         Dictionary::remove(key);
     }
 
-    inline zmm::String encode()
+    inline std::string encode()
     {
         AutoLock lock(mutex);
         return Dictionary::encode();
@@ -152,7 +152,7 @@ public:
         Dictionary::clear();
     }
 
-    inline void decode(zmm::String url)
+    inline void decode(std::string url)
     {
         AutoLock lock(mutex);
         Dictionary::decode(url);

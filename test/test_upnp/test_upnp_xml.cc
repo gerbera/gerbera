@@ -12,8 +12,8 @@ class UpnpXmlTest : public ::testing::Test {
   virtual ~UpnpXmlTest() {};
 
   virtual void SetUp() {
-    zmm::String virtualDir = "/dir/virtual";
-    zmm::String presentationURl = "http://someurl/";
+    std::string virtualDir = "/dir/virtual";
+    std::string presentationURl = "http://someurl/";
     subject = new UpnpXMLBuilder(virtualDir, presentationURl);
   }
 
@@ -25,7 +25,7 @@ class UpnpXmlTest : public ::testing::Test {
 };
 
 TEST_F(UpnpXmlTest, CreatesUpnpDateElement) {
-  zmm::Ref<mxml::Element> result = subject->renderAlbumDate(_("2001-01-01"));
+  zmm::Ref<mxml::Element> result = subject->renderAlbumDate("2001-01-01");
 
   EXPECT_NE(result, nullptr);
   EXPECT_STREQ(result->getText().c_str(), "2001-01-01");
@@ -33,7 +33,7 @@ TEST_F(UpnpXmlTest, CreatesUpnpDateElement) {
 }
 
 TEST_F(UpnpXmlTest, CreatesUpnpOrchestraElement) {
-  zmm::Ref<mxml::Element> result = subject->renderOrchestra(_("Orchestra"));
+  zmm::Ref<mxml::Element> result = subject->renderOrchestra("Orchestra");
 
   EXPECT_NE(result, nullptr);
   EXPECT_STREQ(result->getText().c_str(), "Orchestra");
@@ -41,7 +41,7 @@ TEST_F(UpnpXmlTest, CreatesUpnpOrchestraElement) {
 }
 
 TEST_F(UpnpXmlTest, CreatesUpnpConductorElement) {
-  zmm::Ref<mxml::Element> result = subject->renderConductor(_("Conductor"));
+  zmm::Ref<mxml::Element> result = subject->renderConductor("Conductor");
 
   EXPECT_NE(result, nullptr);
   EXPECT_STREQ(result->getText().c_str(), "Conductor");
@@ -49,7 +49,7 @@ TEST_F(UpnpXmlTest, CreatesUpnpConductorElement) {
 }
 
 TEST_F(UpnpXmlTest, CreatesUpnpAlbumArtUriElement) {
-  zmm::Ref<mxml::Element> result = subject->renderAlbumArtURI(_("/some/uri"));
+  zmm::Ref<mxml::Element> result = subject->renderAlbumArtURI("/some/uri");
 
   EXPECT_NE(result, nullptr);
   EXPECT_STREQ(result->getText().c_str(), "/some/uri");
@@ -57,7 +57,7 @@ TEST_F(UpnpXmlTest, CreatesUpnpAlbumArtUriElement) {
 }
 
 TEST_F(UpnpXmlTest, CreatesDcCreatorElement) {
-  zmm::Ref<mxml::Element> result = subject->renderCreator(_("Creator"));
+  zmm::Ref<mxml::Element> result = subject->renderCreator("Creator");
 
   EXPECT_NE(result, nullptr);
   EXPECT_STREQ(result->getText().c_str(), "Creator");
@@ -65,7 +65,7 @@ TEST_F(UpnpXmlTest, CreatesDcCreatorElement) {
 }
 
 TEST_F(UpnpXmlTest, CreatesSecCaptionInfoElement) {
-  zmm::Ref<mxml::Element> result = subject->renderCaptionInfo(_("file.srt"));
+  zmm::Ref<mxml::Element> result = subject->renderCaptionInfo("file.srt");
 
   EXPECT_NE(result, nullptr);
   EXPECT_STREQ(result->getText().c_str(), "file.srt");
@@ -107,8 +107,8 @@ TEST_F(UpnpXmlTest, UpdatesObjectActiveItem) {
 }
 
 TEST_F(UpnpXmlTest, CreateResponse) {
-  zmm::String actionName = "action";
-  zmm::String serviceType = "urn:schemas-upnp-org:service:ContentDirectory:1";
+  std::string actionName = "action";
+  std::string serviceType = "urn:schemas-upnp-org:service:ContentDirectory:1";
 
   zmm::Ref<mxml::Element> result = subject->createResponse(actionName, serviceType);
 
@@ -119,53 +119,53 @@ TEST_F(UpnpXmlTest, CreateResponse) {
 
 TEST_F(UpnpXmlTest, FirstResourceRendersPureWhenExternalUrl) {
   zmm::Ref<CdsObject> obj(new CdsItemExternalURL());
-  obj->setLocation(_("http://localhost/external/url"));
+  obj->setLocation("http://localhost/external/url");
 
   zmm::Ref<CdsItem> item = RefCast(obj, CdsItem);
 
-  zmm::String result = subject->getFirstResourcePath(item);
+  std::string result = subject->getFirstResourcePath(item);
 
-  EXPECT_NE(result, nullptr);
+  EXPECT_NE(result, "");
   EXPECT_STREQ(result.c_str(), "http://localhost/external/url");
 }
 
 TEST_F(UpnpXmlTest, FirstResourceAddsLocalResourceIdToExternalUrlWhenOnlineWithProxy) {
   zmm::Ref<CdsObject> obj(new CdsItemExternalURL());
-  obj->setLocation(_("http://localhost/external/url"));
+  obj->setLocation("http://localhost/external/url");
   obj->setID(12345);
   obj->setFlag(OBJECT_FLAG_ONLINE_SERVICE);
   obj->setFlag(OBJECT_FLAG_PROXY_URL);
 
   zmm::Ref<CdsItem> item = RefCast(obj, CdsItem);
 
-  zmm::String result = subject->getFirstResourcePath(item);
+  std::string result = subject->getFirstResourcePath(item);
 
-  EXPECT_NE(result, nullptr);
+  EXPECT_NE(result, "");
   EXPECT_STREQ(result.c_str(), "content/online/object_id/12345/res_id/0");
 }
 
 TEST_F(UpnpXmlTest, FirstResourceAddsLocalResourceIdToItem) {
   zmm::Ref<CdsObject> obj(new CdsItem());
-  obj->setLocation(_("local/content"));
+  obj->setLocation("local/content");
   obj->setID(12345);
 
   zmm::Ref<CdsItem> item = RefCast(obj, CdsItem);
 
-  zmm::String result = subject->getFirstResourcePath(item);
+  std::string result = subject->getFirstResourcePath(item);
 
-  EXPECT_NE(result, nullptr);
+  EXPECT_NE(result, "");
   EXPECT_STREQ(result.c_str(), "content/media/object_id/12345/res_id/0");
 }
 
 TEST_F(UpnpXmlTest, FirstResourceAddsContentServeToInternalUrlItem) {
   zmm::Ref<CdsObject> obj(new CdsItemInternalURL());
-  obj->setLocation(_("local/content"));
+  obj->setLocation("local/content");
   obj->setID(12345);
 
   zmm::Ref<CdsItem> item = RefCast(obj, CdsItem);
 
-  zmm::String result = subject->getFirstResourcePath(item);
+  std::string result = subject->getFirstResourcePath(item);
 
-  EXPECT_NE(result, nullptr);
+  EXPECT_NE(result, "");
   EXPECT_STREQ(result.c_str(), "/serve/local/content");
 }

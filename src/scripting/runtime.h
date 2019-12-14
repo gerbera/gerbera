@@ -46,7 +46,7 @@ protected:
 public:
     Runtime();
     virtual ~Runtime();
-    zmm::String getName() override { return _("Runtime"); }
+    std::string getName() override { return "Runtime"; }
     
     /// \brief Returns a new (sub)context. !!! Not thread-safe !!!
     duk_context *createContext(std::string name);

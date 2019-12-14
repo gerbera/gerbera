@@ -30,7 +30,7 @@ void TaskProcessor::init()
         this);
 
     if (ret != 0) {
-        throw _Exception(_("Could not launch task processor thread!"));
+        throw _Exception("Could not launch task processor thread!");
     }
 }
 

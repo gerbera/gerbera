@@ -41,14 +41,14 @@ namespace mxml
 class Attribute : public zmm::Object
 {
 public:
-    zmm::String name;
-    zmm::String value;
+    std::string name;
+    std::string value;
     enum mxml_value_type vtype;
 public:
-    Attribute(zmm::String name);
-    Attribute(zmm::String name, zmm::String value);
-    Attribute(zmm::String name, zmm::String value, enum mxml_value_type vtype);
-    void setValue(zmm::String value);
+    Attribute(std::string name);
+    Attribute(std::string name, std::string value);
+    Attribute(std::string name, std::string value, enum mxml_value_type vtype);
+    void setValue(std::string value);
     inline enum mxml_value_type getVType() { return this->vtype; };
     inline void setVType(enum mxml_value_type vtype) { this->vtype = vtype; };
 };

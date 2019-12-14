@@ -32,7 +32,7 @@
 #include <arpa/inet.h>
 #include <cerrno>
 #include <climits>
-#include <cstring>
+#include <cctype>
 #include <iterator>
 #include <netdb.h>
 #include <netinet/in.h>
@@ -69,59 +69,60 @@ using namespace std;
 
 static const char* HEX_CHARS = "0123456789abcdef";
 
-Ref<Array<StringBase>> split_string(String str, char sep, bool empty)
+std::vector<std::string> split_string(std::string str, char sep, bool empty)
 {
-    Ref<Array<StringBase>> ret(new Array<StringBase>());
+    std::vector<std::string> ret;
     const char* data = str.c_str();
     const char* end = data + str.length();
     while (data < end) {
         const char* pos = strchr(data, sep);
         if (pos == nullptr) {
-            String part = data;
-            ret->append(part);
+            std::string part = data;
+            ret.push_back(part);
             data = end;
         } else if (pos == data) {
             data++;
             if ((data < end) && empty)
-                ret->append(_(""));
+                ret.push_back("");
         } else {
-            String part(data, pos - data);
-            ret->append(part);
+            std::string part(data, pos - data);
+            ret.push_back(part);
             data = pos + 1;
         }
     }
     return ret;
 }
 
-Ref<Array<StringBase>> split_path(String str)
+std::vector<std::string> split_path(std::string str)
 {
     if (!string_ok(str))
-        throw _Exception(_("invalid path given to split_path"));
-    Ref<Array<StringBase>> ret(new Array<StringBase>());
-    int pos = str.rindex(DIR_SEPARATOR);
+        throw _Exception("invalid path given to split_path");
+
+    std::vector<std::string> ret;
+    size_t pos = str.rfind(DIR_SEPARATOR);
+    if (pos == std::string::npos)
+        throw _Exception("relative path given to split_path: " + str);
+
     const char* data = str.c_str();
-
-    if (pos < 0)
-        throw _Exception(_("relative path given to split_path: ") + str);
-
     if (pos == 0) {
         /* there is only one separator at the beginning "/..." or "/" */
-        ret->append(_(_DIR_SEPARATOR));
-        String filename = data + 1;
-        ret->append(filename);
+        ret.push_back(_DIR_SEPARATOR);
+        std::string filename = data + 1;
+        ret.push_back(filename);
     } else {
-        String path(data, pos);
-        ret->append(path);
-        String filename = data + pos + 1;
-        ret->append(filename);
+        std::string path(data, pos);
+        ret.push_back(path);
+        std::string filename = data + pos + 1;
+        ret.push_back(filename);
     }
     return ret;
 }
 
-String trim_string(String str)
+std::string trim_string(std::string str)
 {
-    if (str == nullptr)
-        return nullptr;
+    if (str.empty())
+        return str;
+
     int i;
     int start = 0;
     int end = 0;
@@ -136,17 +137,89 @@ String trim_string(String str)
         }
     }
     if (i >= len)
-        return _("");
+        return "";
     for (i = len - 1; i >= start; i--) {
         if (!strchr(WHITE_SPACE, buf[i])) {
             end = i + 1;
             break;
         }
     }
-    return str.substring(start, end - start);
+    return str.substr(start, end - start);
 }
 
-bool check_path(String path, bool needDir)
+bool startswith(std::string str, std::string check)
+{
+    return str.rfind(check, 0) == 0;
+}
+
+std::string tolower_string(std::string str)
+{
+    std::transform(str.begin(), str.end(), str.begin(), ::tolower);
+    return str;
+}
+
+int stoi_string(std::string str, int def)
+{
+    if (str.empty())
+        return def;
+
+    return std::stoi(str);
+}
+
+std::string reduce_string(std::string str, char ch)
+{
+    const char* data = str.c_str();
+    const char* pos = strchr(data, ch);
+    if (!pos)
+        return str;
+
+    // TODO: optimize: use direct std::string with reserve
+    char* result = (char*)MALLOC(str.length() + 1);
+    char* pos2 = result;
+
+    const char* pos3 = data;
+    do
+    {
+        if (*(pos + 1) == ch)
+        {
+            if (pos-pos3 == 0)
+            {
+                *pos2 = ch;
+                pos2++;
+            }
+            else
+            {
+                strncpy(pos2, pos3, (pos-pos3)+1);
+                pos2 = pos2 + ((pos-pos3)+1);
+            }
+            while (*pos == ch) pos++;
+            pos3 = pos;
+            if (*pos == '\0')
+            {
+                *pos2 = '\0';
+                break;
+            }
+            pos = strchr(pos, ch);
+        }
+        else
+        {
+            pos++;
+            if (*pos == '\0')
+                break;
+            pos = strchr(pos, ch);
+        }
+    } while (pos);
+
+    if (data + str.length() - pos3)
+        strncpy(pos2, pos3, data + str.length() - pos3);
+    pos2[data + str.length() - pos3] = 0;
+
+    std::string res = result;
+    FREE(result);
+    return res;
+}
+
+bool check_path(std::string path, bool needDir)
 {
     int ret = 0;
     struct stat statbuf;
@@ -161,7 +234,7 @@ bool check_path(String path, bool needDir)
     return true;
 }
 
-time_t check_path_ex(String path, bool needDir, bool existenceUnneeded,
+time_t check_path_ex(std::string path, bool needDir, bool existenceUnneeded,
     off_t* filesize)
 {
     int ret = 0;
@@ -174,14 +247,14 @@ time_t check_path_ex(String path, bool needDir, bool existenceUnneeded,
     if (ret != 0) {
         if (existenceUnneeded && (errno == ENOENT))
             return 0;
-        throw _Exception(mt_strerror(errno) + ": " + path + " (errno: " + errno + (int)existenceUnneeded + ")");
+        throw _Exception(mt_strerror(errno) + ": " + path + " (errno: " + std::to_string(errno) + std::to_string((int)existenceUnneeded) + ")");
     }
 
     if (needDir && (!S_ISDIR(statbuf.st_mode)))
-        throw _Exception(_("Not a directory: ") + path);
+        throw _Exception("Not a directory: " + path);
 
     if (!needDir && (S_ISDIR(statbuf.st_mode)))
-        throw _Exception(_("Not a file: ") + path);
+        throw _Exception("Not a file: " + path);
 
     if ((filesize != nullptr) && S_ISREG(statbuf.st_mode))
         *filesize = statbuf.st_size;
@@ -189,7 +262,7 @@ time_t check_path_ex(String path, bool needDir, bool existenceUnneeded,
     return statbuf.st_mtime;
 }
 
-bool is_executable(String path, int* err)
+bool is_executable(std::string path, int* err)
 {
     int ret = access(path.c_str(), R_OK | X_OK);
     if (err != nullptr)
@@ -201,61 +274,61 @@ bool is_executable(String path, int* err)
         return false;
 }
 
-String find_in_path(String exec)
+std::string find_in_path(std::string exec)
 {
-    String PATH = getenv("PATH");
+    std::string PATH = getenv("PATH");
     if (!string_ok(PATH))
-        return nullptr;
+        return "";
 
     Ref<StringTokenizer> st(new StringTokenizer(PATH));
-    String path = nullptr;
-    String next;
+    std::string path = "";
+    std::string next;
     do {
-        if (path == nullptr)
-            path = st->nextToken(_(":"));
-        next = st->nextToken(_(":"));
+        if (path.empty())
+            path = st->nextToken(":");
+        next = st->nextToken(":");
 
-        if (path == nullptr)
+        if (path.empty())
             break;
 
-        if ((next != nullptr) && !next.startsWith(_("/"))) {
-            path = path + _(":") + next;
-            next = nullptr;
+        if ((!next.empty()) && !startswith(next, "/")) {
+            path = path + ":" + next;
+            next = "";
         }
 
-        String check = path + _("/") + exec;
+        std::string check = path + "/" + exec;
         if (check_path(check))
             return check;
 
-        if (next != nullptr)
+        if (!next.empty())
             path = next;
         else
-            path = nullptr;
+            path = "";
 
-    } while (path != nullptr);
+    } while (!path.empty());
 
-    return nullptr;
+    return "";
 }
 
-bool string_ok(String str)
+bool string_ok(std::string str)
 {
-    if ((str == nullptr) || (str == ""))
+    if (str.empty())
         return false;
     return true;
 }
 
-void string_ok_ex(String str)
+void string_ok_ex(std::string str)
 {
-    if ((str == nullptr) || (str == ""))
-        throw _Exception(_("Empty string"));
+    if (str.empty())
+        throw _Exception("Empty string");
 }
 
-String http_redirect_to(String ip, String port, String page)
+std::string http_redirect_to(std::string ip, std::string port, std::string page)
 {
-    return _("<html><head><meta http-equiv=\"Refresh\" content=\"0;URL=http://") + ip + ":" + port + "/" + page + "\"></head><body bgcolor=\"#dddddd\"></body></html>";
+    return "<html><head><meta http-equiv=\"Refresh\" content=\"0;URL=http://" + ip + ":" + port + "/" + page + "\"></head><body bgcolor=\"#dddddd\"></body></html>";
 }
 
-String hex_encode(const void* data, int len)
+std::string hex_encode(const void* data, int len)
 {
     const unsigned char* chars;
     int i;
@@ -273,7 +346,7 @@ String hex_encode(const void* data, int len)
     return buf.str();
 }
 
-String hex_decode_string(String encoded)
+std::string hex_decode_string(std::string encoded)
 {
     auto* ptr = const_cast<char*>(encoded.c_str());
     int len = encoded.length();
@@ -299,7 +372,7 @@ String hex_decode_string(String encoded)
     return buf.str();
 }
 
-String hex_md5(const void* data, int length)
+std::string hex_md5(const void* data, int length)
 {
     char md5buf[16];
 
@@ -310,11 +383,11 @@ String hex_md5(const void* data, int length)
 
     return hex_encode(md5buf, 16);
 }
-String hex_string_md5(String str)
+std::string hex_string_md5(std::string str)
 {
     return hex_md5(str.c_str(), str.length());
 }
-String generate_random_id()
+std::string generate_random_id()
 {
 #ifdef BSD_NATIVE_UUID
     char* uuid_str;
@@ -333,7 +406,7 @@ String generate_random_id()
 #endif
 
     log_debug("Generated: %s\n", uuid_str);
-    String uuid_String = String(uuid_str);
+    std::string uuid_String = std::string(uuid_str);
 #ifdef BSD_NATIVE_UUID
     free(uuid_str);
 #endif
@@ -343,7 +416,7 @@ String generate_random_id()
 
 static const char* HEX_CHARS2 = "0123456789ABCDEF";
 
-String url_escape(String str)
+std::string url_escape(std::string str)
 {
     const char* data = str.c_str();
     int len = str.length();
@@ -361,7 +434,7 @@ String url_escape(String str)
     return buf.str();
 }
 
-String urlUnescape(String str)
+std::string urlUnescape(std::string str)
 {
     auto* data = const_cast<char*>(str.c_str());
     int len = str.length();
@@ -402,20 +475,20 @@ String urlUnescape(String str)
     return buf.str();
 }
 
-String mime_types_to_CSV(Ref<Array<StringBase>> mimeTypes)
+std::string mime_types_to_CSV(std::vector<std::string> mimeTypes)
 {
     std::ostringstream buf;
-    for (int i = 0; i < mimeTypes->size(); i++) {
+    for (size_t i = 0; i < mimeTypes.size(); i++) {
         if (i > 0)
             buf << ",";
-        String mimeType = mimeTypes->get(i);
+        std::string mimeType = mimeTypes[i];
         buf << "http-get:*:" << mimeType << ":*";
     }
 
     return buf.str();
 }
 
-String mt_strerror(int mt_errno)
+std::string mt_strerror(int mt_errno)
 {
 #ifdef DONT_USE_YET_HAVE_STRERROR_R
     char* buffer = (char*)MALLOC(512);
@@ -427,10 +500,10 @@ String mt_strerror(int mt_errno)
 #else
     int ret = strerror_r(errno, buffer, 512);
     if (ret < 0)
-        return _("cannot get error string: error while calling XSI-compliant strerror_r");
+        return "cannot get error string: error while calling XSI-compliant strerror_r";
     err_str = buffer;
 #endif
-    String errStr(err_str);
+    std::string errStr(err_str);
     FREE(buffer);
     return errStr;
 #else
@@ -438,11 +511,11 @@ String mt_strerror(int mt_errno)
 #endif
 }
 
-String read_text_file(String path)
+std::string read_text_file(std::string path)
 {
     FILE* f = fopen(path.c_str(), "r");
     if (!f) {
-        throw _Exception(_("read_text_file: could not open ") + path + " : " + mt_strerror(errno));
+        throw _Exception("read_text_file: could not open " + path + " : " + mt_strerror(errno));
     }
     std::ostringstream buf;
     char buffer[1024];
@@ -453,35 +526,35 @@ String read_text_file(String path)
     fclose(f);
     return buf.str();
 }
-void write_text_file(String path, String contents)
+void write_text_file(std::string path, std::string contents)
 {
-    int bytesWritten;
+    size_t bytesWritten;
     FILE* f = fopen(path.c_str(), "w");
     if (!f) {
-        throw _Exception(_("write_text_file: could not open ") + path + " : " + mt_strerror(errno));
+        throw _Exception("write_text_file: could not open " + path + " : " + mt_strerror(errno));
     }
 
     bytesWritten = fwrite(contents.c_str(), 1, contents.length(), f);
     if (bytesWritten < contents.length()) {
         fclose(f);
         if (bytesWritten >= 0)
-            throw _Exception(_("write_text_file: incomplete write to ") + path + " : ");
+            throw _Exception("write_text_file: incomplete write to " + path + " : ");
         else
-            throw _Exception(_("write_text_file: error writing to ") + path + " : " + mt_strerror(errno));
+            throw _Exception("write_text_file: error writing to " + path + " : " + mt_strerror(errno));
     }
     fclose(f);
 }
 
-void copy_file(String from, String to)
+void copy_file(std::string from, std::string to)
 {
     FILE* f = fopen(from.c_str(), "r");
     if (!f) {
-        throw _Exception(_("copy_file: could not open ") + from + " for read: " + mt_strerror(errno));
+        throw _Exception("copy_file: could not open " + from + " for read: " + mt_strerror(errno));
     }
     FILE* t = fopen(to.c_str(), "w");
     if (!t) {
         fclose(f);
-        throw _Exception(_("copy_file: could not open ") + to + " for write: " + mt_strerror(errno));
+        throw _Exception("copy_file: could not open " + to + " for write: " + mt_strerror(errno));
     }
     auto* buffer = (char*)MALLOC(1024);
     size_t bytesRead = 0;
@@ -495,7 +568,7 @@ void copy_file(String from, String to)
         int my_errno = errno;
         fclose(f);
         fclose(t);
-        throw _Exception(_("copy_file: error while copying ") + from + " to " + to + ": " + mt_strerror(my_errno));
+        throw _Exception("copy_file: error while copying " + from + " to " + to + ": " + mt_strerror(my_errno));
     }
 
     fclose(f);
@@ -505,7 +578,9 @@ void copy_file(String from, String to)
 /* sorting */
 int StringBaseComparator(void* arg1, void* arg2)
 {
-    return strcmp(((StringBase*)arg1)->data, ((StringBase*)arg2)->data);
+    std::string* s1 = static_cast<std::string*>(arg1);
+    std::string* s2 = static_cast<std::string*>(arg2);
+    return strcmp(s1->c_str(), s2->c_str());
 }
 
 static void quicksort_impl(COMPARABLE* a, int lo0, int hi0, COMPARATOR comparator)
@@ -572,7 +647,7 @@ void quicksort(COMPARABLE* arr, int size, COMPARATOR comparator)
     quicksort_impl(arr, 0, size - 1, comparator);
 }
 
-String renderProtocolInfo(String mimetype, String protocol, String extend)
+std::string renderProtocolInfo(std::string mimetype, std::string protocol, std::string extend)
 {
     if (string_ok(mimetype) && string_ok(protocol)) {
         if (string_ok(extend))
@@ -580,31 +655,31 @@ String renderProtocolInfo(String mimetype, String protocol, String extend)
         else
             return protocol + ":*:" + mimetype + ":*";
     } else
-        return _("http-get:*:*:*");
+        return "http-get:*:*:*";
 }
 
-String getMTFromProtocolInfo(String protocol)
+std::string getMTFromProtocolInfo(std::string protocol)
 {
-    Ref<Array<StringBase>> parts = split_string(protocol, ':');
-    if (parts->size() > 2)
-        return parts->get(2);
+    std::vector<std::string> parts = split_string(protocol, ':');
+    if (parts.size() > 2)
+        return parts[2];
     else
-        return nullptr;
+        return "";
 }
 
-String getProtocol(String protocolInfo)
+std::string getProtocol(std::string protocolInfo)
 {
-    String protocol;
-    int pos = protocolInfo.index(':');
-    if (pos <= 0)
-        protocol = _("http-get");
+    std::string protocol;
+    size_t pos = protocolInfo.find(':');
+    if (pos == std::string::npos || pos == 0)
+        protocol = "http-get";
     else
-        protocol = protocolInfo.substring(0, pos);
+        protocol = protocolInfo.substr(0, pos);
 
     return protocol;
 }
 
-String secondsToHMS(int seconds)
+std::string secondsToHMS(int seconds)
 {
     int h, m, s;
 
@@ -619,12 +694,17 @@ String secondsToHMS(int seconds)
     if (h > 999)
         h = 999;
 
-    auto* str = (char*)malloc(10);
-    sprintf(str, "%02d:%02d:%02d", h, m, s);
-    return String::take(str);
+    // TOOD: optimize
+    char* tmp = (char*)MALLOC(10);
+    sprintf(tmp, "%02d:%02d:%02d", h, m, s);
+
+    std::string res = tmp;
+    FREE(tmp);
+
+    return res;
 }
 
-int HMSToSeconds(String time)
+int HMSToSeconds(std::string time)
 {
     if (!string_ok(time)) {
         log_warning("Could not convert time representation to seconds!\n");
@@ -640,30 +720,30 @@ int HMSToSeconds(String time)
 }
 
 #ifdef HAVE_MAGIC
-String getMIMETypeFromFile(String file)
+std::string getMIMETypeFromFile(std::string file)
 {
     return getMIME(file, nullptr, -1);
 }
 
-String getMIMETypeFromBuffer(const void *buffer, size_t length)
+std::string getMIMETypeFromBuffer(const void *buffer, size_t length)
 {
-    return getMIME(nullptr, buffer, length);
+    return getMIME("", buffer, length);
 }
 
-String getMIME(String filepath, const void *buffer, size_t length)
+std::string getMIME(std::string filepath, const void *buffer, size_t length)
 {
     /* MAGIC_MIME_TYPE tells magic to return ONLY the mimetype */
     magic_t magic_cookie = magic_open(MAGIC_MIME_TYPE);
 
     if (magic_cookie == NULL) {
         log_warning("Failed to initialize libmagic\n");
-        return nullptr;
+        return "";
     }
 
     if (magic_load(magic_cookie, NULL) != 0) {
         log_warning("Failed to load magic database: %s\n", magic_error(magic_cookie));
         magic_close(magic_cookie);
-        return nullptr;
+        return "";
     }
 
     const char* mime;
@@ -673,7 +753,7 @@ String getMIME(String filepath, const void *buffer, size_t length)
         mime = magic_file(magic_cookie, filepath.c_str());
     }
 
-    String out = String::copy(mime);
+    std::string out = mime;
     magic_close(magic_cookie);
     return out;
 }
@@ -684,10 +764,10 @@ void set_jpeg_resolution_resource(Ref<CdsItem> item, int res_num)
     try {
         Ref<IOHandler> fio_h(new FileIOHandler(item->getLocation()));
         fio_h->open(UPNP_READ);
-        String resolution = get_jpeg_resolution(fio_h);
+        std::string resolution = get_jpeg_resolution(fio_h);
 
         if (res_num >= item->getResourceCount())
-            throw _Exception(_("Invalid resource index"));
+            throw _Exception("Invalid resource index");
 
         item->getResource(res_num)->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), resolution);
     } catch (const Exception& e) {
@@ -695,7 +775,7 @@ void set_jpeg_resolution_resource(Ref<CdsItem> item, int res_num)
     }
 }
 
-bool check_resolution(String resolution, int* x, int* y)
+bool check_resolution(std::string resolution, int* x, int* y)
 {
     if (x != nullptr)
         *x = 0;
@@ -703,13 +783,13 @@ bool check_resolution(String resolution, int* x, int* y)
     if (y != nullptr)
         *y = 0;
 
-    Ref<Array<StringBase>> parts = split_string(resolution, 'x');
-    if (parts->size() != 2)
+    std::vector<std::string> parts = split_string(resolution, 'x');
+    if (parts.size() != 2)
         return false;
 
-    if (string_ok(parts->get(0)) && string_ok(parts->get(1))) {
-        int _x = _(parts->get(0)->data).toInt();
-        int _y = _(parts->get(1)->data).toInt();
+    if (string_ok(parts[0]) && string_ok(parts[1])) {
+        int _x = std::stoi(parts[0]);
+        int _y = std::stoi(parts[1]);
 
         if ((_x > 0) && (_y > 0)) {
             if (x != nullptr)
@@ -725,79 +805,83 @@ bool check_resolution(String resolution, int* x, int* y)
     return false;
 }
 
-String escape(String string, char escape_char, char to_escape)
+std::string escape(std::string string, char escape_char, char to_escape)
 {
-    Ref<StringBase> stringBase(new StringBase(string.length() * 2));
-    char* str = stringBase->data;
-    int len = string.length();
+    // TODO: optimize: use direct std::string with reserve
+    char* result = (char*)MALLOC(string.length() * 2);
+    char* str = result;
+    size_t len = string.length();
 
     bool possible_more_esc = true;
     bool possible_more_char = true;
 
-    int last = 0;
+    size_t last = 0;
     do {
-        int next_esc = -1;
+        size_t next_esc = std::string::npos;
         if (possible_more_esc) {
-            next_esc = string.index(last, escape_char);
-            if (next_esc < 0)
+            next_esc = string.find(escape_char, last);
+            if (next_esc == std::string::npos)
                 possible_more_esc = false;
         }
 
-        int next = -1;
+        size_t next = std::string::npos;
         if (possible_more_char) {
-            next = string.index(last, to_escape);
-            if (next < 0)
+            next = string.find(to_escape, last);
+            if (next == std::string::npos)
                 possible_more_char = false;
         }
 
-        if (next < 0 || (next_esc >= 0 && next_esc < next)) {
+        if (next == std::string::npos || (next_esc != std::string::npos && next_esc < next)) {
             next = next_esc;
         }
 
-        if (next < 0)
+        if (next == std::string::npos)
             next = len;
         int cpLen = next - last;
         if (cpLen > 0) {
-            strncpy(str, string.charPtrAt(last), cpLen);
+            strncpy(str, &string[last], cpLen);
             str += cpLen;
         }
         if (next < len) {
             *(str++) = '\\';
-            *(str++) = string.charAt(next);
+            *(str++) = string.at(next);
         }
         last = next;
         last++;
     } while (last < len);
     *str = '\0';
 
-    stringBase->len = strlen(stringBase->data);
-    return stringBase->data;
+    std::string ret = result;
+    FREE(result);
+    return ret;
 }
 
-String unescape(String string, char escape)
+std::string unescape(std::string string, char escape)
 {
-    Ref<StringBase> stringBase(new StringBase(string.length()));
-    char* str = stringBase->data;
-    int len = string.length();
+    // TODO: optimize: use direct std::string with reserve
+    char* result = (char*)MALLOC(string.length());
+    char* str = result;
+    size_t len = string.length();
 
-    int last = -1;
+    size_t last = std::string::npos;
     do {
-        int next = string.index(last + 1, escape);
-        if (next < 0)
+        size_t next = string.find(escape, last + 1);
+        if (next == std::string::npos)
             next = len;
-        if (last < 0)
+        if (last == std::string::npos)
             last = 0;
         int cpLen = next - last;
         if (cpLen > 0)
-            strncpy(str, string.charPtrAt(last), cpLen);
+            strncpy(str, &string[last], cpLen);
         str += cpLen;
         last = next;
         last++;
     } while (last < len);
     *str = '\0';
 
-    stringBase->len = strlen(stringBase->data);
-    return String(stringBase);
+    std::string ret = result;
+    FREE(result);
+    return ret;
 }
 
 /*
@@ -856,47 +940,50 @@ std::string xml_unescape(std::string_view sv)
 }
 */
 
-String unescape_amp(String string)
+std::string unescape_amp(std::string string)
 {
-    if (string == nullptr)
-        return nullptr;
-    Ref<StringBase> stringBase(new StringBase(string.length()));
-    char* str = stringBase->data;
-    int len = string.length();
+    if (string.empty())
+        return "";
 
-    int last = 0;
+    // TODO: optimize: use direct std::string with reserve
+    char* result = (char*)MALLOC(string.length());
+    char* str = result;
+    size_t len = string.length();
+
+    size_t last = 0;
     do {
         int skip = 0;
-        int next = last - 1;
+        size_t next = last - 1;
         do {
-            next = string.index(next + 1, '&');
-            if ((next < len) && (string.charAt(next + 1) == 'a') && (string.charAt(next + 2) == 'm') && (string.charAt(next + 3) == 'p') && (string.charAt(next + 4) == ';')) {
+            next = string.find('&', next + 1);
+            if (next == std::string::npos) break;
+            if ((next < len) && (string.at(next + 1) == 'a') && (string.at(next + 2) == 'm') && (string.at(next + 3) == 'p') && (string.at(next + 4) == ';')) {
                 skip = 4;
             }
         } while (next > 0 && skip == 0);
 
-        if (next < 0)
+        if (next == std::string::npos)
             next = len;
 
         int cpLen = next - last + 1;
-        strncpy(str, string.charPtrAt(last), cpLen);
+        strncpy(str, &string[last], cpLen);
         str += cpLen;
         last = next + skip + 1;
     } while (last <= len);
 
-    stringBase->len = str - stringBase->data - 1;
-    assert(stringBase->len == (int)strlen(stringBase->data));
-    return String(stringBase);
+    std::string ret = result;
+    FREE(result);
+    return ret;
 }
 
-String fallbackString(String first, String fallback)
+std::string fallbackString(std::string first, std::string fallback)
 {
-    if (first == nullptr)
+    if (first.empty())
         return fallback;
     return first;
 }
 
-unsigned int stringHash(String str)
+unsigned int stringHash(std::string str)
 {
     unsigned int hash = 5381;
     auto* data = (unsigned char*)str.c_str();
@@ -906,7 +993,7 @@ unsigned int stringHash(String str)
     return hash;
 }
 
-String toCSV(shared_ptr<unordered_set<int>> array)
+std::string toCSV(shared_ptr<unordered_set<int>> array)
 {
     if (array->empty())
         return nullptr;
@@ -918,7 +1005,7 @@ void getTimespecNow(struct timespec* ts)
     struct timeval tv;
     int ret = gettimeofday(&tv, nullptr);
     if (ret != 0)
-        throw _Exception(_("gettimeofday failed: ") + mt_strerror(errno));
+        throw _Exception("gettimeofday failed: " + mt_strerror(errno));
 
     ts->tv_sec = tv.tv_sec;
     ts->tv_nsec = tv.tv_usec * 1000;
@@ -954,63 +1041,64 @@ void getTimespecAfterMillis(long delta, struct timespec* ret, struct timespec* s
     // log_debug("timespec: sec: %ld, nsec: %ld\n", ret->tv_sec, ret->tv_nsec);
 }
 
-String normalizePath(String path)
+std::string normalizePath(std::string path)
 {
     log_debug("Normalizing path: %s\n", path.c_str());
 
-    int length = path.length();
+    size_t length = path.length();
 
-    Ref<StringBase> result(new StringBase(length));
+    // TODO: optimize: use direct std::string with reserve
+    char* result = (char*)MALLOC(length + 1);
+    char* str = result;
 
     int avarageExpectedSlashes = length / 5;
     if (avarageExpectedSlashes < 3)
         avarageExpectedSlashes = 3;
     Ref<BaseStack<int>> separatorLocations(new BaseStack<int>(avarageExpectedSlashes, -1));
-    char* str = result->data;
-    //int len = string.length();
 
-    if (path.charAt(0) != DIR_SEPARATOR)
-        throw _Exception(_("Relative paths are not allowed!\n"));
+    if (path.at(0) != DIR_SEPARATOR)
+        throw _Exception("Relative paths are not allowed!\n");
 
-    int next = 1;
+    size_t next = 1;
     do {
-        while (next < length && path.charAt(next) == DIR_SEPARATOR)
+        while (next < length && path.at(next) == DIR_SEPARATOR)
             next++;
         if (next >= length)
             break;
 
-        int next_sep = path.index(next, DIR_SEPARATOR);
-        if (next_sep < 0)
+        size_t next_sep = path.find(DIR_SEPARATOR, next);
+        if (next_sep == std::string::npos)
             next_sep = length;
-        if (next_sep == next + 1 && path.charAt(next) == '.') {
+        if (next_sep == next + 1 && path.at(next) == '.') {
             //  "." - can be ignored
-        } else if (next_sep == next + 2 && next + 1 < length && path.charAt(next) == '.' && path.charAt(next + 1) == '.') {
+        } else if (next_sep == next + 2 && next + 1 < length && path.at(next) == '.' && path.at(next + 1) == '.') {
             // ".."
             // go back one part
             int lastSepLocation = separatorLocations->pop();
             if (lastSepLocation < 0)
                 lastSepLocation = 0;
-            str = result->data + lastSepLocation;
+            str = result + lastSepLocation;
         } else {
             // normal part
-            separatorLocations->push(str - result->data);
+            separatorLocations->push(str - result);
             *(str++) = DIR_SEPARATOR;
             int cpLen = next_sep - next;
-            strncpy(str, path.charPtrAt(next), cpLen);
+            strncpy(str, &path[next], cpLen);
             str += cpLen;
         }
         next = next_sep + 1;
     } while (next < length);
 
-    if (str == result->data)
+    if (str == result)
         *(str++) = DIR_SEPARATOR;
 
     *str = 0;
-    result->len = strlen(result->data);
-    return String(result);
+    std::string ret = result;
+    FREE(result);
+    return ret;
 }
 
-String interfaceToIP(String interface)
+std::string interfaceToIP(std::string interface)
 {
 
     struct if_nameindex* iflist = nullptr;
@@ -1049,7 +1137,7 @@ String interfaceToIP(String interface)
             }
 
             memcpy(&local_address, &if_request.ifr_addr, sizeof(if_request.ifr_addr));
-            String ip = inet_ntoa(local_address.sin_addr);
+            std::string ip = inet_ntoa(local_address.sin_addr);
             if_freenameindex(iflist_free);
             close(local_socket);
             return ip;
@@ -1062,10 +1150,10 @@ String interfaceToIP(String interface)
     return nullptr;
 }
 
-String ipToInterface(String ip)
+std::string ipToInterface(std::string ip)
 {
     if (!string_ok(ip)) {
-        return nullptr;
+        return "";
     } else {
         log_debug("Looking for '%s'\n", ip.c_str());
     }
@@ -1083,7 +1171,7 @@ String ipToInterface(String ip)
             continue;
 
         family = ifa->ifa_addr->sa_family;
-        String name = String::copy(ifa->ifa_name);
+        std::string name = ifa->ifa_name;
 
         if (family == AF_INET || family == AF_INET6) {
             s = getnameinfo(ifa->ifa_addr,
@@ -1091,12 +1179,12 @@ String ipToInterface(String ip)
                 host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
             if (s != 0) {
                 log_error("getnameinfo() failed: %s\n", gai_strerror(s));
-                return nullptr;
+                return "";
             }
 
-            String ipaddr = String::copy(host);
+            std::string ipaddr = host;
             // IPv6 link locals come back as fe80::351d:d7f4:6b17:3396%eth0
-            if (ipaddr.startsWith(ip)) {
+            if (startswith(ipaddr, ip)) {
                 return name;
             }
         }
@@ -1104,10 +1192,10 @@ String ipToInterface(String ip)
 
     freeifaddrs(ifaddr);
     log_warning("Failed to find interface for IP: %s\n", ip.c_str());
-    return nullptr;
+    return "";
 }
 
-bool validateYesNo(String value)
+bool validateYesNo(std::string value)
 {
     if ((value != "yes") && (value != "no"))
         return false;
@@ -1115,22 +1203,22 @@ bool validateYesNo(String value)
         return true;
 }
 
-Ref<Array<StringBase>> parseCommandLine(String line, String in, String out,
-    String range)
+std::vector<std::string> parseCommandLine(std::string line, std::string in, std::string out, std::string range)
 {
-    Ref<Array<StringBase>> params = split_string(line, ' ');
-    if ((in == nullptr) && (out == nullptr))
+    std::vector<std::string> params = split_string(line, ' ');
+    if (in.empty() && out.empty())
         return params;
 
-    for (int i = 0; i < params->size(); i++) {
-        String param = params->get(i);
-        String newParam = param.replace(_("%in"), in);
-        newParam = newParam.replace(_("%out"), out);
-        if (range != nullptr) {
-            newParam = newParam.replace(_("%range"), range);
+    for (size_t i = 0; i < params.size(); i++) {
+        std::string param = params[i];
+        std::string newParam = param.replace(param.find("%in"), 3, in);
+
+        newParam = param.replace(param.find("%out"), 3, out);
+        if (!range.empty()) {
+            newParam = param.replace(param.find("%range"), 6, out);
         }
         if (param != newParam) {
-            params->set(newParam, i);
+            params[i] = newParam;
         }
     }
 
@@ -1163,7 +1251,7 @@ Ref<Array<StringBase>> parseCommandLine(String line, String in, String out,
  * Copyright (C) 1991,92,93,94,95,96,97,98,99 Free Software Foundation, Inc.
  */
 // tempName is based on create_temp_file, see (C) above
-String tempName(String leadPath, char* tmpl)
+std::string tempName(std::string leadPath, char* tmpl)
 {
     char* XXXXXX;
     int count;
@@ -1202,7 +1290,7 @@ String tempName(String leadPath, char* tmpl)
         v /= NLETTERS;
         XXXXXX[5] = letters[v % NLETTERS];
 
-        String check = leadPath + tmpl;
+        std::string check = leadPath + tmpl;
         ret = stat(check.c_str(), &statbuf);
         if (ret != 0) {
             if ((errno == ENOENT) || (errno == ENOTDIR))
@@ -1216,19 +1304,19 @@ String tempName(String leadPath, char* tmpl)
     return nullptr;
 }
 
-bool isTheora(String ogg_filename)
+bool isTheora(std::string ogg_filename)
 {
     FILE* f;
     char buffer[7];
     f = fopen(ogg_filename.c_str(), "rb");
 
     if (!f) {
-        throw _Exception(_("Error opening ") + ogg_filename + _(" : ") + mt_strerror(errno));
+        throw _Exception("Error opening " + ogg_filename + " : " + mt_strerror(errno));
     }
 
     if (fread(buffer, 1, 4, f) != 4) {
         fclose(f);
-        throw _Exception(_("Error reading ") + ogg_filename);
+        throw _Exception("Error reading " + ogg_filename);
     }
 
     if (memcmp(buffer, "OggS", 4) != 0) {
@@ -1238,12 +1326,12 @@ bool isTheora(String ogg_filename)
 
     if (fseek(f, 28, SEEK_SET) != 0) {
         fclose(f);
-        throw _Exception(_("Incomplete file ") + ogg_filename);
+        throw _Exception("Incomplete file " + ogg_filename);
     }
 
     if (fread(buffer, 1, 7, f) != 7) {
         fclose(f);
-        throw _Exception(_("Error reading ") + ogg_filename);
+        throw _Exception("Error reading " + ogg_filename);
     }
 
     if (memcmp(buffer, "\x80theora", 7) != 0) {
@@ -1255,22 +1343,22 @@ bool isTheora(String ogg_filename)
     return true;
 }
 
-String get_last_path(String location)
+std::string get_last_path(std::string location)
 {
-    String path;
+    std::string path;
 
-    int last_slash = location.rindex(DIR_SEPARATOR);
-    if (last_slash > 0) {
-        path = location.substring(0, last_slash);
-        int slash = path.rindex(DIR_SEPARATOR);
-        if ((slash >= 0) && ((slash + 1) < path.length()))
-            path = path.substring(slash + 1);
+    size_t last_slash = location.rfind(DIR_SEPARATOR);
+    if (last_slash != std::string::npos) {
+        path = location.substr(0, last_slash);
+        size_t slash = path.rfind(DIR_SEPARATOR);
+        if ((slash != std::string::npos) && ((slash + 1) < path.length()))
+            path = path.substr(slash + 1);
     }
 
     return path;
 }
 
-ssize_t getValidUTF8CutPosition(zmm::String str, ssize_t cutpos)
+ssize_t getValidUTF8CutPosition(std::string str, ssize_t cutpos)
 {
     ssize_t pos = -1;
     size_t len = str.length();
@@ -1278,18 +1366,18 @@ ssize_t getValidUTF8CutPosition(zmm::String str, ssize_t cutpos)
     if ((len == 0) || (cutpos > (ssize_t)len))
         return pos;
 
-    printf("Character at cut position: %0x\n", (char)str.charAt(cutpos));
-    printf("Character at cut-1 position: %0x\n", (char)str.charAt(cutpos - 1));
-    printf("Character at cut-2 position: %0x\n", (char)str.charAt(cutpos - 2));
-    printf("Character at cut-3 position: %0x\n", (char)str.charAt(cutpos - 3));
+    printf("Character at cut position: %0x\n", (char)str.at(cutpos));
+    printf("Character at cut-1 position: %0x\n", (char)str.at(cutpos - 1));
+    printf("Character at cut-2 position: %0x\n", (char)str.at(cutpos - 2));
+    printf("Character at cut-3 position: %0x\n", (char)str.at(cutpos - 3));
 
     // > 0x7f, we are dealing with a non-ascii character
-    if (str.charAt(cutpos) & 0x80) {
+    if (str.at(cutpos) & 0x80) {
         // check if we are at byte 2
-        if (((cutpos - 1) >= 0) && (((str.charAt(cutpos - 1) & 0xc2) == 0xc2) || ((str.charAt(cutpos - 1) & 0xe2) == 0xe2) || ((str.charAt(cutpos - 1) & 0xf0) == 0xf0)))
+        if (((cutpos - 1) >= 0) && (((str.at(cutpos - 1) & 0xc2) == 0xc2) || ((str.at(cutpos - 1) & 0xe2) == 0xe2) || ((str.at(cutpos - 1) & 0xf0) == 0xf0)))
             pos = cutpos - 1;
         // check if we are at byte 3
-        else if (((cutpos - 2) >= 0) && (((str.charAt(cutpos - 2) & 0xe2) == 0xe2) || ((str.charAt(cutpos - 2) & 0xf0) == 0xf0)))
+        else if (((cutpos - 2) >= 0) && (((str.at(cutpos - 2) & 0xe2) == 0xe2) || ((str.at(cutpos - 2) & 0xf0) == 0xf0)))
             pos = cutpos - 2;
         // we must be at byte 4 then...
         else if ((cutpos - 3) >= 0)
@@ -1300,37 +1388,37 @@ ssize_t getValidUTF8CutPosition(zmm::String str, ssize_t cutpos)
     return pos;
 }
 
-String getDLNAprofileString(String contentType)
+std::string getDLNAprofileString(std::string contentType)
 {
-    String profile;
+    std::string profile;
     if (contentType == CONTENT_TYPE_MP4)
-        profile = _(D_PN_AVC_MP4_EU);
+        profile = D_PN_AVC_MP4_EU;
     else if (contentType == CONTENT_TYPE_MKV)
-        profile = _(D_PN_MKV);
+        profile = D_PN_MKV;
     else if (contentType == CONTENT_TYPE_AVI)
-        profile = _(D_PN_AVI);
+        profile = D_PN_AVI;
     else if (contentType == CONTENT_TYPE_MPEG)
-        profile = _(D_PN_MPEG_PS_PAL);
+        profile = D_PN_MPEG_PS_PAL;
     else if (contentType == CONTENT_TYPE_MP3)
-        profile = _(D_MP3);
+        profile = D_MP3;
     else if (contentType == CONTENT_TYPE_PCM)
-        profile = _(D_LPCM);
+        profile = D_LPCM;
     else
-        profile = _("");
+        profile = "";
 
     if (string_ok(profile))
-        profile = _(D_PROFILE) + "=" + profile;
+        profile = std::string(D_PROFILE) + "=" + profile;
     return profile;
 }
 
-String getDLNAContentHeader(String contentType)
+std::string getDLNAContentHeader(std::string contentType)
 {
     Ref<ConfigManager> config = ConfigManager::getInstance();
     if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO)) {
-        String content_parameter;
+        std::string content_parameter;
         content_parameter = getDLNAprofileString(contentType);
         if (string_ok(content_parameter))
-            content_parameter = _(D_PROFILE) + _("=") + content_parameter + ";";
+            content_parameter = D_PROFILE + std::string("=") + content_parameter + ";";
         // enabling or disabling seek
         if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_DLNA_SEEK))
             content_parameter = content_parameter + D_OP + "=" + D_OP_SEEK_ENABLED + ";";
@@ -1343,42 +1431,42 @@ String getDLNAContentHeader(String contentType)
     return nullptr;
 }
 
-String getDLNATransferHeader(String mimeType)
+std::string getDLNATransferHeader(std::string mimeType)
 {
     if (ConfigManager::getInstance()->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO)) {
-        String transfer_parameter;
-        if (mimeType.startsWith(_("image")))
-            transfer_parameter = _(D_HTTP_TRANSFER_MODE_INTERACTIVE);
-        else if (mimeType.startsWith(_("audio")) || mimeType.startsWith(_("video")))
-            transfer_parameter = _(D_HTTP_TRANSFER_MODE_STREAMING);
+        std::string transfer_parameter;
+        if (startswith(mimeType, "image"))
+            transfer_parameter = D_HTTP_TRANSFER_MODE_INTERACTIVE;
+        else if (startswith(mimeType, "audio") || startswith(mimeType, "video"))
+            transfer_parameter = D_HTTP_TRANSFER_MODE_STREAMING;
 
         if (string_ok(transfer_parameter)) {
             return transfer_parameter;
         }
     }
-    return nullptr;
+    return "";
 }
 
 #ifndef HAVE_FFMPEG
-String getAVIFourCC(zmm::String avi_filename)
+std::string getAVIFourCC(std::string avi_filename)
 {
 #define FCC_OFFSET 0xbc
     char* buffer;
     FILE* f = fopen(avi_filename.c_str(), "rb");
     if (!f)
-        throw _Exception(_("could not open file ") + avi_filename + " : " + mt_strerror(errno));
+        throw _Exception("could not open file " + avi_filename + " : " + mt_strerror(errno));
 
     buffer = (char*)MALLOC(FCC_OFFSET + 6);
     if (buffer == nullptr) {
         fclose(f);
-        throw _Exception(_("Out of memory when allocating buffer for file ") + avi_filename);
+        throw _Exception("Out of memory when allocating buffer for file " + avi_filename);
     }
 
     size_t rb = fread(buffer, 1, FCC_OFFSET + 4, f);
     fclose(f);
     if (rb != FCC_OFFSET + 4) {
         free(buffer);
-        throw _Exception(_("could not read header of ") + avi_filename + " : " + mt_strerror(errno));
+        throw _Exception("could not read header of " + avi_filename + " : " + mt_strerror(errno));
     }
 
     buffer[FCC_OFFSET + 5] = '\0';
@@ -1393,7 +1481,7 @@ String getAVIFourCC(zmm::String avi_filename)
         return nullptr;
     }
 
-    String fourcc = String(buffer + FCC_OFFSET, 4);
+    std::string fourcc = std::string(buffer + FCC_OFFSET, 4);
     free(buffer);
 
     if (string_ok(fourcc))

@@ -65,11 +65,11 @@ public:
     static zmm::Ref<T> getInstance()
     {
         if (!singletonActive)
-            throw _ServerShutdownException(_("singleton is currently inactive!"));
+            throw _ServerShutdownException("singleton is currently inactive!");
         if (instance == nullptr) {
             AutoLock lock(mutex);
             if (!singletonActive)
-                throw _ServerShutdownException(_("singleton is currently inactive!"));
+                throw _ServerShutdownException("singleton is currently inactive!");
             if (instance == nullptr) // check again, because there is a very small chance
             // that 2 threads tried to lock() concurrently
             {
@@ -81,7 +81,7 @@ public:
         }
         return instance;
     }
-    virtual zmm::String getName() = 0;
+    virtual std::string getName() = 0;
 
 protected:
     virtual ~Singleton() {}

@@ -45,7 +45,7 @@
 class LastFm : public Singleton<LastFm, std::mutex> {
 public:
     LastFm();
-    zmm::String getName() override { return _("LastFM Scrobbler"); }
+    std::string getName() override { return _("LastFM Scrobbler"); }
     ~LastFm();
 
     /// \brief Initializes the LastFm client.

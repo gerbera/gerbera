@@ -21,15 +21,14 @@
 */
 #include "test_dictionary.h"
 #include "dictionary.h"
-#include "strings.h"
 
 using namespace zmm;
 
 void DictionaryTest::SetUp()
 {
-    dictionary2.put(String("keyOne"), String("valueOne"));
-    dictionary2.put(String("keyTwo"), String("valueTwo"));
-    dictionary2.put(String("keyThree"), String("valueThree"));
+    dictionary2.put(std::string("keyOne"), std::string("valueOne"));
+    dictionary2.put(std::string("keyTwo"), std::string("valueTwo"));
+    dictionary2.put(std::string("keyThree"), std::string("valueThree"));
 }
 
 TEST_F(DictionaryTest, IsEmptyInitially)
@@ -39,17 +38,17 @@ TEST_F(DictionaryTest, IsEmptyInitially)
 
 TEST_F(DictionaryTest, PutAndGet)
 {
-    dictionary1.put(String("put1"), String("value1"));
+    dictionary1.put(std::string("put1"), std::string("value1"));
     EXPECT_EQ(1, dictionary1.size());
-    EXPECT_EQ(dictionary1.get(String("put1")), String("value1"));
+    EXPECT_EQ(dictionary1.get(std::string("put1")), std::string("value1"));
 }
 
 TEST_F(DictionaryTest, PutWithExistingKeyReplacesValue)
 {
     EXPECT_EQ(3, dictionary2.size());
-    EXPECT_EQ(dictionary2.get(String("keyTwo")), String("valueTwo"));
+    EXPECT_EQ(dictionary2.get(std::string("keyTwo")), std::string("valueTwo"));
 
-    dictionary2.put(String("keyTwo"), String("replacementValue"));
+    dictionary2.put(std::string("keyTwo"), std::string("replacementValue"));
     EXPECT_EQ(3, dictionary2.size());
-    EXPECT_EQ(dictionary2.get(String("keyTwo")), String("replacementValue"));
+    EXPECT_EQ(dictionary2.get(std::string("keyTwo")), std::string("replacementValue"));
 }

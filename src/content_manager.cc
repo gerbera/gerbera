@@ -84,15 +84,14 @@ using namespace std;
 
 #define MIMETYPE_REGEXP "^([a-z0-9_-]+/[a-z0-9_-]+)"
 
-static String get_filename(String path)
+static std::string get_filename(std::string path)
 {
-    if (path.charAt(path.length() - 1) == DIR_SEPARATOR) // cut off trailing slash
-        path = path.substring(0, path.length() - 1);
-    int pos = path.rindex(DIR_SEPARATOR);
-    if (pos < 0)
+    if (path.at(path.length() - 1) == DIR_SEPARATOR) // cut off trailing slash
+        path = path.substr(0, path.length() - 1);
+    size_t pos = path.rfind(DIR_SEPARATOR);
+    if (pos == std::string::npos)
         return path;
-    else
-        return path.substring(pos + 1);
+    return path.substr(pos + 1);
 }
 
 ContentManager::ContentManager()
@@ -135,7 +134,7 @@ ContentManager::ContentManager()
     for (i = 0; i < config_timed_list->size(); i++) {
         Ref<AutoscanDirectory> dir = config_timed_list->get(i);
         if (dir != nullptr) {
-            String path = dir->getLocation();
+            std::string path = dir->getLocation();
             if (check_path(path, true)) {
                 dir->setObjectID(ensurePathExistence(path));
             }
@@ -153,7 +152,7 @@ ContentManager::ContentManager()
         for (i = 0; i < config_inotify_list->size(); i++) {
             Ref<AutoscanDirectory> dir = config_inotify_list->get(i);
             if (dir != nullptr) {
-                String path = dir->getLocation();
+                std::string path = dir->getLocation();
                 if (check_path(path, true)) {
                     dir->setObjectID(ensurePathExistence(path));
                 }
@@ -177,10 +176,11 @@ ContentManager::ContentManager()
         if (ms == nullptr) {
             log_error("magic_open failed\n");
         } else {
-            String magicFile = cm->getOption(CFG_IMPORT_MAGIC_FILE);
-            if (!string_ok(magicFile))
-                magicFile = nullptr;
-            if (magic_load(ms, (magicFile == nullptr) ? nullptr : magicFile.c_str()) == -1) {
+            std::string optMagicFile = cm->getOption(CFG_IMPORT_MAGIC_FILE);
+            const char* magicFile = NULL;
+            if (!optMagicFile.empty())
+                magicFile = optMagicFile.c_str();
+            if (magic_load(ms, magicFile) == -1) {
                 log_warning("magic_load: %s\n", magic_error(ms));
                 magic_close(ms);
                 ms = nullptr;
@@ -189,7 +189,7 @@ ContentManager::ContentManager()
     }
 #endif // HAVE_MAGIC
 
-    String layout_type = cm->getOption(CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
+    std::string layout_type = cm->getOption(CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
     if ((layout_type == "builtin") || (layout_type == "js"))
         layout_enabled = true;
 
@@ -254,13 +254,13 @@ ContentManager::~ContentManager() { log_debug("ContentManager destroyed\n"); }
 void ContentManager::init()
 {
     reMimetype = Ref<RExp>(new RExp());
-    reMimetype->compile(_(MIMETYPE_REGEXP));
+    reMimetype->compile(MIMETYPE_REGEXP);
 
     int ret = pthread_create(&taskThread,
         nullptr, //&attr, // attr
         ContentManager::staticThreadProc, this);
     if (ret != 0) {
-        throw _Exception(_("Could not start task thread"));
+        throw _Exception("Could not start task thread");
     }
 
     autoscan_timed->notifyAll(this);
@@ -440,14 +440,14 @@ void ContentManager::_loadAccounting()
 void ContentManager::addVirtualItem(Ref<CdsObject> obj, bool allow_fifo)
 {
     obj->validate();
-    String path = obj->getLocation();
+    std::string path = obj->getLocation();
     check_path_ex(path, false, false);
     Ref<Storage> storage = Storage::getInstance();
     Ref<CdsObject> pcdir = storage->findObjectByPath(path);
     if (pcdir == nullptr) {
         pcdir = createObjectFromFile(path, true, allow_fifo);
         if (pcdir == nullptr) {
-            throw _Exception(_("Could not add ") + path);
+            throw _Exception("Could not add " + path);
         }
         if (IS_CDS_ITEM(pcdir->getObjectType())) {
             this->addObject(pcdir);
@@ -458,11 +458,11 @@ void ContentManager::addVirtualItem(Ref<CdsObject> obj, bool allow_fifo)
     addObject(obj);
 }
 
-int ContentManager::_addFile(String path, String rootPath, bool recursive, bool hidden, Ref<GenericTask> task)
+int ContentManager::_addFile(std::string path, std::string rootPath, bool recursive, bool hidden, Ref<GenericTask> task)
 {
     if (hidden == false) {
-        String filename = get_filename(path);
-        if (string_ok(filename) && filename.charAt(0) == '.')
+        std::string filename = get_filename(path);
+        if (string_ok(filename) && filename.at(0) == '.')
             return INVALID_OBJECT_ID;
     }
 
@@ -493,8 +493,8 @@ int ContentManager::_addFile(String path, String rootPath, bool recursive, bool 
 
                     layout->processCdsObject(obj, rootPath);
 
-                    String mimetype = RefCast(obj, CdsItem)->getMimeType();
-                    String content_type = mimetype_contenttype_map->get(mimetype);
+                    std::string mimetype = RefCast(obj, CdsItem)->getMimeType();
+                    std::string content_type = mimetype_contenttype_map->get(mimetype);
 #ifdef HAVE_JS
                     if ((playlist_parser_script != nullptr) && (content_type == CONTENT_TYPE_PLAYLIST))
                         playlist_parser_script->processPlaylistObject(obj, task);
@@ -518,11 +518,11 @@ int ContentManager::_addFile(String path, String rootPath, bool recursive, bool 
 void ContentManager::_removeObject(int objectID, bool all)
 {
     if (objectID == CDS_ID_ROOT)
-        throw _Exception(_("cannot remove root container"));
+        throw _Exception("cannot remove root container");
     if (objectID == CDS_ID_FS_ROOT)
-        throw _Exception(_("cannot remove PC-Directory container"));
+        throw _Exception("cannot remove PC-Directory container");
     if (IS_FORBIDDEN_CDS_ID(objectID))
-        throw _Exception(_("tried to remove illegal object id"));
+        throw _Exception("tried to remove illegal object id");
 
     Ref<Storage> storage = Storage::getInstance();
 
@@ -537,7 +537,7 @@ void ContentManager::_removeObject(int objectID, bool all)
     // loadAccounting();
 }
 
-int ContentManager::ensurePathExistence(zmm::String path)
+int ContentManager::ensurePathExistence(std::string path)
 {
     int updateID;
     int containerID = Storage::getInstance()->ensurePathExistence(path, &updateID);
@@ -554,8 +554,8 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
     int ret;
     struct dirent* dent;
     struct stat statbuf;
-    String location;
-    String path;
+    std::string location;
+    std::string path;
     Ref<CdsObject> obj;
 
     if (scanID == INVALID_SCAN_ID)
@@ -563,7 +563,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
 
     Ref<AutoscanDirectory> adir = getAutoscanDirectory(scanID, scanMode);
     if (adir == nullptr)
-        throw _Exception(_("ID valid but nullptr returned? this should never happen"));
+        throw _Exception("ID valid but nullptr returned? this should never happen");
 
     Ref<Storage> storage = Storage::getInstance();
 
@@ -571,10 +571,10 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
         try {
             obj = storage->loadObject(containerID);
             if (!IS_CDS_CONTAINER(obj->getObjectType())) {
-                throw _Exception(_("Not a container"));
+                throw _Exception("Not a container");
             }
             if (containerID == CDS_ID_FS_ROOT)
-                location = _(FS_ROOT_DIRECTORY);
+                location = FS_ROOT_DIRECTORY;
             else
                 location = obj->getLocation();
         } catch (const Exception& e) {
@@ -617,7 +617,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
         log_error("Container with ID %d has no location information\n", containerID);
         return;
         //        continue;
-        // throw _Exception(_("Container has no location information!\n"));
+        // throw _Exception("Container has no location information!\n");
     }
 
     DIR* dir = opendir(location.c_str());
@@ -673,7 +673,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
         }
 
         if (S_ISREG(statbuf.st_mode)) {
-            int objectID = storage->findObjectIDByPath(String(path));
+            int objectID = storage->findObjectIDByPath(std::string(path));
             if (objectID > 0) {
                 if (list != nullptr)
                     list->erase(objectID);
@@ -691,7 +691,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
                 } else if (scanLevel == ScanLevel::Basic)
                     continue;
                 else
-                    throw _Exception(_("Unsupported scan level!"));
+                    throw _Exception("Unsupported scan level!");
 
             } else {
                 // add file, not recursive, not async
@@ -747,11 +747,11 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
 }
 
 /* scans the given directory and adds everything recursively */
-void ContentManager::addRecursive(String path, bool hidden, Ref<GenericTask> task)
+void ContentManager::addRecursive(std::string path, bool hidden, Ref<GenericTask> task)
 {
     if (hidden == false) {
         log_debug("Checking path %s\n", path.c_str());
-        if (path.charAt(0) == '.')
+        if (path.at(0) == '.')
             return;
     }
 
@@ -761,7 +761,7 @@ void ContentManager::addRecursive(String path, bool hidden, Ref<GenericTask> tas
     Ref<Storage> storage = Storage::getInstance();
     DIR* dir = opendir(path.c_str());
     if (!dir) {
-        throw _Exception(_("could not list directory ") + path + " : " + strerror(errno));
+        throw _Exception("could not list directory " + path + " : " + strerror(errno));
     }
     int parentID = storage->findObjectIDByPath(path + DIR_SEPARATOR);
     struct dirent* dent;
@@ -780,20 +780,20 @@ void ContentManager::addRecursive(String path, bool hidden, Ref<GenericTask> tas
             } else if (hidden == false)
                 continue;
         }
-        String newPath = path + DIR_SEPARATOR + name;
+        std::string newPath = path + DIR_SEPARATOR + name;
 
         if (ConfigManager::getInstance()->getConfigFilename() == newPath)
             continue;
 
         // For the Web UI
         if (task != nullptr) {
-            task->setDescription(_("Importing: ") + newPath);
+            task->setDescription("Importing: " + newPath);
         }
 
         try {
             Ref<CdsObject> obj = nullptr;
             if (parentID > 0)
-                obj = storage->findObjectByPath(String(newPath));
+                obj = storage->findObjectByPath(std::string(newPath));
             if (obj == nullptr) // create object
             {
                 obj = createObjectFromFile(newPath);
@@ -814,14 +814,14 @@ void ContentManager::addRecursive(String path, bool hidden, Ref<GenericTask> tas
                 if (IS_CDS_ITEM(obj->getObjectType())) {
                     if (layout != nullptr) {
                         try {
-                            String rootpath = nullptr;
+                            std::string rootpath = "";
                             if (task != nullptr)
                                 rootpath = RefCast(task, CMAddFileTask)->getRootPath();
                             layout->processCdsObject(obj, rootpath);
 #ifdef HAVE_JS
                             Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-                            String mimetype = RefCast(obj, CdsItem)->getMimeType();
-                            String content_type = mappings->get(mimetype);
+                            std::string mimetype = RefCast(obj, CdsItem)->getMimeType();
+                            std::string content_type = mappings->get(mimetype);
 
                             if ((playlist_parser_script != nullptr) && (content_type == CONTENT_TYPE_PLAYLIST))
                                 playlist_parser_script->processPlaylistObject(obj, task);
@@ -849,13 +849,13 @@ void ContentManager::addRecursive(String path, bool hidden, Ref<GenericTask> tas
 
 void ContentManager::updateObject(int objectID, Ref<Dictionary> parameters)
 {
-    String title = parameters->get(_("title"));
-    String upnp_class = parameters->get(_("class"));
-    String autoscan = parameters->get(_("autoscan"));
-    String mimetype = parameters->get(_("mime-type"));
-    String description = parameters->get(_("description"));
-    String location = parameters->get(_("location"));
-    String protocol = parameters->get(_("protocol"));
+    std::string title = parameters->get("title");
+    std::string upnp_class = parameters->get("class");
+    std::string autoscan = parameters->get("autoscan");
+    std::string mimetype = parameters->get("mime-type");
+    std::string description = parameters->get("description");
+    std::string location = parameters->get("location");
+    std::string protocol = parameters->get("protocol");
 
     Ref<Storage> storage = Storage::getInstance();
     Ref<UpdateManager> um = UpdateManager::getInstance();
@@ -882,16 +882,16 @@ void ContentManager::updateObject(int objectID, Ref<Dictionary> parameters)
         if (string_ok(mimetype) && (string_ok(protocol))) {
             cloned_item->setMimeType(mimetype);
             Ref<CdsResource> resource = cloned_item->getResource(0);
-            resource->addAttribute(_("protocolInfo"), renderProtocolInfo(mimetype, protocol));
+            resource->addAttribute("protocolInfo", renderProtocolInfo(mimetype, protocol));
         } else if (!string_ok(mimetype) && (string_ok(protocol))) {
             Ref<CdsResource> resource = cloned_item->getResource(0);
-            resource->addAttribute(_("protocolInfo"), renderProtocolInfo(cloned_item->getMimeType(), protocol));
+            resource->addAttribute("protocolInfo", renderProtocolInfo(cloned_item->getMimeType(), protocol));
         } else if (string_ok(mimetype) && (!string_ok(protocol))) {
             cloned_item->setMimeType(mimetype);
             Ref<CdsResource> resource = cloned_item->getResource(0);
-            Ref<Array<StringBase>> parts = split_string(resource->getAttribute(_("protocolInfo")), ':');
-            protocol = parts->get(0);
-            resource->addAttribute(_("protocolInfo"), renderProtocolInfo(mimetype, protocol));
+            std::vector<std::string> parts = split_string(resource->getAttribute("protocolInfo"), ':');
+            protocol = parts[0];
+            resource->addAttribute("protocolInfo", renderProtocolInfo(mimetype, protocol));
         }
 
         if (string_ok(description)) {
@@ -912,8 +912,8 @@ void ContentManager::updateObject(int objectID, Ref<Dictionary> parameters)
         }
     }
     if (IS_CDS_ACTIVE_ITEM(objectType)) {
-        String action = parameters->get(_("action"));
-        String state = parameters->get(_("state"));
+        std::string action = parameters->get("action");
+        std::string state = parameters->get("state");
 
         Ref<CdsActiveItem> item = RefCast(obj, CdsActiveItem);
         Ref<CdsObject> clone = CdsObject::createObject(objectType);
@@ -933,7 +933,7 @@ void ContentManager::updateObject(int objectID, Ref<Dictionary> parameters)
             cloned_item->removeMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION));
         }
 
-        if (state != nullptr)
+        if (!state.empty())
             cloned_item->setState(state);
 
         if (string_ok(mimetype))
@@ -981,7 +981,7 @@ void ContentManager::addObject(zmm::Ref<CdsObject> obj)
     int containerChanged = INVALID_OBJECT_ID;
     log_debug("Adding: parent ID is %d\n", obj->getParentID());
     if (!IS_CDS_ITEM_EXTERNAL_URL(obj->getObjectType())) {
-        obj->setLocation(obj->getLocation().reduce(DIR_SEPARATOR));
+        obj->setLocation(reduce_string(obj->getLocation(), DIR_SEPARATOR));
     }
     storage->addObject(obj, &containerChanged);
     log_debug("After adding: parent ID is %d\n", obj->getParentID());
@@ -1005,20 +1005,20 @@ void ContentManager::addObject(zmm::Ref<CdsObject> obj)
         ContentManager::getInstance()->getAccounting()->totalFiles++;
 }
 
-void ContentManager::addContainer(int parentID, String title, String upnpClass)
+void ContentManager::addContainer(int parentID, std::string title, std::string upnpClass)
 {
     Ref<Storage> storage = Storage::getInstance();
     addContainerChain(storage->buildContainerPath(parentID, escape(title, VIRTUAL_CONTAINER_ESCAPE, VIRTUAL_CONTAINER_SEPARATOR)), upnpClass);
 }
 
-int ContentManager::addContainerChain(String chain, String lastClass, int lastRefID, Ref<Dictionary> lastMetadata)
+int ContentManager::addContainerChain(std::string chain, std::string lastClass, int lastRefID, Ref<Dictionary> lastMetadata)
 {
     Ref<Storage> storage = Storage::getInstance();
     int updateID = INVALID_OBJECT_ID;
     int containerID;
 
     if (!string_ok(chain))
-        throw _Exception(_("addContainerChain() called with empty chain parameter"));
+        throw _Exception("addContainerChain() called with empty chain parameter");
 
     log_debug("received chain: %s (%s) [%s]\n", chain.c_str(), lastClass.c_str(), lastMetadata != nullptr ? lastMetadata->encodeSimple().c_str() : "null");
     storage->addContainerChain(chain, lastClass, lastRefID, &containerID, &updateID, lastMetadata);
@@ -1058,7 +1058,7 @@ Ref<CdsObject> ContentManager::convertObject(Ref<CdsObject> oldObj, int newType)
     if (oldType == newType)
         return oldObj;
     if (!IS_CDS_ITEM(oldType) || !IS_CDS_ITEM(newType)) {
-        throw _Exception(_("Cannot convert object type ") + oldType + " to " + newType);
+        throw _Exception("Cannot convert object type " + std::to_string(oldType) + " to " + std::to_string(newType));
     }
 
     Ref<CdsObject> newObj = CdsObject::createObject(newType);
@@ -1069,29 +1069,29 @@ Ref<CdsObject> ContentManager::convertObject(Ref<CdsObject> oldObj, int newType)
 }
 
 // returns nullptr if file ignored due to configuration
-Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic, bool allow_fifo)
+Ref<CdsObject> ContentManager::createObjectFromFile(std::string path, bool magic, bool allow_fifo)
 {
-    String filename = get_filename(path);
+    std::string filename = get_filename(path);
 
     struct stat statbuf;
     int ret;
 
     ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
-        throw _Exception(_("Failed to stat ") + path + _(" , ") + mt_strerror(errno));
+        throw _Exception("Failed to stat " + path + " , " + mt_strerror(errno));
     }
 
     Ref<CdsObject> obj;
     if (S_ISREG(statbuf.st_mode) || (allow_fifo && S_ISFIFO(statbuf.st_mode))) { // item
         /* retrieve information about item and decide if it should be included */
-        String mimetype;
-        String upnp_class;
-        String extension;
+        std::string mimetype;
+        std::string upnp_class;
+        std::string extension;
 
         // get file extension
-        int dotIndex = filename.rindex('.');
-        if (dotIndex > 0)
-            extension = filename.substring(dotIndex + 1);
+        size_t dotIndex = filename.rfind('.');
+        if (dotIndex != std::string::npos)
+            extension = filename.substr(dotIndex + 1);
 
         if (magic) {
             mimetype = extension2mimetype(extension);
@@ -1105,17 +1105,17 @@ Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic, boo
             }
         }
 
-        if (mimetype != nullptr) {
+        if (!mimetype.empty()) {
             upnp_class = mimetype2upnpclass(mimetype);
         }
 
         if (!string_ok(upnp_class)) {
-            String content_type = mimetype_contenttype_map->get(mimetype);
+            std::string content_type = mimetype_contenttype_map->get(mimetype);
             if (content_type == CONTENT_TYPE_OGG) {
                 if (isTheora(path))
-                    upnp_class = _(UPNP_DEFAULT_CLASS_VIDEO_ITEM);
+                    upnp_class = UPNP_DEFAULT_CLASS_VIDEO_ITEM;
                 else
-                    upnp_class = _(UPNP_DEFAULT_CLASS_MUSIC_TRACK);
+                    upnp_class = UPNP_DEFAULT_CLASS_MUSIC_TRACK;
             }
         }
 
@@ -1125,10 +1125,10 @@ Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic, boo
         item->setMTime(statbuf.st_mtime);
         item->setSizeOnDisk(statbuf.st_size);
 
-        if (mimetype != nullptr) {
+        if (!mimetype.empty()) {
             item->setMimeType(mimetype);
         }
-        if (upnp_class != nullptr) {
+        if (!upnp_class.empty()) {
             item->setClass(upnp_class);
         }
 
@@ -1152,36 +1152,36 @@ Ref<CdsObject> ContentManager::createObjectFromFile(String path, bool magic, boo
         */
     } else {
         // only regular files and directories are supported
-        throw _Exception(_("ContentManager: skipping file ") + path.c_str());
+        throw _Exception("ContentManager: skipping file " + path);
     }
     //    Ref<StringConverter> f2i = StringConverter::f2i();
     //    obj->setTitle(f2i->convert(filename));
     return obj;
 }
 
-String ContentManager::extension2mimetype(String extension)
+std::string ContentManager::extension2mimetype(std::string extension)
 {
     if (extension_mimetype_map == nullptr)
-        return nullptr;
+        return "";
 
     if (!extension_map_case_sensitive)
-        extension = extension.toLower();
+        extension = tolower_string(extension);
 
     return extension_mimetype_map->get(extension);
 }
 
-String ContentManager::mimetype2upnpclass(String mimeType)
+std::string ContentManager::mimetype2upnpclass(std::string mimeType)
 {
     if (mimetype_upnpclass_map == nullptr)
         return nullptr;
-    String upnpClass = mimetype_upnpclass_map->get(mimeType);
-    if (upnpClass != nullptr)
+    std::string upnpClass = mimetype_upnpclass_map->get(mimeType);
+    if (!upnpClass.empty())
         return upnpClass;
     // try to match foo
-    Ref<Array<StringBase>> parts = split_string(mimeType, '/');
-    if (parts->size() != 2)
-        return nullptr;
-    return mimetype_upnpclass_map->get((String)parts->get(0) + "/*");
+    std::vector<std::string> parts = split_string(mimeType, '/');
+    if (parts.size() != 2)
+        return "";
+    return mimetype_upnpclass_map->get((std::string)parts[0] + "/*");
 }
 
 void ContentManager::initLayout()
@@ -1191,7 +1191,7 @@ void ContentManager::initLayout()
         AutoLock lock(mutex);
         if (layout == nullptr)
             try {
-                String layout_type = ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
+                std::string layout_type = ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
                 if (layout_type == "js") {
 #ifdef HAVE_JS
                     layout = Ref<Layout>((Layout*)new JSLayout());
@@ -1294,32 +1294,32 @@ void ContentManager::loadAccounting(bool async)
 {
     if (async) {
         Ref<GenericTask> task(new CMLoadAccountingTask());
-        task->setDescription(_("Initializing statistics"));
+        task->setDescription("Initializing statistics");
         addTask(task);
     } else {
         _loadAccounting();
     }
 }
 
-int ContentManager::addFile(zmm::String path, bool recursive, bool async, bool hidden, bool lowPriority, bool cancellable)
+int ContentManager::addFile(std::string path, bool recursive, bool async, bool hidden, bool lowPriority, bool cancellable)
 {
-    String rootpath;
+    std::string rootpath;
     if (check_path(path, true))
         rootpath = path;
     return addFileInternal(path, rootpath, recursive, async, hidden, lowPriority, 0, cancellable);
 }
 
-int ContentManager::addFile(zmm::String path, zmm::String rootpath, bool recursive, bool async, bool hidden, bool lowPriority, bool cancellable)
+int ContentManager::addFile(std::string path, std::string rootpath, bool recursive, bool async, bool hidden, bool lowPriority, bool cancellable)
 {
     return addFileInternal(path, rootpath, recursive, async, hidden, lowPriority, 0, cancellable);
 }
 
 int ContentManager::addFileInternal(
-    String path, String rootpath, bool recursive, bool async, bool hidden, bool lowPriority, unsigned int parentTaskID, bool cancellable)
+    std::string path, std::string rootpath, bool recursive, bool async, bool hidden, bool lowPriority, unsigned int parentTaskID, bool cancellable)
 {
     if (async) {
         Ref<GenericTask> task(new CMAddFileTask(path, rootpath, recursive, hidden, cancellable));
-        task->setDescription(_("Importing: ") + path);
+        task->setDescription("Importing: " + path);
         task->setParentID(parentTaskID);
         addTask(task, lowPriority);
         return INVALID_OBJECT_ID;
@@ -1334,7 +1334,7 @@ void ContentManager::fetchOnlineContent(service_type_t service, bool lowPriority
     Ref<OnlineService> os = online_services->getService(service);
     if (os == nullptr) {
         log_debug("No surch service! %d\n", service);
-        throw _Exception(_("Service not found!"));
+        throw _Exception("Service not found!");
     }
     fetchOnlineContentInternal(os, lowPriority, cancellable, 0, unscheduled_refresh);
 }
@@ -1346,7 +1346,7 @@ void ContentManager::fetchOnlineContentInternal(
         initLayout();
 
     Ref<GenericTask> task(new CMFetchOnlineContentTask(service, layout, cancellable, unscheduled_refresh));
-    task->setDescription(_("Updating content from ") + service->getServiceName());
+    task->setDescription("Updating content from " + service->getServiceName());
     task->setParentID(parentTaskID);
     service->incTaskCount();
     addTask(task, lowPriority);
@@ -1363,18 +1363,18 @@ void ContentManager::cleanupOnlineServiceObjects(zmm::Ref<OnlineService> service
         struct timespec current, last;
         getTimespecNow(&current);
         last.tv_nsec = 0;
-        String temp;
+        std::string temp;
 
         for (int object_id : *ids) {
             Ref<CdsObject> obj = storage->loadObject(object_id);
             if (obj == nullptr)
                 continue;
 
-            temp = obj->getAuxData(_(ONLINE_SERVICE_LAST_UPDATE));
+            temp = obj->getAuxData(ONLINE_SERVICE_LAST_UPDATE);
             if (!string_ok(temp))
                 continue;
 
-            last.tv_sec = temp.toLong();
+            last.tv_sec = std::stol(temp);
 
             if ((service->getItemPurgeInterval() > 0) && ((current.tv_sec - last.tv_sec) > service->getItemPurgeInterval())) {
                 log_debug("Purging old online service object %s\n", obj->getTitle().c_str());
@@ -1386,11 +1386,11 @@ void ContentManager::cleanupOnlineServiceObjects(zmm::Ref<OnlineService> service
 
 #endif
 
-void ContentManager::invalidateAddTask(Ref<GenericTask> t, String path)
+void ContentManager::invalidateAddTask(Ref<GenericTask> t, std::string path)
 {
     if (t->getType() == AddFile) {
         log_debug("comparing, task path: %s, remove path: %s\n", RefCast(t, CMAddFileTask)->getPath().c_str(), path.c_str());
-        if ((RefCast(t, CMAddFileTask)->getPath().startsWith(path))) {
+        if (startswith(RefCast(t, CMAddFileTask)->getPath(), path)) {
             log_debug("Invalidating task with path %s\n", RefCast(t, CMAddFileTask)->getPath().c_str());
             t->invalidate();
         }
@@ -1448,16 +1448,16 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
         */
         Ref<GenericTask> task(new CMRemoveObjectTask(objectID, all));
         Ref<Storage> storage = Storage::getInstance();
-        String path;
+        std::string path;
         Ref<CdsObject> obj;
 
         try {
             obj = storage->loadObject(objectID);
             path = obj->getLocation();
 
-            String vpath = obj->getVirtualPath();
+            std::string vpath = obj->getVirtualPath();
             if (string_ok(vpath))
-                task->setDescription(_("Removing: ") + obj->getVirtualPath());
+                task->setDescription("Removing: " + obj->getVirtualPath());
         } catch (const Exception& e) {
             log_debug("trying to remove an object ID which is no longer in the database! %d\n", objectID);
             return;
@@ -1509,7 +1509,7 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
     }
 }
 
-void ContentManager::rescanDirectory(int objectID, int scanID, ScanMode scanMode, String descPath, bool cancellable)
+void ContentManager::rescanDirectory(int objectID, int scanID, ScanMode scanMode, std::string descPath, bool cancellable)
 {
     // building container path for the description
     Ref<GenericTask> task(new CMRescanDirectoryTask(objectID, scanID, scanMode, cancellable));
@@ -1518,16 +1518,16 @@ void ContentManager::rescanDirectory(int objectID, int scanID, ScanMode scanMode
         return;
 
     dir->incTaskCount();
-    String level;
+    std::string level;
     if (dir->getScanLevel() == ScanLevel::Basic)
-        level = _("basic");
+        level = "basic";
     else
-        level = _("full");
+        level = "full";
 
     if (!string_ok(descPath))
         descPath = dir->getLocation();
 
-    task->setDescription(_("Performing ") + level + " scan: " + descPath);
+    task->setDescription("Performing " + level + " scan: " + descPath);
     addTask(task, true); // adding with low priority
 }
 
@@ -1572,7 +1572,7 @@ Ref<Array<AutoscanDirectory>> ContentManager::getAutoscanDirectories()
     return all;
 }
 
-Ref<AutoscanDirectory> ContentManager::getAutoscanDirectory(String location)
+Ref<AutoscanDirectory> ContentManager::getAutoscanDirectory(std::string location)
 {
     // \todo change this when more scanmodes become available
     Ref<AutoscanDirectory> dir = autoscan_timed->get(location);
@@ -1589,7 +1589,7 @@ void ContentManager::removeAutoscanDirectory(int scanID, ScanMode scanMode)
         Ref<Storage> storage = Storage::getInstance();
         Ref<AutoscanDirectory> adir = autoscan_timed->get(scanID);
         if (adir == nullptr)
-            throw _Exception(_("can not remove autoscan directory - was not an autoscan"));
+            throw _Exception("can not remove autoscan directory - was not an autoscan");
 
         autoscan_timed->remove(scanID);
         storage->removeAutoscanDirectory(adir->getStorageID());
@@ -1604,7 +1604,7 @@ void ContentManager::removeAutoscanDirectory(int scanID, ScanMode scanMode)
             Ref<Storage> storage = Storage::getInstance();
             Ref<AutoscanDirectory> adir = autoscan_inotify->get(scanID);
             if (adir == nullptr)
-                throw _Exception(_("can not remove autoscan directory - was not an autoscan"));
+                throw _Exception("can not remove autoscan directory - was not an autoscan");
             autoscan_inotify->remove(scanID);
             storage->removeAutoscanDirectory(adir->getStorageID());
             SessionManager::getInstance()->containerChangedUI(adir->getObjectID());
@@ -1619,7 +1619,7 @@ void ContentManager::removeAutoscanDirectory(int objectID)
     Ref<Storage> storage = Storage::getInstance();
     Ref<AutoscanDirectory> adir = storage->getAutoscanDirectory(objectID);
     if (adir == nullptr)
-        throw _Exception(_("can not remove autoscan directory - was not an autoscan"));
+        throw _Exception("can not remove autoscan directory - was not an autoscan");
 
     if (adir->getScanMode() == ScanMode::Timed) {
         autoscan_timed->remove(adir->getLocation());
@@ -1639,7 +1639,7 @@ void ContentManager::removeAutoscanDirectory(int objectID)
 #endif
 }
 
-void ContentManager::removeAutoscanDirectory(String location)
+void ContentManager::removeAutoscanDirectory(std::string location)
 {
     /// \todo change this when more scanmodes become avaiable
     Ref<AutoscanDirectory> adir = autoscan_timed->get(location);
@@ -1650,7 +1650,7 @@ void ContentManager::removeAutoscanDirectory(String location)
     }
 #endif
     if (adir == nullptr)
-        throw _Exception(_("can not remove autoscan directory - was not an autoscan"));
+        throw _Exception("can not remove autoscan directory - was not an autoscan");
 
     removeAutoscanDirectory(adir->getObjectID());
 }
@@ -1698,17 +1698,17 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
     // adding a new autoscan directory
     if (original == nullptr) {
         if (dir->getObjectID() == CDS_ID_FS_ROOT)
-            dir->setLocation(_(FS_ROOT_DIRECTORY));
+            dir->setLocation(FS_ROOT_DIRECTORY);
         else {
             log_debug("objectID: %d\n", dir->getObjectID());
             Ref<CdsObject> obj = storage->loadObject(dir->getObjectID());
             if (obj == nullptr || !IS_CDS_CONTAINER(obj->getObjectType()) || obj->isVirtual())
-                throw _Exception(_("tried to remove an illegal object (id) from the list of the autoscan directories"));
+                throw _Exception("tried to remove an illegal object (id) from the list of the autoscan directories");
 
             log_debug("location: %s\n", obj->getLocation().c_str());
 
             if (!string_ok(obj->getLocation()))
-                throw _Exception(_("tried to add an illegal object as autoscan - no location information available!"));
+                throw _Exception("tried to add an illegal object as autoscan - no location information available!");
 
             dir->setLocation(obj->getLocation());
         }
@@ -1788,13 +1788,13 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
 }
 
 #ifdef HAVE_MAGIC
-zmm::String ContentManager::getMimeTypeFromBuffer(const void* buffer, size_t length)
+std::string ContentManager::getMimeTypeFromBuffer(const void* buffer, size_t length)
 {
     return getMIMETypeFromBuffer(buffer, length);
 }
 #endif
 
-CMAddFileTask::CMAddFileTask(String path, String rootpath, bool recursive, bool hidden, bool cancellable)
+CMAddFileTask::CMAddFileTask(std::string path, std::string rootpath, bool recursive, bool hidden, bool cancellable)
     : GenericTask(ContentManagerTask)
 {
     this->path = path;
@@ -1805,9 +1805,9 @@ CMAddFileTask::CMAddFileTask(String path, String rootpath, bool recursive, bool 
     this->cancellable = cancellable;
 }
 
-String CMAddFileTask::getPath() { return path; }
+std::string CMAddFileTask::getPath() { return path; }
 
-String CMAddFileTask::getRootPath() { return rootpath; }
+std::string CMAddFileTask::getRootPath() { return rootpath; }
 void CMAddFileTask::run()
 {
     log_debug("running add file task with path %s recursive: %d\n", path.c_str(), recursive);

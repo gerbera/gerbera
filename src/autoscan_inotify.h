@@ -93,21 +93,20 @@ private:
 
     class WatchAutoscan : public Watch {
     public:
-        WatchAutoscan(bool startPoint, zmm::Ref<AutoscanDirectory> adir, zmm::String normalizedAutoscanPath)
+        WatchAutoscan(bool startPoint, zmm::Ref<AutoscanDirectory> adir, std::string normalizedAutoscanPath)
             : Watch(WatchType::Autoscan)
         {
             setAutoscanDirectory(adir);
             setNormalizedAutoscanPath(normalizedAutoscanPath);
-            setNonexistingPathArray(nullptr);
             this->startPoint = startPoint;
         }
         zmm::Ref<AutoscanDirectory> getAutoscanDirectory() { return adir; }
         void setAutoscanDirectory(zmm::Ref<AutoscanDirectory> adir) { this->adir = adir; }
-        zmm::String getNormalizedAutoscanPath() { return normalizedAutoscanPath; }
-        void setNormalizedAutoscanPath(zmm::String normalizedAutoscanPath) { this->normalizedAutoscanPath = normalizedAutoscanPath; }
+        std::string getNormalizedAutoscanPath() { return normalizedAutoscanPath; }
+        void setNormalizedAutoscanPath(std::string normalizedAutoscanPath) { this->normalizedAutoscanPath = normalizedAutoscanPath; }
         bool isStartPoint() { return startPoint; }
-        zmm::Ref<zmm::Array<zmm::StringBase>> getNonexistingPathArray() { return nonexistingPathArray; }
-        void setNonexistingPathArray(zmm::Ref<zmm::Array<zmm::StringBase>> nonexistingPathArray) { this->nonexistingPathArray = nonexistingPathArray; }
+        std::vector<std::string> getNonexistingPathArray() { return nonexistingPathArray; }
+        void setNonexistingPathArray(std::vector<std::string> nonexistingPathArray) { this->nonexistingPathArray = nonexistingPathArray; }
         void addDescendant(int wd)
         {
             descendants.push_back(wd);
@@ -118,8 +117,8 @@ private:
         zmm::Ref<AutoscanDirectory> adir;
         bool startPoint;
         std::vector<int> descendants;
-        zmm::String normalizedAutoscanPath;
-        zmm::Ref<zmm::Array<zmm::StringBase>> nonexistingPathArray;
+        std::string normalizedAutoscanPath;
+        std::vector<std::string> nonexistingPathArray;
     };
 
     class WatchMove : public Watch {
@@ -137,14 +136,14 @@ private:
 
     class Wd : public zmm::Object {
     public:
-        Wd(zmm::String path, int wd, int parentWd)
+        Wd(std::string path, int wd, int parentWd)
         {
             wdWatches = zmm::Ref<zmm::Array<Watch>>(new zmm::Array<Watch>(1));
             this->path = path;
             this->wd = wd;
             this->parentWd = parentWd;
         }
-        zmm::String getPath() { return path; }
+        std::string getPath() { return path; }
         int getWd() { return wd; }
         int getParentWd() { return parentWd; }
         void setParentWd(int parentWd) { this->parentWd = parentWd; }
@@ -152,34 +151,34 @@ private:
 
     private:
         zmm::Ref<zmm::Array<Watch>> wdWatches;
-        zmm::String path;
+        std::string path;
         int parentWd;
         int wd;
     };
 
     std::shared_ptr<std::unordered_map<int, zmm::Ref<Wd>>> watches;
 
-    zmm::String normalizePathNoEx(zmm::String path);
+    std::string normalizePathNoEx(std::string path);
 
-    void monitorUnmonitorRecursive(zmm::String startPath, bool unmonitor, zmm::Ref<AutoscanDirectory> adir, zmm::String normalizedAutoscanPath, bool startPoint);
-    int monitorDirectory(zmm::String path, zmm::Ref<AutoscanDirectory> adir, zmm::String normalizedAutoscanPath, bool startPoint, zmm::Ref<zmm::Array<zmm::StringBase>> pathArray = nullptr);
-    void unmonitorDirectory(zmm::String path, zmm::Ref<AutoscanDirectory> adir);
+    void monitorUnmonitorRecursive(std::string startPath, bool unmonitor, zmm::Ref<AutoscanDirectory> adir, std::string normalizedAutoscanPath, bool startPoint);
+    int monitorDirectory(std::string path, zmm::Ref<AutoscanDirectory> adir, std::string normalizedAutoscanPath, bool startPoint, std::vector<std::string>* pathArray = nullptr);
+    void unmonitorDirectory(std::string path, zmm::Ref<AutoscanDirectory> adir);
 
     zmm::Ref<WatchAutoscan> getAppropriateAutoscan(zmm::Ref<Wd> wdObj, zmm::Ref<AutoscanDirectory> adir);
-    zmm::Ref<WatchAutoscan> getAppropriateAutoscan(zmm::Ref<Wd> wdObj, zmm::String path);
+    zmm::Ref<WatchAutoscan> getAppropriateAutoscan(zmm::Ref<Wd> wdObj, std::string path);
     zmm::Ref<WatchAutoscan> getStartPoint(zmm::Ref<Wd> wdObj);
 
     bool removeFromWdObj(zmm::Ref<Wd> wdObj, zmm::Ref<Watch> toRemove);
     bool removeFromWdObj(zmm::Ref<Wd> wdObj, zmm::Ref<WatchAutoscan> toRemove);
     bool removeFromWdObj(zmm::Ref<Wd> wdObj, zmm::Ref<WatchMove> toRemove);
 
-    void monitorNonexisting(zmm::String path, zmm::Ref<AutoscanDirectory> adir, zmm::String normalizedAutoscanPath);
-    void recheckNonexistingMonitor(int curWd, zmm::Ref<zmm::Array<zmm::StringBase>> nonexistingPathArray, zmm::Ref<AutoscanDirectory> adir, zmm::String normalizedAutoscanPath);
+    void monitorNonexisting(std::string path, zmm::Ref<AutoscanDirectory> adir, std::string normalizedAutoscanPath);
+    void recheckNonexistingMonitor(int curWd, std::vector<std::string> nonexistingPathArray, zmm::Ref<AutoscanDirectory> adir, std::string normalizedAutoscanPath);
     void recheckNonexistingMonitors(int wd, zmm::Ref<Wd> wdObj);
-    void removeNonexistingMonitor(int wd, zmm::Ref<Wd> wdObj, zmm::Ref<zmm::Array<zmm::StringBase>> pathAr);
+    void removeNonexistingMonitor(int wd, zmm::Ref<Wd> wdObj, std::vector<std::string> pathAr);
 
-    int watchPathForMoves(zmm::String path, int wd);
-    int addMoveWatch(zmm::String path, int removeWd, int parentWd);
+    int watchPathForMoves(std::string path, int wd);
+    int addMoveWatch(std::string path, int removeWd, int parentWd);
     void checkMoveWatches(int wd, zmm::Ref<Wd> wdObj);
     void removeWatchMoves(int wd);
 

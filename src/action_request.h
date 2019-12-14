@@ -55,17 +55,17 @@ protected:
     /// \brief Name of the action.
     ////request///
     /// Returned by getActionName()
-    zmm::String actionName;
+    std::string actionName;
 
     /// \brief UDN of the recipient device (it should be our UDN)
     ///
     /// Returned by getUDN()
-    zmm::String UDN;
+    std::string UDN;
 
     /// \brief ID of the service.
     ///
     /// Returned by getServiceID()
-    zmm::String serviceID;
+    std::string serviceID;
 
     /// \brief XML holding the request that comes to us.
     ///
@@ -83,13 +83,13 @@ public:
     ActionRequest(UpnpActionRequest* upnp_request);
 
     /// \brief Returns the name of the action.
-    zmm::String getActionName();
+    std::string getActionName();
 
     /// \brief Returns the UDN of the recipient device (should be ours)
-    zmm::String getUDN();
+    std::string getUDN();
 
     /// \brief Returns the ID of the service (the action is for this service id)
-    zmm::String getServiceID();
+    std::string getServiceID();
 
     /// \brief Returns the XML representation of the request.
     zmm::Ref<mxml::Element> getRequest();

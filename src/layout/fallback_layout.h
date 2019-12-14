@@ -42,15 +42,15 @@ class FallbackLayout : public Layout
 {
 public:
     FallbackLayout();
-    virtual void processCdsObject(zmm::Ref<CdsObject> obj, zmm::String rootpath) override;
+    virtual void processCdsObject(zmm::Ref<CdsObject> obj, std::string rootpath) override;
 #ifdef ENABLE_PROFILING
     virtual ~FallbackLayout();
 #endif
 protected:
     void add(zmm::Ref<CdsObject> obj, int parentID, bool use_ref = true);
-    zmm::String esc(zmm::String str);
-    void addVideo(zmm::Ref<CdsObject> obj, zmm::String rootpath);
-    void addImage(zmm::Ref<CdsObject> obj, zmm::String rootpath);
+    std::string esc(std::string str);
+    void addVideo(zmm::Ref<CdsObject> obj, std::string rootpath);
+    void addImage(zmm::Ref<CdsObject> obj, std::string rootpath);
     void addAudio(zmm::Ref<CdsObject> obj);
 #ifdef SOPCAST
     void addSopCast(zmm::Ref<CdsObject> obj);

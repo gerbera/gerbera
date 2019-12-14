@@ -81,10 +81,10 @@ void signal_handler(int signum);
 int main(int argc, char** argv, char** envp)
 {
 #ifdef SOLARIS
-    String ld_preload;
+    std::string ld_preload;
     char* preload = getenv("LD_PRELOAD");
     if (preload != NULL)
-        ld_preload = String(preload);
+        ld_preload = std::string(preload);
 
     if ((preload == NULL) || (ld_preload.find("0@0") == -1)) {
         printf("Gerbera: Solaris check failed!\n");
@@ -241,13 +241,13 @@ int main(int argc, char** argv, char** envp)
         }
 
         // FIXME: We will remove the singletons at some point.. and this compat
-        String configFile_ = _(config_file);
-        String home_ = _(home);
-        String confdir_ = _(confdir);
-        String prefix_ = _(prefix);
-        String magic_ = _(magic);
-        String ip_ = _(ip);
-        String interface_ = _(interface);
+        std::string configFile_ = *config_file;
+        std::string home_ = *home;
+        std::string confdir_ = *confdir;
+        std::string prefix_ = *prefix;
+        std::string magic_ = *magic;
+        std::string ip_ = *ip;
+        std::string interface_ = *interface;
 
         ConfigManager::setStaticArgs(configFile_, home_, confdir_, prefix_, magic_, debug, ip_, interface_, portnum.value_or(-1));
         try {
@@ -332,7 +332,7 @@ int main(int argc, char** argv, char** envp)
             for (const auto& f : files) {
                 try {
                     // add file/directory recursively and asynchronously
-                    ContentManager::getInstance()->addFile(String(f), true, true,
+                    ContentManager::getInstance()->addFile(std::string(f), true, true,
                         ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_HIDDEN_FILES));
                 } catch (const Exception& e) {
                     e.printStackTrace();
