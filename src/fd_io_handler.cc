@@ -42,7 +42,7 @@
 using namespace zmm;
 using namespace mxml;
 
-FDIOHandler::FDIOHandler(String filename)
+FDIOHandler::FDIOHandler(std::string filename)
     : IOHandler()
 {
     this->filename = filename;
@@ -92,7 +92,7 @@ void FDIOHandler::open(IN enum UpnpOpenFileMode mode)
     }
 
     if (fd == -1) {
-        throw _Exception(_("FDIOHandler::open: failed to open: ") + filename.c_str());
+        throw _Exception(_("FDIOHandler::open: failed to open: ") + filename);
     }
 }
 

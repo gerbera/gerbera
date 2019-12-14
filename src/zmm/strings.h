@@ -32,6 +32,10 @@
 #ifndef __ZMM_STRINGS_H__
 #define __ZMM_STRINGS_H__
 
+#include <string>
+#define _(str) str
+
+/*
 #include <optional>
 #include <string>
 
@@ -43,7 +47,7 @@
 #include "object.h"
 #include "ref.h"
 
-#define _(str) zmm::String::refer(str)
+#define _(str) std::string::refer(str)
 //#define _(str) str
 
 #define MAX_INT_STRING_LENGTH 12
@@ -229,9 +233,9 @@ protected:
 namespace std
 {
 template<>
-struct hash<zmm::String>
+struct hash<std::string>
 {
-    typedef zmm::String argument_type;
+    typedef std::string argument_type;
     typedef std::size_t value_type;
 
     value_type operator()(argument_type const& s) const
@@ -242,9 +246,10 @@ struct hash<zmm::String>
 }
 
 template <typename T>
-std::basic_ostream<T> &operator<<(std::basic_ostream<T> &oss, const zmm::String &s) {
+std::basic_ostream<T> &operator<<(std::basic_ostream<T> &oss, const std::string &s) {
     oss << (s.c_str() == nullptr ? "" : s.c_str());
     return oss;
 }
+*/
 
 #endif // __STRINGS_H__

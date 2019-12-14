@@ -41,16 +41,16 @@ protected:
 
 public:
     XPath(zmm::Ref<mxml::Element> context);
-    zmm::String getText(zmm::String xpath);
-    zmm::Ref<mxml::Element> getElement(zmm::String xpath);
+    std::string getText(std::string xpath);
+    zmm::Ref<mxml::Element> getElement(std::string xpath);
 
-    static zmm::String getPathPart(zmm::String xpath);
-    static zmm::String getAxisPart(zmm::String xpath);
-    static zmm::String getAxis(zmm::String axisPart);
-    static zmm::String getSpec(zmm::String axisPart);
+    static std::string getPathPart(std::string xpath);
+    static std::string getAxisPart(std::string xpath);
+    static std::string getAxis(std::string axisPart);
+    static std::string getSpec(std::string axisPart);
 
 protected:
-    zmm::Ref<mxml::Element> elementAtPath(zmm::String path);
+    zmm::Ref<mxml::Element> elementAtPath(std::string path);
 };
 
 #endif // __XPATH_H__

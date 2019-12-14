@@ -39,7 +39,7 @@ using namespace mxml;
 void web::tasks::process()
 {
     check_request();
-    String action = param(_("action"));
+    std::string action = param(_("action"));
     if (!string_ok(action))
         throw _Exception(_("web:tasks called with illegal action"));
     Ref<ContentManager> cm = ContentManager::getInstance();

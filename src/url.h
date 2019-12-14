@@ -52,21 +52,21 @@ public:
         ///
         /// \param size size of the media in bytes
         /// \param mimetype mime type of the media
-        Stat(zmm::String url, off_t size, zmm::String mimetype)
+        Stat(std::string url, off_t size, std::string mimetype)
         {
             this->url = url;
             this->size = size;
             this->mimetype = mimetype;
         }
 
-        zmm::String getURL() { return url; }
+        std::string getURL() { return url; }
         off_t getSize() { return size; }
-        zmm::String getMimeType() { return mimetype; }
+        std::string getMimeType() { return mimetype; }
 
     protected:
-        zmm::String url;
+        std::string url;
         off_t size;
-        zmm::String mimetype;
+        std::string mimetype;
     };
 
     /// \brief downloads either the content or the headers to the buffer.
@@ -80,14 +80,14 @@ public:
     /// \param only_header set true if you only want the header and not the
     /// body
     /// \param vebose enable curl verbose option
-    std::string download(zmm::String URL,
+    std::string download(std::string URL,
         long* HTTP_retcode,
         CURL* curl_handle = NULL,
         bool only_header = false,
         bool verbose = false,
         bool redirect = false);
 
-    zmm::Ref<Stat> getInfo(zmm::String URL, CURL* curl_handle = NULL);
+    zmm::Ref<Stat> getInfo(std::string URL, CURL* curl_handle = NULL);
 
 protected:
     /// \brief This function is installed as a callback for libcurl, when

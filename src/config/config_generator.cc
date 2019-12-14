@@ -45,11 +45,11 @@ ConfigGenerator::~ConfigGenerator() {}
 
 std::string ConfigGenerator::generate(std::string userHome, std::string configDir, std::string prefixDir, std::string magicFile) {
   Ref<Element> config(new Element(_("config")));
-  config->setAttribute(_("version"), String::from(CONFIG_XML_VERSION));
-  config->setAttribute(_("xmlns"), _(XML_XMLNS) + CONFIG_XML_VERSION);
+  config->setAttribute(_("version"), std::to_string(CONFIG_XML_VERSION));
+  config->setAttribute(_("xmlns"), _(XML_XMLNS) + std::to_string(CONFIG_XML_VERSION));
   config->setAttribute(_("xmlns:xsi"), _(XML_XMLNS_XSI));
   config->setAttribute(_("xsi:schemaLocation"),
-                       _(XML_XMLNS) + CONFIG_XML_VERSION + " " + XML_XMLNS + CONFIG_XML_VERSION + ".xsd");
+                       std::string(XML_XMLNS) + std::to_string(CONFIG_XML_VERSION) + " " + XML_XMLNS + std::to_string(CONFIG_XML_VERSION) + ".xsd");
 
   Ref<Comment> docinfo(new Comment(_("\n\
      See http://gerbera.io or read the docs for more\n\
@@ -74,16 +74,16 @@ Ref<Element> ConfigGenerator::generateServer(std::string userHome, std::string c
   server->appendElementChild(generateUdn());
 
   std::string homepath = userHome + DIR_SEPARATOR + configDir;
-  server->appendTextChild(_("home"), String::copy(homepath.c_str()));
+  server->appendTextChild(_("home"), homepath);
 
   std::string webRoot = prefixDir + DIR_SEPARATOR + DEFAULT_WEB_DIR;
-  server->appendTextChild(_("webroot"), String::copy(webRoot.c_str()));
+  server->appendTextChild(_("webroot"), webRoot);
 
   Ref<Comment> aliveinfo(new Comment(
       _("\n\
         How frequently (in seconds) to send ssdp:alive advertisements.\n\
         Minimum alive value accepted is: ")
-          + String::from(ALIVE_INTERVAL_MIN) + _("\n\n\
+          + std::to_string(ALIVE_INTERVAL_MIN) + _("\n\n\
         The advertisement will be sent every (A/2)-30 seconds,\n\
         and will have a cache-control max-age of A where A is\n\
         the value configured here. Ex: A value of 62 will result\n\
@@ -91,7 +91,7 @@ Ref<Element> ConfigGenerator::generateServer(std::string userHome, std::string c
     "),
       true));
   server->appendChild(RefCast(aliveinfo, Node));
-  server->appendTextChild(_("alive"), String::from(DEFAULT_ALIVE_INTERVAL));
+  server->appendTextChild(_("alive"), std::to_string(DEFAULT_ALIVE_INTERVAL));
 
   server->appendElementChild(generateStorage());
 
@@ -138,7 +138,7 @@ Ref<Element> ConfigGenerator::generateUi() {
   ui->setAttribute(_("show-tooltips"), _(DEFAULT_UI_SHOW_TOOLTIPS_VALUE));
   Ref<Element> accounts(new Element(_("accounts")));
   accounts->setAttribute(_("enabled"), _(DEFAULT_ACCOUNTS_EN_VALUE));
-  accounts->setAttribute(_("session-timeout"), String::from(DEFAULT_SESSION_TIMEOUT));
+  accounts->setAttribute(_("session-timeout"), std::to_string(DEFAULT_SESSION_TIMEOUT));
   Ref<Element> account(new Element(_("account")));
   account->setAttribute(_("user"), _(DEFAULT_ACCOUNT_USER));
   account->setAttribute(_("password"), _(DEFAULT_ACCOUNT_PASSWORD));
@@ -158,7 +158,7 @@ Ref<Element> ConfigGenerator::generateStorage() {
   //    <backup enabled="no" interval="6000"/>
   Ref<Element> backup(new Element(_("backup")));
   backup->setAttribute(_("enabled"), _(YES));
-  backup->setAttribute(_("interval"), String::from(DEFAULT_SQLITE_BACKUP_INTERVAL));
+  backup->setAttribute(_("interval"), std::to_string(DEFAULT_SQLITE_BACKUP_INTERVAL));
   sqlite3->appendElementChild(backup);
 #endif
   storage->appendElementChild(sqlite3);
@@ -187,11 +187,11 @@ Ref<Element> ConfigGenerator::generateExtendedRuntime() {
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
   Ref<Element> ffth(new Element(_("ffmpegthumbnailer")));
   ffth->setAttribute(_("enabled"), _(DEFAULT_FFMPEGTHUMBNAILER_ENABLED));
-  ffth->appendTextChild(_("thumbnail-size"), String::from(DEFAULT_FFMPEGTHUMBNAILER_THUMBSIZE));
-  ffth->appendTextChild(_("seek-percentage"), String::from(DEFAULT_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE));
+  ffth->appendTextChild(_("thumbnail-size"), std::to_string(DEFAULT_FFMPEGTHUMBNAILER_THUMBSIZE));
+  ffth->appendTextChild(_("seek-percentage"), std::to_string(DEFAULT_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE));
   ffth->appendTextChild(_("filmstrip-overlay"), _(DEFAULT_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY));
   ffth->appendTextChild(_("workaround-bugs"), _(DEFAULT_FFMPEGTHUMBNAILER_WORKAROUND_BUGS));
-  ffth->appendTextChild(_("image-quality"), String::from(DEFAULT_FFMPEGTHUMBNAILER_IMAGE_QUALITY));
+  ffth->appendTextChild(_("image-quality"), std::to_string(DEFAULT_FFMPEGTHUMBNAILER_IMAGE_QUALITY));
   extended->appendElementChild(ffth);
 #endif
 
@@ -236,13 +236,13 @@ Ref<Element> ConfigGenerator::generateImport(std::string prefixDir, std::string 
 #ifdef HAVE_JS
   std::string script;
   script = prefixDir + DIR_SEPARATOR + DEFAULT_JS_DIR + DIR_SEPARATOR + DEFAULT_IMPORT_SCRIPT;
-  layout->appendTextChild(_("import-script"), String::copy(script.c_str()));
+  layout->appendTextChild(_("import-script"), script);
 
   script = prefixDir + DIR_SEPARATOR + DEFAULT_JS_DIR + DIR_SEPARATOR + DEFAULT_COMMON_SCRIPT;
-  scripting->appendTextChild(_("common-script"), String::copy(script.c_str()));
+  scripting->appendTextChild(_("common-script"), script);
 
   script = prefixDir + DIR_SEPARATOR + DEFAULT_JS_DIR + DIR_SEPARATOR + DEFAULT_PLAYLISTS_SCRIPT;
-  scripting->appendTextChild(_("playlist-script"), String::copy(script.c_str()));
+  scripting->appendTextChild(_("playlist-script"), script);
 #endif
 
   scripting->appendElementChild(layout);
@@ -329,9 +329,9 @@ Ref<Element> ConfigGenerator::generateOnlineContent() {
 #ifdef ATRAILERS
   Ref<Element> at(new Element(_("AppleTrailers")));
   at->setAttribute(_("enabled"), _(DEFAULT_ATRAILERS_ENABLED));
-  at->setAttribute(_("refresh"), String::from(DEFAULT_ATRAILERS_REFRESH));
+  at->setAttribute(_("refresh"), std::to_string(DEFAULT_ATRAILERS_REFRESH));
   at->setAttribute(_("update-at-start"), _(DEFAULT_ATRAILERS_UPDATE_AT_START));
-  at->setAttribute(_("resolution"), String::from(DEFAULT_ATRAILERS_RESOLUTION));
+  at->setAttribute(_("resolution"), std::to_string(DEFAULT_ATRAILERS_RESOLUTION));
   onlinecontent->appendElementChild(at);
 #endif
   return onlinecontent;
@@ -379,9 +379,9 @@ Ref<Element> ConfigGenerator::generateTranscoding() {
   oggmp3->appendElementChild(oggmp3_agent);
 
   Ref<Element> oggmp3_buffer(new Element(_("buffer")));
-  oggmp3_buffer->setAttribute(_("size"), String::from(DEFAULT_AUDIO_BUFFER_SIZE));
-  oggmp3_buffer->setAttribute(_("chunk-size"), String::from(DEFAULT_AUDIO_CHUNK_SIZE));
-  oggmp3_buffer->setAttribute(_("fill-size"), String::from(DEFAULT_AUDIO_FILL_SIZE));
+  oggmp3_buffer->setAttribute(_("size"), std::to_string(DEFAULT_AUDIO_BUFFER_SIZE));
+  oggmp3_buffer->setAttribute(_("chunk-size"), std::to_string(DEFAULT_AUDIO_CHUNK_SIZE));
+  oggmp3_buffer->setAttribute(_("fill-size"), std::to_string(DEFAULT_AUDIO_FILL_SIZE));
   oggmp3->appendElementChild(oggmp3_buffer);
 
   profiles->appendElementChild(oggmp3);
@@ -402,9 +402,9 @@ Ref<Element> ConfigGenerator::generateTranscoding() {
   vlcmpeg->appendElementChild(vlcmpeg_agent);
 
   Ref<Element> vlcmpeg_buffer(new Element(_("buffer")));
-  vlcmpeg_buffer->setAttribute(_("size"), String::from(DEFAULT_VIDEO_BUFFER_SIZE));
-  vlcmpeg_buffer->setAttribute(_("chunk-size"), String::from(DEFAULT_VIDEO_CHUNK_SIZE));
-  vlcmpeg_buffer->setAttribute(_("fill-size"), String::from(DEFAULT_VIDEO_FILL_SIZE));
+  vlcmpeg_buffer->setAttribute(_("size"), std::to_string(DEFAULT_VIDEO_BUFFER_SIZE));
+  vlcmpeg_buffer->setAttribute(_("chunk-size"), std::to_string(DEFAULT_VIDEO_CHUNK_SIZE));
+  vlcmpeg_buffer->setAttribute(_("fill-size"), std::to_string(DEFAULT_VIDEO_FILL_SIZE));
   vlcmpeg->appendElementChild(vlcmpeg_buffer);
 
   profiles->appendElementChild(vlcmpeg);
@@ -429,7 +429,7 @@ Ref<Element> ConfigGenerator::generateUdn() {
 
   log_debug("UUID generated: %s\n", uuid_str);
   Ref<Element> udn(new Element(_("udn")));
-  udn->setText(_("uuid:") + uuid_str, mxml_string_type);
+  udn->setText(_("uuid:") + std::string(uuid_str), mxml_string_type);
 #ifdef BSD_NATIVE_UUID
   free(uuid_str);
 #endif
@@ -438,14 +438,14 @@ Ref<Element> ConfigGenerator::generateUdn() {
 
 Ref<Element> ConfigGenerator::map_from_to(std::string from, std::string to) {
   Ref<Element> map(new Element(_("map")));
-  map->setAttribute(_("from"), String::copy(from.c_str()));
-  map->setAttribute(_("to"), String::copy(to.c_str()));
+  map->setAttribute(_("from"), from);
+  map->setAttribute(_("to"), to);
   return map;
 }
 
 Ref<Element> ConfigGenerator::treat_as(std::string mimetype, std::string as) {
   Ref<Element> treat(new Element(_("treat")));
-  treat->setAttribute(_("mimetype"), String::copy(mimetype.c_str()));
-  treat->setAttribute(_("as"), String::copy(as.c_str()));
+  treat->setAttribute(_("mimetype"), mimetype);
+  treat->setAttribute(_("as"), as);
   return treat;
 }

@@ -45,16 +45,16 @@ OnlineServiceHelper::OnlineServiceHelper()
 {
 }
 
-String OnlineServiceHelper::resolveURL(Ref<CdsItemExternalURL> item)
+std::string OnlineServiceHelper::resolveURL(Ref<CdsItemExternalURL> item)
 {
     if (!item->getFlag(OBJECT_FLAG_ONLINE_SERVICE))
         throw _Exception(_("The given item does not belong to an online service"));
 
-    service_type_t service = (service_type_t)(item->getAuxData(_(ONLINE_SERVICE_AUX_ID)).toInt());
+    service_type_t service = (service_type_t)std::stoi(item->getAuxData(_(ONLINE_SERVICE_AUX_ID)));
     if (service > OS_Max)
         throw _Exception(_("Invalid service id!"));
 
-    String url;
+    std::string url;
 
     switch (service) {
 #ifdef SOPCAST

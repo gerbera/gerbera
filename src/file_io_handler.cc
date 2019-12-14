@@ -39,7 +39,7 @@
 using namespace zmm;
 using namespace mxml;
 
-FileIOHandler::FileIOHandler(String filename)
+FileIOHandler::FileIOHandler(std::string filename)
     : filename(filename)
     , f(nullptr)
 {
@@ -57,7 +57,7 @@ void FileIOHandler::open(IN enum UpnpOpenFileMode mode)
     }
 
     if (f == nullptr) {
-        throw _Exception(_("FileIOHandler::open: failed to open: ") + filename.c_str());
+        throw _Exception(_("FileIOHandler::open: failed to open: ") + filename);
     }
 }
 

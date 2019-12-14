@@ -74,8 +74,8 @@ void ConnectionManagerService::doGetProtocolInfo(Ref<ActionRequest> request)
     Ref<Element> response;
     response = xmlBuilder->createResponse(request->getActionName(), _(DESC_CM_SERVICE_TYPE));
 
-    Ref<Array<StringBase>> mimeTypes = Storage::getInstance()->getMimeTypes();
-    String CSV = mime_types_to_CSV(mimeTypes);
+    std::vector<std::string> mimeTypes = Storage::getInstance()->getMimeTypes();
+    std::string CSV = mime_types_to_CSV(mimeTypes);
 
     response->appendTextChild(_("Source"), CSV);
     response->appendTextChild(_("Sink"), _(""));
@@ -113,16 +113,16 @@ void ConnectionManagerService::processSubscriptionRequest(zmm::Ref<SubscriptionR
 
     Ref<Element> propset, property;
 
-    Ref<Array<StringBase>> mimeTypes = Storage::getInstance()->getMimeTypes();
-    String CSV = mime_types_to_CSV(mimeTypes);
+    std::vector<std::string> mimeTypes = Storage::getInstance()->getMimeTypes();
+    std::string CSV = mime_types_to_CSV(mimeTypes);
 
     propset = xmlBuilder->createEventPropertySet();
     property = propset->getFirstElementChild();
-    property->appendTextChild(_("CurrentConnectionIDs"), _("0"));
-    property->appendTextChild(_("SinkProtocolInfo"), _(""));
-    property->appendTextChild(_("SourceProtocolInfo"), CSV);
+    property->appendTextChild(std::string("CurrentConnectionIDs"), _("0"));
+    property->appendTextChild(std::string("SinkProtocolInfo"), _(""));
+    property->appendTextChild(std::string("SourceProtocolInfo"), CSV);
 
-    String xml = propset->print();
+    std::string xml = propset->print();
     err = ixmlParseBufferEx(xml.c_str(), &event);
     if (err != IXML_SUCCESS) {
         throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, _("Could not convert property set to ixml"));
@@ -135,7 +135,7 @@ void ConnectionManagerService::processSubscriptionRequest(zmm::Ref<SubscriptionR
     ixmlDocument_free(event);
 }
 
-void ConnectionManagerService::sendSubscriptionUpdate(String sourceProtocol_CSV)
+void ConnectionManagerService::sendSubscriptionUpdate(std::string sourceProtocol_CSV)
 {
     int err;
     IXML_Document* event = nullptr;
@@ -146,7 +146,7 @@ void ConnectionManagerService::sendSubscriptionUpdate(String sourceProtocol_CSV)
     property = propset->getFirstElementChild();
     property->appendTextChild(_("SourceProtocolInfo"), sourceProtocol_CSV);
 
-    String xml = propset->print();
+    std::string xml = propset->print();
 
     err = ixmlParseBufferEx(xml.c_str(), &event);
     if (err != IXML_SUCCESS) {

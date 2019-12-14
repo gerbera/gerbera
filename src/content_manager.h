@@ -66,16 +66,16 @@ class PlaylistParserScript;
 
 class CMAddFileTask : public GenericTask {
 protected:
-    zmm::String path;
-    zmm::String rootpath;
+    std::string path;
+    std::string rootpath;
     bool recursive;
     bool hidden;
 
 public:
-    CMAddFileTask(zmm::String path, zmm::String rootpath, bool recursive = false,
+    CMAddFileTask(std::string path, std::string rootpath, bool recursive = false,
         bool hidden = false, bool cancellable = true);
-    zmm::String getPath();
-    zmm::String getRootPath();
+    std::string getPath();
+    std::string getRootPath();
     virtual void run() override;
 };
 
@@ -149,11 +149,11 @@ protected:
     zmm::Ref<zmm::Array<DirCacheEntry> > entries;
 public:
     DirCache();
-    void push(zmm::String name);
+    void push(std::string name);
     void pop();
-    void setPath(zmm::String path);
+    void setPath(std::string path);
     void clear();
-    zmm::String getPath();
+    std::string getPath();
     int createContainers();
 };
 */
@@ -162,7 +162,7 @@ class ContentManager : public Timer::Subscriber, public Singleton<ContentManager
 public:
     ContentManager();
     void init() override;
-    zmm::String getName() override { return _("Content Manager"); }
+    std::string getName() override { return _("Content Manager"); }
     virtual ~ContentManager();
     void shutdown() override;
 
@@ -193,7 +193,7 @@ public:
     /// \param hidden true allows to import hidden files, false ignores them
     /// \param queue for immediate processing or in normal order
     /// \return object ID of the added file - only in blockign mode, when used in async mode this function will return INVALID_OBJECT_ID
-    int addFile(zmm::String path, bool recursive = true, bool async = true,
+    int addFile(std::string path, bool recursive = true, bool async = true,
         bool hidden = false, bool lowPriority = false,
         bool cancellable = true);
 
@@ -205,21 +205,21 @@ public:
     /// \param hidden true allows to import hidden files, false ignores them
     /// \param queue for immediate processing or in normal order
     /// \return object ID of the added file - only in blockign mode, when used in async mode this function will return INVALID_OBJECT_ID
-    int addFile(zmm::String path, zmm::String rootpath, bool recursive = true, bool async = true,
+    int addFile(std::string path, std::string rootpath, bool recursive = true, bool async = true,
         bool hidden = false, bool lowPriority = false,
         bool cancellable = true);
 
-    int ensurePathExistence(zmm::String path);
+    int ensurePathExistence(std::string path);
     void removeObject(int objectID, bool async = true, bool all = false);
     void rescanDirectory(int objectID, int scanID, ScanMode scanMode,
-        zmm::String descPath = nullptr, bool cancellable = true);
+        std::string descPath = nullptr, bool cancellable = true);
 
     /// \brief Updates an object in the database using the given parameters.
     /// \param objectID ID of the object to update
     /// \param parameters key value pairs of fields to be updated
     void updateObject(int objectID, zmm::Ref<Dictionary> parameters);
 
-    zmm::Ref<CdsObject> createObjectFromFile(zmm::String path,
+    zmm::Ref<CdsObject> createObjectFromFile(std::string path,
         bool magic = true,
         bool allow_fifo = false);
 
@@ -259,14 +259,14 @@ public:
     /// \param lastRefID reference id of the last container in the chain,
     /// INVALID_OBJECT_ID indicates that the id will not be set.
     /// \return ID of the last container in the chain.
-    int addContainerChain(zmm::String chain, zmm::String lastClass = nullptr,
+    int addContainerChain(std::string chain, std::string lastClass = "",
         int lastRefID = INVALID_OBJECT_ID, zmm::Ref<Dictionary> lastMetadata = nullptr);
 
     /// \brief Adds a virtual container specified by parentID and title
     /// \param parentID the id of the parent.
     /// \param title the title of the container.
     /// \param upnpClass the upnp class of the container.
-    void addContainer(int parentID, zmm::String title, zmm::String upnpClass);
+    void addContainer(int parentID, std::string title, std::string upnpClass);
 
     /// \brief Updates an object in the database.
     /// \param obj the object to update
@@ -284,12 +284,12 @@ public:
     zmm::Ref<AutoscanDirectory> getAutoscanDirectory(int scanID, ScanMode scanMode);
 
     /// \brief Get an AutoscanDirectory given by location on disk from the watch list.
-    zmm::Ref<AutoscanDirectory> getAutoscanDirectory(zmm::String location);
+    zmm::Ref<AutoscanDirectory> getAutoscanDirectory(std::string location);
     /// \brief Removes an AutoscanDirectrory (found by scanID) from the watch list.
     void removeAutoscanDirectory(int scanID, ScanMode scanMode);
 
     /// \brief Removes an AutoscanDirectrory (found by location) from the watch list.
-    void removeAutoscanDirectory(zmm::String location);
+    void removeAutoscanDirectory(std::string location);
 
     /// \brief Removes an AutoscanDirectory (by objectID) from the watch list.
     void removeAutoscanDirectory(int objectID);
@@ -330,7 +330,7 @@ public:
     void unregisterExecutor(zmm::Ref<Executor> exec);
 
 #ifdef HAVE_MAGIC
-    zmm::String getMimeTypeFromBuffer(const void* buffer, size_t length);
+    std::string getMimeTypeFromBuffer(const void* buffer, size_t length);
 #endif
 
 protected:
@@ -361,25 +361,25 @@ protected:
 
     void _loadAccounting();
 
-    int addFileInternal(zmm::String path, zmm::String rootpath,
+    int addFileInternal(std::string path, std::string rootpath,
         bool recursive = true,
         bool async = true, bool hidden = false,
         bool lowPriority = false,
         unsigned int parentTaskID = 0,
         bool cancellable = true);
-    int _addFile(zmm::String path, zmm::String rootPath, bool recursive = false, bool hidden = false, zmm::Ref<GenericTask> task = nullptr);
-    //void _addFile2(zmm::String path, bool recursive=0);
+    int _addFile(std::string path, std::string rootPath, bool recursive = false, bool hidden = false, zmm::Ref<GenericTask> task = nullptr);
+    //void _addFile2(std::string path, bool recursive=0);
     void _removeObject(int objectID, bool all);
 
     void _rescanDirectory(int containerID, int scanID, ScanMode scanMode, ScanLevel scanLevel, zmm::Ref<GenericTask> task = nullptr);
     /* for recursive addition */
-    void addRecursive(zmm::String path, bool hidden, zmm::Ref<GenericTask> task);
-    //void addRecursive2(zmm::Ref<DirCache> dirCache, zmm::String filename, bool recursive);
+    void addRecursive(std::string path, bool hidden, zmm::Ref<GenericTask> task);
+    //void addRecursive2(zmm::Ref<DirCache> dirCache, std::string filename, bool recursive);
 
-    zmm::String extension2mimetype(zmm::String extension);
-    zmm::String mimetype2upnpclass(zmm::String mimeType);
+    std::string extension2mimetype(std::string extension);
+    std::string mimetype2upnpclass(std::string mimeType);
 
-    void invalidateAddTask(zmm::Ref<GenericTask> t, zmm::String path);
+    void invalidateAddTask(zmm::Ref<GenericTask> t, std::string path);
 
     zmm::Ref<Layout> layout;
 

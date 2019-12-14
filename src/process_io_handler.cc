@@ -124,7 +124,7 @@ void ProcessIOHandler::unregisterAll()
     }
 }
 
-ProcessIOHandler::ProcessIOHandler(String filename,
+ProcessIOHandler::ProcessIOHandler(std::string filename,
     zmm::Ref<Executor> main_proc,
     zmm::Ref<zmm::Array<ProcListItem>> proclist,
     bool ignoreSeek)
@@ -169,14 +169,14 @@ void ProcessIOHandler::open(IN enum UpnpOpenFileMode mode)
 
     if (fd == -1) {
         if (errno == ENXIO) {
-            throw _TryAgainException(_("open failed: ") + strerror(errno));
+            throw _TryAgainException(std::string("open failed: ") + strerror(errno));
         }
 
         killall();
         if (main_proc != nullptr)
             main_proc->kill();
         unlink(filename.c_str());
-        throw _Exception(_("open: failed to open: ") + filename.c_str());
+        throw _Exception(_("open: failed to open: ") + filename);
     }
 }
 

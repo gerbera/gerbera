@@ -48,7 +48,7 @@ public:
     /// \param path file or directory to monitor.
     /// \param events inotify event mask
     /// \return watch descriptor or a negative value on error
-    int addWatch(zmm::String path, int events);
+    int addWatch(std::string path, int events);
 
     /// \brief Removes a previously added file or directory from the watch list
     /// \param wd watch descriptor that was returned by the add_watch function

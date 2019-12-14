@@ -27,12 +27,6 @@ Gerbera - https://gerbera.io/
 #include <string>
 #include <tools.h>
 
-void Headers::addHeader(zmm::String header, zmm::String value)
-{
-    if (string_ok(header) && string_ok(value))
-        addHeader(std::string(header.c_str()), std::string(value.c_str()));
-}
-
 std::string Headers::stripInvalid(std::string value) {
     std::string result = value;
     std::size_t found = value.find_first_of('\r');

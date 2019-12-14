@@ -38,7 +38,7 @@
 using namespace zmm;
 using namespace std;
 
-CurlIOHandler::CurlIOHandler(String URL, CURL* curl_handle, size_t bufSize, size_t initialFillSize)
+CurlIOHandler::CurlIOHandler(std::string URL, CURL* curl_handle, size_t bufSize, size_t initialFillSize)
     : IOHandlerBufferHelper(bufSize, initialFillSize)
 {
     if (!string_ok(URL))

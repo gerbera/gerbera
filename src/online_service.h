@@ -77,7 +77,7 @@ public:
     virtual service_type_t getServiceType() = 0;
 
     /// \brief Returns the service name
-    virtual zmm::String getServiceName() = 0;
+    virtual std::string getServiceName() = 0;
 
     /// \brief Get the storage service prefix for a particular service
     char getStoragePrefix();
@@ -133,9 +133,9 @@ protected:
     zmm::Ref<Timer::Parameter> timer_parameter;
 
     /// \brief retrieves a required attribute given by the name
-    zmm::String getCheckAttr(zmm::Ref<mxml::Element> xml, zmm::String attrname);
+    std::string getCheckAttr(zmm::Ref<mxml::Element> xml, std::string attrname);
     /// \brief retrieves a required positive integer attribute given by the name
-    int getCheckPosIntAttr(zmm::Ref<mxml::Element> xml, zmm::String attrname);
+    int getCheckPosIntAttr(zmm::Ref<mxml::Element> xml, std::string attrname);
 };
 
 class OnlineServiceList : public zmm::Object {

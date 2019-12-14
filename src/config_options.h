@@ -43,7 +43,7 @@
 
 class ConfigOption : public zmm::Object {
 public:
-    virtual zmm::String getOption()
+    virtual std::string getOption()
     {
         throw _Exception(_("Wrong option type"));
     };
@@ -68,7 +68,7 @@ public:
         throw _Exception(_("Wrong option type"));
     };
 
-    virtual zmm::Ref<zmm::Array<zmm::StringBase>> getStringArrayOption()
+    virtual std::vector<std::string> getStringArrayOption()
     {
         throw _Exception(_("Wrong option type"));
     };
@@ -90,12 +90,12 @@ public:
 
 class Option : public ConfigOption {
 public:
-    Option(zmm::String option) { this->option = option; };
+    Option(std::string option) { this->option = option; };
 
-    virtual zmm::String getOption() { return option; };
+    virtual std::string getOption() { return option; };
 
 protected:
-    zmm::String option;
+    std::string option;
 };
 
 class IntOption : public ConfigOption {
@@ -131,18 +131,18 @@ protected:
 
 class StringArrayOption : public ConfigOption {
 public:
-    StringArrayOption(zmm::Ref<zmm::Array<zmm::StringBase>> option)
+    StringArrayOption(std::vector<std::string> option)
     {
         this->option = option;
     };
 
-    virtual zmm::Ref<zmm::Array<zmm::StringBase>> getStringArrayOption()
+    virtual std::vector<std::string> getStringArrayOption()
     {
         return option;
     };
 
 protected:
-    zmm::Ref<zmm::Array<zmm::StringBase>> option;
+    std::vector<std::string> option;
 };
 
 class AutoscanListOption : public ConfigOption {

@@ -77,7 +77,7 @@ public:
     ConnectionManagerService(UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle handle);
     ~ConnectionManagerService();
 
-    static void setStaticArgs(zmm::String serviceType, zmm::String serviceID);
+    static void setStaticArgs(std::string serviceType, std::string serviceID);
 
     /// \brief Dispatches the ActionRequest between the available actions.
     /// \param request Incoming ActionRequest.
@@ -97,7 +97,7 @@ public:
     /// \param sourceProtocol_CSV Comma Separated Value list of protocol information
     ///
     /// Sends out an update with protocol information to all subscribed devices
-    void sendSubscriptionUpdate(zmm::String sourceProtocol_CSV);
+    void sendSubscriptionUpdate(std::string sourceProtocol_CSV);
 };
 
 #endif // __UPNP_CM_H__

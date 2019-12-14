@@ -37,7 +37,7 @@
 
 class StringConverter : public zmm::Object {
 public:
-    StringConverter(zmm::String from, zmm::String to);
+    StringConverter(std::string from, std::string to);
     virtual ~StringConverter();
     /// \brief Converts uses the from and to values that were passed
     /// to the constructor to convert the string str to a specific character
@@ -46,8 +46,8 @@ public:
     /// \param validate if this parameter is true then an exception will be
     /// thrown if illegal input is encountered. If false, illegal characters
     /// will be padded with '?' and the function will return the string.
-    zmm::String convert(zmm::String str, bool validate = false);
-    bool validate(zmm::String str);
+    std::string convert(std::string str, bool validate = false);
+    bool validate(std::string str);
 
     /// \brief internal (UTF-8) to filesystem
     static zmm::Ref<StringConverter> i2f();
@@ -76,7 +76,7 @@ protected:
     iconv_t cd;
     bool dirty;
 
-    zmm::String _convert(zmm::String str, bool validate,
+    std::string _convert(std::string str, bool validate,
         size_t* stoppedAt = NULL);
 };
 

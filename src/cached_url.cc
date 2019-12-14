@@ -36,7 +36,7 @@
 
 using namespace zmm;
 
-CachedURL::CachedURL(int object_id, zmm::String url)
+CachedURL::CachedURL(int object_id, std::string url)
 {
     this->object_id = object_id;
     this->url = url;
@@ -52,7 +52,7 @@ int CachedURL::getObjectID()
     return object_id;
 }
 
-String CachedURL::getURL()
+std::string CachedURL::getURL()
 {
     AutoLock lock(mutex);
     last_access_time = time(nullptr);

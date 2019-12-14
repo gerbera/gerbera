@@ -63,14 +63,14 @@ public:
     /// \brief modify the creator of the task using the supplied pthread_mutex and pthread_cond, that the task is finished
     void sendSignal();
 
-    void sendSignal(zmm::String error);
+    void sendSignal(std::string error);
 
     void waitForTask();
 
     bool didContamination() { return contamination; }
     bool didDecontamination() { return decontamination; }
 
-    zmm::String getError() { return error; }
+    std::string getError() { return error; }
 
 protected:
     /// \brief true as long as the task is not finished
@@ -87,7 +87,7 @@ protected:
     std::condition_variable cond;
     std::mutex mutex;
 
-    zmm::String error;
+    std::string error;
 };
 
 /// \brief A task for the sqlite3 thread to inititally create the database.
@@ -156,23 +156,23 @@ private:
     void init() override;
     void shutdownDriver() override;
 
-    zmm::String quote(zmm::String str) override;
-    inline zmm::String quote(int val) override { return zmm::String::from(val); }
-    inline zmm::String quote(unsigned int val) override { return zmm::String::from(val); }
-    inline zmm::String quote(long val) override { return zmm::String::from(val); }
-    inline zmm::String quote(unsigned long val) override { return zmm::String::from(val); }
-    inline zmm::String quote(bool val) override { return zmm::String(val ? '1' : '0'); }
-    inline zmm::String quote(char val) override { return quote(zmm::String(val)); }
-    inline zmm::String quote(long long val) override { return zmm::String::from(val); }
+    std::string quote(std::string str) override;
+    inline std::string quote(int val) override { return std::to_string(val); }
+    inline std::string quote(unsigned int val) override { return std::to_string(val); }
+    inline std::string quote(long val) override { return std::to_string(val); }
+    inline std::string quote(unsigned long val) override { return std::to_string(val); }
+    inline std::string quote(bool val) override { return std::string(val ? "1" : "0"); }
+    inline std::string quote(char val) override { return quote(std::string(1, val)); }
+    inline std::string quote(long long val) override { return std::to_string(val); }
     zmm::Ref<SQLResult> select(const char* query, int length) override;
     int exec(const char* query, int length, bool getLastInsertId = false) override;
-    void storeInternalSetting(zmm::String key, zmm::String value) override;
+    void storeInternalSetting(std::string key, std::string value) override;
 
     void _exec(const char* query);
 
-    zmm::String startupError;
+    std::string startupError;
 
-    zmm::String getError(zmm::String query, zmm::String error, sqlite3* db);
+    std::string getError(std::string query, std::string error, sqlite3* db);
 
     static void* staticThreadProc(void* arg);
     void threadProc();

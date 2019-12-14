@@ -48,8 +48,8 @@ void web::files::process()
 {
     check_request();
 
-    String path;
-    String parentID = param(_("parent_id"));
+    std::string path;
+    std::string parentID = param(_("parent_id"));
     if (!string_ok(parentID) || parentID == "0")
         path = _(FS_ROOT_DIRECTORY);
     else
@@ -69,9 +69,9 @@ void web::files::process()
         Ref<FsObject> obj = arr->get(i);
 
         Ref<Element> fe(new Element(_("file")));
-        String filename = obj->filename;
-        String filepath = path + _("/") + filename;
-        String id = hex_encode(filepath.c_str(), filepath.length());
+        std::string filename = obj->filename;
+        std::string filepath = path + _("/") + filename;
+        std::string id = hex_encode(filepath.c_str(), filepath.length());
         fe->setAttribute(_("id"), id);
 
         Ref<StringConverter> f2i = StringConverter::f2i();

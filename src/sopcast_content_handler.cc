@@ -44,7 +44,7 @@ using namespace mxml;
 
 bool SopCastContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
 {
-    String temp;
+    std::string temp;
 
     if (service->getName() != "channels")
         throw _Exception(_("Invalid XML for SopCast service received"));
@@ -68,7 +68,7 @@ bool SopCastContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
 Ref<CdsObject> SopCastContentHandler::getNextObject()
 {
 #define DATE_BUF_LEN 12
-    String temp;
+    std::string temp;
     struct timespec ts;
 
     while (current_group_node_index < group_count) {
@@ -123,7 +123,7 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
             item->addResource(resource);
 
             item->setAuxData(_(ONLINE_SERVICE_AUX_ID),
-                String::from(OS_SopCast));
+                std::to_string(OS_SopCast));
 
             item->setAuxData(_(SOPCAST_AUXDATA_GROUP), current_group_name);
 
@@ -133,7 +133,7 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
                 continue;
             }
 
-            temp = String(OnlineService::getStoragePrefix(OS_SopCast)) + temp;
+            temp.insert(temp.begin(), OnlineService::getStoragePrefix(OS_SopCast));
             item->setServiceID(temp);
 
             temp = channel->getChildText(_("stream_type"));
@@ -143,8 +143,8 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
             }
 
             // I wish they had a mimetype setting
-            //String mt = extension_mimetype_map->get(temp);
-            String mt;
+            //std::string mt = extension_mimetype_map->get(temp);
+            std::string mt;
             // map was empty, we have to do construct the mimetype ourselves
             if (!string_ok(mt)) {
                 if (temp == "wmv")
@@ -205,7 +205,7 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
             item->setClass(_(UPNP_DEFAULT_CLASS_VIDEO_BROADCAST));
 
             getTimespecNow(&ts);
-            item->setAuxData(_(ONLINE_SERVICE_LAST_UPDATE), String::from(ts.tv_sec));
+            item->setAuxData(_(ONLINE_SERVICE_LAST_UPDATE), std::to_string(ts.tv_sec));
             item->setFlag(OBJECT_FLAG_PROXY_URL);
             item->setFlag(OBJECT_FLAG_ONLINE_SERVICE);
 

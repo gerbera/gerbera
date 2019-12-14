@@ -182,18 +182,18 @@ public:
     ConfigManager();
 
     void init() override;
-    zmm::String getName() override { return _("Config Manager"); }
+    std::string getName() override { return _("Config Manager"); }
 
     virtual ~ConfigManager();
 
     /// \brief Returns the name of the config file that was used to launch the server.
-    inline zmm::String getConfigFilename() { return filename; }
+    inline std::string getConfigFilename() { return filename; }
 
-    void load(zmm::String filename);
+    void load(std::string filename);
 
     /// \brief returns a config option of type String
     /// \param option option to retrieve.
-    zmm::String getOption(config_option_t option);
+    std::string getOption(config_option_t option);
 
     /// \brief returns a config option of type int
     /// \param option option to retrieve.
@@ -209,7 +209,7 @@ public:
 
     /// \brief returns a config option of type Array of StringBase
     /// \param option option to retrieve.
-    zmm::Ref<zmm::Array<zmm::StringBase>> getStringArrayOption(config_option_t option);
+    std::vector<std::string> getStringArrayOption(config_option_t option);
 
     zmm::Ref<ObjectDictionary<zmm::Object>> getObjectDictionaryOption(config_option_t option);
 #ifdef ONLINE_SERVICES
@@ -228,33 +228,33 @@ public:
 
     /// \brief sets static configuration parameters that will be used by
     /// when the ConfigManager class initializes
-    static void setStaticArgs(zmm::String _filename, zmm::String _userhome,
-        zmm::String _config_dir = _(DEFAULT_CONFIG_HOME),
-        zmm::String _prefix_dir = _(PACKAGE_DATADIR),
-        zmm::String _magic = nullptr,
+    static void setStaticArgs(std::string _filename, std::string _userhome,
+        std::string _config_dir = _(DEFAULT_CONFIG_HOME),
+        std::string _prefix_dir = _(PACKAGE_DATADIR),
+        std::string _magic = "",
         bool _debug_logging = false,
-        zmm::String _ip = nullptr, zmm::String _interface = nullptr, int _port = 0);
+        std::string _ip = "", std::string _interface = "", int _port = 0);
 
     static bool isDebugLogging() { return debug_logging; };
 
     /// \brief Creates a html file that is a redirector to the current server i
     /// instance
-    void writeBookmark(zmm::String ip, zmm::String port);
+    void writeBookmark(std::string ip, std::string port);
     void emptyBookmark();
 
 protected:
-    void validate(zmm::String serverhome);
-    zmm::String construct_path(zmm::String path);
-    void prepare_path(zmm::String path, bool needDir = false, bool existenceUnneeded = false);
+    void validate(std::string serverhome);
+    std::string construct_path(std::string path);
+    void prepare_path(std::string path, bool needDir = false, bool existenceUnneeded = false);
 
-    static zmm::String filename;
-    static zmm::String userhome;
-    static zmm::String config_dir;
-    static zmm::String prefix_dir;
-    static zmm::String magic;
+    static std::string filename;
+    static std::string userhome;
+    static std::string config_dir;
+    static std::string prefix_dir;
+    static std::string magic;
     static bool debug_logging;
-    static zmm::String ip;
-    static zmm::String interface;
+    static std::string ip;
+    static std::string interface;
     static int port;
 
     zmm::Ref<mxml::Document> rootDoc;
@@ -272,10 +272,10 @@ protected:
     /// Currently only two xpath constructs are supported:
     /// "/path/to/option" will return the text value of the given "option" element
     /// "/path/to/option/attribute::attr" will return the value of the attribute "attr"
-    zmm::String getOption(zmm::String xpath, zmm::String def);
+    std::string getOption(std::string xpath, std::string def);
 
     /// \brief same as getOption but returns an integer value of the option
-    int getIntOption(zmm::String xpath, int def);
+    int getIntOption(std::string xpath, int def);
 
     /// \brief Returns a config option with the given path, an exception is raised if option does not exist.
     /// \param xpath option xpath.
@@ -284,21 +284,21 @@ protected:
     /// Currently only two xpath constructs are supported:
     /// "/path/to/option" will return the text value of the given "option" element
     /// "/path/to/option/attribute::attr" will return the value of the attribute "attr"
-    zmm::String getOption(zmm::String xpath);
+    std::string getOption(std::string xpath);
 
     /// \brief same as getOption but returns an integer value of the option
-    int getIntOption(zmm::String xpath);
+    int getIntOption(std::string xpath);
 
     /// \brief Returns a config XML element with the given path, an exception is raised if element does not exist.
     /// \param xpath option xpath.
     ///
     /// The xpath parameter has XPath syntax.
     /// "/path/to/element" will return the text value of the given "element" element
-    zmm::Ref<mxml::Element> getElement(zmm::String xpath);
+    zmm::Ref<mxml::Element> getElement(std::string xpath);
 
     /// \brief Checks if the string returned by getOption is valid.
     /// \param xpath xpath expression to the XML node
-    zmm::String checkOptionString(zmm::String xpath);
+    std::string checkOptionString(std::string xpath);
 
     /// \brief Creates a dictionary from an XML nodeset.
     /// \param element starting element of the nodeset.
@@ -315,7 +315,7 @@ protected:
     ///
     /// This function will create a dictionary with the following
     /// key:value paris: "1":"2", "3":"4"
-    zmm::Ref<Dictionary> createDictionaryFromNodeset(zmm::Ref<mxml::Element> element, zmm::String nodeName, zmm::String keyAttr, zmm::String valAttr, bool tolower = false);
+    zmm::Ref<Dictionary> createDictionaryFromNodeset(zmm::Ref<mxml::Element> element, std::string nodeName, std::string keyAttr, std::string valAttr, bool tolower = false);
 
     /// \brief Creates an array of AutoscanDirectory objects from a XML nodeset.
     /// \param element starting element of the nodeset.
@@ -340,7 +340,7 @@ protected:
     /// <some-section>
     ///
     /// This function will create an array like that: ["data", "otherdata"]
-    zmm::Ref<zmm::Array<zmm::StringBase>> createArrayFromNodeset(zmm::Ref<mxml::Element> element, zmm::String nodeName, zmm::String attrName);
+    std::vector<std::string> createArrayFromNodeset(zmm::Ref<mxml::Element> element, std::string nodeName, std::string attrName);
 
     void dumpOptions();
 

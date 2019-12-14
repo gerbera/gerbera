@@ -58,9 +58,9 @@ static duk_function_list_entry js_global_functions[] =
     { nullptr,          nullptr,         0 },
 };
 
-String Script::getProperty(String name)
+std::string Script::getProperty(std::string name)
 {
-    String ret;
+    std::string ret;
     if (!duk_is_object_coercible(ctx, -1))
         return nullptr;
     duk_get_prop_string(ctx, -1, name.c_str());
@@ -74,7 +74,7 @@ String Script::getProperty(String name)
     return ret;
 }
 
-int Script::getBoolProperty(String name)
+int Script::getBoolProperty(std::string name)
 {
     int ret;
     if (!duk_is_object_coercible(ctx, -1))
@@ -90,7 +90,7 @@ int Script::getBoolProperty(String name)
     return ret;
 }
 
-int Script::getIntProperty(String name, int def)
+int Script::getIntProperty(std::string name, int def)
 {
     int ret;
     if (!duk_is_object_coercible(ctx, -1))
@@ -106,13 +106,13 @@ int Script::getIntProperty(String name, int def)
     return ret;
 }
 
-void Script::setProperty(String name, String value)
+void Script::setProperty(std::string name, std::string value)
 {
     duk_push_string(ctx, value.c_str());
     duk_put_prop_string(ctx, -2, name.c_str());
 }
 
-void Script::setIntProperty(String name, int value)
+void Script::setIntProperty(std::string name, int value)
 {
     duk_push_int(ctx, value);
     duk_put_prop_string(ctx, -2, name.c_str());
@@ -198,7 +198,7 @@ Script::Script(Ref<Runtime> runtime, std::string name) : Object(), name(name)
 
     defineFunctions(js_global_functions);
 
-    String common_scr_path = ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_COMMON_SCRIPT);
+    std::string common_scr_path = ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_COMMON_SCRIPT);
 
     if (!string_ok(common_scr_path))
         log_js("Common script disabled in configuration\n");
@@ -236,7 +236,7 @@ Script *Script::getContextScript(duk_context *ctx)
     return self;
 }
 
-void Script::defineFunction(String name, duk_c_function function, uint32_t numParams)
+void Script::defineFunction(std::string name, duk_c_function function, uint32_t numParams)
 {
     duk_push_c_function(ctx, function, numParams);
     duk_put_global_string(ctx, name.c_str());
@@ -249,9 +249,9 @@ void Script::defineFunctions(duk_function_list_entry *functions)
     duk_pop(ctx);
 }
 
-void Script::_load(zmm::String scriptPath)
+void Script::_load(std::string scriptPath)
 {
-    String scriptText = read_text_file(scriptPath);
+    std::string scriptText = read_text_file(scriptPath);
 
     if (!string_ok(scriptText))
         throw _Exception(_("empty script"));
@@ -263,7 +263,7 @@ void Script::_load(zmm::String scriptPath)
     }
     catch (const Exception & e)
     {
-        throw _Exception(_("Failed to convert import script:") + e.getMessage().c_str());
+        throw _Exception(_("Failed to convert import script:") + e.getMessage());
     }
 
     duk_push_string(ctx, scriptPath.c_str());
@@ -271,7 +271,7 @@ void Script::_load(zmm::String scriptPath)
         throw _Exception(_("Scripting: failed to compile ") + scriptPath);
 }
 
-void Script::load(zmm::String scriptPath)
+void Script::load(std::string scriptPath)
 {
     AutoLock lock(runtime->getMutex());
     duk_push_thread_stash(ctx, ctx);
@@ -302,7 +302,7 @@ void Script::execute()
 
 Ref<CdsObject> Script::dukObject2cdsObject(zmm::Ref<CdsObject> pcd)
 {
-    String val;
+    std::string val;
     int objectType;
     int b;
     int i;
@@ -341,7 +341,7 @@ Ref<CdsObject> Script::dukObject2cdsObject(zmm::Ref<CdsObject> pcd)
         obj->setParentID(i);
 
     val = getProperty(_("title"));
-    if (val != nullptr)
+    if (!val.empty())
     {
         val = sc->convert(val);
         obj->setTitle(val);
@@ -353,7 +353,7 @@ Ref<CdsObject> Script::dukObject2cdsObject(zmm::Ref<CdsObject> pcd)
     }
 
     val = getProperty(_("upnpclass"));
-    if (val != nullptr)
+    if (!val.empty())
     {
         val = sc->convert(val);
         obj->setClass(val);
@@ -376,11 +376,11 @@ Ref<CdsObject> Script::dukObject2cdsObject(zmm::Ref<CdsObject> pcd)
         for (int i = 0; i < M_MAX; i++)
         {
             val = getProperty(_(MT_KEYS[i].upnp));
-            if (val != nullptr)
+            if (!val.empty())
             {
                 if (i == M_TRACKNUMBER)
                 {
-                    int j = val.toInt();
+                    int j = std::stoi(val);
                     if (j > 0)
                     {
                         obj->setMetadata(MT_KEYS[i].upnp, val);
@@ -417,7 +417,7 @@ Ref<CdsObject> Script::dukObject2cdsObject(zmm::Ref<CdsObject> pcd)
             pcd_item = RefCast(pcd, CdsItem);
 
         val = getProperty(_("mimetype"));
-        if (val != nullptr)
+        if (!val.empty())
         {
             val = sc->convert(val);
             item->setMimeType(val);
@@ -429,7 +429,7 @@ Ref<CdsObject> Script::dukObject2cdsObject(zmm::Ref<CdsObject> pcd)
         }
 
         val = getProperty(_("serviceID"));
-        if (val != nullptr)
+        if (!val.empty())
         {
             val = sc->convert(val);
             item->setServiceID(val);
@@ -438,7 +438,7 @@ Ref<CdsObject> Script::dukObject2cdsObject(zmm::Ref<CdsObject> pcd)
         /// \todo check what this is doing here, wasn't it already handled
         /// in the MT_KEYS loop?
         val = getProperty(_("description"));
-        if (val != nullptr)
+        if (!val.empty())
         {
             val = sc->convert(val);
             item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), val);
@@ -456,7 +456,7 @@ Ref<CdsObject> Script::dukObject2cdsObject(zmm::Ref<CdsObject> pcd)
 
         // location must not be touched by character conversion!
         val = getProperty(_("location"));
-        if ((val != nullptr) && (IS_CDS_PURE_ITEM(objectType) || IS_CDS_ACTIVE_ITEM(objectType)))
+        if ((!val.empty()) && (IS_CDS_PURE_ITEM(objectType) || IS_CDS_ACTIVE_ITEM(objectType)))
             val = normalizePath(val);
 
         if (string_ok(val))
@@ -475,7 +475,7 @@ Ref<CdsObject> Script::dukObject2cdsObject(zmm::Ref<CdsObject> pcd)
                 pcd_aitem = RefCast(pcd, CdsActiveItem);
           /// \todo what about character conversion for action and state fields?
             val = getProperty(_("action"));
-            if (val != nullptr)
+            if (!val.empty())
                 aitem->setAction(val);
             else
             {
@@ -484,7 +484,7 @@ Ref<CdsObject> Script::dukObject2cdsObject(zmm::Ref<CdsObject> pcd)
             }
 
             val = getProperty(_("state"));
-            if (val != nullptr)
+            if (!val.empty())
                 aitem->setState(val);
             else
             {
@@ -495,12 +495,12 @@ Ref<CdsObject> Script::dukObject2cdsObject(zmm::Ref<CdsObject> pcd)
 
         if (IS_CDS_ITEM_EXTERNAL_URL(objectType))
         {
-            String protocolInfo;
+            std::string protocolInfo;
 
             obj->setRestricted(true);
             Ref<CdsItemExternalURL> item = RefCast(obj, CdsItemExternalURL);
             val = getProperty(_("protocol"));
-            if (val != nullptr)
+            if (!val.empty())
             {
                 val = sc->convert(val);
                 protocolInfo = renderProtocolInfo(item->getMimeType(), val);
@@ -539,7 +539,7 @@ Ref<CdsObject> Script::dukObject2cdsObject(zmm::Ref<CdsObject> pcd)
 
 void Script::cdsObject2dukObject(Ref<CdsObject> obj)
 {
-    String val;
+    std::string val;
     int i;
 
     duk_push_object(ctx);
@@ -559,15 +559,15 @@ void Script::cdsObject2dukObject(Ref<CdsObject> obj)
         setIntProperty(_("parentID"), i);
 
     val = obj->getTitle();
-    if (val != nullptr)
+    if (!val.empty())
         setProperty(_("title"), val);
 
     val = obj->getClass();
-    if (val != nullptr)
+    if (!val.empty())
         setProperty(_("upnpclass"), val);
 
     val = obj->getLocation();
-    if (val != nullptr)
+    if (!val.empty())
         setProperty(_("location"), val);
 
     setIntProperty(_("mtime"), (int)obj->getMTime());
@@ -585,7 +585,7 @@ void Script::cdsObject2dukObject(Ref<CdsObject> obj)
 #ifdef ONLINE_SERVICES
     if (obj->getFlag(OBJECT_FLAG_ONLINE_SERVICE))
     {
-         service_type_t service = (service_type_t)(obj->getAuxData(_(ONLINE_SERVICE_AUX_ID)).toInt());
+         service_type_t service = (service_type_t)std::stoi(obj->getAuxData(_(ONLINE_SERVICE_AUX_ID)));
         setIntProperty(_("onlineservice"), (int)service);
     }
     else
@@ -607,7 +607,7 @@ void Script::cdsObject2dukObject(Ref<CdsObject> obj)
         }
 
         if (RefCast(obj, CdsItem)->getTrackNumber() > 0)
-            setProperty(MetadataHandler::getMetaFieldName(M_TRACKNUMBER), String::from(RefCast(obj, CdsItem)->getTrackNumber()));
+            setProperty(MetadataHandler::getMetaFieldName(M_TRACKNUMBER), std::to_string(RefCast(obj, CdsItem)->getTrackNumber()));
 
         duk_put_prop_string(ctx, -2, "meta");
         // stack: js
@@ -666,21 +666,21 @@ void Script::cdsObject2dukObject(Ref<CdsObject> obj)
     {
         Ref<CdsItem> item = RefCast(obj, CdsItem);
         val = item->getMimeType();
-        if (val != nullptr)
+        if (!val.empty())
             setProperty(_("mimetype"), val);
 
         val = item->getServiceID();
-        if (val != nullptr)
+        if (!val.empty())
             setProperty(_("serviceID"), val);
 
         if (IS_CDS_ACTIVE_ITEM(objectType))
         {
             Ref<CdsActiveItem> aitem = RefCast(obj, CdsActiveItem);
             val = aitem->getAction();
-            if (val != nullptr)
+            if (!val.empty())
                 setProperty(_("action"), val);
             val = aitem->getState();
-            if (val != nullptr)
+            if (!val.empty())
                 setProperty(_("state"), val);
         }
     }
@@ -698,7 +698,7 @@ void Script::cdsObject2dukObject(Ref<CdsObject> obj)
     }
 }
 
-String Script::convertToCharset(String str, charset_convert_t chr)
+std::string Script::convertToCharset(std::string str, charset_convert_t chr)
 {
     switch (chr)
     {

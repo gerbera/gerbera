@@ -136,7 +136,7 @@ class Storage : public Singleton<Storage, std::mutex> {
 public:
     static zmm::Ref<Storage> getInstance();
 
-    zmm::String getName() override { return _("Storage"); }
+    std::string getName() override { return _("Storage"); }
 
     virtual void init() override = 0;
     virtual void addObject(zmm::Ref<CdsObject> object, int* changedContainer) = 0;
@@ -157,7 +157,7 @@ public:
     /// the object ID of the container that is last in the path. The
     /// updateID will hold the objectID of the container that was changed,
     /// in case new containers were created during the operation.
-    virtual void addContainerChain(zmm::String path, zmm::String lastClass, int lastRefID, int* containerID,
+    virtual void addContainerChain(std::string path, std::string lastClass, int lastRefID, int* containerID,
         int* updateID, zmm::Ref<Dictionary> lastMetadata)
         = 0;
 
@@ -166,12 +166,12 @@ public:
     /// \param parentID the parent id of the parent container
     /// \param title the title of the container to add to the path.
     /// It will be escaped.
-    virtual zmm::String buildContainerPath(int parentID, zmm::String title) = 0;
+    virtual std::string buildContainerPath(int parentID, std::string title) = 0;
 
     virtual void updateObject(zmm::Ref<CdsObject> object, int* changedContainer) = 0;
 
     virtual zmm::Ref<zmm::Array<CdsObject>> browse(zmm::Ref<BrowseParam> param) = 0;
-    virtual zmm::Ref<zmm::Array<zmm::StringBase>> getMimeTypes() = 0;
+    virtual std::vector<std::string> getMimeTypes() = 0;
 
     //virtual zmm::Ref<zmm::Array<CdsObject> > selectObjects(zmm::Ref<SelectParam> param) = 0;
 
@@ -181,7 +181,7 @@ public:
     /// if the path ends with DIR_SEPERATOR, as file otherwise
     /// multiple DIR_SEPERATOR are irgnored
     /// \return the CdsObject
-    virtual zmm::Ref<CdsObject> findObjectByPath(zmm::String path) = 0;
+    virtual zmm::Ref<CdsObject> findObjectByPath(std::string path) = 0;
 
     /// \brief checks for a given (pc directory) object, identified by the given path
     /// from the database
@@ -189,20 +189,20 @@ public:
     /// if the path ends with DIR_SEPERATOR, as file otherwise
     /// multiple DIR_SEPERATOR are irgnored
     /// \return the obejectID
-    virtual int findObjectIDByPath(zmm::String fullpath) = 0;
+    virtual int findObjectIDByPath(std::string fullpath) = 0;
 
     /// \brief increments the updateIDs for the given objectIDs
     /// \param ids pointer to the array of ids
     /// \param size number of entries in the given array
     /// \return a String for UPnP: a CSV list; for every existing object:
     ///  "id,update_id"
-    virtual zmm::String incrementUpdateIDs(std::shared_ptr<std::unordered_set<int>> ids) = 0;
+    virtual std::string incrementUpdateIDs(std::shared_ptr<std::unordered_set<int>> ids) = 0;
 
     /* utility methods */
     virtual zmm::Ref<CdsObject> loadObject(int objectID) = 0;
     virtual int getChildCount(int contId, bool containers = true, bool items = true, bool hideFsRoot = false) = 0;
 
-    virtual zmm::String findFolderImage(int id, zmm::String trackArtBase) = 0;
+    virtual std::string findFolderImage(int id, std::string trackArtBase) = 0;
 
     virtual zmm::Ref<zmm::Array<CdsObject>> search(zmm::Ref<SearchParam> param, int* numMatches) = 0;
 
@@ -238,7 +238,7 @@ public:
     virtual zmm::Ref<ChangedContainers> removeObjects(std::shared_ptr<std::unordered_set<int>> list, bool all = false) = 0;
 
     /// \brief Loads an object given by the online service ID.
-    virtual zmm::Ref<CdsObject> loadObjectByServiceID(zmm::String serviceID) = 0;
+    virtual zmm::Ref<CdsObject> loadObjectByServiceID(std::string serviceID) = 0;
 
     /// \brief Return an array of object ID's for a particular service.
     ///
@@ -249,8 +249,8 @@ public:
     virtual int getTotalFiles() = 0;
 
     /* internal setting methods */
-    virtual zmm::String getInternalSetting(zmm::String key) = 0;
-    virtual void storeInternalSetting(zmm::String key, zmm::String value) = 0;
+    virtual std::string getInternalSetting(std::string key) = 0;
+    virtual void storeInternalSetting(std::string key, std::string value) = 0;
 
     /* autoscan methods */
     virtual void updateAutoscanPersistentList(ScanMode scanmode, zmm::Ref<AutoscanList> list) = 0;
@@ -301,12 +301,12 @@ public:
     ///
     /// \param *changedContainer returns the ID for the UpdateManager
     /// \return objectID of the container given by path
-    virtual int ensurePathExistence(zmm::String path, int* changedContainer) = 0;
+    virtual int ensurePathExistence(std::string path, int* changedContainer) = 0;
 
     /// \brief clears the given flag in all objects in the DB
     virtual void clearFlagInDB(int flag) = 0;
 
-    virtual zmm::String getFsRootName() = 0;
+    virtual std::string getFsRootName() = 0;
 
     virtual void threadCleanup() = 0;
     virtual bool threadCleanupRequired() = 0;
@@ -315,7 +315,7 @@ public:
 
 protected:
     /* helper for addContainerChain */
-    static void stripAndUnescapeVirtualContainerFromPath(zmm::String path, zmm::String& first, zmm::String& last);
+    static void stripAndUnescapeVirtualContainerFromPath(std::string path, std::string& first, std::string& last);
     static zmm::Ref<Storage> createInstance();
 };
 

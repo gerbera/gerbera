@@ -32,11 +32,11 @@ public:
     explicit DeviceDescriptionHandler(UpnpXMLBuilder* xmlBuilder);
 
     void getInfo(IN const char *filename, OUT UpnpFileInfo *info) override;
-    zmm::Ref<IOHandler> open(IN const char* filename, IN enum UpnpOpenFileMode mode, IN zmm::String range) override;
+    zmm::Ref<IOHandler> open(IN const char* filename, IN enum UpnpOpenFileMode mode, IN std::string range) override;
 
 protected:
     UpnpXMLBuilder* xmlBuilder;
-    zmm::String deviceDescription;
+    std::string deviceDescription;
 };
 
 

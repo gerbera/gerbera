@@ -57,12 +57,12 @@ CdsResource::CdsResource(int handlerType,
     this->options = options;
 }
 
-void CdsResource::addAttribute(String name, String value)
+void CdsResource::addAttribute(std::string name, std::string value)
 {
     attributes->put(name, value);
 }
 
-void CdsResource::removeAttribute(String name)
+void CdsResource::removeAttribute(std::string name)
 {
     attributes->remove(name);
 }
@@ -72,12 +72,12 @@ void CdsResource::mergeAttributes(Ref<Dictionary> additional)
     attributes->merge(additional);
 }
 
-void CdsResource::addParameter(String name, String value)
+void CdsResource::addParameter(std::string name, std::string value)
 {
     parameters->put(name, value);
 }
 
-void CdsResource::addOption(String name, String value)
+void CdsResource::addOption(std::string name, std::string value)
 {
     options->put(name, value);
 }
@@ -102,17 +102,17 @@ Ref<Dictionary> CdsResource::getOptions()
     return options;
 }
 
-String CdsResource::getAttribute(String name)
+std::string CdsResource::getAttribute(std::string name)
 {
     return attributes->get(name);
 }
 
-String CdsResource::getParameter(String name)
+std::string CdsResource::getParameter(std::string name)
 {
     return parameters->get(name);
 }
 
-String CdsResource::getOption(String name)
+std::string CdsResource::getOption(std::string name)
 {
     return options->get(name);
 }
@@ -131,7 +131,7 @@ Ref<CdsResource> CdsResource::clone()
         options->clone()));
 }
 
-String CdsResource::encode()
+std::string CdsResource::encode()
 {
     // encode resources
     std::ostringstream buf;
@@ -145,27 +145,27 @@ String CdsResource::encode()
     return buf.str().c_str();
 }
 
-Ref<CdsResource> CdsResource::decode(String serial)
+Ref<CdsResource> CdsResource::decode(std::string serial)
 {
-    Ref<Array<StringBase>> parts = split_string(serial, RESOURCE_PART_SEP, true);
-    int size = parts->size();
+    std::vector<std::string> parts = split_string(serial, RESOURCE_PART_SEP, true);
+    int size = parts.size();
     if (size < 2 || size > 4)
         throw _Exception(_("CdsResource::decode: Could not parse resources"));
 
-    int handlerType = String(parts->get(0)).toInt();
+    int handlerType = std::stoi(parts[0]);
 
     Ref<Dictionary> attr(new Dictionary());
-    attr->decode(parts->get(1));
+    attr->decode(parts[1]);
 
     Ref<Dictionary> par(new Dictionary());
 
     if (size >= 3)
-        par->decode(parts->get(2));
+        par->decode(parts[2]);
 
     Ref<Dictionary> opt(new Dictionary());
 
     if (size >= 4)
-        opt->decode(parts->get(3));
+        opt->decode(parts[3]);
 
     Ref<CdsResource> resource(new CdsResource(handlerType, attr, par, opt));
 

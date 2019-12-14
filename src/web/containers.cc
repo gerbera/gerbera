@@ -55,7 +55,7 @@ void web::containers::process()
 
     Ref<Element> containers(new Element(_("containers")));
     containers->setArrayName(_("container"));
-    containers->setAttribute(_("parent_id"), String::from(parentID), mxml_int_type);
+    containers->setAttribute(_("parent_id"), std::to_string(parentID), mxml_int_type);
     containers->setAttribute(_("type"), _("database"));
 
     if (string_ok(param(_("select_it"))))
@@ -72,13 +72,13 @@ void web::containers::process()
         //{
         Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
         Ref<Element> ce(new Element(_("container")));
-        ce->setAttribute(_("id"), String::from(cont->getID()), mxml_int_type);
+        ce->setAttribute(_("id"), std::to_string(cont->getID()), mxml_int_type);
         int childCount = cont->getChildCount();
-        ce->setAttribute(_("child_count"), String::from(childCount), mxml_int_type);
+        ce->setAttribute(_("child_count"), std::to_string(childCount), mxml_int_type);
         int autoscanType = cont->getAutoscanType();
         ce->setAttribute(_("autoscan_type"), mapAutoscanType(autoscanType));
 
-        String autoscanMode = _("none");
+        std::string autoscanMode = _("none");
         if (autoscanType > 0) {
             autoscanMode = _("timed");
 #ifdef HAVE_INOTIFY

@@ -37,7 +37,7 @@
 using namespace zmm;
 using namespace mxml;
 
-String XML2JSON::getJSON(Ref<Element> root)
+std::string XML2JSON::getJSON(Ref<Element> root)
 {
     std::ostringstream buf;
     buf << '{';
@@ -65,7 +65,7 @@ void XML2JSON::handleElement(std::ostringstream &buf, Ref<Element> el)
     }
     
     bool array = el->isArrayType();
-    String nodeName = nullptr;
+    std::string nodeName = nullptr;
     
     if (array)
     {
@@ -94,7 +94,7 @@ void XML2JSON::handleElement(std::ostringstream &buf, Ref<Element> el)
                     buf << ',';
                 else
                     firstChild = false;
-                String key = el->getTextKey();
+                std::string key = el->getTextKey();
                 if (! string_ok(key))
                     throw _Exception(_("XML2JSON: Element ") + el->getName() + " had a text child, but had no textKey set");
                     //key = _("value");
@@ -102,7 +102,7 @@ void XML2JSON::handleElement(std::ostringstream &buf, Ref<Element> el)
                 buf << '"' << key << "\":" << getValue(el->getText(), el->getVTypeText());
             }
             else
-                throw _Exception(_("XML2JSON cannot handle an element which consists of text AND element children - element: ") + el->getName() + "; has type: " + type);
+                throw _Exception(_("XML2JSON cannot handle an element which consists of text AND element children - element: ") + el->getName() + "; has type: " + std::to_string(type));
         }
         else
         {
@@ -169,7 +169,7 @@ void XML2JSON::handleElement(std::ostringstream &buf, Ref<Element> el)
     
 }
 
-String XML2JSON::getValue(String text, enum mxml_value_type type)
+std::string XML2JSON::getValue(std::string text, enum mxml_value_type type)
 {
     if (type == mxml_string_type)
         return _("\"") + escape(text, '\\', '"') + '"';

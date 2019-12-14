@@ -35,6 +35,8 @@
 
 #ifdef HAVE_TAGLIB
 
+#include <string>
+
 #include <taglib/tbytevector.h>
 #include <taglib/tfile.h>
 #include <taglib/tiostream.h>
@@ -50,9 +52,9 @@ public:
 
 private:
     void populateGenericTags(zmm::Ref<CdsItem> item, const TagLib::File& file) const;
-    bool isValidArtworkContentType(zmm::String content_type);
-    zmm::String getContentTypeFromByteVector(const TagLib::ByteVector& data) const;
-    void addArtworkResource(zmm::Ref<CdsItem> item, zmm::String content_type);
+    bool isValidArtworkContentType(std::string content_type);
+    std::string getContentTypeFromByteVector(const TagLib::ByteVector& data) const;
+    void addArtworkResource(zmm::Ref<CdsItem> item, std::string content_type);
     void extractMP3(TagLib::IOStream* roStream, zmm::Ref<CdsItem> item);
     void extractOgg(TagLib::IOStream* roStream, zmm::Ref<CdsItem> item);
     void extractASF(TagLib::IOStream* roStream, zmm::Ref<CdsItem> item);

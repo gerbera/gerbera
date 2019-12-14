@@ -38,7 +38,7 @@ void DeviceDescriptionHandler::getInfo(const char* filename, UpnpFileInfo* info)
     UpnpFileInfo_set_IsDirectory(info, 0);
 }
 
-zmm::Ref<IOHandler> DeviceDescriptionHandler::open(const char* filename, enum UpnpOpenFileMode mode, zmm::String range)
+zmm::Ref<IOHandler> DeviceDescriptionHandler::open(const char* filename, enum UpnpOpenFileMode mode, std::string range)
 {
     log_debug("Device description requested\n");
     if (!string_ok(deviceDescription)) { // This always true for now

@@ -50,17 +50,17 @@ protected:
     /// \brief ID of the service.
     ///
     /// Returned by getServiceID()
-    zmm::String serviceID;
+    std::string serviceID;
 
     /// \brief UDN of the recepient device (it should be our UDN)
     ///
     /// Returned by getUDN()
-    zmm::String UDN;
+    std::string UDN;
 
     /// \brief Subscription ID.
     ///
     /// Returned by getSubscriptionID()
-    zmm::String sID;
+    std::string sID;
 
 public:
     /// \brief The Constructor takes the values from the upnp_request and fills in internal variables.
@@ -68,13 +68,13 @@ public:
     SubscriptionRequest(UpnpSubscriptionRequest* upnp_request);
 
     /// \brief Returns the service ID (should be one of the services that we support).
-    zmm::String getServiceID();
+    std::string getServiceID();
 
     /// \brief Returns the UDN of the recepient device (should be ours)
-    zmm::String getUDN();
+    std::string getUDN();
 
     /// \brief Returns the subscription ID.
-    zmm::String getSubscriptionID();
+    std::string getSubscriptionID();
 };
 
 #endif // __SUBSCRIPTION_REQUEST_H__

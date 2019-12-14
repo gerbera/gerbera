@@ -48,16 +48,15 @@ void ServeRequestHandler::getInfo(IN const char *filename, OUT UpnpFileInfo *inf
 {
     struct stat statbuf;
     int ret = 0;
-    int len = 0;
 
     log_debug("got filename: %s\n", filename);
 
-    String url_path, parameters;
+    std::string url_path, parameters;
     splitUrl(filename, URL_PARAM_SEPARATOR, url_path, parameters);
 
     log_debug("url_path: %s, parameters: %s\n", url_path.c_str(), parameters.c_str());
 
-    len = (_("/") + SERVER_VIRTUAL_DIR + _("/") + CONTENT_SERVE_HANDLER).length();
+    size_t len = (std::string("/") + SERVER_VIRTUAL_DIR + _("/") + CONTENT_SERVE_HANDLER).length();
 
     if (len > url_path.length()) {
         throw _Exception(_("There is something wrong with the link ") + url_path);
@@ -65,8 +64,8 @@ void ServeRequestHandler::getInfo(IN const char *filename, OUT UpnpFileInfo *inf
 
     url_path = urlUnescape(url_path);
 
-    String path = ConfigManager::getInstance()->getOption(CFG_SERVER_SERVEDIR)
-        + url_path.substring(len, url_path.length()) + _("/") + parameters;
+    std::string path = ConfigManager::getInstance()->getOption(CFG_SERVER_SERVEDIR)
+        + url_path.substr(len, url_path.length()) + _("/") + parameters;
 
     log_debug("Constructed new path: %s\n", path.c_str());
 
@@ -77,9 +76,9 @@ void ServeRequestHandler::getInfo(IN const char *filename, OUT UpnpFileInfo *inf
 
     if (S_ISREG(statbuf.st_mode)) // we have a regular file
     {
-        String mimetype = _(MIMETYPE_DEFAULT);
+        std::string mimetype = _(MIMETYPE_DEFAULT);
 #ifdef HAVE_MAGIC
-        String mime = getMIMETypeFromFile(path);
+        std::string mime = getMIMETypeFromFile(path);
         if (string_ok(mime))
             mimetype = mime;
 #endif // HAVE_MAGIC
@@ -102,31 +101,30 @@ void ServeRequestHandler::getInfo(IN const char *filename, OUT UpnpFileInfo *inf
 
 Ref<IOHandler> ServeRequestHandler::open(IN const char* filename,
     IN enum UpnpOpenFileMode mode,
-    IN zmm::String range)
+    IN std::string range)
 {
     struct stat statbuf;
     int ret = 0;
-    int len = 0;
 
     // Currently we explicitly do not support UPNP_WRITE
     // due to security reasons.
     if (mode != UPNP_READ)
         throw _Exception(_("UPNP_WRITE unsupported"));
 
-    len = (_("/") + SERVER_VIRTUAL_DIR + _("/") + CONTENT_SERVE_HANDLER).length();
-    String url_path, parameters;
+    size_t len = (std::string("/") + SERVER_VIRTUAL_DIR + _("/") + CONTENT_SERVE_HANDLER).length();
+    std::string url_path, parameters;
     splitUrl(filename, URL_PARAM_SEPARATOR, url_path, parameters);
 
     log_debug("url_path: %s, parameters: %s\n", url_path.c_str(), parameters.c_str());
 
-    len = (_("/") + SERVER_VIRTUAL_DIR + _("/") + CONTENT_SERVE_HANDLER).length();
+    len = (std::string("/") + SERVER_VIRTUAL_DIR + _("/") + CONTENT_SERVE_HANDLER).length();
 
     if (len > url_path.length()) {
         throw _Exception(_("There is something wrong with the link ") + url_path);
     }
 
-    String path = ConfigManager::getInstance()->getOption(CFG_SERVER_SERVEDIR)
-        + url_path.substring(len, url_path.length()) + _("/") + parameters;
+    std::string path = ConfigManager::getInstance()->getOption(CFG_SERVER_SERVEDIR)
+        + url_path.substr(len, url_path.length()) + _("/") + parameters;
 
     log_debug("Constructed new path: %s\n", path.c_str());
     ret = stat(path.c_str(), &statbuf);
@@ -136,9 +134,9 @@ Ref<IOHandler> ServeRequestHandler::open(IN const char* filename,
 
     if (S_ISREG(statbuf.st_mode)) // we have a regular file
     {
-        String mimetype = _(MIMETYPE_DEFAULT);
+        std::string mimetype = _(MIMETYPE_DEFAULT);
 #ifdef HAVE_MAGIC
-        String mime = getMIMETypeFromFile(path);
+        std::string mime = getMIMETypeFromFile(path);
         if (string_ok(mime))
             mimetype = mime;
 #endif // HAVE_MAGIC

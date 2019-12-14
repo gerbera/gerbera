@@ -46,7 +46,7 @@ web::addObject::addObject()
 {
 }
 
-/*static Ref<Element> addOption(String option_name, String option_type, String default_value = nullptr)
+/*static Ref<Element> addOption(std::string option_name, std::string option_type, std::string default_value = nullptr)
 {
     Ref<Element> option (new Element(_("option")));
     option->addAttribute(_("name"), option_name);
@@ -65,7 +65,7 @@ void web::addObject::addContainer(int parentID)
 
 Ref<CdsObject> web::addObject::addItem(int parentID, Ref<CdsItem> item)
 {
-    String tmp;
+    std::string tmp;
 
     item->setParentID(parentID);
 
@@ -90,7 +90,7 @@ Ref<CdsObject> web::addObject::addItem(int parentID, Ref<CdsItem> item)
 
 Ref<CdsObject> web::addObject::addActiveItem(int parentID)
 {
-    String tmp;
+    std::string tmp;
     Ref<CdsActiveItem> item(new CdsActiveItem());
 
     item->setAction(param(_("action")));
@@ -131,8 +131,8 @@ Ref<CdsObject> web::addObject::addActiveItem(int parentID)
 
 Ref<CdsObject> web::addObject::addUrl(int parentID, Ref<CdsItemExternalURL> item, bool addProtocol)
 {
-    String tmp;
-    String protocolInfo;
+    std::string tmp;
+    std::string protocolInfo;
 
     item->setParentID(parentID);
 
@@ -151,7 +151,7 @@ Ref<CdsObject> web::addObject::addUrl(int parentID, Ref<CdsItemExternalURL> item
     item->setMimeType(tmp);
 
     if (addProtocol) {
-        String protocol = param(_("protocol"));
+        std::string protocol = param(_("protocol"));
         if (string_ok(protocol))
             protocolInfo = renderProtocolInfo(tmp, protocol);
         else
@@ -171,8 +171,8 @@ void web::addObject::process()
 {
     check_request();
 
-    String obj_type = param(_("obj_type"));
-    String location = param(_("location"));
+    std::string obj_type = param(_("obj_type"));
+    std::string location = param(_("location"));
 
     if (!string_ok(param(_("title"))))
         throw _Exception(_("empty title"));
@@ -219,7 +219,7 @@ void web::addObject::process()
             throw _Exception(_("No URL given"));
         obj = this->addUrl(parentID, Ref<CdsItemExternalURL>(new CdsItemInternalURL()), false);
     } else {
-        throw _Exception(_("unknown object type: ") + obj_type.c_str());
+        throw _Exception(_("unknown object type: ") + obj_type);
     }
 
     if (obj != nullptr) {

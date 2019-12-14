@@ -49,10 +49,10 @@ class MRRegistrarService {
 protected:
     /// \brief UPnP standard defined service type
     /// \todo Check if it makes sense to use it as it is done now...why not define constants here?
-    static zmm::String serviceType;
+    static std::string serviceType;
 
     /// \brief ID of the service.
-    static zmm::String serviceID;
+    static std::string serviceID;
 
     /// \brief Media Receiver Registrar service action: IsAuthorized()
     /// \param request Incoming ActionRequest.
@@ -106,7 +106,7 @@ public:
     /// \param sourceProtocol_CSV Comma Separated Value list of protocol information
     ///
     /// Sends out an update with protocol information to all subscribed devices
-    //    void sendSubscriptionUpdate(zmm::String sourceProtocol_CSV);
+    //    void sendSubscriptionUpdate(std::string sourceProtocol_CSV);
 };
 
 #endif // __UPNP_CM_H__

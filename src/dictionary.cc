@@ -37,29 +37,29 @@
 
 using namespace zmm;
 
-DictionaryElement::DictionaryElement(String key, String value)
+DictionaryElement::DictionaryElement(std::string key, std::string value)
     : Object()
 {
     this->key = key;
     this->value = value;
 }
 
-void DictionaryElement::setKey(String key)
+void DictionaryElement::setKey(std::string key)
 {
     this->key = key;
 }
 
-void DictionaryElement::setValue(String value)
+void DictionaryElement::setValue(std::string value)
 {
     this->value = value;
 }
 
-String DictionaryElement::getKey()
+std::string DictionaryElement::getKey()
 {
     return key;
 }
 
-String DictionaryElement::getValue()
+std::string DictionaryElement::getValue()
 {
     return value;
 }
@@ -70,7 +70,7 @@ Dictionary::Dictionary()
     elements = Ref<Array<DictionaryElement>>(new Array<DictionaryElement>());
 }
 
-void Dictionary::put(String key, String value)
+void Dictionary::put(std::string key, std::string value)
 {
     for (int i = 0; i < elements->size(); i++) {
         Ref<DictionaryElement> el = elements->get(i);
@@ -83,7 +83,7 @@ void Dictionary::put(String key, String value)
     elements->append(newEl);
 }
 
-String Dictionary::get(String key)
+std::string Dictionary::get(std::string key)
 {
     for (int i = 0; i < elements->size(); i++) {
         Ref<DictionaryElement> el = elements->get(i);
@@ -91,7 +91,7 @@ String Dictionary::get(String key)
             return el->getValue();
         }
     }
-    return nullptr;
+    return "";
 }
 
 int Dictionary::size()
@@ -99,7 +99,7 @@ int Dictionary::size()
     return elements->size();
 }
 
-void Dictionary::remove(String key)
+void Dictionary::remove(std::string key)
 {
     for (int i = 0; i < elements->size(); i++) {
         Ref<DictionaryElement> el = elements->get(i);
@@ -110,7 +110,7 @@ void Dictionary::remove(String key)
     }
 }
 
-String Dictionary::_encode(char sep1, char sep2)
+std::string Dictionary::_encode(char sep1, char sep2)
 {
     std::ostringstream buf;
     int len = elements->size();
@@ -124,17 +124,17 @@ String Dictionary::_encode(char sep1, char sep2)
     return buf.str();
 }
 
-String Dictionary::encode()
+std::string Dictionary::encode()
 {
     return _encode('&', '=');
 }
 
-String Dictionary::encodeSimple()
+std::string Dictionary::encodeSimple()
 {
     return _encode('/', '/');
 }
 
-void Dictionary::decode(String url)
+void Dictionary::decode(std::string url)
 {
     const char* data = url.c_str();
     const char* dataEnd = data + url.length();
@@ -145,8 +145,8 @@ void Dictionary::decode(String url)
         }
         const char* eqPos = strchr(data, '=');
         if (eqPos && eqPos < ampPos) {
-            String key(data, eqPos - data);
-            String value(eqPos + 1, ampPos - eqPos - 1);
+            std::string key(data, eqPos - data);
+            std::string value(eqPos + 1, ampPos - eqPos - 1);
             key = urlUnescape(key);
             value = urlUnescape(value);
 
@@ -158,25 +158,25 @@ void Dictionary::decode(String url)
 
 // this is somewhat tricky as we need an exact amount of pairs
 // object_id=720&res_id=0
-void Dictionary::decodeSimple(String url)
+void Dictionary::decodeSimple(std::string url)
 {
-    String encoded;
-    int pos;
-    int last_pos = 0;
+    std::string encoded;
+    size_t pos;
+    size_t last_pos = 0;
     do {
-        pos = url.index(last_pos, '/');
-        if (pos < last_pos + 1)
+        pos = url.find('/', last_pos);
+        if (pos == std::string::npos || pos < last_pos + 1)
             break;
 
-        String key = urlUnescape(url.substring(last_pos, pos - last_pos));
+        std::string key = urlUnescape(url.substr(last_pos, pos - last_pos));
         last_pos = pos + 1;
-        pos = url.index(last_pos, '/');
-        if (pos == -1)
+        pos = url.find('/', last_pos);
+        if (pos == std::string::npos)
             pos = url.length();
         if (pos < last_pos + 1)
             break;
 
-        String value = urlUnescape(url.substring(last_pos, pos - last_pos));
+        std::string value = urlUnescape(url.substr(last_pos, pos - last_pos));
         last_pos = pos + 1;
         put(key, value);
     } while (last_pos < url.length());

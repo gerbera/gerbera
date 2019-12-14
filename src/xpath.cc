@@ -42,29 +42,29 @@ XPath::XPath(Ref<Element> context)
     this->context = context;
 }
 
-Ref<Element> XPath::getElement(String xpath)
+Ref<Element> XPath::getElement(std::string xpath)
 {
-    String axisPart = getAxisPart(xpath);
-    if (axisPart != nullptr) {
+    std::string axisPart = getAxisPart(xpath);
+    if (!axisPart.empty()) {
         throw _Exception(_("XPath::getElement: unexpected axis in ") + xpath);
     }
     return elementAtPath(xpath);
 }
 
-String XPath::getText(String xpath)
+std::string XPath::getText(std::string xpath)
 {
-    String axisPart = getAxisPart(xpath);
-    String pathPart = getPathPart(xpath);
+    std::string axisPart = getAxisPart(xpath);
+    std::string pathPart = getPathPart(xpath);
 
     Ref<Element> el = elementAtPath(pathPart);
     if (el == nullptr)
-        return nullptr;
+        return "";
 
-    if (axisPart == nullptr)
+    if (axisPart.empty())
         return el->getText();
 
-    String axis = getAxis(axisPart);
-    String spec = getSpec(axisPart);
+    std::string axis = getAxis(axisPart);
+    std::string spec = getSpec(axisPart);
 
     if (axis != "attribute") {
         throw _Exception(_("XPath::getText: unexpected axis: ") + axis);
@@ -73,24 +73,24 @@ String XPath::getText(String xpath)
     return el->getAttribute(spec);
 }
 
-String XPath::getPathPart(String xpath)
+std::string XPath::getPathPart(std::string xpath)
 {
-    int slashPos = xpath.rindex('/');
-    if (slashPos < 0)
+    size_t slashPos = xpath.rfind('/');
+    if (slashPos == std::string::npos)
         return xpath;
     if (strstr(xpath.c_str() + slashPos, "::")) {
-        return xpath.substring(0, slashPos);
+        return xpath.substr(0, slashPos);
     }
     return xpath;
 }
 
-Ref<Element> XPath::elementAtPath(String path)
+Ref<Element> XPath::elementAtPath(std::string path)
 {
     Ref<Element> cur = context;
-    Ref<Array<StringBase>> parts = split_string(path, '/');
+    std::vector<std::string> parts = split_string(path, '/');
 
-    for (int i = 0; i < parts->size(); i++) {
-        String part = parts->get(i);
+    for (size_t i = 0; i < parts.size(); i++) {
+        std::string part = parts[i];
         cur = cur->getChildByName(part);
         if (cur == nullptr)
             break;
@@ -98,24 +98,24 @@ Ref<Element> XPath::elementAtPath(String path)
     return cur;
 }
 
-String XPath::getAxisPart(String xpath)
+std::string XPath::getAxisPart(std::string xpath)
 {
-    int slashPos = xpath.rindex('/');
-    if (slashPos < 0)
+    size_t slashPos = xpath.rfind('/');
+    if (slashPos == std::string::npos)
         slashPos = 0;
     if (strstr(xpath.c_str() + slashPos, "::")) {
-        return xpath.substring(slashPos + 1);
+        return xpath.substr(slashPos + 1);
     }
-    return nullptr;
+    return "";
 }
 
-String XPath::getAxis(String axisPart)
+std::string XPath::getAxis(std::string axisPart)
 {
     const char* pos = strstr(axisPart.c_str(), "::");
-    return axisPart.substring(0, pos - axisPart.c_str());
+    return axisPart.substr(0, pos - axisPart.c_str());
 }
 
-String XPath::getSpec(String axisPart)
+std::string XPath::getSpec(std::string axisPart)
 {
     const char* pos = strstr(axisPart.c_str(), "::");
     return pos + 2;

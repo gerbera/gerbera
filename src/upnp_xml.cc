@@ -38,13 +38,13 @@
 using namespace zmm;
 using namespace mxml;
 
-UpnpXMLBuilder::UpnpXMLBuilder(String virtualUrl, String presentationURL)
+UpnpXMLBuilder::UpnpXMLBuilder(std::string virtualUrl, std::string presentationURL)
     : virtualURL(virtualUrl)
     , presentationURL(presentationURL)
 {
 }
 
-Ref<Element> UpnpXMLBuilder::createResponse(String actionName, String serviceType)
+Ref<Element> UpnpXMLBuilder::createResponse(std::string actionName, std::string serviceType)
 {
     Ref<Element> response(new Element(_("u:") + actionName + "Response"));
     response->setAttribute(_("xmlns:u"), serviceType);
@@ -52,18 +52,18 @@ Ref<Element> UpnpXMLBuilder::createResponse(String actionName, String serviceTyp
     return response;
 }
 
-Ref<Element> UpnpXMLBuilder::renderObject(Ref<CdsObject> obj, bool renderActions, int stringLimit)
+Ref<Element> UpnpXMLBuilder::renderObject(Ref<CdsObject> obj, bool renderActions, size_t stringLimit)
 {
     Ref<Element> result(new Element(_("")));
 
-    result->setAttribute(_("id"), String::from(obj->getID()));
-    result->setAttribute(_("parentID"), String::from(obj->getParentID()));
+    result->setAttribute(_("id"), std::to_string(obj->getID()));
+    result->setAttribute(_("parentID"), std::to_string(obj->getParentID()));
     result->setAttribute(_("restricted"), obj->isRestricted() ? _("1") : _("0"));
 
-    String tmp = obj->getTitle();
+    std::string tmp = obj->getTitle();
 
-    if ((stringLimit > 0) && (tmp.length() > stringLimit)) {
-        tmp = tmp.substring(0, getValidUTF8CutPosition(tmp, stringLimit - 3));
+    if ((stringLimit != std::string::npos) && (tmp.length() > stringLimit)) {
+        tmp = tmp.substr(0, getValidUTF8CutPosition(tmp, stringLimit - 3));
         tmp = tmp + _("...");
     }
 
@@ -79,8 +79,8 @@ Ref<Element> UpnpXMLBuilder::renderObject(Ref<CdsObject> obj, bool renderActions
         Ref<Array<DictionaryElement>> elements = meta->getElements();
         int len = elements->size();
 
-        String key;
-        String upnp_class = obj->getClass();
+        std::string key;
+        std::string upnp_class = obj->getClass();
 
         for (int i = 0; i < len; i++) {
             Ref<DictionaryElement> el = elements->get(i);
@@ -88,7 +88,7 @@ Ref<Element> UpnpXMLBuilder::renderObject(Ref<CdsObject> obj, bool renderActions
             if (key == MetadataHandler::getMetaFieldName(M_DESCRIPTION)) {
                 tmp = el->getValue();
                 if ((stringLimit > 0) && (tmp.length() > stringLimit)) {
-                    tmp = tmp.substring(0, getValidUTF8CutPosition(tmp, stringLimit - 3));
+                    tmp = tmp.substr(0, getValidUTF8CutPosition(tmp, stringLimit - 3));
                     tmp = tmp + _("...");
                 }
                 result->appendTextChild(key, tmp);
@@ -105,15 +105,15 @@ Ref<Element> UpnpXMLBuilder::renderObject(Ref<CdsObject> obj, bool renderActions
             Ref<Storage> storage = Storage::getInstance();
             // extract extension-less, lowercase track name to search for corresponding
             // image as cover alternative
-            String dctl = item->getTitle().toLower();
-            String trackArtBase = String();
-            int doti = dctl.rindex('.');
-            if (doti >= 0) {
-                trackArtBase = dctl.substring(0, doti);
+            std::string dctl = tolower_string(item->getTitle());
+            std::string trackArtBase = std::string();
+            size_t doti = dctl.rfind('.');
+            if (doti != std::string::npos) {
+                trackArtBase = dctl.substr(0, doti);
             }
-            String aa_id = storage->findFolderImage(item->getParentID(), trackArtBase);
-            if (aa_id != nullptr) {
-                String url;
+            std::string aa_id = storage->findFolderImage(item->getParentID(), trackArtBase);
+            if (!aa_id.empty()) {
+                std::string url;
                 Ref<Dictionary> dict(new Dictionary());
                 dict->put(_(URL_OBJECT_ID), aa_id);
 
@@ -131,14 +131,14 @@ Ref<Element> UpnpXMLBuilder::renderObject(Ref<CdsObject> obj, bool renderActions
         result->setName(_("container"));
         int childCount = cont->getChildCount();
         if (childCount >= 0)
-            result->setAttribute(_("childCount"), String::from(childCount));
+            result->setAttribute(_("childCount"), std::to_string(childCount));
 
-        String upnp_class = obj->getClass();
+        std::string upnp_class = obj->getClass();
         log_debug("container is class: %s\n", upnp_class.c_str());
         if (upnp_class == UPNP_DEFAULT_CLASS_MUSIC_ALBUM) {
             Ref<Dictionary> meta = obj->getMetadata();
 
-            String creator = meta->get(MetadataHandler::getMetaFieldName(M_ALBUMARTIST));
+            std::string creator = meta->get(MetadataHandler::getMetaFieldName(M_ALBUMARTIST));
             if (!string_ok(creator)) {
                 creator = meta->get(MetadataHandler::getMetaFieldName(M_ARTIST));
             }
@@ -147,7 +147,7 @@ Ref<Element> UpnpXMLBuilder::renderObject(Ref<CdsObject> obj, bool renderActions
                 result->appendElementChild(renderCreator(creator));
             }
 
-            String composer = meta->get(MetadataHandler::getMetaFieldName(M_COMPOSER));
+            std::string composer = meta->get(MetadataHandler::getMetaFieldName(M_COMPOSER));
             if (!string_ok(composer)) {
                 composer = _("None");
             }
@@ -156,7 +156,7 @@ Ref<Element> UpnpXMLBuilder::renderObject(Ref<CdsObject> obj, bool renderActions
                 result->appendElementChild(renderComposer(composer));
             }
 
-            String conductor = meta->get(MetadataHandler::getMetaFieldName(M_CONDUCTOR));
+            std::string conductor = meta->get(MetadataHandler::getMetaFieldName(M_CONDUCTOR));
             if (!string_ok(conductor)) {
                 conductor = _("None");
             }
@@ -165,7 +165,7 @@ Ref<Element> UpnpXMLBuilder::renderObject(Ref<CdsObject> obj, bool renderActions
                 result->appendElementChild(renderConductor(conductor));
             }
 
-            String orchestra = meta->get(MetadataHandler::getMetaFieldName(M_ORCHESTRA));
+            std::string orchestra = meta->get(MetadataHandler::getMetaFieldName(M_ORCHESTRA));
             if (!string_ok(orchestra)) {
                 orchestra = _("None");
             }
@@ -174,7 +174,7 @@ Ref<Element> UpnpXMLBuilder::renderObject(Ref<CdsObject> obj, bool renderActions
                 result->appendElementChild(renderOrchestra(orchestra));
             }
 
-            String date = meta->get(MetadataHandler::getMetaFieldName(M_UPNP_DATE));
+            std::string date = meta->get(MetadataHandler::getMetaFieldName(M_UPNP_DATE));
             if (!string_ok(date)) {
                 date = _("None");
             }
@@ -186,12 +186,12 @@ Ref<Element> UpnpXMLBuilder::renderObject(Ref<CdsObject> obj, bool renderActions
         }
         if (upnp_class == UPNP_DEFAULT_CLASS_MUSIC_ALBUM || upnp_class == UPNP_DEFAULT_CLASS_CONTAINER) {
             Ref<Storage> storage = Storage::getInstance();
-            String aa_id = storage->findFolderImage(cont->getID(), String());
+            std::string aa_id = storage->findFolderImage(cont->getID(), std::string());
 
-            if (aa_id != nullptr) {
+            if (!aa_id.empty()) {
                 log_debug("Using folder image as artwork for container\n");
 
-                String url;
+                std::string url;
                 Ref<Dictionary> dict(new Dictionary());
                 dict->put(_(URL_OBJECT_ID), aa_id);
 
@@ -223,7 +223,7 @@ Ref<Element> UpnpXMLBuilder::renderObject(Ref<CdsObject> obj, bool renderActions
                             if ((res->getHandlerType() == CH_ID3) || (res->getHandlerType() == CH_MP4) || (res->getHandlerType() == CH_FLAC) || (res->getHandlerType() == CH_FANART) || (res->getHandlerType() == CH_EXTURL)) {
 
 
-                                String url = getArtworkUrl(item);
+                                std::string url = getArtworkUrl(item);
                                 result->appendElementChild(renderAlbumArtURI(url));
 
                                 artAdded = true;
@@ -249,7 +249,7 @@ Ref<Element> UpnpXMLBuilder::renderObject(Ref<CdsObject> obj, bool renderActions
     return result;
 }
 
-void UpnpXMLBuilder::updateObject(Ref<CdsObject> obj, String text)
+void UpnpXMLBuilder::updateObject(Ref<CdsObject> obj, std::string text)
 {
     Ref<Parser> parser(new Parser());
     Ref<Element> root = parser->parseString(text)->getRoot();
@@ -258,32 +258,28 @@ void UpnpXMLBuilder::updateObject(Ref<CdsObject> obj, String text)
     if (IS_CDS_ACTIVE_ITEM(objectType)) {
         Ref<CdsActiveItem> aitem = RefCast(obj, CdsActiveItem);
 
-        String title = root->getChildText(_("dc:title"));
-        if (title != nullptr && title != "")
+        std::string title = root->getChildText(_("dc:title"));
+        if (!title.empty())
             aitem->setTitle(title);
 
         /// \todo description should be taken from the dictionary
-        String description = root->getChildText(_("dc:description"));
-        if (description == nullptr)
-            description = _("");
+        std::string description = root->getChildText(_("dc:description"));
         aitem->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION),
             description);
 
-        String location = root->getChildText(_("location"));
-        if (location != nullptr && location != "")
+        std::string location = root->getChildText(_("location"));
+        if (!location.empty())
             aitem->setLocation(location);
 
-        String mimeType = root->getChildText(_("mime-type"));
-        if (mimeType != nullptr && mimeType != "")
+        std::string mimeType = root->getChildText(_("mime-type"));
+        if (!mimeType.empty())
             aitem->setMimeType(mimeType);
 
-        String action = root->getChildText(_("action"));
-        if (action != nullptr && action != "")
+        std::string action = root->getChildText(_("action"));
+        if (!action.empty())
             aitem->setAction(action);
 
-        String state = root->getChildText(_("state"));
-        if (state == nullptr)
-            state = _("");
+        std::string state = root->getChildText(_("state"));
         aitem->setState(state);
     }
 }
@@ -452,7 +448,7 @@ Ref<Element> UpnpXMLBuilder::renderDeviceDescription()
     return root;
 }
 
-Ref<Element> UpnpXMLBuilder::renderResource(String URL, Ref<Dictionary> attributes)
+Ref<Element> UpnpXMLBuilder::renderResource(std::string URL, Ref<Dictionary> attributes)
 {
     Ref<Element> res(new Element(_("res")));
 
@@ -461,7 +457,7 @@ Ref<Element> UpnpXMLBuilder::renderResource(String URL, Ref<Dictionary> attribut
     Ref<Array<DictionaryElement>> elements = attributes->getElements();
     int len = elements->size();
 
-    String attribute;
+    std::string attribute;
 
     for (int i = 0; i < len; i++) {
         Ref<DictionaryElement> el = elements->get(i);
@@ -472,7 +468,7 @@ Ref<Element> UpnpXMLBuilder::renderResource(String URL, Ref<Dictionary> attribut
     return res;
 }
 
-Ref<Element> UpnpXMLBuilder::renderCaptionInfo(String URL)
+Ref<Element> UpnpXMLBuilder::renderCaptionInfo(std::string URL)
 {
     Ref<Element> cap(new Element(_("sec:CaptionInfoEx")));
 
@@ -483,14 +479,14 @@ Ref<Element> UpnpXMLBuilder::renderCaptionInfo(String URL)
     // This tag seems to be only a hint for Samsung devices,
     // though it's necessary.
 
-    int endp = URL.rindex('.');
-    cap->setText(URL.substring(0, endp) + ".srt");
+    size_t endp = URL.rfind('.');
+    cap->setText(URL.substr(0, endp) + ".srt");
     cap->setAttribute(_("sec:type"), _("srt"));
 
     return cap;
 }
 
-Ref<Element> UpnpXMLBuilder::renderCreator(String creator)
+Ref<Element> UpnpXMLBuilder::renderCreator(std::string creator)
 {
     Ref<Element> out(new Element(_("dc:creator")));
 
@@ -499,35 +495,35 @@ Ref<Element> UpnpXMLBuilder::renderCreator(String creator)
     return out;
 }
 
-Ref<Element> UpnpXMLBuilder::renderAlbumArtURI(String uri)
+Ref<Element> UpnpXMLBuilder::renderAlbumArtURI(std::string uri)
 {
     Ref<Element> out(new Element(_("upnp:albumArtURI")));
     out->setText(uri);
     return out;
 }
 
-Ref<Element> UpnpXMLBuilder::renderComposer(String composer)
+Ref<Element> UpnpXMLBuilder::renderComposer(std::string composer)
 {
     Ref<Element> out(new Element(_("upnp:composer")));
     out->setText(composer);
     return out;
 }
 
-Ref<Element> UpnpXMLBuilder::renderConductor(String Conductor)
+Ref<Element> UpnpXMLBuilder::renderConductor(std::string Conductor)
 {
     Ref<Element> out(new Element(_("upnp:Conductor")));
     out->setText(Conductor);
     return out;
 }
 
-Ref<Element> UpnpXMLBuilder::renderOrchestra(String orchestra)
+Ref<Element> UpnpXMLBuilder::renderOrchestra(std::string orchestra)
 {
     Ref<Element> out(new Element(_("upnp:orchestra")));
     out->setText(orchestra);
     return out;
 }
 
-Ref<Element> UpnpXMLBuilder::renderAlbumDate(String date) {
+Ref<Element> UpnpXMLBuilder::renderAlbumDate(std::string date) {
     Ref<Element> out(new Element(_("upnp:date")));
     out->setText(date);
     return out;
@@ -541,14 +537,14 @@ Ref<UpnpXMLBuilder::PathBase> UpnpXMLBuilder::getPathBase(Ref<CdsItem> item, boo
     /// \todo resource options must be read from configuration files
 
     Ref<Dictionary> dict(new Dictionary());
-    dict->put(_(URL_OBJECT_ID), String::from(item->getID()));
+    dict->put(_(URL_OBJECT_ID), std::to_string(item->getID()));
 
     pathBase->addResID = false;
     /// \todo move this down into the "for" loop and create different urls
     /// for each resource once the io handlers are ready
     int objectType = item->getObjectType();
     if (IS_CDS_ITEM_INTERNAL_URL(objectType)) {
-        pathBase->pathBase = _(_URL_PARAM_SEPARATOR) + CONTENT_SERVE_HANDLER + _(_URL_PARAM_SEPARATOR) + item->getLocation();
+        pathBase->pathBase = std::string(_URL_PARAM_SEPARATOR) + CONTENT_SERVE_HANDLER + _(_URL_PARAM_SEPARATOR) + item->getLocation();
         return pathBase;
     }
 
@@ -559,47 +555,47 @@ Ref<UpnpXMLBuilder::PathBase> UpnpXMLBuilder::getPathBase(Ref<CdsItem> item, boo
         }
 
         if ((item->getFlag(OBJECT_FLAG_ONLINE_SERVICE) && item->getFlag(OBJECT_FLAG_PROXY_URL)) || forceLocal) {
-            pathBase->pathBase = _(_URL_PARAM_SEPARATOR) + CONTENT_ONLINE_HANDLER + _(_URL_PARAM_SEPARATOR) + dict->encodeSimple() + _(_URL_PARAM_SEPARATOR) + _(URL_RESOURCE_ID) + _(_URL_PARAM_SEPARATOR);
+            pathBase->pathBase = std::string(_URL_PARAM_SEPARATOR) + CONTENT_ONLINE_HANDLER + _(_URL_PARAM_SEPARATOR) + dict->encodeSimple() + _(_URL_PARAM_SEPARATOR) + _(URL_RESOURCE_ID) + _(_URL_PARAM_SEPARATOR);
             pathBase->addResID = true;
             return pathBase;
         }
     }
 
-    pathBase->pathBase = _(_URL_PARAM_SEPARATOR) + CONTENT_MEDIA_HANDLER + _(_URL_PARAM_SEPARATOR) + dict->encodeSimple() + _(_URL_PARAM_SEPARATOR) + _(URL_RESOURCE_ID) + _(_URL_PARAM_SEPARATOR);
+    pathBase->pathBase = std::string(_URL_PARAM_SEPARATOR) + CONTENT_MEDIA_HANDLER + _(_URL_PARAM_SEPARATOR) + dict->encodeSimple() + _(_URL_PARAM_SEPARATOR) + _(URL_RESOURCE_ID) + _(_URL_PARAM_SEPARATOR);
     pathBase->addResID = true;
     return pathBase;
 }
 
-String UpnpXMLBuilder::getFirstResourcePath(Ref<CdsItem> item)
+std::string UpnpXMLBuilder::getFirstResourcePath(Ref<CdsItem> item)
 {
-    zmm::String result;
+    std::string result;
     Ref<PathBase> urlBase = getPathBase(item);
     int objectType = item->getObjectType();
 
     if (IS_CDS_ITEM_EXTERNAL_URL(objectType) && !urlBase->addResID) { // a remote resource
       result = urlBase->pathBase;
     } else if (urlBase->addResID){                                    // a proxy, remote, resource
-      result = _(SERVER_VIRTUAL_DIR) + urlBase->pathBase + 0;
+      result = _(SERVER_VIRTUAL_DIR) + urlBase->pathBase + std::to_string(0);
     } else {                                                          // a local resource
       result = _(SERVER_VIRTUAL_DIR) + urlBase->pathBase;
     }
     return result;
 }
 
-String UpnpXMLBuilder::getArtworkUrl(zmm::Ref<CdsItem> item) {
+std::string UpnpXMLBuilder::getArtworkUrl(zmm::Ref<CdsItem> item) {
     // FIXME: This is temporary until we do artwork properly.
     log_debug("Building Art url for %d\n", item->getID());
 
     Ref<PathBase> urlBase = getPathBase(item);
     if (urlBase->addResID) {
-        return virtualURL + urlBase->pathBase + 1 + "/rct/aa";
+        return virtualURL + urlBase->pathBase + std::to_string(1) + "/rct/aa";
     }
     return virtualURL + urlBase->pathBase;
 }
 
-String UpnpXMLBuilder::renderExtension(String contentType, String location)
+std::string UpnpXMLBuilder::renderExtension(std::string contentType, std::string location)
 {
-    String ext = _(_URL_PARAM_SEPARATOR) + URL_FILE_EXTENSION + _URL_PARAM_SEPARATOR + "file";
+    std::string ext = std::string(_URL_PARAM_SEPARATOR) + URL_FILE_EXTENSION + _URL_PARAM_SEPARATOR + "file";
 
     if (string_ok(contentType) && (contentType != CONTENT_TYPE_PLAYLIST)) {
         ext = ext + _(".") + contentType;
@@ -607,11 +603,11 @@ String UpnpXMLBuilder::renderExtension(String contentType, String location)
     }
 
     if (string_ok(location)) {
-        int dot = location.rindex('.');
-        if (dot > -1) {
-            String extension = location.substring(dot);
+        size_t dot = location.rfind('.');
+        if (dot != std::string::npos) {
+            std::string extension = location.substr(dot);
             // make sure that the extension does not contain the separator character
-            if (string_ok(extension) && (extension.index(URL_PARAM_SEPARATOR) == -1) && (extension.index(URL_PARAM_SEPARATOR) == -1)) {
+            if (string_ok(extension) && (extension.find(URL_PARAM_SEPARATOR) == std::string::npos) && (extension.find(URL_PARAM_SEPARATOR) == std::string::npos)) {
                 ext = ext + extension;
                 return ext;
             }
@@ -631,24 +627,24 @@ void UpnpXMLBuilder::addResources(Ref<CdsItem> item, Ref<Element> element)
 
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
     if (config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED) && (item->getMimeType().startsWith(_("video")) || item->getFlag(OBJECT_FLAG_OGG_THEORA))) {
-        String videoresolution = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_RESOLUTION));
+        std::string videoresolution = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_RESOLUTION));
         int x;
         int y;
 
         if (string_ok(videoresolution) && check_resolution(videoresolution, &x, &y)) {
-            String thumb_mimetype = mappings->get(_(CONTENT_TYPE_JPG));
+            std::string thumb_mimetype = mappings->get(_(CONTENT_TYPE_JPG));
             if (!string_ok(thumb_mimetype))
                 thumb_mimetype = _("image/jpeg");
 
             Ref<CdsResource> ffres(new CdsResource(CH_FFTH));
-            ffres->addParameter(_(RESOURCE_HANDLER), String::from(CH_FFTH));
+            ffres->addParameter(_(RESOURCE_HANDLER), std::string::from(CH_FFTH));
             ffres->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
                 renderProtocolInfo(thumb_mimetype));
             ffres->addOption(_(RESOURCE_CONTENT_TYPE), _(THUMBNAIL));
 
             y = config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE) * y / x;
             x = config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE);
-            String resolution = String::from(x) + "x" + String::from(y);
+            std::string resolution = std::string::from(x) + "x" + std::string::from(y);
             ffres->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION),
                 resolution);
             item->addResource(ffres);
@@ -681,7 +677,7 @@ void UpnpXMLBuilder::addResources(Ref<CdsItem> item, Ref<Element> element)
             if (tp == nullptr)
                 throw _Exception(_("Invalid profile encountered!"));
 
-            String ct = mappings->get(item->getMimeType());
+            std::string ct = mappings->get(item->getMimeType());
             if (ct == CONTENT_TYPE_OGG) {
                 if (((item->getFlag(OBJECT_FLAG_OGG_THEORA)) && (!tp->isTheora())) || (!item->getFlag(OBJECT_FLAG_OGG_THEORA) && (tp->isTheora()))) {
                     continue;
@@ -691,11 +687,11 @@ void UpnpXMLBuilder::addResources(Ref<CdsItem> item, Ref<Element> element)
             else if (ct == CONTENT_TYPE_AVI) {
                 avi_fourcc_listmode_t fcc_mode = tp->getAVIFourCCListMode();
 
-                Ref<Array<StringBase>> fcc_list = tp->getAVIFourCCList();
+                std::vector<std::string> fcc_list = tp->getAVIFourCCList();
                 // mode is either process or ignore, so we will have to take a
                 // look at the settings
                 if (fcc_mode != FCC_None) {
-                    String current_fcc = item->getResource(0)->getOption(_(RESOURCE_OPTION_FOURCC));
+                    std::string current_fcc = item->getResource(0)->getOption(_(RESOURCE_OPTION_FOURCC));
                     // we can not do much if the item has no fourcc info,
                     // so we will transcode it anyway
                     if (!string_ok(current_fcc)) {
@@ -709,8 +705,8 @@ void UpnpXMLBuilder::addResources(Ref<CdsItem> item, Ref<Element> element)
                     // let's have a look if it matches the list
                     else {
                         bool fcc_match = false;
-                        for (int f = 0; f < fcc_list->size(); f++) {
-                            if (current_fcc == fcc_list->get(f)->data)
+                        for (size_t f = 0; f < fcc_list.size(); f++) {
+                            if (current_fcc == fcc_list[f])
                                 fcc_match = true;
                         }
 
@@ -731,38 +727,38 @@ void UpnpXMLBuilder::addResources(Ref<CdsItem> item, Ref<Element> element)
                 item->getResource(0)->getOption(_(CONTENT_TYPE_OGG)));
             t_res->addParameter(_(URL_PARAM_TRANSCODE), _(URL_VALUE_TRANSCODE));
 
-            String targetMimeType = tp->getTargetMimeType();
+            std::string targetMimeType = tp->getTargetMimeType();
 
             if (!tp->isThumbnail()) {
                 // duration should be the same for transcoded media, so we can
                 // take the value from the original resource
-                String duration = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_DURATION));
+                std::string duration = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_DURATION));
                 if (string_ok(duration))
                     t_res->addAttribute(MetadataHandler::getResAttrName(R_DURATION),
                         duration);
 
                 int freq = tp->getSampleFreq();
                 if (freq == SOURCE) {
-                    String frequency = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY));
+                    std::string frequency = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY));
                     if (string_ok(frequency)) {
                         t_res->addAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY), frequency);
                         targetMimeType = targetMimeType + _(";rate=") + frequency;
                     }
                 } else if (freq != OFF) {
-                    t_res->addAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY), String::from(freq));
-                    targetMimeType = targetMimeType + _(";rate=") + String::from(freq);
+                    t_res->addAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY), std::to_string(freq));
+                    targetMimeType = targetMimeType + _(";rate=") + std::to_string(freq);
                 }
 
                 int chan = tp->getNumChannels();
                 if (chan == SOURCE) {
-                    String nchannels = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS));
+                    std::string nchannels = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS));
                     if (string_ok(nchannels)) {
                         t_res->addAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS), nchannels);
                         targetMimeType = targetMimeType + _(";channels=") + nchannels;
                     }
                 } else if (chan != OFF) {
-                    t_res->addAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS), String::from(chan));
-                    targetMimeType = targetMimeType + _(";channels=") + String::from(chan);
+                    t_res->addAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS), std::to_string(chan));
+                    targetMimeType = targetMimeType + _(";channels=") + std::to_string(chan);
                 }
             }
 
@@ -792,23 +788,23 @@ void UpnpXMLBuilder::addResources(Ref<CdsItem> item, Ref<Element> element)
     for (int i = 0; i < resCount; i++) {
 
         /// \todo what if the resource has a different mimetype than the item??
-        /*        String mimeType = item->getMimeType();
+        /*        std::string mimeType = item->getMimeType();
                   if (!string_ok(mimeType)) mimeType = DEFAULT_MIMETYPE; */
 
         Ref<CdsResource> res = item->getResource(i);
         Ref<Dictionary> res_attrs = res->getAttributes();
         Ref<Dictionary> res_params = res->getParameters();
-        String protocolInfo = res_attrs->get(MetadataHandler::getResAttrName(R_PROTOCOLINFO));
-        String mimeType = getMTFromProtocolInfo(protocolInfo);
+        std::string protocolInfo = res_attrs->get(MetadataHandler::getResAttrName(R_PROTOCOLINFO));
+        std::string mimeType = getMTFromProtocolInfo(protocolInfo);
 
-        int pos = mimeType.find(";");
-        if (pos != -1) {
-            mimeType = mimeType.substring(0, pos);
+        size_t pos = mimeType.find(";");
+        if (pos != std::string::npos) {
+            mimeType = mimeType.substr(0, pos);
         }
 
         assert(string_ok(mimeType));
-        String contentType = mappings->get(mimeType);
-        String url;
+        std::string contentType = mappings->get(mimeType);
+        std::string url;
 
         /// \todo who will sync mimetype that is part of the protocol info and
         /// that is lying in the resources with the information that is in the
@@ -827,7 +823,7 @@ void UpnpXMLBuilder::addResources(Ref<CdsItem> item, Ref<Element> element)
         bool transcoded = (res_params->get(_(URL_PARAM_TRANSCODE)) == URL_VALUE_TRANSCODE);
         if (!transcoded) {
             if (urlBase->addResID) {
-                url = urlBase->pathBase + realCount;
+                url = urlBase->pathBase + std::to_string(realCount);
             } else
                 url = urlBase->pathBase;
 
@@ -863,7 +859,7 @@ void UpnpXMLBuilder::addResources(Ref<CdsItem> item, Ref<Element> element)
 
             if (handlerType == CH_ID3 || (handlerType == CH_MP4) || handlerType == CH_FLAC || handlerType == CH_FANART || handlerType == CH_EXTURL) {
 
-                String rct;
+                std::string rct;
                 if (res->getHandlerType() == CH_EXTURL)
                     rct = res->getOption(_(RESOURCE_CONTENT_TYPE));
                 else
@@ -897,21 +893,21 @@ void UpnpXMLBuilder::addResources(Ref<CdsItem> item, Ref<Element> element)
             }
         }
         if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO)) {
-            String extend;
+            std::string extend;
             if (contentType == CONTENT_TYPE_JPG) {
-                String resolution = res_attrs->get(MetadataHandler::getResAttrName(R_RESOLUTION));
+                std::string resolution = res_attrs->get(MetadataHandler::getResAttrName(R_RESOLUTION));
                 int x;
                 int y;
                 if (string_ok(resolution) && check_resolution(resolution, &x, &y)) {
 
                     if ((i > 0) && (((item->getResource(i)->getHandlerType() == CH_LIBEXIF) && (item->getResource(i)->getParameter(_(RESOURCE_CONTENT_TYPE)) == EXIF_THUMBNAIL)) || (item->getResource(i)->getOption(_(RESOURCE_CONTENT_TYPE)) == EXIF_THUMBNAIL) || (item->getResource(i)->getOption(_(RESOURCE_CONTENT_TYPE)) == THUMBNAIL)) && (x <= 160) && (y <= 160))
-                        extend = _(D_PROFILE) + "=" + D_JPEG_TN + ";";
+                        extend = std::string(D_PROFILE) + "=" + D_JPEG_TN + ";";
                     else if ((x <= 640) && (y <= 420))
-                        extend = _(D_PROFILE) + "=" + D_JPEG_SM + ";";
+                        extend = std::string(D_PROFILE) + "=" + D_JPEG_SM + ";";
                     else if ((x <= 1024) && (y <= 768))
-                        extend = _(D_PROFILE) + "=" + D_JPEG_MED + ";";
+                        extend = std::string(D_PROFILE) + "=" + D_JPEG_MED + ";";
                     else if ((x <= 4096) && (y <= 4096))
-                        extend = _(D_PROFILE) + "=" + D_JPEG_LRG + ";";
+                        extend = std::string(D_PROFILE) + "=" + D_JPEG_LRG + ";";
                 }
             } else {
                 /* handle audio/video content */
@@ -925,7 +921,7 @@ void UpnpXMLBuilder::addResources(Ref<CdsItem> item, Ref<Element> element)
             if (!isExtThumbnail && transcoded) {
                 extend = extend + D_OP + "=" + D_OP_SEEK_DISABLED + ";" + D_CONVERSION_INDICATOR + "=" D_CONVERSION;
 
-                if (mimeType.startsWith(_("audio")) || mimeType.startsWith(_("video")))
+                if (startswith_string(mimeType, _("audio")) || startswith_string(mimeType, _("video")))
                     extend = extend + ";" D_FLAGS "=" D_TR_FLAGS_AV;
             } else {
                 if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_DLNA_SEEK))
@@ -935,12 +931,12 @@ void UpnpXMLBuilder::addResources(Ref<CdsItem> item, Ref<Element> element)
                 extend = extend + D_CONVERSION_INDICATOR + "=" + D_NO_CONVERSION;
             }
 
-            protocolInfo = protocolInfo.substring(0, protocolInfo.rindex(':') + 1) + extend;
+            protocolInfo = protocolInfo.substr(0, protocolInfo.rfind(':') + 1) + extend;
             res_attrs->put(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
                 protocolInfo);
 
             if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK)) {
-                if (mimeType.startsWith(_("video"))) {
+                if (startswith_string(mimeType, _("video"))) {
                     element->appendElementChild(renderCaptionInfo(url));
                 }
             }

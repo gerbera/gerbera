@@ -39,27 +39,27 @@
 using namespace zmm;
 using namespace mxml;
 
-Element::Element(String name) : Node()
+Element::Element(std::string name) : Node()
 {
     type = mxml_node_element;
     this->name = name;
     arrayType = false;
-    arrayName = nullptr;
-    textKey = nullptr;
+    arrayName = "";
+    textKey = "";
 }
-Element::Element(String name, Ref<Context> context) : Node()
+Element::Element(std::string name, Ref<Context> context) : Node()
 {
     type = mxml_node_element;
     this->name = name;
     this->context = context;
     arrayType = false;
-    arrayName = nullptr;
-    textKey = nullptr;
+    arrayName = "";
+    textKey = "";
 }
-String Element::getAttribute(String name)
+std::string Element::getAttribute(std::string name)
 {
     if(attributes == nullptr)
-        return nullptr;
+        return "";
     int len = attributes->size();
     for(int i = 0; i < len; i++)
     {
@@ -67,9 +67,9 @@ String Element::getAttribute(String name)
         if(attr->name == name)
             return attr->value;
     }
-    return nullptr;
+    return "";
 }
-void Element::addAttribute(String name, String value, enum mxml_value_type type)
+void Element::addAttribute(std::string name, std::string value, enum mxml_value_type type)
 {
     Ref<Attribute> attr = Ref<Attribute>(new Attribute(name, value, type));
     addAttribute(attr);
@@ -82,7 +82,7 @@ void Element::addAttribute(Ref<Attribute> attr)
     attributes->append(attr);
 }
 
-void Element::setAttribute(String name, String value, enum mxml_value_type type)
+void Element::setAttribute(std::string name, std::string value, enum mxml_value_type type)
 {
     if (attributes == nullptr)
         attributes = Ref<Array<Attribute> >(new Array<Attribute>());
@@ -155,7 +155,7 @@ Ref<Node> Element::getChild(int index, enum mxml_node_types type, bool remove)
     return nullptr;
 }
 
-bool Element::removeElementChild(String name, bool removeAll)
+bool Element::removeElementChild(std::string name, bool removeAll)
 {
     int id = getChildIdByName(name);
     if (id < 0)
@@ -202,7 +202,7 @@ void Element::removeWhitespace()
         if (node->getType() == mxml_node_text)
         {
             Ref<Text> text = RefCast(node, Text);
-            String trimmed = trim_string(text->getText());
+            std::string trimmed = trim_string(text->getText());
             if (string_ok(trimmed))
             {
                 text->setText(trimmed);
@@ -267,7 +267,7 @@ void Element::indent(int level)
             }
             if (newlineBefore)
             {
-                Ref<Text> indentText(new Text(_("\n")+ptr));
+                Ref<Text> indentText(new Text(std::string("\n") + ptr));
                 insertChild(i++,RefCast(indentText, Node));
                 numChildren++;
             }
@@ -275,12 +275,12 @@ void Element::indent(int level)
         
         ptr += 2;
         
-        Ref<Text> indentTextAfter(new Text(_("\n")+ptr));
+        Ref<Text> indentTextAfter(new Text(std::string("\n") + ptr));
         appendChild(RefCast(indentTextAfter, Node));
     }
 }
 
-String Element::getText()
+std::string Element::getText()
 {
     std::ostringstream buf;
     Ref<Text> text;
@@ -335,7 +335,7 @@ Ref<Attribute> Element::getAttribute(int index)
     return attributes->get(index);
 }
 
-void Element::setText(String str, enum mxml_value_type type)
+void Element::setText(std::string str, enum mxml_value_type type)
 {
     if (childCount() > 1)
         throw _Exception(_("Element::setText() cannot be called on an element which has more than one child"));
@@ -355,20 +355,20 @@ void Element::setText(String str, enum mxml_value_type type)
     }
 }
 
-void Element::appendTextChild(String name, String text, enum mxml_value_type type)
+void Element::appendTextChild(std::string name, std::string text, enum mxml_value_type type)
 {
-    String attr;
-    String val;
-    int i, j;
+    std::string attr;
+    std::string val;
+    size_t i, j;
 
     // name@attr[val] => <name attr="val">
-    if (((i = name.index('@')) > 0)
-        && ((j = name.index(i + 1, '[')) > 0)
+    if (((i = name.find('@')) != std::string::npos)
+        && ((j = name.find('[', i + 1)) != std::string::npos)
         && (name[name.length() - 1] == ']'))
     {
-        attr = name.substring(i + 1, j - i - 1);
-        val = name.substring(j + 1, name.length() - j - 2);
-        name = name.substring(0, i);
+        attr = name.substr(i + 1, j - i - 1);
+        val = name.substr(j + 1, name.length() - j - 2);
+        name = name.substr(0, i);
     }
     Ref<Element> el = Ref<Element>(new Element(name));
     if (attr.length() && val.length())
@@ -379,7 +379,7 @@ void Element::appendTextChild(String name, String text, enum mxml_value_type typ
 
 
 
-int Element::getChildIdByName(String name)
+int Element::getChildIdByName(std::string name)
 {
     if(children == nullptr)
         return -1;
@@ -389,14 +389,14 @@ int Element::getChildIdByName(String name)
         if (nd->getType() == mxml_node_element)
         {
             Ref<Element> el = RefCast(nd, Element);
-            if (name == nullptr || el->name == name)
+            if (name.empty() || el->name == name)
                 return i;
         }
     }
     return -1;
 }
 
-Ref<Element> Element::getChildByName(String name)
+Ref<Element> Element::getChildByName(std::string name)
 {
     int id = getChildIdByName(name);
     if (id < 0)
@@ -404,7 +404,7 @@ Ref<Element> Element::getChildByName(String name)
     return RefCast(getChild(id), Element);
 }
 
-String Element::getChildText(String name)
+std::string Element::getChildText(std::string name)
 {
     Ref<Element> el = getChildByName(name);
     if(el == nullptr)

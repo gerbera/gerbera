@@ -46,7 +46,7 @@ AutoscanDirectory::AutoscanDirectory()
     timer_parameter = Ref<Timer::Parameter>(new Timer::Parameter(Timer::Parameter::IDAutoscan, INVALID_SCAN_ID));
 }
 
-AutoscanDirectory::AutoscanDirectory(String location, ScanMode mode,
+AutoscanDirectory::AutoscanDirectory(std::string location, ScanMode mode,
     ScanLevel level, bool recursive, bool persistent,
     int id, unsigned int interval, bool hidden)
     : location(location)
@@ -97,7 +97,7 @@ int AutoscanList::add(Ref<AutoscanDirectory> dir)
 int AutoscanList::_add(Ref<AutoscanDirectory> dir)
 {
 
-    String loc = dir->getLocation();
+    std::string loc = dir->getLocation();
     int nil_index = -1;
 
     for (int i = 0; i < list->size(); i++) {
@@ -165,7 +165,7 @@ Ref<AutoscanDirectory> AutoscanList::getByObjectID(int objectID)
     return nullptr;
 }
 
-Ref<AutoscanDirectory> AutoscanList::get(String location)
+Ref<AutoscanDirectory> AutoscanList::get(std::string location)
 {
     AutoLock lock(mutex);
     for (int i = 0; i < list->size(); i++) {
@@ -215,7 +215,7 @@ int AutoscanList::removeByObjectID(int objectID)
     return INVALID_SCAN_ID;
 }
 
-int AutoscanList::remove(String location)
+int AutoscanList::remove(std::string location)
 {
     AutoLock lock(mutex);
 
@@ -234,14 +234,14 @@ int AutoscanList::remove(String location)
     return INVALID_SCAN_ID;
 }
 
-Ref<AutoscanList> AutoscanList::removeIfSubdir(String parent, bool persistent)
+Ref<AutoscanList> AutoscanList::removeIfSubdir(std::string parent, bool persistent)
 {
     AutoLock lock(mutex);
 
     Ref<AutoscanList> rm_id_list(new AutoscanList());
 
     for (int i = 0; i < list->size(); i++) {
-        if (list->get(i) != nullptr && (list->get(i)->getLocation().startsWith(parent))) {
+        if (list->get(i) != nullptr && startswith_string(list->get(i)->getLocation(), parent)) {
             Ref<AutoscanDirectory> dir = list->get(i);
             if (dir == nullptr)
                 continue;
@@ -278,12 +278,9 @@ void AutoscanList::notifyAll(Timer::Subscriber* sub)
     }
 }
 
-void AutoscanDirectory::setLocation(String location)
+void AutoscanDirectory::setLocation(std::string location)
 {
-    if (this->location == nullptr)
-        this->location = location;
-    else
-        throw _Exception(_("UNALLOWED LOCATION CHANGE!"));
+    this->location = location;
 }
 
 void AutoscanDirectory::setScanID(int id)
@@ -292,9 +289,9 @@ void AutoscanDirectory::setScanID(int id)
     timer_parameter->setID(id);
 }
 
-String AutoscanDirectory::mapScanmode(ScanMode scanmode)
+std::string AutoscanDirectory::mapScanmode(ScanMode scanmode)
 {
-    String scanmode_str = nullptr;
+    std::string scanmode_str;
     switch (scanmode) {
     case ScanMode::Timed:
         scanmode_str = _("timed");
@@ -302,13 +299,13 @@ String AutoscanDirectory::mapScanmode(ScanMode scanmode)
     case ScanMode::INotify:
         scanmode_str = _("inotify");
         break;
-    }
-    if (scanmode_str == nullptr)
+    default:
         throw Exception(_("illegal scanmode given to mapScanmode()"));
+    }
     return scanmode_str;
 }
 
-ScanMode AutoscanDirectory::remapScanmode(String scanmode)
+ScanMode AutoscanDirectory::remapScanmode(std::string scanmode)
 {
     if (scanmode == "timed")
         return ScanMode::Timed;
@@ -318,9 +315,9 @@ ScanMode AutoscanDirectory::remapScanmode(String scanmode)
         throw _Exception(_("illegal scanmode (") + scanmode + ") given to remapScanmode()");
 }
 
-String AutoscanDirectory::mapScanlevel(ScanLevel scanlevel)
+std::string AutoscanDirectory::mapScanlevel(ScanLevel scanlevel)
 {
-    String scanlevel_str = nullptr;
+    std::string scanlevel_str;
     switch (scanlevel) {
     case ScanLevel::Basic:
         scanlevel_str = _("basic");
@@ -328,13 +325,13 @@ String AutoscanDirectory::mapScanlevel(ScanLevel scanlevel)
     case ScanLevel::Full:
         scanlevel_str = _("full");
         break;
-    }
-    if (scanlevel_str == nullptr)
+    default:
         throw Exception(_("illegal scanlevel given to mapScanlevel()"));
+    }
     return scanlevel_str;
 }
 
-ScanLevel AutoscanDirectory::remapScanlevel(String scanlevel)
+ScanLevel AutoscanDirectory::remapScanlevel(std::string scanlevel)
 {
     if (scanlevel == "basic")
         return ScanLevel::Basic;

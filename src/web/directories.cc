@@ -48,9 +48,9 @@ void web::directories::process()
 {
     check_request();
 
-    String path;
-    String parentID = param(_("parent_id"));
-    if (parentID == nullptr || parentID == "0")
+    std::string path;
+    std::string parentID = param(_("parent_id"));
+    if (parentID.empty() || parentID == "0")
         path = _(FS_ROOT_DIRECTORY);
     else
         path = hex_decode_string(parentID);
@@ -73,20 +73,20 @@ void web::directories::process()
         Ref<FsObject> obj = arr->get(i);
 
         Ref<Element> ce(new Element(_("container")));
-        String filename = obj->filename;
-        String filepath;
+        std::string filename = obj->filename;
+        std::string filepath;
         if (path.c_str()[path.length() - 1] == '/')
             filepath = path + filename;
         else
             filepath = path + '/' + filename;
 
         /// \todo replace hex_encode with base64_encode?
-        String id = hex_encode(filepath.c_str(), filepath.length());
+        std::string id = hex_encode(filepath.c_str(), filepath.length());
         ce->setAttribute(_("id"), id);
         if (obj->hasContent)
-            ce->setAttribute(_("child_count"), String::from(1), mxml_int_type);
+            ce->setAttribute(_("child_count"), std::to_string(1), mxml_int_type);
         else
-            ce->setAttribute(_("child_count"), String::from(0), mxml_int_type);
+            ce->setAttribute(_("child_count"), std::to_string(0), mxml_int_type);
 
         Ref<StringConverter> f2i = StringConverter::f2i();
         ce->setTextKey(_("title"));

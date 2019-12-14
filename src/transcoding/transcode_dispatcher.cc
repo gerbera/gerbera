@@ -43,9 +43,9 @@ TranscodeDispatcher::TranscodeDispatcher() : TranscodeHandler()
 }
 
 Ref<IOHandler> TranscodeDispatcher::open(Ref<TranscodingProfile> profile, 
-                                         String location, 
+                                         std::string location, 
                                          Ref<CdsObject> obj,
-                                         String range)
+                                         std::string range)
 {
     if (profile == nullptr)
         throw _Exception(_("Transcoding of file ") + location +
