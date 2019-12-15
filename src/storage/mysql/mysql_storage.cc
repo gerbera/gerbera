@@ -143,12 +143,12 @@ void MysqlStorage::init()
 
     Ref<ConfigManager> config = ConfigManager::getInstance();
 
-    String dbHost = config->getOption(CFG_SERVER_STORAGE_MYSQL_HOST);
-    String dbName = config->getOption(CFG_SERVER_STORAGE_MYSQL_DATABASE);
-    String dbUser = config->getOption(CFG_SERVER_STORAGE_MYSQL_USERNAME);
+    std::string dbHost = config->getOption(CFG_SERVER_STORAGE_MYSQL_HOST);
+    std::string dbName = config->getOption(CFG_SERVER_STORAGE_MYSQL_DATABASE);
+    std::string dbUser = config->getOption(CFG_SERVER_STORAGE_MYSQL_USERNAME);
     int dbPort = config->getIntOption(CFG_SERVER_STORAGE_MYSQL_PORT);
-    String dbPass = config->getOption(CFG_SERVER_STORAGE_MYSQL_PASSWORD);
-    String dbSock = config->getOption(CFG_SERVER_STORAGE_MYSQL_SOCKET);
+    std::string dbPass = config->getOption(CFG_SERVER_STORAGE_MYSQL_PASSWORD);
+    std::string dbSock = config->getOption(CFG_SERVER_STORAGE_MYSQL_SOCKET);
 
     MYSQL* res_mysql;
 
@@ -181,14 +181,14 @@ void MysqlStorage::init()
     int res = mysql_real_query(&db, MYSQL_SET_NAMES, strlen(MYSQL_SET_NAMES));
     if(res)
     {
-        String myError = getError(&db);
-        throw _StorageException(nullptr, "MySQL query 'SET NAMES' failed!");
+        std::string myError = getError(&db);
+        throw _StorageException("", "MySQL query 'SET NAMES' failed!");
     }
     */
 
     mysql_connection = true;
 
-    String dbVersion = nullptr;
+    std::string dbVersion = nullptr;
     try {
         dbVersion = getInternalSetting("db_version");
     } catch (Exception) {
@@ -211,7 +211,7 @@ void MysqlStorage::init()
         do {
             ret = mysql_real_query(&db, sql_start, sql_end - sql_start);
             if (ret) {
-                String myError = getError(&db);
+                std::string myError = getError(&db);
                 throw _StorageException(myError, "Mysql: error while creating db: " + myError);
             }
             sql_start = sql_end + 1; // skip ';'
@@ -281,23 +281,23 @@ void MysqlStorage::init()
     dbReady();
 }
 
-String MysqlStorage::quote(String value)
+std::string MysqlStorage::quote(std::string value)
 {
     /* note: mysql_real_escape_string returns a maximum of (length * 2 + 1)
      * chars; we need +1 for the first ' - the second ' will be written over
      * the \0; then the string won't be null-terminated, but that doesn't matter,
-     * because we give the correct length to String()
+     * because we give the correct length to std::string()
      */
     auto* q = (char*)MALLOC(value.length() * 2 + 2);
     *q = '\'';
     long size = mysql_real_escape_string(&db, q + 1, value.c_str(), value.length());
     q[size + 1] = '\'';
-    String ret(q, size + 2);
+    std::string ret(q, size + 2);
     FREE(q);
     return ret;
 }
 
-String MysqlStorage::getError(MYSQL* db)
+std::string MysqlStorage::getError(MYSQL* db)
 {
     std::ostringstream err_buf;
     err_buf << "mysql_error (" << mysql_errno(db);
@@ -319,14 +319,14 @@ Ref<SQLResult> MysqlStorage::select(const char* query, int length)
     AutoLock lock(mysqlMutex);
     res = mysql_real_query(&db, query, length);
     if (res) {
-        String myError = getError(&db);
+        std::string myError = getError(&db);
         throw _StorageException(myError, "Mysql: mysql_real_query() failed: " + myError + "; query: " + query);
     }
 
     MYSQL_RES* mysql_res;
     mysql_res = mysql_store_result(&db);
     if (!mysql_res) {
-        String myError = getError(&db);
+        std::string myError = getError(&db);
         throw _StorageException(myError, "Mysql: mysql_store_result() failed: " + myError + "; query: " + query);
     }
     return Ref<SQLResult>(new MysqlResult(mysql_res));
@@ -345,7 +345,7 @@ int MysqlStorage::exec(const char* query, int length, bool getLastInsertId)
     AutoLock lock(mysqlMutex);
     res = mysql_real_query(&db, query, length);
     if (res) {
-        String myError = getError(&db);
+        std::string myError = getError(&db);
         throw _StorageException(myError, "Mysql: mysql_real_query() failed: " + myError + "; query: " + query);
     }
     int insert_id = -1;
@@ -358,9 +358,9 @@ void MysqlStorage::shutdownDriver()
 {
 }
 
-void MysqlStorage::storeInternalSetting(String key, String value)
+void MysqlStorage::storeInternalSetting(std::string key, std::string value)
 {
-    String quotedValue = quote(value);
+    std::string quotedValue = quote(value);
     std::ostringstream q;
     q << "INSERT INTO " << QTB << INTERNAL_SETTINGS_TABLE << QTE << " (`key`, `value`) "
                                                                      "VALUES ("
@@ -373,7 +373,7 @@ void MysqlStorage::storeInternalSetting(String key, String value)
 void MysqlStorage::_exec(const char* query, int length)
 {
     if (mysql_real_query(&db, query, (length > 0 ? length : strlen(query)))) {
-        String myError = getError(&db);
+        std::string myError = getError(&db);
         throw _StorageException(myError, "Mysql: error while updating db: " + myError);
     }
 }
