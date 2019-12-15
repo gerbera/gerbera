@@ -48,19 +48,19 @@ web::addObject::addObject()
 
 /*static Ref<Element> addOption(std::string option_name, std::string option_type, std::string default_value = nullptr)
 {
-    Ref<Element> option (new Element(_("option")));
-    option->addAttribute(_("name"), option_name);
-    option->addAttribute(_("type"), option_type);
+    Ref<Element> option (new Element("option"));
+    option->addAttribute("name", option_name);
+    option->addAttribute("type", option_type);
     
     if (default_value != nullptr)
-        option->addAttribute(_("default"), default_value);
+        option->addAttribute("default", default_value);
     
     return option;
 }*/
 
 void web::addObject::addContainer(int parentID)
 {
-    ContentManager::getInstance()->addContainer(parentID, param(_("title")), param(_("class")));
+    ContentManager::getInstance()->addContainer(parentID, param("title"), param("class"));
 }
 
 Ref<CdsObject> web::addObject::addItem(int parentID, Ref<CdsItem> item)
@@ -69,18 +69,18 @@ Ref<CdsObject> web::addObject::addItem(int parentID, Ref<CdsItem> item)
 
     item->setParentID(parentID);
 
-    item->setTitle(param(_("title")));
-    item->setLocation(param(_("location")));
-    item->setClass(param(_("class")));
+    item->setTitle(param("title"));
+    item->setLocation(param("location"));
+    item->setClass(param("class"));
 
-    tmp = param(_("description"));
+    tmp = param("description");
     if (string_ok(tmp))
         item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), tmp);
 
     /// \todo is there a default setting? autoscan? import settings?
-    tmp = param(_("mime-type"));
+    tmp = param("mime-type");
     if (!string_ok(tmp))
-        tmp = _(MIMETYPE_DEFAULT);
+        tmp = MIMETYPE_DEFAULT;
     item->setMimeType(tmp);
 
     item->setFlag(OBJECT_FLAG_USE_RESOURCE_REF);
@@ -93,27 +93,27 @@ Ref<CdsObject> web::addObject::addActiveItem(int parentID)
     std::string tmp;
     Ref<CdsActiveItem> item(new CdsActiveItem());
 
-    item->setAction(param(_("action")));
+    item->setAction(param("action"));
 
     /// \todo is there a default setting? autoscan? import settings?
-    tmp = param(_("state"));
+    tmp = param("state");
     if (string_ok(tmp))
         item->setState(tmp);
 
     item->setParentID(parentID);
-    item->setLocation(param(_("location")));
+    item->setLocation(param("location"));
 
-    tmp = param(_("mime-type"));
+    tmp = param("mime-type");
     if (!string_ok(tmp))
-        tmp = _(MIMETYPE_DEFAULT);
+        tmp = MIMETYPE_DEFAULT;
     item->setMimeType(tmp);
 
     MetadataHandler::setMetadata(RefCast(item, CdsItem));
 
-    item->setTitle(param(_("title")));
-    item->setClass(param(_("class")));
+    item->setTitle(param("title"));
+    item->setClass(param("class"));
 
-    tmp = param(_("description"));
+    tmp = param("description");
     if (string_ok(tmp))
         item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), tmp);
 
@@ -136,22 +136,22 @@ Ref<CdsObject> web::addObject::addUrl(int parentID, Ref<CdsItemExternalURL> item
 
     item->setParentID(parentID);
 
-    item->setTitle(param(_("title")));
-    item->setURL(param(_("location")));
-    item->setClass(param(_("class")));
+    item->setTitle(param("title"));
+    item->setURL(param("location"));
+    item->setClass(param("class"));
 
-    tmp = param(_("description"));
+    tmp = param("description");
     if (string_ok(tmp))
         item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), tmp);
 
     /// \todo is there a default setting? autoscan? import settings?
-    tmp = param(_("mime-type"));
+    tmp = param("mime-type");
     if (!string_ok(tmp))
-        tmp = _(MIMETYPE_DEFAULT);
+        tmp = MIMETYPE_DEFAULT;
     item->setMimeType(tmp);
 
     if (addProtocol) {
-        std::string protocol = param(_("protocol"));
+        std::string protocol = param("protocol");
         if (string_ok(protocol))
             protocolInfo = renderProtocolInfo(tmp, protocol);
         else
@@ -171,16 +171,16 @@ void web::addObject::process()
 {
     check_request();
 
-    std::string obj_type = param(_("obj_type"));
-    std::string location = param(_("location"));
+    std::string obj_type = param("obj_type");
+    std::string location = param("location");
 
-    if (!string_ok(param(_("title"))))
-        throw _Exception(_("empty title"));
+    if (!string_ok(param("title")))
+        throw _Exception("empty title");
 
-    if (!string_ok(param(_("class"))))
-        throw _Exception(_("empty class"));
+    if (!string_ok(param("class")))
+        throw _Exception("empty class");
 
-    int parentID = intParam(_("parent_id"), 0);
+    int parentID = intParam("parent_id", 0);
 
     Ref<CdsObject> obj = nullptr;
 
@@ -190,36 +190,36 @@ void web::addObject::process()
 
     if (obj_type == STRING_OBJECT_TYPE_CONTAINER) {
         this->addContainer(parentID);
-        //updateContainerEl = Ref<Element>(new Element(_("updateContainer")));
+        //updateContainerEl = Ref<Element>(new Element("updateContainer"));
         //updateContainerEl->setText(parID);
-        //updateContainerEl->addAttribute(_("add"), _("1"));
+        //updateContainerEl->addAttribute("add", "1");
         //root->appendChild(updateContainerEl);
     } else if (obj_type == STRING_OBJECT_TYPE_ITEM) {
         if (!string_ok(location))
-            throw _Exception(_("no location given"));
+            throw _Exception("no location given");
         if (!check_path(location, false))
-            throw _Exception(_("file not found"));
+            throw _Exception("file not found");
         obj = this->addItem(parentID, Ref<CdsItem>(new CdsItem()));
         allow_fifo = true;
     } else if (obj_type == STRING_OBJECT_TYPE_ACTIVE_ITEM) {
-        if (!string_ok(param(_("action"))))
-            throw _Exception(_("no action given"));
+        if (!string_ok(param("action")))
+            throw _Exception("no action given");
         if (!string_ok(location))
-            throw _Exception(_("no location given"));
+            throw _Exception("no location given");
         if (!check_path(location, false))
-            throw _Exception(_("path not found"));
+            throw _Exception("path not found");
         obj = this->addActiveItem(parentID);
         allow_fifo = true;
     } else if (obj_type == STRING_OBJECT_TYPE_EXTERNAL_URL) {
         if (!string_ok(location))
-            throw _Exception(_("No URL given"));
+            throw _Exception("No URL given");
         obj = this->addUrl(parentID, Ref<CdsItemExternalURL>(new CdsItemExternalURL()), true);
     } else if (obj_type == STRING_OBJECT_TYPE_INTERNAL_URL) {
         if (!string_ok(location))
-            throw _Exception(_("No URL given"));
+            throw _Exception("No URL given");
         obj = this->addUrl(parentID, Ref<CdsItemExternalURL>(new CdsItemInternalURL()), false);
     } else {
-        throw _Exception(_("unknown object type: ") + obj_type);
+        throw _Exception("unknown object type: " + obj_type);
     }
 
     if (obj != nullptr) {

@@ -46,7 +46,7 @@ void Timer::init()
         this);
 
     if (ret)
-        throw _Exception(_("failed to start timer thread: ") + ret);
+        throw _Exception("failed to start timer thread: " + ret);
 }
 
 void* Timer::staticThreadProc(void* arg)
@@ -67,13 +67,13 @@ void Timer::addTimerSubscriber(Subscriber* timerSubscriber, unsigned int notifyI
 {
     log_debug("Adding subscriber... interval: %d once: %d \n", notifyInterval, once);
     if (notifyInterval == 0)
-        throw zmm::Exception(_("Tried to add timer with illegal notifyInterval: ") + notifyInterval);
+        throw zmm::Exception("Tried to add timer with illegal notifyInterval: " + notifyInterval);
 
     AutoLock lock(mutex);
     TimerSubscriberElement element(timerSubscriber, notifyInterval, parameter, once);
     for (auto& subscriber : subscribers) {
         if (subscriber == element) {
-            throw zmm::Exception(_("Tried to add same timer twice"));
+            throw zmm::Exception("Tried to add same timer twice");
         }
     }
     subscribers.push_back(element);
@@ -90,7 +90,7 @@ void Timer::removeTimerSubscriber(Subscriber* timerSubscriber, zmm::Ref<Paramete
         subscribers.erase(it);
         signal();
     } else if (!dontFail) {
-        throw zmm::Exception(_("Tried to remove nonexistent timer"));
+        throw zmm::Exception("Tried to remove nonexistent timer");
     }
 }
 

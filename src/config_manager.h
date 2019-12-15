@@ -182,7 +182,7 @@ public:
     ConfigManager();
 
     void init() override;
-    std::string getName() override { return _("Config Manager"); }
+    std::string getName() override { return "Config Manager"; }
 
     virtual ~ConfigManager();
 
@@ -229,8 +229,8 @@ public:
     /// \brief sets static configuration parameters that will be used by
     /// when the ConfigManager class initializes
     static void setStaticArgs(std::string _filename, std::string _userhome,
-        std::string _config_dir = _(DEFAULT_CONFIG_HOME),
-        std::string _prefix_dir = _(PACKAGE_DATADIR),
+        std::string _config_dir = DEFAULT_CONFIG_HOME,
+        std::string _prefix_dir = PACKAGE_DATADIR,
         std::string _magic = "",
         bool _debug_logging = false,
         std::string _ip = "", std::string _interface = "", int _port = 0);

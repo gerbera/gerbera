@@ -42,7 +42,7 @@ zmm::Ref<IOHandler> DeviceDescriptionHandler::open(const char* filename, enum Up
 {
     log_debug("Device description requested\n");
     if (!string_ok(deviceDescription)) { // This always true for now
-        deviceDescription = _("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n") + xmlBuilder->renderDeviceDescription()->print();
+        deviceDescription = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + xmlBuilder->renderDeviceDescription()->print();
     }
     auto t = zmm::Ref<IOHandler>(new MemIOHandler(deviceDescription));
     t->open(mode);

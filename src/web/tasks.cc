@@ -39,14 +39,14 @@ using namespace mxml;
 void web::tasks::process()
 {
     check_request();
-    std::string action = param(_("action"));
+    std::string action = param("action");
     if (!string_ok(action))
-        throw _Exception(_("web:tasks called with illegal action"));
+        throw _Exception("web:tasks called with illegal action");
     Ref<ContentManager> cm = ContentManager::getInstance();
 
     if (action == "list") {
-        Ref<Element> tasksEl(new Element(_("tasks")));
-        tasksEl->setArrayName(_("task"));
+        Ref<Element> tasksEl(new Element("tasks"));
+        tasksEl->setArrayName("task");
         root->appendElementChild(tasksEl); // inherited from WebRequestHandler
         Ref<Array<GenericTask>> taskList = cm->getTasklist();
         if (taskList == nullptr)
@@ -56,8 +56,8 @@ void web::tasks::process()
             appendTask(tasksEl, taskList->get(i));
         }
     } else if (action == "cancel") {
-        int taskID = intParam(_("task_id"));
+        int taskID = intParam("task_id");
         cm->invalidateTask(taskID);
     } else
-        throw _Exception(_("web:tasks called with illegal action"));
+        throw _Exception("web:tasks called with illegal action");
 }

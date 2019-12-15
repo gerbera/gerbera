@@ -72,10 +72,10 @@ void FileRequestHandler::getInfo(IN const char* filename, OUT UpnpFileInfo* info
 
     log_debug("full url (filename): %s, parameters: %s\n", filename, parameters.c_str());
 
-    std::string objID = dict->get(_("object_id"));
+    std::string objID = dict->get("object_id");
     if (objID.empty()) {
         //log_error("object_id not found in url\n");
-        throw _Exception(_("getInfo: object_id not found"));
+        throw _Exception("getInfo: object_id not found");
     }
     objectID = std::stoi(objID);
 
@@ -88,7 +88,7 @@ void FileRequestHandler::getInfo(IN const char* filename, OUT UpnpFileInfo* info
     int objectType = obj->getObjectType();
 
     if (!IS_CDS_ITEM(objectType)) {
-        throw _Exception(_("requested object is not an item"));
+        throw _Exception("requested object is not an item");
     }
 
     Ref<CdsItem> item = RefCast(obj, CdsItem);
@@ -97,13 +97,13 @@ void FileRequestHandler::getInfo(IN const char* filename, OUT UpnpFileInfo* info
 
     // determining which resource to serve
     int res_id = 0;
-    std::string s_res_id = dict->get(_(URL_RESOURCE_ID));
-    if (string_ok(s_res_id) && (s_res_id != _(URL_VALUE_TRANSCODE_NO_RES_ID)))
+    std::string s_res_id = dict->get(URL_RESOURCE_ID);
+    if (string_ok(s_res_id) && (s_res_id != URL_VALUE_TRANSCODE_NO_RES_ID))
         res_id = std::stoi(s_res_id);
     else
         res_id = -1;
 
-    std::string ext = dict->get(_("ext"));
+    std::string ext = dict->get("ext");
     size_t edot = ext.rfind('.');
     if (edot != std::string::npos)
         ext = ext.substr(edot);
@@ -115,7 +115,7 @@ void FileRequestHandler::getInfo(IN const char* filename, OUT UpnpFileInfo* info
         }
 
         path = path + ext;
-        mimeType = _(MIMETYPE_TEXT);
+        mimeType = MIMETYPE_TEXT;
 
         // reset resource id
         res_id = 0;
@@ -126,10 +126,10 @@ void FileRequestHandler::getInfo(IN const char* filename, OUT UpnpFileInfo* info
     if (ret != 0) {
         if (is_srt)
             throw SubtitlesNotFoundException(
-                _("Subtitle file ") + path + " is not available.");
+                "Subtitle file " + path + " is not available.");
         else
             throw _Exception(
-                _("Failed to open ") + path + " - " + strerror(errno));
+                "Failed to open " + path + " - " + strerror(errno));
     }
 
     if (access(path.c_str(), R_OK) == 0) {
@@ -145,16 +145,16 @@ void FileRequestHandler::getInfo(IN const char* filename, OUT UpnpFileInfo* info
         if (slash_pos < path.length() - 1) {
             slash_pos++;
 
-            header = _("Content-Disposition: attachment; filename=\"")
-                + path.substr(slash_pos) + _("\"");
+            header = "Content-Disposition: attachment; filename=\""
+                + path.substr(slash_pos) + "\"";
         }
     }
 
-    tr_profile = dict->get(_(URL_PARAM_TRANSCODE_PROFILE_NAME));
+    tr_profile = dict->get(URL_PARAM_TRANSCODE_PROFILE_NAME);
 
     // for transcoded resourecs res_id will always be negative
     log_debug("fetching resource id %d\n", res_id);
-    std::string rh = dict->get(_(RESOURCE_HANDLER));
+    std::string rh = dict->get(RESOURCE_HANDLER);
 
     if (((res_id > 0) && (res_id < item->getResourceCount()))
         || ((res_id > 0) && string_ok(rh))) {
@@ -166,7 +166,7 @@ void FileRequestHandler::getInfo(IN const char* filename, OUT UpnpFileInfo* info
             Ref<CdsResource> resource = item->getResource(res_id);
             res_handler = resource->getHandlerType();
             // http-get:*:image/jpeg:*
-            std::string protocolInfo = item->getResource(res_id)->getAttributes()->get(_("protocolInfo"));
+            std::string protocolInfo = item->getResource(res_id)->getAttributes()->get("protocolInfo");
             if (!protocolInfo.empty()) {
                 mimeType = getMTFromProtocolInfo(protocolInfo);
             }
@@ -186,7 +186,7 @@ void FileRequestHandler::getInfo(IN const char* filename, OUT UpnpFileInfo* info
                                          ->getByName(tr_profile);
 
         if (tp == nullptr)
-            throw _Exception(_("Transcoding of file ") + path
+            throw _Exception("Transcoding of file " + path
                 + " but no profile matching the name "
                 + tr_profile + " found");
 
@@ -204,9 +204,9 @@ void FileRequestHandler::getInfo(IN const char* filename, OUT UpnpFileInfo* info
                                   R_NRAUDIOCHANNELS));
 
             if (string_ok(freq))
-                mimeType = mimeType + _(";rate=") + freq;
+                mimeType = mimeType + ";rate=" + freq;
             if (string_ok(nrch))
-                mimeType = mimeType + _(";channels=") + nrch;
+                mimeType = mimeType + ";channels=" + nrch;
         }
 
         UpnpFileInfo_set_FileLength(info, -1);
@@ -222,10 +222,10 @@ void FileRequestHandler::getInfo(IN const char* filename, OUT UpnpFileInfo* info
                 // server we should check for getCaptionInfo.sec: 1
                 // request header.
                 std::vector<std::string> subexts(4);
-                subexts.push_back(_(".srt"));
-                subexts.push_back(_(".ssa"));
-                subexts.push_back(_(".smi"));
-                subexts.push_back(_(".sub"));
+                subexts.push_back(".srt");
+                subexts.push_back(".ssa");
+                subexts.push_back(".smi");
+                subexts.push_back(".sub");
 
                 std::string bfilepath = path.substr(0, path.rfind('.'));
                 std::string validext;
@@ -240,11 +240,11 @@ void FileRequestHandler::getInfo(IN const char* filename, OUT UpnpFileInfo* info
                 }
 
                 if (validext.length() > 0) {
-                    std::string burlpath = _(filename);
+                    std::string burlpath = filename;
                     burlpath = burlpath.substr(0, burlpath.rfind('.'));
                     Ref<Server> server = Server::getInstance(); // FIXME server sigleton usage
-                    std::string url = _("http://") + server->getIP() + ":" + server->getPort() + burlpath + validext;
-                    headers.addHeader(_("CaptionInfo.sec:"), url);
+                    std::string url = "http://" + server->getIP() + ":" + server->getPort() + burlpath + validext;
+                    headers.addHeader("CaptionInfo.sec:", url);
                 }
             }
         }
@@ -252,7 +252,7 @@ void FileRequestHandler::getInfo(IN const char* filename, OUT UpnpFileInfo* info
             CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
         std::string dlnaContentHeader = getDLNAContentHeader(mappings->get(item->getMimeType()));
         if (string_ok(dlnaContentHeader)) {
-            headers.addHeader(_(D_HTTP_CONTENT_FEATURES_HEADER), dlnaContentHeader);
+            headers.addHeader(D_HTTP_CONTENT_FEATURES_HEADER, dlnaContentHeader);
         }
     }
 
@@ -260,7 +260,7 @@ void FileRequestHandler::getInfo(IN const char* filename, OUT UpnpFileInfo* info
         mimeType = item->getMimeType();
     std::string dlnaTransferHeader = getDLNATransferHeader(mimeType);
     if (string_ok(dlnaTransferHeader)) {
-        headers.addHeader(_(D_HTTP_TRANSFER_MODE_HEADER), dlnaTransferHeader);
+        headers.addHeader(D_HTTP_TRANSFER_MODE_HEADER, dlnaTransferHeader);
     }
 
     //log_debug("sizeof off_t %d, statbuf.st_size %d\n", sizeof(off_t), sizeof(statbuf.st_size));
@@ -285,7 +285,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char* filename,
 
     // We explicitly do not support UPNP_WRITE due to security reasons.
     if (mode != UPNP_READ) {
-        throw _Exception(_("UPNP_WRITE unsupported"));
+        throw _Exception("UPNP_WRITE unsupported");
     }
 
     std::string parameters = (filename + strlen(LINK_FILE_REQUEST_HANDLER));
@@ -294,9 +294,9 @@ Ref<IOHandler> FileRequestHandler::open(IN const char* filename,
     params.decodeSimple(parameters);
     log_debug("full url (filename): %s, parameters: %s\n", filename, parameters.c_str());
 
-    std::string objID = params.get(_("object_id"));
+    std::string objID = params.get("object_id");
     if (objID.empty()) {
-        throw _Exception(_("object_id not found in parameters"));
+        throw _Exception("object_id not found in parameters");
     }
 
     int objectID = std::stoi(objID);
@@ -308,13 +308,13 @@ Ref<IOHandler> FileRequestHandler::open(IN const char* filename,
     int objectType = obj->getObjectType();
 
     if (!IS_CDS_ITEM(objectType)) {
-        throw _Exception(_("requested object is not an item"));
+        throw _Exception("requested object is not an item");
     }
 
     // determining which resource to serve
     int res_id = 0;
-    std::string s_res_id = params.get(_(URL_RESOURCE_ID));
-    if (string_ok(s_res_id) && (s_res_id != _(URL_VALUE_TRANSCODE_NO_RES_ID))) {
+    std::string s_res_id = params.get(URL_RESOURCE_ID);
+    if (string_ok(s_res_id) && (s_res_id != URL_VALUE_TRANSCODE_NO_RES_ID)) {
         res_id = std::stoi(s_res_id);
     } else {
         res_id = -1;
@@ -326,8 +326,8 @@ Ref<IOHandler> FileRequestHandler::open(IN const char* filename,
 
         Ref<Element> inputElement = xmlBuilder->renderObject(obj, true);
 
-        inputElement->setAttribute(_(XML_DC_NAMESPACE_ATTR), _(XML_DC_NAMESPACE));
-        inputElement->setAttribute(_(XML_UPNP_NAMESPACE_ATTR), _(XML_UPNP_NAMESPACE));
+        inputElement->setAttribute(XML_DC_NAMESPACE_ATTR, XML_DC_NAMESPACE);
+        inputElement->setAttribute(XML_UPNP_NAMESPACE_ATTR, XML_UPNP_NAMESPACE);
         std::string action = aitem->getAction();
         std::string input = inputElement->print();
         std::string output;
@@ -338,7 +338,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char* filename,
             struct timespec before;
             getTimespecNow(&before);
 #endif
-            output = run_simple_process(action, _("run"), input);
+            output = run_simple_process(action, "run", input);
 #ifdef TOMBDEBUG
             long delta = getDeltaMillis(&before);
             log_debug("script executed in %ld milliseconds\n", delta);
@@ -383,7 +383,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char* filename,
     bool is_srt = false;
 
     std::string mimeType;
-    std::string ext = params.get(_("ext"));
+    std::string ext = params.get("ext");
     size_t edot = ext.rfind('.');
     if (edot != std::string::npos)
         ext = ext.substr(edot);
@@ -394,7 +394,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char* filename,
         }
 
         path = path + ext;
-        mimeType = _(MIMETYPE_TEXT);
+        mimeType = MIMETYPE_TEXT;
         // reset resource id
         res_id = 0;
         is_srt = true;
@@ -404,28 +404,28 @@ Ref<IOHandler> FileRequestHandler::open(IN const char* filename,
     int ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
         if (is_srt)
-            throw SubtitlesNotFoundException(_("Subtitle file ") + path + " is not available.");
+            throw SubtitlesNotFoundException("Subtitle file " + path + " is not available.");
         else
-            throw _Exception(_("Failed to open ") + path + " - " + strerror(errno));
+            throw _Exception("Failed to open " + path + " - " + strerror(errno));
     }
 
     log_debug("fetching resource id %d\n", res_id);
 
-    std::string tr_profile = params.get(_(URL_PARAM_TRANSCODE_PROFILE_NAME));
+    std::string tr_profile = params.get(URL_PARAM_TRANSCODE_PROFILE_NAME);
     if (string_ok(tr_profile)) {
         if (res_id != (-1)) {
-            throw _Exception(_("Invalid resource ID given!"));
+            throw _Exception("Invalid resource ID given!");
         }
     } else {
         if (res_id == -1) {
-            throw _Exception(_("Invalid resource ID given!"));
+            throw _Exception("Invalid resource ID given!");
         }
     }
 
     // some resources are created dynamically and not saved in the database,
     // so we can not load such a resource for a particular item, we will have
     // to trust the resource handler parameter
-    std::string rh = params.get(_(RESOURCE_HANDLER));
+    std::string rh = params.get(RESOURCE_HANDLER);
     if (((res_id > 0) && (res_id < item->getResourceCount())) || ((res_id > 0) && string_ok(rh))) {
         //info->file_length = -1;
 
@@ -436,7 +436,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char* filename,
             Ref<CdsResource> resource = item->getResource(res_id);
             res_handler = resource->getHandlerType();
             // http-get:*:image/jpeg:*
-            std::string protocolInfo = item->getResource(res_id)->getAttributes()->get(_("protocolInfo"));
+            std::string protocolInfo = item->getResource(res_id)->getAttributes()->get("protocolInfo");
             if (!protocolInfo.empty()) {
                 mimeType = getMTFromProtocolInfo(protocolInfo);
             }
@@ -467,7 +467,7 @@ Ref<IOHandler> FileRequestHandler::open(IN const char* filename,
 
     } else {
         if (!is_srt && string_ok(tr_profile)) {
-            std::string range = params.get(_("range"));
+            std::string range = params.get("range");
 
             Ref<TranscodeDispatcher> tr_d(new TranscodeDispatcher());
             Ref<TranscodingProfile> tp = ConfigManager::getInstance()->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(tr_profile);
@@ -488,9 +488,9 @@ Ref<IOHandler> FileRequestHandler::open(IN const char* filename,
             if (S_ISREG(statbuf.st_mode))
             {
                 if (string_ok(header))
-                    header = header + _("\r\n");
+                    header = header + "\r\n";
 
-                header = header + _("Accept-Ranges: bytes");
+                header = header + "Accept-Ranges: bytes";
             }
 
             header = getDLNAtransferHeader(mimeType, header);

@@ -184,11 +184,11 @@ void MatroskaHandler::parseAttachments(Ref<CdsItem> item, EbmlStream & ebml_stre
 
 std::string MatroskaHandler::getContentTypeFromByteVector(const KaxFileData* data) const
 {
-    std::string art_mimetype = _(MIMETYPE_DEFAULT);
+    std::string art_mimetype = MIMETYPE_DEFAULT;
 #ifdef HAVE_MAGIC
     art_mimetype = ContentManager::getInstance()->getMimeTypeFromBuffer(data->GetBuffer(), data->GetSize());
     if (!string_ok(art_mimetype)) {
-        return _(MIMETYPE_DEFAULT);
+        return MIMETYPE_DEFAULT;
     }
 #endif
     return art_mimetype;
@@ -200,14 +200,14 @@ void MatroskaHandler::addArtworkResource(Ref<CdsItem> item, std::string art_mime
     // point to add the resource - it's probably garbage
     log_debug("Found artwork of type %s in file %s\n", art_mimetype.c_str(), item->getLocation().c_str());
 
-    if (art_mimetype != _(MIMETYPE_DEFAULT)) {
+    if (art_mimetype != MIMETYPE_DEFAULT) {
         Ref<CdsResource> resource(new CdsResource(CH_MATROSKA));
         resource->addAttribute(
             MetadataHandler::getResAttrName(R_PROTOCOLINFO),
             renderProtocolInfo(art_mimetype));
         resource->addParameter(
-            _(RESOURCE_CONTENT_TYPE),
-            _(ID3_ALBUM_ART));
+            RESOURCE_CONTENT_TYPE,
+            ID3_ALBUM_ART);
         item->addResource(resource);
     }
 }

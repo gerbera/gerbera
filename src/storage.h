@@ -136,7 +136,7 @@ class Storage : public Singleton<Storage, std::mutex> {
 public:
     static zmm::Ref<Storage> getInstance();
 
-    std::string getName() override { return _("Storage"); }
+    std::string getName() override { return "Storage"; }
 
     virtual void init() override = 0;
     virtual void addObject(zmm::Ref<CdsObject> object, int* changedContainer) = 0;

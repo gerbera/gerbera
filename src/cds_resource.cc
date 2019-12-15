@@ -150,7 +150,7 @@ Ref<CdsResource> CdsResource::decode(std::string serial)
     std::vector<std::string> parts = split_string(serial, RESOURCE_PART_SEP, true);
     int size = parts.size();
     if (size < 2 || size > 4)
-        throw _Exception(_("CdsResource::decode: Could not parse resources"));
+        throw _Exception("CdsResource::decode: Could not parse resources");
 
     int handlerType = std::stoi(parts[0]);
 

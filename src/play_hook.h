@@ -42,7 +42,7 @@
 class PlayHook : public Singleton<PlayHook, std::mutex> {
 public:
     void trigger(zmm::Ref<CdsObject> obj);
-    std::string getName() override { return _("PlayHook"); }
+    std::string getName() override { return "PlayHook"; }
 };
 
 #endif //__PLAY_HOOK_H__

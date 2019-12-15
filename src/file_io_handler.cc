@@ -50,14 +50,14 @@ void FileIOHandler::open(IN enum UpnpOpenFileMode mode)
     if (mode == UPNP_READ) {
         f = fopen(filename.c_str(), "rb");
     } else if (mode == UPNP_WRITE) {
-        throw _Exception(_("FileIOHandler::open: Write mode not supported"));
+        throw _Exception("FileIOHandler::open: Write mode not supported");
         ;
     } else {
-        throw _Exception(_("FileIOHandler::open: invalid UpnpOpenFileMode mode"));
+        throw _Exception("FileIOHandler::open: invalid UpnpOpenFileMode mode");
     }
 
     if (f == nullptr) {
-        throw _Exception(_("FileIOHandler::open: failed to open: ") + filename);
+        throw _Exception("FileIOHandler::open: failed to open: " + filename);
     }
 }
 
@@ -89,14 +89,14 @@ size_t FileIOHandler::write(IN char* buf, IN size_t length)
 void FileIOHandler::seek(IN off_t offset, IN int whence)
 {
     if (fseeko(f, offset, whence) != 0) {
-        throw _Exception(_("fseek failed"));
+        throw _Exception("fseek failed");
     }
 }
 
 void FileIOHandler::close()
 {
     if (fclose(f) != 0) {
-        throw _Exception(_("fclose failed"));
+        throw _Exception("fclose failed");
     }
     f = nullptr;
 }

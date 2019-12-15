@@ -38,9 +38,9 @@ IOHandlerChainer::IOHandlerChainer(Ref<IOHandler> readFrom, Ref<IOHandler> write
     : ThreadExecutor()
 {
     if (chunkSize <= 0)
-        throw _Exception(_("chunkSize must be positive"));
+        throw _Exception("chunkSize must be positive");
     if (readFrom == nullptr || writeTo == nullptr)
-        throw _Exception(_("readFrom and writeTo need to be set"));
+        throw _Exception("readFrom and writeTo need to be set");
     status = 0;
     this->chunkSize = chunkSize;
     this->readFrom = readFrom;

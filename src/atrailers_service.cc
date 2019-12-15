@@ -54,12 +54,12 @@ ATrailersService::ATrailersService()
     pid = 0;
     curl_handle = curl_easy_init();
     if (!curl_handle)
-        throw _Exception(_("failed to initialize curl!\n"));
+        throw _Exception("failed to initialize curl!\n");
 
     if (ConfigManager::getInstance()->getOption(CFG_ONLINE_CONTENT_ATRAILERS_RESOLUTION) == "640")
-        service_url = _(ATRAILERS_SERVICE_URL_640);
+        service_url = ATRAILERS_SERVICE_URL_640;
     else
-        service_url = _(ATRAILERS_SERVICE_URL_720P);
+        service_url = ATRAILERS_SERVICE_URL_720P;
 }
 
 ATrailersService::~ATrailersService()
@@ -75,7 +75,7 @@ service_type_t ATrailersService::getServiceType()
 
 std::string ATrailersService::getServiceName()
 {
-    return _("Apple Trailers");
+    return "Apple Trailers";
 }
 
 Ref<Object> ATrailersService::defineServiceTask(Ref<Element> xmlopt, Ref<Object> params)
@@ -140,7 +140,7 @@ bool ATrailersService::refreshServiceData(Ref<Layout> layout)
         pid = pthread_self();
 
     if (pid != pthread_self())
-        throw _Exception(_("Not allowed to call refreshServiceData from different threads!"));
+        throw _Exception("Not allowed to call refreshServiceData from different threads!");
 
     Ref<Element> reply = getData();
 
@@ -149,7 +149,7 @@ bool ATrailersService::refreshServiceData(Ref<Layout> layout)
         sc->setServiceContent(reply);
     else {
         log_debug("Failed to get XML content from Trailers service\n");
-        throw _Exception(_("Failed to get XML content from Trailers service"));
+        throw _Exception("Failed to get XML content from Trailers service");
     }
 
     Ref<CdsObject> obj;
@@ -172,9 +172,9 @@ bool ATrailersService::refreshServiceData(Ref<Layout> layout)
             obj->setParentID(old->getParentID());
             //            struct timespec oldt, newt;
             //            oldt.tv_nsec = 0;
-            //            oldt.tv_sec = old->getAuxData(_(ONLINE_SERVICE_LAST_UPDATE)).toLong();
+            //            oldt.tv_sec = old->getAuxData(ONLINE_SERVICE_LAST_UPDATE).toLong();
             //            newt.tv_nsec = 0;
-            //            newt.tv_sec = obj->getAuxData(_(ONLINE_SERVICE_LAST_UPDATE)).toLong();
+            //            newt.tv_sec = obj->getAuxData(ONLINE_SERVICE_LAST_UPDATE).toLong();
             ContentManager::getInstance()->updateObject(obj);
         }
 

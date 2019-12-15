@@ -78,8 +78,8 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
     char fifo_template[]="mt_transcode_XXXXXX";
 
     if (profile == nullptr)
-        throw _Exception(_("Transcoding of file ") + location +
-                           "requested but no profile given");
+        throw _Exception("Transcoding of file " + location +
+                         "requested but no profile given");
     
     isURL = (IS_CDS_ITEM_INTERNAL_URL(obj->getObjectType()) ||
             IS_CDS_ITEM_EXTERNAL_URL(obj->getObjectType()));
@@ -98,9 +98,9 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
             std::string nrch = it->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS));
 
             if (string_ok(freq)) 
-                mimeType = mimeType + _(";rate=") + freq;
+                mimeType = mimeType + ";rate=" + freq;
             if (string_ok(nrch))
-                mimeType = mimeType + _(";channels=") + nrch;
+                mimeType = mimeType + ";channels=" + nrch;
         }
     }
 
@@ -108,7 +108,7 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
     info->content_type = ixmlCloneDOMString(mimeType.c_str());
 #ifdef EXTEND_PROTOCOLINFO
     std::string header;
-    header = header + _("TimeSeekRange.dlna.org: npt=") + range;
+    header = header + "TimeSeekRange.dlna.org: npt=" + range;
 
     log_debug("Adding TimeSeekRange response HEADERS: %s\n", header.c_str());
     header = getDLNAtransferHeader(mimeType, header);
@@ -134,7 +134,7 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
     service_type_t service = OS_None;
     if (obj->getFlag(OBJECT_FLAG_ONLINE_SERVICE))
     {
-        service = (service_type_t)std::stoi(obj->getAuxData(_(ONLINE_SERVICE_AUX_ID)));
+        service = (service_type_t)std::stoi(obj->getAuxData(ONLINE_SERVICE_AUX_ID));
     }
     
     if (service == OS_SopCast)
@@ -144,12 +144,12 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
         int p2 = find_local_port(45000,65500);
         sop_args = parseCommandLine(location + " " + std::to_string(p1) + " " +
                    std::to_string(p2), nullptr, nullptr, nullptr);
-        Ref<ProcessExecutor> spsc(new ProcessExecutor(_("sp-sc-auth"), 
+        Ref<ProcessExecutor> spsc(new ProcessExecutor("sp-sc-auth", 
                                                       sop_args));
         proc_list = Ref<Array<ProcListItem> >(new Array<ProcListItem>(1));
         Ref<ProcListItem> pr_item(new ProcListItem(RefCast(spsc, Executor)));
         proc_list->append(pr_item);
-        location = _("http://localhost:") + std::to_string(p2) + "/tv.asf";
+        location = "http://localhost:" + std::to_string(p2) + "/tv.asf";
 
 //FIXME: #warning check if socket is ready
         sleep(15); 
@@ -169,7 +169,7 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
             {
                 log_error("Failed to create fifo for the remote content "
                           "reading thread: %s\n", strerror(errno));
-                throw _Exception(_("Could not create reader fifo!\n"));
+                throw _Exception("Could not create reader fifo!\n");
             }
 
             try
@@ -192,8 +192,8 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
                 throw ex;
             }
 #else
-            throw _Exception(_("MediaTomb was compiled without libcurl support,"
-                               "data proxying is not available"));
+            throw _Exception("MediaTomb was compiled without libcurl support,"
+                             "data proxying is not available");
 #endif
 
         }
@@ -202,10 +202,10 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
 #endif
 
     std::string check;
-    if (startswith_string(profile->getCommand(), _(_DIR_SEPARATOR)))
+    if (startswith_string(profile->getCommand(), _DIR_SEPARATOR))
     {
         if (!check_path(profile->getCommand()))
-            throw _Exception(_("Could not find transcoder: ") + 
+            throw _Exception("Could not find transcoder: " + 
                     profile->getCommand());
 
         check = profile->getCommand();
@@ -215,21 +215,21 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
         check = find_in_path(profile->getCommand());
 
         if (!string_ok(check))
-            throw _Exception(_("Could not find transcoder ") + 
+            throw _Exception("Could not find transcoder " + 
                         profile->getCommand() + " in $PATH");
 
     }
 
     int err = 0;
     if (!is_executable(check, &err))
-        throw _Exception(_("Transcoder ") + profile->getCommand() + 
+        throw _Exception("Transcoder " + profile->getCommand() + 
                 " is not executable: " + strerror(err));
 
     log_debug("creating fifo: %s\n", fifo_name.c_str());
     if (mkfifo(fifo_name.c_str(), O_RDWR) == -1) 
     {
         log_error("Failed to create fifo for the transcoding process!: %s\n", strerror(errno));
-        throw _Exception(_("Could not create fifo!\n"));
+        throw _Exception("Could not create fifo!\n");
     }
         
     chmod(fifo_name.c_str(), S_IWUSR | S_IRUSR);

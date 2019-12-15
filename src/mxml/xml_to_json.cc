@@ -71,7 +71,7 @@ void XML2JSON::handleElement(std::ostringstream &buf, Ref<Element> el)
     {
         nodeName = el->getArrayName();
         if (! string_ok(nodeName))
-            throw _Exception(_("XML2JSON: Element ") + el->getName() + " was of arrayType, but had no arrayName set");
+            throw _Exception("XML2JSON: Element " + el->getName() + " was of arrayType, but had no arrayName set");
         
         if (! firstChild)
             buf << ',';
@@ -96,13 +96,13 @@ void XML2JSON::handleElement(std::ostringstream &buf, Ref<Element> el)
                     firstChild = false;
                 std::string key = el->getTextKey();
                 if (! string_ok(key))
-                    throw _Exception(_("XML2JSON: Element ") + el->getName() + " had a text child, but had no textKey set");
-                    //key = _("value");
+                    throw _Exception("XML2JSON: Element " + el->getName() + " had a text child, but had no textKey set");
+                    //key = "value";
                 
                 buf << '"' << key << "\":" << getValue(el->getText(), el->getVTypeText());
             }
             else
-                throw _Exception(_("XML2JSON cannot handle an element which consists of text AND element children - element: ") + el->getName() + "; has type: " + std::to_string(type));
+                throw _Exception("XML2JSON cannot handle an element which consists of text AND element children - element: " + el->getName() + "; has type: " + std::to_string(type));
         }
         else
         {
@@ -118,7 +118,7 @@ void XML2JSON::handleElement(std::ostringstream &buf, Ref<Element> el)
                 {
                     Ref<Node> nextNode = el->getChild(1);
                     if (nextNode->getType() != mxml_node_element)
-                        throw _Exception(_("XML2JSON cannot handle an element which consists of text AND element children"));
+                        throw _Exception("XML2JSON cannot handle an element which consists of text AND element children");
                     Ref<Element> nextChildEl = RefCast(nextNode, Element);
                     if (nextChildEl->getName() == childEl->getName())
                         array = true;
@@ -132,7 +132,7 @@ void XML2JSON::handleElement(std::ostringstream &buf, Ref<Element> el)
                 if (i > 1) // we got the name from 0 and already checked with 1
                 {
                     if (nodeName != childEl->getName())
-                        throw _Exception(_("XML2JSON: if there are multiple elements of the same name (->array), there are no other elements allowed"));
+                        throw _Exception("XML2JSON: if there are multiple elements of the same name (->array), there are no other elements allowed");
                 }
             }
             */
@@ -146,7 +146,7 @@ void XML2JSON::handleElement(std::ostringstream &buf, Ref<Element> el)
             if (array)
             {
                 if (nodeName != childEl->getName())
-                    throw _Exception(_("XML2JSON: if an element is of arrayType, all children have to have the same name"));
+                    throw _Exception("XML2JSON: if an element is of arrayType, all children have to have the same name");
             }
             else
                 buf << '"' << escape(childEl->getName(), '\\', '"') << "\":";
@@ -172,17 +172,17 @@ void XML2JSON::handleElement(std::ostringstream &buf, Ref<Element> el)
 std::string XML2JSON::getValue(std::string text, enum mxml_value_type type)
 {
     if (type == mxml_string_type)
-        return _("\"") + escape(text, '\\', '"') + '"';
+        return "\"" + escape(text, '\\', '"') + '"';
     if (type == mxml_bool_type)
     {
         assert(string_ok(text)); // must be real string
         assert(text == "0" || text == "1");  // must be bool type
-        return text == "0" ? _("false") : _("true");
+        return text == "0" ? "false" : "true";
     }
     if (type == mxml_null_type)
     {
         assert(! string_ok(text)); // must not contain text
-        return _("null");
+        return "null";
     }
     
     if (type == mxml_int_type)

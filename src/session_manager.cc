@@ -100,7 +100,7 @@ std::string Session::getUIUpdateIDs()
     AutoLock lock(mutex);
     if (updateAll) {
         updateAll = false;
-        return _("all");
+        return "all";
     }
     std::string ret = toCSV(uiUpdateIDs);
     if (!ret.empty())
@@ -143,7 +143,7 @@ Ref<Session> SessionManager::createSession(long timeout)
     do {
         sessionID = generate_random_id();
         if (count++ > 100)
-            throw _Exception(_("There seems to be something wrong with the random numbers. I tried to get a unique id 100 times and failed. last sessionID: ") + sessionID);
+            throw _Exception("There seems to be something wrong with the random numbers. I tried to get a unique id 100 times and failed. last sessionID: " + sessionID);
     } while (getSession(sessionID, false) != nullptr); // for the rare case, where we get a random id, that is already taken
 
     newSession->setID(sessionID);

@@ -102,7 +102,7 @@ class ConfigManagerTest : public ::testing::Test {
 };
 
 TEST_F(ConfigManagerTest, LoadsWebUIDefaultValues) {
-  subject->setStaticArgs(config_file, _(home.c_str()), _(confdir.c_str()), _(prefix.c_str()), _(magic.c_str()));
+  subject->setStaticArgs(config_file, home.c_str(), confdir.c_str(), prefix.c_str(), magic.c_str());
 
   subject->init();
 
@@ -124,7 +124,7 @@ TEST_F(ConfigManagerTest, ThrowsExceptionWhenMissingConfigFileAndNoDefault) {
 
   config_file = "";
 
-  subject->setStaticArgs(config_file, _(notExistsDir.c_str()), _(confdir.c_str()), _(prefix.c_str()), _(magic.c_str()));
+  subject->setStaticArgs(config_file, notExistsDir.c_str(), confdir.c_str(), prefix.c_str(), magic.c_str());
 
   try {
     subject->init();
@@ -135,7 +135,7 @@ TEST_F(ConfigManagerTest, ThrowsExceptionWhenMissingConfigFileAndNoDefault) {
 
 TEST_F(ConfigManagerTest, LoadsConfigFromDefaultHomeWhenExistsButNotSpecified) {
   config_file = "";
-  subject->setStaticArgs(config_file, _(home.c_str()), _(confdir.c_str()), _(prefix.c_str()), _(magic.c_str()));
+  subject->setStaticArgs(config_file, home.c_str(), confdir.c_str(), prefix.c_str(), magic.c_str());
 
   subject->init();
 

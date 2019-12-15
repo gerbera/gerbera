@@ -107,7 +107,7 @@ int AutoscanList::_add(Ref<AutoscanDirectory> dir)
         }
 
         if (loc == list->get(i)->getLocation()) {
-            throw _Exception(_("Attempted to add same autoscan path twice"));
+            throw _Exception("Attempted to add same autoscan path twice");
         }
     }
 
@@ -294,13 +294,13 @@ std::string AutoscanDirectory::mapScanmode(ScanMode scanmode)
     std::string scanmode_str;
     switch (scanmode) {
     case ScanMode::Timed:
-        scanmode_str = _("timed");
+        scanmode_str = "timed";
         break;
     case ScanMode::INotify:
-        scanmode_str = _("inotify");
+        scanmode_str = "inotify";
         break;
     default:
-        throw Exception(_("illegal scanmode given to mapScanmode()"));
+        throw Exception("illegal scanmode given to mapScanmode()");
     }
     return scanmode_str;
 }
@@ -312,7 +312,7 @@ ScanMode AutoscanDirectory::remapScanmode(std::string scanmode)
     if (scanmode == "inotify")
         return ScanMode::INotify;
     else
-        throw _Exception(_("illegal scanmode (") + scanmode + ") given to remapScanmode()");
+        throw _Exception("illegal scanmode (" + scanmode + ") given to remapScanmode()");
 }
 
 std::string AutoscanDirectory::mapScanlevel(ScanLevel scanlevel)
@@ -320,13 +320,13 @@ std::string AutoscanDirectory::mapScanlevel(ScanLevel scanlevel)
     std::string scanlevel_str;
     switch (scanlevel) {
     case ScanLevel::Basic:
-        scanlevel_str = _("basic");
+        scanlevel_str = "basic";
         break;
     case ScanLevel::Full:
-        scanlevel_str = _("full");
+        scanlevel_str = "full";
         break;
     default:
-        throw Exception(_("illegal scanlevel given to mapScanlevel()"));
+        throw Exception("illegal scanlevel given to mapScanlevel()");
     }
     return scanlevel_str;
 }
@@ -338,7 +338,7 @@ ScanLevel AutoscanDirectory::remapScanlevel(std::string scanlevel)
     else if (scanlevel == "full")
         return ScanLevel::Full;
     else
-        throw _Exception(_("illegal scanlevel (") + scanlevel + ") given to remapScanlevel()");
+        throw _Exception("illegal scanlevel (" + scanlevel + ") given to remapScanlevel()");
 }
 
 void AutoscanDirectory::copyTo(Ref<AutoscanDirectory> copy)

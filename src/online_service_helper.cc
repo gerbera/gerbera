@@ -48,11 +48,11 @@ OnlineServiceHelper::OnlineServiceHelper()
 std::string OnlineServiceHelper::resolveURL(Ref<CdsItemExternalURL> item)
 {
     if (!item->getFlag(OBJECT_FLAG_ONLINE_SERVICE))
-        throw _Exception(_("The given item does not belong to an online service"));
+        throw _Exception("The given item does not belong to an online service");
 
-    service_type_t service = (service_type_t)std::stoi(item->getAuxData(_(ONLINE_SERVICE_AUX_ID)));
+    service_type_t service = (service_type_t)std::stoi(item->getAuxData(ONLINE_SERVICE_AUX_ID));
     if (service > OS_Max)
-        throw _Exception(_("Invalid service id!"));
+        throw _Exception("Invalid service id!");
 
     std::string url;
 
@@ -69,7 +69,7 @@ std::string OnlineServiceHelper::resolveURL(Ref<CdsItemExternalURL> item)
 #endif
     case OS_Max:
     default:
-        throw _Exception(_("No handler for this service!"));
+        throw _Exception("No handler for this service!");
     }
 
     return url;

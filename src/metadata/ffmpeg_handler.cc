@@ -125,7 +125,7 @@ static void addFfmpegMetadataFields(Ref<CdsItem> item, AVFormatContext* pFormatC
             field = M_ALBUM;
         } else if (strcmp(e->key, "date") == 0) {
             if ((value.length() == 4) && (std::stoi(value) > 0)) {
-                value = value + _("-01-01");
+                value = value + "-01-01";
                 log_debug("Identified metadata date: %s\n", value.c_str());
             }
             /// \toto parse possible ISO8601 timestamp
@@ -198,7 +198,7 @@ static void addFfmpegResourceFields(Ref<CdsItem> item, AVFormatContext* pFormatC
                     as_codecpar(st)->codec_tag, fourcc);
                 std::string fcc = fourcc;
                 if (string_ok(fcc))
-                    item->getResource(0)->addOption(_(RESOURCE_OPTION_FOURCC),
+                    item->getResource(0)->addOption(RESOURCE_OPTION_FOURCC,
                         fcc);
             }
 
@@ -443,7 +443,7 @@ Ref<IOHandler> FfmpegHandler::serveContent(Ref<CdsItem> item, int resNum, off_t*
 #endif // old api
     {
         pthread_mutex_unlock(&thumb_lock);
-        throw _Exception(_("Could not generate thumbnail for ") + item->getLocation());
+        throw _Exception("Could not generate thumbnail for " + item->getLocation());
     }
     if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED)) {
         writeThumbnailCacheFile(item->getLocation(),
@@ -472,9 +472,9 @@ std::string FfmpegHandler::getMimeType()
     Ref<ConfigManager> cfg = ConfigManager::getInstance();
 
     Ref<Dictionary> mappings = cfg->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-    std::string thumb_mimetype = mappings->get(_(CONTENT_TYPE_JPG));
+    std::string thumb_mimetype = mappings->get(CONTENT_TYPE_JPG);
     if (!string_ok(thumb_mimetype))
-        thumb_mimetype = _("image/jpeg");
+        thumb_mimetype = "image/jpeg";
 
     return thumb_mimetype;
 }
