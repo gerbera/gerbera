@@ -261,7 +261,6 @@ set(libgerberaFILES
         src/zmm/object.cc
         src/zmm/object.h
         src/zmm/ref.h
-        src/zmm/strings.h
         src/zmm/zmm.h)
 
 add_library(libgerbera OBJECT ${libgerberaFILES})
