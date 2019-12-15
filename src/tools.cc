@@ -835,7 +835,7 @@ std::string escape(std::string string, char escape_char, char to_escape)
             next = next_esc;
         }
 
-        if (next < 0)
+        if (next == std::string::npos)
             next = len;
         int cpLen = next - last;
         if (cpLen > 0) {
