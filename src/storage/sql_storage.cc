@@ -1065,7 +1065,7 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
     }
 
     if (!matched_types) {
-        throw _StorageException(nullptr, "unknown object type: " + objectType);
+        throw _StorageException("", "unknown object type: " + objectType);
     }
 
     return obj;
@@ -1113,7 +1113,7 @@ Ref<CdsObject> SQLStorage::createObjectFromSearchRow(Ref<SQLRow> row)
 
         item->setTrackNumber(std::stoi(row->col(SearchCol::track_number)));
     } else {
-        throw _StorageException(nullptr, "unknown object type: " + objectType);
+        throw _StorageException("", "unknown object type: " + objectType);
     }
 
     return obj;
@@ -1460,7 +1460,7 @@ Ref<Storage::ChangedContainers> SQLStorage::_recursiveRemove(
         sql << parentsSql.str() << join(parentIds, ',') << ')';
         res = select(sql);
         if (res == nullptr)
-            throw _StorageException(nullptr, "sql error");
+            throw _StorageException("", "sql error");
         parentIds.clear();
         while ((row = res->nextRow()) != nullptr) {
             changedContainers->ui.push_back(std::stoi(row->col(0)));
@@ -1476,7 +1476,7 @@ Ref<Storage::ChangedContainers> SQLStorage::_recursiveRemove(
             sql << parentsSql.str() << join(parentIds, ',') << ')';
             res = select(sql);
             if (res == nullptr)
-                throw _StorageException(nullptr, std::string("sql error: ") + sql.str());
+                throw _StorageException("", std::string("sql error: ") + sql.str());
             parentIds.clear();
             while ((row = res->nextRow()) != nullptr) {
                 changedContainers->upnp.push_back(std::stoi(row->col(0)));
@@ -1488,7 +1488,7 @@ Ref<Storage::ChangedContainers> SQLStorage::_recursiveRemove(
             sql << itemsSql.str() << join(itemIds, ',') << ')';
             res = select(sql);
             if (res == nullptr)
-                throw _StorageException(nullptr, std::string("sql error: ") + sql.str());
+                throw _StorageException("", std::string("sql error: ") + sql.str());
             itemIds.clear();
             while ((row = res->nextRow()) != nullptr) {
                 removeIds.push_back(std::stoi(row->col(0)));
@@ -1501,7 +1501,7 @@ Ref<Storage::ChangedContainers> SQLStorage::_recursiveRemove(
             sql << containersSql.str() << join(containerIds, ',') << ')';
             res = select(sql);
             if (res == nullptr)
-                throw _StorageException(nullptr, std::string("sql error: ") + sql.str());
+                throw _StorageException("", std::string("sql error: ") + sql.str());
             containerIds.clear();
             while ((row = res->nextRow()) != nullptr) {
                 int objectType = std::stoi(row->col(1));
@@ -1714,7 +1714,7 @@ void SQLStorage::updateAutoscanPersistentList(ScanMode scanmode, Ref<AutoscanLis
         q << " LIMIT 1";
         Ref<SQLResult> res = select(q);
         if (res == nullptr)
-            throw _StorageException(nullptr, "query error while selecting from autoscan list");
+            throw _StorageException("", "query error while selecting from autoscan list");
         Ref<SQLRow> row;
         if ((row = res->nextRow()) != nullptr) {
             ad->setStorageID(std::stoi(row->col(0)));
@@ -1742,7 +1742,7 @@ Ref<AutoscanList> SQLStorage::getAutoscanList(ScanMode scanmode)
        << " WHERE " FLD("scan_mode") '=' << quote(AutoscanDirectory::mapScanmode(scanmode));
     Ref<SQLResult> res = select(q);
     if (res == nullptr)
-        throw _StorageException(nullptr, "query error while fetching autoscan list");
+        throw _StorageException("", "query error while fetching autoscan list");
     Ref<AutoscanList> ret(new AutoscanList());
     Ref<SQLRow> row;
     while ((row = res->nextRow()) != nullptr) {
@@ -1766,7 +1766,7 @@ Ref<AutoscanDirectory> SQLStorage::getAutoscanDirectory(int objectID)
        << " WHERE " << TQD('t', "id") << '=' << quote(objectID);
     Ref<SQLResult> res = select(q);
     if (res == nullptr)
-        throw _StorageException(nullptr, "query error while fetching autoscan");
+        throw _StorageException("", "query error while fetching autoscan");
     Ref<AutoscanList> ret(new AutoscanList());
     Ref<SQLRow> row = res->nextRow();
     if (row == nullptr)
@@ -1953,7 +1953,7 @@ int SQLStorage::_getAutoscanObjectID(int autoscanID)
        << " LIMIT 1";
     Ref<SQLResult> res = select(q);
     if (res == nullptr)
-        throw _StorageException(nullptr, "error while doing select on ");
+        throw _StorageException("", "error while doing select on ");
     Ref<SQLRow> row;
     if ((row = res->nextRow()) != nullptr && string_ok(row->col(0)))
         return std::stoi(row->col(0));
