@@ -39,9 +39,9 @@ IOHandlerBufferHelper::IOHandlerBufferHelper(size_t bufSize, size_t initialFillS
     : IOHandler()
 {
     if (bufSize <= 0)
-        throw _Exception(_("bufSize must be positive"));
+        throw _Exception("bufSize must be positive");
     if (initialFillSize > bufSize)
-        throw _Exception(_("initialFillSize must be lesser than or equal to the size of the buffer"));
+        throw _Exception("initialFillSize must be lesser than or equal to the size of the buffer");
 
     this->bufSize = bufSize;
     this->initialFillSize = initialFillSize;
@@ -63,10 +63,10 @@ IOHandlerBufferHelper::IOHandlerBufferHelper(size_t bufSize, size_t initialFillS
 void IOHandlerBufferHelper::open(IN enum UpnpOpenFileMode mode)
 {
     if (isOpen)
-        throw _Exception(_("tried to reopen an open IOHandlerBufferHelper"));
+        throw _Exception("tried to reopen an open IOHandlerBufferHelper");
     buffer = (char*)MALLOC(bufSize);
     if (buffer == nullptr)
-        throw _Exception(_("Failed to allocate memory for transcoding buffer!"));
+        throw _Exception("Failed to allocate memory for transcoding buffer!");
 
     startBufferThread();
     isOpen = true;
@@ -146,7 +146,7 @@ void IOHandlerBufferHelper::seek(IN off_t offset, IN int whence)
 {
     log_debug("seek called: %lld %d\n", offset, whence);
     if (!seekEnabled)
-        throw _Exception(_("seek currently disabled in this IOHandlerBufferHelper"));
+        throw _Exception("seek currently disabled in this IOHandlerBufferHelper");
 
     assert(isOpen);
 
@@ -179,7 +179,7 @@ void IOHandlerBufferHelper::seek(IN off_t offset, IN int whence)
 void IOHandlerBufferHelper::close()
 {
     if (!isOpen)
-        throw _Exception(_("close called on closed IOHandlerBufferHelper"));
+        throw _Exception("close called on closed IOHandlerBufferHelper");
     isOpen = false;
     stopBufferThread();
     FREE(buffer);

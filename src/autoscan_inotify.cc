@@ -48,9 +48,9 @@ using namespace std;
 
 AutoscanInotify::AutoscanInotify()
 {
-    if (check_path(_(INOTIFY_MAX_USER_WATCHES_FILE))) {
+    if (check_path(INOTIFY_MAX_USER_WATCHES_FILE)) {
         try {
-            int max_watches = std::stoi(trim_string(read_text_file(_(INOTIFY_MAX_USER_WATCHES_FILE))));
+            int max_watches = std::stoi(trim_string(read_text_file(INOTIFY_MAX_USER_WATCHES_FILE)));
             log_debug("Max watches on the system: %d\n", max_watches);
         } catch (const Exception& ex) {
             log_error("Could not determine maximum number of inotify user watches: %s\n", ex.getMessage().c_str());

@@ -53,7 +53,7 @@ void MRRegistrarService::doIsAuthorized(Ref<ActionRequest> request)
 
     Ref<Element> response;
     response = xmlBuilder->createResponse(request->getActionName(), DESC_MRREG_SERVICE_TYPE);
-    response->appendTextChild(_("Result"), _("1"));
+    response->appendTextChild("Result", "1");
 
     request->setResponse(response);
     request->setErrorCode(UPNP_E_SUCCESS);
@@ -76,7 +76,7 @@ void MRRegistrarService::doIsValidated(Ref<ActionRequest> request)
 
     Ref<Element> response;
     response = xmlBuilder->createResponse(request->getActionName(), DESC_MRREG_SERVICE_TYPE);
-    response->appendTextChild(_("Result"), _("1"));
+    response->appendTextChild("Result", "1");
 
     request->setResponse(response);
     request->setErrorCode(UPNP_E_SUCCESS);
@@ -98,7 +98,7 @@ void MRRegistrarService::processActionRequest(Ref<ActionRequest> request)
         // invalid or unsupported action
         log_debug("unrecognized action %s\n", request->getActionName().c_str());
         request->setErrorCode(UPNP_E_INVALID_ACTION);
-        //throw UpnpException(UPNP_E_INVALID_ACTION, _("unrecognized action"));
+        //throw UpnpException(UPNP_E_INVALID_ACTION, "unrecognized action");
     }
 
     log_debug("end\n");
@@ -113,15 +113,15 @@ void MRRegistrarService::processSubscriptionRequest(zmm::Ref<SubscriptionRequest
 
     propset = xmlBuilder->createEventPropertySet();
     property = propset->getFirstElementChild();
-    property->appendTextChild(_("ValidationRevokedUpdateID"), _("0"));
-    property->appendTextChild(_("ValidationSucceededUpdateID"), _("0"));
-    property->appendTextChild(_("AuthorizationDeniedUpdateID"), _("0"));
-    property->appendTextChild(_("AuthorizationGrantedUpdateID"), _("0"));
+    property->appendTextChild("ValidationRevokedUpdateID", "0");
+    property->appendTextChild("ValidationSucceededUpdateID", "0");
+    property->appendTextChild("AuthorizationDeniedUpdateID", "0");
+    property->appendTextChild("AuthorizationGrantedUpdateID", "0");
 
     std::string xml = propset->print();
     err = ixmlParseBufferEx(xml.c_str(), &event);
     if (err != IXML_SUCCESS) {
-        throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, _("Could not convert property set to ixml"));
+        throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, "Could not convert property set to ixml");
     }
 
     UpnpAcceptSubscriptionExt(deviceHandle,
@@ -142,7 +142,7 @@ void MRRegistrarService::subscription_update(std::string sourceProtocol_CSV)
 
     propset = UpnpXML_CreateEventPropertySet();
     property = propset->getFirstChild();
-    property->appendTextChild(_("SourceProtocolInfo"), sourceProtocol_CSV);
+    property->appendTextChild("SourceProtocolInfo", sourceProtocol_CSV);
 
     std::string xml = propset->print();
 
@@ -150,7 +150,7 @@ void MRRegistrarService::subscription_update(std::string sourceProtocol_CSV)
     if (err != IXML_SUCCESS)
     {
         /// \todo add another error code
-        throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, _("Could not convert property set to ixml"));
+        throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, "Could not convert property set to ixml");
 
     }
 

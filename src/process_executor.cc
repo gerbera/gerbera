@@ -60,7 +60,7 @@ ProcessExecutor::ProcessExecutor(std::string command, std::vector<std::string> a
 
     switch (process_id) {
     case -1:
-        throw _Exception(_("Failed to launch process ") + command);
+        throw _Exception("Failed to launch process " + command);
 
     case 0:
         sigset_t mask_set;

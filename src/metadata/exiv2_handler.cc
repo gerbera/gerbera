@@ -116,14 +116,14 @@ void Exiv2Handler::fillMetadata(Ref<CdsItem> item)
 
 
             if (string_ok(cam_model))
-                comment = _("Taken with ") + cam_model;
+                comment = "Taken with " + cam_model;
 
             if (string_ok(flash))
             {
                 if (string_ok(comment))
                     comment = comment + ", Flash setting:" + flash;
                 else
-                    comment = _("Flash setting: ") + flash;
+                    comment = "Flash setting: " + flash;
             }
 
             if (string_ok(focal_length))
@@ -131,7 +131,7 @@ void Exiv2Handler::fillMetadata(Ref<CdsItem> item)
                 if (string_ok(comment))
                     comment = comment + ", Focal length: " + focal_length;
                 else
-                    comment = _("Focal length: ") + focal_length;
+                    comment = "Focal length: " + focal_length;
             }
         log_debug("Fabricated Comment: %s\n", comment.c_str());
         }  */

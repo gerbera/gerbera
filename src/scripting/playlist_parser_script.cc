@@ -105,8 +105,8 @@ PlaylistParserScript::PlaylistParserScript(Ref<Runtime> runtime) : Script(runtim
     try
     {
         AutoLock lock(runtime->getMutex());
-        defineFunction(_("readln"), js_readln, 0);
-        defineFunction(_("getCdsObject"), js_getCdsObject, 1);
+        defineFunction("readln", js_readln, 0);
+        defineFunction("getCdsObject", js_getCdsObject, 1);
 
         std::string scriptPath = ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT); 
         load(scriptPath);
@@ -122,7 +122,7 @@ std::string PlaylistParserScript::readln()
 {
     std::string ret;
     if (!currentHandle)
-        throw _Exception(_("Readline not yet setup for use"));
+        throw _Exception("Readline not yet setup for use");
 
     if ((currentTask != nullptr) && (!currentTask->isValid()))
         return nullptr;
@@ -143,12 +143,12 @@ void PlaylistParserScript::processPlaylistObject(zmm::Ref<CdsObject> obj, Ref<Ge
     if ((currentObjectID != INVALID_OBJECT_ID) || (currentHandle != nullptr) ||
             (currentLine != nullptr))
     {
-        throw _Exception(_("recursion not allowed!"));
+        throw _Exception("recursion not allowed!");
     }
 
     if (!IS_CDS_PURE_ITEM(obj->getObjectType()))
     {
-        throw _Exception(_("only allowed for pure items"));
+        throw _Exception("only allowed for pure items");
     }
 
     currentTask = task;
@@ -158,7 +158,7 @@ void PlaylistParserScript::processPlaylistObject(zmm::Ref<CdsObject> obj, Ref<Ge
     {
         currentObjectID = INVALID_OBJECT_ID;
         currentTask = nullptr;
-        throw _Exception(_("failed to allocate memory for playlist parsing!"));
+        throw _Exception("failed to allocate memory for playlist parsing!");
     }
 
     currentLine[0] = '\0';
@@ -169,7 +169,7 @@ void PlaylistParserScript::processPlaylistObject(zmm::Ref<CdsObject> obj, Ref<Ge
         currentObjectID = INVALID_OBJECT_ID;
         currentTask = nullptr;
         FREE(currentLine);
-        throw _Exception(_("failed to open file: ") + obj->getLocation());
+        throw _Exception("failed to open file: " + obj->getLocation());
     }
 
     AutoLock lock(runtime->getMutex());

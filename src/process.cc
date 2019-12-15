@@ -63,7 +63,7 @@ std::string run_simple_process(std::string prog, std::string param, std::string 
     if (fd == -1) {
         log_debug("Failed to open input file %s: %s\n", input_file.c_str(),
             strerror(errno));
-        throw _Exception(_("Failed to open input file ") + input_file + _(" ") + strerror(errno));
+        throw _Exception("Failed to open input file " + input_file + " " + strerror(errno));
     }
     size_t ret = write(fd, input.c_str(), input.length());
     close(fd);
@@ -71,7 +71,7 @@ std::string run_simple_process(std::string prog, std::string param, std::string 
 
         log_debug("Failed to write to %s: %s\n", input.c_str(),
             strerror(errno));
-        throw _Exception(_("Failed to write to ") + input + ": " + strerror(errno));
+        throw _Exception("Failed to write to " + input + ": " + strerror(errno));
     }
 
     /* touching output file */
@@ -80,7 +80,7 @@ std::string run_simple_process(std::string prog, std::string param, std::string 
     if (fd == -1) {
         log_debug("Failed to open output file %s: %s\n", output_file.c_str(),
             strerror(errno));
-        throw _Exception(_("Failed to open output file ") + input_file + _(" ") + strerror(errno));
+        throw _Exception("Failed to open output file " + input_file + " " + strerror(errno));
     }
     close(fd);
 
@@ -90,7 +90,7 @@ std::string run_simple_process(std::string prog, std::string param, std::string 
     int sysret = system(command.c_str());
     if (sysret == -1) {
         log_debug("Failed to execute: %s\n", command.c_str());
-        throw _Exception(_("Failed to execute: ") + command);
+        throw _Exception("Failed to execute: " + command);
     }
 
     /* reading output file */
@@ -98,7 +98,7 @@ std::string run_simple_process(std::string prog, std::string param, std::string 
     if (!file) {
         log_debug("Could not open output file %s: %s\n", output_file.c_str(),
             strerror(errno));
-        throw _Exception(_("Failed to open output file ") + output_file + _(" ") + strerror(errno));
+        throw _Exception("Failed to open output file " + output_file + " " + strerror(errno));
     }
     std::ostringstream output;
 

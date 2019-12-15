@@ -47,18 +47,18 @@ void web::items::process()
 {
     check_request();
 
-    int parentID = intParam(_("parent_id"));
-    int start = intParam(_("start"));
-    int count = intParam(_("count"));
+    int parentID = intParam("parent_id");
+    int start = intParam("start");
+    int count = intParam("count");
     if (start < 0)
-        throw _Exception(_("illegal start parameter"));
+        throw _Exception("illegal start parameter");
     if (count < 0)
-        throw _Exception(_("illegal count parameter"));
+        throw _Exception("illegal count parameter");
 
     Ref<Storage> storage = Storage::getInstance();
-    Ref<Element> items(new Element(_("items")));
-    items->setArrayName(_("item"));
-    items->setAttribute(_("parent_id"), std::to_string(parentID), mxml_int_type);
+    Ref<Element> items(new Element("items"));
+    items->setArrayName("item");
+    items->setAttribute("parent_id", std::to_string(parentID), mxml_int_type);
     root->appendElementChild(items);
     Ref<CdsObject> obj;
     obj = storage->loadObject(parentID);
@@ -73,20 +73,20 @@ void web::items::process()
 
     std::string location = obj->getVirtualPath();
     if (string_ok(location))
-        items->setAttribute(_("location"), location);
-    items->setAttribute(_("virtual"), (obj->isVirtual() ? _("1") : _("0")), mxml_bool_type);
+        items->setAttribute("location", location);
+    items->setAttribute("virtual", (obj->isVirtual() ? "1" : "0"), mxml_bool_type);
 
-    items->setAttribute(_("start"), std::to_string(start), mxml_int_type);
-    //items->setAttribute(_("returned"), std::to_string(arr->size()));
-    items->setAttribute(_("total_matches"), std::to_string(param->getTotalMatches()), mxml_int_type);
+    items->setAttribute("start", std::to_string(start), mxml_int_type);
+    //items->setAttribute("returned", std::to_string(arr->size()));
+    items->setAttribute("total_matches", std::to_string(param->getTotalMatches()), mxml_int_type);
 
     int protectContainer = 0;
     int protectItems = 0;
-    std::string autoscanMode = _("none");
+    std::string autoscanMode = "none";
 
     int autoscanType = storage->getAutoscanDirectoryType(parentID);
     if (autoscanType > 0)
-        autoscanMode = _("timed");
+        autoscanMode = "timed";
 
 #ifdef HAVE_INOTIFY
     if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
@@ -104,29 +104,29 @@ void web::items::process()
                 if (autoscanType == 0 || adir->persistent())
                     protectContainer = 1;
 
-                autoscanMode = _("inotify");
+                autoscanMode = "inotify";
             }
         }
     }
 #endif
-    items->setAttribute(_("autoscan_mode"), autoscanMode);
-    items->setAttribute(_("autoscan_type"), mapAutoscanType(autoscanType));
-    items->setAttribute(_("protect_container"), std::to_string(protectContainer), mxml_bool_type);
-    items->setAttribute(_("protect_items"), std::to_string(protectItems), mxml_bool_type);
+    items->setAttribute("autoscan_mode", autoscanMode);
+    items->setAttribute("autoscan_type", mapAutoscanType(autoscanType));
+    items->setAttribute("protect_container", std::to_string(protectContainer), mxml_bool_type);
+    items->setAttribute("protect_items", std::to_string(protectItems), mxml_bool_type);
 
     for (int i = 0; i < arr->size(); i++) {
         Ref<CdsObject> obj = arr->get(i);
         //if (IS_CDS_ITEM(obj->getObjectType()))
         //{
-        Ref<Element> item(new Element(_("item")));
-        item->setAttribute(_("id"), std::to_string(obj->getID()), mxml_int_type);
-        item->appendTextChild(_("title"), obj->getTitle());
+        Ref<Element> item(new Element("item"));
+        item->setAttribute("id", std::to_string(obj->getID()), mxml_int_type);
+        item->appendTextChild("title", obj->getTitle());
         /// \todo clean this up, should have more generic options for online
         /// services
         // FIXME
-        item->appendTextChild(_("res"), UpnpXMLBuilder::getFirstResourcePath(RefCast(obj, CdsItem)));
+        item->appendTextChild("res", UpnpXMLBuilder::getFirstResourcePath(RefCast(obj, CdsItem)));
 
-        //item->appendTextChild(_("virtual"), obj->isVirtual() ? _("1") : _("0"), mxml_bool_type);
+        //item->appendTextChild("virtual", obj->isVirtual() ? "1" : "0", mxml_bool_type);
         items->appendElementChild(item);
         //}
     }

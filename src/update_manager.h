@@ -48,7 +48,7 @@ public:
     UpdateManager();
     virtual void shutdown() override;
     virtual void init() override;
-    std::string getName() override { return _("Update Manager"); }
+    std::string getName() override { return "Update Manager"; }
 
     void containerChanged(int objectID, int flushPolicy = FLUSH_SPEC);
     void containersChanged(const std::vector<int>& objectIDs, int flushPolicy = FLUSH_SPEC);

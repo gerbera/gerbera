@@ -254,13 +254,13 @@ ContentManager::~ContentManager() { log_debug("ContentManager destroyed\n"); }
 void ContentManager::init()
 {
     reMimetype = Ref<RExp>(new RExp());
-    reMimetype->compile(_(MIMETYPE_REGEXP));
+    reMimetype->compile(MIMETYPE_REGEXP);
 
     int ret = pthread_create(&taskThread,
         nullptr, //&attr, // attr
         ContentManager::staticThreadProc, this);
     if (ret != 0) {
-        throw _Exception(_("Could not start task thread"));
+        throw _Exception("Could not start task thread");
     }
 
     autoscan_timed->notifyAll(this);
@@ -447,7 +447,7 @@ void ContentManager::addVirtualItem(Ref<CdsObject> obj, bool allow_fifo)
     if (pcdir == nullptr) {
         pcdir = createObjectFromFile(path, true, allow_fifo);
         if (pcdir == nullptr) {
-            throw _Exception(_("Could not add ") + path);
+            throw _Exception("Could not add " + path);
         }
         if (IS_CDS_ITEM(pcdir->getObjectType())) {
             this->addObject(pcdir);
@@ -518,11 +518,11 @@ int ContentManager::_addFile(std::string path, std::string rootPath, bool recurs
 void ContentManager::_removeObject(int objectID, bool all)
 {
     if (objectID == CDS_ID_ROOT)
-        throw _Exception(_("cannot remove root container"));
+        throw _Exception("cannot remove root container");
     if (objectID == CDS_ID_FS_ROOT)
-        throw _Exception(_("cannot remove PC-Directory container"));
+        throw _Exception("cannot remove PC-Directory container");
     if (IS_FORBIDDEN_CDS_ID(objectID))
-        throw _Exception(_("tried to remove illegal object id"));
+        throw _Exception("tried to remove illegal object id");
 
     Ref<Storage> storage = Storage::getInstance();
 
@@ -563,7 +563,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
 
     Ref<AutoscanDirectory> adir = getAutoscanDirectory(scanID, scanMode);
     if (adir == nullptr)
-        throw _Exception(_("ID valid but nullptr returned? this should never happen"));
+        throw _Exception("ID valid but nullptr returned? this should never happen");
 
     Ref<Storage> storage = Storage::getInstance();
 
@@ -571,10 +571,10 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
         try {
             obj = storage->loadObject(containerID);
             if (!IS_CDS_CONTAINER(obj->getObjectType())) {
-                throw _Exception(_("Not a container"));
+                throw _Exception("Not a container");
             }
             if (containerID == CDS_ID_FS_ROOT)
-                location = _(FS_ROOT_DIRECTORY);
+                location = FS_ROOT_DIRECTORY;
             else
                 location = obj->getLocation();
         } catch (const Exception& e) {
@@ -617,7 +617,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
         log_error("Container with ID %d has no location information\n", containerID);
         return;
         //        continue;
-        // throw _Exception(_("Container has no location information!\n"));
+        // throw _Exception("Container has no location information!\n");
     }
 
     DIR* dir = opendir(location.c_str());
@@ -691,7 +691,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
                 } else if (scanLevel == ScanLevel::Basic)
                     continue;
                 else
-                    throw _Exception(_("Unsupported scan level!"));
+                    throw _Exception("Unsupported scan level!");
 
             } else {
                 // add file, not recursive, not async
@@ -761,7 +761,7 @@ void ContentManager::addRecursive(std::string path, bool hidden, Ref<GenericTask
     Ref<Storage> storage = Storage::getInstance();
     DIR* dir = opendir(path.c_str());
     if (!dir) {
-        throw _Exception(_("could not list directory ") + path + " : " + strerror(errno));
+        throw _Exception("could not list directory " + path + " : " + strerror(errno));
     }
     int parentID = storage->findObjectIDByPath(path + DIR_SEPARATOR);
     struct dirent* dent;
@@ -787,7 +787,7 @@ void ContentManager::addRecursive(std::string path, bool hidden, Ref<GenericTask
 
         // For the Web UI
         if (task != nullptr) {
-            task->setDescription(_("Importing: ") + newPath);
+            task->setDescription("Importing: " + newPath);
         }
 
         try {
@@ -849,13 +849,13 @@ void ContentManager::addRecursive(std::string path, bool hidden, Ref<GenericTask
 
 void ContentManager::updateObject(int objectID, Ref<Dictionary> parameters)
 {
-    std::string title = parameters->get(_("title"));
-    std::string upnp_class = parameters->get(_("class"));
-    std::string autoscan = parameters->get(_("autoscan"));
-    std::string mimetype = parameters->get(_("mime-type"));
-    std::string description = parameters->get(_("description"));
-    std::string location = parameters->get(_("location"));
-    std::string protocol = parameters->get(_("protocol"));
+    std::string title = parameters->get("title");
+    std::string upnp_class = parameters->get("class");
+    std::string autoscan = parameters->get("autoscan");
+    std::string mimetype = parameters->get("mime-type");
+    std::string description = parameters->get("description");
+    std::string location = parameters->get("location");
+    std::string protocol = parameters->get("protocol");
 
     Ref<Storage> storage = Storage::getInstance();
     Ref<UpdateManager> um = UpdateManager::getInstance();
@@ -882,16 +882,16 @@ void ContentManager::updateObject(int objectID, Ref<Dictionary> parameters)
         if (string_ok(mimetype) && (string_ok(protocol))) {
             cloned_item->setMimeType(mimetype);
             Ref<CdsResource> resource = cloned_item->getResource(0);
-            resource->addAttribute(_("protocolInfo"), renderProtocolInfo(mimetype, protocol));
+            resource->addAttribute("protocolInfo", renderProtocolInfo(mimetype, protocol));
         } else if (!string_ok(mimetype) && (string_ok(protocol))) {
             Ref<CdsResource> resource = cloned_item->getResource(0);
-            resource->addAttribute(_("protocolInfo"), renderProtocolInfo(cloned_item->getMimeType(), protocol));
+            resource->addAttribute("protocolInfo", renderProtocolInfo(cloned_item->getMimeType(), protocol));
         } else if (string_ok(mimetype) && (!string_ok(protocol))) {
             cloned_item->setMimeType(mimetype);
             Ref<CdsResource> resource = cloned_item->getResource(0);
-            std::vector<std::string> parts = split_string(resource->getAttribute(_("protocolInfo")), ':');
+            std::vector<std::string> parts = split_string(resource->getAttribute("protocolInfo"), ':');
             protocol = parts[0];
-            resource->addAttribute(_("protocolInfo"), renderProtocolInfo(mimetype, protocol));
+            resource->addAttribute("protocolInfo", renderProtocolInfo(mimetype, protocol));
         }
 
         if (string_ok(description)) {
@@ -912,8 +912,8 @@ void ContentManager::updateObject(int objectID, Ref<Dictionary> parameters)
         }
     }
     if (IS_CDS_ACTIVE_ITEM(objectType)) {
-        std::string action = parameters->get(_("action"));
-        std::string state = parameters->get(_("state"));
+        std::string action = parameters->get("action");
+        std::string state = parameters->get("state");
 
         Ref<CdsActiveItem> item = RefCast(obj, CdsActiveItem);
         Ref<CdsObject> clone = CdsObject::createObject(objectType);
@@ -1018,7 +1018,7 @@ int ContentManager::addContainerChain(std::string chain, std::string lastClass, 
     int containerID;
 
     if (!string_ok(chain))
-        throw _Exception(_("addContainerChain() called with empty chain parameter"));
+        throw _Exception("addContainerChain() called with empty chain parameter");
 
     log_debug("received chain: %s (%s) [%s]\n", chain.c_str(), lastClass.c_str(), lastMetadata != nullptr ? lastMetadata->encodeSimple().c_str() : "null");
     storage->addContainerChain(chain, lastClass, lastRefID, &containerID, &updateID, lastMetadata);
@@ -1058,7 +1058,7 @@ Ref<CdsObject> ContentManager::convertObject(Ref<CdsObject> oldObj, int newType)
     if (oldType == newType)
         return oldObj;
     if (!IS_CDS_ITEM(oldType) || !IS_CDS_ITEM(newType)) {
-        throw _Exception(_("Cannot convert object type ") + std::to_string(oldType) + " to " + std::to_string(newType));
+        throw _Exception("Cannot convert object type " + std::to_string(oldType) + " to " + std::to_string(newType));
     }
 
     Ref<CdsObject> newObj = CdsObject::createObject(newType);
@@ -1078,7 +1078,7 @@ Ref<CdsObject> ContentManager::createObjectFromFile(std::string path, bool magic
 
     ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
-        throw _Exception(_("Failed to stat ") + path + _(" , ") + mt_strerror(errno));
+        throw _Exception("Failed to stat " + path + " , " + mt_strerror(errno));
     }
 
     Ref<CdsObject> obj;
@@ -1113,9 +1113,9 @@ Ref<CdsObject> ContentManager::createObjectFromFile(std::string path, bool magic
             std::string content_type = mimetype_contenttype_map->get(mimetype);
             if (content_type == CONTENT_TYPE_OGG) {
                 if (isTheora(path))
-                    upnp_class = _(UPNP_DEFAULT_CLASS_VIDEO_ITEM);
+                    upnp_class = UPNP_DEFAULT_CLASS_VIDEO_ITEM;
                 else
-                    upnp_class = _(UPNP_DEFAULT_CLASS_MUSIC_TRACK);
+                    upnp_class = UPNP_DEFAULT_CLASS_MUSIC_TRACK;
             }
         }
 
@@ -1152,7 +1152,7 @@ Ref<CdsObject> ContentManager::createObjectFromFile(std::string path, bool magic
         */
     } else {
         // only regular files and directories are supported
-        throw _Exception(_("ContentManager: skipping file ") + path);
+        throw _Exception("ContentManager: skipping file " + path);
     }
     //    Ref<StringConverter> f2i = StringConverter::f2i();
     //    obj->setTitle(f2i->convert(filename));
@@ -1294,7 +1294,7 @@ void ContentManager::loadAccounting(bool async)
 {
     if (async) {
         Ref<GenericTask> task(new CMLoadAccountingTask());
-        task->setDescription(_("Initializing statistics"));
+        task->setDescription("Initializing statistics");
         addTask(task);
     } else {
         _loadAccounting();
@@ -1319,7 +1319,7 @@ int ContentManager::addFileInternal(
 {
     if (async) {
         Ref<GenericTask> task(new CMAddFileTask(path, rootpath, recursive, hidden, cancellable));
-        task->setDescription(_("Importing: ") + path);
+        task->setDescription("Importing: " + path);
         task->setParentID(parentTaskID);
         addTask(task, lowPriority);
         return INVALID_OBJECT_ID;
@@ -1334,7 +1334,7 @@ void ContentManager::fetchOnlineContent(service_type_t service, bool lowPriority
     Ref<OnlineService> os = online_services->getService(service);
     if (os == nullptr) {
         log_debug("No surch service! %d\n", service);
-        throw _Exception(_("Service not found!"));
+        throw _Exception("Service not found!");
     }
     fetchOnlineContentInternal(os, lowPriority, cancellable, 0, unscheduled_refresh);
 }
@@ -1346,7 +1346,7 @@ void ContentManager::fetchOnlineContentInternal(
         initLayout();
 
     Ref<GenericTask> task(new CMFetchOnlineContentTask(service, layout, cancellable, unscheduled_refresh));
-    task->setDescription(_("Updating content from ") + service->getServiceName());
+    task->setDescription("Updating content from " + service->getServiceName());
     task->setParentID(parentTaskID);
     service->incTaskCount();
     addTask(task, lowPriority);
@@ -1370,7 +1370,7 @@ void ContentManager::cleanupOnlineServiceObjects(zmm::Ref<OnlineService> service
             if (obj == nullptr)
                 continue;
 
-            temp = obj->getAuxData(_(ONLINE_SERVICE_LAST_UPDATE));
+            temp = obj->getAuxData(ONLINE_SERVICE_LAST_UPDATE);
             if (!string_ok(temp))
                 continue;
 
@@ -1457,7 +1457,7 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
 
             std::string vpath = obj->getVirtualPath();
             if (string_ok(vpath))
-                task->setDescription(_("Removing: ") + obj->getVirtualPath());
+                task->setDescription("Removing: " + obj->getVirtualPath());
         } catch (const Exception& e) {
             log_debug("trying to remove an object ID which is no longer in the database! %d\n", objectID);
             return;
@@ -1520,14 +1520,14 @@ void ContentManager::rescanDirectory(int objectID, int scanID, ScanMode scanMode
     dir->incTaskCount();
     std::string level;
     if (dir->getScanLevel() == ScanLevel::Basic)
-        level = _("basic");
+        level = "basic";
     else
-        level = _("full");
+        level = "full";
 
     if (!string_ok(descPath))
         descPath = dir->getLocation();
 
-    task->setDescription(_("Performing ") + level + " scan: " + descPath);
+    task->setDescription("Performing " + level + " scan: " + descPath);
     addTask(task, true); // adding with low priority
 }
 
@@ -1589,7 +1589,7 @@ void ContentManager::removeAutoscanDirectory(int scanID, ScanMode scanMode)
         Ref<Storage> storage = Storage::getInstance();
         Ref<AutoscanDirectory> adir = autoscan_timed->get(scanID);
         if (adir == nullptr)
-            throw _Exception(_("can not remove autoscan directory - was not an autoscan"));
+            throw _Exception("can not remove autoscan directory - was not an autoscan");
 
         autoscan_timed->remove(scanID);
         storage->removeAutoscanDirectory(adir->getStorageID());
@@ -1604,7 +1604,7 @@ void ContentManager::removeAutoscanDirectory(int scanID, ScanMode scanMode)
             Ref<Storage> storage = Storage::getInstance();
             Ref<AutoscanDirectory> adir = autoscan_inotify->get(scanID);
             if (adir == nullptr)
-                throw _Exception(_("can not remove autoscan directory - was not an autoscan"));
+                throw _Exception("can not remove autoscan directory - was not an autoscan");
             autoscan_inotify->remove(scanID);
             storage->removeAutoscanDirectory(adir->getStorageID());
             SessionManager::getInstance()->containerChangedUI(adir->getObjectID());
@@ -1619,7 +1619,7 @@ void ContentManager::removeAutoscanDirectory(int objectID)
     Ref<Storage> storage = Storage::getInstance();
     Ref<AutoscanDirectory> adir = storage->getAutoscanDirectory(objectID);
     if (adir == nullptr)
-        throw _Exception(_("can not remove autoscan directory - was not an autoscan"));
+        throw _Exception("can not remove autoscan directory - was not an autoscan");
 
     if (adir->getScanMode() == ScanMode::Timed) {
         autoscan_timed->remove(adir->getLocation());
@@ -1650,7 +1650,7 @@ void ContentManager::removeAutoscanDirectory(std::string location)
     }
 #endif
     if (adir == nullptr)
-        throw _Exception(_("can not remove autoscan directory - was not an autoscan"));
+        throw _Exception("can not remove autoscan directory - was not an autoscan");
 
     removeAutoscanDirectory(adir->getObjectID());
 }
@@ -1698,17 +1698,17 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
     // adding a new autoscan directory
     if (original == nullptr) {
         if (dir->getObjectID() == CDS_ID_FS_ROOT)
-            dir->setLocation(_(FS_ROOT_DIRECTORY));
+            dir->setLocation(FS_ROOT_DIRECTORY);
         else {
             log_debug("objectID: %d\n", dir->getObjectID());
             Ref<CdsObject> obj = storage->loadObject(dir->getObjectID());
             if (obj == nullptr || !IS_CDS_CONTAINER(obj->getObjectType()) || obj->isVirtual())
-                throw _Exception(_("tried to remove an illegal object (id) from the list of the autoscan directories"));
+                throw _Exception("tried to remove an illegal object (id) from the list of the autoscan directories");
 
             log_debug("location: %s\n", obj->getLocation().c_str());
 
             if (!string_ok(obj->getLocation()))
-                throw _Exception(_("tried to add an illegal object as autoscan - no location information available!"));
+                throw _Exception("tried to add an illegal object as autoscan - no location information available!");
 
             dir->setLocation(obj->getLocation());
         }

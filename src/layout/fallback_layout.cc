@@ -70,7 +70,7 @@ std::string FallbackLayout::esc(std::string str)
 void FallbackLayout::addVideo(zmm::Ref<CdsObject> obj, std::string rootpath)
 {
     Ref<StringConverter> f2i = StringConverter::f2i();
-    int id = ContentManager::getInstance()->addContainerChain(_("/Video/All Video"));
+    int id = ContentManager::getInstance()->addContainerChain("/Video/All Video");
 
     if (obj->getID() != INVALID_OBJECT_ID)
     {
@@ -99,7 +99,7 @@ void FallbackLayout::addVideo(zmm::Ref<CdsObject> obj, std::string rootpath)
 
     if (string_ok(dir))
     {
-        id = ContentManager::getInstance()->addContainerChain(_("/Video/Directories/") + dir);
+        id = ContentManager::getInstance()->addContainerChain("/Video/Directories/" + dir);
         add(obj, id);
     }
 }
@@ -110,7 +110,7 @@ void FallbackLayout::addImage(Ref<CdsObject> obj, std::string rootpath)
     Ref<StringConverter> f2i = StringConverter::f2i();
 
     
-    id = ContentManager::getInstance()->addContainerChain(_("/Photos/All Photos"));
+    id = ContentManager::getInstance()->addContainerChain("/Photos/All Photos");
     if (obj->getID() != INVALID_OBJECT_ID)
     {
         obj->setRefID(obj->getID());
@@ -142,12 +142,12 @@ void FallbackLayout::addImage(Ref<CdsObject> obj, std::string rootpath)
         std::string chain;
         if ((y > 0) && (m > 0))
         {
-            chain = _("/Photos/Year/") + esc(year) + "/" + esc(month);
+            chain = "/Photos/Year/" + esc(year) + "/" + esc(month);
             id = ContentManager::getInstance()->addContainerChain(chain);
             add(obj, id);
         }
 
-        chain = _("/Photos/Date/") + esc(date);
+        chain = "/Photos/Date/" + esc(date);
         id = ContentManager::getInstance()->addContainerChain(chain);
         add(obj, id);
     }
@@ -168,7 +168,7 @@ void FallbackLayout::addImage(Ref<CdsObject> obj, std::string rootpath)
 
     if (string_ok(dir))
     {
-        id = ContentManager::getInstance()->addContainerChain(_("/Photos/Directories/") + dir);
+        id = ContentManager::getInstance()->addContainerChain("/Photos/Directories/" + dir);
         add(obj, id);
     }
 }
@@ -195,21 +195,21 @@ void FallbackLayout::addAudio(zmm::Ref<CdsObject> obj)
         desc = artist;
     }
     else
-        artist = _("Unknown");
+        artist = "Unknown";
 
     std::string album = meta->get(MetadataHandler::getMetaFieldName(M_ALBUM));
     if (string_ok(album))
     {
-        desc = desc + _(", ") + album;
+        desc = desc + ", " + album;
         album_full = album;
     }
     else
     {
-        album = _("Unknown");
+        album = "Unknown";
     }
 
     if (string_ok(desc))
-        desc = desc + _(", ");
+        desc = desc + ", ";
 
     desc = desc + title;
 
@@ -220,11 +220,11 @@ void FallbackLayout::addAudio(zmm::Ref<CdsObject> obj)
         if (i != std::string::npos)
             date = date.substr(0, i);
 
-        desc = desc + _(", ") + date;
+        desc = desc + ", " + date;
         albumDate = esc(date);
     } else {
-        date = _("Unknown");
-        albumDate = _("Unknown");
+        date = "Unknown";
+        albumDate = "Unknown";
     }
 
     meta->put(MetadataHandler::getMetaFieldName(M_UPNP_DATE), albumDate);
@@ -233,7 +233,7 @@ void FallbackLayout::addAudio(zmm::Ref<CdsObject> obj)
     if (string_ok(genre))
         desc = desc + ", " + genre;
     else
-        genre = _("Unknown");
+        genre = "Unknown";
 
 
     std::string description = meta->get(MetadataHandler::getMetaFieldName(M_DESCRIPTION));
@@ -246,20 +246,20 @@ void FallbackLayout::addAudio(zmm::Ref<CdsObject> obj)
     std::string composer = meta->get(MetadataHandler::getMetaFieldName(M_COMPOSER));
     if (!string_ok(composer))
     {
-        composer = _("None");
+        composer = "None";
     }
 
     std::string conductor = meta->get(MetadataHandler::getMetaFieldName(M_CONDUCTOR));
     if (!string_ok(conductor)) {
-        conductor = _("None");
+        conductor = "None";
     }
 
     std::string orchestra = meta->get(MetadataHandler::getMetaFieldName(M_ORCHESTRA));
     if (!string_ok(orchestra)) {
-        orchestra = _("None");
+        orchestra = "None";
     }
 
-    id = ContentManager::getInstance()->addContainerChain(_("/Audio/All Audio"));
+    id = ContentManager::getInstance()->addContainerChain("/Audio/All Audio");
     obj->setTitle(title);
 
     // we get the main object here, so the object that we will add below
@@ -282,7 +282,7 @@ void FallbackLayout::addAudio(zmm::Ref<CdsObject> obj)
 
     artist = esc(artist);
 
-    chain = _("/Audio/Artists/") + artist + "/All Songs";
+    chain = "/Audio/Artists/" + artist + "/All Songs";
 
     id = ContentManager::getInstance()->addContainerChain(chain);
     add(obj, id);
@@ -297,32 +297,32 @@ void FallbackLayout::addAudio(zmm::Ref<CdsObject> obj)
         temp = temp + " - ";
 
     album = esc(album);
-    chain = _("/Audio/Artists/") +  artist + _("/") + album;
-    id = ContentManager::getInstance()->addContainerChain(chain, _(UPNP_DEFAULT_CLASS_MUSIC_ALBUM), obj->getID(), obj->getMetadata());
+    chain = "/Audio/Artists/" +  artist + "/" + album;
+    id = ContentManager::getInstance()->addContainerChain(chain, UPNP_DEFAULT_CLASS_MUSIC_ALBUM, obj->getID(), obj->getMetadata());
     add(obj, id);
 
-    chain = _("/Audio/Albums/") + album;
-    id = ContentManager::getInstance()->addContainerChain(chain, _(UPNP_DEFAULT_CLASS_MUSIC_ALBUM), obj->getID(), obj->getMetadata());
+    chain = "/Audio/Albums/" + album;
+    id = ContentManager::getInstance()->addContainerChain(chain, UPNP_DEFAULT_CLASS_MUSIC_ALBUM, obj->getID(), obj->getMetadata());
     add(obj, id);
 
-    chain = _("/Audio/Genres/") + esc(genre);
-    id = ContentManager::getInstance()->addContainerChain(chain, _(UPNP_DEFAULT_CLASS_MUSIC_GENRE));
+    chain = "/Audio/Genres/" + esc(genre);
+    id = ContentManager::getInstance()->addContainerChain(chain, UPNP_DEFAULT_CLASS_MUSIC_GENRE);
     add(obj, id);
 
-    chain = _("/Audio/Composers/") + esc(composer);
-    id = ContentManager::getInstance()->addContainerChain(chain, _(UPNP_DEFAULT_CLASS_MUSIC_COMPOSER));
+    chain = "/Audio/Composers/" + esc(composer);
+    id = ContentManager::getInstance()->addContainerChain(chain, UPNP_DEFAULT_CLASS_MUSIC_COMPOSER);
     add(obj, id);
 
-    chain = _("/Audio/Year/") + esc(date);
+    chain = "/Audio/Year/" + esc(date);
     id = ContentManager::getInstance()->addContainerChain(chain);
     add(obj, id);
 
     obj->setTitle(temp + title);
 
-    id = ContentManager::getInstance()->addContainerChain(_("/Audio/All - full name"));
+    id = ContentManager::getInstance()->addContainerChain("/Audio/All - full name");
     add(obj, id);
 
-    chain = _("/Audio/Artists/") + artist + "/All - full name";
+    chain = "/Audio/Artists/" + artist + "/All - full name";
     id = ContentManager::getInstance()->addContainerChain(chain);
     add(obj, id);
 
@@ -344,7 +344,7 @@ void FallbackLayout::addSopCast(zmm::Ref<CdsObject> obj)
         ref_set = true;
     }
 
-    chain = _(SP_VPATH "/" "All Channels");
+    chain = SP_VPATH "/" "All Channels";
     id =  ContentManager::getInstance()->addContainerChain(chain);
     add(obj, id, ref_set);
     if (!ref_set)
@@ -353,10 +353,10 @@ void FallbackLayout::addSopCast(zmm::Ref<CdsObject> obj)
         ref_set = true;
     }
 
-    temp = obj->getAuxData(_(SOPCAST_AUXDATA_GROUP));
+    temp = obj->getAuxData(SOPCAST_AUXDATA_GROUP);
     if (string_ok(temp))
     {
-        chain = _(SP_VPATH "/" "Groups" "/") + esc(temp);
+        chain = SP_VPATH "/" "Groups" "/" + esc(temp);
         id =  ContentManager::getInstance()->addContainerChain(chain);
         add(obj, id, ref_set);
     }
@@ -370,8 +370,8 @@ void FallbackLayout::addATrailers(zmm::Ref<CdsObject> obj)
     std::string chain;
     std::string temp;
 
-    int id = ContentManager::getInstance()->addContainerChain(_(AT_VPATH 
-                                                              "/All Trailers"));
+    int id = ContentManager::getInstance()->addContainerChain(AT_VPATH 
+                                                              "/All Trailers");
 
     if (obj->getID() != INVALID_OBJECT_ID)
     {
@@ -395,16 +395,16 @@ void FallbackLayout::addATrailers(zmm::Ref<CdsObject> obj)
         do
         {
             if (!string_ok(genre))
-                genre = st->nextToken(_(","));
-            next = st->nextToken(_(","));
+                genre = st->nextToken(",");
+            next = st->nextToken(",");
 
             genre = trim_string(genre);
 
             if (!string_ok(genre))
                 break;
 
-            id = ContentManager::getInstance()->addContainerChain(_(AT_VPATH
-                        "/Genres/") + esc(genre));
+            id = ContentManager::getInstance()->addContainerChain(AT_VPATH
+                        "/Genres/" + esc(genre));
             add(obj, id);
 
             if (string_ok(next))
@@ -418,16 +418,16 @@ void FallbackLayout::addATrailers(zmm::Ref<CdsObject> obj)
     temp = meta->get(MetadataHandler::getMetaFieldName(M_DATE));
     if (string_ok(temp) && temp.length() >= 7)
     {
-        id = ContentManager::getInstance()->addContainerChain(_(AT_VPATH
-                    "/Release Date/") + esc(temp.substr(0, 7)));
+        id = ContentManager::getInstance()->addContainerChain(AT_VPATH
+                    "/Release Date/" + esc(temp.substr(0, 7)));
         add(obj, id);
     }
 
-    temp = obj->getAuxData(_(ATRAILERS_AUXDATA_POST_DATE));
+    temp = obj->getAuxData(ATRAILERS_AUXDATA_POST_DATE);
     if (string_ok(temp) && temp.length() >= 7)
     {
-        id = ContentManager::getInstance()->addContainerChain(_(AT_VPATH
-                    "/Post Date/") + esc(temp.substr(0, 7)));
+        id = ContentManager::getInstance()->addContainerChain(AT_VPATH
+                    "/Post Date/" + esc(temp.substr(0, 7)));
         add(obj, id);
     }
 }
@@ -454,7 +454,7 @@ void FallbackLayout::processCdsObject(zmm::Ref<CdsObject> obj, std::string rootp
 #ifdef ONLINE_SERVICES
     if (clone->getFlag(OBJECT_FLAG_ONLINE_SERVICE))
     {
-        service_type_t service = (service_type_t)std::stoi(clone->getAuxData(_(ONLINE_SERVICE_AUX_ID)));
+        service_type_t service = (service_type_t)std::stoi(clone->getAuxData(ONLINE_SERVICE_AUX_ID));
 
         switch (service)
         {
@@ -484,11 +484,11 @@ void FallbackLayout::processCdsObject(zmm::Ref<CdsObject> obj, std::string rootp
                     CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
         std::string content_type = mappings->get(mimetype);
 
-        if (startswith_string(mimetype, _("video")))
+        if (startswith_string(mimetype, "video"))
             addVideo(clone, rootpath);
-        else if (startswith_string(mimetype, _("image")))
+        else if (startswith_string(mimetype, "image"))
             addImage(clone, rootpath);
-        else if ((startswith_string(mimetype, _("audio")) && 
+        else if ((startswith_string(mimetype, "audio") && 
                     (content_type != CONTENT_TYPE_PLAYLIST)))
             addAudio(clone);
         else if (content_type == CONTENT_TYPE_OGG)

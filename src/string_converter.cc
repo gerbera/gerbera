@@ -98,7 +98,7 @@ std::string StringConverter::_convert(std::string str, bool validate,
     auto* output = (char*)MALLOC(buf_size);
     if (!output) {
         log_debug("Could not allocate memory for string conversion!\n");
-        throw _Exception(_("Could not allocate memory for string conversion!"));
+        throw _Exception("Could not allocate memory for string conversion!");
     }
 
     const char* input_copy = input;
@@ -151,7 +151,7 @@ std::string StringConverter::_convert(std::string str, bool validate,
             break;
         case E2BIG:
             /// \todo should encode the whole string anyway
-            err = _("iconv: Insufficient space in output buffer");
+            err = "iconv: Insufficient space in output buffer";
             break;
         default:
             err = std::string("iconv: ") + strerror(errno);
@@ -182,21 +182,21 @@ std::string StringConverter::_convert(std::string str, bool validate,
 Ref<StringConverter> StringConverter::i2f()
 {
     Ref<StringConverter> conv(new StringConverter(
-        _(DEFAULT_INTERNAL_CHARSET), ConfigManager::getInstance()->getOption(CFG_IMPORT_FILESYSTEM_CHARSET)));
+        DEFAULT_INTERNAL_CHARSET, ConfigManager::getInstance()->getOption(CFG_IMPORT_FILESYSTEM_CHARSET)));
     //        INTERNAL_CHARSET, ConfigManager::getInstance()->getFilesystemCharset()));
     return conv;
 }
 Ref<StringConverter> StringConverter::f2i()
 {
     Ref<StringConverter> conv(new StringConverter(
-        ConfigManager::getInstance()->getOption(CFG_IMPORT_FILESYSTEM_CHARSET), _(DEFAULT_INTERNAL_CHARSET)));
+        ConfigManager::getInstance()->getOption(CFG_IMPORT_FILESYSTEM_CHARSET), DEFAULT_INTERNAL_CHARSET));
     return conv;
 }
 Ref<StringConverter> StringConverter::m2i()
 {
     Ref<StringConverter> conv(new StringConverter(
         ConfigManager::getInstance()->getOption(CFG_IMPORT_METADATA_CHARSET),
-        _(DEFAULT_INTERNAL_CHARSET)));
+        DEFAULT_INTERNAL_CHARSET));
     return conv;
 }
 
@@ -205,7 +205,7 @@ Ref<StringConverter> StringConverter::j2i()
 {
     Ref<StringConverter> conv(new StringConverter(
         ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_CHARSET),
-        _(DEFAULT_INTERNAL_CHARSET)));
+        DEFAULT_INTERNAL_CHARSET));
     return conv;
 }
 
@@ -213,7 +213,7 @@ Ref<StringConverter> StringConverter::p2i()
 {
     Ref<StringConverter> conv(new StringConverter(
         ConfigManager::getInstance()->getOption(CFG_IMPORT_PLAYLIST_CHARSET),
-        _(DEFAULT_INTERNAL_CHARSET)));
+        DEFAULT_INTERNAL_CHARSET));
     return conv;
 }
 #endif
@@ -222,8 +222,8 @@ Ref<StringConverter> StringConverter::p2i()
 
 Ref<StringConverter> StringConverter::i2i()
 {
-    Ref<StringConverter> conv(new StringConverter(_(DEFAULT_INTERNAL_CHARSET),
-        _(DEFAULT_INTERNAL_CHARSET)));
+    Ref<StringConverter> conv(new StringConverter(DEFAULT_INTERNAL_CHARSET,
+        DEFAULT_INTERNAL_CHARSET));
     return conv;
 }
 

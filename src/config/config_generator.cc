@@ -44,17 +44,17 @@ ConfigGenerator::ConfigGenerator() {}
 ConfigGenerator::~ConfigGenerator() {}
 
 std::string ConfigGenerator::generate(std::string userHome, std::string configDir, std::string prefixDir, std::string magicFile) {
-  Ref<Element> config(new Element(_("config")));
-  config->setAttribute(_("version"), std::to_string(CONFIG_XML_VERSION));
-  config->setAttribute(_("xmlns"), _(XML_XMLNS) + std::to_string(CONFIG_XML_VERSION));
-  config->setAttribute(_("xmlns:xsi"), _(XML_XMLNS_XSI));
-  config->setAttribute(_("xsi:schemaLocation"),
+  Ref<Element> config(new Element("config"));
+  config->setAttribute("version", std::to_string(CONFIG_XML_VERSION));
+  config->setAttribute("xmlns", XML_XMLNS + std::to_string(CONFIG_XML_VERSION));
+  config->setAttribute("xmlns:xsi", XML_XMLNS_XSI);
+  config->setAttribute("xsi:schemaLocation",
                        std::string(XML_XMLNS) + std::to_string(CONFIG_XML_VERSION) + " " + XML_XMLNS + std::to_string(CONFIG_XML_VERSION) + ".xsd");
 
-  Ref<Comment> docinfo(new Comment(_("\n\
+  Ref<Comment> docinfo(new Comment("\n\
      See http://gerbera.io or read the docs for more\n\
      information on creating and using config.xml configration files.\n\
-    "),true));
+    ",true));
 
   config->appendChild(RefCast(docinfo, Node));
   config->appendElementChild(generateServer(userHome, configDir, prefixDir));
@@ -62,65 +62,65 @@ std::string ConfigGenerator::generate(std::string userHome, std::string configDi
   config->appendElementChild(generateTranscoding());
   config->indent();
 
-  return std::string((_(XML_HEADER) + config->print() + "\n").c_str());
+  return std::string((XML_HEADER) + config->print() + "\n");
 }
 
 Ref<Element> ConfigGenerator::generateServer(std::string userHome, std::string configDir, std::string prefixDir) {
-  Ref<Element> server(new Element(_("server")));
+  Ref<Element> server(new Element("server"));
 
   server->appendElementChild(generateUi());
-  server->appendTextChild(_("name"), _(PACKAGE_NAME));
+  server->appendTextChild("name", PACKAGE_NAME);
 
   server->appendElementChild(generateUdn());
 
   std::string homepath = userHome + DIR_SEPARATOR + configDir;
-  server->appendTextChild(_("home"), homepath);
+  server->appendTextChild("home", homepath);
 
   std::string webRoot = prefixDir + DIR_SEPARATOR + DEFAULT_WEB_DIR;
-  server->appendTextChild(_("webroot"), webRoot);
+  server->appendTextChild("webroot", webRoot);
 
   Ref<Comment> aliveinfo(new Comment(
-      _("\n\
+      "\n\
         How frequently (in seconds) to send ssdp:alive advertisements.\n\
-        Minimum alive value accepted is: ")
-          + std::to_string(ALIVE_INTERVAL_MIN) + _("\n\n\
+        Minimum alive value accepted is: "
+          + std::to_string(ALIVE_INTERVAL_MIN) + "\n\n\
         The advertisement will be sent every (A/2)-30 seconds,\n\
         and will have a cache-control max-age of A where A is\n\
         the value configured here. Ex: A value of 62 will result\n\
         in an SSDP advertisement being sent every second.\n\
-    "),
-      true));
+    ", true));
+
   server->appendChild(RefCast(aliveinfo, Node));
-  server->appendTextChild(_("alive"), std::to_string(DEFAULT_ALIVE_INTERVAL));
+  server->appendTextChild("alive", std::to_string(DEFAULT_ALIVE_INTERVAL));
 
   server->appendElementChild(generateStorage());
 
-  Ref<Element> protocolinfo(new Element(_("protocolInfo")));
-  protocolinfo->setAttribute(_("extend"), _(DEFAULT_EXTEND_PROTOCOLINFO));
-  protocolinfo->setAttribute(_("dlna-seek"), _(DEFAULT_EXTEND_PROTOCOLINFO_DLNA_SEEK));
+  Ref<Element> protocolinfo(new Element("protocolInfo"));
+  protocolinfo->setAttribute("extend", DEFAULT_EXTEND_PROTOCOLINFO);
+  protocolinfo->setAttribute("dlna-seek", DEFAULT_EXTEND_PROTOCOLINFO_DLNA_SEEK);
   server->appendElementChild(protocolinfo);
 
-  Ref<Comment> ps3protinfo(new Comment(_(" For PS3 support change to \"yes\" ")));
+  Ref<Comment> ps3protinfo(new Comment(" For PS3 support change to \"yes\" "));
   server->appendChild(RefCast(ps3protinfo, Node));
 
-  Ref<Comment> redinfo(new Comment(_("\n\
+  Ref<Comment> redinfo(new Comment("\n\
        Uncomment the lines below to get rid of jerky avi playback on the\n\
        DSM320 or to enable subtitles support on the DSM units\n\
-    "), true));
+    ", true));
 
-  Ref<Comment> redsonic(new Comment(_("\n\
+  Ref<Comment> redsonic(new Comment("\n\
     <custom-http-headers>\n\
       <add header=\"X-User-Agent: redsonic\"/>\n\
     </custom-http-headers>\n\
 \n\
     <manufacturerURL>redsonic.com</manufacturerURL>\n\
     <modelNumber>105</modelNumber>\n\
-    "), true));
+    ", true));
 
-  Ref<Comment> tg100info(new Comment(_(" Uncomment the line below if you have a Telegent TG100 "), true));
-  Ref<Comment> tg100(new Comment(_("\n\
+  Ref<Comment> tg100info(new Comment(" Uncomment the line below if you have a Telegent TG100 ", true));
+  Ref<Comment> tg100(new Comment("\n\
        <upnp-string-limit>101</upnp-string-limit>\n\
-    "), true));
+    ", true));
 
   server->appendChild(RefCast(redinfo, Node));
   server->appendChild(RefCast(redsonic, Node));
@@ -133,48 +133,48 @@ Ref<Element> ConfigGenerator::generateServer(std::string userHome, std::string c
 }
 
 Ref<Element> ConfigGenerator::generateUi() {
-  Ref<Element> ui(new Element(_("ui")));
-  ui->setAttribute(_("enabled"), _(DEFAULT_UI_EN_VALUE));
-  ui->setAttribute(_("show-tooltips"), _(DEFAULT_UI_SHOW_TOOLTIPS_VALUE));
-  Ref<Element> accounts(new Element(_("accounts")));
-  accounts->setAttribute(_("enabled"), _(DEFAULT_ACCOUNTS_EN_VALUE));
-  accounts->setAttribute(_("session-timeout"), std::to_string(DEFAULT_SESSION_TIMEOUT));
-  Ref<Element> account(new Element(_("account")));
-  account->setAttribute(_("user"), _(DEFAULT_ACCOUNT_USER));
-  account->setAttribute(_("password"), _(DEFAULT_ACCOUNT_PASSWORD));
+  Ref<Element> ui(new Element("ui"));
+  ui->setAttribute("enabled", DEFAULT_UI_EN_VALUE);
+  ui->setAttribute("show-tooltips", DEFAULT_UI_SHOW_TOOLTIPS_VALUE);
+  Ref<Element> accounts(new Element("accounts"));
+  accounts->setAttribute("enabled", DEFAULT_ACCOUNTS_EN_VALUE);
+  accounts->setAttribute("session-timeout", std::to_string(DEFAULT_SESSION_TIMEOUT));
+  Ref<Element> account(new Element("account"));
+  account->setAttribute("user", DEFAULT_ACCOUNT_USER);
+  account->setAttribute("password", DEFAULT_ACCOUNT_PASSWORD);
   accounts->appendElementChild(account);
   ui->appendElementChild(accounts);
   return ui;
 }
 
 Ref<Element> ConfigGenerator::generateStorage() {
-  Ref<Element> storage(new Element(_("storage")));
+  Ref<Element> storage(new Element("storage"));
 
 #ifdef HAVE_SQLITE3
-  Ref<Element> sqlite3(new Element(_("sqlite3")));
-  sqlite3->setAttribute(_("enabled"), _(DEFAULT_SQLITE_ENABLED));
-  sqlite3->appendTextChild(_("database-file"), _(DEFAULT_SQLITE3_DB_FILENAME));
+  Ref<Element> sqlite3(new Element("sqlite3"));
+  sqlite3->setAttribute("enabled", DEFAULT_SQLITE_ENABLED);
+  sqlite3->appendTextChild("database-file", DEFAULT_SQLITE3_DB_FILENAME);
 #ifdef SQLITE_BACKUP_ENABLED
   //    <backup enabled="no" interval="6000"/>
-  Ref<Element> backup(new Element(_("backup")));
-  backup->setAttribute(_("enabled"), _(YES));
-  backup->setAttribute(_("interval"), std::to_string(DEFAULT_SQLITE_BACKUP_INTERVAL));
+  Ref<Element> backup(new Element("backup"));
+  backup->setAttribute("enabled", YES);
+  backup->setAttribute("interval", std::to_string(DEFAULT_SQLITE_BACKUP_INTERVAL));
   sqlite3->appendElementChild(backup);
 #endif
   storage->appendElementChild(sqlite3);
 #endif
 
 #ifdef HAVE_MYSQL
-  Ref<Element> mysql(new Element(_("mysql")));
+  Ref<Element> mysql(new Element("mysql"));
 #ifndef HAVE_SQLITE3
-  mysql->setAttribute(_("enabled"), _(DEFAULT_MYSQL_ENABLED));
+  mysql->setAttribute("enabled", DEFAULT_MYSQL_ENABLED);
   mysql_flag = true;
 #else
-  mysql->setAttribute(_("enabled"), _("no"));
+  mysql->setAttribute("enabled", "no");
 #endif
-  mysql->appendTextChild(_("host"), _(DEFAULT_MYSQL_HOST));
-  mysql->appendTextChild(_("username"), _(DEFAULT_MYSQL_USER));
-  mysql->appendTextChild(_("database"), _(DEFAULT_MYSQL_DB));
+  mysql->appendTextChild("host", DEFAULT_MYSQL_HOST);
+  mysql->appendTextChild("username", DEFAULT_MYSQL_USER);
+  mysql->appendTextChild("database", DEFAULT_MYSQL_DB);
 
   storage->appendElementChild(mysql);
 #endif
@@ -182,32 +182,30 @@ Ref<Element> ConfigGenerator::generateStorage() {
 }
 
 Ref<Element> ConfigGenerator::generateExtendedRuntime() {
-  Ref<Element> extended(new Element(_("extended-runtime-options")));
+  Ref<Element> extended(new Element("extended-runtime-options"));
 
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
-  Ref<Element> ffth(new Element(_("ffmpegthumbnailer")));
-  ffth->setAttribute(_("enabled"), _(DEFAULT_FFMPEGTHUMBNAILER_ENABLED));
-  ffth->appendTextChild(_("thumbnail-size"), std::to_string(DEFAULT_FFMPEGTHUMBNAILER_THUMBSIZE));
-  ffth->appendTextChild(_("seek-percentage"), std::to_string(DEFAULT_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE));
-  ffth->appendTextChild(_("filmstrip-overlay"), _(DEFAULT_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY));
-  ffth->appendTextChild(_("workaround-bugs"), _(DEFAULT_FFMPEGTHUMBNAILER_WORKAROUND_BUGS));
-  ffth->appendTextChild(_("image-quality"), std::to_string(DEFAULT_FFMPEGTHUMBNAILER_IMAGE_QUALITY));
+  Ref<Element> ffth(new Element("ffmpegthumbnailer"));
+  ffth->setAttribute("enabled", DEFAULT_FFMPEGTHUMBNAILER_ENABLED);
+  ffth->appendTextChild("thumbnail-size", std::to_string(DEFAULT_FFMPEGTHUMBNAILER_THUMBSIZE));
+  ffth->appendTextChild("seek-percentage", std::to_string(DEFAULT_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE));
+  ffth->appendTextChild("filmstrip-overlay", DEFAULT_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY);
+  ffth->appendTextChild("workaround-bugs", DEFAULT_FFMPEGTHUMBNAILER_WORKAROUND_BUGS);
+  ffth->appendTextChild("image-quality", std::to_string(DEFAULT_FFMPEGTHUMBNAILER_IMAGE_QUALITY));
   extended->appendElementChild(ffth);
 #endif
 
-  Ref<Element> mark(new Element(_("mark-played-items")));
-  mark->setAttribute(_("enabled"), _(DEFAULT_MARK_PLAYED_ITEMS_ENABLED));
-  mark->setAttribute(_("suppress-cds-updates"),
-                     _(DEFAULT_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES));
-  Ref<Element> mark_string(new Element(_("string")));
-  mark_string->setAttribute(_("mode"),
-                            _(DEFAULT_MARK_PLAYED_ITEMS_STRING_MODE));
-  mark_string->setText(_(DEFAULT_MARK_PLAYED_ITEMS_STRING));
+  Ref<Element> mark(new Element("mark-played-items"));
+  mark->setAttribute("enabled", DEFAULT_MARK_PLAYED_ITEMS_ENABLED);
+  mark->setAttribute("suppress-cds-updates", DEFAULT_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES);
+  Ref<Element> mark_string(new Element("string"));
+  mark_string->setAttribute("mode", DEFAULT_MARK_PLAYED_ITEMS_STRING_MODE);
+  mark_string->setText(DEFAULT_MARK_PLAYED_ITEMS_STRING);
   mark->appendElementChild(mark_string);
 
-  Ref<Element> mark_content_section(new Element(_("mark")));
-  Ref<Element> content_video(new Element(_("content")));
-  content_video->setText(_(DEFAULT_MARK_PLAYED_CONTENT_VIDEO));
+  Ref<Element> mark_content_section(new Element("mark"));
+  Ref<Element> content_video(new Element("content"));
+  content_video->setText(DEFAULT_MARK_PLAYED_CONTENT_VIDEO);
   mark_content_section->appendElementChild(content_video);
   mark->appendElementChild(mark_content_section);
   extended->appendElementChild(mark);
@@ -216,33 +214,33 @@ Ref<Element> ConfigGenerator::generateExtendedRuntime() {
 }
 
 Ref<Element> ConfigGenerator::generateImport(std::string prefixDir, std::string magicFile) {
-  Ref<Element> import(new Element(_("import")));
-  import->setAttribute(_("hidden-files"), _(DEFAULT_HIDDEN_FILES_VALUE));
+  Ref<Element> import(new Element("import"));
+  import->setAttribute("hidden-files", DEFAULT_HIDDEN_FILES_VALUE);
 
 #ifdef HAVE_MAGIC
   if (string_ok(magicFile.c_str())) {
-    Ref<Element> magicfile(new Element(_("magic-file")));
+    Ref<Element> magicfile(new Element("magic-file"));
     magicfile->setText(magicFile.c_str());
     import->appendElementChild(magicfile);
   }
 #endif
 
-  Ref<Element> scripting(new Element(_("scripting")));
-  scripting->setAttribute(_("script-charset"), _(DEFAULT_JS_CHARSET));
+  Ref<Element> scripting(new Element("scripting"));
+  scripting->setAttribute("script-charset", DEFAULT_JS_CHARSET);
 
-  Ref<Element> layout(new Element(_("virtual-layout")));
-  layout->setAttribute(_("type"), _(DEFAULT_LAYOUT_TYPE));
+  Ref<Element> layout(new Element("virtual-layout"));
+  layout->setAttribute("type", DEFAULT_LAYOUT_TYPE);
 
 #ifdef HAVE_JS
   std::string script;
   script = prefixDir + DIR_SEPARATOR + DEFAULT_JS_DIR + DIR_SEPARATOR + DEFAULT_IMPORT_SCRIPT;
-  layout->appendTextChild(_("import-script"), script);
+  layout->appendTextChild("import-script", script);
 
   script = prefixDir + DIR_SEPARATOR + DEFAULT_JS_DIR + DIR_SEPARATOR + DEFAULT_COMMON_SCRIPT;
-  scripting->appendTextChild(_("common-script"), script);
+  scripting->appendTextChild("common-script", script);
 
   script = prefixDir + DIR_SEPARATOR + DEFAULT_JS_DIR + DIR_SEPARATOR + DEFAULT_PLAYLISTS_SCRIPT;
-  scripting->appendTextChild(_("playlist-script"), script);
+  scripting->appendTextChild("playlist-script", script);
 #endif
 
   scripting->appendElementChild(layout);
@@ -256,9 +254,9 @@ Ref<Element> ConfigGenerator::generateImport(std::string prefixDir, std::string 
 }
 
 Ref<Element> ConfigGenerator::generateMappings() {
-  Ref<Element> mappings(new Element(_("mappings")));
-  Ref<Element> ext2mt(new Element(_("extension-mimetype")));
-  ext2mt->setAttribute(_("ignore-unknown"), _(DEFAULT_IGNORE_UNKNOWN_EXTENSIONS));
+  Ref<Element> mappings(new Element("mappings"));
+  Ref<Element> ext2mt(new Element("extension-mimetype"));
+  ext2mt->setAttribute("ignore-unknown", DEFAULT_IGNORE_UNKNOWN_EXTENSIONS);
   ext2mt->appendElementChild(map_from_to("mp3", "audio/mpeg"));
   ext2mt->appendElementChild(map_from_to("ogx", "application/ogg"));
   ext2mt->appendElementChild(map_from_to("ogv", "video/ogg"));
@@ -282,25 +280,25 @@ Ref<Element> ConfigGenerator::generateMappings() {
   ext2mt->appendElementChild(map_from_to("dff", "audio/x-dsd"));
   ext2mt->appendElementChild(map_from_to("wv", "audio/x-wavpack"));
 
-  Ref<Comment> ps3info(new Comment(_(" Uncomment the line below for PS3 divx support "), true));
-  Ref<Comment> ps3avi(new Comment(_(" <map from=\"avi\" to=\"video/divx\"/> "), true));
+  Ref<Comment> ps3info(new Comment(" Uncomment the line below for PS3 divx support ", true));
+  Ref<Comment> ps3avi(new Comment(" <map from=\"avi\" to=\"video/divx\"/> ", true));
   ext2mt->appendChild(RefCast(ps3info, Node));
   ext2mt->appendChild(RefCast(ps3avi, Node));
 
-  Ref<Comment> dsmzinfo(new Comment(_(" Uncomment the line below for D-Link DSM / ZyXEL DMA-1000 "), true));
-  Ref<Comment> dsmzavi(new Comment(_(" <map from=\"avi\" to=\"video/avi\"/> "), true));
+  Ref<Comment> dsmzinfo(new Comment(" Uncomment the line below for D-Link DSM / ZyXEL DMA-1000 ", true));
+  Ref<Comment> dsmzavi(new Comment(" <map from=\"avi\" to=\"video/avi\"/> ", true));
   ext2mt->appendChild(RefCast(dsmzinfo, Node));
   ext2mt->appendChild(RefCast(dsmzavi, Node));
   mappings->appendElementChild(ext2mt);
 
-  Ref<Element> mtupnp(new Element(_("mimetype-upnpclass")));
+  Ref<Element> mtupnp(new Element("mimetype-upnpclass"));
   mtupnp->appendElementChild(map_from_to("audio/*", UPNP_DEFAULT_CLASS_MUSIC_TRACK));
   mtupnp->appendElementChild(map_from_to("video/*", UPNP_DEFAULT_CLASS_VIDEO_ITEM));
   mtupnp->appendElementChild(map_from_to("image/*", "object.item.imageItem"));
   mtupnp->appendElementChild(map_from_to("application/ogg", UPNP_DEFAULT_CLASS_MUSIC_TRACK));
   mappings->appendElementChild(mtupnp);
 
-  Ref<Element> mtcontent(new Element(_("mimetype-contenttype")));
+  Ref<Element> mtcontent(new Element("mimetype-contenttype"));
   mtcontent->appendElementChild(treat_as("audio/mpeg", CONTENT_TYPE_MP3));
   mtcontent->appendElementChild(treat_as("application/ogg", CONTENT_TYPE_OGG));
   mtcontent->appendElementChild(treat_as("audio/ogg", CONTENT_TYPE_OGG));
@@ -325,86 +323,86 @@ Ref<Element> ConfigGenerator::generateMappings() {
 }
 
 Ref<Element> ConfigGenerator::generateOnlineContent() {
-  Ref<Element> onlinecontent(new Element(_("online-content")));
+  Ref<Element> onlinecontent(new Element("online-content"));
 #ifdef ATRAILERS
-  Ref<Element> at(new Element(_("AppleTrailers")));
-  at->setAttribute(_("enabled"), _(DEFAULT_ATRAILERS_ENABLED));
-  at->setAttribute(_("refresh"), std::to_string(DEFAULT_ATRAILERS_REFRESH));
-  at->setAttribute(_("update-at-start"), _(DEFAULT_ATRAILERS_UPDATE_AT_START));
-  at->setAttribute(_("resolution"), std::to_string(DEFAULT_ATRAILERS_RESOLUTION));
+  Ref<Element> at(new Element("AppleTrailers"));
+  at->setAttribute("enabled", DEFAULT_ATRAILERS_ENABLED);
+  at->setAttribute("refresh", std::to_string(DEFAULT_ATRAILERS_REFRESH));
+  at->setAttribute("update-at-start", DEFAULT_ATRAILERS_UPDATE_AT_START);
+  at->setAttribute("resolution", std::to_string(DEFAULT_ATRAILERS_RESOLUTION));
   onlinecontent->appendElementChild(at);
 #endif
   return onlinecontent;
 }
 
 Ref<Element> ConfigGenerator::generateTranscoding() {
-  Ref<Element> transcoding(new Element(_("transcoding")));
-  transcoding->setAttribute(_("enabled"), _(DEFAULT_TRANSCODING_ENABLED));
+  Ref<Element> transcoding(new Element("transcoding"));
+  transcoding->setAttribute("enabled", DEFAULT_TRANSCODING_ENABLED);
 
-  Ref<Element> mt_prof_map(new Element(_("mimetype-profile-mappings")));
+  Ref<Element> mt_prof_map(new Element("mimetype-profile-mappings"));
 
-  Ref<Element> prof_flv(new Element(_("transcode")));
-  prof_flv->setAttribute(_("mimetype"), _("video/x-flv"));
-  prof_flv->setAttribute(_("using"), _("vlcmpeg"));
+  Ref<Element> prof_flv(new Element("transcode"));
+  prof_flv->setAttribute("mimetype", "video/x-flv");
+  prof_flv->setAttribute("using", "vlcmpeg");
 
   mt_prof_map->appendElementChild(prof_flv);
 
-  Ref<Element> prof_theora(new Element(_("transcode")));
-  prof_theora->setAttribute(_("mimetype"), _("application/ogg"));
-  prof_theora->setAttribute(_("using"), _("vlcmpeg"));
+  Ref<Element> prof_theora(new Element("transcode"));
+  prof_theora->setAttribute("mimetype", "application/ogg");
+  prof_theora->setAttribute("using", "vlcmpeg");
   mt_prof_map->appendElementChild(prof_theora);
 
-  Ref<Element> prof_ogg(new Element(_("transcode")));
-  prof_ogg->setAttribute(_("mimetype"), _("audio/ogg"));
-  prof_ogg->setAttribute(_("using"), _("ogg2mp3"));
+  Ref<Element> prof_ogg(new Element("transcode"));
+  prof_ogg->setAttribute("mimetype", "audio/ogg");
+  prof_ogg->setAttribute("using", "ogg2mp3");
   mt_prof_map->appendElementChild(prof_ogg);
 
   transcoding->appendElementChild(mt_prof_map);
 
-  Ref<Element> profiles(new Element(_("profiles")));
+  Ref<Element> profiles(new Element("profiles"));
 
-  Ref<Element> oggmp3(new Element(_("profile")));
-  oggmp3->setAttribute(_("name"), _("ogg2mp3"));
-  oggmp3->setAttribute(_("enabled"), _(NO));
-  oggmp3->setAttribute(_("type"), _("external"));
+  Ref<Element> oggmp3(new Element("profile"));
+  oggmp3->setAttribute("name", "ogg2mp3");
+  oggmp3->setAttribute("enabled", NO);
+  oggmp3->setAttribute("type", "external");
 
-  oggmp3->appendTextChild(_("mimetype"), _("audio/mpeg"));
-  oggmp3->appendTextChild(_("accept-url"), _(NO));
-  oggmp3->appendTextChild(_("first-resource"), _(YES));
-  oggmp3->appendTextChild(_("accept-ogg-theora"), _(NO));
+  oggmp3->appendTextChild("mimetype", "audio/mpeg");
+  oggmp3->appendTextChild("accept-url", NO);
+  oggmp3->appendTextChild("first-resource", YES);
+  oggmp3->appendTextChild("accept-ogg-theora", NO);
 
-  Ref<Element> oggmp3_agent(new Element(_("agent")));
-  oggmp3_agent->setAttribute(_("command"), _("ffmpeg"));
-  oggmp3_agent->setAttribute(_("arguments"), _("-y -i %in -f mp3 %out"));
+  Ref<Element> oggmp3_agent(new Element("agent"));
+  oggmp3_agent->setAttribute("command", "ffmpeg");
+  oggmp3_agent->setAttribute("arguments", "-y -i %in -f mp3 %out");
   oggmp3->appendElementChild(oggmp3_agent);
 
-  Ref<Element> oggmp3_buffer(new Element(_("buffer")));
-  oggmp3_buffer->setAttribute(_("size"), std::to_string(DEFAULT_AUDIO_BUFFER_SIZE));
-  oggmp3_buffer->setAttribute(_("chunk-size"), std::to_string(DEFAULT_AUDIO_CHUNK_SIZE));
-  oggmp3_buffer->setAttribute(_("fill-size"), std::to_string(DEFAULT_AUDIO_FILL_SIZE));
+  Ref<Element> oggmp3_buffer(new Element("buffer"));
+  oggmp3_buffer->setAttribute("size", std::to_string(DEFAULT_AUDIO_BUFFER_SIZE));
+  oggmp3_buffer->setAttribute("chunk-size", std::to_string(DEFAULT_AUDIO_CHUNK_SIZE));
+  oggmp3_buffer->setAttribute("fill-size", std::to_string(DEFAULT_AUDIO_FILL_SIZE));
   oggmp3->appendElementChild(oggmp3_buffer);
 
   profiles->appendElementChild(oggmp3);
 
-  Ref<Element> vlcmpeg(new Element(_("profile")));
-  vlcmpeg->setAttribute(_("name"), _("vlcmpeg"));
-  vlcmpeg->setAttribute(_("enabled"), _(NO));
-  vlcmpeg->setAttribute(_("type"), _("external"));
+  Ref<Element> vlcmpeg(new Element("profile"));
+  vlcmpeg->setAttribute("name", "vlcmpeg");
+  vlcmpeg->setAttribute("enabled", NO);
+  vlcmpeg->setAttribute("type", "external");
 
-  vlcmpeg->appendTextChild(_("mimetype"), _("video/mpeg"));
-  vlcmpeg->appendTextChild(_("accept-url"), _(YES));
-  vlcmpeg->appendTextChild(_("first-resource"), _(YES));
-  vlcmpeg->appendTextChild(_("accept-ogg-theora"), _(YES));
+  vlcmpeg->appendTextChild("mimetype", "video/mpeg");
+  vlcmpeg->appendTextChild("accept-url", YES);
+  vlcmpeg->appendTextChild("first-resource", YES);
+  vlcmpeg->appendTextChild("accept-ogg-theora", YES);
 
-  Ref<Element> vlcmpeg_agent(new Element(_("agent")));
-  vlcmpeg_agent->setAttribute(_("command"), _("vlc"));
-  vlcmpeg_agent->setAttribute(_("arguments"), _("-I dummy %in --sout #transcode{venc=ffmpeg,vcodec=mp2v,vb=4096,fps=25,aenc=ffmpeg,acodec=mpga,ab=192,samplerate=44100,channels=2}:standard{access=file,mux=ps,dst=%out} vlc:quit"));
+  Ref<Element> vlcmpeg_agent(new Element("agent"));
+  vlcmpeg_agent->setAttribute("command", "vlc");
+  vlcmpeg_agent->setAttribute("arguments", "-I dummy %in --sout #transcode{venc=ffmpeg,vcodec=mp2v,vb=4096,fps=25,aenc=ffmpeg,acodec=mpga,ab=192,samplerate=44100,channels=2}:standard{access=file,mux=ps,dst=%out} vlc:quit");
   vlcmpeg->appendElementChild(vlcmpeg_agent);
 
-  Ref<Element> vlcmpeg_buffer(new Element(_("buffer")));
-  vlcmpeg_buffer->setAttribute(_("size"), std::to_string(DEFAULT_VIDEO_BUFFER_SIZE));
-  vlcmpeg_buffer->setAttribute(_("chunk-size"), std::to_string(DEFAULT_VIDEO_CHUNK_SIZE));
-  vlcmpeg_buffer->setAttribute(_("fill-size"), std::to_string(DEFAULT_VIDEO_FILL_SIZE));
+  Ref<Element> vlcmpeg_buffer(new Element("buffer"));
+  vlcmpeg_buffer->setAttribute("size", std::to_string(DEFAULT_VIDEO_BUFFER_SIZE));
+  vlcmpeg_buffer->setAttribute("chunk-size", std::to_string(DEFAULT_VIDEO_CHUNK_SIZE));
+  vlcmpeg_buffer->setAttribute("fill-size", std::to_string(DEFAULT_VIDEO_FILL_SIZE));
   vlcmpeg->appendElementChild(vlcmpeg_buffer);
 
   profiles->appendElementChild(vlcmpeg);
@@ -428,8 +426,8 @@ Ref<Element> ConfigGenerator::generateUdn() {
 #endif
 
   log_debug("UUID generated: %s\n", uuid_str);
-  Ref<Element> udn(new Element(_("udn")));
-  udn->setText(_("uuid:") + std::string(uuid_str), mxml_string_type);
+  Ref<Element> udn(new Element("udn"));
+  udn->setText("uuid:" + std::string(uuid_str), mxml_string_type);
 #ifdef BSD_NATIVE_UUID
   free(uuid_str);
 #endif
@@ -437,15 +435,15 @@ Ref<Element> ConfigGenerator::generateUdn() {
 }
 
 Ref<Element> ConfigGenerator::map_from_to(std::string from, std::string to) {
-  Ref<Element> map(new Element(_("map")));
-  map->setAttribute(_("from"), from);
-  map->setAttribute(_("to"), to);
+  Ref<Element> map(new Element("map"));
+  map->setAttribute("from", from);
+  map->setAttribute("to", to);
   return map;
 }
 
 Ref<Element> ConfigGenerator::treat_as(std::string mimetype, std::string as) {
-  Ref<Element> treat(new Element(_("treat")));
-  treat->setAttribute(_("mimetype"), mimetype);
-  treat->setAttribute(_("as"), as);
+  Ref<Element> treat(new Element("treat"));
+  treat->setAttribute("mimetype", mimetype);
+  treat->setAttribute("as", as);
   return treat;
 }

@@ -47,7 +47,7 @@ bool SopCastContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
     std::string temp;
 
     if (service->getName() != "channels")
-        throw _Exception(_("Invalid XML for SopCast service received"));
+        throw _Exception("Invalid XML for SopCast service received");
 
     channels = service;
 
@@ -92,9 +92,9 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
             } else {
                 current_group_name = current_group->getText();
                 if (!string_ok(current_group_name)) {
-                    current_group_name = current_group->getAttribute(_("en"));
+                    current_group_name = current_group->getAttribute("en");
                     if (!string_ok(current_group_name))
-                        current_group_name = _("Unknown");
+                        current_group_name = "Unknown";
                 }
             }
 
@@ -122,12 +122,12 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
             Ref<CdsResource> resource(new CdsResource(CH_DEFAULT));
             item->addResource(resource);
 
-            item->setAuxData(_(ONLINE_SERVICE_AUX_ID),
+            item->setAuxData(ONLINE_SERVICE_AUX_ID,
                 std::to_string(OS_SopCast));
 
-            item->setAuxData(_(SOPCAST_AUXDATA_GROUP), current_group_name);
+            item->setAuxData(SOPCAST_AUXDATA_GROUP, current_group_name);
 
-            temp = channel->getAttribute(_("id"));
+            temp = channel->getAttribute("id");
             if (!string_ok(temp)) {
                 log_warning("Failed to retrieve SopCast channel ID\n");
                 continue;
@@ -136,7 +136,7 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
             temp.insert(temp.begin(), OnlineService::getStoragePrefix(OS_SopCast));
             item->setServiceID(temp);
 
-            temp = channel->getChildText(_("stream_type"));
+            temp = channel->getChildText("stream_type");
             if (!string_ok(temp)) {
                 log_warning("Failed to retrieve SopCast channel mimetype\n");
                 continue;
@@ -148,64 +148,64 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
             // map was empty, we have to do construct the mimetype ourselves
             if (!string_ok(mt)) {
                 if (temp == "wmv")
-                    mt = _("video/sopcast-x-ms-wmv");
+                    mt = "video/sopcast-x-ms-wmv";
                 else if (temp == "mp3")
-                    mt = _("audio/sopcast-mpeg");
+                    mt = "audio/sopcast-mpeg";
                 else if (temp == "wma")
-                    mt = _("audio/sopcast-x-ms-wma");
+                    mt = "audio/sopcast-x-ms-wma";
                 else {
                     log_warning("Could not determine mimetype for SopCast channel (stream_type: %s)\n", temp.c_str());
-                    mt = _("application/sopcast-stream");
+                    mt = "application/sopcast-stream";
                 }
             }
             resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
-                renderProtocolInfo(mt, _(SOPCAST_PROTOCOL)));
+                renderProtocolInfo(mt, SOPCAST_PROTOCOL));
             item->setMimeType(mt);
 
-            Ref<Element> tmp_el = channel->getChildByName(_("sop_address"));
+            Ref<Element> tmp_el = channel->getChildByName("sop_address");
             if (tmp_el == nullptr) {
                 log_warning("Failed to retrieve SopCast channel URL\n");
                 continue;
             }
 
-            temp = tmp_el->getChildText(_("item"));
+            temp = tmp_el->getChildText("item");
             if (!string_ok(temp)) {
                 log_warning("Failed to retrieve SopCast channel URL\n");
                 continue;
             }
             item->setURL(temp);
 
-            tmp_el = channel->getChildByName(_("name"));
+            tmp_el = channel->getChildByName("name");
             if (tmp_el == nullptr) {
                 log_warning("Failed to retrieve SopCast channel name\n");
                 continue;
             }
 
-            temp = tmp_el->getAttribute(_("en"));
+            temp = tmp_el->getAttribute("en");
             if (string_ok(temp))
                 item->setTitle(temp);
             else
-                item->setTitle(_("Unknown"));
+                item->setTitle("Unknown");
 
-            tmp_el = channel->getChildByName(_("region"));
+            tmp_el = channel->getChildByName("region");
             if (tmp_el != nullptr) {
-                temp = tmp_el->getAttribute(_("en"));
+                temp = tmp_el->getAttribute("en");
                 if (string_ok(temp))
                     item->setMetadata(MetadataHandler::getMetaFieldName(M_REGION), temp);
             }
 
-            temp = channel->getChildText(_("description"));
+            temp = channel->getChildText("description");
             if (string_ok(temp))
                 item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), temp);
 
-            temp = channel->getAttribute(_("language"));
+            temp = channel->getAttribute("language");
             if (string_ok(temp))
-                item->setAuxData(_(SOPCAST_AUXDATA_LANGUAGE), temp);
+                item->setAuxData(SOPCAST_AUXDATA_LANGUAGE, temp);
 
-            item->setClass(_(UPNP_DEFAULT_CLASS_VIDEO_BROADCAST));
+            item->setClass(UPNP_DEFAULT_CLASS_VIDEO_BROADCAST);
 
             getTimespecNow(&ts);
-            item->setAuxData(_(ONLINE_SERVICE_LAST_UPDATE), std::to_string(ts.tv_sec));
+            item->setAuxData(ONLINE_SERVICE_LAST_UPDATE, std::to_string(ts.tv_sec));
             item->setFlag(OBJECT_FLAG_PROXY_URL);
             item->setFlag(OBJECT_FLAG_ONLINE_SERVICE);
 

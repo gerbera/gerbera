@@ -49,7 +49,7 @@ class Server : public Singleton<Server> {
 public:
     Server();
 
-    std::string getName() override { return _("Server"); }
+    std::string getName() override { return "Server"; }
 
     /// \brief Initializes the server.
     ///

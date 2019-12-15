@@ -147,14 +147,14 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item) {
 #endif
 
 #ifdef HAVE_FFMPEG
-    if (content_type != CONTENT_TYPE_PLAYLIST && ((content_type == CONTENT_TYPE_OGG && item->getFlag(OBJECT_FLAG_OGG_THEORA)) || startswith_string(item->getMimeType(), _("video")) || startswith_string(item->getMimeType(), _("audio")))) {
+    if (content_type != CONTENT_TYPE_PLAYLIST && ((content_type == CONTENT_TYPE_OGG && item->getFlag(OBJECT_FLAG_OGG_THEORA)) || startswith_string(item->getMimeType(), "video") || startswith_string(item->getMimeType(), "audio"))) {
         FfmpegHandler().fillMetadata(item);
     }
 #else
     if (content_type == CONTENT_TYPE_AVI) {
         std::string fourcc = getAVIFourCC(item->getLocation());
         if (string_ok(fourcc)) {
-            item->getResource(0)->addOption(_(RESOURCE_OPTION_FOURCC),
+            item->getResource(0)->addOption(RESOURCE_OPTION_FOURCC,
                 fourcc);
         }
     }
@@ -197,11 +197,11 @@ Ref<MetadataHandler> MetadataHandler::createHandler(int handlerType)
     case CH_FANART:
         return Ref<MetadataHandler>(new FanArtHandler());
     default:
-        throw _Exception(_("unknown content handler ID: ") + handlerType);
+        throw _Exception("unknown content handler ID: " + handlerType);
     }
 }
 
 std::string MetadataHandler::getMimeType()
 {
-    return _(MIMETYPE_DEFAULT);
+    return MIMETYPE_DEFAULT;
 }

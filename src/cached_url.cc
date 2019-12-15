@@ -42,7 +42,7 @@ CachedURL::CachedURL(int object_id, std::string url)
     this->url = url;
     this->creation_time = time(nullptr);
     if (this->creation_time == -1) {
-        throw _Exception(_("Failed to get current time: ") + mt_strerror(errno));
+        throw _Exception("Failed to get current time: " + mt_strerror(errno));
     }
     this->last_access_time = creation_time;
 }
@@ -57,7 +57,7 @@ std::string CachedURL::getURL()
     AutoLock lock(mutex);
     last_access_time = time(nullptr);
     if (last_access_time == -1) {
-        throw _Exception(_("Failed to get current time: ") + mt_strerror(errno));
+        throw _Exception("Failed to get current time: " + mt_strerror(errno));
     }
     return url;
 }

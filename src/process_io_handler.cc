@@ -137,7 +137,7 @@ ProcessIOHandler::ProcessIOHandler(std::string filename,
 
     if ((main_proc != nullptr) && ((!main_proc->isAlive() || abort()))) {
         killall();
-        throw _Exception(_("process terminated early"));
+        throw _Exception("process terminated early");
     }
     /*
     if (mkfifo(filename.c_str(), O_RDWR) == -1)
@@ -147,7 +147,7 @@ ProcessIOHandler::ProcessIOHandler(std::string filename,
         if (main_proc != nullptr)
             main_proc->kill();
 
-        throw _Exception(_("Could not create reader fifo!\n"));
+        throw _Exception("Could not create reader fifo!\n");
     }
 */
     registerAll();
@@ -157,7 +157,7 @@ void ProcessIOHandler::open(IN enum UpnpOpenFileMode mode)
 {
     if ((main_proc != nullptr) && ((!main_proc->isAlive() || abort()))) {
         killall();
-        throw _Exception(_("process terminated early"));
+        throw _Exception("process terminated early");
     }
 
     if (mode == UPNP_READ)
@@ -176,7 +176,7 @@ void ProcessIOHandler::open(IN enum UpnpOpenFileMode mode)
         if (main_proc != nullptr)
             main_proc->kill();
         unlink(filename.c_str());
-        throw _Exception(_("open: failed to open: ") + filename);
+        throw _Exception("open: failed to open: " + filename);
     }
 }
 
@@ -374,7 +374,7 @@ void ProcessIOHandler::seek(IN off_t offset, IN int whence)
 {
     // we know we can not seek in a fifo, but the PS3 asks for a hack...
     if (!ignore_seek)
-        throw _Exception(_("fseek failed"));
+        throw _Exception("fseek failed");
 }
 
 void ProcessIOHandler::close()
@@ -396,7 +396,7 @@ void ProcessIOHandler::close()
     unlink(filename.c_str());
 
     if (!ret)
-        throw _Exception(_("failed to kill process!"));
+        throw _Exception("failed to kill process!");
 }
 
 ProcessIOHandler::~ProcessIOHandler()

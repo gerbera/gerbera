@@ -72,15 +72,15 @@ void WebRequestHandler::check_request(bool checkLogin)
 
     checkRequestCalled = true;
 
-    std::string sid = param(_("sid"));
+    std::string sid = param("sid");
     if (sid.empty())
-        throw SessionException(_("no session id given"));
+        throw SessionException("no session id given");
 
     if ((session = SessionManager::getInstance()->getSession(sid)) == nullptr)
-        throw SessionException(_("invalid session id"));
+        throw SessionException("invalid session id");
 
     if (checkLogin && !session->isLoggedIn())
-        throw LoginException(_("not logged in"));
+        throw LoginException("not logged in");
     session->access();
 }
 
@@ -107,12 +107,12 @@ void WebRequestHandler::getInfo(IN const char *filename, OUT UpnpFileInfo *info)
     std::string contentType;
 
     std::string mimetype;
-    std::string returnType = param(_("return_type"));
+    std::string returnType = param("return_type");
 
     if (string_ok(returnType) && returnType == "xml")
-        mimetype = _(MIMETYPE_XML);
+        mimetype = MIMETYPE_XML;
     else
-        mimetype = _(MIMETYPE_JSON);
+        mimetype = MIMETYPE_JSON;
 
     contentType = mimetype + "; charset=" + DEFAULT_INTERNAL_CHARSET;
 
@@ -124,7 +124,7 @@ void WebRequestHandler::getInfo(IN const char *filename, OUT UpnpFileInfo *info)
 
 Ref<IOHandler> WebRequestHandler::open(IN enum UpnpOpenFileMode mode)
 {
-    root = Ref<Element>(new Element(_("root")));
+    root = Ref<Element>(new Element("root"));
 
     std::string error = nullptr;
     int error_code = 0;
@@ -134,7 +134,7 @@ Ref<IOHandler> WebRequestHandler::open(IN enum UpnpOpenFileMode mode)
     try {
         if (!ConfigManager::getInstance()->getBoolOption(CFG_SERVER_UI_ENABLED)) {
             log_warning("The UI is disabled in the configuration file. See README.\n");
-            error = _("The UI is disabled in the configuration file. See README.");
+            error = "The UI is disabled in the configuration file. See README.";
             error_code = 900;
         } else {
             process();
@@ -160,26 +160,26 @@ Ref<IOHandler> WebRequestHandler::open(IN enum UpnpOpenFileMode mode)
         error_code = 500;
         e.printStackTrace();
     } catch (const Exception& e) {
-        error = _("Error: ") + e.getMessage();
+        error = "Error: " + e.getMessage();
         error_code = 800;
         e.printStackTrace();
     }
 
     if (!string_ok(error)) {
-        root->setAttribute(_("success"), _("1"), mxml_bool_type);
+        root->setAttribute("success", "1", mxml_bool_type);
     } else {
-        root->setAttribute(_("success"), _("0"), mxml_bool_type);
-        Ref<Element> errorEl(new Element(_("error")));
-        errorEl->setTextKey(_("text"));
+        root->setAttribute("success", "0", mxml_bool_type);
+        Ref<Element> errorEl(new Element("error"));
+        errorEl->setTextKey("text");
         errorEl->setText(error);
 
         if (error_code == 0)
             error_code = 899;
-        errorEl->setAttribute(_("code"), std::to_string(error_code));
+        errorEl->setAttribute("code", std::to_string(error_code));
         root->appendElementChild(errorEl);
     }
 
-    std::string returnType = param(_("return_type"));
+    std::string returnType = param("return_type");
     if (string_ok(returnType) && returnType == "xml") {
 #ifdef TOMBDEBUG
         try {
@@ -238,12 +238,12 @@ void WebRequestHandler::handleUpdateIDs()
 {
     // session will be filled by check_request
 
-    std::string updates = param(_("updates"));
+    std::string updates = param("updates");
     if (string_ok(updates)) {
-        Ref<Element> updateIDs(new Element(_("update_ids")));
+        Ref<Element> updateIDs(new Element("update_ids"));
         root->appendElementChild(updateIDs);
         if (updates == "check") {
-            updateIDs->setAttribute(_("pending"), session->hasUIUpdateIDs() ? _("1") : _("0"), mxml_bool_type);
+            updateIDs->setAttribute("pending", session->hasUIUpdateIDs() ? "1" : "0", mxml_bool_type);
         } else if (updates == "get") {
             addUpdateIDs(updateIDs, session);
         }
@@ -255,9 +255,9 @@ void WebRequestHandler::addUpdateIDs(Ref<Element> updateIDsEl, Ref<Session> sess
     std::string updateIDs = session->getUIUpdateIDs();
     if (string_ok(updateIDs)) {
         log_debug("UI: sending update ids: %s\n", updateIDs.c_str());
-        updateIDsEl->setTextKey(_("ids"));
+        updateIDsEl->setTextKey("ids");
         updateIDsEl->setText(updateIDs);
-        updateIDsEl->setAttribute(_("updates"), _("1"), mxml_bool_type);
+        updateIDsEl->setAttribute("updates", "1", mxml_bool_type);
     }
 }
 
@@ -265,10 +265,10 @@ void WebRequestHandler::appendTask(Ref<Element> el, Ref<GenericTask> task)
 {
     if (task == nullptr || el == nullptr)
         return;
-    Ref<Element> taskEl(new Element(_("task")));
-    taskEl->setAttribute(_("id"), std::to_string(task->getID()), mxml_int_type);
-    taskEl->setAttribute(_("cancellable"), task->isCancellable() ? _("1") : _("0"), mxml_bool_type);
-    taskEl->setTextKey(_("text"));
+    Ref<Element> taskEl(new Element("task"));
+    taskEl->setAttribute("id", std::to_string(task->getID()), mxml_int_type);
+    taskEl->setAttribute("cancellable", task->isCancellable() ? "1" : "0", mxml_bool_type);
+    taskEl->setTextKey("text");
     taskEl->setText(task->getDescription());
     el->appendElementChild(taskEl);
 }
@@ -276,9 +276,9 @@ void WebRequestHandler::appendTask(Ref<Element> el, Ref<GenericTask> task)
 std::string WebRequestHandler::mapAutoscanType(int type)
 {
     if (type == 1)
-        return _("ui");
+        return "ui";
     else if (type == 2)
-        return _("persistent");
+        return "persistent";
     else
-        return _("none");
+        return "none";
 }

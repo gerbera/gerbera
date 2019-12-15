@@ -52,13 +52,13 @@ void web::add::process()
     check_request();
 
     std::string path;
-    std::string objID = param(_("object_id"));
+    std::string objID = param("object_id");
     if (!string_ok(objID) || objID == "0")
-        path = _(FS_ROOT_DIRECTORY);
+        path = FS_ROOT_DIRECTORY;
     else
         path = hex_decode_string(objID);
     if (path.empty())
-        throw _Exception(_("web::add::process(): illegal path"));
+        throw _Exception("web::add::process(): illegal path");
 
     Ref<ContentManager> cm = ContentManager::getInstance();
     cm->addFile(path, true);

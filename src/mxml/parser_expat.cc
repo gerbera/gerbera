@@ -112,7 +112,7 @@ void XMLCALL Parser::default_callback(void *userdata, const XML_Char *s, int len
         if (parser->ignoreNextDefaultNewline)
         {
             parser->ignoreNextDefaultNewline = false;
-            if (text == _("\n"))
+            if (text == "\n")
                 add_as_character_data = false;
         }
         if (add_as_character_data)
@@ -134,7 +134,7 @@ Ref<Document> Parser::parseFile(std::string filename)
 
 Ref<Document> Parser::parseString(std::string str)
 {
-    Ref<Context> ctx(new Context(_("")));
+    Ref<Context> ctx(new Context(""));
     return parse(ctx, str);
 }
 
@@ -142,7 +142,7 @@ Ref<Document> Parser::parse(Ref<Context> ctx, std::string input)
 {
     XML_Parser parser = XML_ParserCreate(nullptr);
     if (!parser)
-        throw Exception(_("Unable to allocate XML parser"));
+        throw Exception("Unable to allocate XML parser");
 
     XML_SetUserData(parser, this);
     XML_SetElementHandler(parser, Parser::element_start, Parser::element_end);

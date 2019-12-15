@@ -129,7 +129,7 @@ void string_ok_ex(std::string str);
 /// \param port Port as string.
 /// \oaram page HTML document to redirect to.
 /// \return string representing the desired HTML document.
-std::string http_redirect_to(std::string ip, std::string port, std::string page = _(""));
+std::string http_redirect_to(std::string ip, std::string port, std::string page = "");
 
 /// \brief Encodes arbitrary data to a hex string.
 /// \param data Buffer that is holding the data
@@ -194,7 +194,7 @@ void quicksort(COMPARABLE* arr, int size, COMPARATOR comparator);
 /// \param mimetype the mimetype that should be inserted
 /// \param protocol the protocol which should be inserted (default: "http-get")
 /// \return The rendered protocolInfo String
-std::string renderProtocolInfo(std::string mimetype, std::string protocol = _(PROTOCOL), std::string extend = "");
+std::string renderProtocolInfo(std::string mimetype, std::string protocol = PROTOCOL, std::string extend = "");
 
 /// \brief Extracts mimetype from the protocol info string.
 /// \param protocol info string as used in the protocolInfo attribute

@@ -46,7 +46,7 @@ Ref<Element> XPath::getElement(std::string xpath)
 {
     std::string axisPart = getAxisPart(xpath);
     if (!axisPart.empty()) {
-        throw _Exception(_("XPath::getElement: unexpected axis in ") + xpath);
+        throw _Exception("XPath::getElement: unexpected axis in " + xpath);
     }
     return elementAtPath(xpath);
 }
@@ -67,7 +67,7 @@ std::string XPath::getText(std::string xpath)
     std::string spec = getSpec(axisPart);
 
     if (axis != "attribute") {
-        throw _Exception(_("XPath::getText: unexpected axis: ") + axis);
+        throw _Exception("XPath::getText: unexpected axis: " + axis);
     }
 
     return el->getAttribute(spec);

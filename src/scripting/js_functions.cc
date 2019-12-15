@@ -127,7 +127,7 @@ duk_ret_t js_addCdsObject(duk_context *ctx)
         //stack: js_orig_obj path containerclass js_cds_obj
         if (self->whoami() == S_PLAYLIST)
         {
-            int otype = self->getIntProperty(_("objectType"), -1);
+            int otype = self->getIntProperty("objectType", -1);
             if (otype == -1)
             {
                 log_error("missing objectType property\n");
@@ -137,7 +137,7 @@ duk_ret_t js_addCdsObject(duk_context *ctx)
             if (!IS_CDS_ITEM_EXTERNAL_URL(otype) &&
                 !IS_CDS_ITEM_INTERNAL_URL(otype))
             {
-                std::string loc = self->getProperty(_("location"));
+                std::string loc = self->getProperty("location");
                 if (string_ok(loc) &&
                    (IS_CDS_PURE_ITEM(otype) || IS_CDS_ACTIVE_ITEM(otype)))
                     loc = normalizePath(loc);
@@ -252,7 +252,7 @@ static duk_ret_t convert_charset_generic(duk_context *ctx, charset_convert_t chr
 
     try
     {
-        std::string result = self->convertToCharset(_(ts), chr);
+        std::string result = self->convertToCharset(ts, chr);
         duk_push_lstring(ctx, result.c_str(), result.length());
         return 1;
     }

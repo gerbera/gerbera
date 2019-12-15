@@ -45,14 +45,14 @@ using namespace zmm;
 Ref<Storage> Storage::getInstance()
 {
     if (!instance->singletonActive)
-        throw _Exception(_("singleton is currently inactive!"));
+        throw _Exception("singleton is currently inactive!");
     if (instance == nullptr) {
         // extra scope added so that lock can be released prior to metadata upgrade
         // when flushInsertBuffer() will try taking this lock
         {
             AutoLock lock(mutex);
             if (!instance->singletonActive)
-                throw _Exception(_("singleton is currently inactive!"));
+                throw _Exception("singleton is currently inactive!");
             if (instance == nullptr) {
                 Ref<Storage> tmpInstance = createInstance();
                 tmpInstance->init();
@@ -89,7 +89,7 @@ Ref<Storage> Storage::createInstance()
         }
 #endif
         // other database types...
-        throw _Exception(_("Unknown storage type: ") + type);
+        throw _Exception("Unknown storage type: " + type);
     } while (false);
 
     return storage;
@@ -98,11 +98,11 @@ Ref<Storage> Storage::createInstance()
 void Storage::stripAndUnescapeVirtualContainerFromPath(std::string path, std::string& first, std::string& last)
 {
     if (path.at(0) != VIRTUAL_CONTAINER_SEPARATOR) {
-        throw _Exception(_("got non-absolute virtual path; needs to start with: ") + VIRTUAL_CONTAINER_SEPARATOR);
+        throw _Exception("got non-absolute virtual path; needs to start with: " + VIRTUAL_CONTAINER_SEPARATOR);
     }
     size_t sep = path.rfind(VIRTUAL_CONTAINER_SEPARATOR);
     if (sep == 0) {
-        first = _("/");
+        first = "/";
         last = path.substr(1);
     } else {
         while (sep != std::string::npos) {
@@ -113,7 +113,7 @@ void Storage::stripAndUnescapeVirtualContainerFromPath(std::string path, std::st
             sep = path.rfind(VIRTUAL_CONTAINER_SEPARATOR, sep - 1);
         }
         if (sep == 0) {
-            first = _("/");
+            first = "/";
             last = unescape(path.substr(sep + 1), VIRTUAL_CONTAINER_ESCAPE);
         } else {
             first = path.substr(0, sep);

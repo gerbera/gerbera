@@ -127,7 +127,7 @@ public:
     /// \brief Constructor, initializes the array.
     SessionManager();
 
-    std::string getName() override { return _("Session Manager"); }
+    std::string getName() override { return "Session Manager"; }
 
     virtual ~SessionManager() override { log_debug("SessionManager destroyed\n"); }
 

@@ -130,7 +130,7 @@ void Sqlite3Storage::init()
 
     // check for db-file
     if (access(dbFilePath.c_str(), R_OK | W_OK) != 0 && errno != ENOENT)
-        throw _StorageException("", _("Error while accessing sqlite database file (") + dbFilePath + "): " + mt_strerror(errno));
+        throw _StorageException("", "Error while accessing sqlite database file (" + dbFilePath + "): " + mt_strerror(errno));
 
     taskQueue = Ref<ObjectQueue<SLTask>>(new ObjectQueue<SLTask>(SL3_INITITAL_QUEUE_SIZE));
     taskQueueOpen = true;
@@ -142,7 +142,7 @@ void Sqlite3Storage::init()
         this);
 
     if (ret != 0) {
-        throw _StorageException("", _("Could not start sqlite thread: ") + mt_strerror(errno));
+        throw _StorageException("", "Could not start sqlite thread: " + mt_strerror(errno));
     }
 
     // wait for sqlite3 thread to become ready
@@ -153,7 +153,7 @@ void Sqlite3Storage::init()
 
     std::string dbVersion = "";
     try {
-        dbVersion = getInternalSetting(_("db_version"));
+        dbVersion = getInternalSetting("db_version");
     } catch (Exception) {
         log_warning("Sqlite3 database seems to be corrupt or doesn't exist yet.\n");
         // database seems to be corrupt or nonexistent
@@ -168,7 +168,7 @@ void Sqlite3Storage::init()
                     Ref<SLBackupTask> btask(new SLBackupTask(true));
                     this->addTask(RefCast(btask, SLTask));
                     btask->waitForTask();
-                    dbVersion = getInternalSetting(_("db_version"));
+                    dbVersion = getInternalSetting("db_version");
                 } catch (Exception) {
                 }
             }
@@ -179,23 +179,23 @@ void Sqlite3Storage::init()
                 addTask(RefCast(ptask, SLTask));
                 try {
                     ptask->waitForTask();
-                    dbVersion = getInternalSetting(_("db_version"));
+                    dbVersion = getInternalSetting("db_version");
                 } catch (const Exception& e) {
                     shutdown();
-                    throw _Exception(_("error while creating database: ") + e.getMessage());
+                    throw _Exception("error while creating database: " + e.getMessage());
                 }
                 log_info("database created successfully.\n");
             }
         } else {
             // fail because restore option is false
             shutdown();
-            throw _Exception(_("sqlite3 database seems to be corrupt and the 'on-error' option is set to 'fail'"));
+            throw _Exception("sqlite3 database seems to be corrupt and the 'on-error' option is set to 'fail'");
         }
     }
 
     if (dbVersion.empty()) {
         shutdown();
-        throw _Exception(_("sqlite3 database seems to be corrupt and restoring from backup failed"));
+        throw _Exception("sqlite3 database seems to be corrupt and restoring from backup failed");
     }
 
     _exec("PRAGMA locking_mode = EXCLUSIVE");
@@ -216,7 +216,7 @@ void Sqlite3Storage::init()
         _exec(SQLITE3_UPDATE_1_2_3);
         _exec(SQLITE3_UPDATE_1_2_4);
         log_info("Database upgrade successful.\n");
-        dbVersion = _("2");
+        dbVersion = "2";
     }
 
     if (dbVersion == "2") {
@@ -225,7 +225,7 @@ void Sqlite3Storage::init()
         _exec(SQLITE3_UPDATE_2_3_2);
         _exec(SQLITE3_UPDATE_2_3_3);
         log_info("Database upgrade successful.\n");
-        dbVersion = _("3");
+        dbVersion = "3";
     }
 
     if (dbVersion == "3") {
@@ -234,7 +234,7 @@ void Sqlite3Storage::init()
         _exec(SQLITE3_UPDATE_3_4_2);
         _exec(SQLITE3_UPDATE_3_4_3);
         log_info("Database upgrade successful.\n");
-        dbVersion = _("4");
+        dbVersion = "4";
     }
 
     if (dbVersion == "4") {
@@ -242,13 +242,13 @@ void Sqlite3Storage::init()
         _exec(SQLITE3_UPDATE_4_5_1);
         _exec(SQLITE3_UPDATE_4_5_2);
         log_info("Database upgrade successful.\n");
-        dbVersion = _("5");
+        dbVersion = "5";
     }
 
     /* --- --- ---*/
 
     if (!string_ok(dbVersion) || dbVersion != "5")
-        throw _Exception(_("The database seems to be from a newer version!"));
+        throw _Exception("The database seems to be from a newer version!");
 
     // add timer for backups
     if (ConfigManager::getInstance()->getBoolOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED)) {
@@ -280,7 +280,7 @@ std::string Sqlite3Storage::quote(std::string value)
 std::string Sqlite3Storage::getError(std::string query, std::string error, sqlite3* db)
 {
     return std::string("SQLITE3: (") + std::to_string(sqlite3_errcode(db)) + " : " + std::to_string(sqlite3_extended_errcode(db)) + ") "
-        + sqlite3_errmsg(db) + "\nQuery:" + (query.empty() ? _("unknown") : query) + "\nerror: " + (error.empty() ? _("unknown") : error);
+        + sqlite3_errmsg(db) + "\nQuery:" + (query.empty() ? "unknown" : query) + "\nerror: " + (error.empty() ? "unknown" : error);
 }
 
 Ref<SQLResult> Sqlite3Storage::select(const char* query, int length)
@@ -323,7 +323,7 @@ void Sqlite3Storage::threadProc()
 
     int res = sqlite3_open(dbFilePath.c_str(), &db);
     if (res != SQLITE_OK) {
-        startupError = _("Sqlite3Storage.init: could not open ") + dbFilePath;
+        startupError = "Sqlite3Storage.init: could not open " + dbFilePath;
         return;
     }
     AutoLockU lock(sqliteMutex);
@@ -352,7 +352,7 @@ void Sqlite3Storage::threadProc()
 
     taskQueueOpen = false;
     while ((task = taskQueue->dequeue()) != nullptr) {
-        task->sendSignal(_("Sorry, sqlite3 thread is shutting down"));
+        task->sendSignal("Sorry, sqlite3 thread is shutting down");
     }
     if (db)
         sqlite3_close(db);
@@ -361,10 +361,10 @@ void Sqlite3Storage::threadProc()
 void Sqlite3Storage::addTask(zmm::Ref<SLTask> task, bool onlyIfDirty)
 {
     if (!taskQueueOpen)
-        throw _Exception(_("sqlite3 task queue is already closed"));
+        throw _Exception("sqlite3 task queue is already closed");
     AutoLock lock(sqliteMutex);
     if (!taskQueueOpen) {
-        throw _Exception(_("sqlite3 task queue is already closed"));
+        throw _Exception("sqlite3 task queue is already closed");
     }
     if (!onlyIfDirty || dirty) {
         taskQueue->enqueue(task);
@@ -449,17 +449,17 @@ void SLInitTask::run(sqlite3** db, Sqlite3Storage* sl)
     sqlite3_close(*db);
 
     if (unlink(dbFilePath.c_str()) != 0)
-        throw _StorageException(nullptr, _("error while autocreating sqlite3 database: could not unlink old database file: ") + mt_strerror(errno));
+        throw _StorageException(nullptr, "error while autocreating sqlite3 database: could not unlink old database file: " + mt_strerror(errno));
 
     int res = sqlite3_open(dbFilePath.c_str(), db);
     if (res != SQLITE_OK)
-        throw _StorageException(nullptr, _("error while autocreating sqlite3 database: could not create new database"));
+        throw _StorageException(nullptr, "error while autocreating sqlite3 database: could not create new database");
 
     unsigned char buf[SL3_CREATE_SQL_INFLATED_SIZE + 1]; // +1 for '\0' at the end of the string
     unsigned long uncompressed_size = SL3_CREATE_SQL_INFLATED_SIZE;
     int ret = uncompress(buf, &uncompressed_size, sqlite3_create_sql, SL3_CREATE_SQL_DEFLATED_SIZE);
     if (ret != Z_OK || uncompressed_size != SL3_CREATE_SQL_INFLATED_SIZE)
-        throw _StorageException(nullptr, _("Error while uncompressing sqlite3 create sql. returned: ") + ret);
+        throw _StorageException(nullptr, "Error while uncompressing sqlite3 create sql. returned: " + ret);
     buf[SL3_CREATE_SQL_INFLATED_SIZE] = '\0';
 
     char* err = nullptr;
@@ -572,11 +572,11 @@ void SLBackupTask::run(sqlite3** db, Sqlite3Storage* sl)
                 dbFilePath);
 
         } catch (const Exception& e) {
-            throw _StorageException("", _("error while restoring sqlite3 backup: ") + e.getMessage());
+            throw _StorageException("", "error while restoring sqlite3 backup: " + e.getMessage());
         }
         int res = sqlite3_open(dbFilePath.c_str(), db);
         if (res != SQLITE_OK) {
-            throw _StorageException("", _("error while restoring sqlite3 backup: could not reopen sqlite3 database after restore"));
+            throw _StorageException("", "error while restoring sqlite3 backup: could not reopen sqlite3 database after restore");
         }
         log_info("sqlite3 database successfully restored from backup.\n");
     }

@@ -376,7 +376,7 @@ void LibExifHandler::fillMetadata(Ref<CdsItem> item)
             Ref<CdsResource> resource(new CdsResource(CH_LIBEXIF));
             resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(item->getMimeType()));
             resource->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), th_resolution);
-            resource->addParameter(_(RESOURCE_CONTENT_TYPE), _(EXIF_THUMBNAIL));
+            resource->addParameter(RESOURCE_CONTENT_TYPE, EXIF_THUMBNAIL);
             item->addResource(resource);
         } catch (const Exception& e) {
             e.printStackTrace();
@@ -391,16 +391,16 @@ Ref<IOHandler> LibExifHandler::serveContent(Ref<CdsItem> item, int resNum, off_t
     ExifData* ed;
     Ref<CdsResource> res = item->getResource(resNum);
 
-    std::string ctype = res->getParameters()->get(_(RESOURCE_CONTENT_TYPE));
+    std::string ctype = res->getParameters()->get(RESOURCE_CONTENT_TYPE);
 
     if (ctype != EXIF_THUMBNAIL)
-        throw _Exception(_("LibExifHandler: got unknown content type: ") + ctype);
+        throw _Exception("LibExifHandler: got unknown content type: " + ctype);
     ed = exif_data_new_from_file(item->getLocation().c_str());
     if (!ed)
-        throw _Exception(_("LibExifHandler: resource has no exif information"));
+        throw _Exception("LibExifHandler: resource has no exif information");
 
     if (!(ed->size))
-        throw _Exception(_("LibExifHandler: resource has no exif thumbnail"));
+        throw _Exception("LibExifHandler: resource has no exif thumbnail");
 
     Ref<IOHandler> h(new MemIOHandler(ed->data, ed->size));
     *data_size = ed->size;

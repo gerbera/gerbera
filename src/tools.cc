@@ -83,7 +83,7 @@ std::vector<std::string> split_string(std::string str, char sep, bool empty)
         } else if (pos == data) {
             data++;
             if ((data < end) && empty)
-                ret.push_back(_(""));
+                ret.push_back("");
         } else {
             std::string part(data, pos - data);
             ret.push_back(part);
@@ -96,17 +96,17 @@ std::vector<std::string> split_string(std::string str, char sep, bool empty)
 std::vector<std::string> split_path(std::string str)
 {
     if (!string_ok(str))
-        throw _Exception(_("invalid path given to split_path"));
+        throw _Exception("invalid path given to split_path");
 
     std::vector<std::string> ret;
     size_t pos = str.rfind(DIR_SEPARATOR);
     if (pos == std::string::npos)
-        throw _Exception(_("relative path given to split_path: ") + str);
+        throw _Exception("relative path given to split_path: " + str);
 
     const char* data = str.c_str();
     if (pos == 0) {
         /* there is only one separator at the beginning "/..." or "/" */
-        ret.push_back(_(_DIR_SEPARATOR));
+        ret.push_back(_DIR_SEPARATOR);
         std::string filename = data + 1;
         ret.push_back(filename);
     } else {
@@ -137,7 +137,7 @@ std::string trim_string(std::string str)
         }
     }
     if (i >= len)
-        return _("");
+        return "";
     for (i = len - 1; i >= start; i--) {
         if (!strchr(WHITE_SPACE, buf[i])) {
             end = i + 1;
@@ -251,10 +251,10 @@ time_t check_path_ex(std::string path, bool needDir, bool existenceUnneeded,
     }
 
     if (needDir && (!S_ISDIR(statbuf.st_mode)))
-        throw _Exception(_("Not a directory: ") + path);
+        throw _Exception("Not a directory: " + path);
 
     if (!needDir && (S_ISDIR(statbuf.st_mode)))
-        throw _Exception(_("Not a file: ") + path);
+        throw _Exception("Not a file: " + path);
 
     if ((filesize != nullptr) && S_ISREG(statbuf.st_mode))
         *filesize = statbuf.st_size;
@@ -285,18 +285,18 @@ std::string find_in_path(std::string exec)
     std::string next;
     do {
         if (path.empty())
-            path = st->nextToken(_(":"));
-        next = st->nextToken(_(":"));
+            path = st->nextToken(":");
+        next = st->nextToken(":");
 
         if (path.empty())
             break;
 
-        if ((!next.empty()) && !startswith_string(next, _("/"))) {
-            path = path + _(":") + next;
+        if ((!next.empty()) && !startswith_string(next, "/")) {
+            path = path + ":" + next;
             next = "";
         }
 
-        std::string check = path + _("/") + exec;
+        std::string check = path + "/" + exec;
         if (check_path(check))
             return check;
 
@@ -320,12 +320,12 @@ bool string_ok(std::string str)
 void string_ok_ex(std::string str)
 {
     if (str.empty())
-        throw _Exception(_("Empty string"));
+        throw _Exception("Empty string");
 }
 
 std::string http_redirect_to(std::string ip, std::string port, std::string page)
 {
-    return _("<html><head><meta http-equiv=\"Refresh\" content=\"0;URL=http://") + ip + ":" + port + "/" + page + "\"></head><body bgcolor=\"#dddddd\"></body></html>";
+    return "<html><head><meta http-equiv=\"Refresh\" content=\"0;URL=http://" + ip + ":" + port + "/" + page + "\"></head><body bgcolor=\"#dddddd\"></body></html>";
 }
 
 std::string hex_encode(const void* data, int len)
@@ -500,7 +500,7 @@ std::string mt_strerror(int mt_errno)
 #else
     int ret = strerror_r(errno, buffer, 512);
     if (ret < 0)
-        return _("cannot get error string: error while calling XSI-compliant strerror_r");
+        return "cannot get error string: error while calling XSI-compliant strerror_r";
     err_str = buffer;
 #endif
     std::string errStr(err_str);
@@ -515,7 +515,7 @@ std::string read_text_file(std::string path)
 {
     FILE* f = fopen(path.c_str(), "r");
     if (!f) {
-        throw _Exception(_("read_text_file: could not open ") + path + " : " + mt_strerror(errno));
+        throw _Exception("read_text_file: could not open " + path + " : " + mt_strerror(errno));
     }
     std::ostringstream buf;
     char buffer[1024];
@@ -531,16 +531,16 @@ void write_text_file(std::string path, std::string contents)
     size_t bytesWritten;
     FILE* f = fopen(path.c_str(), "w");
     if (!f) {
-        throw _Exception(_("write_text_file: could not open ") + path + " : " + mt_strerror(errno));
+        throw _Exception("write_text_file: could not open " + path + " : " + mt_strerror(errno));
     }
 
     bytesWritten = fwrite(contents.c_str(), 1, contents.length(), f);
     if (bytesWritten < contents.length()) {
         fclose(f);
         if (bytesWritten >= 0)
-            throw _Exception(_("write_text_file: incomplete write to ") + path + " : ");
+            throw _Exception("write_text_file: incomplete write to " + path + " : ");
         else
-            throw _Exception(_("write_text_file: error writing to ") + path + " : " + mt_strerror(errno));
+            throw _Exception("write_text_file: error writing to " + path + " : " + mt_strerror(errno));
     }
     fclose(f);
 }
@@ -549,12 +549,12 @@ void copy_file(std::string from, std::string to)
 {
     FILE* f = fopen(from.c_str(), "r");
     if (!f) {
-        throw _Exception(_("copy_file: could not open ") + from + " for read: " + mt_strerror(errno));
+        throw _Exception("copy_file: could not open " + from + " for read: " + mt_strerror(errno));
     }
     FILE* t = fopen(to.c_str(), "w");
     if (!t) {
         fclose(f);
-        throw _Exception(_("copy_file: could not open ") + to + " for write: " + mt_strerror(errno));
+        throw _Exception("copy_file: could not open " + to + " for write: " + mt_strerror(errno));
     }
     auto* buffer = (char*)MALLOC(1024);
     size_t bytesRead = 0;
@@ -568,7 +568,7 @@ void copy_file(std::string from, std::string to)
         int my_errno = errno;
         fclose(f);
         fclose(t);
-        throw _Exception(_("copy_file: error while copying ") + from + " to " + to + ": " + mt_strerror(my_errno));
+        throw _Exception("copy_file: error while copying " + from + " to " + to + ": " + mt_strerror(my_errno));
     }
 
     fclose(f);
@@ -655,7 +655,7 @@ std::string renderProtocolInfo(std::string mimetype, std::string protocol, std::
         else
             return protocol + ":*:" + mimetype + ":*";
     } else
-        return _("http-get:*:*:*");
+        return "http-get:*:*:*";
 }
 
 std::string getMTFromProtocolInfo(std::string protocol)
@@ -672,7 +672,7 @@ std::string getProtocol(std::string protocolInfo)
     std::string protocol;
     size_t pos = protocolInfo.find(':');
     if (pos == std::string::npos || pos == 0)
-        protocol = _("http-get");
+        protocol = "http-get";
     else
         protocol = protocolInfo.substr(0, pos);
 
@@ -767,7 +767,7 @@ void set_jpeg_resolution_resource(Ref<CdsItem> item, int res_num)
         std::string resolution = get_jpeg_resolution(fio_h);
 
         if (res_num >= item->getResourceCount())
-            throw _Exception(_("Invalid resource index"));
+            throw _Exception("Invalid resource index");
 
         item->getResource(res_num)->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), resolution);
     } catch (const Exception& e) {
@@ -1005,7 +1005,7 @@ void getTimespecNow(struct timespec* ts)
     struct timeval tv;
     int ret = gettimeofday(&tv, nullptr);
     if (ret != 0)
-        throw _Exception(_("gettimeofday failed: ") + mt_strerror(errno));
+        throw _Exception("gettimeofday failed: " + mt_strerror(errno));
 
     ts->tv_sec = tv.tv_sec;
     ts->tv_nsec = tv.tv_usec * 1000;
@@ -1057,7 +1057,7 @@ std::string normalizePath(std::string path)
     Ref<BaseStack<int>> separatorLocations(new BaseStack<int>(avarageExpectedSlashes, -1));
 
     if (path.at(0) != DIR_SEPARATOR)
-        throw _Exception(_("Relative paths are not allowed!\n"));
+        throw _Exception("Relative paths are not allowed!\n");
 
     size_t next = 1;
     do {
@@ -1311,12 +1311,12 @@ bool isTheora(std::string ogg_filename)
     f = fopen(ogg_filename.c_str(), "rb");
 
     if (!f) {
-        throw _Exception(_("Error opening ") + ogg_filename + _(" : ") + mt_strerror(errno));
+        throw _Exception("Error opening " + ogg_filename + " : " + mt_strerror(errno));
     }
 
     if (fread(buffer, 1, 4, f) != 4) {
         fclose(f);
-        throw _Exception(_("Error reading ") + ogg_filename);
+        throw _Exception("Error reading " + ogg_filename);
     }
 
     if (memcmp(buffer, "OggS", 4) != 0) {
@@ -1326,12 +1326,12 @@ bool isTheora(std::string ogg_filename)
 
     if (fseek(f, 28, SEEK_SET) != 0) {
         fclose(f);
-        throw _Exception(_("Incomplete file ") + ogg_filename);
+        throw _Exception("Incomplete file " + ogg_filename);
     }
 
     if (fread(buffer, 1, 7, f) != 7) {
         fclose(f);
-        throw _Exception(_("Error reading ") + ogg_filename);
+        throw _Exception("Error reading " + ogg_filename);
     }
 
     if (memcmp(buffer, "\x80theora", 7) != 0) {
@@ -1392,19 +1392,19 @@ std::string getDLNAprofileString(std::string contentType)
 {
     std::string profile;
     if (contentType == CONTENT_TYPE_MP4)
-        profile = _(D_PN_AVC_MP4_EU);
+        profile = D_PN_AVC_MP4_EU;
     else if (contentType == CONTENT_TYPE_MKV)
-        profile = _(D_PN_MKV);
+        profile = D_PN_MKV;
     else if (contentType == CONTENT_TYPE_AVI)
-        profile = _(D_PN_AVI);
+        profile = D_PN_AVI;
     else if (contentType == CONTENT_TYPE_MPEG)
-        profile = _(D_PN_MPEG_PS_PAL);
+        profile = D_PN_MPEG_PS_PAL;
     else if (contentType == CONTENT_TYPE_MP3)
-        profile = _(D_MP3);
+        profile = D_MP3;
     else if (contentType == CONTENT_TYPE_PCM)
-        profile = _(D_LPCM);
+        profile = D_LPCM;
     else
-        profile = _("");
+        profile = "";
 
     if (string_ok(profile))
         profile = std::string(D_PROFILE) + "=" + profile;
@@ -1418,7 +1418,7 @@ std::string getDLNAContentHeader(std::string contentType)
         std::string content_parameter;
         content_parameter = getDLNAprofileString(contentType);
         if (string_ok(content_parameter))
-            content_parameter = _(D_PROFILE) + std::string("=") + content_parameter + ";";
+            content_parameter = D_PROFILE + std::string("=") + content_parameter + ";";
         // enabling or disabling seek
         if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_DLNA_SEEK))
             content_parameter = content_parameter + D_OP + "=" + D_OP_SEEK_ENABLED + ";";
@@ -1435,10 +1435,10 @@ std::string getDLNATransferHeader(std::string mimeType)
 {
     if (ConfigManager::getInstance()->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO)) {
         std::string transfer_parameter;
-        if (startswith_string(mimeType, _("image")))
-            transfer_parameter = _(D_HTTP_TRANSFER_MODE_INTERACTIVE);
-        else if (startswith_string(mimeType, _("audio")) || startswith_string(mimeType, _("video")))
-            transfer_parameter = _(D_HTTP_TRANSFER_MODE_STREAMING);
+        if (startswith_string(mimeType, "image"))
+            transfer_parameter = D_HTTP_TRANSFER_MODE_INTERACTIVE;
+        else if (startswith_string(mimeType, "audio") || startswith_string(mimeType, "video"))
+            transfer_parameter = D_HTTP_TRANSFER_MODE_STREAMING;
 
         if (string_ok(transfer_parameter)) {
             return transfer_parameter;
@@ -1454,19 +1454,19 @@ std::string getAVIFourCC(std::string avi_filename)
     char* buffer;
     FILE* f = fopen(avi_filename.c_str(), "rb");
     if (!f)
-        throw _Exception(_("could not open file ") + avi_filename + " : " + mt_strerror(errno));
+        throw _Exception("could not open file " + avi_filename + " : " + mt_strerror(errno));
 
     buffer = (char*)MALLOC(FCC_OFFSET + 6);
     if (buffer == nullptr) {
         fclose(f);
-        throw _Exception(_("Out of memory when allocating buffer for file ") + avi_filename);
+        throw _Exception("Out of memory when allocating buffer for file " + avi_filename);
     }
 
     size_t rb = fread(buffer, 1, FCC_OFFSET + 4, f);
     fclose(f);
     if (rb != FCC_OFFSET + 4) {
         free(buffer);
-        throw _Exception(_("could not read header of ") + avi_filename + " : " + mt_strerror(errno));
+        throw _Exception("could not read header of " + avi_filename + " : " + mt_strerror(errno));
     }
 
     buffer[FCC_OFFSET + 5] = '\0';
