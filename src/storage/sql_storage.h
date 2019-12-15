@@ -83,6 +83,7 @@ class SQLStorage : protected Storage
 public:
     /* methods to override in subclasses */
     virtual std::string quote(std::string str) = 0;
+    virtual std::string quote(const char* str) = 0;
     virtual std::string quote(int val) = 0;
     virtual std::string quote(unsigned int val) = 0;
     virtual std::string quote(long val) = 0;

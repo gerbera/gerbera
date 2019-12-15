@@ -50,6 +50,7 @@ private:
     virtual void shutdownDriver();
 
     virtual std::string quote(std::string str);
+    virtual inline std::string quote(const char* str) override { return quote(std::string(str)); }
     virtual inline std::string quote(int val) { return std::string::from(val); }
     virtual inline std::string quote(unsigned int val) { return std::string::from(val); }
     virtual inline std::string quote(long val) { return std::string::from(val); }
