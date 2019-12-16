@@ -68,7 +68,7 @@ std::vector<std::string> split_path(std::string str);
 std::string trim_string(std::string str);
 
 /// \brief returns true if str starts with check
-bool startswith_string(std::string str, std::string check);
+bool startswith(std::string str, std::string check);
 
 /// \brief returns lowercase of str
 std::string tolower_string(std::string str);

@@ -147,7 +147,7 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item) {
 #endif
 
 #ifdef HAVE_FFMPEG
-    if (content_type != CONTENT_TYPE_PLAYLIST && ((content_type == CONTENT_TYPE_OGG && item->getFlag(OBJECT_FLAG_OGG_THEORA)) || startswith_string(item->getMimeType(), "video") || startswith_string(item->getMimeType(), "audio"))) {
+    if (content_type != CONTENT_TYPE_PLAYLIST && ((content_type == CONTENT_TYPE_OGG && item->getFlag(OBJECT_FLAG_OGG_THEORA)) || startswith(item->getMimeType(), "video") || startswith(item->getMimeType(), "audio"))) {
         FfmpegHandler().fillMetadata(item);
     }
 #else

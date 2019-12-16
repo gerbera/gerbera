@@ -215,7 +215,7 @@ void FileRequestHandler::getInfo(IN const char* filename, OUT UpnpFileInfo* info
 
         Ref<ConfigManager> cfg = ConfigManager::getInstance();
         if (cfg->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK)) {
-            if (startswith_string(item->getMimeType(), "video")) {
+            if (startswith(item->getMimeType(), "video")) {
                 // Look for subtitle file and returns it's URL
                 // in CaptionInfo.sec response header.
                 // To be more compliant with original Samsung

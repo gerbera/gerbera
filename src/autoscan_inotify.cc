@@ -619,7 +619,7 @@ Ref<AutoscanInotify::WatchAutoscan> AutoscanInotify::getAppropriateAutoscan(Ref<
             watchAs = RefCast(watch, WatchAutoscan);
             if (watchAs->getNonexistingPathArray().empty()) {
                 std::string testLocation = watchAs->getNormalizedAutoscanPath();
-                if (startswith_string(path, testLocation)) {
+                if (startswith(path, testLocation)) {
                     if (string_ok(pathBestMatch)) {
                         if (pathBestMatch.length() < testLocation.length()) {
                             pathBestMatch = testLocation;

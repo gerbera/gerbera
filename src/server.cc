@@ -411,9 +411,9 @@ Ref<RequestHandler> Server::createRequestHandler(const char* filename) const
 
     RequestHandler* ret = nullptr;
 
-    if (startswith_string(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_MEDIA_HANDLER)) {
+    if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_MEDIA_HANDLER)) {
         ret = new FileRequestHandler(xmlbuilder.get());
-    } else if (startswith_string(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_UI_HANDLER)) {
+    } else if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_UI_HANDLER)) {
         std::string parameters;
         std::string path;
         RequestHandler::splitUrl(filename, URL_UI_PARAM_SEPARATOR, path, parameters);
@@ -427,9 +427,9 @@ Ref<RequestHandler> Server::createRequestHandler(const char* filename) const
         } else {
             ret = createWebRequestHandler("index");
         }
-    } else if (startswith_string(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + DEVICE_DESCRIPTION_PATH)) {
+    } else if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + DEVICE_DESCRIPTION_PATH)) {
         ret = new DeviceDescriptionHandler(xmlbuilder.get());
-    } else if (startswith_string(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_SERVE_HANDLER)) {
+    } else if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_SERVE_HANDLER)) {
         if (string_ok(ConfigManager::getInstance()->getOption(CFG_SERVER_SERVEDIR)))
             ret = new ServeRequestHandler();
         else
@@ -437,7 +437,7 @@ Ref<RequestHandler> Server::createRequestHandler(const char* filename) const
     }
 
 #if defined(HAVE_CURL)
-    else if (startswith_string(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_ONLINE_HANDLER)) {
+    else if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_ONLINE_HANDLER)) {
         ret = new URLRequestHandler();
     }
 #endif

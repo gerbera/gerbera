@@ -241,7 +241,7 @@ Ref<AutoscanList> AutoscanList::removeIfSubdir(std::string parent, bool persiste
     Ref<AutoscanList> rm_id_list(new AutoscanList());
 
     for (int i = 0; i < list->size(); i++) {
-        if (list->get(i) != nullptr && startswith_string(list->get(i)->getLocation(), parent)) {
+        if (list->get(i) != nullptr && startswith(list->get(i)->getLocation(), parent)) {
             Ref<AutoscanDirectory> dir = list->get(i);
             if (dir == nullptr)
                 continue;

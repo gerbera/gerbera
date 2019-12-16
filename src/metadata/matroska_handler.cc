@@ -158,7 +158,7 @@ void MatroskaHandler::parseAttachments(Ref<CdsItem> item, EbmlStream & ebml_stre
         // printf("KaxFileName = %s\n", fileName.c_str());
 
         bool isCoverArt = false;
-        if (startswith_string(fileName, "cover")) {
+        if (startswith(fileName, "cover")) {
             isCoverArt = true;
         }
 

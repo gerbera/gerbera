@@ -247,7 +247,7 @@ void CdsItemInternalURL::validate()
 {
     CdsItemExternalURL::validate();
 
-    if (startswith_string(this->location, "http://"))
+    if (startswith(this->location, "http://"))
         throw _Exception("Internal URL item validation failed: only realative URLs allowd\n");
 }
 

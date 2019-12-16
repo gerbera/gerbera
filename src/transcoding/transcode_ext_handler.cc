@@ -202,7 +202,7 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
 #endif
 
     std::string check;
-    if (startswith_string(profile->getCommand(), _DIR_SEPARATOR))
+    if (startswith(profile->getCommand(), _DIR_SEPARATOR))
     {
         if (!check_path(profile->getCommand()))
             throw _Exception("Could not find transcoder: " + 
