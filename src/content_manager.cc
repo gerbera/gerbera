@@ -1390,7 +1390,7 @@ void ContentManager::invalidateAddTask(Ref<GenericTask> t, std::string path)
 {
     if (t->getType() == AddFile) {
         log_debug("comparing, task path: %s, remove path: %s\n", RefCast(t, CMAddFileTask)->getPath().c_str(), path.c_str());
-        if (startswith_string(RefCast(t, CMAddFileTask)->getPath(), path)) {
+        if (startswith(RefCast(t, CMAddFileTask)->getPath(), path)) {
             log_debug("Invalidating task with path %s\n", RefCast(t, CMAddFileTask)->getPath().c_str());
             t->invalidate();
         }

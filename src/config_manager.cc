@@ -1753,7 +1753,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
         prof->setCommand(param);
 
         std::string tmp_path;
-        if (startswith_string(param, _DIR_SEPARATOR)) {
+        if (startswith(param, _DIR_SEPARATOR)) {
             if (!check_path(param))
                 throw _Exception("error in configuration, transcoding "
                                  "profile \""

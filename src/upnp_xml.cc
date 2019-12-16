@@ -921,7 +921,7 @@ void UpnpXMLBuilder::addResources(Ref<CdsItem> item, Ref<Element> element)
             if (!isExtThumbnail && transcoded) {
                 extend = extend + D_OP + "=" + D_OP_SEEK_DISABLED + ";" + D_CONVERSION_INDICATOR + "=" D_CONVERSION;
 
-                if (startswith_string(mimeType, "audio") || startswith_string(mimeType, "video"))
+                if (startswith(mimeType, "audio") || startswith(mimeType, "video"))
                     extend = extend + ";" D_FLAGS "=" D_TR_FLAGS_AV;
             } else {
                 if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_DLNA_SEEK))
@@ -936,7 +936,7 @@ void UpnpXMLBuilder::addResources(Ref<CdsItem> item, Ref<Element> element)
                 protocolInfo);
 
             if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK)) {
-                if (startswith_string(mimeType, "video")) {
+                if (startswith(mimeType, "video")) {
                     element->appendElementChild(renderCaptionInfo(url));
                 }
             }

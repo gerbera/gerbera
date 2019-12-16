@@ -147,9 +147,9 @@ std::string trim_string(std::string str)
     return str.substr(start, end - start);
 }
 
-bool startswith_string(std::string str, std::string check)
+bool startswith(std::string str, std::string check)
 {
-    return str.rfind(check) == 0;
+    return str.rfind(check, 0) == 0;
 }
 
 std::string tolower_string(std::string str)
@@ -291,7 +291,7 @@ std::string find_in_path(std::string exec)
         if (path.empty())
             break;
 
-        if ((!next.empty()) && !startswith_string(next, "/")) {
+        if ((!next.empty()) && !startswith(next, "/")) {
             path = path + ":" + next;
             next = "";
         }
@@ -1184,7 +1184,7 @@ std::string ipToInterface(std::string ip)
 
             std::string ipaddr = host;
             // IPv6 link locals come back as fe80::351d:d7f4:6b17:3396%eth0
-            if (startswith_string(ipaddr, ip)) {
+            if (startswith(ipaddr, ip)) {
                 return name;
             }
         }
@@ -1435,9 +1435,9 @@ std::string getDLNATransferHeader(std::string mimeType)
 {
     if (ConfigManager::getInstance()->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO)) {
         std::string transfer_parameter;
-        if (startswith_string(mimeType, "image"))
+        if (startswith(mimeType, "image"))
             transfer_parameter = D_HTTP_TRANSFER_MODE_INTERACTIVE;
-        else if (startswith_string(mimeType, "audio") || startswith_string(mimeType, "video"))
+        else if (startswith(mimeType, "audio") || startswith(mimeType, "video"))
             transfer_parameter = D_HTTP_TRANSFER_MODE_STREAMING;
 
         if (string_ok(transfer_parameter)) {

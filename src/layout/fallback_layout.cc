@@ -89,7 +89,7 @@ void FallbackLayout::addVideo(zmm::Ref<CdsObject> obj, std::string rootpath)
     {
         rootpath = rootpath.substr(0, rootpath.rfind(DIR_SEPARATOR));
         dir = obj->getLocation().substr(rootpath.length(), obj->getLocation().rfind(DIR_SEPARATOR)-rootpath.length());
-        if (startswith_string(dir, _DIR_SEPARATOR))
+        if (startswith(dir, _DIR_SEPARATOR))
             dir = dir.substr(1);
 
         dir = f2i->convert(dir);
@@ -158,7 +158,7 @@ void FallbackLayout::addImage(Ref<CdsObject> obj, std::string rootpath)
     {
         rootpath = rootpath.substr(0, rootpath.rfind(DIR_SEPARATOR));
         dir = obj->getLocation().substr(rootpath.length(), obj->getLocation().rfind(DIR_SEPARATOR)-rootpath.length());
-        if (startswith_string(dir, _DIR_SEPARATOR))
+        if (startswith(dir, _DIR_SEPARATOR))
             dir = dir.substr(1);
 
         dir = f2i->convert(dir);
@@ -484,11 +484,11 @@ void FallbackLayout::processCdsObject(zmm::Ref<CdsObject> obj, std::string rootp
                     CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
         std::string content_type = mappings->get(mimetype);
 
-        if (startswith_string(mimetype, "video"))
+        if (startswith(mimetype, "video"))
             addVideo(clone, rootpath);
-        else if (startswith_string(mimetype, "image"))
+        else if (startswith(mimetype, "image"))
             addImage(clone, rootpath);
-        else if ((startswith_string(mimetype, "audio") && 
+        else if ((startswith(mimetype, "audio") &&
                     (content_type != CONTENT_TYPE_PLAYLIST)))
             addAudio(clone);
         else if (content_type == CONTENT_TYPE_OGG)

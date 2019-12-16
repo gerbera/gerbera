@@ -434,7 +434,7 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, zmm::Ref<CdsItem> ite
             continue;
         }
 
-        if (hasTXXXFrames && startswith_string(desiredFrame, "TXXX:")) {
+        if (hasTXXXFrames && startswith(desiredFrame, "TXXX:")) {
             const auto frameList = frameListMap["TXXX"];
             //log_debug("TXXX Frame list has %d elements\n", frameList.size());
 
