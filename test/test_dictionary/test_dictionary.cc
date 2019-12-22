@@ -21,7 +21,6 @@
 */
 #include "test_dictionary.h"
 #include "dictionary.h"
-#include "strings.h"
 
 using namespace zmm;
 
