@@ -60,7 +60,7 @@ IOHandlerBufferHelper::IOHandlerBufferHelper(size_t bufSize, size_t initialFillS
     doSeek = false;
 }
 
-void IOHandlerBufferHelper::open(IN enum UpnpOpenFileMode mode)
+void IOHandlerBufferHelper::open(enum UpnpOpenFileMode mode)
 {
     if (isOpen)
         throw _Exception(_("tried to reopen an open IOHandlerBufferHelper"));
@@ -78,7 +78,7 @@ IOHandlerBufferHelper::~IOHandlerBufferHelper()
         close();
 }
 
-size_t IOHandlerBufferHelper::read(OUT char* buf, IN size_t length)
+size_t IOHandlerBufferHelper::read(char* buf, size_t length)
 {
     // check read on closed BufferedIOHandler
     assert(isOpen);
@@ -142,7 +142,7 @@ size_t IOHandlerBufferHelper::read(OUT char* buf, IN size_t length)
     return didRead;
 }
 
-void IOHandlerBufferHelper::seek(IN off_t offset, IN int whence)
+void IOHandlerBufferHelper::seek(off_t offset, int whence)
 {
     log_debug("seek called: %lld %d\n", offset, whence);
     if (!seekEnabled)
