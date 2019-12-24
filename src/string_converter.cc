@@ -218,7 +218,7 @@ Ref<StringConverter> StringConverter::p2i()
 }
 #endif
 
-#if defined(HAVE_JS) || defined(HAVE_TAGLIB) || defined(ATRAILERS)
+#if defined(HAVE_JS) || defined(HAVE_TAGLIB) || defined(ATRAILERS) || defined(HAVE_MATROSKA)
 
 Ref<StringConverter> StringConverter::i2i()
 {
