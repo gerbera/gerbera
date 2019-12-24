@@ -5,15 +5,17 @@ if ! [ "$(id -u)" = 0 ]; then
 fi
 set -ex
 
+DUK_VER="2.5.0"
+
 makeCMD="make"
 unamestr=$(uname)
 if [ "$unamestr" == 'FreeBSD' ]; then
    makeCMD="gmake"
 fi
 
-wget http://duktape.org/duktape-2.2.0.tar.xz
-tar -xJvf duktape-2.2.0.tar.xz
-cd duktape-2.2.0
+wget http://duktape.org/duktape-$DUK_VER.tar.xz
+tar -xJvf duktape-$DUK_VER.tar.xz
+cd duktape-$DUK_VER
 
 if [ "$unamestr" == 'Darwin' ]; then
   # Patch Makefile to install on macOS
