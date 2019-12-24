@@ -31,8 +31,8 @@ class DeviceDescriptionHandler : public RequestHandler {
 public:
     explicit DeviceDescriptionHandler(UpnpXMLBuilder* xmlBuilder);
 
-    void getInfo(IN const char *filename, OUT UpnpFileInfo *info) override;
-    zmm::Ref<IOHandler> open(IN const char* filename, IN enum UpnpOpenFileMode mode, IN zmm::String range) override;
+    void getInfo(const char *filename, UpnpFileInfo *info) override;
+    zmm::Ref<IOHandler> open(const char* filename, enum UpnpOpenFileMode mode, zmm::String range) override;
 
 protected:
     UpnpXMLBuilder* xmlBuilder;

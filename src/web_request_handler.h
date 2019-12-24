@@ -101,7 +101,7 @@ protected:
     /// \brief Prepares the output buffer and calls the process function.
     /// \return IOHandler
     /// \todo Genych, chto tut proishodit, ya tolkom che to ne wrubaus??
-    zmm::Ref<IOHandler> open(IN enum UpnpOpenFileMode mode);
+    zmm::Ref<IOHandler> open(enum UpnpOpenFileMode mode);
 
     /// \brief add the ui update ids from the given session as xml tags to the given root element
     /// \param root the xml element to add the elements to
@@ -135,15 +135,15 @@ public:
     /// dynamic XML) we do not know the size of the data. This is of course different
     /// for the FileRequestHandler, where we can check the file and return all
     /// information about it.
-    void getInfo(IN const char *filename, OUT UpnpFileInfo *info) override;
+    void getInfo(const char *filename, UpnpFileInfo *info) override;
 
     /// \brief Decodes the parameters from the filename (URL) and calls the internal open() function.
     /// \param filename The requested URL
     /// \param mode either UPNP_READ or UPNP_WRITE
     /// \return the appropriate IOHandler for the request.
-    zmm::Ref<IOHandler> open(IN const char* filename,
-        IN enum UpnpOpenFileMode mode,
-        IN zmm::String range) override;
+    zmm::Ref<IOHandler> open(const char* filename,
+        enum UpnpOpenFileMode mode,
+        zmm::String range) override;
 
     /// \brief This method must be overridden by the subclasses that actually process the given request.
     virtual void process() = 0;

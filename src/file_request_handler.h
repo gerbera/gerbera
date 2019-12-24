@@ -44,11 +44,11 @@ protected:
 public:
     explicit FileRequestHandler(UpnpXMLBuilder* xmlBuilder);
 
-    virtual void getInfo(IN const char *filename, OUT UpnpFileInfo *info);
+    virtual void getInfo(const char *filename, UpnpFileInfo *info);
     virtual zmm::Ref<IOHandler> open(
-        IN const char* filename,
-        IN enum UpnpOpenFileMode mode,
-        IN zmm::String range);
+        const char* filename,
+        enum UpnpOpenFileMode mode,
+        zmm::String range);
 };
 
 #endif // __FILE_REQUEST_HANDLER_H__
