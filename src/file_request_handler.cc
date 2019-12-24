@@ -52,7 +52,7 @@ FileRequestHandler::FileRequestHandler(UpnpXMLBuilder* xmlBuilder)
     : RequestHandler()
     , xmlBuilder(xmlBuilder) {};
 
-void FileRequestHandler::getInfo(IN const char* filename, OUT UpnpFileInfo* info)
+void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 {
     Headers headers;
     log_debug("start\n");
@@ -278,8 +278,8 @@ void FileRequestHandler::getInfo(IN const char* filename, OUT UpnpFileInfo* info
     log_debug("web_get_info(): end\n");
 }
 
-Ref<IOHandler> FileRequestHandler::open(IN const char* filename,
-    IN enum UpnpOpenFileMode mode, IN std::string range)
+Ref<IOHandler> FileRequestHandler::open(const char* filename,
+    enum UpnpOpenFileMode mode, std::string range)
 {
     log_debug("start\n");
 

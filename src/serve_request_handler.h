@@ -39,10 +39,10 @@
 class ServeRequestHandler : public RequestHandler {
 public:
     ServeRequestHandler();
-    virtual void getInfo(IN const char *filename, OUT UpnpFileInfo *info);
-    virtual zmm::Ref<IOHandler> open(IN const char* filename,
-        IN enum UpnpOpenFileMode mode,
-        IN std::string range);
+    virtual void getInfo(const char *filename, OUT UpnpFileInfo *info);
+    virtual zmm::Ref<IOHandler> open(const char* filename,
+        enum UpnpOpenFileMode mode,
+        std::string range);
 };
 
 #endif // __SERVE_REQUEST_HANDLER_H__

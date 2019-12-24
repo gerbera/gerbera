@@ -153,7 +153,7 @@ ProcessIOHandler::ProcessIOHandler(std::string filename,
     registerAll();
 }
 
-void ProcessIOHandler::open(IN enum UpnpOpenFileMode mode)
+void ProcessIOHandler::open(enum UpnpOpenFileMode mode)
 {
     if ((main_proc != nullptr) && ((!main_proc->isAlive() || abort()))) {
         killall();
@@ -180,7 +180,7 @@ void ProcessIOHandler::open(IN enum UpnpOpenFileMode mode)
     }
 }
 
-size_t ProcessIOHandler::read(OUT char* buf, IN size_t length)
+size_t ProcessIOHandler::read(char* buf, size_t length)
 {
     fd_set readSet;
     struct timeval timeout;
@@ -279,7 +279,7 @@ size_t ProcessIOHandler::read(OUT char* buf, IN size_t length)
     return num_bytes;
 }
 
-size_t ProcessIOHandler::write(IN char* buf, IN size_t length)
+size_t ProcessIOHandler::write(char* buf, size_t length)
 {
     fd_set writeSet;
     struct timeval timeout;
@@ -370,7 +370,7 @@ size_t ProcessIOHandler::write(IN char* buf, IN size_t length)
     return num_bytes;
 }
 
-void ProcessIOHandler::seek(IN off_t offset, IN int whence)
+void ProcessIOHandler::seek(off_t offset, int whence)
 {
     // we know we can not seek in a fifo, but the PS3 asks for a hack...
     if (!ignore_seek)

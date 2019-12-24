@@ -89,7 +89,7 @@ std::string WebRequestHandler::renderXMLHeader()
     return std::string("<?xml version=\"1.0\" encoding=\"") + DEFAULT_INTERNAL_CHARSET + "\"?>\n";
 }
 
-void WebRequestHandler::getInfo(IN const char *filename, OUT UpnpFileInfo *info)
+void WebRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
 {
     this->filename = filename;
 
@@ -122,7 +122,7 @@ void WebRequestHandler::getInfo(IN const char *filename, OUT UpnpFileInfo *info)
     headers.writeHeaders(info);
 }
 
-Ref<IOHandler> WebRequestHandler::open(IN enum UpnpOpenFileMode mode)
+Ref<IOHandler> WebRequestHandler::open(enum UpnpOpenFileMode mode)
 {
     root = Ref<Element>(new Element("root"));
 
@@ -219,9 +219,9 @@ Ref<IOHandler> WebRequestHandler::open(IN enum UpnpOpenFileMode mode)
     return RefCast(io_handler, IOHandler);
 }
 
-Ref<IOHandler> WebRequestHandler::open(IN const char* filename,
-    IN enum UpnpOpenFileMode mode,
-    IN std::string range)
+Ref<IOHandler> WebRequestHandler::open(const char* filename,
+    enum UpnpOpenFileMode mode,
+    std::string range)
 {
     this->filename = filename;
     this->mode = mode;

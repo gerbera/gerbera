@@ -38,9 +38,9 @@
 
 class RequestHandler : public zmm::Object {
 public:
-    virtual void getInfo(IN const char *filename, OUT UpnpFileInfo *info) = 0;
+    virtual void getInfo(const char *filename, UpnpFileInfo *info) = 0;
 
-    virtual zmm::Ref<IOHandler> open(IN const char* filename, IN enum UpnpOpenFileMode mode, IN std::string range) = 0;
+    virtual zmm::Ref<IOHandler> open(const char* filename, enum UpnpOpenFileMode mode, std::string range) = 0;
 
     /// \brief Splits the url into a path and parameters string.
     /// Only '?' and '/' separators are allowed, otherwise an exception will

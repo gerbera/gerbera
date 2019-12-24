@@ -276,7 +276,7 @@ void TagLibHandler::addArtworkResource(Ref<CdsItem> item, std::string art_mimety
     }
 }
 
-Ref<IOHandler> TagLibHandler::serveContent(IN Ref<CdsItem> item, IN int resNum, OUT off_t* data_size)
+Ref<IOHandler> TagLibHandler::serveContent(Ref<CdsItem> item, int resNum, off_t* data_size)
 {
     Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
     std::string content_type = mappings->get(item->getMimeType());

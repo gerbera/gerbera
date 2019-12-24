@@ -51,7 +51,7 @@ BufferedIOHandler::BufferedIOHandler(Ref<IOHandler> underlyingHandler, size_t bu
     //seekEnabled = true;
 }
 
-void BufferedIOHandler::open(IN enum UpnpOpenFileMode mode)
+void BufferedIOHandler::open(enum UpnpOpenFileMode mode)
 {
     // do the open here instead of threadProc() because it may throw an exception
     underlyingHandler->open(mode);
