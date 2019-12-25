@@ -136,3 +136,13 @@ void MemIOHandler::seek(off_t offset, int whence)
         throw _Exception("MemIOHandler seek failed: unrecognized whence");
     }
 }
+
+off_t MemIOHandler::tell()
+{
+    return pos;
+}
+
+void MemIOHandler::close()
+{
+    pos = -1;
+}

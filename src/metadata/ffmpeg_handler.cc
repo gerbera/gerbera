@@ -389,9 +389,8 @@ static void writeThumbnailCacheFile(std::string movie_filename, uint8_t* ptr_img
 
 #endif
 
-Ref<IOHandler> FfmpegHandler::serveContent(Ref<CdsItem> item, int resNum, off_t* data_size)
+Ref<IOHandler> FfmpegHandler::serveContent(Ref<CdsItem> item, int resNum)
 {
-    *data_size = -1;
 #ifdef HAVE_FFMPEGTHUMBNAILER
     Ref<ConfigManager> cfg = ConfigManager::getInstance();
 
@@ -401,9 +400,7 @@ Ref<IOHandler> FfmpegHandler::serveContent(Ref<CdsItem> item, int resNum, off_t*
     if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED)) {
         uint8_t* ptr_image;
         size_t size_image;
-        if (readThumbnailCacheFile(item->getLocation(),
-                &ptr_image, &size_image)) {
-            *data_size = (off_t)size_image;
+        if (readThumbnailCacheFile(item->getLocation(), &ptr_image, &size_image)) {
             Ref<IOHandler> h(new MemIOHandler(ptr_image, size_image));
             free(ptr_image);
             log_debug("Returning cached thumbnail for file: %s\n", item->getLocation().c_str());

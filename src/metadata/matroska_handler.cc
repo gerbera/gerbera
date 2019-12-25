@@ -2,7 +2,7 @@
     
     MediaTomb - http://www.mediatomb.cc/
     
-    matroska_handler.h - this file is part of MediaTomb.
+    matroska_handler.cc - this file is part of MediaTomb.
     
     Copyright (C) 2019 Patrick Ammann <pammann@gmx.net>
     
@@ -30,7 +30,7 @@
 #include <vector>
 #include <iostream>
 
-#include <ebml/StdIOCallback.h>
+#include <ebml/IOCallback.h>
 #include <ebml/EbmlHead.h>
 #include <ebml/EbmlSubHead.h>
 #include <ebml/EbmlStream.h>
@@ -53,6 +53,68 @@ using namespace zmm;
 using namespace LIBEBML_NAMESPACE;
 using namespace LIBMATROSKA_NAMESPACE;
 
+
+// file managment
+class file_io_callback: public IOCallback
+{
+private:
+    FILE* file;
+
+public:
+    file_io_callback(const char* path)
+    {
+        file = fopen(path, "rb");
+        if (file == nullptr) {
+            throw _Exception(_("Could not fopen ") + path);
+        }
+    }
+
+    virtual ~file_io_callback()
+    {
+        close();
+    }
+
+    virtual uint32 read(void * buffer, size_t size)
+    {
+        assert(file != nullptr);
+        if (size <= 0)
+            return 0;
+        return fread(buffer, 1, size, file);
+    }
+
+    virtual void setFilePointer(int64_t offset, seek_mode mode = seek_beginning)
+    {
+        assert(file != nullptr);
+        assert(mode == SEEK_CUR || mode == SEEK_END || mode == SEEK_SET);
+        if (fseeko(file, offset, mode) != 0) {
+            throw _Exception(_("fseek failed"));
+        }
+    }
+
+    virtual size_t write(const void *p_buffer, size_t i_size)
+    {
+        // not needed
+        return 0;
+    }
+
+    virtual uint64 getFilePointer(void)
+    {
+        assert(file != nullptr);
+        return ftello(file);
+    }
+
+    virtual void close(void)
+    {
+        if (file == nullptr)
+            return;
+        if (fclose(file) !=0) {
+            throw _Exception(_("fclose failed"));
+        }
+        file = nullptr;
+    }
+};
+
+
 MatroskaHandler::MatroskaHandler()
     : MetadataHandler()
 {
@@ -60,23 +122,21 @@ MatroskaHandler::MatroskaHandler()
 
 void MatroskaHandler::fillMetadata(Ref<CdsItem> item)
 {
-    parseMKV(item, NULL, NULL);
+    parseMKV(item, NULL);
 }
 
-Ref<IOHandler> MatroskaHandler::serveContent(Ref<CdsItem> item, int resNum, off_t* data_size)
+Ref<IOHandler> MatroskaHandler::serveContent(Ref<CdsItem> item, int resNum)
 {
-    *data_size = -1;
-
     MemIOHandler* io_handler;
-    parseMKV(item, &io_handler, &data_size);
+    parseMKV(item, &io_handler);
 
     Ref<IOHandler> h(io_handler);
     return h;
 }
 
-void MatroskaHandler::parseMKV(Ref<CdsItem> item, MemIOHandler** p_io_handler, off_t** p_data_size)
+void MatroskaHandler::parseMKV(Ref<CdsItem> item, MemIOHandler** p_io_handler)
 {
-    StdIOCallback ebml_file(item->getLocation().c_str(), ::MODE_READ);
+    file_io_callback ebml_file(item->getLocation().c_str());
     EbmlStream ebml_stream(ebml_file);
 
     EbmlElement * el_l0 = ebml_stream.FindNextID(KaxSegment::ClassInfos, ~0);
@@ -84,7 +144,7 @@ void MatroskaHandler::parseMKV(Ref<CdsItem> item, MemIOHandler** p_io_handler, o
         int i_upper_level = 0;
         EbmlElement * el_l1 = ebml_stream.FindNextElement(el_l0->Generic().Context, i_upper_level, ~0, true);
         while (el_l1 != NULL) {
-            parseLevel1Element(item, ebml_stream, el_l1, p_io_handler, p_data_size);
+            parseLevel1Element(item, ebml_stream, el_l1, p_io_handler);
 
             el_l1->SkipData(ebml_stream, KaxAttachments_Context);
             delete el_l1;
@@ -101,12 +161,12 @@ void MatroskaHandler::parseMKV(Ref<CdsItem> item, MemIOHandler** p_io_handler, o
     ebml_file.close();
 }
 
-void MatroskaHandler::parseLevel1Element(zmm::Ref<CdsItem> item, EbmlStream & ebml_stream, EbmlElement * el_l1, MemIOHandler** p_io_handler, off_t** p_data_size)
+void MatroskaHandler::parseLevel1Element(zmm::Ref<CdsItem> item, EbmlStream & ebml_stream, EbmlElement * el_l1, MemIOHandler** p_io_handler)
 {
     if (EbmlId(*el_l1) == KaxInfo::ClassInfos.GlobalId) {
         parseInfo(item, ebml_stream, static_cast<KaxInfo *>(el_l1));
     } else if (EbmlId(*el_l1) == KaxAttachments::ClassInfos.GlobalId) {
-        parseAttachments(item, ebml_stream, static_cast<KaxAttachments *>(el_l1), p_io_handler, p_data_size);
+        parseAttachments(item, ebml_stream, static_cast<KaxAttachments *>(el_l1), p_io_handler);
     }
 }
 
@@ -145,7 +205,7 @@ void MatroskaHandler::parseInfo(Ref<CdsItem> item, EbmlStream & ebml_stream, Kax
     }
 }
 
-void MatroskaHandler::parseAttachments(Ref<CdsItem> item, EbmlStream & ebml_stream, KaxAttachments *attachments, MemIOHandler** p_io_handler, off_t** p_data_size)
+void MatroskaHandler::parseAttachments(Ref<CdsItem> item, EbmlStream & ebml_stream, KaxAttachments *attachments, MemIOHandler** p_io_handler)
 {
     EbmlElement* dummy_el;
     int i_upper_level = 0;
@@ -169,7 +229,6 @@ void MatroskaHandler::parseAttachments(Ref<CdsItem> item, EbmlStream & ebml_stre
             if (p_io_handler != NULL) {
                 // serveContent
                 *p_io_handler = new MemIOHandler(fileData.GetBuffer(), fileData.GetSize());
-                **p_data_size = fileData.GetSize();
             } else {
                 // fillMetadata
                 std::string art_mimetype = getContentTypeFromByteVector(&fileData);

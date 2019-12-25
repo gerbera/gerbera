@@ -90,13 +90,12 @@ void FanArtHandler::fillMetadata(Ref<CdsItem> item)
     }
 }
 
-Ref<IOHandler> FanArtHandler::serveContent(Ref<CdsItem> item, int resNum, off_t* data_size)
+Ref<IOHandler> FanArtHandler::serveContent(Ref<CdsItem> item, int resNum)
 {
     std::string path = getFanArtPath(getFolderName(item));
 
     log_debug("FanArt: Opening name: %s\n", path.c_str());
 
-    *data_size = -1;
     Ref<IOHandler> io_handler(new FileIOHandler(path));
     return io_handler;
 }

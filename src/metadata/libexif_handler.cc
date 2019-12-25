@@ -386,7 +386,7 @@ void LibExifHandler::fillMetadata(Ref<CdsItem> item)
     exif_data_unref(ed);
 }
 
-Ref<IOHandler> LibExifHandler::serveContent(Ref<CdsItem> item, int resNum, off_t* data_size)
+Ref<IOHandler> LibExifHandler::serveContent(Ref<CdsItem> item, int resNum)
 {
     ExifData* ed;
     Ref<CdsResource> res = item->getResource(resNum);
@@ -403,7 +403,6 @@ Ref<IOHandler> LibExifHandler::serveContent(Ref<CdsItem> item, int resNum, off_t
         throw _Exception("LibExifHandler: resource has no exif thumbnail");
 
     Ref<IOHandler> h(new MemIOHandler(ed->data, ed->size));
-    *data_size = ed->size;
 
     exif_data_unref(ed);
 
