@@ -276,7 +276,7 @@ void TagLibHandler::addArtworkResource(Ref<CdsItem> item, String art_mimetype)
     }
 }
 
-Ref<IOHandler> TagLibHandler::serveContent(Ref<CdsItem> item, int resNum, off_t* data_size)
+Ref<IOHandler> TagLibHandler::serveContent(Ref<CdsItem> item, int resNum)
 {
     Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
     String content_type = mappings->get(item->getMimeType());
@@ -299,10 +299,7 @@ Ref<IOHandler> TagLibHandler::serveContent(Ref<CdsItem> item, int resNum, off_t*
 
         auto* art = static_cast<TagLib::ID3v2::AttachedPictureFrame*>(list.front());
 
-        Ref<IOHandler> h(new MemIOHandler((void*)art->picture().data(),
-            art->picture().size()));
-
-        *data_size = art->picture().size();
+        Ref<IOHandler> h(new MemIOHandler((void*)art->picture().data(), art->picture().size()));
         return h;
 
     } else if (content_type == CONTENT_TYPE_FLAC) {
@@ -318,8 +315,6 @@ Ref<IOHandler> TagLibHandler::serveContent(Ref<CdsItem> item, int resNum, off_t*
         const TagLib::ByteVector& data = pic->data();
 
         Ref<IOHandler> h(new MemIOHandler(data.data(), data.size()));
-
-        *data_size = data.size();
         return h;
 
     } else if (content_type == CONTENT_TYPE_MP4) {
@@ -346,8 +341,6 @@ Ref<IOHandler> TagLibHandler::serveContent(Ref<CdsItem> item, int resNum, off_t*
         const TagLib::ByteVector& data = coverArt.data();
 
         Ref<IOHandler> h(new MemIOHandler(data.data(), data.size()));
-
-        *data_size = data.size();
         return h;
     } else if (content_type == CONTENT_TYPE_WMA) {
         TagLib::ASF::File f(&roStream);
@@ -370,7 +363,6 @@ Ref<IOHandler> TagLibHandler::serveContent(Ref<CdsItem> item, int resNum, off_t*
         const TagLib::ByteVector& data = wmpic.picture();
 
         Ref<IOHandler> h(new MemIOHandler(data.data(), data.size()));
-        *data_size = data.size();
         return h;
     } else if (content_type == CONTENT_TYPE_OGG) {
         TagLib::Ogg::Vorbis::File f(&roStream);
@@ -386,7 +378,6 @@ Ref<IOHandler> TagLibHandler::serveContent(Ref<CdsItem> item, int resNum, off_t*
         const TagLib::ByteVector& data = pic->data();
 
         Ref<IOHandler> h(new MemIOHandler(data.data(), data.size()));
-        *data_size = data.size();
         return h;
     }
 

@@ -113,6 +113,12 @@ void IOHandler::seek(off_t offset, int whence)
 {
 }
 
+/// \brief Return the current stream position.
+off_t IOHandler::tell()
+{
+    return -1;
+}
+
 /// \fn static int web_close (UpnpWebFileHandle f)
 /// \brief Closes a previously opened file.
 /// \param f Handle of the file.

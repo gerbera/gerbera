@@ -66,6 +66,9 @@ public:
     /// SEEK_SET to specify an absolute offset.
     virtual void seek(off_t offset, int whence);
 
+    /// \brief Return the current stream position.
+    virtual off_t tell();
+
     /// \brief Close/free previously opened/initialized data.
     virtual void close();
 };

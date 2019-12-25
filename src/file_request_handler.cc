@@ -176,8 +176,14 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         if (!string_ok(mimeType))
             mimeType = h->getMimeType();
 
-        off_t size = -1;
-        h->serveContent(item, res_id, &(size));
+        Ref<IOHandler> io_handler = h->serveContent(item, res_id);
+
+        // get size
+        io_handler->open(UPNP_READ);
+        io_handler->seek(0L, SEEK_END);
+        off_t size = io_handler->tell();
+        io_handler->close();
+        
         UpnpFileInfo_set_FileLength(info, size);
     } else if (!is_srt && string_ok(tr_profile)) {
 
@@ -459,8 +465,7 @@ Ref<IOHandler> FileRequestHandler::open(const char* filename,
         //info->content_type = ixmlCloneDOMString(mimeType.c_str());
         //Ref<IOHandler> io_handler = h->serveContent(item, res_id, &(info->file_length));
 
-        off_t filelength = -1;
-        Ref<IOHandler> io_handler = h->serveContent(item, res_id, &filelength);
+        Ref<IOHandler> io_handler = h->serveContent(item, res_id);
         io_handler->open(mode);
         log_debug("end\n");
         return io_handler;
