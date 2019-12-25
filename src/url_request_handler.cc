@@ -58,7 +58,7 @@ URLRequestHandler::URLRequestHandler()
 {
 }
 
-void URLRequestHandler::getInfo(IN const char *filename, OUT UpnpFileInfo *info)
+void URLRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
 {
     log_debug("start\n");
 
@@ -154,9 +154,9 @@ void URLRequestHandler::getInfo(IN const char *filename, OUT UpnpFileInfo *info)
     /// \todo transcoding for get_info
 }
 
-Ref<IOHandler> URLRequestHandler::open(IN const char* filename,
-    IN enum UpnpOpenFileMode mode,
-    IN std::string range)
+Ref<IOHandler> URLRequestHandler::open(const char* filename,
+    enum UpnpOpenFileMode mode,
+    std::string range)
 {
     int objectID;
     std::string mimeType;

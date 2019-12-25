@@ -57,7 +57,7 @@ CurlIOHandler::CurlIOHandler(std::string URL, CURL* curl_handle, size_t bufSize,
     seekEnabled = true;
 }
 
-void CurlIOHandler::open(IN enum UpnpOpenFileMode mode)
+void CurlIOHandler::open(enum UpnpOpenFileMode mode)
 {
     if (curl_handle == nullptr) {
         curl_handle = curl_easy_init();
