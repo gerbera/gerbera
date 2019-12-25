@@ -2,7 +2,7 @@
     
     MediaTomb - http://www.mediatomb.cc/
     
-    matroska_handler.h - this file is part of MediaTomb.
+    matroska_handler.cc - this file is part of MediaTomb.
     
     Copyright (C) 2019 Patrick Ammann <pammann@gmx.net>
     
