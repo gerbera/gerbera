@@ -30,7 +30,7 @@
 #include <vector>
 #include <iostream>
 
-#include <ebml/StdIOCallback.h>
+#include <ebml/IOCallback.h>
 #include <ebml/EbmlHead.h>
 #include <ebml/EbmlSubHead.h>
 #include <ebml/EbmlStream.h>
@@ -52,6 +52,68 @@
 using namespace zmm;
 using namespace LIBEBML_NAMESPACE;
 using namespace LIBMATROSKA_NAMESPACE;
+
+
+// file managment
+class file_io_callback: public IOCallback
+{
+private:
+    FILE* file;
+
+public:
+    file_io_callback(const char* path)
+    {
+        file = fopen(path, "rb");
+        if (file == nullptr) {
+            throw _Exception(_("Could not fopen ") + path);
+        }
+    }
+
+    virtual ~file_io_callback()
+    {
+        close();
+    }
+
+    virtual uint32 read(void * buffer, size_t size)
+    {
+        assert(file != nullptr);
+        if (size <= 0)
+            return 0;
+        return fread(buffer, 1, size, file);
+    }
+
+    virtual void setFilePointer(int64_t offset, seek_mode mode = seek_beginning)
+    {
+        assert(file != nullptr);
+        assert(mode == SEEK_CUR || mode == SEEK_END || mode == SEEK_SET);
+        if (fseeko(file, offset, mode) != 0) {
+            throw _Exception(_("fseek failed"));
+        }
+    }
+
+    virtual size_t write(const void *p_buffer, size_t i_size)
+    {
+        // not needed
+        return 0;
+    }
+
+    virtual uint64 getFilePointer(void)
+    {
+        assert(file != nullptr);
+        return ftello(file);
+    }
+
+    virtual void close(void)
+    {
+        if (file == nullptr)
+            return;
+        if (fclose(file) !=0) {
+            throw _Exception(_("fclose failed"));
+        }
+        file = nullptr;
+    }
+};
+
 
 MatroskaHandler::MatroskaHandler()
     : MetadataHandler()
@@ -76,7 +138,7 @@ Ref<IOHandler> MatroskaHandler::serveContent(Ref<CdsItem> item, int resNum, off_
 
 void MatroskaHandler::parseMKV(Ref<CdsItem> item, MemIOHandler** p_io_handler, off_t** p_data_size)
 {
-    StdIOCallback ebml_file(item->getLocation().c_str(), ::MODE_READ);
+    file_io_callback ebml_file(item->getLocation().c_str());
     EbmlStream ebml_stream(ebml_file);
 
     EbmlElement * el_l0 = ebml_stream.FindNextID(KaxSegment::ClassInfos, ~0);
