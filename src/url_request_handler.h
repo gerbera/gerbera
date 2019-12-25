@@ -39,7 +39,7 @@
 class URLRequestHandler : public RequestHandler {
 public:
     URLRequestHandler();
-    virtual void getInfo(const char *filename, OUT UpnpFileInfo *info);
+    virtual void getInfo(const char *filename, UpnpFileInfo *info);
     virtual zmm::Ref<IOHandler> open(const char* filename,
         enum UpnpOpenFileMode mode,
         std::string range);
