@@ -276,7 +276,7 @@ void TagLibHandler::addArtworkResource(Ref<CdsItem> item, String art_mimetype)
     }
 }
 
-Ref<IOHandler> TagLibHandler::serveContent(IN Ref<CdsItem> item, IN int resNum)
+Ref<IOHandler> TagLibHandler::serveContent(Ref<CdsItem> item, int resNum)
 {
     Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
     String content_type = mappings->get(item->getMimeType());

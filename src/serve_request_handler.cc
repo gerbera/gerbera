@@ -44,7 +44,7 @@ ServeRequestHandler::ServeRequestHandler()
 }
 
 /// \todo clean up the fix for internal items
-void ServeRequestHandler::getInfo(IN const char *filename, OUT UpnpFileInfo *info)
+void ServeRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
 {
     struct stat statbuf;
     int ret = 0;
@@ -100,9 +100,9 @@ void ServeRequestHandler::getInfo(IN const char *filename, OUT UpnpFileInfo *inf
     }
 }
 
-Ref<IOHandler> ServeRequestHandler::open(IN const char* filename,
-    IN enum UpnpOpenFileMode mode,
-    IN zmm::String range)
+Ref<IOHandler> ServeRequestHandler::open(const char* filename,
+    enum UpnpOpenFileMode mode,
+    zmm::String range)
 {
     struct stat statbuf;
     int ret = 0;

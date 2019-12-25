@@ -72,7 +72,7 @@ void FDIOHandler::closeOther(Ref<IOHandler> other)
     this->other = other;
 }
 
-void FDIOHandler::open(IN enum UpnpOpenFileMode mode)
+void FDIOHandler::open(enum UpnpOpenFileMode mode)
 {
 
     if (fd != -1) {
@@ -96,7 +96,7 @@ void FDIOHandler::open(IN enum UpnpOpenFileMode mode)
     }
 }
 
-size_t FDIOHandler::read(OUT char* buf, IN size_t length)
+size_t FDIOHandler::read(char* buf, size_t length)
 {
     size_t ret = 0;
 
@@ -105,7 +105,7 @@ size_t FDIOHandler::read(OUT char* buf, IN size_t length)
     return ret;
 }
 
-size_t FDIOHandler::write(IN char* buf, IN size_t length)
+size_t FDIOHandler::write(char* buf, size_t length)
 {
     size_t ret = 0;
 
@@ -114,7 +114,7 @@ size_t FDIOHandler::write(IN char* buf, IN size_t length)
     return ret;
 }
 
-void FDIOHandler::seek(IN off_t offset, IN int whence)
+void FDIOHandler::seek(off_t offset, int whence)
 {
     if (lseek(fd, offset, whence) != 0) {
         throw _Exception(_("fseek failed"));

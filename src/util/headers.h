@@ -37,7 +37,7 @@ class Headers {
 public:
     void addHeader(zmm::String header, zmm::String value);
     void addHeader(const std::string& header, const std::string& value);
-    void writeHeaders(IN UpnpFileInfo *fileInfo) const;
+    void writeHeaders(UpnpFileInfo *fileInfo) const;
 
 private:
     std::unique_ptr<std::map<std::string, std::string>> headers;

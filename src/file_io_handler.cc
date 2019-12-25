@@ -45,7 +45,7 @@ FileIOHandler::FileIOHandler(String filename)
 {
 }
 
-void FileIOHandler::open(IN enum UpnpOpenFileMode mode)
+void FileIOHandler::open(enum UpnpOpenFileMode mode)
 {
     if (mode == UPNP_READ) {
         f = fopen(filename.c_str(), "rb");
@@ -61,7 +61,7 @@ void FileIOHandler::open(IN enum UpnpOpenFileMode mode)
     }
 }
 
-size_t FileIOHandler::read(OUT char* buf, IN size_t length)
+size_t FileIOHandler::read(char* buf, size_t length)
 {
     size_t ret = 0;
 
@@ -77,7 +77,7 @@ size_t FileIOHandler::read(OUT char* buf, IN size_t length)
     return ret;
 }
 
-size_t FileIOHandler::write(IN char* buf, IN size_t length)
+size_t FileIOHandler::write(char* buf, size_t length)
 {
     size_t ret = 0;
 
@@ -86,7 +86,7 @@ size_t FileIOHandler::write(IN char* buf, IN size_t length)
     return ret;
 }
 
-void FileIOHandler::seek(IN off_t offset, IN int whence)
+void FileIOHandler::seek(off_t offset, int whence)
 {
     if (fseeko(f, offset, whence) != 0) {
         throw _Exception(_("fseek failed"));

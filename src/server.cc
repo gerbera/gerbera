@@ -453,9 +453,9 @@ int Server::registerVirtualDirCallbacks()
 {
     log_debug("Setting UpnpVirtualDir GetInfoCallback\n");
 #ifdef UPNP_HAS_REQUEST_COOKIES
-    int ret = UpnpVirtualDir_set_GetInfoCallback([](IN const char* filename, OUT UpnpFileInfo* info, const void* cookie, OUT const void** requestCookie) -> int {
+    int ret = UpnpVirtualDir_set_GetInfoCallback([](const char* filename, UpnpFileInfo* info, const void* cookie, const void** requestCookie) -> int {
 #else
-    int ret = UpnpVirtualDir_set_GetInfoCallback([](IN const char* filename, OUT UpnpFileInfo* info, const void* cookie) -> int {
+    int ret = UpnpVirtualDir_set_GetInfoCallback([](const char* filename, UpnpFileInfo* info, const void* cookie) -> int {
 #endif
         try {
             Ref<RequestHandler> reqHandler = static_cast<const Server *>(cookie)->createRequestHandler(filename);
@@ -475,9 +475,9 @@ int Server::registerVirtualDirCallbacks()
 
     log_debug("Setting UpnpVirtualDir OpenCallback\n");
 #ifdef UPNP_HAS_REQUEST_COOKIES
-    ret = UpnpVirtualDir_set_OpenCallback([](IN const char* filename, IN enum UpnpOpenFileMode mode, IN const void* cookie, IN const void* requestCookie) -> UpnpWebFileHandle {
+    ret = UpnpVirtualDir_set_OpenCallback([](const char* filename, enum UpnpOpenFileMode mode, const void* cookie, const void* requestCookie) -> UpnpWebFileHandle {
 #else
-    ret = UpnpVirtualDir_set_OpenCallback([](IN const char* filename, IN enum UpnpOpenFileMode mode, IN const void* cookie) -> UpnpWebFileHandle {
+    ret = UpnpVirtualDir_set_OpenCallback([](const char* filename, enum UpnpOpenFileMode mode, const void* cookie) -> UpnpWebFileHandle {
 #endif
         String link = urlUnescape(zmm::String::copy(filename));
 
@@ -502,9 +502,9 @@ int Server::registerVirtualDirCallbacks()
 
     log_debug("Setting UpnpVirtualDir ReadCallback\n");
 #ifdef UPNP_HAS_REQUEST_COOKIES
-    ret = UpnpVirtualDir_set_ReadCallback([](IN UpnpWebFileHandle f, OUT char* buf, IN size_t length, IN const void* cookie, IN const void* requestCookie) -> int {
+    ret = UpnpVirtualDir_set_ReadCallback([](UpnpWebFileHandle f, char* buf, size_t length, const void* cookie, const void* requestCookie) -> int {
 #else
-    ret = UpnpVirtualDir_set_ReadCallback([](IN UpnpWebFileHandle f, OUT char* buf, IN size_t length, IN const void* cookie) -> int {
+    ret = UpnpVirtualDir_set_ReadCallback([](UpnpWebFileHandle f, char* buf, size_t length, const void* cookie) -> int {
 #endif
         //log_debug("%p read(%d)\n", f, length);
         if (static_cast<const Server*>(cookie)->getShutdownStatus())
@@ -518,9 +518,9 @@ int Server::registerVirtualDirCallbacks()
 
     log_debug("Setting UpnpVirtualDir WriteCallback\n");
 #ifdef UPNP_HAS_REQUEST_COOKIES
-    ret = UpnpVirtualDir_set_WriteCallback([](IN UpnpWebFileHandle f, IN char* buf, IN size_t length, IN const void* cookie, IN const void* requestCookie) -> int {
+    ret = UpnpVirtualDir_set_WriteCallback([](UpnpWebFileHandle f, char* buf, size_t length, const void* cookie, const void* requestCookie) -> int {
 #else
-    ret = UpnpVirtualDir_set_WriteCallback([](IN UpnpWebFileHandle f, IN char* buf, IN size_t length, IN const void* cookie) -> int {
+    ret = UpnpVirtualDir_set_WriteCallback([](UpnpWebFileHandle f, char* buf, size_t length, const void* cookie) -> int {
 #endif
         //log_debug("%p write(%d)\n", f, length);
         return 0;
@@ -530,9 +530,9 @@ int Server::registerVirtualDirCallbacks()
 
     log_debug("Setting UpnpVirtualDir SeekCallback\n");
 #ifdef UPNP_HAS_REQUEST_COOKIES
-    ret = UpnpVirtualDir_set_SeekCallback([](IN UpnpWebFileHandle f, IN off_t offset, IN int whence, IN const void* cookie, IN const void* requestCookie) -> int {
+    ret = UpnpVirtualDir_set_SeekCallback([](UpnpWebFileHandle f, off_t offset, int whence, const void* cookie, const void* requestCookie) -> int {
 #else
-    ret = UpnpVirtualDir_set_SeekCallback([](IN UpnpWebFileHandle f, IN off_t offset, IN int whence, IN const void* cookie) -> int {
+    ret = UpnpVirtualDir_set_SeekCallback([](UpnpWebFileHandle f, off_t offset, int whence, const void* cookie) -> int {
 #endif
         //log_debug("%p seek(%d, %d)\n", f, offset, whence);
         try {
@@ -551,9 +551,9 @@ int Server::registerVirtualDirCallbacks()
 
     log_debug("Setting UpnpVirtualDir CloseCallback\n");
 #ifdef UPNP_HAS_REQUEST_COOKIES
-    UpnpVirtualDir_set_CloseCallback([](IN UpnpWebFileHandle f, IN const void* cookie, IN const void* requestCookie) -> int {
+    UpnpVirtualDir_set_CloseCallback([](UpnpWebFileHandle f, const void* cookie, const void* requestCookie) -> int {
 #else
-    UpnpVirtualDir_set_CloseCallback([](IN UpnpWebFileHandle f, IN const void* cookie) -> int {
+    UpnpVirtualDir_set_CloseCallback([](UpnpWebFileHandle f, const void* cookie) -> int {
 #endif
         //log_debug("%p close()\n", f);
         Ref<IOHandler> handler((IOHandler*)f);

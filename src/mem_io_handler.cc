@@ -69,12 +69,12 @@ MemIOHandler::~MemIOHandler()
     FREE(buffer);
 }
 
-void MemIOHandler::open(IN enum UpnpOpenFileMode mode)
+void MemIOHandler::open(enum UpnpOpenFileMode mode)
 {
     pos = 0;
 }
 
-size_t MemIOHandler::read(OUT char* buf, IN size_t length)
+size_t MemIOHandler::read(char* buf, size_t length)
 {
     size_t ret = 0;
 
@@ -98,7 +98,7 @@ size_t MemIOHandler::read(OUT char* buf, IN size_t length)
     return ret;
 }
 
-void MemIOHandler::seek(IN off_t offset, IN int whence)
+void MemIOHandler::seek(off_t offset, int whence)
 {
     if (whence == SEEK_SET) {
         // offset must be positive when SEEK_SET is used

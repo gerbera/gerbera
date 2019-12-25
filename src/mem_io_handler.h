@@ -53,9 +53,9 @@ public:
     virtual ~MemIOHandler();
 
     ///
-    void open(IN enum UpnpOpenFileMode mode) override;
-    size_t read(OUT char* buf, IN size_t length) override;
-    void seek(IN off_t offset, IN int whence) override;
+    void open(enum UpnpOpenFileMode mode) override;
+    size_t read(char* buf, size_t length) override;
+    void seek(off_t offset, int whence) override;
     off_t tell() override;
     void close() override;
 };
