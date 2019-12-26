@@ -285,7 +285,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 }
 
 Ref<IOHandler> FileRequestHandler::open(const char* filename,
-    enum UpnpOpenFileMode mode, zmm::String range)
+    enum UpnpOpenFileMode mode, std::string range)
 {
     log_debug("start\n");
 
