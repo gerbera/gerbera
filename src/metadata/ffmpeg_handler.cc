@@ -449,7 +449,6 @@ Ref<IOHandler> FfmpegHandler::serveContent(Ref<CdsItem> item, int resNum)
             img->image_data_ptr, img->image_data_size);
     }
 
-    *data_size = (off_t)img->image_data_size;
     Ref<IOHandler> h(new MemIOHandler((void*)img->image_data_ptr,
         img->image_data_size));
 #ifdef FFMPEGTHUMBNAILER_OLD_API
