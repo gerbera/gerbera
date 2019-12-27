@@ -33,7 +33,7 @@
 
 using namespace zmm;
 
-WebRequestHandler* createWebRequestHandler(String page)
+WebRequestHandler* createWebRequestHandler(std::string page)
 {
     if (page == "add")
         return new web::add();
@@ -64,5 +64,5 @@ WebRequestHandler* createWebRequestHandler(String page)
     if (page == "action")
         return new web::action();
 
-    throw _Exception(_("Unknown page: ") + page);
+    throw _Exception("Unknown page: " + page);
 }

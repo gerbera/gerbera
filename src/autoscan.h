@@ -70,7 +70,7 @@ public:
 
     zmm::Ref<AutoscanDirectory> get(int id);
 
-    zmm::Ref<AutoscanDirectory> get(zmm::String location);
+    zmm::Ref<AutoscanDirectory> get(std::string location);
 
     zmm::Ref<AutoscanDirectory> getByObjectID(int objectID);
 
@@ -84,13 +84,13 @@ public:
     /// \brief removes the AutoscanDirectory with the given location
     /// \param location the location to remove
     /// \return the scanID, that was removed; if nothing removed: INVALID_SCAN_ID
-    int remove(zmm::String location);
+    int remove(std::string location);
 
     /// \brief removes the AutoscanDirectory if it is a subdirectory of a given location.
     /// \param parent parent directory.
     /// \param persistent also remove persistent directories.
     /// \return AutoscanList of removed directories, where each directory object in the list is a copy and not the original reference.
-    zmm::Ref<AutoscanList> removeIfSubdir(zmm::String parent, bool persistent = false);
+    zmm::Ref<AutoscanList> removeIfSubdir(std::string parent, bool persistent = false);
 
     /*
     /// \brief Add timer for each directory in the list.
@@ -141,7 +141,7 @@ public:
     /// \param interval rescan interval in seconds (only for timed scan mode)
     /// \param hidden include hidden files
     /// zero means none.
-    AutoscanDirectory(zmm::String location, ScanMode mode,
+    AutoscanDirectory(std::string location, ScanMode mode,
         ScanLevel level, bool recursive,
         bool persistent,
         int id = INVALID_SCAN_ID, unsigned int interval = 0, bool hidden = false);
@@ -151,9 +151,9 @@ public:
     int getStorageID() { return storageID; }
 
     /// \brief The location can only be set once!
-    void setLocation(zmm::String location);
+    void setLocation(std::string location);
 
-    zmm::String getLocation() { return location; }
+    std::string getLocation() { return location; }
 
     ScanMode getScanMode() { return mode; }
 
@@ -239,13 +239,13 @@ public:
     //    bool equals(Ref<AutoscanDirectory> dir);
 
     /* helpers for autoscan stuff */
-    static zmm::String mapScanmode(ScanMode scanmode);
-    static ScanMode remapScanmode(zmm::String scanmode);
-    static zmm::String mapScanlevel(ScanLevel scanlevel);
-    static ScanLevel remapScanlevel(zmm::String scanlevel);
+    static std::string mapScanmode(ScanMode scanmode);
+    static ScanMode remapScanmode(std::string scanmode);
+    static std::string mapScanlevel(ScanLevel scanlevel);
+    static ScanLevel remapScanlevel(std::string scanlevel);
 
 protected:
-    zmm::String location;
+    std::string location;
     ScanMode mode;
     ScanLevel level;
     bool recursive;

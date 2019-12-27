@@ -90,17 +90,15 @@ static void addFfmpegAuxdataFields(Ref<CdsItem> item, AVFormatContext* pFormatCt
 
     Ref<StringConverter> sc = StringConverter::m2i();
     Ref<ConfigManager> cm = ConfigManager::getInstance();
-    Ref<Array<StringBase>> aux = cm->getStringArrayOption(CFG_IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST);
-    if (aux != nullptr) {
-        for (int j = 0; j < aux->size(); j++) {
-            String desiredTag(aux->get(j));
-            if (string_ok(desiredTag)) {
-                AVDictionaryEntry* tag = NULL;
-                tag = av_dict_get(pFormatCtx->metadata, desiredTag.c_str(), NULL, AV_DICT_IGNORE_SUFFIX);
-                if (tag && tag->value && tag->value[0]) {
-                    log_debug("Added %s: %s\n", desiredTag.c_str(), tag->value);
-                    item->setAuxData(desiredTag, sc->convert(tag->value));
-                }
+    std::vector<std::string> aux = cm->getStringArrayOption(CFG_IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST);
+    for (size_t j = 0; j < aux.size(); j++) {
+        std::string desiredTag(aux[j]);
+        if (string_ok(desiredTag)) {
+            AVDictionaryEntry* tag = NULL;
+            tag = av_dict_get(pFormatCtx->metadata, desiredTag.c_str(), NULL, AV_DICT_IGNORE_SUFFIX);
+            if (tag && tag->value && tag->value[0]) {
+                log_debug("Added %s: %s\n", desiredTag.c_str(), tag->value);
+                item->setAuxData(desiredTag, sc->convert(tag->value));
             }
         }
     }
@@ -111,7 +109,7 @@ static void addFfmpegMetadataFields(Ref<CdsItem> item, AVFormatContext* pFormatC
     AVDictionaryEntry* e = NULL;
     Ref<StringConverter> sc = StringConverter::m2i();
     metadata_fields_t field;
-    String value;
+    std::string value;
 
     while ((e = av_dict_get(pFormatCtx->metadata, "", e, AV_DICT_IGNORE_SUFFIX))) {
         value = e->value;
@@ -126,8 +124,8 @@ static void addFfmpegMetadataFields(Ref<CdsItem> item, AVFormatContext* pFormatC
             log_debug("Identified metadata album: %s\n", e->value);
             field = M_ALBUM;
         } else if (strcmp(e->key, "date") == 0) {
-            if ((value.length() == 4) && (value.toInt() > 0)) {
-                value = value + _("-01-01");
+            if ((value.length() == 4) && (std::stoi(value) > 0)) {
+                value = value + "-01-01";
                 log_debug("Identified metadata date: %s\n", value.c_str());
             }
             /// \toto parse possible ISO8601 timestamp
@@ -155,7 +153,7 @@ static void addFfmpegResourceFields(Ref<CdsItem> item, AVFormatContext* pFormatC
     int64_t hours, mins, secs, us;
     int audioch = 0, samplefreq = 0;
     bool audioset, videoset;
-    String resolution;
+    std::string resolution;
     char duration[15];
 
     // Initialize the buffers
@@ -179,7 +177,7 @@ static void addFfmpegResourceFields(Ref<CdsItem> item, AVFormatContext* pFormatC
         // ffmpeg's bit_rate is in bits/sec, upnp wants it in bytes/sec
         // See http://www.upnp.org/schemas/av/didl-lite-v3.xsd
         log_debug("Added overall bitrate: %d kb/s\n", pFormatCtx->bit_rate / 8);
-        item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_BITRATE), String::from(pFormatCtx->bit_rate / 8));
+        item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_BITRATE), std::to_string(pFormatCtx->bit_rate / 8));
     }
 
     // video resolution, audio sampling rate, nr of audio channels
@@ -198,14 +196,14 @@ static void addFfmpegResourceFields(Ref<CdsItem> item, AVFormatContext* pFormatC
 
                 log_debug("FourCC: %x = %s\n",
                     as_codecpar(st)->codec_tag, fourcc);
-                String fcc = fourcc;
+                std::string fcc = fourcc;
                 if (string_ok(fcc))
-                    item->getResource(0)->addOption(_(RESOURCE_OPTION_FOURCC),
+                    item->getResource(0)->addOption(RESOURCE_OPTION_FOURCC,
                         fcc);
             }
 
             if ((as_codecpar(st)->width > 0) && (as_codecpar(st)->height > 0)) {
-                resolution = String::from(as_codecpar(st)->width) + "x" + String::from(as_codecpar(st)->height);
+                resolution = std::to_string(as_codecpar(st)->width) + "x" + std::to_string(as_codecpar(st)->height);
 
                 log_debug("Added resolution: %s pixel\n", resolution.c_str());
                 item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), resolution);
@@ -217,13 +215,13 @@ static void addFfmpegResourceFields(Ref<CdsItem> item, AVFormatContext* pFormatC
             if (as_codecpar(st)->sample_rate > 0) {
                 samplefreq = as_codecpar(st)->sample_rate;
                 log_debug("Added sample frequency: %d Hz\n", samplefreq);
-                item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY), String::from(samplefreq));
+                item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY), std::to_string(samplefreq));
                 audioset = true;
 
                 audioch = as_codecpar(st)->channels;
                 if (audioch > 0) {
                     log_debug("Added number of audio channels: %d\n", audioch);
-                    item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS), String::from(audioch));
+                    item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS), std::to_string(audioch));
                 }
             }
         }
@@ -300,7 +298,7 @@ static int _mkdir(const char* path)
     return ret;
 }
 
-static bool makeThumbnailCacheDir(String& path)
+static bool makeThumbnailCacheDir(std::string& path)
 {
     char* path_temp = strdup(path.c_str());
     char* last_slash = strrchr(path_temp, '/');
@@ -343,13 +341,13 @@ done:
     return ret;
 }
 
-static String getThumbnailCacheFilePath(String& movie_filename, bool create)
+static std::string getThumbnailCacheFilePath(std::string& movie_filename, bool create)
 {
     Ref<ConfigManager> cfg = ConfigManager::getInstance();
-    String cache_dir = cfg->getOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR);
+    std::string cache_dir = cfg->getOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR);
 
     if (cache_dir.length() == 0) {
-        String home_dir = cfg->getOption(CFG_SERVER_HOME);
+        std::string home_dir = cfg->getOption(CFG_SERVER_HOME);
         cache_dir = home_dir + "/cache-dir";
     }
 
@@ -359,9 +357,9 @@ static String getThumbnailCacheFilePath(String& movie_filename, bool create)
     return cache_dir;
 }
 
-static bool readThumbnailCacheFile(String movie_filename, uint8_t** ptr_img, size_t* size_img)
+static bool readThumbnailCacheFile(std::string movie_filename, uint8_t** ptr_img, size_t* size_img)
 {
-    String path = getThumbnailCacheFilePath(movie_filename, false);
+    std::string path = getThumbnailCacheFilePath(movie_filename, false);
     FILE* fp = fopen(path.c_str(), "rb");
     if (!fp)
         return false;
@@ -379,9 +377,9 @@ static bool readThumbnailCacheFile(String movie_filename, uint8_t** ptr_img, siz
     return true;
 }
 
-static void writeThumbnailCacheFile(String movie_filename, uint8_t* ptr_img, int size_img)
+static void writeThumbnailCacheFile(std::string movie_filename, uint8_t* ptr_img, int size_img)
 {
-    String path = getThumbnailCacheFilePath(movie_filename, true);
+    std::string path = getThumbnailCacheFilePath(movie_filename, true);
     FILE* fp = fopen(path.c_str(), "wb");
     if (!fp)
         return;
@@ -442,7 +440,7 @@ Ref<IOHandler> FfmpegHandler::serveContent(Ref<CdsItem> item, int resNum)
 #endif // old api
     {
         pthread_mutex_unlock(&thumb_lock);
-        throw _Exception(_("Could not generate thumbnail for ") + item->getLocation());
+        throw _Exception("Could not generate thumbnail for " + item->getLocation());
     }
     if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED)) {
         writeThumbnailCacheFile(item->getLocation(),
@@ -465,14 +463,14 @@ Ref<IOHandler> FfmpegHandler::serveContent(Ref<CdsItem> item, int resNum)
 #endif
 }
 
-String FfmpegHandler::getMimeType()
+std::string FfmpegHandler::getMimeType()
 {
     Ref<ConfigManager> cfg = ConfigManager::getInstance();
 
     Ref<Dictionary> mappings = cfg->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-    String thumb_mimetype = mappings->get(_(CONTENT_TYPE_JPG));
+    std::string thumb_mimetype = mappings->get(CONTENT_TYPE_JPG);
     if (!string_ok(thumb_mimetype))
-        thumb_mimetype = _("image/jpeg");
+        thumb_mimetype = "image/jpeg";
 
     return thumb_mimetype;
 }

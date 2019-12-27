@@ -57,8 +57,8 @@ void LastFm::init()
     if (!config->getBoolOption(CFG_SERVER_EXTOPTS_LASTFM_ENABLED))
         return;
 
-    String username = config->getOption(CFG_SERVER_EXTOPTS_LASTFM_USERNAME);
-    String password = config->getOption(CFG_SERVER_EXTOPTS_LASTFM_PASSWORD);
+    std::string username = config->getOption(CFG_SERVER_EXTOPTS_LASTFM_USERNAME);
+    std::string password = config->getOption(CFG_SERVER_EXTOPTS_LASTFM_PASSWORD);
 
     scrobbler = create_scrobbler(username.c_str(), password.c_str(), 0, 0);
     authenticate_scrobbler(scrobbler);
@@ -87,8 +87,8 @@ void LastFm::startedPlaying(Ref<CdsItem> item)
     log_debug("Title:\t%s\n",
         item->getMetadata(MetadataHandler::getMetaFieldName(M_TITLE)).c_str());
 
-    String artist = item->getMetadata(MetadataHandler::getMetaFieldName(M_ARTIST));
-    String title = item->getMetadata(MetadataHandler::getMetaFieldName(M_TITLE));
+    std::string artist = item->getMetadata(MetadataHandler::getMetaFieldName(M_ARTIST));
+    std::string title = item->getMetadata(MetadataHandler::getMetaFieldName(M_TITLE));
 
     if (!string_ok(artist) || !string_ok(title)) {
         finished_playing(scrobbler);
@@ -100,17 +100,17 @@ void LastFm::startedPlaying(Ref<CdsItem> item)
     info->artist = const_cast<char*>(artist.c_str());
     info->track = const_cast<char*>(title.c_str());
 
-    String album = item->getMetadata(MetadataHandler::getMetaFieldName(M_ALBUM));
+    std::string album = item->getMetadata(MetadataHandler::getMetaFieldName(M_ALBUM));
     if (string_ok(album))
         info->album = const_cast<char*>(album.c_str());
 
-    String trackNr = item->getMetadata(MetadataHandler::getMetaFieldName(M_TRACKNUMBER));
+    std::string trackNr = item->getMetadata(MetadataHandler::getMetaFieldName(M_TRACKNUMBER));
     if (string_ok(trackNr))
         info->track_nr = atoi(trackNr.c_str());
 
     if (item->getResourceCount() > 0) {
         Ref<CdsResource> resource = item->getResource(0);
-        String duration = resource->getAttribute(MetadataHandler::getResAttrName(R_DURATION));
+        std::string duration = resource->getAttribute(MetadataHandler::getResAttrName(R_DURATION));
         info->track_length_in_secs = HMSToSeconds(duration.c_str());
     }
 

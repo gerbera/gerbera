@@ -63,10 +63,10 @@ public:
     inline long getTimeout() { return timeout; }
 
     /// \brief Returns the session identifier.
-    inline zmm::String getID() { return sessionID; }
+    inline std::string getID() { return sessionID; }
 
     /// \brief Sets the session identifier.
-    inline void setID(zmm::String sessionID) { this->sessionID = sessionID; }
+    inline void setID(std::string sessionID) { this->sessionID = sessionID; }
 
     inline bool isLoggedIn() { return loggedIn; }
 
@@ -79,7 +79,7 @@ public:
     /// \brief Returns the updateIDs, collected for the sessions,
     /// and flushes the storage for the ids
     /// \return the container ids to be updated as String (comma separated)
-    zmm::String getUIUpdateIDs();
+    std::string getUIUpdateIDs();
 
     bool hasUIUpdateIDs();
 
@@ -105,7 +105,7 @@ protected:
     struct timespec last_access;
 
     /// \brief arbitrary but unique string representing the ID of the session (returned by getID())
-    zmm::String sessionID;
+    std::string sessionID;
 
     bool loggedIn;
 
@@ -127,7 +127,7 @@ public:
     /// \brief Constructor, initializes the array.
     SessionManager();
 
-    zmm::String getName() override { return _("Session Manager"); }
+    std::string getName() override { return "Session Manager"; }
 
     virtual ~SessionManager() override { log_debug("SessionManager destroyed\n"); }
 
@@ -138,12 +138,12 @@ public:
     /// \brief Returns the instance to a Session with a given sessionID
     /// \param ID of the Session.
     /// \return intance of the Session with a given ID or nullptr if no session with that ID was found.
-    zmm::Ref<Session> getSession(zmm::String sessionID, bool doLock = true);
+    zmm::Ref<Session> getSession(std::string sessionID, bool doLock = true);
 
     /// \brief Removes a session
-    void removeSession(zmm::String sessionID);
+    void removeSession(std::string sessionID);
 
-    zmm::String getUserPassword(zmm::String user);
+    std::string getUserPassword(std::string user);
 
     /// \brief Is called whenever a container changed in a way,
     /// so that it needs to be redrawn in the tree of the UI.

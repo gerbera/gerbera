@@ -35,7 +35,6 @@ Gerbera - https://gerbera.io/
 
 class Headers {
 public:
-    void addHeader(zmm::String header, zmm::String value);
     void addHeader(const std::string& header, const std::string& value);
     void writeHeaders(UpnpFileInfo *fileInfo) const;
 

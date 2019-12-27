@@ -42,7 +42,7 @@ public:
     virtual void getInfo(const char *filename, UpnpFileInfo *info);
     virtual zmm::Ref<IOHandler> open(const char* filename,
         enum UpnpOpenFileMode mode,
-        zmm::String range);
+        std::string range);
 };
 
 #endif // __URL_REQUEST_HANDLER_H__

@@ -47,19 +47,19 @@ void web::containers::process()
     log_debug(("containers.cc: containers::process()\n"));
     check_request();
 
-    int parentID = intParam(_("parent_id"), INVALID_OBJECT_ID);
+    int parentID = intParam("parent_id", INVALID_OBJECT_ID);
     if (parentID == INVALID_OBJECT_ID)
-        throw _Exception(_("web::containers: no parent_id given"));
+        throw _Exception("web::containers: no parent_id given");
 
     Ref<Storage> storage = Storage::getInstance();
 
-    Ref<Element> containers(new Element(_("containers")));
-    containers->setArrayName(_("container"));
-    containers->setAttribute(_("parent_id"), String::from(parentID), mxml_int_type);
-    containers->setAttribute(_("type"), _("database"));
+    Ref<Element> containers(new Element("containers"));
+    containers->setArrayName("container");
+    containers->setAttribute("parent_id", std::to_string(parentID), mxml_int_type);
+    containers->setAttribute("type", "database");
 
-    if (string_ok(param(_("select_it"))))
-        containers->setAttribute(_("select_it"), param(_("select_it")));
+    if (string_ok(param("select_it")))
+        containers->setAttribute("select_it", param("select_it"));
     root->appendElementChild(containers);
 
     Ref<BrowseParam> param(new BrowseParam(parentID, BROWSE_DIRECT_CHILDREN | BROWSE_CONTAINERS));
@@ -71,26 +71,26 @@ void web::containers::process()
         //if (IS_CDS_CONTAINER(obj->getObjectType()))
         //{
         Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
-        Ref<Element> ce(new Element(_("container")));
-        ce->setAttribute(_("id"), String::from(cont->getID()), mxml_int_type);
+        Ref<Element> ce(new Element("container"));
+        ce->setAttribute("id", std::to_string(cont->getID()), mxml_int_type);
         int childCount = cont->getChildCount();
-        ce->setAttribute(_("child_count"), String::from(childCount), mxml_int_type);
+        ce->setAttribute("child_count", std::to_string(childCount), mxml_int_type);
         int autoscanType = cont->getAutoscanType();
-        ce->setAttribute(_("autoscan_type"), mapAutoscanType(autoscanType));
+        ce->setAttribute("autoscan_type", mapAutoscanType(autoscanType));
 
-        String autoscanMode = _("none");
+        std::string autoscanMode = "none";
         if (autoscanType > 0) {
-            autoscanMode = _("timed");
+            autoscanMode = "timed";
 #ifdef HAVE_INOTIFY
             if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
                 Ref<AutoscanDirectory> adir = storage->getAutoscanDirectory(cont->getID());
                 if ((adir != nullptr) && (adir->getScanMode() == ScanMode::INotify))
-                    autoscanMode = _("inotify");
+                    autoscanMode = "inotify";
             }
 #endif
         }
-        ce->setAttribute(_("autoscan_mode"), autoscanMode);
-        ce->setTextKey(_("title"));
+        ce->setAttribute("autoscan_mode", autoscanMode);
+        ce->setTextKey("title");
         ce->setText(cont->getTitle());
         containers->appendElementChild(ce);
         //}

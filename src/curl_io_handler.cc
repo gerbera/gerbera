@@ -38,13 +38,13 @@
 using namespace zmm;
 using namespace std;
 
-CurlIOHandler::CurlIOHandler(String URL, CURL* curl_handle, size_t bufSize, size_t initialFillSize)
+CurlIOHandler::CurlIOHandler(std::string URL, CURL* curl_handle, size_t bufSize, size_t initialFillSize)
     : IOHandlerBufferHelper(bufSize, initialFillSize)
 {
     if (!string_ok(URL))
-        throw _Exception(_("URL has not been set correctly"));
+        throw _Exception("URL has not been set correctly");
     if (bufSize < CURL_MAX_WRITE_SIZE)
-        throw _Exception(_("bufSize must be at least CURL_MAX_WRITE_SIZE(") + CURL_MAX_WRITE_SIZE + ')');
+        throw _Exception("bufSize must be at least CURL_MAX_WRITE_SIZE(" + CURL_MAX_WRITE_SIZE + ')');
 
     this->URL = URL;
     this->external_curl_handle = (curl_handle != nullptr);
@@ -62,7 +62,7 @@ void CurlIOHandler::open(enum UpnpOpenFileMode mode)
     if (curl_handle == nullptr) {
         curl_handle = curl_easy_init();
         if (curl_handle == nullptr)
-            throw _Exception(_("failed to init curl"));
+            throw _Exception("failed to init curl");
     } else
         curl_easy_reset(curl_handle);
 

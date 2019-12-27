@@ -49,8 +49,8 @@ private:
     void parseLevel1Element(zmm::Ref<CdsItem> item, LIBEBML_NAMESPACE::EbmlStream & ebml_stream, LIBEBML_NAMESPACE::EbmlElement* el_l1, MemIOHandler** p_io_handler);
     void parseInfo(zmm::Ref<CdsItem> item, EbmlStream & ebml_stream, LIBMATROSKA_NAMESPACE::KaxInfo *info);
     void parseAttachments(zmm::Ref<CdsItem> item, LIBEBML_NAMESPACE::EbmlStream & ebml_stream, LIBMATROSKA_NAMESPACE::KaxAttachments *attachments, MemIOHandler** io_handler);
-    zmm::String getContentTypeFromByteVector(const LIBMATROSKA_NAMESPACE::KaxFileData* data) const;
-    void addArtworkResource(zmm::Ref<CdsItem> item, zmm::String content_type);
+    std::string getContentTypeFromByteVector(const LIBMATROSKA_NAMESPACE::KaxFileData* data) const;
+    void addArtworkResource(zmm::Ref<CdsItem> item, std::string content_type);
 };
 
 #endif

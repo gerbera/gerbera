@@ -38,7 +38,7 @@
 
 class UpnpXMLBuilder {
 public:
-    explicit UpnpXMLBuilder(zmm::String virtualUrl, zmm::String presentationURL);
+    explicit UpnpXMLBuilder(std::string virtualUrl, std::string presentationURL);
 
     /// \brief Renders XML for the action response header.
     /// \param actionName Name of the action.
@@ -49,7 +49,7 @@ public:
     /// <u:actionNameResponse xmlns:u="serviceType"/>
     /// Further response information (various parameters, DIDL-Lite or
     /// whatever can then be adapted to it.
-    zmm::Ref<mxml::Element> createResponse(zmm::String actionName, zmm::String serviceType);
+    zmm::Ref<mxml::Element> createResponse(std::string actionName, std::string serviceType);
 
     /// \brief Renders the DIDL-Lite representation of an object in the content directory.
     /// \param obj Object to be rendered as XML.
@@ -60,10 +60,10 @@ public:
     /// either a container or an item. The renderActions parameter tells us whether to also
     /// show the special fields of an active item in the XML. This is currently used when
     /// providing the XML representation of an active item to a trigger/toggle script.
-    zmm::Ref<mxml::Element> renderObject(zmm::Ref<CdsObject> obj, bool renderActions = false, int stringLimit = -1);
+    zmm::Ref<mxml::Element> renderObject(zmm::Ref<CdsObject> obj, bool renderActions = false, size_t stringLimit = std::string::npos);
 
     /// \todo change the text string to element, parsing should be done outside
-    void updateObject(zmm::Ref<CdsObject> obj, zmm::String text);
+    void updateObject(zmm::Ref<CdsObject> obj, std::string text);
 
     /// \brief Renders XML for the event property set.
     /// \return mxml::Element representing the newly created XML.
@@ -79,43 +79,43 @@ public:
     /// \brief Renders a resource tag (part of DIDL-Lite XML)
     /// \param URL download location of the item (will be child element of the <res> tag)
     /// \param attributes Dictionary containing the <res> tag attributes (like resolution, etc.)
-    zmm::Ref<mxml::Element> renderResource(zmm::String URL, zmm::Ref<Dictionary> attributes);
+    zmm::Ref<mxml::Element> renderResource(std::string URL, zmm::Ref<Dictionary> attributes);
 
     /// \brief Renders a subtitle resource tag (Samsung proprietary extension)
     /// \param URL download location of the video item
-    zmm::Ref<mxml::Element> renderCaptionInfo(zmm::String URL);
+    zmm::Ref<mxml::Element> renderCaptionInfo(std::string URL);
 
-    zmm::Ref<mxml::Element> renderCreator(zmm::String creator);
+    zmm::Ref<mxml::Element> renderCreator(std::string creator);
 
-    zmm::Ref<mxml::Element> renderAlbumArtURI(zmm::String uri);
+    zmm::Ref<mxml::Element> renderAlbumArtURI(std::string uri);
 
-    zmm::Ref<mxml::Element> renderComposer(zmm::String composer);
+    zmm::Ref<mxml::Element> renderComposer(std::string composer);
 
-    zmm::Ref<mxml::Element> renderConductor(zmm::String conductor);
+    zmm::Ref<mxml::Element> renderConductor(std::string conductor);
 
-    zmm::Ref<mxml::Element> renderOrchestra(zmm::String orchestra);
+    zmm::Ref<mxml::Element> renderOrchestra(std::string orchestra);
 
-    zmm::Ref<mxml::Element> renderAlbumDate(zmm::String date);
+    zmm::Ref<mxml::Element> renderAlbumDate(std::string date);
 
     void addResources(zmm::Ref<CdsItem> item, zmm::Ref<mxml::Element> element);
 
     // FIXME: This needs to go, once we sort a nicer way for the webui code to access this
-    static zmm::String getFirstResourcePath(zmm::Ref<CdsItem> item);
+    static std::string getFirstResourcePath(zmm::Ref<CdsItem> item);
 
 protected:
-    zmm::String virtualURL;
-    zmm::String presentationURL;
+    std::string virtualURL;
+    std::string presentationURL;
 
     // Holds a part of path and bool which says if we need to append the resource
     // TODO: Remove this and use centralised routing instead of building URLs all over the place
     class PathBase : public zmm::Object {
     public:
-        zmm::String pathBase;
+        std::string pathBase;
         bool addResID;
     };
 
     static zmm::Ref<PathBase> getPathBase(zmm::Ref<CdsItem> item, bool forceLocal = false);
-    zmm::String renderExtension(zmm::String contentType, zmm::String location);
-    zmm::String getArtworkUrl(zmm::Ref<CdsItem> item);
+    std::string renderExtension(std::string contentType, std::string location);
+    std::string getArtworkUrl(zmm::Ref<CdsItem> item);
 };
 #endif // __UPNP_XML_H__

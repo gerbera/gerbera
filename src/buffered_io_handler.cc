@@ -41,9 +41,9 @@ BufferedIOHandler::BufferedIOHandler(Ref<IOHandler> underlyingHandler, size_t bu
     : IOHandlerBufferHelper(bufSize, initialFillSize)
 {
     if (underlyingHandler == nullptr)
-        throw _Exception(_("underlyingHandler must not be nullptr"));
+        throw _Exception("underlyingHandler must not be nullptr");
     if (maxChunkSize <= 0)
-        throw _Exception(_("maxChunkSize must be positive"));
+        throw _Exception("maxChunkSize must be positive");
     this->underlyingHandler = underlyingHandler;
     this->maxChunkSize = maxChunkSize;
 

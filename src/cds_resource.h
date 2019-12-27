@@ -70,12 +70,12 @@ public:
     ///
     /// \param name attribute name
     /// \param value attribute value
-    void addAttribute(zmm::String name, zmm::String value);
+    void addAttribute(std::string name, std::string value);
 
     /// \brief Removes a resource attribute.
     ///
     /// \param name attribute name
-    void removeAttribute(zmm::String name);
+    void removeAttribute(std::string name);
 
     /// \brief Merge existing attributes with new ones
     void mergeAttributes(zmm::Ref<Dictionary> additional);
@@ -89,28 +89,28 @@ public:
     ///
     /// \param name parameter name
     /// \param value parameter value
-    void addParameter(zmm::String name, zmm::String value);
+    void addParameter(std::string name, std::string value);
 
     /// \brief Add an option to the resource.
     ///
     /// The options are internal, they do not appear in the URL or in the
     /// XML but can be used for any purpose.
-    void addOption(zmm::String name, zmm::String value);
+    void addOption(std::string name, std::string value);
 
     // urlencode into string
     int getHandlerType();
     zmm::Ref<Dictionary> getAttributes();
     zmm::Ref<Dictionary> getParameters();
     zmm::Ref<Dictionary> getOptions();
-    zmm::String getAttribute(zmm::String name);
-    zmm::String getParameter(zmm::String name);
-    zmm::String getOption(zmm::String name);
+    std::string getAttribute(std::string name);
+    std::string getParameter(std::string name);
+    std::string getOption(std::string name);
 
     bool equals(zmm::Ref<CdsResource> other);
     zmm::Ref<CdsResource> clone();
 
-    zmm::String encode();
-    static zmm::Ref<CdsResource> decode(zmm::String serial);
+    std::string encode();
+    static zmm::Ref<CdsResource> decode(std::string serial);
 
     /// \brief Frees unnecessary memory
     void optimize();

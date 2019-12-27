@@ -65,7 +65,7 @@ public:
     {
         file = fopen(path, "rb");
         if (file == nullptr) {
-            throw _Exception(_("Could not fopen ") + path);
+            throw _Exception(std::string("Could not fopen ") + path);
         }
     }
 
@@ -87,7 +87,7 @@ public:
         assert(file != nullptr);
         assert(mode == SEEK_CUR || mode == SEEK_END || mode == SEEK_SET);
         if (fseeko(file, offset, mode) != 0) {
-            throw _Exception(_("fseek failed"));
+            throw _Exception("fseek failed");
         }
     }
 
@@ -108,7 +108,7 @@ public:
         if (file == nullptr)
             return;
         if (fclose(file) !=0) {
-            throw _Exception(_("fclose failed"));
+            throw _Exception("fclose failed");
         }
         file = nullptr;
     }
@@ -218,7 +218,7 @@ void MatroskaHandler::parseAttachments(Ref<CdsItem> item, EbmlStream & ebml_stre
         // printf("KaxFileName = %s\n", fileName.c_str());
 
         bool isCoverArt = false;
-        if (fileName.rfind("cover", 0) == 0) {
+        if (startswith(fileName, "cover")) {
             isCoverArt = true;
         }
 
@@ -231,7 +231,7 @@ void MatroskaHandler::parseAttachments(Ref<CdsItem> item, EbmlStream & ebml_stre
                 *p_io_handler = new MemIOHandler(fileData.GetBuffer(), fileData.GetSize());
             } else {
                 // fillMetadata
-                String art_mimetype = getContentTypeFromByteVector(&fileData);
+                std::string art_mimetype = getContentTypeFromByteVector(&fileData);
                 if (string_ok(art_mimetype))
                     addArtworkResource(item, art_mimetype);
             }
@@ -241,32 +241,32 @@ void MatroskaHandler::parseAttachments(Ref<CdsItem> item, EbmlStream & ebml_stre
     }
 }
 
-String MatroskaHandler::getContentTypeFromByteVector(const KaxFileData* data) const
+std::string MatroskaHandler::getContentTypeFromByteVector(const KaxFileData* data) const
 {
-    String art_mimetype = _(MIMETYPE_DEFAULT);
+    std::string art_mimetype = MIMETYPE_DEFAULT;
 #ifdef HAVE_MAGIC
     art_mimetype = ContentManager::getInstance()->getMimeTypeFromBuffer(data->GetBuffer(), data->GetSize());
     if (!string_ok(art_mimetype)) {
-        return _(MIMETYPE_DEFAULT);
+        return MIMETYPE_DEFAULT;
     }
 #endif
     return art_mimetype;
 }
 
-void MatroskaHandler::addArtworkResource(Ref<CdsItem> item, String art_mimetype)
+void MatroskaHandler::addArtworkResource(Ref<CdsItem> item, std::string art_mimetype)
 {
     // if we could not determine the mimetype, then there is no
     // point to add the resource - it's probably garbage
     log_debug("Found artwork of type %s in file %s\n", art_mimetype.c_str(), item->getLocation().c_str());
 
-    if (art_mimetype != _(MIMETYPE_DEFAULT)) {
+    if (art_mimetype != MIMETYPE_DEFAULT) {
         Ref<CdsResource> resource(new CdsResource(CH_MATROSKA));
         resource->addAttribute(
             MetadataHandler::getResAttrName(R_PROTOCOLINFO),
             renderProtocolInfo(art_mimetype));
         resource->addParameter(
-            _(RESOURCE_CONTENT_TYPE),
-            _(ID3_ALBUM_ART));
+            RESOURCE_CONTENT_TYPE,
+            ID3_ALBUM_ART);
         item->addResource(resource);
     }
 }

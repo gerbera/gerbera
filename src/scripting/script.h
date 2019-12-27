@@ -65,17 +65,17 @@ public:
 public:
     virtual ~Script();
     
-    zmm::String getProperty(zmm::String name);
-    int getBoolProperty(zmm::String name);
-    int getIntProperty(zmm::String name, int def);
+    std::string getProperty(std::string name);
+    int getBoolProperty(std::string name);
+    int getIntProperty(std::string name, int def);
     
-    void setProperty(zmm::String name, zmm::String value);
-    void setIntProperty(zmm::String name, int value);
+    void setProperty(std::string name, std::string value);
+    void setIntProperty(std::string name, int value);
     
-    void defineFunction(zmm::String name, duk_c_function function, uint32_t numParams);
+    void defineFunction(std::string name, duk_c_function function, uint32_t numParams);
     void defineFunctions(duk_function_list_entry *functions);
-    void load(zmm::String scriptPath);
-    void load(zmm::String scriptText, zmm::String scriptPath);
+    void load(std::string scriptPath);
+    void load(std::string scriptText, std::string scriptPath);
     
     zmm::Ref<CdsObject> dukObject2cdsObject(zmm::Ref<CdsObject> pcd);
     void cdsObject2dukObject(zmm::Ref<CdsObject> obj);
@@ -84,7 +84,7 @@ public:
 
     zmm::Ref<CdsObject> getProcessedObject(); 
 
-    zmm::String convertToCharset(zmm::String str, charset_convert_t chr);
+    std::string convertToCharset(std::string str, charset_convert_t chr);
     
     static Script *getContextScript(duk_context *ctx);
 
@@ -102,7 +102,7 @@ protected:
 
 private:
     std::string name;
-    void _load(zmm::String scriptPath);
+    void _load(std::string scriptPath);
     void _execute();
     zmm::Ref<StringConverter> _p2i;
     zmm::Ref<StringConverter> _j2i;

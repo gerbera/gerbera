@@ -3,7 +3,6 @@ find_package(Threads REQUIRED)
 add_executable(testzmm
         $<TARGET_OBJECTS:libgerbera>
         main.cc
-        test_strings.cc
         )
 
 include(DefFileName)

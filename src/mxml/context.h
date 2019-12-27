@@ -41,11 +41,11 @@ class Context : public zmm::Object
 {
 public:
     zmm::Ref<Context> parent;
-    zmm::String location;
+    std::string location;
     int line;
     int col;
 public:
-    Context(zmm::String location);
+    Context(std::string location);
     Context();
     zmm::Ref<Context> clone();
     void setParent(zmm::Ref<Context> parent);

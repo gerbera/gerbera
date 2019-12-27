@@ -50,11 +50,10 @@ TranscodingProfile::TranscodingProfile()
     sample_frequency = SOURCE; // keep original
     number_of_channels = SOURCE;
     attributes = Ref<Dictionary>(new Dictionary());
-    fourcc_list = Ref<Array<StringBase> >(new Array<StringBase>());
     fourcc_mode = FCC_None;
 }
 
-TranscodingProfile::TranscodingProfile(transcoding_type_t tr_type, String name) 
+TranscodingProfile::TranscodingProfile(transcoding_type_t tr_type, std::string name) 
 {
     this->name = name;
     this->tr_type = tr_type;
@@ -71,7 +70,6 @@ TranscodingProfile::TranscodingProfile(transcoding_type_t tr_type, String name)
     initial_fill_size = 0;
     tr_type = TR_None;
     attributes = Ref<Dictionary>(new Dictionary());
-    fourcc_list = Ref<Array<StringBase> >(new Array<StringBase>());
     fourcc_mode = FCC_None;
 }
 
@@ -82,7 +80,7 @@ void TranscodingProfile::setBufferOptions(size_t bs, size_t cs, size_t ifs)
     initial_fill_size = ifs;
 }
 
-void TranscodingProfile::addAttribute(zmm::String name, zmm::String value)
+void TranscodingProfile::addAttribute(std::string name, std::string value)
 {
     attributes->put(name, value);
 }
@@ -93,14 +91,13 @@ Ref<Dictionary> TranscodingProfile::getAttributes()
 }   
 
 
-void TranscodingProfile::setAVIFourCCList(Ref<Array<StringBase> > list,
-                                          avi_fourcc_listmode_t mode)
+void TranscodingProfile::setAVIFourCCList(std::vector<std::string> list, avi_fourcc_listmode_t mode)
 {
     fourcc_list = list;
     fourcc_mode = mode;
 }
 
-Ref<Array<StringBase> > TranscodingProfile::getAVIFourCCList()
+std::vector<std::string> TranscodingProfile::getAVIFourCCList()
 {
     return fourcc_list;
 }
@@ -111,7 +108,7 @@ TranscodingProfileList::TranscodingProfileList()
     list = Ref<ObjectDictionary<ObjectDictionary<TranscodingProfile> > >(new ObjectDictionary<ObjectDictionary<TranscodingProfile> >());
 }
 
-void TranscodingProfileList::add(zmm::String sourceMimeType, zmm::Ref<TranscodingProfile> prof)
+void TranscodingProfileList::add(std::string sourceMimeType, zmm::Ref<TranscodingProfile> prof)
 {
     Ref<ObjectDictionary<TranscodingProfile> > inner = list->get(sourceMimeType);
 
@@ -122,12 +119,12 @@ void TranscodingProfileList::add(zmm::String sourceMimeType, zmm::Ref<Transcodin
     list->put(sourceMimeType, inner);
 }
 
-Ref<ObjectDictionary<TranscodingProfile> > TranscodingProfileList::get(zmm::String sourceMimeType)
+Ref<ObjectDictionary<TranscodingProfile> > TranscodingProfileList::get(std::string sourceMimeType)
 {
     return list->get(sourceMimeType);
 }
 
-Ref<TranscodingProfile> TranscodingProfileList::getByName(zmm::String name)
+Ref<TranscodingProfile> TranscodingProfileList::getByName(std::string name)
 {
     Ref<Array<ObjectDictionaryElement<ObjectDictionary<TranscodingProfile> > > > mt_list = list->getElements();
 

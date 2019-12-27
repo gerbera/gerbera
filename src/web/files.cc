@@ -48,17 +48,17 @@ void web::files::process()
 {
     check_request();
 
-    String path;
-    String parentID = param(_("parent_id"));
+    std::string path;
+    std::string parentID = param("parent_id");
     if (!string_ok(parentID) || parentID == "0")
-        path = _(FS_ROOT_DIRECTORY);
+        path = FS_ROOT_DIRECTORY;
     else
         path = hex_decode_string(parentID);
 
-    Ref<Element> files(new Element(_("files")));
-    files->setArrayName(_("file"));
-    files->setAttribute(_("parent_id"), parentID);
-    files->setAttribute(_("location"), path);
+    Ref<Element> files(new Element("files"));
+    files->setArrayName("file");
+    files->setAttribute("parent_id", parentID);
+    files->setAttribute("location", path);
     root->appendElementChild(files);
 
     Ref<Filesystem> fs(new Filesystem());
@@ -68,14 +68,14 @@ void web::files::process()
     for (int i = 0; i < arr->size(); i++) {
         Ref<FsObject> obj = arr->get(i);
 
-        Ref<Element> fe(new Element(_("file")));
-        String filename = obj->filename;
-        String filepath = path + _("/") + filename;
-        String id = hex_encode(filepath.c_str(), filepath.length());
-        fe->setAttribute(_("id"), id);
+        Ref<Element> fe(new Element("file"));
+        std::string filename = obj->filename;
+        std::string filepath = path + "/" + filename;
+        std::string id = hex_encode(filepath.c_str(), filepath.length());
+        fe->setAttribute("id", id);
 
         Ref<StringConverter> f2i = StringConverter::f2i();
-        fe->setTextKey(_("filename"));
+        fe->setTextKey("filename");
         fe->setText(f2i->convert(filename));
         files->appendElementChild(fe);
     }

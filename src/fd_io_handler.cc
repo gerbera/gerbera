@@ -42,7 +42,7 @@
 using namespace zmm;
 using namespace mxml;
 
-FDIOHandler::FDIOHandler(String filename)
+FDIOHandler::FDIOHandler(std::string filename)
     : IOHandler()
 {
     this->filename = filename;
@@ -81,18 +81,18 @@ void FDIOHandler::open(enum UpnpOpenFileMode mode)
     }
 
     if (!string_ok(filename))
-        throw _Exception(_("Missing filename!"));
+        throw _Exception("Missing filename!");
 
     if (mode == UPNP_READ) {
         fd = ::open(filename.c_str(), O_RDONLY);
     } else if (mode == UPNP_WRITE) {
         fd = ::open(filename.c_str(), O_WRONLY | O_CREAT, S_IWUSR | S_IRUSR);
     } else {
-        throw _Exception(_("FDIOHandler::open: invdalid read/write mode"));
+        throw _Exception("FDIOHandler::open: invdalid read/write mode");
     }
 
     if (fd == -1) {
-        throw _Exception(_("FDIOHandler::open: failed to open: ") + filename.c_str());
+        throw _Exception("FDIOHandler::open: failed to open: " + filename);
     }
 }
 
@@ -117,7 +117,7 @@ size_t FDIOHandler::write(char* buf, size_t length)
 void FDIOHandler::seek(off_t offset, int whence)
 {
     if (lseek(fd, offset, whence) != 0) {
-        throw _Exception(_("fseek failed"));
+        throw _Exception("fseek failed");
     }
 }
 
@@ -142,7 +142,7 @@ void FDIOHandler::close()
 
     // protect from multiple close calls
     if (::close(fd) != 0) {
-        throw _Exception(_("fclose failed"));
+        throw _Exception("fclose failed");
     }
     fd = -1;
     closed = true;

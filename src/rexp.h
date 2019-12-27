@@ -44,16 +44,16 @@ class RExp : public zmm::Object {
 public:
     RExp();
     virtual ~RExp();
-    void compile(zmm::String pattern, int flags = 0);
-    void compile(zmm::String pattern, const char* flags);
-    zmm::Ref<Matcher> matcher(zmm::String text, int nmatch = DEFAULT_NMATCH);
-    zmm::Ref<Matcher> match(zmm::String text, int nmatch = DEFAULT_NMATCH);
-    bool matches(zmm::String text);
-    zmm::String getPattern();
+    void compile(std::string pattern, int flags = 0);
+    void compile(std::string pattern, const char* flags);
+    zmm::Ref<Matcher> matcher(std::string text, int nmatch = DEFAULT_NMATCH);
+    zmm::Ref<Matcher> match(std::string text, int nmatch = DEFAULT_NMATCH);
+    bool matches(std::string text);
+    std::string getPattern();
 
 protected:
     bool isCompiled;
-    zmm::String pattern;
+    std::string pattern;
     regex_t regex;
 
     friend class Matcher;
@@ -62,16 +62,16 @@ protected:
 class Matcher : public zmm::Object {
 public:
     virtual ~Matcher();
-    zmm::String group(int i);
+    std::string group(int i);
     bool next();
     bool matches();
 
 protected:
-    Matcher(zmm::Ref<RExp> rexp, zmm::String text, int nmatch);
+    Matcher(zmm::Ref<RExp> rexp, std::string text, int nmatch);
 
 protected:
     zmm::Ref<RExp> rexp;
-    zmm::String text;
+    std::string text;
     char* ptr;
     int nmatch;
     regmatch_t* pmatch;

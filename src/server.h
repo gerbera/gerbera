@@ -49,7 +49,7 @@ class Server : public Singleton<Server> {
 public:
     Server();
 
-    zmm::String getName() override { return _("Server"); }
+    std::string getName() override { return "Server"; }
 
     /// \brief Initializes the server.
     ///
@@ -88,7 +88,7 @@ public:
     ///
     /// Returns a string representation of the IP where the server is
     /// running. This is useful for constructing URL's, etc.
-    zmm::String getIP() const;
+    std::string getIP() const;
 
     /// \brief Returns the port of the server.
     ///
@@ -96,7 +96,7 @@ public:
     /// the port is also specified in the config, we can never be sure
     /// that we actually get that port after startup. This function
     /// returns the port on which the server is actually running.
-    zmm::String getPort() const;
+    std::string getPort() const;
 
     /// \brief Tells if the server is about to be terminated.
     ///
@@ -106,7 +106,7 @@ public:
 
     static void static_cleanup_callback();
 
-    void sendCDSSubscriptionUpdate(zmm::String updateString);
+    void sendCDSSubscriptionUpdate(std::string updateString);
 
 protected:
     static zmm::Ref<Storage> storage;
@@ -123,7 +123,7 @@ protected:
     ///
     /// The UDN is read from the config, it must be unique and
     /// persistent over reboots.
-    zmm::String serverUDN;
+    std::string serverUDN;
 
     /// \brief Name of the virtual web server directory.
     ///
@@ -131,14 +131,14 @@ protected:
     /// callback functions.
     /// \todo Is there any need that this is a variable? A constant
     /// should be sufficient here.
-    zmm::String virtual_directory;
+    std::string virtual_directory;
 
     /// \brief Full virtual web server url.
     ///
     /// The URL is constructed upon server initialization, since
     /// the real port is not known before. The value of this variable
     /// is returned by the getVirtualURL() function.
-    zmm::String virtualUrl;
+    std::string virtualUrl;
 
     /// \brief Device description document is created on the fly and
     /// stored here.
@@ -146,7 +146,7 @@ protected:
     /// All necessary values for the device description document are
     /// read from the configuration and the device desc doc is created
     /// on the fly.
-    zmm::String device_description_document;
+    std::string device_description_document;
 
     /// \brief Time interval to send ssdp:alive advertisements.
     ///

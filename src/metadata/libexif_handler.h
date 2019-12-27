@@ -32,6 +32,8 @@
 #ifndef __METADATA_LIBEXIF_H__
 #define __METADATA_LIBEXIF_H__
 
+#include <vector>
+
 #include "metadata_handler.h"
 #include "string_converter.h"
 #include <libexif/exif-content.h>
@@ -46,10 +48,10 @@ protected:
     // tags for X and Y, so I have to save the information
     // and in the very end - when I have both values - add the
     // appropriate resource
-    zmm::String imageX;
-    zmm::String imageY;
+    std::string imageX;
+    std::string imageY;
 
-    void process_ifd(ExifContent* content, zmm::Ref<CdsItem> item, zmm::Ref<StringConverter> sc, zmm::Ref<zmm::Array<zmm::StringBase>> auxtags);
+    void process_ifd(ExifContent* content, zmm::Ref<CdsItem> item, zmm::Ref<StringConverter> sc, std::vector<std::string> auxtags);
 
 public:
     LibExifHandler();

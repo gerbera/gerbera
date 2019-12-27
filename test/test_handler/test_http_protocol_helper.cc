@@ -158,7 +158,7 @@ TEST_F(HeadersHelperTest, EmptyValueNotAdded) {
 }
 
 TEST_F(HeadersHelperTest, HandlesNullZmmString) {
-  zmm::String header;
+  std::string header;
 
   subject->addHeader(header, header);
   subject->writeHeaders(info);

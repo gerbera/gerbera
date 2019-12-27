@@ -207,7 +207,7 @@ void UpdateManager::threadProc()
                 log_debug("sending updates...\n");
                 lastContainerChanged = INVALID_OBJECT_ID;
                 flushPolicy = FLUSH_SPEC;
-                String updateString;
+                std::string updateString;
 
                 try {
                     updateString = Storage::getInstance()->incrementUpdateIDs(objectIDHash);

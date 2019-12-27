@@ -49,8 +49,8 @@ void ConnectionManagerService::doGetCurrentConnectionIDs(Ref<ActionRequest> requ
     log_debug("start\n");
 
     Ref<Element> response;
-    response = xmlBuilder->createResponse(request->getActionName(), _(DESC_CM_SERVICE_TYPE));
-    response->appendTextChild(_("ConnectionID"), _("0"));
+    response = xmlBuilder->createResponse(request->getActionName(), DESC_CM_SERVICE_TYPE);
+    response->appendTextChild("ConnectionID", "0");
 
     request->setResponse(response);
     request->setErrorCode(UPNP_E_SUCCESS);
@@ -72,13 +72,13 @@ void ConnectionManagerService::doGetProtocolInfo(Ref<ActionRequest> request)
     log_debug("start\n");
 
     Ref<Element> response;
-    response = xmlBuilder->createResponse(request->getActionName(), _(DESC_CM_SERVICE_TYPE));
+    response = xmlBuilder->createResponse(request->getActionName(), DESC_CM_SERVICE_TYPE);
 
-    Ref<Array<StringBase>> mimeTypes = Storage::getInstance()->getMimeTypes();
-    String CSV = mime_types_to_CSV(mimeTypes);
+    std::vector<std::string> mimeTypes = Storage::getInstance()->getMimeTypes();
+    std::string CSV = mime_types_to_CSV(mimeTypes);
 
-    response->appendTextChild(_("Source"), CSV);
-    response->appendTextChild(_("Sink"), _(""));
+    response->appendTextChild("Source", CSV);
+    response->appendTextChild("Sink", "");
 
     request->setResponse(response);
     request->setErrorCode(UPNP_E_SUCCESS);
@@ -100,7 +100,7 @@ void ConnectionManagerService::processActionRequest(Ref<ActionRequest> request)
         // invalid or unsupported action
         log_debug("unrecognized action %s\n", request->getActionName().c_str());
         request->setErrorCode(UPNP_E_INVALID_ACTION);
-        //        throw UpnpException(UPNP_E_INVALID_ACTION, _("unrecognized action"));
+        //        throw UpnpException(UPNP_E_INVALID_ACTION, "unrecognized action");
     }
 
     log_debug("end\n");
@@ -113,19 +113,19 @@ void ConnectionManagerService::processSubscriptionRequest(zmm::Ref<SubscriptionR
 
     Ref<Element> propset, property;
 
-    Ref<Array<StringBase>> mimeTypes = Storage::getInstance()->getMimeTypes();
-    String CSV = mime_types_to_CSV(mimeTypes);
+    std::vector<std::string> mimeTypes = Storage::getInstance()->getMimeTypes();
+    std::string CSV = mime_types_to_CSV(mimeTypes);
 
     propset = xmlBuilder->createEventPropertySet();
     property = propset->getFirstElementChild();
-    property->appendTextChild(_("CurrentConnectionIDs"), _("0"));
-    property->appendTextChild(_("SinkProtocolInfo"), _(""));
-    property->appendTextChild(_("SourceProtocolInfo"), CSV);
+    property->appendTextChild(std::string("CurrentConnectionIDs"), "0");
+    property->appendTextChild(std::string("SinkProtocolInfo"), "");
+    property->appendTextChild(std::string("SourceProtocolInfo"), CSV);
 
-    String xml = propset->print();
+    std::string xml = propset->print();
     err = ixmlParseBufferEx(xml.c_str(), &event);
     if (err != IXML_SUCCESS) {
-        throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, _("Could not convert property set to ixml"));
+        throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, "Could not convert property set to ixml");
     }
 
     UpnpAcceptSubscriptionExt(deviceHandle,
@@ -135,7 +135,7 @@ void ConnectionManagerService::processSubscriptionRequest(zmm::Ref<SubscriptionR
     ixmlDocument_free(event);
 }
 
-void ConnectionManagerService::sendSubscriptionUpdate(String sourceProtocol_CSV)
+void ConnectionManagerService::sendSubscriptionUpdate(std::string sourceProtocol_CSV)
 {
     int err;
     IXML_Document* event = nullptr;
@@ -144,14 +144,14 @@ void ConnectionManagerService::sendSubscriptionUpdate(String sourceProtocol_CSV)
 
     propset = xmlBuilder->createEventPropertySet();
     property = propset->getFirstElementChild();
-    property->appendTextChild(_("SourceProtocolInfo"), sourceProtocol_CSV);
+    property->appendTextChild("SourceProtocolInfo", sourceProtocol_CSV);
 
-    String xml = propset->print();
+    std::string xml = propset->print();
 
     err = ixmlParseBufferEx(xml.c_str(), &event);
     if (err != IXML_SUCCESS) {
         /// \todo add another error code
-        throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, _("Could not convert property set to ixml"));
+        throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, "Could not convert property set to ixml");
     }
 
     UpnpNotifyExt(deviceHandle,
