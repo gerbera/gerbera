@@ -41,7 +41,7 @@
 #include <csignal>
 #include <climits>
 #include "common.h"
-#include "storage.h"
+#include "storage/storage.h"
 #include "cds_objects.h"
 #include "util/process.h"
 #include "update_manager.h"

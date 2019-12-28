@@ -35,7 +35,6 @@
 #include "zmm/dictionary.h"
 #include "util/process.h"
 #include "server.h"
-#include "storage.h"
 #include "update_manager.h"
 #include <cstdio>
 #include <cstring>

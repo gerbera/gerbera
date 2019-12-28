@@ -41,7 +41,7 @@
 #include "common.h"
 #include "zmm/dictionary.h"
 #include "util/generic_task.h"
-#include "storage.h"
+#include "storage/storage.h"
 #include "util/timer.h"
 
 #ifdef HAVE_JS

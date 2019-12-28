@@ -33,7 +33,7 @@
 #include "config/config_manager.h"
 #include "search_handler.h"
 #include "server.h"
-#include "storage.h"
+#include "storage/storage.h"
 #include <memory>
 #include <string>
 #include <vector>

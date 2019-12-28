@@ -35,7 +35,7 @@
 
 #include "script.h"
 #include <typeinfo>
-#include "storage.h"
+#include "storage/storage.h"
 #include "content_manager.h"
 #include "config/config_manager.h"
 #include "metadata/metadata_handler.h"

@@ -158,8 +158,6 @@ set(libgerberaFILES
         src/server.h
         src/singleton.cc
         src/singleton.h
-        src/storage.cc
-        src/storage.h
         src/storage/mysql/mysql_create_sql.h
         src/storage/mysql/mysql_storage.cc
         src/storage/mysql/mysql_storage.h
@@ -168,6 +166,8 @@ set(libgerberaFILES
         src/storage/sqlite3/sqlite3_storage.h
         src/storage/sql_storage.cc
         src/storage/sql_storage.h
+        src/storage/storage.cc
+        src/storage/storage.h
         src/subscription_request.cc
         src/subscription_request.h
         src/transcoding/transcode_dispatcher.cc

@@ -37,7 +37,7 @@
 #include "config/config_manager.h"
 #include "request_handler.h"
 #include "singleton.h"
-#include "storage.h"
+#include "storage/storage.h"
 #include "subscription_request.h"
 #include "upnp_cds.h"
 #include "upnp_cm.h"

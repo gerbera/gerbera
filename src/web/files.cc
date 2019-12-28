@@ -32,7 +32,7 @@
 #include "common.h"
 #include "util/filesystem.h"
 #include "pages.h"
-#include "storage.h"
+#include "storage/storage.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
 

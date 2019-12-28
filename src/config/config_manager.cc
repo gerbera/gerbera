@@ -32,7 +32,7 @@
 #include "config_manager.h"
 #include "common.h"
 #include "metadata/metadata_handler.h"
-#include "storage.h"
+#include "storage/storage.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
 #ifdef BSD_NATIVE_UUID

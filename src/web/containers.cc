@@ -32,7 +32,7 @@
 #include "cds_objects.h"
 #include "common.h"
 #include "pages.h"
-#include "storage.h"
+#include "storage/storage.h"
 
 using namespace zmm;
 using namespace mxml;

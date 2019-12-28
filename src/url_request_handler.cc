@@ -35,7 +35,7 @@
 
 #include "common.h"
 #include "server.h"
-#include "storage.h"
+#include "storage/storage.h"
 
 #include "iohandler/buffered_io_handler.h"
 #include "cds_objects.h"

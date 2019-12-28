@@ -21,7 +21,7 @@
 */
 #include "search_handler.h"
 #include "config/config_manager.h"
-#include "storage.h"
+#include "storage/storage.h"
 #include "util/tools.h"
 
 #include <algorithm>

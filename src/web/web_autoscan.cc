@@ -33,7 +33,7 @@
 #include "content_manager.h"
 #include "util/filesystem.h"
 #include "pages.h"
-#include "storage.h"
+#include "storage/storage.h"
 
 using namespace zmm;
 using namespace mxml;

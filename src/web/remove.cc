@@ -33,7 +33,7 @@
 #include "content_manager.h"
 #include "pages.h"
 #include "server.h"
-#include "storage.h"
+#include "storage/storage.h"
 #include "util/tools.h"
 #include <cstdio>
 

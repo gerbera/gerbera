@@ -32,7 +32,7 @@
 #include "upnp_mrreg.h"
 #include "ixml.h"
 #include "server.h"
-#include "storage.h"
+#include "storage/storage.h"
 #include "util/tools.h"
 #include "upnp_xml.h"
 
