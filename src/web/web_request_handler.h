@@ -39,21 +39,22 @@
 #include "mxml/mxml.h"
 #include "request_handler.h"
 #include "session_manager.h"
+#include "util/exception.h"
 
 namespace web {
 
-class SessionException : public zmm::Exception {
+class SessionException : public Exception {
 public:
     SessionException(std::string message)
-        : zmm::Exception(message)
+        : Exception(message)
     {
     }
 };
 
-class LoginException : public zmm::Exception {
+class LoginException : public Exception {
 public:
     LoginException(std::string message)
-        : zmm::Exception(message)
+        : Exception(message)
     {
     }
 };

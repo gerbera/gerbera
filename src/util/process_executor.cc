@@ -31,6 +31,7 @@
 
 #include "process_executor.h"
 #include "process.h"
+#include "util/exception.h"
 
 #include <csignal>
 #include <pthread.h>

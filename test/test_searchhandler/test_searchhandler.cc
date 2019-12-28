@@ -22,7 +22,7 @@
 #include "gtest/gtest.h"
 #include "search_handler.h"
 #include "config/config_manager.h"
-#include "zmm/exception.h"
+#include "util/exception.h"
 #include <iostream>
 
 using upVecUpST = std::unique_ptr<std::vector<std::unique_ptr<SearchToken>>>;
@@ -77,7 +77,7 @@ decltype(auto) getAllTokens(const std::string& input)
             return ::testing::AssertionFailure() << "\nExpected [" << expectedOutput << "]\nActual   [" << output << "]\n";
 
         return ::testing::AssertionSuccess();
-    } catch (const zmm::Exception& e) {
+    } catch (const Exception& e) {
         return ::testing::AssertionFailure() << e.getMessage().c_str();
     }
 }

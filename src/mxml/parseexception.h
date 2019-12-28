@@ -33,13 +33,14 @@
 #define __MXML_PARSEEXCEPTION_H__
 
 #include "zmm/zmmf.h"
+#include "util/exception.h"
 
 namespace mxml
 {
 
 class Context;
 
-class ParseException : public zmm::Exception
+class ParseException : public Exception
 {
 public:
     zmm::Ref<Context> context;

@@ -37,6 +37,7 @@
 #include "zmm/ref.h"
 #include "zmm/zmm.h"
 #include "zmm/zmmf.h"
+#include "util/exception.h"
 #include <algorithm>
 #include <condition_variable>
 #include <list>
@@ -106,7 +107,7 @@ protected:
         {
             try {
                 subscriber->timerNotify(parameter);
-            } catch (const zmm::Exception& e) {
+            } catch (const Exception& e) {
                 log_debug("timer caught exception!\n");
                 e.printStackTrace();
             }

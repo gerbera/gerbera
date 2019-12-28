@@ -36,15 +36,9 @@
 #include <vector>
 #include <string>
 
-#include "zmm.h"
-#include "array.h"
+#include "logger.h"
 
-#include "../util/logger.h"
-
-#define _Exception(format) zmm::Exception(format, __FILENAME__, __LINE__, __func__)
-
-namespace zmm
-{
+#define _Exception(format) Exception(format, __FILENAME__, __LINE__, __func__)
 
 class Exception
 {
@@ -68,7 +62,5 @@ public:
 #endif
 
 };
-
-}
 
 #endif // __ZMMF_EXCEPTION_H__

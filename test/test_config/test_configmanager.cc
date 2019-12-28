@@ -6,6 +6,7 @@
 
 #include "config/config_manager.h"
 #include "config/config_generator.h"
+#include "util/exception.h"
 
 using namespace zmm;
 using namespace mxml;
@@ -128,7 +129,7 @@ TEST_F(ConfigManagerTest, ThrowsExceptionWhenMissingConfigFileAndNoDefault) {
 
   try {
     subject->init();
-  }catch(zmm::Exception const & err) {
+  }catch(Exception const & err) {
     EXPECT_EQ(err.getMessage(), expErrMsg.str());
   }
 }

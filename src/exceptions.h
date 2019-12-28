@@ -32,7 +32,7 @@
 #ifndef __EXCEPTIONS_H__
 #define __EXCEPTIONS_H__
 
-#include "zmm/zmmf.h"
+#include "util/exception.h"
 
 #define EXCEPTION_DATA __FILENAME__, __LINE__, __func__
 #define _UpnpException(code, msg) UpnpException(code, msg, EXCEPTION_DATA)
@@ -41,7 +41,7 @@
 #define _ServerShutdownException(msg) ServerShutdownException(msg, EXCEPTION_DATA)
 #define _TryAgainException(msg) TryAgainException(msg, EXCEPTION_DATA)
 
-class UpnpException : public zmm::Exception {
+class UpnpException : public Exception {
 protected:
     int errCode;
 
@@ -51,18 +51,18 @@ public:
     inline int getErrorCode() const { return errCode; }
 };
 
-class StorageException : public zmm::Exception {
+class StorageException : public Exception {
 protected:
     std::string userMessage;
 
 public:
     inline StorageException(std::string _userMessage, std::string message)
-        : zmm::Exception(message)
+        : Exception(message)
     {
         userMessage = _userMessage;
     }
     inline StorageException(std::string _userMessage, std::string message, const char* file, int line, const char* function)
-        : zmm::Exception(message, file, line, function)
+        : Exception(message, file, line, function)
     {
         userMessage = _userMessage;
     }
@@ -81,50 +81,50 @@ public:
     }
 };
 
-class SubtitlesNotFoundException : public zmm::Exception {
+class SubtitlesNotFoundException : public Exception {
 public:
     inline SubtitlesNotFoundException(std::string message)
-        : zmm::Exception(message)
+        : Exception(message)
     {
     }
     inline SubtitlesNotFoundException(std::string message, const char* file, int line, const char* function)
-        : zmm::Exception(message, file, line, function)
+        : Exception(message, file, line, function)
     {
     }
 };
 
-class ServerShutdownException : public zmm::Exception {
+class ServerShutdownException : public Exception {
 public:
     inline ServerShutdownException(std::string message)
-        : zmm::Exception(message)
+        : Exception(message)
     {
     }
     inline ServerShutdownException(std::string message, const char* file, int line, const char* function)
-        : zmm::Exception(message, file, line, function)
+        : Exception(message, file, line, function)
     {
     }
 };
 
-class TryAgainException : public zmm::Exception {
+class TryAgainException : public Exception {
 public:
     inline TryAgainException(std::string message)
-        : zmm::Exception(message)
+        : Exception(message)
     {
     }
     inline TryAgainException(std::string message, const char* file, int line, const char* function)
-        : zmm::Exception(message, file, line, function)
+        : Exception(message, file, line, function)
     {
     }
 };
 
-class SingletonException : public zmm::Exception {
+class SingletonException : public Exception {
 public:
     inline SingletonException(std::string message)
-        : zmm::Exception(message)
+        : Exception(message)
     {
     }
     inline SingletonException(std::string message, const char* file, int line, const char* function)
-        : zmm::Exception(message, file, line, function)
+        : Exception(message, file, line, function)
     {
     }
 };

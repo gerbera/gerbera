@@ -34,6 +34,7 @@
 
 #include "zmm.h"
 #include "util/memory.h"
+#include "util/logger.h"
 
 namespace zmm
 {

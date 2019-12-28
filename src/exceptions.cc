@@ -31,8 +31,6 @@
 
 #include "exceptions.h"
 
-using namespace zmm;
-
 UpnpException::UpnpException(int errCode, std::string message)
     : Exception(message)
 {

@@ -194,6 +194,8 @@ set(libgerberaFILES
         src/url_request_handler.cc
         src/url_request_handler.h
         src/util/executor.h
+        src/util/exception.cc
+        src/util/exception.h
         src/util/filesystem.cc
         src/util/filesystem.h
         src/util/generic_task.cc
@@ -249,8 +251,6 @@ set(libgerberaFILES
         src/zmm/base_stack.h
         src/zmm/dictionary.cc
         src/zmm/dictionary.h
-        src/zmm/exception.cc
-        src/zmm/exception.h
         src/zmm/object_dictionary.h
         src/zmm/object_queue.h
         src/zmm/object_stack.h

@@ -35,8 +35,6 @@
     #include <execinfo.h>
 #endif
 
-using namespace zmm;
-
 #define STRACE_TAG "_STRACE_"
 
 Exception::Exception(std::string message, const char* file, int line, const char* function)

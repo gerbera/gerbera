@@ -33,6 +33,7 @@
 
 #include "cached_url.h"
 #include "util/tools.h"
+#include "util/exception.h"
 
 using namespace zmm;
 
