@@ -32,7 +32,7 @@
 #include "mem_io_handler.h"
 #include "cds_objects.h"
 #include "common.h"
-#include "dictionary.h"
+#include "zmm/dictionary.h"
 #include "process.h"
 #include "server.h"
 #include "storage.h"

@@ -39,7 +39,7 @@
 
 #include "autoscan.h"
 #include "cds_objects.h"
-#include "dictionary.h"
+#include "zmm/dictionary.h"
 #include "singleton.h"
 #include "zmm/zmmf.h"
 

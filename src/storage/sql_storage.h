@@ -34,7 +34,7 @@
 
 #include "zmm/zmmf.h"
 #include "cds_objects.h"
-#include "dictionary.h"
+#include "zmm/dictionary.h"
 #include "storage.h"
 
 #include <unordered_set>

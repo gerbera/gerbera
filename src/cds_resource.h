@@ -33,7 +33,7 @@
 #define __CDS_RESOURCE_H__
 
 #include "common.h"
-#include "dictionary.h"
+#include "zmm/dictionary.h"
 
 /// \brief name for external urls that can appear in object resources (i.e.
 /// a YouTube thumbnail)

@@ -34,7 +34,7 @@
 
 #include "cds_objects.h"
 #include "common.h"
-#include "dictionary.h"
+#include "zmm/dictionary.h"
 #include "request_handler.h"
 #include "web_request_handler.h"
 

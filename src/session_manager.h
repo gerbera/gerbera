@@ -36,7 +36,7 @@
 #include <unordered_set>
 #include <vector>
 
-#include "dictionary.h"
+#include "zmm/dictionary.h"
 #include "singleton.h"
 #include "timer.h"
 

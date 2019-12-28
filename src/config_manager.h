@@ -36,9 +36,9 @@
 #include "autoscan.h"
 #include "common.h"
 #include "config_options.h"
-#include "dictionary.h"
+#include "zmm/dictionary.h"
+#include "zmm/object_dictionary.h"
 #include "mxml/mxml.h"
-#include "object_dictionary.h"
 #include "singleton.h"
 #include "xpath.h"
 

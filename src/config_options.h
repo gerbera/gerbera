@@ -35,7 +35,7 @@
 
 #include "autoscan.h"
 #include "exceptions.h"
-#include "object_dictionary.h"
+#include "zmm/object_dictionary.h"
 #include "zmm/zmmf.h"
 #include <assert.h>
 

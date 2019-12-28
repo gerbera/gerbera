@@ -36,7 +36,7 @@
 
 #include "cds_resource.h"
 #include "common.h"
-#include "dictionary.h"
+#include "zmm/dictionary.h"
 
 // ATTENTION: These values need to be changed in web/js/items.js too.
 #define OBJECT_TYPE_CONTAINER 0x00000001

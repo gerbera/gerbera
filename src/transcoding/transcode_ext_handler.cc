@@ -50,7 +50,7 @@
 #include "iohandler/buffered_io_handler.h"
 #include "iohandler/file_io_handler.h"
 #include "iohandler/io_handler_chainer.h"
-#include "dictionary.h"
+#include "zmm/dictionary.h"
 #include "metadata_handler.h"
 #include "tools.h"
 #include "transcoding_process_executor.h"

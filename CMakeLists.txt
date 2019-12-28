@@ -58,8 +58,6 @@ set(libgerberaFILES
         src/contrib/md5.h
         src/device_description_handler.cc
         src/device_description_handler.h
-        src/dictionary.cc
-        src/dictionary.h
         src/exceptions.cc
         src/exceptions.h
         src/executor.h
@@ -138,7 +136,6 @@ set(libgerberaFILES
         src/mxml/xml_text.h
         src/mxml/xml_to_json.cc
         src/mxml/xml_to_json.h
-        src/object_dictionary.h
         src/onlineservice/atrailers_content_handler.cc
         src/onlineservice/atrailers_content_handler.h
         src/onlineservice/atrailers_service.cc
@@ -251,8 +248,11 @@ set(libgerberaFILES
         src/zmm/array.h
         src/zmm/base_queue.h
         src/zmm/base_stack.h
+        src/zmm/dictionary.cc
+        src/zmm/dictionary.h
         src/zmm/exception.cc
         src/zmm/exception.h
+        src/zmm/object_dictionary.h
         src/zmm/object_queue.h
         src/zmm/object_stack.h
         src/zmm/stringtokenizer.cc

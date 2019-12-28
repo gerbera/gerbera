@@ -35,11 +35,11 @@
 #ifndef __SOPCAST_SERVICE_H__
 #define __SOPCAST_SERVICE_H__
 
-#include "dictionary.h"
 #include "mxml/mxml.h"
 #include "online_service.h"
 #include "url.h"
 #include "zmm/zmm.h"
+#include "zmm/dictionary.h"
 #include <curl/curl.h>
 
 /// \brief This is an interface for all online services, the function

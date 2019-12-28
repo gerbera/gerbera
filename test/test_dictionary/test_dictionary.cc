@@ -20,7 +20,7 @@
   $Id$
 */
 #include "test_dictionary.h"
-#include "dictionary.h"
+#include "zmm/dictionary.h"
 
 using namespace zmm;
 

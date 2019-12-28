@@ -34,7 +34,7 @@
 
 #include "cds_objects.h"
 #include "common.h"
-#include "dictionary.h"
+#include "zmm/dictionary.h"
 #include "iohandler/io_handler.h"
 
 // content handler Id's
