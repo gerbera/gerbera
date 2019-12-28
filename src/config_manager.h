@@ -44,7 +44,7 @@
 
 #include "transcoding/transcoding.h"
 #ifdef ONLINE_SERVICES
-#include "online_service.h"
+#include "onlineservice/online_service.h"
 #endif
 typedef enum {
     CFG_SERVER_PORT = 0,

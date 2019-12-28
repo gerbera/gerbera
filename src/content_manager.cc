@@ -55,11 +55,11 @@
 #include "process.h"
 
 #ifdef SOPCAST
-#include "sopcast_service.h"
+#include "onlineservice/sopcast_service.h"
 #endif
 
 #ifdef ATRAILERS
-#include "atrailers_service.h"
+#include "onlineservice/atrailers_service.h"
 #endif
 
 #ifdef ONLINE_SERVICES

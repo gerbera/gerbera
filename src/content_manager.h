@@ -59,7 +59,7 @@ class PlaylistParserScript;
 #include "transcoding/transcoding.h"
 
 #ifdef ONLINE_SERVICES
-#include "online_service.h"
+#include "onlineservice/online_service.h"
 #endif //ONLINE_SERVICES
 
 #include "executor.h"

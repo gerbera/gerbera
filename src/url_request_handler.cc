@@ -44,7 +44,7 @@
 #include "url_request_handler.h"
 
 #ifdef ONLINE_SERVICES
-#include "online_service_helper.h"
+#include "onlineservice/online_service_helper.h"
 #endif
 #include "iohandler/curl_io_handler.h"
 #include "transcoding/transcode_dispatcher.h"

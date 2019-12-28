@@ -36,10 +36,6 @@ set(WITH_TESTS          0 CACHE BOOL "Enables Unit Tests")
 set(libgerberaFILES
         src/action_request.cc
         src/action_request.h
-        src/atrailers_content_handler.cc
-        src/atrailers_content_handler.h
-        src/atrailers_service.cc
-        src/atrailers_service.h
         src/autoscan.cc
         src/autoscan.h
         src/autoscan_inotify.cc
@@ -143,10 +139,18 @@ set(libgerberaFILES
         src/mxml/xml_to_json.cc
         src/mxml/xml_to_json.h
         src/object_dictionary.h
-        src/online_service.cc
-        src/online_service.h
-        src/online_service_helper.cc
-        src/online_service_helper.h
+        src/onlineservice/atrailers_content_handler.cc
+        src/onlineservice/atrailers_content_handler.h
+        src/onlineservice/atrailers_service.cc
+        src/onlineservice/atrailers_service.h
+        src/onlineservice/online_service.cc
+        src/onlineservice/online_service.h
+        src/onlineservice/online_service_helper.cc
+        src/onlineservice/online_service_helper.h
+        src/onlineservice/sopcast_content_handler.cc
+        src/onlineservice/sopcast_content_handler.h
+        src/onlineservice/sopcast_service.cc
+        src/onlineservice/sopcast_service.h
         src/play_hook.cc
         src/play_hook.h
         src/process.cc
@@ -178,10 +182,6 @@ set(libgerberaFILES
         src/session_manager.h
         src/singleton.cc
         src/singleton.h
-        src/sopcast_content_handler.cc
-        src/sopcast_content_handler.h
-        src/sopcast_service.cc
-        src/sopcast_service.h
         src/storage.cc
         src/storage.h
         src/storage/mysql/mysql_create_sql.h

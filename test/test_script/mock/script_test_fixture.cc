@@ -3,11 +3,11 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include <duktape.h>
-#include <string_converter.h>
-#include <cds_objects.h>
+#include "string_converter.h"
+#include "cds_objects.h"
 #include <memory>
-#include <metadata_handler.h>
-#include <atrailers_content_handler.h>
+#include "metadata_handler.h"
+#include "onlineservice/atrailers_content_handler.h"
 
 #include "common_script_mock.h"
 #include "script_test_fixture.h"

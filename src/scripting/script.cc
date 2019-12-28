@@ -37,11 +37,11 @@
 #include "js_functions.h"
 #include "config_manager.h"
 #ifdef ONLINE_SERVICES
-    #include "online_service.h"
+    #include "onlineservice/online_service.h"
 #endif
 
 #ifdef ATRAILERS
-    #include "atrailers_content_handler.h"
+    #include "onlineservice/atrailers_content_handler.h"
 #endif
 
 using namespace zmm;
