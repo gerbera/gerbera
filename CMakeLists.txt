@@ -40,8 +40,6 @@ set(libgerberaFILES
         src/autoscan.h
         src/autoscan_inotify.cc
         src/autoscan_inotify.h
-        src/cached_url.cc
-        src/cached_url.h
         src/cds_objects.cc
         src/cds_objects.h
         src/cds_resource.cc
@@ -66,8 +64,6 @@ set(libgerberaFILES
         src/iohandler/buffered_io_handler.h
         src/iohandler/curl_io_handler.cc
         src/iohandler/curl_io_handler.h
-        src/iohandler/fd_io_handler.cc
-        src/iohandler/fd_io_handler.h
         src/iohandler/file_io_handler.cc
         src/iohandler/file_io_handler.h
         src/iohandler/io_handler_buffer_helper.cc
@@ -260,7 +256,6 @@ set(libgerberaFILES
         src/zmm/object.cc
         src/zmm/object.h
         src/zmm/ref.h
-        src/zmm/reentrant_array.h
         src/zmm/zmm.h)
 
 add_library(libgerbera OBJECT ${libgerberaFILES})
