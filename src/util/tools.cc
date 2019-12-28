@@ -61,6 +61,7 @@
 #include "iohandler/file_io_handler.h"
 #include "metadata/metadata_handler.h"
 #include "tools.h"
+#include "string_tokenizer.h"
 
 #define WHITE_SPACE " \t\r\n"
 

@@ -34,6 +34,7 @@
 #include "config/config_manager.h"
 #include "metadata/metadata_handler.h"
 #include "util/string_converter.h"
+#include "util/string_tokenizer.h"
 #include "util/tools.h"
 
 #ifdef ONLINE_SERVICES

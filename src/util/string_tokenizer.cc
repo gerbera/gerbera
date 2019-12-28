@@ -29,11 +29,9 @@
 
 /// \file stringtokenizer.cc
 
-#include "stringtokenizer.h"
+#include "string_tokenizer.h"
 
 #include <cstring>
-
-using namespace zmm;
 
 StringTokenizer::StringTokenizer(std::string str)
 {

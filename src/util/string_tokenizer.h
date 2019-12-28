@@ -29,15 +29,14 @@
 
 /// \file stringtokenizer.h
 
-#ifndef __ZMMF_STRINGTOKENIZER_H__
-#define __ZMMF_STRINGTOKENIZER_H__
+#ifndef __STRING_TOKENIZER_H__
+#define __STRING_TOKENIZER_H__
 
-#include "zmm.h"
+#include <string>
 
-namespace zmm
-{
+#include "zmm/zmmf.h"
 
-class StringTokenizer : public Object
+class StringTokenizer : public zmm::Object
 {
 public:
     StringTokenizer(std::string str);
@@ -48,6 +47,4 @@ protected:
     int pos;
 };
 
-} // namespace
-
-#endif // __ZMM_STRINGTOKENIZER_H__
+#endif // __STRING_TOKENIZER_H__

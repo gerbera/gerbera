@@ -217,6 +217,8 @@ set(libgerberaFILES
         src/util/rexp.h
         src/util/string_converter.cc
         src/util/string_converter.h
+        src/util/string_tokenizer.cc
+        src/util/string_tokenizer.h
         src/util/task_processor.cc
         src/util/task_processor.h
         src/util/thread_executor.cc
@@ -254,8 +256,6 @@ set(libgerberaFILES
         src/zmm/object_dictionary.h
         src/zmm/object_queue.h
         src/zmm/object_stack.h
-        src/zmm/stringtokenizer.cc
-        src/zmm/stringtokenizer.h
         src/zmm/zmmf.h
         src/zmm/object.cc
         src/zmm/object.h
