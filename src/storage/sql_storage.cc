@@ -30,7 +30,7 @@
 /// \file sql_storage.cc
 
 #include "sql_storage.h"
-#include "config_manager.h"
+#include "config/config_manager.h"
 #include "util/filesystem.h"
 #include "util/string_converter.h"
 #include "util/tools.h"

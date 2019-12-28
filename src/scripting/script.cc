@@ -35,7 +35,7 @@
 #include "util/tools.h"
 #include "metadata/metadata_handler.h"
 #include "js_functions.h"
-#include "config_manager.h"
+#include "config/config_manager.h"
 #ifdef ONLINE_SERVICES
     #include "onlineservice/online_service.h"
 #endif

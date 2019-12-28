@@ -21,7 +21,7 @@
 */
 #include "gtest/gtest.h"
 #include "search_handler.h"
-#include "config_manager.h"
+#include "config/config_manager.h"
 #include "zmm/exception.h"
 #include <iostream>
 

@@ -33,7 +33,7 @@
 #define __WEB_REQUEST_HANDLER_H__
 
 #include "common.h"
-#include "config_manager.h"
+#include "config/config_manager.h"
 #include "content_manager.h"
 #include "zmm/dictionary.h"
 #include "mxml/mxml.h"

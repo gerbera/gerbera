@@ -33,8 +33,8 @@
 
 #include "atrailers_service.h"
 #include "atrailers_content_handler.h"
-#include "config_manager.h"
-#include "config_options.h"
+#include "config/config_manager.h"
+#include "config/config_options.h"
 #include "content_manager.h"
 #include "server.h"
 #include "util/string_converter.h"

@@ -34,7 +34,7 @@
 #include <sys/types.h>
 
 #include "common.h"
-#include "config_manager.h"
+#include "config/config_manager.h"
 #include "content_manager.h"
 #include "filesystem.h"
 #include "mxml/mxml.h"

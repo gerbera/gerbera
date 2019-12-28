@@ -30,7 +30,7 @@
 /// \file string_converter.cc
 
 #include "string_converter.h"
-#include "config_manager.h"
+#include "config/config_manager.h"
 
 using namespace zmm;
 

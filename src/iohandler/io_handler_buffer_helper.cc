@@ -30,7 +30,7 @@
 /// \file io_handler_buffer_helper.cc
 
 #include "io_handler_buffer_helper.h"
-#include "config_manager.h"
+#include "config/config_manager.h"
 
 using namespace zmm;
 using namespace std;

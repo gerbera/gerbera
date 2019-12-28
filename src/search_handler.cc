@@ -20,7 +20,7 @@
   $Id$
 */
 #include "search_handler.h"
-#include "config_manager.h"
+#include "config/config_manager.h"
 #include "storage.h"
 #include "util/tools.h"
 

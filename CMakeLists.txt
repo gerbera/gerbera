@@ -49,9 +49,9 @@ set(libgerberaFILES
         src/common.h
         src/config/config_generator.h
         src/config/config_generator.cc
-        src/config_manager.cc
-        src/config_manager.h
-        src/config_options.h
+        src/config/config_manager.cc
+        src/config/config_manager.h
+        src/config/config_options.h
         src/content_manager.cc
         src/content_manager.h
         src/contrib/md5.c

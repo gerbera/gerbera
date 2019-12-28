@@ -31,7 +31,7 @@
 
 #include "upnp_xml.h"
 #include "common.h"
-#include "config_manager.h"
+#include "config/config_manager.h"
 #include "metadata/metadata_handler.h"
 #include "server.h"
 

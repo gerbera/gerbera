@@ -42,7 +42,7 @@
 #include <cerrno>
 #include <cstring>
 
-#include "config_manager.h"
+#include "config/config_manager.h"
 
 using namespace zmm;
 

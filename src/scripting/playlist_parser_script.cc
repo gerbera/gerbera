@@ -32,7 +32,7 @@
 #ifdef HAVE_JS
 
 #include "playlist_parser_script.h"
-#include "config_manager.h"
+#include "config/config_manager.h"
 #include "content_manager.h"
 #include "js_functions.h"
 

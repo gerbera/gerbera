@@ -37,7 +37,7 @@
 #include <typeinfo>
 #include "storage.h"
 #include "content_manager.h"
-#include "config_manager.h"
+#include "config/config_manager.h"
 #include "metadata/metadata_handler.h"
 
 using namespace zmm;

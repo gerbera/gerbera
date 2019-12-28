@@ -36,7 +36,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "config_manager.h"
+#include "config/config_manager.h"
 #include "content_manager.h"
 #include "util/filesystem.h"
 #include "layout/fallback_layout.h"

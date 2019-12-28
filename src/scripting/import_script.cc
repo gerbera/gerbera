@@ -32,7 +32,7 @@
 #ifdef HAVE_JS
 
 #include "import_script.h"
-#include "config_manager.h"
+#include "config/config_manager.h"
 #include "js_functions.h"
 
 using namespace zmm;

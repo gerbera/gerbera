@@ -32,7 +32,7 @@
 #ifdef SOPCAST
 
 #include "sopcast_service.h"
-#include "config_manager.h"
+#include "config/config_manager.h"
 #include "content_manager.h"
 #include "server.h"
 #include "sopcast_content_handler.h"

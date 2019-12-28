@@ -29,7 +29,7 @@
 
 /// \file storage.cc
 
-#include "config_manager.h"
+#include "config/config_manager.h"
 
 #if !defined(HAVE_MYSQL) && !defined(HAVE_SQLITE3)
 #error "need at least one storage (mysql or sqlite3)"

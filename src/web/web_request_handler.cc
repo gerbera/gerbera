@@ -30,7 +30,7 @@
 /// \file web_request_handler.cc
 
 #include "web_request_handler.h"
-#include "config_manager.h"
+#include "config/config_manager.h"
 #include "content_manager.h"
 #include "iohandler/mem_io_handler.h"
 #include "util/tools.h"

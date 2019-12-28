@@ -4,8 +4,8 @@
 #include <uuid/uuid.h>
 #include <fstream>
 
-#include <config_manager.h>
-#include <config/config_generator.h>
+#include "config/config_manager.h"
+#include "config/config_generator.h"
 
 using namespace zmm;
 using namespace mxml;

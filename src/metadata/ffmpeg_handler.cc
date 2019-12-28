@@ -63,7 +63,7 @@ extern "C" {
 #include <libffmpegthumbnailer/videothumbnailerc.h>
 #endif
 
-#include "config_manager.h"
+#include "config/config_manager.h"
 #include "ffmpeg_handler.h"
 #include "util/string_converter.h"
 

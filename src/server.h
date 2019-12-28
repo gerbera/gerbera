@@ -34,7 +34,7 @@
 
 #include "action_request.h"
 #include "common.h"
-#include "config_manager.h"
+#include "config/config_manager.h"
 #include "request_handler.h"
 #include "singleton.h"
 #include "storage.h"

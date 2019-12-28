@@ -34,7 +34,7 @@
 
 #include "sqlite3_storage.h"
 #include "common.h"
-#include "config_manager.h"
+#include "config/config_manager.h"
 #include "sqlite3_create_sql.h"
 
 

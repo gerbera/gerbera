@@ -31,7 +31,7 @@
 /// \brief Implementeation of the MetadataHandler class.
 
 #include "metadata_handler.h"
-#include "config_manager.h"
+#include "config/config_manager.h"
 #include "util/tools.h"
 
 #ifdef HAVE_EXIV2

@@ -32,7 +32,7 @@
 #include <memory>
 #include <unordered_set>
 
-#include "config_manager.h"
+#include "config/config_manager.h"
 #include "session_manager.h"
 #include "util/timer.h"
 #include "util/tools.h"

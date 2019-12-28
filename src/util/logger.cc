@@ -40,7 +40,7 @@
 #include <execinfo.h>
 #endif
 
-#include "config_manager.h"
+#include "config/config_manager.h"
 #include "logger.h"
 
 FILE* LOG_FILE = stderr;

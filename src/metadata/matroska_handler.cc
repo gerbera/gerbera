@@ -42,7 +42,7 @@
 #include <matroska/KaxAttached.h>
 #include <matroska/KaxAttachments.h>
 
-#include "config_manager.h"
+#include "config/config_manager.h"
 #include "iohandler/mem_io_handler.h"
 #include "util/string_converter.h"
 #include "matroska_handler.h"
