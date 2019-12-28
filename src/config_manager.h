@@ -39,8 +39,8 @@
 #include "zmm/dictionary.h"
 #include "zmm/object_dictionary.h"
 #include "mxml/mxml.h"
+#include "mxml/xpath.h"
 #include "singleton.h"
-#include "xpath.h"
 
 #include "transcoding/transcoding.h"
 #ifdef ONLINE_SERVICES

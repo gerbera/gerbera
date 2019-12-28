@@ -122,6 +122,8 @@ set(libgerberaFILES
         src/mxml/xml_text.h
         src/mxml/xml_to_json.cc
         src/mxml/xml_to_json.h
+        src/mxml/xpath.cc
+        src/mxml/xpath.h
         src/onlineservice/atrailers_content_handler.cc
         src/onlineservice/atrailers_content_handler.h
         src/onlineservice/atrailers_service.cc
@@ -241,8 +243,6 @@ set(libgerberaFILES
         src/web/tasks.cc
         src/web/web_autoscan.cc
         src/web/web_update.cc
-        src/xpath.cc
-        src/xpath.h
         src/zmm/array.cc
         src/zmm/array.h
         src/zmm/base_queue.h
