@@ -154,7 +154,6 @@ set(libgerberaFILES
         src/process_executor.cc
         src/process_executor.h
         src/process.h
-        src/reentrant_array.h
         src/request_handler.cc
         src/request_handler.h
         src/rexp.cc
@@ -261,6 +260,7 @@ set(libgerberaFILES
         src/zmm/object.cc
         src/zmm/object.h
         src/zmm/ref.h
+        src/zmm/reentrant_array.h
         src/zmm/zmm.h)
 
 add_library(libgerbera OBJECT ${libgerberaFILES})
