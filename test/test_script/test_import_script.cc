@@ -6,7 +6,7 @@
 #include "util/string_converter.h"
 #include "cds_objects.h"
 #include <memory>
-#include "metadata_handler.h"
+#include "metadata/metadata_handler.h"
 #include "onlineservice/online_service.h"
 
 #include "mock/common_script_mock.h"

@@ -28,7 +28,7 @@ Gerbera - https://gerbera.io/
 #include "mxml/mxml.h"
 #include "common.h"
 #include "util/tools.h"
-#include "metadata_handler.h"
+#include "metadata/metadata_handler.h"
 #ifdef BSD_NATIVE_UUID
 #include <uuid.h>
 #else

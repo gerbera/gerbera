@@ -91,8 +91,8 @@ set(libgerberaFILES
         src/metadata/exiv2_handler.h
         src/metadata/ffmpeg_handler.cc
         src/metadata/ffmpeg_handler.h
-        src/metadata_handler.cc
-        src/metadata_handler.h
+        src/metadata/metadata_handler.cc
+        src/metadata/metadata_handler.h
         src/metadata/libexif_handler.cc
         src/metadata/libexif_handler.h
         src/metadata/taglib_handler.cc

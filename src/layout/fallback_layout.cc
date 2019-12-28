@@ -32,7 +32,7 @@
 #include "fallback_layout.h"
 #include "content_manager.h"
 #include "config_manager.h"
-#include "metadata_handler.h"
+#include "metadata/metadata_handler.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
 

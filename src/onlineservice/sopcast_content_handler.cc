@@ -35,7 +35,7 @@
 #include "sopcast_content_handler.h"
 #include "cds_objects.h"
 #include "config_manager.h"
-#include "metadata_handler.h"
+#include "metadata/metadata_handler.h"
 #include "online_service.h"
 #include "util/tools.h"
 

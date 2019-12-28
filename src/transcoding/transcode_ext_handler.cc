@@ -51,7 +51,7 @@
 #include "iohandler/file_io_handler.h"
 #include "iohandler/io_handler_chainer.h"
 #include "zmm/dictionary.h"
-#include "metadata_handler.h"
+#include "metadata/metadata_handler.h"
 #include "util/tools.h"
 #include "transcoding_process_executor.h"
 #include "play_hook.h"

@@ -31,7 +31,7 @@
 
 #include "config_manager.h"
 #include "common.h"
-#include "metadata_handler.h"
+#include "metadata/metadata_handler.h"
 #include "storage.h"
 #include "util/string_converter.h"
 #include "util/tools.h"

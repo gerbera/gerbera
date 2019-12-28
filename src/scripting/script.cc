@@ -33,7 +33,7 @@
 
 #include "script.h"
 #include "util/tools.h"
-#include "metadata_handler.h"
+#include "metadata/metadata_handler.h"
 #include "js_functions.h"
 #include "config_manager.h"
 #ifdef ONLINE_SERVICES

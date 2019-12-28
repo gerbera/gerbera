@@ -40,7 +40,7 @@
 #include "content_manager.h"
 #include "util/filesystem.h"
 #include "layout/fallback_layout.h"
-#include "metadata_handler.h"
+#include "metadata/metadata_handler.h"
 #include "util/rexp.h"
 #include "session_manager.h"
 #include "util/string_converter.h"

@@ -34,7 +34,7 @@
 
 #include "iohandler/file_io_handler.h"
 #include "file_request_handler.h"
-#include "metadata_handler.h"
+#include "metadata/metadata_handler.h"
 #include "play_hook.h"
 #include "util/process.h"
 #include "server.h"
