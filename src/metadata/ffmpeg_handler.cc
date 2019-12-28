@@ -65,7 +65,7 @@ extern "C" {
 
 #include "config_manager.h"
 #include "ffmpeg_handler.h"
-#include "string_converter.h"
+#include "util/string_converter.h"
 
 #ifdef HAVE_AVSTREAM_CODECPAR
 #define as_codecpar(s) s->codecpar

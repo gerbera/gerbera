@@ -30,11 +30,11 @@
 /// \file directories.cc
 
 #include "common.h"
-#include "filesystem.h"
+#include "util/filesystem.h"
 #include "pages.h"
 #include "storage.h"
-#include "string_converter.h"
-#include "tools.h"
+#include "util/string_converter.h"
+#include "util/tools.h"
 
 using namespace zmm;
 using namespace mxml;

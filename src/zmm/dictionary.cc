@@ -31,7 +31,7 @@
 
 #include "dictionary.h"
 
-#include "tools.h"
+#include "util/tools.h"
 #include <cstring>
 #include <sstream>
 

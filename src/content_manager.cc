@@ -38,21 +38,21 @@
 
 #include "config_manager.h"
 #include "content_manager.h"
-#include "filesystem.h"
+#include "util/filesystem.h"
 #include "layout/fallback_layout.h"
 #include "metadata_handler.h"
-#include "rexp.h"
+#include "util/rexp.h"
 #include "session_manager.h"
-#include "string_converter.h"
-#include "timer.h"
-#include "tools.h"
+#include "util/string_converter.h"
+#include "util/timer.h"
+#include "util/tools.h"
 #include "update_manager.h"
 
 #ifdef HAVE_JS
 #include "layout/js_layout.h"
 #endif
 
-#include "process.h"
+#include "util/process.h"
 
 #ifdef SOPCAST
 #include "onlineservice/sopcast_service.h"
@@ -63,7 +63,7 @@
 #endif
 
 #ifdef ONLINE_SERVICES
-#include "task_processor.h"
+#include "util/task_processor.h"
 #endif
 
 #define DEFAULT_DIR_CACHE_CAPACITY 10

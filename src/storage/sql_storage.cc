@@ -31,9 +31,9 @@
 
 #include "sql_storage.h"
 #include "config_manager.h"
-#include "filesystem.h"
-#include "string_converter.h"
-#include "tools.h"
+#include "util/filesystem.h"
+#include "util/string_converter.h"
+#include "util/tools.h"
 #include "update_manager.h"
 #include "search_handler.h"
 #include <climits>

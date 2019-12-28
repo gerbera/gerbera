@@ -36,7 +36,7 @@
 #include "content_manager.h"
 #include "server.h"
 #include "sopcast_content_handler.h"
-#include "string_converter.h"
+#include "util/string_converter.h"
 #include "zmm/zmm.h"
 
 using namespace zmm;

@@ -3,7 +3,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include <duktape.h>
-#include <string_converter.h>
+#include "util/string_converter.h"
 
 using namespace ::testing;
 

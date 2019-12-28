@@ -60,15 +60,8 @@ set(libgerberaFILES
         src/device_description_handler.h
         src/exceptions.cc
         src/exceptions.h
-        src/executor.h
         src/file_request_handler.cc
         src/file_request_handler.h
-        src/filesystem.cc
-        src/filesystem.h
-        src/generic_task.cc
-        src/generic_task.h
-        src/util/headers.h
-        src/util/headers.cc
         src/iohandler/buffered_io_handler.cc
         src/iohandler/buffered_io_handler.h
         src/iohandler/curl_io_handler.cc
@@ -87,7 +80,6 @@ set(libgerberaFILES
         src/iohandler/mem_io_handler.h
         src/iohandler/process_io_handler.cc
         src/iohandler/process_io_handler.h
-        src/jpeg_resolution.cc
         src/lastfm_scrobbler.cc
         src/lastfm_scrobbler.h
         src/layout/fallback_layout.cc
@@ -95,10 +87,6 @@ set(libgerberaFILES
         src/layout/js_layout.cc
         src/layout/js_layout.h
         src/layout/layout.h
-        src/logger.cc
-        src/logger.h
-        src/memory.cc
-        src/memory.h
         src/metadata/exiv2_handler.cc
         src/metadata/exiv2_handler.h
         src/metadata/ffmpeg_handler.cc
@@ -113,8 +101,6 @@ set(libgerberaFILES
         src/metadata/fanart_handler.h
         src/metadata/matroska_handler.cc
         src/metadata/matroska_handler.h
-        src/mt_inotify.cc
-        src/mt_inotify.h
         src/mxml/attribute.cc
         src/mxml/attribute.h
         src/mxml/comment.cc
@@ -150,14 +136,8 @@ set(libgerberaFILES
         src/onlineservice/sopcast_service.h
         src/play_hook.cc
         src/play_hook.h
-        src/process.cc
-        src/process_executor.cc
-        src/process_executor.h
-        src/process.h
         src/request_handler.cc
         src/request_handler.h
-        src/rexp.cc
-        src/rexp.h
         src/scripting/import_script.cc
         src/scripting/import_script.h
         src/scripting/js_functions.cc
@@ -188,18 +168,8 @@ set(libgerberaFILES
         src/storage/sqlite3/sqlite3_storage.h
         src/storage/sql_storage.cc
         src/storage/sql_storage.h
-        src/string_converter.cc
-        src/string_converter.h
         src/subscription_request.cc
         src/subscription_request.h
-        src/task_processor.cc
-        src/task_processor.h
-        src/thread_executor.cc
-        src/thread_executor.h
-        src/timer.cc
-        src/timer.h
-        src/tools.cc
-        src/tools.h
         src/transcoding/transcode_dispatcher.cc
         src/transcoding/transcode_dispatcher.h
         src/transcoding/transcode_ext_handler.cc
@@ -223,6 +193,36 @@ set(libgerberaFILES
         src/url.h
         src/url_request_handler.cc
         src/url_request_handler.h
+        src/util/executor.h
+        src/util/filesystem.cc
+        src/util/filesystem.h
+        src/util/generic_task.cc
+        src/util/generic_task.h
+        src/util/headers.h
+        src/util/headers.cc
+        src/util/jpeg_resolution.cc
+        src/util/logger.cc
+        src/util/logger.h
+        src/util/memory.cc
+        src/util/memory.h
+        src/util/mt_inotify.cc
+        src/util/mt_inotify.h
+        src/util/process.cc
+        src/util/process_executor.cc
+        src/util/process_executor.h
+        src/util/process.h
+        src/util/rexp.cc
+        src/util/rexp.h
+        src/util/string_converter.cc
+        src/util/string_converter.h
+        src/util/task_processor.cc
+        src/util/task_processor.h
+        src/util/thread_executor.cc
+        src/util/thread_executor.h
+        src/util/timer.cc
+        src/util/timer.h
+        src/util/tools.cc
+        src/util/tools.h
         src/web/action.cc
         src/web/add.cc
         src/web/add_object.cc

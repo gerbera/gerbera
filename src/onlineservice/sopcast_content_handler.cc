@@ -37,7 +37,7 @@
 #include "config_manager.h"
 #include "metadata_handler.h"
 #include "online_service.h"
-#include "tools.h"
+#include "util/tools.h"
 
 using namespace zmm;
 using namespace mxml;

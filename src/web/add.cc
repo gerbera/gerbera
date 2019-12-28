@@ -31,10 +31,10 @@
 
 #include "common.h"
 #include "content_manager.h"
-#include "filesystem.h"
+#include "util/filesystem.h"
 #include "pages.h"
 #include "server.h"
-#include "tools.h"
+#include "util/tools.h"
 #include <cstdio>
 
 using namespace zmm;

@@ -33,8 +33,8 @@
 #include "common.h"
 #include "metadata_handler.h"
 #include "storage.h"
-#include "string_converter.h"
-#include "tools.h"
+#include "util/string_converter.h"
+#include "util/tools.h"
 #ifdef BSD_NATIVE_UUID
 #include <uuid.h>
 #else
@@ -45,7 +45,7 @@
 #include <sys/types.h>
 
 #ifdef HAVE_INOTIFY
-#include "mt_inotify.h"
+#include "util/mt_inotify.h"
 #endif
 
 #if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE)

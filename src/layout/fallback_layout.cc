@@ -33,8 +33,8 @@
 #include "content_manager.h"
 #include "config_manager.h"
 #include "metadata_handler.h"
-#include "string_converter.h"
-#include "tools.h"
+#include "util/string_converter.h"
+#include "util/tools.h"
 
 #ifdef ONLINE_SERVICES
 

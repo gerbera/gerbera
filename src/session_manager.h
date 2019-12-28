@@ -38,7 +38,7 @@
 
 #include "zmm/dictionary.h"
 #include "singleton.h"
-#include "timer.h"
+#include "util/timer.h"
 
 /// \brief One UI session.
 ///

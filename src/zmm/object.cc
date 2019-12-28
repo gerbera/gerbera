@@ -32,7 +32,7 @@
 #include <cstdio>
 #include <cstdlib>
 
-#include "memory.h"
+#include "util/memory.h"
 #include "object.h"
 
 using namespace zmm;

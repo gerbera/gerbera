@@ -49,7 +49,7 @@
 
 #include "config_manager.h"
 #include "iohandler/mem_io_handler.h"
-#include "string_converter.h"
+#include "util/string_converter.h"
 #include "taglib_handler.h"
 
 #include "content_manager.h"

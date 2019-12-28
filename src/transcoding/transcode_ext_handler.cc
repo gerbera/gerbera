@@ -43,7 +43,7 @@
 #include "common.h"
 #include "storage.h"
 #include "cds_objects.h"
-#include "process.h"
+#include "util/process.h"
 #include "update_manager.h"
 #include "session_manager.h"
 #include "iohandler/process_io_handler.h"
@@ -52,7 +52,7 @@
 #include "iohandler/io_handler_chainer.h"
 #include "zmm/dictionary.h"
 #include "metadata_handler.h"
-#include "tools.h"
+#include "util/tools.h"
 #include "transcoding_process_executor.h"
 #include "play_hook.h"
 

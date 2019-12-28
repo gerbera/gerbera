@@ -33,7 +33,7 @@
 
 #include "curl_io_handler.h"
 #include "config_manager.h"
-#include "tools.h"
+#include "util/tools.h"
 
 using namespace zmm;
 using namespace std;

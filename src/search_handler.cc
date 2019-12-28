@@ -22,7 +22,7 @@
 #include "search_handler.h"
 #include "config_manager.h"
 #include "storage.h"
-#include "tools.h"
+#include "util/tools.h"
 
 #include <algorithm>
 #include <cctype>

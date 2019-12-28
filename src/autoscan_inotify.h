@@ -38,7 +38,7 @@
 #include <vector>
 
 #include "autoscan.h"
-#include "mt_inotify.h"
+#include "util/mt_inotify.h"
 #include "singleton.h"
 #include "zmm/zmmf.h"
 

@@ -40,9 +40,9 @@
 #include "cds_objects.h"
 #include "common.h"
 #include "zmm/dictionary.h"
-#include "generic_task.h"
+#include "util/generic_task.h"
 #include "storage.h"
-#include "timer.h"
+#include "util/timer.h"
 
 #ifdef HAVE_JS
 // this is somewhat not nice, the playlist header needs the cm header and
@@ -62,7 +62,7 @@ class PlaylistParserScript;
 #include "onlineservice/online_service.h"
 #endif //ONLINE_SERVICES
 
-#include "executor.h"
+#include "util/executor.h"
 
 class CMAddFileTask : public GenericTask {
 protected:

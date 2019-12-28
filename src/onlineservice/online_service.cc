@@ -32,7 +32,7 @@
 #ifdef ONLINE_SERVICES
 
 #include "online_service.h"
-#include "tools.h"
+#include "util/tools.h"
 
 using namespace zmm;
 using namespace mxml;

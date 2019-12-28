@@ -32,7 +32,7 @@
 #ifdef HAVE_JS
 
 #include "script.h"
-#include "tools.h"
+#include "util/tools.h"
 #include "metadata_handler.h"
 #include "js_functions.h"
 #include "config_manager.h"

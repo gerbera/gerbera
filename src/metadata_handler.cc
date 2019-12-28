@@ -32,7 +32,7 @@
 
 #include "metadata_handler.h"
 #include "config_manager.h"
-#include "tools.h"
+#include "util/tools.h"
 
 #ifdef HAVE_EXIV2
 #include "metadata/exiv2_handler.h"

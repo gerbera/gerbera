@@ -23,7 +23,7 @@ Gerbera - https://gerbera.io/
 
 #include "device_description_handler.h"
 #include "iohandler/mem_io_handler.h"
-#include "tools.h"
+#include "util/tools.h"
 
 DeviceDescriptionHandler::DeviceDescriptionHandler(UpnpXMLBuilder* xmlBuilder)
     : RequestHandler()

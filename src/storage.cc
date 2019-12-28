@@ -38,7 +38,7 @@
 #include "storage/mysql/mysql_storage.h"
 #include "storage/sqlite3/sqlite3_storage.h"
 
-#include "tools.h"
+#include "util/tools.h"
 
 using namespace zmm;
 

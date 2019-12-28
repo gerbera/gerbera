@@ -33,7 +33,7 @@
 #ifndef __AUTOSCAN_H__
 #define __AUTOSCAN_H__
 
-#include "timer.h"
+#include "util/timer.h"
 #include "zmm/zmmf.h"
 #include <mutex>
 

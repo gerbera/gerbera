@@ -32,7 +32,7 @@
 #include <cassert>
 
 #include "buffered_io_handler.h"
-#include "tools.h"
+#include "util/tools.h"
 
 using namespace zmm;
 using namespace std;

@@ -36,7 +36,7 @@
 #include "file_request_handler.h"
 #include "metadata_handler.h"
 #include "play_hook.h"
-#include "process.h"
+#include "util/process.h"
 #include "server.h"
 #include "session_manager.h"
 #include "update_manager.h"

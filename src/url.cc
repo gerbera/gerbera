@@ -34,8 +34,8 @@
 #include "url.h"
 #include "common.h"
 #include "config_manager.h"
-#include "rexp.h"
-#include "tools.h"
+#include "util/rexp.h"
+#include "util/tools.h"
 #include <pthread.h>
 
 #include <sstream>
