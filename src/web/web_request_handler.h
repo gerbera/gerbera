@@ -40,6 +40,8 @@
 #include "request_handler.h"
 #include "session_manager.h"
 
+namespace web {
+
 class SessionException : public zmm::Exception {
 public:
     SessionException(std::string message)
@@ -148,5 +150,7 @@ public:
     /// \brief This method must be overridden by the subclasses that actually process the given request.
     virtual void process() = 0;
 };
+
+} // namespace
 
 #endif // __WEB_REQUEST_HANDLER_H__

@@ -31,7 +31,7 @@
 
 #include "pages.h"
 
-using namespace zmm;
+namespace web {
 
 WebRequestHandler* createWebRequestHandler(std::string page)
 {
@@ -66,3 +66,5 @@ WebRequestHandler* createWebRequestHandler(std::string page)
 
     throw _Exception("Unknown page: " + page);
 }
+
+} // namespace

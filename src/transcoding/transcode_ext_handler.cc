@@ -45,7 +45,7 @@
 #include "cds_objects.h"
 #include "util/process.h"
 #include "update_manager.h"
-#include "session_manager.h"
+#include "web/session_manager.h"
 #include "iohandler/process_io_handler.h"
 #include "iohandler/buffered_io_handler.h"
 #include "iohandler/file_io_handler.h"

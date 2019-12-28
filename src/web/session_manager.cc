@@ -44,6 +44,8 @@ using namespace zmm;
 using namespace mxml;
 using namespace std;
 
+namespace web {
+
 Session::Session(long timeout)
     : Dictionary_r()
 {
@@ -240,3 +242,5 @@ void SessionManager::timerNotify(Ref<Timer::Parameter> parameter)
         }
     }
 }
+
+} // namespace

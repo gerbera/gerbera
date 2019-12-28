@@ -42,7 +42,7 @@
 #include "layout/fallback_layout.h"
 #include "metadata/metadata_handler.h"
 #include "util/rexp.h"
-#include "session_manager.h"
+#include "web/session_manager.h"
 #include "util/string_converter.h"
 #include "util/timer.h"
 #include "util/tools.h"
@@ -81,6 +81,7 @@ struct magic_set* ms = nullptr;
 using namespace zmm;
 using namespace mxml;
 using namespace std;
+using namespace web;
 
 #define MIMETYPE_REGEXP "^([a-z0-9_-]+/[a-z0-9_-]+)"
 

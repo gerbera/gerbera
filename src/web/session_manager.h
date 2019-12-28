@@ -40,6 +40,8 @@
 #include "singleton.h"
 #include "util/timer.h"
 
+namespace web {
+
 /// \brief One UI session.
 ///
 /// When the user logs in for the first time (via the web UI) a new Session will be
@@ -155,5 +157,7 @@ public:
 
     virtual void timerNotify(zmm::Ref<Timer::Parameter> parameter) override;
 };
+
+} // namespace
 
 #endif //  __SESSION_MANAGER_H__

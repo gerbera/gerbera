@@ -148,11 +148,11 @@ public:
     virtual void process();
 };
 
-} // namespace
-
 /// \brief Chooses and creates the appropriate handler for processing the request.
 /// \param page identifies what type of the request we are dealing with.
 /// \return the appropriate request handler.
 WebRequestHandler* createWebRequestHandler(std::string page);
+
+} // namespace
 
 #endif // __WEB_PAGES_H__

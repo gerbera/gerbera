@@ -156,8 +156,6 @@ set(libgerberaFILES
         src/serve_request_handler.cc
         src/serve_request_handler.h
         src/server.h
-        src/session_manager.cc
-        src/session_manager.h
         src/singleton.cc
         src/singleton.h
         src/storage.cc
@@ -238,8 +236,10 @@ set(libgerberaFILES
         src/web/pages.cc
         src/web/pages.h
         src/web/remove.cc
-        src/web_request_handler.cc
-        src/web_request_handler.h
+        src/web/web_request_handler.cc
+        src/web/web_request_handler.h
+        src/web/session_manager.cc
+        src/web/session_manager.h
         src/web/tasks.cc
         src/web/web_autoscan.cc
         src/web/web_update.cc

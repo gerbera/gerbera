@@ -41,6 +41,8 @@
 using namespace zmm;
 using namespace mxml;
 
+namespace web {
+
 WebRequestHandler::WebRequestHandler()
     : RequestHandler()
     , checkRequestCalled(false)
@@ -282,3 +284,5 @@ std::string WebRequestHandler::mapAutoscanType(int type)
     else
         return "none";
 }
+
+} // namespace

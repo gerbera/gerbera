@@ -38,7 +38,7 @@
 #include "play_hook.h"
 #include "util/process.h"
 #include "server.h"
-#include "session_manager.h"
+#include "web/session_manager.h"
 #include "update_manager.h"
 
 #include "util/headers.h"
@@ -47,6 +47,7 @@
 
 using namespace zmm;
 using namespace mxml;
+using namespace web;
 
 FileRequestHandler::FileRequestHandler(UpnpXMLBuilder* xmlBuilder)
     : RequestHandler()
