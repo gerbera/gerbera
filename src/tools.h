@@ -41,7 +41,7 @@
 
 #include "cds_objects.h"
 #include "common.h"
-#include "io_handler.h"
+#include "iohandler/io_handler.h"
 #include "rexp.h"
 
 #ifdef HAVE_MAGIC

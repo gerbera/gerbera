@@ -37,7 +37,7 @@
 #include "server.h"
 #include "storage.h"
 
-#include "buffered_io_handler.h"
+#include "iohandler/buffered_io_handler.h"
 #include "cds_objects.h"
 #include "dictionary.h"
 #include "play_hook.h"
@@ -46,7 +46,7 @@
 #ifdef ONLINE_SERVICES
 #include "online_service_helper.h"
 #endif
-#include "curl_io_handler.h"
+#include "iohandler/curl_io_handler.h"
 #include "transcoding/transcode_dispatcher.h"
 #include "url.h"
 

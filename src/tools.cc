@@ -58,7 +58,7 @@
 
 #include "config_manager.h"
 #include "contrib/md5.h"
-#include "file_io_handler.h"
+#include "iohandler/file_io_handler.h"
 #include "metadata_handler.h"
 #include "tools.h"
 

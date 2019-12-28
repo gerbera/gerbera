@@ -32,7 +32,7 @@
 #include <sys/stat.h>
 
 
-#include "file_io_handler.h"
+#include "iohandler/file_io_handler.h"
 #include "file_request_handler.h"
 #include "metadata_handler.h"
 #include "play_hook.h"

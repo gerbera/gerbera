@@ -35,7 +35,7 @@
 #include "cds_objects.h"
 #include "common.h"
 #include "dictionary.h"
-#include "io_handler.h"
+#include "iohandler/io_handler.h"
 
 // content handler Id's
 #define CH_DEFAULT 0

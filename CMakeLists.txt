@@ -44,8 +44,6 @@ set(libgerberaFILES
         src/autoscan.h
         src/autoscan_inotify.cc
         src/autoscan_inotify.h
-        src/buffered_io_handler.cc
-        src/buffered_io_handler.h
         src/cached_url.cc
         src/cached_url.h
         src/cds_objects.cc
@@ -62,8 +60,6 @@ set(libgerberaFILES
         src/content_manager.h
         src/contrib/md5.c
         src/contrib/md5.h
-        src/curl_io_handler.cc
-        src/curl_io_handler.h
         src/device_description_handler.cc
         src/device_description_handler.h
         src/dictionary.cc
@@ -71,10 +67,6 @@ set(libgerberaFILES
         src/exceptions.cc
         src/exceptions.h
         src/executor.h
-        src/fd_io_handler.cc
-        src/fd_io_handler.h
-        src/file_io_handler.cc
-        src/file_io_handler.h
         src/file_request_handler.cc
         src/file_request_handler.h
         src/filesystem.cc
@@ -83,12 +75,24 @@ set(libgerberaFILES
         src/generic_task.h
         src/util/headers.h
         src/util/headers.cc
-        src/io_handler_buffer_helper.cc
-        src/io_handler_buffer_helper.h
-        src/io_handler.cc
-        src/io_handler_chainer.cc
-        src/io_handler_chainer.h
-        src/io_handler.h
+        src/iohandler/buffered_io_handler.cc
+        src/iohandler/buffered_io_handler.h
+        src/iohandler/curl_io_handler.cc
+        src/iohandler/curl_io_handler.h
+        src/iohandler/fd_io_handler.cc
+        src/iohandler/fd_io_handler.h
+        src/iohandler/file_io_handler.cc
+        src/iohandler/file_io_handler.h
+        src/iohandler/io_handler_buffer_helper.cc
+        src/iohandler/io_handler_buffer_helper.h
+        src/iohandler/io_handler.cc
+        src/iohandler/io_handler_chainer.cc
+        src/iohandler/io_handler_chainer.h
+        src/iohandler/io_handler.h
+        src/iohandler/mem_io_handler.cc
+        src/iohandler/mem_io_handler.h
+        src/iohandler/process_io_handler.cc
+        src/iohandler/process_io_handler.h
         src/jpeg_resolution.cc
         src/lastfm_scrobbler.cc
         src/lastfm_scrobbler.h
@@ -99,8 +103,6 @@ set(libgerberaFILES
         src/layout/layout.h
         src/logger.cc
         src/logger.h
-        src/mem_io_handler.cc
-        src/mem_io_handler.h
         src/memory.cc
         src/memory.h
         src/metadata/exiv2_handler.cc
@@ -151,8 +153,6 @@ set(libgerberaFILES
         src/process_executor.cc
         src/process_executor.h
         src/process.h
-        src/process_io_handler.cc
-        src/process_io_handler.h
         src/reentrant_array.h
         src/request_handler.cc
         src/request_handler.h

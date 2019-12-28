@@ -59,7 +59,7 @@ extern "C" {
 } // extern "C"
 
 #ifdef HAVE_FFMPEGTHUMBNAILER
-#include "mem_io_handler.h"
+#include "iohandler/mem_io_handler.h"
 #include <libffmpegthumbnailer/videothumbnailerc.h>
 #endif
 

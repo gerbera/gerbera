@@ -46,18 +46,18 @@
 #include "process.h"
 #include "update_manager.h"
 #include "session_manager.h"
-#include "process_io_handler.h"
-#include "buffered_io_handler.h"
+#include "iohandler/process_io_handler.h"
+#include "iohandler/buffered_io_handler.h"
+#include "iohandler/file_io_handler.h"
+#include "iohandler/io_handler_chainer.h"
 #include "dictionary.h"
 #include "metadata_handler.h"
 #include "tools.h"
-#include "file_io_handler.h"
 #include "transcoding_process_executor.h"
-#include "io_handler_chainer.h"
 #include "play_hook.h"
 
 #ifdef HAVE_CURL
-    #include "curl_io_handler.h"
+    #include "iohandler/curl_io_handler.h"
 #endif
 
 using namespace zmm;
