@@ -31,21 +31,22 @@
 
 #include "fallback_layout.h"
 #include "content_manager.h"
-#include "config_manager.h"
-#include "metadata_handler.h"
-#include "string_converter.h"
-#include "tools.h"
+#include "config/config_manager.h"
+#include "metadata/metadata_handler.h"
+#include "util/string_converter.h"
+#include "util/string_tokenizer.h"
+#include "util/tools.h"
 
 #ifdef ONLINE_SERVICES
 
-#include "online_service.h"
+#include "onlineservice/online_service.h"
 
 #ifdef SOPCAST
-    #include "sopcast_content_handler.h"
+    #include "onlineservice/sopcast_content_handler.h"
 #endif
 
 #ifdef ATRAILERS
-    #include "atrailers_content_handler.h"
+    #include "onlineservice/atrailers_content_handler.h"
 #endif
 
 #endif//ONLINE_SERVICES

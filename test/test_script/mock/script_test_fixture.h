@@ -5,7 +5,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include <duktape.h>
-#include <string_converter.h>
+#include "util/string_converter.h"
 #include <memory>
 
 #include "common_script_mock.h"

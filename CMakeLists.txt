@@ -36,18 +36,10 @@ set(WITH_TESTS          0 CACHE BOOL "Enables Unit Tests")
 set(libgerberaFILES
         src/action_request.cc
         src/action_request.h
-        src/atrailers_content_handler.cc
-        src/atrailers_content_handler.h
-        src/atrailers_service.cc
-        src/atrailers_service.h
         src/autoscan.cc
         src/autoscan.h
         src/autoscan_inotify.cc
         src/autoscan_inotify.h
-        src/buffered_io_handler.cc
-        src/buffered_io_handler.h
-        src/cached_url.cc
-        src/cached_url.h
         src/cds_objects.cc
         src/cds_objects.h
         src/cds_resource.cc
@@ -55,41 +47,35 @@ set(libgerberaFILES
         src/common.h
         src/config/config_generator.h
         src/config/config_generator.cc
-        src/config_manager.cc
-        src/config_manager.h
-        src/config_options.h
+        src/config/config_manager.cc
+        src/config/config_manager.h
+        src/config/config_options.h
         src/content_manager.cc
         src/content_manager.h
         src/contrib/md5.c
         src/contrib/md5.h
-        src/curl_io_handler.cc
-        src/curl_io_handler.h
         src/device_description_handler.cc
         src/device_description_handler.h
-        src/dictionary.cc
-        src/dictionary.h
         src/exceptions.cc
         src/exceptions.h
-        src/executor.h
-        src/fd_io_handler.cc
-        src/fd_io_handler.h
-        src/file_io_handler.cc
-        src/file_io_handler.h
         src/file_request_handler.cc
         src/file_request_handler.h
-        src/filesystem.cc
-        src/filesystem.h
-        src/generic_task.cc
-        src/generic_task.h
-        src/util/headers.h
-        src/util/headers.cc
-        src/io_handler_buffer_helper.cc
-        src/io_handler_buffer_helper.h
-        src/io_handler.cc
-        src/io_handler_chainer.cc
-        src/io_handler_chainer.h
-        src/io_handler.h
-        src/jpeg_resolution.cc
+        src/iohandler/buffered_io_handler.cc
+        src/iohandler/buffered_io_handler.h
+        src/iohandler/curl_io_handler.cc
+        src/iohandler/curl_io_handler.h
+        src/iohandler/file_io_handler.cc
+        src/iohandler/file_io_handler.h
+        src/iohandler/io_handler_buffer_helper.cc
+        src/iohandler/io_handler_buffer_helper.h
+        src/iohandler/io_handler.cc
+        src/iohandler/io_handler_chainer.cc
+        src/iohandler/io_handler_chainer.h
+        src/iohandler/io_handler.h
+        src/iohandler/mem_io_handler.cc
+        src/iohandler/mem_io_handler.h
+        src/iohandler/process_io_handler.cc
+        src/iohandler/process_io_handler.h
         src/lastfm_scrobbler.cc
         src/lastfm_scrobbler.h
         src/layout/fallback_layout.cc
@@ -97,18 +83,12 @@ set(libgerberaFILES
         src/layout/js_layout.cc
         src/layout/js_layout.h
         src/layout/layout.h
-        src/logger.cc
-        src/logger.h
-        src/mem_io_handler.cc
-        src/mem_io_handler.h
-        src/memory.cc
-        src/memory.h
         src/metadata/exiv2_handler.cc
         src/metadata/exiv2_handler.h
         src/metadata/ffmpeg_handler.cc
         src/metadata/ffmpeg_handler.h
-        src/metadata_handler.cc
-        src/metadata_handler.h
+        src/metadata/metadata_handler.cc
+        src/metadata/metadata_handler.h
         src/metadata/libexif_handler.cc
         src/metadata/libexif_handler.h
         src/metadata/taglib_handler.cc
@@ -117,8 +97,6 @@ set(libgerberaFILES
         src/metadata/fanart_handler.h
         src/metadata/matroska_handler.cc
         src/metadata/matroska_handler.h
-        src/mt_inotify.cc
-        src/mt_inotify.h
         src/mxml/attribute.cc
         src/mxml/attribute.h
         src/mxml/comment.cc
@@ -140,24 +118,24 @@ set(libgerberaFILES
         src/mxml/xml_text.h
         src/mxml/xml_to_json.cc
         src/mxml/xml_to_json.h
-        src/object_dictionary.h
-        src/online_service.cc
-        src/online_service.h
-        src/online_service_helper.cc
-        src/online_service_helper.h
+        src/mxml/xpath.cc
+        src/mxml/xpath.h
+        src/onlineservice/atrailers_content_handler.cc
+        src/onlineservice/atrailers_content_handler.h
+        src/onlineservice/atrailers_service.cc
+        src/onlineservice/atrailers_service.h
+        src/onlineservice/online_service.cc
+        src/onlineservice/online_service.h
+        src/onlineservice/online_service_helper.cc
+        src/onlineservice/online_service_helper.h
+        src/onlineservice/sopcast_content_handler.cc
+        src/onlineservice/sopcast_content_handler.h
+        src/onlineservice/sopcast_service.cc
+        src/onlineservice/sopcast_service.h
         src/play_hook.cc
         src/play_hook.h
-        src/process.cc
-        src/process_executor.cc
-        src/process_executor.h
-        src/process.h
-        src/process_io_handler.cc
-        src/process_io_handler.h
-        src/reentrant_array.h
         src/request_handler.cc
         src/request_handler.h
-        src/rexp.cc
-        src/rexp.h
         src/scripting/import_script.cc
         src/scripting/import_script.h
         src/scripting/js_functions.cc
@@ -174,16 +152,8 @@ set(libgerberaFILES
         src/serve_request_handler.cc
         src/serve_request_handler.h
         src/server.h
-        src/session_manager.cc
-        src/session_manager.h
         src/singleton.cc
         src/singleton.h
-        src/sopcast_content_handler.cc
-        src/sopcast_content_handler.h
-        src/sopcast_service.cc
-        src/sopcast_service.h
-        src/storage.cc
-        src/storage.h
         src/storage/mysql/mysql_create_sql.h
         src/storage/mysql/mysql_storage.cc
         src/storage/mysql/mysql_storage.h
@@ -192,18 +162,10 @@ set(libgerberaFILES
         src/storage/sqlite3/sqlite3_storage.h
         src/storage/sql_storage.cc
         src/storage/sql_storage.h
-        src/string_converter.cc
-        src/string_converter.h
+        src/storage/storage.cc
+        src/storage/storage.h
         src/subscription_request.cc
         src/subscription_request.h
-        src/task_processor.cc
-        src/task_processor.h
-        src/thread_executor.cc
-        src/thread_executor.h
-        src/timer.cc
-        src/timer.h
-        src/tools.cc
-        src/tools.h
         src/transcoding/transcode_dispatcher.cc
         src/transcoding/transcode_dispatcher.h
         src/transcoding/transcode_ext_handler.cc
@@ -227,6 +189,40 @@ set(libgerberaFILES
         src/url.h
         src/url_request_handler.cc
         src/url_request_handler.h
+        src/util/executor.h
+        src/util/exception.cc
+        src/util/exception.h
+        src/util/filesystem.cc
+        src/util/filesystem.h
+        src/util/generic_task.cc
+        src/util/generic_task.h
+        src/util/headers.h
+        src/util/headers.cc
+        src/util/jpeg_resolution.cc
+        src/util/logger.cc
+        src/util/logger.h
+        src/util/memory.cc
+        src/util/memory.h
+        src/util/mt_inotify.cc
+        src/util/mt_inotify.h
+        src/util/process.cc
+        src/util/process_executor.cc
+        src/util/process_executor.h
+        src/util/process.h
+        src/util/rexp.cc
+        src/util/rexp.h
+        src/util/string_converter.cc
+        src/util/string_converter.h
+        src/util/string_tokenizer.cc
+        src/util/string_tokenizer.h
+        src/util/task_processor.cc
+        src/util/task_processor.h
+        src/util/thread_executor.cc
+        src/util/thread_executor.h
+        src/util/timer.cc
+        src/util/timer.h
+        src/util/tools.cc
+        src/util/tools.h
         src/web/action.cc
         src/web/add.cc
         src/web/add_object.cc
@@ -240,23 +236,22 @@ set(libgerberaFILES
         src/web/pages.cc
         src/web/pages.h
         src/web/remove.cc
-        src/web_request_handler.cc
-        src/web_request_handler.h
+        src/web/web_request_handler.cc
+        src/web/web_request_handler.h
+        src/web/session_manager.cc
+        src/web/session_manager.h
         src/web/tasks.cc
         src/web/web_autoscan.cc
         src/web/web_update.cc
-        src/xpath.cc
-        src/xpath.h
         src/zmm/array.cc
         src/zmm/array.h
         src/zmm/base_queue.h
         src/zmm/base_stack.h
-        src/zmm/exception.cc
-        src/zmm/exception.h
+        src/zmm/dictionary.cc
+        src/zmm/dictionary.h
+        src/zmm/object_dictionary.h
         src/zmm/object_queue.h
         src/zmm/object_stack.h
-        src/zmm/stringtokenizer.cc
-        src/zmm/stringtokenizer.h
         src/zmm/zmmf.h
         src/zmm/object.cc
         src/zmm/object.h

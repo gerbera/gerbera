@@ -35,7 +35,7 @@
 #include <upnp.h>
 
 #include "common.h"
-#include "io_handler.h"
+#include "iohandler/io_handler.h"
 #include "transcoding.h"
 
 #include "cds_objects.h"

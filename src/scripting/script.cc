@@ -32,16 +32,16 @@
 #ifdef HAVE_JS
 
 #include "script.h"
-#include "tools.h"
-#include "metadata_handler.h"
+#include "util/tools.h"
+#include "metadata/metadata_handler.h"
 #include "js_functions.h"
-#include "config_manager.h"
+#include "config/config_manager.h"
 #ifdef ONLINE_SERVICES
-    #include "online_service.h"
+    #include "onlineservice/online_service.h"
 #endif
 
 #ifdef ATRAILERS
-    #include "atrailers_content_handler.h"
+    #include "onlineservice/atrailers_content_handler.h"
 #endif
 
 using namespace zmm;

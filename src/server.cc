@@ -423,9 +423,9 @@ Ref<RequestHandler> Server::createRequestHandler(const char* filename) const
 
         std::string r_type = dict->get(URL_REQUEST_TYPE);
         if (!r_type.empty()) {
-            ret = createWebRequestHandler(r_type);
+            ret = web::createWebRequestHandler(r_type);
         } else {
-            ret = createWebRequestHandler("index");
+            ret = web::createWebRequestHandler("index");
         }
     } else if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + DEVICE_DESCRIPTION_PATH)) {
         ret = new DeviceDescriptionHandler(xmlbuilder.get());

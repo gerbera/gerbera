@@ -33,7 +33,7 @@
 // \todo this should be solved via an observer model
 
 #include "play_hook.h"
-#include "config_manager.h"
+#include "config/config_manager.h"
 #include "content_manager.h"
 
 #ifdef HAVE_LASTFMLIB

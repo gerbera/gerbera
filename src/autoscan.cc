@@ -31,7 +31,7 @@
 
 #include "autoscan.h"
 #include "content_manager.h"
-#include "storage.h"
+#include "storage/storage.h"
 
 using namespace zmm;
 using namespace std;

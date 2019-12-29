@@ -59,13 +59,13 @@ extern "C" {
 } // extern "C"
 
 #ifdef HAVE_FFMPEGTHUMBNAILER
-#include "mem_io_handler.h"
+#include "iohandler/mem_io_handler.h"
 #include <libffmpegthumbnailer/videothumbnailerc.h>
 #endif
 
-#include "config_manager.h"
+#include "config/config_manager.h"
 #include "ffmpeg_handler.h"
-#include "string_converter.h"
+#include "util/string_converter.h"
 
 #ifdef HAVE_AVSTREAM_CODECPAR
 #define as_codecpar(s) s->codecpar

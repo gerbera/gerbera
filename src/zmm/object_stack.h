@@ -32,9 +32,9 @@
 #ifndef __ZMMF_OBJECT_STACK_H__
 #define __ZMMF_OBJECT_STACK_H__
 
-#include <logger.h>
+#include "util/logger.h"
 #include "zmm.h"
-#include "memory.h"
+#include "util/memory.h"
 #include "base_stack.h"
 
 namespace zmm

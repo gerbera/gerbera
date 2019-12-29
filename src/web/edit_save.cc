@@ -30,10 +30,10 @@
 /// \file edit_save.cc
 
 #include "content_manager.h"
-#include "dictionary.h"
+#include "zmm/dictionary.h"
 #include "pages.h"
-#include "storage.h"
-#include "tools.h"
+#include "storage/storage.h"
+#include "util/tools.h"
 #include <cstdio>
 
 using namespace zmm;

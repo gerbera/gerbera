@@ -33,7 +33,7 @@
 #define __URL_REQUEST_HANDLER_H__
 
 #include "common.h"
-#include "dictionary.h"
+#include "zmm/dictionary.h"
 #include "request_handler.h"
 
 class URLRequestHandler : public RequestHandler {

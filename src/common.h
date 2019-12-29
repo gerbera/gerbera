@@ -34,8 +34,8 @@
 #include <errno.h>
 
 #include "exceptions.h"
-#include "logger.h"
-#include "memory.h"
+#include "util/logger.h"
+#include "util/memory.h"
 #include "zmm/zmmf.h"
 
 #define CONFIG_XML_VERSION_0_11_0 1

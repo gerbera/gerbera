@@ -1,8 +1,8 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include <config_manager.h>
-#include <config/config_generator.h>
+#include "config/config_manager.h"
+#include "config/config_generator.h"
 #include <fstream>
 #include <regex>
 

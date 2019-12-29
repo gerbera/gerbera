@@ -30,7 +30,7 @@
 /// \file cds_resource.cc
 
 #include "cds_resource.h"
-#include "tools.h"
+#include "util/tools.h"
 
 #include <sstream>
 

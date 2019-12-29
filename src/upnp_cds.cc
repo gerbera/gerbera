@@ -30,10 +30,10 @@
 /// \file upnp_cds.cc
 
 #include "upnp_cds.h"
-#include "config_manager.h"
+#include "config/config_manager.h"
 #include "search_handler.h"
 #include "server.h"
-#include "storage.h"
+#include "storage/storage.h"
 #include <memory>
 #include <string>
 #include <vector>

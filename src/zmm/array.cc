@@ -30,7 +30,7 @@
 /// \file array.cc
 
 #include "array.h"
-#include "memory.h"
+#include "util/memory.h"
 
 #include <cstring>
 

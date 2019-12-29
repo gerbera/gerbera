@@ -33,7 +33,7 @@
 #define __SERVE_REQUEST_HANDLER_H__
 
 #include "common.h"
-#include "dictionary.h"
+#include "zmm/dictionary.h"
 #include "request_handler.h"
 
 class ServeRequestHandler : public RequestHandler {

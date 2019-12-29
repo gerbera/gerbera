@@ -41,23 +41,23 @@
 #include <csignal>
 #include <climits>
 #include "common.h"
-#include "storage.h"
+#include "storage/storage.h"
 #include "cds_objects.h"
-#include "process.h"
+#include "util/process.h"
 #include "update_manager.h"
-#include "session_manager.h"
-#include "process_io_handler.h"
-#include "buffered_io_handler.h"
-#include "dictionary.h"
-#include "metadata_handler.h"
-#include "tools.h"
-#include "file_io_handler.h"
+#include "web/session_manager.h"
+#include "iohandler/process_io_handler.h"
+#include "iohandler/buffered_io_handler.h"
+#include "iohandler/file_io_handler.h"
+#include "iohandler/io_handler_chainer.h"
+#include "zmm/dictionary.h"
+#include "metadata/metadata_handler.h"
+#include "util/tools.h"
 #include "transcoding_process_executor.h"
-#include "io_handler_chainer.h"
 #include "play_hook.h"
 
 #ifdef HAVE_CURL
-    #include "curl_io_handler.h"
+    #include "iohandler/curl_io_handler.h"
 #endif
 
 using namespace zmm;

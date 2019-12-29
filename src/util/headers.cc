@@ -25,7 +25,7 @@ Gerbera - https://gerbera.io/
 
 #include "headers.h"
 #include <string>
-#include <tools.h>
+#include "tools.h"
 
 std::string Headers::stripInvalid(std::string value) {
     std::string result = value;

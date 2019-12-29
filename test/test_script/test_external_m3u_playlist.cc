@@ -2,10 +2,10 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include <cds_objects.h>
+#include "cds_objects.h"
 #include <duktape.h>
-#include <string_converter.h>
-#include <cds_objects.h>
+#include "util/string_converter.h"
+#include "cds_objects.h"
 #include <memory>
 
 #include "mock/common_script_mock.h"

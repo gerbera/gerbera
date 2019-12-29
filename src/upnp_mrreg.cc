@@ -32,8 +32,8 @@
 #include "upnp_mrreg.h"
 #include "ixml.h"
 #include "server.h"
-#include "storage.h"
-#include "tools.h"
+#include "storage/storage.h"
+#include "util/tools.h"
 #include "upnp_xml.h"
 
 using namespace zmm;

@@ -22,7 +22,7 @@
 #ifndef __DICTIONARY_TEST_H__
 #define __DICTIONARY_TEST_H__
 
-#include "dictionary.h"
+#include "zmm/dictionary.h"
 #include "gtest/gtest.h"
 
 class DictionaryTest : public ::testing::Test {

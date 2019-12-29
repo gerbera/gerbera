@@ -31,8 +31,8 @@
 
 #include "cds_objects.h"
 #include "mxml/mxml.h"
-#include "storage.h"
-#include "tools.h"
+#include "storage/storage.h"
+#include "util/tools.h"
 
 using namespace zmm;
 using namespace mxml;

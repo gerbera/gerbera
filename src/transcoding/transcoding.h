@@ -37,8 +37,8 @@
 #include <string>
 
 #include "zmm/zmmf.h"
-#include "dictionary.h"
-#include "object_dictionary.h"
+#include "zmm/dictionary.h"
+#include "zmm/object_dictionary.h"
 
 #define SOURCE  (-1)
 #define OFF       0

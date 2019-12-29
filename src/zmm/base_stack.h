@@ -33,7 +33,8 @@
 #define __ZMMF_BASE_STACK_H__
 
 #include "zmm.h"
-#include "memory.h"
+#include "util/memory.h"
+#include "util/logger.h"
 
 namespace zmm
 {

@@ -35,7 +35,7 @@
 #include "common.h"
 #include "script.h"
 #include "cds_objects.h"
-#include "generic_task.h"
+#include "util/generic_task.h"
 #include "content_manager.h"
 
 class PlaylistParserScript : public Script

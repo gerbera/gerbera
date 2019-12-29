@@ -32,10 +32,10 @@
 #include "cds_objects.h"
 #include "common.h"
 #include "content_manager.h"
-#include "metadata_handler.h"
+#include "metadata/metadata_handler.h"
 #include "pages.h"
 #include "server.h"
-#include "tools.h"
+#include "util/tools.h"
 #include <cstdio>
 
 using namespace zmm;

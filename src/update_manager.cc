@@ -33,8 +33,8 @@
 
 #include "server.h"
 #include "singleton.h"
-#include "storage.h"
-#include "tools.h"
+#include "storage/storage.h"
+#include "util/tools.h"
 #include "upnp_cds.h"
 #include <chrono>
 #include <csignal>

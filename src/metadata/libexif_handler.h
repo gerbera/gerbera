@@ -35,7 +35,7 @@
 #include <vector>
 
 #include "metadata_handler.h"
-#include "string_converter.h"
+#include "util/string_converter.h"
 #include <libexif/exif-content.h>
 #include <libexif/exif-data.h>
 

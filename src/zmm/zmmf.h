@@ -33,9 +33,7 @@
 #define __ZMMF_H__
 
 #include "zmm.h"
-#include "exception.h"
 #include "array.h"
-#include "stringtokenizer.h"
 #include "base_stack.h"
 #include "object_stack.h"
 #include "base_queue.h"
