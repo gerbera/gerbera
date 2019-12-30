@@ -188,13 +188,13 @@ void MysqlStorage::init()
 
     mysql_connection = true;
 
-    std::string dbVersion = nullptr;
+    std::string dbVersion = "";
     try {
         dbVersion = getInternalSetting("db_version");
     } catch (Exception) {
     }
 
-    if (dbVersion == nullptr) {
+    if (dbVersion.empty()) {
         log_info("database doesn't seem to exist. automatically creating database...\n");
         unsigned char buf[MS_CREATE_SQL_INFLATED_SIZE + 1]; // + 1 for '\0' at the end of the string
         unsigned long uncompressed_size = MS_CREATE_SQL_INFLATED_SIZE;
@@ -221,7 +221,7 @@ void MysqlStorage::init()
             sql_end = strchr(sql_start, ';');
         } while (sql_end != nullptr);
         dbVersion = getInternalSetting("db_version");
-        if (dbVersion == nullptr) {
+        if (dbVersion.empty()) {
             shutdown();
             throw _Exception("error while creating database");
         }

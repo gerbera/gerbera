@@ -250,7 +250,7 @@ private:
     std::string mapBool(bool val) { return quote((val ? 1 : 0)); }
     bool remapBool(std::string field) { return (string_ok(field) && field == "1"); }
     
-    void setFsRootName(std::string rootName = nullptr);
+    void setFsRootName(std::string rootName = "");
     
     std::string fsRootName;
     
