@@ -125,7 +125,7 @@ Ref<CdsObject> CdsObject::createObject(unsigned int objectType)
     } else if (IS_CDS_ITEM(objectType)) {
         pobj = new CdsItem();
     } else {
-        throw _Exception("invalid object type: " + objectType);
+        throw _Exception("invalid object type: " + std::to_string(objectType));
     }
     return Ref<CdsObject>(pobj);
 }
@@ -345,7 +345,7 @@ std::string CdsObject::mapObjectType(int type)
         return STRING_OBJECT_TYPE_EXTERNAL_URL;
     if (IS_CDS_ITEM_INTERNAL_URL(type))
         return STRING_OBJECT_TYPE_INTERNAL_URL;
-    throw Exception("illegal objectType: " + type);
+    throw Exception("illegal objectType: " + std::to_string(type));
 }
 
 int CdsObject::remapObjectType(std::string objectType)

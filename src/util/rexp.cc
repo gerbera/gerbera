@@ -81,7 +81,7 @@ void RExp::compile(std::string pattern, const char* sflags)
             flags |= REG_NEWLINE;
             break;
         default:
-            throw _Exception("RExp: unknown flag: " + c);
+            throw _Exception("RExp: unknown flag: " + std::to_string(c));
         }
         p++;
     }
