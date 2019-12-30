@@ -33,10 +33,10 @@
 #ifdef HAVE_EXIV2
 #include <exiv2/exiv2.hpp>
 
-#include "config_manager.h"
+#include "config/config_manager.h"
 #include "exiv2_handler.h"
-#include "string_converter.h"
-#include "tools.h"
+#include "util/string_converter.h"
+#include "util/tools.h"
 
 using namespace zmm;
 
@@ -72,7 +72,7 @@ void Exiv2Handler::fillMetadata(Ref<CdsItem> item)
             /// \todo convert date to ISO 8601 as required in the UPnP spec
             // from YYYY:MM:DD to YYYY-MM-DD
             if (value.length() >= 11) {
-                value = value.substring(0, 4) + "-" + value.substring(5, 2) + "-" + value.substring(8, 2);
+                value = value.substr(0, 4) + "-" + value.substr(5, 2) + "-" + value.substr(8, 2);
                 log_debug("date: %s\n", value.c_str());
                 item->setMetadata(MetadataHandler::getMetaFieldName(M_DATE), value);
             }
@@ -140,23 +140,22 @@ void Exiv2Handler::fillMetadata(Ref<CdsItem> item)
             item->setMetadata(MT_KEYS[M_DESCRIPTION].upnp, sc->convert(comment));
 
         // if there are any auxilary tags that the user wants - add them
-        Ref<Array<StringBase>> aux;
         Ref<ConfigManager> cm = ConfigManager::getInstance();
 
-        aux = cm->getStringArrayOption(CFG_IMPORT_LIBOPTS_EXIV2_AUXDATA_TAGS_LIST);
-        if (aux != nullptr) {
+        auto aux = cm->getStringArrayOption(CFG_IMPORT_LIBOPTS_EXIV2_AUXDATA_TAGS_LIST);
+        if (aux.size() != 0) {
             std::string value;
             std::string auxtag;
 
-            for (int j = 0; j < aux->size(); j++) {
+            for (size_t j = 0; j < aux.size(); j++) {
                 value = "";
-                auxtag = aux->get(j);
+                auxtag = aux[j];
                 log_debug("auxtag: %s \n", auxtag.c_str());
-                if (auxtag.substring(0, 4) == "Exif") {
+                if (auxtag.substr(0, 4) == "Exif") {
                     Exiv2::ExifData::const_iterator md = exifData.findKey(Exiv2::ExifKey(auxtag.c_str()));
                     if (md != exifData.end())
                         value = (char*)md->toString().c_str();
-                } else if (auxtag.substring(0, 3) == "Xmp") {
+                } else if (auxtag.substr(0, 3) == "Xmp") {
                     Exiv2::XmpData::const_iterator md = xmpData.findKey(Exiv2::XmpKey(auxtag.c_str()));
                     if (md != xmpData.end())
                         value = (char*)md->toString().c_str();
