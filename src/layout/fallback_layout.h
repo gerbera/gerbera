@@ -32,16 +32,25 @@
 #ifndef __FALLBACK_LAYOUT_H__
 #define __FALLBACK_LAYOUT_H__
 
+#include <memory>
 #include "layout.h"
 #include "../cds_objects.h"
 
 #ifdef ENABLE_PROFILING
     #include "tools.h"
 #endif
+
+// forward declaration
+class ConfigManager;
+class Storage;
+class ContentManager;
+
 class FallbackLayout : public Layout
 {
 public:
-    FallbackLayout();
+    FallbackLayout(std::shared_ptr<ConfigManager> config,
+        std::shared_ptr<Storage> storage,
+        std::shared_ptr<ContentManager> content);
     virtual void processCdsObject(zmm::Ref<CdsObject> obj, std::string rootpath) override;
 #ifdef ENABLE_PROFILING
     virtual ~FallbackLayout();
@@ -58,6 +67,11 @@ protected:
 #ifdef ATRAILERS
     void addATrailers(zmm::Ref<CdsObject> obj);
 #endif
+
+    std::shared_ptr<ConfigManager> config;
+    std::shared_ptr<Storage> storage;
+    std::shared_ptr<ContentManager> content;
+
 #ifdef ENABLE_PROFILING
     bool profiling_initialized;
     profiling_t layout_profiling;

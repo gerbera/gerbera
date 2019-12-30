@@ -54,7 +54,7 @@ protected:
     void process_ifd(ExifContent* content, zmm::Ref<CdsItem> item, zmm::Ref<StringConverter> sc, std::vector<std::string> auxtags);
 
 public:
-    LibExifHandler();
+    LibExifHandler(std::shared_ptr<ConfigManager> config);
     virtual void fillMetadata(zmm::Ref<CdsItem> item);
     virtual zmm::Ref<IOHandler> serveContent(zmm::Ref<CdsItem> item, int resNum);
 };

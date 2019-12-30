@@ -32,16 +32,26 @@
 #ifndef __JS_LAYOUT_H__
 #define __JS_LAYOUT_H__
 
+#include <memory>
 #include "layout.h"
 #include "scripting/import_script.h"
+
+// forward declaration
+class ConfigManager;
+class Runtime;
 
 class JSLayout : public Layout
 {
 protected:
+    std::shared_ptr<ConfigManager> config;
+    std::shared_ptr<Runtime> runtime;
     zmm::Ref<ImportScript> import_script;
 
 public:
-    JSLayout();
+    JSLayout(std::shared_ptr<ConfigManager> config,
+        std::shared_ptr<Storage> storage,
+        std::shared_ptr<ContentManager> content,
+        std::shared_ptr<Runtime> runtime);
     virtual ~JSLayout();
     virtual void processCdsObject(zmm::Ref<CdsObject> obj, std::string rootpath) override;
 };

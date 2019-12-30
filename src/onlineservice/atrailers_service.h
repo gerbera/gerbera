@@ -35,18 +35,26 @@
 #ifndef __ATRAILERS_SERVICE_H__
 #define __ATRAILERS_SERVICE_H__
 
+#include <memory>
+#include <curl/curl.h>
 #include "mxml/mxml.h"
 #include "online_service.h"
 #include "url.h"
 #include "zmm/zmm.h"
-#include <curl/curl.h>
+
+// forward declaration
+class ConfigManager;
+class ContentManager;
 
 /// \brief This is an interface for all online services, the function
 /// handles adding/refreshing content in the database.
 class ATrailersService : public OnlineService {
 public:
-    ATrailersService();
+    ATrailersService(std::shared_ptr<ConfigManager> config,
+        std::shared_ptr<Storage> storage,
+        std::shared_ptr<ContentManager> content);
     ~ATrailersService();
+
     /// \brief Retrieves user specified content from the service and adds
     /// the items to the database.
     virtual bool refreshServiceData(zmm::Ref<Layout> layout);
@@ -62,6 +70,10 @@ public:
     virtual zmm::Ref<zmm::Object> defineServiceTask(zmm::Ref<mxml::Element> xmlopt, zmm::Ref<zmm::Object> params);
 
 protected:
+    std::shared_ptr<ConfigManager> config;
+    std::shared_ptr<Storage> storage;
+    std::shared_ptr<ContentManager> content;
+
     // the handle *must never be used from multiple threads*
     CURL* curl_handle;
     // safeguard to ensure the above

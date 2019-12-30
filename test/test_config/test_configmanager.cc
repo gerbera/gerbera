@@ -55,7 +55,7 @@ class ConfigManagerTest : public ::testing::Test {
     file << cfgContent;
     file.close();
 
-    subject = new ConfigManager();
+    subject = nullptr;
   };
 
   std::string createTempPath() {
@@ -90,7 +90,8 @@ class ConfigManagerTest : public ::testing::Test {
   }
 
   virtual void TearDown() {
-    delete subject;
+    if (subject)
+      delete subject;
   };
 
   std::string gerberaDir;
@@ -103,9 +104,7 @@ class ConfigManagerTest : public ::testing::Test {
 };
 
 TEST_F(ConfigManagerTest, LoadsWebUIDefaultValues) {
-  subject->setStaticArgs(config_file, home.c_str(), confdir.c_str(), prefix.c_str(), magic.c_str());
-
-  subject->init();
+  subject = new ConfigManager(config_file, home, confdir, prefix, magic, "", "", 0, false);
 
   ASSERT_TRUE(subject->getBoolOption(CFG_SERVER_UI_ENABLED));
   ASSERT_TRUE(subject->getBoolOption(CFG_SERVER_UI_SHOW_TOOLTIPS));
@@ -125,24 +124,19 @@ TEST_F(ConfigManagerTest, ThrowsExceptionWhenMissingConfigFileAndNoDefault) {
 
   config_file = "";
 
-  subject->setStaticArgs(config_file, notExistsDir.c_str(), confdir.c_str(), prefix.c_str(), magic.c_str());
-
   try {
-    subject->init();
-  }catch(Exception const & err) {
+    subject = new ConfigManager(config_file, notExistsDir, confdir, prefix, magic, "", "", 0, false);
+  } catch(Exception const & err) {
     EXPECT_EQ(err.getMessage(), expErrMsg.str());
   }
 }
 
 TEST_F(ConfigManagerTest, LoadsConfigFromDefaultHomeWhenExistsButNotSpecified) {
   config_file = "";
-  subject->setStaticArgs(config_file, home.c_str(), confdir.c_str(), prefix.c_str(), magic.c_str());
-
-  subject->init();
+  subject = new ConfigManager(config_file, home, confdir, prefix, magic, "", "", 0, false);
 
   ASSERT_TRUE(subject->getBoolOption(CFG_SERVER_UI_ENABLED));
   ASSERT_TRUE(subject->getBoolOption(CFG_SERVER_UI_SHOW_TOOLTIPS));
   ASSERT_FALSE(subject->getBoolOption(CFG_SERVER_UI_ACCOUNTS_ENABLED));
   ASSERT_EQ(30, subject->getIntOption(CFG_SERVER_UI_SESSION_TIMEOUT));
 }
-

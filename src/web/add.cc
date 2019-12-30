@@ -30,6 +30,7 @@
 /// \file add.cc
 
 #include "common.h"
+#include "config/config_manager.h"
 #include "content_manager.h"
 #include "util/filesystem.h"
 #include "pages.h"
@@ -40,8 +41,9 @@
 using namespace zmm;
 using namespace mxml;
 
-web::add::add()
-    : WebRequestHandler()
+web::add::add(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
+    std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
+    : WebRequestHandler(config, storage, content, sessionManager)
 {
 }
 
@@ -60,7 +62,6 @@ void web::add::process()
     if (path.empty())
         throw _Exception("web::add::process(): illegal path");
 
-    Ref<ContentManager> cm = ContentManager::getInstance();
-    cm->addFile(path, true);
+    content->addFile(path, true);
     log_debug("add: returning\n");
 }

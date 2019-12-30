@@ -40,7 +40,7 @@
 /// \brief This class is responsible for reading webm or mkv tags metadata
 class MatroskaHandler : public MetadataHandler {
 public:
-    MatroskaHandler();
+    MatroskaHandler(std::shared_ptr<ConfigManager> config);
     virtual void fillMetadata(zmm::Ref<CdsItem> item);
     virtual zmm::Ref<IOHandler> serveContent(zmm::Ref<CdsItem> item, int resNum);
 

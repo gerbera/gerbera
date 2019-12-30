@@ -45,8 +45,8 @@ const char* names[] = {
     "/poster.jpg"
 };
 
-FanArtHandler::FanArtHandler()
-    : MetadataHandler()
+FanArtHandler::FanArtHandler(std::shared_ptr<ConfigManager> config)
+    : MetadataHandler(config)
 {
 }
 

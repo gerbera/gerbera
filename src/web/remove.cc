@@ -40,8 +40,9 @@
 using namespace zmm;
 using namespace mxml;
 
-web::remove::remove()
-    : WebRequestHandler()
+web::remove::remove(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
+    std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
+    : WebRequestHandler(config, storage, content, sessionManager)
 {
 }
 
@@ -54,7 +55,7 @@ void web::remove::process()
     int objectID = intParam("object_id");
     bool all = intParam("all");
 
-    ContentManager::getInstance()->removeObject(objectID, true, all);
+    content->removeObject(objectID, true, all);
 
     log_debug("remove: returning\n");
 }

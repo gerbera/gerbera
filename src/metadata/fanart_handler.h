@@ -38,7 +38,7 @@
 /// \brief This class is responsible for populating filesystem based album and fan art
 class FanArtHandler : public MetadataHandler {
 public:
-    FanArtHandler();
+    FanArtHandler(std::shared_ptr<ConfigManager> config);
     virtual void fillMetadata(zmm::Ref<CdsItem> item);
     virtual zmm::Ref<IOHandler> serveContent(zmm::Ref<CdsItem> item, int resNum);
 };

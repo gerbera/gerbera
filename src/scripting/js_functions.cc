@@ -92,13 +92,14 @@ duk_ret_t js_addCdsObject(duk_context *ctx)
         Ref<StringConverter> p2i;
         Ref<StringConverter> i2i;
 
+        auto config = self->getConfig();
         if (self->whoami() == S_PLAYLIST)
         {
-            p2i = StringConverter::p2i();
+            p2i = StringConverter::p2i(config);
         }
         else
         {
-            i2i = StringConverter::i2i();
+            i2i = StringConverter::i2i(config);
         }
 
         if (self->whoami() == S_PLAYLIST)
@@ -120,7 +121,7 @@ duk_ret_t js_addCdsObject(duk_context *ctx)
             return 0;
 
         Ref<CdsObject> cds_obj;
-        Ref<ContentManager> cm = ContentManager::getInstance();
+        auto cm = self->getContent();
         int pcd_id = INVALID_OBJECT_ID;
 
         duk_swap_top(ctx, 0);
@@ -148,7 +149,7 @@ duk_ret_t js_addCdsObject(duk_context *ctx)
                     return 0;
                 }
 
-                Ref<CdsObject> mainObj = Storage::getInstance()->loadObject(pcd_id);
+                Ref<CdsObject> mainObj = self->getStorage()->loadObject(pcd_id);
                 cds_obj = self->dukObject2cdsObject(mainObj);
             }
             else
@@ -165,7 +166,7 @@ duk_ret_t js_addCdsObject(duk_context *ctx)
         int id;
 
         if ((self->whoami() == S_PLAYLIST) &&
-            (ConfigManager::getInstance()->
+            (self->getConfig()->
              getBoolOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS)))
         {
             path = p2i->convert(path);
@@ -211,7 +212,7 @@ duk_ret_t js_addCdsObject(duk_context *ctx)
                  IS_CDS_ITEM_INTERNAL_URL(cds_obj->getObjectType()))
         {
             if ((self->whoami() == S_PLAYLIST) &&
-            (ConfigManager::getInstance()->
+            (self->getConfig()->
              getBoolOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS)))
             {
                 cds_obj->setFlag(OBJECT_FLAG_PLAYLIST_REF);

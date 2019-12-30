@@ -32,25 +32,27 @@
 #ifndef __SCRIPTING_RUNTIME_H__
 #define __SCRIPTING_RUNTIME_H__
 
+#include <mutex>
 #include "duktape.h"
 #include <pthread.h>
 #include "common.h"
-#include "singleton.h"
 
 /// \brief Runtime class definition.
-class Runtime : public Singleton<Runtime, std::recursive_mutex>
+class Runtime
 {
 protected:
     duk_context *ctx;
+    std::recursive_mutex mutex;
 
 public:
     Runtime();
     virtual ~Runtime();
-    std::string getName() override { return "Runtime"; }
     
     /// \brief Returns a new (sub)context. !!! Not thread-safe !!!
     duk_context *createContext(std::string name);
     void destroyContext(std::string name);
+
+    using AutoLock = std::lock_guard<std::recursive_mutex>;
     std::recursive_mutex& getMutex() { return mutex; }
 };
 

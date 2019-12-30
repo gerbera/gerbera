@@ -51,11 +51,13 @@ enum class ScanMode {
     INotify
 };
 
+// forward declaration
+class Storage;
 class AutoscanDirectory;
 
 class AutoscanList : public zmm::Object {
 public:
-    AutoscanList();
+    AutoscanList(std::shared_ptr<Storage> storage);
 
     /// \brief Adds a new AutoscanDirectory to the list.
     ///
@@ -121,6 +123,8 @@ public:
 */
 
 protected:
+    std::shared_ptr<Storage> storage;
+
     std::recursive_mutex mutex;
     using AutoLock = std::lock_guard<std::recursive_mutex>;
 

@@ -60,13 +60,13 @@ int FsObjectComparator(void* arg1, void* arg2)
     }
 }
 
-Filesystem::Filesystem()
+Filesystem::Filesystem(std::shared_ptr<ConfigManager> config)
     : Object()
+    , config(config)
 {
     includeRules = Ref<Array<RExp>>(new Array<RExp>());
-    Ref<ConfigManager> cm = ConfigManager::getInstance();
-    /*    
-    Ref<Element> rules = cm->getElement("filter");
+    /*
+    Ref<Element> rules = config->getElement("filter");
     if (rules == nullptr)
         return;
     for (int i = 0; i < rules->childCount(); i++)
@@ -234,7 +234,7 @@ bool Filesystem::haveDirectories(std::string dir)
 
 bool Filesystem::fileAllowed(std::string path)
 {
-    if (path == ConfigManager::getInstance()->getConfigFilename())
+    if (path == config->getConfigFilename())
         return false;
 
     return true;

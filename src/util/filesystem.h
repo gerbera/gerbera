@@ -32,6 +32,7 @@
 #ifndef __FILESYSTEM_H__
 #define __FILESYSTEM_H__
 
+#include <memory>
 #include "common.h"
 #include "rexp.h"
 
@@ -56,9 +57,12 @@ public:
     bool hasContent;
 };
 
+// forward declaration
+class ConfigManager;
+
 class Filesystem : public zmm::Object {
 public:
-    Filesystem();
+    Filesystem(std::shared_ptr<ConfigManager> config);
 
     zmm::Ref<zmm::Array<FsObject>> readDirectory(std::string path, int mask,
         int chldMask = 0);
@@ -67,6 +71,7 @@ public:
     bool fileAllowed(std::string path);
 
 protected:
+    std::shared_ptr<ConfigManager> config;
     zmm::Ref<zmm::Array<RExp>> includeRules;
     bool have(std::string dir, int mask);
 };

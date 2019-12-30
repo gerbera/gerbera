@@ -38,7 +38,8 @@
 
 using namespace zmm;
 
-TranscodeDispatcher::TranscodeDispatcher() : TranscodeHandler()
+TranscodeDispatcher::TranscodeDispatcher(std::shared_ptr<ConfigManager> config,
+    std::shared_ptr<ContentManager> content) : TranscodeHandler(config, content)
 {
 }
 
@@ -55,7 +56,7 @@ Ref<IOHandler> TranscodeDispatcher::open(Ref<TranscodingProfile> profile,
 
     if (profile->getType() == TR_External)
     {
-        Ref<TranscodeExternalHandler> tr_ext(new TranscodeExternalHandler());
+        Ref<TranscodeExternalHandler> tr_ext(new TranscodeExternalHandler(config, content));
         return tr_ext->open(profile, location, obj, range);
     }
     else

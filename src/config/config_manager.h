@@ -33,14 +33,15 @@
 #ifndef __CONFIG_MANAGER_H__
 #define __CONFIG_MANAGER_H__
 
+#include <memory>
 #include "autoscan.h"
 #include "common.h"
 #include "config_options.h"
 #include "zmm/dictionary.h"
 #include "zmm/object_dictionary.h"
 #include "mxml/mxml.h"
+#include "zmm/object_dictionary.h"
 #include "mxml/xpath.h"
-#include "singleton.h"
 
 #include "transcoding/transcoding.h"
 #ifdef ONLINE_SERVICES
@@ -177,13 +178,13 @@ typedef enum {
     CFG_MAX
 } config_option_t;
 
-class ConfigManager : public Singleton<ConfigManager, std::mutex> {
+class ConfigManager {
 public:
-    ConfigManager();
-
-    void init() override;
-    std::string getName() override { return "Config Manager"; }
-
+    ConfigManager(std::string filename,
+        std::string userhome, std::string config_dir,
+        std::string prefix_dir, std::string magic,
+        std::string ip, std::string interface, int port,
+        bool debug_logging);
     virtual ~ConfigManager();
 
     /// \brief Returns the name of the config file that was used to launch the server.
@@ -226,15 +227,6 @@ public:
     /// \param option to retrieve
     zmm::Ref<TranscodingProfileList> getTranscodingProfileListOption(config_option_t option);
 
-    /// \brief sets static configuration parameters that will be used by
-    /// when the ConfigManager class initializes
-    static void setStaticArgs(std::string _filename, std::string _userhome,
-        std::string _config_dir = DEFAULT_CONFIG_HOME,
-        std::string _prefix_dir = PACKAGE_DATADIR,
-        std::string _magic = "",
-        bool _debug_logging = false,
-        std::string _ip = "", std::string _interface = "", int _port = 0);
-
     static bool isDebugLogging() { return debug_logging; };
 
     /// \brief Creates a html file that is a redirector to the current server i
@@ -247,15 +239,13 @@ protected:
     std::string construct_path(std::string path);
     void prepare_path(std::string path, bool needDir = false, bool existenceUnneeded = false);
 
-    static std::string filename;
-    static std::string userhome;
-    static std::string config_dir;
-    static std::string prefix_dir;
-    static std::string magic;
+    std::string filename;
+    std::string prefix_dir;
+    std::string magic;
+    std::string ip;
+    std::string interface;
+    int port;
     static bool debug_logging;
-    static std::string ip;
-    static std::string interface;
-    static int port;
 
     zmm::Ref<mxml::Document> rootDoc;
     zmm::Ref<mxml::Element> root;
@@ -320,7 +310,7 @@ protected:
     /// \brief Creates an array of AutoscanDirectory objects from a XML nodeset.
     /// \param element starting element of the nodeset.
     /// \param scanmode add only directories with the specified scanmode to the array
-    zmm::Ref<AutoscanList> createAutoscanListFromNodeset(zmm::Ref<mxml::Element> element, ScanMode scanmode);
+    zmm::Ref<AutoscanList> createAutoscanListFromNodeset(std::shared_ptr<Storage> storage, zmm::Ref<mxml::Element> element, ScanMode scanmode);
 
     /// \brief Creates ab aray of TranscodingProfile objects from an XML
     /// nodeset.

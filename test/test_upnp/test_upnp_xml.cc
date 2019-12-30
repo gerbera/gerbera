@@ -14,7 +14,7 @@ class UpnpXmlTest : public ::testing::Test {
   virtual void SetUp() {
     std::string virtualDir = "/dir/virtual";
     std::string presentationURl = "http://someurl/";
-    subject = new UpnpXMLBuilder(virtualDir, presentationURl);
+    subject = new UpnpXMLBuilder(nullptr, nullptr, virtualDir, presentationURl);
   }
 
   virtual void TearDown() {
@@ -83,7 +83,7 @@ TEST_F(UpnpXmlTest, CreatesEventPropertySet) {
 }
 
 TEST_F(UpnpXmlTest, UpdatesObjectActiveItem) {
-  zmm::Ref<CdsObject> obj(new CdsActiveItem());
+  zmm::Ref<CdsObject> obj(new CdsActiveItem(nullptr));
   std::ostringstream inputXml;
   inputXml << "<item>";  // this is not valid UPNP, but just enough to test with
   inputXml << "<dc:title>Title</dc:title>";
@@ -118,7 +118,7 @@ TEST_F(UpnpXmlTest, CreateResponse) {
 }
 
 TEST_F(UpnpXmlTest, FirstResourceRendersPureWhenExternalUrl) {
-  zmm::Ref<CdsObject> obj(new CdsItemExternalURL());
+  zmm::Ref<CdsObject> obj(new CdsItemExternalURL(nullptr));
   obj->setLocation("http://localhost/external/url");
 
   zmm::Ref<CdsItem> item = RefCast(obj, CdsItem);
@@ -130,7 +130,7 @@ TEST_F(UpnpXmlTest, FirstResourceRendersPureWhenExternalUrl) {
 }
 
 TEST_F(UpnpXmlTest, FirstResourceAddsLocalResourceIdToExternalUrlWhenOnlineWithProxy) {
-  zmm::Ref<CdsObject> obj(new CdsItemExternalURL());
+  zmm::Ref<CdsObject> obj(new CdsItemExternalURL(nullptr));
   obj->setLocation("http://localhost/external/url");
   obj->setID(12345);
   obj->setFlag(OBJECT_FLAG_ONLINE_SERVICE);
@@ -145,7 +145,7 @@ TEST_F(UpnpXmlTest, FirstResourceAddsLocalResourceIdToExternalUrlWhenOnlineWithP
 }
 
 TEST_F(UpnpXmlTest, FirstResourceAddsLocalResourceIdToItem) {
-  zmm::Ref<CdsObject> obj(new CdsItem());
+  zmm::Ref<CdsObject> obj(new CdsItem(nullptr));
   obj->setLocation("local/content");
   obj->setID(12345);
 
@@ -158,7 +158,7 @@ TEST_F(UpnpXmlTest, FirstResourceAddsLocalResourceIdToItem) {
 }
 
 TEST_F(UpnpXmlTest, FirstResourceAddsContentServeToInternalUrlItem) {
-  zmm::Ref<CdsObject> obj(new CdsItemInternalURL());
+  zmm::Ref<CdsObject> obj(new CdsItemInternalURL(nullptr));
   obj->setLocation("local/content");
   obj->setID(12345);
 

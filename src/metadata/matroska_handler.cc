@@ -47,7 +47,7 @@
 #include "util/string_converter.h"
 #include "matroska_handler.h"
 
-#include "content_manager.h"
+#include "util/tools.h"
 
 using namespace zmm;
 using namespace LIBEBML_NAMESPACE;
@@ -115,8 +115,8 @@ public:
 };
 
 
-MatroskaHandler::MatroskaHandler()
-    : MetadataHandler()
+MatroskaHandler::MatroskaHandler(std::shared_ptr<ConfigManager> config)
+    : MetadataHandler(config)
 {
 }
 
@@ -180,7 +180,7 @@ void MatroskaHandler::parseInfo(Ref<CdsItem> item, EbmlStream & ebml_stream, Kax
     m = static_cast<EbmlMaster *>(info);
     m->Read(ebml_stream, EBML_CONTEXT(info), i_upper_level, dummy_el, true);
 
-    Ref<StringConverter> sc = StringConverter::i2i(); // sure is sure
+    Ref<StringConverter> sc = StringConverter::i2i(config); // sure is sure
 
     for( size_t i = 0; i < m->ListSize(); i++) {
         EbmlElement* el = (*m)[i];
@@ -245,7 +245,7 @@ std::string MatroskaHandler::getContentTypeFromByteVector(const KaxFileData* dat
 {
     std::string art_mimetype = MIMETYPE_DEFAULT;
 #ifdef HAVE_MAGIC
-    art_mimetype = ContentManager::getInstance()->getMimeTypeFromBuffer(data->GetBuffer(), data->GetSize());
+    art_mimetype = getMIMETypeFromBuffer(data->GetBuffer(), data->GetSize());
     if (!string_ok(art_mimetype)) {
         return MIMETYPE_DEFAULT;
     }

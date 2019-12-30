@@ -38,7 +38,14 @@
 #include "request_handler.h"
 #include "web_request_handler.h"
 
+// forward declaration
+class ConfigManager;
+class Storage;
+
 namespace web {
+
+// forward declaration
+class SessionManager;
 
 /// \brief Authentication handler (used over AJAX)
 class auth : public WebRequestHandler {
@@ -46,70 +53,80 @@ protected:
     int timeout;
 
 public:
-    auth();
+    auth(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
+        std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
     virtual void process();
 };
 
 /// \brief Browser container tree
 class containers : public WebRequestHandler {
 public:
-    containers();
+    containers(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
+        std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
     virtual void process();
 };
 
 /// \brief Browser directory tree
 class directories : public WebRequestHandler {
 public:
-    directories();
+    directories(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
+        std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
     virtual void process();
 };
 
 /// \brief Browser file list
 class files : public WebRequestHandler {
 public:
-    files();
+    files(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
+        std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
     virtual void process();
 };
 
 /// \brief Browser item list
 class items : public WebRequestHandler {
 public:
-    items();
+    items(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
+        std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
     virtual void process();
 };
 
 /// \brief Browser add item
 class add : public WebRequestHandler {
 public:
-    add();
+    add(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
+        std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
     virtual void process();
 };
 
 /// \brief Browser remove item
 class remove : public WebRequestHandler {
 public:
-    remove();
+    remove(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
+        std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
     virtual void process();
 };
 
 /// \brief Browser remove item
 class edit_load : public WebRequestHandler {
 public:
-    edit_load();
+    edit_load(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
+        std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
     virtual void process();
 };
 
 /// \brief Browser remove item
 class edit_save : public WebRequestHandler {
 public:
-    edit_save();
+    edit_save(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
+        std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
     virtual void process();
 };
 
 /// \brief Browser add object.
 class addObject : public WebRequestHandler {
 public:
-    addObject();
+    addObject(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
+        std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
     virtual void process();
 
 protected:
@@ -122,7 +139,8 @@ protected:
 /// \brief autoscan add and remove
 class autoscan : public WebRequestHandler {
 public:
-    autoscan();
+    autoscan(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
+        std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
     virtual void process();
 
 protected:
@@ -132,26 +150,35 @@ protected:
 /// \brief nothing :)
 class voidType : public WebRequestHandler {
 public:
+    voidType(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
+        std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
+        : WebRequestHandler(config, storage, content, sessionManager) {};
     virtual void process();
 };
 
 /// \brief task list and task cancel
 class tasks : public WebRequestHandler {
 public:
+    tasks(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
+        std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
     virtual void process();
 };
 
 /// \brief UI action button
 class action : public WebRequestHandler {
 public:
-    action();
+    action(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
+        std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
     virtual void process();
 };
 
 /// \brief Chooses and creates the appropriate handler for processing the request.
 /// \param page identifies what type of the request we are dealing with.
 /// \return the appropriate request handler.
-WebRequestHandler* createWebRequestHandler(std::string page);
+WebRequestHandler* createWebRequestHandler(
+    std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
+    std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager,
+    std::string page);
 
 } // namespace
 

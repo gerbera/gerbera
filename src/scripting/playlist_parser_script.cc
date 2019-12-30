@@ -32,6 +32,7 @@
 #ifdef HAVE_JS
 
 #include "playlist_parser_script.h"
+#include "storage/storage.h"
 #include "config/config_manager.h"
 #include "content_manager.h"
 #include "js_functions.h"
@@ -82,10 +83,10 @@ js_getCdsObject(duk_context *ctx)
     if (!string_ok(path))
         return 0;
 
-    Ref<Storage> storage = Storage::getInstance();
+    auto storage = self->getStorage();
     Ref<CdsObject> obj = storage->findObjectByPath(path);
     if (obj == nullptr) {
-        Ref<ContentManager> cm = ContentManager::getInstance();
+        auto cm = self->getContent();
         obj = cm->createObjectFromFile(path);
         if (obj == nullptr) // object ignored
             return 0;
@@ -96,7 +97,11 @@ js_getCdsObject(duk_context *ctx)
 
 } // extern "C"
 
-PlaylistParserScript::PlaylistParserScript(Ref<Runtime> runtime) : Script(runtime, "playlist")
+PlaylistParserScript::PlaylistParserScript(std::shared_ptr<ConfigManager> config,
+    std::shared_ptr<Storage> storage,
+    std::shared_ptr<ContentManager> content,
+    std::shared_ptr<Runtime> runtime)
+    : Script(config, storage, content, runtime, "playlist")
 {
     currentHandle = nullptr;
     currentObjectID = INVALID_OBJECT_ID;
@@ -104,18 +109,17 @@ PlaylistParserScript::PlaylistParserScript(Ref<Runtime> runtime) : Script(runtim
  
     try
     {
-        AutoLock lock(runtime->getMutex());
+        Runtime::AutoLock lock(runtime->getMutex());
         defineFunction("readln", js_readln, 0);
         defineFunction("getCdsObject", js_getCdsObject, 1);
 
-        std::string scriptPath = ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT); 
+        std::string scriptPath = config->getOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT);
         load(scriptPath);
     }
     catch (const Exception & ex)
     {
         throw ex;
     }
-    
 }
 
 std::string PlaylistParserScript::readln()
@@ -172,8 +176,7 @@ void PlaylistParserScript::processPlaylistObject(zmm::Ref<CdsObject> obj, Ref<Ge
         throw _Exception("failed to open file: " + obj->getLocation());
     }
 
-    AutoLock lock(runtime->getMutex());
-
+    Runtime::AutoLock lock(runtime->getMutex());
     try
     {
         cdsObject2dukObject(obj);
@@ -185,7 +188,6 @@ void PlaylistParserScript::processPlaylistObject(zmm::Ref<CdsObject> obj, Ref<Ge
         duk_del_prop_string(ctx, -1, "playlist");
         duk_pop(ctx);
     }
-
     catch (const Exception & e)
     {
         duk_push_global_object(ctx);
@@ -221,7 +223,6 @@ void PlaylistParserScript::processPlaylistObject(zmm::Ref<CdsObject> obj, Ref<Ge
     }
 
 }
-
 
 PlaylistParserScript::~PlaylistParserScript()
 {

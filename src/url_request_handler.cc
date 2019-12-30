@@ -34,13 +34,14 @@
 #include <ixml.h>
 
 #include "common.h"
+#include "config/config_manager.h"
 #include "server.h"
 #include "storage/storage.h"
+#include "content_manager.h"
 
 #include "iohandler/buffered_io_handler.h"
 #include "cds_objects.h"
 #include "zmm/dictionary.h"
-#include "play_hook.h"
 #include "url_request_handler.h"
 
 #ifdef ONLINE_SERVICES
@@ -53,8 +54,11 @@
 using namespace zmm;
 using namespace mxml;
 
-URLRequestHandler::URLRequestHandler()
-    : RequestHandler()
+URLRequestHandler::URLRequestHandler(std::shared_ptr<ConfigManager> config,
+    std::shared_ptr<Storage> storage,
+    std::shared_ptr<ContentManager> content)
+    : RequestHandler(config, storage)
+    , content(content)
 {
 }
 
@@ -85,8 +89,6 @@ void URLRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
 
     //log_debug("got ObjectID: [%s]\n", object_id.c_str());
 
-    Ref<Storage> storage = Storage::getInstance();
-
     Ref<CdsObject> obj = storage->loadObject(objectID);
 
     int objectType = obj->getObjectType();
@@ -98,7 +100,7 @@ void URLRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
     tr_profile = dict->get(URL_PARAM_TRANSCODE_PROFILE_NAME);
 
     if (string_ok(tr_profile)) {
-        Ref<TranscodingProfile> tp = ConfigManager::getInstance()->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(tr_profile);
+        Ref<TranscodingProfile> tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(tr_profile);
 
         if (tp == nullptr)
             throw _Exception("Transcoding requested but no profile "
@@ -184,8 +186,6 @@ Ref<IOHandler> URLRequestHandler::open(const char* filename,
     } else
         objectID = std::stoi(objID);
 
-    Ref<Storage> storage = Storage::getInstance();
-
     Ref<CdsObject> obj = storage->loadObject(objectID);
 
     int objectType = obj->getObjectType();
@@ -216,12 +216,12 @@ Ref<IOHandler> URLRequestHandler::open(const char* filename,
     tr_profile = dict->get(URL_PARAM_TRANSCODE_PROFILE_NAME);
 
     if (string_ok(tr_profile)) {
-        Ref<TranscodingProfile> tp = ConfigManager::getInstance()->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(tr_profile);
+        Ref<TranscodingProfile> tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(tr_profile);
 
         if (tp == nullptr)
             throw _Exception("Transcoding of file " + url + " but no profile matching the name " + tr_profile + " found");
 
-        Ref<TranscodeDispatcher> tr_d(new TranscodeDispatcher());
+        Ref<TranscodeDispatcher> tr_d(new TranscodeDispatcher(config, content));
         return tr_d->open(tp, url, RefCast(item, CdsObject), range);
     } else {
         Ref<URL> u(new URL());
@@ -249,7 +249,7 @@ Ref<IOHandler> URLRequestHandler::open(const char* filename,
 
     io_handler->open(mode);
 
-    PlayHook::getInstance()->trigger(obj);
+    content->triggerPlayHook(obj);
     return io_handler;
 }
 

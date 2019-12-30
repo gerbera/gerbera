@@ -52,6 +52,9 @@ extern "C" {
 
 #endif
 
+// forward declaration
+class ConfigManager;
+
 /// \brief splits the given string into array of strings using a separator character.
 /// \param str String to split
 /// \param sep separator character
@@ -347,9 +350,9 @@ std::string get_last_path(std::string location);
 /// \return Caclulated position or -1 in case of an error.
 ssize_t getValidUTF8CutPosition(std::string str, ssize_t cutpos);
 
-std::string getDLNATransferHeader(std::string mimeType);
+std::string getDLNATransferHeader(std::shared_ptr<ConfigManager> config, std::string mimeType);
 std::string getDLNAprofileString(std::string contentType);
-std::string getDLNAContentHeader(std::string contentType);
+std::string getDLNAContentHeader(std::shared_ptr<ConfigManager> config, std::string contentType);
 
 #ifndef HAVE_FFMPEG
 /// \brief Fallback code to retrieve the used fourcc from an AVI file.

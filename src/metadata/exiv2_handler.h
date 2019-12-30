@@ -37,7 +37,7 @@
 /// \brief This class is responsible for reading exif header metadata
 class Exiv2Handler : public MetadataHandler {
 public:
-    Exiv2Handler();
+    Exiv2Handler(std::shared_ptr<ConfigManager> config);
     virtual void fillMetadata(zmm::Ref<CdsItem> item);
     virtual zmm::Ref<IOHandler> serveContent(zmm::Ref<CdsItem> item, int resNum);
 };

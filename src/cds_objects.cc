@@ -37,8 +37,9 @@
 using namespace zmm;
 using namespace mxml;
 
-CdsObject::CdsObject()
+CdsObject::CdsObject(std::shared_ptr<Storage> storage)
     : Object()
+    , storage(storage)
 {
     metadata = Ref<Dictionary>(new Dictionary());
     auxdata = Ref<Dictionary>(new Dictionary());
@@ -110,20 +111,20 @@ void CdsObject::validate()
         throw _Exception("Object validation failed: missing upnp class\n");
 }
 
-Ref<CdsObject> CdsObject::createObject(unsigned int objectType)
+Ref<CdsObject> CdsObject::createObject(std::shared_ptr<Storage> storage, unsigned int objectType)
 {
     CdsObject* pobj;
 
     if (IS_CDS_CONTAINER(objectType)) {
-        pobj = new CdsContainer();
+        pobj = new CdsContainer(storage);
     } else if (IS_CDS_ITEM_INTERNAL_URL(objectType)) {
-        pobj = new CdsItemInternalURL();
+        pobj = new CdsItemInternalURL(storage);
     } else if (IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
-        pobj = new CdsItemExternalURL();
+        pobj = new CdsItemExternalURL(storage);
     } else if (IS_CDS_ACTIVE_ITEM(objectType)) {
-        pobj = new CdsActiveItem();
+        pobj = new CdsActiveItem(storage);
     } else if (IS_CDS_ITEM(objectType)) {
-        pobj = new CdsItem();
+        pobj = new CdsItem(storage);
     } else {
         throw _Exception("invalid object type: " + std::to_string(objectType));
     }
@@ -132,8 +133,8 @@ Ref<CdsObject> CdsObject::createObject(unsigned int objectType)
 
 /* CdsItem */
 
-CdsItem::CdsItem()
-    : CdsObject()
+CdsItem::CdsItem(std::shared_ptr<Storage> storage)
+    : CdsObject(storage)
 {
     objectType = OBJECT_TYPE_ITEM;
     upnpClass = "object.item";
@@ -175,8 +176,8 @@ void CdsItem::validate()
         throw _Exception("Item validation failed: file " + this->location + " not found");
 }
 
-CdsActiveItem::CdsActiveItem()
-    : CdsItem()
+CdsActiveItem::CdsActiveItem(std::shared_ptr<Storage> storage)
+    : CdsItem(storage)
 {
     objectType |= OBJECT_TYPE_ACTIVE_ITEM;
 
@@ -214,8 +215,8 @@ void CdsActiveItem::validate()
 }
 //---------
 
-CdsItemExternalURL::CdsItemExternalURL()
-    : CdsItem()
+CdsItemExternalURL::CdsItemExternalURL(std::shared_ptr<Storage> storage)
+    : CdsItem(storage)
 {
     objectType |= OBJECT_TYPE_ITEM_EXTERNAL_URL;
 
@@ -234,8 +235,8 @@ void CdsItemExternalURL::validate()
 }
 //---------
 
-CdsItemInternalURL::CdsItemInternalURL()
-    : CdsItemExternalURL()
+CdsItemInternalURL::CdsItemInternalURL(std::shared_ptr<Storage> storage)
+    : CdsItemExternalURL(storage)
 {
     objectType |= OBJECT_TYPE_ITEM_INTERNAL_URL;
 
@@ -251,8 +252,8 @@ void CdsItemInternalURL::validate()
         throw _Exception("Internal URL item validation failed: only realative URLs allowd\n");
 }
 
-CdsContainer::CdsContainer()
-    : CdsObject()
+CdsContainer::CdsContainer(std::shared_ptr<Storage> storage)
+    : CdsObject(storage)
 {
     objectType = OBJECT_TYPE_CONTAINER;
     updateID = 0;
@@ -304,12 +305,10 @@ std::string CdsContainer::getVirtualPath()
     if (getID() == CDS_ID_ROOT) {
         location = "/";
     } else if (getID() == CDS_ID_FS_ROOT) {
-        Ref<Storage> storage = Storage::getInstance();
         location = "/" + storage->getFsRootName();
     } else if (string_ok(getLocation())) {
         location = getLocation();
         if (!isVirtual()) {
-            Ref<Storage> storage = Storage::getInstance();
             location = "/" + storage->getFsRootName() + location;
         }
     }
@@ -322,7 +321,6 @@ std::string CdsContainer::getVirtualPath()
 
 std::string CdsItem::getVirtualPath()
 {
-    Ref<Storage> storage = Storage::getInstance();
     Ref<CdsObject> cont = storage->loadObject(getParentID());
     std::string location = cont->getVirtualPath();
     location = location + '/' + getTitle();

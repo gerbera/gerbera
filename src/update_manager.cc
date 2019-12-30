@@ -32,7 +32,6 @@
 #include "update_manager.h"
 
 #include "server.h"
-#include "singleton.h"
 #include "storage/storage.h"
 #include "util/tools.h"
 #include "upnp_cds.h"
@@ -51,8 +50,9 @@
 using namespace zmm;
 using namespace std;
 
-UpdateManager::UpdateManager()
-    : Singleton<UpdateManager>()
+UpdateManager::UpdateManager(std::shared_ptr<Storage> storage, std::shared_ptr<Server> server)
+    : storage(storage)
+    , server(server)
     , objectIDHash(make_shared<unordered_set<int>>())
     , shutdownFlag(false)
     , flushPolicy(FLUSH_SPEC)
@@ -78,10 +78,12 @@ void UpdateManager::init()
     //pthread_attr_destroy(&attr);
 }
 
+UpdateManager::~UpdateManager() { log_debug("UpdateManager destroyed\n"); }
+
 void UpdateManager::shutdown()
 {
     log_debug("start\n");
-    unique_lock<mutex_type> lock(mutex);
+    AutoLockU lock(mutex);
     shutdownFlag = true;
     log_debug("signalling...\n");
     cond.notify_one();
@@ -95,7 +97,7 @@ void UpdateManager::shutdown()
 
 void UpdateManager::containersChanged(const std::vector<int>& objectIDs, int flushPolicy)
 {
-    unique_lock<mutex_type> lock(mutex);
+    AutoLockU lock(mutex);
     // signalling thread if it could have been idle, because
     // there were no unprocessed updates
     bool signal = (!haveUpdates());
@@ -172,7 +174,7 @@ void UpdateManager::threadProc()
     struct timespec lastUpdate;
     getTimespecNow(&lastUpdate);
 
-    unique_lock<mutex_type> lock(mutex);
+    AutoLockU lock(mutex);
     //cond.notify_one();
     while (!shutdownFlag) {
         if (haveUpdates()) {
@@ -210,7 +212,7 @@ void UpdateManager::threadProc()
                 std::string updateString;
 
                 try {
-                    updateString = Storage::getInstance()->incrementUpdateIDs(objectIDHash);
+                    updateString = storage->incrementUpdateIDs(objectIDHash);
                     objectIDHash->clear(); // hash_data_array will be invalid after clear()
                 } catch (const Exception& e) {
                     e.printStackTrace();
@@ -222,7 +224,7 @@ void UpdateManager::threadProc()
                 if (string_ok(updateString)) {
                     try {
                         log_debug("updates sent: \"%s\"\n", updateString.c_str());
-                        Server::getInstance()->sendCDSSubscriptionUpdate(updateString);
+                        server->sendCDSSubscriptionUpdate(updateString);
                         getTimespecNow(&lastUpdate);
                     } catch (const Exception& e) {
                         log_error("Fatal error when sending updates: %s\n", e.getMessage().c_str());
@@ -239,6 +241,8 @@ void UpdateManager::threadProc()
             cond.wait(lock);
         }
     }
+
+    storage->threadCleanup();
 }
 
 void* UpdateManager::staticThreadProc(void* arg)
@@ -246,7 +250,6 @@ void* UpdateManager::staticThreadProc(void* arg)
     log_debug("starting update thread... thread: %d\n", pthread_self());
     auto* inst = (UpdateManager*)arg;
     inst->threadProc();
-    Storage::getInstance()->threadCleanup();
 
     log_debug("update thread shut down. thread: %d\n", pthread_self());
     return nullptr;

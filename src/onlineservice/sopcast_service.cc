@@ -32,6 +32,7 @@
 #ifdef SOPCAST
 
 #include "sopcast_service.h"
+#include "storage/storage.h"
 #include "config/config_manager.h"
 #include "content_manager.h"
 #include "server.h"
@@ -44,7 +45,12 @@ using namespace mxml;
 
 #define SOPCAST_CHANNEL_URL "http://www.sopcast.com/gchlxml"
 
-SopCastService::SopCastService()
+SopCastService::SopCastService(std::shared_ptr<ConfigManager> config,
+    std::shared_ptr<Storage> storage,
+    std::shared_ptr<ContentManager> content)
+    : config(config)
+    , storage(storage)
+    , content(content)
 {
     url = Ref<URL>(new URL());
     pid = 0;
@@ -77,7 +83,7 @@ Ref<Object> SopCastService::defineServiceTask(Ref<Element> xmlopt, Ref<Object> p
 Ref<Element> SopCastService::getData()
 {
     long retcode;
-    Ref<StringConverter> sc = StringConverter::i2i();
+    Ref<StringConverter> sc = StringConverter::i2i(config);
 
     std::string buffer;
 
@@ -134,7 +140,7 @@ bool SopCastService::refreshServiceData(Ref<Layout> layout)
 
     Ref<Element> reply = getData();
 
-    Ref<SopCastContentHandler> sc(new SopCastContentHandler());
+    Ref<SopCastContentHandler> sc(new SopCastContentHandler(config, storage));
     if (reply != nullptr)
         sc->setServiceContent(reply);
     else {
@@ -152,7 +158,7 @@ bool SopCastService::refreshServiceData(Ref<Layout> layout)
 
         obj->setVirtual(true);
 
-        Ref<CdsObject> old = Storage::getInstance()->loadObjectByServiceID(RefCast(obj, CdsItem)->getServiceID());
+        Ref<CdsObject> old = storage->loadObjectByServiceID(RefCast(obj, CdsItem)->getServiceID());
         if (old == nullptr) {
             log_debug("Adding new SopCast object\n");
 
@@ -167,10 +173,10 @@ bool SopCastService::refreshServiceData(Ref<Layout> layout)
             //            oldt.tv_sec = old->getAuxData(ONLINE_SERVICE_LAST_UPDATE).toLong();
             //            newt.tv_nsec = 0;
             //            newt.tv_sec = obj->getAuxData(ONLINE_SERVICE_LAST_UPDATE).toLong();
-            ContentManager::getInstance()->updateObject(obj);
+            content->updateObject(obj);
         }
 
-//        if (Server::getInstance()->getShutdownStatus())
+//        if (server->getShutdownStatus())
 //            return false;
 
     } while (obj != nullptr);

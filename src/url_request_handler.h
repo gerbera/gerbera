@@ -36,13 +36,22 @@
 #include "zmm/dictionary.h"
 #include "request_handler.h"
 
+// forward declaration
+class Storage;
+class ContentManager;
+
 class URLRequestHandler : public RequestHandler {
 public:
-    URLRequestHandler();
+    URLRequestHandler(std::shared_ptr<ConfigManager> config,
+        std::shared_ptr<Storage> storage,
+        std::shared_ptr<ContentManager> content);
     virtual void getInfo(const char *filename, UpnpFileInfo *info);
     virtual zmm::Ref<IOHandler> open(const char* filename,
         enum UpnpOpenFileMode mode,
         std::string range);
+
+protected:
+    std::shared_ptr<ContentManager> content;
 };
 
 #endif // __URL_REQUEST_HANDLER_H__

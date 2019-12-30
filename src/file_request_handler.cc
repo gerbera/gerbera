@@ -35,9 +35,11 @@
 #include "iohandler/file_io_handler.h"
 #include "file_request_handler.h"
 #include "metadata/metadata_handler.h"
-#include "play_hook.h"
 #include "util/process.h"
 #include "server.h"
+#include "config/config_manager.h"
+#include "storage/storage.h"
+#include "content_manager.h"
 #include "web/session_manager.h"
 #include "update_manager.h"
 
@@ -47,11 +49,19 @@
 
 using namespace zmm;
 using namespace mxml;
-using namespace web;
 
-FileRequestHandler::FileRequestHandler(UpnpXMLBuilder* xmlBuilder)
-    : RequestHandler()
-    , xmlBuilder(xmlBuilder) {};
+FileRequestHandler::FileRequestHandler(std::shared_ptr<ConfigManager> config,
+    std::shared_ptr<Storage> storage,
+    std::shared_ptr<ContentManager> content,
+    std::shared_ptr<UpdateManager> updateManager, std::shared_ptr<web::SessionManager> sessionManager,
+    UpnpXMLBuilder* xmlBuilder)
+    : RequestHandler(config, storage)
+    , content(content)
+    , updateManager(updateManager)
+    , sessionManager(sessionManager)
+    , xmlBuilder(xmlBuilder)
+{
+}
 
 void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 {
@@ -81,8 +91,6 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     objectID = std::stoi(objID);
 
     //log_debug("got ObjectID: [%s]\n", object_id.c_str());
-
-    Ref<Storage> storage = Storage::getInstance();
 
     Ref<CdsObject> obj = storage->loadObject(objectID);
 
@@ -173,7 +181,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
             }
         }
 
-        Ref<MetadataHandler> h = MetadataHandler::createHandler(res_handler);
+        Ref<MetadataHandler> h = MetadataHandler::createHandler(config, res_handler);
         if (!string_ok(mimeType))
             mimeType = h->getMimeType();
 
@@ -188,7 +196,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         UpnpFileInfo_set_FileLength(info, size);
     } else if (!is_srt && string_ok(tr_profile)) {
 
-        Ref<TranscodingProfile> tp = ConfigManager::getInstance()
+        Ref<TranscodingProfile> tp = config
                                          ->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)
                                          ->getByName(tr_profile);
 
@@ -199,7 +207,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
         mimeType = tp->getTargetMimeType();
 
-        Ref<Dictionary> mappings = ConfigManager::getInstance()
+        Ref<Dictionary> mappings = config
                                        ->getDictionaryOption(
                                            CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
         if (mappings->get(mimeType) == CONTENT_TYPE_PCM) {
@@ -220,8 +228,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     } else {
         UpnpFileInfo_set_FileLength(info, statbuf.st_size);
 
-        Ref<ConfigManager> cfg = ConfigManager::getInstance();
-        if (cfg->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK)) {
+        if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK)) {
             if (startswith(item->getMimeType(), "video")) {
                 // Look for subtitle file and returns it's URL
                 // in CaptionInfo.sec response header.
@@ -249,15 +256,14 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
                 if (validext.length() > 0) {
                     std::string burlpath = filename;
                     burlpath = burlpath.substr(0, burlpath.rfind('.'));
-                    Ref<Server> server = Server::getInstance(); // FIXME server sigleton usage
-                    std::string url = "http://" + server->getIP() + ":" + server->getPort() + burlpath + validext;
+                    std::string url = "http://" + Server::getIP() + ":" + Server::getPort() + burlpath + validext;
                     headers.addHeader("CaptionInfo.sec:", url);
                 }
             }
         }
-        Ref<Dictionary> mappings = cfg->getDictionaryOption(
+        Ref<Dictionary> mappings = config->getDictionaryOption(
             CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-        std::string dlnaContentHeader = getDLNAContentHeader(mappings->get(item->getMimeType()));
+        std::string dlnaContentHeader = getDLNAContentHeader(config, mappings->get(item->getMimeType()));
         if (string_ok(dlnaContentHeader)) {
             headers.addHeader(D_HTTP_CONTENT_FEATURES_HEADER, dlnaContentHeader);
         }
@@ -265,7 +271,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
     if (!string_ok(mimeType))
         mimeType = item->getMimeType();
-    std::string dlnaTransferHeader = getDLNATransferHeader(mimeType);
+    std::string dlnaTransferHeader = getDLNATransferHeader(config, mimeType);
     if (string_ok(dlnaTransferHeader)) {
         headers.addHeader(D_HTTP_TRANSFER_MODE_HEADER, dlnaTransferHeader);
     }
@@ -309,7 +315,6 @@ Ref<IOHandler> FileRequestHandler::open(const char* filename,
     int objectID = std::stoi(objID);
 
     log_debug("Opening media file with object id %d\n", objectID);
-    Ref<Storage> storage = Storage::getInstance();
     Ref<CdsObject> obj = storage->loadObject(objectID);
 
     int objectType = obj->getObjectType();
@@ -345,7 +350,7 @@ Ref<IOHandler> FileRequestHandler::open(const char* filename,
             struct timespec before;
             getTimespecNow(&before);
 #endif
-            output = run_simple_process(action, "run", input);
+            output = run_simple_process(config, action, "run", input);
 #ifdef TOMBDEBUG
             long delta = getDeltaMillis(&before);
             log_debug("script executed in %ld milliseconds\n", delta);
@@ -357,26 +362,23 @@ Ref<IOHandler> FileRequestHandler::open(const char* filename,
         }
         log_debug("Script output: %s\n", output.c_str());
 
-        Ref<CdsObject> clone = CdsObject::createObject(objectType);
+        Ref<CdsObject> clone = CdsObject::createObject(storage, objectType);
         aitem->copyTo(clone);
 
         xmlBuilder->updateObject(clone, output);
 
         if (!aitem->equals(clone, true)) // check for all differences
         {
-            Ref<UpdateManager> um = UpdateManager::getInstance();
-            Ref<SessionManager> sm = SessionManager::getInstance();
-
             log_debug("Item changed, updating database\n");
             int containerChanged = INVALID_OBJECT_ID;
             storage->updateObject(clone, &containerChanged);
-            um->containerChanged(containerChanged);
-            sm->containerChangedUI(containerChanged);
+            updateManager->containerChanged(containerChanged);
+            sessionManager->containerChangedUI(containerChanged);
 
             if (!aitem->equals(clone)) // check for visible differences
             {
                 log_debug("Item changed visually, updating parent\n");
-                um->containerChanged(clone->getParentID(), FLUSH_ASAP);
+                updateManager->containerChanged(clone->getParentID(), FLUSH_ASAP);
             }
             obj = clone;
         } else {
@@ -449,7 +451,7 @@ Ref<IOHandler> FileRequestHandler::open(const char* filename,
             }
         }
 
-        Ref<MetadataHandler> h = MetadataHandler::createHandler(res_handler);
+        Ref<MetadataHandler> h = MetadataHandler::createHandler(config, res_handler);
 
         if (!string_ok(mimeType))
             mimeType = h->getMimeType();
@@ -475,8 +477,8 @@ Ref<IOHandler> FileRequestHandler::open(const char* filename,
         if (!is_srt && string_ok(tr_profile)) {
             std::string range = params.get("range");
 
-            Ref<TranscodeDispatcher> tr_d(new TranscodeDispatcher());
-            Ref<TranscodingProfile> tp = ConfigManager::getInstance()->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(tr_profile);
+            Ref<TranscodeDispatcher> tr_d(new TranscodeDispatcher(config, content));
+            Ref<TranscodingProfile> tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(tr_profile);
             return tr_d->open(tp, path, RefCast(item, CdsObject), range);
         } else {
             if (mimeType.empty())
@@ -507,7 +509,7 @@ Ref<IOHandler> FileRequestHandler::open(const char* filename,
 
             Ref<IOHandler> io_handler(new FileIOHandler(path));
             io_handler->open(mode);
-            PlayHook::getInstance()->trigger(obj);
+            content->triggerPlayHook(obj);
             log_debug("end\n");
             return io_handler;
         }

@@ -42,12 +42,19 @@
 #include "zmm/dictionary.h"
 #include <curl/curl.h>
 
+// forward declaration
+class ConfigManager;
+class ContentManager;
+
 /// \brief This is an interface for all online services, the function
 /// handles adding/refreshing content in the database.
 class SopCastService : public OnlineService {
 public:
-    SopCastService();
+    SopCastService(std::shared_ptr<ConfigManager> config,
+        std::shared_ptr<Storage> storage,
+        std::shared_ptr<ContentManager> content);
     ~SopCastService();
+
     /// \brief Retrieves user specified content from the service and adds
     /// the items to the database.
     virtual bool refreshServiceData(zmm::Ref<Layout> layout);
@@ -63,6 +70,10 @@ public:
     virtual zmm::Ref<zmm::Object> defineServiceTask(zmm::Ref<mxml::Element> xmlopt, zmm::Ref<zmm::Object> params);
 
 protected:
+    std::shared_ptr<ConfigManager> config;
+    std::shared_ptr<Storage> storage;
+    std::shared_ptr<ContentManager> content;
+
     // the handle *must never be used from multiple threads*
     CURL* curl_handle;
     // safeguard to ensure the above

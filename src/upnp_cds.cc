@@ -41,9 +41,13 @@
 using namespace zmm;
 using namespace mxml;
 
-ContentDirectoryService::ContentDirectoryService(UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle, int stringLimit)
+ContentDirectoryService::ContentDirectoryService(std::shared_ptr<ConfigManager> config,
+    std::shared_ptr<Storage> storage,
+    UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle, int stringLimit)
     : systemUpdateID(0)
     , stringLimit(stringLimit)
+    , config(config)
+    , storage(storage)
     , deviceHandle(deviceHandle)
     , xmlBuilder(xmlBuilder)
 {
@@ -54,8 +58,6 @@ ContentDirectoryService::~ContentDirectoryService() = default;
 void ContentDirectoryService::doBrowse(Ref<ActionRequest> request)
 {
     log_debug("start\n");
-    Ref<Storage> storage = Storage::getInstance();
-
     Ref<Element> req = request->getRequest();
 
     std::string objID = req->getChildText("ObjectID");
@@ -86,7 +88,7 @@ void ContentDirectoryService::doBrowse(Ref<ActionRequest> request)
     if ((parent->getClass() == UPNP_DEFAULT_CLASS_MUSIC_ALBUM) || (parent->getClass() == UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER))
         flag |= BROWSE_TRACK_SORT;
 
-    if (ConfigManager::getInstance()->getBoolOption(CFG_SERVER_HIDE_PC_DIRECTORY))
+    if (config->getBoolOption(CFG_SERVER_HIDE_PC_DIRECTORY))
         flag |= BROWSE_HIDE_FS_ROOT;
 
     Ref<BrowseParam> param(new BrowseParam(objectID, flag));
@@ -110,21 +112,19 @@ void ContentDirectoryService::doBrowse(Ref<ActionRequest> request)
     didl_lite->setAttribute(XML_UPNP_NAMESPACE_ATTR,
         XML_UPNP_NAMESPACE);
 
-    Ref<ConfigManager> cfg = ConfigManager::getInstance();
-
-    if (cfg->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK)) {
+    if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK)) {
         didl_lite->setAttribute(XML_SEC_NAMESPACE_ATTR,
             XML_SEC_NAMESPACE);
     }
 
     for (int i = 0; i < arr->size(); i++) {
         Ref<CdsObject> obj = arr->get(i);
-        if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && obj->getFlag(OBJECT_FLAG_PLAYED)) {
+        if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && obj->getFlag(OBJECT_FLAG_PLAYED)) {
             std::string title = obj->getTitle();
-            if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND))
-                title = cfg->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING) + title;
+            if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND))
+                title = config->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING) + title;
             else
-                title = title + cfg->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING);
+                title = title + config->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING);
 
             obj->setTitle(title);
         }
@@ -165,9 +165,7 @@ void ContentDirectoryService::doSearch(Ref<ActionRequest> request)
     didl_lite->setAttribute(XML_UPNP_NAMESPACE_ATTR,
         XML_UPNP_NAMESPACE);
 
-    Ref<ConfigManager> cfg = ConfigManager::getInstance();
-
-    if (cfg->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK)) {
+    if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK)) {
         didl_lite->setAttribute(XML_SEC_NAMESPACE_ATTR,
             XML_SEC_NAMESPACE);
     }
@@ -178,7 +176,6 @@ void ContentDirectoryService::doSearch(Ref<ActionRequest> request)
     Ref<Array<CdsObject>> results;
     int numMatches = 0;
     try {
-        Ref<Storage> storage = Storage::getInstance();
         results = storage->search(searchParam, &numMatches);
     } catch (const Exception& e) {
         log_debug(e.getMessage().c_str());
@@ -187,12 +184,12 @@ void ContentDirectoryService::doSearch(Ref<ActionRequest> request)
 
     for (int i = 0; i < results->size(); i++) {
         Ref<CdsObject> cdsObject = results->get(i);
-        if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && cdsObject->getFlag(OBJECT_FLAG_PLAYED)) {
+        if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && cdsObject->getFlag(OBJECT_FLAG_PLAYED)) {
             std::string title = cdsObject->getTitle();
-            if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND))
-                title = cfg->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING) + title;
+            if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND))
+                title = config->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING) + title;
             else
-                title = title + cfg->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING);
+                title = title + config->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING);
 
             cdsObject->setTitle(title);
         }
@@ -287,7 +284,7 @@ void ContentDirectoryService::processSubscriptionRequest(zmm::Ref<SubscriptionRe
     propset = xmlBuilder->createEventPropertySet();
     property = propset->getFirstElementChild();
     property->appendTextChild("SystemUpdateID", "" + systemUpdateID);
-    Ref<CdsObject> obj = Storage::getInstance()->loadObject(0);
+    Ref<CdsObject> obj = storage->loadObject(0);
     Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
     property->appendTextChild("ContainerUpdateIDs", "0," + cont->getUpdateID());
     std::string xml = propset->print();
@@ -297,7 +294,7 @@ void ContentDirectoryService::processSubscriptionRequest(zmm::Ref<SubscriptionRe
     }
 
     UpnpAcceptSubscriptionExt(deviceHandle,
-        ConfigManager::getInstance()->getOption(CFG_SERVER_UDN).c_str(),
+        config->getOption(CFG_SERVER_UDN).c_str(),
         DESC_CDS_SERVICE_ID, event, request->getSubscriptionID().c_str());
 
     ixmlDocument_free(event);
@@ -329,7 +326,7 @@ void ContentDirectoryService::sendSubscriptionUpdate(std::string containerUpdate
     }
 
     UpnpNotifyExt(deviceHandle,
-        ConfigManager::getInstance()->getOption(CFG_SERVER_UDN).c_str(),
+        config->getOption(CFG_SERVER_UDN).c_str(),
         DESC_CDS_SERVICE_ID, event);
 
     ixmlDocument_free(event);

@@ -41,7 +41,6 @@
 #include "common.h"
 #include "zmm/dictionary.h"
 #include "util/generic_task.h"
-#include "storage/storage.h"
 #include "util/timer.h"
 
 #ifdef HAVE_JS
@@ -64,15 +63,27 @@ class PlaylistParserScript;
 
 #include "util/executor.h"
 
+// forward declaration
+class ConfigManager;
+class Storage;
+class UpdateManager;
+namespace web { class SessionManager; }
+class Runtime;
+class LastFm;
+class ContentManager;
+class TaskProcessor;
+
 class CMAddFileTask : public GenericTask {
 protected:
+    std::shared_ptr<ContentManager> content;
     std::string path;
     std::string rootpath;
     bool recursive;
     bool hidden;
 
 public:
-    CMAddFileTask(std::string path, std::string rootpath, bool recursive = false,
+    CMAddFileTask(std::shared_ptr<ContentManager> content,
+        std::string path, std::string rootpath, bool recursive = false,
         bool hidden = false, bool cancellable = true);
     std::string getPath();
     std::string getRootPath();
@@ -81,28 +92,34 @@ public:
 
 class CMRemoveObjectTask : public GenericTask {
 protected:
+    std::shared_ptr<ContentManager> content;
     int objectID;
     bool all;
 
 public:
-    CMRemoveObjectTask(int objectID, bool all);
+    CMRemoveObjectTask(std::shared_ptr<ContentManager> content,
+        int objectID, bool all);
     virtual void run() override;
 };
 
 class CMLoadAccountingTask : public GenericTask {
+protected:
+    std::shared_ptr<ContentManager> content;
 public:
-    CMLoadAccountingTask();
+    CMLoadAccountingTask(std::shared_ptr<ContentManager> content);
     virtual void run() override;
 };
 
 class CMRescanDirectoryTask : public GenericTask {
 protected:
+    std::shared_ptr<ContentManager> content;
     int objectID;
     int scanID;
     ScanMode scanMode;
 
 public:
-    CMRescanDirectoryTask(int objectID, int scanID, ScanMode scanMode,
+    CMRescanDirectoryTask(std::shared_ptr<ContentManager> content,
+        int objectID, int scanID, ScanMode scanMode,
         bool cancellable);
     virtual void run() override;
 };
@@ -118,13 +135,18 @@ public:
 #ifdef ONLINE_SERVICES
 class CMFetchOnlineContentTask : public GenericTask {
 protected:
+    std::shared_ptr<ContentManager> content;
+    std::shared_ptr<TaskProcessor> task_processor;
+    std::shared_ptr<Timer> timer;
     zmm::Ref<OnlineService> service;
     zmm::Ref<Layout> layout;
     bool unscheduled_refresh;
 
 public:
-    CMFetchOnlineContentTask(zmm::Ref<OnlineService> service,
-        zmm::Ref<Layout> layout,
+    CMFetchOnlineContentTask(std::shared_ptr<ContentManager> content,
+        std::shared_ptr<TaskProcessor> task_processor,
+        std::shared_ptr<Timer> timer,
+        zmm::Ref<OnlineService> service, zmm::Ref<Layout> layout,
         bool cancellable, bool unscheduled_refresh);
     virtual void run() override;
 };
@@ -158,13 +180,15 @@ public:
 };
 */
 
-class ContentManager : public Timer::Subscriber, public Singleton<ContentManager, std::recursive_mutex> {
+class ContentManager : public Timer::Subscriber, public std::enable_shared_from_this<ContentManager> {
 public:
-    ContentManager();
-    void init() override;
-    std::string getName() override { return "Content Manager"; }
+    ContentManager(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
+        std::shared_ptr<UpdateManager> update_manager, std::shared_ptr<web::SessionManager> session_manager,
+        std::shared_ptr<Timer> timer, std::shared_ptr<TaskProcessor> task_processor,
+        std::shared_ptr<Runtime> scripting_runtime, std::shared_ptr<LastFm> last_fm);
+    void init();
     virtual ~ContentManager();
-    void shutdown() override;
+    void shutdown();
 
     virtual void timerNotify(zmm::Ref<Timer::Parameter> parameter) override;
 
@@ -329,9 +353,7 @@ public:
     /// The handler will then remove the executor from the list.
     void unregisterExecutor(zmm::Ref<Executor> exec);
 
-#ifdef HAVE_MAGIC
-    std::string getMimeTypeFromBuffer(const void* buffer, size_t length);
-#endif
+    void triggerPlayHook(zmm::Ref<CdsObject> obj);
 
 protected:
     void initLayout();
@@ -341,6 +363,19 @@ protected:
     void initJS();
     void destroyJS();
 #endif
+
+    std::shared_ptr<ConfigManager> config;
+    std::shared_ptr<Storage> storage;
+    std::shared_ptr<UpdateManager> update_manager;
+    std::shared_ptr<web::SessionManager> session_manager;
+    std::shared_ptr<Timer> timer;
+    std::shared_ptr<TaskProcessor> task_processor;
+    std::shared_ptr<Runtime> scripting_runtime;
+    std::shared_ptr<LastFm> last_fm;
+
+    std::recursive_mutex mutex;
+    using AutoLock = std::lock_guard<decltype(mutex)>;
+    using AutoLockU = std::unique_lock<decltype(mutex)>;
 
     zmm::Ref<RExp> reMimetype;
 
@@ -353,7 +388,7 @@ protected:
 
     zmm::Ref<AutoscanList> autoscan_timed;
 #ifdef HAVE_INOTIFY
-    AutoscanInotify inotify;
+    std::unique_ptr<AutoscanInotify> inotify;
     zmm::Ref<AutoscanList> autoscan_inotify;
 #endif
 

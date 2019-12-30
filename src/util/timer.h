@@ -32,7 +32,6 @@
 #ifndef __TIMER_H__
 #define __TIMER_H__
 
-#include "singleton.h"
 #include "tools.h"
 #include "zmm/ref.h"
 #include "zmm/zmm.h"
@@ -42,7 +41,7 @@
 #include <condition_variable>
 #include <list>
 
-class Timer : public Singleton<Timer, std::mutex> {
+class Timer {
 public:
     /// \brief This is the parameter class for timerNotify
     class Parameter : public zmm::Object {
@@ -75,10 +74,11 @@ public:
         virtual void timerNotify(zmm::Ref<Parameter> parameter) = 0;
     };
 
-    ~Timer() { log_debug("Timer destroyed!\n"); }
-    void init() override;
-    void shutdown() override;
-    std::string getName() override { return "Timer"; }
+    Timer();
+    void init();
+
+    virtual ~Timer() { log_debug("Timer destroyed!\n"); }
+    void shutdown();
 
     /// \brief Add a subscriber
     ///
@@ -144,6 +144,9 @@ private:
     static void* staticThreadProc(void* arg);
     void threadProc();
     pthread_t thread;
+
+    std::mutex mutex;
+    using AutoLock = std::lock_guard<decltype(mutex)>;
 };
 
 #endif // __TIMER_H__

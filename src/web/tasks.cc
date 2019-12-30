@@ -36,19 +36,24 @@
 using namespace zmm;
 using namespace mxml;
 
+web::tasks::tasks(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
+    std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
+    : WebRequestHandler(config, storage, content, sessionManager)
+{
+}
+
 void web::tasks::process()
 {
     check_request();
     std::string action = param("action");
     if (!string_ok(action))
         throw _Exception("web:tasks called with illegal action");
-    Ref<ContentManager> cm = ContentManager::getInstance();
 
     if (action == "list") {
         Ref<Element> tasksEl(new Element("tasks"));
         tasksEl->setArrayName("task");
         root->appendElementChild(tasksEl); // inherited from WebRequestHandler
-        Ref<Array<GenericTask>> taskList = cm->getTasklist();
+        Ref<Array<GenericTask>> taskList = content->getTasklist();
         if (taskList == nullptr)
             return;
         int count = taskList->size();
@@ -57,7 +62,7 @@ void web::tasks::process()
         }
     } else if (action == "cancel") {
         int taskID = intParam("task_id");
-        cm->invalidateTask(taskID);
+        content->invalidateTask(taskID);
     } else
         throw _Exception("web:tasks called with illegal action");
 }

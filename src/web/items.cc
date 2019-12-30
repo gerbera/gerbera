@@ -38,8 +38,9 @@
 using namespace zmm;
 using namespace mxml;
 
-web::items::items()
-    : WebRequestHandler()
+web::items::items(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
+    std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
+    : WebRequestHandler(config, storage, content, sessionManager)
 {
 }
 
@@ -55,7 +56,6 @@ void web::items::process()
     if (count < 0)
         throw _Exception("illegal count parameter");
 
-    Ref<Storage> storage = Storage::getInstance();
     Ref<Element> items(new Element("items"));
     items->setArrayName("item");
     items->setAttribute("parent_id", std::to_string(parentID), mxml_int_type);
@@ -89,7 +89,7 @@ void web::items::process()
         autoscanMode = "timed";
 
 #ifdef HAVE_INOTIFY
-    if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
+    if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
         int startpoint_id = INVALID_OBJECT_ID;
         if (autoscanType == 0) {
             startpoint_id = storage->isAutoscanChild(parentID);

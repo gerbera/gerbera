@@ -36,9 +36,15 @@
 #include "common.h"
 #include "mxml/mxml.h"
 
+// forward declaration
+class ConfigManager;
+class Storage;
+
 class UpnpXMLBuilder {
 public:
-    explicit UpnpXMLBuilder(std::string virtualUrl, std::string presentationURL);
+    explicit UpnpXMLBuilder(std::shared_ptr<ConfigManager> config,
+        std::shared_ptr<Storage> storage,
+        std::string virtualUrl, std::string presentationURL);
 
     /// \brief Renders XML for the action response header.
     /// \param actionName Name of the action.
@@ -103,6 +109,9 @@ public:
     static std::string getFirstResourcePath(zmm::Ref<CdsItem> item);
 
 protected:
+    std::shared_ptr<ConfigManager> config;
+    std::shared_ptr<Storage> storage;
+
     std::string virtualURL;
     std::string presentationURL;
 

@@ -37,8 +37,10 @@
 #include <vector>
 
 #include "zmm/dictionary.h"
-#include "singleton.h"
 #include "util/timer.h"
+
+// forward declaration
+class ConfigManager;
 
 namespace web {
 
@@ -115,8 +117,13 @@ protected:
 };
 
 /// \brief This class offers ways to create new sessoins, stores all available sessions and provides access to them.
-class SessionManager : public Timer::Subscriber, public Singleton<SessionManager> {
+class SessionManager : public Timer::Subscriber {
 protected:
+    std::shared_ptr<Timer> timer;
+
+    std::mutex mutex;
+    using AutoLock = std::lock_guard<decltype(mutex)>;
+
     /// \brief This array is holding available sessions.
     zmm::Ref<zmm::Array<Session>> sessions;
 
@@ -127,10 +134,7 @@ protected:
 
 public:
     /// \brief Constructor, initializes the array.
-    SessionManager();
-
-    std::string getName() override { return "Session Manager"; }
-
+    SessionManager(std::shared_ptr<ConfigManager> config, std::shared_ptr<Timer> timer);
     virtual ~SessionManager() override { log_debug("SessionManager destroyed\n"); }
 
     /// \brief Creates a Session with a given timeout.

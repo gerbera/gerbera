@@ -46,11 +46,13 @@
 /// \brief This class is responsible for reading id3 or ogg tags metadata
 class TagLibHandler : public MetadataHandler {
 public:
-    TagLibHandler();
+    TagLibHandler(std::shared_ptr<ConfigManager> config);
     virtual void fillMetadata(zmm::Ref<CdsItem> item);
     virtual zmm::Ref<IOHandler> serveContent(zmm::Ref<CdsItem> item, int resNum);
 
 private:
+    void addField(metadata_fields_t field, const TagLib::File& file, const TagLib::Tag* tag, zmm::Ref<CdsItem> item) const;
+
     void populateGenericTags(zmm::Ref<CdsItem> item, const TagLib::File& file) const;
     bool isValidArtworkContentType(std::string content_type);
     std::string getContentTypeFromByteVector(const TagLib::ByteVector& data) const;

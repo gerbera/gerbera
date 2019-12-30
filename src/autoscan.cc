@@ -72,7 +72,8 @@ void AutoscanDirectory::setCurrentLMT(time_t lmt)
         last_mod_current_scan = lmt;
 }
 
-AutoscanList::AutoscanList()
+AutoscanList::AutoscanList(std::shared_ptr<Storage> storage)
+    : storage(storage)
 {
     list = Ref<Array<AutoscanDirectory>>(new Array<AutoscanDirectory>());
 }
@@ -84,7 +85,7 @@ void AutoscanList::updateLMinDB()
         log_debug("i: %d\n", i);
         Ref<AutoscanDirectory> ad = list->get(i);
         if (ad != nullptr)
-            Storage::getInstance()->autoscanUpdateLM(ad);
+            storage->autoscanUpdateLM(ad);
     }
 }
 
@@ -238,7 +239,7 @@ Ref<AutoscanList> AutoscanList::removeIfSubdir(std::string parent, bool persiste
 {
     AutoLock lock(mutex);
 
-    Ref<AutoscanList> rm_id_list(new AutoscanList());
+    Ref<AutoscanList> rm_id_list(new AutoscanList(storage));
 
     for (int i = 0; i < list->size(); i++) {
         if (list->get(i) != nullptr && startswith(list->get(i)->getLocation(), parent)) {
@@ -270,7 +271,6 @@ void AutoscanList::notifyAll(Timer::Subscriber* sub)
         return;
     AutoLock lock(mutex);
 
-    Ref<Timer> timer = Timer::getInstance();
     for (int i = 0; i < list->size(); i++) {
         if (list->get(i) == nullptr)
             continue;

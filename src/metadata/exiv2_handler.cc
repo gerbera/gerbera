@@ -40,8 +40,8 @@
 
 using namespace zmm;
 
-Exiv2Handler::Exiv2Handler()
-    : MetadataHandler()
+Exiv2Handler::Exiv2Handler(std::shared_ptr<ConfigManager> config)
+    : MetadataHandler(config)
 {
 }
 
@@ -49,7 +49,7 @@ void Exiv2Handler::fillMetadata(Ref<CdsItem> item)
 {
     try {
         std::string value;
-        Ref<StringConverter> sc = StringConverter::m2i();
+        Ref<StringConverter> sc = StringConverter::m2i(config);
 
         Exiv2::Image::AutoPtr image = Exiv2::ImageFactory::open(std::string(item->getLocation().c_str()));
         image->readMetadata();
@@ -140,10 +140,8 @@ void Exiv2Handler::fillMetadata(Ref<CdsItem> item)
             item->setMetadata(MT_KEYS[M_DESCRIPTION].upnp, sc->convert(comment));
 
         // if there are any auxilary tags that the user wants - add them
-        Ref<ConfigManager> cm = ConfigManager::getInstance();
-
-        auto aux = cm->getStringArrayOption(CFG_IMPORT_LIBOPTS_EXIV2_AUXDATA_TAGS_LIST);
-        if (aux.size() != 0) {
+        auto aux = config->getStringArrayOption(CFG_IMPORT_LIBOPTS_EXIV2_AUXDATA_TAGS_LIST);
+        if (!aux.empty()) {
             std::string value;
             std::string auxtag;
 

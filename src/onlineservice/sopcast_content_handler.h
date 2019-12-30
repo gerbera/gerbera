@@ -44,13 +44,19 @@
 #define SOPCAST_AUXDATA_LANGUAGE SOPCAST_SERVICE_ID "1"
 #define SOPCAST_AUXDATA_GROUP SOPCAST_SERVICE_ID "2"
 
+#include <memory>
 #include "cds_objects.h"
 #include "mxml/mxml.h"
+
+// forward declaration
+class ConfigManager;
 
 /// \brief this class is responsible for creating objects from the SopCast
 /// metadata XML.
 class SopCastContentHandler : public zmm::Object {
 public:
+    SopCastContentHandler(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage);
+
     /// \brief Sets the service XML from which we will extract the objects.
     /// \return false if service XML contained an error status.
     bool setServiceContent(zmm::Ref<mxml::Element> service);
@@ -65,6 +71,9 @@ public:
     zmm::Ref<CdsObject> getNextObject();
 
 protected:
+    std::shared_ptr<ConfigManager> config;
+    std::shared_ptr<Storage> storage;
+
     zmm::Ref<mxml::Element> channels;
     int current_group_node_index;
     int group_count;

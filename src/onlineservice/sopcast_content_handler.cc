@@ -42,6 +42,12 @@
 using namespace zmm;
 using namespace mxml;
 
+SopCastContentHandler::SopCastContentHandler(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage)
+    : config(config)
+    , storage(storage)
+{
+}
+
 bool SopCastContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
 {
     std::string temp;
@@ -60,7 +66,7 @@ bool SopCastContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
     channel_count = 0;
     current_group = nullptr;
 
-    extension_mimetype_map = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
+    extension_mimetype_map = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
 
     return true;
 }
@@ -118,7 +124,7 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
             if (channel->getName() != "channel")
                 continue;
 
-            Ref<CdsItemExternalURL> item(new CdsItemExternalURL());
+            Ref<CdsItemExternalURL> item(new CdsItemExternalURL(storage));
             Ref<CdsResource> resource(new CdsResource(CH_DEFAULT));
             item->addResource(resource);
 

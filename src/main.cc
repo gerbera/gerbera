@@ -42,7 +42,9 @@
 
 #include "common.h"
 #include "config/config_generator.h"
+#include "config/config_manager.h"
 #include "content_manager.h"
+
 #include "contrib/cxxopts.hpp"
 #include "server.h"
 
@@ -240,19 +242,12 @@ int main(int argc, char** argv, char** envp)
             interface = opts["interface"].as<std::string>();
         }
 
-        // FIXME: We will remove the singletons at some point.. and this compat
-        std::string configFile_ = *config_file;
-        std::string home_ = *home;
-        std::string confdir_ = *confdir;
-        std::string prefix_ = *prefix;
-        std::string magic_ = *magic;
-        std::string ip_ = *ip;
-        std::string interface_ = *interface;
-
-        ConfigManager::setStaticArgs(configFile_, home_, confdir_, prefix_, magic_, debug, ip_, interface_, portnum.value_or(-1));
+        std::shared_ptr<ConfigManager> config;
         try {
-            ConfigManager::getInstance();
-            portnum = ConfigManager::getInstance()->getIntOption(CFG_SERVER_PORT);
+            config = std::make_shared<ConfigManager>(
+                *config_file, *home, *confdir, *prefix, *magic, *ip, *interface, portnum.value_or(-1), debug
+            );
+            portnum = config->getIntOption(CFG_SERVER_PORT);
         } catch (const mxml::ParseException& pe) {
             log_error("Error parsing config file: %s line %d:\n%s\n",
                 pe.context->location.c_str(),
@@ -291,10 +286,10 @@ int main(int argc, char** argv, char** envp)
             log_error("Could not register SIGPIPE handler!\n");
         }
 
-        Ref<SingletonManager> singletonManager = SingletonManager::getInstance();
-        Ref<Server> server;
+        std::shared_ptr<Server> server;
         try {
-            server = Server::getInstance();
+            server = std::make_shared<Server>(config);
+            server->init();
             server->run();
         } catch (const UpnpException& upnp_e) {
 
@@ -315,11 +310,15 @@ int main(int argc, char** argv, char** envp)
             }
 
             try {
-                singletonManager->shutdown(true);
+                if (server)
+                    server->shutdown();
+                server = nullptr;
+                config = nullptr;
             } catch (const Exception& e) {
                 log_error("%s\n", e.getMessage().c_str());
                 e.printStackTrace();
             }
+
             exit(EXIT_FAILURE);
         } catch (const Exception& e) {
             log_error("%s\n", e.getMessage().c_str());
@@ -332,8 +331,8 @@ int main(int argc, char** argv, char** envp)
             for (const auto& f : files) {
                 try {
                     // add file/directory recursively and asynchronously
-                    ContentManager::getInstance()->addFile(std::string(f), true, true,
-                        ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_HIDDEN_FILES));
+                    server->getContent()->addFile(std::string(f), true, true,
+                        config->getBoolOption(CFG_IMPORT_HIDDEN_FILES));
                 } catch (const Exception& e) {
                     e.printStackTrace();
                     exit(EXIT_FAILURE);
@@ -351,16 +350,14 @@ int main(int argc, char** argv, char** envp)
             if (restart_flag != 0) {
                 log_info("Restarting Gerbera!\n");
                 try {
+                    server->shutdown();
                     server = nullptr;
-
-                    singletonManager->shutdown(true);
-                    singletonManager = nullptr;
-                    singletonManager = SingletonManager::getInstance();
+                    config = nullptr;
 
                     try {
-                        ConfigManager::setStaticArgs(config_file.value(), home.value(), confdir.value(),
-                            prefix.value(), magic.value());
-                        ConfigManager::getInstance();
+                        config = std::make_shared<ConfigManager>(
+                            *config_file, *home, *confdir, *prefix, *magic, *ip, *interface, portnum.value_or(-1), debug
+                        );
                     } catch (const mxml::ParseException& pe) {
                         log_error("Error parsing config file: %s line %d:\n%s\n",
                             pe.context->location.c_str(),
@@ -378,7 +375,8 @@ int main(int argc, char** argv, char** envp)
                     }
 
                     ///  \todo fix this for SIGHUP
-                    server = Server::getInstance();
+                    server = std::make_shared<Server>(config);
+                    server->init();
                     server->run();
 
                     restart_flag = 0;
@@ -395,7 +393,9 @@ int main(int argc, char** argv, char** envp)
         // shutting down
         int ret = EXIT_SUCCESS;
         try {
-            singletonManager->shutdown(true);
+            server->shutdown();
+            server = nullptr;
+            config = nullptr;
         } catch (const UpnpException& upnp_e) {
             log_error("main: upnp error %d\n", upnp_e.getErrorCode());
             ret = EXIT_FAILURE;

@@ -41,13 +41,15 @@
 #include <string>
 #include <vector>
 
-class MysqlStorage : private SQLStorage {
+class MysqlStorage : public SQLStorage, public std::enable_shared_from_this<SQLStorage> {
+public:
+    MysqlStorage(std::shared_ptr<ConfigManager> config);
+
 private:
-    MysqlStorage();
-    friend zmm::Ref<Storage> Storage::createInstance();
     virtual ~MysqlStorage();
     virtual void init();
     virtual void shutdownDriver();
+    std::shared_ptr<Storage> getSelf();
 
     virtual std::string quote(std::string str);
     virtual inline std::string quote(const char* str) override { return quote(std::string(str)); }

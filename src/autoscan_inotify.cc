@@ -35,6 +35,7 @@
 
 #include "autoscan_inotify.h"
 #include "content_manager.h"
+#include "storage/storage.h"
 
 #include <dirent.h>
 #include <sys/stat.h>
@@ -46,7 +47,9 @@
 using namespace zmm;
 using namespace std;
 
-AutoscanInotify::AutoscanInotify()
+AutoscanInotify::AutoscanInotify(std::shared_ptr<Storage> storage, std::shared_ptr<ContentManager> content)
+    : storage(storage)
+    , content(content)
 {
     if (check_path(INOTIFY_MAX_USER_WATCHES_FILE)) {
         try {
@@ -91,20 +94,6 @@ void AutoscanInotify::run()
 
 void AutoscanInotify::threadProc()
 {
-    Ref<ContentManager> cm;
-    Ref<Storage> st;
-
-    inotify_event* event;
-
-    try {
-        cm = ContentManager::getInstance();
-        st = Storage::getInstance();
-    } catch (const Exception& e) {
-        log_error("Inotify thread caught: %s\n", e.getMessage().c_str());
-        e.printStackTrace();
-        shutdownFlag = true;
-        inotify = nullptr;
-    }
     while (!shutdownFlag) {
         try {
             Ref<AutoscanDirectory> adir;
@@ -146,7 +135,7 @@ void AutoscanInotify::threadProc()
                     log_debug("adding non-recursive watch: %s\n", location.c_str());
                     monitorDirectory(location, adir, location, true);
                 }
-                cm->rescanDirectory(adir->getObjectID(), adir->getScanID(), adir->getScanMode(), "", false);
+                content->rescanDirectory(adir->getObjectID(), adir->getScanID(), adir->getScanMode(), "", false);
 
                 lock.lock();
             }
@@ -154,7 +143,7 @@ void AutoscanInotify::threadProc()
             lock.unlock();
 
             /* --- get event --- (blocking) */
-            event = inotify->nextEvent();
+            inotify_event* event = inotify->nextEvent();
             /* --- */
 
             if (event) {
@@ -226,19 +215,19 @@ void AutoscanInotify::threadProc()
                             if (watch != nullptr) {
                                 if (adir->persistent()) {
                                     monitorNonexisting(path, watch->getAutoscanDirectory(), watch->getNormalizedAutoscanPath());
-                                    cm->handlePeristentAutoscanRemove(adir->getScanID(), ScanMode::INotify);
+                                    content->handlePeristentAutoscanRemove(adir->getScanID(), ScanMode::INotify);
                                 }
                             }
                         }
 
-                        int objectID = st->findObjectIDByPath(fullPath);
+                        int objectID = storage->findObjectIDByPath(fullPath);
                         if (objectID != INVALID_OBJECT_ID)
-                            cm->removeObject(objectID);
+                            content->removeObject(objectID);
                     }
                     if (mask & (IN_CLOSE_WRITE | IN_MOVED_TO | IN_CREATE)) {
                         log_debug("adding %s\n", path.c_str());
                         // path, recursive, async, hidden, low priority, cancellable
-                        cm->addFile(fullPath, adir->getLocation(), adir->getRecursive(), true, adir->getHidden(), true, false);
+                        content->addFile(fullPath, adir->getLocation(), adir->getRecursive(), true, adir->getHidden(), true, false);
 
                         if (mask & IN_ISDIR)
                             monitorUnmonitorRecursive(path, false, adir, watchAs->getNormalizedAutoscanPath(), false);
@@ -358,7 +347,7 @@ void AutoscanInotify::recheckNonexistingMonitor(int curWd, std::vector<std::stri
             std::string path = buf.str() + DIR_SEPARATOR;
             if (first) {
                 monitorDirectory(path, adir, normalizedAutoscanPath, true);
-                ContentManager::getInstance()->handlePersistentAutoscanRecreate(adir->getScanID(), adir->getScanMode());
+                content->handlePersistentAutoscanRecreate(adir->getScanID(), adir->getScanMode());
             } else {
                 monitorDirectory(path, adir, normalizedAutoscanPath, false, &pathAr);
             }
@@ -394,18 +383,17 @@ void AutoscanInotify::checkMoveWatches(int wd, Ref<Wd> wdObj)
                 log_debug("found wd to remove because of move event: %d %s\n", removeWd, path.c_str());
 
                 inotify->removeWatch(removeWd);
-                Ref<ContentManager> cm = ContentManager::getInstance();
                 Ref<WatchAutoscan> watch = getStartPoint(wdToRemove);
                 if (watch != nullptr) {
                     Ref<AutoscanDirectory> adir = watch->getAutoscanDirectory();
                     if (adir->persistent()) {
                         monitorNonexisting(path, adir, watch->getNormalizedAutoscanPath());
-                        cm->handlePeristentAutoscanRemove(adir->getScanID(), ScanMode::INotify);
+                        content->handlePeristentAutoscanRemove(adir->getScanID(), ScanMode::INotify);
                     }
 
-                    int objectID = Storage::getInstance()->findObjectIDByPath(path);
+                    int objectID = storage->findObjectIDByPath(path);
                     if (objectID != INVALID_OBJECT_ID)
-                        cm->removeObject(objectID);
+                        content->removeObject(objectID);
                 }
             } catch (const out_of_range& ex) {
             } // Not found in map

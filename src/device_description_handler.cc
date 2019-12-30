@@ -25,8 +25,9 @@ Gerbera - https://gerbera.io/
 #include "iohandler/mem_io_handler.h"
 #include "util/tools.h"
 
-DeviceDescriptionHandler::DeviceDescriptionHandler(UpnpXMLBuilder* xmlBuilder)
-    : RequestHandler()
+DeviceDescriptionHandler::DeviceDescriptionHandler(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
+    UpnpXMLBuilder* xmlBuilder)
+    : RequestHandler(config, storage)
     , xmlBuilder(xmlBuilder) {}
 
 void DeviceDescriptionHandler::getInfo(const char* filename, UpnpFileInfo* info)

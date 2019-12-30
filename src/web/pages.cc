@@ -33,36 +33,39 @@
 
 namespace web {
 
-WebRequestHandler* createWebRequestHandler(std::string page)
+WebRequestHandler* createWebRequestHandler(
+    std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
+    std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager,
+    std::string page)
 {
     if (page == "add")
-        return new web::add();
+        return new web::add(config, storage, content, sessionManager);
     if (page == "remove")
-        return new web::remove();
+        return new web::remove(config, storage, content, sessionManager);
     if (page == "add_object")
-        return new web::addObject();
+        return new web::addObject(config, storage, content, sessionManager);
     if (page == "auth")
-        return new web::auth();
+        return new web::auth(config, storage, content, sessionManager);
     if (page == "containers")
-        return new web::containers();
+        return new web::containers(config, storage, content, sessionManager);
     if (page == "directories")
-        return new web::directories();
+        return new web::directories(config, storage, content, sessionManager);
     if (page == "files")
-        return new web::files();
+        return new web::files(config, storage, content, sessionManager);
     if (page == "items")
-        return new web::items();
+        return new web::items(config, storage, content, sessionManager);
     if (page == "edit_load")
-        return new web::edit_load();
+        return new web::edit_load(config, storage, content, sessionManager);
     if (page == "edit_save")
-        return new web::edit_save();
+        return new web::edit_save(config, storage, content, sessionManager);
     if (page == "autoscan")
-        return new web::autoscan();
+        return new web::autoscan(config, storage, content, sessionManager);
     if (page == "void")
-        return new web::voidType();
+        return new web::voidType(config, storage, content, sessionManager);
     if (page == "tasks")
-        return new web::tasks();
+        return new web::tasks(config, storage, content, sessionManager);
     if (page == "action")
-        return new web::action();
+        return new web::action(config, storage, content, sessionManager);
 
     throw _Exception("Unknown page: " + page);
 }

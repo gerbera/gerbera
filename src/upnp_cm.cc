@@ -30,14 +30,20 @@
 /// \file upnp_cm.cc
 
 #include "upnp_cm.h"
+#include "config/config_manager.h"
+#include "storage/storage.h"
 #include "server.h"
 #include "util/tools.h"
 
 using namespace zmm;
 using namespace mxml;
 
-ConnectionManagerService::ConnectionManagerService(UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle)
-    : xmlBuilder(xmlBuilder)
+ConnectionManagerService::ConnectionManagerService(std::shared_ptr<ConfigManager> config,
+    std::shared_ptr<Storage> storage,
+    UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle)
+    : config(config)
+    , storage(storage)
+    , xmlBuilder(xmlBuilder)
     , deviceHandle(deviceHandle)
 {
 }
@@ -74,7 +80,7 @@ void ConnectionManagerService::doGetProtocolInfo(Ref<ActionRequest> request)
     Ref<Element> response;
     response = xmlBuilder->createResponse(request->getActionName(), DESC_CM_SERVICE_TYPE);
 
-    std::vector<std::string> mimeTypes = Storage::getInstance()->getMimeTypes();
+    std::vector<std::string> mimeTypes = storage->getMimeTypes();
     std::string CSV = mime_types_to_CSV(mimeTypes);
 
     response->appendTextChild("Source", CSV);
@@ -113,7 +119,7 @@ void ConnectionManagerService::processSubscriptionRequest(zmm::Ref<SubscriptionR
 
     Ref<Element> propset, property;
 
-    std::vector<std::string> mimeTypes = Storage::getInstance()->getMimeTypes();
+    std::vector<std::string> mimeTypes = storage->getMimeTypes();
     std::string CSV = mime_types_to_CSV(mimeTypes);
 
     propset = xmlBuilder->createEventPropertySet();
@@ -129,7 +135,7 @@ void ConnectionManagerService::processSubscriptionRequest(zmm::Ref<SubscriptionR
     }
 
     UpnpAcceptSubscriptionExt(deviceHandle,
-        ConfigManager::getInstance()->getOption(CFG_SERVER_UDN).c_str(),
+        config->getOption(CFG_SERVER_UDN).c_str(),
         DESC_CM_SERVICE_ID, event, request->getSubscriptionID().c_str());
 
     ixmlDocument_free(event);
@@ -155,7 +161,7 @@ void ConnectionManagerService::sendSubscriptionUpdate(std::string sourceProtocol
     }
 
     UpnpNotifyExt(deviceHandle,
-        ConfigManager::getInstance()->getOption(CFG_SERVER_UDN).c_str(),
+        config->getOption(CFG_SERVER_UDN).c_str(),
         DESC_CM_SERVICE_ID, event);
 
     ixmlDocument_free(event);

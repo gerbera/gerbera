@@ -76,21 +76,20 @@ extern "C" {
 using namespace zmm;
 
 // Default constructor
-FfmpegHandler::FfmpegHandler()
-    : MetadataHandler()
+FfmpegHandler::FfmpegHandler(std::shared_ptr<ConfigManager> config)
+    : MetadataHandler(config)
 {
 }
 
-static void addFfmpegAuxdataFields(Ref<CdsItem> item, AVFormatContext* pFormatCtx)
+void FfmpegHandler::addFfmpegAuxdataFields(Ref<CdsItem> item, AVFormatContext* pFormatCtx) const
 {
     if (!pFormatCtx->metadata) {
         log_debug("no metadata\n");
         return;
     }
 
-    Ref<StringConverter> sc = StringConverter::m2i();
-    Ref<ConfigManager> cm = ConfigManager::getInstance();
-    std::vector<std::string> aux = cm->getStringArrayOption(CFG_IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST);
+    Ref<StringConverter> sc = StringConverter::m2i(config);
+    std::vector<std::string> aux = config->getStringArrayOption(CFG_IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST);
     for (size_t j = 0; j < aux.size(); j++) {
         std::string desiredTag(aux[j]);
         if (string_ok(desiredTag)) {
@@ -104,10 +103,10 @@ static void addFfmpegAuxdataFields(Ref<CdsItem> item, AVFormatContext* pFormatCt
     }
 } //addFfmpegAuxdataFields
 
-static void addFfmpegMetadataFields(Ref<CdsItem> item, AVFormatContext* pFormatCtx)
+void FfmpegHandler::addFfmpegMetadataFields(Ref<CdsItem> item, AVFormatContext* pFormatCtx) const
 {
     AVDictionaryEntry* e = NULL;
-    Ref<StringConverter> sc = StringConverter::m2i();
+    Ref<StringConverter> sc = StringConverter::m2i(config);
     metadata_fields_t field;
     std::string value;
 
@@ -341,13 +340,12 @@ done:
     return ret;
 }
 
-static std::string getThumbnailCacheFilePath(std::string& movie_filename, bool create)
+std::string FfmpegHandler::getThumbnailCacheFilePath(std::string& movie_filename, bool create) const
 {
-    Ref<ConfigManager> cfg = ConfigManager::getInstance();
-    std::string cache_dir = cfg->getOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR);
+    std::string cache_dir = config->getOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR);
 
     if (cache_dir.length() == 0) {
-        std::string home_dir = cfg->getOption(CFG_SERVER_HOME);
+        std::string home_dir = config->getOption(CFG_SERVER_HOME);
         cache_dir = home_dir + "/cache-dir";
     }
 
@@ -357,7 +355,7 @@ static std::string getThumbnailCacheFilePath(std::string& movie_filename, bool c
     return cache_dir;
 }
 
-static bool readThumbnailCacheFile(std::string movie_filename, uint8_t** ptr_img, size_t* size_img)
+bool FfmpegHandler::readThumbnailCacheFile(std::string movie_filename, uint8_t** ptr_img, size_t* size_img) const
 {
     std::string path = getThumbnailCacheFilePath(movie_filename, false);
     FILE* fp = fopen(path.c_str(), "rb");
@@ -377,7 +375,7 @@ static bool readThumbnailCacheFile(std::string movie_filename, uint8_t** ptr_img
     return true;
 }
 
-static void writeThumbnailCacheFile(std::string movie_filename, uint8_t* ptr_img, int size_img)
+void FfmpegHandler::writeThumbnailCacheFile(std::string movie_filename, uint8_t* ptr_img, int size_img) const
 {
     std::string path = getThumbnailCacheFilePath(movie_filename, true);
     FILE* fp = fopen(path.c_str(), "wb");
@@ -386,18 +384,15 @@ static void writeThumbnailCacheFile(std::string movie_filename, uint8_t* ptr_img
     fwrite(ptr_img, sizeof(uint8_t), size_img, fp);
     fclose(fp);
 }
-
 #endif
 
 Ref<IOHandler> FfmpegHandler::serveContent(Ref<CdsItem> item, int resNum)
 {
 #ifdef HAVE_FFMPEGTHUMBNAILER
-    Ref<ConfigManager> cfg = ConfigManager::getInstance();
-
-    if (!cfg->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED))
+    if (!config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED))
         return nullptr;
 
-    if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED)) {
+    if (config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED)) {
         uint8_t* ptr_image;
         size_t size_image;
         if (readThumbnailCacheFile(item->getLocation(), &ptr_image, &size_image)) {
@@ -418,15 +413,15 @@ Ref<IOHandler> FfmpegHandler::serveContent(Ref<CdsItem> item, int resNum)
     image_data* img = video_thumbnailer_create_image_data();
 #endif // old api
 
-    th->seek_percentage = cfg->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE);
+    th->seek_percentage = config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE);
 
-    if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY))
+    if (config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY))
         th->overlay_film_strip = 1;
     else
         th->overlay_film_strip = 0;
 
-    th->thumbnail_size = cfg->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE);
-    th->thumbnail_image_quality = cfg->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_IMAGE_QUALITY);
+    th->thumbnail_size = config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE);
+    th->thumbnail_image_quality = config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_IMAGE_QUALITY);
     th->thumbnail_image_type = Jpeg;
 
     log_debug("Generating thumbnail for file: %s\n", item->getLocation().c_str());
@@ -442,7 +437,7 @@ Ref<IOHandler> FfmpegHandler::serveContent(Ref<CdsItem> item, int resNum)
         pthread_mutex_unlock(&thumb_lock);
         throw _Exception("Could not generate thumbnail for " + item->getLocation());
     }
-    if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED)) {
+    if (config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED)) {
         writeThumbnailCacheFile(item->getLocation(),
             img->image_data_ptr, img->image_data_size);
     }
@@ -465,9 +460,7 @@ Ref<IOHandler> FfmpegHandler::serveContent(Ref<CdsItem> item, int resNum)
 
 std::string FfmpegHandler::getMimeType()
 {
-    Ref<ConfigManager> cfg = ConfigManager::getInstance();
-
-    Ref<Dictionary> mappings = cfg->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+    Ref<Dictionary> mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
     std::string thumb_mimetype = mappings->get(CONTENT_TYPE_JPG);
     if (!string_ok(thumb_mimetype))
         thumb_mimetype = "image/jpeg";
