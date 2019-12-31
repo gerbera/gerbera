@@ -37,7 +37,7 @@
 //#define MYSQL_EXEC_DEBUG
 
 #include "mysql_storage.h"
-#include "config_manager.h"
+#include "config/config_manager.h"
 
 #include "mysql_create_sql.h"
 #include <zlib.h>

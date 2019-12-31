@@ -626,7 +626,7 @@ void UpnpXMLBuilder::addResources(Ref<CdsItem> item, Ref<Element> element)
     Ref<Dictionary> mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
 
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
-    if (config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED) && (item->getMimeType().startsWith("video") || item->getFlag(OBJECT_FLAG_OGG_THEORA))) {
+    if (config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED) && (startswith(item->getMimeType(), "video") || item->getFlag(OBJECT_FLAG_OGG_THEORA))) {
         std::string videoresolution = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_RESOLUTION));
         int x;
         int y;
@@ -637,14 +637,14 @@ void UpnpXMLBuilder::addResources(Ref<CdsItem> item, Ref<Element> element)
                 thumb_mimetype = "image/jpeg";
 
             Ref<CdsResource> ffres(new CdsResource(CH_FFTH));
-            ffres->addParameter(RESOURCE_HANDLER, std::string::from(CH_FFTH));
+            ffres->addParameter(RESOURCE_HANDLER, std::to_string(CH_FFTH));
             ffres->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
                 renderProtocolInfo(thumb_mimetype));
             ffres->addOption(RESOURCE_CONTENT_TYPE, THUMBNAIL);
 
             y = config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE) * y / x;
             x = config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE);
-            std::string resolution = std::string::from(x) + "x" + std::string::from(y);
+            std::string resolution = std::to_string(x) + "x" + std::to_string(y);
             ffres->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION),
                 resolution);
             item->addResource(ffres);
