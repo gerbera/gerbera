@@ -46,7 +46,7 @@ web::addObject::addObject()
 {
 }
 
-/*static Ref<Element> addOption(std::string option_name, std::string option_type, std::string default_value = nullptr)
+/*static Ref<Element> addOption(std::string option_name, std::string option_type, std::string default_value = "")
 {
     Ref<Element> option (new Element("option"));
     option->addAttribute("name", option_name);

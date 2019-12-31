@@ -65,7 +65,7 @@ void XML2JSON::handleElement(std::ostringstream &buf, Ref<Element> el)
     }
     
     bool array = el->isArrayType();
-    std::string nodeName = nullptr;
+    std::string nodeName = "";
     
     if (array)
     {

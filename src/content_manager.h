@@ -212,7 +212,7 @@ public:
     int ensurePathExistence(std::string path);
     void removeObject(int objectID, bool async = true, bool all = false);
     void rescanDirectory(int objectID, int scanID, ScanMode scanMode,
-        std::string descPath = nullptr, bool cancellable = true);
+        std::string descPath = "", bool cancellable = true);
 
     /// \brief Updates an object in the database using the given parameters.
     /// \param objectID ID of the object to update

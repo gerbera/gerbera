@@ -128,7 +128,7 @@ Ref<IOHandler> WebRequestHandler::open(enum UpnpOpenFileMode mode)
 {
     root = Ref<Element>(new Element("root"));
 
-    std::string error = nullptr;
+    std::string error = "";
     int error_code = 0;
 
     std::string output;
