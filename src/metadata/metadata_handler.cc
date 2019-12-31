@@ -197,7 +197,7 @@ Ref<MetadataHandler> MetadataHandler::createHandler(int handlerType)
     case CH_FANART:
         return Ref<MetadataHandler>(new FanArtHandler());
     default:
-        throw _Exception("unknown content handler ID: " + handlerType);
+        throw _Exception("unknown content handler ID: " + std::to_string(handlerType));
     }
 }
 

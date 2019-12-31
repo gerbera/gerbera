@@ -460,7 +460,7 @@ Ref<CdsObject> SQLStorage::loadObject(int objectID)
     if (res != nullptr && (row = res->nextRow()) != nullptr) {
         return createObjectFromRow(row);
     }
-    throw _ObjectNotFoundException("Object not found: " + objectID);
+    throw _ObjectNotFoundException("Object not found: " + std::to_string(objectID));
 }
 
 Ref<CdsObject> SQLStorage::loadObjectByServiceID(std::string serviceID)
@@ -523,7 +523,7 @@ Ref<Array<CdsObject>> SQLStorage::browse(Ref<BrowseParam> param)
             objectType = std::stoi(row->col(0));
             haveObjectType = true;
         } else {
-            throw _ObjectNotFoundException("Object not found: " + objectID);
+            throw _ObjectNotFoundException("Object not found: " + std::to_string(objectID));
         }
 
         row = nullptr;
@@ -1065,7 +1065,7 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
     }
 
     if (!matched_types) {
-        throw _StorageException("", "unknown object type: " + objectType);
+        throw _StorageException("", "unknown object type: " + std::to_string(objectType));
     }
 
     return obj;
@@ -1113,7 +1113,7 @@ Ref<CdsObject> SQLStorage::createObjectFromSearchRow(Ref<SQLRow> row)
 
         item->setTrackNumber(std::stoi(row->col(SearchCol::track_number)));
     } else {
-        throw _StorageException("", "unknown object type: " + objectType);
+        throw _StorageException("", "unknown object type: " + std::to_string(objectType));
     }
 
     return obj;

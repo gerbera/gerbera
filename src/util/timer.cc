@@ -47,7 +47,7 @@ void Timer::init()
         this);
 
     if (ret)
-        throw _Exception("failed to start timer thread: " + ret);
+        throw _Exception("failed to start timer thread: " + std::to_string(ret));
 }
 
 void* Timer::staticThreadProc(void* arg)

@@ -200,7 +200,7 @@ void MysqlStorage::init()
         unsigned long uncompressed_size = MS_CREATE_SQL_INFLATED_SIZE;
         int ret = uncompress(buf, &uncompressed_size, mysql_create_sql, MS_CREATE_SQL_DEFLATED_SIZE);
         if (ret != Z_OK || uncompressed_size != MS_CREATE_SQL_INFLATED_SIZE)
-            throw _Exception("Error while uncompressing mysql create sql. returned: " + ret);
+            throw _Exception("Error while uncompressing mysql create sql. returned: " + std::to_string(ret));
         buf[MS_CREATE_SQL_INFLATED_SIZE] = '\0';
 
         auto* sql_start = (char*)buf;
