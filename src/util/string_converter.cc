@@ -179,52 +179,50 @@ std::string StringConverter::_convert(std::string str, bool validate,
 }
 
 /// \todo iconv caching
-Ref<StringConverter> StringConverter::i2f()
+Ref<StringConverter> StringConverter::i2f(std::shared_ptr<ConfigManager> cm)
 {
     Ref<StringConverter> conv(new StringConverter(
-        DEFAULT_INTERNAL_CHARSET, ConfigManager::getInstance()->getOption(CFG_IMPORT_FILESYSTEM_CHARSET)));
-    //        INTERNAL_CHARSET, ConfigManager::getInstance()->getFilesystemCharset()));
+        DEFAULT_INTERNAL_CHARSET, cm->getOption(CFG_IMPORT_FILESYSTEM_CHARSET)));
+    //        INTERNAL_CHARSET, cm->getFilesystemCharset()));
     return conv;
 }
-Ref<StringConverter> StringConverter::f2i()
+Ref<StringConverter> StringConverter::f2i(std::shared_ptr<ConfigManager> cm)
 {
     Ref<StringConverter> conv(new StringConverter(
-        ConfigManager::getInstance()->getOption(CFG_IMPORT_FILESYSTEM_CHARSET), DEFAULT_INTERNAL_CHARSET));
+        cm->getOption(CFG_IMPORT_FILESYSTEM_CHARSET), DEFAULT_INTERNAL_CHARSET));
     return conv;
 }
-Ref<StringConverter> StringConverter::m2i()
+Ref<StringConverter> StringConverter::m2i(std::shared_ptr<ConfigManager> cm)
 {
     Ref<StringConverter> conv(new StringConverter(
-        ConfigManager::getInstance()->getOption(CFG_IMPORT_METADATA_CHARSET),
+        cm->getOption(CFG_IMPORT_METADATA_CHARSET),
         DEFAULT_INTERNAL_CHARSET));
     return conv;
 }
 
 #ifdef HAVE_JS
-Ref<StringConverter> StringConverter::j2i()
+Ref<StringConverter> StringConverter::j2i(std::shared_ptr<ConfigManager> cm)
 {
     Ref<StringConverter> conv(new StringConverter(
-        ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_CHARSET),
+        cm->getOption(CFG_IMPORT_SCRIPTING_CHARSET),
         DEFAULT_INTERNAL_CHARSET));
     return conv;
 }
 
-Ref<StringConverter> StringConverter::p2i()
+Ref<StringConverter> StringConverter::p2i(std::shared_ptr<ConfigManager> cm)
 {
     Ref<StringConverter> conv(new StringConverter(
-        ConfigManager::getInstance()->getOption(CFG_IMPORT_PLAYLIST_CHARSET),
+        cm->getOption(CFG_IMPORT_PLAYLIST_CHARSET),
         DEFAULT_INTERNAL_CHARSET));
     return conv;
 }
 #endif
 
 #if defined(HAVE_JS) || defined(HAVE_TAGLIB) || defined(ATRAILERS) || defined(HAVE_MATROSKA)
-
-Ref<StringConverter> StringConverter::i2i()
+Ref<StringConverter> StringConverter::i2i(std::shared_ptr<ConfigManager> cm)
 {
     Ref<StringConverter> conv(new StringConverter(DEFAULT_INTERNAL_CHARSET,
         DEFAULT_INTERNAL_CHARSET));
     return conv;
 }
-
 #endif

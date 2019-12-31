@@ -40,8 +40,8 @@
 using namespace zmm;
 using namespace mxml;
 
-LibExifHandler::LibExifHandler()
-    : MetadataHandler()
+LibExifHandler::LibExifHandler(std::shared_ptr<ConfigManager> config)
+    : MetadataHandler(config)
 {
 }
 
@@ -341,7 +341,7 @@ void LibExifHandler::fillMetadata(Ref<CdsItem> item)
 {
     ExifData* ed;
 
-    Ref<StringConverter> sc = StringConverter::m2i();
+    Ref<StringConverter> sc = StringConverter::m2i(config);
 
     ed = exif_data_new_from_file(item->getLocation().c_str());
 
@@ -351,8 +351,7 @@ void LibExifHandler::fillMetadata(Ref<CdsItem> item)
         return;
     }
 
-    Ref<ConfigManager> cm = ConfigManager::getInstance();
-    std::vector<std::string> aux = cm->getStringArrayOption(CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST);
+    std::vector<std::string> aux = config->getStringArrayOption(CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST);
     for (int i = 0; i < EXIF_IFD_COUNT; i++) {
         if (ed->ifd[i])
             process_ifd(ed->ifd[i], item, sc, aux);

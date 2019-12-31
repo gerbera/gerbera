@@ -13,8 +13,7 @@ using namespace zmm;
 using namespace std;
 
 TaskProcessor::TaskProcessor()
-    : Singleton<TaskProcessor>()
-    , taskThread(0)
+    : taskThread(0)
     , shutdownFlag(false)
     , working(false)
     , taskID(1)
@@ -25,7 +24,6 @@ TaskProcessor::TaskProcessor()
 void TaskProcessor::init()
 {
     int ret;
-
     ret = pthread_create(&taskThread, nullptr, TaskProcessor::staticThreadProc,
         this);
 
@@ -55,7 +53,7 @@ void* TaskProcessor::staticThreadProc(void* arg)
 void TaskProcessor::threadProc()
 {
     Ref<GenericTask> task;
-    unique_lock<mutex_type> lock(mutex);
+    AutoLockU lock(mutex);
     working = true;
 
     while (!shutdownFlag) {
@@ -157,17 +155,23 @@ TaskProcessor::~TaskProcessor()
 {
 }
 
-TPFetchOnlineContentTask::TPFetchOnlineContentTask(Ref<OnlineService> service,
+TPFetchOnlineContentTask::TPFetchOnlineContentTask(std::shared_ptr<ContentManager> content,
+    std::shared_ptr<TaskProcessor> task_processor,
+    std::shared_ptr<Timer> timer,
+    Ref<OnlineService> service,
     Ref<Layout> layout,
     bool cancellable,
     bool unscheduled_refresh)
     : GenericTask(TaskProcessorTask)
+    , content(content)
+    , task_processor(task_processor)
+    , timer(timer)
+    , service(service)
+    , layout(layout)
 {
-    this->service = service;
-    this->layout = layout;
-    this->taskType = FetchOnlineContent;
     this->cancellable = cancellable;
     this->unscheduled_refresh = unscheduled_refresh;
+    this->taskType = FetchOnlineContent;
 }
 
 void TPFetchOnlineContentTask::run()
@@ -184,11 +188,13 @@ void TPFetchOnlineContentTask::run()
                 service->getServiceName().c_str());
 
             if ((service->getRefreshInterval() > 0) || unscheduled_refresh) {
-                Ref<GenericTask> t(new TPFetchOnlineContentTask(service, layout, cancellable, unscheduled_refresh));
-                TaskProcessor::getInstance()->addTask(t);
+                Ref<GenericTask> t(
+                    new TPFetchOnlineContentTask(content, task_processor, timer, service, layout, cancellable, unscheduled_refresh)
+                );
+                task_processor->addTask(t);
             }
         } else {
-            ContentManager::getInstance()->cleanupOnlineServiceObjects(service);
+            content->cleanupOnlineServiceObjects(service);
         }
     } catch (const Exception& ex) {
         log_error("%s\n", ex.getMessage().c_str());
@@ -196,8 +202,8 @@ void TPFetchOnlineContentTask::run()
     service->decTaskCount();
     if (service->getTaskCount() == 0) {
         if ((service->getRefreshInterval() > 0) && !unscheduled_refresh) {
-            Timer::getInstance()->addTimerSubscriber(
-                ContentManager::getInstance().getPtr(),
+            timer->addTimerSubscriber(
+                content.get(),
                 service->getRefreshInterval(),
                 service->getTimerParameter(), true);
         }

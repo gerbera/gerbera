@@ -120,23 +120,32 @@ void Script::setIntProperty(std::string name, int value)
 
 /* **************** */
 
-Script::Script(Ref<Runtime> runtime, std::string name) : Object(), name(name)
+Script::Script(std::shared_ptr<ConfigManager> config,
+    std::shared_ptr<Storage> storage,
+    std::shared_ptr<ContentManager> content,
+    std::shared_ptr<Runtime> runtime, std::string name)
+    : Object()
+    , config(config)
+    , storage(storage)
+    , content(content)
+    , runtime(runtime)
+    , name(name)
 {
     gc_counter = 0;
 
     this->runtime = runtime;
 
     /* create a context and associate it with the JS run time */
-    AutoLock lock(runtime->getMutex());
+    Runtime::AutoLock lock(runtime->getMutex());
     ctx = runtime->createContext(name);
     if (!ctx)
         throw _Exception("Scripting: could not initialize js context");
 
-    _p2i = StringConverter::p2i();
-    _j2i = StringConverter::j2i();
-    _m2i = StringConverter::m2i();
-    _f2i = StringConverter::f2i();
-    _i2i = StringConverter::i2i();
+    _p2i = StringConverter::p2i(config);
+    _j2i = StringConverter::j2i(config);
+    _m2i = StringConverter::m2i(config);
+    _f2i = StringConverter::f2i(config);
+    _i2i = StringConverter::i2i(config);
 
     duk_push_thread_stash(ctx, ctx);
     duk_push_pointer(ctx, this);
@@ -198,7 +207,7 @@ Script::Script(Ref<Runtime> runtime, std::string name) : Object(), name(name)
 
     defineFunctions(js_global_functions);
 
-    std::string common_scr_path = ConfigManager::getInstance()->getOption(CFG_IMPORT_SCRIPTING_COMMON_SCRIPT);
+    std::string common_scr_path = config->getOption(CFG_IMPORT_SCRIPTING_COMMON_SCRIPT);
 
     if (!string_ok(common_scr_path))
         log_js("Common script disabled in configuration\n");
@@ -256,7 +265,7 @@ void Script::_load(std::string scriptPath)
     if (!string_ok(scriptText))
         throw _Exception("empty script");
 
-    Ref<StringConverter> j2i = StringConverter::j2i();
+    Ref<StringConverter> j2i = StringConverter::j2i(config);
     try
     {
         scriptText = j2i->convert(scriptText, true);
@@ -273,7 +282,7 @@ void Script::_load(std::string scriptPath)
 
 void Script::load(std::string scriptPath)
 {
-    AutoLock lock(runtime->getMutex());
+    Runtime::AutoLock lock(runtime->getMutex());
     duk_push_thread_stash(ctx, ctx);
     _load(scriptPath);
     duk_put_prop_string(ctx, -2, "script");
@@ -293,7 +302,7 @@ void Script::_execute()
 
 void Script::execute()
 {
-    AutoLock lock(runtime->getMutex());
+    Runtime::AutoLock lock(runtime->getMutex());
     duk_push_thread_stash(ctx, ctx);
     duk_get_prop_string(ctx, -1, "script");
     duk_remove(ctx, -2);
@@ -310,10 +319,10 @@ Ref<CdsObject> Script::dukObject2cdsObject(zmm::Ref<CdsObject> pcd)
 
     if (this->whoami() == S_PLAYLIST)
     {
-        sc = StringConverter::p2i();
+        sc = StringConverter::p2i(config);
     }
     else
-        sc = StringConverter::i2i();
+        sc = StringConverter::i2i(config);
 
     objectType = getIntProperty("objectType", -1);
     if (objectType == -1)
@@ -322,7 +331,7 @@ Ref<CdsObject> Script::dukObject2cdsObject(zmm::Ref<CdsObject> pcd)
         return nullptr;
     }
 
-    Ref<CdsObject> obj = CdsObject::createObject(objectType);
+    Ref<CdsObject> obj = CdsObject::createObject(storage, objectType);
     objectType = obj->getObjectType(); // this is important, because the
     // type will be changed appropriately
     // by the create function

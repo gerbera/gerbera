@@ -48,7 +48,7 @@ using namespace zmm;
 
 #define BUF_SIZE 256
 
-std::string run_simple_process(std::string prog, std::string param, std::string input)
+std::string run_simple_process(std::shared_ptr<ConfigManager> cfg, std::string prog, std::string param, std::string input)
 {
     FILE* file;
     int fd;
@@ -57,7 +57,6 @@ std::string run_simple_process(std::string prog, std::string param, std::string 
     char temp_in[] = "mt_in_XXXXXX";
     char temp_out[] = "mt_out_XXXXXX";
 
-    Ref<ConfigManager> cfg = ConfigManager::getInstance();
     std::string input_file = tempName(cfg->getOption(CFG_SERVER_TMPDIR), temp_in);
     fd = open(input_file.c_str(), O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
     if (fd == -1) {

@@ -30,6 +30,7 @@
 /// \file auth.cc
 
 #include "pages.h"
+#include "config/config_manager.h"
 #include "session_manager.h"
 #include "util/tools.h"
 #include <sys/time.h>
@@ -65,15 +66,15 @@ static bool check_token(std::string token, std::string password, std::string enc
     return (checksum == encPassword);
 }
 
-web::auth::auth()
-    : WebRequestHandler()
+web::auth::auth(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
+    std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
+    : WebRequestHandler(config, storage, content, sessionManager)
 {
-    timeout = 60 * ConfigManager::getInstance()->getIntOption(CFG_SERVER_UI_SESSION_TIMEOUT);
+    timeout = 60 * config->getIntOption(CFG_SERVER_UI_SESSION_TIMEOUT);
 }
 void web::auth::process()
 {
     std::string action = param("action");
-    Ref<SessionManager> sessionManager = SessionManager::getInstance();
 
     if (!string_ok(action)) {
         root->appendTextChild("error", "req_type auth: no action given");
@@ -81,44 +82,43 @@ void web::auth::process()
     }
 
     if (action == "get_config") {
-        Ref<ConfigManager> cm = ConfigManager::getInstance();
-        Ref<Element> config(new Element("config"));
-        root->appendElementChild(config);
-        config->setAttribute("accounts", accountsEnabled() ? "1" : "0", mxml_bool_type);
-        config->setAttribute("show-tooltips",
-            (cm->getBoolOption(
+        Ref<Element> cfg(new Element("cfg"));
+        root->appendElementChild(cfg);
+        cfg->setAttribute("accounts", accountsEnabled() ? "1" : "0", mxml_bool_type);
+        cfg->setAttribute("show-tooltips",
+            (config->getBoolOption(
                  CFG_SERVER_UI_SHOW_TOOLTIPS)
                     ? "1"
                     : "0"),
             mxml_bool_type);
-        config->setAttribute("poll-when-idle",
-            (cm->getBoolOption(
+        cfg->setAttribute("poll-when-idle",
+            (config->getBoolOption(
                  CFG_SERVER_UI_POLL_WHEN_IDLE)
                     ? "1"
                     : "0"),
             mxml_bool_type);
-        config->setAttribute("poll-interval",
-            std::to_string(cm->getIntOption(CFG_SERVER_UI_POLL_INTERVAL)), mxml_int_type);
+        cfg->setAttribute("poll-interval",
+            std::to_string(config->getIntOption(CFG_SERVER_UI_POLL_INTERVAL)), mxml_int_type);
         /// CREATE XML FRAGMENT FOR ITEMS PER PAGE
         Ref<Element> ipp(new Element("items-per-page"));
         ipp->setArrayName("option");
         ipp->setAttribute("default",
-            std::to_string(cm->getIntOption(CFG_SERVER_UI_DEFAULT_ITEMS_PER_PAGE)), mxml_int_type);
+            std::to_string(config->getIntOption(CFG_SERVER_UI_DEFAULT_ITEMS_PER_PAGE)), mxml_int_type);
 
-        std::vector<std::string> menu_opts = cm->getStringArrayOption(CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN);
+        std::vector<std::string> menu_opts = config->getStringArrayOption(CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN);
 
         for (size_t i = 0; i < menu_opts.size(); i++) {
             ipp->appendTextChild("option", menu_opts[i], mxml_int_type);
         }
 
-        config->appendElementChild(ipp);
+        cfg->appendElementChild(ipp);
 #ifdef HAVE_INOTIFY
-        if (cm->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY))
-            config->setAttribute("have-inotify", "1", mxml_bool_type);
+        if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY))
+            cfg->setAttribute("have-inotify", "1", mxml_bool_type);
         else
-            config->setAttribute("have-inotify", "0", mxml_bool_type);
+            cfg->setAttribute("have-inotify", "0", mxml_bool_type);
 #else
-        config->setAttribute("have-inotify", "0", mxml_bool_type);
+        cfg->setAttribute("have-inotify", "0", mxml_bool_type);
 #endif
 
         Ref<Element> actions(new Element("actions"));
@@ -126,15 +126,15 @@ void web::auth::process()
         //actions->appendTextChild("action", "fokel1");
         //actions->appendTextChild("action", "fokel2");
 
-        config->appendElementChild(actions);
+        cfg->appendElementChild(actions);
 
         Ref<Element> friendlyName(new Element("friendlyName"));
-        friendlyName->setText(cm->getOption(CFG_SERVER_NAME));
-        config->appendElementChild(friendlyName);
+        friendlyName->setText(config->getOption(CFG_SERVER_NAME));
+        cfg->appendElementChild(friendlyName);
 
         Ref<Element> gerberaVersion(new Element("version"));
         gerberaVersion->setText(VERSION);
-        config->appendElementChild(gerberaVersion);
+        cfg->appendElementChild(gerberaVersion);
     } else if (action == "get_sid") {
         log_debug("checking/getting sid...\n");
         Ref<Session> session = nullptr;
@@ -157,7 +157,7 @@ void web::auth::process()
     } else if (action == "logout") {
         check_request();
         std::string sid = param("sid");
-        Ref<Session> session = SessionManager::getInstance()->getSession(sid);
+        Ref<Session> session = sessionManager->getSession(sid);
         if (session == nullptr)
             throw _Exception("illegal session id");
         sessionManager->removeSession(sid);

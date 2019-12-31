@@ -93,12 +93,13 @@ res_key RES_KEYS[] = {
     { "R_PROTOCOLINFO", "protocolInfo" }
 };
 
-MetadataHandler::MetadataHandler()
+MetadataHandler::MetadataHandler(std::shared_ptr<ConfigManager> config)
     : Object()
+    , config(config)
 {
 }
 
-void MetadataHandler::setMetadata(Ref<CdsItem> item) {
+void MetadataHandler::setMetadata(std::shared_ptr<ConfigManager> config, Ref<CdsItem> item) {
     std::string location = item->getLocation();
     off_t filesize;
 
@@ -113,7 +114,7 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item) {
 
     item->addResource(resource);
 
-    Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+    Ref<Dictionary> mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
     std::string content_type = mappings->get(mimetype);
 
     if ((content_type == CONTENT_TYPE_OGG) && (isTheora(item->getLocation()))) {
@@ -122,33 +123,31 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item) {
 
 #ifdef HAVE_TAGLIB
     if ((content_type == CONTENT_TYPE_MP3) || ((content_type == CONTENT_TYPE_OGG) && (!item->getFlag(OBJECT_FLAG_OGG_THEORA))) || (content_type == CONTENT_TYPE_WMA) || (content_type == CONTENT_TYPE_WAVPACK) || (content_type == CONTENT_TYPE_FLAC) || (content_type == CONTENT_TYPE_PCM) || (content_type == CONTENT_TYPE_AIFF) || (content_type == CONTENT_TYPE_APE) || (content_type == CONTENT_TYPE_MP4)) {
-        TagLibHandler().fillMetadata(item);
+        TagLibHandler(config).fillMetadata(item);
     }
 #endif // HAVE_TAGLIB
 
 #ifdef HAVE_EXIV2
-
     if (content_type == CONTENT_TYPE_JPG) {
-        Exiv2Handler().fillMetadata(item);
+        Exiv2Handler(config).fillMetadata(item);
     }
-
 #endif
 
 #ifdef HAVE_LIBEXIF
     if (content_type == CONTENT_TYPE_JPG) {
-        LibExifHandler().fillMetadata(item);
+        LibExifHandler(config).fillMetadata(item);
     }
 #endif // HAVE_LIBEXIF
 
 #ifdef HAVE_MATROSKA
     if (content_type == CONTENT_TYPE_MKV) {
-        MatroskaHandler().fillMetadata(item);
+        MatroskaHandler(config).fillMetadata(item);
     }
 #endif
 
 #ifdef HAVE_FFMPEG
     if (content_type != CONTENT_TYPE_PLAYLIST && ((content_type == CONTENT_TYPE_OGG && item->getFlag(OBJECT_FLAG_OGG_THEORA)) || startswith(item->getMimeType(), "video") || startswith(item->getMimeType(), "audio"))) {
-        FfmpegHandler().fillMetadata(item);
+        FfmpegHandler(config).fillMetadata(item);
     }
 #else
     if (content_type == CONTENT_TYPE_AVI) {
@@ -158,11 +157,10 @@ void MetadataHandler::setMetadata(Ref<CdsItem> item) {
                 fourcc);
         }
     }
-
 #endif // HAVE_FFMPEG
 
     // Fanart for all things!
-    FanArtHandler().fillMetadata(item);
+    FanArtHandler(config).fillMetadata(item);
 }
 
 std::string MetadataHandler::getMetaFieldName(metadata_fields_t field)
@@ -175,27 +173,27 @@ std::string MetadataHandler::getResAttrName(resource_attributes_t attr)
     return RES_KEYS[attr].upnp;
 }
 
-Ref<MetadataHandler> MetadataHandler::createHandler(int handlerType)
+Ref<MetadataHandler> MetadataHandler::createHandler(std::shared_ptr<ConfigManager> config, int handlerType)
 {
     switch (handlerType) {
 #ifdef HAVE_LIBEXIF
     case CH_LIBEXIF:
-        return Ref<MetadataHandler>(new LibExifHandler());
+        return Ref<MetadataHandler>(new LibExifHandler(config));
 #endif
 #ifdef HAVE_TAGLIB
     case CH_ID3:
-        return Ref<MetadataHandler>(new TagLibHandler());
+        return Ref<MetadataHandler>(new TagLibHandler(config));
 #endif
 #ifdef HAVE_MATROSKA
     case CH_MATROSKA:
-        return Ref<MetadataHandler>(new MatroskaHandler());
+        return Ref<MetadataHandler>(new MatroskaHandler(config));
 #endif
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
     case CH_FFTH:
-        return Ref<MetadataHandler>(new FfmpegHandler());
+        return Ref<MetadataHandler>(new FfmpegHandler(config));
 #endif
     case CH_FANART:
-        return Ref<MetadataHandler>(new FanArtHandler());
+        return Ref<MetadataHandler>(new FanArtHandler(config));
     default:
         throw _Exception("unknown content handler ID: " + std::to_string(handlerType));
     }

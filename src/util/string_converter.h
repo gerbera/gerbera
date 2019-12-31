@@ -32,8 +32,12 @@
 #ifndef __STRING_CONVERTER_H__
 #define __STRING_CONVERTER_H__
 
+#include <memory>
 #include "common.h"
 #include <iconv.h>
+
+// forward declaration
+class ConfigManager;
 
 class StringConverter : public zmm::Object {
 public:
@@ -50,26 +54,25 @@ public:
     bool validate(std::string str);
 
     /// \brief internal (UTF-8) to filesystem
-    static zmm::Ref<StringConverter> i2f();
+    static zmm::Ref<StringConverter> i2f(std::shared_ptr<ConfigManager> cm);
 
     /// \brief filesystem to internal
-    static zmm::Ref<StringConverter> f2i();
+    static zmm::Ref<StringConverter> f2i(std::shared_ptr<ConfigManager> cm);
 
     /// \brief metadata to internal
-    static zmm::Ref<StringConverter> m2i();
+    static zmm::Ref<StringConverter> m2i(std::shared_ptr<ConfigManager> cm);
 #ifdef HAVE_JS
     /// \brief scripting to internal
-    static zmm::Ref<StringConverter> j2i();
+    static zmm::Ref<StringConverter> j2i(std::shared_ptr<ConfigManager> cm);
 
     /// \brief playlist to internal
-    static zmm::Ref<StringConverter> p2i();
-
+    static zmm::Ref<StringConverter> p2i(std::shared_ptr<ConfigManager> cm);
 #endif
 #if defined(HAVE_JS) || defined(HAVE_TAGLIB) || defined(ATRAILERS) || defined(HAVE_MATROSKA)
     /// \brief safeguard - internal to internal - needed to catch some
     /// scenarious where the user may have forgotten to add proper conversion
     /// in the script.
-    static zmm::Ref<StringConverter> i2i();
+    static zmm::Ref<StringConverter> i2i(std::shared_ptr<ConfigManager> cm);
 #endif
 
 protected:

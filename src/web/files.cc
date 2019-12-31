@@ -39,8 +39,9 @@
 using namespace zmm;
 using namespace mxml;
 
-web::files::files()
-    : WebRequestHandler()
+web::files::files(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
+    std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
+    : WebRequestHandler(config, storage, content, sessionManager)
 {
 }
 
@@ -61,7 +62,7 @@ void web::files::process()
     files->setAttribute("location", path);
     root->appendElementChild(files);
 
-    Ref<Filesystem> fs(new Filesystem());
+    Ref<Filesystem> fs(new Filesystem(config));
     Ref<Array<FsObject>> arr;
     arr = fs->readDirectory(path, FS_MASK_FILES);
 
@@ -74,7 +75,7 @@ void web::files::process()
         std::string id = hex_encode(filepath.c_str(), filepath.length());
         fe->setAttribute("id", id);
 
-        Ref<StringConverter> f2i = StringConverter::f2i();
+        Ref<StringConverter> f2i = StringConverter::f2i(config);
         fe->setTextKey("filename");
         fe->setText(f2i->convert(filename));
         files->appendElementChild(fe);

@@ -36,9 +36,13 @@
 
 using namespace zmm;
 
-JSLayout::JSLayout() : Layout()
+JSLayout::JSLayout(std::shared_ptr<ConfigManager> config,
+    std::shared_ptr<Storage> storage,
+    std::shared_ptr<ContentManager> content,
+    std::shared_ptr<Runtime> runtime)
+    : Layout()
 {
-    import_script = Ref<ImportScript>(new ImportScript(Runtime::getInstance()));
+    import_script = Ref<ImportScript>(new ImportScript(config, storage, content, runtime));
 }
 
 JSLayout::~JSLayout()

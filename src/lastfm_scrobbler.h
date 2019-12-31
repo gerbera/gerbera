@@ -35,30 +35,29 @@
 #ifndef __LASTFM_H__
 #define __LASTFM_H__
 
+#include <memory>
 #include "cds_objects.h"
-#include "singleton.h"
 #include "zmm/ref.h"
 #include "zmm/zmm.h"
 #include <lastfmlib/lastfmscrobblerc.h>
 #include <stdlib.h>
 
-class LastFm : public Singleton<LastFm, std::mutex> {
+class LastFm {
 public:
     LastFm();
-    std::string getName() override { return _("LastFM Scrobbler"); }
     ~LastFm();
 
     /// \brief Initializes the LastFm client.
     ///
     /// This function reads information from the config and initializes
     /// various variables (like username and password).
-    void init() override;
+    void init();
 
     /// \brief Destroys the LastFm client.
     ///
     /// This function destroys the LastFm client after submitting the
     /// last Track info
-    void shutdown() override;
+    void shutdown();
 
     /// \brief indicates that a new file has started playing.
     ///
@@ -69,6 +68,8 @@ public:
     void startedPlaying(zmm::Ref<CdsItem> item);
 
 private:
+    std::shared_ptr<ConfigManager> config;
+
     lastfm_scrobbler* scrobbler;
     int currentTrackId;
 };

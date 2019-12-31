@@ -33,15 +33,16 @@
 #define __TRANSCODE_EXTERNAL_HANDLER_H__
 
 #include <upnp.h>
+#include <memory>
 
 #include "common.h"
 #include "transcode_handler.h"
 
-
 class TranscodeExternalHandler : public TranscodeHandler 
 {
 public:
-    TranscodeExternalHandler();
+    TranscodeExternalHandler(std::shared_ptr<ConfigManager> config,
+        std::shared_ptr<ContentManager> content);
     virtual zmm::Ref<IOHandler> open(zmm::Ref<TranscodingProfile> profile, 
                                      std::string location,
                                      zmm::Ref<CdsObject> obj,

@@ -57,11 +57,12 @@ typedef enum
     I2I,
 } charset_convert_t;
 
+// forward declaration
+class ConfigManager;
+class ContentManager;
+
 class Script : public zmm::Object
 {
-public:
-    zmm::Ref<Runtime> runtime;
-    
 public:
     virtual ~Script();
     
@@ -88,8 +89,15 @@ public:
     
     static Script *getContextScript(duk_context *ctx);
 
+    std::shared_ptr<ConfigManager> getConfig() { return config; }
+    std::shared_ptr<Storage> getStorage() { return storage; }
+    std::shared_ptr<ContentManager> getContent() { return content; }
+
 protected:
-    Script(zmm::Ref<Runtime> runtime, std::string name);
+    Script(std::shared_ptr<ConfigManager> config,
+        std::shared_ptr<Storage> storage,
+        std::shared_ptr<ContentManager> content,
+        std::shared_ptr<Runtime> runtime, std::string name);
     void execute();
     int gc_counter;
 
@@ -97,8 +105,13 @@ protected:
     // script)
     zmm::Ref<CdsObject> processed;
     
-    using AutoLock = std::lock_guard<std::recursive_mutex>;
     duk_context *ctx;
+
+protected:
+    std::shared_ptr<ConfigManager> config;
+    std::shared_ptr<Storage> storage;
+    std::shared_ptr<ContentManager> content;
+    std::shared_ptr<Runtime> runtime;
 
 private:
     std::string name;

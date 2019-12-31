@@ -34,12 +34,16 @@
 
 #include "common.h"
 #include "config/config_manager.h"
-#include "content_manager.h"
+#include "session_manager.h"
 #include "zmm/dictionary.h"
 #include "mxml/mxml.h"
 #include "request_handler.h"
-#include "session_manager.h"
 #include "util/exception.h"
+#include "util/generic_task.h"
+
+// forward declaration
+class ContentManager;
+class Storage;
 
 namespace web {
 
@@ -59,9 +63,14 @@ public:
     }
 };
 
+class SessionManager;
+
 /// \brief This class is responsible for processing requests that come to the user interface.
 class WebRequestHandler : public RequestHandler {
 protected:
+    std::shared_ptr<ContentManager> content;
+    std::shared_ptr<web::SessionManager> sessionManager;
+
     bool checkRequestCalled;
 
     /// \brief Decoded URL parameters are stored as a dictionary.
@@ -123,13 +132,15 @@ protected:
 
     /// \brief check if accounts are enabled in the config
     /// \return true if accounts are enabled, false if not
-    bool accountsEnabled() { return (ConfigManager::getInstance()->getBoolOption(CFG_SERVER_UI_ACCOUNTS_ENABLED)); }
+    bool accountsEnabled() { return config->getBoolOption(CFG_SERVER_UI_ACCOUNTS_ENABLED); }
 
     std::string mapAutoscanType(int type);
 
 public:
     /// \brief Constructor, currently empty.
-    WebRequestHandler();
+    WebRequestHandler(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
+        std::shared_ptr<ContentManager> content, std::shared_ptr<web::SessionManager> sessionManager);
+
     /// \brief Returns information about the requested content.
     /// \param filename Requested URL
     /// \param info File_Info structure, quite similar to statbuf.

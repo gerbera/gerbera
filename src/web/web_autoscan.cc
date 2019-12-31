@@ -45,8 +45,9 @@ int WebAutoscanProcessListComparator(void* arg1, void* arg2)
     return strcmp(a1->getLocation().c_str(), a2->getLocation().c_str());
 }
 
-web::autoscan::autoscan()
-    : WebRequestHandler()
+web::autoscan::autoscan(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
+    std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
+    : WebRequestHandler(config, storage, content, sessionManager)
 {
 }
 
@@ -58,9 +59,6 @@ void web::autoscan::process()
     std::string action = param("action");
     if (!string_ok(action))
         throw _Exception("web:autoscan called with illegal action");
-
-    Ref<ContentManager> cm = ContentManager::getInstance();
-    Ref<Storage> storage = Storage::getInstance();
 
     bool fromFs = boolParam("from_fs");
     std::string path;
@@ -78,7 +76,7 @@ void web::autoscan::process()
         if (fromFs) {
             autoscan->appendTextChild("from_fs", "1", mxml_bool_type);
             autoscan->appendTextChild("object_id", objID);
-            Ref<AutoscanDirectory> adir = cm->getAutoscanDirectory(path);
+            Ref<AutoscanDirectory> adir = content->getAutoscanDirectory(path);
             autoscan2XML(autoscan, adir);
         } else {
             autoscan->appendTextChild("from_fs", "0", mxml_bool_type);
@@ -92,9 +90,9 @@ void web::autoscan::process()
             // remove...
             try {
                 if (fromFs)
-                    cm->removeAutoscanDirectory(path);
+                    content->removeAutoscanDirectory(path);
                 else
-                    cm->removeAutoscanDirectory(intParam("object_id"));
+                    content->removeAutoscanDirectory(intParam("object_id"));
             } catch (const Exception& e) {
                 // didn't work, well we don't care in this case
             }
@@ -113,7 +111,7 @@ void web::autoscan::process()
 
             int objectID = INVALID_OBJECT_ID;
             if (fromFs)
-                objectID = cm->ensurePathExistence(path);
+                objectID = content->ensurePathExistence(path);
             else
                 objectID = intParam("object_id");
 
@@ -131,10 +129,10 @@ void web::autoscan::process()
                 interval,
                 hidden));
             autoscan->setObjectID(objectID);
-            cm->setAutoscanDirectory(autoscan);
+            content->setAutoscanDirectory(autoscan);
         }
     } else if (action == "list") {
-        Ref<Array<AutoscanDirectory>> autoscanList = cm->getAutoscanDirectories();
+        Ref<Array<AutoscanDirectory>> autoscanList = content->getAutoscanDirectories();
         int size = autoscanList->size();
 
         // --- sorting autoscans

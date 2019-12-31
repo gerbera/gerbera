@@ -132,8 +132,6 @@ set(libgerberaFILES
         src/onlineservice/sopcast_content_handler.h
         src/onlineservice/sopcast_service.cc
         src/onlineservice/sopcast_service.h
-        src/play_hook.cc
-        src/play_hook.h
         src/request_handler.cc
         src/request_handler.h
         src/scripting/import_script.cc
@@ -152,8 +150,6 @@ set(libgerberaFILES
         src/serve_request_handler.cc
         src/serve_request_handler.h
         src/server.h
-        src/singleton.cc
-        src/singleton.h
         src/storage/mysql/mysql_create_sql.h
         src/storage/mysql/mysql_storage.cc
         src/storage/mysql/mysql_storage.h

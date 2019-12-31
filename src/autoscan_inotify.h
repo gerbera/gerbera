@@ -39,15 +39,18 @@
 
 #include "autoscan.h"
 #include "util/mt_inotify.h"
-#include "singleton.h"
 #include "zmm/zmmf.h"
 
 #define INOTIFY_ROOT -1
 #define INOTIFY_UNKNOWN_PARENT_WD -2
 
+// forward declaration
+class Storage;
+class ContentManager;
+
 class AutoscanInotify {
 public:
-    AutoscanInotify();
+    AutoscanInotify(std::shared_ptr<Storage> storage, std::shared_ptr<ContentManager> content);
     ~AutoscanInotify();
 
     void run();
@@ -59,6 +62,9 @@ public:
     void unmonitor(zmm::Ref<AutoscanDirectory> dir);
 
 private:
+    std::shared_ptr<Storage> storage;
+    std::shared_ptr<ContentManager> content;
+
     void threadProc();
 
     std::thread thread_;

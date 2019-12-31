@@ -34,12 +34,17 @@
 #include "config/config_manager.h"
 #include "metadata/metadata_handler.h"
 #include "server.h"
+#include "storage/storage.h"
 
 using namespace zmm;
 using namespace mxml;
 
-UpnpXMLBuilder::UpnpXMLBuilder(std::string virtualUrl, std::string presentationURL)
-    : virtualURL(virtualUrl)
+UpnpXMLBuilder::UpnpXMLBuilder(std::shared_ptr<ConfigManager> config,
+    std::shared_ptr<Storage> storage,
+    std::string virtualUrl, std::string presentationURL)
+    : config(config)
+    , storage(storage)
+    , virtualURL(virtualUrl)
     , presentationURL(presentationURL)
 {
 }
@@ -102,7 +107,6 @@ Ref<Element> UpnpXMLBuilder::renderObject(Ref<CdsObject> obj, bool renderActions
         addResources(item, result);
 
         if (upnp_class == UPNP_DEFAULT_CLASS_MUSIC_TRACK) {
-            Ref<Storage> storage = Storage::getInstance();
             // extract extension-less, lowercase track name to search for corresponding
             // image as cover alternative
             std::string dctl = tolower_string(item->getTitle());
@@ -185,7 +189,6 @@ Ref<Element> UpnpXMLBuilder::renderObject(Ref<CdsObject> obj, bool renderActions
 
         }
         if (upnp_class == UPNP_DEFAULT_CLASS_MUSIC_ALBUM || upnp_class == UPNP_DEFAULT_CLASS_CONTAINER) {
-            Ref<Storage> storage = Storage::getInstance();
             std::string aa_id = storage->findFolderImage(cont->getID(), std::string());
 
             if (!aa_id.empty()) {
@@ -297,8 +300,6 @@ Ref<Element> UpnpXMLBuilder::createEventPropertySet()
 
 Ref<Element> UpnpXMLBuilder::renderDeviceDescription()
 {
-    Ref<ConfigManager> config = ConfigManager::getInstance();
-
     Ref<Element> root(new Element("root"));
     root->setAttribute("xmlns", DESC_DEVICE_NAMESPACE);
 
@@ -619,7 +620,6 @@ std::string UpnpXMLBuilder::renderExtension(std::string contentType, std::string
 void UpnpXMLBuilder::addResources(Ref<CdsItem> item, Ref<Element> element)
 {
     Ref<PathBase> urlBase = getPathBase(item);
-    Ref<ConfigManager> config = ConfigManager::getInstance();
     bool skipURL = ((IS_CDS_ITEM_INTERNAL_URL(item->getObjectType()) || IS_CDS_ITEM_EXTERNAL_URL(item->getObjectType())) && (!item->getFlag(OBJECT_FLAG_PROXY_URL)));
 
     bool isExtThumbnail = false; // this sucks

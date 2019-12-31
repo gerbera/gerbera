@@ -38,10 +38,14 @@
 #include "lastfm_scrobbler.h"
 #endif
 
+#include "server.h"
+#include "config/config_manager.h"
 #include "content_manager.h"
 #include "file_request_handler.h"
-#include "server.h"
 #include "update_manager.h"
+#include "util/task_processor.h"
+#include "web/session_manager.h"
+#include "storage/storage.h"
 #ifdef HAVE_CURL
 #include "url_request_handler.h"
 #endif
@@ -52,24 +56,13 @@
 using namespace zmm;
 using namespace mxml;
 
-Ref<Storage> Server::storage = nullptr;
-
 static int static_upnp_callback(Upnp_EventType eventtype, const void* event, void* cookie)
 {
     return static_cast<Server*>(cookie)->handleUpnpEvent(eventtype, event);
 }
 
-void Server::static_cleanup_callback()
-{
-    if (storage != nullptr) {
-        try {
-            storage->threadCleanup();
-        } catch (const Exception& ex) {
-        }
-    }
-}
-
-Server::Server()
+Server::Server(std::shared_ptr<ConfigManager> config)
+    : config(config)
 {
     server_shutdown_flag = false;
 }
@@ -78,8 +71,6 @@ void Server::init()
 {
     virtual_directory = SERVER_VIRTUAL_DIR;
 
-    Ref<ConfigManager> config = ConfigManager::getInstance();
-
     serverUDN = config->getOption(CFG_SERVER_UDN);
     aliveAdvertisementInterval = config->getIntOption(CFG_SERVER_ALIVE_INTERVAL);
 
@@ -87,17 +78,33 @@ void Server::init()
     curl_global_init(CURL_GLOBAL_ALL);
 #endif
 
+    // initalize what is needed
+    auto self = shared_from_this();
+    timer = std::make_shared<Timer>();
+    timer->init();
+    task_processor = std::make_shared<TaskProcessor>();
+    task_processor->init();
+    scripting_runtime = std::make_shared<Runtime>();
+    storage = Storage::createInstance(config, timer);
+    update_manager = std::make_shared<UpdateManager>(storage, self);
+    update_manager->init();
+    session_manager = std::make_shared<web::SessionManager>(config, timer);
 #ifdef HAVE_LASTFMLIB
-    LastFm::getInstance();
+    last_fm = std::make_shared<LastFm>();
+    last_fm->init();
 #endif
+    content = std::make_shared<ContentManager>(
+        config, storage, update_manager, session_manager, timer, task_processor, scripting_runtime, last_fm
+    );
+    content->init();
 }
+
+Server::~Server() { log_debug("Server destroyed\n"); }
 
 void Server::run()
 {
     int ret = 0; // general purpose error code
     log_debug("start\n");
-
-    Ref<ConfigManager> config = ConfigManager::getInstance();
 
     std::string iface = config->getOption(CFG_SERVER_NETWORK_INTERFACE);
     std::string ip = config->getOption(CFG_SERVER_IP);
@@ -112,11 +119,6 @@ void Server::run()
         throw _Exception("Could not find ip: " + ip);
 
     int port = config->getIntOption(CFG_SERVER_PORT);
-
-    // this is important, so the storage lives a little longer when
-    // shutdown is initiated
-    // FIMXE: why?
-    storage = Storage::getInstance();
 
     log_debug("Initialising libupnp with interface: '%s', port: %d\n", iface.c_str(), port);
     const char* IfName = NULL;
@@ -190,7 +192,7 @@ void Server::run()
     }
 
     log_debug("Creating UpnpXMLBuilder\n");
-    xmlbuilder = std::make_unique<UpnpXMLBuilder>(virtualUrl, presentationURL);
+    xmlbuilder = std::make_unique<UpnpXMLBuilder>(config, storage, virtualUrl, presentationURL);
 
     // register root device with the library
     std::string deviceDescription = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + xmlbuilder->renderDeviceDescription()->print();
@@ -210,14 +212,14 @@ void Server::run()
     }
 
     log_debug("Creating ContentDirectoryService\n");
-    cds = std::make_unique<ContentDirectoryService>(xmlbuilder.get(), deviceHandle,
-        ConfigManager::getInstance()->getIntOption(CFG_SERVER_UPNP_TITLE_AND_DESC_STRING_LIMIT));
+    cds = std::make_unique<ContentDirectoryService>(config, storage, xmlbuilder.get(), deviceHandle,
+        config->getIntOption(CFG_SERVER_UPNP_TITLE_AND_DESC_STRING_LIMIT));
 
     log_debug("Creating ConnectionManagerService\n");
-    cmgr = std::make_unique<ConnectionManagerService>(xmlbuilder.get(), deviceHandle);
+    cmgr = std::make_unique<ConnectionManagerService>(config, storage, xmlbuilder.get(), deviceHandle);
 
     log_debug("Creating MRRegistrarService\n");
-    mrreg = std::make_unique<MRRegistrarService>(xmlbuilder.get(), deviceHandle);
+    mrreg = std::make_unique<MRRegistrarService>(config, xmlbuilder.get(), deviceHandle);
 
     // The advertisement will be sent by LibUPnP every (A/2)-30 seconds, and will have a cache-control max-age of A where A is
     // the value configured here. Ex: A value of 62 will result in an SSDP advertisement being sent every second.
@@ -226,12 +228,6 @@ void Server::run()
     if (ret != UPNP_E_SUCCESS) {
         throw _UpnpException(ret, "run: UpnpSendAdvertisement failed");
     }
-
-    // initializing UpdateManager
-    UpdateManager::getInstance();
-
-    // initializing ContentManager
-    ContentManager::getInstance();
 
     config->writeBookmark(ip, std::to_string(port));
     log_info("The Web UI can be reached by following this link: http://%s:%d/\n", ip.c_str(), port);
@@ -248,20 +244,14 @@ void Server::shutdown()
 {
     int ret = 0; // return code
 
-    /*
-    ContentManager::getInstance()->shutdown();
-    UpdateManager::getInstance()->shutdown();
-    Storage::getInstance()->shutdown();
-    */
-
-    ConfigManager::getInstance()->emptyBookmark();
+    config->emptyBookmark();
     server_shutdown_flag = true;
 
     log_debug("Server shutting down\n");
 
     ret = UpnpUnRegisterRootDevice(deviceHandle);
     if (ret != UPNP_E_SUCCESS) {
-        throw _UpnpException(ret, "upnp_cleanup: UpnpUnRegisterRootDevice failed");
+        log_error("upnp_cleanup: UpnpUnRegisterRootDevice failed: %i", ret);
     }
 
 #ifdef HAVE_CURL
@@ -270,12 +260,31 @@ void Server::shutdown()
 
     log_debug("now calling upnp finish\n");
     UpnpFinish();
-    if (storage != nullptr && storage->threadCleanupRequired()) {
-        static_cleanup_callback();
+
+    content->shutdown();
+    content = nullptr;
+#ifdef HAVE_LASTFMLIB
+    last_fm->shutdown();
+    last_fm = nullptr;
+#endif
+    session_manager = nullptr;
+    update_manager->shutdown();
+    update_manager = nullptr;
+
+    if (storage->threadCleanupRequired()) {
+        try {
+            storage->threadCleanup();
+        } catch (const Exception& ex) {
+        }
     }
+    storage->shutdown();
     storage = nullptr;
 
-
+    scripting_runtime = nullptr;
+    task_processor->shutdown();
+    task_processor = nullptr;
+    timer->shutdown();
+    timer = nullptr;
 }
 
 int Server::handleUpnpEvent(Upnp_EventType eventtype, const void* event)
@@ -332,12 +341,12 @@ int Server::handleUpnpEvent(Upnp_EventType eventtype, const void* event)
     return ret;
 }
 
-std::string Server::getIP() const
+std::string Server::getIP()
 {
     return UpnpGetServerIpAddress();
 }
 
-std::string Server::getPort() const
+std::string Server::getPort()
 {
     return std::to_string(UpnpGetServerPort());
 }
@@ -412,7 +421,7 @@ Ref<RequestHandler> Server::createRequestHandler(const char* filename) const
     RequestHandler* ret = nullptr;
 
     if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_MEDIA_HANDLER)) {
-        ret = new FileRequestHandler(xmlbuilder.get());
+        ret = new FileRequestHandler(config, storage, content, update_manager, session_manager, xmlbuilder.get());
     } else if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_UI_HANDLER)) {
         std::string parameters;
         std::string path;
@@ -423,22 +432,22 @@ Ref<RequestHandler> Server::createRequestHandler(const char* filename) const
 
         std::string r_type = dict->get(URL_REQUEST_TYPE);
         if (!r_type.empty()) {
-            ret = web::createWebRequestHandler(r_type);
+            ret = web::createWebRequestHandler(config, storage, content, session_manager, r_type);
         } else {
-            ret = web::createWebRequestHandler("index");
+            ret = web::createWebRequestHandler(config, storage, content, session_manager, "index");
         }
     } else if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + DEVICE_DESCRIPTION_PATH)) {
-        ret = new DeviceDescriptionHandler(xmlbuilder.get());
+        ret = new DeviceDescriptionHandler(config, storage, xmlbuilder.get());
     } else if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_SERVE_HANDLER)) {
-        if (string_ok(ConfigManager::getInstance()->getOption(CFG_SERVER_SERVEDIR)))
-            ret = new ServeRequestHandler();
+        if (string_ok(config->getOption(CFG_SERVER_SERVEDIR)))
+            ret = new ServeRequestHandler(config, storage);
         else
             throw _Exception("Serving directories is not enabled in configuration");
     }
 
 #if defined(HAVE_CURL)
     else if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_ONLINE_HANDLER)) {
-        ret = new URLRequestHandler();
+        ret = new URLRequestHandler(config, storage, content);
     }
 #endif
     else {

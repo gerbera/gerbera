@@ -33,6 +33,7 @@
 
 #include "atrailers_service.h"
 #include "atrailers_content_handler.h"
+#include "storage/storage.h"
 #include "config/config_manager.h"
 #include "config/config_options.h"
 #include "content_manager.h"
@@ -48,7 +49,12 @@ using namespace mxml;
 #define ATRAILERS_SERVICE_URL_640 "http://www.apple.com/trailers/home/xml/current.xml"
 #define ATRAILERS_SERVICE_URL_720P "http://www.apple.com/trailers/home/xml/current_720p.xml"
 
-ATrailersService::ATrailersService()
+ATrailersService::ATrailersService(std::shared_ptr<ConfigManager> config,
+    std::shared_ptr<Storage> storage,
+    std::shared_ptr<ContentManager> content)
+    : config(config)
+    , storage(storage)
+    , content(content)
 {
     url = Ref<URL>(new URL());
     pid = 0;
@@ -56,7 +62,7 @@ ATrailersService::ATrailersService()
     if (!curl_handle)
         throw _Exception("failed to initialize curl!\n");
 
-    if (ConfigManager::getInstance()->getOption(CFG_ONLINE_CONTENT_ATRAILERS_RESOLUTION) == "640")
+    if (config->getOption(CFG_ONLINE_CONTENT_ATRAILERS_RESOLUTION) == "640")
         service_url = ATRAILERS_SERVICE_URL_640;
     else
         service_url = ATRAILERS_SERVICE_URL_720P;
@@ -87,7 +93,7 @@ Ref<Object> ATrailersService::defineServiceTask(Ref<Element> xmlopt, Ref<Object>
 Ref<Element> ATrailersService::getData()
 {
     long retcode;
-    Ref<StringConverter> sc = StringConverter::i2i();
+    Ref<StringConverter> sc = StringConverter::i2i(config);
 
     std::string buffer;
 
@@ -144,7 +150,7 @@ bool ATrailersService::refreshServiceData(Ref<Layout> layout)
 
     Ref<Element> reply = getData();
 
-    Ref<ATrailersContentHandler> sc(new ATrailersContentHandler());
+    Ref<ATrailersContentHandler> sc(new ATrailersContentHandler(config, storage));
     if (reply != nullptr)
         sc->setServiceContent(reply);
     else {
@@ -160,7 +166,7 @@ bool ATrailersService::refreshServiceData(Ref<Layout> layout)
 
         obj->setVirtual(true);
 
-        Ref<CdsObject> old = Storage::getInstance()->loadObjectByServiceID(RefCast(obj, CdsItem)->getServiceID());
+        Ref<CdsObject> old = storage->loadObjectByServiceID(RefCast(obj, CdsItem)->getServiceID());
         if (old == nullptr) {
             log_debug("Adding new Trailers object\n");
 
@@ -175,10 +181,10 @@ bool ATrailersService::refreshServiceData(Ref<Layout> layout)
             //            oldt.tv_sec = old->getAuxData(ONLINE_SERVICE_LAST_UPDATE).toLong();
             //            newt.tv_nsec = 0;
             //            newt.tv_sec = obj->getAuxData(ONLINE_SERVICE_LAST_UPDATE).toLong();
-            ContentManager::getInstance()->updateObject(obj);
+            content->updateObject(obj);
         }
 
-//        if (Server::getInstance()->getShutdownStatus())
+//        if (server->getShutdownStatus())
 //            return false;
 
     } while (obj != nullptr);

@@ -42,55 +42,36 @@
 
 using namespace zmm;
 
-Ref<Storage> Storage::getInstance()
+Storage::Storage(std::shared_ptr<ConfigManager> config)
+    : config(config)
 {
-    if (!instance->singletonActive)
-        throw _Exception("singleton is currently inactive!");
-    if (instance == nullptr) {
-        // extra scope added so that lock can be released prior to metadata upgrade
-        // when flushInsertBuffer() will try taking this lock
-        {
-            AutoLock lock(mutex);
-            if (!instance->singletonActive)
-                throw _Exception("singleton is currently inactive!");
-            if (instance == nullptr) {
-                Ref<Storage> tmpInstance = createInstance();
-                tmpInstance->init();
-                tmpInstance->registerSingleton();
-                instance = tmpInstance;
-            }
-        }
-        if (instance != nullptr)
-            instance->doMetadataMigration();
-    }
-    return instance;
 }
 
-Ref<Storage> Storage::createInstance()
+std::shared_ptr<Storage> Storage::createInstance(std::shared_ptr<ConfigManager> config, std::shared_ptr<Timer> timer)
 {
-    std::string type;
-    Ref<Storage> storage;
+    std::shared_ptr<Storage> storage;
 
-    Ref<ConfigManager> config = ConfigManager::getInstance();
-    type = config->getOption(CFG_SERVER_STORAGE_DRIVER);
-
+    std::string type = config->getOption(CFG_SERVER_STORAGE_DRIVER);
     do {
 #ifdef HAVE_SQLITE3
         if (type == "sqlite3") {
-            storage = Ref<Storage>(new Sqlite3Storage());
+            storage = std::static_pointer_cast<Storage>(std::make_shared<Sqlite3Storage>(config, timer));
             break;
         }
 #endif
 
 #ifdef HAVE_MYSQL
         if (type == "mysql") {
-            storage = Ref<Storage>(new MysqlStorage());
+            storage = std::static_pointer_cast<Storage>(std::make_shared<MysqlStorage>());
             break;
         }
 #endif
         // other database types...
         throw _Exception("Unknown storage type: " + type);
     } while (false);
+
+    storage->init();
+    storage->doMetadataMigration();
 
     return storage;
 }

@@ -33,29 +33,42 @@
 #define __SERVER_H__
 
 #include "action_request.h"
-#include "common.h"
-#include "config/config_manager.h"
 #include "request_handler.h"
-#include "singleton.h"
-#include "storage/storage.h"
 #include "subscription_request.h"
 #include "upnp_cds.h"
 #include "upnp_cm.h"
 #include "upnp_mrreg.h"
 
+// forward declaration
+class ConfigManager;
+class Storage;
+class UpdateManager;
+class Timer;
+namespace web { class SessionManager; }
+class TaskProcessor;
+class Runtime;
+class LastFm;
+class ContentManager;
+
 /// \brief Provides methods to initialize and shutdown
 /// and to retrieve various information about the server.
-class Server : public Singleton<Server> {
+class Server : public std::enable_shared_from_this<Server> {
 public:
-    Server();
-
-    std::string getName() override { return "Server"; }
+    Server(std::shared_ptr<ConfigManager> config);
 
     /// \brief Initializes the server.
     ///
     /// This function reads information from the config and initializes
     /// various variables (like server UDN and so forth).
-    virtual void init() override;
+    virtual void init();
+
+    virtual ~Server();
+
+    /// \brief Cleanup routine to shutdown the server.
+    ///
+    /// Unregisters the device with the SDK, shuts down the
+    /// update manager task, storage task, content manager.
+    void shutdown();
 
     /// \brief Initializes UPnP portion, only ip or interface can be given
     ///
@@ -64,12 +77,6 @@ public:
     /// sets up the virutal web server directories and registers
     /// web callbacks. Starts the update manager task.
     void run();
-
-    /// \brief Cleanup routine to shutdown the server.
-    ///
-    /// Unregisters the device with the SDK, shuts down the
-    /// update manager task, storage task, content manager.
-    void shutdown() override;
 
     /// \brief Dispatch incoming UPnP events.
     /// \param eventtype Upnp_EventType, identifying what kind of event came in.
@@ -88,7 +95,7 @@ public:
     ///
     /// Returns a string representation of the IP where the server is
     /// running. This is useful for constructing URL's, etc.
-    std::string getIP() const;
+    static std::string getIP();
 
     /// \brief Returns the port of the server.
     ///
@@ -96,7 +103,7 @@ public:
     /// the port is also specified in the config, we can never be sure
     /// that we actually get that port after startup. This function
     /// returns the port on which the server is actually running.
-    std::string getPort() const;
+    static std::string getPort();
 
     /// \brief Tells if the server is about to be terminated.
     ///
@@ -104,12 +111,20 @@ public:
     /// terminated. This is the case when upnp_clean() was called.
     bool getShutdownStatus() const;
 
-    static void static_cleanup_callback();
-
     void sendCDSSubscriptionUpdate(std::string updateString);
 
+    std::shared_ptr<ContentManager>  getContent() { return content; }
+
 protected:
-    static zmm::Ref<Storage> storage;
+    std::shared_ptr<ConfigManager> config;
+    std::shared_ptr<Storage> storage;
+    std::shared_ptr<UpdateManager> update_manager;
+    std::shared_ptr<Timer> timer;
+    std::shared_ptr<web::SessionManager> session_manager;
+    std::shared_ptr<TaskProcessor> task_processor;
+    std::shared_ptr<Runtime> scripting_runtime;
+    std::shared_ptr<LastFm> last_fm;
+    std::shared_ptr<ContentManager> content;
 
     /// \brief This flag is set to true by the upnp_cleanup() function.
     bool server_shutdown_flag;

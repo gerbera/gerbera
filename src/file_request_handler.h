@@ -32,17 +32,31 @@
 #ifndef __FILE_REQUEST_HANDLER_H__
 #define __FILE_REQUEST_HANDLER_H__
 
+#include <memory>
 #include "common.h"
 #include "zmm/dictionary.h"
 #include "request_handler.h"
 #include "upnp_xml.h"
 
+// forward declaration
+class ConfigManager;
+class ContentManager;
+class UpdateManager;
+namespace web { class SessionManager; }
+
 class FileRequestHandler : public RequestHandler {
 protected:
+    std::shared_ptr<ContentManager> content;
+    std::shared_ptr<UpdateManager> updateManager;
+    std::shared_ptr<web::SessionManager> sessionManager;
     UpnpXMLBuilder* xmlBuilder;
 
 public:
-    explicit FileRequestHandler(UpnpXMLBuilder* xmlBuilder);
+    explicit FileRequestHandler(std::shared_ptr<ConfigManager> config,
+        std::shared_ptr<Storage> storage,
+        std::shared_ptr<ContentManager> content,
+        std::shared_ptr<UpdateManager> update_manager, std::shared_ptr<web::SessionManager> session_manager,
+        UpnpXMLBuilder* xmlBuilder);
 
     virtual void getInfo(const char *filename, UpnpFileInfo *info);
     virtual zmm::Ref<IOHandler> open(

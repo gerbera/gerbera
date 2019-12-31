@@ -97,7 +97,7 @@ void ProcessIOHandler::killall()
 void ProcessIOHandler::registerAll()
 {
     if (main_proc != nullptr)
-        ContentManager::getInstance()->registerExecutor(main_proc);
+        content->registerExecutor(main_proc);
 
     if (proclist == nullptr)
         return;
@@ -105,14 +105,14 @@ void ProcessIOHandler::registerAll()
     for (int i = 0; i < proclist->size(); i++) {
         Ref<Executor> exec = proclist->get(i)->getExecutor();
         if (exec != nullptr)
-            ContentManager::getInstance()->registerExecutor(exec);
+            content->registerExecutor(exec);
     }
 }
 
 void ProcessIOHandler::unregisterAll()
 {
     if (main_proc != nullptr)
-        ContentManager::getInstance()->unregisterExecutor(main_proc);
+        content->unregisterExecutor(main_proc);
 
     if (proclist == nullptr)
         return;
@@ -120,16 +120,18 @@ void ProcessIOHandler::unregisterAll()
     for (int i = 0; i < proclist->size(); i++) {
         Ref<Executor> exec = proclist->get(i)->getExecutor();
         if (exec != nullptr)
-            ContentManager::getInstance()->unregisterExecutor(exec);
+            content->unregisterExecutor(exec);
     }
 }
 
-ProcessIOHandler::ProcessIOHandler(std::string filename,
+ProcessIOHandler::ProcessIOHandler(std::shared_ptr<ContentManager> content,
+    std::string filename,
     zmm::Ref<Executor> main_proc,
     zmm::Ref<zmm::Array<ProcListItem>> proclist,
     bool ignoreSeek)
     : IOHandler()
 {
+    this->content = content;
     this->filename = filename;
     this->proclist = proclist;
     this->main_proc = main_proc;

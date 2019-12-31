@@ -32,11 +32,16 @@
 #ifndef __UPNP_CDS_H__
 #define __UPNP_CDS_H__
 
+#include <memory>
+#include <string>
 #include "action_request.h"
 #include "common.h"
-#include "singleton.h"
 #include "subscription_request.h"
 #include "upnp_xml.h"
+
+// forward declaration
+class ConfigManager;
+class Storage;
 
 /// \brief This class is responsible for the UPnP Content Directory Service operations.
 ///
@@ -89,14 +94,18 @@ protected:
     /// GetSystemUpdateID(ui4 Id)
     void doGetSystemUpdateID(zmm::Ref<ActionRequest> request);
 
-    UpnpDevice_Handle deviceHandle;
+    std::shared_ptr<ConfigManager> config;
+    std::shared_ptr<Storage> storage;
 
+    UpnpDevice_Handle deviceHandle;
     UpnpXMLBuilder* xmlBuilder;
 
 public:
     /// \brief Constructor for the CDS, saves the service type and service id
     /// in internal variables.
-    explicit ContentDirectoryService(UpnpXMLBuilder* builder, UpnpDevice_Handle deviceHandle, int stringLimit);
+    explicit ContentDirectoryService(std::shared_ptr<ConfigManager> config,
+        std::shared_ptr<Storage> storage,
+        UpnpXMLBuilder* builder, UpnpDevice_Handle deviceHandle, int stringLimit);
     ~ContentDirectoryService();
 
     /// \brief Dispatches the ActionRequest between the available actions.

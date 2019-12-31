@@ -37,8 +37,9 @@
 using namespace zmm;
 using namespace mxml;
 
-web::containers::containers()
-    : WebRequestHandler()
+web::containers::containers(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
+    std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
+    : WebRequestHandler(config, storage, content, sessionManager)
 {
 }
 
@@ -50,8 +51,6 @@ void web::containers::process()
     int parentID = intParam("parent_id", INVALID_OBJECT_ID);
     if (parentID == INVALID_OBJECT_ID)
         throw _Exception("web::containers: no parent_id given");
-
-    Ref<Storage> storage = Storage::getInstance();
 
     Ref<Element> containers(new Element("containers"));
     containers->setArrayName("container");
@@ -82,7 +81,7 @@ void web::containers::process()
         if (autoscanType > 0) {
             autoscanMode = "timed";
 #ifdef HAVE_INOTIFY
-            if (ConfigManager::getInstance()->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
+            if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
                 Ref<AutoscanDirectory> adir = storage->getAutoscanDirectory(cont->getID());
                 if ((adir != nullptr) && (adir->getScanMode() == ScanMode::INotify))
                     autoscanMode = "inotify";

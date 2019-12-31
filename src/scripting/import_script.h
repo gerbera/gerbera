@@ -32,6 +32,7 @@
 #ifndef __SCRIPTING_IMPORT_SCRIPT_H__
 #define __SCRIPTING_IMPORT_SCRIPT_H__
 
+#include <memory>
 #include "common.h"
 #include "script.h"
 #include "cds_objects.h"
@@ -40,7 +41,10 @@
 class ImportScript : public Script
 {
 public:
-    ImportScript(zmm::Ref<Runtime> runtime);
+    ImportScript(std::shared_ptr<ConfigManager> config,
+        std::shared_ptr<Storage> storage,
+        std::shared_ptr<ContentManager> content,
+        std::shared_ptr<Runtime> runtime);
     ~ImportScript();
     void processCdsObject(zmm::Ref<CdsObject> obj, std::string rootpath);
     virtual script_class_t whoami() override { return S_IMPORT; }

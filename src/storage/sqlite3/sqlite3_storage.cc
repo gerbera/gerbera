@@ -105,8 +105,9 @@ using namespace zmm;
 using namespace mxml;
 using namespace std;
 
-Sqlite3Storage::Sqlite3Storage()
-    : SQLStorage()
+Sqlite3Storage::Sqlite3Storage(std::shared_ptr<ConfigManager> config, std::shared_ptr<Timer> timer)
+    : SQLStorage(config)
+    , timer(timer)
 {
     shutdownFlag = false;
     table_quote_begin = '"';
@@ -126,7 +127,7 @@ void Sqlite3Storage::init()
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
     */
 
-    std::string dbFilePath = ConfigManager::getInstance()->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
+    std::string dbFilePath = config->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
 
     // check for db-file
     if (access(dbFilePath.c_str(), R_OK | W_OK) != 0 && errno != ENOENT)
@@ -157,7 +158,7 @@ void Sqlite3Storage::init()
     } catch (Exception) {
         log_warning("Sqlite3 database seems to be corrupt or doesn't exist yet.\n");
         // database seems to be corrupt or nonexistent
-        if (ConfigManager::getInstance()->getBoolOption(CFG_SERVER_STORAGE_SQLITE_RESTORE)) {
+        if (config->getBoolOption(CFG_SERVER_STORAGE_SQLITE_RESTORE)) {
             // try to restore database
 
             // checking for backup file
@@ -165,7 +166,7 @@ void Sqlite3Storage::init()
             if (access(dbFilePathbackup.c_str(), R_OK) == 0) {
                 try {
                     // trying to copy backup file
-                    Ref<SLBackupTask> btask(new SLBackupTask(true));
+                    Ref<SLBackupTask> btask(new SLBackupTask(config, true));
                     this->addTask(RefCast(btask, SLTask));
                     btask->waitForTask();
                     dbVersion = getInternalSetting("db_version");
@@ -175,7 +176,7 @@ void Sqlite3Storage::init()
 
             if (dbVersion.empty()) {
                 log_info("no sqlite3 backup is available or backup is corrupt. automatically creating database...\n");
-                Ref<SLInitTask> ptask(new SLInitTask());
+                Ref<SLInitTask> ptask(new SLInitTask(config));
                 addTask(RefCast(ptask, SLTask));
                 try {
                     ptask->waitForTask();
@@ -200,7 +201,7 @@ void Sqlite3Storage::init()
 
     _exec("PRAGMA locking_mode = EXCLUSIVE");
     _exec("PRAGMA foreign_keys = ON");
-    int synchronousOption = ConfigManager::getInstance()->getIntOption(CFG_SERVER_STORAGE_SQLITE_SYNCHRONOUS);
+    int synchronousOption = config->getIntOption(CFG_SERVER_STORAGE_SQLITE_SYNCHRONOUS);
     std::ostringstream buf;
     buf << "PRAGMA synchronous = " << synchronousOption;
     SQLStorage::exec(buf);
@@ -251,17 +252,22 @@ void Sqlite3Storage::init()
         throw _Exception("The database seems to be from a newer version!");
 
     // add timer for backups
-    if (ConfigManager::getInstance()->getBoolOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED)) {
-        int backupInterval = ConfigManager::getInstance()->getIntOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_INTERVAL);
-        Timer::getInstance()->addTimerSubscriber(this, backupInterval, nullptr);
+    if (config->getBoolOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED)) {
+        int backupInterval = config->getIntOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_INTERVAL);
+        timer->addTimerSubscriber(this, backupInterval, nullptr);
 
         // do a backup now
-        Ref<SLBackupTask> btask(new SLBackupTask(false));
+        Ref<SLBackupTask> btask(new SLBackupTask(config, false));
         this->addTask(RefCast(btask, SLTask));
         btask->waitForTask();
     }
 
     dbReady();
+}
+
+std::shared_ptr<Storage> Sqlite3Storage::getSelf()
+{
+    return shared_from_this();
 }
 
 void Sqlite3Storage::_exec(const char* query)
@@ -319,7 +325,7 @@ void Sqlite3Storage::threadProc()
 
     sqlite3* db;
 
-    std::string dbFilePath = ConfigManager::getInstance()->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
+    std::string dbFilePath = config->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
 
     int res = sqlite3_open(dbFilePath.c_str(), &db);
     if (res != SQLITE_OK) {
@@ -377,8 +383,8 @@ void Sqlite3Storage::shutdownDriver()
     log_debug("start\n");
     AutoLockU lock(sqliteMutex);
     shutdownFlag = true;
-    if (ConfigManager::getInstance()->getBoolOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED)) {
-        Timer::getInstance()->removeTimerSubscriber(this, nullptr);
+    if (config->getBoolOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED)) {
+        timer->removeTimerSubscriber(this, nullptr);
     }
     log_debug("signalling...\n");
     cond.notify_one();
@@ -441,10 +447,14 @@ void SLTask::waitForTask()
 }
 
 /* SLInitTask */
+SLInitTask::SLInitTask(std::shared_ptr<ConfigManager> config) : SLTask()
+    , config(config)
+{
+}
 
 void SLInitTask::run(sqlite3** db, Sqlite3Storage* sl)
 {
-    std::string dbFilePath = ConfigManager::getInstance()->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
+    std::string dbFilePath = config->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
 
     sqlite3_close(*db);
 
@@ -547,11 +557,15 @@ void SLExecTask::run(sqlite3** db, Sqlite3Storage* sl)
 }
 
 /* SLBackupTask */
+SLBackupTask::SLBackupTask(std::shared_ptr<ConfigManager> config, bool restore) :
+    config(config)
+    , restore(restore)
+{
+}
 
 void SLBackupTask::run(sqlite3** db, Sqlite3Storage* sl)
 {
-
-    std::string dbFilePath = ConfigManager::getInstance()->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
+    std::string dbFilePath = config->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
 
     if (!restore) {
         try {
@@ -623,7 +637,7 @@ Sqlite3Row::Sqlite3Row(char** row, Ref<SQLResult> sqlResult)
 
 void Sqlite3Storage::timerNotify(Ref<Timer::Parameter> param)
 {
-    Ref<SLBackupTask> btask(new SLBackupTask(false));
+    Ref<SLBackupTask> btask(new SLBackupTask(config, false));
     this->addTask(RefCast(btask, SLTask), true);
 }
 

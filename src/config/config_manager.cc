@@ -61,50 +61,21 @@
 using namespace zmm;
 using namespace mxml;
 
-std::string ConfigManager::filename = "";
-std::string ConfigManager::userhome = "";
-std::string ConfigManager::config_dir = DEFAULT_CONFIG_HOME;
-std::string ConfigManager::prefix_dir = PACKAGE_DATADIR;
-std::string ConfigManager::magic = "";
 bool ConfigManager::debug_logging = false;
-std::string ConfigManager::ip = "";
-std::string ConfigManager::interface = "";
-int ConfigManager::port = 0;
 
-ConfigManager::~ConfigManager()
+ConfigManager::ConfigManager(std::string filename,
+    std::string userhome, std::string config_dir,
+    std::string prefix_dir, std::string magic,
+    std::string ip, std::string interface, int port,
+    bool debug_logging)
+    :filename(filename)
+    , prefix_dir(prefix_dir)
+    , magic(magic)
+    , ip(ip)
+    , interface(interface)
+    , port(port)
 {
-    filename = "";
-    userhome = "";
-    config_dir = DEFAULT_CONFIG_HOME;
-    prefix_dir = PACKAGE_DATADIR;
-    magic = "";
-    ip = "";
-    interface = "";
-}
-
-void ConfigManager::setStaticArgs(std::string _filename, std::string _userhome,
-    std::string _config_dir, std::string _prefix_dir,
-    std::string _magic, bool _debug_logging,
-    std::string _ip, std::string _interface, int _port)
-{
-    filename = _filename;
-    userhome = _userhome;
-    config_dir = _config_dir;
-    prefix_dir = _prefix_dir;
-    magic = _magic;
-    debug_logging = _debug_logging;
-    ip = _ip;
-    interface = _interface;
-    port = _port;
-}
-
-ConfigManager::ConfigManager()
-    : Singleton<ConfigManager, std::mutex>()
-{
-}
-
-void ConfigManager::init()
-{
+    this->debug_logging = debug_logging;
     options = Ref<Array<ConfigOption>>(new Array<ConfigOption>(CFG_MAX));
 
     std::string home = userhome + DIR_SEPARATOR + config_dir;
@@ -133,6 +104,11 @@ void ConfigManager::init()
 #endif
     // now the XML is no longer needed we can destroy it
     root = nullptr;
+}
+
+ConfigManager::~ConfigManager()
+{
+    log_debug("ConfigManager destroyed\n");
 }
 
 std::string ConfigManager::construct_path(std::string path)
@@ -888,7 +864,7 @@ void ConfigManager::validate(std::string serverhome)
 
     el = getElement("/import/autoscan");
 
-    NEW_AUTOSCANLIST_OPTION(createAutoscanListFromNodeset(el, ScanMode::Timed));
+    NEW_AUTOSCANLIST_OPTION(createAutoscanListFromNodeset(nullptr, el, ScanMode::Timed));
     SET_AUTOSCANLIST_OPTION(CFG_IMPORT_AUTOSCAN_TIMED_LIST);
 
 #ifdef HAVE_INOTIFY
@@ -914,7 +890,7 @@ void ConfigManager::validate(std::string serverhome)
 #ifdef HAVE_INOTIFY
     if (temp == "auto" || (temp == YES)) {
         if (inotify_supported) {
-            NEW_AUTOSCANLIST_OPTION(createAutoscanListFromNodeset(el, ScanMode::INotify));
+            NEW_AUTOSCANLIST_OPTION(createAutoscanListFromNodeset(nullptr, el, ScanMode::INotify));
             SET_AUTOSCANLIST_OPTION(CFG_IMPORT_AUTOSCAN_INOTIFY_LIST);
 
             NEW_BOOL_OPTION(true);
@@ -1243,8 +1219,8 @@ void ConfigManager::validate(std::string serverhome)
 
 #ifdef HAVE_INOTIFY
     tmpEl = getElement("/import/autoscan");
-    Ref<AutoscanList> config_timed_list = createAutoscanListFromNodeset(tmpEl, ScanMode::Timed);  
-    Ref<AutoscanList> config_inotify_list = createAutoscanListFromNodeset(tmpEl, ScanMode::INotify);
+    Ref<AutoscanList> config_timed_list = createAutoscanListFromNodeset(nullptr, tmpEl, ScanMode::Timed);
+    Ref<AutoscanList> config_inotify_list = createAutoscanListFromNodeset(nullptr, tmpEl, ScanMode::INotify);
 
     for (int i = 0; i < config_inotify_list->size(); i++) {
         Ref<AutoscanDirectory> i_dir = config_inotify_list->get(i);
@@ -1862,9 +1838,9 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
     return list;
 }
 
-Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(zmm::Ref<mxml::Element> element, ScanMode scanmode)
+Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(std::shared_ptr<Storage> storage, zmm::Ref<mxml::Element> element, ScanMode scanmode)
 {
-    Ref<AutoscanList> list(new AutoscanList());
+    Ref<AutoscanList> list(new AutoscanList(storage));
 
     if (element == nullptr)
         return list;

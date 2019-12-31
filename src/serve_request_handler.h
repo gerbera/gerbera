@@ -38,7 +38,7 @@
 
 class ServeRequestHandler : public RequestHandler {
 public:
-    ServeRequestHandler();
+    ServeRequestHandler(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage);
     virtual void getInfo(const char *filename, UpnpFileInfo *info);
     virtual zmm::Ref<IOHandler> open(const char* filename,
         enum UpnpOpenFileMode mode,

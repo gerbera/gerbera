@@ -77,7 +77,7 @@ using namespace zmm;
 using namespace mxml;
 using namespace std;
 
-MysqlStorage::MysqlStorage()
+MysqlStorage::MysqlStorage(std::shared_ptr<ConfigManager> config)
     : SQLStorage()
 {
     mysql_init_key_initialized = false;
@@ -140,8 +140,6 @@ void MysqlStorage::init()
     }
     mysql_server_init(0, nullptr, nullptr);
     pthread_setspecific(mysql_init_key, (void*)1);
-
-    Ref<ConfigManager> config = ConfigManager::getInstance();
 
     std::string dbHost = config->getOption(CFG_SERVER_STORAGE_MYSQL_HOST);
     std::string dbName = config->getOption(CFG_SERVER_STORAGE_MYSQL_DATABASE);
@@ -279,6 +277,11 @@ void MysqlStorage::init()
     log_debug("end\n");
 
     dbReady();
+}
+
+std::shared_ptr<Storage> MysqlStorage::getSelf()
+{
+    return shared_from_this();
 }
 
 std::string MysqlStorage::quote(std::string value)

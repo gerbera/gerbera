@@ -38,6 +38,9 @@
 #include "subscription_request.h"
 #include "upnp_xml.h"
 
+// forward declaration
+class ConfigManager;
+
 /// \brief This class is responsible for the UPnP Connection Manager Service operations.
 ///
 /// Handles subscription and action invocation requests for the Media Reciver Registrar.
@@ -76,13 +79,16 @@ protected:
     /// IsValidated(string DeviceID, i4 Result)
     void doIsValidated(zmm::Ref<ActionRequest> request);
 
+    std::shared_ptr<ConfigManager> config;
+
     UpnpXMLBuilder* xmlBuilder;
     UpnpDevice_Handle deviceHandle;
 
 public:
     /// \brief Constructor for MRReg
     /// in internal variables.
-    MRRegistrarService(UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle);
+    MRRegistrarService(std::shared_ptr<ConfigManager> config,
+        UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle);
     ~MRRegistrarService();
 
     /// \brief Dispatches the ActionRequest between the available actions.

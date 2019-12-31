@@ -40,13 +40,21 @@
 
 #define ATRAILERS_AUXDATA_POST_DATE ATRAILERS_SERVICE_ID "0"
 
+#include <memory>
 #include "cds_objects.h"
 #include "mxml/mxml.h"
+
+// forward declaration
+class ConfigManager;
+class Storage;
 
 /// \brief this class is responsible for creating objects from the ATrailers
 /// metadata XML.
 class ATrailersContentHandler : public zmm::Object {
 public:
+    ATrailersContentHandler(std::shared_ptr<ConfigManager> config,
+        std::shared_ptr<Storage> storage);
+
     /// \brief Sets the service XML from which we will extract the objects.
     /// \return false if service XML contained an error status.
     bool setServiceContent(zmm::Ref<mxml::Element> service);
@@ -61,6 +69,9 @@ public:
     zmm::Ref<CdsObject> getNextObject();
 
 protected:
+    std::shared_ptr<ConfigManager> config;
+    std::shared_ptr<Storage> storage;
+
     zmm::Ref<mxml::Element> service_xml;
     int current_trailer_index;
     int trailer_count;

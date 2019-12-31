@@ -1412,9 +1412,8 @@ std::string getDLNAprofileString(std::string contentType)
     return profile;
 }
 
-std::string getDLNAContentHeader(std::string contentType)
+std::string getDLNAContentHeader(std::shared_ptr<ConfigManager> config, std::string contentType)
 {
-    Ref<ConfigManager> config = ConfigManager::getInstance();
     if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO)) {
         std::string content_parameter;
         content_parameter = getDLNAprofileString(contentType);
@@ -1432,9 +1431,9 @@ std::string getDLNAContentHeader(std::string contentType)
     return nullptr;
 }
 
-std::string getDLNATransferHeader(std::string mimeType)
+std::string getDLNATransferHeader(std::shared_ptr<ConfigManager> config, std::string mimeType)
 {
-    if (ConfigManager::getInstance()->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO)) {
+    if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO)) {
         std::string transfer_parameter;
         if (startswith(mimeType, "image"))
             transfer_parameter = D_HTTP_TRANSFER_MODE_INTERACTIVE;

@@ -43,8 +43,13 @@ using namespace mxml;
 
 namespace web {
 
-WebRequestHandler::WebRequestHandler()
-    : RequestHandler()
+WebRequestHandler::WebRequestHandler(std::shared_ptr<ConfigManager> config,
+    std::shared_ptr<Storage> storage,
+    std::shared_ptr<ContentManager> content,
+    std::shared_ptr<SessionManager> sessionManager)
+    : RequestHandler(config, storage)
+    , content(content)
+    , sessionManager(sessionManager)
     , checkRequestCalled(false)
 {
     params = Ref<Dictionary>(new Dictionary());
@@ -78,7 +83,7 @@ void WebRequestHandler::check_request(bool checkLogin)
     if (sid.empty())
         throw SessionException("no session id given");
 
-    if ((session = SessionManager::getInstance()->getSession(sid)) == nullptr)
+    if ((session = sessionManager->getSession(sid)) == nullptr)
         throw SessionException("invalid session id");
 
     if (checkLogin && !session->isLoggedIn())
@@ -134,7 +139,7 @@ Ref<IOHandler> WebRequestHandler::open(enum UpnpOpenFileMode mode)
     std::string output;
     // processing page, creating output
     try {
-        if (!ConfigManager::getInstance()->getBoolOption(CFG_SERVER_UI_ENABLED)) {
+        if (!config->getBoolOption(CFG_SERVER_UI_ENABLED)) {
             log_warning("The UI is disabled in the configuration file. See README.\n");
             error = "The UI is disabled in the configuration file. See README.";
             error_code = 900;
@@ -143,7 +148,7 @@ Ref<IOHandler> WebRequestHandler::open(enum UpnpOpenFileMode mode)
 
             if (checkRequestCalled) {
                 // add current task
-                appendTask(root, ContentManager::getInstance()->getCurrentTask());
+                appendTask(root, content->getCurrentTask());
 
                 handleUpdateIDs();
             }

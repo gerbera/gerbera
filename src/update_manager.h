@@ -38,24 +38,34 @@
 #include <vector>
 
 #include "common.h"
-#include "singleton.h"
 
 #define FLUSH_ASAP 2
 #define FLUSH_SPEC 1
 
-class UpdateManager : public Singleton<UpdateManager> {
+// forward declaration
+class Storage;
+class Server;
+
+class UpdateManager {
 public:
-    UpdateManager();
-    virtual void shutdown() override;
-    virtual void init() override;
-    std::string getName() override { return "Update Manager"; }
+    UpdateManager(std::shared_ptr<Storage> storage, std::shared_ptr<Server> server);
+    void init();
+    virtual ~UpdateManager();
+    void shutdown();
 
     void containerChanged(int objectID, int flushPolicy = FLUSH_SPEC);
     void containersChanged(const std::vector<int>& objectIDs, int flushPolicy = FLUSH_SPEC);
 
 protected:
+    std::shared_ptr<Storage> storage;
+    std::shared_ptr<Server> server;
+
     pthread_t updateThread;
     std::condition_variable cond;
+
+    std::mutex mutex;
+    using AutoLock = std::lock_guard<decltype(mutex)>;
+    using AutoLockU = std::unique_lock<decltype(mutex)>;
 
     std::shared_ptr<std::unordered_set<int>> objectIDHash;
 

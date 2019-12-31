@@ -52,16 +52,16 @@
 #include "util/string_converter.h"
 #include "taglib_handler.h"
 
-#include "content_manager.h"
+#include "util/tools.h"
 
 using namespace zmm;
 
-TagLibHandler::TagLibHandler()
-    : MetadataHandler()
+TagLibHandler::TagLibHandler(std::shared_ptr<ConfigManager> config)
+    : MetadataHandler(config)
 {
 }
 
-static void addField(metadata_fields_t field, const TagLib::File& file, const TagLib::Tag* tag, Ref<CdsItem> item)
+void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, const TagLib::Tag* tag, Ref<CdsItem> item) const
 {
     if (tag == nullptr)
         return;
@@ -69,7 +69,7 @@ static void addField(metadata_fields_t field, const TagLib::File& file, const Ta
     if (tag->isEmpty())
         return;
 
-    Ref<StringConverter> sc = StringConverter::i2i(); // sure is sure
+    Ref<StringConverter> sc = StringConverter::i2i(config); // sure is sure
 
     TagLib::String val;
     TagLib::StringList list;
@@ -214,7 +214,7 @@ void TagLibHandler::populateGenericTags(Ref<CdsItem> item, const TagLib::File& f
 
 void TagLibHandler::fillMetadata(Ref<CdsItem> item)
 {
-    Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+    Ref<Dictionary> mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
     std::string content_type = mappings->get(item->getMimeType());
 
     TagLib::FileStream fs(item->getLocation().c_str(), true); // true = Read only
@@ -252,7 +252,7 @@ std::string TagLibHandler::getContentTypeFromByteVector(const TagLib::ByteVector
 {
     std::string art_mimetype = MIMETYPE_DEFAULT;
 #ifdef HAVE_MAGIC
-    art_mimetype = ContentManager::getInstance()->getMimeTypeFromBuffer(data.data(), data.size());
+    art_mimetype = getMIMETypeFromBuffer(data.data(), data.size());
     if (!string_ok(art_mimetype))
         return MIMETYPE_DEFAULT;
 #endif
@@ -278,7 +278,7 @@ void TagLibHandler::addArtworkResource(Ref<CdsItem> item, std::string art_mimety
 
 Ref<IOHandler> TagLibHandler::serveContent(Ref<CdsItem> item, int resNum)
 {
-    Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+    Ref<Dictionary> mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
     std::string content_type = mappings->get(item->getMimeType());
 
     TagLib::FileStream roStream(item->getLocation().c_str(), true); // Open read only
@@ -395,13 +395,13 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, zmm::Ref<CdsItem> ite
     }
     populateGenericTags(item, mp3);
 
-    Ref<StringConverter> sc = StringConverter::i2i();
+    Ref<StringConverter> sc = StringConverter::i2i(config);
 
     auto frameListMap = mp3.ID3v2Tag()->frameListMap();
     // http://id3.org/id3v2.4.0-frames "4.2.6. User defined text information frame"
     bool hasTXXXFrames = frameListMap.contains("TXXX");
 
-    std::vector<std::string> aux_tags_list = ConfigManager::getInstance()->getStringArrayOption(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
+    std::vector<std::string> aux_tags_list = config->getStringArrayOption(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
     for (size_t i = 0; i < aux_tags_list.size(); i++) {
 
         std::string desiredFrame = aux_tags_list[i];
@@ -490,7 +490,7 @@ void TagLibHandler::extractOgg(TagLib::IOStream* roStream, zmm::Ref<CdsItem> ite
     const TagLib::FLAC::Picture* pic = picList.front();
     const TagLib::ByteVector& data = pic->data();
 
-    Ref<StringConverter> sc = StringConverter::i2i();
+    Ref<StringConverter> sc = StringConverter::i2i(config);
     std::string art_mimetype = sc->convert(pic->mimeType().toCString(true));
     if (!isValidArtworkContentType(art_mimetype)) {
         art_mimetype = getContentTypeFromByteVector(data);
@@ -519,7 +519,7 @@ void TagLibHandler::extractASF(TagLib::IOStream* roStream, zmm::Ref<CdsItem> ite
         if (!wmpic.isValid())
             return;
 
-        Ref<StringConverter> sc = StringConverter::i2i();
+        Ref<StringConverter> sc = StringConverter::i2i(config);
         std::string art_mimetype = sc->convert(wmpic.mimeType().toCString(true));
         if (!isValidArtworkContentType(art_mimetype)) {
             art_mimetype = getContentTypeFromByteVector(wmpic.picture());
@@ -539,9 +539,9 @@ void TagLibHandler::extractFLAC(TagLib::IOStream* roStream, zmm::Ref<CdsItem> it
     }
     populateGenericTags(item, flac);
 
-    Ref<StringConverter> sc = StringConverter::i2i();
+    Ref<StringConverter> sc = StringConverter::i2i(config);
 
-    std::vector<std::string> aux_tags_list = ConfigManager::getInstance()->getStringArrayOption(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
+    std::vector<std::string> aux_tags_list = config->getStringArrayOption(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
     for (size_t j = 0; j < aux_tags_list.size(); j++) {
 
         std::string desiredTag = aux_tags_list[j];

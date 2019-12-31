@@ -158,8 +158,8 @@ enum MetadataCol
 /* enum for createObjectFromRow's mode parameter */
 
 
-SQLStorage::SQLStorage()
-    : Storage()
+SQLStorage::SQLStorage(std::shared_ptr<ConfigManager> config)
+    : Storage(config)
 {
     table_quote_begin = '\0';
     table_quote_end = '\0';
@@ -781,7 +781,7 @@ int SQLStorage::_ensurePathExistence(std::string path, int* changedContainer)
 
     int parentID = ensurePathExistence(parent, changedContainer);
 
-    Ref<StringConverter> f2i = StringConverter::f2i();
+    Ref<StringConverter> f2i = StringConverter::f2i(config);
     if (changedContainer != nullptr && *changedContainer == INVALID_OBJECT_ID)
         *changedContainer = parentID;
 
@@ -950,7 +950,8 @@ std::string SQLStorage::stripLocationPrefix(std::string path)
 Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
 {
     int objectType = std::stoi(row->col(_object_type));
-    Ref<CdsObject> obj = CdsObject::createObject(objectType);
+    auto self = getSelf();
+    Ref<CdsObject> obj = CdsObject::createObject(self, objectType);
 
     /* set common properties */
     obj->setID(std::stoi(row->col(_id)));
@@ -1074,7 +1075,8 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
 Ref<CdsObject> SQLStorage::createObjectFromSearchRow(Ref<SQLRow> row)
 {
     int objectType = std::stoi(row->col(_object_type));
-    Ref<CdsObject> obj = CdsObject::createObject(objectType);
+    auto self = getSelf();
+    Ref<CdsObject> obj = CdsObject::createObject(self, objectType);
 
     /* set common properties */
     obj->setID(std::stoi(row->col(SearchCol::id)));
@@ -1236,7 +1238,7 @@ std::string SQLStorage::findFolderImage(int id, std::string trackArtBase)
     q << TQ("object_type") << '=' << quote(OBJECT_TYPE_ITEM);
 
     // only use this optimization on sqlite3
-    if (ConfigManager::getInstance()->getOption(CFG_SERVER_STORAGE_DRIVER) == "sqlite3") {
+    if (config->getOption(CFG_SERVER_STORAGE_DRIVER) == "sqlite3") {
         q <<               " LIMIT " << MAX_ART_CONTAINERS << ")";
     } else {
         q <<               ")";
@@ -1743,7 +1745,9 @@ Ref<AutoscanList> SQLStorage::getAutoscanList(ScanMode scanmode)
     Ref<SQLResult> res = select(q);
     if (res == nullptr)
         throw _StorageException("", "query error while fetching autoscan list");
-    Ref<AutoscanList> ret(new AutoscanList());
+
+    auto self = getSelf();
+    Ref<AutoscanList> ret(new AutoscanList(self));
     Ref<SQLRow> row;
     while ((row = res->nextRow()) != nullptr) {
         Ref<AutoscanDirectory> dir = _fillAutoscanDirectory(row);
@@ -1767,7 +1771,9 @@ Ref<AutoscanDirectory> SQLStorage::getAutoscanDirectory(int objectID)
     Ref<SQLResult> res = select(q);
     if (res == nullptr)
         throw _StorageException("", "query error while fetching autoscan");
-    Ref<AutoscanList> ret(new AutoscanList());
+
+    auto self = getSelf();
+    Ref<AutoscanList> ret(new AutoscanList(self));
     Ref<SQLRow> row = res->nextRow();
     if (row == nullptr)
         return nullptr;

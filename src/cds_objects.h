@@ -33,6 +33,7 @@
 #define __CDS_OBJECTS_H__
 
 #include <sys/types.h>
+#include <memory>
 
 #include "cds_resource.h"
 #include "common.h"
@@ -74,9 +75,14 @@
 
 int CdsObjectTitleComparator(void* arg1, void* arg2);
 
+// forward declaration
+class Storage;
+
 /// \brief Generic object in the Content Directory.
 class CdsObject : public zmm::Object {
 protected:
+    std::shared_ptr<Storage> storage;
+
     /// \brief ID of the object in the content directory
     int id;
 
@@ -123,7 +129,7 @@ protected:
 
 public:
     /// \brief Constructor. Sets the default values.
-    CdsObject();
+    CdsObject(std::shared_ptr<Storage> storage);
 
     /// \brief Set the object ID.
     ///
@@ -338,7 +344,7 @@ public:
     /// \brief Frees unnecessary memory
     void optimize();
 
-    static zmm::Ref<CdsObject> createObject(unsigned int objectType);
+    static zmm::Ref<CdsObject> createObject(std::shared_ptr<Storage> storage, unsigned int objectType);
 
     /// \brief Returns the path to the object as it appears in the database tree.
     virtual std::string getVirtualPath() = 0;
@@ -362,7 +368,7 @@ protected:
 
 public:
     /// \brief Constructor, sets the object type and default upnp:class (object.item)
-    CdsItem();
+    CdsItem(std::shared_ptr<Storage> storage);
 
     /// \brief Set mime-type information of the media.
     inline void setMimeType(std::string mimeType) { this->mimeType = mimeType; }
@@ -428,7 +434,7 @@ protected:
 
 public:
     /// \brief Constructor, sets the object type.
-    CdsActiveItem();
+    CdsActiveItem(std::shared_ptr<Storage> storage);
 
     /// \brief Sets the action for the item.
     /// \param action absolute path to the script that will process the XML data.
@@ -464,7 +470,7 @@ public:
 class CdsItemExternalURL : public CdsItem {
 public:
     /// \brief Constructor, sets the object type.
-    CdsItemExternalURL();
+    CdsItemExternalURL(std::shared_ptr<Storage> storage);
 
     /// \brief Sets the URL for the item.
     /// \param URL full url to the item: http://somewhere.com/something.mpg
@@ -497,7 +503,7 @@ public:
 class CdsItemInternalURL : public CdsItemExternalURL {
 public:
     /// \brief Constructor, sets the object type.
-    CdsItemInternalURL();
+    CdsItemInternalURL(std::shared_ptr<Storage> storage);
 
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
     virtual void validate();
@@ -568,7 +574,7 @@ protected:
 
 public:
     /// \brief Constructor, initializes default values for the flags and sets the object type.
-    CdsContainer();
+    CdsContainer(std::shared_ptr<Storage> storage);
 
     /// \brief Set the searchable flag.
     inline void setSearchable(bool searchable) { changeFlag(OBJECT_FLAG_SEARCHABLE, searchable); }

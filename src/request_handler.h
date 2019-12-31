@@ -33,11 +33,18 @@
 #ifndef __REQUEST_HANDLER_H__
 #define __REQUEST_HANDLER_H__
 
+#include <memory>
 #include "common.h"
 #include "iohandler/io_handler.h"
 
+// forward declaration
+class ConfigManager;
+class Storage;
+
 class RequestHandler : public zmm::Object {
 public:
+    RequestHandler(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage);
+
     virtual void getInfo(const char *filename, UpnpFileInfo *info) = 0;
 
     virtual zmm::Ref<IOHandler> open(const char* filename, enum UpnpOpenFileMode mode, std::string range) = 0;
@@ -54,6 +61,10 @@ public:
     /// path = "content/media"
     /// parameters = "object_id=12345&transcode=wav"
     static void splitUrl(const char *url, char separator, std::string &path, std::string &parameters);
+
+protected:
+    std::shared_ptr<ConfigManager> config;
+    std::shared_ptr<Storage> storage;
 };
 
 #endif // __REQUEST_HANDLER_H__

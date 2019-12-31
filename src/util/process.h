@@ -32,10 +32,14 @@
 #ifndef __PROCESS_H__
 #define __PROCESS_H__
 
-#include "zmm/zmmf.h"
+#include <memory>
+#include <string>
+
+// forward declaration
+class ConfigManager;
 
 void init_process();
-std::string run_simple_process(std::string prog, std::string param, std::string input);
+std::string run_simple_process(std::shared_ptr<ConfigManager> cfg, std::string prog, std::string param, std::string input);
 
 void run_process(std::string prog, std::string param);
 

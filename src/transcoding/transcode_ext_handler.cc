@@ -41,6 +41,7 @@
 #include <csignal>
 #include <climits>
 #include "common.h"
+#include "config/config_manager.h"
 #include "storage/storage.h"
 #include "cds_objects.h"
 #include "util/process.h"
@@ -54,7 +55,8 @@
 #include "metadata/metadata_handler.h"
 #include "util/tools.h"
 #include "transcoding_process_executor.h"
-#include "play_hook.h"
+#include "iohandler/io_handler_chainer.h"
+#include "content_manager.h"
 
 #ifdef HAVE_CURL
     #include "iohandler/curl_io_handler.h"
@@ -62,7 +64,9 @@
 
 using namespace zmm;
 
-TranscodeExternalHandler::TranscodeExternalHandler() : TranscodeHandler()
+TranscodeExternalHandler::TranscodeExternalHandler(std::shared_ptr<ConfigManager> config,
+    std::shared_ptr<ContentManager> content)
+    : TranscodeHandler(config, content)
 {
 }
 
@@ -89,7 +93,7 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
     if (IS_CDS_ITEM(obj->getObjectType()))
     {
         Ref<CdsItem> it = RefCast(obj, CdsItem);
-        Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(
+        Ref<Dictionary> mappings = config->getDictionaryOption(
                 CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
 
         if (mappings->get(mimeType) == CONTENT_TYPE_PCM)
@@ -120,9 +124,7 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
     info->force_chunked = (int)profile->getChunked();
     */
 
-    Ref<ConfigManager> cfg = ConfigManager::getInstance();
-   
-    std::string fifo_name = normalizePath(tempName(cfg->getOption(CFG_SERVER_TMPDIR),
+    std::string fifo_name = normalizePath(tempName(config->getOption(CFG_SERVER_TMPDIR),
                                      fifo_template));
     std::string arguments;
     std::string temp;
@@ -163,7 +165,7 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
 #ifdef HAVE_CURL
             std::string url = location;
             strcpy(fifo_template, "mt_transcode_XXXXXX");
-            location = normalizePath(tempName(cfg->getOption(CFG_SERVER_TMPDIR), fifo_template));
+            location = normalizePath(tempName(config->getOption(CFG_SERVER_TMPDIR), fifo_template));
             log_debug("creating reader fifo: %s\n", location.c_str());
             if (mkfifo(location.c_str(), O_RDWR) == -1)
             {
@@ -177,10 +179,10 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
                 chmod(location.c_str(), S_IWUSR | S_IRUSR);
 
                 Ref<IOHandler> c_ioh(new CurlIOHandler(url, nullptr, 
-                   cfg->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE),
-                   cfg->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_FILL_SIZE)));
+                   config->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE),
+                   config->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_FILL_SIZE)));
 
-                Ref<IOHandler> p_ioh(new ProcessIOHandler(location, nullptr));
+                Ref<IOHandler> p_ioh(new ProcessIOHandler(content, location, nullptr));
                 Ref<Executor> ch(new IOHandlerChainer(c_ioh, p_ioh, 16384));
                 proc_list = Ref<Array<ProcListItem> >(new Array<ProcListItem>(1));
                 Ref<ProcListItem> pr_item(new ProcListItem(ch));
@@ -244,10 +246,11 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
     {
         main_proc->removeFile(location);
     }
-    Ref<IOHandler> io_handler(new BufferedIOHandler(Ref<IOHandler> (new ProcessIOHandler(fifo_name, RefCast(main_proc, Executor), proc_list)), profile->getBufferSize(), profile->getBufferChunkSize(), profile->getBufferInitialFillSize()));
+    Ref<IOHandler> io_handler(new BufferedIOHandler(Ref<IOHandler> (
+        new ProcessIOHandler(content, fifo_name, RefCast(main_proc, Executor), proc_list)
+    ), profile->getBufferSize(), profile->getBufferChunkSize(), profile->getBufferInitialFillSize()));
 
     io_handler->open(UPNP_READ);
-    PlayHook::getInstance()->trigger(obj);
+    content->triggerPlayHook(obj);
     return io_handler;
 }
-

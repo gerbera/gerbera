@@ -29,7 +29,8 @@ Gerbera - https://gerbera.io/
 
 class DeviceDescriptionHandler : public RequestHandler {
 public:
-    explicit DeviceDescriptionHandler(UpnpXMLBuilder* xmlBuilder);
+    explicit DeviceDescriptionHandler(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
+        UpnpXMLBuilder* xmlBuilder);
 
     void getInfo(const char *filename, UpnpFileInfo *info) override;
     zmm::Ref<IOHandler> open(const char* filename, enum UpnpOpenFileMode mode, std::string range) override;

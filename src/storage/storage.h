@@ -40,7 +40,6 @@
 #include "autoscan.h"
 #include "cds_objects.h"
 #include "zmm/dictionary.h"
-#include "singleton.h"
 #include "zmm/zmmf.h"
 
 #define BROWSE_DIRECT_CHILDREN 0x00000001
@@ -132,13 +131,18 @@ public:
     int getRequestedCount() { return requestedCount; };
 };
 
-class Storage : public Singleton<Storage, std::mutex> {
+// forward declaration
+class ConfigManager;
+class Timer;
+
+class Storage {
 public:
-    static zmm::Ref<Storage> getInstance();
+    Storage(std::shared_ptr<ConfigManager> config);
+    virtual void init() = 0;
 
-    std::string getName() override { return "Storage"; }
+    /// \brief shutdown the Storage with its possible threads
+    virtual void shutdown() = 0;
 
-    virtual void init() override = 0;
     virtual void addObject(zmm::Ref<CdsObject> object, int* changedContainer) = 0;
 
     /// \brief Adds a virtual container chain specified by path.
@@ -158,8 +162,7 @@ public:
     /// updateID will hold the objectID of the container that was changed,
     /// in case new containers were created during the operation.
     virtual void addContainerChain(std::string path, std::string lastClass, int lastRefID, int* containerID,
-        int* updateID, zmm::Ref<Dictionary> lastMetadata)
-        = 0;
+        int* updateID, zmm::Ref<Dictionary> lastMetadata) = 0;
 
     /// \brief Builds the container path. Fetches the path of the
     /// parent and adds the title
@@ -206,7 +209,7 @@ public:
 
     virtual zmm::Ref<zmm::Array<CdsObject>> search(zmm::Ref<SearchParam> param, int* numMatches) = 0;
 
-    class ChangedContainers : public Object {
+    class ChangedContainers : public zmm::Object {
     public:
         // Signed because IDs start at -1.
         std::vector<int32_t> upnp;
@@ -292,9 +295,6 @@ public:
 
     virtual std::unique_ptr<std::vector<int>> getPathIDs(int objectID) = 0;
 
-    /// \brief shutdown the Storage with its possible threads
-    virtual void shutdown() override = 0;
-
     /// \brief Ensures that a container given by it's location on disk is
     /// present in the database. If it does not exist it will be created, but
     /// it's content will not be added.
@@ -316,7 +316,14 @@ public:
 protected:
     /* helper for addContainerChain */
     static void stripAndUnescapeVirtualContainerFromPath(std::string path, std::string& first, std::string& last);
-    static zmm::Ref<Storage> createInstance();
+
+    static std::shared_ptr<Storage> createInstance(std::shared_ptr<ConfigManager> config, std::shared_ptr<Timer> timer);
+    friend class Server;
+
+    virtual std::shared_ptr<Storage> getSelf() = 0;
+
+protected:
+    std::shared_ptr<ConfigManager> config;
 };
 
 #endif // __STORAGE_H__

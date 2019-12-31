@@ -32,7 +32,12 @@
 #include "request_handler.h"
 #include "util/tools.h"
 
-using namespace zmm;
+
+RequestHandler::RequestHandler(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage)
+    : config(config)
+    , storage(storage)
+{
+}
 
 void RequestHandler::splitUrl(const char *url, char separator, std::string &path, std::string &parameters)
 {

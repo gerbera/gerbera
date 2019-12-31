@@ -78,7 +78,7 @@ public:
     virtual unsigned long long getNumRows() = 0;
 };
 
-class SQLStorage : protected Storage
+class SQLStorage : public Storage
 {
 public:
     /* methods to override in subclasses */
@@ -160,7 +160,7 @@ public:
     
     virtual std::unique_ptr<std::vector<int>> getPathIDs(int objectID) override;
     
-    virtual void shutdown() override;
+    virtual void shutdown();
     virtual void shutdownDriver() = 0;
     
     virtual int ensurePathExistence(std::string path, int *changedContainer) override;
@@ -170,9 +170,9 @@ public:
     virtual void clearFlagInDB(int flag) override;
 
 protected:
-    SQLStorage();
+    SQLStorage(std::shared_ptr<ConfigManager> config);
     //virtual ~SQLStorage();
-    virtual void init() override;
+    virtual void init();
 
     void doMetadataMigration() override;
     void migrateMetadata(zmm::Ref<CdsObject> object);
@@ -196,7 +196,7 @@ private:
     int _ensurePathExistence(std::string path, int *changedContainer);
     
     /* helper class and helper function for addObject and updateObject */
-    class AddUpdateTable : public Object
+    class AddUpdateTable : public zmm::Object
     {
     public:
         AddUpdateTable(std::string table, zmm::Ref<Dictionary> dict, std::string operation)
@@ -267,7 +267,6 @@ private:
     std::shared_ptr<SQLEmitter> sqlEmitter;
 
     std::mutex nextIDMutex;
-
     using AutoLock = std::lock_guard<std::mutex>;
 };
 

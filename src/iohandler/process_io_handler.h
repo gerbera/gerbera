@@ -32,6 +32,7 @@
 #ifndef __PROCESS_IO_HANDLER_H__
 #define __PROCESS_IO_HANDLER_H__
 
+#include <memory>
 #include "common.h"
 #include "util/executor.h"
 #include "io_handler.h"
@@ -50,6 +51,9 @@ protected:
     bool abort;
 };
 
+// forward declaration
+class ContentManager;
+
 /// \brief Allows the web server to read from a fifo.
 class ProcessIOHandler : public IOHandler {
 public:
@@ -57,7 +61,8 @@ public:
     /// \param filename to read the data from
     /// \param proclist associated processes that will be terminated once
     /// they are no longer needed
-    ProcessIOHandler(std::string filename, zmm::Ref<Executor> main_proc,
+    ProcessIOHandler(std::shared_ptr<ContentManager> content,
+        std::string filename, zmm::Ref<Executor> main_proc,
         zmm::Ref<zmm::Array<ProcListItem>> proclist = nullptr,
         bool ignoreSeek = false);
 
@@ -90,6 +95,8 @@ public:
     ~ProcessIOHandler();
 
 protected:
+    std::shared_ptr<ContentManager> content;
+
     /// \brief List of associated processes.
     zmm::Ref<zmm::Array<ProcListItem>> proclist;
 

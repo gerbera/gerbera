@@ -39,8 +39,9 @@
 using namespace zmm;
 using namespace mxml;
 
-web::directories::directories()
-    : WebRequestHandler()
+web::directories::directories(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
+    std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
+    : WebRequestHandler(config, storage, content, sessionManager)
 {
 }
 
@@ -63,7 +64,7 @@ void web::directories::process()
     containers->setAttribute("type", "filesystem");
     root->appendElementChild(containers);
 
-    Ref<Filesystem> fs(new Filesystem());
+    Ref<Filesystem> fs(new Filesystem(config));
 
     Ref<Array<FsObject>> arr;
     arr = fs->readDirectory(path, FS_MASK_DIRECTORIES,
@@ -88,7 +89,7 @@ void web::directories::process()
         else
             ce->setAttribute("child_count", std::to_string(0), mxml_int_type);
 
-        Ref<StringConverter> f2i = StringConverter::f2i();
+        Ref<StringConverter> f2i = StringConverter::f2i(config);
         ce->setTextKey("title");
         ce->setText(f2i->convert(filename));
         containers->appendElementChild(ce);

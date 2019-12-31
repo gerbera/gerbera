@@ -117,16 +117,4 @@ public:
     }
 };
 
-class SingletonException : public Exception {
-public:
-    inline SingletonException(std::string message)
-        : Exception(message)
-    {
-    }
-    inline SingletonException(std::string message, const char* file, int line, const char* function)
-        : Exception(message, file, line, function)
-    {
-    }
-};
-
 #endif // __EXCEPTIONS_H__

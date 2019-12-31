@@ -94,11 +94,11 @@ protected:
 class SLInitTask : public SLTask {
 public:
     /// \brief Constructor for the sqlite3 init task
-    SLInitTask()
-        : SLTask()
-    {
-    }
+    SLInitTask(std::shared_ptr<ConfigManager> config);
     virtual void run(sqlite3** db, Sqlite3Storage* sl);
+
+protected:
+    std::shared_ptr<ConfigManager> config;
 };
 
 /// \brief A task for the sqlite3 thread to do a SQL select.
@@ -138,23 +138,24 @@ protected:
 class SLBackupTask : public SLTask {
 public:
     /// \brief Constructor for the sqlite3 backup task
-    SLBackupTask(bool restore) { this->restore = restore; };
+    SLBackupTask(std::shared_ptr<ConfigManager> config, bool restore);
     virtual void run(sqlite3** db, Sqlite3Storage* sl);
 
 protected:
+    std::shared_ptr<ConfigManager> config;
     bool restore;
 };
 
 /// \brief The Storage class for using SQLite3
-class Sqlite3Storage : public Timer::Subscriber, private SQLStorage {
+class Sqlite3Storage : public Timer::Subscriber, public SQLStorage, public std::enable_shared_from_this<SQLStorage> {
 public:
     virtual void timerNotify(zmm::Ref<Timer::Parameter> sqlite3storage) override;
+    Sqlite3Storage(std::shared_ptr<ConfigManager> config, std::shared_ptr<Timer> timer);
 
 private:
-    Sqlite3Storage();
-    friend zmm::Ref<Storage> Storage::createInstance();
     void init() override;
     void shutdownDriver() override;
+    std::shared_ptr<Storage> getSelf();
 
     std::string quote(std::string str) override;
     inline std::string quote(const char* str) override { return quote(std::string(str)); }
@@ -185,6 +186,8 @@ private:
     std::mutex sqliteMutex;
     using AutoLock = std::lock_guard<decltype(sqliteMutex)>;
     using AutoLockU = std::unique_lock<decltype(sqliteMutex)>;
+
+    std::shared_ptr<Timer> timer;
 
     /// \brief is set to true by shutdown() if the sqlite3 thread should terminate
     bool shutdownFlag;

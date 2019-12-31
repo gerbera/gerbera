@@ -42,6 +42,13 @@
 using namespace zmm;
 using namespace mxml;
 
+ATrailersContentHandler::ATrailersContentHandler(std::shared_ptr<ConfigManager> config,
+    std::shared_ptr<Storage> storage)
+    : config(config)
+    , storage(storage)
+{
+}
+
 bool ATrailersContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
 {
     std::string temp;
@@ -58,7 +65,7 @@ bool ATrailersContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
 
     current_trailer_index = 0;
 
-    Ref<Dictionary> mappings = ConfigManager::getInstance()->getDictionaryOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
+    Ref<Dictionary> mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
     trailer_mimetype = mappings->get("mov");
     if (!string_ok(trailer_mimetype))
         trailer_mimetype = "video/quicktime";
@@ -87,7 +94,7 @@ Ref<CdsObject> ATrailersContentHandler::getNextObject()
             continue;
 
         // we know what we are adding
-        Ref<CdsItemExternalURL> item(new CdsItemExternalURL());
+        Ref<CdsItemExternalURL> item(new CdsItemExternalURL(storage));
         Ref<CdsResource> resource(new CdsResource(CH_DEFAULT));
         item->addResource(resource);
 

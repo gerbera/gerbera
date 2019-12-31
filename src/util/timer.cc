@@ -30,12 +30,14 @@
 /// \file timer.cc
 
 #include "timer.h"
-#include "singleton.h"
-#include "util/exception.h"
 #include <cassert>
 
 using namespace zmm;
 using namespace std;
+
+Timer::Timer()
+{
+}
 
 void Timer::init()
 {

@@ -126,11 +126,10 @@ void Session::clearUpdateIDs()
     updateAll = false;
 }
 
-SessionManager::SessionManager()
+SessionManager::SessionManager(std::shared_ptr<ConfigManager> config, std::shared_ptr<Timer> timer)
 {
-    Ref<ConfigManager> configManager = ConfigManager::getInstance();
-
-    accounts = configManager->getDictionaryOption(CFG_SERVER_UI_ACCOUNT_LIST);
+    this->timer = timer;
+    accounts = config->getDictionaryOption(CFG_SERVER_UI_ACCOUNT_LIST);
     sessions = Ref<Array<Session>>(new Array<Session>());
     timerAdded = false;
 }
@@ -218,10 +217,10 @@ void SessionManager::containerChangedUI(const std::vector<int>& objectIDs)
 void SessionManager::checkTimer()
 {
     if (sessions->size() > 0 && !timerAdded) {
-        Timer::getInstance()->addTimerSubscriber(this, SESSION_TIMEOUT_CHECK_INTERVAL);
+        timer->addTimerSubscriber(this, SESSION_TIMEOUT_CHECK_INTERVAL);
         timerAdded = true;
     } else if (sessions->size() <= 0 && timerAdded) {
-        Timer::getInstance()->removeTimerSubscriber(this);
+        timer->removeTimerSubscriber(this);
         timerAdded = false;
     }
 }

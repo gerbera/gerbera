@@ -40,13 +40,23 @@
 
 #include "metadata_handler.h"
 
+// forward declaration
+class AVFormatContext;
+
 /// \brief This class is responsible for reading id3 tags metadata
 class FfmpegHandler : public MetadataHandler {
 public:
-    FfmpegHandler();
+    FfmpegHandler(std::shared_ptr<ConfigManager> config);
     virtual void fillMetadata(zmm::Ref<CdsItem> item);
     virtual zmm::Ref<IOHandler> serveContent(zmm::Ref<CdsItem> item, int resNum);
     virtual std::string getMimeType();
+
+private:
+    void addFfmpegAuxdataFields(zmm::Ref<CdsItem> item, AVFormatContext* pFormatCtx) const;
+    void addFfmpegMetadataFields(zmm::Ref<CdsItem> item, AVFormatContext* pFormatCtx) const;
+    std::string getThumbnailCacheFilePath(std::string& movie_filename, bool create) const;
+    bool readThumbnailCacheFile(std::string movie_filename, uint8_t** ptr_img, size_t* size_img) const;
+    void writeThumbnailCacheFile(std::string movie_filename, uint8_t* ptr_img, int size_img) const;
 };
 
 #endif //__FFMPEG_HANDLER_H__

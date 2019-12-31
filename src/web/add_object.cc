@@ -31,6 +31,7 @@
 
 #include "cds_objects.h"
 #include "common.h"
+#include "config/config_manager.h"
 #include "content_manager.h"
 #include "metadata/metadata_handler.h"
 #include "pages.h"
@@ -41,8 +42,9 @@
 using namespace zmm;
 using namespace mxml;
 
-web::addObject::addObject()
-    : WebRequestHandler()
+web::addObject::addObject(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
+    std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
+    : WebRequestHandler(config, storage, content, sessionManager)
 {
 }
 
@@ -60,7 +62,7 @@ web::addObject::addObject()
 
 void web::addObject::addContainer(int parentID)
 {
-    ContentManager::getInstance()->addContainer(parentID, param("title"), param("class"));
+    content->addContainer(parentID, param("title"), param("class"));
 }
 
 Ref<CdsObject> web::addObject::addItem(int parentID, Ref<CdsItem> item)
@@ -91,7 +93,7 @@ Ref<CdsObject> web::addObject::addItem(int parentID, Ref<CdsItem> item)
 Ref<CdsObject> web::addObject::addActiveItem(int parentID)
 {
     std::string tmp;
-    Ref<CdsActiveItem> item(new CdsActiveItem());
+    Ref<CdsActiveItem> item(new CdsActiveItem(storage));
 
     item->setAction(param("action"));
 
@@ -108,7 +110,7 @@ Ref<CdsObject> web::addObject::addActiveItem(int parentID)
         tmp = MIMETYPE_DEFAULT;
     item->setMimeType(tmp);
 
-    MetadataHandler::setMetadata(RefCast(item, CdsItem));
+    MetadataHandler::setMetadata(config, RefCast(item, CdsItem));
 
     item->setTitle(param("title"));
     item->setClass(param("class"));
@@ -199,7 +201,7 @@ void web::addObject::process()
             throw _Exception("no location given");
         if (!check_path(location, false))
             throw _Exception("file not found");
-        obj = this->addItem(parentID, Ref<CdsItem>(new CdsItem()));
+        obj = this->addItem(parentID, Ref<CdsItem>(new CdsItem(storage)));
         allow_fifo = true;
     } else if (obj_type == STRING_OBJECT_TYPE_ACTIVE_ITEM) {
         if (!string_ok(param("action")))
@@ -213,11 +215,11 @@ void web::addObject::process()
     } else if (obj_type == STRING_OBJECT_TYPE_EXTERNAL_URL) {
         if (!string_ok(location))
             throw _Exception("No URL given");
-        obj = this->addUrl(parentID, Ref<CdsItemExternalURL>(new CdsItemExternalURL()), true);
+        obj = this->addUrl(parentID, Ref<CdsItemExternalURL>(new CdsItemExternalURL(storage)), true);
     } else if (obj_type == STRING_OBJECT_TYPE_INTERNAL_URL) {
         if (!string_ok(location))
             throw _Exception("No URL given");
-        obj = this->addUrl(parentID, Ref<CdsItemExternalURL>(new CdsItemInternalURL()), false);
+        obj = this->addUrl(parentID, Ref<CdsItemExternalURL>(new CdsItemInternalURL(storage)), false);
     } else {
         throw _Exception("unknown object type: " + obj_type);
     }
@@ -225,9 +227,9 @@ void web::addObject::process()
     if (obj != nullptr) {
         obj->setVirtual(true);
         if (obj_type == STRING_OBJECT_TYPE_ITEM) {
-            ContentManager::getInstance()->addVirtualItem(obj, allow_fifo);
+            content->addVirtualItem(obj, allow_fifo);
         } else {
-            ContentManager::getInstance()->addObject(obj);
+            content->addObject(obj);
         }
     }
 }

@@ -134,19 +134,24 @@ struct res_key {
 
 extern res_key RES_KEYS[];
 
+// forward declaration
+class ConfigManager;
+
 /// \brief This class is responsible for providing access to metadata information
 /// of various media.
 class MetadataHandler : public zmm::Object {
+protected:
+    std::shared_ptr<ConfigManager> config;
+    
 public:
     /// \brief Definition of the supported metadata fields.
 
-    MetadataHandler();
+    MetadataHandler(std::shared_ptr<ConfigManager> config);
 
-    static void setMetadata(zmm::Ref<CdsItem> item);
+    static void setMetadata(std::shared_ptr<ConfigManager> config, zmm::Ref<CdsItem> item);
     static std::string getMetaFieldName(metadata_fields_t field);
     static std::string getResAttrName(resource_attributes_t attr);
-
-    static zmm::Ref<MetadataHandler> createHandler(int handlerType);
+    static zmm::Ref<MetadataHandler> createHandler(std::shared_ptr<ConfigManager> config, int handlerType);
 
     virtual void fillMetadata(zmm::Ref<CdsItem> item) = 0;
     virtual zmm::Ref<IOHandler> serveContent(zmm::Ref<CdsItem> item, int resNum) = 0;

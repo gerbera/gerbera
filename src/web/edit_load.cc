@@ -43,16 +43,15 @@
 using namespace zmm;
 using namespace mxml;
 
-web::edit_load::edit_load()
-    : WebRequestHandler()
+web::edit_load::edit_load(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
+    std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
+    : WebRequestHandler(config, storage, content, sessionManager)
 {
 }
 
 void web::edit_load::process()
 {
     check_request();
-
-    Ref<Storage> storage;
 
     std::string objID = param("object_id");
     int objectID;
@@ -61,7 +60,6 @@ void web::edit_load::process()
     else
         objectID = std::stoi(objID);
 
-    storage = Storage::getInstance();
     Ref<CdsObject> obj = storage->loadObject(objectID);
 
     Ref<Element> item(new Element("item"));

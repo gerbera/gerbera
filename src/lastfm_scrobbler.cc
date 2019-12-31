@@ -37,8 +37,8 @@
 #include "tools.h"
 using namespace zmm;
 
-LastFm::LastFm()
-    : Singleton<LastFm, std::mutex>()
+LastFm::LastFm(std::shared_ptr<ConfigManager> config)
+    , config(config)
     , scrobbler(NULL)
     , currentTrackId(-1)
 {
@@ -52,8 +52,6 @@ LastFm::~LastFm()
 
 void LastFm::init()
 {
-    Ref<ConfigManager> config = ConfigManager::getInstance();
-
     if (!config->getBoolOption(CFG_SERVER_EXTOPTS_LASTFM_ENABLED))
         return;
 

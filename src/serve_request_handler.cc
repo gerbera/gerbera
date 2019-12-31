@@ -33,13 +33,15 @@
 
 #include "iohandler/file_io_handler.h"
 #include "serve_request_handler.h"
+#include "config/config_manager.h"
 #include "server.h"
+#include "util/tools.h"
 
 using namespace zmm;
 using namespace mxml;
 
-ServeRequestHandler::ServeRequestHandler()
-    : RequestHandler()
+ServeRequestHandler::ServeRequestHandler(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage)
+    : RequestHandler(config, storage)
 {
 }
 
@@ -64,7 +66,7 @@ void ServeRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
 
     url_path = urlUnescape(url_path);
 
-    std::string path = ConfigManager::getInstance()->getOption(CFG_SERVER_SERVEDIR)
+    std::string path = config->getOption(CFG_SERVER_SERVEDIR)
         + url_path.substr(len, url_path.length()) + "/" + parameters;
 
     log_debug("Constructed new path: %s\n", path.c_str());
@@ -123,7 +125,7 @@ Ref<IOHandler> ServeRequestHandler::open(const char* filename,
         throw _Exception("There is something wrong with the link " + url_path);
     }
 
-    std::string path = ConfigManager::getInstance()->getOption(CFG_SERVER_SERVEDIR)
+    std::string path = config->getOption(CFG_SERVER_SERVEDIR)
         + url_path.substr(len, url_path.length()) + "/" + parameters;
 
     log_debug("Constructed new path: %s\n", path.c_str());

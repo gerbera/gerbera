@@ -39,8 +39,9 @@
 using namespace zmm;
 using namespace mxml;
 
-web::edit_save::edit_save()
-    : WebRequestHandler()
+web::edit_save::edit_save(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
+    std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
+    : WebRequestHandler(config, storage, content, sessionManager)
 {
 }
 
@@ -55,5 +56,5 @@ void web::edit_save::process()
     else
         objectID = std::stoi(objID);
 
-    ContentManager::getInstance()->updateObject(objectID, params);
+    content->updateObject(objectID, params);
 }
