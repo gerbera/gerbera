@@ -294,7 +294,7 @@ std::string Element::getText()
     if (someText)
         return buf.str();
     else
-        return nullptr;
+        return "";
 }
 
 enum mxml_value_type Element::getVTypeText()

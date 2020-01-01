@@ -51,7 +51,7 @@ Session::Session(long timeout)
 {
     this->timeout = timeout;
     loggedIn = false;
-    sessionID = nullptr;
+    sessionID = "";
     uiUpdateIDs = make_shared<unordered_set<int>>();
     //(new DBRHash<int>(UI_UPDATE_ID_HASH_SIZE, MAX_UI_UPDATE_IDS + 5, INVALID_OBJECT_ID, INVALID_OBJECT_ID_2));
     updateAll = false;
@@ -98,7 +98,7 @@ void Session::containerChangedUI(const std::vector<int>& objectIDs)
 std::string Session::getUIUpdateIDs()
 {
     if (!hasUIUpdateIDs())
-        return nullptr;
+        return "";
     AutoLock lock(mutex);
     if (updateAll) {
         updateAll = false;

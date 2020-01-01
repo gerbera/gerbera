@@ -466,7 +466,8 @@ void ConfigManager::validate(std::string serverhome)
     }
 
     // create the array from either user or default settings
-    std::vector<std::string> menu_opts(element->elementChildCount());
+    std::vector<std::string> menu_opts;
+    menu_opts.reserve(element->elementChildCount());
     for (int j = 0; j < element->elementChildCount(); j++) {
         Ref<Element> child = element->getElementChild(j);
         if (child->getName() == "option")
@@ -1137,7 +1138,8 @@ void ConfigManager::validate(std::string serverhome)
     NEW_OPTION(temp);
     SET_OPTION(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING);
 
-    std::vector<std::string> mark_content_list(element->elementChildCount());
+    std::vector<std::string> mark_content_list;
+    mark_content_list.reserve(element->elementChildCount());
     tmpEl = getElement("/server/extended-runtime-options/mark-played-items/mark");
 
     int contentElementCount = 0;
@@ -1609,7 +1611,8 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
                 throw _Exception("error in configuration: invalid mode given for avi-fourcc-list: \"" + mode + "\"");
 
             if (fcc_mode != FCC_None) {
-                std::vector<std::string> fcc_list(avi_fcc->elementChildCount());
+                std::vector<std::string> fcc_list;
+                fcc_list.reserve(avi_fcc->elementChildCount());
                 for (int f = 0; f < avi_fcc->elementChildCount(); f++) {
                     Ref<Element> fourcc = avi_fcc->getElementChild(f);
                     if (fourcc->getName() != "fourcc")
