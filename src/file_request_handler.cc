@@ -185,7 +185,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         if (!string_ok(mimeType))
             mimeType = h->getMimeType();
 
-        Ref<IOHandler> io_handler = h->serveContent(item, res_id);
+        auto io_handler = h->serveContent(item, res_id);
 
         // get size
         io_handler->open(UPNP_READ);
@@ -292,7 +292,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     log_debug("web_get_info(): end\n");
 }
 
-Ref<IOHandler> FileRequestHandler::open(const char* filename,
+std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
     enum UpnpOpenFileMode mode, std::string range)
 {
     log_debug("start\n");
@@ -467,9 +467,9 @@ Ref<IOHandler> FileRequestHandler::open(const char* filename,
         */
 
         //info->content_type = ixmlCloneDOMString(mimeType.c_str());
-        //Ref<IOHandler> io_handler = h->serveContent(item, res_id, &(info->file_length));
+        //auto io_handler = h->serveContent(item, res_id, &(info->file_length));
 
-        Ref<IOHandler> io_handler = h->serveContent(item, res_id);
+        auto io_handler = h->serveContent(item, res_id);
         io_handler->open(mode);
         log_debug("end\n");
         return io_handler;
@@ -508,7 +508,7 @@ Ref<IOHandler> FileRequestHandler::open(const char* filename,
                 info->http_header = ixmlCloneDOMString(header.c_str());
             */
 
-            Ref<IOHandler> io_handler(new FileIOHandler(path));
+            auto io_handler = std::make_unique<FileIOHandler>(path);
             io_handler->open(mode);
             content->triggerPlayHook(obj);
             log_debug("end\n");

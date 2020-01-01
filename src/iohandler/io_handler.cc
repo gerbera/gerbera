@@ -35,10 +35,11 @@
 
 #include "server.h"
 
-using namespace zmm;
-
 IOHandler::IOHandler()
-    : Object()
+{
+}
+
+IOHandler::~IOHandler()
 {
 }
 

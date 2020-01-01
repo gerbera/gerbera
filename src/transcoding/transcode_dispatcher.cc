@@ -43,10 +43,10 @@ TranscodeDispatcher::TranscodeDispatcher(std::shared_ptr<ConfigManager> config,
 {
 }
 
-Ref<IOHandler> TranscodeDispatcher::open(Ref<TranscodingProfile> profile, 
-                                         std::string location, 
-                                         Ref<CdsObject> obj,
-                                         std::string range)
+std::unique_ptr<IOHandler> TranscodeDispatcher::open(Ref<TranscodingProfile> profile,
+    std::string location,
+    Ref<CdsObject> obj,
+    std::string range)
 {
     if (profile == nullptr)
         throw _Exception("Transcoding of file " + location +
@@ -63,4 +63,3 @@ Ref<IOHandler> TranscodeDispatcher::open(Ref<TranscodingProfile> profile,
         throw _Exception("Unknown transcoding type for profile " + 
                          profile->getName());
 }
-

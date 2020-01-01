@@ -50,7 +50,7 @@ public:
     /// \param writeTo the IOHandler to write to
     /// \param chunkSize the amount of bytes to read/write at once. a buffer of
     /// this size will be allocated
-    IOHandlerChainer(zmm::Ref<IOHandler> readFrom, zmm::Ref<IOHandler> writeTo, int chunkSize);
+    IOHandlerChainer(std::unique_ptr<IOHandler>& readFrom, std::unique_ptr<IOHandler>& writeTo, int chunkSize);
     virtual int getStatus() { return status; }
 
 protected:
@@ -60,8 +60,8 @@ private:
     int status;
     char* buf;
     int chunkSize;
-    zmm::Ref<IOHandler> readFrom;
-    zmm::Ref<IOHandler> writeTo;
+    std::unique_ptr<IOHandler> readFrom;
+    std::unique_ptr<IOHandler> writeTo;
 };
 
 #endif // __IO_HANDLER_CHAINER_H__

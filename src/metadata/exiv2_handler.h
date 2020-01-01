@@ -39,7 +39,7 @@ class Exiv2Handler : public MetadataHandler {
 public:
     Exiv2Handler(std::shared_ptr<ConfigManager> config);
     virtual void fillMetadata(zmm::Ref<CdsItem> item);
-    virtual zmm::Ref<IOHandler> serveContent(zmm::Ref<CdsItem> item, int resNum);
+    virtual std::unique_ptr<IOHandler> serveContent(zmm::Ref<CdsItem> item, int resNum);
 };
 
 #endif // __METADATA_EXIV2_H__

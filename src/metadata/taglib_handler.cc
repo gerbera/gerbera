@@ -276,7 +276,7 @@ void TagLibHandler::addArtworkResource(Ref<CdsItem> item, std::string art_mimety
     }
 }
 
-Ref<IOHandler> TagLibHandler::serveContent(Ref<CdsItem> item, int resNum)
+std::unique_ptr<IOHandler> TagLibHandler::serveContent(Ref<CdsItem> item, int resNum)
 {
     Ref<Dictionary> mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
     std::string content_type = mappings->get(item->getMimeType());
@@ -299,7 +299,7 @@ Ref<IOHandler> TagLibHandler::serveContent(Ref<CdsItem> item, int resNum)
 
         auto* art = static_cast<TagLib::ID3v2::AttachedPictureFrame*>(list.front());
 
-        Ref<IOHandler> h(new MemIOHandler((void*)art->picture().data(), art->picture().size()));
+        auto h = std::make_unique<MemIOHandler>((void*)art->picture().data(), art->picture().size());
         return h;
 
     } else if (content_type == CONTENT_TYPE_FLAC) {
@@ -314,7 +314,7 @@ Ref<IOHandler> TagLibHandler::serveContent(Ref<CdsItem> item, int resNum)
         TagLib::FLAC::Picture* pic = f.pictureList().front();
         const TagLib::ByteVector& data = pic->data();
 
-        Ref<IOHandler> h(new MemIOHandler(data.data(), data.size()));
+        auto h = std::make_unique<MemIOHandler>(data.data(), data.size());
         return h;
 
     } else if (content_type == CONTENT_TYPE_MP4) {
@@ -340,7 +340,7 @@ Ref<IOHandler> TagLibHandler::serveContent(Ref<CdsItem> item, int resNum)
         const TagLib::MP4::CoverArt& coverArt = coverArtList.front();
         const TagLib::ByteVector& data = coverArt.data();
 
-        Ref<IOHandler> h(new MemIOHandler(data.data(), data.size()));
+        auto h = std::make_unique<MemIOHandler>(data.data(), data.size());
         return h;
     } else if (content_type == CONTENT_TYPE_WMA) {
         TagLib::ASF::File f(&roStream);
@@ -362,7 +362,7 @@ Ref<IOHandler> TagLibHandler::serveContent(Ref<CdsItem> item, int resNum)
 
         const TagLib::ByteVector& data = wmpic.picture();
 
-        Ref<IOHandler> h(new MemIOHandler(data.data(), data.size()));
+        auto h = std::make_unique<MemIOHandler>(data.data(), data.size());
         return h;
     } else if (content_type == CONTENT_TYPE_OGG) {
         TagLib::Ogg::Vorbis::File f(&roStream);
@@ -377,7 +377,7 @@ Ref<IOHandler> TagLibHandler::serveContent(Ref<CdsItem> item, int resNum)
         const TagLib::FLAC::Picture* pic = picList.front();
         const TagLib::ByteVector& data = pic->data();
 
-        Ref<IOHandler> h(new MemIOHandler(data.data(), data.size()));
+        auto h = std::make_unique<MemIOHandler>(data.data(), data.size());
         return h;
     }
 

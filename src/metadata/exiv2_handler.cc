@@ -177,7 +177,7 @@ void Exiv2Handler::fillMetadata(Ref<CdsItem> item)
     }
 }
 
-Ref<IOHandler> Exiv2Handler::serveContent(Ref<CdsItem> item, int resNum)
+std::unique_ptr<IOHandler> Exiv2Handler::serveContent(Ref<CdsItem> item, int resNum)
 {
     return nullptr;
 }

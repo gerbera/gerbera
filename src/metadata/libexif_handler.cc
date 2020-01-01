@@ -367,7 +367,7 @@ void LibExifHandler::fillMetadata(Ref<CdsItem> item)
 
     if (ed->size) {
         try {
-            Ref<IOHandler> io_h(new MemIOHandler(ed->data, ed->size));
+            std::unique_ptr<IOHandler> io_h(new MemIOHandler(ed->data, ed->size));
             io_h->open(UPNP_READ);
             std::string th_resolution = get_jpeg_resolution(io_h);
             log_debug("RESOLUTION: %s\n", th_resolution.c_str());
@@ -385,7 +385,7 @@ void LibExifHandler::fillMetadata(Ref<CdsItem> item)
     exif_data_unref(ed);
 }
 
-Ref<IOHandler> LibExifHandler::serveContent(Ref<CdsItem> item, int resNum)
+std::unique_ptr<IOHandler> LibExifHandler::serveContent(Ref<CdsItem> item, int resNum)
 {
     ExifData* ed;
     Ref<CdsResource> res = item->getResource(resNum);
@@ -401,10 +401,8 @@ Ref<IOHandler> LibExifHandler::serveContent(Ref<CdsItem> item, int resNum)
     if (!(ed->size))
         throw _Exception("LibExifHandler: resource has no exif thumbnail");
 
-    Ref<IOHandler> h(new MemIOHandler(ed->data, ed->size));
-
+    auto h = std::make_unique<MemIOHandler>(ed->data, ed->size);
     exif_data_unref(ed);
-
     return h;
 }
 

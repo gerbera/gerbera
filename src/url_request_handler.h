@@ -46,7 +46,7 @@ public:
         std::shared_ptr<Storage> storage,
         std::shared_ptr<ContentManager> content);
     virtual void getInfo(const char *filename, UpnpFileInfo *info);
-    virtual zmm::Ref<IOHandler> open(const char* filename,
+    virtual std::unique_ptr<IOHandler> open(const char* filename,
         enum UpnpOpenFileMode mode,
         std::string range);
 

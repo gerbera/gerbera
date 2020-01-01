@@ -129,7 +129,7 @@ void WebRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
     headers.writeHeaders(info);
 }
 
-Ref<IOHandler> WebRequestHandler::open(enum UpnpOpenFileMode mode)
+std::unique_ptr<IOHandler> WebRequestHandler::open(enum UpnpOpenFileMode mode)
 {
     root = Ref<Element>(new Element("root"));
 
@@ -221,12 +221,12 @@ Ref<IOHandler> WebRequestHandler::open(enum UpnpOpenFileMode mode)
 
     //root = nullptr;
 
-    Ref<MemIOHandler> io_handler(new MemIOHandler(output));
+    auto io_handler = std::make_unique<MemIOHandler>(output);
     io_handler->open(mode);
-    return RefCast(io_handler, IOHandler);
+    return io_handler;
 }
 
-Ref<IOHandler> WebRequestHandler::open(const char* filename,
+std::unique_ptr<IOHandler> WebRequestHandler::open(const char* filename,
     enum UpnpOpenFileMode mode,
     std::string range)
 {

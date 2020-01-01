@@ -24,6 +24,7 @@ Gerbera - https://gerbera.io/
 #ifndef GERBERA_DEVICE_DESCRIPTION_HANDLER_H
 #define GERBERA_DEVICE_DESCRIPTION_HANDLER_H
 
+#include <memory>
 #include "request_handler.h"
 #include "upnp_xml.h"
 
@@ -33,7 +34,7 @@ public:
         UpnpXMLBuilder* xmlBuilder);
 
     void getInfo(const char *filename, UpnpFileInfo *info) override;
-    zmm::Ref<IOHandler> open(const char* filename, enum UpnpOpenFileMode mode, std::string range) override;
+    std::unique_ptr<IOHandler> open(const char* filename, enum UpnpOpenFileMode mode, std::string range) override;
 
 protected:
     UpnpXMLBuilder* xmlBuilder;

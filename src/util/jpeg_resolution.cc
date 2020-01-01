@@ -75,7 +75,7 @@ static int Get16m(const void* Short)
     return (((uchar*)Short)[0] << 8) | ((uchar*)Short)[1];
 }
 
-static int ioh_fgetc(Ref<IOHandler> ioh)
+static int ioh_fgetc(const std::unique_ptr<IOHandler>& ioh)
 {
     uchar c[1] = { 0 };
     int ret = ioh->read((char*)c, sizeof(char));
@@ -84,7 +84,7 @@ static int ioh_fgetc(Ref<IOHandler> ioh)
     return (int)c[0];
 }
 
-static void get_jpeg_resolution(Ref<IOHandler> ioh, int* w, int* h)
+static void get_jpeg_resolution(const std::unique_ptr<IOHandler>& ioh, int* w, int* h)
 {
     int a;
 
@@ -163,7 +163,7 @@ static void get_jpeg_resolution(Ref<IOHandler> ioh, int* w, int* h)
 }
 
 // IOHandler must be opened
-std::string get_jpeg_resolution(Ref<IOHandler> ioh)
+std::string get_jpeg_resolution(const std::unique_ptr<IOHandler>& ioh)
 {
     int w, h;
     try {
