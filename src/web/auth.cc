@@ -82,7 +82,7 @@ void web::auth::process()
     }
 
     if (action == "get_config") {
-        Ref<Element> cfg(new Element("cfg"));
+        Ref<Element> cfg(new Element("config"));
         root->appendElementChild(cfg);
         cfg->setAttribute("accounts", accountsEnabled() ? "1" : "0", mxml_bool_type);
         cfg->setAttribute("show-tooltips",

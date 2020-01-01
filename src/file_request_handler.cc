@@ -235,7 +235,8 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
                 // To be more compliant with original Samsung
                 // server we should check for getCaptionInfo.sec: 1
                 // request header.
-                std::vector<std::string> subexts(4);
+                std::vector<std::string> subexts;
+                subexts.reserve(4);
                 subexts.push_back(".srt");
                 subexts.push_back(".ssa");
                 subexts.push_back(".smi");
