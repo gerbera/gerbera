@@ -53,13 +53,13 @@ private:
 
     virtual std::string quote(std::string str);
     virtual inline std::string quote(const char* str) override { return quote(std::string(str)); }
-    virtual inline std::string quote(int val) { return std::string::from(val); }
-    virtual inline std::string quote(unsigned int val) { return std::string::from(val); }
-    virtual inline std::string quote(long val) { return std::string::from(val); }
-    virtual inline std::string quote(unsigned long val) { return std::string::from(val); }
+    virtual inline std::string quote(int val) { return std::to_string(val); }
+    virtual inline std::string quote(unsigned int val) { return std::to_string(val); }
+    virtual inline std::string quote(long val) { return std::to_string(val); }
+    virtual inline std::string quote(unsigned long val) { return std::to_string(val); }
     virtual inline std::string quote(bool val) { return std::string(val ? '1' : '0'); }
     virtual inline std::string quote(char val) { return quote(std::string(val)); }
-    virtual inline std::string quote(long long val) { return std::string::from(val); }
+    virtual inline std::string quote(long long val) { return std::to_string(val); }
     virtual zmm::Ref<SQLResult> select(const char* query, int length);
     virtual int exec(const char* query, int length, bool getLastInsertId = false);
     virtual void storeInternalSetting(std::string key, std::string value);
