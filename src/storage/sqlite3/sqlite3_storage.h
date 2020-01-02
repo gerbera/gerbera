@@ -212,7 +212,7 @@ class Sqlite3Result : public SQLResult {
 private:
     Sqlite3Result();
     virtual ~Sqlite3Result();
-    virtual zmm::Ref<SQLRow> nextRow() override;
+    virtual std::unique_ptr<SQLRow> nextRow() override;
     virtual unsigned long long getNumRows() override { return nrow; }
 
     char** table;
@@ -230,8 +230,9 @@ private:
 
 /// \brief Represents a row of a result of a sqlite3 select
 class Sqlite3Row : public SQLRow {
-private:
+public:
     Sqlite3Row(char** row, zmm::Ref<SQLResult> sqlResult);
+private:
     inline virtual char* col_c_str(int index) { return row[index]; }
     char** row;
     zmm::Ref<Sqlite3Result> res;

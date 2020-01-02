@@ -53,7 +53,7 @@
 class SQLResult;
 class SQLEmitter;
 
-class SQLRow : public zmm::Object
+class SQLRow
 {
 public:
     SQLRow(zmm::Ref<SQLResult> sqlResult) { this->sqlResult = sqlResult; }
@@ -74,7 +74,7 @@ class SQLResult : public zmm::Object
 public:
     //SQLResult();
     //virtual ~SQLResult();
-    virtual zmm::Ref<SQLRow> nextRow() = 0;
+    virtual std::unique_ptr<SQLRow> nextRow() = 0;
     virtual unsigned long long getNumRows() = 0;
 };
 
@@ -186,8 +186,8 @@ private:
     /* helper for createObjectFromRow() */
     std::string getRealLocation(int parentID, std::string location);
     
-    zmm::Ref<CdsObject> createObjectFromRow(zmm::Ref<SQLRow> row);
-    zmm::Ref<CdsObject> createObjectFromSearchRow(zmm::Ref<SQLRow> row);
+    zmm::Ref<CdsObject> createObjectFromRow(const std::unique_ptr<SQLRow>& row);
+    zmm::Ref<CdsObject> createObjectFromSearchRow(const std::unique_ptr<SQLRow>& row);
     zmm::Ref<Dictionary> retrieveMetadataForObject(int objectId);
     
     /* helper for findObjectByPath and findObjectIDByPath */ 
@@ -236,7 +236,7 @@ private:
     /* helpers for autoscan */
     int _getAutoscanObjectID(int autoscanID);
     void _autoscanChangePersistentFlag(int objectID, bool persistent);
-    zmm::Ref<AutoscanDirectory> _fillAutoscanDirectory(zmm::Ref<SQLRow> row);
+    zmm::Ref<AutoscanDirectory> _fillAutoscanDirectory(const std::unique_ptr<SQLRow>& row);
     int _getAutoscanDirectoryInfo(int objectID, std::string field);
     std::unique_ptr<std::vector<int>> _checkOverlappingAutoscans(zmm::Ref<AutoscanDirectory> adir);
     
