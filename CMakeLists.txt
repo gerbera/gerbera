@@ -76,8 +76,6 @@ set(libgerberaFILES
         src/iohandler/mem_io_handler.h
         src/iohandler/process_io_handler.cc
         src/iohandler/process_io_handler.h
-        src/lastfm_scrobbler.cc
-        src/lastfm_scrobbler.h
         src/layout/fallback_layout.cc
         src/layout/fallback_layout.h
         src/layout/js_layout.cc
@@ -124,6 +122,8 @@ set(libgerberaFILES
         src/onlineservice/atrailers_content_handler.h
         src/onlineservice/atrailers_service.cc
         src/onlineservice/atrailers_service.h
+        src/onlineservice/lastfm_scrobbler.cc
+        src/onlineservice/lastfm_scrobbler.h
         src/onlineservice/online_service.cc
         src/onlineservice/online_service.h
         src/onlineservice/online_service_helper.cc
