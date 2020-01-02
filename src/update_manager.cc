@@ -53,7 +53,7 @@ using namespace std;
 UpdateManager::UpdateManager(std::shared_ptr<Storage> storage, std::shared_ptr<Server> server)
     : storage(storage)
     , server(server)
-    , objectIDHash(make_shared<unordered_set<int>>())
+    , objectIDHash(make_unique<unordered_set<int>>())
     , shutdownFlag(false)
     , flushPolicy(FLUSH_SPEC)
     , lastContainerChanged(INVALID_OBJECT_ID)

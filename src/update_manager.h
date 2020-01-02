@@ -67,7 +67,7 @@ protected:
     using AutoLock = std::lock_guard<decltype(mutex)>;
     using AutoLockU = std::unique_lock<decltype(mutex)>;
 
-    std::shared_ptr<std::unordered_set<int>> objectIDHash;
+    std::unique_ptr<std::unordered_set<int>> objectIDHash;
 
     bool shutdownFlag;
     int flushPolicy;

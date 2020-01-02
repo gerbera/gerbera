@@ -434,7 +434,7 @@ void SQLStorage::updateObject(zmm::Ref<CdsObject> obj, int* changedContainer)
     for (int i = 0; i < data->size(); i++) {
         Ref<AddUpdateTable> addUpdateTable = data->get(i);
         std::string operation = addUpdateTable->getOperation();
-        std::shared_ptr<std::ostringstream> qb;
+        std::unique_ptr<std::ostringstream> qb;
         if (operation == "update") {
             qb = sqlForUpdate(obj, addUpdateTable);
         } else if (operation == "insert") {
@@ -1156,7 +1156,7 @@ int SQLStorage::getTotalFiles()
     return 0;
 }
 
-std::string SQLStorage::incrementUpdateIDs(shared_ptr<unordered_set<int>> ids)
+std::string SQLStorage::incrementUpdateIDs(const unique_ptr<unordered_set<int>>& ids)
 {
     if (ids->empty())
         return nullptr;
@@ -1267,7 +1267,7 @@ std::string SQLStorage::findFolderImage(int id, std::string trackArtBase)
 }
 
 
-shared_ptr<unordered_set<int>> SQLStorage::getObjects(int parentID, bool withoutContainer)
+unique_ptr<unordered_set<int>> SQLStorage::getObjects(int parentID, bool withoutContainer)
 {
     std::ostringstream q;
     q << "SELECT " << TQ("id") << " FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE ";
@@ -1287,15 +1287,14 @@ shared_ptr<unordered_set<int>> SQLStorage::getObjects(int parentID, bool without
     if (capacity < 521)
         capacity = 521;
 
-    shared_ptr<unordered_set<int>> ret = make_shared<unordered_set<int>>();
-
+    auto ret = make_unique<unordered_set<int>>();
     while ((row = res->nextRow()) != nullptr) {
         ret->insert(std::stoi(row->col(0)));
     }
     return ret;
 }
 
-Ref<Storage::ChangedContainers> SQLStorage::removeObjects(shared_ptr<unordered_set<int>> list, bool all)
+Ref<Storage::ChangedContainers> SQLStorage::removeObjects(const unique_ptr<unordered_set<int>>& list, bool all)
 {
     int count = list->size();
     if (count <= 0)
@@ -2268,7 +2267,7 @@ void SQLStorage::generateMetadataDBOperations(Ref<CdsObject> obj, bool isUpdate,
     }
 }
 
-std::shared_ptr<std::ostringstream> SQLStorage::sqlForInsert(Ref<CdsObject> obj, Ref<AddUpdateTable> addUpdateTable)
+std::unique_ptr<std::ostringstream> SQLStorage::sqlForInsert(Ref<CdsObject> obj, Ref<AddUpdateTable> addUpdateTable)
 {
     int lastInsertID = INVALID_OBJECT_ID;
     int lastMetadataInsertID = INVALID_OBJECT_ID;
@@ -2310,13 +2309,13 @@ std::shared_ptr<std::ostringstream> SQLStorage::sqlForInsert(Ref<CdsObject> obj,
         values << ',' << quote(obj->getID());
     }
 
-    std::shared_ptr<std::ostringstream> qb = std::make_shared<std::ostringstream>();
+    auto qb = std::make_unique<std::ostringstream>();
     *qb << "INSERT INTO " << TQ(tableName) << " (" << fields.str() << ") VALUES (" << values.str() << ')';
 
     return qb;
 }
 
-std::shared_ptr<std::ostringstream> SQLStorage::sqlForUpdate(Ref<CdsObject> obj, Ref<AddUpdateTable> addUpdateTable)
+std::unique_ptr<std::ostringstream> SQLStorage::sqlForUpdate(Ref<CdsObject> obj, Ref<AddUpdateTable> addUpdateTable)
 {
     if (addUpdateTable == nullptr || addUpdateTable->getDict() == nullptr
         || (addUpdateTable->getTable() == METADATA_TABLE && addUpdateTable->getDict()->size() != 2))
@@ -2325,7 +2324,7 @@ std::shared_ptr<std::ostringstream> SQLStorage::sqlForUpdate(Ref<CdsObject> obj,
     std::string tableName = addUpdateTable->getTable();
     Ref<Array<DictionaryElement>> dataElements = addUpdateTable->getDict()->getElements();
 
-    std::shared_ptr<std::ostringstream> qb = std::make_shared<std::ostringstream>();
+    auto qb = std::make_unique<std::ostringstream>();
     *qb << "UPDATE " << TQ(tableName) << " SET ";
     for (int j = 0; j < dataElements->size(); j++) {
         Ref<DictionaryElement> element = dataElements->get(j);
@@ -2343,7 +2342,7 @@ std::shared_ptr<std::ostringstream> SQLStorage::sqlForUpdate(Ref<CdsObject> obj,
     return qb;
 }
 
-std::shared_ptr<std::ostringstream> SQLStorage::sqlForDelete(Ref<CdsObject> obj, Ref<AddUpdateTable> addUpdateTable)
+std::unique_ptr<std::ostringstream> SQLStorage::sqlForDelete(Ref<CdsObject> obj, Ref<AddUpdateTable> addUpdateTable)
 {
     if (addUpdateTable == nullptr || addUpdateTable->getDict() == nullptr
         || (addUpdateTable->getTable() == METADATA_TABLE && addUpdateTable->getDict()->size() != 2))
@@ -2351,7 +2350,8 @@ std::shared_ptr<std::ostringstream> SQLStorage::sqlForDelete(Ref<CdsObject> obj,
 
     Ref<Array<DictionaryElement>> dataElements = addUpdateTable->getDict()->getElements();
     std::string tableName = addUpdateTable->getTable();
-    std::shared_ptr<std::ostringstream> qb = std::make_shared<std::ostringstream>();
+
+    auto qb = std::make_unique<std::ostringstream>();
     *qb << "DELETE FROM " << TQ(tableName)
         << " WHERE " << TQ("id") << " = " << obj->getID();
     

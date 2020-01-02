@@ -199,7 +199,7 @@ public:
     /// \param size number of entries in the given array
     /// \return a String for UPnP: a CSV list; for every existing object:
     ///  "id,update_id"
-    virtual std::string incrementUpdateIDs(std::shared_ptr<std::unordered_set<int>> ids) = 0;
+    virtual std::string incrementUpdateIDs(const std::unique_ptr<std::unordered_set<int>>& ids) = 0;
 
     /* utility methods */
     virtual zmm::Ref<CdsObject> loadObject(int objectID) = 0;
@@ -232,13 +232,13 @@ public:
     /// \param parentID parent container
     /// \param withoutContainer if false: all children are returned; if true: only items are returned
     /// \return DBHash containing the objectID's - nullptr if there are none!
-    virtual std::shared_ptr<std::unordered_set<int>> getObjects(int parentID, bool withoutContainer) = 0;
+    virtual std::unique_ptr<std::unordered_set<int>> getObjects(int parentID, bool withoutContainer) = 0;
 
     /// \brief Remove all objects found in list
     /// \param list a DBHash containing objectIDs that have to be removed
     /// \param all if true and the object to be removed is a reference
     /// \return changed container ids
-    virtual zmm::Ref<ChangedContainers> removeObjects(std::shared_ptr<std::unordered_set<int>> list, bool all = false) = 0;
+    virtual zmm::Ref<ChangedContainers> removeObjects(const std::unique_ptr<std::unordered_set<int>>& list, bool all = false) = 0;
 
     /// \brief Loads an object given by the online service ID.
     virtual zmm::Ref<CdsObject> loadObjectByServiceID(std::string serviceID) = 0;

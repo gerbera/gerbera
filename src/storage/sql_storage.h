@@ -116,10 +116,10 @@ public:
     
     //virtual zmm::Ref<zmm::Array<CdsObject> > selectObjects(zmm::Ref<SelectParam> param);
     
-    virtual std::shared_ptr<std::unordered_set<int> > getObjects(int parentID, bool withoutContainer) override;
+    virtual std::unique_ptr<std::unordered_set<int>> getObjects(int parentID, bool withoutContainer) override;
     
     virtual zmm::Ref<ChangedContainers> removeObject(int objectID, bool all) override;
-    virtual zmm::Ref<ChangedContainers> removeObjects(std::shared_ptr<std::unordered_set<int> > list, bool all = false) override;
+    virtual zmm::Ref<ChangedContainers> removeObjects(const std::unique_ptr<std::unordered_set<int>>& list, bool all = false) override;
     
     virtual zmm::Ref<CdsObject> loadObjectByServiceID(std::string serviceID) override;
     virtual std::unique_ptr<std::vector<int>> getServiceObjectIDs(char servicePrefix) override;
@@ -138,7 +138,7 @@ public:
     //virtual zmm::Ref<CdsObject> findObjectByTitle(std::string title, int parentID);
     virtual zmm::Ref<CdsObject> findObjectByPath(std::string fullpath) override;
     virtual int findObjectIDByPath(std::string fullpath) override;
-    virtual std::string incrementUpdateIDs(std::shared_ptr<std::unordered_set<int> > ids) override;
+    virtual std::string incrementUpdateIDs(const std::unique_ptr<std::unordered_set<int>>& ids) override;
 
     virtual std::string buildContainerPath(int parentID, std::string title) override;
     virtual void addContainerChain(std::string path, std::string lastClass, int lastRefID, int *containerID, int *updateID, zmm::Ref<Dictionary> lastMetadata) override;
@@ -217,9 +217,10 @@ private:
 
     void generateMetadataDBOperations(zmm::Ref<CdsObject> obj, bool isUpdate,
         zmm::Ref<zmm::Array<AddUpdateTable>> operations);
-    std::shared_ptr<std::ostringstream> sqlForInsert(zmm::Ref<CdsObject> obj, zmm::Ref<AddUpdateTable> addUpdateTable);
-    std::shared_ptr<std::ostringstream> sqlForUpdate(zmm::Ref<CdsObject> obj, zmm::Ref<AddUpdateTable> addUpdateTable);
-    std::shared_ptr<std::ostringstream> sqlForDelete(zmm::Ref<CdsObject> obj, zmm::Ref<AddUpdateTable> addUpdateTable);
+
+    std::unique_ptr<std::ostringstream> sqlForInsert(zmm::Ref<CdsObject> obj, zmm::Ref<AddUpdateTable> addUpdateTable);
+    std::unique_ptr<std::ostringstream> sqlForUpdate(zmm::Ref<CdsObject> obj, zmm::Ref<AddUpdateTable> addUpdateTable);
+    std::unique_ptr<std::ostringstream> sqlForDelete(zmm::Ref<CdsObject> obj, zmm::Ref<AddUpdateTable> addUpdateTable);
     
     /* helper for removeObject(s) */
     void _removeObjects(const std::vector<int32_t> &objectIDs);
