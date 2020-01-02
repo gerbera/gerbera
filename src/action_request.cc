@@ -35,8 +35,7 @@ using namespace zmm;
 using namespace mxml;
 
 ActionRequest::ActionRequest(UpnpActionRequest* upnp_request)
-    : Object()
-    , upnp_request(upnp_request)
+    : upnp_request(upnp_request)
     , errCode(UPNP_E_SUCCESS)
     , actionName(UpnpActionRequest_get_ActionName_cstr(upnp_request))
     , UDN(UpnpActionRequest_get_DevUDN_cstr(upnp_request))

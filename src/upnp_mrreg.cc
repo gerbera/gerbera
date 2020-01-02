@@ -50,7 +50,7 @@ MRRegistrarService::MRRegistrarService(std::shared_ptr<ConfigManager> config,
 
 MRRegistrarService::~MRRegistrarService() = default;
 
-void MRRegistrarService::doIsAuthorized(Ref<ActionRequest> request)
+void MRRegistrarService::doIsAuthorized(const std::unique_ptr<ActionRequest>& request)
 {
     log_debug("start\n");
 
@@ -64,7 +64,7 @@ void MRRegistrarService::doIsAuthorized(Ref<ActionRequest> request)
     log_debug("end\n");
 }
 
-void MRRegistrarService::doRegisterDevice(Ref<ActionRequest> request)
+void MRRegistrarService::doRegisterDevice(const std::unique_ptr<ActionRequest>& request)
 {
     log_debug("start\n");
 
@@ -73,7 +73,7 @@ void MRRegistrarService::doRegisterDevice(Ref<ActionRequest> request)
     log_debug("upnpActionGetCurrentConnectionInfo: end\n");
 }
 
-void MRRegistrarService::doIsValidated(Ref<ActionRequest> request)
+void MRRegistrarService::doIsValidated(const std::unique_ptr<ActionRequest>& request)
 {
     log_debug("start\n");
 
@@ -87,7 +87,7 @@ void MRRegistrarService::doIsValidated(Ref<ActionRequest> request)
     log_debug("end\n");
 }
 
-void MRRegistrarService::processActionRequest(Ref<ActionRequest> request)
+void MRRegistrarService::processActionRequest(const std::unique_ptr<ActionRequest>& request)
 {
     log_debug("start\n");
 

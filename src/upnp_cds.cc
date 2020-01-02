@@ -55,7 +55,7 @@ ContentDirectoryService::ContentDirectoryService(std::shared_ptr<ConfigManager> 
 
 ContentDirectoryService::~ContentDirectoryService() = default;
 
-void ContentDirectoryService::doBrowse(Ref<ActionRequest> request)
+void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& request)
 {
     log_debug("start\n");
     Ref<Element> req = request->getRequest();
@@ -145,7 +145,7 @@ void ContentDirectoryService::doBrowse(Ref<ActionRequest> request)
     log_debug("end\n");
 }
 
-void ContentDirectoryService::doSearch(Ref<ActionRequest> request)
+void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& request)
 {
     log_debug("start\n");
 
@@ -209,7 +209,7 @@ void ContentDirectoryService::doSearch(Ref<ActionRequest> request)
     log_debug("end\n");
 }
 
-void ContentDirectoryService::doGetSearchCapabilities(Ref<ActionRequest> request)
+void ContentDirectoryService::doGetSearchCapabilities(const std::unique_ptr<ActionRequest>& request)
 {
     log_debug("start\n");
 
@@ -222,7 +222,7 @@ void ContentDirectoryService::doGetSearchCapabilities(Ref<ActionRequest> request
     log_debug("end\n");
 }
 
-void ContentDirectoryService::doGetSortCapabilities(Ref<ActionRequest> request)
+void ContentDirectoryService::doGetSortCapabilities(const std::unique_ptr<ActionRequest>& request)
 {
     log_debug("start\n");
 
@@ -235,7 +235,7 @@ void ContentDirectoryService::doGetSortCapabilities(Ref<ActionRequest> request)
     log_debug("end\n");
 }
 
-void ContentDirectoryService::doGetSystemUpdateID(Ref<ActionRequest> request)
+void ContentDirectoryService::doGetSystemUpdateID(const std::unique_ptr<ActionRequest>& request)
 {
     log_debug("start\n");
 
@@ -248,7 +248,7 @@ void ContentDirectoryService::doGetSystemUpdateID(Ref<ActionRequest> request)
     log_debug("end\n");
 }
 
-void ContentDirectoryService::processActionRequest(Ref<ActionRequest> request)
+void ContentDirectoryService::processActionRequest(const std::unique_ptr<ActionRequest>& request)
 {
     log_debug("start\n");
 

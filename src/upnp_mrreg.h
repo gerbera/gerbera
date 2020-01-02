@@ -63,7 +63,7 @@ protected:
     /// IsAuthorized(string DeviceID, i4 Result)
     ///
     /// This is currently unsupported (always returns 1)
-    void doIsAuthorized(zmm::Ref<ActionRequest> request);
+    void doIsAuthorized(const std::unique_ptr<ActionRequest>& request);
 
     /// \brief Media Receiver Registrar service action: RegisterDevice()
     /// \param request Incoming ActionRequest.
@@ -71,13 +71,13 @@ protected:
     /// RegisterDevice(bin.base64 RegistrationReqMsg, bin.base64 RegistrationRespMsg)
     ///
     /// This action is currently unsupported.
-    void doRegisterDevice(zmm::Ref<ActionRequest> request);
+    void doRegisterDevice(const std::unique_ptr<ActionRequest>& request);
 
     /// \brief Media Receiver Registrar service action: IsValidated()
     /// \param request Incoming ActionRequest.
     ///
     /// IsValidated(string DeviceID, i4 Result)
-    void doIsValidated(zmm::Ref<ActionRequest> request);
+    void doIsValidated(const std::unique_ptr<ActionRequest>& request);
 
     std::shared_ptr<ConfigManager> config;
 
@@ -96,7 +96,7 @@ public:
     ///
     /// This function looks at the incoming ActionRequest and passes it on
     /// to the appropriate action for processing.
-    void processActionRequest(zmm::Ref<ActionRequest> request);
+    void processActionRequest(const std::unique_ptr<ActionRequest>& request);
 
     /// \brief Processes an incoming SubscriptionRequest.
     /// \param request Incoming SubscriptionRequest.

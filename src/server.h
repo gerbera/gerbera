@@ -198,7 +198,7 @@ protected:
     /// and ConnectionManagerService), this function looks at the service id
     /// of the request and calls the process_action_request() for the
     /// appropriate service.
-    void routeActionRequest(zmm::Ref<ActionRequest> request) const;
+    void routeActionRequest(const std::unique_ptr<ActionRequest>& request) const;
 
     /// \brief Dispatched a SubscriptionRequest between the services.
     /// \param request Incoming SubscriptionRequest.

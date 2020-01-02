@@ -66,7 +66,7 @@ protected:
     /// Browse(string ObjectID, string BrowseFlag, string Filter, ui4 StartingIndex,
     /// ui4 RequestedCount, string SortCriteria, string Result, ui4 NumberReturned,
     /// ui4 TotalMatches, ui4 UpdateID)
-    void doBrowse(zmm::Ref<ActionRequest> request);
+    void doBrowse(const std::unique_ptr<ActionRequest>& request);
 
     /// \brief UPnP standard defined action: Search()
     /// \param request Incoming ActionRequest.
@@ -74,25 +74,25 @@ protected:
     /// Search(string ContainerID, string SearchCriteria, string Filter, ui4 StartingIndex,
     /// ui4 RequestedCount, string SortCriteria, string Result, ui4 NumberReturned,
     /// ui4 TotalMatches, ui4 UpdateID)
-    void doSearch(zmm::Ref<ActionRequest> request);
+    void doSearch(const std::unique_ptr<ActionRequest>& request);
 
     /// \brief UPnP standard defined action: GetSearchCapabilities()
     /// \param request Incoming ActionRequest.
     ///
     /// GetSearchCapabilities(string SearchCaps)
-    void doGetSearchCapabilities(zmm::Ref<ActionRequest> request);
+    void doGetSearchCapabilities(const std::unique_ptr<ActionRequest>& request);
 
     /// \brief UPnP standard defined action: GetSortCapabilities()
     /// \param request Incoming ActionRequest.
     ///
     /// GetSortCapabilities(string SortCaps)
-    void doGetSortCapabilities(zmm::Ref<ActionRequest> request);
+    void doGetSortCapabilities(const std::unique_ptr<ActionRequest>& request);
 
     /// \brief UPnP standard defined action: GetSystemUpdateID()
     /// \param request Incoming ActionRequest.
     ///
     /// GetSystemUpdateID(ui4 Id)
-    void doGetSystemUpdateID(zmm::Ref<ActionRequest> request);
+    void doGetSystemUpdateID(const std::unique_ptr<ActionRequest>& request);
 
     std::shared_ptr<ConfigManager> config;
     std::shared_ptr<Storage> storage;
@@ -113,7 +113,7 @@ public:
     ///
     /// This function looks at the incoming ActionRequest and passes it on
     /// to the appropriate action for processing.
-    void processActionRequest(zmm::Ref<ActionRequest> request);
+    void processActionRequest(const std::unique_ptr<ActionRequest>& request);
 
     /// \brief Processes an incoming SubscriptionRequest.
     /// \param request SubscriptionRequest to be processed by the function.
