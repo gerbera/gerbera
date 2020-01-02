@@ -1294,7 +1294,7 @@ unique_ptr<unordered_set<int>> SQLStorage::getObjects(int parentID, bool without
     return ret;
 }
 
-Ref<Storage::ChangedContainers> SQLStorage::removeObjects(const unique_ptr<unordered_set<int>>& list, bool all)
+std::unique_ptr<Storage::ChangedContainers> SQLStorage::removeObjects(const unique_ptr<unordered_set<int>>& list, bool all)
 {
     int count = list->size();
     if (count <= 0)
@@ -1324,7 +1324,9 @@ Ref<Storage::ChangedContainers> SQLStorage::removeObjects(const unique_ptr<unord
         else
             items.push_back(std::stol(row->col(0)));
     }
-    return _purgeEmptyContainers(_recursiveRemove(items, containers, all));
+
+    auto rr = _recursiveRemove(items, containers, all);
+    return _purgeEmptyContainers(rr);
 }
 
 void SQLStorage::_removeObjects(const std::vector<int32_t> &objectIDs) {
@@ -1387,7 +1389,7 @@ void SQLStorage::_removeObjects(const std::vector<int32_t> &objectIDs) {
     exec(qObject);
 }
 
-Ref<Storage::ChangedContainers> SQLStorage::removeObject(int objectID, bool all)
+std::unique_ptr<Storage::ChangedContainers> SQLStorage::removeObject(int objectID, bool all)
 {
     std::ostringstream q;
     q << "SELECT " << TQ("object_type") << ',' << TQ("ref_id")
@@ -1424,7 +1426,7 @@ Ref<Storage::ChangedContainers> SQLStorage::removeObject(int objectID, bool all)
     return _purgeEmptyContainers(changedContainers);
 }
 
-Ref<Storage::ChangedContainers> SQLStorage::_recursiveRemove(
+std::unique_ptr<Storage::ChangedContainers> SQLStorage::_recursiveRemove(
     const std::vector<int32_t> &items, const std::vector<int32_t> &containers,
     bool all)
 {
@@ -1445,7 +1447,7 @@ Ref<Storage::ChangedContainers> SQLStorage::_recursiveRemove(
                       << " FROM " << TQ(CDS_OBJECT_TABLE)
                       << " WHERE " << TQ("id") << " IN (";
 
-    Ref<ChangedContainers> changedContainers(new ChangedContainers());
+    auto changedContainers = std::make_unique<ChangedContainers>();
 
     Ref<SQLResult> res;
     Ref<SQLRow> row;
@@ -1548,12 +1550,12 @@ std::string SQLStorage::toCSV(const std::vector<int>& input)
     return join(input, ",");
 }
 
-Ref<Storage::ChangedContainers> SQLStorage::_purgeEmptyContainers(Ref<ChangedContainers> maybeEmpty)
+std::unique_ptr<Storage::ChangedContainers> SQLStorage::_purgeEmptyContainers(std::unique_ptr<ChangedContainers>& maybeEmpty)
 {
     log_debug("start upnp: %s; ui: %s\n",
             join(maybeEmpty->upnp, ',').c_str(),
             join(maybeEmpty->ui, ',').c_str());
-    Ref<ChangedContainers> changedContainers(new ChangedContainers());
+    auto changedContainers = std::make_unique<ChangedContainers>();
     if (maybeEmpty->upnp.empty() && maybeEmpty->ui.empty())
         return changedContainers;
 

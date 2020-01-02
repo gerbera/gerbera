@@ -118,8 +118,8 @@ public:
     
     virtual std::unique_ptr<std::unordered_set<int>> getObjects(int parentID, bool withoutContainer) override;
     
-    virtual zmm::Ref<ChangedContainers> removeObject(int objectID, bool all) override;
-    virtual zmm::Ref<ChangedContainers> removeObjects(const std::unique_ptr<std::unordered_set<int>>& list, bool all = false) override;
+    virtual std::unique_ptr<ChangedContainers> removeObject(int objectID, bool all) override;
+    virtual std::unique_ptr<ChangedContainers> removeObjects(const std::unique_ptr<std::unordered_set<int>>& list, bool all = false) override;
     
     virtual zmm::Ref<CdsObject> loadObjectByServiceID(std::string serviceID) override;
     virtual std::unique_ptr<std::vector<int>> getServiceObjectIDs(char servicePrefix) override;
@@ -227,11 +227,11 @@ private:
 
     std::string toCSV(const std::vector<int>& input);
 
-    zmm::Ref<ChangedContainers> _recursiveRemove(
+    std::unique_ptr<ChangedContainers> _recursiveRemove(
         const std::vector<int32_t> &items,
         const std::vector<int32_t> &containers, bool all);
     
-    virtual zmm::Ref<ChangedContainers> _purgeEmptyContainers(zmm::Ref<ChangedContainers> maybeEmpty);
+    virtual std::unique_ptr<ChangedContainers> _purgeEmptyContainers(std::unique_ptr<ChangedContainers>& maybeEmpty);
     
     /* helpers for autoscan */
     int _getAutoscanObjectID(int autoscanID);

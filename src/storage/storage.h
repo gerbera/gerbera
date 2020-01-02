@@ -209,7 +209,7 @@ public:
 
     virtual zmm::Ref<zmm::Array<CdsObject>> search(const std::unique_ptr<SearchParam>& param, int* numMatches) = 0;
 
-    class ChangedContainers : public zmm::Object {
+    class ChangedContainers {
     public:
         // Signed because IDs start at -1.
         std::vector<int32_t> upnp;
@@ -226,7 +226,7 @@ public:
     /// \param objectType pointer to an int; will be filled with the objectType of
     /// the removed object, if not NULL
     /// \return changed container ids
-    virtual zmm::Ref<ChangedContainers> removeObject(int objectID, bool all) = 0;
+    virtual std::unique_ptr<ChangedContainers> removeObject(int objectID, bool all) = 0;
 
     /// \brief Get all objects under the given parentID.
     /// \param parentID parent container
@@ -238,7 +238,7 @@ public:
     /// \param list a DBHash containing objectIDs that have to be removed
     /// \param all if true and the object to be removed is a reference
     /// \return changed container ids
-    virtual zmm::Ref<ChangedContainers> removeObjects(const std::unique_ptr<std::unordered_set<int>>& list, bool all = false) = 0;
+    virtual std::unique_ptr<ChangedContainers> removeObjects(const std::unique_ptr<std::unordered_set<int>>& list, bool all = false) = 0;
 
     /// \brief Loads an object given by the online service ID.
     virtual zmm::Ref<CdsObject> loadObjectByServiceID(std::string serviceID) = 0;
