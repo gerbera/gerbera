@@ -322,7 +322,7 @@ int Server::handleUpnpEvent(Upnp_EventType eventtype, const void* event)
         // a cp wants a subscription
         log_debug("UPNP_EVENT_SUBSCRIPTION_REQUEST\n");
         try {
-            Ref<SubscriptionRequest> request(new SubscriptionRequest((UpnpSubscriptionRequest*)event));
+            auto request = std::make_unique<SubscriptionRequest>((UpnpSubscriptionRequest*)event);
             routeSubscriptionRequest(request);
         } catch (const UpnpException& upnp_e) {
             log_warning("Subscription exception: %s\n", upnp_e.getMessage().c_str());
@@ -379,7 +379,7 @@ void Server::routeActionRequest(Ref<ActionRequest> request) const
     }
 }
 
-void Server::routeSubscriptionRequest(Ref<SubscriptionRequest> request) const
+void Server::routeSubscriptionRequest(std::unique_ptr<SubscriptionRequest>& request) const
 {
     // make sure that the request is for our device
     if (request->getUDN() != serverUDN) {

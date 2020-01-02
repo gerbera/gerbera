@@ -42,7 +42,7 @@
 /// When we get a Upnp_Subscription_Request from the SDK we convert it to our
 /// structure. We then have the possibility to easily access various
 /// information inside it.
-class SubscriptionRequest : public zmm::Object {
+class SubscriptionRequest {
 protected:
     /// \brief Upnp_Subscription_Request that comes from the SDK.
     UpnpSubscriptionRequest* upnp_request;
