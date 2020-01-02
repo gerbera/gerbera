@@ -49,7 +49,7 @@
 #define BROWSE_TRACK_SORT 0x00000010
 #define BROWSE_HIDE_FS_ROOT 0x00000020
 
-class BrowseParam : public zmm::Object {
+class BrowseParam {
 protected:
     unsigned int flags;
     int objectID;
@@ -110,7 +110,7 @@ public:
     }
 };
 
-class SearchParam : public zmm::Object {
+class SearchParam {
 protected:
     std::string containerID;
     std::string searchCrit;
@@ -173,7 +173,7 @@ public:
 
     virtual void updateObject(zmm::Ref<CdsObject> object, int* changedContainer) = 0;
 
-    virtual zmm::Ref<zmm::Array<CdsObject>> browse(zmm::Ref<BrowseParam> param) = 0;
+    virtual zmm::Ref<zmm::Array<CdsObject>> browse(const std::unique_ptr<BrowseParam>& param) = 0;
     virtual std::vector<std::string> getMimeTypes() = 0;
 
     //virtual zmm::Ref<zmm::Array<CdsObject> > selectObjects(zmm::Ref<SelectParam> param) = 0;
@@ -207,7 +207,7 @@ public:
 
     virtual std::string findFolderImage(int id, std::string trackArtBase) = 0;
 
-    virtual zmm::Ref<zmm::Array<CdsObject>> search(zmm::Ref<SearchParam> param, int* numMatches) = 0;
+    virtual zmm::Ref<zmm::Array<CdsObject>> search(const std::unique_ptr<SearchParam>& param, int* numMatches) = 0;
 
     class ChangedContainers : public zmm::Object {
     public:

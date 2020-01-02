@@ -91,7 +91,7 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
     if (config->getBoolOption(CFG_SERVER_HIDE_PC_DIRECTORY))
         flag |= BROWSE_HIDE_FS_ROOT;
 
-    Ref<BrowseParam> param(new BrowseParam(objectID, flag));
+    auto param = std::make_unique<BrowseParam>(objectID, flag);
 
     param->setStartingIndex(std::stoi(StartingIndex));
     param->setRequestedCount(std::stoi(RequestedCount));
@@ -170,8 +170,8 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
             XML_SEC_NAMESPACE);
     }
 
-    zmm::Ref<SearchParam> searchParam = zmm::Ref<SearchParam>(new SearchParam(containerID, searchCriteria,
-        std::stoi(startingIndex.c_str(), nullptr), std::stoi(requestedCount.c_str(), nullptr)));
+    auto searchParam = std::make_unique<SearchParam>(containerID, searchCriteria,
+        std::stoi(startingIndex.c_str(), nullptr), std::stoi(requestedCount.c_str(), nullptr));
 
     Ref<Array<CdsObject>> results;
     int numMatches = 0;

@@ -498,7 +498,7 @@ std::unique_ptr<std::vector<int>> SQLStorage::getServiceObjectIDs(char servicePr
     return objectIDs;
 }
 
-Ref<Array<CdsObject>> SQLStorage::browse(Ref<BrowseParam> param)
+Ref<Array<CdsObject>> SQLStorage::browse(const std::unique_ptr<BrowseParam>& param)
 {
     int objectID;
     int objectType = 0;
@@ -614,7 +614,7 @@ Ref<Array<CdsObject>> SQLStorage::browse(Ref<BrowseParam> param)
     return arr;
 }
 
-zmm::Ref<zmm::Array<CdsObject>> SQLStorage::search(zmm::Ref<SearchParam> param, int* numMatches)
+zmm::Ref<zmm::Array<CdsObject>> SQLStorage::search(const std::unique_ptr<SearchParam>& param, int* numMatches)
 {
     std::unique_ptr<SearchParser> searchParser = std::make_unique<SearchParser>(*sqlEmitter, param->searchCriteria());
     std::shared_ptr<ASTNode> rootNode = searchParser->parse();

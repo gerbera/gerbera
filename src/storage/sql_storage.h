@@ -129,9 +129,9 @@ public:
     /* accounting methods */
     virtual int getTotalFiles() override;
     
-    virtual zmm::Ref<zmm::Array<CdsObject> > browse(zmm::Ref<BrowseParam> param) override;
+    virtual zmm::Ref<zmm::Array<CdsObject> > browse(const std::unique_ptr<BrowseParam>& param) override;
     // virtual _and_ override for consistency!
-    virtual zmm::Ref<zmm::Array<CdsObject> > search(zmm::Ref<SearchParam> param, int* numMatches) override;
+    virtual zmm::Ref<zmm::Array<CdsObject> > search(const std::unique_ptr<SearchParam>& param, int* numMatches) override;
     
     virtual std::vector<std::string> getMimeTypes() override;
     
