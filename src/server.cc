@@ -413,15 +413,15 @@ void Server::sendCDSSubscriptionUpdate(std::string updateString)
     cds->sendSubscriptionUpdate(updateString);
 }
 
-Ref<RequestHandler> Server::createRequestHandler(const char* filename) const
+std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filename) const
 {
     std::string link = urlUnescape(filename);
     log_debug("Filename: %s\n", filename);
 
-    RequestHandler* ret = nullptr;
+    std::unique_ptr<RequestHandler> ret = nullptr;
 
     if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_MEDIA_HANDLER)) {
-        ret = new FileRequestHandler(config, storage, content, update_manager, session_manager, xmlbuilder.get());
+        ret = std::make_unique<FileRequestHandler>(config, storage, content, update_manager, session_manager, xmlbuilder.get());
     } else if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_UI_HANDLER)) {
         std::string parameters;
         std::string path;
@@ -431,29 +431,28 @@ Ref<RequestHandler> Server::createRequestHandler(const char* filename) const
         dict->decode(parameters);
 
         std::string r_type = dict->get(URL_REQUEST_TYPE);
-        if (!r_type.empty()) {
-            ret = web::createWebRequestHandler(config, storage, content, session_manager, r_type);
-        } else {
-            ret = web::createWebRequestHandler(config, storage, content, session_manager, "index");
-        }
+        if (r_type.empty())
+            r_type = "index";
+
+        ret = web::createWebRequestHandler(config, storage, content, session_manager, r_type);
     } else if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + DEVICE_DESCRIPTION_PATH)) {
-        ret = new DeviceDescriptionHandler(config, storage, xmlbuilder.get());
+        ret = std::make_unique<DeviceDescriptionHandler>(config, storage, xmlbuilder.get());
     } else if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_SERVE_HANDLER)) {
         if (string_ok(config->getOption(CFG_SERVER_SERVEDIR)))
-            ret = new ServeRequestHandler(config, storage);
+            ret = std::make_unique<ServeRequestHandler>(config, storage);
         else
             throw _Exception("Serving directories is not enabled in configuration");
     }
-
 #if defined(HAVE_CURL)
     else if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_ONLINE_HANDLER)) {
-        ret = new URLRequestHandler(config, storage, content);
+        ret = std::make_unique<URLRequestHandler>(config, storage, content);
     }
 #endif
     else {
         throw _Exception(std::string("no valid handler type in ") + filename);
     }
-    return Ref<RequestHandler>(ret);
+
+    return ret;
 }
 
 int Server::registerVirtualDirCallbacks()
@@ -465,7 +464,7 @@ int Server::registerVirtualDirCallbacks()
     int ret = UpnpVirtualDir_set_GetInfoCallback([](const char* filename, UpnpFileInfo* info, const void* cookie) -> int {
 #endif
         try {
-            Ref<RequestHandler> reqHandler = static_cast<const Server *>(cookie)->createRequestHandler(filename);
+            auto reqHandler = static_cast<const Server *>(cookie)->createRequestHandler(filename);
             reqHandler->getInfo(filename, info);
         } catch (const ServerShutdownException& se) {
             return -1;
@@ -489,7 +488,7 @@ int Server::registerVirtualDirCallbacks()
         std::string link = urlUnescape(filename);
 
         try {
-            Ref<RequestHandler> reqHandler = static_cast<const Server*>(cookie)->createRequestHandler(filename);
+            auto reqHandler = static_cast<const Server*>(cookie)->createRequestHandler(filename);
             auto ioHandler = reqHandler->open(link.c_str(), mode, "");
             auto ioPtr = (UpnpWebFileHandle)ioHandler.release();
             //log_debug("%p open(%s)\n", ioPtr, filename);
