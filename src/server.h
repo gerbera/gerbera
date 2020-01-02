@@ -212,7 +212,7 @@ protected:
     /// \brief Registers callback functions for the internal web server.
     /// \param filename Incoming filename.
     ///
-    zmm::Ref<RequestHandler> createRequestHandler(const char *filename) const;
+    std::unique_ptr<RequestHandler> createRequestHandler(const char *filename) const;
 
     /// \brief Registers callback functions for the internal web server.
     ///

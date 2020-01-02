@@ -41,7 +41,7 @@
 class ConfigManager;
 class Storage;
 
-class RequestHandler : public zmm::Object {
+class RequestHandler {
 public:
     RequestHandler(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage);
 

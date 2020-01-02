@@ -175,7 +175,7 @@ public:
 /// \brief Chooses and creates the appropriate handler for processing the request.
 /// \param page identifies what type of the request we are dealing with.
 /// \return the appropriate request handler.
-WebRequestHandler* createWebRequestHandler(
+std::unique_ptr<WebRequestHandler> createWebRequestHandler(
     std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
     std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager,
     std::string page);
