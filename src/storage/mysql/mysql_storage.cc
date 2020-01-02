@@ -403,12 +403,13 @@ MysqlResult::~MysqlResult()
     }
 }
 
-Ref<SQLRow> MysqlResult::nextRow()
+std::unique_ptr<SQLRow> MysqlResult::nextRow()
 {
     MYSQL_ROW mysql_row;
     mysql_row = mysql_fetch_row(mysql_res);
     if (mysql_row) {
-        return Ref<SQLRow>(new MysqlRow(mysql_row, Ref<SQLResult>(this)));
+        auto p = std::make_unique<MysqlRow>(mysql_row, Ref<SQLResult>(this));
+        return p;
     }
     nullRead = true;
     mysql_free_result(mysql_res);

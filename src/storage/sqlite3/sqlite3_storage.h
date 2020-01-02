@@ -232,6 +232,7 @@ private:
 class Sqlite3Row : public SQLRow {
 public:
     Sqlite3Row(char** row, zmm::Ref<SQLResult> sqlResult);
+
 private:
     inline virtual char* col_c_str(int index) { return row[index]; }
     char** row;

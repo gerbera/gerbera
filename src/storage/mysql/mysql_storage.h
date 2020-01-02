@@ -89,7 +89,7 @@ private:
     int nullRead;
     MysqlResult(MYSQL_RES* mysql_res);
     virtual ~MysqlResult();
-    virtual zmm::Ref<SQLRow> nextRow();
+    virtual std::unique_ptr<SQLRow> nextRow();
     virtual unsigned long long getNumRows() { return mysql_num_rows(mysql_res); }
     MYSQL_RES* mysql_res;
 
@@ -98,13 +98,15 @@ private:
 };
 
 class MysqlRow : private SQLRow {
-private:
+public:
     MysqlRow(MYSQL_ROW mysql_row, zmm::Ref<SQLResult> sqlResult);
+
+private:
     inline virtual char* col_c_str(int index) { return mysql_row[index]; }
 
     MYSQL_ROW mysql_row;
 
-    friend zmm::Ref<SQLRow> MysqlResult::nextRow();
+    friend std::unique_ptr<SQLRow> MysqlResult::nextRow();
 };
 
 #endif // __MYSQL_STORAGE_H__
