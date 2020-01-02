@@ -78,7 +78,7 @@ using namespace mxml;
 using namespace std;
 
 MysqlStorage::MysqlStorage(std::shared_ptr<ConfigManager> config)
-    : SQLStorage()
+    : SQLStorage(config)
 {
     mysql_init_key_initialized = false;
     mysql_connection = false;
@@ -165,10 +165,10 @@ void MysqlStorage::init()
     res_mysql = mysql_real_connect(&db,
         dbHost.c_str(),
         dbUser.c_str(),
-        (dbPass == nullptr ? nullptr : dbPass.c_str()),
+        (dbPass.empty() ? nullptr : dbPass.c_str()),
         dbName.c_str(),
         dbPort, // port
-        (dbSock == nullptr ? nullptr : dbSock.c_str()), // socket
+        (dbSock.empty() ? nullptr : dbSock.c_str()), // socket
         0 // flags
         );
     if (!res_mysql) {
