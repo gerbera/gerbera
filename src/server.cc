@@ -35,7 +35,7 @@
 #endif
 
 #ifdef HAVE_LASTFMLIB
-#include "lastfm_scrobbler.h"
+#include "onlineservice/lastfm_scrobbler.h"
 #endif
 
 #include "server.h"

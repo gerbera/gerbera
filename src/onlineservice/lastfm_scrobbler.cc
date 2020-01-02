@@ -32,9 +32,9 @@
 #ifdef HAVE_LASTFMLIB
 
 #include "lastfm_scrobbler.h"
-#include "config_manager.h"
-#include "metadata_handler.h"
-#include "tools.h"
+#include "config/config_manager.h"
+#include "metadata/metadata_handler.h"
+#include "util/tools.h"
 using namespace zmm;
 
 LastFm::LastFm(std::shared_ptr<ConfigManager> config)
