@@ -610,15 +610,15 @@ Sqlite3Result::~Sqlite3Result()
         table = nullptr;
     }
 }
-Ref<SQLRow> Sqlite3Result::nextRow()
+std::unique_ptr<SQLRow> Sqlite3Result::nextRow()
 {
     if (nrow) {
         row += ncolumn;
         cur_row++;
         if (cur_row <= nrow) {
-            Ref<Sqlite3Row> p(new Sqlite3Row(row, Ref<SQLResult>(this)));
+            auto p = std::make_unique<Sqlite3Row>(row, Ref<SQLResult>(this));
             p->res = Ref<Sqlite3Result>(this);
-            return RefCast(p, SQLRow);
+            return p;
         } else
             return nullptr;
     }

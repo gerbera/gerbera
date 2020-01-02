@@ -456,7 +456,7 @@ Ref<CdsObject> SQLStorage::loadObject(int objectID)
     qb << SQL_QUERY << " WHERE " << TQD('f', "id") << '=' << objectID;
 
     Ref<SQLResult> res = select(qb);
-    Ref<SQLRow> row;
+    std::unique_ptr<SQLRow> row;
     if (res != nullptr && (row = res->nextRow()) != nullptr) {
         return createObjectFromRow(row);
     }
@@ -468,7 +468,7 @@ Ref<CdsObject> SQLStorage::loadObjectByServiceID(std::string serviceID)
     std::ostringstream qb;
     qb << SQL_QUERY << " WHERE " << TQD('f', "service_id") << '=' << quote(serviceID);
     Ref<SQLResult> res = select(qb);
-    Ref<SQLRow> row;
+    std::unique_ptr<SQLRow> row;
     if (res != nullptr && (row = res->nextRow()) != nullptr) {
         return createObjectFromRow(row);
     }
@@ -490,7 +490,7 @@ std::unique_ptr<std::vector<int>> SQLStorage::getServiceObjectIDs(char servicePr
     if (res == nullptr)
         throw _Exception("db error");
 
-    Ref<SQLRow> row;
+    std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow()) != nullptr) {
         objectIDs->push_back(std::stoi(row->col(0)));
     }
@@ -498,7 +498,7 @@ std::unique_ptr<std::vector<int>> SQLStorage::getServiceObjectIDs(char servicePr
     return objectIDs;
 }
 
-Ref<Array<CdsObject>> SQLStorage::browse(Ref<BrowseParam> param)
+Ref<Array<CdsObject>> SQLStorage::browse(const std::unique_ptr<BrowseParam>& param)
 {
     int objectID;
     int objectType = 0;
@@ -509,7 +509,7 @@ Ref<Array<CdsObject>> SQLStorage::browse(Ref<BrowseParam> param)
     objectID = param->getObjectID();
 
     Ref<SQLResult> res;
-    Ref<SQLRow> row;
+    std::unique_ptr<SQLRow> row;
 
     bool haveObjectType = false;
 
@@ -614,7 +614,7 @@ Ref<Array<CdsObject>> SQLStorage::browse(Ref<BrowseParam> param)
     return arr;
 }
 
-zmm::Ref<zmm::Array<CdsObject>> SQLStorage::search(zmm::Ref<SearchParam> param, int* numMatches)
+zmm::Ref<zmm::Array<CdsObject>> SQLStorage::search(const std::unique_ptr<SearchParam>& param, int* numMatches)
 {
     std::unique_ptr<SearchParser> searchParser = std::make_unique<SearchParser>(*sqlEmitter, param->searchCriteria());
     std::shared_ptr<ASTNode> rootNode = searchParser->parse();
@@ -626,7 +626,7 @@ zmm::Ref<zmm::Array<CdsObject>> SQLStorage::search(zmm::Ref<SearchParam> param, 
     countSQL << "select count(*) " << *searchSQL << ';';
     zmm::Ref<SQLResult> sqlResult;
     sqlResult = select(countSQL);
-    zmm::Ref<SQLRow> countRow = sqlResult->nextRow();
+    std::unique_ptr<SQLRow> countRow = sqlResult->nextRow();
     if (countRow != nullptr) {
         *numMatches = std::stoi(countRow->col(0));
     }
@@ -645,7 +645,7 @@ zmm::Ref<zmm::Array<CdsObject>> SQLStorage::search(zmm::Ref<SearchParam> param, 
     sqlResult = select(retrievalSQL);
 
     zmm::Ref<zmm::Array<CdsObject>> arr(new Array<CdsObject>()); 
-    zmm::Ref<SQLRow> sqlRow;
+    std::unique_ptr<SQLRow> sqlRow;
     while ((sqlRow = sqlResult->nextRow()) != nullptr) {
         Ref<CdsObject> obj = createObjectFromSearchRow(sqlRow);
         arr->append(obj);
@@ -662,7 +662,7 @@ int SQLStorage::getChildCount(int contId, bool containers, bool items, bool hide
     if (!containers && !items)
         return 0;
 
-    Ref<SQLRow> row;
+    std::unique_ptr<SQLRow> row;
     Ref<SQLResult> res;
     std::ostringstream qb;
     qb << "SELECT COUNT(*) FROM " << TQ(CDS_OBJECT_TABLE)
@@ -696,8 +696,7 @@ std::vector<std::string> SQLStorage::getMimeTypes()
     if (res == nullptr)
         throw _Exception("db error");
 
-    Ref<SQLRow> row;
-
+    std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow()) != nullptr) {
         arr.push_back(std::string(row->col(0)));
     }
@@ -734,7 +733,7 @@ Ref<CdsObject> SQLStorage::_findObjectByPath(std::string fullpath)
     if (res == nullptr)
         throw _Exception("error while doing select: " + qb.str());
 
-    Ref<SQLRow> row = res->nextRow();
+    std::unique_ptr<SQLRow> row = res->nextRow();
     if (row == nullptr)
         return nullptr;
     return createObjectFromRow(row);
@@ -878,7 +877,7 @@ std::string SQLStorage::buildContainerPath(int parentID, std::string title)
     if (res == nullptr)
         return nullptr;
 
-    Ref<SQLRow> row = res->nextRow();
+    std::unique_ptr<SQLRow> row = res->nextRow();
     if (row == nullptr)
         return nullptr;
 
@@ -907,7 +906,7 @@ void SQLStorage::addContainerChain(std::string path, std::string lastClass, int 
 
     Ref<SQLResult> res = select(qb);
     if (res != nullptr) {
-        Ref<SQLRow> row = res->nextRow();
+        std::unique_ptr<SQLRow> row = res->nextRow();
         if (row != nullptr) {
             if (containerID != nullptr)
                 *containerID = std::stoi(row->col(0));
@@ -947,7 +946,7 @@ std::string SQLStorage::stripLocationPrefix(std::string path)
     return path.substr(1);
 }
 
-Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
+Ref<CdsObject> SQLStorage::createObjectFromRow(const std::unique_ptr<SQLRow>& row)
 {
     int objectType = std::stoi(row->col(_object_type));
     auto self = getSelf();
@@ -1055,7 +1054,7 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
                << TQ("state") << " FROM " << TQ(CDS_ACTIVE_ITEM_TABLE)
                << " WHERE " << TQ("id") << '=' << quote(aitem->getID());
         Ref<SQLResult> resAI = select(query);
-        Ref<SQLRow> rowAI;
+        std::unique_ptr<SQLRow> rowAI;
         if (resAI != nullptr && (rowAI = resAI->nextRow()) != nullptr) {
             aitem->setAction(rowAI->col(1));
             aitem->setState(rowAI->col(2));
@@ -1072,7 +1071,7 @@ Ref<CdsObject> SQLStorage::createObjectFromRow(Ref<SQLRow> row)
     return obj;
 }
 
-Ref<CdsObject> SQLStorage::createObjectFromSearchRow(Ref<SQLRow> row)
+Ref<CdsObject> SQLStorage::createObjectFromSearchRow(const std::unique_ptr<SQLRow>& row)
 {
     int objectType = std::stoi(row->col(_object_type));
     auto self = getSelf();
@@ -1134,7 +1133,7 @@ Ref<Dictionary> SQLStorage::retrieveMetadataForObject(int objectId)
         return nullptr;
 
     Ref<Dictionary> metadata(new Dictionary);
-    Ref<SQLRow> row;
+    std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow()) != nullptr) {
         metadata->put(row->col(m_property_name), row->col(m_property_value));
     }
@@ -1149,7 +1148,7 @@ int SQLStorage::getTotalFiles()
            << TQ("object_type") << " != " << quote(OBJECT_TYPE_CONTAINER);
     //<< " AND is_virtual = 0";
     Ref<SQLResult> res = select(query);
-    Ref<SQLRow> row;
+    std::unique_ptr<SQLRow> row;
     if (res != nullptr && (row = res->nextRow()) != nullptr) {
         return std::stoi(row->col(0));
     }
@@ -1186,7 +1185,7 @@ std::string SQLStorage::incrementUpdateIDs(const unique_ptr<unordered_set<int>>&
     Ref<SQLResult> res = select(bufSelect);
     if (res == nullptr)
         throw _Exception("Error while fetching update ids");
-    Ref<SQLRow> row;
+    std::unique_ptr<SQLRow> row;
     std::list<std::string> rows;
     while ((row = res->nextRow()) != nullptr) {
         std::ostringstream s;
@@ -1257,7 +1256,7 @@ std::string SQLStorage::findFolderImage(int id, std::string trackArtBase)
     Ref<SQLResult> res = select(q);
     if (res == nullptr)
         throw _Exception("db error");
-    Ref<SQLRow> row;
+    std::unique_ptr<SQLRow> row;
     if ((row = res->nextRow()) != nullptr) // we only care about the first result
     {
         log_debug("findFolderImage result: %s\n", row->col(0).c_str());
@@ -1278,7 +1277,7 @@ unique_ptr<unordered_set<int>> SQLStorage::getObjects(int parentID, bool without
     Ref<SQLResult> res = select(q);
     if (res == nullptr)
         throw _Exception("db error");
-    Ref<SQLRow> row;
+    std::unique_ptr<SQLRow> row;
 
     if (res->getNumRows() <= 0)
         return nullptr;
@@ -1294,7 +1293,7 @@ unique_ptr<unordered_set<int>> SQLStorage::getObjects(int parentID, bool without
     return ret;
 }
 
-Ref<Storage::ChangedContainers> SQLStorage::removeObjects(const unique_ptr<unordered_set<int>>& list, bool all)
+std::unique_ptr<Storage::ChangedContainers> SQLStorage::removeObjects(const unique_ptr<unordered_set<int>>& list, bool all)
 {
     int count = list->size();
     if (count <= 0)
@@ -1316,7 +1315,7 @@ Ref<Storage::ChangedContainers> SQLStorage::removeObjects(const unique_ptr<unord
 
     std::vector<int32_t> items;
     std::vector<int32_t> containers;
-    Ref<SQLRow> row;
+    std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow()) != nullptr) {
         int objectType = std::stoi(row->col(1));
         if (IS_CDS_CONTAINER(objectType))
@@ -1324,7 +1323,9 @@ Ref<Storage::ChangedContainers> SQLStorage::removeObjects(const unique_ptr<unord
         else
             items.push_back(std::stol(row->col(0)));
     }
-    return _purgeEmptyContainers(_recursiveRemove(items, containers, all));
+
+    auto rr = _recursiveRemove(items, containers, all);
+    return _purgeEmptyContainers(rr);
 }
 
 void SQLStorage::_removeObjects(const std::vector<int32_t> &objectIDs) {
@@ -1346,7 +1347,7 @@ void SQLStorage::_removeObjects(const std::vector<int32_t> &objectIDs) {
     if (res != nullptr) {
         log_debug("relevant autoscans!\n");
         std::vector<std::string> delete_as;
-        Ref<SQLRow> row;
+        std::unique_ptr<SQLRow> row;
         while ((row = res->nextRow()) != nullptr) {
             bool persistent = remapBool(row->col(1));
             if (persistent) {
@@ -1387,7 +1388,7 @@ void SQLStorage::_removeObjects(const std::vector<int32_t> &objectIDs) {
     exec(qObject);
 }
 
-Ref<Storage::ChangedContainers> SQLStorage::removeObject(int objectID, bool all)
+std::unique_ptr<Storage::ChangedContainers> SQLStorage::removeObject(int objectID, bool all)
 {
     std::ostringstream q;
     q << "SELECT " << TQ("object_type") << ',' << TQ("ref_id")
@@ -1396,7 +1397,7 @@ Ref<Storage::ChangedContainers> SQLStorage::removeObject(int objectID, bool all)
     Ref<SQLResult> res = select(q);
     if (res == nullptr)
         return nullptr;
-    Ref<SQLRow> row = res->nextRow();
+    std::unique_ptr<SQLRow> row = res->nextRow();
     if (row == nullptr)
         return nullptr;
 
@@ -1424,7 +1425,7 @@ Ref<Storage::ChangedContainers> SQLStorage::removeObject(int objectID, bool all)
     return _purgeEmptyContainers(changedContainers);
 }
 
-Ref<Storage::ChangedContainers> SQLStorage::_recursiveRemove(
+std::unique_ptr<Storage::ChangedContainers> SQLStorage::_recursiveRemove(
     const std::vector<int32_t> &items, const std::vector<int32_t> &containers,
     bool all)
 {
@@ -1445,10 +1446,10 @@ Ref<Storage::ChangedContainers> SQLStorage::_recursiveRemove(
                       << " FROM " << TQ(CDS_OBJECT_TABLE)
                       << " WHERE " << TQ("id") << " IN (";
 
-    Ref<ChangedContainers> changedContainers(new ChangedContainers());
+    auto changedContainers = std::make_unique<ChangedContainers>();
 
     Ref<SQLResult> res;
-    Ref<SQLRow> row;
+    std::unique_ptr<SQLRow> row;
 
     std::vector<int32_t> itemIds(items);
     std::vector<int32_t> containerIds(containers);
@@ -1548,12 +1549,12 @@ std::string SQLStorage::toCSV(const std::vector<int>& input)
     return join(input, ",");
 }
 
-Ref<Storage::ChangedContainers> SQLStorage::_purgeEmptyContainers(Ref<ChangedContainers> maybeEmpty)
+std::unique_ptr<Storage::ChangedContainers> SQLStorage::_purgeEmptyContainers(std::unique_ptr<ChangedContainers>& maybeEmpty)
 {
     log_debug("start upnp: %s; ui: %s\n",
             join(maybeEmpty->upnp, ',').c_str(),
             join(maybeEmpty->ui, ',').c_str());
-    Ref<ChangedContainers> changedContainers(new ChangedContainers());
+    auto changedContainers = std::make_unique<ChangedContainers>();
     if (maybeEmpty->upnp.empty() && maybeEmpty->ui.empty())
         return changedContainers;
 
@@ -1574,7 +1575,7 @@ Ref<Storage::ChangedContainers> SQLStorage::_purgeEmptyContainers(Ref<ChangedCon
     std::vector<int32_t> del;
 
     Ref<SQLResult> res;
-    Ref<SQLRow> row;
+    std::unique_ptr<SQLRow> row;
     std::vector<int32_t> selUi;
     std::vector<int32_t> selUpnp;
 
@@ -1667,7 +1668,7 @@ std::string SQLStorage::getInternalSetting(std::string key)
     Ref<SQLResult> res = select(q);
     if (res == nullptr)
         return nullptr;
-    Ref<SQLRow> row = res->nextRow();
+    std::unique_ptr<SQLRow> row = res->nextRow();
     if (row == nullptr)
         return nullptr;
     return row->col(0);
@@ -1716,7 +1717,7 @@ void SQLStorage::updateAutoscanPersistentList(ScanMode scanmode, Ref<AutoscanLis
         Ref<SQLResult> res = select(q);
         if (res == nullptr)
             throw _StorageException("", "query error while selecting from autoscan list");
-        Ref<SQLRow> row;
+        std::unique_ptr<SQLRow> row;
         if ((row = res->nextRow()) != nullptr) {
             ad->setStorageID(std::stoi(row->col(0)));
             updateAutoscanDirectory(ad);
@@ -1747,7 +1748,7 @@ Ref<AutoscanList> SQLStorage::getAutoscanList(ScanMode scanmode)
 
     auto self = getSelf();
     Ref<AutoscanList> ret(new AutoscanList(self));
-    Ref<SQLRow> row;
+    std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow()) != nullptr) {
         Ref<AutoscanDirectory> dir = _fillAutoscanDirectory(row);
         if (dir == nullptr)
@@ -1773,14 +1774,14 @@ Ref<AutoscanDirectory> SQLStorage::getAutoscanDirectory(int objectID)
 
     auto self = getSelf();
     Ref<AutoscanList> ret(new AutoscanList(self));
-    Ref<SQLRow> row = res->nextRow();
+    std::unique_ptr<SQLRow> row = res->nextRow();
     if (row == nullptr)
         return nullptr;
     else
         return _fillAutoscanDirectory(row);
 }
 
-Ref<AutoscanDirectory> SQLStorage::_fillAutoscanDirectory(Ref<SQLRow> row)
+Ref<AutoscanDirectory> SQLStorage::_fillAutoscanDirectory(const std::unique_ptr<SQLRow>& row)
 {
     int objectID = INVALID_OBJECT_ID;
     std::string objectIDstr = row->col(1);
@@ -1941,7 +1942,7 @@ int SQLStorage::_getAutoscanDirectoryInfo(int objectID, std::string field)
     q << "SELECT " << TQ(field) << " FROM " << TQ(AUTOSCAN_TABLE)
        << " WHERE " << TQ("obj_id") << '=' << quote(objectID);
     Ref<SQLResult> res = select(q);
-    Ref<SQLRow> row;
+    std::unique_ptr<SQLRow> row;
     if (res == nullptr || (row = res->nextRow()) == nullptr)
         return 0;
     if (!remapBool(row->col(0)))
@@ -1959,7 +1960,7 @@ int SQLStorage::_getAutoscanObjectID(int autoscanID)
     Ref<SQLResult> res = select(q);
     if (res == nullptr)
         throw _StorageException("", "error while doing select on ");
-    Ref<SQLRow> row;
+    std::unique_ptr<SQLRow> row;
     if ((row = res->nextRow()) != nullptr && string_ok(row->col(0)))
         return std::stoi(row->col(0));
     return INVALID_OBJECT_ID;
@@ -2027,7 +2028,7 @@ std::unique_ptr<std::vector<int>> SQLStorage::_checkOverlappingAutoscans(Ref<Aut
     int storageID = adir->getStorageID();
 
     Ref<SQLResult> res;
-    Ref<SQLRow> row;
+    std::unique_ptr<SQLRow> row;
 
     std::ostringstream q;
     q << "SELECT " << TQ("id")
@@ -2115,7 +2116,7 @@ std::unique_ptr<std::vector<int>> SQLStorage::getPathIDs(int objectID)
     sel << TQ("id") << '=';
     
     Ref<SQLResult> res;
-    Ref<SQLRow> row;
+    std::unique_ptr<SQLRow> row;
     while (objectID != CDS_ID_ROOT) {
         pathIDs->push_back(objectID);
         std::ostringstream q;
@@ -2167,7 +2168,7 @@ void SQLStorage::loadLastID()
     if (res == nullptr)
         throw _Exception("could not load lastID (res==nullptr)");
 
-    Ref<SQLRow> row = res->nextRow();
+    std::unique_ptr<SQLRow> row = res->nextRow();
     if (row == nullptr)
         throw _Exception("could not load lastID (row==nullptr)");
 
@@ -2201,7 +2202,7 @@ void SQLStorage::loadLastMetadataID()
     if (res == nullptr)
         throw _Exception("could not load lastMetadataID (res==nullptr)");
 
-    Ref<SQLRow> row = res->nextRow();
+    std::unique_ptr<SQLRow> row = res->nextRow();
     if (row == nullptr)
         throw _Exception("could not load lastMetadataID (row==nullptr)");
 
@@ -2395,7 +2396,7 @@ void SQLStorage::doMetadataMigration()
        << " WHERE " << TQ("metadata")
        << " is not null";
     Ref<SQLResult> resIds = select(qbRetrieveIDs);
-    Ref<SQLRow> row;
+    std::unique_ptr<SQLRow> row;
 
     int objectsUpdated = 0;
     while ((row = resIds->nextRow()) != nullptr) {

@@ -545,8 +545,7 @@ void ContentManager::_removeObject(int objectID, bool all)
     if (IS_FORBIDDEN_CDS_ID(objectID))
         throw _Exception("tried to remove illegal object id");
 
-    Ref<Storage::ChangedContainers> changedContainers = storage->removeObject(objectID, all);
-
+    auto changedContainers = storage->removeObject(objectID, all);
     if (changedContainers != nullptr) {
         session_manager->containerChangedUI(changedContainers->ui);
         update_manager->containersChanged(changedContainers->upnp);
@@ -753,7 +752,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
         return;
 
     if (list != nullptr && list->size() > 0) {
-        Ref<Storage::ChangedContainers> changedContainers = storage->removeObjects(list);
+        auto changedContainers = storage->removeObjects(list);
         if (changedContainers != nullptr) {
             session_manager->containerChangedUI(changedContainers->ui);
             update_manager->containersChanged(changedContainers->upnp);

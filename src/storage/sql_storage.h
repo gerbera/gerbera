@@ -53,7 +53,7 @@
 class SQLResult;
 class SQLEmitter;
 
-class SQLRow : public zmm::Object
+class SQLRow
 {
 public:
     SQLRow(zmm::Ref<SQLResult> sqlResult) { this->sqlResult = sqlResult; }
@@ -74,7 +74,7 @@ class SQLResult : public zmm::Object
 public:
     //SQLResult();
     //virtual ~SQLResult();
-    virtual zmm::Ref<SQLRow> nextRow() = 0;
+    virtual std::unique_ptr<SQLRow> nextRow() = 0;
     virtual unsigned long long getNumRows() = 0;
 };
 
@@ -118,8 +118,8 @@ public:
     
     virtual std::unique_ptr<std::unordered_set<int>> getObjects(int parentID, bool withoutContainer) override;
     
-    virtual zmm::Ref<ChangedContainers> removeObject(int objectID, bool all) override;
-    virtual zmm::Ref<ChangedContainers> removeObjects(const std::unique_ptr<std::unordered_set<int>>& list, bool all = false) override;
+    virtual std::unique_ptr<ChangedContainers> removeObject(int objectID, bool all) override;
+    virtual std::unique_ptr<ChangedContainers> removeObjects(const std::unique_ptr<std::unordered_set<int>>& list, bool all = false) override;
     
     virtual zmm::Ref<CdsObject> loadObjectByServiceID(std::string serviceID) override;
     virtual std::unique_ptr<std::vector<int>> getServiceObjectIDs(char servicePrefix) override;
@@ -129,9 +129,9 @@ public:
     /* accounting methods */
     virtual int getTotalFiles() override;
     
-    virtual zmm::Ref<zmm::Array<CdsObject> > browse(zmm::Ref<BrowseParam> param) override;
+    virtual zmm::Ref<zmm::Array<CdsObject> > browse(const std::unique_ptr<BrowseParam>& param) override;
     // virtual _and_ override for consistency!
-    virtual zmm::Ref<zmm::Array<CdsObject> > search(zmm::Ref<SearchParam> param, int* numMatches) override;
+    virtual zmm::Ref<zmm::Array<CdsObject> > search(const std::unique_ptr<SearchParam>& param, int* numMatches) override;
     
     virtual std::vector<std::string> getMimeTypes() override;
     
@@ -186,8 +186,8 @@ private:
     /* helper for createObjectFromRow() */
     std::string getRealLocation(int parentID, std::string location);
     
-    zmm::Ref<CdsObject> createObjectFromRow(zmm::Ref<SQLRow> row);
-    zmm::Ref<CdsObject> createObjectFromSearchRow(zmm::Ref<SQLRow> row);
+    zmm::Ref<CdsObject> createObjectFromRow(const std::unique_ptr<SQLRow>& row);
+    zmm::Ref<CdsObject> createObjectFromSearchRow(const std::unique_ptr<SQLRow>& row);
     zmm::Ref<Dictionary> retrieveMetadataForObject(int objectId);
     
     /* helper for findObjectByPath and findObjectIDByPath */ 
@@ -227,16 +227,16 @@ private:
 
     std::string toCSV(const std::vector<int>& input);
 
-    zmm::Ref<ChangedContainers> _recursiveRemove(
+    std::unique_ptr<ChangedContainers> _recursiveRemove(
         const std::vector<int32_t> &items,
         const std::vector<int32_t> &containers, bool all);
     
-    virtual zmm::Ref<ChangedContainers> _purgeEmptyContainers(zmm::Ref<ChangedContainers> maybeEmpty);
+    virtual std::unique_ptr<ChangedContainers> _purgeEmptyContainers(std::unique_ptr<ChangedContainers>& maybeEmpty);
     
     /* helpers for autoscan */
     int _getAutoscanObjectID(int autoscanID);
     void _autoscanChangePersistentFlag(int objectID, bool persistent);
-    zmm::Ref<AutoscanDirectory> _fillAutoscanDirectory(zmm::Ref<SQLRow> row);
+    zmm::Ref<AutoscanDirectory> _fillAutoscanDirectory(const std::unique_ptr<SQLRow>& row);
     int _getAutoscanDirectoryInfo(int objectID, std::string field);
     std::unique_ptr<std::vector<int>> _checkOverlappingAutoscans(zmm::Ref<AutoscanDirectory> adir);
     

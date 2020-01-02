@@ -61,7 +61,7 @@ void web::containers::process()
         containers->setAttribute("select_it", param("select_it"));
     root->appendElementChild(containers);
 
-    Ref<BrowseParam> param(new BrowseParam(parentID, BROWSE_DIRECT_CHILDREN | BROWSE_CONTAINERS));
+    auto param = std::make_unique<BrowseParam>(parentID, BROWSE_DIRECT_CHILDREN | BROWSE_CONTAINERS);
     Ref<Array<CdsObject>> arr;
     arr = storage->browse(param);
 

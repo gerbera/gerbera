@@ -62,7 +62,7 @@ void web::items::process()
     root->appendElementChild(items);
     Ref<CdsObject> obj;
     obj = storage->loadObject(parentID);
-    Ref<BrowseParam> param(new BrowseParam(parentID, BROWSE_DIRECT_CHILDREN | BROWSE_ITEMS));
+    auto param = std::make_unique<BrowseParam>(parentID, BROWSE_DIRECT_CHILDREN | BROWSE_ITEMS);
     param->setRange(start, count);
 
     if ((obj->getClass() == UPNP_DEFAULT_CLASS_MUSIC_ALBUM) || (obj->getClass() == UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER))

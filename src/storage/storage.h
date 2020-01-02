@@ -49,7 +49,7 @@
 #define BROWSE_TRACK_SORT 0x00000010
 #define BROWSE_HIDE_FS_ROOT 0x00000020
 
-class BrowseParam : public zmm::Object {
+class BrowseParam {
 protected:
     unsigned int flags;
     int objectID;
@@ -110,7 +110,7 @@ public:
     }
 };
 
-class SearchParam : public zmm::Object {
+class SearchParam {
 protected:
     std::string containerID;
     std::string searchCrit;
@@ -173,7 +173,7 @@ public:
 
     virtual void updateObject(zmm::Ref<CdsObject> object, int* changedContainer) = 0;
 
-    virtual zmm::Ref<zmm::Array<CdsObject>> browse(zmm::Ref<BrowseParam> param) = 0;
+    virtual zmm::Ref<zmm::Array<CdsObject>> browse(const std::unique_ptr<BrowseParam>& param) = 0;
     virtual std::vector<std::string> getMimeTypes() = 0;
 
     //virtual zmm::Ref<zmm::Array<CdsObject> > selectObjects(zmm::Ref<SelectParam> param) = 0;
@@ -207,9 +207,9 @@ public:
 
     virtual std::string findFolderImage(int id, std::string trackArtBase) = 0;
 
-    virtual zmm::Ref<zmm::Array<CdsObject>> search(zmm::Ref<SearchParam> param, int* numMatches) = 0;
+    virtual zmm::Ref<zmm::Array<CdsObject>> search(const std::unique_ptr<SearchParam>& param, int* numMatches) = 0;
 
-    class ChangedContainers : public zmm::Object {
+    class ChangedContainers {
     public:
         // Signed because IDs start at -1.
         std::vector<int32_t> upnp;
@@ -226,7 +226,7 @@ public:
     /// \param objectType pointer to an int; will be filled with the objectType of
     /// the removed object, if not NULL
     /// \return changed container ids
-    virtual zmm::Ref<ChangedContainers> removeObject(int objectID, bool all) = 0;
+    virtual std::unique_ptr<ChangedContainers> removeObject(int objectID, bool all) = 0;
 
     /// \brief Get all objects under the given parentID.
     /// \param parentID parent container
@@ -238,7 +238,7 @@ public:
     /// \param list a DBHash containing objectIDs that have to be removed
     /// \param all if true and the object to be removed is a reference
     /// \return changed container ids
-    virtual zmm::Ref<ChangedContainers> removeObjects(const std::unique_ptr<std::unordered_set<int>>& list, bool all = false) = 0;
+    virtual std::unique_ptr<ChangedContainers> removeObjects(const std::unique_ptr<std::unordered_set<int>>& list, bool all = false) = 0;
 
     /// \brief Loads an object given by the online service ID.
     virtual zmm::Ref<CdsObject> loadObjectByServiceID(std::string serviceID) = 0;
