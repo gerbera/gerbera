@@ -44,7 +44,7 @@
 /// structure. The idea is to get the XML of the request, process it outside
 /// of the class, create a response XML and put it back in. Before passing
 /// *upnp_request back to the SDK the update() function MUST be called.
-class ActionRequest : public zmm::Object {
+class ActionRequest {
 protected:
     /// \brief Upnp_Action_Request that comes from the SDK.
     UpnpActionRequest* upnp_request;

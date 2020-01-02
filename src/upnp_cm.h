@@ -53,7 +53,7 @@ protected:
     /// GetCurrentConnectionIDs(string ConnectionIDs)
     ///
     /// This is currently unsupported (returns empty string)
-    void doGetCurrentConnectionIDs(zmm::Ref<ActionRequest> request);
+    void doGetCurrentConnectionIDs(const std::unique_ptr<ActionRequest>& request);
 
     /// \brief UPnP standard defined action: GetCurrentConnectionInfo()
     /// \param request Incoming ActionRequest.
@@ -62,13 +62,13 @@ protected:
     /// string PeerConnectionManager, i4 PeerConnectionID, string Direction, string Status)
     ///
     /// This action is currently unsupported.
-    void doGetCurrentConnectionInfo(zmm::Ref<ActionRequest> request);
+    void doGetCurrentConnectionInfo(const std::unique_ptr<ActionRequest>& request);
 
     /// \brief UPnP standard defined action: GetProtocolInfo()
     /// \param request Incoming ActionRequest.
     ///
     /// GetProtocolInfo(string Source, string Sink)
-    void doGetProtocolInfo(zmm::Ref<ActionRequest> request);
+    void doGetProtocolInfo(const std::unique_ptr<ActionRequest>& request);
 
     std::shared_ptr<ConfigManager> config;
     std::shared_ptr<Storage> storage;
@@ -92,7 +92,7 @@ public:
     ///
     /// This function looks at the incoming ActionRequest and passes it on
     /// to the appropriate action for processing.
-    void processActionRequest(zmm::Ref<ActionRequest> request);
+    void processActionRequest(const std::unique_ptr<ActionRequest>& request);
 
     /// \brief Processes an incoming SubscriptionRequest.
     /// \param request Incoming SubscriptionRequest.

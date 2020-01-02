@@ -50,7 +50,7 @@ ConnectionManagerService::ConnectionManagerService(std::shared_ptr<ConfigManager
 
 ConnectionManagerService::~ConnectionManagerService() = default;
 
-void ConnectionManagerService::doGetCurrentConnectionIDs(Ref<ActionRequest> request)
+void ConnectionManagerService::doGetCurrentConnectionIDs(const std::unique_ptr<ActionRequest>& request)
 {
     log_debug("start\n");
 
@@ -64,7 +64,7 @@ void ConnectionManagerService::doGetCurrentConnectionIDs(Ref<ActionRequest> requ
     log_debug("end\n");
 }
 
-void ConnectionManagerService::doGetCurrentConnectionInfo(Ref<ActionRequest> request)
+void ConnectionManagerService::doGetCurrentConnectionInfo(const std::unique_ptr<ActionRequest>& request)
 {
     log_debug("start\n");
 
@@ -73,7 +73,7 @@ void ConnectionManagerService::doGetCurrentConnectionInfo(Ref<ActionRequest> req
     log_debug("doGetCurrentConnectionInfo: end\n");
 }
 
-void ConnectionManagerService::doGetProtocolInfo(Ref<ActionRequest> request)
+void ConnectionManagerService::doGetProtocolInfo(const std::unique_ptr<ActionRequest>& request)
 {
     log_debug("start\n");
 
@@ -92,7 +92,7 @@ void ConnectionManagerService::doGetProtocolInfo(Ref<ActionRequest> request)
     log_debug("end\n");
 }
 
-void ConnectionManagerService::processActionRequest(Ref<ActionRequest> request)
+void ConnectionManagerService::processActionRequest(const std::unique_ptr<ActionRequest>& request)
 {
     log_debug("start\n");
 

@@ -306,7 +306,7 @@ int Server::handleUpnpEvent(Upnp_EventType eventtype, const void* event)
         // a CP is invoking an action
         log_debug("UPNP_CONTROL_ACTION_REQUEST\n");
         try {
-            Ref<ActionRequest> request(new ActionRequest((UpnpActionRequest*)event));
+            auto request = std::make_unique<ActionRequest>((UpnpActionRequest*)event);
             routeActionRequest(request);
             request->update();
             // set in update() ((struct Upnp_Action_Request *)event)->ErrCode = ret;
@@ -351,7 +351,7 @@ std::string Server::getPort()
     return std::to_string(UpnpGetServerPort());
 }
 
-void Server::routeActionRequest(Ref<ActionRequest> request) const
+void Server::routeActionRequest(const std::unique_ptr<ActionRequest>& request) const
 {
     log_debug("start\n");
 
