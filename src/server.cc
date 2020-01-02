@@ -379,7 +379,7 @@ void Server::routeActionRequest(Ref<ActionRequest> request) const
     }
 }
 
-void Server::routeSubscriptionRequest(std::unique_ptr<SubscriptionRequest>& request) const
+void Server::routeSubscriptionRequest(const std::unique_ptr<SubscriptionRequest>& request) const
 {
     // make sure that the request is for our device
     if (request->getUDN() != serverUDN) {

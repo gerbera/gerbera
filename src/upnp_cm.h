@@ -99,7 +99,7 @@ public:
     ///
     /// Looks at the incoming SubscriptionRequest and accepts the subscription
     /// if everything is ok.
-    void processSubscriptionRequest(std::unique_ptr<SubscriptionRequest>& request);
+    void processSubscriptionRequest(const std::unique_ptr<SubscriptionRequest>& request);
 
     /// \brief Sends out an event to all subscribed devices.
     /// \param sourceProtocol_CSV Comma Separated Value list of protocol information

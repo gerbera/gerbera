@@ -272,7 +272,7 @@ void ContentDirectoryService::processActionRequest(Ref<ActionRequest> request)
     log_debug("ContentDirectoryService::processActionRequest: end\n");
 }
 
-void ContentDirectoryService::processSubscriptionRequest(std::unique_ptr<SubscriptionRequest>& request)
+void ContentDirectoryService::processSubscriptionRequest(const std::unique_ptr<SubscriptionRequest>& request)
 {
     int err;
     IXML_Document* event = nullptr;
