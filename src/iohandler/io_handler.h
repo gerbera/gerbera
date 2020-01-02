@@ -36,9 +36,10 @@
 
 #include "common.h"
 
-class IOHandler : public zmm::Object {
+class IOHandler {
 public:
     IOHandler();
+    virtual ~IOHandler();
 
     /// \brief Opens a data for the web server.
     /// \param mode in which the data will be opened (we only support UPNP_READ)

@@ -70,10 +70,10 @@ TranscodeExternalHandler::TranscodeExternalHandler(std::shared_ptr<ConfigManager
 {
 }
 
-Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile, 
-                                              std::string location, 
-                                              Ref<CdsObject> obj,
-                                              std::string range)
+std::unique_ptr<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
+    std::string location,
+    Ref<CdsObject> obj,
+    std::string range)
 {
     bool isURL = false;
 //    bool is_srt = false;
@@ -178,11 +178,10 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
             {
                 chmod(location.c_str(), S_IWUSR | S_IRUSR);
 
-                Ref<IOHandler> c_ioh(new CurlIOHandler(url, nullptr, 
+                std::unique_ptr<IOHandler> c_ioh = std::make_unique<CurlIOHandler>(url, nullptr,
                    config->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE),
-                   config->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_FILL_SIZE)));
-
-                Ref<IOHandler> p_ioh(new ProcessIOHandler(content, location, nullptr));
+                   config->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_FILL_SIZE));
+                std::unique_ptr<IOHandler> p_ioh = std::make_unique<ProcessIOHandler>(content, location, nullptr);
                 Ref<Executor> ch(new IOHandlerChainer(c_ioh, p_ioh, 16384));
                 proc_list = Ref<Array<ProcListItem> >(new Array<ProcListItem>(1));
                 Ref<ProcListItem> pr_item(new ProcListItem(ch));
@@ -246,10 +245,12 @@ Ref<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
     {
         main_proc->removeFile(location);
     }
-    Ref<IOHandler> io_handler(new BufferedIOHandler(Ref<IOHandler> (
-        new ProcessIOHandler(content, fifo_name, RefCast(main_proc, Executor), proc_list)
-    ), profile->getBufferSize(), profile->getBufferChunkSize(), profile->getBufferInitialFillSize()));
 
+    std::unique_ptr<IOHandler> u_ioh = std::make_unique<ProcessIOHandler>(content, fifo_name, RefCast(main_proc, Executor), proc_list);
+    auto io_handler = std::make_unique<BufferedIOHandler>(
+        u_ioh,
+        profile->getBufferSize(), profile->getBufferChunkSize(), profile->getBufferInitialFillSize()
+    );
     io_handler->open(UPNP_READ);
     content->triggerPlayHook(obj);
     return io_handler;

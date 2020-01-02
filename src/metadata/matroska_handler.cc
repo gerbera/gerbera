@@ -125,12 +125,13 @@ void MatroskaHandler::fillMetadata(Ref<CdsItem> item)
     parseMKV(item, NULL);
 }
 
-Ref<IOHandler> MatroskaHandler::serveContent(Ref<CdsItem> item, int resNum)
+std::unique_ptr<IOHandler> MatroskaHandler::serveContent(Ref<CdsItem> item, int resNum)
 {
     MemIOHandler* io_handler;
     parseMKV(item, &io_handler);
 
-    Ref<IOHandler> h(io_handler);
+    std::unique_ptr<IOHandler> h;
+    h.reset(io_handler);
     return h;
 }
 

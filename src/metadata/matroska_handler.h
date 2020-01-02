@@ -42,7 +42,7 @@ class MatroskaHandler : public MetadataHandler {
 public:
     MatroskaHandler(std::shared_ptr<ConfigManager> config);
     virtual void fillMetadata(zmm::Ref<CdsItem> item);
-    virtual zmm::Ref<IOHandler> serveContent(zmm::Ref<CdsItem> item, int resNum);
+    virtual std::unique_ptr<IOHandler> serveContent(zmm::Ref<CdsItem> item, int resNum);
 
 private:
     void parseMKV(zmm::Ref<CdsItem> item, MemIOHandler** p_io_handler);

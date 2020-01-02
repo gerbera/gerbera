@@ -154,7 +154,7 @@ public:
     static zmm::Ref<MetadataHandler> createHandler(std::shared_ptr<ConfigManager> config, int handlerType);
 
     virtual void fillMetadata(zmm::Ref<CdsItem> item) = 0;
-    virtual zmm::Ref<IOHandler> serveContent(zmm::Ref<CdsItem> item, int resNum) = 0;
+    virtual std::unique_ptr<IOHandler> serveContent(zmm::Ref<CdsItem> item, int resNum) = 0;
     virtual std::string getMimeType();
 };
 

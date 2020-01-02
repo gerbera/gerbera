@@ -232,7 +232,7 @@ int find_local_port(unsigned short range_min,
     unsigned short range_max);
 #endif
 /// \brief Extracts resolution from a JPEG image
-std::string get_jpeg_resolution(zmm::Ref<IOHandler> ioh);
+std::string get_jpeg_resolution(const std::unique_ptr<IOHandler>& ioh);
 
 /// \brief Sets resolution for a given resource index, item must be a JPEG image
 void set_jpeg_resolution_resource(zmm::Ref<CdsItem> item, int res_num);

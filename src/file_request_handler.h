@@ -59,7 +59,7 @@ public:
         UpnpXMLBuilder* xmlBuilder);
 
     virtual void getInfo(const char *filename, UpnpFileInfo *info);
-    virtual zmm::Ref<IOHandler> open(
+    virtual std::unique_ptr<IOHandler> open(
         const char* filename,
         enum UpnpOpenFileMode mode,
         std::string range);

@@ -763,7 +763,7 @@ std::string getMIME(std::string filepath, const void *buffer, size_t length)
 void set_jpeg_resolution_resource(Ref<CdsItem> item, int res_num)
 {
     try {
-        Ref<IOHandler> fio_h(new FileIOHandler(item->getLocation()));
+        std::unique_ptr<IOHandler> fio_h = std::make_unique<FileIOHandler>(item->getLocation());
         fio_h->open(UPNP_READ);
         std::string resolution = get_jpeg_resolution(fio_h);
 

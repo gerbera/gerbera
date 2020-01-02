@@ -156,7 +156,7 @@ void URLRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
     /// \todo transcoding for get_info
 }
 
-Ref<IOHandler> URLRequestHandler::open(const char* filename,
+std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
     enum UpnpOpenFileMode mode,
     std::string range)
 {
@@ -245,10 +245,8 @@ Ref<IOHandler> URLRequestHandler::open(const char* filename,
     */
 
     ///\todo make curl io handler configurable for url request handler
-    Ref<IOHandler> io_handler(new CurlIOHandler(url, nullptr, 1024 * 1024, 0));
-
+    auto io_handler = std::make_unique<CurlIOHandler>(url, nullptr, 1024 * 1024, 0);
     io_handler->open(mode);
-
     content->triggerPlayHook(obj);
     return io_handler;
 }

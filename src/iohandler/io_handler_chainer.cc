@@ -34,7 +34,7 @@
 
 using namespace zmm;
 
-IOHandlerChainer::IOHandlerChainer(Ref<IOHandler> readFrom, Ref<IOHandler> writeTo, int chunkSize)
+IOHandlerChainer::IOHandlerChainer(std::unique_ptr<IOHandler>& readFrom, std::unique_ptr<IOHandler>& writeTo, int chunkSize)
     : ThreadExecutor()
 {
     if (chunkSize <= 0)
@@ -43,8 +43,8 @@ IOHandlerChainer::IOHandlerChainer(Ref<IOHandler> readFrom, Ref<IOHandler> write
         throw _Exception("readFrom and writeTo need to be set");
     status = 0;
     this->chunkSize = chunkSize;
-    this->readFrom = readFrom;
-    this->writeTo = writeTo;
+    this->readFrom = std::move(readFrom);
+    this->writeTo = std::move(writeTo);
     readFrom->open(UPNP_READ);
     buf = (char*)MALLOC(chunkSize);
     startThread();

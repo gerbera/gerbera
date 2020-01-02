@@ -101,7 +101,7 @@ void ServeRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
     }
 }
 
-Ref<IOHandler> ServeRequestHandler::open(const char* filename,
+std::unique_ptr<IOHandler> ServeRequestHandler::open(const char* filename,
     enum UpnpOpenFileMode mode,
     std::string range)
 {
@@ -164,8 +164,8 @@ Ref<IOHandler> ServeRequestHandler::open(const char* filename,
     } else {
         throw _Exception("Not a regular file: " + path);
     }
-    Ref<IOHandler> io_handler(new FileIOHandler(path));
-    io_handler->open(mode);
 
+    auto io_handler = std::make_unique<FileIOHandler>(path);
+    io_handler->open(mode);
     return io_handler;
 }

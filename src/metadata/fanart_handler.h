@@ -40,7 +40,7 @@ class FanArtHandler : public MetadataHandler {
 public:
     FanArtHandler(std::shared_ptr<ConfigManager> config);
     virtual void fillMetadata(zmm::Ref<CdsItem> item);
-    virtual zmm::Ref<IOHandler> serveContent(zmm::Ref<CdsItem> item, int resNum);
+    virtual std::unique_ptr<IOHandler> serveContent(zmm::Ref<CdsItem> item, int resNum);
 };
 
 #endif // __METADATA_FANART_H__

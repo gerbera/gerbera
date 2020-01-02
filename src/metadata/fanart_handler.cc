@@ -90,12 +90,12 @@ void FanArtHandler::fillMetadata(Ref<CdsItem> item)
     }
 }
 
-Ref<IOHandler> FanArtHandler::serveContent(Ref<CdsItem> item, int resNum)
+std::unique_ptr<IOHandler> FanArtHandler::serveContent(Ref<CdsItem> item, int resNum)
 {
     std::string path = getFanArtPath(getFolderName(item));
 
     log_debug("FanArt: Opening name: %s\n", path.c_str());
 
-    Ref<IOHandler> io_handler(new FileIOHandler(path));
+    auto io_handler = std::make_unique<FileIOHandler>(path);
     return io_handler;
 }

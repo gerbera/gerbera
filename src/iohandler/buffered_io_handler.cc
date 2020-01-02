@@ -34,17 +34,16 @@
 #include "buffered_io_handler.h"
 #include "util/tools.h"
 
-using namespace zmm;
 using namespace std;
 
-BufferedIOHandler::BufferedIOHandler(Ref<IOHandler> underlyingHandler, size_t bufSize, size_t maxChunkSize, size_t initialFillSize)
+BufferedIOHandler::BufferedIOHandler(std::unique_ptr<IOHandler>& underlyingHandler, size_t bufSize, size_t maxChunkSize, size_t initialFillSize)
     : IOHandlerBufferHelper(bufSize, initialFillSize)
 {
     if (underlyingHandler == nullptr)
         throw _Exception("underlyingHandler must not be nullptr");
     if (maxChunkSize <= 0)
         throw _Exception("maxChunkSize must be positive");
-    this->underlyingHandler = underlyingHandler;
+    this->underlyingHandler = std::move(underlyingHandler);
     this->maxChunkSize = maxChunkSize;
 
     // test it first!

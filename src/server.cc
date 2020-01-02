@@ -490,10 +490,10 @@ int Server::registerVirtualDirCallbacks()
 
         try {
             Ref<RequestHandler> reqHandler = static_cast<const Server*>(cookie)->createRequestHandler(filename);
-            Ref<IOHandler> ioHandler = reqHandler->open(link.c_str(), mode, "");
-            ioHandler->retain();
-            //log_debug("%p open(%s)\n", ioHandler.getPtr(), filename);
-            return (UpnpWebFileHandle)ioHandler.getPtr();
+            auto ioHandler = reqHandler->open(link.c_str(), mode, "");
+            auto ioPtr = (UpnpWebFileHandle)ioHandler.release();
+            //log_debug("%p open(%s)\n", ioPtr, filename);
+            return ioPtr;
         } catch (const ServerShutdownException& se) {
             return nullptr;
         } catch (const SubtitlesNotFoundException& sex) {
@@ -517,7 +517,7 @@ int Server::registerVirtualDirCallbacks()
         if (static_cast<const Server*>(cookie)->getShutdownStatus())
             return -1;
 
-        auto* handler = (IOHandler*)f;
+        auto* handler = static_cast<IOHandler*>(f);
         return handler->read(buf, length);
     });
     if (ret != UPNP_E_SUCCESS)
@@ -562,17 +562,21 @@ int Server::registerVirtualDirCallbacks()
 #else
     UpnpVirtualDir_set_CloseCallback([](UpnpWebFileHandle f, const void* cookie) -> int {
 #endif
+        int ret_close = 0;
         //log_debug("%p close()\n", f);
-        Ref<IOHandler> handler((IOHandler*)f);
-        handler->release();
+        auto* handler = static_cast<IOHandler*>(f);
         try {
             handler->close();
         } catch (const Exception& e) {
             log_error("Exception during close: %s\n", e.getMessage().c_str());
             e.printStackTrace();
-            return -1;
+            ret_close = -1;
         }
-        return 0;
+
+        delete handler;
+        handler = nullptr;
+
+        return ret_close;
     });
 
     return ret;

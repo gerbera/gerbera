@@ -113,7 +113,7 @@ protected:
     /// \brief Prepares the output buffer and calls the process function.
     /// \return IOHandler
     /// \todo Genych, chto tut proishodit, ya tolkom che to ne wrubaus??
-    zmm::Ref<IOHandler> open(enum UpnpOpenFileMode mode);
+    std::unique_ptr<IOHandler> open(enum UpnpOpenFileMode mode);
 
     /// \brief add the ui update ids from the given session as xml tags to the given root element
     /// \param root the xml element to add the elements to
@@ -155,7 +155,7 @@ public:
     /// \param filename The requested URL
     /// \param mode either UPNP_READ or UPNP_WRITE
     /// \return the appropriate IOHandler for the request.
-    zmm::Ref<IOHandler> open(const char* filename,
+    std::unique_ptr<IOHandler> open(const char* filename,
         enum UpnpOpenFileMode mode,
         std::string range) override;
 

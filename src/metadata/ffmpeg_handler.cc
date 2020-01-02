@@ -386,7 +386,7 @@ void FfmpegHandler::writeThumbnailCacheFile(std::string movie_filename, uint8_t*
 }
 #endif
 
-Ref<IOHandler> FfmpegHandler::serveContent(Ref<CdsItem> item, int resNum)
+std::unique_ptr<IOHandler> FfmpegHandler::serveContent(Ref<CdsItem> item, int resNum)
 {
 #ifdef HAVE_FFMPEGTHUMBNAILER
     if (!config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED))
@@ -396,7 +396,7 @@ Ref<IOHandler> FfmpegHandler::serveContent(Ref<CdsItem> item, int resNum)
         uint8_t* ptr_image;
         size_t size_image;
         if (readThumbnailCacheFile(item->getLocation(), &ptr_image, &size_image)) {
-            Ref<IOHandler> h(new MemIOHandler(ptr_image, size_image));
+            auto h = std::make_unique<MemIOHandler>(ptr_image, size_image);
             free(ptr_image);
             log_debug("Returning cached thumbnail for file: %s\n", item->getLocation().c_str());
             return h;
@@ -442,8 +442,7 @@ Ref<IOHandler> FfmpegHandler::serveContent(Ref<CdsItem> item, int resNum)
             img->image_data_ptr, img->image_data_size);
     }
 
-    Ref<IOHandler> h(new MemIOHandler((void*)img->image_data_ptr,
-        img->image_data_size));
+    auto h = std::make_unique<MemIOHandler>((void*)img->image_data_ptr, img->image_data_size);
 #ifdef FFMPEGTHUMBNAILER_OLD_API
     destroy_image_data(img);
     destroy_thumbnailer(th);

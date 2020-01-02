@@ -39,13 +39,13 @@ void DeviceDescriptionHandler::getInfo(const char* filename, UpnpFileInfo* info)
     UpnpFileInfo_set_IsDirectory(info, 0);
 }
 
-zmm::Ref<IOHandler> DeviceDescriptionHandler::open(const char* filename, enum UpnpOpenFileMode mode, std::string range)
+std::unique_ptr<IOHandler> DeviceDescriptionHandler::open(const char* filename, enum UpnpOpenFileMode mode, std::string range)
 {
     log_debug("Device description requested\n");
     if (!string_ok(deviceDescription)) { // This always true for now
         deviceDescription = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + xmlBuilder->renderDeviceDescription()->print();
     }
-    auto t = zmm::Ref<IOHandler>(new MemIOHandler(deviceDescription));
+    auto t = std::make_unique<MemIOHandler>(deviceDescription);
     t->open(mode);
     return t;
 }
