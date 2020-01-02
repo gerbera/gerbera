@@ -112,7 +112,7 @@ void ConnectionManagerService::processActionRequest(Ref<ActionRequest> request)
     log_debug("end\n");
 }
 
-void ConnectionManagerService::processSubscriptionRequest(zmm::Ref<SubscriptionRequest> request)
+void ConnectionManagerService::processSubscriptionRequest(std::unique_ptr<SubscriptionRequest>& request)
 {
     int err;
     IXML_Document* event = nullptr;

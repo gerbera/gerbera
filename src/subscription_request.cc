@@ -32,11 +32,9 @@
 #include "subscription_request.h"
 #include "mxml/mxml.h"
 
-using namespace zmm;
 using namespace mxml;
 
 SubscriptionRequest::SubscriptionRequest(UpnpSubscriptionRequest* upnp_request)
-    : Object()
 {
     this->upnp_request = upnp_request;
 

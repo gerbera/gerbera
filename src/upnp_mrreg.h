@@ -103,7 +103,7 @@ public:
     ///
     /// Looks at the incoming SubscriptionRequest and accepts the subscription
     /// if everything is ok. Currently we do not support any updates.
-    void processSubscriptionRequest(zmm::Ref<SubscriptionRequest> request);
+    void processSubscriptionRequest(std::unique_ptr<SubscriptionRequest>& request);
 
     // subscriptions for this service are not supported
     // subscriptions for this service are not supported
