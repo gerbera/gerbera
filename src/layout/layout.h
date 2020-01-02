@@ -37,6 +37,7 @@
 class Layout : public zmm::Object
 {
 public:
+    virtual ~Layout() {}
     virtual void processCdsObject(zmm::Ref<CdsObject> obj, std::string rootpath) = 0;
 };
 

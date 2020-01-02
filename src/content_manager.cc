@@ -354,6 +354,11 @@ void ContentManager::shutdown()
     log_debug("updating last_modified data for autoscan in database...\n");
     autoscan_timed->updateLMinDB();
 
+#ifdef HAVE_JS
+    destroyJS();
+#endif
+    destroyLayout();
+
 #ifdef HAVE_INOTIFY
     for (int i = 0; i < autoscan_inotify->size(); i++) {
         log_debug("AutoDir %d\n", i);
@@ -370,6 +375,8 @@ void ContentManager::shutdown()
     }
 
     autoscan_inotify->updateLMinDB();
+    autoscan_inotify = nullptr;
+    inotify = nullptr;
 #endif
 
     shutdownFlag = true;

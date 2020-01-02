@@ -146,10 +146,10 @@ void MatroskaHandler::parseMKV(Ref<CdsItem> item, MemIOHandler** p_io_handler)
         while (el_l1 != NULL) {
             parseLevel1Element(item, ebml_stream, el_l1, p_io_handler);
 
-            el_l1->SkipData(ebml_stream, KaxAttachments_Context);
+            el_l1->SkipData(ebml_stream, el_l1->Generic().Context);
             delete el_l1;
 
-            el_l1 = ebml_stream.FindNextElement(KaxSegment_Context, i_upper_level, ~0, true);
+            el_l1 = ebml_stream.FindNextElement(el_l0->Generic().Context, i_upper_level, ~0, true);
         } // while elementLevel1
 
         el_l0->SkipData(ebml_stream, KaxSegment_Context);

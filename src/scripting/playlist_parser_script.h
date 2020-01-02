@@ -50,7 +50,7 @@ public:
         std::shared_ptr<Storage> storage,
         std::shared_ptr<ContentManager> content,
         std::shared_ptr<Runtime> runtime);
-    ~PlaylistParserScript();
+    virtual ~PlaylistParserScript();
 
     std::string readln();
     void processPlaylistObject(zmm::Ref<CdsObject> obj, zmm::Ref<GenericTask> task);

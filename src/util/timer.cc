@@ -36,6 +36,8 @@ using namespace zmm;
 using namespace std;
 
 Timer::Timer()
+    : shutdownFlag(false)
+    , thread(0)
 {
 }
 
