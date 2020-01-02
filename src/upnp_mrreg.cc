@@ -107,7 +107,7 @@ void MRRegistrarService::processActionRequest(Ref<ActionRequest> request)
     log_debug("end\n");
 }
 
-void MRRegistrarService::processSubscriptionRequest(std::unique_ptr<SubscriptionRequest>& request)
+void MRRegistrarService::processSubscriptionRequest(const std::unique_ptr<SubscriptionRequest>& request)
 {
     int err;
     IXML_Document* event = NULL;
