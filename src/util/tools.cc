@@ -174,30 +174,26 @@ std::string reduce_string(std::string str, char ch)
     if (!pos)
         return str;
 
-    // TODO: optimize: use direct std::string with reserve
-    char* result = (char*)MALLOC(str.length() + 1);
-    char* pos2 = result;
+    std::ostringstream buf;
 
     const char* pos3 = data;
     do
     {
         if (*(pos + 1) == ch)
         {
-            if (pos-pos3 == 0)
+            if (pos - pos3 == 0)
             {
-                *pos2 = ch;
-                pos2++;
+                buf << ch;
             }
             else
             {
-                strncpy(pos2, pos3, (pos-pos3)+1);
-                pos2 = pos2 + ((pos-pos3)+1);
+                buf.write(pos3, (pos-pos3)+1);
             }
             while (*pos == ch) pos++;
             pos3 = pos;
             if (*pos == '\0')
             {
-                *pos2 = '\0';
+                buf << '\0';
                 break;
             }
             pos = strchr(pos, ch);
@@ -212,12 +208,9 @@ std::string reduce_string(std::string str, char ch)
     } while (pos);
 
     if (data + str.length() - pos3)
-        strncpy(pos2, pos3, data + str.length() - pos3);
-    pos2[data + str.length() - pos3] = 0;
+        buf.write(pos3, data + str.length() - pos3);
 
-    std::string res = result;
-    FREE(result);
-    return res;
+    return buf.str();
 }
 
 bool check_path(std::string path, bool needDir)
@@ -808,9 +801,7 @@ bool check_resolution(std::string resolution, int* x, int* y)
 
 std::string escape(std::string string, char escape_char, char to_escape)
 {
-    // TODO: optimize: use direct std::string with reserve
-    char* result = (char*)MALLOC(string.length() * 2);
-    char* str = result;
+    std::ostringstream buf;
     size_t len = string.length();
 
     bool possible_more_esc = true;
@@ -840,28 +831,22 @@ std::string escape(std::string string, char escape_char, char to_escape)
             next = len;
         int cpLen = next - last;
         if (cpLen > 0) {
-            strncpy(str, &string[last], cpLen);
-            str += cpLen;
+            buf.write(&string[last], cpLen);
         }
         if (next < len) {
-            *(str++) = '\\';
-            *(str++) = string.at(next);
+            buf << '\\';
+            buf << string.at(next);
         }
         last = next;
         last++;
     } while (last < len);
-    *str = '\0';
 
-    std::string ret = result;
-    FREE(result);
-    return ret;
+    return buf.str();
 }
 
 std::string unescape(std::string string, char escape)
 {
-    // TODO: optimize: use direct std::string with reserve
-    char* result = (char*)MALLOC(string.length());
-    char* str = result;
+    std::ostringstream buf;
     size_t len = string.length();
 
     size_t last = std::string::npos;
@@ -873,16 +858,12 @@ std::string unescape(std::string string, char escape)
             last = 0;
         int cpLen = next - last;
         if (cpLen > 0)
-            strncpy(str, &string[last], cpLen);
-        str += cpLen;
+            buf.write(&string[last], cpLen);
         last = next;
         last++;
     } while (last < len);
-    *str = '\0';
 
-    std::string ret = result;
-    FREE(result);
-    return ret;
+    return buf.str();
 }
 
 /*
@@ -946,9 +927,7 @@ std::string unescape_amp(std::string string)
     if (string.empty())
         return "";
 
-    // TODO: optimize: use direct std::string with reserve
-    char* result = (char*)MALLOC(string.length());
-    char* str = result;
+    std::ostringstream buf;
     size_t len = string.length();
 
     size_t last = 0;
@@ -967,14 +946,11 @@ std::string unescape_amp(std::string string)
             next = len;
 
         int cpLen = next - last + 1;
-        strncpy(str, &string[last], cpLen);
-        str += cpLen;
+        buf.write(&string[last], cpLen);
         last = next + skip + 1;
     } while (last <= len);
 
-    std::string ret = result;
-    FREE(result);
-    return ret;
+    return buf.str();
 }
 
 std::string fallbackString(std::string first, std::string fallback)
