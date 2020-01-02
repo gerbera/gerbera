@@ -655,7 +655,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
     }
 
     // request only items if non-recursive scan is wanted
-    shared_ptr<unordered_set<int>> list = storage->getObjects(containerID, !adir->getRecursive());
+    unique_ptr<unordered_set<int>> list = storage->getObjects(containerID, !adir->getRecursive());
 
     unsigned int thisTaskID;
     if (task != nullptr) {
