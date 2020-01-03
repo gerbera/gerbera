@@ -182,10 +182,7 @@ void SessionManager::removeSession(std::string sessionID)
 
 std::string SessionManager::getUserPassword(std::string user)
 {
-    if (accounts == nullptr) {
-        return nullptr;
-    }
-    return accounts->get(user);
+    return getValueOrDefault(accounts, user);
 }
 
 void SessionManager::containerChangedUI(int objectID)

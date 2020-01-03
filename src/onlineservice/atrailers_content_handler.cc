@@ -65,8 +65,8 @@ bool ATrailersContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
 
     current_trailer_index = 0;
 
-    Ref<Dictionary> mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
-    trailer_mimetype = mappings->get("mov");
+    auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
+    trailer_mimetype = getValueOrDefault(mappings, "mov");
     if (!string_ok(trailer_mimetype))
         trailer_mimetype = "video/quicktime";
 

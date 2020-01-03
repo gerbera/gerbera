@@ -214,8 +214,8 @@ void TagLibHandler::populateGenericTags(Ref<CdsItem> item, const TagLib::File& f
 
 void TagLibHandler::fillMetadata(Ref<CdsItem> item)
 {
-    Ref<Dictionary> mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-    std::string content_type = mappings->get(item->getMimeType());
+    auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+    std::string content_type = getValueOrDefault(mappings, item->getMimeType());
 
     TagLib::FileStream fs(item->getLocation().c_str(), true); // true = Read only
 
@@ -278,8 +278,8 @@ void TagLibHandler::addArtworkResource(Ref<CdsItem> item, std::string art_mimety
 
 std::unique_ptr<IOHandler> TagLibHandler::serveContent(Ref<CdsItem> item, int resNum)
 {
-    Ref<Dictionary> mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-    std::string content_type = mappings->get(item->getMimeType());
+    auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+    std::string content_type = getValueOrDefault(mappings, item->getMimeType());
 
     TagLib::FileStream roStream(item->getLocation().c_str(), true); // Open read only
 

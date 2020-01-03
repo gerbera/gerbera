@@ -43,7 +43,7 @@ std::string Headers::stripInvalid(std::string value) {
 void Headers::addHeader(const std::string& header, const std::string& value)
 {
     if (headers == nullptr) {
-        headers = std::make_unique<std::map<std::string, std::string>>();
+        headers = std::make_unique<std::map<std::string,std::string>>();
     }
 
     if (header.empty() || value.empty()) {

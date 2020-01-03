@@ -623,7 +623,7 @@ void UpnpXMLBuilder::addResources(Ref<CdsItem> item, Ref<Element> element)
     bool skipURL = ((IS_CDS_ITEM_INTERNAL_URL(item->getObjectType()) || IS_CDS_ITEM_EXTERNAL_URL(item->getObjectType())) && (!item->getFlag(OBJECT_FLAG_PROXY_URL)));
 
     bool isExtThumbnail = false; // this sucks
-    Ref<Dictionary> mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+    auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
 
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
     if (config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED) && (startswith(item->getMimeType(), "video") || item->getFlag(OBJECT_FLAG_OGG_THEORA))) {
@@ -632,7 +632,7 @@ void UpnpXMLBuilder::addResources(Ref<CdsItem> item, Ref<Element> element)
         int y;
 
         if (string_ok(videoresolution) && check_resolution(videoresolution, &x, &y)) {
-            std::string thumb_mimetype = mappings->get(CONTENT_TYPE_JPG);
+            std::string thumb_mimetype = getValueOrDefault(mappings, CONTENT_TYPE_JPG);
             if (!string_ok(thumb_mimetype))
                 thumb_mimetype = "image/jpeg";
 
@@ -667,7 +667,7 @@ void UpnpXMLBuilder::addResources(Ref<CdsItem> item, Ref<Element> element)
     // TODO: allow transcoding for URLs
 
     // now get the profile
-    Ref<TranscodingProfileList> tlist = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST);
+    auto tlist = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST);
     Ref<ObjectDictionary<TranscodingProfile>> tp_mt = tlist->get(item->getMimeType());
     if (tp_mt != nullptr) {
         Ref<Array<ObjectDictionaryElement<TranscodingProfile>>> profiles = tp_mt->getElements();
@@ -677,7 +677,7 @@ void UpnpXMLBuilder::addResources(Ref<CdsItem> item, Ref<Element> element)
             if (tp == nullptr)
                 throw _Exception("Invalid profile encountered!");
 
-            std::string ct = mappings->get(item->getMimeType());
+            std::string ct = getValueOrDefault(mappings, item->getMimeType());
             if (ct == CONTENT_TYPE_OGG) {
                 if (((item->getFlag(OBJECT_FLAG_OGG_THEORA)) && (!tp->isTheora())) || (!item->getFlag(OBJECT_FLAG_OGG_THEORA) && (tp->isTheora()))) {
                     continue;
@@ -803,7 +803,7 @@ void UpnpXMLBuilder::addResources(Ref<CdsItem> item, Ref<Element> element)
         }
 
         assert(string_ok(mimeType));
-        std::string contentType = mappings->get(mimeType);
+        std::string contentType = getValueOrDefault(mappings, mimeType);
         std::string url;
 
         /// \todo who will sync mimetype that is part of the protocol info and

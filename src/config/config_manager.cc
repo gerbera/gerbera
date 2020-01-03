@@ -76,7 +76,8 @@ ConfigManager::ConfigManager(std::string filename,
     , port(port)
 {
     this->debug_logging = debug_logging;
-    options = Ref<Array<ConfigOption>>(new Array<ConfigOption>(CFG_MAX));
+    options = std::make_unique<std::vector<std::shared_ptr<ConfigOption>>>();
+    options->resize(CFG_MAX);
 
     std::string home = userhome + DIR_SEPARATOR + config_dir;
 
@@ -126,40 +127,27 @@ std::string ConfigManager::construct_path(std::string path)
         return home + DIR_SEPARATOR + path;
 }
 
-#define NEW_OPTION(optval) opt = Ref<Option>(new Option(optval));
-#define SET_OPTION(opttype) options->set(RefCast(opt, ConfigOption), opttype);
+#define NEW_OPTION(optval) opt = std::make_shared<Option>(optval);
+#define SET_OPTION(opttype) options->at(opttype) = opt;
 
-#define NEW_INT_OPTION(optval) int_opt = Ref<IntOption>(new IntOption(optval));
-#define SET_INT_OPTION(opttype) \
-    options->set(RefCast(int_opt, ConfigOption), opttype);
+#define NEW_INT_OPTION(optval) int_opt = std::make_shared<IntOption>(optval);
+#define SET_INT_OPTION(opttype) options->at(opttype) = int_opt;
 
-#define NEW_BOOL_OPTION(optval) bool_opt = Ref<BoolOption>(new BoolOption(optval));
-#define SET_BOOL_OPTION(opttype) \
-    options->set(RefCast(bool_opt, ConfigOption), opttype);
+#define NEW_BOOL_OPTION(optval) bool_opt = std::make_shared<BoolOption>(optval);
+#define SET_BOOL_OPTION(opttype) options->at(opttype) = bool_opt;
 
-#define NEW_DICT_OPTION(optval) dict_opt = Ref<DictionaryOption>(new DictionaryOption(optval));
-#define SET_DICT_OPTION(opttype) \
-    options->set(RefCast(dict_opt, ConfigOption), opttype);
+#define NEW_DICT_OPTION(optval) dict_opt = std::make_shared<DictionaryOption>(optval);
+#define SET_DICT_OPTION(opttype) options->at(opttype) = dict_opt;
 
-#define NEW_STRARR_OPTION(optval) str_array_opt = Ref<StringArrayOption>(new StringArrayOption(optval));
-#define SET_STRARR_OPTION(opttype) \
-    options->set(RefCast(str_array_opt, ConfigOption), opttype);
+#define NEW_STRARR_OPTION(optval) str_array_opt = std::make_shared<StringArrayOption>(optval);
+#define SET_STRARR_OPTION(opttype) options->at(opttype) = str_array_opt;
 
-#define NEW_AUTOSCANLIST_OPTION(optval) alist_opt = Ref<AutoscanListOption>(new AutoscanListOption(optval));
-#define SET_AUTOSCANLIST_OPTION(opttype) \
-    options->set(RefCast(alist_opt, ConfigOption), opttype);
-#define NEW_TRANSCODING_PROFILELIST_OPTION(optval) trlist_opt = Ref<TranscodingProfileListOption>(new TranscodingProfileListOption(optval));
-#define SET_TRANSCODING_PROFILELIST_OPTION(opttype) \
-    options->set(RefCast(trlist_opt, ConfigOption), opttype);
-#ifdef ONLINE_SERVICES
-#define NEW_OBJARR_OPTION(optval) obj_array_opt = Ref<ObjectArrayOption>(new ObjectArrayOption(optval));
-#define SET_OBJARR_OPTION(opttype) \
-    options->set(RefCast(obj_array_opt, ConfigOption), opttype);
-#endif //ONLINE_SERVICES
+#define NEW_AUTOSCANLIST_OPTION(optval) alist_opt = std::make_shared<AutoscanListOption>(optval);
+#define SET_AUTOSCANLIST_OPTION(opttype) options->at(opttype) = alist_opt;
 
-#define NEW_OBJDICT_OPTION(optval) obj_dict_opt = Ref<ObjectDictionaryOption>(new ObjectDictionaryOption(optval));
-#define SET_OBJDICT_OPTION(opttype) \
-    options->set(RefCast(obj_dict_opt, ConfigOption), opttype);
+#define NEW_TRANSCODING_PROFILELIST_OPTION(optval) trlist_opt = std::make_shared<TranscodingProfileListOption>(optval);
+#define SET_TRANSCODING_PROFILELIST_OPTION(opttype) options->at(opttype) = trlist_opt;
+
 
 void ConfigManager::validate(std::string serverhome)
 {
@@ -167,16 +155,13 @@ void ConfigManager::validate(std::string serverhome)
     int temp_int;
     Ref<Element> tmpEl;
 
-    Ref<Option> opt;
-    Ref<BoolOption> bool_opt;
-    Ref<IntOption> int_opt;
-    Ref<DictionaryOption> dict_opt;
-    Ref<StringArrayOption> str_array_opt;
-    Ref<AutoscanListOption> alist_opt;
-    Ref<TranscodingProfileListOption> trlist_opt;
-#ifdef ONLINE_SERVICES
-    Ref<ObjectArrayOption> obj_array_opt;
-#endif
+    std::shared_ptr<Option> opt;
+    std::shared_ptr<BoolOption> bool_opt;
+    std::shared_ptr<IntOption> int_opt;
+    std::shared_ptr<DictionaryOption> dict_opt;
+    std::shared_ptr<StringArrayOption> str_array_opt;
+    std::shared_ptr<AutoscanListOption> alist_opt;
+    std::shared_ptr<TranscodingProfileListOption> trlist_opt;
 
     log_info("Checking configuration...\n");
 
@@ -538,30 +523,30 @@ void ConfigManager::validate(std::string serverhome)
         "from", "to", !csens));
     SET_DICT_OPTION(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
 
+    std::map<std::string,std::string> mime_content;
     tmpEl = getElement("/import/mappings/mimetype-contenttype");
     if (tmpEl != nullptr) {
         mime_content = createDictionaryFromNodeset(tmpEl, "treat",
             "mimetype", "as");
     } else {
-        mime_content = Ref<Dictionary>(new Dictionary());
-        mime_content->put("audio/mpeg", CONTENT_TYPE_MP3);
-        mime_content->put("audio/mp4", CONTENT_TYPE_MP4);
-        mime_content->put("video/mp4", CONTENT_TYPE_MP4);
-        mime_content->put("application/ogg", CONTENT_TYPE_OGG);
-        mime_content->put("audio/x-flac", CONTENT_TYPE_FLAC);
-        mime_content->put("audio/flac", CONTENT_TYPE_FLAC);
-        mime_content->put("image/jpeg", CONTENT_TYPE_JPG);
-        mime_content->put("audio/x-mpegurl", CONTENT_TYPE_PLAYLIST);
-        mime_content->put("audio/x-scpls", CONTENT_TYPE_PLAYLIST);
-        mime_content->put("audio/x-wav", CONTENT_TYPE_PCM);
-        mime_content->put("audio/wave", CONTENT_TYPE_PCM);
-        mime_content->put("audio/wav", CONTENT_TYPE_PCM);
-        mime_content->put("audio/vnd.wave", CONTENT_TYPE_PCM);
-        mime_content->put("audio/L16", CONTENT_TYPE_PCM);
-        mime_content->put("audio/x-aiff", CONTENT_TYPE_AIFF);
-        mime_content->put("audio/aiff", CONTENT_TYPE_AIFF);
-        mime_content->put("video/x-msvideo", CONTENT_TYPE_AVI);
-        mime_content->put("video/mpeg", CONTENT_TYPE_MPEG);
+        mime_content["audio/mpeg"] = CONTENT_TYPE_MP3;
+        mime_content["audio/mp4"] = CONTENT_TYPE_MP4;
+        mime_content["video/mp4"] = CONTENT_TYPE_MP4;
+        mime_content["application/ogg"] = CONTENT_TYPE_OGG;
+        mime_content["audio/x-flac"] = CONTENT_TYPE_FLAC;
+        mime_content["audio/flac"] = CONTENT_TYPE_FLAC;
+        mime_content["image/jpeg"] = CONTENT_TYPE_JPG;
+        mime_content["audio/x-mpegurl"] = CONTENT_TYPE_PLAYLIST;
+        mime_content["audio/x-scpls"] = CONTENT_TYPE_PLAYLIST;
+        mime_content["audio/x-wav"] = CONTENT_TYPE_PCM;
+        mime_content["audio/wave"] = CONTENT_TYPE_PCM;
+        mime_content["audio/wav"] = CONTENT_TYPE_PCM;
+        mime_content["audio/vnd.wave"] = CONTENT_TYPE_PCM;
+        mime_content["audio/L16"] = CONTENT_TYPE_PCM;
+        mime_content["audio/x-aiff"] = CONTENT_TYPE_AIFF;
+        mime_content["audio/aiff"] = CONTENT_TYPE_AIFF;
+        mime_content["video/x-msvideo"] = CONTENT_TYPE_AVI;
+        mime_content["video/mpeg"] = CONTENT_TYPE_MPEG;
     }
 
     NEW_DICT_OPTION(mime_content);
@@ -1221,8 +1206,8 @@ void ConfigManager::validate(std::string serverhome)
 
 #ifdef HAVE_INOTIFY
     tmpEl = getElement("/import/autoscan");
-    Ref<AutoscanList> config_timed_list = createAutoscanListFromNodeset(nullptr, tmpEl, ScanMode::Timed);
-    Ref<AutoscanList> config_inotify_list = createAutoscanListFromNodeset(nullptr, tmpEl, ScanMode::INotify);
+    auto config_timed_list = createAutoscanListFromNodeset(nullptr, tmpEl, ScanMode::Timed);
+    auto config_inotify_list = createAutoscanListFromNodeset(nullptr, tmpEl, ScanMode::INotify);
 
     for (int i = 0; i < config_inotify_list->size(); i++) {
         Ref<AutoscanDirectory> i_dir = config_inotify_list->get(i);
@@ -1481,9 +1466,9 @@ std::string ConfigManager::checkOptionString(std::string xpath)
     return temp;
 }
 
-Ref<Dictionary> ConfigManager::createDictionaryFromNodeset(Ref<Element> element, std::string nodeName, std::string keyAttr, std::string valAttr, bool tolower)
+std::map<std::string,std::string> ConfigManager::createDictionaryFromNodeset(Ref<Element> element, std::string nodeName, std::string keyAttr, std::string valAttr, bool tolower)
 {
-    Ref<Dictionary> dict(new Dictionary());
+    std::map<std::string,std::string> dict;
     std::string key;
     std::string value;
 
@@ -1498,7 +1483,7 @@ Ref<Dictionary> ConfigManager::createDictionaryFromNodeset(Ref<Element> element,
                     if (tolower) {
                         key = tolower_string(key);
                     }
-                    dict->put(key, value);
+                    dict[key] = value;
                 }
             }
         }
@@ -1507,7 +1492,7 @@ Ref<Dictionary> ConfigManager::createDictionaryFromNodeset(Ref<Element> element,
     return dict;
 }
 
-Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodeset(Ref<Element> element)
+std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodeset(Ref<Element> element)
 {
     size_t bs;
     size_t cs;
@@ -1518,7 +1503,7 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
     bool set = false;
     std::string param;
 
-    Ref<TranscodingProfileList> list(new TranscodingProfileList());
+    auto list = std::make_shared<TranscodingProfileList>();
     if (element == nullptr)
         return list;
 
@@ -1841,9 +1826,9 @@ Ref<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodes
     return list;
 }
 
-Ref<AutoscanList> ConfigManager::createAutoscanListFromNodeset(std::shared_ptr<Storage> storage, zmm::Ref<mxml::Element> element, ScanMode scanmode)
+std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNodeset(std::shared_ptr<Storage> storage, zmm::Ref<mxml::Element> element, ScanMode scanmode)
 {
-    Ref<AutoscanList> list(new AutoscanList(storage));
+    auto list = std::make_shared<AutoscanList>(storage);
 
     if (element == nullptr)
         return list;
@@ -2006,17 +1991,17 @@ std::vector<std::string> ConfigManager::createArrayFromNodeset(Ref<mxml::Element
 // None of the options->get() calls will ever return nullptr!
 std::string ConfigManager::getOption(config_option_t option)
 {
-    Ref<ConfigOption> r = options->get(option);
-    if (r.getPtr() == nullptr) {
+    auto o = options->at(option);
+    if (o == nullptr) {
         throw _Exception("option not set");
     }
-    return r->getOption();
+    return o->getOption();
 }
 
 int ConfigManager::getIntOption(config_option_t option)
 {
-    Ref<ConfigOption> o = options->get(option);
-    if (o.getPtr() == nullptr) {
+    auto o = options->at(option);
+    if (o == nullptr) {
         throw _Exception("option not set");
     }
     return o->getIntOption();
@@ -2024,43 +2009,31 @@ int ConfigManager::getIntOption(config_option_t option)
 
 bool ConfigManager::getBoolOption(config_option_t option)
 {
-    Ref<ConfigOption> o = options->get(option);
-    if (o.getPtr() == nullptr) {
+    auto o = options->at(option);
+    if (o == nullptr) {
         throw _Exception("option not set");
     }
     return o->getBoolOption();
 }
 
-Ref<Dictionary> ConfigManager::getDictionaryOption(config_option_t option)
+std::map<std::string,std::string> ConfigManager::getDictionaryOption(config_option_t option)
 {
-    return options->get(option)->getDictionaryOption();
+    return options->at(option)->getDictionaryOption();
 }
 
 std::vector<std::string> ConfigManager::getStringArrayOption(config_option_t option)
 {
-    return options->get(option)->getStringArrayOption();
+    return options->at(option)->getStringArrayOption();
 }
 
-Ref<ObjectDictionary<zmm::Object>> ConfigManager::getObjectDictionaryOption(config_option_t option)
+std::shared_ptr<AutoscanList> ConfigManager::getAutoscanListOption(config_option_t option)
 {
-    return options->get(option)->getObjectDictionaryOption();
+    return options->at(option)->getAutoscanListOption();
 }
 
-#ifdef ONLINE_SERVICES
-Ref<Array<Object>> ConfigManager::getObjectArrayOption(config_option_t option)
+std::shared_ptr<TranscodingProfileList> ConfigManager::getTranscodingProfileListOption(config_option_t option)
 {
-    return options->get(option)->getObjectArrayOption();
-}
-#endif
-
-Ref<AutoscanList> ConfigManager::getAutoscanListOption(config_option_t option)
-{
-    return options->get(option)->getAutoscanListOption();
-}
-
-Ref<TranscodingProfileList> ConfigManager::getTranscodingProfileListOption(config_option_t option)
-{
-    return options->get(option)->getTranscodingProfileListOption();
+    return options->at(option)->getTranscodingProfileListOption();
 }
 
 #ifdef ONLINE_SERVICES

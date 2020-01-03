@@ -484,9 +484,9 @@ void FallbackLayout::processCdsObject(zmm::Ref<CdsObject> obj, std::string rootp
 #endif
 
         std::string mimetype = RefCast(obj, CdsItem)->getMimeType();
-        Ref<Dictionary> mappings = config->getDictionaryOption(
+        auto mappings = config->getDictionaryOption(
                     CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-        std::string content_type = mappings->get(mimetype);
+        std::string content_type = getValueOrDefault(mappings, mimetype);
 
         if (startswith(mimetype, "video"))
             addVideo(clone, rootpath);

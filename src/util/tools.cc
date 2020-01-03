@@ -970,6 +970,11 @@ unsigned int stringHash(std::string str)
     return hash;
 }
 
+std::string getValueOrDefault(const std::map<std::string,std::string>& m, const std::string& key, const std::string& defval)
+{
+    return getValueOrDefault<std::string,std::string>(m, key, defval);
+}
+
 std::string toCSV(shared_ptr<unordered_set<int>> array)
 {
     if (array->empty())

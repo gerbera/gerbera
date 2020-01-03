@@ -44,6 +44,7 @@
 #include "update_manager.h"
 
 #include "util/headers.h"
+#include "util/tools.h"
 
 #include "transcoding/transcode_dispatcher.h"
 
@@ -207,10 +208,10 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
         mimeType = tp->getTargetMimeType();
 
-        Ref<Dictionary> mappings = config
-                                       ->getDictionaryOption(
-                                           CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-        if (mappings->get(mimeType) == CONTENT_TYPE_PCM) {
+        auto mappings = config->getDictionaryOption(
+            CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+        if (getValueOrDefault(mappings, mimeType) == CONTENT_TYPE_PCM)
+        {
             std::string freq = item->getResource(0)
                               ->getAttribute(MetadataHandler::getResAttrName(
                                   R_SAMPLEFREQUENCY));
@@ -262,9 +263,9 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
                 }
             }
         }
-        Ref<Dictionary> mappings = config->getDictionaryOption(
+        auto mappings = config->getDictionaryOption(
             CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-        std::string dlnaContentHeader = getDLNAContentHeader(config, mappings->get(item->getMimeType()));
+        std::string dlnaContentHeader = getDLNAContentHeader(config, getValueOrDefault(mappings, item->getMimeType()));
         if (string_ok(dlnaContentHeader)) {
             headers.addHeader(D_HTTP_CONTENT_FEATURES_HEADER, dlnaContentHeader);
         }

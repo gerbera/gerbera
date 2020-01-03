@@ -1674,7 +1674,7 @@ std::string SQLStorage::getInternalSetting(std::string key)
     return row->col(0);
 }
 
-void SQLStorage::updateAutoscanPersistentList(ScanMode scanmode, Ref<AutoscanList> list)
+void SQLStorage::updateAutoscanPersistentList(ScanMode scanmode, std::shared_ptr<AutoscanList> list)
 {
 
     log_debug("setting persistent autoscans untouched - scanmode: %s;\n", AutoscanDirectory::mapScanmode(scanmode).c_str());

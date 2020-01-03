@@ -114,8 +114,8 @@ void MetadataHandler::setMetadata(std::shared_ptr<ConfigManager> config, Ref<Cds
 
     item->addResource(resource);
 
-    Ref<Dictionary> mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-    std::string content_type = mappings->get(mimetype);
+    auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+    std::string content_type = getValueOrDefault(mappings, mimetype);
 
     if ((content_type == CONTENT_TYPE_OGG) && (isTheora(item->getLocation()))) {
         item->setFlag(OBJECT_FLAG_OGG_THEORA);

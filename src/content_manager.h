@@ -31,6 +31,9 @@
 #ifndef __CONTENT_MANAGER_H__
 #define __CONTENT_MANAGER_H__
 
+#include <string>
+#include <vector>
+#include <map>
 #include <condition_variable>
 #include <memory>
 #include <mutex>
@@ -151,34 +154,6 @@ public:
     virtual void run() override;
 };
 #endif
-
-/*
-class DirCacheEntry : public zmm::Object
-{
-public:
-    DirCacheEntry();
-public:
-    int end;
-    int id;
-};
-
-class DirCache : public zmm::Object
-{
-protected:
-    std::ostringstream buffer;
-    int size; // number of entries
-    int capacity; // capacity of entries
-    zmm::Ref<zmm::Array<DirCacheEntry> > entries;
-public:
-    DirCache();
-    void push(std::string name);
-    void pop();
-    void setPath(std::string path);
-    void clear();
-    std::string getPath();
-    int createContainers();
-};
-*/
 
 class ContentManager : public Timer::Subscriber, public std::enable_shared_from_this<ContentManager> {
 public:
@@ -382,9 +357,9 @@ protected:
     bool ignore_unknown_extensions;
     bool extension_map_case_sensitive;
 
-    zmm::Ref<Dictionary> extension_mimetype_map;
-    zmm::Ref<Dictionary> mimetype_upnpclass_map;
-    zmm::Ref<Dictionary> mimetype_contenttype_map;
+    std::map<std::string,std::string> extension_mimetype_map;
+    std::map<std::string,std::string> mimetype_upnpclass_map;
+    std::map<std::string,std::string> mimetype_contenttype_map;
 
     zmm::Ref<AutoscanList> autoscan_timed;
 #ifdef HAVE_INOTIFY

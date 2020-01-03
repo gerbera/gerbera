@@ -82,7 +82,6 @@ protected:
     std::string current_group_name;
 
     zmm::Ref<mxml::Element> current_group;
-    zmm::Ref<Dictionary> extension_mimetype_map;
 };
 
 #endif //__SOPCAST_CONTENT_HANDLER_H__

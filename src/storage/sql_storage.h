@@ -145,7 +145,7 @@ public:
     virtual std::string getInternalSetting(std::string key) override;
     virtual void storeInternalSetting(std::string key, std::string value) override = 0;
     
-    virtual void updateAutoscanPersistentList(ScanMode scanmode, zmm::Ref<AutoscanList> list) override;
+    virtual void updateAutoscanPersistentList(ScanMode scanmode, std::shared_ptr<AutoscanList> list) override;
     virtual zmm::Ref<AutoscanList> getAutoscanList(ScanMode scanmode) override;
     virtual void addAutoscanDirectory(zmm::Ref<AutoscanDirectory> adir) override;
     virtual void updateAutoscanDirectory(zmm::Ref<AutoscanDirectory> adir) override;

@@ -127,7 +127,7 @@ protected:
     /// \brief This array is holding available sessions.
     zmm::Ref<zmm::Array<Session>> sessions;
 
-    zmm::Ref<Dictionary> accounts;
+    std::map<std::string,std::string> accounts;
 
     void checkTimer();
     bool timerAdded;

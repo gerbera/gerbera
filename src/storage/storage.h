@@ -256,7 +256,7 @@ public:
     virtual void storeInternalSetting(std::string key, std::string value) = 0;
 
     /* autoscan methods */
-    virtual void updateAutoscanPersistentList(ScanMode scanmode, zmm::Ref<AutoscanList> list) = 0;
+    virtual void updateAutoscanPersistentList(ScanMode scanmode, std::shared_ptr<AutoscanList> list) = 0;
     virtual zmm::Ref<AutoscanList> getAutoscanList(ScanMode scanode) = 0;
     virtual void addAutoscanDirectory(zmm::Ref<AutoscanDirectory> adir) = 0;
     virtual void updateAutoscanDirectory(zmm::Ref<AutoscanDirectory> adir) = 0;
