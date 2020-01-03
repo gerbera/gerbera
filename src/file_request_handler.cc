@@ -182,7 +182,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
             }
         }
 
-        Ref<MetadataHandler> h = MetadataHandler::createHandler(config, res_handler);
+        auto h = MetadataHandler::createHandler(config, res_handler);
         if (!string_ok(mimeType))
             mimeType = h->getMimeType();
 
@@ -453,8 +453,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
             }
         }
 
-        Ref<MetadataHandler> h = MetadataHandler::createHandler(config, res_handler);
-
+        auto h = MetadataHandler::createHandler(config, res_handler);
         if (!string_ok(mimeType))
             mimeType = h->getMimeType();
 

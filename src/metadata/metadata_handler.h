@@ -34,7 +34,6 @@
 
 #include "cds_objects.h"
 #include "common.h"
-#include "zmm/dictionary.h"
 #include "iohandler/io_handler.h"
 
 // content handler Id's
@@ -139,7 +138,7 @@ class ConfigManager;
 
 /// \brief This class is responsible for providing access to metadata information
 /// of various media.
-class MetadataHandler : public zmm::Object {
+class MetadataHandler {
 protected:
     std::shared_ptr<ConfigManager> config;
     
@@ -151,7 +150,7 @@ public:
     static void setMetadata(std::shared_ptr<ConfigManager> config, zmm::Ref<CdsItem> item);
     static std::string getMetaFieldName(metadata_fields_t field);
     static std::string getResAttrName(resource_attributes_t attr);
-    static zmm::Ref<MetadataHandler> createHandler(std::shared_ptr<ConfigManager> config, int handlerType);
+    static std::unique_ptr<MetadataHandler> createHandler(std::shared_ptr<ConfigManager> config, int handlerType);
 
     virtual void fillMetadata(zmm::Ref<CdsItem> item) = 0;
     virtual std::unique_ptr<IOHandler> serveContent(zmm::Ref<CdsItem> item, int resNum) = 0;

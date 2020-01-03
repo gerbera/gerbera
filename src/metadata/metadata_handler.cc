@@ -94,8 +94,7 @@ res_key RES_KEYS[] = {
 };
 
 MetadataHandler::MetadataHandler(std::shared_ptr<ConfigManager> config)
-    : Object()
-    , config(config)
+    : config(config)
 {
 }
 
@@ -173,27 +172,27 @@ std::string MetadataHandler::getResAttrName(resource_attributes_t attr)
     return RES_KEYS[attr].upnp;
 }
 
-Ref<MetadataHandler> MetadataHandler::createHandler(std::shared_ptr<ConfigManager> config, int handlerType)
+std::unique_ptr<MetadataHandler> MetadataHandler::createHandler(std::shared_ptr<ConfigManager> config, int handlerType)
 {
     switch (handlerType) {
 #ifdef HAVE_LIBEXIF
     case CH_LIBEXIF:
-        return Ref<MetadataHandler>(new LibExifHandler(config));
+        return std::make_unique<LibExifHandler>(config);
 #endif
 #ifdef HAVE_TAGLIB
     case CH_ID3:
-        return Ref<MetadataHandler>(new TagLibHandler(config));
+        return std::make_unique<TagLibHandler>(config);
 #endif
 #ifdef HAVE_MATROSKA
     case CH_MATROSKA:
-        return Ref<MetadataHandler>(new MatroskaHandler(config));
+        return std::make_unique<MatroskaHandler>(config);
 #endif
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
     case CH_FFTH:
-        return Ref<MetadataHandler>(new FfmpegHandler(config));
+        return std::make_unique<FfmpegHandler>(config);
 #endif
     case CH_FANART:
-        return Ref<MetadataHandler>(new FanArtHandler(config));
+        return std::make_unique<FanArtHandler>(config);
     default:
         throw _Exception("unknown content handler ID: " + std::to_string(handlerType));
     }
