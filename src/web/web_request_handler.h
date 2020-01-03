@@ -87,7 +87,7 @@ protected:
 
     /// \brief The current session, used for this request; will be filled by
     /// check_request()
-    zmm::Ref<Session> session;
+    std::shared_ptr<Session> session;
 
     /// \brief Little support function to access stuff from the dictionary in
     /// in an easier fashion.
@@ -118,7 +118,7 @@ protected:
     /// \brief add the ui update ids from the given session as xml tags to the given root element
     /// \param root the xml element to add the elements to
     /// \param session the session from which the ui update ids should be taken
-    void addUpdateIDs(zmm::Ref<mxml::Element> root, zmm::Ref<Session> session);
+    void addUpdateIDs(zmm::Ref<mxml::Element> root, std::shared_ptr<Session> session);
 
     /// \brief check if ui update ids should be added to the response and add
     /// them in that case.

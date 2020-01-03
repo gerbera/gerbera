@@ -257,7 +257,7 @@ void WebRequestHandler::handleUpdateIDs()
     }
 }
 
-void WebRequestHandler::addUpdateIDs(Ref<Element> updateIDsEl, Ref<Session> session)
+void WebRequestHandler::addUpdateIDs(Ref<Element> updateIDsEl, std::shared_ptr<Session> session)
 {
     std::string updateIDs = session->getUIUpdateIDs();
     if (string_ok(updateIDs)) {

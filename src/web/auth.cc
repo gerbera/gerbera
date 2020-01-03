@@ -137,7 +137,7 @@ void web::auth::process()
         cfg->appendElementChild(gerberaVersion);
     } else if (action == "get_sid") {
         log_debug("checking/getting sid...\n");
-        Ref<Session> session = nullptr;
+        std::shared_ptr<Session> session = nullptr;
         std::string sid = param("sid");
 
         if (sid.empty() || (session = sessionManager->getSession(sid)) == nullptr) {
@@ -157,7 +157,7 @@ void web::auth::process()
     } else if (action == "logout") {
         check_request();
         std::string sid = param("sid");
-        Ref<Session> session = sessionManager->getSession(sid);
+        auto session = sessionManager->getSession(sid);
         if (session == nullptr)
             throw _Exception("illegal session id");
         sessionManager->removeSession(sid);
@@ -179,7 +179,7 @@ void web::auth::process()
         if (!string_ok(username) || !string_ok(encPassword))
             throw LoginException("Missing username or password");
 
-        Ref<Session> session = sessionManager->getSession(sid);
+        auto session = sessionManager->getSession(sid);
         if (session == nullptr)
             throw _Exception("illegal session id");
 

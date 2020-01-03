@@ -36,7 +36,6 @@
 #include <unordered_set>
 #include <vector>
 
-#include "zmm/dictionary.h"
 #include "util/timer.h"
 
 // forward declaration
@@ -50,7 +49,7 @@ namespace web {
 /// created. It then will be used to store various information to support
 /// the UI - remember the position of browsing for each driver, remember the page
 /// count for each driver and so on.
-class Session : public Dictionary_r {
+class Session {
 public:
     /// \brief Constructor, creates a session with a given timeout.
     /// \param timeout time in milliseconds after which the session will expire if not accessed.
@@ -59,6 +58,9 @@ public:
     /// last_access value, if last access lies further back than the timeout - the session will
     /// be deleted (will time out)
     Session(long timeout);
+
+    void put(std::string key, std::string value);
+    std::string get(std::string key);
 
     /// \brief Returns the time of last access to the session.
     /// \return pointer to a timespec
@@ -96,6 +98,10 @@ protected:
 
     void containerChangedUI(const std::vector<int>& objectIDs);
 
+    std::recursive_mutex mutex;
+    using AutoLock = std::lock_guard<decltype(mutex)>;
+    std::map<std::string,std::string> dict;
+
     /// \brief True if the ui update id hash became to big and
     /// the UI shall update every container
     bool updateAll;
@@ -125,7 +131,7 @@ protected:
     using AutoLock = std::lock_guard<decltype(mutex)>;
 
     /// \brief This array is holding available sessions.
-    zmm::Ref<zmm::Array<Session>> sessions;
+    std::vector<std::shared_ptr<Session>> sessions;
 
     std::map<std::string,std::string> accounts;
 
@@ -139,12 +145,12 @@ public:
 
     /// \brief Creates a Session with a given timeout.
     /// \param timeout Session timeout in milliseconds.
-    zmm::Ref<Session> createSession(long timeout);
+    std::shared_ptr<Session> createSession(long timeout);
 
     /// \brief Returns the instance to a Session with a given sessionID
     /// \param ID of the Session.
     /// \return intance of the Session with a given ID or nullptr if no session with that ID was found.
-    zmm::Ref<Session> getSession(std::string sessionID, bool doLock = true);
+    std::shared_ptr<Session> getSession(std::string sessionID, bool doLock = true);
 
     /// \brief Removes a session
     void removeSession(std::string sessionID);
