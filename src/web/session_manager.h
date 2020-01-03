@@ -159,7 +159,7 @@ public:
 
     void containerChangedUI(const std::vector<int>& objectIDs);
 
-    virtual void timerNotify(zmm::Ref<Timer::Parameter> parameter) override;
+    virtual void timerNotify(std::shared_ptr<Timer::Parameter> parameter) override;
 };
 
 } // namespace

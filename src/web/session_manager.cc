@@ -222,7 +222,7 @@ void SessionManager::checkTimer()
     }
 }
 
-void SessionManager::timerNotify(Ref<Timer::Parameter> parameter)
+void SessionManager::timerNotify(std::shared_ptr<Timer::Parameter> parameter)
 {
     log_debug("notified... %d web sessions.\n", sessions->size());
     AutoLock lock(mutex);

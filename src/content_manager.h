@@ -165,7 +165,7 @@ public:
     virtual ~ContentManager();
     void shutdown();
 
-    virtual void timerNotify(zmm::Ref<Timer::Parameter> parameter) override;
+    virtual void timerNotify(std::shared_ptr<Timer::Parameter> parameter) override;
 
     bool isBusy() { return working; }
 

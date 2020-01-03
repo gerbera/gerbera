@@ -228,7 +228,7 @@ void ContentManager::init()
             if (config->getBoolOption(CFG_ONLINE_CONTENT_SOPCAST_UPDATE_AT_START))
                 i = CFG_DEFAULT_UPDATE_AT_START;
 
-            Ref<Timer::Parameter> sc_param(new Timer::Parameter(Timer::Parameter::IDOnlineContent, OS_SopCast));
+            auto sc_param = std::make_shared<Timer::Parameter>(Timer::Parameter::IDOnlineContent, OS_SopCast);
             sc->setTimerParameter(sc_param);
             online_services->registerService(sc);
             if (i > 0) {
@@ -253,7 +253,7 @@ void ContentManager::init()
             if (config->getBoolOption(CFG_ONLINE_CONTENT_ATRAILERS_UPDATE_AT_START))
                 i = CFG_DEFAULT_UPDATE_AT_START;
 
-            Ref<Timer::Parameter> at_param(new Timer::Parameter(Timer::Parameter::IDOnlineContent, OS_ATrailers));
+            auto at_param = std::make_shared<Timer::Parameter>(Timer::Parameter::IDOnlineContent, OS_ATrailers);
             at->setTimerParameter(at_param);
             online_services->registerService(at);
             if (i > 0) {
@@ -292,7 +292,7 @@ void ContentManager::init()
 
     for (int i = 0; i < autoscan_timed->size(); i++) {
         Ref<AutoscanDirectory> dir = autoscan_timed->get(i);
-        Ref<Timer::Parameter> param(new Timer::Parameter(Timer::Parameter::timer_param_t::IDAutoscan, dir->getScanID()));
+        auto param = std::make_shared<Timer::Parameter>(Timer::Parameter::timer_param_t::IDAutoscan, dir->getScanID());
         log_debug("Adding timed scan with interval %d\n", dir->getInterval());
         timer->addTimerSubscriber(this, dir->getInterval(), param, false);
     }
@@ -326,7 +326,7 @@ void ContentManager::unregisterExecutor(Ref<Executor> exec)
     }
 }
 
-void ContentManager::timerNotify(Ref<Timer::Parameter> parameter)
+void ContentManager::timerNotify(std::shared_ptr<Timer::Parameter> parameter)
 {
     if (parameter == nullptr)
         return;

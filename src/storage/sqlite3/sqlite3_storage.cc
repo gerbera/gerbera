@@ -635,7 +635,7 @@ Sqlite3Row::Sqlite3Row(char** row, Ref<SQLResult> sqlResult)
 
 /* Sqlite3BackupTimerSubscriber */
 
-void Sqlite3Storage::timerNotify(Ref<Timer::Parameter> param)
+void Sqlite3Storage::timerNotify(std::shared_ptr<Timer::Parameter> param)
 {
     Ref<SLBackupTask> btask(new SLBackupTask(config, false));
     this->addTask(RefCast(btask, SLTask), true);

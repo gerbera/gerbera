@@ -43,7 +43,7 @@ AutoscanDirectory::AutoscanDirectory()
     storageID = INVALID_OBJECT_ID;
     last_mod_previous_scan = 0;
     last_mod_current_scan = 0;
-    timer_parameter = Ref<Timer::Parameter>(new Timer::Parameter(Timer::Parameter::IDAutoscan, INVALID_SCAN_ID));
+    timer_parameter = std::make_shared<Timer::Parameter>(Timer::Parameter::IDAutoscan, INVALID_SCAN_ID);
 }
 
 AutoscanDirectory::AutoscanDirectory(std::string location, ScanMode mode,
@@ -63,7 +63,7 @@ AutoscanDirectory::AutoscanDirectory(std::string location, ScanMode mode,
     , last_mod_previous_scan(0)
     , last_mod_current_scan(0)
 {
-    timer_parameter = Ref<Timer::Parameter>(new Timer::Parameter(Timer::Parameter::IDAutoscan, INVALID_SCAN_ID));
+    timer_parameter = std::make_shared<Timer::Parameter>(Timer::Parameter::IDAutoscan, INVALID_SCAN_ID);
 }
 
 void AutoscanDirectory::setCurrentLMT(time_t lmt)
@@ -359,7 +359,7 @@ void AutoscanDirectory::copyTo(Ref<AutoscanDirectory> copy)
     copy->timer_parameter = timer_parameter;
 }
 
-Ref<Timer::Parameter> AutoscanDirectory::getTimerParameter()
+std::shared_ptr<Timer::Parameter> AutoscanDirectory::getTimerParameter()
 {
     return timer_parameter;
 }
