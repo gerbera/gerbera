@@ -390,7 +390,7 @@ std::unique_ptr<IOHandler> LibExifHandler::serveContent(Ref<CdsItem> item, int r
     ExifData* ed;
     Ref<CdsResource> res = item->getResource(resNum);
 
-    std::string ctype = res->getParameters()->get(RESOURCE_CONTENT_TYPE);
+    std::string ctype = getValueOrDefault(res->getParameters(), RESOURCE_CONTENT_TYPE);
 
     if (ctype != EXIF_THUMBNAIL)
         throw _Exception("LibExifHandler: got unknown content type: " + ctype);

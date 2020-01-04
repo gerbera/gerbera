@@ -35,6 +35,7 @@
 
 #include <vector>
 #include <string>
+#include <map>
 
 #include "zmm/zmmf.h"
 #include "zmm/dictionary.h"
@@ -126,7 +127,7 @@ public:
     /// \param value attribute value
     void addAttribute(std::string name, std::string value);
 
-    zmm::Ref<Dictionary> getAttributes();
+    std::map<std::string,std::string> getAttributes();
 
     /// \brief Override for theora content.
     ///
@@ -197,7 +198,7 @@ protected:
     transcoding_type_t tr_type;
     int number_of_channels;
     int sample_frequency;
-    zmm::Ref<Dictionary> attributes;
+    std::map<std::string,std::string> attributes;
     std::vector<std::string> fourcc_list;
     avi_fourcc_listmode_t fourcc_mode;
     TranscodingProfile();

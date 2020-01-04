@@ -49,7 +49,6 @@ TranscodingProfile::TranscodingProfile()
     thumbnail = false;
     sample_frequency = SOURCE; // keep original
     number_of_channels = SOURCE;
-    attributes = Ref<Dictionary>(new Dictionary());
     fourcc_mode = FCC_None;
 }
 
@@ -69,7 +68,6 @@ TranscodingProfile::TranscodingProfile(transcoding_type_t tr_type, std::string n
     chunk_size = 0;
     initial_fill_size = 0;
     tr_type = TR_None;
-    attributes = Ref<Dictionary>(new Dictionary());
     fourcc_mode = FCC_None;
 }
 
@@ -82,10 +80,10 @@ void TranscodingProfile::setBufferOptions(size_t bs, size_t cs, size_t ifs)
 
 void TranscodingProfile::addAttribute(std::string name, std::string value)
 {
-    attributes->put(name, value);
+    attributes[name] = value;
 }
 
-Ref<Dictionary> TranscodingProfile::getAttributes()
+std::map<std::string,std::string> TranscodingProfile::getAttributes()
 {   
     return attributes;
 }   

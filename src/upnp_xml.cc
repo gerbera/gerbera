@@ -446,21 +446,14 @@ Ref<Element> UpnpXMLBuilder::renderDeviceDescription()
     return root;
 }
 
-Ref<Element> UpnpXMLBuilder::renderResource(std::string URL, Ref<Dictionary> attributes)
+Ref<Element> UpnpXMLBuilder::renderResource(std::string URL, const std::map<std::string,std::string>& attributes)
 {
     Ref<Element> res(new Element("res"));
 
     res->setText(URL);
 
-    Ref<Array<DictionaryElement>> elements = attributes->getElements();
-    int len = elements->size();
-
-    std::string attribute;
-
-    for (int i = 0; i < len; i++) {
-        Ref<DictionaryElement> el = elements->get(i);
-        attribute = el->getKey();
-        res->setAttribute(attribute, el->getValue());
+    for (auto it = attributes.begin(); it != attributes.end(); it++) {
+        res->setAttribute(it->first, it->second);
     }
 
     return res;
@@ -789,9 +782,9 @@ void UpnpXMLBuilder::addResources(Ref<CdsItem> item, Ref<Element> element)
                   if (!string_ok(mimeType)) mimeType = DEFAULT_MIMETYPE; */
 
         Ref<CdsResource> res = item->getResource(i);
-        Ref<Dictionary> res_attrs = res->getAttributes();
-        Ref<Dictionary> res_params = res->getParameters();
-        std::string protocolInfo = res_attrs->get(MetadataHandler::getResAttrName(R_PROTOCOLINFO));
+        auto res_attrs = res->getAttributes();
+        auto res_params = res->getParameters();
+        std::string protocolInfo = getValueOrDefault(res_attrs, MetadataHandler::getResAttrName(R_PROTOCOLINFO));
         std::string mimeType = getMTFromProtocolInfo(protocolInfo);
 
         size_t pos = mimeType.find(";");
@@ -817,7 +810,7 @@ void UpnpXMLBuilder::addResources(Ref<CdsItem> item, Ref<Element> element)
         // for transcoded resources the res_id can be safely ignored,
         // because a transcoded resource is identified by the profile name
         // flag if we are dealing with the transcoded resource
-        bool transcoded = (res_params->get(URL_PARAM_TRANSCODE) == URL_VALUE_TRANSCODE);
+        bool transcoded = (getValueOrDefault(res_params, URL_PARAM_TRANSCODE) == URL_VALUE_TRANSCODE);
         if (!transcoded) {
             if (urlBase->addResID) {
                 url = urlBase->pathBase + std::to_string(realCount);
@@ -833,9 +826,9 @@ void UpnpXMLBuilder::addResources(Ref<CdsItem> item, Ref<Element> element)
                 url = urlBase_tr->pathBase + URL_VALUE_TRANSCODE_NO_RES_ID;
             }
         }
-        if ((res_params != nullptr) && (res_params->size() > 0)) {
+        if (!res_params.empty()) {
             url = url + _URL_PARAM_SEPARATOR;
-            url = url + res_params->encodeSimple();
+            url = url + dict_encode_simple(res_params);
         }
 
         // ok this really sucks, I guess another rewrite of the resource manager
@@ -892,7 +885,7 @@ void UpnpXMLBuilder::addResources(Ref<CdsItem> item, Ref<Element> element)
         if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO)) {
             std::string extend;
             if (contentType == CONTENT_TYPE_JPG) {
-                std::string resolution = res_attrs->get(MetadataHandler::getResAttrName(R_RESOLUTION));
+                std::string resolution = getValueOrDefault(res_attrs, MetadataHandler::getResAttrName(R_RESOLUTION));
                 int x;
                 int y;
                 if (string_ok(resolution) && check_resolution(resolution, &x, &y)) {
@@ -929,8 +922,7 @@ void UpnpXMLBuilder::addResources(Ref<CdsItem> item, Ref<Element> element)
             }
 
             protocolInfo = protocolInfo.substr(0, protocolInfo.rfind(':') + 1) + extend;
-            res_attrs->put(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
-                protocolInfo);
+            res_attrs[MetadataHandler::getResAttrName(R_PROTOCOLINFO)] = protocolInfo;
 
             if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK)) {
                 if (startswith(mimeType, "video")) {

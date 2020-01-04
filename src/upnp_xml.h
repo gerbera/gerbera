@@ -85,7 +85,7 @@ public:
     /// \brief Renders a resource tag (part of DIDL-Lite XML)
     /// \param URL download location of the item (will be child element of the <res> tag)
     /// \param attributes Dictionary containing the <res> tag attributes (like resolution, etc.)
-    zmm::Ref<mxml::Element> renderResource(std::string URL, zmm::Ref<Dictionary> attributes);
+    zmm::Ref<mxml::Element> renderResource(std::string URL, const std::map<std::string,std::string>& attributes);
 
     /// \brief Renders a subtitle resource tag (Samsung proprietary extension)
     /// \param URL download location of the video item

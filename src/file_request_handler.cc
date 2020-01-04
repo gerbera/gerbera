@@ -176,7 +176,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
             Ref<CdsResource> resource = item->getResource(res_id);
             res_handler = resource->getHandlerType();
             // http-get:*:image/jpeg:*
-            std::string protocolInfo = item->getResource(res_id)->getAttributes()->get("protocolInfo");
+            std::string protocolInfo = getValueOrDefault(item->getResource(res_id)->getAttributes(), "protocolInfo");
             if (!protocolInfo.empty()) {
                 mimeType = getMTFromProtocolInfo(protocolInfo);
             }
@@ -447,7 +447,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
             Ref<CdsResource> resource = item->getResource(res_id);
             res_handler = resource->getHandlerType();
             // http-get:*:image/jpeg:*
-            std::string protocolInfo = item->getResource(res_id)->getAttributes()->get("protocolInfo");
+            std::string protocolInfo = getValueOrDefault(item->getResource(res_id)->getAttributes(), "protocolInfo");
             if (!protocolInfo.empty()) {
                 mimeType = getMTFromProtocolInfo(protocolInfo);
             }

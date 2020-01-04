@@ -647,14 +647,9 @@ void Script::cdsObject2dukObject(Ref<CdsObject> obj)
 
         if (obj->getResourceCount() > 0) {
             auto res = obj->getResource(0);
-
             auto attributes = res->getAttributes();
-            auto elements = attributes->getElements();
-            auto len = elements->size();
-            for (auto i = 0; i < len; i++)
-            {
-                Ref<DictionaryElement> el = elements->get(i);
-                setProperty(el->getKey(), el->getValue());
+            for (auto it = attributes.begin(); it != attributes.end(); it++) {
+                setProperty(it->first, it->second);
             }
         }
 
