@@ -606,13 +606,9 @@ void Script::cdsObject2dukObject(Ref<CdsObject> obj)
         duk_push_object(ctx);
         // stack: js meta_js
 
-        Ref<Dictionary> meta = obj->getMetadata();
-        Ref<Array<DictionaryElement> > elements = meta->getElements();
-        int len = elements->size();
-        for (int i = 0; i < len; i++)
-        {
-            Ref<DictionaryElement> el = elements->get(i);
-            setProperty(el->getKey(), el->getValue());
+        auto meta = obj->getMetadata();
+        for (auto it = meta.begin(); it != meta.end(); it++) {
+            setProperty(it->first, it->second);
         }
 
         if (RefCast(obj, CdsItem)->getTrackNumber() > 0)
@@ -627,20 +623,16 @@ void Script::cdsObject2dukObject(Ref<CdsObject> obj)
         duk_push_object(ctx);
         // stack: js aux_js
 
-        Ref<Dictionary> aux = obj->getAuxData();
+        auto aux = obj->getAuxData();
 
 #ifdef HAVE_ATRAILERS
-        tmp = obj->getAuxData(ATRAILERS_AUXDATA_POST_DATE);
+        auto tmp = obj->getAuxData(ATRAILERS_AUXDATA_POST_DATE);
         if (string_ok(tmp))
-            aux->put(ATRAILERS_AUXDATA_POST_DATE, tmp);
+            aux[ATRAILERS_AUXDATA_POST_DATE] = tmp;
 #endif
 
-        Ref<Array<DictionaryElement> > elements = aux->getElements();
-        int len = elements->size();
-        for (int i = 0; i < len; i++)
-        {
-            Ref<DictionaryElement> el = elements->get(i);
-            setProperty(el->getKey(), el->getValue());
+        for (auto it = aux.begin(); it != aux.end(); it++) {
+            setProperty(it->first, it->second);
         }
 
         duk_put_prop_string(ctx, -2, "aux");

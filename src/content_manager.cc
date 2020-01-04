@@ -1018,7 +1018,7 @@ void ContentManager::addContainer(int parentID, std::string title, std::string u
     addContainerChain(storage->buildContainerPath(parentID, escape(title, VIRTUAL_CONTAINER_ESCAPE, VIRTUAL_CONTAINER_SEPARATOR)), upnpClass);
 }
 
-int ContentManager::addContainerChain(std::string chain, std::string lastClass, int lastRefID, Ref<Dictionary> lastMetadata)
+int ContentManager::addContainerChain(std::string chain, std::string lastClass, int lastRefID, const std::map<std::string,std::string>& lastMetadata)
 {
     int updateID = INVALID_OBJECT_ID;
     int containerID;
@@ -1026,7 +1026,7 @@ int ContentManager::addContainerChain(std::string chain, std::string lastClass, 
     if (!string_ok(chain))
         throw _Exception("addContainerChain() called with empty chain parameter");
 
-    log_debug("received chain: %s (%s) [%s]\n", chain.c_str(), lastClass.c_str(), lastMetadata != nullptr ? lastMetadata->encodeSimple().c_str() : "null");
+    log_debug("received chain: %s (%s) [%s]\n", chain.c_str(), lastClass.c_str(), dict_encode_simple(lastMetadata).c_str());
     storage->addContainerChain(chain, lastClass, lastRefID, &containerID, &updateID, lastMetadata);
 
     // if (updateID != INVALID_OBJECT_ID)

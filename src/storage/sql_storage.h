@@ -141,7 +141,7 @@ public:
     virtual std::string incrementUpdateIDs(const std::unique_ptr<std::unordered_set<int>>& ids) override;
 
     virtual std::string buildContainerPath(int parentID, std::string title) override;
-    virtual void addContainerChain(std::string path, std::string lastClass, int lastRefID, int *containerID, int *updateID, zmm::Ref<Dictionary> lastMetadata) override;
+    virtual void addContainerChain(std::string path, std::string lastClass, int lastRefID, int *containerID, int *updateID, const std::map<std::string,std::string>& lastMetadata) override;
     virtual std::string getInternalSetting(std::string key) override;
     virtual void storeInternalSetting(std::string key, std::string value) override = 0;
     
@@ -188,7 +188,7 @@ private:
     
     zmm::Ref<CdsObject> createObjectFromRow(const std::unique_ptr<SQLRow>& row);
     zmm::Ref<CdsObject> createObjectFromSearchRow(const std::unique_ptr<SQLRow>& row);
-    zmm::Ref<Dictionary> retrieveMetadataForObject(int objectId);
+    std::map<std::string,std::string> retrieveMetadataForObject(int objectId);
     
     /* helper for findObjectByPath and findObjectIDByPath */ 
     zmm::Ref<CdsObject> _findObjectByPath(std::string fullpath);
@@ -246,7 +246,7 @@ private:
     std::string stripLocationPrefix(std::string path);
     
     zmm::Ref<CdsObject> checkRefID(zmm::Ref<CdsObject> obj);
-    int createContainer(int parentID, std::string name, std::string path, bool isVirtual, std::string upnpClass, int refID, zmm::Ref<Dictionary> lastMetadata);
+    int createContainer(int parentID, std::string name, std::string path, bool isVirtual, std::string upnpClass, int refID, const std::map<std::string,std::string>& lastMetadata);
 
     std::string mapBool(bool val) { return quote((val ? 1 : 0)); }
     bool remapBool(std::string field) { return (string_ok(field) && field == "1"); }

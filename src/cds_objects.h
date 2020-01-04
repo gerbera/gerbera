@@ -34,10 +34,13 @@
 
 #include <sys/types.h>
 #include <memory>
+#include <string>
+#include <map>
 
 #include "cds_resource.h"
 #include "common.h"
 #include "zmm/dictionary.h"
+#include "util/tools.h"
 
 // ATTENTION: These values need to be changed in web/js/items.js too.
 #define OBJECT_TYPE_CONTAINER 0x00000001
@@ -120,12 +123,9 @@ protected:
     /// \brief flag that allows to sort objects within a container
     int sortPriority;
 
-    zmm::Ref<Dictionary> metadata;
-    zmm::Ref<Dictionary> auxdata;
+    std::map<std::string,std::string> metadata;
+    std::map<std::string,std::string> auxdata;
     zmm::Ref<zmm::Array<CdsResource>> resources;
-
-    /// \ brief IDs of the metadata attributes in the metadata table
-    zmm::Ref<Dictionary> metadataIDs;
 
 public:
     /// \brief Constructor. Sets the default values.
@@ -237,14 +237,14 @@ public:
     /// \brief Query single metadata value.
     inline std::string getMetadata(std::string key)
     {
-        return metadata->get(key);
+        return getValueOrDefault(metadata, key);
     }
 
     /// \brief Query entire metadata dictionary.
-    inline zmm::Ref<Dictionary> getMetadata() { return metadata; }
+    inline std::map<std::string,std::string> getMetadata() { return metadata; }
 
     /// \brief Set entire metadata dictionary.
-    inline void setMetadata(zmm::Ref<Dictionary> metadata)
+    inline void setMetadata(const std::map<std::string,std::string>& metadata)
     {
         this->metadata = metadata;
     }
@@ -252,32 +252,32 @@ public:
     /// \brief Set a single metadata value.
     inline void setMetadata(std::string key, std::string value)
     {
-        metadata->put(key, value);
+        metadata[key] = value;
     }
 
     /// \brief Removes metadata with the given key
     inline void removeMetadata(std::string key)
     {
-        metadata->remove(key);
+        metadata.erase(key);
     }
 
     /// \brief Query single auxdata value.
     inline std::string getAuxData(std::string key)
     {
-        return auxdata->get(key);
+        return getValueOrDefault(auxdata, key);
     }
 
     /// \brief Query entire auxdata dictionary.
-    inline zmm::Ref<Dictionary> getAuxData() { return auxdata; }
+    inline std::map<std::string,std::string> getAuxData() { return auxdata; }
 
     /// \brief Set a single auxdata value.
     inline void setAuxData(std::string key, std::string value)
     {
-        auxdata->put(key, value);
+        auxdata[key] = value;
     }
 
     /// \brief Set entire auxdata dictionary.
-    inline void setAuxData(zmm::Ref<Dictionary> auxdata)
+    inline void setAuxData(const std::map<std::string,std::string>& auxdata)
     {
         this->auxdata = auxdata;
     }
@@ -285,7 +285,7 @@ public:
     /// \brief Removes auxdata with the given key
     inline void removeAuxData(std::string key)
     {
-        auxdata->remove(key);
+        auxdata.erase(key);
     }
 
     /// \brief Get number of resource tags

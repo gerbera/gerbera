@@ -80,18 +80,15 @@ Ref<Element> UpnpXMLBuilder::renderObject(Ref<CdsObject> obj, bool renderActions
     if (IS_CDS_ITEM(objectType)) {
         Ref<CdsItem> item = RefCast(obj, CdsItem);
 
-        Ref<Dictionary> meta = obj->getMetadata();
-        Ref<Array<DictionaryElement>> elements = meta->getElements();
-        int len = elements->size();
+        auto meta = obj->getMetadata();
 
         std::string key;
         std::string upnp_class = obj->getClass();
 
-        for (int i = 0; i < len; i++) {
-            Ref<DictionaryElement> el = elements->get(i);
-            key = el->getKey();
+        for (auto it = meta.begin(); it != meta.end(); it++) {
+            key = it->first;
             if (key == MetadataHandler::getMetaFieldName(M_DESCRIPTION)) {
-                tmp = el->getValue();
+                tmp = it->second;
                 if ((stringLimit > 0) && (tmp.length() > stringLimit)) {
                     tmp = tmp.substr(0, getValidUTF8CutPosition(tmp, stringLimit - 3));
                     tmp = tmp + "...";
@@ -99,9 +96,9 @@ Ref<Element> UpnpXMLBuilder::renderObject(Ref<CdsObject> obj, bool renderActions
                 result->appendTextChild(key, tmp);
             } else if (key == MetadataHandler::getMetaFieldName(M_TRACKNUMBER)) {
                 if (upnp_class == UPNP_DEFAULT_CLASS_MUSIC_TRACK)
-                    result->appendTextChild(key, el->getValue());
+                    result->appendTextChild(key, it->second);
             } else if ((key != MetadataHandler::getMetaFieldName(M_TITLE)) || ((key == MetadataHandler::getMetaFieldName(M_TRACKNUMBER)) && (upnp_class == UPNP_DEFAULT_CLASS_MUSIC_TRACK)))
-                result->appendTextChild(key, el->getValue());
+                result->appendTextChild(key, it->second);
         }
 
         addResources(item, result);
@@ -140,18 +137,18 @@ Ref<Element> UpnpXMLBuilder::renderObject(Ref<CdsObject> obj, bool renderActions
         std::string upnp_class = obj->getClass();
         log_debug("container is class: %s\n", upnp_class.c_str());
         if (upnp_class == UPNP_DEFAULT_CLASS_MUSIC_ALBUM) {
-            Ref<Dictionary> meta = obj->getMetadata();
+            auto meta = obj->getMetadata();
 
-            std::string creator = meta->get(MetadataHandler::getMetaFieldName(M_ALBUMARTIST));
+            std::string creator = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_ALBUMARTIST));
             if (!string_ok(creator)) {
-                creator = meta->get(MetadataHandler::getMetaFieldName(M_ARTIST));
+                creator = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_ARTIST));
             }
 
             if (string_ok(creator)) {
                 result->appendElementChild(renderCreator(creator));
             }
 
-            std::string composer = meta->get(MetadataHandler::getMetaFieldName(M_COMPOSER));
+            std::string composer = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_COMPOSER));
             if (!string_ok(composer)) {
                 composer = "None";
             }
@@ -160,7 +157,7 @@ Ref<Element> UpnpXMLBuilder::renderObject(Ref<CdsObject> obj, bool renderActions
                 result->appendElementChild(renderComposer(composer));
             }
 
-            std::string conductor = meta->get(MetadataHandler::getMetaFieldName(M_CONDUCTOR));
+            std::string conductor = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_CONDUCTOR));
             if (!string_ok(conductor)) {
                 conductor = "None";
             }
@@ -169,7 +166,7 @@ Ref<Element> UpnpXMLBuilder::renderObject(Ref<CdsObject> obj, bool renderActions
                 result->appendElementChild(renderConductor(conductor));
             }
 
-            std::string orchestra = meta->get(MetadataHandler::getMetaFieldName(M_ORCHESTRA));
+            std::string orchestra = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_ORCHESTRA));
             if (!string_ok(orchestra)) {
                 orchestra = "None";
             }
@@ -178,7 +175,7 @@ Ref<Element> UpnpXMLBuilder::renderObject(Ref<CdsObject> obj, bool renderActions
                 result->appendElementChild(renderOrchestra(orchestra));
             }
 
-            std::string date = meta->get(MetadataHandler::getMetaFieldName(M_UPNP_DATE));
+            std::string date = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_UPNP_DATE));
             if (!string_ok(date)) {
                 date = "None";
             }

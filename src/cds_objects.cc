@@ -41,8 +41,6 @@ CdsObject::CdsObject(std::shared_ptr<Storage> storage)
     : Object()
     , storage(storage)
 {
-    metadata = Ref<Dictionary>(new Dictionary());
-    auxdata = Ref<Dictionary>(new Dictionary());
     resources = Ref<Array<CdsResource>>(new Array<CdsResource>);
     id = INVALID_OBJECT_ID;
     parentID = INVALID_OBJECT_ID;
@@ -65,8 +63,8 @@ void CdsObject::copyTo(Ref<CdsObject> obj)
     obj->setMTime(mtime);
     obj->setSizeOnDisk(sizeOnDisk);
     obj->setVirtual(virt);
-    obj->setMetadata(metadata->clone());
-    obj->setAuxData(auxdata->clone());
+    obj->setMetadata(metadata);
+    obj->setAuxData(auxdata);
     obj->setFlags(objectFlags);
     obj->setSortPriority(sortPriority);
     for (int i = 0; i < resources->size(); i++)
@@ -74,17 +72,29 @@ void CdsObject::copyTo(Ref<CdsObject> obj)
 }
 int CdsObject::equals(Ref<CdsObject> obj, bool exactly)
 {
-    if (!(
-            id == obj->getID() && parentID == obj->getParentID() && isRestricted() == obj->isRestricted() && title == obj->getTitle() && upnpClass == obj->getClass() && sortPriority == obj->getSortPriority()))
+    if (!(id == obj->getID()
+        && parentID == obj->getParentID()
+        && isRestricted() == obj->isRestricted()
+        && title == obj->getTitle()
+        && upnpClass == obj->getClass()
+        && sortPriority == obj->getSortPriority())
+        )
         return 0;
 
     if (!resourcesEqual(obj))
         return 0;
 
-    if (!metadata->equals(obj->getMetadata()))
+    if (!std::equal(metadata.begin(), metadata.end(), obj->getMetadata().begin()))
         return 0;
 
-    if (exactly && !(location == obj->getLocation() && mtime == obj->getMTime() && sizeOnDisk == obj->getSizeOnDisk() && virt == obj->isVirtual() && auxdata->equals(obj->auxdata) && objectFlags == obj->getFlags()))
+    if (exactly
+        && !(location == obj->getLocation()
+            && mtime == obj->getMTime()
+            && sizeOnDisk == obj->getSizeOnDisk()
+            && virt == obj->isVirtual()
+            && std::equal(auxdata.begin(), auxdata.end(), obj->auxdata.begin())
+            && objectFlags == obj->getFlags())
+        )
         return 0;
     return 1;
 }
@@ -287,8 +297,6 @@ void CdsContainer::validate()
 }
 void CdsObject::optimize()
 {
-    metadata->optimize();
-    auxdata->optimize();
     resources->optimize();
 }
 

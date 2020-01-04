@@ -40,7 +40,6 @@
 
 #include <sys/time.h>
 
-#include "cds_objects.h"
 #include "common.h"
 #include "iohandler/io_handler.h"
 #include "rexp.h"
@@ -50,11 +49,12 @@
 extern "C" {
 #include <magic.h>
 }
-
 #endif
 
 // forward declaration
 class ConfigManager;
+class CdsItem;
+
 
 /// \brief splits the given string into array of strings using a separator character.
 /// \param str String to split
@@ -163,6 +163,11 @@ std::string url_escape(std::string str);
 
 /// \brief Opposite of url_escape :)
 std::string urlUnescape(std::string str);
+
+std::string dict_encode(const std::map<std::string,std::string>& dict);
+std::string dict_encode_simple(const std::map<std::string,std::string>& dict);
+void dict_decode(std::string url, std::map<std::string,std::string>* dict);
+void dict_decode_simple(std::string url, std::map<std::string,std::string>* dict);
 
 /// \brief Convert an array of strings to a CSV list, with additional protocol information
 /// \param array that needs to be converted

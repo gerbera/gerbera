@@ -259,7 +259,7 @@ public:
     /// INVALID_OBJECT_ID indicates that the id will not be set.
     /// \return ID of the last container in the chain.
     int addContainerChain(std::string chain, std::string lastClass = "",
-        int lastRefID = INVALID_OBJECT_ID, zmm::Ref<Dictionary> lastMetadata = nullptr);
+        int lastRefID = INVALID_OBJECT_ID, const std::map<std::string,std::string>& lastMetadata = std::map<std::string,std::string>());
 
     /// \brief Adds a virtual container specified by parentID and title
     /// \param parentID the id of the parent.
