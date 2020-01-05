@@ -79,12 +79,12 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
     std::string parameters = (filename + strlen(LINK_FILE_REQUEST_HANDLER));
 
-    Ref<Dictionary> dict(new Dictionary());
-    dict->decodeSimple(parameters);
+    std::map<std::string,std::string> dict;
+    dict_decode_simple(parameters, &dict);
 
     log_debug("full url (filename): %s, parameters: %s\n", filename, parameters.c_str());
 
-    std::string objID = dict->get("object_id");
+    std::string objID = getValueOrDefault(dict, "object_id");
     if (objID.empty()) {
         //log_error("object_id not found in url\n");
         throw _Exception("getInfo: object_id not found");
@@ -107,13 +107,13 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
     // determining which resource to serve
     int res_id = 0;
-    std::string s_res_id = dict->get(URL_RESOURCE_ID);
+    std::string s_res_id = getValueOrDefault(dict, URL_RESOURCE_ID);
     if (string_ok(s_res_id) && (s_res_id != URL_VALUE_TRANSCODE_NO_RES_ID))
         res_id = std::stoi(s_res_id);
     else
         res_id = -1;
 
-    std::string ext = dict->get("ext");
+    std::string ext = getValueOrDefault(dict, "ext");
     size_t edot = ext.rfind('.');
     if (edot != std::string::npos)
         ext = ext.substr(edot);
@@ -160,11 +160,11 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         }
     }
 
-    tr_profile = dict->get(URL_PARAM_TRANSCODE_PROFILE_NAME);
+    tr_profile = getValueOrDefault(dict, URL_PARAM_TRANSCODE_PROFILE_NAME);
 
     // for transcoded resourecs res_id will always be negative
     log_debug("fetching resource id %d\n", res_id);
-    std::string rh = dict->get(RESOURCE_HANDLER);
+    std::string rh = getValueOrDefault(dict, RESOURCE_HANDLER);
 
     if (((res_id > 0) && (res_id < item->getResourceCount()))
         || ((res_id > 0) && string_ok(rh))) {

@@ -2408,23 +2408,21 @@ void SQLStorage::migrateMetadata(Ref<CdsObject> object)
     auto dict = object->getMetadata();
     if (!dict.empty()) {
         log_debug("Migrating metadata for cds object %d\n", object->getID());
-        Ref<Dictionary> metadataSQLVals(new Dictionary());
+        std::map<std::string,std::string> metadataSQLVals;
         for (auto it = dict.begin(); it != dict.end(); it++) {
-            metadataSQLVals->put(quote(it->first), quote(it->second));
+            metadataSQLVals[quote(it->first)] = quote(it->second);
         }
 
-        Ref<Array<DictionaryElement>> dataElements = metadataSQLVals->getElements();
-        for (int j = 0; j < dataElements->size(); j++) {
+        for (auto it = metadataSQLVals.begin(); it != metadataSQLVals.end(); it++) {
             std::ostringstream fields, values;
-            Ref<DictionaryElement> element = dataElements->get(j);
             fields << TQ("id") << ','
                     << TQ("item_id") << ','
                     << TQ("property_name") << ','
                     << TQ("property_value");
             values << getNextMetadataID() << ','
                     << object->getID() << ','
-                    << element->getKey() << ','
-                    << element->getValue();
+                    << it->first << ','
+                    << it->second;
             std::ostringstream qb;
             qb << "INSERT INTO " << TQ(METADATA_TABLE)
                << " (" << fields.str()

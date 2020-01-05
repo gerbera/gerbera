@@ -115,10 +115,10 @@ Ref<Element> UpnpXMLBuilder::renderObject(Ref<CdsObject> obj, bool renderActions
             std::string aa_id = storage->findFolderImage(item->getParentID(), trackArtBase);
             if (!aa_id.empty()) {
                 std::string url;
-                Ref<Dictionary> dict(new Dictionary());
-                dict->put(URL_OBJECT_ID, aa_id);
+                std::map<std::string,std::string> dict;
+                dict[URL_OBJECT_ID] = aa_id;
 
-                url = virtualURL + _URL_PARAM_SEPARATOR + CONTENT_MEDIA_HANDLER + _URL_PARAM_SEPARATOR + dict->encodeSimple() + _URL_PARAM_SEPARATOR + URL_RESOURCE_ID + _URL_PARAM_SEPARATOR + "0";
+                url = virtualURL + _URL_PARAM_SEPARATOR + CONTENT_MEDIA_HANDLER + _URL_PARAM_SEPARATOR + dict_encode_simple(dict) + _URL_PARAM_SEPARATOR + URL_RESOURCE_ID + _URL_PARAM_SEPARATOR + "0";
                 log_debug("UpnpXMLRenderer::DIDLRenderObject: url: %s\n", url.c_str());
                 Ref<Element> aa(new Element(MetadataHandler::getMetaFieldName(M_ALBUMARTURI)));
                 aa->setText(url);
@@ -192,10 +192,10 @@ Ref<Element> UpnpXMLBuilder::renderObject(Ref<CdsObject> obj, bool renderActions
                 log_debug("Using folder image as artwork for container\n");
 
                 std::string url;
-                Ref<Dictionary> dict(new Dictionary());
-                dict->put(URL_OBJECT_ID, aa_id);
+                std::map<std::string,std::string> dict;
+                dict[URL_OBJECT_ID] = aa_id;
 
-                url = virtualURL + _URL_PARAM_SEPARATOR + CONTENT_MEDIA_HANDLER + _URL_PARAM_SEPARATOR + dict->encodeSimple() + _URL_PARAM_SEPARATOR + URL_RESOURCE_ID + _URL_PARAM_SEPARATOR + "0";
+                url = virtualURL + _URL_PARAM_SEPARATOR + CONTENT_MEDIA_HANDLER + _URL_PARAM_SEPARATOR + dict_encode_simple(dict) + _URL_PARAM_SEPARATOR + URL_RESOURCE_ID + _URL_PARAM_SEPARATOR + "0";
 
                 result->appendElementChild(renderAlbumArtURI(url));
 
@@ -527,8 +527,8 @@ Ref<UpnpXMLBuilder::PathBase> UpnpXMLBuilder::getPathBase(Ref<CdsItem> item, boo
     Ref<PathBase> pathBase(new PathBase);
     /// \todo resource options must be read from configuration files
 
-    Ref<Dictionary> dict(new Dictionary());
-    dict->put(URL_OBJECT_ID, std::to_string(item->getID()));
+    std::map<std::string,std::string> dict;
+    dict[URL_OBJECT_ID] = std::to_string(item->getID());
 
     pathBase->addResID = false;
     /// \todo move this down into the "for" loop and create different urls
@@ -546,13 +546,13 @@ Ref<UpnpXMLBuilder::PathBase> UpnpXMLBuilder::getPathBase(Ref<CdsItem> item, boo
         }
 
         if ((item->getFlag(OBJECT_FLAG_ONLINE_SERVICE) && item->getFlag(OBJECT_FLAG_PROXY_URL)) || forceLocal) {
-            pathBase->pathBase = std::string(_URL_PARAM_SEPARATOR) + CONTENT_ONLINE_HANDLER + _URL_PARAM_SEPARATOR + dict->encodeSimple() + _URL_PARAM_SEPARATOR + URL_RESOURCE_ID + _URL_PARAM_SEPARATOR;
+            pathBase->pathBase = std::string(_URL_PARAM_SEPARATOR) + CONTENT_ONLINE_HANDLER + _URL_PARAM_SEPARATOR + dict_encode_simple(dict) + _URL_PARAM_SEPARATOR + URL_RESOURCE_ID + _URL_PARAM_SEPARATOR;
             pathBase->addResID = true;
             return pathBase;
         }
     }
 
-    pathBase->pathBase = std::string(_URL_PARAM_SEPARATOR) + CONTENT_MEDIA_HANDLER + _URL_PARAM_SEPARATOR + dict->encodeSimple() + _URL_PARAM_SEPARATOR + URL_RESOURCE_ID + _URL_PARAM_SEPARATOR;
+    pathBase->pathBase = std::string(_URL_PARAM_SEPARATOR) + CONTENT_MEDIA_HANDLER + _URL_PARAM_SEPARATOR + dict_encode_simple(dict) + _URL_PARAM_SEPARATOR + URL_RESOURCE_ID + _URL_PARAM_SEPARATOR;
     pathBase->addResID = true;
     return pathBase;
 }
