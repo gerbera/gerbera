@@ -768,7 +768,7 @@ void ContentManager::addRecursive(std::string path, bool hidden, Ref<GenericTask
             return;
     }
 
-    Ref<StringConverter> f2i = StringConverter::f2i(config);
+    auto f2i = StringConverter::f2i(config);
 
     DIR* dir = opendir(path.c_str());
     if (!dir) {
@@ -1132,7 +1132,7 @@ Ref<CdsObject> ContentManager::createObjectFromFile(std::string path, bool magic
             item->setClass(upnp_class);
         }
 
-        Ref<StringConverter> f2i = StringConverter::f2i(config);
+        auto f2i = StringConverter::f2i(config);
         obj->setTitle(f2i->convert(filename));
 
         if (magic) {

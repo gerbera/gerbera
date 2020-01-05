@@ -83,7 +83,7 @@ void web::directories::process()
         else
             ce->setAttribute("child_count", std::to_string(0), mxml_int_type);
 
-        Ref<StringConverter> f2i = StringConverter::f2i(config);
+        auto f2i = StringConverter::f2i(config);
         ce->setTextKey("title");
         ce->setText(f2i->convert(filename));
         containers->appendElementChild(ce);

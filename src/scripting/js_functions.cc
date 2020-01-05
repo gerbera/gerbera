@@ -89,8 +89,8 @@ duk_ret_t js_addCdsObject(duk_context *ctx)
     {
         Ref<CdsObject> orig_object;
 
-        Ref<StringConverter> p2i;
-        Ref<StringConverter> i2i;
+        std::unique_ptr<StringConverter> p2i;
+        std::unique_ptr<StringConverter> i2i;
 
         auto config = self->getConfig();
         if (self->whoami() == S_PLAYLIST)

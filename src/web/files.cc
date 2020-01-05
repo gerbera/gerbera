@@ -71,7 +71,7 @@ void web::files::process()
         std::string id = hex_encode(filepath.c_str(), filepath.length());
         fe->setAttribute("id", id);
 
-        Ref<StringConverter> f2i = StringConverter::f2i(config);
+        auto f2i = StringConverter::f2i(config);
         fe->setTextKey("filename");
         fe->setText(f2i->convert(filename));
         files->appendElementChild(fe);

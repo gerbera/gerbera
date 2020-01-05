@@ -265,7 +265,7 @@ void Script::_load(std::string scriptPath)
     if (!string_ok(scriptText))
         throw _Exception("empty script");
 
-    Ref<StringConverter> j2i = StringConverter::j2i(config);
+    auto j2i = StringConverter::j2i(config);
     try
     {
         scriptText = j2i->convert(scriptText, true);
@@ -315,7 +315,7 @@ Ref<CdsObject> Script::dukObject2cdsObject(zmm::Ref<CdsObject> pcd)
     int objectType;
     int b;
     int i;
-    Ref<StringConverter> sc;
+    std::unique_ptr<StringConverter> sc;
 
     if (this->whoami() == S_PLAYLIST)
     {

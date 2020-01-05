@@ -70,7 +70,7 @@ std::string FallbackLayout::esc(std::string str)
 
 void FallbackLayout::addVideo(zmm::Ref<CdsObject> obj, std::string rootpath)
 {
-    Ref<StringConverter> f2i = StringConverter::f2i(config);
+    auto f2i = StringConverter::f2i(config);
     int id = content->addContainerChain("/Video/All Video");
 
     if (obj->getID() != INVALID_OBJECT_ID)
@@ -108,7 +108,7 @@ void FallbackLayout::addVideo(zmm::Ref<CdsObject> obj, std::string rootpath)
 void FallbackLayout::addImage(Ref<CdsObject> obj, std::string rootpath)
 {
     int id;
-    Ref<StringConverter> f2i = StringConverter::f2i(config);
+    auto f2i = StringConverter::f2i(config);
 
     id = content->addContainerChain("/Photos/All Photos");
     if (obj->getID() != INVALID_OBJECT_ID)

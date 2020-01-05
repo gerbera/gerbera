@@ -49,7 +49,7 @@ void Exiv2Handler::fillMetadata(Ref<CdsItem> item)
 {
     try {
         std::string value;
-        Ref<StringConverter> sc = StringConverter::m2i(config);
+        auto sc = StringConverter::m2i(config);
 
         Exiv2::Image::AutoPtr image = Exiv2::ImageFactory::open(std::string(item->getLocation().c_str()));
         image->readMetadata();

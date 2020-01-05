@@ -181,7 +181,7 @@ void MatroskaHandler::parseInfo(Ref<CdsItem> item, EbmlStream & ebml_stream, Kax
     m = static_cast<EbmlMaster *>(info);
     m->Read(ebml_stream, EBML_CONTEXT(info), i_upper_level, dummy_el, true);
 
-    Ref<StringConverter> sc = StringConverter::i2i(config); // sure is sure
+    auto sc = StringConverter::i2i(config); // sure is sure
 
     for( size_t i = 0; i < m->ListSize(); i++) {
         EbmlElement* el = (*m)[i];

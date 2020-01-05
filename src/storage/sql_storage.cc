@@ -786,7 +786,7 @@ int SQLStorage::_ensurePathExistence(std::string path, int* changedContainer)
 
     int parentID = ensurePathExistence(parent, changedContainer);
 
-    Ref<StringConverter> f2i = StringConverter::f2i(config);
+    auto f2i = StringConverter::f2i(config);
     if (changedContainer != nullptr && *changedContainer == INVALID_OBJECT_ID)
         *changedContainer = parentID;
 

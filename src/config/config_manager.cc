@@ -565,15 +565,15 @@ void ConfigManager::validate(std::string serverhome)
 #endif
     // check if the one we take as default is actually available
     try {
-        Ref<StringConverter> conv(new StringConverter(temp,
-            DEFAULT_INTERNAL_CHARSET));
+        auto conv = std::make_unique<StringConverter>(temp,
+            DEFAULT_INTERNAL_CHARSET);
     } catch (const Exception& e) {
         temp = DEFAULT_FALLBACK_CHARSET;
     }
     std::string charset = getOption("/import/filesystem-charset", temp);
     try {
-        Ref<StringConverter> conv(new StringConverter(charset,
-            DEFAULT_INTERNAL_CHARSET));
+        auto conv = std::make_unique<StringConverter>(charset,
+            DEFAULT_INTERNAL_CHARSET);
     } catch (const Exception& e) {
         throw _Exception("Error in config file: unsupported "
                          "filesystem-charset specified: "
@@ -586,8 +586,8 @@ void ConfigManager::validate(std::string serverhome)
 
     charset = getOption("/import/metadata-charset", temp);
     try {
-        Ref<StringConverter> conv(new StringConverter(charset,
-            DEFAULT_INTERNAL_CHARSET));
+        auto conv = std::make_unique<StringConverter>(charset,
+            DEFAULT_INTERNAL_CHARSET);
     } catch (const Exception& e) {
         throw _Exception("Error in config file: unsupported "
                          "metadata-charset specified: "
@@ -600,8 +600,8 @@ void ConfigManager::validate(std::string serverhome)
 
     charset = getOption("/import/playlist-charset", temp);
     try {
-        Ref<StringConverter> conv(new StringConverter(charset,
-            DEFAULT_INTERNAL_CHARSET));
+        auto conv = std::make_unique<StringConverter>(charset,
+            DEFAULT_INTERNAL_CHARSET);
     } catch (const Exception& e) {
         throw _Exception("Error in config file: unsupported playlist-charset specified: " + charset);
     }
@@ -789,8 +789,8 @@ void ConfigManager::validate(std::string serverhome)
         DEFAULT_JS_CHARSET);
     if (temp == "js") {
         try {
-            Ref<StringConverter> conv(new StringConverter(charset,
-                DEFAULT_INTERNAL_CHARSET));
+            auto conv = std::make_unique<StringConverter>(charset,
+                DEFAULT_INTERNAL_CHARSET);
         } catch (const Exception& e) {
             throw _Exception("Error in config file: unsupported import script charset specified: " + charset);
         }
