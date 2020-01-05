@@ -32,6 +32,7 @@
 #-------------- FIND MYSQL_INCLUDE_DIR ------------------
 FIND_PATH(MYSQL_INCLUDE_DIR mysql.h
   /usr/include/mysql
+  /usr/include/mariadb
   /usr/local/include/mysql
   /opt/mysql/mysql/include
   /opt/mysql/mysql/include/mysql
@@ -66,9 +67,10 @@ IF (WIN32)
     $ENV{ProgramFiles}/MySQL/*/lib/${libsuffixDist}
     $ENV{SystemDrive}/MySQL/*/lib/${libsuffixDist})
 ELSE (WIN32)
-  FIND_LIBRARY(MYSQL_LIB NAMES mysqlclient_r mysqlclient
+  FIND_LIBRARY(MYSQL_LIB NAMES mysqlclient_r mysqlclient mariadbclient
     PATHS
     /usr/lib/mysql
+    /usr/lib/mariadb
     /usr/local/lib/mysql
     /usr/local/mysql/lib
     /usr/local/mysql/lib/mysql

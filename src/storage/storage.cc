@@ -62,7 +62,7 @@ std::shared_ptr<Storage> Storage::createInstance(std::shared_ptr<ConfigManager> 
 
 #ifdef HAVE_MYSQL
         if (type == "mysql") {
-            storage = std::static_pointer_cast<Storage>(std::make_shared<MysqlStorage>());
+            storage = std::static_pointer_cast<Storage>(std::make_shared<MysqlStorage>(config));
             break;
         }
 #endif
