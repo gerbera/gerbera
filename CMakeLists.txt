@@ -243,8 +243,6 @@ set(libgerberaFILES
         src/zmm/array.h
         src/zmm/base_queue.h
         src/zmm/base_stack.h
-        src/zmm/dictionary.cc
-        src/zmm/dictionary.h
         src/zmm/object_dictionary.h
         src/zmm/object_queue.h
         src/zmm/object_stack.h

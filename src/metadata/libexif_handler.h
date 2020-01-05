@@ -51,7 +51,7 @@ protected:
     std::string imageX;
     std::string imageY;
 
-    void process_ifd(ExifContent* content, zmm::Ref<CdsItem> item, zmm::Ref<StringConverter> sc, std::vector<std::string> auxtags);
+    void process_ifd(ExifContent* content, zmm::Ref<CdsItem> item, const std::unique_ptr<StringConverter>& sc, std::vector<std::string> auxtags);
 
 public:
     LibExifHandler(std::shared_ptr<ConfigManager> config);

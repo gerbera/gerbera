@@ -107,12 +107,12 @@ public:
     void setTaskCount(int taskCount) { this->taskCount = taskCount; }
 
     /// Parameter that can be used by timerNotify
-    void setTimerParameter(zmm::Ref<Timer::Parameter> param)
+    void setTimerParameter(std::shared_ptr<Timer::Parameter> param)
     {
         timer_parameter = param;
     }
 
-    zmm::Ref<Timer::Parameter> getTimerParameter() { return timer_parameter; }
+    std::shared_ptr<Timer::Parameter> getTimerParameter() { return timer_parameter; }
 
     /// \brief Sets the service refresh interval in seconds
     void setRefreshInterval(int interval) { refresh_interval = interval; }
@@ -130,7 +130,7 @@ protected:
     int taskCount;
     int refresh_interval;
     int purge_interval;
-    zmm::Ref<Timer::Parameter> timer_parameter;
+    std::shared_ptr<Timer::Parameter> timer_parameter;
 
     /// \brief retrieves a required attribute given by the name
     std::string getCheckAttr(zmm::Ref<mxml::Element> xml, std::string attrname);

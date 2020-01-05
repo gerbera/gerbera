@@ -274,7 +274,7 @@ std::string find_in_path(std::string exec)
     if (!string_ok(PATH))
         return "";
 
-    Ref<StringTokenizer> st(new StringTokenizer(PATH));
+    auto st = std::make_unique<StringTokenizer>(PATH);
     std::string path = "";
     std::string next;
     do {
@@ -467,6 +467,77 @@ std::string urlUnescape(std::string str)
         }
     }
     return buf.str();
+}
+
+static std::string dict_encode(const std::map<std::string,std::string>& dict, char sep1, char sep2)
+{
+    std::ostringstream buf;
+    for (auto it = dict.begin(); it != dict.end(); it++) {
+        if (it != dict.begin())
+            buf << sep1;
+        buf << url_escape(it->first) << sep2
+            << url_escape(it->second);
+    }
+    return buf.str();
+}
+
+std::string dict_encode(const std::map<std::string,std::string>& dict)
+{
+    return dict_encode(dict, '&', '=');
+}
+
+std::string dict_encode_simple(const std::map<std::string,std::string>& dict)
+{
+    return dict_encode(dict, '/', '/');
+}
+
+void dict_decode(std::string url, std::map<std::string,std::string>* dict)
+{
+    const char* data = url.c_str();
+    const char* dataEnd = data + url.length();
+    while (data < dataEnd) {
+        const char* ampPos = strchr(data, '&');
+        if (!ampPos) {
+            ampPos = dataEnd;
+        }
+        const char* eqPos = strchr(data, '=');
+        if (eqPos && eqPos < ampPos) {
+            std::string key(data, eqPos - data);
+            std::string value(eqPos + 1, ampPos - eqPos - 1);
+            key = urlUnescape(key);
+            value = urlUnescape(value);
+
+            dict->insert(std::pair(key, value));
+        }
+        data = ampPos + 1;
+    }
+}
+
+// this is somewhat tricky as we need an exact amount of pairs
+// object_id=720&res_id=0
+void dict_decode_simple(std::string url, std::map<std::string,std::string>* dict)
+{
+    std::string encoded;
+    size_t pos;
+    size_t last_pos = 0;
+    do {
+        pos = url.find('/', last_pos);
+        if (pos == std::string::npos || pos < last_pos + 1)
+            break;
+
+        std::string key = urlUnescape(url.substr(last_pos, pos - last_pos));
+        last_pos = pos + 1;
+        pos = url.find('/', last_pos);
+        if (pos == std::string::npos)
+            pos = url.length();
+        if (pos < last_pos + 1)
+            break;
+
+        std::string value = urlUnescape(url.substr(last_pos, pos - last_pos));
+        last_pos = pos + 1;
+
+        dict->insert(std::pair(key, value));
+    } while (last_pos < url.length());
 }
 
 std::string mime_types_to_CSV(std::vector<std::string> mimeTypes)
@@ -968,6 +1039,11 @@ unsigned int stringHash(std::string str)
     while ((c = *data++))
         hash = ((hash << 5) + hash) ^ c; /* (hash * 33) ^ c */
     return hash;
+}
+
+std::string getValueOrDefault(const std::map<std::string,std::string>& m, const std::string& key, const std::string& defval)
+{
+    return getValueOrDefault<std::string,std::string>(m, key, defval);
 }
 
 std::string toCSV(shared_ptr<unordered_set<int>> array)

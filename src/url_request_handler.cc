@@ -41,7 +41,6 @@
 
 #include "iohandler/buffered_io_handler.h"
 #include "cds_objects.h"
-#include "zmm/dictionary.h"
 #include "url_request_handler.h"
 
 #ifdef ONLINE_SERVICES
@@ -74,13 +73,13 @@ void URLRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
     std::string url, parameters;
     parameters = (filename + strlen(LINK_URL_REQUEST_HANDLER));
 
-    Ref<Dictionary> dict(new Dictionary());
-    dict->decodeSimple(parameters);
+    std::map<std::string,std::string> dict;
+    dict_decode_simple(parameters, &dict);
 
     log_debug("full url (filename): %s, parameters: %s\n",
         filename, parameters.c_str());
 
-    std::string objID = dict->get("object_id");
+    std::string objID = getValueOrDefault(dict, "object_id");
     if (objID.empty()) {
         //log_error("object_id not found in url\n");
         throw _Exception("getInfo: object_id not found");
@@ -97,7 +96,7 @@ void URLRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
         throw _Exception("getInfo: object is not an external url item");
     }
 
-    tr_profile = dict->get(URL_PARAM_TRANSCODE_PROFILE_NAME);
+    tr_profile = getValueOrDefault(dict, URL_PARAM_TRANSCODE_PROFILE_NAME);
 
     if (string_ok(tr_profile)) {
         Ref<TranscodingProfile> tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(tr_profile);
@@ -175,12 +174,12 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
     std::string url, parameters;
     parameters = (filename + strlen(LINK_URL_REQUEST_HANDLER));
 
-    Ref<Dictionary> dict(new Dictionary());
-    dict->decodeSimple(parameters);
+    std::map<std::string,std::string> dict;
+    dict_decode_simple(parameters, &dict);
     log_debug("full url (filename): %s, parameters: %s\n",
         filename, parameters.c_str());
 
-    std::string objID = dict->get("object_id");
+    std::string objID = getValueOrDefault(dict, "object_id");
     if (objID.empty()) {
         throw _Exception("object_id not found");
     } else
@@ -213,7 +212,7 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
     //info->is_directory = 0;
     //info->http_header = NULL;
 
-    tr_profile = dict->get(URL_PARAM_TRANSCODE_PROFILE_NAME);
+    tr_profile = getValueOrDefault(dict, URL_PARAM_TRANSCODE_PROFILE_NAME);
 
     if (string_ok(tr_profile)) {
         Ref<TranscodingProfile> tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(tr_profile);

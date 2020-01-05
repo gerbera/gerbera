@@ -427,10 +427,10 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
         std::string path;
         RequestHandler::splitUrl(filename, URL_UI_PARAM_SEPARATOR, path, parameters);
 
-        Ref<Dictionary> dict(new Dictionary());
-        dict->decode(parameters);
+        std::map<std::string,std::string> dict;
+        dict_decode(parameters, &dict);
 
-        std::string r_type = dict->get(URL_REQUEST_TYPE);
+        std::string r_type = getValueOrDefault(dict, URL_REQUEST_TYPE);
         if (r_type.empty())
             r_type = "index";
 

@@ -94,8 +94,7 @@ res_key RES_KEYS[] = {
 };
 
 MetadataHandler::MetadataHandler(std::shared_ptr<ConfigManager> config)
-    : Object()
-    , config(config)
+    : config(config)
 {
 }
 
@@ -108,14 +107,14 @@ void MetadataHandler::setMetadata(std::shared_ptr<ConfigManager> config, Ref<Cds
 
     std::string mimetype = item->getMimeType();
 
-    Ref<CdsResource> resource(new CdsResource(CH_DEFAULT));
+    auto resource = std::make_shared<CdsResource>(CH_DEFAULT);
     resource->addAttribute(getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(mimetype));
     resource->addAttribute(getResAttrName(R_SIZE), std::to_string(filesize));
 
     item->addResource(resource);
 
-    Ref<Dictionary> mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-    std::string content_type = mappings->get(mimetype);
+    auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+    std::string content_type = getValueOrDefault(mappings, mimetype);
 
     if ((content_type == CONTENT_TYPE_OGG) && (isTheora(item->getLocation()))) {
         item->setFlag(OBJECT_FLAG_OGG_THEORA);
@@ -173,27 +172,27 @@ std::string MetadataHandler::getResAttrName(resource_attributes_t attr)
     return RES_KEYS[attr].upnp;
 }
 
-Ref<MetadataHandler> MetadataHandler::createHandler(std::shared_ptr<ConfigManager> config, int handlerType)
+std::unique_ptr<MetadataHandler> MetadataHandler::createHandler(std::shared_ptr<ConfigManager> config, int handlerType)
 {
     switch (handlerType) {
 #ifdef HAVE_LIBEXIF
     case CH_LIBEXIF:
-        return Ref<MetadataHandler>(new LibExifHandler(config));
+        return std::make_unique<LibExifHandler>(config);
 #endif
 #ifdef HAVE_TAGLIB
     case CH_ID3:
-        return Ref<MetadataHandler>(new TagLibHandler(config));
+        return std::make_unique<TagLibHandler>(config);
 #endif
 #ifdef HAVE_MATROSKA
     case CH_MATROSKA:
-        return Ref<MetadataHandler>(new MatroskaHandler(config));
+        return std::make_unique<MatroskaHandler>(config);
 #endif
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
     case CH_FFTH:
-        return Ref<MetadataHandler>(new FfmpegHandler(config));
+        return std::make_unique<FfmpegHandler>(config);
 #endif
     case CH_FANART:
-        return Ref<MetadataHandler>(new FanArtHandler(config));
+        return std::make_unique<FanArtHandler>(config);
     default:
         throw _Exception("unknown content handler ID: " + std::to_string(handlerType));
     }

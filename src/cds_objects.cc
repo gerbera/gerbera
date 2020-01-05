@@ -41,9 +41,6 @@ CdsObject::CdsObject(std::shared_ptr<Storage> storage)
     : Object()
     , storage(storage)
 {
-    metadata = Ref<Dictionary>(new Dictionary());
-    auxdata = Ref<Dictionary>(new Dictionary());
-    resources = Ref<Array<CdsResource>>(new Array<CdsResource>);
     id = INVALID_OBJECT_ID;
     parentID = INVALID_OBJECT_ID;
     refID = INVALID_OBJECT_ID;
@@ -65,38 +62,50 @@ void CdsObject::copyTo(Ref<CdsObject> obj)
     obj->setMTime(mtime);
     obj->setSizeOnDisk(sizeOnDisk);
     obj->setVirtual(virt);
-    obj->setMetadata(metadata->clone());
-    obj->setAuxData(auxdata->clone());
+    obj->setMetadata(metadata);
+    obj->setAuxData(auxdata);
     obj->setFlags(objectFlags);
     obj->setSortPriority(sortPriority);
-    for (int i = 0; i < resources->size(); i++)
-        obj->addResource(resources->get(i)->clone());
+    for (size_t i = 0; i < resources.size(); i++)
+        obj->addResource(resources[i]->clone());
 }
 int CdsObject::equals(Ref<CdsObject> obj, bool exactly)
 {
-    if (!(
-            id == obj->getID() && parentID == obj->getParentID() && isRestricted() == obj->isRestricted() && title == obj->getTitle() && upnpClass == obj->getClass() && sortPriority == obj->getSortPriority()))
+    if (!(id == obj->getID()
+        && parentID == obj->getParentID()
+        && isRestricted() == obj->isRestricted()
+        && title == obj->getTitle()
+        && upnpClass == obj->getClass()
+        && sortPriority == obj->getSortPriority())
+        )
         return 0;
 
     if (!resourcesEqual(obj))
         return 0;
 
-    if (!metadata->equals(obj->getMetadata()))
+    if (!std::equal(metadata.begin(), metadata.end(), obj->getMetadata().begin()))
         return 0;
 
-    if (exactly && !(location == obj->getLocation() && mtime == obj->getMTime() && sizeOnDisk == obj->getSizeOnDisk() && virt == obj->isVirtual() && auxdata->equals(obj->auxdata) && objectFlags == obj->getFlags()))
+    if (exactly
+        && !(location == obj->getLocation()
+            && mtime == obj->getMTime()
+            && sizeOnDisk == obj->getSizeOnDisk()
+            && virt == obj->isVirtual()
+            && std::equal(auxdata.begin(), auxdata.end(), obj->auxdata.begin())
+            && objectFlags == obj->getFlags())
+        )
         return 0;
     return 1;
 }
 
 int CdsObject::resourcesEqual(Ref<CdsObject> obj)
 {
-    if (resources->size() != obj->resources->size())
+    if (resources.size() != obj->resources.size())
         return 0;
 
     // compare all resources
-    for (int i = 0; i < resources->size(); i++) {
-        if (!resources->get(i)->equals(obj->resources->get(i)))
+    for (size_t i = 0; i < resources.size(); i++) {
+        if (!resources[i]->equals(obj->resources[i]))
             return 0;
     }
     return 1;
@@ -284,12 +293,6 @@ void CdsContainer::validate()
     /// \todo well.. we have to know if a container is a real directory or just a virtual container in the database
     /*    if (!check_path(this->location, true))
         throw _Exception("CdsContainer: validation failed"); */
-}
-void CdsObject::optimize()
-{
-    metadata->optimize();
-    auxdata->optimize();
-    resources->optimize();
 }
 
 int CdsObjectTitleComparator(void* arg1, void* arg2)

@@ -66,8 +66,6 @@ bool SopCastContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
     channel_count = 0;
     current_group = nullptr;
 
-    extension_mimetype_map = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
-
     return true;
 }
 
@@ -125,7 +123,7 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
                 continue;
 
             Ref<CdsItemExternalURL> item(new CdsItemExternalURL(storage));
-            Ref<CdsResource> resource(new CdsResource(CH_DEFAULT));
+            auto resource = std::make_shared<CdsResource>(CH_DEFAULT);
             item->addResource(resource);
 
             item->setAuxData(ONLINE_SERVICE_AUX_ID,
@@ -149,7 +147,8 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
             }
 
             // I wish they had a mimetype setting
-            //std::string mt = extension_mimetype_map->get(temp);
+            //auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
+            //std::string mt = getValueOrDefault(mappings, temp);
             std::string mt;
             // map was empty, we have to do construct the mimetype ourselves
             if (!string_ok(mt)) {

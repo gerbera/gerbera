@@ -52,7 +52,6 @@ WebRequestHandler::WebRequestHandler(std::shared_ptr<ConfigManager> config,
     , sessionManager(sessionManager)
     , checkRequestCalled(false)
 {
-    params = Ref<Dictionary>(new Dictionary());
 }
 
 int WebRequestHandler::intParam(std::string name, int invalid)
@@ -103,7 +102,7 @@ void WebRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
     std::string path, parameters;
     splitUrl(filename, URL_UI_PARAM_SEPARATOR, path, parameters);
 
-    params->decode(parameters);
+    dict_decode(parameters, &params);
 
     UpnpFileInfo_set_FileLength(info, -1); // length is unknown
 
@@ -236,7 +235,7 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(const char* filename,
     std::string path, parameters;
     splitUrl(filename, URL_UI_PARAM_SEPARATOR, path, parameters);
 
-    params->decode(parameters);
+    dict_decode(parameters, &params);
 
     return open(mode);
 }
@@ -257,7 +256,7 @@ void WebRequestHandler::handleUpdateIDs()
     }
 }
 
-void WebRequestHandler::addUpdateIDs(Ref<Element> updateIDsEl, Ref<Session> session)
+void WebRequestHandler::addUpdateIDs(Ref<Element> updateIDsEl, std::shared_ptr<Session> session)
 {
     std::string updateIDs = session->getUIUpdateIDs();
     if (string_ok(updateIDs)) {

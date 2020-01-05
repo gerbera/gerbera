@@ -39,7 +39,6 @@
 
 #include "autoscan.h"
 #include "cds_objects.h"
-#include "zmm/dictionary.h"
 #include "zmm/zmmf.h"
 
 #define BROWSE_DIRECT_CHILDREN 0x00000001
@@ -162,7 +161,7 @@ public:
     /// updateID will hold the objectID of the container that was changed,
     /// in case new containers were created during the operation.
     virtual void addContainerChain(std::string path, std::string lastClass, int lastRefID, int* containerID,
-        int* updateID, zmm::Ref<Dictionary> lastMetadata) = 0;
+        int* updateID, const std::map<std::string,std::string>& lastMetadata) = 0;
 
     /// \brief Builds the container path. Fetches the path of the
     /// parent and adds the title
@@ -256,7 +255,7 @@ public:
     virtual void storeInternalSetting(std::string key, std::string value) = 0;
 
     /* autoscan methods */
-    virtual void updateAutoscanPersistentList(ScanMode scanmode, zmm::Ref<AutoscanList> list) = 0;
+    virtual void updateAutoscanPersistentList(ScanMode scanmode, std::shared_ptr<AutoscanList> list) = 0;
     virtual zmm::Ref<AutoscanList> getAutoscanList(ScanMode scanode) = 0;
     virtual void addAutoscanDirectory(zmm::Ref<AutoscanDirectory> adir) = 0;
     virtual void updateAutoscanDirectory(zmm::Ref<AutoscanDirectory> adir) = 0;

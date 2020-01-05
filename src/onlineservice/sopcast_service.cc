@@ -83,7 +83,7 @@ Ref<Object> SopCastService::defineServiceTask(Ref<Element> xmlopt, Ref<Object> p
 Ref<Element> SopCastService::getData()
 {
     long retcode;
-    Ref<StringConverter> sc = StringConverter::i2i(config);
+    auto sc = StringConverter::i2i(config);
 
     std::string buffer;
 

@@ -39,17 +39,13 @@
 using namespace zmm;
 
 CdsResource::CdsResource(int handlerType)
-    : Object()
 {
     this->handlerType = handlerType;
-    this->attributes = Ref<Dictionary>(new Dictionary());
-    this->parameters = Ref<Dictionary>(new Dictionary());
-    this->options = Ref<Dictionary>(new Dictionary());
 }
 CdsResource::CdsResource(int handlerType,
-    Ref<Dictionary> attributes,
-    Ref<Dictionary> parameters,
-    Ref<Dictionary> options)
+    const std::map<std::string,std::string>& attributes,
+    const std::map<std::string,std::string>& parameters,
+    const std::map<std::string,std::string>& options)
 {
     this->handlerType = handlerType;
     this->attributes = attributes;
@@ -59,27 +55,29 @@ CdsResource::CdsResource(int handlerType,
 
 void CdsResource::addAttribute(std::string name, std::string value)
 {
-    attributes->put(name, value);
+    attributes[name] = value;
 }
 
 void CdsResource::removeAttribute(std::string name)
 {
-    attributes->remove(name);
+    attributes.erase(name);
 }
 
-void CdsResource::mergeAttributes(Ref<Dictionary> additional)
+void CdsResource::mergeAttributes(const std::map<std::string,std::string>& additional)
 {
-    attributes->merge(additional);
+    for (auto it = additional.begin(); it != additional.end(); it++) {
+        attributes[it->first] = it->second;
+    }
 }
 
 void CdsResource::addParameter(std::string name, std::string value)
 {
-    parameters->put(name, value);
+    parameters[name] = value;
 }
 
 void CdsResource::addOption(std::string name, std::string value)
 {
-    options->put(name, value);
+    options[name] = value;
 }
 
 int CdsResource::getHandlerType()
@@ -87,48 +85,48 @@ int CdsResource::getHandlerType()
     return handlerType;
 }
 
-Ref<Dictionary> CdsResource::getAttributes()
+std::map<std::string,std::string> CdsResource::getAttributes()
 {
     return attributes;
 }
 
-Ref<Dictionary> CdsResource::getParameters()
+std::map<std::string,std::string> CdsResource::getParameters()
 {
     return parameters;
 }
 
-Ref<Dictionary> CdsResource::getOptions()
+std::map<std::string,std::string> CdsResource::getOptions()
 {
     return options;
 }
 
 std::string CdsResource::getAttribute(std::string name)
 {
-    return attributes->get(name);
+    return getValueOrDefault(attributes, name);
 }
 
 std::string CdsResource::getParameter(std::string name)
 {
-    return parameters->get(name);
+    return getValueOrDefault(parameters, name);
 }
 
 std::string CdsResource::getOption(std::string name)
 {
-    return options->get(name);
+    return getValueOrDefault(options, name);
 }
 
-bool CdsResource::equals(Ref<CdsResource> other)
+bool CdsResource::equals(std::shared_ptr<CdsResource> other)
 {
     return (
-        handlerType == other->handlerType && attributes->equals(other->attributes) && parameters->equals(other->parameters) && options->equals(other->options));
+        handlerType == other->handlerType
+        && std::equal(attributes.begin(), attributes.end(), other->attributes.begin())
+        && std::equal(parameters.begin(), parameters.end(), other->parameters.begin())
+        && std::equal(options.begin(), options.end(), other->options.begin()));
 }
 
-Ref<CdsResource> CdsResource::clone()
+std::shared_ptr<CdsResource> CdsResource::clone()
 {
-    return Ref<CdsResource>(new CdsResource(handlerType,
-        attributes->clone(),
-        parameters->clone(),
-        options->clone()));
+    return std::make_shared<CdsResource>(handlerType, attributes, parameters, options);
 }
 
 std::string CdsResource::encode()
@@ -137,15 +135,15 @@ std::string CdsResource::encode()
     std::ostringstream buf;
     buf << handlerType;
     buf << RESOURCE_PART_SEP;
-    buf << attributes->encode();
+    buf << dict_encode(attributes);
     buf << RESOURCE_PART_SEP;
-    buf << parameters->encode();
+    buf << dict_encode(parameters);
     buf << RESOURCE_PART_SEP;
-    buf << options->encode();
+    buf << dict_encode(options);
     return buf.str().c_str();
 }
 
-Ref<CdsResource> CdsResource::decode(std::string serial)
+std::shared_ptr<CdsResource> CdsResource::decode(std::string serial)
 {
     std::vector<std::string> parts = split_string(serial, RESOURCE_PART_SEP, true);
     int size = parts.size();
@@ -154,27 +152,18 @@ Ref<CdsResource> CdsResource::decode(std::string serial)
 
     int handlerType = std::stoi(parts[0]);
 
-    Ref<Dictionary> attr(new Dictionary());
-    attr->decode(parts[1]);
+    std::map<std::string,std::string> attr;
+    dict_decode(parts[1], &attr);
 
-    Ref<Dictionary> par(new Dictionary());
-
+    std::map<std::string,std::string> par;
     if (size >= 3)
-        par->decode(parts[2]);
+        dict_decode(parts[2], &par);
 
-    Ref<Dictionary> opt(new Dictionary());
-
+    std::map<std::string,std::string> opt;
     if (size >= 4)
-        opt->decode(parts[3]);
+        dict_decode(parts[3], &opt);
 
-    Ref<CdsResource> resource(new CdsResource(handlerType, attr, par, opt));
-
+    auto resource = std::make_shared<CdsResource>(handlerType, attr, par, opt);
     return resource;
 }
 
-void CdsResource::optimize()
-{
-    attributes->optimize();
-    parameters->optimize();
-    options->optimize();
-}

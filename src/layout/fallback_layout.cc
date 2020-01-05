@@ -70,7 +70,7 @@ std::string FallbackLayout::esc(std::string str)
 
 void FallbackLayout::addVideo(zmm::Ref<CdsObject> obj, std::string rootpath)
 {
-    Ref<StringConverter> f2i = StringConverter::f2i(config);
+    auto f2i = StringConverter::f2i(config);
     int id = content->addContainerChain("/Video/All Video");
 
     if (obj->getID() != INVALID_OBJECT_ID)
@@ -108,7 +108,7 @@ void FallbackLayout::addVideo(zmm::Ref<CdsObject> obj, std::string rootpath)
 void FallbackLayout::addImage(Ref<CdsObject> obj, std::string rootpath)
 {
     int id;
-    Ref<StringConverter> f2i = StringConverter::f2i(config);
+    auto f2i = StringConverter::f2i(config);
 
     id = content->addContainerChain("/Photos/All Photos");
     if (obj->getID() != INVALID_OBJECT_ID)
@@ -122,9 +122,9 @@ void FallbackLayout::addImage(Ref<CdsObject> obj, std::string rootpath)
         obj->setRefID(obj->getID());
     }
 
-    Ref<Dictionary> meta = obj->getMetadata();
+    auto meta = obj->getMetadata();
 
-    std::string date = meta->get(MetadataHandler::getMetaFieldName(M_DATE));
+    std::string date = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_DATE));
     if (string_ok(date))
     {
         std::string year, month;
@@ -182,13 +182,13 @@ void FallbackLayout::addAudio(zmm::Ref<CdsObject> obj)
 
     int id;
 
-    Ref<Dictionary> meta = obj->getMetadata();
+    auto meta = obj->getMetadata();
 
-    std::string title = meta->get(MetadataHandler::getMetaFieldName(M_TITLE));
+    std::string title = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_TITLE));
     if (!string_ok(title))
         title = obj->getTitle();
 
-    std::string artist = meta->get(MetadataHandler::getMetaFieldName(M_ARTIST));
+    std::string artist = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_ARTIST));
     if (string_ok(artist))
     {
         artist_full = artist;
@@ -197,7 +197,7 @@ void FallbackLayout::addAudio(zmm::Ref<CdsObject> obj)
     else
         artist = "Unknown";
 
-    std::string album = meta->get(MetadataHandler::getMetaFieldName(M_ALBUM));
+    std::string album = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_ALBUM));
     if (string_ok(album))
     {
         desc = desc + ", " + album;
@@ -213,7 +213,7 @@ void FallbackLayout::addAudio(zmm::Ref<CdsObject> obj)
 
     desc = desc + title;
 
-    std::string date = meta->get(MetadataHandler::getMetaFieldName(M_DATE));
+    std::string date = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_DATE));
     std::string albumDate;
     if (string_ok(date)) {
         size_t i = date.find('-');
@@ -227,34 +227,34 @@ void FallbackLayout::addAudio(zmm::Ref<CdsObject> obj)
         albumDate = "Unknown";
     }
 
-    meta->put(MetadataHandler::getMetaFieldName(M_UPNP_DATE), albumDate);
+    meta[MetadataHandler::getMetaFieldName(M_UPNP_DATE)] = albumDate;
 
-    std::string genre = meta->get(MetadataHandler::getMetaFieldName(M_GENRE));
+    std::string genre = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_GENRE));
     if (string_ok(genre))
         desc = desc + ", " + genre;
     else
         genre = "Unknown";
 
 
-    std::string description = meta->get(MetadataHandler::getMetaFieldName(M_DESCRIPTION));
+    std::string description = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_DESCRIPTION));
     if (!string_ok(description))
     {
-        meta->put(MetadataHandler::getMetaFieldName(M_DESCRIPTION), desc);
+        meta[MetadataHandler::getMetaFieldName(M_DESCRIPTION)] = desc;
         obj->setMetadata(meta);
     }
 
-    std::string composer = meta->get(MetadataHandler::getMetaFieldName(M_COMPOSER));
+    std::string composer = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_COMPOSER));
     if (!string_ok(composer))
     {
         composer = "None";
     }
 
-    std::string conductor = meta->get(MetadataHandler::getMetaFieldName(M_CONDUCTOR));
+    std::string conductor = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_CONDUCTOR));
     if (!string_ok(conductor)) {
         conductor = "None";
     }
 
-    std::string orchestra = meta->get(MetadataHandler::getMetaFieldName(M_ORCHESTRA));
+    std::string orchestra = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_ORCHESTRA));
     if (!string_ok(orchestra)) {
         orchestra = "None";
     }
@@ -384,12 +384,12 @@ void FallbackLayout::addATrailers(zmm::Ref<CdsObject> obj)
         obj->setRefID(obj->getID());
     }
 
-    Ref<Dictionary> meta = obj->getMetadata();
+    auto meta = obj->getMetadata();
 
-    temp = meta->get(MetadataHandler::getMetaFieldName(M_GENRE));
+    temp = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_GENRE));
     if (string_ok(temp))
     {
-        Ref<StringTokenizer> st(new StringTokenizer(temp));
+        auto st = std::make_unique<StringTokenizer>(temp);
         std::string genre;
         std::string next;
         do
@@ -415,7 +415,7 @@ void FallbackLayout::addATrailers(zmm::Ref<CdsObject> obj)
         } while (!genre.empty());
     }
 
-    temp = meta->get(MetadataHandler::getMetaFieldName(M_DATE));
+    temp = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_DATE));
     if (string_ok(temp) && temp.length() >= 7)
     {
         id = content->addContainerChain(AT_VPATH
@@ -484,9 +484,9 @@ void FallbackLayout::processCdsObject(zmm::Ref<CdsObject> obj, std::string rootp
 #endif
 
         std::string mimetype = RefCast(obj, CdsItem)->getMimeType();
-        Ref<Dictionary> mappings = config->getDictionaryOption(
+        auto mappings = config->getDictionaryOption(
                     CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-        std::string content_type = mappings->get(mimetype);
+        std::string content_type = getValueOrDefault(mappings, mimetype);
 
         if (startswith(mimetype, "video"))
             addVideo(clone, rootpath);

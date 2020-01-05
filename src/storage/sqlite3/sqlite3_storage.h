@@ -149,7 +149,7 @@ protected:
 /// \brief The Storage class for using SQLite3
 class Sqlite3Storage : public Timer::Subscriber, public SQLStorage, public std::enable_shared_from_this<SQLStorage> {
 public:
-    virtual void timerNotify(zmm::Ref<Timer::Parameter> sqlite3storage) override;
+    virtual void timerNotify(std::shared_ptr<Timer::Parameter> sqlite3storage) override;
     Sqlite3Storage(std::shared_ptr<ConfigManager> config, std::shared_ptr<Timer> timer);
 
 private:

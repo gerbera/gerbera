@@ -93,7 +93,7 @@ Ref<Object> ATrailersService::defineServiceTask(Ref<Element> xmlopt, Ref<Object>
 Ref<Element> ATrailersService::getData()
 {
     long retcode;
-    Ref<StringConverter> sc = StringConverter::i2i(config);
+    auto sc = StringConverter::i2i(config);
 
     std::string buffer;
 

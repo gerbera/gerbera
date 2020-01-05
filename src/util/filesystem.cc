@@ -43,10 +43,8 @@
 using namespace zmm;
 using namespace mxml;
 
-int FsObjectComparator(void* arg1, void* arg2)
+static int FsObjectComparator(std::shared_ptr<FsObject> o1, std::shared_ptr<FsObject> o2)
 {
-    auto* o1 = (FsObject*)arg1;
-    auto* o2 = (FsObject*)arg2;
     if (o1->isDirectory) {
         if (o2->isDirectory)
             return strcmp(o1->filename.c_str(), o2->filename.c_str());
@@ -61,10 +59,8 @@ int FsObjectComparator(void* arg1, void* arg2)
 }
 
 Filesystem::Filesystem(std::shared_ptr<ConfigManager> config)
-    : Object()
-    , config(config)
+    : config(config)
 {
-    includeRules = Ref<Array<RExp>>(new Array<RExp>());
     /*
     Ref<Element> rules = config->getElement("filter");
     if (rules == nullptr)
@@ -75,11 +71,11 @@ Filesystem::Filesystem(std::shared_ptr<ConfigManager> config)
         std::string pat = rule->getAttribute("pattern");
         /// \todo make patterns from simple wildcards instead of
         /// taking the pattern attribute directly as regexp
-        Ref<RExp> pattern(new RExp());
+        auto pattern = std::make_unique<RExp>();
         try
         {
             pattern->compile(pat);
-            includeRules->append(pattern);
+            includeRules.push_back(pattern);
         }
         catch (const Exception & e)
         {
@@ -89,7 +85,7 @@ Filesystem::Filesystem(std::shared_ptr<ConfigManager> config)
     */
 }
 
-Ref<Array<FsObject>> Filesystem::readDirectory(std::string path, int mask,
+std::vector<std::shared_ptr<FsObject>> Filesystem::readDirectory(std::string path, int mask,
     int childMask)
 {
     if (path.at(0) != '/') {
@@ -101,7 +97,7 @@ Ref<Array<FsObject>> Filesystem::readDirectory(std::string path, int mask,
     struct stat statbuf;
     int ret;
 
-    Ref<Array<FsObject>> files(new Array<FsObject>());
+    std::vector<std::shared_ptr<FsObject>> files;
 
     DIR* dir;
     struct dirent* dent;
@@ -149,17 +145,16 @@ Ref<Array<FsObject>> Filesystem::readDirectory(std::string path, int mask,
             } else
                 continue; // special file
 
-            Ref<FsObject> obj(new FsObject());
+            auto obj = std::make_shared<FsObject>();
             obj->filename = name;
             obj->isDirectory = isDirectory;
             obj->hasContent = hasContent;
-            files->append(obj);
+            files.push_back(obj);
         }
     }
     closedir(dir);
 
-    quicksort((COMPARABLE*)files->getObjectArray(), files->size(),
-        FsObjectComparator);
+    sort(files.begin(), files.end(), FsObjectComparator);
 
     return files;
 }

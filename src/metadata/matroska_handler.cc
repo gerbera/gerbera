@@ -181,7 +181,7 @@ void MatroskaHandler::parseInfo(Ref<CdsItem> item, EbmlStream & ebml_stream, Kax
     m = static_cast<EbmlMaster *>(info);
     m->Read(ebml_stream, EBML_CONTEXT(info), i_upper_level, dummy_el, true);
 
-    Ref<StringConverter> sc = StringConverter::i2i(config); // sure is sure
+    auto sc = StringConverter::i2i(config); // sure is sure
 
     for( size_t i = 0; i < m->ListSize(); i++) {
         EbmlElement* el = (*m)[i];
@@ -261,7 +261,7 @@ void MatroskaHandler::addArtworkResource(Ref<CdsItem> item, std::string art_mime
     log_debug("Found artwork of type %s in file %s\n", art_mimetype.c_str(), item->getLocation().c_str());
 
     if (art_mimetype != MIMETYPE_DEFAULT) {
-        Ref<CdsResource> resource(new CdsResource(CH_MATROSKA));
+        auto resource = std::make_shared<CdsResource>(CH_MATROSKA);
         resource->addAttribute(
             MetadataHandler::getResAttrName(R_PROTOCOLINFO),
             renderProtocolInfo(art_mimetype));

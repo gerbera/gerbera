@@ -32,7 +32,6 @@
 #include "timer.h"
 #include <cassert>
 
-using namespace zmm;
 using namespace std;
 
 Timer::Timer()
@@ -68,7 +67,7 @@ void Timer::threadProc()
     triggerWait();
 }
 
-void Timer::addTimerSubscriber(Subscriber* timerSubscriber, unsigned int notifyInterval, zmm::Ref<Parameter> parameter, bool once)
+void Timer::addTimerSubscriber(Subscriber* timerSubscriber, unsigned int notifyInterval, std::shared_ptr<Parameter> parameter, bool once)
 {
     log_debug("Adding subscriber... interval: %d once: %d \n", notifyInterval, once);
     if (notifyInterval == 0)
@@ -85,7 +84,7 @@ void Timer::addTimerSubscriber(Subscriber* timerSubscriber, unsigned int notifyI
     signal();
 }
 
-void Timer::removeTimerSubscriber(Subscriber* timerSubscriber, zmm::Ref<Parameter> parameter, bool dontFail)
+void Timer::removeTimerSubscriber(Subscriber* timerSubscriber, std::shared_ptr<Parameter> parameter, bool dontFail)
 {
     log_debug("Removing subscriber...\n");
     AutoLock lock(mutex);

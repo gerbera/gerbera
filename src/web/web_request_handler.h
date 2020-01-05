@@ -35,7 +35,6 @@
 #include "common.h"
 #include "config/config_manager.h"
 #include "session_manager.h"
-#include "zmm/dictionary.h"
 #include "mxml/mxml.h"
 #include "request_handler.h"
 #include "util/exception.h"
@@ -74,7 +73,7 @@ protected:
     bool checkRequestCalled;
 
     /// \brief Decoded URL parameters are stored as a dictionary.
-    zmm::Ref<Dictionary> params;
+    std::map<std::string,std::string> params;
 
     /// \brief The original filename from url if anyone needs it.
     std::string filename;
@@ -87,13 +86,13 @@ protected:
 
     /// \brief The current session, used for this request; will be filled by
     /// check_request()
-    zmm::Ref<Session> session;
+    std::shared_ptr<Session> session;
 
     /// \brief Little support function to access stuff from the dictionary in
     /// in an easier fashion.
     /// \param name of the parameter we are looking for.
     /// \return Value of the parameter with the given name or nullptr if not found.
-    inline std::string param(std::string name) { return params->get(name); }
+    inline std::string param(std::string name) { return getValueOrDefault(params, name); }
 
     int intParam(std::string name, int invalid = 0);
     bool boolParam(std::string name);
@@ -118,7 +117,7 @@ protected:
     /// \brief add the ui update ids from the given session as xml tags to the given root element
     /// \param root the xml element to add the elements to
     /// \param session the session from which the ui update ids should be taken
-    void addUpdateIDs(zmm::Ref<mxml::Element> root, zmm::Ref<Session> session);
+    void addUpdateIDs(zmm::Ref<mxml::Element> root, std::shared_ptr<Session> session);
 
     /// \brief check if ui update ids should be added to the response and add
     /// them in that case.

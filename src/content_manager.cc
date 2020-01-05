@@ -128,7 +128,7 @@ ContentManager::ContentManager(std::shared_ptr<ConfigManager> config, std::share
 
     ignore_unknown_extensions = config->getBoolOption(CFG_IMPORT_MAPPINGS_IGNORE_UNKNOWN_EXTENSIONS);
 
-    if (ignore_unknown_extensions && (extension_mimetype_map->size() == 0)) {
+    if (ignore_unknown_extensions && (extension_mimetype_map.size() == 0)) {
         log_warning("Ignore unknown extensions set, but no mappings specified\n");
         log_warning("Please review your configuration!\n");
         ignore_unknown_extensions = false;
@@ -139,8 +139,8 @@ ContentManager::ContentManager(std::shared_ptr<ConfigManager> config, std::share
     mimetype_upnpclass_map = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST);
 
     mimetype_contenttype_map = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-    Ref<AutoscanList> config_timed_list = config->getAutoscanListOption(CFG_IMPORT_AUTOSCAN_TIMED_LIST);
 
+    auto config_timed_list = config->getAutoscanListOption(CFG_IMPORT_AUTOSCAN_TIMED_LIST);
     int i;
     for (i = 0; i < config_timed_list->size(); i++) {
         Ref<AutoscanDirectory> dir = config_timed_list->get(i);
@@ -165,8 +165,7 @@ void ContentManager::init()
     inotify = std::make_unique<AutoscanInotify>(storage, self);
 
     if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
-        Ref<AutoscanList> config_inotify_list = config->getAutoscanListOption(CFG_IMPORT_AUTOSCAN_INOTIFY_LIST);
-
+        auto config_inotify_list = config->getAutoscanListOption(CFG_IMPORT_AUTOSCAN_INOTIFY_LIST);
         for (i = 0; i < config_inotify_list->size(); i++) {
             Ref<AutoscanDirectory> dir = config_inotify_list->get(i);
             if (dir != nullptr) {
@@ -229,7 +228,7 @@ void ContentManager::init()
             if (config->getBoolOption(CFG_ONLINE_CONTENT_SOPCAST_UPDATE_AT_START))
                 i = CFG_DEFAULT_UPDATE_AT_START;
 
-            Ref<Timer::Parameter> sc_param(new Timer::Parameter(Timer::Parameter::IDOnlineContent, OS_SopCast));
+            auto sc_param = std::make_shared<Timer::Parameter>(Timer::Parameter::IDOnlineContent, OS_SopCast);
             sc->setTimerParameter(sc_param);
             online_services->registerService(sc);
             if (i > 0) {
@@ -254,7 +253,7 @@ void ContentManager::init()
             if (config->getBoolOption(CFG_ONLINE_CONTENT_ATRAILERS_UPDATE_AT_START))
                 i = CFG_DEFAULT_UPDATE_AT_START;
 
-            Ref<Timer::Parameter> at_param(new Timer::Parameter(Timer::Parameter::IDOnlineContent, OS_ATrailers));
+            auto at_param = std::make_shared<Timer::Parameter>(Timer::Parameter::IDOnlineContent, OS_ATrailers);
             at->setTimerParameter(at_param);
             online_services->registerService(at);
             if (i > 0) {
@@ -293,23 +292,21 @@ void ContentManager::init()
 
     for (int i = 0; i < autoscan_timed->size(); i++) {
         Ref<AutoscanDirectory> dir = autoscan_timed->get(i);
-        Ref<Timer::Parameter> param(new Timer::Parameter(Timer::Parameter::timer_param_t::IDAutoscan, dir->getScanID()));
+        auto param = std::make_shared<Timer::Parameter>(Timer::Parameter::timer_param_t::IDAutoscan, dir->getScanID());
         log_debug("Adding timed scan with interval %d\n", dir->getInterval());
         timer->addTimerSubscriber(this, dir->getInterval(), param, false);
     }
-
-    process_list = Ref<Array<Executor>>(new Array<Executor>());
 }
 
 ContentManager::~ContentManager() { log_debug("ContentManager destroyed\n"); }
 
-void ContentManager::registerExecutor(Ref<Executor> exec)
+void ContentManager::registerExecutor(std::shared_ptr<Executor> exec)
 {
     AutoLock lock(mutex);
-    process_list->append(exec);
+    process_list.push_back(exec);
 }
 
-void ContentManager::unregisterExecutor(Ref<Executor> exec)
+void ContentManager::unregisterExecutor(std::shared_ptr<Executor> exec)
 {
     // when shutting down we will kill the transcoding processes,
     // which if given enough time will get a close in the io handler and
@@ -321,13 +318,13 @@ void ContentManager::unregisterExecutor(Ref<Executor> exec)
         return;
 
     AutoLock lock(mutex);
-    for (int i = 0; i < process_list->size(); i++) {
-        if (process_list->get(i) == exec)
-            process_list->remove(i);
+    for (size_t i = 0; i < process_list.size(); i++) {
+        if (process_list[i] == exec)
+            process_list.erase(process_list.begin() + i);
     }
 }
 
-void ContentManager::timerNotify(Ref<Timer::Parameter> parameter)
+void ContentManager::timerNotify(std::shared_ptr<Timer::Parameter> parameter)
 {
     if (parameter == nullptr)
         return;
@@ -381,8 +378,8 @@ void ContentManager::shutdown()
 
     shutdownFlag = true;
 
-    for (int i = 0; i < process_list->size(); i++) {
-        Ref<Executor> exec = process_list->get(i);
+    for (size_t i = 0; i < process_list.size(); i++) {
+        auto exec = process_list[i];
         if (exec != nullptr)
             exec->kill();
     }
@@ -515,7 +512,7 @@ int ContentManager::_addFile(std::string path, std::string rootPath, bool recurs
                     layout->processCdsObject(obj, rootPath);
 
                     std::string mimetype = RefCast(obj, CdsItem)->getMimeType();
-                    std::string content_type = mimetype_contenttype_map->get(mimetype);
+                    std::string content_type = getValueOrDefault(mimetype_contenttype_map, mimetype);
 #ifdef HAVE_JS
                     if ((playlist_parser_script != nullptr) && (content_type == CONTENT_TYPE_PLAYLIST))
                         playlist_parser_script->processPlaylistObject(obj, task);
@@ -771,7 +768,7 @@ void ContentManager::addRecursive(std::string path, bool hidden, Ref<GenericTask
             return;
     }
 
-    Ref<StringConverter> f2i = StringConverter::f2i(config);
+    auto f2i = StringConverter::f2i(config);
 
     DIR* dir = opendir(path.c_str());
     if (!dir) {
@@ -834,9 +831,9 @@ void ContentManager::addRecursive(std::string path, bool hidden, Ref<GenericTask
                                 rootpath = RefCast(task, CMAddFileTask)->getRootPath();
                             layout->processCdsObject(obj, rootpath);
 #ifdef HAVE_JS
-                            Ref<Dictionary> mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+                            auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
                             std::string mimetype = RefCast(obj, CdsItem)->getMimeType();
-                            std::string content_type = mappings->get(mimetype);
+                            std::string content_type = getValueOrDefault(mappings, mimetype);
 
                             if ((playlist_parser_script != nullptr) && (content_type == CONTENT_TYPE_PLAYLIST))
                                 playlist_parser_script->processPlaylistObject(obj, task);
@@ -862,15 +859,15 @@ void ContentManager::addRecursive(std::string path, bool hidden, Ref<GenericTask
     closedir(dir);
 }
 
-void ContentManager::updateObject(int objectID, Ref<Dictionary> parameters)
+void ContentManager::updateObject(int objectID, const std::map<std::string,std::string>& parameters)
 {
-    std::string title = parameters->get("title");
-    std::string upnp_class = parameters->get("class");
-    std::string autoscan = parameters->get("autoscan");
-    std::string mimetype = parameters->get("mime-type");
-    std::string description = parameters->get("description");
-    std::string location = parameters->get("location");
-    std::string protocol = parameters->get("protocol");
+    std::string title = getValueOrDefault(parameters, "title");
+    std::string upnp_class = getValueOrDefault(parameters, "class");
+    std::string autoscan = getValueOrDefault(parameters, "autoscan");
+    std::string mimetype = getValueOrDefault(parameters, "mime-type");
+    std::string description = getValueOrDefault(parameters, "description");
+    std::string location = getValueOrDefault(parameters, "location");
+    std::string protocol = getValueOrDefault(parameters, "protocol");
 
     Ref<CdsObject> obj = storage->loadObject(objectID);
     int objectType = obj->getObjectType();
@@ -892,14 +889,14 @@ void ContentManager::updateObject(int objectID, Ref<Dictionary> parameters)
 
         if (string_ok(mimetype) && (string_ok(protocol))) {
             cloned_item->setMimeType(mimetype);
-            Ref<CdsResource> resource = cloned_item->getResource(0);
+            auto resource = cloned_item->getResource(0);
             resource->addAttribute("protocolInfo", renderProtocolInfo(mimetype, protocol));
         } else if (!string_ok(mimetype) && (string_ok(protocol))) {
-            Ref<CdsResource> resource = cloned_item->getResource(0);
+            auto resource = cloned_item->getResource(0);
             resource->addAttribute("protocolInfo", renderProtocolInfo(cloned_item->getMimeType(), protocol));
         } else if (string_ok(mimetype) && (!string_ok(protocol))) {
             cloned_item->setMimeType(mimetype);
-            Ref<CdsResource> resource = cloned_item->getResource(0);
+            auto resource = cloned_item->getResource(0);
             std::vector<std::string> parts = split_string(resource->getAttribute("protocolInfo"), ':');
             protocol = parts[0];
             resource->addAttribute("protocolInfo", renderProtocolInfo(mimetype, protocol));
@@ -923,8 +920,8 @@ void ContentManager::updateObject(int objectID, Ref<Dictionary> parameters)
         }
     }
     if (IS_CDS_ACTIVE_ITEM(objectType)) {
-        std::string action = parameters->get("action");
-        std::string state = parameters->get("state");
+        std::string action = getValueOrDefault(parameters, "action");
+        std::string state = getValueOrDefault(parameters, "state");
 
         Ref<CdsActiveItem> item = RefCast(obj, CdsActiveItem);
         Ref<CdsObject> clone = CdsObject::createObject(storage, objectType);
@@ -1019,7 +1016,7 @@ void ContentManager::addContainer(int parentID, std::string title, std::string u
     addContainerChain(storage->buildContainerPath(parentID, escape(title, VIRTUAL_CONTAINER_ESCAPE, VIRTUAL_CONTAINER_SEPARATOR)), upnpClass);
 }
 
-int ContentManager::addContainerChain(std::string chain, std::string lastClass, int lastRefID, Ref<Dictionary> lastMetadata)
+int ContentManager::addContainerChain(std::string chain, std::string lastClass, int lastRefID, const std::map<std::string,std::string>& lastMetadata)
 {
     int updateID = INVALID_OBJECT_ID;
     int containerID;
@@ -1027,7 +1024,7 @@ int ContentManager::addContainerChain(std::string chain, std::string lastClass, 
     if (!string_ok(chain))
         throw _Exception("addContainerChain() called with empty chain parameter");
 
-    log_debug("received chain: %s (%s) [%s]\n", chain.c_str(), lastClass.c_str(), lastMetadata != nullptr ? lastMetadata->encodeSimple().c_str() : "null");
+    log_debug("received chain: %s (%s) [%s]\n", chain.c_str(), lastClass.c_str(), dict_encode_simple(lastMetadata).c_str());
     storage->addContainerChain(chain, lastClass, lastRefID, &containerID, &updateID, lastMetadata);
 
     // if (updateID != INVALID_OBJECT_ID)
@@ -1113,7 +1110,7 @@ Ref<CdsObject> ContentManager::createObjectFromFile(std::string path, bool magic
         }
 
         if (!string_ok(upnp_class)) {
-            std::string content_type = mimetype_contenttype_map->get(mimetype);
+            std::string content_type = getValueOrDefault(mimetype_contenttype_map, mimetype);
             if (content_type == CONTENT_TYPE_OGG) {
                 if (isTheora(path))
                     upnp_class = UPNP_DEFAULT_CLASS_VIDEO_ITEM;
@@ -1135,7 +1132,7 @@ Ref<CdsObject> ContentManager::createObjectFromFile(std::string path, bool magic
             item->setClass(upnp_class);
         }
 
-        Ref<StringConverter> f2i = StringConverter::f2i(config);
+        auto f2i = StringConverter::f2i(config);
         obj->setTitle(f2i->convert(filename));
 
         if (magic) {
@@ -1164,27 +1161,22 @@ Ref<CdsObject> ContentManager::createObjectFromFile(std::string path, bool magic
 
 std::string ContentManager::extension2mimetype(std::string extension)
 {
-    if (extension_mimetype_map == nullptr)
-        return "";
-
     if (!extension_map_case_sensitive)
         extension = tolower_string(extension);
 
-    return extension_mimetype_map->get(extension);
+    return getValueOrDefault(extension_mimetype_map, extension);
 }
 
 std::string ContentManager::mimetype2upnpclass(std::string mimeType)
 {
-    if (mimetype_upnpclass_map == nullptr)
-        return nullptr;
-    std::string upnpClass = mimetype_upnpclass_map->get(mimeType);
+    std::string upnpClass = getValueOrDefault(mimetype_upnpclass_map, mimeType);
     if (!upnpClass.empty())
         return upnpClass;
     // try to match foo
     std::vector<std::string> parts = split_string(mimeType, '/');
     if (parts.size() != 2)
         return "";
-    return mimetype_upnpclass_map->get((std::string)parts[0] + "/*");
+    return getValueOrDefault(mimetype_upnpclass_map, parts[0] + "/*");
 }
 
 void ContentManager::initLayout()

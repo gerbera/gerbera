@@ -51,7 +51,6 @@
 #include "iohandler/buffered_io_handler.h"
 #include "iohandler/file_io_handler.h"
 #include "iohandler/io_handler_chainer.h"
-#include "zmm/dictionary.h"
 #include "metadata/metadata_handler.h"
 #include "util/tools.h"
 #include "transcoding_process_executor.h"
@@ -93,10 +92,10 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile
     if (IS_CDS_ITEM(obj->getObjectType()))
     {
         Ref<CdsItem> it = RefCast(obj, CdsItem);
-        Ref<Dictionary> mappings = config->getDictionaryOption(
+        auto mappings = config->getDictionaryOption(
                 CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
 
-        if (mappings->get(mimeType) == CONTENT_TYPE_PCM)
+        if (getValueOrDefault(mappings, mimeType) == CONTENT_TYPE_PCM)
         {
             std::string freq = it->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY));
             std::string nrch = it->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS));
@@ -130,7 +129,7 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile
     std::string temp;
     std::string command;
     std::vector<std::string> arglist;
-    Ref<Array<ProcListItem> > proc_list = nullptr;
+    std::vector<std::shared_ptr<ProcListItem>> proc_list;
 
 #ifdef SOPCAST
     service_type_t service = OS_None;
@@ -146,11 +145,9 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile
         int p2 = find_local_port(45000,65500);
         sop_args = parseCommandLine(location + " " + std::to_string(p1) + " " +
                    std::to_string(p2), nullptr, nullptr, nullptr);
-        Ref<ProcessExecutor> spsc(new ProcessExecutor("sp-sc-auth", 
-                                                      sop_args));
-        proc_list = Ref<Array<ProcListItem> >(new Array<ProcListItem>(1));
-        Ref<ProcListItem> pr_item(new ProcListItem(RefCast(spsc, Executor)));
-        proc_list->append(pr_item);
+        auto spsc = std::make_shared<ProcessExecutor>("sp-sc-auth", sop_args);
+        auto pr_item = std::make_shared<ProcListItem>(spsc);
+        proc_list.push_back(pr_item);
         location = "http://localhost:" + std::to_string(p2) + "/tv.asf";
 
 //FIXME: #warning check if socket is ready
@@ -182,10 +179,9 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile
                    config->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE),
                    config->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_FILL_SIZE));
                 std::unique_ptr<IOHandler> p_ioh = std::make_unique<ProcessIOHandler>(content, location, nullptr);
-                Ref<Executor> ch(new IOHandlerChainer(c_ioh, p_ioh, 16384));
-                proc_list = Ref<Array<ProcListItem> >(new Array<ProcListItem>(1));
-                Ref<ProcListItem> pr_item(new ProcListItem(ch));
-                proc_list->append(pr_item);
+                auto ch = std::make_shared<IOHandlerChainer>(c_ioh, p_ioh, 16384);
+                auto pr_item = std::make_shared<ProcListItem>(ch);
+                proc_list.push_back(pr_item);
             }
             catch (const Exception & ex)
             {
@@ -239,14 +235,14 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile
 
     log_debug("Command: %s\n", profile->getCommand().c_str());
     log_debug("Arguments: %s\n", profile->getArguments().c_str());
-    Ref<TranscodingProcessExecutor> main_proc(new TranscodingProcessExecutor(profile->getCommand(), arglist));
+    auto main_proc = std::make_shared<TranscodingProcessExecutor>(profile->getCommand(), arglist);
     main_proc->removeFile(fifo_name);
     if (isURL && (!profile->acceptURL()))
     {
         main_proc->removeFile(location);
     }
 
-    std::unique_ptr<IOHandler> u_ioh = std::make_unique<ProcessIOHandler>(content, fifo_name, RefCast(main_proc, Executor), proc_list);
+    std::unique_ptr<IOHandler> u_ioh = std::make_unique<ProcessIOHandler>(content, fifo_name, main_proc, proc_list);
     auto io_handler = std::make_unique<BufferedIOHandler>(
         u_ioh,
         profile->getBufferSize(), profile->getBufferChunkSize(), profile->getBufferInitialFillSize()

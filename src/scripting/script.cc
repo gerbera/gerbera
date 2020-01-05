@@ -265,7 +265,7 @@ void Script::_load(std::string scriptPath)
     if (!string_ok(scriptText))
         throw _Exception("empty script");
 
-    Ref<StringConverter> j2i = StringConverter::j2i(config);
+    auto j2i = StringConverter::j2i(config);
     try
     {
         scriptText = j2i->convert(scriptText, true);
@@ -315,7 +315,7 @@ Ref<CdsObject> Script::dukObject2cdsObject(zmm::Ref<CdsObject> pcd)
     int objectType;
     int b;
     int i;
-    Ref<StringConverter> sc;
+    std::unique_ptr<StringConverter> sc;
 
     if (this->whoami() == S_PLAYLIST)
     {
@@ -521,7 +521,7 @@ Ref<CdsObject> Script::dukObject2cdsObject(zmm::Ref<CdsObject> pcd)
 
             if (item->getResourceCount() == 0)
             {
-                Ref<CdsResource> resource(new CdsResource(CH_DEFAULT));
+                auto resource = std::make_shared<CdsResource>(CH_DEFAULT);
                 resource->addAttribute(MetadataHandler::getResAttrName(
                             R_PROTOCOLINFO), protocolInfo);
 
@@ -606,13 +606,9 @@ void Script::cdsObject2dukObject(Ref<CdsObject> obj)
         duk_push_object(ctx);
         // stack: js meta_js
 
-        Ref<Dictionary> meta = obj->getMetadata();
-        Ref<Array<DictionaryElement> > elements = meta->getElements();
-        int len = elements->size();
-        for (int i = 0; i < len; i++)
-        {
-            Ref<DictionaryElement> el = elements->get(i);
-            setProperty(el->getKey(), el->getValue());
+        auto meta = obj->getMetadata();
+        for (auto it = meta.begin(); it != meta.end(); it++) {
+            setProperty(it->first, it->second);
         }
 
         if (RefCast(obj, CdsItem)->getTrackNumber() > 0)
@@ -627,20 +623,16 @@ void Script::cdsObject2dukObject(Ref<CdsObject> obj)
         duk_push_object(ctx);
         // stack: js aux_js
 
-        Ref<Dictionary> aux = obj->getAuxData();
+        auto aux = obj->getAuxData();
 
 #ifdef HAVE_ATRAILERS
-        tmp = obj->getAuxData(ATRAILERS_AUXDATA_POST_DATE);
+        auto tmp = obj->getAuxData(ATRAILERS_AUXDATA_POST_DATE);
         if (string_ok(tmp))
-            aux->put(ATRAILERS_AUXDATA_POST_DATE, tmp);
+            aux[ATRAILERS_AUXDATA_POST_DATE] = tmp;
 #endif
 
-        Ref<Array<DictionaryElement> > elements = aux->getElements();
-        int len = elements->size();
-        for (int i = 0; i < len; i++)
-        {
-            Ref<DictionaryElement> el = elements->get(i);
-            setProperty(el->getKey(), el->getValue());
+        for (auto it = aux.begin(); it != aux.end(); it++) {
+            setProperty(it->first, it->second);
         }
 
         duk_put_prop_string(ctx, -2, "aux");
@@ -655,14 +647,9 @@ void Script::cdsObject2dukObject(Ref<CdsObject> obj)
 
         if (obj->getResourceCount() > 0) {
             auto res = obj->getResource(0);
-
             auto attributes = res->getAttributes();
-            auto elements = attributes->getElements();
-            auto len = elements->size();
-            for (auto i = 0; i < len; i++)
-            {
-                Ref<DictionaryElement> el = elements->get(i);
-                setProperty(el->getKey(), el->getValue());
+            for (auto it = attributes.begin(); it != attributes.end(); it++) {
+                setProperty(it->first, it->second);
             }
         }
 

@@ -31,6 +31,9 @@
 #ifndef __CONTENT_MANAGER_H__
 #define __CONTENT_MANAGER_H__
 
+#include <string>
+#include <vector>
+#include <map>
 #include <condition_variable>
 #include <memory>
 #include <mutex>
@@ -39,7 +42,6 @@
 #include "autoscan.h"
 #include "cds_objects.h"
 #include "common.h"
-#include "zmm/dictionary.h"
 #include "util/generic_task.h"
 #include "util/timer.h"
 
@@ -152,34 +154,6 @@ public:
 };
 #endif
 
-/*
-class DirCacheEntry : public zmm::Object
-{
-public:
-    DirCacheEntry();
-public:
-    int end;
-    int id;
-};
-
-class DirCache : public zmm::Object
-{
-protected:
-    std::ostringstream buffer;
-    int size; // number of entries
-    int capacity; // capacity of entries
-    zmm::Ref<zmm::Array<DirCacheEntry> > entries;
-public:
-    DirCache();
-    void push(std::string name);
-    void pop();
-    void setPath(std::string path);
-    void clear();
-    std::string getPath();
-    int createContainers();
-};
-*/
-
 class ContentManager : public Timer::Subscriber, public std::enable_shared_from_this<ContentManager> {
 public:
     ContentManager(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
@@ -190,7 +164,7 @@ public:
     virtual ~ContentManager();
     void shutdown();
 
-    virtual void timerNotify(zmm::Ref<Timer::Parameter> parameter) override;
+    virtual void timerNotify(std::shared_ptr<Timer::Parameter> parameter) override;
 
     bool isBusy() { return working; }
 
@@ -241,7 +215,7 @@ public:
     /// \brief Updates an object in the database using the given parameters.
     /// \param objectID ID of the object to update
     /// \param parameters key value pairs of fields to be updated
-    void updateObject(int objectID, zmm::Ref<Dictionary> parameters);
+    void updateObject(int objectID, const std::map<std::string,std::string>& parameters);
 
     zmm::Ref<CdsObject> createObjectFromFile(std::string path,
         bool magic = true,
@@ -284,7 +258,7 @@ public:
     /// INVALID_OBJECT_ID indicates that the id will not be set.
     /// \return ID of the last container in the chain.
     int addContainerChain(std::string chain, std::string lastClass = "",
-        int lastRefID = INVALID_OBJECT_ID, zmm::Ref<Dictionary> lastMetadata = nullptr);
+        int lastRefID = INVALID_OBJECT_ID, const std::map<std::string,std::string>& lastMetadata = std::map<std::string,std::string>());
 
     /// \brief Adds a virtual container specified by parentID and title
     /// \param parentID the id of the parent.
@@ -344,14 +318,14 @@ public:
     /// when we shutdown the server.
     ///
     /// \param exec the Executor object of the process
-    void registerExecutor(zmm::Ref<Executor> exec);
+    void registerExecutor(std::shared_ptr<Executor> exec);
 
     /// \brief unregister process
     ///
     /// When the the process io handler receives a close on a stream that is
     /// currently being processed by an external process, it will kill it.
     /// The handler will then remove the executor from the list.
-    void unregisterExecutor(zmm::Ref<Executor> exec);
+    void unregisterExecutor(std::shared_ptr<Executor> exec);
 
     void triggerPlayHook(zmm::Ref<CdsObject> obj);
 
@@ -382,9 +356,9 @@ protected:
     bool ignore_unknown_extensions;
     bool extension_map_case_sensitive;
 
-    zmm::Ref<Dictionary> extension_mimetype_map;
-    zmm::Ref<Dictionary> mimetype_upnpclass_map;
-    zmm::Ref<Dictionary> mimetype_contenttype_map;
+    std::map<std::string,std::string> extension_mimetype_map;
+    std::map<std::string,std::string> mimetype_upnpclass_map;
+    std::map<std::string,std::string> mimetype_contenttype_map;
 
     zmm::Ref<AutoscanList> autoscan_timed;
 #ifdef HAVE_INOTIFY
@@ -392,7 +366,7 @@ protected:
     zmm::Ref<AutoscanList> autoscan_inotify;
 #endif
 
-    zmm::Ref<zmm::Array<Executor>> process_list;
+    std::vector<std::shared_ptr<Executor>> process_list;
 
     void _loadAccounting();
 

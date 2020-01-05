@@ -88,7 +88,7 @@ void FfmpegHandler::addFfmpegAuxdataFields(Ref<CdsItem> item, AVFormatContext* p
         return;
     }
 
-    Ref<StringConverter> sc = StringConverter::m2i(config);
+    auto sc = StringConverter::m2i(config);
     std::vector<std::string> aux = config->getStringArrayOption(CFG_IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST);
     for (size_t j = 0; j < aux.size(); j++) {
         std::string desiredTag(aux[j]);
@@ -106,7 +106,7 @@ void FfmpegHandler::addFfmpegAuxdataFields(Ref<CdsItem> item, AVFormatContext* p
 void FfmpegHandler::addFfmpegMetadataFields(Ref<CdsItem> item, AVFormatContext* pFormatCtx) const
 {
     AVDictionaryEntry* e = NULL;
-    Ref<StringConverter> sc = StringConverter::m2i(config);
+    auto sc = StringConverter::m2i(config);
     metadata_fields_t field;
     std::string value;
 
@@ -459,8 +459,8 @@ std::unique_ptr<IOHandler> FfmpegHandler::serveContent(Ref<CdsItem> item, int re
 
 std::string FfmpegHandler::getMimeType()
 {
-    Ref<Dictionary> mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-    std::string thumb_mimetype = mappings->get(CONTENT_TYPE_JPG);
+    auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+    std::string thumb_mimetype = getValueOrDefault(mappings, CONTENT_TYPE_JPG);
     if (!string_ok(thumb_mimetype))
         thumb_mimetype = "image/jpeg";
 

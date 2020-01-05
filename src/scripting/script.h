@@ -117,11 +117,11 @@ private:
     std::string name;
     void _load(std::string scriptPath);
     void _execute();
-    zmm::Ref<StringConverter> _p2i;
-    zmm::Ref<StringConverter> _j2i;
-    zmm::Ref<StringConverter> _f2i;
-    zmm::Ref<StringConverter> _m2i;
-    zmm::Ref<StringConverter> _i2i;
+    std::unique_ptr<StringConverter> _p2i;
+    std::unique_ptr<StringConverter> _j2i;
+    std::unique_ptr<StringConverter> _f2i;
+    std::unique_ptr<StringConverter> _m2i;
+    std::unique_ptr<StringConverter> _i2i;
 };
 
 #endif // __SCRIPTING_SCRIPT_H__

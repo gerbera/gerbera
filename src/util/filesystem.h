@@ -33,6 +33,7 @@
 #define __FILESYSTEM_H__
 
 #include <memory>
+#include <vector>
 #include "common.h"
 #include "rexp.h"
 
@@ -42,10 +43,9 @@
 
 #define FS_ROOT_DIRECTORY "/"
 
-class FsObject : public zmm::Object {
+class FsObject {
 public:
     inline FsObject()
-        : zmm::Object()
     {
         isDirectory = false;
         hasContent = false;
@@ -60,11 +60,11 @@ public:
 // forward declaration
 class ConfigManager;
 
-class Filesystem : public zmm::Object {
+class Filesystem {
 public:
     Filesystem(std::shared_ptr<ConfigManager> config);
 
-    zmm::Ref<zmm::Array<FsObject>> readDirectory(std::string path, int mask,
+    std::vector<std::shared_ptr<FsObject>> readDirectory(std::string path, int mask,
         int chldMask = 0);
     bool haveFiles(std::string dir);
     bool haveDirectories(std::string dir);
@@ -72,7 +72,7 @@ public:
 
 protected:
     std::shared_ptr<ConfigManager> config;
-    zmm::Ref<zmm::Array<RExp>> includeRules;
+    // std::vector<std::unique<RExp>> includeRules;
     bool have(std::string dir, int mask);
 };
 

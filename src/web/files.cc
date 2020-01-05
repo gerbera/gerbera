@@ -62,20 +62,16 @@ void web::files::process()
     files->setAttribute("location", path);
     root->appendElementChild(files);
 
-    Ref<Filesystem> fs(new Filesystem(config));
-    Ref<Array<FsObject>> arr;
-    arr = fs->readDirectory(path, FS_MASK_FILES);
-
-    for (int i = 0; i < arr->size(); i++) {
-        Ref<FsObject> obj = arr->get(i);
-
+    auto fs = std::make_unique<Filesystem>(config);
+    auto arr = fs->readDirectory(path, FS_MASK_FILES);
+    for (auto it = arr.begin(); it != arr.end(); it++) {
         Ref<Element> fe(new Element("file"));
-        std::string filename = obj->filename;
+        std::string filename = (*it)->filename;
         std::string filepath = path + "/" + filename;
         std::string id = hex_encode(filepath.c_str(), filepath.length());
         fe->setAttribute("id", id);
 
-        Ref<StringConverter> f2i = StringConverter::f2i(config);
+        auto f2i = StringConverter::f2i(config);
         fe->setTextKey("filename");
         fe->setText(f2i->convert(filename));
         files->appendElementChild(fe);

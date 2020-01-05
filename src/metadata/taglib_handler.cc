@@ -69,7 +69,7 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
     if (tag->isEmpty())
         return;
 
-    Ref<StringConverter> sc = StringConverter::i2i(config); // sure is sure
+    auto sc = StringConverter::i2i(config); // sure is sure
 
     TagLib::String val;
     TagLib::StringList list;
@@ -186,7 +186,7 @@ void TagLibHandler::populateGenericTags(Ref<CdsItem> item, const TagLib::File& f
     // note: UPnP requres bytes/second
     temp = audioProps->bitrate() * 1024 / 8;
 
-    Ref<CdsResource> res = item->getResource(0);
+    auto res = item->getResource(0);
 
     if (temp > 0) {
         res->addAttribute(MetadataHandler::getResAttrName(R_BITRATE),
@@ -214,8 +214,8 @@ void TagLibHandler::populateGenericTags(Ref<CdsItem> item, const TagLib::File& f
 
 void TagLibHandler::fillMetadata(Ref<CdsItem> item)
 {
-    Ref<Dictionary> mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-    std::string content_type = mappings->get(item->getMimeType());
+    auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+    std::string content_type = getValueOrDefault(mappings, item->getMimeType());
 
     TagLib::FileStream fs(item->getLocation().c_str(), true); // true = Read only
 
@@ -266,7 +266,7 @@ void TagLibHandler::addArtworkResource(Ref<CdsItem> item, std::string art_mimety
     log_debug("Found artwork of type %s in file %s\n", art_mimetype.c_str(), item->getLocation().c_str());
 
     if (art_mimetype != MIMETYPE_DEFAULT) {
-        Ref<CdsResource> resource(new CdsResource(CH_ID3));
+        auto resource = std::make_shared<CdsResource>(CH_ID3);
         resource->addAttribute(MetadataHandler::getResAttrName(
                                    R_PROTOCOLINFO),
             renderProtocolInfo(art_mimetype));
@@ -278,8 +278,8 @@ void TagLibHandler::addArtworkResource(Ref<CdsItem> item, std::string art_mimety
 
 std::unique_ptr<IOHandler> TagLibHandler::serveContent(Ref<CdsItem> item, int resNum)
 {
-    Ref<Dictionary> mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-    std::string content_type = mappings->get(item->getMimeType());
+    auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+    std::string content_type = getValueOrDefault(mappings, item->getMimeType());
 
     TagLib::FileStream roStream(item->getLocation().c_str(), true); // Open read only
 
@@ -395,7 +395,7 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, zmm::Ref<CdsItem> ite
     }
     populateGenericTags(item, mp3);
 
-    Ref<StringConverter> sc = StringConverter::i2i(config);
+    auto sc = StringConverter::i2i(config);
 
     auto frameListMap = mp3.ID3v2Tag()->frameListMap();
     // http://id3.org/id3v2.4.0-frames "4.2.6. User defined text information frame"
@@ -490,7 +490,7 @@ void TagLibHandler::extractOgg(TagLib::IOStream* roStream, zmm::Ref<CdsItem> ite
     const TagLib::FLAC::Picture* pic = picList.front();
     const TagLib::ByteVector& data = pic->data();
 
-    Ref<StringConverter> sc = StringConverter::i2i(config);
+    auto sc = StringConverter::i2i(config);
     std::string art_mimetype = sc->convert(pic->mimeType().toCString(true));
     if (!isValidArtworkContentType(art_mimetype)) {
         art_mimetype = getContentTypeFromByteVector(data);
@@ -519,7 +519,7 @@ void TagLibHandler::extractASF(TagLib::IOStream* roStream, zmm::Ref<CdsItem> ite
         if (!wmpic.isValid())
             return;
 
-        Ref<StringConverter> sc = StringConverter::i2i(config);
+        auto sc = StringConverter::i2i(config);
         std::string art_mimetype = sc->convert(wmpic.mimeType().toCString(true));
         if (!isValidArtworkContentType(art_mimetype)) {
             art_mimetype = getContentTypeFromByteVector(wmpic.picture());
@@ -539,7 +539,7 @@ void TagLibHandler::extractFLAC(TagLib::IOStream* roStream, zmm::Ref<CdsItem> it
     }
     populateGenericTags(item, flac);
 
-    Ref<StringConverter> sc = StringConverter::i2i(config);
+    auto sc = StringConverter::i2i(config);
 
     std::vector<std::string> aux_tags_list = config->getStringArrayOption(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
     for (size_t j = 0; j < aux_tags_list.size(); j++) {

@@ -238,7 +238,7 @@ public:
     //    void setTimerParamter(zmm::Ref<zmm::Object> parameter);
 
     /// \brief Get the timer notify parameter associated with this directory.
-    zmm::Ref<Timer::Parameter> getTimerParameter();
+    std::shared_ptr<Timer::Parameter> getTimerParameter();
 
     //    bool equals(Ref<AutoscanDirectory> dir);
 
@@ -262,7 +262,7 @@ protected:
     int storageID;
     time_t last_mod_previous_scan;
     time_t last_mod_current_scan;
-    zmm::Ref<Timer::Parameter> timer_parameter;
+    std::shared_ptr<Timer::Parameter> timer_parameter;
 };
 
 #endif

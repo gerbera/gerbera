@@ -44,6 +44,7 @@
 #include "update_manager.h"
 
 #include "util/headers.h"
+#include "util/tools.h"
 
 #include "transcoding/transcode_dispatcher.h"
 
@@ -78,12 +79,12 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
     std::string parameters = (filename + strlen(LINK_FILE_REQUEST_HANDLER));
 
-    Ref<Dictionary> dict(new Dictionary());
-    dict->decodeSimple(parameters);
+    std::map<std::string,std::string> dict;
+    dict_decode_simple(parameters, &dict);
 
     log_debug("full url (filename): %s, parameters: %s\n", filename, parameters.c_str());
 
-    std::string objID = dict->get("object_id");
+    std::string objID = getValueOrDefault(dict, "object_id");
     if (objID.empty()) {
         //log_error("object_id not found in url\n");
         throw _Exception("getInfo: object_id not found");
@@ -106,13 +107,13 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
     // determining which resource to serve
     int res_id = 0;
-    std::string s_res_id = dict->get(URL_RESOURCE_ID);
+    std::string s_res_id = getValueOrDefault(dict, URL_RESOURCE_ID);
     if (string_ok(s_res_id) && (s_res_id != URL_VALUE_TRANSCODE_NO_RES_ID))
         res_id = std::stoi(s_res_id);
     else
         res_id = -1;
 
-    std::string ext = dict->get("ext");
+    std::string ext = getValueOrDefault(dict, "ext");
     size_t edot = ext.rfind('.');
     if (edot != std::string::npos)
         ext = ext.substr(edot);
@@ -159,11 +160,11 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         }
     }
 
-    tr_profile = dict->get(URL_PARAM_TRANSCODE_PROFILE_NAME);
+    tr_profile = getValueOrDefault(dict, URL_PARAM_TRANSCODE_PROFILE_NAME);
 
     // for transcoded resourecs res_id will always be negative
     log_debug("fetching resource id %d\n", res_id);
-    std::string rh = dict->get(RESOURCE_HANDLER);
+    std::string rh = getValueOrDefault(dict, RESOURCE_HANDLER);
 
     if (((res_id > 0) && (res_id < item->getResourceCount()))
         || ((res_id > 0) && string_ok(rh))) {
@@ -172,16 +173,16 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         if (string_ok(rh))
             res_handler = std::stoi(rh);
         else {
-            Ref<CdsResource> resource = item->getResource(res_id);
+            auto resource = item->getResource(res_id);
             res_handler = resource->getHandlerType();
             // http-get:*:image/jpeg:*
-            std::string protocolInfo = item->getResource(res_id)->getAttributes()->get("protocolInfo");
+            std::string protocolInfo = getValueOrDefault(item->getResource(res_id)->getAttributes(), "protocolInfo");
             if (!protocolInfo.empty()) {
                 mimeType = getMTFromProtocolInfo(protocolInfo);
             }
         }
 
-        Ref<MetadataHandler> h = MetadataHandler::createHandler(config, res_handler);
+        auto h = MetadataHandler::createHandler(config, res_handler);
         if (!string_ok(mimeType))
             mimeType = h->getMimeType();
 
@@ -207,10 +208,10 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
         mimeType = tp->getTargetMimeType();
 
-        Ref<Dictionary> mappings = config
-                                       ->getDictionaryOption(
-                                           CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-        if (mappings->get(mimeType) == CONTENT_TYPE_PCM) {
+        auto mappings = config->getDictionaryOption(
+            CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+        if (getValueOrDefault(mappings, mimeType) == CONTENT_TYPE_PCM)
+        {
             std::string freq = item->getResource(0)
                               ->getAttribute(MetadataHandler::getResAttrName(
                                   R_SAMPLEFREQUENCY));
@@ -262,9 +263,9 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
                 }
             }
         }
-        Ref<Dictionary> mappings = config->getDictionaryOption(
+        auto mappings = config->getDictionaryOption(
             CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-        std::string dlnaContentHeader = getDLNAContentHeader(config, mappings->get(item->getMimeType()));
+        std::string dlnaContentHeader = getDLNAContentHeader(config, getValueOrDefault(mappings, item->getMimeType()));
         if (string_ok(dlnaContentHeader)) {
             headers.addHeader(D_HTTP_CONTENT_FEATURES_HEADER, dlnaContentHeader);
         }
@@ -304,11 +305,11 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
 
     std::string parameters = (filename + strlen(LINK_FILE_REQUEST_HANDLER));
 
-    Dictionary params;
-    params.decodeSimple(parameters);
+    std::map<std::string,std::string> params;
+    dict_decode_simple(parameters, &params);
     log_debug("full url (filename): %s, parameters: %s\n", filename, parameters.c_str());
 
-    std::string objID = params.get("object_id");
+    std::string objID = getValueOrDefault(params, "object_id");
     if (objID.empty()) {
         throw _Exception("object_id not found in parameters");
     }
@@ -326,7 +327,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
 
     // determining which resource to serve
     int res_id = 0;
-    std::string s_res_id = params.get(URL_RESOURCE_ID);
+    std::string s_res_id = getValueOrDefault(params, URL_RESOURCE_ID);
     if (string_ok(s_res_id) && (s_res_id != URL_VALUE_TRANSCODE_NO_RES_ID)) {
         res_id = std::stoi(s_res_id);
     } else {
@@ -393,7 +394,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
     bool is_srt = false;
 
     std::string mimeType;
-    std::string ext = params.get("ext");
+    std::string ext = getValueOrDefault(params, "ext");
     size_t edot = ext.rfind('.');
     if (edot != std::string::npos)
         ext = ext.substr(edot);
@@ -421,7 +422,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
 
     log_debug("fetching resource id %d\n", res_id);
 
-    std::string tr_profile = params.get(URL_PARAM_TRANSCODE_PROFILE_NAME);
+    std::string tr_profile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
     if (string_ok(tr_profile)) {
         if (res_id != (-1)) {
             throw _Exception("Invalid resource ID given!");
@@ -435,7 +436,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
     // some resources are created dynamically and not saved in the database,
     // so we can not load such a resource for a particular item, we will have
     // to trust the resource handler parameter
-    std::string rh = params.get(RESOURCE_HANDLER);
+    std::string rh = getValueOrDefault(params, RESOURCE_HANDLER);
     if (((res_id > 0) && (res_id < item->getResourceCount())) || ((res_id > 0) && string_ok(rh))) {
         //info->file_length = -1;
 
@@ -443,17 +444,16 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
         if (string_ok(rh))
             res_handler = std::stoi(rh);
         else {
-            Ref<CdsResource> resource = item->getResource(res_id);
+            auto resource = item->getResource(res_id);
             res_handler = resource->getHandlerType();
             // http-get:*:image/jpeg:*
-            std::string protocolInfo = item->getResource(res_id)->getAttributes()->get("protocolInfo");
+            std::string protocolInfo = getValueOrDefault(item->getResource(res_id)->getAttributes(), "protocolInfo");
             if (!protocolInfo.empty()) {
                 mimeType = getMTFromProtocolInfo(protocolInfo);
             }
         }
 
-        Ref<MetadataHandler> h = MetadataHandler::createHandler(config, res_handler);
-
+        auto h = MetadataHandler::createHandler(config, res_handler);
         if (!string_ok(mimeType))
             mimeType = h->getMimeType();
 
@@ -476,7 +476,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
 
     } else {
         if (!is_srt && string_ok(tr_profile)) {
-            std::string range = params.get("range");
+            std::string range = getValueOrDefault(params, "range");
 
             Ref<TranscodeDispatcher> tr_d(new TranscodeDispatcher(config, content));
             Ref<TranscodingProfile> tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(tr_profile);

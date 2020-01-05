@@ -65,8 +65,8 @@ bool ATrailersContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
 
     current_trailer_index = 0;
 
-    Ref<Dictionary> mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
-    trailer_mimetype = mappings->get("mov");
+    auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
+    trailer_mimetype = getValueOrDefault(mappings, "mov");
     if (!string_ok(trailer_mimetype))
         trailer_mimetype = "video/quicktime";
 
@@ -95,7 +95,7 @@ Ref<CdsObject> ATrailersContentHandler::getNextObject()
 
         // we know what we are adding
         Ref<CdsItemExternalURL> item(new CdsItemExternalURL(storage));
-        Ref<CdsResource> resource(new CdsResource(CH_DEFAULT));
+        auto resource = std::make_shared<CdsResource>(CH_DEFAULT);
         item->addResource(resource);
 
         Ref<Element> info = trailer->getChildByName("info");

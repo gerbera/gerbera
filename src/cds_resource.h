@@ -32,8 +32,11 @@
 #ifndef __CDS_RESOURCE_H__
 #define __CDS_RESOURCE_H__
 
+#include <memory>
+#include <string>
+#include <map>
+
 #include "common.h"
-#include "zmm/dictionary.h"
 
 /// \brief name for external urls that can appear in object resources (i.e.
 /// a YouTube thumbnail)
@@ -45,12 +48,12 @@
 
 #define RESOURCE_OPTION_FOURCC "4cc"
 
-class CdsResource : public zmm::Object {
+class CdsResource {
 protected:
     int handlerType;
-    zmm::Ref<Dictionary> attributes;
-    zmm::Ref<Dictionary> parameters;
-    zmm::Ref<Dictionary> options;
+    std::map<std::string,std::string> attributes;
+    std::map<std::string,std::string> parameters;
+    std::map<std::string,std::string> options;
 
 public:
     /// \brief creates a new resource object.
@@ -60,9 +63,9 @@ public:
     /// \param handler_type id of the associated handler
     CdsResource(int handlerType);
     CdsResource(int handlerType,
-        zmm::Ref<Dictionary> attributes,
-        zmm::Ref<Dictionary> parameters,
-        zmm::Ref<Dictionary> options);
+        const std::map<std::string,std::string>& attributes,
+        const std::map<std::string,std::string>& parameters,
+        const std::map<std::string,std::string>& options);
 
     /// \brief Adds a resource attribute.
     ///
@@ -78,7 +81,7 @@ public:
     void removeAttribute(std::string name);
 
     /// \brief Merge existing attributes with new ones
-    void mergeAttributes(zmm::Ref<Dictionary> additional);
+    void mergeAttributes(const std::map<std::string,std::string>& additional);
 
     /// \brief Adds a parameter (will be appended to the URL)
     ///
@@ -99,21 +102,18 @@ public:
 
     // urlencode into string
     int getHandlerType();
-    zmm::Ref<Dictionary> getAttributes();
-    zmm::Ref<Dictionary> getParameters();
-    zmm::Ref<Dictionary> getOptions();
+    std::map<std::string,std::string> getAttributes();
+    std::map<std::string,std::string> getParameters();
+    std::map<std::string,std::string> getOptions();
     std::string getAttribute(std::string name);
     std::string getParameter(std::string name);
     std::string getOption(std::string name);
 
-    bool equals(zmm::Ref<CdsResource> other);
-    zmm::Ref<CdsResource> clone();
+    bool equals(std::shared_ptr<CdsResource> other);
+    std::shared_ptr<CdsResource> clone();
 
     std::string encode();
-    static zmm::Ref<CdsResource> decode(std::string serial);
-
-    /// \brief Frees unnecessary memory
-    void optimize();
+    static std::shared_ptr<CdsResource> decode(std::string serial);
 };
 
 #endif // __CDS_RESOURCE_H__

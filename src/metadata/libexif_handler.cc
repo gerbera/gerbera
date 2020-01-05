@@ -262,7 +262,7 @@ static int getTagFromString(std::string tag)
 char exif_entry_buffer[BUFLEN];
 #define exif_egv(arg) exif_entry_get_value(arg, exif_entry_buffer, BUFLEN)
 
-void LibExifHandler::process_ifd(ExifContent* content, Ref<CdsItem> item, Ref<StringConverter> sc, std::vector<std::string> auxtags)
+void LibExifHandler::process_ifd(ExifContent* content, Ref<CdsItem> item, const std::unique_ptr<StringConverter>& sc, std::vector<std::string> auxtags)
 {
     ExifEntry* e;
     unsigned int i;
@@ -341,7 +341,7 @@ void LibExifHandler::fillMetadata(Ref<CdsItem> item)
 {
     ExifData* ed;
 
-    Ref<StringConverter> sc = StringConverter::m2i(config);
+    auto sc = StringConverter::m2i(config);
 
     ed = exif_data_new_from_file(item->getLocation().c_str());
 
@@ -372,7 +372,7 @@ void LibExifHandler::fillMetadata(Ref<CdsItem> item)
             std::string th_resolution = get_jpeg_resolution(io_h);
             log_debug("RESOLUTION: %s\n", th_resolution.c_str());
 
-            Ref<CdsResource> resource(new CdsResource(CH_LIBEXIF));
+            auto resource = std::make_shared<CdsResource>(CH_LIBEXIF);
             resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(item->getMimeType()));
             resource->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), th_resolution);
             resource->addParameter(RESOURCE_CONTENT_TYPE, EXIF_THUMBNAIL);
@@ -388,9 +388,8 @@ void LibExifHandler::fillMetadata(Ref<CdsItem> item)
 std::unique_ptr<IOHandler> LibExifHandler::serveContent(Ref<CdsItem> item, int resNum)
 {
     ExifData* ed;
-    Ref<CdsResource> res = item->getResource(resNum);
-
-    std::string ctype = res->getParameters()->get(RESOURCE_CONTENT_TYPE);
+    auto res = item->getResource(resNum);
+    std::string ctype = getValueOrDefault(res->getParameters(), RESOURCE_CONTENT_TYPE);
 
     if (ctype != EXIF_THUMBNAIL)
         throw _Exception("LibExifHandler: got unknown content type: " + ctype);

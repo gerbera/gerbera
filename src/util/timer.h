@@ -32,10 +32,9 @@
 #ifndef __TIMER_H__
 #define __TIMER_H__
 
+#include <memory>
+
 #include "tools.h"
-#include "zmm/ref.h"
-#include "zmm/zmm.h"
-#include "zmm/zmmf.h"
 #include "util/exception.h"
 #include <algorithm>
 #include <condition_variable>
@@ -44,7 +43,7 @@
 class Timer {
 public:
     /// \brief This is the parameter class for timerNotify
-    class Parameter : public zmm::Object {
+    class Parameter {
     public:
         enum timer_param_t {
             IDAutoscan,
@@ -71,7 +70,7 @@ public:
     class Subscriber {
     public:
         virtual ~Subscriber() { log_debug("Subscriber destroyed\n"); }
-        virtual void timerNotify(zmm::Ref<Parameter> parameter) = 0;
+        virtual void timerNotify(std::shared_ptr<Parameter> parameter) = 0;
     };
 
     Timer();
@@ -87,18 +86,18 @@ public:
     /// the same parameter argument, unless the subscription is for a one-shot
     /// timer and the subscriber has already been notified (and removed from the
     /// subscribers list).
-    void addTimerSubscriber(Subscriber* timerSubscriber, unsigned int notifyInterval, zmm::Ref<Parameter> parameter = nullptr, bool once = false);
-    void removeTimerSubscriber(Subscriber* timerSubscriber, zmm::Ref<Parameter> parameter = nullptr, bool dontFail = false);
+    void addTimerSubscriber(Subscriber* timerSubscriber, unsigned int notifyInterval, std::shared_ptr<Parameter> parameter = nullptr, bool once = false);
+    void removeTimerSubscriber(Subscriber* timerSubscriber, std::shared_ptr<Parameter> parameter = nullptr, bool dontFail = false);
     void triggerWait();
     inline void signal() { cond.notify_one(); }
 
 protected:
     class TimerSubscriberElement {
     public:
-        TimerSubscriberElement(Subscriber* subscriber, unsigned int notifyInterval, zmm::Ref<Parameter> parameter, bool once = false)
+        TimerSubscriberElement(Subscriber* subscriber, unsigned int notifyInterval, std::shared_ptr<Parameter> parameter, bool once = false)
             : subscriber(subscriber)
             , notifyInterval(notifyInterval)
-            , parameter(parameter)
+            , parameter(std::move(parameter))
             , once(once)
         {
             updateNextNotify();
@@ -117,7 +116,9 @@ protected:
             getTimespecAfterMillis(notifyInterval * 1000, &nextNotify);
         }
         inline struct timespec* getNextNotify() { return &nextNotify; }
-        inline zmm::Ref<Parameter> getParameter() { return parameter; }
+
+        inline std::shared_ptr<Parameter> getParameter() { return parameter; }
+
         bool operator==(const TimerSubscriberElement& other) const
         {
             return subscriber == other.subscriber && parameter == other.parameter;
@@ -127,7 +128,7 @@ protected:
     protected:
         Subscriber* subscriber;
         unsigned int notifyInterval;
-        zmm::Ref<Parameter> parameter;
+        std::shared_ptr<Parameter> parameter;
         struct timespec nextNotify;
         bool once;
     };

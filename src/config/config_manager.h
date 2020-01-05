@@ -37,7 +37,6 @@
 #include "autoscan.h"
 #include "common.h"
 #include "config_options.h"
-#include "zmm/dictionary.h"
 #include "zmm/object_dictionary.h"
 #include "mxml/mxml.h"
 #include "zmm/object_dictionary.h"
@@ -206,26 +205,19 @@ public:
 
     /// \brief returns a config option of type Dictionary
     /// \param option option to retrieve.
-    zmm::Ref<Dictionary> getDictionaryOption(config_option_t option);
+    std::map<std::string,std::string> getDictionaryOption(config_option_t option);
 
     /// \brief returns a config option of type Array of StringBase
     /// \param option option to retrieve.
     std::vector<std::string> getStringArrayOption(config_option_t option);
 
-    zmm::Ref<ObjectDictionary<zmm::Object>> getObjectDictionaryOption(config_option_t option);
-#ifdef ONLINE_SERVICES
-    /// \brief returns a config option of type Array of Object
-    /// \param option option to retrieve.
-    zmm::Ref<zmm::Array<zmm::Object>> getObjectArrayOption(config_option_t option);
-#endif
-
     /// \brief returns a config option of type AutoscanList
     /// \param option to retrieve
-    zmm::Ref<AutoscanList> getAutoscanListOption(config_option_t option);
+    std::shared_ptr<AutoscanList> getAutoscanListOption(config_option_t option);
 
     /// \brief returns a config option of type TranscodingProfileList
     /// \param option to retrieve
-    zmm::Ref<TranscodingProfileList> getTranscodingProfileListOption(config_option_t option);
+    std::shared_ptr<TranscodingProfileList> getTranscodingProfileListOption(config_option_t option);
 
     static bool isDebugLogging() { return debug_logging; };
 
@@ -250,9 +242,7 @@ protected:
     zmm::Ref<mxml::Document> rootDoc;
     zmm::Ref<mxml::Element> root;
 
-    zmm::Ref<Dictionary> mime_content;
-
-    zmm::Ref<zmm::Array<ConfigOption>> options;
+    std::unique_ptr<std::vector<std::shared_ptr<ConfigOption>>> options;
 
     /// \brief Returns a config option with the given path, if option does not exist a default value is returned.
     /// \param xpath option xpath
@@ -305,17 +295,17 @@ protected:
     ///
     /// This function will create a dictionary with the following
     /// key:value paris: "1":"2", "3":"4"
-    zmm::Ref<Dictionary> createDictionaryFromNodeset(zmm::Ref<mxml::Element> element, std::string nodeName, std::string keyAttr, std::string valAttr, bool tolower = false);
+    std::map<std::string,std::string> createDictionaryFromNodeset(zmm::Ref<mxml::Element> element, std::string nodeName, std::string keyAttr, std::string valAttr, bool tolower = false);
 
     /// \brief Creates an array of AutoscanDirectory objects from a XML nodeset.
     /// \param element starting element of the nodeset.
     /// \param scanmode add only directories with the specified scanmode to the array
-    zmm::Ref<AutoscanList> createAutoscanListFromNodeset(std::shared_ptr<Storage> storage, zmm::Ref<mxml::Element> element, ScanMode scanmode);
+    std::shared_ptr<AutoscanList> createAutoscanListFromNodeset(std::shared_ptr<Storage> storage, zmm::Ref<mxml::Element> element, ScanMode scanmode);
 
     /// \brief Creates ab aray of TranscodingProfile objects from an XML
     /// nodeset.
     /// \param element starting element of the nodeset.
-    zmm::Ref<TranscodingProfileList> createTranscodingProfileListFromNodeset(zmm::Ref<mxml::Element> element);
+    std::shared_ptr<TranscodingProfileList> createTranscodingProfileListFromNodeset(zmm::Ref<mxml::Element> element);
 
     /// \brief Creates an array of strings from an XML nodeset.
     /// \param element starting element of the nodeset.
