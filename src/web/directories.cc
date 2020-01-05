@@ -64,17 +64,11 @@ void web::directories::process()
     containers->setAttribute("type", "filesystem");
     root->appendElementChild(containers);
 
-    Ref<Filesystem> fs(new Filesystem(config));
-
-    Ref<Array<FsObject>> arr;
-    arr = fs->readDirectory(path, FS_MASK_DIRECTORIES,
-        FS_MASK_DIRECTORIES);
-
-    for (int i = 0; i < arr->size(); i++) {
-        Ref<FsObject> obj = arr->get(i);
-
+    auto fs = std::make_unique<Filesystem>(config);
+    auto arr = fs->readDirectory(path, FS_MASK_DIRECTORIES, FS_MASK_DIRECTORIES);
+    for (auto it = arr.begin(); it != arr.end(); it++) {
         Ref<Element> ce(new Element("container"));
-        std::string filename = obj->filename;
+        std::string filename = (*it)->filename;
         std::string filepath;
         if (path.c_str()[path.length() - 1] == '/')
             filepath = path + filename;
@@ -84,7 +78,7 @@ void web::directories::process()
         /// \todo replace hex_encode with base64_encode?
         std::string id = hex_encode(filepath.c_str(), filepath.length());
         ce->setAttribute("id", id);
-        if (obj->hasContent)
+        if ((*it)->hasContent)
             ce->setAttribute("child_count", std::to_string(1), mxml_int_type);
         else
             ce->setAttribute("child_count", std::to_string(0), mxml_int_type);
