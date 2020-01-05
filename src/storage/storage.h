@@ -39,7 +39,6 @@
 
 #include "autoscan.h"
 #include "cds_objects.h"
-#include "zmm/dictionary.h"
 #include "zmm/zmmf.h"
 
 #define BROWSE_DIRECT_CHILDREN 0x00000001

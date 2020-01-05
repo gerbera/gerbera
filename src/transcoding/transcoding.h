@@ -38,7 +38,6 @@
 #include <map>
 
 #include "zmm/zmmf.h"
-#include "zmm/dictionary.h"
 #include "zmm/object_dictionary.h"
 
 #define SOURCE  (-1)

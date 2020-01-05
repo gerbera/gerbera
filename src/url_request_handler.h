@@ -33,7 +33,6 @@
 #define __URL_REQUEST_HANDLER_H__
 
 #include "common.h"
-#include "zmm/dictionary.h"
 #include "request_handler.h"
 
 // forward declaration

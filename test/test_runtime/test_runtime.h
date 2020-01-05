@@ -22,7 +22,6 @@
 #ifndef __RUNTIME_TEST_H__
 #define __RUNTIME_TEST_H__
 
-#include "zmm/dictionary.h"
 #include "gtest/gtest.h"
 
 class RuntimeTest : public ::testing::Test {

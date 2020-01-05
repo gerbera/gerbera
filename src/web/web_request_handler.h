@@ -35,7 +35,6 @@
 #include "common.h"
 #include "config/config_manager.h"
 #include "session_manager.h"
-#include "zmm/dictionary.h"
 #include "mxml/mxml.h"
 #include "request_handler.h"
 #include "util/exception.h"

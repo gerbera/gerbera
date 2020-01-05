@@ -305,11 +305,11 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
 
     std::string parameters = (filename + strlen(LINK_FILE_REQUEST_HANDLER));
 
-    Dictionary params;
-    params.decodeSimple(parameters);
+    std::map<std::string,std::string> params;
+    dict_decode_simple(parameters, &params);
     log_debug("full url (filename): %s, parameters: %s\n", filename, parameters.c_str());
 
-    std::string objID = params.get("object_id");
+    std::string objID = getValueOrDefault(params, "object_id");
     if (objID.empty()) {
         throw _Exception("object_id not found in parameters");
     }
@@ -327,7 +327,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
 
     // determining which resource to serve
     int res_id = 0;
-    std::string s_res_id = params.get(URL_RESOURCE_ID);
+    std::string s_res_id = getValueOrDefault(params, URL_RESOURCE_ID);
     if (string_ok(s_res_id) && (s_res_id != URL_VALUE_TRANSCODE_NO_RES_ID)) {
         res_id = std::stoi(s_res_id);
     } else {
@@ -394,7 +394,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
     bool is_srt = false;
 
     std::string mimeType;
-    std::string ext = params.get("ext");
+    std::string ext = getValueOrDefault(params, "ext");
     size_t edot = ext.rfind('.');
     if (edot != std::string::npos)
         ext = ext.substr(edot);
@@ -422,7 +422,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
 
     log_debug("fetching resource id %d\n", res_id);
 
-    std::string tr_profile = params.get(URL_PARAM_TRANSCODE_PROFILE_NAME);
+    std::string tr_profile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
     if (string_ok(tr_profile)) {
         if (res_id != (-1)) {
             throw _Exception("Invalid resource ID given!");
@@ -436,7 +436,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
     // some resources are created dynamically and not saved in the database,
     // so we can not load such a resource for a particular item, we will have
     // to trust the resource handler parameter
-    std::string rh = params.get(RESOURCE_HANDLER);
+    std::string rh = getValueOrDefault(params, RESOURCE_HANDLER);
     if (((res_id > 0) && (res_id < item->getResourceCount())) || ((res_id > 0) && string_ok(rh))) {
         //info->file_length = -1;
 
@@ -476,7 +476,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
 
     } else {
         if (!is_srt && string_ok(tr_profile)) {
-            std::string range = params.get("range");
+            std::string range = getValueOrDefault(params, "range");
 
             Ref<TranscodeDispatcher> tr_d(new TranscodeDispatcher(config, content));
             Ref<TranscodingProfile> tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(tr_profile);

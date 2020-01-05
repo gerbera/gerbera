@@ -36,7 +36,6 @@
 #include <map>
 
 #include "common.h"
-#include "zmm/dictionary.h"
 
 /// \brief name for external urls that can appear in object resources (i.e.
 /// a YouTube thumbnail)

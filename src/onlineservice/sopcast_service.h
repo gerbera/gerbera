@@ -39,7 +39,6 @@
 #include "online_service.h"
 #include "url.h"
 #include "zmm/zmm.h"
-#include "zmm/dictionary.h"
 #include <curl/curl.h>
 
 // forward declaration

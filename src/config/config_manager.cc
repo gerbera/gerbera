@@ -1507,7 +1507,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
     if (element == nullptr)
         return list;
 
-    Ref<Array<DictionaryElement>> mt_mappings(new Array<DictionaryElement>());
+    std::map<std::string,std::string> mt_mappings;
 
     std::string mt;
     std::string pname;
@@ -1521,8 +1521,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
                 pname = child->getAttribute("using");
 
                 if (string_ok(mt) && string_ok(pname)) {
-                    Ref<DictionaryElement> del(new DictionaryElement(mt, pname));
-                    mt_mappings->append(del);
+                    mt_mappings[mt] = pname;
                 } else {
                     throw _Exception("error in configuration: invalid or missing mimetype to profile mapping");
                 }
@@ -1807,9 +1806,9 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
                              "mappings specified");
         }
 
-        for (int k = 0; k < mt_mappings->size(); k++) {
-            if (mt_mappings->get(k)->getValue() == prof->getName()) {
-                list->add(mt_mappings->get(k)->getKey(), prof);
+        for (auto it = mt_mappings.begin(); it != mt_mappings.end(); it++) {
+            if (it->second == prof->getName()) {
+                list->add(it->first, prof);
                 set = true;
             }
         }
