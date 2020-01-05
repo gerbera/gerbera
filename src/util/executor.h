@@ -32,10 +32,8 @@
 #ifndef __EXECUTOR_H__
 #define __EXECUTOR_H__
 
-#include "zmm/zmmf.h"
-
 /// \brief wraps something executable e.g. a thread or a process
-class Executor : public zmm::Object {
+class Executor {
 public:
     /// \brief destructor of the executor, has to make sure that the executor is dead
     virtual ~Executor() {};

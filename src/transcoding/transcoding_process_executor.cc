@@ -32,12 +32,9 @@
 #include <unistd.h>
 #include "transcoding_process_executor.h"
 
-using namespace zmm;
-
 TranscodingProcessExecutor::TranscodingProcessExecutor(std::string command, std::vector<std::string> arglist) : ProcessExecutor(command, arglist)
 {
 };
-
 
 void TranscodingProcessExecutor::removeFile(std::string filename)
 {

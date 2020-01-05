@@ -296,19 +296,17 @@ void ContentManager::init()
         log_debug("Adding timed scan with interval %d\n", dir->getInterval());
         timer->addTimerSubscriber(this, dir->getInterval(), param, false);
     }
-
-    process_list = Ref<Array<Executor>>(new Array<Executor>());
 }
 
 ContentManager::~ContentManager() { log_debug("ContentManager destroyed\n"); }
 
-void ContentManager::registerExecutor(Ref<Executor> exec)
+void ContentManager::registerExecutor(std::shared_ptr<Executor> exec)
 {
     AutoLock lock(mutex);
-    process_list->append(exec);
+    process_list.push_back(exec);
 }
 
-void ContentManager::unregisterExecutor(Ref<Executor> exec)
+void ContentManager::unregisterExecutor(std::shared_ptr<Executor> exec)
 {
     // when shutting down we will kill the transcoding processes,
     // which if given enough time will get a close in the io handler and
@@ -320,9 +318,9 @@ void ContentManager::unregisterExecutor(Ref<Executor> exec)
         return;
 
     AutoLock lock(mutex);
-    for (int i = 0; i < process_list->size(); i++) {
-        if (process_list->get(i) == exec)
-            process_list->remove(i);
+    for (size_t i = 0; i < process_list.size(); i++) {
+        if (process_list[i] == exec)
+            process_list.erase(process_list.begin() + i);
     }
 }
 
@@ -380,8 +378,8 @@ void ContentManager::shutdown()
 
     shutdownFlag = true;
 
-    for (int i = 0; i < process_list->size(); i++) {
-        Ref<Executor> exec = process_list->get(i);
+    for (size_t i = 0; i < process_list.size(); i++) {
+        auto exec = process_list[i];
         if (exec != nullptr)
             exec->kill();
     }

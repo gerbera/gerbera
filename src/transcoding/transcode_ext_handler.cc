@@ -145,10 +145,9 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile
         int p2 = find_local_port(45000,65500);
         sop_args = parseCommandLine(location + " " + std::to_string(p1) + " " +
                    std::to_string(p2), nullptr, nullptr, nullptr);
-        Ref<ProcessExecutor> spsc(new ProcessExecutor("sp-sc-auth", 
-                                                      sop_args));
+        auto spsc = std::make_shared<ProcessExecutor>("sp-sc-auth", sop_args);
         proc_list = Ref<Array<ProcListItem> >(new Array<ProcListItem>(1));
-        Ref<ProcListItem> pr_item(new ProcListItem(RefCast(spsc, Executor)));
+        Ref<ProcListItem> pr_item(new ProcListItem(spsc));
         proc_list->append(pr_item);
         location = "http://localhost:" + std::to_string(p2) + "/tv.asf";
 
@@ -181,7 +180,7 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile
                    config->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE),
                    config->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_FILL_SIZE));
                 std::unique_ptr<IOHandler> p_ioh = std::make_unique<ProcessIOHandler>(content, location, nullptr);
-                Ref<Executor> ch(new IOHandlerChainer(c_ioh, p_ioh, 16384));
+                auto ch = std::make_shared<IOHandlerChainer>(c_ioh, p_ioh, 16384);
                 proc_list = Ref<Array<ProcListItem> >(new Array<ProcListItem>(1));
                 Ref<ProcListItem> pr_item(new ProcListItem(ch));
                 proc_list->append(pr_item);
@@ -238,14 +237,14 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile
 
     log_debug("Command: %s\n", profile->getCommand().c_str());
     log_debug("Arguments: %s\n", profile->getArguments().c_str());
-    Ref<TranscodingProcessExecutor> main_proc(new TranscodingProcessExecutor(profile->getCommand(), arglist));
+    auto main_proc = std::make_shared<TranscodingProcessExecutor>(profile->getCommand(), arglist);
     main_proc->removeFile(fifo_name);
     if (isURL && (!profile->acceptURL()))
     {
         main_proc->removeFile(location);
     }
 
-    std::unique_ptr<IOHandler> u_ioh = std::make_unique<ProcessIOHandler>(content, fifo_name, RefCast(main_proc, Executor), proc_list);
+    std::unique_ptr<IOHandler> u_ioh = std::make_unique<ProcessIOHandler>(content, fifo_name, main_proc, proc_list);
     auto io_handler = std::make_unique<BufferedIOHandler>(
         u_ioh,
         profile->getBufferSize(), profile->getBufferChunkSize(), profile->getBufferInitialFillSize()

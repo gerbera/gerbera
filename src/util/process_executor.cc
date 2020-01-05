@@ -38,8 +38,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-using namespace zmm;
-
 ProcessExecutor::ProcessExecutor(std::string command, std::vector<std::string> arglist)
 {
 #define MAX_ARGS 255

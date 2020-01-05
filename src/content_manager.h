@@ -318,14 +318,14 @@ public:
     /// when we shutdown the server.
     ///
     /// \param exec the Executor object of the process
-    void registerExecutor(zmm::Ref<Executor> exec);
+    void registerExecutor(std::shared_ptr<Executor> exec);
 
     /// \brief unregister process
     ///
     /// When the the process io handler receives a close on a stream that is
     /// currently being processed by an external process, it will kill it.
     /// The handler will then remove the executor from the list.
-    void unregisterExecutor(zmm::Ref<Executor> exec);
+    void unregisterExecutor(std::shared_ptr<Executor> exec);
 
     void triggerPlayHook(zmm::Ref<CdsObject> obj);
 
@@ -366,7 +366,7 @@ protected:
     zmm::Ref<AutoscanList> autoscan_inotify;
 #endif
 
-    zmm::Ref<zmm::Array<Executor>> process_list;
+    std::vector<std::shared_ptr<Executor>> process_list;
 
     void _loadAccounting();
 

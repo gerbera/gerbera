@@ -47,13 +47,13 @@
 
 using namespace zmm;
 
-ProcListItem::ProcListItem(Ref<Executor> exec, bool abortOnDeath)
+ProcListItem::ProcListItem(std::shared_ptr<Executor> exec, bool abortOnDeath)
 {
     executor = exec;
     abort = abortOnDeath;
 }
 
-Ref<Executor> ProcListItem::getExecutor()
+std::shared_ptr<Executor> ProcListItem::getExecutor()
 {
     return executor;
 }
@@ -71,7 +71,7 @@ bool ProcessIOHandler::abort()
         return abort;
 
     for (int i = 0; i < proclist->size(); i++) {
-        Ref<Executor> exec = proclist->get(i)->getExecutor();
+        auto exec = proclist->get(i)->getExecutor();
         if ((exec != nullptr) && (!exec->isAlive())) {
             if (proclist->get(i)->abortOnDeath())
                 abort = true;
@@ -88,7 +88,7 @@ void ProcessIOHandler::killall()
         return;
 
     for (int i = 0; i < proclist->size(); i++) {
-        Ref<Executor> exec = proclist->get(i)->getExecutor();
+        auto exec = proclist->get(i)->getExecutor();
         if (exec != nullptr)
             exec->kill();
     }
@@ -103,7 +103,7 @@ void ProcessIOHandler::registerAll()
         return;
 
     for (int i = 0; i < proclist->size(); i++) {
-        Ref<Executor> exec = proclist->get(i)->getExecutor();
+        auto exec = proclist->get(i)->getExecutor();
         if (exec != nullptr)
             content->registerExecutor(exec);
     }
@@ -118,7 +118,7 @@ void ProcessIOHandler::unregisterAll()
         return;
 
     for (int i = 0; i < proclist->size(); i++) {
-        Ref<Executor> exec = proclist->get(i)->getExecutor();
+        auto exec = proclist->get(i)->getExecutor();
         if (exec != nullptr)
             content->unregisterExecutor(exec);
     }
@@ -126,7 +126,7 @@ void ProcessIOHandler::unregisterAll()
 
 ProcessIOHandler::ProcessIOHandler(std::shared_ptr<ContentManager> content,
     std::string filename,
-    zmm::Ref<Executor> main_proc,
+    std::shared_ptr<Executor> main_proc,
     zmm::Ref<zmm::Array<ProcListItem>> proclist,
     bool ignoreSeek)
     : IOHandler()
