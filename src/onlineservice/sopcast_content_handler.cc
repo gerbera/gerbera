@@ -123,7 +123,7 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
                 continue;
 
             Ref<CdsItemExternalURL> item(new CdsItemExternalURL(storage));
-            Ref<CdsResource> resource(new CdsResource(CH_DEFAULT));
+            auto resource = std::make_shared<CdsResource>(CH_DEFAULT);
             item->addResource(resource);
 
             item->setAuxData(ONLINE_SERVICE_AUX_ID,

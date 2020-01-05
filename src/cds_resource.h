@@ -32,6 +32,7 @@
 #ifndef __CDS_RESOURCE_H__
 #define __CDS_RESOURCE_H__
 
+#include <memory>
 #include <string>
 #include <map>
 
@@ -47,7 +48,7 @@
 
 #define RESOURCE_OPTION_FOURCC "4cc"
 
-class CdsResource : public zmm::Object {
+class CdsResource {
 protected:
     int handlerType;
     std::map<std::string,std::string> attributes;
@@ -108,11 +109,11 @@ public:
     std::string getParameter(std::string name);
     std::string getOption(std::string name);
 
-    bool equals(zmm::Ref<CdsResource> other);
-    zmm::Ref<CdsResource> clone();
+    bool equals(std::shared_ptr<CdsResource> other);
+    std::shared_ptr<CdsResource> clone();
 
     std::string encode();
-    static zmm::Ref<CdsResource> decode(std::string serial);
+    static std::shared_ptr<CdsResource> decode(std::string serial);
 };
 
 #endif // __CDS_RESOURCE_H__

@@ -107,7 +107,7 @@ void MetadataHandler::setMetadata(std::shared_ptr<ConfigManager> config, Ref<Cds
 
     std::string mimetype = item->getMimeType();
 
-    Ref<CdsResource> resource(new CdsResource(CH_DEFAULT));
+    auto resource = std::make_shared<CdsResource>(CH_DEFAULT);
     resource->addAttribute(getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(mimetype));
     resource->addAttribute(getResAttrName(R_SIZE), std::to_string(filesize));
 

@@ -95,7 +95,7 @@ Ref<CdsObject> ATrailersContentHandler::getNextObject()
 
         // we know what we are adding
         Ref<CdsItemExternalURL> item(new CdsItemExternalURL(storage));
-        Ref<CdsResource> resource(new CdsResource(CH_DEFAULT));
+        auto resource = std::make_shared<CdsResource>(CH_DEFAULT);
         item->addResource(resource);
 
         Ref<Element> info = trailer->getChildByName("info");

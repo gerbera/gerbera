@@ -83,7 +83,7 @@ void FanArtHandler::fillMetadata(Ref<CdsItem> item)
 
     std::string found = getFanArtPath(getFolderName(item));
     if (!found.empty()) {
-        Ref<CdsResource> resource(new CdsResource(CH_FANART));
+        auto resource = std::make_shared<CdsResource>(CH_FANART);
         resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo("jpg"));
         resource->addParameter(RESOURCE_CONTENT_TYPE, ID3_ALBUM_ART);
         item->addResource(resource);

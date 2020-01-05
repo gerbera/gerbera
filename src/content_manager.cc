@@ -891,14 +891,14 @@ void ContentManager::updateObject(int objectID, const std::map<std::string,std::
 
         if (string_ok(mimetype) && (string_ok(protocol))) {
             cloned_item->setMimeType(mimetype);
-            Ref<CdsResource> resource = cloned_item->getResource(0);
+            auto resource = cloned_item->getResource(0);
             resource->addAttribute("protocolInfo", renderProtocolInfo(mimetype, protocol));
         } else if (!string_ok(mimetype) && (string_ok(protocol))) {
-            Ref<CdsResource> resource = cloned_item->getResource(0);
+            auto resource = cloned_item->getResource(0);
             resource->addAttribute("protocolInfo", renderProtocolInfo(cloned_item->getMimeType(), protocol));
         } else if (string_ok(mimetype) && (!string_ok(protocol))) {
             cloned_item->setMimeType(mimetype);
-            Ref<CdsResource> resource = cloned_item->getResource(0);
+            auto resource = cloned_item->getResource(0);
             std::vector<std::string> parts = split_string(resource->getAttribute("protocolInfo"), ':');
             protocol = parts[0];
             resource->addAttribute("protocolInfo", renderProtocolInfo(mimetype, protocol));

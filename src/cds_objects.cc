@@ -41,7 +41,6 @@ CdsObject::CdsObject(std::shared_ptr<Storage> storage)
     : Object()
     , storage(storage)
 {
-    resources = Ref<Array<CdsResource>>(new Array<CdsResource>);
     id = INVALID_OBJECT_ID;
     parentID = INVALID_OBJECT_ID;
     refID = INVALID_OBJECT_ID;
@@ -67,8 +66,8 @@ void CdsObject::copyTo(Ref<CdsObject> obj)
     obj->setAuxData(auxdata);
     obj->setFlags(objectFlags);
     obj->setSortPriority(sortPriority);
-    for (int i = 0; i < resources->size(); i++)
-        obj->addResource(resources->get(i)->clone());
+    for (size_t i = 0; i < resources.size(); i++)
+        obj->addResource(resources[i]->clone());
 }
 int CdsObject::equals(Ref<CdsObject> obj, bool exactly)
 {
@@ -101,12 +100,12 @@ int CdsObject::equals(Ref<CdsObject> obj, bool exactly)
 
 int CdsObject::resourcesEqual(Ref<CdsObject> obj)
 {
-    if (resources->size() != obj->resources->size())
+    if (resources.size() != obj->resources.size())
         return 0;
 
     // compare all resources
-    for (int i = 0; i < resources->size(); i++) {
-        if (!resources->get(i)->equals(obj->resources->get(i)))
+    for (size_t i = 0; i < resources.size(); i++) {
+        if (!resources[i]->equals(obj->resources[i]))
             return 0;
     }
     return 1;
@@ -294,10 +293,6 @@ void CdsContainer::validate()
     /// \todo well.. we have to know if a container is a real directory or just a virtual container in the database
     /*    if (!check_path(this->location, true))
         throw _Exception("CdsContainer: validation failed"); */
-}
-void CdsObject::optimize()
-{
-    resources->optimize();
 }
 
 int CdsObjectTitleComparator(void* arg1, void* arg2)

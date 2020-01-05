@@ -161,7 +161,7 @@ Ref<CdsObject> web::addObject::addUrl(int parentID, Ref<CdsItemExternalURL> item
     } else
         protocolInfo = renderProtocolInfo(tmp);
 
-    Ref<CdsResource> resource(new CdsResource(CH_DEFAULT));
+    auto resource = std::make_shared<CdsResource>(CH_DEFAULT);
     resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
         protocolInfo);
     item->addResource(resource);

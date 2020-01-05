@@ -39,7 +39,6 @@
 using namespace zmm;
 
 CdsResource::CdsResource(int handlerType)
-    : Object()
 {
     this->handlerType = handlerType;
 }
@@ -116,7 +115,7 @@ std::string CdsResource::getOption(std::string name)
     return getValueOrDefault(options, name);
 }
 
-bool CdsResource::equals(Ref<CdsResource> other)
+bool CdsResource::equals(std::shared_ptr<CdsResource> other)
 {
     return (
         handlerType == other->handlerType
@@ -125,9 +124,9 @@ bool CdsResource::equals(Ref<CdsResource> other)
         && std::equal(options.begin(), options.end(), other->options.begin()));
 }
 
-Ref<CdsResource> CdsResource::clone()
+std::shared_ptr<CdsResource> CdsResource::clone()
 {
-    return Ref<CdsResource>(new CdsResource(handlerType, attributes, parameters, options));
+    return std::make_shared<CdsResource>(handlerType, attributes, parameters, options);
 }
 
 std::string CdsResource::encode()
@@ -144,7 +143,7 @@ std::string CdsResource::encode()
     return buf.str().c_str();
 }
 
-Ref<CdsResource> CdsResource::decode(std::string serial)
+std::shared_ptr<CdsResource> CdsResource::decode(std::string serial)
 {
     std::vector<std::string> parts = split_string(serial, RESOURCE_PART_SEP, true);
     int size = parts.size();
@@ -164,8 +163,7 @@ Ref<CdsResource> CdsResource::decode(std::string serial)
     if (size >= 4)
         dict_decode(parts[3], &opt);
 
-    Ref<CdsResource> resource(new CdsResource(handlerType, attr, par, opt));
-
+    auto resource = std::make_shared<CdsResource>(handlerType, attr, par, opt);
     return resource;
 }
 

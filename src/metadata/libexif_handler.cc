@@ -372,7 +372,7 @@ void LibExifHandler::fillMetadata(Ref<CdsItem> item)
             std::string th_resolution = get_jpeg_resolution(io_h);
             log_debug("RESOLUTION: %s\n", th_resolution.c_str());
 
-            Ref<CdsResource> resource(new CdsResource(CH_LIBEXIF));
+            auto resource = std::make_shared<CdsResource>(CH_LIBEXIF);
             resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(item->getMimeType()));
             resource->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), th_resolution);
             resource->addParameter(RESOURCE_CONTENT_TYPE, EXIF_THUMBNAIL);
@@ -388,8 +388,7 @@ void LibExifHandler::fillMetadata(Ref<CdsItem> item)
 std::unique_ptr<IOHandler> LibExifHandler::serveContent(Ref<CdsItem> item, int resNum)
 {
     ExifData* ed;
-    Ref<CdsResource> res = item->getResource(resNum);
-
+    auto res = item->getResource(resNum);
     std::string ctype = getValueOrDefault(res->getParameters(), RESOURCE_CONTENT_TYPE);
 
     if (ctype != EXIF_THUMBNAIL)

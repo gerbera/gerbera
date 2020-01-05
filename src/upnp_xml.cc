@@ -216,9 +216,8 @@ Ref<Element> UpnpXMLBuilder::renderObject(Ref<CdsObject> obj, bool renderActions
                         Ref<CdsItem> item = RefCast(obj, CdsItem);
 
                         auto resources = item->getResources();
-
-                        for (int i = 1; i < resources->size(); i++) {
-                            auto res = resources->get(i);
+                        for (size_t i = 1; i < resources.size(); i++) {
+                            auto res = resources[i];
                             // only add upnp:AlbumArtURI if we have an AA, skip the resource
                             if ((res->getHandlerType() == CH_ID3) || (res->getHandlerType() == CH_MP4) || (res->getHandlerType() == CH_FLAC) || (res->getHandlerType() == CH_FANART) || (res->getHandlerType() == CH_EXTURL)) {
 
@@ -626,7 +625,7 @@ void UpnpXMLBuilder::addResources(Ref<CdsItem> item, Ref<Element> element)
             if (!string_ok(thumb_mimetype))
                 thumb_mimetype = "image/jpeg";
 
-            Ref<CdsResource> ffres(new CdsResource(CH_FFTH));
+            auto ffres = std::make_shared<CdsResource>(CH_FFTH);
             ffres->addParameter(RESOURCE_HANDLER, std::to_string(CH_FFTH));
             ffres->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
                 renderProtocolInfo(thumb_mimetype));
@@ -709,7 +708,7 @@ void UpnpXMLBuilder::addResources(Ref<CdsItem> item, Ref<Element> element)
                 }
             }
 
-            Ref<CdsResource> t_res(new CdsResource(CH_TRANSCODE));
+            auto t_res = std::make_shared<CdsResource>(CH_TRANSCODE);
             t_res->addParameter(URL_PARAM_TRANSCODE_PROFILE_NAME, tp->getName());
             // after transcoding resource was added we can not rely on
             // index 0, so we will make sure the ogg option is there
@@ -781,7 +780,7 @@ void UpnpXMLBuilder::addResources(Ref<CdsItem> item, Ref<Element> element)
         /*        std::string mimeType = item->getMimeType();
                   if (!string_ok(mimeType)) mimeType = DEFAULT_MIMETYPE; */
 
-        Ref<CdsResource> res = item->getResource(i);
+        auto res = item->getResource(i);
         auto res_attrs = res->getAttributes();
         auto res_params = res->getParameters();
         std::string protocolInfo = getValueOrDefault(res_attrs, MetadataHandler::getResAttrName(R_PROTOCOLINFO));

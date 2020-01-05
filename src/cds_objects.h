@@ -35,6 +35,7 @@
 #include <sys/types.h>
 #include <memory>
 #include <string>
+#include <vector>
 #include <map>
 
 #include "cds_resource.h"
@@ -124,7 +125,7 @@ protected:
 
     std::map<std::string,std::string> metadata;
     std::map<std::string,std::string> auxdata;
-    zmm::Ref<zmm::Array<CdsResource>> resources;
+    std::vector<std::shared_ptr<CdsResource>> resources;
 
 public:
     /// \brief Constructor. Sets the default values.
@@ -288,36 +289,36 @@ public:
     }
 
     /// \brief Get number of resource tags
-    inline int getResourceCount() { return resources->size(); }
+    inline int getResourceCount() { return resources.size(); }
 
     /// \brief Query resources
-    inline zmm::Ref<zmm::Array<CdsResource>> getResources()
+    inline std::vector<std::shared_ptr<CdsResource>> getResources()
     {
         return resources;
     }
 
     /// \brief Set resources
-    inline void setResources(zmm::Ref<zmm::Array<CdsResource>> res)
+    inline void setResources(std::vector<std::shared_ptr<CdsResource>> res)
     {
         resources = res;
     }
 
     /// \brief Query resource tag with the given index
-    inline zmm::Ref<CdsResource> getResource(int index)
+    inline std::shared_ptr<CdsResource> getResource(int index)
     {
-        return resources->get(index);
+        return resources.at(index);
     }
 
     /// \brief Add resource tag
-    inline void addResource(zmm::Ref<CdsResource> resource)
+    inline void addResource(std::shared_ptr<CdsResource> resource)
     {
-        resources->append(resource);
+        resources.push_back(resource);
     }
 
     /// \brief Insert resource tag at index
-    inline void insertResource(int index, zmm::Ref<CdsResource> resource)
+    inline void insertResource(int index, std::shared_ptr<CdsResource> resource)
     {
-        resources->insert(index, resource);
+        resources.insert(resources.begin() + index, resource);
     }
 
     /// \brief Copies all object properties to another object.
@@ -339,9 +340,6 @@ public:
 
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
     virtual void validate();
-
-    /// \brief Frees unnecessary memory
-    void optimize();
 
     static zmm::Ref<CdsObject> createObject(std::shared_ptr<Storage> storage, unsigned int objectType);
 
