@@ -389,7 +389,7 @@ void FallbackLayout::addATrailers(zmm::Ref<CdsObject> obj)
     temp = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_GENRE));
     if (string_ok(temp))
     {
-        Ref<StringTokenizer> st(new StringTokenizer(temp));
+        auto st = std::make_unique<StringTokenizer>(temp);
         std::string genre;
         std::string next;
         do

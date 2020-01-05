@@ -34,9 +34,7 @@
 
 #include <string>
 
-#include "zmm/zmmf.h"
-
-class StringTokenizer : public zmm::Object
+class StringTokenizer
 {
 public:
     StringTokenizer(std::string str);

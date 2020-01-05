@@ -274,7 +274,7 @@ std::string find_in_path(std::string exec)
     if (!string_ok(PATH))
         return "";
 
-    Ref<StringTokenizer> st(new StringTokenizer(PATH));
+    auto st = std::make_unique<StringTokenizer>(PATH);
     std::string path = "";
     std::string next;
     do {
