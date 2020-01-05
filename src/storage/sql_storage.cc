@@ -250,41 +250,32 @@ Ref<Array<SQLStorage::AddUpdateTable>> SQLStorage::_addUpdateObject(Ref<CdsObjec
             throw _Exception("refId set, but it makes no sense");
     }
 
-    int returnValSize = 2;
-    returnValSize += obj->getMetadata().size();
-    Ref<Array<AddUpdateTable>> returnVal(new Array<AddUpdateTable>(returnValSize));
-    Ref<Dictionary> cdsObjectSql(new Dictionary());
-    returnVal->append(Ref<AddUpdateTable>(
-        new AddUpdateTable(CDS_OBJECT_TABLE, cdsObjectSql, isUpdate ? "update" : "insert")));
-
-    cdsObjectSql->put("object_type", quote(objectType));
+    std::map<std::string,std::string> cdsObjectSql;
+    cdsObjectSql["object_type"] = quote(objectType);
 
     if (hasReference || playlistRef)
-        cdsObjectSql->put("ref_id", quote(refObj->getID()));
+        cdsObjectSql["ref_id"] = quote(refObj->getID());
     else if (isUpdate)
-        cdsObjectSql->put("ref_id", SQL_NULL);
+        cdsObjectSql["ref_id"] = SQL_NULL;
 
     if (!hasReference || refObj->getClass() != obj->getClass())
-        cdsObjectSql->put("upnp_class", quote(obj->getClass()));
+        cdsObjectSql["upnp_class"] = quote(obj->getClass());
     else if (isUpdate)
-        cdsObjectSql->put("upnp_class", SQL_NULL);
+        cdsObjectSql["upnp_class"] = SQL_NULL;
 
     //if (!hasReference || refObj->getTitle() != obj->getTitle())
-    cdsObjectSql->put("dc_title", quote(obj->getTitle()));
+    cdsObjectSql["dc_title"] = quote(obj->getTitle());
     //else if (isUpdate)
-    //    cdsObjectSql->put("dc_title", SQL_NULL);
+    //    cdsObjectSql["dc_title"] = SQL_NULL;
 
 
     auto dict = obj->getMetadata();
-    if (!hasReference || !std::equal(dict.begin(), dict.end(), refObj->getMetadata().begin())) {
-        generateMetadataDBOperations(obj, isUpdate, returnVal);
-    }
     
     if (isUpdate)
-        cdsObjectSql->put("auxdata", SQL_NULL);
+        cdsObjectSql["auxdata"] = SQL_NULL;
     dict = obj->getAuxData();
     if (dict.size() > 0 && (!hasReference || !std::equal(dict.begin(), dict.end(), refObj->getAuxData().begin()))) {
-        cdsObjectSql->put("auxdata", quote(dict_encode(obj->getAuxData())));
+        cdsObjectSql["auxdata"] = quote(dict_encode(obj->getAuxData()));
     }
 
     if (!hasReference || (!obj->getFlag(OBJECT_FLAG_USE_RESOURCE_REF) && !refObj->resourcesEqual(obj))) {
@@ -297,22 +288,22 @@ Ref<Array<SQLStorage::AddUpdateTable>> SQLStorage::_addUpdateObject(Ref<CdsObjec
         }
         std::string resStr = resBuf.str();
         if (string_ok(resStr))
-            cdsObjectSql->put("resources", quote(resStr));
+            cdsObjectSql["resources"] = quote(resStr);
         else
-            cdsObjectSql->put("resources", SQL_NULL);
+            cdsObjectSql["resources"] = SQL_NULL;
     } else if (isUpdate)
-        cdsObjectSql->put("resources", SQL_NULL);
+        cdsObjectSql["resources"] = SQL_NULL;
 
     obj->clearFlag(OBJECT_FLAG_USE_RESOURCE_REF);
 
-    cdsObjectSql->put("flags", quote(obj->getFlags()));
+    cdsObjectSql["flags"] = quote(obj->getFlags());
 
     if (IS_CDS_CONTAINER(objectType)) {
         if (!(isUpdate && obj->isVirtual()))
             throw _Exception("tried to add a container or tried to update a non-virtual container via _addUpdateObject; is this correct?");
         std::string dbLocation = addLocationPrefix(LOC_VIRT_PREFIX, obj->getLocation());
-        cdsObjectSql->put("location", quote(dbLocation));
-        cdsObjectSql->put("location_hash", quote(stringHash(dbLocation)));
+        cdsObjectSql["location"] = quote(dbLocation);
+        cdsObjectSql["location_hash"] = quote(stringHash(dbLocation));
     }
 
     if (IS_CDS_ITEM(objectType)) {
@@ -328,48 +319,38 @@ Ref<Array<SQLStorage::AddUpdateTable>> SQLStorage::_addUpdateObject(Ref<CdsObjec
                 int parentID = ensurePathExistence(path, changedContainer);
                 item->setParentID(parentID);
                 std::string dbLocation = addLocationPrefix(LOC_FILE_PREFIX, loc);
-                cdsObjectSql->put("location", quote(dbLocation));
-                cdsObjectSql->put("location_hash", quote(stringHash(dbLocation)));
+                cdsObjectSql["location"] = quote(dbLocation);
+                cdsObjectSql["location_hash"] = quote(stringHash(dbLocation));
             } else {
                 // URLs and active items
-                cdsObjectSql->put("location", quote(loc));
-                cdsObjectSql->put("location_hash", SQL_NULL);
+                cdsObjectSql["location"] = quote(loc);
+                cdsObjectSql["location_hash"] = SQL_NULL;
             }
         } else {
             if (isUpdate) {
-                cdsObjectSql->put("location", SQL_NULL);
-                cdsObjectSql->put("location_hash", SQL_NULL);
+                cdsObjectSql["location"] = SQL_NULL;
+                cdsObjectSql["location_hash"] = SQL_NULL;
             }
         }
 
         if (item->getTrackNumber() > 0) {
-            cdsObjectSql->put("track_number", quote(item->getTrackNumber()));
+            cdsObjectSql["track_number"] = quote(item->getTrackNumber());
         } else {
             if (isUpdate)
-                cdsObjectSql->put("track_number", SQL_NULL);
+                cdsObjectSql["track_number"] = SQL_NULL;
         }
 
         if (string_ok(item->getServiceID())) {
             if (!hasReference || RefCast(refObj, CdsItem)->getServiceID() != item->getServiceID())
-                cdsObjectSql->put("service_id", quote(item->getServiceID()));
+                cdsObjectSql["service_id"] = quote(item->getServiceID());
             else
-                cdsObjectSql->put("service_id", SQL_NULL);
+                cdsObjectSql["service_id"] = SQL_NULL;
         } else {
             if (isUpdate)
-                cdsObjectSql->put("service_id", SQL_NULL);
+                cdsObjectSql["service_id"] = SQL_NULL;
         }
 
-        cdsObjectSql->put("mime_type", quote(item->getMimeType()));
-    }
-    if (IS_CDS_ACTIVE_ITEM(objectType)) {
-        Ref<Dictionary> cdsActiveItemSql(new Dictionary());
-        returnVal->append(Ref<AddUpdateTable>(new AddUpdateTable(CDS_ACTIVE_ITEM_TABLE, cdsActiveItemSql,
-                    isUpdate ? "update" : "insert")));
-        Ref<CdsActiveItem> aitem = RefCast(obj, CdsActiveItem);
-
-        cdsActiveItemSql->put("id", std::to_string(aitem->getID()));
-        cdsActiveItemSql->put("action", quote(aitem->getAction()));
-        cdsActiveItemSql->put("state", quote(aitem->getState()));
+        cdsObjectSql["mime_type"] = quote(item->getMimeType());
     }
 
     // check for a duplicate (virtual) object
@@ -392,7 +373,29 @@ Ref<Array<SQLStorage::AddUpdateTable>> SQLStorage::_addUpdateObject(Ref<CdsObjec
 
     if (obj->getParentID() == INVALID_OBJECT_ID)
         throw _Exception("tried to create or update an object with an illegal parent id");
-    cdsObjectSql->put("parent_id", std::to_string(obj->getParentID()));
+    cdsObjectSql["parent_id"] = std::to_string(obj->getParentID());
+
+    int returnValSize = 2;
+    returnValSize += obj->getMetadata().size();
+    Ref<Array<AddUpdateTable>> returnVal(new Array<AddUpdateTable>(returnValSize));
+    returnVal->append(Ref<AddUpdateTable>(
+        new AddUpdateTable(CDS_OBJECT_TABLE, cdsObjectSql, isUpdate ? "update" : "insert")));
+
+    if (!hasReference || !std::equal(dict.begin(), dict.end(), refObj->getMetadata().begin())) {
+        generateMetadataDBOperations(obj, isUpdate, returnVal);
+    }
+
+    if (IS_CDS_ACTIVE_ITEM(objectType)) {
+        std::map<std::string,std::string> cdsActiveItemSql;
+        Ref<CdsActiveItem> aitem = RefCast(obj, CdsActiveItem);
+
+        cdsActiveItemSql["id"] = std::to_string(aitem->getID());
+        cdsActiveItemSql["action"] = quote(aitem->getAction());
+        cdsActiveItemSql["state"] = quote(aitem->getState());
+
+        returnVal->append(Ref<AddUpdateTable>(new AddUpdateTable(CDS_ACTIVE_ITEM_TABLE, cdsActiveItemSql,
+            isUpdate ? "update" : "insert")));
+    }
 
     return returnVal;
 }
@@ -419,12 +422,14 @@ void SQLStorage::updateObject(zmm::Ref<CdsObject> obj, int* changedContainer)
 {
     Ref<Array<AddUpdateTable>> data;
     if (obj->getID() == CDS_ID_FS_ROOT) {
-        data = Ref<Array<AddUpdateTable>>(new Array<AddUpdateTable>(1));
-        Ref<Dictionary> cdsObjectSql(new Dictionary());
-        data->append(Ref<AddUpdateTable>(new AddUpdateTable(CDS_OBJECT_TABLE, cdsObjectSql, "update")));
-        cdsObjectSql->put("dc_title", quote(obj->getTitle()));
+        std::map<std::string,std::string> cdsObjectSql;
+
+        cdsObjectSql["dc_title"] = quote(obj->getTitle());
         setFsRootName(obj->getTitle());
-        cdsObjectSql->put("upnp_class", quote(obj->getClass()));
+        cdsObjectSql["upnp_class"] = quote(obj->getClass());
+
+        data = Ref<Array<AddUpdateTable>>(new Array<AddUpdateTable>(1));
+        data->append(Ref<AddUpdateTable>(new AddUpdateTable(CDS_OBJECT_TABLE, cdsObjectSql, "update")));
     } else {
         if (IS_FORBIDDEN_CDS_ID(obj->getID()))
             throw _Exception("tried to update an object with a forbidden ID (" + std::to_string(obj->getID()) + ")!");
@@ -2231,9 +2236,9 @@ void SQLStorage::generateMetadataDBOperations(Ref<CdsObject> obj, bool isUpdate,
     auto dict = obj->getMetadata();
     if (!isUpdate) {
         for (auto it = dict.begin(); it != dict.end(); it++) {
-            Ref<Dictionary> metadataSql(new Dictionary());
-            metadataSql->put("property_name", quote(it->first));
-            metadataSql->put("property_value", quote(it->second));
+            std::map<std::string,std::string> metadataSql;
+            metadataSql["property_name"] = quote(it->first);
+            metadataSql["property_value"] = quote(it->second);
             operations->append(Ref<AddUpdateTable>(new AddUpdateTable(METADATA_TABLE, metadataSql, "insert")));
         }
     } else {
@@ -2241,17 +2246,17 @@ void SQLStorage::generateMetadataDBOperations(Ref<CdsObject> obj, bool isUpdate,
         auto dbMetadata = retrieveMetadataForObject(obj->getID());
         for (auto it = dict.begin(); it != dict.end(); it++) {
             std::string operation = dbMetadata.find(it->first) == dbMetadata.end() ? "insert" : "update";
-            Ref<Dictionary> metadataSql(new Dictionary());
-            metadataSql->put("property_name", quote(it->first));
-            metadataSql->put("property_value", quote(it->second));
+            std::map<std::string,std::string> metadataSql;
+            metadataSql["property_name"] = quote(it->first);
+            metadataSql["property_value"] = quote(it->second);
             operations->append(Ref<AddUpdateTable>(new AddUpdateTable(METADATA_TABLE, metadataSql, operation)));
         }
         for (auto it = dbMetadata.begin(); it != dbMetadata.end(); it++) {
             if (dict.find(it->first) == dict.end()) {
                 // key in db metadata but not obj metadata, so needs a delete
-                Ref<Dictionary> metadataSql(new Dictionary());
-                metadataSql->put("property_name", quote(it->first));
-                metadataSql->put("property_value", quote(it->second));
+                std::map<std::string,std::string> metadataSql;
+                metadataSql["property_name"] = quote(it->first);
+                metadataSql["property_value"] = quote(it->second);
                 operations->append(Ref<AddUpdateTable>(new AddUpdateTable(METADATA_TABLE, metadataSql, "delete")));
             }
         }
@@ -2264,25 +2269,24 @@ std::unique_ptr<std::ostringstream> SQLStorage::sqlForInsert(Ref<CdsObject> obj,
     int lastMetadataInsertID = INVALID_OBJECT_ID;
 
     std::string tableName = addUpdateTable->getTable();
-    Ref<Array<DictionaryElement>> dataElements = addUpdateTable->getDict()->getElements();
+    auto dict = addUpdateTable->getDict();
 
     std::ostringstream fields;
     std::ostringstream values;
 
-    for (int j = 0; j < dataElements->size(); j++) {
-        Ref<DictionaryElement> element = dataElements->get(j);
-        if (j != 0) {
+    for (auto it = dict.begin(); it != dict.end(); it++) {
+        if (it != dict.begin()) {
             fields << ',';
             values << ',';
         }
-        fields << TQ(element->getKey());
-        if (lastInsertID != INVALID_OBJECT_ID && element->getKey() == "id" && std::stoi(element->getValue()) == INVALID_OBJECT_ID) {
+        fields << TQ(it->first);
+        if (lastInsertID != INVALID_OBJECT_ID && it->first == "id" && std::stoi(it->second) == INVALID_OBJECT_ID) {
             if (tableName == METADATA_TABLE)
                 values << lastMetadataInsertID;
             else
                 values << lastInsertID;
         } else
-            values << element->getValue();
+            values << it->second;
     }
 
     /* manually generate ID */
@@ -2308,39 +2312,38 @@ std::unique_ptr<std::ostringstream> SQLStorage::sqlForInsert(Ref<CdsObject> obj,
 
 std::unique_ptr<std::ostringstream> SQLStorage::sqlForUpdate(Ref<CdsObject> obj, Ref<AddUpdateTable> addUpdateTable)
 {
-    if (addUpdateTable == nullptr || addUpdateTable->getDict() == nullptr
-        || (addUpdateTable->getTable() == METADATA_TABLE && addUpdateTable->getDict()->size() != 2))
+    if (addUpdateTable == nullptr
+        || (addUpdateTable->getTable() == METADATA_TABLE && addUpdateTable->getDict().size() != 2))
         throw _Exception("sqlForUpdate called with invalid arguments");
 
     std::string tableName = addUpdateTable->getTable();
-    Ref<Array<DictionaryElement>> dataElements = addUpdateTable->getDict()->getElements();
+    auto dict = addUpdateTable->getDict();
 
     auto qb = std::make_unique<std::ostringstream>();
     *qb << "UPDATE " << TQ(tableName) << " SET ";
-    for (int j = 0; j < dataElements->size(); j++) {
-        Ref<DictionaryElement> element = dataElements->get(j);
-        if (j != 0)
+    for (auto it = dict.begin(); it != dict.end(); it++) {
+        if (it != dict.begin())
             *qb << ',';
-        *qb << TQ(element->getKey()) << '='
-            << element->getValue();
+        *qb << TQ(it->first) << '='
+            << it->second;
     }
     *qb << " WHERE " << TQ("id") << " = " << obj->getID();
 
     // relying on only one element when table is mt_metadata
     if (tableName == METADATA_TABLE)
-        *qb << " AND " << TQ("property_name") << " = " <<  dataElements->get(0)->getKey();
+        *qb << " AND " << TQ("property_name") << " = " <<  dict.begin()->first;
 
     return qb;
 }
 
 std::unique_ptr<std::ostringstream> SQLStorage::sqlForDelete(Ref<CdsObject> obj, Ref<AddUpdateTable> addUpdateTable)
 {
-    if (addUpdateTable == nullptr || addUpdateTable->getDict() == nullptr
-        || (addUpdateTable->getTable() == METADATA_TABLE && addUpdateTable->getDict()->size() != 2))
+    if (addUpdateTable == nullptr
+        || (addUpdateTable->getTable() == METADATA_TABLE && addUpdateTable->getDict().size() != 2))
         throw _Exception("sqlForDelete called with invalid arguments");
 
-    Ref<Array<DictionaryElement>> dataElements = addUpdateTable->getDict()->getElements();
     std::string tableName = addUpdateTable->getTable();
+    auto dict = addUpdateTable->getDict();
 
     auto qb = std::make_unique<std::ostringstream>();
     *qb << "DELETE FROM " << TQ(tableName)
@@ -2348,7 +2351,7 @@ std::unique_ptr<std::ostringstream> SQLStorage::sqlForDelete(Ref<CdsObject> obj,
     
     // relying on only one element when table is mt_metadata
     if (tableName == METADATA_TABLE)
-        *qb << " AND " << TQ("property_name") << " = " <<  dataElements->get(0)->getKey();
+        *qb << " AND " << TQ("property_name") << " = " <<  dict.begin()->first;
     
     return qb;
 }

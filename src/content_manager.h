@@ -216,7 +216,7 @@ public:
     /// \brief Updates an object in the database using the given parameters.
     /// \param objectID ID of the object to update
     /// \param parameters key value pairs of fields to be updated
-    void updateObject(int objectID, zmm::Ref<Dictionary> parameters);
+    void updateObject(int objectID, const std::map<std::string,std::string>& parameters);
 
     zmm::Ref<CdsObject> createObjectFromFile(std::string path,
         bool magic = true,

@@ -74,7 +74,7 @@ protected:
     bool checkRequestCalled;
 
     /// \brief Decoded URL parameters are stored as a dictionary.
-    zmm::Ref<Dictionary> params;
+    std::map<std::string,std::string> params;
 
     /// \brief The original filename from url if anyone needs it.
     std::string filename;
@@ -93,7 +93,7 @@ protected:
     /// in an easier fashion.
     /// \param name of the parameter we are looking for.
     /// \return Value of the parameter with the given name or nullptr if not found.
-    inline std::string param(std::string name) { return params->get(name); }
+    inline std::string param(std::string name) { return getValueOrDefault(params, name); }
 
     int intParam(std::string name, int invalid = 0);
     bool boolParam(std::string name);

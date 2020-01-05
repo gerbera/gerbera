@@ -861,15 +861,15 @@ void ContentManager::addRecursive(std::string path, bool hidden, Ref<GenericTask
     closedir(dir);
 }
 
-void ContentManager::updateObject(int objectID, Ref<Dictionary> parameters)
+void ContentManager::updateObject(int objectID, const std::map<std::string,std::string>& parameters)
 {
-    std::string title = parameters->get("title");
-    std::string upnp_class = parameters->get("class");
-    std::string autoscan = parameters->get("autoscan");
-    std::string mimetype = parameters->get("mime-type");
-    std::string description = parameters->get("description");
-    std::string location = parameters->get("location");
-    std::string protocol = parameters->get("protocol");
+    std::string title = getValueOrDefault(parameters, "title");
+    std::string upnp_class = getValueOrDefault(parameters, "class");
+    std::string autoscan = getValueOrDefault(parameters, "autoscan");
+    std::string mimetype = getValueOrDefault(parameters, "mime-type");
+    std::string description = getValueOrDefault(parameters, "description");
+    std::string location = getValueOrDefault(parameters, "location");
+    std::string protocol = getValueOrDefault(parameters, "protocol");
 
     Ref<CdsObject> obj = storage->loadObject(objectID);
     int objectType = obj->getObjectType();
@@ -922,8 +922,8 @@ void ContentManager::updateObject(int objectID, Ref<Dictionary> parameters)
         }
     }
     if (IS_CDS_ACTIVE_ITEM(objectType)) {
-        std::string action = parameters->get("action");
-        std::string state = parameters->get("state");
+        std::string action = getValueOrDefault(parameters, "action");
+        std::string state = getValueOrDefault(parameters, "state");
 
         Ref<CdsActiveItem> item = RefCast(obj, CdsActiveItem);
         Ref<CdsObject> clone = CdsObject::createObject(storage, objectType);

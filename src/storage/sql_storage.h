@@ -199,18 +199,18 @@ private:
     class AddUpdateTable : public zmm::Object
     {
     public:
-        AddUpdateTable(std::string table, zmm::Ref<Dictionary> dict, std::string operation)
+        AddUpdateTable(std::string table, std::map<std::string,std::string> dict, std::string operation)
         {
             this->table = table;
             this->dict = dict;
             this->operation = operation;
         }
         std::string getTable() { return table; }
-        zmm::Ref<Dictionary> getDict() { return dict; }
+        std::map<std::string,std::string> getDict() { return dict; }
         std::string getOperation() { return operation; }
     protected:
         std::string table;
-        zmm::Ref<Dictionary> dict;
+        std::map<std::string,std::string> dict;
         std::string operation;
     };
     zmm::Ref<zmm::Array<AddUpdateTable> > _addUpdateObject(zmm::Ref<CdsObject> obj, bool isUpdate, int *changedContainer);
