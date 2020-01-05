@@ -129,7 +129,7 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile
     std::string temp;
     std::string command;
     std::vector<std::string> arglist;
-    Ref<Array<ProcListItem> > proc_list = nullptr;
+    std::vector<std::shared_ptr<ProcListItem>> proc_list;
 
 #ifdef SOPCAST
     service_type_t service = OS_None;
@@ -146,9 +146,8 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile
         sop_args = parseCommandLine(location + " " + std::to_string(p1) + " " +
                    std::to_string(p2), nullptr, nullptr, nullptr);
         auto spsc = std::make_shared<ProcessExecutor>("sp-sc-auth", sop_args);
-        proc_list = Ref<Array<ProcListItem> >(new Array<ProcListItem>(1));
-        Ref<ProcListItem> pr_item(new ProcListItem(spsc));
-        proc_list->append(pr_item);
+        auto pr_item = std::make_shared<ProcListItem>(spsc);
+        proc_list.push_back(pr_item);
         location = "http://localhost:" + std::to_string(p2) + "/tv.asf";
 
 //FIXME: #warning check if socket is ready
@@ -181,9 +180,8 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile
                    config->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_FILL_SIZE));
                 std::unique_ptr<IOHandler> p_ioh = std::make_unique<ProcessIOHandler>(content, location, nullptr);
                 auto ch = std::make_shared<IOHandlerChainer>(c_ioh, p_ioh, 16384);
-                proc_list = Ref<Array<ProcListItem> >(new Array<ProcListItem>(1));
-                Ref<ProcListItem> pr_item(new ProcListItem(ch));
-                proc_list->append(pr_item);
+                auto pr_item = std::make_shared<ProcListItem>(ch);
+                proc_list.push_back(pr_item);
             }
             catch (const Exception & ex)
             {

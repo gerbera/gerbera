@@ -67,13 +67,13 @@ bool ProcessIOHandler::abort()
 {
     bool abort = false;
 
-    if (proclist == nullptr)
+    if (proclist.empty())
         return abort;
 
-    for (int i = 0; i < proclist->size(); i++) {
-        auto exec = proclist->get(i)->getExecutor();
+    for (size_t i = 0; i < proclist.size(); i++) {
+        auto exec = proclist[i]->getExecutor();
         if ((exec != nullptr) && (!exec->isAlive())) {
-            if (proclist->get(i)->abortOnDeath())
+            if (proclist[i]->abortOnDeath())
                 abort = true;
             break;
         }
@@ -84,11 +84,8 @@ bool ProcessIOHandler::abort()
 
 void ProcessIOHandler::killall()
 {
-    if (proclist == nullptr)
-        return;
-
-    for (int i = 0; i < proclist->size(); i++) {
-        auto exec = proclist->get(i)->getExecutor();
+    for (size_t i = 0; i < proclist.size(); i++) {
+        auto exec = proclist[i]->getExecutor();
         if (exec != nullptr)
             exec->kill();
     }
@@ -99,11 +96,8 @@ void ProcessIOHandler::registerAll()
     if (main_proc != nullptr)
         content->registerExecutor(main_proc);
 
-    if (proclist == nullptr)
-        return;
-
-    for (int i = 0; i < proclist->size(); i++) {
-        auto exec = proclist->get(i)->getExecutor();
+    for (size_t i = 0; i < proclist.size(); i++) {
+        auto exec = proclist[i]->getExecutor();
         if (exec != nullptr)
             content->registerExecutor(exec);
     }
@@ -114,11 +108,8 @@ void ProcessIOHandler::unregisterAll()
     if (main_proc != nullptr)
         content->unregisterExecutor(main_proc);
 
-    if (proclist == nullptr)
-        return;
-
-    for (int i = 0; i < proclist->size(); i++) {
-        auto exec = proclist->get(i)->getExecutor();
+    for (size_t i = 0; i < proclist.size(); i++) {
+        auto exec = proclist[i]->getExecutor();
         if (exec != nullptr)
             content->unregisterExecutor(exec);
     }
@@ -127,7 +118,7 @@ void ProcessIOHandler::unregisterAll()
 ProcessIOHandler::ProcessIOHandler(std::shared_ptr<ContentManager> content,
     std::string filename,
     std::shared_ptr<Executor> main_proc,
-    zmm::Ref<zmm::Array<ProcListItem>> proclist,
+    std::vector<std::shared_ptr<ProcListItem>> proclist,
     bool ignoreSeek)
     : IOHandler()
 {

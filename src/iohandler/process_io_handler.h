@@ -40,7 +40,7 @@
 #define FIFO_READ_TIMEOUT 2
 #define FIFO_WRITE_TIMEOUT 2
 
-class ProcListItem : public zmm::Object {
+class ProcListItem {
 public:
     ProcListItem(std::shared_ptr<Executor> exec, bool abortOnDeath = false);
     std::shared_ptr<Executor> getExecutor();
@@ -63,7 +63,7 @@ public:
     /// they are no longer needed
     ProcessIOHandler(std::shared_ptr<ContentManager> content,
         std::string filename, std::shared_ptr<Executor> main_proc,
-        zmm::Ref<zmm::Array<ProcListItem>> proclist = nullptr,
+        std::vector<std::shared_ptr<ProcListItem>> proclist = std::vector<std::shared_ptr<ProcListItem>>(),
         bool ignoreSeek = false);
 
     /// \brief Opens file for reading (writing is not supported)
@@ -98,7 +98,7 @@ protected:
     std::shared_ptr<ContentManager> content;
 
     /// \brief List of associated processes.
-    zmm::Ref<zmm::Array<ProcListItem>> proclist;
+    std::vector<std::shared_ptr<ProcListItem>> proclist;
 
     /// \brief Main process used for reading
     std::shared_ptr<Executor> main_proc;
