@@ -48,12 +48,15 @@
 #include "util/timer.h"
 #include "util/tools.h"
 #include "update_manager.h"
+#include "util/process.h"
 
 #ifdef HAVE_JS
 #include "layout/js_layout.h"
 #endif
 
-#include "util/process.h"
+#ifdef HAVE_LASTFMLIB
+#include "onlineservice/lastfm_scrobbler.h"
+#endif
 
 #ifdef SOPCAST
 #include "onlineservice/sopcast_service.h"
@@ -1801,8 +1804,9 @@ void ContentManager::triggerPlayHook(std::shared_ptr<CdsObject> obj)
     }
 
 #ifdef HAVE_LASTFMLIB
-    if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_LASTFM_ENABLED) && (std::static_pointer_cast<CdsItem>(obj)->getMimeType().startsWith("audio")))
+    if (config->getBoolOption(CFG_SERVER_EXTOPTS_LASTFM_ENABLED) && startswith(std::static_pointer_cast<CdsItem>(obj)->getMimeType(), ("audio"))) {
         last_fm->startedPlaying(std::static_pointer_cast<CdsItem>(obj));
+    }
 #endif
     log_debug("end\n");
 }

@@ -38,7 +38,7 @@
 using namespace zmm;
 
 LastFm::LastFm(std::shared_ptr<ConfigManager> config)
-    , config(config)
+    : config(config)
     , scrobbler(NULL)
     , currentTrackId(-1)
 {
@@ -107,7 +107,7 @@ void LastFm::startedPlaying(std::shared_ptr<CdsItem> item)
         info->track_nr = atoi(trackNr.c_str());
 
     if (item->getResourceCount() > 0) {
-        Ref<CdsResource> resource = item->getResource(0);
+        auto resource = item->getResource(0);
         std::string duration = resource->getAttribute(MetadataHandler::getResAttrName(R_DURATION));
         info->track_length_in_secs = HMSToSeconds(duration.c_str());
     }

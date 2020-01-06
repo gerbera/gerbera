@@ -90,7 +90,7 @@ void Server::init()
     update_manager->init();
     session_manager = std::make_shared<web::SessionManager>(config, timer);
 #ifdef HAVE_LASTFMLIB
-    last_fm = std::make_shared<LastFm>();
+    last_fm = std::make_shared<LastFm>(config);
     last_fm->init();
 #endif
     content = std::make_shared<ContentManager>(
