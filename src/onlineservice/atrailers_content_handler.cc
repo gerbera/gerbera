@@ -73,7 +73,7 @@ bool ATrailersContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
     return true;
 }
 
-Ref<CdsObject> ATrailersContentHandler::getNextObject()
+std::shared_ptr<CdsObject> ATrailersContentHandler::getNextObject()
 {
     std::string temp;
     struct timespec ts;
@@ -94,7 +94,7 @@ Ref<CdsObject> ATrailersContentHandler::getNextObject()
             continue;
 
         // we know what we are adding
-        Ref<CdsItemExternalURL> item(new CdsItemExternalURL(storage));
+        auto item = std::make_shared<CdsItemExternalURL>(storage);
         auto resource = std::make_shared<CdsResource>(CH_DEFAULT);
         item->addResource(resource);
 
@@ -244,7 +244,7 @@ Ref<CdsObject> ATrailersContentHandler::getNextObject()
         item->setFlag(OBJECT_FLAG_ONLINE_SERVICE);
         try {
             item->validate();
-            return RefCast(item, CdsObject);
+            return item;
         } catch (const Exception& ex) {
             log_warning("Failed to validate newly created Trailer item: %s\n",
                 ex.getMessage().c_str());

@@ -53,7 +53,7 @@
 
 using namespace zmm;
 
-void FallbackLayout::add(Ref<CdsObject> obj, int parentID, bool use_ref)
+void FallbackLayout::add(std::shared_ptr<CdsObject> obj, int parentID, bool use_ref)
 {
     obj->setParentID(parentID);
     if (use_ref)
@@ -68,7 +68,7 @@ std::string FallbackLayout::esc(std::string str)
     return escape(str, VIRTUAL_CONTAINER_ESCAPE, VIRTUAL_CONTAINER_SEPARATOR);
 }
 
-void FallbackLayout::addVideo(zmm::Ref<CdsObject> obj, std::string rootpath)
+void FallbackLayout::addVideo(std::shared_ptr<CdsObject> obj, std::string rootpath)
 {
     auto f2i = StringConverter::f2i(config);
     int id = content->addContainerChain("/Video/All Video");
@@ -105,7 +105,7 @@ void FallbackLayout::addVideo(zmm::Ref<CdsObject> obj, std::string rootpath)
     }
 }
 
-void FallbackLayout::addImage(Ref<CdsObject> obj, std::string rootpath)
+void FallbackLayout::addImage(std::shared_ptr<CdsObject> obj, std::string rootpath)
 {
     int id;
     auto f2i = StringConverter::f2i(config);
@@ -173,7 +173,7 @@ void FallbackLayout::addImage(Ref<CdsObject> obj, std::string rootpath)
     }
 }
 
-void FallbackLayout::addAudio(zmm::Ref<CdsObject> obj)
+void FallbackLayout::addAudio(std::shared_ptr<CdsObject> obj)
 {
     std::string desc;
     std::string chain;
@@ -330,7 +330,7 @@ void FallbackLayout::addAudio(zmm::Ref<CdsObject> obj)
 }
 
 #ifdef SOPCAST
-void FallbackLayout::addSopCast(zmm::Ref<CdsObject> obj)
+void FallbackLayout::addSopCast(std::shared_ptr<CdsObject> obj)
 {
     #define SP_VPATH "/Online Services/SopCast"
     std::string chain;
@@ -364,7 +364,7 @@ void FallbackLayout::addSopCast(zmm::Ref<CdsObject> obj)
 #endif
 
 #ifdef ATRAILERS
-void FallbackLayout::addATrailers(zmm::Ref<CdsObject> obj)
+void FallbackLayout::addATrailers(std::shared_ptr<CdsObject> obj)
 {
     #define AT_VPATH "/Online Services/Apple Trailers"
     std::string chain;
@@ -446,13 +446,13 @@ FallbackLayout::FallbackLayout(std::shared_ptr<ConfigManager> config,
 #endif
 }
 
-void FallbackLayout::processCdsObject(zmm::Ref<CdsObject> obj, std::string rootpath)
+void FallbackLayout::processCdsObject(std::shared_ptr<CdsObject> obj, std::string rootpath)
 {
     log_debug("Process CDS Object: %s\n", obj->getTitle().c_str());
 #ifdef ENABLE_PROFILING
     PROF_START(&layout_profiling);
 #endif
-    Ref<CdsObject> clone = CdsObject::createObject(storage, obj->getObjectType());
+    auto clone = CdsObject::createObject(storage, obj->getObjectType());
     obj->copyTo(clone);
     clone->setVirtual(true);
 
@@ -483,7 +483,7 @@ void FallbackLayout::processCdsObject(zmm::Ref<CdsObject> obj, std::string rootp
     {
 #endif
 
-        std::string mimetype = RefCast(obj, CdsItem)->getMimeType();
+        std::string mimetype = std::static_pointer_cast<CdsItem>(obj)->getMimeType();
         auto mappings = config->getDictionaryOption(
                     CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
         std::string content_type = getValueOrDefault(mappings, mimetype);

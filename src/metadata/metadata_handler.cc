@@ -98,7 +98,7 @@ MetadataHandler::MetadataHandler(std::shared_ptr<ConfigManager> config)
 {
 }
 
-void MetadataHandler::setMetadata(std::shared_ptr<ConfigManager> config, Ref<CdsItem> item) {
+void MetadataHandler::setMetadata(std::shared_ptr<ConfigManager> config, std::shared_ptr<CdsItem> item) {
     std::string location = item->getLocation();
     off_t filesize;
 

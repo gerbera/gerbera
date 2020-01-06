@@ -69,7 +69,7 @@ bool SopCastContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
     return true;
 }
 
-Ref<CdsObject> SopCastContentHandler::getNextObject()
+std::shared_ptr<CdsObject> SopCastContentHandler::getNextObject()
 {
 #define DATE_BUF_LEN 12
     std::string temp;
@@ -122,7 +122,7 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
             if (channel->getName() != "channel")
                 continue;
 
-            Ref<CdsItemExternalURL> item(new CdsItemExternalURL(storage));
+            auto item = std::make_shared<CdsItemExternalURL>(storage);
             auto resource = std::make_shared<CdsResource>(CH_DEFAULT);
             item->addResource(resource);
 
@@ -216,7 +216,7 @@ Ref<CdsObject> SopCastContentHandler::getNextObject()
 
             try {
                 item->validate();
-                return RefCast(item, CdsObject);
+                return item;
             } catch (const Exception& ex) {
                 log_warning("Failed to validate newly created SopCast item: %s\n",
                     ex.getMessage().c_str());

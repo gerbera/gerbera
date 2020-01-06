@@ -54,7 +54,7 @@ public:
     {};
     virtual std::unique_ptr<IOHandler> open(zmm::Ref<TranscodingProfile> profile,
         std::string location,
-        zmm::Ref<CdsObject> obj,
+        std::shared_ptr<CdsObject> obj,
         std::string range) = 0;
 protected:
     std::shared_ptr<ConfigManager> config;

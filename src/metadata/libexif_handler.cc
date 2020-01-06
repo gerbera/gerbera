@@ -262,7 +262,7 @@ static int getTagFromString(std::string tag)
 char exif_entry_buffer[BUFLEN];
 #define exif_egv(arg) exif_entry_get_value(arg, exif_entry_buffer, BUFLEN)
 
-void LibExifHandler::process_ifd(ExifContent* content, Ref<CdsItem> item, const std::unique_ptr<StringConverter>& sc, std::vector<std::string> auxtags)
+void LibExifHandler::process_ifd(ExifContent* content, std::shared_ptr<CdsItem> item, const std::unique_ptr<StringConverter>& sc, std::vector<std::string> auxtags)
 {
     ExifEntry* e;
     unsigned int i;
@@ -337,7 +337,7 @@ void LibExifHandler::process_ifd(ExifContent* content, Ref<CdsItem> item, const 
     }
 }
 
-void LibExifHandler::fillMetadata(Ref<CdsItem> item)
+void LibExifHandler::fillMetadata(std::shared_ptr<CdsItem> item)
 {
     ExifData* ed;
 
@@ -385,7 +385,7 @@ void LibExifHandler::fillMetadata(Ref<CdsItem> item)
     exif_data_unref(ed);
 }
 
-std::unique_ptr<IOHandler> LibExifHandler::serveContent(Ref<CdsItem> item, int resNum)
+std::unique_ptr<IOHandler> LibExifHandler::serveContent(std::shared_ptr<CdsItem> item, int resNum)
 {
     ExifData* ed;
     auto res = item->getResource(resNum);

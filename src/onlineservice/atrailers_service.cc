@@ -158,7 +158,7 @@ bool ATrailersService::refreshServiceData(Ref<Layout> layout)
         throw _Exception("Failed to get XML content from Trailers service");
     }
 
-    Ref<CdsObject> obj;
+    std::shared_ptr<CdsObject> obj;
     do {
         obj = sc->getNextObject();
         if (obj == nullptr)
@@ -166,7 +166,7 @@ bool ATrailersService::refreshServiceData(Ref<Layout> layout)
 
         obj->setVirtual(true);
 
-        Ref<CdsObject> old = storage->loadObjectByServiceID(RefCast(obj, CdsItem)->getServiceID());
+        auto old = storage->loadObjectByServiceID(std::static_pointer_cast<CdsItem>(obj)->getServiceID());
         if (old == nullptr) {
             log_debug("Adding new Trailers object\n");
 

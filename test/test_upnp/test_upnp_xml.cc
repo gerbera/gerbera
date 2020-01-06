@@ -83,7 +83,7 @@ TEST_F(UpnpXmlTest, CreatesEventPropertySet) {
 }
 
 TEST_F(UpnpXmlTest, UpdatesObjectActiveItem) {
-  zmm::Ref<CdsObject> obj(new CdsActiveItem(nullptr));
+  auto obj = std::make_shared<CdsActiveItem>(nullptr);
   std::ostringstream inputXml;
   inputXml << "<item>";  // this is not valid UPNP, but just enough to test with
   inputXml << "<dc:title>Title</dc:title>";
@@ -96,7 +96,7 @@ TEST_F(UpnpXmlTest, UpdatesObjectActiveItem) {
 
   subject->updateObject(obj, inputXml.str());
 
-  zmm::Ref<CdsActiveItem> aitem = RefCast(obj, CdsActiveItem);
+  auto aitem = std::static_pointer_cast<CdsActiveItem>(obj);
   EXPECT_NE(aitem, nullptr);
   EXPECT_STREQ(aitem->getTitle().c_str(), "Title");
   EXPECT_STREQ(aitem->getMetadata("dc:description").c_str(), "description");
@@ -118,10 +118,10 @@ TEST_F(UpnpXmlTest, CreateResponse) {
 }
 
 TEST_F(UpnpXmlTest, FirstResourceRendersPureWhenExternalUrl) {
-  zmm::Ref<CdsObject> obj(new CdsItemExternalURL(nullptr));
+  auto obj = std::make_shared<CdsItemExternalURL>(nullptr);
   obj->setLocation("http://localhost/external/url");
 
-  zmm::Ref<CdsItem> item = RefCast(obj, CdsItem);
+  auto item = std::static_pointer_cast<CdsItem>(obj);
 
   std::string result = subject->getFirstResourcePath(item);
 
@@ -130,13 +130,13 @@ TEST_F(UpnpXmlTest, FirstResourceRendersPureWhenExternalUrl) {
 }
 
 TEST_F(UpnpXmlTest, FirstResourceAddsLocalResourceIdToExternalUrlWhenOnlineWithProxy) {
-  zmm::Ref<CdsObject> obj(new CdsItemExternalURL(nullptr));
+  auto obj = std::make_shared<CdsItemExternalURL>(nullptr);
   obj->setLocation("http://localhost/external/url");
   obj->setID(12345);
   obj->setFlag(OBJECT_FLAG_ONLINE_SERVICE);
   obj->setFlag(OBJECT_FLAG_PROXY_URL);
 
-  zmm::Ref<CdsItem> item = RefCast(obj, CdsItem);
+  auto item = std::static_pointer_cast<CdsItem>(obj);
 
   std::string result = subject->getFirstResourcePath(item);
 
@@ -145,11 +145,11 @@ TEST_F(UpnpXmlTest, FirstResourceAddsLocalResourceIdToExternalUrlWhenOnlineWithP
 }
 
 TEST_F(UpnpXmlTest, FirstResourceAddsLocalResourceIdToItem) {
-  zmm::Ref<CdsObject> obj(new CdsItem(nullptr));
+  auto obj = std::make_shared<CdsItem>(nullptr);
   obj->setLocation("local/content");
   obj->setID(12345);
 
-  zmm::Ref<CdsItem> item = RefCast(obj, CdsItem);
+  auto item = std::static_pointer_cast<CdsItem>(obj);
 
   std::string result = subject->getFirstResourcePath(item);
 
@@ -158,11 +158,11 @@ TEST_F(UpnpXmlTest, FirstResourceAddsLocalResourceIdToItem) {
 }
 
 TEST_F(UpnpXmlTest, FirstResourceAddsContentServeToInternalUrlItem) {
-  zmm::Ref<CdsObject> obj(new CdsItemInternalURL(nullptr));
+  auto obj = std::make_shared<CdsItemInternalURL>(nullptr);
   obj->setLocation("local/content");
   obj->setID(12345);
 
-  zmm::Ref<CdsItem> item = RefCast(obj, CdsItem);
+  auto item = std::static_pointer_cast<CdsItem>(obj);
 
   std::string result = subject->getFirstResourcePath(item);
 

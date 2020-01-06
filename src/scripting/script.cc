@@ -309,7 +309,7 @@ void Script::execute()
     _execute();
 }
 
-Ref<CdsObject> Script::dukObject2cdsObject(zmm::Ref<CdsObject> pcd)
+std::shared_ptr<CdsObject> Script::dukObject2cdsObject(std::shared_ptr<CdsObject> pcd)
 {
     std::string val;
     int objectType;
@@ -331,7 +331,7 @@ Ref<CdsObject> Script::dukObject2cdsObject(zmm::Ref<CdsObject> pcd)
         return nullptr;
     }
 
-    Ref<CdsObject> obj = CdsObject::createObject(storage, objectType);
+    auto obj = CdsObject::createObject(storage, objectType);
     objectType = obj->getObjectType(); // this is important, because the
     // type will be changed appropriately
     // by the create function
@@ -393,10 +393,10 @@ Ref<CdsObject> Script::dukObject2cdsObject(zmm::Ref<CdsObject> pcd)
                     if (j > 0)
                     {
                         obj->setMetadata(MT_KEYS[i].upnp, val);
-                        RefCast(obj, CdsItem)->setTrackNumber(j);
+                        std::static_pointer_cast<CdsItem>(obj)->setTrackNumber(j);
                     }
                     else
-                        RefCast(obj, CdsItem)->setTrackNumber(0);
+                        std::static_pointer_cast<CdsItem>(obj)->setTrackNumber(0);
                 }
                 else
                 {
@@ -419,11 +419,11 @@ Ref<CdsObject> Script::dukObject2cdsObject(zmm::Ref<CdsObject> pcd)
     // CdsItem
     if (IS_CDS_ITEM(objectType))
     {
-        Ref<CdsItem> item = RefCast(obj, CdsItem);
-        Ref<CdsItem> pcd_item;
+        auto item = std::static_pointer_cast<CdsItem>(obj);
+        std::shared_ptr<CdsItem> pcd_item;
 
         if (pcd != nullptr)
-            pcd_item = RefCast(pcd, CdsItem);
+            pcd_item = std::static_pointer_cast<CdsItem>(pcd);
 
         val = getProperty("mimetype");
         if (!val.empty())
@@ -478,11 +478,12 @@ Ref<CdsObject> Script::dukObject2cdsObject(zmm::Ref<CdsObject> pcd)
 
         if (IS_CDS_ACTIVE_ITEM(objectType))
         {
-            Ref<CdsActiveItem> aitem = RefCast(obj, CdsActiveItem);
-            Ref<CdsActiveItem> pcd_aitem;
+            auto aitem = std::static_pointer_cast<CdsActiveItem>(obj);
+            std::shared_ptr<CdsActiveItem> pcd_aitem;
             if (pcd != nullptr)
-                pcd_aitem = RefCast(pcd, CdsActiveItem);
-          /// \todo what about character conversion for action and state fields?
+                pcd_aitem = std::static_pointer_cast<CdsActiveItem>(pcd);
+
+            /// \todo what about character conversion for action and state fields?
             val = getProperty("action");
             if (!val.empty())
                 aitem->setAction(val);
@@ -507,7 +508,7 @@ Ref<CdsObject> Script::dukObject2cdsObject(zmm::Ref<CdsObject> pcd)
             std::string protocolInfo;
 
             obj->setRestricted(true);
-            Ref<CdsItemExternalURL> item = RefCast(obj, CdsItemExternalURL);
+            auto item = std::static_pointer_cast<CdsItemExternalURL>(obj);
             val = getProperty("protocol");
             if (!val.empty())
             {
@@ -533,7 +534,7 @@ Ref<CdsObject> Script::dukObject2cdsObject(zmm::Ref<CdsObject> pcd)
     // CdsDirectory
     if (IS_CDS_CONTAINER(objectType))
     {
-        Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
+        auto cont = std::static_pointer_cast<CdsContainer>(obj);
         i = getIntProperty("updateID", -1);
         if (i >= 0)
             cont->setUpdateID(i);
@@ -546,7 +547,7 @@ Ref<CdsObject> Script::dukObject2cdsObject(zmm::Ref<CdsObject> pcd)
     return obj;
 }
 
-void Script::cdsObject2dukObject(Ref<CdsObject> obj)
+void Script::cdsObject2dukObject(std::shared_ptr<CdsObject> obj)
 {
     std::string val;
     int i;
@@ -611,8 +612,8 @@ void Script::cdsObject2dukObject(Ref<CdsObject> obj)
             setProperty(it->first, it->second);
         }
 
-        if (RefCast(obj, CdsItem)->getTrackNumber() > 0)
-            setProperty(MetadataHandler::getMetaFieldName(M_TRACKNUMBER), std::to_string(RefCast(obj, CdsItem)->getTrackNumber()));
+        if (std::static_pointer_cast<CdsItem>(obj)->getTrackNumber() > 0)
+            setProperty(MetadataHandler::getMetaFieldName(M_TRACKNUMBER), std::to_string(std::static_pointer_cast<CdsItem>(obj)->getTrackNumber()));
 
         duk_put_prop_string(ctx, -2, "meta");
         // stack: js
@@ -660,7 +661,7 @@ void Script::cdsObject2dukObject(Ref<CdsObject> obj)
     // CdsItem
     if (IS_CDS_ITEM(objectType))
     {
-        Ref<CdsItem> item = RefCast(obj, CdsItem);
+        auto item = std::static_pointer_cast<CdsItem>(obj);
         val = item->getMimeType();
         if (!val.empty())
             setProperty("mimetype", val);
@@ -671,7 +672,7 @@ void Script::cdsObject2dukObject(Ref<CdsObject> obj)
 
         if (IS_CDS_ACTIVE_ITEM(objectType))
         {
-            Ref<CdsActiveItem> aitem = RefCast(obj, CdsActiveItem);
+            auto aitem = std::static_pointer_cast<CdsActiveItem>(obj);
             val = aitem->getAction();
             if (!val.empty())
                 setProperty("action", val);
@@ -684,7 +685,7 @@ void Script::cdsObject2dukObject(Ref<CdsObject> obj)
     // CdsDirectory
     if (IS_CDS_CONTAINER(objectType))
     {
-        Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
+        auto cont = std::static_pointer_cast<CdsContainer>(obj);
         // TODO: boolean type, hide updateID
         i = cont->getUpdateID();
         setIntProperty("updateID", i);
@@ -713,7 +714,7 @@ std::string Script::convertToCharset(std::string str, charset_convert_t chr)
     return nullptr;
 }
 
-Ref<CdsObject> Script::getProcessedObject()
+std::shared_ptr<CdsObject> Script::getProcessedObject()
 {
     return processed;
 }

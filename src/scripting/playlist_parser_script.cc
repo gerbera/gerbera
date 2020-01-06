@@ -84,7 +84,7 @@ js_getCdsObject(duk_context *ctx)
         return 0;
 
     auto storage = self->getStorage();
-    Ref<CdsObject> obj = storage->findObjectByPath(path);
+    auto obj = storage->findObjectByPath(path);
     if (obj == nullptr) {
         auto cm = self->getContent();
         obj = cm->createObjectFromFile(path);
@@ -142,7 +142,7 @@ std::string PlaylistParserScript::readln()
     }
 }
 
-void PlaylistParserScript::processPlaylistObject(zmm::Ref<CdsObject> obj, Ref<GenericTask> task)
+void PlaylistParserScript::processPlaylistObject(std::shared_ptr<CdsObject> obj, Ref<GenericTask> task)
 {
     if ((currentObjectID != INVALID_OBJECT_ID) || (currentHandle != nullptr) ||
             (currentLine != nullptr))

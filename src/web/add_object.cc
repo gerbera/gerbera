@@ -65,7 +65,7 @@ void web::addObject::addContainer(int parentID)
     content->addContainer(parentID, param("title"), param("class"));
 }
 
-Ref<CdsObject> web::addObject::addItem(int parentID, Ref<CdsItem> item)
+std::shared_ptr<CdsObject> web::addObject::addItem(int parentID, std::shared_ptr<CdsItem> item)
 {
     std::string tmp;
 
@@ -87,13 +87,13 @@ Ref<CdsObject> web::addObject::addItem(int parentID, Ref<CdsItem> item)
 
     item->setFlag(OBJECT_FLAG_USE_RESOURCE_REF);
 
-    return RefCast(item, CdsObject);
+    return item;
 }
 
-Ref<CdsObject> web::addObject::addActiveItem(int parentID)
+std::shared_ptr<CdsObject> web::addObject::addActiveItem(int parentID)
 {
     std::string tmp;
-    Ref<CdsActiveItem> item(new CdsActiveItem(storage));
+    auto item = std::make_shared<CdsActiveItem>(storage);
 
     item->setAction(param("action"));
 
@@ -110,7 +110,7 @@ Ref<CdsObject> web::addObject::addActiveItem(int parentID)
         tmp = MIMETYPE_DEFAULT;
     item->setMimeType(tmp);
 
-    MetadataHandler::setMetadata(config, RefCast(item, CdsItem));
+    MetadataHandler::setMetadata(config, item);
 
     item->setTitle(param("title"));
     item->setClass(param("class"));
@@ -121,17 +121,17 @@ Ref<CdsObject> web::addObject::addActiveItem(int parentID)
 
     /// \todo is there a default setting? autoscan? import settings?
 
-    //    Ref<CdsResource> resource(new CdsResource(CH_DEFAULT));
+    //    auto resource = std::make_shared<CdsResource>(CH_DEFAULT);
 
-    //    Ref<CdsResource> resource = item->getResource(0); // added by m-handler
+    //    auto resource = item->getResource(0); // added by m-handler
     //    resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
     //                           renderProtocolInfo(tmp));
     //    item->addResource(resource);
 
-    return RefCast(item, CdsObject);
+    return item;
 }
 
-Ref<CdsObject> web::addObject::addUrl(int parentID, Ref<CdsItemExternalURL> item, bool addProtocol)
+std::shared_ptr<CdsObject> web::addObject::addUrl(int parentID, std::shared_ptr<CdsItemExternalURL> item, bool addProtocol)
 {
     std::string tmp;
     std::string protocolInfo;
@@ -166,7 +166,7 @@ Ref<CdsObject> web::addObject::addUrl(int parentID, Ref<CdsItemExternalURL> item
         protocolInfo);
     item->addResource(resource);
 
-    return RefCast(item, CdsObject);
+    return item;
 }
 
 void web::addObject::process()
@@ -184,7 +184,7 @@ void web::addObject::process()
 
     int parentID = intParam("parent_id", 0);
 
-    Ref<CdsObject> obj = nullptr;
+    std::shared_ptr<CdsObject> obj = nullptr;
 
     Ref<Element> updateContainerEl;
 
@@ -201,7 +201,7 @@ void web::addObject::process()
             throw _Exception("no location given");
         if (!check_path(location, false))
             throw _Exception("file not found");
-        obj = this->addItem(parentID, Ref<CdsItem>(new CdsItem(storage)));
+        obj = this->addItem(parentID, std::make_shared<CdsItem>(storage));
         allow_fifo = true;
     } else if (obj_type == STRING_OBJECT_TYPE_ACTIVE_ITEM) {
         if (!string_ok(param("action")))
@@ -215,11 +215,11 @@ void web::addObject::process()
     } else if (obj_type == STRING_OBJECT_TYPE_EXTERNAL_URL) {
         if (!string_ok(location))
             throw _Exception("No URL given");
-        obj = this->addUrl(parentID, Ref<CdsItemExternalURL>(new CdsItemExternalURL(storage)), true);
+        obj = this->addUrl(parentID, std::make_shared<CdsItemExternalURL>(storage), true);
     } else if (obj_type == STRING_OBJECT_TYPE_INTERNAL_URL) {
         if (!string_ok(location))
             throw _Exception("No URL given");
-        obj = this->addUrl(parentID, Ref<CdsItemExternalURL>(new CdsItemInternalURL(storage)), false);
+        obj = this->addUrl(parentID, std::make_shared<CdsItemInternalURL>(storage), false);
     } else {
         throw _Exception("unknown object type: " + obj_type);
     }

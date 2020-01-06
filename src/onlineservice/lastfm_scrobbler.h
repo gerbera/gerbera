@@ -65,7 +65,7 @@ public:
     /// to a file
     ///
     /// \param item the audio item that is being played
-    void startedPlaying(zmm::Ref<CdsItem> item);
+    void startedPlaying(std::shared_ptr<CdsItem> item);
 
 private:
     std::shared_ptr<ConfigManager> config;

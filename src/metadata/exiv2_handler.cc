@@ -45,7 +45,7 @@ Exiv2Handler::Exiv2Handler(std::shared_ptr<ConfigManager> config)
 {
 }
 
-void Exiv2Handler::fillMetadata(Ref<CdsItem> item)
+void Exiv2Handler::fillMetadata(std::shared_ptr<CdsItem> item)
 {
     try {
         std::string value;
@@ -177,7 +177,7 @@ void Exiv2Handler::fillMetadata(Ref<CdsItem> item)
     }
 }
 
-std::unique_ptr<IOHandler> Exiv2Handler::serveContent(Ref<CdsItem> item, int resNum)
+std::unique_ptr<IOHandler> Exiv2Handler::serveContent(std::shared_ptr<CdsItem> item, int resNum)
 {
     return nullptr;
 }

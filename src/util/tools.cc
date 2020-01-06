@@ -824,7 +824,7 @@ std::string getMIME(std::string filepath, const void *buffer, size_t length)
 }
 #endif
 
-void set_jpeg_resolution_resource(Ref<CdsItem> item, int res_num)
+void set_jpeg_resolution_resource(std::shared_ptr<CdsItem> item, int res_num)
 {
     try {
         std::unique_ptr<IOHandler> fio_h = std::make_unique<FileIOHandler>(item->getLocation());

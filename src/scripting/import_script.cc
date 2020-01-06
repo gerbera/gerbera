@@ -55,7 +55,7 @@ ImportScript::ImportScript(std::shared_ptr<ConfigManager> config,
     }
 }
 
-void ImportScript::processCdsObject(Ref<CdsObject> obj, std::string scriptpath)
+void ImportScript::processCdsObject(std::shared_ptr<CdsObject> obj, std::string scriptpath)
 {
     processed = obj;
     try 

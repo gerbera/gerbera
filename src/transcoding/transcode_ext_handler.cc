@@ -71,7 +71,7 @@ TranscodeExternalHandler::TranscodeExternalHandler(std::shared_ptr<ConfigManager
 
 std::unique_ptr<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile> profile,
     std::string location,
-    Ref<CdsObject> obj,
+    std::shared_ptr<CdsObject> obj,
     std::string range)
 {
     bool isURL = false;
@@ -91,14 +91,14 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile
 
     if (IS_CDS_ITEM(obj->getObjectType()))
     {
-        Ref<CdsItem> it = RefCast(obj, CdsItem);
+        auto item = std::static_pointer_cast<CdsItem>(obj);
         auto mappings = config->getDictionaryOption(
                 CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
 
         if (getValueOrDefault(mappings, mimeType) == CONTENT_TYPE_PCM)
         {
-            std::string freq = it->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY));
-            std::string nrch = it->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS));
+            std::string freq = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY));
+            std::string nrch = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS));
 
             if (string_ok(freq)) 
                 mimeType = mimeType + ";rate=" + freq;

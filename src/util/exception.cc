@@ -63,8 +63,8 @@ Exception::Exception(std::string message, const char* file, int line, const char
 Exception::Exception(std::string message)
 {
     this->message = message;
-    this->file = nullptr;
-    this->function = nullptr;
+    this->file = "";
+    this->function = "";
     this->line = -1;
 #if defined HAVE_BACKTRACE && defined HAVE_BACKTRACE_SYMBOLS
     void *b[100];

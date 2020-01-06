@@ -47,13 +47,13 @@ class AVFormatContext;
 class FfmpegHandler : public MetadataHandler {
 public:
     FfmpegHandler(std::shared_ptr<ConfigManager> config);
-    virtual void fillMetadata(zmm::Ref<CdsItem> item);
-    virtual std::unique_ptr<IOHandler> serveContent(zmm::Ref<CdsItem> item, int resNum);
+    virtual void fillMetadata(std::shared_ptr<CdsItem> item);
+    virtual std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsItem> item, int resNum);
     virtual std::string getMimeType();
 
 private:
-    void addFfmpegAuxdataFields(zmm::Ref<CdsItem> item, AVFormatContext* pFormatCtx) const;
-    void addFfmpegMetadataFields(zmm::Ref<CdsItem> item, AVFormatContext* pFormatCtx) const;
+    void addFfmpegAuxdataFields(std::shared_ptr<CdsItem> item, AVFormatContext* pFormatCtx) const;
+    void addFfmpegMetadataFields(std::shared_ptr<CdsItem> item, AVFormatContext* pFormatCtx) const;
     std::string getThumbnailCacheFilePath(std::string& movie_filename, bool create) const;
     bool readThumbnailCacheFile(std::string movie_filename, uint8_t** ptr_img, size_t* size_img) const;
     void writeThumbnailCacheFile(std::string movie_filename, uint8_t* ptr_img, int size_img) const;

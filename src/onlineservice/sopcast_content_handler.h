@@ -68,7 +68,7 @@ public:
     /// this function will return nullptr.
     ///
     /// \return CdsObject or nullptr if there are no more objects to parse.
-    zmm::Ref<CdsObject> getNextObject();
+    std::shared_ptr<CdsObject> getNextObject();
 
 protected:
     std::shared_ptr<ConfigManager> config;

@@ -142,7 +142,7 @@ public:
     /// \brief shutdown the Storage with its possible threads
     virtual void shutdown() = 0;
 
-    virtual void addObject(zmm::Ref<CdsObject> object, int* changedContainer) = 0;
+    virtual void addObject(std::shared_ptr<CdsObject> object, int* changedContainer) = 0;
 
     /// \brief Adds a virtual container chain specified by path.
     /// \param path container path separated by '/'. Slashes in container
@@ -170,9 +170,11 @@ public:
     /// It will be escaped.
     virtual std::string buildContainerPath(int parentID, std::string title) = 0;
 
-    virtual void updateObject(zmm::Ref<CdsObject> object, int* changedContainer) = 0;
+    virtual void updateObject(std::shared_ptr<CdsObject> object, int* changedContainer) = 0;
 
-    virtual zmm::Ref<zmm::Array<CdsObject>> browse(const std::unique_ptr<BrowseParam>& param) = 0;
+    virtual std::vector<std::shared_ptr<CdsObject>> browse(const std::unique_ptr<BrowseParam>& param) = 0;
+    virtual std::vector<std::shared_ptr<CdsObject>> search(const std::unique_ptr<SearchParam>& param, int* numMatches) = 0;
+
     virtual std::vector<std::string> getMimeTypes() = 0;
 
     //virtual zmm::Ref<zmm::Array<CdsObject> > selectObjects(zmm::Ref<SelectParam> param) = 0;
@@ -183,7 +185,7 @@ public:
     /// if the path ends with DIR_SEPERATOR, as file otherwise
     /// multiple DIR_SEPERATOR are irgnored
     /// \return the CdsObject
-    virtual zmm::Ref<CdsObject> findObjectByPath(std::string path) = 0;
+    virtual std::shared_ptr<CdsObject> findObjectByPath(std::string path) = 0;
 
     /// \brief checks for a given (pc directory) object, identified by the given path
     /// from the database
@@ -201,12 +203,10 @@ public:
     virtual std::string incrementUpdateIDs(const std::unique_ptr<std::unordered_set<int>>& ids) = 0;
 
     /* utility methods */
-    virtual zmm::Ref<CdsObject> loadObject(int objectID) = 0;
+    virtual std::shared_ptr<CdsObject> loadObject(int objectID) = 0;
     virtual int getChildCount(int contId, bool containers = true, bool items = true, bool hideFsRoot = false) = 0;
 
     virtual std::string findFolderImage(int id, std::string trackArtBase) = 0;
-
-    virtual zmm::Ref<zmm::Array<CdsObject>> search(const std::unique_ptr<SearchParam>& param, int* numMatches) = 0;
 
     class ChangedContainers {
     public:
@@ -240,7 +240,7 @@ public:
     virtual std::unique_ptr<ChangedContainers> removeObjects(const std::unique_ptr<std::unordered_set<int>>& list, bool all = false) = 0;
 
     /// \brief Loads an object given by the online service ID.
-    virtual zmm::Ref<CdsObject> loadObjectByServiceID(std::string serviceID) = 0;
+    virtual std::shared_ptr<CdsObject> loadObjectByServiceID(std::string serviceID) = 0;
 
     /// \brief Return an array of object ID's for a particular service.
     ///

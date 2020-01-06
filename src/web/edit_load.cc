@@ -60,7 +60,7 @@ void web::edit_load::process()
     else
         objectID = std::stoi(objID);
 
-    Ref<CdsObject> obj = storage->loadObject(objectID);
+    auto obj = storage->loadObject(objectID);
 
     Ref<Element> item(new Element("item"));
 
@@ -82,7 +82,7 @@ void web::edit_load::process()
     item->appendTextChild("obj_type", CdsObject::mapObjectType(objectType));
 
     if (IS_CDS_ITEM(objectType)) {
-        Ref<CdsItem> objItem = RefCast(obj, CdsItem);
+        auto objItem = std::static_pointer_cast<CdsItem>(obj);
 
         Ref<Element> description(new Element("description"));
         description->setTextKey("value");
@@ -112,7 +112,7 @@ void web::edit_load::process()
             protocol->setAttribute("editable", "1", mxml_bool_type);
             item->appendElementChild(protocol);
         } else if (IS_CDS_ACTIVE_ITEM(objectType)) {
-            Ref<CdsActiveItem> objActiveItem = RefCast(objItem, CdsActiveItem);
+            auto objActiveItem = std::static_pointer_cast<CdsActiveItem>(objItem);
 
             Ref<Element> action(new Element("action"));
             action->setTextKey("value");

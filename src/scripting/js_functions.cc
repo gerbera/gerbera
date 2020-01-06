@@ -58,7 +58,7 @@ duk_ret_t js_copyObject(duk_context *ctx)
     auto *self = Script::getContextScript(ctx);
     if (!duk_is_object(ctx, 0))
         return duk_error(ctx, DUK_ERR_TYPE_ERROR, "copyObject argument is not an object");
-    Ref<CdsObject> cds_obj = self->dukObject2cdsObject(nullptr);
+    auto cds_obj = self->dukObject2cdsObject(nullptr);
     self->cdsObject2dukObject(cds_obj);
     return 1;
 }
@@ -87,8 +87,6 @@ duk_ret_t js_addCdsObject(duk_context *ctx)
 
     try
     {
-        Ref<CdsObject> orig_object;
-
         std::unique_ptr<StringConverter> p2i;
         std::unique_ptr<StringConverter> i2i;
 
@@ -116,11 +114,11 @@ duk_ret_t js_addCdsObject(duk_context *ctx)
             return 0;
         }
 
-        orig_object = self->dukObject2cdsObject(self->getProcessedObject());
+        auto orig_object = self->dukObject2cdsObject(self->getProcessedObject());
         if (orig_object == nullptr)
             return 0;
 
-        Ref<CdsObject> cds_obj;
+        std::shared_ptr<CdsObject> cds_obj;
         auto cm = self->getContent();
         int pcd_id = INVALID_OBJECT_ID;
 
@@ -149,7 +147,7 @@ duk_ret_t js_addCdsObject(duk_context *ctx)
                     return 0;
                 }
 
-                Ref<CdsObject> mainObj = self->getStorage()->loadObject(pcd_id);
+                auto mainObj = self->getStorage()->loadObject(pcd_id);
                 cds_obj = self->dukObject2cdsObject(mainObj);
             }
             else
