@@ -519,11 +519,11 @@ Ref<Element> UpnpXMLBuilder::renderAlbumDate(std::string date) {
     return out;
 }
 
-Ref<UpnpXMLBuilder::PathBase> UpnpXMLBuilder::getPathBase(std::shared_ptr<CdsItem> item, bool forceLocal)
+std::unique_ptr<UpnpXMLBuilder::PathBase> UpnpXMLBuilder::getPathBase(std::shared_ptr<CdsItem> item, bool forceLocal)
 {
     Ref<Element> res;
 
-    Ref<PathBase> pathBase(new PathBase);
+    auto pathBase = std::make_unique<PathBase>();
     /// \todo resource options must be read from configuration files
 
     std::map<std::string,std::string> dict;
@@ -559,7 +559,7 @@ Ref<UpnpXMLBuilder::PathBase> UpnpXMLBuilder::getPathBase(std::shared_ptr<CdsIte
 std::string UpnpXMLBuilder::getFirstResourcePath(std::shared_ptr<CdsItem> item)
 {
     std::string result;
-    Ref<PathBase> urlBase = getPathBase(item);
+    auto urlBase = getPathBase(item);
     int objectType = item->getObjectType();
 
     if (IS_CDS_ITEM_EXTERNAL_URL(objectType) && !urlBase->addResID) { // a remote resource
@@ -576,7 +576,7 @@ std::string UpnpXMLBuilder::getArtworkUrl(std::shared_ptr<CdsItem> item) {
     // FIXME: This is temporary until we do artwork properly.
     log_debug("Building Art url for %d\n", item->getID());
 
-    Ref<PathBase> urlBase = getPathBase(item);
+    auto urlBase = getPathBase(item);
     if (urlBase->addResID) {
         return virtualURL + urlBase->pathBase + std::to_string(1) + "/rct/aa";
     }
@@ -608,7 +608,7 @@ std::string UpnpXMLBuilder::renderExtension(std::string contentType, std::string
 
 void UpnpXMLBuilder::addResources(std::shared_ptr<CdsItem> item, Ref<Element> element)
 {
-    Ref<PathBase> urlBase = getPathBase(item);
+    auto urlBase = getPathBase(item);
     bool skipURL = ((IS_CDS_ITEM_INTERNAL_URL(item->getObjectType()) || IS_CDS_ITEM_EXTERNAL_URL(item->getObjectType())) && (!item->getFlag(OBJECT_FLAG_PROXY_URL)));
 
     bool isExtThumbnail = false; // this sucks
@@ -648,7 +648,7 @@ void UpnpXMLBuilder::addResources(std::shared_ptr<CdsItem> item, Ref<Element> el
     bool hide_original_resource = false;
     int original_resource = 0;
 
-    Ref<PathBase> urlBase_tr;
+    std::unique_ptr<PathBase> urlBase_tr;
 
     // once proxying is a feature that can be turned off or on in
     // config manager we should use that setting

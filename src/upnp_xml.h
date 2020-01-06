@@ -117,13 +117,13 @@ protected:
 
     // Holds a part of path and bool which says if we need to append the resource
     // TODO: Remove this and use centralised routing instead of building URLs all over the place
-    class PathBase : public zmm::Object {
+    class PathBase {
     public:
         std::string pathBase;
         bool addResID;
     };
 
-    static zmm::Ref<PathBase> getPathBase(std::shared_ptr<CdsItem> item, bool forceLocal = false);
+    static std::unique_ptr<PathBase> getPathBase(std::shared_ptr<CdsItem> item, bool forceLocal = false);
     std::string renderExtension(std::string contentType, std::string location);
     std::string getArtworkUrl(std::shared_ptr<CdsItem> item);
 };
