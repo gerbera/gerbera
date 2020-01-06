@@ -43,18 +43,18 @@
 using namespace zmm;
 using namespace mxml;
 
-static int FsObjectComparator(std::shared_ptr<FsObject> o1, std::shared_ptr<FsObject> o2)
+static bool FsObjectComparator(std::shared_ptr<FsObject> o1, std::shared_ptr<FsObject> o2)
 {
     if (o1->isDirectory) {
         if (o2->isDirectory)
-            return strcmp(o1->filename.c_str(), o2->filename.c_str());
+            return strcmp(o1->filename.c_str(), o2->filename.c_str()) < 0;
         else
-            return -1;
+            return false;
     } else {
         if (o2->isDirectory)
-            return 1;
+            return true;
         else
-            return strcmp(o1->filename.c_str(), o2->filename.c_str());
+            return strcmp(o1->filename.c_str(), o2->filename.c_str()) < 0;
     }
 }
 
@@ -154,7 +154,7 @@ std::vector<std::shared_ptr<FsObject>> Filesystem::readDirectory(std::string pat
     }
     closedir(dir);
 
-    sort(files.begin(), files.end(), FsObjectComparator);
+    std::sort(files.begin(), files.end(), FsObjectComparator);
 
     return files;
 }
