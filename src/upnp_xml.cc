@@ -57,7 +57,7 @@ Ref<Element> UpnpXMLBuilder::createResponse(std::string actionName, std::string 
     return response;
 }
 
-Ref<Element> UpnpXMLBuilder::renderObject(Ref<CdsObject> obj, bool renderActions, size_t stringLimit)
+Ref<Element> UpnpXMLBuilder::renderObject(std::shared_ptr<CdsObject> obj, bool renderActions, size_t stringLimit)
 {
     Ref<Element> result(new Element(""));
 
@@ -78,7 +78,7 @@ Ref<Element> UpnpXMLBuilder::renderObject(Ref<CdsObject> obj, bool renderActions
 
     int objectType = obj->getObjectType();
     if (IS_CDS_ITEM(objectType)) {
-        Ref<CdsItem> item = RefCast(obj, CdsItem);
+        auto item = std::static_pointer_cast<CdsItem>(obj);
 
         auto meta = obj->getMetadata();
 
@@ -127,7 +127,7 @@ Ref<Element> UpnpXMLBuilder::renderObject(Ref<CdsObject> obj, bool renderActions
         }
         result->setName("item");
     } else if (IS_CDS_CONTAINER(objectType)) {
-        Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
+        auto cont = std::static_pointer_cast<CdsContainer>(obj);
 
         result->setName("container");
         int childCount = cont->getChildCount();
@@ -209,11 +209,11 @@ Ref<Element> UpnpXMLBuilder::renderObject(Ref<CdsObject> obj, bool renderActions
                         if (artAdded)
                             break;
 
-                        Ref<CdsObject> obj = storage->loadObject(id);
+                        auto obj = storage->loadObject(id);
                         if (obj->getClass() != UPNP_DEFAULT_CLASS_MUSIC_TRACK)
                             continue;
 
-                        Ref<CdsItem> item = RefCast(obj, CdsItem);
+                        auto item = std::static_pointer_cast<CdsItem>(obj);
 
                         auto resources = item->getResources();
                         for (size_t i = 1; i < resources.size(); i++) {
@@ -236,7 +236,7 @@ Ref<Element> UpnpXMLBuilder::renderObject(Ref<CdsObject> obj, bool renderActions
     }
 
     if (renderActions && IS_CDS_ACTIVE_ITEM(objectType)) {
-        Ref<CdsActiveItem> aitem = RefCast(obj, CdsActiveItem);
+        auto aitem = std::static_pointer_cast<CdsActiveItem>(obj);
         result->appendTextChild("action", aitem->getAction());
         result->appendTextChild("state", aitem->getState());
         result->appendTextChild("location", aitem->getLocation());
@@ -248,14 +248,14 @@ Ref<Element> UpnpXMLBuilder::renderObject(Ref<CdsObject> obj, bool renderActions
     return result;
 }
 
-void UpnpXMLBuilder::updateObject(Ref<CdsObject> obj, std::string text)
+void UpnpXMLBuilder::updateObject(std::shared_ptr<CdsObject> obj, std::string text)
 {
     Ref<Parser> parser(new Parser());
     Ref<Element> root = parser->parseString(text)->getRoot();
     int objectType = obj->getObjectType();
 
     if (IS_CDS_ACTIVE_ITEM(objectType)) {
-        Ref<CdsActiveItem> aitem = RefCast(obj, CdsActiveItem);
+        auto aitem = std::static_pointer_cast<CdsActiveItem>(obj);
 
         std::string title = root->getChildText("dc:title");
         if (!title.empty())
@@ -519,7 +519,7 @@ Ref<Element> UpnpXMLBuilder::renderAlbumDate(std::string date) {
     return out;
 }
 
-Ref<UpnpXMLBuilder::PathBase> UpnpXMLBuilder::getPathBase(Ref<CdsItem> item, bool forceLocal)
+Ref<UpnpXMLBuilder::PathBase> UpnpXMLBuilder::getPathBase(std::shared_ptr<CdsItem> item, bool forceLocal)
 {
     Ref<Element> res;
 
@@ -556,7 +556,7 @@ Ref<UpnpXMLBuilder::PathBase> UpnpXMLBuilder::getPathBase(Ref<CdsItem> item, boo
     return pathBase;
 }
 
-std::string UpnpXMLBuilder::getFirstResourcePath(Ref<CdsItem> item)
+std::string UpnpXMLBuilder::getFirstResourcePath(std::shared_ptr<CdsItem> item)
 {
     std::string result;
     Ref<PathBase> urlBase = getPathBase(item);
@@ -572,7 +572,7 @@ std::string UpnpXMLBuilder::getFirstResourcePath(Ref<CdsItem> item)
     return result;
 }
 
-std::string UpnpXMLBuilder::getArtworkUrl(zmm::Ref<CdsItem> item) {
+std::string UpnpXMLBuilder::getArtworkUrl(std::shared_ptr<CdsItem> item) {
     // FIXME: This is temporary until we do artwork properly.
     log_debug("Building Art url for %d\n", item->getID());
 
@@ -606,7 +606,7 @@ std::string UpnpXMLBuilder::renderExtension(std::string contentType, std::string
     return nullptr;
 }
 
-void UpnpXMLBuilder::addResources(Ref<CdsItem> item, Ref<Element> element)
+void UpnpXMLBuilder::addResources(std::shared_ptr<CdsItem> item, Ref<Element> element)
 {
     Ref<PathBase> urlBase = getPathBase(item);
     bool skipURL = ((IS_CDS_ITEM_INTERNAL_URL(item->getObjectType()) || IS_CDS_ITEM_EXTERNAL_URL(item->getObjectType())) && (!item->getFlag(OBJECT_FLAG_PROXY_URL)));

@@ -34,12 +34,10 @@
 #include "storage/storage.h"
 #include "util/tools.h"
 
-using namespace zmm;
 using namespace mxml;
 
 CdsObject::CdsObject(std::shared_ptr<Storage> storage)
-    : Object()
-    , storage(storage)
+    : storage(storage)
 {
     id = INVALID_OBJECT_ID;
     parentID = INVALID_OBJECT_ID;
@@ -51,7 +49,7 @@ CdsObject::CdsObject(std::shared_ptr<Storage> storage)
     objectFlags = OBJECT_FLAG_RESTRICTED;
 }
 
-void CdsObject::copyTo(Ref<CdsObject> obj)
+void CdsObject::copyTo(std::shared_ptr<CdsObject> obj)
 {
     obj->setID(id);
     obj->setRefID(refID);
@@ -69,7 +67,7 @@ void CdsObject::copyTo(Ref<CdsObject> obj)
     for (size_t i = 0; i < resources.size(); i++)
         obj->addResource(resources[i]->clone());
 }
-int CdsObject::equals(Ref<CdsObject> obj, bool exactly)
+int CdsObject::equals(std::shared_ptr<CdsObject> obj, bool exactly)
 {
     if (!(id == obj->getID()
         && parentID == obj->getParentID()
@@ -98,7 +96,7 @@ int CdsObject::equals(Ref<CdsObject> obj, bool exactly)
     return 1;
 }
 
-int CdsObject::resourcesEqual(Ref<CdsObject> obj)
+int CdsObject::resourcesEqual(std::shared_ptr<CdsObject> obj)
 {
     if (resources.size() != obj->resources.size())
         return 0;
@@ -120,24 +118,24 @@ void CdsObject::validate()
         throw _Exception("Object validation failed: missing upnp class\n");
 }
 
-Ref<CdsObject> CdsObject::createObject(std::shared_ptr<Storage> storage, unsigned int objectType)
+std::shared_ptr<CdsObject> CdsObject::createObject(std::shared_ptr<Storage> storage, unsigned int objectType)
 {
-    CdsObject* pobj;
+    std::shared_ptr<CdsObject> obj;
 
     if (IS_CDS_CONTAINER(objectType)) {
-        pobj = new CdsContainer(storage);
+        obj = std::make_shared<CdsContainer>(storage);
     } else if (IS_CDS_ITEM_INTERNAL_URL(objectType)) {
-        pobj = new CdsItemInternalURL(storage);
+        obj = std::make_shared<CdsItemInternalURL>(storage);
     } else if (IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
-        pobj = new CdsItemExternalURL(storage);
+        obj = std::make_shared<CdsItemExternalURL>(storage);
     } else if (IS_CDS_ACTIVE_ITEM(objectType)) {
-        pobj = new CdsActiveItem(storage);
+        obj = std::make_shared<CdsActiveItem>(storage);
     } else if (IS_CDS_ITEM(objectType)) {
-        pobj = new CdsItem(storage);
+        obj = std::make_shared<CdsItem>(storage);
     } else {
         throw _Exception("invalid object type: " + std::to_string(objectType));
     }
-    return Ref<CdsObject>(pobj);
+    return obj;
 }
 
 /* CdsItem */
@@ -152,20 +150,20 @@ CdsItem::CdsItem(std::shared_ptr<Storage> storage)
     serviceID = "";
 }
 
-void CdsItem::copyTo(Ref<CdsObject> obj)
+void CdsItem::copyTo(std::shared_ptr<CdsObject> obj)
 {
     CdsObject::copyTo(obj);
     if (!IS_CDS_ITEM(obj->getObjectType()))
         return;
-    Ref<CdsItem> item = RefCast(obj, CdsItem);
+    auto item = std::static_pointer_cast<CdsItem>(obj);
     //    item->setDescription(description);
     item->setMimeType(mimeType);
     item->setTrackNumber(trackNumber);
     item->setServiceID(serviceID);
 }
-int CdsItem::equals(Ref<CdsObject> obj, bool exactly)
+int CdsItem::equals(std::shared_ptr<CdsObject> obj, bool exactly)
 {
-    Ref<CdsItem> item = RefCast(obj, CdsItem);
+    auto item = std::static_pointer_cast<CdsItem>(obj);
     if (!CdsObject::equals(obj, exactly))
         return 0;
     return (mimeType == item->getMimeType() && trackNumber == item->getTrackNumber() && serviceID == item->getServiceID());
@@ -194,18 +192,18 @@ CdsActiveItem::CdsActiveItem(std::shared_ptr<Storage> storage)
     mimeType = MIMETYPE_DEFAULT;
 }
 
-void CdsActiveItem::copyTo(Ref<CdsObject> obj)
+void CdsActiveItem::copyTo(std::shared_ptr<CdsObject> obj)
 {
     CdsItem::copyTo(obj);
     if (!IS_CDS_ACTIVE_ITEM(obj->getObjectType()))
         return;
-    Ref<CdsActiveItem> item = RefCast(obj, CdsActiveItem);
+    auto item = std::static_pointer_cast<CdsActiveItem>(obj);
     item->setAction(action);
     item->setState(state);
 }
-int CdsActiveItem::equals(Ref<CdsObject> obj, bool exactly)
+int CdsActiveItem::equals(std::shared_ptr<CdsObject> obj, bool exactly)
 {
-    Ref<CdsActiveItem> item = RefCast(obj, CdsActiveItem);
+    auto item = std::static_pointer_cast<CdsActiveItem>(obj);
     if (!CdsItem::equals(obj, exactly))
         return 0;
     if (exactly && (action != item->getAction() || state != item->getState()))
@@ -272,17 +270,17 @@ CdsContainer::CdsContainer(std::shared_ptr<Storage> storage)
     autoscanType = OBJECT_AUTOSCAN_NONE;
 }
 
-void CdsContainer::copyTo(Ref<CdsObject> obj)
+void CdsContainer::copyTo(std::shared_ptr<CdsObject> obj)
 {
     CdsObject::copyTo(obj);
     if (!IS_CDS_CONTAINER(obj->getObjectType()))
         return;
-    Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
+    auto cont = std::static_pointer_cast<CdsContainer>(obj);
     cont->setUpdateID(updateID);
 }
-int CdsContainer::equals(Ref<CdsObject> obj, bool exactly)
+int CdsContainer::equals(std::shared_ptr<CdsObject> obj, bool exactly)
 {
-    Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
+    auto cont = std::static_pointer_cast<CdsContainer>(obj);
     return (
         CdsObject::equals(obj, exactly) && isSearchable() == cont->isSearchable());
 }
@@ -293,13 +291,6 @@ void CdsContainer::validate()
     /// \todo well.. we have to know if a container is a real directory or just a virtual container in the database
     /*    if (!check_path(this->location, true))
         throw _Exception("CdsContainer: validation failed"); */
-}
-
-int CdsObjectTitleComparator(void* arg1, void* arg2)
-{
-    /// \todo get rid of getTitle() to avod unnecessary reference counting ops
-    return strcmp(((CdsObject*)arg1)->title.c_str(),
-        ((CdsObject*)arg2)->title.c_str());
 }
 
 std::string CdsContainer::getVirtualPath()
@@ -324,7 +315,7 @@ std::string CdsContainer::getVirtualPath()
 
 std::string CdsItem::getVirtualPath()
 {
-    Ref<CdsObject> cont = storage->loadObject(getParentID());
+    auto cont = storage->loadObject(getParentID());
     std::string location = cont->getVirtualPath();
     location = location + '/' + getTitle();
 

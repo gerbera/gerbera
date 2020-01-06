@@ -147,13 +147,13 @@ public:
 
     MetadataHandler(std::shared_ptr<ConfigManager> config);
 
-    static void setMetadata(std::shared_ptr<ConfigManager> config, zmm::Ref<CdsItem> item);
+    static void setMetadata(std::shared_ptr<ConfigManager> config, std::shared_ptr<CdsItem> item);
     static std::string getMetaFieldName(metadata_fields_t field);
     static std::string getResAttrName(resource_attributes_t attr);
     static std::unique_ptr<MetadataHandler> createHandler(std::shared_ptr<ConfigManager> config, int handlerType);
 
-    virtual void fillMetadata(zmm::Ref<CdsItem> item) = 0;
-    virtual std::unique_ptr<IOHandler> serveContent(zmm::Ref<CdsItem> item, int resNum) = 0;
+    virtual void fillMetadata(std::shared_ptr<CdsItem> item) = 0;
+    virtual std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsItem> item, int resNum) = 0;
     virtual std::string getMimeType();
 };
 

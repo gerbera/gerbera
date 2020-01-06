@@ -56,7 +56,7 @@ inline bool path_exists(std::string name)
     return (stat(name.c_str(), &buffer) == 0);
 }
 
-std::string getFolderName(Ref<CdsItem> item)
+std::string getFolderName(std::shared_ptr<CdsItem> item)
 {
     std::string folder = item->getLocation().substr(0, item->getLocation().rfind('/'));
     log_debug("Folder name: %s\n", folder.c_str());
@@ -77,7 +77,7 @@ std::string getFanArtPath(std::string folder)
     return found;
 }
 
-void FanArtHandler::fillMetadata(Ref<CdsItem> item)
+void FanArtHandler::fillMetadata(std::shared_ptr<CdsItem> item)
 {
     log_debug("Running fanart handler on %s\n", item->getLocation().c_str());
 
@@ -90,7 +90,7 @@ void FanArtHandler::fillMetadata(Ref<CdsItem> item)
     }
 }
 
-std::unique_ptr<IOHandler> FanArtHandler::serveContent(Ref<CdsItem> item, int resNum)
+std::unique_ptr<IOHandler> FanArtHandler::serveContent(std::shared_ptr<CdsItem> item, int resNum)
 {
     std::string path = getFanArtPath(getFolderName(item));
 

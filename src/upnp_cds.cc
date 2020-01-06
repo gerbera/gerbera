@@ -84,7 +84,7 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
         throw UpnpException(UPNP_SOAP_E_INVALID_ARGS,
             "invalid browse flag: " + BrowseFlag);
 
-    Ref<CdsObject> parent = storage->loadObject(objectID);
+    auto parent = storage->loadObject(objectID);
     if ((parent->getClass() == UPNP_DEFAULT_CLASS_MUSIC_ALBUM) || (parent->getClass() == UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER))
         flag |= BROWSE_TRACK_SORT;
 
@@ -96,8 +96,7 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
     param->setStartingIndex(std::stoi(StartingIndex));
     param->setRequestedCount(std::stoi(RequestedCount));
 
-    Ref<Array<CdsObject>> arr;
-
+    std::vector<std::shared_ptr<CdsObject>> arr;
     try {
         arr = storage->browse(param);
     } catch (const Exception& e) {
@@ -117,8 +116,8 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
             XML_SEC_NAMESPACE);
     }
 
-    for (int i = 0; i < arr->size(); i++) {
-        Ref<CdsObject> obj = arr->get(i);
+    for (size_t i = 0; i < arr.size(); i++) {
+        auto obj = arr[i];
         if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && obj->getFlag(OBJECT_FLAG_PLAYED)) {
             std::string title = obj->getTitle();
             if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND))
@@ -137,7 +136,7 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
     Ref<Element> response = xmlBuilder->createResponse(request->getActionName(), DESC_CDS_SERVICE_TYPE);
 
     response->appendTextChild("Result", didl_lite->print());
-    response->appendTextChild("NumberReturned", std::to_string(arr->size()));
+    response->appendTextChild("NumberReturned", std::to_string(arr.size()));
     response->appendTextChild("TotalMatches", std::to_string(param->getTotalMatches()));
     response->appendTextChild("UpdateID", std::to_string(systemUpdateID));
 
@@ -173,7 +172,7 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
     auto searchParam = std::make_unique<SearchParam>(containerID, searchCriteria,
         std::stoi(startingIndex.c_str(), nullptr), std::stoi(requestedCount.c_str(), nullptr));
 
-    Ref<Array<CdsObject>> results;
+    std::vector<std::shared_ptr<CdsObject>> results;
     int numMatches = 0;
     try {
         results = storage->search(searchParam, &numMatches);
@@ -182,8 +181,8 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
         throw UpnpException(UPNP_E_NO_SUCH_ID, "no such object");
     }
 
-    for (int i = 0; i < results->size(); i++) {
-        Ref<CdsObject> cdsObject = results->get(i);
+    for (size_t i = 0; i < results.size(); i++) {
+        auto cdsObject = results[i];
         if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && cdsObject->getFlag(OBJECT_FLAG_PLAYED)) {
             std::string title = cdsObject->getTitle();
             if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND))
@@ -201,7 +200,7 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
     Ref<Element> response = xmlBuilder->createResponse(request->getActionName(), DESC_CDS_SERVICE_TYPE);
 
     response->appendTextChild("Result", didl_lite->print());
-    response->appendTextChild("NumberReturned", std::to_string(results->size()));
+    response->appendTextChild("NumberReturned", std::to_string(results.size()));
     response->appendTextChild("TotalMatches", std::to_string(numMatches));
     response->appendTextChild("UpdateID", std::to_string(systemUpdateID));
 
@@ -284,8 +283,8 @@ void ContentDirectoryService::processSubscriptionRequest(const std::unique_ptr<S
     propset = xmlBuilder->createEventPropertySet();
     property = propset->getFirstElementChild();
     property->appendTextChild("SystemUpdateID", "" + systemUpdateID);
-    Ref<CdsObject> obj = storage->loadObject(0);
-    Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
+    auto obj = storage->loadObject(0);
+    auto cont = std::static_pointer_cast<CdsContainer>(obj);
     property->appendTextChild("ContainerUpdateIDs", "0," + cont->getUpdateID());
     std::string xml = propset->print();
     err = ixmlParseBufferEx(xml.c_str(), &event);

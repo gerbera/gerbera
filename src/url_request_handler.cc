@@ -88,7 +88,7 @@ void URLRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
 
     //log_debug("got ObjectID: [%s]\n", object_id.c_str());
 
-    Ref<CdsObject> obj = storage->loadObject(objectID);
+    auto obj = storage->loadObject(objectID);
 
     int objectType = obj->getObjectType();
 
@@ -109,7 +109,7 @@ void URLRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
         mimeType = tp->getTargetMimeType();
         UpnpFileInfo_set_FileLength(info, -1);
     } else {
-        Ref<CdsItemExternalURL> item = RefCast(obj, CdsItemExternalURL);
+        auto item = std::static_pointer_cast<CdsItemExternalURL>(obj);
 
 #ifdef ONLINE_SERVICES
         if (item->getFlag(OBJECT_FLAG_ONLINE_SERVICE)) {
@@ -185,7 +185,7 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
     } else
         objectID = std::stoi(objID);
 
-    Ref<CdsObject> obj = storage->loadObject(objectID);
+    auto obj = storage->loadObject(objectID);
 
     int objectType = obj->getObjectType();
 
@@ -193,7 +193,7 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
         throw _Exception("object is not an external url item");
     }
 
-    Ref<CdsItemExternalURL> item = RefCast(obj, CdsItemExternalURL);
+    auto item = std::static_pointer_cast<CdsItemExternalURL>(obj);
 
 #ifdef ONLINE_SERVICES
     if (item->getFlag(OBJECT_FLAG_ONLINE_SERVICE)) {
@@ -221,7 +221,7 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
             throw _Exception("Transcoding of file " + url + " but no profile matching the name " + tr_profile + " found");
 
         Ref<TranscodeDispatcher> tr_d(new TranscodeDispatcher(config, content));
-        return tr_d->open(tp, url, RefCast(item, CdsObject), range);
+        return tr_d->open(tp, url, item, range);
     } else {
         Ref<URL> u(new URL());
         Ref<URL::Stat> st;

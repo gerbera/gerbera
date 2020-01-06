@@ -81,7 +81,7 @@ FfmpegHandler::FfmpegHandler(std::shared_ptr<ConfigManager> config)
 {
 }
 
-void FfmpegHandler::addFfmpegAuxdataFields(Ref<CdsItem> item, AVFormatContext* pFormatCtx) const
+void FfmpegHandler::addFfmpegAuxdataFields(std::shared_ptr<CdsItem> item, AVFormatContext* pFormatCtx) const
 {
     if (!pFormatCtx->metadata) {
         log_debug("no metadata\n");
@@ -103,7 +103,7 @@ void FfmpegHandler::addFfmpegAuxdataFields(Ref<CdsItem> item, AVFormatContext* p
     }
 } //addFfmpegAuxdataFields
 
-void FfmpegHandler::addFfmpegMetadataFields(Ref<CdsItem> item, AVFormatContext* pFormatCtx) const
+void FfmpegHandler::addFfmpegMetadataFields(std::shared_ptr<CdsItem> item, AVFormatContext* pFormatCtx) const
 {
     AVDictionaryEntry* e = NULL;
     auto sc = StringConverter::m2i(config);
@@ -147,7 +147,7 @@ void FfmpegHandler::addFfmpegMetadataFields(Ref<CdsItem> item, AVFormatContext* 
 }
 
 // ffmpeg library calls
-static void addFfmpegResourceFields(Ref<CdsItem> item, AVFormatContext* pFormatCtx)
+static void addFfmpegResourceFields(std::shared_ptr<CdsItem> item, AVFormatContext* pFormatCtx)
 {
     int64_t hours, mins, secs, us;
     int audioch = 0, samplefreq = 0;
@@ -233,7 +233,7 @@ void FfmpegNoOutputStub(void* ptr, int level, const char* fmt, va_list vl)
     // do nothing
 }
 
-void FfmpegHandler::fillMetadata(Ref<CdsItem> item)
+void FfmpegHandler::fillMetadata(std::shared_ptr<CdsItem> item)
 {
     log_debug("Running ffmpeg handler on %s\n", item->getLocation().c_str());
 
@@ -386,7 +386,7 @@ void FfmpegHandler::writeThumbnailCacheFile(std::string movie_filename, uint8_t*
 }
 #endif
 
-std::unique_ptr<IOHandler> FfmpegHandler::serveContent(Ref<CdsItem> item, int resNum)
+std::unique_ptr<IOHandler> FfmpegHandler::serveContent(std::shared_ptr<CdsItem> item, int resNum)
 {
 #ifdef HAVE_FFMPEGTHUMBNAILER
     if (!config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED))

@@ -51,21 +51,21 @@ public:
     FallbackLayout(std::shared_ptr<ConfigManager> config,
         std::shared_ptr<Storage> storage,
         std::shared_ptr<ContentManager> content);
-    virtual void processCdsObject(zmm::Ref<CdsObject> obj, std::string rootpath) override;
+    virtual void processCdsObject(std::shared_ptr<CdsObject> obj, std::string rootpath) override;
 #ifdef ENABLE_PROFILING
     virtual ~FallbackLayout();
 #endif
 protected:
-    void add(zmm::Ref<CdsObject> obj, int parentID, bool use_ref = true);
+    void add(std::shared_ptr<CdsObject> obj, int parentID, bool use_ref = true);
     std::string esc(std::string str);
-    void addVideo(zmm::Ref<CdsObject> obj, std::string rootpath);
-    void addImage(zmm::Ref<CdsObject> obj, std::string rootpath);
-    void addAudio(zmm::Ref<CdsObject> obj);
+    void addVideo(std::shared_ptr<CdsObject> obj, std::string rootpath);
+    void addImage(std::shared_ptr<CdsObject> obj, std::string rootpath);
+    void addAudio(std::shared_ptr<CdsObject> obj);
 #ifdef SOPCAST
-    void addSopCast(zmm::Ref<CdsObject> obj);
+    void addSopCast(std::shared_ptr<CdsObject> obj);
 #endif
 #ifdef ATRAILERS
-    void addATrailers(zmm::Ref<CdsObject> obj);
+    void addATrailers(std::shared_ptr<CdsObject> obj);
 #endif
 
     std::shared_ptr<ConfigManager> config;

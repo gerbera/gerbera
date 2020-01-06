@@ -93,7 +93,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
     //log_debug("got ObjectID: [%s]\n", object_id.c_str());
 
-    Ref<CdsObject> obj = storage->loadObject(objectID);
+    auto obj = storage->loadObject(objectID);
 
     int objectType = obj->getObjectType();
 
@@ -101,7 +101,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         throw _Exception("requested object is not an item");
     }
 
-    Ref<CdsItem> item = RefCast(obj, CdsItem);
+    auto item = std::static_pointer_cast<CdsItem>(obj);
 
     std::string path = item->getLocation();
 
@@ -317,7 +317,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
     int objectID = std::stoi(objID);
 
     log_debug("Opening media file with object id %d\n", objectID);
-    Ref<CdsObject> obj = storage->loadObject(objectID);
+    auto obj = storage->loadObject(objectID);
 
     int objectType = obj->getObjectType();
 
@@ -336,7 +336,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
 
     // update item info by running action
     if (IS_CDS_ACTIVE_ITEM(objectType) && (res_id == 0)) { // check - if thumbnails, then no action, just show
-        Ref<CdsActiveItem> aitem = RefCast(obj, CdsActiveItem);
+        auto aitem = std::static_pointer_cast<CdsActiveItem>(obj);
 
         Ref<Element> inputElement = xmlBuilder->renderObject(obj, true);
 
@@ -364,7 +364,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
         }
         log_debug("Script output: %s\n", output.c_str());
 
-        Ref<CdsObject> clone = CdsObject::createObject(storage, objectType);
+        auto clone = CdsObject::createObject(storage, objectType);
         aitem->copyTo(clone);
 
         xmlBuilder->updateObject(clone, output);
@@ -388,7 +388,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
         }
     }
 
-    Ref<CdsItem> item = RefCast(obj, CdsItem);
+    auto item = std::static_pointer_cast<CdsItem>(obj);
 
     std::string path = item->getLocation();
     bool is_srt = false;
@@ -480,7 +480,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
 
             Ref<TranscodeDispatcher> tr_d(new TranscodeDispatcher(config, content));
             Ref<TranscodingProfile> tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(tr_profile);
-            return tr_d->open(tp, path, RefCast(item, CdsObject), range);
+            return tr_d->open(tp, path, item, range);
         } else {
             if (mimeType.empty())
                 mimeType = item->getMimeType();

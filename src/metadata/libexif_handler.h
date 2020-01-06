@@ -51,12 +51,12 @@ protected:
     std::string imageX;
     std::string imageY;
 
-    void process_ifd(ExifContent* content, zmm::Ref<CdsItem> item, const std::unique_ptr<StringConverter>& sc, std::vector<std::string> auxtags);
+    void process_ifd(ExifContent* content, std::shared_ptr<CdsItem> item, const std::unique_ptr<StringConverter>& sc, std::vector<std::string> auxtags);
 
 public:
     LibExifHandler(std::shared_ptr<ConfigManager> config);
-    virtual void fillMetadata(zmm::Ref<CdsItem> item);
-    virtual std::unique_ptr<IOHandler> serveContent(zmm::Ref<CdsItem> item, int resNum);
+    virtual void fillMetadata(std::shared_ptr<CdsItem> item);
+    virtual std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsItem> item, int resNum);
 };
 
 #endif // __METADATA_LIBEXIF_H__

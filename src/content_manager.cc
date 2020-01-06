@@ -458,12 +458,12 @@ void ContentManager::_loadAccounting()
     acct->totalFiles = storage->getTotalFiles();
 }
 
-void ContentManager::addVirtualItem(Ref<CdsObject> obj, bool allow_fifo)
+void ContentManager::addVirtualItem(std::shared_ptr<CdsObject> obj, bool allow_fifo)
 {
     obj->validate();
     std::string path = obj->getLocation();
     check_path_ex(path, false, false);
-    Ref<CdsObject> pcdir = storage->findObjectByPath(path);
+    auto pcdir = storage->findObjectByPath(path);
     if (pcdir == nullptr) {
         pcdir = createObjectFromFile(path, true, allow_fifo);
         if (pcdir == nullptr) {
@@ -497,7 +497,7 @@ int ContentManager::_addFile(std::string path, std::string rootPath, bool recurs
     initJS();
 #endif
 
-    Ref<CdsObject> obj = storage->findObjectByPath(path);
+    auto obj = storage->findObjectByPath(path);
     if (obj == nullptr) {
         obj = createObjectFromFile(path);
         if (obj == nullptr) // object ignored
@@ -511,7 +511,7 @@ int ContentManager::_addFile(std::string path, std::string rootPath, bool recurs
 
                     layout->processCdsObject(obj, rootPath);
 
-                    std::string mimetype = RefCast(obj, CdsItem)->getMimeType();
+                    std::string mimetype = std::static_pointer_cast<CdsItem>(obj)->getMimeType();
                     std::string content_type = getValueOrDefault(mimetype_contenttype_map, mimetype);
 #ifdef HAVE_JS
                     if ((playlist_parser_script != nullptr) && (content_type == CONTENT_TYPE_PLAYLIST))
@@ -571,7 +571,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
     struct stat statbuf;
     std::string location;
     std::string path;
-    Ref<CdsObject> obj;
+    std::shared_ptr<CdsObject> obj;
 
     if (scanID == INVALID_SCAN_ID)
         return;
@@ -803,7 +803,7 @@ void ContentManager::addRecursive(std::string path, bool hidden, Ref<GenericTask
         }
 
         try {
-            Ref<CdsObject> obj = nullptr;
+            std::shared_ptr<CdsObject> obj = nullptr;
             if (parentID > 0)
                 obj = storage->findObjectByPath(std::string(newPath));
             if (obj == nullptr) // create object
@@ -832,7 +832,7 @@ void ContentManager::addRecursive(std::string path, bool hidden, Ref<GenericTask
                             layout->processCdsObject(obj, rootpath);
 #ifdef HAVE_JS
                             auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-                            std::string mimetype = RefCast(obj, CdsItem)->getMimeType();
+                            std::string mimetype = std::static_pointer_cast<CdsItem>(obj)->getMimeType();
                             std::string content_type = getValueOrDefault(mappings, mimetype);
 
                             if ((playlist_parser_script != nullptr) && (content_type == CONTENT_TYPE_PLAYLIST))
@@ -869,13 +869,13 @@ void ContentManager::updateObject(int objectID, const std::map<std::string,std::
     std::string location = getValueOrDefault(parameters, "location");
     std::string protocol = getValueOrDefault(parameters, "protocol");
 
-    Ref<CdsObject> obj = storage->loadObject(objectID);
+    auto obj = storage->loadObject(objectID);
     int objectType = obj->getObjectType();
 
     /// \todo if we have an active item, does it mean we first go through IS_ITEM and then thorugh IS_ACTIVE item? ask Gena
     if (IS_CDS_ITEM(objectType)) {
-        Ref<CdsItem> item = RefCast(obj, CdsItem);
-        Ref<CdsObject> clone = CdsObject::createObject(storage, objectType);
+        auto item = std::static_pointer_cast<CdsItem>(obj);
+        auto clone = CdsObject::createObject(storage, objectType);
         item->copyTo(clone);
 
         if (string_ok(title))
@@ -885,7 +885,7 @@ void ContentManager::updateObject(int objectID, const std::map<std::string,std::
         if (string_ok(location))
             clone->setLocation(location);
 
-        Ref<CdsItem> cloned_item = RefCast(clone, CdsItem);
+        auto cloned_item = std::static_pointer_cast<CdsItem>(clone);
 
         if (string_ok(mimetype) && (string_ok(protocol))) {
             cloned_item->setMimeType(mimetype);
@@ -909,7 +909,7 @@ void ContentManager::updateObject(int objectID, const std::map<std::string,std::
         }
 
         log_debug("updateObject: checking equality of item %s\n", item->getTitle().c_str());
-        if (!item->equals(clone, true)) {
+        if (!item->equals(cloned_item, true)) {
             cloned_item->validate();
             int containerChanged = INVALID_OBJECT_ID;
             storage->updateObject(clone, &containerChanged);
@@ -923,8 +923,8 @@ void ContentManager::updateObject(int objectID, const std::map<std::string,std::
         std::string action = getValueOrDefault(parameters, "action");
         std::string state = getValueOrDefault(parameters, "state");
 
-        Ref<CdsActiveItem> item = RefCast(obj, CdsActiveItem);
-        Ref<CdsObject> clone = CdsObject::createObject(storage, objectType);
+        auto item = std::static_pointer_cast<CdsActiveItem>(obj);
+        auto clone = CdsObject::createObject(storage, objectType);
         item->copyTo(clone);
 
         if (string_ok(title))
@@ -932,7 +932,7 @@ void ContentManager::updateObject(int objectID, const std::map<std::string,std::
         if (string_ok(upnp_class))
             clone->setClass(upnp_class);
 
-        Ref<CdsActiveItem> cloned_item = RefCast(clone, CdsActiveItem);
+        auto cloned_item = std::static_pointer_cast<CdsActiveItem>(clone);
 
         // state and description can be an empty strings - if you want to clear it
         if (string_ok(description)) {
@@ -949,7 +949,7 @@ void ContentManager::updateObject(int objectID, const std::map<std::string,std::
         if (string_ok(action))
             cloned_item->setAction(action);
 
-        if (!item->equals(clone, true)) {
+        if (!item->equals(cloned_item, true)) {
             cloned_item->validate();
             int containerChanged = INVALID_OBJECT_ID;
             storage->updateObject(clone, &containerChanged);
@@ -958,8 +958,8 @@ void ContentManager::updateObject(int objectID, const std::map<std::string,std::
             update_manager->containerChanged(item->getParentID());
         }
     } else if (IS_CDS_CONTAINER(objectType)) {
-        Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
-        Ref<CdsObject> clone = CdsObject::createObject(storage, objectType);
+        auto cont = std::static_pointer_cast<CdsContainer>(obj);
+        auto clone = CdsObject::createObject(storage, objectType);
         cont->copyTo(clone);
 
         if (string_ok(title))
@@ -967,7 +967,9 @@ void ContentManager::updateObject(int objectID, const std::map<std::string,std::
         if (string_ok(upnp_class))
             clone->setClass(upnp_class);
 
-        if (!cont->equals(clone, true)) {
+        auto cloned_item = std::static_pointer_cast<CdsContainer>(clone);
+
+        if (!cont->equals(cloned_item, true)) {
             clone->validate();
             int containerChanged = INVALID_OBJECT_ID;
             storage->updateObject(clone, &containerChanged);
@@ -979,7 +981,7 @@ void ContentManager::updateObject(int objectID, const std::map<std::string,std::
     }
 }
 
-void ContentManager::addObject(zmm::Ref<CdsObject> obj)
+void ContentManager::addObject(std::shared_ptr<CdsObject> obj)
 {
     obj->validate();
 
@@ -997,8 +999,7 @@ void ContentManager::addObject(zmm::Ref<CdsObject> obj)
 
     int parent_id = obj->getParentID();
     if ((parent_id != -1) && (storage->getChildCount(parent_id) == 1)) {
-        Ref<CdsObject> parent; //(new CdsObject());
-        parent = storage->loadObject(parent_id);
+        auto parent = storage->loadObject(parent_id);
         log_debug("Will update ID %d\n", parent->getParentID());
         update_manager->containerChanged(parent->getParentID());
     }
@@ -1035,7 +1036,7 @@ int ContentManager::addContainerChain(std::string chain, std::string lastClass, 
     return containerID;
 }
 
-void ContentManager::updateObject(Ref<CdsObject> obj, bool send_updates)
+void ContentManager::updateObject(std::shared_ptr<CdsObject> obj, bool send_updates)
 {
     obj->validate();
 
@@ -1052,7 +1053,7 @@ void ContentManager::updateObject(Ref<CdsObject> obj, bool send_updates)
     }
 }
 
-Ref<CdsObject> ContentManager::convertObject(Ref<CdsObject> oldObj, int newType)
+std::shared_ptr<CdsObject> ContentManager::convertObject(std::shared_ptr<CdsObject> oldObj, int newType)
 {
     int oldType = oldObj->getObjectType();
     if (oldType == newType)
@@ -1061,15 +1062,14 @@ Ref<CdsObject> ContentManager::convertObject(Ref<CdsObject> oldObj, int newType)
         throw _Exception("Cannot convert object type " + std::to_string(oldType) + " to " + std::to_string(newType));
     }
 
-    Ref<CdsObject> newObj = CdsObject::createObject(storage, newType);
-
+    auto newObj = CdsObject::createObject(storage, newType);
     oldObj->copyTo(newObj);
 
     return newObj;
 }
 
 // returns nullptr if file ignored due to configuration
-Ref<CdsObject> ContentManager::createObjectFromFile(std::string path, bool magic, bool allow_fifo)
+std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(std::string path, bool magic, bool allow_fifo)
 {
     std::string filename = get_filename(path);
 
@@ -1081,7 +1081,7 @@ Ref<CdsObject> ContentManager::createObjectFromFile(std::string path, bool magic
         throw _Exception("Failed to stat " + path + " , " + mt_strerror(errno));
     }
 
-    Ref<CdsObject> obj;
+    std::shared_ptr<CdsObject> obj;
     if (S_ISREG(statbuf.st_mode) || (allow_fifo && S_ISFIFO(statbuf.st_mode))) { // item
         /* retrieve information about item and decide if it should be included */
         std::string mimetype;
@@ -1119,8 +1119,8 @@ Ref<CdsObject> ContentManager::createObjectFromFile(std::string path, bool magic
             }
         }
 
-        Ref<CdsItem> item(new CdsItem(storage));
-        obj = RefCast(item, CdsObject);
+        auto item = std::make_shared<CdsItem>(storage);
+        obj = item;
         item->setLocation(path);
         item->setMTime(statbuf.st_mtime);
         item->setSizeOnDisk(statbuf.st_size);
@@ -1139,22 +1139,22 @@ Ref<CdsObject> ContentManager::createObjectFromFile(std::string path, bool magic
             MetadataHandler::setMetadata(config, item);
         }
     } else if (S_ISDIR(statbuf.st_mode)) {
-        Ref<CdsContainer> cont(new CdsContainer(storage));
-        obj = RefCast(cont, CdsObject);
+        auto cont = std::make_shared<CdsContainer>(storage);
+        obj = cont;
         /* adding containers is done by Storage now
          * this exists only to inform the caller that
          * this is a container
          */
         /*
         cont->setLocation(path);
-        Ref<StringConverter> f2i = StringConverter::f2i();
+        auto f2i = StringConverter::f2i();
         obj->setTitle(f2i->convert(filename));
         */
     } else {
         // only regular files and directories are supported
         throw _Exception("ContentManager: skipping file " + path);
     }
-    //    Ref<StringConverter> f2i = StringConverter::f2i();
+    //    auto f2i = StringConverter::f2i();
     //    obj->setTitle(f2i->convert(filename));
     return obj;
 }
@@ -1366,7 +1366,7 @@ void ContentManager::cleanupOnlineServiceObjects(zmm::Ref<OnlineService> service
         std::string temp;
 
         for (int object_id : *ids) {
-            Ref<CdsObject> obj = storage->loadObject(object_id);
+            auto obj = storage->loadObject(object_id);
             if (obj == nullptr)
                 continue;
 
@@ -1448,7 +1448,7 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
         auto self = shared_from_this();
         Ref<GenericTask> task(new CMRemoveObjectTask(self, objectID, all));
         std::string path;
-        Ref<CdsObject> obj;
+        std::shared_ptr<CdsObject> obj;
 
         try {
             obj = storage->loadObject(objectID);
@@ -1696,7 +1696,7 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
             dir->setLocation(FS_ROOT_DIRECTORY);
         else {
             log_debug("objectID: %d\n", dir->getObjectID());
-            Ref<CdsObject> obj = storage->loadObject(dir->getObjectID());
+            auto obj = storage->loadObject(dir->getObjectID());
             if (obj == nullptr || !IS_CDS_CONTAINER(obj->getObjectType()) || obj->isVirtual())
                 throw _Exception("tried to remove an illegal object (id) from the list of the autoscan directories");
 
@@ -1782,14 +1782,14 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
         session_manager->containerChangedUI(copy->getObjectID());
 }
 
-void ContentManager::triggerPlayHook(zmm::Ref<CdsObject> obj)
+void ContentManager::triggerPlayHook(std::shared_ptr<CdsObject> obj)
 {
     log_debug("start\n");
 
     if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && !obj->getFlag(OBJECT_FLAG_PLAYED)) {
         std::vector<std::string>  mark_list = config->getStringArrayOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST);
         for (size_t i = 0; i < mark_list.size(); i++) {
-            if (startswith(RefCast(obj, CdsItem)->getMimeType(), mark_list[i])) {
+            if (startswith(std::static_pointer_cast<CdsItem>(obj)->getMimeType(), mark_list[i])) {
                 obj->setFlag(OBJECT_FLAG_PLAYED);
 
                 bool supress = config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES);
@@ -1801,8 +1801,8 @@ void ContentManager::triggerPlayHook(zmm::Ref<CdsObject> obj)
     }
 
 #ifdef HAVE_LASTFMLIB
-    if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_LASTFM_ENABLED) && (RefCast(obj, CdsItem)->getMimeType().startsWith("audio")))
-        last_fm->startedPlaying(RefCast(obj, CdsItem));
+    if (cfg->getBoolOption(CFG_SERVER_EXTOPTS_LASTFM_ENABLED) && (std::static_pointer_cast<CdsItem>(obj)->getMimeType().startsWith("audio")))
+        last_fm->startedPlaying(std::static_pointer_cast<CdsItem>(obj));
 #endif
     log_debug("end\n");
 }

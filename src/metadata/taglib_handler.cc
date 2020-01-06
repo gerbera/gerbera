@@ -61,7 +61,7 @@ TagLibHandler::TagLibHandler(std::shared_ptr<ConfigManager> config)
 {
 }
 
-void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, const TagLib::Tag* tag, Ref<CdsItem> item) const
+void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, const TagLib::Tag* tag, std::shared_ptr<CdsItem> item) const
 {
     if (tag == nullptr)
         return;
@@ -166,7 +166,7 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
     }
 }
 
-void TagLibHandler::populateGenericTags(Ref<CdsItem> item, const TagLib::File& file) const
+void TagLibHandler::populateGenericTags(std::shared_ptr<CdsItem> item, const TagLib::File& file) const
 {
     if (!file.tag())
         return;
@@ -212,7 +212,7 @@ void TagLibHandler::populateGenericTags(Ref<CdsItem> item, const TagLib::File& f
     }
 }
 
-void TagLibHandler::fillMetadata(Ref<CdsItem> item)
+void TagLibHandler::fillMetadata(std::shared_ptr<CdsItem> item)
 {
     auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
     std::string content_type = getValueOrDefault(mappings, item->getMimeType());
@@ -259,7 +259,7 @@ std::string TagLibHandler::getContentTypeFromByteVector(const TagLib::ByteVector
     return art_mimetype;
 }
 
-void TagLibHandler::addArtworkResource(Ref<CdsItem> item, std::string art_mimetype)
+void TagLibHandler::addArtworkResource(std::shared_ptr<CdsItem> item, std::string art_mimetype)
 {
     // if we could not determine the mimetype, then there is no
     // point to add the resource - it's probably garbage
@@ -276,7 +276,7 @@ void TagLibHandler::addArtworkResource(Ref<CdsItem> item, std::string art_mimety
     }
 }
 
-std::unique_ptr<IOHandler> TagLibHandler::serveContent(Ref<CdsItem> item, int resNum)
+std::unique_ptr<IOHandler> TagLibHandler::serveContent(std::shared_ptr<CdsItem> item, int resNum)
 {
     auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
     std::string content_type = getValueOrDefault(mappings, item->getMimeType());
@@ -384,7 +384,7 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(Ref<CdsItem> item, int re
     throw _Exception("TagLibHandler: Unsupported content_type: " + content_type);
 }
 
-void TagLibHandler::extractMP3(TagLib::IOStream* roStream, zmm::Ref<CdsItem> item)
+void TagLibHandler::extractMP3(TagLib::IOStream* roStream, std::shared_ptr<CdsItem> item)
 {
     TagLib::MPEG::File mp3(roStream, TagLib::ID3v2::FrameFactory::instance());
 
@@ -466,7 +466,7 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, zmm::Ref<CdsItem> ite
     }
 }
 
-void TagLibHandler::extractOgg(TagLib::IOStream* roStream, zmm::Ref<CdsItem> item)
+void TagLibHandler::extractOgg(TagLib::IOStream* roStream, std::shared_ptr<CdsItem> item)
 {
     TagLib::Ogg::Vorbis::File vorbis(item->getLocation().c_str());
 
@@ -498,7 +498,7 @@ void TagLibHandler::extractOgg(TagLib::IOStream* roStream, zmm::Ref<CdsItem> ite
     addArtworkResource(item, art_mimetype);
 }
 
-void TagLibHandler::extractASF(TagLib::IOStream* roStream, zmm::Ref<CdsItem> item)
+void TagLibHandler::extractASF(TagLib::IOStream* roStream, std::shared_ptr<CdsItem> item)
 {
     TagLib::ASF::File asf(roStream);
 
@@ -528,7 +528,7 @@ void TagLibHandler::extractASF(TagLib::IOStream* roStream, zmm::Ref<CdsItem> ite
     }
 }
 
-void TagLibHandler::extractFLAC(TagLib::IOStream* roStream, zmm::Ref<CdsItem> item)
+void TagLibHandler::extractFLAC(TagLib::IOStream* roStream, std::shared_ptr<CdsItem> item)
 {
     TagLib::FLAC::File flac(roStream, TagLib::ID3v2::FrameFactory::instance());
 
@@ -580,7 +580,7 @@ void TagLibHandler::extractFLAC(TagLib::IOStream* roStream, zmm::Ref<CdsItem> it
     addArtworkResource(item, art_mimetype);
 }
 
-void TagLibHandler::extractAPE(TagLib::IOStream* roStream, zmm::Ref<CdsItem> item)
+void TagLibHandler::extractAPE(TagLib::IOStream* roStream, std::shared_ptr<CdsItem> item)
 {
     TagLib::APE::File ape(roStream);
 
@@ -592,7 +592,7 @@ void TagLibHandler::extractAPE(TagLib::IOStream* roStream, zmm::Ref<CdsItem> ite
     populateGenericTags(item, ape);
 }
 
-void TagLibHandler::extractWavPack(TagLib::IOStream* roStream, zmm::Ref<CdsItem> item)
+void TagLibHandler::extractWavPack(TagLib::IOStream* roStream, std::shared_ptr<CdsItem> item)
 {
     TagLib::WavPack::File wavpack(roStream);
 
@@ -604,7 +604,7 @@ void TagLibHandler::extractWavPack(TagLib::IOStream* roStream, zmm::Ref<CdsItem>
     populateGenericTags(item, wavpack);
 }
 
-void TagLibHandler::extractMP4(TagLib::IOStream* roStream, zmm::Ref<CdsItem> item)
+void TagLibHandler::extractMP4(TagLib::IOStream* roStream, std::shared_ptr<CdsItem> item)
 {
     TagLib::MP4::File mp4(roStream);
     populateGenericTags(item, mp4);
@@ -642,7 +642,7 @@ void TagLibHandler::extractMP4(TagLib::IOStream* roStream, zmm::Ref<CdsItem> ite
     }
 }
 
-void TagLibHandler::extractAiff(TagLib::IOStream* roStream, zmm::Ref<CdsItem> item)
+void TagLibHandler::extractAiff(TagLib::IOStream* roStream, std::shared_ptr<CdsItem> item)
 {
     TagLib::RIFF::AIFF::File aiff(roStream);
 

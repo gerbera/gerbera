@@ -60,16 +60,14 @@ void web::items::process()
     items->setArrayName("item");
     items->setAttribute("parent_id", std::to_string(parentID), mxml_int_type);
     root->appendElementChild(items);
-    Ref<CdsObject> obj;
-    obj = storage->loadObject(parentID);
+    auto obj = storage->loadObject(parentID);
     auto param = std::make_unique<BrowseParam>(parentID, BROWSE_DIRECT_CHILDREN | BROWSE_ITEMS);
     param->setRange(start, count);
 
     if ((obj->getClass() == UPNP_DEFAULT_CLASS_MUSIC_ALBUM) || (obj->getClass() == UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER))
         param->setFlag(BROWSE_TRACK_SORT);
 
-    Ref<Array<CdsObject>> arr;
-    arr = storage->browse(param);
+    auto arr = storage->browse(param);
 
     std::string location = obj->getVirtualPath();
     if (string_ok(location))
@@ -114,8 +112,8 @@ void web::items::process()
     items->setAttribute("protect_container", std::to_string(protectContainer), mxml_bool_type);
     items->setAttribute("protect_items", std::to_string(protectItems), mxml_bool_type);
 
-    for (int i = 0; i < arr->size(); i++) {
-        Ref<CdsObject> obj = arr->get(i);
+    for (size_t i = 0; i < arr.size(); i++) {
+        auto obj = arr[i];
         //if (IS_CDS_ITEM(obj->getObjectType()))
         //{
         Ref<Element> item(new Element("item"));
@@ -124,7 +122,7 @@ void web::items::process()
         /// \todo clean this up, should have more generic options for online
         /// services
         // FIXME
-        item->appendTextChild("res", UpnpXMLBuilder::getFirstResourcePath(RefCast(obj, CdsItem)));
+        item->appendTextChild("res", UpnpXMLBuilder::getFirstResourcePath(std::static_pointer_cast<CdsItem>(obj)));
 
         //item->appendTextChild("virtual", obj->isVirtual() ? "1" : "0", mxml_bool_type);
         items->appendElementChild(item);

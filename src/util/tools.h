@@ -241,7 +241,7 @@ int find_local_port(unsigned short range_min,
 std::string get_jpeg_resolution(const std::unique_ptr<IOHandler>& ioh);
 
 /// \brief Sets resolution for a given resource index, item must be a JPEG image
-void set_jpeg_resolution_resource(zmm::Ref<CdsItem> item, int res_num);
+void set_jpeg_resolution_resource(std::shared_ptr<CdsItem> item, int res_num);
 
 /// \brief checks if the given string has the format xr x yr (i.e. 320x200 etc.)
 bool check_resolution(std::string resolution, int* x = NULL, int* y = NULL);

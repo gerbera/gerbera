@@ -73,7 +73,7 @@ void LastFm::shutdown()
     scrobbler = NULL;
 }
 
-void LastFm::startedPlaying(Ref<CdsItem> item)
+void LastFm::startedPlaying(std::shared_ptr<CdsItem> item)
 {
     if (currentTrackId == item->getID() || scrobbler == NULL)
         return;

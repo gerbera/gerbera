@@ -66,10 +66,10 @@ public:
     /// either a container or an item. The renderActions parameter tells us whether to also
     /// show the special fields of an active item in the XML. This is currently used when
     /// providing the XML representation of an active item to a trigger/toggle script.
-    zmm::Ref<mxml::Element> renderObject(zmm::Ref<CdsObject> obj, bool renderActions = false, size_t stringLimit = std::string::npos);
+    zmm::Ref<mxml::Element> renderObject(std::shared_ptr<CdsObject> obj, bool renderActions = false, size_t stringLimit = std::string::npos);
 
     /// \todo change the text string to element, parsing should be done outside
-    void updateObject(zmm::Ref<CdsObject> obj, std::string text);
+    void updateObject(std::shared_ptr<CdsObject> obj, std::string text);
 
     /// \brief Renders XML for the event property set.
     /// \return mxml::Element representing the newly created XML.
@@ -103,10 +103,10 @@ public:
 
     zmm::Ref<mxml::Element> renderAlbumDate(std::string date);
 
-    void addResources(zmm::Ref<CdsItem> item, zmm::Ref<mxml::Element> element);
+    void addResources(std::shared_ptr<CdsItem> item, zmm::Ref<mxml::Element> element);
 
     // FIXME: This needs to go, once we sort a nicer way for the webui code to access this
-    static std::string getFirstResourcePath(zmm::Ref<CdsItem> item);
+    static std::string getFirstResourcePath(std::shared_ptr<CdsItem> item);
 
 protected:
     std::shared_ptr<ConfigManager> config;
@@ -123,8 +123,8 @@ protected:
         bool addResID;
     };
 
-    static zmm::Ref<PathBase> getPathBase(zmm::Ref<CdsItem> item, bool forceLocal = false);
+    static zmm::Ref<PathBase> getPathBase(std::shared_ptr<CdsItem> item, bool forceLocal = false);
     std::string renderExtension(std::string contentType, std::string location);
-    std::string getArtworkUrl(zmm::Ref<CdsItem> item);
+    std::string getArtworkUrl(std::shared_ptr<CdsItem> item);
 };
 #endif // __UPNP_XML_H__

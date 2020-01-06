@@ -62,14 +62,13 @@ void web::containers::process()
     root->appendElementChild(containers);
 
     auto param = std::make_unique<BrowseParam>(parentID, BROWSE_DIRECT_CHILDREN | BROWSE_CONTAINERS);
-    Ref<Array<CdsObject>> arr;
-    arr = storage->browse(param);
+    auto arr = storage->browse(param);
 
-    for (int i = 0; i < arr->size(); i++) {
-        Ref<CdsObject> obj = arr->get(i);
+    for (size_t i = 0; i < arr.size(); i++) {
+        auto obj = arr[i];
         //if (IS_CDS_CONTAINER(obj->getObjectType()))
         //{
-        Ref<CdsContainer> cont = RefCast(obj, CdsContainer);
+        auto cont = std::static_pointer_cast<CdsContainer>(obj);
         Ref<Element> ce(new Element("container"));
         ce->setAttribute("id", std::to_string(cont->getID()), mxml_int_type);
         int childCount = cont->getChildCount();

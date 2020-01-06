@@ -76,13 +76,11 @@
 #define OBJECT_AUTOSCAN_UI 1
 #define OBJECT_AUTOSCAN_CFG 2
 
-int CdsObjectTitleComparator(void* arg1, void* arg2);
-
 // forward declaration
 class Storage;
 
 /// \brief Generic object in the Content Directory.
-class CdsObject : public zmm::Object {
+class CdsObject {
 protected:
     std::shared_ptr<Storage> storage;
 
@@ -323,7 +321,7 @@ public:
 
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)
-    virtual void copyTo(zmm::Ref<CdsObject> obj);
+    virtual void copyTo(std::shared_ptr<CdsObject> obj);
 
     /// \brief Checks if current object is equal to obj.
     /// \param obj object to check against
@@ -332,24 +330,22 @@ public:
     /// The difference between setting this flag to true or false is following:
     /// exactly=true checks all fields, also internal ones, exactly=false checks
     /// only the fields that will be visible in DIDL-Lite
-    virtual int equals(zmm::Ref<CdsObject> obj, bool exactly = false);
+    virtual int equals(std::shared_ptr<CdsObject> obj, bool exactly = false);
 
     /// \brief Checks if current object has the same resources as obj
     /// \param obj object to check against
-    int resourcesEqual(zmm::Ref<CdsObject> obj);
+    int resourcesEqual(std::shared_ptr<CdsObject> obj);
 
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
     virtual void validate();
 
-    static zmm::Ref<CdsObject> createObject(std::shared_ptr<Storage> storage, unsigned int objectType);
+    static std::shared_ptr<CdsObject> createObject(std::shared_ptr<Storage> storage, unsigned int objectType);
 
     /// \brief Returns the path to the object as it appears in the database tree.
     virtual std::string getVirtualPath() = 0;
 
     static std::string mapObjectType(int objectType);
     static int remapObjectType(std::string objectType);
-
-    friend int CdsObjectTitleComparator(void* arg1, void* arg2);
 };
 
 /// \brief An Item in the content directory.
@@ -379,12 +375,12 @@ public:
     inline int getTrackNumber() { return trackNumber; }
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)
-    virtual void copyTo(zmm::Ref<CdsObject> obj);
+    virtual void copyTo(std::shared_ptr<CdsObject> obj) override;
 
     /// \brief Checks if current object is equal to obj.
     ///
     /// See description for CdsObject::equals() for details.
-    virtual int equals(zmm::Ref<CdsObject> obj, bool exactly = false);
+    virtual int equals(std::shared_ptr<CdsObject> obj, bool exactly = false) override;
 
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
     virtual void validate();
@@ -452,12 +448,12 @@ public:
 
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)
-    virtual void copyTo(zmm::Ref<CdsObject> obj);
+    virtual void copyTo(std::shared_ptr<CdsObject> obj) override;
 
     /// \brief Checks if current object is equal to obj.
     ///
     /// See description for CdsObject::equals() for details.
-    virtual int equals(zmm::Ref<CdsObject> obj, bool exactly = false);
+    virtual int equals(std::shared_ptr<CdsObject> obj, bool exactly = false) override;
 
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
     virtual void validate();
@@ -477,12 +473,12 @@ public:
     inline std::string getURL() { return location; }
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)
-    //virtual void copyTo(zmm::Ref<CdsObject> obj);
+    //virtual void copyTo(std::shared_ptr<CdsObject> obj) override;
 
     /// \brief Checks if current object is equal to obj.
     ///
     /// See description for CdsObject::equals() for details.
-    //virtual int equals(zmm::Ref<CdsObject> obj, bool exactly=false);
+    //virtual int equals(std::shared_ptr<CdsObject> obj, bool exactly=false) override;
 
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
     virtual void validate();
@@ -544,12 +540,12 @@ public:
 
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)
-    virtual void copyTo(zmm::Ref<CdsObject> obj);
+    virtual void copyTo(std::shared_ptr<CdsObject> obj) override;
 
     /// \brief Checks if current object is equal to obj.
     ///
     /// See description for CdsObject::equals() for details.
-    virtual int equals(zmm::Ref<CdsObject> obj, bool exactly=false);
+    virtual int equals(std::shared_ptr<CdsObject> obj, bool exactly=false) override;
 
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
     virtual void validate();
@@ -599,12 +595,12 @@ public:
 
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)
-    virtual void copyTo(zmm::Ref<CdsObject> obj);
+    virtual void copyTo(std::shared_ptr<CdsObject> obj) override;
 
     /// \brief Checks if current object is equal to obj.
     ///
     /// See description for CdsObject::equals() for details.
-    virtual int equals(zmm::Ref<CdsObject> obj, bool exactly = false);
+    virtual int equals(std::shared_ptr<CdsObject> obj, bool exactly = false) override;
 
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
     virtual void validate();

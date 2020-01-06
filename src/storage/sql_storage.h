@@ -107,20 +107,18 @@ public:
         return exec(s.c_str(), s.length(), getLastInsertId);
     }
     
-    virtual void addObject(zmm::Ref<CdsObject> object, int *changedContainer) override;
-    virtual void updateObject(zmm::Ref<CdsObject> object, int *changedContainer) override;
+    virtual void addObject(std::shared_ptr<CdsObject> object, int *changedContainer) override;
+    virtual void updateObject(std::shared_ptr<CdsObject> object, int *changedContainer) override;
     
-    virtual zmm::Ref<CdsObject> loadObject(int objectID) override;
+    virtual std::shared_ptr<CdsObject> loadObject(int objectID) override;
     virtual int getChildCount(int contId, bool containers, bool items, bool hideFsRoot) override;
-    
-    //virtual zmm::Ref<zmm::Array<CdsObject> > selectObjects(zmm::Ref<SelectParam> param);
     
     virtual std::unique_ptr<std::unordered_set<int>> getObjects(int parentID, bool withoutContainer) override;
     
     virtual std::unique_ptr<ChangedContainers> removeObject(int objectID, bool all) override;
     virtual std::unique_ptr<ChangedContainers> removeObjects(const std::unique_ptr<std::unordered_set<int>>& list, bool all = false) override;
     
-    virtual zmm::Ref<CdsObject> loadObjectByServiceID(std::string serviceID) override;
+    virtual std::shared_ptr<CdsObject> loadObjectByServiceID(std::string serviceID) override;
     virtual std::unique_ptr<std::vector<int>> getServiceObjectIDs(char servicePrefix) override;
 
     virtual std::string findFolderImage(int id, std::string trackArtBase) override;
@@ -128,14 +126,13 @@ public:
     /* accounting methods */
     virtual int getTotalFiles() override;
     
-    virtual zmm::Ref<zmm::Array<CdsObject> > browse(const std::unique_ptr<BrowseParam>& param) override;
-    // virtual _and_ override for consistency!
-    virtual zmm::Ref<zmm::Array<CdsObject> > search(const std::unique_ptr<SearchParam>& param, int* numMatches) override;
+    virtual std::vector<std::shared_ptr<CdsObject>> browse(const std::unique_ptr<BrowseParam>& param) override;
+    virtual std::vector<std::shared_ptr<CdsObject>> search(const std::unique_ptr<SearchParam>& param, int* numMatches) override;
     
     virtual std::vector<std::string> getMimeTypes() override;
     
-    //virtual zmm::Ref<CdsObject> findObjectByTitle(std::string title, int parentID);
-    virtual zmm::Ref<CdsObject> findObjectByPath(std::string fullpath) override;
+    //virtual std::shared_ptr<CdsObject> findObjectByTitle(std::string title, int parentID);
+    virtual std::shared_ptr<CdsObject> findObjectByPath(std::string fullpath) override;
     virtual int findObjectIDByPath(std::string fullpath) override;
     virtual std::string incrementUpdateIDs(const std::unique_ptr<std::unordered_set<int>>& ids) override;
 
@@ -174,7 +171,7 @@ protected:
     virtual void init();
 
     void doMetadataMigration() override;
-    void migrateMetadata(zmm::Ref<CdsObject> object);
+    void migrateMetadata(std::shared_ptr<CdsObject> object);
     
     char table_quote_begin;
     char table_quote_end;
@@ -185,12 +182,12 @@ private:
     /* helper for createObjectFromRow() */
     std::string getRealLocation(int parentID, std::string location);
     
-    zmm::Ref<CdsObject> createObjectFromRow(const std::unique_ptr<SQLRow>& row);
-    zmm::Ref<CdsObject> createObjectFromSearchRow(const std::unique_ptr<SQLRow>& row);
+    std::shared_ptr<CdsObject> createObjectFromRow(const std::unique_ptr<SQLRow>& row);
+    std::shared_ptr<CdsObject> createObjectFromSearchRow(const std::unique_ptr<SQLRow>& row);
     std::map<std::string,std::string> retrieveMetadataForObject(int objectId);
     
     /* helper for findObjectByPath and findObjectIDByPath */ 
-    zmm::Ref<CdsObject> _findObjectByPath(std::string fullpath);
+    std::shared_ptr<CdsObject> _findObjectByPath(std::string fullpath);
     
     int _ensurePathExistence(std::string path, int *changedContainer);
     
@@ -212,14 +209,14 @@ private:
         std::map<std::string,std::string> dict;
         std::string operation;
     };
-    zmm::Ref<zmm::Array<AddUpdateTable> > _addUpdateObject(zmm::Ref<CdsObject> obj, bool isUpdate, int *changedContainer);
+    zmm::Ref<zmm::Array<AddUpdateTable> > _addUpdateObject(std::shared_ptr<CdsObject> obj, bool isUpdate, int *changedContainer);
 
-    void generateMetadataDBOperations(zmm::Ref<CdsObject> obj, bool isUpdate,
+    void generateMetadataDBOperations(std::shared_ptr<CdsObject> obj, bool isUpdate,
         zmm::Ref<zmm::Array<AddUpdateTable>> operations);
 
-    std::unique_ptr<std::ostringstream> sqlForInsert(zmm::Ref<CdsObject> obj, zmm::Ref<AddUpdateTable> addUpdateTable);
-    std::unique_ptr<std::ostringstream> sqlForUpdate(zmm::Ref<CdsObject> obj, zmm::Ref<AddUpdateTable> addUpdateTable);
-    std::unique_ptr<std::ostringstream> sqlForDelete(zmm::Ref<CdsObject> obj, zmm::Ref<AddUpdateTable> addUpdateTable);
+    std::unique_ptr<std::ostringstream> sqlForInsert(std::shared_ptr<CdsObject> obj, zmm::Ref<AddUpdateTable> addUpdateTable);
+    std::unique_ptr<std::ostringstream> sqlForUpdate(std::shared_ptr<CdsObject> obj, zmm::Ref<AddUpdateTable> addUpdateTable);
+    std::unique_ptr<std::ostringstream> sqlForDelete(std::shared_ptr<CdsObject> obj, zmm::Ref<AddUpdateTable> addUpdateTable);
     
     /* helper for removeObject(s) */
     void _removeObjects(const std::vector<int32_t> &objectIDs);
@@ -244,7 +241,7 @@ private:
     std::string stripLocationPrefix(char* prefix, std::string path);
     std::string stripLocationPrefix(std::string path);
     
-    zmm::Ref<CdsObject> checkRefID(zmm::Ref<CdsObject> obj);
+    std::shared_ptr<CdsObject> checkRefID(std::shared_ptr<CdsObject> obj);
     int createContainer(int parentID, std::string name, std::string path, bool isVirtual, std::string upnpClass, int refID, const std::map<std::string,std::string>& lastMetadata);
 
     std::string mapBool(bool val) { return quote((val ? 1 : 0)); }

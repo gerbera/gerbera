@@ -148,7 +148,7 @@ bool SopCastService::refreshServiceData(Ref<Layout> layout)
         throw _Exception("Failed to get XML content from SopCast service");
     }
 
-    Ref<CdsObject> obj;
+    std::shared_ptr<CdsObject> obj;
     do {
         /// \todo add try/catch here and a possibility do find out if we
         /// may request more stuff or if we are at the end of the list
@@ -158,7 +158,7 @@ bool SopCastService::refreshServiceData(Ref<Layout> layout)
 
         obj->setVirtual(true);
 
-        Ref<CdsObject> old = storage->loadObjectByServiceID(RefCast(obj, CdsItem)->getServiceID());
+        auto old = storage->loadObjectByServiceID(std::static_pointer_cast<CdsItem>(obj)->getServiceID());
         if (old == nullptr) {
             log_debug("Adding new SopCast object\n");
 

@@ -78,12 +78,12 @@ public:
     void load(std::string scriptPath);
     void load(std::string scriptText, std::string scriptPath);
     
-    zmm::Ref<CdsObject> dukObject2cdsObject(zmm::Ref<CdsObject> pcd);
-    void cdsObject2dukObject(zmm::Ref<CdsObject> obj);
+    std::shared_ptr<CdsObject> dukObject2cdsObject(std::shared_ptr<CdsObject> pcd);
+    void cdsObject2dukObject(std::shared_ptr<CdsObject> obj);
     
     virtual script_class_t whoami() = 0;
 
-    zmm::Ref<CdsObject> getProcessedObject(); 
+    std::shared_ptr<CdsObject> getProcessedObject();
 
     std::string convertToCharset(std::string str, charset_convert_t chr);
     
@@ -103,7 +103,7 @@ protected:
 
     // object that is currently being processed by the script (set in import
     // script)
-    zmm::Ref<CdsObject> processed;
+    std::shared_ptr<CdsObject> processed;
     
     duk_context *ctx;
 

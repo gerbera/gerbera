@@ -120,12 +120,12 @@ MatroskaHandler::MatroskaHandler(std::shared_ptr<ConfigManager> config)
 {
 }
 
-void MatroskaHandler::fillMetadata(Ref<CdsItem> item)
+void MatroskaHandler::fillMetadata(std::shared_ptr<CdsItem> item)
 {
     parseMKV(item, NULL);
 }
 
-std::unique_ptr<IOHandler> MatroskaHandler::serveContent(Ref<CdsItem> item, int resNum)
+std::unique_ptr<IOHandler> MatroskaHandler::serveContent(std::shared_ptr<CdsItem> item, int resNum)
 {
     MemIOHandler* io_handler;
     parseMKV(item, &io_handler);
@@ -135,7 +135,7 @@ std::unique_ptr<IOHandler> MatroskaHandler::serveContent(Ref<CdsItem> item, int 
     return h;
 }
 
-void MatroskaHandler::parseMKV(Ref<CdsItem> item, MemIOHandler** p_io_handler)
+void MatroskaHandler::parseMKV(std::shared_ptr<CdsItem> item, MemIOHandler** p_io_handler)
 {
     file_io_callback ebml_file(item->getLocation().c_str());
     EbmlStream ebml_stream(ebml_file);
@@ -162,7 +162,7 @@ void MatroskaHandler::parseMKV(Ref<CdsItem> item, MemIOHandler** p_io_handler)
     ebml_file.close();
 }
 
-void MatroskaHandler::parseLevel1Element(zmm::Ref<CdsItem> item, EbmlStream & ebml_stream, EbmlElement * el_l1, MemIOHandler** p_io_handler)
+void MatroskaHandler::parseLevel1Element(std::shared_ptr<CdsItem> item, EbmlStream & ebml_stream, EbmlElement * el_l1, MemIOHandler** p_io_handler)
 {
     if (EbmlId(*el_l1) == KaxInfo::ClassInfos.GlobalId) {
         parseInfo(item, ebml_stream, static_cast<KaxInfo *>(el_l1));
@@ -171,7 +171,7 @@ void MatroskaHandler::parseLevel1Element(zmm::Ref<CdsItem> item, EbmlStream & eb
     }
 }
 
-void MatroskaHandler::parseInfo(Ref<CdsItem> item, EbmlStream & ebml_stream, KaxInfo *info)
+void MatroskaHandler::parseInfo(std::shared_ptr<CdsItem> item, EbmlStream & ebml_stream, KaxInfo *info)
 {
     EbmlElement* dummy_el;
     int i_upper_level = 0;
@@ -206,7 +206,7 @@ void MatroskaHandler::parseInfo(Ref<CdsItem> item, EbmlStream & ebml_stream, Kax
     }
 }
 
-void MatroskaHandler::parseAttachments(Ref<CdsItem> item, EbmlStream & ebml_stream, KaxAttachments *attachments, MemIOHandler** p_io_handler)
+void MatroskaHandler::parseAttachments(std::shared_ptr<CdsItem> item, EbmlStream & ebml_stream, KaxAttachments *attachments, MemIOHandler** p_io_handler)
 {
     EbmlElement* dummy_el;
     int i_upper_level = 0;
@@ -254,7 +254,7 @@ std::string MatroskaHandler::getContentTypeFromByteVector(const KaxFileData* dat
     return art_mimetype;
 }
 
-void MatroskaHandler::addArtworkResource(Ref<CdsItem> item, std::string art_mimetype)
+void MatroskaHandler::addArtworkResource(std::shared_ptr<CdsItem> item, std::string art_mimetype)
 {
     // if we could not determine the mimetype, then there is no
     // point to add the resource - it's probably garbage

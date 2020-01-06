@@ -46,7 +46,7 @@ public:
         std::shared_ptr<ContentManager> content,
         std::shared_ptr<Runtime> runtime);
     ~ImportScript();
-    void processCdsObject(zmm::Ref<CdsObject> obj, std::string rootpath);
+    void processCdsObject(std::shared_ptr<CdsObject> obj, std::string rootpath);
     virtual script_class_t whoami() override { return S_IMPORT; }
 };
 
