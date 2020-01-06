@@ -36,15 +36,16 @@
 #define __LASTFM_H__
 
 #include <memory>
+#include <lastfmlib/lastfmscrobblerc.h>
+#include <cstdlib>
+
 #include "cds_objects.h"
 #include "zmm/ref.h"
 #include "zmm/zmm.h"
-#include <lastfmlib/lastfmscrobblerc.h>
-#include <stdlib.h>
 
 class LastFm {
 public:
-    LastFm();
+    explicit LastFm(std::shared_ptr<ConfigManager> config);
     ~LastFm();
 
     /// \brief Initializes the LastFm client.
