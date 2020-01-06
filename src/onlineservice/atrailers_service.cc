@@ -56,7 +56,6 @@ ATrailersService::ATrailersService(std::shared_ptr<ConfigManager> config,
     , storage(storage)
     , content(content)
 {
-    url = Ref<URL>(new URL());
     pid = 0;
     curl_handle = curl_easy_init();
     if (!curl_handle)
@@ -99,7 +98,7 @@ Ref<Element> ATrailersService::getData()
 
     try {
         log_debug("DOWNLOADING URL: {}", service_url.c_str());
-        buffer = url->download(service_url, &retcode,
+        buffer = URL::download(service_url, &retcode,
             curl_handle, false, true, true);
     } catch (const std::runtime_error& ex) {
         log_error("Failed to download Apple Trailers XML data: {}",

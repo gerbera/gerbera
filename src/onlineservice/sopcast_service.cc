@@ -52,7 +52,6 @@ SopCastService::SopCastService(std::shared_ptr<ConfigManager> config,
     , storage(storage)
     , content(content)
 {
-    url = Ref<URL>(new URL());
     pid = 0;
     curl_handle = curl_easy_init();
     if (!curl_handle)
@@ -89,7 +88,7 @@ Ref<Element> SopCastService::getData()
 
     try {
         log_debug("DOWNLOADING URL: {}", SOPCAST_CHANNEL_URL);
-        buffer = url->download(SOPCAST_CHANNEL_URL, &retcode,
+        buffer = URL::download(SOPCAST_CHANNEL_URL, &retcode,
             curl_handle, false, true, true);
 
     } catch (const std::runtime_error& ex) {

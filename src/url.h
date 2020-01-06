@@ -35,17 +35,15 @@
 #ifndef __URL_H__
 #define __URL_H__
 
+#include <memory>
 #include <curl/curl.h>
 #include <string>
 
-#include "zmm/zmm.h"
-#include "zmm/zmmf.h"
-
-class URL : public zmm::Object {
+class URL {
 public:
     /// \brief This is a simplified version of the File_Info class as used
     /// in libupnp.
-    class Stat : public zmm::Object {
+    class Stat {
     public:
         /// \brief Initalizes the class with given values, the values
         /// can not be changed afterwards.
@@ -80,14 +78,14 @@ public:
     /// \param only_header set true if you only want the header and not the
     /// body
     /// \param vebose enable curl verbose option
-    std::string download(std::string URL,
+    static std::string download(std::string URL,
         long* HTTP_retcode,
         CURL* curl_handle = NULL,
         bool only_header = false,
         bool verbose = false,
         bool redirect = false);
 
-    zmm::Ref<Stat> getInfo(std::string URL, CURL* curl_handle = NULL);
+    static std::unique_ptr<Stat> getInfo(std::string URL, CURL* curl_handle = NULL);
 
 protected:
     /// \brief This function is installed as a callback for libcurl, when

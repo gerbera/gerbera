@@ -78,9 +78,6 @@ protected:
     // safeguard to ensure the above
     pthread_t pid;
 
-    // url retriever class
-    zmm::Ref<URL> url;
-
     /// \brief This function will retrieve the XML according to the parametrs
     zmm::Ref<mxml::Element> getData();
 };

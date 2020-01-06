@@ -124,10 +124,8 @@ void URLRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
         }
 
         log_debug("Online content url: {}", url.c_str());
-        Ref<URL> u(new URL());
-        Ref<URL::Stat> st;
         try {
-            st = u->getInfo(url);
+            auto st = URL::getInfo(url);
             UpnpFileInfo_set_FileLength(info, st->getSize());
             header = "Accept-Ranges: bytes";
             log_debug("URL used for request: {}", st->getURL().c_str());
@@ -223,10 +221,9 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
         Ref<TranscodeDispatcher> tr_d(new TranscodeDispatcher(config, content));
         return tr_d->open(tp, url, item, range);
     } else {
-        Ref<URL> u(new URL());
-        Ref<URL::Stat> st;
+        auto u = std::make_unique<URL>();
         try {
-            st = u->getInfo(url);
+            auto st = u->getInfo(url);
             // info->file_length = st->getSize();
             header = "Accept-Ranges: bytes";
             log_debug("URL used for request: {}", st->getURL().c_str());
