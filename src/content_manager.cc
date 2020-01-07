@@ -182,7 +182,7 @@ void ContentManager::init()
         autoscan_inotify = storage->getAutoscanList(ScanMode::INotify);
     } else {
         // make an empty list so we do not have to do extra checks on shutdown
-        autoscan_inotify = Ref<AutoscanList>(new AutoscanList(storage));
+        autoscan_inotify = std::make_shared<AutoscanList>(storage);
     }
 
     // Start INotify thread
@@ -1470,7 +1470,7 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
 
         if (IS_CDS_CONTAINER(obj->getObjectType())) {
             // make sure to remove possible child autoscan directories from the scanlist
-            Ref<AutoscanList> rm_list = autoscan_timed->removeIfSubdir(path);
+            std::shared_ptr<AutoscanList> rm_list = autoscan_timed->removeIfSubdir(path);
             for (size_t i = 0; i < rm_list->size(); i++) {
                 timer->removeTimerSubscriber(this, rm_list->get(i)->getTimerParameter(), true);
             }

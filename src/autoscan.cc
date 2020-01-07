@@ -109,7 +109,7 @@ int AutoscanList::_add(std::shared_ptr<AutoscanDirectory> dir)
     return dir->getScanID();
 }
 
-void AutoscanList::addList(zmm::Ref<AutoscanList> list)
+void AutoscanList::addList(std::shared_ptr<AutoscanList> list)
 {
     AutoLock lock(mutex);
 
@@ -202,11 +202,11 @@ int AutoscanList::remove(std::string location)
     return INVALID_SCAN_ID;
 }
 
-Ref<AutoscanList> AutoscanList::removeIfSubdir(std::string parent, bool persistent)
+std::shared_ptr<AutoscanList> AutoscanList::removeIfSubdir(std::string parent, bool persistent)
 {
     AutoLock lock(mutex);
 
-    Ref<AutoscanList> rm_id_list(new AutoscanList(storage));
+    auto rm_id_list = std::make_shared<AutoscanList>(storage);
 
     for (auto it = list.begin(); it != list.end(); /*++it*/) {
         auto& dir = *it;

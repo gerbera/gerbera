@@ -360,10 +360,10 @@ protected:
     std::map<std::string,std::string> mimetype_upnpclass_map;
     std::map<std::string,std::string> mimetype_contenttype_map;
 
-    zmm::Ref<AutoscanList> autoscan_timed;
+    std::shared_ptr<AutoscanList> autoscan_timed;
 #ifdef HAVE_INOTIFY
     std::unique_ptr<AutoscanInotify> inotify;
-    zmm::Ref<AutoscanList> autoscan_inotify;
+    std::shared_ptr<AutoscanList> autoscan_inotify;
 #endif
 
     std::vector<std::shared_ptr<Executor>> process_list;

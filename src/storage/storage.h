@@ -256,7 +256,7 @@ public:
 
     /* autoscan methods */
     virtual void updateAutoscanPersistentList(ScanMode scanmode, std::shared_ptr<AutoscanList> list) = 0;
-    virtual zmm::Ref<AutoscanList> getAutoscanList(ScanMode scanode) = 0;
+    virtual std::shared_ptr<AutoscanList> getAutoscanList(ScanMode scanode) = 0;
     virtual void addAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir) = 0;
     virtual void updateAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir) = 0;
     virtual void removeAutoscanDirectoryByObjectID(int objectID) = 0;

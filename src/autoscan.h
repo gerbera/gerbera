@@ -34,7 +34,6 @@
 #define __AUTOSCAN_H__
 
 #include "util/timer.h"
-#include "zmm/zmmf.h"
 #include <mutex>
 
 #define INVALID_SCAN_ID -1
@@ -55,7 +54,7 @@ enum class ScanMode {
 class Storage;
 class AutoscanDirectory;
 
-class AutoscanList : public zmm::Object {
+class AutoscanList {
 public:
     AutoscanList(std::shared_ptr<Storage> storage);
 
@@ -68,7 +67,7 @@ public:
     /// \return scanID of the newly added AutoscanDirectory
     int add(std::shared_ptr<AutoscanDirectory> dir);
 
-    void addList(zmm::Ref<AutoscanList> list);
+    void addList(std::shared_ptr<AutoscanList> list);
 
     std::shared_ptr<AutoscanDirectory> get(size_t id);
 
@@ -92,35 +91,18 @@ public:
     /// \param parent parent directory.
     /// \param persistent also remove persistent directories.
     /// \return AutoscanList of removed directories, where each directory object in the list is a copy and not the original reference.
-    zmm::Ref<AutoscanList> removeIfSubdir(std::string parent, bool persistent = false);
-
-    /*
-    /// \brief Add timer for each directory in the list.
-    /// \param obj instance of the class that will receive notifications.
-    void subscribeAll(zmm::Ref<Subscriber> obj);
-    */
+    std::shared_ptr<AutoscanList> removeIfSubdir(std::string parent, bool persistent = false);
 
     /// \brief Send notification for each directory that is stored in the list.
     ///
     /// \param sub instance of the class that will receive the notifications.
     void notifyAll(Timer::Subscriber* sub);
 
-    /*
-    /// \brief Add timer for given directory.
-    /// \param obj instance of the class that will receive notifications.
-    /// \param id dir id.
-    void subscribeDir(zmm::Ref<Subscriber> obj, int id, bool once = true);
-    */
-
     /// \brief updates the last_modified data for all AutoscanDirectories.
     void updateLMinDB();
 
     /// \brief returns a copy of the autoscan list in the form of an array
     std::vector<std::shared_ptr<AutoscanDirectory>> getArrayCopy();
-
-    /*
-    void dump();
-*/
 
 protected:
     std::shared_ptr<Storage> storage;
@@ -233,14 +215,8 @@ public:
     /// \brief copies all properties to another object
     void copyTo(std::shared_ptr<AutoscanDirectory> copy);
 
-    /// \brief Set the parameter for timer notify that is associated with
-    /// the particular autoscan directory.
-    //    void setTimerParamter(zmm::Ref<zmm::Object> parameter);
-
     /// \brief Get the timer notify parameter associated with this directory.
     std::shared_ptr<Timer::Parameter> getTimerParameter();
-
-    //    bool equals(Ref<AutoscanDirectory> dir);
 
     /* helpers for autoscan stuff */
     static std::string mapScanmode(ScanMode scanmode);

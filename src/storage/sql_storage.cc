@@ -1737,7 +1737,7 @@ void SQLStorage::updateAutoscanPersistentList(ScanMode scanmode, std::shared_ptr
     exec(del);
 }
 
-Ref<AutoscanList> SQLStorage::getAutoscanList(ScanMode scanmode)
+std::shared_ptr<AutoscanList> SQLStorage::getAutoscanList(ScanMode scanmode)
 {
 #define FLD(field) << TQD('a', field) <<
     std::ostringstream q;
@@ -1751,7 +1751,7 @@ Ref<AutoscanList> SQLStorage::getAutoscanList(ScanMode scanmode)
         throw StorageException("", "query error while fetching autoscan list");
 
     auto self = getSelf();
-    Ref<AutoscanList> ret(new AutoscanList(self));
+    auto ret = std::make_shared<AutoscanList>(self);
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow()) != nullptr) {
         std::shared_ptr<AutoscanDirectory> dir = _fillAutoscanDirectory(row);
@@ -1776,8 +1776,6 @@ std::shared_ptr<AutoscanDirectory> SQLStorage::getAutoscanDirectory(int objectID
     if (res == nullptr)
         throw StorageException("", "query error while fetching autoscan");
 
-    auto self = getSelf();
-    Ref<AutoscanList> ret(new AutoscanList(self));
     std::unique_ptr<SQLRow> row = res->nextRow();
     if (row == nullptr)
         return nullptr;
