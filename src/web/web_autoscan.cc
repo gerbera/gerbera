@@ -117,7 +117,7 @@ void web::autoscan::process()
             //    location.c_str(), AutoscanDirectory::mapScanmode(scan_mode).c_str(),
             //    AutoscanDirectory::mapScanlevel(scan_level).c_str(), recursive, interval, hidden);
 
-            std::shared_ptr<AutoscanDirectory> autoscan(new AutoscanDirectory(
+            auto autoscan = std::make_shared<AutoscanDirectory>(
                 nullptr, //location
                 scan_mode,
                 scan_level,
@@ -125,7 +125,7 @@ void web::autoscan::process()
                 false, // persistent
                 INVALID_SCAN_ID, // autoscan id - used only internally by CM
                 interval,
-                hidden));
+                hidden);
             autoscan->setObjectID(objectID);
             content->setAutoscanDirectory(autoscan);
         }

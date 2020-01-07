@@ -1813,7 +1813,7 @@ std::shared_ptr<AutoscanDirectory> SQLStorage::_fillAutoscanDirectory(const std:
 
     //log_debug("adding autoscan location: {}; recursive: {}", location.c_str(), recursive);
 
-    std::shared_ptr<AutoscanDirectory> dir(new AutoscanDirectory(location, mode, level, recursive, persistent, INVALID_SCAN_ID, interval, hidden));
+    auto dir = std::make_shared<AutoscanDirectory>(location, mode, level, recursive, persistent, INVALID_SCAN_ID, interval, hidden);
     dir->setObjectID(objectID);
     dir->setStorageID(storageID);
     dir->setCurrentLMT(last_modified);

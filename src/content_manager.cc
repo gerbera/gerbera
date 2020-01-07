@@ -1731,7 +1731,7 @@ void ContentManager::setAutoscanDirectory(std::shared_ptr<AutoscanDirectory> dir
     }
 #endif
 
-    std::shared_ptr<AutoscanDirectory> copy(new AutoscanDirectory());
+    auto copy = std::make_shared<AutoscanDirectory>();
     original->copyTo(copy);
 
     // changing from full scan to basic scan need to reset last modification time
