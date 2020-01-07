@@ -169,7 +169,7 @@ void AutoscanInotify::threadProc()
                 std::string path(pathBuf.str());
 
                 std::shared_ptr<AutoscanDirectory> adir;
-                Ref<WatchAutoscan> watchAs = getAppropriateAutoscan(wdObj, path);
+                auto watchAs = getAppropriateAutoscan(wdObj, path);
                 if (watchAs != nullptr)
                     adir = watchAs->getAutoscanDirectory();
                 else
@@ -213,7 +213,7 @@ void AutoscanInotify::threadProc()
                         if (mask & (IN_DELETE_SELF | IN_MOVE_SELF | IN_UNMOUNT)) {
                             if (IN_MOVE_SELF)
                                 inotify->removeWatch(wd);
-                            Ref<WatchAutoscan> watch = getStartPoint(wdObj);
+                            auto watch = getStartPoint(wdObj);
                             if (watch != nullptr) {
                                 if (adir->persistent()) {
                                     monitorNonexisting(path, watch->getAutoscanDirectory(), watch->getNormalizedAutoscanPath());
@@ -312,8 +312,8 @@ int AutoscanInotify::addMoveWatch(std::string path, int removeWd, int parentWd)
         }
 
         if (!alreadyThere) {
-            Ref<WatchMove> watch(new WatchMove(removeWd));
-            wdObj->getWdWatches()->append(RefCast(watch, Watch));
+            auto watch = std::make_shared<WatchMove>(removeWd);
+            wdObj->addWatch(watch);
         }
     }
     return wd;
@@ -361,19 +361,18 @@ void AutoscanInotify::recheckNonexistingMonitor(int curWd, std::vector<std::stri
 
 void AutoscanInotify::checkMoveWatches(int wd, Ref<Wd> wdObj)
 {
-    Ref<Watch> watch;
-    Ref<WatchMove> watchMv;
-    Ref<Array<Watch>> wdWatches = wdObj->getWdWatches();
-    for (int i = 0; i < wdWatches->size(); i++) {
-        watch = wdWatches->get(i);
+    auto wdWatches = wdObj->getWdWatches();
+    for (auto it = wdWatches->begin(); it != wdWatches->end(); /*++it*/) {
+        auto& watch = *it;
         if (watch->getType() == WatchType::Move) {
             if (wdWatches->size() == 1) {
                 inotify->removeWatch(wd);
+                ++it;
             } else {
-                wdWatches->removeUnordered(i);
+                it = wdWatches->erase(it);
             }
 
-            watchMv = RefCast(watch, WatchMove);
+            auto watchMv = std::static_pointer_cast<WatchMove>(watch);
             int removeWd = watchMv->getRemoveWd();
             try {
                 Ref<Wd> wdToRemove = watches->at(removeWd);
@@ -384,7 +383,7 @@ void AutoscanInotify::checkMoveWatches(int wd, Ref<Wd> wdObj)
                 log_debug("found wd to remove because of move event: {} {}", removeWd, path.c_str());
 
                 inotify->removeWatch(removeWd);
-                Ref<WatchAutoscan> watch = getStartPoint(wdToRemove);
+                auto watch = getStartPoint(wdToRemove);
                 if (watch != nullptr) {
                     std::shared_ptr<AutoscanDirectory> adir = watch->getAutoscanDirectory();
                     if (adir->persistent()) {
@@ -398,19 +397,18 @@ void AutoscanInotify::checkMoveWatches(int wd, Ref<Wd> wdObj)
                 }
             } catch (const out_of_range& ex) {
             } // Not found in map
-        }
+        } else
+            ++it;
     }
 }
 
 void AutoscanInotify::recheckNonexistingMonitors(int wd, Ref<Wd> wdObj)
 {
-    Ref<Watch> watch;
-    Ref<WatchAutoscan> watchAs;
-    Ref<Array<Watch>> wdWatches = wdObj->getWdWatches();
-    for (int i = 0; i < wdWatches->size(); i++) {
-        watch = wdWatches->get(i);
+    auto wdWatches = wdObj->getWdWatches();
+    for (auto it = wdWatches->begin(); it != wdWatches->end(); ++it) {
+        auto& watch = *it;
         if (watch->getType() == WatchType::Autoscan) {
-            watchAs = RefCast(watch, WatchAutoscan);
+            auto watchAs = std::static_pointer_cast<WatchAutoscan>(watch);
             auto pathAr = watchAs->getNonexistingPathArray();
             if (pathAr.size() != 0) {
                 recheckNonexistingMonitor(wd, pathAr, watchAs->getAutoscanDirectory(), watchAs->getNormalizedAutoscanPath());
@@ -421,25 +419,25 @@ void AutoscanInotify::recheckNonexistingMonitors(int wd, Ref<Wd> wdObj)
 
 void AutoscanInotify::removeNonexistingMonitor(int wd, Ref<Wd> wdObj, std::vector<std::string> pathAr)
 {
-    Ref<Watch> watch;
-    Ref<WatchAutoscan> watchAs;
-    Ref<Array<Watch>> wdWatches = wdObj->getWdWatches();
-    for (int i = 0; i < wdWatches->size(); i++) {
-        watch = wdWatches->get(i);
+    auto wdWatches = wdObj->getWdWatches();
+    for (auto it = wdWatches->begin(); it != wdWatches->end(); /*++it*/) {
+        auto& watch = *it;
         if (watch->getType() == WatchType::Autoscan) {
-            watchAs = RefCast(watch, WatchAutoscan);
+            auto watchAs = std::static_pointer_cast<WatchAutoscan>(watch);
             if (watchAs->getNonexistingPathArray() == pathAr) {
                 if (wdWatches->size() == 1) {
                     // should be done automatically, because removeWatch triggers an IGNORED event
                     //watches->remove(wd);
 
                     inotify->removeWatch(wd);
+                    ++it;
                 } else {
-                    wdWatches->removeUnordered(i);
+                    it = wdWatches->erase(it);
                 }
                 return;
             }
-        }
+        } else
+            ++it;
     }
 }
 
@@ -521,11 +519,11 @@ int AutoscanInotify::monitorDirectory(std::string pathOri, std::shared_ptr<Autos
         }
 
         if (!alreadyWatching) {
-            Ref<WatchAutoscan> watch(new WatchAutoscan(startPoint, adir, normalizedAutoscanPath));
+            auto watch = std::make_shared<WatchAutoscan>(startPoint, adir, normalizedAutoscanPath);
             if (pathArray != nullptr) {
                 watch->setNonexistingPathArray(*pathArray);
             }
-            wdObj->getWdWatches()->append(RefCast(watch, Watch));
+            wdObj->addWatch(watch);
 
             if (!startPoint) {
                 int startPointWd = inotify->addWatch(normalizedAutoscanPath, events);
@@ -561,7 +559,7 @@ void AutoscanInotify::unmonitorDirectory(std::string path, std::shared_ptr<Autos
         return;
     }
 
-    Ref<WatchAutoscan> watchAs = getAppropriateAutoscan(wdObj, adir);
+    auto watchAs = getAppropriateAutoscan(wdObj, adir);
     if (watchAs == nullptr) {
         log_debug("autoscan not found in watches? ({}, {})", wd, path.c_str());
     } else {
@@ -576,15 +574,13 @@ void AutoscanInotify::unmonitorDirectory(std::string path, std::shared_ptr<Autos
     }
 }
 
-Ref<AutoscanInotify::WatchAutoscan> AutoscanInotify::getAppropriateAutoscan(Ref<Wd> wdObj, std::shared_ptr<AutoscanDirectory> adir)
+std::shared_ptr<AutoscanInotify::WatchAutoscan> AutoscanInotify::getAppropriateAutoscan(Ref<Wd> wdObj, std::shared_ptr<AutoscanDirectory> adir)
 {
-    Ref<Watch> watch;
-    Ref<WatchAutoscan> watchAs;
-    Ref<Array<Watch>> wdWatches = wdObj->getWdWatches();
-    for (int i = 0; i < wdWatches->size(); i++) {
-        watch = wdWatches->get(i);
+    auto  wdWatches = wdObj->getWdWatches();
+    for (auto it = wdWatches->begin(); it != wdWatches->end(); ++it) {
+        auto& watch = *it;
         if (watch->getType() == WatchType::Autoscan) {
-            watchAs = RefCast(watch, WatchAutoscan);
+            auto watchAs = std::static_pointer_cast<WatchAutoscan>(watch);
             if (watchAs->getNonexistingPathArray().empty()) {
                 if (watchAs->getAutoscanDirectory()->getLocation() == adir->getLocation()) {
                     return watchAs;
@@ -595,17 +591,15 @@ Ref<AutoscanInotify::WatchAutoscan> AutoscanInotify::getAppropriateAutoscan(Ref<
     return nullptr;
 }
 
-Ref<AutoscanInotify::WatchAutoscan> AutoscanInotify::getAppropriateAutoscan(Ref<Wd> wdObj, std::string path)
+std::shared_ptr<AutoscanInotify::WatchAutoscan> AutoscanInotify::getAppropriateAutoscan(Ref<Wd> wdObj, std::string path)
 {
     std::string pathBestMatch;
-    Ref<WatchAutoscan> bestMatch = nullptr;
-    Ref<Watch> watch;
-    Ref<WatchAutoscan> watchAs;
-    Ref<Array<Watch>> wdWatches = wdObj->getWdWatches();
-    for (int i = 0; i < wdWatches->size(); i++) {
-        watch = wdWatches->get(i);
+    std::shared_ptr<WatchAutoscan> bestMatch = nullptr;
+    auto wdWatches = wdObj->getWdWatches();
+    for (auto it = wdWatches->begin(); it != wdWatches->end(); ++it) {
+        auto& watch = *it;
         if (watch->getType() == WatchType::Autoscan) {
-            watchAs = RefCast(watch, WatchAutoscan);
+            auto watchAs = std::static_pointer_cast<WatchAutoscan>(watch);
             if (watchAs->getNonexistingPathArray().empty()) {
                 std::string testLocation = watchAs->getNormalizedAutoscanPath();
                 if (startswith(path, testLocation)) {
@@ -628,9 +622,6 @@ Ref<AutoscanInotify::WatchAutoscan> AutoscanInotify::getAppropriateAutoscan(Ref<
 void AutoscanInotify::removeWatchMoves(int wd)
 {
     Ref<Wd> wdObj;
-    Ref<Array<Watch>> wdWatches;
-    Ref<Watch> watch;
-    Ref<WatchMove> watchMv;
     bool first = true;
     int checkWd = wd;
     do {
@@ -641,24 +632,26 @@ void AutoscanInotify::removeWatchMoves(int wd)
             break;
         }
 
-        wdWatches = wdObj->getWdWatches();
-        if (wdWatches == nullptr)
+        auto wdWatches = wdObj->getWdWatches();
+        if (wdWatches->empty())
             break;
 
         if (first) {
             first = false;
         } else {
-            for (int i = 0; i < wdWatches->size(); i++) {
-                watch = wdWatches->get(i);
+            for (auto it = wdWatches->begin(); it != wdWatches->end(); /*++it*/) {
+                auto& watch = *it;
                 if (watch->getType() == WatchType::Move) {
-                    watchMv = RefCast(watch, WatchMove);
+                    auto watchMv = std::static_pointer_cast<WatchMove>(watch);
                     if (watchMv->getRemoveWd() == wd) {
                         log_debug("removing watch move");
-                        if (wdWatches->size() == 1)
+                        if (wdWatches->size() == 1) {
                             inotify->removeWatch(checkWd);
-                        else
-                            wdWatches->removeUnordered(i);
-                    }
+                            ++it;
+                        } else
+                            it = wdWatches->erase(it);
+                    } else
+                        ++it;
                 }
             }
         }
@@ -666,42 +659,31 @@ void AutoscanInotify::removeWatchMoves(int wd)
     } while (checkWd >= 0);
 }
 
-bool AutoscanInotify::removeFromWdObj(Ref<Wd> wdObj, Ref<Watch> toRemove)
+bool AutoscanInotify::removeFromWdObj(Ref<Wd> wdObj, std::shared_ptr<Watch> toRemove)
 {
-    Ref<Array<Watch>> wdWatches = wdObj->getWdWatches();
-    Ref<Watch> watch;
-    for (int i = 0; i < wdWatches->size(); i++) {
-        watch = wdWatches->get(i);
+    auto wdWatches = wdObj->getWdWatches();
+    for (auto it = wdWatches->begin(); it != wdWatches->end(); /*++it*/) {
+        auto& watch = *it;
         if (watch == toRemove) {
-            if (wdWatches->size() == 1)
+            if (wdWatches->size() == 1) {
                 inotify->removeWatch(wdObj->getWd());
-            else
-                wdWatches->removeUnordered(i);
+                ++it;
+            } else
+                it = wdWatches->erase(it);
             return true;
-        }
+        } else
+            ++it;
     }
     return false;
 }
 
-bool AutoscanInotify::removeFromWdObj(Ref<Wd> wdObj, Ref<WatchAutoscan> toRemove)
+std::shared_ptr<AutoscanInotify::WatchAutoscan> AutoscanInotify::getStartPoint(Ref<Wd> wdObj)
 {
-    return removeFromWdObj(wdObj, RefCast(toRemove, Watch));
-}
-
-bool AutoscanInotify::removeFromWdObj(Ref<Wd> wdObj, Ref<WatchMove> toRemove)
-{
-    return removeFromWdObj(wdObj, RefCast(toRemove, Watch));
-}
-
-Ref<AutoscanInotify::WatchAutoscan> AutoscanInotify::getStartPoint(Ref<Wd> wdObj)
-{
-    Ref<Watch> watch;
-    Ref<WatchAutoscan> watchAs;
-    Ref<Array<Watch>> wdWatches = wdObj->getWdWatches();
-    for (int i = 0; i < wdWatches->size(); i++) {
-        watch = wdWatches->get(i);
+    auto wdWatches = wdObj->getWdWatches();
+    for (auto it = wdWatches->begin(); it != wdWatches->end(); ++it) {
+        auto& watch = *it;
         if (watch->getType() == WatchType::Autoscan) {
-            watchAs = RefCast(watch, WatchAutoscan);
+            auto watchAs = std::static_pointer_cast<WatchAutoscan>(watch);
             if (watchAs->isStartPoint())
                 return watchAs;
         }
@@ -722,7 +704,7 @@ void AutoscanInotify::addDescendant(int startPointWd, int addWd, std::shared_ptr
         return;
 
     //   log_debug("found wdObj");
-    Ref<WatchAutoscan> watch = getAppropriateAutoscan(wdObj, adir);
+    auto watch = getAppropriateAutoscan(wdObj, adir);
     if (watch == nullptr)
         return;
     //    log_debug("adding descendant");
@@ -739,16 +721,11 @@ void AutoscanInotify::removeDescendants(int wd)
         return;
     }
 
-    Ref<Array<Watch>> wdWatches = wdObj->getWdWatches();
-    if (wdWatches == nullptr)
-        return;
-
-    Ref<Watch> watch;
-    Ref<WatchAutoscan> watchAs;
-    for (int i = 0; i < wdWatches->size(); i++) {
-        watch = wdWatches->get(i);
+    auto wdWatches = wdObj->getWdWatches();
+    for (auto it = wdWatches->begin(); it != wdWatches->end(); ++it) {
+        auto& watch = *it;
         if (watch->getType() == WatchType::Autoscan) {
-            watchAs = RefCast(watch, WatchAutoscan);
+            auto watchAs = std::static_pointer_cast<WatchAutoscan>(watch);
             for (int descWd : watchAs->getDescendants()) {
                 inotify->removeWatch(descWd);
             }
