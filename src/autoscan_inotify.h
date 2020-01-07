@@ -141,7 +141,7 @@ private:
         int removeWd;
     };
 
-    class Wd : public zmm::Object {
+    class Wd {
     public:
         Wd(std::string path, int wd, int parentWd)
         {
@@ -165,7 +165,7 @@ private:
         int wd;
     };
 
-    std::shared_ptr<std::unordered_map<int, zmm::Ref<Wd>>> watches;
+    std::unique_ptr<std::unordered_map<int, std::shared_ptr<Wd>>> watches;
 
     std::string normalizePathNoEx(std::string path);
 
@@ -173,20 +173,20 @@ private:
     int monitorDirectory(std::string path, std::shared_ptr<AutoscanDirectory> adir, std::string normalizedAutoscanPath, bool startPoint, std::vector<std::string>* pathArray = nullptr);
     void unmonitorDirectory(std::string path, std::shared_ptr<AutoscanDirectory> adir);
 
-    std::shared_ptr<WatchAutoscan> getAppropriateAutoscan(zmm::Ref<Wd> wdObj, std::shared_ptr<AutoscanDirectory> adir);
-    std::shared_ptr<WatchAutoscan> getAppropriateAutoscan(zmm::Ref<Wd> wdObj, std::string path);
-    std::shared_ptr<WatchAutoscan> getStartPoint(zmm::Ref<Wd> wdObj);
+    std::shared_ptr<WatchAutoscan> getAppropriateAutoscan(std::shared_ptr<Wd> wdObj, std::shared_ptr<AutoscanDirectory> adir);
+    std::shared_ptr<WatchAutoscan> getAppropriateAutoscan(std::shared_ptr<Wd> wdObj, std::string path);
+    std::shared_ptr<WatchAutoscan> getStartPoint(std::shared_ptr<Wd> wdObj);
 
-    bool removeFromWdObj(zmm::Ref<Wd> wdObj, std::shared_ptr<Watch> toRemove);
+    bool removeFromWdObj(std::shared_ptr<Wd> wdObj, std::shared_ptr<Watch> toRemove);
 
     void monitorNonexisting(std::string path, std::shared_ptr<AutoscanDirectory> adir, std::string normalizedAutoscanPath);
     void recheckNonexistingMonitor(int curWd, std::vector<std::string> nonexistingPathArray, std::shared_ptr<AutoscanDirectory> adir, std::string normalizedAutoscanPath);
-    void recheckNonexistingMonitors(int wd, zmm::Ref<Wd> wdObj);
-    void removeNonexistingMonitor(int wd, zmm::Ref<Wd> wdObj, std::vector<std::string> pathAr);
+    void recheckNonexistingMonitors(int wd, std::shared_ptr<Wd> wdObj);
+    void removeNonexistingMonitor(int wd, std::shared_ptr<Wd> wdObj, std::vector<std::string> pathAr);
 
     int watchPathForMoves(std::string path, int wd);
     int addMoveWatch(std::string path, int removeWd, int parentWd);
-    void checkMoveWatches(int wd, zmm::Ref<Wd> wdObj);
+    void checkMoveWatches(int wd, std::shared_ptr<Wd> wdObj);
     void removeWatchMoves(int wd);
 
     void addDescendant(int startPointWd, int addWd, std::shared_ptr<AutoscanDirectory> adir);
