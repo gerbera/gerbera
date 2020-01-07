@@ -121,7 +121,7 @@ std::string ConfigManager::construct_path(std::string path)
     if (home == "." && path.at(0) == '.')
         return path;
 
-    if (home == "")
+    if (home.empty())
         return "." + DIR_SEPARATOR + path;
     else
         return home + DIR_SEPARATOR + path;

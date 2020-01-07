@@ -383,10 +383,10 @@ public:
     virtual int equals(std::shared_ptr<CdsObject> obj, bool exactly = false) override;
 
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
-    virtual void validate();
+    virtual void validate() override;
 
     /// \brief Returns the path to the object as it appears in the database tree.
-    virtual std::string getVirtualPath();
+    virtual std::string getVirtualPath() override;
 
     /// \brief Set the unique service ID.
     inline void setServiceID(std::string serviceID) { this->serviceID = serviceID; }
@@ -456,7 +456,7 @@ public:
     virtual int equals(std::shared_ptr<CdsObject> obj, bool exactly = false) override;
 
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
-    virtual void validate();
+    virtual void validate() override;
 };
 
 /// \brief An item that is accessible via a URL.
@@ -603,10 +603,10 @@ public:
     virtual int equals(std::shared_ptr<CdsObject> obj, bool exactly = false) override;
 
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
-    virtual void validate();
+    virtual void validate() override;
 
     /// \brief Returns the path to the object as it appears in the database tree.
-    virtual std::string getVirtualPath();
+    virtual std::string getVirtualPath() override;
 };
 
 #endif // __CDS_OBJECTS_H__
