@@ -42,7 +42,6 @@
 
 #define INOTIFY_MAX_USER_WATCHES_FILE "/proc/sys/fs/inotify/max_user_watches"
 
-using namespace zmm;
 using namespace std;
 
 AutoscanInotify::AutoscanInotify(std::shared_ptr<Storage> storage, std::shared_ptr<ContentManager> content)
@@ -84,7 +83,7 @@ void AutoscanInotify::run()
 
     if (shutdownFlag) {
         shutdownFlag = false;
-        inotify = Ref<Inotify>(new Inotify());
+        inotify = std::make_unique<Inotify>();
         thread_ = thread { &AutoscanInotify::threadProc, this };
     }
 }

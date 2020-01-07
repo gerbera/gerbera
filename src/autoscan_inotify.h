@@ -40,7 +40,6 @@
 
 #include "autoscan.h"
 #include "util/mt_inotify.h"
-#include "zmm/zmmf.h"
 
 #define INOTIFY_ROOT -1
 #define INOTIFY_UNKNOWN_PARENT_WD -2
@@ -70,7 +69,7 @@ private:
 
     std::thread thread_;
 
-    zmm::Ref<Inotify> inotify;
+    std::unique_ptr<Inotify> inotify;
 
     std::mutex mutex;
     using AutoLock = std::lock_guard<std::mutex>;
