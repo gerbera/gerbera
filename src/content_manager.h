@@ -33,6 +33,7 @@
 
 #include <string>
 #include <vector>
+#include <deque>
 #include <map>
 #include <condition_variable>
 #include <memory>
@@ -75,7 +76,7 @@ class LastFm;
 class ContentManager;
 class TaskProcessor;
 
-class CMAddFileTask : public GenericTask {
+class CMAddFileTask : public GenericTask, public std::enable_shared_from_this<CMAddFileTask> {
 protected:
     std::shared_ptr<ContentManager> content;
     std::string path;
@@ -112,7 +113,7 @@ public:
     virtual void run() override;
 };
 
-class CMRescanDirectoryTask : public GenericTask {
+class CMRescanDirectoryTask : public GenericTask, public std::enable_shared_from_this<CMRescanDirectoryTask> {
 protected:
     std::shared_ptr<ContentManager> content;
     int objectID;
@@ -171,10 +172,10 @@ public:
     zmm::Ref<CMAccounting> getAccounting();
 
     /// \brief Returns the task that is currently being executed.
-    zmm::Ref<GenericTask> getCurrentTask();
+    std::shared_ptr<GenericTask> getCurrentTask();
 
     /// \brief Returns the list of all enqueued tasks, including the current or nullptr if no tasks are present.
-    zmm::Ref<zmm::Array<GenericTask>> getTasklist();
+    std::deque<std::shared_ptr<GenericTask>> getTasklist();
 
     /// \brief Find a task identified by the task ID and invalidate it.
     void invalidateTask(unsigned int taskID, task_owner_t taskOwner = ContentManagerTask);
@@ -376,19 +377,19 @@ protected:
         bool lowPriority = false,
         unsigned int parentTaskID = 0,
         bool cancellable = true);
-    int _addFile(std::string path, std::string rootPath, bool recursive = false, bool hidden = false, zmm::Ref<GenericTask> task = nullptr);
+    int _addFile(std::string path, std::string rootPath, bool recursive = false, bool hidden = false, std::shared_ptr<CMAddFileTask> task = nullptr);
     //void _addFile2(std::string path, bool recursive=0);
     void _removeObject(int objectID, bool all);
 
-    void _rescanDirectory(int containerID, int scanID, ScanMode scanMode, ScanLevel scanLevel, zmm::Ref<GenericTask> task = nullptr);
+    void _rescanDirectory(int containerID, int scanID, ScanMode scanMode, ScanLevel scanLevel, std::shared_ptr<GenericTask> task = nullptr);
     /* for recursive addition */
-    void addRecursive(std::string path, bool hidden, zmm::Ref<GenericTask> task);
+    void addRecursive(std::string path, bool hidden, std::shared_ptr<CMAddFileTask> task);
     //void addRecursive2(zmm::Ref<DirCache> dirCache, std::string filename, bool recursive);
 
     std::string extension2mimetype(std::string extension);
     std::string mimetype2upnpclass(std::string mimeType);
 
-    void invalidateAddTask(zmm::Ref<GenericTask> t, std::string path);
+    void invalidateAddTask(std::shared_ptr<GenericTask> t, std::string path);
 
     zmm::Ref<Layout> layout;
 
@@ -415,7 +416,7 @@ protected:
     static void* staticThreadProc(void* arg);
     void threadProc();
 
-    void addTask(zmm::Ref<GenericTask> task, bool lowPriority = false);
+    void addTask(std::shared_ptr<GenericTask> task, bool lowPriority = false);
 
     zmm::Ref<CMAccounting> acct;
 
@@ -426,9 +427,9 @@ protected:
 
     bool shutdownFlag;
 
-    zmm::Ref<zmm::ObjectQueue<GenericTask>> taskQueue1; // priority 1
-    zmm::Ref<zmm::ObjectQueue<GenericTask>> taskQueue2; // priority 2
-    zmm::Ref<GenericTask> currentTask;
+    std::deque<std::shared_ptr<GenericTask>> taskQueue1; // priority 1
+    std::deque<std::shared_ptr<GenericTask>> taskQueue2; // priority 2
+    std::shared_ptr<GenericTask> currentTask;
 
     unsigned int taskID;
 

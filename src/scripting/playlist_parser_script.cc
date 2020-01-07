@@ -142,7 +142,7 @@ std::string PlaylistParserScript::readln()
     }
 }
 
-void PlaylistParserScript::processPlaylistObject(std::shared_ptr<CdsObject> obj, Ref<GenericTask> task)
+void PlaylistParserScript::processPlaylistObject(std::shared_ptr<CdsObject> obj, std::shared_ptr<GenericTask> task)
 {
     if ((currentObjectID != INVALID_OBJECT_ID) || (currentHandle != nullptr) ||
             (currentLine != nullptr))

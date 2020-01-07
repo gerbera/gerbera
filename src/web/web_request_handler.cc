@@ -267,7 +267,7 @@ void WebRequestHandler::addUpdateIDs(Ref<Element> updateIDsEl, std::shared_ptr<S
     }
 }
 
-void WebRequestHandler::appendTask(Ref<Element> el, Ref<GenericTask> task)
+void WebRequestHandler::appendTask(Ref<Element> el, std::shared_ptr<GenericTask> task)
 {
     if (task == nullptr || el == nullptr)
         return;

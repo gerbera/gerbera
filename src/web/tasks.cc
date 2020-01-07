@@ -53,12 +53,9 @@ void web::tasks::process()
         Ref<Element> tasksEl(new Element("tasks"));
         tasksEl->setArrayName("task");
         root->appendElementChild(tasksEl); // inherited from WebRequestHandler
-        Ref<Array<GenericTask>> taskList = content->getTasklist();
-        if (taskList == nullptr)
-            return;
-        int count = taskList->size();
-        for (int i = 0; i < count; i++) {
-            appendTask(tasksEl, taskList->get(i));
+        auto taskList = content->getTasklist();
+        for (size_t i = 0; i < taskList.size(); i++) {
+            appendTask(tasksEl, taskList[i]);
         }
     } else if (action == "cancel") {
         int taskID = intParam("task_id");

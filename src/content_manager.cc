@@ -70,9 +70,6 @@
 #include "util/task_processor.h"
 #endif
 
-#define DEFAULT_DIR_CACHE_CAPACITY 10
-#define CM_INITIAL_QUEUE_SIZE 20
-
 #ifdef HAVE_MAGIC
 // for older versions of filemagic
 extern "C" {
@@ -120,10 +117,6 @@ ContentManager::ContentManager(std::shared_ptr<ConfigManager> config, std::share
     layout_enabled = false;
 
     acct = Ref<CMAccounting>(new CMAccounting());
-    taskQueue1 = Ref<ObjectQueue<GenericTask>>(new ObjectQueue<GenericTask>(CM_INITIAL_QUEUE_SIZE));
-    taskQueue2 = Ref<ObjectQueue<GenericTask>>(new ObjectQueue<GenericTask>(CM_INITIAL_QUEUE_SIZE));
-
-    Ref<Element> tmpEl;
 
     // loading extension - mimetype map
     // we can always be sure to get a valid element because everything was prepared by the config manager
@@ -410,51 +403,47 @@ void ContentManager::shutdown()
     log_debug("ContentManager destroyed");
 }
 
-Ref<CMAccounting> ContentManager::getAccounting() { return acct; }
-Ref<GenericTask> ContentManager::getCurrentTask()
+Ref<CMAccounting> ContentManager::getAccounting()
 {
-    Ref<GenericTask> task;
+     return acct;
+}
+
+std::shared_ptr<GenericTask> ContentManager::getCurrentTask()
+{
     AutoLock lock(mutex);
-    task = currentTask;
+
+    auto task = currentTask;
     return task;
 }
 
-Ref<Array<GenericTask>> ContentManager::getTasklist()
+std::deque<std::shared_ptr<GenericTask>> ContentManager::getTasklist()
 {
-    int i;
-
     AutoLock lock(mutex);
 
-    Ref<Array<GenericTask>> taskList = nullptr;
+    std::deque<std::shared_ptr<GenericTask>> taskList;
 #ifdef ONLINE_SERVICES
     taskList = task_processor->getTasklist();
 #endif
-    Ref<GenericTask> t = getCurrentTask();
+    auto t = getCurrentTask();
 
     // if there is no current task, then the queues are empty
     // and we do not have to allocate the array
-    if ((t == nullptr) && (taskList == nullptr))
-        return nullptr;
-
-    if (taskList == nullptr)
-        taskList = Ref<Array<GenericTask>>(new Array<GenericTask>());
+    if (t == nullptr && taskList.empty())
+        return taskList;
 
     if (t != nullptr)
-        taskList->append(t);
+        taskList.push_back(t);
 
-    int qsize = taskQueue1->size();
-
-    for (i = 0; i < qsize; i++) {
-        Ref<GenericTask> t = taskQueue1->get(i);
+    for (size_t i = 0; i < taskQueue1.size(); i++) {
+        auto t = taskQueue1[i];
         if (t->isValid())
-            taskList->append(t);
+            taskList.push_back(t);
     }
 
-    qsize = taskQueue2->size();
-    for (i = 0; i < qsize; i++) {
-        Ref<GenericTask> t = taskQueue2->get(i);
+    for (size_t i = 0; i < taskQueue2.size(); i++) {
+        auto t = taskQueue2[i];
         if (t->isValid())
-            taskList = Ref<Array<GenericTask>>(new Array<GenericTask>());
+            taskList.clear();
     }
 
     return taskList;
@@ -485,7 +474,7 @@ void ContentManager::addVirtualItem(std::shared_ptr<CdsObject> obj, bool allow_f
     addObject(obj);
 }
 
-int ContentManager::_addFile(std::string path, std::string rootPath, bool recursive, bool hidden, Ref<GenericTask> task)
+int ContentManager::_addFile(std::string path, std::string rootPath, bool recursive, bool hidden, std::shared_ptr<CMAddFileTask> task)
 {
     if (hidden == false) {
         std::string filename = get_filename(path);
@@ -514,7 +503,7 @@ int ContentManager::_addFile(std::string path, std::string rootPath, bool recurs
             if (layout != nullptr) {
                 try {
                     if (!string_ok(rootPath) && (task != nullptr))
-                        rootPath = RefCast(task, CMAddFileTask)->getRootPath();
+                        rootPath = task->getRootPath();
 
                     layout->processCdsObject(obj, rootPath);
 
@@ -570,7 +559,7 @@ int ContentManager::ensurePathExistence(std::string path)
     return containerID;
 }
 
-void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scanMode, ScanLevel scanLevel, Ref<GenericTask> task)
+void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scanMode, ScanLevel scanLevel, std::shared_ptr<GenericTask> task)
 {
     log_debug("start");
     int ret;
@@ -767,7 +756,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
 }
 
 /* scans the given directory and adds everything recursively */
-void ContentManager::addRecursive(std::string path, bool hidden, Ref<GenericTask> task)
+void ContentManager::addRecursive(std::string path, bool hidden, std::shared_ptr<CMAddFileTask> task)
 {
     if (hidden == false) {
         log_debug("Checking path {}", path.c_str());
@@ -835,7 +824,7 @@ void ContentManager::addRecursive(std::string path, bool hidden, Ref<GenericTask
                         try {
                             std::string rootpath = "";
                             if (task != nullptr)
-                                rootpath = RefCast(task, CMAddFileTask)->getRootPath();
+                                rootpath = task->getRootPath();
                             layout->processCdsObject(obj, rootpath);
 #ifdef HAVE_JS
                             auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
@@ -1237,12 +1226,22 @@ void ContentManager::reloadLayout()
 
 void ContentManager::threadProc()
 {
-    Ref<GenericTask> task;
+    std::shared_ptr<GenericTask> task;
     AutoLockU lock(mutex);
     working = true;
     while (!shutdownFlag) {
         currentTask = nullptr;
-        if (((task = taskQueue1->dequeue()) == nullptr) && ((task = taskQueue2->dequeue()) == nullptr)) {
+
+        task = nullptr;
+        if (!taskQueue1.empty()) {
+            task = taskQueue1.front();
+            taskQueue1.pop_front();
+        } else if (!taskQueue2.empty()) {
+            task = taskQueue2.front();
+            taskQueue2.pop_front();
+        }
+
+        if (task == nullptr) {
             working = false;
             /* if nothing to do, sleep until awakened */
             cond.wait(lock);
@@ -1280,16 +1279,16 @@ void* ContentManager::staticThreadProc(void* arg)
     return nullptr;
 }
 
-void ContentManager::addTask(zmm::Ref<GenericTask> task, bool lowPriority)
+void ContentManager::addTask(std::shared_ptr<GenericTask> task, bool lowPriority)
 {
     AutoLock lock(mutex);
 
     task->setID(taskID++);
 
     if (!lowPriority)
-        taskQueue1->enqueue(task);
+        taskQueue1.push_back(task);
     else
-        taskQueue2->enqueue(task);
+        taskQueue2.push_back(task);
     signal();
 }
 
@@ -1298,7 +1297,7 @@ void ContentManager::loadAccounting(bool async)
 {
     if (async) {
         auto self = shared_from_this();
-        Ref<GenericTask> task(new CMLoadAccountingTask(self));
+        auto task = std::make_shared<CMLoadAccountingTask>(self);
         task->setDescription("Initializing statistics");
         addTask(task);
     } else {
@@ -1324,7 +1323,7 @@ int ContentManager::addFileInternal(
 {
     if (async) {
         auto self = shared_from_this();
-        Ref<GenericTask> task(new CMAddFileTask(self, path, rootpath, recursive, hidden, cancellable));
+        auto task = std::make_shared<CMAddFileTask>(self, path, rootpath, recursive, hidden, cancellable);
         task->setDescription("Importing: " + path);
         task->setParentID(parentTaskID);
         addTask(task, lowPriority);
@@ -1352,7 +1351,7 @@ void ContentManager::fetchOnlineContentInternal(
         initLayout();
 
     auto self = shared_from_this();
-    Ref<GenericTask> task(new CMFetchOnlineContentTask(self, task_processor, timer, service, layout, cancellable, unscheduled_refresh));
+    auto task = std::make_shared<CMFetchOnlineContentTask>(self, task_processor, timer, service, layout, cancellable, unscheduled_refresh);
     task->setDescription("Updating content from " + service->getServiceName());
     task->setParentID(parentTaskID);
     service->incTaskCount();
@@ -1392,42 +1391,38 @@ void ContentManager::cleanupOnlineServiceObjects(zmm::Ref<OnlineService> service
 
 #endif
 
-void ContentManager::invalidateAddTask(Ref<GenericTask> t, std::string path)
+void ContentManager::invalidateAddTask(std::shared_ptr<GenericTask> t, std::string path)
 {
     if (t->getType() == AddFile) {
-        log_debug("comparing, task path: {}, remove path: {}", RefCast(t, CMAddFileTask)->getPath().c_str(), path.c_str());
-        if (startswith(RefCast(t, CMAddFileTask)->getPath(), path)) {
-            log_debug("Invalidating task with path {}", RefCast(t, CMAddFileTask)->getPath().c_str());
-            t->invalidate();
+        auto add_task = std::static_pointer_cast<CMAddFileTask>(t);
+        log_debug("comparing, task path: {}, remove path: {}", add_task->getPath().c_str(), path.c_str());
+        if (startswith(add_task->getPath(), path)) {
+            log_debug("Invalidating task with path {}", add_task->getPath().c_str());
+            add_task->invalidate();
         }
     }
 }
 
 void ContentManager::invalidateTask(unsigned int taskID, task_owner_t taskOwner)
 {
-    int i;
-
     if (taskOwner == ContentManagerTask) {
         AutoLock lock(mutex);
-        Ref<GenericTask> t = getCurrentTask();
+        auto t = getCurrentTask();
         if (t != nullptr) {
             if ((t->getID() == taskID) || (t->getParentID() == taskID)) {
                 t->invalidate();
             }
         }
 
-        int qsize = taskQueue1->size();
-
-        for (i = 0; i < qsize; i++) {
-            Ref<GenericTask> t = taskQueue1->get(i);
+        for (size_t i = 0; i < taskQueue1.size(); i++) {
+            auto t = taskQueue1[i];
             if ((t->getID() == taskID) || (t->getParentID() == taskID)) {
                 t->invalidate();
             }
         }
 
-        qsize = taskQueue2->size();
-        for (i = 0; i < qsize; i++) {
-            Ref<GenericTask> t = taskQueue2->get(i);
+        for (size_t i = 0; i < taskQueue2.size(); i++) {
+            auto t = taskQueue2[i];
             if ((t->getID() == taskID) || (t->getParentID() == taskID)) {
                 t->invalidate();
             }
@@ -1444,7 +1439,7 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
     if (async) {
         /*
         // building container path for the description
-        Ref<Array<CdsObject> > objectPath = storage->getObjectPath(objectID);
+        auto objectPath = storage->getObjectPath(objectID);
         std::ostringstream desc;
         desc << "Removing ";
         // skip root container, start from 1
@@ -1452,7 +1447,7 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
             desc << '/' << objectPath->get(i)->getTitle();
         */
         auto self = shared_from_this();
-        Ref<GenericTask> task(new CMRemoveObjectTask(self, objectID, all));
+        auto task = std::make_shared<CMRemoveObjectTask>(self, objectID, all);
         std::string path;
         std::shared_ptr<CdsObject> obj;
 
@@ -1485,22 +1480,20 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
 #endif
 
             AutoLock lock(mutex);
-            int qsize = taskQueue1->size();
 
             // we have to make sure that a currently running autoscan task will not
             // launch add tasks for directories that anyway are going to be deleted
-            for (int i = 0; i < qsize; i++) {
-                Ref<GenericTask> t = taskQueue1->get(i);
+            for (size_t i = 0; i < taskQueue1.size(); i++) {
+                auto t = taskQueue1[i];
                 invalidateAddTask(t, path);
             }
 
-            qsize = taskQueue2->size();
-            for (int i = 0; i < qsize; i++) {
-                Ref<GenericTask> t = taskQueue2->get(i);
+            for (size_t i = 0; i < taskQueue2.size(); i++) {
+                auto t = taskQueue2[i];
                 invalidateAddTask(t, path);
             }
 
-            Ref<GenericTask> t = getCurrentTask();
+            auto t = getCurrentTask();
             if (t != nullptr) {
                 invalidateAddTask(t, path);
             }
@@ -1516,7 +1509,7 @@ void ContentManager::rescanDirectory(int objectID, int scanID, ScanMode scanMode
 {
     // building container path for the description
     auto self = shared_from_this();
-    Ref<GenericTask> task(new CMRescanDirectoryTask(self, objectID, scanID, scanMode, cancellable));
+    auto task = std::make_shared<CMRescanDirectoryTask>(self, objectID, scanID, scanMode, cancellable);
     std::shared_ptr<AutoscanDirectory> dir = getAutoscanDirectory(scanID, scanMode);
     if (dir == nullptr)
         return;
@@ -1831,7 +1824,8 @@ std::string CMAddFileTask::getRootPath() { return rootpath; }
 void CMAddFileTask::run()
 {
     log_debug("running add file task with path {} recursive: {}", path.c_str(), recursive);
-    content->_addFile(path, rootpath, recursive, hidden, Ref<GenericTask>(this));
+    auto self = shared_from_this();
+    content->_addFile(path, rootpath, recursive, hidden, self);
 }
 
 CMRemoveObjectTask::CMRemoveObjectTask(std::shared_ptr<ContentManager> content,
@@ -1868,7 +1862,8 @@ void CMRescanDirectoryTask::run()
     if (dir == nullptr)
         return;
 
-    content->_rescanDirectory(objectID, dir->getScanID(), dir->getScanMode(), dir->getScanLevel(), Ref<GenericTask>(this));
+    auto self = shared_from_this();
+    content->_rescanDirectory(objectID, dir->getScanID(), dir->getScanMode(), dir->getScanLevel(), self);
     dir->decTaskCount();
 
     if (dir->getTaskCount() == 0) {
@@ -1899,7 +1894,7 @@ void CMFetchOnlineContentTask::run()
         return;
     }
     try {
-        Ref<GenericTask> t(
+        std::shared_ptr<GenericTask> t(
             new TPFetchOnlineContentTask(content, task_processor, timer, service, layout, cancellable, unscheduled_refresh)
         );
         task_processor->addTask(t);
