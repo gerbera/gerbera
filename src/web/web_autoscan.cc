@@ -38,11 +38,9 @@
 using namespace zmm;
 using namespace mxml;
 
-int WebAutoscanProcessListComparator(void* arg1, void* arg2)
+static bool WebAutoscanProcessListComparator(std::shared_ptr<AutoscanDirectory> a1, std::shared_ptr<AutoscanDirectory> a2)
 {
-    auto* a1 = (AutoscanDirectory*)arg1;
-    auto* a2 = (AutoscanDirectory*)arg2;
-    return strcmp(a1->getLocation().c_str(), a2->getLocation().c_str());
+    return strcmp(a1->getLocation().c_str(), a2->getLocation().c_str()) < 0;
 }
 
 web::autoscan::autoscan(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
@@ -76,12 +74,12 @@ void web::autoscan::process()
         if (fromFs) {
             autoscan->appendTextChild("from_fs", "1", mxml_bool_type);
             autoscan->appendTextChild("object_id", objID);
-            Ref<AutoscanDirectory> adir = content->getAutoscanDirectory(path);
+            std::shared_ptr<AutoscanDirectory> adir = content->getAutoscanDirectory(path);
             autoscan2XML(autoscan, adir);
         } else {
             autoscan->appendTextChild("from_fs", "0", mxml_bool_type);
             autoscan->appendTextChild("object_id", objID);
-            Ref<AutoscanDirectory> adir = storage->getAutoscanDirectory(intParam("object_id"));
+            std::shared_ptr<AutoscanDirectory> adir = storage->getAutoscanDirectory(intParam("object_id"));
             autoscan2XML(autoscan, adir);
         }
     } else if (action == "as_edit_save") {
@@ -119,7 +117,7 @@ void web::autoscan::process()
             //    location.c_str(), AutoscanDirectory::mapScanmode(scan_mode).c_str(),
             //    AutoscanDirectory::mapScanlevel(scan_level).c_str(), recursive, interval, hidden);
 
-            Ref<AutoscanDirectory> autoscan(new AutoscanDirectory(
+            std::shared_ptr<AutoscanDirectory> autoscan(new AutoscanDirectory(
                 nullptr, //location
                 scan_mode,
                 scan_level,
@@ -132,20 +130,18 @@ void web::autoscan::process()
             content->setAutoscanDirectory(autoscan);
         }
     } else if (action == "list") {
-        Ref<Array<AutoscanDirectory>> autoscanList = content->getAutoscanDirectories();
-        int size = autoscanList->size();
+        auto autoscanList = content->getAutoscanDirectories();
 
         // --- sorting autoscans
 
-        quicksort((COMPARABLE*)autoscanList->getObjectArray(), autoscanList->size(),
-            WebAutoscanProcessListComparator);
+        std::sort(autoscanList.begin(), autoscanList.end(), WebAutoscanProcessListComparator);
 
         // ---
 
         Ref<Element> autoscansEl(new Element("autoscans"));
         autoscansEl->setArrayName("autoscan");
-        for (int i = 0; i < size; i++) {
-            Ref<AutoscanDirectory> autoscanDir = autoscanList->get(i);
+        for (size_t i = 0; i < autoscanList.size(); i++) {
+            auto autoscanDir = autoscanList[i];
             Ref<Element> autoscanEl(new Element("autoscan"));
             autoscanEl->setAttribute("objectID", std::to_string(autoscanDir->getObjectID()));
             autoscanEl->appendTextChild("location", autoscanDir->getLocation());
@@ -159,7 +155,7 @@ void web::autoscan::process()
         throw std::runtime_error("web:autoscan called with illegal action");
 }
 
-void web::autoscan::autoscan2XML(Ref<Element> element, Ref<AutoscanDirectory> adir)
+void web::autoscan::autoscan2XML(Ref<Element> element, std::shared_ptr<AutoscanDirectory> adir)
 {
     if (adir == nullptr) {
         element->appendTextChild("scan_mode", "none");

@@ -279,10 +279,10 @@ public:
     std::shared_ptr<CdsObject> convertObject(std::shared_ptr<CdsObject> obj, int objectType);
 
     /// \brief Gets an AutocsanDirectrory from the watch list.
-    zmm::Ref<AutoscanDirectory> getAutoscanDirectory(int scanID, ScanMode scanMode);
+    std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(int scanID, ScanMode scanMode);
 
     /// \brief Get an AutoscanDirectory given by location on disk from the watch list.
-    zmm::Ref<AutoscanDirectory> getAutoscanDirectory(std::string location);
+    std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(std::string location);
     /// \brief Removes an AutoscanDirectrory (found by scanID) from the watch list.
     void removeAutoscanDirectory(int scanID, ScanMode scanMode);
 
@@ -294,7 +294,7 @@ public:
 
     /// \brief Update autoscan parameters for an existing autoscan directory
     /// or add a new autoscan directory
-    void setAutoscanDirectory(zmm::Ref<AutoscanDirectory> dir);
+    void setAutoscanDirectory(std::shared_ptr<AutoscanDirectory> dir);
 
     /// \brief handles the removal of a persistent autoscan directory
     void handlePeristentAutoscanRemove(int scanID, ScanMode scanMode);
@@ -303,10 +303,10 @@ public:
     void handlePersistentAutoscanRecreate(int scanID, ScanMode scanMode);
 
     /// \brief returns an array of autoscan directories for the given scan mode
-    zmm::Ref<zmm::Array<AutoscanDirectory>> getAutoscanDirectories(ScanMode scanMode);
+    std::vector<std::shared_ptr<AutoscanDirectory>> getAutoscanDirectories(ScanMode scanMode);
 
     /// \brief returns an array of all autoscan directories
-    zmm::Ref<zmm::Array<AutoscanDirectory>> getAutoscanDirectories();
+    std::vector<std::shared_ptr<AutoscanDirectory>> getAutoscanDirectories();
 
     /// \brief instructs ContentManager to reload scripting environment
     void reloadLayout();

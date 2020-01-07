@@ -1695,7 +1695,7 @@ void SQLStorage::updateAutoscanPersistentList(ScanMode scanmode, std::shared_ptr
     log_debug("updating/adding persistent autoscans (count: {})", listSize);
     for (int i = 0; i < listSize; i++) {
         log_debug("getting ad {} from list..", i);
-        Ref<AutoscanDirectory> ad = list->get(i);
+        std::shared_ptr<AutoscanDirectory> ad = list->get(i);
         if (ad == nullptr)
             continue;
 
@@ -1754,7 +1754,7 @@ Ref<AutoscanList> SQLStorage::getAutoscanList(ScanMode scanmode)
     Ref<AutoscanList> ret(new AutoscanList(self));
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow()) != nullptr) {
-        Ref<AutoscanDirectory> dir = _fillAutoscanDirectory(row);
+        std::shared_ptr<AutoscanDirectory> dir = _fillAutoscanDirectory(row);
         if (dir == nullptr)
             removeAutoscanDirectory(std::stoi(row->col(0)));
         else
@@ -1763,7 +1763,7 @@ Ref<AutoscanList> SQLStorage::getAutoscanList(ScanMode scanmode)
     return ret;
 }
 
-Ref<AutoscanDirectory> SQLStorage::getAutoscanDirectory(int objectID)
+std::shared_ptr<AutoscanDirectory> SQLStorage::getAutoscanDirectory(int objectID)
 {
 #define FLD(field) << TQD('a', field) <<
     std::ostringstream q;
@@ -1785,7 +1785,7 @@ Ref<AutoscanDirectory> SQLStorage::getAutoscanDirectory(int objectID)
         return _fillAutoscanDirectory(row);
 }
 
-Ref<AutoscanDirectory> SQLStorage::_fillAutoscanDirectory(const std::unique_ptr<SQLRow>& row)
+std::shared_ptr<AutoscanDirectory> SQLStorage::_fillAutoscanDirectory(const std::unique_ptr<SQLRow>& row)
 {
     int objectID = INVALID_OBJECT_ID;
     std::string objectIDstr = row->col(1);
@@ -1815,7 +1815,7 @@ Ref<AutoscanDirectory> SQLStorage::_fillAutoscanDirectory(const std::unique_ptr<
 
     //log_debug("adding autoscan location: {}; recursive: {}", location.c_str(), recursive);
 
-    Ref<AutoscanDirectory> dir(new AutoscanDirectory(location, mode, level, recursive, persistent, INVALID_SCAN_ID, interval, hidden));
+    std::shared_ptr<AutoscanDirectory> dir(new AutoscanDirectory(location, mode, level, recursive, persistent, INVALID_SCAN_ID, interval, hidden));
     dir->setObjectID(objectID);
     dir->setStorageID(storageID);
     dir->setCurrentLMT(last_modified);
@@ -1823,7 +1823,7 @@ Ref<AutoscanDirectory> SQLStorage::_fillAutoscanDirectory(const std::unique_ptr<
     return dir;
 }
 
-void SQLStorage::addAutoscanDirectory(Ref<AutoscanDirectory> adir)
+void SQLStorage::addAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir)
 {
     if (adir == nullptr)
         throw std::runtime_error("addAutoscanDirectory called with adir==nullptr");
@@ -1868,7 +1868,7 @@ void SQLStorage::addAutoscanDirectory(Ref<AutoscanDirectory> adir)
     adir->setStorageID(exec(q, true));
 }
 
-void SQLStorage::updateAutoscanDirectory(Ref<AutoscanDirectory> adir)
+void SQLStorage::updateAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir)
 {
     log_debug("id: {}, obj_id: {}", adir->getStorageID(), adir->getObjectID());
 
@@ -1984,7 +1984,7 @@ void SQLStorage::_autoscanChangePersistentFlag(int objectID, bool persistent)
     exec(q);
 }
 
-void SQLStorage::autoscanUpdateLM(Ref<AutoscanDirectory> adir)
+void SQLStorage::autoscanUpdateLM(std::shared_ptr<AutoscanDirectory> adir)
 {
     /*
     int objectID = adir->getObjectID();
@@ -2017,12 +2017,12 @@ int SQLStorage::isAutoscanChild(int objectID)
     return INVALID_OBJECT_ID;
 }
 
-void SQLStorage::checkOverlappingAutoscans(Ref<AutoscanDirectory> adir)
+void SQLStorage::checkOverlappingAutoscans(std::shared_ptr<AutoscanDirectory> adir)
 {
     _checkOverlappingAutoscans(adir);
 }
 
-std::unique_ptr<std::vector<int>> SQLStorage::_checkOverlappingAutoscans(Ref<AutoscanDirectory> adir)
+std::unique_ptr<std::vector<int>> SQLStorage::_checkOverlappingAutoscans(std::shared_ptr<AutoscanDirectory> adir)
 {
     if (adir == nullptr)
         throw std::runtime_error("_checkOverlappingAutoscans called with adir==nullptr");

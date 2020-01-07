@@ -66,20 +66,20 @@ public:
     ///
     /// \param dir AutoscanDirectory to add to the list.
     /// \return scanID of the newly added AutoscanDirectory
-    int add(zmm::Ref<AutoscanDirectory> dir);
+    int add(std::shared_ptr<AutoscanDirectory> dir);
 
     void addList(zmm::Ref<AutoscanList> list);
 
-    zmm::Ref<AutoscanDirectory> get(int id);
+    std::shared_ptr<AutoscanDirectory> get(size_t id);
 
-    zmm::Ref<AutoscanDirectory> get(std::string location);
+    std::shared_ptr<AutoscanDirectory> get(std::string location);
 
-    zmm::Ref<AutoscanDirectory> getByObjectID(int objectID);
+    std::shared_ptr<AutoscanDirectory> getByObjectID(int objectID);
 
-    int size() { return list->size(); }
+    size_t size() { return list.size(); }
 
     /// \brief removes the AutoscanDirectory given by its scan ID
-    void remove(int id);
+    void remove(size_t id);
 
     int removeByObjectID(int objectID);
 
@@ -116,7 +116,7 @@ public:
     void updateLMinDB();
 
     /// \brief returns a copy of the autoscan list in the form of an array
-    zmm::Ref<zmm::Array<AutoscanDirectory>> getArrayCopy();
+    std::vector<std::shared_ptr<AutoscanDirectory>> getArrayCopy();
 
     /*
     void dump();
@@ -128,12 +128,12 @@ protected:
     std::recursive_mutex mutex;
     using AutoLock = std::lock_guard<std::recursive_mutex>;
 
-    zmm::Ref<zmm::Array<AutoscanDirectory>> list;
-    int _add(zmm::Ref<AutoscanDirectory> dir);
+    std::vector<std::shared_ptr<AutoscanDirectory>> list;
+    int _add(std::shared_ptr<AutoscanDirectory> dir);
 };
 
 /// \brief Provides information about one autoscan directory.
-class AutoscanDirectory : public zmm::Object {
+class AutoscanDirectory {
 public:
     AutoscanDirectory();
 
@@ -231,7 +231,7 @@ public:
     }
 
     /// \brief copies all properties to another object
-    void copyTo(zmm::Ref<AutoscanDirectory> copy);
+    void copyTo(std::shared_ptr<AutoscanDirectory> copy);
 
     /// \brief Set the parameter for timer notify that is associated with
     /// the particular autoscan directory.

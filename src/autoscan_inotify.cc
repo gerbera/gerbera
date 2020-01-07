@@ -40,8 +40,6 @@
 #include <dirent.h>
 #include <sys/stat.h>
 
-#define AUTOSCAN_INOTIFY_INITIAL_QUEUE_SIZE 20
-
 #define INOTIFY_MAX_USER_WATCHES_FILE "/proc/sys/fs/inotify/max_user_watches"
 
 using namespace zmm;
@@ -62,8 +60,6 @@ AutoscanInotify::AutoscanInotify(std::shared_ptr<Storage> storage, std::shared_p
 
     watches = make_shared<unordered_map<int, Ref<Wd>>>();
     shutdownFlag = true;
-    monitorQueue = Ref<ObjectQueue<AutoscanDirectory>>(new ObjectQueue<AutoscanDirectory>(AUTOSCAN_INOTIFY_INITIAL_QUEUE_SIZE));
-    unmonitorQueue = Ref<ObjectQueue<AutoscanDirectory>>(new ObjectQueue<AutoscanDirectory>(AUTOSCAN_INOTIFY_INITIAL_QUEUE_SIZE));
     events = IN_CLOSE_WRITE | IN_CREATE | IN_MOVED_FROM | IN_MOVED_TO | IN_DELETE | IN_DELETE_SELF | IN_MOVE_SELF | IN_UNMOUNT;
 }
 
@@ -85,6 +81,7 @@ AutoscanInotify::~AutoscanInotify()
 void AutoscanInotify::run()
 {
     AutoLock lock(mutex);
+
     if (shutdownFlag) {
         shutdownFlag = false;
         inotify = Ref<Inotify>(new Inotify());
@@ -96,10 +93,12 @@ void AutoscanInotify::threadProc()
 {
     while (!shutdownFlag) {
         try {
-            Ref<AutoscanDirectory> adir;
-
             unique_lock<std::mutex> lock(mutex);
-            while ((adir = unmonitorQueue->dequeue()) != nullptr) {
+
+            while (!unmonitorQueue.empty()) {
+                auto adir = unmonitorQueue.front();
+                unmonitorQueue.pop();
+
                 lock.unlock();
 
                 std::string location = normalizePathNoEx(adir->getLocation());
@@ -119,7 +118,10 @@ void AutoscanInotify::threadProc()
                 lock.lock();
             }
 
-            while ((adir = monitorQueue->dequeue()) != nullptr) {
+            while (!monitorQueue.empty()) {
+                auto adir = monitorQueue.front();
+                monitorQueue.pop();
+
                 lock.unlock();
 
                 std::string location = normalizePathNoEx(adir->getLocation());
@@ -166,7 +168,7 @@ void AutoscanInotify::threadProc()
                     pathBuf << name;
                 std::string path(pathBuf.str());
 
-                Ref<AutoscanDirectory> adir;
+                std::shared_ptr<AutoscanDirectory> adir;
                 Ref<WatchAutoscan> watchAs = getAppropriateAutoscan(wdObj, path);
                 if (watchAs != nullptr)
                     adir = watchAs->getAutoscanDirectory();
@@ -245,23 +247,23 @@ void AutoscanInotify::threadProc()
     }
 }
 
-void AutoscanInotify::monitor(zmm::Ref<AutoscanDirectory> dir)
+void AutoscanInotify::monitor(std::shared_ptr<AutoscanDirectory> dir)
 {
     assert(dir->getScanMode() == ScanMode::INotify);
     log_debug("Requested to monitor \"{}\"", dir->getLocation().c_str());
     AutoLock lock(mutex);
-    monitorQueue->enqueue(dir);
+    monitorQueue.push(dir);
     inotify->stop();
 }
 
-void AutoscanInotify::unmonitor(zmm::Ref<AutoscanDirectory> dir)
+void AutoscanInotify::unmonitor(std::shared_ptr<AutoscanDirectory> dir)
 {
     // must not be persistent
     assert(!dir->persistent());
 
     log_debug("Requested to stop monitoring \"{}\"", dir->getLocation().c_str());
     AutoLock lock(mutex);
-    unmonitorQueue->enqueue(dir);
+    unmonitorQueue.push(dir);
     inotify->stop();
 }
 
@@ -317,14 +319,14 @@ int AutoscanInotify::addMoveWatch(std::string path, int removeWd, int parentWd)
     return wd;
 }
 
-void AutoscanInotify::monitorNonexisting(std::string path, Ref<AutoscanDirectory> adir, std::string normalizedAutoscanPath)
+void AutoscanInotify::monitorNonexisting(std::string path, std::shared_ptr<AutoscanDirectory> adir, std::string normalizedAutoscanPath)
 {
     std::string pathTmp = path;
     auto pathAr = split_string(path, DIR_SEPARATOR);
     recheckNonexistingMonitor(-1, pathAr, adir, normalizedAutoscanPath);
 }
 
-void AutoscanInotify::recheckNonexistingMonitor(int curWd, std::vector<std::string> pathAr, Ref<AutoscanDirectory> adir, std::string normalizedAutoscanPath)
+void AutoscanInotify::recheckNonexistingMonitor(int curWd, std::vector<std::string> pathAr, std::shared_ptr<AutoscanDirectory> adir, std::string normalizedAutoscanPath)
 {
     bool first = true;
     for (int i = pathAr.size(); i >= 0; i--) {
@@ -384,7 +386,7 @@ void AutoscanInotify::checkMoveWatches(int wd, Ref<Wd> wdObj)
                 inotify->removeWatch(removeWd);
                 Ref<WatchAutoscan> watch = getStartPoint(wdToRemove);
                 if (watch != nullptr) {
-                    Ref<AutoscanDirectory> adir = watch->getAutoscanDirectory();
+                    std::shared_ptr<AutoscanDirectory> adir = watch->getAutoscanDirectory();
                     if (adir->persistent()) {
                         monitorNonexisting(path, adir, watch->getNormalizedAutoscanPath());
                         content->handlePeristentAutoscanRemove(adir->getScanID(), ScanMode::INotify);
@@ -441,7 +443,7 @@ void AutoscanInotify::removeNonexistingMonitor(int wd, Ref<Wd> wdObj, std::vecto
     }
 }
 
-void AutoscanInotify::monitorUnmonitorRecursive(std::string startPath, bool unmonitor, Ref<AutoscanDirectory> adir, std::string normalizedAutoscanPath, bool startPoint)
+void AutoscanInotify::monitorUnmonitorRecursive(std::string startPath, bool unmonitor, std::shared_ptr<AutoscanDirectory> adir, std::string normalizedAutoscanPath, bool startPoint)
 {
     std::string location;
     if (unmonitor)
@@ -483,7 +485,7 @@ void AutoscanInotify::monitorUnmonitorRecursive(std::string startPath, bool unmo
     closedir(dir);
 }
 
-int AutoscanInotify::monitorDirectory(std::string pathOri, Ref<AutoscanDirectory> adir, std::string normalizedAutoscanPath, bool startPoint, std::vector<std::string>* pathArray)
+int AutoscanInotify::monitorDirectory(std::string pathOri, std::shared_ptr<AutoscanDirectory> adir, std::string normalizedAutoscanPath, bool startPoint, std::vector<std::string>* pathArray)
 {
     std::string path = pathOri;
     if (path.length() > 0 && path[path.length() - 1] != DIR_SEPARATOR) {
@@ -536,7 +538,7 @@ int AutoscanInotify::monitorDirectory(std::string pathOri, Ref<AutoscanDirectory
     return wd;
 }
 
-void AutoscanInotify::unmonitorDirectory(std::string path, Ref<AutoscanDirectory> adir)
+void AutoscanInotify::unmonitorDirectory(std::string path, std::shared_ptr<AutoscanDirectory> adir)
 {
     if (path.length() > 0 && path[path.length() - 1] != DIR_SEPARATOR) {
         path = path + DIR_SEPARATOR;
@@ -574,7 +576,7 @@ void AutoscanInotify::unmonitorDirectory(std::string path, Ref<AutoscanDirectory
     }
 }
 
-Ref<AutoscanInotify::WatchAutoscan> AutoscanInotify::getAppropriateAutoscan(Ref<Wd> wdObj, Ref<AutoscanDirectory> adir)
+Ref<AutoscanInotify::WatchAutoscan> AutoscanInotify::getAppropriateAutoscan(Ref<Wd> wdObj, std::shared_ptr<AutoscanDirectory> adir)
 {
     Ref<Watch> watch;
     Ref<WatchAutoscan> watchAs;
@@ -707,7 +709,7 @@ Ref<AutoscanInotify::WatchAutoscan> AutoscanInotify::getStartPoint(Ref<Wd> wdObj
     return nullptr;
 }
 
-void AutoscanInotify::addDescendant(int startPointWd, int addWd, Ref<AutoscanDirectory> adir)
+void AutoscanInotify::addDescendant(int startPointWd, int addWd, std::shared_ptr<AutoscanDirectory> adir)
 {
     //    log_debug("called for {}, (adir->path={}); adding {}", startPointWd, adir->getLocation().c_str(), addWd);
     Ref<Wd> wdObj = nullptr;

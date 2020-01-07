@@ -178,14 +178,17 @@ std::shared_ptr<Session> SessionManager::getSession(std::string sessionID, bool 
 void SessionManager::removeSession(std::string sessionID)
 {
     AutoLock lock(mutex);
-    for (size_t i = 0; i < sessions.size(); i++) {
-        auto s = sessions[i];
+
+    for (auto it = sessions.begin(); it != sessions.end(); /*++it*/) {
+        auto& s = *it;
+
         if (s->getID() == sessionID) {
-            sessions.erase(sessions.begin() + i);
+            it = sessions.erase(it);
             checkTimer();
-            i--; // to not skip a session. the removed id is now taken by another session
             return;
         }
+        else
+            ++it;
     }
 }
 
@@ -232,17 +235,22 @@ void SessionManager::checkTimer()
 void SessionManager::timerNotify(std::shared_ptr<Timer::Parameter> parameter)
 {
     log_debug("notified... {} web sessions.", sessions.size());
+
     AutoLock lock(mutex);
+
     struct timespec now;
     getTimespecNow(&now);
-    for (size_t i = 0; i < sessions.size(); i++) {
-        auto session = sessions[i];
+
+    for (auto it = sessions.begin(); it != sessions.end(); /*++it*/) {
+        auto& session = *it;
+
         if (getDeltaMillis(session->getLastAccessTime(), &now) > 1000 * session->getTimeout()) {
             log_debug("session timeout: {} - diff: {}", session->getID().c_str(), getDeltaMillis(session->getLastAccessTime(), &now));
-            sessions.erase(sessions.begin() + i);
+            it = sessions.erase(it);
             checkTimer();
-            i--; // to not skip a session. the removed id is now taken by another session
         }
+        else
+            ++it;
     }
 }
 

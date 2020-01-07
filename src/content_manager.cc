@@ -144,9 +144,8 @@ ContentManager::ContentManager(std::shared_ptr<ConfigManager> config, std::share
     mimetype_contenttype_map = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
 
     auto config_timed_list = config->getAutoscanListOption(CFG_IMPORT_AUTOSCAN_TIMED_LIST);
-    int i;
-    for (i = 0; i < config_timed_list->size(); i++) {
-        Ref<AutoscanDirectory> dir = config_timed_list->get(i);
+    for (size_t i = 0; i < config_timed_list->size(); i++) {
+        auto dir = config_timed_list->get(i);
         if (dir != nullptr) {
             std::string path = dir->getLocation();
             if (check_path(path, true)) {
@@ -169,8 +168,8 @@ void ContentManager::init()
 
     if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
         auto config_inotify_list = config->getAutoscanListOption(CFG_IMPORT_AUTOSCAN_INOTIFY_LIST);
-        for (i = 0; i < config_inotify_list->size(); i++) {
-            Ref<AutoscanDirectory> dir = config_inotify_list->get(i);
+        for (size_t i = 0; i < config_inotify_list->size(); i++) {
+            auto dir = config_inotify_list->get(i);
             if (dir != nullptr) {
                 std::string path = dir->getLocation();
                 if (check_path(path, true)) {
@@ -285,16 +284,16 @@ void ContentManager::init()
 #ifdef HAVE_INOTIFY
     if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
         /// \todo change this (we need a new autoscan architecture)
-        for (int i = 0; i < autoscan_inotify->size(); i++) {
-            Ref<AutoscanDirectory> dir = autoscan_inotify->get(i);
+        for (size_t i = 0; i < autoscan_inotify->size(); i++) {
+            std::shared_ptr<AutoscanDirectory> dir = autoscan_inotify->get(i);
             if (dir != nullptr)
                 inotify->monitor(dir);
         }
     }
 #endif
 
-    for (int i = 0; i < autoscan_timed->size(); i++) {
-        Ref<AutoscanDirectory> dir = autoscan_timed->get(i);
+    for (size_t i = 0; i < autoscan_timed->size(); i++) {
+        std::shared_ptr<AutoscanDirectory> dir = autoscan_timed->get(i);
         auto param = std::make_shared<Timer::Parameter>(Timer::Parameter::timer_param_t::IDAutoscan, dir->getScanID());
         log_debug("Adding timed scan with interval {}", dir->getInterval());
         timer->addTimerSubscriber(this, dir->getInterval(), param, false);
@@ -321,9 +320,14 @@ void ContentManager::unregisterExecutor(std::shared_ptr<Executor> exec)
         return;
 
     AutoLock lock(mutex);
-    for (size_t i = 0; i < process_list.size(); i++) {
-        if (process_list[i] == exec)
-            process_list.erase(process_list.begin() + i);
+
+    for (auto it = process_list.begin(); it != process_list.end(); /*++it*/) {
+        auto& e = *it;
+
+        if (e == exec)
+            it = process_list.erase(it);
+        else
+            ++it;
     }
 }
 
@@ -333,7 +337,7 @@ void ContentManager::timerNotify(std::shared_ptr<Timer::Parameter> parameter)
         return;
 
     if (parameter->whoami() == Timer::Parameter::IDAutoscan) {
-        Ref<AutoscanDirectory> dir = autoscan_timed->get(parameter->getID());
+        std::shared_ptr<AutoscanDirectory> dir = autoscan_timed->get(parameter->getID());
         if (dir == nullptr)
             return;
 
@@ -360,9 +364,9 @@ void ContentManager::shutdown()
     destroyLayout();
 
 #ifdef HAVE_INOTIFY
-    for (int i = 0; i < autoscan_inotify->size(); i++) {
+    for (size_t i = 0; i < autoscan_inotify->size(); i++) {
         log_debug("AutoDir {}", i);
-        Ref<AutoscanDirectory> dir = autoscan_inotify->get(i);
+        std::shared_ptr<AutoscanDirectory> dir = autoscan_inotify->get(i);
         if (dir != nullptr) {
             try {
                 dir->resetLMT();
@@ -579,7 +583,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
     if (scanID == INVALID_SCAN_ID)
         return;
 
-    Ref<AutoscanDirectory> adir = getAutoscanDirectory(scanID, scanMode);
+    std::shared_ptr<AutoscanDirectory> adir = getAutoscanDirectory(scanID, scanMode);
     if (adir == nullptr)
         throw std::runtime_error("ID valid but nullptr returned? this should never happen");
 
@@ -1465,18 +1469,16 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
         }
 
         if (IS_CDS_CONTAINER(obj->getObjectType())) {
-            int i;
-
             // make sure to remove possible child autoscan directories from the scanlist
             Ref<AutoscanList> rm_list = autoscan_timed->removeIfSubdir(path);
-            for (i = 0; i < rm_list->size(); i++) {
+            for (size_t i = 0; i < rm_list->size(); i++) {
                 timer->removeTimerSubscriber(this, rm_list->get(i)->getTimerParameter(), true);
             }
 #ifdef HAVE_INOTIFY
             if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
                 rm_list = autoscan_inotify->removeIfSubdir(path);
-                for (i = 0; i < rm_list->size(); i++) {
-                    Ref<AutoscanDirectory> dir = rm_list->get(i);
+                for (size_t i = 0; i < rm_list->size(); i++) {
+                    std::shared_ptr<AutoscanDirectory> dir = rm_list->get(i);
                     inotify->unmonitor(dir);
                 }
             }
@@ -1487,13 +1489,13 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
 
             // we have to make sure that a currently running autoscan task will not
             // launch add tasks for directories that anyway are going to be deleted
-            for (i = 0; i < qsize; i++) {
+            for (int i = 0; i < qsize; i++) {
                 Ref<GenericTask> t = taskQueue1->get(i);
                 invalidateAddTask(t, path);
             }
 
             qsize = taskQueue2->size();
-            for (i = 0; i < qsize; i++) {
+            for (int i = 0; i < qsize; i++) {
                 Ref<GenericTask> t = taskQueue2->get(i);
                 invalidateAddTask(t, path);
             }
@@ -1515,7 +1517,7 @@ void ContentManager::rescanDirectory(int objectID, int scanID, ScanMode scanMode
     // building container path for the description
     auto self = shared_from_this();
     Ref<GenericTask> task(new CMRescanDirectoryTask(self, objectID, scanID, scanMode, cancellable));
-    Ref<AutoscanDirectory> dir = getAutoscanDirectory(scanID, scanMode);
+    std::shared_ptr<AutoscanDirectory> dir = getAutoscanDirectory(scanID, scanMode);
     if (dir == nullptr)
         return;
 
@@ -1533,7 +1535,7 @@ void ContentManager::rescanDirectory(int objectID, int scanID, ScanMode scanMode
     addTask(task, true); // adding with low priority
 }
 
-Ref<AutoscanDirectory> ContentManager::getAutoscanDirectory(int scanID, ScanMode scanMode)
+std::shared_ptr<AutoscanDirectory> ContentManager::getAutoscanDirectory(int scanID, ScanMode scanMode)
 {
     if (scanMode == ScanMode::Timed) {
         return autoscan_timed->get(scanID);
@@ -1547,7 +1549,7 @@ Ref<AutoscanDirectory> ContentManager::getAutoscanDirectory(int scanID, ScanMode
     return nullptr;
 }
 
-Ref<Array<AutoscanDirectory>> ContentManager::getAutoscanDirectories(ScanMode scanMode)
+std::vector<std::shared_ptr<AutoscanDirectory>> ContentManager::getAutoscanDirectories(ScanMode scanMode)
 {
     if (scanMode == ScanMode::Timed) {
         return autoscan_timed->getArrayCopy();
@@ -1558,26 +1560,25 @@ Ref<Array<AutoscanDirectory>> ContentManager::getAutoscanDirectories(ScanMode sc
         return autoscan_inotify->getArrayCopy();
     }
 #endif
-    return nullptr;
+    return std::vector<std::shared_ptr<AutoscanDirectory>>();
 }
 
-Ref<Array<AutoscanDirectory>> ContentManager::getAutoscanDirectories()
+std::vector<std::shared_ptr<AutoscanDirectory>> ContentManager::getAutoscanDirectories()
 {
-    Ref<Array<AutoscanDirectory>> all = autoscan_timed->getArrayCopy();
+    auto all = autoscan_timed->getArrayCopy();
 
 #if HAVE_INOTIFY
-    Ref<Array<AutoscanDirectory>> ino = autoscan_inotify->getArrayCopy();
-    if (ino != nullptr)
-        for (int i = 0; i < ino->size(); i++)
-            all->append(ino->get(i));
+    auto ino = autoscan_inotify->getArrayCopy();
+    for (size_t i = 0; i < ino.size(); i++)
+        all.push_back(ino[i]);
 #endif
     return all;
 }
 
-Ref<AutoscanDirectory> ContentManager::getAutoscanDirectory(std::string location)
+std::shared_ptr<AutoscanDirectory> ContentManager::getAutoscanDirectory(std::string location)
 {
     // \todo change this when more scanmodes become available
-    Ref<AutoscanDirectory> dir = autoscan_timed->get(location);
+    std::shared_ptr<AutoscanDirectory> dir = autoscan_timed->get(location);
 #if HAVE_INOTIFY
     if (dir == nullptr)
         dir = autoscan_inotify->get(location);
@@ -1588,7 +1589,7 @@ Ref<AutoscanDirectory> ContentManager::getAutoscanDirectory(std::string location
 void ContentManager::removeAutoscanDirectory(int scanID, ScanMode scanMode)
 {
     if (scanMode == ScanMode::Timed) {
-        Ref<AutoscanDirectory> adir = autoscan_timed->get(scanID);
+        std::shared_ptr<AutoscanDirectory> adir = autoscan_timed->get(scanID);
         if (adir == nullptr)
             throw std::runtime_error("can not remove autoscan directory - was not an autoscan");
 
@@ -1602,7 +1603,7 @@ void ContentManager::removeAutoscanDirectory(int scanID, ScanMode scanMode)
 #ifdef HAVE_INOTIFY
     if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
         if (scanMode == ScanMode::INotify) {
-            Ref<AutoscanDirectory> adir = autoscan_inotify->get(scanID);
+            std::shared_ptr<AutoscanDirectory> adir = autoscan_inotify->get(scanID);
             if (adir == nullptr)
                 throw std::runtime_error("can not remove autoscan directory - was not an autoscan");
             autoscan_inotify->remove(scanID);
@@ -1616,7 +1617,7 @@ void ContentManager::removeAutoscanDirectory(int scanID, ScanMode scanMode)
 
 void ContentManager::removeAutoscanDirectory(int objectID)
 {
-    Ref<AutoscanDirectory> adir = storage->getAutoscanDirectory(objectID);
+    std::shared_ptr<AutoscanDirectory> adir = storage->getAutoscanDirectory(objectID);
     if (adir == nullptr)
         throw std::runtime_error("can not remove autoscan directory - was not an autoscan");
 
@@ -1641,7 +1642,7 @@ void ContentManager::removeAutoscanDirectory(int objectID)
 void ContentManager::removeAutoscanDirectory(std::string location)
 {
     /// \todo change this when more scanmodes become avaiable
-    Ref<AutoscanDirectory> adir = autoscan_timed->get(location);
+    std::shared_ptr<AutoscanDirectory> adir = autoscan_timed->get(location);
 #ifdef HAVE_INOTIFY
     if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
         if (adir == nullptr)
@@ -1656,7 +1657,7 @@ void ContentManager::removeAutoscanDirectory(std::string location)
 
 void ContentManager::handlePeristentAutoscanRemove(int scanID, ScanMode scanMode)
 {
-    Ref<AutoscanDirectory> adir = getAutoscanDirectory(scanID, scanMode);
+    std::shared_ptr<AutoscanDirectory> adir = getAutoscanDirectory(scanID, scanMode);
     if (adir->persistent()) {
         adir->setObjectID(INVALID_OBJECT_ID);
         storage->updateAutoscanDirectory(adir);
@@ -1668,15 +1669,15 @@ void ContentManager::handlePeristentAutoscanRemove(int scanID, ScanMode scanMode
 
 void ContentManager::handlePersistentAutoscanRecreate(int scanID, ScanMode scanMode)
 {
-    Ref<AutoscanDirectory> adir = getAutoscanDirectory(scanID, scanMode);
+    std::shared_ptr<AutoscanDirectory> adir = getAutoscanDirectory(scanID, scanMode);
     int id = ensurePathExistence(adir->getLocation());
     adir->setObjectID(id);
     storage->updateAutoscanDirectory(adir);
 }
 
-void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
+void ContentManager::setAutoscanDirectory(std::shared_ptr<AutoscanDirectory> dir)
 {
-    Ref<AutoscanDirectory> original;
+    std::shared_ptr<AutoscanDirectory> original;
 
     // We will have to change this for other scan modes
     original = autoscan_timed->getByObjectID(dir->getObjectID());
@@ -1737,7 +1738,7 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
     }
 #endif
 
-    Ref<AutoscanDirectory> copy(new AutoscanDirectory());
+    std::shared_ptr<AutoscanDirectory> copy(new AutoscanDirectory());
     original->copyTo(copy);
 
     // changing from full scan to basic scan need to reset last modification time
@@ -1863,7 +1864,7 @@ CMRescanDirectoryTask::CMRescanDirectoryTask(std::shared_ptr<ContentManager> con
 
 void CMRescanDirectoryTask::run()
 {
-    Ref<AutoscanDirectory> dir = content->getAutoscanDirectory(scanID, scanMode);
+    std::shared_ptr<AutoscanDirectory> dir = content->getAutoscanDirectory(scanID, scanMode);
     if (dir == nullptr)
         return;
 
