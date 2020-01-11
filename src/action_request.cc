@@ -31,9 +31,6 @@
 
 #include "action_request.h"
 
-using namespace zmm;
-using namespace mxml;
-
 ActionRequest::ActionRequest(UpnpActionRequest* upnp_request)
     : upnp_request(upnp_request)
     , errCode(UPNP_E_SUCCESS)
@@ -41,29 +38,33 @@ ActionRequest::ActionRequest(UpnpActionRequest* upnp_request)
     , UDN(UpnpActionRequest_get_DevUDN_cstr(upnp_request))
     , serviceID(UpnpActionRequest_get_ServiceID_cstr(upnp_request))
 {
-    DOMString cxml = ixmlPrintDocument(UpnpActionRequest_get_ActionRequest(upnp_request));
-    std::string xml = cxml;
-    ixmlFreeDOMString(cxml);
-
-    Ref<Parser> parser(new Parser());
-
-    request = parser->parseString(xml)->getRoot();
 }
 
 std::string ActionRequest::getActionName()
 {
     return actionName;
 }
+
 std::string ActionRequest::getUDN()
 {
     return UDN;
 }
+
 std::string ActionRequest::getServiceID()
 {
     return serviceID;
 }
-Ref<Element> ActionRequest::getRequest()
+
+std::unique_ptr<pugi::xml_document> ActionRequest::getRequest()
 {
+    DOMString cxml = ixmlPrintDocument(UpnpActionRequest_get_ActionRequest(upnp_request));
+    auto request = std::make_unique<pugi::xml_document>();
+    auto ret = request->load_string(cxml);
+    ixmlFreeDOMString(cxml);
+
+    if (ret.status != pugi::xml_parse_status::status_ok)
+        throw Exception("Unable to parse ixml");
+
     return request;
 }
 
@@ -71,6 +72,7 @@ void ActionRequest::setResponse(std::unique_ptr<pugi::xml_document>& response)
 {
     this->response = std::move(response);
 }
+
 void ActionRequest::setErrorCode(int errCode)
 {
     this->errCode = errCode;
