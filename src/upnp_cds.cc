@@ -58,19 +58,20 @@ ContentDirectoryService::~ContentDirectoryService() = default;
 void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& request)
 {
     log_debug("start");
-    Ref<Element> req = request->getRequest();
 
-    std::string objID = req->getChildText("ObjectID");
-    int objectID;
-    std::string BrowseFlag = req->getChildText("BrowseFlag");
+    auto req = request->getRequest();
+    auto req_root = req->document_element();
+    std::string objID = req_root.child("ObjectID").text().as_string();
+    std::string BrowseFlag = req_root.child("BrowseFlag").text().as_string();
     //std::string Filter; // not yet supported
-    std::string StartingIndex = req->getChildText("StartingIndex");
-    std::string RequestedCount = req->getChildText("RequestedCount");
+    std::string StartingIndex = req_root.child("StartingIndex").text().as_string();
+    std::string RequestedCount = req_root.child("RequestedCount").text().as_string();
     // std::string SortCriteria; // not yet supported
 
     log_debug("Browse received parameters: ObjectID [{}] BrowseFlag [{}] StartingIndex [{}] RequestedCount [{}]",
         objID.c_str(), BrowseFlag.c_str(), StartingIndex.c_str(), RequestedCount.c_str());
 
+    int objectID;
     if (objID.empty())
         throw UpnpException(UPNP_E_NO_SUCH_ID, "empty object id");
     else
@@ -134,11 +135,11 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
     }
 
     auto response = xmlBuilder->createResponse(request->getActionName(), DESC_CDS_SERVICE_TYPE);
-    auto root = response->document_element();
-    root.append_child("Result").append_child(pugi::node_pcdata).set_value(didl_lite->print().c_str());
-    root.append_child("NumberReturned").append_child(pugi::node_pcdata).set_value(std::to_string(arr.size()).c_str());
-    root.append_child("TotalMatches").append_child(pugi::node_pcdata).set_value(std::to_string(param->getTotalMatches()).c_str());
-    root.append_child("UpdateID").append_child(pugi::node_pcdata).set_value(std::to_string(systemUpdateID).c_str());
+    auto resp_root = response->document_element();
+    resp_root.append_child("Result").append_child(pugi::node_pcdata).set_value(didl_lite->print().c_str());
+    resp_root.append_child("NumberReturned").append_child(pugi::node_pcdata).set_value(std::to_string(arr.size()).c_str());
+    resp_root.append_child("TotalMatches").append_child(pugi::node_pcdata).set_value(std::to_string(param->getTotalMatches()).c_str());
+    resp_root.append_child("UpdateID").append_child(pugi::node_pcdata).set_value(std::to_string(systemUpdateID).c_str());
     request->setResponse(response);
 
     log_debug("end");
@@ -148,11 +149,13 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
 {
     log_debug("start");
 
-    Ref<Element> req = request->getRequest();
-    std::string containerID(req->getChildText("ContainerID").c_str());
-    std::string searchCriteria(req->getChildText("SearchCriteria").c_str());
-    std::string startingIndex(req->getChildText("StartingIndex").c_str());
-    std::string requestedCount(req->getChildText("RequestedCount").c_str());
+    auto req = request->getRequest();
+    auto req_root = req->document_element();
+    std::string containerID = req_root.child("ContainerID").text().as_string();
+    std::string searchCriteria = req_root.child("SearchCriteria").text().as_string();
+    std::string startingIndex = req_root.child("StartingIndex").text().as_string();
+    std::string requestedCount = req_root.child("RequestedCount").text().as_string();
+
     log_debug("Search received parameters: ContainerID [{}] SearchCriteria [{}] StartingIndex [{}] RequestedCount [{}]",
         containerID.c_str(), searchCriteria.c_str(), startingIndex.c_str(), requestedCount.c_str());
 
@@ -198,11 +201,11 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
     }
 
     auto response = xmlBuilder->createResponse(request->getActionName(), DESC_CDS_SERVICE_TYPE);
-    auto root = response->document_element();
-    root.append_child("Result").append_child(pugi::node_pcdata).set_value(didl_lite->print().c_str());
-    root.append_child("NumberReturned").append_child(pugi::node_pcdata).set_value(std::to_string(results.size()).c_str());
-    root.append_child("TotalMatches").append_child(pugi::node_pcdata).set_value(std::to_string(numMatches).c_str());
-    root.append_child("UpdateID").append_child(pugi::node_pcdata).set_value(std::to_string(systemUpdateID).c_str());
+    auto resp_root = response->document_element();
+    resp_root.append_child("Result").append_child(pugi::node_pcdata).set_value(didl_lite->print().c_str());
+    resp_root.append_child("NumberReturned").append_child(pugi::node_pcdata).set_value(std::to_string(results.size()).c_str());
+    resp_root.append_child("TotalMatches").append_child(pugi::node_pcdata).set_value(std::to_string(numMatches).c_str());
+    resp_root.append_child("UpdateID").append_child(pugi::node_pcdata).set_value(std::to_string(systemUpdateID).c_str());
     request->setResponse(response);
 
     log_debug("end");

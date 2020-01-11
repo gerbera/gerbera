@@ -38,7 +38,6 @@
 #include <pugixml.hpp>
 
 #include "common.h"
-#include "mxml/mxml.h"
 
 /// \brief This class represents the Upnp_Action_Request type from the SDK.
 ///
@@ -69,11 +68,6 @@ protected:
     /// Returned by getServiceID()
     std::string serviceID;
 
-    /// \brief XML holding the request that comes to us.
-    ///
-    /// Returned by getRequest()
-    zmm::Ref<mxml::Element> request;
-
     /// \brief XML holding the response, we fill it in.
     ///
     /// Set by setResponse()
@@ -93,8 +87,8 @@ public:
     /// \brief Returns the ID of the service (the action is for this service id)
     std::string getServiceID();
 
-    /// \brief Returns the XML representation of the request.
-    zmm::Ref<mxml::Element> getRequest();
+    /// \brief Returns the XML representation of the request, that comes to us.
+    std::unique_ptr<pugi::xml_document> getRequest();
 
     /// \brief Sets the response (XML created outside as the answer to the request)
     /// \param response XML holding the action response.
