@@ -1014,7 +1014,7 @@ probably the time to take a closer look.
 
          // Perform m3u specific parsing:
 
-         var matches = line.match(/^#EXTINF:(-?\d+),(\S.+)$/i);
+         var matches = line.match(/^#EXTINF:(-?\d+),\s?(\S.+)$/i);
          if (matches) {
              // duration = matches[1]; // currently unused
              title = matches[2];

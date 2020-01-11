@@ -78,7 +78,7 @@ if (type === '') {
     title = null;
     line = readln();
     do {
-        var matches = line.match(/^#EXTINF:(-?\d+),(\S.+)$/i);
+        var matches = line.match(/^#EXTINF:(-?\d+),\s?(\S.+)$/i);
         if (matches) {
             // duration = matches[1]; // currently unused
             title = matches[2];
