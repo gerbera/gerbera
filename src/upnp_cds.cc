@@ -133,14 +133,14 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
         didl_lite->appendElementChild(didl_object);
     }
 
-    Ref<Element> response = xmlBuilder->createResponse(request->getActionName(), DESC_CDS_SERVICE_TYPE);
-
-    response->appendTextChild("Result", didl_lite->print());
-    response->appendTextChild("NumberReturned", std::to_string(arr.size()));
-    response->appendTextChild("TotalMatches", std::to_string(param->getTotalMatches()));
-    response->appendTextChild("UpdateID", std::to_string(systemUpdateID));
-
+    auto response = xmlBuilder->createResponse(request->getActionName(), DESC_CDS_SERVICE_TYPE);
+    auto root = response->document_element();
+    root.append_child("Result").append_child(pugi::node_pcdata).set_value(didl_lite->print().c_str());
+    root.append_child("NumberReturned").append_child(pugi::node_pcdata).set_value(std::to_string(arr.size()).c_str());
+    root.append_child("TotalMatches").append_child(pugi::node_pcdata).set_value(std::to_string(param->getTotalMatches()).c_str());
+    root.append_child("UpdateID").append_child(pugi::node_pcdata).set_value(std::to_string(systemUpdateID).c_str());
     request->setResponse(response);
+
     log_debug("end");
 }
 
@@ -197,14 +197,14 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
         didl_lite->appendElementChild(didl_object);
     }
 
-    Ref<Element> response = xmlBuilder->createResponse(request->getActionName(), DESC_CDS_SERVICE_TYPE);
-
-    response->appendTextChild("Result", didl_lite->print());
-    response->appendTextChild("NumberReturned", std::to_string(results.size()));
-    response->appendTextChild("TotalMatches", std::to_string(numMatches));
-    response->appendTextChild("UpdateID", std::to_string(systemUpdateID));
-
+    auto response = xmlBuilder->createResponse(request->getActionName(), DESC_CDS_SERVICE_TYPE);
+    auto root = response->document_element();
+    root.append_child("Result").append_child(pugi::node_pcdata).set_value(didl_lite->print().c_str());
+    root.append_child("NumberReturned").append_child(pugi::node_pcdata).set_value(std::to_string(results.size()).c_str());
+    root.append_child("TotalMatches").append_child(pugi::node_pcdata).set_value(std::to_string(numMatches).c_str());
+    root.append_child("UpdateID").append_child(pugi::node_pcdata).set_value(std::to_string(systemUpdateID).c_str());
     request->setResponse(response);
+
     log_debug("end");
 }
 
@@ -212,10 +212,9 @@ void ContentDirectoryService::doGetSearchCapabilities(const std::unique_ptr<Acti
 {
     log_debug("start");
 
-    Ref<Element> response;
-    response = xmlBuilder->createResponse(request->getActionName(), DESC_CDS_SERVICE_TYPE);
-    response->appendTextChild("SearchCaps", "dc:title,upnp:class,upnp:artist,upnp:album");
-
+    auto response = xmlBuilder->createResponse(request->getActionName(), DESC_CDS_SERVICE_TYPE);
+    auto root = response->document_element();
+    root.append_child("SearchCaps").append_child(pugi::node_pcdata).set_value("dc:title,upnp:class,upnp:artist,upnp:album");
     request->setResponse(response);
 
     log_debug("end");
@@ -225,10 +224,9 @@ void ContentDirectoryService::doGetSortCapabilities(const std::unique_ptr<Action
 {
     log_debug("start");
 
-    Ref<Element> response;
-    response = xmlBuilder->createResponse(request->getActionName(), DESC_CDS_SERVICE_TYPE);
-    response->appendTextChild("SortCaps", "");
-
+    auto response = xmlBuilder->createResponse(request->getActionName(), DESC_CDS_SERVICE_TYPE);
+    auto root = response->document_element();
+    root.append_child("SortCaps").append_child(pugi::node_pcdata).set_value("");
     request->setResponse(response);
 
     log_debug("end");
@@ -238,10 +236,9 @@ void ContentDirectoryService::doGetSystemUpdateID(const std::unique_ptr<ActionRe
 {
     log_debug("start");
 
-    Ref<Element> response;
-    response = xmlBuilder->createResponse(request->getActionName(), DESC_CDS_SERVICE_TYPE);
-    response->appendTextChild("Id", std::to_string(systemUpdateID));
-
+    auto response = xmlBuilder->createResponse(request->getActionName(), DESC_CDS_SERVICE_TYPE);
+    auto root = response->document_element();
+    root.append_child("Id").append_child(pugi::node_pcdata).set_value(std::to_string(systemUpdateID).c_str());
     request->setResponse(response);
 
     log_debug("end");

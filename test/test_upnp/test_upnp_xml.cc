@@ -110,11 +110,12 @@ TEST_F(UpnpXmlTest, CreateResponse) {
   std::string actionName = "action";
   std::string serviceType = "urn:schemas-upnp-org:service:ContentDirectory:1";
 
-  zmm::Ref<mxml::Element> result = subject->createResponse(actionName, serviceType);
-
+  auto result = subject->createResponse(actionName, serviceType);
   EXPECT_NE(result, nullptr);
-  EXPECT_STREQ(result->getName().c_str(), "u:actionResponse");
-  EXPECT_STREQ(result->getAttribute("xmlns:u").c_str(), "urn:schemas-upnp-org:service:ContentDirectory:1");
+
+  auto root = result->document_element();
+  EXPECT_STREQ(root.name(), "u:actionResponse");
+  EXPECT_STREQ(root.attribute("xmlns:u").value(), "urn:schemas-upnp-org:service:ContentDirectory:1");
 }
 
 TEST_F(UpnpXmlTest, FirstResourceRendersPureWhenExternalUrl) {

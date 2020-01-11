@@ -67,9 +67,9 @@ Ref<Element> ActionRequest::getRequest()
     return request;
 }
 
-void ActionRequest::setResponse(Ref<Element> response)
+void ActionRequest::setResponse(std::unique_ptr<pugi::xml_document>& response)
 {
-    this->response = response;
+    this->response = std::move(response);
 }
 void ActionRequest::setErrorCode(int errCode)
 {
@@ -79,7 +79,9 @@ void ActionRequest::setErrorCode(int errCode)
 void ActionRequest::update()
 {
     if (response != nullptr) {
-        std::string xml = response->print();
+        std::stringstream buf;
+        response->document_element().print(buf);
+        std::string xml = buf.str();
         log_debug("ActionRequest::update(): {}", xml.c_str());
 
         IXML_Document* result = ixmlDocument_createDocument();

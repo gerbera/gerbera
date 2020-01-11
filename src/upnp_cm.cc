@@ -54,9 +54,9 @@ void ConnectionManagerService::doGetCurrentConnectionIDs(const std::unique_ptr<A
 {
     log_debug("start");
 
-    Ref<Element> response;
-    response = xmlBuilder->createResponse(request->getActionName(), DESC_CM_SERVICE_TYPE);
-    response->appendTextChild("ConnectionID", "0");
+    auto response = xmlBuilder->createResponse(request->getActionName(), DESC_CM_SERVICE_TYPE);
+    auto root = response->document_element();
+    root.append_child("ConnectionID").append_child(pugi::node_pcdata).set_value("0");
 
     request->setResponse(response);
     request->setErrorCode(UPNP_E_SUCCESS);
@@ -77,14 +77,14 @@ void ConnectionManagerService::doGetProtocolInfo(const std::unique_ptr<ActionReq
 {
     log_debug("start");
 
-    Ref<Element> response;
-    response = xmlBuilder->createResponse(request->getActionName(), DESC_CM_SERVICE_TYPE);
+    auto response = xmlBuilder->createResponse(request->getActionName(), DESC_CM_SERVICE_TYPE);
 
     std::vector<std::string> mimeTypes = storage->getMimeTypes();
     std::string CSV = mime_types_to_CSV(mimeTypes);
 
-    response->appendTextChild("Source", CSV);
-    response->appendTextChild("Sink", "");
+    auto root = response->document_element();
+    root.append_child("Source").append_child(pugi::node_pcdata).set_value(CSV.c_str());
+    root.append_child("Sink").append_child(pugi::node_pcdata).set_value("");
 
     request->setResponse(response);
     request->setErrorCode(UPNP_E_SUCCESS);

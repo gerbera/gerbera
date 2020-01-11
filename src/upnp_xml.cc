@@ -49,10 +49,11 @@ UpnpXMLBuilder::UpnpXMLBuilder(std::shared_ptr<ConfigManager> config,
 {
 }
 
-Ref<Element> UpnpXMLBuilder::createResponse(std::string actionName, std::string serviceType)
+std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createResponse(std::string actionName, std::string serviceType)
 {
-    Ref<Element> response(new Element("u:" + actionName + "Response"));
-    response->setAttribute("xmlns:u", serviceType);
+    auto response = std::make_unique<pugi::xml_document>();
+    auto root = response->append_child(("u:" + actionName + "Response").c_str());
+    root.append_attribute("xmlns:u") = serviceType.c_str();
 
     return response;
 }
