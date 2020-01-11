@@ -78,12 +78,12 @@ if (type === '') {
     title = null;
     line = readln();
     do {
-        if (line.match(/^#EXTINF:(-?\d+),(\S.+)$/i)) {
-            // duration = RegExp.$1; // currently unused
-            matches = line.match(/^#EXTINF:(-?\d+),(\S.+)$/i);
+        var matches = line.match(/^#EXTINF:(-?\d+),(\S.+)$/i);
+        if (matches) {
+            // duration = matches[1]; // currently unused
             title = matches[2];
         }
-        else if (! line.match(/^(#|\s*$)/)) {
+        else if (!line.match(/^(#|\s*$)/)) {
             addPlaylistItem(line, title, playlistChain);
             if (playlistDirChain)
                 addPlaylistItem(line, title, playlistDirChain);

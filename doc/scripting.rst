@@ -1009,20 +1009,18 @@ probably the time to take a closer look.
       // Here is the do - while loop which will read the playlist line by line.
       do
       {
-
          // Read the line:
          line = readln();
 
          // Perform m3u specific parsing:
 
-         if (line.match(/^#EXTINF:(\d+),(\S.+)$/i))
-         {
-            // duration = RegExp.$1; // currently unused
-            title = RegExp.$2;
+         var matches = line.match(/^#EXTINF:(-?\d+),(\S.+)$/i);
+         if (matches) {
+             // duration = matches[1]; // currently unused
+             title = matches[2];
          }
          else if (! line.match(/^(#|\s*$)/))
          {
-
             // Call the helper function to add the item once you gathered the data:
             addPlaylistItem(line, title, playlistChain);
             title = null;
