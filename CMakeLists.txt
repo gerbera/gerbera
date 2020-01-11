@@ -311,6 +311,11 @@ endif()
 find_package(Threads REQUIRED)
 target_link_libraries(gerbera ${CMAKE_THREAD_LIBS_INIT})
 
+check_library_exists(atomic __atomic_fetch_add_4 "" HAVE_ATOMIC)
+if(HAVE_ATOMIC)
+    target_link_libraries(gerbera atomic)
+endif(HAVE_ATOMIC)
+
 find_package(Iconv REQUIRED)
 include_directories(${ICONV_INCLUDE_DIR})
 target_link_libraries(gerbera ${ICONV_LIBRARIES})
