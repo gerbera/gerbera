@@ -85,7 +85,7 @@ sudo make install
 #### On Ubuntu 16.04
 ```
 apt-get install uuid-dev libexpat1-dev libsqlite3-dev libmysqlclient-dev \
-libmagic-dev libexif-dev libcurl4-openssl-dev
+libmagic-dev libexif-dev libcurl4-openssl-dev libspdlog-dev
 # If building with LibAV/FFmpeg (-DWITH_AVCODEC=1)
 apt-get install libavutil-dev libavcodec-dev libavformat-dev libavdevice-dev \
 libavfilter-dev libavresample-dev libswscale-dev libswresample-dev libpostproc-dev
@@ -134,6 +134,7 @@ The Gerbera Team maintains a Homebrew Tap to allow for easy installation of Gerb
 | libiconv     	|         	| Required  	|                      	     |                     |          |
 | sqlite3      	|         	| Required  	| Database storage     	     |                     |          |
 | zlib          |        	| Required  	|                            |                     |          |
+| spdlog        |        	| Required  	|                            |                     |          |
 | duktape      	| 2.1.0   	| Optional  	| Scripting Support    	     | WITH_JS             | Enabled  |
 | mysql        	|         	| Optional  	| Alternate database storage | WITH_MYSQL          | Disabled |
 | curl         	|         	| Optional  	| Enables web services 	     | WITH_CURL           | Enabled  |
