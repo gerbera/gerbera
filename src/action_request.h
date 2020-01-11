@@ -33,7 +33,9 @@
 #ifndef __ACTION_REQUEST_H__
 #define __ACTION_REQUEST_H__
 
+#include <memory>
 #include <upnp.h>
+#include <pugixml.hpp>
 
 #include "common.h"
 #include "mxml/mxml.h"
@@ -75,7 +77,7 @@ protected:
     /// \brief XML holding the response, we fill it in.
     ///
     /// Set by setResponse()
-    zmm::Ref<mxml::Element> response;
+    std::unique_ptr<pugi::xml_document> response;
 
 public:
     /// \brief The Constructor takes the values from the upnp_request and fills in internal variables.
@@ -96,7 +98,7 @@ public:
 
     /// \brief Sets the response (XML created outside as the answer to the request)
     /// \param response XML holding the action response.
-    void setResponse(zmm::Ref<mxml::Element> response);
+    void setResponse(std::unique_ptr<pugi::xml_document>& response);
 
     /// \brief Set the error code for the SDK.
     /// \param errCode UPnP error code.

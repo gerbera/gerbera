@@ -32,6 +32,9 @@
 #ifndef __UPNP_XML_H__
 #define __UPNP_XML_H__
 
+#include <memory>
+#include <pugixml.hpp>
+
 #include "cds_objects.h"
 #include "common.h"
 #include "mxml/mxml.h"
@@ -55,7 +58,7 @@ public:
     /// <u:actionNameResponse xmlns:u="serviceType"/>
     /// Further response information (various parameters, DIDL-Lite or
     /// whatever can then be adapted to it.
-    zmm::Ref<mxml::Element> createResponse(std::string actionName, std::string serviceType);
+    std::unique_ptr<pugi::xml_document> createResponse(std::string actionName, std::string serviceType);
 
     /// \brief Renders the DIDL-Lite representation of an object in the content directory.
     /// \param obj Object to be rendered as XML.

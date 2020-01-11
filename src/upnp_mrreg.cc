@@ -54,9 +54,9 @@ void MRRegistrarService::doIsAuthorized(const std::unique_ptr<ActionRequest>& re
 {
     log_debug("start");
 
-    Ref<Element> response;
-    response = xmlBuilder->createResponse(request->getActionName(), DESC_MRREG_SERVICE_TYPE);
-    response->appendTextChild("Result", "1");
+    auto response = xmlBuilder->createResponse(request->getActionName(), DESC_MRREG_SERVICE_TYPE);
+    auto root = response->document_element();
+    root.append_child("Result").append_child(pugi::node_pcdata).set_value("1");
 
     request->setResponse(response);
     request->setErrorCode(UPNP_E_SUCCESS);
@@ -77,9 +77,9 @@ void MRRegistrarService::doIsValidated(const std::unique_ptr<ActionRequest>& req
 {
     log_debug("start");
 
-    Ref<Element> response;
-    response = xmlBuilder->createResponse(request->getActionName(), DESC_MRREG_SERVICE_TYPE);
-    response->appendTextChild("Result", "1");
+    auto response = xmlBuilder->createResponse(request->getActionName(), DESC_MRREG_SERVICE_TYPE);
+    auto root = response->document_element();
+    root.append_child("Result").append_child(pugi::node_pcdata).set_value("1");
 
     request->setResponse(response);
     request->setErrorCode(UPNP_E_SUCCESS);
