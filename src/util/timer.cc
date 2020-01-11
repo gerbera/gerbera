@@ -42,7 +42,7 @@ Timer::Timer()
 
 void Timer::init()
 {
-    log_debug("Starting Timer thread...\n");
+    log_debug("Starting Timer thread...");
     int ret = pthread_create(
         &thread,
         nullptr,
@@ -55,10 +55,10 @@ void Timer::init()
 
 void* Timer::staticThreadProc(void* arg)
 {
-    log_debug("Started Timer thread.\n");
+    log_debug("Started Timer thread.");
     auto* inst = (Timer*)arg;
     inst->threadProc();
-    log_debug("Exiting Timer thread...\n");
+    log_debug("Exiting Timer thread...");
     return nullptr;
 }
 
@@ -69,7 +69,7 @@ void Timer::threadProc()
 
 void Timer::addTimerSubscriber(Subscriber* timerSubscriber, unsigned int notifyInterval, std::shared_ptr<Parameter> parameter, bool once)
 {
-    log_debug("Adding subscriber... interval: %d once: %d \n", notifyInterval, once);
+    log_debug("Adding subscriber... interval: {} once: {} ", notifyInterval, once);
     if (notifyInterval == 0)
         throw Exception("Tried to add timer with illegal notifyInterval: " + notifyInterval);
 
@@ -86,7 +86,7 @@ void Timer::addTimerSubscriber(Subscriber* timerSubscriber, unsigned int notifyI
 
 void Timer::removeTimerSubscriber(Subscriber* timerSubscriber, std::shared_ptr<Parameter> parameter, bool dontFail)
 {
-    log_debug("Removing subscriber...\n");
+    log_debug("Removing subscriber...");
     AutoLock lock(mutex);
     TimerSubscriberElement element(timerSubscriber, 0, parameter);
     auto it = std::find(subscribers.cbegin(), subscribers.cend(), element);
@@ -103,10 +103,10 @@ void Timer::triggerWait()
     unique_lock<std::mutex> lock(waitMutex);
 
     while (!shutdownFlag) {
-        log_debug("triggerWait. - %d subscriber(s)\n", subscribers.size());
+        log_debug("triggerWait. - {} subscriber(s)", subscribers.size());
 
         if (subscribers.empty()) {
-            log_debug("Nothing to do, sleeping...\n");
+            log_debug("Nothing to do, sleeping...");
             cond.wait(lock);
             continue;
         }

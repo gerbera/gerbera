@@ -80,18 +80,18 @@ void ActionRequest::update()
 {
     if (response != nullptr) {
         std::string xml = response->print();
-        log_debug("ActionRequest::update(): %s\n", xml.c_str());
+        log_debug("ActionRequest::update(): {}", xml.c_str());
 
         IXML_Document* result = ixmlDocument_createDocument();
         int ret = ixmlParseBufferEx(xml.c_str(), &result);
 
         if (ret != IXML_SUCCESS) {
-            log_error("ActionRequest::update(): could not convert to iXML\n");
-            log_debug("Dump:\n%s\n", xml.c_str());
+            log_error("ActionRequest::update(): could not convert to iXML");
+            log_debug("Dump:{}", xml.c_str());
 
             UpnpActionRequest_set_ErrCode(upnp_request, UPNP_E_ACTION_FAILED);
         } else {
-            log_debug("ActionRequest::update(): converted to iXML, code %d\n", errCode);
+            log_debug("ActionRequest::update(): converted to iXML, code {}", errCode);
             UpnpActionRequest_set_ActionResult(upnp_request, result);
             UpnpActionRequest_set_ErrCode(upnp_request, errCode);
         }
@@ -104,6 +104,6 @@ void ActionRequest::update()
             UpnpActionRequest_set_ErrCode(upnp_request, UPNP_E_ACTION_FAILED);
         }
 
-        log_error("ActionRequest::update(): response is nullptr, code %d for %s\n", errCode, actionName.c_str());
+        log_error("ActionRequest::update(): response is nullptr, code {} for {}", errCode, actionName.c_str());
     }
 }

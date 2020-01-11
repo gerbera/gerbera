@@ -213,7 +213,7 @@ std::shared_ptr<CdsObject> SQLStorage::checkRefID(std::shared_ptr<CdsObject> obj
 
     // This should never happen - but fail softly
     // It means that something doesn't set the refID correctly
-    log_warning("Failed to loadObject with refid: %d\n", refID);
+    log_warning("Failed to loadObject with refid: {}", refID);
 
     return findObjectByPath(location);
 }
@@ -413,7 +413,7 @@ void SQLStorage::addObject(std::shared_ptr<CdsObject> obj, int* changedContainer
     for (int i = 0; i < data->size(); i++) {
         Ref<AddUpdateTable> addUpdateTable = data->get(i);
         std::shared_ptr<std::ostringstream> qb = sqlForInsert(obj, addUpdateTable);
-        log_debug("insert_query: %s\n", qb->str().c_str());
+        log_debug("insert_query: {}", qb->str().c_str());
         exec(*qb);
     }
 }
@@ -449,7 +449,7 @@ void SQLStorage::updateObject(std::shared_ptr<CdsObject> obj, int* changedContai
             qb = sqlForDelete(obj, addUpdateTable);
         }
 
-        log_debug("upd_query: %s\n", qb->str().c_str());
+        log_debug("upd_query: {}", qb->str().c_str());
         exec(*qb);
     }
 }
@@ -457,7 +457,7 @@ void SQLStorage::updateObject(std::shared_ptr<CdsObject> obj, int* changedContai
 std::shared_ptr<CdsObject> SQLStorage::loadObject(int objectID)
 {
      std::ostringstream qb;
-    //log_debug("sql_query = %s\n",sql_query.c_str());
+    //log_debug("sql_query = {}",sql_query.c_str());
 
     qb << SQL_QUERY << " WHERE " << TQD('f', "id") << '=' << objectID;
 
@@ -594,7 +594,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLStorage::browse(const std::unique_ptr
     {
         qb << TQD('f', "id") << '=' << objectID << " LIMIT 1";
     }
-    log_debug("QUERY: %s\n", qb.str().c_str());
+    log_debug("QUERY: {}", qb.str().c_str());
     res = select(qb);
 
     std::vector<std::shared_ptr<CdsObject>> arr;
@@ -647,7 +647,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLStorage::search(const std::unique_ptr
     }
     retrievalSQL << ';';
 
-    log_debug("Search resolves to SQL [%s]\n", retrievalSQL.str().c_str());
+    log_debug("Search resolves to SQL [{}]", retrievalSQL.str().c_str());
     sqlResult = select(retrievalSQL);
 
     std::vector<std::shared_ptr<CdsObject>> arr;
@@ -713,9 +713,9 @@ std::vector<std::string> SQLStorage::getMimeTypes()
 
 std::shared_ptr<CdsObject> SQLStorage::_findObjectByPath(std::string fullpath)
 {
-    //log_debug("fullpath: %s\n", fullpath.c_str());
+    //log_debug("fullpath: {}", fullpath.c_str());
     fullpath = reduce_string(fullpath, DIR_SEPARATOR);
-    //log_debug("fullpath after reduce: %s\n", fullpath.c_str());
+    //log_debug("fullpath after reduce: {}", fullpath.c_str());
     std::vector<std::string> pathAr = split_path(fullpath);
     std::string path = pathAr[0];
     std::string filename = pathAr[1];
@@ -796,7 +796,7 @@ int SQLStorage::_ensurePathExistence(std::string path, int* changedContainer)
 
 int SQLStorage::createContainer(int parentID, std::string name, std::string path, bool isVirtual, std::string upnpClass, int refID, const std::map<std::string,std::string>& itemMetadata)
 {
-    // log_debug("Creating Container: parent: %d, name: %s, path %s, isVirt: %d, upnpClass: %s, refId: %d\n",
+    // log_debug("Creating Container: parent: {}, name: {}, path {}, isVirt: {}, upnpClass: {}, refId: {}",
     // parentID, name.c_str(), path.c_str(), isVirtual, upnpClass.c_str(), refID);
     if (refID > 0) {
         auto refObj = loadObject(refID);
@@ -861,7 +861,7 @@ int SQLStorage::createContainer(int parentID, std::string name, std::string path
                 << ")";
             exec(ib);
         }
-        log_debug("Wrote metadata for cds_object %d", newID);
+        log_debug("Wrote metadata for cds_object {}", newID);
     }
 
     return newID;
@@ -895,7 +895,7 @@ std::string SQLStorage::buildContainerPath(int parentID, std::string title)
 
 void SQLStorage::addContainerChain(std::string path, std::string lastClass, int lastRefID, int* containerID, int* updateID, const std::map<std::string,std::string>& lastMetadata)
 {
-    log_debug("Adding container Chain for path: %s, lastRefId: %d, containerId: %d\n", path.c_str(), lastRefID, *containerID);
+    log_debug("Adding container Chain for path: {}, lastRefId: {}, containerId: {}", path.c_str(), lastRefID, *containerID);
     path = reduce_string(path, VIRTUAL_CONTAINER_SEPARATOR);
     if (path == std::string(1, VIRTUAL_CONTAINER_SEPARATOR)) {
         *containerID = CDS_ID_ROOT;
@@ -1256,14 +1256,14 @@ std::string SQLStorage::findFolderImage(int id, std::string trackArtBase)
 #endif
     q << " LIMIT 1";
 
-    //log_debug("findFolderImage %d, %s\n", id, q->c_str());
+    //log_debug("findFolderImage {}, {}", id, q->c_str());
     Ref<SQLResult> res = select(q);
     if (res == nullptr)
         throw _Exception("db error");
     std::unique_ptr<SQLRow> row;
     if ((row = res->nextRow()) != nullptr) // we only care about the first result
     {
-        log_debug("findFolderImage result: %s\n", row->col(0).c_str());
+        log_debug("findFolderImage result: {}", row->col(0).c_str());
         return row->col(0);
     }
     return "";
@@ -1345,11 +1345,11 @@ void SQLStorage::_removeObjects(const std::vector<int32_t> &objectIDs) {
         << " WHERE " << TQD('o', "id")
         << " IN (" << objectIdsStr << ')';
 
-    log_debug("%s\n", sel.str().c_str());
+    log_debug("{}", sel.str().c_str());
 
     Ref<SQLResult> res = select(sel);
     if (res != nullptr) {
-        log_debug("relevant autoscans!\n");
+        log_debug("relevant autoscans!");
         std::vector<std::string> delete_as;
         std::unique_ptr<SQLRow> row;
         while ((row = res->nextRow()) != nullptr) {
@@ -1365,7 +1365,7 @@ void SQLStorage::_removeObjects(const std::vector<int32_t> &objectIDs) {
             } else {
                 delete_as.emplace_back(row->col_c_str(0));
             }
-            log_debug("relevant autoscan: %d; persistent: %d\n", row->col_c_str(0), persistent);
+            log_debug("relevant autoscan: {}; persistent: {}", row->col_c_str(0), persistent);
         }
 
         if (!delete_as.empty()) {
@@ -1375,7 +1375,7 @@ void SQLStorage::_removeObjects(const std::vector<int32_t> &objectIDs) {
                         << join(delete_as, ',')
                         << ')';
             exec(delAutoscan);
-            log_debug("deleting autoscans: %s\n", delAutoscan.str().c_str());
+            log_debug("deleting autoscans: {}", delAutoscan.str().c_str());
         }
     }
 
@@ -1433,7 +1433,7 @@ std::unique_ptr<Storage::ChangedContainers> SQLStorage::_recursiveRemove(
     const std::vector<int32_t> &items, const std::vector<int32_t> &containers,
     bool all)
 {
-    log_debug("start\n");
+    log_debug("start");
     std::ostringstream itemsSql;
     itemsSql << "SELECT DISTINCT " << TQ("id") << ',' << TQ("parent_id")
                  << " FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE " << TQ("ref_id") << " IN (";
@@ -1544,7 +1544,7 @@ std::unique_ptr<Storage::ChangedContainers> SQLStorage::_recursiveRemove(
 
     if (!removeIds.empty())
         _removeObjects(removeIds);
-    log_debug("end\n");
+    log_debug("end");
     return changedContainers;
 }
 
@@ -1555,7 +1555,7 @@ std::string SQLStorage::toCSV(const std::vector<int>& input)
 
 std::unique_ptr<Storage::ChangedContainers> SQLStorage::_purgeEmptyContainers(std::unique_ptr<ChangedContainers>& maybeEmpty)
 {
-    log_debug("start upnp: %s; ui: %s\n",
+    log_debug("start upnp: {}; ui: {}",
             join(maybeEmpty->upnp, ',').c_str(),
             join(maybeEmpty->ui, ',').c_str());
     auto changedContainers = std::make_unique<ChangedContainers>();
@@ -1596,7 +1596,7 @@ std::unique_ptr<Storage::ChangedContainers> SQLStorage::_purgeEmptyContainers(st
         if (!selUpnp.empty()) {
             std::ostringstream sql;
             sql << selectSql.str() << join(selUpnp, ',') << strSel2;
-            log_debug("upnp-sql: %s\n", sql.str().c_str());
+            log_debug("upnp-sql: {}", sql.str().c_str());
             res = select(sql.str());
             selUpnp.clear();
             if (res == nullptr)
@@ -1617,7 +1617,7 @@ std::unique_ptr<Storage::ChangedContainers> SQLStorage::_purgeEmptyContainers(st
         if (!selUi.empty()) {
             std::ostringstream sql;
             sql << selectSql.str() << join(selUi, ',') << strSel2;
-            log_debug("ui-sql: %s\n", sql.str().c_str());
+            log_debug("ui-sql: {}", sql.str().c_str());
             res = select(sql.str());
             selUi.clear();
             if (res == nullptr)
@@ -1636,7 +1636,7 @@ std::unique_ptr<Storage::ChangedContainers> SQLStorage::_purgeEmptyContainers(st
             }
         }
 
-        //log_debug("selecting: %s; removing: %s\n", bufSel->c_str(), join(del, ',').c_str());
+        //log_debug("selecting: {}; removing: {}", bufSel->c_str(), join(del, ',').c_str());
         if (!del.empty()) {
             _removeObjects(del);
             del.clear();
@@ -1656,10 +1656,10 @@ std::unique_ptr<Storage::ChangedContainers> SQLStorage::_purgeEmptyContainers(st
     if (!selUpnp.empty()) {
         changedUpnp.insert(changedUpnp.end(), selUpnp.begin(), selUpnp.end());
     }
-    // log_debug("end; changedContainers (upnp): %s\n", join(changedUpnp, ',').c_str());
-    // log_debug("end; changedContainers (ui): %s\n", join(changedUi, ',').c_str());
-    log_debug("end; changedContainers (upnp): %d\n", changedUpnp.size());
-    log_debug("end; changedContainers (ui): %d\n", changedUi.size());
+    // log_debug("end; changedContainers (upnp): {}", join(changedUpnp, ',').c_str());
+    // log_debug("end; changedContainers (ui): {}", join(changedUi, ',').c_str());
+    log_debug("end; changedContainers (upnp): {}", changedUpnp.size());
+    log_debug("end; changedContainers (ui): {}", changedUi.size());
 
     return changedContainers;
 }
@@ -1681,7 +1681,7 @@ std::string SQLStorage::getInternalSetting(std::string key)
 void SQLStorage::updateAutoscanPersistentList(ScanMode scanmode, std::shared_ptr<AutoscanList> list)
 {
 
-    log_debug("setting persistent autoscans untouched - scanmode: %s;\n", AutoscanDirectory::mapScanmode(scanmode).c_str());
+    log_debug("setting persistent autoscans untouched - scanmode: {};", AutoscanDirectory::mapScanmode(scanmode).c_str());
     std::ostringstream update;
     update << "UPDATE " << TQ(AUTOSCAN_TABLE)
        << " SET " << TQ("touched") << '=' << mapBool(false)
@@ -1692,9 +1692,9 @@ void SQLStorage::updateAutoscanPersistentList(ScanMode scanmode, std::shared_ptr
     exec(update);
 
     int listSize = list->size();
-    log_debug("updating/adding persistent autoscans (count: %d)\n", listSize);
+    log_debug("updating/adding persistent autoscans (count: {})", listSize);
     for (int i = 0; i < listSize; i++) {
-        log_debug("getting ad %d from list..\n", i);
+        log_debug("getting ad {} from list..", i);
         Ref<AutoscanDirectory> ad = list->get(i);
         if (ad == nullptr)
             continue;
@@ -1712,7 +1712,7 @@ void SQLStorage::updateAutoscanPersistentList(ScanMode scanmode, std::shared_ptr
         q << "SELECT " << TQ("id") << " FROM " << TQ(AUTOSCAN_TABLE)
            << " WHERE ";
         int objectID = findObjectIDByPath(location + '/');
-        log_debug("objectID = %d\n", objectID);
+        log_debug("objectID = {}", objectID);
         if (objectID == INVALID_OBJECT_ID)
             q << TQ("location") << '=' << quote(location);
         else
@@ -1813,7 +1813,7 @@ Ref<AutoscanDirectory> SQLStorage::_fillAutoscanDirectory(const std::unique_ptr<
         interval = std::stoi(row->col(6));
     time_t last_modified = std::stol(row->col(7));
 
-    //log_debug("adding autoscan location: %s; recursive: %d\n", location.c_str(), recursive);
+    //log_debug("adding autoscan location: {}; recursive: {}", location.c_str(), recursive);
 
     Ref<AutoscanDirectory> dir(new AutoscanDirectory(location, mode, level, recursive, persistent, INVALID_SCAN_ID, interval, hidden));
     dir->setObjectID(objectID);
@@ -1870,7 +1870,7 @@ void SQLStorage::addAutoscanDirectory(Ref<AutoscanDirectory> adir)
 
 void SQLStorage::updateAutoscanDirectory(Ref<AutoscanDirectory> adir)
 {
-    log_debug("id: %d, obj_id: %d\n", adir->getStorageID(), adir->getObjectID());
+    log_debug("id: {}, obj_id: {}", adir->getStorageID(), adir->getObjectID());
 
     if (adir == nullptr)
         throw _Exception("updateAutoscanDirectory called with adir==nullptr");
@@ -1995,7 +1995,7 @@ void SQLStorage::autoscanUpdateLM(Ref<AutoscanDirectory> adir)
             throw _Exception("autoscanUpdateLM called with adir with illegal objectID and location");
     }
     */
-    log_debug("id: %d; last_modified: %d\n", adir->getStorageID(), adir->getPreviousLMT());
+    log_debug("id: {}; last_modified: {}", adir->getStorageID(), adir->getPreviousLMT());
     std::ostringstream q;
     q << "UPDATE " << TQ(AUTOSCAN_TABLE)
        << " SET " << TQ("last_modified") << '=' << quote(adir->getPreviousLMT())
@@ -2050,7 +2050,7 @@ std::unique_ptr<std::vector<int>> SQLStorage::_checkOverlappingAutoscans(Ref<Aut
         auto obj = loadObject(checkObjectID);
         if (obj == nullptr)
             throw _Exception("Referenced object (by Autoscan) not found.");
-        log_error("There is already an Autoscan set on %s\n", obj->getLocation().c_str());
+        log_error("There is already an Autoscan set on {}", obj->getLocation().c_str());
         throw _Exception("There is already an Autoscan set on " + obj->getLocation());
     }
 
@@ -2064,18 +2064,18 @@ std::unique_ptr<std::vector<int>> SQLStorage::_checkOverlappingAutoscans(Ref<Aut
             q << " AND " << TQ("id") << " != " << quote(storageID);
         q << " LIMIT 1";
 
-        log_debug("------------ %s\n", q.str().c_str());
+        log_debug("------------ {}", q.str().c_str());
 
         res = select(q);
         if (res == nullptr)
             throw _Exception("SQL error");
         if ((row = res->nextRow()) != nullptr) {
             int objectID = std::stoi(row->col(0));
-            log_debug("-------------- %d\n", objectID);
+            log_debug("-------------- {}", objectID);
             auto obj = loadObject(objectID);
             if (obj == nullptr)
                 throw _Exception("Referenced object (by Autoscan) not found.");
-            log_error("Overlapping Autoscans are not allowed. There is already an Autoscan set on %s\n", obj->getLocation().c_str());
+            log_error("Overlapping Autoscans are not allowed. There is already an Autoscan set on {}", obj->getLocation().c_str());
             throw _Exception("Overlapping Autoscans are not allowed. There is already an Autoscan set on " + obj->getLocation());
         }
     }
@@ -2103,7 +2103,7 @@ std::unique_ptr<std::vector<int>> SQLStorage::_checkOverlappingAutoscans(Ref<Aut
         auto obj = loadObject(objectID);
         if (obj == nullptr)
             throw _Exception("Referenced object (by Autoscan) not found.");
-        log_error("Overlapping Autoscans are not allowed. There is already a recursive Autoscan set on %s\n", obj->getLocation().c_str());
+        log_error("Overlapping Autoscans are not allowed. There is already a recursive Autoscan set on {}", obj->getLocation().c_str());
         throw _Exception("Overlapping Autoscans are not allowed. There is already a recursive Autoscan set on " + obj->getLocation());
     }
 }
@@ -2153,7 +2153,7 @@ void SQLStorage::setFsRootName(std::string rootName)
 
 int SQLStorage::getNextID()
 {
-    log_debug("NextId: %d\n", lastID + 1);
+    log_debug("NextId: {}", lastID + 1);
     if (lastID < CDS_ID_FS_ROOT)
         throw _Exception("SQLStorage::getNextID() called, but lastID hasn't been loaded correctly yet");
     AutoLock lock(nextIDMutex);
@@ -2180,7 +2180,7 @@ void SQLStorage::loadLastID()
     if (lastID < CDS_ID_FS_ROOT)
         throw _Exception("could not load correct lastID (db not initialized?)");
 
-    log_debug("LoadedId: %d\n", lastID);
+    log_debug("LoadedId: {}", lastID);
 }
 
 int SQLStorage::getNextMetadataID()
@@ -2359,7 +2359,7 @@ std::unique_ptr<std::ostringstream> SQLStorage::sqlForDelete(std::shared_ptr<Cds
 
 void SQLStorage::doMetadataMigration()
 {
-    log_debug("Checking if metadata migration is required\n");
+    log_debug("Checking if metadata migration is required");
     std::ostringstream qbCountNotNull;
     qbCountNotNull << "SELECT COUNT(*)"
        << " FROM " << TQ(CDS_OBJECT_TABLE)
@@ -2367,22 +2367,22 @@ void SQLStorage::doMetadataMigration()
        << " is not null";
     Ref<SQLResult> res = select(qbCountNotNull);
     int expectedConversionCount = std::stoi(res->nextRow()->col(0));
-    log_debug("mt_cds_object rows having metadata: %d\n", expectedConversionCount);
+    log_debug("mt_cds_object rows having metadata: {}", expectedConversionCount);
 
     std::ostringstream qbCountMetadata;
     qbCountMetadata << "SELECT COUNT(*)"
        << " FROM " << TQ(METADATA_TABLE);
     res = select(qbCountMetadata);
     int metadataRowCount = std::stoi(res->nextRow()->col(0));
-    log_debug("mt_metadata rows having metadata: %d\n", metadataRowCount);
+    log_debug("mt_metadata rows having metadata: {}", metadataRowCount);
 
     if (expectedConversionCount > 0 && metadataRowCount > 0) {
-        log_info("No metadata migration required\n");
+        log_info("No metadata migration required");
         return;
     }
 
-    log_info("About to migrate metadata from mt_cds_object to mt_metadata\n");
-    log_info("No data will be removed from mt_cds_object\n");
+    log_info("About to migrate metadata from mt_cds_object to mt_metadata");
+    log_info("No data will be removed from mt_cds_object");
         
     std::ostringstream qbRetrieveIDs;
     qbRetrieveIDs << "SELECT " << TQ("id")
@@ -2398,7 +2398,7 @@ void SQLStorage::doMetadataMigration()
         migrateMetadata(cdsObject);
         ++objectsUpdated;
     }
-    log_info("Migrated metadata - object count: %d\n", objectsUpdated);
+    log_info("Migrated metadata - object count: {}", objectsUpdated);
 }
 
 void SQLStorage::migrateMetadata(std::shared_ptr<CdsObject> object)
@@ -2408,7 +2408,7 @@ void SQLStorage::migrateMetadata(std::shared_ptr<CdsObject> object)
  
     auto dict = object->getMetadata();
     if (!dict.empty()) {
-        log_debug("Migrating metadata for cds object %d\n", object->getID());
+        log_debug("Migrating metadata for cds object {}", object->getID());
         std::map<std::string,std::string> metadataSQLVals;
         for (auto it = dict.begin(); it != dict.end(); it++) {
             metadataSQLVals[quote(it->first)] = quote(it->second);
@@ -2433,6 +2433,6 @@ void SQLStorage::migrateMetadata(std::shared_ptr<CdsObject> object)
             exec(qb);
         }
     } else {
-        log_debug("Skipping migration - no metadata for cds object %d\n", object->getID());
+        log_debug("Skipping migration - no metadata for cds object {}", object->getID());
     }
 }

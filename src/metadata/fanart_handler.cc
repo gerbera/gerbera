@@ -59,7 +59,7 @@ inline bool path_exists(std::string name)
 std::string getFolderName(std::shared_ptr<CdsItem> item)
 {
     std::string folder = item->getLocation().substr(0, item->getLocation().rfind('/'));
-    log_debug("Folder name: %s\n", folder.c_str());
+    log_debug("Folder name: {}", folder.c_str());
     return folder;
 }
 
@@ -68,7 +68,7 @@ std::string getFanArtPath(std::string folder)
     std::string found;
     for (int i = 0; i < num_names; i++) {
         bool exists = path_exists(folder + names[i]);
-        log_debug("%s: %s\n", names[i], exists ? "found" : "missing");
+        log_debug("{}: {}", names[i], exists ? "found" : "missing");
         if (!exists)
             continue;
         found = folder + names[i];
@@ -79,7 +79,7 @@ std::string getFanArtPath(std::string folder)
 
 void FanArtHandler::fillMetadata(std::shared_ptr<CdsItem> item)
 {
-    log_debug("Running fanart handler on %s\n", item->getLocation().c_str());
+    log_debug("Running fanart handler on {}", item->getLocation().c_str());
 
     std::string found = getFanArtPath(getFolderName(item));
     if (!found.empty()) {
@@ -94,7 +94,7 @@ std::unique_ptr<IOHandler> FanArtHandler::serveContent(std::shared_ptr<CdsItem> 
 {
     std::string path = getFanArtPath(getFolderName(item));
 
-    log_debug("FanArt: Opening name: %s\n", path.c_str());
+    log_debug("FanArt: Opening name: {}", path.c_str());
 
     auto io_handler = std::make_unique<FileIOHandler>(path);
     return io_handler;

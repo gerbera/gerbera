@@ -119,7 +119,7 @@ Ref<Element> UpnpXMLBuilder::renderObject(std::shared_ptr<CdsObject> obj, bool r
                 dict[URL_OBJECT_ID] = aa_id;
 
                 url = virtualURL + _URL_PARAM_SEPARATOR + CONTENT_MEDIA_HANDLER + _URL_PARAM_SEPARATOR + dict_encode_simple(dict) + _URL_PARAM_SEPARATOR + URL_RESOURCE_ID + _URL_PARAM_SEPARATOR + "0";
-                log_debug("UpnpXMLRenderer::DIDLRenderObject: url: %s\n", url.c_str());
+                log_debug("UpnpXMLRenderer::DIDLRenderObject: url: {}", url.c_str());
                 Ref<Element> aa(new Element(MetadataHandler::getMetaFieldName(M_ALBUMARTURI)));
                 aa->setText(url);
                 result->appendElementChild(aa);
@@ -135,7 +135,7 @@ Ref<Element> UpnpXMLBuilder::renderObject(std::shared_ptr<CdsObject> obj, bool r
             result->setAttribute("childCount", std::to_string(childCount));
 
         std::string upnp_class = obj->getClass();
-        log_debug("container is class: %s\n", upnp_class.c_str());
+        log_debug("container is class: {}", upnp_class.c_str());
         if (upnp_class == UPNP_DEFAULT_CLASS_MUSIC_ALBUM) {
             auto meta = obj->getMetadata();
 
@@ -189,7 +189,7 @@ Ref<Element> UpnpXMLBuilder::renderObject(std::shared_ptr<CdsObject> obj, bool r
             std::string aa_id = storage->findFolderImage(cont->getID(), std::string());
 
             if (!aa_id.empty()) {
-                log_debug("Using folder image as artwork for container\n");
+                log_debug("Using folder image as artwork for container");
 
                 std::string url;
                 std::map<std::string,std::string> dict;
@@ -243,7 +243,7 @@ Ref<Element> UpnpXMLBuilder::renderObject(std::shared_ptr<CdsObject> obj, bool r
         result->appendTextChild("mime-type", aitem->getMimeType());
     }
 
-    // log_debug("Rendered DIDL: \n%s\n", result->print().c_str());
+    // log_debug("Rendered DIDL: {}", result->print().c_str());
 
     return result;
 }
@@ -574,7 +574,7 @@ std::string UpnpXMLBuilder::getFirstResourcePath(std::shared_ptr<CdsItem> item)
 
 std::string UpnpXMLBuilder::getArtworkUrl(std::shared_ptr<CdsItem> item) {
     // FIXME: This is temporary until we do artwork properly.
-    log_debug("Building Art url for %d\n", item->getID());
+    log_debug("Building Art url for {}", item->getID());
 
     auto urlBase = getPathBase(item);
     if (urlBase->addResID) {
@@ -637,7 +637,7 @@ void UpnpXMLBuilder::addResources(std::shared_ptr<CdsItem> item, Ref<Element> el
             ffres->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION),
                 resolution);
             item->addResource(ffres);
-            log_debug("Adding resource for video thumbnail\n");
+            log_debug("Adding resource for video thumbnail");
         }
     }
 #endif // FFMPEGTHUMBNAILER
@@ -929,7 +929,7 @@ void UpnpXMLBuilder::addResources(std::shared_ptr<CdsItem> item, Ref<Element> el
                 }
             }
 
-            log_debug("extended protocolInfo: %s\n", protocolInfo.c_str());
+            log_debug("extended protocolInfo: {}", protocolInfo.c_str());
         }
         // URL is path until now
         int objectType = item->getObjectType();

@@ -63,7 +63,7 @@ URLRequestHandler::URLRequestHandler(std::shared_ptr<ConfigManager> config,
 
 void URLRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
 {
-    log_debug("start\n");
+    log_debug("start");
 
     std::string header;
     std::string mimeType;
@@ -76,17 +76,17 @@ void URLRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
     std::map<std::string,std::string> dict;
     dict_decode_simple(parameters, &dict);
 
-    log_debug("full url (filename): %s, parameters: %s\n",
+    log_debug("full url (filename): {}, parameters: {}",
         filename, parameters.c_str());
 
     std::string objID = getValueOrDefault(dict, "object_id");
     if (objID.empty()) {
-        //log_error("object_id not found in url\n");
+        //log_error("object_id not found in url");
         throw _Exception("getInfo: object_id not found");
     } else
         objectID = std::stoi(objID);
 
-    //log_debug("got ObjectID: [%s]\n", object_id.c_str());
+    //log_debug("got ObjectID: [{}]", object_id.c_str());
 
     auto obj = storage->loadObject(objectID);
 
@@ -123,16 +123,16 @@ void URLRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
             url = item->getLocation();
         }
 
-        log_debug("Online content url: %s\n", url.c_str());
+        log_debug("Online content url: {}", url.c_str());
         Ref<URL> u(new URL());
         Ref<URL::Stat> st;
         try {
             st = u->getInfo(url);
             UpnpFileInfo_set_FileLength(info, st->getSize());
             header = "Accept-Ranges: bytes";
-            log_debug("URL used for request: %s\n", st->getURL().c_str());
+            log_debug("URL used for request: {}", st->getURL().c_str());
         } catch (const Exception& ex) {
-            log_warning("%s\n", ex.getMessage().c_str());
+            log_warning("{}", ex.getMessage().c_str());
             UpnpFileInfo_set_FileLength(info, -1);
         }
 
@@ -150,7 +150,7 @@ void URLRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
 //    }
 
     UpnpFileInfo_set_ContentType(info, ixmlCloneDOMString(mimeType.c_str()));
-    log_debug("web_get_info(): end\n");
+    log_debug("web_get_info(): end");
 
     /// \todo transcoding for get_info
 }
@@ -164,7 +164,7 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
     std::string header;
     std::string tr_profile;
 
-    log_debug("start\n");
+    log_debug("start");
 
     // Currently we explicitly do not support UPNP_WRITE
     // due to security reasons.
@@ -176,7 +176,7 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
 
     std::map<std::string,std::string> dict;
     dict_decode_simple(parameters, &dict);
-    log_debug("full url (filename): %s, parameters: %s\n",
+    log_debug("full url (filename): {}, parameters: {}",
         filename, parameters.c_str());
 
     std::string objID = getValueOrDefault(dict, "object_id");
@@ -205,7 +205,7 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
         url = item->getLocation();
     }
 
-    log_debug("Online content url: %s\n", url.c_str());
+    log_debug("Online content url: {}", url.c_str());
 
     //info->is_readable = 1;
     //info->last_modified = 0;
@@ -229,9 +229,9 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
             st = u->getInfo(url);
             // info->file_length = st->getSize();
             header = "Accept-Ranges: bytes";
-            log_debug("URL used for request: %s\n", st->getURL().c_str());
+            log_debug("URL used for request: {}", st->getURL().c_str());
         } catch (const Exception& ex) {
-            log_warning("%s\n", ex.getMessage().c_str());
+            log_warning("{}", ex.getMessage().c_str());
             //info->file_length = -1;
         }
         mimeType = item->getMimeType();

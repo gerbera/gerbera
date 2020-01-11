@@ -130,7 +130,7 @@ bool Session::hasUIUpdateIDs()
 
 void Session::clearUpdateIDs()
 {
-    log_debug("clearing UI updateIDs\n");
+    log_debug("clearing UI updateIDs");
     AutoLock lock(mutex);
     uiUpdateIDs->clear();
     updateAll = false;
@@ -231,14 +231,14 @@ void SessionManager::checkTimer()
 
 void SessionManager::timerNotify(std::shared_ptr<Timer::Parameter> parameter)
 {
-    log_debug("notified... %d web sessions.\n", sessions.size());
+    log_debug("notified... {} web sessions.", sessions.size());
     AutoLock lock(mutex);
     struct timespec now;
     getTimespecNow(&now);
     for (size_t i = 0; i < sessions.size(); i++) {
         auto session = sessions[i];
         if (getDeltaMillis(session->getLastAccessTime(), &now) > 1000 * session->getTimeout()) {
-            log_debug("session timeout: %s - diff: %ld\n", session->getID().c_str(), getDeltaMillis(session->getLastAccessTime(), &now));
+            log_debug("session timeout: {} - diff: {}", session->getID().c_str(), getDeltaMillis(session->getLastAccessTime(), &now));
             sessions.erase(sessions.begin() + i);
             checkTimer();
             i--; // to not skip a session. the removed id is now taken by another session

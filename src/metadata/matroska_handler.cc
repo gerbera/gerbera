@@ -258,7 +258,7 @@ void MatroskaHandler::addArtworkResource(std::shared_ptr<CdsItem> item, std::str
 {
     // if we could not determine the mimetype, then there is no
     // point to add the resource - it's probably garbage
-    log_debug("Found artwork of type %s in file %s\n", art_mimetype.c_str(), item->getLocation().c_str());
+    log_debug("Found artwork of type {} in file {}", art_mimetype.c_str(), item->getLocation().c_str());
 
     if (art_mimetype != MIMETYPE_DEFAULT) {
         auto resource = std::make_shared<CdsResource>(CH_MATROSKA);

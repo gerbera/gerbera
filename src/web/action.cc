@@ -44,13 +44,13 @@ web::action::action(std::shared_ptr<ConfigManager> config, std::shared_ptr<Stora
 
 void web::action::process()
 {
-    log_debug("action: start\n");
+    log_debug("action: start");
     check_request();
 
     std::string action = param("action");
     if (!string_ok(action))
         throw _Exception("No action given!");
-    log_debug("action: %s\n", action.c_str());
+    log_debug("action: {}", action.c_str());
 
-    log_debug("action: returning\n");
+    log_debug("action: returning");
 }

@@ -254,7 +254,7 @@ static int getTagFromString(std::string tag)
     if (tag == "EXIF_TAG_IMAGE_UNIQUE_ID")
         return EXIF_TAG_IMAGE_UNIQUE_ID;
 
-    log_warning("Ignoring unknown libexif tag: %s\n", tag.c_str());
+    log_warning("Ignoring unknown libexif tag: {}", tag.c_str());
     return -1;
 }
 
@@ -271,7 +271,7 @@ void LibExifHandler::process_ifd(ExifContent* content, std::shared_ptr<CdsItem> 
     for (i = 0; i < content->count; i++) {
         e = content->entries[i];
 
-        //        log_debug("Processing entry: %d\n", i);
+        //        log_debug("Processing entry: {}", i);
 
         switch (e->tag) {
         case EXIF_TAG_DATE_TIME_ORIGINAL:
@@ -329,7 +329,7 @@ void LibExifHandler::process_ifd(ExifContent* content, std::shared_ptr<CdsItem> 
                     if (string_ok(value)) {
                         value = sc->convert(value);
                         item->setAuxData(tmp, value);
-                        //                            log_debug(("Adding tag: %s with value %s\n", tmp.c_str(), value.c_str()));
+                        //                            log_debug(("Adding tag: {} with value {}", tmp.c_str(), value.c_str()));
                     }
                 }
             }
@@ -346,7 +346,7 @@ void LibExifHandler::fillMetadata(std::shared_ptr<CdsItem> item)
     ed = exif_data_new_from_file(item->getLocation().c_str());
 
     if (!ed) {
-        log_debug("Exif data not found, attempting to set resolution internally...\n");
+        log_debug("Exif data not found, attempting to set resolution internally...");
         set_jpeg_resolution_resource(item, 0);
         return;
     }
@@ -370,7 +370,7 @@ void LibExifHandler::fillMetadata(std::shared_ptr<CdsItem> item)
             std::unique_ptr<IOHandler> io_h(new MemIOHandler(ed->data, ed->size));
             io_h->open(UPNP_READ);
             std::string th_resolution = get_jpeg_resolution(io_h);
-            log_debug("RESOLUTION: %s\n", th_resolution.c_str());
+            log_debug("RESOLUTION: {}", th_resolution.c_str());
 
             auto resource = std::make_shared<CdsResource>(CH_LIBEXIF);
             resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(item->getMimeType()));
@@ -378,7 +378,7 @@ void LibExifHandler::fillMetadata(std::shared_ptr<CdsItem> item)
             resource->addParameter(RESOURCE_CONTENT_TYPE, EXIF_THUMBNAIL);
             item->addResource(resource);
         } catch (const Exception& e) {
-            e.printStackTrace();
+            log_error("Something bad happened! {}", e.getMessage());
         }
 
     } // (ed->size)

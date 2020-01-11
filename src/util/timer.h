@@ -107,8 +107,7 @@ protected:
             try {
                 subscriber->timerNotify(parameter);
             } catch (const Exception& e) {
-                log_debug("timer caught exception!\n");
-                e.printStackTrace();
+                log_error("timer caught exception!\n");
             }
         }
         inline void updateNextNotify()

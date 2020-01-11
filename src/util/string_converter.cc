@@ -94,7 +94,7 @@ std::string StringConverter::_convert(std::string str, bool validate,
     const char* input = str.c_str();
     auto* output = (char*)MALLOC(buf_size);
     if (!output) {
-        log_debug("Could not allocate memory for string conversion!\n");
+        log_debug("Could not allocate memory for string conversion!");
         throw _Exception("Could not allocate memory for string conversion!");
     }
 
@@ -115,7 +115,7 @@ std::string StringConverter::_convert(std::string str, bool validate,
         dirty = false;
     }
 
-    //log_debug(("iconv: BEFORE: input bytes left: %d  output bytes left: %d\n",
+    //log_debug(("iconv: BEFORE: input bytes left: {}  output bytes left: {}",
     //       input_bytes, output_bytes));
 #if defined(ICONV_CONST) || defined(SOLARIS)
     ret = iconv(cd, input_ptr, &input_bytes,
@@ -126,17 +126,19 @@ std::string StringConverter::_convert(std::string str, bool validate,
 #endif
 
     if (ret == -1) {
-        log_error("iconv: %s\n", strerror(errno));
+        log_error("iconv: {}", strerror(errno));
         std::string err;
         switch (errno) {
         case EILSEQ:
         case EINVAL:
-            if (errno == EILSEQ)
-                log_error("iconv: %s could not be converted to new encoding: invalid character sequence!\n", str.c_str());
-            else
-                log_error("iconv: Incomplete multibyte sequence\n");
-            if (validate)
+            if (errno == EILSEQ) {
+                log_error("iconv: {} could not be converted to new encoding: invalid character sequence!", str.c_str());
+            } else {
+                log_error("iconv: Incomplete multibyte sequence");
+            }
+            if (validate) {
                 throw _Exception(err);
+            }
 
             if (stoppedAt)
                 *stoppedAt = (size_t)str.length() - input_bytes;
@@ -155,18 +157,18 @@ std::string StringConverter::_convert(std::string str, bool validate,
             break;
         }
         *output_copy = 0;
-        log_error("%s\n", err.c_str());
-        //        log_debug("iconv: input: %s\n", input);
-        //        log_debug("iconv: converted part:  %s\n", output);
+        log_error("{}", err.c_str());
+        //        log_debug("iconv: input: {}", input);
+        //        log_debug("iconv: converted part:  {}", output);
         dirty = true;
         if (output)
             FREE(output);
         throw _Exception(err);
     }
 
-    //log_debug("iconv: AFTER: input bytes left: %d  output bytes left: %d\n",
+    //log_debug("iconv: AFTER: input bytes left: {}  output bytes left: {}",
     //       input_bytes, output_bytes);
-    //log_debug("iconv: returned %d\n", ret);
+    //log_debug("iconv: returned {}", ret);
 
     ret_str = std::string(output, output_copy - output);
     FREE(output);

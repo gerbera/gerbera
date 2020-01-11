@@ -448,7 +448,7 @@ FallbackLayout::FallbackLayout(std::shared_ptr<ConfigManager> config,
 
 void FallbackLayout::processCdsObject(std::shared_ptr<CdsObject> obj, std::string rootpath)
 {
-    log_debug("Process CDS Object: %s\n", obj->getTitle().c_str());
+    log_debug("Process CDS Object: {}", obj->getTitle().c_str());
 #ifdef ENABLE_PROFILING
     PROF_START(&layout_profiling);
 #endif
@@ -475,7 +475,7 @@ void FallbackLayout::processCdsObject(std::shared_ptr<CdsObject> obj, std::strin
 #endif
             case OS_Max:
             default:
-                log_warning("No handler for service type\n");
+                log_warning("No handler for service type");
                 break;
         }
     }

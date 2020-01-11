@@ -45,7 +45,7 @@ web::containers::containers(std::shared_ptr<ConfigManager> config, std::shared_p
 
 void web::containers::process()
 {
-    log_debug(("containers.cc: containers::process()\n"));
+    log_debug(("containers.cc: containers::process()"));
     check_request();
 
     int parentID = intParam("parent_id", INVALID_OBJECT_ID);

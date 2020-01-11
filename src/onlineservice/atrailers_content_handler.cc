@@ -115,7 +115,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getNextObject()
 
         temp = trailer->getAttribute("id");
         if (!string_ok(temp)) {
-            log_warning("Failed to retrieve Trailer ID for \"%s\", "
+            log_warning("Failed to retrieve Trailer ID for \"{}\", "
                         "skipping...\n",
                 item->getTitle().c_str());
             continue;
@@ -126,7 +126,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getNextObject()
 
         Ref<Element> preview = trailer->getChildByName("preview");
         if (preview == nullptr) {
-            log_warning("Failed to retrieve Trailer location for \"%s\", "
+            log_warning("Failed to retrieve Trailer location for \"{}\", "
                         "skipping...\n",
                 item->getTitle().c_str());
             continue;
@@ -136,7 +136,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getNextObject()
         if (string_ok(temp)) {
             item->setURL(temp);
         } else {
-            log_error("Could not get location for Trailers item %s, "
+            log_error("Could not get location for Trailers item {}, "
                       "skipping.\n",
                 item->getTitle().c_str());
             continue;
@@ -246,7 +246,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getNextObject()
             item->validate();
             return item;
         } catch (const Exception& ex) {
-            log_warning("Failed to validate newly created Trailer item: %s\n",
+            log_warning("Failed to validate newly created Trailer item: {}",
                 ex.getMessage().c_str());
             continue;
         }

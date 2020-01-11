@@ -51,12 +51,12 @@ void ServeRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
     struct stat statbuf;
     int ret = 0;
 
-    log_debug("got filename: %s\n", filename);
+    log_debug("got filename: {}", filename);
 
     std::string url_path, parameters;
     splitUrl(filename, URL_PARAM_SEPARATOR, url_path, parameters);
 
-    log_debug("url_path: %s, parameters: %s\n", url_path.c_str(), parameters.c_str());
+    log_debug("url_path: {}, parameters: {}", url_path.c_str(), parameters.c_str());
 
     size_t len = (std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_SERVE_HANDLER).length();
 
@@ -69,7 +69,7 @@ void ServeRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
     std::string path = config->getOption(CFG_SERVER_SERVEDIR)
         + url_path.substr(len, url_path.length()) + "/" + parameters;
 
-    log_debug("Constructed new path: %s\n", path.c_str());
+    log_debug("Constructed new path: {}", path.c_str());
 
     ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
@@ -117,7 +117,7 @@ std::unique_ptr<IOHandler> ServeRequestHandler::open(const char* filename,
     std::string url_path, parameters;
     splitUrl(filename, URL_PARAM_SEPARATOR, url_path, parameters);
 
-    log_debug("url_path: %s, parameters: %s\n", url_path.c_str(), parameters.c_str());
+    log_debug("url_path: {}, parameters: {}", url_path.c_str(), parameters.c_str());
 
     len = (std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_SERVE_HANDLER).length();
 
@@ -128,7 +128,7 @@ std::unique_ptr<IOHandler> ServeRequestHandler::open(const char* filename,
     std::string path = config->getOption(CFG_SERVER_SERVEDIR)
         + url_path.substr(len, url_path.length()) + "/" + parameters;
 
-    log_debug("Constructed new path: %s\n", path.c_str());
+    log_debug("Constructed new path: {}", path.c_str());
     ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
         throw _Exception("Failed to stat " + path);

@@ -115,7 +115,7 @@ void web::autoscan::process()
             else
                 objectID = intParam("object_id");
 
-            //log_debug("adding autoscan: location=%s, scan_mode=%s, scan_level=%s, recursive=%d, interval=%d, hidden=%d\n",
+            //log_debug("adding autoscan: location={}, scan_mode={}, scan_level={}, recursive={}, interval={}, hidden={}",
             //    location.c_str(), AutoscanDirectory::mapScanmode(scan_mode).c_str(),
             //    AutoscanDirectory::mapScanlevel(scan_level).c_str(), recursive, interval, hidden);
 

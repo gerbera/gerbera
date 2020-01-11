@@ -56,7 +56,7 @@ void Headers::addHeader(const std::string& header, const std::string& value)
     if (cleanHeader.empty() || cleanValue.empty()) {
         return;
     }
-    log_debug("Adding header: '%s: %s'\n", cleanHeader.c_str(), cleanValue.c_str());
+    log_debug("Adding header: '{}: {}'", cleanHeader.c_str(), cleanValue.c_str());
 
     headers->insert({cleanHeader, cleanValue});
 }

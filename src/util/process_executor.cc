@@ -64,13 +64,13 @@ ProcessExecutor::ProcessExecutor(std::string command, std::vector<std::string> a
     case 0:
         sigset_t mask_set;
         pthread_sigmask(SIG_SETMASK, &mask_set, nullptr);
-        log_debug("Launching process: %s\n", command.c_str());
+        log_debug("Launching process: {}", command.c_str());
         execvp(command.c_str(), const_cast<char** const>(argv));
     default:
         break;
     }
 
-    log_debug("Launched process %s, pid: %d\n", command.c_str(), process_id);
+    log_debug("Launched process {}, pid: {}", command.c_str(), process_id);
 }
 
 bool ProcessExecutor::isAlive()

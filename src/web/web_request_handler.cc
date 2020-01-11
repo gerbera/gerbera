@@ -139,7 +139,7 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(enum UpnpOpenFileMode mode)
     // processing page, creating output
     try {
         if (!config->getBoolOption(CFG_SERVER_UI_ENABLED)) {
-            log_warning("The UI is disabled in the configuration file. See README.\n");
+            log_warning("The UI is disabled in the configuration file. See README.");
             error = "The UI is disabled in the configuration file. See README.";
             error_code = 900;
         } else {
@@ -164,11 +164,9 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(enum UpnpOpenFileMode mode)
     } catch (const StorageException& e) {
         error = e.getUserMessage();
         error_code = 500;
-        e.printStackTrace();
     } catch (const Exception& e) {
         error = "Error: " + e.getMessage();
         error_code = 800;
-        e.printStackTrace();
     }
 
     if (!string_ok(error)) {
@@ -183,6 +181,8 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(enum UpnpOpenFileMode mode)
             error_code = 899;
         errorEl->setAttribute("code", std::to_string(error_code));
         root->appendElementChild(errorEl);
+
+        log_warning("Web Error: {} {}", error_code, error);
     }
 
     std::string returnType = param("return_type");
@@ -191,9 +191,9 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(enum UpnpOpenFileMode mode)
         try {
             // make sure we can generate JSON w/o exceptions
             XML2JSON::getJSON(root);
-            //log_debug("JSON-----------------------\n\n\n%s\n\n\n\n", XML2JSON::getJSON(root).c_str());
+            //log_debug("JSON-----------------------{}", XML2JSON::getJSON(root).c_str());
         } catch (const Exception& e) {
-            e.printStackTrace();
+            log_error("Exception: {}", e.getMessage());
         }
 #endif
         output = renderXMLHeader() + root->print();
@@ -201,7 +201,7 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(enum UpnpOpenFileMode mode)
         try {
             output = XML2JSON::getJSON(root);
         } catch (const Exception& e) {
-            e.printStackTrace();
+            log_error("Exception: {}", e.getMessage());
         }
     }
 
@@ -260,7 +260,7 @@ void WebRequestHandler::addUpdateIDs(Ref<Element> updateIDsEl, std::shared_ptr<S
 {
     std::string updateIDs = session->getUIUpdateIDs();
     if (string_ok(updateIDs)) {
-        log_debug("UI: sending update ids: %s\n", updateIDs.c_str());
+        log_debug("UI: sending update ids: {}", updateIDs.c_str());
         updateIDsEl->setTextKey("ids");
         updateIDsEl->setText(updateIDs);
         updateIDsEl->setAttribute("updates", "1", mxml_bool_type);

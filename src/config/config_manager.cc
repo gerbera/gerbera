@@ -97,7 +97,7 @@ ConfigManager::ConfigManager(std::string filename,
         }
     }
 
-    log_info("Loading configuration from: %s\n", filename.c_str());
+    log_info("Loading configuration from: {}", filename.c_str());
     load(filename);
     validate(home);
 #ifdef TOMBDEBUG
@@ -109,7 +109,7 @@ ConfigManager::ConfigManager(std::string filename,
 
 ConfigManager::~ConfigManager()
 {
-    log_debug("ConfigManager destroyed\n");
+    log_debug("ConfigManager destroyed");
 }
 
 std::string ConfigManager::construct_path(std::string path)
@@ -163,7 +163,7 @@ void ConfigManager::validate(std::string serverhome)
     std::shared_ptr<AutoscanListOption> alist_opt;
     std::shared_ptr<TranscodingProfileListOption> trlist_opt;
 
-    log_info("Checking configuration...\n");
+    log_info("Checking configuration...");
 
     // first check if the config file itself looks ok, it must have a config
     // and a server tag
@@ -555,7 +555,7 @@ void ConfigManager::validate(std::string serverhome)
 #if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE)
     if (setlocale(LC_ALL, "") != nullptr) {
         temp = nl_langinfo(CODESET);
-        log_debug("received %s from nl_langinfo\n", temp.c_str());
+        log_debug("received {} from nl_langinfo", temp.c_str());
     }
 
     if (!string_ok(temp))
@@ -580,7 +580,7 @@ void ConfigManager::validate(std::string serverhome)
             + charset);
     }
 
-    log_info("Setting filesystem import charset to %s\n", charset.c_str());
+    log_info("Setting filesystem import charset to {}", charset.c_str());
     NEW_OPTION(charset);
     SET_OPTION(CFG_IMPORT_FILESYSTEM_CHARSET);
 
@@ -594,7 +594,7 @@ void ConfigManager::validate(std::string serverhome)
             + charset);
     }
 
-    log_info("Setting metadata import charset to %s\n", charset.c_str());
+    log_info("Setting metadata import charset to {}", charset.c_str());
     NEW_OPTION(charset);
     SET_OPTION(CFG_IMPORT_METADATA_CHARSET);
 
@@ -606,7 +606,7 @@ void ConfigManager::validate(std::string serverhome)
         throw _Exception("Error in config file: unsupported playlist-charset specified: " + charset);
     }
 
-    log_info("Setting playlist charset to %s\n", charset.c_str());
+    log_info("Setting playlist charset to {}", charset.c_str());
     NEW_OPTION(charset);
     SET_OPTION(CFG_IMPORT_PLAYLIST_CHARSET);
 
@@ -1297,11 +1297,11 @@ void ConfigManager::validate(std::string serverhome)
     SET_OPTION(CFG_ONLINE_CONTENT_ATRAILERS_RESOLUTION);
 #endif
 
-    log_info("Configuration check succeeded.\n");
+    log_info("Configuration check succeeded.");
 
     //root->indent();
 
-    log_debug("Config file dump after validation: \n%s\n", rootDoc->print().c_str());
+    log_debug("Config file dump after validation: {}", rootDoc->print().c_str());
 }
 
 void ConfigManager::prepare_path(std::string xpath, bool needDir, bool existenceUnneeded)
@@ -1338,7 +1338,7 @@ std::string ConfigManager::getOption(std::string xpath, std::string def)
     if (string_ok(value))
         return trim_string(value);
 
-    log_debug("Config: option not found: '%s' using default value: '%s'\n",
+    log_debug("Config: option not found: '{}' using default value: '{}'",
         xpath.c_str(), def.c_str());
 
     std::string pathPart = XPath::getPathPart(xpath);
@@ -1422,7 +1422,7 @@ void ConfigManager::writeBookmark(std::string ip, std::string port)
     filename = getOption(CFG_SERVER_BOOKMARK_FILE);
     path = construct_path(filename);
 
-    log_debug("Writing bookmark file to: %s\n", path.c_str());
+    log_debug("Writing bookmark file to: {}", path.c_str());
 
     f = fopen(path.c_str(), "w");
     if (f == nullptr) {
@@ -1443,7 +1443,7 @@ void ConfigManager::emptyBookmark()
     std::string filename = getOption(CFG_SERVER_BOOKMARK_FILE);
     std::string path = construct_path(filename);
 
-    log_debug("Clearing bookmark file at: %s\n", path.c_str());
+    log_debug("Clearing bookmark file at: {}", path.c_str());
 
     FILE* f = fopen(path.c_str(), "w");
     if (f == nullptr) {
@@ -1946,20 +1946,20 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNodeset(std::
 void ConfigManager::dumpOptions()
 {
 #ifdef TOMBDEBUG
-    log_debug("Dumping options!\n");
+    log_debug("Dumping options!");
     for (int i = 0; i < (int)CFG_MAX; i++) {
         try {
-            log_debug("    Option %02d - %s\n", i,
+            log_debug("    Option %02d - {}", i,
                 getOption((config_option_t)i).c_str());
         } catch (const Exception& e) {
         }
         try {
-            log_debug(" IntOption %02d - %d\n", i,
+            log_debug(" IntOption %02d - {}", i,
                 getIntOption((config_option_t)i));
         } catch (const Exception& e) {
         }
         try {
-            log_debug("BoolOption %02d - %s\n", i,
+            log_debug("BoolOption %02d - {}", i,
                 (getBoolOption((config_option_t)i) ? "true" : "false"));
         } catch (const Exception& e) {
         }

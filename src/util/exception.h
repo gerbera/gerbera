@@ -55,12 +55,6 @@ public:
     std::string getMessage() const;
 
     std::vector<std::string> getStackTrace();
-#ifdef TOMBDEBUG
-    void printStackTrace(FILE *file = LOG_FILE) const;
-#else
-    inline void printStackTrace(FILE *file = LOG_FILE) const {};
-#endif
-
 };
 
 #endif // __ZMMF_EXCEPTION_H__

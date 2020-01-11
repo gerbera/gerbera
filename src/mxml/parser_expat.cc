@@ -60,7 +60,7 @@ void XMLCALL Parser::element_start(void *userdata, const char *name, const char 
     else
     {
         // second root? - should not happen...
-        print_backtrace();
+        throw std::runtime_error("second root? - should not happen...");
     }
 }
 

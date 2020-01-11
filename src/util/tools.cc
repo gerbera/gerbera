@@ -399,7 +399,7 @@ std::string generate_random_id()
     uuid_unparse(uuid, uuid_str);
 #endif
 
-    log_debug("Generated: %s\n", uuid_str);
+    log_debug("Generated: {}", uuid_str);
     std::string uuid_String = std::string(uuid_str);
 #ifdef BSD_NATIVE_UUID
     free(uuid_str);
@@ -772,7 +772,7 @@ std::string secondsToHMS(int seconds)
 int HMSToSeconds(std::string time)
 {
     if (!string_ok(time)) {
-        log_warning("Could not convert time representation to seconds!\n");
+        log_warning("Could not convert time representation to seconds!");
         return 0;
     }
 
@@ -801,12 +801,12 @@ std::string getMIME(std::string filepath, const void *buffer, size_t length)
     magic_t magic_cookie = magic_open(MAGIC_MIME_TYPE);
 
     if (magic_cookie == NULL) {
-        log_warning("Failed to initialize libmagic\n");
+        log_warning("Failed to initialize libmagic");
         return "";
     }
 
     if (magic_load(magic_cookie, NULL) != 0) {
-        log_warning("Failed to load magic database: %s\n", magic_error(magic_cookie));
+        log_warning("Failed to load magic database: {}", magic_error(magic_cookie));
         magic_close(magic_cookie);
         return "";
     }
@@ -836,7 +836,7 @@ void set_jpeg_resolution_resource(std::shared_ptr<CdsItem> item, int res_num)
 
         item->getResource(res_num)->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), resolution);
     } catch (const Exception& e) {
-        e.printStackTrace();
+        log_error("Exception! {}", e.getMessage());
     }
 }
 
@@ -1091,12 +1091,12 @@ void getTimespecAfterMillis(long delta, struct timespec* ret, struct timespec* s
         ret->tv_nsec -= 1000000000;
     }
 
-    // log_debug("timespec: sec: %ld, nsec: %ld\n", ret->tv_sec, ret->tv_nsec);
+    // log_debug("timespec: sec: {}, nsec: {}", ret->tv_sec, ret->tv_nsec);
 }
 
 std::string normalizePath(std::string path)
 {
-    log_debug("Normalizing path: %s\n", path.c_str());
+    log_debug("Normalizing path: {}", path.c_str());
 
     size_t length = path.length();
 
@@ -1165,14 +1165,14 @@ std::string interfaceToIP(std::string interface)
 
     local_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (local_socket < 0) {
-        log_error("Could not create local socket: %s\n",
+        log_error("Could not create local socket: {}",
             mt_strerror(errno).c_str());
         return nullptr;
     }
 
     iflist = iflist_free = if_nameindex();
     if (iflist == nullptr) {
-        log_error("Could not get interface list: %s\n",
+        log_error("Could not get interface list: {}",
             mt_strerror(errno).c_str());
         close(local_socket);
         return nullptr;
@@ -1182,7 +1182,7 @@ std::string interfaceToIP(std::string interface)
         if (interface == iflist->if_name) {
             strncpy(if_request.ifr_name, iflist->if_name, IF_NAMESIZE);
             if (ioctl(local_socket, SIOCGIFADDR, &if_request) != 0) {
-                log_error("Could not determine interface address: %s\n",
+                log_error("Could not determine interface address: {}",
                     mt_strerror(errno).c_str());
                 close(local_socket);
                 if_freenameindex(iflist_free);
@@ -1208,7 +1208,7 @@ std::string ipToInterface(std::string ip)
     if (!string_ok(ip)) {
         return "";
     } else {
-        log_debug("Looking for '%s'\n", ip.c_str());
+        log_debug("Looking for '{}'", ip.c_str());
     }
 
     struct ifaddrs *ifaddr, *ifa;
@@ -1216,7 +1216,7 @@ std::string ipToInterface(std::string ip)
     char host[NI_MAXHOST];
 
     if (getifaddrs(&ifaddr) == -1) {
-        log_error("Could not getifaddrs: %s\n", mt_strerror(errno).c_str());
+        log_error("Could not getifaddrs: {}", mt_strerror(errno).c_str());
     }
 
     for (ifa = ifaddr, n = 0; ifa != NULL; ifa = ifa->ifa_next, n++) {
@@ -1231,7 +1231,7 @@ std::string ipToInterface(std::string ip)
                 (family == AF_INET) ? sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6),
                 host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
             if (s != 0) {
-                log_error("getnameinfo() failed: %s\n", gai_strerror(s));
+                log_error("getnameinfo() failed: {}", gai_strerror(s));
                 return "";
             }
 
@@ -1244,7 +1244,7 @@ std::string ipToInterface(std::string ip)
     }
 
     freeifaddrs(ifaddr);
-    log_warning("Failed to find interface for IP: %s\n", ip.c_str());
+    log_warning("Failed to find interface for IP: {}", ip.c_str());
     return "";
 }
 
@@ -1543,75 +1543,6 @@ std::string getAVIFourCC(std::string avi_filename)
 }
 #endif
 
-#ifdef TOMBDEBUG
-
-void profiling_thread_check(struct profiling_t* data)
-{
-    if (data->thread != pthread_self()) {
-        log_debug("profiling_..() called from a different thread than profiling_init was called! (init: %d; this: %d) - aborting...\n", data->thread, pthread_self());
-        print_backtrace();
-        abort();
-        return;
-    }
-}
-
-void profiling_start(struct profiling_t* data)
-{
-    profiling_thread_check(data);
-    if (data->running) {
-        log_debug("profiling_start() called on an already running profile! - aborting...\n");
-        print_backtrace();
-        abort();
-        return;
-    }
-    data->running = true;
-    getTimespecNow(&(data->last_start));
-}
-
-void profiling_end(struct profiling_t* data)
-{
-    profiling_thread_check(data);
-    struct timespec now;
-    getTimespecNow(&now);
-    if (!data->running) {
-        log_debug("profiling_end() called on a not-running profile! - aborting...\n");
-        print_backtrace();
-        abort();
-        return;
-    }
-    struct timespec* sum = &(data->sum);
-    struct timespec* last_start = &(data->last_start);
-    sum->tv_sec += now.tv_sec - last_start->tv_sec;
-    //log_debug("!!!!!! adding %d sec\n", now.tv_sec - last_start->tv_sec);
-    if (now.tv_nsec >= last_start->tv_nsec) {
-        sum->tv_nsec += now.tv_nsec - last_start->tv_nsec;
-        //log_debug("adding %ld nsec\n", now.tv_nsec - last_start->tv_nsec);
-    } else {
-        sum->tv_nsec += 1000000000L - last_start->tv_nsec + now.tv_nsec;
-        sum->tv_sec--;
-    }
-    if (sum->tv_nsec >= 1000000000L) {
-        sum->tv_nsec -= 1000000000L;
-        sum->tv_sec++;
-    }
-
-    data->running = false;
-}
-
-void profiling_print(struct profiling_t* data)
-{
-    if (data->running) {
-        log_debug("profiling_print() called on running profile! - aborting...\n");
-        print_backtrace();
-        abort();
-        return;
-    }
-    //log_debug("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\nPROFILING: took %ld sec %ld nsec thread %u\n", data->sum.tv_sec, data->sum.tv_nsec, pthread_self());
-    log_debug("PROFILING: took %ld sec %ld nsec\n", data->sum.tv_sec, data->sum.tv_nsec);
-}
-
-#endif
-
 #ifdef SOPCAST
 /// \brief
 int find_local_port(unsigned short range_min, unsigned short range_max)
@@ -1623,7 +1554,7 @@ int find_local_port(unsigned short range_min, unsigned short range_max)
     struct hostent* server;
 
     if (range_min > range_max) {
-        log_error("min port range > max port range!\n");
+        log_error("min port range > max port range!");
         return -1;
     }
 
@@ -1632,15 +1563,14 @@ int find_local_port(unsigned short range_min, unsigned short range_max)
 
         fd = socket(AF_INET, SOCK_STREAM, 0);
         if (fd < 0) {
-            log_error("could not determine free port: "
-                      "error creating socket (%s)\n",
+            log_error("could not determine free port: error creating socket ({})\n",
                 mt_strerror(errno).c_str());
             return -1;
         }
 
         server = gethostbyname("127.0.0.1");
         if (server == NULL) {
-            log_error("could not resolve localhost\n");
+            log_error("could not resolve localhost");
             close(fd);
             return -1;
         }
@@ -1661,7 +1591,7 @@ int find_local_port(unsigned short range_min, unsigned short range_max)
 
     } while (retry_count < USHRT_MAX);
 
-    log_error("Could not find free port on localhost\n");
+    log_error("Could not find free port on localhost");
 
     return -1;
 }

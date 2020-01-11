@@ -132,8 +132,8 @@ ContentManager::ContentManager(std::shared_ptr<ConfigManager> config, std::share
     ignore_unknown_extensions = config->getBoolOption(CFG_IMPORT_MAPPINGS_IGNORE_UNKNOWN_EXTENSIONS);
 
     if (ignore_unknown_extensions && (extension_mimetype_map.size() == 0)) {
-        log_warning("Ignore unknown extensions set, but no mappings specified\n");
-        log_warning("Please review your configuration!\n");
+        log_warning("Ignore unknown extensions set, but no mappings specified");
+        log_warning("Please review your configuration!");
         ignore_unknown_extensions = false;
     }
 
@@ -194,14 +194,14 @@ void ContentManager::init()
     if (!ignore_unknown_extensions) {
         ms = magic_open(MAGIC_MIME);
         if (ms == nullptr) {
-            log_error("magic_open failed\n");
+            log_error("magic_open failed");
         } else {
             std::string optMagicFile = config->getOption(CFG_IMPORT_MAGIC_FILE);
             const char* magicFile = NULL;
             if (!optMagicFile.empty())
                 magicFile = optMagicFile.c_str();
             if (magic_load(ms, magicFile) == -1) {
-                log_warning("magic_load: %s\n", magic_error(ms));
+                log_warning("magic_load: {}", magic_error(ms));
                 magic_close(ms);
                 ms = nullptr;
             }
@@ -238,7 +238,7 @@ void ContentManager::init()
                 timer->addTimerSubscriber(this, i, sc->getTimerParameter(), true);
             }
         } catch (const Exception& ex) {
-            log_error("Could not setup SopCast: %s\n", ex.getMessage().c_str());
+            log_error("Could not setup SopCast: {}", ex.getMessage().c_str());
         }
     }
 #endif // SOPCAST
@@ -263,7 +263,7 @@ void ContentManager::init()
                 timer->addTimerSubscriber(this, i, at->getTimerParameter(), true);
             }
         } catch (const Exception& ex) {
-            log_error("Could not setup Apple Trailers: %s\n", ex.getMessage().c_str());
+            log_error("Could not setup Apple Trailers: {}", ex.getMessage().c_str());
         }
     }
 #endif // ATRAILERS
@@ -296,12 +296,12 @@ void ContentManager::init()
     for (int i = 0; i < autoscan_timed->size(); i++) {
         Ref<AutoscanDirectory> dir = autoscan_timed->get(i);
         auto param = std::make_shared<Timer::Parameter>(Timer::Parameter::timer_param_t::IDAutoscan, dir->getScanID());
-        log_debug("Adding timed scan with interval %d\n", dir->getInterval());
+        log_debug("Adding timed scan with interval {}", dir->getInterval());
         timer->addTimerSubscriber(this, dir->getInterval(), param, false);
     }
 }
 
-ContentManager::~ContentManager() { log_debug("ContentManager destroyed\n"); }
+ContentManager::~ContentManager() { log_debug("ContentManager destroyed"); }
 
 void ContentManager::registerExecutor(std::shared_ptr<Executor> exec)
 {
@@ -349,9 +349,9 @@ void ContentManager::timerNotify(std::shared_ptr<Timer::Parameter> parameter)
 
 void ContentManager::shutdown()
 {
-    log_debug("start\n");
+    log_debug("start");
     AutoLockU lock(mutex);
-    log_debug("updating last_modified data for autoscan in database...\n");
+    log_debug("updating last_modified data for autoscan in database...");
     autoscan_timed->updateLMinDB();
 
 #ifdef HAVE_JS
@@ -361,7 +361,7 @@ void ContentManager::shutdown()
 
 #ifdef HAVE_INOTIFY
     for (int i = 0; i < autoscan_inotify->size(); i++) {
-        log_debug("AutoDir %d\n", i);
+        log_debug("AutoDir {}", i);
         Ref<AutoscanDirectory> dir = autoscan_inotify->get(i);
         if (dir != nullptr) {
             try {
@@ -387,10 +387,10 @@ void ContentManager::shutdown()
             exec->kill();
     }
 
-    log_debug("signalling...\n");
+    log_debug("signalling...");
     signal();
     lock.unlock();
-    log_debug("waiting for thread...\n");
+    log_debug("waiting for thread...");
 
     if (taskThread)
         pthread_join(taskThread, nullptr);
@@ -402,8 +402,8 @@ void ContentManager::shutdown()
         ms = nullptr;
     }
 #endif
-    log_debug("end\n");
-    log_debug("ContentManager destroyed\n");
+    log_debug("end");
+    log_debug("ContentManager destroyed");
 }
 
 Ref<CMAccounting> ContentManager::getAccounting() { return acct; }
@@ -521,7 +521,7 @@ int ContentManager::_addFile(std::string path, std::string rootPath, bool recurs
                         playlist_parser_script->processPlaylistObject(obj, task);
 #else
                     if (content_type == CONTENT_TYPE_PLAYLIST)
-                        log_warning("Playlist %s will not be parsed: Gerbera was compiled without JS support!\n", obj->getLocation().c_str());
+                        log_warning("Playlist {} will not be parsed: Gerbera was compiled without JS support!", obj->getLocation().c_str());
 #endif // JS
                 } catch (const Exception& e) {
                     throw e;
@@ -568,7 +568,7 @@ int ContentManager::ensurePathExistence(std::string path)
 
 void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scanMode, ScanLevel scanLevel, Ref<GenericTask> task)
 {
-    log_debug("start\n");
+    log_debug("start");
     int ret;
     struct dirent* dent;
     struct stat statbuf;
@@ -627,10 +627,10 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
 
     time_t last_modified_current_max = adir->getPreviousLMT();
 
-    log_debug("Rescanning location: %s\n", location.c_str());
+    log_debug("Rescanning location: {}", location.c_str());
 
     if (!string_ok(location)) {
-        log_error("Container with ID %d has no location information\n", containerID);
+        log_error("Container with ID {} has no location information", containerID);
         return;
         //        continue;
         // throw _Exception("Container has no location information!\n");
@@ -638,7 +638,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
 
     DIR* dir = opendir(location.c_str());
     if (!dir) {
-        log_warning("Could not open %s: %s\n", location.c_str(), strerror(errno));
+        log_warning("Could not open {}: {}", location.c_str(), strerror(errno));
         if (adir->persistent()) {
             removeObject(containerID, false);
             adir->setObjectID(INVALID_OBJECT_ID);
@@ -677,7 +677,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
         path = location + DIR_SEPARATOR + name;
         ret = stat(path.c_str(), &statbuf);
         if (ret != 0) {
-            log_error("Failed to stat %s, %s\n", path.c_str(), mt_strerror(errno).c_str());
+            log_error("Failed to stat {}, {}", path.c_str(), mt_strerror(errno).c_str());
             continue;
         }
 
@@ -766,7 +766,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
 void ContentManager::addRecursive(std::string path, bool hidden, Ref<GenericTask> task)
 {
     if (hidden == false) {
-        log_debug("Checking path %s\n", path.c_str());
+        log_debug("Checking path {}", path.c_str());
         if (path.at(0) == '.')
             return;
     }
@@ -783,7 +783,7 @@ void ContentManager::addRecursive(std::string path, bool hidden, Ref<GenericTask
     // abort loop if either:
     // no valid directory returned, server is about to shutdown, the task is there and was invalidated
     if (task != nullptr) {
-        log_debug("IS TASK VALID? [%d], taskoath: [%s]\n", task->isValid(), path.c_str());
+        log_debug("IS TASK VALID? [{}], taskoath: [{}]", task->isValid(), path.c_str());
     }
     while (((dent = readdir(dir)) != nullptr) && (!shutdownFlag) && (task == nullptr || ((task != nullptr) && task->isValid()))) {
         char* name = dent->d_name;
@@ -815,7 +815,7 @@ void ContentManager::addRecursive(std::string path, bool hidden, Ref<GenericTask
 
                 if (obj == nullptr) // object ignored
                 {
-                    log_warning("file ignored: %s\n", newPath.c_str());
+                    log_warning("file ignored: {}", newPath.c_str());
                 } else {
                     // obj->setParentID(parentID);
                     if (IS_CDS_ITEM(obj->getObjectType())) {
@@ -856,7 +856,7 @@ void ContentManager::addRecursive(std::string path, bool hidden, Ref<GenericTask
                 }
             }
         } catch (const Exception& e) {
-            log_warning("skipping %s : %s\n", newPath.c_str(), e.getMessage().c_str());
+            log_warning("skipping {} : {}", newPath.c_str(), e.getMessage().c_str());
         }
     }
     closedir(dir);
@@ -911,14 +911,14 @@ void ContentManager::updateObject(int objectID, const std::map<std::string,std::
             cloned_item->removeMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION));
         }
 
-        log_debug("updateObject: checking equality of item %s\n", item->getTitle().c_str());
+        log_debug("updateObject: checking equality of item {}", item->getTitle().c_str());
         if (!item->equals(cloned_item, true)) {
             cloned_item->validate();
             int containerChanged = INVALID_OBJECT_ID;
             storage->updateObject(clone, &containerChanged);
             update_manager->containerChanged(containerChanged);
             session_manager->containerChangedUI(containerChanged);
-            log_debug("updateObject: calling containerChanged on item %s\n", item->getTitle().c_str());
+            log_debug("updateObject: calling containerChanged on item {}", item->getTitle().c_str());
             update_manager->containerChanged(item->getParentID());
         }
     }
@@ -989,13 +989,13 @@ void ContentManager::addObject(std::shared_ptr<CdsObject> obj)
     obj->validate();
 
     int containerChanged = INVALID_OBJECT_ID;
-    log_debug("Adding: parent ID is %d\n", obj->getParentID());
+    log_debug("Adding: parent ID is {}", obj->getParentID());
     if (!IS_CDS_ITEM_EXTERNAL_URL(obj->getObjectType())) {
         obj->setLocation(reduce_string(obj->getLocation(), DIR_SEPARATOR));
     }
 
     storage->addObject(obj, &containerChanged);
-    log_debug("After adding: parent ID is %d\n", obj->getParentID());
+    log_debug("After adding: parent ID is {}", obj->getParentID());
 
     update_manager->containerChanged(containerChanged);
     session_manager->containerChangedUI(containerChanged);
@@ -1003,7 +1003,7 @@ void ContentManager::addObject(std::shared_ptr<CdsObject> obj)
     int parent_id = obj->getParentID();
     if ((parent_id != -1) && (storage->getChildCount(parent_id) == 1)) {
         auto parent = storage->loadObject(parent_id);
-        log_debug("Will update ID %d\n", parent->getParentID());
+        log_debug("Will update ID {}", parent->getParentID());
         update_manager->containerChanged(parent->getParentID());
     }
 
@@ -1028,7 +1028,7 @@ int ContentManager::addContainerChain(std::string chain, std::string lastClass, 
     if (!string_ok(chain))
         throw _Exception("addContainerChain() called with empty chain parameter");
 
-    log_debug("received chain: %s (%s) [%s]\n", chain.c_str(), lastClass.c_str(), dict_encode_simple(lastMetadata).c_str());
+    log_debug("received chain: {} ({}) [{}]", chain.c_str(), lastClass.c_str(), dict_encode_simple(lastMetadata).c_str());
     storage->addContainerChain(chain, lastClass, lastRefID, &containerID, &updateID, lastMetadata);
 
     // if (updateID != INVALID_OBJECT_ID)
@@ -1202,7 +1202,7 @@ void ContentManager::initLayout()
                 }
             } catch (const Exception& e) {
                 layout = nullptr;
-                log_error("ContentManager virtual container layout: %s\n", e.getMessage().c_str());
+                log_error("ContentManager virtual container layout: {}", e.getMessage().c_str());
             }
     }
 }
@@ -1249,17 +1249,16 @@ void ContentManager::threadProc()
         }
         lock.unlock();
 
-        // log_debug("content manager Async START %s\n", task->getDescription().c_str());
+        // log_debug("content manager Async START {}", task->getDescription().c_str());
         try {
             if (task->isValid())
                 task->run();
         } catch (const ServerShutdownException& se) {
             shutdownFlag = true;
         } catch (const Exception& e) {
-            log_error("Exception caught: %s\n", e.getMessage().c_str());
-            e.printStackTrace();
+            log_error("Exception caught: {}", e.getMessage().c_str());
         }
-        // log_debug("content manager ASYNC STOP  %s\n", task->getDescription().c_str());
+        // log_debug("content manager ASYNC STOP  {}", task->getDescription().c_str());
 
         if (!shutdownFlag) {
             lock.lock();
@@ -1336,7 +1335,7 @@ void ContentManager::fetchOnlineContent(service_type_t service, bool lowPriority
 {
     Ref<OnlineService> os = online_services->getService(service);
     if (os == nullptr) {
-        log_debug("No surch service! %d\n", service);
+        log_debug("No surch service! {}", service);
         throw _Exception("Service not found!");
     }
     fetchOnlineContentInternal(os, lowPriority, cancellable, 0, unscheduled_refresh);
@@ -1358,7 +1357,7 @@ void ContentManager::fetchOnlineContentInternal(
 
 void ContentManager::cleanupOnlineServiceObjects(zmm::Ref<OnlineService> service)
 {
-    log_debug("Finished fetch cycle for service: %s\n", service->getServiceName().c_str());
+    log_debug("Finished fetch cycle for service: {}", service->getServiceName().c_str());
 
     if (service->getItemPurgeInterval() > 0) {
         auto ids = storage->getServiceObjectIDs(service->getStoragePrefix());
@@ -1380,7 +1379,7 @@ void ContentManager::cleanupOnlineServiceObjects(zmm::Ref<OnlineService> service
             last.tv_sec = std::stol(temp);
 
             if ((service->getItemPurgeInterval() > 0) && ((current.tv_sec - last.tv_sec) > service->getItemPurgeInterval())) {
-                log_debug("Purging old online service object %s\n", obj->getTitle().c_str());
+                log_debug("Purging old online service object {}", obj->getTitle().c_str());
                 removeObject(object_id, false);
             }
         }
@@ -1392,9 +1391,9 @@ void ContentManager::cleanupOnlineServiceObjects(zmm::Ref<OnlineService> service
 void ContentManager::invalidateAddTask(Ref<GenericTask> t, std::string path)
 {
     if (t->getType() == AddFile) {
-        log_debug("comparing, task path: %s, remove path: %s\n", RefCast(t, CMAddFileTask)->getPath().c_str(), path.c_str());
+        log_debug("comparing, task path: {}, remove path: {}", RefCast(t, CMAddFileTask)->getPath().c_str(), path.c_str());
         if (startswith(RefCast(t, CMAddFileTask)->getPath(), path)) {
-            log_debug("Invalidating task with path %s\n", RefCast(t, CMAddFileTask)->getPath().c_str());
+            log_debug("Invalidating task with path {}", RefCast(t, CMAddFileTask)->getPath().c_str());
             t->invalidate();
         }
     }
@@ -1461,7 +1460,7 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
             if (string_ok(vpath))
                 task->setDescription("Removing: " + obj->getVirtualPath());
         } catch (const Exception& e) {
-            log_debug("trying to remove an object ID which is no longer in the database! %d\n", objectID);
+            log_debug("trying to remove an object ID which is no longer in the database! {}", objectID);
             return;
         }
 
@@ -1698,12 +1697,12 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
         if (dir->getObjectID() == CDS_ID_FS_ROOT)
             dir->setLocation(FS_ROOT_DIRECTORY);
         else {
-            log_debug("objectID: %d\n", dir->getObjectID());
+            log_debug("objectID: {}", dir->getObjectID());
             auto obj = storage->loadObject(dir->getObjectID());
             if (obj == nullptr || !IS_CDS_CONTAINER(obj->getObjectType()) || obj->isVirtual())
                 throw _Exception("tried to remove an illegal object (id) from the list of the autoscan directories");
 
-            log_debug("location: %s\n", obj->getLocation().c_str());
+            log_debug("location: {}", obj->getLocation().c_str());
 
             if (!string_ok(obj->getLocation()))
                 throw _Exception("tried to add an illegal object as autoscan - no location information available!");
@@ -1787,7 +1786,7 @@ void ContentManager::setAutoscanDirectory(Ref<AutoscanDirectory> dir)
 
 void ContentManager::triggerPlayHook(std::shared_ptr<CdsObject> obj)
 {
-    log_debug("start\n");
+    log_debug("start");
 
     if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && !obj->getFlag(OBJECT_FLAG_PLAYED)) {
         std::vector<std::string>  mark_list = config->getStringArrayOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST);
@@ -1796,7 +1795,7 @@ void ContentManager::triggerPlayHook(std::shared_ptr<CdsObject> obj)
                 obj->setFlag(OBJECT_FLAG_PLAYED);
 
                 bool supress = config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES);
-                log_debug("Marking object %s as played\n", obj->getTitle().c_str());
+                log_debug("Marking object {} as played", obj->getTitle().c_str());
                 updateObject(obj, !supress);
                 break;
             }
@@ -1808,7 +1807,7 @@ void ContentManager::triggerPlayHook(std::shared_ptr<CdsObject> obj)
         last_fm->startedPlaying(std::static_pointer_cast<CdsItem>(obj));
     }
 #endif
-    log_debug("end\n");
+    log_debug("end");
 }
 
 CMAddFileTask::CMAddFileTask(std::shared_ptr<ContentManager> content,
@@ -1830,7 +1829,7 @@ std::string CMAddFileTask::getRootPath() { return rootpath; }
 
 void CMAddFileTask::run()
 {
-    log_debug("running add file task with path %s recursive: %d\n", path.c_str(), recursive);
+    log_debug("running add file task with path {} recursive: {}", path.c_str(), recursive);
     content->_addFile(path, rootpath, recursive, hidden, Ref<GenericTask>(this));
 }
 
@@ -1895,7 +1894,7 @@ CMFetchOnlineContentTask::CMFetchOnlineContentTask(std::shared_ptr<ContentManage
 void CMFetchOnlineContentTask::run()
 {
     if (this->service == nullptr) {
-        log_debug("Received invalid service!\n");
+        log_debug("Received invalid service!");
         return;
     }
     try {
@@ -1904,7 +1903,7 @@ void CMFetchOnlineContentTask::run()
         );
         task_processor->addTask(t);
     } catch (const Exception& ex) {
-        log_error("%s\n", ex.getMessage().c_str());
+        log_error("{}", ex.getMessage().c_str());
     }
 }
 #endif // ONLINE_SERVICES

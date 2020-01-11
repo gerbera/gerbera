@@ -144,7 +144,7 @@ size_t IOHandlerBufferHelper::read(char* buf, size_t length)
 
 void IOHandlerBufferHelper::seek(off_t offset, int whence)
 {
-    log_debug("seek called: %lld %d\n", offset, whence);
+    log_debug("seek called: %lld {}", offset, whence);
     if (!seekEnabled)
         throw _Exception("seek currently disabled in this IOHandlerBufferHelper");
 
@@ -211,10 +211,10 @@ void IOHandlerBufferHelper::stopBufferThread()
 
 void* IOHandlerBufferHelper::staticThreadProc(void* arg)
 {
-    log_debug("starting buffer thread... thread: %d\n", pthread_self());
+    log_debug("starting buffer thread... thread: {}", pthread_self());
     auto* inst = (IOHandlerBufferHelper*)arg;
     inst->threadProc();
-    log_debug("buffer thread shut down. thread: %d\n", pthread_self());
+    log_debug("buffer thread shut down. thread: {}", pthread_self());
     pthread_exit(nullptr);
     return nullptr;
 }

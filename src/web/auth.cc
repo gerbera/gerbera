@@ -136,7 +136,7 @@ void web::auth::process()
         gerberaVersion->setText(VERSION);
         cfg->appendElementChild(gerberaVersion);
     } else if (action == "get_sid") {
-        log_debug("checking/getting sid...\n");
+        log_debug("checking/getting sid...");
         std::shared_ptr<Session> session = nullptr;
         std::string sid = param("sid");
 

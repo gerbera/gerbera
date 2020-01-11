@@ -73,7 +73,7 @@ void Exiv2Handler::fillMetadata(std::shared_ptr<CdsItem> item)
             // from YYYY:MM:DD to YYYY-MM-DD
             if (value.length() >= 11) {
                 value = value.substr(0, 4) + "-" + value.substr(5, 2) + "-" + value.substr(8, 2);
-                log_debug("date: %s\n", value.c_str());
+                log_debug("date: {}", value.c_str());
                 item->setMetadata(MetadataHandler::getMetaFieldName(M_DATE), value);
             }
         }
@@ -84,7 +84,7 @@ void Exiv2Handler::fillMetadata(std::shared_ptr<CdsItem> item)
             md = exifData.findKey(Exiv2::ExifKey("Exif.Photo.UserComment"));
             if (md != exifData.end())
                 comment = (char*)md->toString().c_str();
-            log_debug("Comment: %s\n", comment.c_str());
+            log_debug("Comment: {}", comment.c_str());
         }
 
         // if the image has no comment, compose something nice out of the exiv information
@@ -133,7 +133,7 @@ void Exiv2Handler::fillMetadata(std::shared_ptr<CdsItem> item)
                 else
                     comment = "Focal length: " + focal_length;
             }
-        log_debug("Fabricated Comment: %s\n", comment.c_str());
+        log_debug("Fabricated Comment: {}", comment.c_str());
         }  */
 
         if (string_ok(comment))
@@ -148,7 +148,7 @@ void Exiv2Handler::fillMetadata(std::shared_ptr<CdsItem> item)
             for (size_t j = 0; j < aux.size(); j++) {
                 value = "";
                 auxtag = aux[j];
-                log_debug("auxtag: %s \n", auxtag.c_str());
+                log_debug("auxtag: {} ", auxtag.c_str());
                 if (auxtag.substr(0, 4) == "Exif") {
                     Exiv2::ExifData::const_iterator md = exifData.findKey(Exiv2::ExifKey(auxtag.c_str()));
                     if (md != exifData.end())
@@ -158,22 +158,22 @@ void Exiv2Handler::fillMetadata(std::shared_ptr<CdsItem> item)
                     if (md != xmpData.end())
                         value = (char*)md->toString().c_str();
                 } else {
-                    log_debug("Invalid Aux Tag %s\n", auxtag.c_str());
+                    log_debug("Invalid Aux Tag {}", auxtag.c_str());
                     break;
                 }
                 if (string_ok(value)) {
                     value = sc->convert(value);
                     item->setAuxData(auxtag, value);
-                    log_debug("Adding aux tag: %s with value %s\n", auxtag.c_str(), value.c_str());
+                    log_debug("Adding aux tag: {} with value {}", auxtag.c_str(), value.c_str());
                 }
             }
 
         } else {
-            log_debug("No aux data requested\n");
+            log_debug("No aux data requested");
         }
 
     } catch (Exiv2::AnyError& ex) {
-        log_warning("Caught Exiv2 exception processing %s: '%s'\n", item->getLocation().c_str(), ex.what());
+        log_warning("Caught Exiv2 exception processing {}: '{}'", item->getLocation().c_str(), ex.what());
     }
 }
 

@@ -56,12 +56,12 @@ js_readln(duk_context *ctx)
     }
     catch (const ServerShutdownException & se)
     {
-        log_warning("Aborting script execution due to server shutdown.\n");
+        log_warning("Aborting script execution due to server shutdown.");
         return duk_error(ctx, DUK_ERR_ERROR, "Aborting script execution due to server shutdown.");
     }
     catch (const Exception & e)
     {
-        e.printStackTrace();
+        log_error("DUK exception: {}", e.getMessage());
         return 0;
     }
 

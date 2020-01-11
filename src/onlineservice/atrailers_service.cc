@@ -98,11 +98,11 @@ Ref<Element> ATrailersService::getData()
     std::string buffer;
 
     try {
-        log_debug("DOWNLOADING URL: %s\n", service_url.c_str());
+        log_debug("DOWNLOADING URL: {}", service_url.c_str());
         buffer = url->download(service_url, &retcode,
             curl_handle, false, true, true);
     } catch (const Exception& ex) {
-        log_error("Failed to download Apple Trailers XML data: %s\n",
+        log_error("Failed to download Apple Trailers XML data: {}",
             ex.getMessage().c_str());
         return nullptr;
     }
@@ -113,18 +113,18 @@ Ref<Element> ATrailersService::getData()
     if (retcode != 200)
         return nullptr;
 
-    log_debug("GOT BUFFER\n%s\n", buffer.c_str());
+    log_debug("GOT BUFFER{}", buffer.c_str());
     Ref<Parser> parser(new Parser());
     try {
         return parser->parseString(sc->convert(buffer))->getRoot();
     } catch (const ParseException& pe) {
-        log_error("Error parsing Apple Trailers XML %s line %d:\n%s\n",
+        log_error("Error parsing Apple Trailers XML {} line {}:{}",
             pe.context->location.c_str(),
             pe.context->line,
             pe.getMessage().c_str());
         return nullptr;
     } catch (const Exception& ex) {
-        log_error("Error parsing Apple Trailers XML %s\n",
+        log_error("Error parsing Apple Trailers XML {}",
             ex.getMessage().c_str());
         return nullptr;
     }
@@ -134,7 +134,7 @@ Ref<Element> ATrailersService::getData()
 
 bool ATrailersService::refreshServiceData(Ref<Layout> layout)
 {
-    log_debug("Refreshing Apple Trailers\n");
+    log_debug("Refreshing Apple Trailers");
     // the layout is in full control of the service items
 
     // this is a safeguard to ensure that this class is not called from
@@ -154,7 +154,7 @@ bool ATrailersService::refreshServiceData(Ref<Layout> layout)
     if (reply != nullptr)
         sc->setServiceContent(reply);
     else {
-        log_debug("Failed to get XML content from Trailers service\n");
+        log_debug("Failed to get XML content from Trailers service");
         throw _Exception("Failed to get XML content from Trailers service");
     }
 
@@ -168,12 +168,12 @@ bool ATrailersService::refreshServiceData(Ref<Layout> layout)
 
         auto old = storage->loadObjectByServiceID(std::static_pointer_cast<CdsItem>(obj)->getServiceID());
         if (old == nullptr) {
-            log_debug("Adding new Trailers object\n");
+            log_debug("Adding new Trailers object");
 
             if (layout != nullptr)
                 layout->processCdsObject(obj, nullptr);
         } else {
-            log_debug("Updating existing Trailers object\n");
+            log_debug("Updating existing Trailers object");
             obj->setID(old->getID());
             obj->setParentID(old->getParentID());
             //            struct timespec oldt, newt;

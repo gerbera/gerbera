@@ -156,7 +156,7 @@ void Sqlite3Storage::init()
     try {
         dbVersion = getInternalSetting("db_version");
     } catch (Exception) {
-        log_warning("Sqlite3 database seems to be corrupt or doesn't exist yet.\n");
+        log_warning("Sqlite3 database seems to be corrupt or doesn't exist yet.");
         // database seems to be corrupt or nonexistent
         if (config->getBoolOption(CFG_SERVER_STORAGE_SQLITE_RESTORE)) {
             // try to restore database
@@ -175,7 +175,7 @@ void Sqlite3Storage::init()
             }
 
             if (dbVersion.empty()) {
-                log_info("no sqlite3 backup is available or backup is corrupt. automatically creating database...\n");
+                log_info("no sqlite3 backup is available or backup is corrupt. automatically creating database...");
                 Ref<SLInitTask> ptask(new SLInitTask(config));
                 addTask(RefCast(ptask, SLTask));
                 try {
@@ -185,7 +185,7 @@ void Sqlite3Storage::init()
                     shutdown();
                     throw _Exception("error while creating database: " + e.getMessage());
                 }
-                log_info("database created successfully.\n");
+                log_info("database created successfully.");
             }
         } else {
             // fail because restore option is false
@@ -206,43 +206,43 @@ void Sqlite3Storage::init()
     buf << "PRAGMA synchronous = " << synchronousOption;
     SQLStorage::exec(buf);
 
-    log_debug("db_version: %s\n", dbVersion.c_str());
+    log_debug("db_version: {}", dbVersion.c_str());
 
     /* --- database upgrades --- */
 
     if (dbVersion == "1") {
-        log_info("Running an automatic database upgrade from database version 1 to version 2...\n");
+        log_info("Running an automatic database upgrade from database version 1 to version 2...");
         _exec(SQLITE3_UPDATE_1_2_1);
         _exec(SQLITE3_UPDATE_1_2_2);
         _exec(SQLITE3_UPDATE_1_2_3);
         _exec(SQLITE3_UPDATE_1_2_4);
-        log_info("Database upgrade successful.\n");
+        log_info("Database upgrade successful.");
         dbVersion = "2";
     }
 
     if (dbVersion == "2") {
-        log_info("Running an automatic database upgrade from database version 2 to version 3...\n");
+        log_info("Running an automatic database upgrade from database version 2 to version 3...");
         _exec(SQLITE3_UPDATE_2_3_1);
         _exec(SQLITE3_UPDATE_2_3_2);
         _exec(SQLITE3_UPDATE_2_3_3);
-        log_info("Database upgrade successful.\n");
+        log_info("Database upgrade successful.");
         dbVersion = "3";
     }
 
     if (dbVersion == "3") {
-        log_info("Running an automatic database upgrade from database version 3 to version 4...\n");
+        log_info("Running an automatic database upgrade from database version 3 to version 4...");
         _exec(SQLITE3_UPDATE_3_4_1);
         _exec(SQLITE3_UPDATE_3_4_2);
         _exec(SQLITE3_UPDATE_3_4_3);
-        log_info("Database upgrade successful.\n");
+        log_info("Database upgrade successful.");
         dbVersion = "4";
     }
 
     if (dbVersion == "4") {
-        log_info("Running an automatic database upgrade from database version 4 to version 5...\n");
+        log_info("Running an automatic database upgrade from database version 4 to version 5...");
         _exec(SQLITE3_UPDATE_4_5_1);
         _exec(SQLITE3_UPDATE_4_5_2);
-        log_info("Database upgrade successful.\n");
+        log_info("Database upgrade successful.");
         dbVersion = "5";
     }
 
@@ -301,7 +301,7 @@ Ref<SQLResult> Sqlite3Storage::select(const char* query, int length)
 
 int Sqlite3Storage::exec(const char* query, int length, bool getLastInsertId)
 {
-    log_debug("Adding query to Queue: %s\n", query);
+    log_debug("Adding query to Queue: {}", query);
     Ref<SLExecTask> ptask(new SLExecTask(query, getLastInsertId));
     addTask(RefCast(ptask, SLTask));
     ptask->waitForTask();
@@ -315,7 +315,7 @@ void* Sqlite3Storage::staticThreadProc(void* arg)
 {
     auto* inst = (Sqlite3Storage*)arg;
     inst->threadProc();
-    log_debug("Sqlite3Storage::staticThreadProc - exiting thread\n");
+    log_debug("Sqlite3Storage::staticThreadProc - exiting thread");
     pthread_exit(nullptr);
 }
 
@@ -380,20 +380,20 @@ void Sqlite3Storage::addTask(zmm::Ref<SLTask> task, bool onlyIfDirty)
 
 void Sqlite3Storage::shutdownDriver()
 {
-    log_debug("start\n");
+    log_debug("start");
     AutoLockU lock(sqliteMutex);
     shutdownFlag = true;
     if (config->getBoolOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED)) {
         timer->removeTimerSubscriber(this, nullptr);
     }
-    log_debug("signalling...\n");
+    log_debug("signalling...");
     cond.notify_one();
     lock.unlock();
-    log_debug("waiting for thread\n");
+    log_debug("waiting for thread");
     if (sqliteThread)
         pthread_join(sqliteThread, nullptr);
     sqliteThread = 0;
-    log_debug("end\n");
+    log_debug("end");
 }
 
 void Sqlite3Storage::storeInternalSetting(std::string key, std::string value)
@@ -441,7 +441,7 @@ void SLTask::waitForTask()
     }
 
     if (!getError().empty()) {
-        log_debug("%s\n", getError().c_str());
+        log_debug("{}", getError().c_str());
         throw _Exception(getError());
     }
 }
@@ -535,7 +535,7 @@ SLExecTask::SLExecTask(const char* query, bool getLastInsertId)
 
 void SLExecTask::run(sqlite3** db, Sqlite3Storage* sl)
 {
-    log_debug("%s\n", query);
+    log_debug("{}", query);
     char* err;
     int res = sqlite3_exec(
         *db,
@@ -572,13 +572,13 @@ void SLBackupTask::run(sqlite3** db, Sqlite3Storage* sl)
             copy_file(
                 dbFilePath,
                 dbFilePath + ".backup");
-            log_debug("sqlite3 backup successful\n");
+            log_debug("sqlite3 backup successful");
             decontamination = true;
         } catch (const Exception& e) {
-            log_error("error while making sqlite3 backup: %s\n", e.getMessage().c_str());
+            log_error("error while making sqlite3 backup: {}", e.getMessage().c_str());
         }
     } else {
-        log_info("trying to restore sqlite3 database from backup...\n");
+        log_info("trying to restore sqlite3 database from backup...");
         sqlite3_close(*db);
         try {
             copy_file(
@@ -592,7 +592,7 @@ void SLBackupTask::run(sqlite3** db, Sqlite3Storage* sl)
         if (res != SQLITE_OK) {
             throw _StorageException("", "error while restoring sqlite3 backup: could not reopen sqlite3 database after restore");
         }
-        log_info("sqlite3 database successfully restored from backup.\n");
+        log_info("sqlite3 database successfully restored from backup.");
     }
 }
 

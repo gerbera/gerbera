@@ -425,7 +425,7 @@ Ref<Element> ConfigGenerator::generateUdn() {
   uuid_unparse(uuid, uuid_str);
 #endif
 
-  log_debug("UUID generated: %s\n", uuid_str);
+  log_debug("UUID generated: {}", uuid_str);
   Ref<Element> udn(new Element("udn"));
   udn->setText("uuid:" + std::string(uuid_str), mxml_string_type);
 #ifdef BSD_NATIVE_UUID

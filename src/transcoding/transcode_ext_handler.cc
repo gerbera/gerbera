@@ -77,7 +77,7 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile
     bool isURL = false;
 //    bool is_srt = false;
 
-    log_debug("start transcoding file: %s\n", location.c_str());
+    log_debug("start transcoding file: {}", location.c_str());
     char fifo_template[]="mt_transcode_XXXXXX";
 
     if (profile == nullptr)
@@ -113,7 +113,7 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile
     std::string header;
     header = header + "TimeSeekRange.dlna.org: npt=" + range;
 
-    log_debug("Adding TimeSeekRange response HEADERS: %s\n", header.c_str());
+    log_debug("Adding TimeSeekRange response HEADERS: {}", header.c_str());
     header = getDLNAtransferHeader(mimeType, header);
     if (string_ok(header))
         info->http_header = ixmlCloneDOMString(header.c_str());
@@ -163,11 +163,11 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile
             std::string url = location;
             strcpy(fifo_template, "mt_transcode_XXXXXX");
             location = normalizePath(tempName(config->getOption(CFG_SERVER_TMPDIR), fifo_template));
-            log_debug("creating reader fifo: %s\n", location.c_str());
+            log_debug("creating reader fifo: {}", location.c_str());
             if (mkfifo(location.c_str(), O_RDWR) == -1)
             {
                 log_error("Failed to create fifo for the remote content "
-                          "reading thread: %s\n", strerror(errno));
+                          "reading thread: {}\n", strerror(errno));
                 throw _Exception("Could not create reader fifo!\n");
             }
 
@@ -222,10 +222,10 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile
         throw _Exception("Transcoder " + profile->getCommand() + 
                 " is not executable: " + strerror(err));
 
-    log_debug("creating fifo: %s\n", fifo_name.c_str());
+    log_debug("creating fifo: {}", fifo_name.c_str());
     if (mkfifo(fifo_name.c_str(), O_RDWR) == -1) 
     {
-        log_error("Failed to create fifo for the transcoding process!: %s\n", strerror(errno));
+        log_error("Failed to create fifo for the transcoding process!: {}", strerror(errno));
         throw _Exception("Could not create fifo!\n");
     }
         
@@ -233,8 +233,8 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile
    
     arglist = parseCommandLine(profile->getArguments(), location, fifo_name, range);
 
-    log_debug("Command: %s\n", profile->getCommand().c_str());
-    log_debug("Arguments: %s\n", profile->getArguments().c_str());
+    log_debug("Command: {}", profile->getCommand().c_str());
+    log_debug("Arguments: {}", profile->getArguments().c_str());
     auto main_proc = std::make_shared<TranscodingProcessExecutor>(profile->getCommand(), arglist);
     main_proc->removeFile(fifo_name);
     if (isURL && (!profile->acceptURL()))

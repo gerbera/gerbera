@@ -67,7 +67,7 @@ FileRequestHandler::FileRequestHandler(std::shared_ptr<ConfigManager> config,
 void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 {
     Headers headers;
-    log_debug("start\n");
+    log_debug("start");
 
     std::string mimeType;
     int objectID;
@@ -82,16 +82,16 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     std::map<std::string,std::string> dict;
     dict_decode_simple(parameters, &dict);
 
-    log_debug("full url (filename): %s, parameters: %s\n", filename, parameters.c_str());
+    log_debug("full url (filename): {}, parameters: {}", filename, parameters.c_str());
 
     std::string objID = getValueOrDefault(dict, "object_id");
     if (objID.empty()) {
-        //log_error("object_id not found in url\n");
+        //log_error("object_id not found in url");
         throw _Exception("getInfo: object_id not found");
     }
     objectID = std::stoi(objID);
 
-    //log_debug("got ObjectID: [%s]\n", object_id.c_str());
+    //log_debug("got ObjectID: [{}]", object_id.c_str());
 
     auto obj = storage->loadObject(objectID);
 
@@ -149,7 +149,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     }
 
     std::string header;
-    log_debug("path: %s\n", path.c_str());
+    log_debug("path: {}", path.c_str());
     size_t slash_pos = path.rfind(DIR_SEPARATOR);
     if (slash_pos != std::string::npos) {
         if (slash_pos < path.length() - 1) {
@@ -163,7 +163,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     tr_profile = getValueOrDefault(dict, URL_PARAM_TRANSCODE_PROFILE_NAME);
 
     // for transcoded resourecs res_id will always be negative
-    log_debug("fetching resource id %d\n", res_id);
+    log_debug("fetching resource id {}", res_id);
     std::string rh = getValueOrDefault(dict, RESOURCE_HANDLER);
 
     if (((res_id > 0) && (res_id < item->getResourceCount()))
@@ -278,8 +278,8 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         headers.addHeader(D_HTTP_TRANSFER_MODE_HEADER, dlnaTransferHeader);
     }
 
-    //log_debug("sizeof off_t %d, statbuf.st_size %d\n", sizeof(off_t), sizeof(statbuf.st_size));
-    //log_debug("getInfo: file_length: " OFF_T_SPRINTF "\n", statbuf.st_size);
+    //log_debug("sizeof off_t {}, statbuf.st_size {}", sizeof(off_t), sizeof(statbuf.st_size));
+    //log_debug("getInfo: file_length: " OFF_T_SPRINTF "", statbuf.st_size);
 
     UpnpFileInfo_set_LastModified(info, statbuf.st_mtime);
     UpnpFileInfo_set_IsDirectory(info, S_ISDIR(statbuf.st_mode));
@@ -287,16 +287,16 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
     headers.writeHeaders(info);
 
-    // log_debug("getInfo: Requested %s, ObjectID: %s, Location: %s\n, MimeType: %s\n",
+    // log_debug("getInfo: Requested {}, ObjectID: {}, Location: {}, MimeType: {}",
     //      filename, object_id.c_str(), path.c_str(), info->content_type);
 
-    log_debug("web_get_info(): end\n");
+    log_debug("web_get_info(): end");
 }
 
 std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
     enum UpnpOpenFileMode mode, std::string range)
 {
-    log_debug("start\n");
+    log_debug("start");
 
     // We explicitly do not support UPNP_WRITE due to security reasons.
     if (mode != UPNP_READ) {
@@ -307,7 +307,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
 
     std::map<std::string,std::string> params;
     dict_decode_simple(parameters, &params);
-    log_debug("full url (filename): %s, parameters: %s\n", filename, parameters.c_str());
+    log_debug("full url (filename): {}, parameters: {}", filename, parameters.c_str());
 
     std::string objID = getValueOrDefault(params, "object_id");
     if (objID.empty()) {
@@ -316,7 +316,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
 
     int objectID = std::stoi(objID);
 
-    log_debug("Opening media file with object id %d\n", objectID);
+    log_debug("Opening media file with object id {}", objectID);
     auto obj = storage->loadObject(objectID);
 
     int objectType = obj->getObjectType();
@@ -346,7 +346,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
         std::string input = inputElement->print();
         std::string output;
 
-        log_debug("Script input: %s\n", input.c_str());
+        log_debug("Script input: {}", input.c_str());
         if (strncmp(action.c_str(), "http://", 7)) {
 #ifdef TOMBDEBUG
             struct timespec before;
@@ -355,14 +355,14 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
             output = run_simple_process(config, action, "run", input);
 #ifdef TOMBDEBUG
             long delta = getDeltaMillis(&before);
-            log_debug("script executed in %ld milliseconds\n", delta);
+            log_debug("script executed in {} milliseconds", delta);
 #endif
         } else {
             /// \todo actually fetch...
-            log_debug("fetching %s\n", action.c_str());
+            log_debug("fetching {}", action.c_str());
             output = input;
         }
-        log_debug("Script output: %s\n", output.c_str());
+        log_debug("Script output: {}", output.c_str());
 
         auto clone = CdsObject::createObject(storage, objectType);
         aitem->copyTo(clone);
@@ -371,7 +371,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
 
         if (!aitem->equals(clone, true)) // check for all differences
         {
-            log_debug("Item changed, updating database\n");
+            log_debug("Item changed, updating database");
             int containerChanged = INVALID_OBJECT_ID;
             storage->updateObject(clone, &containerChanged);
             updateManager->containerChanged(containerChanged);
@@ -379,12 +379,12 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
 
             if (!aitem->equals(clone)) // check for visible differences
             {
-                log_debug("Item changed visually, updating parent\n");
+                log_debug("Item changed visually, updating parent");
                 updateManager->containerChanged(clone->getParentID(), FLUSH_ASAP);
             }
             obj = clone;
         } else {
-            log_debug("Item untouched...\n");
+            log_debug("Item untouched...");
         }
     }
 
@@ -420,7 +420,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
             throw _Exception("Failed to open " + path + " - " + strerror(errno));
     }
 
-    log_debug("fetching resource id %d\n", res_id);
+    log_debug("fetching resource id {}", res_id);
 
     std::string tr_profile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
     if (string_ok(tr_profile)) {
@@ -471,7 +471,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
 
         auto io_handler = h->serveContent(item, res_id);
         io_handler->open(mode);
-        log_debug("end\n");
+        log_debug("end");
         return io_handler;
 
     } else {
@@ -489,7 +489,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
             info->file_length = statbuf.st_size;
             info->content_type = ixmlCloneDOMString(mimeType.c_str());
 
-            log_debug("Adding content disposition header: %s\n", 
+            log_debug("Adding content disposition header: {}",
                     header.c_str());
             // if we are dealing with a regular file we should add the
             // Accept-Ranges: bytes header, in order to indicate that we support
@@ -511,7 +511,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
             auto io_handler = std::make_unique<FileIOHandler>(path);
             io_handler->open(mode);
             content->triggerPlayHook(obj);
-            log_debug("end\n");
+            log_debug("end");
             return io_handler;
         }
     }

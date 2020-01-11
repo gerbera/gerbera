@@ -172,7 +172,7 @@ int CdsItem::equals(std::shared_ptr<CdsObject> obj, bool exactly)
 void CdsItem::validate()
 {
     CdsObject::validate();
-    //    log_info("mime: [%s] loc [%s]\n", this->mimeType.c_str(), this->location.c_str());
+    //    log_info("mime: [{}] loc [{}]", this->mimeType.c_str(), this->location.c_str());
     if (!string_ok(this->mimeType))
         throw _Exception("Item validation failed: missing mimetype");
 

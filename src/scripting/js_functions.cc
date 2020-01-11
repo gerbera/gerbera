@@ -49,7 +49,7 @@ duk_ret_t js_print(duk_context *ctx)
     duk_push_string(ctx, " ");
     duk_insert(ctx, 0);
     duk_join(ctx, duk_get_top(ctx)-1);
-    log_js("%s\n", duk_get_string(ctx, 0));
+    log_js("{}", duk_get_string(ctx, 0));
     return 0;
 }
 
@@ -110,7 +110,7 @@ duk_ret_t js_addCdsObject(duk_context *ctx)
 
         if (duk_is_undefined(ctx, -1))
         {
-            log_debug("Could not retrieve orig/playlist object\n");
+            log_debug("Could not retrieve orig/playlist object");
             return 0;
         }
 
@@ -129,7 +129,7 @@ duk_ret_t js_addCdsObject(duk_context *ctx)
             int otype = self->getIntProperty("objectType", -1);
             if (otype == -1)
             {
-                log_error("missing objectType property\n");
+                log_error("missing objectType property");
                 return 0;
             }
 
@@ -228,13 +228,12 @@ duk_ret_t js_addCdsObject(duk_context *ctx)
     }
     catch (const ServerShutdownException & se)
     {
-        log_warning("Aborting script execution due to server shutdown.\n");
+        log_warning("Aborting script execution due to server shutdown.");
         return duk_error(ctx, DUK_ERR_ERROR, "Aborting script execution due to server shutdown.\n");
     }
     catch (const Exception & e)
     {
-        log_error("%s\n", e.getMessage().c_str());
-        e.printStackTrace();
+        log_error("{}", e.getMessage().c_str());
     }
     return 0;
 }
@@ -257,13 +256,12 @@ static duk_ret_t convert_charset_generic(duk_context *ctx, charset_convert_t chr
     }
     catch (const ServerShutdownException & se)
     {
-        log_warning("Aborting script execution due to server shutdown.\n");
+        log_warning("Aborting script execution due to server shutdown.");
         return DUK_RET_ERROR;
     }
     catch (const Exception & e)
     {
-        log_error("%s\n", e.getMessage().c_str());
-        e.printStackTrace();
+        log_error("{}", e.getMessage().c_str());
     }
     return 0;
 }

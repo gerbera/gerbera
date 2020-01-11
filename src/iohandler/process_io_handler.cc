@@ -135,7 +135,7 @@ ProcessIOHandler::ProcessIOHandler(std::shared_ptr<ContentManager> content,
     /*
     if (mkfifo(filename.c_str(), O_RDWR) == -1)
     {
-        log_error("Failed to create fifo: %s\n", strerror(errno));
+        log_error("Failed to create fifo: {}", strerror(errno));
         killall();
         if (main_proc != nullptr)
             main_proc->kill();
@@ -204,7 +204,7 @@ size_t ProcessIOHandler::read(char* buf, size_t length)
                 if (!main_ok || abort()) {
                     if (!main_ok) {
                         exit_status = main_proc->getStatus();
-                        log_debug("process exited with status %d\n", exit_status);
+                        log_debug("process exited with status {}", exit_status);
                         killall();
                         if (exit_status == EXIT_SUCCESS)
                             return 0;
@@ -223,7 +223,7 @@ size_t ProcessIOHandler::read(char* buf, size_t length)
 
             timeout_count++;
             if (timeout_count > MAX_TIMEOUTS) {
-                log_debug("max timeouts, checking socket!\n");
+                log_debug("max timeouts, checking socket!");
                 return CHECK_SOCKET;
             }
         }
@@ -235,7 +235,7 @@ size_t ProcessIOHandler::read(char* buf, size_t length)
                 break;
 
             if (bytes_read < 0) {
-                log_debug("aborting read!!!\n");
+                log_debug("aborting read!!!");
                 return -1;
             }
 
@@ -303,7 +303,7 @@ size_t ProcessIOHandler::write(char* buf, size_t length)
                 if (!main_ok || abort()) {
                     if (!main_ok) {
                         exit_status = main_proc->getStatus();
-                        log_debug("process exited with status %d\n", exit_status);
+                        log_debug("process exited with status {}", exit_status);
                         killall();
                         if (exit_status == EXIT_SUCCESS)
                             return 0;
@@ -327,7 +327,7 @@ size_t ProcessIOHandler::write(char* buf, size_t length)
                 break;
 
             if (bytes_written < 0) {
-                log_debug("aborting write!!!\n");
+                log_debug("aborting write!!!");
                 return -1;
             }
 
@@ -374,7 +374,7 @@ void ProcessIOHandler::close()
 {
     bool ret;
 
-    log_debug("terminating process, closing %s\n", this->filename.c_str());
+    log_debug("terminating process, closing {}", this->filename.c_str());
     unregisterAll();
 
     if (main_proc != nullptr) {
