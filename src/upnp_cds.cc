@@ -57,7 +57,7 @@ ContentDirectoryService::~ContentDirectoryService() = default;
 
 void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& request)
 {
-    log_debug("start\n");
+    log_debug("start");
     Ref<Element> req = request->getRequest();
 
     std::string objID = req->getChildText("ObjectID");
@@ -68,7 +68,7 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
     std::string RequestedCount = req->getChildText("RequestedCount");
     // std::string SortCriteria; // not yet supported
 
-    log_debug("Browse received parameters: ObjectID [%s] BrowseFlag [%s] StartingIndex [%s] RequestedCount [%s]\n",
+    log_debug("Browse received parameters: ObjectID [{}] BrowseFlag [{}] StartingIndex [{}] RequestedCount [{}]",
         objID.c_str(), BrowseFlag.c_str(), StartingIndex.c_str(), RequestedCount.c_str());
 
     if (objID.empty())
@@ -99,7 +99,7 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
     std::vector<std::shared_ptr<CdsObject>> arr;
     try {
         arr = storage->browse(param);
-    } catch (const Exception& e) {
+    } catch (const std::runtime_error& e) {
         throw UpnpException(UPNP_E_NO_SUCH_ID, "no such object");
     }
 
@@ -141,19 +141,19 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
     response->appendTextChild("UpdateID", std::to_string(systemUpdateID));
 
     request->setResponse(response);
-    log_debug("end\n");
+    log_debug("end");
 }
 
 void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& request)
 {
-    log_debug("start\n");
+    log_debug("start");
 
     Ref<Element> req = request->getRequest();
     std::string containerID(req->getChildText("ContainerID").c_str());
     std::string searchCriteria(req->getChildText("SearchCriteria").c_str());
     std::string startingIndex(req->getChildText("StartingIndex").c_str());
     std::string requestedCount(req->getChildText("RequestedCount").c_str());
-    log_debug("Search received parameters: ContainerID [%s] SearchCriteria [%s] StartingIndex [%s] RequestedCount [%s]\n",
+    log_debug("Search received parameters: ContainerID [{}] SearchCriteria [{}] StartingIndex [{}] RequestedCount [{}]",
         containerID.c_str(), searchCriteria.c_str(), startingIndex.c_str(), requestedCount.c_str());
 
     Ref<Element> didl_lite(new Element("DIDL-Lite"));
@@ -176,8 +176,8 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
     int numMatches = 0;
     try {
         results = storage->search(searchParam, &numMatches);
-    } catch (const Exception& e) {
-        log_debug(e.getMessage().c_str());
+    } catch (const std::runtime_error& e) {
+        log_debug(e.what());
         throw UpnpException(UPNP_E_NO_SUCH_ID, "no such object");
     }
 
@@ -205,12 +205,12 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
     response->appendTextChild("UpdateID", std::to_string(systemUpdateID));
 
     request->setResponse(response);
-    log_debug("end\n");
+    log_debug("end");
 }
 
 void ContentDirectoryService::doGetSearchCapabilities(const std::unique_ptr<ActionRequest>& request)
 {
-    log_debug("start\n");
+    log_debug("start");
 
     Ref<Element> response;
     response = xmlBuilder->createResponse(request->getActionName(), DESC_CDS_SERVICE_TYPE);
@@ -218,12 +218,12 @@ void ContentDirectoryService::doGetSearchCapabilities(const std::unique_ptr<Acti
 
     request->setResponse(response);
 
-    log_debug("end\n");
+    log_debug("end");
 }
 
 void ContentDirectoryService::doGetSortCapabilities(const std::unique_ptr<ActionRequest>& request)
 {
-    log_debug("start\n");
+    log_debug("start");
 
     Ref<Element> response;
     response = xmlBuilder->createResponse(request->getActionName(), DESC_CDS_SERVICE_TYPE);
@@ -231,12 +231,12 @@ void ContentDirectoryService::doGetSortCapabilities(const std::unique_ptr<Action
 
     request->setResponse(response);
 
-    log_debug("end\n");
+    log_debug("end");
 }
 
 void ContentDirectoryService::doGetSystemUpdateID(const std::unique_ptr<ActionRequest>& request)
 {
-    log_debug("start\n");
+    log_debug("start");
 
     Ref<Element> response;
     response = xmlBuilder->createResponse(request->getActionName(), DESC_CDS_SERVICE_TYPE);
@@ -244,12 +244,12 @@ void ContentDirectoryService::doGetSystemUpdateID(const std::unique_ptr<ActionRe
 
     request->setResponse(response);
 
-    log_debug("end\n");
+    log_debug("end");
 }
 
 void ContentDirectoryService::processActionRequest(const std::unique_ptr<ActionRequest>& request)
 {
-    log_debug("start\n");
+    log_debug("start");
 
     if (request->getActionName() == "Browse") {
         doBrowse(request);
@@ -263,12 +263,12 @@ void ContentDirectoryService::processActionRequest(const std::unique_ptr<ActionR
         doSearch(request);
     } else {
         // invalid or unsupported action
-        log_info("unrecognized action %s\n", request->getActionName().c_str());
+        log_info("unrecognized action {}", request->getActionName().c_str());
         request->setErrorCode(UPNP_E_INVALID_ACTION);
         // throw UpnpException(UPNP_E_INVALID_ACTION, "unrecognized action");
     }
 
-    log_debug("ContentDirectoryService::processActionRequest: end\n");
+    log_debug("ContentDirectoryService::processActionRequest: end");
 }
 
 void ContentDirectoryService::processSubscriptionRequest(const std::unique_ptr<SubscriptionRequest>& request)
@@ -278,7 +278,7 @@ void ContentDirectoryService::processSubscriptionRequest(const std::unique_ptr<S
 
     Ref<Element> propset, property;
 
-    log_debug("start\n");
+    log_debug("start");
 
     propset = xmlBuilder->createEventPropertySet();
     property = propset->getFirstElementChild();
@@ -297,7 +297,7 @@ void ContentDirectoryService::processSubscriptionRequest(const std::unique_ptr<S
         DESC_CDS_SERVICE_ID, event, request->getSubscriptionID().c_str());
 
     ixmlDocument_free(event);
-    log_debug("end\n");
+    log_debug("end");
 }
 
 void ContentDirectoryService::sendSubscriptionUpdate(std::string containerUpdateIDs_CSV)
@@ -307,7 +307,7 @@ void ContentDirectoryService::sendSubscriptionUpdate(std::string containerUpdate
 
     Ref<Element> propset, property;
 
-    log_debug("start\n");
+    log_debug("start");
 
     systemUpdateID++;
 
@@ -330,5 +330,5 @@ void ContentDirectoryService::sendSubscriptionUpdate(std::string containerUpdate
 
     ixmlDocument_free(event);
 
-    log_debug("end\n");
+    log_debug("end");
 }

@@ -7,9 +7,6 @@ add_executable(testruntime
         test_runtime.cc
         )
 
-include(DefFileName)
-define_file_path_for_sources(testruntime)
-
 include_directories(
         ${UPNP_INCLUDE_DIRS}
         ${UUID_INCLUDE_DIRS}

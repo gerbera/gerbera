@@ -16,9 +16,6 @@ add_executable(testscript
         test_internal_m3u_playlist.cc
         test_internal_pls_playlist.cc)
 
-include(DefFileName)
-define_file_path_for_sources(testscript)
-
 include_directories(
         ${UPNP_INCLUDE_DIRS}
         ${UUID_INCLUDE_DIRS}

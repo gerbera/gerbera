@@ -40,9 +40,9 @@ BufferedIOHandler::BufferedIOHandler(std::unique_ptr<IOHandler>& underlyingHandl
     : IOHandlerBufferHelper(bufSize, initialFillSize)
 {
     if (underlyingHandler == nullptr)
-        throw _Exception("underlyingHandler must not be nullptr");
+        throw std::runtime_error("underlyingHandler must not be nullptr");
     if (maxChunkSize <= 0)
-        throw _Exception("maxChunkSize must be positive");
+        throw std::runtime_error("maxChunkSize must be positive");
     this->underlyingHandler = std::move(underlyingHandler);
     this->maxChunkSize = maxChunkSize;
 
@@ -89,7 +89,7 @@ void BufferedIOHandler::threadProc()
                     currentFillSize += bufSize;
                 percentFillLevel = ((float)currentFillSize / (float)bufSize) * 100;
             }
-            log_debug("buffer fill level: %3.2f%%  (bufSize: %d; a: %d; b: %d)\n", percentFillLevel, bufSize, a, b);
+            log_debug("buffer fill level: %3.2f%%  (bufSize: {}; a: {}; b: {})", percentFillLevel, bufSize, a, b);
         }
 #endif
         if (empty)
@@ -129,9 +129,8 @@ void BufferedIOHandler::threadProc()
                 underlyingHandler->seek(seekOffset, seekWhence);
                 empty = true;
                 a = b = 0;
-            } catch (const Exception& e) {
-                log_error("Error while seeking in buffer: %s\n", e.getMessage().c_str());
-                e.printStackTrace();
+            } catch (const std::runtime_error& e) {
+                log_error("Error while seeking in buffer: {}", e.what());
             }
 
             /// \todo should we do that?
@@ -163,7 +162,7 @@ void BufferedIOHandler::threadProc()
                     if (currentFillSize <= 0)
                         currentFillSize += bufSize;
                     if ((size_t)currentFillSize >= initialFillSize) {
-                        log_debug("buffer: initial fillsize reached\n");
+                        log_debug("buffer: initial fillsize reached");
                         waitForInitialFillSize = false;
                         cond.notify_one();
                     }

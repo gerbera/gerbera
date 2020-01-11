@@ -139,7 +139,7 @@ Script::Script(std::shared_ptr<ConfigManager> config,
     Runtime::AutoLock lock(runtime->getMutex());
     ctx = runtime->createContext(name);
     if (!ctx)
-        throw _Exception("Scripting: could not initialize js context");
+        throw std::runtime_error("Scripting: could not initialize js context");
 
     _p2i = StringConverter::p2i(config);
     _j2i = StringConverter::j2i(config);
@@ -209,19 +209,18 @@ Script::Script(std::shared_ptr<ConfigManager> config,
 
     std::string common_scr_path = config->getOption(CFG_IMPORT_SCRIPTING_COMMON_SCRIPT);
 
-    if (!string_ok(common_scr_path))
-        log_js("Common script disabled in configuration\n");
-    else
-    {
+    if (!string_ok(common_scr_path)) {
+        log_js("Common script disabled in configuration");
+    } else {
         try
         {
             _load(common_scr_path);
             _execute();
         }
-        catch (const Exception & e)
+        catch (const std::runtime_error& e)
         {
-            log_js("Unable to load %s: %s\n", common_scr_path.c_str(), 
-                    e.getMessage().c_str());
+            log_js("Unable to load {}: {}", common_scr_path.c_str(),
+                    e.what());
         }
     }
 }
@@ -239,7 +238,7 @@ Script *Script::getContextScript(duk_context *ctx)
     duk_pop_2(ctx);
     if (self == nullptr)
     {
-        log_debug("Could not retrieve class instance from global object\n");
+        log_debug("Could not retrieve class instance from global object");
         duk_error(ctx, DUK_ERR_ERROR, "Could not retrieve current script from stash");
     }
     return self;
@@ -263,21 +262,21 @@ void Script::_load(std::string scriptPath)
     std::string scriptText = read_text_file(scriptPath);
 
     if (!string_ok(scriptText))
-        throw _Exception("empty script");
+        throw std::runtime_error("empty script");
 
     auto j2i = StringConverter::j2i(config);
     try
     {
         scriptText = j2i->convert(scriptText, true);
     }
-    catch (const Exception & e)
+    catch (const std::runtime_error& e)
     {
-        throw _Exception("Failed to convert import script:" + e.getMessage());
+        throw std::runtime_error(std::string{"Failed to convert import script:"} + e.what());
     }
 
     duk_push_string(ctx, scriptPath.c_str());
     if (duk_pcompile_lstring_filename(ctx, 0, scriptText.c_str(), scriptText.length()) != 0)
-        throw _Exception("Scripting: failed to compile " + scriptPath);
+        throw std::runtime_error("Scripting: failed to compile " + scriptPath);
 }
 
 void Script::load(std::string scriptPath)
@@ -294,8 +293,8 @@ void Script::_execute()
 {
     if (duk_pcall(ctx, 0) != DUK_EXEC_SUCCESS)
     {
-        log_error("Failed to execute script: %s\n", duk_safe_to_string(ctx, -1));
-        throw _Exception("Script: failed to execute script");
+        log_error("Failed to execute script: {}", duk_safe_to_string(ctx, -1));
+        throw std::runtime_error("Script: failed to execute script");
     }
     duk_pop(ctx);
 }
@@ -327,7 +326,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(std::shared_ptr<CdsObject
     objectType = getIntProperty("objectType", -1);
     if (objectType == -1)
     {
-        log_error("missing objectType property\n");
+        log_error("missing objectType property");
         return nullptr;
     }
 

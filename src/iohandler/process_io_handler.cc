@@ -130,17 +130,17 @@ ProcessIOHandler::ProcessIOHandler(std::shared_ptr<ContentManager> content,
 
     if ((main_proc != nullptr) && ((!main_proc->isAlive() || abort()))) {
         killall();
-        throw _Exception("process terminated early");
+        throw std::runtime_error("process terminated early");
     }
     /*
     if (mkfifo(filename.c_str(), O_RDWR) == -1)
     {
-        log_error("Failed to create fifo: %s\n", strerror(errno));
+        log_error("Failed to create fifo: {}", strerror(errno));
         killall();
         if (main_proc != nullptr)
             main_proc->kill();
 
-        throw _Exception("Could not create reader fifo!\n");
+        throw std::runtime_error("Could not create reader fifo!\n");
     }
 */
     registerAll();
@@ -150,7 +150,7 @@ void ProcessIOHandler::open(enum UpnpOpenFileMode mode)
 {
     if ((main_proc != nullptr) && ((!main_proc->isAlive() || abort()))) {
         killall();
-        throw _Exception("process terminated early");
+        throw std::runtime_error("process terminated early");
     }
 
     if (mode == UPNP_READ)
@@ -162,14 +162,14 @@ void ProcessIOHandler::open(enum UpnpOpenFileMode mode)
 
     if (fd == -1) {
         if (errno == ENXIO) {
-            throw _TryAgainException(std::string("open failed: ") + strerror(errno));
+            throw TryAgainException(std::string("open failed: ") + strerror(errno));
         }
 
         killall();
         if (main_proc != nullptr)
             main_proc->kill();
         unlink(filename.c_str());
-        throw _Exception("open: failed to open: " + filename);
+        throw std::runtime_error("open: failed to open: " + filename);
     }
 }
 
@@ -204,7 +204,7 @@ size_t ProcessIOHandler::read(char* buf, size_t length)
                 if (!main_ok || abort()) {
                     if (!main_ok) {
                         exit_status = main_proc->getStatus();
-                        log_debug("process exited with status %d\n", exit_status);
+                        log_debug("process exited with status {}", exit_status);
                         killall();
                         if (exit_status == EXIT_SUCCESS)
                             return 0;
@@ -223,7 +223,7 @@ size_t ProcessIOHandler::read(char* buf, size_t length)
 
             timeout_count++;
             if (timeout_count > MAX_TIMEOUTS) {
-                log_debug("max timeouts, checking socket!\n");
+                log_debug("max timeouts, checking socket!");
                 return CHECK_SOCKET;
             }
         }
@@ -235,7 +235,7 @@ size_t ProcessIOHandler::read(char* buf, size_t length)
                 break;
 
             if (bytes_read < 0) {
-                log_debug("aborting read!!!\n");
+                log_debug("aborting read!!!");
                 return -1;
             }
 
@@ -303,7 +303,7 @@ size_t ProcessIOHandler::write(char* buf, size_t length)
                 if (!main_ok || abort()) {
                     if (!main_ok) {
                         exit_status = main_proc->getStatus();
-                        log_debug("process exited with status %d\n", exit_status);
+                        log_debug("process exited with status {}", exit_status);
                         killall();
                         if (exit_status == EXIT_SUCCESS)
                             return 0;
@@ -327,7 +327,7 @@ size_t ProcessIOHandler::write(char* buf, size_t length)
                 break;
 
             if (bytes_written < 0) {
-                log_debug("aborting write!!!\n");
+                log_debug("aborting write!!!");
                 return -1;
             }
 
@@ -367,14 +367,14 @@ void ProcessIOHandler::seek(off_t offset, int whence)
 {
     // we know we can not seek in a fifo, but the PS3 asks for a hack...
     if (!ignore_seek)
-        throw _Exception("fseek failed");
+        throw std::runtime_error("fseek failed");
 }
 
 void ProcessIOHandler::close()
 {
     bool ret;
 
-    log_debug("terminating process, closing %s\n", this->filename.c_str());
+    log_debug("terminating process, closing {}", this->filename.c_str());
     unregisterAll();
 
     if (main_proc != nullptr) {
@@ -389,13 +389,13 @@ void ProcessIOHandler::close()
     unlink(filename.c_str());
 
     if (!ret)
-        throw _Exception("failed to kill process!");
+        throw std::runtime_error("failed to kill process!");
 }
 
 ProcessIOHandler::~ProcessIOHandler()
 {
     try {
         close();
-    } catch (const Exception& ex) {
+    } catch (const std::runtime_error& ex) {
     }
 }

@@ -56,7 +56,7 @@ SopCastService::SopCastService(std::shared_ptr<ConfigManager> config,
     pid = 0;
     curl_handle = curl_easy_init();
     if (!curl_handle)
-        throw _Exception("failed to initialize curl!\n");
+        throw std::runtime_error("failed to initialize curl!\n");
 }
 
 SopCastService::~SopCastService()
@@ -88,13 +88,13 @@ Ref<Element> SopCastService::getData()
     std::string buffer;
 
     try {
-        log_debug("DOWNLOADING URL: %s\n", SOPCAST_CHANNEL_URL);
+        log_debug("DOWNLOADING URL: {}", SOPCAST_CHANNEL_URL);
         buffer = url->download(SOPCAST_CHANNEL_URL, &retcode,
             curl_handle, false, true, true);
 
-    } catch (const Exception& ex) {
-        log_error("Failed to download SopCast XML data: %s\n",
-            ex.getMessage().c_str());
+    } catch (const std::runtime_error& ex) {
+        log_error("Failed to download SopCast XML data: {}",
+            ex.what());
         return nullptr;
     }
 
@@ -104,18 +104,18 @@ Ref<Element> SopCastService::getData()
     if (retcode != 200)
         return nullptr;
 
-    log_debug("GOT BUFFER\n%s\n", buffer.c_str());
+    log_debug("GOT BUFFER{}", buffer.c_str());
     Ref<Parser> parser(new Parser());
     try {
         return parser->parseString(sc->convert(std::string(buffer.c_str())))->getRoot();
     } catch (const ParseException& pe) {
-        log_error("Error parsing SopCast XML %s line %d:\n%s\n",
+        log_error("Error parsing SopCast XML {} line {}:{}",
             pe.context->location.c_str(),
             pe.context->line,
-            pe.getMessage().c_str());
+            pe.what());
         return nullptr;
-    } catch (const Exception& ex) {
-        log_error("Error parsing SopCast XML %s\n", ex.getMessage().c_str());
+    } catch (const std::runtime_error& ex) {
+        log_error("Error parsing SopCast XML {}", ex.what());
         return nullptr;
     }
 
@@ -124,7 +124,7 @@ Ref<Element> SopCastService::getData()
 
 bool SopCastService::refreshServiceData(Ref<Layout> layout)
 {
-    log_debug("Refreshing SopCast service\n");
+    log_debug("Refreshing SopCast service");
     // the layout is in full control of the service items
 
     // this is a safeguard to ensure that this class is not called from
@@ -136,7 +136,7 @@ bool SopCastService::refreshServiceData(Ref<Layout> layout)
         pid = pthread_self();
 
     if (pid != pthread_self())
-        throw _Exception("Not allowed to call refreshServiceData from different threads!");
+        throw std::runtime_error("Not allowed to call refreshServiceData from different threads!");
 
     Ref<Element> reply = getData();
 
@@ -144,8 +144,8 @@ bool SopCastService::refreshServiceData(Ref<Layout> layout)
     if (reply != nullptr)
         sc->setServiceContent(reply);
     else {
-        log_debug("Failed to get XML content from SopCast service\n");
-        throw _Exception("Failed to get XML content from SopCast service");
+        log_debug("Failed to get XML content from SopCast service");
+        throw std::runtime_error("Failed to get XML content from SopCast service");
     }
 
     std::shared_ptr<CdsObject> obj;
@@ -160,12 +160,12 @@ bool SopCastService::refreshServiceData(Ref<Layout> layout)
 
         auto old = storage->loadObjectByServiceID(std::static_pointer_cast<CdsItem>(obj)->getServiceID());
         if (old == nullptr) {
-            log_debug("Adding new SopCast object\n");
+            log_debug("Adding new SopCast object");
 
             if (layout != nullptr)
                 layout->processCdsObject(obj, nullptr);
         } else {
-            log_debug("Updating existing SopCast object\n");
+            log_debug("Updating existing SopCast object");
             obj->setID(old->getID());
             obj->setParentID(old->getParentID());
             //            struct timespec oldt, newt;

@@ -5,9 +5,6 @@ add_executable(testupnp
         main.cc
         test_upnp_xml.cc)
 
-include(DefFileName)
-define_file_path_for_sources(testupnp)
-
 include_directories(
         ${UPNP_INCLUDE_DIRS}
         ${UUID_INCLUDE_DIRS}

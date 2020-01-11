@@ -28,13 +28,13 @@ void TaskProcessor::init()
         this);
 
     if (ret != 0) {
-        throw _Exception("Could not launch task processor thread!");
+        throw std::runtime_error("Could not launch task processor thread!");
     }
 }
 
 void TaskProcessor::shutdown()
 {
-    log_debug("Shutting down TaskProcessor\n");
+    log_debug("Shutting down TaskProcessor");
     shutdownFlag = true;
     cond.notify_one();
     if (taskThread)
@@ -73,9 +73,8 @@ void TaskProcessor::threadProc()
                 task->run();
         } catch (const ServerShutdownException& se) {
             shutdownFlag = true;
-        } catch (const Exception& e) {
-            log_error("Exception caught: %s\n", e.getMessage().c_str());
-            e.printStackTrace();
+        } catch (const std::runtime_error& e) {
+            log_error("Exception caught: {}", e.what());
         }
 
         if (!shutdownFlag) {
@@ -177,14 +176,14 @@ TPFetchOnlineContentTask::TPFetchOnlineContentTask(std::shared_ptr<ContentManage
 void TPFetchOnlineContentTask::run()
 {
     if (this->service == nullptr) {
-        log_debug("No service specified\n");
+        log_debug("No service specified");
         return;
     }
 
     try {
         //cm->_fetchOnlineContent(service, getParentID(), unscheduled_refresh);
         if (service->refreshServiceData(layout) && (isValid())) {
-            log_debug("Scheduling another task for online service: %s\n",
+            log_debug("Scheduling another task for online service: {}",
                 service->getServiceName().c_str());
 
             if ((service->getRefreshInterval() > 0) || unscheduled_refresh) {
@@ -196,8 +195,8 @@ void TPFetchOnlineContentTask::run()
         } else {
             content->cleanupOnlineServiceObjects(service);
         }
-    } catch (const Exception& ex) {
-        log_error("%s\n", ex.getMessage().c_str());
+    } catch (const std::runtime_error& ex) {
+        log_error("{}", ex.what());
     }
     service->decTaskCount();
     if (service->getTaskCount() == 0) {

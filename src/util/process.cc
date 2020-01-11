@@ -60,44 +60,44 @@ std::string run_simple_process(std::shared_ptr<ConfigManager> cfg, std::string p
     std::string input_file = tempName(cfg->getOption(CFG_SERVER_TMPDIR), temp_in);
     fd = open(input_file.c_str(), O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
     if (fd == -1) {
-        log_debug("Failed to open input file %s: %s\n", input_file.c_str(),
+        log_debug("Failed to open input file {}: {}", input_file.c_str(),
             strerror(errno));
-        throw _Exception("Failed to open input file " + input_file + " " + strerror(errno));
+        throw std::runtime_error("Failed to open input file " + input_file + " " + strerror(errno));
     }
     size_t ret = write(fd, input.c_str(), input.length());
     close(fd);
     if (ret < input.length()) {
 
-        log_debug("Failed to write to %s: %s\n", input.c_str(),
+        log_debug("Failed to write to {}: {}", input.c_str(),
             strerror(errno));
-        throw _Exception("Failed to write to " + input + ": " + strerror(errno));
+        throw std::runtime_error("Failed to write to " + input + ": " + strerror(errno));
     }
 
     /* touching output file */
     std::string output_file = tempName(cfg->getOption(CFG_SERVER_TMPDIR), temp_out);
     fd = open(output_file.c_str(), O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
     if (fd == -1) {
-        log_debug("Failed to open output file %s: %s\n", output_file.c_str(),
+        log_debug("Failed to open output file {}: {}", output_file.c_str(),
             strerror(errno));
-        throw _Exception("Failed to open output file " + input_file + " " + strerror(errno));
+        throw std::runtime_error("Failed to open output file " + input_file + " " + strerror(errno));
     }
     close(fd);
 
     /* executing script */
     std::string command = prog + " " + param + " < " + input_file + " > " + output_file;
-    log_debug("running %s\n", command.c_str());
+    log_debug("running {}", command.c_str());
     int sysret = system(command.c_str());
     if (sysret == -1) {
-        log_debug("Failed to execute: %s\n", command.c_str());
-        throw _Exception("Failed to execute: " + command);
+        log_debug("Failed to execute: {}", command.c_str());
+        throw std::runtime_error("Failed to execute: " + command);
     }
 
     /* reading output file */
     file = fopen(output_file.c_str(), "r");
     if (!file) {
-        log_debug("Could not open output file %s: %s\n", output_file.c_str(),
+        log_debug("Could not open output file {}: {}", output_file.c_str(),
             strerror(errno));
-        throw _Exception("Failed to open output file " + output_file + " " + strerror(errno));
+        throw std::runtime_error("Failed to open output file " + output_file + " " + strerror(errno));
     }
     std::ostringstream output;
 
@@ -130,21 +130,21 @@ bool is_alive(pid_t pid, int* status)
 bool kill_proc(pid_t kill_pid)
 {
     if (is_alive(kill_pid)) {
-        log_debug("KILLING TERM PID: %d\n", kill_pid);
+        log_debug("KILLING TERM PID: {}", kill_pid);
         kill(kill_pid, SIGTERM);
         sleep(1);
     } else
         return true;
 
     if (is_alive(kill_pid)) {
-        log_debug("KILLING INT PID: %d\n", kill_pid);
+        log_debug("KILLING INT PID: {}", kill_pid);
         kill(kill_pid, SIGINT);
         sleep(1);
     } else
         return true;
 
     if (is_alive(kill_pid)) {
-        log_debug("KILLING KILL PID: %d\n", kill_pid);
+        log_debug("KILLING KILL PID: {}", kill_pid);
         kill(kill_pid, SIGKILL);
         sleep(1);
     } else

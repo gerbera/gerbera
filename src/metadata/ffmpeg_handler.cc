@@ -84,7 +84,7 @@ FfmpegHandler::FfmpegHandler(std::shared_ptr<ConfigManager> config)
 void FfmpegHandler::addFfmpegAuxdataFields(std::shared_ptr<CdsItem> item, AVFormatContext* pFormatCtx) const
 {
     if (!pFormatCtx->metadata) {
-        log_debug("no metadata\n");
+        log_debug("no metadata");
         return;
     }
 
@@ -96,7 +96,7 @@ void FfmpegHandler::addFfmpegAuxdataFields(std::shared_ptr<CdsItem> item, AVForm
             AVDictionaryEntry* tag = NULL;
             tag = av_dict_get(pFormatCtx->metadata, desiredTag.c_str(), NULL, AV_DICT_IGNORE_SUFFIX);
             if (tag && tag->value && tag->value[0]) {
-                log_debug("Added %s: %s\n", desiredTag.c_str(), tag->value);
+                log_debug("Added {}: {}", desiredTag.c_str(), tag->value);
                 item->setAuxData(desiredTag, sc->convert(tag->value));
             }
         }
@@ -114,29 +114,29 @@ void FfmpegHandler::addFfmpegMetadataFields(std::shared_ptr<CdsItem> item, AVFor
         value = e->value;
 
         if (strcmp(e->key, "title") == 0) {
-            log_debug("Identified metadata title: %s\n", e->value);
+            log_debug("Identified metadata title: {}", e->value);
             field = M_TITLE;
         } else if (strcmp(e->key, "artist") == 0) {
-            log_debug("Identified metadata artist: %s\n", e->value);
+            log_debug("Identified metadata artist: {}", e->value);
             field = M_ARTIST;
         } else if (strcmp(e->key, "album") == 0) {
-            log_debug("Identified metadata album: %s\n", e->value);
+            log_debug("Identified metadata album: {}", e->value);
             field = M_ALBUM;
         } else if (strcmp(e->key, "date") == 0) {
             if ((value.length() == 4) && (std::stoi(value) > 0)) {
                 value = value + "-01-01";
-                log_debug("Identified metadata date: %s\n", value.c_str());
+                log_debug("Identified metadata date: {}", value.c_str());
             }
             /// \toto parse possible ISO8601 timestamp
             field = M_DATE;
         } else if (strcmp(e->key, "genre") == 0) {
-            log_debug("Identified metadata genre: %s\n", e->value);
+            log_debug("Identified metadata genre: {}", e->value);
             field = M_GENRE;
         } else if (strcmp(e->key, "description") == 0) {
-            log_debug("Identified metadata description: %s\n", e->value);
+            log_debug("Identified metadata description: {}", e->value);
             field = M_DESCRIPTION;
         } else if (strcmp(e->key, "track") == 0) {
-            log_debug("Identified metadata track: %d\n", e->value);
+            log_debug("Identified metadata track: {}", e->value);
             field = M_TRACKNUMBER;
         } else {
             continue;
@@ -167,7 +167,7 @@ static void addFfmpegResourceFields(std::shared_ptr<CdsItem> item, AVFormatConte
     mins %= 60;
     if ((hours + mins + secs) > 0) {
         sprintf(duration, "%02" PRId64 ":%02" PRId64 ":%02" PRId64 ".%01" PRId64, hours, mins, secs, (10 * us) / AV_TIME_BASE);
-        log_debug("Added duration: %s\n", duration);
+        log_debug("Added duration: {}", duration);
         item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_DURATION), duration);
     }
 
@@ -175,7 +175,7 @@ static void addFfmpegResourceFields(std::shared_ptr<CdsItem> item, AVFormatConte
     if (pFormatCtx->bit_rate > 0) {
         // ffmpeg's bit_rate is in bits/sec, upnp wants it in bytes/sec
         // See http://www.upnp.org/schemas/av/didl-lite-v3.xsd
-        log_debug("Added overall bitrate: %d kb/s\n", pFormatCtx->bit_rate / 8);
+        log_debug("Added overall bitrate: {} kb/s", pFormatCtx->bit_rate / 8);
         item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_BITRATE), std::to_string(pFormatCtx->bit_rate / 8));
     }
 
@@ -193,7 +193,7 @@ static void addFfmpegResourceFields(std::shared_ptr<CdsItem> item, AVFormatConte
                 fourcc[3] = as_codecpar(st)->codec_tag >> 24;
                 fourcc[4] = '\0';
 
-                log_debug("FourCC: %x = %s\n",
+                log_debug("FourCC: %x = {}",
                     as_codecpar(st)->codec_tag, fourcc);
                 std::string fcc = fourcc;
                 if (string_ok(fcc))
@@ -204,7 +204,7 @@ static void addFfmpegResourceFields(std::shared_ptr<CdsItem> item, AVFormatConte
             if ((as_codecpar(st)->width > 0) && (as_codecpar(st)->height > 0)) {
                 resolution = std::to_string(as_codecpar(st)->width) + "x" + std::to_string(as_codecpar(st)->height);
 
-                log_debug("Added resolution: %s pixel\n", resolution.c_str());
+                log_debug("Added resolution: {} pixel", resolution.c_str());
                 item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), resolution);
                 videoset = true;
             }
@@ -213,13 +213,13 @@ static void addFfmpegResourceFields(std::shared_ptr<CdsItem> item, AVFormatConte
             // find the first stream that has a valid sample rate
             if (as_codecpar(st)->sample_rate > 0) {
                 samplefreq = as_codecpar(st)->sample_rate;
-                log_debug("Added sample frequency: %d Hz\n", samplefreq);
+                log_debug("Added sample frequency: {} Hz", samplefreq);
                 item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY), std::to_string(samplefreq));
                 audioset = true;
 
                 audioch = as_codecpar(st)->channels;
                 if (audioch > 0) {
-                    log_debug("Added number of audio channels: %d\n", audioch);
+                    log_debug("Added number of audio channels: {}", audioch);
                     item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS), std::to_string(audioch));
                 }
             }
@@ -235,7 +235,7 @@ void FfmpegNoOutputStub(void* ptr, int level, const char* fmt, va_list vl)
 
 void FfmpegHandler::fillMetadata(std::shared_ptr<CdsItem> item)
 {
-    log_debug("Running ffmpeg handler on %s\n", item->getLocation().c_str());
+    log_debug("Running ffmpeg handler on {}", item->getLocation().c_str());
 
     AVFormatContext* pFormatCtx = NULL;
 
@@ -282,13 +282,13 @@ static int _mkdir(const char* path)
         // Make sure we are +x in case of restrictive umask that strips +x.
         struct stat st;
         if (stat(path, &st)) {
-            log_warning("could not stat(%s): %s\n", path, strerror(errno));
+            log_warning("could not stat({}): {}", path, strerror(errno));
             return -1;
         }
         mode_t xbits = S_IXUSR | S_IXGRP | S_IXOTH;
         if (!(st.st_mode & xbits)) {
             if (chmod(path, st.st_mode | xbits)) {
-                log_warning("could not chmod(%s, +x): %s\n", path, strerror(errno));
+                log_warning("could not chmod({}, +x): {}", path, strerror(errno));
                 return -1;
             }
         }
@@ -398,7 +398,7 @@ std::unique_ptr<IOHandler> FfmpegHandler::serveContent(std::shared_ptr<CdsItem> 
         if (readThumbnailCacheFile(item->getLocation(), &ptr_image, &size_image)) {
             auto h = std::make_unique<MemIOHandler>(ptr_image, size_image);
             free(ptr_image);
-            log_debug("Returning cached thumbnail for file: %s\n", item->getLocation().c_str());
+            log_debug("Returning cached thumbnail for file: {}", item->getLocation().c_str());
             return h;
         }
     }
@@ -424,7 +424,7 @@ std::unique_ptr<IOHandler> FfmpegHandler::serveContent(std::shared_ptr<CdsItem> 
     th->thumbnail_image_quality = config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_IMAGE_QUALITY);
     th->thumbnail_image_type = Jpeg;
 
-    log_debug("Generating thumbnail for file: %s\n", item->getLocation().c_str());
+    log_debug("Generating thumbnail for file: {}", item->getLocation().c_str());
 
 #ifdef FFMPEGTHUMBNAILER_OLD_API
     if (generate_thumbnail_to_buffer(th, item->getLocation().c_str(), img) != 0)
@@ -435,7 +435,7 @@ std::unique_ptr<IOHandler> FfmpegHandler::serveContent(std::shared_ptr<CdsItem> 
 #endif // old api
     {
         pthread_mutex_unlock(&thumb_lock);
-        throw _Exception("Could not generate thumbnail for " + item->getLocation());
+        throw std::runtime_error("Could not generate thumbnail for " + item->getLocation());
     }
     if (config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED)) {
         writeThumbnailCacheFile(item->getLocation(),

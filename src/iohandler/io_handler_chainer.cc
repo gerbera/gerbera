@@ -38,9 +38,9 @@ IOHandlerChainer::IOHandlerChainer(std::unique_ptr<IOHandler>& readFrom, std::un
     : ThreadExecutor()
 {
     if (chunkSize <= 0)
-        throw _Exception("chunkSize must be positive");
+        throw std::runtime_error("chunkSize must be positive");
     if (readFrom == nullptr || writeTo == nullptr)
-        throw _Exception("readFrom and writeTo need to be set");
+        throw std::runtime_error("readFrom and writeTo need to be set");
     status = 0;
     this->chunkSize = chunkSize;
     this->readFrom = std::move(readFrom);
@@ -84,8 +84,8 @@ void IOHandlerChainer::threadProc()
                 }
             }
         }
-    } catch (const Exception& e) {
-        log_debug("%s", e.getMessage().c_str());
+    } catch (const std::runtime_error& e) {
+        log_debug("{}", e.what());
         status = IOHC_EXCEPTION;
     }
     try {
@@ -93,8 +93,8 @@ void IOHandlerChainer::threadProc()
             status = IOHC_FORCED_SHUTDOWN;
         readFrom->close();
         writeTo->close();
-    } catch (const Exception& e) {
-        log_debug("%s", e.getMessage().c_str());
+    } catch (const std::runtime_error& e) {
+        log_debug("{}", e.what());
         status = IOHC_EXCEPTION;
     }
 }

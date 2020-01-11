@@ -49,7 +49,7 @@ web::add::add(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> st
 
 void web::add::process()
 {
-    log_debug("add: start\n");
+    log_debug("add: start");
 
     check_request();
 
@@ -60,8 +60,8 @@ void web::add::process()
     else
         path = hex_decode_string(objID);
     if (path.empty())
-        throw _Exception("web::add::process(): illegal path");
+        throw std::runtime_error("web::add::process(): illegal path");
 
     content->addFile(path, true);
-    log_debug("add: returning\n");
+    log_debug("add: returning");
 }

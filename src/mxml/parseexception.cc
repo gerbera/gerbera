@@ -36,7 +36,7 @@
 using namespace zmm;
 using namespace mxml;
 
-ParseException::ParseException(std::string msg, Ref<Context> context) : Exception(msg)
+ParseException::ParseException(std::string msg, Ref<Context> context) : std::runtime_error(msg)
 {
     this->context = context;
 }

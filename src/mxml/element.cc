@@ -338,13 +338,13 @@ Ref<Attribute> Element::getAttribute(int index)
 void Element::setText(std::string str, enum mxml_value_type type)
 {
     if (childCount() > 1)
-        throw _Exception("Element::setText() cannot be called on an element which has more than one child");
+        throw std::runtime_error("Element::setText() cannot be called on an element which has more than one child");
     
     if (childCount() == 1)
     {
         Ref<Node> child = getChild(0);
         if (child == nullptr || child->getType() != mxml_node_text)
-            throw _Exception("Element::setText() cannot be called on an element which has a non-text child");
+            throw std::runtime_error("Element::setText() cannot be called on an element which has a non-text child");
         Ref<Text> text = RefCast(child, Text);
         text->setText(str);
     }

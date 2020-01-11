@@ -80,9 +80,9 @@ void LastFm::startedPlaying(std::shared_ptr<CdsItem> item)
 
     currentTrackId = item->getID();
 
-    log_debug("Artist:\t%s\n",
+    log_debug("Artist:\t{}",
         item->getMetadata(MetadataHandler::getMetaFieldName(M_ARTIST)).c_str());
-    log_debug("Title:\t%s\n",
+    log_debug("Title:\t{}",
         item->getMetadata(MetadataHandler::getMetaFieldName(M_TITLE)).c_str());
 
     std::string artist = item->getMetadata(MetadataHandler::getMetaFieldName(M_ARTIST));

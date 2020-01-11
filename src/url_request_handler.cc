@@ -63,7 +63,7 @@ URLRequestHandler::URLRequestHandler(std::shared_ptr<ConfigManager> config,
 
 void URLRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
 {
-    log_debug("start\n");
+    log_debug("start");
 
     std::string header;
     std::string mimeType;
@@ -76,24 +76,24 @@ void URLRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
     std::map<std::string,std::string> dict;
     dict_decode_simple(parameters, &dict);
 
-    log_debug("full url (filename): %s, parameters: %s\n",
+    log_debug("full url (filename): {}, parameters: {}",
         filename, parameters.c_str());
 
     std::string objID = getValueOrDefault(dict, "object_id");
     if (objID.empty()) {
-        //log_error("object_id not found in url\n");
-        throw _Exception("getInfo: object_id not found");
+        //log_error("object_id not found in url");
+        throw std::runtime_error("getInfo: object_id not found");
     } else
         objectID = std::stoi(objID);
 
-    //log_debug("got ObjectID: [%s]\n", object_id.c_str());
+    //log_debug("got ObjectID: [{}]", object_id.c_str());
 
     auto obj = storage->loadObject(objectID);
 
     int objectType = obj->getObjectType();
 
     if (!IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
-        throw _Exception("getInfo: object is not an external url item");
+        throw std::runtime_error("getInfo: object is not an external url item");
     }
 
     tr_profile = getValueOrDefault(dict, URL_PARAM_TRANSCODE_PROFILE_NAME);
@@ -102,7 +102,7 @@ void URLRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
         Ref<TranscodingProfile> tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(tr_profile);
 
         if (tp == nullptr)
-            throw _Exception("Transcoding requested but no profile "
+            throw std::runtime_error("Transcoding requested but no profile "
                              "matching the name "
                 + tr_profile + " found");
 
@@ -123,16 +123,16 @@ void URLRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
             url = item->getLocation();
         }
 
-        log_debug("Online content url: %s\n", url.c_str());
+        log_debug("Online content url: {}", url.c_str());
         Ref<URL> u(new URL());
         Ref<URL::Stat> st;
         try {
             st = u->getInfo(url);
             UpnpFileInfo_set_FileLength(info, st->getSize());
             header = "Accept-Ranges: bytes";
-            log_debug("URL used for request: %s\n", st->getURL().c_str());
-        } catch (const Exception& ex) {
-            log_warning("%s\n", ex.getMessage().c_str());
+            log_debug("URL used for request: {}", st->getURL().c_str());
+        } catch (const std::runtime_error& ex) {
+            log_warning("{}", ex.what());
             UpnpFileInfo_set_FileLength(info, -1);
         }
 
@@ -150,7 +150,7 @@ void URLRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
 //    }
 
     UpnpFileInfo_set_ContentType(info, ixmlCloneDOMString(mimeType.c_str()));
-    log_debug("web_get_info(): end\n");
+    log_debug("web_get_info(): end");
 
     /// \todo transcoding for get_info
 }
@@ -164,24 +164,24 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
     std::string header;
     std::string tr_profile;
 
-    log_debug("start\n");
+    log_debug("start");
 
     // Currently we explicitly do not support UPNP_WRITE
     // due to security reasons.
     if (mode != UPNP_READ)
-        throw _Exception("UPNP_WRITE unsupported");
+        throw std::runtime_error("UPNP_WRITE unsupported");
 
     std::string url, parameters;
     parameters = (filename + strlen(LINK_URL_REQUEST_HANDLER));
 
     std::map<std::string,std::string> dict;
     dict_decode_simple(parameters, &dict);
-    log_debug("full url (filename): %s, parameters: %s\n",
+    log_debug("full url (filename): {}, parameters: {}",
         filename, parameters.c_str());
 
     std::string objID = getValueOrDefault(dict, "object_id");
     if (objID.empty()) {
-        throw _Exception("object_id not found");
+        throw std::runtime_error("object_id not found");
     } else
         objectID = std::stoi(objID);
 
@@ -190,7 +190,7 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
     int objectType = obj->getObjectType();
 
     if (!IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
-        throw _Exception("object is not an external url item");
+        throw std::runtime_error("object is not an external url item");
     }
 
     auto item = std::static_pointer_cast<CdsItemExternalURL>(obj);
@@ -205,7 +205,7 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
         url = item->getLocation();
     }
 
-    log_debug("Online content url: %s\n", url.c_str());
+    log_debug("Online content url: {}", url.c_str());
 
     //info->is_readable = 1;
     //info->last_modified = 0;
@@ -218,7 +218,7 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
         Ref<TranscodingProfile> tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(tr_profile);
 
         if (tp == nullptr)
-            throw _Exception("Transcoding of file " + url + " but no profile matching the name " + tr_profile + " found");
+            throw std::runtime_error("Transcoding of file " + url + " but no profile matching the name " + tr_profile + " found");
 
         Ref<TranscodeDispatcher> tr_d(new TranscodeDispatcher(config, content));
         return tr_d->open(tp, url, item, range);
@@ -229,9 +229,9 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
             st = u->getInfo(url);
             // info->file_length = st->getSize();
             header = "Accept-Ranges: bytes";
-            log_debug("URL used for request: %s\n", st->getURL().c_str());
-        } catch (const Exception& ex) {
-            log_warning("%s\n", ex.getMessage().c_str());
+            log_debug("URL used for request: {}", st->getURL().c_str());
+        } catch (const std::runtime_error& ex) {
+            log_warning("{}", ex.what());
             //info->file_length = -1;
         }
         mimeType = item->getMimeType();

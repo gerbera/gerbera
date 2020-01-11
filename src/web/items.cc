@@ -52,9 +52,9 @@ void web::items::process()
     int start = intParam("start");
     int count = intParam("count");
     if (start < 0)
-        throw _Exception("illegal start parameter");
+        throw std::runtime_error("illegal start parameter");
     if (count < 0)
-        throw _Exception("illegal count parameter");
+        throw std::runtime_error("illegal count parameter");
 
     Ref<Element> items(new Element("items"));
     items->setArrayName("item");

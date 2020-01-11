@@ -35,7 +35,7 @@
 #include <memory>
 
 #include "tools.h"
-#include "util/exception.h"
+
 #include <algorithm>
 #include <condition_variable>
 #include <list>
@@ -106,9 +106,8 @@ protected:
         {
             try {
                 subscriber->timerNotify(parameter);
-            } catch (const Exception& e) {
-                log_debug("timer caught exception!\n");
-                e.printStackTrace();
+            } catch (const std::runtime_error& e) {
+                log_error("timer caught exception!\n");
             }
         }
         inline void updateNextNotify()

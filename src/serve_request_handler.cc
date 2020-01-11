@@ -51,17 +51,17 @@ void ServeRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
     struct stat statbuf;
     int ret = 0;
 
-    log_debug("got filename: %s\n", filename);
+    log_debug("got filename: {}", filename);
 
     std::string url_path, parameters;
     splitUrl(filename, URL_PARAM_SEPARATOR, url_path, parameters);
 
-    log_debug("url_path: %s, parameters: %s\n", url_path.c_str(), parameters.c_str());
+    log_debug("url_path: {}, parameters: {}", url_path.c_str(), parameters.c_str());
 
     size_t len = (std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_SERVE_HANDLER).length();
 
     if (len > url_path.length()) {
-        throw _Exception("There is something wrong with the link " + url_path);
+        throw std::runtime_error("There is something wrong with the link " + url_path);
     }
 
     url_path = urlUnescape(url_path);
@@ -69,11 +69,11 @@ void ServeRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
     std::string path = config->getOption(CFG_SERVER_SERVEDIR)
         + url_path.substr(len, url_path.length()) + "/" + parameters;
 
-    log_debug("Constructed new path: %s\n", path.c_str());
+    log_debug("Constructed new path: {}", path.c_str());
 
     ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
-        throw _Exception("Failed to stat " + path);
+        throw std::runtime_error("Failed to stat " + path);
     }
 
     if (S_ISREG(statbuf.st_mode)) // we have a regular file
@@ -97,7 +97,7 @@ void ServeRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
 
         UpnpFileInfo_set_ContentType(info, ixmlCloneDOMString(mimetype.c_str()));
     } else {
-        throw _Exception("Not a regular file: " + path);
+        throw std::runtime_error("Not a regular file: " + path);
     }
 }
 
@@ -111,27 +111,27 @@ std::unique_ptr<IOHandler> ServeRequestHandler::open(const char* filename,
     // Currently we explicitly do not support UPNP_WRITE
     // due to security reasons.
     if (mode != UPNP_READ)
-        throw _Exception("UPNP_WRITE unsupported");
+        throw std::runtime_error("UPNP_WRITE unsupported");
 
     size_t len = (std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_SERVE_HANDLER).length();
     std::string url_path, parameters;
     splitUrl(filename, URL_PARAM_SEPARATOR, url_path, parameters);
 
-    log_debug("url_path: %s, parameters: %s\n", url_path.c_str(), parameters.c_str());
+    log_debug("url_path: {}, parameters: {}", url_path.c_str(), parameters.c_str());
 
     len = (std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_SERVE_HANDLER).length();
 
     if (len > url_path.length()) {
-        throw _Exception("There is something wrong with the link " + url_path);
+        throw std::runtime_error("There is something wrong with the link " + url_path);
     }
 
     std::string path = config->getOption(CFG_SERVER_SERVEDIR)
         + url_path.substr(len, url_path.length()) + "/" + parameters;
 
-    log_debug("Constructed new path: %s\n", path.c_str());
+    log_debug("Constructed new path: {}", path.c_str());
     ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
-        throw _Exception("Failed to stat " + path);
+        throw std::runtime_error("Failed to stat " + path);
     }
 
     if (S_ISREG(statbuf.st_mode)) // we have a regular file
@@ -162,7 +162,7 @@ std::unique_ptr<IOHandler> ServeRequestHandler::open(const char* filename,
         info->content_type = ixmlCloneDOMString(mimetype.c_str());
         */
     } else {
-        throw _Exception("Not a regular file: " + path);
+        throw std::runtime_error("Not a regular file: " + path);
     }
 
     auto io_handler = std::make_unique<FileIOHandler>(path);

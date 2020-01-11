@@ -58,7 +58,7 @@ void web::autoscan::process()
 
     std::string action = param("action");
     if (!string_ok(action))
-        throw _Exception("web:autoscan called with illegal action");
+        throw std::runtime_error("web:autoscan called with illegal action");
 
     bool fromFs = boolParam("from_fs");
     std::string path;
@@ -93,7 +93,7 @@ void web::autoscan::process()
                     content->removeAutoscanDirectory(path);
                 else
                     content->removeAutoscanDirectory(intParam("object_id"));
-            } catch (const Exception& e) {
+            } catch (const std::runtime_error& e) {
                 // didn't work, well we don't care in this case
             }
         } else {
@@ -107,7 +107,7 @@ void web::autoscan::process()
             scan_level = AutoscanDirectory::remapScanlevel(param("scan_level"));
             int interval = intParam("interval", 0);
             if (scan_mode == ScanMode::Timed && interval <= 0)
-                throw _Exception("illegal interval given");
+                throw std::runtime_error("illegal interval given");
 
             int objectID = INVALID_OBJECT_ID;
             if (fromFs)
@@ -115,7 +115,7 @@ void web::autoscan::process()
             else
                 objectID = intParam("object_id");
 
-            //log_debug("adding autoscan: location=%s, scan_mode=%s, scan_level=%s, recursive=%d, interval=%d, hidden=%d\n",
+            //log_debug("adding autoscan: location={}, scan_mode={}, scan_level={}, recursive={}, interval={}, hidden={}",
             //    location.c_str(), AutoscanDirectory::mapScanmode(scan_mode).c_str(),
             //    AutoscanDirectory::mapScanlevel(scan_level).c_str(), recursive, interval, hidden);
 
@@ -156,7 +156,7 @@ void web::autoscan::process()
         }
         root->appendElementChild(autoscansEl);
     } else
-        throw _Exception("web:autoscan called with illegal action");
+        throw std::runtime_error("web:autoscan called with illegal action");
 }
 
 void web::autoscan::autoscan2XML(Ref<Element> element, Ref<AutoscanDirectory> adir)

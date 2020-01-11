@@ -36,6 +36,9 @@
 
 #include <csignal>
 #include <mutex>
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/basic_file_sink.h>
+
 #ifdef SOLARIS
 #include <iso/limits_iso.h>
 #endif
@@ -47,6 +50,7 @@
 
 #include "contrib/cxxopts.hpp"
 #include "server.h"
+
 
 using namespace zmm;
 
@@ -70,12 +74,12 @@ void print_copyright()
 
 void log_copyright()
 {
-    log_info("Gerbera UPnP Server version %s - %s\n", VERSION, DESC_MANUFACTURER_URL);
-    log_info("===============================================================================\n");
-    log_info("Gerbera is free software, covered by the GNU General Public License version 2\n");
-    log_info("Copyright 2016-2019 Gerbera Contributors.\n");
-    log_info("Gerbera is based on MediaTomb: Copyright 2005-2010 Gena Batsyan, Sergey Bostandzhyan, Leonhard Wimmer.\n");
-    log_info("===============================================================================\n");
+    log_info("Gerbera UPnP Server version {} - {}", VERSION, DESC_MANUFACTURER_URL);
+    log_info("===============================================================================");
+    log_info("Gerbera is free software, covered by the GNU General Public License version 2");
+    log_info("Copyright 2016-2019 Gerbera Contributors.");
+    log_info("Gerbera is based on MediaTomb: Copyright 2005-2010 Gena Batsyan, Sergey Bostandzhyan, Leonhard Wimmer.");
+    log_info("===============================================================================");
 }
 
 void signal_handler(int signum);
@@ -95,7 +99,6 @@ int main(int argc, char** argv, char** envp)
         exit(EXIT_FAILURE);
     }
 #endif
-
     cxxopts::Options options("gerbera", "Gerbera UPnP Media Server - https://gerbera.io");
 
     options.add_options()
@@ -139,9 +142,19 @@ int main(int argc, char** argv, char** envp)
             exit(EXIT_SUCCESS);
         }
 
+        bool debug = opts["debug"].as<bool>();
+        if (debug) {
+            spdlog::set_level(spdlog::level::debug);
+            spdlog::set_pattern("%Y-%m-%d %X %6l: [%s:%#] %!(): %v");
+        } else {
+            spdlog::set_level(spdlog::level::info);
+            spdlog::set_pattern("%Y-%m-%d %X %6l: %v");
+        }
+
         std::optional<std::string> logfile;
         if (opts.count("logfile") > 0) {
-            log_open(opts["logfile"].as<std::string>().c_str());
+            auto file_logger = spdlog::basic_logger_mt("basic_logger", opts["logfile"].as<std::string>());
+            spdlog::set_default_logger(file_logger);
         }
 
         // Action starts here
@@ -182,10 +195,10 @@ int main(int argc, char** argv, char** envp)
             }
 
             if (!home.has_value()) {
-                log_error("Could not determine users home directory\n");
+                log_error("Could not determine users home directory");
                 exit(EXIT_FAILURE);
             }
-            log_debug("Home detected as: %s\n", home->c_str());
+            log_debug("Home detected as: {}", home->c_str());
         }
 
         std::optional<std::string> prefix;
@@ -230,8 +243,6 @@ int main(int argc, char** argv, char** envp)
             portnum = opts["port"].as<int>();
         }
 
-        bool debug = opts["debug"].as<bool>();
-
         std::optional<std::string> ip;
         if (opts.count("ip") > 0) {
             ip = opts["ip"].as<std::string>();
@@ -249,13 +260,13 @@ int main(int argc, char** argv, char** envp)
             );
             portnum = config->getIntOption(CFG_SERVER_PORT);
         } catch (const mxml::ParseException& pe) {
-            log_error("Error parsing config file: %s line %d:\n%s\n",
+            log_error("Error parsing config file: {} line {}:{}",
                 pe.context->location.c_str(),
                 pe.context->line,
-                pe.getMessage().c_str());
+                pe.what());
             exit(EXIT_FAILURE);
-        } catch (const Exception& e) {
-            log_error("%s\n", e.getMessage().c_str());
+        } catch (const std::runtime_error& e) {
+            log_error("{}", e.what());
             exit(EXIT_FAILURE);
         }
 
@@ -271,19 +282,19 @@ int main(int argc, char** argv, char** envp)
         action.sa_flags = 0;
         sigfillset(&action.sa_mask);
         if (sigaction(SIGINT, &action, nullptr) < 0) {
-            log_error("Could not register SIGINT handler!\n");
+            log_error("Could not register SIGINT handler!");
         }
 
         if (sigaction(SIGTERM, &action, nullptr) < 0) {
-            log_error("Could not register SIGTERM handler!\n");
+            log_error("Could not register SIGTERM handler!");
         }
 
         if (sigaction(SIGHUP, &action, nullptr) < 0) {
-            log_error("Could not register SIGHUP handler!\n");
+            log_error("Could not register SIGHUP handler!");
         }
 
         if (sigaction(SIGPIPE, &action, nullptr) < 0) {
-            log_error("Could not register SIGPIPE handler!\n");
+            log_error("Could not register SIGPIPE handler!");
         }
 
         std::shared_ptr<Server> server;
@@ -296,17 +307,16 @@ int main(int argc, char** argv, char** envp)
             sigemptyset(&mask_set);
             pthread_sigmask(SIG_SETMASK, &mask_set, nullptr);
 
-            upnp_e.printStackTrace();
             if (upnp_e.getErrorCode() == UPNP_E_SOCKET_BIND) {
-                log_error("LibUPnP could not bind to socket.\n");
-                log_info("Please check if another instance of Gerbera or\n");
-                log_info("another application is running on port TCP %d or UDP 1900.\n", portnum.value());
+                log_error("LibUPnP could not bind to socket.");
+                log_info("Please check if another instance of Gerbera or");
+                log_info("another application is running on port TCP {} or UDP 1900.", portnum.value());
             } else if (upnp_e.getErrorCode() == UPNP_E_SOCKET_ERROR) {
-                log_error("LibUPnP Socket error.\n");
-                log_info("Please check if your network interface was configured for multicast!\n");
-                log_info("Refer to the README file for more information.\n");
+                log_error("LibUPnP Socket error.");
+                log_info("Please check if your network interface was configured for multicast!");
+                log_info("Refer to the README file for more information.");
             } else {
-                log_error("LibUPnP error code: %d\n", upnp_e.getErrorCode());
+                log_error("LibUPnP error code: {}", upnp_e.getErrorCode());
             }
 
             try {
@@ -314,15 +324,13 @@ int main(int argc, char** argv, char** envp)
                     server->shutdown();
                 server = nullptr;
                 config = nullptr;
-            } catch (const Exception& e) {
-                log_error("%s\n", e.getMessage().c_str());
-                e.printStackTrace();
+            } catch (const std::runtime_error& e) {
+                log_error("{}", e.what());
             }
 
             exit(EXIT_FAILURE);
-        } catch (const Exception& e) {
-            log_error("%s\n", e.getMessage().c_str());
-            e.printStackTrace();
+        } catch (const std::runtime_error& e) {
+            log_error("{}", e.what());
             exit(EXIT_FAILURE);
         }
 
@@ -333,8 +341,8 @@ int main(int argc, char** argv, char** envp)
                     // add file/directory recursively and asynchronously
                     server->getContent()->addFile(std::string(f), true, true,
                         config->getBoolOption(CFG_IMPORT_HIDDEN_FILES));
-                } catch (const Exception& e) {
-                    e.printStackTrace();
+                } catch (const std::runtime_error& e) {
+                    log_error("{}", e.what());
                     exit(EXIT_FAILURE);
                 }
             }
@@ -348,7 +356,7 @@ int main(int argc, char** argv, char** envp)
             cond.wait(lock);
 
             if (restart_flag != 0) {
-                log_info("Restarting Gerbera!\n");
+                log_info("Restarting Gerbera!");
                 try {
                     server->shutdown();
                     server = nullptr;
@@ -359,18 +367,17 @@ int main(int argc, char** argv, char** envp)
                             *config_file, *home, *confdir, *prefix, *magic, *ip, *interface, portnum.value_or(-1), debug
                         );
                     } catch (const mxml::ParseException& pe) {
-                        log_error("Error parsing config file: %s line %d:\n%s\n",
+                        log_error("Error parsing config file: {} line {}:{}",
                             pe.context->location.c_str(),
                             pe.context->line,
-                            pe.getMessage().c_str());
-                        log_error("Could not restart Gerbera\n");
+                            pe.what());
+                        log_error("Could not restart Gerbera");
                         // at this point upnp shutdown has already been called
                         // so it is safe to exit
                         exit(EXIT_FAILURE);
-                    } catch (const Exception& e) {
-                        log_error("Error reloading configuration: %s\n",
-                            e.getMessage().c_str());
-                        e.printStackTrace();
+                    } catch (const std::runtime_error& e) {
+                        log_error("Error reloading configuration: {}",
+                            e.what());
                         exit(EXIT_FAILURE);
                     }
 
@@ -380,12 +387,12 @@ int main(int argc, char** argv, char** envp)
                     server->run();
 
                     restart_flag = 0;
-                } catch (const Exception& e) {
+                } catch (const std::runtime_error& e) {
                     restart_flag = 0;
                     shutdown_flag = 1;
                     sigemptyset(&mask_set);
                     pthread_sigmask(SIG_SETMASK, &mask_set, nullptr);
-                    log_error("Could not restart Gerbera\n");
+                    log_error("Could not restart Gerbera");
                 }
             }
         }
@@ -397,15 +404,14 @@ int main(int argc, char** argv, char** envp)
             server = nullptr;
             config = nullptr;
         } catch (const UpnpException& upnp_e) {
-            log_error("main: upnp error %d\n", upnp_e.getErrorCode());
+            log_error("main: upnp error {}", upnp_e.getErrorCode());
             ret = EXIT_FAILURE;
-        } catch (const Exception e) {
-            e.printStackTrace();
+        } catch (const std::runtime_error& e) {
+            log_error("main: error {}", e.what());
             ret = EXIT_FAILURE;
         }
 
-        log_info("Gerbera exiting. Have a nice day.\n");
-        log_close();
+        log_info("Gerbera exiting. Have a nice day.");
         exit(ret);
 
     } catch (const cxxopts::OptionException& e) {
@@ -422,12 +428,12 @@ void signal_handler(int signum)
 
     if ((signum == SIGINT) || (signum == SIGTERM)) {
         shutdown_flag++;
-        if (shutdown_flag == 1)
-            log_info("Gerbera shutting down. Please wait...\n");
-        else if (shutdown_flag == 2)
-            log_info("Gerbera still shutting down, signal again to kill.\n");
-        else if (shutdown_flag > 2) {
-            log_error("Clean shutdown failed, killing Gerbera!\n");
+        if (shutdown_flag == 1) {
+            log_info("Gerbera shutting down. Please wait...");
+        } else if (shutdown_flag == 2) {
+            log_info("Gerbera still shutting down, signal again to kill.");
+        } else if (shutdown_flag > 2) {
+            log_error("Clean shutdown failed, killing Gerbera!");
             exit(1);
         }
     } else if (signum == SIGHUP) {

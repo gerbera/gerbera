@@ -78,21 +78,21 @@ void UpdateManager::init()
     //pthread_attr_destroy(&attr);
 }
 
-UpdateManager::~UpdateManager() { log_debug("UpdateManager destroyed\n"); }
+UpdateManager::~UpdateManager() { log_debug("UpdateManager destroyed"); }
 
 void UpdateManager::shutdown()
 {
-    log_debug("start\n");
+    log_debug("start");
     AutoLockU lock(mutex);
     shutdownFlag = true;
-    log_debug("signalling...\n");
+    log_debug("signalling...");
     cond.notify_one();
     lock.unlock();
-    log_debug("waiting for thread\n");
+    log_debug("waiting for thread");
     if (updateThread)
         pthread_join(updateThread, nullptr);
     updateThread = 0;
-    log_debug("end\n");
+    log_debug("end");
 }
 
 void UpdateManager::containersChanged(const std::vector<int>& objectIDs, int flushPolicy)
@@ -113,11 +113,11 @@ void UpdateManager::containersChanged(const std::vector<int>& objectIDs, int flu
     bool split = (hashSize + size >= MAX_OBJECT_IDS + MAX_OBJECT_IDS_OVERLOAD);
     for (int objectID : objectIDs) {
         if (objectID != lastContainerChanged) {
-            //log_debug("containerChanged. id: %d, signal: %d\n", objectID, signal);
+            //log_debug("containerChanged. id: {}, signal: {}", objectID, signal);
             objectIDHash->insert(objectID);
             if (split && objectIDHash->size() > MAX_OBJECT_IDS) {
                 while (objectIDHash->size() > MAX_OBJECT_IDS) {
-                    log_debug("in-between signalling...\n");
+                    log_debug("in-between signalling...");
                     cond.notify_one();
                     lock.unlock();
                     lock.lock();
@@ -128,7 +128,7 @@ void UpdateManager::containersChanged(const std::vector<int>& objectIDs, int flu
     if (objectIDHash->size() >= MAX_OBJECT_IDS)
         signal = true;
     if (signal) {
-        log_debug("signalling...\n");
+        log_debug("signalling...");
         cond.notify_one();
     }
 }
@@ -142,7 +142,7 @@ void UpdateManager::containerChanged(int objectID, int flushPolicy)
         // signalling thread if it could have been idle, because
         // there were no unprocessed updates
         bool signal = (!haveUpdates());
-        log_debug("containerChanged. id: %d, signal: %d\n", objectID, signal);
+        log_debug("containerChanged. id: {}, signal: {}", objectID, signal);
         objectIDHash->insert(objectID);
 
         // signalling if the hash gets too full
@@ -159,11 +159,11 @@ void UpdateManager::containerChanged(int objectID, int flushPolicy)
             signal = true;
         }
         if (signal) {
-            log_debug("signalling...\n");
+            log_debug("signalling...");
             cond.notify_one();
         }
     } else {
-        log_debug("last container changed!\n");
+        log_debug("last container changed!");
     }
 }
 
@@ -194,7 +194,7 @@ void UpdateManager::threadProc()
             if (sleepMillis >= MIN_SLEEP && objectIDHash->size() < MAX_OBJECT_IDS) {
                 struct timespec timeout;
                 getTimespecAfterMillis(sleepMillis, &timeout, &now);
-                log_debug("threadProc: sleeping for %ld millis\n", sleepMillis);
+                log_debug("threadProc: sleeping for {} millis", sleepMillis);
 
                 cv_status ret = cond.wait_for(lock, chrono::milliseconds(sleepMillis));
 
@@ -206,7 +206,7 @@ void UpdateManager::threadProc()
             }
 
             if (sendUpdates) {
-                log_debug("sending updates...\n");
+                log_debug("sending updates...");
                 lastContainerChanged = INVALID_OBJECT_ID;
                 flushPolicy = FLUSH_SPEC;
                 std::string updateString;
@@ -214,25 +214,24 @@ void UpdateManager::threadProc()
                 try {
                     updateString = storage->incrementUpdateIDs(objectIDHash);
                     objectIDHash->clear(); // hash_data_array will be invalid after clear()
-                } catch (const Exception& e) {
-                    e.printStackTrace();
-                    log_error("Fatal error when sending updates: %s\n", e.getMessage().c_str());
-                    log_error("Forcing MediaTomb shutdown.\n");
+                } catch (const std::runtime_error& e) {
+                    log_error("Fatal error when sending updates: {}", e.what());
+                    log_error("Forcing Gerbera shutdown.");
                     kill(0, SIGINT);
                 }
                 lock.unlock(); // we don't need to hold the lock during the sending of the updates
                 if (string_ok(updateString)) {
                     try {
-                        log_debug("updates sent: \"%s\"\n", updateString.c_str());
+                        log_debug("updates sent: \"{}\"", updateString.c_str());
                         server->sendCDSSubscriptionUpdate(updateString);
                         getTimespecNow(&lastUpdate);
-                    } catch (const Exception& e) {
-                        log_error("Fatal error when sending updates: %s\n", e.getMessage().c_str());
-                        log_error("Forcing MediaTomb shutdown.\n");
+                    } catch (const std::runtime_error& e) {
+                        log_error("Fatal error when sending updates: {}", e.what());
+                        log_error("Forcing Gerbera shutdown.");
                         kill(0, SIGINT);
                     }
                 } else {
-                    log_debug("NOT sending updates (string empty or invalid).\n");
+                    log_debug("NOT sending updates (string empty or invalid).");
                 }
                 lock.lock();
             }
@@ -247,10 +246,10 @@ void UpdateManager::threadProc()
 
 void* UpdateManager::staticThreadProc(void* arg)
 {
-    log_debug("starting update thread... thread: %d\n", pthread_self());
+    log_debug("starting update thread... thread: {}", pthread_self());
     auto* inst = (UpdateManager*)arg;
     inst->threadProc();
 
-    log_debug("update thread shut down. thread: %d\n", pthread_self());
+    log_debug("update thread shut down. thread: {}", pthread_self());
     return nullptr;
 }

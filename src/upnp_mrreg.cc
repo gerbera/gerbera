@@ -52,7 +52,7 @@ MRRegistrarService::~MRRegistrarService() = default;
 
 void MRRegistrarService::doIsAuthorized(const std::unique_ptr<ActionRequest>& request)
 {
-    log_debug("start\n");
+    log_debug("start");
 
     Ref<Element> response;
     response = xmlBuilder->createResponse(request->getActionName(), DESC_MRREG_SERVICE_TYPE);
@@ -61,21 +61,21 @@ void MRRegistrarService::doIsAuthorized(const std::unique_ptr<ActionRequest>& re
     request->setResponse(response);
     request->setErrorCode(UPNP_E_SUCCESS);
 
-    log_debug("end\n");
+    log_debug("end");
 }
 
 void MRRegistrarService::doRegisterDevice(const std::unique_ptr<ActionRequest>& request)
 {
-    log_debug("start\n");
+    log_debug("start");
 
     request->setErrorCode(UPNP_E_NOT_EXIST);
 
-    log_debug("upnpActionGetCurrentConnectionInfo: end\n");
+    log_debug("upnpActionGetCurrentConnectionInfo: end");
 }
 
 void MRRegistrarService::doIsValidated(const std::unique_ptr<ActionRequest>& request)
 {
-    log_debug("start\n");
+    log_debug("start");
 
     Ref<Element> response;
     response = xmlBuilder->createResponse(request->getActionName(), DESC_MRREG_SERVICE_TYPE);
@@ -84,12 +84,12 @@ void MRRegistrarService::doIsValidated(const std::unique_ptr<ActionRequest>& req
     request->setResponse(response);
     request->setErrorCode(UPNP_E_SUCCESS);
 
-    log_debug("end\n");
+    log_debug("end");
 }
 
 void MRRegistrarService::processActionRequest(const std::unique_ptr<ActionRequest>& request)
 {
-    log_debug("start\n");
+    log_debug("start");
 
     if (request->getActionName() == "IsAuthorized") {
         doIsAuthorized(request);
@@ -99,12 +99,12 @@ void MRRegistrarService::processActionRequest(const std::unique_ptr<ActionReques
         doIsValidated(request);
     } else {
         // invalid or unsupported action
-        log_debug("unrecognized action %s\n", request->getActionName().c_str());
+        log_debug("unrecognized action {}", request->getActionName().c_str());
         request->setErrorCode(UPNP_E_INVALID_ACTION);
         //throw UpnpException(UPNP_E_INVALID_ACTION, "unrecognized action");
     }
 
-    log_debug("end\n");
+    log_debug("end");
 }
 
 void MRRegistrarService::processSubscriptionRequest(const std::unique_ptr<SubscriptionRequest>& request)

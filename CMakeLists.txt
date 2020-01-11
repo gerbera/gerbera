@@ -186,8 +186,6 @@ set(libgerberaFILES
         src/url_request_handler.cc
         src/url_request_handler.h
         src/util/executor.h
-        src/util/exception.cc
-        src/util/exception.h
         src/util/filesystem.cc
         src/util/filesystem.h
         src/util/generic_task.cc
@@ -195,7 +193,6 @@ set(libgerberaFILES
         src/util/headers.h
         src/util/headers.cc
         src/util/jpeg_resolution.cc
-        src/util/logger.cc
         src/util/logger.h
         src/util/memory.cc
         src/util/memory.h
@@ -269,11 +266,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 # directories outside the build tree to the install RPATH
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-# Provide __FILENAME__ for debug statements
-include(DefFileName)
-define_file_path_for_sources(libgerbera)
-define_file_path_for_sources(gerbera)
-
 # Use libc++ with clang
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
@@ -306,6 +298,9 @@ endif()
 
 if (WITH_DEBUG)
     add_definitions(-DTOMBDEBUG)
+	add_definitions(-DSPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_DEBUG)
+else()
+	add_definitions(-DSPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO)
 endif()
 
 find_package(Threads REQUIRED)
@@ -329,7 +324,6 @@ target_link_libraries(gerbera ${UUID_LIBRARIES})
 if (FOUND_BSD_UUID)
     add_definitions(-DBSD_NATIVE_UUID)
 endif()
-
 
 find_package(LFS REQUIRED)
 if (LFS_FOUND)
@@ -366,6 +360,9 @@ endif()
 if(UPNP_INCLUDE_DIR AND NOT EXISTS "${UPNP_INCLUDE_DIR}/TemplateInclude.h")
     message (FATAL_ERROR "\n!! You are using a very old 1.8 snapshot. Please upgrade to a 1.8.x release from upstream (https://github.com/mrjimenez/pupnp) !!\n")
 endif()
+
+find_package(spdlog REQUIRED)
+target_link_libraries(gerbera spdlog::spdlog)
 
 find_package (EXPAT REQUIRED)
 if (EXPAT_FOUND)

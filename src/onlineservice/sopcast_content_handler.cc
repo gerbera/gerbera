@@ -53,7 +53,7 @@ bool SopCastContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
     std::string temp;
 
     if (service->getName() != "channels")
-        throw _Exception("Invalid XML for SopCast service received");
+        throw std::runtime_error("Invalid XML for SopCast service received");
 
     channels = service;
 
@@ -133,7 +133,7 @@ std::shared_ptr<CdsObject> SopCastContentHandler::getNextObject()
 
             temp = channel->getAttribute("id");
             if (!string_ok(temp)) {
-                log_warning("Failed to retrieve SopCast channel ID\n");
+                log_warning("Failed to retrieve SopCast channel ID");
                 continue;
             }
 
@@ -142,7 +142,7 @@ std::shared_ptr<CdsObject> SopCastContentHandler::getNextObject()
 
             temp = channel->getChildText("stream_type");
             if (!string_ok(temp)) {
-                log_warning("Failed to retrieve SopCast channel mimetype\n");
+                log_warning("Failed to retrieve SopCast channel mimetype");
                 continue;
             }
 
@@ -159,7 +159,7 @@ std::shared_ptr<CdsObject> SopCastContentHandler::getNextObject()
                 else if (temp == "wma")
                     mt = "audio/sopcast-x-ms-wma";
                 else {
-                    log_warning("Could not determine mimetype for SopCast channel (stream_type: %s)\n", temp.c_str());
+                    log_warning("Could not determine mimetype for SopCast channel (stream_type: {})", temp.c_str());
                     mt = "application/sopcast-stream";
                 }
             }
@@ -169,20 +169,20 @@ std::shared_ptr<CdsObject> SopCastContentHandler::getNextObject()
 
             Ref<Element> tmp_el = channel->getChildByName("sop_address");
             if (tmp_el == nullptr) {
-                log_warning("Failed to retrieve SopCast channel URL\n");
+                log_warning("Failed to retrieve SopCast channel URL");
                 continue;
             }
 
             temp = tmp_el->getChildText("item");
             if (!string_ok(temp)) {
-                log_warning("Failed to retrieve SopCast channel URL\n");
+                log_warning("Failed to retrieve SopCast channel URL");
                 continue;
             }
             item->setURL(temp);
 
             tmp_el = channel->getChildByName("name");
             if (tmp_el == nullptr) {
-                log_warning("Failed to retrieve SopCast channel name\n");
+                log_warning("Failed to retrieve SopCast channel name");
                 continue;
             }
 
@@ -217,9 +217,9 @@ std::shared_ptr<CdsObject> SopCastContentHandler::getNextObject()
             try {
                 item->validate();
                 return item;
-            } catch (const Exception& ex) {
-                log_warning("Failed to validate newly created SopCast item: %s\n",
-                    ex.getMessage().c_str());
+            } catch (const std::runtime_error& ex) {
+                log_warning("Failed to validate newly created SopCast item: {}",
+                    ex.what());
                 continue;
             }
         }

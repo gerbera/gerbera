@@ -48,7 +48,7 @@ web::remove::remove(std::shared_ptr<ConfigManager> config, std::shared_ptr<Stora
 
 void web::remove::process()
 {
-    log_debug("remove: start\n");
+    log_debug("remove: start");
 
     check_request();
 
@@ -57,5 +57,5 @@ void web::remove::process()
 
     content->removeObject(objectID, true, all);
 
-    log_debug("remove: returning\n");
+    log_debug("remove: returning");
 }

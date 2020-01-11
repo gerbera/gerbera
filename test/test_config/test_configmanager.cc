@@ -6,7 +6,7 @@
 
 #include "config/config_manager.h"
 #include "config/config_generator.h"
-#include "util/exception.h"
+
 
 using namespace zmm;
 using namespace mxml;
@@ -126,8 +126,8 @@ TEST_F(ConfigManagerTest, ThrowsExceptionWhenMissingConfigFileAndNoDefault) {
 
   try {
     subject = new ConfigManager(config_file, notExistsDir, confdir, prefix, magic, "", "", 0, false);
-  } catch(Exception const & err) {
-    EXPECT_EQ(err.getMessage(), expErrMsg.str());
+  } catch(const std::runtime_error& err) {
+    EXPECT_EQ(err.what(), expErrMsg.str());
   }
 }
 

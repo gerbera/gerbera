@@ -6,9 +6,6 @@ add_executable(testserver
         test_main.cc
         )
 
-include(DefFileName)
-define_file_path_for_sources(testserver)
-
 include_directories(
         ${UPNP_INCLUDE_DIRS}
         ${UUID_INCLUDE_DIRS}

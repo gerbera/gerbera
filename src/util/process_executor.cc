@@ -30,11 +30,10 @@
 /// \file process_executor.cc
 
 #include "process_executor.h"
+#include "logger.h"
 #include "process.h"
-#include "util/exception.h"
 
 #include <csignal>
-#include <pthread.h>
 #include <sys/types.h>
 #include <unistd.h>
 
@@ -59,18 +58,18 @@ ProcessExecutor::ProcessExecutor(std::string command, std::vector<std::string> a
 
     switch (process_id) {
     case -1:
-        throw _Exception("Failed to launch process " + command);
+        throw std::runtime_error("Failed to launch process " + command);
 
     case 0:
         sigset_t mask_set;
         pthread_sigmask(SIG_SETMASK, &mask_set, nullptr);
-        log_debug("Launching process: %s\n", command.c_str());
+        log_debug("Launching process: {}", command.c_str());
         execvp(command.c_str(), const_cast<char** const>(argv));
     default:
         break;
     }
 
-    log_debug("Launched process %s, pid: %d\n", command.c_str(), process_id);
+    log_debug("Launched process {}, pid: {}", command.c_str(), process_id);
 }
 
 bool ProcessExecutor::isAlive()

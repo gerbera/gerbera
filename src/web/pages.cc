@@ -67,7 +67,7 @@ std::unique_ptr<WebRequestHandler> createWebRequestHandler(
     if (page == "action")
         return std::make_unique<web::action>(config, storage, content, sessionManager);
 
-    throw _Exception("Unknown page: " + page);
+    throw std::runtime_error("Unknown page: " + page);
 }
 
 } // namespace

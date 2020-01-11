@@ -52,7 +52,7 @@ ConnectionManagerService::~ConnectionManagerService() = default;
 
 void ConnectionManagerService::doGetCurrentConnectionIDs(const std::unique_ptr<ActionRequest>& request)
 {
-    log_debug("start\n");
+    log_debug("start");
 
     Ref<Element> response;
     response = xmlBuilder->createResponse(request->getActionName(), DESC_CM_SERVICE_TYPE);
@@ -61,21 +61,21 @@ void ConnectionManagerService::doGetCurrentConnectionIDs(const std::unique_ptr<A
     request->setResponse(response);
     request->setErrorCode(UPNP_E_SUCCESS);
 
-    log_debug("end\n");
+    log_debug("end");
 }
 
 void ConnectionManagerService::doGetCurrentConnectionInfo(const std::unique_ptr<ActionRequest>& request)
 {
-    log_debug("start\n");
+    log_debug("start");
 
     request->setErrorCode(UPNP_E_NOT_EXIST);
 
-    log_debug("doGetCurrentConnectionInfo: end\n");
+    log_debug("doGetCurrentConnectionInfo: end");
 }
 
 void ConnectionManagerService::doGetProtocolInfo(const std::unique_ptr<ActionRequest>& request)
 {
-    log_debug("start\n");
+    log_debug("start");
 
     Ref<Element> response;
     response = xmlBuilder->createResponse(request->getActionName(), DESC_CM_SERVICE_TYPE);
@@ -89,12 +89,12 @@ void ConnectionManagerService::doGetProtocolInfo(const std::unique_ptr<ActionReq
     request->setResponse(response);
     request->setErrorCode(UPNP_E_SUCCESS);
 
-    log_debug("end\n");
+    log_debug("end");
 }
 
 void ConnectionManagerService::processActionRequest(const std::unique_ptr<ActionRequest>& request)
 {
-    log_debug("start\n");
+    log_debug("start");
 
     if (request->getActionName() == "GetCurrentConnectionIDs") {
         doGetCurrentConnectionIDs(request);
@@ -104,12 +104,12 @@ void ConnectionManagerService::processActionRequest(const std::unique_ptr<Action
         doGetProtocolInfo(request);
     } else {
         // invalid or unsupported action
-        log_debug("unrecognized action %s\n", request->getActionName().c_str());
+        log_debug("unrecognized action {}", request->getActionName().c_str());
         request->setErrorCode(UPNP_E_INVALID_ACTION);
         //        throw UpnpException(UPNP_E_INVALID_ACTION, "unrecognized action");
     }
 
-    log_debug("end\n");
+    log_debug("end");
 }
 
 void ConnectionManagerService::processSubscriptionRequest(const std::unique_ptr<SubscriptionRequest>& request)

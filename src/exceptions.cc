@@ -30,14 +30,11 @@
 /// \file exceptions.cc
 
 #include "exceptions.h"
+#include <string>
 
 UpnpException::UpnpException(int errCode, std::string message)
-    : Exception(message)
+    : std::runtime_error(message)
 {
     this->errCode = errCode;
 }
-UpnpException::UpnpException(int errCode, std::string message, const char* file, int line, const char* function)
-    : Exception(message, file, line, function)
-{
-    this->errCode = errCode;
-}
+

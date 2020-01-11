@@ -136,7 +136,7 @@ void web::auth::process()
         gerberaVersion->setText(VERSION);
         cfg->appendElementChild(gerberaVersion);
     } else if (action == "get_sid") {
-        log_debug("checking/getting sid...\n");
+        log_debug("checking/getting sid...");
         std::shared_ptr<Session> session = nullptr;
         std::string sid = param("sid");
 
@@ -159,7 +159,7 @@ void web::auth::process()
         std::string sid = param("sid");
         auto session = sessionManager->getSession(sid);
         if (session == nullptr)
-            throw _Exception("illegal session id");
+            throw std::runtime_error("illegal session id");
         sessionManager->removeSession(sid);
     } else if (action == "get_token") {
         check_request(false);
@@ -181,7 +181,7 @@ void web::auth::process()
 
         auto session = sessionManager->getSession(sid);
         if (session == nullptr)
-            throw _Exception("illegal session id");
+            throw std::runtime_error("illegal session id");
 
         std::string correctPassword = sessionManager->getUserPassword(username);
 
@@ -190,5 +190,5 @@ void web::auth::process()
 
         session->logIn();
     } else
-        throw _Exception("illegal action given to req_type auth");
+        throw std::runtime_error("illegal action given to req_type auth");
 }

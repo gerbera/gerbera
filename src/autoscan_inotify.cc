@@ -54,9 +54,9 @@ AutoscanInotify::AutoscanInotify(std::shared_ptr<Storage> storage, std::shared_p
     if (check_path(INOTIFY_MAX_USER_WATCHES_FILE)) {
         try {
             int max_watches = std::stoi(trim_string(read_text_file(INOTIFY_MAX_USER_WATCHES_FILE)));
-            log_debug("Max watches on the system: %d\n", max_watches);
-        } catch (const Exception& ex) {
-            log_error("Could not determine maximum number of inotify user watches: %s\n", ex.getMessage().c_str());
+            log_debug("Max watches on the system: {}", max_watches);
+        } catch (const std::runtime_error& ex) {
+            log_error("Could not determine maximum number of inotify user watches: {}", ex.what());
         }
     }
 
@@ -71,12 +71,12 @@ AutoscanInotify::~AutoscanInotify()
 {
     unique_lock<std::mutex> lock(mutex);
     if (!shutdownFlag) {
-        log_debug("start\n");
+        log_debug("start");
         shutdownFlag = true;
         inotify->stop();
         lock.unlock();
         thread_.join();
-        log_debug("inotify thread died.\n");
+        log_debug("inotify thread died.");
         inotify = nullptr;
         watches->clear();
     }
@@ -109,10 +109,10 @@ void AutoscanInotify::threadProc()
                 }
 
                 if (adir->getRecursive()) {
-                    log_debug("removing recursive watch: %s\n", location.c_str());
+                    log_debug("removing recursive watch: {}", location.c_str());
                     monitorUnmonitorRecursive(location, true, adir, location, true);
                 } else {
-                    log_debug("removing non-recursive watch: %s\n", location.c_str());
+                    log_debug("removing non-recursive watch: {}", location.c_str());
                     unmonitorDirectory(location, adir);
                 }
 
@@ -129,10 +129,10 @@ void AutoscanInotify::threadProc()
                 }
 
                 if (adir->getRecursive()) {
-                    log_debug("adding recursive watch: %s\n", location.c_str());
+                    log_debug("adding recursive watch: {}", location.c_str());
                     monitorUnmonitorRecursive(location, false, adir, location, true);
                 } else {
-                    log_debug("adding non-recursive watch: %s\n", location.c_str());
+                    log_debug("adding non-recursive watch: {}", location.c_str());
                     monitorDirectory(location, adir, location, true);
                 }
                 content->rescanDirectory(adir->getObjectID(), adir->getScanID(), adir->getScanMode(), "", false);
@@ -150,7 +150,7 @@ void AutoscanInotify::threadProc()
                 int wd = event->wd;
                 int mask = event->mask;
                 std::string name = event->name;
-                log_debug("inotify event: %d %x %s\n", wd, mask, name.c_str());
+                log_debug("inotify event: {} %x {}", wd, mask, name.c_str());
 
                 Ref<Wd> wdObj = nullptr;
                 try {
@@ -189,10 +189,10 @@ void AutoscanInotify::threadProc()
                     if (adir != nullptr && adir->getRecursive()) {
                         if (mask & IN_CREATE) {
                             if (adir->getHidden() || name.at(0) != '.') {
-                                log_debug("new dir detected, adding to inotify: %s\n", path.c_str());
+                                log_debug("new dir detected, adding to inotify: {}", path.c_str());
                                 monitorUnmonitorRecursive(path, false, adir, watchAs->getNormalizedAutoscanPath(), false);
                             } else {
-                                log_debug("new dir detected, irgnoring because it's hidden: %s\n", path.c_str());
+                                log_debug("new dir detected, irgnoring because it's hidden: {}", path.c_str());
                             }
                         }
                     }
@@ -206,7 +206,7 @@ void AutoscanInotify::threadProc()
                         fullPath = path;
 
                     if (!(mask & (IN_MOVED_TO | IN_CREATE))) {
-                        log_debug("deleting %s\n", fullPath.c_str());
+                        log_debug("deleting {}", fullPath.c_str());
 
                         if (mask & (IN_DELETE_SELF | IN_MOVE_SELF | IN_UNMOUNT)) {
                             if (IN_MOVE_SELF)
@@ -225,7 +225,7 @@ void AutoscanInotify::threadProc()
                             content->removeObject(objectID);
                     }
                     if (mask & (IN_CLOSE_WRITE | IN_MOVED_TO | IN_CREATE)) {
-                        log_debug("adding %s\n", path.c_str());
+                        log_debug("adding {}", path.c_str());
                         // path, recursive, async, hidden, low priority, cancellable
                         content->addFile(fullPath, adir->getLocation(), adir->getRecursive(), true, adir->getHidden(), true, false);
 
@@ -239,9 +239,8 @@ void AutoscanInotify::threadProc()
                     watches->erase(wd);
                 }
             }
-        } catch (const Exception& e) {
-            log_error("Inotify thread caught exception: %s\n", e.getMessage().c_str());
-            e.printStackTrace();
+        } catch (const std::runtime_error& e) {
+            log_error("Inotify thread caught exception: {}", e.what());
         }
     }
 }
@@ -249,7 +248,7 @@ void AutoscanInotify::threadProc()
 void AutoscanInotify::monitor(zmm::Ref<AutoscanDirectory> dir)
 {
     assert(dir->getScanMode() == ScanMode::INotify);
-    log_debug("Requested to monitor \"%s\"\n", dir->getLocation().c_str());
+    log_debug("Requested to monitor \"{}\"", dir->getLocation().c_str());
     AutoLock lock(mutex);
     monitorQueue->enqueue(dir);
     inotify->stop();
@@ -260,7 +259,7 @@ void AutoscanInotify::unmonitor(zmm::Ref<AutoscanDirectory> dir)
     // must not be persistent
     assert(!dir->persistent());
 
-    log_debug("Requested to stop monitoring \"%s\"\n", dir->getLocation().c_str());
+    log_debug("Requested to stop monitoring \"{}\"", dir->getLocation().c_str());
     AutoLock lock(mutex);
     unmonitorQueue->enqueue(dir);
     inotify->stop();
@@ -276,7 +275,7 @@ int AutoscanInotify::watchPathForMoves(std::string path, int wd)
             buf << DIR_SEPARATOR;
         if (i >= 0)
             buf << pathAr[i];
-        log_debug("adding move watch: %s\n", buf.str().c_str());
+        log_debug("adding move watch: {}", buf.str().c_str());
         parentWd = addMoveWatch(buf.str(), wd, parentWd);
     }
     return parentWd;
@@ -295,7 +294,7 @@ int AutoscanInotify::addMoveWatch(std::string path, int removeWd, int parentWd)
             int parentWdSet = wdObj->getParentWd();
             if (parentWdSet >= 0) {
                 if (parentWd != parentWdSet) {
-                    log_debug("error: parentWd doesn't match wd: %d, parent is: %d, should be: %d\n", wd, parentWdSet, parentWd);
+                    log_debug("error: parentWd doesn't match wd: {}, parent is: {}, should be: {}", wd, parentWdSet, parentWd);
                     wdObj->setParentWd(parentWd);
                 }
             } else
@@ -335,11 +334,11 @@ void AutoscanInotify::recheckNonexistingMonitor(int curWd, std::vector<std::stri
         else {
             for (int j = 0; j < i; j++) {
                 buf << DIR_SEPARATOR << pathAr[j];
-                //                log_debug("adding: %s\n", pathAr->get(j)->data);
+                //                log_debug("adding: {}", pathAr->get(j)->data);
             }
         }
         bool pathExists = check_path(buf.str(), true);
-        //        log_debug("checking %s: %d\n", buf->c_str(), pathExists);
+        //        log_debug("checking {}: {}", buf->c_str(), pathExists);
         if (pathExists) {
             if (curWd != -1)
                 removeNonexistingMonitor(curWd, watches->at(curWd), pathAr);
@@ -380,7 +379,7 @@ void AutoscanInotify::checkMoveWatches(int wd, Ref<Wd> wdObj)
                 recheckNonexistingMonitors(removeWd, wdToRemove);
 
                 std::string path = wdToRemove->getPath();
-                log_debug("found wd to remove because of move event: %d %s\n", removeWd, path.c_str());
+                log_debug("found wd to remove because of move event: {} {}", removeWd, path.c_str());
 
                 inotify->removeWatch(removeWd);
                 Ref<WatchAutoscan> watch = getStartPoint(wdToRemove);
@@ -458,7 +457,7 @@ void AutoscanInotify::monitorUnmonitorRecursive(std::string startPath, bool unmo
 
     DIR* dir = opendir(startPath.c_str());
     if (!dir) {
-        log_warning("Could not open %s\n", startPath.c_str());
+        log_warning("Could not open {}", startPath.c_str());
         return;
     }
 
@@ -528,7 +527,7 @@ int AutoscanInotify::monitorDirectory(std::string pathOri, Ref<AutoscanDirectory
 
             if (!startPoint) {
                 int startPointWd = inotify->addWatch(normalizedAutoscanPath, events);
-                log_debug("getting start point for %s -> %s wd=%d\n", pathOri.c_str(), normalizedAutoscanPath.c_str(), startPointWd);
+                log_debug("getting start point for {} -> {} wd={}", pathOri.c_str(), normalizedAutoscanPath.c_str(), startPointWd);
                 if (wd >= 0)
                     addDescendant(startPointWd, wd, adir);
             }
@@ -550,19 +549,19 @@ void AutoscanInotify::unmonitorDirectory(std::string path, Ref<AutoscanDirectory
 
     if (wd < 0) {
         // doesn't seem to be monitored currently
-        log_debug("unmonitorDirectory called, but it isn't monitored? (%s)\n", path.c_str());
+        log_debug("unmonitorDirectory called, but it isn't monitored? ({})", path.c_str());
         return;
     }
 
     Ref<Wd> wdObj = watches->at(wd);
     if (wdObj == nullptr) {
-        log_error("wd not found in watches!? (%d, %s)\n", wd, path.c_str());
+        log_error("wd not found in watches!? ({}, {})", wd, path.c_str());
         return;
     }
 
     Ref<WatchAutoscan> watchAs = getAppropriateAutoscan(wdObj, adir);
     if (watchAs == nullptr) {
-        log_debug("autoscan not found in watches? (%d, %s)\n", wd, path.c_str());
+        log_debug("autoscan not found in watches? ({}, {})", wd, path.c_str());
     } else {
         if (wdObj->getWdWatches()->size() == 1) {
             // should be done automatically, because removeWatch triggers an IGNORED event
@@ -652,7 +651,7 @@ void AutoscanInotify::removeWatchMoves(int wd)
                 if (watch->getType() == WatchType::Move) {
                     watchMv = RefCast(watch, WatchMove);
                     if (watchMv->getRemoveWd() == wd) {
-                        log_debug("removing watch move\n");
+                        log_debug("removing watch move");
                         if (wdWatches->size() == 1)
                             inotify->removeWatch(checkWd);
                         else
@@ -710,7 +709,7 @@ Ref<AutoscanInotify::WatchAutoscan> AutoscanInotify::getStartPoint(Ref<Wd> wdObj
 
 void AutoscanInotify::addDescendant(int startPointWd, int addWd, Ref<AutoscanDirectory> adir)
 {
-    //    log_debug("called for %d, (adir->path=%s); adding %d\n", startPointWd, adir->getLocation().c_str(), addWd);
+    //    log_debug("called for {}, (adir->path={}); adding {}", startPointWd, adir->getLocation().c_str(), addWd);
     Ref<Wd> wdObj = nullptr;
     try {
         wdObj = watches->at(startPointWd);
@@ -720,13 +719,13 @@ void AutoscanInotify::addDescendant(int startPointWd, int addWd, Ref<AutoscanDir
     if (wdObj == nullptr)
         return;
 
-    //   log_debug("found wdObj\n");
+    //   log_debug("found wdObj");
     Ref<WatchAutoscan> watch = getAppropriateAutoscan(wdObj, adir);
     if (watch == nullptr)
         return;
-    //    log_debug("adding descendant\n");
+    //    log_debug("adding descendant");
     watch->addDescendant(addWd);
-    //    log_debug("added descendant to %d (adir->path=%s): %d; now: %s\n", startPointWd, adir->getLocation().c_str(), addWd, watch->getDescendants()->toCSV().c_str());
+    //    log_debug("added descendant to {} (adir->path={}): {}; now: {}", startPointWd, adir->getLocation().c_str(), addWd, watch->getDescendants()->toCSV().c_str());
 }
 
 void AutoscanInotify::removeDescendants(int wd)
@@ -759,8 +758,8 @@ std::string AutoscanInotify::normalizePathNoEx(std::string path)
 {
     try {
         return normalizePath(path);
-    } catch (const Exception& e) {
-        log_error("%s\n", e.getMessage().c_str());
+    } catch (const std::runtime_error& e) {
+        log_error("{}", e.what());
         return nullptr;
     }
 }

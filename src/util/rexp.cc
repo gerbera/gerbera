@@ -63,7 +63,7 @@ void RExp::compile(std::string pattern, int flags)
     this->pattern = pattern;
     ret = regcomp(&regex, pattern.c_str(), flags);
     if (ret != 0)
-        throw _Exception(error_string(ret, &regex));
+        throw std::runtime_error(error_string(ret, &regex));
     isCompiled = true;
 }
 
@@ -81,7 +81,7 @@ void RExp::compile(std::string pattern, const char* sflags)
             flags |= REG_NEWLINE;
             break;
         default:
-            throw _Exception("RExp: unknown flag: " + std::to_string(c));
+            throw std::runtime_error("RExp: unknown flag: " + std::to_string(c));
         }
         p++;
     }
@@ -154,6 +154,6 @@ bool Matcher::next()
     case 0:
         return true;
     default:
-        throw _Exception(error_string(ret, &rexp->regex));
+        throw std::runtime_error(error_string(ret, &rexp->regex));
     }
 }

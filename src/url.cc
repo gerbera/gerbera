@@ -54,7 +54,7 @@ std::string URL::download(std::string URL, long* HTTP_retcode,
         curl_handle = curl_easy_init();
         cleanup = true;
         if (curl_handle == nullptr)
-            throw _Exception("Invalid curl handle!\n");
+            throw std::runtime_error("Invalid curl handle!\n");
     }
 
     std::ostringstream buffer;
@@ -97,18 +97,18 @@ std::string URL::download(std::string URL, long* HTTP_retcode,
 
     res = curl_easy_perform(curl_handle);
     if (res != CURLE_OK) {
-        log_error("%s\n", error_buffer);
+        log_error("{}", error_buffer);
         if (cleanup)
             curl_easy_cleanup(curl_handle);
-        throw _Exception(error_buffer);
+        throw std::runtime_error(error_buffer);
     }
 
     res = curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, HTTP_retcode);
     if (res != CURLE_OK) {
-        log_error("%s\n", error_buffer);
+        log_error("{}", error_buffer);
         if (cleanup)
             curl_easy_cleanup(curl_handle);
-        throw _Exception(error_buffer);
+        throw std::runtime_error(error_buffer);
     }
 
     if (cleanup)
@@ -133,14 +133,14 @@ Ref<URL::Stat> URL::getInfo(std::string URL, CURL* curl_handle)
         curl_handle = curl_easy_init();
         cleanup = true;
         if (curl_handle == nullptr)
-            throw _Exception("Invalid curl handle!\n");
+            throw std::runtime_error("Invalid curl handle!\n");
     }
 
     download(URL, &retcode, curl_handle, true, true, true);
     if (retcode != 200) {
         if (cleanup)
             curl_easy_cleanup(curl_handle);
-        throw _Exception("Error retrieving information from " + URL + " HTTP return code: " + std::to_string(retcode));
+        throw std::runtime_error("Error retrieving information from " + URL + " HTTP return code: " + std::to_string(retcode));
     }
     /*    
     Ref<RExp> getMT(new RExp());
@@ -149,7 +149,7 @@ Ref<URL::Stat> URL::getInfo(std::string URL, CURL* curl_handle)
     {
         getMT->compile("\nContent-Type: ([^\n]+)\n", REG_ICASE);
     }
-    catch (const Exception & ex)
+    catch (const std::runtime_error& ex)
     {
         if (cleanup)
             curl_easy_cleanup(curl_handle);
@@ -164,7 +164,7 @@ Ref<URL::Stat> URL::getInfo(std::string URL, CURL* curl_handle)
     else
         mt = MIMETYPE_DEFAULT;
 
-    log_debug("Extracted content type: %s\n", mt.c_str());
+    log_debug("Extracted content type: {}", mt.c_str());
 
     Ref<RExp> getCL(new RExp());
 
@@ -172,7 +172,7 @@ Ref<URL::Stat> URL::getInfo(std::string URL, CURL* curl_handle)
     {
         getCL->compile("\nContent-Length: ([^\n]+)\n", REG_ICASE);
     }
-    catch (const Exception & ex)
+    catch (const std::runtime_error& ex)
     {
         if (cleanup)
             curl_easy_cleanup(curl_handle);
@@ -189,18 +189,18 @@ Ref<URL::Stat> URL::getInfo(std::string URL, CURL* curl_handle)
 */
     res = curl_easy_getinfo(curl_handle, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &cl);
     if (res != CURLE_OK) {
-        log_error("%s\n", error_buffer);
+        log_error("{}", error_buffer);
         if (cleanup)
             curl_easy_cleanup(curl_handle);
-        throw _Exception(error_buffer);
+        throw std::runtime_error(error_buffer);
     }
 
     res = curl_easy_getinfo(curl_handle, CURLINFO_CONTENT_TYPE, &ct);
     if (res != CURLE_OK) {
-        log_error("%s\n", error_buffer);
+        log_error("{}", error_buffer);
         if (cleanup)
             curl_easy_cleanup(curl_handle);
-        throw _Exception(error_buffer);
+        throw std::runtime_error(error_buffer);
     }
 
     if (ct == nullptr)
@@ -208,14 +208,14 @@ Ref<URL::Stat> URL::getInfo(std::string URL, CURL* curl_handle)
     else
         mt = ct;
 
-    log_debug("Extracted content length: %lld\n", (long long)cl);
+    log_debug("Extracted content length: %lld", (long long)cl);
 
     res = curl_easy_getinfo(curl_handle, CURLINFO_EFFECTIVE_URL, &c_url);
     if (res != CURLE_OK) {
-        log_error("%s\n", error_buffer);
+        log_error("{}", error_buffer);
         if (cleanup)
             curl_easy_cleanup(curl_handle);
-        throw _Exception(error_buffer);
+        throw std::runtime_error(error_buffer);
     }
 
     if (c_url == nullptr)

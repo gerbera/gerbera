@@ -60,7 +60,7 @@ void XMLCALL Parser::element_start(void *userdata, const char *name, const char 
     else
     {
         // second root? - should not happen...
-        print_backtrace();
+        throw std::runtime_error("second root? - should not happen...");
     }
 }
 
@@ -142,7 +142,7 @@ Ref<Document> Parser::parse(Ref<Context> ctx, std::string input)
 {
     XML_Parser parser = XML_ParserCreate(nullptr);
     if (!parser)
-        throw Exception("Unable to allocate XML parser");
+        throw std::runtime_error("Unable to allocate XML parser");
 
     XML_SetUserData(parser, this);
     XML_SetElementHandler(parser, Parser::element_start, Parser::element_end);

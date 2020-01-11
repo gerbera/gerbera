@@ -5,9 +5,6 @@ add_executable(testhandler
         test_http_protocol_helper.cc
         )
 
-include(DefFileName)
-define_file_path_for_sources(testhandler)
-
 include_directories(
         ${UPNP_INCLUDE_DIRS}
         ${UUID_INCLUDE_DIRS}

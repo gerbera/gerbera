@@ -41,7 +41,7 @@ void DeviceDescriptionHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
 std::unique_ptr<IOHandler> DeviceDescriptionHandler::open(const char* filename, enum UpnpOpenFileMode mode, std::string range)
 {
-    log_debug("Device description requested\n");
+    log_debug("Device description requested");
     if (!string_ok(deviceDescription)) { // This always true for now
         deviceDescription = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + xmlBuilder->renderDeviceDescription()->print();
     }

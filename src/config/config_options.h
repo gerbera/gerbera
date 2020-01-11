@@ -47,37 +47,37 @@ class ConfigOption {
 public:
     virtual std::string getOption()
     {
-        throw _Exception("Wrong option type");
+        throw std::runtime_error("Wrong option type");
     };
 
     virtual int getIntOption()
     {
-        throw _Exception("Wrong option type");
+        throw std::runtime_error("Wrong option type");
     };
 
     virtual bool getBoolOption()
     {
-        throw _Exception("Wrong option type");
+        throw std::runtime_error("Wrong option type");
     };
 
     virtual std::map<std::string,std::string> getDictionaryOption()
     {
-        throw _Exception("Wrong option type");
+        throw std::runtime_error("Wrong option type");
     };
 
     virtual std::shared_ptr<AutoscanList> getAutoscanListOption()
     {
-        throw _Exception("Wrong option type");
+        throw std::runtime_error("Wrong option type");
     };
 
     virtual std::vector<std::string> getStringArrayOption()
     {
-        throw _Exception("Wrong option type");
+        throw std::runtime_error("Wrong option type");
     };
 
     virtual std::shared_ptr<TranscodingProfileList> getTranscodingProfileListOption()
     {
-        throw _Exception("Wrong option type");
+        throw std::runtime_error("Wrong option type");
     };
 };
 
