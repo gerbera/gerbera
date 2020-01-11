@@ -110,13 +110,13 @@ void Server::run()
     std::string ip = config->getOption(CFG_SERVER_IP);
 
     if (string_ok(ip) && string_ok(iface))
-        throw _Exception("You can not specify interface and IP at the same time!");
+        throw std::runtime_error("You can not specify interface and IP at the same time!");
 
     if (!string_ok(iface))
         iface = ipToInterface(ip);
 
     if (string_ok(ip) && !string_ok(iface))
-        throw _Exception("Could not find ip: " + ip);
+        throw std::runtime_error("Could not find ip: " + ip);
 
     int port = config->getIntOption(CFG_SERVER_PORT);
 
@@ -125,7 +125,7 @@ void Server::run()
     if (!iface.empty()) IfName = iface.c_str();
     ret = UpnpInit2(IfName, port);
     if (ret != UPNP_E_SUCCESS) {
-        throw _UpnpException(ret, "run: UpnpInit failed");
+        throw UpnpException(ret, "run: UpnpInit failed");
     }
 
     port = UpnpGetServerPort();
@@ -143,12 +143,12 @@ void Server::run()
     std::string web_root = config->getOption(CFG_SERVER_WEBROOT);
 
     if (!string_ok(web_root)) {
-        throw _Exception("invalid web server root directory");
+        throw std::runtime_error("invalid web server root directory");
     }
 
     ret = UpnpSetWebServerRootDir(web_root.c_str());
     if (ret != UPNP_E_SUCCESS) {
-        throw _UpnpException(ret, "run: UpnpSetWebServerRootDir failed");
+        throw UpnpException(ret, "run: UpnpSetWebServerRootDir failed");
     }
 
     log_debug("webroot: {}", web_root.c_str());
@@ -162,7 +162,7 @@ void Server::run()
             //ret = UpnpAddCustomHTTPHeader(tmp.c_str());
             //if (ret != UPNP_E_SUCCESS)
             //{
-            //    throw _UpnpException(ret, "run: UpnpAddCustomHTTPHeader failed");
+            //    throw UpnpException(ret, "run: UpnpAddCustomHTTPHeader failed");
             //}
         }
     }
@@ -170,13 +170,13 @@ void Server::run()
     log_debug("Setting virtual dir to: {}", virtual_directory.c_str());
     ret = UpnpAddVirtualDir(virtual_directory.c_str(), this, nullptr);
     if (ret != UPNP_E_SUCCESS) {
-        throw _UpnpException(ret, "run: UpnpAddVirtualDir failed");
+        throw UpnpException(ret, "run: UpnpAddVirtualDir failed");
     }
 
     ret = registerVirtualDirCallbacks();
 
     if (ret != UPNP_E_SUCCESS) {
-        throw _UpnpException(ret, "run: UpnpSetVirtualDirCallbacks failed");
+        throw UpnpException(ret, "run: UpnpSetVirtualDirCallbacks failed");
     }
 
     std::string presentationURL = config->getOption(CFG_SERVER_PRESENTATION_URL);
@@ -208,7 +208,7 @@ void Server::run()
         &deviceHandle);
 
     if (ret != UPNP_E_SUCCESS) {
-        throw _UpnpException(ret, "run: UpnpRegisterRootDevice failed");
+        throw UpnpException(ret, "run: UpnpRegisterRootDevice failed");
     }
 
     log_debug("Creating ContentDirectoryService");
@@ -226,7 +226,7 @@ void Server::run()
     log_debug("Sending UPnP Alive advertisements every {} seconds", (aliveAdvertisementInterval / 2) - 30);
     ret = UpnpSendAdvertisement(deviceHandle, aliveAdvertisementInterval);
     if (ret != UPNP_E_SUCCESS) {
-        throw _UpnpException(ret, "run: UpnpSendAdvertisement failed");
+        throw UpnpException(ret, "run: UpnpSendAdvertisement failed");
     }
 
     config->writeBookmark(ip, std::to_string(port));
@@ -274,7 +274,7 @@ void Server::shutdown()
     if (storage->threadCleanupRequired()) {
         try {
             storage->threadCleanup();
-        } catch (const Exception& ex) {
+        } catch (const std::runtime_error& ex) {
         }
     }
     storage->shutdown();
@@ -313,8 +313,8 @@ int Server::handleUpnpEvent(Upnp_EventType eventtype, const void* event)
         } catch (const UpnpException& upnp_e) {
             ret = upnp_e.getErrorCode();
             UpnpActionRequest_set_ErrCode((UpnpActionRequest*)event, ret);
-        } catch (const Exception& e) {
-            log_info("Exception: {}", e.getMessage().c_str());
+        } catch (const std::runtime_error& e) {
+            log_info("Exception: {}", e.what());
         }
         break;
 
@@ -325,7 +325,7 @@ int Server::handleUpnpEvent(Upnp_EventType eventtype, const void* event)
             auto request = std::make_unique<SubscriptionRequest>((UpnpSubscriptionRequest*)event);
             routeSubscriptionRequest(request);
         } catch (const UpnpException& upnp_e) {
-            log_warning("Subscription exception: {}", upnp_e.getMessage().c_str());
+            log_warning("Subscription exception: {}", upnp_e.what());
             ret = upnp_e.getErrorCode();
         }
         break;
@@ -358,7 +358,7 @@ void Server::routeActionRequest(const std::unique_ptr<ActionRequest>& request) c
     // make sure the request is for our device
     if (request->getUDN() != serverUDN) {
         // not for us
-        throw _UpnpException(UPNP_E_BAD_REQUEST, "routeActionRequest: request not for this device");
+        throw UpnpException(UPNP_E_BAD_REQUEST, "routeActionRequest: request not for this device");
     }
 
     // we need to match the serviceID to one of our services
@@ -375,7 +375,7 @@ void Server::routeActionRequest(const std::unique_ptr<ActionRequest>& request) c
     } else {
         // cp is asking for a nonexistent service, or for a service
         // that does not support any actions
-        throw _UpnpException(UPNP_E_BAD_REQUEST, "Service does not exist or action not supported");
+        throw UpnpException(UPNP_E_BAD_REQUEST, "Service does not exist or action not supported");
     }
 }
 
@@ -386,7 +386,7 @@ void Server::routeSubscriptionRequest(const std::unique_ptr<SubscriptionRequest>
         // not for us
         log_debug("routeSubscriptionRequest: request not for this device: {} vs {}",
             request->getUDN().c_str(), serverUDN.c_str());
-        throw _UpnpException(UPNP_E_BAD_REQUEST, "routeActionRequest: request not for this device");
+        throw UpnpException(UPNP_E_BAD_REQUEST, "routeActionRequest: request not for this device");
     }
 
     // we need to match the serviceID to one of our services
@@ -403,7 +403,7 @@ void Server::routeSubscriptionRequest(const std::unique_ptr<SubscriptionRequest>
     } else {
         // cp asks for a nonexistent service or for a service that
         // does not support subscriptions
-        throw _UpnpException(UPNP_E_BAD_REQUEST, "Service does not exist or subscriptions not supported");
+        throw UpnpException(UPNP_E_BAD_REQUEST, "Service does not exist or subscriptions not supported");
     }
 }
 
@@ -441,7 +441,7 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
         if (string_ok(config->getOption(CFG_SERVER_SERVEDIR)))
             ret = std::make_unique<ServeRequestHandler>(config, storage);
         else
-            throw _Exception("Serving directories is not enabled in configuration");
+            throw std::runtime_error("Serving directories is not enabled in configuration");
     }
 #if defined(HAVE_CURL)
     else if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_ONLINE_HANDLER)) {
@@ -449,7 +449,7 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
     }
 #endif
     else {
-        throw _Exception(std::string("no valid handler type in ") + filename);
+        throw std::runtime_error(std::string("no valid handler type in ") + filename);
     }
 
     return ret;
@@ -469,10 +469,10 @@ int Server::registerVirtualDirCallbacks()
         } catch (const ServerShutdownException& se) {
             return -1;
         } catch (const SubtitlesNotFoundException& sex) {
-            log_warning("{}", sex.getMessage().c_str());
+            log_warning("{}", sex.what());
             return -1;
-        } catch (const Exception& e) {
-            log_error("{}", e.getMessage().c_str());
+        } catch (const std::runtime_error& e) {
+            log_error("{}", e.what());
             return -1;
         }
         return 0; });
@@ -496,10 +496,10 @@ int Server::registerVirtualDirCallbacks()
         } catch (const ServerShutdownException& se) {
             return nullptr;
         } catch (const SubtitlesNotFoundException& sex) {
-            log_info("SubtitlesNotFoundException: {}", sex.getMessage().c_str());
+            log_info("SubtitlesNotFoundException: {}", sex.what());
             return nullptr;
-        } catch (const Exception& ex) {
-            log_error("Exception: {}", ex.getMessage().c_str());
+        } catch (const std::runtime_error& ex) {
+            log_error("Exception: {}", ex.what());
             return nullptr;
         }
     });
@@ -544,8 +544,8 @@ int Server::registerVirtualDirCallbacks()
         try {
             auto* handler = static_cast<IOHandler*>(f);
             handler->seek(offset, whence);
-        } catch (const Exception& e) {
-            log_error("Exception during seek: {}", e.getMessage().c_str());
+        } catch (const std::runtime_error& e) {
+            log_error("Exception during seek: {}", e.what());
             return -1;
         }
 
@@ -565,8 +565,8 @@ int Server::registerVirtualDirCallbacks()
         auto* handler = static_cast<IOHandler*>(f);
         try {
             handler->close();
-        } catch (const Exception& e) {
-            log_error("Exception during close: {}", e.getMessage().c_str());
+        } catch (const std::runtime_error& e) {
+            log_error("Exception during close: {}", e.what());
             ret_close = -1;
         }
 

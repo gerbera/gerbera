@@ -54,7 +54,7 @@ bool ATrailersContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
     std::string temp;
 
     if (service->getName() != "records")
-        throw _Exception("Recieved invalid XML for Apple Trailers service");
+        throw std::runtime_error("Recieved invalid XML for Apple Trailers service");
 
     this->service_xml = service;
 
@@ -245,9 +245,9 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getNextObject()
         try {
             item->validate();
             return item;
-        } catch (const Exception& ex) {
+        } catch (const std::runtime_error& ex) {
             log_warning("Failed to validate newly created Trailer item: {}",
-                ex.getMessage().c_str());
+                ex.what());
             continue;
         }
     } // while

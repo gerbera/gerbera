@@ -139,7 +139,7 @@ Script::Script(std::shared_ptr<ConfigManager> config,
     Runtime::AutoLock lock(runtime->getMutex());
     ctx = runtime->createContext(name);
     if (!ctx)
-        throw _Exception("Scripting: could not initialize js context");
+        throw std::runtime_error("Scripting: could not initialize js context");
 
     _p2i = StringConverter::p2i(config);
     _j2i = StringConverter::j2i(config);
@@ -217,10 +217,10 @@ Script::Script(std::shared_ptr<ConfigManager> config,
             _load(common_scr_path);
             _execute();
         }
-        catch (const Exception & e)
+        catch (const std::runtime_error& e)
         {
             log_js("Unable to load {}: {}", common_scr_path.c_str(),
-                    e.getMessage().c_str());
+                    e.what());
         }
     }
 }
@@ -262,21 +262,21 @@ void Script::_load(std::string scriptPath)
     std::string scriptText = read_text_file(scriptPath);
 
     if (!string_ok(scriptText))
-        throw _Exception("empty script");
+        throw std::runtime_error("empty script");
 
     auto j2i = StringConverter::j2i(config);
     try
     {
         scriptText = j2i->convert(scriptText, true);
     }
-    catch (const Exception & e)
+    catch (const std::runtime_error& e)
     {
-        throw _Exception("Failed to convert import script:" + e.getMessage());
+        throw std::runtime_error(std::string{"Failed to convert import script:"} + e.what());
     }
 
     duk_push_string(ctx, scriptPath.c_str());
     if (duk_pcompile_lstring_filename(ctx, 0, scriptText.c_str(), scriptText.length()) != 0)
-        throw _Exception("Scripting: failed to compile " + scriptPath);
+        throw std::runtime_error("Scripting: failed to compile " + scriptPath);
 }
 
 void Script::load(std::string scriptPath)
@@ -294,7 +294,7 @@ void Script::_execute()
     if (duk_pcall(ctx, 0) != DUK_EXEC_SUCCESS)
     {
         log_error("Failed to execute script: {}", duk_safe_to_string(ctx, -1));
-        throw _Exception("Script: failed to execute script");
+        throw std::runtime_error("Script: failed to execute script");
     }
     duk_pop(ctx);
 }

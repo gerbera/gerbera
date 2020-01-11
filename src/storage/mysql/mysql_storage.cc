@@ -102,14 +102,14 @@ MysqlStorage::~MysqlStorage()
 void MysqlStorage::checkMysqlThreadInit()
 {
     if (!mysql_connection)
-        throw _Exception("mysql connection is not open or already closed");
+        throw std::runtime_error("mysql connection is not open or already closed");
     //log_debug("checkMysqlThreadInit; thread_id={}", pthread_self());
     if (pthread_getspecific(mysql_init_key) == nullptr) {
         log_debug("running mysql_thread_init(); thread_id={}", pthread_self());
         if (mysql_thread_init())
-            throw _Exception("error while calling mysql_thread_init()");
+            throw std::runtime_error("error while calling mysql_thread_init()");
         if (pthread_setspecific(mysql_init_key, (void*)1))
-            throw _Exception("error while calling pthread_setspecific()");
+            throw std::runtime_error("error while calling pthread_setspecific()");
     }
 }
 
@@ -130,13 +130,13 @@ void MysqlStorage::init()
     int ret;
 
     if (!mysql_thread_safe()) {
-        throw _Exception("mysql library is not thread safe!");
+        throw std::runtime_error("mysql library is not thread safe!");
     }
 
     /// \todo write destructor function
     ret = pthread_key_create(&mysql_init_key, nullptr);
     if (ret) {
-        throw _Exception("could not create pthread_key");
+        throw std::runtime_error("could not create pthread_key");
     }
     mysql_server_init(0, nullptr, nullptr);
     pthread_setspecific(mysql_init_key, (void*)1);
@@ -152,7 +152,7 @@ void MysqlStorage::init()
 
     res_mysql = mysql_init(&db);
     if (!res_mysql) {
-        throw _Exception("mysql_init failed");
+        throw std::runtime_error("mysql_init failed");
     }
 
     mysql_init_key_initialized = true;
@@ -172,7 +172,7 @@ void MysqlStorage::init()
         0 // flags
         );
     if (!res_mysql) {
-        throw _Exception("The connection to the MySQL database has failed: " + getError(&db));
+        throw std::runtime_error("The connection to the MySQL database has failed: " + getError(&db));
     }
 
     /*
@@ -180,7 +180,7 @@ void MysqlStorage::init()
     if(res)
     {
         std::string myError = getError(&db);
-        throw _StorageException("", "MySQL query 'SET NAMES' failed!");
+        throw StorageException("", "MySQL query 'SET NAMES' failed!");
     }
     */
 
@@ -189,7 +189,8 @@ void MysqlStorage::init()
     std::string dbVersion = "";
     try {
         dbVersion = getInternalSetting("db_version");
-    } catch (Exception) {
+    } catch (const std::runtime_error& e) {
+        log_debug("{}", e.what());
     }
 
     if (dbVersion.empty()) {
@@ -198,19 +199,19 @@ void MysqlStorage::init()
         unsigned long uncompressed_size = MS_CREATE_SQL_INFLATED_SIZE;
         int ret = uncompress(buf, &uncompressed_size, mysql_create_sql, MS_CREATE_SQL_DEFLATED_SIZE);
         if (ret != Z_OK || uncompressed_size != MS_CREATE_SQL_INFLATED_SIZE)
-            throw _Exception("Error while uncompressing mysql create sql. returned: " + std::to_string(ret));
+            throw std::runtime_error("Error while uncompressing mysql create sql. returned: " + std::to_string(ret));
         buf[MS_CREATE_SQL_INFLATED_SIZE] = '\0';
 
         auto* sql_start = (char*)buf;
         char* sql_end = strchr(sql_start, ';');
         if (sql_end == nullptr) {
-            throw _Exception("';' not found in mysql create sql");
+            throw std::runtime_error("';' not found in mysql create sql");
         }
         do {
             ret = mysql_real_query(&db, sql_start, sql_end - sql_start);
             if (ret) {
                 std::string myError = getError(&db);
-                throw _StorageException(myError, "Mysql: error while creating db: " + myError);
+                throw StorageException(myError, "Mysql: error while creating db: " + myError);
             }
             sql_start = sql_end + 1; // skip ';'
             if (*sql_start == '\n') // skip newline
@@ -221,7 +222,7 @@ void MysqlStorage::init()
         dbVersion = getInternalSetting("db_version");
         if (dbVersion.empty()) {
             shutdown();
-            throw _Exception("error while creating database");
+            throw std::runtime_error("error while creating database");
         }
         log_info("database created successfully.");
     }
@@ -270,7 +271,7 @@ void MysqlStorage::init()
     /* --- --- ---*/
 
     if (!string_ok(dbVersion) || dbVersion != "5")
-        throw _Exception("The database seems to be from a newer version (database version " + dbVersion + ")!");
+        throw std::runtime_error("The database seems to be from a newer version (database version " + dbVersion + ")!");
 
     lock.unlock();
 
@@ -323,14 +324,14 @@ Ref<SQLResult> MysqlStorage::select(const char* query, int length)
     res = mysql_real_query(&db, query, length);
     if (res) {
         std::string myError = getError(&db);
-        throw _StorageException(myError, "Mysql: mysql_real_query() failed: " + myError + "; query: " + query);
+        throw StorageException(myError, "Mysql: mysql_real_query() failed: " + myError + "; query: " + query);
     }
 
     MYSQL_RES* mysql_res;
     mysql_res = mysql_store_result(&db);
     if (!mysql_res) {
         std::string myError = getError(&db);
-        throw _StorageException(myError, "Mysql: mysql_store_result() failed: " + myError + "; query: " + query);
+        throw StorageException(myError, "Mysql: mysql_store_result() failed: " + myError + "; query: " + query);
     }
     return Ref<SQLResult>(new MysqlResult(mysql_res));
 }
@@ -349,7 +350,7 @@ int MysqlStorage::exec(const char* query, int length, bool getLastInsertId)
     res = mysql_real_query(&db, query, length);
     if (res) {
         std::string myError = getError(&db);
-        throw _StorageException(myError, "Mysql: mysql_real_query() failed: " + myError + "; query: " + query);
+        throw StorageException(myError, "Mysql: mysql_real_query() failed: " + myError + "; query: " + query);
     }
     int insert_id = -1;
     if (getLastInsertId)
@@ -377,7 +378,7 @@ void MysqlStorage::_exec(const char* query, int length)
 {
     if (mysql_real_query(&db, query, (length > 0 ? length : strlen(query)))) {
         std::string myError = getError(&db);
-        throw _StorageException(myError, "Mysql: error while updating db: " + myError);
+        throw StorageException(myError, "Mysql: error while updating db: " + myError);
     }
 }
 

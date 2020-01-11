@@ -37,7 +37,7 @@
 #include "session_manager.h"
 #include "mxml/mxml.h"
 #include "request_handler.h"
-#include "util/exception.h"
+
 #include "util/generic_task.h"
 
 // forward declaration
@@ -46,18 +46,18 @@ class Storage;
 
 namespace web {
 
-class SessionException : public Exception {
+class SessionException : public std::runtime_error {
 public:
-    SessionException(std::string message)
-        : Exception(message)
+    explicit SessionException(std::string message)
+        : std::runtime_error(message)
     {
     }
 };
 
-class LoginException : public Exception {
+class LoginException : public std::runtime_error {
 public:
-    LoginException(std::string message)
-        : Exception(message)
+    explicit LoginException(std::string message)
+        : std::runtime_error(message)
     {
     }
 };

@@ -377,8 +377,8 @@ void LibExifHandler::fillMetadata(std::shared_ptr<CdsItem> item)
             resource->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), th_resolution);
             resource->addParameter(RESOURCE_CONTENT_TYPE, EXIF_THUMBNAIL);
             item->addResource(resource);
-        } catch (const Exception& e) {
-            log_error("Something bad happened! {}", e.getMessage());
+        } catch (const std::runtime_error& e) {
+            log_error("Something bad happened! {}", e.what());
         }
 
     } // (ed->size)
@@ -392,13 +392,13 @@ std::unique_ptr<IOHandler> LibExifHandler::serveContent(std::shared_ptr<CdsItem>
     std::string ctype = getValueOrDefault(res->getParameters(), RESOURCE_CONTENT_TYPE);
 
     if (ctype != EXIF_THUMBNAIL)
-        throw _Exception("LibExifHandler: got unknown content type: " + ctype);
+        throw std::runtime_error("LibExifHandler: got unknown content type: " + ctype);
     ed = exif_data_new_from_file(item->getLocation().c_str());
     if (!ed)
-        throw _Exception("LibExifHandler: resource has no exif information");
+        throw std::runtime_error("LibExifHandler: resource has no exif information");
 
     if (!(ed->size))
-        throw _Exception("LibExifHandler: resource has no exif thumbnail");
+        throw std::runtime_error("LibExifHandler: resource has no exif thumbnail");
 
     auto h = std::make_unique<MemIOHandler>(ed->data, ed->size);
     exif_data_unref(ed);

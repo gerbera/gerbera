@@ -87,7 +87,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     std::string objID = getValueOrDefault(dict, "object_id");
     if (objID.empty()) {
         //log_error("object_id not found in url");
-        throw _Exception("getInfo: object_id not found");
+        throw std::runtime_error("getInfo: object_id not found");
     }
     objectID = std::stoi(objID);
 
@@ -98,7 +98,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     int objectType = obj->getObjectType();
 
     if (!IS_CDS_ITEM(objectType)) {
-        throw _Exception("requested object is not an item");
+        throw std::runtime_error("requested object is not an item");
     }
 
     auto item = std::static_pointer_cast<CdsItem>(obj);
@@ -138,7 +138,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
             throw SubtitlesNotFoundException(
                 "Subtitle file " + path + " is not available.");
         else
-            throw _Exception(
+            throw std::runtime_error(
                 "Failed to open " + path + " - " + strerror(errno));
     }
 
@@ -202,7 +202,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
                                          ->getByName(tr_profile);
 
         if (tp == nullptr)
-            throw _Exception("Transcoding of file " + path
+            throw std::runtime_error("Transcoding of file " + path
                 + " but no profile matching the name "
                 + tr_profile + " found");
 
@@ -300,7 +300,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
 
     // We explicitly do not support UPNP_WRITE due to security reasons.
     if (mode != UPNP_READ) {
-        throw _Exception("UPNP_WRITE unsupported");
+        throw std::runtime_error("UPNP_WRITE unsupported");
     }
 
     std::string parameters = (filename + strlen(LINK_FILE_REQUEST_HANDLER));
@@ -311,7 +311,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
 
     std::string objID = getValueOrDefault(params, "object_id");
     if (objID.empty()) {
-        throw _Exception("object_id not found in parameters");
+        throw std::runtime_error("object_id not found in parameters");
     }
 
     int objectID = std::stoi(objID);
@@ -322,7 +322,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
     int objectType = obj->getObjectType();
 
     if (!IS_CDS_ITEM(objectType)) {
-        throw _Exception("requested object is not an item");
+        throw std::runtime_error("requested object is not an item");
     }
 
     // determining which resource to serve
@@ -417,7 +417,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
         if (is_srt)
             throw SubtitlesNotFoundException("Subtitle file " + path + " is not available.");
         else
-            throw _Exception("Failed to open " + path + " - " + strerror(errno));
+            throw std::runtime_error("Failed to open " + path + " - " + strerror(errno));
     }
 
     log_debug("fetching resource id {}", res_id);
@@ -425,11 +425,11 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
     std::string tr_profile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
     if (string_ok(tr_profile)) {
         if (res_id != (-1)) {
-            throw _Exception("Invalid resource ID given!");
+            throw std::runtime_error("Invalid resource ID given!");
         }
     } else {
         if (res_id == -1) {
-            throw _Exception("Invalid resource ID given!");
+            throw std::runtime_error("Invalid resource ID given!");
         }
     }
 

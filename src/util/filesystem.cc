@@ -77,7 +77,7 @@ Filesystem::Filesystem(std::shared_ptr<ConfigManager> config)
             pattern->compile(pat);
             includeRules.push_back(pattern);
         }
-        catch (const Exception & e)
+        catch (const std::runtime_error& e)
         {
             e.printStackTrace();
         }
@@ -89,10 +89,10 @@ std::vector<std::shared_ptr<FsObject>> Filesystem::readDirectory(std::string pat
     int childMask)
 {
     if (path.at(0) != '/') {
-        throw _Exception("Filesystem: relative paths not allowed: " + path);
+        throw std::runtime_error("Filesystem: relative paths not allowed: " + path);
     }
     if (!fileAllowed(path))
-        throw _Exception("Filesystem: file blocked: " + path);
+        throw std::runtime_error("Filesystem: file blocked: " + path);
 
     struct stat statbuf;
     int ret;
@@ -104,7 +104,7 @@ std::vector<std::shared_ptr<FsObject>> Filesystem::readDirectory(std::string pat
 
     dir = opendir(path.c_str());
     if (!dir) {
-        throw _Exception("could not list directory " + path + " : " + strerror(errno));
+        throw std::runtime_error("could not list directory " + path + " : " + strerror(errno));
     }
 
     while ((dent = readdir(dir)) != nullptr) {
@@ -138,7 +138,7 @@ std::vector<std::shared_ptr<FsObject>> Filesystem::readDirectory(std::string pat
                 if (childMask) {
                     try {
                         hasContent = have(childPath, childMask);
-                    } catch (const Exception& e) {
+                    } catch (const std::runtime_error& e) {
                         //continue;
                     }
                 }
@@ -164,7 +164,7 @@ bool Filesystem::have(std::string path, int mask)
     /*
     if (path.charAt(0) != '/')
     {
-        throw _Exception("Filesystem relative paths not allowed: " +
+        throw std::runtime_error("Filesystem relative paths not allowed: " +
                         path);
     }
     */
@@ -181,7 +181,7 @@ bool Filesystem::have(std::string path, int mask)
 
     dir = opendir(path.c_str());
     if (!dir) {
-        throw _Exception("could not list directory " + path + " : " + strerror(errno));
+        throw std::runtime_error("could not list directory " + path + " : " + strerror(errno));
     }
 
     bool result = false;

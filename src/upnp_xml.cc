@@ -664,7 +664,7 @@ void UpnpXMLBuilder::addResources(std::shared_ptr<CdsItem> item, Ref<Element> el
             Ref<TranscodingProfile> tp = profiles->get(p)->getValue();
 
             if (tp == nullptr)
-                throw _Exception("Invalid profile encountered!");
+                throw std::runtime_error("Invalid profile encountered!");
 
             std::string ct = getValueOrDefault(mappings, item->getMimeType());
             if (ct == CONTENT_TYPE_OGG) {
@@ -835,7 +835,7 @@ void UpnpXMLBuilder::addResources(std::shared_ptr<CdsItem> item, Ref<Element> el
         if ((i > 0) && (res->getHandlerType() == CH_EXTURL) && ((res->getOption(RESOURCE_CONTENT_TYPE) == THUMBNAIL) || (res->getOption(RESOURCE_CONTENT_TYPE) == ID3_ALBUM_ART))) {
             url = res->getOption(RESOURCE_OPTION_URL);
             if (!string_ok(url))
-                throw _Exception("missing thumbnail URL!");
+                throw std::runtime_error("missing thumbnail URL!");
 
             isExtThumbnail = true;
         }

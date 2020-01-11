@@ -47,7 +47,7 @@ void web::tasks::process()
     check_request();
     std::string action = param("action");
     if (!string_ok(action))
-        throw _Exception("web:tasks called with illegal action");
+        throw std::runtime_error("web:tasks called with illegal action");
 
     if (action == "list") {
         Ref<Element> tasksEl(new Element("tasks"));
@@ -64,5 +64,5 @@ void web::tasks::process()
         int taskID = intParam("task_id");
         content->invalidateTask(taskID);
     } else
-        throw _Exception("web:tasks called with illegal action");
+        throw std::runtime_error("web:tasks called with illegal action");
 }

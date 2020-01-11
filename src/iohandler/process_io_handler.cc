@@ -130,7 +130,7 @@ ProcessIOHandler::ProcessIOHandler(std::shared_ptr<ContentManager> content,
 
     if ((main_proc != nullptr) && ((!main_proc->isAlive() || abort()))) {
         killall();
-        throw _Exception("process terminated early");
+        throw std::runtime_error("process terminated early");
     }
     /*
     if (mkfifo(filename.c_str(), O_RDWR) == -1)
@@ -140,7 +140,7 @@ ProcessIOHandler::ProcessIOHandler(std::shared_ptr<ContentManager> content,
         if (main_proc != nullptr)
             main_proc->kill();
 
-        throw _Exception("Could not create reader fifo!\n");
+        throw std::runtime_error("Could not create reader fifo!\n");
     }
 */
     registerAll();
@@ -150,7 +150,7 @@ void ProcessIOHandler::open(enum UpnpOpenFileMode mode)
 {
     if ((main_proc != nullptr) && ((!main_proc->isAlive() || abort()))) {
         killall();
-        throw _Exception("process terminated early");
+        throw std::runtime_error("process terminated early");
     }
 
     if (mode == UPNP_READ)
@@ -162,14 +162,14 @@ void ProcessIOHandler::open(enum UpnpOpenFileMode mode)
 
     if (fd == -1) {
         if (errno == ENXIO) {
-            throw _TryAgainException(std::string("open failed: ") + strerror(errno));
+            throw TryAgainException(std::string("open failed: ") + strerror(errno));
         }
 
         killall();
         if (main_proc != nullptr)
             main_proc->kill();
         unlink(filename.c_str());
-        throw _Exception("open: failed to open: " + filename);
+        throw std::runtime_error("open: failed to open: " + filename);
     }
 }
 
@@ -367,7 +367,7 @@ void ProcessIOHandler::seek(off_t offset, int whence)
 {
     // we know we can not seek in a fifo, but the PS3 asks for a hack...
     if (!ignore_seek)
-        throw _Exception("fseek failed");
+        throw std::runtime_error("fseek failed");
 }
 
 void ProcessIOHandler::close()
@@ -389,13 +389,13 @@ void ProcessIOHandler::close()
     unlink(filename.c_str());
 
     if (!ret)
-        throw _Exception("failed to kill process!");
+        throw std::runtime_error("failed to kill process!");
 }
 
 ProcessIOHandler::~ProcessIOHandler()
 {
     try {
         close();
-    } catch (const Exception& ex) {
+    } catch (const std::runtime_error& ex) {
     }
 }

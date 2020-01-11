@@ -32,87 +32,60 @@
 #ifndef __EXCEPTIONS_H__
 #define __EXCEPTIONS_H__
 
-#include "util/exception.h"
+#include <stdexcept>
+#include <utility>
+#include <string>
 
-#define EXCEPTION_DATA __FILENAME__, __LINE__, __func__
-#define _UpnpException(code, msg) UpnpException(code, msg, EXCEPTION_DATA)
-#define _StorageException(usermsg, debugmsg) StorageException(usermsg, debugmsg, EXCEPTION_DATA)
-#define _ObjectNotFoundException(msg) ObjectNotFoundException(msg, EXCEPTION_DATA)
-#define _ServerShutdownException(msg) ServerShutdownException(msg, EXCEPTION_DATA)
-#define _TryAgainException(msg) TryAgainException(msg, EXCEPTION_DATA)
-
-class UpnpException : public Exception {
+class UpnpException : public std::runtime_error {
 protected:
     int errCode;
 
 public:
     UpnpException(int errCode, std::string message);
-    UpnpException(int errCode, std::string message, const char* file, int line, const char* function);
-    inline int getErrorCode() const { return errCode; }
+    [[nodiscard]] inline int getErrorCode() const { return errCode; }
 };
 
-class StorageException : public Exception {
+class StorageException : public std::runtime_error {
 protected:
     std::string userMessage;
 
 public:
     inline StorageException(std::string _userMessage, std::string message)
-        : Exception(message)
+        : std::runtime_error(message)
     {
-        userMessage = _userMessage;
+        userMessage = std::move(_userMessage);
     }
-    inline StorageException(std::string _userMessage, std::string message, const char* file, int line, const char* function)
-        : Exception(message, file, line, function)
-    {
-        userMessage = _userMessage;
-    }
-    std::string getUserMessage() const { return (!userMessage.empty() ? userMessage : message); }
+    std::string getUserMessage() const { return (!userMessage.empty() ? userMessage : what()); }
 };
 
 class ObjectNotFoundException : public StorageException {
 public:
-    inline ObjectNotFoundException(std::string message)
+    inline explicit ObjectNotFoundException(std::string message)
         : StorageException(message, message)
     {
     }
-    inline ObjectNotFoundException(std::string message, const char* file, int line, const char* function)
-        : StorageException(message, message, file, line, function)
+};
+
+class SubtitlesNotFoundException : public std::runtime_error {
+public:
+    inline explicit SubtitlesNotFoundException(std::string message)
+        : std::runtime_error(message)
     {
     }
 };
 
-class SubtitlesNotFoundException : public Exception {
+class ServerShutdownException : public std::runtime_error {
 public:
-    inline SubtitlesNotFoundException(std::string message)
-        : Exception(message)
-    {
-    }
-    inline SubtitlesNotFoundException(std::string message, const char* file, int line, const char* function)
-        : Exception(message, file, line, function)
+    inline explicit ServerShutdownException(std::string message)
+        : std::runtime_error(message)
     {
     }
 };
 
-class ServerShutdownException : public Exception {
+class TryAgainException : public std::runtime_error {
 public:
-    inline ServerShutdownException(std::string message)
-        : Exception(message)
-    {
-    }
-    inline ServerShutdownException(std::string message, const char* file, int line, const char* function)
-        : Exception(message, file, line, function)
-    {
-    }
-};
-
-class TryAgainException : public Exception {
-public:
-    inline TryAgainException(std::string message)
-        : Exception(message)
-    {
-    }
-    inline TryAgainException(std::string message, const char* file, int line, const char* function)
-        : Exception(message, file, line, function)
+    inline explicit TryAgainException(std::string message)
+        : std::runtime_error(message)
     {
     }
 };

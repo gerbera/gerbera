@@ -40,9 +40,9 @@ BufferedIOHandler::BufferedIOHandler(std::unique_ptr<IOHandler>& underlyingHandl
     : IOHandlerBufferHelper(bufSize, initialFillSize)
 {
     if (underlyingHandler == nullptr)
-        throw _Exception("underlyingHandler must not be nullptr");
+        throw std::runtime_error("underlyingHandler must not be nullptr");
     if (maxChunkSize <= 0)
-        throw _Exception("maxChunkSize must be positive");
+        throw std::runtime_error("maxChunkSize must be positive");
     this->underlyingHandler = std::move(underlyingHandler);
     this->maxChunkSize = maxChunkSize;
 
@@ -129,8 +129,8 @@ void BufferedIOHandler::threadProc()
                 underlyingHandler->seek(seekOffset, seekWhence);
                 empty = true;
                 a = b = 0;
-            } catch (const Exception& e) {
-                log_error("Error while seeking in buffer: {}", e.getMessage().c_str());
+            } catch (const std::runtime_error& e) {
+                log_error("Error while seeking in buffer: {}", e.what());
             }
 
             /// \todo should we do that?

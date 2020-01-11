@@ -56,7 +56,7 @@ SopCastService::SopCastService(std::shared_ptr<ConfigManager> config,
     pid = 0;
     curl_handle = curl_easy_init();
     if (!curl_handle)
-        throw _Exception("failed to initialize curl!\n");
+        throw std::runtime_error("failed to initialize curl!\n");
 }
 
 SopCastService::~SopCastService()
@@ -92,9 +92,9 @@ Ref<Element> SopCastService::getData()
         buffer = url->download(SOPCAST_CHANNEL_URL, &retcode,
             curl_handle, false, true, true);
 
-    } catch (const Exception& ex) {
+    } catch (const std::runtime_error& ex) {
         log_error("Failed to download SopCast XML data: {}",
-            ex.getMessage().c_str());
+            ex.what());
         return nullptr;
     }
 
@@ -112,10 +112,10 @@ Ref<Element> SopCastService::getData()
         log_error("Error parsing SopCast XML {} line {}:{}",
             pe.context->location.c_str(),
             pe.context->line,
-            pe.getMessage().c_str());
+            pe.what());
         return nullptr;
-    } catch (const Exception& ex) {
-        log_error("Error parsing SopCast XML {}", ex.getMessage().c_str());
+    } catch (const std::runtime_error& ex) {
+        log_error("Error parsing SopCast XML {}", ex.what());
         return nullptr;
     }
 
@@ -136,7 +136,7 @@ bool SopCastService::refreshServiceData(Ref<Layout> layout)
         pid = pthread_self();
 
     if (pid != pthread_self())
-        throw _Exception("Not allowed to call refreshServiceData from different threads!");
+        throw std::runtime_error("Not allowed to call refreshServiceData from different threads!");
 
     Ref<Element> reply = getData();
 
@@ -145,7 +145,7 @@ bool SopCastService::refreshServiceData(Ref<Layout> layout)
         sc->setServiceContent(reply);
     else {
         log_debug("Failed to get XML content from SopCast service");
-        throw _Exception("Failed to get XML content from SopCast service");
+        throw std::runtime_error("Failed to get XML content from SopCast service");
     }
 
     std::shared_ptr<CdsObject> obj;

@@ -39,7 +39,7 @@ StringConverter::StringConverter(std::string from, std::string to)
     cd = iconv_open(to.c_str(), from.c_str());
     if (cd == (iconv_t)(-1)) {
         cd = (iconv_t) nullptr;
-        throw _Exception(std::string("iconv: ") + strerror(errno));
+        throw std::runtime_error(std::string("iconv: ") + strerror(errno));
     }
 }
 
@@ -79,7 +79,7 @@ bool StringConverter::validate(std::string str)
     try {
         _convert(str, true);
         return true;
-    } catch (const Exception& e) {
+    } catch (const std::runtime_error& e) {
         return false;
     }
 }
@@ -95,7 +95,7 @@ std::string StringConverter::_convert(std::string str, bool validate,
     auto* output = (char*)MALLOC(buf_size);
     if (!output) {
         log_debug("Could not allocate memory for string conversion!");
-        throw _Exception("Could not allocate memory for string conversion!");
+        throw std::runtime_error("Could not allocate memory for string conversion!");
     }
 
     const char* input_copy = input;
@@ -137,7 +137,7 @@ std::string StringConverter::_convert(std::string str, bool validate,
                 log_error("iconv: Incomplete multibyte sequence");
             }
             if (validate) {
-                throw _Exception(err);
+                throw std::runtime_error(err);
             }
 
             if (stoppedAt)
@@ -163,7 +163,7 @@ std::string StringConverter::_convert(std::string str, bool validate,
         dirty = true;
         if (output)
             FREE(output);
-        throw _Exception(err);
+        throw std::runtime_error(err);
     }
 
     //log_debug("iconv: AFTER: input bytes left: {}  output bytes left: {}",

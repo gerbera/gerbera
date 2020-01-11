@@ -50,7 +50,7 @@ void web::containers::process()
 
     int parentID = intParam("parent_id", INVALID_OBJECT_ID);
     if (parentID == INVALID_OBJECT_ID)
-        throw _Exception("web::containers: no parent_id given");
+        throw std::runtime_error("web::containers: no parent_id given");
 
     Ref<Element> containers(new Element("containers"));
     containers->setArrayName("container");

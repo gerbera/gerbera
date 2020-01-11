@@ -52,7 +52,7 @@ void OnlineServiceList::registerService(Ref<OnlineService> service)
         return;
 
     if (service->getServiceType() >= OS_Max) {
-        throw _Exception("Requested service with illegal type!");
+        throw std::runtime_error("Requested service with illegal type!");
     }
 
     service_list->set(service, service->getServiceType());
@@ -76,7 +76,7 @@ OnlineService::OnlineService()
 char OnlineService::getStoragePrefix(service_type_t service)
 {
     if ((service < 0) || (service >= OS_Max))
-        throw _Exception("Illegal service requested\n");
+        throw std::runtime_error("Illegal service requested\n");
 
     return service_prefixes[service];
 }
@@ -92,7 +92,7 @@ std::string OnlineService::getCheckAttr(Ref<Element> xml, std::string attrname)
     if (string_ok(temp))
         return temp;
     else
-        throw _Exception(getServiceName() + ": Tag <" + xml->getName() + "> is missing the required \"" + attrname + "\" attribute!");
+        throw std::runtime_error(getServiceName() + ": Tag <" + xml->getName() + "> is missing the required \"" + attrname + "\" attribute!");
     return nullptr;
 }
 
@@ -103,10 +103,10 @@ int OnlineService::getCheckPosIntAttr(Ref<Element> xml, std::string attrname)
     if (string_ok(temp))
         itmp = std::stoi(temp);
     else
-        throw _Exception(getServiceName() + ": Tag <" + xml->getName() + "> is missing the required \"" + attrname + "\" attribute!");
+        throw std::runtime_error(getServiceName() + ": Tag <" + xml->getName() + "> is missing the required \"" + attrname + "\" attribute!");
 
     if (itmp < 1)
-        throw _Exception("Invalid value in " + attrname + " for <" + xml->getName() + "> tag");
+        throw std::runtime_error("Invalid value in " + attrname + " for <" + xml->getName() + "> tag");
 
     return itmp;
 }

@@ -153,19 +153,19 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(enum UpnpOpenFileMode mode)
             }
         }
     } catch (const LoginException& e) {
-        error = e.getMessage();
+        error = e.what();
         error_code = 300;
     } catch (const ObjectNotFoundException& e) {
-        error = e.getMessage();
+        error = e.what();
         error_code = 200;
     } catch (const SessionException& e) {
-        error = e.getMessage();
+        error = e.what();
         error_code = 400;
     } catch (const StorageException& e) {
         error = e.getUserMessage();
         error_code = 500;
-    } catch (const Exception& e) {
-        error = "Error: " + e.getMessage();
+    } catch (const std::runtime_error& e) {
+        error = std::string{"Error: "} + e.what();
         error_code = 800;
     }
 
@@ -192,16 +192,16 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(enum UpnpOpenFileMode mode)
             // make sure we can generate JSON w/o exceptions
             XML2JSON::getJSON(root);
             //log_debug("JSON-----------------------{}", XML2JSON::getJSON(root).c_str());
-        } catch (const Exception& e) {
-            log_error("Exception: {}", e.getMessage());
+        } catch (const std::runtime_error& e) {
+            log_error("Exception: {}", e.what());
         }
 #endif
         output = renderXMLHeader() + root->print();
     } else {
         try {
             output = XML2JSON::getJSON(root);
-        } catch (const Exception& e) {
-            log_error("Exception: {}", e.getMessage());
+        } catch (const std::runtime_error& e) {
+            log_error("Exception: {}", e.what());
         }
     }
 
@@ -212,7 +212,7 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(enum UpnpOpenFileMode mode)
         std::string json = XML2JSON::getJSON(root);
         printf("%s\n",json.c_str());
     }
-    catch (const Exception e)
+    catch (const std::runtime_error& e)
     {
         e.printStackTrace();
     }

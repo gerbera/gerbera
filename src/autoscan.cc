@@ -108,7 +108,7 @@ int AutoscanList::_add(Ref<AutoscanDirectory> dir)
         }
 
         if (loc == list->get(i)->getLocation()) {
-            throw _Exception("Attempted to add same autoscan path twice");
+            throw std::runtime_error("Attempted to add same autoscan path twice");
         }
     }
 
@@ -300,7 +300,7 @@ std::string AutoscanDirectory::mapScanmode(ScanMode scanmode)
         scanmode_str = "inotify";
         break;
     default:
-        throw Exception("illegal scanmode given to mapScanmode()");
+        throw std::runtime_error("illegal scanmode given to mapScanmode()");
     }
     return scanmode_str;
 }
@@ -312,7 +312,7 @@ ScanMode AutoscanDirectory::remapScanmode(std::string scanmode)
     if (scanmode == "inotify")
         return ScanMode::INotify;
     else
-        throw _Exception("illegal scanmode (" + scanmode + ") given to remapScanmode()");
+        throw std::runtime_error("illegal scanmode (" + scanmode + ") given to remapScanmode()");
 }
 
 std::string AutoscanDirectory::mapScanlevel(ScanLevel scanlevel)
@@ -326,7 +326,7 @@ std::string AutoscanDirectory::mapScanlevel(ScanLevel scanlevel)
         scanlevel_str = "full";
         break;
     default:
-        throw Exception("illegal scanlevel given to mapScanlevel()");
+        throw std::runtime_error("illegal scanlevel given to mapScanlevel()");
     }
     return scanlevel_str;
 }
@@ -338,7 +338,7 @@ ScanLevel AutoscanDirectory::remapScanlevel(std::string scanlevel)
     else if (scanlevel == "full")
         return ScanLevel::Full;
     else
-        throw _Exception("illegal scanlevel (" + scanlevel + ") given to remapScanlevel()");
+        throw std::runtime_error("illegal scanlevel (" + scanlevel + ") given to remapScanlevel()");
 }
 
 void AutoscanDirectory::copyTo(Ref<AutoscanDirectory> copy)

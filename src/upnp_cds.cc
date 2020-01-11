@@ -99,7 +99,7 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
     std::vector<std::shared_ptr<CdsObject>> arr;
     try {
         arr = storage->browse(param);
-    } catch (const Exception& e) {
+    } catch (const std::runtime_error& e) {
         throw UpnpException(UPNP_E_NO_SUCH_ID, "no such object");
     }
 
@@ -176,8 +176,8 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
     int numMatches = 0;
     try {
         results = storage->search(searchParam, &numMatches);
-    } catch (const Exception& e) {
-        log_debug(e.getMessage().c_str());
+    } catch (const std::runtime_error& e) {
+        log_debug(e.what());
         throw UpnpException(UPNP_E_NO_SUCH_ID, "no such object");
     }
 

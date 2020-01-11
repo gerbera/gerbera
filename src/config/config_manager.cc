@@ -93,7 +93,7 @@ ConfigManager::ConfigManager(std::string filename,
             expErrMsg << "Try specifying an alternative configuration file on the command line.\n";
             expErrMsg << "For a list of options run: gerbera -h\n";
 
-            throw _Exception(expErrMsg.str());
+            throw std::runtime_error(expErrMsg.str());
         }
     }
 
@@ -168,14 +168,14 @@ void ConfigManager::validate(std::string serverhome)
     // first check if the config file itself looks ok, it must have a config
     // and a server tag
     if (root->getName() != "config")
-        throw _Exception("Error in config file: <config> tag not found");
+        throw std::runtime_error("Error in config file: <config> tag not found");
 
     if (root->getChildByName("server") == nullptr)
-        throw _Exception("Error in config file: <server> tag not found");
+        throw std::runtime_error("Error in config file: <server> tag not found");
 
     std::string version = root->getAttribute("version");
     if (std::stoi(version) > CONFIG_XML_VERSION)
-        throw _Exception("Config version \"" + version + "\" does not yet exist!");
+        throw std::runtime_error("Config version \"" + version + "\" does not yet exist!");
 
     // now go through the mandatory parameters, if something is missing
     // we will not start the server
@@ -194,7 +194,7 @@ void ConfigManager::validate(std::string serverhome)
 
     temp = getOption("/server/tmpdir", DEFAULT_TMPDIR);
     if (!check_path(temp, true)) {
-        throw _Exception("Temporary directory " + temp + " does not exist!");
+        throw std::runtime_error("Temporary directory " + temp + " does not exist!");
     }
     temp = temp + "/";
     NEW_OPTION(temp);
@@ -217,14 +217,14 @@ void ConfigManager::validate(std::string serverhome)
 
     tmpEl = getElement("/server/storage");
     if (tmpEl == nullptr)
-        throw _Exception("Error in config file: <storage> tag not found");
+        throw std::runtime_error("Error in config file: <storage> tag not found");
 
     tmpEl = getElement("/server/storage/mysql");
     if (tmpEl != nullptr) {
         mysql_en = getOption("/server/storage/mysql/attribute::enabled",
             DEFAULT_MYSQL_ENABLED);
         if (!validateYesNo(mysql_en))
-            throw _Exception("Invalid <mysql enabled=\"\"> value");
+            throw std::runtime_error("Invalid <mysql enabled=\"\"> value");
     }
 
     tmpEl = getElement("/server/storage/sqlite3");
@@ -232,16 +232,16 @@ void ConfigManager::validate(std::string serverhome)
         sqlite3_en = getOption("/server/storage/sqlite3/attribute::enabled",
             DEFAULT_SQLITE_ENABLED);
         if (!validateYesNo(sqlite3_en))
-            throw _Exception("Invalid <sqlite3 enabled=\"\"> value");
+            throw std::runtime_error("Invalid <sqlite3 enabled=\"\"> value");
     }
 
     if ((sqlite3_en == "yes") && (mysql_en == "yes"))
-        throw _Exception("You enabled both, sqlite3 and mysql but "
+        throw std::runtime_error("You enabled both, sqlite3 and mysql but "
                          "only one database driver may be active at "
                          "a time!");
 
     if ((sqlite3_en == "no") && (mysql_en == "no"))
-        throw _Exception("You disabled both, sqlite3 and mysql but "
+        throw std::runtime_error("You disabled both, sqlite3 and mysql but "
                          "one database driver must be active!");
 
 #ifdef HAVE_MYSQL
@@ -278,7 +278,7 @@ void ConfigManager::validate(std::string serverhome)
     }
 #else
     if (mysql_en == "yes") {
-        throw _Exception("You enabled MySQL storage in configuration, "
+        throw std::runtime_error("You enabled MySQL storage in configuration, "
                          "however this version of Gerbera was compiled "
                          "without MySQL support!");
     }
@@ -303,7 +303,7 @@ void ConfigManager::validate(std::string serverhome)
         else if (temp == "full")
             temp_int = MT_SQLITE_SYNC_FULL;
         else
-            throw _Exception("Invalid <synchronous> value in sqlite3 "
+            throw std::runtime_error("Invalid <synchronous> value in sqlite3 "
                              "section");
 
         NEW_INT_OPTION(temp_int);
@@ -319,7 +319,7 @@ void ConfigManager::validate(std::string serverhome)
         else if (temp == "fail")
             tmp_bool = false;
         else
-            throw _Exception("Invalid <on-error> value in sqlite3 "
+            throw std::runtime_error("Invalid <on-error> value in sqlite3 "
                              "section");
 
         NEW_BOOL_OPTION(tmp_bool);
@@ -332,7 +332,7 @@ void ConfigManager::validate(std::string serverhome)
             DEFAULT_SQLITE_BACKUP_ENABLED);
 #endif
         if (!validateYesNo(temp))
-            throw _Exception("Error in config file: incorrect parameter "
+            throw std::runtime_error("Error in config file: incorrect parameter "
                              "for <backup enabled=\"\" /> attribute");
         NEW_BOOL_OPTION(temp == "yes" ? true : false);
         SET_BOOL_OPTION(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED);
@@ -340,14 +340,14 @@ void ConfigManager::validate(std::string serverhome)
         temp_int = getIntOption("/server/storage/sqlite3/backup/attribute::interval",
             DEFAULT_SQLITE_BACKUP_INTERVAL);
         if (temp_int < 1)
-            throw _Exception("Error in config file: incorrect parameter for "
+            throw std::runtime_error("Error in config file: incorrect parameter for "
                              "<backup interval=\"\" /> attribute");
         NEW_INT_OPTION(temp_int);
         SET_INT_OPTION(CFG_SERVER_STORAGE_SQLITE_BACKUP_INTERVAL);
     }
 #else
     if (sqlite3_en == "yes") {
-        throw _Exception("You enabled sqlite3 storage in configuration, "
+        throw std::runtime_error("You enabled sqlite3 storage in configuration, "
                          "however this version of Gerbera was compiled "
                          "without sqlite3 support!");
     }
@@ -372,7 +372,7 @@ void ConfigManager::validate(std::string serverhome)
     temp = getOption("/server/ui/attribute::enabled",
         DEFAULT_UI_EN_VALUE);
     if (!validateYesNo(temp))
-        throw _Exception("Error in config file: incorrect parameter "
+        throw std::runtime_error("Error in config file: incorrect parameter "
                          "for <ui enabled=\"\" /> attribute");
     NEW_BOOL_OPTION(temp == "yes" ? true : false);
     SET_BOOL_OPTION(CFG_SERVER_UI_ENABLED);
@@ -380,7 +380,7 @@ void ConfigManager::validate(std::string serverhome)
     temp = getOption("/server/ui/attribute::show-tooltips",
         DEFAULT_UI_SHOW_TOOLTIPS_VALUE);
     if (!validateYesNo(temp))
-        throw _Exception("Error in config file: incorrect parameter "
+        throw std::runtime_error("Error in config file: incorrect parameter "
                          "for <ui show-tooltips=\"\" /> attribute");
     NEW_BOOL_OPTION(temp == "yes" ? true : false);
     SET_BOOL_OPTION(CFG_SERVER_UI_SHOW_TOOLTIPS);
@@ -388,7 +388,7 @@ void ConfigManager::validate(std::string serverhome)
     temp = getOption("/server/ui/attribute::poll-when-idle",
         DEFAULT_POLL_WHEN_IDLE_VALUE);
     if (!validateYesNo(temp))
-        throw _Exception("Error in config file: incorrect parameter "
+        throw std::runtime_error("Error in config file: incorrect parameter "
                          "for <ui poll-when-idle=\"\" /> attribute");
     NEW_BOOL_OPTION(temp == "yes" ? true : false);
     SET_BOOL_OPTION(CFG_SERVER_UI_POLL_WHEN_IDLE);
@@ -396,7 +396,7 @@ void ConfigManager::validate(std::string serverhome)
     temp_int = getIntOption("/server/ui/attribute::poll-interval",
         DEFAULT_POLL_INTERVAL);
     if (temp_int < 1)
-        throw _Exception("Error in config file: incorrect parameter for "
+        throw std::runtime_error("Error in config file: incorrect parameter for "
                          "<ui poll-interval=\"\" /> attribute");
     NEW_INT_OPTION(temp_int);
     SET_INT_OPTION(CFG_SERVER_UI_POLL_INTERVAL);
@@ -404,7 +404,7 @@ void ConfigManager::validate(std::string serverhome)
     temp_int = getIntOption("/server/ui/items-per-page/attribute::default",
         DEFAULT_ITEMS_PER_PAGE_2);
     if (temp_int < 1)
-        throw _Exception("Error in config file: incorrect parameter for "
+        throw std::runtime_error("Error in config file: incorrect parameter for "
                          "<items-per-page default=\"\" /> attribute");
     NEW_INT_OPTION(temp_int);
     SET_INT_OPTION(CFG_SERVER_UI_DEFAULT_ITEMS_PER_PAGE);
@@ -414,7 +414,7 @@ void ConfigManager::validate(std::string serverhome)
     // create default structure
     if (element->elementChildCount() == 0) {
         if ((temp_int != DEFAULT_ITEMS_PER_PAGE_1) && (temp_int != DEFAULT_ITEMS_PER_PAGE_2) && (temp_int != DEFAULT_ITEMS_PER_PAGE_3) && (temp_int != DEFAULT_ITEMS_PER_PAGE_4)) {
-            throw _Exception("Error in config file: you specified an "
+            throw std::runtime_error("Error in config file: you specified an "
                              "<items-per-page default=\"\"> value that is "
                              "not listed in the options");
         }
@@ -436,7 +436,7 @@ void ConfigManager::validate(std::string serverhome)
             if (child->getName() == "option") {
                 i = std::stoi(child->getText());
                 if (i < 1)
-                    throw _Exception("Error in config file: incorrect "
+                    throw std::runtime_error("Error in config file: incorrect "
                                     "<option> value for <items-per-page>");
 
                 if (i == temp_int)
@@ -445,7 +445,7 @@ void ConfigManager::validate(std::string serverhome)
         }
 
         if (!default_found)
-            throw _Exception("Error in config file: at least one <option> "
+            throw std::runtime_error("Error in config file: at least one <option> "
                              "under <items-per-page> must match the "
                              "<items-per-page default=\"\" /> attribute");
     }
@@ -464,7 +464,7 @@ void ConfigManager::validate(std::string serverhome)
     temp = getOption("/server/ui/accounts/attribute::enabled",
         DEFAULT_ACCOUNTS_EN_VALUE);
     if (!validateYesNo(temp))
-        throw _Exception("Error in config file: incorrect parameter for "
+        throw std::runtime_error("Error in config file: incorrect parameter for "
                          "<accounts enabled=\"\" /> attribute");
 
     NEW_BOOL_OPTION(temp == "yes" ? true : false);
@@ -477,7 +477,7 @@ void ConfigManager::validate(std::string serverhome)
     temp_int = getIntOption("/server/ui/accounts/attribute::session-timeout",
         DEFAULT_SESSION_TIMEOUT);
     if (temp_int < 1) {
-        throw _Exception("Error in config file: invalid session-timeout "
+        throw std::runtime_error("Error in config file: invalid session-timeout "
                          "(must be > 0)\n");
     }
     NEW_INT_OPTION(temp_int);
@@ -486,7 +486,7 @@ void ConfigManager::validate(std::string serverhome)
     temp = getOption("/import/attribute::hidden-files",
         DEFAULT_HIDDEN_FILES_VALUE);
     if (!validateYesNo(temp))
-        throw _Exception("Error in config file: incorrect parameter for "
+        throw std::runtime_error("Error in config file: incorrect parameter for "
                          "<import hidden-files=\"\" /> attribute");
     NEW_BOOL_OPTION(temp == "yes" ? true : false);
     SET_BOOL_OPTION(CFG_IMPORT_HIDDEN_FILES);
@@ -496,7 +496,7 @@ void ConfigManager::validate(std::string serverhome)
         DEFAULT_IGNORE_UNKNOWN_EXTENSIONS);
 
     if (!validateYesNo(temp))
-        throw _Exception("Error in config file: incorrect parameter for "
+        throw std::runtime_error("Error in config file: incorrect parameter for "
                          "<extension-mimetype ignore-unknown=\"\" /> attribute");
 
     NEW_BOOL_OPTION(temp == "yes" ? true : false);
@@ -507,7 +507,7 @@ void ConfigManager::validate(std::string serverhome)
         DEFAULT_CASE_SENSITIVE_EXTENSION_MAPPINGS);
 
     if (!validateYesNo(temp))
-        throw _Exception("Error in config file: incorrect parameter for "
+        throw std::runtime_error("Error in config file: incorrect parameter for "
                          "<extension-mimetype case-sensitive=\"\" /> attribute");
 
     bool csens = false;
@@ -567,15 +567,15 @@ void ConfigManager::validate(std::string serverhome)
     try {
         auto conv = std::make_unique<StringConverter>(temp,
             DEFAULT_INTERNAL_CHARSET);
-    } catch (const Exception& e) {
+    } catch (const std::runtime_error& e) {
         temp = DEFAULT_FALLBACK_CHARSET;
     }
     std::string charset = getOption("/import/filesystem-charset", temp);
     try {
         auto conv = std::make_unique<StringConverter>(charset,
             DEFAULT_INTERNAL_CHARSET);
-    } catch (const Exception& e) {
-        throw _Exception("Error in config file: unsupported "
+    } catch (const std::runtime_error& e) {
+        throw std::runtime_error("Error in config file: unsupported "
                          "filesystem-charset specified: "
             + charset);
     }
@@ -588,8 +588,8 @@ void ConfigManager::validate(std::string serverhome)
     try {
         auto conv = std::make_unique<StringConverter>(charset,
             DEFAULT_INTERNAL_CHARSET);
-    } catch (const Exception& e) {
-        throw _Exception("Error in config file: unsupported "
+    } catch (const std::runtime_error& e) {
+        throw std::runtime_error("Error in config file: unsupported "
                          "metadata-charset specified: "
             + charset);
     }
@@ -602,8 +602,8 @@ void ConfigManager::validate(std::string serverhome)
     try {
         auto conv = std::make_unique<StringConverter>(charset,
             DEFAULT_INTERNAL_CHARSET);
-    } catch (const Exception& e) {
-        throw _Exception("Error in config file: unsupported playlist-charset specified: " + charset);
+    } catch (const std::runtime_error& e) {
+        throw std::runtime_error("Error in config file: unsupported playlist-charset specified: " + charset);
     }
 
     log_info("Setting playlist charset to {}", charset.c_str());
@@ -613,7 +613,7 @@ void ConfigManager::validate(std::string serverhome)
     temp = getOption("/server/protocolInfo/attribute::extend",
         DEFAULT_EXTEND_PROTOCOLINFO);
     if (!validateYesNo(temp))
-        throw _Exception("Error in config file: extend attribute of the "
+        throw std::runtime_error("Error in config file: extend attribute of the "
                          "protocolInfo tag must be either \"yes\" or \"no\"");
 
     NEW_BOOL_OPTION(temp == "yes" ? true : false);
@@ -623,7 +623,7 @@ void ConfigManager::validate(std::string serverhome)
     temp = getOption("/server/protocolInfo/attribute::ps3-hack",
                      DEFAULT_EXTEND_PROTOCOLINFO_CL_HACK);
     if (!validateYesNo(temp))
-        throw _Exception("Error in config file: ps3-hack attribute of the "
+        throw std::runtime_error("Error in config file: ps3-hack attribute of the "
                          "protocolInfo tag must be either \"yes\" or \"no\"");
 
     NEW_BOOL_OPTION(temp == "yes" ? true : false);
@@ -632,7 +632,7 @@ void ConfigManager::validate(std::string serverhome)
     temp = getOption("/server/protocolInfo/attribute::samsung-hack",
         DEFAULT_EXTEND_PROTOCOLINFO_SM_HACK);
     if (!validateYesNo(temp))
-        throw _Exception("Error in config file: samsung-hack attribute of the "
+        throw std::runtime_error("Error in config file: samsung-hack attribute of the "
                          "protocolInfo tag must be either \"yes\" or \"no\"");
 
     NEW_BOOL_OPTION(temp == "yes" ? true : false);
@@ -641,7 +641,7 @@ void ConfigManager::validate(std::string serverhome)
     temp = getOption("/server/protocolInfo/attribute::dlna-seek",
         DEFAULT_EXTEND_PROTOCOLINFO_DLNA_SEEK);
     if (!validateYesNo(temp))
-        throw _Exception("Error in config file: dlna-seek attribute of the "
+        throw std::runtime_error("Error in config file: dlna-seek attribute of the "
                          "protocolInfo tag must be either \"yes\" or \"no\"");
 
     NEW_BOOL_OPTION(temp == "yes" ? true : false);
@@ -650,7 +650,7 @@ void ConfigManager::validate(std::string serverhome)
     temp = getOption("/server/pc-directory/attribute::upnp-hide",
         DEFAULT_HIDE_PC_DIRECTORY);
     if (!validateYesNo(temp))
-        throw _Exception("Error in config file: hide attribute of the "
+        throw std::runtime_error("Error in config file: hide attribute of the "
                          "pc-directory tag must be either \"yes\" or \"no\"");
 
     NEW_BOOL_OPTION(temp == "yes" ? true : false);
@@ -662,7 +662,7 @@ void ConfigManager::validate(std::string serverhome)
         temp = interface;
     }
     if (string_ok(temp) && string_ok(getOption("/server/ip", "")))
-        throw _Exception("Error in config file: you can not specify interface and ip at the same time!");
+        throw std::runtime_error("Error in config file: you can not specify interface and ip at the same time!");
 
     NEW_OPTION(temp);
     SET_OPTION(CFG_SERVER_NETWORK_INTERFACE);
@@ -719,13 +719,13 @@ void ConfigManager::validate(std::string serverhome)
         DEFAULT_PRES_URL_APPENDTO_ATTR);
 
     if ((temp != "none") && (temp != "ip") && (temp != "port")) {
-        throw _Exception("Error in config file: "
+        throw std::runtime_error("Error in config file: "
                          "invalid \"append-to\" attribute value in "
                          "<presentationURL> tag");
     }
 
     if (((temp == "ip") || (temp == "port")) && !string_ok(getOption("/server/presentationURL"))) {
-        throw _Exception("Error in config file: \"append-to\" attribute "
+        throw std::runtime_error("Error in config file: \"append-to\" attribute "
                          "value in <presentationURL> tag is set to \""
             + temp + "\" but no URL is specified");
     }
@@ -735,7 +735,7 @@ void ConfigManager::validate(std::string serverhome)
     temp_int = getIntOption("/server/upnp-string-limit",
         DEFAULT_UPNP_STRING_LIMIT);
     if ((temp_int != -1) && (temp_int < 4)) {
-        throw _Exception("Error in config file: invalid value for "
+        throw std::runtime_error("Error in config file: invalid value for "
                          "<upnp-string-limit>");
     }
     NEW_INT_OPTION(temp_int);
@@ -745,7 +745,7 @@ void ConfigManager::validate(std::string serverhome)
     temp = getOption("/import/scripting/playlist-script",
         prefix_dir + DIR_SEPARATOR + DEFAULT_JS_DIR + DIR_SEPARATOR + DEFAULT_PLAYLISTS_SCRIPT);
     if (!string_ok(temp))
-        throw _Exception("playlist script location invalid");
+        throw std::runtime_error("playlist script location invalid");
     prepare_path("/import/scripting/playlist-script");
     NEW_OPTION(getOption("/import/scripting/playlist-script"));
     SET_OPTION(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT);
@@ -753,7 +753,7 @@ void ConfigManager::validate(std::string serverhome)
     temp = getOption("/import/scripting/common-script",
         prefix_dir + DIR_SEPARATOR + DEFAULT_JS_DIR + DIR_SEPARATOR + DEFAULT_COMMON_SCRIPT);
     if (!string_ok(temp))
-        throw _Exception("common script location invalid");
+        throw std::runtime_error("common script location invalid");
     prepare_path("/import/scripting/common-script");
     NEW_OPTION(getOption("/import/scripting/common-script"));
     SET_OPTION(CFG_IMPORT_SCRIPTING_COMMON_SCRIPT);
@@ -763,7 +763,7 @@ void ConfigManager::validate(std::string serverhome)
         DEFAULT_PLAYLIST_CREATE_LINK);
 
     if (!validateYesNo(temp))
-        throw _Exception("Error in config file: "
+        throw std::runtime_error("Error in config file: "
                          "invalid \"create-link\" attribute value in "
                          "<playlist-script> tag");
 
@@ -774,14 +774,14 @@ void ConfigManager::validate(std::string serverhome)
     temp = getOption("/import/scripting/virtual-layout/attribute::type",
         DEFAULT_LAYOUT_TYPE);
     if ((temp != "js") && (temp != "builtin") && (temp != "disabled"))
-        throw _Exception("Error in config file: invalid virtual layout "
+        throw std::runtime_error("Error in config file: invalid virtual layout "
                          "type specified!");
     NEW_OPTION(temp);
     SET_OPTION(CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
 
 #ifndef HAVE_JS
     if (temp == "js")
-        throw _Exception("Gerbera was compiled without JS support, "
+        throw std::runtime_error("Gerbera was compiled without JS support, "
                          "however you specified \"js\" to be used for the "
                          "virtual-layout.");
 #else
@@ -791,8 +791,8 @@ void ConfigManager::validate(std::string serverhome)
         try {
             auto conv = std::make_unique<StringConverter>(charset,
                 DEFAULT_INTERNAL_CHARSET);
-        } catch (const Exception& e) {
-            throw _Exception("Error in config file: unsupported import script charset specified: " + charset);
+        } catch (const std::runtime_error& e) {
+            throw std::runtime_error("Error in config file: unsupported import script charset specified: " + charset);
         }
     }
 
@@ -804,7 +804,7 @@ void ConfigManager::validate(std::string serverhome)
         prefix_dir + DIR_SEPARATOR + DEFAULT_JS_DIR + DIR_SEPARATOR + DEFAULT_IMPORT_SCRIPT);
     if (temp == "js") {
         if (!string_ok(script_path))
-            throw _Exception("Error in config file: you specified \"js\" to "
+            throw std::runtime_error("Error in config file: you specified \"js\" to "
                              "be used for virtual layout, but script "
                              "location is invalid.");
 
@@ -829,7 +829,7 @@ void ConfigManager::validate(std::string serverhome)
 
     temp_int = getIntOption("/server/alive", DEFAULT_ALIVE_INTERVAL);
     if (temp_int < ALIVE_INTERVAL_MIN)
-        throw _Exception("Error in config file: incorrect parameter "
+        throw std::runtime_error("Error in config file: incorrect parameter "
                          "for /server/alive, must be at least "
             + ALIVE_INTERVAL_MIN);
     NEW_INT_OPTION(temp_int);
@@ -845,7 +845,7 @@ void ConfigManager::validate(std::string serverhome)
 
     temp = getOption("/import/autoscan/attribute::use-inotify", "auto");
     if ((temp != "auto") && !validateYesNo(temp))
-        throw _Exception("Error in config file: incorrect parameter for "
+        throw std::runtime_error("Error in config file: incorrect parameter for "
                          "\"<autoscan use-inotify=\" attribute");
 
     el = getElement("/import/autoscan");
@@ -861,12 +861,12 @@ void ConfigManager::validate(std::string serverhome)
     if (temp == YES) {
 #ifdef HAVE_INOTIFY
         if (!inotify_supported)
-            throw _Exception("You specified "
+            throw std::runtime_error("You specified "
                              "\"yes\" in \"<autoscan use-inotify=\"\">"
                              " however your system does not have "
                              "inotify support");
 #else
-        throw _Exception("You specified"
+        throw std::runtime_error("You specified"
                          " \"yes\" in \"<autoscan use-inotify=\"\">"
                          " however this version of Gerbera was compiled "
                          "without inotify support");
@@ -896,7 +896,7 @@ void ConfigManager::validate(std::string serverhome)
         DEFAULT_TRANSCODING_ENABLED);
 
     if (!validateYesNo(temp))
-        throw _Exception("Error in config file: incorrect parameter "
+        throw std::runtime_error("Error in config file: incorrect parameter "
                          "for <transcoding enabled=\"\"> attribute");
 
     if (temp == "yes")
@@ -913,7 +913,7 @@ void ConfigManager::validate(std::string serverhome)
             "/transcoding/attribute::fetch-buffer-size",
             DEFAULT_CURL_BUFFER_SIZE);
         if (temp_int < CURL_MAX_WRITE_SIZE)
-            throw _Exception("Error in config file: incorrect parameter "
+            throw std::runtime_error("Error in config file: incorrect parameter "
                              "for <transcoding fetch-buffer-size=\"\"> attribute, "
                              "must be at least "
                 + CURL_MAX_WRITE_SIZE);
@@ -924,7 +924,7 @@ void ConfigManager::validate(std::string serverhome)
             "/transcoding/attribute::fetch-buffer-fill-size",
             DEFAULT_CURL_INITIAL_FILL_SIZE);
         if (temp_int < 0)
-            throw _Exception("Error in config file: incorrect parameter "
+            throw std::runtime_error("Error in config file: incorrect parameter "
                              "for <transcoding fetch-buffer-fill-size=\"\"> attribute");
 
         NEW_INT_OPTION(temp_int);
@@ -985,7 +985,7 @@ void ConfigManager::validate(std::string serverhome)
         DEFAULT_FFMPEGTHUMBNAILER_ENABLED);
 
     if (!validateYesNo(temp))
-        throw _Exception("Error in config file: "
+        throw std::runtime_error("Error in config file: "
                          "invalid \"enabled\" attribute value in "
                          "<ffmpegthumbnailer> tag");
 
@@ -998,7 +998,7 @@ void ConfigManager::validate(std::string serverhome)
             DEFAULT_FFMPEGTHUMBNAILER_THUMBSIZE);
 
         if (temp_int <= 0)
-            throw _Exception("Error in config file: ffmpegthumbnailer - "
+            throw std::runtime_error("Error in config file: ffmpegthumbnailer - "
                              "invalid value attribute value in "
                              "<thumbnail-size> tag");
 
@@ -1010,7 +1010,7 @@ void ConfigManager::validate(std::string serverhome)
             DEFAULT_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE);
 
         if (temp_int < 0)
-            throw _Exception("Error in config file: ffmpegthumbnailer - "
+            throw std::runtime_error("Error in config file: ffmpegthumbnailer - "
                              "invalid value attribute value in "
                              "<seek-percentage> tag");
 
@@ -1022,7 +1022,7 @@ void ConfigManager::validate(std::string serverhome)
             DEFAULT_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY);
 
         if (!validateYesNo(temp))
-            throw _Exception("Error in config file: ffmpegthumbnailer - "
+            throw std::runtime_error("Error in config file: ffmpegthumbnailer - "
                              "invalid value in <filmstrip-overlay> tag");
 
         NEW_BOOL_OPTION(temp == YES ? true : false);
@@ -1033,7 +1033,7 @@ void ConfigManager::validate(std::string serverhome)
             DEFAULT_FFMPEGTHUMBNAILER_WORKAROUND_BUGS);
 
         if (!validateYesNo(temp))
-            throw _Exception("Error in config file: ffmpegthumbnailer - "
+            throw std::runtime_error("Error in config file: ffmpegthumbnailer - "
                              "invalid value in <workaround-bugs> tag");
 
         NEW_BOOL_OPTION(temp == YES ? true : false);
@@ -1044,12 +1044,12 @@ void ConfigManager::validate(std::string serverhome)
             DEFAULT_FFMPEGTHUMBNAILER_IMAGE_QUALITY);
 
         if (temp_int < 0)
-            throw _Exception("Error in config file: ffmpegthumbnailer - "
+            throw std::runtime_error("Error in config file: ffmpegthumbnailer - "
                              "invalid value attribute value in "
                              "<image-quality> tag, allowed values: 0-10");
 
         if (temp_int > 10)
-            throw _Exception("Error in config file: ffmpegthumbnailer - "
+            throw std::runtime_error("Error in config file: ffmpegthumbnailer - "
                              "invalid value attribute value in "
                              "<image-quality> tag, allowed values: 0-10");
 
@@ -1068,7 +1068,7 @@ void ConfigManager::validate(std::string serverhome)
             DEFAULT_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED);
 
         if (!validateYesNo(temp))
-            throw _Exception("Error in config file: "
+            throw std::runtime_error("Error in config file: "
                              "invalid \"enabled\" attribute value in "
                              "ffmpegthumbnailer <cache-dir> tag");
 
@@ -1082,7 +1082,7 @@ void ConfigManager::validate(std::string serverhome)
         DEFAULT_MARK_PLAYED_ITEMS_ENABLED);
 
     if (!validateYesNo(temp))
-        throw _Exception("Error in config file: "
+        throw std::runtime_error("Error in config file: "
                          "invalid \"enabled\" attribute value in "
                          "<mark-played-items> tag");
 
@@ -1094,7 +1094,7 @@ void ConfigManager::validate(std::string serverhome)
                      "attribute::suppress-cds-updates",
         DEFAULT_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES);
     if (!validateYesNo(temp))
-        throw _Exception("Error in config file: "
+        throw std::runtime_error("Error in config file: "
                          "invalid \":suppress-cds-updates\" attribute "
                          "value in <mark-played-items> tag");
 
@@ -1106,7 +1106,7 @@ void ConfigManager::validate(std::string serverhome)
         DEFAULT_MARK_PLAYED_ITEMS_STRING_MODE);
 
     if ((temp != "prepend") && (temp != "append"))
-        throw _Exception("Error in config file: "
+        throw std::runtime_error("Error in config file: "
                          "invalid \"mode\" attribute value in "
                          "<string> tag in the <mark-played-items> section");
 
@@ -1117,7 +1117,7 @@ void ConfigManager::validate(std::string serverhome)
                      "string",
         DEFAULT_MARK_PLAYED_ITEMS_STRING);
     if (!string_ok(temp))
-        throw _Exception("Error in config file: "
+        throw std::runtime_error("Error in config file: "
                          "empty string given for the <string> tag in the "
                          "<mark-played-items> section");
     NEW_OPTION(temp);
@@ -1138,10 +1138,10 @@ void ConfigManager::validate(std::string serverhome)
 
             std::string mark_content = content->getText();
             if (!string_ok(mark_content))
-                throw _Exception("error in configuration, <mark-played-items>, empty <content> parameter!");
+                throw std::runtime_error("error in configuration, <mark-played-items>, empty <content> parameter!");
 
             if ((mark_content != DEFAULT_MARK_PLAYED_CONTENT_VIDEO) && (mark_content != DEFAULT_MARK_PLAYED_CONTENT_AUDIO) && (mark_content != DEFAULT_MARK_PLAYED_CONTENT_IMAGE))
-                throw _Exception("error in configuration, <mark-played-items>, invalid <content> parameter! Allowed values are \"video\", \"audio\", \"image\"");
+                throw std::runtime_error("error in configuration, <mark-played-items>, invalid <content> parameter! Allowed values are \"video\", \"audio\", \"image\"");
 
             mark_content_list.push_back(mark_content);
             NEW_STRARR_OPTION(mark_content_list);
@@ -1150,14 +1150,14 @@ void ConfigManager::validate(std::string serverhome)
     }
 
     if (markingEnabled && contentElementCount == 0) {
-        throw _Exception("Error in config file: <mark-played-items>/<mark> tag must contain at least one <content> tag!");
+        throw std::runtime_error("Error in config file: <mark-played-items>/<mark> tag must contain at least one <content> tag!");
     }
 
 #if defined(HAVE_LASTFMLIB)
     temp = getOption("/server/extended-runtime-options/lastfm/attribute::enabled", DEFAULT_LASTFM_ENABLED);
 
     if (!validateYesNo(temp))
-        throw _Exception("Error in config file: "
+        throw std::runtime_error("Error in config file: "
                          "invalid \"enabled\" attribute value in "
                          "<lastfm> tag");
 
@@ -1169,7 +1169,7 @@ void ConfigManager::validate(std::string serverhome)
             DEFAULT_LASTFM_USERNAME);
 
         if (!string_ok(temp))
-            throw _Exception("Error in config file: lastfm - "
+            throw std::runtime_error("Error in config file: lastfm - "
                              "invalid username value in "
                              "<username> tag");
 
@@ -1180,7 +1180,7 @@ void ConfigManager::validate(std::string serverhome)
             DEFAULT_LASTFM_PASSWORD);
 
         if (!string_ok(temp))
-            throw _Exception("Error in config file: lastfm - "
+            throw std::runtime_error("Error in config file: lastfm - "
                              "invalid password value in "
                              "<password> tag");
 
@@ -1214,7 +1214,7 @@ void ConfigManager::validate(std::string serverhome)
         for (int j = 0; j < config_timed_list->size(); j++) {
             Ref<AutoscanDirectory> t_dir = config_timed_list->get(j);
             if (i_dir->getLocation() == t_dir->getLocation())
-                throw _Exception("Error in config file: same path used in both inotify and timed scan modes");
+                throw std::runtime_error("Error in config file: same path used in both inotify and timed scan modes");
         }
     }
 #endif
@@ -1224,7 +1224,7 @@ void ConfigManager::validate(std::string serverhome)
         DEFAULT_SOPCAST_ENABLED);
 
     if (!validateYesNo(temp))
-        throw _Exception("Error in config file: "
+        throw std::runtime_error("Error in config file: "
                          "invalid \"enabled\" attribute value in "
                          "<SopCast> tag");
 
@@ -1238,7 +1238,7 @@ void ConfigManager::validate(std::string serverhome)
     temp_int = getIntOption("/import/online-content/SopCast/attribute::purge-after", 0);
     if (getIntOption("/import/online-content/SopCast/attribute::refresh") >= temp_int) {
         if (temp_int != 0)
-            throw _Exception("Error in config file: SopCast purge-after value must be greater than refresh interval");
+            throw std::runtime_error("Error in config file: SopCast purge-after value must be greater than refresh interval");
     }
 
     NEW_INT_OPTION(temp_int);
@@ -1248,7 +1248,7 @@ void ConfigManager::validate(std::string serverhome)
         DEFAULT_SOPCAST_UPDATE_AT_START);
 
     if (!validateYesNo(temp))
-        throw _Exception("Error in config file: "
+        throw std::runtime_error("Error in config file: "
                          "invalid \"update-at-start\" attribute value in "
                          "<SopCast> tag");
 
@@ -1261,7 +1261,7 @@ void ConfigManager::validate(std::string serverhome)
         DEFAULT_ATRAILERS_ENABLED);
 
     if (!validateYesNo(temp))
-        throw _Exception("Error in config file: "
+        throw std::runtime_error("Error in config file: "
                          "invalid \"enabled\" attribute value in "
                          "<AppleTrailers> tag");
 
@@ -1277,7 +1277,7 @@ void ConfigManager::validate(std::string serverhome)
         DEFAULT_ATRAILERS_UPDATE_AT_START);
 
     if (!validateYesNo(temp))
-        throw _Exception("Error in config file: "
+        throw std::runtime_error("Error in config file: "
                          "invalid \"update-at-start\" attribute value in "
                          "<AppleTrailers> tag");
 
@@ -1287,7 +1287,7 @@ void ConfigManager::validate(std::string serverhome)
     temp = getOption("/import/online-content/AppleTrailers/attribute::resolution",
         std::to_string(DEFAULT_ATRAILERS_RESOLUTION));
     if ((temp != "640") && (temp != "720p")) {
-        throw _Exception("Error in config file: "
+        throw std::runtime_error("Error in config file: "
                          "invalid \"resolution\" attribute value in "
                          "<AppleTrailers> tag, only \"640\" and \"720p\" is "
                          "supported");
@@ -1327,7 +1327,7 @@ void ConfigManager::load(std::string filename)
     root = rootDoc->getRoot();
 
     if (rootDoc == nullptr) {
-        throw _Exception("Unable to parse server configuration!");
+        throw std::runtime_error("Unable to parse server configuration!");
     }
 }
 
@@ -1368,7 +1368,7 @@ std::string ConfigManager::getOption(std::string xpath, std::string def)
         std::string axis = XPath::getAxis(axisPart);
         std::string spec = XPath::getSpec(axisPart);
         if (axis != "attribute") {
-            throw _Exception("ConfigManager::getOption: only attribute:: axis supported");
+            throw std::runtime_error("ConfigManager::getOption: only attribute:: axis supported");
         }
         cur->setAttribute(spec, def);
     } else
@@ -1426,14 +1426,14 @@ void ConfigManager::writeBookmark(std::string ip, std::string port)
 
     f = fopen(path.c_str(), "w");
     if (f == nullptr) {
-        throw _Exception("writeBookmark: failed to open: " + path);
+        throw std::runtime_error("writeBookmark: failed to open: " + path);
     }
 
     size = fwrite(data.c_str(), sizeof(char), data.length(), f);
     fclose(f);
 
     if (size < data.length())
-        throw _Exception("write_Bookmark: failed to write to: " + path);
+        throw std::runtime_error("write_Bookmark: failed to write to: " + path);
 }
 
 void ConfigManager::emptyBookmark()
@@ -1447,21 +1447,21 @@ void ConfigManager::emptyBookmark()
 
     FILE* f = fopen(path.c_str(), "w");
     if (f == nullptr) {
-        throw _Exception("emptyBookmark: failed to open: " + path);
+        throw std::runtime_error("emptyBookmark: failed to open: " + path);
     }
 
     size_t size = fwrite(data.c_str(), sizeof(char), data.length(), f);
     fclose(f);
 
     if (size < data.length())
-        throw _Exception("emptyBookmark: failed to write to: " + path);
+        throw std::runtime_error("emptyBookmark: failed to write to: " + path);
 }
 
 std::string ConfigManager::checkOptionString(std::string xpath)
 {
     std::string temp = getOption(xpath);
     if (!string_ok(temp))
-        throw _Exception("Config: value of " + xpath + " tag is invalid");
+        throw std::runtime_error("Config: value of " + xpath + " tag is invalid");
 
     return temp;
 }
@@ -1523,7 +1523,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
                 if (string_ok(mt) && string_ok(pname)) {
                     mt_mappings[mt] = pname;
                 } else {
-                    throw _Exception("error in configuration: invalid or missing mimetype to profile mapping");
+                    throw std::runtime_error("error in configuration: invalid or missing mimetype to profile mapping");
                 }
             }
         }
@@ -1540,7 +1540,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
 
         param = child->getAttribute("enabled");
         if (!validateYesNo(param))
-            throw _Exception("Error in config file: incorrect parameter "
+            throw std::runtime_error("Error in config file: incorrect parameter "
                              "for <profile enabled=\"\" /> attribute");
 
         if (param == "no")
@@ -1548,7 +1548,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
 
         param = child->getAttribute("type");
         if (!string_ok(param))
-            throw _Exception("error in configuration: missing transcoding type in profile");
+            throw std::runtime_error("error in configuration: missing transcoding type in profile");
 
         if (param == "external")
             tr_type = TR_External;
@@ -1557,17 +1557,17 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
             tr_type = TR_Remote;
          */
         else
-            throw _Exception("error in configuration: invalid transcoding type " + param + " in profile");
+            throw std::runtime_error("error in configuration: invalid transcoding type " + param + " in profile");
 
         param = child->getAttribute("name");
         if (!string_ok(param))
-            throw _Exception("error in configuration: invalid transcoding profile name");
+            throw std::runtime_error("error in configuration: invalid transcoding profile name");
 
         Ref<TranscodingProfile> prof(new TranscodingProfile(tr_type, param));
 
         param = child->getChildText("mimetype");
         if (!string_ok(param))
-            throw _Exception("error in configuration: invalid target mimetype in transcoding profile");
+            throw std::runtime_error("error in configuration: invalid target mimetype in transcoding profile");
         prof->setTargetMimeType(param);
 
         if (child->getChildByName("resolution") != nullptr) {
@@ -1582,7 +1582,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
         if (avi_fcc != nullptr) {
             std::string mode = avi_fcc->getAttribute("mode");
             if (!string_ok(mode))
-                throw _Exception("error in configuration: avi-fourcc-list requires a valid \"mode\" attribute");
+                throw std::runtime_error("error in configuration: avi-fourcc-list requires a valid \"mode\" attribute");
 
             avi_fourcc_listmode_t fcc_mode;
             if (mode == "ignore")
@@ -1592,7 +1592,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
             else if (mode == "disabled")
                 fcc_mode = FCC_None;
             else
-                throw _Exception("error in configuration: invalid mode given for avi-fourcc-list: \"" + mode + "\"");
+                throw std::runtime_error("error in configuration: invalid mode given for avi-fourcc-list: \"" + mode + "\"");
 
             if (fcc_mode != FCC_None) {
                 std::vector<std::string> fcc_list;
@@ -1604,7 +1604,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
 
                     std::string fcc = fourcc->getText();
                     if (!string_ok(fcc))
-                        throw _Exception("error in configuration: empty fourcc specified!");
+                        throw std::runtime_error("error in configuration: empty fourcc specified!");
                     fcc_list.push_back(fcc);
                 }
 
@@ -1615,7 +1615,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
         if (child->getChildByName("accept-url") != nullptr) {
             param = child->getChildText("accept-url");
             if (!validateYesNo(param))
-                throw _Exception("Error in config file: incorrect parameter "
+                throw std::runtime_error("Error in config file: incorrect parameter "
                                  "for <accept-url> tag");
             if (param == "yes")
                 prof->setAcceptURL(true);
@@ -1632,7 +1632,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
             else {
                 int freq = std::stoi(param);
                 if (freq <= 0)
-                    throw _Exception("Error in config file: incorrect "
+                    throw std::runtime_error("Error in config file: incorrect "
                                      "parameter for <sample-frequency> "
                                      "tag");
 
@@ -1649,7 +1649,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
             else {
                 int chan = std::stoi(param);
                 if (chan <= 0)
-                    throw _Exception("Error in config file: incorrect "
+                    throw std::runtime_error("Error in config file: incorrect "
                                      "parameter for <number-of-channels> "
                                      "tag");
                 prof->setNumChannels(chan);
@@ -1659,7 +1659,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
         if (child->getChildByName("hide-original-resource") != nullptr) {
             param = child->getChildText("hide-original-resource");
             if (!validateYesNo(param))
-                throw _Exception("Error in config file: incorrect parameter "
+                throw std::runtime_error("Error in config file: incorrect parameter "
                                  "for <hide-original-resource> tag");
             if (param == "yes")
                 prof->setHideOriginalResource(true);
@@ -1670,7 +1670,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
         if (child->getChildByName("thumbnail") != nullptr) {
             param = child->getChildText("thumbnail");
             if (!validateYesNo(param))
-                throw _Exception("Error in config file: incorrect parameter "
+                throw std::runtime_error("Error in config file: incorrect parameter "
                                  "for <thumbnail> tag");
             if (param == "yes")
                 prof->setThumbnail(true);
@@ -1681,7 +1681,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
         if (child->getChildByName("first-resource") != nullptr) {
             param = child->getChildText("first-resource");
             if (!validateYesNo(param))
-                throw _Exception("Error in config file: incorrect parameter "
+                throw std::runtime_error("Error in config file: incorrect parameter "
                                  "for <profile first-resource=\"\" /> attribute");
 
             if (param == "yes")
@@ -1693,7 +1693,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
         if (child->getChildByName("use-chunked-encoding") != nullptr) {
             param = child->getChildText("use-chunked-encoding");
             if (!validateYesNo(param))
-                throw _Exception("Error in config file: incorrect parameter "
+                throw std::runtime_error("Error in config file: incorrect parameter "
                                  "for use-chunked-encoding tag");
 
             if (param == "yes")
@@ -1704,13 +1704,13 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
 
         Ref<Element> sub = child->getChildByName("agent");
         if (sub == nullptr)
-            throw _Exception("error in configuration: transcoding "
+            throw std::runtime_error("error in configuration: transcoding "
                              "profile \""
                 + prof->getName() + "\" is missing the <agent> option");
 
         param = sub->getAttribute("command");
         if (!string_ok(param))
-            throw _Exception("error in configuration: transcoding "
+            throw std::runtime_error("error in configuration: transcoding "
                              "profile \""
                 + prof->getName() + "\" has an invalid command setting");
         prof->setCommand(param);
@@ -1718,82 +1718,82 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
         std::string tmp_path;
         if (startswith(param, _DIR_SEPARATOR)) {
             if (!check_path(param))
-                throw _Exception("error in configuration, transcoding "
+                throw std::runtime_error("error in configuration, transcoding "
                                  "profile \""
                     + prof->getName() + "\" could not find transcoding command " + param);
             tmp_path = param;
         } else {
             tmp_path = find_in_path(param);
             if (!string_ok(tmp_path))
-                throw _Exception("error in configuration, transcoding "
+                throw std::runtime_error("error in configuration, transcoding "
                                  "profile \""
                     + prof->getName() + "\" could not find transcoding command " + param + " in $PATH");
         }
 
         int err = 0;
         if (!is_executable(tmp_path, &err))
-            throw _Exception("error in configuration, transcoding "
+            throw std::runtime_error("error in configuration, transcoding "
                              "profile "
                 + prof->getName() + ": transcoder " + param + "is not executable - " + strerror(err));
 
         param = sub->getAttribute("arguments");
         if (!string_ok(param))
-            throw _Exception("error in configuration: transcoding profile " + prof->getName() + " has an empty argument string");
+            throw std::runtime_error("error in configuration: transcoding profile " + prof->getName() + " has an empty argument string");
 
         prof->setArguments(param);
 
         sub = child->getChildByName("buffer");
         if (sub == nullptr)
-            throw _Exception("error in configuration: transcoding "
+            throw std::runtime_error("error in configuration: transcoding "
                              "profile \""
                 + prof->getName() + "\" is missing the <buffer> option");
 
         param = sub->getAttribute("size");
         if (!string_ok(param))
-            throw _Exception("error in configuration: transcoding "
+            throw std::runtime_error("error in configuration: transcoding "
                              "profile \""
                 + prof->getName() + "\" <buffer> tag is missing the size attribute");
         itmp = std::stoi(param);
         if (itmp < 0)
-            throw _Exception("error in configuration: transcoding "
+            throw std::runtime_error("error in configuration: transcoding "
                              "profile \""
                 + prof->getName() + "\" buffer size can not be negative");
         bs = itmp;
 
         param = sub->getAttribute("chunk-size");
         if (!string_ok(param))
-            throw _Exception("error in configuration: transcoding "
+            throw std::runtime_error("error in configuration: transcoding "
                              "profile \""
                 + prof->getName() + "\" <buffer> tag is missing the chunk-size "
                                     "attribute");
         itmp = std::stoi(param);
         if (itmp < 0)
-            throw _Exception("error in configuration: transcoding "
+            throw std::runtime_error("error in configuration: transcoding "
                              "profile \""
                 + prof->getName() + "\" chunk size can not be negative");
         cs = itmp;
 
         if (cs > bs)
-            throw _Exception("error in configuration: transcoding "
+            throw std::runtime_error("error in configuration: transcoding "
                              "profile \""
                 + prof->getName() + "\" chunk size can not be greater than "
                                     "buffer size");
 
         param = sub->getAttribute("fill-size");
         if (!string_ok(param))
-            throw _Exception("error in configuration: transcoding "
+            throw std::runtime_error("error in configuration: transcoding "
                              "profile \""
                 + prof->getName() + "\" <buffer> tag is missing the fill-size "
                                     "attribute");
         itmp = std::stoi(param);
         if (i < 0)
-            throw _Exception("error in configuration: transcoding "
+            throw std::runtime_error("error in configuration: transcoding "
                              "profile \""
                 + prof->getName() + "\" fill size can not be negative");
         fs = itmp;
 
         if (fs > bs)
-            throw _Exception("error in configuration: transcoding "
+            throw std::runtime_error("error in configuration: transcoding "
                              "profile \""
                 + prof->getName() + "\" fill size can not be greater than "
                                     "buffer size");
@@ -1801,7 +1801,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
         prof->setBufferOptions(bs, cs, fs);
 
         if (mtype_profile == nullptr) {
-            throw _Exception("error in configuration: transcoding "
+            throw std::runtime_error("error in configuration: transcoding "
                              "profiles exist, but no mimetype to profile "
                              "mappings specified");
         }
@@ -1814,7 +1814,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
         }
 
         if (!set)
-            throw _Exception("error in configuration: you specified"
+            throw std::runtime_error("error in configuration: you specified"
                              "a mimetype to transcoding profile mapping, "
                              "but no match for profile \""
                 + prof->getName() + "\" exists");
@@ -1842,23 +1842,23 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNodeset(std::
 
         std::string location = child->getAttribute("location");
         if (!string_ok(location)) {
-            throw _Exception("autoscan directory with invalid location!\n");
+            throw std::runtime_error("autoscan directory with invalid location!\n");
         }
 
         try {
             location = normalizePath(location);
-        } catch (const Exception& e) {
-            throw _Exception("autoscan directory \"" + location + "\": " + e.getMessage());
+        } catch (const std::runtime_error& e) {
+            throw std::runtime_error("autoscan directory \"" + location + "\": " + e.what());
         }
 
         if (check_path(location, false)) {
-            throw _Exception("autoscan " + location + " - not a directory!");
+            throw std::runtime_error("autoscan " + location + " - not a directory!");
         }
 
         ScanMode mode;
         std::string temp = child->getAttribute("mode");
         if (!string_ok(temp) || ((temp != "timed") && (temp != "inotify"))) {
-            throw _Exception("autoscan directory " + location + ": mode attribute is missing or invalid");
+            throw std::runtime_error("autoscan directory " + location + ": mode attribute is missing or invalid");
         } else if (temp == "timed") {
             mode = ScanMode::Timed;
         } else {
@@ -1875,28 +1875,28 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNodeset(std::
         if (mode == ScanMode::Timed) {
             temp = child->getAttribute("level");
             if (!string_ok(temp)) {
-                throw _Exception("autoscan directory " + location + ": level attribute is missing or invalid");
+                throw std::runtime_error("autoscan directory " + location + ": level attribute is missing or invalid");
             } else {
                 if (temp == "basic")
                     level = ScanLevel::Basic;
                 else if (temp == "full")
                     level = ScanLevel::Full;
                 else {
-                    throw _Exception("autoscan directory "
+                    throw std::runtime_error("autoscan directory "
                         + location + ": level attribute " + temp + "is invalid");
                 }
             }
 
             temp = child->getAttribute("interval");
             if (!string_ok(temp)) {
-                throw _Exception("autoscan directory "
+                throw std::runtime_error("autoscan directory "
                     + location + ": interval attribute is required for timed mode");
             }
 
             interval = std::stoi(temp);
 
             if (interval == 0) {
-                throw _Exception("autoscan directory " + location + ": invalid interval attribute");
+                throw std::runtime_error("autoscan directory " + location + ": invalid interval attribute");
                 continue;
             }
         } else {
@@ -1907,7 +1907,7 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNodeset(std::
 
         temp = child->getAttribute("recursive");
         if (!string_ok(temp))
-            throw _Exception("autoscan directory " + location + ": recursive attribute is missing or invalid");
+            throw std::runtime_error("autoscan directory " + location + ": recursive attribute is missing or invalid");
 
         bool recursive;
         if (temp == "yes")
@@ -1915,7 +1915,7 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNodeset(std::
         else if (temp == "no")
             recursive = false;
         else {
-            throw _Exception("autoscan directory " + location
+            throw std::runtime_error("autoscan directory " + location
                 + ": recusrive attribute " + temp + " is invalid");
         }
 
@@ -1929,14 +1929,14 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNodeset(std::
         else if (temp == "no")
             hidden = false;
         else
-            throw _Exception("autoscan directory " + location + ": hidden attribute " + temp + " is invalid");
+            throw std::runtime_error("autoscan directory " + location + ": hidden attribute " + temp + " is invalid");
 
         Ref<AutoscanDirectory> dir(new AutoscanDirectory(location, mode, level, recursive, true, -1, interval, hidden));
         try {
             list->add(dir);
-        } catch (const Exception& e) {
-            throw _Exception("Could not add " + location + ": "
-                + e.getMessage());
+        } catch (const std::runtime_error& e) {
+            throw std::runtime_error("Could not add " + location + ": "
+                + e.what());
         }
     }
 
@@ -1951,17 +1951,17 @@ void ConfigManager::dumpOptions()
         try {
             log_debug("    Option %02d - {}", i,
                 getOption((config_option_t)i).c_str());
-        } catch (const Exception& e) {
+        } catch (const std::runtime_error& e) {
         }
         try {
             log_debug(" IntOption %02d - {}", i,
                 getIntOption((config_option_t)i));
-        } catch (const Exception& e) {
+        } catch (const std::runtime_error& e) {
         }
         try {
             log_debug("BoolOption %02d - {}", i,
                 (getBoolOption((config_option_t)i) ? "true" : "false"));
-        } catch (const Exception& e) {
+        } catch (const std::runtime_error& e) {
         }
     }
 #endif
@@ -1992,7 +1992,7 @@ std::string ConfigManager::getOption(config_option_t option)
 {
     auto o = options->at(option);
     if (o == nullptr) {
-        throw _Exception("option not set");
+        throw std::runtime_error("option not set");
     }
     return o->getOption();
 }
@@ -2001,7 +2001,7 @@ int ConfigManager::getIntOption(config_option_t option)
 {
     auto o = options->at(option);
     if (o == nullptr) {
-        throw _Exception("option not set");
+        throw std::runtime_error("option not set");
     }
     return o->getIntOption();
 }
@@ -2010,7 +2010,7 @@ bool ConfigManager::getBoolOption(config_option_t option)
 {
     auto o = options->at(option);
     if (o == nullptr) {
-        throw _Exception("option not set");
+        throw std::runtime_error("option not set");
     }
     return o->getBoolOption();
 }

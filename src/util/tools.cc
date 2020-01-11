@@ -97,12 +97,12 @@ std::vector<std::string> split_string(std::string str, char sep, bool empty)
 std::vector<std::string> split_path(std::string str)
 {
     if (!string_ok(str))
-        throw _Exception("invalid path given to split_path");
+        throw std::runtime_error("invalid path given to split_path");
 
     std::vector<std::string> ret;
     size_t pos = str.rfind(DIR_SEPARATOR);
     if (pos == std::string::npos)
-        throw _Exception("relative path given to split_path: " + str);
+        throw std::runtime_error("relative path given to split_path: " + str);
 
     const char* data = str.c_str();
     if (pos == 0) {
@@ -241,14 +241,14 @@ time_t check_path_ex(std::string path, bool needDir, bool existenceUnneeded,
     if (ret != 0) {
         if (existenceUnneeded && (errno == ENOENT))
             return 0;
-        throw _Exception(mt_strerror(errno) + ": " + path + " (errno: " + std::to_string(errno) + std::to_string((int)existenceUnneeded) + ")");
+        throw std::runtime_error(mt_strerror(errno) + ": " + path + " (errno: " + std::to_string(errno) + std::to_string((int)existenceUnneeded) + ")");
     }
 
     if (needDir && (!S_ISDIR(statbuf.st_mode)))
-        throw _Exception("Not a directory: " + path);
+        throw std::runtime_error("Not a directory: " + path);
 
     if (!needDir && (S_ISDIR(statbuf.st_mode)))
-        throw _Exception("Not a file: " + path);
+        throw std::runtime_error("Not a file: " + path);
 
     if ((filesize != nullptr) && S_ISREG(statbuf.st_mode))
         *filesize = statbuf.st_size;
@@ -314,7 +314,7 @@ bool string_ok(std::string str)
 void string_ok_ex(std::string str)
 {
     if (str.empty())
-        throw _Exception("Empty string");
+        throw std::runtime_error("Empty string");
 }
 
 std::string http_redirect_to(std::string ip, std::string port, std::string page)
@@ -580,7 +580,7 @@ std::string read_text_file(std::string path)
 {
     FILE* f = fopen(path.c_str(), "r");
     if (!f) {
-        throw _Exception("read_text_file: could not open " + path + " : " + mt_strerror(errno));
+        throw std::runtime_error("read_text_file: could not open " + path + " : " + mt_strerror(errno));
     }
     std::ostringstream buf;
     char buffer[1024];
@@ -596,16 +596,16 @@ void write_text_file(std::string path, std::string contents)
     size_t bytesWritten;
     FILE* f = fopen(path.c_str(), "w");
     if (!f) {
-        throw _Exception("write_text_file: could not open " + path + " : " + mt_strerror(errno));
+        throw std::runtime_error("write_text_file: could not open " + path + " : " + mt_strerror(errno));
     }
 
     bytesWritten = fwrite(contents.c_str(), 1, contents.length(), f);
     if (bytesWritten < contents.length()) {
         fclose(f);
         if (bytesWritten >= 0)
-            throw _Exception("write_text_file: incomplete write to " + path + " : ");
+            throw std::runtime_error("write_text_file: incomplete write to " + path + " : ");
         else
-            throw _Exception("write_text_file: error writing to " + path + " : " + mt_strerror(errno));
+            throw std::runtime_error("write_text_file: error writing to " + path + " : " + mt_strerror(errno));
     }
     fclose(f);
 }
@@ -614,12 +614,12 @@ void copy_file(std::string from, std::string to)
 {
     FILE* f = fopen(from.c_str(), "r");
     if (!f) {
-        throw _Exception("copy_file: could not open " + from + " for read: " + mt_strerror(errno));
+        throw std::runtime_error("copy_file: could not open " + from + " for read: " + mt_strerror(errno));
     }
     FILE* t = fopen(to.c_str(), "w");
     if (!t) {
         fclose(f);
-        throw _Exception("copy_file: could not open " + to + " for write: " + mt_strerror(errno));
+        throw std::runtime_error("copy_file: could not open " + to + " for write: " + mt_strerror(errno));
     }
     auto* buffer = (char*)MALLOC(1024);
     size_t bytesRead = 0;
@@ -633,7 +633,7 @@ void copy_file(std::string from, std::string to)
         int my_errno = errno;
         fclose(f);
         fclose(t);
-        throw _Exception("copy_file: error while copying " + from + " to " + to + ": " + mt_strerror(my_errno));
+        throw std::runtime_error("copy_file: error while copying " + from + " to " + to + ": " + mt_strerror(my_errno));
     }
 
     fclose(f);
@@ -832,11 +832,11 @@ void set_jpeg_resolution_resource(std::shared_ptr<CdsItem> item, int res_num)
         std::string resolution = get_jpeg_resolution(fio_h);
 
         if (res_num >= item->getResourceCount())
-            throw _Exception("Invalid resource index");
+            throw std::runtime_error("Invalid resource index");
 
         item->getResource(res_num)->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), resolution);
-    } catch (const Exception& e) {
-        log_error("Exception! {}", e.getMessage());
+    } catch (const std::runtime_error& e) {
+        log_error("Exception! {}", e.what());
     }
 }
 
@@ -1058,7 +1058,7 @@ void getTimespecNow(struct timespec* ts)
     struct timeval tv;
     int ret = gettimeofday(&tv, nullptr);
     if (ret != 0)
-        throw _Exception("gettimeofday failed: " + mt_strerror(errno));
+        throw std::runtime_error("gettimeofday failed: " + mt_strerror(errno));
 
     ts->tv_sec = tv.tv_sec;
     ts->tv_nsec = tv.tv_usec * 1000;
@@ -1110,7 +1110,7 @@ std::string normalizePath(std::string path)
     Ref<BaseStack<int>> separatorLocations(new BaseStack<int>(avarageExpectedSlashes, -1));
 
     if (path.at(0) != DIR_SEPARATOR)
-        throw _Exception("Relative paths are not allowed!\n");
+        throw std::runtime_error("Relative paths are not allowed!\n");
 
     size_t next = 1;
     do {
@@ -1364,12 +1364,12 @@ bool isTheora(std::string ogg_filename)
     f = fopen(ogg_filename.c_str(), "rb");
 
     if (!f) {
-        throw _Exception("Error opening " + ogg_filename + " : " + mt_strerror(errno));
+        throw std::runtime_error("Error opening " + ogg_filename + " : " + mt_strerror(errno));
     }
 
     if (fread(buffer, 1, 4, f) != 4) {
         fclose(f);
-        throw _Exception("Error reading " + ogg_filename);
+        throw std::runtime_error("Error reading " + ogg_filename);
     }
 
     if (memcmp(buffer, "OggS", 4) != 0) {
@@ -1379,12 +1379,12 @@ bool isTheora(std::string ogg_filename)
 
     if (fseek(f, 28, SEEK_SET) != 0) {
         fclose(f);
-        throw _Exception("Incomplete file " + ogg_filename);
+        throw std::runtime_error("Incomplete file " + ogg_filename);
     }
 
     if (fread(buffer, 1, 7, f) != 7) {
         fclose(f);
-        throw _Exception("Error reading " + ogg_filename);
+        throw std::runtime_error("Error reading " + ogg_filename);
     }
 
     if (memcmp(buffer, "\x80theora", 7) != 0) {
@@ -1506,19 +1506,19 @@ std::string getAVIFourCC(std::string avi_filename)
     char* buffer;
     FILE* f = fopen(avi_filename.c_str(), "rb");
     if (!f)
-        throw _Exception("could not open file " + avi_filename + " : " + mt_strerror(errno));
+        throw std::runtime_error("could not open file " + avi_filename + " : " + mt_strerror(errno));
 
     buffer = (char*)MALLOC(FCC_OFFSET + 6);
     if (buffer == nullptr) {
         fclose(f);
-        throw _Exception("Out of memory when allocating buffer for file " + avi_filename);
+        throw std::runtime_error("Out of memory when allocating buffer for file " + avi_filename);
     }
 
     size_t rb = fread(buffer, 1, FCC_OFFSET + 4, f);
     fclose(f);
     if (rb != FCC_OFFSET + 4) {
         free(buffer);
-        throw _Exception("could not read header of " + avi_filename + " : " + mt_strerror(errno));
+        throw std::runtime_error("could not read header of " + avi_filename + " : " + mt_strerror(errno));
     }
 
     buffer[FCC_OFFSET + 5] = '\0';

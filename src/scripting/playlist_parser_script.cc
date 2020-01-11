@@ -59,9 +59,9 @@ js_readln(duk_context *ctx)
         log_warning("Aborting script execution due to server shutdown.");
         return duk_error(ctx, DUK_ERR_ERROR, "Aborting script execution due to server shutdown.");
     }
-    catch (const Exception & e)
+    catch (const std::runtime_error& e)
     {
-        log_error("DUK exception: {}", e.getMessage());
+        log_error("DUK exception: {}", e.what());
         return 0;
     }
 
@@ -116,7 +116,7 @@ PlaylistParserScript::PlaylistParserScript(std::shared_ptr<ConfigManager> config
         std::string scriptPath = config->getOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT);
         load(scriptPath);
     }
-    catch (const Exception & ex)
+    catch (const std::runtime_error& ex)
     {
         throw ex;
     }
@@ -126,7 +126,7 @@ std::string PlaylistParserScript::readln()
 {
     std::string ret;
     if (!currentHandle)
-        throw _Exception("Readline not yet setup for use");
+        throw std::runtime_error("Readline not yet setup for use");
 
     if ((currentTask != nullptr) && (!currentTask->isValid()))
         return nullptr;
@@ -147,12 +147,12 @@ void PlaylistParserScript::processPlaylistObject(std::shared_ptr<CdsObject> obj,
     if ((currentObjectID != INVALID_OBJECT_ID) || (currentHandle != nullptr) ||
             (currentLine != nullptr))
     {
-        throw _Exception("recursion not allowed!");
+        throw std::runtime_error("recursion not allowed!");
     }
 
     if (!IS_CDS_PURE_ITEM(obj->getObjectType()))
     {
-        throw _Exception("only allowed for pure items");
+        throw std::runtime_error("only allowed for pure items");
     }
 
     currentTask = task;
@@ -162,7 +162,7 @@ void PlaylistParserScript::processPlaylistObject(std::shared_ptr<CdsObject> obj,
     {
         currentObjectID = INVALID_OBJECT_ID;
         currentTask = nullptr;
-        throw _Exception("failed to allocate memory for playlist parsing!");
+        throw std::runtime_error("failed to allocate memory for playlist parsing!");
     }
 
     currentLine[0] = '\0';
@@ -173,7 +173,7 @@ void PlaylistParserScript::processPlaylistObject(std::shared_ptr<CdsObject> obj,
         currentObjectID = INVALID_OBJECT_ID;
         currentTask = nullptr;
         FREE(currentLine);
-        throw _Exception("failed to open file: " + obj->getLocation());
+        throw std::runtime_error("failed to open file: " + obj->getLocation());
     }
 
     Runtime::AutoLock lock(runtime->getMutex());
@@ -188,7 +188,7 @@ void PlaylistParserScript::processPlaylistObject(std::shared_ptr<CdsObject> obj,
         duk_del_prop_string(ctx, -1, "playlist");
         duk_pop(ctx);
     }
-    catch (const Exception & e)
+    catch (const std::runtime_error& e)
     {
         duk_push_global_object(ctx);
         duk_del_prop_string(ctx, -1, "playlist");

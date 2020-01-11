@@ -82,7 +82,7 @@ void URLRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
     std::string objID = getValueOrDefault(dict, "object_id");
     if (objID.empty()) {
         //log_error("object_id not found in url");
-        throw _Exception("getInfo: object_id not found");
+        throw std::runtime_error("getInfo: object_id not found");
     } else
         objectID = std::stoi(objID);
 
@@ -93,7 +93,7 @@ void URLRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
     int objectType = obj->getObjectType();
 
     if (!IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
-        throw _Exception("getInfo: object is not an external url item");
+        throw std::runtime_error("getInfo: object is not an external url item");
     }
 
     tr_profile = getValueOrDefault(dict, URL_PARAM_TRANSCODE_PROFILE_NAME);
@@ -102,7 +102,7 @@ void URLRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
         Ref<TranscodingProfile> tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(tr_profile);
 
         if (tp == nullptr)
-            throw _Exception("Transcoding requested but no profile "
+            throw std::runtime_error("Transcoding requested but no profile "
                              "matching the name "
                 + tr_profile + " found");
 
@@ -131,8 +131,8 @@ void URLRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
             UpnpFileInfo_set_FileLength(info, st->getSize());
             header = "Accept-Ranges: bytes";
             log_debug("URL used for request: {}", st->getURL().c_str());
-        } catch (const Exception& ex) {
-            log_warning("{}", ex.getMessage().c_str());
+        } catch (const std::runtime_error& ex) {
+            log_warning("{}", ex.what());
             UpnpFileInfo_set_FileLength(info, -1);
         }
 
@@ -169,7 +169,7 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
     // Currently we explicitly do not support UPNP_WRITE
     // due to security reasons.
     if (mode != UPNP_READ)
-        throw _Exception("UPNP_WRITE unsupported");
+        throw std::runtime_error("UPNP_WRITE unsupported");
 
     std::string url, parameters;
     parameters = (filename + strlen(LINK_URL_REQUEST_HANDLER));
@@ -181,7 +181,7 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
 
     std::string objID = getValueOrDefault(dict, "object_id");
     if (objID.empty()) {
-        throw _Exception("object_id not found");
+        throw std::runtime_error("object_id not found");
     } else
         objectID = std::stoi(objID);
 
@@ -190,7 +190,7 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
     int objectType = obj->getObjectType();
 
     if (!IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
-        throw _Exception("object is not an external url item");
+        throw std::runtime_error("object is not an external url item");
     }
 
     auto item = std::static_pointer_cast<CdsItemExternalURL>(obj);
@@ -218,7 +218,7 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
         Ref<TranscodingProfile> tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(tr_profile);
 
         if (tp == nullptr)
-            throw _Exception("Transcoding of file " + url + " but no profile matching the name " + tr_profile + " found");
+            throw std::runtime_error("Transcoding of file " + url + " but no profile matching the name " + tr_profile + " found");
 
         Ref<TranscodeDispatcher> tr_d(new TranscodeDispatcher(config, content));
         return tr_d->open(tp, url, item, range);
@@ -230,8 +230,8 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
             // info->file_length = st->getSize();
             header = "Accept-Ranges: bytes";
             log_debug("URL used for request: {}", st->getURL().c_str());
-        } catch (const Exception& ex) {
-            log_warning("{}", ex.getMessage().c_str());
+        } catch (const std::runtime_error& ex) {
+            log_warning("{}", ex.what());
             //info->file_length = -1;
         }
         mimeType = item->getMimeType();

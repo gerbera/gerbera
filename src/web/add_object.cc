@@ -177,10 +177,10 @@ void web::addObject::process()
     std::string location = param("location");
 
     if (!string_ok(param("title")))
-        throw _Exception("empty title");
+        throw std::runtime_error("empty title");
 
     if (!string_ok(param("class")))
-        throw _Exception("empty class");
+        throw std::runtime_error("empty class");
 
     int parentID = intParam("parent_id", 0);
 
@@ -198,30 +198,30 @@ void web::addObject::process()
         //root->appendChild(updateContainerEl);
     } else if (obj_type == STRING_OBJECT_TYPE_ITEM) {
         if (!string_ok(location))
-            throw _Exception("no location given");
+            throw std::runtime_error("no location given");
         if (!check_path(location, false))
-            throw _Exception("file not found");
+            throw std::runtime_error("file not found");
         obj = this->addItem(parentID, std::make_shared<CdsItem>(storage));
         allow_fifo = true;
     } else if (obj_type == STRING_OBJECT_TYPE_ACTIVE_ITEM) {
         if (!string_ok(param("action")))
-            throw _Exception("no action given");
+            throw std::runtime_error("no action given");
         if (!string_ok(location))
-            throw _Exception("no location given");
+            throw std::runtime_error("no location given");
         if (!check_path(location, false))
-            throw _Exception("path not found");
+            throw std::runtime_error("path not found");
         obj = this->addActiveItem(parentID);
         allow_fifo = true;
     } else if (obj_type == STRING_OBJECT_TYPE_EXTERNAL_URL) {
         if (!string_ok(location))
-            throw _Exception("No URL given");
+            throw std::runtime_error("No URL given");
         obj = this->addUrl(parentID, std::make_shared<CdsItemExternalURL>(storage), true);
     } else if (obj_type == STRING_OBJECT_TYPE_INTERNAL_URL) {
         if (!string_ok(location))
-            throw _Exception("No URL given");
+            throw std::runtime_error("No URL given");
         obj = this->addUrl(parentID, std::make_shared<CdsItemInternalURL>(storage), false);
     } else {
-        throw _Exception("unknown object type: " + obj_type);
+        throw std::runtime_error("unknown object type: " + obj_type);
     }
 
     if (obj != nullptr) {

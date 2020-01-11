@@ -49,7 +49,7 @@ std::unique_ptr<IOHandler> TranscodeDispatcher::open(Ref<TranscodingProfile> pro
     std::string range)
 {
     if (profile == nullptr)
-        throw _Exception("Transcoding of file " + location +
+        throw std::runtime_error("Transcoding of file " + location +
                          "requested but no profile given ");
    
 //    check_path_ex(location);
@@ -60,6 +60,6 @@ std::unique_ptr<IOHandler> TranscodeDispatcher::open(Ref<TranscodingProfile> pro
         return tr_ext->open(profile, location, obj, range);
     }
     else
-        throw _Exception("Unknown transcoding type for profile " + 
+        throw std::runtime_error("Unknown transcoding type for profile " +
                          profile->getName());
 }

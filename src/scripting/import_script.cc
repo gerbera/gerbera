@@ -49,7 +49,7 @@ ImportScript::ImportScript(std::shared_ptr<ConfigManager> config,
     {
         load(scriptPath);
     }
-    catch (const Exception & ex)
+    catch (const std::runtime_error& ex)
     {
         throw ex;
     }
@@ -70,7 +70,7 @@ void ImportScript::processCdsObject(std::shared_ptr<CdsObject> obj, std::string 
         duk_del_prop_string(ctx, -1, "object_script_path");
         duk_pop(ctx);
     }
-    catch (const Exception & ex)
+    catch (const std::runtime_error& ex)
     {
         duk_push_global_object(ctx);
         duk_del_prop_string(ctx, -1, "orig");

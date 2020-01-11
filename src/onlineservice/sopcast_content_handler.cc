@@ -53,7 +53,7 @@ bool SopCastContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
     std::string temp;
 
     if (service->getName() != "channels")
-        throw _Exception("Invalid XML for SopCast service received");
+        throw std::runtime_error("Invalid XML for SopCast service received");
 
     channels = service;
 
@@ -217,9 +217,9 @@ std::shared_ptr<CdsObject> SopCastContentHandler::getNextObject()
             try {
                 item->validate();
                 return item;
-            } catch (const Exception& ex) {
+            } catch (const std::runtime_error& ex) {
                 log_warning("Failed to validate newly created SopCast item: {}",
-                    ex.getMessage().c_str());
+                    ex.what());
                 continue;
             }
         }

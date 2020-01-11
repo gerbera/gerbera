@@ -435,7 +435,7 @@ std::unique_ptr<IOHandler> FfmpegHandler::serveContent(std::shared_ptr<CdsItem> 
 #endif // old api
     {
         pthread_mutex_unlock(&thumb_lock);
-        throw _Exception("Could not generate thumbnail for " + item->getLocation());
+        throw std::runtime_error("Could not generate thumbnail for " + item->getLocation());
     }
     if (config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED)) {
         writeThumbnailCacheFile(item->getLocation(),

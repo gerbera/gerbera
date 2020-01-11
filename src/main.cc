@@ -263,10 +263,10 @@ int main(int argc, char** argv, char** envp)
             log_error("Error parsing config file: {} line {}:{}",
                 pe.context->location.c_str(),
                 pe.context->line,
-                pe.getMessage().c_str());
+                pe.what());
             exit(EXIT_FAILURE);
-        } catch (const Exception& e) {
-            log_error("{}", e.getMessage().c_str());
+        } catch (const std::runtime_error& e) {
+            log_error("{}", e.what());
             exit(EXIT_FAILURE);
         }
 
@@ -324,13 +324,13 @@ int main(int argc, char** argv, char** envp)
                     server->shutdown();
                 server = nullptr;
                 config = nullptr;
-            } catch (const Exception& e) {
-                log_error("{}", e.getMessage().c_str());
+            } catch (const std::runtime_error& e) {
+                log_error("{}", e.what());
             }
 
             exit(EXIT_FAILURE);
-        } catch (const Exception& e) {
-            log_error("{}", e.getMessage().c_str());
+        } catch (const std::runtime_error& e) {
+            log_error("{}", e.what());
             exit(EXIT_FAILURE);
         }
 
@@ -341,8 +341,8 @@ int main(int argc, char** argv, char** envp)
                     // add file/directory recursively and asynchronously
                     server->getContent()->addFile(std::string(f), true, true,
                         config->getBoolOption(CFG_IMPORT_HIDDEN_FILES));
-                } catch (const Exception& e) {
-                    log_error("{}", e.getMessage().c_str());
+                } catch (const std::runtime_error& e) {
+                    log_error("{}", e.what());
                     exit(EXIT_FAILURE);
                 }
             }
@@ -370,14 +370,14 @@ int main(int argc, char** argv, char** envp)
                         log_error("Error parsing config file: {} line {}:{}",
                             pe.context->location.c_str(),
                             pe.context->line,
-                            pe.getMessage().c_str());
+                            pe.what());
                         log_error("Could not restart Gerbera");
                         // at this point upnp shutdown has already been called
                         // so it is safe to exit
                         exit(EXIT_FAILURE);
-                    } catch (const Exception& e) {
+                    } catch (const std::runtime_error& e) {
                         log_error("Error reloading configuration: {}",
-                            e.getMessage().c_str());
+                            e.what());
                         exit(EXIT_FAILURE);
                     }
 
@@ -387,7 +387,7 @@ int main(int argc, char** argv, char** envp)
                     server->run();
 
                     restart_flag = 0;
-                } catch (const Exception& e) {
+                } catch (const std::runtime_error& e) {
                     restart_flag = 0;
                     shutdown_flag = 1;
                     sigemptyset(&mask_set);
@@ -406,8 +406,8 @@ int main(int argc, char** argv, char** envp)
         } catch (const UpnpException& upnp_e) {
             log_error("main: upnp error {}", upnp_e.getErrorCode());
             ret = EXIT_FAILURE;
-        } catch (const Exception e) {
-            log_error("main: error {}", e.getMessage().c_str());
+        } catch (const std::runtime_error& e) {
+            log_error("main: error {}", e.what());
             ret = EXIT_FAILURE;
         }
 

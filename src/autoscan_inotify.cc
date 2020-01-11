@@ -55,8 +55,8 @@ AutoscanInotify::AutoscanInotify(std::shared_ptr<Storage> storage, std::shared_p
         try {
             int max_watches = std::stoi(trim_string(read_text_file(INOTIFY_MAX_USER_WATCHES_FILE)));
             log_debug("Max watches on the system: {}", max_watches);
-        } catch (const Exception& ex) {
-            log_error("Could not determine maximum number of inotify user watches: {}", ex.getMessage().c_str());
+        } catch (const std::runtime_error& ex) {
+            log_error("Could not determine maximum number of inotify user watches: {}", ex.what());
         }
     }
 
@@ -239,8 +239,8 @@ void AutoscanInotify::threadProc()
                     watches->erase(wd);
                 }
             }
-        } catch (const Exception& e) {
-            log_error("Inotify thread caught exception: {}", e.getMessage().c_str());
+        } catch (const std::runtime_error& e) {
+            log_error("Inotify thread caught exception: {}", e.what());
         }
     }
 }
@@ -758,8 +758,8 @@ std::string AutoscanInotify::normalizePathNoEx(std::string path)
 {
     try {
         return normalizePath(path);
-    } catch (const Exception& e) {
-        log_error("{}", e.getMessage().c_str());
+    } catch (const std::runtime_error& e) {
+        log_error("{}", e.what());
         return nullptr;
     }
 }

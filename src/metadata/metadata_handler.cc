@@ -194,7 +194,7 @@ std::unique_ptr<MetadataHandler> MetadataHandler::createHandler(std::shared_ptr<
     case CH_FANART:
         return std::make_unique<FanArtHandler>(config);
     default:
-        throw _Exception("unknown content handler ID: " + std::to_string(handlerType));
+        throw std::runtime_error("unknown content handler ID: " + std::to_string(handlerType));
     }
 }
 
