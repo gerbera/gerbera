@@ -69,7 +69,7 @@ public:
     /// either a container or an item. The renderActions parameter tells us whether to also
     /// show the special fields of an active item in the XML. This is currently used when
     /// providing the XML representation of an active item to a trigger/toggle script.
-    zmm::Ref<mxml::Element> renderObject(std::shared_ptr<CdsObject> obj, bool renderActions = false, size_t stringLimit = std::string::npos);
+    void renderObject(std::shared_ptr<CdsObject> obj, bool renderActions, size_t stringLimit, pugi::xml_node* parent);
 
     /// \todo change the text string to element, parsing should be done outside
     void updateObject(std::shared_ptr<CdsObject> obj, std::string text);
@@ -88,25 +88,20 @@ public:
     /// \brief Renders a resource tag (part of DIDL-Lite XML)
     /// \param URL download location of the item (will be child element of the <res> tag)
     /// \param attributes Dictionary containing the <res> tag attributes (like resolution, etc.)
-    zmm::Ref<mxml::Element> renderResource(std::string URL, const std::map<std::string,std::string>& attributes);
+    void renderResource(std::string URL, const std::map<std::string,std::string>& attributes, pugi::xml_node* parent);
 
     /// \brief Renders a subtitle resource tag (Samsung proprietary extension)
     /// \param URL download location of the video item
-    zmm::Ref<mxml::Element> renderCaptionInfo(std::string URL);
+    void renderCaptionInfo(std::string URL, pugi::xml_node* parent);
 
-    zmm::Ref<mxml::Element> renderCreator(std::string creator);
+    void renderCreator(std::string creator, pugi::xml_node* parent);
+    void renderAlbumArtURI(std::string uri, pugi::xml_node* parent);
+    void renderComposer(std::string composer, pugi::xml_node* parent);
+    void renderConductor(std::string conductor, pugi::xml_node* parent);
+    void renderOrchestra(std::string orchestra, pugi::xml_node* parent);
+    void renderAlbumDate(std::string date, pugi::xml_node* parent);
 
-    zmm::Ref<mxml::Element> renderAlbumArtURI(std::string uri);
-
-    zmm::Ref<mxml::Element> renderComposer(std::string composer);
-
-    zmm::Ref<mxml::Element> renderConductor(std::string conductor);
-
-    zmm::Ref<mxml::Element> renderOrchestra(std::string orchestra);
-
-    zmm::Ref<mxml::Element> renderAlbumDate(std::string date);
-
-    void addResources(std::shared_ptr<CdsItem> item, zmm::Ref<mxml::Element> element);
+    void addResources(std::shared_ptr<CdsItem> item, pugi::xml_node* parent);
 
     // FIXME: This needs to go, once we sort a nicer way for the webui code to access this
     static std::string getFirstResourcePath(std::shared_ptr<CdsItem> item);

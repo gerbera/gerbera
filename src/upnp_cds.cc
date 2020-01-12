@@ -104,17 +104,14 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
         throw UpnpException(UPNP_E_NO_SUCH_ID, "no such object");
     }
 
-    Ref<Element> didl_lite(new Element("DIDL-Lite"));
-    didl_lite->setAttribute(XML_NAMESPACE_ATTR,
-        XML_DIDL_LITE_NAMESPACE);
-    didl_lite->setAttribute(XML_DC_NAMESPACE_ATTR,
-        XML_DC_NAMESPACE);
-    didl_lite->setAttribute(XML_UPNP_NAMESPACE_ATTR,
-        XML_UPNP_NAMESPACE);
+    pugi::xml_document didl_lite;
+    auto didl_lite_root = didl_lite.append_child("DIDL-Lite");
+    didl_lite_root.append_attribute(XML_NAMESPACE_ATTR) = XML_DIDL_LITE_NAMESPACE;
+    didl_lite_root.append_attribute(XML_DC_NAMESPACE_ATTR) = XML_DC_NAMESPACE;
+    didl_lite_root.append_attribute(XML_UPNP_NAMESPACE_ATTR) = XML_UPNP_NAMESPACE;
 
     if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK)) {
-        didl_lite->setAttribute(XML_SEC_NAMESPACE_ATTR,
-            XML_SEC_NAMESPACE);
+        didl_lite_root.append_attribute(XML_SEC_NAMESPACE_ATTR) = XML_SEC_NAMESPACE;
     }
 
     for (size_t i = 0; i < arr.size(); i++) {
@@ -129,14 +126,16 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
             obj->setTitle(title);
         }
 
-        Ref<Element> didl_object = xmlBuilder->renderObject(obj, false, stringLimit);
-
-        didl_lite->appendElementChild(didl_object);
+        xmlBuilder->renderObject(obj, false, stringLimit, &didl_lite_root);
     }
+
+    std::stringstream buf;
+    didl_lite.print(buf, "", 0);
+    std::string didl_lite_xml = buf.str();
 
     auto response = xmlBuilder->createResponse(request->getActionName(), DESC_CDS_SERVICE_TYPE);
     auto resp_root = response->document_element();
-    resp_root.append_child("Result").append_child(pugi::node_pcdata).set_value(didl_lite->print().c_str());
+    resp_root.append_child("Result").append_child(pugi::node_pcdata).set_value(didl_lite_xml.c_str());
     resp_root.append_child("NumberReturned").append_child(pugi::node_pcdata).set_value(std::to_string(arr.size()).c_str());
     resp_root.append_child("TotalMatches").append_child(pugi::node_pcdata).set_value(std::to_string(param->getTotalMatches()).c_str());
     resp_root.append_child("UpdateID").append_child(pugi::node_pcdata).set_value(std::to_string(systemUpdateID).c_str());
@@ -159,17 +158,14 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
     log_debug("Search received parameters: ContainerID [{}] SearchCriteria [{}] StartingIndex [{}] RequestedCount [{}]",
         containerID.c_str(), searchCriteria.c_str(), startingIndex.c_str(), requestedCount.c_str());
 
-    Ref<Element> didl_lite(new Element("DIDL-Lite"));
-    didl_lite->setAttribute(XML_NAMESPACE_ATTR,
-        XML_DIDL_LITE_NAMESPACE);
-    didl_lite->setAttribute(XML_DC_NAMESPACE_ATTR,
-        XML_DC_NAMESPACE);
-    didl_lite->setAttribute(XML_UPNP_NAMESPACE_ATTR,
-        XML_UPNP_NAMESPACE);
+    pugi::xml_document didl_lite;
+    auto didl_lite_root = didl_lite.append_child("DIDL-Lite");
+    didl_lite_root.append_attribute(XML_NAMESPACE_ATTR) = XML_DIDL_LITE_NAMESPACE;
+    didl_lite_root.append_attribute(XML_DC_NAMESPACE_ATTR) = XML_DC_NAMESPACE;
+    didl_lite_root.append_attribute(XML_UPNP_NAMESPACE_ATTR) = XML_UPNP_NAMESPACE;
 
     if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK)) {
-        didl_lite->setAttribute(XML_SEC_NAMESPACE_ATTR,
-            XML_SEC_NAMESPACE);
+        didl_lite_root.append_attribute(XML_SEC_NAMESPACE_ATTR) = XML_SEC_NAMESPACE;
     }
 
     auto searchParam = std::make_unique<SearchParam>(containerID, searchCriteria,
@@ -196,13 +192,16 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
             cdsObject->setTitle(title);
         }
 
-        Ref<Element> didl_object = xmlBuilder->renderObject(cdsObject, false, stringLimit);
-        didl_lite->appendElementChild(didl_object);
+        xmlBuilder->renderObject(cdsObject, false, stringLimit, &didl_lite);
     }
+
+    std::stringstream buf;
+    didl_lite.print(buf, "", 0);
+    std::string didl_lite_xml = buf.str();
 
     auto response = xmlBuilder->createResponse(request->getActionName(), DESC_CDS_SERVICE_TYPE);
     auto resp_root = response->document_element();
-    resp_root.append_child("Result").append_child(pugi::node_pcdata).set_value(didl_lite->print().c_str());
+    resp_root.append_child("Result").append_child(pugi::node_pcdata).set_value(didl_lite_xml.c_str());
     resp_root.append_child("NumberReturned").append_child(pugi::node_pcdata).set_value(std::to_string(results.size()).c_str());
     resp_root.append_child("TotalMatches").append_child(pugi::node_pcdata).set_value(std::to_string(numMatches).c_str());
     resp_root.append_child("UpdateID").append_child(pugi::node_pcdata).set_value(std::to_string(systemUpdateID).c_str());
