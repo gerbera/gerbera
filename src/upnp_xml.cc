@@ -876,7 +876,7 @@ void UpnpXMLBuilder::addResources(std::shared_ptr<CdsItem> item, Ref<Element> el
             // first resource
             if (!skipURL) {
                 if (transcoded)
-                    url = url + renderExtension(contentType, nullptr);
+                    url = url + renderExtension(contentType, "");
                 else
                     url = url + renderExtension(contentType, item->getLocation());
             }

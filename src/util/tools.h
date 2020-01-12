@@ -345,7 +345,7 @@ bool validateYesNo(std::string value);
 /// separator. In addition special %in and %out tokens are replaced by given
 /// strings.
 /// \todo add escaping
-std::vector<std::string> parseCommandLine(std::string line,
+std::vector<std::string> populateCommandLine(std::string line,
     std::string in,
     std::string out,
     std::string range);
