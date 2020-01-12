@@ -29,17 +29,18 @@
 
 /// \file transcode_dispatcher.cc
 
-#include "common.h"
-#include "cds_objects.h"
-#include "transcoding.h"
 #include "transcode_dispatcher.h"
+#include "cds_objects.h"
+#include "common.h"
 #include "transcode_ext_handler.h"
+#include "transcoding.h"
 #include "util/tools.h"
 
 using namespace zmm;
 
 TranscodeDispatcher::TranscodeDispatcher(std::shared_ptr<ConfigManager> config,
-    std::shared_ptr<ContentManager> content) : TranscodeHandler(config, content)
+    std::shared_ptr<ContentManager> content)
+    : TranscodeHandler(config, content)
 {
 }
 
@@ -49,17 +50,13 @@ std::unique_ptr<IOHandler> TranscodeDispatcher::open(Ref<TranscodingProfile> pro
     std::string range)
 {
     if (profile == nullptr)
-        throw std::runtime_error("Transcoding of file " + location +
-                         "requested but no profile given ");
-   
-//    check_path_ex(location);
+        throw std::runtime_error("Transcoding of file " + location + "requested but no profile given ");
 
-    if (profile->getType() == TR_External)
-    {
+    //    check_path_ex(location);
+
+    if (profile->getType() == TR_External) {
         Ref<TranscodeExternalHandler> tr_ext(new TranscodeExternalHandler(config, content));
         return tr_ext->open(profile, location, obj, range);
-    }
-    else
-        throw std::runtime_error("Unknown transcoding type for profile " +
-                         profile->getName());
+    } else
+        throw std::runtime_error("Unknown transcoding type for profile " + profile->getName());
 }

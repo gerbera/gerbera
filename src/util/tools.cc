@@ -1256,22 +1256,27 @@ bool validateYesNo(std::string value)
         return true;
 }
 
-std::vector<std::string> parseCommandLine(std::string line, std::string in, std::string out, std::string range)
+std::vector<std::string> populateCommandLine(std::string line, std::string in, std::string out, std::string range)
 {
+    log_debug("Template: '{}', in: '{}', out: '{}', range: '{}'", line, in, out, range);
     std::vector<std::string> params = split_string(line, ' ');
     if (in.empty() && out.empty())
         return params;
 
-    for (size_t i = 0; i < params.size(); i++) {
-        std::string param = params[i];
-        std::string newParam = param.replace(param.find("%in"), 3, in);
-
-        newParam = param.replace(param.find("%out"), 3, out);
-        if (!range.empty()) {
-            newParam = param.replace(param.find("%range"), 6, out);
+    for (auto& param : params) {
+        size_t inPos = param.find("%in");
+        if (inPos != string::npos) {
+            std::string newParam = param.replace(inPos, 3, in);
         }
-        if (param != newParam) {
-            params[i] = newParam;
+
+        size_t outPos = param.find("%out");
+        if (outPos != string::npos) {
+            std::string newParam = param.replace(outPos, 4, out);
+        }
+
+        size_t rangePos = param.find("%range");
+        if (rangePos != string::npos) {
+            std::string newParam = param.replace(rangePos, 5, range);
         }
     }
 

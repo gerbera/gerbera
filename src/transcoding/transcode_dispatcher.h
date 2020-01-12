@@ -35,8 +35,7 @@
 #include "common.h"
 #include "transcode_handler.h"
 
-class TranscodeDispatcher : public TranscodeHandler
-{
+class TranscodeDispatcher : public TranscodeHandler {
 public:
     TranscodeDispatcher(std::shared_ptr<ConfigManager> config,
         std::shared_ptr<ContentManager> content);
@@ -45,6 +44,5 @@ public:
         std::shared_ptr<CdsObject> obj,
         std::string range);
 };
-
 
 #endif // __TRANSCODE_DISPATCHER_H__

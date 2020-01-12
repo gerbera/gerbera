@@ -34,11 +34,10 @@
 
 #include "util/process_executor.h"
 
-class TranscodingProcessExecutor : public ProcessExecutor
-{
+class TranscodingProcessExecutor : public ProcessExecutor {
 public:
     TranscodingProcessExecutor(std::string command,
-                               std::vector<std::string> arglist);
+        std::vector<std::string> arglist);
     /// \brief This function adds a filename to a list, files in that list
     /// will be removed once the class is destroyed.
     void removeFile(std::string filename);
@@ -52,4 +51,3 @@ protected:
 };
 
 #endif // __TRANSCODING_PROCESS_EXECUTOR_H__
-

@@ -28,38 +28,35 @@
 */
 
 /// \file transcoding.h
-/// \brief Definitions of the Transcoding classes. 
+/// \brief Definitions of the Transcoding classes.
 
 #ifndef __TRANSCODING_H__
 #define __TRANSCODING_H__
 
-#include <vector>
-#include <string>
 #include <map>
+#include <string>
+#include <vector>
 
-#include "zmm/zmmf.h"
 #include "zmm/object_dictionary.h"
+#include "zmm/zmmf.h"
 
-#define SOURCE  (-1)
-#define OFF       0
+#define SOURCE (-1)
+#define OFF 0
 
-typedef enum 
-{
+typedef enum {
     TR_None,
     TR_External,
     TR_Remote
 } transcoding_type_t;
 
-typedef enum 
-{
+typedef enum {
     FCC_None,
     FCC_Process,
     FCC_Ignore
 } avi_fourcc_listmode_t;
 
 /// \brief this class keeps all data associated with one transcoding profile.
-class TranscodingProfile : public zmm::Object
-{
+class TranscodingProfile : public zmm::Object {
 public:
     TranscodingProfile(transcoding_type_t tr_type, std::string name);
 
@@ -102,7 +99,7 @@ public:
 
     /// \brief sets the arguments that will be fed to the transcoder,
     /// this is the string that comes right after the command.
-    /// 
+    ///
     /// The argument string must contain the special %out token and may contain
     /// the special %in token. The %in token is replaced by the filename of the
     /// appropriate item - this is the source media for the transcoder. The
@@ -122,11 +119,11 @@ public:
     ///
     /// This maps to an attribute of the <res> tag in the DIDL-Lite XML.
     ///
-    /// \param name attribute name 
+    /// \param name attribute name
     /// \param value attribute value
     void addAttribute(std::string name, std::string value);
 
-    std::map<std::string,std::string> getAttributes();
+    std::map<std::string, std::string> getAttributes();
 
     /// \brief Override for theora content.
     ///
@@ -161,7 +158,7 @@ public:
     /// \param list List of FourCC entries.
     /// \param mode Specifies if the FourCCs in the list are accepted or ignored
     void setAVIFourCCList(std::vector<std::string> list,
-                          avi_fourcc_listmode_t mode = FCC_Ignore);
+        avi_fourcc_listmode_t mode = FCC_Ignore);
 
     /// \brief Retrieves the FourCC list
     std::vector<std::string> getAVIFourCCList();
@@ -197,34 +194,36 @@ protected:
     transcoding_type_t tr_type;
     int number_of_channels;
     int sample_frequency;
-    std::map<std::string,std::string> attributes;
+    std::map<std::string, std::string> attributes;
     std::vector<std::string> fourcc_list;
     avi_fourcc_listmode_t fourcc_mode;
     TranscodingProfile();
 };
 
 /// \brief this class allows access to available transcoding profiles.
-class TranscodingProfileList : public zmm::Object
-{
+class TranscodingProfileList : public zmm::Object {
 public:
     TranscodingProfileList();
     void add(std::string sourceMimeType, zmm::Ref<TranscodingProfile> prof);
-    zmm::Ref<ObjectDictionary<TranscodingProfile> > get(std::string sourceMimeType);
-    zmm::Ref<ObjectDictionary<TranscodingProfile> > get(int index);
+    zmm::Ref<ObjectDictionary<TranscodingProfile>> get(std::string sourceMimeType);
+    zmm::Ref<ObjectDictionary<TranscodingProfile>> get(int index);
     zmm::Ref<TranscodingProfile> getByName(std::string name);
     inline int size() { return list->size(); }
+
 protected:
-    // outer dictionary is keyed by the source mimetype, inner dictionary by 
+    // outer dictionary is keyed by the source mimetype, inner dictionary by
     // profile name; this whole construction is necessary to allow to transcode
     // to the same output format but vary things like resolution, bitrate, etc.
-    zmm::Ref<ObjectDictionary<ObjectDictionary<TranscodingProfile> > > list;
+    zmm::Ref<ObjectDictionary<ObjectDictionary<TranscodingProfile>>> list;
 };
 
-class TranscodingProcess : public zmm::Object
-{
+class TranscodingProcess : public zmm::Object {
 public:
-    TranscodingProcess(pid_t pid, std::string fname) 
-                       { this->pid = pid; this->fname = fname; }
+    TranscodingProcess(pid_t pid, std::string fname)
+    {
+        this->pid = pid;
+        this->fname = fname;
+    }
 
     pid_t getPID() { return pid; }
     std::string getFName() { return fname; }
@@ -234,7 +233,4 @@ protected:
     std::string fname;
 };
 
-
-
-#endif//__TRANSCODING_H__
-
+#endif //__TRANSCODING_H__
