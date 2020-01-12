@@ -3,6 +3,7 @@
 #include "gmock/gmock.h"
 #include <uuid/uuid.h>
 #include <fstream>
+#include <ftw.h>
 
 #include "config/config_manager.h"
 #include "config/config_generator.h"
@@ -10,6 +11,19 @@
 
 using namespace zmm;
 using namespace mxml;
+
+static int unlinkCB(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
+{
+    int rv = remove(fpath);
+    if (rv)
+        perror(fpath);
+    return rv;
+}
+
+static int removeTree(const std::string& path)
+{
+    return nftw(path.c_str(), unlinkCB, 64, FTW_DEPTH | FTW_PHYS);
+}
 
 class ConfigManagerTest : public ::testing::Test {
 
@@ -92,6 +106,7 @@ class ConfigManagerTest : public ::testing::Test {
   virtual void TearDown() {
     if (subject)
       delete subject;
+    removeTree(gerberaDir);
   };
 
   std::string gerberaDir;
