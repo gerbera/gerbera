@@ -63,7 +63,7 @@ std::unique_ptr<pugi::xml_document> ActionRequest::getRequest()
     ixmlFreeDOMString(cxml);
 
     if (ret.status != pugi::xml_parse_status::status_ok)
-        throw Exception("Unable to parse ixml");
+        throw std::runtime_error("Unable to parse ixml");
 
     return request;
 }
