@@ -82,7 +82,7 @@ void ActionRequest::update()
 {
     if (response != nullptr) {
         std::stringstream buf;
-        response->document_element().print(buf);
+        response->print(buf, "", 0);
         std::string xml = buf.str();
         log_debug("ActionRequest::update(): {}", xml.c_str());
 
@@ -91,8 +91,6 @@ void ActionRequest::update()
 
         if (ret != IXML_SUCCESS) {
             log_error("ActionRequest::update(): could not convert to iXML");
-            log_debug("Dump:{}", xml.c_str());
-
             UpnpActionRequest_set_ErrCode(upnp_request, UPNP_E_ACTION_FAILED);
         } else {
             log_debug("ActionRequest::update(): converted to iXML, code {}", errCode);
