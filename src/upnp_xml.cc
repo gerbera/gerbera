@@ -58,24 +58,22 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createResponse(std::string a
     return response;
 }
 
-Ref<Element> UpnpXMLBuilder::renderObject(std::shared_ptr<CdsObject> obj, bool renderActions, size_t stringLimit)
+void UpnpXMLBuilder::renderObject(std::shared_ptr<CdsObject> obj, bool renderActions, size_t stringLimit, pugi::xml_node* parent)
 {
-    Ref<Element> result(new Element(""));
+    auto result = parent->append_child("");
 
-    result->setAttribute("id", std::to_string(obj->getID()));
-    result->setAttribute("parentID", std::to_string(obj->getParentID()));
-    result->setAttribute("restricted", obj->isRestricted() ? "1" : "0");
+    result.append_attribute("id") = obj->getID();
+    result.append_attribute("parentID") = obj->getParentID();
+    result.append_attribute("restricted") = obj->isRestricted() ? "1" : "0";
 
     std::string tmp = obj->getTitle();
-
     if ((stringLimit != std::string::npos) && (tmp.length() > stringLimit)) {
         tmp = tmp.substr(0, getValidUTF8CutPosition(tmp, stringLimit - 3));
         tmp = tmp + "...";
     }
+    result.append_child("dc:title").append_child(pugi::node_pcdata).set_value(tmp.c_str());
 
-    result->appendTextChild("dc:title", tmp);
-
-    result->appendTextChild("upnp:class", obj->getClass());
+    result.append_child("upnp:class").append_child(pugi::node_pcdata).set_value(obj->getClass().c_str());
 
     int objectType = obj->getObjectType();
     if (IS_CDS_ITEM(objectType)) {
@@ -94,15 +92,15 @@ Ref<Element> UpnpXMLBuilder::renderObject(std::shared_ptr<CdsObject> obj, bool r
                     tmp = tmp.substr(0, getValidUTF8CutPosition(tmp, stringLimit - 3));
                     tmp = tmp + "...";
                 }
-                result->appendTextChild(key, tmp);
+                result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(tmp.c_str());
             } else if (key == MetadataHandler::getMetaFieldName(M_TRACKNUMBER)) {
                 if (upnp_class == UPNP_DEFAULT_CLASS_MUSIC_TRACK)
-                    result->appendTextChild(key, it->second);
+                    result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(it->second.c_str());
             } else if ((key != MetadataHandler::getMetaFieldName(M_TITLE)) || ((key == MetadataHandler::getMetaFieldName(M_TRACKNUMBER)) && (upnp_class == UPNP_DEFAULT_CLASS_MUSIC_TRACK)))
-                result->appendTextChild(key, it->second);
+                result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(it->second.c_str());
         }
 
-        addResources(item, result);
+        addResources(item, &result);
 
         if (upnp_class == UPNP_DEFAULT_CLASS_MUSIC_TRACK) {
             // extract extension-less, lowercase track name to search for corresponding
@@ -121,19 +119,17 @@ Ref<Element> UpnpXMLBuilder::renderObject(std::shared_ptr<CdsObject> obj, bool r
 
                 url = virtualURL + _URL_PARAM_SEPARATOR + CONTENT_MEDIA_HANDLER + _URL_PARAM_SEPARATOR + dict_encode_simple(dict) + _URL_PARAM_SEPARATOR + URL_RESOURCE_ID + _URL_PARAM_SEPARATOR + "0";
                 log_debug("UpnpXMLRenderer::DIDLRenderObject: url: {}", url.c_str());
-                Ref<Element> aa(new Element(MetadataHandler::getMetaFieldName(M_ALBUMARTURI)));
-                aa->setText(url);
-                result->appendElementChild(aa);
+                result.append_child(MetadataHandler::getMetaFieldName(M_ALBUMARTURI).c_str()).append_child(pugi::node_pcdata).set_value(url.c_str());
             }
         }
-        result->setName("item");
+        result.set_name("item");
     } else if (IS_CDS_CONTAINER(objectType)) {
         auto cont = std::static_pointer_cast<CdsContainer>(obj);
 
-        result->setName("container");
+        result.set_name("container");
         int childCount = cont->getChildCount();
         if (childCount >= 0)
-            result->setAttribute("childCount", std::to_string(childCount));
+            result.append_attribute("childCount") = childCount;
 
         std::string upnp_class = obj->getClass();
         log_debug("container is class: {}", upnp_class.c_str());
@@ -146,7 +142,7 @@ Ref<Element> UpnpXMLBuilder::renderObject(std::shared_ptr<CdsObject> obj, bool r
             }
 
             if (string_ok(creator)) {
-                result->appendElementChild(renderCreator(creator));
+                renderCreator(creator, &result);
             }
 
             std::string composer = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_COMPOSER));
@@ -155,7 +151,7 @@ Ref<Element> UpnpXMLBuilder::renderObject(std::shared_ptr<CdsObject> obj, bool r
             }
 
             if (string_ok(composer)) {
-                result->appendElementChild(renderComposer(composer));
+                renderComposer(composer, &result);
             }
 
             std::string conductor = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_CONDUCTOR));
@@ -164,7 +160,7 @@ Ref<Element> UpnpXMLBuilder::renderObject(std::shared_ptr<CdsObject> obj, bool r
             }
 
             if (string_ok(conductor)) {
-                result->appendElementChild(renderConductor(conductor));
+                renderConductor(conductor, &result);
             }
 
             std::string orchestra = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_ORCHESTRA));
@@ -173,7 +169,7 @@ Ref<Element> UpnpXMLBuilder::renderObject(std::shared_ptr<CdsObject> obj, bool r
             }
 
             if (string_ok(orchestra)) {
-                result->appendElementChild(renderOrchestra(orchestra));
+                renderOrchestra(orchestra, &result);
             }
 
             std::string date = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_UPNP_DATE));
@@ -182,7 +178,7 @@ Ref<Element> UpnpXMLBuilder::renderObject(std::shared_ptr<CdsObject> obj, bool r
             }
 
             if (string_ok(date)) {
-                result->appendElementChild(renderAlbumDate(date));
+                renderAlbumDate(date, &result);
             }
 
         }
@@ -197,8 +193,7 @@ Ref<Element> UpnpXMLBuilder::renderObject(std::shared_ptr<CdsObject> obj, bool r
                 dict[URL_OBJECT_ID] = aa_id;
 
                 url = virtualURL + _URL_PARAM_SEPARATOR + CONTENT_MEDIA_HANDLER + _URL_PARAM_SEPARATOR + dict_encode_simple(dict) + _URL_PARAM_SEPARATOR + URL_RESOURCE_ID + _URL_PARAM_SEPARATOR + "0";
-
-                result->appendElementChild(renderAlbumArtURI(url));
+                renderAlbumArtURI(url, &result);
 
             } else if (upnp_class == UPNP_DEFAULT_CLASS_MUSIC_ALBUM) {
                 // try to find the first track and use its artwork
@@ -224,7 +219,7 @@ Ref<Element> UpnpXMLBuilder::renderObject(std::shared_ptr<CdsObject> obj, bool r
 
 
                                 std::string url = getArtworkUrl(item);
-                                result->appendElementChild(renderAlbumArtURI(url));
+                                renderAlbumArtURI(url, &result);
 
                                 artAdded = true;
                                 break;
@@ -238,15 +233,13 @@ Ref<Element> UpnpXMLBuilder::renderObject(std::shared_ptr<CdsObject> obj, bool r
 
     if (renderActions && IS_CDS_ACTIVE_ITEM(objectType)) {
         auto aitem = std::static_pointer_cast<CdsActiveItem>(obj);
-        result->appendTextChild("action", aitem->getAction());
-        result->appendTextChild("state", aitem->getState());
-        result->appendTextChild("location", aitem->getLocation());
-        result->appendTextChild("mime-type", aitem->getMimeType());
+        result.append_child("action").append_child(pugi::node_pcdata).set_value(aitem->getAction().c_str());
+        result.append_child("state").append_child(pugi::node_pcdata).set_value(aitem->getState().c_str());
+        result.append_child("location").append_child(pugi::node_pcdata).set_value(aitem->getLocation().c_str());
+        result.append_child("mime-type").append_child(pugi::node_pcdata).set_value(aitem->getMimeType().c_str());
     }
 
     // log_debug("Rendered DIDL: {}", result->print().c_str());
-
-    return result;
 }
 
 void UpnpXMLBuilder::updateObject(std::shared_ptr<CdsObject> obj, std::string text)
@@ -446,22 +439,19 @@ Ref<Element> UpnpXMLBuilder::renderDeviceDescription()
     return root;
 }
 
-Ref<Element> UpnpXMLBuilder::renderResource(std::string URL, const std::map<std::string,std::string>& attributes)
+void UpnpXMLBuilder::renderResource(std::string URL, const std::map<std::string,std::string>& attributes, pugi::xml_node* parent)
 {
-    Ref<Element> res(new Element("res"));
-
-    res->setText(URL);
+    auto res = parent->append_child("res");
+    res.append_child(pugi::node_pcdata).set_value(URL.c_str());
 
     for (auto it = attributes.begin(); it != attributes.end(); it++) {
-        res->setAttribute(it->first, it->second);
+        res.append_attribute(it->first.c_str()) = it->second.c_str();
     }
-
-    return res;
 }
 
-Ref<Element> UpnpXMLBuilder::renderCaptionInfo(std::string URL)
+void UpnpXMLBuilder::renderCaptionInfo(std::string URL, pugi::xml_node* parent)
 {
-    Ref<Element> cap(new Element("sec:CaptionInfoEx"));
+    auto cap = parent->append_child("sec:CaptionInfoEx");
 
     // Samsung DLNA clients don't follow this URL and
     // obtain subtitle location from video HTTP headers.
@@ -471,53 +461,38 @@ Ref<Element> UpnpXMLBuilder::renderCaptionInfo(std::string URL)
     // though it's necessary.
 
     size_t endp = URL.rfind('.');
-    cap->setText(URL.substr(0, endp) + ".srt");
-    cap->setAttribute("sec:type", "srt");
-
-    return cap;
+    cap.append_child(pugi::node_pcdata).set_value((URL.substr(0, endp) + ".srt").c_str());
+    cap.append_attribute("sec:type") = "srt";
 }
 
-Ref<Element> UpnpXMLBuilder::renderCreator(std::string creator)
+void UpnpXMLBuilder::renderCreator(std::string creator, pugi::xml_node* parent)
 {
-    Ref<Element> out(new Element("dc:creator"));
-
-    out->setText(creator);
-
-    return out;
+    parent->append_child("dc:creator").append_child(pugi::node_pcdata).set_value(creator.c_str());
 }
 
-Ref<Element> UpnpXMLBuilder::renderAlbumArtURI(std::string uri)
+void UpnpXMLBuilder::renderAlbumArtURI(std::string uri, pugi::xml_node* parent)
 {
-    Ref<Element> out(new Element("upnp:albumArtURI"));
-    out->setText(uri);
-    return out;
+    parent->append_child("upnp:albumArtURI").append_child(pugi::node_pcdata).set_value(uri.c_str());
 }
 
-Ref<Element> UpnpXMLBuilder::renderComposer(std::string composer)
+void UpnpXMLBuilder::renderComposer(std::string composer, pugi::xml_node* parent)
 {
-    Ref<Element> out(new Element("upnp:composer"));
-    out->setText(composer);
-    return out;
+    parent->append_child("upnp:composer").append_child(pugi::node_pcdata).set_value(composer.c_str());
 }
 
-Ref<Element> UpnpXMLBuilder::renderConductor(std::string Conductor)
+void UpnpXMLBuilder::renderConductor(std::string conductor, pugi::xml_node* parent)
 {
-    Ref<Element> out(new Element("upnp:Conductor"));
-    out->setText(Conductor);
-    return out;
+    parent->append_child("upnp:Conductor").append_child(pugi::node_pcdata).set_value(conductor.c_str());
 }
 
-Ref<Element> UpnpXMLBuilder::renderOrchestra(std::string orchestra)
+void UpnpXMLBuilder::renderOrchestra(std::string orchestra, pugi::xml_node* parent)
 {
-    Ref<Element> out(new Element("upnp:orchestra"));
-    out->setText(orchestra);
-    return out;
+    parent->append_child("upnp:orchestra").append_child(pugi::node_pcdata).set_value(orchestra.c_str());
 }
 
-Ref<Element> UpnpXMLBuilder::renderAlbumDate(std::string date) {
-    Ref<Element> out(new Element("upnp:date"));
-    out->setText(date);
-    return out;
+void UpnpXMLBuilder::renderAlbumDate(std::string date, pugi::xml_node* parent)
+{
+    parent->append_child("upnp:date").append_child(pugi::node_pcdata).set_value(date.c_str());
 }
 
 std::unique_ptr<UpnpXMLBuilder::PathBase> UpnpXMLBuilder::getPathBase(std::shared_ptr<CdsItem> item, bool forceLocal)
@@ -607,7 +582,7 @@ std::string UpnpXMLBuilder::renderExtension(std::string contentType, std::string
     return nullptr;
 }
 
-void UpnpXMLBuilder::addResources(std::shared_ptr<CdsItem> item, Ref<Element> element)
+void UpnpXMLBuilder::addResources(std::shared_ptr<CdsItem> item, pugi::xml_node* parent)
 {
     auto urlBase = getPathBase(item);
     bool skipURL = ((IS_CDS_ITEM_INTERNAL_URL(item->getObjectType()) || IS_CDS_ITEM_EXTERNAL_URL(item->getObjectType())) && (!item->getFlag(OBJECT_FLAG_PROXY_URL)));
@@ -855,15 +830,14 @@ void UpnpXMLBuilder::addResources(std::shared_ptr<CdsItem> item, Ref<Element> el
                     rct = res->getParameter(RESOURCE_CONTENT_TYPE);
 
                 if (rct == ID3_ALBUM_ART) {
-                    Ref<Element> aa(new Element(MetadataHandler::getMetaFieldName(M_ALBUMARTURI)));
-                    aa->setText(virtualURL + url);
+                    auto aa = parent->append_child(MetadataHandler::getMetaFieldName(M_ALBUMARTURI).c_str());
+                    aa.append_child(pugi::node_pcdata).set_value((virtualURL + url).c_str());
                     if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO)) {
                         /// \todo clean this up, make sure to check the mimetype and
                         /// provide the profile correctly
-                        aa->setAttribute("xmlns:dlna", "urn:schemas-dlna-org:metadata-1-0");
-                        aa->setAttribute("dlna:profileID", "JPEG_TN");
+                        aa.append_attribute("xmlns:dlna") = "urn:schemas-dlna-org:metadata-1-0";
+                        aa.append_attribute("dlna:profileID") = "JPEG_TN";
                     }
-                    element->appendElementChild(aa);
                     continue;
                 }
             }
@@ -925,7 +899,7 @@ void UpnpXMLBuilder::addResources(std::shared_ptr<CdsItem> item, Ref<Element> el
 
             if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK)) {
                 if (startswith(mimeType, "video")) {
-                    element->appendElementChild(renderCaptionInfo(url));
+                    renderCaptionInfo(url, parent);
                 }
             }
 
@@ -938,6 +912,6 @@ void UpnpXMLBuilder::addResources(std::shared_ptr<CdsItem> item, Ref<Element> el
         }
 
         if (!hide_original_resource || transcoded || (hide_original_resource && (original_resource != i)))
-            element->appendElementChild(renderResource(url, res_attrs));
+            renderResource(url, res_attrs, parent);
     }
 }

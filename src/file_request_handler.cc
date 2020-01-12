@@ -337,12 +337,17 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
     if (IS_CDS_ACTIVE_ITEM(objectType) && (res_id == 0)) { // check - if thumbnails, then no action, just show
         auto aitem = std::static_pointer_cast<CdsActiveItem>(obj);
 
-        Ref<Element> inputElement = xmlBuilder->renderObject(obj, true);
+        pugi::xml_document doc;
+        auto root = doc.document_element();
+        root.append_attribute(XML_DC_NAMESPACE_ATTR) = XML_DC_NAMESPACE;
+        root.append_attribute(XML_UPNP_NAMESPACE_ATTR) = XML_UPNP_NAMESPACE;
+        xmlBuilder->renderObject(obj, true, std::string::npos, &root);
 
-        inputElement->setAttribute(XML_DC_NAMESPACE_ATTR, XML_DC_NAMESPACE);
-        inputElement->setAttribute(XML_UPNP_NAMESPACE_ATTR, XML_UPNP_NAMESPACE);
+        std::stringstream buf;
+        doc.print(buf, "", 0);
+
+        std::string input = buf.str();
         std::string action = aitem->getAction();
-        std::string input = inputElement->print();
         std::string output;
 
         log_debug("Script input: {}", input.c_str());

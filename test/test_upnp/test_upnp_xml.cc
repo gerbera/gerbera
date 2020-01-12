@@ -25,52 +25,70 @@ class UpnpXmlTest : public ::testing::Test {
 };
 
 TEST_F(UpnpXmlTest, CreatesUpnpDateElement) {
-  zmm::Ref<mxml::Element> result = subject->renderAlbumDate("2001-01-01");
+  pugi::xml_document doc;
+  auto container = doc.append_child("container");
+  subject->renderAlbumDate("2001-01-01", &container);
+  auto result = container.first_child();
 
   EXPECT_NE(result, nullptr);
-  EXPECT_STREQ(result->getText().c_str(), "2001-01-01");
-  EXPECT_STREQ(result->getName().c_str(), "upnp:date");
+  EXPECT_STREQ(result.text().as_string(), "2001-01-01");
+  EXPECT_STREQ(result.name(), "upnp:date");
 }
 
 TEST_F(UpnpXmlTest, CreatesUpnpOrchestraElement) {
-  zmm::Ref<mxml::Element> result = subject->renderOrchestra("Orchestra");
+  pugi::xml_document doc;
+  auto container = doc.append_child("container");
+  subject->renderOrchestra("Orchestra", &container);
+  auto result = container.first_child();
 
   EXPECT_NE(result, nullptr);
-  EXPECT_STREQ(result->getText().c_str(), "Orchestra");
-  EXPECT_STREQ(result->getName().c_str(), "upnp:orchestra");
+  EXPECT_STREQ(result.text().as_string(), "Orchestra");
+  EXPECT_STREQ(result.name(), "upnp:orchestra");
 }
 
 TEST_F(UpnpXmlTest, CreatesUpnpConductorElement) {
-  zmm::Ref<mxml::Element> result = subject->renderConductor("Conductor");
+  pugi::xml_document doc;
+  auto container = doc.append_child("container");
+  subject->renderConductor("Conductor", &container);
+  auto result = container.first_child();
 
   EXPECT_NE(result, nullptr);
-  EXPECT_STREQ(result->getText().c_str(), "Conductor");
-  EXPECT_STREQ(result->getName().c_str(), "upnp:Conductor");
+  EXPECT_STREQ(result.text().as_string(), "Conductor");
+  EXPECT_STREQ(result.name(), "upnp:Conductor");
 }
 
 TEST_F(UpnpXmlTest, CreatesUpnpAlbumArtUriElement) {
-  zmm::Ref<mxml::Element> result = subject->renderAlbumArtURI("/some/uri");
+  pugi::xml_document doc;
+  auto container = doc.append_child("container");
+  subject->renderAlbumArtURI("/some/uri", &container);
+  auto result = container.first_child();
 
   EXPECT_NE(result, nullptr);
-  EXPECT_STREQ(result->getText().c_str(), "/some/uri");
-  EXPECT_STREQ(result->getName().c_str(), "upnp:albumArtURI");
+  EXPECT_STREQ(result.text().as_string(), "/some/uri");
+  EXPECT_STREQ(result.name(), "upnp:albumArtURI");
 }
 
 TEST_F(UpnpXmlTest, CreatesDcCreatorElement) {
-  zmm::Ref<mxml::Element> result = subject->renderCreator("Creator");
+  pugi::xml_document doc;
+  auto container = doc.append_child("container");
+  subject->renderCreator("Creator", &container);
+  auto result = container.first_child();
 
   EXPECT_NE(result, nullptr);
-  EXPECT_STREQ(result->getText().c_str(), "Creator");
-  EXPECT_STREQ(result->getName().c_str(), "dc:creator");
+  EXPECT_STREQ(result.text().as_string(), "Creator");
+  EXPECT_STREQ(result.name(), "dc:creator");
 }
 
 TEST_F(UpnpXmlTest, CreatesSecCaptionInfoElement) {
-  zmm::Ref<mxml::Element> result = subject->renderCaptionInfo("file.srt");
+  pugi::xml_document doc;
+  auto container = doc.append_child("container");
+  subject->renderCaptionInfo("file.srt", &container);
+  auto result = container.first_child();
 
   EXPECT_NE(result, nullptr);
-  EXPECT_STREQ(result->getText().c_str(), "file.srt");
-  EXPECT_STREQ(result->getName().c_str(), "sec:CaptionInfoEx");
-  EXPECT_STREQ(result->getAttribute("sec:type").c_str(), "srt");
+  EXPECT_STREQ(result.text().as_string(), "file.srt");
+  EXPECT_STREQ(result.name(), "sec:CaptionInfoEx");
+  EXPECT_STREQ(result.attribute("sec:type").as_string(), "srt");
 }
 
 TEST_F(UpnpXmlTest, CreatesEventPropertySet) {
