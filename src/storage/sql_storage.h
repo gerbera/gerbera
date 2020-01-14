@@ -192,7 +192,7 @@ private:
     int _ensurePathExistence(std::string path, int *changedContainer);
     
     /* helper class and helper function for addObject and updateObject */
-    class AddUpdateTable : public zmm::Object
+    class AddUpdateTable
     {
     public:
         AddUpdateTable(std::string table, std::map<std::string,std::string> dict, std::string operation)
@@ -209,14 +209,14 @@ private:
         std::map<std::string,std::string> dict;
         std::string operation;
     };
-    zmm::Ref<zmm::Array<AddUpdateTable> > _addUpdateObject(std::shared_ptr<CdsObject> obj, bool isUpdate, int *changedContainer);
+    std::vector<std::shared_ptr<AddUpdateTable>> _addUpdateObject(std::shared_ptr<CdsObject> obj, bool isUpdate, int *changedContainer);
 
     void generateMetadataDBOperations(std::shared_ptr<CdsObject> obj, bool isUpdate,
-        zmm::Ref<zmm::Array<AddUpdateTable>> operations);
+        std::vector<std::shared_ptr<AddUpdateTable>>& operations);
 
-    std::unique_ptr<std::ostringstream> sqlForInsert(std::shared_ptr<CdsObject> obj, zmm::Ref<AddUpdateTable> addUpdateTable);
-    std::unique_ptr<std::ostringstream> sqlForUpdate(std::shared_ptr<CdsObject> obj, zmm::Ref<AddUpdateTable> addUpdateTable);
-    std::unique_ptr<std::ostringstream> sqlForDelete(std::shared_ptr<CdsObject> obj, zmm::Ref<AddUpdateTable> addUpdateTable);
+    std::unique_ptr<std::ostringstream> sqlForInsert(std::shared_ptr<CdsObject> obj, std::shared_ptr<AddUpdateTable> addUpdateTable);
+    std::unique_ptr<std::ostringstream> sqlForUpdate(std::shared_ptr<CdsObject> obj, std::shared_ptr<AddUpdateTable> addUpdateTable);
+    std::unique_ptr<std::ostringstream> sqlForDelete(std::shared_ptr<CdsObject> obj, std::shared_ptr<AddUpdateTable> addUpdateTable);
     
     /* helper for removeObject(s) */
     void _removeObjects(const std::vector<int32_t> &objectIDs);

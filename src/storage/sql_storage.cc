@@ -218,7 +218,7 @@ std::shared_ptr<CdsObject> SQLStorage::checkRefID(std::shared_ptr<CdsObject> obj
     return findObjectByPath(location);
 }
 
-Ref<Array<SQLStorage::AddUpdateTable>> SQLStorage::_addUpdateObject(std::shared_ptr<CdsObject> obj, bool isUpdate, int* changedContainer)
+std::vector<std::shared_ptr<SQLStorage::AddUpdateTable>> SQLStorage::_addUpdateObject(std::shared_ptr<CdsObject> obj, bool isUpdate, int* changedContainer)
 {
     int objectType = obj->getObjectType();
     std::shared_ptr<CdsObject> refObj = nullptr;
@@ -353,6 +353,8 @@ Ref<Array<SQLStorage::AddUpdateTable>> SQLStorage::_addUpdateObject(std::shared_
         cdsObjectSql["mime_type"] = quote(item->getMimeType());
     }
 
+    std::vector<std::shared_ptr<SQLStorage::AddUpdateTable>> returnVal;
+
     // check for a duplicate (virtual) object
     if (hasReference && !isUpdate) {
         std::ostringstream q;
@@ -368,18 +370,16 @@ Ref<Array<SQLStorage::AddUpdateTable>> SQLStorage::_addUpdateObject(std::shared_
         Ref<SQLResult> res = select(q);
         // if duplicate items is found - ignore
         if (res != nullptr && (res->nextRow() != nullptr))
-            return nullptr;
+            return returnVal;
     }
 
     if (obj->getParentID() == INVALID_OBJECT_ID)
         throw std::runtime_error("tried to create or update an object with an illegal parent id");
     cdsObjectSql["parent_id"] = std::to_string(obj->getParentID());
 
-    int returnValSize = 2;
-    returnValSize += obj->getMetadata().size();
-    Ref<Array<AddUpdateTable>> returnVal(new Array<AddUpdateTable>(returnValSize));
-    returnVal->append(Ref<AddUpdateTable>(
-        new AddUpdateTable(CDS_OBJECT_TABLE, cdsObjectSql, isUpdate ? "update" : "insert")));
+    returnVal.push_back(
+        std::make_shared<AddUpdateTable>(CDS_OBJECT_TABLE, cdsObjectSql, isUpdate ? "update" : "insert")
+    );
 
     if (!hasReference || !std::equal(dict.begin(), dict.end(), refObj->getMetadata().begin())) {
         generateMetadataDBOperations(obj, isUpdate, returnVal);
@@ -393,8 +393,9 @@ Ref<Array<SQLStorage::AddUpdateTable>> SQLStorage::_addUpdateObject(std::shared_
         cdsActiveItemSql["action"] = quote(aitem->getAction());
         cdsActiveItemSql["state"] = quote(aitem->getState());
 
-        returnVal->append(Ref<AddUpdateTable>(new AddUpdateTable(CDS_ACTIVE_ITEM_TABLE, cdsActiveItemSql,
-            isUpdate ? "update" : "insert")));
+        returnVal.push_back(
+            std::make_shared<AddUpdateTable>(CDS_ACTIVE_ITEM_TABLE, cdsActiveItemSql, isUpdate ? "update" : "insert")
+        );
     }
 
     return returnVal;
@@ -405,13 +406,12 @@ void SQLStorage::addObject(std::shared_ptr<CdsObject> obj, int* changedContainer
     if (obj->getID() != INVALID_OBJECT_ID)
         throw std::runtime_error("tried to add an object with an object ID set");
     //obj->setID(INVALID_OBJECT_ID);
-    Ref<Array<AddUpdateTable>> data = _addUpdateObject(obj, false, changedContainer);
-    if (data == nullptr)
-        return;
+    auto data = _addUpdateObject(obj, false, changedContainer);
+
     // int lastInsertID = INVALID_OBJECT_ID;
     // int lastMetadataInsertID = INVALID_OBJECT_ID;
-    for (int i = 0; i < data->size(); i++) {
-        Ref<AddUpdateTable> addUpdateTable = data->get(i);
+    for (size_t i = 0; i < data.size(); i++) {
+        auto& addUpdateTable = data[i];
         std::shared_ptr<std::ostringstream> qb = sqlForInsert(obj, addUpdateTable);
         log_debug("insert_query: {}", qb->str().c_str());
         exec(*qb);
@@ -420,7 +420,7 @@ void SQLStorage::addObject(std::shared_ptr<CdsObject> obj, int* changedContainer
 
 void SQLStorage::updateObject(std::shared_ptr<CdsObject> obj, int* changedContainer)
 {
-    Ref<Array<AddUpdateTable>> data;
+    std::vector<std::shared_ptr<AddUpdateTable>> data;
     if (obj->getID() == CDS_ID_FS_ROOT) {
         std::map<std::string,std::string> cdsObjectSql;
 
@@ -428,17 +428,14 @@ void SQLStorage::updateObject(std::shared_ptr<CdsObject> obj, int* changedContai
         setFsRootName(obj->getTitle());
         cdsObjectSql["upnp_class"] = quote(obj->getClass());
 
-        data = Ref<Array<AddUpdateTable>>(new Array<AddUpdateTable>(1));
-        data->append(Ref<AddUpdateTable>(new AddUpdateTable(CDS_OBJECT_TABLE, cdsObjectSql, "update")));
+        data.push_back(std::make_shared<AddUpdateTable>(CDS_OBJECT_TABLE, cdsObjectSql, "update"));
     } else {
         if (IS_FORBIDDEN_CDS_ID(obj->getID()))
             throw std::runtime_error("tried to update an object with a forbidden ID (" + std::to_string(obj->getID()) + ")!");
         data = _addUpdateObject(obj, true, changedContainer);
-        if (data == nullptr)
-            return;
     }
-    for (int i = 0; i < data->size(); i++) {
-        Ref<AddUpdateTable> addUpdateTable = data->get(i);
+    for (size_t i = 0; i < data.size(); i++) {
+        auto& addUpdateTable = data[i];
         std::string operation = addUpdateTable->getOperation();
         std::unique_ptr<std::ostringstream> qb;
         if (operation == "update") {
@@ -2230,7 +2227,7 @@ void SQLStorage::clearFlagInDB(int flag)
 }
 
 void SQLStorage::generateMetadataDBOperations(std::shared_ptr<CdsObject> obj, bool isUpdate,
-    Ref<Array<AddUpdateTable>> operations)
+    std::vector<std::shared_ptr<AddUpdateTable>>& operations)
 {
     auto dict = obj->getMetadata();
     if (!isUpdate) {
@@ -2238,7 +2235,7 @@ void SQLStorage::generateMetadataDBOperations(std::shared_ptr<CdsObject> obj, bo
             std::map<std::string,std::string> metadataSql;
             metadataSql["property_name"] = quote(it->first);
             metadataSql["property_value"] = quote(it->second);
-            operations->append(Ref<AddUpdateTable>(new AddUpdateTable(METADATA_TABLE, metadataSql, "insert")));
+            operations.push_back(std::make_shared<AddUpdateTable>(METADATA_TABLE, metadataSql, "insert"));
         }
     } else {
         // get current metadata from DB: if only it really was a dictionary...
@@ -2248,7 +2245,7 @@ void SQLStorage::generateMetadataDBOperations(std::shared_ptr<CdsObject> obj, bo
             std::map<std::string,std::string> metadataSql;
             metadataSql["property_name"] = quote(it->first);
             metadataSql["property_value"] = quote(it->second);
-            operations->append(Ref<AddUpdateTable>(new AddUpdateTable(METADATA_TABLE, metadataSql, operation)));
+            operations.push_back(std::make_shared<AddUpdateTable>(METADATA_TABLE, metadataSql, operation));
         }
         for (auto it = dbMetadata.begin(); it != dbMetadata.end(); it++) {
             if (dict.find(it->first) == dict.end()) {
@@ -2256,13 +2253,13 @@ void SQLStorage::generateMetadataDBOperations(std::shared_ptr<CdsObject> obj, bo
                 std::map<std::string,std::string> metadataSql;
                 metadataSql["property_name"] = quote(it->first);
                 metadataSql["property_value"] = quote(it->second);
-                operations->append(Ref<AddUpdateTable>(new AddUpdateTable(METADATA_TABLE, metadataSql, "delete")));
+                operations.push_back(std::make_shared<AddUpdateTable>(METADATA_TABLE, metadataSql, "delete"));
             }
         }
     }
 }
 
-std::unique_ptr<std::ostringstream> SQLStorage::sqlForInsert(std::shared_ptr<CdsObject> obj, Ref<AddUpdateTable> addUpdateTable)
+std::unique_ptr<std::ostringstream> SQLStorage::sqlForInsert(std::shared_ptr<CdsObject> obj, std::shared_ptr<AddUpdateTable> addUpdateTable)
 {
     int lastInsertID = INVALID_OBJECT_ID;
     int lastMetadataInsertID = INVALID_OBJECT_ID;
@@ -2309,7 +2306,7 @@ std::unique_ptr<std::ostringstream> SQLStorage::sqlForInsert(std::shared_ptr<Cds
     return qb;
 }
 
-std::unique_ptr<std::ostringstream> SQLStorage::sqlForUpdate(std::shared_ptr<CdsObject> obj, Ref<AddUpdateTable> addUpdateTable)
+std::unique_ptr<std::ostringstream> SQLStorage::sqlForUpdate(std::shared_ptr<CdsObject> obj, std::shared_ptr<AddUpdateTable> addUpdateTable)
 {
     if (addUpdateTable == nullptr
         || (addUpdateTable->getTable() == METADATA_TABLE && addUpdateTable->getDict().size() != 2))
@@ -2335,7 +2332,7 @@ std::unique_ptr<std::ostringstream> SQLStorage::sqlForUpdate(std::shared_ptr<Cds
     return qb;
 }
 
-std::unique_ptr<std::ostringstream> SQLStorage::sqlForDelete(std::shared_ptr<CdsObject> obj, Ref<AddUpdateTable> addUpdateTable)
+std::unique_ptr<std::ostringstream> SQLStorage::sqlForDelete(std::shared_ptr<CdsObject> obj, std::shared_ptr<AddUpdateTable> addUpdateTable)
 {
     if (addUpdateTable == nullptr
         || (addUpdateTable->getTable() == METADATA_TABLE && addUpdateTable->getDict().size() != 2))
