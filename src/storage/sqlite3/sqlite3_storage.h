@@ -108,13 +108,13 @@ public:
     /// \param query The SQL query string
     SLSelectTask(const char* query);
     virtual void run(sqlite3** db, Sqlite3Storage* sl);
-    inline zmm::Ref<SQLResult> getResult() { return RefCast(pres, SQLResult); };
+    inline std::shared_ptr<SQLResult> getResult() { return std::static_pointer_cast<SQLResult>(pres); };
 
 protected:
     /// \brief The SQL query string
     const char* query;
     /// \brief The Sqlite3Result
-    zmm::Ref<Sqlite3Result> pres;
+    std::shared_ptr<Sqlite3Result> pres;
 };
 
 /// \brief A task for the sqlite3 thread to do a SQL exec.
@@ -166,7 +166,7 @@ private:
     inline std::string quote(bool val) override { return std::string(val ? "1" : "0"); }
     inline std::string quote(char val) override { return quote(std::string(1, val)); }
     inline std::string quote(long long val) override { return std::to_string(val); }
-    zmm::Ref<SQLResult> select(const char* query, int length) override;
+    std::shared_ptr<SQLResult> select(const char* query, int length) override;
     int exec(const char* query, int length, bool getLastInsertId = false) override;
     void storeInternalSetting(std::string key, std::string value) override;
 
@@ -209,9 +209,11 @@ private:
 
 /// \brief Represents a result of a sqlite3 select
 class Sqlite3Result : public SQLResult {
-private:
+public:
     Sqlite3Result();
     virtual ~Sqlite3Result();
+
+private:
     virtual std::unique_ptr<SQLRow> nextRow() override;
     virtual unsigned long long getNumRows() override { return nrow; }
 
@@ -231,12 +233,12 @@ private:
 /// \brief Represents a row of a result of a sqlite3 select
 class Sqlite3Row : public SQLRow {
 public:
-    Sqlite3Row(char** row, zmm::Ref<SQLResult> sqlResult);
+    Sqlite3Row(char** row, std::shared_ptr<SQLResult> sqlResult);
 
 private:
     inline virtual char* col_c_str(int index) { return row[index]; }
     char** row;
-    zmm::Ref<Sqlite3Result> res;
+    std::shared_ptr<Sqlite3Result> res;
 
     friend class Sqlite3Result;
 };

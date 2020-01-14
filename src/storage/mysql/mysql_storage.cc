@@ -310,7 +310,7 @@ std::string MysqlStorage::getError(MYSQL* db)
     return err_buf.str();
 }
 
-Ref<SQLResult> MysqlStorage::select(const char* query, int length)
+std::shared_ptr<SQLResult> MysqlStorage::select(const char* query, int length)
 {
 #ifdef MYSQL_SELECT_DEBUG
     log_debug("{}", query);
@@ -333,7 +333,8 @@ Ref<SQLResult> MysqlStorage::select(const char* query, int length)
         std::string myError = getError(&db);
         throw StorageException(myError, "Mysql: mysql_store_result() failed: " + myError + "; query: " + query);
     }
-    return Ref<SQLResult>(new MysqlResult(mysql_res));
+
+    return std::static_pointer_cast<SQLResult>(std::make_shared<MysqlResult>(mysql_res));
 }
 
 int MysqlStorage::exec(const char* query, int length, bool getLastInsertId)
@@ -409,7 +410,8 @@ std::unique_ptr<SQLRow> MysqlResult::nextRow()
     MYSQL_ROW mysql_row;
     mysql_row = mysql_fetch_row(mysql_res);
     if (mysql_row) {
-        auto p = std::make_unique<MysqlRow>(mysql_row, Ref<SQLResult>(this));
+        auto self = shared_from_this();
+        auto p = std::make_unique<MysqlRow>(mysql_row, self);
         return p;
     }
     nullRead = true;
@@ -420,7 +422,7 @@ std::unique_ptr<SQLRow> MysqlResult::nextRow()
 
 /* MysqlRow */
 
-MysqlRow::MysqlRow(MYSQL_ROW mysql_row, Ref<SQLResult> sqlResult)
+MysqlRow::MysqlRow(MYSQL_ROW mysql_row, std::shared_ptr<SQLResult> sqlResult)
     : SQLRow(sqlResult)
 {
     this->mysql_row = mysql_row;

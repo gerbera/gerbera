@@ -289,7 +289,7 @@ std::string Sqlite3Storage::getError(std::string query, std::string error, sqlit
         + sqlite3_errmsg(db) + "\nQuery:" + (query.empty() ? "unknown" : query) + "\nerror: " + (error.empty() ? "unknown" : error);
 }
 
-Ref<SQLResult> Sqlite3Storage::select(const char* query, int length)
+std::shared_ptr<SQLResult> Sqlite3Storage::select(const char* query, int length)
 {
     //fprintf(stdout, "%s\n",query);
     //fflush(stdout);
@@ -500,7 +500,7 @@ SLSelectTask::SLSelectTask(const char* query)
 
 void SLSelectTask::run(sqlite3** db, Sqlite3Storage* sl)
 {
-    pres = Ref<Sqlite3Result>(new Sqlite3Result());
+    pres = std::make_shared<Sqlite3Result>();
 
     char* err = nullptr;;
     int ret = sqlite3_get_table(
@@ -616,8 +616,9 @@ std::unique_ptr<SQLRow> Sqlite3Result::nextRow()
         row += ncolumn;
         cur_row++;
         if (cur_row <= nrow) {
-            auto p = std::make_unique<Sqlite3Row>(row, Ref<SQLResult>(this));
-            p->res = Ref<Sqlite3Result>(this);
+            auto self = shared_from_this();
+            auto p = std::make_unique<Sqlite3Row>(row, self);
+            p->res = std::static_pointer_cast<Sqlite3Result>(self);
             return p;
         } else
             return nullptr;
@@ -627,7 +628,7 @@ std::unique_ptr<SQLRow> Sqlite3Result::nextRow()
 
 /* Sqlite3Row */
 
-Sqlite3Row::Sqlite3Row(char** row, Ref<SQLResult> sqlResult)
+Sqlite3Row::Sqlite3Row(char** row, std::shared_ptr<SQLResult> sqlResult)
     : SQLRow(sqlResult)
 {
     this->row = row;
