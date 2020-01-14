@@ -121,10 +121,11 @@ std::string ConfigManager::construct_path(std::string path)
     if (home == "." && path.at(0) == '.')
         return path;
 
-    if (home.empty())
-        return "." + DIR_SEPARATOR + path;
-    else
-        return home + DIR_SEPARATOR + path;
+    if (home.empty()) {
+        return fmt::format("./{}", path);
+    } else {
+        return fmt::format("{}/{}", home, path);
+    }
 }
 
 #define NEW_OPTION(optval) opt = std::make_shared<Option>(optval);
@@ -829,9 +830,7 @@ void ConfigManager::validate(std::string serverhome)
 
     temp_int = getIntOption("/server/alive", DEFAULT_ALIVE_INTERVAL);
     if (temp_int < ALIVE_INTERVAL_MIN)
-        throw std::runtime_error("Error in config file: incorrect parameter "
-                         "for /server/alive, must be at least "
-            + ALIVE_INTERVAL_MIN);
+        throw std::runtime_error(fmt::format("Error in config file: incorrect parameter for /server/alive, must be at least {}", ALIVE_INTERVAL_MIN));
     NEW_INT_OPTION(temp_int);
     SET_INT_OPTION(CFG_SERVER_ALIVE_INTERVAL);
 
@@ -913,10 +912,9 @@ void ConfigManager::validate(std::string serverhome)
             "/transcoding/attribute::fetch-buffer-size",
             DEFAULT_CURL_BUFFER_SIZE);
         if (temp_int < CURL_MAX_WRITE_SIZE)
-            throw std::runtime_error("Error in config file: incorrect parameter "
+            throw std::runtime_error(fmt::format("Error in config file: incorrect parameter "
                              "for <transcoding fetch-buffer-size=\"\"> attribute, "
-                             "must be at least "
-                + CURL_MAX_WRITE_SIZE);
+                             "must be at least {}", CURL_MAX_WRITE_SIZE));
         NEW_INT_OPTION(temp_int);
         SET_INT_OPTION(CFG_EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE);
 

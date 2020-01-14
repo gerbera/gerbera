@@ -71,7 +71,7 @@ void Timer::addTimerSubscriber(Subscriber* timerSubscriber, unsigned int notifyI
 {
     log_debug("Adding subscriber... interval: {} once: {} ", notifyInterval, once);
     if (notifyInterval == 0)
-        throw std::runtime_error("Tried to add timer with illegal notifyInterval: " + notifyInterval);
+        throw std::runtime_error(fmt::format("Tried to add timer with illegal notifyInterval: {}", notifyInterval));
 
     AutoLock lock(mutex);
     TimerSubscriberElement element(timerSubscriber, notifyInterval, parameter, once);
