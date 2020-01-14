@@ -190,13 +190,6 @@ void write_text_file(std::string path, std::string contents);
 /// \param to the path to the file to copy to
 void copy_file(std::string from, std::string to);
 
-typedef int (*COMPARATOR)(void*, void*);
-typedef void* COMPARABLE;
-
-int StringBaseComparatorAsc(void*, void*);
-
-void quicksort(COMPARABLE* arr, int size, COMPARATOR comparator);
-
 /// \brief Renders a string that can be used as the protocolInfo resource
 /// attribute: "http-get:*:mimetype:*"
 ///

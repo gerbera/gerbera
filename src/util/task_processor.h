@@ -5,6 +5,8 @@
 #define __TASK_PROCESSOR_H__
 
 #include <memory>
+#include <deque>
+
 #include "common.h"
 #include "generic_task.h"
 #include "onlineservice/online_service.h"
@@ -20,9 +22,9 @@ public:
     virtual ~TaskProcessor();
     void shutdown();
 
-    void addTask(zmm::Ref<GenericTask> task);
-    zmm::Ref<zmm::Array<GenericTask>> getTasklist();
-    zmm::Ref<GenericTask> getCurrentTask();
+    void addTask(std::shared_ptr<GenericTask> task);
+    std::deque<std::shared_ptr<GenericTask>> getTasklist();
+    std::shared_ptr<GenericTask> getCurrentTask();
     void invalidateTask(unsigned int taskID);
 
 protected:
@@ -35,8 +37,8 @@ protected:
     bool shutdownFlag;
     bool working;
     unsigned int taskID;
-    zmm::Ref<zmm::ObjectQueue<GenericTask>> taskQueue;
-    zmm::Ref<GenericTask> currentTask;
+    std::deque<std::shared_ptr<GenericTask>> taskQueue;
+    std::shared_ptr<GenericTask> currentTask;
 
     static void* staticThreadProc(void* arg);
 

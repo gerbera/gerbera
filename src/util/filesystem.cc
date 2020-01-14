@@ -174,8 +174,6 @@ bool Filesystem::have(std::string path, int mask)
     struct stat statbuf;
     int ret;
 
-    Ref<Array<FsObject>> files(new Array<FsObject>());
-
     DIR* dir;
     struct dirent* dent;
 

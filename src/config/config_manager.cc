@@ -1209,10 +1209,10 @@ void ConfigManager::validate(std::string serverhome)
     auto config_timed_list = createAutoscanListFromNodeset(nullptr, tmpEl, ScanMode::Timed);
     auto config_inotify_list = createAutoscanListFromNodeset(nullptr, tmpEl, ScanMode::INotify);
 
-    for (int i = 0; i < config_inotify_list->size(); i++) {
-        Ref<AutoscanDirectory> i_dir = config_inotify_list->get(i);
-        for (int j = 0; j < config_timed_list->size(); j++) {
-            Ref<AutoscanDirectory> t_dir = config_timed_list->get(j);
+    for (size_t i = 0; i < config_inotify_list->size(); i++) {
+        auto i_dir = config_inotify_list->get(i);
+        for (size_t j = 0; j < config_timed_list->size(); j++) {
+            auto t_dir = config_timed_list->get(j);
             if (i_dir->getLocation() == t_dir->getLocation())
                 throw std::runtime_error("Error in config file: same path used in both inotify and timed scan modes");
         }
@@ -1931,7 +1931,7 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNodeset(std::
         else
             throw std::runtime_error("autoscan directory " + location + ": hidden attribute " + temp + " is invalid");
 
-        Ref<AutoscanDirectory> dir(new AutoscanDirectory(location, mode, level, recursive, true, -1, interval, hidden));
+        auto dir = std::make_shared<AutoscanDirectory>(location, mode, level, recursive, true, -1, interval, hidden);
         try {
             list->add(dir);
         } catch (const std::runtime_error& e) {

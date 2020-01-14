@@ -96,7 +96,7 @@ void web::items::process()
         }
 
         if (startpoint_id != INVALID_OBJECT_ID) {
-            Ref<AutoscanDirectory> adir = storage->getAutoscanDirectory(startpoint_id);
+            std::shared_ptr<AutoscanDirectory> adir = storage->getAutoscanDirectory(startpoint_id);
             if ((adir != nullptr) && (adir->getScanMode() == ScanMode::INotify)) {
                 protectItems = 1;
                 if (autoscanType == 0 || adir->persistent())

@@ -81,9 +81,6 @@ protected:
 
     std::string service_url;
 
-    // url retriever class
-    zmm::Ref<URL> url;
-
     /// \brief This function will retrieve the service XML
     zmm::Ref<mxml::Element> getData();
 };

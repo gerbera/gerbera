@@ -40,8 +40,6 @@
 
 #include <sstream>
 
-using namespace zmm;
-
 std::string URL::download(std::string URL, long* HTTP_retcode,
     CURL* curl_handle, bool only_header,
     bool verbose, bool redirect)
@@ -117,7 +115,7 @@ std::string URL::download(std::string URL, long* HTTP_retcode,
     return buffer.str();
 }
 
-Ref<URL::Stat> URL::getInfo(std::string URL, CURL* curl_handle)
+std::unique_ptr<URL::Stat> URL::getInfo(std::string URL, CURL* curl_handle)
 {
     long retcode;
     bool cleanup = false;
@@ -223,7 +221,7 @@ Ref<URL::Stat> URL::getInfo(std::string URL, CURL* curl_handle)
     else
         used_url = c_url;
 
-    Ref<Stat> st(new Stat(used_url, (off_t)cl, mt));
+    auto st = std::make_unique<Stat>(used_url, (off_t)cl, mt);
 
     if (cleanup)
         curl_easy_cleanup(curl_handle);

@@ -75,125 +75,100 @@ void AutoscanDirectory::setCurrentLMT(time_t lmt)
 AutoscanList::AutoscanList(std::shared_ptr<Storage> storage)
     : storage(storage)
 {
-    list = Ref<Array<AutoscanDirectory>>(new Array<AutoscanDirectory>());
 }
 
 void AutoscanList::updateLMinDB()
 {
     AutoLock lock(mutex);
-    for (int i = 0; i < list->size(); i++) {
+    for (size_t i = 0; i < list.size(); i++) {
         log_debug("i: {}", i);
-        Ref<AutoscanDirectory> ad = list->get(i);
-        if (ad != nullptr)
-            storage->autoscanUpdateLM(ad);
+        auto ad = list[i];
+        storage->autoscanUpdateLM(ad);
     }
 }
 
-int AutoscanList::add(Ref<AutoscanDirectory> dir)
+int AutoscanList::add(std::shared_ptr<AutoscanDirectory> dir)
 {
     AutoLock lock(mutex);
     return _add(dir);
 }
 
-int AutoscanList::_add(Ref<AutoscanDirectory> dir)
+int AutoscanList::_add(std::shared_ptr<AutoscanDirectory> dir)
 {
-
     std::string loc = dir->getLocation();
-    int nil_index = -1;
 
-    for (int i = 0; i < list->size(); i++) {
-        if (list->get(i) == nullptr) {
-            nil_index = i;
-            continue;
-        }
-
-        if (loc == list->get(i)->getLocation()) {
+    for (size_t i = 0; i < list.size(); i++) {
+        if (loc == list[i]->getLocation()) {
             throw std::runtime_error("Attempted to add same autoscan path twice");
         }
     }
 
-    if (nil_index != -1) {
-        dir->setScanID(nil_index);
-        list->set(dir, nil_index);
-    } else {
-        dir->setScanID(list->size());
-        list->append(dir);
-    }
+    dir->setScanID(list.size());
+    list.push_back(dir);
 
     return dir->getScanID();
 }
 
-void AutoscanList::addList(zmm::Ref<AutoscanList> list)
+void AutoscanList::addList(std::shared_ptr<AutoscanList> list)
 {
     AutoLock lock(mutex);
 
-    for (int i = 0; i < list->list->size(); i++) {
-        if (list->list->get(i) == nullptr)
-            continue;
-
-        _add(list->list->get(i));
+    for (size_t i = 0; i < list->list.size(); i++) {
+        _add(list->list[i]);
     }
 }
 
-Ref<Array<AutoscanDirectory>> AutoscanList::getArrayCopy()
+std::vector<std::shared_ptr<AutoscanDirectory>> AutoscanList::getArrayCopy()
 {
     AutoLock lock(mutex);
-    Ref<Array<AutoscanDirectory>> copy(new Array<AutoscanDirectory>(list->size()));
-    for (int i = 0; i < list->size(); i++)
-        copy->append(list->get(i));
 
-    return copy;
+    return list;
 }
 
-Ref<AutoscanDirectory> AutoscanList::get(int id)
+std::shared_ptr<AutoscanDirectory> AutoscanList::get(size_t id)
 {
     AutoLock lock(mutex);
 
-    if ((id < 0) || (id >= list->size()))
+    if ((id < 0) || (id >= list.size()))
         return nullptr;
 
-    return list->get(id);
+    return list[id];
 }
 
-Ref<AutoscanDirectory> AutoscanList::getByObjectID(int objectID)
+std::shared_ptr<AutoscanDirectory> AutoscanList::getByObjectID(int objectID)
 {
     AutoLock lock(mutex);
 
-    for (int i = 0; i < list->size(); i++) {
-        if (list->get(i) != nullptr && objectID == list->get(i)->getObjectID())
-            return list->get(i);
+    for (size_t i = 0; i < list.size(); i++) {
+        if (objectID == list[i]->getObjectID())
+            return list[i];
     }
     return nullptr;
 }
 
-Ref<AutoscanDirectory> AutoscanList::get(std::string location)
+std::shared_ptr<AutoscanDirectory> AutoscanList::get(std::string location)
 {
     AutoLock lock(mutex);
-    for (int i = 0; i < list->size(); i++) {
-        if (list->get(i) != nullptr && (location == list->get(i)->getLocation()))
-            return list->get(i);
+    for (size_t i = 0; i < list.size(); i++) {
+        if (location == list[i]->getLocation())
+            return list[i];
     }
     return nullptr;
 }
 
-void AutoscanList::remove(int id)
+void AutoscanList::remove(size_t id)
 {
     AutoLock lock(mutex);
 
-    if ((id < 0) || (id >= list->size())) {
+    if ((id < 0) || (id >= list.size())) {
         log_debug("No such ID {}!", id);
         return;
     }
 
-    Ref<AutoscanDirectory> dir = list->get(id);
+    auto dir = list[id];
     dir->setScanID(INVALID_SCAN_ID);
 
-    if (id == list->size() - 1) {
-        list->removeUnordered(id);
-    } else {
-        list->set(nullptr, id);
-    }
-
+    list.erase(list.begin() + id);
     log_debug("ID {} removed!", id);
 }
 
@@ -201,15 +176,11 @@ int AutoscanList::removeByObjectID(int objectID)
 {
     AutoLock lock(mutex);
 
-    for (int i = 0; i < list->size(); i++) {
-        if (list->get(i) != nullptr && objectID == list->get(i)->getObjectID()) {
-            Ref<AutoscanDirectory> dir = list->get(i);
+    for (size_t i = 0; i < list.size(); i++) {
+        if (objectID == list[i]->getObjectID()) {
+            auto dir = list[i];
             dir->setScanID(INVALID_SCAN_ID);
-            if (i == list->size() - 1) {
-                list->removeUnordered(i);
-            } else {
-                list->set(nullptr, i);
-            }
+            list.erase(list.begin() + i);
             return i;
         }
     }
@@ -220,46 +191,42 @@ int AutoscanList::remove(std::string location)
 {
     AutoLock lock(mutex);
 
-    for (int i = 0; i < list->size(); i++) {
-        if (list->get(i) != nullptr && location == list->get(i)->getLocation()) {
-            Ref<AutoscanDirectory> dir = list->get(i);
+    for (size_t i = 0; i < list.size(); i++) {
+        if (location == list[i]->getLocation()) {
+            auto dir = list[i];
             dir->setScanID(INVALID_SCAN_ID);
-            if (i == list->size() - 1) {
-                list->removeUnordered(i);
-            } else {
-                list->set(nullptr, i);
-            }
+            list.erase(list.begin() + i);
             return i;
         }
     }
     return INVALID_SCAN_ID;
 }
 
-Ref<AutoscanList> AutoscanList::removeIfSubdir(std::string parent, bool persistent)
+std::shared_ptr<AutoscanList> AutoscanList::removeIfSubdir(std::string parent, bool persistent)
 {
     AutoLock lock(mutex);
 
-    Ref<AutoscanList> rm_id_list(new AutoscanList(storage));
+    auto rm_id_list = std::make_shared<AutoscanList>(storage);
 
-    for (int i = 0; i < list->size(); i++) {
-        if (list->get(i) != nullptr && startswith(list->get(i)->getLocation(), parent)) {
-            Ref<AutoscanDirectory> dir = list->get(i);
-            if (dir == nullptr)
-                continue;
+    for (auto it = list.begin(); it != list.end(); /*++it*/) {
+        auto& dir = *it;
+
+        if (startswith(dir->getLocation(), parent)) {
             if (dir->persistent() && !persistent) {
+                 ++it;
                 continue;
             }
-            Ref<AutoscanDirectory> copy(new AutoscanDirectory());
+            auto copy = std::make_shared<AutoscanDirectory>();
             dir->copyTo(copy);
-            rm_id_list->add(copy);
             copy->setScanID(dir->getScanID());
+            rm_id_list->add(copy);
+
             dir->setScanID(INVALID_SCAN_ID);
-            if (i == list->size() - 1) {
-                list->removeUnordered(i);
-            } else {
-                list->set(nullptr, i);
-            }
+            it = list.erase(it);
         }
+        else
+            ++it;
+
     }
 
     return rm_id_list;
@@ -271,10 +238,8 @@ void AutoscanList::notifyAll(Timer::Subscriber* sub)
         return;
     AutoLock lock(mutex);
 
-    for (int i = 0; i < list->size(); i++) {
-        if (list->get(i) == nullptr)
-            continue;
-        sub->timerNotify(list->get(i)->getTimerParameter());
+    for (size_t i = 0; i < list.size(); i++) {
+        sub->timerNotify(list[i]->getTimerParameter());
     }
 }
 
@@ -341,7 +306,7 @@ ScanLevel AutoscanDirectory::remapScanlevel(std::string scanlevel)
         throw std::runtime_error("illegal scanlevel (" + scanlevel + ") given to remapScanlevel()");
 }
 
-void AutoscanDirectory::copyTo(Ref<AutoscanDirectory> copy)
+void AutoscanDirectory::copyTo(std::shared_ptr<AutoscanDirectory> copy)
 {
     copy->location = location;
     copy->mode = mode;

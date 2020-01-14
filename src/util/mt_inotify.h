@@ -35,11 +35,10 @@
 #ifdef HAVE_INOTIFY
 
 #include <sys/inotify.h>
-
-#include "zmm/zmmf.h"
+#include <string>
 
 /// \brief Inotify interface.
-class Inotify : public zmm::Object {
+class Inotify {
 public:
     Inotify();
     virtual ~Inotify();

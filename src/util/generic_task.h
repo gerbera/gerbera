@@ -20,7 +20,7 @@ enum task_owner_t {
     TaskProcessorTask
 };
 
-class GenericTask : public zmm::Object {
+class GenericTask {
 protected:
     std::string description;
     task_type_t taskType;

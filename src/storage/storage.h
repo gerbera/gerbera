@@ -256,9 +256,9 @@ public:
 
     /* autoscan methods */
     virtual void updateAutoscanPersistentList(ScanMode scanmode, std::shared_ptr<AutoscanList> list) = 0;
-    virtual zmm::Ref<AutoscanList> getAutoscanList(ScanMode scanode) = 0;
-    virtual void addAutoscanDirectory(zmm::Ref<AutoscanDirectory> adir) = 0;
-    virtual void updateAutoscanDirectory(zmm::Ref<AutoscanDirectory> adir) = 0;
+    virtual std::shared_ptr<AutoscanList> getAutoscanList(ScanMode scanode) = 0;
+    virtual void addAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir) = 0;
+    virtual void updateAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir) = 0;
     virtual void removeAutoscanDirectoryByObjectID(int objectID) = 0;
     virtual void removeAutoscanDirectory(int autoscanID) = 0;
     /// \brief checks if the given object is a direct or indirect child of
@@ -283,14 +283,14 @@ public:
     /// \param objectID the object id to get the AutoscanDirectory for
     /// \return nullptr if the given id is no autoscan start point,
     /// or the matching AutoscanDirectory
-    virtual zmm::Ref<AutoscanDirectory> getAutoscanDirectory(int objectID) = 0;
+    virtual std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(int objectID) = 0;
 
     /// \brief updates the last modified info for the given AutoscanDirectory
     /// in the database
     /// \param adir the AutoscanDirectory to be updated
-    virtual void autoscanUpdateLM(zmm::Ref<AutoscanDirectory> adir) = 0;
+    virtual void autoscanUpdateLM(std::shared_ptr<AutoscanDirectory> adir) = 0;
 
-    virtual void checkOverlappingAutoscans(zmm::Ref<AutoscanDirectory> adir) = 0;
+    virtual void checkOverlappingAutoscans(std::shared_ptr<AutoscanDirectory> adir) = 0;
 
     virtual std::unique_ptr<std::vector<int>> getPathIDs(int objectID) = 0;
 

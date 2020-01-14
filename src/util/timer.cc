@@ -137,7 +137,7 @@ void Timer::notify()
 
     std::list<TimerSubscriberElement> toNotify;
 
-    for (auto it = subscribers.begin(); it != subscribers.end();) {
+    for (auto it = subscribers.begin(); it != subscribers.end(); /*++it*/) {
         TimerSubscriberElement& element = *it;
 
         struct timespec now;

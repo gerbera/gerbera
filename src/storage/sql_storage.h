@@ -142,17 +142,17 @@ public:
     virtual void storeInternalSetting(std::string key, std::string value) override = 0;
     
     virtual void updateAutoscanPersistentList(ScanMode scanmode, std::shared_ptr<AutoscanList> list) override;
-    virtual zmm::Ref<AutoscanList> getAutoscanList(ScanMode scanmode) override;
-    virtual void addAutoscanDirectory(zmm::Ref<AutoscanDirectory> adir) override;
-    virtual void updateAutoscanDirectory(zmm::Ref<AutoscanDirectory> adir) override;
+    virtual std::shared_ptr<AutoscanList> getAutoscanList(ScanMode scanmode) override;
+    virtual void addAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir) override;
+    virtual void updateAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir) override;
     virtual void removeAutoscanDirectoryByObjectID(int objectID) override;
     virtual void removeAutoscanDirectory(int autoscanID) override;
     virtual int getAutoscanDirectoryType(int objectId) override;
     virtual int isAutoscanDirectoryRecursive(int objectId) override;
-    virtual void autoscanUpdateLM(zmm::Ref<AutoscanDirectory> adir) override;
-    virtual zmm::Ref<AutoscanDirectory> getAutoscanDirectory(int objectID) override;
+    virtual void autoscanUpdateLM(std::shared_ptr<AutoscanDirectory> adir) override;
+    virtual std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(int objectID) override;
     virtual int isAutoscanChild(int objectID) override;
-    virtual void checkOverlappingAutoscans(zmm::Ref<AutoscanDirectory> adir) override;
+    virtual void checkOverlappingAutoscans(std::shared_ptr<AutoscanDirectory> adir) override;
     
     virtual std::unique_ptr<std::vector<int>> getPathIDs(int objectID) override;
     
@@ -232,9 +232,9 @@ private:
     /* helpers for autoscan */
     int _getAutoscanObjectID(int autoscanID);
     void _autoscanChangePersistentFlag(int objectID, bool persistent);
-    zmm::Ref<AutoscanDirectory> _fillAutoscanDirectory(const std::unique_ptr<SQLRow>& row);
+    std::shared_ptr<AutoscanDirectory> _fillAutoscanDirectory(const std::unique_ptr<SQLRow>& row);
     int _getAutoscanDirectoryInfo(int objectID, std::string field);
-    std::unique_ptr<std::vector<int>> _checkOverlappingAutoscans(zmm::Ref<AutoscanDirectory> adir);
+    std::unique_ptr<std::vector<int>> _checkOverlappingAutoscans(std::shared_ptr<AutoscanDirectory> adir);
     
     /* location hash helpers */
     std::string addLocationPrefix(char prefix, std::string path);

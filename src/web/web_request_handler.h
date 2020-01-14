@@ -127,7 +127,7 @@ protected:
     /// \brief add the content manager task to the given xml element as xml elements
     /// \param el the xml element to add the elements to
     /// \param task the task to add to the given xml element
-    void appendTask(zmm::Ref<mxml::Element> el, zmm::Ref<GenericTask> task);
+    void appendTask(zmm::Ref<mxml::Element> el, std::shared_ptr<GenericTask> task);
 
     /// \brief check if accounts are enabled in the config
     /// \return true if accounts are enabled, false if not

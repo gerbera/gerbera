@@ -4,7 +4,6 @@
 #include "generic_task.h"
 
 GenericTask::GenericTask(task_owner_t taskOwner)
-    : Object()
 {
     valid = true;
     cancellable = true;

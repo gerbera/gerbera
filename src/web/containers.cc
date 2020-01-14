@@ -81,7 +81,7 @@ void web::containers::process()
             autoscanMode = "timed";
 #ifdef HAVE_INOTIFY
             if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
-                Ref<AutoscanDirectory> adir = storage->getAutoscanDirectory(cont->getID());
+                std::shared_ptr<AutoscanDirectory> adir = storage->getAutoscanDirectory(cont->getID());
                 if ((adir != nullptr) && (adir->getScanMode() == ScanMode::INotify))
                     autoscanMode = "inotify";
             }
