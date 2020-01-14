@@ -2,7 +2,7 @@
 
 # Gerbera - UPnP Media Server
 
- [![Current Release](https://img.shields.io/github/release/gerbera/gerbera.svg)](https://github.com/gerbera/gerbera/releases/latest) [![Build Status](https://travis-ci.org/gerbera/gerbera.svg?branch=master)](https://travis-ci.org/gerbera/gerbera) [![Documentation Status](https://readthedocs.org/projects/gerbera/badge/?version=latest)](http://docs.gerbera.io/en/latest/?badge=latest) [![IRC](https://img.shields.io/badge/IRC-on%20freenode-orange.svg)](https://webchat.freenode.net/?channels=#gerbera)
+ [![Current Release](https://img.shields.io/github/release/gerbera/gerbera.svg)](https://github.com/gerbera/gerbera/releases/latest) [![Build Status](https://travis-ci.com/gerbera/gerbera.svg?branch=master)](https://travis-ci.com/gerbera/gerbera) [![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/gerbera/gerbera)](https://hub.docker.com/r/gerbera/gerbera) [![Documentation Status](https://readthedocs.org/projects/gerbera/badge/?version=latest)](http://docs.gerbera.io/en/latest/?badge=latest) [![IRC](https://img.shields.io/badge/IRC-on%20freenode-orange.svg)](https://webchat.freenode.net/?channels=#gerbera) 
 
 Gerbera is a UPnP media server which allows you to stream your digital media through your home network and consume it on a variety of UPnP compatible devices.
 
@@ -31,26 +31,7 @@ View our documentation online at [http://docs.gerbera.io](http://docs.gerbera.io
 
 ## Installing
 
-### Docker
-Docker images are provided on [Docker Hub], we recommend running a tagged version.
-
-### Ubuntu
-Stephen Czetty maintains a [Ubuntu PPA].
-
-### Gentoo
-The latest version and git ebuild are in [the main portage tree](https://packages.gentoo.org/packages/net-misc/gerbera).
-
-### Arch
-Gerbera is available in AUR [stable](https://aur.archlinux.org/packages/gerbera/) or [git version](https://aur.archlinux.org/packages/gerbera-git/).
-
-### openSUSE
-Gerbera is avaiable on [software.opensuse.org](https://software.opensuse.org/package/gerbera).
-
-### Debian
-Gerbera is included in [Testing](https://packages.debian.org/buster/gerbera) and [Unstable](https://packages.debian.org/sid/gerbera).
-
-### Entware (Optware)
-Gerbera is available in [Entware](https://github.com/Entware/rtndev/tree/master/gerbera) for your embedded device/router!
+Head over to the docs page on [Installing Gerbera](http://docs.gerbera.io/en/latest/install.html).
 
 ## Building
 
