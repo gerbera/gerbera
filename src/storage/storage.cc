@@ -79,7 +79,7 @@ std::shared_ptr<Storage> Storage::createInstance(std::shared_ptr<ConfigManager> 
 void Storage::stripAndUnescapeVirtualContainerFromPath(std::string path, std::string& first, std::string& last)
 {
     if (path.at(0) != VIRTUAL_CONTAINER_SEPARATOR) {
-        throw std::runtime_error("got non-absolute virtual path; needs to start with: " + VIRTUAL_CONTAINER_SEPARATOR);
+        throw std::runtime_error(fmt::format("Got non-absolute virtual path; needs to start with: {}", VIRTUAL_CONTAINER_SEPARATOR));
     }
     size_t sep = path.rfind(VIRTUAL_CONTAINER_SEPARATOR);
     if (sep == 0) {

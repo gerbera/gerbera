@@ -282,10 +282,10 @@ void ContentDirectoryService::processSubscriptionRequest(const std::unique_ptr<S
 
     propset = xmlBuilder->createEventPropertySet();
     property = propset->getFirstElementChild();
-    property->appendTextChild("SystemUpdateID", "" + systemUpdateID);
+    property->appendTextChild("SystemUpdateID", std::to_string(systemUpdateID));
     auto obj = storage->loadObject(0);
     auto cont = std::static_pointer_cast<CdsContainer>(obj);
-    property->appendTextChild("ContainerUpdateIDs", "0," + cont->getUpdateID());
+    property->appendTextChild("ContainerUpdateIDs", fmt::format("0,{}", + cont->getUpdateID()));
     std::string xml = propset->print();
     err = ixmlParseBufferEx(xml.c_str(), &event);
     if (err != IXML_SUCCESS) {
@@ -314,7 +314,7 @@ void ContentDirectoryService::sendSubscriptionUpdate(std::string containerUpdate
     propset = xmlBuilder->createEventPropertySet();
     property = propset->getFirstElementChild();
     property->appendTextChild("ContainerUpdateIDs", containerUpdateIDs_CSV);
-    property->appendTextChild("SystemUpdateID", "" + systemUpdateID);
+    property->appendTextChild("SystemUpdateID", std::to_string(systemUpdateID));
 
     std::string xml = propset->print();
 
