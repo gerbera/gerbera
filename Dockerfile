@@ -1,7 +1,7 @@
 FROM ubuntu:18.04
 
 RUN apt-get update &&\
-    apt-get install -y uuid-dev libexpat1-dev libsqlite3-dev zlib1g-dev libspdlog-dev \
+    apt-get install -y uuid-dev libexpat1-dev libsqlite3-dev zlib1g-dev \
     libmagic-dev libexif-dev libcurl4-openssl-dev libavutil-dev libavcodec-dev \
     libavformat-dev libavdevice-dev libavfilter-dev libavresample-dev \
     libswscale-dev libswresample-dev libpostproc-dev g++ cmake \
@@ -14,9 +14,10 @@ COPY . .
 
 RUN mkdir build &&\
     cd build &&\
-    sh ../scripts/install-pupnp18.sh &&\
-    sh ../scripts/install-duktape.sh &&\
-    sh ../scripts/install-taglib111.sh &&\
+    sh ../scripts/install-pupnp18.sh && \
+    sh ../scripts/install-duktape.sh && \
+    sh ../scripts/install-taglib111.sh && \
+    sh ../scripts/install-spdlog.sh && \
     cmake ../ -DWITH_MAGIC=1 -DWITH_MYSQL=0 -DWITH_CURL=1 -DWITH_JS=1 \
         -DWITH_TAGLIB=1 -DWITH_AVCODEC=1 -DWITH_FFMPEGTHUMBNAILER=0 \
         -DWITH_EXIF=1 -DWITH_LASTFM=0 -DWITH_SYSTEMD=0 &&\
