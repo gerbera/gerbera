@@ -116,8 +116,6 @@ ContentManager::ContentManager(std::shared_ptr<ConfigManager> config, std::share
     shutdownFlag = false;
     layout_enabled = false;
 
-    acct = Ref<CMAccounting>(new CMAccounting());
-
     // loading extension - mimetype map
     // we can always be sure to get a valid element because everything was prepared by the config manager
     extension_mimetype_map = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
@@ -403,11 +401,6 @@ void ContentManager::shutdown()
     log_debug("ContentManager destroyed");
 }
 
-Ref<CMAccounting> ContentManager::getAccounting()
-{
-     return acct;
-}
-
 std::shared_ptr<GenericTask> ContentManager::getCurrentTask()
 {
     AutoLock lock(mutex);
@@ -447,11 +440,6 @@ std::deque<std::shared_ptr<GenericTask>> ContentManager::getTasklist()
     }
 
     return taskList;
-}
-
-void ContentManager::_loadAccounting()
-{
-    acct->totalFiles = storage->getTotalFiles();
 }
 
 void ContentManager::addVirtualItem(std::shared_ptr<CdsObject> obj, bool allow_fifo)
@@ -1003,9 +991,6 @@ void ContentManager::addObject(std::shared_ptr<CdsObject> obj)
     update_manager->containerChanged(obj->getParentID());
     if (IS_CDS_CONTAINER(obj->getObjectType()))
         session_manager->containerChangedUI(obj->getParentID());
-
-    if (!obj->isVirtual() && IS_CDS_ITEM(obj->getObjectType()))
-        getAccounting()->totalFiles++;
 }
 
 void ContentManager::addContainer(int parentID, std::string title, std::string upnpClass)
@@ -1290,19 +1275,6 @@ void ContentManager::addTask(std::shared_ptr<GenericTask> task, bool lowPriority
     else
         taskQueue2.push_back(task);
     signal();
-}
-
-/* sync / async methods */
-void ContentManager::loadAccounting(bool async)
-{
-    if (async) {
-        auto self = shared_from_this();
-        auto task = std::make_shared<CMLoadAccountingTask>(self);
-        task->setDescription("Initializing statistics");
-        addTask(task);
-    } else {
-        _loadAccounting();
-    }
 }
 
 int ContentManager::addFile(std::string path, bool recursive, bool async, bool hidden, bool lowPriority, bool cancellable)
@@ -1903,21 +1875,3 @@ void CMFetchOnlineContentTask::run()
     }
 }
 #endif // ONLINE_SERVICES
-
-CMLoadAccountingTask::CMLoadAccountingTask(std::shared_ptr<ContentManager> content)
-    : GenericTask(ContentManagerTask)
-    , content(content)
-{
-    this->taskType = LoadAccounting;
-}
-
-void CMLoadAccountingTask::run()
-{
-    content->_loadAccounting();
-}
-
-CMAccounting::CMAccounting()
-    : Object()
-{
-    totalFiles = 0;
-}

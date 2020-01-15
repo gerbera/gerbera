@@ -105,14 +105,6 @@ public:
     virtual void run() override;
 };
 
-class CMLoadAccountingTask : public GenericTask {
-protected:
-    std::shared_ptr<ContentManager> content;
-public:
-    CMLoadAccountingTask(std::shared_ptr<ContentManager> content);
-    virtual void run() override;
-};
-
 class CMRescanDirectoryTask : public GenericTask, public std::enable_shared_from_this<CMRescanDirectoryTask> {
 protected:
     std::shared_ptr<ContentManager> content;
@@ -125,14 +117,6 @@ public:
         int objectID, int scanID, ScanMode scanMode,
         bool cancellable);
     virtual void run() override;
-};
-
-class CMAccounting : public zmm::Object {
-public:
-    CMAccounting();
-
-public:
-    int totalFiles;
 };
 
 #ifdef ONLINE_SERVICES
@@ -169,8 +153,6 @@ public:
 
     bool isBusy() { return working; }
 
-    zmm::Ref<CMAccounting> getAccounting();
-
     /// \brief Returns the task that is currently being executed.
     std::shared_ptr<GenericTask> getCurrentTask();
 
@@ -181,9 +163,6 @@ public:
     void invalidateTask(unsigned int taskID, task_owner_t taskOwner = ContentManagerTask);
 
     /* the functions below return true if the task has been enqueued */
-
-    /* sync/async methods */
-    void loadAccounting(bool async = true);
 
     /// \brief Adds a file or directory to the database.
     /// \param path absolute path to the file
@@ -369,8 +348,6 @@ protected:
 
     std::vector<std::shared_ptr<Executor>> process_list;
 
-    void _loadAccounting();
-
     int addFileInternal(std::string path, std::string rootpath,
         bool recursive = true,
         bool async = true, bool hidden = false,
@@ -418,8 +395,6 @@ protected:
 
     void addTask(std::shared_ptr<GenericTask> task, bool lowPriority = false);
 
-    zmm::Ref<CMAccounting> acct;
-
     pthread_t taskThread;
     std::condition_variable_any cond;
 
@@ -439,7 +414,6 @@ protected:
 #ifdef ONLINE_SERVICES
     friend void CMFetchOnlineContentTask::run();
 #endif
-    friend void CMLoadAccountingTask::run();
 };
 
 #endif // __CONTENT_MANAGER_H__
