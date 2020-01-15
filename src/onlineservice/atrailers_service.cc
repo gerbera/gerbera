@@ -131,7 +131,7 @@ Ref<Element> ATrailersService::getData()
     return nullptr;
 }
 
-bool ATrailersService::refreshServiceData(Ref<Layout> layout)
+bool ATrailersService::refreshServiceData(std::shared_ptr<Layout> layout)
 {
     log_debug("Refreshing Apple Trailers");
     // the layout is in full control of the service items

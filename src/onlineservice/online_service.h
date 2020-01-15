@@ -71,7 +71,7 @@ public:
     /// to get. Another call to this function after it returned true will
     /// reset the internal counters and thus make it fetch the content from
     /// the beginning.
-    virtual bool refreshServiceData(zmm::Ref<Layout> layout) = 0;
+    virtual bool refreshServiceData(std::shared_ptr<Layout> layout) = 0;
 
     /// \brief Returns the service type
     virtual service_type_t getServiceType() = 0;

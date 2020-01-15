@@ -121,7 +121,7 @@ Ref<Element> SopCastService::getData()
     return nullptr;
 }
 
-bool SopCastService::refreshServiceData(Ref<Layout> layout)
+bool SopCastService::refreshServiceData(std::shared_ptr<Layout> layout)
 {
     log_debug("Refreshing SopCast service");
     // the layout is in full control of the service items

@@ -56,7 +56,7 @@ public:
 
     /// \brief Retrieves user specified content from the service and adds
     /// the items to the database.
-    virtual bool refreshServiceData(zmm::Ref<Layout> layout);
+    virtual bool refreshServiceData(std::shared_ptr<Layout> layout);
 
     /// \brief Get the type of the service (i.e. SopCast, Shoutcast, etc.)
     virtual service_type_t getServiceType();

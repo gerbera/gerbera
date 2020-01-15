@@ -1171,12 +1171,12 @@ void ContentManager::initLayout()
                 auto self = shared_from_this();
                 if (layout_type == "js") {
 #ifdef HAVE_JS
-                    layout = Ref<Layout>((Layout*)new JSLayout(config, storage, self, scripting_runtime));
+                    layout = std::make_shared<JSLayout>(config, storage, self, scripting_runtime);
 #else
                     log_error("Cannot init layout: Gerbera compiled without JS support, but JS was requested.");
 #endif
                 } else if (layout_type == "builtin") {
-                    layout = Ref<Layout>((FallbackLayout*)new FallbackLayout(config, storage, self));
+                    layout = std::make_shared<FallbackLayout>(config, storage, self);
                 }
             } catch (const std::runtime_error& e) {
                 layout = nullptr;
@@ -1846,7 +1846,7 @@ void CMRescanDirectoryTask::run()
 #ifdef ONLINE_SERVICES
 CMFetchOnlineContentTask::CMFetchOnlineContentTask(std::shared_ptr<ContentManager> content,
     std::shared_ptr<TaskProcessor> task_processor, std::shared_ptr<Timer> timer,
-    Ref<OnlineService> service, Ref<Layout> layout, bool cancellable, bool unscheduled_refresh)
+    Ref<OnlineService> service, std::shared_ptr<Layout> layout, bool cancellable, bool unscheduled_refresh)
     : GenericTask(ContentManagerTask)
     , content(content)
     , task_processor(task_processor)

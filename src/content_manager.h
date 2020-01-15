@@ -126,14 +126,14 @@ protected:
     std::shared_ptr<TaskProcessor> task_processor;
     std::shared_ptr<Timer> timer;
     zmm::Ref<OnlineService> service;
-    zmm::Ref<Layout> layout;
+    std::shared_ptr<Layout> layout;
     bool unscheduled_refresh;
 
 public:
     CMFetchOnlineContentTask(std::shared_ptr<ContentManager> content,
         std::shared_ptr<TaskProcessor> task_processor,
         std::shared_ptr<Timer> timer,
-        zmm::Ref<OnlineService> service, zmm::Ref<Layout> layout,
+        zmm::Ref<OnlineService> service, std::shared_ptr<Layout> layout,
         bool cancellable, bool unscheduled_refresh);
     virtual void run() override;
 };
@@ -368,7 +368,7 @@ protected:
 
     void invalidateAddTask(std::shared_ptr<GenericTask> t, std::string path);
 
-    zmm::Ref<Layout> layout;
+    std::shared_ptr<Layout> layout;
 
 #ifdef ONLINE_SERVICES
     zmm::Ref<OnlineServiceList> online_services;
