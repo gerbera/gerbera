@@ -45,7 +45,8 @@ class JSLayout : public Layout
 protected:
     std::shared_ptr<ConfigManager> config;
     std::shared_ptr<Runtime> runtime;
-    zmm::Ref<ImportScript> import_script;
+
+    std::unique_ptr<ImportScript> import_script;
 
 public:
     JSLayout(std::shared_ptr<ConfigManager> config,

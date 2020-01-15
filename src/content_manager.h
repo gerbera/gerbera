@@ -405,7 +405,7 @@ protected:
 #endif //ONLINE_SERVICES
 
 #ifdef HAVE_JS
-    zmm::Ref<PlaylistParserScript> playlist_parser_script;
+    std::unique_ptr<PlaylistParserScript> playlist_parser_script;
 #endif
 
     bool layout_enabled;

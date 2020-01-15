@@ -1205,7 +1205,7 @@ void ContentManager::initJS()
 {
     if (playlist_parser_script == nullptr) {
         auto self = shared_from_this();
-        playlist_parser_script = Ref<PlaylistParserScript>(new PlaylistParserScript(config, storage, self, scripting_runtime));
+        playlist_parser_script = std::make_unique<PlaylistParserScript>(config, storage, self, scripting_runtime);
     }
 }
 
