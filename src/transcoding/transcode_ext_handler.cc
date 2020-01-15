@@ -76,8 +76,8 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile
     bool isURL = false;
     //    bool is_srt = false;
 
-    log_debug("start transcoding file: {}", location.c_str());
-    char fifo_template[] = "mt_transcode_XXXXXX";
+    log_debug("Start transcoding file: {}", location.c_str());
+    char fifo_template[] = "grb_transcode_XXXXXX";
 
     if (profile == nullptr)
         throw std::runtime_error("Transcoding of file " + location + "requested but no profile given");
@@ -102,24 +102,7 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::open(Ref<TranscodingProfile
         }
     }
 
-    /* Upstream, move to getinfo?
-    info->content_type = ixmlCloneDOMString(mimeType.c_str());
-#ifdef EXTEND_PROTOCOLINFO
-    std::string header;
-    header = header + "TimeSeekRange.dlna.org: npt=" + range;
-
-    log_debug("Adding TimeSeekRange response HEADERS: {}", header.c_str());
-    header = getDLNAtransferHeader(mimeType, header);
-    if (string_ok(header))
-        info->http_header = ixmlCloneDOMString(header.c_str());
-#endif
-
-    info->file_length = UNKNOWN_CONTENT_LENGTH;
-    info->force_chunked = (int)profile->getChunked();
-    */
-
-    std::string fifo_name = normalizePath(tempName(config->getOption(CFG_SERVER_TMPDIR),
-        fifo_template));
+    std::string fifo_name = normalizePath(tempName(config->getOption(CFG_SERVER_TMPDIR), fifo_template));
     std::string arguments;
     std::string temp;
     std::string command;
