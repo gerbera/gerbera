@@ -99,38 +99,40 @@ std::vector<std::string> TranscodingProfile::getAVIFourCCList()
     return fourcc_list;
 }
 
+
 TranscodingProfileList::TranscodingProfileList()
 {
-    list = Ref<ObjectDictionary<ObjectDictionary<TranscodingProfile>>>(new ObjectDictionary<ObjectDictionary<TranscodingProfile>>());
 }
 
-void TranscodingProfileList::add(std::string sourceMimeType, zmm::Ref<TranscodingProfile> prof)
+void TranscodingProfileList::add(std::string sourceMimeType, std::shared_ptr<TranscodingProfile> prof)
 {
-    Ref<ObjectDictionary<TranscodingProfile>> inner = list->get(sourceMimeType);
+    std::shared_ptr<TranscodingProfileMap> inner;
 
-    if (inner == nullptr)
-        inner = Ref<ObjectDictionary<TranscodingProfile>>(new ObjectDictionary<TranscodingProfile>());
+    auto it = list.find(sourceMimeType);
+    if (it != list.end())
+        inner = it->second;
+    else
+        inner = std::make_shared<TranscodingProfileMap>();
 
-    inner->put(prof->getName(), prof);
-    list->put(sourceMimeType, inner);
+    inner->insert(std::pair<std::string,std::shared_ptr<TranscodingProfile>>(prof->getName(), prof));
+    list[sourceMimeType] = inner;
 }
 
-Ref<ObjectDictionary<TranscodingProfile>> TranscodingProfileList::get(std::string sourceMimeType)
+std::shared_ptr<TranscodingProfileMap> TranscodingProfileList::get(std::string sourceMimeType)
 {
-    return list->get(sourceMimeType);
+    auto it = list.find(sourceMimeType);
+    if (it != list.end())
+        return it->second;
+    return nullptr;
 }
 
-Ref<TranscodingProfile> TranscodingProfileList::getByName(std::string name)
+std::shared_ptr<TranscodingProfile> TranscodingProfileList::getByName(std::string name)
 {
-    Ref<Array<ObjectDictionaryElement<ObjectDictionary<TranscodingProfile>>>> mt_list = list->getElements();
-
-    for (int i = 0; i < mt_list->size(); i++) {
-        Ref<ObjectDictionary<TranscodingProfile>> names = mt_list->get(i)->getValue();
-        if (names != nullptr) {
-            Ref<TranscodingProfile> tp = names->get(name);
-            if (tp != nullptr)
-                return tp;
-        }
+    for (auto it = list.begin(); it != list.end(); ++it) {
+        auto inner = it->second;
+        auto tp = inner->find(name);
+        if (tp != inner->end())
+            return tp->second;
     }
     return nullptr;
 }

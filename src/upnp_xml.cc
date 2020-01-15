@@ -657,11 +657,10 @@ void UpnpXMLBuilder::addResources(std::shared_ptr<CdsItem> item, Ref<Element> el
 
     // now get the profile
     auto tlist = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST);
-    Ref<ObjectDictionary<TranscodingProfile>> tp_mt = tlist->get(item->getMimeType());
+    auto tp_mt = tlist->get(item->getMimeType());
     if (tp_mt != nullptr) {
-        Ref<Array<ObjectDictionaryElement<TranscodingProfile>>> profiles = tp_mt->getElements();
-        for (int p = 0; p < profiles->size(); p++) {
-            Ref<TranscodingProfile> tp = profiles->get(p)->getValue();
+        for (auto it = tp_mt->begin(); it != tp_mt->end(); ++it) {
+            auto tp = it->second;
 
             if (tp == nullptr)
                 throw std::runtime_error("Invalid profile encountered!");

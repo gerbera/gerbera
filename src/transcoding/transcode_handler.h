@@ -44,13 +44,13 @@
 class ConfigManager;
 class ContentManager;
 
-class TranscodeHandler : public zmm::Object {
+class TranscodeHandler {
 public:
     TranscodeHandler(std::shared_ptr<ConfigManager> config,
         std::shared_ptr<ContentManager> content)
         : config(config)
         , content(content) {};
-    virtual std::unique_ptr<IOHandler> open(zmm::Ref<TranscodingProfile> profile,
+    virtual std::unique_ptr<IOHandler> open(std::shared_ptr<TranscodingProfile> profile,
         std::string location,
         std::shared_ptr<CdsObject> obj,
         std::string range)

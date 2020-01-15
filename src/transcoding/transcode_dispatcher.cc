@@ -44,7 +44,7 @@ TranscodeDispatcher::TranscodeDispatcher(std::shared_ptr<ConfigManager> config,
 {
 }
 
-std::unique_ptr<IOHandler> TranscodeDispatcher::open(Ref<TranscodingProfile> profile,
+std::unique_ptr<IOHandler> TranscodeDispatcher::open(std::shared_ptr<TranscodingProfile> profile,
     std::string location,
     std::shared_ptr<CdsObject> obj,
     std::string range)
@@ -55,7 +55,7 @@ std::unique_ptr<IOHandler> TranscodeDispatcher::open(Ref<TranscodingProfile> pro
     //    check_path_ex(location);
 
     if (profile->getType() == TR_External) {
-        Ref<TranscodeExternalHandler> tr_ext(new TranscodeExternalHandler(config, content));
+        auto tr_ext = std::make_unique<TranscodeExternalHandler>(config, content);
         return tr_ext->open(profile, location, obj, range);
     } else
         throw std::runtime_error("Unknown transcoding type for profile " + profile->getName());
