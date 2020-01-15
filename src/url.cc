@@ -34,7 +34,6 @@
 #include "url.h"
 #include "common.h"
 #include "config/config_manager.h"
-#include "util/rexp.h"
 #include "util/tools.h"
 #include <pthread.h>
 
@@ -140,51 +139,7 @@ std::unique_ptr<URL::Stat> URL::getInfo(std::string URL, CURL* curl_handle)
             curl_easy_cleanup(curl_handle);
         throw std::runtime_error("Error retrieving information from " + URL + " HTTP return code: " + std::to_string(retcode));
     }
-    /*    
-    Ref<RExp> getMT(new RExp());
-    
-    try
-    {
-        getMT->compile("\nContent-Type: ([^\n]+)\n", REG_ICASE);
-    }
-    catch (const std::runtime_error& ex)
-    {
-        if (cleanup)
-            curl_easy_cleanup(curl_handle);
 
-        throw ex;
-    }
-
-    Ref<Matcher> matcher = getMT->matcher(buffer->toString());
-    std::string mt;
-    if (matcher->next())
-        mt = trim_string(matcher->group(1));
-    else
-        mt = MIMETYPE_DEFAULT;
-
-    log_debug("Extracted content type: {}", mt.c_str());
-
-    Ref<RExp> getCL(new RExp());
-
-    try
-    {
-        getCL->compile("\nContent-Length: ([^\n]+)\n", REG_ICASE);
-    }
-    catch (const std::runtime_error& ex)
-    {
-        if (cleanup)
-            curl_easy_cleanup(curl_handle);
-
-        throw ex;
-    }
-
-    matcher = getCL->matcher(buffer->toString());
-    off_t cl;
-    if (matcher->next())
-        cl = trim_string(matcher->group(1)).toOFF_T();
-    else
-        cl = -1;
-*/
     res = curl_easy_getinfo(curl_handle, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &cl);
     if (res != CURLE_OK) {
         log_error("{}", error_buffer);

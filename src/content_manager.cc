@@ -42,7 +42,6 @@
 #include "util/filesystem.h"
 #include "layout/fallback_layout.h"
 #include "metadata/metadata_handler.h"
-#include "util/rexp.h"
 #include "web/session_manager.h"
 #include "util/string_converter.h"
 #include "util/timer.h"
@@ -82,8 +81,6 @@ struct magic_set* ms = nullptr;
 using namespace zmm;
 using namespace mxml;
 using namespace std;
-
-#define MIMETYPE_REGEXP "^([a-z0-9_-]+/[a-z0-9_-]+)"
 
 static std::string get_filename(std::string path)
 {
@@ -259,9 +256,6 @@ void ContentManager::init()
 #endif // ATRAILERS
 
 #endif // ONLINE_SERVICES
-
-    reMimetype = Ref<RExp>(new RExp());
-    reMimetype->compile(MIMETYPE_REGEXP);
 
     int ret = pthread_create(&taskThread,
         nullptr, //&attr, // attr

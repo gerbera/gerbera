@@ -331,8 +331,6 @@ protected:
     using AutoLock = std::lock_guard<decltype(mutex)>;
     using AutoLockU = std::unique_lock<decltype(mutex)>;
 
-    zmm::Ref<RExp> reMimetype;
-
     bool ignore_unknown_extensions;
     bool extension_map_case_sensitive;
 
