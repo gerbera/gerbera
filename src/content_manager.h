@@ -125,7 +125,7 @@ protected:
     std::shared_ptr<ContentManager> content;
     std::shared_ptr<TaskProcessor> task_processor;
     std::shared_ptr<Timer> timer;
-    zmm::Ref<OnlineService> service;
+    std::shared_ptr<OnlineService> service;
     std::shared_ptr<Layout> layout;
     bool unscheduled_refresh;
 
@@ -133,7 +133,7 @@ public:
     CMFetchOnlineContentTask(std::shared_ptr<ContentManager> content,
         std::shared_ptr<TaskProcessor> task_processor,
         std::shared_ptr<Timer> timer,
-        zmm::Ref<OnlineService> service, std::shared_ptr<Layout> layout,
+        std::shared_ptr<OnlineService> service, std::shared_ptr<Layout> layout,
         bool cancellable, bool unscheduled_refresh);
     virtual void run() override;
 };
@@ -208,7 +208,7 @@ public:
         bool cancellable = true,
         bool unscheduled_refresh = false);
 
-    void cleanupOnlineServiceObjects(zmm::Ref<OnlineService> service);
+    void cleanupOnlineServiceObjects(std::shared_ptr<OnlineService> service);
 
 #endif //ONLINE_SERVICES
 
@@ -371,14 +371,7 @@ protected:
     std::shared_ptr<Layout> layout;
 
 #ifdef ONLINE_SERVICES
-    zmm::Ref<OnlineServiceList> online_services;
-
-    void fetchOnlineContentInternal(zmm::Ref<OnlineService> service,
-        bool lowPriority = true,
-        bool cancellable = true,
-        unsigned int parentTaskID = 0,
-        bool unscheduled_refresh = false);
-
+    std::unique_ptr<OnlineServiceList> online_services;
 #endif //ONLINE_SERVICES
 
 #ifdef HAVE_JS

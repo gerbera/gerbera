@@ -139,7 +139,7 @@ bool SopCastService::refreshServiceData(std::shared_ptr<Layout> layout)
 
     Ref<Element> reply = getData();
 
-    Ref<SopCastContentHandler> sc(new SopCastContentHandler(config, storage));
+    auto sc = std::make_unique<SopCastContentHandler>(config, storage);
     if (reply != nullptr)
         sc->setServiceContent(reply);
     else {

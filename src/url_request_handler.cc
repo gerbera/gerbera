@@ -115,7 +115,7 @@ void URLRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
         if (item->getFlag(OBJECT_FLAG_ONLINE_SERVICE)) {
             /// \todo write a helper class that will handle various online
             /// services
-            Ref<OnlineServiceHelper> helper(new OnlineServiceHelper());
+            auto helper = std::make_unique<OnlineServiceHelper>();
             url = helper->resolveURL(item);
         } else
 #endif
@@ -195,7 +195,7 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
 
 #ifdef ONLINE_SERVICES
     if (item->getFlag(OBJECT_FLAG_ONLINE_SERVICE)) {
-        Ref<OnlineServiceHelper> helper(new OnlineServiceHelper());
+        auto helper = std::make_unique<OnlineServiceHelper>();
         url = helper->resolveURL(item);
     } else
 #endif

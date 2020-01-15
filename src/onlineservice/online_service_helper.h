@@ -36,11 +36,9 @@
 #define __ONLINE_SERVICE_HELPER_H__
 
 #include "cds_objects.h"
-#include "zmm/zmm.h"
-#include "zmm/zmmf.h"
 
 /// \brief This class will handle things that are specific to various services
-class OnlineServiceHelper : public zmm::Object {
+class OnlineServiceHelper {
 public:
     OnlineServiceHelper();
 

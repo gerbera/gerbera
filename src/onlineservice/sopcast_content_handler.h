@@ -53,7 +53,7 @@ class ConfigManager;
 
 /// \brief this class is responsible for creating objects from the SopCast
 /// metadata XML.
-class SopCastContentHandler : public zmm::Object {
+class SopCastContentHandler {
 public:
     SopCastContentHandler(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage);
 

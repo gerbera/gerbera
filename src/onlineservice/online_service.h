@@ -35,6 +35,9 @@
 #ifndef __ONLINE_SERVICE_H__
 #define __ONLINE_SERVICE_H__
 
+#include <vector>
+#include <memory>
+
 #include "layout/layout.h"
 #include "mxml/mxml.h"
 #include "util/timer.h"
@@ -56,7 +59,7 @@ typedef enum {
 
 /// \brief This is an interface for all online services, the function
 /// handles adding/refreshing content in the database.
-class OnlineService : public zmm::Object {
+class OnlineService {
 public:
     OnlineService();
 
@@ -138,18 +141,18 @@ protected:
     int getCheckPosIntAttr(zmm::Ref<mxml::Element> xml, std::string attrname);
 };
 
-class OnlineServiceList : public zmm::Object {
+class OnlineServiceList {
 public:
     OnlineServiceList();
 
     /// \brief Adds a service to the service list.
-    void registerService(zmm::Ref<OnlineService> service);
+    void registerService(std::shared_ptr<OnlineService> service);
 
     /// \brief Retrieves a service given by the service ID from the list
-    zmm::Ref<OnlineService> getService(service_type_t service);
+    std::shared_ptr<OnlineService> getService(service_type_t service);
 
 protected:
-    zmm::Ref<zmm::Array<OnlineService>> service_list;
+    std::vector<std::shared_ptr<OnlineService>> service_list;
 };
 
 #endif //__ONLINE_SERVICE_H__

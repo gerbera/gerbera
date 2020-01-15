@@ -39,8 +39,6 @@
 #include "zmm/zmm.h"
 #include "zmm/zmmf.h"
 
-using namespace zmm;
-
 OnlineServiceHelper::OnlineServiceHelper()
 {
 }

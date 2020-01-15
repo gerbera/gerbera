@@ -204,13 +204,13 @@ void ContentManager::init()
         layout_enabled = true;
 
 #ifdef ONLINE_SERVICES
-    online_services = Ref<OnlineServiceList>(new OnlineServiceList());
+    online_services = std::make_unique<OnlineServiceList>();
 
 #ifdef SOPCAST
     if (config->getBoolOption(CFG_ONLINE_CONTENT_SOPCAST_ENABLED)) {
         try {
             auto self = shared_from_this();
-            Ref<OnlineService> sc((OnlineService*)new SopCastService(config, storage, self));
+            auto sc = std::make_shared<SopCastService>(config, storage, self);
 
             i = config->getIntOption(CFG_ONLINE_CONTENT_SOPCAST_REFRESH);
             sc->setRefreshInterval(i);
@@ -237,7 +237,7 @@ void ContentManager::init()
     if (config->getBoolOption(CFG_ONLINE_CONTENT_ATRAILERS_ENABLED)) {
         try {
             auto self = shared_from_this();
-            Ref<OnlineService> at((OnlineService*)new ATrailersService(config, storage, self));
+            auto at = std::make_shared<ATrailersService>(config, storage, self);
             i = config->getIntOption(CFG_ONLINE_CONTENT_ATRAILERS_REFRESH);
             at->setRefreshInterval(i);
 
@@ -1306,21 +1306,18 @@ int ContentManager::addFileInternal(
 }
 
 #ifdef ONLINE_SERVICES
-void ContentManager::fetchOnlineContent(service_type_t service, bool lowPriority, bool cancellable, bool unscheduled_refresh)
+void ContentManager::fetchOnlineContent(service_type_t serviceType, bool lowPriority, bool cancellable, bool unscheduled_refresh)
 {
-    Ref<OnlineService> os = online_services->getService(service);
-    if (os == nullptr) {
-        log_debug("No surch service! {}", service);
+    auto service = online_services->getService(serviceType);
+    if (service == nullptr) {
+        log_debug("No surch service! {}", serviceType);
         throw std::runtime_error("Service not found!");
     }
-    fetchOnlineContentInternal(os, lowPriority, cancellable, 0, unscheduled_refresh);
-}
 
-void ContentManager::fetchOnlineContentInternal(
-    Ref<OnlineService> service, bool lowPriority, bool cancellable, unsigned int parentTaskID, bool unscheduled_refresh)
-{
     if (layout_enabled)
         initLayout();
+
+    unsigned int parentTaskID = 0;
 
     auto self = shared_from_this();
     auto task = std::make_shared<CMFetchOnlineContentTask>(self, task_processor, timer, service, layout, cancellable, unscheduled_refresh);
@@ -1330,7 +1327,7 @@ void ContentManager::fetchOnlineContentInternal(
     addTask(task, lowPriority);
 }
 
-void ContentManager::cleanupOnlineServiceObjects(zmm::Ref<OnlineService> service)
+void ContentManager::cleanupOnlineServiceObjects(std::shared_ptr<OnlineService> service)
 {
     log_debug("Finished fetch cycle for service: {}", service->getServiceName().c_str());
 
@@ -1846,7 +1843,7 @@ void CMRescanDirectoryTask::run()
 #ifdef ONLINE_SERVICES
 CMFetchOnlineContentTask::CMFetchOnlineContentTask(std::shared_ptr<ContentManager> content,
     std::shared_ptr<TaskProcessor> task_processor, std::shared_ptr<Timer> timer,
-    Ref<OnlineService> service, std::shared_ptr<Layout> layout, bool cancellable, bool unscheduled_refresh)
+    std::shared_ptr<OnlineService> service, std::shared_ptr<Layout> layout, bool cancellable, bool unscheduled_refresh)
     : GenericTask(ContentManagerTask)
     , content(content)
     , task_processor(task_processor)

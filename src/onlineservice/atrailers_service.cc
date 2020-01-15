@@ -149,7 +149,7 @@ bool ATrailersService::refreshServiceData(std::shared_ptr<Layout> layout)
 
     Ref<Element> reply = getData();
 
-    Ref<ATrailersContentHandler> sc(new ATrailersContentHandler(config, storage));
+    auto sc = std::make_unique<ATrailersContentHandler>(config, storage);
     if (reply != nullptr)
         sc->setServiceContent(reply);
     else {
