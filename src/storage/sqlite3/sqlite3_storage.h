@@ -39,6 +39,7 @@
 #include <mutex>
 #include <sqlite3.h>
 #include <sstream>
+#include <queue>
 
 #include "storage/sql_storage.h"
 #include "util/timer.h"
@@ -47,7 +48,7 @@ class Sqlite3Storage;
 class Sqlite3Result;
 
 /// \brief A virtual class that represents a task to be done by the sqlite3 thread.
-class SLTask : public zmm::Object {
+class SLTask {
 public:
     /// \brief Instantiate a task
     SLTask();
@@ -179,7 +180,7 @@ private:
     static void* staticThreadProc(void* arg);
     void threadProc();
 
-    void addTask(zmm::Ref<SLTask> task, bool onlyIfDirty = false);
+    void addTask(std::shared_ptr<SLTask> task, bool onlyIfDirty = false);
 
     pthread_t sqliteThread;
     std::condition_variable cond;
@@ -193,7 +194,7 @@ private:
     bool shutdownFlag;
 
     /// \brief the tasks to be done by the sqlite3 thread
-    zmm::Ref<zmm::ObjectQueue<SLTask>> taskQueue;
+    std::queue<std::shared_ptr<SLTask>> taskQueue;
     bool taskQueueOpen;
 
     virtual void threadCleanup() override {}

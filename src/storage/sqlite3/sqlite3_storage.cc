@@ -133,7 +133,6 @@ void Sqlite3Storage::init()
     if (access(dbFilePath.c_str(), R_OK | W_OK) != 0 && errno != ENOENT)
         throw StorageException("", "Error while accessing sqlite database file (" + dbFilePath + "): " + mt_strerror(errno));
 
-    taskQueue = Ref<ObjectQueue<SLTask>>(new ObjectQueue<SLTask>(SL3_INITITAL_QUEUE_SIZE));
     taskQueueOpen = true;
 
     int ret = pthread_create(
@@ -166,8 +165,8 @@ void Sqlite3Storage::init()
             if (access(dbFilePathbackup.c_str(), R_OK) == 0) {
                 try {
                     // trying to copy backup file
-                    Ref<SLBackupTask> btask(new SLBackupTask(config, true));
-                    this->addTask(RefCast(btask, SLTask));
+                    auto btask = std::make_shared<SLBackupTask>(config, true);
+                    this->addTask(btask);
                     btask->waitForTask();
                     dbVersion = getInternalSetting("db_version");
                 } catch (const std::runtime_error& e) {
@@ -176,10 +175,10 @@ void Sqlite3Storage::init()
 
             if (dbVersion.empty()) {
                 log_info("no sqlite3 backup is available or backup is corrupt. automatically creating database...");
-                Ref<SLInitTask> ptask(new SLInitTask(config));
-                addTask(RefCast(ptask, SLTask));
+                auto itask = std::make_shared<SLInitTask>(config);
+                addTask(itask);
                 try {
-                    ptask->waitForTask();
+                    itask->waitForTask();
                     dbVersion = getInternalSetting("db_version");
                 } catch (const std::runtime_error& e) {
                     shutdown();
@@ -257,8 +256,8 @@ void Sqlite3Storage::init()
         timer->addTimerSubscriber(this, backupInterval, nullptr);
 
         // do a backup now
-        Ref<SLBackupTask> btask(new SLBackupTask(config, false));
-        this->addTask(RefCast(btask, SLTask));
+        auto btask = std::make_shared<SLBackupTask>(config, false);
+        this->addTask(btask);
         btask->waitForTask();
     }
 
@@ -293,20 +292,20 @@ std::shared_ptr<SQLResult> Sqlite3Storage::select(const char* query, int length)
 {
     //fprintf(stdout, "%s\n",query);
     //fflush(stdout);
-    Ref<SLSelectTask> ptask(new SLSelectTask(query));
-    addTask(RefCast(ptask, SLTask));
-    ptask->waitForTask();
-    return ptask->getResult();
+    auto stask = std::make_shared<SLSelectTask>(query);
+    addTask(stask);
+    stask->waitForTask();
+    return stask->getResult();
 }
 
 int Sqlite3Storage::exec(const char* query, int length, bool getLastInsertId)
 {
     log_debug("Adding query to Queue: {}", query);
-    Ref<SLExecTask> ptask(new SLExecTask(query, getLastInsertId));
-    addTask(RefCast(ptask, SLTask));
-    ptask->waitForTask();
+    auto etask = std::make_shared<SLExecTask>(query, getLastInsertId);
+    addTask(etask);
+    etask->waitForTask();
     if (getLastInsertId)
-        return ptask->getLastInsertId();
+        return etask->getLastInsertId();
     else
         return -1;
 }
@@ -321,8 +320,6 @@ void* Sqlite3Storage::staticThreadProc(void* arg)
 
 void Sqlite3Storage::threadProc()
 {
-    Ref<SLTask> task;
-
     sqlite3* db;
 
     std::string dbFilePath = config->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
@@ -337,11 +334,15 @@ void Sqlite3Storage::threadProc()
     cond.notify_one();
 
     while (!shutdownFlag) {
-        if ((task = taskQueue->dequeue()) == nullptr) {
+        while (taskQueue.empty()) {
             /* if nothing to do, sleep until awakened */
             cond.wait(lock);
             continue;
         }
+
+        auto task = taskQueue.front();
+        taskQueue.pop();
+
         lock.unlock();
         try {
             task->run(&db, this);
@@ -357,14 +358,17 @@ void Sqlite3Storage::threadProc()
     }
 
     taskQueueOpen = false;
-    while ((task = taskQueue->dequeue()) != nullptr) {
+    while (!taskQueue.empty()) {
+        auto task = taskQueue.front();
+        taskQueue.pop();
+
         task->sendSignal("Sorry, sqlite3 thread is shutting down");
     }
     if (db)
         sqlite3_close(db);
 }
 
-void Sqlite3Storage::addTask(zmm::Ref<SLTask> task, bool onlyIfDirty)
+void Sqlite3Storage::addTask(std::shared_ptr<SLTask> task, bool onlyIfDirty)
 {
     if (!taskQueueOpen)
         throw std::runtime_error("sqlite3 task queue is already closed");
@@ -373,7 +377,7 @@ void Sqlite3Storage::addTask(zmm::Ref<SLTask> task, bool onlyIfDirty)
         throw std::runtime_error("sqlite3 task queue is already closed");
     }
     if (!onlyIfDirty || dirty) {
-        taskQueue->enqueue(task);
+        taskQueue.push(task);
         cond.notify_one();
     }
 }
@@ -406,7 +410,6 @@ void Sqlite3Storage::storeInternalSetting(std::string key, std::string value)
 
 /* SLTask */
 SLTask::SLTask()
-    : Object()
 {
     running = true;
     error = "";
@@ -638,8 +641,8 @@ Sqlite3Row::Sqlite3Row(char** row, std::shared_ptr<SQLResult> sqlResult)
 
 void Sqlite3Storage::timerNotify(std::shared_ptr<Timer::Parameter> param)
 {
-    Ref<SLBackupTask> btask(new SLBackupTask(config, false));
-    this->addTask(RefCast(btask, SLTask), true);
+    auto btask = std::make_shared<SLBackupTask>(config, false);
+    this->addTask(btask, true);
 }
 
 #endif // HAVE_SQLITE3
