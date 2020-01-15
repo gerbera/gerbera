@@ -83,12 +83,6 @@ std::string ATrailersService::getServiceName()
     return "Apple Trailers";
 }
 
-Ref<Object> ATrailersService::defineServiceTask(Ref<Element> xmlopt, Ref<Object> params)
-{
-    // there are no configurable tasks here, we fetch an XML and parse it
-    return nullptr;
-}
-
 Ref<Element> ATrailersService::getData()
 {
     long retcode;

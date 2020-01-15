@@ -74,11 +74,6 @@ std::string SopCastService::getServiceName()
     return "SopCast";
 }
 
-Ref<Object> SopCastService::defineServiceTask(Ref<Element> xmlopt, Ref<Object> params)
-{
-    return nullptr;
-}
-
 Ref<Element> SopCastService::getData()
 {
     long retcode;
