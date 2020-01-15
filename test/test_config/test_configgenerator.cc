@@ -70,13 +70,16 @@ TEST_F(ConfigGeneratorTest, GeneratesConfigXmlWithDefaultDefinitions) {
 TEST_F(ConfigGeneratorTest, GeneratesFullServerXmlWithAllDefinitions) {
   std::string mockXml = mockConfigXml("fixtures/mock-server-all.xml");
 
-  zmm::Ref<mxml::Element> result = subject->generateServer(homePath, configDir, prefixDir);
-  result->indent();
+  pugi::xml_document doc;
+  auto config = doc.append_child("config");
+  subject->generateServer(homePath, configDir, prefixDir, &config);
+
+  std::stringstream result;
+  config.first_child().print(result, "  ");
 
   // remove UUID, for simple compare...TODO: mock UUID?
-  std::string resultStr = result->print().c_str();
   std::regex reg("<udn>uuid:[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}</udn>");
-  resultStr = std::regex_replace(resultStr, reg, "<udn/>");
+  std::string resultStr = std::regex_replace(result.str(), reg, "<udn/>");
 
   EXPECT_STREQ(mockXml.c_str(), resultStr.c_str());
 }
@@ -85,29 +88,41 @@ TEST_F(ConfigGeneratorTest, GeneratesFullServerXmlWithAllDefinitions) {
 TEST_F(ConfigGeneratorTest, GeneratesUiAllTheTime) {
   std::string mockXml = mockConfigXml("fixtures/mock-ui.xml");
 
-  zmm::Ref<mxml::Element> result = subject->generateUi();
-  result->indent();
+  pugi::xml_document doc;
+  auto server = doc.append_child("server");
+  subject->generateUi(&server);
 
-  EXPECT_STREQ(mockXml.c_str(), result->print().c_str());
+  std::stringstream result;
+  server.first_child().print(result, "  ");
+
+  EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
 }
 
 TEST_F(ConfigGeneratorTest, GeneratesImportMappingsAllTheTime) {
   std::string mockXml = mockConfigXml("fixtures/mock-import-mappings.xml");
 
-  zmm::Ref<mxml::Element> result = subject->generateMappings();
-  result->indent();
+  pugi::xml_document doc;
+  auto import = doc.append_child("import");
+  subject->generateMappings(&import);
 
-  EXPECT_STREQ(mockXml.c_str(), result->print().c_str());
+  std::stringstream result;
+  import.first_child().print(result, "  ");
+
+  EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
 }
 
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
 TEST_F(ConfigGeneratorTest, GeneratesExtendedRuntimeXmlWithFFMPEG) {
   std::string mockXml = mockConfigXml("fixtures/mock-extended-ffmpeg.xml");
 
-  zmm::Ref<mxml::Element> result = subject->generateExtendedRuntime();
-  result->indent();
+  pugi::xml_document doc;
+  auto server = doc.append_child("server");
+  subject->generateExtendedRuntime(&server);
 
-  EXPECT_STREQ(mockXml.c_str(), result->print().c_str());
+  std::stringstream result;
+  server.first_child().print(result, "  ");
+
+  EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
 }
 #endif
 
@@ -115,10 +130,14 @@ TEST_F(ConfigGeneratorTest, GeneratesExtendedRuntimeXmlWithFFMPEG) {
 TEST_F(ConfigGeneratorTest, GeneratesExtendedRuntimeXmlWithoutFFMPEG) {
   std::string mockXml = mockConfigXml("fixtures/mock-extended.xml");
 
-  zmm::Ref<mxml::Element> result = subject->generateExtendedRuntime();
-  result->indent();
+  pugi::xml_document doc;
+  auto server = doc.append_child("server");
+  subject->generateExtendedRuntime(&server);
 
-  EXPECT_STREQ(mockXml.c_str(), result->print().c_str());
+  std::stringstream result;
+  server.first_child().print(result, "  ");
+
+  EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
 }
 #endif
 
@@ -126,10 +145,14 @@ TEST_F(ConfigGeneratorTest, GeneratesExtendedRuntimeXmlWithoutFFMPEG) {
 TEST_F(ConfigGeneratorTest, GeneratesStorageXmlWithMySQLAndSqlLite) {
   std::string mockXml = mockConfigXml("fixtures/mock-storage-mysql.xml");
 
-  zmm::Ref<mxml::Element> result = subject->generateStorage();
-  result->indent();
+  pugi::xml_document doc;
+  auto server = doc.append_child("server");
+  subject->generateStorage(&server);
 
-  EXPECT_STREQ(mockXml.c_str(), result->print().c_str());
+  std::stringstream result;
+  server.first_child().print(result, "  ");
+
+  EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
 }
 #endif
 
@@ -137,53 +160,71 @@ TEST_F(ConfigGeneratorTest, GeneratesStorageXmlWithMySQLAndSqlLite) {
 TEST_F(ConfigGeneratorTest, GeneratesStorageXmlWithSqlLiteOnly) {
   std::string mockXml = mockConfigXml("fixtures/mock-storage-sqlite.xml");
 
-  zmm::Ref<mxml::Element> result = subject->generateStorage();
-  result->indent();
+  pugi::xml_document doc;
+  auto server = doc.append_child("server");
+  subject->generateStorage(&server);
 
-  EXPECT_STREQ(mockXml.c_str(), result->print().c_str());
+  std::stringstream result;
+  server.first_child().print(result, "  ");
+
+  EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
 }
 #endif
-
-
 
 #if defined(HAVE_MAGIC) && !defined(HAVE_JS) && !defined(ONLINE_SERVICES)
 TEST_F(ConfigGeneratorTest, GeneratesImportWithMagicFile) {
   std::string mockXml = mockConfigXml("fixtures/mock-import-magic.xml");
 
-  zmm::Ref<mxml::Element> result = subject->generateImport(prefixDir, magicFile);
-  result->indent();
+  pugi::xml_document doc;
+  auto config = doc.append_child("config");
+  subject->generateImport(prefixDir, magicFile, &config);
 
-  EXPECT_STREQ(mockXml.c_str(), result->print().c_str());
+  std::stringstream result;
+  config.first_child().print(result, "  ");
+
+  EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
 }
 
 #elif defined(HAVE_MAGIC) && defined(HAVE_JS) && !defined(ONLINE_SERVICES)
 TEST_F(ConfigGeneratorTest, GeneratesImportWithMagicAndJS) {
   std::string mockXml = mockConfigXml("fixtures/mock-import-magic-js.xml");
 
-  zmm::Ref<mxml::Element> result = subject->generateImport(prefixDir, magicFile);
-  result->indent();
+  pugi::xml_document doc;
+  auto config = doc.append_child("config");
+  subject->generateImport(prefixDir, magicFile, &config);
 
-  EXPECT_STREQ(mockXml.c_str(), result->print().c_str());
+  std::stringstream result;
+  config.first_child().print(result, "  ");
+
+  EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
 }
 
 #elif defined(HAVE_MAGIC) && defined(HAVE_JS) && defined(ONLINE_SERVICES)
 TEST_F(ConfigGeneratorTest, GeneratesImportWithMagicJSandOnline) {
   std::string mockXml = mockConfigXml("fixtures/mock-import-magic-js-online.xml");
 
-  zmm::Ref<mxml::Element> result = subject->generateImport(prefixDir, magicFile);
-  result->indent();
+  pugi::xml_document doc;
+  auto config = doc.append_child("config");
+  subject->generateImport(prefixDir, magicFile, &config);
 
-  EXPECT_STREQ(mockXml.c_str(), result->print().c_str());
+  std::stringstream result;
+  config.first_child().print(result, "  ");
+
+  EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
 }
 
 #elif !defined(HAVE_MAGIC) && !defined(HAVE_JS) && !defined(ONLINE_SERVICES)
 TEST_F(ConfigGeneratorTest, GeneratesImportNoMagicJSorOnline) {
   std::string mockXml = mockConfigXml("fixtures/mock-import-none.xml");
 
-  zmm::Ref<mxml::Element> result = subject->generateImport(prefixDir, magicFile);
-  result->indent();
+  pugi::xml_document doc;
+  auto config = doc.append_child("config");
+  subject->generateImport(prefixDir, magicFile, &config);
 
-  EXPECT_STREQ(mockXml.c_str(), result->print().c_str());
+  std::stringstream result;
+  config.first_child().print(result, "  ");
+
+  EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
 }
 #endif
 
@@ -191,36 +232,51 @@ TEST_F(ConfigGeneratorTest, GeneratesImportNoMagicJSorOnline) {
 TEST_F(ConfigGeneratorTest, GeneratesOnlineContentWithAppleTrailers) {
   std::string mockXml = mockConfigXml("fixtures/mock-online-atrailers.xml");
 
-  zmm::Ref<mxml::Element> result = subject->generateOnlineContent();
-  result->indent();
+  pugi::xml_document doc;
+  auto import = doc.append_child("import");
+  subject->generateOnlineContent(&import);
 
-  EXPECT_STREQ(mockXml.c_str(), result->print().c_str());
+  std::stringstream result;
+  import.first_child().print(result, "  ");
+
+  EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
 }
 #else
 TEST_F(ConfigGeneratorTest, GeneratesOnlineContentEmpty) {
   std::string mockXml = "<online-content/>";
 
-  zmm::Ref<mxml::Element> result = subject->generateOnlineContent();
-  result->indent();
+  pugi::xml_document doc;
+  auto import = doc.append_child("import");
+  subject->generateOnlineContent(&import);
 
-  EXPECT_STREQ(mockXml.c_str(), result->print().c_str());
+  std::stringstream result;
+  import.first_child().print(result, "  ");
+
+  EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
 }
 #endif
 
 TEST_F(ConfigGeneratorTest, GeneratesTranscodingProfilesAlways) {
   std::string mockXml = mockConfigXml("fixtures/mock-transcoding.xml");
 
-  zmm::Ref<mxml::Element> result = subject->generateTranscoding();
-  result->indent();
+  pugi::xml_document doc;
+  auto config = doc.append_child("config");
+  subject->generateTranscoding(&config);
 
-  EXPECT_STREQ(mockXml.c_str(), result->print().c_str());
+  std::stringstream result;
+  config.first_child().print(result, "  ");
+
+  EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
 }
 
 TEST_F(ConfigGeneratorTest, GeneratesUdnWithUUID) {
 
-  zmm::Ref<mxml::Element> result = subject->generateUdn();
+  pugi::xml_document doc;
+  auto server = doc.append_child("server");
+  subject->generateUdn(&server);
 
-  EXPECT_THAT(result->getText().c_str(), MatchesRegex("^uuid:[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}"));
+  std::stringstream result;
+  server.first_child().first_child().print(result, "  ");
+
+  EXPECT_THAT(result.str(), MatchesRegex("^uuid:[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}"));
 }
-
-

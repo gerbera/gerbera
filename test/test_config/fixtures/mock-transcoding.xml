@@ -1,8 +1,8 @@
 <transcoding enabled="no">
   <mimetype-profile-mappings>
-    <transcode mimetype="video/x-flv" using="vlcmpeg"/>
-    <transcode mimetype="application/ogg" using="vlcmpeg"/>
-    <transcode mimetype="audio/ogg" using="ogg2mp3"/>
+    <transcode mimetype="video/x-flv" using="vlcmpeg" />
+    <transcode mimetype="application/ogg" using="vlcmpeg" />
+    <transcode mimetype="audio/ogg" using="ogg2mp3" />
   </mimetype-profile-mappings>
   <profiles>
     <profile name="ogg2mp3" enabled="no" type="external">
@@ -10,16 +10,16 @@
       <accept-url>no</accept-url>
       <first-resource>yes</first-resource>
       <accept-ogg-theora>no</accept-ogg-theora>
-      <agent command="ffmpeg" arguments="-y -i %in -f mp3 %out"/>
-      <buffer size="1048576" chunk-size="131072" fill-size="262144"/>
+      <agent command="ffmpeg" arguments="-y -i %in -f mp3 %out" />
+      <buffer size="1048576" chunk-size="131072" fill-size="262144" />
     </profile>
     <profile name="vlcmpeg" enabled="no" type="external">
       <mimetype>video/mpeg</mimetype>
       <accept-url>yes</accept-url>
       <first-resource>yes</first-resource>
       <accept-ogg-theora>yes</accept-ogg-theora>
-      <agent command="vlc" arguments="-I dummy %in --sout #transcode{venc=ffmpeg,vcodec=mp2v,vb=4096,fps=25,aenc=ffmpeg,acodec=mpga,ab=192,samplerate=44100,channels=2}:standard{access=file,mux=ps,dst=%out} vlc:quit"/>
-      <buffer size="14400000" chunk-size="512000" fill-size="120000"/>
+      <agent command="vlc" arguments="-I dummy %in --sout #transcode{venc=ffmpeg,vcodec=mp2v,vb=4096,fps=25,aenc=ffmpeg,acodec=mpga,ab=192,samplerate=44100,channels=2}:standard{access=file,mux=ps,dst=%out} vlc:quit" />
+      <buffer size="14400000" chunk-size="512000" fill-size="120000" />
     </profile>
   </profiles>
 </transcoding>
