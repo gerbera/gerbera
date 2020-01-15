@@ -1,7 +1,7 @@
 <server>
   <ui enabled="yes" show-tooltips="yes">
     <accounts enabled="no" session-timeout="30">
-      <account user="gerbera" password="gerbera"/>
+      <account user="gerbera" password="gerbera" />
     </accounts>
   </ui>
   <name>Gerbera</name>
@@ -28,14 +28,15 @@
       <database>gerbera</database>
     </mysql>
   </storage>
-  <protocolInfo extend="no" dlna-seek="yes"/><!-- For PS3 support change to "yes" -->
+  <!-- For PS3 support change "extend" to "yes" -->
+  <protocolInfo extend="no" dlna-seek="yes" />
   <!--
        Uncomment the lines below to get rid of jerky avi playback on the
        DSM320 or to enable subtitles support on the DSM units
     -->
   <!--
     <custom-http-headers>
-      <add header="X-User-Agent: redsonic"/>
+      <add header="X-User-Agent: redsonic" />
     </custom-http-headers>
 
     <manufacturerURL>redsonic.com</manufacturerURL>

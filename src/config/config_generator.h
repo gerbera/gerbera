@@ -26,7 +26,7 @@ Gerbera - https://gerbera.io/
 #ifndef GERBERA_CONFIG_GENERATOR_H
 #define GERBERA_CONFIG_GENERATOR_H
 
-#include <mxml/element.h>
+#include <pugixml.hpp>
 
 class ConfigGenerator {
  public:
@@ -34,18 +34,20 @@ class ConfigGenerator {
   ~ConfigGenerator();
 
   std::string generate(std::string userHome, std::string configDir, std::string prefixDir, std::string magicFile);
-  zmm::Ref<mxml::Element> generateServer(std::string userHome, std::string configDir, std::string prefixDir);
-  zmm::Ref<mxml::Element> generateUi();
-  zmm::Ref<mxml::Element> generateExtendedRuntime();
-  zmm::Ref<mxml::Element> generateStorage();
-  zmm::Ref<mxml::Element> generateImport(std::string prefixDir, std::string magicFile);
-  zmm::Ref<mxml::Element> generateMappings();
-  zmm::Ref<mxml::Element> generateOnlineContent();
-  zmm::Ref<mxml::Element> generateTranscoding();
-  zmm::Ref<mxml::Element> generateUdn();
+  
+  void generateServer(std::string userHome, std::string configDir, std::string prefixDir, pugi::xml_node* config);
+  void generateUi(pugi::xml_node* server);
+  void generateExtendedRuntime(pugi::xml_node* server);
+  void generateStorage(pugi::xml_node* server);
+  void generateImport(std::string prefixDir, std::string magicFile, pugi::xml_node* config);
+  void generateMappings(pugi::xml_node* import);
+  void generateOnlineContent(pugi::xml_node* import);
+  void generateTranscoding(pugi::xml_node* config);
+  void generateUdn(pugi::xml_node* server);
+
  protected:
-  zmm::Ref<mxml::Element> map_from_to(std::string from, std::string to);
-  zmm::Ref<mxml::Element> treat_as(std::string mimetype, std::string as);
+  void map_from_to(std::string from, std::string to, pugi::xml_node* parent);
+  void treat_as(std::string mimetype, std::string as, pugi::xml_node* parent);
 };
 
 #endif //GERBERA_CONFIG_GENERATOR_H

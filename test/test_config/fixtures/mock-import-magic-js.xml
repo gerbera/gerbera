@@ -9,58 +9,58 @@
   </scripting>
   <mappings>
     <extension-mimetype ignore-unknown="no">
-      <map from="mp3" to="audio/mpeg"/>
-      <map from="ogx" to="application/ogg"/>
-      <map from="ogv" to="video/ogg"/>
-      <map from="oga" to="audio/ogg"/>
-      <map from="ogg" to="audio/ogg"/>
-      <map from="ogm" to="video/ogg"/>
-      <map from="asf" to="video/x-ms-asf"/>
-      <map from="asx" to="video/x-ms-asf"/>
-      <map from="wma" to="audio/x-ms-wma"/>
-      <map from="wax" to="audio/x-ms-wax"/>
-      <map from="wmv" to="video/x-ms-wmv"/>
-      <map from="wvx" to="video/x-ms-wvx"/>
-      <map from="wm" to="video/x-ms-wm"/>
-      <map from="wmx" to="video/x-ms-wmx"/>
-      <map from="m3u" to="audio/x-mpegurl"/>
-      <map from="pls" to="audio/x-scpls"/>
-      <map from="flv" to="video/x-flv"/>
-      <map from="mkv" to="video/x-matroska"/>
-      <map from="mka" to="audio/x-matroska"/>
-      <map from="dsf" to="audio/x-dsd"/>
-      <map from="dff" to="audio/x-dsd"/>
-      <map from="wv" to="audio/x-wavpack"/>
+      <map from="mp3" to="audio/mpeg" />
+      <map from="ogx" to="application/ogg" />
+      <map from="ogv" to="video/ogg" />
+      <map from="oga" to="audio/ogg" />
+      <map from="ogg" to="audio/ogg" />
+      <map from="ogm" to="video/ogg" />
+      <map from="asf" to="video/x-ms-asf" />
+      <map from="asx" to="video/x-ms-asf" />
+      <map from="wma" to="audio/x-ms-wma" />
+      <map from="wax" to="audio/x-ms-wax" />
+      <map from="wmv" to="video/x-ms-wmv" />
+      <map from="wvx" to="video/x-ms-wvx" />
+      <map from="wm" to="video/x-ms-wm" />
+      <map from="wmx" to="video/x-ms-wmx" />
+      <map from="m3u" to="audio/x-mpegurl" />
+      <map from="pls" to="audio/x-scpls" />
+      <map from="flv" to="video/x-flv" />
+      <map from="mkv" to="video/x-matroska" />
+      <map from="mka" to="audio/x-matroska" />
+      <map from="dsf" to="audio/x-dsd" />
+      <map from="dff" to="audio/x-dsd" />
+      <map from="wv" to="audio/x-wavpack" />
       <!-- Uncomment the line below for PS3 divx support -->
-      <!-- <map from="avi" to="video/divx"/> -->
+      <!-- <map from="avi" to="video/divx" /> -->
       <!-- Uncomment the line below for D-Link DSM / ZyXEL DMA-1000 -->
-      <!-- <map from="avi" to="video/avi"/> -->
+      <!-- <map from="avi" to="video/avi" /> -->
     </extension-mimetype>
     <mimetype-upnpclass>
-      <map from="audio/*" to="object.item.audioItem.musicTrack"/>
-      <map from="video/*" to="object.item.videoItem"/>
-      <map from="image/*" to="object.item.imageItem"/>
-      <map from="application/ogg" to="object.item.audioItem.musicTrack"/>
+      <map from="audio/*" to="object.item.audioItem.musicTrack" />
+      <map from="video/*" to="object.item.videoItem" />
+      <map from="image/*" to="object.item.imageItem" />
+      <map from="application/ogg" to="object.item.audioItem.musicTrack" />
     </mimetype-upnpclass>
     <mimetype-contenttype>
-      <treat mimetype="audio/mpeg" as="mp3"/>
-      <treat mimetype="application/ogg" as="ogg"/>
-      <treat mimetype="audio/ogg" as="ogg"/>
-      <treat mimetype="audio/x-flac" as="flac"/>
-      <treat mimetype="audio/flac" as="flac"/>
-      <treat mimetype="audio/x-ms-wma" as="wma"/>
-      <treat mimetype="audio/x-wavpack" as="wv"/>
-      <treat mimetype="image/jpeg" as="jpg"/>
-      <treat mimetype="audio/x-mpegurl" as="playlist"/>
-      <treat mimetype="audio/x-scpls" as="playlist"/>
-      <treat mimetype="audio/x-wav" as="pcm"/>
-      <treat mimetype="audio/L16" as="pcm"/>
-      <treat mimetype="video/x-msvideo" as="avi"/>
-      <treat mimetype="video/mp4" as="mp4"/>
-      <treat mimetype="audio/mp4" as="mp4"/>
-      <treat mimetype="video/x-matroska" as="mkv"/>
-      <treat mimetype="audio/x-matroska" as="mka"/>
-      <treat mimetype="audio/x-dsd" as="dsd"/>
+      <treat mimetype="audio/mpeg" as="mp3" />
+      <treat mimetype="application/ogg" as="ogg" />
+      <treat mimetype="audio/ogg" as="ogg" />
+      <treat mimetype="audio/x-flac" as="flac" />
+      <treat mimetype="audio/flac" as="flac" />
+      <treat mimetype="audio/x-ms-wma" as="wma" />
+      <treat mimetype="audio/x-wavpack" as="wv" />
+      <treat mimetype="image/jpeg" as="jpg" />
+      <treat mimetype="audio/x-mpegurl" as="playlist" />
+      <treat mimetype="audio/x-scpls" as="playlist" />
+      <treat mimetype="audio/x-wav" as="pcm" />
+      <treat mimetype="audio/L16" as="pcm" />
+      <treat mimetype="video/x-msvideo" as="avi" />
+      <treat mimetype="video/mp4" as="mp4" />
+      <treat mimetype="audio/mp4" as="mp4" />
+      <treat mimetype="video/x-matroska" as="mkv" />
+      <treat mimetype="audio/x-matroska" as="mka" />
+      <treat mimetype="audio/x-dsd" as="dsd" />
     </mimetype-contenttype>
   </mappings>
 </import>

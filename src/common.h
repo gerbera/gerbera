@@ -324,7 +324,6 @@
 #define DEFAULT_JS_RUNTIME_MEM (1L * 1024L * 1024L)
 #endif
 
-#define XML_HEADER "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 #define XML_XMLNS_XSI "http://www.w3.org/2001/XMLSchema-instance"
 #define XML_XMLNS "http://mediatomb.cc/config/"
 
@@ -353,7 +352,7 @@
 #define DEFAULT_MARK_PLAYED_ITEMS_ENABLED NO
 #define DEFAULT_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES YES
 #define DEFAULT_MARK_PLAYED_ITEMS_STRING_MODE "prepend"
-#define DEFAULT_MARK_PLAYED_ITEMS_STRING "* "
+#define DEFAULT_MARK_PLAYED_ITEMS_STRING "*"
 #define DEFAULT_MARK_PLAYED_CONTENT_AUDIO "audio"
 #define DEFAULT_MARK_PLAYED_CONTENT_VIDEO "video"
 #define DEFAULT_MARK_PLAYED_CONTENT_IMAGE "image"
