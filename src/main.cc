@@ -67,7 +67,7 @@ void print_copyright()
     printf("\nGerbera UPnP Server version %s - %s\n\n", VERSION, DESC_MANUFACTURER_URL);
     printf("===============================================================================\n");
     printf("Gerbera is free software, covered by the GNU General Public License version 2\n\n");
-    printf("Copyright 2016-2019 Gerbera Contributors.\n");
+    printf("Copyright 2016-2020 Gerbera Contributors.\n");
     printf("Gerbera is based on MediaTomb: Copyright 2005-2010 Gena Batsyan, Sergey Bostandzhyan, Leonhard Wimmer.\n");
     printf("===============================================================================\n");
 }
@@ -77,7 +77,7 @@ void log_copyright()
     log_info("Gerbera UPnP Server version {} - {}", VERSION, DESC_MANUFACTURER_URL);
     log_info("===============================================================================");
     log_info("Gerbera is free software, covered by the GNU General Public License version 2");
-    log_info("Copyright 2016-2019 Gerbera Contributors.");
+    log_info("Copyright 2016-2020 Gerbera Contributors.");
     log_info("Gerbera is based on MediaTomb: Copyright 2005-2010 Gena Batsyan, Sergey Bostandzhyan, Leonhard Wimmer.");
     log_info("===============================================================================");
 }

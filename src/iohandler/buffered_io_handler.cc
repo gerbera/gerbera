@@ -89,7 +89,7 @@ void BufferedIOHandler::threadProc()
                     currentFillSize += bufSize;
                 percentFillLevel = ((float)currentFillSize / (float)bufSize) * 100;
             }
-            log_debug("buffer fill level: %3.2f%%  (bufSize: {}; a: {}; b: {})", percentFillLevel, bufSize, a, b);
+            log_debug("buffer fill level: {:03.2f}%  (bufSize: {}; a: {}; b: {})", percentFillLevel, bufSize, a, b);
         }
 #endif
         if (empty)

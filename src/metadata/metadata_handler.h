@@ -145,7 +145,7 @@ protected:
 public:
     /// \brief Definition of the supported metadata fields.
 
-    MetadataHandler(std::shared_ptr<ConfigManager> config);
+    explicit MetadataHandler(std::shared_ptr<ConfigManager> config);
 
     static void setMetadata(std::shared_ptr<ConfigManager> config, std::shared_ptr<CdsItem> item);
     static std::string getMetaFieldName(metadata_fields_t field);

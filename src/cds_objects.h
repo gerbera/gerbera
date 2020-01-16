@@ -35,6 +35,7 @@
 #include <sys/types.h>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 #include <map>
 
@@ -43,11 +44,11 @@
 #include "util/tools.h"
 
 // ATTENTION: These values need to be changed in web/js/items.js too.
-#define OBJECT_TYPE_CONTAINER 0x00000001
-#define OBJECT_TYPE_ITEM 0x00000002
-#define OBJECT_TYPE_ACTIVE_ITEM 0x00000004
-#define OBJECT_TYPE_ITEM_EXTERNAL_URL 0x00000008
-#define OBJECT_TYPE_ITEM_INTERNAL_URL 0x00000010
+#define OBJECT_TYPE_CONTAINER 0x00000001u
+#define OBJECT_TYPE_ITEM 0x00000002u
+#define OBJECT_TYPE_ACTIVE_ITEM 0x00000004u
+#define OBJECT_TYPE_ITEM_EXTERNAL_URL 0x00000008u
+#define OBJECT_TYPE_ITEM_INTERNAL_URL 0x00000010u
 
 #define STRING_OBJECT_TYPE_CONTAINER "container"
 #define STRING_OBJECT_TYPE_ITEM "item"
@@ -62,19 +63,19 @@
 #define IS_CDS_ITEM_INTERNAL_URL(type) (type & OBJECT_TYPE_ITEM_INTERNAL_URL)
 #define IS_CDS_PURE_ITEM(type) (type == OBJECT_TYPE_ITEM)
 
-#define OBJECT_FLAG_RESTRICTED 0x00000001
-#define OBJECT_FLAG_SEARCHABLE 0x00000002
-#define OBJECT_FLAG_USE_RESOURCE_REF 0x00000004
-#define OBJECT_FLAG_PERSISTENT_CONTAINER 0x00000008
-#define OBJECT_FLAG_PLAYLIST_REF 0x00000010
-#define OBJECT_FLAG_PROXY_URL 0x00000020
-#define OBJECT_FLAG_ONLINE_SERVICE 0x00000040
-#define OBJECT_FLAG_OGG_THEORA 0x00000080
-#define OBJECT_FLAG_PLAYED 0x00000200
+#define OBJECT_FLAG_RESTRICTED 0x00000001u
+#define OBJECT_FLAG_SEARCHABLE 0x00000002u
+#define OBJECT_FLAG_USE_RESOURCE_REF 0x00000004u
+#define OBJECT_FLAG_PERSISTENT_CONTAINER 0x00000008u
+#define OBJECT_FLAG_PLAYLIST_REF 0x00000010u
+#define OBJECT_FLAG_PROXY_URL 0x00000020u
+#define OBJECT_FLAG_ONLINE_SERVICE 0x00000040u
+#define OBJECT_FLAG_OGG_THEORA 0x00000080u
+#define OBJECT_FLAG_PLAYED 0x00000200u
 
-#define OBJECT_AUTOSCAN_NONE 0
-#define OBJECT_AUTOSCAN_UI 1
-#define OBJECT_AUTOSCAN_CFG 2
+#define OBJECT_AUTOSCAN_NONE 0u
+#define OBJECT_AUTOSCAN_UI 1u
+#define OBJECT_AUTOSCAN_CFG 2u
 
 // forward declaration
 class Storage;
@@ -110,7 +111,7 @@ protected:
     off_t sizeOnDisk;
 
     /// \brief virtual object flag
-    int virt;
+    bool virt;
 
     /// \brief type of the object: item, container, etc.
     unsigned int objectType;
@@ -127,7 +128,7 @@ protected:
 
 public:
     /// \brief Constructor. Sets the default values.
-    CdsObject(std::shared_ptr<Storage> storage);
+    explicit CdsObject(std::shared_ptr<Storage> storage);
 
     /// \brief Set the object ID.
     ///
@@ -164,7 +165,7 @@ public:
     inline bool isRestricted() { return getFlag(OBJECT_FLAG_RESTRICTED); }
 
     /// \brief Set the object title (dc:title)
-    inline void setTitle(std::string title) { this->title = title; }
+    inline void setTitle(std::string title) { this->title = std::move(title); }
 
     /// \brief Retrieve the title.
     inline std::string getTitle() { return title; }
@@ -202,10 +203,10 @@ public:
     /// \brief Query information on object type: item, container, etc.
     inline unsigned int getObjectType() { return objectType; }
 
-    /// \brief Retrive sort priority setting.
+    /// \brief Retrieve sort priority setting.
     inline int getSortPriority() { return sortPriority; }
 
-    /// \brief Set the sort prioroty of an object.
+    /// \brief Set the sort priority of an object.
     inline void setSortPriority(int sortPriority) { this->sortPriority = sortPriority; }
 
     /// \brief Get flags of an object.
@@ -302,7 +303,7 @@ public:
     }
 
     /// \brief Query resource tag with the given index
-    inline std::shared_ptr<CdsResource> getResource(int index)
+    inline std::shared_ptr<CdsResource> getResource(size_t index)
     {
         return resources.at(index);
     }
@@ -361,7 +362,7 @@ protected:
 
 public:
     /// \brief Constructor, sets the object type and default upnp:class (object.item)
-    CdsItem(std::shared_ptr<Storage> storage);
+    explicit CdsItem(std::shared_ptr<Storage> storage);
 
     /// \brief Set mime-type information of the media.
     inline void setMimeType(std::string mimeType) { this->mimeType = mimeType; }
@@ -374,7 +375,7 @@ public:
 
     inline int getTrackNumber() { return trackNumber; }
     /// \brief Copies all object properties to another object.
-    /// \param obj target object (clone)
+    /// \param obj target object (clone)`
     virtual void copyTo(std::shared_ptr<CdsObject> obj) override;
 
     /// \brief Checks if current object is equal to obj.
@@ -554,7 +555,7 @@ public:
 */
 
 /// \brief A container in the content directory.
-class CdsContainer : public CdsObject {
+class CdsContainer final : public CdsObject {
 protected:
     /// \brief container update id.
     int updateID;
@@ -562,12 +563,13 @@ protected:
     /// \brief childCount attribute
     int childCount;
 
-    /// \brief wheather this container is an autoscan start point.
+    /// \brief whether this container is an autoscan start point.
     int autoscanType;
 
 public:
     /// \brief Constructor, initializes default values for the flags and sets the object type.
-    CdsContainer(std::shared_ptr<Storage> storage);
+    explicit CdsContainer(std::shared_ptr<Storage> storage);
+
 
     /// \brief Set the searchable flag.
     inline void setSearchable(bool searchable) { changeFlag(OBJECT_FLAG_SEARCHABLE, searchable); }
@@ -587,26 +589,26 @@ public:
     /// \brief Retrieve number of children
     inline int getChildCount() { return childCount; }
 
-    /// \brief returns wheather this container is an autoscan start point.
+    /// \brief returns whether this container is an autoscan start point.
     inline int getAutoscanType() { return autoscanType; }
 
-    /// \brief sets wheather this container is an autoscan start point.
+    /// \brief sets whether this container is an autoscan start point.
     inline void setAutoscanType(int type) { autoscanType = type; }
 
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)
-    virtual void copyTo(std::shared_ptr<CdsObject> obj) override;
+    void copyTo(std::shared_ptr<CdsObject> obj) override;
 
     /// \brief Checks if current object is equal to obj.
     ///
     /// See description for CdsObject::equals() for details.
-    virtual int equals(std::shared_ptr<CdsObject> obj, bool exactly = false) override;
+    int equals(std::shared_ptr<CdsObject> obj, bool exactly = false) override;
 
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
-    virtual void validate() override;
+    void validate() override;
 
     /// \brief Returns the path to the object as it appears in the database tree.
-    virtual std::string getVirtualPath() override;
+    std::string getVirtualPath() override;
 };
 
 #endif // __CDS_OBJECTS_H__

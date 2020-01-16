@@ -67,13 +67,13 @@ bool ProcessIOHandler::abort()
 {
     bool abort = false;
 
-    if (proclist.empty())
+    if (procList.empty())
         return abort;
 
-    for (size_t i = 0; i < proclist.size(); i++) {
-        auto exec = proclist[i]->getExecutor();
+    for (size_t i = 0; i < procList.size(); i++) {
+        auto exec = procList[i]->getExecutor();
         if ((exec != nullptr) && (!exec->isAlive())) {
-            if (proclist[i]->abortOnDeath())
+            if (procList[i]->abortOnDeath())
                 abort = true;
             break;
         }
@@ -82,10 +82,10 @@ bool ProcessIOHandler::abort()
     return abort;
 }
 
-void ProcessIOHandler::killall()
+void ProcessIOHandler::killAll()
 {
-    for (size_t i = 0; i < proclist.size(); i++) {
-        auto exec = proclist[i]->getExecutor();
+    for (auto & i : procList) {
+        auto exec = i->getExecutor();
         if (exec != nullptr)
             exec->kill();
     }
@@ -93,11 +93,11 @@ void ProcessIOHandler::killall()
 
 void ProcessIOHandler::registerAll()
 {
-    if (main_proc != nullptr)
-        content->registerExecutor(main_proc);
+    if (mainProc != nullptr)
+        content->registerExecutor(mainProc);
 
-    for (size_t i = 0; i < proclist.size(); i++) {
-        auto exec = proclist[i]->getExecutor();
+    for (size_t i = 0; i < procList.size(); i++) {
+        auto exec = procList[i]->getExecutor();
         if (exec != nullptr)
             content->registerExecutor(exec);
     }
@@ -105,11 +105,11 @@ void ProcessIOHandler::registerAll()
 
 void ProcessIOHandler::unregisterAll()
 {
-    if (main_proc != nullptr)
-        content->unregisterExecutor(main_proc);
+    if (mainProc != nullptr)
+        content->unregisterExecutor(mainProc);
 
-    for (size_t i = 0; i < proclist.size(); i++) {
-        auto exec = proclist[i]->getExecutor();
+    for (size_t i = 0; i < procList.size(); i++) {
+        auto exec = procList[i]->getExecutor();
         if (exec != nullptr)
             content->unregisterExecutor(exec);
     }
@@ -117,26 +117,26 @@ void ProcessIOHandler::unregisterAll()
 
 ProcessIOHandler::ProcessIOHandler(std::shared_ptr<ContentManager> content,
     std::string filename,
-    std::shared_ptr<Executor> main_proc,
-    std::vector<std::shared_ptr<ProcListItem>> proclist,
+    std::shared_ptr<Executor> mainProc,
+    std::vector<std::shared_ptr<ProcListItem>> procList,
     bool ignoreSeek)
     : IOHandler()
 {
     this->content = content;
     this->filename = filename;
-    this->proclist = proclist;
-    this->main_proc = main_proc;
-    this->ignore_seek = ignoreSeek;
+    this->procList = procList;
+    this->mainProc = mainProc;
+    this->ignoreSeek = ignoreSeek;
 
-    if ((main_proc != nullptr) && ((!main_proc->isAlive() || abort()))) {
-        killall();
+    if ((mainProc != nullptr) && ((!mainProc->isAlive() || abort()))) {
+        killAll();
         throw std::runtime_error("process terminated early");
     }
     /*
     if (mkfifo(filename.c_str(), O_RDWR) == -1)
     {
         log_error("Failed to create fifo: {}", strerror(errno));
-        killall();
+        killAll();
         if (main_proc != nullptr)
             main_proc->kill();
 
@@ -148,8 +148,8 @@ ProcessIOHandler::ProcessIOHandler(std::shared_ptr<ContentManager> content,
 
 void ProcessIOHandler::open(enum UpnpOpenFileMode mode)
 {
-    if ((main_proc != nullptr) && ((!main_proc->isAlive() || abort()))) {
-        killall();
+    if ((mainProc != nullptr) && ((!mainProc->isAlive() || abort()))) {
+        killAll();
         throw std::runtime_error("process terminated early");
     }
 
@@ -165,9 +165,9 @@ void ProcessIOHandler::open(enum UpnpOpenFileMode mode)
             throw TryAgainException(std::string("open failed: ") + strerror(errno));
         }
 
-        killall();
-        if (main_proc != nullptr)
-            main_proc->kill();
+        killAll();
+        if (mainProc != nullptr)
+            mainProc->kill();
         unlink(filename.c_str());
         throw std::runtime_error("open: failed to open: " + filename);
     }
@@ -199,25 +199,25 @@ size_t ProcessIOHandler::read(char* buf, size_t length)
 
         // timeout
         if (ret == 0) {
-            if (main_proc != nullptr) {
-                bool main_ok = main_proc->isAlive();
+            if (mainProc != nullptr) {
+                bool main_ok = mainProc->isAlive();
                 if (!main_ok || abort()) {
                     if (!main_ok) {
-                        exit_status = main_proc->getStatus();
+                        exit_status = mainProc->getStatus();
                         log_debug("process exited with status {}", exit_status);
-                        killall();
+                        killAll();
                         if (exit_status == EXIT_SUCCESS)
                             return 0;
                         else
                             return -1;
                     } else {
-                        main_proc->kill();
-                        killall();
+                        mainProc->kill();
+                        killAll();
                         return -1;
                     }
                 }
             } else {
-                killall();
+                killAll();
                 return 0;
             }
 
@@ -254,18 +254,18 @@ size_t ProcessIOHandler::read(char* buf, size_t length)
         // actually that will depend on the ret code of the process
         ret = -1;
 
-        if (main_proc != nullptr) {
-            if (!main_proc->isAlive()) {
-                if (main_proc->getStatus() == EXIT_SUCCESS)
+        if (mainProc != nullptr) {
+            if (!mainProc->isAlive()) {
+                if (mainProc->getStatus() == EXIT_SUCCESS)
                     ret = 0;
 
             } else {
-                main_proc->kill();
+                mainProc->kill();
             }
         } else
             ret = 0;
 
-        killall();
+        killAll();
         return ret;
     }
 
@@ -298,25 +298,25 @@ size_t ProcessIOHandler::write(char* buf, size_t length)
 
         // timeout
         if (ret == 0) {
-            if (main_proc != nullptr) {
-                bool main_ok = main_proc->isAlive();
+            if (mainProc != nullptr) {
+                bool main_ok = mainProc->isAlive();
                 if (!main_ok || abort()) {
                     if (!main_ok) {
-                        exit_status = main_proc->getStatus();
+                        exit_status = mainProc->getStatus();
                         log_debug("process exited with status {}", exit_status);
-                        killall();
+                        killAll();
                         if (exit_status == EXIT_SUCCESS)
                             return 0;
                         else
                             return -1;
                     } else {
-                        main_proc->kill();
-                        killall();
+                        mainProc->kill();
+                        killAll();
                         return -1;
                     }
                 }
             } else {
-                killall();
+                killAll();
                 return 0;
             }
         }
@@ -345,18 +345,18 @@ size_t ProcessIOHandler::write(char* buf, size_t length)
         // actually that will depend on the ret code of the process
         ret = -1;
 
-        if (main_proc != nullptr) {
-            if (!main_proc->isAlive()) {
-                if (main_proc->getStatus() == EXIT_SUCCESS)
+        if (mainProc != nullptr) {
+            if (!mainProc->isAlive()) {
+                if (mainProc->getStatus() == EXIT_SUCCESS)
                     ret = 0;
 
             } else {
-                main_proc->kill();
+                mainProc->kill();
             }
         } else
             ret = 0;
 
-        killall();
+        killAll();
         return ret;
     }
 
@@ -366,7 +366,7 @@ size_t ProcessIOHandler::write(char* buf, size_t length)
 void ProcessIOHandler::seek(off_t offset, int whence)
 {
     // we know we can not seek in a fifo, but the PS3 asks for a hack...
-    if (!ignore_seek)
+    if (!ignoreSeek)
         throw std::runtime_error("fseek failed");
 }
 
@@ -377,12 +377,12 @@ void ProcessIOHandler::close()
     log_debug("terminating process, closing {}", this->filename.c_str());
     unregisterAll();
 
-    if (main_proc != nullptr) {
-        ret = main_proc->kill();
+    if (mainProc != nullptr) {
+        ret = mainProc->kill();
     } else
         ret = true;
 
-    killall();
+    killAll();
 
     ::close(fd);
 

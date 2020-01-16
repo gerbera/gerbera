@@ -42,7 +42,7 @@
 
 class ProcListItem {
 public:
-    ProcListItem(std::shared_ptr<Executor> exec, bool abortOnDeath = false);
+    explicit ProcListItem(std::shared_ptr<Executor> exec, bool abortOnDeath = false);
     std::shared_ptr<Executor> getExecutor();
     bool abortOnDeath();
 
@@ -59,11 +59,11 @@ class ProcessIOHandler : public IOHandler {
 public:
     /// \brief Sets the filename to work with.
     /// \param filename to read the data from
-    /// \param proclist associated processes that will be terminated once
+    /// \param procList associated processes that will be terminated once
     /// they are no longer needed
     ProcessIOHandler(std::shared_ptr<ContentManager> content,
-        std::string filename, std::shared_ptr<Executor> main_proc,
-        std::vector<std::shared_ptr<ProcListItem>> proclist = std::vector<std::shared_ptr<ProcListItem>>(),
+        std::string filename, std::shared_ptr<Executor> mainProc,
+        std::vector<std::shared_ptr<ProcListItem>> procList = std::vector<std::shared_ptr<ProcListItem>>(),
         bool ignoreSeek = false);
 
     /// \brief Opens file for reading (writing is not supported)
@@ -92,28 +92,28 @@ public:
     /// \brief Close a previously opened file and kills the kill_pid process
     void close() override;
 
-    ~ProcessIOHandler();
+    ~ProcessIOHandler() override;
 
 protected:
     std::shared_ptr<ContentManager> content;
 
     /// \brief List of associated processes.
-    std::vector<std::shared_ptr<ProcListItem>> proclist;
+    std::vector<std::shared_ptr<ProcListItem>> procList;
 
     /// \brief Main process used for reading
-    std::shared_ptr<Executor> main_proc;
+    std::shared_ptr<Executor> mainProc;
 
     /// \brief name of the file or fifo to read the data from
     std::string filename;
 
     /// \brief file descriptor
-    int fd;
+    int fd{};
 
     /// \brief if this flag is set seek on a fifo will not return an error
-    bool ignore_seek;
+    bool ignoreSeek;
 
     bool abort();
-    void killall();
+    void killAll();
     void registerAll();
     void unregisterAll();
 };
