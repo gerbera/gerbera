@@ -197,9 +197,8 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         UpnpFileInfo_set_FileLength(info, size);
     } else if (!is_srt && string_ok(tr_profile)) {
 
-        Ref<TranscodingProfile> tp = config
-                                         ->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)
-                                         ->getByName(tr_profile);
+        auto tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)
+                        ->getByName(tr_profile);
 
         if (tp == nullptr)
             throw std::runtime_error("Transcoding of file " + path
@@ -478,8 +477,9 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
         if (!is_srt && string_ok(tr_profile)) {
             std::string range = getValueOrDefault(params, "range");
 
-            Ref<TranscodeDispatcher> tr_d(new TranscodeDispatcher(config, content));
-            Ref<TranscodingProfile> tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(tr_profile);
+            auto tr_d = std::make_unique<TranscodeDispatcher>(config, content);
+            auto tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)
+                            ->getByName(tr_profile);
             return tr_d->open(tp, path, item, range);
         } else {
             if (mimeType.empty())

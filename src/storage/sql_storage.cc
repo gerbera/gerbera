@@ -218,7 +218,7 @@ std::shared_ptr<CdsObject> SQLStorage::checkRefID(std::shared_ptr<CdsObject> obj
     return findObjectByPath(location);
 }
 
-Ref<Array<SQLStorage::AddUpdateTable>> SQLStorage::_addUpdateObject(std::shared_ptr<CdsObject> obj, bool isUpdate, int* changedContainer)
+std::vector<std::shared_ptr<SQLStorage::AddUpdateTable>> SQLStorage::_addUpdateObject(std::shared_ptr<CdsObject> obj, bool isUpdate, int* changedContainer)
 {
     int objectType = obj->getObjectType();
     std::shared_ptr<CdsObject> refObj = nullptr;
@@ -353,6 +353,8 @@ Ref<Array<SQLStorage::AddUpdateTable>> SQLStorage::_addUpdateObject(std::shared_
         cdsObjectSql["mime_type"] = quote(item->getMimeType());
     }
 
+    std::vector<std::shared_ptr<SQLStorage::AddUpdateTable>> returnVal;
+
     // check for a duplicate (virtual) object
     if (hasReference && !isUpdate) {
         std::ostringstream q;
@@ -365,21 +367,19 @@ Ref<Array<SQLStorage::AddUpdateTable>> SQLStorage::_addUpdateObject(std::shared_
             << " AND " << TQ("dc_title")
             << '=' << quote(obj->getTitle())
             << " LIMIT 1";
-        Ref<SQLResult> res = select(q);
+        auto res = select(q);
         // if duplicate items is found - ignore
         if (res != nullptr && (res->nextRow() != nullptr))
-            return nullptr;
+            return returnVal;
     }
 
     if (obj->getParentID() == INVALID_OBJECT_ID)
         throw std::runtime_error("tried to create or update an object with an illegal parent id");
     cdsObjectSql["parent_id"] = std::to_string(obj->getParentID());
 
-    int returnValSize = 2;
-    returnValSize += obj->getMetadata().size();
-    Ref<Array<AddUpdateTable>> returnVal(new Array<AddUpdateTable>(returnValSize));
-    returnVal->append(Ref<AddUpdateTable>(
-        new AddUpdateTable(CDS_OBJECT_TABLE, cdsObjectSql, isUpdate ? "update" : "insert")));
+    returnVal.push_back(
+        std::make_shared<AddUpdateTable>(CDS_OBJECT_TABLE, cdsObjectSql, isUpdate ? "update" : "insert")
+    );
 
     if (!hasReference || !std::equal(dict.begin(), dict.end(), refObj->getMetadata().begin())) {
         generateMetadataDBOperations(obj, isUpdate, returnVal);
@@ -393,8 +393,9 @@ Ref<Array<SQLStorage::AddUpdateTable>> SQLStorage::_addUpdateObject(std::shared_
         cdsActiveItemSql["action"] = quote(aitem->getAction());
         cdsActiveItemSql["state"] = quote(aitem->getState());
 
-        returnVal->append(Ref<AddUpdateTable>(new AddUpdateTable(CDS_ACTIVE_ITEM_TABLE, cdsActiveItemSql,
-            isUpdate ? "update" : "insert")));
+        returnVal.push_back(
+            std::make_shared<AddUpdateTable>(CDS_ACTIVE_ITEM_TABLE, cdsActiveItemSql, isUpdate ? "update" : "insert")
+        );
     }
 
     return returnVal;
@@ -405,13 +406,12 @@ void SQLStorage::addObject(std::shared_ptr<CdsObject> obj, int* changedContainer
     if (obj->getID() != INVALID_OBJECT_ID)
         throw std::runtime_error("tried to add an object with an object ID set");
     //obj->setID(INVALID_OBJECT_ID);
-    Ref<Array<AddUpdateTable>> data = _addUpdateObject(obj, false, changedContainer);
-    if (data == nullptr)
-        return;
+    auto data = _addUpdateObject(obj, false, changedContainer);
+
     // int lastInsertID = INVALID_OBJECT_ID;
     // int lastMetadataInsertID = INVALID_OBJECT_ID;
-    for (int i = 0; i < data->size(); i++) {
-        Ref<AddUpdateTable> addUpdateTable = data->get(i);
+    for (size_t i = 0; i < data.size(); i++) {
+        auto& addUpdateTable = data[i];
         std::shared_ptr<std::ostringstream> qb = sqlForInsert(obj, addUpdateTable);
         log_debug("insert_query: {}", qb->str().c_str());
         exec(*qb);
@@ -420,7 +420,7 @@ void SQLStorage::addObject(std::shared_ptr<CdsObject> obj, int* changedContainer
 
 void SQLStorage::updateObject(std::shared_ptr<CdsObject> obj, int* changedContainer)
 {
-    Ref<Array<AddUpdateTable>> data;
+    std::vector<std::shared_ptr<AddUpdateTable>> data;
     if (obj->getID() == CDS_ID_FS_ROOT) {
         std::map<std::string,std::string> cdsObjectSql;
 
@@ -428,17 +428,14 @@ void SQLStorage::updateObject(std::shared_ptr<CdsObject> obj, int* changedContai
         setFsRootName(obj->getTitle());
         cdsObjectSql["upnp_class"] = quote(obj->getClass());
 
-        data = Ref<Array<AddUpdateTable>>(new Array<AddUpdateTable>(1));
-        data->append(Ref<AddUpdateTable>(new AddUpdateTable(CDS_OBJECT_TABLE, cdsObjectSql, "update")));
+        data.push_back(std::make_shared<AddUpdateTable>(CDS_OBJECT_TABLE, cdsObjectSql, "update"));
     } else {
         if (IS_FORBIDDEN_CDS_ID(obj->getID()))
             throw std::runtime_error("tried to update an object with a forbidden ID (" + std::to_string(obj->getID()) + ")!");
         data = _addUpdateObject(obj, true, changedContainer);
-        if (data == nullptr)
-            return;
     }
-    for (int i = 0; i < data->size(); i++) {
-        Ref<AddUpdateTable> addUpdateTable = data->get(i);
+    for (size_t i = 0; i < data.size(); i++) {
+        auto& addUpdateTable = data[i];
         std::string operation = addUpdateTable->getOperation();
         std::unique_ptr<std::ostringstream> qb;
         if (operation == "update") {
@@ -461,7 +458,7 @@ std::shared_ptr<CdsObject> SQLStorage::loadObject(int objectID)
 
     qb << SQL_QUERY << " WHERE " << TQD('f', "id") << '=' << objectID;
 
-    Ref<SQLResult> res = select(qb);
+    auto res = select(qb);
     std::unique_ptr<SQLRow> row;
     if (res != nullptr && (row = res->nextRow()) != nullptr) {
         return createObjectFromRow(row);
@@ -473,7 +470,7 @@ std::shared_ptr<CdsObject> SQLStorage::loadObjectByServiceID(std::string service
 {
     std::ostringstream qb;
     qb << SQL_QUERY << " WHERE " << TQD('f', "service_id") << '=' << quote(serviceID);
-    Ref<SQLResult> res = select(qb);
+    auto res = select(qb);
     std::unique_ptr<SQLRow> row;
     if (res != nullptr && (row = res->nextRow()) != nullptr) {
         return createObjectFromRow(row);
@@ -492,7 +489,7 @@ std::unique_ptr<std::vector<int>> SQLStorage::getServiceObjectIDs(char servicePr
         << " WHERE " << TQ("service_id")
         << " LIKE " << quote(std::string(1, servicePrefix) + '%');
 
-    Ref<SQLResult> res = select(qb);
+    auto res = select(qb);
     if (res == nullptr)
         throw std::runtime_error("db error");
 
@@ -514,7 +511,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLStorage::browse(const std::unique_ptr
 
     objectID = param->getObjectID();
 
-    Ref<SQLResult> res;
+    std::shared_ptr<SQLResult> res;
     std::unique_ptr<SQLRow> row;
 
     bool haveObjectType = false;
@@ -630,8 +627,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLStorage::search(const std::unique_ptr
 
     std::ostringstream countSQL;
     countSQL << "select count(*) " << searchSQL << ';';
-    zmm::Ref<SQLResult> sqlResult;
-    sqlResult = select(countSQL);
+    auto sqlResult = select(countSQL);
     std::unique_ptr<SQLRow> countRow = sqlResult->nextRow();
     if (countRow != nullptr) {
         *numMatches = std::stoi(countRow->col(0));
@@ -669,8 +665,6 @@ int SQLStorage::getChildCount(int contId, bool containers, bool items, bool hide
     if (!containers && !items)
         return 0;
 
-    std::unique_ptr<SQLRow> row;
-    Ref<SQLResult> res;
     std::ostringstream qb;
     qb << "SELECT COUNT(*) FROM " << TQ(CDS_OBJECT_TABLE)
         << " WHERE " << TQ("parent_id") << '=' << contId;
@@ -682,7 +676,9 @@ int SQLStorage::getChildCount(int contId, bool containers, bool items, bool hide
     if (contId == CDS_ID_ROOT && hideFsRoot) {
         qb << " AND " << TQ("id") << "!=" << quote(CDS_ID_FS_ROOT);
     }
-    res = select(qb);
+    auto res = select(qb);
+
+    std::unique_ptr<SQLRow> row;
     if (res != nullptr && (row = res->nextRow()) != nullptr) {
         int childCount = std::stoi(row->col(0));
         return childCount;
@@ -699,7 +695,7 @@ std::vector<std::string> SQLStorage::getMimeTypes()
         << " FROM " << TQ(CDS_OBJECT_TABLE)
         << " WHERE " << TQ("mime_type") << " IS NOT NULL ORDER BY "
         << TQ("mime_type");
-    Ref<SQLResult> res = select(qb);
+    auto res = select(qb);
     if (res == nullptr)
         throw std::runtime_error("db error");
 
@@ -736,7 +732,7 @@ std::shared_ptr<CdsObject> SQLStorage::_findObjectByPath(std::string fullpath)
         << " AND " << TQD('f', "ref_id") << " IS NULL "
                                             "LIMIT 1";
 
-    Ref<SQLResult> res = select(qb);
+    auto res = select(qb);
     if (res == nullptr)
         throw std::runtime_error("error while doing select: " + qb.str());
 
@@ -877,7 +873,7 @@ std::string SQLStorage::buildContainerPath(int parentID, std::string title)
     qb << "SELECT " << TQ("location") << " FROM " << TQ(CDS_OBJECT_TABLE)
             << " WHERE " << TQ("id") << '=' << parentID << " LIMIT 1";
 
-    Ref<SQLResult> res = select(qb);
+    auto res = select(qb);
     if (res == nullptr)
         return nullptr;
 
@@ -908,7 +904,7 @@ void SQLStorage::addContainerChain(std::string path, std::string lastClass, int 
         << " AND " << TQ("location") << '=' << quote(dbLocation)
         << " LIMIT 1";
 
-    Ref<SQLResult> res = select(qb);
+    auto res = select(qb);
     if (res != nullptr) {
         std::unique_ptr<SQLRow> row = res->nextRow();
         if (row != nullptr) {
@@ -1057,7 +1053,8 @@ std::shared_ptr<CdsObject> SQLStorage::createObjectFromRow(const std::unique_ptr
         query << "SELECT " << TQ("id") << ',' << TQ("action") << ','
                << TQ("state") << " FROM " << TQ(CDS_ACTIVE_ITEM_TABLE)
                << " WHERE " << TQ("id") << '=' << quote(aitem->getID());
-        Ref<SQLResult> resAI = select(query);
+        auto resAI = select(query);
+
         std::unique_ptr<SQLRow> rowAI;
         if (resAI != nullptr && (rowAI = resAI->nextRow()) != nullptr) {
             aitem->setAction(rowAI->col(1));
@@ -1131,7 +1128,7 @@ std::map<std::string,std::string> SQLStorage::retrieveMetadataForObject(int obje
         << " FROM " << TQ(METADATA_TABLE)
         << " WHERE " << TQ("item_id")
         << " = " << objectId;
-    Ref<SQLResult> res = select(qb);
+    auto res = select(qb);
 
     std::map<std::string,std::string> metadata;
     if (res == nullptr)
@@ -1151,7 +1148,8 @@ int SQLStorage::getTotalFiles()
     query << "SELECT COUNT(*) FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE "
            << TQ("object_type") << " != " << quote(OBJECT_TYPE_CONTAINER);
     //<< " AND is_virtual = 0";
-    Ref<SQLResult> res = select(query);
+    auto res = select(query);
+
     std::unique_ptr<SQLRow> row;
     if (res != nullptr && (row = res->nextRow()) != nullptr) {
         return std::stoi(row->col(0));
@@ -1186,9 +1184,10 @@ std::string SQLStorage::incrementUpdateIDs(const unique_ptr<unordered_set<int>>&
     bufSelect << "SELECT " << TQ("id") << ',' << TQ("update_id") << " FROM "
             << TQ(CDS_OBJECT_TABLE) << " WHERE " << TQ("id") << ' ';
     bufSelect << inBuf.str();
-    Ref<SQLResult> res = select(bufSelect);
+    auto res = select(bufSelect);
     if (res == nullptr)
         throw std::runtime_error("Error while fetching update ids");
+
     std::unique_ptr<SQLRow> row;
     std::list<std::string> rows;
     while ((row = res->nextRow()) != nullptr) {
@@ -1257,9 +1256,10 @@ std::string SQLStorage::findFolderImage(int id, std::string trackArtBase)
     q << " LIMIT 1";
 
     //log_debug("findFolderImage {}, {}", id, q->c_str());
-    Ref<SQLResult> res = select(q);
+    auto res = select(q);
     if (res == nullptr)
         throw std::runtime_error("db error");
+
     std::unique_ptr<SQLRow> row;
     if ((row = res->nextRow()) != nullptr) // we only care about the first result
     {
@@ -1278,19 +1278,14 @@ unique_ptr<unordered_set<int>> SQLStorage::getObjects(int parentID, bool without
         q << TQ("object_type") << " != " << OBJECT_TYPE_CONTAINER << " AND ";
     q << TQ("parent_id") << '=';
     q << parentID;
-    Ref<SQLResult> res = select(q);
+    auto res = select(q);
     if (res == nullptr)
         throw std::runtime_error("db error");
-    std::unique_ptr<SQLRow> row;
-
     if (res->getNumRows() <= 0)
         return nullptr;
 
-    unsigned long long capacity = res->getNumRows() * 5 + 1;
-    if (capacity < 521)
-        capacity = 521;
-
     auto ret = make_unique<unordered_set<int>>();
+    std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow()) != nullptr) {
         ret->insert(std::stoi(row->col(0)));
     }
@@ -1313,7 +1308,7 @@ std::unique_ptr<Storage::ChangedContainers> SQLStorage::removeObjects(const uniq
             << " FROM " << TQ(CDS_OBJECT_TABLE)
             << " WHERE " << TQ("id") << " IN (" << join(*list, ",") << ")";
 
-    Ref<SQLResult> res = select(idsBuf);
+    auto res = select(idsBuf);
     if (res == nullptr)
         throw std::runtime_error("sql error");
 
@@ -1347,7 +1342,7 @@ void SQLStorage::_removeObjects(const std::vector<int32_t> &objectIDs) {
 
     log_debug("{}", sel.str().c_str());
 
-    Ref<SQLResult> res = select(sel);
+    auto res = select(sel);
     if (res != nullptr) {
         log_debug("relevant autoscans!");
         std::vector<std::string> delete_as;
@@ -1398,9 +1393,10 @@ std::unique_ptr<Storage::ChangedContainers> SQLStorage::removeObject(int objectI
     q << "SELECT " << TQ("object_type") << ',' << TQ("ref_id")
        << " FROM " << TQ(CDS_OBJECT_TABLE)
        << " WHERE " << TQ("id") << '=' << quote(objectID) << " LIMIT 1";
-    Ref<SQLResult> res = select(q);
+    auto res = select(q);
     if (res == nullptr)
         return nullptr;
+
     std::unique_ptr<SQLRow> row = res->nextRow();
     if (row == nullptr)
         return nullptr;
@@ -1452,7 +1448,7 @@ std::unique_ptr<Storage::ChangedContainers> SQLStorage::_recursiveRemove(
 
     auto changedContainers = std::make_unique<ChangedContainers>();
 
-    Ref<SQLResult> res;
+    std::shared_ptr<SQLResult> res;
     std::unique_ptr<SQLRow> row;
 
     std::vector<int32_t> itemIds(items);
@@ -1578,8 +1574,9 @@ std::unique_ptr<Storage::ChangedContainers> SQLStorage::_purgeEmptyContainers(st
 
     std::vector<int32_t> del;
 
-    Ref<SQLResult> res;
+    std::shared_ptr<SQLResult> res;
     std::unique_ptr<SQLRow> row;
+
     std::vector<int32_t> selUi;
     std::vector<int32_t> selUpnp;
 
@@ -1669,9 +1666,10 @@ std::string SQLStorage::getInternalSetting(std::string key)
     std::ostringstream q;
     q << "SELECT " << TQ("value") << " FROM " << TQ(INTERNAL_SETTINGS_TABLE) << " WHERE " << TQ("key") << '='
        << quote(key) << " LIMIT 1";
-    Ref<SQLResult> res = select(q);
+    auto res = select(q);
     if (res == nullptr)
         return nullptr;
+
     std::unique_ptr<SQLRow> row = res->nextRow();
     if (row == nullptr)
         return nullptr;
@@ -1718,9 +1716,10 @@ void SQLStorage::updateAutoscanPersistentList(ScanMode scanmode, std::shared_ptr
         else
             q << TQ("obj_id") << '=' << quote(objectID);
         q << " LIMIT 1";
-        Ref<SQLResult> res = select(q);
+        auto res = select(q);
         if (res == nullptr)
             throw StorageException("", "query error while selecting from autoscan list");
+
         std::unique_ptr<SQLRow> row;
         if ((row = res->nextRow()) != nullptr) {
             ad->setStorageID(std::stoi(row->col(0)));
@@ -1746,7 +1745,7 @@ std::shared_ptr<AutoscanList> SQLStorage::getAutoscanList(ScanMode scanmode)
        << " LEFT JOIN " << TQ(CDS_OBJECT_TABLE) << ' ' << TQ('t')
        << " ON " FLD("obj_id") '=' << TQD('t', "id")
        << " WHERE " FLD("scan_mode") '=' << quote(AutoscanDirectory::mapScanmode(scanmode));
-    Ref<SQLResult> res = select(q);
+    auto res = select(q);
     if (res == nullptr)
         throw StorageException("", "query error while fetching autoscan list");
 
@@ -1772,7 +1771,7 @@ std::shared_ptr<AutoscanDirectory> SQLStorage::getAutoscanDirectory(int objectID
        << " LEFT JOIN " << TQ(CDS_OBJECT_TABLE) << ' ' << TQ('t')
        << " ON " FLD("obj_id") '=' << TQD('t', "id")
        << " WHERE " << TQD('t', "id") << '=' << quote(objectID);
-    Ref<SQLResult> res = select(q);
+    auto res = select(q);
     if (res == nullptr)
         throw StorageException("", "query error while fetching autoscan");
 
@@ -1943,7 +1942,7 @@ int SQLStorage::_getAutoscanDirectoryInfo(int objectID, std::string field)
     std::ostringstream q;
     q << "SELECT " << TQ(field) << " FROM " << TQ(AUTOSCAN_TABLE)
        << " WHERE " << TQ("obj_id") << '=' << quote(objectID);
-    Ref<SQLResult> res = select(q);
+    auto res = select(q);
     std::unique_ptr<SQLRow> row;
     if (res == nullptr || (row = res->nextRow()) == nullptr)
         return 0;
@@ -1959,7 +1958,7 @@ int SQLStorage::_getAutoscanObjectID(int autoscanID)
     q << "SELECT " << TQ("obj_id") << " FROM " << TQ(AUTOSCAN_TABLE)
        << " WHERE " << TQ("id") << '=' << quote(autoscanID)
        << " LIMIT 1";
-    Ref<SQLResult> res = select(q);
+    auto res = select(q);
     if (res == nullptr)
         throw StorageException("", "error while doing select on ");
     std::unique_ptr<SQLRow> row;
@@ -2029,9 +2028,6 @@ std::unique_ptr<std::vector<int>> SQLStorage::_checkOverlappingAutoscans(std::sh
         return nullptr;
     int storageID = adir->getStorageID();
 
-    Ref<SQLResult> res;
-    std::unique_ptr<SQLRow> row;
-
     std::ostringstream q;
     q << "SELECT " << TQ("id")
        << " FROM " << TQ(AUTOSCAN_TABLE)
@@ -2040,10 +2036,11 @@ std::unique_ptr<std::vector<int>> SQLStorage::_checkOverlappingAutoscans(std::sh
     if (storageID >= 0)
         q << " AND " << TQ("id") << " != " << quote(storageID);
 
-    res = select(q);
+    auto res = select(q);
     if (res == nullptr)
         throw std::runtime_error("SQL error");
 
+    std::unique_ptr<SQLRow> row;
     if ((row = res->nextRow()) != nullptr) {
         auto obj = loadObject(checkObjectID);
         if (obj == nullptr)
@@ -2117,7 +2114,7 @@ std::unique_ptr<std::vector<int>> SQLStorage::getPathIDs(int objectID)
     sel << "SELECT " << TQ("parent_id") << " FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE ";
     sel << TQ("id") << '=';
     
-    Ref<SQLResult> res;
+    std::shared_ptr<SQLResult> res;
     std::unique_ptr<SQLRow> row;
     while (objectID != CDS_ID_ROOT) {
         pathIDs->push_back(objectID);
@@ -2166,7 +2163,7 @@ void SQLStorage::loadLastID()
     std::ostringstream qb;
     qb << "SELECT MAX(" << TQ("id") << ')'
         << " FROM " << TQ(CDS_OBJECT_TABLE);
-    Ref<SQLResult> res = select(qb);
+    auto res = select(qb);
     if (res == nullptr)
         throw std::runtime_error("could not load lastID (res==nullptr)");
 
@@ -2200,7 +2197,7 @@ void SQLStorage::loadLastMetadataID()
     std::ostringstream qb;
     qb << "SELECT MAX(" << TQ("id") << ')'
         << " FROM " << TQ(METADATA_TABLE);
-    Ref<SQLResult> res = select(qb);
+    auto res = select(qb);
     if (res == nullptr)
         throw std::runtime_error("could not load lastMetadataID (res==nullptr)");
 
@@ -2230,7 +2227,7 @@ void SQLStorage::clearFlagInDB(int flag)
 }
 
 void SQLStorage::generateMetadataDBOperations(std::shared_ptr<CdsObject> obj, bool isUpdate,
-    Ref<Array<AddUpdateTable>> operations)
+    std::vector<std::shared_ptr<AddUpdateTable>>& operations)
 {
     auto dict = obj->getMetadata();
     if (!isUpdate) {
@@ -2238,7 +2235,7 @@ void SQLStorage::generateMetadataDBOperations(std::shared_ptr<CdsObject> obj, bo
             std::map<std::string,std::string> metadataSql;
             metadataSql["property_name"] = quote(it->first);
             metadataSql["property_value"] = quote(it->second);
-            operations->append(Ref<AddUpdateTable>(new AddUpdateTable(METADATA_TABLE, metadataSql, "insert")));
+            operations.push_back(std::make_shared<AddUpdateTable>(METADATA_TABLE, metadataSql, "insert"));
         }
     } else {
         // get current metadata from DB: if only it really was a dictionary...
@@ -2248,7 +2245,7 @@ void SQLStorage::generateMetadataDBOperations(std::shared_ptr<CdsObject> obj, bo
             std::map<std::string,std::string> metadataSql;
             metadataSql["property_name"] = quote(it->first);
             metadataSql["property_value"] = quote(it->second);
-            operations->append(Ref<AddUpdateTable>(new AddUpdateTable(METADATA_TABLE, metadataSql, operation)));
+            operations.push_back(std::make_shared<AddUpdateTable>(METADATA_TABLE, metadataSql, operation));
         }
         for (auto it = dbMetadata.begin(); it != dbMetadata.end(); it++) {
             if (dict.find(it->first) == dict.end()) {
@@ -2256,13 +2253,13 @@ void SQLStorage::generateMetadataDBOperations(std::shared_ptr<CdsObject> obj, bo
                 std::map<std::string,std::string> metadataSql;
                 metadataSql["property_name"] = quote(it->first);
                 metadataSql["property_value"] = quote(it->second);
-                operations->append(Ref<AddUpdateTable>(new AddUpdateTable(METADATA_TABLE, metadataSql, "delete")));
+                operations.push_back(std::make_shared<AddUpdateTable>(METADATA_TABLE, metadataSql, "delete"));
             }
         }
     }
 }
 
-std::unique_ptr<std::ostringstream> SQLStorage::sqlForInsert(std::shared_ptr<CdsObject> obj, Ref<AddUpdateTable> addUpdateTable)
+std::unique_ptr<std::ostringstream> SQLStorage::sqlForInsert(std::shared_ptr<CdsObject> obj, std::shared_ptr<AddUpdateTable> addUpdateTable)
 {
     int lastInsertID = INVALID_OBJECT_ID;
     int lastMetadataInsertID = INVALID_OBJECT_ID;
@@ -2309,7 +2306,7 @@ std::unique_ptr<std::ostringstream> SQLStorage::sqlForInsert(std::shared_ptr<Cds
     return qb;
 }
 
-std::unique_ptr<std::ostringstream> SQLStorage::sqlForUpdate(std::shared_ptr<CdsObject> obj, Ref<AddUpdateTable> addUpdateTable)
+std::unique_ptr<std::ostringstream> SQLStorage::sqlForUpdate(std::shared_ptr<CdsObject> obj, std::shared_ptr<AddUpdateTable> addUpdateTable)
 {
     if (addUpdateTable == nullptr
         || (addUpdateTable->getTable() == METADATA_TABLE && addUpdateTable->getDict().size() != 2))
@@ -2335,7 +2332,7 @@ std::unique_ptr<std::ostringstream> SQLStorage::sqlForUpdate(std::shared_ptr<Cds
     return qb;
 }
 
-std::unique_ptr<std::ostringstream> SQLStorage::sqlForDelete(std::shared_ptr<CdsObject> obj, Ref<AddUpdateTable> addUpdateTable)
+std::unique_ptr<std::ostringstream> SQLStorage::sqlForDelete(std::shared_ptr<CdsObject> obj, std::shared_ptr<AddUpdateTable> addUpdateTable)
 {
     if (addUpdateTable == nullptr
         || (addUpdateTable->getTable() == METADATA_TABLE && addUpdateTable->getDict().size() != 2))
@@ -2363,7 +2360,7 @@ void SQLStorage::doMetadataMigration()
        << " FROM " << TQ(CDS_OBJECT_TABLE)
        << " WHERE " << TQ("metadata")
        << " is not null";
-    Ref<SQLResult> res = select(qbCountNotNull);
+    auto res = select(qbCountNotNull);
     int expectedConversionCount = std::stoi(res->nextRow()->col(0));
     log_debug("mt_cds_object rows having metadata: {}", expectedConversionCount);
 
@@ -2387,7 +2384,7 @@ void SQLStorage::doMetadataMigration()
        << " FROM " << TQ(CDS_OBJECT_TABLE)
        << " WHERE " << TQ("metadata")
        << " is not null";
-    Ref<SQLResult> resIds = select(qbRetrieveIDs);
+    auto resIds = select(qbRetrieveIDs);
     std::unique_ptr<SQLRow> row;
 
     int objectsUpdated = 0;

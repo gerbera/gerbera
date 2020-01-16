@@ -83,12 +83,6 @@ std::string ATrailersService::getServiceName()
     return "Apple Trailers";
 }
 
-Ref<Object> ATrailersService::defineServiceTask(Ref<Element> xmlopt, Ref<Object> params)
-{
-    // there are no configurable tasks here, we fetch an XML and parse it
-    return nullptr;
-}
-
 Ref<Element> ATrailersService::getData()
 {
     long retcode;
@@ -131,7 +125,7 @@ Ref<Element> ATrailersService::getData()
     return nullptr;
 }
 
-bool ATrailersService::refreshServiceData(Ref<Layout> layout)
+bool ATrailersService::refreshServiceData(std::shared_ptr<Layout> layout)
 {
     log_debug("Refreshing Apple Trailers");
     // the layout is in full control of the service items
@@ -149,7 +143,7 @@ bool ATrailersService::refreshServiceData(Ref<Layout> layout)
 
     Ref<Element> reply = getData();
 
-    Ref<ATrailersContentHandler> sc(new ATrailersContentHandler(config, storage));
+    auto sc = std::make_unique<ATrailersContentHandler>(config, storage);
     if (reply != nullptr)
         sc->setServiceContent(reply);
     else {

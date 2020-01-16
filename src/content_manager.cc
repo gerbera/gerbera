@@ -42,7 +42,6 @@
 #include "util/filesystem.h"
 #include "layout/fallback_layout.h"
 #include "metadata/metadata_handler.h"
-#include "util/rexp.h"
 #include "web/session_manager.h"
 #include "util/string_converter.h"
 #include "util/timer.h"
@@ -83,8 +82,6 @@ using namespace zmm;
 using namespace mxml;
 using namespace std;
 
-#define MIMETYPE_REGEXP "^([a-z0-9_-]+/[a-z0-9_-]+)"
-
 static std::string get_filename(std::string path)
 {
     if (path.at(path.length() - 1) == DIR_SEPARATOR) // cut off trailing slash
@@ -115,8 +112,6 @@ ContentManager::ContentManager(std::shared_ptr<ConfigManager> config, std::share
     working = false;
     shutdownFlag = false;
     layout_enabled = false;
-
-    acct = Ref<CMAccounting>(new CMAccounting());
 
     // loading extension - mimetype map
     // we can always be sure to get a valid element because everything was prepared by the config manager
@@ -206,13 +201,13 @@ void ContentManager::init()
         layout_enabled = true;
 
 #ifdef ONLINE_SERVICES
-    online_services = Ref<OnlineServiceList>(new OnlineServiceList());
+    online_services = std::make_unique<OnlineServiceList>();
 
 #ifdef SOPCAST
     if (config->getBoolOption(CFG_ONLINE_CONTENT_SOPCAST_ENABLED)) {
         try {
             auto self = shared_from_this();
-            Ref<OnlineService> sc((OnlineService*)new SopCastService(config, storage, self));
+            auto sc = std::make_shared<SopCastService>(config, storage, self);
 
             i = config->getIntOption(CFG_ONLINE_CONTENT_SOPCAST_REFRESH);
             sc->setRefreshInterval(i);
@@ -239,7 +234,7 @@ void ContentManager::init()
     if (config->getBoolOption(CFG_ONLINE_CONTENT_ATRAILERS_ENABLED)) {
         try {
             auto self = shared_from_this();
-            Ref<OnlineService> at((OnlineService*)new ATrailersService(config, storage, self));
+            auto at = std::make_shared<ATrailersService>(config, storage, self);
             i = config->getIntOption(CFG_ONLINE_CONTENT_ATRAILERS_REFRESH);
             at->setRefreshInterval(i);
 
@@ -261,9 +256,6 @@ void ContentManager::init()
 #endif // ATRAILERS
 
 #endif // ONLINE_SERVICES
-
-    reMimetype = Ref<RExp>(new RExp());
-    reMimetype->compile(MIMETYPE_REGEXP);
 
     int ret = pthread_create(&taskThread,
         nullptr, //&attr, // attr
@@ -403,11 +395,6 @@ void ContentManager::shutdown()
     log_debug("ContentManager destroyed");
 }
 
-Ref<CMAccounting> ContentManager::getAccounting()
-{
-     return acct;
-}
-
 std::shared_ptr<GenericTask> ContentManager::getCurrentTask()
 {
     AutoLock lock(mutex);
@@ -447,11 +434,6 @@ std::deque<std::shared_ptr<GenericTask>> ContentManager::getTasklist()
     }
 
     return taskList;
-}
-
-void ContentManager::_loadAccounting()
-{
-    acct->totalFiles = storage->getTotalFiles();
 }
 
 void ContentManager::addVirtualItem(std::shared_ptr<CdsObject> obj, bool allow_fifo)
@@ -1003,9 +985,6 @@ void ContentManager::addObject(std::shared_ptr<CdsObject> obj)
     update_manager->containerChanged(obj->getParentID());
     if (IS_CDS_CONTAINER(obj->getObjectType()))
         session_manager->containerChangedUI(obj->getParentID());
-
-    if (!obj->isVirtual() && IS_CDS_ITEM(obj->getObjectType()))
-        getAccounting()->totalFiles++;
 }
 
 void ContentManager::addContainer(int parentID, std::string title, std::string upnpClass)
@@ -1186,12 +1165,12 @@ void ContentManager::initLayout()
                 auto self = shared_from_this();
                 if (layout_type == "js") {
 #ifdef HAVE_JS
-                    layout = Ref<Layout>((Layout*)new JSLayout(config, storage, self, scripting_runtime));
+                    layout = std::make_shared<JSLayout>(config, storage, self, scripting_runtime);
 #else
                     log_error("Cannot init layout: Gerbera compiled without JS support, but JS was requested.");
 #endif
                 } else if (layout_type == "builtin") {
-                    layout = Ref<Layout>((FallbackLayout*)new FallbackLayout(config, storage, self));
+                    layout = std::make_shared<FallbackLayout>(config, storage, self);
                 }
             } catch (const std::runtime_error& e) {
                 layout = nullptr;
@@ -1205,7 +1184,7 @@ void ContentManager::initJS()
 {
     if (playlist_parser_script == nullptr) {
         auto self = shared_from_this();
-        playlist_parser_script = Ref<PlaylistParserScript>(new PlaylistParserScript(config, storage, self, scripting_runtime));
+        playlist_parser_script = std::make_unique<PlaylistParserScript>(config, storage, self, scripting_runtime);
     }
 }
 
@@ -1292,19 +1271,6 @@ void ContentManager::addTask(std::shared_ptr<GenericTask> task, bool lowPriority
     signal();
 }
 
-/* sync / async methods */
-void ContentManager::loadAccounting(bool async)
-{
-    if (async) {
-        auto self = shared_from_this();
-        auto task = std::make_shared<CMLoadAccountingTask>(self);
-        task->setDescription("Initializing statistics");
-        addTask(task);
-    } else {
-        _loadAccounting();
-    }
-}
-
 int ContentManager::addFile(std::string path, bool recursive, bool async, bool hidden, bool lowPriority, bool cancellable)
 {
     std::string rootpath;
@@ -1334,21 +1300,18 @@ int ContentManager::addFileInternal(
 }
 
 #ifdef ONLINE_SERVICES
-void ContentManager::fetchOnlineContent(service_type_t service, bool lowPriority, bool cancellable, bool unscheduled_refresh)
+void ContentManager::fetchOnlineContent(service_type_t serviceType, bool lowPriority, bool cancellable, bool unscheduled_refresh)
 {
-    Ref<OnlineService> os = online_services->getService(service);
-    if (os == nullptr) {
-        log_debug("No surch service! {}", service);
+    auto service = online_services->getService(serviceType);
+    if (service == nullptr) {
+        log_debug("No surch service! {}", serviceType);
         throw std::runtime_error("Service not found!");
     }
-    fetchOnlineContentInternal(os, lowPriority, cancellable, 0, unscheduled_refresh);
-}
 
-void ContentManager::fetchOnlineContentInternal(
-    Ref<OnlineService> service, bool lowPriority, bool cancellable, unsigned int parentTaskID, bool unscheduled_refresh)
-{
     if (layout_enabled)
         initLayout();
+
+    unsigned int parentTaskID = 0;
 
     auto self = shared_from_this();
     auto task = std::make_shared<CMFetchOnlineContentTask>(self, task_processor, timer, service, layout, cancellable, unscheduled_refresh);
@@ -1358,7 +1321,7 @@ void ContentManager::fetchOnlineContentInternal(
     addTask(task, lowPriority);
 }
 
-void ContentManager::cleanupOnlineServiceObjects(zmm::Ref<OnlineService> service)
+void ContentManager::cleanupOnlineServiceObjects(std::shared_ptr<OnlineService> service)
 {
     log_debug("Finished fetch cycle for service: {}", service->getServiceName().c_str());
 
@@ -1874,7 +1837,7 @@ void CMRescanDirectoryTask::run()
 #ifdef ONLINE_SERVICES
 CMFetchOnlineContentTask::CMFetchOnlineContentTask(std::shared_ptr<ContentManager> content,
     std::shared_ptr<TaskProcessor> task_processor, std::shared_ptr<Timer> timer,
-    Ref<OnlineService> service, Ref<Layout> layout, bool cancellable, bool unscheduled_refresh)
+    std::shared_ptr<OnlineService> service, std::shared_ptr<Layout> layout, bool cancellable, bool unscheduled_refresh)
     : GenericTask(ContentManagerTask)
     , content(content)
     , task_processor(task_processor)
@@ -1903,21 +1866,3 @@ void CMFetchOnlineContentTask::run()
     }
 }
 #endif // ONLINE_SERVICES
-
-CMLoadAccountingTask::CMLoadAccountingTask(std::shared_ptr<ContentManager> content)
-    : GenericTask(ContentManagerTask)
-    , content(content)
-{
-    this->taskType = LoadAccounting;
-}
-
-void CMLoadAccountingTask::run()
-{
-    content->_loadAccounting();
-}
-
-CMAccounting::CMAccounting()
-    : Object()
-{
-    totalFiles = 0;
-}

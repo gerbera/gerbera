@@ -56,7 +56,7 @@ typedef enum {
 } avi_fourcc_listmode_t;
 
 /// \brief this class keeps all data associated with one transcoding profile.
-class TranscodingProfile : public zmm::Object {
+class TranscodingProfile {
 public:
     TranscodingProfile(transcoding_type_t tr_type, std::string name);
 
@@ -201,23 +201,25 @@ protected:
 };
 
 /// \brief this class allows access to available transcoding profiles.
-class TranscodingProfileList : public zmm::Object {
+typedef std::map<std::string,std::shared_ptr<TranscodingProfile>> TranscodingProfileMap;
+class TranscodingProfileList {
 public:
     TranscodingProfileList();
-    void add(std::string sourceMimeType, zmm::Ref<TranscodingProfile> prof);
-    zmm::Ref<ObjectDictionary<TranscodingProfile>> get(std::string sourceMimeType);
-    zmm::Ref<ObjectDictionary<TranscodingProfile>> get(int index);
-    zmm::Ref<TranscodingProfile> getByName(std::string name);
-    inline int size() { return list->size(); }
+    void add(std::string sourceMimeType, std::shared_ptr<TranscodingProfile> prof);
+
+    std::shared_ptr<TranscodingProfileMap> get(std::string sourceMimeType);
+    std::shared_ptr<TranscodingProfileMap> get(int index);
+    std::shared_ptr<TranscodingProfile> getByName(std::string name);
+    inline int size() { return list.size(); }
 
 protected:
     // outer dictionary is keyed by the source mimetype, inner dictionary by
     // profile name; this whole construction is necessary to allow to transcode
     // to the same output format but vary things like resolution, bitrate, etc.
-    zmm::Ref<ObjectDictionary<ObjectDictionary<TranscodingProfile>>> list;
+    std::map<std::string, std::shared_ptr<TranscodingProfileMap>> list;
 };
 
-class TranscodingProcess : public zmm::Object {
+class TranscodingProcess {
 public:
     TranscodingProcess(pid_t pid, std::string fname)
     {

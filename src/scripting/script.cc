@@ -124,8 +124,7 @@ Script::Script(std::shared_ptr<ConfigManager> config,
     std::shared_ptr<Storage> storage,
     std::shared_ptr<ContentManager> content,
     std::shared_ptr<Runtime> runtime, std::string name)
-    : Object()
-    , config(config)
+    : config(config)
     , storage(storage)
     , content(content)
     , runtime(runtime)

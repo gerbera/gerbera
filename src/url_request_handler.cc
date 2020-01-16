@@ -99,8 +99,8 @@ void URLRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
     tr_profile = getValueOrDefault(dict, URL_PARAM_TRANSCODE_PROFILE_NAME);
 
     if (string_ok(tr_profile)) {
-        Ref<TranscodingProfile> tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(tr_profile);
-
+        auto tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)
+                        ->getByName(tr_profile);
         if (tp == nullptr)
             throw std::runtime_error("Transcoding requested but no profile "
                              "matching the name "
@@ -115,7 +115,7 @@ void URLRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
         if (item->getFlag(OBJECT_FLAG_ONLINE_SERVICE)) {
             /// \todo write a helper class that will handle various online
             /// services
-            Ref<OnlineServiceHelper> helper(new OnlineServiceHelper());
+            auto helper = std::make_unique<OnlineServiceHelper>();
             url = helper->resolveURL(item);
         } else
 #endif
@@ -195,7 +195,7 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
 
 #ifdef ONLINE_SERVICES
     if (item->getFlag(OBJECT_FLAG_ONLINE_SERVICE)) {
-        Ref<OnlineServiceHelper> helper(new OnlineServiceHelper());
+        auto helper = std::make_unique<OnlineServiceHelper>();
         url = helper->resolveURL(item);
     } else
 #endif
@@ -213,12 +213,12 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
     tr_profile = getValueOrDefault(dict, URL_PARAM_TRANSCODE_PROFILE_NAME);
 
     if (string_ok(tr_profile)) {
-        Ref<TranscodingProfile> tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(tr_profile);
-
+        auto tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)
+                        ->getByName(tr_profile);
         if (tp == nullptr)
             throw std::runtime_error("Transcoding of file " + url + " but no profile matching the name " + tr_profile + " found");
 
-        Ref<TranscodeDispatcher> tr_d(new TranscodeDispatcher(config, content));
+        auto tr_d = std::make_unique<TranscodeDispatcher>(config, content);
         return tr_d->open(tp, url, item, range);
     } else {
         auto u = std::make_unique<URL>();

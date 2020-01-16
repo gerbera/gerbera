@@ -202,8 +202,6 @@ set(libgerberaFILES
         src/util/process_executor.cc
         src/util/process_executor.h
         src/util/process.h
-        src/util/rexp.cc
-        src/util/rexp.h
         src/util/string_converter.cc
         src/util/string_converter.h
         src/util/string_tokenizer.cc

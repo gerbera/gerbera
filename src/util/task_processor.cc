@@ -153,8 +153,8 @@ TaskProcessor::~TaskProcessor()
 TPFetchOnlineContentTask::TPFetchOnlineContentTask(std::shared_ptr<ContentManager> content,
     std::shared_ptr<TaskProcessor> task_processor,
     std::shared_ptr<Timer> timer,
-    Ref<OnlineService> service,
-    Ref<Layout> layout,
+    std::shared_ptr<OnlineService> service,
+    std::shared_ptr<Layout> layout,
     bool cancellable,
     bool unscheduled_refresh)
     : GenericTask(TaskProcessorTask)

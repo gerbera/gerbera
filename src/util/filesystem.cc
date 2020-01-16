@@ -61,28 +61,6 @@ static bool FsObjectComparator(std::shared_ptr<FsObject> o1, std::shared_ptr<FsO
 Filesystem::Filesystem(std::shared_ptr<ConfigManager> config)
     : config(config)
 {
-    /*
-    Ref<Element> rules = config->getElement("filter");
-    if (rules == nullptr)
-        return;
-    for (int i = 0; i < rules->childCount(); i++)
-    {
-        Ref<Element> rule = rules->getChild(i);
-        std::string pat = rule->getAttribute("pattern");
-        /// \todo make patterns from simple wildcards instead of
-        /// taking the pattern attribute directly as regexp
-        auto pattern = std::make_unique<RExp>();
-        try
-        {
-            pattern->compile(pat);
-            includeRules.push_back(pattern);
-        }
-        catch (const std::runtime_error& e)
-        {
-            e.printStackTrace();
-        }
-    }
-    */
 }
 
 std::vector<std::shared_ptr<FsObject>> Filesystem::readDirectory(std::string path, int mask,
@@ -231,13 +209,4 @@ bool Filesystem::fileAllowed(std::string path)
         return false;
 
     return true;
-    /*
-    for (int i = 0; i < include_rules->size(); i++)
-    {
-        Ref<RExp> rule = include_rules->get(i);
-        if (rule->matches(path))
-            return true;
-    }
-    return false;
-    */
 }
