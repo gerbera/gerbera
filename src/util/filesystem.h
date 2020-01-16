@@ -35,7 +35,6 @@
 #include <memory>
 #include <vector>
 #include "common.h"
-#include "rexp.h"
 
 #define FS_MASK_FILES 1
 #define FS_MASK_DIRECTORIES 2
@@ -72,7 +71,6 @@ public:
 
 protected:
     std::shared_ptr<ConfigManager> config;
-    // std::vector<std::unique<RExp>> includeRules;
     bool have(std::string dir, int mask);
 };
 

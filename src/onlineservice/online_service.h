@@ -35,6 +35,9 @@
 #ifndef __ONLINE_SERVICE_H__
 #define __ONLINE_SERVICE_H__
 
+#include <vector>
+#include <memory>
+
 #include "layout/layout.h"
 #include "mxml/mxml.h"
 #include "util/timer.h"
@@ -56,7 +59,7 @@ typedef enum {
 
 /// \brief This is an interface for all online services, the function
 /// handles adding/refreshing content in the database.
-class OnlineService : public zmm::Object {
+class OnlineService {
 public:
     OnlineService();
 
@@ -71,7 +74,7 @@ public:
     /// to get. Another call to this function after it returned true will
     /// reset the internal counters and thus make it fetch the content from
     /// the beginning.
-    virtual bool refreshServiceData(zmm::Ref<Layout> layout) = 0;
+    virtual bool refreshServiceData(std::shared_ptr<Layout> layout) = 0;
 
     /// \brief Returns the service type
     virtual service_type_t getServiceType() = 0;
@@ -84,11 +87,6 @@ public:
 
     /// \brief Get the storage prefix for a given service type
     static char getStoragePrefix(service_type_t service);
-
-    /// \brief Parses the service related line from config.xml and creates
-    /// a task object, which can be anything that helps the service to
-    /// identify what data it has to fetch.
-    virtual zmm::Ref<zmm::Object> defineServiceTask(zmm::Ref<mxml::Element> xmlopt, zmm::Ref<zmm::Object> params) = 0;
 
     /// \brief Increments the task count.
     ///
@@ -138,18 +136,18 @@ protected:
     int getCheckPosIntAttr(zmm::Ref<mxml::Element> xml, std::string attrname);
 };
 
-class OnlineServiceList : public zmm::Object {
+class OnlineServiceList {
 public:
     OnlineServiceList();
 
     /// \brief Adds a service to the service list.
-    void registerService(zmm::Ref<OnlineService> service);
+    void registerService(std::shared_ptr<OnlineService> service);
 
     /// \brief Retrieves a service given by the service ID from the list
-    zmm::Ref<OnlineService> getService(service_type_t service);
+    std::shared_ptr<OnlineService> getService(service_type_t service);
 
 protected:
-    zmm::Ref<zmm::Array<OnlineService>> service_list;
+    std::vector<std::shared_ptr<OnlineService>> service_list;
 };
 
 #endif //__ONLINE_SERVICE_H__

@@ -50,7 +50,7 @@ class Storage;
 
 /// \brief this class is responsible for creating objects from the ATrailers
 /// metadata XML.
-class ATrailersContentHandler : public zmm::Object {
+class ATrailersContentHandler {
 public:
     ATrailersContentHandler(std::shared_ptr<ConfigManager> config,
         std::shared_ptr<Storage> storage);

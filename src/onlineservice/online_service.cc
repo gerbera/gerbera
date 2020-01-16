@@ -43,10 +43,10 @@ char service_prefixes[] = { '\0', 'Y', 'S', 'W', 'T', '\0' };
 
 OnlineServiceList::OnlineServiceList()
 {
-    service_list = Ref<Array<OnlineService>>(new Array<OnlineService>(OS_Max));
+    service_list.resize(OS_Max);
 }
 
-void OnlineServiceList::registerService(Ref<OnlineService> service)
+void OnlineServiceList::registerService(std::shared_ptr<OnlineService> service)
 {
     if (service == nullptr)
         return;
@@ -55,15 +55,15 @@ void OnlineServiceList::registerService(Ref<OnlineService> service)
         throw std::runtime_error("Requested service with illegal type!");
     }
 
-    service_list->set(service, service->getServiceType());
+    service_list.at(service->getServiceType()) = service;
 }
 
-Ref<OnlineService> OnlineServiceList::getService(service_type_t service)
+std::shared_ptr<OnlineService> OnlineServiceList::getService(service_type_t service)
 {
     if ((service > OS_Max) || (service < 0))
         return nullptr;
 
-    return service_list->get(service);
+    return service_list.at(service);
 }
 
 OnlineService::OnlineService()

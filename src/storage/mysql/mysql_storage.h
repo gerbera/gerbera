@@ -60,7 +60,7 @@ private:
     virtual inline std::string quote(bool val) { return std::to_string(val ? '1' : '0'); }
     virtual inline std::string quote(char val) { return quote(std::to_string(val)); }
     virtual inline std::string quote(long long val) { return std::to_string(val); }
-    virtual zmm::Ref<SQLResult> select(const char* query, int length);
+    virtual std::shared_ptr<SQLResult> select(const char* query, int length);
     virtual int exec(const char* query, int length, bool getLastInsertId = false);
     virtual void storeInternalSetting(std::string key, std::string value);
 
@@ -84,11 +84,13 @@ private:
     void checkMysqlThreadInit();
 };
 
-class MysqlResult : private SQLResult {
-private:
-    int nullRead;
+class MysqlResult : public SQLResult {
+public:
     MysqlResult(MYSQL_RES* mysql_res);
     virtual ~MysqlResult();
+
+private:
+    int nullRead;
     virtual std::unique_ptr<SQLRow> nextRow();
     virtual unsigned long long getNumRows() { return mysql_num_rows(mysql_res); }
     MYSQL_RES* mysql_res;
@@ -99,7 +101,7 @@ private:
 
 class MysqlRow : public SQLRow {
 public:
-    MysqlRow(MYSQL_ROW mysql_row, zmm::Ref<SQLResult> sqlResult);
+    MysqlRow(MYSQL_ROW mysql_row, std::shared_ptr<SQLResult> sqlResult);
 
 private:
     inline virtual char* col_c_str(int index) { return mysql_row[index]; }

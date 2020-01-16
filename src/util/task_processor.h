@@ -50,8 +50,8 @@ public:
     TPFetchOnlineContentTask(std::shared_ptr<ContentManager> content,
         std::shared_ptr<TaskProcessor> task_processor,
         std::shared_ptr<Timer> timer,
-        zmm::Ref<OnlineService> service,
-        zmm::Ref<Layout> layout, bool cancellable,
+        std::shared_ptr<OnlineService> service,
+        std::shared_ptr<Layout> layout, bool cancellable,
         bool unscheduled_refresh);
     virtual void run();
 
@@ -60,8 +60,8 @@ protected:
     std::shared_ptr<TaskProcessor> task_processor;
     std::shared_ptr<Timer> timer;
 
-    zmm::Ref<OnlineService> service;
-    zmm::Ref<Layout> layout;
+    std::shared_ptr<OnlineService> service;
+    std::shared_ptr<Layout> layout;
     bool unscheduled_refresh;
 };
 

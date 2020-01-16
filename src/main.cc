@@ -158,7 +158,9 @@ int main(int argc, char** argv, char** envp)
         }
 
         // Action starts here
-        log_copyright();
+        if (opts.count("create-config") == 0) {
+            log_copyright();
+        }
 
         std::optional<std::string> home;
         if (opts.count("home") > 0) {

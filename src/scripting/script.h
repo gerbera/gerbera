@@ -61,7 +61,7 @@ typedef enum
 class ConfigManager;
 class ContentManager;
 
-class Script : public zmm::Object
+class Script
 {
 public:
     virtual ~Script();

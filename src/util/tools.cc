@@ -41,6 +41,7 @@
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <queue>
 
 #include <ifaddrs.h>
 #include <net/if.h>
@@ -1026,20 +1027,16 @@ std::string normalizePath(std::string path)
 {
     log_debug("Normalizing path: {}", path.c_str());
 
+    if (path.at(0) != DIR_SEPARATOR)
+        throw std::runtime_error("Relative paths are not allowed!\n");
+
     size_t length = path.length();
 
     // TODO: optimize: use direct std::string with reserve
     char* result = (char*)MALLOC(length + 1);
     char* str = result;
 
-    int avarageExpectedSlashes = length / 5;
-    if (avarageExpectedSlashes < 3)
-        avarageExpectedSlashes = 3;
-    Ref<BaseStack<int>> separatorLocations(new BaseStack<int>(avarageExpectedSlashes, -1));
-
-    if (path.at(0) != DIR_SEPARATOR)
-        throw std::runtime_error("Relative paths are not allowed!\n");
-
+    std::queue<int> separatorLocations;
     size_t next = 1;
     do {
         while (next < length && path.at(next) == DIR_SEPARATOR)
@@ -1055,13 +1052,15 @@ std::string normalizePath(std::string path)
         } else if (next_sep == next + 2 && next + 1 < length && path.at(next) == '.' && path.at(next + 1) == '.') {
             // ".."
             // go back one part
-            int lastSepLocation = separatorLocations->pop();
-            if (lastSepLocation < 0)
-                lastSepLocation = 0;
+            int lastSepLocation = 0;
+            if (!separatorLocations.empty()) {
+                lastSepLocation = separatorLocations.front();
+                separatorLocations.pop();
+            }
             str = result + lastSepLocation;
         } else {
             // normal part
-            separatorLocations->push(str - result);
+            separatorLocations.push(str - result);
             *(str++) = DIR_SEPARATOR;
             int cpLen = next_sep - next;
             strncpy(str, &path[next], cpLen);

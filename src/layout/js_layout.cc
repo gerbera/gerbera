@@ -42,7 +42,7 @@ JSLayout::JSLayout(std::shared_ptr<ConfigManager> config,
     std::shared_ptr<Runtime> runtime)
     : Layout()
 {
-    import_script = Ref<ImportScript>(new ImportScript(config, storage, content, runtime));
+    import_script = std::make_unique<ImportScript>(config, storage, content, runtime);
 }
 
 JSLayout::~JSLayout()

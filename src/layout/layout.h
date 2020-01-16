@@ -34,7 +34,7 @@
 
 #include "cds_objects.h"
 
-class Layout : public zmm::Object
+class Layout
 {
 public:
     virtual ~Layout() {}

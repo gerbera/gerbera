@@ -3,7 +3,7 @@
 Installing Gerbera
 ==================
 
-We strongly advise using the packages provided by your distribution where provided.
+We strongly advise using the packages provided by your distribution if available.
 Please see below for guides on how to install Gerbera on various distributions.
 
 Docker
@@ -57,33 +57,34 @@ Gerbera is available in Fedora 29 or later.
 
 CentOS
 ~~~~~~~~~~~~~~~~~
-Gerbera 1.2 for centos x86/64 is available via GitHub https://github.com/lukesoft76/CENTOS_7.
-Gerbera 1.2 only installs correctly if some dependencies are satisfied:
-Duktape
-libupnp
-taglib
-All neccessary rpm files are listed in the provided github project https://github.com/lukesoft76/CENTOS_7 .
+.. index:: CentOS
 
-Attention! Sofar, Gerbera is not part of any repository that is mantained in CentOS 7 due to the fact that Gerbera is only 
-availalbe for Fedora 28 which is not the base for CentOS 7!
+Gerbera 1.2 for Centos x86/64 is available via GitHub: https://github.com/lukesoft76/CENTOS_7.
+
+All necessary rpm files are listed in the provided github project https://github.com/lukesoft76/CENTOS_7 .
+
+Attention! So far, Gerbera is not part of any repository that is maintained in CentOS 7 due to the fact that Gerbera is only
+available for Fedora 28 which is not the base for CentOS 7!
 
 Debian
 ~~~~~~~~~~~~~~~~~
 .. index:: Debian Linux
 
-Gerbera is included in `Testing <https://packages.debian.org/buster/gerbera>`_ and `Unstable <https://packages.debian.org/sid/gerbera>`_.
+Gerbera is included in `Buster <https://packages.debian.org/buster/gerbera>`_ and `Sid <https://packages.debian.org/sid/gerbera>`_.
 
 .. code-block:: sh
 
     sudo apt install gerbera
+
+Due to the stable nature of Debian, these packages are likely to be some versions behind the current Gerbera release.
+
+`Deb-Multimedia.org <https://www.deb-multimedia.org/>`_ also provide builds for `Buster <http://www.deb-multimedia.org/dists/buster/main/binary-amd64/package/gerbera>`_ and `Sid <http://www.deb-multimedia.org/dists/sid/main/binary-amd64/package/gerbera>`_.
 
 openSUSE
 ~~~~~~~~~~~~~~~~~
 .. index:: openSUSE Linux
 
 Gerbera is available on `software.opensuse.org <https://software.opensuse.org/package/gerbera>`_.
-
-
 
 Entware (Optware)
 ~~~~~~~~~~~~~~~~~

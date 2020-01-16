@@ -105,14 +105,6 @@ public:
     virtual void run() override;
 };
 
-class CMLoadAccountingTask : public GenericTask {
-protected:
-    std::shared_ptr<ContentManager> content;
-public:
-    CMLoadAccountingTask(std::shared_ptr<ContentManager> content);
-    virtual void run() override;
-};
-
 class CMRescanDirectoryTask : public GenericTask, public std::enable_shared_from_this<CMRescanDirectoryTask> {
 protected:
     std::shared_ptr<ContentManager> content;
@@ -127,29 +119,21 @@ public:
     virtual void run() override;
 };
 
-class CMAccounting : public zmm::Object {
-public:
-    CMAccounting();
-
-public:
-    int totalFiles;
-};
-
 #ifdef ONLINE_SERVICES
 class CMFetchOnlineContentTask : public GenericTask {
 protected:
     std::shared_ptr<ContentManager> content;
     std::shared_ptr<TaskProcessor> task_processor;
     std::shared_ptr<Timer> timer;
-    zmm::Ref<OnlineService> service;
-    zmm::Ref<Layout> layout;
+    std::shared_ptr<OnlineService> service;
+    std::shared_ptr<Layout> layout;
     bool unscheduled_refresh;
 
 public:
     CMFetchOnlineContentTask(std::shared_ptr<ContentManager> content,
         std::shared_ptr<TaskProcessor> task_processor,
         std::shared_ptr<Timer> timer,
-        zmm::Ref<OnlineService> service, zmm::Ref<Layout> layout,
+        std::shared_ptr<OnlineService> service, std::shared_ptr<Layout> layout,
         bool cancellable, bool unscheduled_refresh);
     virtual void run() override;
 };
@@ -169,8 +153,6 @@ public:
 
     bool isBusy() { return working; }
 
-    zmm::Ref<CMAccounting> getAccounting();
-
     /// \brief Returns the task that is currently being executed.
     std::shared_ptr<GenericTask> getCurrentTask();
 
@@ -181,9 +163,6 @@ public:
     void invalidateTask(unsigned int taskID, task_owner_t taskOwner = ContentManagerTask);
 
     /* the functions below return true if the task has been enqueued */
-
-    /* sync/async methods */
-    void loadAccounting(bool async = true);
 
     /// \brief Adds a file or directory to the database.
     /// \param path absolute path to the file
@@ -229,7 +208,7 @@ public:
         bool cancellable = true,
         bool unscheduled_refresh = false);
 
-    void cleanupOnlineServiceObjects(zmm::Ref<OnlineService> service);
+    void cleanupOnlineServiceObjects(std::shared_ptr<OnlineService> service);
 
 #endif //ONLINE_SERVICES
 
@@ -352,8 +331,6 @@ protected:
     using AutoLock = std::lock_guard<decltype(mutex)>;
     using AutoLockU = std::unique_lock<decltype(mutex)>;
 
-    zmm::Ref<RExp> reMimetype;
-
     bool ignore_unknown_extensions;
     bool extension_map_case_sensitive;
 
@@ -368,8 +345,6 @@ protected:
 #endif
 
     std::vector<std::shared_ptr<Executor>> process_list;
-
-    void _loadAccounting();
 
     int addFileInternal(std::string path, std::string rootpath,
         bool recursive = true,
@@ -391,21 +366,14 @@ protected:
 
     void invalidateAddTask(std::shared_ptr<GenericTask> t, std::string path);
 
-    zmm::Ref<Layout> layout;
+    std::shared_ptr<Layout> layout;
 
 #ifdef ONLINE_SERVICES
-    zmm::Ref<OnlineServiceList> online_services;
-
-    void fetchOnlineContentInternal(zmm::Ref<OnlineService> service,
-        bool lowPriority = true,
-        bool cancellable = true,
-        unsigned int parentTaskID = 0,
-        bool unscheduled_refresh = false);
-
+    std::unique_ptr<OnlineServiceList> online_services;
 #endif //ONLINE_SERVICES
 
 #ifdef HAVE_JS
-    zmm::Ref<PlaylistParserScript> playlist_parser_script;
+    std::unique_ptr<PlaylistParserScript> playlist_parser_script;
 #endif
 
     bool layout_enabled;
@@ -417,8 +385,6 @@ protected:
     void threadProc();
 
     void addTask(std::shared_ptr<GenericTask> task, bool lowPriority = false);
-
-    zmm::Ref<CMAccounting> acct;
 
     pthread_t taskThread;
     std::condition_variable_any cond;
@@ -439,7 +405,6 @@ protected:
 #ifdef ONLINE_SERVICES
     friend void CMFetchOnlineContentTask::run();
 #endif
-    friend void CMLoadAccountingTask::run();
 };
 
 #endif // __CONTENT_MANAGER_H__

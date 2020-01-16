@@ -74,11 +74,6 @@ std::string SopCastService::getServiceName()
     return "SopCast";
 }
 
-Ref<Object> SopCastService::defineServiceTask(Ref<Element> xmlopt, Ref<Object> params)
-{
-    return nullptr;
-}
-
 Ref<Element> SopCastService::getData()
 {
     long retcode;
@@ -121,7 +116,7 @@ Ref<Element> SopCastService::getData()
     return nullptr;
 }
 
-bool SopCastService::refreshServiceData(Ref<Layout> layout)
+bool SopCastService::refreshServiceData(std::shared_ptr<Layout> layout)
 {
     log_debug("Refreshing SopCast service");
     // the layout is in full control of the service items
@@ -139,7 +134,7 @@ bool SopCastService::refreshServiceData(Ref<Layout> layout)
 
     Ref<Element> reply = getData();
 
-    Ref<SopCastContentHandler> sc(new SopCastContentHandler(config, storage));
+    auto sc = std::make_unique<SopCastContentHandler>(config, storage);
     if (reply != nullptr)
         sc->setServiceContent(reply);
     else {

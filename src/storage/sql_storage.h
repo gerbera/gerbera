@@ -55,7 +55,7 @@ class SQLEmitter;
 class SQLRow
 {
 public:
-    SQLRow(zmm::Ref<SQLResult> sqlResult) { this->sqlResult = sqlResult; }
+    SQLRow(std::shared_ptr<SQLResult> sqlResult) { this->sqlResult = sqlResult; }
     //virtual ~SQLRow();
     std::string col(int index)
     {
@@ -65,10 +65,10 @@ public:
     }
     virtual char* col_c_str(int index) = 0;
 protected:
-    zmm::Ref<SQLResult> sqlResult;
+    std::shared_ptr<SQLResult> sqlResult;
 };
 
-class SQLResult : public zmm::Object
+class SQLResult : public std::enable_shared_from_this<SQLResult>
 {
 public:
     //SQLResult();
@@ -90,15 +90,15 @@ public:
     virtual std::string quote(bool val) = 0;
     virtual std::string quote(char val) = 0;
     virtual std::string quote(long long val) = 0;
-    virtual zmm::Ref<SQLResult> select(const char *query, int length) = 0;
+    virtual std::shared_ptr<SQLResult> select(const char *query, int length) = 0;
     virtual int exec(const char *query, int length, bool getLastInsertId = false) = 0;
     
     void dbReady();
     
     /* wrapper functions for select and exec */
-    zmm::Ref<SQLResult> select(const std::string &buf)
+    std::shared_ptr<SQLResult> select(const std::string &buf)
         { return select(buf.c_str(), buf.length()); }
-    zmm::Ref<SQLResult> select(const std::ostringstream &buf) {
+    std::shared_ptr<SQLResult> select(const std::ostringstream &buf) {
         auto s = buf.str();
         return select(s.c_str(), s.length());
     }
@@ -192,7 +192,7 @@ private:
     int _ensurePathExistence(std::string path, int *changedContainer);
     
     /* helper class and helper function for addObject and updateObject */
-    class AddUpdateTable : public zmm::Object
+    class AddUpdateTable
     {
     public:
         AddUpdateTable(std::string table, std::map<std::string,std::string> dict, std::string operation)
@@ -209,14 +209,14 @@ private:
         std::map<std::string,std::string> dict;
         std::string operation;
     };
-    zmm::Ref<zmm::Array<AddUpdateTable> > _addUpdateObject(std::shared_ptr<CdsObject> obj, bool isUpdate, int *changedContainer);
+    std::vector<std::shared_ptr<AddUpdateTable>> _addUpdateObject(std::shared_ptr<CdsObject> obj, bool isUpdate, int *changedContainer);
 
     void generateMetadataDBOperations(std::shared_ptr<CdsObject> obj, bool isUpdate,
-        zmm::Ref<zmm::Array<AddUpdateTable>> operations);
+        std::vector<std::shared_ptr<AddUpdateTable>>& operations);
 
-    std::unique_ptr<std::ostringstream> sqlForInsert(std::shared_ptr<CdsObject> obj, zmm::Ref<AddUpdateTable> addUpdateTable);
-    std::unique_ptr<std::ostringstream> sqlForUpdate(std::shared_ptr<CdsObject> obj, zmm::Ref<AddUpdateTable> addUpdateTable);
-    std::unique_ptr<std::ostringstream> sqlForDelete(std::shared_ptr<CdsObject> obj, zmm::Ref<AddUpdateTable> addUpdateTable);
+    std::unique_ptr<std::ostringstream> sqlForInsert(std::shared_ptr<CdsObject> obj, std::shared_ptr<AddUpdateTable> addUpdateTable);
+    std::unique_ptr<std::ostringstream> sqlForUpdate(std::shared_ptr<CdsObject> obj, std::shared_ptr<AddUpdateTable> addUpdateTable);
+    std::unique_ptr<std::ostringstream> sqlForDelete(std::shared_ptr<CdsObject> obj, std::shared_ptr<AddUpdateTable> addUpdateTable);
     
     /* helper for removeObject(s) */
     void _removeObjects(const std::vector<int32_t> &objectIDs);

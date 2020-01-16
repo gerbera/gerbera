@@ -1561,7 +1561,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
         if (!string_ok(param))
             throw std::runtime_error("error in configuration: invalid transcoding profile name");
 
-        Ref<TranscodingProfile> prof(new TranscodingProfile(tr_type, param));
+        auto prof = std::make_shared<TranscodingProfile>(tr_type, param);
 
         param = child->getChildText("mimetype");
         if (!string_ok(param))
