@@ -323,20 +323,6 @@ protected:
     std::vector<std::string> createArrayFromNodeset(zmm::Ref<mxml::Element> element, std::string nodeName, std::string attrName);
 
     void dumpOptions();
-
-#ifdef ONLINE_SERVICES
-    /// \brief This functions activates the YouTube class and retrieves
-    /// lets it parse the options.
-    ///
-    /// Note that usually the config manager does all the parsing, however
-    /// in the case of online services the tasklist is something very generic
-    /// and only the service class knows how to organize it. Since an
-    /// online service is controlled by an external authority, the API and
-    /// thus the options can change, for that reason we prefer keeping
-    /// absolutely all functionality related to the service inside the
-    /// service class.
-    zmm::Ref<zmm::Array<zmm::Object>> createServiceTaskList(service_type_t service, zmm::Ref<mxml::Element> element);
-#endif
 };
 
 #endif // __CONFIG_MANAGER_H__

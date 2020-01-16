@@ -359,7 +359,6 @@ protected:
     void _rescanDirectory(int containerID, int scanID, ScanMode scanMode, ScanLevel scanLevel, std::shared_ptr<GenericTask> task = nullptr);
     /* for recursive addition */
     void addRecursive(std::string path, bool hidden, std::shared_ptr<CMAddFileTask> task);
-    //void addRecursive2(zmm::Ref<DirCache> dirCache, std::string filename, bool recursive);
 
     std::string extension2mimetype(std::string extension);
     std::string mimetype2upnpclass(std::string mimeType);
