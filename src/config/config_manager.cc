@@ -2032,15 +2032,3 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::getTranscodingProfileList
 {
     return options->at(option)->getTranscodingProfileListOption();
 }
-
-#ifdef ONLINE_SERVICES
-Ref<Array<Object>> ConfigManager::createServiceTaskList(service_type_t service,
-    Ref<Element> element)
-{
-    Ref<Array<Object>> arr(new Array<Object>());
-
-    if (element == nullptr)
-        return arr;
-    return arr;
-}
-#endif
