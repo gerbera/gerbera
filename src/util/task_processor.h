@@ -9,11 +9,11 @@
 
 #include "common.h"
 #include "generic_task.h"
-#include "onlineservice/online_service.h"
 #include <condition_variable>
 
 // forward declaration
 class ContentManager;
+class OnlineService;
 
 class TaskProcessor {
 public:

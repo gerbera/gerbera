@@ -46,6 +46,9 @@
 #include "util/task_processor.h"
 #include "web/session_manager.h"
 #include "storage/storage.h"
+#ifdef HAVE_JS
+#include "scripting/runtime.h"
+#endif
 #ifdef HAVE_CURL
 #include "url_request_handler.h"
 #endif
@@ -82,9 +85,13 @@ void Server::init()
     auto self = shared_from_this();
     timer = std::make_shared<Timer>();
     timer->init();
+#ifdef ONLINE_SERVICES
     task_processor = std::make_shared<TaskProcessor>();
     task_processor->init();
+#endif
+#ifdef HAVE_JS
     scripting_runtime = std::make_shared<Runtime>();
+#endif
     storage = Storage::createInstance(config, timer);
     update_manager = std::make_shared<UpdateManager>(storage, self);
     update_manager->init();
@@ -281,8 +288,10 @@ void Server::shutdown()
     storage = nullptr;
 
     scripting_runtime = nullptr;
+#ifdef ONLINE_SERVICES
     task_processor->shutdown();
     task_processor = nullptr;
+#endif
     timer->shutdown();
     timer = nullptr;
 }

@@ -148,8 +148,6 @@ ContentManager::ContentManager(std::shared_ptr<ConfigManager> config, std::share
 
 void ContentManager::init()
 {
-    int i;
-
 #ifdef HAVE_INOTIFY
     auto self = shared_from_this();
     inotify = std::make_unique<AutoscanInotify>(storage, self);
@@ -209,7 +207,7 @@ void ContentManager::init()
             auto self = shared_from_this();
             auto sc = std::make_shared<SopCastService>(config, storage, self);
 
-            i = config->getIntOption(CFG_ONLINE_CONTENT_SOPCAST_REFRESH);
+            int i = config->getIntOption(CFG_ONLINE_CONTENT_SOPCAST_REFRESH);
             sc->setRefreshInterval(i);
 
             i = config->getIntOption(CFG_ONLINE_CONTENT_SOPCAST_PURGE_AFTER);
@@ -235,7 +233,8 @@ void ContentManager::init()
         try {
             auto self = shared_from_this();
             auto at = std::make_shared<ATrailersService>(config, storage, self);
-            i = config->getIntOption(CFG_ONLINE_CONTENT_ATRAILERS_REFRESH);
+
+            int i = config->getIntOption(CFG_ONLINE_CONTENT_ATRAILERS_REFRESH);
             at->setRefreshInterval(i);
 
             i = config->getIntOption(CFG_ONLINE_CONTENT_ATRAILERS_PURGE_AFTER);
