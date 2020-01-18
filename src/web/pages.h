@@ -143,7 +143,7 @@ public:
     virtual void process();
 
 protected:
-    void autoscan2XML(zmm::Ref<mxml::Element> element, std::shared_ptr<AutoscanDirectory> adir);
+    void autoscan2XML(std::shared_ptr<AutoscanDirectory> adir, pugi::xml_node* element);
 };
 
 /// \brief nothing :)

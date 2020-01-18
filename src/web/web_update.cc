@@ -34,9 +34,6 @@
 #include "pages.h"
 #include "storage/storage.h"
 
-using namespace zmm;
-using namespace mxml;
-
 void web::voidType::process()
 {
     check_request();

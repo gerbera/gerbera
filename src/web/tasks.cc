@@ -33,9 +33,6 @@
 #include "content_manager.h"
 #include "pages.h"
 
-using namespace zmm;
-using namespace mxml;
-
 web::tasks::tasks(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
     std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
     : WebRequestHandler(config, storage, content, sessionManager)
@@ -49,13 +46,14 @@ void web::tasks::process()
     if (!string_ok(action))
         throw std::runtime_error("web:tasks called with illegal action");
 
+    auto root = xmlDoc->document_element();
+
     if (action == "list") {
-        Ref<Element> tasksEl(new Element("tasks"));
-        tasksEl->setArrayName("task");
-        root->appendElementChild(tasksEl); // inherited from WebRequestHandler
+        auto tasksEl = root.append_child("tasks");
+        xml2JsonHints->setArrayName(tasksEl, "tasks");
         auto taskList = content->getTasklist();
         for (size_t i = 0; i < taskList.size(); i++) {
-            appendTask(tasksEl, taskList[i]);
+            appendTask(taskList[i], &tasksEl);
         }
     } else if (action == "cancel") {
         int taskID = intParam("task_id");

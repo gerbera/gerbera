@@ -37,9 +37,7 @@
 #include "web/pages.h"
 #include <ctime>
 #include <util/headers.h>
-
-using namespace zmm;
-using namespace mxml;
+#include "util/xml_to_json.h"
 
 namespace web {
 
@@ -130,7 +128,13 @@ void WebRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
 
 std::unique_ptr<IOHandler> WebRequestHandler::open(enum UpnpOpenFileMode mode)
 {
-    root = Ref<Element>(new Element("root"));
+    xmlDoc = std::make_shared<pugi::xml_document>();
+    auto decl = xmlDoc->prepend_child(pugi::node_declaration);
+    decl.append_attribute("version") = "1.0";
+    decl.append_attribute("encoding") = "UTF-8";
+    auto root = xmlDoc->append_child("root");
+
+    xml2JsonHints = std::make_shared<Xml2Json::Hints>();
 
     std::string error = "";
     int error_code = 0;
@@ -147,7 +151,7 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(enum UpnpOpenFileMode mode)
 
             if (checkRequestCalled) {
                 // add current task
-                appendTask(root, content->getCurrentTask());
+                appendTask(content->getCurrentTask(), &root);
 
                 handleUpdateIDs();
             }
@@ -170,17 +174,16 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(enum UpnpOpenFileMode mode)
     }
 
     if (!string_ok(error)) {
-        root->setAttribute("success", "1", mxml_bool_type);
+        root.append_attribute("success") = true;
     } else {
-        root->setAttribute("success", "0", mxml_bool_type);
-        Ref<Element> errorEl(new Element("error"));
-        errorEl->setTextKey("text");
-        errorEl->setText(error);
+        root.append_attribute("success") = false;
+
+        auto errorEl = root.append_child("error");
+        errorEl.append_attribute("text") = error.c_str();
 
         if (error_code == 0)
             error_code = 899;
-        errorEl->setAttribute("code", std::to_string(error_code));
-        root->appendElementChild(errorEl);
+        errorEl.append_attribute("code") = error_code;
 
         log_warning("Web Error: {} {}", error_code, error);
     }
@@ -190,35 +193,33 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(enum UpnpOpenFileMode mode)
 #ifdef TOMBDEBUG
         try {
             // make sure we can generate JSON w/o exceptions
-            XML2JSON::getJSON(root);
-            //log_debug("JSON-----------------------{}", XML2JSON::getJSON(root).c_str());
+            std::stringstream buf;
+            xmlDoc->print(buf, "    ");
+            output = Xml2Json::getJson(root, xml2JsonHints.get());
+            log_debug("JSON-----------------------{}", output);
         } catch (const std::runtime_error& e) {
             log_error("Exception: {}", e.what());
         }
 #endif
-        output = renderXMLHeader() + root->print();
+        std::stringstream buf;
+        xmlDoc->print(buf, "  ");
+        output = buf.str();
     } else {
         try {
-            output = XML2JSON::getJSON(root);
+#if 0
+            // debug helper
+            std::stringstream buf;
+            xmlDoc->print(buf, "    ");
+            output = buf.str();
+            log_debug("XML-----------------------{}", output);
+#endif
+            output = Xml2Json::getJson(root, xml2JsonHints.get());
         } catch (const std::runtime_error& e) {
             log_error("Exception: {}", e.what());
         }
     }
 
-    /*
-    try
-    {
-        printf("%s\n", output.c_str());
-        std::string json = XML2JSON::getJSON(root);
-        printf("%s\n",json.c_str());
-    }
-    catch (const std::runtime_error& e)
-    {
-        e.printStackTrace();
-    }
-    */
-
-    //root = nullptr;
+    log_debug("output-----------------------{}", output);
 
     auto io_handler = std::make_unique<MemIOHandler>(output);
     io_handler->open(mode);
@@ -243,40 +244,37 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(const char* filename,
 void WebRequestHandler::handleUpdateIDs()
 {
     // session will be filled by check_request
-
     std::string updates = param("updates");
     if (string_ok(updates)) {
-        Ref<Element> updateIDs(new Element("update_ids"));
-        root->appendElementChild(updateIDs);
+        auto root = xmlDoc->document_element();
+        auto updateIDs = root.append_child("update_ids");
+
         if (updates == "check") {
-            updateIDs->setAttribute("pending", session->hasUIUpdateIDs() ? "1" : "0", mxml_bool_type);
+            updateIDs.append_attribute("pending") = session->hasUIUpdateIDs();
         } else if (updates == "get") {
-            addUpdateIDs(updateIDs, session);
+            addUpdateIDs(session, &updateIDs);
         }
     }
 }
 
-void WebRequestHandler::addUpdateIDs(Ref<Element> updateIDsEl, std::shared_ptr<Session> session)
+void WebRequestHandler::addUpdateIDs(std::shared_ptr<Session> session, pugi::xml_node* updateIDsEl)
 {
     std::string updateIDs = session->getUIUpdateIDs();
     if (string_ok(updateIDs)) {
         log_debug("UI: sending update ids: {}", updateIDs.c_str());
-        updateIDsEl->setTextKey("ids");
-        updateIDsEl->setText(updateIDs);
-        updateIDsEl->setAttribute("updates", "1", mxml_bool_type);
+        updateIDsEl->append_attribute("ids") = updateIDs.c_str();
+        updateIDsEl->append_attribute("updates") = true;
     }
 }
 
-void WebRequestHandler::appendTask(Ref<Element> el, std::shared_ptr<GenericTask> task)
+void WebRequestHandler::appendTask(std::shared_ptr<GenericTask> task, pugi::xml_node* parent)
 {
-    if (task == nullptr || el == nullptr)
+    if (task == nullptr || parent == nullptr)
         return;
-    Ref<Element> taskEl(new Element("task"));
-    taskEl->setAttribute("id", std::to_string(task->getID()), mxml_int_type);
-    taskEl->setAttribute("cancellable", task->isCancellable() ? "1" : "0", mxml_bool_type);
-    taskEl->setTextKey("text");
-    taskEl->setText(task->getDescription());
-    el->appendElementChild(taskEl);
+    auto taskEl = parent->append_child("task");
+    taskEl.append_attribute("id") = task->getID();
+    taskEl.append_attribute("cancellable") = task->isCancellable();
+    taskEl.append_attribute("text") = task->getDescription().c_str();
 }
 
 std::string WebRequestHandler::mapAutoscanType(int type)

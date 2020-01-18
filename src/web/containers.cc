@@ -34,9 +34,6 @@
 #include "pages.h"
 #include "storage/storage.h"
 
-using namespace zmm;
-using namespace mxml;
-
 web::containers::containers(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
     std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
     : WebRequestHandler(config, storage, content, sessionManager)
@@ -52,14 +49,14 @@ void web::containers::process()
     if (parentID == INVALID_OBJECT_ID)
         throw std::runtime_error("web::containers: no parent_id given");
 
-    Ref<Element> containers(new Element("containers"));
-    containers->setArrayName("container");
-    containers->setAttribute("parent_id", std::to_string(parentID), mxml_int_type);
-    containers->setAttribute("type", "database");
+    auto root = xmlDoc->document_element();
 
+    auto containers = root.append_child("containers");
+    xml2JsonHints->setArrayName(containers, "container");
+    containers.append_attribute("parent_id") = parentID;
+    containers.append_attribute("type") = "database";
     if (string_ok(param("select_it")))
-        containers->setAttribute("select_it", param("select_it"));
-    root->appendElementChild(containers);
+        containers.append_attribute("select_it") = param("select_it").c_str();
 
     auto param = std::make_unique<BrowseParam>(parentID, BROWSE_DIRECT_CHILDREN | BROWSE_CONTAINERS);
     auto arr = storage->browse(param);
@@ -69,12 +66,12 @@ void web::containers::process()
         //if (IS_CDS_CONTAINER(obj->getObjectType()))
         //{
         auto cont = std::static_pointer_cast<CdsContainer>(obj);
-        Ref<Element> ce(new Element("container"));
-        ce->setAttribute("id", std::to_string(cont->getID()), mxml_int_type);
+        auto ce = containers.append_child("container");
+        ce.append_attribute("id") = cont->getID();
         int childCount = cont->getChildCount();
-        ce->setAttribute("child_count", std::to_string(childCount), mxml_int_type);
+        ce.append_attribute("child_count") = childCount;
         int autoscanType = cont->getAutoscanType();
-        ce->setAttribute("autoscan_type", mapAutoscanType(autoscanType));
+        ce.append_attribute("autoscan_type") = mapAutoscanType(autoscanType).c_str();
 
         std::string autoscanMode = "none";
         if (autoscanType > 0) {
@@ -87,10 +84,8 @@ void web::containers::process()
             }
 #endif
         }
-        ce->setAttribute("autoscan_mode", autoscanMode);
-        ce->setTextKey("title");
-        ce->setText(cont->getTitle());
-        containers->appendElementChild(ce);
+        ce.append_attribute("autoscan_mode") = autoscanMode.c_str();
+        ce.append_attribute("title") = cont->getTitle().c_str();
         //}
     }
 }

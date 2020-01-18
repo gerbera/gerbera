@@ -32,13 +32,14 @@
 #ifndef __WEB_REQUEST_HANDLER_H__
 #define __WEB_REQUEST_HANDLER_H__
 
+#include <pugixml.hpp>
+
 #include "common.h"
 #include "config/config_manager.h"
 #include "session_manager.h"
-#include "mxml/mxml.h"
 #include "request_handler.h"
-
 #include "util/generic_task.h"
+#include "util/xml_to_json.h"
 
 // forward declaration
 class ContentManager;
@@ -81,8 +82,11 @@ protected:
     /// \brief We can also always see what mode was requested.
     enum UpnpOpenFileMode mode;
 
-    /// \brief This is the root xml element to be populated by process() method.
-    zmm::Ref<mxml::Element> root;
+    /// \brief This is the xml document, the root node to be populated by process() method.
+    std::shared_ptr<pugi::xml_document> xmlDoc;
+
+    /// \brief Hints for Xml2Json, such that we know when to create an array
+    std::shared_ptr<Xml2Json::Hints> xml2JsonHints;
 
     /// \brief The current session, used for this request; will be filled by
     /// check_request()
@@ -115,9 +119,9 @@ protected:
     std::unique_ptr<IOHandler> open(enum UpnpOpenFileMode mode);
 
     /// \brief add the ui update ids from the given session as xml tags to the given root element
-    /// \param root the xml element to add the elements to
     /// \param session the session from which the ui update ids should be taken
-    void addUpdateIDs(zmm::Ref<mxml::Element> root, std::shared_ptr<Session> session);
+    /// \param updateIDsEl the xml element to add the elements to
+    void addUpdateIDs(std::shared_ptr<Session> session, pugi::xml_node* updateIDsEl);
 
     /// \brief check if ui update ids should be added to the response and add
     /// them in that case.
@@ -125,9 +129,9 @@ protected:
     void handleUpdateIDs();
 
     /// \brief add the content manager task to the given xml element as xml elements
-    /// \param el the xml element to add the elements to
     /// \param task the task to add to the given xml element
-    void appendTask(zmm::Ref<mxml::Element> el, std::shared_ptr<GenericTask> task);
+    /// \param parent the xml element to add the elements to
+    void appendTask(std::shared_ptr<GenericTask> task, pugi::xml_node* parent);
 
     /// \brief check if accounts are enabled in the config
     /// \return true if accounts are enabled, false if not

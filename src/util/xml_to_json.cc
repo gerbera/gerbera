@@ -11,6 +11,8 @@
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
     
+    Copyright (C) 2020 Patrick Ammann <pammann@gmx.net>
+    
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
@@ -29,166 +31,118 @@
 
 /// \file xml_to_json.cc
 
-#include <cassert>
+#include <iostream>
+#include <regex>
 
 #include "xml_to_json.h"
 #include "util/tools.h"
 
-using namespace zmm;
-using namespace mxml;
-
-std::string XML2JSON::getJSON(Ref<Element> root)
+std::string Xml2Json::getJson(pugi::xml_node& root, const Hints* hints)
 {
     std::ostringstream buf;
     buf << '{';
-    handleElement(buf, root);
+    handleElement(buf, root, hints);
     buf << '}';
     return buf.str();
 }
 
-
-void XML2JSON::handleElement(std::ostringstream &buf, Ref<Element> el)
+void Xml2Json::handleElement(std::ostringstream& buf, pugi::xml_node& node, const Hints* hints)
 {
     bool firstChild = true;
-    int attributeCount = el->attributeCount();
-    if (attributeCount > 0)
-    {
-        for (int i = 0; i < attributeCount; i++)
-        {
-            Ref<Attribute> at = el->getAttribute(i);
-            if (! firstChild)
+
+    auto attrs = node.attributes();
+    size_t attributeCount = std::distance(attrs.begin(), attrs.end());
+    if (attributeCount > 0) {
+        for (pugi::xml_attribute at : attrs) {
+            if (!firstChild)
                 buf << ',';
             else
                 firstChild = false;
-            buf << '"' << escape(at->name, '\\', '"') << "\":" << getValue(at->value, at->getVType());
+            buf << getAsString(at.name()) << ':' << getValue(at.as_string());
         }
     }
-    
-    bool array = el->isArrayType();
-    std::string nodeName = "";
-    
-    if (array)
-    {
-        nodeName = el->getArrayName();
-        if (! string_ok(nodeName))
-            throw std::runtime_error("XML2JSON: Element " + el->getName() + " was of arrayType, but had no arrayName set");
-        
-        if (! firstChild)
+
+    std::string nodeName;
+    bool array = isArray(node, hints, &nodeName);
+
+    if (array) {
+        if (!firstChild)
             buf << ',';
-        buf << '"' << escape(nodeName, '\\', '"') << "\":";
+        buf << getAsString(nodeName.c_str()) << ':';
         buf << '[';
         firstChild = true;
     }
     
-    int childCount = el->childCount();
-    
-    for (int i = 0; i < childCount; i++)
-    {
-        Ref<Node> node = el->getChild(i);
-        mxml_node_types type = node->getType();
-        if (type != mxml_node_element)
-        {
-            if (childCount == 1 && type == mxml_node_text)
-            {
-                if (! firstChild)
-                    buf << ',';
-                else
-                    firstChild = false;
-                std::string key = el->getTextKey();
-                if (! string_ok(key))
-                    throw std::runtime_error("XML2JSON: Element " + el->getName() + " had a text child, but had no textKey set");
-                    //key = "value";
-                
-                buf << '"' << key << "\":" << getValue(el->getText(), el->getVTypeText());
-            }
-            else
-                throw std::runtime_error("XML2JSON cannot handle an element which consists of text AND element children - element: " + el->getName() + "; has type: " + std::to_string(type));
-        }
-        else
-        {
-            if (! firstChild)
+    for (pugi::xml_node child: node.children()) {
+        pugi::xml_node_type type = child.type();
+
+        if (type == pugi::node_element) {
+            if (!firstChild)
                 buf << ',';
             else
                 firstChild = false;
             
-            /*
-            if (i == 0)
-            {
-                if (childCount > 1)
-                {
-                    Ref<Node> nextNode = el->getChild(1);
-                    if (nextNode->getType() != mxml_node_element)
-                        throw std::runtime_error("XML2JSON cannot handle an element which consists of text AND element children");
-                    Ref<Element> nextChildEl = RefCast(nextNode, Element);
-                    if (nextChildEl->getName() == childEl->getName())
-                        array = true;
-                }
+            // look ahead
+            auto childAttrs = child.attributes();
+            size_t childAttributeCount = std::distance(childAttrs.begin(), childAttrs.end());
+            size_t childElementCount = 0;
+            for (pugi::xml_node el: child.children()) {
+                if (el.type() == pugi::node_element)
+                    childElementCount++;
             }
-            */
-            
-            /*
+
             if (array)
             {
-                if (i > 1) // we got the name from 0 and already checked with 1
-                {
-                    if (nodeName != childEl->getName())
-                        throw std::runtime_error("XML2JSON: if there are multiple elements of the same name (->array), there are no other elements allowed");
-                }
-            }
-            */
-            
-            
-            
-            Ref<Element> childEl = RefCast(node, Element);
-            int childAttributeCount = childEl->attributeCount();
-            int childElementCount = childEl->elementChildCount();
-            
-            if (array)
-            {
-                if (nodeName != childEl->getName())
-                    throw std::runtime_error("XML2JSON: if an element is of arrayType, all children have to have the same name");
-            }
-            else
-                buf << '"' << escape(childEl->getName(), '\\', '"') << "\":";
-            
-            if (childAttributeCount > 0 || childElementCount > 0 || childEl->isArrayType())
-            {
+                if (nodeName != child.name())
+                    throw std::runtime_error("if an element is of arrayType, all children have to have the same name");
+            } else
+                buf << getAsString(child.name()) << ':';
+
+            if (childAttributeCount > 0 || childElementCount > 0 || isArray(child, hints, nullptr)) {
                 buf << '{';
-                handleElement(buf, childEl);
+                handleElement(buf, child, hints);
                 buf << '}';
-            }
-            else
-            {
-                buf << getValue(childEl->getText(), childEl->getVTypeText());
+            } else {
+                buf << getValue(child.text().as_string());
             }
         }
     }
     
     if (array)
         buf << ']';
-    
 }
 
-std::string XML2JSON::getValue(std::string text, enum mxml_value_type type)
+std::string Xml2Json::getAsString(const char* str)
 {
-    if (type == mxml_string_type)
-        return "\"" + escape(text, '\\', '"') + '"';
-    if (type == mxml_bool_type)
-    {
-        assert(string_ok(text)); // must be real string
-        assert(text == "0" || text == "1");  // must be bool type
-        return text == "0" ? "false" : "true";
-    }
-    if (type == mxml_null_type)
-    {
-        assert(! string_ok(text)); // must not contain text
-        return "null";
-    }
+    return "\"" + escape(str, '\\', '"') + '"';
+}
+
+std::string Xml2Json::getValue(const char* text)
+{
+    // type information is gone, we need to guess...
+    std::string str = text;
+
+    // boolean
+    if (str == "true" || str == "false")
+        return str;
+
+    // number
+    if (std::regex_match(str, std::regex("-?\\d+")))
+        return str;
+
+    return getAsString(text);
+}
+
+bool Xml2Json::isArray(pugi::xml_node& node, const Hints* hints, std::string* arrayName)
+{
+    for (auto it = hints->asArray.begin(); it != hints->asArray.end(); ++it) {
+        auto& hint = *it;
+        if (hint.first == node) {
+            if (arrayName != nullptr) *arrayName = hint.second;
+            return true;
+        }
     
-    if (type == mxml_int_type)
-    {
-        /// \todo should we check if really int?
-        return text;
     }
-    return nullptr;
+
+    return false;
 }
