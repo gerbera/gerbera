@@ -14,6 +14,8 @@
 // forward declaration
 class ContentManager;
 class OnlineService;
+class Layout;
+class Timer;
 
 class TaskProcessor {
 public:
