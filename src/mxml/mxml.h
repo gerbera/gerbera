@@ -54,6 +54,6 @@ enum mxml_value_type
 #include "comment.h"
 #include "parseexception.h"
 #include "parser.h"
-#include "xml_to_json.h"
+#include "util/xml_to_json.h"
 
 #endif // __MXML_H__
