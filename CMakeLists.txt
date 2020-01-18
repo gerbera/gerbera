@@ -114,8 +114,6 @@ set(libgerberaFILES
         src/mxml/parser.h
         src/mxml/xml_text.cc
         src/mxml/xml_text.h
-        src/mxml/xml_to_json.cc
-        src/mxml/xml_to_json.h
         src/mxml/xpath.cc
         src/mxml/xpath.h
         src/onlineservice/atrailers_content_handler.cc
@@ -214,6 +212,8 @@ set(libgerberaFILES
         src/util/timer.h
         src/util/tools.cc
         src/util/tools.h
+        src/util/xml_to_json.cc
+        src/util/xml_to_json.h
         src/web/action.cc
         src/web/add.cc
         src/web/add_object.cc
