@@ -39,26 +39,11 @@
 #include "util/tools.h"
 #include <cstdio>
 
-using namespace zmm;
-using namespace mxml;
-
 web::addObject::addObject(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
     std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
     : WebRequestHandler(config, storage, content, sessionManager)
 {
 }
-
-/*static Ref<Element> addOption(std::string option_name, std::string option_type, std::string default_value = "")
-{
-    Ref<Element> option (new Element("option"));
-    option->addAttribute("name", option_name);
-    option->addAttribute("type", option_type);
-    
-    if (default_value != nullptr)
-        option->addAttribute("default", default_value);
-    
-    return option;
-}*/
 
 void web::addObject::addContainer(int parentID)
 {
@@ -186,16 +171,10 @@ void web::addObject::process()
 
     std::shared_ptr<CdsObject> obj = nullptr;
 
-    Ref<Element> updateContainerEl;
-
     bool allow_fifo = false;
 
     if (obj_type == STRING_OBJECT_TYPE_CONTAINER) {
         this->addContainer(parentID);
-        //updateContainerEl = Ref<Element>(new Element("updateContainer"));
-        //updateContainerEl->setText(parID);
-        //updateContainerEl->addAttribute("add", "1");
-        //root->appendChild(updateContainerEl);
     } else if (obj_type == STRING_OBJECT_TYPE_ITEM) {
         if (!string_ok(location))
             throw std::runtime_error("no location given");

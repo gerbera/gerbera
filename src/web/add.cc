@@ -38,9 +38,6 @@
 #include "util/tools.h"
 #include <cstdio>
 
-using namespace zmm;
-using namespace mxml;
-
 web::add::add(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
     std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
     : WebRequestHandler(config, storage, content, sessionManager)

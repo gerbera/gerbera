@@ -35,9 +35,6 @@
 #include "storage/storage.h"
 #include "upnp_xml.h"
 
-using namespace zmm;
-using namespace mxml;
-
 web::items::items(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
     std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
     : WebRequestHandler(config, storage, content, sessionManager)
@@ -56,10 +53,12 @@ void web::items::process()
     if (count < 0)
         throw std::runtime_error("illegal count parameter");
 
-    Ref<Element> items(new Element("items"));
-    items->setArrayName("item");
-    items->setAttribute("parent_id", std::to_string(parentID), mxml_int_type);
-    root->appendElementChild(items);
+    auto root = xmlDoc->document_element();
+
+    auto items = root.append_child("items");
+    xml2JsonHints->setArrayName(items, "item");
+    items.append_attribute("parent_id") = parentID;
+
     auto obj = storage->loadObject(parentID);
     auto param = std::make_unique<BrowseParam>(parentID, BROWSE_DIRECT_CHILDREN | BROWSE_ITEMS);
     param->setRange(start, count);
@@ -71,15 +70,15 @@ void web::items::process()
 
     std::string location = obj->getVirtualPath();
     if (string_ok(location))
-        items->setAttribute("location", location);
-    items->setAttribute("virtual", (obj->isVirtual() ? "1" : "0"), mxml_bool_type);
+        items.append_attribute("location") = location.c_str();
+    items.append_attribute("virtual") = obj->isVirtual();
 
-    items->setAttribute("start", std::to_string(start), mxml_int_type);
-    //items->setAttribute("returned", std::to_string(arr->size()));
-    items->setAttribute("total_matches", std::to_string(param->getTotalMatches()), mxml_int_type);
+    items.append_attribute("start") = start;
+    //items.append_attribute("returned") = arr->size();
+    items.append_attribute("total_matches") = param->getTotalMatches();
 
-    int protectContainer = 0;
-    int protectItems = 0;
+    bool protectContainer = false;
+    bool protectItems = false;
     std::string autoscanMode = "none";
 
     int autoscanType = storage->getAutoscanDirectoryType(parentID);
@@ -98,34 +97,33 @@ void web::items::process()
         if (startpoint_id != INVALID_OBJECT_ID) {
             std::shared_ptr<AutoscanDirectory> adir = storage->getAutoscanDirectory(startpoint_id);
             if ((adir != nullptr) && (adir->getScanMode() == ScanMode::INotify)) {
-                protectItems = 1;
+                protectItems = true;
                 if (autoscanType == 0 || adir->persistent())
-                    protectContainer = 1;
+                    protectContainer = true;
 
                 autoscanMode = "inotify";
             }
         }
     }
 #endif
-    items->setAttribute("autoscan_mode", autoscanMode);
-    items->setAttribute("autoscan_type", mapAutoscanType(autoscanType));
-    items->setAttribute("protect_container", std::to_string(protectContainer), mxml_bool_type);
-    items->setAttribute("protect_items", std::to_string(protectItems), mxml_bool_type);
+    items.append_attribute("autoscan_mode") = autoscanMode.c_str();
+    items.append_attribute("autoscan_type") = mapAutoscanType(autoscanType).c_str();
+    items.append_attribute("protect_container") = protectContainer;
+    items.append_attribute("protect_items") =  protectItems;
 
     for (size_t i = 0; i < arr.size(); i++) {
         auto obj = arr[i];
         //if (IS_CDS_ITEM(obj->getObjectType()))
         //{
-        Ref<Element> item(new Element("item"));
-        item->setAttribute("id", std::to_string(obj->getID()), mxml_int_type);
-        item->appendTextChild("title", obj->getTitle());
+        auto item = items.append_child("item");
+        item.append_attribute("id") = obj->getID();
+        item.append_child("title").append_child(pugi::node_pcdata).set_value(obj->getTitle().c_str());
         /// \todo clean this up, should have more generic options for online
         /// services
         // FIXME
-        item->appendTextChild("res", UpnpXMLBuilder::getFirstResourcePath(std::static_pointer_cast<CdsItem>(obj)));
-
-        //item->appendTextChild("virtual", obj->isVirtual() ? "1" : "0", mxml_bool_type);
-        items->appendElementChild(item);
+        std::string res = UpnpXMLBuilder::getFirstResourcePath(std::static_pointer_cast<CdsItem>(obj));
+        item.append_child("res").append_child(pugi::node_pcdata).set_value(res.c_str());
+        //item.append_attribute("virtual") = obj->isVirtual();
         //}
     }
 }

@@ -36,9 +36,6 @@
 #include "util/string_converter.h"
 #include "util/tools.h"
 
-using namespace zmm;
-using namespace mxml;
-
 web::directories::directories(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
     std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
     : WebRequestHandler(config, storage, content, sessionManager)
@@ -56,18 +53,19 @@ void web::directories::process()
     else
         path = hex_decode_string(parentID);
 
-    Ref<Element> containers(new Element("containers"));
-    containers->setArrayName("container");
-    containers->setAttribute("parent_id", parentID);
+    auto root = xmlDoc->document_element();
+
+    auto containers = root.append_child("containers");
+    xml2JsonHints->setArrayName(containers, "container");
+    containers.append_attribute("parent_id") = parentID.c_str();
     if (string_ok(param("select_it")))
-        containers->setAttribute("select_it", param("select_it"));
-    containers->setAttribute("type", "filesystem");
-    root->appendElementChild(containers);
+        containers.append_attribute("select_it") = param("select_it").c_str();
+    containers.append_attribute("type") = "filesystem";
 
     auto fs = std::make_unique<Filesystem>(config);
     auto arr = fs->readDirectory(path, FS_MASK_DIRECTORIES, FS_MASK_DIRECTORIES);
     for (auto it = arr.begin(); it != arr.end(); it++) {
-        Ref<Element> ce(new Element("container"));
+        auto ce = containers.append_child("container");
         std::string filename = (*it)->filename;
         std::string filepath;
         if (path.c_str()[path.length() - 1] == '/')
@@ -77,15 +75,13 @@ void web::directories::process()
 
         /// \todo replace hex_encode with base64_encode?
         std::string id = hex_encode(filepath.c_str(), filepath.length());
-        ce->setAttribute("id", id);
+        ce.append_attribute("id") = id.c_str();
         if ((*it)->hasContent)
-            ce->setAttribute("child_count", std::to_string(1), mxml_int_type);
+            ce.append_attribute("child_count") = 1;
         else
-            ce->setAttribute("child_count", std::to_string(0), mxml_int_type);
+            ce.append_attribute("child_count") = 0;
 
         auto f2i = StringConverter::f2i(config);
-        ce->setTextKey("title");
-        ce->setText(f2i->convert(filename));
-        containers->appendElementChild(ce);
+        ce.append_attribute("title") = f2i->convert(filename).c_str();
     }
 }

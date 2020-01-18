@@ -37,12 +37,6 @@
 #include "util/tools.h"
 #include <cstdio>
 
-//#include "server.h"
-//#include "content_manager.h"
-
-using namespace zmm;
-using namespace mxml;
-
 web::edit_load::edit_load(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
     std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
     : WebRequestHandler(config, storage, content, sessionManager)
@@ -62,72 +56,54 @@ void web::edit_load::process()
 
     auto obj = storage->loadObject(objectID);
 
-    Ref<Element> item(new Element("item"));
+    auto root = xmlDoc->document_element();
 
-    item->setAttribute("object_id", objID, mxml_int_type);
+    auto item = root.append_child("item");
+    item.append_attribute("object_id") = objectID;
 
-    Ref<Element> title(new Element("title"));
-    title->setTextKey("value");
-    title->setText(obj->getTitle());
-    title->setAttribute("editable", obj->isVirtual() || objectID == CDS_ID_FS_ROOT ? "1" : "0", mxml_bool_type);
-    item->appendElementChild(title);
+    auto title = item.append_child("title");
+    title.append_attribute("value") = obj->getTitle().c_str();
+    title.append_attribute("editable") = obj->isVirtual() || objectID == CDS_ID_FS_ROOT ? "1" : "0";
 
-    Ref<Element> classEl(new Element("class"));
-    classEl->setTextKey("value");
-    classEl->setText(obj->getClass());
-    classEl->setAttribute("editable", "1", mxml_bool_type);
-    item->appendElementChild(classEl);
+    auto classEl = item.append_child("class");
+    classEl.append_attribute("value") = obj->getClass().c_str();
+    classEl.append_attribute("editable") = true;
 
     int objectType = obj->getObjectType();
-    item->appendTextChild("obj_type", CdsObject::mapObjectType(objectType));
+    item.append_child("obj_type").append_child(pugi::node_pcdata).set_value(CdsObject::mapObjectType(objectType).c_str());
 
     if (IS_CDS_ITEM(objectType)) {
         auto objItem = std::static_pointer_cast<CdsItem>(obj);
 
-        Ref<Element> description(new Element("description"));
-        description->setTextKey("value");
-        description->setText(objItem->getMetadata("dc:description"));
-        description->setAttribute("editable", "1", mxml_bool_type);
-        item->appendElementChild(description);
+        auto description = item.append_child("description");
+        description.append_attribute("value") = objItem->getMetadata("dc:description").c_str();
+        description.append_attribute("editable") = true;
 
-        Ref<Element> location(new Element("location"));
-        location->setTextKey("value");
-        location->setText(objItem->getLocation());
+        auto location = item.append_child("location");
+        location.append_attribute("value") = objItem->getLocation().c_str();
         if (IS_CDS_PURE_ITEM(objectType) || !objItem->isVirtual())
-            location->setAttribute("editable", "0", mxml_bool_type);
+            location.append_attribute("editable") = false;
         else
-            location->setAttribute("editable", "1", mxml_bool_type);
-        item->appendElementChild(location);
+            location.append_attribute("editable") = true;
 
-        Ref<Element> mimeType(new Element("mime-type"));
-        mimeType->setTextKey("value");
-        mimeType->setText(objItem->getMimeType());
-        mimeType->setAttribute("editable", "1", mxml_bool_type);
-        item->appendElementChild(mimeType);
+        auto mimeType = item.append_child("mime-type");
+        mimeType.append_attribute("value") = objItem->getMimeType().c_str();
+        mimeType.append_attribute("editable") = true;
 
         if (IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
-            Ref<Element> protocol(new Element("protocol"));
-            protocol->setTextKey("value");
-            protocol->setText(getProtocol(objItem->getResource(0)->getAttribute("protocolInfo")));
-            protocol->setAttribute("editable", "1", mxml_bool_type);
-            item->appendElementChild(protocol);
+            auto protocol = item.append_child("protocol");
+            protocol.append_attribute("value") = getProtocol(objItem->getResource(0)->getAttribute("protocolInfo")).c_str();
+            protocol.append_attribute("editable") = true;
         } else if (IS_CDS_ACTIVE_ITEM(objectType)) {
             auto objActiveItem = std::static_pointer_cast<CdsActiveItem>(objItem);
 
-            Ref<Element> action(new Element("action"));
-            action->setTextKey("value");
-            action->setText(objActiveItem->getAction());
-            action->setAttribute("editable", "1", mxml_bool_type);
-            item->appendElementChild(action);
+            auto action = item.append_child("action");
+            action.append_attribute("value") = objActiveItem->getAction().c_str();
+            action.append_attribute("editable") = true;
 
-            Ref<Element> state(new Element("state"));
-            state->setTextKey("value");
-            state->setText(objActiveItem->getState());
-            state->setAttribute("editable", "1", mxml_bool_type);
-            item->appendElementChild(state);
+            auto state = item.append_child("state");
+            state.append_attribute("value") = objActiveItem->getState().c_str();
+            state.append_attribute("editable") = true;
         }
     }
-
-    root->appendElementChild(item);
-    //log_debug("serving XML: {}",  root->print().c_str());
 }

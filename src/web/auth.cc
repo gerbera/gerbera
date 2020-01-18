@@ -35,9 +35,6 @@
 #include "util/tools.h"
 #include <sys/time.h>
 
-using namespace zmm;
-using namespace mxml;
-
 #define LOGIN_TIMEOUT 10 // in seconds
 
 static long get_time()
@@ -75,66 +72,46 @@ web::auth::auth(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> 
 void web::auth::process()
 {
     std::string action = param("action");
+    auto root = xmlDoc->document_element();
 
     if (!string_ok(action)) {
-        root->appendTextChild("error", "req_type auth: no action given");
+        root.append_child("error").append_child(pugi::node_pcdata).set_value("req_type auth: no action given");
         return;
     }
 
     if (action == "get_config") {
-        Ref<Element> cfg(new Element("config"));
-        root->appendElementChild(cfg);
-        cfg->setAttribute("accounts", accountsEnabled() ? "1" : "0", mxml_bool_type);
-        cfg->setAttribute("show-tooltips",
-            (config->getBoolOption(
-                 CFG_SERVER_UI_SHOW_TOOLTIPS)
-                    ? "1"
-                    : "0"),
-            mxml_bool_type);
-        cfg->setAttribute("poll-when-idle",
-            (config->getBoolOption(
-                 CFG_SERVER_UI_POLL_WHEN_IDLE)
-                    ? "1"
-                    : "0"),
-            mxml_bool_type);
-        cfg->setAttribute("poll-interval",
-            std::to_string(config->getIntOption(CFG_SERVER_UI_POLL_INTERVAL)), mxml_int_type);
+        auto cfg = root.append_child("config");
+        cfg.append_attribute("accounts") = accountsEnabled();
+        cfg.append_attribute("show-tooltips") = config->getBoolOption(CFG_SERVER_UI_SHOW_TOOLTIPS);
+        cfg.append_attribute("poll-when-idle") = config->getBoolOption(CFG_SERVER_UI_POLL_WHEN_IDLE);
+        cfg.append_attribute("poll-interval") = config->getIntOption(CFG_SERVER_UI_POLL_INTERVAL);
+
         /// CREATE XML FRAGMENT FOR ITEMS PER PAGE
-        Ref<Element> ipp(new Element("items-per-page"));
-        ipp->setArrayName("option");
-        ipp->setAttribute("default",
-            std::to_string(config->getIntOption(CFG_SERVER_UI_DEFAULT_ITEMS_PER_PAGE)), mxml_int_type);
+        auto ipp = cfg.append_child("items-per-page");
+        xml2JsonHints->setArrayName(ipp, "option");
+        ipp.append_attribute("default") = config->getIntOption(CFG_SERVER_UI_DEFAULT_ITEMS_PER_PAGE);
 
-        std::vector<std::string> menu_opts = config->getStringArrayOption(CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN);
-
+        auto menu_opts = config->getStringArrayOption(CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN);
         for (size_t i = 0; i < menu_opts.size(); i++) {
-            ipp->appendTextChild("option", menu_opts[i], mxml_int_type);
+            ipp.append_child("option").append_child(pugi::node_pcdata).set_value(menu_opts[i].c_str());
         }
 
-        cfg->appendElementChild(ipp);
 #ifdef HAVE_INOTIFY
-        if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY))
-            cfg->setAttribute("have-inotify", "1", mxml_bool_type);
-        else
-            cfg->setAttribute("have-inotify", "0", mxml_bool_type);
+        cfg.append_attribute("have-inotify") = config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY);
 #else
-        cfg->setAttribute("have-inotify", "0", mxml_bool_type);
+        cfg.append_attribute("have-inotify") = false;
 #endif
 
-        Ref<Element> actions(new Element("actions"));
-        actions->setArrayName("action");
+        auto actions = cfg.append_child("actions");
+        xml2JsonHints->setArrayName(actions, "action");
         //actions->appendTextChild("action", "fokel1");
         //actions->appendTextChild("action", "fokel2");
 
-        cfg->appendElementChild(actions);
+        auto friendlyName = cfg.append_child("friendlyName").append_child(pugi::node_pcdata);
+        friendlyName.set_value(config->getOption(CFG_SERVER_NAME).c_str());
 
-        Ref<Element> friendlyName(new Element("friendlyName"));
-        friendlyName->setText(config->getOption(CFG_SERVER_NAME));
-        cfg->appendElementChild(friendlyName);
-
-        Ref<Element> gerberaVersion(new Element("version"));
-        gerberaVersion->setText(VERSION);
-        cfg->appendElementChild(gerberaVersion);
+        auto gerberaVersion = cfg.append_child("version").append_child(pugi::node_pcdata);
+        gerberaVersion.set_value(VERSION);
     } else if (action == "get_sid") {
         log_debug("checking/getting sid...");
         std::shared_ptr<Session> session = nullptr;
@@ -142,18 +119,18 @@ void web::auth::process()
 
         if (sid.empty() || (session = sessionManager->getSession(sid)) == nullptr) {
             session = sessionManager->createSession(timeout);
-            root->setAttribute("sid_was_valid", "0", mxml_bool_type);
+            root.append_attribute("sid_was_valid") = false;
         } else {
             session->clearUpdateIDs();
-            root->setAttribute("sid_was_valid", "1", mxml_bool_type);
+            root.append_attribute("sid_was_valid") = true;
         }
-        root->setAttribute("sid", session->getID());
+        root.append_attribute("sid") = session->getID().c_str();
 
         if (!session->isLoggedIn() && !accountsEnabled()) {
             session->logIn();
             //throw SessionException("not logged in");
         }
-        root->setAttribute("logged_in", session->isLoggedIn() ? "1" : "0", mxml_bool_type);
+        root.append_attribute("logged_in") = session->isLoggedIn();
     } else if (action == "logout") {
         check_request();
         std::string sid = param("sid");
@@ -167,7 +144,7 @@ void web::auth::process()
         // sending token
         std::string token = generate_token();
         session->put("token", token);
-        root->appendTextChild("token", token);
+        root.append_child("token").append_child(pugi::node_pcdata).set_value(token.c_str());
     } else if (action == "login") {
         check_request(false);
 

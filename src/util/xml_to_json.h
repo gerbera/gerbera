@@ -11,6 +11,8 @@
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
     
+    Copyright (C) 2020 Patrick Ammann <pammann@gmx.net>
+    
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
@@ -29,26 +31,34 @@
 
 /// \file xml_to_json.h
 
-#ifndef __MXML_XML_TO_JSON_H__
-#define __MXML_XML_TO_JSON_H__
+#ifndef __UTIL_XML_TO_JSON_H__
+#define __UTIL_XML_TO_JSON_H__
 
-#include "zmm/zmmf.h"
+#include <string>
+#include <stack>
+#include <sstream>
+#include <memory>
 
-#include "mxml.h"
+#include <pugixml.hpp>
 
-namespace mxml
+class Xml2Json
 {
-
-class XML2JSON : public zmm::Object
-{
-protected:
-    static void handleElement(std::ostringstream &buf, zmm::Ref<Element> el);
-    static std::string getValue(std::string text, enum mxml_value_type type);
 public:
-    static std::string getJSON(zmm::Ref<Element> root);
-    
+    class Hints {
+    public:
+        void setArrayName(pugi::xml_node& node, const std::string& name) { asArray[node] = name; }
+    private:
+        std::map<pugi::xml_node, std::string> asArray;
+        friend class Xml2Json;
+    };
+
+    static std::string getJson(pugi::xml_node& root, const Hints* hints);
+
+private:
+    static void handleElement(std::ostringstream& buf, pugi::xml_node& node, const Hints* hints);
+    static std::string getAsString(const char* str);
+    static std::string getValue(const char* text);
+    static bool isArray(pugi::xml_node& node, const Hints* hints, std::string* arrayName);
 };
 
-} // namespace
-
-#endif // __MXML_XML_TO_JSON_H__
+#endif // __UTIL_XML_TO_JSON_H__
