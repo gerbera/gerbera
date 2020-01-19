@@ -261,11 +261,8 @@ int main(int argc, char** argv, char** envp)
                 *config_file, *home, *confdir, *prefix, *magic, *ip, *interface, portnum.value_or(-1), debug
             );
             portnum = config->getIntOption(CFG_SERVER_PORT);
-        } catch (const mxml::ParseException& pe) {
-            log_error("Error parsing config file: {} line {}:{}",
-                pe.context->location.c_str(),
-                pe.context->line,
-                pe.what());
+        } catch (const ConfigParseException& ce) {
+            log_error("Error parsing config file '{}': {}", (*config_file).c_str(), ce.what());
             exit(EXIT_FAILURE);
         } catch (const std::runtime_error& e) {
             log_error("{}", e.what());
@@ -368,11 +365,8 @@ int main(int argc, char** argv, char** envp)
                         config = std::make_shared<ConfigManager>(
                             *config_file, *home, *confdir, *prefix, *magic, *ip, *interface, portnum.value_or(-1), debug
                         );
-                    } catch (const mxml::ParseException& pe) {
-                        log_error("Error parsing config file: {} line {}:{}",
-                            pe.context->location.c_str(),
-                            pe.context->line,
-                            pe.what());
+                    } catch (const ConfigParseException& ce) {
+                        log_error("Error parsing config file '{}': {}", (*config_file).c_str(), ce.what());
                         log_error("Could not restart Gerbera");
                         // at this point upnp shutdown has already been called
                         // so it is safe to exit

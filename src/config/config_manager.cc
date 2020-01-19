@@ -41,8 +41,10 @@
 #include <uuid/uuid.h>
 #endif
 #include <cstdio>
+#include <iostream>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <filesystem>
 
 #ifdef HAVE_INOTIFY
 #include "util/mt_inotify.h"
@@ -55,77 +57,58 @@
 
 #ifdef HAVE_CURL
 #include <curl/curl.h>
-
 #endif
-
-using namespace zmm;
-using namespace mxml;
 
 bool ConfigManager::debug_logging = false;
 
 ConfigManager::ConfigManager(std::string filename,
     std::string userhome, std::string config_dir,
-    std::string prefix_dir, std::string magic,
+    std::string prefix_dir, std::string magic_file,
     std::string ip, std::string interface, int port,
     bool debug_logging)
     :filename(filename)
     , prefix_dir(prefix_dir)
-    , magic(magic)
+    , magic_file(magic_file)
     , ip(ip)
     , interface(interface)
     , port(port)
 {
     this->debug_logging = debug_logging;
+
+    xmlDoc = std::make_unique<pugi::xml_document>();
     options = std::make_unique<std::vector<std::shared_ptr<ConfigOption>>>();
     options->resize(CFG_MAX);
 
-    std::string home = userhome + DIR_SEPARATOR + config_dir;
-
     if (filename.empty()) {
         // No config file path provided, so lets find one.
-        if (check_path(home + DIR_SEPARATOR + DEFAULT_CONFIG_NAME)) {
-            filename = home + DIR_SEPARATOR + DEFAULT_CONFIG_NAME;
-        } else {
-            std::ostringstream expErrMsg;
-            expErrMsg << "\nThe server configuration file could not be found in: ";
-            expErrMsg << home << "\n";
-            expErrMsg << "Gerbera could not find a default configuration file.\n";
-            expErrMsg << "Try specifying an alternative configuration file on the command line.\n";
-            expErrMsg << "For a list of options run: gerbera -h\n";
-
-            throw std::runtime_error(expErrMsg.str());
-        }
+        std::string home = userhome + DIR_SEPARATOR + config_dir;
+        filename += home + DIR_SEPARATOR + DEFAULT_CONFIG_NAME;
     }
 
-    log_info("Loading configuration from: {}", filename.c_str());
-    load(filename);
-    validate(home);
+    if (!std::filesystem::exists(filename)) {
+        std::ostringstream expErrMsg;
+        expErrMsg << "\nThe server configuration file could not be found: ";
+        expErrMsg << filename << "\n";
+        expErrMsg << "Gerbera could not find a default configuration file.\n";
+        expErrMsg << "Try specifying an alternative configuration file on the command line.\n";
+        expErrMsg << "For a list of options run: gerbera -h\n";
+
+        throw std::runtime_error(expErrMsg.str());
+    }
+
+    load(filename, userhome);
+
 #ifdef TOMBDEBUG
     dumpOptions();
 #endif
+
     // now the XML is no longer needed we can destroy it
-    root = nullptr;
+    xmlDoc = nullptr;
 }
 
 ConfigManager::~ConfigManager()
 {
     log_debug("ConfigManager destroyed");
-}
-
-std::string ConfigManager::construct_path(std::string path)
-{
-    std::string home = getOption(CFG_SERVER_HOME);
-
-    if (path.at(0) == '/')
-        return path;
-    if (home == "." && path.at(0) == '.')
-        return path;
-
-    if (home.empty()) {
-        return fmt::format("./{}", path);
-    } else {
-        return fmt::format("{}/{}", home, path);
-    }
 }
 
 #define NEW_OPTION(optval) opt = std::make_shared<Option>(optval);
@@ -150,11 +133,11 @@ std::string ConfigManager::construct_path(std::string path)
 #define SET_TRANSCODING_PROFILELIST_OPTION(opttype) options->at(opttype) = trlist_opt;
 
 
-void ConfigManager::validate(std::string serverhome)
+void ConfigManager::load(std::string filename, std::string userHome)
 {
     std::string temp;
     int temp_int;
-    Ref<Element> tmpEl;
+    pugi::xml_node tmpEl;
 
     std::shared_ptr<Option> opt;
     std::shared_ptr<BoolOption> bool_opt;
@@ -164,51 +147,59 @@ void ConfigManager::validate(std::string serverhome)
     std::shared_ptr<AutoscanListOption> alist_opt;
     std::shared_ptr<TranscodingProfileListOption> trlist_opt;
 
+    log_info("Loading configuration from: {}", filename.c_str());
+    this->filename = filename;
+    pugi::xml_parse_result result = xmlDoc->load_file(filename.c_str());
+    if (result.status != pugi::xml_parse_status::status_ok) {
+        throw ConfigParseException(result.description());
+    }
+
     log_info("Checking configuration...");
+
+    auto root = xmlDoc->document_element();
 
     // first check if the config file itself looks ok, it must have a config
     // and a server tag
-    if (root->getName() != "config")
+    if (std::string(root.name()) != "config")
         throw std::runtime_error("Error in config file: <config> tag not found");
 
-    if (root->getChildByName("server") == nullptr)
+    if (root.child("server") == nullptr)
         throw std::runtime_error("Error in config file: <server> tag not found");
 
-    std::string version = root->getAttribute("version");
+    std::string version = root.attribute("version").as_string();
     if (std::stoi(version) > CONFIG_XML_VERSION)
         throw std::runtime_error("Config version \"" + version + "\" does not yet exist!");
 
     // now go through the mandatory parameters, if something is missing
     // we will not start the server
 
-    /// \todo clean up the construct path / prepare path mess
-    getOption("/server/home", serverhome);
-    NEW_OPTION(getOption("/server/home"));
-    SET_OPTION(CFG_SERVER_HOME);
-    prepare_path("/server/home", true);
-    NEW_OPTION(getOption("/server/home"));
+    if (!userHome.empty()) {
+        // respect command line; ignore xml value
+        temp = userHome;
+    } else
+        temp = getOption("/server/home");
+    if (!std::filesystem::exists(temp))
+        throw std::runtime_error("Directory '" + temp + "' does not exist!");
+    NEW_OPTION(temp);
     SET_OPTION(CFG_SERVER_HOME);
 
-    prepare_path("/server/webroot", true);
-    NEW_OPTION(getOption("/server/webroot"));
+    temp = getOption("/server/webroot");
+    temp = resolvePath(temp);
+    NEW_OPTION(temp);
     SET_OPTION(CFG_SERVER_WEBROOT);
 
     temp = getOption("/server/tmpdir", DEFAULT_TMPDIR);
-    if (!check_path(temp, true)) {
-        throw std::runtime_error("Temporary directory " + temp + " does not exist!");
-    }
-    temp = temp + "/";
+    temp = resolvePath(temp);
+    temp = temp + "/"; // TODO: fix users
     NEW_OPTION(temp);
     SET_OPTION(CFG_SERVER_TMPDIR);
 
-    if (string_ok(getOption("/server/servedir", "")))
-        prepare_path("/server/servedir", true);
-
-    NEW_OPTION(getOption("/server/servedir"));
+    temp = getOption("/server/servedir", "");
+    temp = resolvePath(temp);
+    NEW_OPTION(temp);
     SET_OPTION(CFG_SERVER_SERVEDIR);
 
     // udn should be already prepared
-    checkOptionString("/server/udn");
     NEW_OPTION(getOption("/server/udn"));
     SET_OPTION(CFG_SERVER_UDN);
 
@@ -288,8 +279,9 @@ void ConfigManager::validate(std::string serverhome)
 #ifdef HAVE_SQLITE3
 
     if (sqlite3_en == "yes") {
-        prepare_path("/server/storage/sqlite3/database-file", false, true);
-        NEW_OPTION(getOption("/server/storage/sqlite3/database-file"));
+        temp = getOption("/server/storage/sqlite3/database-file");
+        temp = resolvePath(temp, true, false);
+        NEW_OPTION(temp);
         SET_OPTION(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
 
         temp = getOption("/server/storage/sqlite3/synchronous",
@@ -365,8 +357,6 @@ void ConfigManager::validate(std::string serverhome)
     NEW_OPTION(dbDriver);
     SET_OPTION(CFG_SERVER_STORAGE_DRIVER);
 
-    //    temp = checkOption_("/server/storage/database-file");
-    //    check_path_ex(construct_path(temp));
 
     // now go through the optional settings and fix them if anything is missing
 
@@ -411,31 +401,30 @@ void ConfigManager::validate(std::string serverhome)
     SET_INT_OPTION(CFG_SERVER_UI_DEFAULT_ITEMS_PER_PAGE);
 
     // now get the option list for the drop down menu
-    Ref<Element> element = getElement("/server/ui/items-per-page");
+    tmpEl = getElement("/server/ui/items-per-page");
     // create default structure
-    if (element->elementChildCount() == 0) {
-        if ((temp_int != DEFAULT_ITEMS_PER_PAGE_1) && (temp_int != DEFAULT_ITEMS_PER_PAGE_2) && (temp_int != DEFAULT_ITEMS_PER_PAGE_3) && (temp_int != DEFAULT_ITEMS_PER_PAGE_4)) {
+    if (std::distance(tmpEl.begin(), tmpEl.end()) == 0) {
+        if ((temp_int != DEFAULT_ITEMS_PER_PAGE_1) && (temp_int != DEFAULT_ITEMS_PER_PAGE_2) &&
+            (temp_int != DEFAULT_ITEMS_PER_PAGE_3) && (temp_int != DEFAULT_ITEMS_PER_PAGE_4)) {
             throw std::runtime_error("Error in config file: you specified an "
                              "<items-per-page default=\"\"> value that is "
                              "not listed in the options");
         }
 
-        element->appendTextChild("option",
-            std::to_string(DEFAULT_ITEMS_PER_PAGE_1));
-        element->appendTextChild("option",
-            std::to_string(DEFAULT_ITEMS_PER_PAGE_2));
-        element->appendTextChild("option",
-            std::to_string(DEFAULT_ITEMS_PER_PAGE_3));
-        element->appendTextChild("option",
-            std::to_string(DEFAULT_ITEMS_PER_PAGE_4));
+        tmpEl.append_child("option").append_child(pugi::node_pcdata)
+            .set_value(std::to_string(DEFAULT_ITEMS_PER_PAGE_1).c_str());
+        tmpEl.append_child("option").append_child(pugi::node_pcdata)
+            .set_value(std::to_string(DEFAULT_ITEMS_PER_PAGE_2).c_str());
+        tmpEl.append_child("option").append_child(pugi::node_pcdata)
+            .set_value(std::to_string(DEFAULT_ITEMS_PER_PAGE_3).c_str());
+        tmpEl.append_child("option").append_child(pugi::node_pcdata)
+            .set_value(std::to_string(DEFAULT_ITEMS_PER_PAGE_4).c_str());
     } else // validate user settings
     {
-        int i;
         bool default_found = false;
-        for (int j = 0; j < element->elementChildCount(); j++) {
-            Ref<Element> child = element->getElementChild(j);
-            if (child->getName() == "option") {
-                i = std::stoi(child->getText());
+        for (pugi::xml_node child: tmpEl.children()) {
+            if (std::string(child.name()) == "option") {
+                int i = child.text().as_int();
                 if (i < 1)
                     throw std::runtime_error("Error in config file: incorrect "
                                     "<option> value for <items-per-page>");
@@ -453,11 +442,9 @@ void ConfigManager::validate(std::string serverhome)
 
     // create the array from either user or default settings
     std::vector<std::string> menu_opts;
-    menu_opts.reserve(element->elementChildCount());
-    for (int j = 0; j < element->elementChildCount(); j++) {
-        Ref<Element> child = element->getElementChild(j);
-        if (child->getName() == "option")
-            menu_opts.push_back(child->getText());
+    for (pugi::xml_node child: tmpEl.children()) {
+        if (std::string(child.name()) == "option")
+            menu_opts.push_back(child.text().as_string());
     }
     NEW_STRARR_OPTION(menu_opts);
     SET_STRARR_OPTION(CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN);
@@ -472,7 +459,7 @@ void ConfigManager::validate(std::string serverhome)
     SET_BOOL_OPTION(CFG_SERVER_UI_ACCOUNTS_ENABLED);
 
     tmpEl = getElement("/server/ui/accounts");
-    NEW_DICT_OPTION(createDictionaryFromNodeset(tmpEl, "account", "user", "password"));
+    NEW_DICT_OPTION(createDictionaryFromNode(tmpEl, "account", "user", "password"));
     SET_DICT_OPTION(CFG_SERVER_UI_ACCOUNT_LIST);
 
     temp_int = getIntOption("/server/ui/accounts/attribute::session-timeout",
@@ -520,15 +507,13 @@ void ConfigManager::validate(std::string serverhome)
     SET_BOOL_OPTION(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_CASE_SENSITIVE);
 
     tmpEl = getElement("/import/mappings/extension-mimetype");
-    NEW_DICT_OPTION(createDictionaryFromNodeset(tmpEl, "map",
-        "from", "to", !csens));
+    NEW_DICT_OPTION(createDictionaryFromNode(tmpEl, "map", "from", "to", !csens));
     SET_DICT_OPTION(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
 
     std::map<std::string,std::string> mime_content;
     tmpEl = getElement("/import/mappings/mimetype-contenttype");
     if (tmpEl != nullptr) {
-        mime_content = createDictionaryFromNodeset(tmpEl, "treat",
-            "mimetype", "as");
+        mime_content = createDictionaryFromNode(tmpEl, "treat", "mimetype", "as");
     } else {
         mime_content["audio/mpeg"] = CONTENT_TYPE_MP3;
         mime_content["audio/mp4"] = CONTENT_TYPE_MP4;
@@ -677,6 +662,7 @@ void ConfigManager::validate(std::string serverhome)
     SET_OPTION(CFG_SERVER_IP);
 
     temp = getOption("/server/bookmark", DEFAULT_BOOKMARK_FILE);
+    temp = resolvePath(temp, true, false);
     NEW_OPTION(temp);
     SET_OPTION(CFG_SERVER_BOOKMARK_FILE);
 
@@ -745,18 +731,14 @@ void ConfigManager::validate(std::string serverhome)
 #ifdef HAVE_JS
     temp = getOption("/import/scripting/playlist-script",
         prefix_dir + DIR_SEPARATOR + DEFAULT_JS_DIR + DIR_SEPARATOR + DEFAULT_PLAYLISTS_SCRIPT);
-    if (!string_ok(temp))
-        throw std::runtime_error("playlist script location invalid");
-    prepare_path("/import/scripting/playlist-script");
-    NEW_OPTION(getOption("/import/scripting/playlist-script"));
+    temp = resolvePath(temp);
+    NEW_OPTION(temp);
     SET_OPTION(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT);
 
     temp = getOption("/import/scripting/common-script",
         prefix_dir + DIR_SEPARATOR + DEFAULT_JS_DIR + DIR_SEPARATOR + DEFAULT_COMMON_SCRIPT);
-    if (!string_ok(temp))
-        throw std::runtime_error("common script location invalid");
-    prepare_path("/import/scripting/common-script");
-    NEW_OPTION(getOption("/import/scripting/common-script"));
+    temp = resolvePath(temp);
+    NEW_OPTION(temp);
     SET_OPTION(CFG_IMPORT_SCRIPTING_COMMON_SCRIPT);
 
     temp = getOption(
@@ -803,20 +785,14 @@ void ConfigManager::validate(std::string serverhome)
     std::string script_path = getOption(
         "/import/scripting/virtual-layout/import-script",
         prefix_dir + DIR_SEPARATOR + DEFAULT_JS_DIR + DIR_SEPARATOR + DEFAULT_IMPORT_SCRIPT);
-    if (temp == "js") {
-        if (!string_ok(script_path))
-            throw std::runtime_error("Error in config file: you specified \"js\" to "
-                             "be used for virtual layout, but script "
-                             "location is invalid.");
-
-        prepare_path("/import/scripting/virtual-layout/import-script");
-        script_path = getOption(
-            "/import/scripting/virtual-layout/import-script");
-    }
+    temp = resolvePath(temp, true, temp == "js");
+    if (temp == "js" && script_path.empty())
+        throw std::runtime_error("Error in config file: you specified \"js\" to "
+                                "be used for virtual layout, but script "
+                                "location is invalid.");
 
     NEW_OPTION(script_path);
     SET_OPTION(CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT);
-
 #endif
 
     // 0 means, that the SDK will any free port itself
@@ -834,12 +810,11 @@ void ConfigManager::validate(std::string serverhome)
     NEW_INT_OPTION(temp_int);
     SET_INT_OPTION(CFG_SERVER_ALIVE_INTERVAL);
 
-    Ref<Element> el = getElement("/import/mappings/mimetype-upnpclass");
+    pugi::xml_node el = getElement("/import/mappings/mimetype-upnpclass");
     if (el == nullptr) {
         getOption("/import/mappings/mimetype-upnpclass", "");
     }
-    NEW_DICT_OPTION(createDictionaryFromNodeset(el, "map",
-        "from", "to"));
+    NEW_DICT_OPTION(createDictionaryFromNode(el, "map", "from", "to"));
     SET_DICT_OPTION(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST);
 
     temp = getOption("/import/autoscan/attribute::use-inotify", "auto");
@@ -849,7 +824,7 @@ void ConfigManager::validate(std::string serverhome)
 
     el = getElement("/import/autoscan");
 
-    NEW_AUTOSCANLIST_OPTION(createAutoscanListFromNodeset(nullptr, el, ScanMode::Timed));
+    NEW_AUTOSCANLIST_OPTION(createAutoscanListFromNode(nullptr, el, ScanMode::Timed));
     SET_AUTOSCANLIST_OPTION(CFG_IMPORT_AUTOSCAN_TIMED_LIST);
 
 #ifdef HAVE_INOTIFY
@@ -875,7 +850,7 @@ void ConfigManager::validate(std::string serverhome)
 #ifdef HAVE_INOTIFY
     if (temp == "auto" || (temp == YES)) {
         if (inotify_supported) {
-            NEW_AUTOSCANLIST_OPTION(createAutoscanListFromNodeset(nullptr, el, ScanMode::INotify));
+            NEW_AUTOSCANLIST_OPTION(createAutoscanListFromNode(nullptr, el, ScanMode::INotify));
             SET_AUTOSCANLIST_OPTION(CFG_IMPORT_AUTOSCAN_INOTIFY_LIST);
 
             NEW_BOOL_OPTION(true);
@@ -901,9 +876,8 @@ void ConfigManager::validate(std::string serverhome)
     if (temp == "yes")
         el = getElement("/transcoding");
     else
-        el = nullptr;
-
-    NEW_TRANSCODING_PROFILELIST_OPTION(createTranscodingProfileListFromNodeset(el));
+        el = pugi::xml_node(NULL);
+    NEW_TRANSCODING_PROFILELIST_OPTION(createTranscodingProfileListFromNode(el));
     SET_TRANSCODING_PROFILELIST_OPTION(CFG_TRANSCODING_PROFILE_LIST);
 
 #ifdef HAVE_CURL
@@ -932,7 +906,7 @@ void ConfigManager::validate(std::string serverhome)
 #endif //HAVE_CURL
 
     el = getElement("/server/custom-http-headers");
-    NEW_STRARR_OPTION(createArrayFromNodeset(el, "add", "header"));
+    NEW_STRARR_OPTION(createArrayFromNode(el, "add", "header"));
     SET_STRARR_OPTION(CFG_SERVER_CUSTOM_HTTP_HEADERS);
 
 #ifdef HAVE_LIBEXIF
@@ -942,7 +916,7 @@ void ConfigManager::validate(std::string serverhome)
         getOption("/import/library-options/libexif/auxdata",
             "");
     }
-    NEW_STRARR_OPTION(createArrayFromNodeset(el, "add-data", "tag"));
+    NEW_STRARR_OPTION(createArrayFromNode(el, "add-data", "tag"));
     SET_STRARR_OPTION(CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST);
 
 #endif // HAVE_LIBEXIF
@@ -954,7 +928,7 @@ void ConfigManager::validate(std::string serverhome)
         getOption("/import/library-options/exiv2/auxdata",
             "");
     }
-    NEW_STRARR_OPTION(createArrayFromNodeset(el, "add-data", "tag"));
+    NEW_STRARR_OPTION(createArrayFromNode(el, "add-data", "tag"));
     SET_STRARR_OPTION(CFG_IMPORT_LIBOPTS_EXIV2_AUXDATA_TAGS_LIST);
 
 #endif // HAVE_EXIV2
@@ -964,7 +938,7 @@ void ConfigManager::validate(std::string serverhome)
     if (el == nullptr) {
         getOption("/import/library-options/id3/auxdata", "");
     }
-    NEW_STRARR_OPTION(createArrayFromNodeset(el, "add-data", "tag"));
+    NEW_STRARR_OPTION(createArrayFromNode(el, "add-data", "tag"));
     SET_STRARR_OPTION(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
 #endif
 
@@ -973,7 +947,7 @@ void ConfigManager::validate(std::string serverhome)
     if (el == nullptr) {
         getOption("/import/library-options/ffmpeg/auxdata", "");
     }
-    NEW_STRARR_OPTION(createArrayFromNodeset(el, "add-data", "tag"));
+    NEW_STRARR_OPTION(createArrayFromNode(el, "add-data", "tag"));
     SET_STRARR_OPTION(CFG_IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST);
 #endif
 
@@ -1122,19 +1096,17 @@ void ConfigManager::validate(std::string serverhome)
     SET_OPTION(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING);
 
     std::vector<std::string> mark_content_list;
-    mark_content_list.reserve(element->elementChildCount());
     tmpEl = getElement("/server/extended-runtime-options/mark-played-items/mark");
 
     int contentElementCount = 0;
     if (tmpEl != nullptr) {
-        for (int m = 0; m < tmpEl->elementChildCount(); m++) {
-            Ref<Element> content = tmpEl->getElementChild(m);
-            if (content->getName() != "content")
+        for (pugi::xml_node content: tmpEl.children()) {
+            if (std::string(content.name()) != "content")
                 continue;
 
             contentElementCount++;
 
-            std::string mark_content = content->getText();
+            std::string mark_content = content.text().as_string();
             if (!string_ok(mark_content))
                 throw std::runtime_error("error in configuration, <mark-played-items>, empty <content> parameter!");
 
@@ -1188,24 +1160,22 @@ void ConfigManager::validate(std::string serverhome)
 #endif
 
 #ifdef HAVE_MAGIC
-    std::string magic_file;
-    if (!string_ok(magic)) {
-        if (string_ok(getOption("/import/magic-file", ""))) {
-            prepare_path("/import/magic-file");
-        }
-
-        magic_file = getOption("/import/magic-file");
-    } else
-        magic_file = magic;
-
+    if (!magic_file.empty()) {
+        // respect command line; ignore xml value
+        magic_file = resolvePath(magic_file, true);
+    } else {
+        magic_file = getOption("/import/magic-file", "");
+        if (!magic_file.empty())
+            magic_file = resolvePath(magic_file, true);
+    }
     NEW_OPTION(magic_file);
     SET_OPTION(CFG_IMPORT_MAGIC_FILE);
 #endif
 
 #ifdef HAVE_INOTIFY
     tmpEl = getElement("/import/autoscan");
-    auto config_timed_list = createAutoscanListFromNodeset(nullptr, tmpEl, ScanMode::Timed);
-    auto config_inotify_list = createAutoscanListFromNodeset(nullptr, tmpEl, ScanMode::INotify);
+    auto config_timed_list = createAutoscanListFromNode(nullptr, tmpEl, ScanMode::Timed);
+    auto config_inotify_list = createAutoscanListFromNode(nullptr, tmpEl, ScanMode::INotify);
 
     for (size_t i = 0; i < config_inotify_list->size(); i++) {
         auto i_dir = config_inotify_list->get(i);
@@ -1229,12 +1199,12 @@ void ConfigManager::validate(std::string serverhome)
     NEW_BOOL_OPTION(temp == "yes" ? true : false);
     SET_BOOL_OPTION(CFG_ONLINE_CONTENT_SOPCAST_ENABLED);
 
-    temp_int = getIntOption("/import/online-content/SopCast/attribute::refresh", 0);
-    NEW_INT_OPTION(temp_int);
+    int sopcast_refresh = getIntOption("/import/online-content/SopCast/attribute::refresh", 0);
+    NEW_INT_OPTION(sopcast_refresh);
     SET_INT_OPTION(CFG_ONLINE_CONTENT_SOPCAST_REFRESH);
 
     temp_int = getIntOption("/import/online-content/SopCast/attribute::purge-after", 0);
-    if (getIntOption("/import/online-content/SopCast/attribute::refresh") >= temp_int) {
+    if (sopcast_refresh >= temp_int) {
         if (temp_int != 0)
             throw std::runtime_error("Error in config file: SopCast purge-after value must be greater than refresh interval");
     }
@@ -1297,80 +1267,27 @@ void ConfigManager::validate(std::string serverhome)
 
     log_info("Configuration check succeeded.");
 
-    //root->indent();
-
-    log_debug("Config file dump after validation: {}", rootDoc->print().c_str());
-}
-
-void ConfigManager::prepare_path(std::string xpath, bool needDir, bool existenceUnneeded)
-{
-    std::string temp;
-
-    temp = checkOptionString(xpath);
-
-    temp = construct_path(temp);
-
-    check_path_ex(temp, needDir, existenceUnneeded);
-
-    Ref<Element> script = getElement(xpath);
-    if (script != nullptr)
-        script->setText(temp);
-}
-
-void ConfigManager::load(std::string filename)
-{
-    this->filename = filename;
-    Ref<Parser> parser(new Parser());
-    rootDoc = parser->parseFile(filename);
-    root = rootDoc->getRoot();
-
-    if (rootDoc == nullptr) {
-        throw std::runtime_error("Unable to parse server configuration!");
-    }
+    std::ostringstream buf;
+    xmlDoc->print(buf, "  ");
+    log_debug("Config file dump after validation: {}", buf.str().c_str());
 }
 
 std::string ConfigManager::getOption(std::string xpath, std::string def)
 {
-    Ref<XPath> rootXPath(new XPath(root));
-    std::string value = rootXPath->getText(xpath);
-    if (string_ok(value))
-        return trim_string(value);
+    auto root = xmlDoc->document_element();
+    xpath = "/config" + xpath;
+    pugi::xpath_node xpathNode = root.select_node(xpath.c_str());
+
+    if (xpathNode.node() != nullptr) {
+        return trim_string(xpathNode.node().text().as_string());
+    }
+
+    if (xpathNode.attribute() != nullptr) {
+        return trim_string(xpathNode.attribute().value());
+    }
 
     log_debug("Config: option not found: '{}' using default value: '{}'",
         xpath.c_str(), def.c_str());
-
-    std::string pathPart = XPath::getPathPart(xpath);
-    std::string axisPart = XPath::getAxisPart(xpath);
-
-    std::vector<std::string> parts = split_string(pathPart, '/');
-
-    Ref<Element> cur = root;
-    std::string attr = "";
-
-    size_t i;
-    Ref<Element> child;
-    for (i = 0; i < parts.size(); i++) {
-        child = cur->getChildByName(parts[i]);
-        if (child == nullptr)
-            break;
-        cur = child;
-    }
-    // here cur is the last existing element in the path
-    for (; i < parts.size(); i++) {
-        child = Ref<Element>(new Element(parts[i]));
-        cur->appendElementChild(child);
-        cur = child;
-    }
-
-    if (!axisPart.empty()) {
-        std::string axis = XPath::getAxis(axisPart);
-        std::string spec = XPath::getSpec(axisPart);
-        if (axis != "attribute") {
-            throw std::runtime_error("ConfigManager::getOption: only attribute:: axis supported");
-        }
-        cur->setAttribute(spec, def);
-    } else
-        cur->setText(def);
 
     return def;
 }
@@ -1385,22 +1302,62 @@ int ConfigManager::getIntOption(std::string xpath, int def)
 
 std::string ConfigManager::getOption(std::string xpath)
 {
-    Ref<XPath> rootXPath(new XPath(root));
-    std::string value = rootXPath->getText(xpath);
-    return trim_string(value);
+    xpath = "/config" + xpath;
+    auto root = xmlDoc->document_element();
+    pugi::xpath_node xpathNode = root.select_node(xpath.c_str());
+
+    if (xpathNode.node() != nullptr) {
+        return trim_string(xpathNode.node().text().as_string());
+    }
+
+    if (xpathNode.attribute() != nullptr) {
+        return trim_string(xpathNode.attribute().value());
+    }
+
+    throw std::runtime_error(fmt::format("Option '{}' not found in configuration file", xpath));
 }
 
 int ConfigManager::getIntOption(std::string xpath)
 {
     std::string sVal = getOption(xpath);
-    int val = std::stoi(sVal);
-    return val;
+    return std::stoi(sVal);
 }
 
-Ref<Element> ConfigManager::getElement(std::string xpath)
+pugi::xml_node ConfigManager::getElement(std::string xpath)
 {
-    Ref<XPath> rootXPath(new XPath(root));
-    return rootXPath->getElement(xpath);
+    xpath = "/config" + xpath;
+    auto root = xmlDoc->document_element();
+    pugi::xpath_node xpathNode = root.select_node(xpath.c_str());
+    return xpathNode.node();
+}
+
+std::string ConfigManager::resolvePath(std::string path, bool isFile, bool exists)
+{
+    std::string home = getOption(CFG_SERVER_HOME);
+
+    if (!path.empty() && (path.at(0) == '/' || (home == "." && path.at(0) == '.')))
+        ; // absolute or relative, nothing to resolve
+    else if (home.empty())
+        path = fmt::format("./{}", path);
+    else
+        path = fmt::format("{}/{}", home, path);
+
+    // verify that file/directory is there
+    if (isFile) {
+        if (exists) {
+            if (!std::filesystem::exists(path))
+                throw std::runtime_error("File '" + path + "' does not exist!");
+        } else {
+            std::string parent_path = std::filesystem::path(path).parent_path();
+            if (!std::filesystem::exists(parent_path))
+                throw std::runtime_error("Parent directory '" + path + "' does not exist!");
+        }
+    } else if (exists) {
+        if (!std::filesystem::exists(path))
+            throw std::runtime_error("Directory '" + path + "' does not exist!");
+    }
+
+    return path;
 }
 
 void ConfigManager::writeBookmark(std::string ip, std::string port)
@@ -1417,9 +1374,7 @@ void ConfigManager::writeBookmark(std::string ip, std::string port)
         data = http_redirect_to(ip, port);
     }
 
-    filename = getOption(CFG_SERVER_BOOKMARK_FILE);
-    path = construct_path(filename);
-
+    path = getOption(CFG_SERVER_BOOKMARK_FILE);
     log_debug("Writing bookmark file to: {}", path.c_str());
 
     f = fopen(path.c_str(), "w");
@@ -1438,8 +1393,7 @@ void ConfigManager::emptyBookmark()
 {
     std::string data = "<html><body><h1>Gerbera Media Server is not running.</h1><p>Please start it and try again.</p></body></html>";
 
-    std::string filename = getOption(CFG_SERVER_BOOKMARK_FILE);
-    std::string path = construct_path(filename);
+    std::string path = getOption(CFG_SERVER_BOOKMARK_FILE);
 
     log_debug("Clearing bookmark file at: {}", path.c_str());
 
@@ -1455,27 +1409,16 @@ void ConfigManager::emptyBookmark()
         throw std::runtime_error("emptyBookmark: failed to write to: " + path);
 }
 
-std::string ConfigManager::checkOptionString(std::string xpath)
-{
-    std::string temp = getOption(xpath);
-    if (!string_ok(temp))
-        throw std::runtime_error("Config: value of " + xpath + " tag is invalid");
-
-    return temp;
-}
-
-std::map<std::string,std::string> ConfigManager::createDictionaryFromNodeset(Ref<Element> element, std::string nodeName, std::string keyAttr, std::string valAttr, bool tolower)
+std::map<std::string,std::string> ConfigManager::createDictionaryFromNode(const pugi::xml_node& element,
+    std::string nodeName, std::string keyAttr, std::string valAttr, bool tolower)
 {
     std::map<std::string,std::string> dict;
-    std::string key;
-    std::string value;
 
     if (element != nullptr) {
-        for (int i = 0; i < element->elementChildCount(); i++) {
-            Ref<Element> child = element->getElementChild(i);
-            if (child->getName() == nodeName) {
-                key = child->getAttribute(keyAttr);
-                value = child->getAttribute(valAttr);
+        for (pugi::xml_node child: element.children()) {
+            if (child.name() == nodeName) {
+                std::string key = child.attribute(keyAttr.c_str()).as_string();
+                std::string value = child.attribute(valAttr.c_str()).as_string();
 
                 if (string_ok(key) && string_ok(value)) {
                     if (tolower) {
@@ -1490,16 +1433,10 @@ std::map<std::string,std::string> ConfigManager::createDictionaryFromNodeset(Ref
     return dict;
 }
 
-std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNodeset(Ref<Element> element)
+std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileListFromNode(const pugi::xml_node& element)
 {
-    size_t bs;
-    size_t cs;
-    size_t fs;
-    int itmp;
-    transcoding_type_t tr_type;
-    Ref<Element> mtype_profile;
-    bool set = false;
     std::string param;
+    int param_int;
 
     auto list = std::make_shared<TranscodingProfileList>();
     if (element == nullptr)
@@ -1507,16 +1444,12 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
 
     std::map<std::string,std::string> mt_mappings;
 
-    std::string mt;
-    std::string pname;
-
-    mtype_profile = element->getChildByName("mimetype-profile-mappings");
+    auto mtype_profile = element.child("mimetype-profile-mappings");
     if (mtype_profile != nullptr) {
-        for (int e = 0; e < mtype_profile->elementChildCount(); e++) {
-            Ref<Element> child = mtype_profile->getElementChild(e);
-            if (child->getName() == "transcode") {
-                mt = child->getAttribute("mimetype");
-                pname = child->getAttribute("using");
+        for (pugi::xml_node child: element.children()) {
+            if (std::string(child.name()) == "transcode") {
+                std::string mt = child.attribute("mimetype").as_string();
+                std::string pname = child.attribute("using").as_string();
 
                 if (string_ok(mt) && string_ok(pname)) {
                     mt_mappings[mt] = pname;
@@ -1527,16 +1460,15 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
         }
     }
 
-    Ref<Element> profiles = element->getChildByName("profiles");
+    auto profiles = element.child("profiles");
     if (profiles == nullptr)
         return list;
 
-    for (int i = 0; i < profiles->elementChildCount(); i++) {
-        Ref<Element> child = profiles->getElementChild(i);
-        if (child->getName() != "profile")
+    for (pugi::xml_node child: element.children()) {
+        if (std::string(child.name()) != "profile")
             continue;
 
-        param = child->getAttribute("enabled");
+        param = child.attribute("enabled").as_string();
         if (!validateYesNo(param))
             throw std::runtime_error("Error in config file: incorrect parameter "
                              "for <profile enabled=\"\" /> attribute");
@@ -1544,10 +1476,11 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
         if (param == "no")
             continue;
 
-        param = child->getAttribute("type");
+        param = child.attribute("type").as_string();
         if (!string_ok(param))
             throw std::runtime_error("error in configuration: missing transcoding type in profile");
 
+        transcoding_type_t tr_type;
         if (param == "external")
             tr_type = TR_External;
         /* for the future...
@@ -1557,28 +1490,31 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
         else
             throw std::runtime_error("error in configuration: invalid transcoding type " + param + " in profile");
 
-        param = child->getAttribute("name");
+        param = child.attribute("name").as_string();
         if (!string_ok(param))
             throw std::runtime_error("error in configuration: invalid transcoding profile name");
 
         auto prof = std::make_shared<TranscodingProfile>(tr_type, param);
 
-        param = child->getChildText("mimetype");
+        pugi::xml_node sub;
+        sub = child.child("mimetype");
+        param = sub.text().as_string();
         if (!string_ok(param))
             throw std::runtime_error("error in configuration: invalid target mimetype in transcoding profile");
         prof->setTargetMimeType(param);
 
-        if (child->getChildByName("resolution") != nullptr) {
-            param = child->getChildText("resolution");
+        sub = child.child("resolution");
+        if (sub != nullptr) {
+            param = sub.text().as_string();
             if (string_ok(param)) {
                 if (check_resolution(param))
                     prof->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), param);
             }
         }
 
-        Ref<Element> avi_fcc = child->getChildByName("avi-fourcc-list");
-        if (avi_fcc != nullptr) {
-            std::string mode = avi_fcc->getAttribute("mode");
+        sub = child.child("avi-fourcc-list");
+        if (sub != nullptr) {
+            std::string mode = sub.attribute("mode").as_string();
             if (!string_ok(mode))
                 throw std::runtime_error("error in configuration: avi-fourcc-list requires a valid \"mode\" attribute");
 
@@ -1594,13 +1530,11 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
 
             if (fcc_mode != FCC_None) {
                 std::vector<std::string> fcc_list;
-                fcc_list.reserve(avi_fcc->elementChildCount());
-                for (int f = 0; f < avi_fcc->elementChildCount(); f++) {
-                    Ref<Element> fourcc = avi_fcc->getElementChild(f);
-                    if (fourcc->getName() != "fourcc")
+                for (pugi::xml_node fourcc: sub.children()) {
+                    if (std::string(fourcc.name()) != "fourcc")
                         continue;
 
-                    std::string fcc = fourcc->getText();
+                    std::string fcc = fourcc.text().as_string();
                     if (!string_ok(fcc))
                         throw std::runtime_error("error in configuration: empty fourcc specified!");
                     fcc_list.push_back(fcc);
@@ -1610,8 +1544,9 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
             }
         }
 
-        if (child->getChildByName("accept-url") != nullptr) {
-            param = child->getChildText("accept-url");
+        sub = child.child("accept-url");
+        if (sub != nullptr) {
+            param = sub.text().as_string();
             if (!validateYesNo(param))
                 throw std::runtime_error("Error in config file: incorrect parameter "
                                  "for <accept-url> tag");
@@ -1621,8 +1556,9 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
                 prof->setAcceptURL(false);
         }
 
-        if (child->getChildByName("sample-frequency") != nullptr) {
-            param = child->getChildText("sample-frequency");
+        sub = child.child("sample-frequency");
+        if (sub != nullptr) {
+            param = sub.text().as_string();
             if (param == "source")
                 prof->setSampleFreq(SOURCE);
             else if (param == "off")
@@ -1638,8 +1574,9 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
             }
         }
 
-        if (child->getChildByName("audio-channels") != nullptr) {
-            param = child->getChildText("audio-channels");
+        sub = child.child("audio-channels");
+        if (sub != nullptr) {
+            param = sub.text().as_string();
             if (param == "source")
                 prof->setNumChannels(SOURCE);
             else if (param == "off")
@@ -1654,8 +1591,9 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
             }
         }
 
-        if (child->getChildByName("hide-original-resource") != nullptr) {
-            param = child->getChildText("hide-original-resource");
+        sub = child.child("hide-original-resource");
+        if (sub != nullptr) {
+            param = sub.text().as_string();
             if (!validateYesNo(param))
                 throw std::runtime_error("Error in config file: incorrect parameter "
                                  "for <hide-original-resource> tag");
@@ -1665,8 +1603,9 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
                 prof->setHideOriginalResource(false);
         }
 
-        if (child->getChildByName("thumbnail") != nullptr) {
-            param = child->getChildText("thumbnail");
+        sub = child.child("thumbnail");
+        if (sub != nullptr) {
+            param = sub.text().as_string();
             if (!validateYesNo(param))
                 throw std::runtime_error("Error in config file: incorrect parameter "
                                  "for <thumbnail> tag");
@@ -1676,8 +1615,9 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
                 prof->setThumbnail(false);
         }
 
-        if (child->getChildByName("first-resource") != nullptr) {
-            param = child->getChildText("first-resource");
+        sub = child.child("first-resource");
+        if (sub != nullptr) {
+            param = sub.text().as_string();
             if (!validateYesNo(param))
                 throw std::runtime_error("Error in config file: incorrect parameter "
                                  "for <profile first-resource=\"\" /> attribute");
@@ -1688,8 +1628,9 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
                 prof->setFirstResource(false);
         }
 
-        if (child->getChildByName("use-chunked-encoding") != nullptr) {
-            param = child->getChildText("use-chunked-encoding");
+        sub = child.child("use-chunked-encoding");
+        if (sub != nullptr) {
+            param = sub.text().as_string();
             if (!validateYesNo(param))
                 throw std::runtime_error("Error in config file: incorrect parameter "
                                  "for use-chunked-encoding tag");
@@ -1700,145 +1641,130 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
                 prof->setChunked(false);
         }
 
-        Ref<Element> sub = child->getChildByName("agent");
+        sub = child.child("agent");
         if (sub == nullptr)
             throw std::runtime_error("error in configuration: transcoding "
                              "profile \""
                 + prof->getName() + "\" is missing the <agent> option");
+        else {
+            param = sub.attribute("command").as_string();
+            if (!string_ok(param))
+                throw std::runtime_error("error in configuration: transcoding "
+                                "profile \""
+                    + prof->getName() + "\" has an invalid command setting");
+            prof->setCommand(param);
 
-        param = sub->getAttribute("command");
-        if (!string_ok(param))
-            throw std::runtime_error("error in configuration: transcoding "
-                             "profile \""
-                + prof->getName() + "\" has an invalid command setting");
-        prof->setCommand(param);
+            std::string tmp_path;
+            if (startswith(param, _DIR_SEPARATOR)) {
+                if (!check_path(param))
+                    throw std::runtime_error("error in configuration, transcoding "
+                                    "profile \""
+                        + prof->getName() + "\" could not find transcoding command " + param);
+                tmp_path = param;
+            } else {
+                tmp_path = find_in_path(param);
+                if (!string_ok(tmp_path))
+                    throw std::runtime_error("error in configuration, transcoding "
+                                    "profile \""
+                        + prof->getName() + "\" could not find transcoding command " + param + " in $PATH");
+            }
 
-        std::string tmp_path;
-        if (startswith(param, _DIR_SEPARATOR)) {
-            if (!check_path(param))
+            int err = 0;
+            if (!is_executable(tmp_path, &err))
                 throw std::runtime_error("error in configuration, transcoding "
-                                 "profile \""
-                    + prof->getName() + "\" could not find transcoding command " + param);
-            tmp_path = param;
-        } else {
-            tmp_path = find_in_path(param);
-            if (!string_ok(tmp_path))
-                throw std::runtime_error("error in configuration, transcoding "
-                                 "profile \""
-                    + prof->getName() + "\" could not find transcoding command " + param + " in $PATH");
+                                "profile "
+                    + prof->getName() + ": transcoder " + param + "is not executable - " + strerror(err));
+
+            param = sub.attribute("arguments").as_string();
+            if (!string_ok(param))
+                throw std::runtime_error("error in configuration: transcoding profile " + prof->getName() + " has an empty argument string");
+
+            prof->setArguments(param);
         }
 
-        int err = 0;
-        if (!is_executable(tmp_path, &err))
-            throw std::runtime_error("error in configuration, transcoding "
-                             "profile "
-                + prof->getName() + ": transcoder " + param + "is not executable - " + strerror(err));
-
-        param = sub->getAttribute("arguments");
-        if (!string_ok(param))
-            throw std::runtime_error("error in configuration: transcoding profile " + prof->getName() + " has an empty argument string");
-
-        prof->setArguments(param);
-
-        sub = child->getChildByName("buffer");
+        sub = child.child("buffer");
         if (sub == nullptr)
             throw std::runtime_error("error in configuration: transcoding "
                              "profile \""
                 + prof->getName() + "\" is missing the <buffer> option");
+        else {
+            param_int = sub.attribute("size").as_int();
+            if (param_int < 0)
+                throw std::runtime_error("error in configuration: transcoding "
+                                "profile \""
+                    + prof->getName() + "\" buffer size can not be negative");
+            size_t bs = param_int;
 
-        param = sub->getAttribute("size");
-        if (!string_ok(param))
-            throw std::runtime_error("error in configuration: transcoding "
-                             "profile \""
-                + prof->getName() + "\" <buffer> tag is missing the size attribute");
-        itmp = std::stoi(param);
-        if (itmp < 0)
-            throw std::runtime_error("error in configuration: transcoding "
-                             "profile \""
-                + prof->getName() + "\" buffer size can not be negative");
-        bs = itmp;
+            param_int = sub.attribute("chunk-size").as_int();
+            if (param_int < 0)
+                throw std::runtime_error("error in configuration: transcoding "
+                                "profile \""
+                    + prof->getName() + "\" chunk size can not be negative");
+            size_t cs = param_int;
 
-        param = sub->getAttribute("chunk-size");
-        if (!string_ok(param))
-            throw std::runtime_error("error in configuration: transcoding "
-                             "profile \""
-                + prof->getName() + "\" <buffer> tag is missing the chunk-size "
-                                    "attribute");
-        itmp = std::stoi(param);
-        if (itmp < 0)
-            throw std::runtime_error("error in configuration: transcoding "
-                             "profile \""
-                + prof->getName() + "\" chunk size can not be negative");
-        cs = itmp;
+            if (cs > bs)
+                throw std::runtime_error("error in configuration: transcoding "
+                                "profile \""
+                    + prof->getName() + "\" chunk size can not be greater than "
+                                        "buffer size");
 
-        if (cs > bs)
-            throw std::runtime_error("error in configuration: transcoding "
-                             "profile \""
-                + prof->getName() + "\" chunk size can not be greater than "
-                                    "buffer size");
+            param_int = sub.attribute("fill-size").as_int();
+            if (param_int < 0)
+                throw std::runtime_error("error in configuration: transcoding "
+                                "profile \""
+                    + prof->getName() + "\" fill size can not be negative");
+            size_t fs = param_int;
 
-        param = sub->getAttribute("fill-size");
-        if (!string_ok(param))
-            throw std::runtime_error("error in configuration: transcoding "
-                             "profile \""
-                + prof->getName() + "\" <buffer> tag is missing the fill-size "
-                                    "attribute");
-        itmp = std::stoi(param);
-        if (i < 0)
-            throw std::runtime_error("error in configuration: transcoding "
-                             "profile \""
-                + prof->getName() + "\" fill size can not be negative");
-        fs = itmp;
+            if (fs > bs)
+                throw std::runtime_error("error in configuration: transcoding "
+                                "profile \""
+                    + prof->getName() + "\" fill size can not be greater than "
+                                        "buffer size");
 
-        if (fs > bs)
-            throw std::runtime_error("error in configuration: transcoding "
-                             "profile \""
-                + prof->getName() + "\" fill size can not be greater than "
-                                    "buffer size");
+            prof->setBufferOptions(bs, cs, fs);
 
-        prof->setBufferOptions(bs, cs, fs);
-
-        if (mtype_profile == nullptr) {
-            throw std::runtime_error("error in configuration: transcoding "
-                             "profiles exist, but no mimetype to profile "
-                             "mappings specified");
-        }
-
-        for (auto it = mt_mappings.begin(); it != mt_mappings.end(); it++) {
-            if (it->second == prof->getName()) {
-                list->add(it->first, prof);
-                set = true;
+            if (mtype_profile == nullptr) {
+                throw std::runtime_error("error in configuration: transcoding "
+                                "profiles exist, but no mimetype to profile "
+                                "mappings specified");
             }
-        }
 
-        if (!set)
-            throw std::runtime_error("error in configuration: you specified"
-                             "a mimetype to transcoding profile mapping, "
-                             "but no match for profile \""
-                + prof->getName() + "\" exists");
-        else
-            set = false;
+            bool set = false;
+            for (auto it = mt_mappings.begin(); it != mt_mappings.end(); it++) {
+                if (it->second == prof->getName()) {
+                    list->add(it->first, prof);
+                    set = true;
+                }
+            }
+
+            if (!set)
+                throw std::runtime_error("error in configuration: you specified"
+                                "a mimetype to transcoding profile mapping, "
+                                "but no match for profile \""
+                    + prof->getName() + "\" exists");
+            else
+                set = false;
+        }
     }
 
     return list;
 }
 
-std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNodeset(std::shared_ptr<Storage> storage, zmm::Ref<mxml::Element> element, ScanMode scanmode)
+std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNode(std::shared_ptr<Storage> storage, const pugi::xml_node& element,
+    ScanMode scanmode)
 {
     auto list = std::make_shared<AutoscanList>(storage);
 
     if (element == nullptr)
         return list;
 
-    for (int i = 0; i < element->elementChildCount(); i++) {
-
-        Ref<Element> child = element->getElementChild(i);
+    for (pugi::xml_node child: element.children()) {
 
         // We only want directories
-        if (child->getName() != "directory")
+        if (std::string(child.name()) != "directory")
             continue;
 
-        std::string location = child->getAttribute("location");
+        std::string location = child.attribute("location").as_string();
         if (!string_ok(location)) {
             throw std::runtime_error("autoscan directory with invalid location!\n");
         }
@@ -1854,7 +1780,7 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNodeset(std::
         }
 
         ScanMode mode;
-        std::string temp = child->getAttribute("mode");
+        std::string temp = child.attribute("mode").as_string();
         if (!string_ok(temp) || ((temp != "timed") && (temp != "inotify"))) {
             throw std::runtime_error("autoscan directory " + location + ": mode attribute is missing or invalid");
         } else if (temp == "timed") {
@@ -1871,7 +1797,7 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNodeset(std::
         ScanLevel level;
 
         if (mode == ScanMode::Timed) {
-            temp = child->getAttribute("level");
+            temp = child.attribute("level").as_string();
             if (!string_ok(temp)) {
                 throw std::runtime_error("autoscan directory " + location + ": level attribute is missing or invalid");
             } else {
@@ -1885,7 +1811,7 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNodeset(std::
                 }
             }
 
-            temp = child->getAttribute("interval");
+            temp = child.attribute("interval").as_string();
             if (!string_ok(temp)) {
                 throw std::runtime_error("autoscan directory "
                     + location + ": interval attribute is required for timed mode");
@@ -1903,7 +1829,7 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNodeset(std::
             level = ScanLevel::Full;
         }
 
-        temp = child->getAttribute("recursive");
+        temp = child.attribute("recursive").as_string();
         if (!string_ok(temp))
             throw std::runtime_error("autoscan directory " + location + ": recursive attribute is missing or invalid");
 
@@ -1918,7 +1844,7 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNodeset(std::
         }
 
         bool hidden;
-        temp = child->getAttribute("hidden-files");
+        temp = child.attribute("hidden-files").as_string();
         if (!string_ok(temp))
             temp = getOption("/import/attribute::hidden-files");
 
@@ -1947,33 +1873,32 @@ void ConfigManager::dumpOptions()
     log_debug("Dumping options!");
     for (int i = 0; i < (int)CFG_MAX; i++) {
         try {
-            log_debug("    Option %02d - {}", i,
-                getOption((config_option_t)i).c_str());
+            std::string opt = getOption((config_option_t)i);
+            log_debug("    Option {:02d} {}", i, opt.c_str());
         } catch (const std::runtime_error& e) {
         }
         try {
-            log_debug(" IntOption %02d - {}", i,
-                getIntOption((config_option_t)i));
+            int opt = getIntOption((config_option_t)i);
+            log_debug(" IntOption {:02d} {}", i, opt);
         } catch (const std::runtime_error& e) {
         }
         try {
-            log_debug("BoolOption %02d - {}", i,
-                (getBoolOption((config_option_t)i) ? "true" : "false"));
+            bool opt = getBoolOption((config_option_t)i);
+            log_debug("BoolOption {:02d} {}", i, opt ? "true" : "false");
         } catch (const std::runtime_error& e) {
         }
     }
 #endif
 }
 
-std::vector<std::string> ConfigManager::createArrayFromNodeset(Ref<mxml::Element> element, std::string nodeName, std::string attrName)
+std::vector<std::string> ConfigManager::createArrayFromNode(const pugi::xml_node& element, std::string nodeName, std::string attrName)
 {
     std::vector<std::string> arr;
 
     if (element != nullptr) {
-        for (int i = 0; i < element->elementChildCount(); i++) {
-            Ref<Element> child = element->getElementChild(i);
-            if (child->getName() == nodeName) {
-                std::string attrValue = child->getAttribute(attrName);
+        for (pugi::xml_node child: element.children()) {
+            if (child.name() == nodeName) {
+                std::string attrValue = child.attribute(attrName.c_str()).as_string();
 
                 if (string_ok(attrValue))
                     arr.push_back(attrValue);

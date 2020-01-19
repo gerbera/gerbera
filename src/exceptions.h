@@ -36,6 +36,14 @@
 #include <utility>
 #include <string>
 
+class ConfigParseException : public std::runtime_error {
+public:
+    inline ConfigParseException(std::string message)
+        : std::runtime_error(message)
+    {
+    }
+};
+
 class UpnpException : public std::runtime_error {
 protected:
     int errCode;

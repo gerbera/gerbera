@@ -34,13 +34,11 @@
 #define __CONFIG_MANAGER_H__
 
 #include <memory>
+#include <pugixml.hpp>
+
 #include "autoscan.h"
 #include "common.h"
 #include "config_options.h"
-#include "zmm/object_dictionary.h"
-#include "mxml/mxml.h"
-#include "zmm/object_dictionary.h"
-#include "mxml/xpath.h"
 
 #include "transcoding/transcoding.h"
 #ifdef ONLINE_SERVICES
@@ -181,7 +179,7 @@ class ConfigManager {
 public:
     ConfigManager(std::string filename,
         std::string userhome, std::string config_dir,
-        std::string prefix_dir, std::string magic,
+        std::string prefix_dir, std::string magic_file,
         std::string ip, std::string interface, int port,
         bool debug_logging);
     virtual ~ConfigManager();
@@ -189,7 +187,7 @@ public:
     /// \brief Returns the name of the config file that was used to launch the server.
     inline std::string getConfigFilename() { return filename; }
 
-    void load(std::string filename);
+    void load(std::string filename, std::string userHome);
 
     /// \brief returns a config option of type String
     /// \param option option to retrieve.
@@ -227,29 +225,23 @@ public:
     void emptyBookmark();
 
 protected:
-    void validate(std::string serverhome);
-    std::string construct_path(std::string path);
-    void prepare_path(std::string path, bool needDir = false, bool existenceUnneeded = false);
-
     std::string filename;
     std::string prefix_dir;
-    std::string magic;
+    std::string magic_file;
     std::string ip;
     std::string interface;
     int port;
     static bool debug_logging;
 
-    zmm::Ref<mxml::Document> rootDoc;
-    zmm::Ref<mxml::Element> root;
+    std::unique_ptr<pugi::xml_document> xmlDoc;
 
     std::unique_ptr<std::vector<std::shared_ptr<ConfigOption>>> options;
 
-    /// \brief Returns a config option with the given path, if option does not exist a default value is returned.
+    /// \brief Returns a config option with the given xpath, if option does not exist a default value is returned.
     /// \param xpath option xpath
     /// \param def default value if option not found
     ///
-    /// the name parameter has the XPath syntax.
-    /// Currently only two xpath constructs are supported:
+    /// The xpath parameter has XPath syntax:
     /// "/path/to/option" will return the text value of the given "option" element
     /// "/path/to/option/attribute::attr" will return the value of the attribute "attr"
     std::string getOption(std::string xpath, std::string def);
@@ -257,28 +249,34 @@ protected:
     /// \brief same as getOption but returns an integer value of the option
     int getIntOption(std::string xpath, int def);
 
-    /// \brief Returns a config option with the given path, an exception is raised if option does not exist.
+    /// \brief Returns a config option with the given xpath, an exception is raised if option does not exist.
     /// \param xpath option xpath.
     ///
-    /// The xpath parameter has XPath syntax.
-    /// Currently only two xpath constructs are supported:
+    /// The xpath parameter has XPath syntax:
     /// "/path/to/option" will return the text value of the given "option" element
     /// "/path/to/option/attribute::attr" will return the value of the attribute "attr"
     std::string getOption(std::string xpath);
 
-    /// \brief same as getOption but returns an integer value of the option
-    int getIntOption(std::string xpath);
-
-    /// \brief Returns a config XML element with the given path, an exception is raised if element does not exist.
+    /// \brief Returns an integer value of the option with the given xpath, an exception is raised if option does not exist.
     /// \param xpath option xpath.
     ///
-    /// The xpath parameter has XPath syntax.
-    /// "/path/to/element" will return the text value of the given "element" element
-    zmm::Ref<mxml::Element> getElement(std::string xpath);
+    /// The xpath parameter has XPath syntax:
+    /// "/path/to/option" will return the text value of the given "option" element
+    /// "/path/to/option/attribute::attr" will return the value of the attribute "attr"
+    int getIntOption(std::string xpath);
 
-    /// \brief Checks if the string returned by getOption is valid.
-    /// \param xpath xpath expression to the XML node
-    std::string checkOptionString(std::string xpath);
+    /// \brief Returns a config XML element with the given xpath, an exception is raised if element does not exist.
+    /// \param xpath option xpath.
+    ///
+    /// The xpath parameter has XPath syntax:
+    /// "/path/to/element" will return the text value of the given "element" element
+    pugi::xml_node getElement(std::string xpath);
+
+    /// \brief resolve path against home, an exception is raised if path does not exist on filesystem.
+    /// \param path path to be resolved
+    /// \param isFile file or directory
+    /// \param exists must file exist
+    std::string resolvePath(std::string path, bool isFile = false, bool exists=true);
 
     /// \brief Creates a dictionary from an XML nodeset.
     /// \param element starting element of the nodeset.
@@ -295,17 +293,19 @@ protected:
     ///
     /// This function will create a dictionary with the following
     /// key:value paris: "1":"2", "3":"4"
-    std::map<std::string,std::string> createDictionaryFromNodeset(zmm::Ref<mxml::Element> element, std::string nodeName, std::string keyAttr, std::string valAttr, bool tolower = false);
+    std::map<std::string,std::string> createDictionaryFromNode(const pugi::xml_node& element,
+        std::string nodeName, std::string keyAttr, std::string valAttr, bool tolower = false);
 
     /// \brief Creates an array of AutoscanDirectory objects from a XML nodeset.
     /// \param element starting element of the nodeset.
     /// \param scanmode add only directories with the specified scanmode to the array
-    std::shared_ptr<AutoscanList> createAutoscanListFromNodeset(std::shared_ptr<Storage> storage, zmm::Ref<mxml::Element> element, ScanMode scanmode);
+    std::shared_ptr<AutoscanList> createAutoscanListFromNode(std::shared_ptr<Storage> storage, const pugi::xml_node& element,
+        ScanMode scanmode);
 
     /// \brief Creates ab aray of TranscodingProfile objects from an XML
     /// nodeset.
     /// \param element starting element of the nodeset.
-    std::shared_ptr<TranscodingProfileList> createTranscodingProfileListFromNodeset(zmm::Ref<mxml::Element> element);
+    std::shared_ptr<TranscodingProfileList> createTranscodingProfileListFromNode(const pugi::xml_node& element);
 
     /// \brief Creates an array of strings from an XML nodeset.
     /// \param element starting element of the nodeset.
@@ -320,7 +320,7 @@ protected:
     /// <some-section>
     ///
     /// This function will create an array like that: ["data", "otherdata"]
-    std::vector<std::string> createArrayFromNodeset(zmm::Ref<mxml::Element> element, std::string nodeName, std::string attrName);
+    std::vector<std::string> createArrayFromNode(const pugi::xml_node& element, std::string nodeName, std::string attrName);
 
     void dumpOptions();
 };
