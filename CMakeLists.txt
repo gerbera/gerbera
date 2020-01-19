@@ -95,27 +95,6 @@ set(libgerberaFILES
         src/metadata/fanart_handler.h
         src/metadata/matroska_handler.cc
         src/metadata/matroska_handler.h
-        src/mxml/attribute.cc
-        src/mxml/attribute.h
-        src/mxml/comment.cc
-        src/mxml/comment.h
-        src/mxml/context.cc
-        src/mxml/context.h
-        src/mxml/document.cc
-        src/mxml/document.h
-        src/mxml/element.cc
-        src/mxml/element.h
-        src/mxml/mxml.h
-        src/mxml/node.cc
-        src/mxml/node.h
-        src/mxml/parseexception.cc
-        src/mxml/parseexception.h
-        src/mxml/parser_expat.cc
-        src/mxml/parser.h
-        src/mxml/xml_text.cc
-        src/mxml/xml_text.h
-        src/mxml/xpath.cc
-        src/mxml/xpath.h
         src/onlineservice/atrailers_content_handler.cc
         src/onlineservice/atrailers_content_handler.h
         src/onlineservice/atrailers_service.cc
@@ -361,14 +340,6 @@ endif()
 
 find_package(spdlog REQUIRED)
 target_link_libraries(gerbera spdlog::spdlog)
-
-find_package (EXPAT REQUIRED)
-if (EXPAT_FOUND)
-    include_directories(${EXPAT_INCLUDE_DIRS})
-    target_link_libraries (gerbera ${EXPAT_LIBRARIES})
-else()
-    message(FATAL_ERROR "Expat not found!")
-endif()
 
 find_package (Pugixml REQUIRED)
 if (PUGIXML_FOUND)
