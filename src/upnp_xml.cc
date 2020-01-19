@@ -289,155 +289,130 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createEventPropertySet()
     return doc;
 }
 
-Ref<Element> UpnpXMLBuilder::renderDeviceDescription()
+std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription()
 {
-    Ref<Element> root(new Element("root"));
-    root->setAttribute("xmlns", DESC_DEVICE_NAMESPACE);
+    auto doc = std::make_unique<pugi::xml_document>();
 
-    Ref<Element> specVersion(new Element("specVersion"));
-    specVersion->appendTextChild("major", DESC_SPEC_VERSION_MAJOR);
-    specVersion->appendTextChild("minor", DESC_SPEC_VERSION_MINOR);
+    auto decl = doc->prepend_child(pugi::node_declaration);
+    decl.append_attribute("version") = "1.0";
+    decl.append_attribute("encoding") = "UTF-8";
 
-    root->appendElementChild(specVersion);
+    auto root = doc->append_child("root");
+    root.append_attribute("xmlns") = DESC_DEVICE_NAMESPACE;
 
-    Ref<Element> device(new Element("device"));
+    auto specVersion = root.append_child("specVersion");
+    specVersion.append_child("major").append_child(pugi::node_pcdata).set_value(DESC_SPEC_VERSION_MAJOR);
+    specVersion.append_child("minor").append_child(pugi::node_pcdata).set_value(DESC_SPEC_VERSION_MINOR);
+
+    auto device = root.append_child("device");
 
     if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO)) {
-        //we do not do DLNA yet but this is needed for bravia tv (v5500)
-        Ref<Element> DLNADOC(new Element("dlna:X_DLNADOC"));
-        DLNADOC->setText("DMS-1.50");
-        //      DLNADOC->setText("M-DMS-1.50");
-        DLNADOC->setAttribute("xmlns:dlna", "urn:schemas-dlna-org:device-1-0");
-        device->appendElementChild(DLNADOC);
+        // we do not do DLNA yet but this is needed for bravia tv (v5500)
+        auto dlnaDoc = device.append_child("dlna:X_DLNADOC");
+        dlnaDoc.append_attribute("xmlns:dlna") = "urn:schemas-dlna-org:device-1-0";
+        dlnaDoc.append_child(pugi::node_pcdata).set_value("DMS-1.50");
+        // dlnaDoc.append_child(pugi::node_pcdata).set_value("M-DMS-1.50");
     }
 
-    device->appendTextChild("deviceType", DESC_DEVICE_TYPE);
+    device.append_child("deviceType").append_child(pugi::node_pcdata).set_value(DESC_DEVICE_TYPE);
     if (!string_ok(presentationURL))
-        device->appendTextChild("presentationURL", "/");
+        device.append_child("presentationURL").append_child(pugi::node_pcdata).set_value("/");
     else
-        device->appendTextChild("presentationURL", presentationURL);
+        device.append_child("presentationURL").append_child(pugi::node_pcdata).set_value(presentationURL.c_str());
 
-    device->appendTextChild("friendlyName", config->getOption(CFG_SERVER_NAME));
-    device->appendTextChild("manufacturer", config->getOption(CFG_SERVER_MANUFACTURER));
-    device->appendTextChild("manufacturerURL", config->getOption(CFG_SERVER_MANUFACTURER_URL));
-    device->appendTextChild("modelDescription", config->getOption(CFG_SERVER_MODEL_DESCRIPTION));
-    device->appendTextChild("modelName", config->getOption(CFG_SERVER_MODEL_NAME));
-    device->appendTextChild("modelNumber", config->getOption(CFG_SERVER_MODEL_NUMBER));
-    device->appendTextChild("modelURL", config->getOption(CFG_SERVER_MODEL_URL));
-    device->appendTextChild("serialNumber", config->getOption(CFG_SERVER_SERIAL_NUMBER));
-    device->appendTextChild("UDN", config->getOption(CFG_SERVER_UDN));
+    device.append_child("friendlyName").append_child(pugi::node_pcdata)
+        .set_value(config->getOption(CFG_SERVER_NAME).c_str());
+    device.append_child("manufacturer").append_child(pugi::node_pcdata)
+        .set_value(config->getOption(CFG_SERVER_MANUFACTURER).c_str());
+    device.append_child("manufacturerURL").append_child(pugi::node_pcdata)
+        .set_value(config->getOption(CFG_SERVER_MANUFACTURER_URL).c_str());
+    device.append_child("modelDescription").append_child(pugi::node_pcdata)
+        .set_value(config->getOption(CFG_SERVER_MODEL_DESCRIPTION).c_str());
+    device.append_child("modelName").append_child(pugi::node_pcdata)
+        .set_value(config->getOption(CFG_SERVER_MODEL_NAME).c_str());
+    device.append_child("modelNumber").append_child(pugi::node_pcdata)
+        .set_value(config->getOption(CFG_SERVER_MODEL_NUMBER).c_str());
+    device.append_child("modelURL").append_child(pugi::node_pcdata)
+        .set_value(config->getOption(CFG_SERVER_MODEL_URL).c_str());
+    device.append_child("serialNumber").append_child(pugi::node_pcdata)
+        .set_value(config->getOption(CFG_SERVER_SERIAL_NUMBER).c_str());
+    device.append_child("UDN").append_child(pugi::node_pcdata)
+        .set_value(config->getOption(CFG_SERVER_UDN).c_str());
 
-    Ref<Element> iconList(new Element("iconList"));
+    // add icons
+    {
+        auto iconList = device.append_child("iconList");
 
-    Ref<Element> icon120_png(new Element("icon"));
-    icon120_png->appendTextChild("mimetype", DESC_ICON_PNG_MIMETYPE);
-    icon120_png->appendTextChild("width", "120");
-    icon120_png->appendTextChild("height", "120");
-    icon120_png->appendTextChild("depth", "24");
-    icon120_png->appendTextChild("url", DESC_ICON120_PNG);
-    iconList->appendElementChild(icon120_png);
+        struct IconDim {
+            const char* dim;
+            const char* depth;
+        };
+        std::vector<IconDim> iconDims;
+        iconDims.push_back({"120", "24"});
+        iconDims.push_back({"48", "24"});
+        iconDims.push_back({"32", "8"});
+        struct IconType {
+            const char* mimetype;
+            const char* ext;
+        };
+        std::vector<IconType> iconTypes;
+        iconTypes.push_back({DESC_ICON_PNG_MIMETYPE, ".png"});
+        iconTypes.push_back({DESC_ICON_BMP_MIMETYPE, ".bmp"});
+        iconTypes.push_back({DESC_ICON_JPG_MIMETYPE, ".jpg"});
 
-    Ref<Element> icon120_bmp(new Element("icon"));
-    icon120_bmp->appendTextChild("mimetype", DESC_ICON_BMP_MIMETYPE);
-    icon120_bmp->appendTextChild("width", "120");
-    icon120_bmp->appendTextChild("height", "120");
-    icon120_bmp->appendTextChild("depth", "24");
-    icon120_bmp->appendTextChild("url", DESC_ICON120_BMP);
-    iconList->appendElementChild(icon120_bmp);
+        for (auto const& d: iconDims) {
+            for (auto const& t: iconTypes) {
+                auto icon = iconList.append_child("icon");
+                icon.append_child("mimetype").append_child(pugi::node_pcdata).set_value(t.mimetype);
+                icon.append_child("width").append_child(pugi::node_pcdata).set_value(d.dim);
+                icon.append_child("height").append_child(pugi::node_pcdata).set_value(d.dim);
+                icon.append_child("depth").append_child(pugi::node_pcdata).set_value(d.depth);
+                std::string url = fmt::format("/icons/mt-icon{}{}", d.dim, t.ext);
+                icon.append_child("url").append_child(pugi::node_pcdata).set_value(url.c_str());
+            }
+        }
+    }
 
-    Ref<Element> icon120_jpg(new Element("icon"));
-    icon120_jpg->appendTextChild("mimetype", DESC_ICON_JPG_MIMETYPE);
-    icon120_jpg->appendTextChild("width", "120");
-    icon120_jpg->appendTextChild("height", "120");
-    icon120_jpg->appendTextChild("depth", "24");
-    icon120_jpg->appendTextChild("url", DESC_ICON120_JPG);
-    iconList->appendElementChild(icon120_jpg);
+    // add services
+    {
+        auto serviceList = device.append_child("serviceList");
 
-    Ref<Element> icon48_png(new Element("icon"));
-    icon48_png->appendTextChild("mimetype", DESC_ICON_PNG_MIMETYPE);
-    icon48_png->appendTextChild("width", "48");
-    icon48_png->appendTextChild("height", "48");
-    icon48_png->appendTextChild("depth", "24");
-    icon48_png->appendTextChild("url", DESC_ICON48_PNG);
-    iconList->appendElementChild(icon48_png);
+        struct ServiceInfo {
+            const char* serviceType;
+            const char* serviceId;
+            const char* SCPDURL;
+            const char* controlURL;
+            const char* eventSubURL;
+        };
+        std::vector<ServiceInfo> services;
 
-    Ref<Element> icon48_bmp(new Element("icon"));
-    icon48_bmp->appendTextChild("mimetype", DESC_ICON_BMP_MIMETYPE);
-    icon48_bmp->appendTextChild("width", "48");
-    icon48_bmp->appendTextChild("height", "48");
-    icon48_bmp->appendTextChild("depth", "24");
-    icon48_bmp->appendTextChild("url", DESC_ICON48_BMP);
-    iconList->appendElementChild(icon48_bmp);
+        // cm
+        services.push_back({
+            DESC_CM_SERVICE_TYPE, DESC_CM_SERVICE_ID,
+            DESC_CM_SCPD_URL, DESC_CM_CONTROL_URL, DESC_CM_EVENT_URL
+        });
+        // cds
+        services.push_back({
+            DESC_CDS_SERVICE_TYPE, DESC_CDS_SERVICE_ID,
+            DESC_CDS_SCPD_URL, DESC_CDS_CONTROL_URL, DESC_CDS_EVENT_URL
+        });
+        // media receiver registrar service for the Xbox 360
+        services.push_back({
+            DESC_MRREG_SERVICE_TYPE, DESC_MRREG_SERVICE_ID,
+            DESC_MRREG_SCPD_URL, DESC_MRREG_CONTROL_URL, DESC_MRREG_EVENT_URL
+        });
 
-    Ref<Element> icon48_jpg(new Element("icon"));
-    icon48_jpg->appendTextChild("mimetype", DESC_ICON_JPG_MIMETYPE);
-    icon48_jpg->appendTextChild("width", "48");
-    icon48_jpg->appendTextChild("height", "48");
-    icon48_jpg->appendTextChild("depth", "24");
-    icon48_jpg->appendTextChild("url", DESC_ICON48_JPG);
-    iconList->appendElementChild(icon48_jpg);
+        for (auto const& s: services) {
+            auto service = serviceList.append_child("service");
+            service.append_child("serviceType").append_child(pugi::node_pcdata).set_value(s.serviceType);
+            service.append_child("serviceId").append_child(pugi::node_pcdata).set_value(s.serviceId);
+            service.append_child("SCPDURL").append_child(pugi::node_pcdata).set_value(s.SCPDURL);
+            service.append_child("controlURL").append_child(pugi::node_pcdata).set_value(s.controlURL);
+            service.append_child("eventSubURL").append_child(pugi::node_pcdata).set_value(s.eventSubURL);
+        }
+    }
 
-    Ref<Element> icon32_png(new Element("icon"));
-    icon32_png->appendTextChild("mimetype", DESC_ICON_PNG_MIMETYPE);
-    icon32_png->appendTextChild("width", "32");
-    icon32_png->appendTextChild("height", "32");
-    icon32_png->appendTextChild("depth", "8");
-    icon32_png->appendTextChild("url", DESC_ICON32_PNG);
-    iconList->appendElementChild(icon32_png);
-
-    Ref<Element> icon32_bmp(new Element("icon"));
-    icon32_bmp->appendTextChild("mimetype", DESC_ICON_BMP_MIMETYPE);
-    icon32_bmp->appendTextChild("width", "32");
-    icon32_bmp->appendTextChild("height", "32");
-    icon32_bmp->appendTextChild("depth", "8");
-    icon32_bmp->appendTextChild("url", DESC_ICON32_BMP);
-    iconList->appendElementChild(icon32_bmp);
-
-    Ref<Element> icon32_jpg(new Element("icon"));
-    icon32_jpg->appendTextChild("mimetype", DESC_ICON_JPG_MIMETYPE);
-    icon32_jpg->appendTextChild("width", "32");
-    icon32_jpg->appendTextChild("height", "32");
-    icon32_jpg->appendTextChild("depth", "8");
-    icon32_jpg->appendTextChild("url", DESC_ICON32_JPG);
-    iconList->appendElementChild(icon32_jpg);
-
-    device->appendElementChild(iconList);
-
-    Ref<Element> serviceList(new Element("serviceList"));
-
-    Ref<Element> serviceCM(new Element("service"));
-    serviceCM->appendTextChild("serviceType", DESC_CM_SERVICE_TYPE);
-    serviceCM->appendTextChild("serviceId", DESC_CM_SERVICE_ID);
-    serviceCM->appendTextChild("SCPDURL", DESC_CM_SCPD_URL);
-    serviceCM->appendTextChild("controlURL", DESC_CM_CONTROL_URL);
-    serviceCM->appendTextChild("eventSubURL", DESC_CM_EVENT_URL);
-
-    serviceList->appendElementChild(serviceCM);
-
-    Ref<Element> serviceCDS(new Element("service"));
-    serviceCDS->appendTextChild("serviceType", DESC_CDS_SERVICE_TYPE);
-    serviceCDS->appendTextChild("serviceId", DESC_CDS_SERVICE_ID);
-    serviceCDS->appendTextChild("SCPDURL", DESC_CDS_SCPD_URL);
-    serviceCDS->appendTextChild("controlURL", DESC_CDS_CONTROL_URL);
-    serviceCDS->appendTextChild("eventSubURL", DESC_CDS_EVENT_URL);
-
-    serviceList->appendElementChild(serviceCDS);
-
-    // media receiver registrar service for the Xbox 360
-    Ref<Element> serviceMRREG(new Element("service"));
-    serviceMRREG->appendTextChild("serviceType", DESC_MRREG_SERVICE_TYPE);
-    serviceMRREG->appendTextChild("serviceId", DESC_MRREG_SERVICE_ID);
-    serviceMRREG->appendTextChild("SCPDURL", DESC_MRREG_SCPD_URL);
-    serviceMRREG->appendTextChild("controlURL", DESC_MRREG_CONTROL_URL);
-    serviceMRREG->appendTextChild("eventSubURL", DESC_MRREG_EVENT_URL);
-
-    serviceList->appendElementChild(serviceMRREG);
-
-    device->appendElementChild(serviceList);
-
-    root->appendElementChild(device);
-
-    return root;
+    return doc;
 }
 
 void UpnpXMLBuilder::renderResource(std::string URL, const std::map<std::string,std::string>& attributes, pugi::xml_node* parent)

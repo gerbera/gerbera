@@ -78,11 +78,11 @@ public:
     std::unique_ptr<pugi::xml_document> createEventPropertySet();
 
     /// \brief Renders the device description XML.
-    /// \return mxml::Element representing the newly created device description.
+    /// \return pugi::xml_document representing the newly created device description.
     ///
     /// Some elements are statically defined in common.h, others are loaded
     /// from the config with the help of the ConfigManager.
-    zmm::Ref<mxml::Element> renderDeviceDescription();
+    std::unique_ptr<pugi::xml_document> renderDeviceDescription();
 
     /// \brief Renders a resource tag (part of DIDL-Lite XML)
     /// \param URL download location of the item (will be child element of the <res> tag)
