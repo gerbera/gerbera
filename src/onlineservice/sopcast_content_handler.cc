@@ -39,193 +39,190 @@
 #include "online_service.h"
 #include "util/tools.h"
 
-using namespace zmm;
-using namespace mxml;
-
 SopCastContentHandler::SopCastContentHandler(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage)
     : config(config)
     , storage(storage)
 {
 }
 
-bool SopCastContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
+void SopCastContentHandler::setServiceContent(std::unique_ptr<pugi::xml_document>& service)
 {
-    std::string temp;
+    service_xml = std::move(service);
+    auto root = service_xml->document_element();
 
-    if (service->getName() != "channels")
+    if (std::string(root.name()) != "channels")
         throw std::runtime_error("Invalid XML for SopCast service received");
 
-    channels = service;
-
-    group_count = channels->childCount();
-    if (group_count < 1)
-        return false;
-
-    current_group_node_index = 0;
-    current_channel_index = 0;
-    channel_count = 0;
-    current_group = nullptr;
-
-    return true;
+    group_it = root.begin();
+    if (group_it != root.end())
+        channel_it = (*group_it).begin();
 }
 
 std::shared_ptr<CdsObject> SopCastContentHandler::getNextObject()
 {
-#define DATE_BUF_LEN 12
-    std::string temp;
-    struct timespec ts;
+    auto root = service_xml->document_element();
+    bool skipGroup = false;
 
-    while (current_group_node_index < group_count) {
-        if (current_group == nullptr) {
-            Ref<Node> n = channels->getChild(current_group_node_index);
-            current_group_node_index++;
+    while (group_it != root.end()) {
+        auto group = *group_it;
 
-            if (n == nullptr)
-                continue;
+        if (skipGroup || channel_it == group.end()) {
+            // invalid group or all channels of group are handled, go to next group
+            ++group_it;
+            if (group_it != root.end())
+                channel_it = (*group_it).begin();
 
-            if (n->getType() != mxml_node_element)
-                continue;
-
-            current_group = RefCast(n, Element);
-            channel_count = current_group->childCount();
-
-            if ((current_group->getName() != "group") || (channel_count < 1)) {
-                current_group = nullptr;
-                current_group_name = nullptr;
-                continue;
-            } else {
-                current_group_name = current_group->getText();
-                if (!string_ok(current_group_name)) {
-                    current_group_name = current_group->getAttribute("en");
-                    if (!string_ok(current_group_name))
-                        current_group_name = "Unknown";
-                }
-            }
-
-            current_channel_index = 0;
-        }
-
-        if (current_channel_index >= channel_count) {
-            current_group = nullptr;
+            skipGroup = false;
             continue;
         }
+        skipGroup = true;
 
-        while (current_channel_index < channel_count) {
-            Ref<Node> n = current_group->getChild(current_channel_index);
-            current_channel_index++;
+        if (group == nullptr)
+            continue;
 
-            if ((n == nullptr) || (n->getType() != mxml_node_element))
-                continue;
+        if (group.type() != pugi::node_element)
+            continue;
 
-            Ref<Element> channel = RefCast(n, Element);
+        if (std::string(group.name()) != "group")
+            continue;
 
-            if (channel->getName() != "channel")
-                continue;
+        // we know that we have a group
+        skipGroup = false;
 
-            auto item = std::make_shared<CdsItemExternalURL>(storage);
-            auto resource = std::make_shared<CdsResource>(CH_DEFAULT);
-            item->addResource(resource);
-
-            item->setAuxData(ONLINE_SERVICE_AUX_ID,
-                std::to_string(OS_SopCast));
-
-            item->setAuxData(SOPCAST_AUXDATA_GROUP, current_group_name);
-
-            temp = channel->getAttribute("id");
-            if (!string_ok(temp)) {
-                log_warning("Failed to retrieve SopCast channel ID");
-                continue;
-            }
-
-            temp.insert(temp.begin(), OnlineService::getStoragePrefix(OS_SopCast));
-            item->setServiceID(temp);
-
-            temp = channel->getChildText("stream_type");
-            if (!string_ok(temp)) {
-                log_warning("Failed to retrieve SopCast channel mimetype");
-                continue;
-            }
-
-            // I wish they had a mimetype setting
-            //auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
-            //std::string mt = getValueOrDefault(mappings, temp);
-            std::string mt;
-            // map was empty, we have to do construct the mimetype ourselves
-            if (!string_ok(mt)) {
-                if (temp == "wmv")
-                    mt = "video/sopcast-x-ms-wmv";
-                else if (temp == "mp3")
-                    mt = "audio/sopcast-mpeg";
-                else if (temp == "wma")
-                    mt = "audio/sopcast-x-ms-wma";
-                else {
-                    log_warning("Could not determine mimetype for SopCast channel (stream_type: {})", temp.c_str());
-                    mt = "application/sopcast-stream";
-                }
-            }
-            resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
-                renderProtocolInfo(mt, SOPCAST_PROTOCOL));
-            item->setMimeType(mt);
-
-            Ref<Element> tmp_el = channel->getChildByName("sop_address");
-            if (tmp_el == nullptr) {
-                log_warning("Failed to retrieve SopCast channel URL");
-                continue;
-            }
-
-            temp = tmp_el->getChildText("item");
-            if (!string_ok(temp)) {
-                log_warning("Failed to retrieve SopCast channel URL");
-                continue;
-            }
-            item->setURL(temp);
-
-            tmp_el = channel->getChildByName("name");
-            if (tmp_el == nullptr) {
-                log_warning("Failed to retrieve SopCast channel name");
-                continue;
-            }
-
-            temp = tmp_el->getAttribute("en");
-            if (string_ok(temp))
-                item->setTitle(temp);
-            else
-                item->setTitle("Unknown");
-
-            tmp_el = channel->getChildByName("region");
-            if (tmp_el != nullptr) {
-                temp = tmp_el->getAttribute("en");
-                if (string_ok(temp))
-                    item->setMetadata(MetadataHandler::getMetaFieldName(M_REGION), temp);
-            }
-
-            temp = channel->getChildText("description");
-            if (string_ok(temp))
-                item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), temp);
-
-            temp = channel->getAttribute("language");
-            if (string_ok(temp))
-                item->setAuxData(SOPCAST_AUXDATA_LANGUAGE, temp);
-
-            item->setClass(UPNP_DEFAULT_CLASS_VIDEO_BROADCAST);
-
-            getTimespecNow(&ts);
-            item->setAuxData(ONLINE_SERVICE_LAST_UPDATE, std::to_string(ts.tv_sec));
-            item->setFlag(OBJECT_FLAG_PROXY_URL);
-            item->setFlag(OBJECT_FLAG_ONLINE_SERVICE);
-
-            try {
-                item->validate();
-                return item;
-            } catch (const std::runtime_error& ex) {
-                log_warning("Failed to validate newly created SopCast item: {}",
-                    ex.what());
-                continue;
-            }
+        std::string groupName = group.text().as_string();
+        if (groupName.empty()) {
+            groupName = group.attribute("en").as_string();
+            if (groupName.empty())
+                groupName = "Unknown";
         }
-    }
+
+        while (channel_it != group.end()) {
+            auto channel = *channel_it;
+             ++channel_it;
+
+            if (channel == nullptr)
+                continue;
+
+            if (channel.type() != pugi::node_element)
+                continue;
+
+            if (std::string(channel.name()) != "channel")
+                continue;
+
+            // we know that we have a channel
+            auto item = getObject(groupName, channel);
+            if (item != nullptr)
+                return item;
+
+        } // for channel
+    } // for group
 
     return nullptr;
+}
+
+std::shared_ptr<CdsObject> SopCastContentHandler::getObject(std::string groupName, const pugi::xml_node& channel) const
+{
+    auto item = std::make_shared<CdsItemExternalURL>(storage);
+    auto resource = std::make_shared<CdsResource>(CH_DEFAULT);
+    item->addResource(resource);
+
+    item->setAuxData(ONLINE_SERVICE_AUX_ID,
+        std::to_string(OS_SopCast));
+
+    item->setAuxData(SOPCAST_AUXDATA_GROUP, groupName);
+
+    std::string temp = channel.attribute("id").as_string();
+    if (!string_ok(temp)) {
+        log_warning("Failed to retrieve SopCast channel ID");
+        return nullptr;
+    }
+
+    temp.insert(temp.begin(), OnlineService::getStoragePrefix(OS_SopCast));
+    item->setServiceID(temp);
+
+    temp = channel.child("stream_type").text().as_string();
+    if (!string_ok(temp)) {
+        log_warning("Failed to retrieve SopCast channel mimetype");
+        return nullptr;
+    }
+
+    // I wish they had a mimetype setting
+    //auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
+    //std::string mt = getValueOrDefault(mappings, temp);
+    std::string mt;
+    // map was empty, we have to do construct the mimetype ourselves
+    if (!string_ok(mt)) {
+        if (temp == "wmv")
+            mt = "video/sopcast-x-ms-wmv";
+        else if (temp == "mp3")
+            mt = "audio/sopcast-mpeg";
+        else if (temp == "wma")
+            mt = "audio/sopcast-x-ms-wma";
+        else {
+            log_warning("Could not determine mimetype for SopCast channel (stream_type: {})", temp.c_str());
+            mt = "application/sopcast-stream";
+        }
+    }
+    resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
+        renderProtocolInfo(mt, SOPCAST_PROTOCOL));
+    item->setMimeType(mt);
+
+    auto tmp_el = channel.child("sop_address");
+    if (tmp_el == nullptr) {
+        log_warning("Failed to retrieve SopCast channel URL");
+        return nullptr;
+    }
+
+    temp = tmp_el.child("item").text().as_string();
+    if (!string_ok(temp)) {
+        log_warning("Failed to retrieve SopCast channel URL");
+        return nullptr;
+    }
+    item->setURL(temp);
+
+    tmp_el = channel.child("name");
+    if (tmp_el == nullptr) {
+        log_warning("Failed to retrieve SopCast channel name");
+        return nullptr;
+    }
+
+    temp = tmp_el.attribute("en").as_string();
+    if (string_ok(temp))
+        item->setTitle(temp);
+    else
+        item->setTitle("Unknown");
+
+    tmp_el = channel.child("region");
+    if (tmp_el != nullptr) {
+        temp = tmp_el.attribute("en").as_string();
+        if (string_ok(temp))
+            item->setMetadata(MetadataHandler::getMetaFieldName(M_REGION), temp);
+    }
+
+    temp = channel.child("description").text().as_string();
+    if (string_ok(temp))
+        item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), temp);
+
+    temp = channel.attribute("language").as_string();
+    if (string_ok(temp))
+        item->setAuxData(SOPCAST_AUXDATA_LANGUAGE, temp);
+
+    item->setClass(UPNP_DEFAULT_CLASS_VIDEO_BROADCAST);
+
+    struct timespec ts;
+    getTimespecNow(&ts);
+    item->setAuxData(ONLINE_SERVICE_LAST_UPDATE, std::to_string(ts.tv_sec));
+    item->setFlag(OBJECT_FLAG_PROXY_URL);
+    item->setFlag(OBJECT_FLAG_ONLINE_SERVICE);
+
+    try {
+        item->validate();
+        return item;
+    } catch (const std::runtime_error& ex) {
+        log_warning("Failed to validate newly created SopCast item: {}",
+            ex.what());
+        return nullptr;
+    }
 }
 
 #endif //SOPCAST

@@ -36,11 +36,11 @@
 #define __ATRAILERS_SERVICE_H__
 
 #include <memory>
+#include <pugixml.hpp>
 #include <curl/curl.h>
-#include "mxml/mxml.h"
+
 #include "online_service.h"
 #include "url.h"
-#include "zmm/zmm.h"
 
 // forward declaration
 class ConfigManager;
@@ -78,7 +78,7 @@ protected:
     std::string service_url;
 
     /// \brief This function will retrieve the service XML
-    zmm::Ref<mxml::Element> getData();
+    std::unique_ptr<pugi::xml_document> getData();
 };
 
 #endif //__ONLINE_SERVICE_H__

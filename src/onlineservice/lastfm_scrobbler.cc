@@ -35,7 +35,6 @@
 #include "config/config_manager.h"
 #include "metadata/metadata_handler.h"
 #include "util/tools.h"
-using namespace zmm;
 
 LastFm::LastFm(std::shared_ptr<ConfigManager> config)
     : config(config)

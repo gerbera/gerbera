@@ -40,8 +40,6 @@
 #include <cstdlib>
 
 #include "cds_objects.h"
-#include "zmm/ref.h"
-#include "zmm/zmm.h"
 
 class LastFm {
 public:

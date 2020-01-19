@@ -38,10 +38,6 @@
 #include "server.h"
 #include "sopcast_content_handler.h"
 #include "util/string_converter.h"
-#include "zmm/zmm.h"
-
-using namespace zmm;
-using namespace mxml;
 
 #define SOPCAST_CHANNEL_URL "http://www.sopcast.com/gchlxml"
 
@@ -74,7 +70,7 @@ std::string SopCastService::getServiceName()
     return "SopCast";
 }
 
-Ref<Element> SopCastService::getData()
+std::unique_ptr<pugi::xml_document> SopCastService::getData()
 {
     long retcode;
     auto sc = StringConverter::i2i(config);
@@ -99,21 +95,14 @@ Ref<Element> SopCastService::getData()
         return nullptr;
 
     log_debug("GOT BUFFER{}", buffer.c_str());
-    Ref<Parser> parser(new Parser());
-    try {
-        return parser->parseString(sc->convert(std::string(buffer.c_str())))->getRoot();
-    } catch (const ParseException& pe) {
-        log_error("Error parsing SopCast XML {} line {}:{}",
-            pe.context->location.c_str(),
-            pe.context->line,
-            pe.what());
-        return nullptr;
-    } catch (const std::runtime_error& ex) {
-        log_error("Error parsing SopCast XML {}", ex.what());
+    auto doc = std::make_unique<pugi::xml_document>();
+    pugi::xml_parse_result result = doc->load_string(sc->convert(buffer).c_str());
+    if (result.status != pugi::xml_parse_status::status_ok) {
+        log_error("Error parsing SopCast XML: {}", result.description());
         return nullptr;
     }
 
-    return nullptr;
+    return doc;
 }
 
 bool SopCastService::refreshServiceData(std::shared_ptr<Layout> layout)
@@ -132,15 +121,14 @@ bool SopCastService::refreshServiceData(std::shared_ptr<Layout> layout)
     if (pid != pthread_self())
         throw std::runtime_error("Not allowed to call refreshServiceData from different threads!");
 
-    Ref<Element> reply = getData();
-
-    auto sc = std::make_unique<SopCastContentHandler>(config, storage);
-    if (reply != nullptr)
-        sc->setServiceContent(reply);
-    else {
+    auto reply = getData();
+    if (reply == nullptr) {
         log_debug("Failed to get XML content from SopCast service");
         throw std::runtime_error("Failed to get XML content from SopCast service");
     }
+
+    auto sc = std::make_unique<SopCastContentHandler>(config, storage);
+    sc->setServiceContent(reply);
 
     std::shared_ptr<CdsObject> obj;
     do {

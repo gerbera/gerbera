@@ -45,8 +45,9 @@
 #define SOPCAST_AUXDATA_GROUP SOPCAST_SERVICE_ID "2"
 
 #include <memory>
+#include <pugixml.hpp>
+
 #include "cds_objects.h"
-#include "mxml/mxml.h"
 
 // forward declaration
 class ConfigManager;
@@ -59,7 +60,7 @@ public:
 
     /// \brief Sets the service XML from which we will extract the objects.
     /// \return false if service XML contained an error status.
-    bool setServiceContent(zmm::Ref<mxml::Element> service);
+    void setServiceContent(std::unique_ptr<pugi::xml_document>& service);
 
     /// \brief retrieves an object from the service.
     ///
@@ -71,17 +72,15 @@ public:
     std::shared_ptr<CdsObject> getNextObject();
 
 protected:
+    std::shared_ptr<CdsObject> getObject(std::string groupName, const pugi::xml_node& channel) const;
+
+protected:
     std::shared_ptr<ConfigManager> config;
     std::shared_ptr<Storage> storage;
 
-    zmm::Ref<mxml::Element> channels;
-    int current_group_node_index;
-    int group_count;
-    int current_channel_index;
-    int channel_count;
-    std::string current_group_name;
-
-    zmm::Ref<mxml::Element> current_group;
+    std::unique_ptr<pugi::xml_document> service_xml;
+    pugi::xml_node_iterator group_it;
+    pugi::xml_node_iterator channel_it;
 };
 
 #endif //__SOPCAST_CONTENT_HANDLER_H__

@@ -39,10 +39,7 @@
 #include <memory>
 
 #include "layout/layout.h"
-#include "mxml/mxml.h"
 #include "util/timer.h"
-#include "zmm/zmm.h"
-#include "zmm/zmmf.h"
 
 #define ONLINE_SERVICE_AUX_ID "ols"
 #define ONLINE_SERVICE_LAST_UPDATE "lu"
@@ -129,11 +126,6 @@ protected:
     int refresh_interval;
     int purge_interval;
     std::shared_ptr<Timer::Parameter> timer_parameter;
-
-    /// \brief retrieves a required attribute given by the name
-    std::string getCheckAttr(zmm::Ref<mxml::Element> xml, std::string attrname);
-    /// \brief retrieves a required positive integer attribute given by the name
-    int getCheckPosIntAttr(zmm::Ref<mxml::Element> xml, std::string attrname);
 };
 
 class OnlineServiceList {
