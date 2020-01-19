@@ -33,8 +33,6 @@
 #include "transcoding.h"
 #include "util/tools.h"
 
-using namespace zmm;
-
 TranscodingProfile::TranscodingProfile()
 {
     first_resource = false;

@@ -32,8 +32,6 @@
 #include "io_handler_chainer.h"
 #include "exceptions.h"
 
-using namespace zmm;
-
 IOHandlerChainer::IOHandlerChainer(std::unique_ptr<IOHandler>& readFrom, std::unique_ptr<IOHandler>& writeTo, int chunkSize)
     : ThreadExecutor()
 {

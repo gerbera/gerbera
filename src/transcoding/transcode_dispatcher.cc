@@ -36,8 +36,6 @@
 #include "transcoding.h"
 #include "util/tools.h"
 
-using namespace zmm;
-
 TranscodeDispatcher::TranscodeDispatcher(std::shared_ptr<ConfigManager> config,
     std::shared_ptr<ContentManager> content)
     : TranscodeHandler(config, content)

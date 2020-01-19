@@ -51,9 +51,6 @@
 #include "contrib/cxxopts.hpp"
 #include "server.h"
 
-
-using namespace zmm;
-
 int shutdown_flag = 0;
 int restart_flag = 0;
 pthread_t main_thread_id;

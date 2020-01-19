@@ -33,12 +33,10 @@
 #ifndef __TRANSCODING_H__
 #define __TRANSCODING_H__
 
+#include <memory>
 #include <map>
 #include <string>
 #include <vector>
-
-#include "zmm/object_dictionary.h"
-#include "zmm/zmmf.h"
 
 #define SOURCE (-1)
 #define OFF 0

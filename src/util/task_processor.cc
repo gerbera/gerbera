@@ -7,7 +7,6 @@
 #include "content_manager.h"
 #include "layout/layout.h"
 
-using namespace zmm;
 using namespace std;
 
 TaskProcessor::TaskProcessor()

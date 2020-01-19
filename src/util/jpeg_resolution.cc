@@ -67,8 +67,6 @@ typedef unsigned char uchar;
 #define M_DHT 0xC4
 #define M_DRI 0xDD
 
-using namespace zmm;
-
 #define ITEM_BUF_SIZE 16
 static int Get16m(const void* Short)
 {

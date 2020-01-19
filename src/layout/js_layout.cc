@@ -34,8 +34,6 @@
 #include "js_layout.h"
 #include "scripting/runtime.h"
 
-using namespace zmm;
-
 JSLayout::JSLayout(std::shared_ptr<ConfigManager> config,
     std::shared_ptr<Storage> storage,
     std::shared_ptr<ContentManager> content,

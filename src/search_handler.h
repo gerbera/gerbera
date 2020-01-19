@@ -30,7 +30,6 @@
 
 #include "cds_objects.h"
 #include "memory.h"
-#include "zmm/ref.h"
 
 #include <memory>
 #include <string>

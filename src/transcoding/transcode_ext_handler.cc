@@ -60,8 +60,6 @@
 #include "iohandler/curl_io_handler.h"
 #endif
 
-using namespace zmm;
-
 TranscodeExternalHandler::TranscodeExternalHandler(std::shared_ptr<ConfigManager> config,
     std::shared_ptr<ContentManager> content)
     : TranscodeHandler(config, content)

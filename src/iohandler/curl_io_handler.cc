@@ -35,7 +35,6 @@
 #include "config/config_manager.h"
 #include "util/tools.h"
 
-using namespace zmm;
 using namespace std;
 
 CurlIOHandler::CurlIOHandler(std::string URL, CURL* curl_handle, size_t bufSize, size_t initialFillSize)
