@@ -78,8 +78,6 @@ extern "C" {
 struct magic_set* ms = nullptr;
 #endif
 
-using namespace zmm;
-using namespace mxml;
 using namespace std;
 
 static std::string get_filename(std::string path)

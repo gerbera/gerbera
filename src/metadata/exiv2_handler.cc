@@ -38,8 +38,6 @@
 #include "util/string_converter.h"
 #include "util/tools.h"
 
-using namespace zmm;
-
 Exiv2Handler::Exiv2Handler(std::shared_ptr<ConfigManager> config)
     : MetadataHandler(config)
 {

@@ -101,8 +101,6 @@ PRAGMA foreign_keys = ON;"
 
 #define SL3_INITITAL_QUEUE_SIZE 20
 
-using namespace zmm;
-using namespace mxml;
 using namespace std;
 
 Sqlite3Storage::Sqlite3Storage(std::shared_ptr<ConfigManager> config, std::shared_ptr<Timer> timer)
