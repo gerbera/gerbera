@@ -56,9 +56,6 @@
 #include "serve_request_handler.h"
 #include "web/pages.h"
 
-using namespace zmm;
-using namespace mxml;
-
 static int static_upnp_callback(Upnp_EventType eventtype, const void* event, void* cookie)
 {
     return static_cast<Server*>(cookie)->handleUpnpEvent(eventtype, event);
@@ -202,7 +199,10 @@ void Server::run()
     xmlbuilder = std::make_unique<UpnpXMLBuilder>(config, storage, virtualUrl, presentationURL);
 
     // register root device with the library
-    std::string deviceDescription = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + xmlbuilder->renderDeviceDescription()->print();
+    auto desc = xmlbuilder->renderDeviceDescription();
+    std::ostringstream buf;
+    desc->print(buf, "", 0);
+    std::string deviceDescription = buf.str();
     //log_debug("Device Description: {}", deviceDescription.c_str());
 
     log_debug("Registering with UPnP...");

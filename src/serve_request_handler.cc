@@ -37,9 +37,6 @@
 #include "server.h"
 #include "util/tools.h"
 
-using namespace zmm;
-using namespace mxml;
-
 ServeRequestHandler::ServeRequestHandler(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage)
     : RequestHandler(config, storage)
 {

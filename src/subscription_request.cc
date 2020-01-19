@@ -30,9 +30,6 @@
 /// \file subscription_request.cc
 
 #include "subscription_request.h"
-#include "mxml/mxml.h"
-
-using namespace mxml;
 
 SubscriptionRequest::SubscriptionRequest(UpnpSubscriptionRequest* upnp_request)
 {

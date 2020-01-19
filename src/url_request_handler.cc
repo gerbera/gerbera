@@ -50,9 +50,6 @@
 #include "transcoding/transcode_dispatcher.h"
 #include "url.h"
 
-using namespace zmm;
-using namespace mxml;
-
 URLRequestHandler::URLRequestHandler(std::shared_ptr<ConfigManager> config,
     std::shared_ptr<Storage> storage,
     std::shared_ptr<ContentManager> content)

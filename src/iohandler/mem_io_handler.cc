@@ -43,9 +43,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-using namespace zmm;
-using namespace mxml;
-
 MemIOHandler::MemIOHandler(const void* buffer, int length)
     : buffer((char*)MALLOC(length))
     , length(length)

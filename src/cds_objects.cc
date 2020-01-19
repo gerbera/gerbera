@@ -30,11 +30,8 @@
 /// \file cds_objects.cc
 
 #include "cds_objects.h"
-#include "mxml/mxml.h"
 #include "storage/storage.h"
 #include "util/tools.h"
-
-using namespace mxml;
 
 CdsObject::CdsObject(std::shared_ptr<Storage> storage)
     : storage(storage)
