@@ -71,10 +71,7 @@
   CONSTRAINT `mt_metadata_idfk1` FOREIGN KEY (`item_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE \
 ) ENGINE=MyISAM CHARSET=utf8"
 #define MYSQL_UPDATE_4_5_2 "UPDATE `mt_internal_setting` SET `value`='5' WHERE `key`='db_version' AND `value`='4'"
-  
 
-using namespace zmm;
-using namespace mxml;
 using namespace std;
 
 MysqlStorage::MysqlStorage(std::shared_ptr<ConfigManager> config)

@@ -39,7 +39,6 @@
 
 #include "autoscan.h"
 #include "cds_objects.h"
-#include "zmm/zmmf.h"
 
 #define BROWSE_DIRECT_CHILDREN 0x00000001
 #define BROWSE_ITEMS 0x00000002
@@ -177,7 +176,7 @@ public:
 
     virtual std::vector<std::string> getMimeTypes() = 0;
 
-    //virtual zmm::Ref<zmm::Array<CdsObject> > selectObjects(zmm::Ref<SelectParam> param) = 0;
+    //virtual std::vector<std::shared_ptr<CdsObject>> selectObjects(const std::unique_ptr<SelectParam>& param) = 0;
 
     /// \brief Loads a given (pc directory) object, identified by the given path
     /// from the database

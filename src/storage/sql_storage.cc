@@ -42,7 +42,6 @@
 #include <string>
 #include <vector>
 
-using namespace zmm;
 using namespace std;
 
 #define MAX_REMOVE_SIZE 1000

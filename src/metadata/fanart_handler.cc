@@ -37,10 +37,7 @@
 #include "iohandler/file_io_handler.h"
 #include "util/tools.h"
 
-using namespace zmm;
-
-const int num_names = 2;
-const char* names[] = {
+static const char* names[] = {
     "/folder.jpg",
     "/poster.jpg"
 };
@@ -66,7 +63,7 @@ std::string getFolderName(std::shared_ptr<CdsItem> item)
 std::string getFanArtPath(std::string folder)
 {
     std::string found;
-    for (int i = 0; i < num_names; i++) {
+    for (size_t i = 0; i < sizeof(names)/sizeof(names[0]); i++) {
         bool exists = path_exists(folder + names[i]);
         log_debug("{}: {}", names[i], exists ? "found" : "missing");
         if (!exists)

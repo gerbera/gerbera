@@ -37,9 +37,6 @@
 #include "iohandler/mem_io_handler.h"
 #include "util/tools.h"
 
-using namespace zmm;
-using namespace mxml;
-
 LibExifHandler::LibExifHandler(std::shared_ptr<ConfigManager> config)
     : MetadataHandler(config)
 {

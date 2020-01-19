@@ -49,7 +49,6 @@
 
 #include "util/tools.h"
 
-using namespace zmm;
 using namespace LIBEBML_NAMESPACE;
 using namespace LIBMATROSKA_NAMESPACE;
 

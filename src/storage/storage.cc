@@ -40,8 +40,6 @@
 
 #include "util/tools.h"
 
-using namespace zmm;
-
 Storage::Storage(std::shared_ptr<ConfigManager> config)
     : config(config)
 {

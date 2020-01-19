@@ -73,8 +73,6 @@ extern "C" {
 #define as_codecpar(s) s->codec
 #endif
 
-using namespace zmm;
-
 // Default constructor
 FfmpegHandler::FfmpegHandler(std::shared_ptr<ConfigManager> config)
     : MetadataHandler(config)

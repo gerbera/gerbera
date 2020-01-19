@@ -56,8 +56,6 @@
 
 #include "metadata/fanart_handler.h"
 
-using namespace zmm;
-
 mt_key MT_KEYS[] = {
     { "M_TITLE", "dc:title" },
     { "M_ARTIST", "upnp:artist" },

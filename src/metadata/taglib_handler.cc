@@ -54,8 +54,6 @@
 
 #include "util/tools.h"
 
-using namespace zmm;
-
 TagLibHandler::TagLibHandler(std::shared_ptr<ConfigManager> config)
     : MetadataHandler(config)
 {
