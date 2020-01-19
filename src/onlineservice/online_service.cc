@@ -34,12 +34,9 @@
 #include "online_service.h"
 #include "util/tools.h"
 
-using namespace zmm;
-using namespace mxml;
-
 // DO NOT FORGET TO ADD SERVICE STORAGE PREFIXES TO THIS ARRAY WHEN ADDING
 // NEW SERVICES!
-char service_prefixes[] = { '\0', 'Y', 'S', 'W', 'T', '\0' };
+static char service_prefixes[] = { '\0', 'Y', 'S', 'W', 'T', '\0' };
 
 OnlineServiceList::OnlineServiceList()
 {
@@ -84,31 +81,6 @@ char OnlineService::getStoragePrefix(service_type_t service)
 char OnlineService::getStoragePrefix()
 {
     return getStoragePrefix(getServiceType());
-}
-
-std::string OnlineService::getCheckAttr(Ref<Element> xml, std::string attrname)
-{
-    std::string temp = xml->getAttribute(attrname);
-    if (string_ok(temp))
-        return temp;
-    else
-        throw std::runtime_error(getServiceName() + ": Tag <" + xml->getName() + "> is missing the required \"" + attrname + "\" attribute!");
-    return nullptr;
-}
-
-int OnlineService::getCheckPosIntAttr(Ref<Element> xml, std::string attrname)
-{
-    int itmp;
-    std::string temp = xml->getAttribute(attrname);
-    if (string_ok(temp))
-        itmp = std::stoi(temp);
-    else
-        throw std::runtime_error(getServiceName() + ": Tag <" + xml->getName() + "> is missing the required \"" + attrname + "\" attribute!");
-
-    if (itmp < 1)
-        throw std::runtime_error("Invalid value in " + attrname + " for <" + xml->getName() + "> tag");
-
-    return itmp;
 }
 
 #endif //ONLINE_SERVICES

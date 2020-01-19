@@ -35,11 +35,12 @@
 #ifndef __SOPCAST_SERVICE_H__
 #define __SOPCAST_SERVICE_H__
 
-#include "mxml/mxml.h"
+#include <memory>
+#include <pugixml.hpp>
+#include <curl/curl.h>
+
 #include "online_service.h"
 #include "url.h"
-#include "zmm/zmm.h"
-#include <curl/curl.h>
 
 // forward declaration
 class ConfigManager;
@@ -75,7 +76,7 @@ protected:
     pthread_t pid;
 
     /// \brief This function will retrieve the XML according to the parametrs
-    zmm::Ref<mxml::Element> getData();
+    std::unique_ptr<pugi::xml_document> getData();
 };
 
 #endif //__ONLINE_SERVICE_H__

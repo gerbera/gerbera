@@ -35,14 +35,15 @@
 #ifndef __ATRAILERS_CONTENT_HANDLER_H__
 #define __ATRAILERS_CONTENT_HANDLER_H__
 
+#include <memory>
+#include <pugixml.hpp>
+
+#include "cds_objects.h"
+
 #define ATRAILERS_SERVICE "Apple Trailers"
 #define ATRAILERS_SERVICE_ID "T"
 
 #define ATRAILERS_AUXDATA_POST_DATE ATRAILERS_SERVICE_ID "0"
-
-#include <memory>
-#include "cds_objects.h"
-#include "mxml/mxml.h"
 
 // forward declaration
 class ConfigManager;
@@ -57,7 +58,7 @@ public:
 
     /// \brief Sets the service XML from which we will extract the objects.
     /// \return false if service XML contained an error status.
-    bool setServiceContent(zmm::Ref<mxml::Element> service);
+    void setServiceContent(std::unique_ptr<pugi::xml_document>& service);
 
     /// \brief retrieves an object from the service.
     ///
@@ -69,12 +70,14 @@ public:
     std::shared_ptr<CdsObject> getNextObject();
 
 protected:
+    std::shared_ptr<CdsObject> getObject(const pugi::xml_node& trailer) const;
+
+protected:
     std::shared_ptr<ConfigManager> config;
     std::shared_ptr<Storage> storage;
 
-    zmm::Ref<mxml::Element> service_xml;
-    int current_trailer_index;
-    int trailer_count;
+    std::unique_ptr<pugi::xml_document> service_xml;
+    pugi::xml_node_iterator trailer_it;
 
     std::string trailer_mimetype;
 };

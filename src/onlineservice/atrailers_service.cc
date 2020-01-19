@@ -39,12 +39,8 @@
 #include "content_manager.h"
 #include "server.h"
 #include "util/string_converter.h"
-#include "zmm/zmm.h"
 
 #include <string>
-
-using namespace zmm;
-using namespace mxml;
 
 #define ATRAILERS_SERVICE_URL_640 "http://www.apple.com/trailers/home/xml/current.xml"
 #define ATRAILERS_SERVICE_URL_720P "http://www.apple.com/trailers/home/xml/current_720p.xml"
@@ -83,7 +79,7 @@ std::string ATrailersService::getServiceName()
     return "Apple Trailers";
 }
 
-Ref<Element> ATrailersService::getData()
+std::unique_ptr<pugi::xml_document> ATrailersService::getData()
 {
     long retcode;
     auto sc = StringConverter::i2i(config);
@@ -107,22 +103,14 @@ Ref<Element> ATrailersService::getData()
         return nullptr;
 
     log_debug("GOT BUFFER{}", buffer.c_str());
-    Ref<Parser> parser(new Parser());
-    try {
-        return parser->parseString(sc->convert(buffer))->getRoot();
-    } catch (const ParseException& pe) {
-        log_error("Error parsing Apple Trailers XML {} line {}:{}",
-            pe.context->location.c_str(),
-            pe.context->line,
-            pe.what());
-        return nullptr;
-    } catch (const std::runtime_error& ex) {
-        log_error("Error parsing Apple Trailers XML {}",
-            ex.what());
+    auto doc = std::make_unique<pugi::xml_document>();
+    pugi::xml_parse_result result = doc->load_string(sc->convert(buffer).c_str());
+    if (result.status != pugi::xml_parse_status::status_ok) {
+        log_error("Error parsing Apple Trailers XML: {}", result.description());
         return nullptr;
     }
 
-    return nullptr;
+    return doc;
 }
 
 bool ATrailersService::refreshServiceData(std::shared_ptr<Layout> layout)
@@ -141,15 +129,14 @@ bool ATrailersService::refreshServiceData(std::shared_ptr<Layout> layout)
     if (pid != pthread_self())
         throw std::runtime_error("Not allowed to call refreshServiceData from different threads!");
 
-    Ref<Element> reply = getData();
-
-    auto sc = std::make_unique<ATrailersContentHandler>(config, storage);
-    if (reply != nullptr)
-        sc->setServiceContent(reply);
-    else {
+    auto reply = getData();
+    if (reply == nullptr) {
         log_debug("Failed to get XML content from Trailers service");
         throw std::runtime_error("Failed to get XML content from Trailers service");
     }
+
+    auto sc = std::make_unique<ATrailersContentHandler>(config, storage);
+    sc->setServiceContent(reply);
 
     std::shared_ptr<CdsObject> obj;
     do {

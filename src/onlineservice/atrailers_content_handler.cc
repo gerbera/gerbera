@@ -39,9 +39,6 @@
 #include "online_service.h"
 #include "util/tools.h"
 
-using namespace zmm;
-using namespace mxml;
-
 ATrailersContentHandler::ATrailersContentHandler(std::shared_ptr<ConfigManager> config,
     std::shared_ptr<Storage> storage)
     : config(config)
@@ -49,209 +46,201 @@ ATrailersContentHandler::ATrailersContentHandler(std::shared_ptr<ConfigManager> 
 {
 }
 
-bool ATrailersContentHandler::setServiceContent(zmm::Ref<mxml::Element> service)
+void ATrailersContentHandler::setServiceContent(std::unique_ptr<pugi::xml_document>& service)
 {
-    std::string temp;
+    service_xml = std::move(service);
+    auto root = service_xml->document_element();
 
-    if (service->getName() != "records")
+    if (std::string(root.name()) != "records")
         throw std::runtime_error("Recieved invalid XML for Apple Trailers service");
 
-    this->service_xml = service;
-
-    trailer_count = service_xml->childCount();
-
-    if (trailer_count == 0)
-        return false;
-
-    current_trailer_index = 0;
+    trailer_it = root.begin();
 
     auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
     trailer_mimetype = getValueOrDefault(mappings, "mov");
     if (!string_ok(trailer_mimetype))
         trailer_mimetype = "video/quicktime";
-
-    return true;
 }
 
 std::shared_ptr<CdsObject> ATrailersContentHandler::getNextObject()
 {
-    std::string temp;
-    struct timespec ts;
+    auto root = service_xml->document_element();
 
-    while (current_trailer_index < trailer_count) {
-        Ref<Node> n = service_xml->getChild(current_trailer_index);
+    while (trailer_it != root.end()) {
+        auto trailer = *trailer_it;
+        ++trailer_it;
 
-        current_trailer_index++;
-
-        if (n == nullptr)
+        if (trailer == nullptr)
             return nullptr;
 
-        if (n->getType() != mxml_node_element)
+        if (trailer.type() != pugi::node_element)
             continue;
 
-        Ref<Element> trailer = RefCast(n, Element);
-        if (trailer->getName() != "movieinfo")
+        if (std::string(trailer.name()) != "movieinfo")
             continue;
 
-        // we know what we are adding
-        auto item = std::make_shared<CdsItemExternalURL>(storage);
-        auto resource = std::make_shared<CdsResource>(CH_DEFAULT);
-        item->addResource(resource);
-
-        Ref<Element> info = trailer->getChildByName("info");
-        if (info == nullptr)
-            continue;
-
-        temp = info->getChildText("title");
-        if (!string_ok(temp))
-            item->setTitle("Unknown");
-        else
-            item->setTitle(temp);
-
-        item->setMimeType(trailer_mimetype);
-        resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(trailer_mimetype));
-
-        item->setAuxData(ONLINE_SERVICE_AUX_ID, std::to_string(OS_ATrailers));
-
-        temp = trailer->getAttribute("id");
-        if (!string_ok(temp)) {
-            log_warning("Failed to retrieve Trailer ID for \"{}\", "
-                        "skipping...\n",
-                item->getTitle().c_str());
-            continue;
-        }
-
-        temp = std::to_string(OnlineService::getStoragePrefix(OS_ATrailers)) + temp;
-        item->setServiceID(temp);
-
-        Ref<Element> preview = trailer->getChildByName("preview");
-        if (preview == nullptr) {
-            log_warning("Failed to retrieve Trailer location for \"{}\", "
-                        "skipping...\n",
-                item->getTitle().c_str());
-            continue;
-        }
-
-        temp = preview->getChildText("large");
-        if (string_ok(temp)) {
-            item->setURL(temp);
-        } else {
-            log_error("Could not get location for Trailers item {}, "
-                      "skipping.\n",
-                item->getTitle().c_str());
-            continue;
-        }
-
-        item->setClass("object.item.videoItem");
-
-        temp = info->getChildText("rating");
-        if (string_ok(temp))
-            item->setMetadata(MetadataHandler::getMetaFieldName(M_RATING),
-                temp);
-
-        temp = info->getChildText("studio");
-        if (string_ok(temp))
-            item->setMetadata(MetadataHandler::getMetaFieldName(M_PRODUCER),
-                temp);
-
-        temp = info->getChildText("director");
-        if (string_ok(temp))
-            item->setMetadata(MetadataHandler::getMetaFieldName(M_DIRECTOR),
-                temp);
-
-        temp = info->getChildText("postdate");
-        if (string_ok(temp))
-            item->setAuxData(ATRAILERS_AUXDATA_POST_DATE, temp);
-
-        temp = info->getChildText("releasedate");
-        if (string_ok(temp))
-            item->setMetadata(MetadataHandler::getMetaFieldName(M_DATE),
-                temp);
-
-        temp = info->getChildText("description");
-        if (string_ok(temp)) {
-            /// \todo cut out a small part for the usual description
-            item->setMetadata(MetadataHandler::getMetaFieldName(M_LONGDESCRIPTION), temp);
-        }
-
-        Ref<Element> cast = trailer->getChildByName("cast");
-        if (cast != nullptr) {
-            std::string actors;
-            for (int i = 0; i < cast->childCount(); i++) {
-                Ref<Node> cn = cast->getChild(i);
-                if (cn->getType() != mxml_node_element)
-                    continue;
-
-                Ref<Element> actor = RefCast(cn, Element);
-                if (actor->getName() != "name")
-                    continue;
-
-                temp = actor->getText();
-                if (string_ok(temp)) {
-                    if (string_ok(actors))
-                        actors = actors + ", ";
-
-                    actors = actors + temp;
-                }
-            }
-
-            if (string_ok(actors))
-                item->setMetadata(MetadataHandler::getMetaFieldName(M_GENRE),
-                    temp);
-        }
-
-        Ref<Element> genre = trailer->getChildByName("genre");
-        if (genre != nullptr) {
-            std::string genres;
-            for (int i = 0; i < genre->childCount(); i++) {
-                Ref<Node> gn = genre->getChild(i);
-                if (gn->getType() != mxml_node_element)
-                    continue;
-
-                Ref<Element> genre = RefCast(gn, Element);
-                if (genre->getName() != "name")
-                    continue;
-
-                temp = genre->getText();
-                if (string_ok(temp)) {
-                    if (string_ok(genres))
-                        genres = genres + ", ";
-
-                    genres = genres + temp;
-                }
-            }
-
-            if (string_ok(genres))
-                item->setMetadata(MetadataHandler::getMetaFieldName(M_GENRE),
-                    temp);
-        }
-
-        /*
-         
-            we do not know the resolution, check if they use a fixed size
-            since it's anyway too big for a thumbnail I'll think about it once
-            I add the fastscaler
-
-        Ref<Element> poster = trailer->getChildByName("poster");
-        if (poster != nullptr)
-        {
-        }
-        */
-
-        getTimespecNow(&ts);
-        item->setAuxData(ONLINE_SERVICE_LAST_UPDATE, std::to_string(ts.tv_sec));
-
-        item->setFlag(OBJECT_FLAG_ONLINE_SERVICE);
-        try {
-            item->validate();
+        // we know that we have a trailer
+        auto item = getObject(trailer);
+        if (item != nullptr)
             return item;
-        } catch (const std::runtime_error& ex) {
-            log_warning("Failed to validate newly created Trailer item: {}",
-                ex.what());
-            continue;
-        }
-    } // while
+
+    } // while trailer_it
+
     return nullptr;
+}
+
+std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_node& trailer) const
+{
+    auto item = std::make_shared<CdsItemExternalURL>(storage);
+    auto resource = std::make_shared<CdsResource>(CH_DEFAULT);
+    item->addResource(resource);
+
+    auto info = trailer.child("info");
+    if (info == nullptr)
+        return nullptr;
+
+    std::string temp = info.child("title").text().as_string();
+    if (!string_ok(temp))
+        item->setTitle("Unknown");
+    else
+        item->setTitle(temp);
+
+    item->setMimeType(trailer_mimetype);
+    resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(trailer_mimetype));
+
+    item->setAuxData(ONLINE_SERVICE_AUX_ID, std::to_string(OS_ATrailers));
+
+    temp = trailer.attribute("id").as_string();
+    if (!string_ok(temp)) {
+        log_warning("Failed to retrieve Trailer ID for \"{}\", "
+                    "skipping...\n",
+            item->getTitle().c_str());
+        return nullptr;
+    }
+
+    temp = std::to_string(OnlineService::getStoragePrefix(OS_ATrailers)) + temp;
+    item->setServiceID(temp);
+
+    auto preview = trailer.child("preview");
+    if (preview == nullptr) {
+        log_warning("Failed to retrieve Trailer location for \"{}\", "
+                    "skipping...\n",
+            item->getTitle().c_str());
+        return nullptr;
+    }
+
+    temp = preview.child("large").text().as_string();
+    if (string_ok(temp)) {
+        item->setURL(temp);
+    } else {
+        log_error("Could not get location for Trailers item {}, "
+                    "skipping.\n",
+            item->getTitle().c_str());
+        return nullptr;
+    }
+
+    item->setClass("object.item.videoItem");
+
+    temp = info.child("rating").text().as_string();
+    if (string_ok(temp))
+        item->setMetadata(MetadataHandler::getMetaFieldName(M_RATING),
+            temp);
+
+    temp = info.child("studio").text().as_string();
+    if (string_ok(temp))
+        item->setMetadata(MetadataHandler::getMetaFieldName(M_PRODUCER),
+            temp);
+
+    temp = info.child("director").text().as_string();
+    if (string_ok(temp))
+        item->setMetadata(MetadataHandler::getMetaFieldName(M_DIRECTOR),
+            temp);
+
+    temp = info.child("postdate").text().as_string();
+    if (string_ok(temp))
+        item->setAuxData(ATRAILERS_AUXDATA_POST_DATE, temp);
+
+    temp = info.child("releasedate").text().as_string();
+    if (string_ok(temp))
+        item->setMetadata(MetadataHandler::getMetaFieldName(M_DATE),
+            temp);
+
+    temp = info.child("description").text().as_string();
+    if (string_ok(temp)) {
+        /// \todo cut out a small part for the usual description
+        item->setMetadata(MetadataHandler::getMetaFieldName(M_LONGDESCRIPTION), temp);
+    }
+
+    auto cast = trailer.child("cast");
+    if (cast != nullptr) {
+        std::string actors;
+        for (pugi::xml_node actor: cast.children()) {
+            if (actor.type() != pugi::node_element)
+                return nullptr;
+            if (std::string(actor.name()) != "name")
+                return nullptr;
+
+            temp = actor.text().as_string();
+            if (string_ok(temp)) {
+                if (string_ok(actors))
+                    actors = actors + ", ";
+
+                actors = actors + temp;
+            }
+        }
+
+        if (string_ok(actors))
+            item->setMetadata(MetadataHandler::getMetaFieldName(M_GENRE),
+                temp);
+    }
+
+    auto genre = trailer.child("genre");
+    if (genre != nullptr) {
+        std::string genres;
+        for (pugi::xml_node gn: genre.children()) {
+            if (gn.type() != pugi::node_element)
+                return nullptr;
+            if (std::string(gn.name()) != "name")
+                return nullptr;
+
+            temp = gn.text().as_string();
+            if (string_ok(temp)) {
+                if (string_ok(genres))
+                    genres = genres + ", ";
+
+                genres = genres + temp;
+            }
+        }
+
+        if (string_ok(genres))
+            item->setMetadata(MetadataHandler::getMetaFieldName(M_GENRE),
+                temp);
+    }
+
+    /*
+    we do not know the resolution, check if they use a fixed size
+    since it's anyway too big for a thumbnail I'll think about it once
+    I add the fastscaler
+
+    auto poster = trailer.child("poster");
+    if (poster != nullptr)
+    {
+    }
+    */
+
+    struct timespec ts;
+    getTimespecNow(&ts);
+    item->setAuxData(ONLINE_SERVICE_LAST_UPDATE, std::to_string(ts.tv_sec));
+
+    item->setFlag(OBJECT_FLAG_ONLINE_SERVICE);
+    try {
+        item->validate();
+        return item;
+    } catch (const std::runtime_error& ex) {
+        log_warning("Failed to validate newly created Trailer item: {}",
+            ex.what());
+        return nullptr;
+    }
 }
 
 #endif //ATRAILERS
