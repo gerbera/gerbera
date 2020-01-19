@@ -212,19 +212,7 @@ set(libgerberaFILES
         src/web/session_manager.h
         src/web/tasks.cc
         src/web/web_autoscan.cc
-        src/web/web_update.cc
-        src/zmm/array.cc
-        src/zmm/array.h
-        src/zmm/base_queue.h
-        src/zmm/base_stack.h
-        src/zmm/object_dictionary.h
-        src/zmm/object_queue.h
-        src/zmm/object_stack.h
-        src/zmm/zmmf.h
-        src/zmm/object.cc
-        src/zmm/object.h
-        src/zmm/ref.h
-        src/zmm/zmm.h)
+        src/web/web_update.cc)
 
 add_library(libgerbera OBJECT ${libgerberaFILES})
 
