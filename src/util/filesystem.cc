@@ -37,11 +37,7 @@
 #include "config/config_manager.h"
 #include "content_manager.h"
 #include "filesystem.h"
-#include "mxml/mxml.h"
 #include "tools.h"
-
-using namespace zmm;
-using namespace mxml;
 
 static bool FsObjectComparator(std::shared_ptr<FsObject> o1, std::shared_ptr<FsObject> o2)
 {

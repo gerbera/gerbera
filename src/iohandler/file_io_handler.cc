@@ -36,9 +36,6 @@
 #include "file_io_handler.h"
 #include "server.h"
 
-using namespace zmm;
-using namespace mxml;
-
 FileIOHandler::FileIOHandler(std::string filename)
     : filename(filename)
     , f(nullptr)
