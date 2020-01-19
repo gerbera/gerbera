@@ -277,15 +277,16 @@ void UpnpXMLBuilder::updateObject(std::shared_ptr<CdsObject> obj, std::string te
     }
 }
 
-Ref<Element> UpnpXMLBuilder::createEventPropertySet()
+std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createEventPropertySet()
 {
-    Ref<Element> propset(new Element("e:propertyset"));
-    propset->setAttribute("xmlns:e", "urn:schemas-upnp-org:event-1-0");
+    auto doc = std::make_unique<pugi::xml_document>();
 
-    Ref<Element> property(new Element("e:property"));
+    auto propset = doc->append_child("e:propertyset");
+    propset.append_attribute("xmlns:e") = "urn:schemas-upnp-org:event-1-0";
 
-    propset->appendElementChild(property);
-    return propset;
+    propset.append_child("e:property");
+
+    return doc;
 }
 
 Ref<Element> UpnpXMLBuilder::renderDeviceDescription()

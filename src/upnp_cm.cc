@@ -35,9 +35,6 @@
 #include "server.h"
 #include "util/tools.h"
 
-using namespace zmm;
-using namespace mxml;
-
 ConnectionManagerService::ConnectionManagerService(std::shared_ptr<ConfigManager> config,
     std::shared_ptr<Storage> storage,
     UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle)
@@ -114,22 +111,21 @@ void ConnectionManagerService::processActionRequest(const std::unique_ptr<Action
 
 void ConnectionManagerService::processSubscriptionRequest(const std::unique_ptr<SubscriptionRequest>& request)
 {
-    int err;
-    IXML_Document* event = nullptr;
-
-    Ref<Element> propset, property;
-
     std::vector<std::string> mimeTypes = storage->getMimeTypes();
     std::string CSV = mime_types_to_CSV(mimeTypes);
 
-    propset = xmlBuilder->createEventPropertySet();
-    property = propset->getFirstElementChild();
-    property->appendTextChild(std::string("CurrentConnectionIDs"), "0");
-    property->appendTextChild(std::string("SinkProtocolInfo"), "");
-    property->appendTextChild(std::string("SourceProtocolInfo"), CSV);
+    auto propset = xmlBuilder->createEventPropertySet();
+    auto property = propset->document_element().first_child();
+    property.append_child("CurrentConnectionIDs").append_child(pugi::node_pcdata).set_value("0");
+    property.append_child("SinkProtocolInfo").append_child(pugi::node_pcdata).set_value("");
+    property.append_child("SourceProtocolInfo").append_child(pugi::node_pcdata).set_value(CSV.c_str());
 
-    std::string xml = propset->print();
-    err = ixmlParseBufferEx(xml.c_str(), &event);
+    std::ostringstream buf;
+    propset->print(buf, "", 0);
+    std::string xml = buf.str();
+
+    IXML_Document* event = nullptr;
+    int err = ixmlParseBufferEx(xml.c_str(), &event);
     if (err != IXML_SUCCESS) {
         throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, "Could not convert property set to ixml");
     }
@@ -143,18 +139,16 @@ void ConnectionManagerService::processSubscriptionRequest(const std::unique_ptr<
 
 void ConnectionManagerService::sendSubscriptionUpdate(std::string sourceProtocol_CSV)
 {
-    int err;
+    auto propset = xmlBuilder->createEventPropertySet();
+    auto property = propset->document_element().first_child();
+    property.append_child("SourceProtocolInfo").append_child(pugi::node_pcdata).set_value(sourceProtocol_CSV.c_str());
+
+    std::ostringstream buf;
+    propset->print(buf, "", 0);
+    std::string xml = buf.str();
+
     IXML_Document* event = nullptr;
-
-    Ref<Element> propset, property;
-
-    propset = xmlBuilder->createEventPropertySet();
-    property = propset->getFirstElementChild();
-    property->appendTextChild("SourceProtocolInfo", sourceProtocol_CSV);
-
-    std::string xml = propset->print();
-
-    err = ixmlParseBufferEx(xml.c_str(), &event);
+    int err = ixmlParseBufferEx(xml.c_str(), &event);
     if (err != IXML_SUCCESS) {
         /// \todo add another error code
         throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, "Could not convert property set to ixml");

@@ -32,6 +32,8 @@
 #ifndef __UPNP_CM_H__
 #define __UPNP_CM_H__
 
+#include <memory>
+
 #include "action_request.h"
 #include "common.h"
 #include "subscription_request.h"
