@@ -52,8 +52,6 @@
 #define MAX_EVENTS 4096
 #define MAX_STRLEN 4096
 
-using namespace zmm;
-
 Inotify::Inotify()
 {
     inotify_fd = inotify_init();

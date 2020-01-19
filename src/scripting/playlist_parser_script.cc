@@ -39,8 +39,6 @@
 
 #define ONE_TEXTLINE_BYTES  1024
 
-using namespace zmm;
-
 extern "C" {
 
 static duk_ret_t

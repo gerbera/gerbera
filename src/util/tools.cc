@@ -66,7 +66,6 @@
 
 #define WHITE_SPACE " \t\r\n"
 
-using namespace zmm;
 using namespace std;
 
 static const char* HEX_CHARS = "0123456789abcdef";

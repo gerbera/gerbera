@@ -32,7 +32,6 @@
 #include "io_handler_buffer_helper.h"
 #include "config/config_manager.h"
 
-using namespace zmm;
 using namespace std;
 
 IOHandlerBufferHelper::IOHandlerBufferHelper(size_t bufSize, size_t initialFillSize)

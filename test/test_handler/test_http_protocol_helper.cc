@@ -157,7 +157,7 @@ TEST_F(HeadersHelperTest, EmptyValueNotAdded) {
   EXPECT_STREQ(GET_HEADERS(info), "");
 }
 
-TEST_F(HeadersHelperTest, HandlesNullZmmString) {
+TEST_F(HeadersHelperTest, HandlesEmptyString) {
   std::string header;
 
   subject->addHeader(header, header);

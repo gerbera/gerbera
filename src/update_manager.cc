@@ -47,7 +47,6 @@
 #define MAX_OBJECT_IDS_OVERLOAD 30
 #define OBJECT_ID_HASH_CAPACITY 3109
 
-using namespace zmm;
 using namespace std;
 
 UpdateManager::UpdateManager(std::shared_ptr<Storage> storage, std::shared_ptr<Server> server)

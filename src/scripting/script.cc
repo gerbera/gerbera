@@ -44,8 +44,6 @@
     #include "onlineservice/atrailers_content_handler.h"
 #endif
 
-using namespace zmm;
-
 static duk_function_list_entry js_global_functions[] =
 {
     { "print",          js_print,        DUK_VARARGS },

@@ -44,8 +44,6 @@
 
 #include "config/config_manager.h"
 
-using namespace zmm;
-
 #define BUF_SIZE 256
 
 std::string run_simple_process(std::shared_ptr<ConfigManager> cfg, std::string prog, std::string param, std::string input)

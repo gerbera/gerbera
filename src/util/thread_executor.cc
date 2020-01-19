@@ -31,7 +31,6 @@
 
 #include "thread_executor.h"
 
-using namespace zmm;
 using namespace std;
 
 ThreadExecutor::ThreadExecutor()

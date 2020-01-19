@@ -36,8 +36,6 @@
 
 #define RESOURCE_PART_SEP '~'
 
-using namespace zmm;
-
 CdsResource::CdsResource(int handlerType)
 {
     this->handlerType = handlerType;

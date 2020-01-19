@@ -33,7 +33,6 @@
 
 #include "runtime.h"
 
-using namespace zmm;
 using namespace std;
 
 static void fatal_handler(void *udata, const char *msg)

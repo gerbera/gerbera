@@ -40,8 +40,6 @@
 #include "config/config_manager.h"
 #include "metadata/metadata_handler.h"
 
-using namespace zmm;
-
 //extern "C" {
 
 duk_ret_t js_print(duk_context *ctx)

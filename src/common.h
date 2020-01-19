@@ -36,7 +36,6 @@
 #include "exceptions.h"
 #include "util/logger.h"
 #include "util/memory.h"
-#include "zmm/zmmf.h"
 
 #define CONFIG_XML_VERSION_0_11_0 1
 #define CONFIG_XML_VERSION 2

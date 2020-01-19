@@ -29,6 +29,8 @@
 
 /// \file action_request.cc
 
+#include <sstream>
+
 #include "action_request.h"
 
 ActionRequest::ActionRequest(UpnpActionRequest* upnp_request)

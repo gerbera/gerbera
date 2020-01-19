@@ -51,8 +51,6 @@
 
 #endif//ONLINE_SERVICES
 
-using namespace zmm;
-
 void FallbackLayout::add(std::shared_ptr<CdsObject> obj, int parentID, bool use_ref)
 {
     obj->setParentID(parentID);
