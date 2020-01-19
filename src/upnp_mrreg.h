@@ -33,6 +33,8 @@
 #ifndef __UPNP_MRREG_H__
 #define __UPNP_MRREG_H__
 
+#include <memory>
+
 #include "action_request.h"
 #include "common.h"
 #include "subscription_request.h"

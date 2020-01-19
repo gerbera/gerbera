@@ -37,9 +37,6 @@
 #include "util/tools.h"
 #include "upnp_xml.h"
 
-using namespace zmm;
-using namespace mxml;
-
 MRRegistrarService::MRRegistrarService(std::shared_ptr<ConfigManager> config,
     UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle)
     : config(config)
@@ -109,20 +106,19 @@ void MRRegistrarService::processActionRequest(const std::unique_ptr<ActionReques
 
 void MRRegistrarService::processSubscriptionRequest(const std::unique_ptr<SubscriptionRequest>& request)
 {
-    int err;
+    auto propset = xmlBuilder->createEventPropertySet();
+    auto property = propset->document_element().first_child();
+    property.append_child("ValidationRevokedUpdateID").append_child(pugi::node_pcdata).set_value("0");
+    property.append_child("ValidationSucceededUpdateID").append_child(pugi::node_pcdata).set_value("0");
+    property.append_child("AuthorizationDeniedUpdateID").append_child(pugi::node_pcdata).set_value("0");
+    property.append_child("AuthorizationGrantedUpdateID").append_child(pugi::node_pcdata).set_value("0");
+
+    std::ostringstream buf;
+    propset->print(buf, "", 0);
+    std::string xml = buf.str();
+
     IXML_Document* event = NULL;
-
-    Ref<Element> propset, property;
-
-    propset = xmlBuilder->createEventPropertySet();
-    property = propset->getFirstElementChild();
-    property->appendTextChild("ValidationRevokedUpdateID", "0");
-    property->appendTextChild("ValidationSucceededUpdateID", "0");
-    property->appendTextChild("AuthorizationDeniedUpdateID", "0");
-    property->appendTextChild("AuthorizationGrantedUpdateID", "0");
-
-    std::string xml = propset->print();
-    err = ixmlParseBufferEx(xml.c_str(), &event);
+    int err = ixmlParseBufferEx(xml.c_str(), &event);
     if (err != IXML_SUCCESS) {
         throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, "Could not convert property set to ixml");
     }
@@ -136,20 +132,19 @@ void MRRegistrarService::processSubscriptionRequest(const std::unique_ptr<Subscr
 
 // TODO: FIXME
 #if 0
-void MRRegistrarService::subscription_update(std::string sourceProtocol_CSV)
+void MRRegistrarService::prcoessSubscriptionUpdate(std::string sourceProtocol_CSV)
 {
-    int err;
-    IXML_Document *event = NULL;
-
-    Ref<Element> propset, property;
-
-    propset = UpnpXML_CreateEventPropertySet();
-    property = propset->getFirstChild();
+    auto propset = xmlBuilder->createEventPropertySet();
+    auto property = propset->document_element().first_child();
+    property.append_child("SourceProtocolInfo").append_child(pugi::node_pcdata).set_value(sourceProtocol_CSV.c_str());
     property->appendTextChild("SourceProtocolInfo", sourceProtocol_CSV);
 
-    std::string xml = propset->print();
+    std::ostringstream buf;
+    propset->print(buf, "", 0);
+    std::string xml = buf.str();
 
-    err = ixmlParseBufferEx(xml.c_str(), &event);
+    IXML_Document *event = NULL;
+    int err = ixmlParseBufferEx(xml.c_str(), &event);
     if (err != IXML_SUCCESS)
     {
         /// \todo add another error code

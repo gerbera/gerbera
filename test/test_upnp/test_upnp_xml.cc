@@ -92,12 +92,13 @@ TEST_F(UpnpXmlTest, CreatesSecCaptionInfoElement) {
 }
 
 TEST_F(UpnpXmlTest, CreatesEventPropertySet) {
-  zmm::Ref<mxml::Element> result = subject->createEventPropertySet();
+  auto result = subject->createEventPropertySet();
+  auto root = result->document_element();
 
-  EXPECT_NE(result, nullptr);
-  EXPECT_STREQ(result->getName().c_str(), "e:propertyset");
-  EXPECT_STREQ(result->getAttribute("xmlns:e").c_str(), "urn:schemas-upnp-org:event-1-0");
-  EXPECT_NE(result->getChildByName("e:property"), nullptr);
+  EXPECT_NE(root, nullptr);
+  EXPECT_STREQ(root.name(), "e:propertyset");
+  EXPECT_STREQ(root.attribute("xmlns:e").as_string(), "urn:schemas-upnp-org:event-1-0");
+  EXPECT_NE(root.child("e:property"), nullptr);
 }
 
 TEST_F(UpnpXmlTest, UpdatesObjectActiveItem) {

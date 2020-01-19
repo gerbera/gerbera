@@ -38,9 +38,6 @@
 #include <string>
 #include <vector>
 
-using namespace zmm;
-using namespace mxml;
-
 ContentDirectoryService::ContentDirectoryService(std::shared_ptr<ConfigManager> config,
     std::shared_ptr<Storage> storage,
     UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle, int stringLimit)
@@ -272,21 +269,23 @@ void ContentDirectoryService::processActionRequest(const std::unique_ptr<ActionR
 
 void ContentDirectoryService::processSubscriptionRequest(const std::unique_ptr<SubscriptionRequest>& request)
 {
-    int err;
-    IXML_Document* event = nullptr;
-
-    Ref<Element> propset, property;
-
     log_debug("start");
 
-    propset = xmlBuilder->createEventPropertySet();
-    property = propset->getFirstElementChild();
-    property->appendTextChild("SystemUpdateID", std::to_string(systemUpdateID));
+    auto propset = xmlBuilder->createEventPropertySet();
+    auto property = propset->document_element().first_child();
+    property.append_child("SystemUpdateID").append_child(pugi::node_pcdata)
+        .set_value(std::to_string(systemUpdateID).c_str());
     auto obj = storage->loadObject(0);
     auto cont = std::static_pointer_cast<CdsContainer>(obj);
-    property->appendTextChild("ContainerUpdateIDs", fmt::format("0,{}", + cont->getUpdateID()));
-    std::string xml = propset->print();
-    err = ixmlParseBufferEx(xml.c_str(), &event);
+    property.append_child("ContainerUpdateIDs").append_child(pugi::node_pcdata)
+        .set_value(fmt::format("0,{}", + cont->getUpdateID()).c_str());
+
+    std::ostringstream buf;
+    propset->print(buf, "", 0);
+    std::string xml = buf.str();
+
+    IXML_Document* event = nullptr;
+    int err = ixmlParseBufferEx(xml.c_str(), &event);
     if (err != IXML_SUCCESS) {
         throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, "Could not convert property set to ixml");
     }
@@ -301,23 +300,23 @@ void ContentDirectoryService::processSubscriptionRequest(const std::unique_ptr<S
 
 void ContentDirectoryService::sendSubscriptionUpdate(std::string containerUpdateIDs_CSV)
 {
-    int err;
-    IXML_Document* event = nullptr;
-
-    Ref<Element> propset, property;
-
     log_debug("start");
 
     systemUpdateID++;
 
-    propset = xmlBuilder->createEventPropertySet();
-    property = propset->getFirstElementChild();
-    property->appendTextChild("ContainerUpdateIDs", containerUpdateIDs_CSV);
-    property->appendTextChild("SystemUpdateID", std::to_string(systemUpdateID));
+    auto propset = xmlBuilder->createEventPropertySet();
+    auto property = propset->document_element().first_child();
+    property.append_child("ContainerUpdateIDs").append_child(pugi::node_pcdata)
+        .set_value(containerUpdateIDs_CSV.c_str());
+    property.append_child("SystemUpdateID").append_child(pugi::node_pcdata)
+        .set_value(std::to_string(systemUpdateID).c_str());
 
-    std::string xml = propset->print();
+    std::ostringstream buf;
+    propset->print(buf, "", 0);
+    std::string xml = buf.str();
 
-    err = ixmlParseBufferEx(xml.c_str(), &event);
+    IXML_Document* event = nullptr;
+    int err = ixmlParseBufferEx(xml.c_str(), &event);
     if (err != IXML_SUCCESS) {
         /// \todo add another error code
         throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, "Could not convert property set to ixml");

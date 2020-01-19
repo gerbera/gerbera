@@ -52,7 +52,7 @@ public:
     /// \brief Renders XML for the action response header.
     /// \param actionName Name of the action.
     /// \param serviceType Type of service.
-    /// \return mxml::Element representing the newly created XML.
+    /// \return pugi::xml_document representing the newly created XML.
     ///
     /// Basically it renders an XML that looks like the following:
     /// <u:actionNameResponse xmlns:u="serviceType"/>
@@ -63,7 +63,6 @@ public:
     /// \brief Renders the DIDL-Lite representation of an object in the content directory.
     /// \param obj Object to be rendered as XML.
     /// \param renderActions If true, also render special elements of an active item.
-    /// \return mxml::Element representing the newly created XML.
     ///
     /// This function looks at the object, and renders the DIDL-Lite representation of it -
     /// either a container or an item. The renderActions parameter tells us whether to also
@@ -75,8 +74,8 @@ public:
     void updateObject(std::shared_ptr<CdsObject> obj, std::string text);
 
     /// \brief Renders XML for the event property set.
-    /// \return mxml::Element representing the newly created XML.
-    zmm::Ref<mxml::Element> createEventPropertySet();
+    /// \return pugi::xml_document representing the newly created XML.
+    std::unique_ptr<pugi::xml_document> createEventPropertySet();
 
     /// \brief Renders the device description XML.
     /// \return mxml::Element representing the newly created device description.
