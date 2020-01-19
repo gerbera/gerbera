@@ -8,10 +8,6 @@
 #include "config/config_manager.h"
 #include "config/config_generator.h"
 
-
-using namespace zmm;
-using namespace mxml;
-
 static int unlinkCB(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
 {
     int rv = remove(fpath);
@@ -131,8 +127,8 @@ TEST_F(ConfigManagerTest, ThrowsExceptionWhenMissingConfigFileAndNoDefault) {
   std::ostringstream expErrMsg;
   std::string notExistsDir = home + DIR_SEPARATOR + "not_exists";
 
-  expErrMsg << "\nThe server configuration file could not be found in: ";
-  expErrMsg << notExistsDir << DIR_SEPARATOR << confdir << "\n";
+  expErrMsg << "\nThe server configuration file could not be found: ";
+  expErrMsg << notExistsDir << DIR_SEPARATOR << confdir << DIR_SEPARATOR << "config.xml" << "\n";
   expErrMsg << "Gerbera could not find a default configuration file.\n";
   expErrMsg << "Try specifying an alternative configuration file on the command line.\n";
   expErrMsg << "For a list of options run: gerbera -h\n";
