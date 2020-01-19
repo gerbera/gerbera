@@ -36,9 +36,6 @@
 #include "server.h"
 #include "storage/storage.h"
 
-using namespace zmm;
-using namespace mxml;
-
 UpnpXMLBuilder::UpnpXMLBuilder(std::shared_ptr<ConfigManager> config,
     std::shared_ptr<Storage> storage,
     std::string virtualUrl, std::string presentationURL)
@@ -244,35 +241,41 @@ void UpnpXMLBuilder::renderObject(std::shared_ptr<CdsObject> obj, bool renderAct
 
 void UpnpXMLBuilder::updateObject(std::shared_ptr<CdsObject> obj, std::string text)
 {
-    Ref<Parser> parser(new Parser());
-    Ref<Element> root = parser->parseString(text)->getRoot();
+    pugi::xml_document doc;
+    pugi::xml_parse_result result = doc.load_string(text.c_str());
+    if (result.status != pugi::xml_parse_status::status_ok) {
+        log_error("Error parsing object XML: {}", result.description());
+        return;
+    }
+
+    auto root = doc.document_element();
     int objectType = obj->getObjectType();
 
     if (IS_CDS_ACTIVE_ITEM(objectType)) {
         auto aitem = std::static_pointer_cast<CdsActiveItem>(obj);
 
-        std::string title = root->getChildText("dc:title");
+        std::string title = root.child("dc:title").text().as_string();
         if (!title.empty())
             aitem->setTitle(title);
 
         /// \todo description should be taken from the dictionary
-        std::string description = root->getChildText("dc:description");
+        std::string description = root.child("dc:description").text().as_string();
         aitem->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION),
             description);
 
-        std::string location = root->getChildText("location");
+        std::string location = root.child("location").text().as_string();
         if (!location.empty())
             aitem->setLocation(location);
 
-        std::string mimeType = root->getChildText("mime-type");
+        std::string mimeType = root.child("mime-type").text().as_string();
         if (!mimeType.empty())
             aitem->setMimeType(mimeType);
 
-        std::string action = root->getChildText("action");
+        std::string action = root.child("action").text().as_string();
         if (!action.empty())
             aitem->setAction(action);
 
-        std::string state = root->getChildText("state");
+        std::string state = root.child("state").text().as_string();
         aitem->setState(state);
     }
 }
@@ -473,8 +476,6 @@ void UpnpXMLBuilder::renderAlbumDate(std::string date, pugi::xml_node* parent)
 
 std::unique_ptr<UpnpXMLBuilder::PathBase> UpnpXMLBuilder::getPathBase(std::shared_ptr<CdsItem> item, bool forceLocal)
 {
-    Ref<Element> res;
-
     auto pathBase = std::make_unique<PathBase>();
     /// \todo resource options must be read from configuration files
 

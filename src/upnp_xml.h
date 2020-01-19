@@ -37,7 +37,6 @@
 
 #include "cds_objects.h"
 #include "common.h"
-#include "mxml/mxml.h"
 
 // forward declaration
 class ConfigManager;
