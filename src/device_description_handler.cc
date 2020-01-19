@@ -28,7 +28,15 @@ Gerbera - https://gerbera.io/
 DeviceDescriptionHandler::DeviceDescriptionHandler(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
     UpnpXMLBuilder* xmlBuilder)
     : RequestHandler(config, storage)
-    , xmlBuilder(xmlBuilder) {}
+    , xmlBuilder(xmlBuilder)
+{
+
+    auto desc = xmlBuilder->renderDeviceDescription();
+
+    std::ostringstream buf;
+    desc->print(buf, "", 0);
+    deviceDescription = buf.str();
+}
 
 void DeviceDescriptionHandler::getInfo(const char* filename, UpnpFileInfo* info)
 {
@@ -42,9 +50,7 @@ void DeviceDescriptionHandler::getInfo(const char* filename, UpnpFileInfo* info)
 std::unique_ptr<IOHandler> DeviceDescriptionHandler::open(const char* filename, enum UpnpOpenFileMode mode, std::string range)
 {
     log_debug("Device description requested");
-    if (!string_ok(deviceDescription)) { // This always true for now
-        deviceDescription = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + xmlBuilder->renderDeviceDescription()->print();
-    }
+
     auto t = std::make_unique<MemIOHandler>(deviceDescription);
     t->open(mode);
     return t;
