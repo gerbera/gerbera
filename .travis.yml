@@ -23,9 +23,9 @@ script:
       && make install && make test"
 
 env:
-  - CXX=g++-7 CC=gcc-7
+  - CXX=g++-9 CC=gcc-9
   - CXX=g++-8 CC=gcc-8
-  - CXX=clang++-7 CC=clang-7 CXXFLAGS=-stdlib=libc++
+  - CXX=clang++-8 CC=clang-8 CXXFLAGS=-stdlib=libc++
 
 jobs:
   include:
