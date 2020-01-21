@@ -20,7 +20,7 @@ script:
     bash -c \
       "bash ../gerbera-src/scripts/install-googletest.sh \
       && cmake ../gerbera-src -DCMAKE_VERBOSE_MAKEFILE=ON -DWITH_SYSTEMD=0 -DWITH_TESTS=1 -DWITH_FFMPEGTHUMBNAILER=1 -DWITH_EXIF=1 -DWITH_AVCODEC=1 -DWITH_MYSQL=1 \
-      && make install && make test"
+      && make install && make CTEST_OUTPUT_ON_FAILURE=1 test"
 
 env:
   - CXX=g++-9 CC=gcc-9
