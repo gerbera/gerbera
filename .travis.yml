@@ -25,7 +25,7 @@ script:
 env:
   - CXX=g++-9 CC=gcc-9
   - CXX=g++-8 CC=gcc-8
-  - CXX=clang++-8 CC=clang-8 CXXFLAGS=-stdlib=libc++
+  - CXX=clang++-8 CC=clang-8
 
 jobs:
   include:

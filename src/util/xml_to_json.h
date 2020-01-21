@@ -35,6 +35,7 @@
 #define __UTIL_XML_TO_JSON_H__
 
 #include <string>
+#include <map>
 #include <stack>
 #include <sstream>
 #include <memory>
