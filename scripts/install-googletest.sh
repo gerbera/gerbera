@@ -18,11 +18,8 @@ cd googletest-master || exit 1
 
 ## Build GoogleTest using CMake
 mkdir build && cd build || exit 1
-if [[ $CXX == clang++* ]]; then
-	cmake -DCMAKE_CXX_FLAGS="-stdlib=libc++ -std=c++14" ../
-else
-	cmake -DCMAKE_CXX_FLAGS="-std=c++14" ../
-fi
+cmake -DCMAKE_CXX_FLAGS="$CMAKE_CXX_FLAGS -std=c++17" ../
+
 make && make install
 
 if [ "$unamestr" != 'Darwin' ]; then
