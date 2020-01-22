@@ -874,11 +874,11 @@ std::string SQLStorage::buildContainerPath(int parentID, std::string title)
 
     auto res = select(qb);
     if (res == nullptr)
-        return nullptr;
+        return "";
 
     std::unique_ptr<SQLRow> row = res->nextRow();
     if (row == nullptr)
-        return nullptr;
+        return "";
 
     char prefix;
     std::string path = stripLocationPrefix(&prefix, row->col(0)) + VIRTUAL_CONTAINER_SEPARATOR + title;
@@ -1159,7 +1159,7 @@ int SQLStorage::getTotalFiles()
 std::string SQLStorage::incrementUpdateIDs(const unique_ptr<unordered_set<int>>& ids)
 {
     if (ids->empty())
-        return nullptr;
+        return "";
     std::ostringstream inBuf;
 
     bool first = true;
@@ -1195,7 +1195,7 @@ std::string SQLStorage::incrementUpdateIDs(const unique_ptr<unordered_set<int>>&
         rows.emplace_back(s.str());
     }
     if (rows.empty())
-        return nullptr;
+        return "";
     return join(rows, ",");
 }
 
@@ -1667,11 +1667,11 @@ std::string SQLStorage::getInternalSetting(std::string key)
        << quote(key) << " LIMIT 1";
     auto res = select(q);
     if (res == nullptr)
-        return nullptr;
+        return "";
 
     std::unique_ptr<SQLRow> row = res->nextRow();
     if (row == nullptr)
-        return nullptr;
+        return "";
     return row->col(0);
 }
 

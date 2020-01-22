@@ -39,6 +39,7 @@ StringTokenizer::StringTokenizer(std::string str)
     pos = 0;
     len = str.length();
 }
+
 std::string StringTokenizer::nextToken(std::string seps)
 {
     const char *cstr = str.c_str();
@@ -52,5 +53,5 @@ std::string StringTokenizer::nextToken(std::string seps)
             pos++;
         return str.substr(start, pos - start);
     }
-    return nullptr;
+    return "";
 }

@@ -127,12 +127,12 @@ std::string PlaylistParserScript::readln()
         throw std::runtime_error("Readline not yet setup for use");
 
     if ((currentTask != nullptr) && (!currentTask->isValid()))
-        return nullptr;
+        return "";
 
     while (true)
     {
         if(fgets(currentLine, ONE_TEXTLINE_BYTES, currentHandle) == nullptr)
-            return nullptr;
+            return "";
 
         ret = trim_string(currentLine);
         if (string_ok(ret))
