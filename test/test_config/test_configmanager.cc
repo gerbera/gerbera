@@ -143,11 +143,11 @@ TEST_F(ConfigManagerTest, ThrowsExceptionWhenMissingConfigFileAndNoDefault) {
 }
 
 TEST_F(ConfigManagerTest, LoadsConfigFromDefaultHomeWhenExistsButNotSpecified) {
-  config_file = "";
-  subject = new ConfigManager(config_file, home, confdir, prefix, magic, "", "", 0, false);
+    config_file = "";
+    subject = new ConfigManager(config_file, home, confdir, prefix, magic, "", "", 0, false);
 
-  ASSERT_TRUE(subject->getBoolOption(CFG_SERVER_UI_ENABLED));
-  ASSERT_TRUE(subject->getBoolOption(CFG_SERVER_UI_SHOW_TOOLTIPS));
-  ASSERT_FALSE(subject->getBoolOption(CFG_SERVER_UI_ACCOUNTS_ENABLED));
-  ASSERT_EQ(30, subject->getIntOption(CFG_SERVER_UI_SESSION_TIMEOUT));
+    ASSERT_TRUE(subject->getBoolOption(CFG_SERVER_UI_ENABLED));
+    ASSERT_TRUE(subject->getBoolOption(CFG_SERVER_UI_SHOW_TOOLTIPS));
+    ASSERT_FALSE(subject->getBoolOption(CFG_SERVER_UI_ACCOUNTS_ENABLED));
+    ASSERT_EQ(30, subject->getIntOption(CFG_SERVER_UI_SESSION_TIMEOUT));
 }
