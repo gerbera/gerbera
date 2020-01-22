@@ -271,6 +271,9 @@ if(HAVE_ATOMIC)
     target_link_libraries(gerbera atomic)
 endif(HAVE_ATOMIC)
 
+find_package(Filesystem REQUIRED)
+target_link_libraries(gerbera std::filesystem)
+
 find_package(Iconv REQUIRED)
 include_directories(${ICONV_INCLUDE_DIR})
 target_link_libraries(gerbera ${ICONV_LIBRARIES})
