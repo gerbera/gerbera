@@ -1,13 +1,13 @@
 find_package(Threads REQUIRED)
 
 add_executable(testruntime
-        $<TARGET_OBJECTS:libgerbera>
         main.cc
         test_runtime.h
         test_runtime.cc
         )
 
 include_directories(
+        "${CMAKE_SOURCE_DIR}/src"
         ${UPNP_INCLUDE_DIRS}
         ${UUID_INCLUDE_DIRS}
         ${MAGIC_INCLUDE_DIRS}
@@ -27,6 +27,7 @@ include_directories(
 )
 
 target_link_libraries(testruntime PRIVATE
+        libgerbera
         ${UUID_LIBRARIES}
         ${UPNP_LIBRARIES}
         ${MAGIC_LIBRARIES}

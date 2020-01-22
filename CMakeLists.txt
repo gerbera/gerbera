@@ -214,12 +214,12 @@ set(libgerberaFILES
         src/web/web_autoscan.cc
         src/web/web_update.cc)
 
-add_library(libgerbera OBJECT ${libgerberaFILES})
-
+add_library(libgerbera STATIC ${libgerberaFILES})
 target_include_directories(libgerbera PRIVATE "${CMAKE_SOURCE_DIR}/src")
 
-add_executable(gerbera src/main.cc $<TARGET_OBJECTS:libgerbera>)
+add_executable(gerbera src/main.cc)
 target_include_directories(gerbera PRIVATE "${CMAKE_SOURCE_DIR}/src")
+target_link_libraries(gerbera libgerbera)
 
 target_compile_features(gerbera PUBLIC cxx_std_17)
 target_compile_features(libgerbera PUBLIC cxx_std_17)

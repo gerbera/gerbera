@@ -1,7 +1,6 @@
 find_package(Threads REQUIRED)
 
 add_executable(testscript
-        $<TARGET_OBJECTS:libgerbera>
         main.cc
         mock/duk_helper.h
         mock/duk_helper.cc
@@ -17,6 +16,7 @@ add_executable(testscript
         test_internal_pls_playlist.cc)
 
 include_directories(
+        "${CMAKE_SOURCE_DIR}/src"
         ${UPNP_INCLUDE_DIRS}
         ${UUID_INCLUDE_DIRS}
         ${MAGIC_INCLUDE_DIRS}
@@ -37,6 +37,7 @@ include_directories(
 )
 
 target_link_libraries(testscript PRIVATE
+        libgerbera
         ${UUID_LIBRARIES}
         ${UPNP_LIBRARIES}
         ${MAGIC_LIBRARIES}
