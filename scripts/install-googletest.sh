@@ -21,7 +21,7 @@ cd gtest || exit 1
 mkdir build && cd build || exit 1
 cmake -DCMAKE_CXX_FLAGS="$CMAKE_CXX_FLAGS -std=c++17" ../ || exit 1
 
-make && make install
+make -j$(nproc) && make install
 
 if [ "$unamestr" != 'Darwin' ]; then
     ldconfig
