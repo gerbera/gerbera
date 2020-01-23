@@ -176,7 +176,6 @@ int main(int argc, char** argv, char** envp)
 
         // If home is not given by the user, get it from the environment
         if (!config_file.has_value() && !home.has_value()) {
-
             if (!confdir.has_value()) {
                 confdir = DEFAULT_CONFIG_HOME;
             }
@@ -223,16 +222,9 @@ int main(int argc, char** argv, char** envp)
         }
 
         if (opts.count("create-config") > 0) {
-            std::string magicStr;
-            if (!magic.has_value()) {
-                magicStr = "";
-            } else {
-                magicStr = magic.value().c_str();
-            }
-
             ConfigGenerator configGenerator;
 
-            std::string generated = configGenerator.generate(home.value(), confdir.value(), prefix.value(), magicStr);
+            std::string generated = configGenerator.generate(*home, *confdir, *prefix, *magic);
             std::cout << generated.c_str() << std::endl;
             exit(EXIT_SUCCESS);
         }
