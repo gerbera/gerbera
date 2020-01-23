@@ -1,11 +1,11 @@
 find_package(Threads REQUIRED)
 
 add_executable(testhandler
-        $<TARGET_OBJECTS:libgerbera>
         test_http_protocol_helper.cc
         )
 
 include_directories(
+        "${CMAKE_SOURCE_DIR}/src"
         ${UPNP_INCLUDE_DIRS}
         ${UUID_INCLUDE_DIRS}
         ${MAGIC_INCLUDE_DIRS}
@@ -26,6 +26,7 @@ include_directories(
 )
 
 target_link_libraries(testhandler PRIVATE
+        libgerbera
         ${UUID_LIBRARIES}
         ${UPNP_LIBRARIES}
         ${MAGIC_LIBRARIES}
