@@ -65,8 +65,8 @@ sudo make install
 
 #### On Ubuntu 16.04
 ```
-apt-get install uuid-dev libexpat1-dev libsqlite3-dev libmysqlclient-dev \
-libmagic-dev libexif-dev libcurl4-openssl-dev libspdlog-dev
+apt-get install uuid-dev libsqlite3-dev libmysqlclient-dev \
+libmagic-dev libexif-dev libcurl4-openssl-dev libspdlog-dev libpugixml-dev
 # If building with LibAV/FFmpeg (-DWITH_AVCODEC=1)
 apt-get install libavutil-dev libavcodec-dev libavformat-dev libavdevice-dev \
 libavfilter-dev libavresample-dev libswscale-dev libswresample-dev libpostproc-dev
@@ -109,9 +109,9 @@ The Gerbera Team maintains a Homebrew Tap to allow for easy installation of Gerb
 
 | Lib          	| Version 	| Required? 	| Note                 	     | Compile-time option | Default  |
 |--------------	|---------	|-----------	|--------------------------- | --------------------| -------- |
-| libupnp      	| 1.8.3   	| Required  	| [pupnp]                    |                     |          |
+| libupnp      	| >=1.8.6  	| Required  	| [pupnp]                    |                     |          |
 | libuuid      	|         	| Depends on OS | On \*BSD native libuuid is used, others require e2fsprogs-libuuid | | |
-| expat        	|         	| Required  	|                      	     |                     |          |
+| pugixml     	|         	| Required  	| [pugixml]         	     |                     |          |
 | libiconv     	|         	| Required  	|                      	     |                     |          |
 | sqlite3      	|         	| Required  	| Database storage     	     |                     |          |
 | zlib          |        	| Required  	|                            |                     |          |
@@ -141,11 +141,12 @@ The Gerbera Team maintains a Homebrew Tap to allow for easy installation of Gerb
        Sergey Bostandzhyan <jin at mediatomb dot cc>
        Leonhard Wimmer <leo at mediatomb dot cc>
 
-    Copyright (C) 2016-2019
+    Copyright (C) 2016-2020
         Gerbera Contributors
 
 [1]: https://sourceforge.net/p/mediatomb/discussion/440751/thread/258c3cf7/?limit=250
 [pupnp]: https://github.com/mrjimenez/pupnp.git
+[pugixml]: https://github.com/zeux/pugixml
 [taglib]: http://taglib.org/
 [CMake]: https://cmake.org/
 [Ubuntu PPA]: https://launchpad.net/~stephenczetty/+archive/ubuntu/gerbera-updates
