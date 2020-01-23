@@ -23,5 +23,9 @@ if [ "$unamestr" == 'Darwin' ]; then
   sed -i -e 's/-soname/-install_name/g' Makefile.sharedlibrary
 fi
 
-$makeCMD -f Makefile.sharedlibrary && $makeCMD -f Makefile.sharedlibrary install\
- && ldconfig
+$makeCMD -f Makefile.sharedlibrary && $makeCMD -f Makefile.sharedlibrary install || exit 1
+
+. /etc/os-release
+if [ "$ID" != 'alpine' ]; then
+  ldconfig
+fi

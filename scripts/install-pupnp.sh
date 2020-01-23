@@ -1,11 +1,11 @@
-#!/bin/bash
+#!/bin/sh
 if ! [ "$(id -u)" = 0 ]; then
     echo "Please run this script with superuser access!"
     exit 1
 fi
 set -ex
 
-VERSION="1.8.6"
+VERSION="1.12.0"
 
 unamestr=$(uname)
 if [ "$unamestr" == 'FreeBSD' ]; then
@@ -19,6 +19,10 @@ tar -xzvf pupnp-$VERSION.tgz
 cd pupnp-release-$VERSION
 ./bootstrap && \
 ./configure $extraFlags --enable-ipv6 --enable-reuseaddr && \
-make && \
-make install && \
-ldconfig
+make -j$(nproc) && \
+make install
+
+. /etc/os-release
+if [ "$ID" != 'alpine' ]; then
+  ldconfig
+fi

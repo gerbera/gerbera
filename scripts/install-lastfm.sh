@@ -9,6 +9,10 @@ wget "https://storage.googleapis.com/google-code-archive-downloads/v2/code.googl
 tar -xzvf "lastfmlib-${LASTFM_VERSION}.tar.gz"
 cd "lastfmlib-${LASTFM_VERSION}"
 ./configure --prefix=/usr/local
-make
+make -j$(nproc) && \
 make install
-ldconfig
+
+. /etc/os-release
+if [ "$ID" != 'alpine' ]; then
+  ldconfig
+fi
