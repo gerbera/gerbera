@@ -1,7 +1,7 @@
 FROM ubuntu:18.04
 
 RUN apt-get update &&\
-    apt-get install -y uuid-dev libexpat1-dev libsqlite3-dev zlib1g-dev \
+    apt-get install -y uuid-dev libsqlite3-dev zlib1g-dev \
     libmagic-dev libexif-dev libcurl4-openssl-dev libavutil-dev libavcodec-dev \
     libavformat-dev libavdevice-dev libavfilter-dev libavresample-dev \
     libswscale-dev libswresample-dev libpostproc-dev g++ cmake \

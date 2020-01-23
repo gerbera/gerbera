@@ -18,13 +18,13 @@ In order to compile Gerbera you will have to install the following packages:
 +-------------------+-----------+---------------+----------------------------+------------------------+----------+
 | Library           | Version   | Required?     | Note                       | Compile-time option    | Default  |
 +===================+===========+===============+============================+========================+==========+
-| libupnp           | 1.8.3     | Required      | `pupnp <https://github.com/mrjimenez/pupnp>`_       |          |
+| libupnp           | >=1.8.6   | Required      | `pupnp <https://github.com/mrjimenez/pupnp>`_       |          |
 +-------------------+-----------+---------------+----------------------------+------------------------+----------+
 | libuuid           |           | Depends on OS | On BSD native libuuid is   |                        |          |
 |                   |           |               | used others require        |                        |          |
 |                   |           |               | e2fsprogs-libuuid          |                        |          |
 +-------------------+-----------+---------------+----------------------------+------------------------+----------+
-| expat             |           | Required      |                            |                        |          |
+| pugixml           |           | Required      |                            |                        |          |
 +-------------------+-----------+---------------+----------------------------+------------------------+----------+
 | libiconv          |           | Required      |                            |                        |          |
 +-------------------+-----------+---------------+----------------------------+------------------------+----------+
@@ -90,8 +90,8 @@ Build On Ubuntu 16.04
 
 ::
 
-  apt-get install uuid-dev libexpat1-dev libsqlite3-dev libmysqlclient-dev \
-  libmagic-dev libexif-dev libcurl4-openssl-dev
+  apt-get install uuid-dev libsqlite3-dev libmysqlclient-dev \
+  libmagic-dev libexif-dev libcurl4-openssl-dev libspdlog-dev libpugixml-dev
   # If building with LibAV/FFmpeg (-DWITH_AVCODEC=1)
   apt-get install libavutil-dev libavcodec-dev libavformat-dev libavdevice-dev \
   libavfilter-dev libavresample-dev libswscale-dev libswresample-dev libpostproc-dev
