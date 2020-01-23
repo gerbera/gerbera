@@ -115,7 +115,7 @@ void web::autoscan::process()
             //    AutoscanDirectory::mapScanlevel(scan_level).c_str(), recursive, interval, hidden);
 
             auto autoscan = std::make_shared<AutoscanDirectory>(
-                nullptr, //location
+                "", //location
                 scan_mode,
                 scan_level,
                 recursive,
