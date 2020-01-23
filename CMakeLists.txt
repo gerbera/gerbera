@@ -311,6 +311,10 @@ if (UPNP_VERSION_STRING VERSION_GREATER_EQUAL "1.10.0")
     add_definitions(-DUPNP_HAS_REQUEST_COOKIES)
 endif()
 
+if (UPNP_VERSION_STRING VERSION_LESS "1.12.0")
+        add_definitions(-DUpnpListHead=list_head)
+endif()
+
 if (NOT UPNP_HAS_IPV6)
     message(FATAL_ERROR "Gerbera requires libupnp with IPv6 support.")
 endif()
