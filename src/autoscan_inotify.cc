@@ -737,7 +737,7 @@ std::string AutoscanInotify::normalizePathNoEx(std::string path)
         return normalizePath(path);
     } catch (const std::runtime_error& e) {
         log_error("{}", e.what());
-        return nullptr;
+        return "";
     }
 }
 

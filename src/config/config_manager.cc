@@ -1910,7 +1910,6 @@ std::vector<std::string> ConfigManager::createArrayFromNode(const pugi::xml_node
 }
 
 // The validate function ensures that the array is completely filled!
-// None of the options->get() calls will ever return nullptr!
 std::string ConfigManager::getOption(config_option_t option)
 {
     auto o = options->at(option);

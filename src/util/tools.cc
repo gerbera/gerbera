@@ -977,7 +977,7 @@ std::string getValueOrDefault(const std::map<std::string,std::string>& m, const 
 std::string toCSV(shared_ptr<unordered_set<int>> array)
 {
     if (array->empty())
-        return nullptr;
+        return "";
     return join(*array, ",");
 }
 
@@ -1087,13 +1087,13 @@ std::string interfaceToIP(std::string interface)
     int local_socket;
 
     if (!string_ok(interface))
-        return nullptr;
+        return "";
 
     local_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (local_socket < 0) {
         log_error("Could not create local socket: {}",
             mt_strerror(errno).c_str());
-        return nullptr;
+        return "";
     }
 
     iflist = iflist_free = if_nameindex();
@@ -1101,7 +1101,7 @@ std::string interfaceToIP(std::string interface)
         log_error("Could not get interface list: {}",
             mt_strerror(errno).c_str());
         close(local_socket);
-        return nullptr;
+        return "";
     }
 
     while (iflist->if_index || iflist->if_name) {
@@ -1112,7 +1112,7 @@ std::string interfaceToIP(std::string interface)
                     mt_strerror(errno).c_str());
                 close(local_socket);
                 if_freenameindex(iflist_free);
-                return nullptr;
+                return "";
             }
 
             memcpy(&local_address, &if_request.ifr_addr, sizeof(if_request.ifr_addr));
@@ -1126,7 +1126,7 @@ std::string interfaceToIP(std::string interface)
 
     close(local_socket);
     if_freenameindex(iflist_free);
-    return nullptr;
+    return "";
 }
 
 std::string ipToInterface(std::string ip)
@@ -1251,7 +1251,7 @@ std::string tempName(std::string leadPath, char* tmpl)
     XXXXXX = strstr(tmpl, "XXXXXX");
 
     if (!XXXXXX || strncmp(XXXXXX, "XXXXXX", 6)) {
-        return nullptr;
+        return "";
     }
 
     /* Get some more or less random data.  */
@@ -1280,12 +1280,12 @@ std::string tempName(std::string leadPath, char* tmpl)
             if ((errno == ENOENT) || (errno == ENOTDIR))
                 return check;
             else
-                return nullptr;
+                return "";
         }
     }
 
     /* We got out of the loop because we ran out of combinations to try.  */
-    return nullptr;
+    return "";
 }
 
 bool isTheora(std::string ogg_filename)
@@ -1411,7 +1411,7 @@ std::string getDLNAContentHeader(std::shared_ptr<ConfigManager> config, std::str
         content_parameter = content_parameter + D_FLAGS "=" D_TR_FLAGS_AV;
         return content_parameter;
     }
-    return nullptr;
+    return "";
 }
 
 std::string getDLNATransferHeader(std::shared_ptr<ConfigManager> config, std::string mimeType)
@@ -1456,12 +1456,12 @@ std::string getAVIFourCC(std::string avi_filename)
 
     if (strncmp(buffer, "RIFF", 4) != 0) {
         free(buffer);
-        return nullptr;
+        return "";
     }
 
     if (strncmp(buffer + 8, "AVI ", 4) != 0) {
         free(buffer);
-        return nullptr;
+        return "";
     }
 
     std::string fourcc = std::string(buffer + FCC_OFFSET, 4);
@@ -1470,7 +1470,7 @@ std::string getAVIFourCC(std::string avi_filename)
     if (string_ok(fourcc))
         return fourcc;
     else
-        return nullptr;
+        return "";
 }
 #endif
 

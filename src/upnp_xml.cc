@@ -556,7 +556,8 @@ std::string UpnpXMLBuilder::renderExtension(std::string contentType, std::string
             }
         }
     }
-    return nullptr;
+
+    return "";
 }
 
 void UpnpXMLBuilder::addResources(std::shared_ptr<CdsItem> item, pugi::xml_node* parent)

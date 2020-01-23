@@ -60,12 +60,12 @@ std::string Script::getProperty(std::string name)
 {
     std::string ret;
     if (!duk_is_object_coercible(ctx, -1))
-        return nullptr;
+        return "";
     duk_get_prop_string(ctx, -1, name.c_str());
     if (duk_is_null_or_undefined(ctx, -1) || !duk_to_string(ctx, -1))
     {
         duk_pop(ctx);
-        return nullptr;
+        return "";
     }
     ret = duk_get_string(ctx, -1);
     duk_pop(ctx);
@@ -707,7 +707,7 @@ std::string Script::convertToCharset(std::string str, charset_convert_t chr)
             return _i2i->convert(str);
     }
 
-    return nullptr;
+    return "";
 }
 
 std::shared_ptr<CdsObject> Script::getProcessedObject()
