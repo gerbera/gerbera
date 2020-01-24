@@ -29,12 +29,6 @@
 
 /// \file config_manager.cc
 
-#include "config_manager.h"
-#include "common.h"
-#include "metadata/metadata_handler.h"
-#include "storage/storage.h"
-#include "util/string_converter.h"
-#include "util/tools.h"
 #ifdef BSD_NATIVE_UUID
 #include <uuid.h>
 #else
@@ -46,10 +40,6 @@
 #include <sys/types.h>
 #include <filesystem>
 
-#ifdef HAVE_INOTIFY
-#include "util/mt_inotify.h"
-#endif
-
 #if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE)
 #include <clocale>
 #include <langinfo.h>
@@ -57,6 +47,17 @@
 
 #ifdef HAVE_CURL
 #include <curl/curl.h>
+#endif
+
+#include "config_manager.h"
+#include "common.h"
+#include "metadata/metadata_handler.h"
+#include "storage/storage.h"
+#include "util/string_converter.h"
+#include "util/tools.h"
+
+#ifdef HAVE_INOTIFY
+#include "util/mt_inotify.h"
 #endif
 
 bool ConfigManager::debug_logging = false;
@@ -85,7 +86,7 @@ ConfigManager::ConfigManager(std::string filename,
         filename += home + DIR_SEPARATOR + DEFAULT_CONFIG_NAME;
     }
 
-    if (!std::filesystem::exists(filename)) {
+    if (!std::filesystem::is_regular_file(filename)) {
         std::ostringstream expErrMsg;
         expErrMsg << "\nThe server configuration file could not be found: ";
         expErrMsg << filename << "\n";
@@ -178,7 +179,7 @@ void ConfigManager::load(std::string filename, std::string userHome)
         temp = userHome;
     } else
         temp = getOption("/server/home");
-    if (!std::filesystem::exists(temp))
+    if (!std::filesystem::is_directory(temp))
         throw std::runtime_error("Directory '" + temp + "' does not exist!");
     NEW_OPTION(temp);
     SET_OPTION(CFG_SERVER_HOME);
@@ -731,13 +732,13 @@ void ConfigManager::load(std::string filename, std::string userHome)
 #ifdef HAVE_JS
     temp = getOption("/import/scripting/playlist-script",
         prefix_dir + DIR_SEPARATOR + DEFAULT_JS_DIR + DIR_SEPARATOR + DEFAULT_PLAYLISTS_SCRIPT);
-    temp = resolvePath(temp);
+    temp = resolvePath(temp, true);
     NEW_OPTION(temp);
     SET_OPTION(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT);
 
     temp = getOption("/import/scripting/common-script",
         prefix_dir + DIR_SEPARATOR + DEFAULT_JS_DIR + DIR_SEPARATOR + DEFAULT_COMMON_SCRIPT);
-    temp = resolvePath(temp);
+    temp = resolvePath(temp, true);
     NEW_OPTION(temp);
     SET_OPTION(CFG_IMPORT_SCRIPTING_COMMON_SCRIPT);
 
@@ -1345,15 +1346,15 @@ std::string ConfigManager::resolvePath(std::string path, bool isFile, bool exist
     // verify that file/directory is there
     if (isFile) {
         if (exists) {
-            if (!std::filesystem::exists(path))
+            if (!std::filesystem::is_regular_file(path))
                 throw std::runtime_error("File '" + path + "' does not exist!");
         } else {
             std::string parent_path = std::filesystem::path(path).parent_path();
-            if (!std::filesystem::exists(parent_path))
+            if (!std::filesystem::is_directory(parent_path))
                 throw std::runtime_error("Parent directory '" + path + "' does not exist!");
         }
     } else if (exists) {
-        if (!std::filesystem::exists(path))
+        if (!std::filesystem::is_directory(path))
             throw std::runtime_error("Directory '" + path + "' does not exist!");
     }
 
@@ -1656,7 +1657,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
 
             std::string tmp_path;
             if (startswith(param, _DIR_SEPARATOR)) {
-                if (!check_path(param))
+                if (!std::filesystem::is_regular_file(param))
                     throw std::runtime_error("error in configuration, transcoding "
                                     "profile \""
                         + prof->getName() + "\" could not find transcoding command " + param);
@@ -1775,7 +1776,7 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNode(std::sha
             throw std::runtime_error("autoscan directory \"" + location + "\": " + e.what());
         }
 
-        if (check_path(location, false)) {
+        if (!std::filesystem::is_directory(location)) {
             throw std::runtime_error("autoscan " + location + " - not a directory!");
         }
 
