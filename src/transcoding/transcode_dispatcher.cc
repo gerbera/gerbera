@@ -50,8 +50,6 @@ std::unique_ptr<IOHandler> TranscodeDispatcher::open(std::shared_ptr<Transcoding
     if (profile == nullptr)
         throw std::runtime_error("Transcoding of file " + location + "requested but no profile given ");
 
-    //    check_path_ex(location);
-
     if (profile->getType() == TR_External) {
         auto tr_ext = std::make_unique<TranscodeExternalHandler>(config, content);
         return tr_ext->open(profile, location, obj, range);

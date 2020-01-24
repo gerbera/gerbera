@@ -29,6 +29,8 @@
 
 /// \file cds_objects.cc
 
+#include <filesystem>
+
 #include "cds_objects.h"
 #include "storage/storage.h"
 #include "util/tools.h"
@@ -176,8 +178,8 @@ void CdsItem::validate()
     if (!string_ok(this->location))
         throw std::runtime_error("Item validation failed: missing location");
 
-    if (!check_path(this->location))
-        throw std::runtime_error("Item validation failed: file " + this->location + " not found");
+    if (!std::filesystem::is_regular_file(location))
+        throw std::runtime_error("Item validation failed: file " + location + " not found");
 }
 
 CdsActiveItem::CdsActiveItem(std::shared_ptr<Storage> storage)
@@ -214,8 +216,8 @@ void CdsActiveItem::validate()
     if (!string_ok(this->action))
         throw std::runtime_error("Active Item validation failed: missing action\n");
 
-    if (!check_path(this->action))
-        throw std::runtime_error("Active Item validation failed: action script " + this->action + " not found\n");
+    if (!std::filesystem::is_regular_file(this->action))
+        throw std::runtime_error("Active Item validation failed: action script " + action + " not found\n");
 }
 //---------
 
@@ -286,7 +288,7 @@ void CdsContainer::validate()
 {
     CdsObject::validate();
     /// \todo well.. we have to know if a container is a real directory or just a virtual container in the database
-    /*    if (!check_path(this->location, true))
+    /*    if (!std::filesystem::is_directory(this->location, true))
         throw std::runtime_error("CdsContainer: validation failed"); */
 }
 

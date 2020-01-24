@@ -35,6 +35,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <filesystem>
 
 #include "config/config_manager.h"
 #include "storage/storage.h"
@@ -134,7 +135,7 @@ ContentManager::ContentManager(std::shared_ptr<ConfigManager> config, std::share
         auto dir = config_timed_list->get(i);
         if (dir != nullptr) {
             std::string path = dir->getLocation();
-            if (check_path(path, true)) {
+            if (std::filesystem::is_directory(path)) {
                 dir->setObjectID(ensurePathExistence(path));
             }
         }
@@ -156,7 +157,7 @@ void ContentManager::init()
             auto dir = config_inotify_list->get(i);
             if (dir != nullptr) {
                 std::string path = dir->getLocation();
-                if (check_path(path, true)) {
+                if (std::filesystem::is_directory(path)) {
                     dir->setObjectID(ensurePathExistence(path));
                 }
             }
@@ -346,17 +347,17 @@ void ContentManager::shutdown()
     destroyLayout();
 
 #ifdef HAVE_INOTIFY
+    // update mofification time for storage
     for (size_t i = 0; i < autoscan_inotify->size(); i++) {
         log_debug("AutoDir {}", i);
         std::shared_ptr<AutoscanDirectory> dir = autoscan_inotify->get(i);
         if (dir != nullptr) {
-            try {
-                dir->resetLMT();
-                dir->setCurrentLMT(check_path_ex(dir->getLocation(), true));
-                dir->updateLMT();
-            } catch (const std::runtime_error& ex) {
-                continue;
+            dir->resetLMT();
+            if (std::filesystem::is_directory(dir->getLocation())) {
+                auto t = getLastWriteTime(dir->getLocation());
+                dir->setCurrentLMT(t);
             }
+            dir->updateLMT();
         }
     }
 
@@ -437,7 +438,10 @@ void ContentManager::addVirtualItem(std::shared_ptr<CdsObject> obj, bool allow_f
 {
     obj->validate();
     std::string path = obj->getLocation();
-    check_path_ex(path, false, false);
+
+    if (!std::filesystem::is_regular_file(path))
+        throw std::runtime_error("Not a file: " + path);
+
     auto pcdir = storage->findObjectByPath(path);
     if (pcdir == nullptr) {
         pcdir = createObjectFromFile(path, true, allow_fifo);
@@ -578,7 +582,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
     }
 
     if (containerID == INVALID_OBJECT_ID) {
-        if (!check_path(adir->getLocation(), true)) {
+        if (!std::filesystem::is_directory(adir->getLocation())) {
             adir->setObjectID(INVALID_OBJECT_ID);
             storage->updateAutoscanDirectory(adir);
             if (adir->persistent()) {
@@ -1271,7 +1275,7 @@ void ContentManager::addTask(std::shared_ptr<GenericTask> task, bool lowPriority
 int ContentManager::addFile(std::string path, bool recursive, bool async, bool hidden, bool lowPriority, bool cancellable)
 {
     std::string rootpath;
-    if (check_path(path, true))
+    if (std::filesystem::is_directory(path))
         rootpath = path;
     return addFileInternal(path, rootpath, recursive, async, hidden, lowPriority, 0, cancellable);
 }
