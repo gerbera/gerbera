@@ -51,15 +51,17 @@
 #include "contrib/cxxopts.hpp"
 #include "server.h"
 
-int shutdown_flag = 0;
-int restart_flag = 0;
-pthread_t main_thread_id;
+static struct {
+    int shutdown_flag = 0;
+    int restart_flag = 0;
+    pthread_t main_thread_id;
 
-std::mutex mutex;
-std::unique_lock<std::mutex> lock { mutex };
-std::condition_variable cond;
+    std::mutex mutex;
+    std::unique_lock<std::mutex> lock { mutex };
+    std::condition_variable cond;
+} _ctx;
 
-void print_copyright()
+static void printCopyright()
 {
     printf("\nGerbera UPnP Server version %s - %s\n\n", VERSION, DESC_MANUFACTURER_URL);
     printf("===============================================================================\n");
@@ -69,7 +71,7 @@ void print_copyright()
     printf("===============================================================================\n");
 }
 
-void log_copyright()
+static void logCopyright()
 {
     log_info("Gerbera UPnP Server version {} - {}", VERSION, DESC_MANUFACTURER_URL);
     log_info("===============================================================================");
@@ -79,7 +81,54 @@ void log_copyright()
     log_info("===============================================================================");
 }
 
-void signal_handler(int signum);
+static void signalHandler(int signum)
+{
+    if (_ctx.main_thread_id != pthread_self()) {
+        return;
+    }
+
+    if ((signum == SIGINT) || (signum == SIGTERM)) {
+        _ctx.shutdown_flag++;
+        if (_ctx.shutdown_flag == 1) {
+            log_info("Gerbera shutting down. Please wait...");
+        } else if (_ctx.shutdown_flag == 2) {
+            log_info("Gerbera still shutting down, signal again to kill.");
+        } else if (_ctx.shutdown_flag > 2) {
+            log_error("Clean shutdown failed, killing Gerbera!");
+            exit(EXIT_FAILURE);
+        }
+    } else if (signum == SIGHUP) {
+        _ctx.restart_flag = 1;
+    }
+
+    _ctx.cond.notify_one();
+}
+
+static void installSignalHandler()
+{
+    _ctx.main_thread_id = pthread_self();
+
+    struct sigaction action;  
+    memset(&action, 0, sizeof(action));
+    action.sa_handler = signalHandler;
+    action.sa_flags = 0;
+    sigfillset(&action.sa_mask);
+    if (sigaction(SIGINT, &action, nullptr) < 0) {
+        log_error("Could not register SIGINT handler!");
+    }
+
+    if (sigaction(SIGTERM, &action, nullptr) < 0) {
+        log_error("Could not register SIGTERM handler!");
+    }
+
+    if (sigaction(SIGHUP, &action, nullptr) < 0) {
+        log_error("Could not register SIGHUP handler!");
+    }
+
+    if (sigaction(SIGPIPE, &action, nullptr) < 0) {
+        log_error("Could not register SIGPIPE handler!");
+    }
+}
 
 int main(int argc, char** argv, char** envp)
 {
@@ -120,12 +169,12 @@ int main(int argc, char** argv, char** envp)
         }
 
         if (opts.count("version") > 0) {
-            print_copyright();
+            printCopyright();
             exit(EXIT_SUCCESS);
         }
 
         if (opts.count("compile-info") > 0) {
-            print_copyright();
+            printCopyright();
             std::cout << "Compile info" << std::endl
                       << "-------------" << std::endl
                       << COMPILE_INFO << std::endl
@@ -156,7 +205,7 @@ int main(int argc, char** argv, char** envp)
 
         // Action starts here
         if (opts.count("create-config") == 0) {
-            log_copyright();
+            logCopyright();
         }
 
         std::optional<std::string> home;
@@ -247,7 +296,10 @@ int main(int argc, char** argv, char** envp)
         std::shared_ptr<ConfigManager> config;
         try {
             config = std::make_shared<ConfigManager>(
-                *config_file, *home, *confdir, *prefix, *magic, *ip, *interface, portnum.value_or(-1), debug
+                config_file.value_or(""), home.value_or(""), confdir.value_or(""),
+                prefix.value_or(""), magic.value_or(""),
+                ip.value_or(""), interface.value_or(""), portnum.value_or(-1),
+                debug
             );
             portnum = config->getIntOption(CFG_SERVER_PORT);
         } catch (const ConfigParseException& ce) {
@@ -258,32 +310,11 @@ int main(int argc, char** argv, char** envp)
             exit(EXIT_FAILURE);
         }
 
-        struct sigaction action;
         sigset_t mask_set;
-        main_thread_id = pthread_self();
-        // install signal handlers
         sigfillset(&mask_set);
         pthread_sigmask(SIG_SETMASK, &mask_set, nullptr);
 
-        memset(&action, 0, sizeof(action));
-        action.sa_handler = signal_handler;
-        action.sa_flags = 0;
-        sigfillset(&action.sa_mask);
-        if (sigaction(SIGINT, &action, nullptr) < 0) {
-            log_error("Could not register SIGINT handler!");
-        }
-
-        if (sigaction(SIGTERM, &action, nullptr) < 0) {
-            log_error("Could not register SIGTERM handler!");
-        }
-
-        if (sigaction(SIGHUP, &action, nullptr) < 0) {
-            log_error("Could not register SIGHUP handler!");
-        }
-
-        if (sigaction(SIGPIPE, &action, nullptr) < 0) {
-            log_error("Could not register SIGPIPE handler!");
-        }
+        installSignalHandler();
 
         std::shared_ptr<Server> server;
         try {
@@ -340,10 +371,10 @@ int main(int argc, char** argv, char** envp)
         pthread_sigmask(SIG_SETMASK, &mask_set, nullptr);
 
         // wait until signalled to terminate
-        while (!shutdown_flag) {
-            cond.wait(lock);
+        while (!_ctx.shutdown_flag) {
+            _ctx.cond.wait(_ctx.lock);
 
-            if (restart_flag != 0) {
+            if (_ctx.restart_flag != 0) {
                 log_info("Restarting Gerbera!");
                 try {
                     server->shutdown();
@@ -352,7 +383,10 @@ int main(int argc, char** argv, char** envp)
 
                     try {
                         config = std::make_shared<ConfigManager>(
-                            *config_file, *home, *confdir, *prefix, *magic, *ip, *interface, portnum.value_or(-1), debug
+                            config_file.value_or(""), home.value_or(""), confdir.value_or(""),
+                            prefix.value_or(""), magic.value_or(""),
+                            ip.value_or(""), interface.value_or(""), portnum.value_or(-1),
+                            debug
                         );
                     } catch (const ConfigParseException& ce) {
                         log_error("Error parsing config file '{}': {}", (*config_file).c_str(), ce.what());
@@ -371,10 +405,10 @@ int main(int argc, char** argv, char** envp)
                     server->init();
                     server->run();
 
-                    restart_flag = 0;
+                    _ctx.restart_flag = 0;
                 } catch (const std::runtime_error& e) {
-                    restart_flag = 0;
-                    shutdown_flag = 1;
+                    _ctx.restart_flag = 0;
+                    _ctx.shutdown_flag = 1;
                     sigemptyset(&mask_set);
                     pthread_sigmask(SIG_SETMASK, &mask_set, nullptr);
                     log_error("Could not restart Gerbera");
@@ -403,27 +437,4 @@ int main(int argc, char** argv, char** envp)
         std::cerr << "Failed to parse arguments: " << e.what() << std::endl;
         exit(EXIT_FAILURE);
     }
-}
-
-void signal_handler(int signum)
-{
-    if (main_thread_id != pthread_self()) {
-        return;
-    }
-
-    if ((signum == SIGINT) || (signum == SIGTERM)) {
-        shutdown_flag++;
-        if (shutdown_flag == 1) {
-            log_info("Gerbera shutting down. Please wait...");
-        } else if (shutdown_flag == 2) {
-            log_info("Gerbera still shutting down, signal again to kill.");
-        } else if (shutdown_flag > 2) {
-            log_error("Clean shutdown failed, killing Gerbera!");
-            exit(1);
-        }
-    } else if (signum == SIGHUP) {
-        restart_flag = 1;
-    }
-
-    cond.notify_one();
 }
