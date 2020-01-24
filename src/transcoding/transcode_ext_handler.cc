@@ -29,6 +29,17 @@
 
 /// \file transcode_ext_handler.cc
 
+#include <climits>
+#include <csignal>
+#include <cstdio>
+#include <cstring>
+#include <fcntl.h>
+#include <ixml.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <filesystem>
+
 #include "transcode_ext_handler.h"
 #include "cds_objects.h"
 #include "common.h"
@@ -46,15 +57,6 @@
 #include "util/process.h"
 #include "util/tools.h"
 #include "web/session_manager.h"
-#include <climits>
-#include <csignal>
-#include <cstdio>
-#include <cstring>
-#include <fcntl.h>
-#include <ixml.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
 
 #ifdef HAVE_CURL
 #include "iohandler/curl_io_handler.h"
@@ -167,7 +169,7 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::open(std::shared_ptr<Transc
 
     std::string check;
     if (startswith(profile->getCommand(), _DIR_SEPARATOR)) {
-        if (!check_path(profile->getCommand()))
+        if (!std::filesystem::is_regular_file(profile->getCommand()))
             throw std::runtime_error("Could not find transcoder: " + profile->getCommand());
 
         check = profile->getCommand();

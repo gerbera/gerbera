@@ -32,6 +32,7 @@
 #ifdef HAVE_INOTIFY
 
 #include <cassert>
+#include <filesystem>
 
 #include "autoscan_inotify.h"
 #include "content_manager.h"
@@ -48,7 +49,7 @@ AutoscanInotify::AutoscanInotify(std::shared_ptr<Storage> storage, std::shared_p
     : storage(storage)
     , content(content)
 {
-    if (check_path(INOTIFY_MAX_USER_WATCHES_FILE)) {
+    if (std::filesystem::is_regular_file(INOTIFY_MAX_USER_WATCHES_FILE)) {
         try {
             int max_watches = std::stoi(trim_string(read_text_file(INOTIFY_MAX_USER_WATCHES_FILE)));
             log_debug("Max watches on the system: {}", max_watches);
@@ -338,7 +339,7 @@ void AutoscanInotify::recheckNonexistingMonitor(int curWd, std::vector<std::stri
                 //                log_debug("adding: {}", pathAr->get(j)->data);
             }
         }
-        bool pathExists = check_path(buf.str(), true);
+        bool pathExists = std::filesystem::is_directory(buf.str());
         //        log_debug("checking {}: {}", buf->c_str(), pathExists);
         if (pathExists) {
             if (curWd != -1)
@@ -485,7 +486,7 @@ void AutoscanInotify::monitorUnmonitorRecursive(std::string startPath, bool unmo
 int AutoscanInotify::monitorDirectory(std::string pathOri, std::shared_ptr<AutoscanDirectory> adir, std::string normalizedAutoscanPath, bool startPoint, std::vector<std::string>* pathArray)
 {
     std::string path = pathOri;
-    if (path.length() > 0 && path[path.length() - 1] != DIR_SEPARATOR) {
+    if (!path.empty() && path.back() != DIR_SEPARATOR) {
         path = path + DIR_SEPARATOR;
     }
 
@@ -537,7 +538,7 @@ int AutoscanInotify::monitorDirectory(std::string pathOri, std::shared_ptr<Autos
 
 void AutoscanInotify::unmonitorDirectory(std::string path, std::shared_ptr<AutoscanDirectory> adir)
 {
-    if (path.length() > 0 && path[path.length() - 1] != DIR_SEPARATOR) {
+    if (!path.empty() && path.back() != DIR_SEPARATOR) {
         path = path + DIR_SEPARATOR;
     }
 

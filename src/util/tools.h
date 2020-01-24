@@ -80,32 +80,15 @@ int stoi_string(std::string str, int def = 0);
 
 std::string reduce_string(std::string str, char ch);
 
-/// \brief Checks existance of the specified file or path.
+/// \brief Get last write time of the specified file or path, if it does not exist it will throw an exception
 /// \param path file or directory to be checked.
-/// \param needDir true when checked item has to be a directory.
-/// \return true path or file exists
-/// \return false path of file not found
-bool check_path(std::string path, bool needDir = false);
-
-/// \brief Checks existance of the specified file or path.
-/// \param path file or directory to be checked.
-/// \param needDir true when checked item has to be a directory.
-/// \param existenceUnneeded do not throw exception if file was not found
-/// \param filesize returns the size of the file
 /// \return last modification time of the path or directory
-///
-/// More or less the same as check_path, the only difference is,
-/// that this function throws an exception if a path or directory
-/// was not found or was not the desired type. Additionally this function
-/// returns the last modification time of the file or directory and, if
-/// needed, also the filesize.
-time_t check_path_ex(std::string path, bool needDir = false, bool existenceUnneeded = false, off_t* filesize = NULL);
+time_t getLastWriteTime(std::string path);
 
 /// \brief Checks if the given binary is executable by our process
 /// \param path absolute path of the binary
 /// \param err if not NULL err will contain the errno result of the check
-/// \return true if the given binary is executable by our process, otherwise
-/// false
+/// \return true if the given binary is executable by our process, otherwise false
 bool is_executable(std::string path, int* err = NULL);
 
 /// \brief Checks if the given executable exists in $PATH
@@ -130,7 +113,7 @@ void string_ok_ex(std::string str);
 /// \brief Render HTML that is doing a redirect to the given ip, port and html page.
 /// \param ip IP address as string.
 /// \param port Port as string.
-/// \oaram page HTML document to redirect to.
+/// \param page HTML document to redirect to.
 /// \return string representing the desired HTML document.
 std::string http_redirect_to(std::string ip, std::string port, std::string page = "");
 

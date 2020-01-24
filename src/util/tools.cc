@@ -42,6 +42,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <queue>
+#include <filesystem>
 
 #include <ifaddrs.h>
 #include <net/if.h>
@@ -213,45 +214,17 @@ std::string reduce_string(std::string str, char ch)
     return buf.str();
 }
 
-bool check_path(std::string path, bool needDir)
+time_t getLastWriteTime(std::string path)
 {
-    int ret = 0;
+    // in future with C+20 we can replace this function too:
+    // auto ftime = std::filesystem::last_write_time(p);
+    // time_t cftime = decltype(ftime)::clock::to_time_t(ftime);
+
     struct stat statbuf;
-
-    ret = stat(path.c_str(), &statbuf);
-    if (ret != 0)
-        return false;
-
-    if ((needDir && (!S_ISDIR(statbuf.st_mode))) || (!needDir && (S_ISDIR(statbuf.st_mode))))
-        return false;
-
-    return true;
-}
-
-time_t check_path_ex(std::string path, bool needDir, bool existenceUnneeded,
-    off_t* filesize)
-{
-    int ret = 0;
-    struct stat statbuf;
-
-    if (filesize != nullptr)
-        *filesize = 0;
-
-    ret = stat(path.c_str(), &statbuf);
+    int ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
-        if (existenceUnneeded && (errno == ENOENT))
-            return 0;
-        throw std::runtime_error(mt_strerror(errno) + ": " + path + " (errno: " + std::to_string(errno) + std::to_string((int)existenceUnneeded) + ")");
+        throw std::runtime_error(mt_strerror(errno) + ": " + path);
     }
-
-    if (needDir && (!S_ISDIR(statbuf.st_mode)))
-        throw std::runtime_error("Not a directory: " + path);
-
-    if (!needDir && (S_ISDIR(statbuf.st_mode)))
-        throw std::runtime_error("Not a file: " + path);
-
-    if ((filesize != nullptr) && S_ISREG(statbuf.st_mode))
-        *filesize = statbuf.st_size;
 
     return statbuf.st_mtime;
 }
@@ -291,7 +264,7 @@ std::string find_in_path(std::string exec)
         }
 
         std::string check = path + "/" + exec;
-        if (check_path(check))
+        if (std::filesystem::is_regular_file(check))
             return check;
 
         if (!next.empty())
