@@ -1,28 +1,26 @@
-FROM ubuntu:18.04
+FROM alpine:3.11
 
-RUN apt-get update &&\
-    apt-get install -y uuid-dev libsqlite3-dev zlib1g-dev \
-    libmagic-dev libexif-dev libcurl4-openssl-dev libavutil-dev libavcodec-dev \
-    libavformat-dev libavdevice-dev libavfilter-dev libavresample-dev \
-    libswscale-dev libswresample-dev libpostproc-dev g++ cmake \
-    wget autoconf pkg-config libtool xz-utils libmatroska-dev libebml-dev && \
-    rm -rf /var/lib/{apt,dpkg,cache,log}/
+RUN apk add --no-cache tini gcc g++ pkgconf make automake autoconf libtool \
+	util-linux-dev sqlite-dev mariadb-connector-c-dev cmake zlib-dev file-dev \
+	libexif-dev curl-dev ffmpeg-dev ffmpegthumbnailer-dev wget xz libmatroska-dev \
+	libebml-dev taglib-dev
 
-WORKDIR /app
+WORKDIR /gerbera_build
 
 COPY . .
 
-RUN mkdir build &&\
-    cd build &&\
-    sh ../scripts/install-pupnp18.sh && \
+RUN mkdir build && \
+    cd build && \
+    sh ../scripts/install-pugixml.sh && \
+    sh ../scripts/install-pupnp.sh && \
     sh ../scripts/install-duktape.sh && \
-    sh ../scripts/install-taglib111.sh && \
     sh ../scripts/install-spdlog.sh && \
-    cmake ../ -DWITH_MAGIC=1 -DWITH_MYSQL=0 -DWITH_CURL=1 -DWITH_JS=1 \
-        -DWITH_TAGLIB=1 -DWITH_AVCODEC=1 -DWITH_FFMPEGTHUMBNAILER=0 \
-        -DWITH_EXIF=1 -DWITH_LASTFM=0 -DWITH_SYSTEMD=0 &&\
-    make -j4 &&\
-    make install
+    cmake ../ -DWITH_MAGIC=1 -DWITH_MYSQL=1 -DWITH_CURL=1 -DWITH_JS=1 \
+        -DWITH_TAGLIB=1 -DWITH_AVCODEC=1 -DWITH_FFMPEGTHUMBNAILER=1 \
+        -DWITH_EXIF=1 -DWITH_LASTFM=0 -DWITH_SYSTEMD=0 -DWITH_DEBUG=1 && \
+    make -j`nproc` && \
+    make install && \
+    rm -rf /gerbera_build
 
 RUN mkdir -p /root/.config/gerbera &&\
     gerbera --create-config > /root/.config/gerbera/config.xml &&\
@@ -33,6 +31,7 @@ recursive="yes" hidden-files="no"\/>\n\
 <\/autoscan>/' -i /root/.config/gerbera/config.xml
 
 EXPOSE 49152
-EXPOSE 1900
+EXPOSE 1900/udp
 
-ENTRYPOINT [ "gerbera","-p", "49152" ]
+ENTRYPOINT ["/sbin/tini", "--"]
+CMD [ "gerbera","-p", "49152" ]
