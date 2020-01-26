@@ -115,6 +115,7 @@ The Gerbera Team maintains a Homebrew Tap to allow for easy installation of Gerb
 | libiconv     	|         	| Required  	|                      	     |                     |          |
 | sqlite3      	|         	| Required  	| Database storage     	     |                     |          |
 | zlib          |        	| Required  	|                            |                     |          |
+| fmtlib        |        	| Required  	|                            |                     |          |
 | spdlog        |        	| Required  	|                            |                     |          |
 | duktape      	| 2.1.0   	| Optional  	| Scripting Support    	     | WITH_JS             | Enabled  |
 | mysql        	|         	| Optional  	| Alternate database storage | WITH_MYSQL          | Disabled |
