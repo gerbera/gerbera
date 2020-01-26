@@ -1,9 +1,9 @@
 FROM alpine:3.11
 
 RUN apk add --no-cache tini gcc g++ pkgconf make automake autoconf libtool \
-	util-linux-dev sqlite-dev mariadb-connector-c-dev cmake zlib-dev file-dev \
-	libexif-dev curl-dev ffmpeg-dev ffmpegthumbnailer-dev wget xz libmatroska-dev \
-	libebml-dev taglib-dev
+	util-linux-dev sqlite-dev mariadb-connector-c-dev cmake zlib-dev fmt-dev \
+	file-dev libexif-dev curl-dev ffmpeg-dev ffmpegthumbnailer-dev wget xz \
+	libmatroska-dev libebml-dev taglib-dev
 
 WORKDIR /gerbera_build
 
