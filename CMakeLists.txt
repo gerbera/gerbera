@@ -328,8 +328,12 @@ if(UPNP_INCLUDE_DIR AND NOT EXISTS "${UPNP_INCLUDE_DIR}/TemplateInclude.h")
     message (FATAL_ERROR "\n!! You are using a very old 1.8 snapshot. Please upgrade to a 1.8.x release from upstream (https://github.com/mrjimenez/pupnp) !!\n")
 endif()
 
+find_package(fmt REQUIRED)
+target_link_libraries(gerbera fmt::fmt)
+
 find_package(spdlog REQUIRED)
 target_link_libraries(gerbera spdlog::spdlog)
+add_compile_definitions("SPDLOG_FMT_EXTERNAL")
 
 find_package (Pugixml REQUIRED)
 if (PUGIXML_FOUND)
