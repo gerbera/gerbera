@@ -1741,11 +1741,13 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNode(std::sha
 
         fs::path location = child.attribute("location").as_string();
         if (!string_ok(location)) {
-            throw std::runtime_error("autoscan directory with invalid location!\n");
+            log_warning("Found an Autoscan directory with invalid location!");
+            continue;
         }
 
         if (!fs::is_directory(location)) {
-            throw std::runtime_error("autoscan " + location.string() + " - not a directory!");
+            log_warning("Autoscan path is not a directory: {}", location.string());
+            continue;
         }
 
         ScanMode mode;
