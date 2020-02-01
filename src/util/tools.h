@@ -165,11 +165,6 @@ std::string readTextFile(const fs::path& path);
 /// \brief writes a string into a text file
 void writeTextFile(const fs::path& path, std::string contents);
 
-/// \brief copies a file
-/// \param from the path to the file to copy from
-/// \param to the path to the file to copy to
-void copy_file(std::string from, std::string to);
-
 /// \brief Renders a string that can be used as the protocolInfo resource
 /// attribute: "http-get:*:mimetype:*"
 ///

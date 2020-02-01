@@ -525,36 +525,6 @@ void writeTextFile(const fs::path& path, std::string contents)
     fclose(f);
 }
 
-void copy_file(std::string from, std::string to)
-{
-    FILE* f = fopen(from.c_str(), "r");
-    if (!f) {
-        throw std::runtime_error("copy_file: could not open " + from + " for read: " + mt_strerror(errno));
-    }
-    FILE* t = fopen(to.c_str(), "w");
-    if (!t) {
-        fclose(f);
-        throw std::runtime_error("copy_file: could not open " + to + " for write: " + mt_strerror(errno));
-    }
-    auto* buffer = (char*)MALLOC(1024);
-    size_t bytesRead = 0;
-    size_t bytesWritten = 0;
-    while (bytesRead == bytesWritten && !feof(f) && !ferror(f) && !ferror(t)
-        && (bytesRead = fread(buffer, 1, 1024, f)) > 0) {
-        bytesWritten = fwrite(buffer, 1, bytesRead, t);
-    }
-    FREE(buffer);
-    if (ferror(f) || ferror(t)) {
-        int my_errno = errno;
-        fclose(f);
-        fclose(t);
-        throw std::runtime_error("copy_file: error while copying " + from + " to " + to + ": " + mt_strerror(my_errno));
-    }
-
-    fclose(f);
-    fclose(t);
-}
-
 std::string renderProtocolInfo(std::string mimetype, std::string protocol, std::string extend)
 {
     if (string_ok(mimetype) && string_ok(protocol)) {

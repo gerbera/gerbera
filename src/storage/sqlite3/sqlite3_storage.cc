@@ -570,7 +570,7 @@ void SLBackupTask::run(sqlite3** db, Sqlite3Storage* sl)
 
     if (!restore) {
         try {
-            copy_file(
+            fs::copy(
                 dbFilePath,
                 dbFilePath + ".backup");
             log_debug("sqlite3 backup successful");
@@ -582,7 +582,7 @@ void SLBackupTask::run(sqlite3** db, Sqlite3Storage* sl)
         log_info("trying to restore sqlite3 database from backup...");
         sqlite3_close(*db);
         try {
-            copy_file(
+            fs::copy(
                 dbFilePath + ".backup",
                 dbFilePath);
 
