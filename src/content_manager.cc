@@ -36,6 +36,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <filesystem>
+namespace fs = std::filesystem;
 
 #include "config/config_manager.h"
 #include "storage/storage.h"
@@ -81,16 +82,6 @@ struct magic_set* ms = nullptr;
 
 using namespace std;
 
-static std::string get_filename(std::string path)
-{
-    if (path.at(path.length() - 1) == DIR_SEPARATOR) // cut off trailing slash
-        path = path.substr(0, path.length() - 1);
-    size_t pos = path.rfind(DIR_SEPARATOR);
-    if (pos == std::string::npos)
-        return path;
-    return path.substr(pos + 1);
-}
-
 ContentManager::ContentManager(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
     std::shared_ptr<UpdateManager> update_manager, std::shared_ptr<web::SessionManager> session_manager,
     std::shared_ptr<Timer> timer, std::shared_ptr<TaskProcessor> task_processor,
@@ -134,8 +125,8 @@ ContentManager::ContentManager(std::shared_ptr<ConfigManager> config, std::share
     for (size_t i = 0; i < config_timed_list->size(); i++) {
         auto dir = config_timed_list->get(i);
         if (dir != nullptr) {
-            std::string path = dir->getLocation();
-            if (std::filesystem::is_directory(path)) {
+            fs::path path = dir->getLocation();
+            if (fs::is_directory(path)) {
                 dir->setObjectID(ensurePathExistence(path));
             }
         }
@@ -156,8 +147,8 @@ void ContentManager::init()
         for (size_t i = 0; i < config_inotify_list->size(); i++) {
             auto dir = config_inotify_list->get(i);
             if (dir != nullptr) {
-                std::string path = dir->getLocation();
-                if (std::filesystem::is_directory(path)) {
+                fs::path path = dir->getLocation();
+                if (fs::is_directory(path)) {
                     dir->setObjectID(ensurePathExistence(path));
                 }
             }
@@ -353,7 +344,7 @@ void ContentManager::shutdown()
         std::shared_ptr<AutoscanDirectory> dir = autoscan_inotify->get(i);
         if (dir != nullptr) {
             dir->resetLMT();
-            if (std::filesystem::is_directory(dir->getLocation())) {
+            if (fs::is_directory(dir->getLocation())) {
                 auto t = getLastWriteTime(dir->getLocation());
                 dir->setCurrentLMT(t);
             }
@@ -437,16 +428,16 @@ std::deque<std::shared_ptr<GenericTask>> ContentManager::getTasklist()
 void ContentManager::addVirtualItem(std::shared_ptr<CdsObject> obj, bool allow_fifo)
 {
     obj->validate();
-    std::string path = obj->getLocation();
+    fs::path path = obj->getLocation();
 
-    if (!std::filesystem::is_regular_file(path))
-        throw std::runtime_error("Not a file: " + path);
+    if (!fs::is_regular_file(path))
+        throw std::runtime_error("Not a file: " + path.string());
 
     auto pcdir = storage->findObjectByPath(path);
     if (pcdir == nullptr) {
         pcdir = createObjectFromFile(path, true, allow_fifo);
         if (pcdir == nullptr) {
-            throw std::runtime_error("Could not add " + path);
+            throw std::runtime_error("Could not add " + path.string());
         }
         if (IS_CDS_ITEM(pcdir->getObjectType())) {
             this->addObject(pcdir);
@@ -457,11 +448,10 @@ void ContentManager::addVirtualItem(std::shared_ptr<CdsObject> obj, bool allow_f
     addObject(obj);
 }
 
-int ContentManager::_addFile(std::string path, std::string rootPath, bool recursive, bool hidden, std::shared_ptr<CMAddFileTask> task)
+int ContentManager::_addFile(fs::path path, fs::path rootPath, bool recursive, bool hidden, std::shared_ptr<CMAddFileTask> task)
 {
     if (hidden == false) {
-        std::string filename = get_filename(path);
-        if (string_ok(filename) && filename.at(0) == '.')
+        if (path.is_relative())
             return INVALID_OBJECT_ID;
     }
 
@@ -531,7 +521,7 @@ void ContentManager::_removeObject(int objectID, bool all)
     // loadAccounting();
 }
 
-int ContentManager::ensurePathExistence(std::string path)
+int ContentManager::ensurePathExistence(fs::path path)
 {
     int updateID;
     int containerID = storage->ensurePathExistence(path, &updateID);
@@ -548,8 +538,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
     int ret;
     struct dirent* dent;
     struct stat statbuf;
-    std::string location;
-    std::string path;
+    fs::path location;
     std::shared_ptr<CdsObject> obj;
 
     if (scanID == INVALID_SCAN_ID)
@@ -582,7 +571,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
     }
 
     if (containerID == INVALID_OBJECT_ID) {
-        if (!std::filesystem::is_directory(adir->getLocation())) {
+        if (!fs::is_directory(adir->getLocation())) {
             adir->setObjectID(INVALID_OBJECT_ID);
             storage->updateAutoscanDirectory(adir);
             if (adir->persistent()) {
@@ -650,7 +639,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
             }
         }
 
-        path = location + DIR_SEPARATOR + name;
+        auto path = location / name;
         ret = stat(path.c_str(), &statbuf);
         if (ret != 0) {
             log_error("Failed to stat {}, {}", path.c_str(), mt_strerror(errno).c_str());
@@ -695,12 +684,12 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
                 }
             }
         } else if (S_ISDIR(statbuf.st_mode) && (adir->getRecursive())) {
-            int objectID = storage->findObjectIDByPath(path + DIR_SEPARATOR);
+            int objectID = storage->findObjectIDByPath(path);
             if (objectID > 0) {
                 if (list != nullptr)
                     list->erase(objectID);
                 // add a task to rescan the directory that was found
-                rescanDirectory(objectID, scanID, scanMode, path + DIR_SEPARATOR, task->isCancellable());
+                rescanDirectory(objectID, scanID, scanMode, path, task->isCancellable());
             } else {
                 // we have to make sure that we will never add a path to the task list
                 // if it is going to be removed by a pending remove task.
@@ -739,11 +728,11 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
 }
 
 /* scans the given directory and adds everything recursively */
-void ContentManager::addRecursive(std::string path, bool hidden, std::shared_ptr<CMAddFileTask> task)
+void ContentManager::addRecursive(fs::path path, bool hidden, std::shared_ptr<CMAddFileTask> task)
 {
     if (hidden == false) {
         log_debug("Checking path {}", path.c_str());
-        if (path.at(0) == '.')
+        if (path.is_relative())
             return;
     }
 
@@ -751,10 +740,10 @@ void ContentManager::addRecursive(std::string path, bool hidden, std::shared_ptr
 
     DIR* dir = opendir(path.c_str());
     if (!dir) {
-        throw std::runtime_error("could not list directory " + path + " : " + strerror(errno));
+        throw std::runtime_error("could not list directory " + path.string() + " : " + strerror(errno));
     }
 
-    int parentID = storage->findObjectIDByPath(path + DIR_SEPARATOR);
+    int parentID = storage->findObjectIDByPath(path);
     struct dirent* dent;
     // abort loop if either:
     // no valid directory returned, server is about to shutdown, the task is there and was invalidated
@@ -771,20 +760,20 @@ void ContentManager::addRecursive(std::string path, bool hidden, std::shared_ptr
             } else if (hidden == false)
                 continue;
         }
-        std::string newPath = path + DIR_SEPARATOR + name;
+        fs::path newPath = path / name;
 
         if (config->getConfigFilename() == newPath)
             continue;
 
         // For the Web UI
         if (task != nullptr) {
-            task->setDescription("Importing: " + newPath);
+            task->setDescription("Importing: " + newPath.string());
         }
 
         try {
             std::shared_ptr<CdsObject> obj = nullptr;
             if (parentID > 0)
-                obj = storage->findObjectByPath(std::string(newPath));
+                obj = storage->findObjectByPath(newPath);
             if (obj == nullptr) // create object
             {
                 obj = createObjectFromFile(newPath);
@@ -967,7 +956,7 @@ void ContentManager::addObject(std::shared_ptr<CdsObject> obj)
     int containerChanged = INVALID_OBJECT_ID;
     log_debug("Adding: parent ID is {}", obj->getParentID());
     if (!IS_CDS_ITEM_EXTERNAL_URL(obj->getObjectType())) {
-        obj->setLocation(reduce_string(obj->getLocation(), DIR_SEPARATOR));
+        obj->setLocation(obj->getLocation());
     }
 
     storage->addObject(obj, &containerChanged);
@@ -1045,16 +1034,12 @@ std::shared_ptr<CdsObject> ContentManager::convertObject(std::shared_ptr<CdsObje
 }
 
 // returns nullptr if file ignored due to configuration
-std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(std::string path, bool magic, bool allow_fifo)
+std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(fs::path path, bool magic, bool allow_fifo)
 {
-    std::string filename = get_filename(path);
-
     struct stat statbuf;
-    int ret;
-
-    ret = stat(path.c_str(), &statbuf);
+    int ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
-        throw std::runtime_error("Failed to stat " + path + " , " + mt_strerror(errno));
+        throw std::runtime_error("Failed to stat " + path.string() + " , " + mt_strerror(errno));
     }
 
     std::shared_ptr<CdsObject> obj;
@@ -1062,12 +1047,7 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(std::string path
         /* retrieve information about item and decide if it should be included */
         std::string mimetype;
         std::string upnp_class;
-        std::string extension;
-
-        // get file extension
-        size_t dotIndex = filename.rfind('.');
-        if (dotIndex != std::string::npos)
-            extension = filename.substr(dotIndex + 1);
+        std::string extension = path.extension();
 
         if (magic) {
             mimetype = extension2mimetype(extension);
@@ -1109,7 +1089,7 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(std::string path
         }
 
         auto f2i = StringConverter::f2i(config);
-        obj->setTitle(f2i->convert(filename));
+        obj->setTitle(f2i->convert(path.filename()));
 
         if (magic) {
             MetadataHandler::setMetadata(config, item);
@@ -1128,7 +1108,7 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(std::string path
         */
     } else {
         // only regular files and directories are supported
-        throw std::runtime_error("ContentManager: skipping file " + path);
+        throw std::runtime_error("ContentManager: skipping file " + path.string());
     }
     //    auto f2i = StringConverter::f2i();
     //    obj->setTitle(f2i->convert(filename));
@@ -1272,26 +1252,26 @@ void ContentManager::addTask(std::shared_ptr<GenericTask> task, bool lowPriority
     signal();
 }
 
-int ContentManager::addFile(std::string path, bool recursive, bool async, bool hidden, bool lowPriority, bool cancellable)
+int ContentManager::addFile(fs::path path, bool recursive, bool async, bool hidden, bool lowPriority, bool cancellable)
 {
-    std::string rootpath;
-    if (std::filesystem::is_directory(path))
+    fs::path rootpath;
+    if (fs::is_directory(path))
         rootpath = path;
     return addFileInternal(path, rootpath, recursive, async, hidden, lowPriority, 0, cancellable);
 }
 
-int ContentManager::addFile(std::string path, std::string rootpath, bool recursive, bool async, bool hidden, bool lowPriority, bool cancellable)
+int ContentManager::addFile(fs::path path, fs::path rootpath, bool recursive, bool async, bool hidden, bool lowPriority, bool cancellable)
 {
     return addFileInternal(path, rootpath, recursive, async, hidden, lowPriority, 0, cancellable);
 }
 
 int ContentManager::addFileInternal(
-    std::string path, std::string rootpath, bool recursive, bool async, bool hidden, bool lowPriority, unsigned int parentTaskID, bool cancellable)
+    fs::path path, fs::path rootpath, bool recursive, bool async, bool hidden, bool lowPriority, unsigned int parentTaskID, bool cancellable)
 {
     if (async) {
         auto self = shared_from_this();
         auto task = std::make_shared<CMAddFileTask>(self, path, rootpath, recursive, hidden, cancellable);
-        task->setDescription("Importing: " + path);
+        task->setDescription("Importing: " + path.string());
         task->setParentID(parentTaskID);
         addTask(task, lowPriority);
         return INVALID_OBJECT_ID;
@@ -1355,7 +1335,7 @@ void ContentManager::cleanupOnlineServiceObjects(std::shared_ptr<OnlineService> 
 
 #endif
 
-void ContentManager::invalidateAddTask(std::shared_ptr<GenericTask> t, std::string path)
+void ContentManager::invalidateAddTask(std::shared_ptr<GenericTask> t, fs::path path)
 {
     if (t->getType() == AddFile) {
         auto add_task = std::static_pointer_cast<CMAddFileTask>(t);
@@ -1412,7 +1392,7 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
         */
         auto self = shared_from_this();
         auto task = std::make_shared<CMRemoveObjectTask>(self, objectID, all);
-        std::string path;
+        fs::path path;
         std::shared_ptr<CdsObject> obj;
 
         try {
@@ -1769,7 +1749,7 @@ void ContentManager::triggerPlayHook(std::shared_ptr<CdsObject> obj)
 }
 
 CMAddFileTask::CMAddFileTask(std::shared_ptr<ContentManager> content,
-    std::string path, std::string rootpath, bool recursive, bool hidden, bool cancellable)
+    fs::path path, fs::path rootpath, bool recursive, bool hidden, bool cancellable)
     : GenericTask(ContentManagerTask)
     , content(content)
     , path(path)
@@ -1781,9 +1761,9 @@ CMAddFileTask::CMAddFileTask(std::shared_ptr<ContentManager> content,
     this->taskType = AddFile;
 }
 
-std::string CMAddFileTask::getPath() { return path; }
+fs::path CMAddFileTask::getPath() { return path; }
 
-std::string CMAddFileTask::getRootPath() { return rootpath; }
+fs::path CMAddFileTask::getRootPath() { return rootpath; }
 
 void CMAddFileTask::run()
 {

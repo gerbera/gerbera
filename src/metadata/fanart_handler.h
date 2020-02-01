@@ -41,6 +41,9 @@ public:
     FanArtHandler(std::shared_ptr<ConfigManager> config);
     virtual void fillMetadata(std::shared_ptr<CdsItem> item);
     virtual std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsItem> item, int resNum);
+
+private:
+    fs::path getFanArtPath(std::shared_ptr<CdsItem> item) const;
 };
 
 #endif // __METADATA_FANART_H__

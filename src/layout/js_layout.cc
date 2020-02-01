@@ -47,7 +47,7 @@ JSLayout::~JSLayout()
 {
 }
 
-void JSLayout::processCdsObject(std::shared_ptr<CdsObject> obj, std::string rootpath)
+void JSLayout::processCdsObject(std::shared_ptr<CdsObject> obj, fs::path rootpath)
 {
     if (import_script == nullptr)
         return;

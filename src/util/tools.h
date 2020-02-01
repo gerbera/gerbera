@@ -37,6 +37,8 @@
 #include <map>
 #include <sstream>
 #include <unordered_set>
+#include <filesystem>
+namespace fs = std::filesystem;
 
 #include <sys/time.h>
 
@@ -62,11 +64,6 @@ class CdsItem;
 /// \return array of strings
 std::vector<std::string> split_string(std::string str, char sep, bool empty = false);
 
-/// \brief splits the given file path into the path to the file and the filename.
-/// \param str the path to split
-/// \return an array with the path at position 0 and the filename at position 1.
-std::vector<std::string> split_path(std::string str);
-
 /// \brief returns str with leading and trailing whitespace removed
 std::string trim_string(std::string str);
 
@@ -78,23 +75,24 @@ std::string tolower_string(std::string str);
 
 int stoi_string(std::string str, int def = 0);
 
+/// \brief  Used to replace potential multiple following //../ with single /
 std::string reduce_string(std::string str, char ch);
 
 /// \brief Get last write time of the specified file or path, if it does not exist it will throw an exception
 /// \param path file or directory to be checked.
 /// \return last modification time of the path or directory
-time_t getLastWriteTime(std::string path);
+time_t getLastWriteTime(const fs::path& path);
 
 /// \brief Checks if the given binary is executable by our process
 /// \param path absolute path of the binary
 /// \param err if not NULL err will contain the errno result of the check
 /// \return true if the given binary is executable by our process, otherwise false
-bool is_executable(std::string path, int* err = NULL);
+bool is_executable(const fs::path& path, int* err = NULL);
 
 /// \brief Checks if the given executable exists in $PATH
 /// \param exec filename of the executable that needs to be checked
 /// \return aboslute path to the given executable or nullptr of it was not found
-std::string find_in_path(std::string exec);
+fs::path find_in_path(const fs::path& exec);
 
 /// \brief Checks if the string contains any data.
 /// \param str String to be checked.
@@ -162,10 +160,10 @@ std::string mime_types_to_CSV(std::vector<std::string> mimeTypes);
 std::string mt_strerror(int mt_errno);
 
 /// \brief Reads the entire contents of a text file and returns it as a string.
-std::string read_text_file(std::string path);
+std::string readTextFile(const fs::path& path);
 
 /// \brief writes a string into a text file
-void write_text_file(std::string path, std::string contents);
+void writeTextFile(const fs::path& path, std::string contents);
 
 /// \brief copies a file
 /// \param from the path to the file to copy from
@@ -199,11 +197,11 @@ int HMSToSeconds(std::string time);
 
 #ifdef HAVE_MAGIC
 /// \brief Extracts mimetype from a file using filemagic
-std::string getMIMETypeFromFile(std::string file);
+std::string getMIMETypeFromFile(const fs::path& file);
 /// \brief Extracts mimetype from a buffer using filemagic
 std::string getMIMETypeFromBuffer(const void *buffer, size_t length);
 /// \brief Extracts mimetype from a filepath OR buffer using filemagic
-std::string getMIME(std::string filepath, const void *buffer, size_t length);
+std::string getMIME(const fs::path& filepath, const void *buffer, size_t length);
 
 #endif // HAVE_MAGIC
 
@@ -294,11 +292,6 @@ long getDeltaMillis(struct timespec* first, struct timespec* second);
 
 void getTimespecAfterMillis(long delta, struct timespec* ret, struct timespec* start = NULL);
 
-/// \brief This function makes sure that there are no trailing slashes, no
-/// consecutive slashes. If /../ or /..\0 is encountered an exception is
-/// thrown.
-std::string normalizePath(std::string path);
-
 /// \brief Finds the IP address of the specified network interface.
 /// \param interface i.e. eth0, lo, etc.
 /// \return IP address or nullptr if interface was not found.
@@ -330,15 +323,15 @@ std::vector<std::string> populateCommandLine(std::string line,
 ///
 /// The reason behind this is, that we need to open a pipe, while mkstemp will
 /// open a regular file.
-std::string tempName(std::string leadPath, char* tmpl);
+fs::path tempName(const fs::path& leadPath, char* tmpl);
 
 /// \brief Determines if the particular ogg file contains a video (theora)
-bool isTheora(std::string ogg_filename);
+bool isTheora(const fs::path& ogg_filename);
 
 /// \brief Gets an absolute filename as a parameter and returns the last parent
 ///
 /// "/some/path/to/file.txt" -> "to"
-std::string get_last_path(std::string location);
+fs::path get_last_path(const fs::path& path);
 
 /// \brief Calculates a position where it is safe to cut an UTF-8 string.
 /// \return Caclulated position or -1 in case of an error.
@@ -353,7 +346,7 @@ std::string getDLNAContentHeader(std::shared_ptr<ConfigManager> config, std::str
 ///
 /// This code is based on offsets, so we will use it only if ffmpeg is not
 /// available.
-std::string getAVIFourCC(std::string avi_filename);
+std::string getAVIFourCC(const fs::path& avi_filename);
 #endif
 
 

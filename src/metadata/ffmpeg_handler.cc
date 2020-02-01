@@ -295,7 +295,7 @@ static int _mkdir(const char* path)
     return ret;
 }
 
-static bool makeThumbnailCacheDir(std::string& path)
+static bool makeThumbnailCacheDir(fs::path& path)
 {
     char* path_temp = strdup(path.c_str());
     char* last_slash = strrchr(path_temp, '/');
@@ -338,24 +338,24 @@ done:
     return ret;
 }
 
-std::string FfmpegHandler::getThumbnailCacheFilePath(std::string& movie_filename, bool create) const
+fs::path FfmpegHandler::getThumbnailCacheFilePath(const fs::path& movie_filename, bool create) const
 {
-    std::string cache_dir = config->getOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR);
+    fs::path cache_dir = config->getOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR);
 
-    if (cache_dir.length() == 0) {
-        std::string home_dir = config->getOption(CFG_SERVER_HOME);
-        cache_dir = home_dir + "/cache-dir";
+    if (cache_dir.empty()) {
+        fs::path home_dir = config->getOption(CFG_SERVER_HOME);
+        cache_dir = home_dir / "cache-dir";
     }
 
-    cache_dir = cache_dir + movie_filename + "-thumb.jpg";
+    cache_dir = cache_dir / (movie_filename.string() + "-thumb.jpg");
     if (create && !makeThumbnailCacheDir(cache_dir))
         cache_dir = "";
     return cache_dir;
 }
 
-bool FfmpegHandler::readThumbnailCacheFile(std::string movie_filename, uint8_t** ptr_img, size_t* size_img) const
+bool FfmpegHandler::readThumbnailCacheFile(const fs::path& movie_filename, uint8_t** ptr_img, size_t* size_img) const
 {
-    std::string path = getThumbnailCacheFilePath(movie_filename, false);
+    fs::path path = getThumbnailCacheFilePath(movie_filename, false);
     FILE* fp = fopen(path.c_str(), "rb");
     if (!fp)
         return false;
@@ -373,9 +373,9 @@ bool FfmpegHandler::readThumbnailCacheFile(std::string movie_filename, uint8_t**
     return true;
 }
 
-void FfmpegHandler::writeThumbnailCacheFile(std::string movie_filename, uint8_t* ptr_img, int size_img) const
+void FfmpegHandler::writeThumbnailCacheFile(const fs::path& movie_filename, uint8_t* ptr_img, int size_img) const
 {
-    std::string path = getThumbnailCacheFilePath(movie_filename, true);
+    fs::path path = getThumbnailCacheFilePath(movie_filename, true);
     FILE* fp = fopen(path.c_str(), "wb");
     if (!fp)
         return;
@@ -433,7 +433,7 @@ std::unique_ptr<IOHandler> FfmpegHandler::serveContent(std::shared_ptr<CdsItem> 
 #endif // old api
     {
         pthread_mutex_unlock(&thumb_lock);
-        throw std::runtime_error("Could not generate thumbnail for " + item->getLocation());
+        throw std::runtime_error("Could not generate thumbnail for " + item->getLocation().string());
     }
     if (config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED)) {
         writeThumbnailCacheFile(item->getLocation(),

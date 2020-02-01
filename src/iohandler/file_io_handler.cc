@@ -36,7 +36,7 @@
 #include "file_io_handler.h"
 #include "server.h"
 
-FileIOHandler::FileIOHandler(std::string filename)
+FileIOHandler::FileIOHandler(const fs::path& filename)
     : filename(filename)
     , f(nullptr)
 {
@@ -54,7 +54,7 @@ void FileIOHandler::open(enum UpnpOpenFileMode mode)
     }
 
     if (f == nullptr) {
-        throw std::runtime_error("FileIOHandler::open: failed to open: " + filename);
+        throw std::runtime_error("FileIOHandler::open: failed to open: " + filename.string());
     }
 }
 

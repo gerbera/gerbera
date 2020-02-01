@@ -32,13 +32,16 @@
 #ifndef __LAYOUT_H__
 #define __LAYOUT_H__
 
+#include <filesystem>
+namespace fs = std::filesystem;
+
 #include "cds_objects.h"
 
 class Layout
 {
 public:
     virtual ~Layout() {}
-    virtual void processCdsObject(std::shared_ptr<CdsObject> obj, std::string rootpath) = 0;
+    virtual void processCdsObject(std::shared_ptr<CdsObject> obj, fs::path rootpath) = 0;
 };
 
 #endif // __LAYOUT_H__

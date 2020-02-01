@@ -39,6 +39,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <filesystem>
+namespace fs = std::filesystem;
 
 #include "transcode_ext_handler.h"
 #include "cds_objects.h"
@@ -102,7 +103,7 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::open(std::shared_ptr<Transc
         }
     }
 
-    std::string fifo_name = normalizePath(tempName(config->getOption(CFG_SERVER_TMPDIR), fifo_template));
+    fs::path fifo_name = tempName(config->getOption(CFG_SERVER_TMPDIR), fifo_template);
     std::string arguments;
     std::string temp;
     std::string command;
@@ -135,7 +136,7 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::open(std::shared_ptr<Transc
 #ifdef HAVE_CURL
             std::string url = location;
             strcpy(fifo_template, "mt_transcode_XXXXXX");
-            location = normalizePath(tempName(config->getOption(CFG_SERVER_TMPDIR), fifo_template));
+            location = tempName(config->getOption(CFG_SERVER_TMPDIR), fifo_template);
             log_debug("creating reader fifo: {}", location.c_str());
             if (mkfifo(location.c_str(), O_RDWR) == -1) {
                 log_error("Failed to create fifo for the remote content "
@@ -167,22 +168,22 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::open(std::shared_ptr<Transc
     }
 #endif
 
-    std::string check;
-    if (startswith(profile->getCommand(), _DIR_SEPARATOR)) {
-        if (!std::filesystem::is_regular_file(profile->getCommand()))
-            throw std::runtime_error("Could not find transcoder: " + profile->getCommand());
+    fs::path check;
+    if (profile->getCommand().is_absolute()) {
+        if (!fs::is_regular_file(profile->getCommand()))
+            throw std::runtime_error("Could not find transcoder: " + profile->getCommand().string());
 
         check = profile->getCommand();
     } else {
         check = find_in_path(profile->getCommand());
 
         if (!string_ok(check))
-            throw std::runtime_error("Could not find transcoder " + profile->getCommand() + " in $PATH");
+            throw std::runtime_error("Could not find transcoder " + profile->getCommand().string() + " in $PATH");
     }
 
     int err = 0;
     if (!is_executable(check, &err))
-        throw std::runtime_error("Transcoder " + profile->getCommand() + " is not executable: " + strerror(err));
+        throw std::runtime_error("Transcoder " + profile->getCommand().string() + " is not executable: " + strerror(err));
 
     log_debug("creating fifo: {}", fifo_name.c_str());
     if (mkfifo(fifo_name.c_str(), O_RDWR) == -1) {

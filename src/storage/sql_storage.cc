@@ -29,6 +29,14 @@
 
 /// \file sql_storage.cc
 
+#include <climits>
+#include <algorithm>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <filesystem>
+namespace fs = std::filesystem;
+
 #include "sql_storage.h"
 #include "config/config_manager.h"
 #include "util/filesystem.h"
@@ -36,11 +44,6 @@
 #include "util/tools.h"
 #include "update_manager.h"
 #include "search_handler.h"
-#include <climits>
-#include <algorithm>
-#include <sstream>
-#include <string>
-#include <vector>
 
 using namespace std;
 
@@ -309,13 +312,11 @@ std::vector<std::shared_ptr<SQLStorage::AddUpdateTable>> SQLStorage::_addUpdateO
         auto item = std::static_pointer_cast<CdsItem>(obj);
 
         if (!hasReference) {
-            std::string loc = item->getLocation();
+            fs::path loc = item->getLocation();
             if (!string_ok(loc))
                 throw std::runtime_error("tried to create or update a non-referenced item without a location set");
             if (IS_CDS_PURE_ITEM(objectType)) {
-                std::vector<std::string> pathAr = split_path(loc);
-                std::string path = pathAr[0];
-                int parentID = ensurePathExistence(path, changedContainer);
+                int parentID = ensurePathExistence(loc.parent_path(), changedContainer);
                 item->setParentID(parentID);
                 std::string dbLocation = addLocationPrefix(LOC_FILE_PREFIX, loc);
                 cdsObjectSql["location"] = quote(dbLocation);
@@ -706,23 +707,13 @@ std::vector<std::string> SQLStorage::getMimeTypes()
     return arr;
 }
 
-std::shared_ptr<CdsObject> SQLStorage::_findObjectByPath(std::string fullpath)
+std::shared_ptr<CdsObject> SQLStorage::findObjectByPath(fs::path fullpath)
 {
-    //log_debug("fullpath: {}", fullpath.c_str());
-    fullpath = reduce_string(fullpath, DIR_SEPARATOR);
-    //log_debug("fullpath after reduce: {}", fullpath.c_str());
-    std::vector<std::string> pathAr = split_path(fullpath);
-    std::string path = pathAr[0];
-    std::string filename = pathAr[1];
-
-    bool file = string_ok(filename);
-
     std::string dbLocation;
-    if (file) {
-        //flushInsertBuffer(); - not needed if correctly in cache (see below)
+    if (fs::is_regular_file(fullpath)) {
         dbLocation = addLocationPrefix(LOC_FILE_PREFIX, fullpath);
     } else
-        dbLocation = addLocationPrefix(LOC_DIR_PREFIX, path);
+        dbLocation = addLocationPrefix(LOC_DIR_PREFIX, fullpath);
 
     std::ostringstream qb;
     qb << SQL_QUERY
@@ -741,55 +732,34 @@ std::shared_ptr<CdsObject> SQLStorage::_findObjectByPath(std::string fullpath)
     return createObjectFromRow(row);
 }
 
-std::shared_ptr<CdsObject> SQLStorage::findObjectByPath(std::string fullpath)
+int SQLStorage::findObjectIDByPath(fs::path fullpath)
 {
-    return _findObjectByPath(fullpath);
-}
-
-int SQLStorage::findObjectIDByPath(std::string fullpath)
-{
-    auto obj = _findObjectByPath(fullpath);
+    auto obj = findObjectByPath(fullpath);
     if (obj == nullptr)
         return INVALID_OBJECT_ID;
     return obj->getID();
 }
 
-int SQLStorage::ensurePathExistence(std::string path, int* changedContainer)
+int SQLStorage::ensurePathExistence(fs::path path, int* changedContainer)
 {
     *changedContainer = INVALID_OBJECT_ID;
-    std::string cleanPath = reduce_string(path, DIR_SEPARATOR);
-    if (cleanPath == std::string(1, DIR_SEPARATOR))
-        return CDS_ID_FS_ROOT;
-
-    if (cleanPath.at(cleanPath.length() - 1) == DIR_SEPARATOR) // cut off trailing slash
-        cleanPath = cleanPath.substr(0, cleanPath.length() - 1);
-
-    return _ensurePathExistence(cleanPath, changedContainer);
-}
-
-int SQLStorage::_ensurePathExistence(std::string path, int* changedContainer)
-{
     if (path == std::string(1, DIR_SEPARATOR))
         return CDS_ID_FS_ROOT;
 
-    auto obj = findObjectByPath(path + DIR_SEPARATOR);
+    auto obj = findObjectByPath(path);
     if (obj != nullptr)
         return obj->getID();
 
-    std::vector<std::string> pathAr = split_path(path);
-    std::string parent = pathAr[0];
-    std::string folder = pathAr[1];
-
-    int parentID = ensurePathExistence(parent, changedContainer);
+    int parentID = ensurePathExistence(path.parent_path(), changedContainer);
 
     auto f2i = StringConverter::f2i(config);
     if (changedContainer != nullptr && *changedContainer == INVALID_OBJECT_ID)
         *changedContainer = parentID;
 
-    return createContainer(parentID, f2i->convert(folder), path, false, "", INVALID_OBJECT_ID, std::map<std::string,std::string>());
+    return createContainer(parentID, f2i->convert(path.filename()), path, false, "", INVALID_OBJECT_ID, std::map<std::string,std::string>());
 }
 
-int SQLStorage::createContainer(int parentID, std::string name, std::string path, bool isVirtual, std::string upnpClass, int refID, const std::map<std::string,std::string>& itemMetadata)
+int SQLStorage::createContainer(int parentID, std::string name, std::string virtualPath, bool isVirtual, std::string upnpClass, int refID, const std::map<std::string,std::string>& itemMetadata)
 {
     // log_debug("Creating Container: parent: {}, name: {}, path {}, isVirt: {}, upnpClass: {}, refId: {}",
     // parentID, name.c_str(), path.c_str(), isVirtual, upnpClass.c_str(), refID);
@@ -798,7 +768,7 @@ int SQLStorage::createContainer(int parentID, std::string name, std::string path
         if (refObj == nullptr)
             throw std::runtime_error("tried to create container with refID set, but refID doesn't point to an existing object");
     }
-    std::string dbLocation = addLocationPrefix((isVirtual ? LOC_VIRT_PREFIX : LOC_DIR_PREFIX), path);
+    std::string dbLocation = addLocationPrefix((isVirtual ? LOC_VIRT_PREFIX : LOC_DIR_PREFIX), virtualPath);
 
     /*std::map<std::string,std::string> metadata;
     if (!itemMetadata.empty()) {
@@ -862,7 +832,7 @@ int SQLStorage::createContainer(int parentID, std::string name, std::string path
     return newID;
 }
 
-std::string SQLStorage::buildContainerPath(int parentID, std::string title)
+fs::path SQLStorage::buildContainerPath(int parentID, std::string title)
 {
     //title = escape(title, xxx);
     if (parentID == CDS_ID_ROOT)
@@ -881,23 +851,24 @@ std::string SQLStorage::buildContainerPath(int parentID, std::string title)
         return "";
 
     char prefix;
-    std::string path = stripLocationPrefix(&prefix, row->col(0)) + VIRTUAL_CONTAINER_SEPARATOR + title;
+    fs::path path = stripLocationPrefix(row->col(0) + VIRTUAL_CONTAINER_SEPARATOR + title, &prefix);
     if (prefix != LOC_VIRT_PREFIX)
         throw std::runtime_error("tried to build a virtual container path with an non-virtual parentID");
 
     return path;
 }
 
-void SQLStorage::addContainerChain(std::string path, std::string lastClass, int lastRefID, int* containerID, int* updateID, const std::map<std::string,std::string>& lastMetadata)
+void SQLStorage::addContainerChain(std::string virtualPath, std::string lastClass, int lastRefID, int* containerID, int* updateID, const std::map<std::string,std::string>& lastMetadata)
 {
-    log_debug("Adding container Chain for path: {}, lastRefId: {}, containerId: {}", path.c_str(), lastRefID, *containerID);
-    path = reduce_string(path, VIRTUAL_CONTAINER_SEPARATOR);
-    if (path == std::string(1, VIRTUAL_CONTAINER_SEPARATOR)) {
+    log_debug("Adding container Chain for path: {}, lastRefId: {}, containerId: {}", virtualPath.c_str(), lastRefID, *containerID);
+
+    virtualPath = reduce_string(virtualPath, VIRTUAL_CONTAINER_SEPARATOR);
+    if (virtualPath == std::string(1, VIRTUAL_CONTAINER_SEPARATOR)) {
         *containerID = CDS_ID_ROOT;
         return;
     }
     std::ostringstream qb;
-    std::string dbLocation = addLocationPrefix(LOC_VIRT_PREFIX, path);
+    std::string dbLocation = addLocationPrefix(LOC_VIRT_PREFIX, virtualPath);
     qb << "SELECT " << TQ("id") << " FROM " << TQ(CDS_OBJECT_TABLE)
         << " WHERE " << TQ("location_hash") << '=' << quote(stringHash(dbLocation))
         << " AND " << TQ("location") << '=' << quote(dbLocation)
@@ -915,12 +886,12 @@ void SQLStorage::addContainerChain(std::string path, std::string lastClass, int 
 
     int parentContainerID;
     std::string newpath, container;
-    stripAndUnescapeVirtualContainerFromPath(path, newpath, container);
+    stripAndUnescapeVirtualContainerFromPath(virtualPath, newpath, container);
 
     addContainerChain(newpath, "", INVALID_OBJECT_ID, &parentContainerID, updateID, std::map<std::string,std::string>());
     if (updateID != nullptr && *updateID == INVALID_OBJECT_ID)
         *updateID = parentContainerID;
-    *containerID = createContainer(parentContainerID, container, path, true, lastClass, lastRefID, lastMetadata);
+    *containerID = createContainer(parentContainerID, container, virtualPath, true, lastClass, lastRefID, lastMetadata);
 }
 
 std::string SQLStorage::addLocationPrefix(char prefix, std::string path)
@@ -928,21 +899,14 @@ std::string SQLStorage::addLocationPrefix(char prefix, std::string path)
     return std::string(1, prefix) + path;
 }
 
-std::string SQLStorage::stripLocationPrefix(char* prefix, std::string path)
+fs::path SQLStorage::stripLocationPrefix(std::string dbLocation, char* prefix)
 {
-    if (path.empty()) {
-        *prefix = LOC_ILLEGAL_PREFIX;
+    if (dbLocation.empty()) {
+        if (prefix) *prefix = LOC_ILLEGAL_PREFIX;
         return "";
     }
-    *prefix = path.at(0);
-    return path.substr(1);
-}
-
-std::string SQLStorage::stripLocationPrefix(std::string path)
-{
-    if (path.empty())
-        return "";
-    return path.substr(1);
+    if (prefix) *prefix = dbLocation.at(0);
+    return dbLocation.substr(1);
 }
 
 std::shared_ptr<CdsObject> SQLStorage::createObjectFromRow(const std::unique_ptr<SQLRow>& row)
@@ -1004,7 +968,7 @@ std::shared_ptr<CdsObject> SQLStorage::createObjectFromRow(const std::unique_ptr
         auto cont = std::static_pointer_cast<CdsContainer>(obj);
         cont->setUpdateID(std::stoi(row->col(_update_id)));
         char locationPrefix;
-        cont->setLocation(stripLocationPrefix(&locationPrefix, row->col(_location)));
+        cont->setLocation(stripLocationPrefix(row->col(_location), &locationPrefix));
         if (locationPrefix == LOC_VIRT_PREFIX)
             cont->setVirtual(true);
 
@@ -1708,7 +1672,7 @@ void SQLStorage::updateAutoscanPersistentList(ScanMode scanmode, std::shared_ptr
         std::ostringstream q;
         q << "SELECT " << TQ("id") << " FROM " << TQ(AUTOSCAN_TABLE)
            << " WHERE ";
-        int objectID = findObjectIDByPath(location + '/');
+        int objectID = findObjectIDByPath(location);
         log_debug("objectID = {}", objectID);
         if (objectID == INVALID_OBJECT_ID)
             q << TQ("location") << '=' << quote(location);
@@ -1789,12 +1753,12 @@ std::shared_ptr<AutoscanDirectory> SQLStorage::_fillAutoscanDirectory(const std:
         objectID = std::stoi(objectIDstr);
     int storageID = std::stoi(row->col(0));
 
-    std::string location;
+    fs::path location;
     if (objectID == INVALID_OBJECT_ID) {
         location = row->col(9);
     } else {
         char prefix;
-        location = stripLocationPrefix(&prefix, row->col(10));
+        location = stripLocationPrefix(row->col(10), &prefix);
         if (prefix != LOC_DIR_PREFIX)
             return nullptr;
     }
@@ -1829,7 +1793,7 @@ void SQLStorage::addAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir)
     if (adir->getLocation() == FS_ROOT_DIRECTORY)
         objectID = CDS_ID_FS_ROOT;
     else
-        objectID = findObjectIDByPath(adir->getLocation() + DIR_SEPARATOR);
+        objectID = findObjectIDByPath(adir->getLocation());
     if (!adir->persistent() && objectID < 0)
         throw std::runtime_error("tried to add non-persistent autoscan directory with an illegal objectID or location");
 
@@ -1982,15 +1946,6 @@ void SQLStorage::_autoscanChangePersistentFlag(int objectID, bool persistent)
 
 void SQLStorage::autoscanUpdateLM(std::shared_ptr<AutoscanDirectory> adir)
 {
-    /*
-    int objectID = adir->getObjectID();
-    if (IS_FORBIDDEN_CDS_ID(objectID))
-    {
-        objectID = findObjectIDByPath(adir->getLocation() + '/');
-        if (IS_FORBIDDEN_CDS_ID(objectID))
-            throw std::runtime_error("autoscanUpdateLM called with adir with illegal objectID and location");
-    }
-    */
     log_debug("id: {}; last_modified: {}", adir->getStorageID(), adir->getPreviousLMT());
     std::ostringstream q;
     q << "UPDATE " << TQ(AUTOSCAN_TABLE)
@@ -2045,7 +2000,7 @@ std::unique_ptr<std::vector<int>> SQLStorage::_checkOverlappingAutoscans(std::sh
         if (obj == nullptr)
             throw std::runtime_error("Referenced object (by Autoscan) not found.");
         log_error("There is already an Autoscan set on {}", obj->getLocation().c_str());
-        throw std::runtime_error("There is already an Autoscan set on " + obj->getLocation());
+        throw std::runtime_error("There is already an Autoscan set on " + obj->getLocation().string());
     }
 
     if (adir->getRecursive()) {
@@ -2070,7 +2025,7 @@ std::unique_ptr<std::vector<int>> SQLStorage::_checkOverlappingAutoscans(std::sh
             if (obj == nullptr)
                 throw std::runtime_error("Referenced object (by Autoscan) not found.");
             log_error("Overlapping Autoscans are not allowed. There is already an Autoscan set on {}", obj->getLocation().c_str());
-            throw std::runtime_error("Overlapping Autoscans are not allowed. There is already an Autoscan set on " + obj->getLocation());
+            throw std::runtime_error("Overlapping Autoscans are not allowed. There is already an Autoscan set on " + obj->getLocation().string());
         }
     }
 
@@ -2098,7 +2053,7 @@ std::unique_ptr<std::vector<int>> SQLStorage::_checkOverlappingAutoscans(std::sh
         if (obj == nullptr)
             throw std::runtime_error("Referenced object (by Autoscan) not found.");
         log_error("Overlapping Autoscans are not allowed. There is already a recursive Autoscan set on {}", obj->getLocation().c_str());
-        throw std::runtime_error("Overlapping Autoscans are not allowed. There is already a recursive Autoscan set on " + obj->getLocation());
+        throw std::runtime_error("Overlapping Autoscans are not allowed. There is already a recursive Autoscan set on " + obj->getLocation().string());
     }
 }
 

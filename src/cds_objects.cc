@@ -178,8 +178,8 @@ void CdsItem::validate()
     if (!string_ok(this->location))
         throw std::runtime_error("Item validation failed: missing location");
 
-    if (!std::filesystem::is_regular_file(location))
-        throw std::runtime_error("Item validation failed: file " + location + " not found");
+    if (!fs::is_regular_file(location))
+        throw std::runtime_error("Item validation failed: file " + location.string() + " not found");
 }
 
 CdsActiveItem::CdsActiveItem(std::shared_ptr<Storage> storage)
@@ -216,7 +216,7 @@ void CdsActiveItem::validate()
     if (!string_ok(this->action))
         throw std::runtime_error("Active Item validation failed: missing action\n");
 
-    if (!std::filesystem::is_regular_file(this->action))
+    if (!fs::is_regular_file(this->action))
         throw std::runtime_error("Active Item validation failed: action script " + action + " not found\n");
 }
 //---------
@@ -288,7 +288,7 @@ void CdsContainer::validate()
 {
     CdsObject::validate();
     /// \todo well.. we have to know if a container is a real directory or just a virtual container in the database
-    /*    if (!std::filesystem::is_directory(this->location, true))
+    /*    if (!fs::is_directory(this->location, true))
         throw std::runtime_error("CdsContainer: validation failed"); */
 }
 
@@ -296,13 +296,13 @@ std::string CdsContainer::getVirtualPath()
 {
     std::string location;
     if (getID() == CDS_ID_ROOT) {
-        location = "/";
+        location = std::string(1, VIRTUAL_CONTAINER_SEPARATOR);
     } else if (getID() == CDS_ID_FS_ROOT) {
-        location = "/" + storage->getFsRootName();
+        location = std::string(1, VIRTUAL_CONTAINER_SEPARATOR) + storage->getFsRootName();
     } else if (string_ok(getLocation())) {
         location = getLocation();
         if (!isVirtual()) {
-            location = "/" + storage->getFsRootName() + location;
+            location = std::string(1, VIRTUAL_CONTAINER_SEPARATOR) + storage->getFsRootName() + location;
         }
     }
 
@@ -316,7 +316,7 @@ std::string CdsItem::getVirtualPath()
 {
     auto cont = storage->loadObject(getParentID());
     std::string location = cont->getVirtualPath();
-    location = location + '/' + getTitle();
+    location = location + VIRTUAL_CONTAINER_SEPARATOR + getTitle();
 
     if (!string_ok(location))
         throw std::runtime_error("virtual location not available");

@@ -1,11 +1,15 @@
 #ifdef HAVE_JS
 
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 #include <duktape.h>
-#include "util/string_converter.h"
-#include "cds_objects.h"
 #include <memory>
+#include <filesystem>
+namespace fs = std::filesystem;
+
+#include "util/string_converter.h"
+#include "util/tools.h"
+#include "cds_objects.h"
 #include "metadata/metadata_handler.h"
 #include "onlineservice/atrailers_content_handler.h"
 
@@ -19,11 +23,10 @@ using namespace std;
 void ScriptTestFixture::SetUp() {
   ctx = duk_create_heap(nullptr, nullptr, nullptr, nullptr, nullptr);
 
-  stringstream scriptFile;
-  scriptFile << SCRIPTS_DIR << DIR_SEPARATOR << "js" << DIR_SEPARATOR << scriptName;
-  string scriptContent = read_text_file(scriptFile.str());
+  fs::path scriptFile = fs::path(SCRIPTS_DIR) / "js" / scriptName;
+  string scriptContent = readTextFile(scriptFile.c_str());
   duk_push_thread_stash(ctx, ctx);
-  duk_push_string(ctx, scriptFile.str().c_str());
+  duk_push_string(ctx, scriptFile.c_str());
   duk_pcompile_lstring_filename(ctx, 0, scriptContent.c_str(), scriptContent.length());
   duk_put_prop_string(ctx, -2, "script_under_test");
   duk_pop(ctx);
@@ -95,18 +98,6 @@ duk_ret_t ScriptTestFixture::dukMockPlaylist(duk_context *ctx, string title, str
   duk_put_prop_string(ctx, -2, "title");
   duk_put_global_string(ctx, OBJECT_NAME.c_str());
   return 0;
-}
-
-string ScriptTestFixture::read_text_file(string path) {
-  FILE *f = fopen(path.c_str(), "r");
-  ostringstream buf;
-  char buffer[1024];
-  size_t bytesRead;
-  while ((bytesRead = fread(buffer, 1, sizeof(buffer), f)) > 0) {
-    buf << string(buffer, bytesRead);
-  }
-  fclose(f);
-  return buf.str();
 }
 
 void ScriptTestFixture::addGlobalFunctions(duk_context *ctx, const duk_function_list_entry *funcs) {

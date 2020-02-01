@@ -37,6 +37,8 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <filesystem>
+namespace fs = std::filesystem;
 
 #define SOURCE (-1)
 #define OFF 0
@@ -78,10 +80,10 @@ public:
 
     /// \brief sets the program name, i.e. the command line name of the
     /// transcoder that will be executed.
-    void setCommand(std::string command) { this->command = command; }
+    void setCommand(fs::path command) { this->command = command; }
 
     /// \brief gets the transcoders program name
-    std::string getCommand() { return command; }
+    fs::path getCommand() { return command; }
 
     /// \brief set buffering options
     /// \param bs the size of the buffer in bytes
@@ -178,7 +180,7 @@ public:
 protected:
     std::string name;
     std::string tm;
-    std::string command;
+    fs::path command;
     std::string args;
     bool first_resource;
     bool theora;

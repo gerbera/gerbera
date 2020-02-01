@@ -33,8 +33,11 @@
 #ifndef __AUTOSCAN_H__
 #define __AUTOSCAN_H__
 
-#include "util/timer.h"
 #include <mutex>
+#include <filesystem>
+namespace fs = std::filesystem;
+
+#include "util/timer.h"
 
 #define INVALID_SCAN_ID -1
 
@@ -127,7 +130,7 @@ public:
     /// \param interval rescan interval in seconds (only for timed scan mode)
     /// \param hidden include hidden files
     /// zero means none.
-    AutoscanDirectory(std::string location, ScanMode mode,
+    AutoscanDirectory(fs::path location, ScanMode mode,
         ScanLevel level, bool recursive,
         bool persistent,
         int id = INVALID_SCAN_ID, unsigned int interval = 0, bool hidden = false);
@@ -137,9 +140,9 @@ public:
     int getStorageID() { return storageID; }
 
     /// \brief The location can only be set once!
-    void setLocation(std::string location);
+    void setLocation(fs::path location);
 
-    std::string getLocation() { return location; }
+    fs::path getLocation() { return location; }
 
     ScanMode getScanMode() { return mode; }
 
@@ -225,7 +228,7 @@ public:
     static ScanLevel remapScanlevel(std::string scanlevel);
 
 protected:
-    std::string location;
+    fs::path location;
     ScanMode mode;
     ScanLevel level;
     bool recursive;

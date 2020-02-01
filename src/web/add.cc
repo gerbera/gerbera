@@ -50,7 +50,7 @@ void web::add::process()
 
     check_request();
 
-    std::string path;
+    fs::path path;
     std::string objID = param("object_id");
     if (!string_ok(objID) || objID == "0")
         path = FS_ROOT_DIRECTORY;

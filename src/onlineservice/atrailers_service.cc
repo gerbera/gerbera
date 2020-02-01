@@ -151,7 +151,7 @@ bool ATrailersService::refreshServiceData(std::shared_ptr<Layout> layout)
             log_debug("Adding new Trailers object");
 
             if (layout != nullptr)
-                layout->processCdsObject(obj, nullptr);
+                layout->processCdsObject(obj, "");
         } else {
             log_debug("Updating existing Trailers object");
             obj->setID(old->getID());

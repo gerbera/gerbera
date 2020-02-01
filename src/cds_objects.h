@@ -38,6 +38,8 @@
 #include <utility>
 #include <vector>
 #include <map>
+#include <filesystem>
+namespace fs = std::filesystem;
 
 #include "cds_resource.h"
 #include "common.h"
@@ -101,7 +103,7 @@ protected:
     std::string upnpClass;
 
     /// \brief Physical location of the media.
-    std::string location;
+    fs::path location;
 
     /// \brief Last modification time in the file system.
     /// In seconds since UNIX epoch.
@@ -165,7 +167,7 @@ public:
     inline bool isRestricted() { return getFlag(OBJECT_FLAG_RESTRICTED); }
 
     /// \brief Set the object title (dc:title)
-    inline void setTitle(std::string title) { this->title = std::move(title); }
+    inline void setTitle(std::string title) { this->title = title; }
 
     /// \brief Retrieve the title.
     inline std::string getTitle() { return title; }
@@ -177,10 +179,10 @@ public:
     inline std::string getClass() { return upnpClass; }
 
     /// \brief Set the physical location of the media (usually an absolute path)
-    inline void setLocation(std::string location) { this->location = location; }
+    inline void setLocation(fs::path location) { this->location = location; }
 
     /// \brief Retrieve media location.
-    inline std::string getLocation() { return location; }
+    inline fs::path getLocation() { return location; }
 
     /// \brief Set modification time of the media file.
     inline void setMTime(time_t mtime) { this->mtime = mtime; }

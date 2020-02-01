@@ -54,7 +54,7 @@ public:
         std::shared_ptr<ContentManager> content,
         std::shared_ptr<Runtime> runtime);
     virtual ~JSLayout();
-    virtual void processCdsObject(std::shared_ptr<CdsObject> obj, std::string rootpath) override;
+    virtual void processCdsObject(std::shared_ptr<CdsObject> obj, fs::path rootpath) override;
 };
 
 #endif // __JS_LAYOUT_H__

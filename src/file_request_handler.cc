@@ -30,7 +30,8 @@
 /// \file file_request_handler.cc
 
 #include <sys/stat.h>
-
+#include <filesystem>
+namespace fs = std::filesystem;
 
 #include "iohandler/file_io_handler.h"
 #include "file_request_handler.h"
@@ -100,7 +101,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
     auto item = std::static_pointer_cast<CdsItem>(obj);
 
-    std::string path = item->getLocation();
+    fs::path path = item->getLocation();
 
     // determining which resource to serve
     int res_id = 0;
@@ -114,14 +115,10 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     size_t edot = ext.rfind('.');
     if (edot != std::string::npos)
         ext = ext.substr(edot);
-    if ((ext == ".srt") || (ext == ".ssa") || (ext == ".smi")
-        || (ext == ".sub")) {
-        size_t dot = path.rfind('.');
-        if (dot != std::string::npos) {
-            path = path.substr(0, dot);
-        }
-
-        path = path + ext;
+    if ((ext == ".srt") || (ext == ".ssa") || (ext == ".smi") || (ext == ".sub")) {
+        // remove .ext
+        std::string pathNoExt = path.parent_path() / path.stem();
+        path = pathNoExt + ext;
         mimeType = MIMETYPE_TEXT;
 
         // reset resource id
@@ -132,11 +129,9 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
         if (is_srt)
-            throw SubtitlesNotFoundException(
-                "Subtitle file " + path + " is not available.");
+            throw SubtitlesNotFoundException("Subtitle file " + path.string() + " is not available.");
         else
-            throw std::runtime_error(
-                "Failed to open " + path + " - " + strerror(errno));
+            throw std::runtime_error("Failed to open " + path.string() + " - " + strerror(errno));
     }
 
     if (access(path.c_str(), R_OK) == 0) {
@@ -147,14 +142,8 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
     std::string header;
     log_debug("path: {}", path.c_str());
-    size_t slash_pos = path.rfind(DIR_SEPARATOR);
-    if (slash_pos != std::string::npos) {
-        if (slash_pos < path.length() - 1) {
-            slash_pos++;
-
-            header = "Content-Disposition: attachment; filename=\""
-                + path.substr(slash_pos) + "\"";
-        }
+    if (!path.filename().empty()) {
+        header = "Content-Disposition: attachment; filename=\"" + path.filename().string() + "\"";
     }
 
     tr_profile = getValueOrDefault(dict, URL_PARAM_TRANSCODE_PROFILE_NAME);
@@ -198,7 +187,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
                         ->getByName(tr_profile);
 
         if (tp == nullptr)
-            throw std::runtime_error("Transcoding of file " + path
+            throw std::runtime_error("Transcoding of file " + path.string()
                 + " but no profile matching the name "
                 + tr_profile + " found");
 
@@ -239,12 +228,14 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
                 subexts.push_back(".smi");
                 subexts.push_back(".sub");
 
-                std::string bfilepath = path.substr(0, path.rfind('.'));
+                // remove .ext
+                std::string pathNoExt = path.parent_path() / path.stem();
+
                 std::string validext;
                 for (size_t i = 0; i < subexts.size(); i++) {
                     std::string ext = subexts[i];
 
-                    std::string fpath = bfilepath + ext;
+                    std::string fpath = pathNoExt + ext;
                     if (access(fpath.c_str(), R_OK) == 0) {
                         validext = ext;
                         break;
@@ -391,7 +382,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
 
     auto item = std::static_pointer_cast<CdsItem>(obj);
 
-    std::string path = item->getLocation();
+    fs::path path = item->getLocation();
     bool is_srt = false;
 
     std::string mimeType;
@@ -400,13 +391,11 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
     if (edot != std::string::npos)
         ext = ext.substr(edot);
     if ((ext == ".srt") || (ext == ".ssa") || (ext == ".smi") || (ext == ".sub")) {
-        size_t dot = path.rfind('.');
-        if (dot != std::string::npos) {
-            path = path.substr(0, dot);
-        }
-
-        path = path + ext;
+        // remove .ext
+        std::string pathNoExt = path.parent_path() / path.stem();
+        path = pathNoExt + ext;
         mimeType = MIMETYPE_TEXT;
+
         // reset resource id
         res_id = 0;
         is_srt = true;
@@ -416,9 +405,9 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
     int ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
         if (is_srt)
-            throw SubtitlesNotFoundException("Subtitle file " + path + " is not available.");
+            throw SubtitlesNotFoundException("Subtitle file " + path.string() + " is not available.");
         else
-            throw std::runtime_error("Failed to open " + path + " - " + strerror(errno));
+            throw std::runtime_error("Failed to open " + path.string() + " - " + strerror(errno));
     }
 
     log_debug("fetching resource id {}", res_id);

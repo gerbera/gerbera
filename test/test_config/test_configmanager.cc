@@ -8,19 +8,6 @@
 #include "config/config_manager.h"
 #include "config/config_generator.h"
 
-static int unlinkCB(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
-{
-    int rv = remove(fpath);
-    if (rv)
-        perror(fpath);
-    return rv;
-}
-
-static int removeTree(const std::string& path)
-{
-    return nftw(path.c_str(), unlinkCB, 64, FTW_DEPTH | FTW_PHYS);
-}
-
 class ConfigManagerTest : public ::testing::Test {
 
  public:
@@ -32,20 +19,20 @@ class ConfigManagerTest : public ::testing::Test {
   virtual void SetUp() {
     gerberaDir = createTempPath();
 
-    std::string grbWeb = gerberaDir + DIR_SEPARATOR + "web";
+    fs::path grbWeb = gerberaDir / "web";
     create_directory(grbWeb);
 
-    std::string grbJs = gerberaDir + DIR_SEPARATOR + "js";
+    fs::path grbJs = gerberaDir / "js";
     create_directory(grbJs);
 
-    std::string configDir = gerberaDir + DIR_SEPARATOR + ".config";
+    fs::path configDir = gerberaDir / ".config";
     create_directory(configDir);
 
     // Create mock files, allowing for .init()
-    std::string mockFiles[3] = {
-        grbJs + DIR_SEPARATOR + "common.js",
-        grbJs + DIR_SEPARATOR + "import.js",
-        grbJs + DIR_SEPARATOR + "playlists.js"
+    fs::path mockFiles[3] = {
+        grbJs / "common.js",
+        grbJs / "import.js",
+        grbJs / "playlists.js"
     };
     std::ofstream file;
     for (int i = 0; i < 3; i++) {
@@ -53,7 +40,7 @@ class ConfigManagerTest : public ::testing::Test {
       file.close();
     }
 
-    config_file = configDir + DIR_SEPARATOR + "config.xml";
+    config_file = configDir / "config.xml";
     home = gerberaDir;
     prefix = gerberaDir;
     magic = "";
@@ -61,14 +48,14 @@ class ConfigManagerTest : public ::testing::Test {
 
     // Create config using generator
     std::string cfgContent = createConfig();
-    file.open(configDir + DIR_SEPARATOR + "config.xml");
+    file.open(configDir / "config.xml");
     file << cfgContent;
     file.close();
 
     subject = nullptr;
   };
 
-  std::string createTempPath() {
+  fs::path createTempPath() {
     uuid_t uuid;
 #ifdef BSD_NATIVE_UUID
     char *uuid_str;
@@ -81,14 +68,12 @@ class ConfigManagerTest : public ::testing::Test {
     uuid_unparse(uuid, uuid_str);
 #endif
 
-    std::stringstream ss;
-    ss << CMAKE_BINARY_DIR << DIR_SEPARATOR << "test" << DIR_SEPARATOR << "test_config" << DIR_SEPARATOR << uuid_str;
-
-    create_directory(ss.str());
-    return ss.str();
+    fs::path ss = fs::path(CMAKE_BINARY_DIR) / "test" / "test_config" / uuid_str;
+    create_directory(ss);
+    return ss;
   }
 
-  void create_directory(std::string dir) {
+  void create_directory(fs::path dir) {
     if (mkdir(dir.c_str(), 0777) < 0) {
       throw std::runtime_error("Failed to create test_config temporary directory for testing");
     };
@@ -96,21 +81,21 @@ class ConfigManagerTest : public ::testing::Test {
 
   std::string createConfig() {
     ConfigGenerator configGenerator;
-    return configGenerator.generate(std::string(home.c_str()), std::string(confdir.c_str()), std::string(prefix.c_str()), magic);
+    return configGenerator.generate(home, confdir, prefix, magic);
   }
 
   virtual void TearDown() {
     if (subject)
       delete subject;
-    removeTree(gerberaDir);
+    fs::remove_all(gerberaDir);
   };
 
-  std::string gerberaDir;
-  std::string config_file;
-  std::string home;
-  std::string confdir;
-  std::string prefix;
-  std::string magic;
+  fs::path gerberaDir;
+  fs::path config_file;
+  fs::path home;
+  fs::path confdir;
+  fs::path prefix;
+  fs::path magic;
   ConfigManager *subject;
 };
 
@@ -125,10 +110,11 @@ TEST_F(ConfigManagerTest, LoadsWebUIDefaultValues) {
 
 TEST_F(ConfigManagerTest, ThrowsExceptionWhenMissingConfigFileAndNoDefault) {
   std::ostringstream expErrMsg;
-  std::string notExistsDir = home + DIR_SEPARATOR + "not_exists";
+  fs::path notExistsDir = home / "not_exists";
+  fs::path configFile = notExistsDir / confdir / "config.xml";
 
   expErrMsg << "\nThe server configuration file could not be found: ";
-  expErrMsg << notExistsDir << DIR_SEPARATOR << confdir << DIR_SEPARATOR << "config.xml" << "\n";
+  expErrMsg << configFile << "\n";
   expErrMsg << "Gerbera could not find a default configuration file.\n";
   expErrMsg << "Try specifying an alternative configuration file on the command line.\n";
   expErrMsg << "For a list of options run: gerbera -h\n";

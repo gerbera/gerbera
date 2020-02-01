@@ -75,7 +75,7 @@ js_getCdsObject(duk_context *ctx)
     if (!duk_is_string(ctx, 0))
         return 0;
 
-    std::string path = duk_to_string(ctx, 0);
+    fs::path path = duk_to_string(ctx, 0);
     duk_pop(ctx);
 
     if (!string_ok(path))
@@ -171,7 +171,7 @@ void PlaylistParserScript::processPlaylistObject(std::shared_ptr<CdsObject> obj,
         currentObjectID = INVALID_OBJECT_ID;
         currentTask = nullptr;
         FREE(currentLine);
-        throw std::runtime_error("failed to open file: " + obj->getLocation());
+        throw std::runtime_error("failed to open file: " + obj->getLocation().string());
     }
 
     Runtime::AutoLock lock(runtime->getMutex());
