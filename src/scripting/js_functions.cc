@@ -72,7 +72,7 @@ duk_ret_t js_addCdsObject(duk_context *ctx)
     const char *ts = duk_to_string(ctx, 1);
     if (!ts)
         ts = "/";
-    std::string path = ts;
+    fs::path path = ts;
     //stack: js_cds_obj path
     std::string containerclass = "";
     if (!duk_is_null_or_undefined(ctx, 2))
@@ -134,11 +134,7 @@ duk_ret_t js_addCdsObject(duk_context *ctx)
             if (!IS_CDS_ITEM_EXTERNAL_URL(otype) &&
                 !IS_CDS_ITEM_INTERNAL_URL(otype))
             {
-                std::string loc = self->getProperty("location");
-                if (string_ok(loc) &&
-                   (IS_CDS_PURE_ITEM(otype) || IS_CDS_ACTIVE_ITEM(otype)))
-                    loc = normalizePath(loc);
-
+                fs::path loc = self->getProperty("location");
                 pcd_id = cm->addFile(loc, false, false, true);
                 if (pcd_id == INVALID_OBJECT_ID)
                 {

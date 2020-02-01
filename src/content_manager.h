@@ -79,17 +79,17 @@ class TaskProcessor;
 class CMAddFileTask : public GenericTask, public std::enable_shared_from_this<CMAddFileTask> {
 protected:
     std::shared_ptr<ContentManager> content;
-    std::string path;
-    std::string rootpath;
+    fs::path path;
+    fs::path rootpath;
     bool recursive;
     bool hidden;
 
 public:
     CMAddFileTask(std::shared_ptr<ContentManager> content,
-        std::string path, std::string rootpath, bool recursive = false,
+        fs::path path, fs::path rootpath, bool recursive = false,
         bool hidden = false, bool cancellable = true);
-    std::string getPath();
-    std::string getRootPath();
+    fs::path getPath();
+    fs::path getRootPath();
     virtual void run() override;
 };
 
@@ -171,7 +171,7 @@ public:
     /// \param hidden true allows to import hidden files, false ignores them
     /// \param queue for immediate processing or in normal order
     /// \return object ID of the added file - only in blockign mode, when used in async mode this function will return INVALID_OBJECT_ID
-    int addFile(std::string path, bool recursive = true, bool async = true,
+    int addFile(fs::path path, bool recursive = true, bool async = true,
         bool hidden = false, bool lowPriority = false,
         bool cancellable = true);
 
@@ -183,11 +183,11 @@ public:
     /// \param hidden true allows to import hidden files, false ignores them
     /// \param queue for immediate processing or in normal order
     /// \return object ID of the added file - only in blockign mode, when used in async mode this function will return INVALID_OBJECT_ID
-    int addFile(std::string path, std::string rootpath, bool recursive = true, bool async = true,
+    int addFile(fs::path path, fs::path rootpath, bool recursive = true, bool async = true,
         bool hidden = false, bool lowPriority = false,
         bool cancellable = true);
 
-    int ensurePathExistence(std::string path);
+    int ensurePathExistence(fs::path path);
     void removeObject(int objectID, bool async = true, bool all = false);
     void rescanDirectory(int objectID, int scanID, ScanMode scanMode,
         std::string descPath = "", bool cancellable = true);
@@ -197,7 +197,7 @@ public:
     /// \param parameters key value pairs of fields to be updated
     void updateObject(int objectID, const std::map<std::string,std::string>& parameters);
 
-    std::shared_ptr<CdsObject> createObjectFromFile(std::string path,
+    std::shared_ptr<CdsObject> createObjectFromFile(fs::path path,
         bool magic = true,
         bool allow_fifo = false);
 
@@ -346,24 +346,24 @@ protected:
 
     std::vector<std::shared_ptr<Executor>> process_list;
 
-    int addFileInternal(std::string path, std::string rootpath,
+    int addFileInternal(fs::path path, fs::path rootpath,
         bool recursive = true,
         bool async = true, bool hidden = false,
         bool lowPriority = false,
         unsigned int parentTaskID = 0,
         bool cancellable = true);
-    int _addFile(std::string path, std::string rootPath, bool recursive = false, bool hidden = false, std::shared_ptr<CMAddFileTask> task = nullptr);
+    int _addFile(fs::path path, fs::path rootPath, bool recursive = false, bool hidden = false, std::shared_ptr<CMAddFileTask> task = nullptr);
     //void _addFile2(std::string path, bool recursive=0);
     void _removeObject(int objectID, bool all);
 
     void _rescanDirectory(int containerID, int scanID, ScanMode scanMode, ScanLevel scanLevel, std::shared_ptr<GenericTask> task = nullptr);
     /* for recursive addition */
-    void addRecursive(std::string path, bool hidden, std::shared_ptr<CMAddFileTask> task);
+    void addRecursive(fs::path path, bool hidden, std::shared_ptr<CMAddFileTask> task);
 
     std::string extension2mimetype(std::string extension);
     std::string mimetype2upnpclass(std::string mimeType);
 
-    void invalidateAddTask(std::shared_ptr<GenericTask> t, std::string path);
+    void invalidateAddTask(std::shared_ptr<GenericTask> t, fs::path path);
 
     std::shared_ptr<Layout> layout;
 

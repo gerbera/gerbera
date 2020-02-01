@@ -31,6 +31,7 @@
 /// \brief Implementeation of the MetadataHandler class.
 
 #include <filesystem>
+namespace fs = std::filesystem;
 
 #include "metadata_handler.h"
 #include "config/config_manager.h"
@@ -100,9 +101,9 @@ MetadataHandler::MetadataHandler(std::shared_ptr<ConfigManager> config)
 
 void MetadataHandler::setMetadata(std::shared_ptr<ConfigManager> config, std::shared_ptr<CdsItem> item) {
     std::string location = item->getLocation();
-    if (!std::filesystem::is_regular_file(location))
+    if (!fs::is_regular_file(location))
         throw std::runtime_error("Not a file: " + location);
-    auto filesize = std::filesystem::file_size(location);
+    auto filesize = fs::file_size(location);
 
     std::string mimetype = item->getMimeType();
 

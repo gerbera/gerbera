@@ -65,9 +65,6 @@ class ScriptTestFixture : public ::testing::Test {
   // Creates a mock playlist global object in Duktape context
   duk_ret_t dukMockPlaylist(duk_context* ctx, string title, string location, string mimetype);
 
-  // Reads the Duktape script under test
-  string read_text_file(string path);
-
   // Add global Duktape methods to proxy into c++ layer
   void addGlobalFunctions(duk_context *ctx, const duk_function_list_entry *funcs);
 

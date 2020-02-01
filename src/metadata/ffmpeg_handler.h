@@ -54,9 +54,9 @@ public:
 private:
     void addFfmpegAuxdataFields(std::shared_ptr<CdsItem> item, AVFormatContext* pFormatCtx) const;
     void addFfmpegMetadataFields(std::shared_ptr<CdsItem> item, AVFormatContext* pFormatCtx) const;
-    std::string getThumbnailCacheFilePath(std::string& movie_filename, bool create) const;
-    bool readThumbnailCacheFile(std::string movie_filename, uint8_t** ptr_img, size_t* size_img) const;
-    void writeThumbnailCacheFile(std::string movie_filename, uint8_t* ptr_img, int size_img) const;
+    fs::path getThumbnailCacheFilePath(const fs::path& movie_filename, bool create) const;
+    bool readThumbnailCacheFile(const fs::path& movie_filename, uint8_t** ptr_img, size_t* size_img) const;
+    void writeThumbnailCacheFile(const fs::path& movie_filename, uint8_t* ptr_img, int size_img) const;
 };
 
 #endif //__FFMPEG_HANDLER_H__

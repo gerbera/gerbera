@@ -47,39 +47,30 @@ FanArtHandler::FanArtHandler(std::shared_ptr<ConfigManager> config)
 {
 }
 
-inline bool path_exists(std::string name)
+fs::path FanArtHandler::getFanArtPath(std::shared_ptr<CdsItem> item) const
 {
-    struct stat buffer;
-    return (stat(name.c_str(), &buffer) == 0);
-}
-
-std::string getFolderName(std::shared_ptr<CdsItem> item)
-{
-    std::string folder = item->getLocation().substr(0, item->getLocation().rfind('/'));
+    auto folder = item->getLocation().parent_path();
     log_debug("Folder name: {}", folder.c_str());
-    return folder;
-}
 
-std::string getFanArtPath(std::string folder)
-{
-    std::string found;
+    fs::path found;
     for (size_t i = 0; i < sizeof(names)/sizeof(names[0]); i++) {
-        bool exists = path_exists(folder + names[i]);
+        auto found = folder / names[i];
+        bool exists = fs::is_regular_file(found);
         log_debug("{}: {}", names[i], exists ? "found" : "missing");
         if (!exists)
             continue;
-        found = folder + names[i];
+        return found;
         break;
     }
-    return found;
+    return "";
 }
 
 void FanArtHandler::fillMetadata(std::shared_ptr<CdsItem> item)
 {
     log_debug("Running fanart handler on {}", item->getLocation().c_str());
+    auto path = getFanArtPath(item);
 
-    std::string found = getFanArtPath(getFolderName(item));
-    if (!found.empty()) {
+    if (!path.empty()) {
         auto resource = std::make_shared<CdsResource>(CH_FANART);
         resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo("jpg"));
         resource->addParameter(RESOURCE_CONTENT_TYPE, ID3_ALBUM_ART);
@@ -89,8 +80,7 @@ void FanArtHandler::fillMetadata(std::shared_ptr<CdsItem> item)
 
 std::unique_ptr<IOHandler> FanArtHandler::serveContent(std::shared_ptr<CdsItem> item, int resNum)
 {
-    std::string path = getFanArtPath(getFolderName(item));
-
+    auto path = getFanArtPath(item);
     log_debug("FanArt: Opening name: {}", path.c_str());
 
     auto io_handler = std::make_unique<FileIOHandler>(path);

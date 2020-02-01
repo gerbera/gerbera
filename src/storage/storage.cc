@@ -74,29 +74,29 @@ std::shared_ptr<Storage> Storage::createInstance(std::shared_ptr<ConfigManager> 
     return storage;
 }
 
-void Storage::stripAndUnescapeVirtualContainerFromPath(std::string path, std::string& first, std::string& last)
+void Storage::stripAndUnescapeVirtualContainerFromPath(std::string virtualPath, std::string& first, std::string& last)
 {
-    if (path.at(0) != VIRTUAL_CONTAINER_SEPARATOR) {
+    if (virtualPath.at(0) != VIRTUAL_CONTAINER_SEPARATOR) {
         throw std::runtime_error(fmt::format("Got non-absolute virtual path; needs to start with: {}", VIRTUAL_CONTAINER_SEPARATOR));
     }
-    size_t sep = path.rfind(VIRTUAL_CONTAINER_SEPARATOR);
+    size_t sep = virtualPath.rfind(VIRTUAL_CONTAINER_SEPARATOR);
     if (sep == 0) {
         first = "/";
-        last = path.substr(1);
+        last = virtualPath.substr(1);
     } else {
         while (sep != std::string::npos) {
-            char beforeSep = path.at(sep - 1);
+            char beforeSep = virtualPath.at(sep - 1);
             if (beforeSep != VIRTUAL_CONTAINER_ESCAPE) {
                 break;
             }
-            sep = path.rfind(VIRTUAL_CONTAINER_SEPARATOR, sep - 1);
+            sep = virtualPath.rfind(VIRTUAL_CONTAINER_SEPARATOR, sep - 1);
         }
         if (sep == 0) {
             first = "/";
-            last = unescape(path.substr(sep + 1), VIRTUAL_CONTAINER_ESCAPE);
+            last = unescape(virtualPath.substr(sep + 1), VIRTUAL_CONTAINER_ESCAPE);
         } else {
-            first = path.substr(0, sep);
-            last = unescape(path.substr(sep + 1), VIRTUAL_CONTAINER_ESCAPE);
+            first = virtualPath.substr(0, sep);
+            last = unescape(virtualPath.substr(sep + 1), VIRTUAL_CONTAINER_ESCAPE);
         }
     }
 }

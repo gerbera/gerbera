@@ -31,6 +31,7 @@
 
 #include <cstdio>
 #include <filesystem>
+namespace fs = std::filesystem;
 
 #include "cds_objects.h"
 #include "common.h"
@@ -180,7 +181,7 @@ void web::addObject::process()
     } else if (obj_type == STRING_OBJECT_TYPE_ITEM) {
         if (!string_ok(location))
             throw std::runtime_error("no location given");
-        if (!std::filesystem::is_regular_file(location))
+        if (!fs::is_regular_file(location))
             throw std::runtime_error("file not found");
         obj = this->addItem(parentID, std::make_shared<CdsItem>(storage));
         allow_fifo = true;
@@ -189,7 +190,7 @@ void web::addObject::process()
             throw std::runtime_error("no action given");
         if (!string_ok(location))
             throw std::runtime_error("no location given");
-        if (!std::filesystem::is_regular_file(location))
+        if (!fs::is_regular_file(location))
             throw std::runtime_error("file not found");
         obj = this->addActiveItem(parentID);
         allow_fifo = true;

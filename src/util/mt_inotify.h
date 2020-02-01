@@ -36,6 +36,8 @@
 
 #include <sys/inotify.h>
 #include <string>
+#include <filesystem>
+namespace fs = std::filesystem;
 
 /// \brief Inotify interface.
 class Inotify {
@@ -47,7 +49,7 @@ public:
     /// \param path file or directory to monitor.
     /// \param events inotify event mask
     /// \return watch descriptor or a negative value on error
-    int addWatch(std::string path, int events);
+    int addWatch(fs::path path, int events);
 
     /// \brief Removes a previously added file or directory from the watch list
     /// \param wd watch descriptor that was returned by the add_watch function

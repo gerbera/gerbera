@@ -33,6 +33,9 @@
 #define __PROCESS_IO_HANDLER_H__
 
 #include <memory>
+#include <filesystem>
+namespace fs = std::filesystem;
+
 #include "common.h"
 #include "util/executor.h"
 #include "io_handler.h"
@@ -62,7 +65,7 @@ public:
     /// \param procList associated processes that will be terminated once
     /// they are no longer needed
     ProcessIOHandler(std::shared_ptr<ContentManager> content,
-        std::string filename, std::shared_ptr<Executor> mainProc,
+        const fs::path& filename, std::shared_ptr<Executor> mainProc,
         std::vector<std::shared_ptr<ProcListItem>> procList = std::vector<std::shared_ptr<ProcListItem>>(),
         bool ignoreSeek = false);
 
@@ -104,7 +107,7 @@ protected:
     std::shared_ptr<Executor> mainProc;
 
     /// \brief name of the file or fifo to read the data from
-    std::string filename;
+    fs::path filename;
 
     /// \brief file descriptor
     int fd{};

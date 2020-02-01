@@ -256,7 +256,7 @@ void Script::defineFunctions(duk_function_list_entry *functions)
 
 void Script::_load(std::string scriptPath)
 {
-    std::string scriptText = read_text_file(scriptPath);
+    std::string scriptText = readTextFile(scriptPath);
 
     if (!string_ok(scriptText))
         throw std::runtime_error("empty script");
@@ -460,12 +460,9 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(std::shared_ptr<CdsObject
         }
 
         // location must not be touched by character conversion!
-        val = getProperty("location");
-        if ((!val.empty()) && (IS_CDS_PURE_ITEM(objectType) || IS_CDS_ACTIVE_ITEM(objectType)))
-            val = normalizePath(val);
-
-        if (string_ok(val))
-            obj->setLocation(val);
+        fs::path location = getProperty("location");
+        if (string_ok(location))
+            obj->setLocation(location);
         else
         {
             if (pcd != nullptr)

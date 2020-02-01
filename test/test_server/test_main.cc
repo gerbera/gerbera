@@ -2,8 +2,10 @@
 #include <memory>
 #include <fstream>
 #include <common.h>
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
+#include <gtest/gtest.h>
+#include <gmock/gmock.h>
+#include <filesystem>
+namespace fs = std::filesystem;
 
 using namespace ::testing;
 
@@ -40,19 +42,16 @@ class ServerTest : public ::testing::Test {
 
 TEST_F(ServerTest, ServerOutputsHelpInformation) {
   std::string expectedOutput = mockText("fixtures/mock-help.out");
-
-  std::stringstream ss;
-  ss << CMAKE_BINARY_DIR <<  DIR_SEPARATOR << "gerbera --help 2>&1";
-  std::string cmd = ss.str();
+  fs::path cmd = fs::path(CMAKE_BINARY_DIR) / "gerbera --help 2>&1";
   std::string output = exec(cmd.c_str());
+
   ASSERT_THAT(output.c_str(), HasSubstr(expectedOutput.c_str()));
 }
 
 TEST_F(ServerTest, ServerOutputsCompileInformationIncludingGit) {
-  std::stringstream ss;
-  ss << CMAKE_BINARY_DIR << DIR_SEPARATOR << "gerbera --compile-info 2>&1";
-  std::string cmd = ss.str();
+  fs::path cmd = fs::path(CMAKE_BINARY_DIR) / "gerbera --compile-info 2>&1";
   std::string output = exec(cmd.c_str());
+
   ASSERT_THAT(output, HasSubstr("Compile info\n-------------\nWITH_"));
   ASSERT_THAT(output, HasSubstr("Git info:\n-------------\n"));
   ASSERT_THAT(output, HasSubstr("Git Branch: "));
@@ -65,9 +64,7 @@ TEST_F(ServerTest, GeneratesFullConfigFromServerCommand) {
   std::string topOutput = "<config version=\"2\" xmlns=\"http://mediatomb.cc/config/2\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://mediatomb.cc/config/2 http://mediatomb.cc/config/2.xsd\">";
   std::string bottomOutput = "</profile>\n    </profiles>\n  </transcoding>\n</config>";
 
-  std::stringstream ss;
-  ss << CMAKE_BINARY_DIR << DIR_SEPARATOR << "gerbera --create-config 2>&1";
-  std::string cmd = ss.str();
+  fs::path cmd = fs::path(CMAKE_BINARY_DIR) / "gerbera --create-config 2>&1";
   std::string output = exec(cmd.c_str());
 
   ASSERT_THAT(output, HasSubstr(topOutput));

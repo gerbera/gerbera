@@ -177,19 +177,19 @@ typedef enum {
 
 class ConfigManager {
 public:
-    ConfigManager(std::string filename,
-        std::string userhome, std::string config_dir,
-        std::string prefix_dir, std::string magic_file,
+    ConfigManager(fs::path filename,
+        fs::path userhome, fs::path config_dir,
+        fs::path prefix_dir, fs::path magic_file,
         std::string ip, std::string interface, int port,
         bool debug_logging);
     virtual ~ConfigManager();
 
     /// \brief Returns the name of the config file that was used to launch the server.
-    inline std::string getConfigFilename() { return filename; }
+    inline fs::path getConfigFilename() { return filename; }
 
-    void load(std::string filename, std::string userHome);
+    void load(fs::path filename, fs::path userHome);
 
-    /// \brief returns a config option of type String
+    /// \brief returns a config option of type std::string
     /// \param option option to retrieve.
     std::string getOption(config_option_t option);
 
@@ -225,9 +225,9 @@ public:
     void emptyBookmark();
 
 protected:
-    std::string filename;
-    std::string prefix_dir;
-    std::string magic_file;
+    fs::path filename;
+    fs::path prefix_dir;
+    fs::path magic_file;
     std::string ip;
     std::string interface;
     int port;
@@ -276,7 +276,7 @@ protected:
     /// \param path path to be resolved
     /// \param isFile file or directory
     /// \param exists must file exist
-    std::string resolvePath(std::string path, bool isFile = false, bool exists=true);
+    fs::path resolvePath(fs::path path, bool isFile = false, bool exists=true);
 
     /// \brief Creates a dictionary from an XML nodeset.
     /// \param element starting element of the nodeset.

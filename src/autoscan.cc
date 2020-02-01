@@ -45,7 +45,7 @@ AutoscanDirectory::AutoscanDirectory()
     timer_parameter = std::make_shared<Timer::Parameter>(Timer::Parameter::IDAutoscan, INVALID_SCAN_ID);
 }
 
-AutoscanDirectory::AutoscanDirectory(std::string location, ScanMode mode,
+AutoscanDirectory::AutoscanDirectory(fs::path location, ScanMode mode,
     ScanLevel level, bool recursive, bool persistent,
     int id, unsigned int interval, bool hidden)
     : location(location)
@@ -242,7 +242,7 @@ void AutoscanList::notifyAll(Timer::Subscriber* sub)
     }
 }
 
-void AutoscanDirectory::setLocation(std::string location)
+void AutoscanDirectory::setLocation(fs::path location)
 {
     this->location = location;
 }

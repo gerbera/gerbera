@@ -33,6 +33,7 @@
 #define __FALLBACK_LAYOUT_H__
 
 #include <memory>
+
 #include "layout.h"
 #include "../cds_objects.h"
 
@@ -51,15 +52,15 @@ public:
     FallbackLayout(std::shared_ptr<ConfigManager> config,
         std::shared_ptr<Storage> storage,
         std::shared_ptr<ContentManager> content);
-    virtual void processCdsObject(std::shared_ptr<CdsObject> obj, std::string rootpath) override;
+    virtual void processCdsObject(std::shared_ptr<CdsObject> obj, fs::path rootpath) override;
 #ifdef ENABLE_PROFILING
     virtual ~FallbackLayout();
 #endif
 protected:
     void add(std::shared_ptr<CdsObject> obj, int parentID, bool use_ref = true);
     std::string esc(std::string str);
-    void addVideo(std::shared_ptr<CdsObject> obj, std::string rootpath);
-    void addImage(std::shared_ptr<CdsObject> obj, std::string rootpath);
+    void addVideo(std::shared_ptr<CdsObject> obj, fs::path rootpath);
+    void addImage(std::shared_ptr<CdsObject> obj, fs::path rootpath);
     void addAudio(std::shared_ptr<CdsObject> obj);
 #ifdef SOPCAST
     void addSopCast(std::shared_ptr<CdsObject> obj);

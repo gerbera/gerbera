@@ -487,7 +487,7 @@ std::unique_ptr<UpnpXMLBuilder::PathBase> UpnpXMLBuilder::getPathBase(std::share
     /// for each resource once the io handlers are ready
     int objectType = item->getObjectType();
     if (IS_CDS_ITEM_INTERNAL_URL(objectType)) {
-        pathBase->pathBase = std::string(_URL_PARAM_SEPARATOR) + CONTENT_SERVE_HANDLER + _URL_PARAM_SEPARATOR + item->getLocation();
+        pathBase->pathBase = std::string(_URL_PARAM_SEPARATOR) + CONTENT_SERVE_HANDLER + _URL_PARAM_SEPARATOR + item->getLocation().string();
         return pathBase;
     }
 

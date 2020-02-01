@@ -39,6 +39,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <filesystem>
+namespace fs = std::filesystem;
 
 #if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE)
 #include <clocale>
@@ -62,9 +63,9 @@
 
 bool ConfigManager::debug_logging = false;
 
-ConfigManager::ConfigManager(std::string filename,
-    std::string userhome, std::string config_dir,
-    std::string prefix_dir, std::string magic_file,
+ConfigManager::ConfigManager(fs::path filename,
+    fs::path userhome, fs::path config_dir,
+    fs::path prefix_dir, fs::path magic_file,
     std::string ip, std::string interface, int port,
     bool debug_logging)
     :filename(filename)
@@ -82,11 +83,11 @@ ConfigManager::ConfigManager(std::string filename,
 
     if (filename.empty()) {
         // No config file path provided, so lets find one.
-        std::string home = userhome + DIR_SEPARATOR + config_dir;
-        filename += home + DIR_SEPARATOR + DEFAULT_CONFIG_NAME;
+        fs::path home = userhome / config_dir;
+        filename += home / DEFAULT_CONFIG_NAME;
     }
 
-    if (!std::filesystem::is_regular_file(filename)) {
+    if (!fs::is_regular_file(filename)) {
         std::ostringstream expErrMsg;
         expErrMsg << "\nThe server configuration file could not be found: ";
         expErrMsg << filename << "\n";
@@ -134,7 +135,7 @@ ConfigManager::~ConfigManager()
 #define SET_TRANSCODING_PROFILELIST_OPTION(opttype) options->at(opttype) = trlist_opt;
 
 
-void ConfigManager::load(std::string filename, std::string userHome)
+void ConfigManager::load(fs::path filename, fs::path userHome)
 {
     std::string temp;
     int temp_int;
@@ -179,7 +180,7 @@ void ConfigManager::load(std::string filename, std::string userHome)
         temp = userHome;
     } else
         temp = getOption("/server/home");
-    if (!std::filesystem::is_directory(temp))
+    if (!fs::is_directory(temp))
         throw std::runtime_error("Directory '" + temp + "' does not exist!");
     NEW_OPTION(temp);
     SET_OPTION(CFG_SERVER_HOME);
@@ -191,7 +192,6 @@ void ConfigManager::load(std::string filename, std::string userHome)
 
     temp = getOption("/server/tmpdir", DEFAULT_TMPDIR);
     temp = resolvePath(temp);
-    temp = temp + "/"; // TODO: fix users
     NEW_OPTION(temp);
     SET_OPTION(CFG_SERVER_TMPDIR);
 
@@ -731,13 +731,13 @@ void ConfigManager::load(std::string filename, std::string userHome)
 
 #ifdef HAVE_JS
     temp = getOption("/import/scripting/playlist-script",
-        prefix_dir + DIR_SEPARATOR + DEFAULT_JS_DIR + DIR_SEPARATOR + DEFAULT_PLAYLISTS_SCRIPT);
+        prefix_dir / DEFAULT_JS_DIR / DEFAULT_PLAYLISTS_SCRIPT);
     temp = resolvePath(temp, true);
     NEW_OPTION(temp);
     SET_OPTION(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT);
 
     temp = getOption("/import/scripting/common-script",
-        prefix_dir + DIR_SEPARATOR + DEFAULT_JS_DIR + DIR_SEPARATOR + DEFAULT_COMMON_SCRIPT);
+        prefix_dir / DEFAULT_JS_DIR / DEFAULT_COMMON_SCRIPT);
     temp = resolvePath(temp, true);
     NEW_OPTION(temp);
     SET_OPTION(CFG_IMPORT_SCRIPTING_COMMON_SCRIPT);
@@ -785,7 +785,7 @@ void ConfigManager::load(std::string filename, std::string userHome)
 
     std::string script_path = getOption(
         "/import/scripting/virtual-layout/import-script",
-        prefix_dir + DIR_SEPARATOR + DEFAULT_JS_DIR + DIR_SEPARATOR + DEFAULT_IMPORT_SCRIPT);
+        prefix_dir / DEFAULT_JS_DIR / DEFAULT_IMPORT_SCRIPT);
     temp = resolvePath(temp, true, temp == "js");
     if (temp == "js" && script_path.empty())
         throw std::runtime_error("Error in config file: you specified \"js\" to "
@@ -1332,30 +1332,30 @@ pugi::xml_node ConfigManager::getElement(std::string xpath)
     return xpathNode.node();
 }
 
-std::string ConfigManager::resolvePath(std::string path, bool isFile, bool exists)
+fs::path ConfigManager::resolvePath(fs::path path, bool isFile, bool exists)
 {
-    std::string home = getOption(CFG_SERVER_HOME);
+    fs::path home = getOption(CFG_SERVER_HOME);
 
-    if (!path.empty() && (path.at(0) == '/' || (home == "." && path.at(0) == '.')))
+    if (path.is_absolute() || (home.is_relative() && path.is_relative()))
         ; // absolute or relative, nothing to resolve
     else if (home.empty())
-        path = fmt::format("./{}", path);
+        path = "." / path;
     else
-        path = fmt::format("{}/{}", home, path);
+        path = home / path;
 
     // verify that file/directory is there
     if (isFile) {
         if (exists) {
-            if (!std::filesystem::is_regular_file(path))
-                throw std::runtime_error("File '" + path + "' does not exist!");
+            if (!fs::is_regular_file(path))
+                throw std::runtime_error("File '" + path.string() + "' does not exist!");
         } else {
-            std::string parent_path = std::filesystem::path(path).parent_path();
-            if (!std::filesystem::is_directory(parent_path))
-                throw std::runtime_error("Parent directory '" + path + "' does not exist!");
+            std::string parent_path = path.parent_path();
+            if (!fs::is_directory(parent_path))
+                throw std::runtime_error("Parent directory '" + path.string() + "' does not exist!");
         }
     } else if (exists) {
-        if (!std::filesystem::is_directory(path))
-            throw std::runtime_error("Directory '" + path + "' does not exist!");
+        if (!fs::is_directory(path))
+            throw std::runtime_error("Directory '" + path.string() + "' does not exist!");
     }
 
     return path;
@@ -1363,51 +1363,25 @@ std::string ConfigManager::resolvePath(std::string path, bool isFile, bool exist
 
 void ConfigManager::writeBookmark(std::string ip, std::string port)
 {
-    FILE* f;
-    std::string filename;
-    std::string path;
     std::string data;
-    size_t size;
-
     if (!getBoolOption(CFG_SERVER_UI_ENABLED)) {
         data = http_redirect_to(ip, port, "disabled.html");
     } else {
         data = http_redirect_to(ip, port);
     }
 
-    path = getOption(CFG_SERVER_BOOKMARK_FILE);
+    fs::path path = getOption(CFG_SERVER_BOOKMARK_FILE);
     log_debug("Writing bookmark file to: {}", path.c_str());
-
-    f = fopen(path.c_str(), "w");
-    if (f == nullptr) {
-        throw std::runtime_error("writeBookmark: failed to open: " + path);
-    }
-
-    size = fwrite(data.c_str(), sizeof(char), data.length(), f);
-    fclose(f);
-
-    if (size < data.length())
-        throw std::runtime_error("write_Bookmark: failed to write to: " + path);
+    writeTextFile(path, data);
 }
 
 void ConfigManager::emptyBookmark()
 {
     std::string data = "<html><body><h1>Gerbera Media Server is not running.</h1><p>Please start it and try again.</p></body></html>";
 
-    std::string path = getOption(CFG_SERVER_BOOKMARK_FILE);
-
+    fs::path path = getOption(CFG_SERVER_BOOKMARK_FILE);
     log_debug("Clearing bookmark file at: {}", path.c_str());
-
-    FILE* f = fopen(path.c_str(), "w");
-    if (f == nullptr) {
-        throw std::runtime_error("emptyBookmark: failed to open: " + path);
-    }
-
-    size_t size = fwrite(data.c_str(), sizeof(char), data.length(), f);
-    fclose(f);
-
-    if (size < data.length())
-        throw std::runtime_error("emptyBookmark: failed to write to: " + path);
+    writeTextFile(path, data);;
 }
 
 std::map<std::string,std::string> ConfigManager::createDictionaryFromNode(const pugi::xml_node& element,
@@ -1656,8 +1630,8 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
             prof->setCommand(param);
 
             std::string tmp_path;
-            if (startswith(param, _DIR_SEPARATOR)) {
-                if (!std::filesystem::is_regular_file(param))
+            if (fs::path(param).is_absolute()) {
+                if (!fs::is_regular_file(param))
                     throw std::runtime_error("error in configuration, transcoding "
                                     "profile \""
                         + prof->getName() + "\" could not find transcoding command " + param);
@@ -1765,25 +1739,19 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNode(std::sha
         if (std::string(child.name()) != "directory")
             continue;
 
-        std::string location = child.attribute("location").as_string();
+        fs::path location = child.attribute("location").as_string();
         if (!string_ok(location)) {
             throw std::runtime_error("autoscan directory with invalid location!\n");
         }
 
-        try {
-            location = normalizePath(location);
-        } catch (const std::runtime_error& e) {
-            throw std::runtime_error("autoscan directory \"" + location + "\": " + e.what());
-        }
-
-        if (!std::filesystem::is_directory(location)) {
-            throw std::runtime_error("autoscan " + location + " - not a directory!");
+        if (!fs::is_directory(location)) {
+            throw std::runtime_error("autoscan " + location.string() + " - not a directory!");
         }
 
         ScanMode mode;
         std::string temp = child.attribute("mode").as_string();
         if (!string_ok(temp) || ((temp != "timed") && (temp != "inotify"))) {
-            throw std::runtime_error("autoscan directory " + location + ": mode attribute is missing or invalid");
+            throw std::runtime_error("autoscan directory " + location.string() + ": mode attribute is missing or invalid");
         } else if (temp == "timed") {
             mode = ScanMode::Timed;
         } else {
@@ -1800,28 +1768,26 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNode(std::sha
         if (mode == ScanMode::Timed) {
             temp = child.attribute("level").as_string();
             if (!string_ok(temp)) {
-                throw std::runtime_error("autoscan directory " + location + ": level attribute is missing or invalid");
+                throw std::runtime_error("autoscan directory " + location.string() + ": level attribute is missing or invalid");
             } else {
                 if (temp == "basic")
                     level = ScanLevel::Basic;
                 else if (temp == "full")
                     level = ScanLevel::Full;
                 else {
-                    throw std::runtime_error("autoscan directory "
-                        + location + ": level attribute " + temp + "is invalid");
+                    throw std::runtime_error("autoscan directory " + location.string() + ": level attribute " + temp + "is invalid");
                 }
             }
 
             temp = child.attribute("interval").as_string();
             if (!string_ok(temp)) {
-                throw std::runtime_error("autoscan directory "
-                    + location + ": interval attribute is required for timed mode");
+                throw std::runtime_error("autoscan directory " + location.string() + ": interval attribute is required for timed mode");
             }
 
             interval = std::stoi(temp);
 
             if (interval == 0) {
-                throw std::runtime_error("autoscan directory " + location + ": invalid interval attribute");
+                throw std::runtime_error("autoscan directory " + location.string() + ": invalid interval attribute");
                 continue;
             }
         } else {
@@ -1832,7 +1798,7 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNode(std::sha
 
         temp = child.attribute("recursive").as_string();
         if (!string_ok(temp))
-            throw std::runtime_error("autoscan directory " + location + ": recursive attribute is missing or invalid");
+            throw std::runtime_error("autoscan directory " + location.string() + ": recursive attribute is missing or invalid");
 
         bool recursive;
         if (temp == "yes")
@@ -1840,8 +1806,7 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNode(std::sha
         else if (temp == "no")
             recursive = false;
         else {
-            throw std::runtime_error("autoscan directory " + location
-                + ": recusrive attribute " + temp + " is invalid");
+            throw std::runtime_error("autoscan directory " + location.string() + ": recusrive attribute " + temp + " is invalid");
         }
 
         bool hidden;
@@ -1854,14 +1819,13 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNode(std::sha
         else if (temp == "no")
             hidden = false;
         else
-            throw std::runtime_error("autoscan directory " + location + ": hidden attribute " + temp + " is invalid");
+            throw std::runtime_error("autoscan directory " + location.string() + ": hidden attribute " + temp + " is invalid");
 
         auto dir = std::make_shared<AutoscanDirectory>(location, mode, level, recursive, true, -1, interval, hidden);
         try {
             list->add(dir);
         } catch (const std::runtime_error& e) {
-            throw std::runtime_error("Could not add " + location + ": "
-                + e.what());
+            throw std::runtime_error("Could not add " + location.string() + ": " + e.what());
         }
     }
 

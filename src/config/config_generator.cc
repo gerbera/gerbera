@@ -40,7 +40,7 @@ ConfigGenerator::ConfigGenerator() {}
 
 ConfigGenerator::~ConfigGenerator() {}
 
-std::string ConfigGenerator::generate(std::string userHome, std::string configDir, std::string prefixDir, std::string magicFile) {
+std::string ConfigGenerator::generate(fs::path userHome, fs::path configDir, fs::path prefixDir, fs::path magicFile) {
   pugi::xml_document doc;
 
   auto decl = doc.prepend_child(pugi::node_declaration);
@@ -69,7 +69,7 @@ std::string ConfigGenerator::generate(std::string userHome, std::string configDi
   return buf.str();
 }
 
-void ConfigGenerator::generateServer(std::string userHome, std::string configDir, std::string prefixDir, pugi::xml_node* config) {
+void ConfigGenerator::generateServer(fs::path userHome, fs::path configDir, fs::path prefixDir, pugi::xml_node* config) {
   auto server = config->append_child("server");
 
   generateUi(&server);
@@ -77,10 +77,10 @@ void ConfigGenerator::generateServer(std::string userHome, std::string configDir
 
   generateUdn(&server);
 
-  std::string homepath = userHome + DIR_SEPARATOR + configDir;
+  fs::path homepath = userHome / configDir;
   server.append_child("home").append_child(pugi::node_pcdata).set_value(homepath.c_str());
 
-  std::string webRoot = prefixDir + DIR_SEPARATOR + DEFAULT_WEB_DIR;
+  std::string webRoot = prefixDir / DEFAULT_WEB_DIR;
   server.append_child("webroot").append_child(pugi::node_pcdata).set_value(webRoot.c_str());
 
   auto aliveinfo = server.append_child(pugi::node_comment);
@@ -200,7 +200,7 @@ void ConfigGenerator::generateExtendedRuntime(pugi::xml_node* server) {
   content_video.append_child(pugi::node_pcdata).set_value(DEFAULT_MARK_PLAYED_CONTENT_VIDEO);
 }
 
-void ConfigGenerator::generateImport(std::string prefixDir, std::string magicFile, pugi::xml_node* config) {
+void ConfigGenerator::generateImport(fs::path prefixDir, fs::path magicFile, pugi::xml_node* config) {
   auto import = config->append_child("import");
   import.append_attribute("hidden-files") = DEFAULT_HIDDEN_FILES_VALUE;
 
@@ -215,10 +215,10 @@ void ConfigGenerator::generateImport(std::string prefixDir, std::string magicFil
 
 #ifdef HAVE_JS
   std::string script;
-  script = prefixDir + DIR_SEPARATOR + DEFAULT_JS_DIR + DIR_SEPARATOR + DEFAULT_COMMON_SCRIPT;
+  script = prefixDir / DEFAULT_JS_DIR / DEFAULT_COMMON_SCRIPT;
   scripting.append_child("common-script").append_child(pugi::node_pcdata).set_value(script.c_str());
 
-  script = prefixDir + DIR_SEPARATOR + DEFAULT_JS_DIR + DIR_SEPARATOR + DEFAULT_PLAYLISTS_SCRIPT;
+  script = prefixDir / DEFAULT_JS_DIR / DEFAULT_PLAYLISTS_SCRIPT;
   scripting.append_child("playlist-script").append_child(pugi::node_pcdata).set_value(script.c_str());
 #endif
 
@@ -226,7 +226,7 @@ void ConfigGenerator::generateImport(std::string prefixDir, std::string magicFil
   layout.append_attribute("type") = DEFAULT_LAYOUT_TYPE;
 
 #ifdef HAVE_JS
-  script = prefixDir + DIR_SEPARATOR + DEFAULT_JS_DIR + DIR_SEPARATOR + DEFAULT_IMPORT_SCRIPT;
+  script = prefixDir / DEFAULT_JS_DIR / DEFAULT_IMPORT_SCRIPT;
   layout.append_child("import-script").append_child(pugi::node_pcdata).set_value(script.c_str());
 #endif
 

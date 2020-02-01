@@ -131,11 +131,11 @@ public:
     virtual std::vector<std::string> getMimeTypes() override;
     
     //virtual std::shared_ptr<CdsObject> findObjectByTitle(std::string title, int parentID);
-    virtual std::shared_ptr<CdsObject> findObjectByPath(std::string fullpath) override;
-    virtual int findObjectIDByPath(std::string fullpath) override;
+    virtual std::shared_ptr<CdsObject> findObjectByPath(fs::path fullpath) override;
+    virtual int findObjectIDByPath(fs::path fullpath) override;
     virtual std::string incrementUpdateIDs(const std::unique_ptr<std::unordered_set<int>>& ids) override;
 
-    virtual std::string buildContainerPath(int parentID, std::string title) override;
+    virtual fs::path buildContainerPath(int parentID, std::string title) override;
     virtual void addContainerChain(std::string path, std::string lastClass, int lastRefID, int *containerID, int *updateID, const std::map<std::string,std::string>& lastMetadata) override;
     virtual std::string getInternalSetting(std::string key) override;
     virtual void storeInternalSetting(std::string key, std::string value) override = 0;
@@ -158,7 +158,7 @@ public:
     virtual void shutdown();
     virtual void shutdownDriver() = 0;
     
-    virtual int ensurePathExistence(std::string path, int *changedContainer) override;
+    virtual int ensurePathExistence(fs::path path, int *changedContainer) override;
     
     virtual std::string getFsRootName() override;
     
@@ -184,11 +184,6 @@ private:
     std::shared_ptr<CdsObject> createObjectFromRow(const std::unique_ptr<SQLRow>& row);
     std::shared_ptr<CdsObject> createObjectFromSearchRow(const std::unique_ptr<SQLRow>& row);
     std::map<std::string,std::string> retrieveMetadataForObject(int objectId);
-    
-    /* helper for findObjectByPath and findObjectIDByPath */ 
-    std::shared_ptr<CdsObject> _findObjectByPath(std::string fullpath);
-    
-    int _ensurePathExistence(std::string path, int *changedContainer);
     
     /* helper class and helper function for addObject and updateObject */
     class AddUpdateTable
@@ -235,13 +230,13 @@ private:
     int _getAutoscanDirectoryInfo(int objectID, std::string field);
     std::unique_ptr<std::vector<int>> _checkOverlappingAutoscans(std::shared_ptr<AutoscanDirectory> adir);
     
-    /* location hash helpers */
+    /* location helper: filesystem path or virtual path to db location*/
     std::string addLocationPrefix(char prefix, std::string path);
-    std::string stripLocationPrefix(char* prefix, std::string path);
-    std::string stripLocationPrefix(std::string path);
+    /* location helpers: db location to filesystem path */
+    fs::path stripLocationPrefix(std::string dbLocation, char* prefix = NULL);
     
     std::shared_ptr<CdsObject> checkRefID(std::shared_ptr<CdsObject> obj);
-    int createContainer(int parentID, std::string name, std::string path, bool isVirtual, std::string upnpClass, int refID, const std::map<std::string,std::string>& lastMetadata);
+    int createContainer(int parentID, std::string name, std::string virtualPath, bool isVirtual, std::string upnpClass, int refID, const std::map<std::string,std::string>& lastMetadata);
 
     std::string mapBool(bool val) { return quote((val ? 1 : 0)); }
     bool remapBool(std::string field) { return (string_ok(field) && field == "1"); }

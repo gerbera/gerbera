@@ -114,7 +114,7 @@ void ProcessIOHandler::unregisterAll()
 }
 
 ProcessIOHandler::ProcessIOHandler(std::shared_ptr<ContentManager> content,
-    std::string filename,
+    const fs::path& filename,
     std::shared_ptr<Executor> mainProc,
     std::vector<std::shared_ptr<ProcListItem>> procList,
     bool ignoreSeek)
@@ -167,7 +167,7 @@ void ProcessIOHandler::open(enum UpnpOpenFileMode mode)
         if (mainProc != nullptr)
             mainProc->kill();
         unlink(filename.c_str());
-        throw std::runtime_error("open: failed to open: " + filename);
+        throw std::runtime_error("open: failed to open: " + filename.string());
     }
 }
 

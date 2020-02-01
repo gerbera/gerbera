@@ -32,6 +32,9 @@
 #ifndef __FILE_IO_HANDLER_H__
 #define __FILE_IO_HANDLER_H__
 
+#include <filesystem>
+namespace fs = std::filesystem;
+
 #include "common.h"
 #include "io_handler.h"
 
@@ -39,14 +42,14 @@
 class FileIOHandler : public IOHandler {
 protected:
     /// \brief Name of the file.
-    std::string filename;
+    fs::path filename;
 
     /// \brief Handle of the file.
     FILE* f;
 
 public:
     /// \brief Sets the filename to work with.
-    explicit FileIOHandler(std::string filename);
+    explicit FileIOHandler(const fs::path& filename);
 
     /// \brief Opens file for reading (writing is not supported)
     void open(enum UpnpOpenFileMode mode) override;

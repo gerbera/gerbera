@@ -43,6 +43,7 @@
 #include <unistd.h>
 #include <queue>
 #include <filesystem>
+namespace fs = std::filesystem;
 
 #include <ifaddrs.h>
 #include <net/if.h>
@@ -91,31 +92,6 @@ std::vector<std::string> split_string(std::string str, char sep, bool empty)
             ret.push_back(part);
             data = pos + 1;
         }
-    }
-    return ret;
-}
-
-std::vector<std::string> split_path(std::string str)
-{
-    if (!string_ok(str))
-        throw std::runtime_error("invalid path given to split_path");
-
-    std::vector<std::string> ret;
-    size_t pos = str.rfind(DIR_SEPARATOR);
-    if (pos == std::string::npos)
-        throw std::runtime_error("relative path given to split_path: " + str);
-
-    const char* data = str.c_str();
-    if (pos == 0) {
-        /* there is only one separator at the beginning "/..." or "/" */
-        ret.push_back(_DIR_SEPARATOR);
-        std::string filename = data + 1;
-        ret.push_back(filename);
-    } else {
-        std::string path(data, pos);
-        ret.push_back(path);
-        std::string filename = data + pos + 1;
-        ret.push_back(filename);
     }
     return ret;
 }
@@ -170,66 +146,31 @@ int stoi_string(std::string str, int def)
 
 std::string reduce_string(std::string str, char ch)
 {
-    const char* data = str.c_str();
-    const char* pos = strchr(data, ch);
-    if (!pos)
-        return str;
+    std::string::iterator new_end = std::unique(
+        str.begin(), str.end(),
+        [&](char lhs, char rhs) { return (lhs == rhs) && (lhs == ch); }
+    );
 
-    std::ostringstream buf;
-
-    const char* pos3 = data;
-    do
-    {
-        if (*(pos + 1) == ch)
-        {
-            if (pos - pos3 == 0)
-            {
-                buf << ch;
-            }
-            else
-            {
-                buf.write(pos3, (pos-pos3)+1);
-            }
-            while (*pos == ch) pos++;
-            pos3 = pos;
-            if (*pos == '\0')
-            {
-                buf << '\0';
-                break;
-            }
-            pos = strchr(pos, ch);
-        }
-        else
-        {
-            pos++;
-            if (*pos == '\0')
-                break;
-            pos = strchr(pos, ch);
-        }
-    } while (pos);
-
-    if (data + str.length() - pos3)
-        buf.write(pos3, data + str.length() - pos3);
-
-    return buf.str();
+    str.erase(new_end, str.end());
+    return str;
 }
 
-time_t getLastWriteTime(std::string path)
+time_t getLastWriteTime(const fs::path& path)
 {
     // in future with C+20 we can replace this function too:
-    // auto ftime = std::filesystem::last_write_time(p);
+    // auto ftime = fs::last_write_time(p);
     // time_t cftime = decltype(ftime)::clock::to_time_t(ftime);
 
     struct stat statbuf;
     int ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
-        throw std::runtime_error(mt_strerror(errno) + ": " + path);
+        throw std::runtime_error(mt_strerror(errno) + ": " + path.string());
     }
 
     return statbuf.st_mtime;
 }
 
-bool is_executable(std::string path, int* err)
+bool is_executable(const fs::path& path, int* err)
 {
     int ret = access(path.c_str(), R_OK | X_OK);
     if (err != nullptr)
@@ -241,7 +182,7 @@ bool is_executable(std::string path, int* err)
         return false;
 }
 
-std::string find_in_path(std::string exec)
+fs::path find_in_path(const fs::path& exec)
 {
     std::string PATH = getenv("PATH");
     if (!string_ok(PATH))
@@ -263,8 +204,8 @@ std::string find_in_path(std::string exec)
             next = "";
         }
 
-        std::string check = path + "/" + exec;
-        if (std::filesystem::is_regular_file(check))
+        fs::path check = fs::path(path) / exec;
+        if (fs::is_regular_file(check))
             return check;
 
         if (!next.empty())
@@ -549,11 +490,11 @@ std::string mt_strerror(int mt_errno)
 #endif
 }
 
-std::string read_text_file(std::string path)
+std::string readTextFile(const fs::path& path)
 {
-    FILE* f = fopen(path.c_str(), "r");
+    FILE* f = fopen(path.c_str(), "rt");
     if (!f) {
-        throw std::runtime_error("read_text_file: could not open " + path + " : " + mt_strerror(errno));
+        throw std::runtime_error("readTextFile: could not open " + path.string() + " : " + mt_strerror(errno));
     }
     std::ostringstream buf;
     char buffer[1024];
@@ -564,21 +505,22 @@ std::string read_text_file(std::string path)
     fclose(f);
     return buf.str();
 }
-void write_text_file(std::string path, std::string contents)
+
+void writeTextFile(const fs::path& path, std::string contents)
 {
     size_t bytesWritten;
-    FILE* f = fopen(path.c_str(), "w");
+    FILE* f = fopen(path.c_str(), "wt");
     if (!f) {
-        throw std::runtime_error("write_text_file: could not open " + path + " : " + mt_strerror(errno));
+        throw std::runtime_error("writeTextFile: could not open " + path.string() + " : " + mt_strerror(errno));
     }
 
     bytesWritten = fwrite(contents.c_str(), 1, contents.length(), f);
     if (bytesWritten < contents.length()) {
         fclose(f);
         if (bytesWritten >= 0)
-            throw std::runtime_error("write_text_file: incomplete write to " + path + " : ");
+            throw std::runtime_error("writeTextFile: incomplete write to " + path.string() + " : ");
         else
-            throw std::runtime_error("write_text_file: error writing to " + path + " : " + mt_strerror(errno));
+            throw std::runtime_error("writeTextFile: error writing to " + path.string() + " : " + mt_strerror(errno));
     }
     fclose(f);
 }
@@ -686,7 +628,7 @@ int HMSToSeconds(std::string time)
 }
 
 #ifdef HAVE_MAGIC
-std::string getMIMETypeFromFile(std::string file)
+std::string getMIMETypeFromFile(const fs::path& file)
 {
     return getMIME(file, nullptr, -1);
 }
@@ -696,7 +638,7 @@ std::string getMIMETypeFromBuffer(const void *buffer, size_t length)
     return getMIME("", buffer, length);
 }
 
-std::string getMIME(std::string filepath, const void *buffer, size_t length)
+std::string getMIME(const fs::path& filepath, const void *buffer, size_t length)
 {
     /* MAGIC_MIME_TYPE tells magic to return ONLY the mimetype */
     magic_t magic_cookie = magic_open(MAGIC_MIME_TYPE);
@@ -995,61 +937,6 @@ void getTimespecAfterMillis(long delta, struct timespec* ret, struct timespec* s
     // log_debug("timespec: sec: {}, nsec: {}", ret->tv_sec, ret->tv_nsec);
 }
 
-std::string normalizePath(std::string path)
-{
-    log_debug("Normalizing path: {}", path.c_str());
-
-    if (path.at(0) != DIR_SEPARATOR)
-        throw std::runtime_error("Relative paths are not allowed!\n");
-
-    size_t length = path.length();
-
-    // TODO: optimize: use direct std::string with reserve
-    char* result = (char*)MALLOC(length + 1);
-    char* str = result;
-
-    std::queue<int> separatorLocations;
-    size_t next = 1;
-    do {
-        while (next < length && path.at(next) == DIR_SEPARATOR)
-            next++;
-        if (next >= length)
-            break;
-
-        size_t next_sep = path.find(DIR_SEPARATOR, next);
-        if (next_sep == std::string::npos)
-            next_sep = length;
-        if (next_sep == next + 1 && path.at(next) == '.') {
-            //  "." - can be ignored
-        } else if (next_sep == next + 2 && next + 1 < length && path.at(next) == '.' && path.at(next + 1) == '.') {
-            // ".."
-            // go back one part
-            int lastSepLocation = 0;
-            if (!separatorLocations.empty()) {
-                lastSepLocation = separatorLocations.front();
-                separatorLocations.pop();
-            }
-            str = result + lastSepLocation;
-        } else {
-            // normal part
-            separatorLocations.push(str - result);
-            *(str++) = DIR_SEPARATOR;
-            int cpLen = next_sep - next;
-            strncpy(str, &path[next], cpLen);
-            str += cpLen;
-        }
-        next = next_sep + 1;
-    } while (next < length);
-
-    if (str == result)
-        *(str++) = DIR_SEPARATOR;
-
-    *str = 0;
-    std::string ret = result;
-    FREE(result);
-    return ret;
-}
-
 std::string interfaceToIP(std::string interface)
 {
 
@@ -1208,7 +1095,7 @@ std::vector<std::string> populateCommandLine(std::string line, std::string in, s
  * Copyright (C) 1991,92,93,94,95,96,97,98,99 Free Software Foundation, Inc.
  */
 // tempName is based on create_temp_file, see (C) above
-std::string tempName(std::string leadPath, char* tmpl)
+fs::path tempName(const fs::path& leadPath, char* tmpl)
 {
     char* XXXXXX;
     int count;
@@ -1247,7 +1134,7 @@ std::string tempName(std::string leadPath, char* tmpl)
         v /= NLETTERS;
         XXXXXX[5] = letters[v % NLETTERS];
 
-        std::string check = leadPath + tmpl;
+        fs::path check = leadPath / tmpl;
         ret = stat(check.c_str(), &statbuf);
         if (ret != 0) {
             if ((errno == ENOENT) || (errno == ENOTDIR))
@@ -1261,19 +1148,19 @@ std::string tempName(std::string leadPath, char* tmpl)
     return "";
 }
 
-bool isTheora(std::string ogg_filename)
+bool isTheora(const fs::path& ogg_filename)
 {
     FILE* f;
     char buffer[7];
     f = fopen(ogg_filename.c_str(), "rb");
 
     if (!f) {
-        throw std::runtime_error("Error opening " + ogg_filename + " : " + mt_strerror(errno));
+        throw std::runtime_error("Error opening " + ogg_filename.string() + " : " + mt_strerror(errno));
     }
 
     if (fread(buffer, 1, 4, f) != 4) {
         fclose(f);
-        throw std::runtime_error("Error reading " + ogg_filename);
+        throw std::runtime_error("Error reading " + ogg_filename.string());
     }
 
     if (memcmp(buffer, "OggS", 4) != 0) {
@@ -1283,12 +1170,12 @@ bool isTheora(std::string ogg_filename)
 
     if (fseek(f, 28, SEEK_SET) != 0) {
         fclose(f);
-        throw std::runtime_error("Incomplete file " + ogg_filename);
+        throw std::runtime_error("Incomplete file " + ogg_filename.string());
     }
 
     if (fread(buffer, 1, 7, f) != 7) {
         fclose(f);
-        throw std::runtime_error("Error reading " + ogg_filename);
+        throw std::runtime_error("Error reading " + ogg_filename.string());
     }
 
     if (memcmp(buffer, "\x80theora", 7) != 0) {
@@ -1300,19 +1187,17 @@ bool isTheora(std::string ogg_filename)
     return true;
 }
 
-std::string get_last_path(std::string location)
+fs::path get_last_path(const fs::path& path)
 {
-    std::string path;
+    fs::path ret;
 
-    size_t last_slash = location.rfind(DIR_SEPARATOR);
-    if (last_slash != std::string::npos) {
-        path = location.substr(0, last_slash);
-        size_t slash = path.rfind(DIR_SEPARATOR);
-        if ((slash != std::string::npos) && ((slash + 1) < path.length()))
-            path = path.substr(slash + 1);
-    }
+    auto it = std::prev(path.end());    // filename
+    if (it != path.end())
+        it = std::prev(it);             // last path
+    if (it != path.end())
+        ret = *it;
 
-    return path;
+    return ret;
 }
 
 ssize_t getValidUTF8CutPosition(std::string str, ssize_t cutpos)
@@ -1404,7 +1289,7 @@ std::string getDLNATransferHeader(std::shared_ptr<ConfigManager> config, std::st
 }
 
 #ifndef HAVE_FFMPEG
-std::string getAVIFourCC(std::string avi_filename)
+std::string getAVIFourCC(const fs::path& avi_filename)
 {
 #define FCC_OFFSET 0xbc
     char* buffer;

@@ -167,7 +167,7 @@ public:
     /// \param parentID the parent id of the parent container
     /// \param title the title of the container to add to the path.
     /// It will be escaped.
-    virtual std::string buildContainerPath(int parentID, std::string title) = 0;
+    virtual fs::path buildContainerPath(int parentID, std::string title) = 0;
 
     virtual void updateObject(std::shared_ptr<CdsObject> object, int* changedContainer) = 0;
 
@@ -184,7 +184,7 @@ public:
     /// if the path ends with DIR_SEPERATOR, as file otherwise
     /// multiple DIR_SEPERATOR are irgnored
     /// \return the CdsObject
-    virtual std::shared_ptr<CdsObject> findObjectByPath(std::string path) = 0;
+    virtual std::shared_ptr<CdsObject> findObjectByPath(fs::path path) = 0;
 
     /// \brief checks for a given (pc directory) object, identified by the given path
     /// from the database
@@ -192,7 +192,7 @@ public:
     /// if the path ends with DIR_SEPERATOR, as file otherwise
     /// multiple DIR_SEPERATOR are irgnored
     /// \return the obejectID
-    virtual int findObjectIDByPath(std::string fullpath) = 0;
+    virtual int findObjectIDByPath(fs::path fullpath) = 0;
 
     /// \brief increments the updateIDs for the given objectIDs
     /// \param ids pointer to the array of ids
@@ -299,7 +299,7 @@ public:
     ///
     /// \param *changedContainer returns the ID for the UpdateManager
     /// \return objectID of the container given by path
-    virtual int ensurePathExistence(std::string path, int* changedContainer) = 0;
+    virtual int ensurePathExistence(fs::path path, int* changedContainer) = 0;
 
     /// \brief clears the given flag in all objects in the DB
     virtual void clearFlagInDB(int flag) = 0;

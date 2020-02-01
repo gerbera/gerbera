@@ -66,7 +66,7 @@ std::string FallbackLayout::esc(std::string str)
     return escape(str, VIRTUAL_CONTAINER_ESCAPE, VIRTUAL_CONTAINER_SEPARATOR);
 }
 
-void FallbackLayout::addVideo(std::shared_ptr<CdsObject> obj, std::string rootpath)
+void FallbackLayout::addVideo(std::shared_ptr<CdsObject> obj, fs::path rootpath)
 {
     auto f2i = StringConverter::f2i(config);
     int id = content->addContainerChain("/Video/All Video");
@@ -83,14 +83,9 @@ void FallbackLayout::addVideo(std::shared_ptr<CdsObject> obj, std::string rootpa
     }
 
     std::string dir;
-
-    if (string_ok(rootpath))
+    if (!rootpath.empty())
     {
-        rootpath = rootpath.substr(0, rootpath.rfind(DIR_SEPARATOR));
-        dir = obj->getLocation().substr(rootpath.length(), obj->getLocation().rfind(DIR_SEPARATOR)-rootpath.length());
-        if (startswith(dir, _DIR_SEPARATOR))
-            dir = dir.substr(1);
-
+        dir = rootpath.filename();
         dir = f2i->convert(dir);
     }
     else
@@ -103,7 +98,7 @@ void FallbackLayout::addVideo(std::shared_ptr<CdsObject> obj, std::string rootpa
     }
 }
 
-void FallbackLayout::addImage(std::shared_ptr<CdsObject> obj, std::string rootpath)
+void FallbackLayout::addImage(std::shared_ptr<CdsObject> obj, fs::path rootpath)
 {
     int id;
     auto f2i = StringConverter::f2i(config);
@@ -151,14 +146,9 @@ void FallbackLayout::addImage(std::shared_ptr<CdsObject> obj, std::string rootpa
     }
 
     std::string dir;
-
-    if (string_ok(rootpath))
+    if (!rootpath.empty())
     {
-        rootpath = rootpath.substr(0, rootpath.rfind(DIR_SEPARATOR));
-        dir = obj->getLocation().substr(rootpath.length(), obj->getLocation().rfind(DIR_SEPARATOR)-rootpath.length());
-        if (startswith(dir, _DIR_SEPARATOR))
-            dir = dir.substr(1);
-
+        dir = rootpath.filename();
         dir = f2i->convert(dir);
     }
     else
@@ -444,7 +434,7 @@ FallbackLayout::FallbackLayout(std::shared_ptr<ConfigManager> config,
 #endif
 }
 
-void FallbackLayout::processCdsObject(std::shared_ptr<CdsObject> obj, std::string rootpath)
+void FallbackLayout::processCdsObject(std::shared_ptr<CdsObject> obj, fs::path rootpath)
 {
     log_debug("Process CDS Object: {}", obj->getTitle().c_str());
 #ifdef ENABLE_PROFILING

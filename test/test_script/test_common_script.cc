@@ -1,9 +1,13 @@
 #ifdef HAVE_JS
 
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
+#include <gtest/gtest.h>
+#include <gmock/gmock.h>
 #include <duktape.h>
+#include <filesystem>
+namespace fs = std::filesystem;
+
 #include "util/string_converter.h"
+#include "util/tools.h"
 
 using namespace ::testing;
 
@@ -16,28 +20,16 @@ public:
 
     virtual void SetUp() {
       ctx = duk_create_heap(nullptr, nullptr, nullptr, nullptr, nullptr);
-      std::stringstream ss;
-      ss << SCRIPTS_DIR << DIR_SEPARATOR << "js" << DIR_SEPARATOR << "common.js";
-      std::string script = read_text_file(ss.str());
-      duk_push_string(ctx, ss.str().c_str());
+
+      fs::path ss = fs::path(SCRIPTS_DIR) / "js" / "common.js";
+      std::string script = readTextFile(ss.c_str());
+      duk_push_string(ctx, ss.c_str());
       duk_pcompile_lstring_filename(ctx, 0, script.c_str(), script.length());
       duk_call(ctx, 0);
     }
 
     virtual void TearDown() {
       duk_destroy_heap(ctx);
-    }
-
-    std::string read_text_file(std::string path) {
-      FILE *f = fopen(path.c_str(), "r");
-      std::ostringstream buf;
-      char buffer[1024];
-      size_t bytesRead;
-      while ((bytesRead = fread(buffer, 1, sizeof(buffer), f)) > 0) {
-        buf << std::string(buffer, bytesRead);
-      }
-      fclose(f);
-      return buf.str();
     }
 
     std::string invokeABCBOX(duk_context *ctx, std::string input, int boxType, std::string divChar) {

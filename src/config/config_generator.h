@@ -27,19 +27,21 @@ Gerbera - https://gerbera.io/
 #define GERBERA_CONFIG_GENERATOR_H
 
 #include <pugixml.hpp>
+#include <filesystem>
+namespace fs = std::filesystem;
 
 class ConfigGenerator {
  public:
   ConfigGenerator();
   ~ConfigGenerator();
 
-  std::string generate(std::string userHome, std::string configDir, std::string prefixDir, std::string magicFile);
+  std::string generate(fs::path userHome, fs::path configDir, fs::path prefixDir, fs::path magicFile);
   
-  void generateServer(std::string userHome, std::string configDir, std::string prefixDir, pugi::xml_node* config);
+  void generateServer(fs::path userHome, fs::path configDir, fs::path prefixDir, pugi::xml_node* config);
   void generateUi(pugi::xml_node* server);
   void generateExtendedRuntime(pugi::xml_node* server);
   void generateStorage(pugi::xml_node* server);
-  void generateImport(std::string prefixDir, std::string magicFile, pugi::xml_node* config);
+  void generateImport(fs::path prefixDir, fs::path magicFile, pugi::xml_node* config);
   void generateMappings(pugi::xml_node* import);
   void generateOnlineContent(pugi::xml_node* import);
   void generateTranscoding(pugi::xml_node* config);
