@@ -130,9 +130,11 @@
 #define REQ_TYPE_LOGIN "login"
 
 // SEPARATOR
+#define FS_ROOT_DIRECTORY "/"
 #define DIR_SEPARATOR '/'
 #define VIRTUAL_CONTAINER_SEPARATOR '/'
 #define VIRTUAL_CONTAINER_ESCAPE '\\'
+
 // MIME TYPES FOR WEB UI
 #define MIMETYPE_XML "text/xml"
 #define MIMETYPE_HTML "text/html"

@@ -32,7 +32,6 @@
 #include "common.h"
 #include "config/config_manager.h"
 #include "content_manager.h"
-#include "util/filesystem.h"
 #include "pages.h"
 #include "server.h"
 #include "util/tools.h"

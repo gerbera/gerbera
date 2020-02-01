@@ -163,8 +163,6 @@ set(libgerberaFILES
         src/url_request_handler.cc
         src/url_request_handler.h
         src/util/executor.h
-        src/util/filesystem.cc
-        src/util/filesystem.h
         src/util/generic_task.cc
         src/util/generic_task.h
         src/util/headers.h
