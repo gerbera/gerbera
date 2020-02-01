@@ -30,7 +30,6 @@
 /// \file directories.cc
 
 #include "common.h"
-#include "util/filesystem.h"
 #include "pages.h"
 #include "storage/storage.h"
 #include "util/string_converter.h"
@@ -46,7 +45,7 @@ void web::directories::process()
 {
     check_request();
 
-    std::string path;
+    fs::path path;
     std::string parentID = param("parent_id");
     if (parentID.empty() || parentID == "0")
         path = FS_ROOT_DIRECTORY;
@@ -62,26 +61,57 @@ void web::directories::process()
         containers.append_attribute("select_it") = param("select_it").c_str();
     containers.append_attribute("type") = "filesystem";
 
-    auto fs = std::make_unique<Filesystem>(config);
-    auto arr = fs->readDirectory(path, FS_MASK_DIRECTORIES, FS_MASK_DIRECTORIES);
-    for (auto it = arr.begin(); it != arr.end(); it++) {
-        auto ce = containers.append_child("container");
-        std::string filename = (*it)->filename;
-        std::string filepath;
-        if (path.c_str()[path.length() - 1] == '/')
-            filepath = path + filename;
-        else
-            filepath = path + '/' + filename;
+    // don't bother users with system directorties
+    std::vector<fs::path> excludes_fullpath = {
+        "/bin",
+        "/boot",
+        "/dev",
+        "/etc",
+        "/lib", "/lib32", "/lib64", "/libx32",
+        "/media",
+        "/proc",
+        "/run",
+        "/sbin",
+        "/sys",
+        "/tmp",
+        "/usr",
+        "/var"
+    };
+    // don't bother users with special or config directorties
+    std::vector<std::string> excludes_dirname = {
+        "lost+found",
+    };
+    bool exclude_config_dirs = true;
+
+    for (auto& it: fs::directory_iterator(path)) {
+        const fs::path& filepath = it.path();
+
+        if (!it.is_directory())
+            continue;
+        if (std::find(excludes_fullpath.begin(), excludes_fullpath.end(), filepath) != excludes_fullpath.end())
+            continue;
+        if (std::find(excludes_dirname.begin(), excludes_dirname.end(), filepath.filename()) != excludes_dirname.end()
+            || (exclude_config_dirs && startswith(filepath.filename(), ".")))
+            continue;
+
+        bool hasContent = false;
+        for (auto& subIt: fs::directory_iterator(path)) {
+            if (!subIt.is_directory() && !subIt.is_regular_file()) continue;
+            hasContent = true;
+            break;
+        }
 
         /// \todo replace hex_encode with base64_encode?
-        std::string id = hex_encode(filepath.c_str(), filepath.length());
+        std::string id = hex_encode(filepath.c_str(), filepath.string().length());
+
+        auto ce = containers.append_child("container");
         ce.append_attribute("id") = id.c_str();
-        if ((*it)->hasContent)
+        if (hasContent)
             ce.append_attribute("child_count") = 1;
         else
             ce.append_attribute("child_count") = 0;
 
         auto f2i = StringConverter::f2i(config);
-        ce.append_attribute("title") = f2i->convert(filename).c_str();
+        ce.append_attribute("title") = f2i->convert(filepath.filename()).c_str();
     }
 }

@@ -41,7 +41,6 @@ namespace fs = std::filesystem;
 #include "config/config_manager.h"
 #include "storage/storage.h"
 #include "content_manager.h"
-#include "util/filesystem.h"
 #include "layout/fallback_layout.h"
 #include "metadata/metadata_handler.h"
 #include "web/session_manager.h"

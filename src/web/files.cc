@@ -30,7 +30,6 @@
 /// \file files.cc
 
 #include "common.h"
-#include "util/filesystem.h"
 #include "pages.h"
 #include "storage/storage.h"
 #include "util/string_converter.h"
@@ -60,16 +59,21 @@ void web::files::process()
     files.append_attribute("parent_id") = parentID.c_str();
     files.append_attribute("location") = path.c_str();
 
-    auto fs = std::make_unique<Filesystem>(config);
-    auto arr = fs->readDirectory(path, FS_MASK_FILES);
-    for (auto it = arr.begin(); it != arr.end(); it++) {
-        auto fe = files.append_child("file");
-        std::string filename = (*it)->filename;
-        std::string filepath = path + "/" + filename;
-        std::string id = hex_encode(filepath.c_str(), filepath.length());
-        fe.append_attribute("id") = id.c_str();
+    bool exclude_config_files = true;
 
+    for (auto& it: fs::directory_iterator(path)) {
+        const fs::path& filepath = it.path();
+
+        if (!it.is_regular_file())
+            continue;
+        if (exclude_config_files && startswith(filepath.filename(), "."))
+            continue;
+
+        std::string id = hex_encode(filepath.c_str(), filepath.string().length());
+
+        auto fe = files.append_child("file");
+        fe.append_attribute("id") = id.c_str();
         auto f2i = StringConverter::f2i(config);
-        fe.append_attribute("filename") = f2i->convert(filename).c_str();
+        fe.append_attribute("filename") = f2i->convert(filepath.filename()).c_str();
     }
 }

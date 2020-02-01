@@ -31,7 +31,6 @@
 
 #include "autoscan.h"
 #include "content_manager.h"
-#include "util/filesystem.h"
 #include "pages.h"
 #include "storage/storage.h"
 
