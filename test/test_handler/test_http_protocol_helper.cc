@@ -45,8 +45,7 @@ std::string headers_as_string(UpnpFileInfo* info) {
       auto head = const_cast<list_head*>(UpnpFileInfo_get_ExtraHeadersList(info));
       list_for_each(pos, head) {
           extra = (UpnpExtraHeaders *)pos;
-          out += UpnpExtraHeaders_get_resp(extra);
-          out += "\r\n";
+          out.insert(0, std::string{UpnpExtraHeaders_get_resp(extra)} + "\r\n");
       }
       return out;
   }
