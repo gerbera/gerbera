@@ -29,7 +29,7 @@ Gerbera - https://gerbera.io/
 #include <action_request.h>
 #include <memory>
 #include <map>
-#ifdef UPNP_HAS_EXTRA_HEADERS_LIST
+#if defined(UPNP_HAS_EXTRA_HEADERS_LIST) || defined(UPNP_1_12_LIST)
 #include <ExtraHeaders.h>
 #endif
 
@@ -39,7 +39,7 @@ public:
     void writeHeaders(UpnpFileInfo *fileInfo) const;
 
 private:
-    std::unique_ptr<std::map<std::string,std::string>> headers;
+    std::unique_ptr<std::vector<std::pair<std::string,std::string>>> headers;
     static std::string formatHeader(const std::pair<std::string, std::string>& header, bool crlf);
     static std::string stripInvalid(std::string value);
 };

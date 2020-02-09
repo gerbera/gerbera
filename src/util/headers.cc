@@ -25,7 +25,6 @@ Gerbera - https://gerbera.io/
 
 #include "headers.h"
 #include <string>
-#include "tools.h"
 
 std::string Headers::stripInvalid(std::string value) {
     std::string result = value;
@@ -43,7 +42,7 @@ std::string Headers::stripInvalid(std::string value) {
 void Headers::addHeader(const std::string& header, const std::string& value)
 {
     if (headers == nullptr) {
-        headers = std::make_unique<std::map<std::string,std::string>>();
+        headers = std::make_unique<std::vector<std::pair<std::string,std::string>>>();
     }
 
     if (header.empty() || value.empty()) {
@@ -58,7 +57,7 @@ void Headers::addHeader(const std::string& header, const std::string& value)
     }
     log_debug("Adding header: '{}: {}'", cleanHeader.c_str(), cleanValue.c_str());
 
-    headers->insert({cleanHeader, cleanValue});
+    headers->push_back({cleanHeader, cleanValue});
 }
 
 std::string Headers::formatHeader(const std::pair<std::string, std::string>& header, bool crlf)
@@ -73,7 +72,16 @@ std::string Headers::formatHeader(const std::pair<std::string, std::string>& hea
 
 void Headers::writeHeaders(UpnpFileInfo *fileInfo) const
 {
-#ifdef UPNP_HAS_EXTRA_HEADERS_LIST
+#ifdef UPNP_1_12_LIST
+    if (headers != nullptr) {
+        auto head = const_cast<UpnpListHead*>(UpnpFileInfo_get_ExtraHeadersList(fileInfo));
+        for (auto iter : *headers) {
+            UpnpExtraHeaders* h = UpnpExtraHeaders_new();
+            UpnpExtraHeaders_set_resp(h, formatHeader(iter, false).c_str());
+            UpnpListInsert(head, UpnpListEnd(head), const_cast<UpnpListHead*>(UpnpExtraHeaders_get_node(h)));
+        }
+    }
+#elif UPNP_HAS_EXTRA_HEADERS_LIST
     if (headers != nullptr) {
         auto head = const_cast<UpnpListHead*>(UpnpFileInfo_get_ExtraHeadersList(fileInfo));
         for (auto iter : *headers) {
