@@ -1,7 +1,6 @@
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
+#include <gtest/gtest.h>
 
-#include <util/headers.h>
+#include "util/headers.h"
 
 using namespace ::testing;
 
@@ -22,7 +21,22 @@ class HeadersHelperTest : public ::testing::Test {
   Headers* subject;
 };
 
-#ifdef UPNP_HAS_EXTRA_HEADERS_LIST
+#ifdef UPNP_1_12_LIST
+std::string headers_as_string(UpnpFileInfo* info) {
+    std::string out;
+
+    UpnpExtraHeaders* extra;
+    UpnpListIter pos;
+    auto head = const_cast<UpnpListHead *>(UpnpFileInfo_get_ExtraHeadersList(info));
+    for (pos = UpnpListBegin(head); pos != UpnpListEnd(head); pos = UpnpListNext(head, pos)) {
+        extra = (UpnpExtraHeaders *)pos;
+        out += UpnpExtraHeaders_get_resp(extra);
+        out += "\r\n";
+    }
+    return out;
+}
+#define GET_HEADERS(x) headers_as_string(x).c_str()
+#elif UPNP_HAS_EXTRA_HEADERS_LIST
   std::string headers_as_string(UpnpFileInfo* info) {
       std::string out;
 

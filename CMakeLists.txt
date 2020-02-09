@@ -256,9 +256,9 @@ endif()
 
 if (WITH_DEBUG)
     add_definitions(-DTOMBDEBUG)
-	add_definitions(-DSPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_DEBUG)
+    add_definitions(-DSPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_DEBUG)
 else()
-	add_definitions(-DSPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO)
+    add_definitions(-DSPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO)
 endif()
 
 find_package(Threads REQUIRED)
@@ -301,16 +301,14 @@ if (UPNP_VERSION_STRING VERSION_LESS "1.8.3")
     message(FATAL_ERROR "gerbera requires libupnp 1.8.3 or above.")
 endif()
 
-if (UPNP_VERSION_STRING VERSION_GREATER_EQUAL "1.8.5")
-    add_definitions(-DUPNP_HAS_EXTRA_HEADERS_LIST)
-endif()
-
 if (UPNP_VERSION_STRING VERSION_GREATER_EQUAL "1.10.0")
     add_definitions(-DUPNP_HAS_REQUEST_COOKIES)
 endif()
 
-if (UPNP_VERSION_STRING VERSION_LESS "1.12.0")
-        add_definitions(-DUpnpListHead=list_head)
+if (UPNP_VERSION_STRING VERSION_GREATER_EQUAL "1.12.0")
+    add_definitions(-DUPNP_1_12_LIST)
+elseif (UPNP_VERSION_STRING VERSION_GREATER_EQUAL "1.8.5")
+    add_definitions(-DUPNP_HAS_EXTRA_HEADERS_LIST)
 endif()
 
 if (NOT UPNP_HAS_IPV6)
