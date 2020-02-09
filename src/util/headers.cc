@@ -83,7 +83,7 @@ void Headers::writeHeaders(UpnpFileInfo *fileInfo) const
     }
 #elif UPNP_HAS_EXTRA_HEADERS_LIST
     if (headers != nullptr) {
-        auto head = const_cast<UpnpListHead*>(UpnpFileInfo_get_ExtraHeadersList(fileInfo));
+        auto head = const_cast<list_head*>(UpnpFileInfo_get_ExtraHeadersList(fileInfo));
         for (auto iter : *headers) {
             UpnpExtraHeaders* h = UpnpExtraHeaders_new();
             UpnpExtraHeaders_set_resp(h, formatHeader(iter, false).c_str());
