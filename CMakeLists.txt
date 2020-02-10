@@ -297,8 +297,16 @@ find_package (LibUpnp REQUIRED)
 include_directories(${UPNP_INCLUDE_DIRS})
 target_link_libraries (gerbera ${UPNP_LIBRARIES})
 
-if (UPNP_VERSION_STRING VERSION_LESS "1.8.3")
-    message(FATAL_ERROR "gerbera requires libupnp 1.8.3 or above.")
+if (UPNP_VERSION_STRING VERSION_LESS "1.8.6")
+    message(FATAL_ERROR "gerbera requires libupnp 1.8.6 or above.")
+endif()
+
+if (NOT UPNP_HAS_IPV6)
+    message(FATAL_ERROR "Gerbera requires libupnp with IPv6 support.")
+endif()
+
+if (NOT UPNP_HAS_REUSEADDR)
+    message(WARNING "\n !! It is strongly recommended to build libupnp with --enable-reuseaddr !!\nWithout this option Gerbera will be unable to restart with the same port number.")
 endif()
 
 if (UPNP_VERSION_STRING VERSION_GREATER_EQUAL "1.10.0")
@@ -307,21 +315,8 @@ endif()
 
 if (UPNP_VERSION_STRING VERSION_GREATER_EQUAL "1.12.0")
     add_definitions(-DUPNP_1_12_LIST)
-elseif (UPNP_VERSION_STRING VERSION_GREATER_EQUAL "1.8.5")
+else()
     add_definitions(-DUPNP_HAS_EXTRA_HEADERS_LIST)
-endif()
-
-if (NOT UPNP_HAS_IPV6)
-    message(FATAL_ERROR "Gerbera requires libupnp with IPv6 support.")
-endif()
-if (NOT UPNP_HAS_REUSEADDR)
-    message(WARNING "\n !! It is strongly recommended to build libupnp with --enable-reuseaddr !!\nWithout this option Gerbera will be unable to restart with the same port number.")
-endif()
-
-# Debian ships a snapshot from 2010: libupnp4 (1.8.0~svn20100507-1.2)
-# This is missing templated types so we need to ifdef
-if(UPNP_INCLUDE_DIR AND NOT EXISTS "${UPNP_INCLUDE_DIR}/TemplateInclude.h")
-    message (FATAL_ERROR "\n!! You are using a very old 1.8 snapshot. Please upgrade to a 1.8.x release from upstream (https://github.com/mrjimenez/pupnp) !!\n")
 endif()
 
 find_package(fmt REQUIRED)
