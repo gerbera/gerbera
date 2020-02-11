@@ -37,7 +37,7 @@
 #include <cstring>
 
 #include "tools.h"
-typedef unsigned char uchar;
+using uchar = unsigned char;
 
 #ifndef TRUE
 #define TRUE 1
