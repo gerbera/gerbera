@@ -86,7 +86,7 @@ std::vector<std::string> split_string(std::string str, char sep, bool empty)
         } else if (pos == data) {
             data++;
             if ((data < end) && empty)
-                ret.push_back("");
+                ret.emplace_back("");
         } else {
             std::string part(data, pos - data);
             ret.push_back(part);

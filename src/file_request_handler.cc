@@ -223,10 +223,10 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
                 // request header.
                 std::vector<std::string> subexts;
                 subexts.reserve(4);
-                subexts.push_back(".srt");
-                subexts.push_back(".ssa");
-                subexts.push_back(".smi");
-                subexts.push_back(".sub");
+                subexts.emplace_back(".srt");
+                subexts.emplace_back(".ssa");
+                subexts.emplace_back(".smi");
+                subexts.emplace_back(".sub");
 
                 // remove .ext
                 std::string pathNoExt = path.parent_path() / path.stem();
