@@ -573,7 +573,7 @@ std::string secondsToHMS(int seconds)
         h = 999;
 
     // TOOD: optimize
-    char* tmp = (char*)MALLOC(10);
+    auto tmp = (char*)MALLOC(10);
     sprintf(tmp, "%02d:%02d:%02d", h, m, s);
 
     std::string res = tmp;

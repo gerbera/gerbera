@@ -212,7 +212,7 @@ void MatroskaHandler::parseAttachments(std::shared_ptr<CdsItem> item, EbmlStream
 
     attachments->Read(ebml_stream, EBML_CONTEXT(attachments), i_upper_level, dummy_el, true);
 
-    KaxAttached* attachedFile = FindChild<KaxAttached>(*attachments);
+    auto attachedFile = FindChild<KaxAttached>(*attachments);
     while (attachedFile && (attachedFile->GetSize() > 0)) {
         std::string fileName(UTFstring(GetChild<KaxFileName>(*attachedFile)).GetUTF8());
         // printf("KaxFileName = %s\n", fileName.c_str());
@@ -223,7 +223,7 @@ void MatroskaHandler::parseAttachments(std::shared_ptr<CdsItem> item, EbmlStream
         }
 
         if (isCoverArt) {
-            KaxFileData& fileData = GetChild<KaxFileData>(*attachedFile);
+            auto& fileData = GetChild<KaxFileData>(*attachedFile);
             // printf("KaxFileData (size=%ld)\n", fileData.GetSize());
 
             if (p_io_handler != NULL) {
