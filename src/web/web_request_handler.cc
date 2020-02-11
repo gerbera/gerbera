@@ -90,7 +90,7 @@ void WebRequestHandler::check_request(bool checkLogin)
 
 std::string WebRequestHandler::renderXMLHeader()
 {
-    return std::string("<?xml version=\"1.0\" encoding=\"") + DEFAULT_INTERNAL_CHARSET + "\"?>\n";
+    return std::string(R"(<?xml version="1.0" encoding=")") + DEFAULT_INTERNAL_CHARSET + "\"?>\n";
 }
 
 void WebRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)

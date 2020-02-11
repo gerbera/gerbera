@@ -1112,7 +1112,7 @@ void ConfigManager::load(fs::path filename, fs::path userHome)
                 throw std::runtime_error("error in configuration, <mark-played-items>, empty <content> parameter!");
 
             if ((mark_content != DEFAULT_MARK_PLAYED_CONTENT_VIDEO) && (mark_content != DEFAULT_MARK_PLAYED_CONTENT_AUDIO) && (mark_content != DEFAULT_MARK_PLAYED_CONTENT_IMAGE))
-                throw std::runtime_error("error in configuration, <mark-played-items>, invalid <content> parameter! Allowed values are \"video\", \"audio\", \"image\"");
+                throw std::runtime_error(R"(error in configuration, <mark-played-items>, invalid <content> parameter! Allowed values are "video", "audio", "image")");
 
             mark_content_list.push_back(mark_content);
             NEW_STRARR_OPTION(mark_content_list);
