@@ -99,7 +99,7 @@ void ConfigGenerator::generateServer(fs::path userHome, fs::path configDir, fs::
   generateStorage(&server);
 
   auto ps3protinfo = server.append_child(pugi::node_comment);
-  ps3protinfo.set_value(" For PS3 support change \"extend\" to \"yes\" ");
+  ps3protinfo.set_value(R"( For PS3 support change "extend" to "yes" )");
 
   auto protocolinfo = server.append_child("protocolInfo");
   protocolinfo.append_attribute("extend") = DEFAULT_EXTEND_PROTOCOLINFO;
@@ -265,10 +265,10 @@ void ConfigGenerator::generateMappings(pugi::xml_node* import) {
   map_from_to("wv", "audio/x-wavpack", &ext2mt);
 
   ext2mt.append_child(pugi::node_comment).set_value(" Uncomment the line below for PS3 divx support ");
-  ext2mt.append_child(pugi::node_comment).set_value(" <map from=\"avi\" to=\"video/divx\" /> ");
+  ext2mt.append_child(pugi::node_comment).set_value(R"( <map from="avi" to="video/divx" /> )");
 
   ext2mt.append_child(pugi::node_comment).set_value(" Uncomment the line below for D-Link DSM / ZyXEL DMA-1000 ");
-  ext2mt.append_child(pugi::node_comment).set_value(" <map from=\"avi\" to=\"video/avi\" /> ");
+  ext2mt.append_child(pugi::node_comment).set_value(R"( <map from="avi" to="video/avi" /> )");
 
   auto mtupnp = mappings.append_child("mimetype-upnpclass");
   map_from_to("audio/*", UPNP_DEFAULT_CLASS_MUSIC_TRACK, &mtupnp);

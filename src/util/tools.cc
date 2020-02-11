@@ -233,7 +233,7 @@ void string_ok_ex(std::string str)
 
 std::string http_redirect_to(std::string ip, std::string port, std::string page)
 {
-    return "<html><head><meta http-equiv=\"Refresh\" content=\"0;URL=http://" + ip + ":" + port + "/" + page + "\"></head><body bgcolor=\"#dddddd\"></body></html>";
+    return R"(<html><head><meta http-equiv="Refresh" content="0;URL=http://)" + ip + ":" + port + "/" + page + R"("></head><body bgcolor="#dddddd"></body></html>)";
 }
 
 std::string hex_encode(const void* data, int len)
