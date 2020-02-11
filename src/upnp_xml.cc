@@ -739,7 +739,7 @@ void UpnpXMLBuilder::addResources(std::shared_ptr<CdsItem> item, pugi::xml_node*
         std::string protocolInfo = getValueOrDefault(res_attrs, MetadataHandler::getResAttrName(R_PROTOCOLINFO));
         std::string mimeType = getMTFromProtocolInfo(protocolInfo);
 
-        size_t pos = mimeType.find(";");
+        size_t pos = mimeType.find(';');
         if (pos != std::string::npos) {
             mimeType = mimeType.substr(0, pos);
         }

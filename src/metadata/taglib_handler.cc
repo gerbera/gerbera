@@ -435,7 +435,7 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, std::shared_ptr<CdsIt
                 const TagLib::String frameContents = textFrame->toString();
                 std::string value(frameContents.toCString(true));
 
-                size_t subTagEnd = value.find("]");
+                size_t subTagEnd = value.find(']');
                 std::string subTag = value.substr(1, subTagEnd - 1); // Cut out brackets
                 std::string content = value.substr(subTagEnd + 2); // Skip bracket and space
                 // log_debug("TXXX Tag: {}", subTag.c_str());
