@@ -534,7 +534,7 @@ std::string renderProtocolInfo(const std::string& mimetype, const std::string& p
 
 std::string getMTFromProtocolInfo(const std::string& protocol)
 {
-    std::vector<std::string> parts = split_string(std::move(protocol), ':');
+    std::vector<std::string> parts = split_string(protocol, ':');
     if (parts.size() > 2)
         return parts[2];
     else
@@ -657,7 +657,7 @@ bool check_resolution(const std::string& resolution, int* x, int* y)
     if (y != nullptr)
         *y = 0;
 
-    std::vector<std::string> parts = split_string(std::move(resolution), 'x');
+    std::vector<std::string> parts = split_string(resolution, 'x');
     if (parts.size() != 2)
         return false;
 
@@ -1220,7 +1220,7 @@ std::string getDLNAContentHeader(const std::shared_ptr<ConfigManager>& config, c
 {
     if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO)) {
         std::string content_parameter;
-        content_parameter = getDLNAprofileString(std::move(contentType));
+        content_parameter = getDLNAprofileString(contentType);
         if (string_ok(content_parameter))
             content_parameter = D_PROFILE + std::string("=") + content_parameter + ";";
         // enabling or disabling seek

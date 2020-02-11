@@ -41,7 +41,7 @@ ImportScript::ImportScript(const std::shared_ptr<ConfigManager>& config,
     std::shared_ptr<Storage> storage,
     std::shared_ptr<ContentManager> content,
     const std::shared_ptr<Runtime>& runtime)
-    : Script(config, std::move(storage), std::move(content), std::move(runtime), "import")
+    : Script(config, std::move(storage), std::move(content), runtime, "import")
 {
     std::string scriptPath = config->getOption(CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT);
 

@@ -61,8 +61,8 @@ std::string ConfigGenerator::generate(const fs::path& userHome, const fs::path& 
      information on creating and using config.xml configration files.\n\
     ");
 
-    generateServer(std::move(userHome), std::move(configDir), prefixDir, &config);
-    generateImport(prefixDir, std::move(magicFile), &config);
+    generateServer(userHome, configDir, prefixDir, &config);
+    generateImport(prefixDir, magicFile, &config);
     generateTranscoding(&config);
 
     std::stringstream buf;
