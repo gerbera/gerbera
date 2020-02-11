@@ -43,7 +43,7 @@ CdsObject::CdsObject(std::shared_ptr<Storage> storage)
     refID = INVALID_OBJECT_ID;
     mtime = 0;
     sizeOnDisk = 0;
-    virt = 0;
+    virt = false;
     sortPriority = 0;
     objectFlags = OBJECT_FLAG_RESTRICTED;
 }
