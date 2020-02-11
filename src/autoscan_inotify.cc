@@ -316,7 +316,7 @@ int AutoscanInotify::addMoveWatch(const fs::path& path, int removeWd, int parent
 void AutoscanInotify::monitorNonexisting(const fs::path& path, const std::shared_ptr<AutoscanDirectory>& adir)
 {
     auto pathAr = split_string(path, DIR_SEPARATOR);
-    recheckNonexistingMonitor(-1, pathAr, std::move(adir));
+    recheckNonexistingMonitor(-1, pathAr, adir);
 }
 
 void AutoscanInotify::recheckNonexistingMonitor(int curWd, std::vector<std::string> pathAr, const std::shared_ptr<AutoscanDirectory>& adir)
@@ -534,7 +534,7 @@ void AutoscanInotify::unmonitorDirectory(const fs::path& path, const std::shared
         return;
     }
 
-    auto watchAs = getAppropriateAutoscan(wdObj, std::move(adir));
+    auto watchAs = getAppropriateAutoscan(wdObj, adir);
     if (watchAs == nullptr) {
         log_debug("autoscan not found in watches? ({}, {})", wd, path.c_str());
     } else {
@@ -675,7 +675,7 @@ void AutoscanInotify::addDescendant(int startPointWd, int addWd, const std::shar
         return;
 
     //   log_debug("found wdObj");
-    auto watch = getAppropriateAutoscan(wdObj, std::move(adir));
+    auto watch = getAppropriateAutoscan(wdObj, adir);
     if (watch == nullptr)
         return;
     //    log_debug("adding descendant");

@@ -282,7 +282,7 @@ void Script::load(const std::string& scriptPath)
 {
     Runtime::AutoLock lock(runtime->getMutex());
     duk_push_thread_stash(ctx, ctx);
-    _load(std::move(scriptPath));
+    _load(scriptPath);
     duk_put_prop_string(ctx, -2, "script");
     duk_pop(ctx);
 }

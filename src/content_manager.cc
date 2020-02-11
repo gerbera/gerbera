@@ -976,7 +976,7 @@ void ContentManager::addObject(const std::shared_ptr<CdsObject>& obj)
 
 void ContentManager::addContainer(int parentID, std::string title, const std::string& upnpClass)
 {
-    addContainerChain(storage->buildContainerPath(parentID, escape(std::move(title), VIRTUAL_CONTAINER_ESCAPE, VIRTUAL_CONTAINER_SEPARATOR)), std::move(upnpClass));
+    addContainerChain(storage->buildContainerPath(parentID, escape(std::move(title), VIRTUAL_CONTAINER_ESCAPE, VIRTUAL_CONTAINER_SEPARATOR)), upnpClass);
 }
 
 int ContentManager::addContainerChain(const std::string& chain, const std::string& lastClass, int lastRefID, const std::map<std::string, std::string>& lastMetadata)
@@ -1259,7 +1259,7 @@ int ContentManager::addFile(const fs::path& path, bool recursive, bool async, bo
 
 int ContentManager::addFile(const fs::path& path, const fs::path& rootpath, bool recursive, bool async, bool hidden, bool lowPriority, bool cancellable)
 {
-    return addFileInternal(std::move(path), std::move(rootpath), recursive, async, hidden, lowPriority, 0, cancellable);
+    return addFileInternal(path, rootpath, recursive, async, hidden, lowPriority, 0, cancellable);
 }
 
 int ContentManager::addFileInternal(

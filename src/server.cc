@@ -419,7 +419,7 @@ void Server::routeSubscriptionRequest(const std::unique_ptr<SubscriptionRequest>
 // Temp
 void Server::sendCDSSubscriptionUpdate(const std::string& updateString)
 {
-    cds->sendSubscriptionUpdate(std::move(updateString));
+    cds->sendSubscriptionUpdate(updateString);
 }
 
 std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filename) const

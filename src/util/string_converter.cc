@@ -79,7 +79,7 @@ std::string StringConverter::convert(std::string str, bool validate)
 bool StringConverter::validate(const std::string& str)
 {
     try {
-        _convert(std::move(str), true);
+        _convert(str, true);
         return true;
     } catch (const std::runtime_error& e) {
         return false;

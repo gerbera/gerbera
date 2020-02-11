@@ -162,9 +162,9 @@ std::unique_ptr<SearchToken> SearchLexer::makeToken(const std::string& tokenStr)
 {
     auto itr = tokenTypes.find(aslowercase(tokenStr));
     if (itr != tokenTypes.end()) {
-        return std::make_unique<SearchToken>(itr->second, std::move(tokenStr));
+        return std::make_unique<SearchToken>(itr->second, tokenStr);
     } else {
-        return std::make_unique<SearchToken>(TokenType::PROPERTY, std::move(tokenStr));
+        return std::make_unique<SearchToken>(TokenType::PROPERTY, tokenStr);
     }
 }
 

@@ -91,7 +91,7 @@ void AutoscanList::updateLMinDB()
 int AutoscanList::add(const std::shared_ptr<AutoscanDirectory>& dir)
 {
     AutoLock lock(mutex);
-    return _add(std::move(dir));
+    return _add(dir);
 }
 
 int AutoscanList::_add(const std::shared_ptr<AutoscanDirectory>& dir)

@@ -35,7 +35,7 @@
 #include <utility>
 
 TranscodingProcessExecutor::TranscodingProcessExecutor(const std::string& command, const std::vector<std::string>& arglist)
-    : ProcessExecutor(std::move(command), std::move(arglist)) {};
+    : ProcessExecutor(command, arglist) {};
 
 void TranscodingProcessExecutor::removeFile(const std::string& filename)
 {

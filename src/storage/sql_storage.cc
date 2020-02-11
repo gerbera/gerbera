@@ -764,7 +764,7 @@ int SQLStorage::createContainer(int parentID, std::string name, const std::strin
         if (refObj == nullptr)
             throw std::runtime_error("tried to create container with refID set, but refID doesn't point to an existing object");
     }
-    std::string dbLocation = addLocationPrefix((isVirtual ? LOC_VIRT_PREFIX : LOC_DIR_PREFIX), std::move(virtualPath));
+    std::string dbLocation = addLocationPrefix((isVirtual ? LOC_VIRT_PREFIX : LOC_DIR_PREFIX), virtualPath);
 
     /*std::map<std::string,std::string> metadata;
     if (!itemMetadata.empty()) {
