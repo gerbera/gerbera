@@ -96,13 +96,13 @@ public:
         return 0;
     }
 
-    virtual uint64 getFilePointer(void)
+    virtual uint64 getFilePointer()
     {
         assert(file != nullptr);
         return ftello(file);
     }
 
-    virtual void close(void)
+    virtual void close()
     {
         if (file == nullptr)
             return;
