@@ -136,7 +136,7 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(enum UpnpOpenFileMode mode)
 
     xml2JsonHints = std::make_shared<Xml2Json::Hints>();
 
-    std::string error = "";
+    std::string error;
     int error_code = 0;
 
     std::string output;
