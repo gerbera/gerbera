@@ -61,8 +61,7 @@ void web::containers::process()
     auto param = std::make_unique<BrowseParam>(parentID, BROWSE_DIRECT_CHILDREN | BROWSE_CONTAINERS);
     auto arr = storage->browse(param);
 
-    for (size_t i = 0; i < arr.size(); i++) {
-        auto obj = arr[i];
+    for (auto obj : arr) {
         //if (IS_CDS_CONTAINER(obj->getObjectType()))
         //{
         auto cont = std::static_pointer_cast<CdsContainer>(obj);

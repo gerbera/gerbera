@@ -409,8 +409,7 @@ void SQLStorage::addObject(std::shared_ptr<CdsObject> obj, int* changedContainer
 
     // int lastInsertID = INVALID_OBJECT_ID;
     // int lastMetadataInsertID = INVALID_OBJECT_ID;
-    for (size_t i = 0; i < data.size(); i++) {
-        auto& addUpdateTable = data[i];
+    for (const auto& addUpdateTable : data) {
         std::shared_ptr<std::ostringstream> qb = sqlForInsert(obj, addUpdateTable);
         log_debug("insert_query: {}", qb->str().c_str());
         exec(*qb);
@@ -433,8 +432,7 @@ void SQLStorage::updateObject(std::shared_ptr<CdsObject> obj, int* changedContai
             throw std::runtime_error("tried to update an object with a forbidden ID (" + std::to_string(obj->getID()) + ")!");
         data = _addUpdateObject(obj, true, changedContainer);
     }
-    for (size_t i = 0; i < data.size(); i++) {
-        auto& addUpdateTable = data[i];
+    for (const auto& addUpdateTable : data) {
         std::string operation = addUpdateTable->getOperation();
         std::unique_ptr<std::ostringstream> qb;
         if (operation == "update") {
@@ -605,8 +603,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLStorage::browse(const std::unique_ptr
     res = nullptr;
 
     // update childCount fields
-    for (size_t i = 0; i < arr.size(); i++) {
-        auto obj = arr[i];
+    for (auto obj : arr) {
         if (IS_CDS_CONTAINER(obj->getObjectType())) {
             auto cont = std::static_pointer_cast<CdsContainer>(obj);
             cont->setChildCount(getChildCount(cont->getID(), getContainers, getItems, hideFsRoot));
@@ -808,21 +805,21 @@ int SQLStorage::createContainer(int parentID, std::string name, std::string virt
     exec(qb);
 
     if (!itemMetadata.empty()) {
-        for (auto it = itemMetadata.begin(); it != itemMetadata.end(); it++) {
+        for (const auto& it : itemMetadata) {
             int newMetadataID = getNextMetadataID();
             std::ostringstream ib;
             ib << "INSERT INTO"
-                << TQ(METADATA_TABLE)
-                << " ("
-                << TQ("id") << ','
-                << TQ("item_id") << ','
-                << TQ("property_name") << ','
-                << TQ("property_value") << ") VALUES ("
-                << newMetadataID << ','
-                << newID << ","
-                << quote(it->first) << ","
-                << quote(it->second)
-                << ")";
+               << TQ(METADATA_TABLE)
+               << " ("
+               << TQ("id") << ','
+               << TQ("item_id") << ','
+               << TQ("property_name") << ','
+               << TQ("property_value") << ") VALUES ("
+               << newMetadataID << ','
+               << newID << ","
+               << quote(it.first) << ","
+               << quote(it.second)
+               << ")";
             exec(ib);
         }
         log_debug("Wrote metadata for cds_object {}", newID);
@@ -2184,28 +2181,28 @@ void SQLStorage::generateMetadataDBOperations(std::shared_ptr<CdsObject> obj, bo
 {
     auto dict = obj->getMetadata();
     if (!isUpdate) {
-        for (auto it = dict.begin(); it != dict.end(); it++) {
+        for (const auto& it : dict) {
             std::map<std::string,std::string> metadataSql;
-            metadataSql["property_name"] = quote(it->first);
-            metadataSql["property_value"] = quote(it->second);
+            metadataSql["property_name"] = quote(it.first);
+            metadataSql["property_value"] = quote(it.second);
             operations.push_back(std::make_shared<AddUpdateTable>(METADATA_TABLE, metadataSql, "insert"));
         }
     } else {
         // get current metadata from DB: if only it really was a dictionary...
         auto dbMetadata = retrieveMetadataForObject(obj->getID());
-        for (auto it = dict.begin(); it != dict.end(); it++) {
-            std::string operation = dbMetadata.find(it->first) == dbMetadata.end() ? "insert" : "update";
+        for (const auto& it : dict) {
+            std::string operation = dbMetadata.find(it.first) == dbMetadata.end() ? "insert" : "update";
             std::map<std::string,std::string> metadataSql;
-            metadataSql["property_name"] = quote(it->first);
-            metadataSql["property_value"] = quote(it->second);
+            metadataSql["property_name"] = quote(it.first);
+            metadataSql["property_value"] = quote(it.second);
             operations.push_back(std::make_shared<AddUpdateTable>(METADATA_TABLE, metadataSql, operation));
         }
-        for (auto it = dbMetadata.begin(); it != dbMetadata.end(); it++) {
-            if (dict.find(it->first) == dict.end()) {
+        for (const auto& it : dbMetadata) {
+            if (dict.find(it.first) == dict.end()) {
                 // key in db metadata but not obj metadata, so needs a delete
                 std::map<std::string,std::string> metadataSql;
-                metadataSql["property_name"] = quote(it->first);
-                metadataSql["property_value"] = quote(it->second);
+                metadataSql["property_name"] = quote(it.first);
+                metadataSql["property_value"] = quote(it.second);
                 operations.push_back(std::make_shared<AddUpdateTable>(METADATA_TABLE, metadataSql, "delete"));
             }
         }
@@ -2358,20 +2355,20 @@ void SQLStorage::migrateMetadata(std::shared_ptr<CdsObject> object)
     if (!dict.empty()) {
         log_debug("Migrating metadata for cds object {}", object->getID());
         std::map<std::string,std::string> metadataSQLVals;
-        for (auto it = dict.begin(); it != dict.end(); it++) {
-            metadataSQLVals[quote(it->first)] = quote(it->second);
+        for (auto& it : dict) {
+            metadataSQLVals[quote(it.first)] = quote(it.second);
         }
 
-        for (auto it = metadataSQLVals.begin(); it != metadataSQLVals.end(); it++) {
+        for (auto& metadataSQLVal : metadataSQLVals) {
             std::ostringstream fields, values;
             fields << TQ("id") << ','
                     << TQ("item_id") << ','
                     << TQ("property_name") << ','
                     << TQ("property_value");
             values << getNextMetadataID() << ','
-                    << object->getID() << ','
-                    << it->first << ','
-                    << it->second;
+                   << object->getID() << ','
+                   << metadataSQLVal.first << ','
+                   << metadataSQLVal.second;
             std::ostringstream qb;
             qb << "INSERT INTO " << TQ(METADATA_TABLE)
                << " (" << fields.str()

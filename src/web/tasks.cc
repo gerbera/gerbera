@@ -52,8 +52,8 @@ void web::tasks::process()
         auto tasksEl = root.append_child("tasks");
         xml2JsonHints->setArrayName(tasksEl, "tasks");
         auto taskList = content->getTasklist();
-        for (size_t i = 0; i < taskList.size(); i++) {
-            appendTask(taskList[i], &tasksEl);
+        for (const auto& i : taskList) {
+            appendTask(i, &tasksEl);
         }
     } else if (action == "cancel") {
         int taskID = intParam("task_id");

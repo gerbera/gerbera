@@ -73,7 +73,7 @@ public:
         close();
     }
 
-    virtual uint32 read(void * buffer, size_t size)
+    virtual uint32 read(void* buffer, size_t size)
     {
         assert(file != nullptr);
         if (size <= 0)
@@ -90,7 +90,7 @@ public:
         }
     }
 
-    virtual size_t write(const void *p_buffer, size_t i_size)
+    virtual size_t write(const void* p_buffer, size_t i_size)
     {
         // not needed
         return 0;

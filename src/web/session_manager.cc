@@ -166,8 +166,7 @@ std::shared_ptr<Session> SessionManager::getSession(std::string sessionID, bool 
     unique_lock<decltype(mutex)> lock(mutex, std::defer_lock);
     if (doLock)
         lock.lock();
-    for (size_t i = 0; i < sessions.size(); i++) {
-        auto s = sessions[i];
+    for (const auto& s : sessions) {
         if (s->getID() == sessionID)
             return s;
     }
@@ -201,8 +200,7 @@ void SessionManager::containerChangedUI(int objectID)
     if (sessions.size() <= 0)
         return;
     AutoLock lock(mutex);
-    for (size_t i = 0; i < sessions.size(); i++) {
-        auto session = sessions[i];
+    for (auto session : sessions) {
         if (session->isLoggedIn())
             session->containerChangedUI(objectID);
     }
@@ -213,8 +211,7 @@ void SessionManager::containerChangedUI(const std::vector<int>& objectIDs)
     if (sessions.size() <= 0)
         return;
     AutoLock lock(mutex);
-    for (size_t i = 0; i < sessions.size(); i++) {
-        auto session = sessions[i];
+    for (auto session : sessions) {
         if (session->isLoggedIn())
             session->containerChangedUI(objectIDs);
     }

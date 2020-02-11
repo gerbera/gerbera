@@ -135,13 +135,11 @@ std::string Xml2Json::getValue(const char* text)
 
 bool Xml2Json::isArray(pugi::xml_node& node, const Hints* hints, std::string* arrayName)
 {
-    for (auto it = hints->asArray.begin(); it != hints->asArray.end(); ++it) {
-        auto& hint = *it;
+    for (const auto& hint : hints->asArray) {
         if (hint.first == node) {
             if (arrayName != nullptr) *arrayName = hint.second;
             return true;
         }
-    
     }
 
     return false;

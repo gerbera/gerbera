@@ -158,8 +158,7 @@ void Server::run()
     log_debug("webroot: {}", web_root.c_str());
 
     std::vector<std::string> arr = config->getStringArrayOption(CFG_SERVER_CUSTOM_HTTP_HEADERS);
-    for (size_t i = 0; i < arr.size(); i++) {
-        std::string tmp = arr[i];
+    for (const auto& tmp : arr) {
         if (string_ok(tmp)) {
             log_info("(NOT) Adding HTTP header \"{}\"", tmp.c_str());
             // FIXME upstream upnp

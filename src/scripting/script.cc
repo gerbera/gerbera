@@ -601,8 +601,8 @@ void Script::cdsObject2dukObject(std::shared_ptr<CdsObject> obj)
         // stack: js meta_js
 
         auto meta = obj->getMetadata();
-        for (auto it = meta.begin(); it != meta.end(); it++) {
-            setProperty(it->first, it->second);
+        for (const auto& it : meta) {
+            setProperty(it.first, it.second);
         }
 
         if (std::static_pointer_cast<CdsItem>(obj)->getTrackNumber() > 0)
@@ -625,8 +625,8 @@ void Script::cdsObject2dukObject(std::shared_ptr<CdsObject> obj)
             aux[ATRAILERS_AUXDATA_POST_DATE] = tmp;
 #endif
 
-        for (auto it = aux.begin(); it != aux.end(); it++) {
-            setProperty(it->first, it->second);
+        for (const auto& it : aux) {
+            setProperty(it.first, it.second);
         }
 
         duk_put_prop_string(ctx, -2, "aux");
@@ -642,8 +642,8 @@ void Script::cdsObject2dukObject(std::shared_ptr<CdsObject> obj)
         if (obj->getResourceCount() > 0) {
             auto res = obj->getResource(0);
             auto attributes = res->getAttributes();
-            for (auto it = attributes.begin(); it != attributes.end(); it++) {
-                setProperty(it->first, it->second);
+            for (const auto& attribute : attributes) {
+                setProperty(attribute.first, attribute.second);
             }
         }
 

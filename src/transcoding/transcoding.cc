@@ -126,8 +126,8 @@ std::shared_ptr<TranscodingProfileMap> TranscodingProfileList::get(std::string s
 
 std::shared_ptr<TranscodingProfile> TranscodingProfileList::getByName(std::string name)
 {
-    for (auto it = list.begin(); it != list.end(); ++it) {
-        auto inner = it->second;
+    for (const auto& it : list) {
+        auto inner = it.second;
         auto tp = inner->find(name);
         if (tp != inner->end())
             return tp->second;

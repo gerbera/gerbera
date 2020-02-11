@@ -400,9 +400,8 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, std::shared_ptr<CdsIt
     bool hasTXXXFrames = frameListMap.contains("TXXX");
 
     std::vector<std::string> aux_tags_list = config->getStringArrayOption(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
-    for (size_t i = 0; i < aux_tags_list.size(); i++) {
+    for (const auto& desiredFrame : aux_tags_list) {
 
-        std::string desiredFrame = aux_tags_list[i];
         if (!string_ok(desiredFrame)) {
             continue;
         }
@@ -431,7 +430,7 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, std::shared_ptr<CdsIt
             if (!string_ok(desiredSubTag))
                 continue;
 
-            for (auto frame : frameList) {
+            for (const auto& frame : frameList) {
                 const auto textFrame = dynamic_cast<const TagLib::ID3v2::TextIdentificationFrame*>(frame);
                 const TagLib::String frameContents = textFrame->toString();
                 std::string value(frameContents.toCString(true));
@@ -540,9 +539,8 @@ void TagLibHandler::extractFLAC(TagLib::IOStream* roStream, std::shared_ptr<CdsI
     auto sc = StringConverter::i2i(config);
 
     std::vector<std::string> aux_tags_list = config->getStringArrayOption(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
-    for (size_t j = 0; j < aux_tags_list.size(); j++) {
+    for (const auto& desiredTag : aux_tags_list) {
 
-        std::string desiredTag = aux_tags_list[j];
         if (!string_ok(desiredTag)) {
             continue;
         }

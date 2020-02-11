@@ -81,10 +81,10 @@ void UpnpXMLBuilder::renderObject(std::shared_ptr<CdsObject> obj, bool renderAct
         std::string key;
         std::string upnp_class = obj->getClass();
 
-        for (auto it = meta.begin(); it != meta.end(); it++) {
-            key = it->first;
+        for (const auto& it : meta) {
+            key = it.first;
             if (key == MetadataHandler::getMetaFieldName(M_DESCRIPTION)) {
-                tmp = it->second;
+                tmp = it.second;
                 if ((stringLimit > 0) && (tmp.length() > stringLimit)) {
                     tmp = tmp.substr(0, getValidUTF8CutPosition(tmp, stringLimit - 3));
                     tmp = tmp + "...";
@@ -92,9 +92,9 @@ void UpnpXMLBuilder::renderObject(std::shared_ptr<CdsObject> obj, bool renderAct
                 result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(tmp.c_str());
             } else if (key == MetadataHandler::getMetaFieldName(M_TRACKNUMBER)) {
                 if (upnp_class == UPNP_DEFAULT_CLASS_MUSIC_TRACK)
-                    result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(it->second.c_str());
+                    result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(it.second.c_str());
             } else if ((key != MetadataHandler::getMetaFieldName(M_TITLE)) || ((key == MetadataHandler::getMetaFieldName(M_TRACKNUMBER)) && (upnp_class == UPNP_DEFAULT_CLASS_MUSIC_TRACK)))
-                result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(it->second.c_str());
+                result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(it.second.c_str());
         }
 
         addResources(item, &result);
@@ -423,8 +423,8 @@ void UpnpXMLBuilder::renderResource(std::string URL, const std::map<std::string,
     auto res = parent->append_child("res");
     res.append_child(pugi::node_pcdata).set_value(URL.c_str());
 
-    for (auto it = attributes.begin(); it != attributes.end(); it++) {
-        res.append_attribute(it->first.c_str()) = it->second.c_str();
+    for (const auto& attribute : attributes) {
+        res.append_attribute(attribute.first.c_str()) = attribute.second.c_str();
     }
 }
 
@@ -613,8 +613,8 @@ void UpnpXMLBuilder::addResources(std::shared_ptr<CdsItem> item, pugi::xml_node*
     auto tlist = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST);
     auto tp_mt = tlist->get(item->getMimeType());
     if (tp_mt != nullptr) {
-        for (auto it = tp_mt->begin(); it != tp_mt->end(); ++it) {
-            auto tp = it->second;
+        for (const auto& it : *tp_mt) {
+            auto tp = it.second;
 
             if (tp == nullptr)
                 throw std::runtime_error("Invalid profile encountered!");
@@ -647,8 +647,8 @@ void UpnpXMLBuilder::addResources(std::shared_ptr<CdsItem> item, pugi::xml_node*
                     // let's have a look if it matches the list
                     else {
                         bool fcc_match = false;
-                        for (size_t f = 0; f < fcc_list.size(); f++) {
-                            if (current_fcc == fcc_list[f])
+                        for (const auto& f : fcc_list) {
+                            if (current_fcc == f)
                                 fcc_match = true;
                         }
 

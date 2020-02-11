@@ -53,10 +53,10 @@ fs::path FanArtHandler::getFanArtPath(std::shared_ptr<CdsItem> item) const
     log_debug("Folder name: {}", folder.c_str());
 
     fs::path found;
-    for (size_t i = 0; i < sizeof(names)/sizeof(names[0]); i++) {
-        auto found = folder / names[i];
+    for (const auto& name : names) {
+        auto found = folder / name;
         bool exists = fs::is_regular_file(found);
-        log_debug("{}: {}", names[i], exists ? "found" : "missing");
+        log_debug("{}: {}", name, exists ? "found" : "missing");
         if (!exists)
             continue;
         return found;
