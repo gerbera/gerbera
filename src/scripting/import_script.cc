@@ -87,8 +87,6 @@ void ImportScript::processCdsObject(std::shared_ptr<CdsObject> obj, std::string 
     }
 }
 
-ImportScript::~ImportScript()
-{
-}
+ImportScript::~ImportScript() = default;
 
 #endif // HAVE_JS

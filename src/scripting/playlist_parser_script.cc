@@ -222,7 +222,5 @@ void PlaylistParserScript::processPlaylistObject(std::shared_ptr<CdsObject> obj,
 
 }
 
-PlaylistParserScript::~PlaylistParserScript()
-{
-}
+PlaylistParserScript::~PlaylistParserScript() = default;
 #endif // HAVE_JS

@@ -43,9 +43,7 @@ JSLayout::JSLayout(std::shared_ptr<ConfigManager> config,
     import_script = std::make_unique<ImportScript>(config, storage, content, runtime);
 }
 
-JSLayout::~JSLayout()
-{
-}
+JSLayout::~JSLayout() = default;
 
 void JSLayout::processCdsObject(std::shared_ptr<CdsObject> obj, fs::path rootpath)
 {
