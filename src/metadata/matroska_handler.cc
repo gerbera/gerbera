@@ -121,7 +121,7 @@ MatroskaHandler::MatroskaHandler(std::shared_ptr<ConfigManager> config)
 
 void MatroskaHandler::fillMetadata(std::shared_ptr<CdsItem> item)
 {
-    parseMKV(item, NULL);
+    parseMKV(item, nullptr);
 }
 
 std::unique_ptr<IOHandler> MatroskaHandler::serveContent(std::shared_ptr<CdsItem> item, int resNum)
@@ -140,10 +140,10 @@ void MatroskaHandler::parseMKV(std::shared_ptr<CdsItem> item, MemIOHandler** p_i
     EbmlStream ebml_stream(ebml_file);
 
     EbmlElement * el_l0 = ebml_stream.FindNextID(KaxSegment::ClassInfos, ~0);
-    while (el_l0 != NULL) {
+    while (el_l0 != nullptr) {
         int i_upper_level = 0;
         EbmlElement * el_l1 = ebml_stream.FindNextElement(el_l0->Generic().Context, i_upper_level, ~0, true);
-        while (el_l1 != NULL) {
+        while (el_l1 != nullptr) {
             parseLevel1Element(item, ebml_stream, el_l1, p_io_handler);
 
             el_l1->SkipData(ebml_stream, el_l1->Generic().Context);
@@ -226,7 +226,7 @@ void MatroskaHandler::parseAttachments(std::shared_ptr<CdsItem> item, EbmlStream
             auto& fileData = GetChild<KaxFileData>(*attachedFile);
             // printf("KaxFileData (size=%ld)\n", fileData.GetSize());
 
-            if (p_io_handler != NULL) {
+            if (p_io_handler != nullptr) {
                 // serveContent
                 *p_io_handler = new MemIOHandler(fileData.GetBuffer(), fileData.GetSize());
             } else {

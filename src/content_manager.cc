@@ -171,7 +171,7 @@ void ContentManager::init()
             log_error("magic_open failed");
         } else {
             std::string optMagicFile = config->getOption(CFG_IMPORT_MAGIC_FILE);
-            const char* magicFile = NULL;
+            const char* magicFile = nullptr;
             if (!optMagicFile.empty())
                 magicFile = optMagicFile.c_str();
             if (magic_load(ms, magicFile) == -1) {

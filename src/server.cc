@@ -125,7 +125,7 @@ void Server::run()
     int port = config->getIntOption(CFG_SERVER_PORT);
 
     log_debug("Initialising libupnp with interface: '{}', port: {}", iface.c_str(), port);
-    const char* IfName = NULL;
+    const char* IfName = nullptr;
     if (!iface.empty()) IfName = iface.c_str();
     ret = UpnpInit2(IfName, port);
     if (ret != UPNP_E_SUCCESS) {
