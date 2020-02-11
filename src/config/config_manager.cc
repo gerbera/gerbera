@@ -445,7 +445,7 @@ void ConfigManager::load(fs::path filename, fs::path userHome)
     std::vector<std::string> menu_opts;
     for (pugi::xml_node child: tmpEl.children()) {
         if (std::string(child.name()) == "option")
-            menu_opts.push_back(child.text().as_string());
+            menu_opts.emplace_back(child.text().as_string());
     }
     NEW_STRARR_OPTION(menu_opts);
     SET_STRARR_OPTION(CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN);
