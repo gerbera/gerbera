@@ -275,7 +275,7 @@ std::vector<std::shared_ptr<SQLStorage::AddUpdateTable>> SQLStorage::_addUpdateO
     if (isUpdate)
         cdsObjectSql["auxdata"] = SQL_NULL;
     dict = obj->getAuxData();
-    if (dict.size() > 0 && (!hasReference || !std::equal(dict.begin(), dict.end(), refObj->getAuxData().begin()))) {
+    if (!dict.empty() && (!hasReference || !std::equal(dict.begin(), dict.end(), refObj->getAuxData().begin()))) {
         cdsObjectSql["auxdata"] = quote(dict_encode(obj->getAuxData()));
     }
 

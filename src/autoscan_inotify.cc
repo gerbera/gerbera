@@ -402,7 +402,7 @@ void AutoscanInotify::recheckNonexistingMonitors(int wd, std::shared_ptr<Wd> wdO
         if (watch->getType() == WatchType::Autoscan) {
             auto watchAs = std::static_pointer_cast<WatchAutoscan>(watch);
             auto pathAr = watchAs->getNonexistingPathArray();
-            if (pathAr.size() != 0) {
+            if (!pathAr.empty()) {
                 recheckNonexistingMonitor(wd, pathAr, watchAs->getAutoscanDirectory());
             }
         }
