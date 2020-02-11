@@ -2,7 +2,7 @@
 language: cpp
 
 # Ubuntu 16.04 Xenial support
-sudo: required
+os: linux
 dist: xenial
 
 services:
@@ -18,14 +18,12 @@ script:
       -e CXXFLAGS \
       gerbera/gerbera-ci-base:latest \
     bash -c \
-      "bash ../gerbera-src/scripts/install-googletest.sh \
-      && cmake ../gerbera-src -DCMAKE_VERBOSE_MAKEFILE=ON -DWITH_SYSTEMD=0 -DWITH_TESTS=1 -DWITH_FFMPEGTHUMBNAILER=1 -DWITH_EXIF=1 -DWITH_AVCODEC=1 -DWITH_MYSQL=1 \
+      "cmake ../gerbera-src -DCMAKE_VERBOSE_MAKEFILE=ON -DWITH_SYSTEMD=0 -DWITH_TESTS=1 -DWITH_FFMPEGTHUMBNAILER=1 -DWITH_EXIF=1 -DWITH_AVCODEC=1 -DWITH_MYSQL=1 \
       && make -j$(nproc) install && ctest -V"
 
 env:
-  - CXX=g++-9 CC=gcc-9
-  - CXX=g++-8 CC=gcc-8
-  - CXX=clang++-8 CC=clang-8
+  - CXX=g++ CC=gcc # gcc9.2
+  - CXX=clang++ CC=clang #clang9
 
 jobs:
   include:
