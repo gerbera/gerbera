@@ -603,7 +603,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLStorage::browse(const std::unique_ptr
     res = nullptr;
 
     // update childCount fields
-    for (auto obj : arr) {
+    for (const auto& obj : arr) {
         if (IS_CDS_CONTAINER(obj->getObjectType())) {
             auto cont = std::static_pointer_cast<CdsContainer>(obj);
             cont->setChildCount(getChildCount(cont->getID(), getContainers, getItems, hideFsRoot));
