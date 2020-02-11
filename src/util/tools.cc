@@ -186,7 +186,7 @@ fs::path find_in_path(const fs::path& exec)
         return "";
 
     auto st = std::make_unique<StringTokenizer>(PATH);
-    std::string path = "";
+    std::string path;
     std::string next;
     do {
         if (path.empty())

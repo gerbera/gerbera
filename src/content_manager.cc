@@ -790,7 +790,7 @@ void ContentManager::addRecursive(fs::path path, bool hidden, std::shared_ptr<CM
                 if (IS_CDS_ITEM(obj->getObjectType())) {
                     if (layout != nullptr) {
                         try {
-                            std::string rootpath = "";
+                            std::string rootpath;
                             if (task != nullptr)
                                 rootpath = task->getRootPath();
                             layout->processCdsObject(obj, rootpath);

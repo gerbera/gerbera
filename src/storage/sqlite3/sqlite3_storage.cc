@@ -480,7 +480,7 @@ void SLInitTask::run(sqlite3** db, Sqlite3Storage* sl)
         nullptr,
         nullptr,
         &err);
-    std::string error = "";
+    std::string error;
     if (err != nullptr) {
         error = err;
         sqlite3_free(err);
@@ -511,7 +511,7 @@ void SLSelectTask::run(sqlite3** db, Sqlite3Storage* sl)
         &pres->nrow,
         &pres->ncolumn,
         &err);
-    std::string error = "";
+    std::string error;
     if (err != nullptr) {
         log_debug(err);
         error = err;
@@ -544,7 +544,7 @@ void SLExecTask::run(sqlite3** db, Sqlite3Storage* sl)
         nullptr,
         nullptr,
         &err);
-    std::string error = "";
+    std::string error;
     if (err != nullptr) {
         error = err;
         sqlite3_free(err);
