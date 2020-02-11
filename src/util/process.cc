@@ -119,10 +119,7 @@ std::string run_simple_process(std::shared_ptr<ConfigManager> cfg, std::string p
 
 bool is_alive(pid_t pid, int* status)
 {
-    if (waitpid(pid, status, WNOHANG) == 0)
-        return true;
-
-    return false;
+    return waitpid(pid, status, WNOHANG) == 0;
 }
 
 bool kill_proc(pid_t kill_pid)
@@ -148,8 +145,5 @@ bool kill_proc(pid_t kill_pid)
     } else
         return true;
 
-    if (is_alive(kill_pid))
-        return false;
-
-    return true;
+    return !is_alive(kill_pid);
 }

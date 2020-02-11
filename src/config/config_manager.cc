@@ -328,7 +328,7 @@ void ConfigManager::load(fs::path filename, fs::path userHome)
         if (!validateYesNo(temp))
             throw std::runtime_error("Error in config file: incorrect parameter "
                              "for <backup enabled=\"\" /> attribute");
-        NEW_BOOL_OPTION(temp == "yes" ? true : false);
+        NEW_BOOL_OPTION(temp == "yes");
         SET_BOOL_OPTION(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED);
 
         temp_int = getIntOption("/server/storage/sqlite3/backup/attribute::interval",
@@ -366,7 +366,7 @@ void ConfigManager::load(fs::path filename, fs::path userHome)
     if (!validateYesNo(temp))
         throw std::runtime_error("Error in config file: incorrect parameter "
                          "for <ui enabled=\"\" /> attribute");
-    NEW_BOOL_OPTION(temp == "yes" ? true : false);
+    NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_SERVER_UI_ENABLED);
 
     temp = getOption("/server/ui/attribute::show-tooltips",
@@ -374,7 +374,7 @@ void ConfigManager::load(fs::path filename, fs::path userHome)
     if (!validateYesNo(temp))
         throw std::runtime_error("Error in config file: incorrect parameter "
                          "for <ui show-tooltips=\"\" /> attribute");
-    NEW_BOOL_OPTION(temp == "yes" ? true : false);
+    NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_SERVER_UI_SHOW_TOOLTIPS);
 
     temp = getOption("/server/ui/attribute::poll-when-idle",
@@ -382,7 +382,7 @@ void ConfigManager::load(fs::path filename, fs::path userHome)
     if (!validateYesNo(temp))
         throw std::runtime_error("Error in config file: incorrect parameter "
                          "for <ui poll-when-idle=\"\" /> attribute");
-    NEW_BOOL_OPTION(temp == "yes" ? true : false);
+    NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_SERVER_UI_POLL_WHEN_IDLE);
 
     temp_int = getIntOption("/server/ui/attribute::poll-interval",
@@ -456,7 +456,7 @@ void ConfigManager::load(fs::path filename, fs::path userHome)
         throw std::runtime_error("Error in config file: incorrect parameter for "
                          "<accounts enabled=\"\" /> attribute");
 
-    NEW_BOOL_OPTION(temp == "yes" ? true : false);
+    NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_SERVER_UI_ACCOUNTS_ENABLED);
 
     tmpEl = getElement("/server/ui/accounts");
@@ -477,7 +477,7 @@ void ConfigManager::load(fs::path filename, fs::path userHome)
     if (!validateYesNo(temp))
         throw std::runtime_error("Error in config file: incorrect parameter for "
                          "<import hidden-files=\"\" /> attribute");
-    NEW_BOOL_OPTION(temp == "yes" ? true : false);
+    NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_IMPORT_HIDDEN_FILES);
 
     temp = getOption(
@@ -488,7 +488,7 @@ void ConfigManager::load(fs::path filename, fs::path userHome)
         throw std::runtime_error("Error in config file: incorrect parameter for "
                          "<extension-mimetype ignore-unknown=\"\" /> attribute");
 
-    NEW_BOOL_OPTION(temp == "yes" ? true : false);
+    NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_IMPORT_MAPPINGS_IGNORE_UNKNOWN_EXTENSIONS);
 
     temp = getOption(
@@ -603,7 +603,7 @@ void ConfigManager::load(fs::path filename, fs::path userHome)
         throw std::runtime_error("Error in config file: extend attribute of the "
                          "protocolInfo tag must be either \"yes\" or \"no\"");
 
-    NEW_BOOL_OPTION(temp == "yes" ? true : false);
+    NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_SERVER_EXTEND_PROTOCOLINFO);
 
     /*
@@ -622,7 +622,7 @@ void ConfigManager::load(fs::path filename, fs::path userHome)
         throw std::runtime_error("Error in config file: samsung-hack attribute of the "
                          "protocolInfo tag must be either \"yes\" or \"no\"");
 
-    NEW_BOOL_OPTION(temp == "yes" ? true : false);
+    NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK);
 
     temp = getOption("/server/protocolInfo/attribute::dlna-seek",
@@ -631,7 +631,7 @@ void ConfigManager::load(fs::path filename, fs::path userHome)
         throw std::runtime_error("Error in config file: dlna-seek attribute of the "
                          "protocolInfo tag must be either \"yes\" or \"no\"");
 
-    NEW_BOOL_OPTION(temp == "yes" ? true : false);
+    NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_SERVER_EXTEND_PROTOCOLINFO_DLNA_SEEK);
 
     temp = getOption("/server/pc-directory/attribute::upnp-hide",
@@ -640,7 +640,7 @@ void ConfigManager::load(fs::path filename, fs::path userHome)
         throw std::runtime_error("Error in config file: hide attribute of the "
                          "pc-directory tag must be either \"yes\" or \"no\"");
 
-    NEW_BOOL_OPTION(temp == "yes" ? true : false);
+    NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_SERVER_HIDE_PC_DIRECTORY);
 
     if (!string_ok(interface)) {
@@ -751,7 +751,7 @@ void ConfigManager::load(fs::path filename, fs::path userHome)
                          "invalid \"create-link\" attribute value in "
                          "<playlist-script> tag");
 
-    NEW_BOOL_OPTION(temp == "yes" ? true : false);
+    NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS);
 #endif
 
@@ -1059,7 +1059,7 @@ void ConfigManager::load(fs::path filename, fs::path userHome)
                          "invalid \"enabled\" attribute value in "
                          "<mark-played-items> tag");
 
-    bool markingEnabled = temp == YES ? true : false;
+    bool markingEnabled = temp == YES;
     NEW_BOOL_OPTION(markingEnabled);
     SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED);
 
@@ -1071,7 +1071,7 @@ void ConfigManager::load(fs::path filename, fs::path userHome)
                          "invalid \":suppress-cds-updates\" attribute "
                          "value in <mark-played-items> tag");
 
-    NEW_BOOL_OPTION(temp == YES ? true : false);
+    NEW_BOOL_OPTION(temp == YES);
     SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES);
 
     temp = getOption("/server/extended-runtime-options/mark-played-items/"
@@ -1083,7 +1083,7 @@ void ConfigManager::load(fs::path filename, fs::path userHome)
                          "invalid \"mode\" attribute value in "
                          "<string> tag in the <mark-played-items> section");
 
-    NEW_BOOL_OPTION(temp == DEFAULT_MARK_PLAYED_ITEMS_STRING_MODE ? true : false);
+    NEW_BOOL_OPTION(temp == DEFAULT_MARK_PLAYED_ITEMS_STRING_MODE);
     SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND);
 
     temp = getOption("/server/extended-runtime-options/mark-played-items/"
@@ -1197,7 +1197,7 @@ void ConfigManager::load(fs::path filename, fs::path userHome)
                          "invalid \"enabled\" attribute value in "
                          "<SopCast> tag");
 
-    NEW_BOOL_OPTION(temp == "yes" ? true : false);
+    NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_ONLINE_CONTENT_SOPCAST_ENABLED);
 
     int sopcast_refresh = getIntOption("/import/online-content/SopCast/attribute::refresh", 0);
@@ -1221,7 +1221,7 @@ void ConfigManager::load(fs::path filename, fs::path userHome)
                          "invalid \"update-at-start\" attribute value in "
                          "<SopCast> tag");
 
-    NEW_BOOL_OPTION(temp == "yes" ? true : false);
+    NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_ONLINE_CONTENT_SOPCAST_UPDATE_AT_START);
 #endif
 
@@ -1234,7 +1234,7 @@ void ConfigManager::load(fs::path filename, fs::path userHome)
                          "invalid \"enabled\" attribute value in "
                          "<AppleTrailers> tag");
 
-    NEW_BOOL_OPTION(temp == "yes" ? true : false);
+    NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_ONLINE_CONTENT_ATRAILERS_ENABLED);
 
     temp_int = getIntOption("/import/online-content/AppleTrailers/attribute::refresh", DEFAULT_ATRAILERS_REFRESH);
@@ -1250,7 +1250,7 @@ void ConfigManager::load(fs::path filename, fs::path userHome)
                          "invalid \"update-at-start\" attribute value in "
                          "<AppleTrailers> tag");
 
-    NEW_BOOL_OPTION(temp == "yes" ? true : false);
+    NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_ONLINE_CONTENT_ATRAILERS_UPDATE_AT_START);
 
     temp = getOption("/import/online-content/AppleTrailers/attribute::resolution",
