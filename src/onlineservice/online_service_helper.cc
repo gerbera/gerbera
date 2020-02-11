@@ -36,9 +36,7 @@
 #include "config/config_manager.h"
 #include "online_service.h"
 
-OnlineServiceHelper::OnlineServiceHelper()
-{
-}
+OnlineServiceHelper::OnlineServiceHelper() = default;
 
 std::string OnlineServiceHelper::resolveURL(std::shared_ptr<CdsItemExternalURL> item)
 {

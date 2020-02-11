@@ -35,13 +35,9 @@
 
 #include "server.h"
 
-IOHandler::IOHandler()
-{
-}
+IOHandler::IOHandler() = default;
 
-IOHandler::~IOHandler()
-{
-}
+IOHandler::~IOHandler() = default;
 
 /// \fn static UpnpWebFileHandle web_open(const char *filename,
 ///                                       enum UpnpOpenFileMode mode)

@@ -98,9 +98,7 @@ std::vector<std::string> TranscodingProfile::getAVIFourCCList()
 }
 
 
-TranscodingProfileList::TranscodingProfileList()
-{
-}
+TranscodingProfileList::TranscodingProfileList() = default;
 
 void TranscodingProfileList::add(std::string sourceMimeType, std::shared_ptr<TranscodingProfile> prof)
 {
