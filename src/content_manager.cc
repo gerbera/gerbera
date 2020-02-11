@@ -108,7 +108,7 @@ ContentManager::ContentManager(std::shared_ptr<ConfigManager> config, std::share
 
     ignore_unknown_extensions = config->getBoolOption(CFG_IMPORT_MAPPINGS_IGNORE_UNKNOWN_EXTENSIONS);
 
-    if (ignore_unknown_extensions && (extension_mimetype_map.size() == 0)) {
+    if (ignore_unknown_extensions && (extension_mimetype_map.empty())) {
         log_warning("Ignore unknown extensions set, but no mappings specified");
         log_warning("Please review your configuration!");
         ignore_unknown_extensions = false;
@@ -712,7 +712,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
     if ((shutdownFlag) || ((task != nullptr) && !task->isValid()))
         return;
 
-    if (list != nullptr && list->size() > 0) {
+    if (list != nullptr && !list->empty()) {
         auto changedContainers = storage->removeObjects(list);
         if (changedContainers != nullptr) {
             session_manager->containerChangedUI(changedContainers->ui);

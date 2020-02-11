@@ -124,7 +124,7 @@ bool Session::hasUIUpdateIDs()
     if (updateAll)
         return true;
     // AutoLock lock(mutex); only accessing an int - shouldn't be necessary
-    return (uiUpdateIDs->size() > 0);
+    return (!uiUpdateIDs->empty());
 }
 
 void Session::clearUpdateIDs()
@@ -197,7 +197,7 @@ std::string SessionManager::getUserPassword(std::string user)
 
 void SessionManager::containerChangedUI(int objectID)
 {
-    if (sessions.size() <= 0)
+    if (sessions.empty())
         return;
     AutoLock lock(mutex);
     for (const auto& session : sessions) {
@@ -208,7 +208,7 @@ void SessionManager::containerChangedUI(int objectID)
 
 void SessionManager::containerChangedUI(const std::vector<int>& objectIDs)
 {
-    if (sessions.size() <= 0)
+    if (sessions.empty())
         return;
     AutoLock lock(mutex);
     for (const auto& session : sessions) {
@@ -219,10 +219,10 @@ void SessionManager::containerChangedUI(const std::vector<int>& objectIDs)
 
 void SessionManager::checkTimer()
 {
-    if (sessions.size() > 0 && !timerAdded) {
+    if (!sessions.empty() && !timerAdded) {
         timer->addTimerSubscriber(this, SESSION_TIMEOUT_CHECK_INTERVAL);
         timerAdded = true;
-    } else if (sessions.size() <= 0 && timerAdded) {
+    } else if (sessions.empty() && timerAdded) {
         timer->removeTimerSubscriber(this);
         timerAdded = false;
     }
