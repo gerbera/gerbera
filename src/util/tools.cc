@@ -613,12 +613,12 @@ std::string getMIME(const fs::path& filepath, const void *buffer, size_t length)
     /* MAGIC_MIME_TYPE tells magic to return ONLY the mimetype */
     magic_t magic_cookie = magic_open(MAGIC_MIME_TYPE);
 
-    if (magic_cookie == NULL) {
+    if (magic_cookie == nullptr) {
         log_warning("Failed to initialize libmagic");
         return "";
     }
 
-    if (magic_load(magic_cookie, NULL) != 0) {
+    if (magic_load(magic_cookie, nullptr) != 0) {
         log_warning("Failed to load magic database: {}", magic_error(magic_cookie));
         magic_close(magic_cookie);
         return "";
@@ -975,8 +975,8 @@ std::string ipToInterface(std::string ip)
         log_error("Could not getifaddrs: {}", mt_strerror(errno).c_str());
     }
 
-    for (ifa = ifaddr, n = 0; ifa != NULL; ifa = ifa->ifa_next, n++) {
-        if (ifa->ifa_addr == NULL)
+    for (ifa = ifaddr, n = 0; ifa != nullptr; ifa = ifa->ifa_next, n++) {
+        if (ifa->ifa_addr == nullptr)
             continue;
 
         family = ifa->ifa_addr->sa_family;
@@ -985,7 +985,7 @@ std::string ipToInterface(std::string ip)
         if (family == AF_INET || family == AF_INET6) {
             s = getnameinfo(ifa->ifa_addr,
                 (family == AF_INET) ? sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6),
-                host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
+                host, NI_MAXHOST, nullptr, 0, NI_NUMERICHOST);
             if (s != 0) {
                 log_error("getnameinfo() failed: {}", gai_strerror(s));
                 return "";
@@ -1328,7 +1328,7 @@ int find_local_port(unsigned short range_min, unsigned short range_max)
         }
 
         server = gethostbyname("127.0.0.1");
-        if (server == NULL) {
+        if (server == nullptr) {
             log_error("could not resolve localhost");
             close(fd);
             return -1;

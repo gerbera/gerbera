@@ -877,7 +877,7 @@ void ConfigManager::load(fs::path filename, fs::path userHome)
     if (temp == "yes")
         el = getElement("/transcoding");
     else
-        el = pugi::xml_node(NULL);
+        el = pugi::xml_node(nullptr);
     NEW_TRANSCODING_PROFILELIST_OPTION(createTranscodingProfileListFromNode(el));
     SET_TRANSCODING_PROFILELIST_OPTION(CFG_TRANSCODING_PROFILE_LIST);
 
