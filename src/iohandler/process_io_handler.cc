@@ -68,10 +68,10 @@ bool ProcessIOHandler::abort()
     if (procList.empty())
         return abort;
 
-    for (size_t i = 0; i < procList.size(); i++) {
-        auto exec = procList[i]->getExecutor();
+    for (const auto& i : procList) {
+        auto exec = i->getExecutor();
         if ((exec != nullptr) && (!exec->isAlive())) {
-            if (procList[i]->abortOnDeath())
+            if (i->abortOnDeath())
                 abort = true;
             break;
         }
@@ -82,7 +82,7 @@ bool ProcessIOHandler::abort()
 
 void ProcessIOHandler::killAll()
 {
-    for (auto & i : procList) {
+    for (const auto& i : procList) {
         auto exec = i->getExecutor();
         if (exec != nullptr)
             exec->kill();
@@ -94,8 +94,8 @@ void ProcessIOHandler::registerAll()
     if (mainProc != nullptr)
         content->registerExecutor(mainProc);
 
-    for (size_t i = 0; i < procList.size(); i++) {
-        auto exec = procList[i]->getExecutor();
+    for (const auto& i : procList) {
+        auto exec = i->getExecutor();
         if (exec != nullptr)
             content->registerExecutor(exec);
     }
@@ -106,8 +106,8 @@ void ProcessIOHandler::unregisterAll()
     if (mainProc != nullptr)
         content->unregisterExecutor(mainProc);
 
-    for (size_t i = 0; i < procList.size(); i++) {
-        auto exec = procList[i]->getExecutor();
+    for (const auto& i : procList) {
+        auto exec = i->getExecutor();
         if (exec != nullptr)
             content->unregisterExecutor(exec);
     }

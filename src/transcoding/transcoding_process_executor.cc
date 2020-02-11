@@ -44,8 +44,7 @@ TranscodingProcessExecutor::~TranscodingProcessExecutor()
 {
     kill();
 
-    for (size_t i = 0; i < file_list.size(); i++) {
-        std::string name = file_list[i];
+    for (auto name : file_list) {
         unlink(name.c_str());
     }
 }

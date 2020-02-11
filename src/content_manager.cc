@@ -358,8 +358,7 @@ void ContentManager::shutdown()
 
     shutdownFlag = true;
 
-    for (size_t i = 0; i < process_list.size(); i++) {
-        auto exec = process_list[i];
+    for (const auto& exec : process_list) {
         if (exec != nullptr)
             exec->kill();
     }
@@ -409,14 +408,12 @@ std::deque<std::shared_ptr<GenericTask>> ContentManager::getTasklist()
     if (t != nullptr)
         taskList.push_back(t);
 
-    for (size_t i = 0; i < taskQueue1.size(); i++) {
-        auto t = taskQueue1[i];
+    for (const auto &t : taskQueue1) {
         if (t->isValid())
             taskList.push_back(t);
     }
 
-    for (size_t i = 0; i < taskQueue2.size(); i++) {
-        auto t = taskQueue2[i];
+    for (const auto &t : taskQueue2) {
         if (t->isValid())
             taskList.clear();
     }
@@ -1357,15 +1354,13 @@ void ContentManager::invalidateTask(unsigned int taskID, task_owner_t taskOwner)
             }
         }
 
-        for (size_t i = 0; i < taskQueue1.size(); i++) {
-            auto t = taskQueue1[i];
+        for (const auto &t : taskQueue1) {
             if ((t->getID() == taskID) || (t->getParentID() == taskID)) {
                 t->invalidate();
             }
         }
 
-        for (size_t i = 0; i < taskQueue2.size(); i++) {
-            auto t = taskQueue2[i];
+        for (const auto &t : taskQueue2) {
             if ((t->getID() == taskID) || (t->getParentID() == taskID)) {
                 t->invalidate();
             }
@@ -1426,13 +1421,11 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
 
             // we have to make sure that a currently running autoscan task will not
             // launch add tasks for directories that anyway are going to be deleted
-            for (size_t i = 0; i < taskQueue1.size(); i++) {
-                auto t = taskQueue1[i];
+            for (const auto& t : taskQueue1) {
                 invalidateAddTask(t, path);
             }
 
-            for (size_t i = 0; i < taskQueue2.size(); i++) {
-                auto t = taskQueue2[i];
+            for (const auto& t : taskQueue2) {
                 invalidateAddTask(t, path);
             }
 
@@ -1505,8 +1498,8 @@ std::vector<std::shared_ptr<AutoscanDirectory>> ContentManager::getAutoscanDirec
 
 #if HAVE_INOTIFY
     auto ino = autoscan_inotify->getArrayCopy();
-    for (size_t i = 0; i < ino.size(); i++)
-        all.push_back(ino[i]);
+    for (const auto& i : ino)
+        all.push_back(i);
 #endif
     return all;
 }
@@ -1727,8 +1720,8 @@ void ContentManager::triggerPlayHook(std::shared_ptr<CdsObject> obj)
 
     if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && !obj->getFlag(OBJECT_FLAG_PLAYED)) {
         std::vector<std::string>  mark_list = config->getStringArrayOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST);
-        for (size_t i = 0; i < mark_list.size(); i++) {
-            if (startswith(std::static_pointer_cast<CdsItem>(obj)->getMimeType(), mark_list[i])) {
+        for (const auto& i : mark_list) {
+            if (startswith(std::static_pointer_cast<CdsItem>(obj)->getMimeType(), i)) {
                 obj->setFlag(OBJECT_FLAG_PLAYED);
 
                 bool supress = config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES);

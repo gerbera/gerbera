@@ -232,9 +232,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
                 std::string pathNoExt = path.parent_path() / path.stem();
 
                 std::string validext;
-                for (size_t i = 0; i < subexts.size(); i++) {
-                    std::string ext = subexts[i];
-
+                for (const auto& ext : subexts) {
                     std::string fpath = pathNoExt + ext;
                     if (access(fpath.c_str(), R_OK) == 0) {
                         validext = ext;

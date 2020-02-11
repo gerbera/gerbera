@@ -317,8 +317,7 @@ void LibExifHandler::process_ifd(ExifContent* content, std::shared_ptr<CdsItem> 
         }
 
         // if there are any auxilary tags that the user wants - add them
-        for (size_t j = 0; j < auxtags.size(); j++) {
-            std::string tmp = auxtags[j];
+        for (const auto& tmp : auxtags) {
             if (string_ok(tmp)) {
                 if (e->tag == getTagFromString(tmp)) {
                     value = (char*)exif_egv(e);
@@ -349,9 +348,9 @@ void LibExifHandler::fillMetadata(std::shared_ptr<CdsItem> item)
     }
 
     std::vector<std::string> aux = config->getStringArrayOption(CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST);
-    for (int i = 0; i < EXIF_IFD_COUNT; i++) {
-        if (ed->ifd[i])
-            process_ifd(ed->ifd[i], item, sc, aux);
+    for (const auto& i : ed->ifd) {
+        if (i)
+            process_ifd(i, item, sc, aux);
     }
 
     // we got the image resolution so we can add our resource

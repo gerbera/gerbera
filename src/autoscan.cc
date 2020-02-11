@@ -96,8 +96,8 @@ int AutoscanList::_add(std::shared_ptr<AutoscanDirectory> dir)
 {
     std::string loc = dir->getLocation();
 
-    for (size_t i = 0; i < list.size(); i++) {
-        if (loc == list[i]->getLocation()) {
+    for (const auto& i : list) {
+        if (loc == i->getLocation()) {
             throw std::runtime_error("Attempted to add same autoscan path twice");
         }
     }
@@ -112,8 +112,8 @@ void AutoscanList::addList(std::shared_ptr<AutoscanList> list)
 {
     AutoLock lock(mutex);
 
-    for (size_t i = 0; i < list->list.size(); i++) {
-        _add(list->list[i]);
+    for (const auto& i : list->list) {
+        _add(i);
     }
 }
 
@@ -138,9 +138,9 @@ std::shared_ptr<AutoscanDirectory> AutoscanList::getByObjectID(int objectID)
 {
     AutoLock lock(mutex);
 
-    for (size_t i = 0; i < list.size(); i++) {
-        if (objectID == list[i]->getObjectID())
-            return list[i];
+    for (const auto& i : list) {
+        if (objectID == i->getObjectID())
+            return i;
     }
     return nullptr;
 }
@@ -148,9 +148,9 @@ std::shared_ptr<AutoscanDirectory> AutoscanList::getByObjectID(int objectID)
 std::shared_ptr<AutoscanDirectory> AutoscanList::get(std::string location)
 {
     AutoLock lock(mutex);
-    for (size_t i = 0; i < list.size(); i++) {
-        if (location == list[i]->getLocation())
-            return list[i];
+    for (const auto& i : list) {
+        if (location == i->getLocation())
+            return i;
     }
     return nullptr;
 }
@@ -237,8 +237,8 @@ void AutoscanList::notifyAll(Timer::Subscriber* sub)
         return;
     AutoLock lock(mutex);
 
-    for (size_t i = 0; i < list.size(); i++) {
-        sub->timerNotify(list[i]->getTimerParameter());
+    for (const auto& i : list) {
+        sub->timerNotify(i->getTimerParameter());
     }
 }
 

@@ -1705,9 +1705,9 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
             }
 
             bool set = false;
-            for (auto it = mt_mappings.begin(); it != mt_mappings.end(); it++) {
-                if (it->second == prof->getName()) {
-                    list->add(it->first, prof);
+            for (const auto& mt_mapping : mt_mappings) {
+                if (mt_mapping.second == prof->getName()) {
+                    list->add(mt_mapping.first, prof);
                     set = true;
                 }
             }
