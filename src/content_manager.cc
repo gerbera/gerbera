@@ -446,7 +446,7 @@ void ContentManager::addVirtualItem(std::shared_ptr<CdsObject> obj, bool allow_f
 
 int ContentManager::_addFile(fs::path path, fs::path rootPath, bool recursive, bool hidden, std::shared_ptr<CMAddFileTask> task)
 {
-    if (hidden == false) {
+    if (!hidden) {
         if (path.is_relative())
             return INVALID_OBJECT_ID;
     }
@@ -726,7 +726,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
 /* scans the given directory and adds everything recursively */
 void ContentManager::addRecursive(fs::path path, bool hidden, std::shared_ptr<CMAddFileTask> task)
 {
-    if (hidden == false) {
+    if (!hidden) {
         log_debug("Checking path {}", path.c_str());
         if (path.is_relative())
             return;
@@ -753,7 +753,7 @@ void ContentManager::addRecursive(fs::path path, bool hidden, std::shared_ptr<CM
                 continue;
             } else if (name[1] == '.' && name[2] == 0) {
                 continue;
-            } else if (hidden == false)
+            } else if (!hidden)
                 continue;
         }
         fs::path newPath = path / name;

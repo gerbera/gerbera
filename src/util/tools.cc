@@ -176,10 +176,7 @@ bool is_executable(const fs::path& path, int* err)
     if (err != nullptr)
         *err = errno;
 
-    if (ret == 0)
-        return true;
-    else
-        return false;
+    return ret == 0;
 }
 
 fs::path find_in_path(const fs::path& exec)
@@ -220,9 +217,7 @@ fs::path find_in_path(const fs::path& exec)
 
 bool string_ok(std::string str)
 {
-    if (str.empty())
-        return false;
-    return true;
+    return !str.empty();
 }
 
 void string_ok_ex(std::string str)
@@ -1006,10 +1001,7 @@ std::string ipToInterface(std::string ip)
 
 bool validateYesNo(std::string value)
 {
-    if ((value != "yes") && (value != "no"))
-        return false;
-    else
-        return true;
+    return !((value != "yes") && (value != "no"));
 }
 
 std::vector<std::string> populateCommandLine(std::string line, std::string in, std::string out, std::string range)
