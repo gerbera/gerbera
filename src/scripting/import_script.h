@@ -41,12 +41,12 @@
 class ImportScript : public Script
 {
 public:
-    ImportScript(std::shared_ptr<ConfigManager> config,
+    ImportScript(const std::shared_ptr<ConfigManager>& config,
         std::shared_ptr<Storage> storage,
         std::shared_ptr<ContentManager> content,
-        std::shared_ptr<Runtime> runtime);
+        const std::shared_ptr<Runtime>& runtime);
     ~ImportScript();
-    void processCdsObject(std::shared_ptr<CdsObject> obj, std::string rootpath);
+    void processCdsObject(const std::shared_ptr<CdsObject>& obj, const std::string& rootpath);
     virtual script_class_t whoami() override { return S_IMPORT; }
 };
 

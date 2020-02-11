@@ -29,8 +29,9 @@
 
 /// \file file_request_handler.cc
 
-#include <sys/stat.h>
 #include <filesystem>
+#include <sys/stat.h>
+#include <utility>
 namespace fs = std::filesystem;
 
 #include "iohandler/file_io_handler.h"
@@ -54,10 +55,10 @@ FileRequestHandler::FileRequestHandler(std::shared_ptr<ConfigManager> config,
     std::shared_ptr<ContentManager> content,
     std::shared_ptr<UpdateManager> updateManager, std::shared_ptr<web::SessionManager> sessionManager,
     UpnpXMLBuilder* xmlBuilder)
-    : RequestHandler(config, storage)
-    , content(content)
-    , updateManager(updateManager)
-    , sessionManager(sessionManager)
+    : RequestHandler(std::move(config), std::move(storage))
+    , content(std::move(content))
+    , updateManager(std::move(updateManager))
+    , sessionManager(std::move(sessionManager))
     , xmlBuilder(xmlBuilder)
 {
 }

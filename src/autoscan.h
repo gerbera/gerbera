@@ -68,13 +68,13 @@ public:
     ///
     /// \param dir AutoscanDirectory to add to the list.
     /// \return scanID of the newly added AutoscanDirectory
-    int add(std::shared_ptr<AutoscanDirectory> dir);
+    int add(const std::shared_ptr<AutoscanDirectory>& dir);
 
-    void addList(std::shared_ptr<AutoscanList> list);
+    void addList(const std::shared_ptr<AutoscanList>& list);
 
     std::shared_ptr<AutoscanDirectory> get(size_t id);
 
-    std::shared_ptr<AutoscanDirectory> get(std::string location);
+    std::shared_ptr<AutoscanDirectory> get(const std::string& location);
 
     std::shared_ptr<AutoscanDirectory> getByObjectID(int objectID);
 
@@ -88,13 +88,13 @@ public:
     /// \brief removes the AutoscanDirectory with the given location
     /// \param location the location to remove
     /// \return the scanID, that was removed; if nothing removed: INVALID_SCAN_ID
-    int remove(std::string location);
+    int remove(const std::string& location);
 
     /// \brief removes the AutoscanDirectory if it is a subdirectory of a given location.
     /// \param parent parent directory.
     /// \param persistent also remove persistent directories.
     /// \return AutoscanList of removed directories, where each directory object in the list is a copy and not the original reference.
-    std::shared_ptr<AutoscanList> removeIfSubdir(std::string parent, bool persistent = false);
+    std::shared_ptr<AutoscanList> removeIfSubdir(const std::string& parent, bool persistent = false);
 
     /// \brief Send notification for each directory that is stored in the list.
     ///
@@ -114,7 +114,7 @@ protected:
     using AutoLock = std::lock_guard<std::recursive_mutex>;
 
     std::vector<std::shared_ptr<AutoscanDirectory>> list;
-    int _add(std::shared_ptr<AutoscanDirectory> dir);
+    int _add(const std::shared_ptr<AutoscanDirectory>& dir);
 };
 
 /// \brief Provides information about one autoscan directory.
@@ -216,16 +216,16 @@ public:
     }
 
     /// \brief copies all properties to another object
-    void copyTo(std::shared_ptr<AutoscanDirectory> copy);
+    void copyTo(const std::shared_ptr<AutoscanDirectory>& copy);
 
     /// \brief Get the timer notify parameter associated with this directory.
     std::shared_ptr<Timer::Parameter> getTimerParameter();
 
     /* helpers for autoscan stuff */
     static std::string mapScanmode(ScanMode scanmode);
-    static ScanMode remapScanmode(std::string scanmode);
+    static ScanMode remapScanmode(const std::string& scanmode);
     static std::string mapScanlevel(ScanLevel scanlevel);
-    static ScanLevel remapScanlevel(std::string scanlevel);
+    static ScanLevel remapScanlevel(const std::string& scanlevel);
 
 protected:
     fs::path location;

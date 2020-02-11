@@ -178,7 +178,7 @@ typedef enum {
 class ConfigManager {
 public:
     ConfigManager(fs::path filename,
-        fs::path userhome, fs::path config_dir,
+        const fs::path& userhome, const fs::path& config_dir,
         fs::path prefix_dir, fs::path magic_file,
         std::string ip, std::string interface, int port,
         bool debug_logging);
@@ -187,7 +187,7 @@ public:
     /// \brief Returns the name of the config file that was used to launch the server.
     inline fs::path getConfigFilename() { return filename; }
 
-    void load(fs::path filename, fs::path userHome);
+    void load(const fs::path& filename, const fs::path& userHome);
 
     /// \brief returns a config option of type std::string
     /// \param option option to retrieve.
@@ -221,7 +221,7 @@ public:
 
     /// \brief Creates a html file that is a redirector to the current server i
     /// instance
-    void writeBookmark(std::string ip, std::string port);
+    void writeBookmark(const std::string& ip, const std::string& port);
     void emptyBookmark();
 
 protected:
@@ -293,13 +293,13 @@ protected:
     ///
     /// This function will create a dictionary with the following
     /// key:value paris: "1":"2", "3":"4"
-    std::map<std::string,std::string> createDictionaryFromNode(const pugi::xml_node& element,
-        std::string nodeName, std::string keyAttr, std::string valAttr, bool tolower = false);
+    std::map<std::string, std::string> createDictionaryFromNode(const pugi::xml_node& element,
+        const std::string& nodeName, const std::string& keyAttr, const std::string& valAttr, bool tolower = false);
 
     /// \brief Creates an array of AutoscanDirectory objects from a XML nodeset.
     /// \param element starting element of the nodeset.
     /// \param scanmode add only directories with the specified scanmode to the array
-    std::shared_ptr<AutoscanList> createAutoscanListFromNode(std::shared_ptr<Storage> storage, const pugi::xml_node& element,
+    std::shared_ptr<AutoscanList> createAutoscanListFromNode(const std::shared_ptr<Storage>& storage, const pugi::xml_node& element,
         ScanMode scanmode);
 
     /// \brief Creates ab aray of TranscodingProfile objects from an XML
@@ -320,7 +320,7 @@ protected:
     /// <some-section>
     ///
     /// This function will create an array like that: ["data", "otherdata"]
-    std::vector<std::string> createArrayFromNode(const pugi::xml_node& element, std::string nodeName, std::string attrName);
+    std::vector<std::string> createArrayFromNode(const pugi::xml_node& element, const std::string& nodeName, const std::string& attrName);
 
     void dumpOptions();
 };

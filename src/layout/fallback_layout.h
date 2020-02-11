@@ -57,16 +57,16 @@ public:
     virtual ~FallbackLayout();
 #endif
 protected:
-    void add(std::shared_ptr<CdsObject> obj, int parentID, bool use_ref = true);
+    void add(const std::shared_ptr<CdsObject>& obj, int parentID, bool use_ref = true);
     std::string esc(std::string str);
-    void addVideo(std::shared_ptr<CdsObject> obj, fs::path rootpath);
-    void addImage(std::shared_ptr<CdsObject> obj, fs::path rootpath);
-    void addAudio(std::shared_ptr<CdsObject> obj);
+    void addVideo(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath);
+    void addImage(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath);
+    void addAudio(const std::shared_ptr<CdsObject>& obj);
 #ifdef SOPCAST
-    void addSopCast(std::shared_ptr<CdsObject> obj);
+    void addSopCast(const std::shared_ptr<CdsObject>& obj);
 #endif
 #ifdef ATRAILERS
-    void addATrailers(std::shared_ptr<CdsObject> obj);
+    void addATrailers(const std::shared_ptr<CdsObject>& obj);
 #endif
 
     std::shared_ptr<ConfigManager> config;

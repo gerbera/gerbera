@@ -38,7 +38,7 @@
 
 OnlineServiceHelper::OnlineServiceHelper() = default;
 
-std::string OnlineServiceHelper::resolveURL(std::shared_ptr<CdsItemExternalURL> item)
+std::string OnlineServiceHelper::resolveURL(const std::shared_ptr<CdsItemExternalURL>& item)
 {
     if (!item->getFlag(OBJECT_FLAG_ONLINE_SERVICE))
         throw std::runtime_error("The given item does not belong to an online service");

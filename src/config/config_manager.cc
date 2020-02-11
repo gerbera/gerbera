@@ -44,6 +44,7 @@ namespace fs = std::filesystem;
 #if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE)
 #include <clocale>
 #include <langinfo.h>
+#include <utility>
 #endif
 
 #ifdef HAVE_CURL
@@ -64,15 +65,15 @@ namespace fs = std::filesystem;
 bool ConfigManager::debug_logging = false;
 
 ConfigManager::ConfigManager(fs::path filename,
-    fs::path userhome, fs::path config_dir,
+    const fs::path& userhome, const fs::path& config_dir,
     fs::path prefix_dir, fs::path magic_file,
     std::string ip, std::string interface, int port,
     bool debug_logging)
-    :filename(filename)
-    , prefix_dir(prefix_dir)
-    , magic_file(magic_file)
-    , ip(ip)
-    , interface(interface)
+    : filename(filename)
+    , prefix_dir(std::move(prefix_dir))
+    , magic_file(std::move(magic_file))
+    , ip(std::move(ip))
+    , interface(std::move(interface))
     , port(port)
 {
     this->debug_logging = debug_logging;
@@ -134,8 +135,7 @@ ConfigManager::~ConfigManager()
 #define NEW_TRANSCODING_PROFILELIST_OPTION(optval) trlist_opt = std::make_shared<TranscodingProfileListOption>(optval);
 #define SET_TRANSCODING_PROFILELIST_OPTION(opttype) options->at(opttype) = trlist_opt;
 
-
-void ConfigManager::load(fs::path filename, fs::path userHome)
+void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 {
     std::string temp;
     int temp_int;
@@ -1297,7 +1297,7 @@ int ConfigManager::getIntOption(std::string xpath, int def)
 {
     std::string sDef;
     sDef = std::to_string(def);
-    std::string sVal = getOption(xpath, sDef);
+    std::string sVal = getOption(std::move(xpath), sDef);
     return std::stoi(sVal);
 }
 
@@ -1320,7 +1320,7 @@ std::string ConfigManager::getOption(std::string xpath)
 
 int ConfigManager::getIntOption(std::string xpath)
 {
-    std::string sVal = getOption(xpath);
+    std::string sVal = getOption(std::move(xpath));
     return std::stoi(sVal);
 }
 
@@ -1361,7 +1361,7 @@ fs::path ConfigManager::resolvePath(fs::path path, bool isFile, bool exists)
     return path;
 }
 
-void ConfigManager::writeBookmark(std::string ip, std::string port)
+void ConfigManager::writeBookmark(const std::string& ip, const std::string& port)
 {
     std::string data;
     if (!getBoolOption(CFG_SERVER_UI_ENABLED)) {
@@ -1384,8 +1384,8 @@ void ConfigManager::emptyBookmark()
     writeTextFile(path, data);;
 }
 
-std::map<std::string,std::string> ConfigManager::createDictionaryFromNode(const pugi::xml_node& element,
-    std::string nodeName, std::string keyAttr, std::string valAttr, bool tolower)
+std::map<std::string, std::string> ConfigManager::createDictionaryFromNode(const pugi::xml_node& element,
+    const std::string& nodeName, const std::string& keyAttr, const std::string& valAttr, bool tolower)
 {
     std::map<std::string,std::string> dict;
 
@@ -1725,7 +1725,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
     return list;
 }
 
-std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNode(std::shared_ptr<Storage> storage, const pugi::xml_node& element,
+std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNode(const std::shared_ptr<Storage>& storage, const pugi::xml_node& element,
     ScanMode scanmode)
 {
     auto list = std::make_shared<AutoscanList>(storage);
@@ -1858,7 +1858,7 @@ void ConfigManager::dumpOptions()
 #endif
 }
 
-std::vector<std::string> ConfigManager::createArrayFromNode(const pugi::xml_node& element, std::string nodeName, std::string attrName)
+std::vector<std::string> ConfigManager::createArrayFromNode(const pugi::xml_node& element, const std::string& nodeName, const std::string& attrName)
 {
     std::vector<std::string> arr;
 

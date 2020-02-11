@@ -31,7 +31,9 @@
 /// \brief Definitions of the Transcoding classes.
 
 #include "transcoding.h"
+
 #include "util/tools.h"
+#include <utility>
 
 TranscodingProfile::TranscodingProfile()
 {
@@ -52,7 +54,7 @@ TranscodingProfile::TranscodingProfile()
 
 TranscodingProfile::TranscodingProfile(transcoding_type_t tr_type, std::string name)
 {
-    this->name = name;
+    this->name = std::move(name);
     this->tr_type = tr_type;
     theora = false;
     first_resource = false;
@@ -76,9 +78,9 @@ void TranscodingProfile::setBufferOptions(size_t bs, size_t cs, size_t ifs)
     initial_fill_size = ifs;
 }
 
-void TranscodingProfile::addAttribute(std::string name, std::string value)
+void TranscodingProfile::addAttribute(const std::string& name, std::string value)
 {
-    attributes[name] = value;
+    attributes[name] = std::move(value);
 }
 
 std::map<std::string, std::string> TranscodingProfile::getAttributes()
@@ -88,7 +90,7 @@ std::map<std::string, std::string> TranscodingProfile::getAttributes()
 
 void TranscodingProfile::setAVIFourCCList(std::vector<std::string> list, avi_fourcc_listmode_t mode)
 {
-    fourcc_list = list;
+    fourcc_list = std::move(list);
     fourcc_mode = mode;
 }
 
@@ -100,7 +102,7 @@ std::vector<std::string> TranscodingProfile::getAVIFourCCList()
 
 TranscodingProfileList::TranscodingProfileList() = default;
 
-void TranscodingProfileList::add(std::string sourceMimeType, std::shared_ptr<TranscodingProfile> prof)
+void TranscodingProfileList::add(const std::string& sourceMimeType, const std::shared_ptr<TranscodingProfile>& prof)
 {
     std::shared_ptr<TranscodingProfileMap> inner;
 
@@ -114,7 +116,7 @@ void TranscodingProfileList::add(std::string sourceMimeType, std::shared_ptr<Tra
     list[sourceMimeType] = inner;
 }
 
-std::shared_ptr<TranscodingProfileMap> TranscodingProfileList::get(std::string sourceMimeType)
+std::shared_ptr<TranscodingProfileMap> TranscodingProfileList::get(const std::string& sourceMimeType)
 {
     auto it = list.find(sourceMimeType);
     if (it != list.end())
@@ -122,7 +124,7 @@ std::shared_ptr<TranscodingProfileMap> TranscodingProfileList::get(std::string s
     return nullptr;
 }
 
-std::shared_ptr<TranscodingProfile> TranscodingProfileList::getByName(std::string name)
+std::shared_ptr<TranscodingProfile> TranscodingProfileList::getByName(const std::string& name)
 {
     for (const auto& it : list) {
         auto inner = it.second;

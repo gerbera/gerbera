@@ -65,28 +65,28 @@ class Script
 {
 public:
     virtual ~Script();
-    
-    std::string getProperty(std::string name);
-    int getBoolProperty(std::string name);
-    int getIntProperty(std::string name, int def);
-    
-    void setProperty(std::string name, std::string value);
-    void setIntProperty(std::string name, int value);
-    
-    void defineFunction(std::string name, duk_c_function function, uint32_t numParams);
+
+    std::string getProperty(const std::string& name);
+    int getBoolProperty(const std::string& name);
+    int getIntProperty(const std::string& name, int def);
+
+    void setProperty(const std::string& name, const std::string& value);
+    void setIntProperty(const std::string& name, int value);
+
+    void defineFunction(const std::string& name, duk_c_function function, uint32_t numParams);
     void defineFunctions(duk_function_list_entry *functions);
-    void load(std::string scriptPath);
+    void load(const std::string& scriptPath);
     void load(std::string scriptText, std::string scriptPath);
-    
-    std::shared_ptr<CdsObject> dukObject2cdsObject(std::shared_ptr<CdsObject> pcd);
-    void cdsObject2dukObject(std::shared_ptr<CdsObject> obj);
-    
+
+    std::shared_ptr<CdsObject> dukObject2cdsObject(const std::shared_ptr<CdsObject>& pcd);
+    void cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj);
+
     virtual script_class_t whoami() = 0;
 
     std::shared_ptr<CdsObject> getProcessedObject();
 
-    std::string convertToCharset(std::string str, charset_convert_t chr);
-    
+    std::string convertToCharset(const std::string& str, charset_convert_t chr);
+
     static Script *getContextScript(duk_context *ctx);
 
     std::shared_ptr<ConfigManager> getConfig() { return config; }
@@ -94,10 +94,10 @@ public:
     std::shared_ptr<ContentManager> getContent() { return content; }
 
 protected:
-    Script(std::shared_ptr<ConfigManager> config,
+    Script(const std::shared_ptr<ConfigManager>& config,
         std::shared_ptr<Storage> storage,
         std::shared_ptr<ContentManager> content,
-        std::shared_ptr<Runtime> runtime, std::string name);
+        const std::shared_ptr<Runtime>& runtime, const std::string& name);
     void execute();
     int gc_counter;
 
@@ -115,7 +115,7 @@ protected:
 
 private:
     std::string name;
-    void _load(std::string scriptPath);
+    void _load(const std::string& scriptPath);
     void _execute();
     std::unique_ptr<StringConverter> _p2i;
     std::unique_ptr<StringConverter> _j2i;

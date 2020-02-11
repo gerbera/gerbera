@@ -32,10 +32,12 @@
 #ifdef HAVE_JS
 
 #include "script.h"
-#include "util/tools.h"
-#include "metadata/metadata_handler.h"
-#include "js_functions.h"
+
 #include "config/config_manager.h"
+#include "js_functions.h"
+#include "metadata/metadata_handler.h"
+#include "util/tools.h"
+#include <utility>
 #ifdef ONLINE_SERVICES
     #include "onlineservice/online_service.h"
 #endif
@@ -56,7 +58,7 @@ static duk_function_list_entry js_global_functions[] =
     { nullptr,          nullptr,         0 },
 };
 
-std::string Script::getProperty(std::string name)
+std::string Script::getProperty(const std::string& name)
 {
     std::string ret;
     if (!duk_is_object_coercible(ctx, -1))
@@ -72,7 +74,7 @@ std::string Script::getProperty(std::string name)
     return ret;
 }
 
-int Script::getBoolProperty(std::string name)
+int Script::getBoolProperty(const std::string& name)
 {
     int ret;
     if (!duk_is_object_coercible(ctx, -1))
@@ -88,7 +90,7 @@ int Script::getBoolProperty(std::string name)
     return ret;
 }
 
-int Script::getIntProperty(std::string name, int def)
+int Script::getIntProperty(const std::string& name, int def)
 {
     int ret;
     if (!duk_is_object_coercible(ctx, -1))
@@ -104,13 +106,13 @@ int Script::getIntProperty(std::string name, int def)
     return ret;
 }
 
-void Script::setProperty(std::string name, std::string value)
+void Script::setProperty(const std::string& name, const std::string& value)
 {
     duk_push_string(ctx, value.c_str());
     duk_put_prop_string(ctx, -2, name.c_str());
 }
 
-void Script::setIntProperty(std::string name, int value)
+void Script::setIntProperty(const std::string& name, int value)
 {
     duk_push_int(ctx, value);
     duk_put_prop_string(ctx, -2, name.c_str());
@@ -118,13 +120,13 @@ void Script::setIntProperty(std::string name, int value)
 
 /* **************** */
 
-Script::Script(std::shared_ptr<ConfigManager> config,
+Script::Script(const std::shared_ptr<ConfigManager>& config,
     std::shared_ptr<Storage> storage,
     std::shared_ptr<ContentManager> content,
-    std::shared_ptr<Runtime> runtime, std::string name)
+    const std::shared_ptr<Runtime>& runtime, const std::string& name)
     : config(config)
-    , storage(storage)
-    , content(content)
+    , storage(std::move(storage))
+    , content(std::move(content))
     , runtime(runtime)
     , name(name)
 {
@@ -241,7 +243,7 @@ Script *Script::getContextScript(duk_context *ctx)
     return self;
 }
 
-void Script::defineFunction(std::string name, duk_c_function function, uint32_t numParams)
+void Script::defineFunction(const std::string& name, duk_c_function function, uint32_t numParams)
 {
     duk_push_c_function(ctx, function, numParams);
     duk_put_global_string(ctx, name.c_str());
@@ -254,7 +256,7 @@ void Script::defineFunctions(duk_function_list_entry *functions)
     duk_pop(ctx);
 }
 
-void Script::_load(std::string scriptPath)
+void Script::_load(const std::string& scriptPath)
 {
     std::string scriptText = readTextFile(scriptPath);
 
@@ -276,11 +278,11 @@ void Script::_load(std::string scriptPath)
         throw std::runtime_error("Scripting: failed to compile " + scriptPath);
 }
 
-void Script::load(std::string scriptPath)
+void Script::load(const std::string& scriptPath)
 {
     Runtime::AutoLock lock(runtime->getMutex());
     duk_push_thread_stash(ctx, ctx);
-    _load(scriptPath);
+    _load(std::move(scriptPath));
     duk_put_prop_string(ctx, -2, "script");
     duk_pop(ctx);
 }
@@ -305,7 +307,7 @@ void Script::execute()
     _execute();
 }
 
-std::shared_ptr<CdsObject> Script::dukObject2cdsObject(std::shared_ptr<CdsObject> pcd)
+std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<CdsObject>& pcd)
 {
     std::string val;
     int objectType;
@@ -540,7 +542,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(std::shared_ptr<CdsObject
     return obj;
 }
 
-void Script::cdsObject2dukObject(std::shared_ptr<CdsObject> obj)
+void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
 {
     std::string val;
     int i;
@@ -688,7 +690,7 @@ void Script::cdsObject2dukObject(std::shared_ptr<CdsObject> obj)
     }
 }
 
-std::string Script::convertToCharset(std::string str, charset_convert_t chr)
+std::string Script::convertToCharset(const std::string& str, charset_convert_t chr)
 {
     switch (chr)
     {

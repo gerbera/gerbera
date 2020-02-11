@@ -31,6 +31,7 @@
 
 #include <memory>
 #include <unordered_set>
+#include <utility>
 
 #include "config/config_manager.h"
 #include "session_manager.h"
@@ -55,13 +56,13 @@ Session::Session(long timeout)
     access();
 }
 
-void Session::put(std::string key, std::string value)
+void Session::put(const std::string& key, std::string value)
 {
     AutoLock lock(mutex);
-    dict[key] = value;
+    dict[key] = std::move(value);
 }
 
-std::string Session::get(std::string key)
+std::string Session::get(const std::string& key)
 {
     AutoLock lock(mutex);
     return getValueOrDefault(dict, key);
@@ -135,9 +136,9 @@ void Session::clearUpdateIDs()
     updateAll = false;
 }
 
-SessionManager::SessionManager(std::shared_ptr<ConfigManager> config, std::shared_ptr<Timer> timer)
+SessionManager::SessionManager(const std::shared_ptr<ConfigManager>& config, std::shared_ptr<Timer> timer)
 {
-    this->timer = timer;
+    this->timer = std::move(timer);
     accounts = config->getDictionaryOption(CFG_SERVER_UI_ACCOUNT_LIST);
     timerAdded = false;
 }
@@ -161,7 +162,7 @@ std::shared_ptr<Session> SessionManager::createSession(long timeout)
     return newSession;
 }
 
-std::shared_ptr<Session> SessionManager::getSession(std::string sessionID, bool doLock)
+std::shared_ptr<Session> SessionManager::getSession(const std::string& sessionID, bool doLock)
 {
     unique_lock<decltype(mutex)> lock(mutex, std::defer_lock);
     if (doLock)
@@ -173,7 +174,7 @@ std::shared_ptr<Session> SessionManager::getSession(std::string sessionID, bool 
     return nullptr;
 }
 
-void SessionManager::removeSession(std::string sessionID)
+void SessionManager::removeSession(const std::string& sessionID)
 {
     AutoLock lock(mutex);
 
@@ -190,7 +191,7 @@ void SessionManager::removeSession(std::string sessionID)
     }
 }
 
-std::string SessionManager::getUserPassword(std::string user)
+std::string SessionManager::getUserPassword(const std::string& user)
 {
     return getValueOrDefault(accounts, user);
 }

@@ -49,7 +49,7 @@ public:
     /// \brief Initializes the internal buffer.
     /// \param buffer all operations will be done on this buffer.
     MemIOHandler(const void* buffer, int length);
-    explicit MemIOHandler(std::string str);
+    explicit MemIOHandler(const std::string& str);
     virtual ~MemIOHandler();
 
     ///

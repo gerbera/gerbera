@@ -33,11 +33,12 @@
 
 #include "server.h"
 #include "storage/storage.h"
-#include "util/tools.h"
 #include "upnp_cds.h"
+#include "util/tools.h"
 #include <chrono>
 #include <csignal>
 #include <sys/types.h>
+#include <utility>
 
 /* following constants in milliseconds */
 #define SPEC_INTERVAL 2000
@@ -50,8 +51,8 @@
 using namespace std;
 
 UpdateManager::UpdateManager(std::shared_ptr<Storage> storage, std::shared_ptr<Server> server)
-    : storage(storage)
-    , server(server)
+    : storage(std::move(storage))
+    , server(std::move(server))
     , objectIDHash(make_unique<unordered_set<int>>())
     , shutdownFlag(false)
     , flushPolicy(FLUSH_SPEC)

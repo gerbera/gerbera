@@ -49,7 +49,7 @@ public:
     /// \param path file or directory to monitor.
     /// \param events inotify event mask
     /// \return watch descriptor or a negative value on error
-    int addWatch(fs::path path, int events);
+    int addWatch(const fs::path& path, int events);
 
     /// \brief Removes a previously added file or directory from the watch list
     /// \param wd watch descriptor that was returned by the add_watch function

@@ -32,10 +32,11 @@
 #include <cerrno>
 #include <cstring>
 #include <dirent.h>
+#include <filesystem>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <filesystem>
+#include <utility>
 namespace fs = std::filesystem;
 
 #include "config/config_manager.h"
@@ -81,18 +82,18 @@ struct magic_set* ms = nullptr;
 
 using namespace std;
 
-ContentManager::ContentManager(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
+ContentManager::ContentManager(const std::shared_ptr<ConfigManager>& config, const std::shared_ptr<Storage>& storage,
     std::shared_ptr<UpdateManager> update_manager, std::shared_ptr<web::SessionManager> session_manager,
     std::shared_ptr<Timer> timer, std::shared_ptr<TaskProcessor> task_processor,
     std::shared_ptr<Runtime> scripting_runtime, std::shared_ptr<LastFm> last_fm)
     : config(config)
     , storage(storage)
-    , update_manager(update_manager)
-    , session_manager(session_manager)
-    , timer(timer)
-    , task_processor(task_processor)
-    , scripting_runtime(scripting_runtime)
-    , last_fm(last_fm)
+    , update_manager(std::move(update_manager))
+    , session_manager(std::move(session_manager))
+    , timer(std::move(timer))
+    , task_processor(std::move(task_processor))
+    , scripting_runtime(std::move(scripting_runtime))
+    , last_fm(std::move(last_fm))
 {
     ignore_unknown_extensions = false;
     extension_map_case_sensitive = false;
@@ -275,13 +276,13 @@ void ContentManager::init()
 
 ContentManager::~ContentManager() { log_debug("ContentManager destroyed"); }
 
-void ContentManager::registerExecutor(std::shared_ptr<Executor> exec)
+void ContentManager::registerExecutor(const std::shared_ptr<Executor>& exec)
 {
     AutoLock lock(mutex);
     process_list.push_back(exec);
 }
 
-void ContentManager::unregisterExecutor(std::shared_ptr<Executor> exec)
+void ContentManager::unregisterExecutor(const std::shared_ptr<Executor>& exec)
 {
     // when shutting down we will kill the transcoding processes,
     // which if given enough time will get a close in the io handler and
@@ -421,7 +422,7 @@ std::deque<std::shared_ptr<GenericTask>> ContentManager::getTasklist()
     return taskList;
 }
 
-void ContentManager::addVirtualItem(std::shared_ptr<CdsObject> obj, bool allow_fifo)
+void ContentManager::addVirtualItem(const std::shared_ptr<CdsObject>& obj, bool allow_fifo)
 {
     obj->validate();
     fs::path path = obj->getLocation();
@@ -444,7 +445,7 @@ void ContentManager::addVirtualItem(std::shared_ptr<CdsObject> obj, bool allow_f
     addObject(obj);
 }
 
-int ContentManager::_addFile(fs::path path, fs::path rootPath, bool recursive, bool hidden, std::shared_ptr<CMAddFileTask> task)
+int ContentManager::_addFile(const fs::path& path, fs::path rootPath, bool recursive, bool hidden, const std::shared_ptr<CMAddFileTask>& task)
 {
     if (!hidden) {
         if (path.is_relative())
@@ -520,7 +521,7 @@ void ContentManager::_removeObject(int objectID, bool all)
 int ContentManager::ensurePathExistence(fs::path path)
 {
     int updateID;
-    int containerID = storage->ensurePathExistence(path, &updateID);
+    int containerID = storage->ensurePathExistence(std::move(path), &updateID);
     if (updateID != INVALID_OBJECT_ID) {
         update_manager->containerChanged(updateID);
         session_manager->containerChangedUI(updateID);
@@ -528,7 +529,7 @@ int ContentManager::ensurePathExistence(fs::path path)
     return containerID;
 }
 
-void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scanMode, ScanLevel scanLevel, std::shared_ptr<GenericTask> task)
+void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scanMode, ScanLevel scanLevel, const std::shared_ptr<GenericTask>& task)
 {
     log_debug("start");
     int ret;
@@ -724,7 +725,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
 }
 
 /* scans the given directory and adds everything recursively */
-void ContentManager::addRecursive(fs::path path, bool hidden, std::shared_ptr<CMAddFileTask> task)
+void ContentManager::addRecursive(const fs::path& path, bool hidden, const std::shared_ptr<CMAddFileTask>& task)
 {
     if (!hidden) {
         log_debug("Checking path {}", path.c_str());
@@ -945,7 +946,7 @@ void ContentManager::updateObject(int objectID, const std::map<std::string,std::
     }
 }
 
-void ContentManager::addObject(std::shared_ptr<CdsObject> obj)
+void ContentManager::addObject(const std::shared_ptr<CdsObject>& obj)
 {
     obj->validate();
 
@@ -973,12 +974,12 @@ void ContentManager::addObject(std::shared_ptr<CdsObject> obj)
         session_manager->containerChangedUI(obj->getParentID());
 }
 
-void ContentManager::addContainer(int parentID, std::string title, std::string upnpClass)
+void ContentManager::addContainer(int parentID, std::string title, const std::string& upnpClass)
 {
-    addContainerChain(storage->buildContainerPath(parentID, escape(title, VIRTUAL_CONTAINER_ESCAPE, VIRTUAL_CONTAINER_SEPARATOR)), upnpClass);
+    addContainerChain(storage->buildContainerPath(parentID, escape(std::move(title), VIRTUAL_CONTAINER_ESCAPE, VIRTUAL_CONTAINER_SEPARATOR)), std::move(upnpClass));
 }
 
-int ContentManager::addContainerChain(std::string chain, std::string lastClass, int lastRefID, const std::map<std::string,std::string>& lastMetadata)
+int ContentManager::addContainerChain(const std::string& chain, const std::string& lastClass, int lastRefID, const std::map<std::string, std::string>& lastMetadata)
 {
     int updateID = INVALID_OBJECT_ID;
     int containerID;
@@ -997,7 +998,7 @@ int ContentManager::addContainerChain(std::string chain, std::string lastClass, 
     return containerID;
 }
 
-void ContentManager::updateObject(std::shared_ptr<CdsObject> obj, bool send_updates)
+void ContentManager::updateObject(const std::shared_ptr<CdsObject>& obj, bool send_updates)
 {
     obj->validate();
 
@@ -1030,7 +1031,7 @@ std::shared_ptr<CdsObject> ContentManager::convertObject(std::shared_ptr<CdsObje
 }
 
 // returns nullptr if file ignored due to configuration
-std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(fs::path path, bool magic, bool allow_fifo)
+std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::path& path, bool magic, bool allow_fifo)
 {
     struct stat statbuf;
     int ret = stat(path.c_str(), &statbuf);
@@ -1119,7 +1120,7 @@ std::string ContentManager::extension2mimetype(std::string extension)
     return getValueOrDefault(extension_mimetype_map, extension);
 }
 
-std::string ContentManager::mimetype2upnpclass(std::string mimeType)
+std::string ContentManager::mimetype2upnpclass(const std::string& mimeType)
 {
     std::string upnpClass = getValueOrDefault(mimetype_upnpclass_map, mimeType);
     if (!upnpClass.empty())
@@ -1235,7 +1236,7 @@ void* ContentManager::staticThreadProc(void* arg)
     return nullptr;
 }
 
-void ContentManager::addTask(std::shared_ptr<GenericTask> task, bool lowPriority)
+void ContentManager::addTask(const std::shared_ptr<GenericTask>& task, bool lowPriority)
 {
     AutoLock lock(mutex);
 
@@ -1248,7 +1249,7 @@ void ContentManager::addTask(std::shared_ptr<GenericTask> task, bool lowPriority
     signal();
 }
 
-int ContentManager::addFile(fs::path path, bool recursive, bool async, bool hidden, bool lowPriority, bool cancellable)
+int ContentManager::addFile(const fs::path& path, bool recursive, bool async, bool hidden, bool lowPriority, bool cancellable)
 {
     fs::path rootpath;
     if (fs::is_directory(path))
@@ -1256,13 +1257,13 @@ int ContentManager::addFile(fs::path path, bool recursive, bool async, bool hidd
     return addFileInternal(path, rootpath, recursive, async, hidden, lowPriority, 0, cancellable);
 }
 
-int ContentManager::addFile(fs::path path, fs::path rootpath, bool recursive, bool async, bool hidden, bool lowPriority, bool cancellable)
+int ContentManager::addFile(const fs::path& path, const fs::path& rootpath, bool recursive, bool async, bool hidden, bool lowPriority, bool cancellable)
 {
-    return addFileInternal(path, rootpath, recursive, async, hidden, lowPriority, 0, cancellable);
+    return addFileInternal(std::move(path), std::move(rootpath), recursive, async, hidden, lowPriority, 0, cancellable);
 }
 
 int ContentManager::addFileInternal(
-    fs::path path, fs::path rootpath, bool recursive, bool async, bool hidden, bool lowPriority, unsigned int parentTaskID, bool cancellable)
+    const fs::path& path, const fs::path& rootpath, bool recursive, bool async, bool hidden, bool lowPriority, unsigned int parentTaskID, bool cancellable)
 {
     if (async) {
         auto self = shared_from_this();
@@ -1298,7 +1299,7 @@ void ContentManager::fetchOnlineContent(service_type_t serviceType, bool lowPrio
     addTask(task, lowPriority);
 }
 
-void ContentManager::cleanupOnlineServiceObjects(std::shared_ptr<OnlineService> service)
+void ContentManager::cleanupOnlineServiceObjects(const std::shared_ptr<OnlineService>& service)
 {
     log_debug("Finished fetch cycle for service: {}", service->getServiceName().c_str());
 
@@ -1331,7 +1332,7 @@ void ContentManager::cleanupOnlineServiceObjects(std::shared_ptr<OnlineService> 
 
 #endif
 
-void ContentManager::invalidateAddTask(std::shared_ptr<GenericTask> t, fs::path path)
+void ContentManager::invalidateAddTask(const std::shared_ptr<GenericTask>& t, const fs::path& path)
 {
     if (t->getType() == AddFile) {
         auto add_task = std::static_pointer_cast<CMAddFileTask>(t);
@@ -1504,7 +1505,7 @@ std::vector<std::shared_ptr<AutoscanDirectory>> ContentManager::getAutoscanDirec
     return all;
 }
 
-std::shared_ptr<AutoscanDirectory> ContentManager::getAutoscanDirectory(std::string location)
+std::shared_ptr<AutoscanDirectory> ContentManager::getAutoscanDirectory(const std::string& location)
 {
     // \todo change this when more scanmodes become available
     std::shared_ptr<AutoscanDirectory> dir = autoscan_timed->get(location);
@@ -1568,7 +1569,7 @@ void ContentManager::removeAutoscanDirectory(int objectID)
 #endif
 }
 
-void ContentManager::removeAutoscanDirectory(std::string location)
+void ContentManager::removeAutoscanDirectory(const std::string& location)
 {
     /// \todo change this when more scanmodes become avaiable
     std::shared_ptr<AutoscanDirectory> adir = autoscan_timed->get(location);
@@ -1604,7 +1605,7 @@ void ContentManager::handlePersistentAutoscanRecreate(int scanID, ScanMode scanM
     storage->updateAutoscanDirectory(adir);
 }
 
-void ContentManager::setAutoscanDirectory(std::shared_ptr<AutoscanDirectory> dir)
+void ContentManager::setAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>& dir)
 {
     std::shared_ptr<AutoscanDirectory> original;
 
@@ -1714,7 +1715,7 @@ void ContentManager::setAutoscanDirectory(std::shared_ptr<AutoscanDirectory> dir
         session_manager->containerChangedUI(copy->getObjectID());
 }
 
-void ContentManager::triggerPlayHook(std::shared_ptr<CdsObject> obj)
+void ContentManager::triggerPlayHook(const std::shared_ptr<CdsObject>& obj)
 {
     log_debug("start");
 
@@ -1743,9 +1744,9 @@ void ContentManager::triggerPlayHook(std::shared_ptr<CdsObject> obj)
 CMAddFileTask::CMAddFileTask(std::shared_ptr<ContentManager> content,
     fs::path path, fs::path rootpath, bool recursive, bool hidden, bool cancellable)
     : GenericTask(ContentManagerTask)
-    , content(content)
-    , path(path)
-    , rootpath(rootpath)
+    , content(std::move(content))
+    , path(std::move(path))
+    , rootpath(std::move(rootpath))
     , recursive(recursive)
     , hidden(hidden)
 {
@@ -1767,7 +1768,7 @@ void CMAddFileTask::run()
 CMRemoveObjectTask::CMRemoveObjectTask(std::shared_ptr<ContentManager> content,
     int objectID, bool all)
     : GenericTask(ContentManagerTask)
-    , content(content)
+    , content(std::move(content))
     , objectID(objectID)
     , all(all)
 {
@@ -1783,7 +1784,7 @@ void CMRemoveObjectTask::run()
 CMRescanDirectoryTask::CMRescanDirectoryTask(std::shared_ptr<ContentManager> content,
     int objectID, int scanID, ScanMode scanMode, bool cancellable)
     : GenericTask(ContentManagerTask)
-    , content(content)
+    , content(std::move(content))
     , objectID(objectID)
     , scanID(scanID)
     , scanMode(scanMode)
@@ -1812,11 +1813,11 @@ CMFetchOnlineContentTask::CMFetchOnlineContentTask(std::shared_ptr<ContentManage
     std::shared_ptr<TaskProcessor> task_processor, std::shared_ptr<Timer> timer,
     std::shared_ptr<OnlineService> service, std::shared_ptr<Layout> layout, bool cancellable, bool unscheduled_refresh)
     : GenericTask(ContentManagerTask)
-    , content(content)
-    , task_processor(task_processor)
-    , timer(timer)
-    , service(service)
-    , layout(layout)
+    , content(std::move(content))
+    , task_processor(std::move(task_processor))
+    , timer(std::move(timer))
+    , service(std::move(service))
+    , layout(std::move(layout))
 {
     this->cancellable = cancellable;
     this->unscheduled_refresh = unscheduled_refresh;

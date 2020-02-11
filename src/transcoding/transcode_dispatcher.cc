@@ -30,15 +30,17 @@
 /// \file transcode_dispatcher.cc
 
 #include "transcode_dispatcher.h"
+
 #include "cds_objects.h"
 #include "common.h"
 #include "transcode_ext_handler.h"
 #include "transcoding.h"
 #include "util/tools.h"
+#include <utility>
 
 TranscodeDispatcher::TranscodeDispatcher(std::shared_ptr<ConfigManager> config,
     std::shared_ptr<ContentManager> content)
-    : TranscodeHandler(config, content)
+    : TranscodeHandler(std::move(config), std::move(content))
 {
 }
 

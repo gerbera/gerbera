@@ -121,7 +121,7 @@ public:
     ///
     /// \param name attribute name
     /// \param value attribute value
-    void addAttribute(std::string name, std::string value);
+    void addAttribute(const std::string& name, std::string value);
 
     std::map<std::string, std::string> getAttributes();
 
@@ -205,11 +205,11 @@ typedef std::map<std::string,std::shared_ptr<TranscodingProfile>> TranscodingPro
 class TranscodingProfileList {
 public:
     TranscodingProfileList();
-    void add(std::string sourceMimeType, std::shared_ptr<TranscodingProfile> prof);
+    void add(const std::string& sourceMimeType, const std::shared_ptr<TranscodingProfile>& prof);
 
-    std::shared_ptr<TranscodingProfileMap> get(std::string sourceMimeType);
+    std::shared_ptr<TranscodingProfileMap> get(const std::string& sourceMimeType);
     std::shared_ptr<TranscodingProfileMap> get(int index);
-    std::shared_ptr<TranscodingProfile> getByName(std::string name);
+    std::shared_ptr<TranscodingProfile> getByName(const std::string& name);
     inline int size() { return list.size(); }
 
 protected:

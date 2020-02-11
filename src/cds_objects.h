@@ -337,18 +337,18 @@ public:
 
     /// \brief Checks if current object has the same resources as obj
     /// \param obj object to check against
-    int resourcesEqual(std::shared_ptr<CdsObject> obj);
+    int resourcesEqual(const std::shared_ptr<CdsObject>& obj);
 
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
     virtual void validate();
 
-    static std::shared_ptr<CdsObject> createObject(std::shared_ptr<Storage> storage, unsigned int objectType);
+    static std::shared_ptr<CdsObject> createObject(const std::shared_ptr<Storage>& storage, unsigned int objectType);
 
     /// \brief Returns the path to the object as it appears in the database tree.
     virtual std::string getVirtualPath() = 0;
 
     static std::string mapObjectType(int objectType);
-    static int remapObjectType(std::string objectType);
+    static int remapObjectType(const std::string& objectType);
 };
 
 /// \brief An Item in the content directory.

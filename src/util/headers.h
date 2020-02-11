@@ -41,7 +41,7 @@ public:
 private:
     std::unique_ptr<std::vector<std::pair<std::string,std::string>>> headers;
     static std::string formatHeader(const std::pair<std::string, std::string>& header, bool crlf);
-    static std::string stripInvalid(std::string value);
+    static std::string stripInvalid(const std::string& value);
 };
 
 #endif //GERBERA_HEADERS_H

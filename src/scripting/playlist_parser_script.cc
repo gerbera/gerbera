@@ -32,10 +32,12 @@
 #ifdef HAVE_JS
 
 #include "playlist_parser_script.h"
-#include "storage/storage.h"
+
 #include "config/config_manager.h"
 #include "content_manager.h"
 #include "js_functions.h"
+#include "storage/storage.h"
+#include <utility>
 
 #define ONE_TEXTLINE_BYTES  1024
 
@@ -95,11 +97,11 @@ js_getCdsObject(duk_context *ctx)
 
 } // extern "C"
 
-PlaylistParserScript::PlaylistParserScript(std::shared_ptr<ConfigManager> config,
+PlaylistParserScript::PlaylistParserScript(const std::shared_ptr<ConfigManager>& config,
     std::shared_ptr<Storage> storage,
     std::shared_ptr<ContentManager> content,
-    std::shared_ptr<Runtime> runtime)
-    : Script(config, storage, content, runtime, "playlist")
+    const std::shared_ptr<Runtime>& runtime)
+    : Script(config, std::move(storage), std::move(content), runtime, "playlist")
 {
     currentHandle = nullptr;
     currentObjectID = INVALID_OBJECT_ID;
@@ -140,7 +142,7 @@ std::string PlaylistParserScript::readln()
     }
 }
 
-void PlaylistParserScript::processPlaylistObject(std::shared_ptr<CdsObject> obj, std::shared_ptr<GenericTask> task)
+void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject>& obj, std::shared_ptr<GenericTask> task)
 {
     if ((currentObjectID != INVALID_OBJECT_ID) || (currentHandle != nullptr) ||
             (currentLine != nullptr))
@@ -153,7 +155,7 @@ void PlaylistParserScript::processPlaylistObject(std::shared_ptr<CdsObject> obj,
         throw std::runtime_error("only allowed for pure items");
     }
 
-    currentTask = task;
+    currentTask = std::move(task);
     currentObjectID = obj->getID();
     currentLine = (char *)MALLOC(ONE_TEXTLINE_BYTES);
     if (!currentLine)

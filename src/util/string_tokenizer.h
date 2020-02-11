@@ -37,8 +37,9 @@
 class StringTokenizer
 {
 public:
-    StringTokenizer(std::string str);
-    std::string nextToken(std::string seps);
+    StringTokenizer(const std::string& str);
+    std::string nextToken(const std::string& seps);
+
 protected:
     std::string str;
     int len;

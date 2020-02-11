@@ -33,16 +33,18 @@
 #ifdef HAVE_LIBEXIF
 
 #include "libexif_handler.h"
+
 #include "config/config_manager.h"
 #include "iohandler/mem_io_handler.h"
 #include "util/tools.h"
+#include <utility>
 
 LibExifHandler::LibExifHandler(std::shared_ptr<ConfigManager> config)
-    : MetadataHandler(config)
+    : MetadataHandler(std::move(config))
 {
 }
 
-static int getTagFromString(std::string tag)
+static int getTagFromString(const std::string& tag)
 {
     if (tag == "EXIF_TAG_INTEROPERABILITY_INDEX")
         return EXIF_TAG_INTEROPERABILITY_INDEX;
@@ -259,7 +261,7 @@ static int getTagFromString(std::string tag)
 char exif_entry_buffer[BUFLEN];
 #define exif_egv(arg) exif_entry_get_value(arg, exif_entry_buffer, BUFLEN)
 
-void LibExifHandler::process_ifd(ExifContent* content, std::shared_ptr<CdsItem> item, const std::unique_ptr<StringConverter>& sc, std::vector<std::string> auxtags)
+void LibExifHandler::process_ifd(ExifContent* content, const std::shared_ptr<CdsItem>& item, const std::unique_ptr<StringConverter>& sc, const std::vector<std::string>& auxtags)
 {
     ExifEntry* e;
     unsigned int i;

@@ -33,15 +33,17 @@
 #if defined(SOPCAST)
 
 #include "sopcast_content_handler.h"
+
 #include "cds_objects.h"
 #include "config/config_manager.h"
 #include "metadata/metadata_handler.h"
 #include "online_service.h"
 #include "util/tools.h"
+#include <utility>
 
 SopCastContentHandler::SopCastContentHandler(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage)
-    : config(config)
-    , storage(storage)
+    : config(std::move(config))
+    , storage(std::move(storage))
 {
 }
 
@@ -129,7 +131,7 @@ std::shared_ptr<CdsObject> SopCastContentHandler::getObject(std::string groupNam
     item->setAuxData(ONLINE_SERVICE_AUX_ID,
         std::to_string(OS_SopCast));
 
-    item->setAuxData(SOPCAST_AUXDATA_GROUP, groupName);
+    item->setAuxData(SOPCAST_AUXDATA_GROUP, std::move(groupName));
 
     std::string temp = channel.attribute("id").as_string();
     if (!string_ok(temp)) {

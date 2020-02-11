@@ -59,8 +59,8 @@ public:
     /// be deleted (will time out)
     Session(long timeout);
 
-    void put(std::string key, std::string value);
-    std::string get(std::string key);
+    void put(const std::string& key, std::string value);
+    std::string get(const std::string& key);
 
     /// \brief Returns the time of last access to the session.
     /// \return pointer to a timespec
@@ -140,7 +140,7 @@ protected:
 
 public:
     /// \brief Constructor, initializes the array.
-    SessionManager(std::shared_ptr<ConfigManager> config, std::shared_ptr<Timer> timer);
+    SessionManager(const std::shared_ptr<ConfigManager>& config, std::shared_ptr<Timer> timer);
     virtual ~SessionManager() override { log_debug("SessionManager destroyed\n"); }
 
     /// \brief Creates a Session with a given timeout.
@@ -150,12 +150,12 @@ public:
     /// \brief Returns the instance to a Session with a given sessionID
     /// \param ID of the Session.
     /// \return intance of the Session with a given ID or nullptr if no session with that ID was found.
-    std::shared_ptr<Session> getSession(std::string sessionID, bool doLock = true);
+    std::shared_ptr<Session> getSession(const std::string& sessionID, bool doLock = true);
 
     /// \brief Removes a session
-    void removeSession(std::string sessionID);
+    void removeSession(const std::string& sessionID);
 
-    std::string getUserPassword(std::string user);
+    std::string getUserPassword(const std::string& user);
 
     /// \brief Is called whenever a container changed in a way,
     /// so that it needs to be redrawn in the tree of the UI.

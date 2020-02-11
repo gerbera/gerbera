@@ -25,6 +25,7 @@ Gerbera - https://gerbera.io/
 
 
 #include <string>
+#include <utility>
 
 #include "common.h"
 #include "util/tools.h"
@@ -40,79 +41,81 @@ ConfigGenerator::ConfigGenerator() = default;
 
 ConfigGenerator::~ConfigGenerator() = default;
 
-std::string ConfigGenerator::generate(fs::path userHome, fs::path configDir, fs::path prefixDir, fs::path magicFile) {
-  pugi::xml_document doc;
+std::string ConfigGenerator::generate(const fs::path& userHome, const fs::path& configDir, const fs::path& prefixDir, const fs::path& magicFile)
+{
+    pugi::xml_document doc;
 
-  auto decl = doc.prepend_child(pugi::node_declaration);
-  decl.append_attribute("version") = "1.0";
-  decl.append_attribute("encoding") = "UTF-8";
+    auto decl = doc.prepend_child(pugi::node_declaration);
+    decl.append_attribute("version") = "1.0";
+    decl.append_attribute("encoding") = "UTF-8";
 
-  auto config = doc.append_child("config");
-  config.append_attribute("version") = CONFIG_XML_VERSION;
-  config.append_attribute("xmlns") = (XML_XMLNS + std::to_string(CONFIG_XML_VERSION)).c_str();
-  config.append_attribute("xmlns:xsi") = XML_XMLNS_XSI;
-  config.append_attribute("xsi:schemaLocation") =
-    (std::string(XML_XMLNS) + std::to_string(CONFIG_XML_VERSION) + " " + XML_XMLNS + std::to_string(CONFIG_XML_VERSION) + ".xsd").c_str();
+    auto config = doc.append_child("config");
+    config.append_attribute("version") = CONFIG_XML_VERSION;
+    config.append_attribute("xmlns") = (XML_XMLNS + std::to_string(CONFIG_XML_VERSION)).c_str();
+    config.append_attribute("xmlns:xsi") = XML_XMLNS_XSI;
+    config.append_attribute("xsi:schemaLocation") = (std::string(XML_XMLNS) + std::to_string(CONFIG_XML_VERSION) + " " + XML_XMLNS + std::to_string(CONFIG_XML_VERSION) + ".xsd").c_str();
 
-  auto docinfo = config.append_child(pugi::node_comment);
-  docinfo.set_value("\n\
+    auto docinfo = config.append_child(pugi::node_comment);
+    docinfo.set_value("\n\
      See http://gerbera.io or read the docs for more\n\
      information on creating and using config.xml configration files.\n\
     ");
 
-  generateServer(userHome, configDir, prefixDir, &config);
-  generateImport(prefixDir, magicFile, &config);
-  generateTranscoding(&config);
+    generateServer(std::move(userHome), std::move(configDir), prefixDir, &config);
+    generateImport(prefixDir, std::move(magicFile), &config);
+    generateTranscoding(&config);
 
-  std::stringstream buf;
-  doc.print(buf, "  ");
-  return buf.str();
+    std::stringstream buf;
+    doc.print(buf, "  ");
+    return buf.str();
 }
 
-void ConfigGenerator::generateServer(fs::path userHome, fs::path configDir, fs::path prefixDir, pugi::xml_node* config) {
-  auto server = config->append_child("server");
+void ConfigGenerator::generateServer(const fs::path& userHome, const fs::path& configDir, const fs::path& prefixDir, pugi::xml_node* config)
+{
+    auto server = config->append_child("server");
 
-  generateUi(&server);
-  server.append_child("name").append_child(pugi::node_pcdata).set_value(PACKAGE_NAME);
+    generateUi(&server);
+    server.append_child("name").append_child(pugi::node_pcdata).set_value(PACKAGE_NAME);
 
-  generateUdn(&server);
+    generateUdn(&server);
 
-  fs::path homepath = userHome / configDir;
-  server.append_child("home").append_child(pugi::node_pcdata).set_value(homepath.c_str());
+    fs::path homepath = userHome / configDir;
+    server.append_child("home").append_child(pugi::node_pcdata).set_value(homepath.c_str());
 
-  std::string webRoot = prefixDir / DEFAULT_WEB_DIR;
-  server.append_child("webroot").append_child(pugi::node_pcdata).set_value(webRoot.c_str());
+    std::string webRoot = prefixDir / DEFAULT_WEB_DIR;
+    server.append_child("webroot").append_child(pugi::node_pcdata).set_value(webRoot.c_str());
 
-  auto aliveinfo = server.append_child(pugi::node_comment);
-  aliveinfo.set_value(
-      ("\n\
+    auto aliveinfo = server.append_child(pugi::node_comment);
+    aliveinfo.set_value(
+        ("\n\
         How frequently (in seconds) to send ssdp:alive advertisements.\n\
         Minimum alive value accepted is: "
-          + std::to_string(ALIVE_INTERVAL_MIN) + "\n\n\
+            + std::to_string(ALIVE_INTERVAL_MIN) + "\n\n\
         The advertisement will be sent every (A/2)-30 seconds,\n\
         and will have a cache-control max-age of A where A is\n\
         the value configured here. Ex: A value of 62 will result\n\
         in an SSDP advertisement being sent every second.\n\
-    ").c_str());
-  server.append_child("alive").append_child(pugi::node_pcdata).set_value(std::to_string(DEFAULT_ALIVE_INTERVAL).c_str());
+    ")
+            .c_str());
+    server.append_child("alive").append_child(pugi::node_pcdata).set_value(std::to_string(DEFAULT_ALIVE_INTERVAL).c_str());
 
-  generateStorage(&server);
+    generateStorage(&server);
 
-  auto ps3protinfo = server.append_child(pugi::node_comment);
-  ps3protinfo.set_value(R"( For PS3 support change "extend" to "yes" )");
+    auto ps3protinfo = server.append_child(pugi::node_comment);
+    ps3protinfo.set_value(R"( For PS3 support change "extend" to "yes" )");
 
-  auto protocolinfo = server.append_child("protocolInfo");
-  protocolinfo.append_attribute("extend") = DEFAULT_EXTEND_PROTOCOLINFO;
-  protocolinfo.append_attribute("dlna-seek") = DEFAULT_EXTEND_PROTOCOLINFO_DLNA_SEEK;
+    auto protocolinfo = server.append_child("protocolInfo");
+    protocolinfo.append_attribute("extend") = DEFAULT_EXTEND_PROTOCOLINFO;
+    protocolinfo.append_attribute("dlna-seek") = DEFAULT_EXTEND_PROTOCOLINFO_DLNA_SEEK;
 
-  auto redinfo = server.append_child(pugi::node_comment);
-  redinfo.set_value("\n\
+    auto redinfo = server.append_child(pugi::node_comment);
+    redinfo.set_value("\n\
        Uncomment the lines below to get rid of jerky avi playback on the\n\
        DSM320 or to enable subtitles support on the DSM units\n\
     ");
 
-  auto redsonic = server.append_child(pugi::node_comment);
-  redsonic.set_value("\n\
+    auto redsonic = server.append_child(pugi::node_comment);
+    redsonic.set_value("\n\
     <custom-http-headers>\n\
       <add header=\"X-User-Agent: redsonic\" />\n\
     </custom-http-headers>\n\
@@ -121,15 +124,15 @@ void ConfigGenerator::generateServer(fs::path userHome, fs::path configDir, fs::
     <modelNumber>105</modelNumber>\n\
     ");
 
-  auto tg100info = server.append_child(pugi::node_comment);
-  tg100info.set_value(" Uncomment the line below if you have a Telegent TG100 ");
+    auto tg100info = server.append_child(pugi::node_comment);
+    tg100info.set_value(" Uncomment the line below if you have a Telegent TG100 ");
 
-  auto tg100 = server.append_child(pugi::node_comment);
-  tg100.set_value("\n\
+    auto tg100 = server.append_child(pugi::node_comment);
+    tg100.set_value("\n\
        <upnp-string-limit>101</upnp-string-limit>\n\
     ");
 
-  generateExtendedRuntime(&server);
+    generateExtendedRuntime(&server);
 }
 
 void ConfigGenerator::generateUi(pugi::xml_node* server) {
@@ -200,9 +203,10 @@ void ConfigGenerator::generateExtendedRuntime(pugi::xml_node* server) {
   content_video.append_child(pugi::node_pcdata).set_value(DEFAULT_MARK_PLAYED_CONTENT_VIDEO);
 }
 
-void ConfigGenerator::generateImport(fs::path prefixDir, fs::path magicFile, pugi::xml_node* config) {
-  auto import = config->append_child("import");
-  import.append_attribute("hidden-files") = DEFAULT_HIDDEN_FILES_VALUE;
+void ConfigGenerator::generateImport(const fs::path& prefixDir, const fs::path& magicFile, pugi::xml_node* config)
+{
+    auto import = config->append_child("import");
+    import.append_attribute("hidden-files") = DEFAULT_HIDDEN_FILES_VALUE;
 
 #ifdef HAVE_MAGIC
   if (string_ok(magicFile.c_str())) {
@@ -388,14 +392,16 @@ void ConfigGenerator::generateUdn(pugi::xml_node* server) {
 #endif
 }
 
-void ConfigGenerator::map_from_to(std::string from, std::string to, pugi::xml_node* parent) {
-  auto map = parent->append_child("map");
-  map.append_attribute("from") = from.c_str();
-  map.append_attribute("to") = to.c_str();
+void ConfigGenerator::map_from_to(const std::string& from, const std::string& to, pugi::xml_node* parent)
+{
+    auto map = parent->append_child("map");
+    map.append_attribute("from") = from.c_str();
+    map.append_attribute("to") = to.c_str();
 }
 
-void ConfigGenerator::treat_as(std::string mimetype, std::string as, pugi::xml_node* parent) {
-  auto treat = parent->append_child("treat");
-  treat.append_attribute("mimetype") = mimetype.c_str();
-  treat.append_attribute("as") = as.c_str();
+void ConfigGenerator::treat_as(const std::string& mimetype, const std::string& as, pugi::xml_node* parent)
+{
+    auto treat = parent->append_child("treat");
+    treat.append_attribute("mimetype") = mimetype.c_str();
+    treat.append_attribute("as") = as.c_str();
 }

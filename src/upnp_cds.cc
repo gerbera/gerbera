@@ -36,6 +36,7 @@
 #include "storage/storage.h"
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 ContentDirectoryService::ContentDirectoryService(std::shared_ptr<ConfigManager> config,
@@ -43,8 +44,8 @@ ContentDirectoryService::ContentDirectoryService(std::shared_ptr<ConfigManager> 
     UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle, int stringLimit)
     : systemUpdateID(0)
     , stringLimit(stringLimit)
-    , config(config)
-    , storage(storage)
+    , config(std::move(config))
+    , storage(std::move(storage))
     , deviceHandle(deviceHandle)
     , xmlBuilder(xmlBuilder)
 {
@@ -296,7 +297,7 @@ void ContentDirectoryService::processSubscriptionRequest(const std::unique_ptr<S
     log_debug("end");
 }
 
-void ContentDirectoryService::sendSubscriptionUpdate(std::string containerUpdateIDs_CSV)
+void ContentDirectoryService::sendSubscriptionUpdate(const std::string& containerUpdateIDs_CSV)
 {
     log_debug("start");
 

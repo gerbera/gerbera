@@ -32,14 +32,16 @@
 #ifdef HAVE_JS
 
 #include "import_script.h"
+
 #include "config/config_manager.h"
 #include "js_functions.h"
+#include <utility>
 
-ImportScript::ImportScript(std::shared_ptr<ConfigManager> config,
+ImportScript::ImportScript(const std::shared_ptr<ConfigManager>& config,
     std::shared_ptr<Storage> storage,
     std::shared_ptr<ContentManager> content,
-    std::shared_ptr<Runtime> runtime)
-    : Script(config, storage, content, runtime, "import")
+    const std::shared_ptr<Runtime>& runtime)
+    : Script(config, std::move(storage), std::move(content), std::move(runtime), "import")
 {
     std::string scriptPath = config->getOption(CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT);
 
@@ -53,7 +55,7 @@ ImportScript::ImportScript(std::shared_ptr<ConfigManager> config,
     }
 }
 
-void ImportScript::processCdsObject(std::shared_ptr<CdsObject> obj, std::string scriptpath)
+void ImportScript::processCdsObject(const std::shared_ptr<CdsObject>& obj, const std::string& scriptpath)
 {
     processed = obj;
     try 

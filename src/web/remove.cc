@@ -36,10 +36,11 @@
 #include "storage/storage.h"
 #include "util/tools.h"
 #include <cstdio>
+#include <utility>
 
 web::remove::remove(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
     std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
-    : WebRequestHandler(config, storage, content, sessionManager)
+    : WebRequestHandler(std::move(config), std::move(storage), std::move(content), std::move(sessionManager))
 {
 }
 

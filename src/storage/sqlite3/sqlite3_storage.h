@@ -175,12 +175,12 @@ private:
 
     std::string startupError;
 
-    std::string getError(std::string query, std::string error, sqlite3* db);
+    std::string getError(const std::string& query, const std::string& error, sqlite3* db);
 
     static void* staticThreadProc(void* arg);
     void threadProc();
 
-    void addTask(std::shared_ptr<SLTask> task, bool onlyIfDirty = false);
+    void addTask(const std::shared_ptr<SLTask>& task, bool onlyIfDirty = false);
 
     pthread_t sqliteThread;
     std::condition_variable cond;

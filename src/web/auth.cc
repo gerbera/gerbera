@@ -35,6 +35,8 @@
 #include "util/tools.h"
 #include <sys/time.h>
 
+#include <utility>
+
 #define LOGIN_TIMEOUT 10 // in seconds
 
 static long get_time()
@@ -51,7 +53,7 @@ static std::string generate_token()
     return std::to_string(expiration) + '_' + salt;
 }
 
-static bool check_token(std::string token, std::string password, std::string encPassword)
+static bool check_token(const std::string& token, const std::string& password, const std::string& encPassword)
 {
     std::vector<std::string> parts = split_string(token, '_');
     if (parts.size() != 2)
@@ -63,9 +65,9 @@ static bool check_token(std::string token, std::string password, std::string enc
     return (checksum == encPassword);
 }
 
-web::auth::auth(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
+web::auth::auth(const std::shared_ptr<ConfigManager>& config, std::shared_ptr<Storage> storage,
     std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
-    : WebRequestHandler(config, storage, content, sessionManager)
+    : WebRequestHandler(config, std::move(storage), std::move(content), std::move(sessionManager))
 {
     timeout = 60 * config->getIntOption(CFG_SERVER_UI_SESSION_TIMEOUT);
 }

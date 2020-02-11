@@ -33,14 +33,14 @@
 
 #include <cstring>
 
-StringTokenizer::StringTokenizer(std::string str)
+StringTokenizer::StringTokenizer(const std::string& str)
 {
     this->str = str;
     pos = 0;
     len = str.length();
 }
 
-std::string StringTokenizer::nextToken(std::string seps)
+std::string StringTokenizer::nextToken(const std::string& seps)
 {
     const char *cstr = str.c_str();
     const char *cseps = seps.c_str();

@@ -170,8 +170,8 @@ protected:
     virtual void init();
 
     void doMetadataMigration() override;
-    void migrateMetadata(std::shared_ptr<CdsObject> object);
-    
+    void migrateMetadata(const std::shared_ptr<CdsObject>& object);
+
     char table_quote_begin;
     char table_quote_end;
     
@@ -203,15 +203,15 @@ private:
         std::map<std::string,std::string> dict;
         std::string operation;
     };
-    std::vector<std::shared_ptr<AddUpdateTable>> _addUpdateObject(std::shared_ptr<CdsObject> obj, bool isUpdate, int *changedContainer);
+    std::vector<std::shared_ptr<AddUpdateTable>> _addUpdateObject(const std::shared_ptr<CdsObject>& obj, bool isUpdate, int* changedContainer);
 
-    void generateMetadataDBOperations(std::shared_ptr<CdsObject> obj, bool isUpdate,
+    void generateMetadataDBOperations(const std::shared_ptr<CdsObject>& obj, bool isUpdate,
         std::vector<std::shared_ptr<AddUpdateTable>>& operations);
 
-    std::unique_ptr<std::ostringstream> sqlForInsert(std::shared_ptr<CdsObject> obj, std::shared_ptr<AddUpdateTable> addUpdateTable);
-    std::unique_ptr<std::ostringstream> sqlForUpdate(std::shared_ptr<CdsObject> obj, std::shared_ptr<AddUpdateTable> addUpdateTable);
-    std::unique_ptr<std::ostringstream> sqlForDelete(std::shared_ptr<CdsObject> obj, std::shared_ptr<AddUpdateTable> addUpdateTable);
-    
+    std::unique_ptr<std::ostringstream> sqlForInsert(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable);
+    std::unique_ptr<std::ostringstream> sqlForUpdate(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable);
+    std::unique_ptr<std::ostringstream> sqlForDelete(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable);
+
     /* helper for removeObject(s) */
     void _removeObjects(const std::vector<int32_t> &objectIDs);
 
@@ -227,22 +227,22 @@ private:
     int _getAutoscanObjectID(int autoscanID);
     void _autoscanChangePersistentFlag(int objectID, bool persistent);
     std::shared_ptr<AutoscanDirectory> _fillAutoscanDirectory(const std::unique_ptr<SQLRow>& row);
-    int _getAutoscanDirectoryInfo(int objectID, std::string field);
-    std::unique_ptr<std::vector<int>> _checkOverlappingAutoscans(std::shared_ptr<AutoscanDirectory> adir);
-    
+    int _getAutoscanDirectoryInfo(int objectID, const std::string& field);
+    std::unique_ptr<std::vector<int>> _checkOverlappingAutoscans(const std::shared_ptr<AutoscanDirectory>& adir);
+
     /* location helper: filesystem path or virtual path to db location*/
-    std::string addLocationPrefix(char prefix, std::string path);
+    std::string addLocationPrefix(char prefix, const std::string& path);
     /* location helpers: db location to filesystem path */
     fs::path stripLocationPrefix(std::string dbLocation, char* prefix = NULL);
-    
-    std::shared_ptr<CdsObject> checkRefID(std::shared_ptr<CdsObject> obj);
-    int createContainer(int parentID, std::string name, std::string virtualPath, bool isVirtual, std::string upnpClass, int refID, const std::map<std::string,std::string>& lastMetadata);
+
+    std::shared_ptr<CdsObject> checkRefID(const std::shared_ptr<CdsObject>& obj);
+    int createContainer(int parentID, std::string name, const std::string& virtualPath, bool isVirtual, const std::string& upnpClass, int refID, const std::map<std::string, std::string>& lastMetadata);
 
     std::string mapBool(bool val) { return quote((val ? 1 : 0)); }
     bool remapBool(std::string field) { return (string_ok(field) && field == "1"); }
-    
-    void setFsRootName(std::string rootName = "");
-    
+
+    void setFsRootName(const std::string& rootName = "");
+
     std::string fsRootName;
     
     int lastID;

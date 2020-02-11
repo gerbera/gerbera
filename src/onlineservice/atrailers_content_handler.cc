@@ -33,16 +33,18 @@
 #if defined(ATRAILERS)
 
 #include "atrailers_content_handler.h"
+
 #include "cds_objects.h"
 #include "config/config_manager.h"
 #include "metadata/metadata_handler.h"
 #include "online_service.h"
 #include "util/tools.h"
+#include <utility>
 
 ATrailersContentHandler::ATrailersContentHandler(std::shared_ptr<ConfigManager> config,
     std::shared_ptr<Storage> storage)
-    : config(config)
-    , storage(storage)
+    : config(std::move(config))
+    , storage(std::move(storage))
 {
 }
 

@@ -33,6 +33,8 @@
 
 #include <ixml.h>
 
+#include <utility>
+
 #include "common.h"
 #include "config/config_manager.h"
 #include "server.h"
@@ -53,8 +55,8 @@
 URLRequestHandler::URLRequestHandler(std::shared_ptr<ConfigManager> config,
     std::shared_ptr<Storage> storage,
     std::shared_ptr<ContentManager> content)
-    : RequestHandler(config, storage)
-    , content(content)
+    : RequestHandler(std::move(config), std::move(storage))
+    , content(std::move(content))
 {
 }
 

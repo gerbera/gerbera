@@ -37,7 +37,7 @@
 
 using namespace std;
 
-CurlIOHandler::CurlIOHandler(std::string URL, CURL* curl_handle, size_t bufSize, size_t initialFillSize)
+CurlIOHandler::CurlIOHandler(const std::string& URL, CURL* curl_handle, size_t bufSize, size_t initialFillSize)
     : IOHandlerBufferHelper(bufSize, initialFillSize)
 {
     if (!string_ok(URL))

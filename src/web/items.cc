@@ -29,6 +29,8 @@
 
 /// \file items.cc
 
+#include <utility>
+
 #include "cds_objects.h"
 #include "common.h"
 #include "pages.h"
@@ -37,7 +39,7 @@
 
 web::items::items(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
     std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
-    : WebRequestHandler(config, storage, content, sessionManager)
+    : WebRequestHandler(std::move(config), std::move(storage), std::move(content), std::move(sessionManager))
 {
 }
 

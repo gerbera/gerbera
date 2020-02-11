@@ -33,6 +33,7 @@
 #include "util/tools.h"
 
 #include <sstream>
+#include <utility>
 
 #define RESOURCE_PART_SEP '~'
 
@@ -51,12 +52,12 @@ CdsResource::CdsResource(int handlerType,
     this->options = options;
 }
 
-void CdsResource::addAttribute(std::string name, std::string value)
+void CdsResource::addAttribute(const std::string& name, std::string value)
 {
-    attributes[name] = value;
+    attributes[name] = std::move(value);
 }
 
-void CdsResource::removeAttribute(std::string name)
+void CdsResource::removeAttribute(const std::string& name)
 {
     attributes.erase(name);
 }
@@ -68,14 +69,14 @@ void CdsResource::mergeAttributes(const std::map<std::string,std::string>& addit
     }
 }
 
-void CdsResource::addParameter(std::string name, std::string value)
+void CdsResource::addParameter(const std::string& name, std::string value)
 {
-    parameters[name] = value;
+    parameters[name] = std::move(value);
 }
 
-void CdsResource::addOption(std::string name, std::string value)
+void CdsResource::addOption(const std::string& name, std::string value)
 {
-    options[name] = value;
+    options[name] = std::move(value);
 }
 
 int CdsResource::getHandlerType()
@@ -98,22 +99,22 @@ std::map<std::string,std::string> CdsResource::getOptions()
     return options;
 }
 
-std::string CdsResource::getAttribute(std::string name)
+std::string CdsResource::getAttribute(const std::string& name)
 {
     return getValueOrDefault(attributes, name);
 }
 
-std::string CdsResource::getParameter(std::string name)
+std::string CdsResource::getParameter(const std::string& name)
 {
     return getValueOrDefault(parameters, name);
 }
 
-std::string CdsResource::getOption(std::string name)
+std::string CdsResource::getOption(const std::string& name)
 {
     return getValueOrDefault(options, name);
 }
 
-bool CdsResource::equals(std::shared_ptr<CdsResource> other)
+bool CdsResource::equals(const std::shared_ptr<CdsResource>& other)
 {
     return (
         handlerType == other->handlerType
@@ -141,9 +142,9 @@ std::string CdsResource::encode()
     return buf.str().c_str();
 }
 
-std::shared_ptr<CdsResource> CdsResource::decode(std::string serial)
+std::shared_ptr<CdsResource> CdsResource::decode(const std::string& serial)
 {
-    std::vector<std::string> parts = split_string(serial, RESOURCE_PART_SEP, true);
+    std::vector<std::string> parts = split_string(std::move(serial), RESOURCE_PART_SEP, true);
     int size = parts.size();
     if (size < 2 || size > 4)
         throw std::runtime_error("CdsResource::decode: Could not parse resources");

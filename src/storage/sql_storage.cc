@@ -29,12 +29,13 @@
 
 /// \file sql_storage.cc
 
-#include <climits>
 #include <algorithm>
+#include <climits>
+#include <filesystem>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
-#include <filesystem>
 namespace fs = std::filesystem;
 
 #include "sql_storage.h"
@@ -158,9 +159,8 @@ enum MetadataCol
 
 /* enum for createObjectFromRow's mode parameter */
 
-
 SQLStorage::SQLStorage(std::shared_ptr<ConfigManager> config)
-    : Storage(config)
+    : Storage(std::move(config))
 {
     table_quote_begin = '\0';
     table_quote_end = '\0';
@@ -191,7 +191,7 @@ void SQLStorage::shutdown()
     shutdownDriver();
 }
 
-std::shared_ptr<CdsObject> SQLStorage::checkRefID(std::shared_ptr<CdsObject> obj)
+std::shared_ptr<CdsObject> SQLStorage::checkRefID(const std::shared_ptr<CdsObject>& obj)
 {
     if (!obj->isVirtual())
         throw std::runtime_error("checkRefID called for a non-virtual object");
@@ -219,7 +219,7 @@ std::shared_ptr<CdsObject> SQLStorage::checkRefID(std::shared_ptr<CdsObject> obj
     return findObjectByPath(location);
 }
 
-std::vector<std::shared_ptr<SQLStorage::AddUpdateTable>> SQLStorage::_addUpdateObject(std::shared_ptr<CdsObject> obj, bool isUpdate, int* changedContainer)
+std::vector<std::shared_ptr<SQLStorage::AddUpdateTable>> SQLStorage::_addUpdateObject(const std::shared_ptr<CdsObject>& obj, bool isUpdate, int* changedContainer)
 {
     int objectType = obj->getObjectType();
     std::shared_ptr<CdsObject> refObj = nullptr;
@@ -755,7 +755,7 @@ int SQLStorage::ensurePathExistence(fs::path path, int* changedContainer)
     return createContainer(parentID, f2i->convert(path.filename()), path, false, "", INVALID_OBJECT_ID, std::map<std::string,std::string>());
 }
 
-int SQLStorage::createContainer(int parentID, std::string name, std::string virtualPath, bool isVirtual, std::string upnpClass, int refID, const std::map<std::string,std::string>& itemMetadata)
+int SQLStorage::createContainer(int parentID, std::string name, const std::string& virtualPath, bool isVirtual, const std::string& upnpClass, int refID, const std::map<std::string, std::string>& itemMetadata)
 {
     // log_debug("Creating Container: parent: {}, name: {}, path {}, isVirt: {}, upnpClass: {}, refId: {}",
     // parentID, name.c_str(), path.c_str(), isVirtual, upnpClass.c_str(), refID);
@@ -764,7 +764,7 @@ int SQLStorage::createContainer(int parentID, std::string name, std::string virt
         if (refObj == nullptr)
             throw std::runtime_error("tried to create container with refID set, but refID doesn't point to an existing object");
     }
-    std::string dbLocation = addLocationPrefix((isVirtual ? LOC_VIRT_PREFIX : LOC_DIR_PREFIX), virtualPath);
+    std::string dbLocation = addLocationPrefix((isVirtual ? LOC_VIRT_PREFIX : LOC_DIR_PREFIX), std::move(virtualPath));
 
     /*std::map<std::string,std::string> metadata;
     if (!itemMetadata.empty()) {
@@ -778,28 +778,28 @@ int SQLStorage::createContainer(int parentID, std::string name, std::string virt
 
     std::ostringstream qb;
     qb << "INSERT INTO "
-        << TQ(CDS_OBJECT_TABLE)
-        << " ("
-        << TQ("id") << ','
-        << TQ("parent_id") << ','
-        << TQ("object_type") << ','
-        << TQ("upnp_class") << ','
-        << TQ("dc_title") << ','
-        << TQ("location") << ','
-        << TQ("location_hash") << ','
-        << TQ("ref_id") << ") VALUES ("
-        << newID << ','
-        << parentID << ','
-        << OBJECT_TYPE_CONTAINER << ','
-        << (string_ok(upnpClass) ? quote(upnpClass) : quote(UPNP_DEFAULT_CLASS_CONTAINER)) << ','
-        << quote(name) << ','
-        << quote(dbLocation) << ','
-        << quote(stringHash(dbLocation)) << ',';
-        if (refID > 0) {
-            qb << refID;
-        } else {
-            qb << SQL_NULL;
-        }
+       << TQ(CDS_OBJECT_TABLE)
+       << " ("
+       << TQ("id") << ','
+       << TQ("parent_id") << ','
+       << TQ("object_type") << ','
+       << TQ("upnp_class") << ','
+       << TQ("dc_title") << ','
+       << TQ("location") << ','
+       << TQ("location_hash") << ','
+       << TQ("ref_id") << ") VALUES ("
+       << newID << ','
+       << parentID << ','
+       << OBJECT_TYPE_CONTAINER << ','
+       << (string_ok(upnpClass) ? quote(upnpClass) : quote(UPNP_DEFAULT_CLASS_CONTAINER)) << ','
+       << quote(std::move(name)) << ','
+       << quote(dbLocation) << ','
+       << quote(stringHash(dbLocation)) << ',';
+    if (refID > 0) {
+        qb << refID;
+    } else {
+        qb << SQL_NULL;
+    }
         qb << ')';
 
     exec(qb);
@@ -890,7 +890,7 @@ void SQLStorage::addContainerChain(std::string virtualPath, std::string lastClas
     *containerID = createContainer(parentContainerID, container, virtualPath, true, lastClass, lastRefID, lastMetadata);
 }
 
-std::string SQLStorage::addLocationPrefix(char prefix, std::string path)
+std::string SQLStorage::addLocationPrefix(char prefix, const std::string& path)
 {
     return std::string(1, prefix) + path;
 }
@@ -1894,7 +1894,7 @@ int SQLStorage::isAutoscanDirectoryRecursive(int objectID)
     return _getAutoscanDirectoryInfo(objectID, "recursive");
 }
 
-int SQLStorage::_getAutoscanDirectoryInfo(int objectID, std::string field)
+int SQLStorage::_getAutoscanDirectoryInfo(int objectID, const std::string& field)
 {
     if (objectID == INVALID_OBJECT_ID)
         return 0;
@@ -1969,7 +1969,7 @@ void SQLStorage::checkOverlappingAutoscans(std::shared_ptr<AutoscanDirectory> ad
     _checkOverlappingAutoscans(adir);
 }
 
-std::unique_ptr<std::vector<int>> SQLStorage::_checkOverlappingAutoscans(std::shared_ptr<AutoscanDirectory> adir)
+std::unique_ptr<std::vector<int>> SQLStorage::_checkOverlappingAutoscans(const std::shared_ptr<AutoscanDirectory>& adir)
 {
     if (adir == nullptr)
         throw std::runtime_error("_checkOverlappingAutoscans called with adir==nullptr");
@@ -2086,7 +2086,7 @@ std::string SQLStorage::getFsRootName()
     return fsRootName;
 }
 
-void SQLStorage::setFsRootName(std::string rootName)
+void SQLStorage::setFsRootName(const std::string& rootName)
 {
     if (string_ok(rootName)) {
         fsRootName = rootName;
@@ -2176,7 +2176,7 @@ void SQLStorage::clearFlagInDB(int flag)
     exec(qb);
 }
 
-void SQLStorage::generateMetadataDBOperations(std::shared_ptr<CdsObject> obj, bool isUpdate,
+void SQLStorage::generateMetadataDBOperations(const std::shared_ptr<CdsObject>& obj, bool isUpdate,
     std::vector<std::shared_ptr<AddUpdateTable>>& operations)
 {
     auto dict = obj->getMetadata();
@@ -2209,7 +2209,7 @@ void SQLStorage::generateMetadataDBOperations(std::shared_ptr<CdsObject> obj, bo
     }
 }
 
-std::unique_ptr<std::ostringstream> SQLStorage::sqlForInsert(std::shared_ptr<CdsObject> obj, std::shared_ptr<AddUpdateTable> addUpdateTable)
+std::unique_ptr<std::ostringstream> SQLStorage::sqlForInsert(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable)
 {
     int lastInsertID = INVALID_OBJECT_ID;
     int lastMetadataInsertID = INVALID_OBJECT_ID;
@@ -2256,7 +2256,7 @@ std::unique_ptr<std::ostringstream> SQLStorage::sqlForInsert(std::shared_ptr<Cds
     return qb;
 }
 
-std::unique_ptr<std::ostringstream> SQLStorage::sqlForUpdate(std::shared_ptr<CdsObject> obj, std::shared_ptr<AddUpdateTable> addUpdateTable)
+std::unique_ptr<std::ostringstream> SQLStorage::sqlForUpdate(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable)
 {
     if (addUpdateTable == nullptr
         || (addUpdateTable->getTable() == METADATA_TABLE && addUpdateTable->getDict().size() != 2))
@@ -2282,7 +2282,7 @@ std::unique_ptr<std::ostringstream> SQLStorage::sqlForUpdate(std::shared_ptr<Cds
     return qb;
 }
 
-std::unique_ptr<std::ostringstream> SQLStorage::sqlForDelete(std::shared_ptr<CdsObject> obj, std::shared_ptr<AddUpdateTable> addUpdateTable)
+std::unique_ptr<std::ostringstream> SQLStorage::sqlForDelete(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable)
 {
     if (addUpdateTable == nullptr
         || (addUpdateTable->getTable() == METADATA_TABLE && addUpdateTable->getDict().size() != 2))
@@ -2346,7 +2346,7 @@ void SQLStorage::doMetadataMigration()
     log_info("Migrated metadata - object count: {}", objectsUpdated);
 }
 
-void SQLStorage::migrateMetadata(std::shared_ptr<CdsObject> object)
+void SQLStorage::migrateMetadata(const std::shared_ptr<CdsObject>& object)
 {
     if (object == nullptr)
         return;
