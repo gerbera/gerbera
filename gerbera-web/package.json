@@ -19,19 +19,19 @@
     }
   },
   "devDependencies": {
-    "@babel/core": "^7.7.5",
-    "@babel/polyfill": "^7.7.0",
-    "@babel/preset-env": "^7.7.6",
+    "@babel/core": "^7.8.4",
+    "@babel/polyfill": "^7.8.3",
+    "@babel/preset-env": "^7.8.4",
     "babel-loader": "^8.0.6",
     "babel-register": "^6.26.0",
     "bootstrap": "^4.4.1",
     "braces": "^3.0.2",
     "chai": "^4.2.0",
-    "chromedriver": "^78.0.1",
+    "chromedriver": "^80.0.0",
     "concurrently": "^4.1.2",
     "eslint": "^6.7.2",
     "eslint-config-standard": "^14.1.0",
-    "eslint-plugin-import": "^2.19.1",
+    "eslint-plugin-import": "^2.20.1",
     "eslint-plugin-node": "^9.2.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
@@ -55,10 +55,10 @@
     "lodash": "^4.17.15",
     "mkdirp": "^0.5.1",
     "mocha": "^5.2.0",
-    "popper.js": "^1.16.0",
+    "popper.js": "^1.16.1",
     "rimraf": "^2.7.1",
     "selenium-webdriver": "^4.0.0-alpha.5",
-    "webpack": "^4.41.2",
+    "webpack": "^4.41.6",
     "yargs": "^12.0.1"
   }
 }
