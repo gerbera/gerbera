@@ -31,13 +31,14 @@
 
 #include <cstdio>
 #include <ixml.h>
+#include <utility>
 
 #include "cds_objects.h"
 #include "file_io_handler.h"
 #include "server.h"
 
-FileIOHandler::FileIOHandler(const fs::path& filename)
-    : filename(filename)
+FileIOHandler::FileIOHandler(fs::path filename)
+    : filename(std::move(filename))
     , f(nullptr)
 {
 }
