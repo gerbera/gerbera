@@ -114,7 +114,7 @@ void TaskProcessor::invalidateTask(unsigned int taskID)
         }
     }
 
-    for (auto t : taskQueue) {
+    for (const auto& t : taskQueue) {
         if ((t->getID() == taskID) || (t->getParentID() == taskID)) {
             t->invalidate();
         }
@@ -135,7 +135,7 @@ std::deque<std::shared_ptr<GenericTask>> TaskProcessor::getTasklist()
 
     taskList.push_back(t);
 
-    for (auto t : taskQueue) {
+    for (const auto& t : taskQueue) {
         if (t->isValid())
             taskList.push_back(t);
     }

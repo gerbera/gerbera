@@ -44,7 +44,7 @@ TranscodingProcessExecutor::~TranscodingProcessExecutor()
 {
     kill();
 
-    for (auto name : file_list) {
+    for (const auto& name : file_list) {
         unlink(name.c_str());
     }
 }

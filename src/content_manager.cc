@@ -408,12 +408,12 @@ std::deque<std::shared_ptr<GenericTask>> ContentManager::getTasklist()
     if (t != nullptr)
         taskList.push_back(t);
 
-    for (const auto &t : taskQueue1) {
+    for (const auto& t : taskQueue1) {
         if (t->isValid())
             taskList.push_back(t);
     }
 
-    for (const auto &t : taskQueue2) {
+    for (const auto& t : taskQueue2) {
         if (t->isValid())
             taskList.clear();
     }
@@ -1354,13 +1354,13 @@ void ContentManager::invalidateTask(unsigned int taskID, task_owner_t taskOwner)
             }
         }
 
-        for (const auto &t : taskQueue1) {
+        for (const auto& t : taskQueue1) {
             if ((t->getID() == taskID) || (t->getParentID() == taskID)) {
                 t->invalidate();
             }
         }
 
-        for (const auto &t : taskQueue2) {
+        for (const auto& t : taskQueue2) {
             if ((t->getID() == taskID) || (t->getParentID() == taskID)) {
                 t->invalidate();
             }

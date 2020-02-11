@@ -111,7 +111,7 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
         didl_lite_root.append_attribute(XML_SEC_NAMESPACE_ATTR) = XML_SEC_NAMESPACE;
     }
 
-    for (auto obj : arr) {
+    for (const auto& obj : arr) {
         if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && obj->getFlag(OBJECT_FLAG_PLAYED)) {
             std::string title = obj->getTitle();
             if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND))
@@ -176,7 +176,7 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
         throw UpnpException(UPNP_E_NO_SUCH_ID, "no such object");
     }
 
-    for (auto cdsObject : results) {
+    for (const auto& cdsObject : results) {
         if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && cdsObject->getFlag(OBJECT_FLAG_PLAYED)) {
             std::string title = cdsObject->getTitle();
             if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND))

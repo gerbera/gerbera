@@ -200,7 +200,7 @@ void SessionManager::containerChangedUI(int objectID)
     if (sessions.size() <= 0)
         return;
     AutoLock lock(mutex);
-    for (auto session : sessions) {
+    for (const auto& session : sessions) {
         if (session->isLoggedIn())
             session->containerChangedUI(objectID);
     }
@@ -211,7 +211,7 @@ void SessionManager::containerChangedUI(const std::vector<int>& objectIDs)
     if (sessions.size() <= 0)
         return;
     AutoLock lock(mutex);
-    for (auto session : sessions) {
+    for (const auto& session : sessions) {
         if (session->isLoggedIn())
             session->containerChangedUI(objectIDs);
     }
