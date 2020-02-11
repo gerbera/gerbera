@@ -1,0 +1,33 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  build-gcc:
+    runs-on: [ubuntu-latest]
+    container:
+      image: gerbera/gerbera-ci-base
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build with GCC
+      run: |
+        bash -c "cmake ../gerbera-src -DCMAKE_VERBOSE_MAKEFILE=ON -DWITH_SYSTEMD=0 -DWITH_TESTS=1 \
+        -DWITH_FFMPEGTHUMBNAILER=1 -DWITH_EXIF=1 -DWITH_AVCODEC=1 -DWITH_MYSQL=1 && \
+        make -j$(nproc) install && \
+        ctest -V"
+
+  build-clang:
+    runs-on: [ubuntu-latest]
+    container:
+      image: gerbera/gerbera-ci-base
+      env:
+        CC: clang
+        CXX: clang++
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build with GCC
+      run: |
+        bash -c "cmake ../gerbera-src -DCMAKE_VERBOSE_MAKEFILE=ON -DWITH_SYSTEMD=0 -DWITH_TESTS=1 \
+        -DWITH_FFMPEGTHUMBNAILER=1 -DWITH_EXIF=1 -DWITH_AVCODEC=1 -DWITH_MYSQL=1 && \
+        make -j$(nproc) install && \
+        ctest -V"
