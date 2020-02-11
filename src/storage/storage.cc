@@ -29,6 +29,8 @@
 
 /// \file storage.cc
 
+#include <utility>
+
 #include "config/config_manager.h"
 
 #if !defined(HAVE_MYSQL) && !defined(HAVE_SQLITE3)
@@ -41,11 +43,11 @@
 #include "util/tools.h"
 
 Storage::Storage(std::shared_ptr<ConfigManager> config)
-    : config(config)
+    : config(std::move(config))
 {
 }
 
-std::shared_ptr<Storage> Storage::createInstance(std::shared_ptr<ConfigManager> config, std::shared_ptr<Timer> timer)
+std::shared_ptr<Storage> Storage::createInstance(const std::shared_ptr<ConfigManager>& config, const std::shared_ptr<Timer>& timer)
 {
     std::shared_ptr<Storage> storage;
 

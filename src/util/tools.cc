@@ -30,19 +30,20 @@
 /// \file tools.cc
 
 #include <arpa/inet.h>
+#include <cctype>
 #include <cerrno>
 #include <climits>
-#include <cctype>
+#include <filesystem>
 #include <iterator>
 #include <netdb.h>
 #include <netinet/in.h>
+#include <queue>
 #include <sstream>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <queue>
-#include <filesystem>
+#include <utility>
 namespace fs = std::filesystem;
 
 #include <ifaddrs.h>
@@ -72,7 +73,7 @@ using namespace std;
 
 static const char* HEX_CHARS = "0123456789abcdef";
 
-std::vector<std::string> split_string(std::string str, char sep, bool empty)
+std::vector<std::string> split_string(const std::string& str, char sep, bool empty)
 {
     std::vector<std::string> ret;
     const char* data = str.c_str();
@@ -125,7 +126,7 @@ std::string trim_string(std::string str)
     return str.substr(start, end - start);
 }
 
-bool startswith(std::string str, std::string check)
+bool startswith(const std::string& str, const std::string& check)
 {
     return str.rfind(check, 0) == 0;
 }
@@ -136,7 +137,7 @@ std::string tolower_string(std::string str)
     return str;
 }
 
-int stoi_string(std::string str, int def)
+int stoi_string(const std::string& str, int def)
 {
     if (str.empty())
         return def;
@@ -215,18 +216,18 @@ fs::path find_in_path(const fs::path& exec)
     return "";
 }
 
-bool string_ok(std::string str)
+bool string_ok(const std::string& str)
 {
     return !str.empty();
 }
 
-void string_ok_ex(std::string str)
+void string_ok_ex(const std::string& str)
 {
     if (str.empty())
         throw std::runtime_error("Empty string");
 }
 
-std::string http_redirect_to(std::string ip, std::string port, std::string page)
+std::string http_redirect_to(const std::string& ip, const std::string& port, const std::string& page)
 {
     return R"(<html><head><meta http-equiv="Refresh" content="0;URL=http://)" + ip + ":" + port + "/" + page + R"("></head><body bgcolor="#dddddd"></body></html>)";
 }
@@ -249,7 +250,7 @@ std::string hex_encode(const void* data, int len)
     return buf.str();
 }
 
-std::string hex_decode_string(std::string encoded)
+std::string hex_decode_string(const std::string& encoded)
 {
     auto* ptr = const_cast<char*>(encoded.c_str());
     int len = encoded.length();
@@ -286,7 +287,7 @@ std::string hex_md5(const void* data, int length)
 
     return hex_encode(md5buf, 16);
 }
-std::string hex_string_md5(std::string str)
+std::string hex_string_md5(const std::string& str)
 {
     return hex_md5(str.c_str(), str.length());
 }
@@ -319,7 +320,7 @@ std::string generate_random_id()
 
 static const char* HEX_CHARS2 = "0123456789ABCDEF";
 
-std::string url_escape(std::string str)
+std::string url_escape(const std::string& str)
 {
     const char* data = str.c_str();
     int len = str.length();
@@ -337,7 +338,7 @@ std::string url_escape(std::string str)
     return buf.str();
 }
 
-std::string urlUnescape(std::string str)
+std::string urlUnescape(const std::string& str)
 {
     auto* data = const_cast<char*>(str.c_str());
     int len = str.length();
@@ -400,7 +401,7 @@ std::string dict_encode_simple(const std::map<std::string,std::string>& dict)
     return dict_encode(dict, '/', '/');
 }
 
-void dict_decode(std::string url, std::map<std::string,std::string>* dict)
+void dict_decode(const std::string& url, std::map<std::string, std::string>* dict)
 {
     const char* data = url.c_str();
     const char* dataEnd = data + url.length();
@@ -424,7 +425,7 @@ void dict_decode(std::string url, std::map<std::string,std::string>* dict)
 
 // this is somewhat tricky as we need an exact amount of pairs
 // object_id=720&res_id=0
-void dict_decode_simple(std::string url, std::map<std::string,std::string>* dict)
+void dict_decode_simple(const std::string& url, std::map<std::string, std::string>* dict)
 {
     std::string encoded;
     size_t pos;
@@ -501,7 +502,7 @@ std::string readTextFile(const fs::path& path)
     return buf.str();
 }
 
-void writeTextFile(const fs::path& path, std::string contents)
+void writeTextFile(const fs::path& path, const std::string& contents)
 {
     size_t bytesWritten;
     FILE* f = fopen(path.c_str(), "wt");
@@ -520,7 +521,7 @@ void writeTextFile(const fs::path& path, std::string contents)
     fclose(f);
 }
 
-std::string renderProtocolInfo(std::string mimetype, std::string protocol, std::string extend)
+std::string renderProtocolInfo(const std::string& mimetype, const std::string& protocol, const std::string& extend)
 {
     if (string_ok(mimetype) && string_ok(protocol)) {
         if (string_ok(extend))
@@ -531,16 +532,16 @@ std::string renderProtocolInfo(std::string mimetype, std::string protocol, std::
         return "http-get:*:*:*";
 }
 
-std::string getMTFromProtocolInfo(std::string protocol)
+std::string getMTFromProtocolInfo(const std::string& protocol)
 {
-    std::vector<std::string> parts = split_string(protocol, ':');
+    std::vector<std::string> parts = split_string(std::move(protocol), ':');
     if (parts.size() > 2)
         return parts[2];
     else
         return "";
 }
 
-std::string getProtocol(std::string protocolInfo)
+std::string getProtocol(const std::string& protocolInfo)
 {
     std::string protocol;
     size_t pos = protocolInfo.find(':');
@@ -577,7 +578,7 @@ std::string secondsToHMS(int seconds)
     return res;
 }
 
-int HMSToSeconds(std::string time)
+int HMSToSeconds(const std::string& time)
 {
     if (!string_ok(time)) {
         log_warning("Could not convert time representation to seconds!");
@@ -632,7 +633,7 @@ std::string getMIME(const fs::path& filepath, const void *buffer, size_t length)
 }
 #endif
 
-void set_jpeg_resolution_resource(std::shared_ptr<CdsItem> item, int res_num)
+void set_jpeg_resolution_resource(const std::shared_ptr<CdsItem>& item, int res_num)
 {
     try {
         std::unique_ptr<IOHandler> fio_h = std::make_unique<FileIOHandler>(item->getLocation());
@@ -648,7 +649,7 @@ void set_jpeg_resolution_resource(std::shared_ptr<CdsItem> item, int res_num)
     }
 }
 
-bool check_resolution(std::string resolution, int* x, int* y)
+bool check_resolution(const std::string& resolution, int* x, int* y)
 {
     if (x != nullptr)
         *x = 0;
@@ -656,7 +657,7 @@ bool check_resolution(std::string resolution, int* x, int* y)
     if (y != nullptr)
         *y = 0;
 
-    std::vector<std::string> parts = split_string(resolution, 'x');
+    std::vector<std::string> parts = split_string(std::move(resolution), 'x');
     if (parts.size() != 2)
         return false;
 
@@ -839,7 +840,7 @@ std::string fallbackString(std::string first, std::string fallback)
     return first;
 }
 
-unsigned int stringHash(std::string str)
+unsigned int stringHash(const std::string& str)
 {
     unsigned int hash = 5381;
     auto* data = (unsigned char*)str.c_str();
@@ -854,7 +855,7 @@ std::string getValueOrDefault(const std::map<std::string,std::string>& m, const 
     return getValueOrDefault<std::string,std::string>(m, key, defval);
 }
 
-std::string toCSV(shared_ptr<unordered_set<int>> array)
+std::string toCSV(const shared_ptr<unordered_set<int>>& array)
 {
     if (array->empty())
         return "";
@@ -902,7 +903,7 @@ void getTimespecAfterMillis(long delta, struct timespec* ret, struct timespec* s
     // log_debug("timespec: sec: {}, nsec: {}", ret->tv_sec, ret->tv_nsec);
 }
 
-std::string interfaceToIP(std::string interface)
+std::string interfaceToIP(const std::string& interface)
 {
 
     struct if_nameindex* iflist = nullptr;
@@ -954,7 +955,7 @@ std::string interfaceToIP(std::string interface)
     return "";
 }
 
-std::string ipToInterface(std::string ip)
+std::string ipToInterface(const std::string& ip)
 {
     if (!string_ok(ip)) {
         return "";
@@ -999,12 +1000,12 @@ std::string ipToInterface(std::string ip)
     return "";
 }
 
-bool validateYesNo(std::string value)
+bool validateYesNo(const std::string& value)
 {
     return !((value != "yes") && (value != "no"));
 }
 
-std::vector<std::string> populateCommandLine(std::string line, std::string in, std::string out, std::string range)
+std::vector<std::string> populateCommandLine(const std::string& line, const std::string& in, const std::string& out, const std::string& range)
 {
     log_debug("Template: '{}', in: '{}', out: '{}', range: '{}'", line, in, out, range);
     std::vector<std::string> params = split_string(line, ' ');
@@ -1192,7 +1193,7 @@ ssize_t getValidUTF8CutPosition(std::string str, ssize_t cutpos)
     return pos;
 }
 
-std::string getDLNAprofileString(std::string contentType)
+std::string getDLNAprofileString(const std::string& contentType)
 {
     std::string profile;
     if (contentType == CONTENT_TYPE_MP4)
@@ -1215,11 +1216,11 @@ std::string getDLNAprofileString(std::string contentType)
     return profile;
 }
 
-std::string getDLNAContentHeader(std::shared_ptr<ConfigManager> config, std::string contentType)
+std::string getDLNAContentHeader(const std::shared_ptr<ConfigManager>& config, const std::string& contentType)
 {
     if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO)) {
         std::string content_parameter;
-        content_parameter = getDLNAprofileString(contentType);
+        content_parameter = getDLNAprofileString(std::move(contentType));
         if (string_ok(content_parameter))
             content_parameter = D_PROFILE + std::string("=") + content_parameter + ";";
         // enabling or disabling seek
@@ -1234,7 +1235,7 @@ std::string getDLNAContentHeader(std::shared_ptr<ConfigManager> config, std::str
     return "";
 }
 
-std::string getDLNATransferHeader(std::shared_ptr<ConfigManager> config, std::string mimeType)
+std::string getDLNATransferHeader(const std::shared_ptr<ConfigManager>& config, const std::string& mimeType)
 {
     if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO)) {
         std::string transfer_parameter;

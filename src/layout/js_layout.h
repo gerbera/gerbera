@@ -49,10 +49,10 @@ protected:
     std::unique_ptr<ImportScript> import_script;
 
 public:
-    JSLayout(std::shared_ptr<ConfigManager> config,
-        std::shared_ptr<Storage> storage,
-        std::shared_ptr<ContentManager> content,
-        std::shared_ptr<Runtime> runtime);
+    JSLayout(const std::shared_ptr<ConfigManager>& config,
+        const std::shared_ptr<Storage>& storage,
+        const std::shared_ptr<ContentManager>& content,
+        const std::shared_ptr<Runtime>& runtime);
     virtual ~JSLayout();
     virtual void processCdsObject(std::shared_ptr<CdsObject> obj, fs::path rootpath) override;
 };

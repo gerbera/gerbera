@@ -49,7 +49,7 @@ Runtime::~Runtime()
     duk_destroy_heap(ctx);
 }
 
-duk_context *Runtime::createContext(std::string name)
+duk_context* Runtime::createContext(const std::string& name)
 {
     duk_push_heap_stash(ctx);
     duk_idx_t thread_idx = duk_push_thread_new_globalenv(ctx);
@@ -59,7 +59,7 @@ duk_context *Runtime::createContext(std::string name)
     return newctx;
 }
 
-void Runtime::destroyContext(std::string name)
+void Runtime::destroyContext(const std::string& name)
 {
     duk_push_heap_stash(ctx);
     duk_del_prop_string(ctx, -1, name.c_str());

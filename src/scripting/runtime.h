@@ -49,8 +49,8 @@ public:
     virtual ~Runtime();
     
     /// \brief Returns a new (sub)context. !!! Not thread-safe !!!
-    duk_context *createContext(std::string name);
-    void destroyContext(std::string name);
+    duk_context* createContext(const std::string& name);
+    void destroyContext(const std::string& name);
 
     using AutoLock = std::lock_guard<std::recursive_mutex>;
     std::recursive_mutex& getMutex() { return mutex; }

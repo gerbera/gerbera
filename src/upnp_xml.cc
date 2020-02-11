@@ -30,23 +30,25 @@
 /// \file upnp_xml.cc
 
 #include "upnp_xml.h"
+
 #include "common.h"
 #include "config/config_manager.h"
 #include "metadata/metadata_handler.h"
 #include "server.h"
 #include "storage/storage.h"
+#include <utility>
 
 UpnpXMLBuilder::UpnpXMLBuilder(std::shared_ptr<ConfigManager> config,
     std::shared_ptr<Storage> storage,
     std::string virtualUrl, std::string presentationURL)
-    : config(config)
-    , storage(storage)
-    , virtualURL(virtualUrl)
-    , presentationURL(presentationURL)
+    : config(std::move(config))
+    , storage(std::move(storage))
+    , virtualURL(std::move(virtualUrl))
+    , presentationURL(std::move(presentationURL))
 {
 }
 
-std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createResponse(std::string actionName, std::string serviceType)
+std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createResponse(const std::string& actionName, const std::string& serviceType)
 {
     auto response = std::make_unique<pugi::xml_document>();
     auto root = response->append_child(("u:" + actionName + "Response").c_str());
@@ -55,7 +57,7 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createResponse(std::string a
     return response;
 }
 
-void UpnpXMLBuilder::renderObject(std::shared_ptr<CdsObject> obj, bool renderActions, size_t stringLimit, pugi::xml_node* parent)
+void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, bool renderActions, size_t stringLimit, pugi::xml_node* parent)
 {
     auto result = parent->append_child("");
 
@@ -239,7 +241,7 @@ void UpnpXMLBuilder::renderObject(std::shared_ptr<CdsObject> obj, bool renderAct
     // log_debug("Rendered DIDL: {}", result->print().c_str());
 }
 
-void UpnpXMLBuilder::updateObject(std::shared_ptr<CdsObject> obj, std::string text)
+void UpnpXMLBuilder::updateObject(const std::shared_ptr<CdsObject>& obj, const std::string& text)
 {
     pugi::xml_document doc;
     pugi::xml_parse_result result = doc.load_string(text.c_str());
@@ -418,7 +420,7 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription()
     return doc;
 }
 
-void UpnpXMLBuilder::renderResource(std::string URL, const std::map<std::string,std::string>& attributes, pugi::xml_node* parent)
+void UpnpXMLBuilder::renderResource(const std::string& URL, const std::map<std::string, std::string>& attributes, pugi::xml_node* parent)
 {
     auto res = parent->append_child("res");
     res.append_child(pugi::node_pcdata).set_value(URL.c_str());
@@ -428,7 +430,7 @@ void UpnpXMLBuilder::renderResource(std::string URL, const std::map<std::string,
     }
 }
 
-void UpnpXMLBuilder::renderCaptionInfo(std::string URL, pugi::xml_node* parent)
+void UpnpXMLBuilder::renderCaptionInfo(const std::string& URL, pugi::xml_node* parent)
 {
     auto cap = parent->append_child("sec:CaptionInfoEx");
 
@@ -444,37 +446,37 @@ void UpnpXMLBuilder::renderCaptionInfo(std::string URL, pugi::xml_node* parent)
     cap.append_attribute("sec:type") = "srt";
 }
 
-void UpnpXMLBuilder::renderCreator(std::string creator, pugi::xml_node* parent)
+void UpnpXMLBuilder::renderCreator(const std::string& creator, pugi::xml_node* parent)
 {
     parent->append_child("dc:creator").append_child(pugi::node_pcdata).set_value(creator.c_str());
 }
 
-void UpnpXMLBuilder::renderAlbumArtURI(std::string uri, pugi::xml_node* parent)
+void UpnpXMLBuilder::renderAlbumArtURI(const std::string& uri, pugi::xml_node* parent)
 {
     parent->append_child("upnp:albumArtURI").append_child(pugi::node_pcdata).set_value(uri.c_str());
 }
 
-void UpnpXMLBuilder::renderComposer(std::string composer, pugi::xml_node* parent)
+void UpnpXMLBuilder::renderComposer(const std::string& composer, pugi::xml_node* parent)
 {
     parent->append_child("upnp:composer").append_child(pugi::node_pcdata).set_value(composer.c_str());
 }
 
-void UpnpXMLBuilder::renderConductor(std::string conductor, pugi::xml_node* parent)
+void UpnpXMLBuilder::renderConductor(const std::string& conductor, pugi::xml_node* parent)
 {
     parent->append_child("upnp:Conductor").append_child(pugi::node_pcdata).set_value(conductor.c_str());
 }
 
-void UpnpXMLBuilder::renderOrchestra(std::string orchestra, pugi::xml_node* parent)
+void UpnpXMLBuilder::renderOrchestra(const std::string& orchestra, pugi::xml_node* parent)
 {
     parent->append_child("upnp:orchestra").append_child(pugi::node_pcdata).set_value(orchestra.c_str());
 }
 
-void UpnpXMLBuilder::renderAlbumDate(std::string date, pugi::xml_node* parent)
+void UpnpXMLBuilder::renderAlbumDate(const std::string& date, pugi::xml_node* parent)
 {
     parent->append_child("upnp:date").append_child(pugi::node_pcdata).set_value(date.c_str());
 }
 
-std::unique_ptr<UpnpXMLBuilder::PathBase> UpnpXMLBuilder::getPathBase(std::shared_ptr<CdsItem> item, bool forceLocal)
+std::unique_ptr<UpnpXMLBuilder::PathBase> UpnpXMLBuilder::getPathBase(const std::shared_ptr<CdsItem>& item, bool forceLocal)
 {
     auto pathBase = std::make_unique<PathBase>();
     /// \todo resource options must be read from configuration files
@@ -509,7 +511,7 @@ std::unique_ptr<UpnpXMLBuilder::PathBase> UpnpXMLBuilder::getPathBase(std::share
     return pathBase;
 }
 
-std::string UpnpXMLBuilder::getFirstResourcePath(std::shared_ptr<CdsItem> item)
+std::string UpnpXMLBuilder::getFirstResourcePath(const std::shared_ptr<CdsItem>& item)
 {
     std::string result;
     auto urlBase = getPathBase(item);
@@ -525,7 +527,8 @@ std::string UpnpXMLBuilder::getFirstResourcePath(std::shared_ptr<CdsItem> item)
     return result;
 }
 
-std::string UpnpXMLBuilder::getArtworkUrl(std::shared_ptr<CdsItem> item) {
+std::string UpnpXMLBuilder::getArtworkUrl(const std::shared_ptr<CdsItem>& item)
+{
     // FIXME: This is temporary until we do artwork properly.
     log_debug("Building Art url for {}", item->getID());
 
@@ -536,7 +539,7 @@ std::string UpnpXMLBuilder::getArtworkUrl(std::shared_ptr<CdsItem> item) {
     return virtualURL + urlBase->pathBase;
 }
 
-std::string UpnpXMLBuilder::renderExtension(std::string contentType, std::string location)
+std::string UpnpXMLBuilder::renderExtension(const std::string& contentType, const std::string& location)
 {
     std::string ext = std::string(_URL_PARAM_SEPARATOR) + URL_FILE_EXTENSION + _URL_PARAM_SEPARATOR + "file";
 
@@ -560,7 +563,7 @@ std::string UpnpXMLBuilder::renderExtension(std::string contentType, std::string
     return "";
 }
 
-void UpnpXMLBuilder::addResources(std::shared_ptr<CdsItem> item, pugi::xml_node* parent)
+void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xml_node* parent)
 {
     auto urlBase = getPathBase(item);
     bool skipURL = ((IS_CDS_ITEM_INTERNAL_URL(item->getObjectType()) || IS_CDS_ITEM_EXTERNAL_URL(item->getObjectType())) && (!item->getFlag(OBJECT_FLAG_PROXY_URL)));

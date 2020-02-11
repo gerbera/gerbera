@@ -30,13 +30,14 @@
 /// \file cds_objects.cc
 
 #include <filesystem>
+#include <utility>
 
 #include "cds_objects.h"
 #include "storage/storage.h"
 #include "util/tools.h"
 
 CdsObject::CdsObject(std::shared_ptr<Storage> storage)
-    : storage(storage)
+    : storage(std::move(storage))
 {
     id = INVALID_OBJECT_ID;
     parentID = INVALID_OBJECT_ID;
@@ -95,7 +96,7 @@ int CdsObject::equals(std::shared_ptr<CdsObject> obj, bool exactly)
     return 1;
 }
 
-int CdsObject::resourcesEqual(std::shared_ptr<CdsObject> obj)
+int CdsObject::resourcesEqual(const std::shared_ptr<CdsObject>& obj)
 {
     if (resources.size() != obj->resources.size())
         return 0;
@@ -117,7 +118,7 @@ void CdsObject::validate()
         throw std::runtime_error("Object validation failed: missing upnp class\n");
 }
 
-std::shared_ptr<CdsObject> CdsObject::createObject(std::shared_ptr<Storage> storage, unsigned int objectType)
+std::shared_ptr<CdsObject> CdsObject::createObject(const std::shared_ptr<Storage>& storage, unsigned int objectType)
 {
     std::shared_ptr<CdsObject> obj;
 
@@ -140,7 +141,7 @@ std::shared_ptr<CdsObject> CdsObject::createObject(std::shared_ptr<Storage> stor
 /* CdsItem */
 
 CdsItem::CdsItem(std::shared_ptr<Storage> storage)
-    : CdsObject(storage)
+    : CdsObject(std::move(storage))
 {
     objectType = OBJECT_TYPE_ITEM;
     upnpClass = "object.item";
@@ -183,7 +184,7 @@ void CdsItem::validate()
 }
 
 CdsActiveItem::CdsActiveItem(std::shared_ptr<Storage> storage)
-    : CdsItem(storage)
+    : CdsItem(std::move(storage))
 {
     objectType |= OBJECT_TYPE_ACTIVE_ITEM;
 
@@ -222,7 +223,7 @@ void CdsActiveItem::validate()
 //---------
 
 CdsItemExternalURL::CdsItemExternalURL(std::shared_ptr<Storage> storage)
-    : CdsItem(storage)
+    : CdsItem(std::move(storage))
 {
     objectType |= OBJECT_TYPE_ITEM_EXTERNAL_URL;
 
@@ -242,7 +243,7 @@ void CdsItemExternalURL::validate()
 //---------
 
 CdsItemInternalURL::CdsItemInternalURL(std::shared_ptr<Storage> storage)
-    : CdsItemExternalURL(storage)
+    : CdsItemExternalURL(std::move(storage))
 {
     objectType |= OBJECT_TYPE_ITEM_INTERNAL_URL;
 
@@ -259,7 +260,7 @@ void CdsItemInternalURL::validate()
 }
 
 CdsContainer::CdsContainer(std::shared_ptr<Storage> storage)
-    : CdsObject(storage)
+    : CdsObject(std::move(storage))
 {
     objectType = OBJECT_TYPE_CONTAINER;
     updateID = 0;
@@ -339,7 +340,7 @@ std::string CdsObject::mapObjectType(int type)
     throw std::runtime_error("illegal objectType: " + std::to_string(type));
 }
 
-int CdsObject::remapObjectType(std::string objectType)
+int CdsObject::remapObjectType(const std::string& objectType)
 {
     if (objectType == STRING_OBJECT_TYPE_CONTAINER)
         return OBJECT_TYPE_CONTAINER;

@@ -30,18 +30,20 @@
 /// \file web_autoscan.cc
 
 #include "autoscan.h"
+
 #include "content_manager.h"
 #include "pages.h"
 #include "storage/storage.h"
+#include <utility>
 
-static bool WebAutoscanProcessListComparator(std::shared_ptr<AutoscanDirectory> a1, std::shared_ptr<AutoscanDirectory> a2)
+static bool WebAutoscanProcessListComparator(const std::shared_ptr<AutoscanDirectory>& a1, const std::shared_ptr<AutoscanDirectory>& a2)
 {
     return strcmp(a1->getLocation().c_str(), a2->getLocation().c_str()) < 0;
 }
 
 web::autoscan::autoscan(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
     std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
-    : WebRequestHandler(config, storage, content, sessionManager)
+    : WebRequestHandler(std::move(config), std::move(storage), std::move(content), std::move(sessionManager))
 {
 }
 
@@ -153,7 +155,7 @@ void web::autoscan::process()
         throw std::runtime_error("web:autoscan called with illegal action");
 }
 
-void web::autoscan::autoscan2XML(std::shared_ptr<AutoscanDirectory> adir, pugi::xml_node* element)
+void web::autoscan::autoscan2XML(const std::shared_ptr<AutoscanDirectory>& adir, pugi::xml_node* element)
 {
     if (adir == nullptr) {
         element->append_child("scan_mode").append_child(pugi::node_pcdata)

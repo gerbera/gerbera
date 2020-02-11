@@ -73,12 +73,12 @@ public:
     ///
     /// \param name attribute name
     /// \param value attribute value
-    void addAttribute(std::string name, std::string value);
+    void addAttribute(const std::string& name, std::string value);
 
     /// \brief Removes a resource attribute.
     ///
     /// \param name attribute name
-    void removeAttribute(std::string name);
+    void removeAttribute(const std::string& name);
 
     /// \brief Merge existing attributes with new ones
     void mergeAttributes(const std::map<std::string,std::string>& additional);
@@ -92,28 +92,28 @@ public:
     ///
     /// \param name parameter name
     /// \param value parameter value
-    void addParameter(std::string name, std::string value);
+    void addParameter(const std::string& name, std::string value);
 
     /// \brief Add an option to the resource.
     ///
     /// The options are internal, they do not appear in the URL or in the
     /// XML but can be used for any purpose.
-    void addOption(std::string name, std::string value);
+    void addOption(const std::string& name, std::string value);
 
     // urlencode into string
     int getHandlerType();
     std::map<std::string,std::string> getAttributes();
     std::map<std::string,std::string> getParameters();
     std::map<std::string,std::string> getOptions();
-    std::string getAttribute(std::string name);
-    std::string getParameter(std::string name);
-    std::string getOption(std::string name);
+    std::string getAttribute(const std::string& name);
+    std::string getParameter(const std::string& name);
+    std::string getOption(const std::string& name);
 
-    bool equals(std::shared_ptr<CdsResource> other);
+    bool equals(const std::shared_ptr<CdsResource>& other);
     std::shared_ptr<CdsResource> clone();
 
     std::string encode();
-    static std::shared_ptr<CdsResource> decode(std::string serial);
+    static std::shared_ptr<CdsResource> decode(const std::string& serial);
 };
 
 #endif // __CDS_RESOURCE_H__

@@ -41,16 +41,17 @@
 #include "util/string_converter.h"
 
 #include <string>
+#include <utility>
 
 #define ATRAILERS_SERVICE_URL_640 "http://www.apple.com/trailers/home/xml/current.xml"
 #define ATRAILERS_SERVICE_URL_720P "http://www.apple.com/trailers/home/xml/current_720p.xml"
 
-ATrailersService::ATrailersService(std::shared_ptr<ConfigManager> config,
+ATrailersService::ATrailersService(const std::shared_ptr<ConfigManager>& config,
     std::shared_ptr<Storage> storage,
     std::shared_ptr<ContentManager> content)
     : config(config)
-    , storage(storage)
-    , content(content)
+    , storage(std::move(storage))
+    , content(std::move(content))
 {
     pid = 0;
     curl_handle = curl_easy_init();

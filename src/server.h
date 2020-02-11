@@ -111,7 +111,7 @@ public:
     /// terminated. This is the case when upnp_clean() was called.
     bool getShutdownStatus() const;
 
-    void sendCDSSubscriptionUpdate(std::string updateString);
+    void sendCDSSubscriptionUpdate(const std::string& updateString);
 
     std::shared_ptr<ContentManager>  getContent() { return content; }
 

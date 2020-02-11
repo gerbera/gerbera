@@ -30,8 +30,10 @@
 /// \file autoscan.cc
 
 #include "autoscan.h"
+
 #include "content_manager.h"
 #include "storage/storage.h"
+#include <utility>
 
 using namespace std;
 
@@ -48,7 +50,7 @@ AutoscanDirectory::AutoscanDirectory()
 AutoscanDirectory::AutoscanDirectory(fs::path location, ScanMode mode,
     ScanLevel level, bool recursive, bool persistent,
     int id, unsigned int interval, bool hidden)
-    : location(location)
+    : location(std::move(location))
     , mode(mode)
     , level(level)
     , recursive(recursive)
@@ -72,7 +74,7 @@ void AutoscanDirectory::setCurrentLMT(time_t lmt)
 }
 
 AutoscanList::AutoscanList(std::shared_ptr<Storage> storage)
-    : storage(storage)
+    : storage(std::move(storage))
 {
 }
 
@@ -86,13 +88,13 @@ void AutoscanList::updateLMinDB()
     }
 }
 
-int AutoscanList::add(std::shared_ptr<AutoscanDirectory> dir)
+int AutoscanList::add(const std::shared_ptr<AutoscanDirectory>& dir)
 {
     AutoLock lock(mutex);
-    return _add(dir);
+    return _add(std::move(dir));
 }
 
-int AutoscanList::_add(std::shared_ptr<AutoscanDirectory> dir)
+int AutoscanList::_add(const std::shared_ptr<AutoscanDirectory>& dir)
 {
     std::string loc = dir->getLocation();
 
@@ -108,7 +110,7 @@ int AutoscanList::_add(std::shared_ptr<AutoscanDirectory> dir)
     return dir->getScanID();
 }
 
-void AutoscanList::addList(std::shared_ptr<AutoscanList> list)
+void AutoscanList::addList(const std::shared_ptr<AutoscanList>& list)
 {
     AutoLock lock(mutex);
 
@@ -145,7 +147,7 @@ std::shared_ptr<AutoscanDirectory> AutoscanList::getByObjectID(int objectID)
     return nullptr;
 }
 
-std::shared_ptr<AutoscanDirectory> AutoscanList::get(std::string location)
+std::shared_ptr<AutoscanDirectory> AutoscanList::get(const std::string& location)
 {
     AutoLock lock(mutex);
     for (const auto& i : list) {
@@ -186,7 +188,7 @@ int AutoscanList::removeByObjectID(int objectID)
     return INVALID_SCAN_ID;
 }
 
-int AutoscanList::remove(std::string location)
+int AutoscanList::remove(const std::string& location)
 {
     AutoLock lock(mutex);
 
@@ -201,7 +203,7 @@ int AutoscanList::remove(std::string location)
     return INVALID_SCAN_ID;
 }
 
-std::shared_ptr<AutoscanList> AutoscanList::removeIfSubdir(std::string parent, bool persistent)
+std::shared_ptr<AutoscanList> AutoscanList::removeIfSubdir(const std::string& parent, bool persistent)
 {
     AutoLock lock(mutex);
 
@@ -244,7 +246,7 @@ void AutoscanList::notifyAll(Timer::Subscriber* sub)
 
 void AutoscanDirectory::setLocation(fs::path location)
 {
-    this->location = location;
+    this->location = std::move(location);
 }
 
 void AutoscanDirectory::setScanID(int id)
@@ -269,7 +271,7 @@ std::string AutoscanDirectory::mapScanmode(ScanMode scanmode)
     return scanmode_str;
 }
 
-ScanMode AutoscanDirectory::remapScanmode(std::string scanmode)
+ScanMode AutoscanDirectory::remapScanmode(const std::string& scanmode)
 {
     if (scanmode == "timed")
         return ScanMode::Timed;
@@ -295,7 +297,7 @@ std::string AutoscanDirectory::mapScanlevel(ScanLevel scanlevel)
     return scanlevel_str;
 }
 
-ScanLevel AutoscanDirectory::remapScanlevel(std::string scanlevel)
+ScanLevel AutoscanDirectory::remapScanlevel(const std::string& scanlevel)
 {
     if (scanlevel == "basic")
         return ScanLevel::Basic;
@@ -305,7 +307,7 @@ ScanLevel AutoscanDirectory::remapScanlevel(std::string scanlevel)
         throw std::runtime_error("illegal scanlevel (" + scanlevel + ") given to remapScanlevel()");
 }
 
-void AutoscanDirectory::copyTo(std::shared_ptr<AutoscanDirectory> copy)
+void AutoscanDirectory::copyTo(const std::shared_ptr<AutoscanDirectory>& copy)
 {
     copy->location = location;
     copy->mode = mode;

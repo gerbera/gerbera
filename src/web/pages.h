@@ -52,7 +52,7 @@ protected:
     int timeout;
 
 public:
-    auth(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
+    auth(const std::shared_ptr<ConfigManager>& config, std::shared_ptr<Storage> storage,
         std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
     virtual void process();
 };
@@ -143,7 +143,7 @@ public:
     virtual void process();
 
 protected:
-    void autoscan2XML(std::shared_ptr<AutoscanDirectory> adir, pugi::xml_node* element);
+    void autoscan2XML(const std::shared_ptr<AutoscanDirectory>& adir, pugi::xml_node* element);
 };
 
 /// \brief nothing :)
@@ -175,9 +175,9 @@ public:
 /// \param page identifies what type of the request we are dealing with.
 /// \return the appropriate request handler.
 std::unique_ptr<WebRequestHandler> createWebRequestHandler(
-    std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
-    std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager,
-    std::string page);
+    const std::shared_ptr<ConfigManager>& config, const std::shared_ptr<Storage>& storage,
+    const std::shared_ptr<ContentManager>& content, const std::shared_ptr<SessionManager>& sessionManager,
+    const std::string& page);
 
 } // namespace
 

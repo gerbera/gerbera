@@ -22,12 +22,14 @@ Gerbera - https://gerbera.io/
 /// \file device_description_handler.cc
 
 #include "device_description_handler.h"
+
 #include "iohandler/mem_io_handler.h"
 #include "util/tools.h"
+#include <utility>
 
 DeviceDescriptionHandler::DeviceDescriptionHandler(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
     UpnpXMLBuilder* xmlBuilder)
-    : RequestHandler(config, storage)
+    : RequestHandler(std::move(config), std::move(storage))
     , xmlBuilder(xmlBuilder)
 {
 

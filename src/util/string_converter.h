@@ -41,7 +41,7 @@ class ConfigManager;
 
 class StringConverter {
 public:
-    StringConverter(std::string from, std::string to);
+    StringConverter(const std::string& from, const std::string& to);
     virtual ~StringConverter();
     /// \brief Converts uses the from and to values that were passed
     /// to the constructor to convert the string str to a specific character
@@ -51,35 +51,35 @@ public:
     /// thrown if illegal input is encountered. If false, illegal characters
     /// will be padded with '?' and the function will return the string.
     std::string convert(std::string str, bool validate = false);
-    bool validate(std::string str);
+    bool validate(const std::string& str);
 
     /// \brief internal (UTF-8) to filesystem
-    static std::unique_ptr<StringConverter> i2f(std::shared_ptr<ConfigManager> cm);
+    static std::unique_ptr<StringConverter> i2f(const std::shared_ptr<ConfigManager>& cm);
 
     /// \brief filesystem to internal
-    static std::unique_ptr<StringConverter> f2i(std::shared_ptr<ConfigManager> cm);
+    static std::unique_ptr<StringConverter> f2i(const std::shared_ptr<ConfigManager>& cm);
 
     /// \brief metadata to internal
-    static std::unique_ptr<StringConverter> m2i(std::shared_ptr<ConfigManager> cm);
+    static std::unique_ptr<StringConverter> m2i(const std::shared_ptr<ConfigManager>& cm);
 #ifdef HAVE_JS
     /// \brief scripting to internal
-    static std::unique_ptr<StringConverter> j2i(std::shared_ptr<ConfigManager> cm);
+    static std::unique_ptr<StringConverter> j2i(const std::shared_ptr<ConfigManager>& cm);
 
     /// \brief playlist to internal
-    static std::unique_ptr<StringConverter> p2i(std::shared_ptr<ConfigManager> cm);
+    static std::unique_ptr<StringConverter> p2i(const std::shared_ptr<ConfigManager>& cm);
 #endif
 #if defined(HAVE_JS) || defined(HAVE_TAGLIB) || defined(ATRAILERS) || defined(HAVE_MATROSKA)
     /// \brief safeguard - internal to internal - needed to catch some
     /// scenarious where the user may have forgotten to add proper conversion
     /// in the script.
-    static std::unique_ptr<StringConverter> i2i(std::shared_ptr<ConfigManager> cm);
+    static std::unique_ptr<StringConverter> i2i(const std::shared_ptr<ConfigManager>& cm);
 #endif
 
 protected:
     iconv_t cd;
     bool dirty;
 
-    std::string _convert(std::string str, bool validate,
+    std::string _convert(const std::string& str, bool validate,
         size_t* stoppedAt = NULL);
 };
 

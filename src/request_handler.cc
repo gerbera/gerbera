@@ -30,12 +30,13 @@
 /// \file request_handler.cc
 
 #include "request_handler.h"
-#include "util/tools.h"
 
+#include "util/tools.h"
+#include <utility>
 
 RequestHandler::RequestHandler(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage)
-    : config(config)
-    , storage(storage)
+    : config(std::move(config))
+    , storage(std::move(storage))
 {
 }
 

@@ -32,6 +32,7 @@
 #ifdef HAVE_CURL
 #include <curl/curl.h>
 #include <iostream>
+#include <utility>
 #endif
 
 #ifdef HAVE_LASTFMLIB
@@ -62,7 +63,7 @@ static int static_upnp_callback(Upnp_EventType eventtype, const void* event, voi
 }
 
 Server::Server(std::shared_ptr<ConfigManager> config)
-    : config(config)
+    : config(std::move(config))
 {
     server_shutdown_flag = false;
 }
@@ -416,9 +417,9 @@ void Server::routeSubscriptionRequest(const std::unique_ptr<SubscriptionRequest>
 }
 
 // Temp
-void Server::sendCDSSubscriptionUpdate(std::string updateString)
+void Server::sendCDSSubscriptionUpdate(const std::string& updateString)
 {
-    cds->sendSubscriptionUpdate(updateString);
+    cds->sendSubscriptionUpdate(std::move(updateString));
 }
 
 std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filename) const

@@ -24,7 +24,7 @@ public:
     virtual ~TaskProcessor();
     void shutdown();
 
-    void addTask(std::shared_ptr<GenericTask> task);
+    void addTask(const std::shared_ptr<GenericTask>& task);
     std::deque<std::shared_ptr<GenericTask>> getTasklist();
     std::shared_ptr<GenericTask> getCurrentTask();
     void invalidateTask(unsigned int taskID);

@@ -31,6 +31,8 @@
 
 #include <sys/stat.h>
 
+#include <utility>
+
 #include "iohandler/file_io_handler.h"
 #include "serve_request_handler.h"
 #include "config/config_manager.h"
@@ -38,7 +40,7 @@
 #include "util/tools.h"
 
 ServeRequestHandler::ServeRequestHandler(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage)
-    : RequestHandler(config, storage)
+    : RequestHandler(std::move(config), std::move(storage))
 {
 }
 

@@ -4,8 +4,10 @@
 #ifdef ONLINE_SERVICES
 
 #include "task_processor.h"
+
 #include "content_manager.h"
 #include "layout/layout.h"
+#include <utility>
 
 using namespace std;
 
@@ -86,7 +88,7 @@ void TaskProcessor::threadProc()
     }
 }
 
-void TaskProcessor::addTask(std::shared_ptr<GenericTask> task)
+void TaskProcessor::addTask(const std::shared_ptr<GenericTask>& task)
 {
     AutoLock lock(mutex);
 
@@ -153,11 +155,11 @@ TPFetchOnlineContentTask::TPFetchOnlineContentTask(std::shared_ptr<ContentManage
     bool cancellable,
     bool unscheduled_refresh)
     : GenericTask(TaskProcessorTask)
-    , content(content)
-    , task_processor(task_processor)
-    , timer(timer)
-    , service(service)
-    , layout(layout)
+    , content(std::move(content))
+    , task_processor(std::move(task_processor))
+    , timer(std::move(timer))
+    , service(std::move(service))
+    , layout(std::move(layout))
 {
     this->cancellable = cancellable;
     this->unscheduled_refresh = unscheduled_refresh;

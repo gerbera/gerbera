@@ -56,10 +56,10 @@ public:
     void run();
 
     /// \brief Start monitoring a directory
-    void monitor(std::shared_ptr<AutoscanDirectory> dir);
+    void monitor(const std::shared_ptr<AutoscanDirectory>& dir);
 
     /// \brief Stop monitoring a directory
-    void unmonitor(std::shared_ptr<AutoscanDirectory> dir);
+    void unmonitor(const std::shared_ptr<AutoscanDirectory>& dir);
 
 private:
     std::shared_ptr<Storage> storage;
@@ -161,27 +161,27 @@ private:
 
     std::unique_ptr<std::unordered_map<int, std::shared_ptr<Wd>>> watches;
 
-    void monitorUnmonitorRecursive(fs::path startPath, bool unmonitor, std::shared_ptr<AutoscanDirectory> adir, bool startPoint);
-    int monitorDirectory(fs::path path, std::shared_ptr<AutoscanDirectory> adir, bool startPoint, std::vector<std::string>* pathArray = nullptr);
-    void unmonitorDirectory(fs::path path, std::shared_ptr<AutoscanDirectory> adir);
+    void monitorUnmonitorRecursive(const fs::path& startPath, bool unmonitor, const std::shared_ptr<AutoscanDirectory>& adir, bool startPoint);
+    int monitorDirectory(const fs::path& path, const std::shared_ptr<AutoscanDirectory>& adir, bool startPoint, std::vector<std::string>* pathArray = nullptr);
+    void unmonitorDirectory(const fs::path& path, const std::shared_ptr<AutoscanDirectory>& adir);
 
-    std::shared_ptr<WatchAutoscan> getAppropriateAutoscan(std::shared_ptr<Wd> wdObj, std::shared_ptr<AutoscanDirectory> adir);
-    std::shared_ptr<WatchAutoscan> getAppropriateAutoscan(std::shared_ptr<Wd> wdObj, fs::path path);
-    std::shared_ptr<WatchAutoscan> getStartPoint(std::shared_ptr<Wd> wdObj);
+    std::shared_ptr<WatchAutoscan> getAppropriateAutoscan(const std::shared_ptr<Wd>& wdObj, const std::shared_ptr<AutoscanDirectory>& adir);
+    std::shared_ptr<WatchAutoscan> getAppropriateAutoscan(const std::shared_ptr<Wd>& wdObj, const fs::path& path);
+    std::shared_ptr<WatchAutoscan> getStartPoint(const std::shared_ptr<Wd>& wdObj);
 
-    bool removeFromWdObj(std::shared_ptr<Wd> wdObj, std::shared_ptr<Watch> toRemove);
+    bool removeFromWdObj(const std::shared_ptr<Wd>& wdObj, const std::shared_ptr<Watch>& toRemove);
 
-    void monitorNonexisting(fs::path path, std::shared_ptr<AutoscanDirectory> adir);
-    void recheckNonexistingMonitor(int curWd, std::vector<std::string> nonexistingPathArray, std::shared_ptr<AutoscanDirectory> adir);
-    void recheckNonexistingMonitors(int wd, std::shared_ptr<Wd> wdObj);
-    void removeNonexistingMonitor(int wd, std::shared_ptr<Wd> wdObj, std::vector<std::string> pathAr);
+    void monitorNonexisting(const fs::path& path, const std::shared_ptr<AutoscanDirectory>& adir);
+    void recheckNonexistingMonitor(int curWd, std::vector<std::string> nonexistingPathArray, const std::shared_ptr<AutoscanDirectory>& adir);
+    void recheckNonexistingMonitors(int wd, const std::shared_ptr<Wd>& wdObj);
+    void removeNonexistingMonitor(int wd, const std::shared_ptr<Wd>& wdObj, const std::vector<std::string>& pathAr);
 
-    int watchPathForMoves(fs::path path, int wd);
-    int addMoveWatch(fs::path path, int removeWd, int parentWd);
-    void checkMoveWatches(int wd, std::shared_ptr<Wd> wdObj);
+    int watchPathForMoves(const fs::path& path, int wd);
+    int addMoveWatch(const fs::path& path, int removeWd, int parentWd);
+    void checkMoveWatches(int wd, const std::shared_ptr<Wd>& wdObj);
     void removeWatchMoves(int wd);
 
-    void addDescendant(int startPointWd, int addWd, std::shared_ptr<AutoscanDirectory> adir);
+    void addDescendant(int startPointWd, int addWd, const std::shared_ptr<AutoscanDirectory>& adir);
     void removeDescendants(int wd);
 
     /// \brief is set to true by shutdown() if the inotify thread should terminate

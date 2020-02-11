@@ -31,6 +31,7 @@
 /// \brief Implementeation of the MetadataHandler class.
 
 #include <filesystem>
+#include <utility>
 namespace fs = std::filesystem;
 
 #include "metadata_handler.h"
@@ -95,11 +96,12 @@ res_key RES_KEYS[] = {
 };
 
 MetadataHandler::MetadataHandler(std::shared_ptr<ConfigManager> config)
-    : config(config)
+    : config(std::move(config))
 {
 }
 
-void MetadataHandler::setMetadata(std::shared_ptr<ConfigManager> config, std::shared_ptr<CdsItem> item) {
+void MetadataHandler::setMetadata(const std::shared_ptr<ConfigManager>& config, const std::shared_ptr<CdsItem>& item)
+{
     std::string location = item->getLocation();
     if (!fs::is_regular_file(location))
         throw std::runtime_error("Not a file: " + location);
@@ -172,7 +174,7 @@ std::string MetadataHandler::getResAttrName(resource_attributes_t attr)
     return RES_KEYS[attr].upnp;
 }
 
-std::unique_ptr<MetadataHandler> MetadataHandler::createHandler(std::shared_ptr<ConfigManager> config, int handlerType)
+std::unique_ptr<MetadataHandler> MetadataHandler::createHandler(const std::shared_ptr<ConfigManager>& config, int handlerType)
 {
     switch (handlerType) {
 #ifdef HAVE_LIBEXIF

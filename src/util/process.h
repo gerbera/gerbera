@@ -39,7 +39,7 @@
 class ConfigManager;
 
 void init_process();
-std::string run_simple_process(std::shared_ptr<ConfigManager> cfg, std::string prog, std::string param, std::string input);
+std::string run_simple_process(const std::shared_ptr<ConfigManager>& cfg, const std::string& prog, const std::string& param, const std::string& input);
 
 void run_process(std::string prog, std::string param);
 

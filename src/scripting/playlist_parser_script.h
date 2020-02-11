@@ -46,14 +46,14 @@ class ContentManager;
 class PlaylistParserScript : public Script
 {
 public:
-    PlaylistParserScript(std::shared_ptr<ConfigManager> config,
+    PlaylistParserScript(const std::shared_ptr<ConfigManager>& config,
         std::shared_ptr<Storage> storage,
         std::shared_ptr<ContentManager> content,
-        std::shared_ptr<Runtime> runtime);
+        const std::shared_ptr<Runtime>& runtime);
     virtual ~PlaylistParserScript();
 
     std::string readln();
-    void processPlaylistObject(std::shared_ptr<CdsObject> obj, std::shared_ptr<GenericTask> task);
+    void processPlaylistObject(const std::shared_ptr<CdsObject>& obj, std::shared_ptr<GenericTask> task);
     virtual script_class_t whoami() { return S_PLAYLIST; }
 
 private:

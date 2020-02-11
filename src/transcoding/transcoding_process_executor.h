@@ -36,11 +36,11 @@
 
 class TranscodingProcessExecutor : public ProcessExecutor {
 public:
-    TranscodingProcessExecutor(std::string command,
-        std::vector<std::string> arglist);
+    TranscodingProcessExecutor(const std::string& command,
+        const std::vector<std::string>& arglist);
     /// \brief This function adds a filename to a list, files in that list
     /// will be removed once the class is destroyed.
-    void removeFile(std::string filename);
+    void removeFile(const std::string& filename);
 
     virtual ~TranscodingProcessExecutor();
 

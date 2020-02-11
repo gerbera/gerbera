@@ -49,7 +49,7 @@ protected:
     int errCode;
 
 public:
-    UpnpException(int errCode, std::string message);
+    UpnpException(int errCode, const std::string& message);
     [[nodiscard]] inline int getErrorCode() const { return errCode; }
 };
 

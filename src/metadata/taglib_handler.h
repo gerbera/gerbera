@@ -51,20 +51,20 @@ public:
     virtual std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsItem> item, int resNum);
 
 private:
-    void addField(metadata_fields_t field, const TagLib::File& file, const TagLib::Tag* tag, std::shared_ptr<CdsItem> item) const;
+    void addField(metadata_fields_t field, const TagLib::File& file, const TagLib::Tag* tag, const std::shared_ptr<CdsItem>& item) const;
 
-    void populateGenericTags(std::shared_ptr<CdsItem> item, const TagLib::File& file) const;
-    bool isValidArtworkContentType(std::string content_type);
+    void populateGenericTags(const std::shared_ptr<CdsItem>& item, const TagLib::File& file) const;
+    bool isValidArtworkContentType(const std::string& content_type);
     std::string getContentTypeFromByteVector(const TagLib::ByteVector& data) const;
-    void addArtworkResource(std::shared_ptr<CdsItem> item, std::string content_type);
-    void extractMP3(TagLib::IOStream* roStream, std::shared_ptr<CdsItem> item);
-    void extractOgg(TagLib::IOStream* roStream, std::shared_ptr<CdsItem> item);
-    void extractASF(TagLib::IOStream* roStream, std::shared_ptr<CdsItem> item);
-    void extractFLAC(TagLib::IOStream* roStream, std::shared_ptr<CdsItem> item);
-    void extractAPE(TagLib::IOStream* roStream, std::shared_ptr<CdsItem> item);
-    void extractWavPack(TagLib::IOStream* roStream, std::shared_ptr<CdsItem> item);
-    void extractMP4(TagLib::IOStream* roStream, std::shared_ptr<CdsItem> item);
-    void extractAiff(TagLib::IOStream* roStream, std::shared_ptr<CdsItem> item);
+    void addArtworkResource(const std::shared_ptr<CdsItem>& item, const std::string& content_type);
+    void extractMP3(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item);
+    void extractOgg(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item);
+    void extractASF(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item);
+    void extractFLAC(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item);
+    void extractAPE(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item);
+    void extractWavPack(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item);
+    void extractMP4(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item);
+    void extractAiff(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item);
 };
 
 #endif

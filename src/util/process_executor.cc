@@ -37,7 +37,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-ProcessExecutor::ProcessExecutor(std::string command, std::vector<std::string> arglist)
+ProcessExecutor::ProcessExecutor(const std::string& command, const std::vector<std::string>& arglist)
 {
 #define MAX_ARGS 255
     const char* argv[MAX_ARGS];

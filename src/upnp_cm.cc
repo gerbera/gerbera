@@ -30,16 +30,18 @@
 /// \file upnp_cm.cc
 
 #include "upnp_cm.h"
+
 #include "config/config_manager.h"
-#include "storage/storage.h"
 #include "server.h"
+#include "storage/storage.h"
 #include "util/tools.h"
+#include <utility>
 
 ConnectionManagerService::ConnectionManagerService(std::shared_ptr<ConfigManager> config,
     std::shared_ptr<Storage> storage,
     UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle)
-    : config(config)
-    , storage(storage)
+    : config(std::move(config))
+    , storage(std::move(storage))
     , xmlBuilder(xmlBuilder)
     , deviceHandle(deviceHandle)
 {
@@ -137,7 +139,7 @@ void ConnectionManagerService::processSubscriptionRequest(const std::unique_ptr<
     ixmlDocument_free(event);
 }
 
-void ConnectionManagerService::sendSubscriptionUpdate(std::string sourceProtocol_CSV)
+void ConnectionManagerService::sendSubscriptionUpdate(const std::string& sourceProtocol_CSV)
 {
     auto propset = xmlBuilder->createEventPropertySet();
     auto property = propset->document_element().first_child();

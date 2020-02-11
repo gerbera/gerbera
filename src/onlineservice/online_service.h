@@ -133,7 +133,7 @@ public:
     OnlineServiceList();
 
     /// \brief Adds a service to the service list.
-    void registerService(std::shared_ptr<OnlineService> service);
+    void registerService(const std::shared_ptr<OnlineService>& service);
 
     /// \brief Retrieves a service given by the service ID from the list
     std::shared_ptr<OnlineService> getService(service_type_t service);

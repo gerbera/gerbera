@@ -43,7 +43,7 @@ OnlineServiceList::OnlineServiceList()
     service_list.resize(OS_Max);
 }
 
-void OnlineServiceList::registerService(std::shared_ptr<OnlineService> service)
+void OnlineServiceList::registerService(const std::shared_ptr<OnlineService>& service)
 {
     if (service == nullptr)
         return;

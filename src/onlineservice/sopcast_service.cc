@@ -32,21 +32,23 @@
 #ifdef SOPCAST
 
 #include "sopcast_service.h"
-#include "storage/storage.h"
+
 #include "config/config_manager.h"
 #include "content_manager.h"
 #include "server.h"
 #include "sopcast_content_handler.h"
+#include "storage/storage.h"
 #include "util/string_converter.h"
+#include <utility>
 
 #define SOPCAST_CHANNEL_URL "http://www.sopcast.com/gchlxml"
 
 SopCastService::SopCastService(std::shared_ptr<ConfigManager> config,
     std::shared_ptr<Storage> storage,
     std::shared_ptr<ContentManager> content)
-    : config(config)
-    , storage(storage)
-    , content(content)
+    : config(std::move(config))
+    , storage(std::move(storage))
+    , content(std::move(content))
 {
     pid = 0;
     curl_handle = curl_easy_init();

@@ -32,7 +32,7 @@
 #include "exceptions.h"
 #include <string>
 
-UpnpException::UpnpException(int errCode, std::string message)
+UpnpException::UpnpException(int errCode, const std::string& message)
     : std::runtime_error(message)
 {
     this->errCode = errCode;

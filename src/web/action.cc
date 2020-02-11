@@ -29,13 +29,15 @@
 
 /// \file action.cc
 
+#include <utility>
+
 #include "pages.h"
 #include "config/config_manager.h"
 #include "content_manager.h"
 
 web::action::action(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
     std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
-    : WebRequestHandler(config, storage, content, sessionManager)
+    : WebRequestHandler(std::move(config), std::move(storage), std::move(content), std::move(sessionManager))
 {
 }
 

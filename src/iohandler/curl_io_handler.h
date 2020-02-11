@@ -42,7 +42,7 @@
 
 class CurlIOHandler : public IOHandlerBufferHelper {
 public:
-    CurlIOHandler(std::string URL, CURL* curl_handle, size_t bufSize, size_t initialFillSize);
+    CurlIOHandler(const std::string& URL, CURL* curl_handle, size_t bufSize, size_t initialFillSize);
 
     virtual void open(enum UpnpOpenFileMode mode);
     virtual void close();

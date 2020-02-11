@@ -34,9 +34,9 @@
 namespace web {
 
 std::unique_ptr<WebRequestHandler> createWebRequestHandler(
-    std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
-    std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager,
-    std::string page)
+    const std::shared_ptr<ConfigManager>& config, const std::shared_ptr<Storage>& storage,
+    const std::shared_ptr<ContentManager>& content, const std::shared_ptr<SessionManager>& sessionManager,
+    const std::string& page)
 {
     if (page == "add")
         return std::make_unique<web::add>(config, storage, content, sessionManager);

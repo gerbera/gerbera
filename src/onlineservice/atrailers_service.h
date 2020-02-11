@@ -50,7 +50,7 @@ class ContentManager;
 /// handles adding/refreshing content in the database.
 class ATrailersService : public OnlineService {
 public:
-    ATrailersService(std::shared_ptr<ConfigManager> config,
+    ATrailersService(const std::shared_ptr<ConfigManager>& config,
         std::shared_ptr<Storage> storage,
         std::shared_ptr<ContentManager> content);
     ~ATrailersService();

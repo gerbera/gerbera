@@ -31,6 +31,7 @@
 
 #include "timer.h"
 #include <cassert>
+#include <utility>
 
 using namespace std;
 
@@ -74,7 +75,7 @@ void Timer::addTimerSubscriber(Subscriber* timerSubscriber, unsigned int notifyI
         throw std::runtime_error(fmt::format("Tried to add timer with illegal notifyInterval: {}", notifyInterval));
 
     AutoLock lock(mutex);
-    TimerSubscriberElement element(timerSubscriber, notifyInterval, parameter, once);
+    TimerSubscriberElement element(timerSubscriber, notifyInterval, std::move(parameter), once);
     for (auto& subscriber : subscribers) {
         if (subscriber == element) {
             throw std::runtime_error("Tried to add same timer twice");
@@ -88,7 +89,7 @@ void Timer::removeTimerSubscriber(Subscriber* timerSubscriber, std::shared_ptr<P
 {
     log_debug("Removing subscriber...");
     AutoLock lock(mutex);
-    TimerSubscriberElement element(timerSubscriber, 0, parameter);
+    TimerSubscriberElement element(timerSubscriber, 0, std::move(parameter));
     auto it = std::find(subscribers.cbegin(), subscribers.cend(), element);
     if (it != subscribers.cend()) {
         subscribers.erase(it);

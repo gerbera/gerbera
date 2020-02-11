@@ -30,16 +30,18 @@
 /// \file upnp_mrreg.cc
 
 #include "upnp_mrreg.h"
+
 #include "config/config_manager.h"
 #include "ixml.h"
 #include "server.h"
 #include "storage/storage.h"
-#include "util/tools.h"
 #include "upnp_xml.h"
+#include "util/tools.h"
+#include <utility>
 
 MRRegistrarService::MRRegistrarService(std::shared_ptr<ConfigManager> config,
     UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle)
-    : config(config)
+    : config(std::move(config))
     , xmlBuilder(xmlBuilder)
     , deviceHandle(deviceHandle)
 {

@@ -32,6 +32,8 @@
 
 #include <zlib.h>
 
+#include <utility>
+
 #include "sqlite3_storage.h"
 #include "common.h"
 #include "config/config_manager.h"
@@ -104,8 +106,8 @@ PRAGMA foreign_keys = ON;"
 using namespace std;
 
 Sqlite3Storage::Sqlite3Storage(std::shared_ptr<ConfigManager> config, std::shared_ptr<Timer> timer)
-    : SQLStorage(config)
-    , timer(timer)
+    : SQLStorage(std::move(config))
+    , timer(std::move(timer))
 {
     shutdownFlag = false;
     table_quote_begin = '"';
@@ -280,7 +282,7 @@ std::string Sqlite3Storage::quote(std::string value)
     return ret;
 }
 
-std::string Sqlite3Storage::getError(std::string query, std::string error, sqlite3* db)
+std::string Sqlite3Storage::getError(const std::string& query, const std::string& error, sqlite3* db)
 {
     return std::string("SQLITE3: (") + std::to_string(sqlite3_errcode(db)) + " : " + std::to_string(sqlite3_extended_errcode(db)) + ") "
         + sqlite3_errmsg(db) + "\nQuery:" + (query.empty() ? "unknown" : query) + "\nerror: " + (error.empty() ? "unknown" : error);
@@ -365,7 +367,7 @@ void Sqlite3Storage::threadProc()
         sqlite3_close(db);
 }
 
-void Sqlite3Storage::addTask(std::shared_ptr<SLTask> task, bool onlyIfDirty)
+void Sqlite3Storage::addTask(const std::shared_ptr<SLTask>& task, bool onlyIfDirty)
 {
     if (!taskQueueOpen)
         throw std::runtime_error("sqlite3 task queue is already closed");
@@ -427,7 +429,7 @@ void SLTask::sendSignal()
 
 void SLTask::sendSignal(std::string error)
 {
-    this->error = error;
+    this->error = std::move(error);
     sendSignal();
 }
 
@@ -447,8 +449,9 @@ void SLTask::waitForTask()
 }
 
 /* SLInitTask */
-SLInitTask::SLInitTask(std::shared_ptr<ConfigManager> config) : SLTask()
-    , config(config)
+SLInitTask::SLInitTask(std::shared_ptr<ConfigManager> config)
+    : SLTask()
+    , config(std::move(config))
 {
 }
 
@@ -557,8 +560,8 @@ void SLExecTask::run(sqlite3** db, Sqlite3Storage* sl)
 }
 
 /* SLBackupTask */
-SLBackupTask::SLBackupTask(std::shared_ptr<ConfigManager> config, bool restore) :
-    config(config)
+SLBackupTask::SLBackupTask(std::shared_ptr<ConfigManager> config, bool restore)
+    : config(std::move(config))
     , restore(restore)
 {
 }
@@ -629,7 +632,7 @@ std::unique_ptr<SQLRow> Sqlite3Result::nextRow()
 /* Sqlite3Row */
 
 Sqlite3Row::Sqlite3Row(char** row, std::shared_ptr<SQLResult> sqlResult)
-    : SQLRow(sqlResult)
+    : SQLRow(std::move(sqlResult))
 {
     this->row = row;
 }

@@ -34,10 +34,11 @@
 #include "content_manager.h"
 #include "iohandler/mem_io_handler.h"
 #include "util/tools.h"
+#include "util/xml_to_json.h"
 #include "web/pages.h"
 #include <ctime>
 #include <util/headers.h>
-#include "util/xml_to_json.h"
+#include <utility>
 
 namespace web {
 
@@ -45,16 +46,16 @@ WebRequestHandler::WebRequestHandler(std::shared_ptr<ConfigManager> config,
     std::shared_ptr<Storage> storage,
     std::shared_ptr<ContentManager> content,
     std::shared_ptr<SessionManager> sessionManager)
-    : RequestHandler(config, storage)
-    , content(content)
-    , sessionManager(sessionManager)
+    : RequestHandler(std::move(config), std::move(storage))
+    , content(std::move(content))
+    , sessionManager(std::move(sessionManager))
     , checkRequestCalled(false)
 {
 }
 
 int WebRequestHandler::intParam(std::string name, int invalid)
 {
-    std::string value = param(name);
+    std::string value = param(std::move(name));
     if (!string_ok(value))
         return invalid;
     else
@@ -63,7 +64,7 @@ int WebRequestHandler::intParam(std::string name, int invalid)
 
 bool WebRequestHandler::boolParam(std::string name)
 {
-    std::string value = param(name);
+    std::string value = param(std::move(name));
     return string_ok(value) && (value == "1" || value == "true");
 }
 
@@ -257,7 +258,7 @@ void WebRequestHandler::handleUpdateIDs()
     }
 }
 
-void WebRequestHandler::addUpdateIDs(std::shared_ptr<Session> session, pugi::xml_node* updateIDsEl)
+void WebRequestHandler::addUpdateIDs(const std::shared_ptr<Session>& session, pugi::xml_node* updateIDsEl)
 {
     std::string updateIDs = session->getUIUpdateIDs();
     if (string_ok(updateIDs)) {
@@ -267,7 +268,7 @@ void WebRequestHandler::addUpdateIDs(std::shared_ptr<Session> session, pugi::xml
     }
 }
 
-void WebRequestHandler::appendTask(std::shared_ptr<GenericTask> task, pugi::xml_node* parent)
+void WebRequestHandler::appendTask(const std::shared_ptr<GenericTask>& task, pugi::xml_node* parent)
 {
     if (task == nullptr || parent == nullptr)
         return;

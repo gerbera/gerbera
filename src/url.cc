@@ -39,7 +39,7 @@
 
 #include <sstream>
 
-std::string URL::download(std::string URL, long* HTTP_retcode,
+std::string URL::download(const std::string& URL, long* HTTP_retcode,
     CURL* curl_handle, bool only_header,
     bool verbose, bool redirect)
 {
@@ -114,7 +114,7 @@ std::string URL::download(std::string URL, long* HTTP_retcode,
     return buffer.str();
 }
 
-std::unique_ptr<URL::Stat> URL::getInfo(std::string URL, CURL* curl_handle)
+std::unique_ptr<URL::Stat> URL::getInfo(const std::string& URL, CURL* curl_handle)
 {
     long retcode;
     bool cleanup = false;

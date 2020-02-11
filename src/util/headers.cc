@@ -26,7 +26,8 @@ Gerbera - https://gerbera.io/
 #include "headers.h"
 #include <string>
 
-std::string Headers::stripInvalid(std::string value) {
+std::string Headers::stripInvalid(const std::string& value)
+{
     std::string result = value;
     std::size_t found = value.find_first_of('\r');
     if (found != std::string::npos) {
