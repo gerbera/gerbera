@@ -183,9 +183,9 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
             temp = actor.text().as_string();
             if (string_ok(temp)) {
                 if (string_ok(actors))
-                    actors = actors + ", ";
+                    actors.append(", ");
 
-                actors = actors + temp;
+                actors.append(temp);
             }
         }
 
@@ -206,9 +206,9 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
             temp = gn.text().as_string();
             if (string_ok(temp)) {
                 if (string_ok(genres))
-                    genres = genres + ", ";
+                    genres.append(", ");
 
-                genres = genres + temp;
+                genres.append(temp);
             }
         }
 

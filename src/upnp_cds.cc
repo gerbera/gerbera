@@ -115,9 +115,9 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
         if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && obj->getFlag(OBJECT_FLAG_PLAYED)) {
             std::string title = obj->getTitle();
             if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND))
-                title = config->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING) + title;
+                title = config->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING).append(title);
             else
-                title = title + config->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING);
+                title.append(config->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING));
 
             obj->setTitle(title);
         }
@@ -180,9 +180,9 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
         if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && cdsObject->getFlag(OBJECT_FLAG_PLAYED)) {
             std::string title = cdsObject->getTitle();
             if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND))
-                title = config->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING) + title;
+                title = config->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING).append(title);
             else
-                title = title + config->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING);
+                title.append(config->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING));
 
             cdsObject->setTitle(title);
         }
