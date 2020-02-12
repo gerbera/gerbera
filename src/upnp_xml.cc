@@ -87,7 +87,7 @@ void UpnpXMLBuilder::renderObject(std::shared_ptr<CdsObject> obj, bool renderAct
                 tmp = it.second;
                 if ((stringLimit > 0) && (tmp.length() > stringLimit)) {
                     tmp = tmp.substr(0, getValidUTF8CutPosition(tmp, stringLimit - 3));
-                    tmp = tmp + "...";
+                    tmp.append("...");
                 }
                 result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(tmp.c_str());
             } else if (key == MetadataHandler::getMetaFieldName(M_TRACKNUMBER)) {
@@ -684,11 +684,11 @@ void UpnpXMLBuilder::addResources(std::shared_ptr<CdsItem> item, pugi::xml_node*
                     std::string frequency = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY));
                     if (string_ok(frequency)) {
                         t_res->addAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY), frequency);
-                        targetMimeType = targetMimeType + ";rate=" + frequency;
+                        targetMimeType.append(";rate=").append(frequency);
                     }
                 } else if (freq != OFF) {
                     t_res->addAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY), std::to_string(freq));
-                    targetMimeType = targetMimeType + ";rate=" + std::to_string(freq);
+                    targetMimeType.append(";rate=").append(std::to_string(freq));
                 }
 
                 int chan = tp->getNumChannels();
@@ -696,11 +696,11 @@ void UpnpXMLBuilder::addResources(std::shared_ptr<CdsItem> item, pugi::xml_node*
                     std::string nchannels = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS));
                     if (string_ok(nchannels)) {
                         t_res->addAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS), nchannels);
-                        targetMimeType = targetMimeType + ";channels=" + nchannels;
+                        targetMimeType.append(";channels=").append(nchannels);
                     }
                 } else if (chan != OFF) {
                     t_res->addAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS), std::to_string(chan));
-                    targetMimeType = targetMimeType + ";channels=" + std::to_string(chan);
+                    targetMimeType.append(";channels=").append(std::to_string(chan));
                 }
             }
 
@@ -779,8 +779,8 @@ void UpnpXMLBuilder::addResources(std::shared_ptr<CdsItem> item, pugi::xml_node*
             }
         }
         if (!res_params.empty()) {
-            url = url + _URL_PARAM_SEPARATOR;
-            url = url + dict_encode_simple(res_params);
+            url.append(_URL_PARAM_SEPARATOR);
+            url.append(dict_encode_simple(res_params));
         }
 
         // ok this really sucks, I guess another rewrite of the resource manager
@@ -828,9 +828,9 @@ void UpnpXMLBuilder::addResources(std::shared_ptr<CdsItem> item, pugi::xml_node*
             // first resource
             if (!skipURL) {
                 if (transcoded)
-                    url = url + renderExtension(contentType, "");
+                    url.append( renderExtension(contentType, ""));
                 else
-                    url = url + renderExtension(contentType, item->getLocation());
+                    url.append(renderExtension(contentType, item->getLocation()));
             }
         }
         if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO)) {
@@ -854,25 +854,25 @@ void UpnpXMLBuilder::addResources(std::shared_ptr<CdsItem> item, pugi::xml_node*
                 /* handle audio/video content */
                 extend = getDLNAprofileString(contentType);
                 if (string_ok(extend))
-                    extend = extend + ";";
+                    extend.append(";");
             }
 
             // we do not support seeking at all, so 00
             // and the media is converted, so set CI to 1
             if (!isExtThumbnail && transcoded) {
-                extend = extend + D_OP + "=" + D_OP_SEEK_DISABLED + ";" + D_CONVERSION_INDICATOR + "=" D_CONVERSION;
+                extend.append(D_OP).append("=").append( D_OP_SEEK_DISABLED).append(";").append(D_CONVERSION_INDICATOR).append("=" D_CONVERSION);
 
                 if (startswith(mimeType, "audio") || startswith(mimeType, "video"))
-                    extend = extend + ";" D_FLAGS "=" D_TR_FLAGS_AV;
+                    extend.append(";" D_FLAGS "=" D_TR_FLAGS_AV);
             } else {
                 if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_DLNA_SEEK))
-                    extend = extend + D_OP + "=" + D_OP_SEEK_ENABLED + ";";
+                    extend.append(D_OP).append("=").append(D_OP_SEEK_ENABLED).append(";");
                 else
-                    extend = extend + D_OP + "=" + D_OP_SEEK_DISABLED + ";";
-                extend = extend + D_CONVERSION_INDICATOR + "=" + D_NO_CONVERSION;
+                    extend.append(D_OP).append("=").append(D_OP_SEEK_DISABLED).append(";");
+                extend.append(D_CONVERSION_INDICATOR).append("=").append(D_NO_CONVERSION);
             }
 
-            protocolInfo = protocolInfo.substr(0, protocolInfo.rfind(':') + 1) + extend;
+            protocolInfo = protocolInfo.substr(0, protocolInfo.rfind(':') + 1).append(extend);
             res_attrs[MetadataHandler::getResAttrName(R_PROTOCOLINFO)] = protocolInfo;
 
             if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK)) {
@@ -886,7 +886,7 @@ void UpnpXMLBuilder::addResources(std::shared_ptr<CdsItem> item, pugi::xml_node*
         // URL is path until now
         int objectType = item->getObjectType();
         if(!IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
-            url = virtualURL + url;
+            url = virtualURL.append(url);
         }
 
         if (!hide_original_resource || transcoded || (hide_original_resource && (original_resource != i)))
