@@ -70,4 +70,4 @@ std::unique_ptr<WebRequestHandler> createWebRequestHandler(
     throw std::runtime_error("Unknown page: " + page);
 }
 
-} // namespace
+} // namespace web
