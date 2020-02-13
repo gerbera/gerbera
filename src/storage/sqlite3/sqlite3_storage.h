@@ -175,7 +175,7 @@ private:
 
     std::string startupError;
 
-    std::string getError(const std::string& query, const std::string& error, sqlite3* db);
+    static std::string getError(const std::string& query, const std::string& error, sqlite3* db);
 
     static void* staticThreadProc(void* arg);
     void threadProc();

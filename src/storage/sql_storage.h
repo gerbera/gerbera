@@ -218,7 +218,7 @@ private:
     /* helper for removeObject(s) */
     void _removeObjects(const std::vector<int32_t>& objectIDs);
 
-    std::string toCSV(const std::vector<int>& input);
+    static std::string toCSV(const std::vector<int>& input);
 
     std::unique_ptr<ChangedContainers> _recursiveRemove(
         const std::vector<int32_t>& items,
@@ -234,9 +234,9 @@ private:
     std::unique_ptr<std::vector<int>> _checkOverlappingAutoscans(const std::shared_ptr<AutoscanDirectory>& adir);
 
     /* location helper: filesystem path or virtual path to db location*/
-    std::string addLocationPrefix(char prefix, const std::string& path);
+    static std::string addLocationPrefix(char prefix, const std::string& path);
     /* location helpers: db location to filesystem path */
-    fs::path stripLocationPrefix(std::string dbLocation, char* prefix = NULL);
+    static fs::path stripLocationPrefix(std::string dbLocation, char* prefix = NULL);
 
     std::shared_ptr<CdsObject> checkRefID(const std::shared_ptr<CdsObject>& obj);
     int createContainer(int parentID, std::string name, const std::string& virtualPath, bool isVirtual, const std::string& upnpClass, int refID, const std::map<std::string, std::string>& itemMetadata);

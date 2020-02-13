@@ -57,7 +57,7 @@ public:
     /// <u:actionNameResponse xmlns:u="serviceType"/>
     /// Further response information (various parameters, DIDL-Lite or
     /// whatever can then be adapted to it.
-    std::unique_ptr<pugi::xml_document> createResponse(const std::string& actionName, const std::string& serviceType);
+    static std::unique_ptr<pugi::xml_document> createResponse(const std::string& actionName, const std::string& serviceType);
 
     /// \brief Renders the DIDL-Lite representation of an object in the content directory.
     /// \param obj Object to be rendered as XML.
@@ -70,11 +70,11 @@ public:
     void renderObject(const std::shared_ptr<CdsObject>& obj, bool renderActions, size_t stringLimit, pugi::xml_node* parent);
 
     /// \todo change the text string to element, parsing should be done outside
-    void updateObject(const std::shared_ptr<CdsObject>& obj, const std::string& text);
+    static void updateObject(const std::shared_ptr<CdsObject>& obj, const std::string& text);
 
     /// \brief Renders XML for the event property set.
     /// \return pugi::xml_document representing the newly created XML.
-    std::unique_ptr<pugi::xml_document> createEventPropertySet();
+    static std::unique_ptr<pugi::xml_document> createEventPropertySet();
 
     /// \brief Renders the device description XML.
     /// \return pugi::xml_document representing the newly created device description.
@@ -86,18 +86,18 @@ public:
     /// \brief Renders a resource tag (part of DIDL-Lite XML)
     /// \param URL download location of the item (will be child element of the <res> tag)
     /// \param attributes Dictionary containing the <res> tag attributes (like resolution, etc.)
-    void renderResource(const std::string& URL, const std::map<std::string, std::string>& attributes, pugi::xml_node* parent);
+    static void renderResource(const std::string& URL, const std::map<std::string, std::string>& attributes, pugi::xml_node* parent);
 
     /// \brief Renders a subtitle resource tag (Samsung proprietary extension)
     /// \param URL download location of the video item
-    void renderCaptionInfo(const std::string& URL, pugi::xml_node* parent);
+    static void renderCaptionInfo(const std::string& URL, pugi::xml_node* parent);
 
-    void renderCreator(const std::string& creator, pugi::xml_node* parent);
-    void renderAlbumArtURI(const std::string& uri, pugi::xml_node* parent);
-    void renderComposer(const std::string& composer, pugi::xml_node* parent);
-    void renderConductor(const std::string& conductor, pugi::xml_node* parent);
-    void renderOrchestra(const std::string& orchestra, pugi::xml_node* parent);
-    void renderAlbumDate(const std::string& date, pugi::xml_node* parent);
+    static void renderCreator(const std::string& creator, pugi::xml_node* parent);
+    static void renderAlbumArtURI(const std::string& uri, pugi::xml_node* parent);
+    static void renderComposer(const std::string& composer, pugi::xml_node* parent);
+    static void renderConductor(const std::string& conductor, pugi::xml_node* parent);
+    static void renderOrchestra(const std::string& orchestra, pugi::xml_node* parent);
+    static void renderAlbumDate(const std::string& date, pugi::xml_node* parent);
 
     void addResources(const std::shared_ptr<CdsItem>& item, pugi::xml_node* parent);
 
@@ -120,7 +120,7 @@ protected:
     };
 
     static std::unique_ptr<PathBase> getPathBase(const std::shared_ptr<CdsItem>& item, bool forceLocal = false);
-    std::string renderExtension(const std::string& contentType, const std::string& location);
+    static std::string renderExtension(const std::string& contentType, const std::string& location);
     std::string getArtworkUrl(const std::shared_ptr<CdsItem>& item);
 };
 #endif // __UPNP_XML_H__

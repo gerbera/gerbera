@@ -35,21 +35,21 @@ public:
     ConfigGenerator();
     ~ConfigGenerator();
 
-    std::string generate(const fs::path& userHome, const fs::path& configDir, const fs::path& prefixDir, const fs::path& magicFile);
+    static std::string generate(const fs::path& userHome, const fs::path& configDir, const fs::path& prefixDir, const fs::path& magicFile);
 
-    void generateServer(const fs::path& userHome, const fs::path& configDir, const fs::path& prefixDir, pugi::xml_node* config);
-    void generateUi(pugi::xml_node* server);
-    void generateExtendedRuntime(pugi::xml_node* server);
-    void generateStorage(pugi::xml_node* server);
-    void generateImport(const fs::path& prefixDir, const fs::path& magicFile, pugi::xml_node* config);
-    void generateMappings(pugi::xml_node* import);
-    void generateOnlineContent(pugi::xml_node* import);
-    void generateTranscoding(pugi::xml_node* config);
-    void generateUdn(pugi::xml_node* server);
+    static void generateServer(const fs::path& userHome, const fs::path& configDir, const fs::path& prefixDir, pugi::xml_node* config);
+    static void generateUi(pugi::xml_node* server);
+    static void generateExtendedRuntime(pugi::xml_node* server);
+    static void generateStorage(pugi::xml_node* server);
+    static void generateImport(const fs::path& prefixDir, const fs::path& magicFile, pugi::xml_node* config);
+    static void generateMappings(pugi::xml_node* import);
+    static void generateOnlineContent(pugi::xml_node* import);
+    static void generateTranscoding(pugi::xml_node* config);
+    static void generateUdn(pugi::xml_node* server);
 
 protected:
-    void map_from_to(const std::string& from, const std::string& to, pugi::xml_node* parent);
-    void treat_as(const std::string& mimetype, const std::string& as, pugi::xml_node* parent);
+    static void map_from_to(const std::string& from, const std::string& to, pugi::xml_node* parent);
+    static void treat_as(const std::string& mimetype, const std::string& as, pugi::xml_node* parent);
 };
 
 #endif //GERBERA_CONFIG_GENERATOR_H

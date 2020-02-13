@@ -237,7 +237,7 @@ void MatroskaHandler::parseAttachments(const std::shared_ptr<CdsItem>& item, Ebm
     }
 }
 
-std::string MatroskaHandler::getContentTypeFromByteVector(const KaxFileData* data) const
+std::string MatroskaHandler::getContentTypeFromByteVector(const KaxFileData* data)
 {
     std::string art_mimetype = MIMETYPE_DEFAULT;
 #ifdef HAVE_MAGIC

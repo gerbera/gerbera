@@ -248,7 +248,7 @@ bool TagLibHandler::isValidArtworkContentType(const std::string& art_mimetype)
     return (string_ok(art_mimetype) && (art_mimetype.find('/') != std::string::npos));
 }
 
-std::string TagLibHandler::getContentTypeFromByteVector(const TagLib::ByteVector& data) const
+std::string TagLibHandler::getContentTypeFromByteVector(const TagLib::ByteVector& data)
 {
     std::string art_mimetype = MIMETYPE_DEFAULT;
 #ifdef HAVE_MAGIC

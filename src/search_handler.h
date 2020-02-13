@@ -93,7 +93,7 @@ public:
 
 protected:
     std::string nextStringToken(const std::string& input);
-    std::unique_ptr<SearchToken> makeToken(const std::string& tokenStr);
+    static std::unique_ptr<SearchToken> makeToken(const std::string& tokenStr);
     std::string getQuotedValue(const std::string& input);
 
     const std::string& input;

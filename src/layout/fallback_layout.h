@@ -57,7 +57,7 @@ public:
 #endif
 protected:
     void add(const std::shared_ptr<CdsObject>& obj, int parentID, bool use_ref = true);
-    std::string esc(std::string str);
+    static std::string esc(std::string str);
     void addVideo(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath);
     void addImage(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath);
     void addAudio(const std::shared_ptr<CdsObject>& obj);

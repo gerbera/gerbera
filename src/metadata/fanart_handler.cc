@@ -49,7 +49,7 @@ FanArtHandler::FanArtHandler(std::shared_ptr<ConfigManager> config)
 {
 }
 
-fs::path FanArtHandler::getFanArtPath(const std::shared_ptr<CdsItem>& item) const
+fs::path FanArtHandler::getFanArtPath(const std::shared_ptr<CdsItem>& item)
 {
     auto folder = item->getLocation().parent_path();
     log_debug("Folder name: {}", folder.c_str());
