@@ -335,7 +335,6 @@ void Sqlite3Storage::threadProc()
         while (taskQueue.empty()) {
             /* if nothing to do, sleep until awakened */
             cond.wait(lock);
-            continue;
         }
 
         auto task = taskQueue.front();
