@@ -114,9 +114,9 @@ struct inotify_event* Inotify::nextEvent()
 
     // first_byte is index into event buffer
     if (first_byte != 0
-        && first_byte <= (int)(bytes - sizeof(struct inotify_event))) {
+        && first_byte <= static_cast<int>(bytes - sizeof(struct inotify_event))) {
 
-        ret = (struct inotify_event*)((char*)&event[0] + first_byte);
+        ret = reinterpret_cast<struct inotify_event*>(reinterpret_cast<char*>(&event[0]) + first_byte);
         first_byte += sizeof(struct inotify_event) + ret->len;
 
         // if the pointer to the next event exactly hits end of bytes read,
@@ -133,7 +133,7 @@ struct inotify_event* Inotify::nextEvent()
             assert((long)((char*)&event[0] + sizeof(struct inotify_event) + event[0].len) <= (long)ret);
 
             // how much of the event do we have?
-            bytes = (char*)&event[0] + bytes - (char*)ret;
+            bytes = reinterpret_cast<char*>(&event[0]) + bytes - reinterpret_cast<char*>(ret);
             memcpy(&event[0], ret, bytes);
             return nextEvent();
         }

@@ -42,7 +42,7 @@ void TaskProcessor::shutdown()
 
 void* TaskProcessor::staticThreadProc(void* arg)
 {
-    auto* inst = (TaskProcessor*)arg;
+    auto inst = static_cast<TaskProcessor*>(arg);
     inst->threadProc();
     pthread_exit(nullptr);
     return nullptr;

@@ -274,7 +274,7 @@ void LibExifHandler::process_ifd(ExifContent* content, const std::shared_ptr<Cds
 
         switch (e->tag) {
         case EXIF_TAG_DATE_TIME_ORIGINAL:
-            value = (char*)exif_egv(e);
+            value = const_cast<char*>(exif_egv(e));
             value = trim_string(value);
             if (string_ok(value)) {
                 value = sc->convert(value);
@@ -289,7 +289,7 @@ void LibExifHandler::process_ifd(ExifContent* content, const std::shared_ptr<Cds
             break;
 
         case EXIF_TAG_USER_COMMENT:
-            value = (char*)exif_egv(e);
+            value = const_cast<char*>(exif_egv(e));
             value = trim_string(value);
             if (string_ok(value)) {
                 value = sc->convert(value);
@@ -298,7 +298,7 @@ void LibExifHandler::process_ifd(ExifContent* content, const std::shared_ptr<Cds
             break;
 
         case EXIF_TAG_PIXEL_X_DIMENSION:
-            value = (char*)exif_egv(e);
+            value = const_cast<char*>(exif_egv(e));
             value = trim_string(value);
             if (string_ok(value)) {
                 value = sc->convert(value);
@@ -307,7 +307,7 @@ void LibExifHandler::process_ifd(ExifContent* content, const std::shared_ptr<Cds
             break;
 
         case EXIF_TAG_PIXEL_Y_DIMENSION:
-            value = (char*)exif_egv(e);
+            value = const_cast<char*>(exif_egv(e));
             value = trim_string(value);
             if (string_ok(value)) {
                 value = sc->convert(value);
@@ -322,7 +322,7 @@ void LibExifHandler::process_ifd(ExifContent* content, const std::shared_ptr<Cds
         for (const auto& tmp : auxtags) {
             if (string_ok(tmp)) {
                 if (e->tag == getTagFromString(tmp)) {
-                    value = (char*)exif_egv(e);
+                    value = const_cast<char*>(exif_egv(e));
                     value = trim_string(value);
                     if (string_ok(value)) {
                         value = sc->convert(value);

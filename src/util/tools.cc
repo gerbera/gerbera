@@ -250,7 +250,7 @@ std::string hex_encode(const void* data, int len)
 
 std::string hex_decode_string(const std::string& encoded)
 {
-    auto* ptr = const_cast<char*>(encoded.c_str());
+    auto ptr = const_cast<char*>(encoded.c_str());
     int len = encoded.length();
 
     std::ostringstream buf;
@@ -268,7 +268,7 @@ std::string hex_decode_string(const std::string& encoded)
             lo = clo - HEX_CHARS;
         else
             lo = 0;
-        auto ch = (char)(hi << 4 | lo);
+        auto ch = static_cast<char>(hi << 4 | lo);
         buf << ch;
     }
     return buf.str();
@@ -281,7 +281,7 @@ std::string hex_md5(const void* data, int length)
     md5_state_t ctx;
     md5_init(&ctx);
     md5_append(&ctx, (unsigned char*)data, length);
-    md5_finish(&ctx, (unsigned char*)md5buf);
+    md5_finish(&ctx, reinterpret_cast<unsigned char*>(md5buf));
 
     return hex_encode(md5buf, 16);
 }
@@ -324,9 +324,9 @@ std::string url_escape(const std::string& str)
     int len = str.length();
     std::ostringstream buf;
     for (int i = 0; i < len; i++) {
-        auto c = (unsigned char)data[i];
+        auto c = static_cast<unsigned char>(data[i]);
         if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '_' || c == '-') {
-            buf << (char)c;
+            buf << static_cast<char>(c);
         } else {
             int hi = c >> 4;
             int lo = c & 15;
@@ -338,7 +338,7 @@ std::string url_escape(const std::string& str)
 
 std::string urlUnescape(const std::string& str)
 {
-    auto* data = const_cast<char*>(str.c_str());
+    auto data = const_cast<char*>(str.c_str());
     int len = str.length();
     std::ostringstream buf;
 
@@ -367,7 +367,7 @@ std::string urlUnescape(const std::string& str)
                 lo = pos - HEX_CHARS2;
 
             int ascii = (hi << 4) | lo;
-            buf << (char)ascii;
+            buf << static_cast<char>(ascii);
         } else if (c == '+') {
             buf << ' ';
         } else {
@@ -567,7 +567,7 @@ std::string secondsToHMS(int seconds)
         h = 999;
 
     // TOOD: optimize
-    auto tmp = (char*)MALLOC(10);
+    auto tmp = static_cast<char*>(MALLOC(10));
     sprintf(tmp, "%02d:%02d:%02d", h, m, s);
 
     std::string res = tmp;
@@ -842,7 +842,7 @@ std::string fallbackString(std::string first, std::string fallback)
 unsigned int stringHash(const std::string& str)
 {
     unsigned int hash = 5381;
-    auto* data = (unsigned char*)str.c_str();
+    auto data = (unsigned char*)str.c_str();
     int c;
     while ((c = *data++))
         hash = ((hash << 5) + hash) ^ c; /* (hash * 33) ^ c */
@@ -1167,13 +1167,13 @@ ssize_t getValidUTF8CutPosition(std::string str, ssize_t cutpos)
     ssize_t pos = -1;
     size_t len = str.length();
 
-    if ((len == 0) || (cutpos > (ssize_t)len))
+    if ((len == 0) || (cutpos > static_cast<ssize_t>(len)))
         return pos;
 
-    printf("Character at cut position: %0x\n", (char)str.at(cutpos));
-    printf("Character at cut-1 position: %0x\n", (char)str.at(cutpos - 1));
-    printf("Character at cut-2 position: %0x\n", (char)str.at(cutpos - 2));
-    printf("Character at cut-3 position: %0x\n", (char)str.at(cutpos - 3));
+    printf("Character at cut position: %0x\n", static_cast<char>(str.at(cutpos)));
+    printf("Character at cut-1 position: %0x\n", static_cast<char>(str.at(cutpos - 1)));
+    printf("Character at cut-2 position: %0x\n", static_cast<char>(str.at(cutpos - 2)));
+    printf("Character at cut-3 position: %0x\n", static_cast<char>(str.at(cutpos - 3)));
 
     // > 0x7f, we are dealing with a non-ascii character
     if (str.at(cutpos) & 0x80) {
@@ -1259,7 +1259,7 @@ std::string getAVIFourCC(const fs::path& avi_filename)
     if (!f)
         throw std::runtime_error("could not open file " + avi_filename.native() + " : " + mt_strerror(errno));
 
-    buffer = (char*)MALLOC(FCC_OFFSET + 6);
+    buffer = static_cast<char*>(MALLOC(FCC_OFFSET + 6));
     if (buffer == nullptr) {
         fclose(f);
         throw std::runtime_error("Out of memory when allocating buffer for file " + avi_filename.native());
@@ -1328,7 +1328,7 @@ int find_local_port(unsigned short range_min, unsigned short range_max)
         memcpy(&server_addr.sin_addr.s_addr, server->h_addr, server->h_length);
         server_addr.sin_port = htons(port);
 
-        if (connect(fd, (struct sockaddr*)&server_addr,
+        if (connect(fd, reinterpret_cast<struct sockaddr*>(&server_addr),
                 sizeof(server_addr))
             == -1) {
             close(fd);

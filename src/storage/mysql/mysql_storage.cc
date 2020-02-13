@@ -199,8 +199,8 @@ void MysqlStorage::init()
             throw std::runtime_error("Error while uncompressing mysql create sql. returned: " + std::to_string(ret));
         buf[MS_CREATE_SQL_INFLATED_SIZE] = '\0';
 
-        auto* sql_start = (char*)buf;
-        char* sql_end = strchr(sql_start, ';');
+        auto sql_start = (char*)buf;
+        auto sql_end = strchr(sql_start, ';');
         if (sql_end == nullptr) {
             throw std::runtime_error("';' not found in mysql create sql");
         }
@@ -289,7 +289,7 @@ std::string MysqlStorage::quote(std::string value)
      * the \0; then the string won't be null-terminated, but that doesn't matter,
      * because we give the correct length to std::string()
      */
-    auto* q = (char*)MALLOC(value.length() * 2 + 2);
+    auto q = (char*)MALLOC(value.length() * 2 + 2);
     *q = '\'';
     long size = mysql_real_escape_string(&db, q + 1, value.c_str(), value.length());
     q[size + 1] = '\'';
