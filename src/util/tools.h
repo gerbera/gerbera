@@ -293,7 +293,7 @@ std::string interfaceToIP(const std::string& interface);
 /// \brief Finds the Interface with the specified IP address.
 /// \param ip i.e. 192.168.4.56.
 /// \return Interface name or nullptr if IP was not found.
-std::string ipToInterface(const std::string& interface);
+std::string ipToInterface(const std::string& ip);
 
 /// \brief Returns true if the given string is eitehr "yes" or "no", otherwise
 /// returns false.

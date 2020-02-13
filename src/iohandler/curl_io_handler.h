@@ -53,7 +53,7 @@ private:
     std::string URL;
     //off_t bytesCurl;
 
-    static size_t curlCallback(void* ptr, size_t size, size_t nmemb, void* stream);
+    static size_t curlCallback(void* ptr, size_t size, size_t nmemb, void* data);
     virtual void threadProc();
 };
 

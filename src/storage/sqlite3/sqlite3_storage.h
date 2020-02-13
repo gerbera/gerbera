@@ -158,7 +158,7 @@ private:
     void shutdownDriver() override;
     std::shared_ptr<Storage> getSelf();
 
-    std::string quote(std::string str) override;
+    std::string quote(std::string value) override;
     inline std::string quote(const char* str) override { return quote(std::string(str)); }
     inline std::string quote(int val) override { return std::to_string(val); }
     inline std::string quote(unsigned int val) override { return std::to_string(val); }

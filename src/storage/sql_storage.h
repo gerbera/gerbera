@@ -236,7 +236,7 @@ private:
     fs::path stripLocationPrefix(std::string dbLocation, char* prefix = NULL);
 
     std::shared_ptr<CdsObject> checkRefID(const std::shared_ptr<CdsObject>& obj);
-    int createContainer(int parentID, std::string name, const std::string& virtualPath, bool isVirtual, const std::string& upnpClass, int refID, const std::map<std::string, std::string>& lastMetadata);
+    int createContainer(int parentID, std::string name, const std::string& virtualPath, bool isVirtual, const std::string& upnpClass, int refID, const std::map<std::string, std::string>& itemMetadata);
 
     std::string mapBool(bool val) { return quote((val ? 1 : 0)); }
     bool remapBool(std::string field) { return (string_ok(field) && field == "1"); }

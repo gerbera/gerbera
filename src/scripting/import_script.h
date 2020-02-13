@@ -46,7 +46,7 @@ public:
         std::shared_ptr<ContentManager> content,
         const std::shared_ptr<Runtime>& runtime);
     ~ImportScript();
-    void processCdsObject(const std::shared_ptr<CdsObject>& obj, const std::string& rootpath);
+    void processCdsObject(const std::shared_ptr<CdsObject>& obj, const std::string& scriptpath);
     virtual script_class_t whoami() override { return S_IMPORT; }
 };
 

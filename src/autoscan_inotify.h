@@ -172,7 +172,7 @@ private:
     bool removeFromWdObj(const std::shared_ptr<Wd>& wdObj, const std::shared_ptr<Watch>& toRemove);
 
     void monitorNonexisting(const fs::path& path, const std::shared_ptr<AutoscanDirectory>& adir);
-    void recheckNonexistingMonitor(int curWd, std::vector<std::string> nonexistingPathArray, const std::shared_ptr<AutoscanDirectory>& adir);
+    void recheckNonexistingMonitor(int curWd, std::vector<std::string> pathAr, const std::shared_ptr<AutoscanDirectory>& adir);
     void recheckNonexistingMonitors(int wd, const std::shared_ptr<Wd>& wdObj);
     void removeNonexistingMonitor(int wd, const std::shared_ptr<Wd>& wdObj, const std::vector<std::string>& pathAr);
 
