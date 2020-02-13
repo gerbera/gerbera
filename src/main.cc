@@ -39,7 +39,6 @@
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <filesystem>
-namespace fs = std::filesystem;
 
 #ifdef SOLARIS
 #include <iso/limits_iso.h>

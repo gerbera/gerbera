@@ -32,7 +32,6 @@
 #include <filesystem>
 #include <sys/stat.h>
 #include <utility>
-namespace fs = std::filesystem;
 
 #include "iohandler/file_io_handler.h"
 #include "file_request_handler.h"

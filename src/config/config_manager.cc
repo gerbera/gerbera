@@ -39,7 +39,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <filesystem>
-namespace fs = std::filesystem;
 
 #if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE)
 #include <clocale>

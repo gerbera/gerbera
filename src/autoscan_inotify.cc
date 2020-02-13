@@ -36,7 +36,6 @@
 #include <filesystem>
 #include <sys/stat.h>
 #include <utility>
-namespace fs = std::filesystem;
 
 #include "autoscan_inotify.h"
 #include "content_manager.h"

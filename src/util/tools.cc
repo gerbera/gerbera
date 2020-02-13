@@ -44,7 +44,6 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <utility>
-namespace fs = std::filesystem;
 
 #include <ifaddrs.h>
 #include <net/if.h>

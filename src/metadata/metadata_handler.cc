@@ -32,7 +32,6 @@
 
 #include <filesystem>
 #include <utility>
-namespace fs = std::filesystem;
 
 #include "metadata_handler.h"
 #include "config/config_manager.h"
