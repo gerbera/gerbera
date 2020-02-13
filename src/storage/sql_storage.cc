@@ -81,7 +81,7 @@ enum {
 };
 
 /* table quote */
-#define TQ(data) QTB << data << QTE
+#define TQ(data) QTB << (data) << QTE
 /* table quote with dot */
 #define TQD(data1, data2) TQ(data1) << '.' << TQ(data2)
 
