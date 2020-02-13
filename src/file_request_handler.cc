@@ -337,7 +337,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
         std::string output;
 
         log_debug("Script input: {}", input.c_str());
-        if (strncmp(action.c_str(), "http://", 7)) {
+        if (strncmp(action.c_str(), "http://", 7) != 0) {
 #ifdef TOMBDEBUG
             struct timespec before;
             getTimespecNow(&before);
