@@ -40,7 +40,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <utility>
-namespace fs = std::filesystem;
 
 #include "transcode_ext_handler.h"
 #include "cds_objects.h"

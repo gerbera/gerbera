@@ -32,7 +32,6 @@
 #include <cstdio>
 #include <filesystem>
 #include <utility>
-namespace fs = std::filesystem;
 
 #include "cds_objects.h"
 #include "common.h"

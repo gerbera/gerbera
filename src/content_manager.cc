@@ -37,7 +37,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <utility>
-namespace fs = std::filesystem;
 
 #include "config/config_manager.h"
 #include "storage/storage.h"

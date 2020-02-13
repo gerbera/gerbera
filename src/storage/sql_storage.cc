@@ -36,7 +36,6 @@
 #include <string>
 #include <utility>
 #include <vector>
-namespace fs = std::filesystem;
 
 #include "sql_storage.h"
 #include "config/config_manager.h"
