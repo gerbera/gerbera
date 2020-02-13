@@ -287,4 +287,4 @@ std::string WebRequestHandler::mapAutoscanType(int type)
         return "none";
 }
 
-} // namespace
+} // namespace web
