@@ -68,12 +68,12 @@ public:
         }
     }
 
-    virtual ~file_io_callback()
+    ~file_io_callback() override
     {
         close();
     }
 
-    virtual uint32 read(void* buffer, size_t size)
+    uint32 read(void* buffer, size_t size) override
     {
         assert(file != nullptr);
         if (size <= 0)
@@ -81,7 +81,7 @@ public:
         return fread(buffer, 1, size, file);
     }
 
-    virtual void setFilePointer(int64_t offset, seek_mode mode = seek_beginning)
+    void setFilePointer(int64_t offset, seek_mode mode = seek_beginning) override
     {
         assert(file != nullptr);
         assert(mode == SEEK_CUR || mode == SEEK_END || mode == SEEK_SET);
@@ -90,19 +90,19 @@ public:
         }
     }
 
-    virtual size_t write(const void* p_buffer, size_t i_size)
+    size_t write(const void* p_buffer, size_t i_size) override
     {
         // not needed
         return 0;
     }
 
-    virtual uint64 getFilePointer()
+    uint64 getFilePointer() override
     {
         assert(file != nullptr);
         return ftello(file);
     }
 
-    virtual void close()
+    void close() override
     {
         if (file == nullptr)
             return;
