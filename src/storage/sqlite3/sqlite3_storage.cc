@@ -602,7 +602,6 @@ void SLBackupTask::run(sqlite3** db, Sqlite3Storage* sl)
 /* Sqlite3Result */
 
 Sqlite3Result::Sqlite3Result()
-    : SQLResult()
 {
     table = nullptr;
 }

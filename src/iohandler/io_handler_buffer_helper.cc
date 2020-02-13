@@ -35,7 +35,6 @@
 using namespace std;
 
 IOHandlerBufferHelper::IOHandlerBufferHelper(size_t bufSize, size_t initialFillSize)
-    : IOHandler()
 {
     if (bufSize <= 0)
         throw std::runtime_error("bufSize must be positive");
