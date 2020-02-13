@@ -52,9 +52,8 @@ void web::edit_load::process()
     int objectID;
     if (objID.empty())
         throw std::runtime_error("invalid object id");
-    else
-        objectID = std::stoi(objID);
 
+    objectID = std::stoi(objID);
     auto obj = storage->loadObject(objectID);
 
     auto root = xmlDoc->document_element();

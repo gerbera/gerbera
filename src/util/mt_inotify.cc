@@ -76,10 +76,9 @@ bool Inotify::supported()
     int test_fd = inotify_init();
     if (test_fd < 0)
         return false;
-    else {
-        close(test_fd);
-        return true;
-    }
+
+    close(test_fd);
+    return true;
 }
 
 int Inotify::addWatch(const fs::path& path, int events)
@@ -88,11 +87,11 @@ int Inotify::addWatch(const fs::path& path, int events)
     if (wd < 0 && errno != ENOENT) {
         if (errno == ENOSPC)
             throw std::runtime_error("The user limit on the total number of inotify watches was reached or the kernel failed to allocate a needed resource.");
-        else if (errno == EACCES) {
+        if (errno == EACCES) {
             log_warning("Cannot add inotify watch for {}: {}", path.c_str(), strerror(errno));
             return -1;
-        } else
-            throw std::runtime_error(mt_strerror(errno));
+        }
+        throw std::runtime_error(mt_strerror(errno));
     }
     return wd;
 }
@@ -142,7 +141,7 @@ struct inotify_event* Inotify::nextEvent()
 
     }
 
-    else if (first_byte == 0) {
+    if (first_byte == 0) {
         bytes = 0;
     }
 
@@ -166,7 +165,8 @@ struct inotify_event* Inotify::nextEvent()
         nullptr, nullptr, nullptr);
     if (rc < 0) {
         return nullptr;
-    } else if (rc == 0) {
+    }
+    if (rc == 0) {
         // timeout
         return nullptr;
     }

@@ -455,7 +455,7 @@ void AutoscanInotify::monitorUnmonitorRecursive(const fs::path& startPath, bool 
         if (name[0] == '.') {
             if (name[1] == 0)
                 continue;
-            else if (name[1] == '.' && name[2] == 0)
+            if (name[1] == '.' && name[2] == 0)
                 continue;
         }
 
@@ -643,8 +643,8 @@ bool AutoscanInotify::removeFromWdObj(const std::shared_ptr<Wd>& wdObj, const st
             } else
                 it = wdWatches->erase(it);
             return true;
-        } else
-            ++it;
+        }
+        ++it;
     }
     return false;
 }

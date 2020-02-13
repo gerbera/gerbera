@@ -1621,105 +1621,103 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
             throw std::runtime_error("error in configuration: transcoding "
                              "profile \""
                 + prof->getName() + "\" is missing the <agent> option");
-        else {
-            param = sub.attribute("command").as_string();
-            if (!string_ok(param))
-                throw std::runtime_error("error in configuration: transcoding "
-                                "profile \""
-                    + prof->getName() + "\" has an invalid command setting");
-            prof->setCommand(param);
 
-            std::string tmp_path;
-            if (fs::path(param).is_absolute()) {
-                if (!fs::is_regular_file(param))
-                    throw std::runtime_error("error in configuration, transcoding "
-                                    "profile \""
-                        + prof->getName() + "\" could not find transcoding command " + param);
-                tmp_path = param;
-            } else {
-                tmp_path = find_in_path(param);
-                if (!string_ok(tmp_path))
-                    throw std::runtime_error("error in configuration, transcoding "
-                                    "profile \""
-                        + prof->getName() + "\" could not find transcoding command " + param + " in $PATH");
-            }
+        param = sub.attribute("command").as_string();
+        if (!string_ok(param))
+            throw std::runtime_error("error in configuration: transcoding "
+                                     "profile \""
+                + prof->getName() + "\" has an invalid command setting");
+        prof->setCommand(param);
 
-            int err = 0;
-            if (!is_executable(tmp_path, &err))
+        std::string tmp_path;
+        if (fs::path(param).is_absolute()) {
+            if (!fs::is_regular_file(param))
                 throw std::runtime_error("error in configuration, transcoding "
-                                "profile "
-                    + prof->getName() + ": transcoder " + param + "is not executable - " + strerror(err));
-
-            param = sub.attribute("arguments").as_string();
-            if (!string_ok(param))
-                throw std::runtime_error("error in configuration: transcoding profile " + prof->getName() + " has an empty argument string");
-
-            prof->setArguments(param);
+                                         "profile \""
+                    + prof->getName() + "\" could not find transcoding command " + param);
+            tmp_path = param;
+        } else {
+            tmp_path = find_in_path(param);
+            if (!string_ok(tmp_path))
+                throw std::runtime_error("error in configuration, transcoding "
+                                         "profile \""
+                    + prof->getName() + "\" could not find transcoding command " + param + " in $PATH");
         }
+
+        int err = 0;
+        if (!is_executable(tmp_path, &err))
+            throw std::runtime_error("error in configuration, transcoding "
+                                     "profile "
+                + prof->getName() + ": transcoder " + param + "is not executable - " + strerror(err));
+
+        param = sub.attribute("arguments").as_string();
+        if (!string_ok(param))
+            throw std::runtime_error("error in configuration: transcoding profile " + prof->getName() + " has an empty argument string");
+
+        prof->setArguments(param);
 
         sub = child.child("buffer");
         if (sub == nullptr)
             throw std::runtime_error("error in configuration: transcoding "
                              "profile \""
                 + prof->getName() + "\" is missing the <buffer> option");
-        else {
-            param_int = sub.attribute("size").as_int();
-            if (param_int < 0)
-                throw std::runtime_error("error in configuration: transcoding "
-                                "profile \""
-                    + prof->getName() + "\" buffer size can not be negative");
-            size_t bs = param_int;
 
-            param_int = sub.attribute("chunk-size").as_int();
-            if (param_int < 0)
-                throw std::runtime_error("error in configuration: transcoding "
-                                "profile \""
-                    + prof->getName() + "\" chunk size can not be negative");
-            size_t cs = param_int;
+        param_int = sub.attribute("size").as_int();
+        if (param_int < 0)
+            throw std::runtime_error("error in configuration: transcoding "
+                                     "profile \""
+                + prof->getName() + "\" buffer size can not be negative");
+        size_t bs = param_int;
 
-            if (cs > bs)
-                throw std::runtime_error("error in configuration: transcoding "
-                                "profile \""
-                    + prof->getName() + "\" chunk size can not be greater than "
-                                        "buffer size");
+        param_int = sub.attribute("chunk-size").as_int();
+        if (param_int < 0)
+            throw std::runtime_error("error in configuration: transcoding "
+                                     "profile \""
+                + prof->getName() + "\" chunk size can not be negative");
+        size_t cs = param_int;
 
-            param_int = sub.attribute("fill-size").as_int();
-            if (param_int < 0)
-                throw std::runtime_error("error in configuration: transcoding "
-                                "profile \""
-                    + prof->getName() + "\" fill size can not be negative");
-            size_t fs = param_int;
+        if (cs > bs)
+            throw std::runtime_error("error in configuration: transcoding "
+                                     "profile \""
+                + prof->getName() + "\" chunk size can not be greater than "
+                                    "buffer size");
 
-            if (fs > bs)
-                throw std::runtime_error("error in configuration: transcoding "
-                                "profile \""
-                    + prof->getName() + "\" fill size can not be greater than "
-                                        "buffer size");
+        param_int = sub.attribute("fill-size").as_int();
+        if (param_int < 0)
+            throw std::runtime_error("error in configuration: transcoding "
+                                     "profile \""
+                + prof->getName() + "\" fill size can not be negative");
+        size_t fs = param_int;
 
-            prof->setBufferOptions(bs, cs, fs);
+        if (fs > bs)
+            throw std::runtime_error("error in configuration: transcoding "
+                                     "profile \""
+                + prof->getName() + "\" fill size can not be greater than "
+                                    "buffer size");
 
-            if (mtype_profile == nullptr) {
-                throw std::runtime_error("error in configuration: transcoding "
-                                "profiles exist, but no mimetype to profile "
-                                "mappings specified");
-            }
+        prof->setBufferOptions(bs, cs, fs);
 
-            bool set = false;
-            for (const auto& mt_mapping : mt_mappings) {
-                if (mt_mapping.second == prof->getName()) {
-                    list->add(mt_mapping.first, prof);
-                    set = true;
-                }
-            }
-
-            if (!set)
-                throw std::runtime_error("error in configuration: you specified"
-                                "a mimetype to transcoding profile mapping, "
-                                "but no match for profile \""
-                    + prof->getName() + "\" exists");
-            else
-                set = false;
+        if (mtype_profile == nullptr) {
+            throw std::runtime_error("error in configuration: transcoding "
+                                     "profiles exist, but no mimetype to profile "
+                                     "mappings specified");
         }
+
+        bool set = false;
+        for (const auto& mt_mapping : mt_mappings) {
+            if (mt_mapping.second == prof->getName()) {
+                list->add(mt_mapping.first, prof);
+                set = true;
+            }
+        }
+
+        if (!set)
+            throw std::runtime_error("error in configuration: you specified"
+                                     "a mimetype to transcoding profile mapping, "
+                                     "but no match for profile \""
+                + prof->getName() + "\" exists");
+
+        set = false;
     }
 
     return list;
@@ -1754,7 +1752,9 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNode(const st
         std::string temp = child.attribute("mode").as_string();
         if (!string_ok(temp) || ((temp != "timed") && (temp != "inotify"))) {
             throw std::runtime_error("autoscan directory " + location.string() + ": mode attribute is missing or invalid");
-        } else if (temp == "timed") {
+        }
+
+        if (temp == "timed") {
             mode = ScanMode::Timed;
         } else {
             mode = ScanMode::INotify;
@@ -1771,14 +1771,14 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNode(const st
             temp = child.attribute("level").as_string();
             if (!string_ok(temp)) {
                 throw std::runtime_error("autoscan directory " + location.string() + ": level attribute is missing or invalid");
-            } else {
-                if (temp == "basic")
-                    level = ScanLevel::Basic;
-                else if (temp == "full")
-                    level = ScanLevel::Full;
-                else {
-                    throw std::runtime_error("autoscan directory " + location.string() + ": level attribute " + temp + "is invalid");
-                }
+            }
+
+            if (temp == "basic")
+                level = ScanLevel::Basic;
+            else if (temp == "full")
+                level = ScanLevel::Full;
+            else {
+                throw std::runtime_error("autoscan directory " + location.string() + ": level attribute " + temp + "is invalid");
             }
 
             temp = child.attribute("interval").as_string();

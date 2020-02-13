@@ -68,9 +68,9 @@ void TaskProcessor::threadProc()
             cond.wait(lock);
             working = true;
             continue;
-        } else {
-            currentTask = task;
         }
+
+        currentTask = task;
         lock.unlock();
 
         try {

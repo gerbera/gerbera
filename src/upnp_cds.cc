@@ -72,8 +72,8 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
     int objectID;
     if (objID.empty())
         throw UpnpException(UPNP_E_NO_SUCH_ID, "empty object id");
-    else
-        objectID = std::stoi(objID);
+
+    objectID = std::stoi(objID);
 
     unsigned int flag = BROWSE_ITEMS | BROWSE_CONTAINERS | BROWSE_EXACT_CHILDCOUNT;
 

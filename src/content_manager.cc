@@ -573,12 +573,12 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
             storage->updateAutoscanDirectory(adir);
             if (adir->persistent()) {
                 return;
-            } else {
-                adir->setTaskCount(-1);
-                removeAutoscanDirectory(scanID, scanMode);
-                storage->removeAutoscanDirectory(adir->getStorageID());
-                return;
             }
+
+            adir->setTaskCount(-1);
+            removeAutoscanDirectory(scanID, scanMode);
+            storage->removeAutoscanDirectory(adir->getStorageID());
+            return;
         }
 
         containerID = ensurePathExistence(adir->getLocation());
@@ -606,13 +606,12 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
             adir->setObjectID(INVALID_OBJECT_ID);
             storage->updateAutoscanDirectory(adir);
             return;
-        } else {
+        }
             adir->setTaskCount(-1);
             removeObject(containerID, false);
             removeAutoscanDirectory(scanID, scanMode);
             storage->removeAutoscanDirectory(adir->getStorageID());
             return;
-        }
     }
 
     // request only items if non-recursive scan is wanted
@@ -629,9 +628,11 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
         if (name[0] == '.') {
             if (name[1] == 0) {
                 continue;
-            } else if (name[1] == '.' && name[2] == 0) {
+            }
+            if (name[1] == '.' && name[2] == 0) {
                 continue;
-            } else if (!adir->getHidden()) {
+            }
+            if (!adir->getHidden()) {
                 continue;
             }
         }
@@ -752,9 +753,11 @@ void ContentManager::addRecursive(const fs::path& path, bool hidden, const std::
         if (name[0] == '.') {
             if (name[1] == 0) {
                 continue;
-            } else if (name[1] == '.' && name[2] == 0) {
+            }
+            if (name[1] == '.' && name[2] == 0) {
                 continue;
-            } else if (!hidden)
+            }
+            if (!hidden)
                 continue;
         }
         fs::path newPath = path / name;
@@ -1204,9 +1207,9 @@ void ContentManager::threadProc()
             cond.wait(lock);
             working = true;
             continue;
-        } else {
-            currentTask = task;
         }
+
+        currentTask = task;
         lock.unlock();
 
         // log_debug("content manager Async START {}", task->getDescription().c_str());
@@ -1272,9 +1275,8 @@ int ContentManager::addFileInternal(
         task->setParentID(parentTaskID);
         addTask(task, lowPriority);
         return INVALID_OBJECT_ID;
-    } else {
-        return _addFile(path, rootpath, recursive, hidden);
     }
+    return _addFile(path, rootpath, recursive, hidden);
 }
 
 #ifdef ONLINE_SERVICES
@@ -1472,7 +1474,7 @@ std::shared_ptr<AutoscanDirectory> ContentManager::getAutoscanDirectory(int scan
     }
 
 #if HAVE_INOTIFY
-    else if (scanMode == ScanMode::INotify) {
+    if (scanMode == ScanMode::INotify) {
         return autoscan_inotify->get(scanID);
     }
 #endif
@@ -1486,7 +1488,7 @@ std::vector<std::shared_ptr<AutoscanDirectory>> ContentManager::getAutoscanDirec
     }
 
 #if HAVE_INOTIFY
-    else if (scanMode == ScanMode::INotify) {
+    if (scanMode == ScanMode::INotify) {
         return autoscan_inotify->getArrayCopy();
     }
 #endif

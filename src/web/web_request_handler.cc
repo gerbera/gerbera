@@ -56,10 +56,7 @@ WebRequestHandler::WebRequestHandler(std::shared_ptr<ConfigManager> config,
 int WebRequestHandler::intParam(std::string name, int invalid)
 {
     std::string value = param(std::move(name));
-    if (!string_ok(value))
-        return invalid;
-    else
-        return std::stoi(value);
+    return string_ok(value) ? std::stoi(value) : invalid;
 }
 
 bool WebRequestHandler::boolParam(std::string name)
@@ -280,12 +277,14 @@ void WebRequestHandler::appendTask(const std::shared_ptr<GenericTask>& task, pug
 
 std::string WebRequestHandler::mapAutoscanType(int type)
 {
-    if (type == 1)
+    switch (type) {
+    case 1:
         return "ui";
-    else if (type == 2)
+    case 2:
         return "persistent";
-    else
+    default:
         return "none";
+    }
 }
 
 } // namespace web

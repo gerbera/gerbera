@@ -205,15 +205,11 @@ size_t ProcessIOHandler::read(char* buf, size_t length)
                         exit_status = mainProc->getStatus();
                         log_debug("process exited with status {}", exit_status);
                         killAll();
-                        if (exit_status == EXIT_SUCCESS)
-                            return 0;
-                        else
-                            return -1;
-                    } else {
-                        mainProc->kill();
-                        killAll();
-                        return -1;
+                        return (exit_status == EXIT_SUCCESS) ? 0 : -1;
                     }
+                    mainProc->kill();
+                    killAll();
+                    return -1;
                 }
             } else {
                 killAll();
@@ -304,15 +300,12 @@ size_t ProcessIOHandler::write(char* buf, size_t length)
                         exit_status = mainProc->getStatus();
                         log_debug("process exited with status {}", exit_status);
                         killAll();
-                        if (exit_status == EXIT_SUCCESS)
-                            return 0;
-                        else
-                            return -1;
-                    } else {
-                        mainProc->kill();
-                        killAll();
-                        return -1;
+                        return (exit_status == EXIT_SUCCESS) ? 0 : -1;
                     }
+
+                    mainProc->kill();
+                    killAll();
+                    return -1;
                 }
             } else {
                 killAll();

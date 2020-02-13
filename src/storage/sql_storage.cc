@@ -1737,8 +1737,8 @@ std::shared_ptr<AutoscanDirectory> SQLStorage::getAutoscanDirectory(int objectID
     std::unique_ptr<SQLRow> row = res->nextRow();
     if (row == nullptr)
         return nullptr;
-    else
-        return _fillAutoscanDirectory(row);
+
+    return _fillAutoscanDirectory(row);
 }
 
 std::shared_ptr<AutoscanDirectory> SQLStorage::_fillAutoscanDirectory(const std::unique_ptr<SQLRow>& row)
@@ -1905,10 +1905,11 @@ int SQLStorage::_getAutoscanDirectoryInfo(int objectID, const std::string& field
     std::unique_ptr<SQLRow> row;
     if (res == nullptr || (row = res->nextRow()) == nullptr)
         return 0;
+
     if (!remapBool(row->col(0)))
         return 1;
-    else
-        return 2;
+
+    return 2;
 }
 
 int SQLStorage::_getAutoscanObjectID(int autoscanID)
@@ -2043,14 +2044,13 @@ std::unique_ptr<std::vector<int>> SQLStorage::_checkOverlappingAutoscans(const s
         throw std::runtime_error("SQL error");
     if ((row = res->nextRow()) == nullptr)
         return pathIDs;
-    else {
-        int objectID = std::stoi(row->col(0));
-        auto obj = loadObject(objectID);
-        if (obj == nullptr)
-            throw std::runtime_error("Referenced object (by Autoscan) not found.");
-        log_error("Overlapping Autoscans are not allowed. There is already a recursive Autoscan set on {}", obj->getLocation().c_str());
-        throw std::runtime_error("Overlapping Autoscans are not allowed. There is already a recursive Autoscan set on " + obj->getLocation().string());
-    }
+
+    int objectID = std::stoi(row->col(0));
+    auto obj = loadObject(objectID);
+    if (obj == nullptr)
+        throw std::runtime_error("Referenced object (by Autoscan) not found.");
+    log_error("Overlapping Autoscans are not allowed. There is already a recursive Autoscan set on {}", obj->getLocation().c_str());
+    throw std::runtime_error("Overlapping Autoscans are not allowed. There is already a recursive Autoscan set on " + obj->getLocation().string());
 }
 
 std::unique_ptr<std::vector<int>> SQLStorage::getPathIDs(int objectID)
