@@ -108,7 +108,7 @@ void MRRegistrarService::processActionRequest(const std::unique_ptr<ActionReques
 
 void MRRegistrarService::processSubscriptionRequest(const std::unique_ptr<SubscriptionRequest>& request)
 {
-    auto propset = xmlBuilder->createEventPropertySet();
+    auto propset = UpnpXMLBuilder::createEventPropertySet();
     auto property = propset->document_element().first_child();
     property.append_child("ValidationRevokedUpdateID").append_child(pugi::node_pcdata).set_value("0");
     property.append_child("ValidationSucceededUpdateID").append_child(pugi::node_pcdata).set_value("0");

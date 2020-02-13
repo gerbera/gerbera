@@ -130,7 +130,7 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
     didl_lite.print(buf, "", 0);
     std::string didl_lite_xml = buf.str();
 
-    auto response = xmlBuilder->createResponse(request->getActionName(), DESC_CDS_SERVICE_TYPE);
+    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), DESC_CDS_SERVICE_TYPE);
     auto resp_root = response->document_element();
     resp_root.append_child("Result").append_child(pugi::node_pcdata).set_value(didl_lite_xml.c_str());
     resp_root.append_child("NumberReturned").append_child(pugi::node_pcdata).set_value(std::to_string(arr.size()).c_str());
@@ -195,7 +195,7 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
     didl_lite.print(buf, "", 0);
     std::string didl_lite_xml = buf.str();
 
-    auto response = xmlBuilder->createResponse(request->getActionName(), DESC_CDS_SERVICE_TYPE);
+    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), DESC_CDS_SERVICE_TYPE);
     auto resp_root = response->document_element();
     resp_root.append_child("Result").append_child(pugi::node_pcdata).set_value(didl_lite_xml.c_str());
     resp_root.append_child("NumberReturned").append_child(pugi::node_pcdata).set_value(std::to_string(results.size()).c_str());
@@ -234,7 +234,7 @@ void ContentDirectoryService::doGetSystemUpdateID(const std::unique_ptr<ActionRe
 {
     log_debug("start");
 
-    auto response = xmlBuilder->createResponse(request->getActionName(), DESC_CDS_SERVICE_TYPE);
+    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), DESC_CDS_SERVICE_TYPE);
     auto root = response->document_element();
     root.append_child("Id").append_child(pugi::node_pcdata).set_value(std::to_string(systemUpdateID).c_str());
     request->setResponse(response);
@@ -270,7 +270,7 @@ void ContentDirectoryService::processSubscriptionRequest(const std::unique_ptr<S
 {
     log_debug("start");
 
-    auto propset = xmlBuilder->createEventPropertySet();
+    auto propset = UpnpXMLBuilder::createEventPropertySet();
     auto property = propset->document_element().first_child();
     property.append_child("SystemUpdateID").append_child(pugi::node_pcdata).set_value(std::to_string(systemUpdateID).c_str());
     auto obj = storage->loadObject(0);
@@ -301,7 +301,7 @@ void ContentDirectoryService::sendSubscriptionUpdate(const std::string& containe
 
     systemUpdateID++;
 
-    auto propset = xmlBuilder->createEventPropertySet();
+    auto propset = UpnpXMLBuilder::createEventPropertySet();
     auto property = propset->document_element().first_child();
     property.append_child("ContainerUpdateIDs").append_child(pugi::node_pcdata).set_value(containerUpdateIDs_CSV.c_str());
     property.append_child("SystemUpdateID").append_child(pugi::node_pcdata).set_value(std::to_string(systemUpdateID).c_str());
