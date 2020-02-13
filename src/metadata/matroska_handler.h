@@ -50,7 +50,7 @@ private:
     void parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream& ebml_stream, LIBMATROSKA_NAMESPACE::KaxInfo* info);
     void parseAttachments(const std::shared_ptr<CdsItem>& item, LIBEBML_NAMESPACE::EbmlStream& ebml_stream, LIBMATROSKA_NAMESPACE::KaxAttachments* attachments, MemIOHandler** io_handler);
     std::string getContentTypeFromByteVector(const LIBMATROSKA_NAMESPACE::KaxFileData* data) const;
-    void addArtworkResource(const std::shared_ptr<CdsItem>& item, const std::string& content_type);
+    void addArtworkResource(const std::shared_ptr<CdsItem>& item, const std::string& art_mimetype);
 };
 
 #endif

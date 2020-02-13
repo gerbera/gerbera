@@ -54,7 +54,7 @@ public:
     explicit FileRequestHandler(std::shared_ptr<ConfigManager> config,
         std::shared_ptr<Storage> storage,
         std::shared_ptr<ContentManager> content,
-        std::shared_ptr<UpdateManager> update_manager, std::shared_ptr<web::SessionManager> session_manager,
+        std::shared_ptr<UpdateManager> updateManager, std::shared_ptr<web::SessionManager> sessionManager,
         UpnpXMLBuilder* xmlBuilder);
 
     virtual void getInfo(const char *filename, UpnpFileInfo *info);
