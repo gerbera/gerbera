@@ -263,7 +263,7 @@ int main(int argc, char** argv, char** envp)
         if (opts.count("create-config") > 0) {
             ConfigGenerator configGenerator;
 
-            std::string generated = configGenerator.generate(home.value_or(""), confdir.value_or(""), prefix.value_or(""), magic.value_or(""));
+            std::string generated = ConfigGenerator::generate(home.value_or(""), confdir.value_or(""), prefix.value_or(""), magic.value_or(""));
             std::cout << generated.c_str() << std::endl;
             exit(EXIT_SUCCESS);
         }

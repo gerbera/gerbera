@@ -76,7 +76,7 @@ void ConnectionManagerService::doGetProtocolInfo(const std::unique_ptr<ActionReq
 {
     log_debug("start");
 
-    auto response = xmlBuilder->createResponse(request->getActionName(), DESC_CM_SERVICE_TYPE);
+    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), DESC_CM_SERVICE_TYPE);
 
     std::vector<std::string> mimeTypes = storage->getMimeTypes();
     std::string CSV = mime_types_to_CSV(mimeTypes);
@@ -116,7 +116,7 @@ void ConnectionManagerService::processSubscriptionRequest(const std::unique_ptr<
     std::vector<std::string> mimeTypes = storage->getMimeTypes();
     std::string CSV = mime_types_to_CSV(mimeTypes);
 
-    auto propset = xmlBuilder->createEventPropertySet();
+    auto propset = UpnpXMLBuilder::createEventPropertySet();
     auto property = propset->document_element().first_child();
     property.append_child("CurrentConnectionIDs").append_child(pugi::node_pcdata).set_value("0");
     property.append_child("SinkProtocolInfo").append_child(pugi::node_pcdata).set_value("");
@@ -141,7 +141,7 @@ void ConnectionManagerService::processSubscriptionRequest(const std::unique_ptr<
 
 void ConnectionManagerService::sendSubscriptionUpdate(const std::string& sourceProtocol_CSV)
 {
-    auto propset = xmlBuilder->createEventPropertySet();
+    auto propset = UpnpXMLBuilder::createEventPropertySet();
     auto property = propset->document_element().first_child();
     property.append_child("SourceProtocolInfo").append_child(pugi::node_pcdata).set_value(sourceProtocol_CSV.c_str());
 

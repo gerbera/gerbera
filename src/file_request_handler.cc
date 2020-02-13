@@ -356,7 +356,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
         auto clone = CdsObject::createObject(storage, objectType);
         aitem->copyTo(clone);
 
-        xmlBuilder->updateObject(clone, output);
+        UpnpXMLBuilder::updateObject(clone, output);
 
         if (!aitem->equals(clone, true)) // check for all differences
         {

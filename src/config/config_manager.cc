@@ -75,7 +75,7 @@ ConfigManager::ConfigManager(fs::path filename,
     , interface(std::move(interface))
     , port(port)
 {
-    this->debug_logging = debug_logging;
+    ConfigManager::debug_logging = debug_logging;
 
     xmlDoc = std::make_unique<pugi::xml_document>();
     options = std::make_unique<std::vector<std::shared_ptr<ConfigOption>>>();
