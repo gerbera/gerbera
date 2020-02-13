@@ -232,7 +232,7 @@ CdsItemExternalURL::CdsItemExternalURL(std::shared_ptr<Storage> storage)
 
 void CdsItemExternalURL::validate()
 {
-    CdsObject::validate();
+    CdsItem::validate();
     if (!string_ok(this->mimeType))
         throw std::runtime_error("URL Item validation failed: missing mimetype\n");
 
