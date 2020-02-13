@@ -139,7 +139,7 @@ std::string CdsResource::encode()
     buf << dict_encode(parameters);
     buf << RESOURCE_PART_SEP;
     buf << dict_encode(options);
-    return buf.str().c_str();
+    return buf.str();
 }
 
 std::shared_ptr<CdsResource> CdsResource::decode(const std::string& serial)

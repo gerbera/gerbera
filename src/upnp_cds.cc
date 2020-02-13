@@ -166,7 +166,7 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
     }
 
     auto searchParam = std::make_unique<SearchParam>(containerID, searchCriteria,
-        std::stoi(startingIndex.c_str(), nullptr), std::stoi(requestedCount.c_str(), nullptr));
+        std::stoi(startingIndex, nullptr), std::stoi(requestedCount, nullptr));
 
     std::vector<std::shared_ptr<CdsObject>> results;
     int numMatches = 0;
