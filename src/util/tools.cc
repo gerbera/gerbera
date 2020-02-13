@@ -1072,7 +1072,7 @@ fs::path tempName(const fs::path& leadPath, char* tmpl)
     /* find the last occurrence of "XXXXXX" */
     XXXXXX = strstr(tmpl, "XXXXXX");
 
-    if (!XXXXXX || strncmp(XXXXXX, "XXXXXX", 6)) {
+    if (!XXXXXX || strncmp(XXXXXX, "XXXXXX", 6) != 0) {
         return "";
     }
 
