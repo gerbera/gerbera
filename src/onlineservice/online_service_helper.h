@@ -44,7 +44,7 @@ public:
 
     /// \brief this function will determine the final URL for services that
     /// need extra steps to do that
-    std::string resolveURL(const std::shared_ptr<CdsItemExternalURL>& item);
+    static std::string resolveURL(const std::shared_ptr<CdsItemExternalURL>& item);
 };
 
 #endif //__ONLINE_SERVICE_HELPER_H__

@@ -81,13 +81,13 @@ protected:
     /// \param request Incoming ActionRequest.
     ///
     /// GetSearchCapabilities(string SearchCaps)
-    void doGetSearchCapabilities(const std::unique_ptr<ActionRequest>& request);
+    static void doGetSearchCapabilities(const std::unique_ptr<ActionRequest>& request);
 
     /// \brief UPnP standard defined action: GetSortCapabilities()
     /// \param request Incoming ActionRequest.
     ///
     /// GetSortCapabilities(string SortCaps)
-    void doGetSortCapabilities(const std::unique_ptr<ActionRequest>& request);
+    static void doGetSortCapabilities(const std::unique_ptr<ActionRequest>& request);
 
     /// \brief UPnP standard defined action: GetSystemUpdateID()
     /// \param request Incoming ActionRequest.

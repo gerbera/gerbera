@@ -53,7 +53,7 @@ void ConnectionManagerService::doGetCurrentConnectionIDs(const std::unique_ptr<A
 {
     log_debug("start");
 
-    auto response = xmlBuilder->createResponse(request->getActionName(), DESC_CM_SERVICE_TYPE);
+    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), DESC_CM_SERVICE_TYPE);
     auto root = response->document_element();
     root.append_child("ConnectionID").append_child(pugi::node_pcdata).set_value("0");
 

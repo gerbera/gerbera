@@ -293,7 +293,7 @@ protected:
     ///
     /// This function will create a dictionary with the following
     /// key:value paris: "1":"2", "3":"4"
-    std::map<std::string, std::string> createDictionaryFromNode(const pugi::xml_node& element,
+    static std::map<std::string, std::string> createDictionaryFromNode(const pugi::xml_node& element,
         const std::string& nodeName, const std::string& keyAttr, const std::string& valAttr, bool tolower = false);
 
     /// \brief Creates an array of AutoscanDirectory objects from a XML nodeset.
@@ -305,7 +305,7 @@ protected:
     /// \brief Creates ab aray of TranscodingProfile objects from an XML
     /// nodeset.
     /// \param element starting element of the nodeset.
-    std::shared_ptr<TranscodingProfileList> createTranscodingProfileListFromNode(const pugi::xml_node& element);
+    static std::shared_ptr<TranscodingProfileList> createTranscodingProfileListFromNode(const pugi::xml_node& element);
 
     /// \brief Creates an array of strings from an XML nodeset.
     /// \param element starting element of the nodeset.
@@ -320,7 +320,7 @@ protected:
     /// <some-section>
     ///
     /// This function will create an array like that: ["data", "otherdata"]
-    std::vector<std::string> createArrayFromNode(const pugi::xml_node& element, const std::string& nodeName, const std::string& attrName);
+    static std::vector<std::string> createArrayFromNode(const pugi::xml_node& element, const std::string& nodeName, const std::string& attrName);
 
     void dumpOptions();
 };

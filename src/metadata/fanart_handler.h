@@ -43,7 +43,7 @@ public:
     virtual std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsItem> item, int resNum);
 
 private:
-    fs::path getFanArtPath(const std::shared_ptr<CdsItem>& item) const;
+    static fs::path getFanArtPath(const std::shared_ptr<CdsItem>& item);
 };
 
 #endif // __METADATA_FANART_H__

@@ -365,7 +365,7 @@ protected:
     std::string extension2mimetype(std::string extension);
     std::string mimetype2upnpclass(const std::string& mimeType);
 
-    void invalidateAddTask(const std::shared_ptr<GenericTask>& t, const fs::path& path);
+    static void invalidateAddTask(const std::shared_ptr<GenericTask>& t, const fs::path& path);
 
     std::shared_ptr<Layout> layout;
 

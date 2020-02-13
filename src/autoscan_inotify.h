@@ -165,9 +165,9 @@ private:
     int monitorDirectory(const fs::path& path, const std::shared_ptr<AutoscanDirectory>& adir, bool startPoint, std::vector<std::string>* pathArray = nullptr);
     void unmonitorDirectory(const fs::path& path, const std::shared_ptr<AutoscanDirectory>& adir);
 
-    std::shared_ptr<WatchAutoscan> getAppropriateAutoscan(const std::shared_ptr<Wd>& wdObj, const std::shared_ptr<AutoscanDirectory>& adir);
-    std::shared_ptr<WatchAutoscan> getAppropriateAutoscan(const std::shared_ptr<Wd>& wdObj, const fs::path& path);
-    std::shared_ptr<WatchAutoscan> getStartPoint(const std::shared_ptr<Wd>& wdObj);
+    static std::shared_ptr<WatchAutoscan> getAppropriateAutoscan(const std::shared_ptr<Wd>& wdObj, const std::shared_ptr<AutoscanDirectory>& adir);
+    static std::shared_ptr<WatchAutoscan> getAppropriateAutoscan(const std::shared_ptr<Wd>& wdObj, const fs::path& path);
+    static std::shared_ptr<WatchAutoscan> getStartPoint(const std::shared_ptr<Wd>& wdObj);
 
     bool removeFromWdObj(const std::shared_ptr<Wd>& wdObj, const std::shared_ptr<Watch>& toRemove);
 

@@ -228,7 +228,7 @@ protected:
     /// \b web_close Close file.
     ///
     /// \return UPNP_E_SUCCESS Callbacks registered successfully, else error code.
-    int registerVirtualDirCallbacks();
+    static int registerVirtualDirCallbacks();
 };
 
 #endif // __SERVER_H__

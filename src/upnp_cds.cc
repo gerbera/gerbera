@@ -210,7 +210,7 @@ void ContentDirectoryService::doGetSearchCapabilities(const std::unique_ptr<Acti
 {
     log_debug("start");
 
-    auto response = xmlBuilder->createResponse(request->getActionName(), DESC_CDS_SERVICE_TYPE);
+    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), DESC_CDS_SERVICE_TYPE);
     auto root = response->document_element();
     root.append_child("SearchCaps").append_child(pugi::node_pcdata).set_value("dc:title,upnp:class,upnp:artist,upnp:album");
     request->setResponse(response);
@@ -222,7 +222,7 @@ void ContentDirectoryService::doGetSortCapabilities(const std::unique_ptr<Action
 {
     log_debug("start");
 
-    auto response = xmlBuilder->createResponse(request->getActionName(), DESC_CDS_SERVICE_TYPE);
+    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), DESC_CDS_SERVICE_TYPE);
     auto root = response->document_element();
     root.append_child("SortCaps").append_child(pugi::node_pcdata).set_value("");
     request->setResponse(response);

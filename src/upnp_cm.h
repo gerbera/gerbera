@@ -55,7 +55,7 @@ protected:
     /// GetCurrentConnectionIDs(string ConnectionIDs)
     ///
     /// This is currently unsupported (returns empty string)
-    void doGetCurrentConnectionIDs(const std::unique_ptr<ActionRequest>& request);
+    static void doGetCurrentConnectionIDs(const std::unique_ptr<ActionRequest>& request);
 
     /// \brief UPnP standard defined action: GetCurrentConnectionInfo()
     /// \param request Incoming ActionRequest.
@@ -64,7 +64,7 @@ protected:
     /// string PeerConnectionManager, i4 PeerConnectionID, string Direction, string Status)
     ///
     /// This action is currently unsupported.
-    void doGetCurrentConnectionInfo(const std::unique_ptr<ActionRequest>& request);
+    static void doGetCurrentConnectionInfo(const std::unique_ptr<ActionRequest>& request);
 
     /// \brief UPnP standard defined action: GetProtocolInfo()
     /// \param request Incoming ActionRequest.
