@@ -514,8 +514,8 @@ void writeTextFile(const fs::path& path, const std::string& contents)
         fclose(f);
         if (bytesWritten >= 0)
             throw std::runtime_error("writeTextFile: incomplete write to " + path.string() + " : ");
-        else
-            throw std::runtime_error("writeTextFile: error writing to " + path.string() + " : " + mt_strerror(errno));
+
+        throw std::runtime_error("writeTextFile: error writing to " + path.string() + " : " + mt_strerror(errno));
     }
     fclose(f);
 }
@@ -525,10 +525,10 @@ std::string renderProtocolInfo(const std::string& mimetype, const std::string& p
     if (string_ok(mimetype) && string_ok(protocol)) {
         if (string_ok(extend))
             return protocol + ":*:" + mimetype + ":" + extend;
-        else
-            return protocol + ":*:" + mimetype + ":*";
-    } else
-        return "http-get:*:*:*";
+        return protocol + ":*:" + mimetype + ":*";
+    }
+
+    return "http-get:*:*:*";
 }
 
 std::string getMTFromProtocolInfo(const std::string& protocol)
@@ -536,8 +536,8 @@ std::string getMTFromProtocolInfo(const std::string& protocol)
     std::vector<std::string> parts = split_string(protocol, ':');
     if (parts.size() > 2)
         return parts[2];
-    else
-        return "";
+
+    return "";
 }
 
 std::string getProtocol(const std::string& protocolInfo)
@@ -958,9 +958,9 @@ std::string ipToInterface(const std::string& ip)
 {
     if (!string_ok(ip)) {
         return "";
-    } else {
-        log_debug("Looking for '{}'", ip.c_str());
     }
+
+    log_debug("Looking for '{}'", ip.c_str());
 
     struct ifaddrs *ifaddr, *ifa;
     int family, s, n;
@@ -1101,8 +1101,8 @@ fs::path tempName(const fs::path& leadPath, char* tmpl)
         if (ret != 0) {
             if ((errno == ENOENT) || (errno == ENOTDIR))
                 return check;
-            else
-                return "";
+
+            return "";
         }
     }
 
@@ -1287,10 +1287,7 @@ std::string getAVIFourCC(const fs::path& avi_filename)
     std::string fourcc = std::string(buffer + FCC_OFFSET, 4);
     free(buffer);
 
-    if (string_ok(fourcc))
-        return fourcc;
-    else
-        return "";
+    return string_ok(fourcc) ? fourcc : "";
 }
 #endif
 

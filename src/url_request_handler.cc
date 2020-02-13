@@ -82,8 +82,8 @@ void URLRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
     if (objID.empty()) {
         //log_error("object_id not found in url");
         throw std::runtime_error("getInfo: object_id not found");
-    } else
-        objectID = std::stoi(objID);
+    }
+    objectID = std::stoi(objID);
 
     //log_debug("got ObjectID: [{}]", object_id.c_str());
 
@@ -179,8 +179,8 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
     std::string objID = getValueOrDefault(dict, "object_id");
     if (objID.empty()) {
         throw std::runtime_error("object_id not found");
-    } else
-        objectID = std::stoi(objID);
+    }
+    objectID = std::stoi(objID);
 
     auto obj = storage->loadObject(objectID);
 
@@ -219,20 +219,20 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
 
         auto tr_d = std::make_unique<TranscodeDispatcher>(config, content);
         return tr_d->open(tp, url, item, range);
-    } else {
-        auto u = std::make_unique<URL>();
-        try {
-            auto st = u->getInfo(url);
-            // info->file_length = st->getSize();
-            header = "Accept-Ranges: bytes";
-            log_debug("URL used for request: {}", st->getURL().c_str());
-        } catch (const std::runtime_error& ex) {
-            log_warning("{}", ex.what());
-            //info->file_length = -1;
-        }
-        mimeType = item->getMimeType();
-        // info->content_type = ixmlCloneDOMString(mimeType.c_str());
     }
+
+    auto u = std::make_unique<URL>();
+    try {
+        auto st = u->getInfo(url);
+        // info->file_length = st->getSize();
+        header = "Accept-Ranges: bytes";
+        log_debug("URL used for request: {}", st->getURL().c_str());
+    } catch (const std::runtime_error& ex) {
+        log_warning("{}", ex.what());
+        //info->file_length = -1;
+    }
+    mimeType = item->getMimeType();
+    // info->content_type = ixmlCloneDOMString(mimeType.c_str());
 
     /* FIXME headers
     if (string_ok(header))

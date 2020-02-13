@@ -163,9 +163,8 @@ std::unique_ptr<SearchToken> SearchLexer::makeToken(const std::string& tokenStr)
     auto itr = tokenTypes.find(aslowercase(tokenStr));
     if (itr != tokenTypes.end()) {
         return std::make_unique<SearchToken>(itr->second, tokenStr);
-    } else {
-        return std::make_unique<SearchToken>(TokenType::PROPERTY, tokenStr);
     }
+    return std::make_unique<SearchToken>(TokenType::PROPERTY, tokenStr);
 }
 
 void SearchParser::getNextToken()
@@ -178,8 +177,8 @@ std::shared_ptr<ASTNode> SearchParser::parse()
     getNextToken();
     if (currentToken->getType() == TokenType::ASTERISK)
         return std::make_shared<ASTAsterisk>(sqlEmitter, currentToken->getValue());
-    else
-        return parseSearchExpression();
+
+    return parseSearchExpression();
 }
 
 std::shared_ptr<ASTNode> SearchParser::parseSearchExpression()
@@ -452,8 +451,8 @@ std::string DefaultSQLEmitter::emitSQL(const ASTNode* node) const
             << "where "
             << predicates;
         return sql.str();
-    } else
-        throw std::runtime_error("No SQL generated from AST");
+    }
+    throw std::runtime_error("No SQL generated from AST");
 }
 
 std::string DefaultSQLEmitter::emit(const ASTParenthesis* node, const std::string& bracketedNode) const

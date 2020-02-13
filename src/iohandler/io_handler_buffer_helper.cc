@@ -90,8 +90,8 @@ size_t IOHandlerBufferHelper::read(char* buf, size_t length)
         if (checkSocket) {
             checkSocket = false;
             return CHECK_SOCKET;
-        } else
-            cond.wait(lock);
+        }
+        cond.wait(lock);
     }
 
     if (readError || threadShutdown)

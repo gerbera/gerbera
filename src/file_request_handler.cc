@@ -130,8 +130,8 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     if (ret != 0) {
         if (is_srt)
             throw SubtitlesNotFoundException("Subtitle file " + path.string() + " is not available.");
-        else
-            throw std::runtime_error("Failed to open " + path.string() + " - " + strerror(errno));
+
+        throw std::runtime_error("Failed to open " + path.string() + " - " + strerror(errno));
     }
 
     if (access(path.c_str(), R_OK) == 0) {
@@ -404,8 +404,8 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
     if (ret != 0) {
         if (is_srt)
             throw SubtitlesNotFoundException("Subtitle file " + path.string() + " is not available.");
-        else
-            throw std::runtime_error("Failed to open " + path.string() + " - " + strerror(errno));
+
+        throw std::runtime_error("Failed to open " + path.string() + " - " + strerror(errno));
     }
 
     log_debug("fetching resource id {}", res_id);
@@ -461,47 +461,46 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
         io_handler->open(mode);
         log_debug("end");
         return io_handler;
-
-    } else {
-        if (!is_srt && string_ok(tr_profile)) {
-            std::string range = getValueOrDefault(params, "range");
-
-            auto tr_d = std::make_unique<TranscodeDispatcher>(config, content);
-            auto tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)
-                            ->getByName(tr_profile);
-            return tr_d->open(tp, path, item, range);
-        } else {
-            if (mimeType.empty())
-                mimeType = item->getMimeType();
-
-            /* FIXME Upstream headers / DNLA
-            info->file_length = statbuf.st_size;
-            info->content_type = ixmlCloneDOMString(mimeType.c_str());
-
-            log_debug("Adding content disposition header: {}",
-                    header.c_str());
-            // if we are dealing with a regular file we should add the
-            // Accept-Ranges: bytes header, in order to indicate that we support
-            // seeking
-            if (S_ISREG(statbuf.st_mode))
-            {
-                if (string_ok(header))
-                    header = header + "\r\n";
-
-                header = header + "Accept-Ranges: bytes";
-            }
-
-            header = getDLNAtransferHeader(mimeType, header);
-
-            if (string_ok(header))
-                info->http_header = ixmlCloneDOMString(header.c_str());
-            */
-
-            auto io_handler = std::make_unique<FileIOHandler>(path);
-            io_handler->open(mode);
-            content->triggerPlayHook(obj);
-            log_debug("end");
-            return io_handler;
-        }
     }
+
+    if (!is_srt && string_ok(tr_profile)) {
+        std::string range = getValueOrDefault(params, "range");
+
+        auto tr_d = std::make_unique<TranscodeDispatcher>(config, content);
+        auto tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)
+                      ->getByName(tr_profile);
+        return tr_d->open(tp, path, item, range);
+    }
+
+    if (mimeType.empty())
+        mimeType = item->getMimeType();
+
+    /* FIXME Upstream headers / DNLA
+    info->file_length = statbuf.st_size;
+    info->content_type = ixmlCloneDOMString(mimeType.c_str());
+
+    log_debug("Adding content disposition header: {}",
+              header.c_str());
+    // if we are dealing with a regular file we should add the
+    // Accept-Ranges: bytes header, in order to indicate that we support
+    // seeking
+    if (S_ISREG(statbuf.st_mode))
+    {
+        if (string_ok(header))
+            header = header + "\r\n";
+
+         header = header + "Accept-Ranges: bytes";
+    }
+
+    header = getDLNAtransferHeader(mimeType, header);
+
+    if (string_ok(header))
+        info->http_header = ixmlCloneDOMString(header.c_str());
+    */
+
+    auto io_handler = std::make_unique<FileIOHandler>(path);
+    io_handler->open(mode);
+    content->triggerPlayHook(obj);
+    log_debug("end");
+    return io_handler;
 }

@@ -306,8 +306,8 @@ int Sqlite3Storage::exec(const char* query, int length, bool getLastInsertId)
     etask->waitForTask();
     if (getLastInsertId)
         return etask->getLastInsertId();
-    else
-        return -1;
+
+    return -1;
 }
 
 void* Sqlite3Storage::staticThreadProc(void* arg)
@@ -623,8 +623,8 @@ std::unique_ptr<SQLRow> Sqlite3Result::nextRow()
             auto p = std::make_unique<Sqlite3Row>(row, self);
             p->res = std::static_pointer_cast<Sqlite3Result>(self);
             return p;
-        } else
-            return nullptr;
+        }
+        return nullptr;
     }
     return nullptr;
 }

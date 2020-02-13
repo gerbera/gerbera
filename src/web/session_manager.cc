@@ -186,8 +186,7 @@ void SessionManager::removeSession(const std::string& sessionID)
             checkTimer();
             return;
         }
-        else
-            ++it;
+        ++it;
     }
 }
 

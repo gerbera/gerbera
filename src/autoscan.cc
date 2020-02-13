@@ -277,8 +277,8 @@ ScanMode AutoscanDirectory::remapScanmode(const std::string& scanmode)
         return ScanMode::Timed;
     if (scanmode == "inotify")
         return ScanMode::INotify;
-    else
-        throw std::runtime_error("illegal scanmode (" + scanmode + ") given to remapScanmode()");
+
+    throw std::runtime_error("illegal scanmode (" + scanmode + ") given to remapScanmode()");
 }
 
 std::string AutoscanDirectory::mapScanlevel(ScanLevel scanlevel)
@@ -301,10 +301,10 @@ ScanLevel AutoscanDirectory::remapScanlevel(const std::string& scanlevel)
 {
     if (scanlevel == "basic")
         return ScanLevel::Basic;
-    else if (scanlevel == "full")
+    if (scanlevel == "full")
         return ScanLevel::Full;
-    else
-        throw std::runtime_error("illegal scanlevel (" + scanlevel + ") given to remapScanlevel()");
+
+    throw std::runtime_error("illegal scanlevel (" + scanlevel + ") given to remapScanlevel()");
 }
 
 void AutoscanDirectory::copyTo(const std::shared_ptr<AutoscanDirectory>& copy)

@@ -301,8 +301,8 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(std::shared_ptr<CdsItem> 
 
         auto h = std::make_unique<MemIOHandler>((void*)art->picture().data(), art->picture().size());
         return h;
-
-    } else if (content_type == CONTENT_TYPE_FLAC) {
+    }
+    if (content_type == CONTENT_TYPE_FLAC) {
         TagLib::FLAC::File f(&roStream, TagLib::ID3v2::FrameFactory::instance());
 
         if (!f.isValid())
@@ -316,8 +316,8 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(std::shared_ptr<CdsItem> 
 
         auto h = std::make_unique<MemIOHandler>(data.data(), data.size());
         return h;
-
-    } else if (content_type == CONTENT_TYPE_MP4) {
+    }
+    if (content_type == CONTENT_TYPE_MP4) {
         TagLib::MP4::File f(&roStream);
 
         if (!f.isValid()) {
@@ -342,7 +342,8 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(std::shared_ptr<CdsItem> 
 
         auto h = std::make_unique<MemIOHandler>(data.data(), data.size());
         return h;
-    } else if (content_type == CONTENT_TYPE_WMA) {
+    }
+    if (content_type == CONTENT_TYPE_WMA) {
         TagLib::ASF::File f(&roStream);
 
         if (!f.isValid())
@@ -364,7 +365,8 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(std::shared_ptr<CdsItem> 
 
         auto h = std::make_unique<MemIOHandler>(data.data(), data.size());
         return h;
-    } else if (content_type == CONTENT_TYPE_OGG) {
+    }
+    if (content_type == CONTENT_TYPE_OGG) {
         TagLib::Ogg::Vorbis::File f(&roStream);
 
         if (!f.isValid() || !f.tag())
