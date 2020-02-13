@@ -33,7 +33,6 @@
 #include "exceptions.h"
 
 IOHandlerChainer::IOHandlerChainer(std::unique_ptr<IOHandler>& readFrom, std::unique_ptr<IOHandler>& writeTo, int chunkSize)
-    : ThreadExecutor()
 {
     if (chunkSize <= 0)
         throw std::runtime_error("chunkSize must be positive");

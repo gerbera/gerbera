@@ -119,7 +119,6 @@ ProcessIOHandler::ProcessIOHandler(std::shared_ptr<ContentManager> content,
     const std::shared_ptr<Executor>& mainProc,
     std::vector<std::shared_ptr<ProcListItem>> procList,
     bool ignoreSeek)
-    : IOHandler()
 {
     this->content = std::move(content);
     this->filename = filename;

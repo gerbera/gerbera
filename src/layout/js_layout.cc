@@ -38,7 +38,6 @@ JSLayout::JSLayout(const std::shared_ptr<ConfigManager>& config,
     const std::shared_ptr<Storage>& storage,
     const std::shared_ptr<ContentManager>& content,
     const std::shared_ptr<Runtime>& runtime)
-    : Layout()
 {
     import_script = std::make_unique<ImportScript>(config, storage, content, runtime);
 }
