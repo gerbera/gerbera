@@ -299,7 +299,7 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(std::shared_ptr<CdsItem> 
 
         auto art = dynamic_cast<TagLib::ID3v2::AttachedPictureFrame*>(list.front());
 
-        auto h = std::make_unique<MemIOHandler>((void*)art->picture().data(), art->picture().size());
+        auto h = std::make_unique<MemIOHandler>(art->picture().data(), art->picture().size());
         return h;
     }
     if (content_type == CONTENT_TYPE_FLAC) {

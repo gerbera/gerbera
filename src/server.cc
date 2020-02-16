@@ -315,13 +315,13 @@ int Server::handleUpnpEvent(Upnp_EventType eventtype, const void* event)
         // a CP is invoking an action
         log_debug("UPNP_CONTROL_ACTION_REQUEST");
         try {
-            auto request = std::make_unique<ActionRequest>((UpnpActionRequest*)event);
+            auto request = std::make_unique<ActionRequest>(static_cast<UpnpActionRequest*>(const_cast<void*>(event)));
             routeActionRequest(request);
             request->update();
             // set in update() ((struct Upnp_Action_Request *)event)->ErrCode = ret;
         } catch (const UpnpException& upnp_e) {
             ret = upnp_e.getErrorCode();
-            UpnpActionRequest_set_ErrCode((UpnpActionRequest*)event, ret);
+            UpnpActionRequest_set_ErrCode(static_cast<UpnpActionRequest*>(const_cast<void*>(event)), ret);
         } catch (const std::runtime_error& e) {
             log_info("Exception: {}", e.what());
         }
@@ -331,7 +331,7 @@ int Server::handleUpnpEvent(Upnp_EventType eventtype, const void* event)
         // a cp wants a subscription
         log_debug("UPNP_EVENT_SUBSCRIPTION_REQUEST");
         try {
-            auto request = std::make_unique<SubscriptionRequest>((UpnpSubscriptionRequest*)event);
+            auto request = std::make_unique<SubscriptionRequest>(static_cast<UpnpSubscriptionRequest*>(const_cast<void*>(event)));
             routeSubscriptionRequest(request);
         } catch (const UpnpException& upnp_e) {
             log_warning("Subscription exception: {}", upnp_e.what());
@@ -499,7 +499,7 @@ int Server::registerVirtualDirCallbacks()
         try {
             auto reqHandler = static_cast<const Server*>(cookie)->createRequestHandler(filename);
             auto ioHandler = reqHandler->open(link.c_str(), mode, "");
-            auto ioPtr = (UpnpWebFileHandle)ioHandler.release();
+            auto ioPtr = static_cast<UpnpWebFileHandle>(ioHandler.release());
             //log_debug("%p open({})", ioPtr, filename);
             return ioPtr;
         } catch (const ServerShutdownException& se) {
