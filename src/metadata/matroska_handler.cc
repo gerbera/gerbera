@@ -162,9 +162,9 @@ void MatroskaHandler::parseMKV(const std::shared_ptr<CdsItem>& item, MemIOHandle
 void MatroskaHandler::parseLevel1Element(const std::shared_ptr<CdsItem>& item, EbmlStream& ebml_stream, EbmlElement* el_l1, MemIOHandler** p_io_handler)
 {
     if (EbmlId(*el_l1) == KaxInfo::ClassInfos.GlobalId) {
-        parseInfo(item, ebml_stream, static_cast<KaxInfo*>(el_l1));
+        parseInfo(item, ebml_stream, dynamic_cast<KaxInfo*>(el_l1));
     } else if (EbmlId(*el_l1) == KaxAttachments::ClassInfos.GlobalId) {
-        parseAttachments(item, ebml_stream, static_cast<KaxAttachments*>(el_l1), p_io_handler);
+        parseAttachments(item, ebml_stream, dynamic_cast<KaxAttachments*>(el_l1), p_io_handler);
     }
 }
 
@@ -184,11 +184,11 @@ void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream
         EbmlElement* el = (*m)[i];
 
         if (EbmlId(*el) == KaxTitle::ClassInfos.GlobalId) {
-            std::string title(UTFstring(*static_cast<KaxTitle*>(el)).GetUTF8());
+            std::string title(UTFstring(*dynamic_cast<KaxTitle*>(el)).GetUTF8());
             // printf("KaxTitle = %s\n", title.c_str());
             item->setMetadata(MT_KEYS[M_TITLE].upnp, sc->convert(title));
         } else if (EbmlId(*el) == KaxDateUTC::ClassInfos.GlobalId) {
-            KaxDateUTC& date = *static_cast<KaxDateUTC*>(el);
+            KaxDateUTC& date = *dynamic_cast<KaxDateUTC*>(el);
             time_t i_date;
             struct tm tmres;
             char buffer[25];
