@@ -70,7 +70,7 @@ using uchar = unsigned char;
 #define ITEM_BUF_SIZE 16
 static int Get16m(const void* Short)
 {
-    return (((uchar*)Short)[0] << 8) | ((uchar*)Short)[1];
+    return (static_cast<uchar*>(const_cast<void*>(Short))[0] << 8) | static_cast<uchar*>(const_cast<void*>(Short))[1];
 }
 
 static int ioh_fgetc(const std::unique_ptr<IOHandler>& ioh)

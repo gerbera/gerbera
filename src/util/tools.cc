@@ -238,7 +238,7 @@ std::string hex_encode(const void* data, int len)
 
     std::ostringstream buf;
 
-    chars = (unsigned char*)data;
+    chars = static_cast<unsigned char*>(const_cast<void*>(data));
     for (i = 0; i < len; i++) {
         unsigned char c = chars[i];
         hi = c >> 4;
@@ -280,7 +280,7 @@ std::string hex_md5(const void* data, int length)
 
     md5_state_t ctx;
     md5_init(&ctx);
-    md5_append(&ctx, (unsigned char*)data, length);
+    md5_append(&ctx, static_cast<unsigned char*>(const_cast<void*>(data)), length);
     md5_finish(&ctx, reinterpret_cast<unsigned char*>(md5buf));
 
     return hex_encode(md5buf, 16);
@@ -842,7 +842,7 @@ std::string fallbackString(std::string first, std::string fallback)
 unsigned int stringHash(const std::string& str)
 {
     unsigned int hash = 5381;
-    auto data = (unsigned char*)str.c_str();
+    auto data = str.c_str();
     int c;
     while ((c = *data++))
         hash = ((hash << 5) + hash) ^ c; /* (hash * 33) ^ c */

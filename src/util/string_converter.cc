@@ -39,15 +39,15 @@ StringConverter::StringConverter(const std::string& from, const std::string& to)
     dirty = false;
 
     cd = iconv_open(to.c_str(), from.c_str());
-    if (cd == (iconv_t)(-1)) {
-        cd = (iconv_t) nullptr;
+    if (cd == reinterpret_cast<iconv_t>(-1)) {
+        cd = static_cast<iconv_t>(nullptr);
         throw std::runtime_error(std::string("iconv: ") + strerror(errno));
     }
 }
 
 StringConverter::~StringConverter()
 {
-    if (cd != (iconv_t) nullptr)
+    if (cd != static_cast<iconv_t>(nullptr))
         iconv_close(cd);
 }
 
