@@ -52,5 +52,4 @@ void JSLayout::processCdsObject(std::shared_ptr<CdsObject> obj, fs::path rootpat
     import_script->processCdsObject(obj, rootpath);
 }
 
-
 #endif // HAVE_JS

@@ -36,8 +36,8 @@
 
 #include "common.h"
 #include "config/config_manager.h"
-#include "session_manager.h"
 #include "request_handler.h"
+#include "session_manager.h"
 #include "util/generic_task.h"
 #include "util/xml_to_json.h"
 
@@ -74,7 +74,7 @@ protected:
     bool checkRequestCalled;
 
     /// \brief Decoded URL parameters are stored as a dictionary.
-    std::map<std::string,std::string> params;
+    std::map<std::string, std::string> params;
 
     /// \brief The original filename from url if anyone needs it.
     std::string filename;
@@ -152,7 +152,7 @@ public:
     /// dynamic XML) we do not know the size of the data. This is of course different
     /// for the FileRequestHandler, where we can check the file and return all
     /// information about it.
-    void getInfo(const char *filename, UpnpFileInfo *info) override;
+    void getInfo(const char* filename, UpnpFileInfo* info) override;
 
     /// \brief Decodes the parameters from the filename (URL) and calls the internal open() function.
     /// \param filename The requested URL

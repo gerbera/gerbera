@@ -39,14 +39,14 @@
 #include "onlineservice/lastfm_scrobbler.h"
 #endif
 
-#include "server.h"
 #include "config/config_manager.h"
 #include "content_manager.h"
 #include "file_request_handler.h"
+#include "server.h"
+#include "storage/storage.h"
 #include "update_manager.h"
 #include "util/task_processor.h"
 #include "web/session_manager.h"
-#include "storage/storage.h"
 #ifdef HAVE_JS
 #include "scripting/runtime.h"
 #endif
@@ -99,8 +99,7 @@ void Server::init()
     last_fm->init();
 #endif
     content = std::make_shared<ContentManager>(
-        config, storage, update_manager, session_manager, timer, task_processor, scripting_runtime, last_fm
-    );
+        config, storage, update_manager, session_manager, timer, task_processor, scripting_runtime, last_fm);
     content->init();
 }
 
@@ -127,7 +126,8 @@ void Server::run()
 
     log_debug("Initialising libupnp with interface: '{}', port: {}", iface.c_str(), port);
     const char* IfName = nullptr;
-    if (!iface.empty()) IfName = iface.c_str();
+    if (!iface.empty())
+        IfName = iface.c_str();
     ret = UpnpInit2(IfName, port);
     if (ret != UPNP_E_SUCCESS) {
         throw UpnpException(ret, "run: UpnpInit failed");
@@ -436,7 +436,7 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
         std::string path;
         RequestHandler::splitUrl(filename, URL_UI_PARAM_SEPARATOR, path, parameters);
 
-        std::map<std::string,std::string> dict;
+        std::map<std::string, std::string> dict;
         dict_decode(parameters, &dict);
 
         std::string r_type = getValueOrDefault(dict, URL_REQUEST_TYPE);

@@ -34,11 +34,10 @@
 
 #include <utility>
 
-#include "sqlite3_storage.h"
 #include "common.h"
 #include "config/config_manager.h"
 #include "sqlite3_create_sql.h"
-
+#include "sqlite3_storage.h"
 
 // updates 1->2
 #define SQLITE3_UPDATE_1_2_1 "DROP INDEX mt_autoscan_obj_id"
@@ -182,7 +181,7 @@ void Sqlite3Storage::init()
                     dbVersion = getInternalSetting("db_version");
                 } catch (const std::runtime_error& e) {
                     shutdown();
-                    throw std::runtime_error(std::string{"error while creating database: "} + e.what());
+                    throw std::runtime_error(std::string { "error while creating database: " } + e.what());
                 }
                 log_info("database created successfully.");
             }
@@ -403,7 +402,8 @@ void Sqlite3Storage::storeInternalSetting(std::string key, std::string value)
 {
     std::ostringstream q;
     q << "INSERT OR REPLACE INTO " << QTB << INTERNAL_SETTINGS_TABLE << QTE << " (" << QTB << "key" << QTE << ", " << QTB << "value" << QTE << ") "
-         "VALUES ("  << quote(key) << ", " << quote(value) << ") ";
+                                                                                                                                               "VALUES ("
+      << quote(key) << ", " << quote(value) << ") ";
     SQLStorage::exec(q);
 }
 
@@ -505,7 +505,8 @@ void SLSelectTask::run(sqlite3** db, Sqlite3Storage* sl)
 {
     pres = std::make_shared<Sqlite3Result>();
 
-    char* err = nullptr;;
+    char* err = nullptr;
+    ;
     int ret = sqlite3_get_table(
         *db,
         query,
@@ -589,7 +590,7 @@ void SLBackupTask::run(sqlite3** db, Sqlite3Storage* sl)
                 dbFilePath);
 
         } catch (const std::runtime_error& e) {
-            throw StorageException(std::string{"Error while restoring sqlite3 backup: "} + e.what(), std::string{"Error while restoring sqlite3 backup: "} + e.what());
+            throw StorageException(std::string { "Error while restoring sqlite3 backup: " } + e.what(), std::string { "Error while restoring sqlite3 backup: " } + e.what());
         }
         int res = sqlite3_open(dbFilePath.c_str(), db);
         if (res != SQLITE_OK) {

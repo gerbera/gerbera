@@ -29,8 +29,8 @@
 
 /// \file auth.cc
 
-#include "pages.h"
 #include "config/config_manager.h"
+#include "pages.h"
 #include "session_manager.h"
 #include "util/tools.h"
 #include <sys/time.h>

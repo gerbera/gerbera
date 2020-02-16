@@ -4,8 +4,8 @@
 #ifndef __TASK_PROCESSOR_H__
 #define __TASK_PROCESSOR_H__
 
-#include <memory>
 #include <deque>
+#include <memory>
 
 #include "common.h"
 #include "generic_task.h"

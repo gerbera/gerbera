@@ -111,7 +111,7 @@ void web::items::process()
     items.append_attribute("autoscan_mode") = autoscanMode.c_str();
     items.append_attribute("autoscan_type") = mapAutoscanType(autoscanType).c_str();
     items.append_attribute("protect_container") = protectContainer;
-    items.append_attribute("protect_items") =  protectItems;
+    items.append_attribute("protect_items") = protectItems;
 
     for (const auto& obj : arr) {
         //if (IS_CDS_ITEM(obj->getObjectType()))

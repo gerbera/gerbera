@@ -35,9 +35,9 @@
 #ifndef __LASTFM_H__
 #define __LASTFM_H__
 
-#include <memory>
-#include <lastfmlib/lastfmscrobblerc.h>
 #include <cstdlib>
+#include <lastfmlib/lastfmscrobblerc.h>
+#include <memory>
 
 #include "cds_objects.h"
 

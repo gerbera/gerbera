@@ -44,14 +44,14 @@
 #include "onlineservice/online_service.h"
 
 #ifdef SOPCAST
-    #include "onlineservice/sopcast_content_handler.h"
+#include "onlineservice/sopcast_content_handler.h"
 #endif
 
 #ifdef ATRAILERS
-    #include "onlineservice/atrailers_content_handler.h"
+#include "onlineservice/atrailers_content_handler.h"
 #endif
 
-#endif//ONLINE_SERVICES
+#endif //ONLINE_SERVICES
 
 void FallbackLayout::add(const std::shared_ptr<CdsObject>& obj, int parentID, bool use_ref)
 {
@@ -73,28 +73,22 @@ void FallbackLayout::addVideo(const std::shared_ptr<CdsObject>& obj, const fs::p
     auto f2i = StringConverter::f2i(config);
     int id = content->addContainerChain("/Video/All Video");
 
-    if (obj->getID() != INVALID_OBJECT_ID)
-    {
+    if (obj->getID() != INVALID_OBJECT_ID) {
         obj->setRefID(obj->getID());
         add(obj, id);
-    }
-    else
-    {
+    } else {
         add(obj, id);
         obj->setRefID(obj->getID());
     }
 
     std::string dir;
-    if (!rootpath.empty())
-    {
+    if (!rootpath.empty()) {
         dir = rootpath.filename();
         dir = f2i->convert(dir);
-    }
-    else
+    } else
         dir = esc(f2i->convert(get_last_path(obj->getLocation())));
 
-    if (string_ok(dir))
-    {
+    if (string_ok(dir)) {
         id = content->addContainerChain("/Video/Directories/" + dir);
         add(obj, id);
     }
@@ -106,13 +100,10 @@ void FallbackLayout::addImage(const std::shared_ptr<CdsObject>& obj, const fs::p
     auto f2i = StringConverter::f2i(config);
 
     id = content->addContainerChain("/Photos/All Photos");
-    if (obj->getID() != INVALID_OBJECT_ID)
-    {
+    if (obj->getID() != INVALID_OBJECT_ID) {
         obj->setRefID(obj->getID());
         add(obj, id);
-    }
-    else
-    {
+    } else {
         add(obj, id);
         obj->setRefID(obj->getID());
     }
@@ -120,23 +111,20 @@ void FallbackLayout::addImage(const std::shared_ptr<CdsObject>& obj, const fs::p
     auto meta = obj->getMetadata();
 
     std::string date = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_DATE));
-    if (string_ok(date))
-    {
+    if (string_ok(date)) {
         std::string year, month;
         size_t m = -1;
         size_t y = date.find('-');
-        if (y != std::string::npos)
-        {
+        if (y != std::string::npos) {
             year = date.substr(0, y);
             month = date.substr(y + 1);
             m = month.find('-');
             if (m != std::string::npos)
-              month = month.substr(0, m);
+                month = month.substr(0, m);
         }
 
         std::string chain;
-        if ((y > 0) && (m > 0))
-        {
+        if ((y > 0) && (m > 0)) {
             chain = "/Photos/Year/" + esc(year) + "/" + esc(month);
             id = content->addContainerChain(chain);
             add(obj, id);
@@ -148,16 +136,13 @@ void FallbackLayout::addImage(const std::shared_ptr<CdsObject>& obj, const fs::p
     }
 
     std::string dir;
-    if (!rootpath.empty())
-    {
+    if (!rootpath.empty()) {
         dir = rootpath.filename();
         dir = f2i->convert(dir);
-    }
-    else
+    } else
         dir = esc(f2i->convert(get_last_path(obj->getLocation())));
 
-    if (string_ok(dir))
-    {
+    if (string_ok(dir)) {
         id = content->addContainerChain("/Photos/Directories/" + dir);
         add(obj, id);
     }
@@ -179,22 +164,17 @@ void FallbackLayout::addAudio(const std::shared_ptr<CdsObject>& obj)
         title = obj->getTitle();
 
     std::string artist = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_ARTIST));
-    if (string_ok(artist))
-    {
+    if (string_ok(artist)) {
         artist_full = artist;
         desc = artist;
-    }
-    else
+    } else
         artist = "Unknown";
 
     std::string album = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_ALBUM));
-    if (string_ok(album))
-    {
+    if (string_ok(album)) {
         desc = desc + ", " + album;
         album_full = album;
-    }
-    else
-    {
+    } else {
         album = "Unknown";
     }
 
@@ -225,17 +205,14 @@ void FallbackLayout::addAudio(const std::shared_ptr<CdsObject>& obj)
     else
         genre = "Unknown";
 
-
     std::string description = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_DESCRIPTION));
-    if (!string_ok(description))
-    {
+    if (!string_ok(description)) {
         meta[MetadataHandler::getMetaFieldName(M_DESCRIPTION)] = desc;
         obj->setMetadata(meta);
     }
 
     std::string composer = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_COMPOSER));
-    if (!string_ok(composer))
-    {
+    if (!string_ok(composer)) {
         composer = "None";
     }
 
@@ -256,16 +233,14 @@ void FallbackLayout::addAudio(const std::shared_ptr<CdsObject>& obj)
     // will be a reference of the main object, that's why we set the ref
     // id to the object id - the add function will clear out the object
     // id
-    if (obj->getID() != INVALID_OBJECT_ID)
-    {
+    if (obj->getID() != INVALID_OBJECT_ID) {
         obj->setRefID(obj->getID());
         add(obj, id);
     }
     // the object is not yet in the database (probably we got it from a
     // playlist script, so we set the ref id after adding - it will be used
     // for all consequent virtual objects
-    else
-    {
+    else {
         add(obj, id);
         obj->setRefID(obj->getID());
     }
@@ -287,7 +262,7 @@ void FallbackLayout::addAudio(const std::shared_ptr<CdsObject>& obj)
         temp = temp + " - ";
 
     album = esc(album);
-    chain = "/Audio/Artists/" +  artist + "/" + album;
+    chain = "/Audio/Artists/" + artist + "/" + album;
     id = content->addContainerChain(chain, UPNP_DEFAULT_CLASS_MUSIC_ALBUM, obj->getID(), obj->getMetadata());
     add(obj, id);
 
@@ -315,39 +290,38 @@ void FallbackLayout::addAudio(const std::shared_ptr<CdsObject>& obj)
     chain = "/Audio/Artists/" + artist + "/All - full name";
     id = content->addContainerChain(chain);
     add(obj, id);
-
-
 }
 
 #ifdef SOPCAST
 void FallbackLayout::addSopCast(const std::shared_ptr<CdsObject>& obj)
 {
-    #define SP_VPATH "/Online Services/SopCast"
+#define SP_VPATH "/Online Services/SopCast"
     std::string chain;
     std::string temp;
     int id;
     bool ref_set = false;
 
-    if (obj->getID() != INVALID_OBJECT_ID)
-    {
+    if (obj->getID() != INVALID_OBJECT_ID) {
         obj->setRefID(obj->getID());
         ref_set = true;
     }
 
-    chain = SP_VPATH "/" "All Channels";
-    id =  content->addContainerChain(chain);
+    chain = SP_VPATH "/"
+                     "All Channels";
+    id = content->addContainerChain(chain);
     add(obj, id, ref_set);
-    if (!ref_set)
-    {
+    if (!ref_set) {
         obj->setRefID(obj->getID());
         ref_set = true;
     }
 
     temp = obj->getAuxData(SOPCAST_AUXDATA_GROUP);
-    if (string_ok(temp))
-    {
-        chain = SP_VPATH "/" "Groups" "/" + esc(temp);
-        id =  content->addContainerChain(chain);
+    if (string_ok(temp)) {
+        chain = SP_VPATH "/"
+                         "Groups"
+                         "/"
+            + esc(temp);
+        id = content->addContainerChain(chain);
         add(obj, id, ref_set);
     }
 }
@@ -356,20 +330,17 @@ void FallbackLayout::addSopCast(const std::shared_ptr<CdsObject>& obj)
 #ifdef ATRAILERS
 void FallbackLayout::addATrailers(const std::shared_ptr<CdsObject>& obj)
 {
-    #define AT_VPATH "/Online Services/Apple Trailers"
+#define AT_VPATH "/Online Services/Apple Trailers"
     std::string chain;
     std::string temp;
 
     int id = content->addContainerChain(AT_VPATH
         "/All Trailers");
 
-    if (obj->getID() != INVALID_OBJECT_ID)
-    {
+    if (obj->getID() != INVALID_OBJECT_ID) {
         obj->setRefID(obj->getID());
         add(obj, id);
-    }
-    else
-    {
+    } else {
         add(obj, id);
         obj->setRefID(obj->getID());
     }
@@ -377,13 +348,11 @@ void FallbackLayout::addATrailers(const std::shared_ptr<CdsObject>& obj)
     auto meta = obj->getMetadata();
 
     temp = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_GENRE));
-    if (string_ok(temp))
-    {
+    if (string_ok(temp)) {
         auto st = std::make_unique<StringTokenizer>(temp);
         std::string genre;
         std::string next;
-        do
-        {
+        do {
             if (!string_ok(genre))
                 genre = st->nextToken(",");
             next = st->nextToken(",");
@@ -394,30 +363,31 @@ void FallbackLayout::addATrailers(const std::shared_ptr<CdsObject>& obj)
                 break;
 
             id = content->addContainerChain(AT_VPATH
-                "/Genres/" + esc(genre));
+                "/Genres/"
+                + esc(genre));
             add(obj, id);
 
             if (string_ok(next))
                 genre = next;
             else
                 genre = "";
-                    
+
         } while (!genre.empty());
     }
 
     temp = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_DATE));
-    if (string_ok(temp) && temp.length() >= 7)
-    {
+    if (string_ok(temp) && temp.length() >= 7) {
         id = content->addContainerChain(AT_VPATH
-            "/Release Date/" + esc(temp.substr(0, 7)));
+            "/Release Date/"
+            + esc(temp.substr(0, 7)));
         add(obj, id);
     }
 
     temp = obj->getAuxData(ATRAILERS_AUXDATA_POST_DATE);
-    if (string_ok(temp) && temp.length() >= 7)
-    {
+    if (string_ok(temp) && temp.length() >= 7) {
         id = content->addContainerChain(AT_VPATH
-            "/Post Date/" + esc(temp.substr(0, 7)));
+            "/Post Date/"
+            + esc(temp.substr(0, 7)));
         add(obj, id);
     }
 }
@@ -446,46 +416,40 @@ void FallbackLayout::processCdsObject(std::shared_ptr<CdsObject> obj, fs::path r
     clone->setVirtual(true);
 
 #ifdef ONLINE_SERVICES
-    if (clone->getFlag(OBJECT_FLAG_ONLINE_SERVICE))
-    {
+    if (clone->getFlag(OBJECT_FLAG_ONLINE_SERVICE)) {
         service_type_t service = (service_type_t)std::stoi(clone->getAuxData(ONLINE_SERVICE_AUX_ID));
 
-        switch (service)
-        {
+        switch (service) {
 #ifdef SOPCAST
-            case OS_SopCast:
-                addSopCast(clone);
-                break;
+        case OS_SopCast:
+            addSopCast(clone);
+            break;
 #endif
 #ifdef ATRAILERS
-            case OS_ATrailers:
-                addATrailers(clone);
-                break;
+        case OS_ATrailers:
+            addATrailers(clone);
+            break;
 #endif
-            case OS_Max:
-            default:
-                log_warning("No handler for service type");
-                break;
+        case OS_Max:
+        default:
+            log_warning("No handler for service type");
+            break;
         }
-    }
-    else
-    {
+    } else {
 #endif
 
         std::string mimetype = std::static_pointer_cast<CdsItem>(obj)->getMimeType();
         auto mappings = config->getDictionaryOption(
-                    CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+            CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
         std::string content_type = getValueOrDefault(mappings, mimetype);
 
         if (startswith(mimetype, "video"))
             addVideo(clone, rootpath);
         else if (startswith(mimetype, "image"))
             addImage(clone, rootpath);
-        else if ((startswith(mimetype, "audio") &&
-                    (content_type != CONTENT_TYPE_PLAYLIST)))
+        else if ((startswith(mimetype, "audio") && (content_type != CONTENT_TYPE_PLAYLIST)))
             addAudio(clone);
-        else if (content_type == CONTENT_TYPE_OGG)
-        {
+        else if (content_type == CONTENT_TYPE_OGG) {
             if (obj->getFlag(OBJECT_FLAG_OGG_THEORA))
                 addVideo(clone, rootpath);
             else

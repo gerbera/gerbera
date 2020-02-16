@@ -35,8 +35,8 @@
 #ifndef __URL_H__
 #define __URL_H__
 
-#include <memory>
 #include <curl/curl.h>
+#include <memory>
 #include <string>
 
 class URL {

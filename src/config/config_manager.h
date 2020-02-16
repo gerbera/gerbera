@@ -203,7 +203,7 @@ public:
 
     /// \brief returns a config option of type Dictionary
     /// \param option option to retrieve.
-    std::map<std::string,std::string> getDictionaryOption(config_option_t option);
+    std::map<std::string, std::string> getDictionaryOption(config_option_t option);
 
     /// \brief returns a config option of type Array of StringBase
     /// \param option option to retrieve.
@@ -276,7 +276,7 @@ protected:
     /// \param path path to be resolved
     /// \param isFile file or directory
     /// \param exists must file exist
-    fs::path resolvePath(fs::path path, bool isFile = false, bool exists=true);
+    fs::path resolvePath(fs::path path, bool isFile = false, bool exists = true);
 
     /// \brief Creates a dictionary from an XML nodeset.
     /// \param element starting element of the nodeset.

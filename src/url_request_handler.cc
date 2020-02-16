@@ -37,12 +37,12 @@
 
 #include "common.h"
 #include "config/config_manager.h"
+#include "content_manager.h"
 #include "server.h"
 #include "storage/storage.h"
-#include "content_manager.h"
 
-#include "iohandler/buffered_io_handler.h"
 #include "cds_objects.h"
+#include "iohandler/buffered_io_handler.h"
 #include "url_request_handler.h"
 
 #ifdef ONLINE_SERVICES
@@ -60,7 +60,7 @@ URLRequestHandler::URLRequestHandler(std::shared_ptr<ConfigManager> config,
 {
 }
 
-void URLRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
+void URLRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 {
     log_debug("start");
 
@@ -72,7 +72,7 @@ void URLRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
     std::string url, parameters;
     parameters = (filename + strlen(LINK_URL_REQUEST_HANDLER));
 
-    std::map<std::string,std::string> dict;
+    std::map<std::string, std::string> dict;
     dict_decode_simple(parameters, &dict);
 
     log_debug("full url (filename): {}, parameters: {}",
@@ -99,10 +99,10 @@ void URLRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
 
     if (string_ok(tr_profile)) {
         auto tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)
-                        ->getByName(tr_profile);
+                      ->getByName(tr_profile);
         if (tp == nullptr)
             throw std::runtime_error("Transcoding requested but no profile "
-                             "matching the name "
+                                     "matching the name "
                 + tr_profile + " found");
 
         mimeType = tp->getTargetMimeType();
@@ -141,10 +141,10 @@ void URLRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
     UpnpFileInfo_set_IsDirectory(info, 0);
 
     // FIX EXTRA HEADERS
-//    if (string_ok(header)) {
-//        UpnpFileInfo_set_ExtraHeaders(info,
-//            ixmlCloneDOMString(header.c_str()));
-//    }
+    //    if (string_ok(header)) {
+    //        UpnpFileInfo_set_ExtraHeaders(info,
+    //            ixmlCloneDOMString(header.c_str()));
+    //    }
 
     UpnpFileInfo_set_ContentType(info, ixmlCloneDOMString(mimeType.c_str()));
     log_debug("web_get_info(): end");
@@ -171,7 +171,7 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
     std::string url, parameters;
     parameters = (filename + strlen(LINK_URL_REQUEST_HANDLER));
 
-    std::map<std::string,std::string> dict;
+    std::map<std::string, std::string> dict;
     dict_decode_simple(parameters, &dict);
     log_debug("full url (filename): {}, parameters: {}",
         filename, parameters.c_str());
@@ -213,7 +213,7 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
 
     if (string_ok(tr_profile)) {
         auto tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)
-                        ->getByName(tr_profile);
+                      ->getByName(tr_profile);
         if (tp == nullptr)
             throw std::runtime_error("Transcoding of file " + url + " but no profile matching the name " + tr_profile + " found");
 

@@ -24,23 +24,21 @@ Gerbera - https://gerbera.io/
 #ifndef GERBERA_DEVICE_DESCRIPTION_HANDLER_H
 #define GERBERA_DEVICE_DESCRIPTION_HANDLER_H
 
-#include <memory>
 #include "request_handler.h"
 #include "upnp_xml.h"
+#include <memory>
 
 class DeviceDescriptionHandler : public RequestHandler {
 public:
     explicit DeviceDescriptionHandler(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
         UpnpXMLBuilder* xmlBuilder);
 
-    void getInfo(const char *filename, UpnpFileInfo *info) override;
+    void getInfo(const char* filename, UpnpFileInfo* info) override;
     std::unique_ptr<IOHandler> open(const char* filename, enum UpnpOpenFileMode mode, std::string range) override;
 
 protected:
     UpnpXMLBuilder* xmlBuilder;
     std::string deviceDescription;
 };
-
-
 
 #endif //GERBERA_DEVICE_DESCRIPTION_HANDLER_H

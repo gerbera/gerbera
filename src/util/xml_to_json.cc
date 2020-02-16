@@ -34,8 +34,8 @@
 #include <iostream>
 #include <regex>
 
-#include "xml_to_json.h"
 #include "util/tools.h"
+#include "xml_to_json.h"
 
 std::string Xml2Json::getJson(pugi::xml_node& root, const Hints* hints)
 {
@@ -72,8 +72,8 @@ void Xml2Json::handleElement(std::ostringstream& buf, pugi::xml_node& node, cons
         buf << '[';
         firstChild = true;
     }
-    
-    for (pugi::xml_node child: node.children()) {
+
+    for (pugi::xml_node child : node.children()) {
         pugi::xml_node_type type = child.type();
 
         if (type == pugi::node_element) {
@@ -81,18 +81,17 @@ void Xml2Json::handleElement(std::ostringstream& buf, pugi::xml_node& node, cons
                 buf << ',';
             else
                 firstChild = false;
-            
+
             // look ahead
             auto childAttrs = child.attributes();
             size_t childAttributeCount = std::distance(childAttrs.begin(), childAttrs.end());
             size_t childElementCount = 0;
-            for (pugi::xml_node el: child.children()) {
+            for (pugi::xml_node el : child.children()) {
                 if (el.type() == pugi::node_element)
                     childElementCount++;
             }
 
-            if (array)
-            {
+            if (array) {
                 if (nodeName != child.name())
                     throw std::runtime_error("if an element is of arrayType, all children have to have the same name");
             } else
@@ -107,7 +106,7 @@ void Xml2Json::handleElement(std::ostringstream& buf, pugi::xml_node& node, cons
             }
         }
     }
-    
+
     if (array)
         buf << ']';
 }
@@ -137,7 +136,8 @@ bool Xml2Json::isArray(pugi::xml_node& node, const Hints* hints, std::string* ar
 {
     for (const auto& hint : hints->asArray) {
         if (hint.first == node) {
-            if (arrayName != nullptr) *arrayName = hint.second;
+            if (arrayName != nullptr)
+                *arrayName = hint.second;
             return true;
         }
     }

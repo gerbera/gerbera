@@ -32,13 +32,13 @@
 #ifndef __CDS_OBJECTS_H__
 #define __CDS_OBJECTS_H__
 
-#include <sys/types.h>
+#include <filesystem>
+#include <map>
 #include <memory>
 #include <string>
+#include <sys/types.h>
 #include <utility>
 #include <vector>
-#include <map>
-#include <filesystem>
 namespace fs = std::filesystem;
 
 #include "cds_resource.h"
@@ -124,8 +124,8 @@ protected:
     /// \brief flag that allows to sort objects within a container
     int sortPriority;
 
-    std::map<std::string,std::string> metadata;
-    std::map<std::string,std::string> auxdata;
+    std::map<std::string, std::string> metadata;
+    std::map<std::string, std::string> auxdata;
     std::vector<std::shared_ptr<CdsResource>> resources;
 
 public:
@@ -242,10 +242,10 @@ public:
     }
 
     /// \brief Query entire metadata dictionary.
-    inline std::map<std::string,std::string> getMetadata() { return metadata; }
+    inline std::map<std::string, std::string> getMetadata() { return metadata; }
 
     /// \brief Set entire metadata dictionary.
-    inline void setMetadata(const std::map<std::string,std::string>& metadata)
+    inline void setMetadata(const std::map<std::string, std::string>& metadata)
     {
         this->metadata = metadata;
     }
@@ -269,7 +269,7 @@ public:
     }
 
     /// \brief Query entire auxdata dictionary.
-    inline std::map<std::string,std::string> getAuxData() { return auxdata; }
+    inline std::map<std::string, std::string> getAuxData() { return auxdata; }
 
     /// \brief Set a single auxdata value.
     inline void setAuxData(std::string key, std::string value)
@@ -278,7 +278,7 @@ public:
     }
 
     /// \brief Set entire auxdata dictionary.
-    inline void setAuxData(const std::map<std::string,std::string>& auxdata)
+    inline void setAuxData(const std::map<std::string, std::string>& auxdata)
     {
         this->auxdata = auxdata;
     }
@@ -571,7 +571,6 @@ protected:
 public:
     /// \brief Constructor, initializes default values for the flags and sets the object type.
     explicit CdsContainer(std::shared_ptr<Storage> storage);
-
 
     /// \brief Set the searchable flag.
     inline void setSearchable(bool searchable) { changeFlag(OBJECT_FLAG_SEARCHABLE, searchable); }

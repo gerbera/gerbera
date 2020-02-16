@@ -113,7 +113,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, bool re
             std::string aa_id = storage->findFolderImage(item->getParentID(), trackArtBase);
             if (!aa_id.empty()) {
                 std::string url;
-                std::map<std::string,std::string> dict;
+                std::map<std::string, std::string> dict;
                 dict[URL_OBJECT_ID] = aa_id;
 
                 url = virtualURL + _URL_PARAM_SEPARATOR + CONTENT_MEDIA_HANDLER + _URL_PARAM_SEPARATOR + dict_encode_simple(dict) + _URL_PARAM_SEPARATOR + URL_RESOURCE_ID + _URL_PARAM_SEPARATOR + "0";
@@ -179,7 +179,6 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, bool re
             if (string_ok(date)) {
                 renderAlbumDate(date, &result);
             }
-
         }
         if (upnp_class == UPNP_DEFAULT_CLASS_MUSIC_ALBUM || upnp_class == UPNP_DEFAULT_CLASS_CONTAINER) {
             std::string aa_id = storage->findFolderImage(cont->getID(), std::string());
@@ -188,7 +187,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, bool re
                 log_debug("Using folder image as artwork for container");
 
                 std::string url;
-                std::map<std::string,std::string> dict;
+                std::map<std::string, std::string> dict;
                 dict[URL_OBJECT_ID] = aa_id;
 
                 url = virtualURL + _URL_PARAM_SEPARATOR + CONTENT_MEDIA_HANDLER + _URL_PARAM_SEPARATOR + dict_encode_simple(dict) + _URL_PARAM_SEPARATOR + URL_RESOURCE_ID + _URL_PARAM_SEPARATOR + "0";
@@ -215,7 +214,6 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, bool re
                             auto res = resources[i];
                             // only add upnp:AlbumArtURI if we have an AA, skip the resource
                             if ((res->getHandlerType() == CH_ID3) || (res->getHandlerType() == CH_MP4) || (res->getHandlerType() == CH_FLAC) || (res->getHandlerType() == CH_FANART) || (res->getHandlerType() == CH_EXTURL)) {
-
 
                                 std::string url = getArtworkUrl(item);
                                 renderAlbumArtURI(url, &result);
@@ -325,24 +323,15 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription()
     else
         device.append_child("presentationURL").append_child(pugi::node_pcdata).set_value(presentationURL.c_str());
 
-    device.append_child("friendlyName").append_child(pugi::node_pcdata)
-        .set_value(config->getOption(CFG_SERVER_NAME).c_str());
-    device.append_child("manufacturer").append_child(pugi::node_pcdata)
-        .set_value(config->getOption(CFG_SERVER_MANUFACTURER).c_str());
-    device.append_child("manufacturerURL").append_child(pugi::node_pcdata)
-        .set_value(config->getOption(CFG_SERVER_MANUFACTURER_URL).c_str());
-    device.append_child("modelDescription").append_child(pugi::node_pcdata)
-        .set_value(config->getOption(CFG_SERVER_MODEL_DESCRIPTION).c_str());
-    device.append_child("modelName").append_child(pugi::node_pcdata)
-        .set_value(config->getOption(CFG_SERVER_MODEL_NAME).c_str());
-    device.append_child("modelNumber").append_child(pugi::node_pcdata)
-        .set_value(config->getOption(CFG_SERVER_MODEL_NUMBER).c_str());
-    device.append_child("modelURL").append_child(pugi::node_pcdata)
-        .set_value(config->getOption(CFG_SERVER_MODEL_URL).c_str());
-    device.append_child("serialNumber").append_child(pugi::node_pcdata)
-        .set_value(config->getOption(CFG_SERVER_SERIAL_NUMBER).c_str());
-    device.append_child("UDN").append_child(pugi::node_pcdata)
-        .set_value(config->getOption(CFG_SERVER_UDN).c_str());
+    device.append_child("friendlyName").append_child(pugi::node_pcdata).set_value(config->getOption(CFG_SERVER_NAME).c_str());
+    device.append_child("manufacturer").append_child(pugi::node_pcdata).set_value(config->getOption(CFG_SERVER_MANUFACTURER).c_str());
+    device.append_child("manufacturerURL").append_child(pugi::node_pcdata).set_value(config->getOption(CFG_SERVER_MANUFACTURER_URL).c_str());
+    device.append_child("modelDescription").append_child(pugi::node_pcdata).set_value(config->getOption(CFG_SERVER_MODEL_DESCRIPTION).c_str());
+    device.append_child("modelName").append_child(pugi::node_pcdata).set_value(config->getOption(CFG_SERVER_MODEL_NAME).c_str());
+    device.append_child("modelNumber").append_child(pugi::node_pcdata).set_value(config->getOption(CFG_SERVER_MODEL_NUMBER).c_str());
+    device.append_child("modelURL").append_child(pugi::node_pcdata).set_value(config->getOption(CFG_SERVER_MODEL_URL).c_str());
+    device.append_child("serialNumber").append_child(pugi::node_pcdata).set_value(config->getOption(CFG_SERVER_SERIAL_NUMBER).c_str());
+    device.append_child("UDN").append_child(pugi::node_pcdata).set_value(config->getOption(CFG_SERVER_UDN).c_str());
 
     // add icons
     {
@@ -353,20 +342,20 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription()
             const char* depth;
         };
         std::vector<IconDim> iconDims;
-        iconDims.push_back({"120", "24"});
-        iconDims.push_back({"48", "24"});
-        iconDims.push_back({"32", "8"});
+        iconDims.push_back({ "120", "24" });
+        iconDims.push_back({ "48", "24" });
+        iconDims.push_back({ "32", "8" });
         struct IconType {
             const char* mimetype;
             const char* ext;
         };
         std::vector<IconType> iconTypes;
-        iconTypes.push_back({DESC_ICON_PNG_MIMETYPE, ".png"});
-        iconTypes.push_back({DESC_ICON_BMP_MIMETYPE, ".bmp"});
-        iconTypes.push_back({DESC_ICON_JPG_MIMETYPE, ".jpg"});
+        iconTypes.push_back({ DESC_ICON_PNG_MIMETYPE, ".png" });
+        iconTypes.push_back({ DESC_ICON_BMP_MIMETYPE, ".bmp" });
+        iconTypes.push_back({ DESC_ICON_JPG_MIMETYPE, ".jpg" });
 
-        for (auto const& d: iconDims) {
-            for (auto const& t: iconTypes) {
+        for (auto const& d : iconDims) {
+            for (auto const& t : iconTypes) {
                 auto icon = iconList.append_child("icon");
                 icon.append_child("mimetype").append_child(pugi::node_pcdata).set_value(t.mimetype);
                 icon.append_child("width").append_child(pugi::node_pcdata).set_value(d.dim);
@@ -392,22 +381,16 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription()
         std::vector<ServiceInfo> services;
 
         // cm
-        services.push_back({
-            DESC_CM_SERVICE_TYPE, DESC_CM_SERVICE_ID,
-            DESC_CM_SCPD_URL, DESC_CM_CONTROL_URL, DESC_CM_EVENT_URL
-        });
+        services.push_back({ DESC_CM_SERVICE_TYPE, DESC_CM_SERVICE_ID,
+            DESC_CM_SCPD_URL, DESC_CM_CONTROL_URL, DESC_CM_EVENT_URL });
         // cds
-        services.push_back({
-            DESC_CDS_SERVICE_TYPE, DESC_CDS_SERVICE_ID,
-            DESC_CDS_SCPD_URL, DESC_CDS_CONTROL_URL, DESC_CDS_EVENT_URL
-        });
+        services.push_back({ DESC_CDS_SERVICE_TYPE, DESC_CDS_SERVICE_ID,
+            DESC_CDS_SCPD_URL, DESC_CDS_CONTROL_URL, DESC_CDS_EVENT_URL });
         // media receiver registrar service for the Xbox 360
-        services.push_back({
-            DESC_MRREG_SERVICE_TYPE, DESC_MRREG_SERVICE_ID,
-            DESC_MRREG_SCPD_URL, DESC_MRREG_CONTROL_URL, DESC_MRREG_EVENT_URL
-        });
+        services.push_back({ DESC_MRREG_SERVICE_TYPE, DESC_MRREG_SERVICE_ID,
+            DESC_MRREG_SCPD_URL, DESC_MRREG_CONTROL_URL, DESC_MRREG_EVENT_URL });
 
-        for (auto const& s: services) {
+        for (auto const& s : services) {
             auto service = serviceList.append_child("service");
             service.append_child("serviceType").append_child(pugi::node_pcdata).set_value(s.serviceType);
             service.append_child("serviceId").append_child(pugi::node_pcdata).set_value(s.serviceId);
@@ -481,7 +464,7 @@ std::unique_ptr<UpnpXMLBuilder::PathBase> UpnpXMLBuilder::getPathBase(const std:
     auto pathBase = std::make_unique<PathBase>();
     /// \todo resource options must be read from configuration files
 
-    std::map<std::string,std::string> dict;
+    std::map<std::string, std::string> dict;
     dict[URL_OBJECT_ID] = std::to_string(item->getID());
 
     pathBase->addResID = false;
@@ -518,11 +501,11 @@ std::string UpnpXMLBuilder::getFirstResourcePath(const std::shared_ptr<CdsItem>&
     int objectType = item->getObjectType();
 
     if (IS_CDS_ITEM_EXTERNAL_URL(objectType) && !urlBase->addResID) { // a remote resource
-      result = urlBase->pathBase;
-    } else if (urlBase->addResID){                                    // a proxy, remote, resource
-      result = SERVER_VIRTUAL_DIR + urlBase->pathBase + std::to_string(0);
-    } else {                                                          // a local resource
-      result = SERVER_VIRTUAL_DIR + urlBase->pathBase;
+        result = urlBase->pathBase;
+    } else if (urlBase->addResID) { // a proxy, remote, resource
+        result = SERVER_VIRTUAL_DIR + urlBase->pathBase + std::to_string(0);
+    } else { // a local resource
+        result = SERVER_VIRTUAL_DIR + urlBase->pathBase;
     }
     return result;
 }
@@ -831,7 +814,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
             // first resource
             if (!skipURL) {
                 if (transcoded)
-                    url.append( renderExtension(contentType, ""));
+                    url.append(renderExtension(contentType, ""));
                 else
                     url.append(renderExtension(contentType, item->getLocation()));
             }
@@ -863,7 +846,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
             // we do not support seeking at all, so 00
             // and the media is converted, so set CI to 1
             if (!isExtThumbnail && transcoded) {
-                extend.append(D_OP).append("=").append( D_OP_SEEK_DISABLED).append(";").append(D_CONVERSION_INDICATOR).append("=" D_CONVERSION);
+                extend.append(D_OP).append("=").append(D_OP_SEEK_DISABLED).append(";").append(D_CONVERSION_INDICATOR).append("=" D_CONVERSION);
 
                 if (startswith(mimeType, "audio") || startswith(mimeType, "video"))
                     extend.append(";" D_FLAGS "=" D_TR_FLAGS_AV);
@@ -888,7 +871,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
         }
         // URL is path until now
         int objectType = item->getObjectType();
-        if(!IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
+        if (!IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
             url = virtualURL.append(url);
         }
 

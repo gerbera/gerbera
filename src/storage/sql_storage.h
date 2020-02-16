@@ -35,40 +35,40 @@
 #include "cds_objects.h"
 #include "storage.h"
 
-#include <unordered_set>
 #include <mutex>
 #include <sstream>
+#include <unordered_set>
 
-#define QTB                 table_quote_begin
-#define QTE                 table_quote_end
+#define QTB table_quote_begin
+#define QTE table_quote_end
 
-#define CDS_OBJECT_TABLE            "mt_cds_object"
-#define CDS_ACTIVE_ITEM_TABLE       "mt_cds_active_item"
-#define INTERNAL_SETTINGS_TABLE     "mt_internal_setting"
-#define AUTOSCAN_TABLE              "mt_autoscan"
-#define METADATA_TABLE              "mt_metadata"
+#define CDS_OBJECT_TABLE "mt_cds_object"
+#define CDS_ACTIVE_ITEM_TABLE "mt_cds_active_item"
+#define INTERNAL_SETTINGS_TABLE "mt_internal_setting"
+#define AUTOSCAN_TABLE "mt_autoscan"
+#define METADATA_TABLE "mt_metadata"
 
 class SQLResult;
 class SQLEmitter;
 
-class SQLRow
-{
+class SQLRow {
 public:
     SQLRow(std::shared_ptr<SQLResult> sqlResult) { this->sqlResult = sqlResult; }
     //virtual ~SQLRow();
     std::string col(int index)
     {
         char* c = col_c_str(index);
-        if (c == 0) return "";
+        if (c == 0)
+            return "";
         return std::string(c);
     }
     virtual char* col_c_str(int index) = 0;
+
 protected:
     std::shared_ptr<SQLResult> sqlResult;
 };
 
-class SQLResult : public std::enable_shared_from_this<SQLResult>
-{
+class SQLResult : public std::enable_shared_from_this<SQLResult> {
 public:
     //SQLResult();
     //virtual ~SQLResult();
@@ -76,8 +76,7 @@ public:
     virtual unsigned long long getNumRows() = 0;
 };
 
-class SQLStorage : public Storage
-{
+class SQLStorage : public Storage {
 public:
     /* methods to override in subclasses */
     virtual std::string quote(std::string str) = 0;
@@ -89,57 +88,61 @@ public:
     virtual std::string quote(bool val) = 0;
     virtual std::string quote(char val) = 0;
     virtual std::string quote(long long val) = 0;
-    virtual std::shared_ptr<SQLResult> select(const char *query, int length) = 0;
-    virtual int exec(const char *query, int length, bool getLastInsertId = false) = 0;
-    
+    virtual std::shared_ptr<SQLResult> select(const char* query, int length) = 0;
+    virtual int exec(const char* query, int length, bool getLastInsertId = false) = 0;
+
     void dbReady();
-    
+
     /* wrapper functions for select and exec */
-    std::shared_ptr<SQLResult> select(const std::string &buf)
-        { return select(buf.c_str(), buf.length()); }
-    std::shared_ptr<SQLResult> select(const std::ostringstream &buf) {
+    std::shared_ptr<SQLResult> select(const std::string& buf)
+    {
+        return select(buf.c_str(), buf.length());
+    }
+    std::shared_ptr<SQLResult> select(const std::ostringstream& buf)
+    {
         auto s = buf.str();
         return select(s.c_str(), s.length());
     }
-    int exec(const std::ostringstream &buf, bool getLastInsertId = false) {
+    int exec(const std::ostringstream& buf, bool getLastInsertId = false)
+    {
         auto s = buf.str();
         return exec(s.c_str(), s.length(), getLastInsertId);
     }
-    
-    virtual void addObject(std::shared_ptr<CdsObject> object, int *changedContainer) override;
-    virtual void updateObject(std::shared_ptr<CdsObject> object, int *changedContainer) override;
-    
+
+    virtual void addObject(std::shared_ptr<CdsObject> object, int* changedContainer) override;
+    virtual void updateObject(std::shared_ptr<CdsObject> object, int* changedContainer) override;
+
     virtual std::shared_ptr<CdsObject> loadObject(int objectID) override;
     virtual int getChildCount(int contId, bool containers, bool items, bool hideFsRoot) override;
-    
+
     virtual std::unique_ptr<std::unordered_set<int>> getObjects(int parentID, bool withoutContainer) override;
-    
+
     virtual std::unique_ptr<ChangedContainers> removeObject(int objectID, bool all) override;
     virtual std::unique_ptr<ChangedContainers> removeObjects(const std::unique_ptr<std::unordered_set<int>>& list, bool all = false) override;
-    
+
     virtual std::shared_ptr<CdsObject> loadObjectByServiceID(std::string serviceID) override;
     virtual std::unique_ptr<std::vector<int>> getServiceObjectIDs(char servicePrefix) override;
 
     virtual std::string findFolderImage(int id, std::string trackArtBase) override;
-    
+
     /* accounting methods */
     virtual int getTotalFiles() override;
-    
+
     virtual std::vector<std::shared_ptr<CdsObject>> browse(const std::unique_ptr<BrowseParam>& param) override;
     virtual std::vector<std::shared_ptr<CdsObject>> search(const std::unique_ptr<SearchParam>& param, int* numMatches) override;
-    
+
     virtual std::vector<std::string> getMimeTypes() override;
-    
+
     //virtual std::shared_ptr<CdsObject> findObjectByTitle(std::string title, int parentID);
     virtual std::shared_ptr<CdsObject> findObjectByPath(fs::path fullpath) override;
     virtual int findObjectIDByPath(fs::path fullpath) override;
     virtual std::string incrementUpdateIDs(const std::unique_ptr<std::unordered_set<int>>& ids) override;
 
     virtual fs::path buildContainerPath(int parentID, std::string title) override;
-    virtual void addContainerChain(std::string path, std::string lastClass, int lastRefID, int *containerID, int *updateID, const std::map<std::string,std::string>& lastMetadata) override;
+    virtual void addContainerChain(std::string path, std::string lastClass, int lastRefID, int* containerID, int* updateID, const std::map<std::string, std::string>& lastMetadata) override;
     virtual std::string getInternalSetting(std::string key) override;
     virtual void storeInternalSetting(std::string key, std::string value) override = 0;
-    
+
     virtual void updateAutoscanPersistentList(ScanMode scanmode, std::shared_ptr<AutoscanList> list) override;
     virtual std::shared_ptr<AutoscanList> getAutoscanList(ScanMode scanmode) override;
     virtual void addAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir) override;
@@ -152,16 +155,16 @@ public:
     virtual std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(int objectID) override;
     virtual int isAutoscanChild(int objectID) override;
     virtual void checkOverlappingAutoscans(std::shared_ptr<AutoscanDirectory> adir) override;
-    
+
     virtual std::unique_ptr<std::vector<int>> getPathIDs(int objectID) override;
-    
+
     virtual void shutdown();
     virtual void shutdownDriver() = 0;
-    
-    virtual int ensurePathExistence(fs::path path, int *changedContainer) override;
-    
+
+    virtual int ensurePathExistence(fs::path path, int* changedContainer) override;
+
     virtual std::string getFsRootName() override;
-    
+
     virtual void clearFlagInDB(int flag) override;
 
 protected:
@@ -174,33 +177,33 @@ protected:
 
     char table_quote_begin;
     char table_quote_end;
-    
+
 private:
     std::string sql_query;
-    
+
     /* helper for createObjectFromRow() */
     std::string getRealLocation(int parentID, std::string location);
-    
+
     std::shared_ptr<CdsObject> createObjectFromRow(const std::unique_ptr<SQLRow>& row);
     std::shared_ptr<CdsObject> createObjectFromSearchRow(const std::unique_ptr<SQLRow>& row);
-    std::map<std::string,std::string> retrieveMetadataForObject(int objectId);
-    
+    std::map<std::string, std::string> retrieveMetadataForObject(int objectId);
+
     /* helper class and helper function for addObject and updateObject */
-    class AddUpdateTable
-    {
+    class AddUpdateTable {
     public:
-        AddUpdateTable(std::string table, std::map<std::string,std::string> dict, std::string operation)
+        AddUpdateTable(std::string table, std::map<std::string, std::string> dict, std::string operation)
         {
             this->table = table;
             this->dict = dict;
             this->operation = operation;
         }
         std::string getTable() { return table; }
-        std::map<std::string,std::string> getDict() { return dict; }
+        std::map<std::string, std::string> getDict() { return dict; }
         std::string getOperation() { return operation; }
+
     protected:
         std::string table;
-        std::map<std::string,std::string> dict;
+        std::map<std::string, std::string> dict;
         std::string operation;
     };
     std::vector<std::shared_ptr<AddUpdateTable>> _addUpdateObject(const std::shared_ptr<CdsObject>& obj, bool isUpdate, int* changedContainer);
@@ -213,16 +216,16 @@ private:
     std::unique_ptr<std::ostringstream> sqlForDelete(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable);
 
     /* helper for removeObject(s) */
-    void _removeObjects(const std::vector<int32_t> &objectIDs);
+    void _removeObjects(const std::vector<int32_t>& objectIDs);
 
     std::string toCSV(const std::vector<int>& input);
 
     std::unique_ptr<ChangedContainers> _recursiveRemove(
-        const std::vector<int32_t> &items,
-        const std::vector<int32_t> &containers, bool all);
-    
+        const std::vector<int32_t>& items,
+        const std::vector<int32_t>& containers, bool all);
+
     virtual std::unique_ptr<ChangedContainers> _purgeEmptyContainers(std::unique_ptr<ChangedContainers>& maybeEmpty);
-    
+
     /* helpers for autoscan */
     int _getAutoscanObjectID(int autoscanID);
     void _autoscanChangePersistentFlag(int objectID, bool persistent);
@@ -244,9 +247,9 @@ private:
     void setFsRootName(const std::string& rootName = "");
 
     std::string fsRootName;
-    
+
     int lastID;
-    
+
     int getNextID();
     void loadLastID();
 

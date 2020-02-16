@@ -550,7 +550,7 @@ void AutoscanInotify::unmonitorDirectory(const fs::path& path, const std::shared
 
 std::shared_ptr<AutoscanInotify::WatchAutoscan> AutoscanInotify::getAppropriateAutoscan(const std::shared_ptr<Wd>& wdObj, const std::shared_ptr<AutoscanDirectory>& adir)
 {
-    auto  wdWatches = wdObj->getWdWatches();
+    auto wdWatches = wdObj->getWdWatches();
     for (const auto& watch : *wdWatches) {
         if (watch->getType() == WatchType::Autoscan) {
             auto watchAs = std::static_pointer_cast<WatchAutoscan>(watch);

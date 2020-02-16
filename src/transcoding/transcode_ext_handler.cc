@@ -41,7 +41,6 @@
 #include <unistd.h>
 #include <utility>
 
-#include "transcode_ext_handler.h"
 #include "cds_objects.h"
 #include "common.h"
 #include "config/config_manager.h"
@@ -53,6 +52,7 @@
 #include "metadata/metadata_handler.h"
 #include "server.h"
 #include "storage/storage.h"
+#include "transcode_ext_handler.h"
 #include "transcoding_process_executor.h"
 #include "update_manager.h"
 #include "util/process.h"

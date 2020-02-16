@@ -167,7 +167,7 @@ void MysqlStorage::init()
         dbPort, // port
         (dbSock.empty() ? nullptr : dbSock.c_str()), // socket
         0 // flags
-        );
+    );
     if (!res_mysql) {
         throw std::runtime_error("The connection to the MySQL database has failed: " + getError(&db));
     }
@@ -365,10 +365,10 @@ void MysqlStorage::storeInternalSetting(std::string key, std::string value)
     std::string quotedValue = quote(value);
     std::ostringstream q;
     q << "INSERT INTO " << QTB << INTERNAL_SETTINGS_TABLE << QTE << " (`key`, `value`) "
-                                                                     "VALUES ("
-       << quote(key) << ", " << quotedValue << ") "
-                                               "ON DUPLICATE KEY UPDATE `value` = "
-       << quotedValue;
+                                                                    "VALUES ("
+      << quote(key) << ", " << quotedValue << ") "
+                                              "ON DUPLICATE KEY UPDATE `value` = "
+      << quotedValue;
     SQLStorage::exec(q);
 }
 

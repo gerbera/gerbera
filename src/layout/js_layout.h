@@ -32,16 +32,15 @@
 #ifndef __JS_LAYOUT_H__
 #define __JS_LAYOUT_H__
 
-#include <memory>
 #include "layout.h"
 #include "scripting/import_script.h"
+#include <memory>
 
 // forward declaration
 class ConfigManager;
 class Runtime;
 
-class JSLayout : public Layout
-{
+class JSLayout : public Layout {
 protected:
     std::shared_ptr<ConfigManager> config;
     std::shared_ptr<Runtime> runtime;

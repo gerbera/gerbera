@@ -33,9 +33,9 @@
 #ifndef __REQUEST_HANDLER_H__
 #define __REQUEST_HANDLER_H__
 
-#include <memory>
 #include "common.h"
 #include "iohandler/io_handler.h"
+#include <memory>
 
 // forward declaration
 class ConfigManager;
@@ -45,7 +45,7 @@ class RequestHandler {
 public:
     RequestHandler(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage);
 
-    virtual void getInfo(const char *filename, UpnpFileInfo *info) = 0;
+    virtual void getInfo(const char* filename, UpnpFileInfo* info) = 0;
 
     virtual std::unique_ptr<IOHandler> open(const char* filename, enum UpnpOpenFileMode mode, std::string range) = 0;
 
@@ -60,7 +60,7 @@ public:
     /// content/media SEPARATOR object_id=12345&transcode=wav would be transformed to:
     /// path = "content/media"
     /// parameters = "object_id=12345&transcode=wav"
-    static void splitUrl(const char *url, char separator, std::string &path, std::string &parameters);
+    static void splitUrl(const char* url, char separator, std::string& path, std::string& parameters);
 
 protected:
     std::shared_ptr<ConfigManager> config;

@@ -38,24 +38,29 @@
 extern "C" {
 
 /// \brief Log output.
-duk_ret_t js_print(duk_context *ctx);
+duk_ret_t js_print(duk_context* ctx);
 
 /// \brief Adds an object to the database.
-duk_ret_t js_addCdsObject(duk_context *ctx);
+duk_ret_t js_addCdsObject(duk_context* ctx);
 
 /// \brief Makes a copy of an CDS object.
-duk_ret_t js_copyObject(duk_context *ctx);
+duk_ret_t js_copyObject(duk_context* ctx);
 
 /// filesystem charset to internal
-duk_ret_t js_f2i(duk_context *ctx);
+duk_ret_t js_f2i(duk_context* ctx);
 /// metadata charset to internal
-duk_ret_t js_m2i(duk_context *ctx);
+duk_ret_t js_m2i(duk_context* ctx);
 /// playlist charset to internal
-duk_ret_t js_p2i(duk_context *ctx);
+duk_ret_t js_p2i(duk_context* ctx);
 /// js charset to internal
-duk_ret_t js_j2i(duk_context *ctx);
+duk_ret_t js_j2i(duk_context* ctx);
 
-#define log_debug_stack(ctx) do{duk_push_context_dump(ctx);log_debug("%s\n", duk_safe_to_string(ctx, -1));duk_pop(ctx);}while(0)
+#define log_debug_stack(ctx)                            \
+    do {                                                \
+        duk_push_context_dump(ctx);                     \
+        log_debug("%s\n", duk_safe_to_string(ctx, -1)); \
+        duk_pop(ctx);                                   \
+    } while (0)
 } // extern "C"
 
-#endif//__SCRIPTING_JS_FUNCTIONS_H__
+#endif //__SCRIPTING_JS_FUNCTIONS_H__

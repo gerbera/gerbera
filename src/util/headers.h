@@ -27,8 +27,8 @@ Gerbera - https://gerbera.io/
 #define GERBERA_HEADERS_H
 
 #include <action_request.h>
-#include <memory>
 #include <map>
+#include <memory>
 #if defined(UPNP_HAS_EXTRA_HEADERS_LIST) || defined(UPNP_1_12_LIST)
 #include <ExtraHeaders.h>
 #endif
@@ -36,10 +36,10 @@ Gerbera - https://gerbera.io/
 class Headers {
 public:
     void addHeader(const std::string& header, const std::string& value);
-    void writeHeaders(UpnpFileInfo *fileInfo) const;
+    void writeHeaders(UpnpFileInfo* fileInfo) const;
 
 private:
-    std::unique_ptr<std::vector<std::pair<std::string,std::string>>> headers;
+    std::unique_ptr<std::vector<std::pair<std::string, std::string>>> headers;
     static std::string formatHeader(const std::pair<std::string, std::string>& header, bool crlf);
     static std::string stripInvalid(const std::string& value);
 };

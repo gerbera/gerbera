@@ -38,7 +38,7 @@
 class ServeRequestHandler : public RequestHandler {
 public:
     ServeRequestHandler(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage);
-    virtual void getInfo(const char *filename, UpnpFileInfo *info);
+    virtual void getInfo(const char* filename, UpnpFileInfo* info);
     virtual std::unique_ptr<IOHandler> open(const char* filename,
         enum UpnpOpenFileMode mode,
         std::string range);

@@ -99,7 +99,6 @@ std::vector<std::string> TranscodingProfile::getAVIFourCCList()
     return fourcc_list;
 }
 
-
 TranscodingProfileList::TranscodingProfileList() = default;
 
 void TranscodingProfileList::add(const std::string& sourceMimeType, const std::shared_ptr<TranscodingProfile>& prof)
@@ -112,7 +111,7 @@ void TranscodingProfileList::add(const std::string& sourceMimeType, const std::s
     else
         inner = std::make_shared<TranscodingProfileMap>();
 
-    inner->insert(std::pair<std::string,std::shared_ptr<TranscodingProfile>>(prof->getName(), prof));
+    inner->insert(std::pair<std::string, std::shared_ptr<TranscodingProfile>>(prof->getName(), prof));
     list[sourceMimeType] = inner;
 }
 

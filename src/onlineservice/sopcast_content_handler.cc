@@ -100,7 +100,7 @@ std::shared_ptr<CdsObject> SopCastContentHandler::getNextObject()
 
         while (channel_it != group.end()) {
             auto channel = *channel_it;
-             ++channel_it;
+            ++channel_it;
 
             if (channel == nullptr)
                 continue;

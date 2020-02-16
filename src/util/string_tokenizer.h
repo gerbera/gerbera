@@ -34,8 +34,7 @@
 
 #include <string>
 
-class StringTokenizer
-{
+class StringTokenizer {
 public:
     StringTokenizer(const std::string& str);
     std::string nextToken(const std::string& seps);

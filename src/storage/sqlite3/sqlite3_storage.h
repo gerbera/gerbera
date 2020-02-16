@@ -37,9 +37,9 @@
 
 #include <condition_variable>
 #include <mutex>
+#include <queue>
 #include <sqlite3.h>
 #include <sstream>
-#include <queue>
 
 #include "storage/sql_storage.h"
 #include "util/timer.h"

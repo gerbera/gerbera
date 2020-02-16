@@ -51,8 +51,8 @@
 
 #include "config/config_manager.h"
 #include "iohandler/mem_io_handler.h"
-#include "util/string_converter.h"
 #include "taglib_handler.h"
+#include "util/string_converter.h"
 
 #include "util/tools.h"
 

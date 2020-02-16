@@ -31,11 +31,11 @@
 #ifdef HAVE_MATROSKA
 
 #include <ebml/EbmlStream.h>
-#include <matroska/KaxAttachments.h>
 #include <matroska/KaxAttached.h>
+#include <matroska/KaxAttachments.h>
 
-#include "metadata_handler.h"
 #include "iohandler/mem_io_handler.h"
+#include "metadata_handler.h"
 
 /// \brief This class is responsible for reading webm or mkv tags metadata
 class MatroskaHandler : public MetadataHandler {

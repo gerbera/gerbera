@@ -31,13 +31,13 @@
 #ifndef __TOOLS_H__
 #define __TOOLS_H__
 
-#include <string>
-#include <memory>
-#include <vector>
-#include <map>
-#include <sstream>
-#include <unordered_set>
 #include <filesystem>
+#include <map>
+#include <memory>
+#include <sstream>
+#include <string>
+#include <unordered_set>
+#include <vector>
 namespace fs = std::filesystem;
 
 #include <sys/time.h>
@@ -55,7 +55,6 @@ extern "C" {
 // forward declaration
 class ConfigManager;
 class CdsItem;
-
 
 /// \brief splits the given string into array of strings using a separator character.
 /// \param str String to split
@@ -144,8 +143,8 @@ std::string url_escape(const std::string& str);
 /// \brief Opposite of url_escape :)
 std::string urlUnescape(const std::string& str);
 
-std::string dict_encode(const std::map<std::string,std::string>& dict);
-std::string dict_encode_simple(const std::map<std::string,std::string>& dict);
+std::string dict_encode(const std::map<std::string, std::string>& dict);
+std::string dict_encode_simple(const std::map<std::string, std::string>& dict);
 void dict_decode(const std::string& url, std::map<std::string, std::string>* dict);
 void dict_decode_simple(const std::string& url, std::map<std::string, std::string>* dict);
 
@@ -194,9 +193,9 @@ int HMSToSeconds(const std::string& time);
 /// \brief Extracts mimetype from a file using filemagic
 std::string getMIMETypeFromFile(const fs::path& file);
 /// \brief Extracts mimetype from a buffer using filemagic
-std::string getMIMETypeFromBuffer(const void *buffer, size_t length);
+std::string getMIMETypeFromBuffer(const void* buffer, size_t length);
 /// \brief Extracts mimetype from a filepath OR buffer using filemagic
-std::string getMIME(const fs::path& filepath, const void *buffer, size_t length);
+std::string getMIME(const fs::path& filepath, const void* buffer, size_t length);
 
 #endif // HAVE_MAGIC
 
@@ -265,14 +264,14 @@ std::string join(const C& container, const D& delimiter)
 
 /// \brief Get value of map, iff not key is not in map return defval
 template <typename K, typename V>
-V getValueOrDefault(const std::map<K,V>& m, const K& key, const V& defval)
+V getValueOrDefault(const std::map<K, V>& m, const K& key, const V& defval)
 {
-    typename std::map<K,V>::const_iterator it = m.find( key );
+    typename std::map<K, V>::const_iterator it = m.find(key);
     if (it == m.end())
         return defval;
     return it->second;
 }
-std::string getValueOrDefault(const std::map<std::string,std::string>& m, const std::string& key, const std::string& defval = "");
+std::string getValueOrDefault(const std::map<std::string, std::string>& m, const std::string& key, const std::string& defval = "");
 
 std::string toCSV(const std::shared_ptr<std::unordered_set<int>>& array);
 
@@ -341,7 +340,6 @@ std::string getDLNAContentHeader(const std::shared_ptr<ConfigManager>& config, c
 /// available.
 std::string getAVIFourCC(const fs::path& avi_filename);
 #endif
-
 
 #ifdef TOMBDEBUG
 

@@ -39,28 +39,23 @@
 #include "storage/storage.h"
 #include <utility>
 
-#define ONE_TEXTLINE_BYTES  1024
+#define ONE_TEXTLINE_BYTES 1024
 
 extern "C" {
 
 static duk_ret_t
-js_readln(duk_context *ctx)
+js_readln(duk_context* ctx)
 {
-    auto *self = (PlaylistParserScript *)Script::getContextScript(ctx);
+    auto* self = (PlaylistParserScript*)Script::getContextScript(ctx);
 
     std::string line;
-    
-    try
-    {
+
+    try {
         line = self->readln();
-    }
-    catch (const ServerShutdownException & se)
-    {
+    } catch (const ServerShutdownException& se) {
         log_warning("Aborting script execution due to server shutdown.");
         return duk_error(ctx, DUK_ERR_ERROR, "Aborting script execution due to server shutdown.");
-    }
-    catch (const std::runtime_error& e)
-    {
+    } catch (const std::runtime_error& e) {
         log_error("DUK exception: {}", e.what());
         return 0;
     }
@@ -70,9 +65,9 @@ js_readln(duk_context *ctx)
 }
 
 static duk_ret_t
-js_getCdsObject(duk_context *ctx)
+js_getCdsObject(duk_context* ctx)
 {
-    auto *self = (PlaylistParserScript *)Script::getContextScript(ctx);
+    auto* self = (PlaylistParserScript*)Script::getContextScript(ctx);
 
     if (!duk_is_string(ctx, 0))
         return 0;
@@ -106,18 +101,15 @@ PlaylistParserScript::PlaylistParserScript(const std::shared_ptr<ConfigManager>&
     currentHandle = nullptr;
     currentObjectID = INVALID_OBJECT_ID;
     currentLine = nullptr;
- 
-    try
-    {
+
+    try {
         Runtime::AutoLock lock(runtime->getMutex());
         defineFunction("readln", js_readln, 0);
         defineFunction("getCdsObject", js_getCdsObject, 1);
 
         std::string scriptPath = config->getOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT);
         load(scriptPath);
-    }
-    catch (const std::runtime_error& ex)
-    {
+    } catch (const std::runtime_error& ex) {
         throw ex;
     }
 }
@@ -131,9 +123,8 @@ std::string PlaylistParserScript::readln()
     if ((currentTask != nullptr) && (!currentTask->isValid()))
         return "";
 
-    while (true)
-    {
-        if(fgets(currentLine, ONE_TEXTLINE_BYTES, currentHandle) == nullptr)
+    while (true) {
+        if (fgets(currentLine, ONE_TEXTLINE_BYTES, currentHandle) == nullptr)
             return "";
 
         ret = trim_string(currentLine);
@@ -144,22 +135,18 @@ std::string PlaylistParserScript::readln()
 
 void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject>& obj, std::shared_ptr<GenericTask> task)
 {
-    if ((currentObjectID != INVALID_OBJECT_ID) || (currentHandle != nullptr) ||
-            (currentLine != nullptr))
-    {
+    if ((currentObjectID != INVALID_OBJECT_ID) || (currentHandle != nullptr) || (currentLine != nullptr)) {
         throw std::runtime_error("recursion not allowed!");
     }
 
-    if (!IS_CDS_PURE_ITEM(obj->getObjectType()))
-    {
+    if (!IS_CDS_PURE_ITEM(obj->getObjectType())) {
         throw std::runtime_error("only allowed for pure items");
     }
 
     currentTask = std::move(task);
     currentObjectID = obj->getID();
-    currentLine = (char *)MALLOC(ONE_TEXTLINE_BYTES);
-    if (!currentLine)
-    {
+    currentLine = (char*)MALLOC(ONE_TEXTLINE_BYTES);
+    if (!currentLine) {
         currentObjectID = INVALID_OBJECT_ID;
         currentTask = nullptr;
         throw std::runtime_error("failed to allocate memory for playlist parsing!");
@@ -168,8 +155,7 @@ void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject
     currentLine[0] = '\0';
 
     currentHandle = fopen(obj->getLocation().c_str(), "r");
-    if (!currentHandle)
-    {
+    if (!currentHandle) {
         currentObjectID = INVALID_OBJECT_ID;
         currentTask = nullptr;
         FREE(currentLine);
@@ -177,8 +163,7 @@ void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject
     }
 
     Runtime::AutoLock lock(runtime->getMutex());
-    try
-    {
+    try {
         cdsObject2dukObject(obj);
         duk_put_global_string(ctx, "playlist");
 
@@ -187,9 +172,7 @@ void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject
         duk_push_global_object(ctx);
         duk_del_prop_string(ctx, -1, "playlist");
         duk_pop(ctx);
-    }
-    catch (const std::runtime_error& e)
-    {
+    } catch (const std::runtime_error& e) {
         duk_push_global_object(ctx);
         duk_del_prop_string(ctx, -1, "playlist");
         duk_pop(ctx);
@@ -216,12 +199,10 @@ void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject
     currentTask = nullptr;
 
     gc_counter++;
-    if (gc_counter > JS_CALL_GC_AFTER_NUM)
-    {
+    if (gc_counter > JS_CALL_GC_AFTER_NUM) {
         duk_gc(ctx, 0);
         gc_counter = 0;
     }
-
 }
 
 PlaylistParserScript::~PlaylistParserScript() = default;

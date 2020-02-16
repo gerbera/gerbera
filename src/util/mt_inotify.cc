@@ -43,7 +43,7 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 #ifdef SOLARIS
-#include <sys/filio.h>  // FIONREAD
+#include <sys/filio.h> // FIONREAD
 #endif
 
 #include "mt_inotify.h"
@@ -138,7 +138,6 @@ struct inotify_event* Inotify::nextEvent()
             return nextEvent();
         }
         return ret;
-
     }
 
     if (first_byte == 0) {

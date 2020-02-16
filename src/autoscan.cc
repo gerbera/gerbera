@@ -214,7 +214,7 @@ std::shared_ptr<AutoscanList> AutoscanList::removeIfSubdir(const std::string& pa
 
         if (startswith(dir->getLocation(), parent)) {
             if (dir->persistent() && !persistent) {
-                 ++it;
+                ++it;
                 continue;
             }
             auto copy = std::make_shared<AutoscanDirectory>();
@@ -224,10 +224,8 @@ std::shared_ptr<AutoscanList> AutoscanList::removeIfSubdir(const std::string& pa
 
             dir->setScanID(INVALID_SCAN_ID);
             it = list.erase(it);
-        }
-        else
+        } else
             ++it;
-
     }
 
     return rm_id_list;

@@ -32,9 +32,9 @@
 #ifndef __CDS_RESOURCE_H__
 #define __CDS_RESOURCE_H__
 
+#include <map>
 #include <memory>
 #include <string>
-#include <map>
 
 #include "common.h"
 
@@ -51,9 +51,9 @@
 class CdsResource {
 protected:
     int handlerType;
-    std::map<std::string,std::string> attributes;
-    std::map<std::string,std::string> parameters;
-    std::map<std::string,std::string> options;
+    std::map<std::string, std::string> attributes;
+    std::map<std::string, std::string> parameters;
+    std::map<std::string, std::string> options;
 
 public:
     /// \brief creates a new resource object.
@@ -63,9 +63,9 @@ public:
     /// \param handler_type id of the associated handler
     CdsResource(int handlerType);
     CdsResource(int handlerType,
-        const std::map<std::string,std::string>& attributes,
-        const std::map<std::string,std::string>& parameters,
-        const std::map<std::string,std::string>& options);
+        const std::map<std::string, std::string>& attributes,
+        const std::map<std::string, std::string>& parameters,
+        const std::map<std::string, std::string>& options);
 
     /// \brief Adds a resource attribute.
     ///
@@ -81,7 +81,7 @@ public:
     void removeAttribute(const std::string& name);
 
     /// \brief Merge existing attributes with new ones
-    void mergeAttributes(const std::map<std::string,std::string>& additional);
+    void mergeAttributes(const std::map<std::string, std::string>& additional);
 
     /// \brief Adds a parameter (will be appended to the URL)
     ///
@@ -102,9 +102,9 @@ public:
 
     // urlencode into string
     int getHandlerType();
-    std::map<std::string,std::string> getAttributes();
-    std::map<std::string,std::string> getParameters();
-    std::map<std::string,std::string> getOptions();
+    std::map<std::string, std::string> getAttributes();
+    std::map<std::string, std::string> getParameters();
+    std::map<std::string, std::string> getOptions();
     std::string getAttribute(const std::string& name);
     std::string getParameter(const std::string& name);
     std::string getOption(const std::string& name);

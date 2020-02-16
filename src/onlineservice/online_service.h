@@ -35,8 +35,8 @@
 #ifndef __ONLINE_SERVICE_H__
 #define __ONLINE_SERVICE_H__
 
-#include <vector>
 #include <memory>
+#include <vector>
 
 #include "layout/layout.h"
 #include "util/timer.h"

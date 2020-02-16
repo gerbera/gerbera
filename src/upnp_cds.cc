@@ -272,12 +272,10 @@ void ContentDirectoryService::processSubscriptionRequest(const std::unique_ptr<S
 
     auto propset = xmlBuilder->createEventPropertySet();
     auto property = propset->document_element().first_child();
-    property.append_child("SystemUpdateID").append_child(pugi::node_pcdata)
-        .set_value(std::to_string(systemUpdateID).c_str());
+    property.append_child("SystemUpdateID").append_child(pugi::node_pcdata).set_value(std::to_string(systemUpdateID).c_str());
     auto obj = storage->loadObject(0);
     auto cont = std::static_pointer_cast<CdsContainer>(obj);
-    property.append_child("ContainerUpdateIDs").append_child(pugi::node_pcdata)
-        .set_value(fmt::format("0,{}", + cont->getUpdateID()).c_str());
+    property.append_child("ContainerUpdateIDs").append_child(pugi::node_pcdata).set_value(fmt::format("0,{}", +cont->getUpdateID()).c_str());
 
     std::ostringstream buf;
     propset->print(buf, "", 0);
@@ -305,10 +303,8 @@ void ContentDirectoryService::sendSubscriptionUpdate(const std::string& containe
 
     auto propset = xmlBuilder->createEventPropertySet();
     auto property = propset->document_element().first_child();
-    property.append_child("ContainerUpdateIDs").append_child(pugi::node_pcdata)
-        .set_value(containerUpdateIDs_CSV.c_str());
-    property.append_child("SystemUpdateID").append_child(pugi::node_pcdata)
-        .set_value(std::to_string(systemUpdateID).c_str());
+    property.append_child("ContainerUpdateIDs").append_child(pugi::node_pcdata).set_value(containerUpdateIDs_CSV.c_str());
+    property.append_child("SystemUpdateID").append_child(pugi::node_pcdata).set_value(std::to_string(systemUpdateID).c_str());
 
     std::ostringstream buf;
     propset->print(buf, "", 0);

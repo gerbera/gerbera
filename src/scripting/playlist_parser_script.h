@@ -32,19 +32,18 @@
 #ifndef __SCRIPTING_PLAYLIST_PARSER_SCRIPT_H__
 #define __SCRIPTING_PLAYLIST_PARSER_SCRIPT_H__
 
-#include <memory>
-#include "common.h"
-#include "script.h"
 #include "cds_objects.h"
-#include "util/generic_task.h"
+#include "common.h"
 #include "content_manager.h"
+#include "script.h"
+#include "util/generic_task.h"
+#include <memory>
 
 // forward declaration
 class ConfigManager;
 class ContentManager;
 
-class PlaylistParserScript : public Script
-{
+class PlaylistParserScript : public Script {
 public:
     PlaylistParserScript(const std::shared_ptr<ConfigManager>& config,
         std::shared_ptr<Storage> storage,
@@ -57,9 +56,9 @@ public:
     virtual script_class_t whoami() { return S_PLAYLIST; }
 
 private:
-    FILE *currentHandle;
+    FILE* currentHandle;
     int currentObjectID;
-    char *currentLine;
+    char* currentLine;
     std::shared_ptr<GenericTask> currentTask;
 };
 

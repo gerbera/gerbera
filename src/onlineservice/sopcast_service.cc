@@ -160,8 +160,8 @@ bool SopCastService::refreshServiceData(std::shared_ptr<Layout> layout)
             content->updateObject(obj);
         }
 
-//        if (server->getShutdownStatus())
-//            return false;
+        //        if (server->getShutdownStatus())
+        //            return false;
 
     } while (obj != nullptr);
 

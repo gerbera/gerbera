@@ -37,8 +37,7 @@ namespace fs = std::filesystem;
 
 #include "cds_objects.h"
 
-class Layout
-{
+class Layout {
 public:
     virtual ~Layout() {}
     virtual void processCdsObject(std::shared_ptr<CdsObject> obj, fs::path rootpath) = 0;

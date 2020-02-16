@@ -33,8 +33,8 @@
 #include <filesystem>
 #include <utility>
 
-#include "metadata_handler.h"
 #include "config/config_manager.h"
+#include "metadata_handler.h"
 #include "util/tools.h"
 
 #ifdef HAVE_EXIV2

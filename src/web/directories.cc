@@ -85,7 +85,7 @@ void web::directories::process()
     };
     bool exclude_config_dirs = true;
 
-    for (auto& it: fs::directory_iterator(path)) {
+    for (auto& it : fs::directory_iterator(path)) {
         const fs::path& filepath = it.path();
 
         if (!it.is_directory())
@@ -97,8 +97,9 @@ void web::directories::process()
             continue;
 
         bool hasContent = false;
-        for (auto& subIt: fs::directory_iterator(path)) {
-            if (!subIt.is_directory() && !subIt.is_regular_file()) continue;
+        for (auto& subIt : fs::directory_iterator(path)) {
+            if (!subIt.is_directory() && !subIt.is_regular_file())
+                continue;
             hasContent = true;
             break;
         }

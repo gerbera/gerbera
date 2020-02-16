@@ -181,8 +181,7 @@ void TPFetchOnlineContentTask::run()
 
             if ((service->getRefreshInterval() > 0) || unscheduled_refresh) {
                 auto t = std::make_shared<TPFetchOnlineContentTask>(
-                    content, task_processor, timer, service, layout, cancellable, unscheduled_refresh
-                );
+                    content, task_processor, timer, service, layout, cancellable, unscheduled_refresh);
                 task_processor->addTask(t);
             }
         } else {
