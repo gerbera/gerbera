@@ -43,7 +43,7 @@ std::string Headers::stripInvalid(const std::string& value)
 void Headers::addHeader(const std::string& header, const std::string& value)
 {
     if (headers == nullptr) {
-        headers = std::make_unique<std::vector<std::pair<std::string,std::string>>>();
+        headers = std::make_unique<std::vector<std::pair<std::string, std::string>>>();
     }
 
     if (header.empty() || value.empty()) {
@@ -58,7 +58,7 @@ void Headers::addHeader(const std::string& header, const std::string& value)
     }
     log_debug("Adding header: '{}: {}'", cleanHeader.c_str(), cleanValue.c_str());
 
-    headers->push_back({cleanHeader, cleanValue});
+    headers->push_back({ cleanHeader, cleanValue });
 }
 
 std::string Headers::formatHeader(const std::pair<std::string, std::string>& header, bool crlf)
@@ -67,11 +67,12 @@ std::string Headers::formatHeader(const std::pair<std::string, std::string>& hea
     headerValue += header.first;
     headerValue += ": ";
     headerValue += header.second;
-    if (crlf) headerValue += "\r\n";
+    if (crlf)
+        headerValue += "\r\n";
     return headerValue;
 }
 
-void Headers::writeHeaders(UpnpFileInfo *fileInfo) const
+void Headers::writeHeaders(UpnpFileInfo* fileInfo) const
 {
 #ifdef UPNP_1_12_LIST
     if (headers != nullptr) {
@@ -102,4 +103,3 @@ void Headers::writeHeaders(UpnpFileInfo *fileInfo) const
     UpnpFileInfo_set_ExtraHeaders(fileInfo, ixmlCloneDOMString(result.c_str()));
 #endif
 }
-

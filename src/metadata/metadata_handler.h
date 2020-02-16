@@ -141,7 +141,7 @@ class ConfigManager;
 class MetadataHandler {
 protected:
     std::shared_ptr<ConfigManager> config;
-    
+
 public:
     /// \brief Definition of the supported metadata fields.
 

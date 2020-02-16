@@ -142,12 +142,9 @@ void web::autoscan::process()
             auto autoscanEl = autoscansEl.append_child("autoscan");
             autoscanEl.append_attribute("objectID") = autoscanDir->getObjectID();
 
-            autoscanEl.append_child("location").append_child(pugi::node_pcdata)
-                .set_value(autoscanDir->getLocation().c_str());
-            autoscanEl.append_child("scan_mode").append_child(pugi::node_pcdata)
-                .set_value(AutoscanDirectory::mapScanmode(autoscanDir->getScanMode()).c_str());
-            autoscanEl.append_child("from_config").append_child(pugi::node_pcdata)
-                .set_value(autoscanDir->persistent() ? "1" : "0");
+            autoscanEl.append_child("location").append_child(pugi::node_pcdata).set_value(autoscanDir->getLocation().c_str());
+            autoscanEl.append_child("scan_mode").append_child(pugi::node_pcdata).set_value(AutoscanDirectory::mapScanmode(autoscanDir->getScanMode()).c_str());
+            autoscanEl.append_child("from_config").append_child(pugi::node_pcdata).set_value(autoscanDir->persistent() ? "1" : "0");
             //autoscanEl.append_child("scan_level").append_child(pugi::node_pcdata)
             //    .set_value(AutoscanDirectory::mapScanlevel(autoscanDir->getScanLevel()).c_str());
         }
@@ -158,30 +155,18 @@ void web::autoscan::process()
 void web::autoscan::autoscan2XML(const std::shared_ptr<AutoscanDirectory>& adir, pugi::xml_node* element)
 {
     if (adir == nullptr) {
-        element->append_child("scan_mode").append_child(pugi::node_pcdata)
-            .set_value("none");
-        element->append_child("scan_level").append_child(pugi::node_pcdata)
-            .set_value("full");
-        element->append_child("recursive").append_child(pugi::node_pcdata)
-            .set_value("0");
-        element->append_child("hidden").append_child(pugi::node_pcdata)
-            .set_value("0");
-        element->append_child("interval").append_child(pugi::node_pcdata)
-            .set_value("1800");
-        element->append_child("persistent").append_child(pugi::node_pcdata)
-            .set_value("0");
+        element->append_child("scan_mode").append_child(pugi::node_pcdata).set_value("none");
+        element->append_child("scan_level").append_child(pugi::node_pcdata).set_value("full");
+        element->append_child("recursive").append_child(pugi::node_pcdata).set_value("0");
+        element->append_child("hidden").append_child(pugi::node_pcdata).set_value("0");
+        element->append_child("interval").append_child(pugi::node_pcdata).set_value("1800");
+        element->append_child("persistent").append_child(pugi::node_pcdata).set_value("0");
     } else {
-        element->append_child("scan_mode").append_child(pugi::node_pcdata)
-            .set_value(AutoscanDirectory::mapScanmode(adir->getScanMode()).c_str());
-        element->append_child("scan_level").append_child(pugi::node_pcdata)
-            .set_value(AutoscanDirectory::mapScanlevel(adir->getScanLevel()).c_str());
-        element->append_child("recursive").append_child(pugi::node_pcdata)
-            .set_value(adir->getRecursive() ? "1" : "0");
-        element->append_child("hidden").append_child(pugi::node_pcdata)
-            .set_value(adir->getHidden() ? "1" : "0");
-        element->append_child("interval").append_child(pugi::node_pcdata)
-            .set_value(std::to_string(adir->getInterval()).c_str());
-        element->append_child("persistent").append_child(pugi::node_pcdata)
-            .set_value(adir->persistent() ? "1" : "0");
+        element->append_child("scan_mode").append_child(pugi::node_pcdata).set_value(AutoscanDirectory::mapScanmode(adir->getScanMode()).c_str());
+        element->append_child("scan_level").append_child(pugi::node_pcdata).set_value(AutoscanDirectory::mapScanlevel(adir->getScanLevel()).c_str());
+        element->append_child("recursive").append_child(pugi::node_pcdata).set_value(adir->getRecursive() ? "1" : "0");
+        element->append_child("hidden").append_child(pugi::node_pcdata).set_value(adir->getHidden() ? "1" : "0");
+        element->append_child("interval").append_child(pugi::node_pcdata).set_value(std::to_string(adir->getInterval()).c_str());
+        element->append_child("persistent").append_child(pugi::node_pcdata).set_value(adir->persistent() ? "1" : "0");
     }
 }

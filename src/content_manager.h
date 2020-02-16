@@ -31,14 +31,14 @@
 #ifndef __CONTENT_MANAGER_H__
 #define __CONTENT_MANAGER_H__
 
-#include <string>
-#include <vector>
+#include <condition_variable>
 #include <deque>
 #include <map>
-#include <condition_variable>
 #include <memory>
 #include <mutex>
+#include <string>
 #include <unordered_set>
+#include <vector>
 
 #include "autoscan.h"
 #include "cds_objects.h"
@@ -70,7 +70,9 @@ class PlaylistParserScript;
 class ConfigManager;
 class Storage;
 class UpdateManager;
-namespace web { class SessionManager; }
+namespace web {
+class SessionManager;
+}
 class Runtime;
 class LastFm;
 class ContentManager;
@@ -195,7 +197,7 @@ public:
     /// \brief Updates an object in the database using the given parameters.
     /// \param objectID ID of the object to update
     /// \param parameters key value pairs of fields to be updated
-    void updateObject(int objectID, const std::map<std::string,std::string>& parameters);
+    void updateObject(int objectID, const std::map<std::string, std::string>& parameters);
 
     std::shared_ptr<CdsObject> createObjectFromFile(const fs::path& path,
         bool magic = true,
@@ -334,9 +336,9 @@ protected:
     bool ignore_unknown_extensions;
     bool extension_map_case_sensitive;
 
-    std::map<std::string,std::string> extension_mimetype_map;
-    std::map<std::string,std::string> mimetype_upnpclass_map;
-    std::map<std::string,std::string> mimetype_contenttype_map;
+    std::map<std::string, std::string> extension_mimetype_map;
+    std::map<std::string, std::string> mimetype_upnpclass_map;
+    std::map<std::string, std::string> mimetype_contenttype_map;
 
     std::shared_ptr<AutoscanList> autoscan_timed;
 #ifdef HAVE_INOTIFY

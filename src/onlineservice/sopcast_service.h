@@ -35,9 +35,9 @@
 #ifndef __SOPCAST_SERVICE_H__
 #define __SOPCAST_SERVICE_H__
 
+#include <curl/curl.h>
 #include <memory>
 #include <pugixml.hpp>
-#include <curl/curl.h>
 
 #include "online_service.h"
 #include "url.h"

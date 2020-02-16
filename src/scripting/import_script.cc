@@ -45,12 +45,9 @@ ImportScript::ImportScript(const std::shared_ptr<ConfigManager>& config,
 {
     std::string scriptPath = config->getOption(CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT);
 
-    try 
-    {
+    try {
         load(scriptPath);
-    }
-    catch (const std::runtime_error& ex)
-    {
+    } catch (const std::runtime_error& ex) {
         throw ex;
     }
 }
@@ -58,8 +55,7 @@ ImportScript::ImportScript(const std::shared_ptr<ConfigManager>& config,
 void ImportScript::processCdsObject(const std::shared_ptr<CdsObject>& obj, const std::string& scriptpath)
 {
     processed = obj;
-    try 
-    {
+    try {
         cdsObject2dukObject(obj);
         duk_put_global_string(ctx, "orig");
         duk_push_string(ctx, scriptpath.c_str());
@@ -69,9 +65,7 @@ void ImportScript::processCdsObject(const std::shared_ptr<CdsObject>& obj, const
         duk_del_prop_string(ctx, -1, "orig");
         duk_del_prop_string(ctx, -1, "object_script_path");
         duk_pop(ctx);
-    }
-    catch (const std::runtime_error& ex)
-    {
+    } catch (const std::runtime_error& ex) {
         duk_push_global_object(ctx);
         duk_del_prop_string(ctx, -1, "orig");
         duk_del_prop_string(ctx, -1, "object_script_path");
@@ -82,8 +76,7 @@ void ImportScript::processCdsObject(const std::shared_ptr<CdsObject>& obj, const
     processed = nullptr;
 
     gc_counter++;
-    if (gc_counter > JS_CALL_GC_AFTER_NUM)
-    {
+    if (gc_counter > JS_CALL_GC_AFTER_NUM) {
         duk_gc(ctx, 0);
         gc_counter = 0;
     }

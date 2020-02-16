@@ -42,7 +42,7 @@ class TranscodeExternalHandler : public TranscodeHandler {
 public:
     TranscodeExternalHandler(std::shared_ptr<ConfigManager> config,
         std::shared_ptr<ContentManager> content);
-  
+
     std::unique_ptr<IOHandler> open(std::shared_ptr<TranscodingProfile> profile,
         std::string location,
         std::shared_ptr<CdsObject> obj,

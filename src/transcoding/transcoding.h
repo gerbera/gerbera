@@ -33,11 +33,11 @@
 #ifndef __TRANSCODING_H__
 #define __TRANSCODING_H__
 
-#include <memory>
+#include <filesystem>
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
-#include <filesystem>
 namespace fs = std::filesystem;
 
 #define SOURCE (-1)
@@ -201,7 +201,7 @@ protected:
 };
 
 /// \brief this class allows access to available transcoding profiles.
-typedef std::map<std::string,std::shared_ptr<TranscodingProfile>> TranscodingProfileMap;
+typedef std::map<std::string, std::shared_ptr<TranscodingProfile>> TranscodingProfileMap;
 class TranscodingProfileList {
 public:
     TranscodingProfileList();

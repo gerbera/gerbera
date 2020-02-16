@@ -33,11 +33,11 @@
 
 #include "atrailers_service.h"
 #include "atrailers_content_handler.h"
-#include "storage/storage.h"
 #include "config/config_manager.h"
 #include "config/config_options.h"
 #include "content_manager.h"
 #include "server.h"
+#include "storage/storage.h"
 #include "util/string_converter.h"
 
 #include <string>
@@ -165,8 +165,8 @@ bool ATrailersService::refreshServiceData(std::shared_ptr<Layout> layout)
             content->updateObject(obj);
         }
 
-//        if (server->getShutdownStatus())
-//            return false;
+        //        if (server->getShutdownStatus())
+        //            return false;
 
     } while (obj != nullptr);
 

@@ -39,16 +39,16 @@
 #include <utility>
 
 #include "config/config_manager.h"
-#include "storage/storage.h"
 #include "content_manager.h"
 #include "layout/fallback_layout.h"
 #include "metadata/metadata_handler.h"
-#include "web/session_manager.h"
+#include "storage/storage.h"
+#include "update_manager.h"
+#include "util/process.h"
 #include "util/string_converter.h"
 #include "util/timer.h"
 #include "util/tools.h"
-#include "update_manager.h"
-#include "util/process.h"
+#include "web/session_manager.h"
 
 #ifdef HAVE_JS
 #include "layout/js_layout.h"
@@ -606,11 +606,11 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
             storage->updateAutoscanDirectory(adir);
             return;
         }
-            adir->setTaskCount(-1);
-            removeObject(containerID, false);
-            removeAutoscanDirectory(scanID, scanMode);
-            storage->removeAutoscanDirectory(adir->getStorageID());
-            return;
+        adir->setTaskCount(-1);
+        removeObject(containerID, false);
+        removeAutoscanDirectory(scanID, scanMode);
+        storage->removeAutoscanDirectory(adir->getStorageID());
+        return;
     }
 
     // request only items if non-recursive scan is wanted
@@ -826,7 +826,7 @@ void ContentManager::addRecursive(const fs::path& path, bool hidden, const std::
     closedir(dir);
 }
 
-void ContentManager::updateObject(int objectID, const std::map<std::string,std::string>& parameters)
+void ContentManager::updateObject(int objectID, const std::map<std::string, std::string>& parameters)
 {
     std::string title = getValueOrDefault(parameters, "title");
     std::string upnp_class = getValueOrDefault(parameters, "class");
@@ -1721,7 +1721,7 @@ void ContentManager::triggerPlayHook(const std::shared_ptr<CdsObject>& obj)
     log_debug("start");
 
     if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && !obj->getFlag(OBJECT_FLAG_PLAYED)) {
-        std::vector<std::string>  mark_list = config->getStringArrayOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST);
+        std::vector<std::string> mark_list = config->getStringArrayOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST);
         for (const auto& i : mark_list) {
             if (startswith(std::static_pointer_cast<CdsItem>(obj)->getMimeType(), i)) {
                 obj->setFlag(OBJECT_FLAG_PLAYED);
@@ -1833,8 +1833,7 @@ void CMFetchOnlineContentTask::run()
     }
     try {
         std::shared_ptr<GenericTask> t(
-            new TPFetchOnlineContentTask(content, task_processor, timer, service, layout, cancellable, unscheduled_refresh)
-        );
+            new TPFetchOnlineContentTask(content, task_processor, timer, service, layout, cancellable, unscheduled_refresh));
         task_processor->addTask(t);
     } catch (const std::runtime_error& ex) {
         log_error("{}", ex.what());

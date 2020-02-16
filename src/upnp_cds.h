@@ -34,11 +34,11 @@
 
 #include <memory>
 
-#include <string>
 #include "action_request.h"
 #include "common.h"
 #include "subscription_request.h"
 #include "upnp_xml.h"
+#include <string>
 
 // forward declaration
 class ConfigManager;

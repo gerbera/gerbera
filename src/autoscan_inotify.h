@@ -33,10 +33,10 @@
 
 #include <memory>
 #include <mutex>
+#include <queue>
 #include <thread>
 #include <unordered_map>
 #include <vector>
-#include <queue>
 
 #include "autoscan.h"
 #include "util/mt_inotify.h"

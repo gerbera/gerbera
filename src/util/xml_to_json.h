@@ -34,20 +34,20 @@
 #ifndef __UTIL_XML_TO_JSON_H__
 #define __UTIL_XML_TO_JSON_H__
 
-#include <string>
 #include <map>
-#include <stack>
-#include <sstream>
 #include <memory>
+#include <sstream>
+#include <stack>
+#include <string>
 
 #include <pugixml.hpp>
 
-class Xml2Json
-{
+class Xml2Json {
 public:
     class Hints {
     public:
         void setArrayName(pugi::xml_node& node, const std::string& name) { asArray[node] = name; }
+
     private:
         std::map<pugi::xml_node, std::string> asArray;
         friend class Xml2Json;

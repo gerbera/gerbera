@@ -32,9 +32,9 @@
 #include "mem_io_handler.h"
 #include "cds_objects.h"
 #include "common.h"
-#include "util/process.h"
 #include "server.h"
 #include "update_manager.h"
+#include "util/process.h"
 #include <cstdio>
 #include <cstring>
 #include <ctime>

@@ -32,13 +32,13 @@
 #ifndef __PROCESS_IO_HANDLER_H__
 #define __PROCESS_IO_HANDLER_H__
 
-#include <memory>
 #include <filesystem>
+#include <memory>
 namespace fs = std::filesystem;
 
 #include "common.h"
-#include "util/executor.h"
 #include "io_handler.h"
+#include "util/executor.h"
 
 #define FIFO_READ_TIMEOUT 2
 #define FIFO_WRITE_TIMEOUT 2
@@ -110,7 +110,7 @@ protected:
     fs::path filename;
 
     /// \brief file descriptor
-    int fd{};
+    int fd {};
 
     /// \brief if this flag is set seek on a fifo will not return an error
     bool ignoreSeek;

@@ -33,8 +33,8 @@
 #ifndef __AUTOSCAN_H__
 #define __AUTOSCAN_H__
 
-#include <mutex>
 #include <filesystem>
+#include <mutex>
 namespace fs = std::filesystem;
 
 #include "util/timer.h"

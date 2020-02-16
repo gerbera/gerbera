@@ -42,9 +42,9 @@ CdsResource::CdsResource(int handlerType)
     this->handlerType = handlerType;
 }
 CdsResource::CdsResource(int handlerType,
-    const std::map<std::string,std::string>& attributes,
-    const std::map<std::string,std::string>& parameters,
-    const std::map<std::string,std::string>& options)
+    const std::map<std::string, std::string>& attributes,
+    const std::map<std::string, std::string>& parameters,
+    const std::map<std::string, std::string>& options)
 {
     this->handlerType = handlerType;
     this->attributes = attributes;
@@ -62,7 +62,7 @@ void CdsResource::removeAttribute(const std::string& name)
     attributes.erase(name);
 }
 
-void CdsResource::mergeAttributes(const std::map<std::string,std::string>& additional)
+void CdsResource::mergeAttributes(const std::map<std::string, std::string>& additional)
 {
     for (const auto& it : additional) {
         attributes[it.first] = it.second;
@@ -84,17 +84,17 @@ int CdsResource::getHandlerType()
     return handlerType;
 }
 
-std::map<std::string,std::string> CdsResource::getAttributes()
+std::map<std::string, std::string> CdsResource::getAttributes()
 {
     return attributes;
 }
 
-std::map<std::string,std::string> CdsResource::getParameters()
+std::map<std::string, std::string> CdsResource::getParameters()
 {
     return parameters;
 }
 
-std::map<std::string,std::string> CdsResource::getOptions()
+std::map<std::string, std::string> CdsResource::getOptions()
 {
     return options;
 }
@@ -151,18 +151,17 @@ std::shared_ptr<CdsResource> CdsResource::decode(const std::string& serial)
 
     int handlerType = std::stoi(parts[0]);
 
-    std::map<std::string,std::string> attr;
+    std::map<std::string, std::string> attr;
     dict_decode(parts[1], &attr);
 
-    std::map<std::string,std::string> par;
+    std::map<std::string, std::string> par;
     if (size >= 3)
         dict_decode(parts[2], &par);
 
-    std::map<std::string,std::string> opt;
+    std::map<std::string, std::string> opt;
     if (size >= 4)
         dict_decode(parts[3], &opt);
 
     auto resource = std::make_shared<CdsResource>(handlerType, attr, par, opt);
     return resource;
 }
-

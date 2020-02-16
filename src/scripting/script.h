@@ -32,24 +32,22 @@
 #ifndef __SCRIPTING_SCRIPT_H__
 #define __SCRIPTING_SCRIPT_H__
 
-#include <mutex>
-#include "duktape.h"
-#include "common.h"
-#include "runtime.h"
 #include "cds_objects.h"
+#include "common.h"
+#include "duktape.h"
+#include "runtime.h"
 #include "util/string_converter.h"
+#include <mutex>
 
 // perform garbage collection after script has been run for x times
-#define JS_CALL_GC_AFTER_NUM    (1000)
+#define JS_CALL_GC_AFTER_NUM (1000)
 
-typedef enum
-{
+typedef enum {
     S_IMPORT = 0,
     S_PLAYLIST
 } script_class_t;
 
-typedef enum
-{
+typedef enum {
     M2I,
     F2I,
     J2I,
@@ -61,8 +59,7 @@ typedef enum
 class ConfigManager;
 class ContentManager;
 
-class Script
-{
+class Script {
 public:
     virtual ~Script();
 
@@ -74,7 +71,7 @@ public:
     void setIntProperty(const std::string& name, int value);
 
     void defineFunction(const std::string& name, duk_c_function function, uint32_t numParams);
-    void defineFunctions(duk_function_list_entry *functions);
+    void defineFunctions(duk_function_list_entry* functions);
     void load(const std::string& scriptPath);
     void load(std::string scriptText, std::string scriptPath);
 
@@ -87,7 +84,7 @@ public:
 
     std::string convertToCharset(const std::string& str, charset_convert_t chr);
 
-    static Script *getContextScript(duk_context *ctx);
+    static Script* getContextScript(duk_context* ctx);
 
     std::shared_ptr<ConfigManager> getConfig() { return config; }
     std::shared_ptr<Storage> getStorage() { return storage; }
@@ -104,8 +101,8 @@ protected:
     // object that is currently being processed by the script (set in import
     // script)
     std::shared_ptr<CdsObject> processed;
-    
-    duk_context *ctx;
+
+    duk_context* ctx;
 
 protected:
     std::shared_ptr<ConfigManager> config;

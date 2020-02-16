@@ -31,32 +31,30 @@
 #include <utility>
 #include <vector>
 
-#include <ebml/IOCallback.h>
 #include <ebml/EbmlHead.h>
-#include <ebml/EbmlSubHead.h>
 #include <ebml/EbmlStream.h>
+#include <ebml/EbmlSubHead.h>
+#include <ebml/IOCallback.h>
 
-#include <matroska/KaxSegment.h>
-#include <matroska/KaxSeekHead.h>
-#include <matroska/KaxCluster.h>
-#include <matroska/KaxContexts.h>
 #include <matroska/KaxAttached.h>
 #include <matroska/KaxAttachments.h>
+#include <matroska/KaxCluster.h>
+#include <matroska/KaxContexts.h>
+#include <matroska/KaxSeekHead.h>
+#include <matroska/KaxSegment.h>
 
 #include "config/config_manager.h"
 #include "iohandler/mem_io_handler.h"
-#include "util/string_converter.h"
 #include "matroska_handler.h"
+#include "util/string_converter.h"
 
 #include "util/tools.h"
 
 using namespace LIBEBML_NAMESPACE;
 using namespace LIBMATROSKA_NAMESPACE;
 
-
 // file managment
-class file_io_callback: public IOCallback
-{
+class file_io_callback : public IOCallback {
 private:
     FILE* file;
 
@@ -107,7 +105,7 @@ public:
     {
         if (file == nullptr)
             return;
-        if (fclose(file) !=0) {
+        if (fclose(file) != 0) {
             throw std::runtime_error("fclose failed");
         }
         file = nullptr;
@@ -139,10 +137,10 @@ void MatroskaHandler::parseMKV(const std::shared_ptr<CdsItem>& item, MemIOHandle
     file_io_callback ebml_file(item->getLocation().c_str());
     EbmlStream ebml_stream(ebml_file);
 
-    EbmlElement * el_l0 = ebml_stream.FindNextID(KaxSegment::ClassInfos, ~0);
+    EbmlElement* el_l0 = ebml_stream.FindNextID(KaxSegment::ClassInfos, ~0);
     while (el_l0 != nullptr) {
         int i_upper_level = 0;
-        EbmlElement * el_l1 = ebml_stream.FindNextElement(el_l0->Generic().Context, i_upper_level, ~0, true);
+        EbmlElement* el_l1 = ebml_stream.FindNextElement(el_l0->Generic().Context, i_upper_level, ~0, true);
         while (el_l1 != nullptr) {
             parseLevel1Element(item, ebml_stream, el_l1, p_io_handler);
 
@@ -164,9 +162,9 @@ void MatroskaHandler::parseMKV(const std::shared_ptr<CdsItem>& item, MemIOHandle
 void MatroskaHandler::parseLevel1Element(const std::shared_ptr<CdsItem>& item, EbmlStream& ebml_stream, EbmlElement* el_l1, MemIOHandler** p_io_handler)
 {
     if (EbmlId(*el_l1) == KaxInfo::ClassInfos.GlobalId) {
-        parseInfo(item, ebml_stream, static_cast<KaxInfo *>(el_l1));
+        parseInfo(item, ebml_stream, static_cast<KaxInfo*>(el_l1));
     } else if (EbmlId(*el_l1) == KaxAttachments::ClassInfos.GlobalId) {
-        parseAttachments(item, ebml_stream, static_cast<KaxAttachments *>(el_l1), p_io_handler);
+        parseAttachments(item, ebml_stream, static_cast<KaxAttachments*>(el_l1), p_io_handler);
     }
 }
 
@@ -174,30 +172,28 @@ void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream
 {
     EbmlElement* dummy_el;
     int i_upper_level = 0;
-    EbmlMaster  *m;
+    EbmlMaster* m;
 
     // master elements
-    m = static_cast<EbmlMaster *>(info);
+    m = static_cast<EbmlMaster*>(info);
     m->Read(ebml_stream, EBML_CONTEXT(info), i_upper_level, dummy_el, true);
 
     auto sc = StringConverter::i2i(config); // sure is sure
 
-    for( size_t i = 0; i < m->ListSize(); i++) {
+    for (size_t i = 0; i < m->ListSize(); i++) {
         EbmlElement* el = (*m)[i];
 
         if (EbmlId(*el) == KaxTitle::ClassInfos.GlobalId) {
-            std::string title(UTFstring(*static_cast<KaxTitle *>(el)).GetUTF8());
+            std::string title(UTFstring(*static_cast<KaxTitle*>(el)).GetUTF8());
             // printf("KaxTitle = %s\n", title.c_str());
             item->setMetadata(MT_KEYS[M_TITLE].upnp, sc->convert(title));
         } else if (EbmlId(*el) == KaxDateUTC::ClassInfos.GlobalId) {
-            KaxDateUTC &date = *static_cast<KaxDateUTC *>(el);
+            KaxDateUTC& date = *static_cast<KaxDateUTC*>(el);
             time_t i_date;
             struct tm tmres;
-            char   buffer[25];
+            char buffer[25];
             i_date = date.GetEpochDate();
-            if (gmtime_r(&i_date, &tmres) &&
-                strftime(buffer, sizeof(buffer), "%Y-%m-%d", &tmres))
-            {
+            if (gmtime_r(&i_date, &tmres) && strftime(buffer, sizeof(buffer), "%Y-%m-%d", &tmres)) {
                 // printf("KaxDateUTC = %s\n", buffer);
                 item->setMetadata(MT_KEYS[M_DATE].upnp, sc->convert(buffer));
             }

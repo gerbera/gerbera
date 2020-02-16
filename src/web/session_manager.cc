@@ -244,8 +244,7 @@ void SessionManager::timerNotify(std::shared_ptr<Timer::Parameter> parameter)
             log_debug("session timeout: {} - diff: {}", session->getID().c_str(), getDeltaMillis(session->getLastAccessTime(), &now));
             it = sessions.erase(it);
             checkTimer();
-        }
-        else
+        } else
             ++it;
     }
 }

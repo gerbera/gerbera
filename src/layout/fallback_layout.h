@@ -34,11 +34,11 @@
 
 #include <memory>
 
-#include "layout.h"
 #include "../cds_objects.h"
+#include "layout.h"
 
 #ifdef ENABLE_PROFILING
-    #include "tools.h"
+#include "tools.h"
 #endif
 
 // forward declaration
@@ -46,8 +46,7 @@ class ConfigManager;
 class Storage;
 class ContentManager;
 
-class FallbackLayout : public Layout
-{
+class FallbackLayout : public Layout {
 public:
     FallbackLayout(std::shared_ptr<ConfigManager> config,
         std::shared_ptr<Storage> storage,

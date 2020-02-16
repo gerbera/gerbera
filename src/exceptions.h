@@ -33,8 +33,8 @@
 #define __EXCEPTIONS_H__
 
 #include <stdexcept>
-#include <utility>
 #include <string>
+#include <utility>
 
 class ConfigParseException : public std::runtime_error {
 public:

@@ -37,4 +37,3 @@ UpnpException::UpnpException(int errCode, const std::string& message)
 {
     this->errCode = errCode;
 }
-

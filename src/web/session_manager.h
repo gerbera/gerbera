@@ -100,7 +100,7 @@ protected:
 
     std::recursive_mutex mutex;
     using AutoLock = std::lock_guard<decltype(mutex)>;
-    std::map<std::string,std::string> dict;
+    std::map<std::string, std::string> dict;
 
     /// \brief True if the ui update id hash became to big and
     /// the UI shall update every container
@@ -133,7 +133,7 @@ protected:
     /// \brief This array is holding available sessions.
     std::vector<std::shared_ptr<Session>> sessions;
 
-    std::map<std::string,std::string> accounts;
+    std::map<std::string, std::string> accounts;
 
     void checkTimer();
     bool timerAdded;

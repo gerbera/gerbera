@@ -40,7 +40,7 @@ RequestHandler::RequestHandler(std::shared_ptr<ConfigManager> config, std::share
 {
 }
 
-void RequestHandler::splitUrl(const char *url, char separator, std::string &path, std::string &parameters)
+void RequestHandler::splitUrl(const char* url, char separator, std::string& path, std::string& parameters)
 {
     size_t i1;
 

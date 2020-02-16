@@ -32,14 +32,13 @@
 #ifndef __SCRIPTING_IMPORT_SCRIPT_H__
 #define __SCRIPTING_IMPORT_SCRIPT_H__
 
-#include <memory>
-#include "common.h"
-#include "script.h"
 #include "cds_objects.h"
+#include "common.h"
 #include "layout/layout.h"
+#include "script.h"
+#include <memory>
 
-class ImportScript : public Script
-{
+class ImportScript : public Script {
 public:
     ImportScript(const std::shared_ptr<ConfigManager>& config,
         std::shared_ptr<Storage> storage,

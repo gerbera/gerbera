@@ -35,13 +35,14 @@
 
 using namespace std;
 
-static void fatal_handler(void *udata, const char *msg)
+static void fatal_handler(void* udata, const char* msg)
 {
     log_error("Fatal Duktape error: {}", msg ? msg : "no message");
     abort();
 }
 
-Runtime::Runtime() {
+Runtime::Runtime()
+{
     ctx = duk_create_heap(nullptr, nullptr, nullptr, nullptr, fatal_handler);
 }
 Runtime::~Runtime()
@@ -53,7 +54,7 @@ duk_context* Runtime::createContext(const std::string& name)
 {
     duk_push_heap_stash(ctx);
     duk_idx_t thread_idx = duk_push_thread_new_globalenv(ctx);
-    duk_context *newctx = duk_get_context(ctx, thread_idx);
+    duk_context* newctx = duk_get_context(ctx, thread_idx);
     duk_put_prop_string(ctx, -2, name.c_str());
     duk_pop(ctx);
     return newctx;

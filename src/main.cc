@@ -35,10 +35,10 @@
 /// running "doxygen doxygen.conf" from the mediatomb/doc/ directory.
 
 #include <csignal>
-#include <mutex>
-#include <spdlog/spdlog.h>
-#include <spdlog/sinks/basic_file_sink.h>
 #include <filesystem>
+#include <mutex>
+#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/spdlog.h>
 
 #ifdef SOLARIS
 #include <iso/limits_iso.h>
@@ -109,7 +109,7 @@ static void installSignalHandler()
 {
     _ctx.main_thread_id = pthread_self();
 
-    struct sigaction action;  
+    struct sigaction action;
     memset(&action, 0, sizeof(action));
     action.sa_handler = signalHandler;
     action.sa_flags = 0;
@@ -148,18 +148,7 @@ int main(int argc, char** argv, char** envp)
 #endif
     cxxopts::Options options("gerbera", "Gerbera UPnP Media Server - https://gerbera.io");
 
-    options.add_options()
-    ("D,debug", "Enable debugging", cxxopts::value<bool>()->default_value("false"))
-    ("e,interface", "Interface to bind with", cxxopts::value<std::string>())
-    ("p,port", "Port to bind with, must be >=49152", cxxopts::value<int>())
-    ("i,ip", "IP to bind with", cxxopts::value<std::string>())
-    ("c,config", "Path to config file", cxxopts::value<std::string>())
-    ("m,home", "Search this directory for a .gerbera folder containing a config file", cxxopts::value<std::string>())
-    ("f,cfgdir", "Override name of config folder (.config/gerbera) by default. -h must also be set.", cxxopts::value<std::string>())
-    ("l,logfile", "Set log location", cxxopts::value<std::string>())("compile-info", "Print compile info and exit")
-    ("v,version", "Print version info and exit")("h,help", "Print this help and exit")
-    ("create-config", "Print a default config.xml file and exit")
-    ("add-file", "Scan a file into the DB on startup, can be specified multiple times", cxxopts::value<std::vector<std::string>>(), "FILE");
+    options.add_options()("D,debug", "Enable debugging", cxxopts::value<bool>()->default_value("false"))("e,interface", "Interface to bind with", cxxopts::value<std::string>())("p,port", "Port to bind with, must be >=49152", cxxopts::value<int>())("i,ip", "IP to bind with", cxxopts::value<std::string>())("c,config", "Path to config file", cxxopts::value<std::string>())("m,home", "Search this directory for a .gerbera folder containing a config file", cxxopts::value<std::string>())("f,cfgdir", "Override name of config folder (.config/gerbera) by default. -h must also be set.", cxxopts::value<std::string>())("l,logfile", "Set log location", cxxopts::value<std::string>())("compile-info", "Print compile info and exit")("v,version", "Print version info and exit")("h,help", "Print this help and exit")("create-config", "Print a default config.xml file and exit")("add-file", "Scan a file into the DB on startup, can be specified multiple times", cxxopts::value<std::vector<std::string>>(), "FILE");
 
     try {
         cxxopts::ParseResult opts = options.parse(argc, argv);
@@ -300,8 +289,7 @@ int main(int argc, char** argv, char** envp)
                 config_file.value_or(""), home.value_or(""), confdir.value_or(""),
                 prefix.value_or(""), magic.value_or(""),
                 ip.value_or(""), interface.value_or(""), portnum.value_or(-1),
-                debug
-            );
+                debug);
             portnum = config->getIntOption(CFG_SERVER_PORT);
         } catch (const ConfigParseException& ce) {
             log_error("Error parsing config file '{}': {}", (*config_file).c_str(), ce.what());
@@ -387,8 +375,7 @@ int main(int argc, char** argv, char** envp)
                             config_file.value_or(""), home.value_or(""), confdir.value_or(""),
                             prefix.value_or(""), magic.value_or(""),
                             ip.value_or(""), interface.value_or(""), portnum.value_or(-1),
-                            debug
-                        );
+                            debug);
                     } catch (const ConfigParseException& ce) {
                         log_error("Error parsing config file '{}': {}", (*config_file).c_str(), ce.what());
                         log_error("Could not restart Gerbera");

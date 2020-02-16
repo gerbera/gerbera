@@ -33,9 +33,9 @@
 #ifndef __CONFIG_OPTIONS_H__
 #define __CONFIG_OPTIONS_H__
 
+#include <map>
 #include <string>
 #include <vector>
-#include <map>
 
 #include "autoscan.h"
 #include "exceptions.h"
@@ -60,7 +60,7 @@ public:
         throw std::runtime_error("Wrong option type");
     };
 
-    virtual std::map<std::string,std::string> getDictionaryOption()
+    virtual std::map<std::string, std::string> getDictionaryOption()
     {
         throw std::runtime_error("Wrong option type");
     };
@@ -114,12 +114,12 @@ protected:
 
 class DictionaryOption : public ConfigOption {
 public:
-    DictionaryOption(std::map<std::string,std::string> option) { this->option = option; };
+    DictionaryOption(std::map<std::string, std::string> option) { this->option = option; };
 
-    virtual std::map<std::string,std::string> getDictionaryOption() override { return option; };
+    virtual std::map<std::string, std::string> getDictionaryOption() override { return option; };
 
 protected:
-    std::map<std::string,std::string> option;
+    std::map<std::string, std::string> option;
 };
 
 class StringArrayOption : public ConfigOption {

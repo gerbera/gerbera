@@ -44,7 +44,9 @@ class ConfigManager;
 class Storage;
 class UpdateManager;
 class Timer;
-namespace web { class SessionManager; }
+namespace web {
+class SessionManager;
+}
 class TaskProcessor;
 class Runtime;
 class LastFm;
@@ -89,7 +91,7 @@ public:
     /// data structures (ActionRequest or SubscriptionRequest) and is then
     /// passed on to the appropriate request handler - to routeActionEvent() or
     /// upnp_subscriptions()
-    int handleUpnpEvent(Upnp_EventType eventtype, const void *event);
+    int handleUpnpEvent(Upnp_EventType eventtype, const void* event);
 
     /// \brief Returns the IP address of the server.
     ///
@@ -113,7 +115,7 @@ public:
 
     void sendCDSSubscriptionUpdate(const std::string& updateString);
 
-    std::shared_ptr<ContentManager>  getContent() { return content; }
+    std::shared_ptr<ContentManager> getContent() { return content; }
 
 protected:
     std::shared_ptr<ConfigManager> config;
@@ -212,7 +214,7 @@ protected:
     /// \brief Registers callback functions for the internal web server.
     /// \param filename Incoming filename.
     ///
-    std::unique_ptr<RequestHandler> createRequestHandler(const char *filename) const;
+    std::unique_ptr<RequestHandler> createRequestHandler(const char* filename) const;
 
     /// \brief Registers callback functions for the internal web server.
     ///

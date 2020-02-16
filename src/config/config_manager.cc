@@ -35,10 +35,10 @@
 #include <uuid/uuid.h>
 #endif
 #include <cstdio>
+#include <filesystem>
 #include <iostream>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <filesystem>
 
 #if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE)
 #include <clocale>
@@ -50,8 +50,8 @@
 #include <curl/curl.h>
 #endif
 
-#include "config_manager.h"
 #include "common.h"
+#include "config_manager.h"
 #include "metadata/metadata_handler.h"
 #include "storage/storage.h"
 #include "util/string_converter.h"
@@ -229,12 +229,12 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 
     if ((sqlite3_en == "yes") && (mysql_en == "yes"))
         throw std::runtime_error("You enabled both, sqlite3 and mysql but "
-                         "only one database driver may be active at "
-                         "a time!");
+                                 "only one database driver may be active at "
+                                 "a time!");
 
     if ((sqlite3_en == "no") && (mysql_en == "no"))
         throw std::runtime_error("You disabled both, sqlite3 and mysql but "
-                         "one database driver must be active!");
+                                 "one database driver must be active!");
 
 #ifdef HAVE_MYSQL
     if (mysql_en == "yes") {
@@ -271,8 +271,8 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 #else
     if (mysql_en == "yes") {
         throw std::runtime_error("You enabled MySQL storage in configuration, "
-                         "however this version of Gerbera was compiled "
-                         "without MySQL support!");
+                                 "however this version of Gerbera was compiled "
+                                 "without MySQL support!");
     }
 #endif // HAVE_MYSQL
 
@@ -297,7 +297,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
             temp_int = MT_SQLITE_SYNC_FULL;
         else
             throw std::runtime_error("Invalid <synchronous> value in sqlite3 "
-                             "section");
+                                     "section");
 
         NEW_INT_OPTION(temp_int);
         SET_INT_OPTION(CFG_SERVER_STORAGE_SQLITE_SYNCHRONOUS);
@@ -313,7 +313,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
             tmp_bool = false;
         else
             throw std::runtime_error("Invalid <on-error> value in sqlite3 "
-                             "section");
+                                     "section");
 
         NEW_BOOL_OPTION(tmp_bool);
         SET_BOOL_OPTION(CFG_SERVER_STORAGE_SQLITE_RESTORE);
@@ -326,7 +326,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 #endif
         if (!validateYesNo(temp))
             throw std::runtime_error("Error in config file: incorrect parameter "
-                             "for <backup enabled=\"\" /> attribute");
+                                     "for <backup enabled=\"\" /> attribute");
         NEW_BOOL_OPTION(temp == "yes");
         SET_BOOL_OPTION(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED);
 
@@ -334,15 +334,15 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
             DEFAULT_SQLITE_BACKUP_INTERVAL);
         if (temp_int < 1)
             throw std::runtime_error("Error in config file: incorrect parameter for "
-                             "<backup interval=\"\" /> attribute");
+                                     "<backup interval=\"\" /> attribute");
         NEW_INT_OPTION(temp_int);
         SET_INT_OPTION(CFG_SERVER_STORAGE_SQLITE_BACKUP_INTERVAL);
     }
 #else
     if (sqlite3_en == "yes") {
         throw std::runtime_error("You enabled sqlite3 storage in configuration, "
-                         "however this version of Gerbera was compiled "
-                         "without sqlite3 support!");
+                                 "however this version of Gerbera was compiled "
+                                 "without sqlite3 support!");
     }
 
 #endif // SQLITE3
@@ -357,14 +357,13 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     NEW_OPTION(dbDriver);
     SET_OPTION(CFG_SERVER_STORAGE_DRIVER);
 
-
     // now go through the optional settings and fix them if anything is missing
 
     temp = getOption("/server/ui/attribute::enabled",
         DEFAULT_UI_EN_VALUE);
     if (!validateYesNo(temp))
         throw std::runtime_error("Error in config file: incorrect parameter "
-                         "for <ui enabled=\"\" /> attribute");
+                                 "for <ui enabled=\"\" /> attribute");
     NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_SERVER_UI_ENABLED);
 
@@ -372,7 +371,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
         DEFAULT_UI_SHOW_TOOLTIPS_VALUE);
     if (!validateYesNo(temp))
         throw std::runtime_error("Error in config file: incorrect parameter "
-                         "for <ui show-tooltips=\"\" /> attribute");
+                                 "for <ui show-tooltips=\"\" /> attribute");
     NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_SERVER_UI_SHOW_TOOLTIPS);
 
@@ -380,7 +379,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
         DEFAULT_POLL_WHEN_IDLE_VALUE);
     if (!validateYesNo(temp))
         throw std::runtime_error("Error in config file: incorrect parameter "
-                         "for <ui poll-when-idle=\"\" /> attribute");
+                                 "for <ui poll-when-idle=\"\" /> attribute");
     NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_SERVER_UI_POLL_WHEN_IDLE);
 
@@ -388,7 +387,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
         DEFAULT_POLL_INTERVAL);
     if (temp_int < 1)
         throw std::runtime_error("Error in config file: incorrect parameter for "
-                         "<ui poll-interval=\"\" /> attribute");
+                                 "<ui poll-interval=\"\" /> attribute");
     NEW_INT_OPTION(temp_int);
     SET_INT_OPTION(CFG_SERVER_UI_POLL_INTERVAL);
 
@@ -396,7 +395,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
         DEFAULT_ITEMS_PER_PAGE_2);
     if (temp_int < 1)
         throw std::runtime_error("Error in config file: incorrect parameter for "
-                         "<items-per-page default=\"\" /> attribute");
+                                 "<items-per-page default=\"\" /> attribute");
     NEW_INT_OPTION(temp_int);
     SET_INT_OPTION(CFG_SERVER_UI_DEFAULT_ITEMS_PER_PAGE);
 
@@ -404,30 +403,25 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     tmpEl = getElement("/server/ui/items-per-page");
     // create default structure
     if (std::distance(tmpEl.begin(), tmpEl.end()) == 0) {
-        if ((temp_int != DEFAULT_ITEMS_PER_PAGE_1) && (temp_int != DEFAULT_ITEMS_PER_PAGE_2) &&
-            (temp_int != DEFAULT_ITEMS_PER_PAGE_3) && (temp_int != DEFAULT_ITEMS_PER_PAGE_4)) {
+        if ((temp_int != DEFAULT_ITEMS_PER_PAGE_1) && (temp_int != DEFAULT_ITEMS_PER_PAGE_2) && (temp_int != DEFAULT_ITEMS_PER_PAGE_3) && (temp_int != DEFAULT_ITEMS_PER_PAGE_4)) {
             throw std::runtime_error("Error in config file: you specified an "
-                             "<items-per-page default=\"\"> value that is "
-                             "not listed in the options");
+                                     "<items-per-page default=\"\"> value that is "
+                                     "not listed in the options");
         }
 
-        tmpEl.append_child("option").append_child(pugi::node_pcdata)
-            .set_value(std::to_string(DEFAULT_ITEMS_PER_PAGE_1).c_str());
-        tmpEl.append_child("option").append_child(pugi::node_pcdata)
-            .set_value(std::to_string(DEFAULT_ITEMS_PER_PAGE_2).c_str());
-        tmpEl.append_child("option").append_child(pugi::node_pcdata)
-            .set_value(std::to_string(DEFAULT_ITEMS_PER_PAGE_3).c_str());
-        tmpEl.append_child("option").append_child(pugi::node_pcdata)
-            .set_value(std::to_string(DEFAULT_ITEMS_PER_PAGE_4).c_str());
+        tmpEl.append_child("option").append_child(pugi::node_pcdata).set_value(std::to_string(DEFAULT_ITEMS_PER_PAGE_1).c_str());
+        tmpEl.append_child("option").append_child(pugi::node_pcdata).set_value(std::to_string(DEFAULT_ITEMS_PER_PAGE_2).c_str());
+        tmpEl.append_child("option").append_child(pugi::node_pcdata).set_value(std::to_string(DEFAULT_ITEMS_PER_PAGE_3).c_str());
+        tmpEl.append_child("option").append_child(pugi::node_pcdata).set_value(std::to_string(DEFAULT_ITEMS_PER_PAGE_4).c_str());
     } else // validate user settings
     {
         bool default_found = false;
-        for (pugi::xml_node child: tmpEl.children()) {
+        for (pugi::xml_node child : tmpEl.children()) {
             if (std::string(child.name()) == "option") {
                 int i = child.text().as_int();
                 if (i < 1)
                     throw std::runtime_error("Error in config file: incorrect "
-                                    "<option> value for <items-per-page>");
+                                             "<option> value for <items-per-page>");
 
                 if (i == temp_int)
                     default_found = true;
@@ -436,13 +430,13 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 
         if (!default_found)
             throw std::runtime_error("Error in config file: at least one <option> "
-                             "under <items-per-page> must match the "
-                             "<items-per-page default=\"\" /> attribute");
+                                     "under <items-per-page> must match the "
+                                     "<items-per-page default=\"\" /> attribute");
     }
 
     // create the array from either user or default settings
     std::vector<std::string> menu_opts;
-    for (pugi::xml_node child: tmpEl.children()) {
+    for (pugi::xml_node child : tmpEl.children()) {
         if (std::string(child.name()) == "option")
             menu_opts.emplace_back(child.text().as_string());
     }
@@ -453,7 +447,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
         DEFAULT_ACCOUNTS_EN_VALUE);
     if (!validateYesNo(temp))
         throw std::runtime_error("Error in config file: incorrect parameter for "
-                         "<accounts enabled=\"\" /> attribute");
+                                 "<accounts enabled=\"\" /> attribute");
 
     NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_SERVER_UI_ACCOUNTS_ENABLED);
@@ -466,7 +460,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
         DEFAULT_SESSION_TIMEOUT);
     if (temp_int < 1) {
         throw std::runtime_error("Error in config file: invalid session-timeout "
-                         "(must be > 0)\n");
+                                 "(must be > 0)\n");
     }
     NEW_INT_OPTION(temp_int);
     SET_INT_OPTION(CFG_SERVER_UI_SESSION_TIMEOUT);
@@ -475,7 +469,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
         DEFAULT_HIDDEN_FILES_VALUE);
     if (!validateYesNo(temp))
         throw std::runtime_error("Error in config file: incorrect parameter for "
-                         "<import hidden-files=\"\" /> attribute");
+                                 "<import hidden-files=\"\" /> attribute");
     NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_IMPORT_HIDDEN_FILES);
 
@@ -485,7 +479,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 
     if (!validateYesNo(temp))
         throw std::runtime_error("Error in config file: incorrect parameter for "
-                         "<extension-mimetype ignore-unknown=\"\" /> attribute");
+                                 "<extension-mimetype ignore-unknown=\"\" /> attribute");
 
     NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_IMPORT_MAPPINGS_IGNORE_UNKNOWN_EXTENSIONS);
@@ -496,7 +490,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 
     if (!validateYesNo(temp))
         throw std::runtime_error("Error in config file: incorrect parameter for "
-                         "<extension-mimetype case-sensitive=\"\" /> attribute");
+                                 "<extension-mimetype case-sensitive=\"\" /> attribute");
 
     bool csens = false;
 
@@ -510,7 +504,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     NEW_DICT_OPTION(createDictionaryFromNode(tmpEl, "map", "from", "to", !csens));
     SET_DICT_OPTION(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
 
-    std::map<std::string,std::string> mime_content;
+    std::map<std::string, std::string> mime_content;
     tmpEl = getElement("/import/mappings/mimetype-contenttype");
     if (tmpEl != nullptr) {
         mime_content = createDictionaryFromNode(tmpEl, "treat", "mimetype", "as");
@@ -562,7 +556,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
             DEFAULT_INTERNAL_CHARSET);
     } catch (const std::runtime_error& e) {
         throw std::runtime_error("Error in config file: unsupported "
-                         "filesystem-charset specified: "
+                                 "filesystem-charset specified: "
             + charset);
     }
 
@@ -576,7 +570,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
             DEFAULT_INTERNAL_CHARSET);
     } catch (const std::runtime_error& e) {
         throw std::runtime_error("Error in config file: unsupported "
-                         "metadata-charset specified: "
+                                 "metadata-charset specified: "
             + charset);
     }
 
@@ -600,7 +594,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
         DEFAULT_EXTEND_PROTOCOLINFO);
     if (!validateYesNo(temp))
         throw std::runtime_error("Error in config file: extend attribute of the "
-                         "protocolInfo tag must be either \"yes\" or \"no\"");
+                                 "protocolInfo tag must be either \"yes\" or \"no\"");
 
     NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_SERVER_EXTEND_PROTOCOLINFO);
@@ -619,7 +613,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
         DEFAULT_EXTEND_PROTOCOLINFO_SM_HACK);
     if (!validateYesNo(temp))
         throw std::runtime_error("Error in config file: samsung-hack attribute of the "
-                         "protocolInfo tag must be either \"yes\" or \"no\"");
+                                 "protocolInfo tag must be either \"yes\" or \"no\"");
 
     NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK);
@@ -628,7 +622,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
         DEFAULT_EXTEND_PROTOCOLINFO_DLNA_SEEK);
     if (!validateYesNo(temp))
         throw std::runtime_error("Error in config file: dlna-seek attribute of the "
-                         "protocolInfo tag must be either \"yes\" or \"no\"");
+                                 "protocolInfo tag must be either \"yes\" or \"no\"");
 
     NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_SERVER_EXTEND_PROTOCOLINFO_DLNA_SEEK);
@@ -637,7 +631,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
         DEFAULT_HIDE_PC_DIRECTORY);
     if (!validateYesNo(temp))
         throw std::runtime_error("Error in config file: hide attribute of the "
-                         "pc-directory tag must be either \"yes\" or \"no\"");
+                                 "pc-directory tag must be either \"yes\" or \"no\"");
 
     NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_SERVER_HIDE_PC_DIRECTORY);
@@ -707,13 +701,13 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 
     if ((temp != "none") && (temp != "ip") && (temp != "port")) {
         throw std::runtime_error("Error in config file: "
-                         "invalid \"append-to\" attribute value in "
-                         "<presentationURL> tag");
+                                 "invalid \"append-to\" attribute value in "
+                                 "<presentationURL> tag");
     }
 
     if (((temp == "ip") || (temp == "port")) && !string_ok(getOption("/server/presentationURL"))) {
         throw std::runtime_error("Error in config file: \"append-to\" attribute "
-                         "value in <presentationURL> tag is set to \""
+                                 "value in <presentationURL> tag is set to \""
             + temp + "\" but no URL is specified");
     }
     NEW_OPTION(temp);
@@ -723,7 +717,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
         DEFAULT_UPNP_STRING_LIMIT);
     if ((temp_int != -1) && (temp_int < 4)) {
         throw std::runtime_error("Error in config file: invalid value for "
-                         "<upnp-string-limit>");
+                                 "<upnp-string-limit>");
     }
     NEW_INT_OPTION(temp_int);
     SET_INT_OPTION(CFG_SERVER_UPNP_TITLE_AND_DESC_STRING_LIMIT);
@@ -747,8 +741,8 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 
     if (!validateYesNo(temp))
         throw std::runtime_error("Error in config file: "
-                         "invalid \"create-link\" attribute value in "
-                         "<playlist-script> tag");
+                                 "invalid \"create-link\" attribute value in "
+                                 "<playlist-script> tag");
 
     NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS);
@@ -758,15 +752,15 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
         DEFAULT_LAYOUT_TYPE);
     if ((temp != "js") && (temp != "builtin") && (temp != "disabled"))
         throw std::runtime_error("Error in config file: invalid virtual layout "
-                         "type specified!");
+                                 "type specified!");
     NEW_OPTION(temp);
     SET_OPTION(CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
 
 #ifndef HAVE_JS
     if (temp == "js")
         throw std::runtime_error("Gerbera was compiled without JS support, "
-                         "however you specified \"js\" to be used for the "
-                         "virtual-layout.");
+                                 "however you specified \"js\" to be used for the "
+                                 "virtual-layout.");
 #else
     charset = getOption("/import/scripting/attribute::script-charset",
         DEFAULT_JS_CHARSET);
@@ -788,8 +782,8 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     temp = resolvePath(temp, true, temp == "js");
     if (temp == "js" && script_path.empty())
         throw std::runtime_error("Error in config file: you specified \"js\" to "
-                                "be used for virtual layout, but script "
-                                "location is invalid.");
+                                 "be used for virtual layout, but script "
+                                 "location is invalid.");
 
     NEW_OPTION(script_path);
     SET_OPTION(CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT);
@@ -820,7 +814,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     temp = getOption("/import/autoscan/attribute::use-inotify", "auto");
     if ((temp != "auto") && !validateYesNo(temp))
         throw std::runtime_error("Error in config file: incorrect parameter for "
-                         "\"<autoscan use-inotify=\" attribute");
+                                 "\"<autoscan use-inotify=\" attribute");
 
     el = getElement("/import/autoscan");
 
@@ -836,14 +830,14 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 #ifdef HAVE_INOTIFY
         if (!inotify_supported)
             throw std::runtime_error("You specified "
-                             "\"yes\" in \"<autoscan use-inotify=\"\">"
-                             " however your system does not have "
-                             "inotify support");
+                                     "\"yes\" in \"<autoscan use-inotify=\"\">"
+                                     " however your system does not have "
+                                     "inotify support");
 #else
         throw std::runtime_error("You specified"
-                         " \"yes\" in \"<autoscan use-inotify=\"\">"
-                         " however this version of Gerbera was compiled "
-                         "without inotify support");
+                                 " \"yes\" in \"<autoscan use-inotify=\"\">"
+                                 " however this version of Gerbera was compiled "
+                                 "without inotify support");
 #endif
     }
 
@@ -871,7 +865,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 
     if (!validateYesNo(temp))
         throw std::runtime_error("Error in config file: incorrect parameter "
-                         "for <transcoding enabled=\"\"> attribute");
+                                 "for <transcoding enabled=\"\"> attribute");
 
     if (temp == "yes")
         el = getElement("/transcoding");
@@ -887,8 +881,9 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
             DEFAULT_CURL_BUFFER_SIZE);
         if (temp_int < CURL_MAX_WRITE_SIZE)
             throw std::runtime_error(fmt::format("Error in config file: incorrect parameter "
-                             "for <transcoding fetch-buffer-size=\"\"> attribute, "
-                             "must be at least {}", CURL_MAX_WRITE_SIZE));
+                                                 "for <transcoding fetch-buffer-size=\"\"> attribute, "
+                                                 "must be at least {}",
+                CURL_MAX_WRITE_SIZE));
         NEW_INT_OPTION(temp_int);
         SET_INT_OPTION(CFG_EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE);
 
@@ -897,7 +892,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
             DEFAULT_CURL_INITIAL_FILL_SIZE);
         if (temp_int < 0)
             throw std::runtime_error("Error in config file: incorrect parameter "
-                             "for <transcoding fetch-buffer-fill-size=\"\"> attribute");
+                                     "for <transcoding fetch-buffer-fill-size=\"\"> attribute");
 
         NEW_INT_OPTION(temp_int);
         SET_INT_OPTION(CFG_EXTERNAL_TRANSCODING_CURL_FILL_SIZE);
@@ -958,8 +953,8 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 
     if (!validateYesNo(temp))
         throw std::runtime_error("Error in config file: "
-                         "invalid \"enabled\" attribute value in "
-                         "<ffmpegthumbnailer> tag");
+                                 "invalid \"enabled\" attribute value in "
+                                 "<ffmpegthumbnailer> tag");
 
     NEW_BOOL_OPTION(temp == YES ? true : false);
     SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED);
@@ -971,8 +966,8 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 
         if (temp_int <= 0)
             throw std::runtime_error("Error in config file: ffmpegthumbnailer - "
-                             "invalid value attribute value in "
-                             "<thumbnail-size> tag");
+                                     "invalid value attribute value in "
+                                     "<thumbnail-size> tag");
 
         NEW_INT_OPTION(temp_int);
         SET_INT_OPTION(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE);
@@ -983,8 +978,8 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 
         if (temp_int < 0)
             throw std::runtime_error("Error in config file: ffmpegthumbnailer - "
-                             "invalid value attribute value in "
-                             "<seek-percentage> tag");
+                                     "invalid value attribute value in "
+                                     "<seek-percentage> tag");
 
         NEW_INT_OPTION(temp_int);
         SET_INT_OPTION(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE);
@@ -995,7 +990,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 
         if (!validateYesNo(temp))
             throw std::runtime_error("Error in config file: ffmpegthumbnailer - "
-                             "invalid value in <filmstrip-overlay> tag");
+                                     "invalid value in <filmstrip-overlay> tag");
 
         NEW_BOOL_OPTION(temp == YES ? true : false);
         SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY);
@@ -1006,7 +1001,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 
         if (!validateYesNo(temp))
             throw std::runtime_error("Error in config file: ffmpegthumbnailer - "
-                             "invalid value in <workaround-bugs> tag");
+                                     "invalid value in <workaround-bugs> tag");
 
         NEW_BOOL_OPTION(temp == YES ? true : false);
         SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_WORKAROUND_BUGS);
@@ -1017,13 +1012,13 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 
         if (temp_int < 0)
             throw std::runtime_error("Error in config file: ffmpegthumbnailer - "
-                             "invalid value attribute value in "
-                             "<image-quality> tag, allowed values: 0-10");
+                                     "invalid value attribute value in "
+                                     "<image-quality> tag, allowed values: 0-10");
 
         if (temp_int > 10)
             throw std::runtime_error("Error in config file: ffmpegthumbnailer - "
-                             "invalid value attribute value in "
-                             "<image-quality> tag, allowed values: 0-10");
+                                     "invalid value attribute value in "
+                                     "<image-quality> tag, allowed values: 0-10");
 
         NEW_INT_OPTION(temp_int);
         SET_INT_OPTION(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_IMAGE_QUALITY);
@@ -1041,8 +1036,8 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 
         if (!validateYesNo(temp))
             throw std::runtime_error("Error in config file: "
-                             "invalid \"enabled\" attribute value in "
-                             "ffmpegthumbnailer <cache-dir> tag");
+                                     "invalid \"enabled\" attribute value in "
+                                     "ffmpegthumbnailer <cache-dir> tag");
 
         NEW_BOOL_OPTION(temp == YES ? true : false);
         SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED);
@@ -1055,8 +1050,8 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 
     if (!validateYesNo(temp))
         throw std::runtime_error("Error in config file: "
-                         "invalid \"enabled\" attribute value in "
-                         "<mark-played-items> tag");
+                                 "invalid \"enabled\" attribute value in "
+                                 "<mark-played-items> tag");
 
     bool markingEnabled = temp == YES;
     NEW_BOOL_OPTION(markingEnabled);
@@ -1067,8 +1062,8 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
         DEFAULT_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES);
     if (!validateYesNo(temp))
         throw std::runtime_error("Error in config file: "
-                         "invalid \":suppress-cds-updates\" attribute "
-                         "value in <mark-played-items> tag");
+                                 "invalid \":suppress-cds-updates\" attribute "
+                                 "value in <mark-played-items> tag");
 
     NEW_BOOL_OPTION(temp == YES);
     SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES);
@@ -1079,8 +1074,8 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 
     if ((temp != "prepend") && (temp != "append"))
         throw std::runtime_error("Error in config file: "
-                         "invalid \"mode\" attribute value in "
-                         "<string> tag in the <mark-played-items> section");
+                                 "invalid \"mode\" attribute value in "
+                                 "<string> tag in the <mark-played-items> section");
 
     NEW_BOOL_OPTION(temp == DEFAULT_MARK_PLAYED_ITEMS_STRING_MODE);
     SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND);
@@ -1090,8 +1085,8 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
         DEFAULT_MARK_PLAYED_ITEMS_STRING);
     if (!string_ok(temp))
         throw std::runtime_error("Error in config file: "
-                         "empty string given for the <string> tag in the "
-                         "<mark-played-items> section");
+                                 "empty string given for the <string> tag in the "
+                                 "<mark-played-items> section");
     NEW_OPTION(temp);
     SET_OPTION(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING);
 
@@ -1100,7 +1095,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 
     int contentElementCount = 0;
     if (tmpEl != nullptr) {
-        for (pugi::xml_node content: tmpEl.children()) {
+        for (pugi::xml_node content : tmpEl.children()) {
             if (std::string(content.name()) != "content")
                 continue;
 
@@ -1128,8 +1123,8 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 
     if (!validateYesNo(temp))
         throw std::runtime_error("Error in config file: "
-                         "invalid \"enabled\" attribute value in "
-                         "<lastfm> tag");
+                                 "invalid \"enabled\" attribute value in "
+                                 "<lastfm> tag");
 
     NEW_BOOL_OPTION(temp == "yes" ? true : false);
     SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_LASTFM_ENABLED);
@@ -1140,8 +1135,8 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 
         if (!string_ok(temp))
             throw std::runtime_error("Error in config file: lastfm - "
-                             "invalid username value in "
-                             "<username> tag");
+                                     "invalid username value in "
+                                     "<username> tag");
 
         NEW_OPTION(temp);
         SET_OPTION(CFG_SERVER_EXTOPTS_LASTFM_USERNAME);
@@ -1151,8 +1146,8 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 
         if (!string_ok(temp))
             throw std::runtime_error("Error in config file: lastfm - "
-                             "invalid password value in "
-                             "<password> tag");
+                                     "invalid password value in "
+                                     "<password> tag");
 
         NEW_OPTION(temp);
         SET_OPTION(CFG_SERVER_EXTOPTS_LASTFM_PASSWORD);
@@ -1193,8 +1188,8 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 
     if (!validateYesNo(temp))
         throw std::runtime_error("Error in config file: "
-                         "invalid \"enabled\" attribute value in "
-                         "<SopCast> tag");
+                                 "invalid \"enabled\" attribute value in "
+                                 "<SopCast> tag");
 
     NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_ONLINE_CONTENT_SOPCAST_ENABLED);
@@ -1217,8 +1212,8 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 
     if (!validateYesNo(temp))
         throw std::runtime_error("Error in config file: "
-                         "invalid \"update-at-start\" attribute value in "
-                         "<SopCast> tag");
+                                 "invalid \"update-at-start\" attribute value in "
+                                 "<SopCast> tag");
 
     NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_ONLINE_CONTENT_SOPCAST_UPDATE_AT_START);
@@ -1230,8 +1225,8 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 
     if (!validateYesNo(temp))
         throw std::runtime_error("Error in config file: "
-                         "invalid \"enabled\" attribute value in "
-                         "<AppleTrailers> tag");
+                                 "invalid \"enabled\" attribute value in "
+                                 "<AppleTrailers> tag");
 
     NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_ONLINE_CONTENT_ATRAILERS_ENABLED);
@@ -1246,8 +1241,8 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 
     if (!validateYesNo(temp))
         throw std::runtime_error("Error in config file: "
-                         "invalid \"update-at-start\" attribute value in "
-                         "<AppleTrailers> tag");
+                                 "invalid \"update-at-start\" attribute value in "
+                                 "<AppleTrailers> tag");
 
     NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_ONLINE_CONTENT_ATRAILERS_UPDATE_AT_START);
@@ -1256,9 +1251,9 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
         std::to_string(DEFAULT_ATRAILERS_RESOLUTION));
     if ((temp != "640") && (temp != "720p")) {
         throw std::runtime_error("Error in config file: "
-                         "invalid \"resolution\" attribute value in "
-                         "<AppleTrailers> tag, only \"640\" and \"720p\" is "
-                         "supported");
+                                 "invalid \"resolution\" attribute value in "
+                                 "<AppleTrailers> tag, only \"640\" and \"720p\" is "
+                                 "supported");
     }
 
     NEW_OPTION(temp);
@@ -1380,16 +1375,17 @@ void ConfigManager::emptyBookmark()
 
     fs::path path = getOption(CFG_SERVER_BOOKMARK_FILE);
     log_debug("Clearing bookmark file at: {}", path.c_str());
-    writeTextFile(path, data);;
+    writeTextFile(path, data);
+    ;
 }
 
 std::map<std::string, std::string> ConfigManager::createDictionaryFromNode(const pugi::xml_node& element,
     const std::string& nodeName, const std::string& keyAttr, const std::string& valAttr, bool tolower)
 {
-    std::map<std::string,std::string> dict;
+    std::map<std::string, std::string> dict;
 
     if (element != nullptr) {
-        for (pugi::xml_node child: element.children()) {
+        for (pugi::xml_node child : element.children()) {
             if (child.name() == nodeName) {
                 std::string key = child.attribute(keyAttr.c_str()).as_string();
                 std::string value = child.attribute(valAttr.c_str()).as_string();
@@ -1416,11 +1412,11 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
     if (element == nullptr)
         return list;
 
-    std::map<std::string,std::string> mt_mappings;
+    std::map<std::string, std::string> mt_mappings;
 
     auto mtype_profile = element.child("mimetype-profile-mappings");
     if (mtype_profile != nullptr) {
-        for (pugi::xml_node child: element.children()) {
+        for (pugi::xml_node child : element.children()) {
             if (std::string(child.name()) == "transcode") {
                 std::string mt = child.attribute("mimetype").as_string();
                 std::string pname = child.attribute("using").as_string();
@@ -1438,14 +1434,14 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
     if (profiles == nullptr)
         return list;
 
-    for (pugi::xml_node child: element.children()) {
+    for (pugi::xml_node child : element.children()) {
         if (std::string(child.name()) != "profile")
             continue;
 
         param = child.attribute("enabled").as_string();
         if (!validateYesNo(param))
             throw std::runtime_error("Error in config file: incorrect parameter "
-                             "for <profile enabled=\"\" /> attribute");
+                                     "for <profile enabled=\"\" /> attribute");
 
         if (param == "no")
             continue;
@@ -1504,7 +1500,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
 
             if (fcc_mode != FCC_None) {
                 std::vector<std::string> fcc_list;
-                for (pugi::xml_node fourcc: sub.children()) {
+                for (pugi::xml_node fourcc : sub.children()) {
                     if (std::string(fourcc.name()) != "fourcc")
                         continue;
 
@@ -1523,7 +1519,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
             param = sub.text().as_string();
             if (!validateYesNo(param))
                 throw std::runtime_error("Error in config file: incorrect parameter "
-                                 "for <accept-url> tag");
+                                         "for <accept-url> tag");
             if (param == "yes")
                 prof->setAcceptURL(true);
             else
@@ -1541,8 +1537,8 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
                 int freq = std::stoi(param);
                 if (freq <= 0)
                     throw std::runtime_error("Error in config file: incorrect "
-                                     "parameter for <sample-frequency> "
-                                     "tag");
+                                             "parameter for <sample-frequency> "
+                                             "tag");
 
                 prof->setSampleFreq(freq);
             }
@@ -1559,8 +1555,8 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
                 int chan = std::stoi(param);
                 if (chan <= 0)
                     throw std::runtime_error("Error in config file: incorrect "
-                                     "parameter for <number-of-channels> "
-                                     "tag");
+                                             "parameter for <number-of-channels> "
+                                             "tag");
                 prof->setNumChannels(chan);
             }
         }
@@ -1570,7 +1566,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
             param = sub.text().as_string();
             if (!validateYesNo(param))
                 throw std::runtime_error("Error in config file: incorrect parameter "
-                                 "for <hide-original-resource> tag");
+                                         "for <hide-original-resource> tag");
             if (param == "yes")
                 prof->setHideOriginalResource(true);
             else
@@ -1582,7 +1578,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
             param = sub.text().as_string();
             if (!validateYesNo(param))
                 throw std::runtime_error("Error in config file: incorrect parameter "
-                                 "for <thumbnail> tag");
+                                         "for <thumbnail> tag");
             if (param == "yes")
                 prof->setThumbnail(true);
             else
@@ -1594,7 +1590,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
             param = sub.text().as_string();
             if (!validateYesNo(param))
                 throw std::runtime_error("Error in config file: incorrect parameter "
-                                 "for <profile first-resource=\"\" /> attribute");
+                                         "for <profile first-resource=\"\" /> attribute");
 
             if (param == "yes")
                 prof->setFirstResource(true);
@@ -1607,7 +1603,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
             param = sub.text().as_string();
             if (!validateYesNo(param))
                 throw std::runtime_error("Error in config file: incorrect parameter "
-                                 "for use-chunked-encoding tag");
+                                         "for use-chunked-encoding tag");
 
             if (param == "yes")
                 prof->setChunked(true);
@@ -1618,7 +1614,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
         sub = child.child("agent");
         if (sub == nullptr)
             throw std::runtime_error("error in configuration: transcoding "
-                             "profile \""
+                                     "profile \""
                 + prof->getName() + "\" is missing the <agent> option");
 
         param = sub.attribute("command").as_string();
@@ -1658,7 +1654,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
         sub = child.child("buffer");
         if (sub == nullptr)
             throw std::runtime_error("error in configuration: transcoding "
-                             "profile \""
+                                     "profile \""
                 + prof->getName() + "\" is missing the <buffer> option");
 
         param_int = sub.attribute("size").as_int();
@@ -1730,7 +1726,7 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNode(const st
     if (element == nullptr)
         return list;
 
-    for (pugi::xml_node child: element.children()) {
+    for (pugi::xml_node child : element.children()) {
 
         // We only want directories
         if (std::string(child.name()) != "directory")
@@ -1862,7 +1858,7 @@ std::vector<std::string> ConfigManager::createArrayFromNode(const pugi::xml_node
     std::vector<std::string> arr;
 
     if (element != nullptr) {
-        for (pugi::xml_node child: element.children()) {
+        for (pugi::xml_node child : element.children()) {
             if (child.name() == nodeName) {
                 std::string attrValue = child.attribute(attrName.c_str()).as_string();
 
@@ -1903,7 +1899,7 @@ bool ConfigManager::getBoolOption(config_option_t option)
     return o->getBoolOption();
 }
 
-std::map<std::string,std::string> ConfigManager::getDictionaryOption(config_option_t option)
+std::map<std::string, std::string> ConfigManager::getDictionaryOption(config_option_t option)
 {
     return options->at(option)->getDictionaryOption();
 }

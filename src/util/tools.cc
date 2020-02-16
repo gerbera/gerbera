@@ -63,8 +63,8 @@
 #include "contrib/md5.h"
 #include "iohandler/file_io_handler.h"
 #include "metadata/metadata_handler.h"
-#include "tools.h"
 #include "string_tokenizer.h"
+#include "tools.h"
 
 #define WHITE_SPACE " \t\r\n"
 
@@ -148,8 +148,7 @@ std::string reduce_string(std::string str, char ch)
 {
     std::string::iterator new_end = std::unique(
         str.begin(), str.end(),
-        [&](char lhs, char rhs) { return (lhs == rhs) && (lhs == ch); }
-    );
+        [&](char lhs, char rhs) { return (lhs == rhs) && (lhs == ch); });
 
     str.erase(new_end, str.end());
     return str;
@@ -378,7 +377,7 @@ std::string urlUnescape(const std::string& str)
     return buf.str();
 }
 
-static std::string dict_encode(const std::map<std::string,std::string>& dict, char sep1, char sep2)
+static std::string dict_encode(const std::map<std::string, std::string>& dict, char sep1, char sep2)
 {
     std::ostringstream buf;
     for (auto it = dict.begin(); it != dict.end(); it++) {
@@ -390,12 +389,12 @@ static std::string dict_encode(const std::map<std::string,std::string>& dict, ch
     return buf.str();
 }
 
-std::string dict_encode(const std::map<std::string,std::string>& dict)
+std::string dict_encode(const std::map<std::string, std::string>& dict)
 {
     return dict_encode(dict, '&', '=');
 }
 
-std::string dict_encode_simple(const std::map<std::string,std::string>& dict)
+std::string dict_encode_simple(const std::map<std::string, std::string>& dict)
 {
     return dict_encode(dict, '/', '/');
 }
@@ -598,12 +597,12 @@ std::string getMIMETypeFromFile(const fs::path& file)
     return getMIME(file, nullptr, -1);
 }
 
-std::string getMIMETypeFromBuffer(const void *buffer, size_t length)
+std::string getMIMETypeFromBuffer(const void* buffer, size_t length)
 {
     return getMIME("", buffer, length);
 }
 
-std::string getMIME(const fs::path& filepath, const void *buffer, size_t length)
+std::string getMIME(const fs::path& filepath, const void* buffer, size_t length)
 {
     /* MAGIC_MIME_TYPE tells magic to return ONLY the mimetype */
     magic_t magic_cookie = magic_open(MAGIC_MIME_TYPE);
@@ -815,7 +814,8 @@ std::string unescape_amp(std::string string)
         size_t next = last - 1;
         do {
             next = string.find('&', next + 1);
-            if (next == std::string::npos) break;
+            if (next == std::string::npos)
+                break;
             if ((next < len) && (string.at(next + 1) == 'a') && (string.at(next + 2) == 'm') && (string.at(next + 3) == 'p') && (string.at(next + 4) == ';')) {
                 skip = 4;
             }
@@ -849,9 +849,9 @@ unsigned int stringHash(const std::string& str)
     return hash;
 }
 
-std::string getValueOrDefault(const std::map<std::string,std::string>& m, const std::string& key, const std::string& defval)
+std::string getValueOrDefault(const std::map<std::string, std::string>& m, const std::string& key, const std::string& defval)
 {
-    return getValueOrDefault<std::string,std::string>(m, key, defval);
+    return getValueOrDefault<std::string, std::string>(m, key, defval);
 }
 
 std::string toCSV(const shared_ptr<unordered_set<int>>& array)
@@ -1153,9 +1153,9 @@ fs::path get_last_path(const fs::path& path)
 {
     fs::path ret;
 
-    auto it = std::prev(path.end());    // filename
+    auto it = std::prev(path.end()); // filename
     if (it != path.end())
-        it = std::prev(it);             // last path
+        it = std::prev(it); // last path
     if (it != path.end())
         ret = *it;
 

@@ -66,7 +66,7 @@ std::string StringConverter::convert(std::string str, bool validate)
 
         ret = ret + "?";
         if ((stoppedAt + 1) < (size_t)str.length())
-            str = str.substr (stoppedAt + 1);
+            str = str.substr(stoppedAt + 1);
         else
             break;
 

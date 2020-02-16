@@ -70,12 +70,11 @@ void CdsObject::copyTo(std::shared_ptr<CdsObject> obj)
 int CdsObject::equals(std::shared_ptr<CdsObject> obj, bool exactly)
 {
     if (!(id == obj->getID()
-        && parentID == obj->getParentID()
-        && isRestricted() == obj->isRestricted()
-        && title == obj->getTitle()
-        && upnpClass == obj->getClass()
-        && sortPriority == obj->getSortPriority())
-        )
+            && parentID == obj->getParentID()
+            && isRestricted() == obj->isRestricted()
+            && title == obj->getTitle()
+            && upnpClass == obj->getClass()
+            && sortPriority == obj->getSortPriority()))
         return 0;
 
     if (!resourcesEqual(obj))
@@ -90,8 +89,7 @@ int CdsObject::equals(std::shared_ptr<CdsObject> obj, bool exactly)
             && sizeOnDisk == obj->getSizeOnDisk()
             && virt == obj->isVirtual()
             && std::equal(auxdata.begin(), auxdata.end(), obj->auxdata.begin())
-            && objectFlags == obj->getFlags())
-        )
+            && objectFlags == obj->getFlags()))
         return 0;
     return 1;
 }

@@ -32,22 +32,21 @@
 #ifndef __SCRIPTING_RUNTIME_H__
 #define __SCRIPTING_RUNTIME_H__
 
-#include <mutex>
-#include "duktape.h"
-#include <pthread.h>
 #include "common.h"
+#include "duktape.h"
+#include <mutex>
+#include <pthread.h>
 
 /// \brief Runtime class definition.
-class Runtime
-{
+class Runtime {
 protected:
-    duk_context *ctx;
+    duk_context* ctx;
     std::recursive_mutex mutex;
 
 public:
     Runtime();
     virtual ~Runtime();
-    
+
     /// \brief Returns a new (sub)context. !!! Not thread-safe !!!
     duk_context* createContext(const std::string& name);
     void destroyContext(const std::string& name);

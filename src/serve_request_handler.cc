@@ -33,9 +33,9 @@
 
 #include <utility>
 
+#include "config/config_manager.h"
 #include "iohandler/file_io_handler.h"
 #include "serve_request_handler.h"
-#include "config/config_manager.h"
 #include "server.h"
 #include "util/tools.h"
 
@@ -45,7 +45,7 @@ ServeRequestHandler::ServeRequestHandler(std::shared_ptr<ConfigManager> config, 
 }
 
 /// \todo clean up the fix for internal items
-void ServeRequestHandler::getInfo(const char *filename, UpnpFileInfo *info)
+void ServeRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 {
     struct stat statbuf;
     int ret = 0;

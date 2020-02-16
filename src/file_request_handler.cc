@@ -33,16 +33,16 @@
 #include <sys/stat.h>
 #include <utility>
 
-#include "iohandler/file_io_handler.h"
-#include "file_request_handler.h"
-#include "metadata/metadata_handler.h"
-#include "util/process.h"
-#include "server.h"
 #include "config/config_manager.h"
-#include "storage/storage.h"
 #include "content_manager.h"
-#include "web/session_manager.h"
+#include "file_request_handler.h"
+#include "iohandler/file_io_handler.h"
+#include "metadata/metadata_handler.h"
+#include "server.h"
+#include "storage/storage.h"
 #include "update_manager.h"
+#include "util/process.h"
+#include "web/session_manager.h"
 
 #include "util/headers.h"
 #include "util/tools.h"
@@ -77,7 +77,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
     std::string parameters = (filename + strlen(LINK_FILE_REQUEST_HANDLER));
 
-    std::map<std::string,std::string> dict;
+    std::map<std::string, std::string> dict;
     dict_decode_simple(parameters, &dict);
 
     log_debug("full url (filename): {}, parameters: {}", filename, parameters.c_str());
@@ -179,12 +179,12 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         io_handler->seek(0L, SEEK_END);
         off_t size = io_handler->tell();
         io_handler->close();
-        
+
         UpnpFileInfo_set_FileLength(info, size);
     } else if (!is_srt && string_ok(tr_profile)) {
 
         auto tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)
-                        ->getByName(tr_profile);
+                      ->getByName(tr_profile);
 
         if (tp == nullptr)
             throw std::runtime_error("Transcoding of file " + path.string()
@@ -195,14 +195,13 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
         auto mappings = config->getDictionaryOption(
             CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-        if (getValueOrDefault(mappings, mimeType) == CONTENT_TYPE_PCM)
-        {
+        if (getValueOrDefault(mappings, mimeType) == CONTENT_TYPE_PCM) {
             std::string freq = item->getResource(0)
-                              ->getAttribute(MetadataHandler::getResAttrName(
-                                  R_SAMPLEFREQUENCY));
+                                   ->getAttribute(MetadataHandler::getResAttrName(
+                                       R_SAMPLEFREQUENCY));
             std::string nrch = item->getResource(0)
-                              ->getAttribute(MetadataHandler::getResAttrName(
-                                  R_NRAUDIOCHANNELS));
+                                   ->getAttribute(MetadataHandler::getResAttrName(
+                                       R_NRAUDIOCHANNELS));
 
             if (string_ok(freq))
                 mimeType = mimeType + ";rate=" + freq;
@@ -290,7 +289,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
 
     std::string parameters = (filename + strlen(LINK_FILE_REQUEST_HANDLER));
 
-    std::map<std::string,std::string> params;
+    std::map<std::string, std::string> params;
     dict_decode_simple(parameters, &params);
     log_debug("full url (filename): {}, parameters: {}", filename, parameters.c_str());
 

@@ -32,9 +32,9 @@
 #ifndef __STRING_CONVERTER_H__
 #define __STRING_CONVERTER_H__
 
-#include <memory>
 #include "common.h"
 #include <iconv.h>
+#include <memory>
 
 // forward declaration
 class ConfigManager;
