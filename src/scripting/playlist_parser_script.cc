@@ -46,7 +46,7 @@ extern "C" {
 static duk_ret_t
 js_readln(duk_context* ctx)
 {
-    auto* self = (PlaylistParserScript*)Script::getContextScript(ctx);
+    auto self = dynamic_cast<PlaylistParserScript*>(Script::getContextScript(ctx));
 
     std::string line;
 
@@ -67,7 +67,7 @@ js_readln(duk_context* ctx)
 static duk_ret_t
 js_getCdsObject(duk_context* ctx)
 {
-    auto* self = (PlaylistParserScript*)Script::getContextScript(ctx);
+    auto self = dynamic_cast<PlaylistParserScript*>(Script::getContextScript(ctx));
 
     if (!duk_is_string(ctx, 0))
         return 0;
