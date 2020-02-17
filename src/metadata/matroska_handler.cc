@@ -59,7 +59,7 @@ private:
     FILE* file;
 
 public:
-    file_io_callback(const char* path)
+    explicit file_io_callback(const char* path)
     {
         file = fopen(path, "rb");
         if (file == nullptr) {
