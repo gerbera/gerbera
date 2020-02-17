@@ -116,7 +116,7 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
         i = tag->track();
         if (i > 0) {
             value = std::to_string(i);
-            item->setTrackNumber((int)i);
+            item->setTrackNumber(static_cast<int>(i));
         } else
             return;
         break;
@@ -174,7 +174,7 @@ void TagLibHandler::populateGenericTags(const std::shared_ptr<CdsItem>& item, co
     const TagLib::Tag* tag = file.tag();
 
     for (int i = 0; i < M_MAX; i++)
-        addField((metadata_fields_t)i, file, tag, item);
+        addField(static_cast<metadata_fields_t>(i), file, tag, item);
 
     int temp;
 

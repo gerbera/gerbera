@@ -1833,19 +1833,19 @@ void ConfigManager::dumpOptions()
 {
 #ifdef TOMBDEBUG
     log_debug("Dumping options!");
-    for (int i = 0; i < (int)CFG_MAX; i++) {
+    for (int i = 0; i < static_cast<int>(CFG_MAX); i++) {
         try {
-            std::string opt = getOption((config_option_t)i);
+            std::string opt = getOption(static_cast<config_option_t>(i));
             log_debug("    Option {:02d} {}", i, opt.c_str());
         } catch (const std::runtime_error& e) {
         }
         try {
-            int opt = getIntOption((config_option_t)i);
+            int opt = getIntOption(static_cast<config_option_t>(i));
             log_debug(" IntOption {:02d} {}", i, opt);
         } catch (const std::runtime_error& e) {
         }
         try {
-            bool opt = getBoolOption((config_option_t)i);
+            bool opt = getBoolOption(static_cast<config_option_t>(i));
             log_debug("BoolOption {:02d} {}", i, opt ? "true" : "false");
         } catch (const std::runtime_error& e) {
         }

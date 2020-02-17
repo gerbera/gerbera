@@ -143,7 +143,7 @@ void CurlIOHandler::threadProc()
 
 size_t CurlIOHandler::curlCallback(void* ptr, size_t size, size_t nmemb, void* data)
 {
-    auto* ego = (CurlIOHandler*)data;
+    auto ego = static_cast<CurlIOHandler*>(data);
     size_t wantWrite = size * nmemb;
 
     assert(wantWrite <= ego->bufSize);
@@ -209,7 +209,7 @@ size_t CurlIOHandler::curlCallback(void* ptr, size_t size, size_t nmemb, void* d
             if (bufFree < 0)
                 bufFree += ego->bufSize;
         }
-    } while ((size_t)bufFree < wantWrite);
+    } while (static_cast<size_t>(bufFree) < wantWrite);
 
     size_t maxWrite = (ego->empty ? ego->bufSize : (ego->a < ego->b ? ego->bufSize - ego->b : ego->a - ego->b));
     size_t write1 = (wantWrite > maxWrite ? maxWrite : wantWrite);
@@ -221,7 +221,7 @@ size_t CurlIOHandler::curlCallback(void* ptr, size_t size, size_t nmemb, void* d
 
     memcpy(ego->buffer + bLocal, ptr, write1);
     if (write2)
-        memcpy(ego->buffer, (char*)ptr + maxWrite, write2);
+        memcpy(ego->buffer, static_cast<char*>(ptr) + maxWrite, write2);
 
     lock.lock();
 
@@ -237,7 +237,7 @@ size_t CurlIOHandler::curlCallback(void* ptr, size_t size, size_t nmemb, void* d
         int currentFillSize = ego->b - ego->a;
         if (currentFillSize <= 0)
             currentFillSize += ego->bufSize;
-        if ((size_t)currentFillSize >= ego->initialFillSize) {
+        if (static_cast<size_t>(currentFillSize) >= ego->initialFillSize) {
             log_debug("buffer: initial fillsize reached");
             ego->waitForInitialFillSize = false;
             ego->cond.notify_one();

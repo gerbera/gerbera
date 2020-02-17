@@ -44,7 +44,7 @@
 #include <unistd.h>
 
 MemIOHandler::MemIOHandler(const void* buffer, int length)
-    : buffer((char*)MALLOC(length))
+    : buffer(static_cast<char*>(MALLOC(length)))
     , length(length)
     , pos(-1)
 {
@@ -52,7 +52,7 @@ MemIOHandler::MemIOHandler(const void* buffer, int length)
 }
 
 MemIOHandler::MemIOHandler(const std::string& str)
-    : buffer((char*)MALLOC(str.length()))
+    : buffer(static_cast<char*>(MALLOC(str.length())))
     , length(str.length())
     , pos(-1)
 {
@@ -79,12 +79,12 @@ size_t MemIOHandler::read(char* buf, size_t length)
     }
 
     off_t rest = this->length - pos;
-    if (length > (size_t)rest)
+    if (length > static_cast<size_t>(rest))
         length = rest;
 
     memcpy(buf, buffer + pos, length);
     pos = pos + length;
-    ret = (int)length;
+    ret = static_cast<int>(length);
 
     if (pos >= this->length) {
         pos = -1;

@@ -65,7 +65,7 @@ std::string StringConverter::convert(std::string str, bool validate)
             break;
 
         ret = ret + "?";
-        if ((stoppedAt + 1) < (size_t)str.length())
+        if ((stoppedAt + 1) < static_cast<size_t>(str.length()))
             str = str.substr(stoppedAt + 1);
         else
             break;
@@ -93,8 +93,8 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
 
     int buf_size = str.length() * 4;
 
-    const char* input = str.c_str();
-    auto* output = (char*)MALLOC(buf_size);
+    auto input = str.c_str();
+    auto output = static_cast<char*>(MALLOC(buf_size));
     if (!output) {
         log_debug("Could not allocate memory for string conversion!");
         throw std::runtime_error("Could not allocate memory for string conversion!");
@@ -106,8 +106,8 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
     const char** input_ptr = &input_copy;
     char** output_ptr = &output_copy;
 
-    auto input_bytes = (size_t)str.length();
-    auto output_bytes = (size_t)buf_size;
+    auto input_bytes = static_cast<size_t>(str.length());
+    auto output_bytes = static_cast<size_t>(buf_size);
 
     int ret;
 
@@ -123,7 +123,7 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
     ret = iconv(cd, input_ptr, &input_bytes,
         output_ptr, &output_bytes);
 #else
-    ret = iconv(cd, (char**)input_ptr, &input_bytes,
+    ret = iconv(cd, const_cast<char**>(input_ptr), &input_bytes,
         output_ptr, &output_bytes);
 #endif
 
@@ -143,7 +143,7 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
             }
 
             if (stoppedAt)
-                *stoppedAt = (size_t)str.length() - input_bytes;
+                *stoppedAt = static_cast<size_t>(str.length()) - input_bytes;
             ret_str = std::string(output, output_copy - output);
             dirty = true;
             *output_copy = 0;

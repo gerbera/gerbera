@@ -43,7 +43,7 @@ IOHandlerChainer::IOHandlerChainer(std::unique_ptr<IOHandler>& readFrom, std::un
     this->readFrom = std::move(readFrom);
     this->writeTo = std::move(writeTo);
     readFrom->open(UPNP_READ);
-    buf = (char*)MALLOC(chunkSize);
+    buf = static_cast<char*>(MALLOC(chunkSize));
     startThread();
 }
 

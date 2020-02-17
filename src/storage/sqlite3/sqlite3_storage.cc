@@ -303,15 +303,12 @@ int Sqlite3Storage::exec(const char* query, int length, bool getLastInsertId)
     auto etask = std::make_shared<SLExecTask>(query, getLastInsertId);
     addTask(etask);
     etask->waitForTask();
-    if (getLastInsertId)
-        return etask->getLastInsertId();
-
-    return -1;
+    return getLastInsertId ? etask->getLastInsertId() : -1;
 }
 
 void* Sqlite3Storage::staticThreadProc(void* arg)
 {
-    auto* inst = (Sqlite3Storage*)arg;
+    auto inst = static_cast<Sqlite3Storage*>(arg);
     inst->threadProc();
     log_debug("Sqlite3Storage::staticThreadProc - exiting thread");
     pthread_exit(nullptr);
@@ -478,7 +475,7 @@ void SLInitTask::run(sqlite3** db, Sqlite3Storage* sl)
     char* err = nullptr;
     ret = sqlite3_exec(
         *db,
-        (const char*)buf,
+        reinterpret_cast<const char*>(buf),
         nullptr,
         nullptr,
         &err);
@@ -488,7 +485,7 @@ void SLInitTask::run(sqlite3** db, Sqlite3Storage* sl)
         sqlite3_free(err);
     }
     if (ret != SQLITE_OK) {
-        throw StorageException("", sl->getError((const char*)buf, error, *db));
+        throw StorageException("", sl->getError(reinterpret_cast<const char*>(buf), error, *db));
     }
     contamination = true;
 }

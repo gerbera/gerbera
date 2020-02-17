@@ -145,7 +145,7 @@ void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject
 
     currentTask = std::move(task);
     currentObjectID = obj->getID();
-    currentLine = (char*)MALLOC(ONE_TEXTLINE_BYTES);
+    currentLine = static_cast<char*>(MALLOC(ONE_TEXTLINE_BYTES));
     if (!currentLine) {
         currentObjectID = INVALID_OBJECT_ID;
         currentTask = nullptr;

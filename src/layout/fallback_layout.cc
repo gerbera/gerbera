@@ -417,7 +417,7 @@ void FallbackLayout::processCdsObject(std::shared_ptr<CdsObject> obj, fs::path r
 
 #ifdef ONLINE_SERVICES
     if (clone->getFlag(OBJECT_FLAG_ONLINE_SERVICE)) {
-        service_type_t service = (service_type_t)std::stoi(clone->getAuxData(ONLINE_SERVICE_AUX_ID));
+        auto service = static_cast<service_type_t>(std::stoi(clone->getAuxData(ONLINE_SERVICE_AUX_ID)));
 
         switch (service) {
 #ifdef SOPCAST

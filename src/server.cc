@@ -208,7 +208,7 @@ void Server::run()
     log_debug("Registering with UPnP...");
     ret = UpnpRegisterRootDevice2(UPNPREG_BUF_DESC,
         deviceDescription.c_str(),
-        (size_t)deviceDescription.length() + 1,
+        static_cast<size_t>(deviceDescription.length()) + 1,
         true,
         static_upnp_callback,
         this,
@@ -525,7 +525,7 @@ int Server::registerVirtualDirCallbacks()
         if (static_cast<const Server*>(cookie)->getShutdownStatus())
             return -1;
 
-        auto* handler = static_cast<IOHandler*>(f);
+        auto handler = static_cast<IOHandler*>(f);
         return handler->read(buf, length);
     });
     if (ret != UPNP_E_SUCCESS)
@@ -551,7 +551,7 @@ int Server::registerVirtualDirCallbacks()
 #endif
         //log_debug("%p seek({}, {})", f, offset, whence);
         try {
-            auto* handler = static_cast<IOHandler*>(f);
+            auto handler = static_cast<IOHandler*>(f);
             handler->seek(offset, whence);
         } catch (const std::runtime_error& e) {
             log_error("Exception during seek: {}", e.what());
@@ -571,7 +571,7 @@ int Server::registerVirtualDirCallbacks()
 #endif
         int ret_close = 0;
         //log_debug("%p close()", f);
-        auto* handler = static_cast<IOHandler*>(f);
+        auto handler = static_cast<IOHandler*>(f);
         try {
             handler->close();
         } catch (const std::runtime_error& e) {

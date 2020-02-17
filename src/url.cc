@@ -176,7 +176,7 @@ std::unique_ptr<URL::Stat> URL::getInfo(const std::string& URL, CURL* curl_handl
     else
         used_url = c_url;
 
-    auto st = std::make_unique<Stat>(used_url, (off_t)cl, mt);
+    auto st = std::make_unique<Stat>(used_url, static_cast<off_t>(cl), mt);
 
     if (cleanup)
         curl_easy_cleanup(curl_handle);

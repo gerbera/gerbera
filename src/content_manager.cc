@@ -319,7 +319,7 @@ void ContentManager::timerNotify(std::shared_ptr<Timer::Parameter> parameter)
     }
 #ifdef ONLINE_SERVICES
     else if (parameter->whoami() == Timer::Parameter::IDOnlineContent) {
-        fetchOnlineContent((service_type_t)(parameter->getID()));
+        fetchOnlineContent(static_cast<service_type_t>(parameter->getID()));
     }
 #endif // ONLINE_SERVICES
 }
@@ -1232,7 +1232,7 @@ void ContentManager::threadProc()
 
 void* ContentManager::staticThreadProc(void* arg)
 {
-    auto* inst = (ContentManager*)arg;
+    auto inst = static_cast<ContentManager*>(arg);
     inst->threadProc();
     pthread_exit(nullptr);
     return nullptr;
