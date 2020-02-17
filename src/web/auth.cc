@@ -35,15 +35,14 @@
 #include "util/tools.h"
 #include <sys/time.h>
 
+#include <chrono>
 #include <utility>
 
 #define LOGIN_TIMEOUT 10 // in seconds
 
 static long get_time()
 {
-    struct timeval tv;
-    gettimeofday(&tv, nullptr);
-    return tv.tv_sec;
+    return std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::system_clock::now()).time_since_epoch().count();
 }
 
 static std::string generate_token()
