@@ -120,7 +120,7 @@ void CurlIOHandler::threadProc()
                 curl_easy_setopt(curl_handle, CURLOPT_RESUME_FROM_LARGE, posRead);
             } else {
                 log_error("CurlIOHandler currently does not support SEEK_END");
-                static_assert(1, "");
+                static_assert(1);
             }
 
             /// \todo should we do that?
