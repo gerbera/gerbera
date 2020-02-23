@@ -275,8 +275,8 @@ protected:
     /// \brief resolve path against home, an exception is raised if path does not exist on filesystem.
     /// \param path path to be resolved
     /// \param isFile file or directory
-    /// \param exists must file exist
-    fs::path resolvePath(fs::path path, bool isFile = false, bool exists = true);
+    /// \param mustExist file/directory must exist
+    fs::path resolvePath(fs::path path, bool isFile = false, bool mustExist = true);
 
     /// \brief Creates a dictionary from an XML nodeset.
     /// \param element starting element of the nodeset.
