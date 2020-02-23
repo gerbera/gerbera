@@ -134,8 +134,8 @@ public:
     virtual std::vector<std::string> getMimeTypes() override;
 
     //virtual std::shared_ptr<CdsObject> findObjectByTitle(std::string title, int parentID);
-    virtual std::shared_ptr<CdsObject> findObjectByPath(fs::path fullpath) override;
-    virtual int findObjectIDByPath(fs::path fullpath) override;
+    virtual std::shared_ptr<CdsObject> findObjectByPath(fs::path fullpath, bool wasRegularFile = false) override;
+    virtual int findObjectIDByPath(fs::path fullpath, bool wasRegularFile = false) override;
     virtual std::string incrementUpdateIDs(const std::unique_ptr<std::unordered_set<int>>& ids) override;
 
     virtual fs::path buildContainerPath(int parentID, std::string title) override;

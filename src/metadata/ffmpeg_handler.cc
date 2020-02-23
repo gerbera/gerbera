@@ -191,8 +191,7 @@ static void addFfmpegResourceFields(std::shared_ptr<CdsItem> item, AVFormatConte
                 fourcc[3] = as_codecpar(st)->codec_tag >> 24;
                 fourcc[4] = '\0';
 
-                log_debug("FourCC: %x = {}",
-                    as_codecpar(st)->codec_tag, fourcc);
+                log_debug("FourCC: 0x{:x} = {}", as_codecpar(st)->codec_tag, fourcc);
                 std::string fcc = fourcc;
                 if (string_ok(fcc))
                     item->getResource(0)->addOption(RESOURCE_OPTION_FOURCC,
