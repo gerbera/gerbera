@@ -1124,9 +1124,10 @@ std::string ContentManager::extension2mimetype(std::string extension)
 
 std::string ContentManager::mimetype2upnpclass(const std::string& mimeType)
 {
-    std::string upnpClass = getValueOrDefault(mimetype_upnpclass_map, mimeType);
-    if (!upnpClass.empty())
-        return upnpClass;
+    auto it = mimetype_upnpclass_map.find(mimeType);
+    if (it != mimetype_upnpclass_map.end())
+        return it->second;
+
     // try to match foo
     std::vector<std::string> parts = split_string(mimeType, '/');
     if (parts.size() != 2)
