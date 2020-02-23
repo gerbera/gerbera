@@ -64,7 +64,7 @@ std::string ConfigGenerator::generate(const fs::path& userHome, const fs::path& 
     generateImport(prefixDir, magicFile, &config);
     generateTranscoding(&config);
 
-    std::stringstream buf;
+    std::ostringstream buf;
     doc.print(buf, "  ");
     return buf.str();
 }

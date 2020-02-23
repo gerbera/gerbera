@@ -191,7 +191,7 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(enum UpnpOpenFileMode mode)
 #ifdef TOMBDEBUG
         try {
             // make sure we can generate JSON w/o exceptions
-            std::stringstream buf;
+            std::ostringstream buf;
             xmlDoc->print(buf, "    ");
             output = Xml2Json::getJson(root, xml2JsonHints.get());
             log_debug("JSON-----------------------{}", output);
@@ -199,14 +199,14 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(enum UpnpOpenFileMode mode)
             log_error("Exception: {}", e.what());
         }
 #endif
-        std::stringstream buf;
+        std::ostringstream buf;
         xmlDoc->print(buf, "  ");
         output = buf.str();
     } else {
         try {
 #if 0
             // debug helper
-            std::stringstream buf;
+            std::ostringstream buf;
             xmlDoc->print(buf, "    ");
             output = buf.str();
             log_debug("XML-----------------------{}", output);

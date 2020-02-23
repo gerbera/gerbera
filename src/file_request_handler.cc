@@ -328,7 +328,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
         root.append_attribute(XML_UPNP_NAMESPACE_ATTR) = XML_UPNP_NAMESPACE;
         xmlBuilder->renderObject(obj, true, std::string::npos, &root);
 
-        std::stringstream buf;
+        std::ostringstream buf;
         doc.print(buf, "", 0);
 
         std::string input = buf.str();

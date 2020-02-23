@@ -83,7 +83,7 @@ void ActionRequest::setErrorCode(int errCode)
 void ActionRequest::update()
 {
     if (response != nullptr) {
-        std::stringstream buf;
+        std::ostringstream buf;
         response->print(buf, "", 0);
         std::string xml = buf.str();
         log_debug("ActionRequest::update(): {}", xml.c_str());

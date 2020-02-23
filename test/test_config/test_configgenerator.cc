@@ -80,7 +80,7 @@ TEST_F(ConfigGeneratorTest, GeneratesFullServerXmlWithAllDefinitions)
     auto config = doc.append_child("config");
     subject->generateServer(homePath, configDir, prefixDir, &config);
 
-    std::stringstream result;
+    std::ostringstream result;
     config.first_child().print(result, "  ");
 
     // remove UUID, for simple compare...TODO: mock UUID?
@@ -99,7 +99,7 @@ TEST_F(ConfigGeneratorTest, GeneratesUiAllTheTime)
     auto server = doc.append_child("server");
     subject->generateUi(&server);
 
-    std::stringstream result;
+    std::ostringstream result;
     server.first_child().print(result, "  ");
 
     EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
@@ -113,7 +113,7 @@ TEST_F(ConfigGeneratorTest, GeneratesImportMappingsAllTheTime)
     auto import = doc.append_child("import");
     subject->generateMappings(&import);
 
-    std::stringstream result;
+    std::ostringstream result;
     import.first_child().print(result, "  ");
 
     EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
@@ -128,7 +128,7 @@ TEST_F(ConfigGeneratorTest, GeneratesExtendedRuntimeXmlWithFFMPEG)
     auto server = doc.append_child("server");
     subject->generateExtendedRuntime(&server);
 
-    std::stringstream result;
+    std::ostringstream result;
     server.first_child().print(result, "  ");
 
     EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
@@ -144,7 +144,7 @@ TEST_F(ConfigGeneratorTest, GeneratesExtendedRuntimeXmlWithoutFFMPEG)
     auto server = doc.append_child("server");
     subject->generateExtendedRuntime(&server);
 
-    std::stringstream result;
+    std::ostringstream result;
     server.first_child().print(result, "  ");
 
     EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
@@ -160,7 +160,7 @@ TEST_F(ConfigGeneratorTest, GeneratesStorageXmlWithMySQLAndSqlLite)
     auto server = doc.append_child("server");
     subject->generateStorage(&server);
 
-    std::stringstream result;
+    std::ostringstream result;
     server.first_child().print(result, "  ");
 
     EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
@@ -176,7 +176,7 @@ TEST_F(ConfigGeneratorTest, GeneratesStorageXmlWithSqlLiteOnly)
     auto server = doc.append_child("server");
     subject->generateStorage(&server);
 
-    std::stringstream result;
+    std::ostringstream result;
     server.first_child().print(result, "  ");
 
     EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
@@ -192,7 +192,7 @@ TEST_F(ConfigGeneratorTest, GeneratesImportWithMagicFile)
     auto config = doc.append_child("config");
     subject->generateImport(prefixDir, magicFile, &config);
 
-    std::stringstream result;
+    std::ostringstream result;
     config.first_child().print(result, "  ");
 
     EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
@@ -207,7 +207,7 @@ TEST_F(ConfigGeneratorTest, GeneratesImportWithMagicAndJS)
     auto config = doc.append_child("config");
     subject->generateImport(prefixDir, magicFile, &config);
 
-    std::stringstream result;
+    std::ostringstream result;
     config.first_child().print(result, "  ");
 
     EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
@@ -222,7 +222,7 @@ TEST_F(ConfigGeneratorTest, GeneratesImportWithMagicJSandOnline)
     auto config = doc.append_child("config");
     subject->generateImport(prefixDir, magicFile, &config);
 
-    std::stringstream result;
+    std::ostringstream result;
     config.first_child().print(result, "  ");
 
     EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
@@ -237,7 +237,7 @@ TEST_F(ConfigGeneratorTest, GeneratesImportNoMagicJSorOnline)
     auto config = doc.append_child("config");
     subject->generateImport(prefixDir, magicFile, &config);
 
-    std::stringstream result;
+    std::ostringstream result;
     config.first_child().print(result, "  ");
 
     EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
@@ -253,7 +253,7 @@ TEST_F(ConfigGeneratorTest, GeneratesOnlineContentWithAppleTrailers)
     auto import = doc.append_child("import");
     subject->generateOnlineContent(&import);
 
-    std::stringstream result;
+    std::ostringstream result;
     import.first_child().print(result, "  ");
 
     EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
@@ -267,7 +267,7 @@ TEST_F(ConfigGeneratorTest, GeneratesOnlineContentEmpty)
     auto import = doc.append_child("import");
     subject->generateOnlineContent(&import);
 
-    std::stringstream result;
+    std::ostringstream result;
     import.first_child().print(result, "  ");
 
     EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
@@ -282,7 +282,7 @@ TEST_F(ConfigGeneratorTest, GeneratesTranscodingProfilesAlways)
     auto config = doc.append_child("config");
     subject->generateTranscoding(&config);
 
-    std::stringstream result;
+    std::ostringstream result;
     config.first_child().print(result, "  ");
 
     EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
@@ -295,7 +295,7 @@ TEST_F(ConfigGeneratorTest, GeneratesUdnWithUUID)
     auto server = doc.append_child("server");
     subject->generateUdn(&server);
 
-    std::stringstream result;
+    std::ostringstream result;
     server.first_child().first_child().print(result, "  ");
 
     EXPECT_THAT(result.str(), MatchesRegex("^uuid:[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}"));
