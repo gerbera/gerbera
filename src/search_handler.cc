@@ -445,7 +445,7 @@ std::string DefaultSQLEmitter::emitSQL(const ASTNode* node) const
 {
     std::string predicates = node->emit();
     if (predicates.length() > 0) {
-        std::stringstream sql;
+        std::ostringstream sql;
         sql << "from mt_cds_object c "
             << "inner join mt_metadata m on c.id = m.item_id "
             << "where "
@@ -457,7 +457,7 @@ std::string DefaultSQLEmitter::emitSQL(const ASTNode* node) const
 
 std::string DefaultSQLEmitter::emit(const ASTParenthesis* node, const std::string& bracketedNode) const
 {
-    std::stringstream sqlFragment;
+    std::ostringstream sqlFragment;
     sqlFragment << "(" << bracketedNode << ")";
     return sqlFragment.str();
 }
@@ -469,7 +469,7 @@ std::string DefaultSQLEmitter::emit(const ASTCompareOperator* node, const std::s
     if (operatr != "=")
         throw std::runtime_error("operator not yet supported");
 
-    std::stringstream sqlFragment;
+    std::ostringstream sqlFragment;
     sqlFragment << "(m.property_name='" << property << "' and lower(m.property_value)"
                 << operatr << "lower('" << value << "') and c.upnp_class is not null)";
     return sqlFragment.str();
@@ -483,7 +483,7 @@ std::string DefaultSQLEmitter::emit(const ASTStringOperator* node, const std::st
         && lcOperator != "startswith")
         throw std::runtime_error("operator not supported");
 
-    std::stringstream sqlFragment;
+    std::ostringstream sqlFragment;
     if (lcOperator == "contains") {
         sqlFragment << "(m.property_name='" << property << "' and lower(m.property_value) "
                     << "like"
@@ -507,7 +507,7 @@ std::string DefaultSQLEmitter::emit(const ASTStringOperator* node, const std::st
 std::string DefaultSQLEmitter::emit(const ASTExistsOperator* node, const std::string& property,
     const std::string& value) const
 {
-    std::stringstream sqlFragment;
+    std::ostringstream sqlFragment;
     std::string exists;
     if (value == "true") {
         exists = "not null";
@@ -523,7 +523,7 @@ std::string DefaultSQLEmitter::emit(const ASTExistsOperator* node, const std::st
 std::string DefaultSQLEmitter::emit(const ASTAndOperator* node, const std::string& lhs,
     const std::string& rhs) const
 {
-    std::stringstream sqlFragment;
+    std::ostringstream sqlFragment;
     sqlFragment << lhs << " and " << rhs;
     return sqlFragment.str();
 }
@@ -531,7 +531,7 @@ std::string DefaultSQLEmitter::emit(const ASTAndOperator* node, const std::strin
 std::string DefaultSQLEmitter::emit(const ASTOrOperator* node, const std::string& lhs,
     const std::string& rhs) const
 {
-    std::stringstream sqlFragment;
+    std::ostringstream sqlFragment;
     sqlFragment << lhs << " or " << rhs;
     return sqlFragment.str();
 }

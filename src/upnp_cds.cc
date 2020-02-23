@@ -126,7 +126,7 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
         xmlBuilder->renderObject(obj, false, stringLimit, &didl_lite_root);
     }
 
-    std::stringstream buf;
+    std::ostringstream buf;
     didl_lite.print(buf, "", 0);
     std::string didl_lite_xml = buf.str();
 
@@ -191,7 +191,7 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
         xmlBuilder->renderObject(cdsObject, false, stringLimit, &didl_lite);
     }
 
-    std::stringstream buf;
+    std::ostringstream buf;
     didl_lite.print(buf, "", 0);
     std::string didl_lite_xml = buf.str();
 
