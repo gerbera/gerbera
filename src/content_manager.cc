@@ -651,7 +651,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
         }
 
         if (S_ISREG(statbuf.st_mode)) {
-            int objectID = storage->findObjectIDByPath(std::string(path));
+            int objectID = storage->findObjectIDByPath(path);
             if (objectID > 0) {
                 if (list != nullptr)
                     list->erase(objectID);

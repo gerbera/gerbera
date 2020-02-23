@@ -674,12 +674,12 @@ std::vector<std::string> SQLStorage::getMimeTypes()
     return arr;
 }
 
-std::shared_ptr<CdsObject> SQLStorage::findObjectByPath(fs::path fullpath)
+std::shared_ptr<CdsObject> SQLStorage::findObjectByPath(fs::path fullpath, bool wasRegularFile)
 {
     std::string dbLocation;
-    if (fs::is_regular_file(fullpath)) {
+    if (fs::is_regular_file(fullpath) || wasRegularFile)
         dbLocation = addLocationPrefix(LOC_FILE_PREFIX, fullpath);
-    } else
+    else
         dbLocation = addLocationPrefix(LOC_DIR_PREFIX, fullpath);
 
     std::ostringstream qb;
@@ -699,9 +699,9 @@ std::shared_ptr<CdsObject> SQLStorage::findObjectByPath(fs::path fullpath)
     return createObjectFromRow(row);
 }
 
-int SQLStorage::findObjectIDByPath(fs::path fullpath)
+int SQLStorage::findObjectIDByPath(fs::path fullpath, bool wasRegularFile)
 {
-    auto obj = findObjectByPath(fullpath);
+    auto obj = findObjectByPath(fullpath, wasRegularFile);
     if (obj == nullptr)
         return INVALID_OBJECT_ID;
     return obj->getID();

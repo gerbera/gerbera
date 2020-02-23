@@ -152,7 +152,7 @@ void AutoscanInotify::threadProc()
                 int wd = event->wd;
                 int mask = event->mask;
                 std::string name = event->name;
-                log_debug("inotify event: {} %x {}", wd, mask, name.c_str());
+                log_debug("inotify event: {} 0x{:x} {}", wd, mask, name.c_str());
 
                 std::shared_ptr<Wd> wdObj = nullptr;
                 try {
@@ -162,11 +162,9 @@ void AutoscanInotify::threadProc()
                     continue;
                 }
 
-                std::ostringstream pathBuf;
-                pathBuf << wdObj->getPath();
+                fs::path path = wdObj->getPath();
                 if (!(mask & (IN_DELETE_SELF | IN_MOVE_SELF | IN_UNMOUNT)))
-                    pathBuf << name;
-                fs::path path = pathBuf.str();
+                    path /= name;
 
                 std::shared_ptr<AutoscanDirectory> adir;
                 auto watchAs = getAppropriateAutoscan(wdObj, path);
@@ -216,7 +214,7 @@ void AutoscanInotify::threadProc()
                             }
                         }
 
-                        int objectID = storage->findObjectIDByPath(path);
+                        int objectID = storage->findObjectIDByPath(path, true);
                         if (objectID != INVALID_OBJECT_ID)
                             content->removeObject(objectID);
                     }
@@ -383,7 +381,7 @@ void AutoscanInotify::checkMoveWatches(int wd, const std::shared_ptr<Wd>& wdObj)
                         content->handlePeristentAutoscanRemove(adir->getScanID(), ScanMode::INotify);
                     }
 
-                    int objectID = storage->findObjectIDByPath(path);
+                    int objectID = storage->findObjectIDByPath(path, true);
                     if (objectID != INVALID_OBJECT_ID)
                         content->removeObject(objectID);
                 }

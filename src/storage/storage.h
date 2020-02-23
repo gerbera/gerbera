@@ -182,18 +182,16 @@ public:
     /// \brief Loads a given (pc directory) object, identified by the given path
     /// from the database
     /// \param path the path of the object; object is interpreted as directory
-    /// if the path ends with DIR_SEPERATOR, as file otherwise
-    /// multiple DIR_SEPERATOR are irgnored
+    /// \param wasRegularFile was a regular file before file was moved, now fs::is_regular_file returns false (used for inotify events)
     /// \return the CdsObject
-    virtual std::shared_ptr<CdsObject> findObjectByPath(fs::path path) = 0;
+    virtual std::shared_ptr<CdsObject> findObjectByPath(fs::path path, bool wasRegularFile = false) = 0;
 
     /// \brief checks for a given (pc directory) object, identified by the given path
     /// from the database
     /// \param path the path of the object; object is interpreted as directory
-    /// if the path ends with DIR_SEPERATOR, as file otherwise
-    /// multiple DIR_SEPERATOR are irgnored
+    /// \param wasRegularFile was a regular file before file was moved, now fs::is_regular_file returns false (used for inotify events)
     /// \return the obejectID
-    virtual int findObjectIDByPath(fs::path fullpath) = 0;
+    virtual int findObjectIDByPath(fs::path fullpath, bool wasRegularFile = false) = 0;
 
     /// \brief increments the updateIDs for the given objectIDs
     /// \param ids pointer to the array of ids
