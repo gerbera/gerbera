@@ -1326,7 +1326,7 @@ pugi::xml_node ConfigManager::getElement(std::string xpath)
     return xpathNode.node();
 }
 
-fs::path ConfigManager::resolvePath(fs::path path, bool isFile, bool exists)
+fs::path ConfigManager::resolvePath(fs::path path, bool isFile, bool mustExist)
 {
     fs::path home = getOption(CFG_SERVER_HOME);
 
@@ -1339,16 +1339,16 @@ fs::path ConfigManager::resolvePath(fs::path path, bool isFile, bool exists)
 
     // verify that file/directory is there
     if (isFile) {
-        if (exists) {
-            if (!fs::is_regular_file(path))
+        if (mustExist) {
+            if (!fs::is_regular_file(path) && !fs::is_symlink(path))
                 throw std::runtime_error("File '" + path.string() + "' does not exist!");
         } else {
             std::string parent_path = path.parent_path();
-            if (!fs::is_directory(parent_path))
+            if (!fs::is_directory(parent_path) && !fs::is_symlink(path))
                 throw std::runtime_error("Parent directory '" + path.string() + "' does not exist!");
         }
-    } else if (exists) {
-        if (!fs::is_directory(path))
+    } else if (mustExist) {
+        if (!fs::is_directory(path) && !fs::is_symlink(path))
             throw std::runtime_error("Directory '" + path.string() + "' does not exist!");
     }
 
@@ -1626,7 +1626,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
 
         std::string tmp_path;
         if (fs::path(param).is_absolute()) {
-            if (!fs::is_regular_file(param))
+            if (!fs::is_regular_file(param) && !fs::is_symlink(param))
                 throw std::runtime_error("error in configuration, transcoding "
                                          "profile \""
                     + prof->getName() + "\" could not find transcoding command " + param);
