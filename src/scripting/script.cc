@@ -677,8 +677,6 @@ std::string Script::convertToCharset(const std::string& str, charset_convert_t c
     default:
         return _i2i->convert(str);
     }
-
-    return "";
 }
 
 std::shared_ptr<CdsObject> Script::getProcessedObject()

@@ -73,7 +73,7 @@ std::unique_ptr<SearchToken> SearchLexer::nextToken()
             TokenType tokenType = tokenTypes.at(token);
             currentPos++;
             return std::make_unique<SearchToken>(tokenType, token);
-        } break;
+        }
         case '>':
         case '<':
         case '!':
@@ -89,7 +89,6 @@ std::unique_ptr<SearchToken> SearchLexer::nextToken()
                 currentPos++;
                 return std::make_unique<SearchToken>(tokenType, token);
             }
-            break;
         case '"':
             if (!inQuotes) {
                 auto token = std::string(&ch, 1);
@@ -102,7 +101,6 @@ std::unique_ptr<SearchToken> SearchLexer::nextToken()
                 inQuotes = false;
                 return std::make_unique<SearchToken>(TokenType::DQUOTE, std::move(token));
             }
-            break;
         default:
             if (inQuotes) {
                 auto quotedStr = getQuotedValue(input);

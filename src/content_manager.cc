@@ -1236,7 +1236,6 @@ void* ContentManager::staticThreadProc(void* arg)
     auto inst = static_cast<ContentManager*>(arg);
     inst->threadProc();
     pthread_exit(nullptr);
-    return nullptr;
 }
 
 void ContentManager::addTask(const std::shared_ptr<GenericTask>& task, bool lowPriority)
