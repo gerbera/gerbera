@@ -45,7 +45,7 @@ public:
     /// \brief initialize the mutex and the cond
     ThreadExecutor();
     ~ThreadExecutor() override;
-    bool isAlive() override { return threadRunning; };
+    bool isAlive() override { return threadRunning; }
 
     /// \brief kill the thread (pthread_join)
     /// \return always true - this function only returns after the thread has died
@@ -70,7 +70,7 @@ protected:
 
     /// \brief check if the thread should shutdown
     /// should be called by the threadProc in short intervals
-    bool threadShutdownCheck() { return threadShutdown; };
+    bool threadShutdownCheck() { return threadShutdown; }
 
 private:
     pthread_t thread;

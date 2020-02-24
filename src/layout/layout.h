@@ -39,7 +39,7 @@ namespace fs = std::filesystem;
 
 class Layout {
 public:
-    virtual ~Layout() {}
+    virtual ~Layout() = default;
     virtual void processCdsObject(std::shared_ptr<CdsObject> obj, fs::path rootpath) = 0;
 };
 

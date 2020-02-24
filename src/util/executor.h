@@ -36,7 +36,7 @@
 class Executor {
 public:
     /// \brief destructor of the executor, has to make sure that the executor is dead
-    virtual ~Executor() {};
+    virtual ~Executor() = default;
 
     /// \brief method to check if the executor is still running
     /// \return true if the executor is still running, false otherwise
