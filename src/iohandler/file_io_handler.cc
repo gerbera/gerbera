@@ -49,7 +49,6 @@ void FileIOHandler::open(enum UpnpOpenFileMode mode)
         f = fopen(filename.c_str(), "rb");
     } else if (mode == UPNP_WRITE) {
         throw std::runtime_error("FileIOHandler::open: Write mode not supported");
-        ;
     } else {
         throw std::runtime_error("FileIOHandler::open: invalid UpnpOpenFileMode mode");
     }

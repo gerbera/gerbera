@@ -113,26 +113,26 @@ ConfigManager::~ConfigManager()
     log_debug("ConfigManager destroyed");
 }
 
-#define NEW_OPTION(optval) opt = std::make_shared<Option>(optval);
-#define SET_OPTION(opttype) options->at(opttype) = opt;
+#define NEW_OPTION(optval) opt = std::make_shared<Option>(optval)
+#define SET_OPTION(opttype) options->at(opttype) = opt
 
-#define NEW_INT_OPTION(optval) int_opt = std::make_shared<IntOption>(optval);
-#define SET_INT_OPTION(opttype) options->at(opttype) = int_opt;
+#define NEW_INT_OPTION(optval) int_opt = std::make_shared<IntOption>(optval)
+#define SET_INT_OPTION(opttype) options->at(opttype) = int_opt
 
-#define NEW_BOOL_OPTION(optval) bool_opt = std::make_shared<BoolOption>(optval);
-#define SET_BOOL_OPTION(opttype) options->at(opttype) = bool_opt;
+#define NEW_BOOL_OPTION(optval) bool_opt = std::make_shared<BoolOption>(optval)
+#define SET_BOOL_OPTION(opttype) options->at(opttype) = bool_opt
 
-#define NEW_DICT_OPTION(optval) dict_opt = std::make_shared<DictionaryOption>(optval);
-#define SET_DICT_OPTION(opttype) options->at(opttype) = dict_opt;
+#define NEW_DICT_OPTION(optval) dict_opt = std::make_shared<DictionaryOption>(optval)
+#define SET_DICT_OPTION(opttype) options->at(opttype) = dict_opt
 
-#define NEW_STRARR_OPTION(optval) str_array_opt = std::make_shared<StringArrayOption>(optval);
-#define SET_STRARR_OPTION(opttype) options->at(opttype) = str_array_opt;
+#define NEW_STRARR_OPTION(optval) str_array_opt = std::make_shared<StringArrayOption>(optval)
+#define SET_STRARR_OPTION(opttype) options->at(opttype) = str_array_opt
 
-#define NEW_AUTOSCANLIST_OPTION(optval) alist_opt = std::make_shared<AutoscanListOption>(optval);
-#define SET_AUTOSCANLIST_OPTION(opttype) options->at(opttype) = alist_opt;
+#define NEW_AUTOSCANLIST_OPTION(optval) alist_opt = std::make_shared<AutoscanListOption>(optval)
+#define SET_AUTOSCANLIST_OPTION(opttype) options->at(opttype) = alist_opt
 
-#define NEW_TRANSCODING_PROFILELIST_OPTION(optval) trlist_opt = std::make_shared<TranscodingProfileListOption>(optval);
-#define SET_TRANSCODING_PROFILELIST_OPTION(opttype) options->at(opttype) = trlist_opt;
+#define NEW_TRANSCODING_PROFILELIST_OPTION(optval) trlist_opt = std::make_shared<TranscodingProfileListOption>(optval)
+#define SET_TRANSCODING_PROFILELIST_OPTION(opttype) options->at(opttype) = trlist_opt
 
 void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 {
@@ -1376,7 +1376,6 @@ void ConfigManager::emptyBookmark()
     fs::path path = getOption(CFG_SERVER_BOOKMARK_FILE);
     log_debug("Clearing bookmark file at: {}", path.c_str());
     writeTextFile(path, data);
-    ;
 }
 
 std::map<std::string, std::string> ConfigManager::createDictionaryFromNode(const pugi::xml_node& element,
