@@ -151,7 +151,9 @@ class voidType : public WebRequestHandler {
 public:
     voidType(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
         std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
-        : WebRequestHandler(config, storage, content, sessionManager) {};
+        : WebRequestHandler(config, storage, content, sessionManager)
+    {
+    }
     void process() override;
 };
 

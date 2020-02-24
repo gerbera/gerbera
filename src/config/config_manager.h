@@ -217,7 +217,7 @@ public:
     /// \param option to retrieve
     std::shared_ptr<TranscodingProfileList> getTranscodingProfileListOption(config_option_t option);
 
-    static bool isDebugLogging() { return debug_logging; };
+    static bool isDebugLogging() { return debug_logging; }
 
     /// \brief Creates a html file that is a redirector to the current server i
     /// instance

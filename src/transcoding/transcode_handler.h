@@ -49,7 +49,9 @@ public:
     TranscodeHandler(std::shared_ptr<ConfigManager> config,
         std::shared_ptr<ContentManager> content)
         : config(config)
-        , content(content) {};
+        , content(content)
+    {
+    }
     virtual std::unique_ptr<IOHandler> open(std::shared_ptr<TranscodingProfile> profile,
         std::string location,
         std::shared_ptr<CdsObject> obj,
