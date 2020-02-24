@@ -44,10 +44,10 @@ public:
     URLRequestHandler(std::shared_ptr<ConfigManager> config,
         std::shared_ptr<Storage> storage,
         std::shared_ptr<ContentManager> content);
-    virtual void getInfo(const char* filename, UpnpFileInfo* info);
-    virtual std::unique_ptr<IOHandler> open(const char* filename,
+    void getInfo(const char* filename, UpnpFileInfo* info) override;
+    std::unique_ptr<IOHandler> open(const char* filename,
         enum UpnpOpenFileMode mode,
-        std::string range);
+        std::string range) override;
 
 protected:
     std::shared_ptr<ContentManager> content;

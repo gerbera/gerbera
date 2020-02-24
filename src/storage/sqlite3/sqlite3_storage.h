@@ -96,7 +96,7 @@ class SLInitTask : public SLTask {
 public:
     /// \brief Constructor for the sqlite3 init task
     SLInitTask(std::shared_ptr<ConfigManager> config);
-    virtual void run(sqlite3** db, Sqlite3Storage* sl);
+    void run(sqlite3** db, Sqlite3Storage* sl) override;
 
 protected:
     std::shared_ptr<ConfigManager> config;
@@ -108,7 +108,7 @@ public:
     /// \brief Constructor for the sqlite3 select task
     /// \param query The SQL query string
     SLSelectTask(const char* query);
-    virtual void run(sqlite3** db, Sqlite3Storage* sl);
+    void run(sqlite3** db, Sqlite3Storage* sl) override;
     inline std::shared_ptr<SQLResult> getResult() { return std::static_pointer_cast<SQLResult>(pres); };
 
 protected:
@@ -124,7 +124,7 @@ public:
     /// \brief Constructor for the sqlite3 exec task
     /// \param query The SQL query string
     SLExecTask(const char* query, bool getLastInsertId);
-    virtual void run(sqlite3** db, Sqlite3Storage* sl);
+    void run(sqlite3** db, Sqlite3Storage* sl) override;
     inline int getLastInsertId() { return lastInsertId; }
 
 protected:
@@ -140,7 +140,7 @@ class SLBackupTask : public SLTask {
 public:
     /// \brief Constructor for the sqlite3 backup task
     SLBackupTask(std::shared_ptr<ConfigManager> config, bool restore);
-    virtual void run(sqlite3** db, Sqlite3Storage* sl);
+    void run(sqlite3** db, Sqlite3Storage* sl) override;
 
 protected:
     std::shared_ptr<ConfigManager> config;
@@ -156,7 +156,7 @@ public:
 private:
     void init() override;
     void shutdownDriver() override;
-    std::shared_ptr<Storage> getSelf();
+    std::shared_ptr<Storage> getSelf() override;
 
     std::string quote(std::string value) override;
     inline std::string quote(const char* str) override { return quote(std::string(str)); }
@@ -237,7 +237,7 @@ public:
     Sqlite3Row(char** row, std::shared_ptr<SQLResult> sqlResult);
 
 private:
-    inline virtual char* col_c_str(int index) { return row[index]; }
+    inline char* col_c_str(int index) override { return row[index]; }
     char** row;
     std::shared_ptr<Sqlite3Result> res;
 

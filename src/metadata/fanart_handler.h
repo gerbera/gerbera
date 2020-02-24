@@ -39,8 +39,8 @@
 class FanArtHandler : public MetadataHandler {
 public:
     FanArtHandler(std::shared_ptr<ConfigManager> config);
-    virtual void fillMetadata(std::shared_ptr<CdsItem> item);
-    virtual std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsItem> item, int resNum);
+    void fillMetadata(std::shared_ptr<CdsItem> item) override;
+    std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsItem> item, int resNum) override;
 
 private:
     static fs::path getFanArtPath(const std::shared_ptr<CdsItem>& item);

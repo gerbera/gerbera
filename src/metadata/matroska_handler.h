@@ -41,8 +41,8 @@
 class MatroskaHandler : public MetadataHandler {
 public:
     MatroskaHandler(std::shared_ptr<ConfigManager> config);
-    virtual void fillMetadata(std::shared_ptr<CdsItem> item);
-    virtual std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsItem> item, int resNum);
+    void fillMetadata(std::shared_ptr<CdsItem> item) override;
+    std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsItem> item, int resNum) override;
 
 private:
     void parseMKV(const std::shared_ptr<CdsItem>& item, MemIOHandler** p_io_handler);

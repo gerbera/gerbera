@@ -57,13 +57,13 @@ public:
 
     /// \brief Retrieves user specified content from the service and adds
     /// the items to the database.
-    virtual bool refreshServiceData(std::shared_ptr<Layout> layout);
+    bool refreshServiceData(std::shared_ptr<Layout> layout) override;
 
     /// \brief Get the type of the service (i.e. SopCast, Shoutcast, etc.)
-    virtual service_type_t getServiceType();
+    service_type_t getServiceType() override;
 
     /// \brief Get the human readable name for the service
-    virtual std::string getServiceName();
+    std::string getServiceName() override;
 
 protected:
     std::shared_ptr<ConfigManager> config;

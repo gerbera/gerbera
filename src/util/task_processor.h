@@ -55,7 +55,7 @@ public:
         std::shared_ptr<OnlineService> service,
         std::shared_ptr<Layout> layout, bool cancellable,
         bool unscheduled_refresh);
-    virtual void run();
+    void run() override;
 
 protected:
     std::shared_ptr<ContentManager> content;

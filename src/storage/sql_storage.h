@@ -158,7 +158,7 @@ public:
 
     virtual std::unique_ptr<std::vector<int>> getPathIDs(int objectID) override;
 
-    virtual void shutdown();
+    void shutdown() override;
     virtual void shutdownDriver() = 0;
 
     virtual int ensurePathExistence(fs::path path, int* changedContainer) override;
@@ -170,7 +170,7 @@ public:
 protected:
     SQLStorage(std::shared_ptr<ConfigManager> config);
     //virtual ~SQLStorage();
-    virtual void init();
+    void init() override;
 
     void doMetadataMigration() override;
     void migrateMetadata(const std::shared_ptr<CdsObject>& object);

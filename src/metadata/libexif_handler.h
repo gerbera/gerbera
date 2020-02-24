@@ -55,8 +55,8 @@ protected:
 
 public:
     LibExifHandler(std::shared_ptr<ConfigManager> config);
-    virtual void fillMetadata(std::shared_ptr<CdsItem> item);
-    virtual std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsItem> item, int resNum);
+    void fillMetadata(std::shared_ptr<CdsItem> item) override;
+    std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsItem> item, int resNum) override;
 };
 
 #endif // __METADATA_LIBEXIF_H__

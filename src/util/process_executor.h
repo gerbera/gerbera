@@ -41,9 +41,9 @@ class ProcessExecutor : public Executor {
 public:
     ProcessExecutor(const std::string& command,
         const std::vector<std::string>& arglist);
-    virtual bool isAlive();
-    virtual bool kill();
-    virtual int getStatus();
+    bool isAlive() override;
+    bool kill() override;
+    int getStatus() override;
     virtual ~ProcessExecutor();
 
 protected:
