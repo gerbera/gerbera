@@ -128,7 +128,7 @@ public:
         : ASTNode(sqlEmitter)
         , value(std::move(value)) {};
     std::string emit() const override;
-    virtual ~ASTAsterisk() = default;
+    ~ASTAsterisk() override = default;
 
 protected:
     std::string value;
@@ -140,7 +140,7 @@ public:
         : ASTNode(sqlEmitter)
         , value(std::move(value)) {};
     std::string emit() const override;
-    virtual ~ASTProperty() = default;
+    ~ASTProperty() override = default;
 
 protected:
     std::string value;
@@ -152,7 +152,7 @@ public:
         : ASTNode(sqlEmitter)
         , value(std::move(value)) {};
     std::string emit() const override;
-    virtual ~ASTBoolean() = default;
+    ~ASTBoolean() override = default;
 
 protected:
     std::string value;
@@ -164,7 +164,7 @@ public:
         : ASTNode(sqlEmitter)
         , bracketedNode(std::move(node)) {};
     std::string emit() const override;
-    virtual ~ASTParenthesis() = default;
+    ~ASTParenthesis() override = default;
 
 protected:
     std::shared_ptr<ASTNode> bracketedNode;
@@ -176,7 +176,7 @@ public:
         : ASTNode(sqlEmitter)
         , value(std::move(value)) {};
     std::string emit() const override;
-    virtual ~ASTDQuote() = default;
+    ~ASTDQuote() override = default;
 
 protected:
     std::string value;
@@ -188,7 +188,7 @@ public:
         : ASTNode(sqlEmitter)
         , value(std::move(value)) {};
     std::string emit() const override;
-    virtual ~ASTEscapedString() = default;
+    ~ASTEscapedString() override = default;
 
 protected:
     std::string value;
@@ -203,7 +203,7 @@ public:
         , escapedString(std::move(escapedString))
         , closeQuote(std::move(closeQuote)) {};
     std::string emit() const override;
-    virtual ~ASTQuotedString() = default;
+    ~ASTQuotedString() override = default;
 
 protected:
     std::shared_ptr<ASTDQuote> openQuote;
@@ -220,7 +220,7 @@ public:
     std::string emit() const override;
     std::string emit(const std::string& property, const std::string& value) const;
     std::string getValue() const { return value; }
-    virtual ~ASTCompareOperator() = default;
+    ~ASTCompareOperator() override = default;
 
 protected:
     std::string value;
@@ -236,7 +236,7 @@ public:
         , operatr(std::move(operatr))
         , rhs(std::move(rhs)) {};
     std::string emit() const override;
-    virtual ~ASTCompareExpression() = default;
+    ~ASTCompareExpression() override = default;
 
 protected:
     std::shared_ptr<ASTProperty> lhs;
@@ -253,7 +253,7 @@ public:
     std::string emit() const override;
     std::string emit(const std::string& property, const std::string& value) const;
     std::string getValue() const { return value; }
-    virtual ~ASTStringOperator() = default;
+    ~ASTStringOperator() override = default;
 
 protected:
     std::string value;
@@ -269,7 +269,7 @@ public:
         , operatr(std::move(operatr))
         , rhs(std::move(rhs)) {};
     std::string emit() const override;
-    virtual ~ASTStringExpression() = default;
+    ~ASTStringExpression() override = default;
 
 protected:
     std::shared_ptr<ASTProperty> lhs;
@@ -284,7 +284,7 @@ public:
         , value(std::move(value)) {};
     std::string emit() const override;
     std::string emit(const std::string& property, const std::string& value) const;
-    virtual ~ASTExistsOperator() = default;
+    ~ASTExistsOperator() override = default;
 
 protected:
     std::string value;
@@ -300,7 +300,7 @@ public:
         , operatr(std::move(operatr))
         , rhs(std::move(rhs)) {};
     std::string emit() const override;
-    virtual ~ASTExistsExpression() = default;
+    ~ASTExistsExpression() override = default;
 
 protected:
     std::shared_ptr<ASTProperty> lhs;
@@ -316,7 +316,7 @@ public:
         , lhs(std::move(lhs))
         , rhs(std::move(rhs)) {};
     std::string emit() const override;
-    virtual ~ASTAndOperator() = default;
+    ~ASTAndOperator() override = default;
 
 protected:
     std::shared_ptr<ASTNode> lhs;
@@ -331,7 +331,7 @@ public:
         , lhs(std::move(lhs))
         , rhs(std::move(rhs)) {};
     std::string emit() const override;
-    virtual ~ASTOrOperator() = default;
+    ~ASTOrOperator() override = default;
 
 protected:
     std::shared_ptr<ASTNode> lhs;

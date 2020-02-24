@@ -44,7 +44,7 @@ class ThreadExecutor : public Executor {
 public:
     /// \brief initialize the mutex and the cond
     ThreadExecutor();
-    virtual ~ThreadExecutor();
+    ~ThreadExecutor() override;
     bool isAlive() override { return threadRunning; };
 
     /// \brief kill the thread (pthread_join)

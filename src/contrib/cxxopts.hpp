@@ -742,7 +742,7 @@ namespace cxxopts
       {
       }
 
-      virtual ~abstract_value() = default;
+      ~abstract_value() override = default;
 
       abstract_value(const abstract_value& rhs)
       {
@@ -867,11 +867,11 @@ namespace cxxopts
     class standard_value<bool> : public abstract_value<bool>
     {
       public:
-      ~standard_value() = default;
+          ~standard_value() override = default;
 
-      standard_value()
-      {
-        set_default_and_implicit();
+          standard_value()
+          {
+              set_default_and_implicit();
       }
 
       standard_value(bool* b)
