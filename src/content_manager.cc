@@ -76,7 +76,7 @@ extern "C" {
 #include <magic.h>
 }
 
-struct magic_set* ms = nullptr;
+static struct magic_set* ms = nullptr;
 #endif
 
 using namespace std;
