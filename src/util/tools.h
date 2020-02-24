@@ -86,7 +86,7 @@ time_t getLastWriteTime(const fs::path& path);
 /// \param path absolute path of the binary
 /// \param err if not NULL err will contain the errno result of the check
 /// \return true if the given binary is executable by our process, otherwise false
-bool is_executable(const fs::path& path, int* err = NULL);
+bool is_executable(const fs::path& path, int* err = nullptr);
 
 /// \brief Checks if the given executable exists in $PATH
 /// \param exec filename of the executable that needs to be checked
@@ -211,7 +211,7 @@ std::string get_jpeg_resolution(const std::unique_ptr<IOHandler>& ioh);
 void set_jpeg_resolution_resource(const std::shared_ptr<CdsItem>& item, int res_num);
 
 /// \brief checks if the given string has the format xr x yr (i.e. 320x200 etc.)
-bool check_resolution(const std::string& resolution, int* x = NULL, int* y = NULL);
+bool check_resolution(const std::string& resolution, int* x = nullptr, int* y = nullptr);
 
 std::string escape(std::string string, char escape_char, char to_escape);
 
@@ -282,7 +282,7 @@ void getTimespecNow(struct timespec* ts);
 long getDeltaMillis(struct timespec* first);
 long getDeltaMillis(struct timespec* first, struct timespec* second);
 
-void getTimespecAfterMillis(long delta, struct timespec* ret, struct timespec* start = NULL);
+void getTimespecAfterMillis(long delta, struct timespec* ret, struct timespec* start = nullptr);
 
 /// \brief Finds the IP address of the specified network interface.
 /// \param interface i.e. eth0, lo, etc.
