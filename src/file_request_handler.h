@@ -59,11 +59,11 @@ public:
         std::shared_ptr<UpdateManager> updateManager, std::shared_ptr<web::SessionManager> sessionManager,
         UpnpXMLBuilder* xmlBuilder);
 
-    virtual void getInfo(const char* filename, UpnpFileInfo* info);
-    virtual std::unique_ptr<IOHandler> open(
+    void getInfo(const char* filename, UpnpFileInfo* info) override;
+    std::unique_ptr<IOHandler> open(
         const char* filename,
         enum UpnpOpenFileMode mode,
-        std::string range);
+        std::string range) override;
 };
 
 #endif // __FILE_REQUEST_HANDLER_H__

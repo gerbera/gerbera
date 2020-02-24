@@ -55,10 +55,10 @@ public:
     virtual ~IOHandlerBufferHelper();
 
     // inherited from IOHandler
-    virtual void open(enum UpnpOpenFileMode mode);
-    virtual size_t read(char* buf, size_t length);
-    virtual void seek(off_t offset, int whence);
-    virtual void close();
+    void open(enum UpnpOpenFileMode mode) override;
+    size_t read(char* buf, size_t length) override;
+    void seek(off_t offset, int whence) override;
+    void close() override;
 
 protected:
     size_t bufSize;

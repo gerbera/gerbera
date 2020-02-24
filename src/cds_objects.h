@@ -484,7 +484,7 @@ public:
     //virtual int equals(std::shared_ptr<CdsObject> obj, bool exactly=false) override;
 
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
-    virtual void validate();
+    void validate() override;
 };
 
 /// \brief An item that is pointing to a file located in the "servedir"
@@ -502,7 +502,7 @@ public:
     CdsItemInternalURL(std::shared_ptr<Storage> storage);
 
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
-    virtual void validate();
+    void validate() override;
 };
 
 /*

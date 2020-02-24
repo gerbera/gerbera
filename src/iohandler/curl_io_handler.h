@@ -44,8 +44,8 @@ class CurlIOHandler : public IOHandlerBufferHelper {
 public:
     CurlIOHandler(const std::string& URL, CURL* curl_handle, size_t bufSize, size_t initialFillSize);
 
-    virtual void open(enum UpnpOpenFileMode mode);
-    virtual void close();
+    void open(enum UpnpOpenFileMode mode) override;
+    void close() override;
 
 private:
     CURL* curl_handle;
@@ -54,7 +54,7 @@ private:
     //off_t bytesCurl;
 
     static size_t curlCallback(void* ptr, size_t size, size_t nmemb, void* data);
-    virtual void threadProc();
+    void threadProc() override;
 };
 
 #endif // __CURL_IO_HANDLER_H__

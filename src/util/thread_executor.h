@@ -45,14 +45,14 @@ public:
     /// \brief initialize the mutex and the cond
     ThreadExecutor();
     virtual ~ThreadExecutor();
-    virtual bool isAlive() { return threadRunning; };
+    bool isAlive() override { return threadRunning; };
 
     /// \brief kill the thread (pthread_join)
     /// \return always true - this function only returns after the thread has died
-    virtual bool kill();
+    bool kill() override;
 
     /// \brief the exit status of the thread - needs to be overridden
-    virtual int getStatus() = 0;
+    int getStatus() override = 0;
 
 protected:
     bool threadShutdown;
