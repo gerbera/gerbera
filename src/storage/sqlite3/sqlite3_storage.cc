@@ -503,7 +503,6 @@ void SLSelectTask::run(sqlite3** db, Sqlite3Storage* sl)
     pres = std::make_shared<Sqlite3Result>();
 
     char* err = nullptr;
-    ;
     int ret = sqlite3_get_table(
         *db,
         query,
