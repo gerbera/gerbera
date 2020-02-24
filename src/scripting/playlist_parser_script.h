@@ -49,7 +49,7 @@ public:
         std::shared_ptr<Storage> storage,
         std::shared_ptr<ContentManager> content,
         const std::shared_ptr<Runtime>& runtime);
-    virtual ~PlaylistParserScript();
+    ~PlaylistParserScript() override;
 
     std::string readln();
     void processPlaylistObject(const std::shared_ptr<CdsObject>& obj, std::shared_ptr<GenericTask> task);

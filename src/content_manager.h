@@ -148,7 +148,7 @@ public:
         std::shared_ptr<Timer> timer, std::shared_ptr<TaskProcessor> task_processor,
         std::shared_ptr<Runtime> scripting_runtime, std::shared_ptr<LastFm> last_fm);
     void init();
-    virtual ~ContentManager();
+    ~ContentManager() override;
     void shutdown();
 
     virtual void timerNotify(std::shared_ptr<Timer::Parameter> parameter) override;

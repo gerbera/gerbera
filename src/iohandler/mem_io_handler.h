@@ -50,7 +50,7 @@ public:
     /// \param buffer all operations will be done on this buffer.
     MemIOHandler(const void* buffer, int length);
     explicit MemIOHandler(const std::string& str);
-    virtual ~MemIOHandler();
+    ~MemIOHandler() override;
 
     ///
     void open(enum UpnpOpenFileMode mode) override;

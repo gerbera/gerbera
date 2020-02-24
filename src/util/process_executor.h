@@ -44,7 +44,7 @@ public:
     bool isAlive() override;
     bool kill() override;
     int getStatus() override;
-    virtual ~ProcessExecutor();
+    ~ProcessExecutor() override;
 
 protected:
     pid_t process_id;
