@@ -258,7 +258,7 @@ static int getTagFromString(const std::string& tag)
 }
 
 #define BUFLEN 4096
-char exif_entry_buffer[BUFLEN];
+static char exif_entry_buffer[BUFLEN];
 #define exif_egv(arg) exif_entry_get_value(arg, exif_entry_buffer, BUFLEN)
 
 void LibExifHandler::process_ifd(ExifContent* content, const std::shared_ptr<CdsItem>& item, const std::unique_ptr<StringConverter>& sc, const std::vector<std::string>& auxtags)
