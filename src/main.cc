@@ -136,10 +136,10 @@ int main(int argc, char** argv, char** envp)
 #ifdef SOLARIS
     std::string ld_preload;
     char* preload = getenv("LD_PRELOAD");
-    if (preload != NULL)
+    if (preload != nullptr)
         ld_preload = std::string(preload);
 
-    if ((preload == NULL) || (ld_preload.find("0@0") == -1)) {
+    if ((preload == nullptr) || (ld_preload.find("0@0") == -1)) {
         printf("Gerbera: Solaris check failed!\n");
         printf("Please set the environment to match glibc behaviour!\n");
         printf("LD_PRELOAD=/usr/lib/0@0.so.1\n");

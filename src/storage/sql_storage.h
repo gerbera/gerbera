@@ -58,7 +58,7 @@ public:
     std::string col(int index)
     {
         char* c = col_c_str(index);
-        if (c == 0)
+        if (c == nullptr)
             return "";
         return std::string(c);
     }
@@ -236,7 +236,7 @@ private:
     /* location helper: filesystem path or virtual path to db location*/
     static std::string addLocationPrefix(char prefix, const std::string& path);
     /* location helpers: db location to filesystem path */
-    static fs::path stripLocationPrefix(std::string dbLocation, char* prefix = NULL);
+    static fs::path stripLocationPrefix(std::string dbLocation, char* prefix = nullptr);
 
     std::shared_ptr<CdsObject> checkRefID(const std::shared_ptr<CdsObject>& obj);
     int createContainer(int parentID, std::string name, const std::string& virtualPath, bool isVirtual, const std::string& upnpClass, int refID, const std::map<std::string, std::string>& itemMetadata);

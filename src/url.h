@@ -80,12 +80,12 @@ public:
     /// \param vebose enable curl verbose option
     static std::string download(const std::string& URL,
         long* HTTP_retcode,
-        CURL* curl_handle = NULL,
+        CURL* curl_handle = nullptr,
         bool only_header = false,
         bool verbose = false,
         bool redirect = false);
 
-    static std::unique_ptr<Stat> getInfo(const std::string& URL, CURL* curl_handle = NULL);
+    static std::unique_ptr<Stat> getInfo(const std::string& URL, CURL* curl_handle = nullptr);
 
 protected:
     /// \brief This function is installed as a callback for libcurl, when

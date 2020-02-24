@@ -80,7 +80,7 @@ protected:
     bool dirty;
 
     std::string _convert(const std::string& str, bool validate,
-        size_t* stoppedAt = NULL);
+        size_t* stoppedAt = nullptr);
 };
 
 #endif // __STRING_CONVERTER_H__

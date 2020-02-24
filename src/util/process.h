@@ -43,7 +43,7 @@ std::string run_simple_process(const std::shared_ptr<ConfigManager>& cfg, const 
 
 void run_process(std::string prog, std::string param);
 
-bool is_alive(pid_t pid, int* exit_status = NULL);
+bool is_alive(pid_t pid, int* exit_status = nullptr);
 
 bool kill_proc(pid_t kill_pid);
 
