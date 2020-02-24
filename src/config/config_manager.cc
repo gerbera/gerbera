@@ -1784,7 +1784,6 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNode(const st
 
             if (interval == 0) {
                 throw std::runtime_error("autoscan directory " + location.string() + ": invalid interval attribute");
-                continue;
             }
         } else {
             // level is irrelevant for inotify scan, nevertheless we will set

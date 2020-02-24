@@ -214,5 +214,4 @@ void* IOHandlerBufferHelper::staticThreadProc(void* arg)
     inst->threadProc();
     log_debug("buffer thread shut down. thread: {}", pthread_self());
     pthread_exit(nullptr);
-    return nullptr;
 }

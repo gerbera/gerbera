@@ -149,7 +149,6 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
             *output_copy = 0;
             FREE(output);
             return ret_str;
-            break;
         case E2BIG:
             /// \todo should encode the whole string anyway
             err = "iconv: Insufficient space in output buffer";

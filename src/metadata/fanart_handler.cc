@@ -62,7 +62,6 @@ fs::path FanArtHandler::getFanArtPath(const std::shared_ptr<CdsItem>& item)
         if (!exists)
             continue;
         return found;
-        break;
     }
     return "";
 }

@@ -76,5 +76,4 @@ void* ThreadExecutor::staticThreadProc(void* arg)
     auto inst = static_cast<ThreadExecutor*>(arg);
     inst->threadProc();
     pthread_exit(nullptr);
-    return nullptr;
 }
