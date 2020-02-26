@@ -85,7 +85,7 @@ class Option : public ConfigOption {
 public:
     Option(std::string option) { this->option = option; }
 
-    virtual std::string getOption() override { return option; }
+    std::string getOption() override { return option; }
 
 protected:
     std::string option;
@@ -95,7 +95,7 @@ class IntOption : public ConfigOption {
 public:
     IntOption(int option) { this->option = option; }
 
-    virtual int getIntOption() override { return option; }
+    int getIntOption() override { return option; }
 
 protected:
     int option;
@@ -105,7 +105,7 @@ class BoolOption : public ConfigOption {
 public:
     BoolOption(bool option) { this->option = option; }
 
-    virtual bool getBoolOption() override { return option; }
+    bool getBoolOption() override { return option; }
 
 protected:
     BoolOption() = default;
@@ -116,7 +116,7 @@ class DictionaryOption : public ConfigOption {
 public:
     DictionaryOption(std::map<std::string, std::string> option) { this->option = option; }
 
-    virtual std::map<std::string, std::string> getDictionaryOption() override { return option; }
+    std::map<std::string, std::string> getDictionaryOption() override { return option; }
 
 protected:
     std::map<std::string, std::string> option;
@@ -129,7 +129,7 @@ public:
         this->option = option;
     }
 
-    virtual std::vector<std::string> getStringArrayOption() override
+    std::vector<std::string> getStringArrayOption() override
     {
         return option;
     }
@@ -145,7 +145,7 @@ public:
         this->option = option;
     }
 
-    virtual std::shared_ptr<AutoscanList> getAutoscanListOption() override { return option; }
+    std::shared_ptr<AutoscanList> getAutoscanListOption() override { return option; }
 
 protected:
     std::shared_ptr<AutoscanList> option;
@@ -158,7 +158,7 @@ public:
         this->option = option;
     }
 
-    virtual std::shared_ptr<TranscodingProfileList> getTranscodingProfileListOption() override
+    std::shared_ptr<TranscodingProfileList> getTranscodingProfileListOption() override
     {
         return option;
     }

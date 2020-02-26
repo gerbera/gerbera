@@ -150,7 +150,7 @@ protected:
 /// \brief The Storage class for using SQLite3
 class Sqlite3Storage : public Timer::Subscriber, public SQLStorage, public std::enable_shared_from_this<SQLStorage> {
 public:
-    virtual void timerNotify(std::shared_ptr<Timer::Parameter> param) override;
+    void timerNotify(std::shared_ptr<Timer::Parameter> param) override;
     Sqlite3Storage(std::shared_ptr<ConfigManager> config, std::shared_ptr<Timer> timer);
 
 private:
@@ -197,8 +197,8 @@ private:
     std::queue<std::shared_ptr<SLTask>> taskQueue;
     bool taskQueueOpen;
 
-    virtual void threadCleanup() override {}
-    virtual bool threadCleanupRequired() override { return false; }
+    void threadCleanup() override {}
+    bool threadCleanupRequired() override { return false; }
 
     bool dirty;
 
@@ -215,8 +215,8 @@ public:
     virtual ~Sqlite3Result();
 
 private:
-    virtual std::unique_ptr<SQLRow> nextRow() override;
-    virtual unsigned long long getNumRows() override { return nrow; }
+    std::unique_ptr<SQLRow> nextRow() override;
+    unsigned long long getNumRows() override { return nrow; }
 
     char** table;
     char** row;

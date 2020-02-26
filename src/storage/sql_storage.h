@@ -109,63 +109,63 @@ public:
         return exec(s.c_str(), s.length(), getLastInsertId);
     }
 
-    virtual void addObject(std::shared_ptr<CdsObject> object, int* changedContainer) override;
-    virtual void updateObject(std::shared_ptr<CdsObject> object, int* changedContainer) override;
+    void addObject(std::shared_ptr<CdsObject> object, int* changedContainer) override;
+    void updateObject(std::shared_ptr<CdsObject> object, int* changedContainer) override;
 
-    virtual std::shared_ptr<CdsObject> loadObject(int objectID) override;
-    virtual int getChildCount(int contId, bool containers, bool items, bool hideFsRoot) override;
+    std::shared_ptr<CdsObject> loadObject(int objectID) override;
+    int getChildCount(int contId, bool containers, bool items, bool hideFsRoot) override;
 
-    virtual std::unique_ptr<std::unordered_set<int>> getObjects(int parentID, bool withoutContainer) override;
+    std::unique_ptr<std::unordered_set<int>> getObjects(int parentID, bool withoutContainer) override;
 
-    virtual std::unique_ptr<ChangedContainers> removeObject(int objectID, bool all) override;
-    virtual std::unique_ptr<ChangedContainers> removeObjects(const std::unique_ptr<std::unordered_set<int>>& list, bool all = false) override;
+    std::unique_ptr<ChangedContainers> removeObject(int objectID, bool all) override;
+    std::unique_ptr<ChangedContainers> removeObjects(const std::unique_ptr<std::unordered_set<int>>& list, bool all = false) override;
 
-    virtual std::shared_ptr<CdsObject> loadObjectByServiceID(std::string serviceID) override;
-    virtual std::unique_ptr<std::vector<int>> getServiceObjectIDs(char servicePrefix) override;
+    std::shared_ptr<CdsObject> loadObjectByServiceID(std::string serviceID) override;
+    std::unique_ptr<std::vector<int>> getServiceObjectIDs(char servicePrefix) override;
 
-    virtual std::string findFolderImage(int id, std::string trackArtBase) override;
+    std::string findFolderImage(int id, std::string trackArtBase) override;
 
     /* accounting methods */
-    virtual int getTotalFiles() override;
+    int getTotalFiles() override;
 
-    virtual std::vector<std::shared_ptr<CdsObject>> browse(const std::unique_ptr<BrowseParam>& param) override;
-    virtual std::vector<std::shared_ptr<CdsObject>> search(const std::unique_ptr<SearchParam>& param, int* numMatches) override;
+    std::vector<std::shared_ptr<CdsObject>> browse(const std::unique_ptr<BrowseParam>& param) override;
+    std::vector<std::shared_ptr<CdsObject>> search(const std::unique_ptr<SearchParam>& param, int* numMatches) override;
 
-    virtual std::vector<std::string> getMimeTypes() override;
+    std::vector<std::string> getMimeTypes() override;
 
     //virtual std::shared_ptr<CdsObject> findObjectByTitle(std::string title, int parentID);
-    virtual std::shared_ptr<CdsObject> findObjectByPath(fs::path fullpath, bool wasRegularFile = false) override;
-    virtual int findObjectIDByPath(fs::path fullpath, bool wasRegularFile = false) override;
-    virtual std::string incrementUpdateIDs(const std::unique_ptr<std::unordered_set<int>>& ids) override;
+    std::shared_ptr<CdsObject> findObjectByPath(fs::path fullpath, bool wasRegularFile = false) override;
+    int findObjectIDByPath(fs::path fullpath, bool wasRegularFile = false) override;
+    std::string incrementUpdateIDs(const std::unique_ptr<std::unordered_set<int>>& ids) override;
 
-    virtual fs::path buildContainerPath(int parentID, std::string title) override;
-    virtual void addContainerChain(std::string path, std::string lastClass, int lastRefID, int* containerID, int* updateID, const std::map<std::string, std::string>& lastMetadata) override;
-    virtual std::string getInternalSetting(std::string key) override;
-    virtual void storeInternalSetting(std::string key, std::string value) override = 0;
+    fs::path buildContainerPath(int parentID, std::string title) override;
+    void addContainerChain(std::string path, std::string lastClass, int lastRefID, int* containerID, int* updateID, const std::map<std::string, std::string>& lastMetadata) override;
+    std::string getInternalSetting(std::string key) override;
+    void storeInternalSetting(std::string key, std::string value) override = 0;
 
-    virtual void updateAutoscanPersistentList(ScanMode scanmode, std::shared_ptr<AutoscanList> list) override;
-    virtual std::shared_ptr<AutoscanList> getAutoscanList(ScanMode scanmode) override;
-    virtual void addAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir) override;
-    virtual void updateAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir) override;
-    virtual void removeAutoscanDirectoryByObjectID(int objectID) override;
-    virtual void removeAutoscanDirectory(int autoscanID) override;
-    virtual int getAutoscanDirectoryType(int objectId) override;
-    virtual int isAutoscanDirectoryRecursive(int objectId) override;
-    virtual void autoscanUpdateLM(std::shared_ptr<AutoscanDirectory> adir) override;
-    virtual std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(int objectID) override;
-    virtual int isAutoscanChild(int objectID) override;
-    virtual void checkOverlappingAutoscans(std::shared_ptr<AutoscanDirectory> adir) override;
+    void updateAutoscanPersistentList(ScanMode scanmode, std::shared_ptr<AutoscanList> list) override;
+    std::shared_ptr<AutoscanList> getAutoscanList(ScanMode scanmode) override;
+    void addAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir) override;
+    void updateAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir) override;
+    void removeAutoscanDirectoryByObjectID(int objectID) override;
+    void removeAutoscanDirectory(int autoscanID) override;
+    int getAutoscanDirectoryType(int objectId) override;
+    int isAutoscanDirectoryRecursive(int objectId) override;
+    void autoscanUpdateLM(std::shared_ptr<AutoscanDirectory> adir) override;
+    std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(int objectID) override;
+    int isAutoscanChild(int objectID) override;
+    void checkOverlappingAutoscans(std::shared_ptr<AutoscanDirectory> adir) override;
 
-    virtual std::unique_ptr<std::vector<int>> getPathIDs(int objectID) override;
+    std::unique_ptr<std::vector<int>> getPathIDs(int objectID) override;
 
     void shutdown() override;
     virtual void shutdownDriver() = 0;
 
-    virtual int ensurePathExistence(fs::path path, int* changedContainer) override;
+    int ensurePathExistence(fs::path path, int* changedContainer) override;
 
-    virtual std::string getFsRootName() override;
+    std::string getFsRootName() override;
 
-    virtual void clearFlagInDB(int flag) override;
+    void clearFlagInDB(int flag) override;
 
 protected:
     SQLStorage(std::shared_ptr<ConfigManager> config);

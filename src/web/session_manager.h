@@ -141,7 +141,7 @@ protected:
 public:
     /// \brief Constructor, initializes the array.
     SessionManager(const std::shared_ptr<ConfigManager>& config, std::shared_ptr<Timer> timer);
-    virtual ~SessionManager() override { log_debug("SessionManager destroyed\n"); }
+    ~SessionManager() override { log_debug("SessionManager destroyed\n"); }
 
     /// \brief Creates a Session with a given timeout.
     /// \param timeout Session timeout in milliseconds.
@@ -165,7 +165,7 @@ public:
 
     void containerChangedUI(const std::vector<int>& objectIDs);
 
-    virtual void timerNotify(std::shared_ptr<Timer::Parameter> parameter) override;
+    void timerNotify(std::shared_ptr<Timer::Parameter> parameter) override;
 };
 
 } // namespace
