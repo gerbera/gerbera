@@ -779,7 +779,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     std::string script_path = getOption(
         "/import/scripting/virtual-layout/import-script",
         prefix_dir / DEFAULT_JS_DIR / DEFAULT_IMPORT_SCRIPT);
-    temp = resolvePath(temp, true, temp == "js");
+    script_path = resolvePath(script_path, true, temp == "js");
     if (temp == "js" && script_path.empty())
         throw std::runtime_error("Error in config file: you specified \"js\" to "
                                  "be used for virtual layout, but script "
