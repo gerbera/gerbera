@@ -52,7 +52,7 @@ private:
     std::shared_ptr<Storage> getSelf();
 
     virtual std::string quote(std::string str);
-    virtual inline std::string quote(const char* str) override { return quote(std::string(str)); }
+    inline std::string quote(const char* str) override { return quote(std::string(str)); }
     virtual inline std::string quote(int val) { return std::to_string(val); }
     virtual inline std::string quote(unsigned int val) { return std::to_string(val); }
     virtual inline std::string quote(long val) { return std::to_string(val); }

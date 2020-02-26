@@ -92,7 +92,7 @@ public:
         bool hidden = false, bool cancellable = true);
     fs::path getPath();
     fs::path getRootPath();
-    virtual void run() override;
+    void run() override;
 };
 
 class CMRemoveObjectTask : public GenericTask {
@@ -104,7 +104,7 @@ protected:
 public:
     CMRemoveObjectTask(std::shared_ptr<ContentManager> content,
         int objectID, bool all);
-    virtual void run() override;
+    void run() override;
 };
 
 class CMRescanDirectoryTask : public GenericTask, public std::enable_shared_from_this<CMRescanDirectoryTask> {
@@ -118,7 +118,7 @@ public:
     CMRescanDirectoryTask(std::shared_ptr<ContentManager> content,
         int objectID, int scanID, ScanMode scanMode,
         bool cancellable);
-    virtual void run() override;
+    void run() override;
 };
 
 #ifdef ONLINE_SERVICES
@@ -137,7 +137,7 @@ public:
         std::shared_ptr<Timer> timer,
         std::shared_ptr<OnlineService> service, std::shared_ptr<Layout> layout,
         bool cancellable, bool unscheduled_refresh);
-    virtual void run() override;
+    void run() override;
 };
 #endif
 
@@ -151,7 +151,7 @@ public:
     ~ContentManager() override;
     void shutdown();
 
-    virtual void timerNotify(std::shared_ptr<Timer::Parameter> parameter) override;
+    void timerNotify(std::shared_ptr<Timer::Parameter> parameter) override;
 
     bool isBusy() { return working; }
 
