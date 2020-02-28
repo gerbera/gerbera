@@ -872,7 +872,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
         // URL is path until now
         int objectType = item->getObjectType();
         if (!IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
-            url = virtualURL.append(url);
+            url.insert(0, virtualURL);
         }
 
         if (!hide_original_resource || transcoded || (hide_original_resource && (original_resource != i)))
