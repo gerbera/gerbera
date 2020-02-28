@@ -49,7 +49,7 @@ class Server;
 class UpdateManager {
 public:
     UpdateManager(std::shared_ptr<Storage> storage, std::shared_ptr<Server> server);
-    void init();
+    void run();
     virtual ~UpdateManager();
     void shutdown();
 

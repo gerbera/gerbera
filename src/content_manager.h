@@ -147,7 +147,7 @@ public:
         std::shared_ptr<UpdateManager> update_manager, std::shared_ptr<web::SessionManager> session_manager,
         std::shared_ptr<Timer> timer, std::shared_ptr<TaskProcessor> task_processor,
         std::shared_ptr<Runtime> scripting_runtime, std::shared_ptr<LastFm> last_fm);
-    void init();
+    void run();
     ~ContentManager() override;
     void shutdown();
 

@@ -19,7 +19,7 @@ TaskProcessor::TaskProcessor()
 {
 }
 
-void TaskProcessor::init()
+void TaskProcessor::run()
 {
     int ret;
     ret = pthread_create(&taskThread, nullptr, TaskProcessor::staticThreadProc,

@@ -60,7 +60,7 @@ UpdateManager::UpdateManager(std::shared_ptr<Storage> storage, std::shared_ptr<S
 {
 }
 
-void UpdateManager::init()
+void UpdateManager::run()
 {
     /*
     pthread_attr_t attr;
