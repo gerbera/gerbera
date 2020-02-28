@@ -49,7 +49,7 @@ LastFm::~LastFm()
         finished_playing(scrobbler);
 }
 
-void LastFm::init()
+void LastFm::run()
 {
     if (!config->getBoolOption(CFG_SERVER_EXTOPTS_LASTFM_ENABLED))
         return;

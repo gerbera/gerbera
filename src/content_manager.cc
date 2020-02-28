@@ -135,7 +135,7 @@ ContentManager::ContentManager(const std::shared_ptr<ConfigManager>& config, con
     autoscan_timed = storage->getAutoscanList(ScanMode::Timed);
 }
 
-void ContentManager::init()
+void ContentManager::run()
 {
 #ifdef HAVE_INOTIFY
     auto self = shared_from_this();

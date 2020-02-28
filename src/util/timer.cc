@@ -41,7 +41,7 @@ Timer::Timer()
 {
 }
 
-void Timer::init()
+void Timer::run()
 {
     log_debug("Starting Timer thread...");
     int ret = pthread_create(

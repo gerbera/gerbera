@@ -20,7 +20,7 @@ class Timer;
 class TaskProcessor {
 public:
     TaskProcessor();
-    void init();
+    void run();
     virtual ~TaskProcessor();
     void shutdown();
 

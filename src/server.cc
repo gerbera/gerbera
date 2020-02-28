@@ -82,25 +82,20 @@ void Server::init()
     // initalize what is needed
     auto self = shared_from_this();
     timer = std::make_shared<Timer>();
-    timer->init();
 #ifdef ONLINE_SERVICES
     task_processor = std::make_shared<TaskProcessor>();
-    task_processor->init();
 #endif
 #ifdef HAVE_JS
     scripting_runtime = std::make_shared<Runtime>();
 #endif
     storage = Storage::createInstance(config, timer);
     update_manager = std::make_shared<UpdateManager>(storage, self);
-    update_manager->init();
     session_manager = std::make_shared<web::SessionManager>(config, timer);
 #ifdef HAVE_LASTFMLIB
     last_fm = std::make_shared<LastFm>(config);
-    last_fm->init();
 #endif
     content = std::make_shared<ContentManager>(
         config, storage, update_manager, session_manager, timer, task_processor, scripting_runtime, last_fm);
-    content->init();
 }
 
 Server::~Server() { log_debug("Server destroyed"); }
@@ -235,6 +230,17 @@ void Server::run()
     if (ret != UPNP_E_SUCCESS) {
         throw UpnpException(ret, "run: UpnpSendAdvertisement failed");
     }
+
+    // run what is needed
+    timer->run();
+#ifdef ONLINE_SERVICES
+    task_processor->run();
+#endif
+    update_manager->run();
+#ifdef HAVE_LASTFMLIB
+    last_fm->run();
+#endif
+    content->run();
 
     config->writeBookmark(ip, std::to_string(port));
     log_info("The Web UI can be reached by following this link: http://{}:{}/", ip.c_str(), port);
