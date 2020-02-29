@@ -100,7 +100,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
         return nullptr;
 
     std::string temp = info.child("title").text().as_string();
-    if (!string_ok(temp))
+    if (temp.empty())
         item->setTitle("Unknown");
     else
         item->setTitle(temp);
@@ -111,7 +111,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
     item->setAuxData(ONLINE_SERVICE_AUX_ID, std::to_string(OS_ATrailers));
 
     temp = trailer.attribute("id").as_string();
-    if (!string_ok(temp)) {
+    if (temp.empty()) {
         log_warning("Failed to retrieve Trailer ID for \"{}\", "
                     "skipping...\n",
             item->getTitle().c_str());

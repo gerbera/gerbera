@@ -102,7 +102,7 @@ void AutoscanInotify::threadProc()
                 lock.unlock();
 
                 fs::path location = adir->getLocation();
-                if (!string_ok(location)) {
+                if (location.empty()) {
                     lock.lock();
                     continue;
                 }
@@ -125,7 +125,7 @@ void AutoscanInotify::threadProc()
                 lock.unlock();
 
                 fs::path location = adir->getLocation();
-                if (!string_ok(location)) {
+                if (location.empty()) {
                     lock.lock();
                     continue;
                 }

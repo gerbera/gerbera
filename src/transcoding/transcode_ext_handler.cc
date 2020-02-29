@@ -175,7 +175,7 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::open(std::shared_ptr<Transc
     } else {
         check = find_in_path(profile->getCommand());
 
-        if (!string_ok(check))
+        if (check.empty())
             throw std::runtime_error("Could not find transcoder " + profile->getCommand().string() + " in $PATH");
     }
 

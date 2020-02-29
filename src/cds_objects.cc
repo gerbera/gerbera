@@ -109,10 +109,10 @@ int CdsObject::resourcesEqual(const std::shared_ptr<CdsObject>& obj)
 
 void CdsObject::validate()
 {
-    if (!string_ok(this->title))
+    if (this->title.empty())
         throw std::runtime_error("Object validation failed: missing title!\n");
 
-    if (!string_ok(this->upnpClass))
+    if (this->upnpClass.empty())
         throw std::runtime_error("Object validation failed: missing upnp class\n");
 }
 
@@ -171,10 +171,10 @@ void CdsItem::validate()
 {
     CdsObject::validate();
     //    log_info("mime: [{}] loc [{}]", this->mimeType.c_str(), this->location.c_str());
-    if (!string_ok(this->mimeType))
+    if (this->mimeType.empty())
         throw std::runtime_error("Item validation failed: missing mimetype");
 
-    if (!string_ok(this->location))
+    if (this->location.empty())
         throw std::runtime_error("Item validation failed: missing location");
 
     if (!fs::is_regular_file(location))
@@ -212,7 +212,7 @@ int CdsActiveItem::equals(const std::shared_ptr<CdsObject>& obj, bool exactly)
 void CdsActiveItem::validate()
 {
     CdsItem::validate();
-    if (!string_ok(this->action))
+    if (this->action.empty())
         throw std::runtime_error("Active Item validation failed: missing action\n");
 
     if (!fs::is_regular_file(this->action))
@@ -232,10 +232,10 @@ CdsItemExternalURL::CdsItemExternalURL(std::shared_ptr<Storage> storage)
 void CdsItemExternalURL::validate()
 {
     CdsItem::validate();
-    if (!string_ok(this->mimeType))
+    if (this->mimeType.empty())
         throw std::runtime_error("URL Item validation failed: missing mimetype\n");
 
-    if (!string_ok(this->location))
+    if (this->location.empty())
         throw std::runtime_error("URL Item validation failed: missing URL\n");
 }
 //---------
@@ -305,7 +305,7 @@ std::string CdsContainer::getVirtualPath()
         }
     }
 
-    if (!string_ok(location))
+    if (location.empty())
         throw std::runtime_error("virtual location not available");
 
     return location;
@@ -317,7 +317,7 @@ std::string CdsItem::getVirtualPath()
     std::string location = cont->getVirtualPath();
     location = location + VIRTUAL_CONTAINER_SEPARATOR + getTitle();
 
-    if (!string_ok(location))
+    if (location.empty())
         throw std::runtime_error("virtual location not available");
 
     return location;

@@ -69,7 +69,7 @@ std::shared_ptr<CdsObject> web::addObject::addItem(int parentID, std::shared_ptr
 
     /// \todo is there a default setting? autoscan? import settings?
     tmp = param("mime-type");
-    if (!string_ok(tmp))
+    if (tmp.empty())
         tmp = MIMETYPE_DEFAULT;
     item->setMimeType(tmp);
 
@@ -94,7 +94,7 @@ std::shared_ptr<CdsObject> web::addObject::addActiveItem(int parentID)
     item->setLocation(param("location"));
 
     tmp = param("mime-type");
-    if (!string_ok(tmp))
+    if (tmp.empty())
         tmp = MIMETYPE_DEFAULT;
     item->setMimeType(tmp);
 
@@ -136,7 +136,7 @@ std::shared_ptr<CdsObject> web::addObject::addUrl(int parentID, std::shared_ptr<
 
     /// \todo is there a default setting? autoscan? import settings?
     tmp = param("mime-type");
-    if (!string_ok(tmp))
+    if (tmp.empty())
         tmp = MIMETYPE_DEFAULT;
     item->setMimeType(tmp);
 
@@ -164,10 +164,10 @@ void web::addObject::process()
     std::string obj_type = param("obj_type");
     std::string location = param("location");
 
-    if (!string_ok(param("title")))
+    if (param("title").empty())
         throw std::runtime_error("empty title");
 
-    if (!string_ok(param("class")))
+    if (param("class").empty())
         throw std::runtime_error("empty class");
 
     int parentID = intParam("parent_id", 0);
@@ -179,27 +179,27 @@ void web::addObject::process()
     if (obj_type == STRING_OBJECT_TYPE_CONTAINER) {
         this->addContainer(parentID);
     } else if (obj_type == STRING_OBJECT_TYPE_ITEM) {
-        if (!string_ok(location))
+        if (location.empty())
             throw std::runtime_error("no location given");
         if (!fs::is_regular_file(location))
             throw std::runtime_error("file not found");
         obj = this->addItem(parentID, std::make_shared<CdsItem>(storage));
         allow_fifo = true;
     } else if (obj_type == STRING_OBJECT_TYPE_ACTIVE_ITEM) {
-        if (!string_ok(param("action")))
+        if (param("action").empty())
             throw std::runtime_error("no action given");
-        if (!string_ok(location))
+        if (location.empty())
             throw std::runtime_error("no location given");
         if (!fs::is_regular_file(location))
             throw std::runtime_error("file not found");
         obj = this->addActiveItem(parentID);
         allow_fifo = true;
     } else if (obj_type == STRING_OBJECT_TYPE_EXTERNAL_URL) {
-        if (!string_ok(location))
+        if (location.empty())
             throw std::runtime_error("No URL given");
         obj = this->addUrl(parentID, std::make_shared<CdsItemExternalURL>(storage), true);
     } else if (obj_type == STRING_OBJECT_TYPE_INTERNAL_URL) {
-        if (!string_ok(location))
+        if (location.empty())
             throw std::runtime_error("No URL given");
         obj = this->addUrl(parentID, std::make_shared<CdsItemInternalURL>(storage), false);
     } else {

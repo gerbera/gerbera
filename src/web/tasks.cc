@@ -45,7 +45,7 @@ void web::tasks::process()
 {
     check_request();
     std::string action = param("action");
-    if (!string_ok(action))
+    if (action.empty())
         throw std::runtime_error("web:tasks called with illegal action");
 
     auto root = xmlDoc->document_element();

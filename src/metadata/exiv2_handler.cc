@@ -78,7 +78,7 @@ void Exiv2Handler::fillMetadata(std::shared_ptr<CdsItem> item)
 
         // if there was no jpeg comment, look if there is an exiv2 comment
         // should we override the normal jpeg comment, if there is an exiv2 one?
-        if (!string_ok(comment)) {
+        if (comment.empty()) {
             md = exifData.findKey(Exiv2::ExifKey("Exif.Photo.UserComment"));
             if (md != exifData.end())
                 comment = (char*)md->toString().c_str();
@@ -87,7 +87,7 @@ void Exiv2Handler::fillMetadata(std::shared_ptr<CdsItem> item)
 
         // if the image has no comment, compose something nice out of the exiv information
         // Not convinced that this is useful - comment it out for now ...
-        /*    if (!string_ok(comment))
+        /*    if (comment.empty())
         {
             std::string cam_model;
             std::string flash;

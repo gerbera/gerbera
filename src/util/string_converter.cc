@@ -56,7 +56,7 @@ std::string StringConverter::convert(std::string str, bool validate)
     size_t stoppedAt = 0;
     std::string ret;
 
-    if (!string_ok(str))
+    if (str.empty())
         return str;
 
     do {

@@ -101,12 +101,6 @@ fs::path find_in_path(const fs::path& exec);
 /// Checks if str is nullptr or ""
 bool string_ok(const std::string& str);
 
-/// \brief Checks if the string contains any data.
-/// \param str String to be checked.
-///
-/// Checks if str is nullptr or "" and throws an exception if that is the case.
-void string_ok_ex(const std::string& str);
-
 /// \brief Render HTML that is doing a redirect to the given ip, port and html page.
 /// \param ip IP address as string.
 /// \param port Port as string.
