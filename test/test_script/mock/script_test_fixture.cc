@@ -18,7 +18,6 @@ namespace fs = std::filesystem;
 #include "script_test_fixture.h"
 
 using namespace ::testing;
-using namespace std;
 
 void ScriptTestFixture::SetUp()
 {

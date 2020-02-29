@@ -35,8 +35,6 @@
 #include "storage/storage.h"
 #include <utility>
 
-using namespace std;
-
 AutoscanDirectory::AutoscanDirectory()
 {
     taskCount = 0;

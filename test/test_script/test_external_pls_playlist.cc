@@ -12,7 +12,6 @@
 #include "mock/script_test_fixture.h"
 
 using namespace ::testing;
-using namespace std;
 
 class ExternalUrlPLSPlaylistTest : public ScriptTestFixture {
 public:

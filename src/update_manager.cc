@@ -48,12 +48,10 @@
 #define MAX_OBJECT_IDS_OVERLOAD 30
 #define OBJECT_ID_HASH_CAPACITY 3109
 
-using namespace std;
-
 UpdateManager::UpdateManager(std::shared_ptr<Storage> storage, std::shared_ptr<Server> server)
     : storage(std::move(storage))
     , server(std::move(server))
-    , objectIDHash(make_unique<unordered_set<int>>())
+    , objectIDHash(std::make_unique<std::unordered_set<int>>())
     , shutdownFlag(false)
     , flushPolicy(FLUSH_SPEC)
     , lastContainerChanged(INVALID_OBJECT_ID)
@@ -196,10 +194,10 @@ void UpdateManager::threadProc()
                 getTimespecAfterMillis(sleepMillis, &timeout, &now);
                 log_debug("threadProc: sleeping for {} millis", sleepMillis);
 
-                cv_status ret = cond.wait_for(lock, chrono::milliseconds(sleepMillis));
+                std::cv_status ret = cond.wait_for(lock, std::chrono::milliseconds(sleepMillis));
 
                 if (!shutdownFlag) {
-                    if (ret == cv_status::timeout)
+                    if (ret == std::cv_status::timeout)
                         sendUpdates = false;
                 } else
                     sendUpdates = false;

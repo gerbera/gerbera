@@ -68,8 +68,6 @@
 
 #define WHITE_SPACE " \t\r\n"
 
-using namespace std;
-
 static const char* HEX_CHARS = "0123456789abcdef";
 
 std::vector<std::string> split_string(const std::string& str, char sep, bool empty)
@@ -843,7 +841,7 @@ std::string getValueOrDefault(const std::map<std::string, std::string>& m, const
     return getValueOrDefault<std::string, std::string>(m, key, defval);
 }
 
-std::string toCSV(const shared_ptr<unordered_set<int>>& array)
+std::string toCSV(const std::shared_ptr<std::unordered_set<int>>& array)
 {
     if (array->empty())
         return "";
@@ -1002,17 +1000,17 @@ std::vector<std::string> populateCommandLine(const std::string& line, const std:
 
     for (auto& param : params) {
         size_t inPos = param.find("%in");
-        if (inPos != string::npos) {
+        if (inPos != std::string::npos) {
             std::string newParam = param.replace(inPos, 3, in);
         }
 
         size_t outPos = param.find("%out");
-        if (outPos != string::npos) {
+        if (outPos != std::string::npos) {
             std::string newParam = param.replace(outPos, 4, out);
         }
 
         size_t rangePos = param.find("%range");
-        if (rangePos != string::npos) {
+        if (rangePos != std::string::npos) {
             std::string newParam = param.replace(rangePos, 5, range);
         }
     }

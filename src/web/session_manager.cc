@@ -41,8 +41,6 @@
 #define UI_UPDATE_ID_HASH_SIZE 61
 #define MAX_UI_UPDATE_IDS 10
 
-using namespace std;
-
 namespace web {
 
 Session::Session(long timeout)
@@ -50,7 +48,7 @@ Session::Session(long timeout)
     this->timeout = timeout;
     loggedIn = false;
     sessionID = "";
-    uiUpdateIDs = make_shared<unordered_set<int>>();
+    uiUpdateIDs = std::make_shared<std::unordered_set<int>>();
     //(new DBRHash<int>(UI_UPDATE_ID_HASH_SIZE, MAX_UI_UPDATE_IDS + 5, INVALID_OBJECT_ID, INVALID_OBJECT_ID_2));
     updateAll = false;
     access();
@@ -164,7 +162,7 @@ std::shared_ptr<Session> SessionManager::createSession(long timeout)
 
 std::shared_ptr<Session> SessionManager::getSession(const std::string& sessionID, bool doLock)
 {
-    unique_lock<decltype(mutex)> lock(mutex, std::defer_lock);
+    std::unique_lock<decltype(mutex)> lock(mutex, std::defer_lock);
     if (doLock)
         lock.lock();
     for (const auto& s : sessions) {

@@ -35,8 +35,6 @@
 #include "config/config_manager.h"
 #include "util/tools.h"
 
-using namespace std;
-
 CurlIOHandler::CurlIOHandler(const std::string& URL, CURL* curl_handle, size_t bufSize, size_t initialFillSize)
     : IOHandlerBufferHelper(bufSize, initialFillSize)
 {
@@ -106,7 +104,7 @@ void CurlIOHandler::threadProc()
     curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, CurlIOHandler::curlCallback);
     curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void*)this);
 
-    unique_lock<std::mutex> lock(mutex, std::defer_lock);
+    std::unique_lock<std::mutex> lock(mutex, std::defer_lock);
     do {
         lock.lock();
         if (doSeek) {
@@ -150,7 +148,7 @@ size_t CurlIOHandler::curlCallback(void* ptr, size_t size, size_t nmemb, void* d
 
     //log_debug("URL: {}; size: {}; nmemb: {}; wantWrite: {}", ego->URL.c_str(), size, nmemb, wantWrite);
 
-    unique_lock<std::mutex> lock(ego->mutex);
+    std::unique_lock<std::mutex> lock(ego->mutex);
 
     bool first = true;
 

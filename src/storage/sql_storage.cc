@@ -44,8 +44,6 @@
 #include "util/string_converter.h"
 #include "util/tools.h"
 
-using namespace std;
-
 #define MAX_REMOVE_SIZE 1000
 #define MAX_REMOVE_RECURSION 500
 
@@ -1068,7 +1066,7 @@ std::map<std::string, std::string> SQLStorage::retrieveMetadataForObject(int obj
 
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow()) != nullptr) {
-        metadata[row->col(m_property_name)] = row->col(m_property_value);
+        metadata[row->col(MetadataCol::m_property_name)] = row->col(MetadataCol::m_property_value);
     }
     return metadata;
 }
@@ -1088,7 +1086,7 @@ int SQLStorage::getTotalFiles()
     return 0;
 }
 
-std::string SQLStorage::incrementUpdateIDs(const unique_ptr<unordered_set<int>>& ids)
+std::string SQLStorage::incrementUpdateIDs(const std::unique_ptr<std::unordered_set<int>>& ids)
 {
     if (ids->empty())
         return "";
@@ -1200,7 +1198,7 @@ std::string SQLStorage::findFolderImage(int id, std::string trackArtBase)
     return "";
 }
 
-unique_ptr<unordered_set<int>> SQLStorage::getObjects(int parentID, bool withoutContainer)
+std::unique_ptr<std::unordered_set<int>> SQLStorage::getObjects(int parentID, bool withoutContainer)
 {
     std::ostringstream q;
     q << "SELECT " << TQ("id") << " FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE ";
@@ -1214,7 +1212,7 @@ unique_ptr<unordered_set<int>> SQLStorage::getObjects(int parentID, bool without
     if (res->getNumRows() <= 0)
         return nullptr;
 
-    auto ret = make_unique<unordered_set<int>>();
+    auto ret = std::make_unique<std::unordered_set<int>>();
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow()) != nullptr) {
         ret->insert(std::stoi(row->col(0)));
@@ -1222,7 +1220,7 @@ unique_ptr<unordered_set<int>> SQLStorage::getObjects(int parentID, bool without
     return ret;
 }
 
-std::unique_ptr<Storage::ChangedContainers> SQLStorage::removeObjects(const unique_ptr<unordered_set<int>>& list, bool all)
+std::unique_ptr<Storage::ChangedContainers> SQLStorage::removeObjects(const std::unique_ptr<std::unordered_set<int>>& list, bool all)
 {
     int count = list->size();
     if (count <= 0)
@@ -2030,7 +2028,7 @@ std::unique_ptr<std::vector<int>> SQLStorage::getPathIDs(int objectID)
     if (objectID == INVALID_OBJECT_ID)
         return nullptr;
 
-    auto pathIDs = make_unique<std::vector<int>>();
+    auto pathIDs = std::make_unique<std::vector<int>>();
 
     std::ostringstream sel;
     sel << "SELECT " << TQ("parent_id") << " FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE ";
