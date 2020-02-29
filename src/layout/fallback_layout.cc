@@ -82,8 +82,8 @@ void FallbackLayout::addVideo(const std::shared_ptr<CdsObject>& obj, const fs::p
 
     std::string dir;
     if (!rootpath.empty()) {
-        // make location relative to rootpath: "/home/.../Video/Action/a.mkv" with rootpath "/home/.../Video" -> "Video/Action"
-        dir = fs::relative(obj->getLocation().parent_path(), rootpath.parent_path());
+        // make location relative to rootpath: "/home/.../Videos/Action/a.mkv" with rootpath "/home/.../Videos" -> "Action"
+        dir = fs::relative(obj->getLocation().parent_path(), rootpath);
         dir = f2i->convert(dir);
     } else
         dir = esc(f2i->convert(get_last_path(obj->getLocation())));
