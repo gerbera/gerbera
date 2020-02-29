@@ -79,8 +79,6 @@ extern "C" {
 static struct magic_set* ms = nullptr;
 #endif
 
-using namespace std;
-
 ContentManager::ContentManager(const std::shared_ptr<ConfigManager>& config, const std::shared_ptr<Storage>& storage,
     std::shared_ptr<UpdateManager> update_manager, std::shared_ptr<web::SessionManager> session_manager,
     std::shared_ptr<Timer> timer, std::shared_ptr<TaskProcessor> task_processor,
@@ -614,7 +612,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
     }
 
     // request only items if non-recursive scan is wanted
-    unique_ptr<unordered_set<int>> list = storage->getObjects(containerID, !adir->getRecursive());
+    auto list = storage->getObjects(containerID, !adir->getRecursive());
 
     unsigned int thisTaskID;
     if (task != nullptr) {

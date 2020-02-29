@@ -43,8 +43,6 @@
 
 #define INOTIFY_MAX_USER_WATCHES_FILE "/proc/sys/fs/inotify/max_user_watches"
 
-using namespace std;
-
 AutoscanInotify::AutoscanInotify(std::shared_ptr<Storage> storage, std::shared_ptr<ContentManager> content)
     : storage(std::move(storage))
     , content(std::move(content))
@@ -58,14 +56,14 @@ AutoscanInotify::AutoscanInotify(std::shared_ptr<Storage> storage, std::shared_p
         }
     }
 
-    watches = make_unique<unordered_map<int, std::shared_ptr<Wd>>>();
+    watches = std::make_unique<std::unordered_map<int, std::shared_ptr<Wd>>>();
     shutdownFlag = true;
     events = IN_CLOSE_WRITE | IN_CREATE | IN_MOVED_FROM | IN_MOVED_TO | IN_DELETE | IN_DELETE_SELF | IN_MOVE_SELF | IN_UNMOUNT;
 }
 
 AutoscanInotify::~AutoscanInotify()
 {
-    unique_lock<std::mutex> lock(mutex);
+    std::unique_lock<std::mutex> lock(mutex);
     if (!shutdownFlag) {
         log_debug("start");
         shutdownFlag = true;
@@ -85,7 +83,7 @@ void AutoscanInotify::run()
     if (shutdownFlag) {
         shutdownFlag = false;
         inotify = std::make_unique<Inotify>();
-        thread_ = thread { &AutoscanInotify::threadProc, this };
+        thread_ = std::thread { &AutoscanInotify::threadProc, this };
     }
 }
 
@@ -93,7 +91,7 @@ void AutoscanInotify::threadProc()
 {
     while (!shutdownFlag) {
         try {
-            unique_lock<std::mutex> lock(mutex);
+            std::unique_lock<std::mutex> lock(mutex);
 
             while (!unmonitorQueue.empty()) {
                 auto adir = unmonitorQueue.front();
@@ -157,7 +155,7 @@ void AutoscanInotify::threadProc()
                 std::shared_ptr<Wd> wdObj = nullptr;
                 try {
                     wdObj = watches->at(wd);
-                } catch (const out_of_range& ex) {
+                } catch (const std::out_of_range& ex) {
                     inotify->removeWatch(wd);
                     continue;
                 }
@@ -297,7 +295,7 @@ int AutoscanInotify::addMoveWatch(const fs::path& path, int removeWd, int parent
             //alreadyThere =...
             //FIXME: not finished?
 
-        } catch (const out_of_range& ex) {
+        } catch (const std::out_of_range& ex) {
             wdObj = std::make_shared<Wd>(path, wd, parentWd);
             watches->emplace(wd, wdObj);
         }
@@ -385,7 +383,7 @@ void AutoscanInotify::checkMoveWatches(int wd, const std::shared_ptr<Wd>& wdObj)
                     if (objectID != INVALID_OBJECT_ID)
                         content->removeObject(objectID);
                 }
-            } catch (const out_of_range& ex) {
+            } catch (const std::out_of_range& ex) {
             } // Not found in map
         } else
             ++it;
@@ -489,7 +487,7 @@ int AutoscanInotify::monitorDirectory(const fs::path& path, const std::shared_pt
 
             // should we check for already existing "nonexisting" watches?
             // ...
-        } catch (const out_of_range& ex) {
+        } catch (const std::out_of_range& ex) {
             wdObj = std::make_shared<Wd>(path, wd, parentWd);
             watches->emplace(wd, wdObj);
         }
@@ -597,7 +595,7 @@ void AutoscanInotify::removeWatchMoves(int wd)
         std::shared_ptr<Wd> wdObj = nullptr;
         try {
             wdObj = watches->at(checkWd);
-        } catch (const out_of_range& ex) {
+        } catch (const std::out_of_range& ex) {
             break;
         }
 
@@ -685,7 +683,7 @@ void AutoscanInotify::removeDescendants(int wd)
     std::shared_ptr<Wd> wdObj = nullptr;
     try {
         wdObj = watches->at(wd);
-    } catch (const out_of_range& ex) {
+    } catch (const std::out_of_range& ex) {
         return;
     }
 

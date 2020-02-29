@@ -9,8 +9,6 @@
 #include "layout/layout.h"
 #include <utility>
 
-using namespace std;
-
 TaskProcessor::TaskProcessor()
     : taskThread(0)
     , shutdownFlag(false)

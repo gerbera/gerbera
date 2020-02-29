@@ -33,8 +33,6 @@
 
 #include "runtime.h"
 
-using namespace std;
-
 [[noreturn]] static void fatal_handler(void* udata, const char* msg)
 {
     log_error("Fatal Duktape error: {}", msg ? msg : "no message");
