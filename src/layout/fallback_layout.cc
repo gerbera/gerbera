@@ -137,8 +137,8 @@ void FallbackLayout::addImage(const std::shared_ptr<CdsObject>& obj, const fs::p
 
     std::string dir;
     if (!rootpath.empty()) {
-        // make location relative to rootpath: "/home/.../Photos/Action/a.mkv" with rootpath "/home/.../Photos" -> "Photos/Action"
-        dir = fs::relative(obj->getLocation().parent_path(), rootpath.parent_path());
+        // make location relative to rootpath: "/home/.../Photos/Action/a.mkv" with rootpath "/home/.../Photos" -> "Action"
+        dir = fs::relative(obj->getLocation().parent_path(), rootpath);
         dir = f2i->convert(dir);
     } else
         dir = esc(f2i->convert(get_last_path(obj->getLocation())));
