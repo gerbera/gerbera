@@ -261,7 +261,7 @@ std::vector<std::shared_ptr<SQLStorage::AddUpdateTable>> SQLStorage::_addUpdateO
             resBuf << obj->getResource(i)->encode();
         }
         std::string resStr = resBuf.str();
-        if (string_ok(resStr))
+        if (!resStr.empty())
             cdsObjectSql["resources"] = quote(resStr);
         else
             cdsObjectSql["resources"] = SQL_NULL;
@@ -312,7 +312,7 @@ std::vector<std::shared_ptr<SQLStorage::AddUpdateTable>> SQLStorage::_addUpdateO
                 cdsObjectSql["track_number"] = SQL_NULL;
         }
 
-        if (string_ok(item->getServiceID())) {
+        if (!item->getServiceID().empty()) {
             if (!hasReference || std::static_pointer_cast<CdsItem>(refObj)->getServiceID() != item->getServiceID())
                 cdsObjectSql["service_id"] = quote(item->getServiceID());
             else
@@ -762,7 +762,7 @@ int SQLStorage::createContainer(int parentID, std::string name, const std::strin
        << newID << ','
        << parentID << ','
        << OBJECT_TYPE_CONTAINER << ','
-       << (string_ok(upnpClass) ? quote(upnpClass) : quote(UPNP_DEFAULT_CLASS_CONTAINER)) << ','
+       << (!upnpClass.empty() ? quote(upnpClass) : quote(UPNP_DEFAULT_CLASS_CONTAINER)) << ','
        << quote(std::move(name)) << ','
        << quote(dbLocation) << ','
        << quote(stringHash(dbLocation)) << ',';
@@ -916,7 +916,7 @@ std::shared_ptr<CdsObject> SQLStorage::createObjectFromRow(const std::unique_ptr
 
     std::string resources_str = fallbackString(row->col(_resources), row->col(_ref_resources));
     bool resource_zero_ok = false;
-    if (string_ok(resources_str)) {
+    if (!resources_str.empty()) {
         std::vector<std::string> resources = split_string(resources_str,
             RESOURCE_SEP);
         for (size_t i = 0; i < resources.size(); i++) {
@@ -942,7 +942,7 @@ std::shared_ptr<CdsObject> SQLStorage::createObjectFromRow(const std::unique_ptr
             cont->setVirtual(true);
 
         std::string autoscanPersistent = row->col(_as_persistent);
-        if (string_ok(autoscanPersistent)) {
+        if (!autoscanPersistent.empty()) {
             if (remapBool(autoscanPersistent))
                 cont->setAutoscanType(OBJECT_AUTOSCAN_CFG);
             else
@@ -970,7 +970,7 @@ std::shared_ptr<CdsObject> SQLStorage::createObjectFromRow(const std::unique_ptr
 
         item->setTrackNumber(stoi_string(row->col(_track_number)));
 
-        if (string_ok(row->col(_ref_service_id)))
+        if (!row->col(_ref_service_id).empty())
             item->setServiceID(row->col(_ref_service_id));
         else
             item->setServiceID(row->col(_service_id));
@@ -1024,7 +1024,7 @@ std::shared_ptr<CdsObject> SQLStorage::createObjectFromSearchRow(const std::uniq
 
     std::string resources_str = row->col(SearchCol::resources);
     bool resource_zero_ok = false;
-    if (string_ok(resources_str)) {
+    if (!resources_str.empty()) {
         std::vector<std::string> resources = split_string(resources_str, RESOURCE_SEP);
         for (size_t i = 0; i < resources.size(); i++) {
             if (i == 0)
@@ -1337,7 +1337,7 @@ std::unique_ptr<Storage::ChangedContainers> SQLStorage::removeObject(int objectI
     if (all && !isContainer) {
         std::string ref_id_str = row->col(1);
         int ref_id;
-        if (string_ok(ref_id_str)) {
+        if (!ref_id_str.empty()) {
             ref_id = std::stoi(ref_id_str);
             if (!IS_FORBIDDEN_CDS_ID(ref_id))
                 objectID = ref_id;
@@ -1444,7 +1444,7 @@ std::unique_ptr<Storage::ChangedContainers> SQLStorage::_recursiveRemove(
                 } else {
                     if (all) {
                         std::string refId = row->col(2);
-                        if (string_ok(refId)) {
+                        if (!refId.empty()) {
                             parentIds.push_back(std::stoi(row->col(2)));
                             itemIds.push_back(std::stoi(row->col(2)));
                             removeIds.push_back(std::stoi(row->col(2)));
@@ -1717,7 +1717,7 @@ std::shared_ptr<AutoscanDirectory> SQLStorage::_fillAutoscanDirectory(const std:
 {
     int objectID = INVALID_OBJECT_ID;
     std::string objectIDstr = row->col(1);
-    if (string_ok(objectIDstr))
+    if (!objectIDstr.empty())
         objectID = std::stoi(objectIDstr);
     int storageID = std::stoi(row->col(0));
 
@@ -1894,7 +1894,7 @@ int SQLStorage::_getAutoscanObjectID(int autoscanID)
     if (res == nullptr)
         throw StorageException("", "error while doing select on ");
     std::unique_ptr<SQLRow> row;
-    if ((row = res->nextRow()) != nullptr && string_ok(row->col(0)))
+    if ((row = res->nextRow()) != nullptr && !row->col(0).empty())
         return std::stoi(row->col(0));
     return INVALID_OBJECT_ID;
 }
@@ -2052,7 +2052,7 @@ std::unique_ptr<std::vector<int>> SQLStorage::getPathIDs(int objectID)
 
 std::string SQLStorage::getFsRootName()
 {
-    if (string_ok(fsRootName))
+    if (!fsRootName.empty())
         return fsRootName;
     setFsRootName();
     return fsRootName;
@@ -2060,7 +2060,7 @@ std::string SQLStorage::getFsRootName()
 
 void SQLStorage::setFsRootName(const std::string& rootName)
 {
-    if (string_ok(rootName)) {
+    if (!rootName.empty()) {
         fsRootName = rootName;
     } else {
         auto fsRootObj = loadObject(CDS_ID_FS_ROOT);

@@ -436,7 +436,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
         header = getDLNAtransferHeader(mimeType, header);
 #endif
 
-        if (string_ok(header))
+        if (!header.empty())
                 info->http_header = ixmlCloneDOMString(header.c_str());
         */
 
@@ -472,7 +472,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
     // seeking
     if (S_ISREG(statbuf.st_mode))
     {
-        if (string_ok(header))
+        if (!header.empty())
             header = header + "\r\n";
 
          header = header + "Accept-Ranges: bytes";
@@ -480,7 +480,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
 
     header = getDLNAtransferHeader(mimeType, header);
 
-    if (string_ok(header))
+    if (!header.empty())
         info->http_header = ixmlCloneDOMString(header.c_str());
     */
 

@@ -214,11 +214,6 @@ fs::path find_in_path(const fs::path& exec)
     return "";
 }
 
-bool string_ok(const std::string& str)
-{
-    return !str.empty();
-}
-
 std::string http_redirect_to(const std::string& ip, const std::string& port, const std::string& page)
 {
     return R"(<html><head><meta http-equiv="Refresh" content="0;URL=http://)" + ip + ":" + port + "/" + page + R"("></head><body bgcolor="#dddddd"></body></html>)";
@@ -515,8 +510,8 @@ void writeTextFile(const fs::path& path, const std::string& contents)
 
 std::string renderProtocolInfo(const std::string& mimetype, const std::string& protocol, const std::string& extend)
 {
-    if (string_ok(mimetype) && string_ok(protocol)) {
-        if (string_ok(extend))
+    if (!mimetype.empty() && !protocol.empty()) {
+        if (!extend.empty())
             return protocol + ":*:" + mimetype + ":" + extend;
         return protocol + ":*:" + mimetype + ":*";
     }
@@ -653,7 +648,7 @@ bool check_resolution(const std::string& resolution, int* x, int* y)
     if (parts.size() != 2)
         return false;
 
-    if (string_ok(parts[0]) && string_ok(parts[1])) {
+    if (!parts[0].empty() && !parts[1].empty()) {
         int _x = std::stoi(parts[0]);
         int _y = std::stoi(parts[1]);
 
@@ -1204,7 +1199,7 @@ std::string getDLNAprofileString(const std::string& contentType)
     else
         profile = "";
 
-    if (string_ok(profile))
+    if (!profile.empty())
         profile = std::string(D_PROFILE) + "=" + profile;
     return profile;
 }
@@ -1214,7 +1209,7 @@ std::string getDLNAContentHeader(const std::shared_ptr<ConfigManager>& config, c
     if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO)) {
         std::string content_parameter;
         content_parameter = getDLNAprofileString(contentType);
-        if (string_ok(content_parameter))
+        if (!content_parameter.empty())
             content_parameter = D_PROFILE + std::string("=") + content_parameter + ";";
         // enabling or disabling seek
         if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_DLNA_SEEK))
@@ -1237,7 +1232,7 @@ std::string getDLNATransferHeader(const std::shared_ptr<ConfigManager>& config, 
         else if (startswith(mimeType, "audio") || startswith(mimeType, "video"))
             transfer_parameter = D_HTTP_TRANSFER_MODE_STREAMING;
 
-        if (string_ok(transfer_parameter)) {
+        if (!transfer_parameter.empty()) {
             return transfer_parameter;
         }
     }
@@ -1281,7 +1276,7 @@ std::string getAVIFourCC(const fs::path& avi_filename)
     std::string fourcc = std::string(buffer + FCC_OFFSET, 4);
     free(buffer);
 
-    return string_ok(fourcc) ? fourcc : "";
+    return fourcc;
 }
 #endif
 

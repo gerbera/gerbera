@@ -228,7 +228,7 @@ void MatroskaHandler::parseAttachments(const std::shared_ptr<CdsItem>& item, Ebm
             } else {
                 // fillMetadata
                 std::string art_mimetype = getContentTypeFromByteVector(&fileData);
-                if (string_ok(art_mimetype))
+                if (!art_mimetype.empty())
                     addArtworkResource(item, art_mimetype);
             }
         }

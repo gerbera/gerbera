@@ -845,20 +845,20 @@ void ContentManager::updateObject(int objectID, const std::map<std::string, std:
         auto clone = CdsObject::createObject(storage, objectType);
         item->copyTo(clone);
 
-        if (string_ok(title))
+        if (!title.empty())
             clone->setTitle(title);
-        if (string_ok(upnp_class))
+        if (!upnp_class.empty())
             clone->setClass(upnp_class);
-        if (string_ok(location))
+        if (!location.empty())
             clone->setLocation(location);
 
         auto cloned_item = std::static_pointer_cast<CdsItem>(clone);
 
-        if (string_ok(mimetype) && (string_ok(protocol))) {
+        if (!mimetype.empty() && !protocol.empty()) {
             cloned_item->setMimeType(mimetype);
             auto resource = cloned_item->getResource(0);
             resource->addAttribute("protocolInfo", renderProtocolInfo(mimetype, protocol));
-        } else if (mimetype.empty() && (string_ok(protocol))) {
+        } else if (mimetype.empty() && !protocol.empty()) {
             auto resource = cloned_item->getResource(0);
             resource->addAttribute("protocolInfo", renderProtocolInfo(cloned_item->getMimeType(), protocol));
         } else {
@@ -869,7 +869,7 @@ void ContentManager::updateObject(int objectID, const std::map<std::string, std:
             resource->addAttribute("protocolInfo", renderProtocolInfo(mimetype, protocol));
         }
 
-        if (string_ok(description)) {
+        if (!description.empty()) {
             cloned_item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), description);
         } else {
             cloned_item->removeMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION));
@@ -894,15 +894,15 @@ void ContentManager::updateObject(int objectID, const std::map<std::string, std:
         auto clone = CdsObject::createObject(storage, objectType);
         item->copyTo(clone);
 
-        if (string_ok(title))
+        if (!title.empty())
             clone->setTitle(title);
-        if (string_ok(upnp_class))
+        if (!upnp_class.empty())
             clone->setClass(upnp_class);
 
         auto cloned_item = std::static_pointer_cast<CdsActiveItem>(clone);
 
         // state and description can be an empty strings - if you want to clear it
-        if (string_ok(description)) {
+        if (!description.empty()) {
             cloned_item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), description);
         } else {
             cloned_item->removeMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION));
@@ -911,9 +911,9 @@ void ContentManager::updateObject(int objectID, const std::map<std::string, std:
         if (!state.empty())
             cloned_item->setState(state);
 
-        if (string_ok(mimetype))
+        if (!mimetype.empty())
             cloned_item->setMimeType(mimetype);
-        if (string_ok(action))
+        if (!action.empty())
             cloned_item->setAction(action);
 
         if (!item->equals(cloned_item, true)) {
@@ -929,9 +929,9 @@ void ContentManager::updateObject(int objectID, const std::map<std::string, std:
         auto clone = CdsObject::createObject(storage, objectType);
         cont->copyTo(clone);
 
-        if (string_ok(title))
+        if (!title.empty())
             clone->setTitle(title);
-        if (string_ok(upnp_class))
+        if (!upnp_class.empty())
             clone->setClass(upnp_class);
 
         auto cloned_item = std::static_pointer_cast<CdsContainer>(clone);
@@ -1396,7 +1396,7 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
             path = obj->getLocation();
 
             std::string vpath = obj->getVirtualPath();
-            if (string_ok(vpath))
+            if (!vpath.empty())
                 task->setDescription("Removing: " + obj->getVirtualPath());
         } catch (const std::runtime_error& e) {
             log_debug("trying to remove an object ID which is no longer in the database! {}", objectID);

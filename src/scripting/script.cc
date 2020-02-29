@@ -451,7 +451,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
 
         // location must not be touched by character conversion!
         fs::path location = getProperty("location");
-        if (string_ok(location))
+        if (!location.empty())
             obj->setLocation(location);
         else {
             if (pcd != nullptr)
@@ -600,7 +600,7 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
 
 #ifdef HAVE_ATRAILERS
         auto tmp = obj->getAuxData(ATRAILERS_AUXDATA_POST_DATE);
-        if (string_ok(tmp))
+        if (!tmp.empty())
             aux[ATRAILERS_AUXDATA_POST_DATE] = tmp;
 #endif
 

@@ -128,7 +128,7 @@ std::string PlaylistParserScript::readln()
             return "";
 
         ret = trim_string(currentLine);
-        if (string_ok(ret))
+        if (!ret.empty())
             return ret;
     }
 }

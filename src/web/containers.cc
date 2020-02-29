@@ -57,7 +57,7 @@ void web::containers::process()
     xml2JsonHints->setArrayName(containers, "container");
     containers.append_attribute("parent_id") = parentID;
     containers.append_attribute("type") = "database";
-    if (string_ok(param("select_it")))
+    if (!param("select_it").empty())
         containers.append_attribute("select_it") = param("select_it").c_str();
 
     auto param = std::make_unique<BrowseParam>(parentID, BROWSE_DIRECT_CHILDREN | BROWSE_CONTAINERS);

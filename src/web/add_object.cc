@@ -64,7 +64,7 @@ std::shared_ptr<CdsObject> web::addObject::addItem(int parentID, std::shared_ptr
     item->setClass(param("class"));
 
     tmp = param("description");
-    if (string_ok(tmp))
+    if (!tmp.empty())
         item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), tmp);
 
     /// \todo is there a default setting? autoscan? import settings?
@@ -87,7 +87,7 @@ std::shared_ptr<CdsObject> web::addObject::addActiveItem(int parentID)
 
     /// \todo is there a default setting? autoscan? import settings?
     tmp = param("state");
-    if (string_ok(tmp))
+    if (!tmp.empty())
         item->setState(tmp);
 
     item->setParentID(parentID);
@@ -104,7 +104,7 @@ std::shared_ptr<CdsObject> web::addObject::addActiveItem(int parentID)
     item->setClass(param("class"));
 
     tmp = param("description");
-    if (string_ok(tmp))
+    if (!tmp.empty())
         item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), tmp);
 
     /// \todo is there a default setting? autoscan? import settings?
@@ -131,7 +131,7 @@ std::shared_ptr<CdsObject> web::addObject::addUrl(int parentID, std::shared_ptr<
     item->setClass(param("class"));
 
     tmp = param("description");
-    if (string_ok(tmp))
+    if (!tmp.empty())
         item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), tmp);
 
     /// \todo is there a default setting? autoscan? import settings?
@@ -142,7 +142,7 @@ std::shared_ptr<CdsObject> web::addObject::addUrl(int parentID, std::shared_ptr<
 
     if (addProtocol) {
         std::string protocol = param("protocol");
-        if (string_ok(protocol))
+        if (!protocol.empty())
             protocolInfo = renderProtocolInfo(tmp, protocol);
         else
             protocolInfo = renderProtocolInfo(tmp);

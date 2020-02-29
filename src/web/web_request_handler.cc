@@ -56,13 +56,13 @@ WebRequestHandler::WebRequestHandler(std::shared_ptr<ConfigManager> config,
 int WebRequestHandler::intParam(std::string name, int invalid)
 {
     std::string value = param(std::move(name));
-    return string_ok(value) ? std::stoi(value) : invalid;
+    return !value.empty() ? std::stoi(value) : invalid;
 }
 
 bool WebRequestHandler::boolParam(std::string name)
 {
     std::string value = param(std::move(name));
-    return string_ok(value) && (value == "1" || value == "true");
+    return !value.empty() && (value == "1" || value == "true");
 }
 
 void WebRequestHandler::check_request(bool checkLogin)
@@ -111,7 +111,7 @@ void WebRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     std::string mimetype;
     std::string returnType = param("return_type");
 
-    if (string_ok(returnType) && returnType == "xml")
+    if (returnType == "xml")
         mimetype = MIMETYPE_XML;
     else
         mimetype = MIMETYPE_JSON;
@@ -187,7 +187,7 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(enum UpnpOpenFileMode mode)
     }
 
     std::string returnType = param("return_type");
-    if (string_ok(returnType) && returnType == "xml") {
+    if (returnType == "xml") {
 #ifdef TOMBDEBUG
         try {
             // make sure we can generate JSON w/o exceptions
@@ -243,7 +243,7 @@ void WebRequestHandler::handleUpdateIDs()
 {
     // session will be filled by check_request
     std::string updates = param("updates");
-    if (string_ok(updates)) {
+    if (!updates.empty()) {
         auto root = xmlDoc->document_element();
         auto updateIDs = root.append_child("update_ids");
 
@@ -258,7 +258,7 @@ void WebRequestHandler::handleUpdateIDs()
 void WebRequestHandler::addUpdateIDs(const std::shared_ptr<Session>& session, pugi::xml_node* updateIDsEl)
 {
     std::string updateIDs = session->getUIUpdateIDs();
-    if (string_ok(updateIDs)) {
+    if (!updateIDs.empty()) {
         log_debug("UI: sending update ids: {}", updateIDs.c_str());
         updateIDsEl->append_attribute("ids") = updateIDs.c_str();
         updateIDsEl->append_attribute("updates") = true;

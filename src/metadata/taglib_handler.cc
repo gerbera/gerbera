@@ -91,7 +91,7 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
         if (i > 0) {
             value = std::to_string(i);
 
-            if (string_ok(value))
+            if (!value.empty())
                 value = value + "-01-01";
         } else
             return;
@@ -101,7 +101,7 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
         if (i > 0) {
             value = std::to_string(i);
 
-            if (string_ok(value))
+            if (!value.empty())
                 value = value + "-01-01";
         } else
             return;
@@ -160,7 +160,7 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
 
     value = trim_string(value);
 
-    if (string_ok(value)) {
+    if (!value.empty()) {
         item->setMetadata(MT_KEYS[field].upnp, sc->convert(value));
         //        log_debug("Setting metadata on item: {}, {}", field, sc->convert(value).c_str());
     }
@@ -245,7 +245,7 @@ bool TagLibHandler::isValidArtworkContentType(const std::string& art_mimetype)
 {
     // saw that simply "PNG" was used with some mp3's, so mimetype setting
     // was probably invalid
-    return (string_ok(art_mimetype) && (art_mimetype.find('/') != std::string::npos));
+    return art_mimetype.find('/') != std::string::npos;
 }
 
 std::string TagLibHandler::getContentTypeFromByteVector(const TagLib::ByteVector& data)
@@ -633,7 +633,7 @@ void TagLibHandler::extractMP4(TagLib::IOStream* roStream, const std::shared_ptr
         TagLib::ByteVector data = coverArt.data();
         art_mimetype = getContentTypeFromByteVector(data);
 
-        if (string_ok(art_mimetype))
+        if (!art_mimetype.empty())
             addArtworkResource(item, art_mimetype);
     } else {
         log_debug("TagLibHandler: mp4 file has no 'covr' item");

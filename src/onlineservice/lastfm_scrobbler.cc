@@ -98,11 +98,11 @@ void LastFm::startedPlaying(std::shared_ptr<CdsItem> item)
     info->track = const_cast<char*>(title.c_str());
 
     std::string album = item->getMetadata(MetadataHandler::getMetaFieldName(M_ALBUM));
-    if (string_ok(album))
+    if (!album.empty())
         info->album = const_cast<char*>(album.c_str());
 
     std::string trackNr = item->getMetadata(MetadataHandler::getMetaFieldName(M_TRACKNUMBER));
-    if (string_ok(trackNr))
+    if (!trackNr.empty())
         info->track_nr = atoi(trackNr.c_str());
 
     if (item->getResourceCount() > 0) {

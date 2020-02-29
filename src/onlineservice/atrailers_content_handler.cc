@@ -130,7 +130,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
     }
 
     temp = preview.child("large").text().as_string();
-    if (string_ok(temp)) {
+    if (!temp.empty()) {
         item->setURL(temp);
     } else {
         log_error("Could not get location for Trailers item {}, "
@@ -142,31 +142,31 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
     item->setClass("object.item.videoItem");
 
     temp = info.child("rating").text().as_string();
-    if (string_ok(temp))
+    if (!temp.empty())
         item->setMetadata(MetadataHandler::getMetaFieldName(M_RATING),
             temp);
 
     temp = info.child("studio").text().as_string();
-    if (string_ok(temp))
+    if (!temp.empty())
         item->setMetadata(MetadataHandler::getMetaFieldName(M_PRODUCER),
             temp);
 
     temp = info.child("director").text().as_string();
-    if (string_ok(temp))
+    if (!temp.empty())
         item->setMetadata(MetadataHandler::getMetaFieldName(M_DIRECTOR),
             temp);
 
     temp = info.child("postdate").text().as_string();
-    if (string_ok(temp))
+    if (!temp.empty())
         item->setAuxData(ATRAILERS_AUXDATA_POST_DATE, temp);
 
     temp = info.child("releasedate").text().as_string();
-    if (string_ok(temp))
+    if (!temp.empty())
         item->setMetadata(MetadataHandler::getMetaFieldName(M_DATE),
             temp);
 
     temp = info.child("description").text().as_string();
-    if (string_ok(temp)) {
+    if (!temp.empty()) {
         /// \todo cut out a small part for the usual description
         item->setMetadata(MetadataHandler::getMetaFieldName(M_LONGDESCRIPTION), temp);
     }
@@ -181,15 +181,15 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
                 return nullptr;
 
             temp = actor.text().as_string();
-            if (string_ok(temp)) {
-                if (string_ok(actors))
+            if (!temp.empty()) {
+                if (!actors.empty())
                     actors.append(", ");
 
                 actors.append(temp);
             }
         }
 
-        if (string_ok(actors))
+        if (!actors.empty())
             item->setMetadata(MetadataHandler::getMetaFieldName(M_GENRE),
                 temp);
     }
@@ -204,15 +204,15 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
                 return nullptr;
 
             temp = gn.text().as_string();
-            if (string_ok(temp)) {
-                if (string_ok(genres))
+            if (!temp.empty()) {
+                if (!genres.empty())
                     genres.append(", ");
 
                 genres.append(temp);
             }
         }
 
-        if (string_ok(genres))
+        if (!genres.empty())
             item->setMetadata(MetadataHandler::getMetaFieldName(M_GENRE),
                 temp);
     }

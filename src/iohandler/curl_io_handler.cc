@@ -80,7 +80,7 @@ void CurlIOHandler::threadProc()
 {
     CURLcode res;
     assert(curl_handle != nullptr);
-    assert(string_ok(URL));
+    assert(!URL.empty());
 
     //char error_buffer[CURL_ERROR_SIZE] = {'\0'};
     //curl_easy_setopt(curl_handle, CURLOPT_ERRORBUFFER, error_buffer);

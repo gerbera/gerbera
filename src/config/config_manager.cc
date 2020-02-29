@@ -641,7 +641,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     } else {
         temp = interface;
     }
-    if (string_ok(temp) && string_ok(getOption("/server/ip", "")))
+    if (!temp.empty() && !getOption("/server/ip", "").empty())
         throw std::runtime_error("Error in config file: you can not specify interface and ip at the same time!");
 
     NEW_OPTION(temp);
@@ -1389,7 +1389,7 @@ std::map<std::string, std::string> ConfigManager::createDictionaryFromNode(const
                 std::string key = child.attribute(keyAttr.c_str()).as_string();
                 std::string value = child.attribute(valAttr.c_str()).as_string();
 
-                if (string_ok(key) && string_ok(value)) {
+                if (!key.empty() && !value.empty()) {
                     if (tolower) {
                         key = tolower_string(key);
                     }
@@ -1420,7 +1420,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
                 std::string mt = child.attribute("mimetype").as_string();
                 std::string pname = child.attribute("using").as_string();
 
-                if (string_ok(mt) && string_ok(pname)) {
+                if (!mt.empty() && !pname.empty()) {
                     mt_mappings[mt] = pname;
                 } else {
                     throw std::runtime_error("error in configuration: invalid or missing mimetype to profile mapping");
@@ -1475,7 +1475,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
         sub = child.child("resolution");
         if (sub != nullptr) {
             param = sub.text().as_string();
-            if (string_ok(param)) {
+            if (!param.empty()) {
                 if (check_resolution(param))
                     prof->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), param);
             }
@@ -1859,8 +1859,7 @@ std::vector<std::string> ConfigManager::createArrayFromNode(const pugi::xml_node
         for (pugi::xml_node child : element.children()) {
             if (child.name() == nodeName) {
                 std::string attrValue = child.attribute(attrName.c_str()).as_string();
-
-                if (string_ok(attrValue))
+                if (!attrValue.empty())
                     arr.push_back(attrValue);
             }
         }
