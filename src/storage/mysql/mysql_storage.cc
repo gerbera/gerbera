@@ -267,7 +267,7 @@ void MysqlStorage::init()
 
     /* --- --- ---*/
 
-    if (!string_ok(dbVersion) || dbVersion != "5")
+    if (dbVersion != "5")
         throw std::runtime_error("The database seems to be from a newer version (database version " + dbVersion + ")!");
 
     lock.unlock();

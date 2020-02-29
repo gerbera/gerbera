@@ -87,7 +87,7 @@ void LastFm::startedPlaying(std::shared_ptr<CdsItem> item)
     std::string artist = item->getMetadata(MetadataHandler::getMetaFieldName(M_ARTIST));
     std::string title = item->getMetadata(MetadataHandler::getMetaFieldName(M_TITLE));
 
-    if (!string_ok(artist) || !string_ok(title)) {
+    if (artist.empty() || title.empty()) {
         finished_playing(scrobbler);
         currentTrackId = -1;
         return;

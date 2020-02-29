@@ -134,7 +134,7 @@ std::shared_ptr<CdsObject> SopCastContentHandler::getObject(std::string groupNam
     item->setAuxData(SOPCAST_AUXDATA_GROUP, std::move(groupName));
 
     std::string temp = channel.attribute("id").as_string();
-    if (!string_ok(temp)) {
+    if (temp.empty()) {
         log_warning("Failed to retrieve SopCast channel ID");
         return nullptr;
     }
@@ -143,7 +143,7 @@ std::shared_ptr<CdsObject> SopCastContentHandler::getObject(std::string groupNam
     item->setServiceID(temp);
 
     temp = channel.child("stream_type").text().as_string();
-    if (!string_ok(temp)) {
+    if (temp.empty()) {
         log_warning("Failed to retrieve SopCast channel mimetype");
         return nullptr;
     }
@@ -175,7 +175,7 @@ std::shared_ptr<CdsObject> SopCastContentHandler::getObject(std::string groupNam
     }
 
     temp = tmp_el.child("item").text().as_string();
-    if (!string_ok(temp)) {
+    if (temp.empty()) {
         log_warning("Failed to retrieve SopCast channel URL");
         return nullptr;
     }

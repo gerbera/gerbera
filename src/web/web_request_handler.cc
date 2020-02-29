@@ -171,7 +171,7 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(enum UpnpOpenFileMode mode)
         error_code = 800;
     }
 
-    if (!string_ok(error)) {
+    if (error.empty()) {
         root.append_attribute("success") = true;
     } else {
         root.append_attribute("success") = false;

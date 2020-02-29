@@ -181,7 +181,7 @@ bool is_executable(const fs::path& path, int* err)
 fs::path find_in_path(const fs::path& exec)
 {
     std::string PATH = getenv("PATH");
-    if (!string_ok(PATH))
+    if (PATH.empty())
         return "";
 
     auto st = std::make_unique<StringTokenizer>(PATH);
@@ -217,12 +217,6 @@ fs::path find_in_path(const fs::path& exec)
 bool string_ok(const std::string& str)
 {
     return !str.empty();
-}
-
-void string_ok_ex(const std::string& str)
-{
-    if (str.empty())
-        throw std::runtime_error("Empty string");
 }
 
 std::string http_redirect_to(const std::string& ip, const std::string& port, const std::string& page)
@@ -578,7 +572,7 @@ std::string secondsToHMS(int seconds)
 
 int HMSToSeconds(const std::string& time)
 {
-    if (!string_ok(time)) {
+    if (time.empty()) {
         log_warning("Could not convert time representation to seconds!");
         return 0;
     }
@@ -619,7 +613,7 @@ std::string getMIME(const fs::path& filepath, const void* buffer, size_t length)
     }
 
     const char* mime;
-    if (!string_ok(filepath)) {
+    if (filepath.empty()) {
         mime = magic_buffer(magic_cookie, buffer, length);
     } else {
         mime = magic_file(magic_cookie, filepath.c_str());
@@ -911,7 +905,7 @@ std::string interfaceToIP(const std::string& interface)
     struct sockaddr_in local_address;
     int local_socket;
 
-    if (!string_ok(interface))
+    if (interface.empty())
         return "";
 
     local_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
@@ -956,7 +950,7 @@ std::string interfaceToIP(const std::string& interface)
 
 std::string ipToInterface(const std::string& ip)
 {
-    if (!string_ok(ip)) {
+    if (ip.empty()) {
         return "";
     }
 

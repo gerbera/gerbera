@@ -253,7 +253,7 @@ std::string TagLibHandler::getContentTypeFromByteVector(const TagLib::ByteVector
     std::string art_mimetype = MIMETYPE_DEFAULT;
 #ifdef HAVE_MAGIC
     art_mimetype = getMIMETypeFromBuffer(data.data(), data.size());
-    if (!string_ok(art_mimetype))
+    if (art_mimetype.empty())
         return MIMETYPE_DEFAULT;
 #endif
     return art_mimetype;
@@ -406,7 +406,7 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, const std::shared_ptr
     std::vector<std::string> aux_tags_list = config->getStringArrayOption(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
     for (const auto& desiredFrame : aux_tags_list) {
 
-        if (!string_ok(desiredFrame)) {
+        if (desiredFrame.empty()) {
             continue;
         }
 
@@ -431,7 +431,7 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, const std::shared_ptr
             //log_debug("TXXX Frame list has {} elements", frameList.size());
 
             std::string desiredSubTag = desiredFrame.substr(5);
-            if (!string_ok(desiredSubTag))
+            if (desiredSubTag.empty())
                 continue;
 
             for (const auto& frame : frameList) {
@@ -545,7 +545,7 @@ void TagLibHandler::extractFLAC(TagLib::IOStream* roStream, const std::shared_pt
     std::vector<std::string> aux_tags_list = config->getStringArrayOption(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
     for (const auto& desiredTag : aux_tags_list) {
 
-        if (!string_ok(desiredTag)) {
+        if (desiredTag.empty()) {
             continue;
         }
 

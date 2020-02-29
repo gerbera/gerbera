@@ -173,7 +173,7 @@ std::shared_ptr<CdsObject> SQLStorage::checkRefID(const std::shared_ptr<CdsObjec
     int refID = obj->getRefID();
     std::string location = obj->getLocation();
 
-    if (!string_ok(location))
+    if (location.empty())
         throw std::runtime_error("tried to check refID without a location set");
 
     if (refID > 0) {
@@ -285,7 +285,7 @@ std::vector<std::shared_ptr<SQLStorage::AddUpdateTable>> SQLStorage::_addUpdateO
 
         if (!hasReference) {
             fs::path loc = item->getLocation();
-            if (!string_ok(loc))
+            if (loc.empty())
                 throw std::runtime_error("tried to create or update a non-referenced item without a location set");
             if (IS_CDS_PURE_ITEM(objectType)) {
                 int parentID = ensurePathExistence(loc.parent_path(), changedContainer);
@@ -1634,7 +1634,7 @@ void SQLStorage::updateAutoscanPersistentList(ScanMode scanmode, std::shared_ptr
         assert(ad->getScanMode() == scanmode);
 
         std::string location = ad->getLocation();
-        if (!string_ok(location))
+        if (location.empty())
             throw std::runtime_error("AutoscanDirectoy with illegal location given to SQLStorage::updateAutoscanPersistentList");
 
         std::ostringstream q;

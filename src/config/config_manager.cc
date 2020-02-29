@@ -538,7 +538,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
         log_debug("received {} from nl_langinfo", temp.c_str());
     }
 
-    if (!string_ok(temp))
+    if (temp.empty())
         temp = DEFAULT_FILESYSTEM_CHARSET;
 #else
     temp = DEFAULT_FILESYSTEM_CHARSET;
@@ -636,7 +636,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_SERVER_HIDE_PC_DIRECTORY);
 
-    if (!string_ok(interface)) {
+    if (interface.empty()) {
         temp = getOption("/server/interface", "");
     } else {
         temp = interface;
@@ -647,7 +647,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     NEW_OPTION(temp);
     SET_OPTION(CFG_SERVER_NETWORK_INTERFACE);
 
-    if (!string_ok(ip)) {
+    if (ip.empty()) {
         temp = getOption("/server/ip", ""); // bind to any IP address
     } else {
         temp = ip;
@@ -705,7 +705,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
                                  "<presentationURL> tag");
     }
 
-    if (((temp == "ip") || (temp == "port")) && !string_ok(getOption("/server/presentationURL"))) {
+    if (((temp == "ip") || (temp == "port")) && getOption("/server/presentationURL").empty()) {
         throw std::runtime_error("Error in config file: \"append-to\" attribute "
                                  "value in <presentationURL> tag is set to \""
             + temp + "\" but no URL is specified");
@@ -1083,7 +1083,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     temp = getOption("/server/extended-runtime-options/mark-played-items/"
                      "string",
         DEFAULT_MARK_PLAYED_ITEMS_STRING);
-    if (!string_ok(temp))
+    if (temp.empty())
         throw std::runtime_error("Error in config file: "
                                  "empty string given for the <string> tag in the "
                                  "<mark-played-items> section");
@@ -1102,7 +1102,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
             contentElementCount++;
 
             std::string mark_content = content.text().as_string();
-            if (!string_ok(mark_content))
+            if (mark_content.empty())
                 throw std::runtime_error("error in configuration, <mark-played-items>, empty <content> parameter!");
 
             if ((mark_content != DEFAULT_MARK_PLAYED_CONTENT_VIDEO) && (mark_content != DEFAULT_MARK_PLAYED_CONTENT_AUDIO) && (mark_content != DEFAULT_MARK_PLAYED_CONTENT_IMAGE))
@@ -1133,7 +1133,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
         temp = getOption("/server/extended-runtime-options/lastfm/username",
             DEFAULT_LASTFM_USERNAME);
 
-        if (!string_ok(temp))
+        if (temp.empty())
             throw std::runtime_error("Error in config file: lastfm - "
                                      "invalid username value in "
                                      "<username> tag");
@@ -1144,7 +1144,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
         temp = getOption("/server/extended-runtime-options/lastfm/password",
             DEFAULT_LASTFM_PASSWORD);
 
-        if (!string_ok(temp))
+        if (temp.empty())
             throw std::runtime_error("Error in config file: lastfm - "
                                      "invalid password value in "
                                      "<password> tag");
@@ -1446,7 +1446,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
             continue;
 
         param = child.attribute("type").as_string();
-        if (!string_ok(param))
+        if (param.empty())
             throw std::runtime_error("error in configuration: missing transcoding type in profile");
 
         transcoding_type_t tr_type;
@@ -1460,7 +1460,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
             throw std::runtime_error("error in configuration: invalid transcoding type " + param + " in profile");
 
         param = child.attribute("name").as_string();
-        if (!string_ok(param))
+        if (param.empty())
             throw std::runtime_error("error in configuration: invalid transcoding profile name");
 
         auto prof = std::make_shared<TranscodingProfile>(tr_type, param);
@@ -1468,7 +1468,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
         pugi::xml_node sub;
         sub = child.child("mimetype");
         param = sub.text().as_string();
-        if (!string_ok(param))
+        if (param.empty())
             throw std::runtime_error("error in configuration: invalid target mimetype in transcoding profile");
         prof->setTargetMimeType(param);
 
@@ -1484,7 +1484,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
         sub = child.child("avi-fourcc-list");
         if (sub != nullptr) {
             std::string mode = sub.attribute("mode").as_string();
-            if (!string_ok(mode))
+            if (mode.empty())
                 throw std::runtime_error("error in configuration: avi-fourcc-list requires a valid \"mode\" attribute");
 
             avi_fourcc_listmode_t fcc_mode;
@@ -1504,7 +1504,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
                         continue;
 
                     std::string fcc = fourcc.text().as_string();
-                    if (!string_ok(fcc))
+                    if (fcc.empty())
                         throw std::runtime_error("error in configuration: empty fourcc specified!");
                     fcc_list.push_back(fcc);
                 }
@@ -1617,7 +1617,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
                 + prof->getName() + "\" is missing the <agent> option");
 
         param = sub.attribute("command").as_string();
-        if (!string_ok(param))
+        if (param.empty())
             throw std::runtime_error("error in configuration: transcoding "
                                      "profile \""
                 + prof->getName() + "\" has an invalid command setting");
@@ -1632,7 +1632,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
             tmp_path = param;
         } else {
             tmp_path = find_in_path(param);
-            if (!string_ok(tmp_path))
+            if (tmp_path.empty())
                 throw std::runtime_error("error in configuration, transcoding "
                                          "profile \""
                     + prof->getName() + "\" could not find transcoding command " + param + " in $PATH");
@@ -1645,7 +1645,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
                 + prof->getName() + ": transcoder " + param + "is not executable - " + strerror(err));
 
         param = sub.attribute("arguments").as_string();
-        if (!string_ok(param))
+        if (param.empty())
             throw std::runtime_error("error in configuration: transcoding profile " + prof->getName() + " has an empty argument string");
 
         prof->setArguments(param);
@@ -1732,7 +1732,7 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNode(const st
             continue;
 
         fs::path location = child.attribute("location").as_string();
-        if (!string_ok(location)) {
+        if (location.empty()) {
             log_warning("Found an Autoscan directory with invalid location!");
             continue;
         }
@@ -1744,7 +1744,7 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNode(const st
 
         ScanMode mode;
         std::string temp = child.attribute("mode").as_string();
-        if (!string_ok(temp) || ((temp != "timed") && (temp != "inotify"))) {
+        if (temp.empty() || ((temp != "timed") && (temp != "inotify"))) {
             throw std::runtime_error("autoscan directory " + location.string() + ": mode attribute is missing or invalid");
         }
 
@@ -1763,7 +1763,7 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNode(const st
 
         if (mode == ScanMode::Timed) {
             temp = child.attribute("level").as_string();
-            if (!string_ok(temp)) {
+            if (temp.empty()) {
                 throw std::runtime_error("autoscan directory " + location.string() + ": level attribute is missing or invalid");
             }
 
@@ -1776,7 +1776,7 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNode(const st
             }
 
             temp = child.attribute("interval").as_string();
-            if (!string_ok(temp)) {
+            if (temp.empty()) {
                 throw std::runtime_error("autoscan directory " + location.string() + ": interval attribute is required for timed mode");
             }
 
@@ -1792,7 +1792,7 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNode(const st
         }
 
         temp = child.attribute("recursive").as_string();
-        if (!string_ok(temp))
+        if (temp.empty())
             throw std::runtime_error("autoscan directory " + location.string() + ": recursive attribute is missing or invalid");
 
         bool recursive;
@@ -1806,7 +1806,7 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNode(const st
 
         bool hidden;
         temp = child.attribute("hidden-files").as_string();
-        if (!string_ok(temp))
+        if (temp.empty())
             temp = getOption("/import/attribute::hidden-files");
 
         if (temp == "yes")

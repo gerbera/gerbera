@@ -232,7 +232,7 @@ Script::Script(const std::shared_ptr<ConfigManager>& config,
 
     std::string common_scr_path = config->getOption(CFG_IMPORT_SCRIPTING_COMMON_SCRIPT);
 
-    if (!string_ok(common_scr_path)) {
+    if (common_scr_path.empty()) {
         log_js("Common script disabled in configuration");
     } else {
         try {
@@ -280,7 +280,7 @@ void Script::_load(const std::string& scriptPath)
 {
     std::string scriptText = readTextFile(scriptPath);
 
-    if (!string_ok(scriptText))
+    if (scriptText.empty())
         throw std::runtime_error("empty script");
 
     auto j2i = StringConverter::j2i(config);

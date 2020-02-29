@@ -337,13 +337,13 @@ void FallbackLayout::addATrailers(const std::shared_ptr<CdsObject>& obj)
         std::string genre;
         std::string next;
         do {
-            if (!string_ok(genre))
+            if (genre.empty())
                 genre = st->nextToken(",");
             next = st->nextToken(",");
 
             genre = trim_string(genre);
 
-            if (!string_ok(genre))
+            if (genre.empty())
                 break;
 
             id = content->addContainerChain(AT_VPATH

@@ -242,7 +242,7 @@ std::string MatroskaHandler::getContentTypeFromByteVector(const KaxFileData* dat
     std::string art_mimetype = MIMETYPE_DEFAULT;
 #ifdef HAVE_MAGIC
     art_mimetype = getMIMETypeFromBuffer(data->GetBuffer(), data->GetSize());
-    if (!string_ok(art_mimetype)) {
+    if (art_mimetype.empty()) {
         return MIMETYPE_DEFAULT;
     }
 #endif

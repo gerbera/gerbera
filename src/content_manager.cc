@@ -471,7 +471,7 @@ int ContentManager::_addFile(const fs::path& path, fs::path rootPath, bool recur
             addObject(obj);
             if (layout != nullptr) {
                 try {
-                    if (!string_ok(rootPath) && (task != nullptr))
+                    if (rootPath.empty() && (task != nullptr))
                         rootPath = task->getRootPath();
 
                     layout->processCdsObject(obj, rootPath);
@@ -590,7 +590,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
 
     log_debug("Rescanning location: {}", location.c_str());
 
-    if (!string_ok(location)) {
+    if (location.empty()) {
         log_error("Container with ID {} has no location information", containerID);
         return;
         //        continue;
@@ -858,10 +858,10 @@ void ContentManager::updateObject(int objectID, const std::map<std::string, std:
             cloned_item->setMimeType(mimetype);
             auto resource = cloned_item->getResource(0);
             resource->addAttribute("protocolInfo", renderProtocolInfo(mimetype, protocol));
-        } else if (!string_ok(mimetype) && (string_ok(protocol))) {
+        } else if (mimetype.empty() && (string_ok(protocol))) {
             auto resource = cloned_item->getResource(0);
             resource->addAttribute("protocolInfo", renderProtocolInfo(cloned_item->getMimeType(), protocol));
-        } else if (string_ok(mimetype) && (!string_ok(protocol))) {
+        } else {
             cloned_item->setMimeType(mimetype);
             auto resource = cloned_item->getResource(0);
             std::vector<std::string> parts = split_string(resource->getAttribute("protocolInfo"), ':');
@@ -986,7 +986,7 @@ int ContentManager::addContainerChain(const std::string& chain, const std::strin
     int updateID = INVALID_OBJECT_ID;
     int containerID;
 
-    if (!string_ok(chain))
+    if (chain.empty())
         throw std::runtime_error("addContainerChain() called with empty chain parameter");
 
     log_debug("received chain: {} ({}) [{}]", chain.c_str(), lastClass.c_str(), dict_encode_simple(lastMetadata).c_str());
@@ -1051,7 +1051,7 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::path& 
         if (magic) {
             mimetype = extension2mimetype(extension);
 
-            if (!string_ok(mimetype)) {
+            if (mimetype.empty()) {
                 if (ignore_unknown_extensions)
                     return nullptr; // item should be ignored
 #ifdef HAVE_MAGIC
@@ -1064,7 +1064,7 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::path& 
             upnp_class = mimetype2upnpclass(mimetype);
         }
 
-        if (!string_ok(upnp_class)) {
+        if (upnp_class.empty()) {
             std::string content_type = getValueOrDefault(mimetype_contenttype_map, mimetype);
             if (content_type == CONTENT_TYPE_OGG) {
                 if (isTheora(path))
@@ -1318,7 +1318,7 @@ void ContentManager::cleanupOnlineServiceObjects(const std::shared_ptr<OnlineSer
                 continue;
 
             temp = obj->getAuxData(ONLINE_SERVICE_LAST_UPDATE);
-            if (!string_ok(temp))
+            if (temp.empty())
                 continue;
 
             last.tv_sec = std::stol(temp);
@@ -1459,7 +1459,7 @@ void ContentManager::rescanDirectory(int objectID, int scanID, ScanMode scanMode
     else
         level = "full";
 
-    if (!string_ok(descPath))
+    if (descPath.empty())
         descPath = dir->getLocation();
 
     task->setDescription("Performing " + level + " scan: " + descPath);
@@ -1636,7 +1636,7 @@ void ContentManager::setAutoscanDirectory(const std::shared_ptr<AutoscanDirector
 
             log_debug("location: {}", obj->getLocation().c_str());
 
-            if (!string_ok(obj->getLocation()))
+            if (obj->getLocation().empty())
                 throw std::runtime_error("tried to add an illegal object as autoscan - no location information available!");
 
             dir->setLocation(obj->getLocation());

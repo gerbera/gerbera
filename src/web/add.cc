@@ -52,7 +52,7 @@ void web::add::process()
 
     fs::path path;
     std::string objID = param("object_id");
-    if (!string_ok(objID) || objID == "0")
+    if (objID == "0")
         path = FS_ROOT_DIRECTORY;
     else
         path = hex_decode_string(objID);

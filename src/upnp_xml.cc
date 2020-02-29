@@ -289,7 +289,7 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription()
     }
 
     device.append_child("deviceType").append_child(pugi::node_pcdata).set_value(DESC_DEVICE_TYPE);
-    if (!string_ok(presentationURL))
+    if (presentationURL.empty())
         device.append_child("presentationURL").append_child(pugi::node_pcdata).set_value("/");
     else
         device.append_child("presentationURL").append_child(pugi::node_pcdata).set_value(presentationURL.c_str());
@@ -591,7 +591,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
                     std::string current_fcc = item->getResource(0)->getOption(RESOURCE_OPTION_FOURCC);
                     // we can not do much if the item has no fourcc info,
                     // so we will transcode it anyway
-                    if (!string_ok(current_fcc)) {
+                    if (current_fcc.empty()) {
                         // the process mode specifies that we will transcode
                         // ONLY if the fourcc matches the list; since an invalid
                         // fourcc can not match anything we will skip the item
@@ -686,7 +686,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
 
         /// \todo what if the resource has a different mimetype than the item??
         /*        std::string mimeType = item->getMimeType();
-                  if (!string_ok(mimeType)) mimeType = DEFAULT_MIMETYPE; */
+                  if (mimeType.empty()) mimeType = DEFAULT_MIMETYPE; */
 
         auto res = item->getResource(i);
         auto res_attrs = res->getAttributes();
@@ -742,7 +742,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
         // is necessary
         if ((i > 0) && (res->getHandlerType() == CH_EXTURL) && ((res->getOption(RESOURCE_CONTENT_TYPE) == THUMBNAIL) || (res->getOption(RESOURCE_CONTENT_TYPE) == ID3_ALBUM_ART))) {
             url = res->getOption(RESOURCE_OPTION_URL);
-            if (!string_ok(url))
+            if (url.empty())
                 throw std::runtime_error("missing thumbnail URL!");
 
             isExtThumbnail = true;
