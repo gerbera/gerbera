@@ -59,7 +59,7 @@ void web::directories::process()
     auto containers = root.append_child("containers");
     xml2JsonHints->setArrayName(containers, "container");
     containers.append_attribute("parent_id") = parentID.c_str();
-    if (string_ok(param("select_it")))
+    if (!param("select_it").empty())
         containers.append_attribute("select_it") = param("select_it").c_str();
     containers.append_attribute("type") = "filesystem";
 

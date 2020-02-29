@@ -211,7 +211,7 @@ void ConfigGenerator::generateImport(const fs::path& prefixDir, const fs::path& 
     import.append_attribute("hidden-files") = DEFAULT_HIDDEN_FILES_VALUE;
 
 #ifdef HAVE_MAGIC
-    if (string_ok(magicFile.c_str())) {
+    if (!magicFile.empty()) {
         import.append_child("magic-file").append_child(pugi::node_pcdata).set_value(magicFile.c_str());
     }
 #endif

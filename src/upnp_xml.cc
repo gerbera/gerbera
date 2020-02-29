@@ -497,17 +497,17 @@ std::string UpnpXMLBuilder::renderExtension(const std::string& contentType, cons
 {
     std::string ext = std::string(_URL_PARAM_SEPARATOR) + URL_FILE_EXTENSION + _URL_PARAM_SEPARATOR + "file";
 
-    if (string_ok(contentType) && (contentType != CONTENT_TYPE_PLAYLIST)) {
+    if (!contentType.empty() && (contentType != CONTENT_TYPE_PLAYLIST)) {
         ext = ext + "." + contentType;
         return ext;
     }
 
-    if (string_ok(location)) {
+    if (!location.empty()) {
         size_t dot = location.rfind('.');
         if (dot != std::string::npos) {
             std::string extension = location.substr(dot);
             // make sure that the extension does not contain the separator character
-            if (string_ok(extension) && (extension.find(URL_PARAM_SEPARATOR) == std::string::npos) && (extension.find(URL_PARAM_SEPARATOR) == std::string::npos)) {
+            if ((extension.find(URL_PARAM_SEPARATOR) == std::string::npos) && (extension.find(URL_PARAM_SEPARATOR) == std::string::npos)) {
                 ext = ext + extension;
                 return ext;
             }
@@ -630,14 +630,14 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
                 // duration should be the same for transcoded media, so we can
                 // take the value from the original resource
                 std::string duration = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_DURATION));
-                if (string_ok(duration))
+                if (!duration.empty())
                     t_res->addAttribute(MetadataHandler::getResAttrName(R_DURATION),
                         duration);
 
                 int freq = tp->getSampleFreq();
                 if (freq == SOURCE) {
                     std::string frequency = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY));
-                    if (string_ok(frequency)) {
+                    if (!frequency.empty()) {
                         t_res->addAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY), frequency);
                         targetMimeType.append(";rate=").append(frequency);
                     }
@@ -649,7 +649,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
                 int chan = tp->getNumChannels();
                 if (chan == SOURCE) {
                     std::string nchannels = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS));
-                    if (string_ok(nchannels)) {
+                    if (!nchannels.empty()) {
                         t_res->addAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS), nchannels);
                         targetMimeType.append(";channels=").append(nchannels);
                     }
@@ -699,7 +699,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
             mimeType = mimeType.substr(0, pos);
         }
 
-        assert(string_ok(mimeType));
+        assert(!mimeType.empty());
         std::string contentType = getValueOrDefault(mappings, mimeType);
         std::string url;
 
@@ -808,7 +808,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
             } else {
                 /* handle audio/video content */
                 extend = getDLNAprofileString(contentType);
-                if (string_ok(extend))
+                if (!extend.empty())
                     extend.append(";");
             }
 

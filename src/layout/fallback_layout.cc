@@ -89,7 +89,7 @@ void FallbackLayout::addVideo(const std::shared_ptr<CdsObject>& obj, const fs::p
     } else
         dir = esc(f2i->convert(get_last_path(obj->getLocation())));
 
-    if (string_ok(dir)) {
+    if (!dir.empty()) {
         id = content->addContainerChain("/Video/Directories/" + dir);
         add(obj, id);
     }
@@ -143,7 +143,7 @@ void FallbackLayout::addImage(const std::shared_ptr<CdsObject>& obj, const fs::p
     } else
         dir = esc(f2i->convert(get_last_path(obj->getLocation())));
 
-    if (string_ok(dir)) {
+    if (!dir.empty()) {
         id = content->addContainerChain("/Photos/Directories/" + dir);
         add(obj, id);
     }
@@ -299,7 +299,7 @@ void FallbackLayout::addSopCast(const std::shared_ptr<CdsObject>& obj)
     }
 
     temp = obj->getAuxData(SOPCAST_AUXDATA_GROUP);
-    if (string_ok(temp)) {
+    if (!temp.empty()) {
         chain = SP_VPATH "/"
                          "Groups"
                          "/"
@@ -350,7 +350,7 @@ void FallbackLayout::addATrailers(const std::shared_ptr<CdsObject>& obj)
                 + esc(genre));
             add(obj, id);
 
-            if (string_ok(next))
+            if (!next.empty())
                 genre = next;
             else
                 genre = "";

@@ -136,7 +136,7 @@ void URLRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     UpnpFileInfo_set_IsDirectory(info, 0);
 
     // FIX EXTRA HEADERS
-    //    if (string_ok(header)) {
+    //    if (!header.empty()) {
     //        UpnpFileInfo_set_ExtraHeaders(info,
     //            ixmlCloneDOMString(header.c_str()));
     //    }

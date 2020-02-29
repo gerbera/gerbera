@@ -220,7 +220,7 @@ void UpdateManager::threadProc()
                     kill(0, SIGINT);
                 }
                 lock.unlock(); // we don't need to hold the lock during the sending of the updates
-                if (string_ok(updateString)) {
+                if (!updateString.empty()) {
                     try {
                         log_debug("updates sent: \"{}\"", updateString.c_str());
                         server->sendCDSSubscriptionUpdate(updateString);

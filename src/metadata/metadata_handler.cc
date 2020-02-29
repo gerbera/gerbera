@@ -152,7 +152,7 @@ void MetadataHandler::setMetadata(const std::shared_ptr<ConfigManager>& config, 
 #else
     if (content_type == CONTENT_TYPE_AVI) {
         std::string fourcc = getAVIFourCC(item->getLocation());
-        if (string_ok(fourcc)) {
+        if (!fourcc.empty()) {
             item->getResource(0)->addOption(RESOURCE_OPTION_FOURCC,
                 fourcc);
         }

@@ -108,13 +108,13 @@ void Server::run()
     std::string iface = config->getOption(CFG_SERVER_NETWORK_INTERFACE);
     std::string ip = config->getOption(CFG_SERVER_IP);
 
-    if (string_ok(ip) && string_ok(iface))
+    if (!ip.empty() && !iface.empty())
         throw std::runtime_error("You can not specify interface and IP at the same time!");
 
     if (iface.empty())
         iface = ipToInterface(ip);
 
-    if (string_ok(ip) && iface.empty())
+    if (!ip.empty() && iface.empty())
         throw std::runtime_error("Could not find ip: " + ip);
 
     int port = config->getIntOption(CFG_SERVER_PORT);
@@ -155,7 +155,7 @@ void Server::run()
 
     std::vector<std::string> arr = config->getStringArrayOption(CFG_SERVER_CUSTOM_HTTP_HEADERS);
     for (const auto& tmp : arr) {
-        if (string_ok(tmp)) {
+        if (!tmp.empty()) {
             log_info("(NOT) Adding HTTP header \"{}\"", tmp.c_str());
             // FIXME upstream upnp
             //ret = UpnpAddCustomHTTPHeader(tmp.c_str());
@@ -452,7 +452,7 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
     } else if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + DEVICE_DESCRIPTION_PATH)) {
         ret = std::make_unique<DeviceDescriptionHandler>(config, storage, xmlbuilder.get());
     } else if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_SERVE_HANDLER)) {
-        if (string_ok(config->getOption(CFG_SERVER_SERVEDIR)))
+        if (!config->getOption(CFG_SERVER_SERVEDIR).empty())
             ret = std::make_unique<ServeRequestHandler>(config, storage);
         else
             throw std::runtime_error("Serving directories is not enabled in configuration");

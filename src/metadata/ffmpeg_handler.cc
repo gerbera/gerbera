@@ -90,7 +90,7 @@ void FfmpegHandler::addFfmpegAuxdataFields(std::shared_ptr<CdsItem> item, AVForm
     std::vector<std::string> aux = config->getStringArrayOption(CFG_IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST);
     for (size_t j = 0; j < aux.size(); j++) {
         std::string desiredTag(aux[j]);
-        if (string_ok(desiredTag)) {
+        if (!desiredTag.empty()) {
             AVDictionaryEntry* tag = NULL;
             tag = av_dict_get(pFormatCtx->metadata, desiredTag.c_str(), NULL, AV_DICT_IGNORE_SUFFIX);
             if (tag && tag->value && tag->value[0]) {
@@ -193,7 +193,7 @@ static void addFfmpegResourceFields(std::shared_ptr<CdsItem> item, AVFormatConte
 
                 log_debug("FourCC: 0x{:x} = {}", as_codecpar(st)->codec_tag, fourcc);
                 std::string fcc = fourcc;
-                if (string_ok(fcc))
+                if (!fcc.empty())
                     item->getResource(0)->addOption(RESOURCE_OPTION_FOURCC,
                         fcc);
             }

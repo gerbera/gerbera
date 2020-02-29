@@ -298,7 +298,7 @@ std::string CdsContainer::getVirtualPath()
         location = std::string(1, VIRTUAL_CONTAINER_SEPARATOR);
     } else if (getID() == CDS_ID_FS_ROOT) {
         location = std::string(1, VIRTUAL_CONTAINER_SEPARATOR) + storage->getFsRootName();
-    } else if (string_ok(getLocation())) {
+    } else if (!getLocation().empty()) {
         location = getLocation();
         if (!isVirtual()) {
             location = std::string(1, VIRTUAL_CONTAINER_SEPARATOR) + storage->getFsRootName() + location;

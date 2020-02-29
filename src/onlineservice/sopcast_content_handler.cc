@@ -188,7 +188,7 @@ std::shared_ptr<CdsObject> SopCastContentHandler::getObject(std::string groupNam
     }
 
     temp = tmp_el.attribute("en").as_string();
-    if (string_ok(temp))
+    if (!temp.empty())
         item->setTitle(temp);
     else
         item->setTitle("Unknown");
@@ -196,16 +196,16 @@ std::shared_ptr<CdsObject> SopCastContentHandler::getObject(std::string groupNam
     tmp_el = channel.child("region");
     if (tmp_el != nullptr) {
         temp = tmp_el.attribute("en").as_string();
-        if (string_ok(temp))
+        if (!temp.empty())
             item->setMetadata(MetadataHandler::getMetaFieldName(M_REGION), temp);
     }
 
     temp = channel.child("description").text().as_string();
-    if (string_ok(temp))
+    if (!temp.empty())
         item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), temp);
 
     temp = channel.attribute("language").as_string();
-    if (string_ok(temp))
+    if (!temp.empty())
         item->setAuxData(SOPCAST_AUXDATA_LANGUAGE, temp);
 
     item->setClass(UPNP_DEFAULT_CLASS_VIDEO_BROADCAST);
