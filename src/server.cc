@@ -442,12 +442,11 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
         std::string path;
         RequestHandler::splitUrl(filename, URL_UI_PARAM_SEPARATOR, path, parameters);
 
-        std::map<std::string, std::string> dict;
-        dict_decode(parameters, &dict);
+        std::map<std::string, std::string> params;
+        dict_decode(parameters, &params);
 
-        std::string r_type = getValueOrDefault(dict, URL_REQUEST_TYPE);
-        if (r_type.empty())
-            r_type = "index";
+        auto it = params.find(URL_REQUEST_TYPE);
+        std::string r_type = it != params.end() && !it->second.empty() ? it->second : "index";
 
         ret = web::createWebRequestHandler(config, storage, content, session_manager, r_type);
     } else if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + DEVICE_DESCRIPTION_PATH)) {

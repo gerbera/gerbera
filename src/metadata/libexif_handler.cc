@@ -385,13 +385,13 @@ void LibExifHandler::fillMetadata(std::shared_ptr<CdsItem> item)
 
 std::unique_ptr<IOHandler> LibExifHandler::serveContent(std::shared_ptr<CdsItem> item, int resNum)
 {
-    ExifData* ed;
     auto res = item->getResource(resNum);
-    std::string ctype = getValueOrDefault(res->getParameters(), RESOURCE_CONTENT_TYPE);
 
+    std::string ctype = getValueOrDefault(res->getParameters(), RESOURCE_CONTENT_TYPE);
     if (ctype != EXIF_THUMBNAIL)
         throw std::runtime_error("LibExifHandler: got unknown content type: " + ctype);
-    ed = exif_data_new_from_file(item->getLocation().c_str());
+
+    ExifData* ed = exif_data_new_from_file(item->getLocation().c_str());
     if (!ed)
         throw std::runtime_error("LibExifHandler: resource has no exif information");
 

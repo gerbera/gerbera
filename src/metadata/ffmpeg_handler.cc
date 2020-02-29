@@ -457,10 +457,7 @@ std::unique_ptr<IOHandler> FfmpegHandler::serveContent(std::shared_ptr<CdsItem> 
 std::string FfmpegHandler::getMimeType()
 {
     auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-    std::string thumb_mimetype = getValueOrDefault(mappings, CONTENT_TYPE_JPG);
-    if (!string_ok(thumb_mimetype))
-        thumb_mimetype = "image/jpeg";
-
+    std::string thumb_mimetype = getValueOrDefault(mappings, CONTENT_TYPE_JPG, "image/jpeg");
     return thumb_mimetype;
 }
 #endif // HAVE_FFMPEG
