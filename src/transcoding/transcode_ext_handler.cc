@@ -74,19 +74,15 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::open(std::shared_ptr<Transc
     std::shared_ptr<CdsObject> obj,
     std::string range)
 {
-    bool isURL = false;
-    //    bool is_srt = false;
-
     log_debug("Start transcoding file: {}", location.c_str());
-    char fifo_template[] = "grb_transcode_XXXXXX";
 
     if (profile == nullptr)
         throw std::runtime_error("Transcoding of file " + location + "requested but no profile given");
 
-    isURL = (IS_CDS_ITEM_INTERNAL_URL(obj->getObjectType()) || IS_CDS_ITEM_EXTERNAL_URL(obj->getObjectType()));
+    bool isURL = (IS_CDS_ITEM_INTERNAL_URL(obj->getObjectType()) || IS_CDS_ITEM_EXTERNAL_URL(obj->getObjectType()));
 
+#if 0
     std::string mimeType = profile->getTargetMimeType();
-
     if (IS_CDS_ITEM(obj->getObjectType())) {
         auto item = std::static_pointer_cast<CdsItem>(obj);
         auto mappings = config->getDictionaryOption(
@@ -96,13 +92,15 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::open(std::shared_ptr<Transc
             std::string freq = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY));
             std::string nrch = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS));
 
-            if (string_ok(freq))
+            if (!freq.empty())
                 mimeType = mimeType + ";rate=" + freq;
-            if (string_ok(nrch))
+            if (!nrch.empty())
                 mimeType = mimeType + ";channels=" + nrch;
         }
     }
+#endif
 
+    char fifo_template[] = "grb_transcode_XXXXXX";
     fs::path fifo_name = tempName(config->getOption(CFG_SERVER_TMPDIR), fifo_template);
     std::string arguments;
     std::string temp;

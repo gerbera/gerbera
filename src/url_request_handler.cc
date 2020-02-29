@@ -64,40 +64,34 @@ void URLRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 {
     log_debug("start");
 
-    std::string header;
-    std::string mimeType;
-    int objectID;
-    std::string tr_profile;
+    std::string parameters = (filename + strlen(LINK_URL_REQUEST_HANDLER));
 
-    std::string url, parameters;
-    parameters = (filename + strlen(LINK_URL_REQUEST_HANDLER));
+    std::map<std::string, std::string> params;
+    dict_decode_simple(parameters, &params);
 
-    std::map<std::string, std::string> dict;
-    dict_decode_simple(parameters, &dict);
+    log_debug("full url (filename): {}, parameters: {}", filename, parameters.c_str());
 
-    log_debug("full url (filename): {}, parameters: {}",
-        filename, parameters.c_str());
-
-    std::string objID = getValueOrDefault(dict, "object_id");
-    if (objID.empty()) {
+    auto objIdIt = params.find("object_id");
+    if (objIdIt == params.end()) {
         //log_error("object_id not found in url");
         throw std::runtime_error("getInfo: object_id not found");
     }
-    objectID = std::stoi(objID);
-
-    //log_debug("got ObjectID: [{}]", object_id.c_str());
+    int objectID = std::stoi(objIdIt->second);
+    //log_debug("got ObjectID: {}", objectID);
 
     auto obj = storage->loadObject(objectID);
 
     int objectType = obj->getObjectType();
-
     if (!IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
         throw std::runtime_error("getInfo: object is not an external url item");
     }
 
-    tr_profile = getValueOrDefault(dict, URL_PARAM_TRANSCODE_PROFILE_NAME);
+    std::string tr_profile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
 
-    if (string_ok(tr_profile)) {
+    std::string header;
+    std::string mimeType;
+
+    if (!tr_profile.empty()) {
         auto tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)
                       ->getByName(tr_profile);
         if (tp == nullptr)
@@ -109,6 +103,7 @@ void URLRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         UpnpFileInfo_set_FileLength(info, -1);
     } else {
         auto item = std::static_pointer_cast<CdsItemExternalURL>(obj);
+        std::string url;
 
 #ifdef ONLINE_SERVICES
         if (item->getFlag(OBJECT_FLAG_ONLINE_SERVICE)) {
@@ -156,11 +151,6 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
     enum UpnpOpenFileMode mode,
     std::string range)
 {
-    int objectID;
-    std::string mimeType;
-    std::string header;
-    std::string tr_profile;
-
     log_debug("start");
 
     // Currently we explicitly do not support UPNP_WRITE
@@ -168,30 +158,30 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
     if (mode != UPNP_READ)
         throw std::runtime_error("UPNP_WRITE unsupported");
 
-    std::string url, parameters;
-    parameters = (filename + strlen(LINK_URL_REQUEST_HANDLER));
+    std::string parameters = (filename + strlen(LINK_URL_REQUEST_HANDLER));
 
-    std::map<std::string, std::string> dict;
-    dict_decode_simple(parameters, &dict);
-    log_debug("full url (filename): {}, parameters: {}",
-        filename, parameters.c_str());
+    std::map<std::string, std::string> params;
+    dict_decode_simple(parameters, &params);
+    log_debug("full url (filename): {}, parameters: {}", filename, parameters.c_str());
 
-    std::string objID = getValueOrDefault(dict, "object_id");
-    if (objID.empty()) {
-        throw std::runtime_error("object_id not found");
+    auto objIdIt = params.find("object_id");
+    if (objIdIt == params.end()) {
+        //log_error("object_id not found in url");
+        throw std::runtime_error("getInfo: object_id not found");
     }
-    objectID = std::stoi(objID);
+    int objectID = std::stoi(objIdIt->second);
+    //log_debug("got ObjectID: {}", objectID);
 
     auto obj = storage->loadObject(objectID);
 
     int objectType = obj->getObjectType();
-
     if (!IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
         throw std::runtime_error("object is not an external url item");
     }
 
     auto item = std::static_pointer_cast<CdsItemExternalURL>(obj);
 
+    std::string url;
 #ifdef ONLINE_SERVICES
     if (item->getFlag(OBJECT_FLAG_ONLINE_SERVICE)) {
         auto helper = std::make_unique<OnlineServiceHelper>();
@@ -209,9 +199,9 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
     //info->is_directory = 0;
     //info->http_header = NULL;
 
-    tr_profile = getValueOrDefault(dict, URL_PARAM_TRANSCODE_PROFILE_NAME);
+    std::string tr_profile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
 
-    if (string_ok(tr_profile)) {
+    if (!tr_profile.empty()) {
         auto tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)
                       ->getByName(tr_profile);
         if (tp == nullptr)
@@ -221,6 +211,7 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
         return tr_d->open(tp, url, item, range);
     }
 
+    std::string header;
     auto u = std::make_unique<URL>();
     try {
         auto st = u->getInfo(url);
@@ -231,11 +222,12 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
         log_warning("{}", ex.what());
         //info->file_length = -1;
     }
-    mimeType = item->getMimeType();
+
+    std::string mimeType = item->getMimeType();
     // info->content_type = ixmlCloneDOMString(mimeType.c_str());
 
     /* FIXME headers
-    if (string_ok(header))
+    if (!header.empty())
         info->http_header = ixmlCloneDOMString(header.c_str());
     */
 

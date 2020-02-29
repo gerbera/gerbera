@@ -153,18 +153,17 @@ std::shared_ptr<CdsObject> SopCastContentHandler::getObject(std::string groupNam
     //std::string mt = getValueOrDefault(mappings, temp);
     std::string mt;
     // map was empty, we have to do construct the mimetype ourselves
-    if (!string_ok(mt)) {
-        if (temp == "wmv")
-            mt = "video/sopcast-x-ms-wmv";
-        else if (temp == "mp3")
-            mt = "audio/sopcast-mpeg";
-        else if (temp == "wma")
-            mt = "audio/sopcast-x-ms-wma";
-        else {
-            log_warning("Could not determine mimetype for SopCast channel (stream_type: {})", temp.c_str());
-            mt = "application/sopcast-stream";
-        }
+    if (temp == "wmv")
+        mt = "video/sopcast-x-ms-wmv";
+    else if (temp == "mp3")
+        mt = "audio/sopcast-mpeg";
+    else if (temp == "wma")
+        mt = "audio/sopcast-x-ms-wma";
+    else {
+        log_warning("Could not determine mimetype for SopCast channel (stream_type: {})", temp.c_str());
+        mt = "application/sopcast-stream";
     }
+
     resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
         renderProtocolInfo(mt, SOPCAST_PROTOCOL));
     item->setMimeType(mt);

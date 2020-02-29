@@ -67,51 +67,45 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     Headers headers;
     log_debug("start");
 
-    std::string mimeType;
-    int objectID;
     std::string tr_profile;
-
-    struct stat statbuf;
     int ret = 0;
-    bool is_srt = false;
 
     std::string parameters = (filename + strlen(LINK_FILE_REQUEST_HANDLER));
 
-    std::map<std::string, std::string> dict;
-    dict_decode_simple(parameters, &dict);
+    std::map<std::string, std::string> params;
+    dict_decode_simple(parameters, &params);
 
     log_debug("full url (filename): {}, parameters: {}", filename, parameters.c_str());
 
-    std::string objID = getValueOrDefault(dict, "object_id");
-    if (objID.empty()) {
+    auto objIdIt = params.find("object_id");
+    if (objIdIt == params.end()) {
         //log_error("object_id not found in url");
         throw std::runtime_error("getInfo: object_id not found");
     }
-    objectID = std::stoi(objID);
-
-    //log_debug("got ObjectID: [{}]", object_id.c_str());
+    int objectID = std::stoi(objIdIt->second);
+    //log_debug("got ObjectID: {}", objectID);
 
     auto obj = storage->loadObject(objectID);
 
     int objectType = obj->getObjectType();
-
     if (!IS_CDS_ITEM(objectType)) {
         throw std::runtime_error("requested object is not an item");
     }
-
     auto item = std::static_pointer_cast<CdsItem>(obj);
-
-    fs::path path = item->getLocation();
 
     // determining which resource to serve
     int res_id = 0;
-    std::string s_res_id = getValueOrDefault(dict, URL_RESOURCE_ID);
-    if (string_ok(s_res_id) && (s_res_id != URL_VALUE_TRANSCODE_NO_RES_ID))
-        res_id = std::stoi(s_res_id);
+    auto res_id_it = params.find(URL_RESOURCE_ID);
+    if (res_id_it != params.end() && res_id_it->second != URL_VALUE_TRANSCODE_NO_RES_ID)
+        res_id = std::stoi(res_id_it->second);
     else
         res_id = -1;
 
-    std::string ext = getValueOrDefault(dict, "ext");
+    fs::path path = item->getLocation();
+    bool is_srt = false;
+
+    std::string mimeType;
+    std::string ext = getValueOrDefault(params, "ext");
     size_t edot = ext.rfind('.');
     if (edot != std::string::npos)
         ext = ext.substr(edot);
@@ -126,6 +120,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         is_srt = true;
     }
 
+    struct stat statbuf;
     ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
         if (is_srt)
@@ -146,17 +141,18 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         header = "Content-Disposition: attachment; filename=\"" + path.filename().string() + "\"";
     }
 
-    tr_profile = getValueOrDefault(dict, URL_PARAM_TRANSCODE_PROFILE_NAME);
-
     // for transcoded resourecs res_id will always be negative
+    tr_profile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
+
     log_debug("fetching resource id {}", res_id);
-    std::string rh = getValueOrDefault(dict, RESOURCE_HANDLER);
 
-    if (((res_id > 0) && (res_id < item->getResourceCount()))
-        || ((res_id > 0) && string_ok(rh))) {
-
+    // some resources are created dynamically and not saved in the database,
+    // so we can not load such a resource for a particular item, we will have
+    // to trust the resource handler parameter
+    std::string rh = getValueOrDefault(params, RESOURCE_HANDLER);
+    if (res_id > 0 && (res_id < item->getResourceCount() || !rh.empty())) {
         int res_handler;
-        if (string_ok(rh))
+        if (!rh.empty())
             res_handler = std::stoi(rh);
         else {
             auto resource = item->getResource(res_id);
@@ -169,7 +165,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         }
 
         auto h = MetadataHandler::createHandler(config, res_handler);
-        if (!string_ok(mimeType))
+        if (mimeType.empty())
             mimeType = h->getMimeType();
 
         auto io_handler = h->serveContent(item, res_id);
@@ -181,11 +177,9 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         io_handler->close();
 
         UpnpFileInfo_set_FileLength(info, size);
-    } else if (!is_srt && string_ok(tr_profile)) {
-
+    } else if (!is_srt && !tr_profile.empty()) {
         auto tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)
                       ->getByName(tr_profile);
-
         if (tp == nullptr)
             throw std::runtime_error("Transcoding of file " + path.string()
                 + " but no profile matching the name "
@@ -202,10 +196,9 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
             std::string nrch = item->getResource(0)
                                    ->getAttribute(MetadataHandler::getResAttrName(
                                        R_NRAUDIOCHANNELS));
-
-            if (string_ok(freq))
+            if (!freq.empty())
                 mimeType = mimeType + ";rate=" + freq;
-            if (string_ok(nrch))
+            if (!nrch.empty())
                 mimeType = mimeType + ";channels=" + nrch;
         }
 
@@ -250,15 +243,16 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         auto mappings = config->getDictionaryOption(
             CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
         std::string dlnaContentHeader = getDLNAContentHeader(config, getValueOrDefault(mappings, item->getMimeType()));
-        if (string_ok(dlnaContentHeader)) {
+        if (!dlnaContentHeader.empty()) {
             headers.addHeader(D_HTTP_CONTENT_FEATURES_HEADER, dlnaContentHeader);
         }
     }
 
-    if (!string_ok(mimeType))
+    if (mimeType.empty())
         mimeType = item->getMimeType();
+
     std::string dlnaTransferHeader = getDLNATransferHeader(config, mimeType);
-    if (string_ok(dlnaTransferHeader)) {
+    if (!dlnaTransferHeader.empty()) {
         headers.addHeader(D_HTTP_TRANSFER_MODE_HEADER, dlnaTransferHeader);
     }
 
@@ -293,30 +287,27 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
     dict_decode_simple(parameters, &params);
     log_debug("full url (filename): {}, parameters: {}", filename, parameters.c_str());
 
-    std::string objID = getValueOrDefault(params, "object_id");
-    if (objID.empty()) {
+    auto objIdIt = params.find("object_id");
+    if (objIdIt == params.end()) {
         throw std::runtime_error("object_id not found in parameters");
     }
-
-    int objectID = std::stoi(objID);
+    int objectID = std::stoi(objIdIt->second);
 
     log_debug("Opening media file with object id {}", objectID);
     auto obj = storage->loadObject(objectID);
 
     int objectType = obj->getObjectType();
-
     if (!IS_CDS_ITEM(objectType)) {
         throw std::runtime_error("requested object is not an item");
     }
 
     // determining which resource to serve
     int res_id = 0;
-    std::string s_res_id = getValueOrDefault(params, URL_RESOURCE_ID);
-    if (string_ok(s_res_id) && (s_res_id != URL_VALUE_TRANSCODE_NO_RES_ID)) {
-        res_id = std::stoi(s_res_id);
-    } else {
+    auto res_id_it = params.find(URL_RESOURCE_ID);
+    if (res_id_it != params.end() && res_id_it->second != URL_VALUE_TRANSCODE_NO_RES_ID)
+        res_id = std::stoi(res_id_it->second);
+    else
         res_id = -1;
-    }
 
     // update item info by running action
     if (IS_CDS_ACTIVE_ITEM(objectType) && (res_id == 0)) { // check - if thumbnails, then no action, just show
@@ -407,28 +398,24 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
         throw std::runtime_error("Failed to open " + path.string() + " - " + strerror(errno));
     }
 
-    log_debug("fetching resource id {}", res_id);
-
-    std::string tr_profile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
-    if (string_ok(tr_profile)) {
-        if (res_id != (-1)) {
+    // for transcoded resourecs res_id will always be negative
+    auto tr_profile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
+    if (!tr_profile.empty()) {
+        if (res_id != -1)
             throw std::runtime_error("Invalid resource ID given!");
-        }
     } else {
-        if (res_id == -1) {
+        if (res_id == -1)
             throw std::runtime_error("Invalid resource ID given!");
-        }
     }
+    log_debug("fetching resource id {}", res_id);
 
     // some resources are created dynamically and not saved in the database,
     // so we can not load such a resource for a particular item, we will have
     // to trust the resource handler parameter
     std::string rh = getValueOrDefault(params, RESOURCE_HANDLER);
-    if (((res_id > 0) && (res_id < item->getResourceCount())) || ((res_id > 0) && string_ok(rh))) {
-        //info->file_length = -1;
-
+    if (res_id > 0 && (res_id < item->getResourceCount() || !rh.empty())) {
         int res_handler;
-        if (string_ok(rh))
+        if (!rh.empty())
             res_handler = std::stoi(rh);
         else {
             auto resource = item->getResource(res_id);
@@ -441,7 +428,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
         }
 
         auto h = MetadataHandler::createHandler(config, res_handler);
-        if (!string_ok(mimeType))
+        if (mimeType.empty())
             mimeType = h->getMimeType();
 
         /* FIXME Upstream upnp / DNLA
@@ -462,7 +449,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
         return io_handler;
     }
 
-    if (!is_srt && string_ok(tr_profile)) {
+    if (!is_srt && !tr_profile.empty()) {
         std::string range = getValueOrDefault(params, "range");
 
         auto tr_d = std::make_unique<TranscodeDispatcher>(config, content);

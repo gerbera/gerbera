@@ -59,9 +59,7 @@ void ATrailersContentHandler::setServiceContent(std::unique_ptr<pugi::xml_docume
     trailer_it = root.begin();
 
     auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
-    trailer_mimetype = getValueOrDefault(mappings, "mov");
-    if (!string_ok(trailer_mimetype))
-        trailer_mimetype = "video/quicktime";
+    trailer_mimetype = getValueOrDefault(mappings, "mov", "video/quicktime");
 }
 
 std::shared_ptr<CdsObject> ATrailersContentHandler::getNextObject()

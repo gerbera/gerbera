@@ -136,49 +136,20 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, bool re
             auto meta = obj->getMetadata();
 
             std::string creator = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_ALBUMARTIST));
-            if (!string_ok(creator)) {
-                creator = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_ARTIST));
-            }
+            if (creator.empty())
+                creator = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_ARTIST), "None");
 
-            if (string_ok(creator)) {
-                renderCreator(creator, &result);
-            }
+            std::string composer = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_COMPOSER), "None");
+            renderComposer(composer, &result);
 
-            std::string composer = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_COMPOSER));
-            if (!string_ok(composer)) {
-                composer = "None";
-            }
+            std::string conductor = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_CONDUCTOR), "None");
+            renderConductor(conductor, &result);
 
-            if (string_ok(composer)) {
-                renderComposer(composer, &result);
-            }
+            std::string orchestra = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_ORCHESTRA), "None");
+            renderOrchestra(orchestra, &result);
 
-            std::string conductor = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_CONDUCTOR));
-            if (!string_ok(conductor)) {
-                conductor = "None";
-            }
-
-            if (string_ok(conductor)) {
-                renderConductor(conductor, &result);
-            }
-
-            std::string orchestra = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_ORCHESTRA));
-            if (!string_ok(orchestra)) {
-                orchestra = "None";
-            }
-
-            if (string_ok(orchestra)) {
-                renderOrchestra(orchestra, &result);
-            }
-
-            std::string date = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_UPNP_DATE));
-            if (!string_ok(date)) {
-                date = "None";
-            }
-
-            if (string_ok(date)) {
-                renderAlbumDate(date, &result);
-            }
+            std::string date = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_UPNP_DATE), "None");
+            renderAlbumDate(date, &result);
         }
         if (upnp_class == UPNP_DEFAULT_CLASS_MUSIC_ALBUM || upnp_class == UPNP_DEFAULT_CLASS_CONTAINER) {
             std::string aa_id = storage->findFolderImage(cont->getID(), std::string());
@@ -560,10 +531,9 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
         int x;
         int y;
 
-        if (string_ok(videoresolution) && check_resolution(videoresolution, &x, &y)) {
-            std::string thumb_mimetype = getValueOrDefault(mappings, CONTENT_TYPE_JPG);
-            if (!string_ok(thumb_mimetype))
-                thumb_mimetype = "image/jpeg";
+        if (!videoresolution.empty() && check_resolution(videoresolution, &x, &y)) {
+            auto it = mappings.find(CONTENT_TYPE_JPG);
+            std::string thumb_mimetype = it != mappings.end() && !it->second.empty() ? it->second : "image/jpeg";
 
             auto ffres = std::make_shared<CdsResource>(CH_FFTH);
             ffres->addParameter(RESOURCE_HANDLER, std::to_string(CH_FFTH));
@@ -574,8 +544,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
             y = config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE) * y / x;
             x = config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE);
             std::string resolution = std::to_string(x) + "x" + std::to_string(y);
-            ffres->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION),
-                resolution);
+            ffres->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), resolution);
             item->addResource(ffres);
             log_debug("Adding resource for video thumbnail");
         }
@@ -825,7 +794,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
                 std::string resolution = getValueOrDefault(res_attrs, MetadataHandler::getResAttrName(R_RESOLUTION));
                 int x;
                 int y;
-                if (string_ok(resolution) && check_resolution(resolution, &x, &y)) {
+                if (!resolution.empty() && check_resolution(resolution, &x, &y)) {
 
                     if ((i > 0) && (((item->getResource(i)->getHandlerType() == CH_LIBEXIF) && (item->getResource(i)->getParameter(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL)) || (item->getResource(i)->getOption(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL) || (item->getResource(i)->getOption(RESOURCE_CONTENT_TYPE) == THUMBNAIL)) && (x <= 160) && (y <= 160))
                         extend = std::string(D_PROFILE) + "=" + D_JPEG_TN + ";";
