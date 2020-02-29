@@ -88,8 +88,7 @@ void FfmpegHandler::addFfmpegAuxdataFields(std::shared_ptr<CdsItem> item, AVForm
 
     auto sc = StringConverter::m2i(config);
     std::vector<std::string> aux = config->getStringArrayOption(CFG_IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST);
-    for (size_t j = 0; j < aux.size(); j++) {
-        std::string desiredTag(aux[j]);
+    for (const std::string& desiredTag : aux) {
         if (!desiredTag.empty()) {
             AVDictionaryEntry* tag = NULL;
             tag = av_dict_get(pFormatCtx->metadata, desiredTag.c_str(), NULL, AV_DICT_IGNORE_SUFFIX);

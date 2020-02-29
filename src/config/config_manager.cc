@@ -416,7 +416,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     } else // validate user settings
     {
         bool default_found = false;
-        for (pugi::xml_node child : tmpEl.children()) {
+        for (const pugi::xml_node& child : tmpEl.children()) {
             if (std::string(child.name()) == "option") {
                 int i = child.text().as_int();
                 if (i < 1)
@@ -436,7 +436,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 
     // create the array from either user or default settings
     std::vector<std::string> menu_opts;
-    for (pugi::xml_node child : tmpEl.children()) {
+    for (const pugi::xml_node& child : tmpEl.children()) {
         if (std::string(child.name()) == "option")
             menu_opts.emplace_back(child.text().as_string());
     }
@@ -1095,7 +1095,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 
     int contentElementCount = 0;
     if (tmpEl != nullptr) {
-        for (pugi::xml_node content : tmpEl.children()) {
+        for (const pugi::xml_node& content : tmpEl.children()) {
             if (std::string(content.name()) != "content")
                 continue;
 
@@ -1384,7 +1384,7 @@ std::map<std::string, std::string> ConfigManager::createDictionaryFromNode(const
     std::map<std::string, std::string> dict;
 
     if (element != nullptr) {
-        for (pugi::xml_node child : element.children()) {
+        for (const pugi::xml_node& child : element.children()) {
             if (child.name() == nodeName) {
                 std::string key = child.attribute(keyAttr.c_str()).as_string();
                 std::string value = child.attribute(valAttr.c_str()).as_string();
@@ -1415,7 +1415,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
 
     auto mtype_profile = element.child("mimetype-profile-mappings");
     if (mtype_profile != nullptr) {
-        for (pugi::xml_node child : element.children()) {
+        for (const pugi::xml_node& child : element.children()) {
             if (std::string(child.name()) == "transcode") {
                 std::string mt = child.attribute("mimetype").as_string();
                 std::string pname = child.attribute("using").as_string();
@@ -1433,7 +1433,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
     if (profiles == nullptr)
         return list;
 
-    for (pugi::xml_node child : element.children()) {
+    for (const pugi::xml_node& child : element.children()) {
         if (std::string(child.name()) != "profile")
             continue;
 
@@ -1499,7 +1499,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
 
             if (fcc_mode != FCC_None) {
                 std::vector<std::string> fcc_list;
-                for (pugi::xml_node fourcc : sub.children()) {
+                for (const pugi::xml_node& fourcc : sub.children()) {
                     if (std::string(fourcc.name()) != "fourcc")
                         continue;
 
@@ -1725,7 +1725,7 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNode(const st
     if (element == nullptr)
         return list;
 
-    for (pugi::xml_node child : element.children()) {
+    for (const pugi::xml_node& child : element.children()) {
 
         // We only want directories
         if (std::string(child.name()) != "directory")
@@ -1856,7 +1856,7 @@ std::vector<std::string> ConfigManager::createArrayFromNode(const pugi::xml_node
     std::vector<std::string> arr;
 
     if (element != nullptr) {
-        for (pugi::xml_node child : element.children()) {
+        for (const pugi::xml_node& child : element.children()) {
             if (child.name() == nodeName) {
                 std::string attrValue = child.attribute(attrName.c_str()).as_string();
                 if (!attrValue.empty())
