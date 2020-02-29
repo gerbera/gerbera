@@ -56,10 +56,10 @@ public:
     static std::string getJson(pugi::xml_node& root, const Hints* hints);
 
 private:
-    static void handleElement(std::ostringstream& buf, pugi::xml_node& node, const Hints* hints);
+    static void handleElement(std::ostringstream& buf, const pugi::xml_node& node, const Hints* hints);
     static std::string getAsString(const char* str);
     static std::string getValue(const char* text);
-    static bool isArray(pugi::xml_node& node, const Hints* hints, std::string* arrayName);
+    static bool isArray(const pugi::xml_node& node, const Hints* hints, std::string* arrayName);
 };
 
 #endif // __UTIL_XML_TO_JSON_H__

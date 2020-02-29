@@ -238,7 +238,7 @@ void SessionManager::timerNotify(std::shared_ptr<Timer::Parameter> parameter)
     getTimespecNow(&now);
 
     for (auto it = sessions.begin(); it != sessions.end(); /*++it*/) {
-        auto& session = *it;
+        const auto& session = *it;
 
         if (getDeltaMillis(session->getLastAccessTime(), &now) > 1000 * session->getTimeout()) {
             log_debug("session timeout: {} - diff: {}", session->getID().c_str(), getDeltaMillis(session->getLastAccessTime(), &now));

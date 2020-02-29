@@ -174,7 +174,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
     auto cast = trailer.child("cast");
     if (cast != nullptr) {
         std::string actors;
-        for (pugi::xml_node actor : cast.children()) {
+        for (const pugi::xml_node& actor : cast.children()) {
             if (actor.type() != pugi::node_element)
                 return nullptr;
             if (std::string(actor.name()) != "name")
@@ -197,7 +197,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
     auto genre = trailer.child("genre");
     if (genre != nullptr) {
         std::string genres;
-        for (pugi::xml_node gn : genre.children()) {
+        for (const pugi::xml_node& gn : genre.children()) {
             if (gn.type() != pugi::node_element)
                 return nullptr;
             if (std::string(gn.name()) != "name")
