@@ -74,7 +74,7 @@ public:
     };
 
     Timer();
-    void init();
+    void run();
 
     virtual ~Timer() { log_debug("Timer destroyed!\n"); }
     void shutdown();

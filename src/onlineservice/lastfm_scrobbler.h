@@ -50,7 +50,7 @@ public:
     ///
     /// This function reads information from the config and initializes
     /// various variables (like username and password).
-    void init();
+    void run();
 
     /// \brief Destroys the LastFm client.
     ///

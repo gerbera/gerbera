@@ -108,8 +108,8 @@ protected:
     std::shared_ptr<ConfigManager> config;
     std::shared_ptr<Storage> storage;
 
-    std::string virtualURL;
-    std::string presentationURL;
+    const std::string virtualURL;
+    const std::string presentationURL;
 
     // Holds a part of path and bool which says if we need to append the resource
     // TODO: Remove this and use centralised routing instead of building URLs all over the place

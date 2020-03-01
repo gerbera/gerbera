@@ -83,7 +83,8 @@ void FallbackLayout::addVideo(const std::shared_ptr<CdsObject>& obj, const fs::p
 
     std::string dir;
     if (!rootpath.empty()) {
-        dir = rootpath.filename();
+        // make location relative to rootpath: "/home/.../Video/Action/a.mkv" with rootpath "/home/.../Video" -> "Video/Action"
+        dir = fs::relative(obj->getLocation().parent_path(), rootpath.parent_path());
         dir = f2i->convert(dir);
     } else
         dir = esc(f2i->convert(get_last_path(obj->getLocation())));
@@ -137,7 +138,8 @@ void FallbackLayout::addImage(const std::shared_ptr<CdsObject>& obj, const fs::p
 
     std::string dir;
     if (!rootpath.empty()) {
-        dir = rootpath.filename();
+        // make location relative to rootpath: "/home/.../Photos/Action/a.mkv" with rootpath "/home/.../Photos" -> "Photos/Action"
+        dir = fs::relative(obj->getLocation().parent_path(), rootpath.parent_path());
         dir = f2i->convert(dir);
     } else
         dir = esc(f2i->convert(get_last_path(obj->getLocation())));
