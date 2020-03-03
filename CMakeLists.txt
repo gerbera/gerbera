@@ -320,8 +320,16 @@ endif()
 find_package(fmt REQUIRED)
 target_link_libraries(gerbera fmt::fmt)
 
-find_package(spdlog REQUIRED)
-target_link_libraries(gerbera spdlog::spdlog)
+# See if it's just installed as a library first, as not all installs have .cmake files
+find_library(SPDLOG_LIBRARY spdlog)
+if(SPDLOG_LIBRARY)
+    set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${SPDLOG_LIBRARY})
+    target_link_libraries(gerbera ${SPDLOG_LIBRARY})
+else()
+    # Didn't find it, so try the .cmake file, fail if not found
+    find_package(spdlog REQUIRED)
+    target_link_libraries(gerbera spdlog::spdlog)
+endif()
 add_compile_definitions("SPDLOG_FMT_EXTERNAL")
 
 find_package (Pugixml REQUIRED)
