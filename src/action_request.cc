@@ -88,10 +88,10 @@ void ActionRequest::update()
         std::string xml = buf.str();
         log_debug("ActionRequest::update(): {}", xml.c_str());
 
-        IXML_Document* result = ixmlDocument_createDocument();
-        int ret = ixmlParseBufferEx(xml.c_str(), &result);
+        IXML_Document* result = nullptr;
+        int err = ixmlParseBufferEx(xml.c_str(), &result);
 
-        if (ret != IXML_SUCCESS) {
+        if (err != IXML_SUCCESS) {
             log_error("ActionRequest::update(): could not convert to iXML");
             UpnpActionRequest_set_ErrCode(upnp_request, UPNP_E_ACTION_FAILED);
         } else {
