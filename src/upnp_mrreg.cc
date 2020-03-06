@@ -145,7 +145,7 @@ void MRRegistrarService::prcoessSubscriptionUpdate(std::string sourceProtocol_CS
     propset->print(buf, "", 0);
     std::string xml = buf.str();
 
-    IXML_Document *event = NULL;
+    IXML_Document *event = nullptr;
     int err = ixmlParseBufferEx(xml.c_str(), &event);
     if (err != IXML_SUCCESS)
     {
