@@ -407,8 +407,7 @@ std::unique_ptr<SQLRow> MysqlResult::nextRow()
     MYSQL_ROW mysql_row;
     mysql_row = mysql_fetch_row(mysql_res);
     if (mysql_row) {
-        auto self = shared_from_this();
-        auto p = std::make_unique<MysqlRow>(mysql_row, self);
+        auto p = std::make_unique<MysqlRow>(mysql_row);
         return p;
     }
     nullRead = true;
@@ -419,8 +418,7 @@ std::unique_ptr<SQLRow> MysqlResult::nextRow()
 
 /* MysqlRow */
 
-MysqlRow::MysqlRow(MYSQL_ROW mysql_row, std::shared_ptr<SQLResult> sqlResult)
-    : SQLRow(sqlResult)
+MysqlRow::MysqlRow(MYSQL_ROW mysql_row)
 {
     this->mysql_row = mysql_row;
 }

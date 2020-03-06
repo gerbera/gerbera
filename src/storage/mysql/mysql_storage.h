@@ -101,7 +101,7 @@ private:
 
 class MysqlRow : public SQLRow {
 public:
-    MysqlRow(MYSQL_ROW mysql_row, std::shared_ptr<SQLResult> sqlResult);
+    MysqlRow(MYSQL_ROW mysql_row);
 
 private:
     inline virtual char* col_c_str(int index) { return mysql_row[index]; }

@@ -614,9 +614,7 @@ std::unique_ptr<SQLRow> Sqlite3Result::nextRow()
         row += ncolumn;
         cur_row++;
         if (cur_row <= nrow) {
-            auto self = shared_from_this();
-            auto p = std::make_unique<Sqlite3Row>(row, self);
-            p->res = std::static_pointer_cast<Sqlite3Result>(self);
+            auto p = std::make_unique<Sqlite3Row>(row);
             return p;
         }
         return nullptr;
@@ -626,8 +624,7 @@ std::unique_ptr<SQLRow> Sqlite3Result::nextRow()
 
 /* Sqlite3Row */
 
-Sqlite3Row::Sqlite3Row(char** row, std::shared_ptr<SQLResult> sqlResult)
-    : SQLRow(std::move(sqlResult))
+Sqlite3Row::Sqlite3Row(char** row)
 {
     this->row = row;
 }
