@@ -145,7 +145,7 @@ std::shared_ptr<AutoscanDirectory> AutoscanList::getByObjectID(int objectID)
     return nullptr;
 }
 
-std::shared_ptr<AutoscanDirectory> AutoscanList::get(const std::string& location)
+std::shared_ptr<AutoscanDirectory> AutoscanList::get(const fs::path& location)
 {
     AutoLock lock(mutex);
     for (const auto& i : list) {
@@ -186,7 +186,7 @@ int AutoscanList::removeByObjectID(int objectID)
     return INVALID_SCAN_ID;
 }
 
-int AutoscanList::remove(const std::string& location)
+int AutoscanList::remove(const fs::path& location)
 {
     AutoLock lock(mutex);
 
@@ -201,7 +201,7 @@ int AutoscanList::remove(const std::string& location)
     return INVALID_SCAN_ID;
 }
 
-std::shared_ptr<AutoscanList> AutoscanList::removeIfSubdir(const std::string& parent, bool persistent)
+std::shared_ptr<AutoscanList> AutoscanList::removeIfSubdir(const fs::path& parent, bool persistent)
 {
     AutoLock lock(mutex);
 
