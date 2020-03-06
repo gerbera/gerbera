@@ -323,40 +323,41 @@ void Sqlite3Storage::threadProc()
         startupError = "Sqlite3Storage.init: could not open " + dbFilePath;
         return;
     }
+
     AutoLockU lock(sqliteMutex);
     // tell init() that we are ready
     cond.notify_one();
 
     while (!shutdownFlag) {
-        while (taskQueue.empty()) {
-            /* if nothing to do, sleep until awakened */
-            cond.wait(lock);
+        while (!taskQueue.empty()) {
+            auto task = taskQueue.front();
+            taskQueue.pop();
+
+            lock.unlock();
+            try {
+                task->run(&db, this);
+                if (task->didContamination())
+                    dirty = true;
+                else if (task->didDecontamination())
+                    dirty = false;
+                task->sendSignal();
+            } catch (const std::runtime_error& e) {
+                task->sendSignal(e.what());
+            }
+            lock.lock();
         }
 
-        auto task = taskQueue.front();
-        taskQueue.pop();
-
-        lock.unlock();
-        try {
-            task->run(&db, this);
-            if (task->didContamination())
-                dirty = true;
-            else if (task->didDecontamination())
-                dirty = false;
-            task->sendSignal();
-        } catch (const std::runtime_error& e) {
-            task->sendSignal(e.what());
-        }
-        lock.lock();
+        /* if nothing to do, sleep until awakened */
+        cond.wait(lock);
     }
 
     taskQueueOpen = false;
     while (!taskQueue.empty()) {
         auto task = taskQueue.front();
         taskQueue.pop();
-
         task->sendSignal("Sorry, sqlite3 thread is shutting down");
     }
+
     if (db)
         sqlite3_close(db);
 }

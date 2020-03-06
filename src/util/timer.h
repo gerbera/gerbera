@@ -69,14 +69,14 @@ public:
 
     class Subscriber {
     public:
-        virtual ~Subscriber() { log_debug("Subscriber destroyed\n"); }
+        virtual ~Subscriber() { log_debug("Subscriber destroyed"); }
         virtual void timerNotify(std::shared_ptr<Parameter> parameter) = 0;
     };
 
     Timer();
     void run();
 
-    virtual ~Timer() { log_debug("Timer destroyed!\n"); }
+    virtual ~Timer() { log_debug("Timer destroyed"); }
     void shutdown();
 
     /// \brief Add a subscriber
