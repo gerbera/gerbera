@@ -141,7 +141,7 @@ protected:
 public:
     /// \brief Constructor, initializes the array.
     SessionManager(const std::shared_ptr<ConfigManager>& config, std::shared_ptr<Timer> timer);
-    ~SessionManager() override { log_debug("SessionManager destroyed\n"); }
+    ~SessionManager() override { log_debug("SessionManager destroyed"); }
 
     /// \brief Creates a Session with a given timeout.
     /// \param timeout Session timeout in milliseconds.
