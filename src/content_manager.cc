@@ -530,15 +530,15 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
 {
     log_debug("start");
 
-    fs::path location;
-    std::shared_ptr<CdsObject> obj;
-
     if (scanID == INVALID_SCAN_ID)
         return;
 
     std::shared_ptr<AutoscanDirectory> adir = getAutoscanDirectory(scanID, scanMode);
     if (adir == nullptr)
         throw std::runtime_error("ID valid but nullptr returned? this should never happen");
+
+    fs::path location;
+    std::shared_ptr<CdsObject> obj;
 
     if (containerID != INVALID_OBJECT_ID) {
         try {
@@ -619,7 +619,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
         thisTaskID = 0;
 
     struct dirent* dent;
-    while (((dent = readdir(dir)) != nullptr)) {
+    while ((dent = readdir(dir)) != nullptr) {
         char* name = dent->d_name;
         if (name[0] == '.') {
             if (name[1] == 0) {
@@ -632,15 +632,15 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
                 continue;
             }
         }
-        auto path = location / name;
+        fs::path newPath = location / name;
 
         if ((shutdownFlag) || ((task != nullptr) && !task->isValid()))
             break;
 
         struct stat statbuf;
-        int ret = stat(path.c_str(), &statbuf);
+        int ret = stat(newPath.c_str(), &statbuf);
         if (ret != 0) {
-            log_error("Failed to stat {}, {}", path.c_str(), mt_strerror(errno).c_str());
+            log_error("Failed to stat {}, {}", newPath.c_str(), mt_strerror(errno).c_str());
             continue;
         }
 
@@ -652,7 +652,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
         }
 
         if (S_ISREG(statbuf.st_mode)) {
-            int objectID = storage->findObjectIDByPath(path);
+            int objectID = storage->findObjectIDByPath(newPath);
             if (objectID > 0) {
                 if (list != nullptr)
                     list->erase(objectID);
@@ -663,7 +663,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
                         // readd object - we have to do this in order to trigger
                         // layout
                         removeObject(objectID, false);
-                        addFileInternal(path, location, false, false, adir->getHidden());
+                        addFileInternal(newPath, location, false, false, adir->getHidden());
                         // update time variable
                         last_modified_current_max = statbuf.st_mtime;
                     }
@@ -674,17 +674,17 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
 
             } else {
                 // add file, not recursive, not async
-                addFileInternal(path, location, false, false, adir->getHidden());
+                addFileInternal(newPath, location, false, false, adir->getHidden());
                 if (last_modified_current_max < statbuf.st_mtime)
                     last_modified_current_max = statbuf.st_mtime;
             }
         } else if (S_ISDIR(statbuf.st_mode) && (adir->getRecursive())) {
-            int objectID = storage->findObjectIDByPath(path);
+            int objectID = storage->findObjectIDByPath(newPath);
             if (objectID > 0) {
                 if (list != nullptr)
                     list->erase(objectID);
                 // add a task to rescan the directory that was found
-                rescanDirectory(objectID, scanID, scanMode, path, task->isCancellable());
+                rescanDirectory(objectID, scanID, scanMode, newPath, task->isCancellable());
             } else {
                 // we have to make sure that we will never add a path to the task list
                 // if it is going to be removed by a pending remove task.
@@ -701,7 +701,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
                 }
 
                 // add directory, recursive, async, hidden flag, low priority
-                addFileInternal(path, location, true, true, adir->getHidden(), true, thisTaskID, task->isCancellable());
+                addFileInternal(newPath, location, true, true, adir->getHidden(), true, thisTaskID, task->isCancellable());
             }
         }
     } // while
@@ -739,13 +739,15 @@ void ContentManager::addRecursive(const fs::path& path, bool hidden, const std::
     }
 
     int parentID = storage->findObjectIDByPath(path);
-    struct dirent* dent;
+
     // abort loop if either:
     // no valid directory returned, server is about to shutdown, the task is there and was invalidated
     if (task != nullptr) {
-        log_debug("IS TASK VALID? [{}], taskoath: [{}]", task->isValid(), path.c_str());
+        log_debug("IS TASK VALID? [{}], task path: [{}]", task->isValid(), path.c_str());
     }
-    while (((dent = readdir(dir)) != nullptr) && (!shutdownFlag) && (task == nullptr || ((task != nullptr) && task->isValid()))) {
+
+    struct dirent* dent;
+    while ((dent = readdir(dir)) != nullptr) {
         char* name = dent->d_name;
         if (name[0] == '.') {
             if (name[1] == 0) {
@@ -758,6 +760,9 @@ void ContentManager::addRecursive(const fs::path& path, bool hidden, const std::
                 continue;
         }
         fs::path newPath = path / name;
+
+        if ((shutdownFlag) || ((task != nullptr) && !task->isValid()))
+            break;
 
         if (config->getConfigFilename() == newPath)
             continue;
