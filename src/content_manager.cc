@@ -529,9 +529,7 @@ int ContentManager::ensurePathExistence(fs::path path)
 void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scanMode, ScanLevel scanLevel, const std::shared_ptr<GenericTask>& task)
 {
     log_debug("start");
-    int ret;
-    struct dirent* dent;
-    struct stat statbuf;
+
     fs::path location;
     std::shared_ptr<CdsObject> obj;
 
@@ -620,7 +618,8 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
     } else
         thisTaskID = 0;
 
-    while (((dent = readdir(dir)) != nullptr) && (!shutdownFlag) && (task == nullptr || ((task != nullptr) && task->isValid()))) {
+    struct dirent* dent;
+    while (((dent = readdir(dir)) != nullptr)) {
         char* name = dent->d_name;
         if (name[0] == '.') {
             if (name[1] == 0) {
@@ -633,9 +632,13 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
                 continue;
             }
         }
-
         auto path = location / name;
-        ret = stat(path.c_str(), &statbuf);
+
+        if ((shutdownFlag) || ((task != nullptr) && !task->isValid()))
+            break;
+
+        struct stat statbuf;
+        int ret = stat(path.c_str(), &statbuf);
         if (ret != 0) {
             log_error("Failed to stat {}, {}", path.c_str(), mt_strerror(errno).c_str());
             continue;
@@ -1504,7 +1507,7 @@ std::vector<std::shared_ptr<AutoscanDirectory>> ContentManager::getAutoscanDirec
     return all;
 }
 
-std::shared_ptr<AutoscanDirectory> ContentManager::getAutoscanDirectory(const std::string& location)
+std::shared_ptr<AutoscanDirectory> ContentManager::getAutoscanDirectory(const fs::path& location)
 {
     // \todo change this when more scanmodes become available
     std::shared_ptr<AutoscanDirectory> dir = autoscan_timed->get(location);
@@ -1568,7 +1571,7 @@ void ContentManager::removeAutoscanDirectory(int objectID)
 #endif
 }
 
-void ContentManager::removeAutoscanDirectory(const std::string& location)
+void ContentManager::removeAutoscanDirectory(const fs::path& location)
 {
     /// \todo change this when more scanmodes become avaiable
     std::shared_ptr<AutoscanDirectory> adir = autoscan_timed->get(location);
