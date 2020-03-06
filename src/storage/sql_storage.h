@@ -53,7 +53,7 @@ class SQLEmitter;
 
 class SQLRow {
 public:
-    SQLRow(std::shared_ptr<SQLResult> sqlResult) { this->sqlResult = sqlResult; }
+    //SQLRow() { }
     //virtual ~SQLRow();
     std::string col(int index)
     {
@@ -63,12 +63,9 @@ public:
         return std::string(c);
     }
     virtual char* col_c_str(int index) = 0;
-
-protected:
-    std::shared_ptr<SQLResult> sqlResult;
 };
 
-class SQLResult : public std::enable_shared_from_this<SQLResult> {
+class SQLResult {
 public:
     //SQLResult();
     //virtual ~SQLResult();

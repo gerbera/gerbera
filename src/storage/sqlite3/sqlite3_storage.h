@@ -234,14 +234,11 @@ private:
 /// \brief Represents a row of a result of a sqlite3 select
 class Sqlite3Row : public SQLRow {
 public:
-    Sqlite3Row(char** row, std::shared_ptr<SQLResult> sqlResult);
+    Sqlite3Row(char** row);
 
 private:
     inline char* col_c_str(int index) override { return row[index]; }
     char** row;
-    std::shared_ptr<Sqlite3Result> res;
-
-    friend class Sqlite3Result;
 };
 
 #endif // __SQLITE3_STORAGE_H__
