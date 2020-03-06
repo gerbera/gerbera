@@ -33,8 +33,6 @@
 #include <cassert>
 #include <utility>
 
-using namespace std;
-
 Timer::Timer()
     : shutdownFlag(false)
     , thread(0)
@@ -101,7 +99,7 @@ void Timer::removeTimerSubscriber(Subscriber* timerSubscriber, std::shared_ptr<P
 
 void Timer::triggerWait()
 {
-    unique_lock<std::mutex> lock(waitMutex);
+    std::unique_lock<std::mutex> lock(waitMutex);
 
     while (!shutdownFlag) {
         log_debug("triggerWait. - {} subscriber(s)", subscribers.size());
@@ -118,8 +116,8 @@ void Timer::triggerWait()
 
         long wait = getDeltaMillis(&now, timeout);
         if (wait > 0) {
-            cv_status ret = cond.wait_for(lock, chrono::milliseconds(wait));
-            if (ret != cv_status::timeout) {
+            std::cv_status ret = cond.wait_for(lock, std::chrono::milliseconds(wait));
+            if (ret != std::cv_status::timeout) {
                 /*
                  * Some rude thread woke us!
                  * Now we have to wait all over again...
@@ -133,7 +131,7 @@ void Timer::triggerWait()
 
 void Timer::notify()
 {
-    unique_lock<std::mutex> lock(mutex);
+    std::unique_lock<std::mutex> lock(mutex);
     assert(lock.owns_lock());
 
     std::list<TimerSubscriberElement> toNotify;

@@ -59,9 +59,7 @@ void ATrailersContentHandler::setServiceContent(std::unique_ptr<pugi::xml_docume
     trailer_it = root.begin();
 
     auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
-    trailer_mimetype = getValueOrDefault(mappings, "mov");
-    if (!string_ok(trailer_mimetype))
-        trailer_mimetype = "video/quicktime";
+    trailer_mimetype = getValueOrDefault(mappings, "mov", "video/quicktime");
 }
 
 std::shared_ptr<CdsObject> ATrailersContentHandler::getNextObject()
@@ -102,7 +100,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
         return nullptr;
 
     std::string temp = info.child("title").text().as_string();
-    if (!string_ok(temp))
+    if (temp.empty())
         item->setTitle("Unknown");
     else
         item->setTitle(temp);
@@ -113,7 +111,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
     item->setAuxData(ONLINE_SERVICE_AUX_ID, std::to_string(OS_ATrailers));
 
     temp = trailer.attribute("id").as_string();
-    if (!string_ok(temp)) {
+    if (temp.empty()) {
         log_warning("Failed to retrieve Trailer ID for \"{}\", "
                     "skipping...\n",
             item->getTitle().c_str());
@@ -132,7 +130,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
     }
 
     temp = preview.child("large").text().as_string();
-    if (string_ok(temp)) {
+    if (!temp.empty()) {
         item->setURL(temp);
     } else {
         log_error("Could not get location for Trailers item {}, "
@@ -144,31 +142,31 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
     item->setClass("object.item.videoItem");
 
     temp = info.child("rating").text().as_string();
-    if (string_ok(temp))
+    if (!temp.empty())
         item->setMetadata(MetadataHandler::getMetaFieldName(M_RATING),
             temp);
 
     temp = info.child("studio").text().as_string();
-    if (string_ok(temp))
+    if (!temp.empty())
         item->setMetadata(MetadataHandler::getMetaFieldName(M_PRODUCER),
             temp);
 
     temp = info.child("director").text().as_string();
-    if (string_ok(temp))
+    if (!temp.empty())
         item->setMetadata(MetadataHandler::getMetaFieldName(M_DIRECTOR),
             temp);
 
     temp = info.child("postdate").text().as_string();
-    if (string_ok(temp))
+    if (!temp.empty())
         item->setAuxData(ATRAILERS_AUXDATA_POST_DATE, temp);
 
     temp = info.child("releasedate").text().as_string();
-    if (string_ok(temp))
+    if (!temp.empty())
         item->setMetadata(MetadataHandler::getMetaFieldName(M_DATE),
             temp);
 
     temp = info.child("description").text().as_string();
-    if (string_ok(temp)) {
+    if (!temp.empty()) {
         /// \todo cut out a small part for the usual description
         item->setMetadata(MetadataHandler::getMetaFieldName(M_LONGDESCRIPTION), temp);
     }
@@ -176,22 +174,22 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
     auto cast = trailer.child("cast");
     if (cast != nullptr) {
         std::string actors;
-        for (pugi::xml_node actor : cast.children()) {
+        for (const pugi::xml_node& actor : cast.children()) {
             if (actor.type() != pugi::node_element)
                 return nullptr;
             if (std::string(actor.name()) != "name")
                 return nullptr;
 
             temp = actor.text().as_string();
-            if (string_ok(temp)) {
-                if (string_ok(actors))
+            if (!temp.empty()) {
+                if (!actors.empty())
                     actors.append(", ");
 
                 actors.append(temp);
             }
         }
 
-        if (string_ok(actors))
+        if (!actors.empty())
             item->setMetadata(MetadataHandler::getMetaFieldName(M_GENRE),
                 temp);
     }
@@ -199,22 +197,22 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
     auto genre = trailer.child("genre");
     if (genre != nullptr) {
         std::string genres;
-        for (pugi::xml_node gn : genre.children()) {
+        for (const pugi::xml_node& gn : genre.children()) {
             if (gn.type() != pugi::node_element)
                 return nullptr;
             if (std::string(gn.name()) != "name")
                 return nullptr;
 
             temp = gn.text().as_string();
-            if (string_ok(temp)) {
-                if (string_ok(genres))
+            if (!temp.empty()) {
+                if (!genres.empty())
                     genres.append(", ");
 
                 genres.append(temp);
             }
         }
 
-        if (string_ok(genres))
+        if (!genres.empty())
             item->setMetadata(MetadataHandler::getMetaFieldName(M_GENRE),
                 temp);
     }

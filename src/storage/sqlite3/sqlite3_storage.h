@@ -109,7 +109,7 @@ public:
     /// \param query The SQL query string
     SLSelectTask(const char* query);
     void run(sqlite3** db, Sqlite3Storage* sl) override;
-    inline std::shared_ptr<SQLResult> getResult() { return std::static_pointer_cast<SQLResult>(pres); };
+    inline std::shared_ptr<SQLResult> getResult() { return std::static_pointer_cast<SQLResult>(pres); }
 
 protected:
     /// \brief The SQL query string

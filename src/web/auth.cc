@@ -75,7 +75,7 @@ void web::auth::process()
     std::string action = param("action");
     auto root = xmlDoc->document_element();
 
-    if (!string_ok(action)) {
+    if (action.empty()) {
         root.append_child("error").append_child(pugi::node_pcdata).set_value("req_type auth: no action given");
         return;
     }
@@ -154,7 +154,7 @@ void web::auth::process()
         std::string encPassword = param("password");
         std::string sid = param("sid");
 
-        if (!string_ok(username) || !string_ok(encPassword))
+        if (username.empty() || encPassword.empty())
             throw LoginException("Missing username or password");
 
         auto session = sessionManager->getSession(sid);
@@ -163,7 +163,7 @@ void web::auth::process()
 
         std::string correctPassword = sessionManager->getUserPassword(username);
 
-        if (!string_ok(correctPassword) || !check_token(session->get("token"), correctPassword, encPassword))
+        if (correctPassword.empty() || !check_token(session->get("token"), correctPassword, encPassword))
             throw LoginException("Invalid username or password");
 
         session->logIn();

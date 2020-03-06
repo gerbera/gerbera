@@ -72,8 +72,6 @@
 ) ENGINE=MyISAM CHARSET=utf8"
 #define MYSQL_UPDATE_4_5_2 "UPDATE `mt_internal_setting` SET `value`='5' WHERE `key`='db_version' AND `value`='4'"
 
-using namespace std;
-
 MysqlStorage::MysqlStorage(std::shared_ptr<ConfigManager> config)
     : SQLStorage(config)
 {
@@ -123,7 +121,7 @@ void MysqlStorage::init()
     log_debug("start");
     SQLStorage::init();
 
-    unique_lock<decltype(mysqlMutex)> lock(mysqlMutex);
+    std::unique_lock<decltype(mysqlMutex)> lock(mysqlMutex);
     int ret;
 
     if (!mysql_thread_safe()) {
@@ -267,7 +265,7 @@ void MysqlStorage::init()
 
     /* --- --- ---*/
 
-    if (!string_ok(dbVersion) || dbVersion != "5")
+    if (dbVersion != "5")
         throw std::runtime_error("The database seems to be from a newer version (database version " + dbVersion + ")!");
 
     lock.unlock();

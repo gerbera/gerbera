@@ -33,17 +33,17 @@ protected:
 public:
     GenericTask(task_owner_t taskOwner);
     virtual void run() = 0;
-    inline void setDescription(std::string description) { this->description = description; };
-    inline std::string getDescription() { return description; };
-    inline task_type_t getType() { return taskType; };
-    inline unsigned int getID() { return taskID; };
-    inline unsigned int getParentID() { return parentTaskID; };
-    inline void setID(unsigned int taskID) { this->taskID = taskID; };
-    inline void setParentID(unsigned int parentTaskID = 0) { this->parentTaskID = parentTaskID; };
-    inline bool isValid() { return valid; };
-    inline bool isCancellable() { return cancellable; };
-    inline void invalidate() { valid = false; };
-    inline task_owner_t getOwner() { return taskOwner; };
+    inline void setDescription(std::string description) { this->description = description; }
+    inline std::string getDescription() { return description; }
+    inline task_type_t getType() { return taskType; }
+    inline unsigned int getID() { return taskID; }
+    inline unsigned int getParentID() { return parentTaskID; }
+    inline void setID(unsigned int taskID) { this->taskID = taskID; }
+    inline void setParentID(unsigned int parentTaskID = 0) { this->parentTaskID = parentTaskID; }
+    inline bool isValid() { return valid; }
+    inline bool isCancellable() { return cancellable; }
+    inline void invalidate() { valid = false; }
+    inline task_owner_t getOwner() { return taskOwner; }
 };
 
 #endif //__GENERIC_TASK_H__

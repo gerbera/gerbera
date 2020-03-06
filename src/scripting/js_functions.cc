@@ -77,7 +77,7 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
     std::string containerclass;
     if (!duk_is_null_or_undefined(ctx, 2)) {
         containerclass = duk_to_string(ctx, 2);
-        if (!string_ok(containerclass))
+        if (containerclass.empty())
             containerclass = nullptr;
     }
     //stack: js_cds_obj path containerclass

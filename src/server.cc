@@ -108,13 +108,13 @@ void Server::run()
     std::string iface = config->getOption(CFG_SERVER_NETWORK_INTERFACE);
     std::string ip = config->getOption(CFG_SERVER_IP);
 
-    if (string_ok(ip) && string_ok(iface))
+    if (!ip.empty() && !iface.empty())
         throw std::runtime_error("You can not specify interface and IP at the same time!");
 
-    if (!string_ok(iface))
+    if (iface.empty())
         iface = ipToInterface(ip);
 
-    if (string_ok(ip) && !string_ok(iface))
+    if (!ip.empty() && iface.empty())
         throw std::runtime_error("Could not find ip: " + ip);
 
     int port = config->getIntOption(CFG_SERVER_PORT);
@@ -131,7 +131,7 @@ void Server::run()
     port = UpnpGetServerPort();
     log_info("Initialized port: {}", port);
 
-    if (!string_ok(ip)) {
+    if (ip.empty()) {
         ip = UpnpGetServerIpAddress();
     }
 
@@ -142,7 +142,7 @@ void Server::run()
     // next set webroot directory
     std::string web_root = config->getOption(CFG_SERVER_WEBROOT);
 
-    if (!string_ok(web_root)) {
+    if (web_root.empty()) {
         throw std::runtime_error("invalid web server root directory");
     }
 
@@ -155,7 +155,7 @@ void Server::run()
 
     std::vector<std::string> arr = config->getStringArrayOption(CFG_SERVER_CUSTOM_HTTP_HEADERS);
     for (const auto& tmp : arr) {
-        if (string_ok(tmp)) {
+        if (!tmp.empty()) {
             log_info("(NOT) Adding HTTP header \"{}\"", tmp.c_str());
             // FIXME upstream upnp
             //ret = UpnpAddCustomHTTPHeader(tmp.c_str());
@@ -179,7 +179,7 @@ void Server::run()
     }
 
     std::string presentationURL = config->getOption(CFG_SERVER_PRESENTATION_URL);
-    if (!string_ok(presentationURL)) {
+    if (presentationURL.empty()) {
         presentationURL = "http://" + ip + ":" + std::to_string(port) + "/";
     } else {
         std::string appendto = config->getOption(CFG_SERVER_APPEND_PRESENTATION_URL_TO);
@@ -442,18 +442,17 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
         std::string path;
         RequestHandler::splitUrl(filename, URL_UI_PARAM_SEPARATOR, path, parameters);
 
-        std::map<std::string, std::string> dict;
-        dict_decode(parameters, &dict);
+        std::map<std::string, std::string> params;
+        dict_decode(parameters, &params);
 
-        std::string r_type = getValueOrDefault(dict, URL_REQUEST_TYPE);
-        if (r_type.empty())
-            r_type = "index";
+        auto it = params.find(URL_REQUEST_TYPE);
+        std::string r_type = it != params.end() && !it->second.empty() ? it->second : "index";
 
         ret = web::createWebRequestHandler(config, storage, content, session_manager, r_type);
     } else if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + DEVICE_DESCRIPTION_PATH)) {
         ret = std::make_unique<DeviceDescriptionHandler>(config, storage, xmlbuilder.get());
     } else if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_SERVE_HANDLER)) {
-        if (string_ok(config->getOption(CFG_SERVER_SERVEDIR)))
+        if (!config->getOption(CFG_SERVER_SERVEDIR).empty())
             ret = std::make_unique<ServeRequestHandler>(config, storage);
         else
             throw std::runtime_error("Serving directories is not enabled in configuration");

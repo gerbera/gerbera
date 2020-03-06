@@ -68,8 +68,6 @@
 
 #define WHITE_SPACE " \t\r\n"
 
-using namespace std;
-
 static const char* HEX_CHARS = "0123456789abcdef";
 
 std::vector<std::string> split_string(const std::string& str, char sep, bool empty)
@@ -181,7 +179,7 @@ bool is_executable(const fs::path& path, int* err)
 fs::path find_in_path(const fs::path& exec)
 {
     std::string PATH = getenv("PATH");
-    if (!string_ok(PATH))
+    if (PATH.empty())
         return "";
 
     auto st = std::make_unique<StringTokenizer>(PATH);
@@ -212,17 +210,6 @@ fs::path find_in_path(const fs::path& exec)
     } while (!path.empty());
 
     return "";
-}
-
-bool string_ok(const std::string& str)
-{
-    return !str.empty();
-}
-
-void string_ok_ex(const std::string& str)
-{
-    if (str.empty())
-        throw std::runtime_error("Empty string");
 }
 
 std::string http_redirect_to(const std::string& ip, const std::string& port, const std::string& page)
@@ -521,8 +508,8 @@ void writeTextFile(const fs::path& path, const std::string& contents)
 
 std::string renderProtocolInfo(const std::string& mimetype, const std::string& protocol, const std::string& extend)
 {
-    if (string_ok(mimetype) && string_ok(protocol)) {
-        if (string_ok(extend))
+    if (!mimetype.empty() && !protocol.empty()) {
+        if (!extend.empty())
             return protocol + ":*:" + mimetype + ":" + extend;
         return protocol + ":*:" + mimetype + ":*";
     }
@@ -578,7 +565,7 @@ std::string secondsToHMS(int seconds)
 
 int HMSToSeconds(const std::string& time)
 {
-    if (!string_ok(time)) {
+    if (time.empty()) {
         log_warning("Could not convert time representation to seconds!");
         return 0;
     }
@@ -619,7 +606,7 @@ std::string getMIME(const fs::path& filepath, const void* buffer, size_t length)
     }
 
     const char* mime;
-    if (!string_ok(filepath)) {
+    if (filepath.empty()) {
         mime = magic_buffer(magic_cookie, buffer, length);
     } else {
         mime = magic_file(magic_cookie, filepath.c_str());
@@ -659,7 +646,7 @@ bool check_resolution(const std::string& resolution, int* x, int* y)
     if (parts.size() != 2)
         return false;
 
-    if (string_ok(parts[0]) && string_ok(parts[1])) {
+    if (!parts[0].empty() && !parts[1].empty()) {
         int _x = std::stoi(parts[0]);
         int _y = std::stoi(parts[1]);
 
@@ -854,7 +841,7 @@ std::string getValueOrDefault(const std::map<std::string, std::string>& m, const
     return getValueOrDefault<std::string, std::string>(m, key, defval);
 }
 
-std::string toCSV(const shared_ptr<unordered_set<int>>& array)
+std::string toCSV(const std::shared_ptr<std::unordered_set<int>>& array)
 {
     if (array->empty())
         return "";
@@ -911,7 +898,7 @@ std::string interfaceToIP(const std::string& interface)
     struct sockaddr_in local_address;
     int local_socket;
 
-    if (!string_ok(interface))
+    if (interface.empty())
         return "";
 
     local_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
@@ -956,7 +943,7 @@ std::string interfaceToIP(const std::string& interface)
 
 std::string ipToInterface(const std::string& ip)
 {
-    if (!string_ok(ip)) {
+    if (ip.empty()) {
         return "";
     }
 
@@ -1013,17 +1000,17 @@ std::vector<std::string> populateCommandLine(const std::string& line, const std:
 
     for (auto& param : params) {
         size_t inPos = param.find("%in");
-        if (inPos != string::npos) {
+        if (inPos != std::string::npos) {
             std::string newParam = param.replace(inPos, 3, in);
         }
 
         size_t outPos = param.find("%out");
-        if (outPos != string::npos) {
+        if (outPos != std::string::npos) {
             std::string newParam = param.replace(outPos, 4, out);
         }
 
         size_t rangePos = param.find("%range");
-        if (rangePos != string::npos) {
+        if (rangePos != std::string::npos) {
             std::string newParam = param.replace(rangePos, 5, range);
         }
     }
@@ -1210,7 +1197,7 @@ std::string getDLNAprofileString(const std::string& contentType)
     else
         profile = "";
 
-    if (string_ok(profile))
+    if (!profile.empty())
         profile = std::string(D_PROFILE) + "=" + profile;
     return profile;
 }
@@ -1220,7 +1207,7 @@ std::string getDLNAContentHeader(const std::shared_ptr<ConfigManager>& config, c
     if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO)) {
         std::string content_parameter;
         content_parameter = getDLNAprofileString(contentType);
-        if (string_ok(content_parameter))
+        if (!content_parameter.empty())
             content_parameter = D_PROFILE + std::string("=") + content_parameter + ";";
         // enabling or disabling seek
         if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_DLNA_SEEK))
@@ -1243,7 +1230,7 @@ std::string getDLNATransferHeader(const std::shared_ptr<ConfigManager>& config, 
         else if (startswith(mimeType, "audio") || startswith(mimeType, "video"))
             transfer_parameter = D_HTTP_TRANSFER_MODE_STREAMING;
 
-        if (string_ok(transfer_parameter)) {
+        if (!transfer_parameter.empty()) {
             return transfer_parameter;
         }
     }
@@ -1287,7 +1274,7 @@ std::string getAVIFourCC(const fs::path& avi_filename)
     std::string fourcc = std::string(buffer + FCC_OFFSET, 4);
     free(buffer);
 
-    return string_ok(fourcc) ? fourcc : "";
+    return fourcc;
 }
 #endif
 

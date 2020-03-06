@@ -134,7 +134,7 @@ std::shared_ptr<CdsObject> SopCastContentHandler::getObject(std::string groupNam
     item->setAuxData(SOPCAST_AUXDATA_GROUP, std::move(groupName));
 
     std::string temp = channel.attribute("id").as_string();
-    if (!string_ok(temp)) {
+    if (temp.empty()) {
         log_warning("Failed to retrieve SopCast channel ID");
         return nullptr;
     }
@@ -143,7 +143,7 @@ std::shared_ptr<CdsObject> SopCastContentHandler::getObject(std::string groupNam
     item->setServiceID(temp);
 
     temp = channel.child("stream_type").text().as_string();
-    if (!string_ok(temp)) {
+    if (temp.empty()) {
         log_warning("Failed to retrieve SopCast channel mimetype");
         return nullptr;
     }
@@ -153,18 +153,17 @@ std::shared_ptr<CdsObject> SopCastContentHandler::getObject(std::string groupNam
     //std::string mt = getValueOrDefault(mappings, temp);
     std::string mt;
     // map was empty, we have to do construct the mimetype ourselves
-    if (!string_ok(mt)) {
-        if (temp == "wmv")
-            mt = "video/sopcast-x-ms-wmv";
-        else if (temp == "mp3")
-            mt = "audio/sopcast-mpeg";
-        else if (temp == "wma")
-            mt = "audio/sopcast-x-ms-wma";
-        else {
-            log_warning("Could not determine mimetype for SopCast channel (stream_type: {})", temp.c_str());
-            mt = "application/sopcast-stream";
-        }
+    if (temp == "wmv")
+        mt = "video/sopcast-x-ms-wmv";
+    else if (temp == "mp3")
+        mt = "audio/sopcast-mpeg";
+    else if (temp == "wma")
+        mt = "audio/sopcast-x-ms-wma";
+    else {
+        log_warning("Could not determine mimetype for SopCast channel (stream_type: {})", temp.c_str());
+        mt = "application/sopcast-stream";
     }
+
     resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
         renderProtocolInfo(mt, SOPCAST_PROTOCOL));
     item->setMimeType(mt);
@@ -176,7 +175,7 @@ std::shared_ptr<CdsObject> SopCastContentHandler::getObject(std::string groupNam
     }
 
     temp = tmp_el.child("item").text().as_string();
-    if (!string_ok(temp)) {
+    if (temp.empty()) {
         log_warning("Failed to retrieve SopCast channel URL");
         return nullptr;
     }
@@ -189,7 +188,7 @@ std::shared_ptr<CdsObject> SopCastContentHandler::getObject(std::string groupNam
     }
 
     temp = tmp_el.attribute("en").as_string();
-    if (string_ok(temp))
+    if (!temp.empty())
         item->setTitle(temp);
     else
         item->setTitle("Unknown");
@@ -197,16 +196,16 @@ std::shared_ptr<CdsObject> SopCastContentHandler::getObject(std::string groupNam
     tmp_el = channel.child("region");
     if (tmp_el != nullptr) {
         temp = tmp_el.attribute("en").as_string();
-        if (string_ok(temp))
+        if (!temp.empty())
             item->setMetadata(MetadataHandler::getMetaFieldName(M_REGION), temp);
     }
 
     temp = channel.child("description").text().as_string();
-    if (string_ok(temp))
+    if (!temp.empty())
         item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), temp);
 
     temp = channel.attribute("language").as_string();
-    if (string_ok(temp))
+    if (!temp.empty())
         item->setAuxData(SOPCAST_AUXDATA_LANGUAGE, temp);
 
     item->setClass(UPNP_DEFAULT_CLASS_VIDEO_BROADCAST);

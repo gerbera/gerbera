@@ -49,7 +49,7 @@ void web::files::process()
 
     std::string path;
     std::string parentID = param("parent_id");
-    if (!string_ok(parentID) || parentID == "0")
+    if (parentID == "0")
         path = FS_ROOT_DIRECTORY;
     else
         path = hex_decode_string(parentID);

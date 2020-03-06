@@ -34,8 +34,6 @@
 #include "buffered_io_handler.h"
 #include "util/tools.h"
 
-using namespace std;
-
 BufferedIOHandler::BufferedIOHandler(std::unique_ptr<IOHandler>& underlyingHandler, size_t bufSize, size_t maxChunkSize, size_t initialFillSize)
     : IOHandlerBufferHelper(bufSize, initialFillSize)
 {
@@ -74,7 +72,7 @@ void BufferedIOHandler::threadProc()
     bool first_log = true;
 #endif
 
-    unique_lock<std::mutex> lock(mutex);
+    std::unique_lock<std::mutex> lock(mutex);
     do {
 
 #ifdef TOMBDEBUG

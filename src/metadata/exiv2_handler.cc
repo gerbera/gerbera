@@ -78,7 +78,7 @@ void Exiv2Handler::fillMetadata(std::shared_ptr<CdsItem> item)
 
         // if there was no jpeg comment, look if there is an exiv2 comment
         // should we override the normal jpeg comment, if there is an exiv2 one?
-        if (!string_ok(comment)) {
+        if (comment.empty()) {
             md = exifData.findKey(Exiv2::ExifKey("Exif.Photo.UserComment"));
             if (md != exifData.end())
                 comment = (char*)md->toString().c_str();
@@ -87,7 +87,7 @@ void Exiv2Handler::fillMetadata(std::shared_ptr<CdsItem> item)
 
         // if the image has no comment, compose something nice out of the exiv information
         // Not convinced that this is useful - comment it out for now ...
-        /*    if (!string_ok(comment))
+        /*    if (comment.empty())
         {
             std::string cam_model;
             std::string flash;
@@ -113,20 +113,20 @@ void Exiv2Handler::fillMetadata(std::shared_ptr<CdsItem> item)
             }
 
 
-            if (string_ok(cam_model))
+            if (!cam_model.empty())
                 comment = "Taken with " + cam_model;
 
-            if (string_ok(flash))
+            if (!flash.empty())
             {
-                if (string_ok(comment))
+                if (!comment.empty())
                     comment = comment + ", Flash setting:" + flash;
                 else
                     comment = "Flash setting: " + flash;
             }
 
-            if (string_ok(focal_length))
+            if (!focal_length.empty())
             {
-                if (string_ok(comment))
+                if (!comment.empty())
                     comment = comment + ", Focal length: " + focal_length;
                 else
                     comment = "Focal length: " + focal_length;
@@ -134,7 +134,7 @@ void Exiv2Handler::fillMetadata(std::shared_ptr<CdsItem> item)
         log_debug("Fabricated Comment: {}", comment.c_str());
         }  */
 
-        if (string_ok(comment))
+        if (!comment.empty())
             item->setMetadata(MT_KEYS[M_DESCRIPTION].upnp, sc->convert(comment));
 
         // if there are any auxilary tags that the user wants - add them
@@ -159,7 +159,7 @@ void Exiv2Handler::fillMetadata(std::shared_ptr<CdsItem> item)
                     log_debug("Invalid Aux Tag {}", auxtag.c_str());
                     break;
                 }
-                if (string_ok(value)) {
+                if (!value.empty()) {
                     value = sc->convert(value);
                     item->setAuxData(auxtag, value);
                     log_debug("Adding aux tag: {} with value {}", auxtag.c_str(), value.c_str());

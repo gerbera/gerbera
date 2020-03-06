@@ -79,8 +79,6 @@ extern "C" {
 static struct magic_set* ms = nullptr;
 #endif
 
-using namespace std;
-
 ContentManager::ContentManager(const std::shared_ptr<ConfigManager>& config, const std::shared_ptr<Storage>& storage,
     std::shared_ptr<UpdateManager> update_manager, std::shared_ptr<web::SessionManager> session_manager,
     std::shared_ptr<Timer> timer, std::shared_ptr<TaskProcessor> task_processor,
@@ -471,7 +469,7 @@ int ContentManager::_addFile(const fs::path& path, fs::path rootPath, bool recur
             addObject(obj);
             if (layout != nullptr) {
                 try {
-                    if (!string_ok(rootPath) && (task != nullptr))
+                    if (rootPath.empty() && (task != nullptr))
                         rootPath = task->getRootPath();
 
                     layout->processCdsObject(obj, rootPath);
@@ -590,7 +588,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
 
     log_debug("Rescanning location: {}", location.c_str());
 
-    if (!string_ok(location)) {
+    if (location.empty()) {
         log_error("Container with ID {} has no location information", containerID);
         return;
         //        continue;
@@ -614,7 +612,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
     }
 
     // request only items if non-recursive scan is wanted
-    unique_ptr<unordered_set<int>> list = storage->getObjects(containerID, !adir->getRecursive());
+    auto list = storage->getObjects(containerID, !adir->getRecursive());
 
     unsigned int thisTaskID;
     if (task != nullptr) {
@@ -845,23 +843,23 @@ void ContentManager::updateObject(int objectID, const std::map<std::string, std:
         auto clone = CdsObject::createObject(storage, objectType);
         item->copyTo(clone);
 
-        if (string_ok(title))
+        if (!title.empty())
             clone->setTitle(title);
-        if (string_ok(upnp_class))
+        if (!upnp_class.empty())
             clone->setClass(upnp_class);
-        if (string_ok(location))
+        if (!location.empty())
             clone->setLocation(location);
 
         auto cloned_item = std::static_pointer_cast<CdsItem>(clone);
 
-        if (string_ok(mimetype) && (string_ok(protocol))) {
+        if (!mimetype.empty() && !protocol.empty()) {
             cloned_item->setMimeType(mimetype);
             auto resource = cloned_item->getResource(0);
             resource->addAttribute("protocolInfo", renderProtocolInfo(mimetype, protocol));
-        } else if (!string_ok(mimetype) && (string_ok(protocol))) {
+        } else if (mimetype.empty() && !protocol.empty()) {
             auto resource = cloned_item->getResource(0);
             resource->addAttribute("protocolInfo", renderProtocolInfo(cloned_item->getMimeType(), protocol));
-        } else if (string_ok(mimetype) && (!string_ok(protocol))) {
+        } else {
             cloned_item->setMimeType(mimetype);
             auto resource = cloned_item->getResource(0);
             std::vector<std::string> parts = split_string(resource->getAttribute("protocolInfo"), ':');
@@ -869,7 +867,7 @@ void ContentManager::updateObject(int objectID, const std::map<std::string, std:
             resource->addAttribute("protocolInfo", renderProtocolInfo(mimetype, protocol));
         }
 
-        if (string_ok(description)) {
+        if (!description.empty()) {
             cloned_item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), description);
         } else {
             cloned_item->removeMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION));
@@ -894,15 +892,15 @@ void ContentManager::updateObject(int objectID, const std::map<std::string, std:
         auto clone = CdsObject::createObject(storage, objectType);
         item->copyTo(clone);
 
-        if (string_ok(title))
+        if (!title.empty())
             clone->setTitle(title);
-        if (string_ok(upnp_class))
+        if (!upnp_class.empty())
             clone->setClass(upnp_class);
 
         auto cloned_item = std::static_pointer_cast<CdsActiveItem>(clone);
 
         // state and description can be an empty strings - if you want to clear it
-        if (string_ok(description)) {
+        if (!description.empty()) {
             cloned_item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), description);
         } else {
             cloned_item->removeMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION));
@@ -911,9 +909,9 @@ void ContentManager::updateObject(int objectID, const std::map<std::string, std:
         if (!state.empty())
             cloned_item->setState(state);
 
-        if (string_ok(mimetype))
+        if (!mimetype.empty())
             cloned_item->setMimeType(mimetype);
-        if (string_ok(action))
+        if (!action.empty())
             cloned_item->setAction(action);
 
         if (!item->equals(cloned_item, true)) {
@@ -929,9 +927,9 @@ void ContentManager::updateObject(int objectID, const std::map<std::string, std:
         auto clone = CdsObject::createObject(storage, objectType);
         cont->copyTo(clone);
 
-        if (string_ok(title))
+        if (!title.empty())
             clone->setTitle(title);
-        if (string_ok(upnp_class))
+        if (!upnp_class.empty())
             clone->setClass(upnp_class);
 
         auto cloned_item = std::static_pointer_cast<CdsContainer>(clone);
@@ -986,7 +984,7 @@ int ContentManager::addContainerChain(const std::string& chain, const std::strin
     int updateID = INVALID_OBJECT_ID;
     int containerID;
 
-    if (!string_ok(chain))
+    if (chain.empty())
         throw std::runtime_error("addContainerChain() called with empty chain parameter");
 
     log_debug("received chain: {} ({}) [{}]", chain.c_str(), lastClass.c_str(), dict_encode_simple(lastMetadata).c_str());
@@ -1051,7 +1049,7 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::path& 
         if (magic) {
             mimetype = extension2mimetype(extension);
 
-            if (!string_ok(mimetype)) {
+            if (mimetype.empty()) {
                 if (ignore_unknown_extensions)
                     return nullptr; // item should be ignored
 #ifdef HAVE_MAGIC
@@ -1064,7 +1062,7 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::path& 
             upnp_class = mimetype2upnpclass(mimetype);
         }
 
-        if (!string_ok(upnp_class)) {
+        if (upnp_class.empty()) {
             std::string content_type = getValueOrDefault(mimetype_contenttype_map, mimetype);
             if (content_type == CONTENT_TYPE_OGG) {
                 if (isTheora(path))
@@ -1318,7 +1316,7 @@ void ContentManager::cleanupOnlineServiceObjects(const std::shared_ptr<OnlineSer
                 continue;
 
             temp = obj->getAuxData(ONLINE_SERVICE_LAST_UPDATE);
-            if (!string_ok(temp))
+            if (temp.empty())
                 continue;
 
             last.tv_sec = std::stol(temp);
@@ -1396,7 +1394,7 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
             path = obj->getLocation();
 
             std::string vpath = obj->getVirtualPath();
-            if (string_ok(vpath))
+            if (!vpath.empty())
                 task->setDescription("Removing: " + obj->getVirtualPath());
         } catch (const std::runtime_error& e) {
             log_debug("trying to remove an object ID which is no longer in the database! {}", objectID);
@@ -1459,7 +1457,7 @@ void ContentManager::rescanDirectory(int objectID, int scanID, ScanMode scanMode
     else
         level = "full";
 
-    if (!string_ok(descPath))
+    if (descPath.empty())
         descPath = dir->getLocation();
 
     task->setDescription("Performing " + level + " scan: " + descPath);
@@ -1636,7 +1634,7 @@ void ContentManager::setAutoscanDirectory(const std::shared_ptr<AutoscanDirector
 
             log_debug("location: {}", obj->getLocation().c_str());
 
-            if (!string_ok(obj->getLocation()))
+            if (obj->getLocation().empty())
                 throw std::runtime_error("tried to add an illegal object as autoscan - no location information available!");
 
             dir->setLocation(obj->getLocation());

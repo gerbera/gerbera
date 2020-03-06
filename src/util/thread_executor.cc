@@ -31,8 +31,6 @@
 
 #include "thread_executor.h"
 
-using namespace std;
-
 ThreadExecutor::ThreadExecutor()
     : threadShutdown(false)
     , thread(0)
@@ -59,7 +57,7 @@ bool ThreadExecutor::kill()
     if (!threadRunning)
         return true;
 
-    unique_lock<std::mutex> lock(mutex);
+    std::unique_lock<std::mutex> lock(mutex);
     threadShutdown = true;
     cond.notify_one();
     lock.unlock();

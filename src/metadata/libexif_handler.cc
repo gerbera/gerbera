@@ -276,7 +276,7 @@ void LibExifHandler::process_ifd(ExifContent* content, const std::shared_ptr<Cds
         case EXIF_TAG_DATE_TIME_ORIGINAL:
             value = const_cast<char*>(exif_egv(e));
             value = trim_string(value);
-            if (string_ok(value)) {
+            if (!value.empty()) {
                 value = sc->convert(value);
                 //value = split_string(value, ' ');
                 /// \todo convert date to ISO 8601 as required in the UPnP spec
@@ -291,7 +291,7 @@ void LibExifHandler::process_ifd(ExifContent* content, const std::shared_ptr<Cds
         case EXIF_TAG_USER_COMMENT:
             value = const_cast<char*>(exif_egv(e));
             value = trim_string(value);
-            if (string_ok(value)) {
+            if (!value.empty()) {
                 value = sc->convert(value);
                 item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), value);
             }
@@ -300,7 +300,7 @@ void LibExifHandler::process_ifd(ExifContent* content, const std::shared_ptr<Cds
         case EXIF_TAG_PIXEL_X_DIMENSION:
             value = const_cast<char*>(exif_egv(e));
             value = trim_string(value);
-            if (string_ok(value)) {
+            if (!value.empty()) {
                 value = sc->convert(value);
                 imageX = value;
             }
@@ -309,7 +309,7 @@ void LibExifHandler::process_ifd(ExifContent* content, const std::shared_ptr<Cds
         case EXIF_TAG_PIXEL_Y_DIMENSION:
             value = const_cast<char*>(exif_egv(e));
             value = trim_string(value);
-            if (string_ok(value)) {
+            if (!value.empty()) {
                 value = sc->convert(value);
                 imageY = value;
             }
@@ -320,11 +320,11 @@ void LibExifHandler::process_ifd(ExifContent* content, const std::shared_ptr<Cds
 
         // if there are any auxilary tags that the user wants - add them
         for (const auto& tmp : auxtags) {
-            if (string_ok(tmp)) {
+            if (!tmp.empty()) {
                 if (e->tag == getTagFromString(tmp)) {
                     value = const_cast<char*>(exif_egv(e));
                     value = trim_string(value);
-                    if (string_ok(value)) {
+                    if (!value.empty()) {
                         value = sc->convert(value);
                         item->setAuxData(tmp, value);
                         //                            log_debug(("Adding tag: {} with value {}", tmp.c_str(), value.c_str()));
@@ -356,7 +356,7 @@ void LibExifHandler::fillMetadata(std::shared_ptr<CdsItem> item)
     }
 
     // we got the image resolution so we can add our resource
-    if (string_ok(imageX) && string_ok(imageY)) {
+    if (!imageX.empty() && !imageY.empty()) {
         item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION),
             imageX + "x" + imageY);
     } else {
@@ -385,13 +385,13 @@ void LibExifHandler::fillMetadata(std::shared_ptr<CdsItem> item)
 
 std::unique_ptr<IOHandler> LibExifHandler::serveContent(std::shared_ptr<CdsItem> item, int resNum)
 {
-    ExifData* ed;
     auto res = item->getResource(resNum);
-    std::string ctype = getValueOrDefault(res->getParameters(), RESOURCE_CONTENT_TYPE);
 
+    std::string ctype = getValueOrDefault(res->getParameters(), RESOURCE_CONTENT_TYPE);
     if (ctype != EXIF_THUMBNAIL)
         throw std::runtime_error("LibExifHandler: got unknown content type: " + ctype);
-    ed = exif_data_new_from_file(item->getLocation().c_str());
+
+    ExifData* ed = exif_data_new_from_file(item->getLocation().c_str());
     if (!ed)
         throw std::runtime_error("LibExifHandler: resource has no exif information");
 

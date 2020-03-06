@@ -61,7 +61,7 @@ public:
         , value(value)
     {
     }
-    virtual ~SearchToken() {};
+    virtual ~SearchToken() = default;
 
     const TokenType& getType() const { return type; }
     std::string getValue() const { return value; }
@@ -81,8 +81,10 @@ public:
     explicit SearchLexer(const std::string& input)
         : input(input)
         , currentPos(0)
-        , inQuotes(false) {};
-    virtual ~SearchLexer() {};
+        , inQuotes(false)
+    {
+    }
+    virtual ~SearchLexer() = default;
 
     std::unique_ptr<SearchToken> nextToken();
 
@@ -117,7 +119,9 @@ public:
 
 protected:
     explicit ASTNode(const SQLEmitter& emitter)
-        : sqlEmitter(emitter) {};
+        : sqlEmitter(emitter)
+    {
+    }
 
     const SQLEmitter& sqlEmitter;
 };
@@ -126,7 +130,9 @@ class ASTAsterisk : public ASTNode {
 public:
     ASTAsterisk(const SQLEmitter& sqlEmitter, const std::string& value)
         : ASTNode(sqlEmitter)
-        , value(std::move(value)) {};
+        , value(std::move(value))
+    {
+    }
     std::string emit() const override;
     ~ASTAsterisk() override = default;
 
@@ -138,7 +144,9 @@ class ASTProperty : public ASTNode {
 public:
     ASTProperty(const SQLEmitter& sqlEmitter, const std::string& value)
         : ASTNode(sqlEmitter)
-        , value(std::move(value)) {};
+        , value(std::move(value))
+    {
+    }
     std::string emit() const override;
     ~ASTProperty() override = default;
 
@@ -150,7 +158,9 @@ class ASTBoolean : public ASTNode {
 public:
     ASTBoolean(const SQLEmitter& sqlEmitter, const std::string& value)
         : ASTNode(sqlEmitter)
-        , value(std::move(value)) {};
+        , value(std::move(value))
+    {
+    }
     std::string emit() const override;
     ~ASTBoolean() override = default;
 
@@ -162,7 +172,9 @@ class ASTParenthesis : public ASTNode {
 public:
     ASTParenthesis(const SQLEmitter& sqlEmitter, std::shared_ptr<ASTNode> node)
         : ASTNode(sqlEmitter)
-        , bracketedNode(std::move(node)) {};
+        , bracketedNode(std::move(node))
+    {
+    }
     std::string emit() const override;
     ~ASTParenthesis() override = default;
 
@@ -174,7 +186,9 @@ class ASTDQuote : public ASTNode {
 public:
     ASTDQuote(const SQLEmitter& sqlEmitter, const std::string& value)
         : ASTNode(sqlEmitter)
-        , value(std::move(value)) {};
+        , value(std::move(value))
+    {
+    }
     std::string emit() const override;
     ~ASTDQuote() override = default;
 
@@ -186,7 +200,9 @@ class ASTEscapedString : public ASTNode {
 public:
     ASTEscapedString(const SQLEmitter& sqlEmitter, const std::string& value)
         : ASTNode(sqlEmitter)
-        , value(std::move(value)) {};
+        , value(std::move(value))
+    {
+    }
     std::string emit() const override;
     ~ASTEscapedString() override = default;
 
@@ -201,7 +217,9 @@ public:
         : ASTNode(sqlEmitter)
         , openQuote(std::move(openQuote))
         , escapedString(std::move(escapedString))
-        , closeQuote(std::move(closeQuote)) {};
+        , closeQuote(std::move(closeQuote))
+    {
+    }
     std::string emit() const override;
     ~ASTQuotedString() override = default;
 
@@ -216,7 +234,9 @@ class ASTCompareOperator : public ASTNode {
 public:
     ASTCompareOperator(const SQLEmitter& sqlEmitter, const std::string& value)
         : ASTNode(sqlEmitter)
-        , value(std::move(value)) {};
+        , value(std::move(value))
+    {
+    }
     std::string emit() const override;
     std::string emit(const std::string& property, const std::string& value) const;
     std::string getValue() const { return value; }
@@ -234,7 +254,9 @@ public:
         : ASTNode(sqlEmitter)
         , lhs(std::move(lhs))
         , operatr(std::move(operatr))
-        , rhs(std::move(rhs)) {};
+        , rhs(std::move(rhs))
+    {
+    }
     std::string emit() const override;
     ~ASTCompareExpression() override = default;
 
@@ -249,7 +271,9 @@ class ASTStringOperator : public ASTNode {
 public:
     ASTStringOperator(const SQLEmitter& sqlEmitter, const std::string& value)
         : ASTNode(sqlEmitter)
-        , value(std::move(value)) {};
+        , value(std::move(value))
+    {
+    }
     std::string emit() const override;
     std::string emit(const std::string& property, const std::string& value) const;
     std::string getValue() const { return value; }
@@ -267,7 +291,9 @@ public:
         : ASTNode(sqlEmitter)
         , lhs(std::move(lhs))
         , operatr(std::move(operatr))
-        , rhs(std::move(rhs)) {};
+        , rhs(std::move(rhs))
+    {
+    }
     std::string emit() const override;
     ~ASTStringExpression() override = default;
 
@@ -281,7 +307,9 @@ class ASTExistsOperator : public ASTNode {
 public:
     ASTExistsOperator(const SQLEmitter& sqlEmitter, const std::string& value)
         : ASTNode(sqlEmitter)
-        , value(std::move(value)) {};
+        , value(std::move(value))
+    {
+    }
     std::string emit() const override;
     std::string emit(const std::string& property, const std::string& value) const;
     ~ASTExistsOperator() override = default;
@@ -298,7 +326,9 @@ public:
         : ASTNode(sqlEmitter)
         , lhs(std::move(lhs))
         , operatr(std::move(operatr))
-        , rhs(std::move(rhs)) {};
+        , rhs(std::move(rhs))
+    {
+    }
     std::string emit() const override;
     ~ASTExistsExpression() override = default;
 
@@ -314,7 +344,9 @@ public:
         std::shared_ptr<ASTNode> rhs)
         : ASTNode(sqlEmitter)
         , lhs(std::move(lhs))
-        , rhs(std::move(rhs)) {};
+        , rhs(std::move(rhs))
+    {
+    }
     std::string emit() const override;
     ~ASTAndOperator() override = default;
 
@@ -329,7 +361,9 @@ public:
         std::shared_ptr<ASTNode> rhs)
         : ASTNode(sqlEmitter)
         , lhs(std::move(lhs))
-        , rhs(std::move(rhs)) {};
+        , rhs(std::move(rhs))
+    {
+    }
     std::string emit() const override;
     ~ASTOrOperator() override = default;
 
@@ -361,9 +395,9 @@ public:
 
 class DefaultSQLEmitter : public SQLEmitter {
     std::string emitSQL(const ASTNode* node) const override;
-    std::string emit(const ASTAsterisk* node) const override { return "*"; };
+    std::string emit(const ASTAsterisk* node) const override { return "*"; }
     std::string emit(const ASTParenthesis* node, const std::string& bracketedNode) const override;
-    std::string emit(const ASTDQuote* node) const override { return ""; };
+    std::string emit(const ASTDQuote* node) const override { return ""; }
     std::string emit(const ASTCompareOperator* node,
         const std::string& property, const std::string& value) const override;
     std::string emit(const ASTStringOperator* node,
@@ -373,14 +407,16 @@ class DefaultSQLEmitter : public SQLEmitter {
     std::string emit(const ASTAndOperator* node, const std::string& lhs, const std::string& rhs) const override;
     std::string emit(const ASTOrOperator* node, const std::string& lhs, const std::string& rhs) const override;
 
-    inline char tableQuote() const override { return '"'; };
+    inline char tableQuote() const override { return '"'; }
 };
 
 class SearchParser {
 public:
     SearchParser(const SQLEmitter& sqlEmitter, const std::string& searchCriteria)
         : lexer(std::make_unique<SearchLexer>(searchCriteria))
-        , sqlEmitter(sqlEmitter) {};
+        , sqlEmitter(sqlEmitter)
+    {
+    }
     std::shared_ptr<ASTNode> parse();
 
 protected:

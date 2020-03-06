@@ -89,7 +89,7 @@ void FallbackLayout::addVideo(const std::shared_ptr<CdsObject>& obj, const fs::p
     } else
         dir = esc(f2i->convert(get_last_path(obj->getLocation())));
 
-    if (string_ok(dir)) {
+    if (!dir.empty()) {
         id = content->addContainerChain("/Video/Directories/" + dir);
         add(obj, id);
     }
@@ -112,7 +112,7 @@ void FallbackLayout::addImage(const std::shared_ptr<CdsObject>& obj, const fs::p
     auto meta = obj->getMetadata();
 
     std::string date = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_DATE));
-    if (string_ok(date)) {
+    if (!date.empty()) {
         std::string year, month;
         size_t m = -1;
         size_t y = date.find('-');
@@ -144,7 +144,7 @@ void FallbackLayout::addImage(const std::shared_ptr<CdsObject>& obj, const fs::p
     } else
         dir = esc(f2i->convert(get_last_path(obj->getLocation())));
 
-    if (string_ok(dir)) {
+    if (!dir.empty()) {
         id = content->addContainerChain("/Photos/Directories/" + dir);
         add(obj, id);
     }
@@ -153,41 +153,35 @@ void FallbackLayout::addImage(const std::shared_ptr<CdsObject>& obj, const fs::p
 void FallbackLayout::addAudio(const std::shared_ptr<CdsObject>& obj)
 {
     std::string desc;
-    std::string chain;
-    std::string artist_full;
-    std::string album_full;
-
-    int id;
 
     auto meta = obj->getMetadata();
 
-    std::string title = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_TITLE));
-    if (!string_ok(title))
-        title = obj->getTitle();
+    std::string title = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_TITLE), obj->getTitle());
 
     std::string artist = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_ARTIST));
-    if (string_ok(artist)) {
+    std::string artist_full;
+    if (!artist.empty()) {
         artist_full = artist;
         desc = artist;
     } else
         artist = "Unknown";
 
     std::string album = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_ALBUM));
-    if (string_ok(album)) {
+    std::string album_full;
+    if (!album.empty()) {
         desc = desc + ", " + album;
         album_full = album;
     } else {
         album = "Unknown";
     }
 
-    if (string_ok(desc))
+    if (!desc.empty())
         desc = desc + ", ";
-
     desc = desc + title;
 
     std::string date = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_DATE));
     std::string albumDate;
-    if (string_ok(date)) {
+    if (!date.empty()) {
         size_t i = date.find('-');
         if (i != std::string::npos)
             date = date.substr(0, i);
@@ -198,37 +192,25 @@ void FallbackLayout::addAudio(const std::shared_ptr<CdsObject>& obj)
         date = "Unknown";
         albumDate = "Unknown";
     }
-
     meta[MetadataHandler::getMetaFieldName(M_UPNP_DATE)] = albumDate;
 
     std::string genre = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_GENRE));
-    if (string_ok(genre))
+    if (!genre.empty())
         desc = desc + ", " + genre;
     else
         genre = "Unknown";
 
     std::string description = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_DESCRIPTION));
-    if (!string_ok(description)) {
+    if (description.empty()) {
         meta[MetadataHandler::getMetaFieldName(M_DESCRIPTION)] = desc;
         obj->setMetadata(meta);
     }
 
-    std::string composer = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_COMPOSER));
-    if (!string_ok(composer)) {
-        composer = "None";
-    }
+    std::string composer = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_COMPOSER), "None");
+    std::string conductor = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_CONDUCTOR), "None");
+    std::string orchestra = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_ORCHESTRA), "None");
 
-    std::string conductor = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_CONDUCTOR));
-    if (!string_ok(conductor)) {
-        conductor = "None";
-    }
-
-    std::string orchestra = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_ORCHESTRA));
-    if (!string_ok(orchestra)) {
-        orchestra = "None";
-    }
-
-    id = content->addContainerChain("/Audio/All Audio");
+    int id = content->addContainerChain("/Audio/All Audio");
     obj->setTitle(title);
 
     // we get the main object here, so the object that we will add below
@@ -249,16 +231,16 @@ void FallbackLayout::addAudio(const std::shared_ptr<CdsObject>& obj)
 
     artist = esc(artist);
 
-    chain = "/Audio/Artists/" + artist + "/All Songs";
+    std::string chain = "/Audio/Artists/" + artist + "/All Songs";
 
     id = content->addContainerChain(chain);
     add(obj, id);
 
     std::string temp;
-    if (string_ok(artist_full))
+    if (!artist_full.empty())
         temp = artist_full;
 
-    if (string_ok(album_full))
+    if (!album_full.empty())
         temp = temp + " - " + album_full + " - ";
     else
         temp = temp + " - ";
@@ -318,7 +300,7 @@ void FallbackLayout::addSopCast(const std::shared_ptr<CdsObject>& obj)
     }
 
     temp = obj->getAuxData(SOPCAST_AUXDATA_GROUP);
-    if (string_ok(temp)) {
+    if (!temp.empty()) {
         chain = SP_VPATH "/"
                          "Groups"
                          "/"
@@ -350,18 +332,18 @@ void FallbackLayout::addATrailers(const std::shared_ptr<CdsObject>& obj)
     auto meta = obj->getMetadata();
 
     temp = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_GENRE));
-    if (string_ok(temp)) {
+    if (!temp.empty()) {
         auto st = std::make_unique<StringTokenizer>(temp);
         std::string genre;
         std::string next;
         do {
-            if (!string_ok(genre))
+            if (genre.empty())
                 genre = st->nextToken(",");
             next = st->nextToken(",");
 
             genre = trim_string(genre);
 
-            if (!string_ok(genre))
+            if (genre.empty())
                 break;
 
             id = content->addContainerChain(AT_VPATH
@@ -369,7 +351,7 @@ void FallbackLayout::addATrailers(const std::shared_ptr<CdsObject>& obj)
                 + esc(genre));
             add(obj, id);
 
-            if (string_ok(next))
+            if (!next.empty())
                 genre = next;
             else
                 genre = "";
@@ -378,7 +360,7 @@ void FallbackLayout::addATrailers(const std::shared_ptr<CdsObject>& obj)
     }
 
     temp = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_DATE));
-    if (string_ok(temp) && temp.length() >= 7) {
+    if (temp.length() >= 7) {
         id = content->addContainerChain(AT_VPATH
             "/Release Date/"
             + esc(temp.substr(0, 7)));
@@ -386,7 +368,7 @@ void FallbackLayout::addATrailers(const std::shared_ptr<CdsObject>& obj)
     }
 
     temp = obj->getAuxData(ATRAILERS_AUXDATA_POST_DATE);
-    if (string_ok(temp) && temp.length() >= 7) {
+    if (temp.length() >= 7) {
         id = content->addContainerChain(AT_VPATH
             "/Post Date/"
             + esc(temp.substr(0, 7)));

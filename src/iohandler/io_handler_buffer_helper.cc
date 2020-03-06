@@ -32,8 +32,6 @@
 #include "io_handler_buffer_helper.h"
 #include "config/config_manager.h"
 
-using namespace std;
-
 IOHandlerBufferHelper::IOHandlerBufferHelper(size_t bufSize, size_t initialFillSize)
 {
     if (bufSize <= 0)
@@ -83,7 +81,7 @@ size_t IOHandlerBufferHelper::read(char* buf, size_t length)
     // length must be positive
     assert(length > 0);
 
-    unique_lock<std::mutex> lock(mutex);
+    std::unique_lock<std::mutex> lock(mutex);
 
     while ((empty || waitForInitialFillSize) && !(threadShutdown || eof || readError)) {
         if (checkSocket) {
@@ -157,7 +155,7 @@ void IOHandlerBufferHelper::seek(off_t offset, int whence)
     if (whence == SEEK_CUR && offset == 0)
         return;
 
-    unique_lock<std::mutex> lock(mutex);
+    std::unique_lock<std::mutex> lock(mutex);
 
     // if another seek isn't processed yet - well we don't care as this new seek
     // will change the position anyway
@@ -197,7 +195,7 @@ void IOHandlerBufferHelper::startBufferThread()
 
 void IOHandlerBufferHelper::stopBufferThread()
 {
-    unique_lock<std::mutex> lock(mutex);
+    std::unique_lock<std::mutex> lock(mutex);
     threadShutdown = true;
     cond.notify_one();
     lock.unlock();

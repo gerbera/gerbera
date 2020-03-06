@@ -75,7 +75,7 @@ js_getCdsObject(duk_context* ctx)
     fs::path path = duk_to_string(ctx, 0);
     duk_pop(ctx);
 
-    if (!string_ok(path))
+    if (path.empty())
         return 0;
 
     auto storage = self->getStorage();
@@ -128,7 +128,7 @@ std::string PlaylistParserScript::readln()
             return "";
 
         ret = trim_string(currentLine);
-        if (string_ok(ret))
+        if (!ret.empty())
             return ret;
     }
 }

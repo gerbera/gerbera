@@ -232,7 +232,7 @@ Script::Script(const std::shared_ptr<ConfigManager>& config,
 
     std::string common_scr_path = config->getOption(CFG_IMPORT_SCRIPTING_COMMON_SCRIPT);
 
-    if (!string_ok(common_scr_path)) {
+    if (common_scr_path.empty()) {
         log_js("Common script disabled in configuration");
     } else {
         try {
@@ -280,7 +280,7 @@ void Script::_load(const std::string& scriptPath)
 {
     std::string scriptText = readTextFile(scriptPath);
 
-    if (!string_ok(scriptText))
+    if (scriptText.empty())
         throw std::runtime_error("empty script");
 
     auto j2i = StringConverter::j2i(config);
@@ -451,7 +451,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
 
         // location must not be touched by character conversion!
         fs::path location = getProperty("location");
-        if (string_ok(location))
+        if (!location.empty())
             obj->setLocation(location);
         else {
             if (pcd != nullptr)
@@ -600,7 +600,7 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
 
 #ifdef HAVE_ATRAILERS
         auto tmp = obj->getAuxData(ATRAILERS_AUXDATA_POST_DATE);
-        if (string_ok(tmp))
+        if (!tmp.empty())
             aux[ATRAILERS_AUXDATA_POST_DATE] = tmp;
 #endif
 

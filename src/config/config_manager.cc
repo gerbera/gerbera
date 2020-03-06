@@ -254,7 +254,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
         SET_INT_OPTION(CFG_SERVER_STORAGE_MYSQL_PORT);
 
         if (getElement("/server/storage/mysql/socket") == nullptr) {
-            NEW_OPTION(nullptr);
+            NEW_OPTION("");
         } else {
             NEW_OPTION(getOption("/server/storage/mysql/socket"));
         }
@@ -262,7 +262,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
         SET_OPTION(CFG_SERVER_STORAGE_MYSQL_SOCKET);
 
         if (getElement("/server/storage/mysql/password") == nullptr) {
-            NEW_OPTION(nullptr);
+            NEW_OPTION("");
         } else {
             NEW_OPTION(getOption("/server/storage/mysql/password"));
         }
@@ -416,7 +416,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     } else // validate user settings
     {
         bool default_found = false;
-        for (pugi::xml_node child : tmpEl.children()) {
+        for (const pugi::xml_node& child : tmpEl.children()) {
             if (std::string(child.name()) == "option") {
                 int i = child.text().as_int();
                 if (i < 1)
@@ -436,7 +436,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 
     // create the array from either user or default settings
     std::vector<std::string> menu_opts;
-    for (pugi::xml_node child : tmpEl.children()) {
+    for (const pugi::xml_node& child : tmpEl.children()) {
         if (std::string(child.name()) == "option")
             menu_opts.emplace_back(child.text().as_string());
     }
@@ -538,7 +538,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
         log_debug("received {} from nl_langinfo", temp.c_str());
     }
 
-    if (!string_ok(temp))
+    if (temp.empty())
         temp = DEFAULT_FILESYSTEM_CHARSET;
 #else
     temp = DEFAULT_FILESYSTEM_CHARSET;
@@ -636,18 +636,18 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_SERVER_HIDE_PC_DIRECTORY);
 
-    if (!string_ok(interface)) {
+    if (interface.empty()) {
         temp = getOption("/server/interface", "");
     } else {
         temp = interface;
     }
-    if (string_ok(temp) && string_ok(getOption("/server/ip", "")))
+    if (!temp.empty() && !getOption("/server/ip", "").empty())
         throw std::runtime_error("Error in config file: you can not specify interface and ip at the same time!");
 
     NEW_OPTION(temp);
     SET_OPTION(CFG_SERVER_NETWORK_INTERFACE);
 
-    if (!string_ok(ip)) {
+    if (ip.empty()) {
         temp = getOption("/server/ip", ""); // bind to any IP address
     } else {
         temp = ip;
@@ -705,7 +705,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
                                  "<presentationURL> tag");
     }
 
-    if (((temp == "ip") || (temp == "port")) && !string_ok(getOption("/server/presentationURL"))) {
+    if (((temp == "ip") || (temp == "port")) && getOption("/server/presentationURL").empty()) {
         throw std::runtime_error("Error in config file: \"append-to\" attribute "
                                  "value in <presentationURL> tag is set to \""
             + temp + "\" but no URL is specified");
@@ -1083,7 +1083,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     temp = getOption("/server/extended-runtime-options/mark-played-items/"
                      "string",
         DEFAULT_MARK_PLAYED_ITEMS_STRING);
-    if (!string_ok(temp))
+    if (temp.empty())
         throw std::runtime_error("Error in config file: "
                                  "empty string given for the <string> tag in the "
                                  "<mark-played-items> section");
@@ -1095,14 +1095,14 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 
     int contentElementCount = 0;
     if (tmpEl != nullptr) {
-        for (pugi::xml_node content : tmpEl.children()) {
+        for (const pugi::xml_node& content : tmpEl.children()) {
             if (std::string(content.name()) != "content")
                 continue;
 
             contentElementCount++;
 
             std::string mark_content = content.text().as_string();
-            if (!string_ok(mark_content))
+            if (mark_content.empty())
                 throw std::runtime_error("error in configuration, <mark-played-items>, empty <content> parameter!");
 
             if ((mark_content != DEFAULT_MARK_PLAYED_CONTENT_VIDEO) && (mark_content != DEFAULT_MARK_PLAYED_CONTENT_AUDIO) && (mark_content != DEFAULT_MARK_PLAYED_CONTENT_IMAGE))
@@ -1133,7 +1133,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
         temp = getOption("/server/extended-runtime-options/lastfm/username",
             DEFAULT_LASTFM_USERNAME);
 
-        if (!string_ok(temp))
+        if (temp.empty())
             throw std::runtime_error("Error in config file: lastfm - "
                                      "invalid username value in "
                                      "<username> tag");
@@ -1144,7 +1144,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
         temp = getOption("/server/extended-runtime-options/lastfm/password",
             DEFAULT_LASTFM_PASSWORD);
 
-        if (!string_ok(temp))
+        if (temp.empty())
             throw std::runtime_error("Error in config file: lastfm - "
                                      "invalid password value in "
                                      "<password> tag");
@@ -1384,12 +1384,12 @@ std::map<std::string, std::string> ConfigManager::createDictionaryFromNode(const
     std::map<std::string, std::string> dict;
 
     if (element != nullptr) {
-        for (pugi::xml_node child : element.children()) {
+        for (const pugi::xml_node& child : element.children()) {
             if (child.name() == nodeName) {
                 std::string key = child.attribute(keyAttr.c_str()).as_string();
                 std::string value = child.attribute(valAttr.c_str()).as_string();
 
-                if (string_ok(key) && string_ok(value)) {
+                if (!key.empty() && !value.empty()) {
                     if (tolower) {
                         key = tolower_string(key);
                     }
@@ -1415,12 +1415,12 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
 
     auto mtype_profile = element.child("mimetype-profile-mappings");
     if (mtype_profile != nullptr) {
-        for (pugi::xml_node child : element.children()) {
+        for (const pugi::xml_node& child : element.children()) {
             if (std::string(child.name()) == "transcode") {
                 std::string mt = child.attribute("mimetype").as_string();
                 std::string pname = child.attribute("using").as_string();
 
-                if (string_ok(mt) && string_ok(pname)) {
+                if (!mt.empty() && !pname.empty()) {
                     mt_mappings[mt] = pname;
                 } else {
                     throw std::runtime_error("error in configuration: invalid or missing mimetype to profile mapping");
@@ -1433,7 +1433,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
     if (profiles == nullptr)
         return list;
 
-    for (pugi::xml_node child : element.children()) {
+    for (const pugi::xml_node& child : element.children()) {
         if (std::string(child.name()) != "profile")
             continue;
 
@@ -1446,7 +1446,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
             continue;
 
         param = child.attribute("type").as_string();
-        if (!string_ok(param))
+        if (param.empty())
             throw std::runtime_error("error in configuration: missing transcoding type in profile");
 
         transcoding_type_t tr_type;
@@ -1460,7 +1460,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
             throw std::runtime_error("error in configuration: invalid transcoding type " + param + " in profile");
 
         param = child.attribute("name").as_string();
-        if (!string_ok(param))
+        if (param.empty())
             throw std::runtime_error("error in configuration: invalid transcoding profile name");
 
         auto prof = std::make_shared<TranscodingProfile>(tr_type, param);
@@ -1468,14 +1468,14 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
         pugi::xml_node sub;
         sub = child.child("mimetype");
         param = sub.text().as_string();
-        if (!string_ok(param))
+        if (param.empty())
             throw std::runtime_error("error in configuration: invalid target mimetype in transcoding profile");
         prof->setTargetMimeType(param);
 
         sub = child.child("resolution");
         if (sub != nullptr) {
             param = sub.text().as_string();
-            if (string_ok(param)) {
+            if (!param.empty()) {
                 if (check_resolution(param))
                     prof->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), param);
             }
@@ -1484,7 +1484,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
         sub = child.child("avi-fourcc-list");
         if (sub != nullptr) {
             std::string mode = sub.attribute("mode").as_string();
-            if (!string_ok(mode))
+            if (mode.empty())
                 throw std::runtime_error("error in configuration: avi-fourcc-list requires a valid \"mode\" attribute");
 
             avi_fourcc_listmode_t fcc_mode;
@@ -1499,12 +1499,12 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
 
             if (fcc_mode != FCC_None) {
                 std::vector<std::string> fcc_list;
-                for (pugi::xml_node fourcc : sub.children()) {
+                for (const pugi::xml_node& fourcc : sub.children()) {
                     if (std::string(fourcc.name()) != "fourcc")
                         continue;
 
                     std::string fcc = fourcc.text().as_string();
-                    if (!string_ok(fcc))
+                    if (fcc.empty())
                         throw std::runtime_error("error in configuration: empty fourcc specified!");
                     fcc_list.push_back(fcc);
                 }
@@ -1617,7 +1617,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
                 + prof->getName() + "\" is missing the <agent> option");
 
         param = sub.attribute("command").as_string();
-        if (!string_ok(param))
+        if (param.empty())
             throw std::runtime_error("error in configuration: transcoding "
                                      "profile \""
                 + prof->getName() + "\" has an invalid command setting");
@@ -1632,7 +1632,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
             tmp_path = param;
         } else {
             tmp_path = find_in_path(param);
-            if (!string_ok(tmp_path))
+            if (tmp_path.empty())
                 throw std::runtime_error("error in configuration, transcoding "
                                          "profile \""
                     + prof->getName() + "\" could not find transcoding command " + param + " in $PATH");
@@ -1645,7 +1645,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
                 + prof->getName() + ": transcoder " + param + "is not executable - " + strerror(err));
 
         param = sub.attribute("arguments").as_string();
-        if (!string_ok(param))
+        if (param.empty())
             throw std::runtime_error("error in configuration: transcoding profile " + prof->getName() + " has an empty argument string");
 
         prof->setArguments(param);
@@ -1725,14 +1725,14 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNode(const st
     if (element == nullptr)
         return list;
 
-    for (pugi::xml_node child : element.children()) {
+    for (const pugi::xml_node& child : element.children()) {
 
         // We only want directories
         if (std::string(child.name()) != "directory")
             continue;
 
         fs::path location = child.attribute("location").as_string();
-        if (!string_ok(location)) {
+        if (location.empty()) {
             log_warning("Found an Autoscan directory with invalid location!");
             continue;
         }
@@ -1744,7 +1744,7 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNode(const st
 
         ScanMode mode;
         std::string temp = child.attribute("mode").as_string();
-        if (!string_ok(temp) || ((temp != "timed") && (temp != "inotify"))) {
+        if (temp.empty() || ((temp != "timed") && (temp != "inotify"))) {
             throw std::runtime_error("autoscan directory " + location.string() + ": mode attribute is missing or invalid");
         }
 
@@ -1763,7 +1763,7 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNode(const st
 
         if (mode == ScanMode::Timed) {
             temp = child.attribute("level").as_string();
-            if (!string_ok(temp)) {
+            if (temp.empty()) {
                 throw std::runtime_error("autoscan directory " + location.string() + ": level attribute is missing or invalid");
             }
 
@@ -1776,7 +1776,7 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNode(const st
             }
 
             temp = child.attribute("interval").as_string();
-            if (!string_ok(temp)) {
+            if (temp.empty()) {
                 throw std::runtime_error("autoscan directory " + location.string() + ": interval attribute is required for timed mode");
             }
 
@@ -1792,7 +1792,7 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNode(const st
         }
 
         temp = child.attribute("recursive").as_string();
-        if (!string_ok(temp))
+        if (temp.empty())
             throw std::runtime_error("autoscan directory " + location.string() + ": recursive attribute is missing or invalid");
 
         bool recursive;
@@ -1806,7 +1806,7 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNode(const st
 
         bool hidden;
         temp = child.attribute("hidden-files").as_string();
-        if (!string_ok(temp))
+        if (temp.empty())
             temp = getOption("/import/attribute::hidden-files");
 
         if (temp == "yes")
@@ -1856,11 +1856,10 @@ std::vector<std::string> ConfigManager::createArrayFromNode(const pugi::xml_node
     std::vector<std::string> arr;
 
     if (element != nullptr) {
-        for (pugi::xml_node child : element.children()) {
+        for (const pugi::xml_node& child : element.children()) {
             if (child.name() == nodeName) {
                 std::string attrValue = child.attribute(attrName.c_str()).as_string();
-
-                if (string_ok(attrValue))
+                if (!attrValue.empty())
                     arr.push_back(attrValue);
             }
         }

@@ -91,7 +91,7 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
         if (i > 0) {
             value = std::to_string(i);
 
-            if (string_ok(value))
+            if (!value.empty())
                 value = value + "-01-01";
         } else
             return;
@@ -101,7 +101,7 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
         if (i > 0) {
             value = std::to_string(i);
 
-            if (string_ok(value))
+            if (!value.empty())
                 value = value + "-01-01";
         } else
             return;
@@ -160,7 +160,7 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
 
     value = trim_string(value);
 
-    if (string_ok(value)) {
+    if (!value.empty()) {
         item->setMetadata(MT_KEYS[field].upnp, sc->convert(value));
         //        log_debug("Setting metadata on item: {}, {}", field, sc->convert(value).c_str());
     }
@@ -245,7 +245,7 @@ bool TagLibHandler::isValidArtworkContentType(const std::string& art_mimetype)
 {
     // saw that simply "PNG" was used with some mp3's, so mimetype setting
     // was probably invalid
-    return (string_ok(art_mimetype) && (art_mimetype.find('/') != std::string::npos));
+    return art_mimetype.find('/') != std::string::npos;
 }
 
 std::string TagLibHandler::getContentTypeFromByteVector(const TagLib::ByteVector& data)
@@ -253,7 +253,7 @@ std::string TagLibHandler::getContentTypeFromByteVector(const TagLib::ByteVector
     std::string art_mimetype = MIMETYPE_DEFAULT;
 #ifdef HAVE_MAGIC
     art_mimetype = getMIMETypeFromBuffer(data.data(), data.size());
-    if (!string_ok(art_mimetype))
+    if (art_mimetype.empty())
         return MIMETYPE_DEFAULT;
 #endif
     return art_mimetype;
@@ -406,7 +406,7 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, const std::shared_ptr
     std::vector<std::string> aux_tags_list = config->getStringArrayOption(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
     for (const auto& desiredFrame : aux_tags_list) {
 
-        if (!string_ok(desiredFrame)) {
+        if (desiredFrame.empty()) {
             continue;
         }
 
@@ -431,7 +431,7 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, const std::shared_ptr
             //log_debug("TXXX Frame list has {} elements", frameList.size());
 
             std::string desiredSubTag = desiredFrame.substr(5);
-            if (!string_ok(desiredSubTag))
+            if (desiredSubTag.empty())
                 continue;
 
             for (const auto& frame : frameList) {
@@ -545,7 +545,7 @@ void TagLibHandler::extractFLAC(TagLib::IOStream* roStream, const std::shared_pt
     std::vector<std::string> aux_tags_list = config->getStringArrayOption(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
     for (const auto& desiredTag : aux_tags_list) {
 
-        if (!string_ok(desiredTag)) {
+        if (desiredTag.empty()) {
             continue;
         }
 
@@ -633,7 +633,7 @@ void TagLibHandler::extractMP4(TagLib::IOStream* roStream, const std::shared_ptr
         TagLib::ByteVector data = coverArt.data();
         art_mimetype = getContentTypeFromByteVector(data);
 
-        if (string_ok(art_mimetype))
+        if (!art_mimetype.empty())
             addArtworkResource(item, art_mimetype);
     } else {
         log_debug("TagLibHandler: mp4 file has no 'covr' item");

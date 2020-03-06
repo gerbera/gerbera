@@ -71,7 +71,7 @@ void web::items::process()
     auto arr = storage->browse(param);
 
     std::string location = obj->getVirtualPath();
-    if (string_ok(location))
+    if (!location.empty())
         items.append_attribute("location") = location.c_str();
     items.append_attribute("virtual") = obj->isVirtual();
 

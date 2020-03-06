@@ -102,8 +102,6 @@ PRAGMA foreign_keys = ON;"
 
 #define SL3_INITITAL_QUEUE_SIZE 20
 
-using namespace std;
-
 Sqlite3Storage::Sqlite3Storage(std::shared_ptr<ConfigManager> config, std::shared_ptr<Timer> timer)
     : SQLStorage(std::move(config))
     , timer(std::move(timer))
@@ -246,7 +244,7 @@ void Sqlite3Storage::init()
 
     /* --- --- ---*/
 
-    if (!string_ok(dbVersion) || dbVersion != "5")
+    if (dbVersion != "5")
         throw std::runtime_error("The database seems to be from a newer version!");
 
     // add timer for backups
@@ -419,7 +417,7 @@ bool SLTask::is_running()
 
 void SLTask::sendSignal()
 {
-    lock_guard<decltype(mutex)> lock(mutex);
+    std::lock_guard<decltype(mutex)> lock(mutex);
     running = false;
     cond.notify_one();
 }
@@ -433,7 +431,7 @@ void SLTask::sendSignal(std::string error)
 void SLTask::waitForTask()
 {
     if (is_running()) { // we check before we lock first, because there is no need to lock then
-        unique_lock<decltype(mutex)> lock(mutex);
+        std::unique_lock<decltype(mutex)> lock(mutex);
         if (is_running()) { // we check it a second time after locking to ensure we didn't miss the pthread_cond_signal
             cond.wait(lock); // waiting for the task to complete
         }

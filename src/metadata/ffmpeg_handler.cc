@@ -88,9 +88,8 @@ void FfmpegHandler::addFfmpegAuxdataFields(std::shared_ptr<CdsItem> item, AVForm
 
     auto sc = StringConverter::m2i(config);
     std::vector<std::string> aux = config->getStringArrayOption(CFG_IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST);
-    for (size_t j = 0; j < aux.size(); j++) {
-        std::string desiredTag(aux[j]);
-        if (string_ok(desiredTag)) {
+    for (const std::string& desiredTag : aux) {
+        if (!desiredTag.empty()) {
             AVDictionaryEntry* tag = NULL;
             tag = av_dict_get(pFormatCtx->metadata, desiredTag.c_str(), NULL, AV_DICT_IGNORE_SUFFIX);
             if (tag && tag->value && tag->value[0]) {
@@ -193,7 +192,7 @@ static void addFfmpegResourceFields(std::shared_ptr<CdsItem> item, AVFormatConte
 
                 log_debug("FourCC: 0x{:x} = {}", as_codecpar(st)->codec_tag, fourcc);
                 std::string fcc = fourcc;
-                if (string_ok(fcc))
+                if (!fcc.empty())
                     item->getResource(0)->addOption(RESOURCE_OPTION_FOURCC,
                         fcc);
             }
@@ -457,10 +456,7 @@ std::unique_ptr<IOHandler> FfmpegHandler::serveContent(std::shared_ptr<CdsItem> 
 std::string FfmpegHandler::getMimeType()
 {
     auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-    std::string thumb_mimetype = getValueOrDefault(mappings, CONTENT_TYPE_JPG);
-    if (!string_ok(thumb_mimetype))
-        thumb_mimetype = "image/jpeg";
-
+    std::string thumb_mimetype = getValueOrDefault(mappings, CONTENT_TYPE_JPG, "image/jpeg");
     return thumb_mimetype;
 }
 #endif // HAVE_FFMPEG

@@ -52,14 +52,14 @@ void web::autoscan::process()
     check_request();
 
     std::string action = param("action");
-    if (!string_ok(action))
+    if (action.empty())
         throw std::runtime_error("web:autoscan called with illegal action");
 
     bool fromFs = boolParam("from_fs");
     std::string path;
     std::string objID = param("object_id");
     if (fromFs) {
-        if (!string_ok(objID) || objID == "0")
+        if (objID == "0")
             path = FS_ROOT_DIRECTORY;
         else
             path = hex_decode_string(objID);
