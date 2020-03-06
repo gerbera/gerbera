@@ -70,7 +70,6 @@ void web::directories::process()
         "/dev",
         "/etc",
         "/lib", "/lib32", "/lib64", "/libx32",
-        "/media",
         "/proc",
         "/run",
         "/sbin",
