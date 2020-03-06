@@ -254,7 +254,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
         SET_INT_OPTION(CFG_SERVER_STORAGE_MYSQL_PORT);
 
         if (getElement("/server/storage/mysql/socket") == nullptr) {
-            NEW_OPTION(nullptr);
+            NEW_OPTION("");
         } else {
             NEW_OPTION(getOption("/server/storage/mysql/socket"));
         }
@@ -262,7 +262,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
         SET_OPTION(CFG_SERVER_STORAGE_MYSQL_SOCKET);
 
         if (getElement("/server/storage/mysql/password") == nullptr) {
-            NEW_OPTION(nullptr);
+            NEW_OPTION("");
         } else {
             NEW_OPTION(getOption("/server/storage/mysql/password"));
         }
