@@ -537,6 +537,8 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
     if (adir == nullptr)
         throw std::runtime_error("ID valid but nullptr returned? this should never happen");
 
+    fs::path rootpath = adir->getLocation();
+
     fs::path location;
     std::shared_ptr<CdsObject> obj;
 
@@ -663,7 +665,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
                         // readd object - we have to do this in order to trigger
                         // layout
                         removeObject(objectID, false);
-                        addFileInternal(newPath, location, false, false, adir->getHidden());
+                        addFileInternal(newPath, rootpath, false, false, adir->getHidden());
                         // update time variable
                         last_modified_current_max = statbuf.st_mtime;
                     }
@@ -674,7 +676,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
 
             } else {
                 // add file, not recursive, not async
-                addFileInternal(newPath, location, false, false, adir->getHidden());
+                addFileInternal(newPath, rootpath, false, false, adir->getHidden());
                 if (last_modified_current_max < statbuf.st_mtime)
                     last_modified_current_max = statbuf.st_mtime;
             }
@@ -701,7 +703,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
                 }
 
                 // add directory, recursive, async, hidden flag, low priority
-                addFileInternal(newPath, location, true, true, adir->getHidden(), true, thisTaskID, task->isCancellable());
+                addFileInternal(newPath, rootpath, true, true, adir->getHidden(), true, thisTaskID, task->isCancellable());
             }
         }
     } // while
