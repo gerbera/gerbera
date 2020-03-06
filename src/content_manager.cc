@@ -674,12 +674,9 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
 
             } else {
                 // add file, not recursive, not async
-                // make sure not to add the current config.xml
-                if (config->getConfigFilename() != path) {
-                    addFileInternal(path, location, false, false, adir->getHidden());
-                    if (last_modified_current_max < statbuf.st_mtime)
-                        last_modified_current_max = statbuf.st_mtime;
-                }
+                addFileInternal(path, location, false, false, adir->getHidden());
+                if (last_modified_current_max < statbuf.st_mtime)
+                    last_modified_current_max = statbuf.st_mtime;
             }
         } else if (S_ISDIR(statbuf.st_mode) && (adir->getRecursive())) {
             int objectID = storage->findObjectIDByPath(path);
