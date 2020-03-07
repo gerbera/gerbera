@@ -66,15 +66,15 @@ public:
     /// \return pointer to a timespec
     inline struct timespec* getLastAccessTime() { return &last_access; }
 
-    inline long getTimeout() { return timeout; }
+    inline long getTimeout() const { return timeout; }
 
     /// \brief Returns the session identifier.
-    inline std::string getID() { return sessionID; }
+    inline std::string getID() const { return sessionID; }
 
     /// \brief Sets the session identifier.
     inline void setID(const std::string& sessionID) { this->sessionID = sessionID; }
 
-    inline bool isLoggedIn() { return loggedIn; }
+    inline bool isLoggedIn() const { return loggedIn; }
 
     inline void logIn() { loggedIn = true; }
 
@@ -87,7 +87,7 @@ public:
     /// \return the container ids to be updated as String (comma separated)
     std::string getUIUpdateIDs();
 
-    bool hasUIUpdateIDs();
+    bool hasUIUpdateIDs() const;
 
     void clearUpdateIDs();
 

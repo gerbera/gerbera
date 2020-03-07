@@ -83,7 +83,7 @@ void TranscodingProfile::addAttribute(const std::string& name, std::string value
     attributes[name] = std::move(value);
 }
 
-std::map<std::string, std::string> TranscodingProfile::getAttributes()
+std::map<std::string, std::string> TranscodingProfile::getAttributes() const
 {
     return attributes;
 }
@@ -94,7 +94,7 @@ void TranscodingProfile::setAVIFourCCList(std::vector<std::string> list, avi_fou
     fourcc_mode = mode;
 }
 
-std::vector<std::string> TranscodingProfile::getAVIFourCCList()
+std::vector<std::string> TranscodingProfile::getAVIFourCCList() const
 {
     return fourcc_list;
 }

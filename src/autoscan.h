@@ -78,7 +78,7 @@ public:
 
     std::shared_ptr<AutoscanDirectory> getByObjectID(int objectID);
 
-    size_t size() { return list.size(); }
+    size_t size() const { return list.size(); }
 
     /// \brief removes the AutoscanDirectory given by its scan ID
     void remove(size_t id);
@@ -137,30 +137,30 @@ public:
 
     void setStorageID(int storageID) { this->storageID = storageID; }
 
-    int getStorageID() { return storageID; }
+    int getStorageID() const { return storageID; }
 
     /// \brief The location can only be set once!
     void setLocation(fs::path location);
 
-    fs::path getLocation() { return location; }
+    fs::path getLocation() const { return location; }
 
-    ScanMode getScanMode() { return mode; }
+    ScanMode getScanMode() const { return mode; }
 
     void setScanMode(ScanMode mode) { this->mode = mode; }
 
-    ScanLevel getScanLevel() { return level; }
+    ScanLevel getScanLevel() const { return level; }
 
     void setScanLevel(ScanLevel level) { this->level = level; }
 
-    bool getRecursive() { return recursive; }
+    bool getRecursive() const { return recursive; }
 
     void setHidden(bool hidden) { this->hidden = hidden; }
 
-    bool getHidden() { return hidden; }
+    bool getHidden() const { return hidden; }
 
     void setRecursive(bool recursive) { this->recursive = recursive; }
 
-    unsigned int getInterval() { return interval; }
+    unsigned int getInterval() const { return interval; }
 
     void setInterval(unsigned int interval) { this->interval = interval; }
 
@@ -176,7 +176,7 @@ public:
 
     void decTaskCount() { taskCount--; }
 
-    int getTaskCount() { return taskCount; }
+    int getTaskCount() const { return taskCount; }
 
     void setTaskCount(int taskCount) { this->taskCount = taskCount; }
 
@@ -187,13 +187,13 @@ public:
     /// the same id.
     void setScanID(int id);
 
-    int getScanID() { return scanID; }
+    int getScanID() const { return scanID; }
 
     void setObjectID(int id) { objectID = id; }
 
-    int getObjectID() { return objectID; }
+    int getObjectID() const { return objectID; }
 
-    bool persistent() { return persistent_flag; }
+    bool persistent() const { return persistent_flag; }
 
     /// \brief Sets the last modification time of the current ongoing scan.
     ///
@@ -205,7 +205,7 @@ public:
     /// The time will be only set if it is higher than the previous value!
     void setCurrentLMT(time_t lmt);
 
-    time_t getPreviousLMT() { return last_mod_previous_scan; }
+    time_t getPreviousLMT() const { return last_mod_previous_scan; }
 
     void updateLMT() { last_mod_previous_scan = last_mod_current_scan; }
 
@@ -216,7 +216,7 @@ public:
     }
 
     /// \brief copies all properties to another object
-    void copyTo(const std::shared_ptr<AutoscanDirectory>& copy);
+    void copyTo(const std::shared_ptr<AutoscanDirectory>& copy) const;
 
     /// \brief Get the timer notify parameter associated with this directory.
     std::shared_ptr<Timer::Parameter> getTimerParameter();

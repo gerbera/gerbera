@@ -112,7 +112,7 @@ class SQLEmitter;
 
 class ASTNode {
 public:
-    std::string emitSQL();
+    std::string emitSQL() const;
     virtual std::string emit() const = 0;
 
     virtual ~ASTNode() = default;

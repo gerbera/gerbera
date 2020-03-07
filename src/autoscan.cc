@@ -303,7 +303,7 @@ ScanLevel AutoscanDirectory::remapScanlevel(const std::string& scanlevel)
     throw std::runtime_error("illegal scanlevel (" + scanlevel + ") given to remapScanlevel()");
 }
 
-void AutoscanDirectory::copyTo(const std::shared_ptr<AutoscanDirectory>& copy)
+void AutoscanDirectory::copyTo(const std::shared_ptr<AutoscanDirectory>& copy) const
 {
     copy->location = location;
     copy->mode = mode;

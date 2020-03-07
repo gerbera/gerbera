@@ -47,7 +47,7 @@ class ProcListItem {
 public:
     explicit ProcListItem(std::shared_ptr<Executor> exec, bool abortOnDeath = false);
     std::shared_ptr<Executor> getExecutor();
-    bool abortOnDeath();
+    bool abortOnDeath() const;
 
 protected:
     std::shared_ptr<Executor> executor;
@@ -115,8 +115,8 @@ protected:
     /// \brief if this flag is set seek on a fifo will not return an error
     bool ignoreSeek;
 
-    bool abort();
-    void killAll();
+    bool abort() const;
+    void killAll() const;
     void registerAll();
     void unregisterAll();
 };

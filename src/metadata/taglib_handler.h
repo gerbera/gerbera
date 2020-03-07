@@ -61,10 +61,10 @@ private:
     void extractOgg(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item);
     void extractASF(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item);
     void extractFLAC(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item);
-    void extractAPE(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item);
-    void extractWavPack(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item);
-    void extractMP4(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item);
-    void extractAiff(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item);
+    void extractAPE(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item) const;
+    void extractWavPack(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item) const;
+    void extractMP4(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item) const;
+    void extractAiff(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item) const;
 };
 
 #endif

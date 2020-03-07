@@ -79,42 +79,42 @@ void CdsResource::addOption(const std::string& name, std::string value)
     options[name] = std::move(value);
 }
 
-int CdsResource::getHandlerType()
+int CdsResource::getHandlerType() const
 {
     return handlerType;
 }
 
-std::map<std::string, std::string> CdsResource::getAttributes()
+std::map<std::string, std::string> CdsResource::getAttributes() const
 {
     return attributes;
 }
 
-std::map<std::string, std::string> CdsResource::getParameters()
+std::map<std::string, std::string> CdsResource::getParameters() const
 {
     return parameters;
 }
 
-std::map<std::string, std::string> CdsResource::getOptions()
+std::map<std::string, std::string> CdsResource::getOptions() const
 {
     return options;
 }
 
-std::string CdsResource::getAttribute(const std::string& name)
+std::string CdsResource::getAttribute(const std::string& name) const
 {
     return getValueOrDefault(attributes, name);
 }
 
-std::string CdsResource::getParameter(const std::string& name)
+std::string CdsResource::getParameter(const std::string& name) const
 {
     return getValueOrDefault(parameters, name);
 }
 
-std::string CdsResource::getOption(const std::string& name)
+std::string CdsResource::getOption(const std::string& name) const
 {
     return getValueOrDefault(options, name);
 }
 
-bool CdsResource::equals(const std::shared_ptr<CdsResource>& other)
+bool CdsResource::equals(const std::shared_ptr<CdsResource>& other) const
 {
     return (
         handlerType == other->handlerType

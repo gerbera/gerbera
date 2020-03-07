@@ -101,15 +101,15 @@ public:
     void addOption(const std::string& name, std::string value);
 
     // urlencode into string
-    int getHandlerType();
-    std::map<std::string, std::string> getAttributes();
-    std::map<std::string, std::string> getParameters();
-    std::map<std::string, std::string> getOptions();
-    std::string getAttribute(const std::string& name);
-    std::string getParameter(const std::string& name);
-    std::string getOption(const std::string& name);
+    int getHandlerType() const;
+    std::map<std::string, std::string> getAttributes() const;
+    std::map<std::string, std::string> getParameters() const;
+    std::map<std::string, std::string> getOptions() const;
+    std::string getAttribute(const std::string& name) const;
+    std::string getParameter(const std::string& name) const;
+    std::string getOption(const std::string& name) const;
 
-    bool equals(const std::shared_ptr<CdsResource>& other);
+    bool equals(const std::shared_ptr<CdsResource>& other) const;
     std::shared_ptr<CdsResource> clone();
 
     std::string encode();

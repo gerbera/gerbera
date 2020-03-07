@@ -86,9 +86,9 @@ public:
 
     static Script* getContextScript(duk_context* ctx);
 
-    std::shared_ptr<ConfigManager> getConfig() { return config; }
-    std::shared_ptr<Storage> getStorage() { return storage; }
-    std::shared_ptr<ContentManager> getContent() { return content; }
+    std::shared_ptr<ConfigManager> getConfig() const { return config; }
+    std::shared_ptr<Storage> getStorage() const { return storage; }
+    std::shared_ptr<ContentManager> getContent() const { return content; }
 
 protected:
     Script(const std::shared_ptr<ConfigManager>& config,

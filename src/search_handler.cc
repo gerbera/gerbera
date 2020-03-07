@@ -343,7 +343,7 @@ void SearchParser::checkIsExpected(TokenType tokenType, const std::string& token
     }
 }
 
-std::string ASTNode::emitSQL()
+std::string ASTNode::emitSQL() const
 {
     return sqlEmitter.emitSQL(this);
 }

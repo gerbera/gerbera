@@ -40,17 +40,17 @@ SubscriptionRequest::SubscriptionRequest(UpnpSubscriptionRequest* upnp_request)
     sID = UpnpSubscriptionRequest_get_SID_cstr(upnp_request);
 }
 
-std::string SubscriptionRequest::getServiceID()
+std::string SubscriptionRequest::getServiceID() const
 {
     return serviceID;
 }
 
-std::string SubscriptionRequest::getUDN()
+std::string SubscriptionRequest::getUDN() const
 {
     return UDN;
 }
 
-std::string SubscriptionRequest::getSubscriptionID()
+std::string SubscriptionRequest::getSubscriptionID() const
 {
     return sID;
 }

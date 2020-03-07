@@ -68,13 +68,13 @@ public:
     SubscriptionRequest(UpnpSubscriptionRequest* upnp_request);
 
     /// \brief Returns the service ID (should be one of the services that we support).
-    std::string getServiceID();
+    std::string getServiceID() const;
 
     /// \brief Returns the UDN of the recepient device (should be ours)
-    std::string getUDN();
+    std::string getUDN() const;
 
     /// \brief Returns the subscription ID.
-    std::string getSubscriptionID();
+    std::string getSubscriptionID() const;
 };
 
 #endif // __SUBSCRIPTION_REQUEST_H__

@@ -58,9 +58,9 @@ public:
             this->id = id;
         }
 
-        timer_param_t whoami() { return param; }
+        timer_param_t whoami() const { return param; }
         void setID(int id) { this->id = id; }
-        int getID() { return id; }
+        int getID() const { return id; }
 
     protected:
         timer_param_t param;
@@ -116,7 +116,7 @@ protected:
         }
         inline struct timespec* getNextNotify() { return &nextNotify; }
 
-        inline std::shared_ptr<Parameter> getParameter() { return parameter; }
+        inline std::shared_ptr<Parameter> getParameter() const { return parameter; }
 
         bool operator==(const TimerSubscriberElement& other) const
         {

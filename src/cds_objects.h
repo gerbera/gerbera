@@ -140,7 +140,7 @@ public:
     /// \brief Retrieve the object ID.
     ///
     /// ID is the object ID that is used by the UPnP Content Directory service.
-    inline int getID() { return id; }
+    inline int getID() const { return id; }
 
     /// \brief Set the reference object ID.
     ///
@@ -152,70 +152,70 @@ public:
     ///
     /// This is the reference ID that is used by the UPnP Content Directory service.
     /// It also links the reference and the original objects in the database.
-    inline int getRefID() { return refID; }
+    inline int getRefID() const { return refID; }
 
     /// \brief Set the parent ID of the object.
     inline void setParentID(int parentID) { this->parentID = parentID; }
 
     /// \brief Retrieve the objects parent ID.
-    inline int getParentID() { return parentID; }
+    inline int getParentID() const { return parentID; }
 
     /// \brief Set the restricted flag.
     inline void setRestricted(bool restricted) { changeFlag(OBJECT_FLAG_RESTRICTED, restricted); }
 
     /// \brief Query the restricted flag.
-    inline bool isRestricted() { return getFlag(OBJECT_FLAG_RESTRICTED); }
+    inline bool isRestricted() const { return getFlag(OBJECT_FLAG_RESTRICTED); }
 
     /// \brief Set the object title (dc:title)
     inline void setTitle(const std::string& title) { this->title = title; }
 
     /// \brief Retrieve the title.
-    inline std::string getTitle() { return title; }
+    inline std::string getTitle() const { return title; }
 
     /// \brief set the upnp:class
     inline void setClass(const std::string& upnpClass) { this->upnpClass = upnpClass; }
 
     /// \brief Retrieve class
-    inline std::string getClass() { return upnpClass; }
+    inline std::string getClass() const { return upnpClass; }
 
     /// \brief Set the physical location of the media (usually an absolute path)
     inline void setLocation(fs::path location) { this->location = location; }
 
     /// \brief Retrieve media location.
-    inline fs::path getLocation() { return location; }
+    inline fs::path getLocation() const { return location; }
 
     /// \brief Set modification time of the media file.
     inline void setMTime(time_t mtime) { this->mtime = mtime; }
 
     /// \brief Retrieve the file modification time (in seconds since UNIX epoch).
-    inline time_t getMTime() { return mtime; }
+    inline time_t getMTime() const { return mtime; }
 
     /// \brief Set file size.
     inline void setSizeOnDisk(off_t sizeOnDisk) { this->sizeOnDisk = sizeOnDisk; }
 
     /// \brief Retrieve the file size (in bytes).
-    inline off_t getSizeOnDisk() { return sizeOnDisk; }
+    inline off_t getSizeOnDisk() const { return sizeOnDisk; }
 
     /// \brief Set the virtual flag.
     inline void setVirtual(bool virt) { this->virt = virt; }
 
     /// \brief Query the virtual flag.
-    inline bool isVirtual() { return virt; }
+    inline bool isVirtual() const { return virt; }
 
     /// \brief Query information on object type: item, container, etc.
-    inline unsigned int getObjectType() { return objectType; }
+    inline unsigned int getObjectType() const { return objectType; }
 
     /// \brief Retrieve sort priority setting.
-    inline int getSortPriority() { return sortPriority; }
+    inline int getSortPriority() const { return sortPriority; }
 
     /// \brief Set the sort priority of an object.
     inline void setSortPriority(int sortPriority) { this->sortPriority = sortPriority; }
 
     /// \brief Get flags of an object.
-    inline unsigned int getFlags() { return objectFlags; }
+    inline unsigned int getFlags() const { return objectFlags; }
 
     /// \brief Get a flag of an object.
-    inline unsigned int getFlag(unsigned int mask) { return objectFlags & mask; }
+    inline unsigned int getFlag(unsigned int mask) const { return objectFlags & mask; }
 
     /// \brief Set flags for the object.
     inline void setFlags(unsigned int objectFlags) { this->objectFlags = objectFlags; }
@@ -236,13 +236,13 @@ public:
     inline void clearFlag(unsigned int mask) { objectFlags &= ~mask; }
 
     /// \brief Query single metadata value.
-    inline std::string getMetadata(const std::string& key)
+    inline std::string getMetadata(const std::string& key) const
     {
         return getValueOrDefault(metadata, key);
     }
 
     /// \brief Query entire metadata dictionary.
-    inline std::map<std::string, std::string> getMetadata() { return metadata; }
+    inline std::map<std::string, std::string> getMetadata() const { return metadata; }
 
     /// \brief Set entire metadata dictionary.
     inline void setMetadata(const std::map<std::string, std::string>& metadata)
@@ -263,13 +263,13 @@ public:
     }
 
     /// \brief Query single auxdata value.
-    inline std::string getAuxData(const std::string& key)
+    inline std::string getAuxData(const std::string& key) const
     {
         return getValueOrDefault(auxdata, key);
     }
 
     /// \brief Query entire auxdata dictionary.
-    inline std::map<std::string, std::string> getAuxData() { return auxdata; }
+    inline std::map<std::string, std::string> getAuxData() const { return auxdata; }
 
     /// \brief Set a single auxdata value.
     inline void setAuxData(std::string key, const std::string& value)
@@ -290,10 +290,10 @@ public:
     }
 
     /// \brief Get number of resource tags
-    inline int getResourceCount() { return resources.size(); }
+    inline int getResourceCount() const { return resources.size(); }
 
     /// \brief Query resources
-    inline std::vector<std::shared_ptr<CdsResource>> getResources()
+    inline std::vector<std::shared_ptr<CdsResource>> getResources() const
     {
         return resources;
     }
@@ -305,7 +305,7 @@ public:
     }
 
     /// \brief Query resource tag with the given index
-    inline std::shared_ptr<CdsResource> getResource(size_t index)
+    inline std::shared_ptr<CdsResource> getResource(size_t index) const
     {
         return resources.at(index);
     }
@@ -345,7 +345,7 @@ public:
     static std::shared_ptr<CdsObject> createObject(const std::shared_ptr<Storage>& storage, unsigned int objectType);
 
     /// \brief Returns the path to the object as it appears in the database tree.
-    virtual std::string getVirtualPath() = 0;
+    virtual std::string getVirtualPath() const = 0;
 
     static std::string mapObjectType(int objectType);
     static int remapObjectType(const std::string& objectType);
@@ -370,12 +370,12 @@ public:
     inline void setMimeType(const std::string& mimeType) { this->mimeType = mimeType; }
 
     /// \brief Query mime-type information.
-    inline std::string getMimeType() { return mimeType; }
+    inline std::string getMimeType() const { return mimeType; }
 
     /// \brief Sets the upnp:originalTrackNumber property
     inline void setTrackNumber(int trackNumber) { this->trackNumber = trackNumber; }
 
-    inline int getTrackNumber() { return trackNumber; }
+    inline int getTrackNumber() const { return trackNumber; }
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)`
     void copyTo(const std::shared_ptr<CdsObject>& obj) override;
@@ -389,13 +389,13 @@ public:
     void validate() override;
 
     /// \brief Returns the path to the object as it appears in the database tree.
-    std::string getVirtualPath() override;
+    std::string getVirtualPath() const override;
 
     /// \brief Set the unique service ID.
     inline void setServiceID(const std::string& serviceID) { this->serviceID = serviceID; }
 
     /// \brief Retrieve the unique service ID.
-    inline std::string getServiceID() { return serviceID; }
+    inline std::string getServiceID() const { return serviceID; }
 };
 
 /// \brief An Active Item in the content directory.
@@ -437,7 +437,7 @@ public:
     inline void setAction(const std::string& action) { this->action = action; }
 
     /// \brief Get the path of the action script.
-    inline std::string getAction() { return action; }
+    inline std::string getAction() const { return action; }
 
     /// \brief Set action state.
     /// \param state any string you want.
@@ -447,7 +447,7 @@ public:
     inline void setState(const std::string& state) { this->state = state; }
 
     /// \brief Retrieve the item state.
-    inline std::string getState() { return state; }
+    inline std::string getState() const { return state; }
 
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)
@@ -473,7 +473,7 @@ public:
     inline void setURL(const std::string& URL) { this->location = URL; }
 
     /// \brief Get the URL of the item.
-    inline std::string getURL() { return location; }
+    inline std::string getURL() const { return location; }
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)
     //void copyTo(std::shared_ptr<CdsObject> obj) override;
@@ -576,22 +576,22 @@ public:
     inline void setSearchable(bool searchable) { changeFlag(OBJECT_FLAG_SEARCHABLE, searchable); }
 
     /// \brief Query searchable flag.
-    inline int isSearchable() { return getFlag(OBJECT_FLAG_SEARCHABLE); }
+    inline int isSearchable() const { return getFlag(OBJECT_FLAG_SEARCHABLE); }
 
     /// \brief Set the container update ID value.
     inline void setUpdateID(int updateID) { this->updateID = updateID; }
 
     /// \brief Query container update ID value.
-    inline int getUpdateID() { return updateID; }
+    inline int getUpdateID() const { return updateID; }
 
     /// \brief Set container childCount attribute.
     inline void setChildCount(int childCount) { this->childCount = childCount; }
 
     /// \brief Retrieve number of children
-    inline int getChildCount() { return childCount; }
+    inline int getChildCount() const { return childCount; }
 
     /// \brief returns whether this container is an autoscan start point.
-    inline int getAutoscanType() { return autoscanType; }
+    inline int getAutoscanType() const { return autoscanType; }
 
     /// \brief sets whether this container is an autoscan start point.
     inline void setAutoscanType(int type) { autoscanType = type; }
@@ -609,7 +609,7 @@ public:
     void validate() override;
 
     /// \brief Returns the path to the object as it appears in the database tree.
-    std::string getVirtualPath() override;
+    std::string getVirtualPath() const override;
 };
 
 #endif // __CDS_OBJECTS_H__

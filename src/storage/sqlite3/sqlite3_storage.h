@@ -59,7 +59,7 @@ public:
 
     /// \brief returns true if the task is not completed
     /// \return true if the task is not completed yet, false if the task is finished and the results are ready.
-    bool is_running();
+    bool is_running() const;
 
     /// \brief modify the creator of the task using the supplied pthread_mutex and pthread_cond, that the task is finished
     void sendSignal();
@@ -68,10 +68,10 @@ public:
 
     void waitForTask();
 
-    bool didContamination() { return contamination; }
-    bool didDecontamination() { return decontamination; }
+    bool didContamination() const { return contamination; }
+    bool didDecontamination() const { return decontamination; }
 
-    std::string getError() { return error; }
+    std::string getError() const { return error; }
 
 protected:
     /// \brief true as long as the task is not finished
@@ -109,7 +109,7 @@ public:
     /// \param query The SQL query string
     SLSelectTask(const char* query);
     void run(sqlite3** db, Sqlite3Storage* sl) override;
-    inline std::shared_ptr<SQLResult> getResult() { return std::static_pointer_cast<SQLResult>(pres); }
+    inline std::shared_ptr<SQLResult> getResult() const { return std::static_pointer_cast<SQLResult>(pres); }
 
 protected:
     /// \brief The SQL query string
@@ -125,7 +125,7 @@ public:
     /// \param query The SQL query string
     SLExecTask(const char* query, bool getLastInsertId);
     void run(sqlite3** db, Sqlite3Storage* sl) override;
-    inline int getLastInsertId() { return lastInsertId; }
+    inline int getLastInsertId() const { return lastInsertId; }
 
 protected:
     /// \brief The SQL query string
@@ -158,15 +158,15 @@ private:
     void shutdownDriver() override;
     std::shared_ptr<Storage> getSelf() override;
 
-    std::string quote(std::string value) override;
-    inline std::string quote(const char* str) override { return quote(std::string(str)); }
-    inline std::string quote(int val) override { return std::to_string(val); }
-    inline std::string quote(unsigned int val) override { return std::to_string(val); }
-    inline std::string quote(long val) override { return std::to_string(val); }
-    inline std::string quote(unsigned long val) override { return std::to_string(val); }
-    inline std::string quote(bool val) override { return std::string(val ? "1" : "0"); }
-    inline std::string quote(char val) override { return quote(std::string(1, val)); }
-    inline std::string quote(long long val) override { return std::to_string(val); }
+    std::string quote(std::string value) const override;
+    inline std::string quote(const char* str) const override { return quote(std::string(str)); }
+    inline std::string quote(int val) const override { return std::to_string(val); }
+    inline std::string quote(unsigned int val) const override { return std::to_string(val); }
+    inline std::string quote(long val) const override { return std::to_string(val); }
+    inline std::string quote(unsigned long val) const override { return std::to_string(val); }
+    inline std::string quote(bool val) const override { return std::string(val ? "1" : "0"); }
+    inline std::string quote(char val) const override { return quote(std::string(1, val)); }
+    inline std::string quote(long long val) const override { return std::to_string(val); }
     std::shared_ptr<SQLResult> select(const char* query, int length) override;
     int exec(const char* query, int length, bool getLastInsertId = false) override;
     void storeInternalSetting(const std::string& key, const std::string& value) override;
@@ -198,7 +198,7 @@ private:
     bool taskQueueOpen;
 
     void threadCleanup() override {}
-    bool threadCleanupRequired() override { return false; }
+    bool threadCleanupRequired() const override { return false; }
 
     bool dirty;
 
@@ -216,7 +216,7 @@ public:
 
 private:
     std::unique_ptr<SQLRow> nextRow() override;
-    unsigned long long getNumRows() override { return nrow; }
+    unsigned long long getNumRows() const override { return nrow; }
 
     char** table;
     char** row;
@@ -237,7 +237,7 @@ public:
     Sqlite3Row(char** row);
 
 private:
-    inline char* col_c_str(int index) override { return row[index]; }
+    inline char* col_c_str(int index) const override { return row[index]; }
     char** row;
 };
 
