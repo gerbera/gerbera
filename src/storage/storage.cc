@@ -95,10 +95,9 @@ void Storage::stripAndUnescapeVirtualContainerFromPath(std::string virtualPath, 
         }
         if (sep == 0) {
             first = "/";
-            last = unescape(virtualPath.substr(sep + 1), VIRTUAL_CONTAINER_ESCAPE);
         } else {
             first = virtualPath.substr(0, sep);
-            last = unescape(virtualPath.substr(sep + 1), VIRTUAL_CONTAINER_ESCAPE);
         }
+        last = unescape(virtualPath.substr(sep + 1), VIRTUAL_CONTAINER_ESCAPE);
     }
 }
