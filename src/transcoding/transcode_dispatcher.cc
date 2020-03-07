@@ -47,7 +47,7 @@ TranscodeDispatcher::TranscodeDispatcher(std::shared_ptr<ConfigManager> config,
 std::unique_ptr<IOHandler> TranscodeDispatcher::open(std::shared_ptr<TranscodingProfile> profile,
     std::string location,
     std::shared_ptr<CdsObject> obj,
-    std::string range)
+    const std::string& range)
 {
     if (profile == nullptr)
         throw std::runtime_error("Transcoding of file " + location + "requested but no profile given ");

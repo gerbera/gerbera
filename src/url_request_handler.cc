@@ -149,7 +149,7 @@ void URLRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
 std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
     enum UpnpOpenFileMode mode,
-    std::string range)
+    const std::string& range)
 {
     log_debug("start");
 

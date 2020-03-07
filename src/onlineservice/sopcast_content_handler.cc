@@ -122,7 +122,7 @@ std::shared_ptr<CdsObject> SopCastContentHandler::getNextObject()
     return nullptr;
 }
 
-std::shared_ptr<CdsObject> SopCastContentHandler::getObject(std::string groupName, const pugi::xml_node& channel) const
+std::shared_ptr<CdsObject> SopCastContentHandler::getObject(const std::string& groupName, const pugi::xml_node& channel) const
 {
     auto item = std::make_shared<CdsItemExternalURL>(storage);
     auto resource = std::make_shared<CdsResource>(CH_DEFAULT);
@@ -131,7 +131,7 @@ std::shared_ptr<CdsObject> SopCastContentHandler::getObject(std::string groupNam
     item->setAuxData(ONLINE_SERVICE_AUX_ID,
         std::to_string(OS_SopCast));
 
-    item->setAuxData(SOPCAST_AUXDATA_GROUP, std::move(groupName));
+    item->setAuxData(SOPCAST_AUXDATA_GROUP, groupName);
 
     std::string temp = channel.attribute("id").as_string();
     if (temp.empty()) {

@@ -169,7 +169,7 @@ private:
     inline std::string quote(long long val) override { return std::to_string(val); }
     std::shared_ptr<SQLResult> select(const char* query, int length) override;
     int exec(const char* query, int length, bool getLastInsertId = false) override;
-    void storeInternalSetting(std::string key, std::string value) override;
+    void storeInternalSetting(const std::string& key, const std::string& value) override;
 
     void _exec(const char* query);
 

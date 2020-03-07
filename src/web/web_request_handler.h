@@ -49,7 +49,7 @@ namespace web {
 
 class SessionException : public std::runtime_error {
 public:
-    explicit SessionException(std::string message)
+    explicit SessionException(const std::string& message)
         : std::runtime_error(message)
     {
     }
@@ -57,7 +57,7 @@ public:
 
 class LoginException : public std::runtime_error {
 public:
-    explicit LoginException(std::string message)
+    explicit LoginException(const std::string& message)
         : std::runtime_error(message)
     {
     }
@@ -96,10 +96,10 @@ protected:
     /// in an easier fashion.
     /// \param name of the parameter we are looking for.
     /// \return Value of the parameter with the given name or nullptr if not found.
-    inline std::string param(std::string name) { return getValueOrDefault(params, name); }
+    inline std::string param(const std::string& name) { return getValueOrDefault(params, name); }
 
-    int intParam(std::string name, int invalid = 0);
-    bool boolParam(std::string name);
+    int intParam(const std::string& name, int invalid = 0);
+    bool boolParam(const std::string& name);
 
     /// \brief Checks if the incoming request is valid.
     ///
@@ -160,7 +160,7 @@ public:
     /// \return the appropriate IOHandler for the request.
     std::unique_ptr<IOHandler> open(const char* filename,
         enum UpnpOpenFileMode mode,
-        std::string range) override;
+        const std::string& range) override;
 
     /// \brief This method must be overridden by the subclasses that actually process the given request.
     virtual void process() = 0;

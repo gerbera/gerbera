@@ -272,7 +272,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 }
 
 std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
-    enum UpnpOpenFileMode mode, std::string range)
+    enum UpnpOpenFileMode mode, const std::string& range)
 {
     log_debug("start");
 

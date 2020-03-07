@@ -33,7 +33,7 @@ protected:
 public:
     GenericTask(task_owner_t taskOwner);
     virtual void run() = 0;
-    inline void setDescription(std::string description) { this->description = description; }
+    inline void setDescription(const std::string& description) { this->description = description; }
     inline std::string getDescription() { return description; }
     inline task_type_t getType() { return taskType; }
     inline unsigned int getID() { return taskID; }

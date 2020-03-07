@@ -72,7 +72,7 @@ public:
     std::shared_ptr<CdsObject> getNextObject();
 
 protected:
-    std::shared_ptr<CdsObject> getObject(std::string groupName, const pugi::xml_node& channel) const;
+    std::shared_ptr<CdsObject> getObject(const std::string& groupName, const pugi::xml_node& channel) const;
 
 protected:
     std::shared_ptr<ConfigManager> config;

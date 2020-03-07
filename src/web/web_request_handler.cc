@@ -53,15 +53,15 @@ WebRequestHandler::WebRequestHandler(std::shared_ptr<ConfigManager> config,
 {
 }
 
-int WebRequestHandler::intParam(std::string name, int invalid)
+int WebRequestHandler::intParam(const std::string& name, int invalid)
 {
-    std::string value = param(std::move(name));
+    std::string value = param(name);
     return !value.empty() ? std::stoi(value) : invalid;
 }
 
-bool WebRequestHandler::boolParam(std::string name)
+bool WebRequestHandler::boolParam(const std::string& name)
 {
-    std::string value = param(std::move(name));
+    std::string value = param(name);
     return !value.empty() && (value == "1" || value == "true");
 }
 
@@ -226,7 +226,7 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(enum UpnpOpenFileMode mode)
 
 std::unique_ptr<IOHandler> WebRequestHandler::open(const char* filename,
     enum UpnpOpenFileMode mode,
-    std::string range)
+    const std::string& range)
 {
     this->filename = filename;
     this->mode = mode;

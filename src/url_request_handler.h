@@ -47,7 +47,7 @@ public:
     void getInfo(const char* filename, UpnpFileInfo* info) override;
     std::unique_ptr<IOHandler> open(const char* filename,
         enum UpnpOpenFileMode mode,
-        std::string range) override;
+        const std::string& range) override;
 
 protected:
     std::shared_ptr<ContentManager> content;

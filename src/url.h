@@ -50,7 +50,7 @@ public:
         ///
         /// \param size size of the media in bytes
         /// \param mimetype mime type of the media
-        Stat(std::string url, off_t size, std::string mimetype)
+        Stat(const std::string& url, off_t size, const std::string& mimetype)
         {
             this->url = url;
             this->size = size;
