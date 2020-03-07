@@ -128,7 +128,7 @@ std::shared_ptr<AutoscanDirectory> AutoscanList::get(size_t id)
 {
     AutoLock lock(mutex);
 
-    if ((id < 0) || (id >= list.size()))
+    if (id >= list.size())
         return nullptr;
 
     return list[id];
@@ -159,7 +159,7 @@ void AutoscanList::remove(size_t id)
 {
     AutoLock lock(mutex);
 
-    if ((id < 0) || (id >= list.size())) {
+    if (id >= list.size()) {
         log_debug("No such ID {}!", id);
         return;
     }

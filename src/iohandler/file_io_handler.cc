@@ -64,7 +64,7 @@ size_t FileIOHandler::read(char* buf, size_t length)
 
     ret = fread(buf, sizeof(char), length, f);
 
-    if (ret <= 0) {
+    if (ret == 0) {
         if (feof(f))
             return 0;
         if (ferror(f))
