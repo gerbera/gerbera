@@ -1209,7 +1209,7 @@ std::unique_ptr<std::unordered_set<int>> SQLStorage::getObjects(int parentID, bo
     auto res = select(q);
     if (res == nullptr)
         throw std::runtime_error("db error");
-    if (res->getNumRows() <= 0)
+    if (res->getNumRows() == 0)
         return nullptr;
 
     auto ret = std::make_unique<std::unordered_set<int>>();
