@@ -169,8 +169,6 @@ set(libgerberaFILES
         src/util/headers.cc
         src/util/jpeg_resolution.cc
         src/util/logger.h
-        src/util/memory.cc
-        src/util/memory.h
         src/util/mt_inotify.cc
         src/util/mt_inotify.h
         src/util/process.cc
