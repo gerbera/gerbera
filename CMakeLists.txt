@@ -177,8 +177,6 @@ set(libgerberaFILES
         src/util/process.h
         src/util/string_converter.cc
         src/util/string_converter.h
-        src/util/string_tokenizer.cc
-        src/util/string_tokenizer.h
         src/util/task_processor.cc
         src/util/task_processor.h
         src/util/thread_executor.cc
