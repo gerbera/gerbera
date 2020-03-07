@@ -30,7 +30,9 @@
 /// \file io_handler_buffer_helper.cc
 
 #include "io_handler_buffer_helper.h"
+
 #include "config/config_manager.h"
+#include <cstdlib>
 
 IOHandlerBufferHelper::IOHandlerBufferHelper(size_t bufSize, size_t initialFillSize)
 {
@@ -60,7 +62,7 @@ void IOHandlerBufferHelper::open(enum UpnpOpenFileMode mode)
 {
     if (isOpen)
         throw std::runtime_error("tried to reopen an open IOHandlerBufferHelper");
-    buffer = static_cast<char*>(MALLOC(bufSize));
+    buffer = static_cast<char*>(malloc(bufSize));
     if (buffer == nullptr)
         throw std::runtime_error("Failed to allocate memory for transcoding buffer!");
 
@@ -178,7 +180,7 @@ void IOHandlerBufferHelper::close()
         throw std::runtime_error("close called on closed IOHandlerBufferHelper");
     isOpen = false;
     stopBufferThread();
-    FREE(buffer);
+    free(buffer);
     buffer = nullptr;
 }
 

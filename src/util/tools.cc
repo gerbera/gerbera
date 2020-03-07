@@ -29,10 +29,13 @@
 
 /// \file tools.cc
 
+#include "tools.h"
+
 #include <arpa/inet.h>
 #include <cctype>
 #include <cerrno>
 #include <climits>
+#include <cstdlib>
 #include <filesystem>
 #include <iterator>
 #include <netdb.h>
@@ -64,7 +67,6 @@
 #include "iohandler/file_io_handler.h"
 #include "metadata/metadata_handler.h"
 #include "string_tokenizer.h"
-#include "tools.h"
 
 #define WHITE_SPACE " \t\r\n"
 
@@ -451,7 +453,7 @@ std::string mime_types_to_CSV(std::vector<std::string> mimeTypes)
 std::string mt_strerror(int mt_errno)
 {
 #ifdef DONT_USE_YET_HAVE_STRERROR_R
-    char* buffer = (char*)MALLOC(512);
+    char* buffer = (char*)malloc(512);
     char* err_str;
 #ifdef STRERROR_R_CHAR_P
     err_str = strerror_r(errno, buffer, 512);
@@ -464,7 +466,7 @@ std::string mt_strerror(int mt_errno)
     err_str = buffer;
 #endif
     std::string errStr(err_str);
-    FREE(buffer);
+    free(buffer);
     return errStr;
 #else
     return strerror(errno);
@@ -553,12 +555,9 @@ std::string secondsToHMS(int seconds)
     if (h > 999)
         h = 999;
 
-    // TOOD: optimize
-    auto tmp = static_cast<char*>(MALLOC(10));
-    sprintf(tmp, "%02d:%02d:%02d", h, m, s);
-
-    std::string res = tmp;
-    FREE(tmp);
+    char buf[10];
+    snprintf(buf, sizeof(buf), "%02d:%02d:%02d", h, m, s);
+    std::string res = buf;
 
     return res;
 }
