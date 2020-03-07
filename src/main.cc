@@ -191,7 +191,7 @@ int main(int argc, char** argv, char** envp)
         if (opts.count("logfile") > 0) {
             auto file_logger = spdlog::basic_logger_mt("basic_logger", opts["logfile"].as<std::string>());
             spdlog::set_default_logger(file_logger);
-            spdlog::flush_on(spdlog::level::trace); 
+            spdlog::flush_on(spdlog::level::trace);
         }
 
         // Action starts here
