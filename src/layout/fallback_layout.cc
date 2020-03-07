@@ -35,7 +35,6 @@
 #include "content_manager.h"
 #include "metadata/metadata_handler.h"
 #include "util/string_converter.h"
-#include "util/string_tokenizer.h"
 #include "util/tools.h"
 #include <utility>
 
@@ -315,11 +314,7 @@ void FallbackLayout::addSopCast(const std::shared_ptr<CdsObject>& obj)
 void FallbackLayout::addATrailers(const std::shared_ptr<CdsObject>& obj)
 {
 #define AT_VPATH "/Online Services/Apple Trailers"
-    std::string chain;
-    std::string temp;
-
-    int id = content->addContainerChain(AT_VPATH
-        "/All Trailers");
+    int id = content->addContainerChain(AT_VPATH "/All Trailers");
 
     if (obj->getID() != INVALID_OBJECT_ID) {
         obj->setRefID(obj->getID());
@@ -331,47 +326,26 @@ void FallbackLayout::addATrailers(const std::shared_ptr<CdsObject>& obj)
 
     auto meta = obj->getMetadata();
 
-    temp = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_GENRE));
-    if (!temp.empty()) {
-        auto st = std::make_unique<StringTokenizer>(temp);
-        std::string genre;
-        std::string next;
-        do {
-            if (genre.empty())
-                genre = st->nextToken(",");
-            next = st->nextToken(",");
+    std::string temp = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_GENRE));
+    auto genreAr = split_string(temp, ',');
+    for (auto& genre : genreAr) {
+        genre = trim_string(genre);
+        if (genre.empty())
+            continue;
 
-            genre = trim_string(genre);
-
-            if (genre.empty())
-                break;
-
-            id = content->addContainerChain(AT_VPATH
-                "/Genres/"
-                + esc(genre));
-            add(obj, id);
-
-            if (!next.empty())
-                genre = next;
-            else
-                genre = "";
-
-        } while (!genre.empty());
+        id = content->addContainerChain(AT_VPATH "/Genres/" + esc(genre));
+        add(obj, id);
     }
 
     temp = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_DATE));
     if (temp.length() >= 7) {
-        id = content->addContainerChain(AT_VPATH
-            "/Release Date/"
-            + esc(temp.substr(0, 7)));
+        id = content->addContainerChain(AT_VPATH "/Release Date/" + esc(temp.substr(0, 7)));
         add(obj, id);
     }
 
     temp = obj->getAuxData(ATRAILERS_AUXDATA_POST_DATE);
     if (temp.length() >= 7) {
-        id = content->addContainerChain(AT_VPATH
-            "/Post Date/"
-            + esc(temp.substr(0, 7)));
+        id = content->addContainerChain(AT_VPATH "/Post Date/" + esc(temp.substr(0, 7)));
         add(obj, id);
     }
 }
