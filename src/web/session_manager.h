@@ -72,7 +72,7 @@ public:
     inline std::string getID() { return sessionID; }
 
     /// \brief Sets the session identifier.
-    inline void setID(std::string sessionID) { this->sessionID = sessionID; }
+    inline void setID(const std::string& sessionID) { this->sessionID = sessionID; }
 
     inline bool isLoggedIn() { return loggedIn; }
 

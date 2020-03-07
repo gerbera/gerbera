@@ -38,7 +38,7 @@
 
 class ConfigParseException : public std::runtime_error {
 public:
-    inline ConfigParseException(std::string message)
+    inline ConfigParseException(const std::string& message)
         : std::runtime_error(message)
     {
     }
@@ -58,7 +58,7 @@ protected:
     std::string userMessage;
 
 public:
-    inline StorageException(std::string _userMessage, std::string message)
+    inline StorageException(std::string _userMessage, const std::string& message)
         : std::runtime_error(message)
     {
         userMessage = std::move(_userMessage);
@@ -68,7 +68,7 @@ public:
 
 class ObjectNotFoundException : public StorageException {
 public:
-    inline explicit ObjectNotFoundException(std::string message)
+    inline explicit ObjectNotFoundException(const std::string& message)
         : StorageException(message, message)
     {
     }
@@ -76,7 +76,7 @@ public:
 
 class SubtitlesNotFoundException : public std::runtime_error {
 public:
-    inline explicit SubtitlesNotFoundException(std::string message)
+    inline explicit SubtitlesNotFoundException(const std::string& message)
         : std::runtime_error(message)
     {
     }
@@ -84,7 +84,7 @@ public:
 
 class ServerShutdownException : public std::runtime_error {
 public:
-    inline explicit ServerShutdownException(std::string message)
+    inline explicit ServerShutdownException(const std::string& message)
         : std::runtime_error(message)
     {
     }
@@ -92,7 +92,7 @@ public:
 
 class TryAgainException : public std::runtime_error {
 public:
-    inline explicit TryAgainException(std::string message)
+    inline explicit TryAgainException(const std::string& message)
         : std::runtime_error(message)
     {
     }

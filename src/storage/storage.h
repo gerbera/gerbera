@@ -159,7 +159,7 @@ public:
     /// the object ID of the container that is last in the path. The
     /// updateID will hold the objectID of the container that was changed,
     /// in case new containers were created during the operation.
-    virtual void addContainerChain(std::string path, std::string lastClass, int lastRefID, int* containerID,
+    virtual void addContainerChain(std::string path, const std::string& lastClass, int lastRefID, int* containerID,
         int* updateID, const std::map<std::string, std::string>& lastMetadata)
         = 0;
 
@@ -168,7 +168,7 @@ public:
     /// \param parentID the parent id of the parent container
     /// \param title the title of the container to add to the path.
     /// It will be escaped.
-    virtual fs::path buildContainerPath(int parentID, std::string title) = 0;
+    virtual fs::path buildContainerPath(int parentID, const std::string& title) = 0;
 
     virtual void updateObject(std::shared_ptr<CdsObject> object, int* changedContainer) = 0;
 
@@ -238,7 +238,7 @@ public:
     virtual std::unique_ptr<ChangedContainers> removeObjects(const std::unique_ptr<std::unordered_set<int>>& list, bool all = false) = 0;
 
     /// \brief Loads an object given by the online service ID.
-    virtual std::shared_ptr<CdsObject> loadObjectByServiceID(std::string serviceID) = 0;
+    virtual std::shared_ptr<CdsObject> loadObjectByServiceID(const std::string& serviceID) = 0;
 
     /// \brief Return an array of object ID's for a particular service.
     ///
@@ -249,8 +249,8 @@ public:
     virtual int getTotalFiles() = 0;
 
     /* internal setting methods */
-    virtual std::string getInternalSetting(std::string key) = 0;
-    virtual void storeInternalSetting(std::string key, std::string value) = 0;
+    virtual std::string getInternalSetting(const std::string& key) = 0;
+    virtual void storeInternalSetting(const std::string& key, const std::string& value) = 0;
 
     /* autoscan methods */
     virtual void updateAutoscanPersistentList(ScanMode scanmode, std::shared_ptr<AutoscanList> list) = 0;

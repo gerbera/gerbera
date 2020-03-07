@@ -47,7 +47,7 @@ public:
 
     virtual void getInfo(const char* filename, UpnpFileInfo* info) = 0;
 
-    virtual std::unique_ptr<IOHandler> open(const char* filename, enum UpnpOpenFileMode mode, std::string range) = 0;
+    virtual std::unique_ptr<IOHandler> open(const char* filename, enum UpnpOpenFileMode mode, const std::string& range) = 0;
 
     /// \brief Splits the url into a path and parameters string.
     /// Only '?' and '/' separators are allowed, otherwise an exception will

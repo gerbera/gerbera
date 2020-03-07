@@ -46,7 +46,7 @@ public:
     std::unique_ptr<IOHandler> open(std::shared_ptr<TranscodingProfile> profile,
         std::string location,
         std::shared_ptr<CdsObject> obj,
-        std::string range) override;
+        const std::string& range) override;
 };
 
 #endif // __TRANSCODE_EXTERNAL_HANDLER_H__
