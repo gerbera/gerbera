@@ -87,7 +87,7 @@ private:
 
     class Watch {
     public:
-        Watch(WatchType type)
+        explicit Watch(WatchType type)
         {
             this->type = type;
         }
@@ -124,7 +124,7 @@ private:
 
     class WatchMove : public Watch {
     public:
-        WatchMove(int removeWd)
+        explicit WatchMove(int removeWd)
             : Watch(WatchType::Move)
         {
             this->removeWd = removeWd;

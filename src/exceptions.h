@@ -38,7 +38,7 @@
 
 class ConfigParseException : public std::runtime_error {
 public:
-    inline ConfigParseException(const std::string& message)
+    explicit inline ConfigParseException(const std::string& message)
         : std::runtime_error(message)
     {
     }

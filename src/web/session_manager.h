@@ -57,7 +57,7 @@ public:
     /// The session is created with a given timeout, each access to the session updates the
     /// last_access value, if last access lies further back than the timeout - the session will
     /// be deleted (will time out)
-    Session(long timeout);
+    explicit Session(long timeout);
 
     void put(const std::string& key, std::string value);
     std::string get(const std::string& key);

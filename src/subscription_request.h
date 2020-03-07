@@ -65,7 +65,7 @@ protected:
 public:
     /// \brief The Constructor takes the values from the upnp_request and fills in internal variables.
     /// \param *upnp_request Pointer to the Upnp_Subscription_Request structure.
-    SubscriptionRequest(UpnpSubscriptionRequest* upnp_request);
+    explicit SubscriptionRequest(UpnpSubscriptionRequest* upnp_request);
 
     /// \brief Returns the service ID (should be one of the services that we support).
     std::string getServiceID() const;

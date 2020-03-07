@@ -61,7 +61,7 @@ public:
     /// The CdsResource object represents a <res> tag in the DIDL-Lite XML.
     ///
     /// \param handler_type id of the associated handler
-    CdsResource(int handlerType);
+    explicit CdsResource(int handlerType);
     CdsResource(int handlerType,
         const std::map<std::string, std::string>& attributes,
         const std::map<std::string, std::string>& parameters,

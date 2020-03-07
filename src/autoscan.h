@@ -59,7 +59,7 @@ class AutoscanDirectory;
 
 class AutoscanList {
 public:
-    AutoscanList(std::shared_ptr<Storage> storage);
+    explicit AutoscanList(std::shared_ptr<Storage> storage);
 
     /// \brief Adds a new AutoscanDirectory to the list.
     ///
