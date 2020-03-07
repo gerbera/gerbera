@@ -56,7 +56,7 @@ class ContentManager;
 /// and to retrieve various information about the server.
 class Server : public std::enable_shared_from_this<Server> {
 public:
-    Server(std::shared_ptr<ConfigManager> config);
+    explicit Server(std::shared_ptr<ConfigManager> config);
 
     /// \brief Initializes the server.
     ///

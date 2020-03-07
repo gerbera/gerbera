@@ -38,7 +38,7 @@
 /// \brief This class is responsible for populating filesystem based album and fan art
 class FanArtHandler : public MetadataHandler {
 public:
-    FanArtHandler(std::shared_ptr<ConfigManager> config);
+    explicit FanArtHandler(std::shared_ptr<ConfigManager> config);
     void fillMetadata(std::shared_ptr<CdsItem> item) override;
     std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsItem> item, int resNum) override;
 

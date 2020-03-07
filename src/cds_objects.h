@@ -430,7 +430,7 @@ protected:
 
 public:
     /// \brief Constructor, sets the object type.
-    CdsActiveItem(std::shared_ptr<Storage> storage);
+    explicit CdsActiveItem(std::shared_ptr<Storage> storage);
 
     /// \brief Sets the action for the item.
     /// \param action absolute path to the script that will process the XML data.
@@ -466,7 +466,7 @@ public:
 class CdsItemExternalURL : public CdsItem {
 public:
     /// \brief Constructor, sets the object type.
-    CdsItemExternalURL(std::shared_ptr<Storage> storage);
+    explicit CdsItemExternalURL(std::shared_ptr<Storage> storage);
 
     /// \brief Sets the URL for the item.
     /// \param URL full url to the item: http://somewhere.com/something.mpg
@@ -499,7 +499,7 @@ public:
 class CdsItemInternalURL : public CdsItemExternalURL {
 public:
     /// \brief Constructor, sets the object type.
-    CdsItemInternalURL(std::shared_ptr<Storage> storage);
+    explicit CdsItemInternalURL(std::shared_ptr<Storage> storage);
 
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
     void validate() override;

@@ -83,7 +83,7 @@ public:
 
 class Option : public ConfigOption {
 public:
-    Option(const std::string& option) { this->option = option; }
+    explicit Option(const std::string& option) { this->option = option; }
 
     std::string getOption() const override { return option; }
 
@@ -93,7 +93,7 @@ protected:
 
 class IntOption : public ConfigOption {
 public:
-    IntOption(int option) { this->option = option; }
+    explicit IntOption(int option) { this->option = option; }
 
     int getIntOption() const override { return option; }
 
@@ -103,7 +103,7 @@ protected:
 
 class BoolOption : public ConfigOption {
 public:
-    BoolOption(bool option) { this->option = option; }
+    explicit BoolOption(bool option) { this->option = option; }
 
     bool getBoolOption() const override { return option; }
 
@@ -114,7 +114,7 @@ protected:
 
 class DictionaryOption : public ConfigOption {
 public:
-    DictionaryOption(const std::map<std::string, std::string>& option) { this->option = option; }
+    explicit DictionaryOption(const std::map<std::string, std::string>& option) { this->option = option; }
 
     std::map<std::string, std::string> getDictionaryOption() const override { return option; }
 
@@ -124,7 +124,7 @@ protected:
 
 class StringArrayOption : public ConfigOption {
 public:
-    StringArrayOption(const std::vector<std::string>& option)
+    explicit StringArrayOption(const std::vector<std::string>& option)
     {
         this->option = option;
     }
@@ -140,7 +140,7 @@ protected:
 
 class AutoscanListOption : public ConfigOption {
 public:
-    AutoscanListOption(std::shared_ptr<AutoscanList> option)
+    explicit AutoscanListOption(std::shared_ptr<AutoscanList> option)
     {
         this->option = option;
     }
@@ -153,7 +153,7 @@ protected:
 
 class TranscodingProfileListOption : public ConfigOption {
 public:
-    TranscodingProfileListOption(std::shared_ptr<TranscodingProfileList> option)
+    explicit TranscodingProfileListOption(std::shared_ptr<TranscodingProfileList> option)
     {
         this->option = option;
     }
