@@ -1267,7 +1267,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     log_debug("Config file dump after validation: {}", buf.str().c_str());
 }
 
-std::string ConfigManager::getOption(std::string xpath, std::string def)
+std::string ConfigManager::getOption(std::string xpath, std::string def) const
 {
     auto root = xmlDoc->document_element();
     xpath = "/config" + xpath;
@@ -1287,7 +1287,7 @@ std::string ConfigManager::getOption(std::string xpath, std::string def)
     return def;
 }
 
-int ConfigManager::getIntOption(std::string xpath, int def)
+int ConfigManager::getIntOption(std::string xpath, int def) const
 {
     std::string sDef;
     sDef = std::to_string(def);
@@ -1295,7 +1295,7 @@ int ConfigManager::getIntOption(std::string xpath, int def)
     return std::stoi(sVal);
 }
 
-std::string ConfigManager::getOption(std::string xpath)
+std::string ConfigManager::getOption(std::string xpath) const
 {
     xpath = "/config" + xpath;
     auto root = xmlDoc->document_element();
@@ -1312,13 +1312,13 @@ std::string ConfigManager::getOption(std::string xpath)
     throw std::runtime_error(fmt::format("Option '{}' not found in configuration file", xpath));
 }
 
-int ConfigManager::getIntOption(std::string xpath)
+int ConfigManager::getIntOption(std::string xpath) const
 {
     std::string sVal = getOption(std::move(xpath));
     return std::stoi(sVal);
 }
 
-pugi::xml_node ConfigManager::getElement(std::string xpath)
+pugi::xml_node ConfigManager::getElement(std::string xpath) const
 {
     xpath = "/config" + xpath;
     auto root = xmlDoc->document_element();

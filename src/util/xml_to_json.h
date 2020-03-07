@@ -46,14 +46,14 @@ class Xml2Json {
 public:
     class Hints {
     public:
-        void setArrayName(pugi::xml_node& node, const std::string& name) { asArray[node] = name; }
+        void setArrayName(const pugi::xml_node& node, const std::string& name) { asArray[node] = name; }
 
     private:
         std::map<pugi::xml_node, std::string> asArray;
         friend class Xml2Json;
     };
 
-    static std::string getJson(pugi::xml_node& root, const Hints* hints);
+    static std::string getJson(const pugi::xml_node& root, const Hints* hints);
 
 private:
     static void handleElement(std::ostringstream& buf, const pugi::xml_node& node, const Hints* hints);

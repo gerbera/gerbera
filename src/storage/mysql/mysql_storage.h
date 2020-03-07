@@ -51,15 +51,15 @@ private:
     virtual void shutdownDriver();
     std::shared_ptr<Storage> getSelf();
 
-    virtual std::string quote(std::string str);
-    inline std::string quote(const char* str) override { return quote(std::string(str)); }
-    virtual inline std::string quote(int val) { return std::to_string(val); }
-    virtual inline std::string quote(unsigned int val) { return std::to_string(val); }
-    virtual inline std::string quote(long val) { return std::to_string(val); }
-    virtual inline std::string quote(unsigned long val) { return std::to_string(val); }
-    virtual inline std::string quote(bool val) { return std::to_string(val ? '1' : '0'); }
-    virtual inline std::string quote(char val) { return quote(std::to_string(val)); }
-    virtual inline std::string quote(long long val) { return std::to_string(val); }
+    virtual std::string quote(std::string str) const;
+    inline std::string quote(const char* str) const override { return quote(std::string(str)); }
+    inline std::string quote(int val) const override { return std::to_string(val); }
+    inline std::string quote(unsigned int val) const override { return std::to_string(val); }
+    inline std::string quote(long val) const override { return std::to_string(val); }
+    inline std::string quote(unsigned long val) const override { return std::to_string(val); }
+    inline std::string quote(bool val) const override { return std::to_string(val ? '1' : '0'); }
+    inline std::string quote(char val) const override { return quote(std::to_string(val)); }
+    inline std::string quote(long long val) const override { return std::to_string(val); }
     virtual std::shared_ptr<SQLResult> select(const char* query, int length);
     virtual int exec(const char* query, int length, bool getLastInsertId = false);
     virtual void storeInternalSetting(const std::string& key, const std::string& value);
@@ -76,7 +76,7 @@ private:
     using AutoLock = std::lock_guard<decltype(mysqlMutex)>;
 
     virtual void threadCleanup();
-    virtual bool threadCleanupRequired() { return true; }
+    bool threadCleanupRequired() const override { return true; }
 
     pthread_key_t mysql_init_key;
     bool mysql_init_key_initialized;
@@ -92,7 +92,7 @@ public:
 private:
     int nullRead;
     virtual std::unique_ptr<SQLRow> nextRow();
-    virtual unsigned long long getNumRows() { return mysql_num_rows(mysql_res); }
+    unsigned long long getNumRows() const override { return mysql_num_rows(mysql_res); }
     MYSQL_RES* mysql_res;
 
     friend class MysqlRow;
@@ -104,7 +104,7 @@ public:
     MysqlRow(MYSQL_ROW mysql_row);
 
 private:
-    inline virtual char* col_c_str(int index) { return mysql_row[index]; }
+    inline char* col_c_str(int index) const override { return mysql_row[index]; }
 
     MYSQL_ROW mysql_row;
 

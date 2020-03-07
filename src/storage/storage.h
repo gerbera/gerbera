@@ -67,8 +67,8 @@ public:
         requestedCount = 0;
     }
 
-    inline int getFlags() { return flags; }
-    inline unsigned int getFlag(unsigned int mask) { return flags & mask; }
+    inline int getFlags() const { return flags; }
+    inline unsigned int getFlag(unsigned int mask) const { return flags & mask; }
     inline void setFlags(unsigned int flags) { this->flags = flags; }
     inline void setFlag(unsigned int mask) { flags |= mask; }
     inline void changeFlag(unsigned int mask, bool value)
@@ -80,7 +80,7 @@ public:
     }
     inline void clearFlag(unsigned int mask) { flags &= !mask; }
 
-    inline int getObjectID() { return objectID; }
+    inline int getObjectID() const { return objectID; }
 
     inline void setRange(int startingIndex, int requestedCount)
     {
@@ -97,10 +97,10 @@ public:
         this->requestedCount = requestedCount;
     }
 
-    inline int getStartingIndex() { return startingIndex; }
-    inline int getRequestedCount() { return requestedCount; }
+    inline int getStartingIndex() const { return startingIndex; }
+    inline int getRequestedCount() const { return requestedCount; }
 
-    inline int getTotalMatches() { return totalMatches; }
+    inline int getTotalMatches() const { return totalMatches; }
 
     inline void setTotalMatches(int totalMatches)
     {
@@ -125,8 +125,8 @@ public:
     {
     }
     const std::string& searchCriteria() const { return searchCrit; }
-    int getStartingIndex() { return startingIndex; }
-    int getRequestedCount() { return requestedCount; }
+    int getStartingIndex() const { return startingIndex; }
+    int getRequestedCount() const { return requestedCount; }
 };
 
 // forward declaration
@@ -306,7 +306,7 @@ public:
     virtual std::string getFsRootName() = 0;
 
     virtual void threadCleanup() = 0;
-    virtual bool threadCleanupRequired() = 0;
+    virtual bool threadCleanupRequired() const = 0;
 
     virtual void doMetadataMigration() = 0;
 

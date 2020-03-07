@@ -57,9 +57,9 @@ public:
             this->mimetype = mimetype;
         }
 
-        std::string getURL() { return url; }
-        off_t getSize() { return size; }
-        std::string getMimeType() { return mimetype; }
+        std::string getURL() const { return url; }
+        off_t getSize() const { return size; }
+        std::string getMimeType() const { return mimetype; }
 
     protected:
         std::string url;

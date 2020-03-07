@@ -185,7 +185,7 @@ public:
     virtual ~ConfigManager();
 
     /// \brief Returns the name of the config file that was used to launch the server.
-    inline fs::path getConfigFilename() { return filename; }
+    inline fs::path getConfigFilename() const { return filename; }
 
     void load(const fs::path& filename, const fs::path& userHome);
 
@@ -244,10 +244,10 @@ protected:
     /// The xpath parameter has XPath syntax:
     /// "/path/to/option" will return the text value of the given "option" element
     /// "/path/to/option/attribute::attr" will return the value of the attribute "attr"
-    std::string getOption(std::string xpath, std::string def);
+    std::string getOption(std::string xpath, std::string def) const;
 
     /// \brief same as getOption but returns an integer value of the option
-    int getIntOption(std::string xpath, int def);
+    int getIntOption(std::string xpath, int def) const;
 
     /// \brief Returns a config option with the given xpath, an exception is raised if option does not exist.
     /// \param xpath option xpath.
@@ -255,7 +255,7 @@ protected:
     /// The xpath parameter has XPath syntax:
     /// "/path/to/option" will return the text value of the given "option" element
     /// "/path/to/option/attribute::attr" will return the value of the attribute "attr"
-    std::string getOption(std::string xpath);
+    std::string getOption(std::string xpath) const;
 
     /// \brief Returns an integer value of the option with the given xpath, an exception is raised if option does not exist.
     /// \param xpath option xpath.
@@ -263,14 +263,14 @@ protected:
     /// The xpath parameter has XPath syntax:
     /// "/path/to/option" will return the text value of the given "option" element
     /// "/path/to/option/attribute::attr" will return the value of the attribute "attr"
-    int getIntOption(std::string xpath);
+    int getIntOption(std::string xpath) const;
 
     /// \brief Returns a config XML element with the given xpath, an exception is raised if element does not exist.
     /// \param xpath option xpath.
     ///
     /// The xpath parameter has XPath syntax:
     /// "/path/to/element" will return the text value of the given "element" element
-    pugi::xml_node getElement(std::string xpath);
+    pugi::xml_node getElement(std::string xpath) const;
 
     /// \brief resolve path against home, an exception is raised if path does not exist on filesystem.
     /// \param path path to be resolved

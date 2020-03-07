@@ -37,7 +37,7 @@
 #include "util/tools.h"
 #include "xml_to_json.h"
 
-std::string Xml2Json::getJson(pugi::xml_node& root, const Hints* hints)
+std::string Xml2Json::getJson(const pugi::xml_node& root, const Hints* hints)
 {
     std::ostringstream buf;
     buf << '{';

@@ -42,22 +42,22 @@ ActionRequest::ActionRequest(UpnpActionRequest* upnp_request)
 {
 }
 
-std::string ActionRequest::getActionName()
+std::string ActionRequest::getActionName() const
 {
     return actionName;
 }
 
-std::string ActionRequest::getUDN()
+std::string ActionRequest::getUDN() const
 {
     return UDN;
 }
 
-std::string ActionRequest::getServiceID()
+std::string ActionRequest::getServiceID() const
 {
     return serviceID;
 }
 
-std::unique_ptr<pugi::xml_document> ActionRequest::getRequest()
+std::unique_ptr<pugi::xml_document> ActionRequest::getRequest() const
 {
     DOMString cxml = ixmlPrintDocument(UpnpActionRequest_get_ActionRequest(upnp_request));
     auto request = std::make_unique<pugi::xml_document>();

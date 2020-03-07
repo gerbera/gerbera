@@ -96,7 +96,7 @@ protected:
     /// in an easier fashion.
     /// \param name of the parameter we are looking for.
     /// \return Value of the parameter with the given name or nullptr if not found.
-    inline std::string param(const std::string& name) { return getValueOrDefault(params, name); }
+    inline std::string param(const std::string& name) const { return getValueOrDefault(params, name); }
 
     int intParam(const std::string& name, int invalid = 0);
     bool boolParam(const std::string& name);
@@ -135,7 +135,7 @@ protected:
 
     /// \brief check if accounts are enabled in the config
     /// \return true if accounts are enabled, false if not
-    bool accountsEnabled() { return config->getBoolOption(CFG_SERVER_UI_ACCOUNTS_ENABLED); }
+    bool accountsEnabled() const { return config->getBoolOption(CFG_SERVER_UI_ACCOUNTS_ENABLED); }
 
     static std::string mapAutoscanType(int type);
 

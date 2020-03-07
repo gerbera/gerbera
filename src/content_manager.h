@@ -153,7 +153,7 @@ public:
 
     void timerNotify(std::shared_ptr<Timer::Parameter> parameter) override;
 
-    bool isBusy() { return working; }
+    bool isBusy() const { return working; }
 
     /// \brief Returns the task that is currently being executed.
     std::shared_ptr<GenericTask> getCurrentTask();
@@ -261,11 +261,10 @@ public:
     std::shared_ptr<CdsObject> convertObject(std::shared_ptr<CdsObject> obj, int newType);
 
     /// \brief Gets an AutocsanDirectrory from the watch list.
-    std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(int scanID, ScanMode scanMode);
+    std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(int scanID, ScanMode scanMode) const;
 
     /// \brief Get an AutoscanDirectory given by location on disk from the watch list.
-    std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(const fs::path& location);
-
+    std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(const fs::path& location) const;
     /// \brief Removes an AutoscanDirectrory (found by scanID) from the watch list.
     void removeAutoscanDirectory(int scanID, ScanMode scanMode);
 
@@ -286,10 +285,10 @@ public:
     void handlePersistentAutoscanRecreate(int scanID, ScanMode scanMode);
 
     /// \brief returns an array of autoscan directories for the given scan mode
-    std::vector<std::shared_ptr<AutoscanDirectory>> getAutoscanDirectories(ScanMode scanMode);
+    std::vector<std::shared_ptr<AutoscanDirectory>> getAutoscanDirectories(ScanMode scanMode) const;
 
     /// \brief returns an array of all autoscan directories
-    std::vector<std::shared_ptr<AutoscanDirectory>> getAutoscanDirectories();
+    std::vector<std::shared_ptr<AutoscanDirectory>> getAutoscanDirectories() const;
 
     /// \brief instructs ContentManager to reload scripting environment
     void reloadLayout();
