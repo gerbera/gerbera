@@ -39,9 +39,11 @@
 #include "iohandler/file_io_handler.h"
 #include "util/tools.h"
 
+// These must not have a leading slash, or the "/" operator will produce
+// just this, not folder and this
 static const char* names[] = {
-    "/folder.jpg",
-    "/poster.jpg"
+    "folder.jpg",
+    "poster.jpg"
 };
 
 FanArtHandler::FanArtHandler(std::shared_ptr<ConfigManager> config)
@@ -57,7 +59,8 @@ fs::path FanArtHandler::getFanArtPath(const std::shared_ptr<CdsItem>& item)
     fs::path found;
     for (const auto& name : names) {
         auto found = folder / name;
-        bool exists = fs::is_regular_file(found);
+        std::error_code ec;
+        bool exists = fs::is_regular_file(found, ec); // no error throwing, please
         log_debug("{}: {}", name, exists ? "found" : "missing");
         if (!exists)
             continue;

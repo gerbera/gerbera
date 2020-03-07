@@ -37,6 +37,7 @@
 #include "content_manager.h"
 #include "js_functions.h"
 #include "storage/storage.h"
+#include <cstdlib>
 #include <utility>
 
 #define ONE_TEXTLINE_BYTES 1024
@@ -145,7 +146,7 @@ void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject
 
     currentTask = std::move(task);
     currentObjectID = obj->getID();
-    currentLine = static_cast<char*>(MALLOC(ONE_TEXTLINE_BYTES));
+    currentLine = static_cast<char*>(malloc(ONE_TEXTLINE_BYTES));
     if (!currentLine) {
         currentObjectID = INVALID_OBJECT_ID;
         currentTask = nullptr;
@@ -158,7 +159,7 @@ void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject
     if (!currentHandle) {
         currentObjectID = INVALID_OBJECT_ID;
         currentTask = nullptr;
-        FREE(currentLine);
+        free(currentLine);
         throw std::runtime_error("failed to open file: " + obj->getLocation().string());
     }
 
@@ -180,7 +181,7 @@ void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject
         fclose(currentHandle);
         currentHandle = nullptr;
 
-        FREE(currentLine);
+        free(currentLine);
         currentLine = nullptr;
 
         currentObjectID = INVALID_OBJECT_ID;
@@ -192,7 +193,7 @@ void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject
     fclose(currentHandle);
     currentHandle = nullptr;
 
-    FREE(currentLine);
+    free(currentLine);
     currentLine = nullptr;
 
     currentObjectID = INVALID_OBJECT_ID;

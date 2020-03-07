@@ -30,12 +30,15 @@
 /// \file mem_io_handler.cc
 
 #include "mem_io_handler.h"
+
 #include "cds_objects.h"
 #include "common.h"
 #include "server.h"
 #include "update_manager.h"
 #include "util/process.h"
+
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <ctime>
 #include <ixml.h>
@@ -44,7 +47,7 @@
 #include <unistd.h>
 
 MemIOHandler::MemIOHandler(const void* buffer, int length)
-    : buffer(static_cast<char*>(MALLOC(length)))
+    : buffer(static_cast<char*>(malloc(length)))
     , length(length)
     , pos(-1)
 {
@@ -52,7 +55,7 @@ MemIOHandler::MemIOHandler(const void* buffer, int length)
 }
 
 MemIOHandler::MemIOHandler(const std::string& str)
-    : buffer(static_cast<char*>(MALLOC(str.length())))
+    : buffer(static_cast<char*>(malloc(str.length())))
     , length(str.length())
     , pos(-1)
 {
@@ -61,7 +64,7 @@ MemIOHandler::MemIOHandler(const std::string& str)
 
 MemIOHandler::~MemIOHandler()
 {
-    FREE(buffer);
+    free(buffer);
 }
 
 void MemIOHandler::open(enum UpnpOpenFileMode mode)

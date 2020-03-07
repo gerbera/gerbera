@@ -37,9 +37,11 @@
 //#define MYSQL_EXEC_DEBUG
 
 #include "mysql_storage.h"
-#include "config/config_manager.h"
 
+#include "config/config_manager.h"
 #include "mysql_create_sql.h"
+
+#include <cstdlib>
 #include <zlib.h>
 
 // updates 1->2
@@ -287,12 +289,12 @@ std::string MysqlStorage::quote(std::string value)
      * the \0; then the string won't be null-terminated, but that doesn't matter,
      * because we give the correct length to std::string()
      */
-    auto q = (char*)MALLOC(value.length() * 2 + 2);
+    auto q = (char*)malloc(value.length() * 2 + 2);
     *q = '\'';
     long size = mysql_real_escape_string(&db, q + 1, value.c_str(), value.length());
     q[size + 1] = '\'';
     std::string ret(q, size + 2);
-    FREE(q);
+    free(q);
     return ret;
 }
 
@@ -405,8 +407,7 @@ std::unique_ptr<SQLRow> MysqlResult::nextRow()
     MYSQL_ROW mysql_row;
     mysql_row = mysql_fetch_row(mysql_res);
     if (mysql_row) {
-        auto self = shared_from_this();
-        auto p = std::make_unique<MysqlRow>(mysql_row, self);
+        auto p = std::make_unique<MysqlRow>(mysql_row);
         return p;
     }
     nullRead = true;
@@ -417,8 +418,7 @@ std::unique_ptr<SQLRow> MysqlResult::nextRow()
 
 /* MysqlRow */
 
-MysqlRow::MysqlRow(MYSQL_ROW mysql_row, std::shared_ptr<SQLResult> sqlResult)
-    : SQLRow(sqlResult)
+MysqlRow::MysqlRow(MYSQL_ROW mysql_row)
 {
     this->mysql_row = mysql_row;
 }

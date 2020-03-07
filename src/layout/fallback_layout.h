@@ -51,7 +51,7 @@ public:
     FallbackLayout(std::shared_ptr<ConfigManager> config,
         std::shared_ptr<Storage> storage,
         std::shared_ptr<ContentManager> content);
-    virtual void processCdsObject(std::shared_ptr<CdsObject> obj, fs::path rootpath) override;
+    void processCdsObject(std::shared_ptr<CdsObject> obj, fs::path rootpath) override;
 #ifdef ENABLE_PROFILING
     virtual ~FallbackLayout();
 #endif

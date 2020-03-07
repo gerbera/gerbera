@@ -1415,7 +1415,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
 
     auto mtype_profile = element.child("mimetype-profile-mappings");
     if (mtype_profile != nullptr) {
-        for (const pugi::xml_node& child : element.children()) {
+        for (const pugi::xml_node& child : mtype_profile.children()) {
             if (std::string(child.name()) == "transcode") {
                 std::string mt = child.attribute("mimetype").as_string();
                 std::string pname = child.attribute("using").as_string();
@@ -1433,7 +1433,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
     if (profiles == nullptr)
         return list;
 
-    for (const pugi::xml_node& child : element.children()) {
+    for (const pugi::xml_node& child : profiles.children()) {
         if (std::string(child.name()) != "profile")
             continue;
 

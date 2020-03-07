@@ -32,6 +32,7 @@
 #include "string_converter.h"
 
 #include "config/config_manager.h"
+#include <cstdlib>
 #include <utility>
 
 StringConverter::StringConverter(const std::string& from, const std::string& to)
@@ -94,7 +95,7 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
     int buf_size = str.length() * 4;
 
     auto input = str.c_str();
-    auto output = static_cast<char*>(MALLOC(buf_size));
+    auto output = static_cast<char*>(malloc(buf_size));
     if (!output) {
         log_debug("Could not allocate memory for string conversion!");
         throw std::runtime_error("Could not allocate memory for string conversion!");
@@ -147,7 +148,7 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
             ret_str = std::string(output, output_copy - output);
             dirty = true;
             *output_copy = 0;
-            FREE(output);
+            free(output);
             return ret_str;
         case E2BIG:
             /// \todo should encode the whole string anyway
@@ -163,7 +164,7 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
         //        log_debug("iconv: converted part:  {}", output);
         dirty = true;
         if (output)
-            FREE(output);
+            free(output);
         throw std::runtime_error(err);
     }
 
@@ -172,7 +173,7 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
     //log_debug("iconv: returned {}", ret);
 
     ret_str = std::string(output, output_copy - output);
-    FREE(output);
+    free(output);
     if (stoppedAt)
         *stoppedAt = 0; // no error
     return ret_str;

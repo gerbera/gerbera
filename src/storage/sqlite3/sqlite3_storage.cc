@@ -323,40 +323,41 @@ void Sqlite3Storage::threadProc()
         startupError = "Sqlite3Storage.init: could not open " + dbFilePath;
         return;
     }
+
     AutoLockU lock(sqliteMutex);
     // tell init() that we are ready
     cond.notify_one();
 
     while (!shutdownFlag) {
-        while (taskQueue.empty()) {
-            /* if nothing to do, sleep until awakened */
-            cond.wait(lock);
+        while (!taskQueue.empty()) {
+            auto task = taskQueue.front();
+            taskQueue.pop();
+
+            lock.unlock();
+            try {
+                task->run(&db, this);
+                if (task->didContamination())
+                    dirty = true;
+                else if (task->didDecontamination())
+                    dirty = false;
+                task->sendSignal();
+            } catch (const std::runtime_error& e) {
+                task->sendSignal(e.what());
+            }
+            lock.lock();
         }
 
-        auto task = taskQueue.front();
-        taskQueue.pop();
-
-        lock.unlock();
-        try {
-            task->run(&db, this);
-            if (task->didContamination())
-                dirty = true;
-            else if (task->didDecontamination())
-                dirty = false;
-            task->sendSignal();
-        } catch (const std::runtime_error& e) {
-            task->sendSignal(e.what());
-        }
-        lock.lock();
+        /* if nothing to do, sleep until awakened */
+        cond.wait(lock);
     }
 
     taskQueueOpen = false;
     while (!taskQueue.empty()) {
         auto task = taskQueue.front();
         taskQueue.pop();
-
         task->sendSignal("Sorry, sqlite3 thread is shutting down");
     }
+
     if (db)
         sqlite3_close(db);
 }
@@ -613,9 +614,7 @@ std::unique_ptr<SQLRow> Sqlite3Result::nextRow()
         row += ncolumn;
         cur_row++;
         if (cur_row <= nrow) {
-            auto self = shared_from_this();
-            auto p = std::make_unique<Sqlite3Row>(row, self);
-            p->res = std::static_pointer_cast<Sqlite3Result>(self);
+            auto p = std::make_unique<Sqlite3Row>(row);
             return p;
         }
         return nullptr;
@@ -625,8 +624,7 @@ std::unique_ptr<SQLRow> Sqlite3Result::nextRow()
 
 /* Sqlite3Row */
 
-Sqlite3Row::Sqlite3Row(char** row, std::shared_ptr<SQLResult> sqlResult)
-    : SQLRow(std::move(sqlResult))
+Sqlite3Row::Sqlite3Row(char** row)
 {
     this->row = row;
 }

@@ -30,7 +30,9 @@
 /// \file io_handler_chainer.cc
 
 #include "io_handler_chainer.h"
+
 #include "exceptions.h"
+#include <cstdlib>
 
 IOHandlerChainer::IOHandlerChainer(std::unique_ptr<IOHandler>& readFrom, std::unique_ptr<IOHandler>& writeTo, int chunkSize)
 {
@@ -43,7 +45,7 @@ IOHandlerChainer::IOHandlerChainer(std::unique_ptr<IOHandler>& readFrom, std::un
     this->readFrom = std::move(readFrom);
     this->writeTo = std::move(writeTo);
     readFrom->open(UPNP_READ);
-    buf = static_cast<char*>(MALLOC(chunkSize));
+    buf = static_cast<char*>(malloc(chunkSize));
     startThread();
 }
 

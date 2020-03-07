@@ -378,18 +378,18 @@ public:
     inline int getTrackNumber() { return trackNumber; }
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)`
-    virtual void copyTo(const std::shared_ptr<CdsObject>& obj) override;
+    void copyTo(const std::shared_ptr<CdsObject>& obj) override;
 
     /// \brief Checks if current object is equal to obj.
     ///
     /// See description for CdsObject::equals() for details.
-    virtual int equals(const std::shared_ptr<CdsObject>& obj, bool exactly = false) override;
+    int equals(const std::shared_ptr<CdsObject>& obj, bool exactly = false) override;
 
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
-    virtual void validate() override;
+    void validate() override;
 
     /// \brief Returns the path to the object as it appears in the database tree.
-    virtual std::string getVirtualPath() override;
+    std::string getVirtualPath() override;
 
     /// \brief Set the unique service ID.
     inline void setServiceID(std::string serviceID) { this->serviceID = serviceID; }
@@ -451,15 +451,15 @@ public:
 
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)
-    virtual void copyTo(const std::shared_ptr<CdsObject>& obj) override;
+    void copyTo(const std::shared_ptr<CdsObject>& obj) override;
 
     /// \brief Checks if current object is equal to obj.
     ///
     /// See description for CdsObject::equals() for details.
-    virtual int equals(const std::shared_ptr<CdsObject>& obj, bool exactly = false) override;
+    int equals(const std::shared_ptr<CdsObject>& obj, bool exactly = false) override;
 
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
-    virtual void validate() override;
+    void validate() override;
 };
 
 /// \brief An item that is accessible via a URL.
@@ -476,12 +476,12 @@ public:
     inline std::string getURL() { return location; }
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)
-    //virtual void copyTo(std::shared_ptr<CdsObject> obj) override;
+    //void copyTo(std::shared_ptr<CdsObject> obj) override;
 
     /// \brief Checks if current object is equal to obj.
     ///
     /// See description for CdsObject::equals() for details.
-    //virtual int equals(std::shared_ptr<CdsObject> obj, bool exactly=false) override;
+    //int equals(std::shared_ptr<CdsObject> obj, bool exactly=false) override;
 
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
     void validate() override;
@@ -543,15 +543,15 @@ public:
 
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)
-    virtual void copyTo(std::shared_ptr<CdsObject> obj) override;
+    void copyTo(std::shared_ptr<CdsObject> obj) override;
 
     /// \brief Checks if current object is equal to obj.
     ///
     /// See description for CdsObject::equals() for details.
-    virtual int equals(std::shared_ptr<CdsObject> obj, bool exactly=false) override;
+    int equals(std::shared_ptr<CdsObject> obj, bool exactly=false) override;
 
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
-    virtual void validate();
+    void validate();
 };
 
 */
