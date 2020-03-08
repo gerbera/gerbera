@@ -83,7 +83,7 @@ public:
 
 class Option : public ConfigOption {
 public:
-    Option(std::string option) { this->option = option; }
+    Option(const std::string& option) { this->option = option; }
 
     std::string getOption() override { return option; }
 
@@ -114,7 +114,7 @@ protected:
 
 class DictionaryOption : public ConfigOption {
 public:
-    DictionaryOption(std::map<std::string, std::string> option) { this->option = option; }
+    DictionaryOption(const std::map<std::string, std::string>& option) { this->option = option; }
 
     std::map<std::string, std::string> getDictionaryOption() override { return option; }
 
@@ -124,7 +124,7 @@ protected:
 
 class StringArrayOption : public ConfigOption {
 public:
-    StringArrayOption(std::vector<std::string> option)
+    StringArrayOption(const std::vector<std::string>& option)
     {
         this->option = option;
     }

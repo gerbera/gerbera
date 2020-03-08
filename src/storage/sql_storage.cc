@@ -432,7 +432,7 @@ std::shared_ptr<CdsObject> SQLStorage::loadObject(int objectID)
     throw ObjectNotFoundException("Object not found: " + std::to_string(objectID));
 }
 
-std::shared_ptr<CdsObject> SQLStorage::loadObjectByServiceID(std::string serviceID)
+std::shared_ptr<CdsObject> SQLStorage::loadObjectByServiceID(const std::string& serviceID)
 {
     std::ostringstream qb;
     qb << SQL_QUERY << " WHERE " << TQD('f', "service_id") << '=' << quote(serviceID);
@@ -797,7 +797,7 @@ int SQLStorage::createContainer(int parentID, std::string name, const std::strin
     return newID;
 }
 
-fs::path SQLStorage::buildContainerPath(int parentID, std::string title)
+fs::path SQLStorage::buildContainerPath(int parentID, const std::string& title)
 {
     //title = escape(title, xxx);
     if (parentID == CDS_ID_ROOT)
@@ -823,7 +823,7 @@ fs::path SQLStorage::buildContainerPath(int parentID, std::string title)
     return path;
 }
 
-void SQLStorage::addContainerChain(std::string virtualPath, std::string lastClass, int lastRefID, int* containerID, int* updateID, const std::map<std::string, std::string>& lastMetadata)
+void SQLStorage::addContainerChain(std::string virtualPath, const std::string& lastClass, int lastRefID, int* containerID, int* updateID, const std::map<std::string, std::string>& lastMetadata)
 {
     log_debug("Adding container Chain for path: {}, lastRefId: {}, containerId: {}", virtualPath.c_str(), lastRefID, *containerID);
 
@@ -1209,7 +1209,7 @@ std::unique_ptr<std::unordered_set<int>> SQLStorage::getObjects(int parentID, bo
     auto res = select(q);
     if (res == nullptr)
         throw std::runtime_error("db error");
-    if (res->getNumRows() <= 0)
+    if (res->getNumRows() == 0)
         return nullptr;
 
     auto ret = std::make_unique<std::unordered_set<int>>();
@@ -1590,7 +1590,7 @@ std::unique_ptr<Storage::ChangedContainers> SQLStorage::_purgeEmptyContainers(st
     return changedContainers;
 }
 
-std::string SQLStorage::getInternalSetting(std::string key)
+std::string SQLStorage::getInternalSetting(const std::string& key)
 {
     std::ostringstream q;
     q << "SELECT " << TQ("value") << " FROM " << TQ(INTERNAL_SETTINGS_TABLE) << " WHERE " << TQ("key") << '='

@@ -108,7 +108,7 @@ private:
         std::shared_ptr<AutoscanDirectory> getAutoscanDirectory() { return adir; }
         bool isStartPoint() { return startPoint; }
         std::vector<std::string> getNonexistingPathArray() { return nonexistingPathArray; }
-        void setNonexistingPathArray(std::vector<std::string> nonexistingPathArray) { this->nonexistingPathArray = nonexistingPathArray; }
+        void setNonexistingPathArray(const std::vector<std::string>& nonexistingPathArray) { this->nonexistingPathArray = nonexistingPathArray; }
         void addDescendant(int wd)
         {
             descendants.push_back(wd);

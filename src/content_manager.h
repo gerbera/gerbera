@@ -264,12 +264,13 @@ public:
     std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(int scanID, ScanMode scanMode);
 
     /// \brief Get an AutoscanDirectory given by location on disk from the watch list.
-    std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(const std::string& location);
+    std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(const fs::path& location);
+
     /// \brief Removes an AutoscanDirectrory (found by scanID) from the watch list.
     void removeAutoscanDirectory(int scanID, ScanMode scanMode);
 
     /// \brief Removes an AutoscanDirectrory (found by location) from the watch list.
-    void removeAutoscanDirectory(const std::string& location);
+    void removeAutoscanDirectory(const fs::path& location);
 
     /// \brief Removes an AutoscanDirectory (by objectID) from the watch list.
     void removeAutoscanDirectory(int objectID);

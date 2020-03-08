@@ -236,7 +236,7 @@ size_t ProcessIOHandler::read(char* buf, size_t length)
             num_bytes = num_bytes + bytes_read;
             length = length - bytes_read;
 
-            if (length <= 0)
+            if (length == 0)
                 break;
 
             p_buffer = buf + num_bytes;
@@ -324,7 +324,7 @@ size_t ProcessIOHandler::write(char* buf, size_t length)
 
             num_bytes = num_bytes + bytes_written;
             length = length - bytes_written;
-            if (length <= 0)
+            if (length == 0)
                 break;
 
             p_buffer = buf + num_bytes;

@@ -66,7 +66,6 @@
 #include "contrib/md5.h"
 #include "iohandler/file_io_handler.h"
 #include "metadata/metadata_handler.h"
-#include "string_tokenizer.h"
 
 #define WHITE_SPACE " \t\r\n"
 
@@ -184,32 +183,12 @@ fs::path find_in_path(const fs::path& exec)
     if (PATH.empty())
         return "";
 
-    auto st = std::make_unique<StringTokenizer>(PATH);
-    std::string path;
-    std::string next;
-    do {
-        if (path.empty())
-            path = st->nextToken(":");
-        next = st->nextToken(":");
-
-        if (path.empty())
-            break;
-
-        if ((!next.empty()) && !startswith(next, "/")) {
-            path = path + ":" + next;
-            next = "";
-        }
-
+    auto pathAr = split_string(PATH, ':');
+    for (auto& path : pathAr) {
         fs::path check = fs::path(path) / exec;
         if (fs::is_regular_file(check))
             return check;
-
-        if (!next.empty())
-            path = next;
-        else
-            path = "";
-
-    } while (!path.empty());
+    }
 
     return "";
 }

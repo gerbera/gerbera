@@ -36,8 +36,8 @@
 
 IOHandlerBufferHelper::IOHandlerBufferHelper(size_t bufSize, size_t initialFillSize)
 {
-    if (bufSize <= 0)
-        throw std::runtime_error("bufSize must be positive");
+    if (bufSize == 0)
+        throw std::runtime_error("bufSize must be greater than 0");
     if (initialFillSize > bufSize)
         throw std::runtime_error("initialFillSize must be lesser than or equal to the size of the buffer");
 

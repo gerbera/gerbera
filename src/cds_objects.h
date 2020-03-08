@@ -167,13 +167,13 @@ public:
     inline bool isRestricted() { return getFlag(OBJECT_FLAG_RESTRICTED); }
 
     /// \brief Set the object title (dc:title)
-    inline void setTitle(std::string title) { this->title = title; }
+    inline void setTitle(const std::string& title) { this->title = title; }
 
     /// \brief Retrieve the title.
     inline std::string getTitle() { return title; }
 
     /// \brief set the upnp:class
-    inline void setClass(std::string upnpClass) { this->upnpClass = upnpClass; }
+    inline void setClass(const std::string& upnpClass) { this->upnpClass = upnpClass; }
 
     /// \brief Retrieve class
     inline std::string getClass() { return upnpClass; }
@@ -236,7 +236,7 @@ public:
     inline void clearFlag(unsigned int mask) { objectFlags &= ~mask; }
 
     /// \brief Query single metadata value.
-    inline std::string getMetadata(std::string key)
+    inline std::string getMetadata(const std::string& key)
     {
         return getValueOrDefault(metadata, key);
     }
@@ -251,7 +251,7 @@ public:
     }
 
     /// \brief Set a single metadata value.
-    inline void setMetadata(std::string key, std::string value)
+    inline void setMetadata(const std::string& key, const std::string& value)
     {
         metadata[key] = value;
     }
@@ -263,7 +263,7 @@ public:
     }
 
     /// \brief Query single auxdata value.
-    inline std::string getAuxData(std::string key)
+    inline std::string getAuxData(const std::string& key)
     {
         return getValueOrDefault(auxdata, key);
     }
@@ -272,7 +272,7 @@ public:
     inline std::map<std::string, std::string> getAuxData() { return auxdata; }
 
     /// \brief Set a single auxdata value.
-    inline void setAuxData(std::string key, std::string value)
+    inline void setAuxData(std::string key, const std::string& value)
     {
         auxdata[key] = value;
     }
@@ -299,7 +299,7 @@ public:
     }
 
     /// \brief Set resources
-    inline void setResources(std::vector<std::shared_ptr<CdsResource>> res)
+    inline void setResources(const std::vector<std::shared_ptr<CdsResource>>& res)
     {
         resources = res;
     }
@@ -367,7 +367,7 @@ public:
     explicit CdsItem(std::shared_ptr<Storage> storage);
 
     /// \brief Set mime-type information of the media.
-    inline void setMimeType(std::string mimeType) { this->mimeType = mimeType; }
+    inline void setMimeType(const std::string& mimeType) { this->mimeType = mimeType; }
 
     /// \brief Query mime-type information.
     inline std::string getMimeType() { return mimeType; }
@@ -392,7 +392,7 @@ public:
     std::string getVirtualPath() override;
 
     /// \brief Set the unique service ID.
-    inline void setServiceID(std::string serviceID) { this->serviceID = serviceID; }
+    inline void setServiceID(const std::string& serviceID) { this->serviceID = serviceID; }
 
     /// \brief Retrieve the unique service ID.
     inline std::string getServiceID() { return serviceID; }
@@ -434,7 +434,7 @@ public:
 
     /// \brief Sets the action for the item.
     /// \param action absolute path to the script that will process the XML data.
-    inline void setAction(std::string action) { this->action = action; }
+    inline void setAction(const std::string& action) { this->action = action; }
 
     /// \brief Get the path of the action script.
     inline std::string getAction() { return action; }
@@ -444,7 +444,7 @@ public:
     ///
     /// This is quite useful to let the script identify what state the item is in.
     /// Think of it as a cookie (did I already mention that I hate web cookies?)
-    inline void setState(std::string state) { this->state = state; }
+    inline void setState(const std::string& state) { this->state = state; }
 
     /// \brief Retrieve the item state.
     inline std::string getState() { return state; }
@@ -470,7 +470,7 @@ public:
 
     /// \brief Sets the URL for the item.
     /// \param URL full url to the item: http://somewhere.com/something.mpg
-    inline void setURL(std::string URL) { this->location = URL; }
+    inline void setURL(const std::string& URL) { this->location = URL; }
 
     /// \brief Get the URL of the item.
     inline std::string getURL() { return location; }

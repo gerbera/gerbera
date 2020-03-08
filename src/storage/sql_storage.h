@@ -117,7 +117,7 @@ public:
     std::unique_ptr<ChangedContainers> removeObject(int objectID, bool all) override;
     std::unique_ptr<ChangedContainers> removeObjects(const std::unique_ptr<std::unordered_set<int>>& list, bool all = false) override;
 
-    std::shared_ptr<CdsObject> loadObjectByServiceID(std::string serviceID) override;
+    std::shared_ptr<CdsObject> loadObjectByServiceID(const std::string& serviceID) override;
     std::unique_ptr<std::vector<int>> getServiceObjectIDs(char servicePrefix) override;
 
     std::string findFolderImage(int id, std::string trackArtBase) override;
@@ -135,10 +135,10 @@ public:
     int findObjectIDByPath(fs::path fullpath, bool wasRegularFile = false) override;
     std::string incrementUpdateIDs(const std::unique_ptr<std::unordered_set<int>>& ids) override;
 
-    fs::path buildContainerPath(int parentID, std::string title) override;
-    void addContainerChain(std::string path, std::string lastClass, int lastRefID, int* containerID, int* updateID, const std::map<std::string, std::string>& lastMetadata) override;
-    std::string getInternalSetting(std::string key) override;
-    void storeInternalSetting(std::string key, std::string value) override = 0;
+    fs::path buildContainerPath(int parentID, const std::string& title) override;
+    void addContainerChain(std::string path, const std::string& lastClass, int lastRefID, int* containerID, int* updateID, const std::map<std::string, std::string>& lastMetadata) override;
+    std::string getInternalSetting(const std::string& key) override;
+    void storeInternalSetting(const std::string& key, const std::string& value) override = 0;
 
     void updateAutoscanPersistentList(ScanMode scanmode, std::shared_ptr<AutoscanList> list) override;
     std::shared_ptr<AutoscanList> getAutoscanList(ScanMode scanmode) override;
@@ -188,7 +188,7 @@ private:
     /* helper class and helper function for addObject and updateObject */
     class AddUpdateTable {
     public:
-        AddUpdateTable(std::string table, std::map<std::string, std::string> dict, std::string operation)
+        AddUpdateTable(const std::string& table, const std::map<std::string, std::string>& dict, const std::string& operation)
         {
             this->table = table;
             this->dict = dict;
@@ -239,7 +239,7 @@ private:
     int createContainer(int parentID, std::string name, const std::string& virtualPath, bool isVirtual, const std::string& upnpClass, int refID, const std::map<std::string, std::string>& itemMetadata);
 
     std::string mapBool(bool val) { return quote((val ? 1 : 0)); }
-    bool remapBool(std::string field) { return field == "1"; }
+    bool remapBool(const std::string& field) { return field == "1"; }
 
     void setFsRootName(const std::string& rootName = "");
 

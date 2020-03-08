@@ -62,7 +62,7 @@ private:
     virtual inline std::string quote(long long val) { return std::to_string(val); }
     virtual std::shared_ptr<SQLResult> select(const char* query, int length);
     virtual int exec(const char* query, int length, bool getLastInsertId = false);
-    virtual void storeInternalSetting(std::string key, std::string value);
+    virtual void storeInternalSetting(const std::string& key, const std::string& value);
 
     void _exec(const char* query, int lenth = -1);
 

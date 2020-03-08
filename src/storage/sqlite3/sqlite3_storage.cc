@@ -394,7 +394,7 @@ void Sqlite3Storage::shutdownDriver()
     log_debug("end");
 }
 
-void Sqlite3Storage::storeInternalSetting(std::string key, std::string value)
+void Sqlite3Storage::storeInternalSetting(const std::string& key, const std::string& value)
 {
     std::ostringstream q;
     q << "INSERT OR REPLACE INTO " << QTB << INTERNAL_SETTINGS_TABLE << QTE << " (" << QTB << "key" << QTE << ", " << QTB << "value" << QTE << ") "

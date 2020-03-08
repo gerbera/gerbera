@@ -55,7 +55,7 @@ public:
     virtual std::unique_ptr<IOHandler> open(std::shared_ptr<TranscodingProfile> profile,
         std::string location,
         std::shared_ptr<CdsObject> obj,
-        std::string range)
+        const std::string& range)
         = 0;
 
 protected:

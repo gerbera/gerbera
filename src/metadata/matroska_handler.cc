@@ -75,7 +75,7 @@ public:
     uint32 read(void* buffer, size_t size) override
     {
         assert(file != nullptr);
-        if (size <= 0)
+        if (size == 0)
             return 0;
         return fread(buffer, 1, size, file);
     }

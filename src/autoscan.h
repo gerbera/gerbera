@@ -74,7 +74,7 @@ public:
 
     std::shared_ptr<AutoscanDirectory> get(size_t id);
 
-    std::shared_ptr<AutoscanDirectory> get(const std::string& location);
+    std::shared_ptr<AutoscanDirectory> get(const fs::path& location);
 
     std::shared_ptr<AutoscanDirectory> getByObjectID(int objectID);
 
@@ -88,13 +88,13 @@ public:
     /// \brief removes the AutoscanDirectory with the given location
     /// \param location the location to remove
     /// \return the scanID, that was removed; if nothing removed: INVALID_SCAN_ID
-    int remove(const std::string& location);
+    int remove(const fs::path& location);
 
     /// \brief removes the AutoscanDirectory if it is a subdirectory of a given location.
     /// \param parent parent directory.
     /// \param persistent also remove persistent directories.
     /// \return AutoscanList of removed directories, where each directory object in the list is a copy and not the original reference.
-    std::shared_ptr<AutoscanList> removeIfSubdir(const std::string& parent, bool persistent = false);
+    std::shared_ptr<AutoscanList> removeIfSubdir(const fs::path& parent, bool persistent = false);
 
     /// \brief Send notification for each directory that is stored in the list.
     ///

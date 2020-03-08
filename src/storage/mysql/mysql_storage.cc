@@ -360,7 +360,7 @@ void MysqlStorage::shutdownDriver()
 {
 }
 
-void MysqlStorage::storeInternalSetting(std::string key, std::string value)
+void MysqlStorage::storeInternalSetting(const std::string& key, const std::string& value)
 {
     std::string quotedValue = quote(value);
     std::ostringstream q;

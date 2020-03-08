@@ -64,7 +64,7 @@ public:
     transcoding_type_t getType() { return tr_type; }
 
     /// \brief set name of the transcoding profile
-    void setName(std::string name) { this->name = name; }
+    void setName(const std::string& name) { this->name = name; }
 
     /// \brief get name of the transcoding profile
     std::string getName() { return name; }
@@ -73,7 +73,7 @@ public:
     ///
     /// The so called "target mimetype" is the mimetype of the media that will
     /// be produced by the transcoder and identifies the target format.
-    void setTargetMimeType(std::string tm) { this->tm = tm; }
+    void setTargetMimeType(const std::string& tm) { this->tm = tm; }
 
     /// \brief get target mimetype
     std::string getTargetMimeType() { return tm; }
@@ -106,7 +106,7 @@ public:
     /// %out token is replaced by the fifo name that is generated when the
     /// transcoding process is launched. Transcoded data will be read by
     /// the server from the fifo and served via HTTP to the renderer.
-    void setArguments(std::string args) { this->args = args; }
+    void setArguments(const std::string& args) { this->args = args; }
 
     /// \brief retrieves the argument string
     std::string getArguments() { return args; }
@@ -221,7 +221,7 @@ protected:
 
 class TranscodingProcess {
 public:
-    TranscodingProcess(pid_t pid, std::string fname)
+    TranscodingProcess(pid_t pid, const std::string& fname)
     {
         this->pid = pid;
         this->fname = fname;
