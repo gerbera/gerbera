@@ -1010,7 +1010,7 @@ std::shared_ptr<CdsObject> SQLStorage::createObjectFromSearchRow(const std::uniq
 
     /* set common properties */
     obj->setID(std::stoi(row->col(SearchCol::id)));
-    obj->setRefID(std::stoi(row->col(SearchCol::ref_id)));
+    obj->setRefID(stoi_string(row->col(SearchCol::ref_id)));
 
     obj->setParentID(std::stoi(row->col(SearchCol::parent_id)));
     obj->setTitle(row->col(SearchCol::dc_title));
