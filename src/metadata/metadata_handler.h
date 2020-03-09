@@ -37,43 +37,43 @@
 #include "iohandler/io_handler.h"
 
 // content handler Id's
-#define CH_DEFAULT 0
-#define CH_LIBEXIF 1
-#define CH_ID3 2
-#define CH_TRANSCODE 3
-#define CH_EXTURL 4
-#define CH_MP4 5
-#define CH_FFTH 6
-#define CH_FLAC 7
-#define CH_FANART 8
-#define CH_MATROSKA 9
+constexpr auto CH_DEFAULT = 0;
+constexpr auto CH_LIBEXIF = 1;
+constexpr auto CH_ID3 = 2;
+constexpr auto CH_TRANSCODE = 3;
+constexpr auto CH_EXTURL = 4;
+constexpr auto CH_MP4 = 5;
+constexpr auto CH_FFTH = 6;
+constexpr auto CH_FLAC = 7;
+constexpr auto CH_FANART = 8;
+constexpr auto CH_MATROSKA = 9;
 
-#define CONTENT_TYPE_MP3 "mp3"
-#define CONTENT_TYPE_OGG "ogg"
-#define CONTENT_TYPE_FLAC "flac"
-#define CONTENT_TYPE_WMA "wma"
-#define CONTENT_TYPE_WAVPACK "wv"
-#define CONTENT_TYPE_APE "ape"
-#define CONTENT_TYPE_JPG "jpg"
-#define CONTENT_TYPE_PLAYLIST "playlist"
-#define CONTENT_TYPE_MP4 "mp4"
-#define CONTENT_TYPE_PCM "pcm"
-#define CONTENT_TYPE_AVI "avi"
-#define CONTENT_TYPE_MPEG "mpeg"
-#define CONTENT_TYPE_QUICKTIME "quicktime"
-#define CONTENT_TYPE_MKV "mkv"
-#define CONTENT_TYPE_MKA "mka"
-#define CONTENT_TYPE_AIFF "aiff"
-#define CONTENT_TYPE_DSD "dsd"
+constexpr auto CONTENT_TYPE_MP3 = "mp3";
+constexpr auto CONTENT_TYPE_OGG = "ogg";
+constexpr auto CONTENT_TYPE_FLAC = "flac";
+constexpr auto CONTENT_TYPE_WMA = "wma";
+constexpr auto CONTENT_TYPE_WAVPACK = "wv";
+constexpr auto CONTENT_TYPE_APE = "ape";
+constexpr auto CONTENT_TYPE_JPG = "jpg";
+constexpr auto CONTENT_TYPE_PLAYLIST = "playlist";
+constexpr auto CONTENT_TYPE_MP4 = "mp4";
+constexpr auto CONTENT_TYPE_PCM = "pcm";
+constexpr auto CONTENT_TYPE_AVI = "avi";
+constexpr auto CONTENT_TYPE_MPEG = "mpeg";
+constexpr auto CONTENT_TYPE_QUICKTIME = "quicktime";
+constexpr auto CONTENT_TYPE_MKV = "mkv";
+constexpr auto CONTENT_TYPE_MKA = "mka";
+constexpr auto CONTENT_TYPE_AIFF = "aiff";
+constexpr auto CONTENT_TYPE_DSD = "dsd";
 
-#define OGG_THEORA "t"
+constexpr auto OGG_THEORA = "t";
 
-#define RESOURCE_CONTENT_TYPE "rct"
-#define RESOURCE_HANDLER "rh"
+constexpr auto RESOURCE_CONTENT_TYPE = "rct";
+constexpr auto RESOURCE_HANDLER = "rh";
 
-#define ID3_ALBUM_ART "aa"
-#define EXIF_THUMBNAIL "EX_TH"
-#define THUMBNAIL "th" // thumbnail without need for special handling
+constexpr auto ID3_ALBUM_ART = "aa";
+constexpr auto EXIF_THUMBNAIL = "EX_TH";
+constexpr auto THUMBNAIL = "th"; // thumbnail without need for special handling
 
 typedef enum {
     M_TITLE = 0,

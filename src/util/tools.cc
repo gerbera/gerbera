@@ -1189,11 +1189,11 @@ std::string getDLNAContentHeader(const std::shared_ptr<ConfigManager>& config, c
             content_parameter = D_PROFILE + std::string("=") + content_parameter + ";";
         // enabling or disabling seek
         if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_DLNA_SEEK))
-            content_parameter = content_parameter + D_OP + "=" + D_OP_SEEK_ENABLED + ";";
+            content_parameter.append(D_OP).append("=").append(D_OP_SEEK_ENABLED).append(";");
         else
-            content_parameter = content_parameter + D_OP + "=" + D_OP_SEEK_DISABLED + ";";
-        content_parameter = content_parameter + D_CONVERSION_INDICATOR + "=" + D_NO_CONVERSION + ";";
-        content_parameter = content_parameter + D_FLAGS "=" D_TR_FLAGS_AV;
+            content_parameter.append(D_OP).append("=").append(D_OP_SEEK_DISABLED).append(";");
+        content_parameter.append(D_CONVERSION_INDICATOR).append("=").append(D_NO_CONVERSION).append(";");
+        content_parameter.append(D_FLAGS).append("=").append(D_TR_FLAGS_AV);
         return content_parameter;
     }
     return "";

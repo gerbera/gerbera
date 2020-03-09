@@ -35,14 +35,14 @@
 #ifndef __SOPCAST_CONTENT_HANDLER_H__
 #define __SOPCAST_CONTENT_HANDLER_H__
 
-#define SOPCAST_SERVICE "SopCast"
+constexpr auto SOPCAST_SERVICE = "SopCast";
 #define SOPCAST_SERVICE_ID "S"
-#define SOPCAST_CHANNEL_ID "cid"
+constexpr auto SOPCAST_CHANNEL_ID = "cid";
 
-#define SOPCAST_PROTOCOL "sop"
+constexpr auto SOPCAST_PROTOCOL = "sop";
 
-#define SOPCAST_AUXDATA_LANGUAGE SOPCAST_SERVICE_ID "1"
-#define SOPCAST_AUXDATA_GROUP SOPCAST_SERVICE_ID "2"
+constexpr auto SOPCAST_AUXDATA_LANGUAGE = SOPCAST_SERVICE_ID "1";
+constexpr auto SOPCAST_AUXDATA_GROUP = SOPCAST_SERVICE_ID "2";
 
 #include <memory>
 #include <pugixml.hpp>

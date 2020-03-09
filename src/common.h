@@ -36,328 +36,328 @@
 #include "exceptions.h"
 #include "util/logger.h"
 
-#define CONFIG_XML_VERSION_0_11_0 1
-#define CONFIG_XML_VERSION 2
+constexpr auto CONFIG_XML_VERSION_0_11_0 = 1;
+constexpr auto CONFIG_XML_VERSION = 2;
 
 // ERROR CODES
 /// \brief UPnP specific error code.
-#define UPNP_E_ACTION_FAILED 501
-#define UPNP_E_SUBSCRIPTION_FAILED 503
+constexpr auto UPNP_E_ACTION_FAILED = 501;
+constexpr auto UPNP_E_SUBSCRIPTION_FAILED = 503;
 /// \brief UPnP specific error code.
-#define UPNP_E_NO_SUCH_ID 701
-#define UPNP_E_NOT_EXIST 706
+constexpr auto UPNP_E_NO_SUCH_ID = 701;
+constexpr auto UPNP_E_NOT_EXIST = 706;
 
 // UPnP default classes
-#define UPNP_DEFAULT_CLASS_CONTAINER "object.container"
-#define UPNP_DEFAULT_CLASS_ITEM "object.item"
-#define UPNP_DEFAULT_CLASS_VIDEO_ITEM "object.item.videoItem"
-#define UPNP_DEFAULT_CLASS_IMAGE_ITEM "object.item.imageItem"
-#define UPNP_DEFAULT_CLASS_ACTIVE_ITEM "object.item.activeItem"
-#define UPNP_DEFAULT_CLASS_MUSIC_ALBUM "object.container.album.musicAlbum"
-#define UPNP_DEFAULT_CLASS_MUSIC_TRACK "object.item.audioItem.musicTrack"
-#define UPNP_DEFAULT_CLASS_MUSIC_GENRE "object.container.genre.musicGenre"
-#define UPNP_DEFAULT_CLASS_MUSIC_ARTIST "object.container.person.musicArtist"
-#define UPNP_DEFAULT_CLASS_MUSIC_COMPOSER "object.container.person.musicComposer"
-#define UPNP_DEFAULT_CLASS_MUSIC_CONDUCTOR "object.container.person.musicConductor"
-#define UPNP_DEFAULT_CLASS_MUSIC_ORCHESTRA "object.container.person.musicOrchestra"
-#define UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER "object.container.playlistContainer"
-#define UPNP_DEFAULT_CLASS_VIDEO_BROADCAST "object.item.videoItem.videoBroadcast"
+constexpr auto UPNP_DEFAULT_CLASS_CONTAINER = "object.container";
+constexpr auto UPNP_DEFAULT_CLASS_ITEM = "object.item";
+constexpr auto UPNP_DEFAULT_CLASS_VIDEO_ITEM = "object.item.videoItem";
+constexpr auto UPNP_DEFAULT_CLASS_IMAGE_ITEM = "object.item.imageItem";
+constexpr auto UPNP_DEFAULT_CLASS_ACTIVE_ITEM = "object.item.activeItem";
+constexpr auto UPNP_DEFAULT_CLASS_MUSIC_ALBUM = "object.container.album.musicAlbum";
+constexpr auto UPNP_DEFAULT_CLASS_MUSIC_TRACK = "object.item.audioItem.musicTrack";
+constexpr auto UPNP_DEFAULT_CLASS_MUSIC_GENRE = "object.container.genre.musicGenre";
+constexpr auto UPNP_DEFAULT_CLASS_MUSIC_ARTIST = "object.container.person.musicArtist";
+constexpr auto UPNP_DEFAULT_CLASS_MUSIC_COMPOSER = "object.container.person.musicComposer";
+constexpr auto UPNP_DEFAULT_CLASS_MUSIC_CONDUCTOR = "object.container.person.musicConductor";
+constexpr auto UPNP_DEFAULT_CLASS_MUSIC_ORCHESTRA = "object.container.person.musicOrchestra";
+constexpr auto UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER = "object.container.playlistContainer";
+constexpr auto UPNP_DEFAULT_CLASS_VIDEO_BROADCAST = "object.item.videoItem.videoBroadcast";
 
-#define D_HTTP_TRANSFER_MODE_HEADER "transferMode.dlna.org"
-#define D_HTTP_TRANSFER_MODE_STREAMING "Streaming"
-#define D_HTTP_TRANSFER_MODE_INTERACTIVE "Interactive"
-#define D_HTTP_CONTENT_FEATURES_HEADER "contentFeatures.dlna.org"
+constexpr auto D_HTTP_TRANSFER_MODE_HEADER = "transferMode.dlna.org";
+constexpr auto D_HTTP_TRANSFER_MODE_STREAMING = "Streaming";
+constexpr auto D_HTTP_TRANSFER_MODE_INTERACTIVE = "Interactive";
+constexpr auto D_HTTP_CONTENT_FEATURES_HEADER = "contentFeatures.dlna.org";
 
-#define D_PROFILE "DLNA.ORG_PN"
-#define D_CONVERSION_INDICATOR "DLNA.ORG_CI"
-#define D_NO_CONVERSION "0"
-#define D_CONVERSION "1"
-#define D_OP "DLNA.ORG_OP"
+constexpr auto D_PROFILE = "DLNA.ORG_PN";
+constexpr auto D_CONVERSION_INDICATOR = "DLNA.ORG_CI";
+constexpr auto D_NO_CONVERSION = "0";
+constexpr auto D_CONVERSION = "1";
+constexpr auto D_OP = "DLNA.ORG_OP";
 // all seek modes
-#define D_OP_SEEK_RANGE "01"
-#define D_OP_SEEK_TIME "10"
-#define D_OP_SEEK_BOTH "11"
-#define D_OP_SEEK_DISABLED "00"
+constexpr auto D_OP_SEEK_RANGE = "01";
+constexpr auto D_OP_SEEK_TIME = "10";
+constexpr auto D_OP_SEEK_BOTH = "11";
+constexpr auto D_OP_SEEK_DISABLED = "00";
 // since we are using only range seek
-#define D_OP_SEEK_ENABLED D_OP_SEEK_RANGE
-#define D_FLAGS "DLNA.ORG_FLAGS"
-#define D_TR_FLAGS_AV "01200000000000000000000000000000"
-#define D_TR_FLAGS_IMAGE "00800000000000000000000000000000"
-#define D_MP3 "MP3"
-#define D_LPCM "LPCM"
-#define D_JPEG_SM "JPEG_SM"
-#define D_JPEG_MED "JPEG_MED"
-#define D_JPEG_LRG "JPEG_LRG"
-#define D_JPEG_TN "JPEG_TN"
-#define D_JPEG_SM_ICO "JPEG_SM_ICO"
-#define D_JPEG_LRG_ICO "JPEG_LRG_ICO"
-#define D_PN_MPEG_PS_PAL "MPEG_PS_PAL"
-#define D_PN_MKV "MKV"
-#define D_PN_AVC_MP4_EU "AVC_MP4_EU"
-#define D_PN_AVI "AVI"
+constexpr auto D_OP_SEEK_ENABLED = D_OP_SEEK_RANGE;
+constexpr auto D_FLAGS = "DLNA.ORG_FLAGS";
+constexpr auto D_TR_FLAGS_AV = "01200000000000000000000000000000";
+constexpr auto D_TR_FLAGS_IMAGE = "00800000000000000000000000000000";
+constexpr auto D_MP3 = "MP3";
+constexpr auto D_LPCM = "LPCM";
+constexpr auto D_JPEG_SM = "JPEG_SM";
+constexpr auto D_JPEG_MED = "JPEG_MED";
+constexpr auto D_JPEG_LRG = "JPEG_LRG";
+constexpr auto D_JPEG_TN = "JPEG_TN";
+constexpr auto D_JPEG_SM_ICO = "JPEG_SM_ICO";
+constexpr auto D_JPEG_LRG_ICO = "JPEG_LRG_ICO";
+constexpr auto D_PN_MPEG_PS_PAL = "MPEG_PS_PAL";
+constexpr auto D_PN_MKV = "MKV";
+constexpr auto D_PN_AVC_MP4_EU = "AVC_MP4_EU";
+constexpr auto D_PN_AVI = "AVI";
 // fixed CdsObjectIDs
-#define CDS_ID_BLACKHOLE -1
-#define CDS_ID_ROOT 0
-#define CDS_ID_FS_ROOT 1
-#define IS_FORBIDDEN_CDS_ID(id) (id <= CDS_ID_FS_ROOT)
+constexpr auto CDS_ID_BLACKHOLE = -1;
+constexpr auto CDS_ID_ROOT = 0;
+constexpr auto CDS_ID_FS_ROOT = 1;
+constexpr auto IS_FORBIDDEN_CDS_ID(int id) { return id <= CDS_ID_FS_ROOT; };
 
 // internal setting keys
-#define SET_LAST_MODIFIED "last_modified"
+constexpr auto SET_LAST_MODIFIED = "last_modified";
 
-#define YES "yes"
-#define NO "no"
+constexpr auto YES = "yes";
+constexpr auto NO = "no";
 
 // URL FORMATTING CONSTANTS
-#define URL_OBJECT_ID "object_id"
-#define URL_REQUEST_TYPE "req_type"
-#define URL_RESOURCE_ID "res_id"
-#define URL_FILE_EXTENSION "ext"
-#define URL_PARAM_SEPARATOR '/'
-#define _URL_PARAM_SEPARATOR "/"
-#define URL_UI_PARAM_SEPARATOR '?'
-#define URL_ARG_SEPARATOR '&'
-#define _URL_ARG_SEPARATOR "&"
+constexpr auto URL_OBJECT_ID = "object_id";
+constexpr auto URL_REQUEST_TYPE = "req_type";
+constexpr auto URL_RESOURCE_ID = "res_id";
+constexpr auto URL_FILE_EXTENSION = "ext";
+constexpr auto URL_PARAM_SEPARATOR = '/';
+constexpr auto _URL_PARAM_SEPARATOR = "/";
+constexpr auto URL_UI_PARAM_SEPARATOR = '?';
+constexpr auto URL_ARG_SEPARATOR = '&';
+constexpr auto _URL_ARG_SEPARATOR = "&";
 #define SERVER_VIRTUAL_DIR "content"
 #define CONTENT_MEDIA_HANDLER "media"
 #define CONTENT_SERVE_HANDLER "serve"
 #define CONTENT_ONLINE_HANDLER "online"
 #define CONTENT_UI_HANDLER "interface"
-#define DEVICE_DESCRIPTION_PATH "description.xml"
+constexpr auto DEVICE_DESCRIPTION_PATH = "description.xml";
 
 // REQUEST TYPES
-#define REQ_TYPE_BROWSE "browse"
-#define REQ_TYPE_LOGIN "login"
+constexpr auto REQ_TYPE_BROWSE = "browse";
+constexpr auto REQ_TYPE_LOGIN = "login";
 
 // SEPARATOR
-#define FS_ROOT_DIRECTORY "/"
-#define DIR_SEPARATOR '/'
-#define VIRTUAL_CONTAINER_SEPARATOR '/'
-#define VIRTUAL_CONTAINER_ESCAPE '\\'
+constexpr auto FS_ROOT_DIRECTORY = "/";
+constexpr auto DIR_SEPARATOR = '/';
+constexpr auto VIRTUAL_CONTAINER_SEPARATOR = '/';
+constexpr auto VIRTUAL_CONTAINER_ESCAPE = '\\';
 
 // MIME TYPES FOR WEB UI
-#define MIMETYPE_XML "text/xml"
-#define MIMETYPE_HTML "text/html"
-#define MIMETYPE_TEXT "text/plain"
-#define MIMETYPE_JSON "application/json" // RFC 4627
+constexpr auto MIMETYPE_XML = "text/xml";
+constexpr auto MIMETYPE_HTML = "text/html";
+constexpr auto MIMETYPE_TEXT = "text/plain";
+constexpr auto MIMETYPE_JSON = "application/json"; // RFC 4627
 // default mime types for items in the cds
-#define MIMETYPE_DEFAULT "application/octet-stream"
+constexpr auto MIMETYPE_DEFAULT = "application/octet-stream";
 
 // regexp for mimetype matching
-#define MIMETYPE_REGEXP "^([a-z0-9_-]+/[a-z0-9_-]+)"
+constexpr auto MIMETYPE_REGEXP = "^([a-z0-9_-]+/[a-z0-9_-]+)";
 
 // default protocol
-#define PROTOCOL "http-get"
+constexpr auto PROTOCOL = "http-get";
 
 // device description defaults
-#define DESC_DEVICE_NAMESPACE "urn:schemas-upnp-org:device-1-0"
-#define DESC_DEVICE_TYPE "urn:schemas-upnp-org:device:MediaServer:1"
-#define DESC_SPEC_VERSION_MAJOR "1"
-#define DESC_SPEC_VERSION_MINOR "0"
-#define DESC_FRIENDLY_NAME PACKAGE_NAME
-#define DESC_MANUFACTURER "Gerbera Contributors"
-#define DESC_MANUFACTURER_URL "http://gerbera.io/"
-#define DESC_MODEL_DESCRIPTION "Free UPnP AV MediaServer, GNU GPL"
-#define DESC_MODEL_NAME PACKAGE_NAME
-#define DESC_MODEL_NUMBER VERSION
-#define DESC_SERIAL_NUMBER "1"
+constexpr auto DESC_DEVICE_NAMESPACE = "urn:schemas-upnp-org:device-1-0";
+constexpr auto DESC_DEVICE_TYPE = "urn:schemas-upnp-org:device:MediaServer:1";
+constexpr auto DESC_SPEC_VERSION_MAJOR = "1";
+constexpr auto DESC_SPEC_VERSION_MINOR = "0";
+constexpr auto DESC_FRIENDLY_NAME = PACKAGE_NAME;
+constexpr auto DESC_MANUFACTURER = "Gerbera Contributors";
+constexpr auto DESC_MANUFACTURER_URL = "http://gerbera.io/";
+constexpr auto DESC_MODEL_DESCRIPTION = "Free UPnP AV MediaServer, GNU GPL";
+constexpr auto DESC_MODEL_NAME = PACKAGE_NAME;
+constexpr auto DESC_MODEL_NUMBER = VERSION;
+constexpr auto DESC_SERIAL_NUMBER = "1";
 
 //services
 // connection manager
-#define DESC_CM_SERVICE_TYPE "urn:schemas-upnp-org:service:ConnectionManager:1"
-#define DESC_CM_SERVICE_ID "urn:upnp-org:serviceId:ConnectionManager"
-#define DESC_CM_SCPD_URL "cm.xml"
-#define DESC_CM_CONTROL_URL "/upnp/control/cm"
-#define DESC_CM_EVENT_URL "/upnp/event/cm"
+constexpr auto DESC_CM_SERVICE_TYPE = "urn:schemas-upnp-org:service:ConnectionManager:1";
+constexpr auto DESC_CM_SERVICE_ID = "urn:upnp-org:serviceId:ConnectionManager";
+constexpr auto DESC_CM_SCPD_URL = "cm.xml";
+constexpr auto DESC_CM_CONTROL_URL = "/upnp/control/cm";
+constexpr auto DESC_CM_EVENT_URL = "/upnp/event/cm";
 
 // content directory
-#define DESC_CDS_SERVICE_TYPE "urn:schemas-upnp-org:service:ContentDirectory:1"
-#define DESC_CDS_SERVICE_ID "urn:upnp-org:serviceId:ContentDirectory"
-#define DESC_CDS_SCPD_URL "cds.xml"
-#define DESC_CDS_CONTROL_URL "/upnp/control/cds"
-#define DESC_CDS_EVENT_URL "/upnp/event/cds"
+constexpr auto DESC_CDS_SERVICE_TYPE = "urn:schemas-upnp-org:service:ContentDirectory:1";
+constexpr auto DESC_CDS_SERVICE_ID = "urn:upnp-org:serviceId:ContentDirectory";
+constexpr auto DESC_CDS_SCPD_URL = "cds.xml";
+constexpr auto DESC_CDS_CONTROL_URL = "/upnp/control/cds";
+constexpr auto DESC_CDS_EVENT_URL = "/upnp/event/cds";
 
-#define DESC_ICON_PNG_MIMETYPE "image/png"
-#define DESC_ICON_BMP_MIMETYPE "image/x-ms-bmp"
-#define DESC_ICON_JPG_MIMETYPE "image/jpeg"
-#define DESC_ICON32_PNG "/icons/mt-icon32.png"
-#define DESC_ICON32_BMP "/icons/mt-icon32.bmp"
-#define DESC_ICON32_JPG "/icons/mt-icon32.jpg"
-#define DESC_ICON48_PNG "/icons/mt-icon48.png"
-#define DESC_ICON48_BMP "/icons/mt-icon48.bmp"
-#define DESC_ICON48_JPG "/icons/mt-icon48.jpg"
-#define DESC_ICON120_JPG "/icons/mt-icon120.jpg"
-#define DESC_ICON120_PNG "/icons/mt-icon120.png"
-#define DESC_ICON120_BMP "/icons/mt-icon120.bmp"
+constexpr auto DESC_ICON_PNG_MIMETYPE = "image/png";
+constexpr auto DESC_ICON_BMP_MIMETYPE = "image/x-ms-bmp";
+constexpr auto DESC_ICON_JPG_MIMETYPE = "image/jpeg";
+constexpr auto DESC_ICON32_PNG = "/icons/mt-icon32.png";
+constexpr auto DESC_ICON32_BMP = "/icons/mt-icon32.bmp";
+constexpr auto DESC_ICON32_JPG = "/icons/mt-icon32.jpg";
+constexpr auto DESC_ICON48_PNG = "/icons/mt-icon48.png";
+constexpr auto DESC_ICON48_BMP = "/icons/mt-icon48.bmp";
+constexpr auto DESC_ICON48_JPG = "/icons/mt-icon48.jpg";
+constexpr auto DESC_ICON120_JPG = "/icons/mt-icon120.jpg";
+constexpr auto DESC_ICON120_PNG = "/icons/mt-icon120.png";
+constexpr auto DESC_ICON120_BMP = "/icons/mt-icon120.bmp";
 
 // media receiver registrar (xbox 360)
-#define DESC_MRREG_SERVICE_TYPE "urn:microsoft.com:service:X_MS_MediaReceiverRegistrar:1"
-#define DESC_MRREG_SERVICE_ID "urn:microsoft.com:serviceId:X_MS_MediaReceiverRegistrar"
-#define DESC_MRREG_SCPD_URL "mr_reg.xml"
-#define DESC_MRREG_CONTROL_URL "/upnp/control/mr_reg"
-#define DESC_MRREG_EVENT_URL "/upnp/event/mr_reg"
+constexpr auto DESC_MRREG_SERVICE_TYPE = "urn:microsoft.com:service:X_MS_MediaReceiverRegistrar:1";
+constexpr auto DESC_MRREG_SERVICE_ID = "urn:microsoft.com:serviceId:X_MS_MediaReceiverRegistrar";
+constexpr auto DESC_MRREG_SCPD_URL = "mr_reg.xml";
+constexpr auto DESC_MRREG_CONTROL_URL = "/upnp/control/mr_reg";
+constexpr auto DESC_MRREG_EVENT_URL = "/upnp/event/mr_reg";
 
 // xml namespaces
-#define XML_NAMESPACE_ATTR "xmlns"
-#define XML_DIDL_LITE_NAMESPACE "urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/"
-#define XML_DC_NAMESPACE_ATTR "xmlns:dc"
-#define XML_DC_NAMESPACE "http://purl.org/dc/elements/1.1/"
-#define XML_UPNP_NAMESPACE_ATTR "xmlns:upnp"
-#define XML_UPNP_NAMESPACE "urn:schemas-upnp-org:metadata-1-0/upnp/"
-#define XML_SEC_NAMESPACE_ATTR "xmlns:sec"
-#define XML_SEC_NAMESPACE "http://www.sec.co.kr/"
+constexpr auto XML_NAMESPACE_ATTR = "xmlns";
+constexpr auto XML_DIDL_LITE_NAMESPACE = "urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/";
+constexpr auto XML_DC_NAMESPACE_ATTR = "xmlns:dc";
+constexpr auto XML_DC_NAMESPACE = "http://purl.org/dc/elements/1.1/";
+constexpr auto XML_UPNP_NAMESPACE_ATTR = "xmlns:upnp";
+constexpr auto XML_UPNP_NAMESPACE = "urn:schemas-upnp-org:metadata-1-0/upnp/";
+constexpr auto XML_SEC_NAMESPACE_ATTR = "xmlns:sec";
+constexpr auto XML_SEC_NAMESPACE = "http://www.sec.co.kr/";
 
 // default values
-#define DEFAULT_INTERNAL_CHARSET "UTF-8"
-#define DEFAULT_FILESYSTEM_CHARSET "UTF-8"
-#define DEFAULT_FALLBACK_CHARSET "US-ASCII"
-#define DEFAULT_JS_CHARSET "UTF-8"
+constexpr auto DEFAULT_INTERNAL_CHARSET = "UTF-8";
+constexpr auto DEFAULT_FILESYSTEM_CHARSET = "UTF-8";
+constexpr auto DEFAULT_FALLBACK_CHARSET = "US-ASCII";
+constexpr auto DEFAULT_JS_CHARSET = "UTF-8";
 
-#define DEFAULT_CONFIG_HOME ".config/gerbera"
-#define DEFAULT_TMPDIR "/tmp/"
-#define DEFAULT_CONFIG_NAME "config.xml"
-#define DEFAULT_UI_EN_VALUE YES
-#define DEFAULT_UI_SHOW_TOOLTIPS_VALUE YES
-#define DEFAULT_POLL_WHEN_IDLE_VALUE NO
-#define DEFAULT_POLL_INTERVAL 2
-#define DEFAULT_ACCOUNTS_EN_VALUE NO
-#define DEFAULT_ACCOUNT_USER "gerbera"
-#define DEFAULT_ACCOUNT_PASSWORD "gerbera"
-#define DEFAULT_ALIVE_INTERVAL 1800 // seconds
-#define ALIVE_INTERVAL_MIN 62 // seconds
-#define DEFAULT_BOOKMARK_FILE "gerbera.html"
-#define DEFAULT_IGNORE_UNKNOWN_EXTENSIONS NO
-#define DEFAULT_CASE_SENSITIVE_EXTENSION_MAPPINGS NO
-#define DEFAULT_IMPORT_SCRIPT "import.js"
-#define DEFAULT_PLAYLISTS_SCRIPT "playlists.js"
-#define DEFAULT_PLAYLIST_CREATE_LINK YES
-#define DEFAULT_COMMON_SCRIPT "common.js"
-#define DEFAULT_WEB_DIR "web"
-#define DEFAULT_JS_DIR "js"
-#define DEFAULT_HIDDEN_FILES_VALUE NO
-#define DEFAULT_UPNP_STRING_LIMIT (-1)
-#define DEFAULT_SESSION_TIMEOUT 30
-#define SESSION_TIMEOUT_CHECK_INTERVAL (5 * 60)
-#define DEFAULT_PRES_URL_APPENDTO_ATTR "none"
-#define DEFAULT_ITEMS_PER_PAGE_1 10
-#define DEFAULT_ITEMS_PER_PAGE_2 25
-#define DEFAULT_ITEMS_PER_PAGE_3 50
-#define DEFAULT_ITEMS_PER_PAGE_4 100
-#define DEFAULT_LAYOUT_TYPE "builtin"
-#define DEFAULT_EXTEND_PROTOCOLINFO NO
-#define DEFAULT_EXTEND_PROTOCOLINFO_SM_HACK NO
-#define DEFAULT_EXTEND_PROTOCOLINFO_DLNA_SEEK YES
-#define DEFAULT_HIDE_PC_DIRECTORY NO
+constexpr auto DEFAULT_CONFIG_HOME = ".config/gerbera";
+constexpr auto DEFAULT_TMPDIR = "/tmp/";
+constexpr auto DEFAULT_CONFIG_NAME = "config.xml";
+constexpr auto DEFAULT_UI_EN_VALUE = YES;
+constexpr auto DEFAULT_UI_SHOW_TOOLTIPS_VALUE = YES;
+constexpr auto DEFAULT_POLL_WHEN_IDLE_VALUE = NO;
+constexpr auto DEFAULT_POLL_INTERVAL = 2;
+constexpr auto DEFAULT_ACCOUNTS_EN_VALUE = NO;
+constexpr auto DEFAULT_ACCOUNT_USER = "gerbera";
+constexpr auto DEFAULT_ACCOUNT_PASSWORD = "gerbera";
+constexpr auto DEFAULT_ALIVE_INTERVAL = 1800; // seconds
+constexpr auto ALIVE_INTERVAL_MIN = 62; // seconds
+constexpr auto DEFAULT_BOOKMARK_FILE = "gerbera.html";
+constexpr auto DEFAULT_IGNORE_UNKNOWN_EXTENSIONS = NO;
+constexpr auto DEFAULT_CASE_SENSITIVE_EXTENSION_MAPPINGS = NO;
+constexpr auto DEFAULT_IMPORT_SCRIPT = "import.js";
+constexpr auto DEFAULT_PLAYLISTS_SCRIPT = "playlists.js";
+constexpr auto DEFAULT_PLAYLIST_CREATE_LINK = YES;
+constexpr auto DEFAULT_COMMON_SCRIPT = "common.js";
+constexpr auto DEFAULT_WEB_DIR = "web";
+constexpr auto DEFAULT_JS_DIR = "js";
+constexpr auto DEFAULT_HIDDEN_FILES_VALUE = NO;
+constexpr auto DEFAULT_UPNP_STRING_LIMIT = -1;
+constexpr auto DEFAULT_SESSION_TIMEOUT = 30;
+constexpr auto SESSION_TIMEOUT_CHECK_INTERVAL = (5 * 60);
+constexpr auto DEFAULT_PRES_URL_APPENDTO_ATTR = "none";
+constexpr auto DEFAULT_ITEMS_PER_PAGE_1 = 10;
+constexpr auto DEFAULT_ITEMS_PER_PAGE_2 = 25;
+constexpr auto DEFAULT_ITEMS_PER_PAGE_3 = 50;
+constexpr auto DEFAULT_ITEMS_PER_PAGE_4 = 100;
+constexpr auto DEFAULT_LAYOUT_TYPE = "builtin";
+constexpr auto DEFAULT_EXTEND_PROTOCOLINFO = NO;
+constexpr auto DEFAULT_EXTEND_PROTOCOLINFO_SM_HACK = NO;
+constexpr auto DEFAULT_EXTEND_PROTOCOLINFO_DLNA_SEEK = YES;
+constexpr auto DEFAULT_HIDE_PC_DIRECTORY = NO;
 #ifdef SOPCAST
-#define DEFAULT_SOPCAST_ENABLED NO
-#define DEFAULT_SOPCAST_UPDATE_AT_START NO
+constexpr auto DEFAULT_SOPCAST_ENABLED = NO;
+constexpr auto DEFAULT_SOPCAST_UPDATE_AT_START = NO;
 #endif
 #ifdef ATRAILERS
-#define DEFAULT_ATRAILERS_ENABLED NO
-#define DEFAULT_ATRAILERS_UPDATE_AT_START NO
-#define DEFAULT_ATRAILERS_REFRESH 43200
-#define DEFAULT_ATRAILERS_RESOLUTION 640
+constexpr auto DEFAULT_ATRAILERS_ENABLED = NO;
+constexpr auto DEFAULT_ATRAILERS_UPDATE_AT_START = NO;
+constexpr auto DEFAULT_ATRAILERS_REFRESH = 43200;
+constexpr auto DEFAULT_ATRAILERS_RESOLUTION = 640;
 #endif
 #ifdef ONLINE_SERVICES
-#define CFG_DEFAULT_UPDATE_AT_START 10 // seconds
+constexpr auto CFG_DEFAULT_UPDATE_AT_START = 10; // seconds
 #endif
-#define DEFAULT_TRANSCODING_ENABLED NO
-#define DEFAULT_AUDIO_BUFFER_SIZE 1048576
-#define DEFAULT_AUDIO_CHUNK_SIZE 131072
-#define DEFAULT_AUDIO_FILL_SIZE 262144
+constexpr auto DEFAULT_TRANSCODING_ENABLED = NO;
+constexpr auto DEFAULT_AUDIO_BUFFER_SIZE = 1048576;
+constexpr auto DEFAULT_AUDIO_CHUNK_SIZE = 131072;
+constexpr auto DEFAULT_AUDIO_FILL_SIZE = 262144;
 
-#define DEFAULT_VIDEO_BUFFER_SIZE 14400000
-#define DEFAULT_VIDEO_CHUNK_SIZE 512000
-#define DEFAULT_VIDEO_FILL_SIZE 120000
+constexpr auto DEFAULT_VIDEO_BUFFER_SIZE = 14400000;
+constexpr auto DEFAULT_VIDEO_CHUNK_SIZE = 512000;
+constexpr auto DEFAULT_VIDEO_FILL_SIZE = 120000;
 
-#define URL_PARAM_TRANSCODE_PROFILE_NAME "pr_name"
-#define URL_PARAM_TRANSCODE "tr"
-#define URL_PARAM_TRANSCODE_TARGET_MIMETYPE "tmt"
-#define URL_VALUE_TRANSCODE_NO_RES_ID "none"
+constexpr auto URL_PARAM_TRANSCODE_PROFILE_NAME = "pr_name";
+constexpr auto URL_PARAM_TRANSCODE = "tr";
+constexpr auto URL_PARAM_TRANSCODE_TARGET_MIMETYPE = "tmt";
+constexpr auto URL_VALUE_TRANSCODE_NO_RES_ID = "none";
 
-#define URL_VALUE_TRANSCODE "1"
-#define DEFAULT_STORAGE_CACHING_ENABLED YES
+constexpr auto URL_VALUE_TRANSCODE = "1";
+constexpr auto DEFAULT_STORAGE_CACHING_ENABLED = YES;
 #ifdef HAVE_SQLITE3
-#define MT_SQLITE_SYNC_FULL 2
-#define MT_SQLITE_SYNC_NORMAL 1
-#define MT_SQLITE_SYNC_OFF 0
-#define DEFAULT_SQLITE_SYNC "off"
-#define DEFAULT_SQLITE_RESTORE "restore"
-#define DEFAULT_SQLITE_BACKUP_ENABLED NO
-#define DEFAULT_SQLITE_BACKUP_INTERVAL 600
-#define DEFAULT_SQLITE_ENABLED YES
-#define DEFAULT_STORAGE_DRIVER "sqlite3"
+constexpr auto MT_SQLITE_SYNC_FULL = 2;
+constexpr auto MT_SQLITE_SYNC_NORMAL = 1;
+constexpr auto MT_SQLITE_SYNC_OFF = 0;
+constexpr auto DEFAULT_SQLITE_SYNC = "off";
+constexpr auto DEFAULT_SQLITE_RESTORE = "restore";
+constexpr auto DEFAULT_SQLITE_BACKUP_ENABLED = NO;
+constexpr auto DEFAULT_SQLITE_BACKUP_INTERVAL = 600;
+constexpr auto DEFAULT_SQLITE_ENABLED = YES;
+constexpr auto DEFAULT_STORAGE_DRIVER = "sqlite3";
 #else
-#define DEFAULT_STORAGE_DRIVER "mysql"
-#define DEFAULT_SQLITE_ENABLED NO
+constexpr auto DEFAULT_STORAGE_DRIVER = "mysql";
+constexpr auto DEFAULT_SQLITE_ENABLED = NO;
 #endif
 
 #ifdef HAVE_MYSQL
-#define DEFAULT_MYSQL_HOST "localhost"
-#define DEFAULT_MYSQL_DB "gerbera"
-#define DEFAULT_MYSQL_USER "gerbera"
+constexpr auto DEFAULT_MYSQL_HOST = "localhost";
+constexpr auto DEFAULT_MYSQL_DB = "gerbera";
+constexpr auto DEFAULT_MYSQL_USER = "gerbera";
 #ifdef HAVE_SQLITE3
-#define DEFAULT_MYSQL_ENABLED NO
+constexpr auto DEFAULT_MYSQL_ENABLED = NO;
 #else
-#define DEFAULT_MYSQL_ENABLED YES
+constexpr auto DEFAULT_MYSQL_ENABLED = YES;
 #endif //HAVE_SQLITE3
 
 #else //HAVE_MYSQL
-#define DEFAULT_MYSQL_ENABLED NO
+constexpr auto DEFAULT_MYSQL_ENABLED = NO;
 #endif
 
-#define DEFAULT_SQLITE3_DB_FILENAME "gerbera.db"
+constexpr auto DEFAULT_SQLITE3_DB_FILENAME = "gerbera.db";
 
-#define CONFIG_MAPPINGS_TEMPLATE "mappings.xml"
+constexpr auto CONFIG_MAPPINGS_TEMPLATE = "mappings.xml";
 // misc
-#define INVALID_OBJECT_ID (-333)
-#define INVALID_OBJECT_ID_2 (-666)
-#define CHECK_SOCKET (-666)
+constexpr auto INVALID_OBJECT_ID = -333;
+constexpr auto INVALID_OBJECT_ID_2 = -666;
+constexpr auto CHECK_SOCKET = -666;
 
 // storage
-#define LOC_DIR_PREFIX 'D'
-#define LOC_FILE_PREFIX 'F'
-#define LOC_VIRT_PREFIX 'V'
-#define LOC_ILLEGAL_PREFIX 'X'
+constexpr auto LOC_DIR_PREFIX = 'D';
+constexpr auto LOC_FILE_PREFIX = 'F';
+constexpr auto LOC_VIRT_PREFIX = 'V';
+constexpr auto LOC_ILLEGAL_PREFIX = 'X';
 
 #ifndef DEFAULT_JS_RUNTIME_MEM
-#define DEFAULT_JS_RUNTIME_MEM (1L * 1024L * 1024L)
+constexpr auto DEFAULT_JS_RUNTIME_MEM = 1L * 1024L * 1024L;
 #endif
 
-#define XML_XMLNS_XSI "http://www.w3.org/2001/XMLSchema-instance"
-#define XML_XMLNS "http://mediatomb.cc/config/"
+constexpr auto XML_XMLNS_XSI = "http://www.w3.org/2001/XMLSchema-instance";
+constexpr auto XML_XMLNS = "http://mediatomb.cc/config/";
 
 #ifdef HAVE_CURL
-#define DEFAULT_CURL_BUFFER_SIZE 262144
-#define DEFAULT_CURL_INITIAL_FILL_SIZE 0
+constexpr auto DEFAULT_CURL_BUFFER_SIZE = 262144;
+constexpr auto DEFAULT_CURL_INITIAL_FILL_SIZE = 0;
 #endif
 
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
-#define DEFAULT_FFMPEGTHUMBNAILER_ENABLED NO
-#define DEFAULT_FFMPEGTHUMBNAILER_THUMBSIZE 128
-#define DEFAULT_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE 5
-#define DEFAULT_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY YES
-#define DEFAULT_FFMPEGTHUMBNAILER_WORKAROUND_BUGS NO
-#define DEFAULT_FFMPEGTHUMBNAILER_IMAGE_QUALITY 8
-#define DEFAULT_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED YES
-#define DEFAULT_FFMPEGTHUMBNAILER_CACHE_DIR ""
+constexpr auto DEFAULT_FFMPEGTHUMBNAILER_ENABLED = NO;
+constexpr auto DEFAULT_FFMPEGTHUMBNAILER_THUMBSIZE = 128;
+constexpr auto DEFAULT_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE = 5;
+constexpr auto DEFAULT_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY = YES;
+constexpr auto DEFAULT_FFMPEGTHUMBNAILER_WORKAROUND_BUGS = NO;
+constexpr auto DEFAULT_FFMPEGTHUMBNAILER_IMAGE_QUALITY = 8;
+constexpr auto DEFAULT_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED = YES;
+constexpr auto DEFAULT_FFMPEGTHUMBNAILER_CACHE_DIR = "";
 #endif
 
 #if defined(HAVE_LASTFMLIB)
-#define DEFAULT_LASTFM_ENABLED NO
-#define DEFAULT_LASTFM_USERNAME "lastfmuser"
-#define DEFAULT_LASTFM_PASSWORD "lastfmpass"
+constexpr auto DEFAULT_LASTFM_ENABLED = NO;
+constexpr auto DEFAULT_LASTFM_USERNAME = "lastfmuser";
+constexpr auto DEFAULT_LASTFM_PASSWORD = "lastfmpass";
 #endif
 
-#define DEFAULT_MARK_PLAYED_ITEMS_ENABLED NO
-#define DEFAULT_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES YES
-#define DEFAULT_MARK_PLAYED_ITEMS_STRING_MODE "prepend"
-#define DEFAULT_MARK_PLAYED_ITEMS_STRING "*"
-#define DEFAULT_MARK_PLAYED_CONTENT_AUDIO "audio"
-#define DEFAULT_MARK_PLAYED_CONTENT_VIDEO "video"
-#define DEFAULT_MARK_PLAYED_CONTENT_IMAGE "image"
+constexpr auto DEFAULT_MARK_PLAYED_ITEMS_ENABLED = NO;
+constexpr auto DEFAULT_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES = YES;
+constexpr auto DEFAULT_MARK_PLAYED_ITEMS_STRING_MODE = "prepend";
+constexpr auto DEFAULT_MARK_PLAYED_ITEMS_STRING = "*";
+constexpr auto DEFAULT_MARK_PLAYED_CONTENT_AUDIO = "audio";
+constexpr auto DEFAULT_MARK_PLAYED_CONTENT_VIDEO = "video";
+constexpr auto DEFAULT_MARK_PLAYED_CONTENT_IMAGE = "image";
 
-#define LINK_FILE_REQUEST_HANDLER "/" SERVER_VIRTUAL_DIR "/" CONTENT_MEDIA_HANDLER "/"
-#define LINK_WEB_REQUEST_HANDLER "/" SERVER_VIRTUAL_DIR "/" CONTENT_UI_HANDLER "/"
-#define LINK_SERVE_REQUEST_HANDLER "/" SERVER_VIRTUAL_DIR "/" CONTENT_SERVE_HANDLER "/"
-#define LINK_URL_REQUEST_HANDLER "/" SERVER_VIRTUAL_DIR "/" CONTENT_ONLINE_HANDLER "/"
+constexpr auto LINK_FILE_REQUEST_HANDLER = "/" SERVER_VIRTUAL_DIR "/" CONTENT_MEDIA_HANDLER "/";
+constexpr auto LINK_WEB_REQUEST_HANDLER = "/" SERVER_VIRTUAL_DIR "/" CONTENT_UI_HANDLER "/";
+constexpr auto LINK_SERVE_REQUEST_HANDLER = "/" SERVER_VIRTUAL_DIR "/" CONTENT_SERVE_HANDLER "/";
+constexpr auto LINK_URL_REQUEST_HANDLER = "/" SERVER_VIRTUAL_DIR "/" CONTENT_ONLINE_HANDLER "/";
 #endif // __COMMON_H__
