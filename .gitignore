@@ -17,3 +17,5 @@ config/zpipe
 doc/_build
 config/*.sql.Z
 config/*.sql.Z.c
+.vscode
+build
