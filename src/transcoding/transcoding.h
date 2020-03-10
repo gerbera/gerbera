@@ -61,13 +61,13 @@ public:
     TranscodingProfile(transcoding_type_t tr_type, std::string name);
 
     /// \brief returns the transcoding type.
-    transcoding_type_t getType() { return tr_type; }
+    transcoding_type_t getType() const { return tr_type; }
 
     /// \brief set name of the transcoding profile
     void setName(const std::string& name) { this->name = name; }
 
     /// \brief get name of the transcoding profile
-    std::string getName() { return name; }
+    std::string getName() const { return name; }
 
     /// \brief set target mimetype
     ///
@@ -76,14 +76,14 @@ public:
     void setTargetMimeType(const std::string& tm) { this->tm = tm; }
 
     /// \brief get target mimetype
-    std::string getTargetMimeType() { return tm; }
+    std::string getTargetMimeType() const { return tm; }
 
     /// \brief sets the program name, i.e. the command line name of the
     /// transcoder that will be executed.
     void setCommand(fs::path command) { this->command = command; }
 
     /// \brief gets the transcoders program name
-    fs::path getCommand() { return command; }
+    fs::path getCommand() const { return command; }
 
     /// \brief set buffering options
     /// \param bs the size of the buffer in bytes
@@ -93,9 +93,9 @@ public:
     /// 0 disables the delay
     void setBufferOptions(size_t bs, size_t cs, size_t ifs);
 
-    size_t getBufferSize() { return buffer_size; }
-    size_t getBufferChunkSize() { return chunk_size; }
-    size_t getBufferInitialFillSize() { return initial_fill_size; }
+    size_t getBufferSize() const { return buffer_size; }
+    size_t getBufferChunkSize() const { return chunk_size; }
+    size_t getBufferInitialFillSize() const { return initial_fill_size; }
 
     /// \brief sets the arguments that will be fed to the transcoder,
     /// this is the string that comes right after the command.
@@ -109,11 +109,11 @@ public:
     void setArguments(const std::string& args) { this->args = args; }
 
     /// \brief retrieves the argument string
-    std::string getArguments() { return args; }
+    std::string getArguments() const { return args; }
 
     /// \brief identifies if the profile should be set as the first resource
     void setFirstResource(bool fr) { first_resource = fr; }
-    bool firstResource() { return first_resource; }
+    bool firstResource() const { return first_resource; }
 
     /// \brief Adds a resource attribute.
     ///
@@ -123,7 +123,7 @@ public:
     /// \param value attribute value
     void addAttribute(const std::string& name, std::string value);
 
-    std::map<std::string, std::string> getAttributes();
+    std::map<std::string, std::string> getAttributes() const;
 
     /// \brief Override for theora content.
     ///
@@ -132,22 +132,22 @@ public:
     /// become necessary; we need a possibility to have a more fine grained
     /// detection of content where mimetype alone is not enough.
     void setTheora(bool theora) { this->theora = theora; }
-    bool isTheora() { return theora; }
+    bool isTheora() const { return theora; }
 
     /// \brief Specifies if the transcoding profile directly accepts an URL
     /// or if we should proxy the data.
     void setAcceptURL(bool accept) { accept_url = accept; }
-    bool acceptURL() { return accept_url; }
+    bool acceptURL() const { return accept_url; }
 
     /// \brief Specifies if the output of the profile is a thumbnail,
     /// this will add appropriate DLNA tags to the XML.
     void setThumbnail(bool th) { thumbnail = th; }
-    bool isThumbnail() { return thumbnail; }
+    bool isThumbnail() const { return thumbnail; }
 
     /// \brief Specifies if the availability of this transcoding profile
     /// should enforce hiding of all original resources in the browse XML
     void setHideOriginalResource(bool hide) { hide_orig_res = hide; }
-    bool hideOriginalResource() { return hide_orig_res; }
+    bool hideOriginalResource() const { return hide_orig_res; }
 
     /// \brief If the profile handles source content in the AVI container,
     /// we can specify a list of fourcc's; the list can be either processed
@@ -161,21 +161,21 @@ public:
         avi_fourcc_listmode_t mode = FCC_Ignore);
 
     /// \brief Retrieves the FourCC list
-    std::vector<std::string> getAVIFourCCList();
+    std::vector<std::string> getAVIFourCCList() const;
     /// \brief Provides information on the mode of the list
-    avi_fourcc_listmode_t getAVIFourCCListMode() { return fourcc_mode; }
+    avi_fourcc_listmode_t getAVIFourCCListMode() const { return fourcc_mode; }
 
     /// \brief Send out the data in chunked encoding
     void setChunked(bool chunked) { force_chunked = chunked; }
-    bool getChunked() { return force_chunked; }
+    bool getChunked() const { return force_chunked; }
 
     /// \brief Sample frequency handling
     void setSampleFreq(int freq) { sample_frequency = freq; }
-    int getSampleFreq() { return sample_frequency; }
+    int getSampleFreq() const { return sample_frequency; }
 
     /// \brief Number of channels
     void setNumChannels(int chans) { number_of_channels = chans; }
-    int getNumChannels() { return number_of_channels; }
+    int getNumChannels() const { return number_of_channels; }
 
 protected:
     std::string name;
@@ -210,7 +210,7 @@ public:
     std::shared_ptr<TranscodingProfileMap> get(const std::string& sourceMimeType);
     std::shared_ptr<TranscodingProfileMap> get(int index);
     std::shared_ptr<TranscodingProfile> getByName(const std::string& name);
-    inline int size() { return list.size(); }
+    inline int size() const { return list.size(); }
 
 protected:
     // outer dictionary is keyed by the source mimetype, inner dictionary by
@@ -227,8 +227,8 @@ public:
         this->fname = fname;
     }
 
-    pid_t getPID() { return pid; }
-    std::string getFName() { return fname; }
+    pid_t getPID() const { return pid; }
+    std::string getFName() const { return fname; }
 
 protected:
     pid_t pid;

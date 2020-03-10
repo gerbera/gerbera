@@ -115,7 +115,7 @@ public:
 
     void sendCDSSubscriptionUpdate(const std::string& updateString);
 
-    std::shared_ptr<ContentManager> getContent() { return content; }
+    std::shared_ptr<ContentManager> getContent() const { return content; }
 
 protected:
     std::shared_ptr<ConfigManager> config;

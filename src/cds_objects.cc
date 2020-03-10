@@ -291,7 +291,7 @@ void CdsContainer::validate()
         throw std::runtime_error("CdsContainer: validation failed"); */
 }
 
-std::string CdsContainer::getVirtualPath()
+std::string CdsContainer::getVirtualPath() const
 {
     std::string location;
     if (getID() == CDS_ID_ROOT) {
@@ -311,7 +311,7 @@ std::string CdsContainer::getVirtualPath()
     return location;
 }
 
-std::string CdsItem::getVirtualPath()
+std::string CdsItem::getVirtualPath() const
 {
     auto cont = storage->loadObject(getParentID());
     std::string location = cont->getVirtualPath();

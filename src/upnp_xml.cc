@@ -481,7 +481,7 @@ std::string UpnpXMLBuilder::getFirstResourcePath(const std::shared_ptr<CdsItem>&
     return result;
 }
 
-std::string UpnpXMLBuilder::getArtworkUrl(const std::shared_ptr<CdsItem>& item)
+std::string UpnpXMLBuilder::getArtworkUrl(const std::shared_ptr<CdsItem>& item) const
 {
     // FIXME: This is temporary until we do artwork properly.
     log_debug("Building Art url for {}", item->getID());

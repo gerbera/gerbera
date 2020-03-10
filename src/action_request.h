@@ -79,16 +79,16 @@ public:
     ActionRequest(UpnpActionRequest* upnp_request);
 
     /// \brief Returns the name of the action.
-    std::string getActionName();
+    std::string getActionName() const;
 
     /// \brief Returns the UDN of the recipient device (should be ours)
-    std::string getUDN();
+    std::string getUDN() const;
 
     /// \brief Returns the ID of the service (the action is for this service id)
-    std::string getServiceID();
+    std::string getServiceID() const;
 
     /// \brief Returns the XML representation of the request, that comes to us.
-    std::unique_ptr<pugi::xml_document> getRequest();
+    std::unique_ptr<pugi::xml_document> getRequest() const;
 
     /// \brief Sets the response (XML created outside as the answer to the request)
     /// \param response XML holding the action response.

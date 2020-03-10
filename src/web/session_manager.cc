@@ -118,7 +118,7 @@ std::string Session::getUIUpdateIDs()
     return ret;
 }
 
-bool Session::hasUIUpdateIDs()
+bool Session::hasUIUpdateIDs() const
 {
     if (updateAll)
         return true;

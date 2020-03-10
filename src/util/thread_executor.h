@@ -70,7 +70,7 @@ protected:
 
     /// \brief check if the thread should shutdown
     /// should be called by the threadProc in short intervals
-    bool threadShutdownCheck() { return threadShutdown; }
+    bool threadShutdownCheck() const { return threadShutdown; }
 
 private:
     pthread_t thread;

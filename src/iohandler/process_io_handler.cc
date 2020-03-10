@@ -57,12 +57,12 @@ std::shared_ptr<Executor> ProcListItem::getExecutor()
     return executor;
 }
 
-bool ProcListItem::abortOnDeath()
+bool ProcListItem::abortOnDeath() const
 {
     return abort;
 }
 
-bool ProcessIOHandler::abort()
+bool ProcessIOHandler::abort() const
 {
     bool abort = false;
 
@@ -81,7 +81,7 @@ bool ProcessIOHandler::abort()
     return abort;
 }
 
-void ProcessIOHandler::killAll()
+void ProcessIOHandler::killAll() const
 {
     for (const auto& i : procList) {
         auto exec = i->getExecutor();

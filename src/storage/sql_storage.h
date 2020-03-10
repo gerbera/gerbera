@@ -55,14 +55,14 @@ class SQLRow {
 public:
     //SQLRow() { }
     //virtual ~SQLRow();
-    std::string col(int index)
+    std::string col(int index) const
     {
         char* c = col_c_str(index);
         if (c == nullptr)
             return "";
         return std::string(c);
     }
-    virtual char* col_c_str(int index) = 0;
+    virtual char* col_c_str(int index) const = 0;
 };
 
 class SQLResult {
@@ -70,21 +70,21 @@ public:
     //SQLResult();
     //virtual ~SQLResult();
     virtual std::unique_ptr<SQLRow> nextRow() = 0;
-    virtual unsigned long long getNumRows() = 0;
+    virtual unsigned long long getNumRows() const = 0;
 };
 
 class SQLStorage : public Storage {
 public:
     /* methods to override in subclasses */
-    virtual std::string quote(std::string str) = 0;
-    virtual std::string quote(const char* str) = 0;
-    virtual std::string quote(int val) = 0;
-    virtual std::string quote(unsigned int val) = 0;
-    virtual std::string quote(long val) = 0;
-    virtual std::string quote(unsigned long val) = 0;
-    virtual std::string quote(bool val) = 0;
-    virtual std::string quote(char val) = 0;
-    virtual std::string quote(long long val) = 0;
+    virtual std::string quote(std::string str) const = 0;
+    virtual std::string quote(const char* str) const = 0;
+    virtual std::string quote(int val) const = 0;
+    virtual std::string quote(unsigned int val) const = 0;
+    virtual std::string quote(long val) const = 0;
+    virtual std::string quote(unsigned long val) const = 0;
+    virtual std::string quote(bool val) const = 0;
+    virtual std::string quote(char val) const = 0;
+    virtual std::string quote(long long val) const = 0;
     virtual std::shared_ptr<SQLResult> select(const char* query, int length) = 0;
     virtual int exec(const char* query, int length, bool getLastInsertId = false) = 0;
 
@@ -194,9 +194,9 @@ private:
             this->dict = dict;
             this->operation = operation;
         }
-        std::string getTable() { return table; }
-        std::map<std::string, std::string> getDict() { return dict; }
-        std::string getOperation() { return operation; }
+        std::string getTable() const { return table; }
+        std::map<std::string, std::string> getDict() const { return dict; }
+        std::string getOperation() const { return operation; }
 
     protected:
         std::string table;
@@ -238,8 +238,8 @@ private:
     std::shared_ptr<CdsObject> checkRefID(const std::shared_ptr<CdsObject>& obj);
     int createContainer(int parentID, std::string name, const std::string& virtualPath, bool isVirtual, const std::string& upnpClass, int refID, const std::map<std::string, std::string>& itemMetadata);
 
-    std::string mapBool(bool val) { return quote((val ? 1 : 0)); }
-    bool remapBool(const std::string& field) { return field == "1"; }
+    std::string mapBool(bool val) const { return quote((val ? 1 : 0)); }
+    bool remapBool(const std::string& field) const { return field == "1"; }
 
     void setFsRootName(const std::string& rootName = "");
 

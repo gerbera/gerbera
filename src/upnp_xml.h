@@ -121,6 +121,6 @@ protected:
 
     static std::unique_ptr<PathBase> getPathBase(const std::shared_ptr<CdsItem>& item, bool forceLocal = false);
     static std::string renderExtension(const std::string& contentType, const std::string& location);
-    std::string getArtworkUrl(const std::shared_ptr<CdsItem>& item);
+    std::string getArtworkUrl(const std::shared_ptr<CdsItem>& item) const;
 };
 #endif // __UPNP_XML_H__

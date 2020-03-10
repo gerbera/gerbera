@@ -91,7 +91,7 @@ private:
         {
             this->type = type;
         }
-        WatchType getType() { return type; }
+        WatchType getType() const { return type; }
 
     private:
         WatchType type;
@@ -105,9 +105,9 @@ private:
             this->adir = adir;
             this->startPoint = startPoint;
         }
-        std::shared_ptr<AutoscanDirectory> getAutoscanDirectory() { return adir; }
-        bool isStartPoint() { return startPoint; }
-        std::vector<std::string> getNonexistingPathArray() { return nonexistingPathArray; }
+        std::shared_ptr<AutoscanDirectory> getAutoscanDirectory() const { return adir; }
+        bool isStartPoint() const { return startPoint; }
+        std::vector<std::string> getNonexistingPathArray() const { return nonexistingPathArray; }
         void setNonexistingPathArray(const std::vector<std::string>& nonexistingPathArray) { this->nonexistingPathArray = nonexistingPathArray; }
         void addDescendant(int wd)
         {
@@ -129,7 +129,7 @@ private:
         {
             this->removeWd = removeWd;
         }
-        int getRemoveWd() { return removeWd; }
+        int getRemoveWd() const { return removeWd; }
 
     private:
         int removeWd;
@@ -144,12 +144,12 @@ private:
             this->wd = wd;
             this->parentWd = parentWd;
         }
-        fs::path getPath() { return path; }
-        int getWd() { return wd; }
-        int getParentWd() { return parentWd; }
+        fs::path getPath() const { return path; }
+        int getWd() const { return wd; }
+        int getParentWd() const { return parentWd; }
         void setParentWd(int parentWd) { this->parentWd = parentWd; }
 
-        std::shared_ptr<std::vector<std::shared_ptr<Watch>>> getWdWatches() { return wdWatches; }
+        std::shared_ptr<std::vector<std::shared_ptr<Watch>>> getWdWatches() const { return wdWatches; }
         void addWatch(std::shared_ptr<Watch> w) { wdWatches->push_back(w); }
 
     private:

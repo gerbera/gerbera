@@ -1224,7 +1224,7 @@ std::string getAVIFourCC(const fs::path& avi_filename)
     if (!f)
         throw std::runtime_error("could not open file " + avi_filename.native() + " : " + mt_strerror(errno));
 
-    buffer = static_cast<char*>(MALLOC(FCC_OFFSET + 6));
+    buffer = static_cast<char*>(malloc(FCC_OFFSET + 6));
     if (buffer == nullptr) {
         fclose(f);
         throw std::runtime_error("Out of memory when allocating buffer for file " + avi_filename.native());

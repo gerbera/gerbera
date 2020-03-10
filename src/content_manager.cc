@@ -1471,7 +1471,7 @@ void ContentManager::rescanDirectory(int objectID, int scanID, ScanMode scanMode
     addTask(task, true); // adding with low priority
 }
 
-std::shared_ptr<AutoscanDirectory> ContentManager::getAutoscanDirectory(int scanID, ScanMode scanMode)
+std::shared_ptr<AutoscanDirectory> ContentManager::getAutoscanDirectory(int scanID, ScanMode scanMode) const
 {
     if (scanMode == ScanMode::Timed) {
         return autoscan_timed->get(scanID);
@@ -1485,7 +1485,7 @@ std::shared_ptr<AutoscanDirectory> ContentManager::getAutoscanDirectory(int scan
     return nullptr;
 }
 
-std::vector<std::shared_ptr<AutoscanDirectory>> ContentManager::getAutoscanDirectories(ScanMode scanMode)
+std::vector<std::shared_ptr<AutoscanDirectory>> ContentManager::getAutoscanDirectories(ScanMode scanMode) const
 {
     if (scanMode == ScanMode::Timed) {
         return autoscan_timed->getArrayCopy();
@@ -1499,7 +1499,7 @@ std::vector<std::shared_ptr<AutoscanDirectory>> ContentManager::getAutoscanDirec
     return std::vector<std::shared_ptr<AutoscanDirectory>>();
 }
 
-std::vector<std::shared_ptr<AutoscanDirectory>> ContentManager::getAutoscanDirectories()
+std::vector<std::shared_ptr<AutoscanDirectory>> ContentManager::getAutoscanDirectories() const
 {
     auto all = autoscan_timed->getArrayCopy();
 
@@ -1511,7 +1511,7 @@ std::vector<std::shared_ptr<AutoscanDirectory>> ContentManager::getAutoscanDirec
     return all;
 }
 
-std::shared_ptr<AutoscanDirectory> ContentManager::getAutoscanDirectory(const fs::path& location)
+std::shared_ptr<AutoscanDirectory> ContentManager::getAutoscanDirectory(const fs::path& location) const
 {
     // \todo change this when more scanmodes become available
     std::shared_ptr<AutoscanDirectory> dir = autoscan_timed->get(location);

@@ -282,7 +282,7 @@ std::shared_ptr<Storage> MysqlStorage::getSelf()
     return shared_from_this();
 }
 
-std::string MysqlStorage::quote(std::string value)
+std::string MysqlStorage::quote(std::string value) const
 {
     /* note: mysql_real_escape_string returns a maximum of (length * 2 + 1)
      * chars; we need +1 for the first ' - the second ' will be written over
@@ -291,7 +291,7 @@ std::string MysqlStorage::quote(std::string value)
      */
     auto q = (char*)malloc(value.length() * 2 + 2);
     *q = '\'';
-    long size = mysql_real_escape_string(&db, q + 1, value.c_str(), value.length());
+    long size = mysql_real_escape_string(const_cast<MYSQL*>(&db), q + 1, value.c_str(), value.length());
     q[size + 1] = '\'';
     std::string ret(q, size + 2);
     free(q);

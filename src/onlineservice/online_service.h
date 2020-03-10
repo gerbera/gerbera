@@ -97,7 +97,7 @@ public:
 
     void decTaskCount() { taskCount--; }
 
-    int getTaskCount() { return taskCount; }
+    int getTaskCount() const { return taskCount; }
 
     void setTaskCount(int taskCount) { this->taskCount = taskCount; }
 
@@ -107,19 +107,19 @@ public:
         timer_parameter = param;
     }
 
-    std::shared_ptr<Timer::Parameter> getTimerParameter() { return timer_parameter; }
+    std::shared_ptr<Timer::Parameter> getTimerParameter() const { return timer_parameter; }
 
     /// \brief Sets the service refresh interval in seconds
     void setRefreshInterval(int interval) { refresh_interval = interval; }
 
     /// \brief Retrieves the service refresh interval in seconds
-    int getRefreshInterval() { return refresh_interval; }
+    int getRefreshInterval() const { return refresh_interval; }
 
     /// \brief Sets the "purge after" interval in seconds
     void setItemPurgeInterval(int interval) { purge_interval = interval; }
 
     /// \brieg Retrieves the "purte after" interval in seconds
-    int getItemPurgeInterval() { return purge_interval; }
+    int getItemPurgeInterval() const { return purge_interval; }
 
 protected:
     int taskCount;

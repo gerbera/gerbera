@@ -271,7 +271,7 @@ void Sqlite3Storage::_exec(const char* query)
     exec(query, strlen(query), false);
 }
 
-std::string Sqlite3Storage::quote(std::string value)
+std::string Sqlite3Storage::quote(std::string value) const
 {
     char* q = sqlite3_mprintf("'%q'", value.c_str());
     std::string ret = q;
@@ -411,7 +411,7 @@ SLTask::SLTask()
     contamination = false;
     decontamination = false;
 }
-bool SLTask::is_running()
+bool SLTask::is_running() const
 {
     return running;
 }

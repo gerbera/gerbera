@@ -45,37 +45,37 @@
 
 class ConfigOption {
 public:
-    virtual std::string getOption()
+    virtual std::string getOption() const
     {
         throw std::runtime_error("Wrong option type");
     }
 
-    virtual int getIntOption()
+    virtual int getIntOption() const
     {
         throw std::runtime_error("Wrong option type");
     }
 
-    virtual bool getBoolOption()
+    virtual bool getBoolOption() const
     {
         throw std::runtime_error("Wrong option type");
     }
 
-    virtual std::map<std::string, std::string> getDictionaryOption()
+    virtual std::map<std::string, std::string> getDictionaryOption() const
     {
         throw std::runtime_error("Wrong option type");
     }
 
-    virtual std::shared_ptr<AutoscanList> getAutoscanListOption()
+    virtual std::shared_ptr<AutoscanList> getAutoscanListOption() const
     {
         throw std::runtime_error("Wrong option type");
     }
 
-    virtual std::vector<std::string> getStringArrayOption()
+    virtual std::vector<std::string> getStringArrayOption() const
     {
         throw std::runtime_error("Wrong option type");
     }
 
-    virtual std::shared_ptr<TranscodingProfileList> getTranscodingProfileListOption()
+    virtual std::shared_ptr<TranscodingProfileList> getTranscodingProfileListOption() const
     {
         throw std::runtime_error("Wrong option type");
     }
@@ -85,7 +85,7 @@ class Option : public ConfigOption {
 public:
     Option(const std::string& option) { this->option = option; }
 
-    std::string getOption() override { return option; }
+    std::string getOption() const override { return option; }
 
 protected:
     std::string option;
@@ -95,7 +95,7 @@ class IntOption : public ConfigOption {
 public:
     IntOption(int option) { this->option = option; }
 
-    int getIntOption() override { return option; }
+    int getIntOption() const override { return option; }
 
 protected:
     int option;
@@ -105,7 +105,7 @@ class BoolOption : public ConfigOption {
 public:
     BoolOption(bool option) { this->option = option; }
 
-    bool getBoolOption() override { return option; }
+    bool getBoolOption() const override { return option; }
 
 protected:
     BoolOption() = default;
@@ -116,7 +116,7 @@ class DictionaryOption : public ConfigOption {
 public:
     DictionaryOption(const std::map<std::string, std::string>& option) { this->option = option; }
 
-    std::map<std::string, std::string> getDictionaryOption() override { return option; }
+    std::map<std::string, std::string> getDictionaryOption() const override { return option; }
 
 protected:
     std::map<std::string, std::string> option;
@@ -129,7 +129,7 @@ public:
         this->option = option;
     }
 
-    std::vector<std::string> getStringArrayOption() override
+    std::vector<std::string> getStringArrayOption() const override
     {
         return option;
     }
@@ -145,7 +145,7 @@ public:
         this->option = option;
     }
 
-    std::shared_ptr<AutoscanList> getAutoscanListOption() override { return option; }
+    std::shared_ptr<AutoscanList> getAutoscanListOption() const override { return option; }
 
 protected:
     std::shared_ptr<AutoscanList> option;
@@ -158,7 +158,7 @@ public:
         this->option = option;
     }
 
-    std::shared_ptr<TranscodingProfileList> getTranscodingProfileListOption() override
+    std::shared_ptr<TranscodingProfileList> getTranscodingProfileListOption() const override
     {
         return option;
     }

@@ -578,7 +578,7 @@ void TagLibHandler::extractFLAC(TagLib::IOStream* roStream, const std::shared_pt
     addArtworkResource(item, art_mimetype);
 }
 
-void TagLibHandler::extractAPE(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item)
+void TagLibHandler::extractAPE(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item) const
 {
     TagLib::APE::File ape(roStream);
 
@@ -590,7 +590,7 @@ void TagLibHandler::extractAPE(TagLib::IOStream* roStream, const std::shared_ptr
     populateGenericTags(item, ape);
 }
 
-void TagLibHandler::extractWavPack(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item)
+void TagLibHandler::extractWavPack(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item) const
 {
     TagLib::WavPack::File wavpack(roStream);
 
@@ -602,7 +602,7 @@ void TagLibHandler::extractWavPack(TagLib::IOStream* roStream, const std::shared
     populateGenericTags(item, wavpack);
 }
 
-void TagLibHandler::extractMP4(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item)
+void TagLibHandler::extractMP4(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item) const
 {
     TagLib::MP4::File mp4(roStream);
     populateGenericTags(item, mp4);
@@ -640,7 +640,7 @@ void TagLibHandler::extractMP4(TagLib::IOStream* roStream, const std::shared_ptr
     }
 }
 
-void TagLibHandler::extractAiff(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item)
+void TagLibHandler::extractAiff(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item) const
 {
     TagLib::RIFF::AIFF::File aiff(roStream);
 
