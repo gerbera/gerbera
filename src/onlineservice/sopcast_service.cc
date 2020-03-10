@@ -68,7 +68,7 @@ service_type_t SopCastService::getServiceType()
     return OS_SopCast;
 }
 
-std::string SopCastService::getServiceName()
+std::string SopCastService::getServiceName() const
 {
     return "SopCast";
 }

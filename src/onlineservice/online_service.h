@@ -79,7 +79,7 @@ public:
     virtual service_type_t getServiceType() = 0;
 
     /// \brief Returns the service name
-    virtual std::string getServiceName() = 0;
+    virtual std::string getServiceName() const = 0;
 
     /// \brief Get the storage service prefix for a particular service
     char getStoragePrefix();

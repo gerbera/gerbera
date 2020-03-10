@@ -51,7 +51,7 @@ private:
     void shutdownDriver() override;
     std::shared_ptr<Storage> getSelf() override;
 
-    std::string quote(std::string str) const override;
+    std::string quote(std::string value) const override;
     inline std::string quote(const char* str) const override { return quote(std::string(str)); }
     inline std::string quote(int val) const override { return std::to_string(val); }
     inline std::string quote(unsigned int val) const override { return std::to_string(val); }
@@ -64,13 +64,13 @@ private:
     int exec(const char* query, int length, bool getLastInsertId = false) override;
     void storeInternalSetting(const std::string& key, const std::string& value) override;
 
-    void _exec(const char* query, int lenth = -1);
+    void _exec(const char* query, int length = -1);
 
     MYSQL db;
 
     bool mysql_connection;
 
-    std::string getError(MYSQL* db);
+    static std::string getError(MYSQL* db);
 
     std::recursive_mutex mysqlMutex;
     using AutoLock = std::lock_guard<decltype(mysqlMutex)>;

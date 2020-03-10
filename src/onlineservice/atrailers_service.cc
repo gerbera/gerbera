@@ -76,7 +76,7 @@ service_type_t ATrailersService::getServiceType()
     return OS_ATrailers;
 }
 
-std::string ATrailersService::getServiceName()
+std::string ATrailersService::getServiceName() const
 {
     return "Apple Trailers";
 }

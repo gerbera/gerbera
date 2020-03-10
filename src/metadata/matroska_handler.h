@@ -48,9 +48,9 @@ public:
     std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsItem> item, int resNum) override;
 
 private:
-    void parseMKV(const std::shared_ptr<CdsItem>& item, MemIOHandler** p_io_handler);
-    void parseLevel1Element(const std::shared_ptr<CdsItem>& item, LIBEBML_NAMESPACE::EbmlStream& ebml_stream, LIBEBML_NAMESPACE::EbmlElement* el_l1, MemIOHandler** p_io_handler);
-    void parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream& ebml_stream, LIBEBML_NAMESPACE::EbmlMaster* info);
+    void parseMKV(const std::shared_ptr<CdsItem>& item, MemIOHandler** p_io_handler) const;
+    void parseLevel1Element(const std::shared_ptr<CdsItem>& item, LIBEBML_NAMESPACE::EbmlStream& ebml_stream, LIBEBML_NAMESPACE::EbmlElement* el_l1, MemIOHandler** p_io_handler) const;
+    void parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream& ebml_stream, LIBEBML_NAMESPACE::EbmlMaster* info) const;
     static void parseAttachments(const std::shared_ptr<CdsItem>& item, LIBEBML_NAMESPACE::EbmlStream& ebml_stream, LIBEBML_NAMESPACE::EbmlMaster* attachments, MemIOHandler** io_handler);
     static std::string getContentTypeFromByteVector(const LIBMATROSKA_NAMESPACE::KaxFileData* data);
     static void addArtworkResource(const std::shared_ptr<CdsItem>& item, const std::string& art_mimetype);

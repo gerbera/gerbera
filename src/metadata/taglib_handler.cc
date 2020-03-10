@@ -387,7 +387,7 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(std::shared_ptr<CdsItem> 
     throw_std_runtime_error("Unsupported content_type: " + content_type);
 }
 
-void TagLibHandler::extractMP3(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item)
+void TagLibHandler::extractMP3(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item) const
 {
     TagLib::MPEG::File mp3(roStream, TagLib::ID3v2::FrameFactory::instance());
 
@@ -468,7 +468,7 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, const std::shared_ptr
     }
 }
 
-void TagLibHandler::extractOgg(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item)
+void TagLibHandler::extractOgg(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item) const
 {
     TagLib::Ogg::Vorbis::File vorbis(item->getLocation().c_str());
 
@@ -500,7 +500,7 @@ void TagLibHandler::extractOgg(TagLib::IOStream* roStream, const std::shared_ptr
     addArtworkResource(item, art_mimetype);
 }
 
-void TagLibHandler::extractASF(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item)
+void TagLibHandler::extractASF(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item) const
 {
     TagLib::ASF::File asf(roStream);
 
@@ -530,7 +530,7 @@ void TagLibHandler::extractASF(TagLib::IOStream* roStream, const std::shared_ptr
     }
 }
 
-void TagLibHandler::extractFLAC(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item)
+void TagLibHandler::extractFLAC(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item) const
 {
     TagLib::FLAC::File flac(roStream, TagLib::ID3v2::FrameFactory::instance());
 

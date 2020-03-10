@@ -63,7 +63,7 @@ public:
     service_type_t getServiceType() override;
 
     /// \brief Get the human readable name for the service
-    std::string getServiceName() override;
+    std::string getServiceName() const override;
 
 protected:
     std::shared_ptr<ConfigManager> config;
