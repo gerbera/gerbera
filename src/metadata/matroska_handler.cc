@@ -130,7 +130,7 @@ std::unique_ptr<IOHandler> MatroskaHandler::serveContent(std::shared_ptr<CdsItem
     return h;
 }
 
-void MatroskaHandler::parseMKV(const std::shared_ptr<CdsItem>& item, MemIOHandler** p_io_handler)
+void MatroskaHandler::parseMKV(const std::shared_ptr<CdsItem>& item, MemIOHandler** p_io_handler) const
 {
     file_io_callback ebml_file(item->getLocation().c_str());
     EbmlStream ebml_stream(ebml_file);
@@ -157,7 +157,7 @@ void MatroskaHandler::parseMKV(const std::shared_ptr<CdsItem>& item, MemIOHandle
     ebml_file.close();
 }
 
-void MatroskaHandler::parseLevel1Element(const std::shared_ptr<CdsItem>& item, EbmlStream& ebml_stream, EbmlElement* el_l1, MemIOHandler** p_io_handler)
+void MatroskaHandler::parseLevel1Element(const std::shared_ptr<CdsItem>& item, EbmlStream& ebml_stream, EbmlElement* el_l1, MemIOHandler** p_io_handler) const
 {
     // Looking at just at EbmlId is not reliable since it can be a dummy element.
     if (!el_l1->IsMaster())
@@ -174,7 +174,7 @@ void MatroskaHandler::parseLevel1Element(const std::shared_ptr<CdsItem>& item, E
     }
 }
 
-void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream& ebml_stream, EbmlMaster* info)
+void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream& ebml_stream, EbmlMaster* info) const
 {
     EbmlElement* dummy_el;
     int i_upper_level = 0;

@@ -506,7 +506,7 @@ std::string UpnpXMLBuilder::renderExtension(const std::string& contentType, cons
         if (dot != std::string::npos) {
             std::string extension = location.substr(dot);
             // make sure that the extension does not contain the separator character
-            if ((extension.find(URL_PARAM_SEPARATOR) == std::string::npos) && (extension.find(URL_PARAM_SEPARATOR) == std::string::npos)) {
+            if (extension.find(URL_PARAM_SEPARATOR) == std::string::npos) {
                 ext = ext + extension;
                 return ext;
             }
