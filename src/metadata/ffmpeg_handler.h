@@ -49,10 +49,10 @@ class AVFormatContext;
 /// \brief This class is responsible for reading id3 tags metadata
 class FfmpegHandler : public MetadataHandler {
 public:
-    FfmpegHandler(std::shared_ptr<ConfigManager> config);
-    virtual void fillMetadata(std::shared_ptr<CdsItem> item);
-    virtual std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsItem> item, int resNum);
-    virtual std::string getMimeType();
+    explicit FfmpegHandler(std::shared_ptr<ConfigManager> config);
+    void fillMetadata(std::shared_ptr<CdsItem> item) override;
+    std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsItem> item, int resNum) override;
+    std::string getMimeType() override;
 
 private:
     void addFfmpegAuxdataFields(std::shared_ptr<CdsItem> item, AVFormatContext* pFormatCtx) const;

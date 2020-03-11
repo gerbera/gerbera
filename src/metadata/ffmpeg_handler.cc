@@ -45,10 +45,10 @@
 // ffmpeg needs the following sources
 // INT64_C is not defined in ffmpeg/avformat.h but is needed
 // macro defines included via autoconfig.h
+#include <cerrno>
 #include <cinttypes>
-#include <errno.h>
-#include <stdint.h>
-#include <string.h>
+#include <cstdint>
+#include <cstring>
 #include <sys/stat.h>
 
 extern "C" {
@@ -90,8 +90,8 @@ void FfmpegHandler::addFfmpegAuxdataFields(std::shared_ptr<CdsItem> item, AVForm
     std::vector<std::string> aux = config->getStringArrayOption(CFG_IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST);
     for (const std::string& desiredTag : aux) {
         if (!desiredTag.empty()) {
-            AVDictionaryEntry* tag = NULL;
-            tag = av_dict_get(pFormatCtx->metadata, desiredTag.c_str(), NULL, AV_DICT_IGNORE_SUFFIX);
+            AVDictionaryEntry* tag = nullptr;
+            tag = av_dict_get(pFormatCtx->metadata, desiredTag.c_str(), nullptr, AV_DICT_IGNORE_SUFFIX);
             if (tag && tag->value && tag->value[0]) {
                 log_debug("Added {}: {}", desiredTag.c_str(), tag->value);
                 item->setAuxData(desiredTag, sc->convert(tag->value));
@@ -102,7 +102,7 @@ void FfmpegHandler::addFfmpegAuxdataFields(std::shared_ptr<CdsItem> item, AVForm
 
 void FfmpegHandler::addFfmpegMetadataFields(std::shared_ptr<CdsItem> item, AVFormatContext* pFormatCtx) const
 {
-    AVDictionaryEntry* e = NULL;
+    AVDictionaryEntry* e = nullptr;
     auto sc = StringConverter::m2i(config);
     metadata_fields_t field;
     std::string value;
@@ -181,7 +181,7 @@ static void addFfmpegResourceFields(std::shared_ptr<CdsItem> item, AVFormatConte
     videoset = false;
     for (unsigned int i = 0; i < pFormatCtx->nb_streams; i++) {
         AVStream* st = pFormatCtx->streams[i];
-        if ((st != NULL) && (videoset == false) && (as_codecpar(st)->codec_type == AVMEDIA_TYPE_VIDEO)) {
+        if ((st != nullptr) && (!videoset) && (as_codecpar(st)->codec_type == AVMEDIA_TYPE_VIDEO)) {
             if (as_codecpar(st)->codec_tag > 0) {
                 char fourcc[5];
                 fourcc[0] = as_codecpar(st)->codec_tag;
@@ -205,7 +205,7 @@ static void addFfmpegResourceFields(std::shared_ptr<CdsItem> item, AVFormatConte
                 videoset = true;
             }
         }
-        if ((st != NULL) && (audioset == false) && (as_codecpar(st)->codec_type == AVMEDIA_TYPE_AUDIO)) {
+        if ((st != nullptr) && (!audioset) && (as_codecpar(st)->codec_type == AVMEDIA_TYPE_AUDIO)) {
             // find the first stream that has a valid sample rate
             if (as_codecpar(st)->sample_rate > 0) {
                 samplefreq = as_codecpar(st)->sample_rate;
@@ -233,7 +233,7 @@ void FfmpegHandler::fillMetadata(std::shared_ptr<CdsItem> item)
 {
     log_debug("Running ffmpeg handler on {}", item->getLocation().c_str());
 
-    AVFormatContext* pFormatCtx = NULL;
+    AVFormatContext* pFormatCtx = nullptr;
 
     // Suppress all log messages
     av_log_set_callback(FfmpegNoOutputStub);
@@ -244,12 +244,12 @@ void FfmpegHandler::fillMetadata(std::shared_ptr<CdsItem> item)
 #endif
     // Open video file
     if (avformat_open_input(&pFormatCtx,
-            item->getLocation().c_str(), NULL, NULL)
+            item->getLocation().c_str(), nullptr, nullptr)
         != 0)
         return; // Couldn't open file
 
     // Retrieve stream information
-    if (avformat_find_stream_info(pFormatCtx, NULL) < 0) {
+    if (avformat_find_stream_info(pFormatCtx, nullptr) < 0) {
         avformat_close_input(&pFormatCtx);
         return; // Couldn't find stream information
     }
@@ -360,10 +360,10 @@ bool FfmpegHandler::readThumbnailCacheFile(const fs::path& movie_filename, uint8
 
     size_t bytesRead;
     uint8_t buffer[1024];
-    *ptr_img = NULL;
+    *ptr_img = nullptr;
     *size_img = 0;
     while ((bytesRead = fread(buffer, 1, sizeof(buffer), fp)) > 0) {
-        *ptr_img = (uint8_t*)realloc(*ptr_img, *size_img + bytesRead);
+        *ptr_img = static_cast<uint8_t*>(realloc(*ptr_img, *size_img + bytesRead));
         memcpy(*ptr_img + *size_img, buffer, bytesRead);
         *size_img += bytesRead;
     }
