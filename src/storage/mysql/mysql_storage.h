@@ -43,15 +43,15 @@
 
 class MysqlStorage : public SQLStorage, public std::enable_shared_from_this<SQLStorage> {
 public:
-    MysqlStorage(std::shared_ptr<ConfigManager> config);
+    explicit MysqlStorage(std::shared_ptr<ConfigManager> config);
     virtual ~MysqlStorage();
 
 private:
-    virtual void init();
-    virtual void shutdownDriver();
-    std::shared_ptr<Storage> getSelf();
+    void init() override;
+    void shutdownDriver() override;
+    std::shared_ptr<Storage> getSelf() override;
 
-    virtual std::string quote(std::string str) const;
+    std::string quote(std::string str) const override;
     inline std::string quote(const char* str) const override { return quote(std::string(str)); }
     inline std::string quote(int val) const override { return std::to_string(val); }
     inline std::string quote(unsigned int val) const override { return std::to_string(val); }
@@ -60,9 +60,9 @@ private:
     inline std::string quote(bool val) const override { return std::to_string(val ? '1' : '0'); }
     inline std::string quote(char val) const override { return quote(std::to_string(val)); }
     inline std::string quote(long long val) const override { return std::to_string(val); }
-    virtual std::shared_ptr<SQLResult> select(const char* query, int length);
-    virtual int exec(const char* query, int length, bool getLastInsertId = false);
-    virtual void storeInternalSetting(const std::string& key, const std::string& value);
+    std::shared_ptr<SQLResult> select(const char* query, int length) override;
+    int exec(const char* query, int length, bool getLastInsertId = false) override;
+    void storeInternalSetting(const std::string& key, const std::string& value) override;
 
     void _exec(const char* query, int lenth = -1);
 
@@ -75,7 +75,7 @@ private:
     std::recursive_mutex mysqlMutex;
     using AutoLock = std::lock_guard<decltype(mysqlMutex)>;
 
-    virtual void threadCleanup();
+    void threadCleanup() override;
     bool threadCleanupRequired() const override { return true; }
 
     pthread_key_t mysql_init_key;
@@ -86,12 +86,12 @@ private:
 
 class MysqlResult : public SQLResult {
 public:
-    MysqlResult(MYSQL_RES* mysql_res);
+    explicit MysqlResult(MYSQL_RES* mysql_res);
     virtual ~MysqlResult();
 
 private:
     int nullRead;
-    virtual std::unique_ptr<SQLRow> nextRow();
+    std::unique_ptr<SQLRow> nextRow() override;
     unsigned long long getNumRows() const override { return mysql_num_rows(mysql_res); }
     MYSQL_RES* mysql_res;
 
@@ -101,7 +101,7 @@ private:
 
 class MysqlRow : public SQLRow {
 public:
-    MysqlRow(MYSQL_ROW mysql_row);
+    explicit MysqlRow(MYSQL_ROW mysql_row);
 
 private:
     inline char* col_c_str(int index) const override { return mysql_row[index]; }

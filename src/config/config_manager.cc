@@ -959,7 +959,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
                                  "invalid \"enabled\" attribute value in "
                                  "<ffmpegthumbnailer> tag");
 
-    NEW_BOOL_OPTION(temp == YES ? true : false);
+    NEW_BOOL_OPTION(temp == YES);
     SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED);
 
     if (temp == YES) {
@@ -995,7 +995,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
             throw std::runtime_error("Error in config file: ffmpegthumbnailer - "
                                      "invalid value in <filmstrip-overlay> tag");
 
-        NEW_BOOL_OPTION(temp == YES ? true : false);
+        NEW_BOOL_OPTION(temp == YES);
         SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY);
 
         temp = getOption("/server/extended-runtime-options/ffmpegthumbnailer/"
@@ -1006,7 +1006,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
             throw std::runtime_error("Error in config file: ffmpegthumbnailer - "
                                      "invalid value in <workaround-bugs> tag");
 
-        NEW_BOOL_OPTION(temp == YES ? true : false);
+        NEW_BOOL_OPTION(temp == YES);
         SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_WORKAROUND_BUGS);
 
         temp_int = getIntOption("/server/extended-runtime-options/"
@@ -1042,7 +1042,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
                                      "invalid \"enabled\" attribute value in "
                                      "ffmpegthumbnailer <cache-dir> tag");
 
-        NEW_BOOL_OPTION(temp == YES ? true : false);
+        NEW_BOOL_OPTION(temp == YES);
         SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED);
     }
 #endif
