@@ -31,7 +31,6 @@
 
 #include "io_handler.h" // API
 
-#include <ixml.h>
 #include <unistd.h>
 
 #include "server.h"

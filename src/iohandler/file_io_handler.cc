@@ -32,7 +32,6 @@
 #include "file_io_handler.h" // API
 
 #include <cstdio>
-#include <ixml.h>
 #include <utility>
 
 #include "cds_objects.h"

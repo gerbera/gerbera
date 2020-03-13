@@ -262,6 +262,16 @@ bool Clients::getInfoByType(const std::string& match, ClientMatchType type, cons
 
 bool Clients::downloadDescription(const std::string& location, std::unique_ptr<pugi::xml_document>& xml)
 {
+#if defined(USING_NPUPNP)
+    std::string description, ct;
+    int errCode = UpnpDownloadUrlItem(location, description, ct);
+    if (errCode != UPNP_E_SUCCESS) {
+        log_debug("Error obtaining client description from {} -- error = {}", location, errCode);
+        return false;
+    }
+    xml = std::make_unique<pugi::xml_document>();
+    auto ret = xml->load_string(description.c_str());
+#else
     IXML_Document* descDoc = nullptr;
     int errCode = UpnpDownloadXmlDoc(location.c_str(), &descDoc);
     if (errCode != UPNP_E_SUCCESS) {
@@ -275,6 +285,7 @@ bool Clients::downloadDescription(const std::string& location, std::unique_ptr<p
 
     ixmlFreeDOMString(cxml);
     ixmlDocument_free(descDoc);
+#endif
 
     if (ret.status != pugi::xml_parse_status::status_ok) {
         log_debug("Unable to parse xml client description from {}", location);
