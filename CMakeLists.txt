@@ -35,6 +35,7 @@ if (CONAN_EXPORTED)
 endif()
 
 set(CMAKE_VERBOSE_MAKEFILE off CACHE BOOL "Show verbose build commands")
+set(WITH_NPUPNP         0 CACHE BOOL "Use npupnp instead of pupnp")
 set(WITH_MAGIC          1 CACHE BOOL "Use libmagic to identify file mime types")
 set(WITH_MYSQL          0 CACHE BOOL "Store media information in MySQL DB")
 set(WITH_CURL           1 CACHE BOOL "CURL required for online services")
@@ -303,23 +304,39 @@ add_definitions(${LFS_DEFINITIONS})
 add_compile_options(${LFS_COMPILE_OPTIONS})
 target_link_libraries(libgerbera ${LFS_LIBRARIES})
 
-find_package (pupnp "1.12.1" REQUIRED)
+if (WITH_NPUPNP)
+    find_package(PkgConfig QUIET)
+    pkg_check_modules (NPUPNP QUIET libnpupnp>=4.0.11)
+    if (NOT NPUPNP_FOUND)
+        find_package (NPUPNP REQUIRED)
+    endif()
+    if (NPUPNP_FOUND)
+        include_directories (${NPUPNP_INCLUDE_DIRS})
+        set(CMAKE_REQUIRED_LIBRARIES npupnp)
+        add_definitions(-DUSING_NPUPNP)
+        target_link_libraries (libgerbera ${NPUPNP_LIBRARIES})
+    else()
+        message(FATAL_ERROR "libnpupnp not found")
+    endif()
+else()
+    find_package (pupnp "1.12.1" REQUIRED)
 
-set(CMAKE_REQUIRED_LIBRARIES pupnp::pupnp)
+    set(CMAKE_REQUIRED_LIBRARIES pupnp::pupnp)
 
-check_cxx_symbol_exists(UPNP_ENABLE_IPV6 "upnpconfig.h" UPNP_HAS_IPV6)
-if (NOT UPNP_HAS_IPV6)
-    message(FATAL_ERROR "Gerbera requires libupnp with IPv6 support.")
+    check_cxx_symbol_exists(UPNP_ENABLE_IPV6 "upnpconfig.h" UPNP_HAS_IPV6)
+    if (NOT UPNP_HAS_IPV6)
+        message(FATAL_ERROR "Gerbera requires libupnp with IPv6 support.")
+    endif()
+
+    check_cxx_symbol_exists(UPNP_MINISERVER_REUSEADDR "upnpconfig.h" UPNP_HAS_REUSEADDR)
+    if (NOT UPNP_HAS_REUSEADDR)
+        message(WARNING [=[
+    !! It is strongly recommended to build libupnp with --enable-reuseaddr !!
+    Without this option Gerbera will be unable to restart with the same port number.]=])
+    endif()
+
+    target_link_libraries (libgerbera pupnp::pupnp)
 endif()
-
-check_cxx_symbol_exists(UPNP_MINISERVER_REUSEADDR "upnpconfig.h" UPNP_HAS_REUSEADDR)
-if (NOT UPNP_HAS_REUSEADDR)
-    message(WARNING [=[
-!! It is strongly recommended to build libupnp with --enable-reuseaddr !!
-Without this option Gerbera will be unable to restart with the same port number.]=])
-endif()
-
-target_link_libraries (libgerbera pupnp::pupnp)
 
 find_package(fmt REQUIRED)
 target_link_libraries(libgerbera fmt::fmt)

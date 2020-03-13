@@ -25,10 +25,12 @@
 
 #include "upnp_headers.h" // API
 
+#if !defined(USING_NPUPNP)
 #if (UPNP_VERSION > 11299)
 #include <UpnpExtraHeaders.h>
 #else
 #include <ExtraHeaders.h>
+#endif
 #endif
 #include <string>
 
@@ -101,16 +103,23 @@ void Headers::writeHeaders(UpnpFileInfo* fileInfo) const
     if (headers == nullptr)
         return;
 
+#if defined(USING_NPUPNP)
+    std::copy(headers->begin(), headers->end(), std::back_inserter(fileInfo->response_headers));
+#else
     auto head = const_cast<UpnpListHead*>(UpnpFileInfo_get_ExtraHeadersList(fileInfo));
     for (const auto& iter : *headers) {
         UpnpExtraHeaders* h = UpnpExtraHeaders_new();
         UpnpExtraHeaders_set_resp(h, formatHeader(iter, false).c_str());
         UpnpListInsert(head, UpnpListEnd(head), const_cast<UpnpListHead*>(UpnpExtraHeaders_get_node(h)));
     }
+#endif
 }
 
 std::unique_ptr<std::map<std::string, std::string>> Headers::readHeaders(UpnpFileInfo* fileInfo)
 {
+#if defined(USING_NPUPNP)
+    return std::make_unique<std::map<std::string, std::string>>(fileInfo->request_headers);
+#else
     auto ret = std::make_unique<std::map<std::string, std::string>>();
 
     auto head = const_cast<UpnpListHead*>(UpnpFileInfo_get_ExtraHeadersList(fileInfo));
@@ -123,4 +132,5 @@ std::unique_ptr<std::map<std::string, std::string>> Headers::readHeaders(UpnpFil
     }
 
     return ret;
+#endif
 }

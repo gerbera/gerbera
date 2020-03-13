@@ -65,10 +65,14 @@ std::string ActionRequest::getServiceID() const
 
 std::unique_ptr<pugi::xml_document> ActionRequest::getRequest() const
 {
-    DOMString cxml = ixmlPrintDocument(UpnpActionRequest_get_ActionRequest(upnp_request));
     auto request = std::make_unique<pugi::xml_document>();
+#if defined(USING_NPUPNP)
+    auto ret = request->load_string(upnp_request->xmlAction.c_str());
+#else
+    DOMString cxml = ixmlPrintDocument(UpnpActionRequest_get_ActionRequest(upnp_request));
     auto ret = request->load_string(cxml);
     ixmlFreeDOMString(cxml);
+#endif
 
     if (ret.status != pugi::xml_parse_status::status_ok)
         throw_std_runtime_error("Unable to parse ixml");
@@ -94,6 +98,10 @@ void ActionRequest::update()
         std::string xml = buf.str();
         log_debug("ActionRequest::update(): {}", xml.c_str());
 
+#if defined(USING_NPUPNP)
+        UpnpActionRequest_set_xmlResponse(upnp_request, xml);
+        UpnpActionRequest_set_ErrCode(upnp_request, errCode);
+#else
         IXML_Document* result = nullptr;
         int err = ixmlParseBufferEx(xml.c_str(), &result);
 
@@ -105,6 +113,7 @@ void ActionRequest::update()
             UpnpActionRequest_set_ActionResult(upnp_request, result);
             UpnpActionRequest_set_ErrCode(upnp_request, errCode);
         }
+#endif
     } else {
         // ok, here there can be two cases
         // either the function below already did set an error code,

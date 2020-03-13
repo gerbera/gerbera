@@ -238,7 +238,11 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
     UpnpFileInfo_set_LastModified(info, statbuf.st_mtime);
     UpnpFileInfo_set_IsDirectory(info, S_ISDIR(statbuf.st_mode));
+#if defined(USING_NPUPNP)
+    UpnpFileInfo_set_ContentType(info, mimeType);
+#else
     UpnpFileInfo_set_ContentType(info, ixmlCloneDOMString(mimeType.c_str()));
+#endif
 
     headers->writeHeaders(info);
 
