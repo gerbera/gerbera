@@ -31,7 +31,9 @@
 
 #include "io_handler.h" // API
 
+#ifndef USING_NPUPNP
 #include <ixml.h>
+#endif
 #include <unistd.h>
 
 #include "server.h"

@@ -32,7 +32,9 @@
 #ifdef HAVE_CURL
 #include "url_request_handler.h" // API
 
+#ifndef USING_NPUPNP
 #include <ixml.h>
+#endif
 #include <utility>
 
 #include "config/config_manager.h"
@@ -138,7 +140,11 @@ void URLRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     //            ixmlCloneDOMString(header.c_str()));
     //    }
 
+#if defined(USING_NPUPNP)
+    UpnpFileInfo_set_ContentType(info, mimeType);
+#else
     UpnpFileInfo_set_ContentType(info, ixmlCloneDOMString(mimeType.c_str()));
+#endif
     log_debug("web_get_info(): end");
 
     /// \todo transcoding for get_info

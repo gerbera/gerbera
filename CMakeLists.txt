@@ -293,13 +293,11 @@ if (LFS_FOUND)
     target_link_libraries(gerbera ${LFS_LIBRARIES})
 endif()
 
-find_package (LibUpnp REQUIRED)
-include_directories(${UPNP_INCLUDE_DIRS})
-target_link_libraries (gerbera ${UPNP_LIBRARIES})
-
-if (UPNP_VERSION_STRING VERSION_LESS "1.12.1")
-    message(FATAL_ERROR "gerbera requires libupnp 1.12.1 or above.")
-endif()
+####  Hard-coded NPUPNP defs for now, just for testing
+add_definitions(-DUSING_NPUPNP)
+include_directories(/usr/include/npupnp/upnp)
+target_link_libraries (gerbera -lnpupnp)
+set (UPNP_HAS_IPV6 1)
 
 if (NOT UPNP_HAS_IPV6)
     message(FATAL_ERROR "Gerbera requires libupnp with IPv6 support.")

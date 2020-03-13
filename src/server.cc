@@ -398,9 +398,17 @@ int Server::handleUpnpClientEvent(Upnp_EventType eventType, const void* event)
     case UPNP_DISCOVERY_ADVERTISEMENT_ALIVE:
     case UPNP_DISCOVERY_SEARCH_RESULT: {
         auto d_event = reinterpret_cast<const UpnpDiscovery*>(event);
+#if defined(USING_NPUPNP)
+        const char* userAgent = UpnpDiscovery_get_Os_cstr(d_event);
+#else
         const char* userAgent = UpnpString_get_String(UpnpDiscovery_get_Os(d_event));
+#endif
         const struct sockaddr_storage* destAddr = UpnpDiscovery_get_DestAddr(d_event);
+#if defined(USING_NPUPNP)
+        const char* location = UpnpDiscovery_get_Location_cstr(d_event);
+#else
         const char* location = UpnpString_get_String(UpnpDiscovery_get_Location(d_event));
+#endif
 
         Clients::addClientByDiscovery(destAddr, userAgent, location);
         break;

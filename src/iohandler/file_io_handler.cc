@@ -32,7 +32,9 @@
 #include "file_io_handler.h" // API
 
 #include <cstdio>
+#ifndef USING_NPUPNP
 #include <ixml.h>
+#endif
 #include <utility>
 
 #include "cds_objects.h"

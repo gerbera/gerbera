@@ -34,7 +34,9 @@
 #include <utility>
 
 #include "config/config_manager.h"
-#include "ixml.h"
+#ifndef USING_NPUPNP
+#include <ixml.h>
+#endif
 #include "server.h"
 #include "storage/storage.h"
 #include "upnp_xml.h"
@@ -120,6 +122,7 @@ void MRRegistrarService::processSubscriptionRequest(const std::unique_ptr<Subscr
     propset->print(buf, "", 0);
     std::string xml = buf.str();
 
+#if !defined(USING_NPUPNP)
     IXML_Document* event = nullptr;
     int err = ixmlParseBufferEx(xml.c_str(), &event);
     if (err != IXML_SUCCESS) {
@@ -131,6 +134,11 @@ void MRRegistrarService::processSubscriptionRequest(const std::unique_ptr<Subscr
         DESC_MRREG_SERVICE_ID, event, request->getSubscriptionID().c_str());
 
     ixmlDocument_free(event);
+#else
+    UpnpAcceptSubscriptionXML(
+		deviceHandle, config->getOption(CFG_SERVER_UDN).c_str(),
+		DESC_MRREG_SERVICE_ID, xml, request->getSubscriptionID().c_str());
+#endif
 }
 
 // TODO: FIXME

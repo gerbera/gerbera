@@ -45,7 +45,11 @@ void DeviceDescriptionHandler::getInfo(const char* filename, UpnpFileInfo* info)
 {
     // We should be able to do the generation here, but libupnp doesnt support the request cookies yet
     UpnpFileInfo_set_FileLength(info, -1);
+#if defined(USING_NPUPNP)
     UpnpFileInfo_set_ContentType(info, "application/xml");
+#else
+    UpnpFileInfo_set_ContentType(info, ixmlCloneDOMString("application/xml"));
+#endif
     UpnpFileInfo_set_IsReadable(info, 1);
     UpnpFileInfo_set_IsDirectory(info, 0);
 }

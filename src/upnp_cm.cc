@@ -127,6 +127,7 @@ void ConnectionManagerService::processSubscriptionRequest(const std::unique_ptr<
     propset->print(buf, "", 0);
     std::string xml = buf.str();
 
+#if !defined(USING_NPUPNP)
     IXML_Document* event = nullptr;
     int err = ixmlParseBufferEx(xml.c_str(), &event);
     if (err != IXML_SUCCESS) {
@@ -138,6 +139,11 @@ void ConnectionManagerService::processSubscriptionRequest(const std::unique_ptr<
         DESC_CM_SERVICE_ID, event, request->getSubscriptionID().c_str());
 
     ixmlDocument_free(event);
+#else
+    UpnpAcceptSubscriptionXML(
+		deviceHandle, config->getOption(CFG_SERVER_UDN).c_str(),
+		DESC_CM_SERVICE_ID, xml, request->getSubscriptionID().c_str());
+#endif
 }
 
 void ConnectionManagerService::sendSubscriptionUpdate(const std::string& sourceProtocol_CSV)
@@ -150,6 +156,7 @@ void ConnectionManagerService::sendSubscriptionUpdate(const std::string& sourceP
     propset->print(buf, "", 0);
     std::string xml = buf.str();
 
+#if !defined(USING_NPUPNP)
     IXML_Document* event = nullptr;
     int err = ixmlParseBufferEx(xml.c_str(), &event);
     if (err != IXML_SUCCESS) {
@@ -162,4 +169,8 @@ void ConnectionManagerService::sendSubscriptionUpdate(const std::string& sourceP
         DESC_CM_SERVICE_ID, event);
 
     ixmlDocument_free(event);
+#else
+    UpnpNotifyXML(deviceHandle, config->getOption(CFG_SERVER_UDN).c_str(),
+				  DESC_CM_SERVICE_ID, xml);
+#endif
 }

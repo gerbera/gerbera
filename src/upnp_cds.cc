@@ -284,6 +284,7 @@ void ContentDirectoryService::processSubscriptionRequest(const std::unique_ptr<S
     propset->print(buf, "", 0);
     std::string xml = buf.str();
 
+#if !defined(USING_NPUPNP)
     IXML_Document* event = nullptr;
     int err = ixmlParseBufferEx(xml.c_str(), &event);
     if (err != IXML_SUCCESS) {
@@ -295,6 +296,11 @@ void ContentDirectoryService::processSubscriptionRequest(const std::unique_ptr<S
         DESC_CDS_SERVICE_ID, event, request->getSubscriptionID().c_str());
 
     ixmlDocument_free(event);
+#else
+    UpnpAcceptSubscriptionXML(
+		deviceHandle, config->getOption(CFG_SERVER_UDN).c_str(),
+        DESC_CDS_SERVICE_ID, xml, request->getSubscriptionID().c_str());
+#endif
     log_debug("end");
 }
 
@@ -313,6 +319,7 @@ void ContentDirectoryService::sendSubscriptionUpdate(const std::string& containe
     propset->print(buf, "", 0);
     std::string xml = buf.str();
 
+#if !defined(USING_NPUPNP)
     IXML_Document* event = nullptr;
     int err = ixmlParseBufferEx(xml.c_str(), &event);
     if (err != IXML_SUCCESS) {
@@ -323,8 +330,11 @@ void ContentDirectoryService::sendSubscriptionUpdate(const std::string& containe
     UpnpNotifyExt(deviceHandle,
         config->getOption(CFG_SERVER_UDN).c_str(),
         DESC_CDS_SERVICE_ID, event);
-
     ixmlDocument_free(event);
+#else
+	UpnpNotifyXML(deviceHandle, config->getOption(CFG_SERVER_UDN).c_str(),
+				  DESC_CDS_SERVICE_ID, xml);
+#endif
 
     log_debug("end");
 }

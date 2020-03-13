@@ -94,7 +94,11 @@ void ServeRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
             UpnpFileInfo_set_IsReadable(info, 0);
         }
 
+#if defined(USING_NPUPNP)
+        UpnpFileInfo_set_ContentType(info, mimetype);
+#else
         UpnpFileInfo_set_ContentType(info, ixmlCloneDOMString(mimetype.c_str()));
+#endif
     } else {
         throw_std_runtime_error("Not a regular file: " + path);
     }
@@ -157,8 +161,11 @@ std::unique_ptr<IOHandler> ServeRequestHandler::open(const char* filename,
             info->is_readable = 0;
         }
 
-
+#if defined(USING_NPUPNP)
+        info->content_type = mimetype;
+#else
         info->content_type = ixmlCloneDOMString(mimetype.c_str());
+#endif
         */
     } else {
         throw_std_runtime_error("Not a regular file: " + path);

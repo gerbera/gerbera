@@ -35,7 +35,9 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
+#ifndef USING_NPUPNP
 #include <ixml.h>
+#endif
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>

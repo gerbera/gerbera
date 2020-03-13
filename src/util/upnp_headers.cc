@@ -96,18 +96,29 @@ void Headers::writeHeaders(UpnpFileInfo* fileInfo) const
     if (headers == nullptr)
         return;
 
+#if defined(USING_NPUPNP)
+    for (auto iter : *headers) {
+		fileInfo->response_headers.push_back(iter);
+	}
+#else
     auto head = const_cast<UpnpListHead*>(UpnpFileInfo_get_ExtraHeadersList(fileInfo));
     for (auto iter : *headers) {
         UpnpExtraHeaders* h = UpnpExtraHeaders_new();
         UpnpExtraHeaders_set_resp(h, formatHeader(iter, false).c_str());
         UpnpListInsert(head, UpnpListEnd(head), const_cast<UpnpListHead*>(UpnpExtraHeaders_get_node(h)));
     }
+#endif
 }
 
 std::unique_ptr<std::map<std::string, std::string>> Headers::readHeaders(UpnpFileInfo* fileInfo)
 {
     auto ret = std::make_unique<std::map<std::string, std::string>>();
 
+#if defined(USING_NPUPNP)
+	for (const auto& entry : fileInfo->request_headers) {
+        ret->insert(entry);
+	}
+#else
     auto head = const_cast<UpnpListHead*>(UpnpFileInfo_get_ExtraHeadersList(fileInfo));
     UpnpListIter pos;
     for (pos = UpnpListBegin(head); pos != UpnpListEnd(head); pos = UpnpListNext(head, pos)) {
@@ -116,6 +127,7 @@ std::unique_ptr<std::map<std::string, std::string>> Headers::readHeaders(UpnpFil
         auto add = parseHeader(header);
         ret->insert(add);
     }
-
+#endif
+	
     return ret;
 }
