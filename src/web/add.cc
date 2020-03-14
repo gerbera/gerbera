@@ -29,14 +29,16 @@
 
 /// \file add.cc
 
+#include "pages.h" // API
+
+#include <cstdio>
+#include <utility>
+
 #include "common.h"
 #include "config/config_manager.h"
 #include "content_manager.h"
-#include "pages.h"
 #include "server.h"
 #include "util/tools.h"
-#include <cstdio>
-#include <utility>
 
 web::add::add(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
     std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)

@@ -29,6 +29,8 @@
 
 /// \file add_object.cc
 
+#include "pages.h" // API
+
 #include <cstdio>
 #include <filesystem>
 #include <utility>
@@ -38,7 +40,6 @@
 #include "config/config_manager.h"
 #include "content_manager.h"
 #include "metadata/metadata_handler.h"
-#include "pages.h"
 #include "server.h"
 #include "util/tools.h"
 

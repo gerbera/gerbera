@@ -29,9 +29,10 @@
 
 /// \file web_update.cc
 
+#include "pages.h" // API
+
 #include "autoscan.h"
 #include "content_manager.h"
-#include "pages.h"
 #include "storage/storage.h"
 
 void web::voidType::process()

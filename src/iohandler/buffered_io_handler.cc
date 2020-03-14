@@ -29,9 +29,10 @@
 
 /// \file buffered_io_handler.cc
 
+#include "buffered_io_handler.h" // API
+
 #include <cassert>
 
-#include "buffered_io_handler.h"
 #include "util/tools.h"
 
 BufferedIOHandler::BufferedIOHandler(std::unique_ptr<IOHandler>& underlyingHandler, size_t bufSize, size_t maxChunkSize, size_t initialFillSize)

@@ -30,6 +30,7 @@
 /// \file autoscan_inotify.cc
 
 #ifdef HAVE_INOTIFY
+#include "autoscan_inotify.h" // API
 
 #include <cassert>
 #include <dirent.h>
@@ -37,7 +38,6 @@
 #include <sys/stat.h>
 #include <utility>
 
-#include "autoscan_inotify.h"
 #include "content_manager.h"
 #include "storage/storage.h"
 

@@ -29,14 +29,15 @@
 
 /// \file fallback_layout.cc
 
-#include "fallback_layout.h"
+#include "fallback_layout.h" // API
+
+#include <utility>
 
 #include "config/config_manager.h"
 #include "content_manager.h"
 #include "metadata/metadata_handler.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
-#include <utility>
 
 #ifdef ONLINE_SERVICES
 

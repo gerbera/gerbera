@@ -30,8 +30,8 @@
 /// \file lastfm_scrobbler.cc
 
 #ifdef HAVE_LASTFMLIB
+#include "lastfm_scrobbler.h" // API
 
-#include "lastfm_scrobbler.h"
 #include "config/config_manager.h"
 #include "metadata/metadata_handler.h"
 #include "util/tools.h"

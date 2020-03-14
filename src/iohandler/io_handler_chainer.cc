@@ -29,10 +29,11 @@
 
 /// \file io_handler_chainer.cc
 
-#include "io_handler_chainer.h"
+#include "io_handler_chainer.h" // API
+
+#include <cstdlib>
 
 #include "exceptions.h"
-#include <cstdlib>
 
 IOHandlerChainer::IOHandlerChainer(std::unique_ptr<IOHandler>& readFrom, std::unique_ptr<IOHandler>& writeTo, int chunkSize)
 {

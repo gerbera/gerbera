@@ -37,6 +37,7 @@
 /// \file mt_inotify.cc
 
 #ifdef HAVE_INOTIFY
+#include "mt_inotify.h"
 
 #include <cassert>
 #include <cerrno>
@@ -46,7 +47,6 @@
 #include <sys/filio.h> // FIONREAD
 #endif
 
-#include "mt_inotify.h"
 #include "tools.h"
 
 #define MAX_EVENTS 4096

@@ -30,8 +30,8 @@
 /// \file online_service.cc
 
 #ifdef ONLINE_SERVICES
+#include "online_service.h" // API
 
-#include "online_service.h"
 #include "util/tools.h"
 
 // DO NOT FORGET TO ADD SERVICE STORAGE PREFIXES TO THIS ARRAY WHEN ADDING

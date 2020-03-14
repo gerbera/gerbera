@@ -29,12 +29,13 @@
 
 /// \file session_manager.cc
 
+#include "session_manager.h" // API
+
 #include <memory>
 #include <unordered_set>
 #include <utility>
 
 #include "config/config_manager.h"
-#include "session_manager.h"
 #include "util/timer.h"
 #include "util/tools.h"
 

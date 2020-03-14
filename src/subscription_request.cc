@@ -29,7 +29,7 @@
 
 /// \file subscription_request.cc
 
-#include "subscription_request.h"
+#include "subscription_request.h" // API
 
 SubscriptionRequest::SubscriptionRequest(UpnpSubscriptionRequest* upnp_request)
 {

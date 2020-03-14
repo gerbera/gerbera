@@ -29,16 +29,17 @@
 
 /// \file update_manager.cc
 
-#include "update_manager.h"
+#include "update_manager.h" // API
+
+#include <chrono>
+#include <csignal>
+#include <sys/types.h>
+#include <utility>
 
 #include "server.h"
 #include "storage/storage.h"
 #include "upnp_cds.h"
 #include "util/tools.h"
-#include <chrono>
-#include <csignal>
-#include <sys/types.h>
-#include <utility>
 
 /* following constants in milliseconds */
 #define SPEC_INTERVAL 2000

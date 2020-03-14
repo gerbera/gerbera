@@ -29,11 +29,12 @@
 
 /// \file autoscan.cc
 
-#include "autoscan.h"
+#include "autoscan.h" // API
+
+#include <utility>
 
 #include "content_manager.h"
 #include "storage/storage.h"
-#include <utility>
 
 AutoscanDirectory::AutoscanDirectory()
 {

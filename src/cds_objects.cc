@@ -29,10 +29,11 @@
 
 /// \file cds_objects.cc
 
+#include "cds_objects.h" // API
+
 #include <filesystem>
 #include <utility>
 
-#include "cds_objects.h"
 #include "storage/storage.h"
 #include "util/tools.h"
 

@@ -30,15 +30,15 @@
 /// \file playlist_parser_script.cc
 
 #ifdef HAVE_JS
+#include "playlist_parser_script.h" // API
 
-#include "playlist_parser_script.h"
+#include <cstdlib>
+#include <utility>
 
 #include "config/config_manager.h"
 #include "content_manager.h"
 #include "js_functions.h"
 #include "storage/storage.h"
-#include <cstdlib>
-#include <utility>
 
 #define ONE_TEXTLINE_BYTES 1024
 

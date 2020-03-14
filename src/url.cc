@@ -30,14 +30,14 @@
 /// \file url.cc
 
 #ifdef HAVE_CURL
+#include "url.h" // API
 
-#include "url.h"
+#include <pthread.h>
+#include <sstream>
+
 #include "common.h"
 #include "config/config_manager.h"
 #include "util/tools.h"
-#include <pthread.h>
-
-#include <sstream>
 
 std::string URL::download(const std::string& URL, long* HTTP_retcode,
     CURL* curl_handle, bool only_header,

@@ -29,11 +29,12 @@
 
 /// \file tasks.cc
 
+#include "pages.h" // API
+
 #include <utility>
 
 #include "common.h"
 #include "content_manager.h"
-#include "pages.h"
 
 web::tasks::tasks(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
     std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)

@@ -29,14 +29,15 @@
 
 /// \file upnp_xml.cc
 
-#include "upnp_xml.h"
+#include "upnp_xml.h" // API
+
+#include <utility>
 
 #include "common.h"
 #include "config/config_manager.h"
 #include "metadata/metadata_handler.h"
 #include "server.h"
 #include "storage/storage.h"
-#include <utility>
 
 UpnpXMLBuilder::UpnpXMLBuilder(std::shared_ptr<ConfigManager> config,
     std::shared_ptr<Storage> storage,

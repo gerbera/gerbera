@@ -29,11 +29,12 @@
 
 /// \file cds_resource.cc
 
-#include "cds_resource.h"
-#include "util/tools.h"
+#include "cds_resource.h" // API
 
 #include <sstream>
 #include <utility>
+
+#include "util/tools.h"
 
 #define RESOURCE_PART_SEP '~'
 

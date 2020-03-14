@@ -29,6 +29,8 @@
 
 /// \file sql_storage.cc
 
+#include "sql_storage.h" // API
+
 #include <algorithm>
 #include <climits>
 #include <filesystem>
@@ -39,7 +41,6 @@
 
 #include "config/config_manager.h"
 #include "search_handler.h"
-#include "sql_storage.h"
 #include "update_manager.h"
 #include "util/string_converter.h"
 #include "util/tools.h"

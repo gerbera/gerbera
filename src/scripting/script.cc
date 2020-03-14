@@ -30,14 +30,14 @@
 /// \file script.cc
 
 #ifdef HAVE_JS
+#include "script.h" // API
 
-#include "script.h"
+#include <utility>
 
 #include "config/config_manager.h"
 #include "js_functions.h"
 #include "metadata/metadata_handler.h"
 #include "util/tools.h"
-#include <utility>
 #ifdef ONLINE_SERVICES
 #include "onlineservice/online_service.h"
 #endif

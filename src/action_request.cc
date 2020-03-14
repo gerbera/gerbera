@@ -29,9 +29,9 @@
 
 /// \file action_request.cc
 
-#include <sstream>
+#include "action_request.h" // API
 
-#include "action_request.h"
+#include <sstream>
 
 ActionRequest::ActionRequest(UpnpActionRequest* upnp_request)
     : upnp_request(upnp_request)

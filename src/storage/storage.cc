@@ -29,18 +29,18 @@
 
 /// \file storage.cc
 
+#include "storage.h" // API
+
 #include <utility>
 
 #include "config/config_manager.h"
+#include "storage/mysql/mysql_storage.h"
+#include "storage/sqlite3/sqlite3_storage.h"
+#include "util/tools.h"
 
 #if !defined(HAVE_MYSQL) && !defined(HAVE_SQLITE3)
 #error "need at least one storage (mysql or sqlite3)"
 #endif
-
-#include "storage/mysql/mysql_storage.h"
-#include "storage/sqlite3/sqlite3_storage.h"
-
-#include "util/tools.h"
 
 Storage::Storage(std::shared_ptr<ConfigManager> config)
     : config(std::move(config))

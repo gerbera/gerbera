@@ -30,8 +30,8 @@
 /// \file js_layout.cc
 
 #ifdef HAVE_JS
+#include "js_layout.h" // API
 
-#include "js_layout.h"
 #include "scripting/runtime.h"
 
 JSLayout::JSLayout(const std::shared_ptr<ConfigManager>& config,

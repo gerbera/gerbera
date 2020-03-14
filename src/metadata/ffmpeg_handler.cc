@@ -32,7 +32,6 @@
 */
 
 /// \file ffmpeg_handler.cc
-/// \brief Implementeation of the FfmpegHandler class.
 
 // Information about the stream are to be found in the structure
 // AVFormatContext, defined in libavformat/avformat.h:335
@@ -41,6 +40,7 @@
 // in the ffmpeg sources
 
 #ifdef HAVE_FFMPEG
+#include "ffmpeg_handler.h"
 
 // ffmpeg needs the following sources
 // INT64_C is not defined in ffmpeg/avformat.h but is needed
@@ -64,7 +64,6 @@ extern "C" {
 #endif
 
 #include "config/config_manager.h"
-#include "ffmpeg_handler.h"
 #include "util/string_converter.h"
 
 #ifdef HAVE_AVSTREAM_CODECPAR

@@ -29,6 +29,8 @@
 
 /// \file config_manager.cc
 
+#include "config_manager.h" // API
+
 #ifdef BSD_NATIVE_UUID
 #include <uuid.h>
 #else
@@ -51,7 +53,6 @@
 #endif
 
 #include "common.h"
-#include "config_manager.h"
 #include "metadata/metadata_handler.h"
 #include "storage/storage.h"
 #include "util/string_converter.h"

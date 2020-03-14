@@ -28,16 +28,15 @@
 */
 
 /// \file libexif_handler.cc
-/// \brief Implementeation of the LibExifHandler class.
 
 #ifdef HAVE_LIBEXIF
+#include "libexif_handler.h" // API
 
-#include "libexif_handler.h"
+#include <utility>
 
 #include "config/config_manager.h"
 #include "iohandler/mem_io_handler.h"
 #include "util/tools.h"
-#include <utility>
 
 LibExifHandler::LibExifHandler(std::shared_ptr<ConfigManager> config)
     : MetadataHandler(std::move(config))

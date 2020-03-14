@@ -28,16 +28,16 @@
 */
 
 /// \file sqlite3_storage.cc
-#ifdef HAVE_SQLITE3
 
-#include <zlib.h>
+#ifdef HAVE_SQLITE3
+#include "sqlite3_storage.h" // API
 
 #include <utility>
+#include <zlib.h>
 
 #include "common.h"
 #include "config/config_manager.h"
 #include "sqlite3_create_sql.h"
-#include "sqlite3_storage.h"
 
 // updates 1->2
 #define SQLITE3_UPDATE_1_2_1 "DROP INDEX mt_autoscan_obj_id"

@@ -28,7 +28,8 @@
 */
 
 /// \file io_handler.cc
-/// This handles the VirtualDirCallbacks that come from the web server.
+
+#include "io_handler.h" // API
 
 #include <ixml.h>
 #include <unistd.h>

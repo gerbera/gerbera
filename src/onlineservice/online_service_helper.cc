@@ -28,11 +28,10 @@
 */
 
 /// \file online_service_helper.cc
-/// \brief Definition of the OnlineServiceHelper class.
 
 #ifdef ONLINE_SERVICES
+#include "online_service_helper.h" // API
 
-#include "online_service_helper.h"
 #include "config/config_manager.h"
 #include "online_service.h"
 

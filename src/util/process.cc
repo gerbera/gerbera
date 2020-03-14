@@ -29,7 +29,7 @@
 
 /// \file process.cc
 
-#include "process.h"
+#include "process.h" // API
 
 #include <csignal>
 #include <cstdio>
