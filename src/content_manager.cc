@@ -824,8 +824,9 @@ void ContentManager::addRecursive(const fs::path& path, bool hidden, const std::
                     addRecursive(newPath, hidden, task);
                 }
             }
-        } catch (const std::runtime_error& e) {
-            log_warning("skipping {} : {}", newPath.c_str(), e.what());
+        } catch (const std::runtime_error& ex) {
+            fs::file_status status = fs::status(newPath);
+            log_warning("skipping {} (type:{} perms:{} ex:{})", newPath.c_str(), (int)status.type(), (int)status.permissions(), ex.what());
         }
     }
     closedir(dir);
