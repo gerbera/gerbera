@@ -47,10 +47,10 @@
 #include <memory>
 #include <pugixml.hpp>
 
-#include "cds_objects.h"
-
 // forward declaration
+class CdsObject;
 class ConfigManager;
+class Storage;
 
 /// \brief this class is responsible for creating objects from the SopCast
 /// metadata XML.

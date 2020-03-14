@@ -45,6 +45,9 @@ namespace fs = std::filesystem;
 #include "common.h"
 #include "util/tools.h"
 
+// forward declaration
+class Storage;
+
 // ATTENTION: These values need to be changed in web/js/items.js too.
 #define OBJECT_TYPE_CONTAINER 0x00000001u
 #define OBJECT_TYPE_ITEM 0x00000002u
@@ -78,9 +81,6 @@ namespace fs = std::filesystem;
 #define OBJECT_AUTOSCAN_NONE 0u
 #define OBJECT_AUTOSCAN_UI 1u
 #define OBJECT_AUTOSCAN_CFG 2u
-
-// forward declaration
-class Storage;
 
 /// \brief Generic object in the Content Directory.
 class CdsObject {

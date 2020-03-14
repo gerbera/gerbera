@@ -32,13 +32,16 @@
 #ifndef __JS_LAYOUT_H__
 #define __JS_LAYOUT_H__
 
-#include "layout.h"
-#include "scripting/import_script.h"
 #include <memory>
+
+#include "layout.h"
 
 // forward declaration
 class ConfigManager;
+class ContentManager;
+class ImportScript;
 class Runtime;
+class Storage;
 
 class JSLayout : public Layout {
 protected:

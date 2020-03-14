@@ -32,17 +32,18 @@
 #ifndef __TRANSCODE_HANDLER_H__
 #define __TRANSCODE_HANDLER_H__
 
+#include <memory>
+#include <string>
 #include <upnp.h>
 
 #include "common.h"
-#include "iohandler/io_handler.h"
-#include "transcoding.h"
-
-#include "cds_objects.h"
 
 // forward declaration
+class CdsObject;
 class ConfigManager;
 class ContentManager;
+class IOHandler;
+class TranscodingProfile;
 
 class TranscodeHandler {
 public:

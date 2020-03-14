@@ -28,9 +28,6 @@
 #ifndef __SEARCH_HANDLER_H__
 #define __SEARCH_HANDLER_H__
 
-#include "cds_objects.h"
-#include "memory.h"
-
 #include <memory>
 #include <string>
 #include <unordered_map>

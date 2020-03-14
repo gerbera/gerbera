@@ -38,7 +38,6 @@
 #include <unistd.h>
 #include <utility>
 
-#include "common.h"
 #include "content_manager.h"
 #include "util/process.h"
 

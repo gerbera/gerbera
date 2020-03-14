@@ -34,11 +34,14 @@
 #include <algorithm>
 #include <climits>
 #include <filesystem>
+#include <list>
 #include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
 
+#include "autoscan.h"
+#include "cds_objects.h"
 #include "config/config_manager.h"
 #include "search_handler.h"
 #include "update_manager.h"

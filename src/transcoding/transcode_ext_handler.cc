@@ -44,7 +44,6 @@
 #include <utility>
 
 #include "cds_objects.h"
-#include "common.h"
 #include "config/config_manager.h"
 #include "content_manager.h"
 #include "iohandler/buffered_io_handler.h"

@@ -42,9 +42,6 @@ namespace fs = std::filesystem;
 
 #include <sys/time.h>
 
-#include "common.h"
-#include "iohandler/io_handler.h"
-
 #ifdef HAVE_MAGIC
 // for older versions of filemagic
 extern "C" {
@@ -52,9 +49,12 @@ extern "C" {
 }
 #endif
 
+#include "common.h"
+
 // forward declaration
 class ConfigManager;
 class CdsItem;
+class IOHandler;
 
 /// \brief splits the given string into array of strings using a separator character.
 /// \param str String to split

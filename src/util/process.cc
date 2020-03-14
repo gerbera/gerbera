@@ -43,6 +43,7 @@
 #include <cstring>
 
 #include "config/config_manager.h"
+#include "util/tools.h"
 
 #define BUF_SIZE 256
 

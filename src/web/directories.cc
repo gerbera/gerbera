@@ -33,7 +33,6 @@
 
 #include <utility>
 
-#include "common.h"
 #include "storage/storage.h"
 #include "util/string_converter.h"
 #include "util/tools.h"

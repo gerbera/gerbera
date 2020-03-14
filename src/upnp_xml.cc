@@ -33,11 +33,11 @@
 
 #include <utility>
 
-#include "common.h"
 #include "config/config_manager.h"
 #include "metadata/metadata_handler.h"
 #include "server.h"
 #include "storage/storage.h"
+#include "transcoding/transcoding.h"
 
 UpnpXMLBuilder::UpnpXMLBuilder(std::shared_ptr<ConfigManager> config,
     std::shared_ptr<Storage> storage,

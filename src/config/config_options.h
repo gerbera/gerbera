@@ -37,11 +37,9 @@
 #include <string>
 #include <vector>
 
-#include "autoscan.h"
-#include "exceptions.h"
-#include <assert.h>
-
-#include "transcoding/transcoding.h"
+// forward declaration
+class AutoscanList;
+class TranscodingProfileList;
 
 class ConfigOption {
 public:

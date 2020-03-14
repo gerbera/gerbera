@@ -39,7 +39,8 @@
 #include <lastfmlib/lastfmscrobblerc.h>
 #include <memory>
 
-#include "cds_objects.h"
+// forward declaration
+class CdsItem;
 
 class LastFm {
 public:

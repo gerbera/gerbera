@@ -37,7 +37,6 @@
 #include "content_manager.h"
 #include "metadata/metadata_handler.h"
 #include "util/string_converter.h"
-#include "util/tools.h"
 
 #ifdef ONLINE_SERVICES
 

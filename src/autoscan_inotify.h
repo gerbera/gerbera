@@ -41,12 +41,12 @@
 #include "autoscan.h"
 #include "util/mt_inotify.h"
 
-#define INOTIFY_ROOT -1
-#define INOTIFY_UNKNOWN_PARENT_WD -2
-
 // forward declaration
 class Storage;
 class ContentManager;
+
+#define INOTIFY_ROOT -1
+#define INOTIFY_UNKNOWN_PARENT_WD -2
 
 class AutoscanInotify {
 public:

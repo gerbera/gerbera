@@ -40,6 +40,9 @@ namespace fs = std::filesystem;
 #include "io_handler.h"
 #include "util/executor.h"
 
+// forward declaration
+class ContentManager;
+
 #define FIFO_READ_TIMEOUT 2
 #define FIFO_WRITE_TIMEOUT 2
 
@@ -53,9 +56,6 @@ protected:
     std::shared_ptr<Executor> executor;
     bool abort;
 };
-
-// forward declaration
-class ContentManager;
 
 /// \brief Allows the web server to read from a fifo.
 class ProcessIOHandler : public IOHandler {

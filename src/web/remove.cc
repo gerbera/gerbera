@@ -34,7 +34,6 @@
 #include <cstdio>
 #include <utility>
 
-#include "common.h"
 #include "content_manager.h"
 #include "server.h"
 #include "storage/storage.h"

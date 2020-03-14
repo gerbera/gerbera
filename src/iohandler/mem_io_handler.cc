@@ -41,7 +41,6 @@
 #include <unistd.h>
 
 #include "cds_objects.h"
-#include "common.h"
 #include "server.h"
 #include "update_manager.h"
 #include "util/process.h"

@@ -29,14 +29,15 @@
 
 /// \file jpeg_resolution.cc
 
-#include "common.h"
+#include "tools.h" // API
 
 #include <cerrno>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 
-#include "tools.h"
+#include "iohandler/io_handler.h"
+
 using uchar = unsigned char;
 
 #ifndef TRUE

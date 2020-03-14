@@ -32,13 +32,21 @@
 #ifndef __STORAGE_H__
 #define __STORAGE_H__
 
+#include <filesystem>
+#include <map>
 #include <memory>
 #include <string>
 #include <unordered_set>
 #include <vector>
+namespace fs = std::filesystem;
 
-#include "autoscan.h"
-#include "cds_objects.h"
+// forward declaration
+class AutoscanDirectory;
+class AutoscanList;
+class CdsObject;
+class ConfigManager;
+enum class ScanMode;
+class Timer;
 
 #define BROWSE_DIRECT_CHILDREN 0x00000001
 #define BROWSE_ITEMS 0x00000002
@@ -128,10 +136,6 @@ public:
     int getStartingIndex() const { return startingIndex; }
     int getRequestedCount() const { return requestedCount; }
 };
-
-// forward declaration
-class ConfigManager;
-class Timer;
 
 class Storage {
 public:

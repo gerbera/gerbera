@@ -33,8 +33,8 @@
 
 #include <utility>
 
+#include "autoscan.h"
 #include "cds_objects.h"
-#include "common.h"
 #include "storage/storage.h"
 
 web::containers::containers(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,

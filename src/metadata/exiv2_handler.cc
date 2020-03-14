@@ -34,7 +34,9 @@
 
 #include <exiv2/exiv2.hpp>
 
+#include "cds_objects.h"
 #include "config/config_manager.h"
+#include "iohandler/io_handler.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
 

@@ -48,6 +48,7 @@
 #include <taglib/wavpackfile.h>
 #include <utility>
 
+#include "cds_objects.h"
 #include "config/config_manager.h"
 #include "iohandler/mem_io_handler.h"
 #include "util/string_converter.h"

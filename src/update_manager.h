@@ -39,12 +39,12 @@
 
 #include "common.h"
 
-#define FLUSH_ASAP 2
-#define FLUSH_SPEC 1
-
 // forward declaration
 class Storage;
 class Server;
+
+#define FLUSH_ASAP 2
+#define FLUSH_SPEC 1
 
 class UpdateManager {
 public:

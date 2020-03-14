@@ -32,12 +32,15 @@
 #ifndef __SQL_STORAGE_H__
 #define __SQL_STORAGE_H__
 
-#include "cds_objects.h"
-#include "storage.h"
-
 #include <mutex>
 #include <sstream>
 #include <unordered_set>
+
+#include "storage.h"
+
+// forward declaration
+class SQLResult;
+class SQLEmitter;
 
 #define QTB table_quote_begin
 #define QTE table_quote_end
@@ -47,9 +50,6 @@
 #define INTERNAL_SETTINGS_TABLE "mt_internal_setting"
 #define AUTOSCAN_TABLE "mt_autoscan"
 #define METADATA_TABLE "mt_metadata"
-
-class SQLResult;
-class SQLEmitter;
 
 class SQLRow {
 public:

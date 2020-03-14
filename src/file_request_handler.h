@@ -32,10 +32,11 @@
 #ifndef __FILE_REQUEST_HANDLER_H__
 #define __FILE_REQUEST_HANDLER_H__
 
+#include <memory>
+
 #include "common.h"
 #include "request_handler.h"
 #include "upnp_xml.h"
-#include <memory>
 
 // forward declaration
 class ConfigManager;

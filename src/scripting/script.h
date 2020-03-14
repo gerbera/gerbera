@@ -32,12 +32,18 @@
 #ifndef __SCRIPTING_SCRIPT_H__
 #define __SCRIPTING_SCRIPT_H__
 
-#include "cds_objects.h"
-#include "common.h"
-#include "duktape.h"
-#include "runtime.h"
-#include "util/string_converter.h"
+#include <duktape.h>
 #include <mutex>
+
+#include "common.h"
+
+// forward declaration
+class CdsObject;
+class ConfigManager;
+class ContentManager;
+class Runtime;
+class Storage;
+class StringConverter;
 
 // perform garbage collection after script has been run for x times
 #define JS_CALL_GC_AFTER_NUM (1000)
@@ -54,10 +60,6 @@ typedef enum {
     P2I,
     I2I,
 } charset_convert_t;
-
-// forward declaration
-class ConfigManager;
-class ContentManager;
 
 class Script {
 public:

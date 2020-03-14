@@ -63,6 +63,7 @@ extern "C" {
 #include <libffmpegthumbnailer/videothumbnailerc.h>
 #endif
 
+#include "cds_objects.h"
 #include "config/config_manager.h"
 #include "util/string_converter.h"
 
@@ -223,7 +224,7 @@ static void addFfmpegResourceFields(std::shared_ptr<CdsItem> item, AVFormatConte
 }
 
 // Stub for suppressing ffmpeg error messages during matadata extraction
-void FfmpegNoOutputStub(void* ptr, int level, const char* fmt, va_list vl)
+static void FfmpegNoOutputStub(void* ptr, int level, const char* fmt, va_list vl)
 {
     // do nothing
 }

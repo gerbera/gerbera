@@ -32,13 +32,14 @@
 #ifndef __TIMER_H__
 #define __TIMER_H__
 
-#include <memory>
-
-#include "tools.h"
-
 #include <algorithm>
+#include <atomic>
 #include <condition_variable>
 #include <list>
+#include <memory>
+
+#include "common.h"
+#include "tools.h"
 
 class Timer {
 public:

@@ -38,16 +38,15 @@
 #include <memory>
 #include <pugixml.hpp>
 
-#include "cds_objects.h"
+// forward declaration
+class CdsObject;
+class ConfigManager;
+class Storage;
 
 #define ATRAILERS_SERVICE "Apple Trailers"
 #define ATRAILERS_SERVICE_ID "T"
 
 #define ATRAILERS_AUXDATA_POST_DATE ATRAILERS_SERVICE_ID "0"
-
-// forward declaration
-class ConfigManager;
-class Storage;
 
 /// \brief this class is responsible for creating objects from the ATrailers
 /// metadata XML.

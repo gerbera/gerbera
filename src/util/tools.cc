@@ -62,6 +62,7 @@
 #include <sys/sockio.h>
 #endif
 
+#include "cds_objects.h"
 #include "config/config_manager.h"
 #include "contrib/md5.h"
 #include "iohandler/file_io_handler.h"

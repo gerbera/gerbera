@@ -34,8 +34,12 @@
 #include <matroska/KaxAttached.h>
 #include <matroska/KaxAttachments.h>
 
-#include "iohandler/mem_io_handler.h"
 #include "metadata_handler.h"
+
+// forward declaration
+class CdsItem;
+class ConfigManager;
+class MemIOHandler;
 
 /// \brief This class is responsible for reading webm or mkv tags metadata
 class MatroskaHandler : public MetadataHandler {

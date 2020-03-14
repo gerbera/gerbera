@@ -39,6 +39,7 @@
 #include "metadata/metadata_handler.h"
 #include "script.h"
 #include "storage/storage.h"
+#include "util/string_converter.h"
 
 //extern "C" {
 

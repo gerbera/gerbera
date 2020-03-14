@@ -33,6 +33,9 @@
 #ifndef __METADATA_FANART_H__
 #define __METADATA_FANART_H__
 
+#include <filesystem>
+namespace fs = std::filesystem;
+
 #include "metadata_handler.h"
 
 /// \brief This class is responsible for populating filesystem based album and fan art

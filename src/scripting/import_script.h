@@ -32,11 +32,16 @@
 #ifndef __SCRIPTING_IMPORT_SCRIPT_H__
 #define __SCRIPTING_IMPORT_SCRIPT_H__
 
-#include "cds_objects.h"
-#include "common.h"
-#include "layout/layout.h"
-#include "script.h"
 #include <memory>
+
+#include "common.h"
+#include "script.h"
+
+// forward declaration
+class ConfigManager;
+class ContentManager;
+class Runtime;
+class Storage;
 
 class ImportScript : public Script {
 public:

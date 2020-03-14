@@ -39,6 +39,7 @@
 #include "server.h"
 #include "sopcast_content_handler.h"
 #include "storage/storage.h"
+#include "url.h"
 #include "util/string_converter.h"
 
 #define SOPCAST_CHANNEL_URL "http://www.sopcast.com/gchlxml"

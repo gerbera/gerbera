@@ -33,17 +33,22 @@
 #ifndef __CONFIG_MANAGER_H__
 #define __CONFIG_MANAGER_H__
 
+#include <filesystem>
+#include <map>
 #include <memory>
 #include <pugixml.hpp>
+namespace fs = std::filesystem;
 
-#include "autoscan.h"
 #include "common.h"
-#include "config_options.h"
 
-#include "transcoding/transcoding.h"
-#ifdef ONLINE_SERVICES
-#include "onlineservice/online_service.h"
-#endif
+// forward declaration
+class AutoscanList;
+class AutoscanDirectory;
+enum class ScanMode;
+class ConfigOption;
+class Storage;
+class TranscodingProfileList;
+
 typedef enum {
     CFG_SERVER_PORT = 0,
     CFG_SERVER_IP,
