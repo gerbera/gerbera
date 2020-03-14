@@ -32,9 +32,12 @@
 #ifndef __METADATA_HANDLER_H__
 #define __METADATA_HANDLER_H__
 
-#include "cds_objects.h"
 #include "common.h"
-#include "iohandler/io_handler.h"
+
+// forward declaration
+class CdsItem;
+class ConfigManager;
+class IOHandler;
 
 // content handler Id's
 #define CH_DEFAULT 0
@@ -132,9 +135,6 @@ struct res_key {
 };
 
 extern res_key RES_KEYS[];
-
-// forward declaration
-class ConfigManager;
 
 /// \brief This class is responsible for providing access to metadata information
 /// of various media.

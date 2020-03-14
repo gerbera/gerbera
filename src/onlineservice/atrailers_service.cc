@@ -41,6 +41,7 @@
 #include "content_manager.h"
 #include "server.h"
 #include "storage/storage.h"
+#include "url.h"
 #include "util/string_converter.h"
 
 #define ATRAILERS_SERVICE_URL_640 "https://trailers.apple.com/trailers/home/xml/current.xml"

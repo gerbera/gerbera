@@ -34,10 +34,14 @@
 
 #include <utility>
 
+#include "cds_objects.h"
 #include "config/config_manager.h"
 #include "js_functions.h"
 #include "metadata/metadata_handler.h"
+#include "runtime.h"
+#include "util/string_converter.h"
 #include "util/tools.h"
+
 #ifdef ONLINE_SERVICES
 #include "onlineservice/online_service.h"
 #endif

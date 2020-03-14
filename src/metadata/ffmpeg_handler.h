@@ -38,6 +38,9 @@
 #ifndef __FFMPEG_HANDLER_H__
 #define __FFMPEG_HANDLER_H__
 
+#include <filesystem>
+namespace fs = std::filesystem;
+
 #include "metadata_handler.h"
 
 // forward declaration

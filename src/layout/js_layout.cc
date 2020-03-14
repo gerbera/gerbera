@@ -32,6 +32,7 @@
 #ifdef HAVE_JS
 #include "js_layout.h" // API
 
+#include "scripting/import_script.h"
 #include "scripting/runtime.h"
 
 JSLayout::JSLayout(const std::shared_ptr<ConfigManager>& config,

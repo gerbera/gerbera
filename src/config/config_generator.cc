@@ -34,7 +34,6 @@ Gerbera - https://gerbera.io/
 #include <uuid/uuid.h>
 #endif
 
-#include "common.h"
 #include "metadata/metadata_handler.h"
 #include "util/tools.h"
 

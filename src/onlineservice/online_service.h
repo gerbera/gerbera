@@ -38,8 +38,10 @@
 #include <memory>
 #include <vector>
 
-#include "layout/layout.h"
 #include "util/timer.h"
+
+// forward declaration
+class Layout;
 
 #define ONLINE_SERVICE_AUX_ID "ols"
 #define ONLINE_SERVICE_LAST_UPDATE "lu"

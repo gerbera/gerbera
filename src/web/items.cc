@@ -33,8 +33,8 @@
 
 #include <utility>
 
+#include "autoscan.h"
 #include "cds_objects.h"
-#include "common.h"
 #include "storage/storage.h"
 #include "upnp_xml.h"
 

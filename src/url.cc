@@ -35,7 +35,6 @@
 #include <pthread.h>
 #include <sstream>
 
-#include "common.h"
 #include "config/config_manager.h"
 #include "util/tools.h"
 

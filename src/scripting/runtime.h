@@ -32,10 +32,11 @@
 #ifndef __SCRIPTING_RUNTIME_H__
 #define __SCRIPTING_RUNTIME_H__
 
-#include "common.h"
-#include "duktape.h"
+#include <duktape.h>
 #include <mutex>
 #include <pthread.h>
+
+#include "common.h"
 
 /// \brief Runtime class definition.
 class Runtime {

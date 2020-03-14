@@ -52,9 +52,11 @@
 #include <curl/curl.h>
 #endif
 
-#include "common.h"
+#include "autoscan.h"
+#include "config_options.h"
 #include "metadata/metadata_handler.h"
 #include "storage/storage.h"
+#include "transcoding/transcoding.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
 

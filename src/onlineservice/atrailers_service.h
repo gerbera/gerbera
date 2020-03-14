@@ -40,11 +40,11 @@
 #include <pugixml.hpp>
 
 #include "online_service.h"
-#include "url.h"
 
 // forward declaration
 class ConfigManager;
 class ContentManager;
+class Storage;
 
 /// \brief This is an interface for all online services, the function
 /// handles adding/refreshing content in the database.

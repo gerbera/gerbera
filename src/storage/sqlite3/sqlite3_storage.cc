@@ -35,7 +35,6 @@
 #include <utility>
 #include <zlib.h>
 
-#include "common.h"
 #include "config/config_manager.h"
 #include "sqlite3_create_sql.h"
 

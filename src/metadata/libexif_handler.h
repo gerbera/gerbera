@@ -32,12 +32,15 @@
 #ifndef __METADATA_LIBEXIF_H__
 #define __METADATA_LIBEXIF_H__
 
+#include <libexif/exif-content.h>
+#include <libexif/exif-data.h>
 #include <vector>
 
 #include "metadata_handler.h"
-#include "util/string_converter.h"
-#include <libexif/exif-content.h>
-#include <libexif/exif-data.h>
+
+// forward declaration
+class CdsItem;
+class StringConverter;
 
 /// \brief This class is responsible for reading exif header metadata via the
 /// libefix library

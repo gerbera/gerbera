@@ -35,7 +35,6 @@
 #include <utility>
 
 #include "cds_objects.h"
-#include "common.h"
 #include "storage/storage.h"
 #include "util/tools.h"
 

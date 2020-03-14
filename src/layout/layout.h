@@ -33,9 +33,11 @@
 #define __LAYOUT_H__
 
 #include <filesystem>
+#include <memory>
 namespace fs = std::filesystem;
 
-#include "cds_objects.h"
+// forward declaration
+class CdsObject;
 
 class Layout {
 public:

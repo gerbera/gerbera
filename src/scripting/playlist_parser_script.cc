@@ -38,6 +38,7 @@
 #include "config/config_manager.h"
 #include "content_manager.h"
 #include "js_functions.h"
+#include "runtime.h"
 #include "storage/storage.h"
 
 #define ONE_TEXTLINE_BYTES 1024

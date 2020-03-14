@@ -34,8 +34,10 @@
 
 #include <utility>
 
+#include "cds_objects.h"
 #include "config/config_manager.h"
 #include "iohandler/mem_io_handler.h"
+#include "util/string_converter.h"
 #include "util/tools.h"
 
 LibExifHandler::LibExifHandler(std::shared_ptr<ConfigManager> config)

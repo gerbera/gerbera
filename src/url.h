@@ -39,6 +39,8 @@
 #include <memory>
 #include <string>
 
+#include "common.h"
+
 class URL {
 public:
     /// \brief This is a simplified version of the File_Info class as used

@@ -32,16 +32,16 @@
 #ifndef __SCRIPTING_PLAYLIST_PARSER_SCRIPT_H__
 #define __SCRIPTING_PLAYLIST_PARSER_SCRIPT_H__
 
-#include "cds_objects.h"
-#include "common.h"
-#include "content_manager.h"
-#include "script.h"
-#include "util/generic_task.h"
 #include <memory>
 
+#include "common.h"
+#include "script.h"
+
 // forward declaration
+class CdsObject;
 class ConfigManager;
 class ContentManager;
+class GenericTask;
 
 class PlaylistParserScript : public Script {
 public:

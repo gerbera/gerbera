@@ -4,12 +4,12 @@
 #ifndef __TASK_PROCESSOR_H__
 #define __TASK_PROCESSOR_H__
 
+#include <condition_variable>
 #include <deque>
 #include <memory>
 
 #include "common.h"
 #include "generic_task.h"
-#include <condition_variable>
 
 // forward declaration
 class ContentManager;

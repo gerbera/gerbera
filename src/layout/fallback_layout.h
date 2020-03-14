@@ -34,17 +34,17 @@
 
 #include <memory>
 
-#include "../cds_objects.h"
 #include "layout.h"
 
 #ifdef ENABLE_PROFILING
-#include "tools.h"
+#include "util/tools.h"
 #endif
 
 // forward declaration
+class CdsObject;
 class ConfigManager;
-class Storage;
 class ContentManager;
+class Storage;
 
 class FallbackLayout : public Layout {
 public:

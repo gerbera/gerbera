@@ -39,6 +39,10 @@ namespace fs = std::filesystem;
 
 #include "util/timer.h"
 
+// forward declaration
+class Storage;
+class AutoscanDirectory;
+
 #define INVALID_SCAN_ID -1
 
 ///\brief Scan level - the way how exactly directories should be scanned.
@@ -52,10 +56,6 @@ enum class ScanMode {
     Timed,
     INotify
 };
-
-// forward declaration
-class Storage;
-class AutoscanDirectory;
 
 class AutoscanList {
 public:
