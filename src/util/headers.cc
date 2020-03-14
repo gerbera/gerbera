@@ -1,6 +1,6 @@
 /*GRB*
 
-Gerbera - https://gerbera.io/
+    Gerbera - https://gerbera.io/
 
     http_protocol_helper.cc - this file is part of Gerbera.
 
@@ -21,9 +21,10 @@ Gerbera - https://gerbera.io/
     $Id$
 */
 
-/// \file http_protocol_helper.cc
+/// \file headers.cc
 
-#include "headers.h"
+#include "headers.h" // API
+
 #include <string>
 
 std::string Headers::stripInvalid(const std::string& value)

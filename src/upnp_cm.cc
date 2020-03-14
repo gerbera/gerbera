@@ -29,13 +29,14 @@
 
 /// \file upnp_cm.cc
 
-#include "upnp_cm.h"
+#include "upnp_cm.h" // API
+
+#include <utility>
 
 #include "config/config_manager.h"
 #include "server.h"
 #include "storage/storage.h"
 #include "util/tools.h"
-#include <utility>
 
 ConnectionManagerService::ConnectionManagerService(std::shared_ptr<ConfigManager> config,
     std::shared_ptr<Storage> storage,

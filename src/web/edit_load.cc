@@ -29,14 +29,15 @@
 
 /// \file edit_load.cc
 
-#include "pages.h"
+#include "pages.h" // API
+
+#include <cstdio>
+#include <utility>
 
 #include "cds_objects.h"
 #include "common.h"
 #include "storage/storage.h"
 #include "util/tools.h"
-#include <cstdio>
-#include <utility>
 
 web::edit_load::edit_load(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
     std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)

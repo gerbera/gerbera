@@ -29,10 +29,11 @@
 
 /// \file files.cc
 
+#include "pages.h" // API
+
 #include <utility>
 
 #include "common.h"
-#include "pages.h"
 #include "storage/storage.h"
 #include "util/string_converter.h"
 #include "util/tools.h"

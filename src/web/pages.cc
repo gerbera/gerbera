@@ -29,7 +29,7 @@
 
 /// \file pages.cc
 
-#include "pages.h"
+#include "pages.h" // API
 
 namespace web {
 

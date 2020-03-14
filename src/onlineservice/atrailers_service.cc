@@ -30,8 +30,11 @@
 /// \file atrailers_service.cc
 
 #ifdef ATRAILERS
+#include "atrailers_service.h" // API
 
-#include "atrailers_service.h"
+#include <string>
+#include <utility>
+
 #include "atrailers_content_handler.h"
 #include "config/config_manager.h"
 #include "config/config_options.h"
@@ -39,9 +42,6 @@
 #include "server.h"
 #include "storage/storage.h"
 #include "util/string_converter.h"
-
-#include <string>
-#include <utility>
 
 #define ATRAILERS_SERVICE_URL_640 "https://trailers.apple.com/trailers/home/xml/current.xml"
 #define ATRAILERS_SERVICE_URL_720P "https://trailers.apple.com/trailers/home/xml/current_720p.xml"

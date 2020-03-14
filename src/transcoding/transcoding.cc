@@ -28,12 +28,12 @@
 */
 
 /// \file transcoding.cc
-/// \brief Definitions of the Transcoding classes.
 
-#include "transcoding.h"
+#include "transcoding.h" // API
+
+#include <utility>
 
 #include "util/tools.h"
-#include <utility>
 
 TranscodingProfile::TranscodingProfile()
 {

@@ -29,6 +29,8 @@
 
 /// \file content_manager.cc
 
+#include "content_manager.h" // API
+
 #include <cerrno>
 #include <cstring>
 #include <dirent.h>
@@ -39,7 +41,6 @@
 #include <utility>
 
 #include "config/config_manager.h"
-#include "content_manager.h"
 #include "layout/fallback_layout.h"
 #include "metadata/metadata_handler.h"
 #include "storage/storage.h"

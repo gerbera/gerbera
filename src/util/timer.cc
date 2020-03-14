@@ -29,7 +29,8 @@
 
 /// \file timer.cc
 
-#include "timer.h"
+#include "timer.h" // API
+
 #include <cassert>
 #include <utility>
 

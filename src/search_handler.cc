@@ -19,16 +19,20 @@
 
   $Id$
 */
-#include "search_handler.h"
-#include "config/config_manager.h"
-#include "storage/storage.h"
-#include "util/tools.h"
+
+/// \file search_handler.cc
+
+#include "search_handler.h" // API
 
 #include <algorithm>
 #include <cctype>
 #include <iostream>
 #include <sstream>
 #include <stack>
+
+#include "config/config_manager.h"
+#include "storage/storage.h"
+#include "util/tools.h"
 
 static std::unordered_map<std::string, TokenType> tokenTypes {
     { "(", TokenType::LPAREN },

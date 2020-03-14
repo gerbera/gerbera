@@ -29,14 +29,16 @@
 
 /// \file remove.cc
 
+#include "pages.h" // API
+
+#include <cstdio>
+#include <utility>
+
 #include "common.h"
 #include "content_manager.h"
-#include "pages.h"
 #include "server.h"
 #include "storage/storage.h"
 #include "util/tools.h"
-#include <cstdio>
-#include <utility>
 
 web::remove::remove(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
     std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)

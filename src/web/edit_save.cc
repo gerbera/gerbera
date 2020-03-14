@@ -29,12 +29,14 @@
 
 /// \file edit_save.cc
 
-#include "content_manager.h"
-#include "pages.h"
-#include "storage/storage.h"
-#include "util/tools.h"
+#include "pages.h" // API
+
 #include <cstdio>
 #include <utility>
+
+#include "content_manager.h"
+#include "storage/storage.h"
+#include "util/tools.h"
 
 web::edit_save::edit_save(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
     std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)

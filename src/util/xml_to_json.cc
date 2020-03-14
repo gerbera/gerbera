@@ -31,11 +31,12 @@
 
 /// \file xml_to_json.cc
 
+#include "xml_to_json.h"
+
 #include <iostream>
 #include <regex>
 
 #include "util/tools.h"
-#include "xml_to_json.h"
 
 std::string Xml2Json::getJson(const pugi::xml_node& root, const Hints* hints)
 {

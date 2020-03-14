@@ -29,10 +29,11 @@
 
 /// \file io_handler_buffer_helper.cc
 
-#include "io_handler_buffer_helper.h"
+#include "io_handler_buffer_helper.h" // API
+
+#include <cstdlib>
 
 #include "config/config_manager.h"
-#include <cstdlib>
 
 IOHandlerBufferHelper::IOHandlerBufferHelper(size_t bufSize, size_t initialFillSize)
 {

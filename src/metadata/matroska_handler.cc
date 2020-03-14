@@ -23,9 +23,9 @@
 */
 
 /// \file matroska_handler.cc
-/// \brief Implementeation of the MatroskaHandler class.
 
 #ifdef HAVE_MATROSKA
+#include "matroska_handler.h" // API
 
 #include <iostream>
 #include <utility>
@@ -45,9 +45,7 @@
 
 #include "config/config_manager.h"
 #include "iohandler/mem_io_handler.h"
-#include "matroska_handler.h"
 #include "util/string_converter.h"
-
 #include "util/tools.h"
 
 using namespace LIBEBML_NAMESPACE;

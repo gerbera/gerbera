@@ -29,15 +29,17 @@
 
 /// \file upnp_cds.cc
 
-#include "upnp_cds.h"
-#include "config/config_manager.h"
-#include "search_handler.h"
-#include "server.h"
-#include "storage/storage.h"
+#include "upnp_cds.h" // API
+
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
+
+#include "config/config_manager.h"
+#include "search_handler.h"
+#include "server.h"
+#include "storage/storage.h"
 
 ContentDirectoryService::ContentDirectoryService(std::shared_ptr<ConfigManager> config,
     std::shared_ptr<Storage> storage,

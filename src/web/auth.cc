@@ -29,14 +29,15 @@
 
 /// \file auth.cc
 
-#include "config/config_manager.h"
-#include "pages.h"
-#include "session_manager.h"
-#include "util/tools.h"
-#include <sys/time.h>
+#include "pages.h" // API
 
 #include <chrono>
+#include <sys/time.h>
 #include <utility>
+
+#include "config/config_manager.h"
+#include "session_manager.h"
+#include "util/tools.h"
 
 #define LOGIN_TIMEOUT 10 // in seconds
 

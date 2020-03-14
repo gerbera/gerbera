@@ -30,19 +30,17 @@
 /// \file mysql_storage.cc
 
 #ifdef HAVE_MYSQL
-
-//#define MYSQL_SET_NAMES "/*!40101 SET NAMES utf8 */"
-
-//#define MYSQL_SELECT_DEBUG
-//#define MYSQL_EXEC_DEBUG
-
 #include "mysql_storage.h"
+
+#include <cstdlib>
+#include <zlib.h>
 
 #include "config/config_manager.h"
 #include "mysql_create_sql.h"
 
-#include <cstdlib>
-#include <zlib.h>
+//#define MYSQL_SET_NAMES "/*!40101 SET NAMES utf8 */"
+//#define MYSQL_SELECT_DEBUG
+//#define MYSQL_EXEC_DEBUG
 
 // updates 1->2
 #define MYSQL_UPDATE_1_2_1 "ALTER TABLE `mt_cds_object` CHANGE `location` `location` BLOB NULL DEFAULT NULL"

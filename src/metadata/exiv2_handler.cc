@@ -28,13 +28,13 @@
 */
 
 /// \file exiv2_handler.cc
-/// \brief Implementeation of the Exiv2Handler class.
 
 #ifdef HAVE_EXIV2
+#include "exiv2_handler.h" // API
+
 #include <exiv2/exiv2.hpp>
 
 #include "config/config_manager.h"
-#include "exiv2_handler.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
 

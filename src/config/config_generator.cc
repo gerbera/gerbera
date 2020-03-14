@@ -23,18 +23,20 @@ Gerbera - https://gerbera.io/
 
 /// \file config_generator.cc
 
+#include "config_generator.h"
+
 #include <string>
 #include <utility>
 
-#include "common.h"
-#include "metadata/metadata_handler.h"
-#include "util/tools.h"
 #ifdef BSD_NATIVE_UUID
 #include <uuid.h>
 #else
 #include <uuid/uuid.h>
 #endif
-#include "config_generator.h"
+
+#include "common.h"
+#include "metadata/metadata_handler.h"
+#include "util/tools.h"
 
 ConfigGenerator::ConfigGenerator() = default;
 

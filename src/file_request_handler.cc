@@ -29,13 +29,14 @@
 
 /// \file file_request_handler.cc
 
+#include "file_request_handler.h" // API
+
 #include <filesystem>
 #include <sys/stat.h>
 #include <utility>
 
 #include "config/config_manager.h"
 #include "content_manager.h"
-#include "file_request_handler.h"
 #include "iohandler/file_io_handler.h"
 #include "metadata/metadata_handler.h"
 #include "server.h"

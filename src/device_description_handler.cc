@@ -1,6 +1,6 @@
 /*GRB*
 
-Gerbera - https://gerbera.io/
+    Gerbera - https://gerbera.io/
 
     device_description_handler.cc - this file is part of Gerbera.
 
@@ -21,11 +21,12 @@ Gerbera - https://gerbera.io/
 
 /// \file device_description_handler.cc
 
-#include "device_description_handler.h"
+#include "device_description_handler.h" // API
+
+#include <utility>
 
 #include "iohandler/mem_io_handler.h"
 #include "util/tools.h"
-#include <utility>
 
 DeviceDescriptionHandler::DeviceDescriptionHandler(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
     UpnpXMLBuilder* xmlBuilder)

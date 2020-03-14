@@ -29,10 +29,11 @@
 
 /// \file request_handler.cc
 
-#include "request_handler.h"
+#include "request_handler.h" // API
+
+#include <utility>
 
 #include "util/tools.h"
-#include <utility>
 
 RequestHandler::RequestHandler(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage)
     : config(std::move(config))

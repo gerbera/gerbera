@@ -29,7 +29,8 @@
 
 /// \file exceptions.cc
 
-#include "exceptions.h"
+#include "exceptions.h" // API
+
 #include <string>
 
 UpnpException::UpnpException(int errCode, const std::string& message)

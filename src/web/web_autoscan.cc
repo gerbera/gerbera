@@ -29,12 +29,13 @@
 
 /// \file web_autoscan.cc
 
-#include "autoscan.h"
+#include "pages.h" // API
 
-#include "content_manager.h"
-#include "pages.h"
-#include "storage/storage.h"
 #include <utility>
+
+#include "autoscan.h"
+#include "content_manager.h"
+#include "storage/storage.h"
 
 static bool WebAutoscanProcessListComparator(const std::shared_ptr<AutoscanDirectory>& a1, const std::shared_ptr<AutoscanDirectory>& a2)
 {

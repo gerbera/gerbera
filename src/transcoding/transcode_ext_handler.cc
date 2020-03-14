@@ -29,6 +29,8 @@
 
 /// \file transcode_ext_handler.cc
 
+#include "transcode_ext_handler.h" // API
+
 #include <climits>
 #include <csignal>
 #include <cstdio>
@@ -52,7 +54,6 @@
 #include "metadata/metadata_handler.h"
 #include "server.h"
 #include "storage/storage.h"
-#include "transcode_ext_handler.h"
 #include "transcoding_process_executor.h"
 #include "update_manager.h"
 #include "util/process.h"

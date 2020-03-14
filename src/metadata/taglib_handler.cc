@@ -28,9 +28,9 @@
 */
 
 /// \file taglib_handler.cc
-/// \brief Implementeation of the TagHandler class.
 
 #ifdef HAVE_TAGLIB
+#include "taglib_handler.h" // API
 
 #include <taglib/aifffile.h>
 #include <taglib/apefile.h>
@@ -46,14 +46,11 @@
 #include <taglib/tpropertymap.h>
 #include <taglib/vorbisfile.h>
 #include <taglib/wavpackfile.h>
-
 #include <utility>
 
 #include "config/config_manager.h"
 #include "iohandler/mem_io_handler.h"
-#include "taglib_handler.h"
 #include "util/string_converter.h"
-
 #include "util/tools.h"
 
 TagLibHandler::TagLibHandler(std::shared_ptr<ConfigManager> config)

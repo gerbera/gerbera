@@ -29,13 +29,13 @@
 
 /// \file serve_request_handler.cc
 
-#include <sys/stat.h>
+#include "serve_request_handler.h"
 
+#include <sys/stat.h>
 #include <utility>
 
 #include "config/config_manager.h"
 #include "iohandler/file_io_handler.h"
-#include "serve_request_handler.h"
 #include "server.h"
 #include "util/tools.h"
 

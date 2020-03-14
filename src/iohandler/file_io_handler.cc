@@ -29,12 +29,13 @@
 
 /// \file file_io_handler.cc
 
+#include "file_io_handler.h" // API
+
 #include <cstdio>
 #include <ixml.h>
 #include <utility>
 
 #include "cds_objects.h"
-#include "file_io_handler.h"
 #include "server.h"
 
 FileIOHandler::FileIOHandler(fs::path filename)

@@ -30,9 +30,9 @@
 /// \file url_request_handler.cc
 
 #ifdef HAVE_CURL
+#include "url_request_handler.h" // API
 
 #include <ixml.h>
-
 #include <utility>
 
 #include "common.h"
@@ -43,7 +43,6 @@
 
 #include "cds_objects.h"
 #include "iohandler/buffered_io_handler.h"
-#include "url_request_handler.h"
 
 #ifdef ONLINE_SERVICES
 #include "onlineservice/online_service_helper.h"

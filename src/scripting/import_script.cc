@@ -30,12 +30,12 @@
 /// \file import_script.cc
 
 #ifdef HAVE_JS
+#include "import_script.h" // API
 
-#include "import_script.h"
+#include <utility>
 
 #include "config/config_manager.h"
 #include "js_functions.h"
-#include <utility>
 
 ImportScript::ImportScript(const std::shared_ptr<ConfigManager>& config,
     std::shared_ptr<Storage> storage,

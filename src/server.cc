@@ -29,6 +29,8 @@
 
 /// \file server.cc
 
+#include "server.h" // API
+
 #ifdef HAVE_CURL
 #include <curl/curl.h>
 #include <iostream>
@@ -42,7 +44,6 @@
 #include "config/config_manager.h"
 #include "content_manager.h"
 #include "file_request_handler.h"
-#include "server.h"
 #include "storage/storage.h"
 #include "update_manager.h"
 #include "util/task_processor.h"

@@ -29,13 +29,14 @@
 
 /// \file process_executor.cc
 
-#include "process_executor.h"
-#include "logger.h"
-#include "process.h"
+#include "process_executor.h" // API
 
 #include <csignal>
 #include <sys/types.h>
 #include <unistd.h>
+
+#include "logger.h"
+#include "process.h"
 
 ProcessExecutor::ProcessExecutor(const std::string& command, const std::vector<std::string>& arglist)
 {

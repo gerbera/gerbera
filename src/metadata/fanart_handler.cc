@@ -28,11 +28,10 @@
 */
 
 /// \file fanart_handler.cc
-/// \brief Implementeation of the FanArtHelper class.
 
-#include "fanart_handler.h"
+#include "fanart_handler.h" // API
+
 #include <sys/stat.h>
-
 #include <utility>
 
 #include "common.h"

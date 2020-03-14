@@ -30,8 +30,8 @@
 /// \file curl_io_handler.cc
 
 #ifdef HAVE_CURL
+#include "curl_io_handler.h" // API
 
-#include "curl_io_handler.h"
 #include "config/config_manager.h"
 #include "util/tools.h"
 

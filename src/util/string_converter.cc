@@ -29,11 +29,12 @@
 
 /// \file string_converter.cc
 
-#include "string_converter.h"
+#include "string_converter.h" // API
 
-#include "config/config_manager.h"
 #include <cstdlib>
 #include <utility>
+
+#include "config/config_manager.h"
 
 StringConverter::StringConverter(const std::string& from, const std::string& to)
 {

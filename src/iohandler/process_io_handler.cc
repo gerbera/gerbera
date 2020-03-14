@@ -29,16 +29,18 @@
 
 /// \file process_io_handler.cc
 
-#include "process_io_handler.h"
-#include "common.h"
-#include "content_manager.h"
-#include "util/process.h"
+#include "process_io_handler.h" // API
+
 #include <csignal>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <utility>
+
+#include "common.h"
+#include "content_manager.h"
+#include "util/process.h"
 
 // after MAX_TIMEOUTS we will tell libupnp to check the socket,
 // this will make sure that we do not block the read and allow libupnp to

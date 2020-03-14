@@ -28,18 +28,17 @@
 */
 
 /// \file sopcast_content_handler.cc
-/// \brief Implementation of the SopCastContentHandler class.
 
-#if defined(SOPCAST)
+#ifdef SOPCAST
+#include "sopcast_content_handler.h" // API
 
-#include "sopcast_content_handler.h"
+#include <utility>
 
 #include "cds_objects.h"
 #include "config/config_manager.h"
 #include "metadata/metadata_handler.h"
 #include "online_service.h"
 #include "util/tools.h"
-#include <utility>
 
 SopCastContentHandler::SopCastContentHandler(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage)
     : config(std::move(config))

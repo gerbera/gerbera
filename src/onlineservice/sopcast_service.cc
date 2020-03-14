@@ -30,8 +30,9 @@
 /// \file sopcast_service.cc
 
 #ifdef SOPCAST
+#include "sopcast_service.h" // API
 
-#include "sopcast_service.h"
+#include <utility>
 
 #include "config/config_manager.h"
 #include "content_manager.h"
@@ -39,7 +40,6 @@
 #include "sopcast_content_handler.h"
 #include "storage/storage.h"
 #include "util/string_converter.h"
-#include <utility>
 
 #define SOPCAST_CHANNEL_URL "http://www.sopcast.com/gchlxml"
 

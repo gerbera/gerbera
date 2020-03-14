@@ -29,11 +29,12 @@
 
 /// \file items.cc
 
+#include "pages.h" // API
+
 #include <utility>
 
 #include "cds_objects.h"
 #include "common.h"
-#include "pages.h"
 #include "storage/storage.h"
 #include "upnp_xml.h"
 

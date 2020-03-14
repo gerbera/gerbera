@@ -30,15 +30,15 @@
 /// \file js_functions.cc
 
 #ifdef HAVE_JS
+#include "js_functions.h" // API
 
-#include "js_functions.h"
+#include <typeinfo>
 
 #include "config/config_manager.h"
 #include "content_manager.h"
 #include "metadata/metadata_handler.h"
 #include "script.h"
 #include "storage/storage.h"
-#include <typeinfo>
 
 //extern "C" {
 

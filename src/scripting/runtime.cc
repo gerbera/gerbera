@@ -30,8 +30,7 @@
 /// \file runtime.cc
 
 #ifdef HAVE_JS
-
-#include "runtime.h"
+#include "runtime.h" // API
 
 [[noreturn]] static void fatal_handler(void* udata, const char* msg)
 {

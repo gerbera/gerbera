@@ -28,18 +28,17 @@
 */
 
 /// \file atrailers_content_handler.cc
-/// \brief Implementation of the ATrailersContentHandler class.
 
-#if defined(ATRAILERS)
+#ifdef ATRAILERS
+#include "atrailers_content_handler.h" // API
 
-#include "atrailers_content_handler.h"
+#include <utility>
 
 #include "cds_objects.h"
 #include "config/config_manager.h"
 #include "metadata/metadata_handler.h"
 #include "online_service.h"
 #include "util/tools.h"
-#include <utility>
 
 ATrailersContentHandler::ATrailersContentHandler(std::shared_ptr<ConfigManager> config,
     std::shared_ptr<Storage> storage)
