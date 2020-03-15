@@ -90,7 +90,7 @@ ConfigManager::ConfigManager(fs::path filename,
         filename += home / DEFAULT_CONFIG_NAME;
     }
 
-    if (!fs::is_regular_file(filename)) {
+    if (!isRegularFile(filename)) {
         std::ostringstream expErrMsg;
         expErrMsg << "\nThe server configuration file could not be found: ";
         expErrMsg << filename << "\n";
@@ -1343,7 +1343,7 @@ fs::path ConfigManager::resolvePath(fs::path path, bool isFile, bool mustExist)
     // verify that file/directory is there
     if (isFile) {
         if (mustExist) {
-            if (!fs::is_regular_file(path) && !fs::is_symlink(path))
+            if (!isRegularFile(path) && !fs::is_symlink(path))
                 throw std::runtime_error("File '" + path.string() + "' does not exist!");
         } else {
             std::string parent_path = path.parent_path();
@@ -1628,7 +1628,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
 
         std::string tmp_path;
         if (fs::path(param).is_absolute()) {
-            if (!fs::is_regular_file(param) && !fs::is_symlink(param))
+            if (!isRegularFile(param) && !fs::is_symlink(param))
                 throw std::runtime_error("error in configuration, transcoding "
                                          "profile \""
                     + prof->getName() + "\" could not find transcoding command " + param);

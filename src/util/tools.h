@@ -82,6 +82,9 @@ std::string reduce_string(std::string str, char ch);
 /// \return last modification time of the path or directory
 time_t getLastWriteTime(const fs::path& path);
 
+/// \brief Checks if the given file is a regular file
+bool isRegularFile(const fs::path& path);
+
 /// \brief Checks if the given binary is executable by our process
 /// \param path absolute path of the binary
 /// \param err if not NULL err will contain the errno result of the check

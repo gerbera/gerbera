@@ -169,6 +169,18 @@ time_t getLastWriteTime(const fs::path& path)
     return statbuf.st_mtime;
 }
 
+bool isRegularFile(const fs::path& path)
+{
+    // unfortunately fs::is_regular_file(path, ec) does not to work for files >2GB on 32bit systems (see #737)
+
+    struct stat statbuf;
+    int ret = stat(path.c_str(), &statbuf);
+    if (ret != 0)
+        return false;
+
+    return S_ISREG(statbuf.st_mode);
+}
+
 bool is_executable(const fs::path& path, int* err)
 {
     int ret = access(path.c_str(), R_OK | X_OK);
@@ -187,7 +199,7 @@ fs::path find_in_path(const fs::path& exec)
     auto pathAr = split_string(PATH, ':');
     for (auto& path : pathAr) {
         fs::path check = fs::path(path) / exec;
-        if (fs::is_regular_file(check))
+        if (isRegularFile(check))
             return check;
     }
 

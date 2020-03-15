@@ -181,7 +181,7 @@ void web::addObject::process()
     } else if (obj_type == STRING_OBJECT_TYPE_ITEM) {
         if (location.empty())
             throw std::runtime_error("no location given");
-        if (!fs::is_regular_file(location))
+        if (!isRegularFile(location))
             throw std::runtime_error("file not found");
         obj = this->addItem(parentID, std::make_shared<CdsItem>(storage));
         allow_fifo = true;
@@ -190,7 +190,7 @@ void web::addObject::process()
             throw std::runtime_error("no action given");
         if (location.empty())
             throw std::runtime_error("no location given");
-        if (!fs::is_regular_file(location))
+        if (!isRegularFile(location))
             throw std::runtime_error("file not found");
         obj = this->addActiveItem(parentID);
         allow_fifo = true;

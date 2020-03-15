@@ -97,7 +97,7 @@ void web::directories::process()
 
         bool hasContent = false;
         for (auto& subIt : fs::directory_iterator(path)) {
-            if (!subIt.is_directory() && !subIt.is_regular_file())
+            if (!subIt.is_directory() && !isRegularFile(subIt.path()))
                 continue;
             hasContent = true;
             break;
