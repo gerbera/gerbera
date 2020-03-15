@@ -47,7 +47,7 @@ AutoscanInotify::AutoscanInotify(std::shared_ptr<Storage> storage, std::shared_p
     : storage(std::move(storage))
     , content(std::move(content))
 {
-    if (fs::is_regular_file(INOTIFY_MAX_USER_WATCHES_FILE)) {
+    if (isRegularFile(INOTIFY_MAX_USER_WATCHES_FILE)) {
         try {
             int max_watches = std::stoi(trim_string(readTextFile(INOTIFY_MAX_USER_WATCHES_FILE)));
             log_debug("Max watches on the system: {}", max_watches);

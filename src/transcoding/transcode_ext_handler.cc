@@ -168,7 +168,7 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::open(std::shared_ptr<Transc
 
     fs::path check;
     if (profile->getCommand().is_absolute()) {
-        if (!fs::is_regular_file(profile->getCommand()))
+        if (!isRegularFile(profile->getCommand()))
             throw std::runtime_error("Could not find transcoder: " + profile->getCommand().string());
 
         check = profile->getCommand();

@@ -425,7 +425,7 @@ void ContentManager::addVirtualItem(const std::shared_ptr<CdsObject>& obj, bool 
     obj->validate();
     fs::path path = obj->getLocation();
 
-    if (!fs::is_regular_file(path))
+    if (!isRegularFile(path))
         throw std::runtime_error("Not a file: " + path.string());
 
     auto pcdir = storage->findObjectByPath(path);
@@ -826,8 +826,7 @@ void ContentManager::addRecursive(const fs::path& path, bool hidden, const std::
                 }
             }
         } catch (const std::runtime_error& ex) {
-            fs::file_status status = fs::status(newPath);
-            log_warning("skipping {} (type:{} perms:{} ex:{})", newPath.c_str(), (int)status.type(), (int)status.permissions(), ex.what());
+            log_warning("skipping {} (ex:{})", newPath.c_str(), ex.what());
         }
     }
     closedir(dir);
