@@ -88,9 +88,9 @@ public:
     /// \param attributes Dictionary containing the <res> tag attributes (like resolution, etc.)
     static void renderResource(const std::string& URL, const std::map<std::string, std::string>& attributes, pugi::xml_node* parent);
 
-    /// \brief Renders a subtitle resource tag (Samsung proprietary extension)
+    /// \brief Renders a subtitle resource tag
     /// \param URL download location of the video item
-    static void renderCaptionInfo(const std::string& URL, pugi::xml_node* parent);
+    void renderCaptionInfo(const std::string& URL, pugi::xml_node* parent);
 
     static void renderCreator(const std::string& creator, pugi::xml_node* parent);
     static void renderAlbumArtURI(const std::string& uri, pugi::xml_node* parent);
