@@ -13,7 +13,7 @@ public:
 
     virtual void SetUp()
     {
-        std::string virtualDir = "/dir/virtual";
+        std::string virtualDir = "http://server/content";
         std::string presentationURl = "http://someurl/";
         subject = new UpnpXMLBuilder(nullptr, nullptr, virtualDir, presentationURl);
     }
@@ -90,11 +90,11 @@ TEST_F(UpnpXmlTest, CreatesSecCaptionInfoElement)
 {
     pugi::xml_document doc;
     auto container = doc.append_child("container");
-    subject->renderCaptionInfo("file.srt", &container);
+    subject->renderCaptionInfo("/media/object_id/1/file.mp4", &container);
     auto result = container.first_child();
 
     EXPECT_NE(result, nullptr);
-    EXPECT_STREQ(result.text().as_string(), "file.srt");
+    EXPECT_STREQ(result.text().as_string(), "http://server/content/media/object_id/1/file.srt");
     EXPECT_STREQ(result.name(), "sec:CaptionInfoEx");
     EXPECT_STREQ(result.attribute("sec:type").as_string(), "srt");
 }

@@ -391,13 +391,11 @@ void UpnpXMLBuilder::renderCaptionInfo(const std::string& URL, pugi::xml_node* p
 
     // Samsung DLNA clients don't follow this URL and
     // obtain subtitle location from video HTTP headers.
-    // We don't need to know here what the subtitle type
-    // is and even if there is a subtitle.
-    // This tag seems to be only a hint for Samsung devices,
-    // though it's necessary.
+    // However other software players (like VLC) use
+    // it to add a subtitle track.
 
     size_t endp = URL.rfind('.');
-    cap.append_child(pugi::node_pcdata).set_value((URL.substr(0, endp) + ".srt").c_str());
+    cap.append_child(pugi::node_pcdata).set_value((virtualURL + URL.substr(0, endp) + ".srt").c_str());
     cap.append_attribute("sec:type") = "srt";
 }
 
@@ -831,10 +829,8 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
             protocolInfo = protocolInfo.substr(0, protocolInfo.rfind(':') + 1).append(extend);
             res_attrs[MetadataHandler::getResAttrName(R_PROTOCOLINFO)] = protocolInfo;
 
-            if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK)) {
-                if (startswith(mimeType, "video")) {
-                    renderCaptionInfo(url, parent);
-                }
+            if (startswith(mimeType, "video")) {
+                renderCaptionInfo(url, parent);
             }
 
             log_debug("extended protocolInfo: {}", protocolInfo.c_str());
