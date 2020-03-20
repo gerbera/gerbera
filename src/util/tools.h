@@ -85,6 +85,9 @@ time_t getLastWriteTime(const fs::path& path);
 /// \brief Checks if the given file is a regular file
 bool isRegularFile(const fs::path& path);
 
+/// \brief Returns file size of give file, if it does not exist it will throw an exception
+off_t getFileSize(const fs::path& path);
+
 /// \brief Checks if the given binary is executable by our process
 /// \param path absolute path of the binary
 /// \param err if not NULL err will contain the errno result of the check

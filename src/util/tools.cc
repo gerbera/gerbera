@@ -171,14 +171,25 @@ time_t getLastWriteTime(const fs::path& path)
 
 bool isRegularFile(const fs::path& path)
 {
-    // unfortunately fs::is_regular_file(path, ec) does not to work for files >2GB on 32bit systems (see #737)
-
+    // unfortunately fs::is_regular_file(path, ec) does not to work for files >2GB on ARM 32bit systems (see #737)
     struct stat statbuf;
     int ret = stat(path.c_str(), &statbuf);
     if (ret != 0)
         return false;
 
     return S_ISREG(statbuf.st_mode);
+}
+
+off_t getFileSize(const fs::path& path)
+{
+    // unfortunately fs::file_size(path) does not to work for files >2GB on ARM 32bit systems (see #737)
+    struct stat statbuf;
+    int ret = stat(path.c_str(), &statbuf);
+    if (ret != 0) {
+        throw std::runtime_error(mt_strerror(errno) + ": " + path.string());
+    }
+
+    return statbuf.st_size;
 }
 
 bool is_executable(const fs::path& path, int* err)
