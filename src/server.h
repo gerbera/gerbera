@@ -229,6 +229,8 @@ protected:
     ///
     /// \return UPNP_E_SUCCESS Callbacks registered successfully, else error code.
     static int registerVirtualDirCallbacks();
+
+    static int handleUpnpEventCallback(Upnp_EventType eventtype, const void* event, void* cookie);
 };
 
 #endif // __SERVER_H__

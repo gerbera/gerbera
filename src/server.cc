@@ -58,11 +58,6 @@
 #include "serve_request_handler.h"
 #include "web/pages.h"
 
-static int static_upnp_callback(Upnp_EventType eventtype, const void* event, void* cookie)
-{
-    return static_cast<Server*>(cookie)->handleUpnpEvent(eventtype, event);
-}
-
 Server::Server(std::shared_ptr<ConfigManager> config)
     : config(std::move(config))
 {
@@ -206,7 +201,7 @@ void Server::run()
         deviceDescription.c_str(),
         static_cast<size_t>(deviceDescription.length()) + 1,
         true,
-        static_upnp_callback,
+        handleUpnpEventCallback,
         this,
         &deviceHandle);
 
@@ -301,6 +296,11 @@ void Server::shutdown()
 #endif
     timer->shutdown();
     timer = nullptr;
+}
+
+int Server::handleUpnpEventCallback(Upnp_EventType eventtype, const void* event, void* cookie)
+{
+    return static_cast<Server*>(cookie)->handleUpnpEvent(eventtype, event);
 }
 
 int Server::handleUpnpEvent(Upnp_EventType eventtype, const void* event)
