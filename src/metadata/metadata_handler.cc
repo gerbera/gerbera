@@ -105,7 +105,7 @@ void MetadataHandler::setMetadata(const std::shared_ptr<ConfigManager>& config, 
     std::string location = item->getLocation();
     if (!isRegularFile(location))
         throw std::runtime_error("Not a file: " + location);
-    auto filesize = fs::file_size(location);
+    auto filesize = getFileSize(location);
 
     std::string mimetype = item->getMimeType();
 
