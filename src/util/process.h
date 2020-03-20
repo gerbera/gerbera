@@ -38,10 +38,7 @@
 // forward declaration
 class ConfigManager;
 
-void init_process();
 std::string run_simple_process(const std::shared_ptr<ConfigManager>& cfg, const std::string& prog, const std::string& param, const std::string& input);
-
-void run_process(std::string prog, std::string param);
 
 bool is_alive(pid_t pid, int* exit_status = nullptr);
 
