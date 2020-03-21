@@ -1,8 +1,8 @@
 /*GRB*
 
-Gerbera - https://gerbera.io/
+    Gerbera - https://gerbera.io/
 
-    http_protocol_helper.h - this file is part of Gerbera.
+    upnp_headers.h - this file is part of Gerbera.
 
     Copyright (C) 2016-2020 Gerbera Contributors
 
@@ -26,9 +26,10 @@ Gerbera - https://gerbera.io/
 #ifndef GERBERA_HEADERS_H
 #define GERBERA_HEADERS_H
 
-#include <action_request.h>
 #include <map>
 #include <memory>
+#include <upnp.h>
+#include <vector>
 #if defined(UPNP_HAS_EXTRA_HEADERS_LIST) || defined(UPNP_1_12_LIST)
 #include <ExtraHeaders.h>
 #endif
@@ -38,10 +39,14 @@ public:
     void addHeader(const std::string& header, const std::string& value);
     void writeHeaders(UpnpFileInfo* fileInfo) const;
 
+    static std::unique_ptr<std::map<std::string, std::string>> readHeaders(UpnpFileInfo* fileInfo);
+
 private:
-    std::unique_ptr<std::vector<std::pair<std::string, std::string>>> headers;
     static std::string formatHeader(const std::pair<std::string, std::string>& header, bool crlf);
+    static std::pair<std::string, std::string> parseHeader(const std::string& header);
     static std::string stripInvalid(const std::string& value);
+
+    std::unique_ptr<std::map<std::string, std::string>> headers;
 };
 
 #endif //GERBERA_HEADERS_H

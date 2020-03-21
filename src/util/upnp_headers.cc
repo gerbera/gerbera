@@ -2,7 +2,7 @@
 
     Gerbera - https://gerbera.io/
 
-    http_protocol_helper.cc - this file is part of Gerbera.
+    upnp_headers.cc - this file is part of Gerbera.
 
     Copyright (C) 2016-2020 Gerbera Contributors
 
@@ -27,6 +27,9 @@
 
 #include <string>
 
+#include "common.h"
+#include "util/tools.h"
+
 std::string Headers::stripInvalid(const std::string& value)
 {
     std::string result = value;
@@ -41,25 +44,24 @@ std::string Headers::stripInvalid(const std::string& value)
     return result;
 }
 
-void Headers::addHeader(const std::string& header, const std::string& value)
+void Headers::addHeader(const std::string& key, const std::string& value)
 {
-    if (headers == nullptr) {
-        headers = std::make_unique<std::vector<std::pair<std::string, std::string>>>();
-    }
-
-    if (header.empty() || value.empty()) {
+    if (key.empty() || value.empty()) {
         return;
     }
 
-    std::string cleanHeader = stripInvalid(header);
+    std::string cleanKey = stripInvalid(key);
     std::string cleanValue = stripInvalid(value);
-    // Only newlines
-    if (cleanHeader.empty() || cleanValue.empty()) {
+    if (cleanKey.empty() || cleanValue.empty()) {
         return;
     }
-    log_debug("Adding header: '{}: {}'", cleanHeader.c_str(), cleanValue.c_str());
 
-    headers->push_back({ cleanHeader, cleanValue });
+    if (headers == nullptr) {
+        headers = std::make_unique<std::map<std::string, std::string>>();
+    }
+
+    log_debug("Adding header: '{}: {}'", cleanKey.c_str(), cleanValue.c_str());
+    headers->insert(std::make_pair(cleanKey, cleanValue));
 }
 
 std::string Headers::formatHeader(const std::pair<std::string, std::string>& header, bool crlf)
@@ -70,37 +72,85 @@ std::string Headers::formatHeader(const std::pair<std::string, std::string>& hea
     headerValue += header.second;
     if (crlf)
         headerValue += "\r\n";
+
     return headerValue;
+}
+
+std::pair<std::string, std::string> Headers::parseHeader(const std::string& header)
+{
+    std::string first = header;
+    std::string second;
+    std::size_t found = header.find_first_of(':');
+    if (found != std::string::npos) {
+        first = header.substr(0, found);
+        second = header.substr(found + 1);
+    }
+
+    trimStringInPlace(first);
+    trimStringInPlace(second);
+    return std::make_pair(first, second);
 }
 
 void Headers::writeHeaders(UpnpFileInfo* fileInfo) const
 {
+    if (headers == nullptr)
+        return;
+
 #ifdef UPNP_1_12_LIST
-    if (headers != nullptr) {
-        auto head = const_cast<UpnpListHead*>(UpnpFileInfo_get_ExtraHeadersList(fileInfo));
-        for (auto iter : *headers) {
-            UpnpExtraHeaders* h = UpnpExtraHeaders_new();
-            UpnpExtraHeaders_set_resp(h, formatHeader(iter, false).c_str());
-            UpnpListInsert(head, UpnpListEnd(head), const_cast<UpnpListHead*>(UpnpExtraHeaders_get_node(h)));
-        }
+    auto head = const_cast<UpnpListHead*>(UpnpFileInfo_get_ExtraHeadersList(fileInfo));
+    for (auto iter : *headers) {
+        UpnpExtraHeaders* h = UpnpExtraHeaders_new();
+        UpnpExtraHeaders_set_resp(h, formatHeader(iter, false).c_str());
+        UpnpListInsert(head, UpnpListEnd(head), const_cast<UpnpListHead*>(UpnpExtraHeaders_get_node(h)));
     }
 #elif UPNP_HAS_EXTRA_HEADERS_LIST
-    if (headers != nullptr) {
-        auto head = const_cast<list_head*>(UpnpFileInfo_get_ExtraHeadersList(fileInfo));
-        for (auto iter : *headers) {
-            UpnpExtraHeaders* h = UpnpExtraHeaders_new();
-            UpnpExtraHeaders_set_resp(h, formatHeader(iter, false).c_str());
-            UpnpExtraHeaders_add_to_list_node(h, head);
-        }
+    auto head = const_cast<list_head*>(UpnpFileInfo_get_ExtraHeadersList(fileInfo));
+    for (auto iter : *headers) {
+        UpnpExtraHeaders* h = UpnpExtraHeaders_new();
+        UpnpExtraHeaders_set_resp(h, formatHeader(iter, false).c_str());
+        UpnpExtraHeaders_add_to_list_node(h, head);
     }
 #else
     std::string result;
-    if (headers != nullptr) {
-        // Reverse as map is sorted by insertion order latest first
-        for (auto iter = headers->rbegin(); iter != headers->rend(); ++iter) {
-            result += formatHeader(*iter, true);
-        }
+    for (auto iter : *headers) {
+        result += formatHeader(*iter, true);
     }
     UpnpFileInfo_set_ExtraHeaders(fileInfo, ixmlCloneDOMString(result.c_str()));
 #endif
+}
+
+std::unique_ptr<std::map<std::string, std::string>> Headers::readHeaders(UpnpFileInfo* fileInfo)
+{
+    auto ret = std::make_unique<std::map<std::string, std::string>>();
+
+#ifdef UPNP_1_12_LIST
+    auto head = const_cast<UpnpListHead*>(UpnpFileInfo_get_ExtraHeadersList(fileInfo));
+    UpnpListIter pos;
+    for (pos = UpnpListBegin(head); pos != UpnpListEnd(head); pos = UpnpListNext(head, pos)) {
+        UpnpExtraHeaders* extra = (UpnpExtraHeaders*)pos;
+        std::string header = UpnpExtraHeaders_get_resp(extra);
+        auto add = parseHeader(header);
+        ret->insert(add);
+    }
+#elif UPNP_HAS_EXTRA_HEADERS_LIST
+    auto head = const_cast<list_head*>(UpnpFileInfo_get_ExtraHeadersList(fileInfo));
+    list_head* pos;
+    list_for_each(pos, head)
+    {
+        UpnpExtraHeaders* extra = (UpnpExtraHeaders*)pos;
+        std::string header = UpnpExtraHeaders_get_resp(extra);
+        auto add = parseHeader(header);
+        ret->insert(add);
+    }
+#else
+    // each header line should be followed by "\r\n"
+    std::string str = UpnpFileInfo_get_ExtraHeaders_cstr();
+    auto header_list = split_string(str, '\n');
+    for (const auto& header : header_list) {
+        auto add = parseHeader(header);
+        ret->insert(add);
+    }
+#endif
+
+    return ret;
 }

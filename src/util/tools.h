@@ -63,7 +63,16 @@ class IOHandler;
 /// \return array of strings
 std::vector<std::string> split_string(const std::string& str, char sep, bool empty = false);
 
-/// \brief returns str with leading and trailing whitespace removed
+/// \brief trim from start (in place)
+void leftTrimStringInPlace(std::string& str);
+
+/// \brief trim from end (in place)
+void rightTrimStringInPlace(std::string& str);
+
+/// \brief remove leading and trailing whitespace (in place)
+void trimStringInPlace(std::string& str);
+
+/// \brief returns str with leading and trailing whitespace removed (copy)
 std::string trim_string(std::string str);
 
 /// \brief returns true if str starts with check
