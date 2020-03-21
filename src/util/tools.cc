@@ -96,33 +96,35 @@ std::vector<std::string> split_string(const std::string& str, char sep, bool emp
     return ret;
 }
 
+void leftTrimStringInPlace(std::string& str)
+{
+    str.erase(str.begin(), std::find_if(str.begin(), str.end(), [](int ch) {
+        return !std::isspace(ch);
+    }));
+}
+
+void rightTrimStringInPlace(std::string& str)
+{
+    str.erase(std::find_if(str.rbegin(), str.rend(), [](int ch) {
+        return !std::isspace(ch);
+    }).base(),
+        str.end());
+}
+
+void trimStringInPlace(std::string& str)
+{
+    leftTrimStringInPlace(str);
+    rightTrimStringInPlace(str);
+}
+
 std::string trim_string(std::string str)
 {
     if (str.empty())
         return str;
 
-    int i;
-    int start = 0;
-    int end = 0;
-    int len = str.length();
-
-    const char* buf = str.c_str();
-
-    for (i = 0; i < len; i++) {
-        if (!strchr(WHITE_SPACE, buf[i])) {
-            start = i;
-            break;
-        }
-    }
-    if (i >= len)
-        return "";
-    for (i = len - 1; i >= start; i--) {
-        if (!strchr(WHITE_SPACE, buf[i])) {
-            end = i + 1;
-            break;
-        }
-    }
-    return str.substr(start, end - start);
+    leftTrimStringInPlace(str);
+    rightTrimStringInPlace(str);
+    return str;
 }
 
 bool startswith(const std::string& str, const std::string& check)
