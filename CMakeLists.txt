@@ -165,8 +165,6 @@ set(libgerberaFILES
         src/util/executor.h
         src/util/generic_task.cc
         src/util/generic_task.h
-        src/util/headers.h
-        src/util/headers.cc
         src/util/jpeg_resolution.cc
         src/util/logger.h
         src/util/mt_inotify.cc
@@ -185,6 +183,8 @@ set(libgerberaFILES
         src/util/timer.h
         src/util/tools.cc
         src/util/tools.h
+        src/util/upnp_headers.h
+        src/util/upnp_headers.cc
         src/util/xml_to_json.cc
         src/util/xml_to_json.h
         src/web/action.cc

@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "util/headers.h"
+#include "util/upnp_headers.h"
 
 using namespace ::testing;
 
