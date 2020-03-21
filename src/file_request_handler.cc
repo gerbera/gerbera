@@ -45,7 +45,7 @@
 #include "util/process.h"
 #include "web/session_manager.h"
 
-#include "util/headers.h"
+#include "util/upnp_headers.h"
 #include "util/tools.h"
 
 #include "transcoding/transcode_dispatcher.h"

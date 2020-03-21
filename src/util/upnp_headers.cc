@@ -21,9 +21,9 @@
     $Id$
 */
 
-/// \file headers.cc
+/// \file upnp_headers.cc
 
-#include "headers.h" // API
+#include "upnp_headers.h" // API
 
 #include <string>
 

@@ -21,7 +21,7 @@ Gerbera - https://gerbera.io/
     $Id$
 */
 
-/// \file headers.h
+/// \file upnp_headers.h
 
 #ifndef GERBERA_HEADERS_H
 #define GERBERA_HEADERS_H

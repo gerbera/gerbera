@@ -32,13 +32,13 @@
 #include "web_request_handler.h" // API
 
 #include <ctime>
-#include <util/headers.h>
 #include <utility>
 
 #include "config/config_manager.h"
 #include "content_manager.h"
 #include "iohandler/mem_io_handler.h"
 #include "util/tools.h"
+#include "util/upnp_headers.h"
 #include "util/xml_to_json.h"
 #include "web/pages.h"
 
