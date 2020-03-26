@@ -326,11 +326,14 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(std::shared_ptr<CdsItem> 
             throw std::runtime_error("TagLibHandler: mp4 resource has no tag information");
         }
 
-        std::string art_mimetype;
+        auto tag = f.tag();
 
-        const TagLib::MP4::ItemListMap& itemsListMap = f.tag()->itemListMap();
-        const TagLib::MP4::Item& coverItem = itemsListMap["covr"];
-        const TagLib::MP4::CoverArtList& coverArtList = coverItem.toCoverArtList();
+        if (!tag->contains("covr")) {
+            throw std::runtime_error("TagLibHandler: mp4 file has no 'covr' item");
+        }
+
+        auto coverItem = tag->item("covr");
+        TagLib::MP4::CoverArtList coverArtList = coverItem.toCoverArtList();
         if (coverArtList.isEmpty()) {
             throw std::runtime_error("TagLibHandler: mp4 resource has no picture information");
         }
@@ -616,23 +619,19 @@ void TagLibHandler::extractMP4(TagLib::IOStream* roStream, const std::shared_ptr
         return;
     }
 
-    std::string art_mimetype;
-
-    TagLib::MP4::ItemListMap itemsListMap = mp4.tag()->itemListMap();
-    if (itemsListMap.contains("covr")) {
-        TagLib::MP4::Item coverItem = itemsListMap["covr"];
+    if (mp4.tag()->contains("covr")) {
+        auto coverItem = mp4.tag()->item("covr");
         TagLib::MP4::CoverArtList coverArtList = coverItem.toCoverArtList();
         if (coverArtList.isEmpty()) {
             log_debug("TagLibHandler: mp4 file has no coverart");
             return;
         }
 
-        TagLib::MP4::CoverArt coverArt = coverArtList.front();
-        TagLib::ByteVector data = coverArt.data();
-        art_mimetype = getContentTypeFromByteVector(data);
-
-        if (!art_mimetype.empty())
+        auto& coverArt = coverArtList.front();
+        if (auto art_mimetype = getContentTypeFromByteVector(coverArt.data());
+            !art_mimetype.empty()) {
             addArtworkResource(item, art_mimetype);
+        }
     } else {
         log_debug("TagLibHandler: mp4 file has no 'covr' item");
     }

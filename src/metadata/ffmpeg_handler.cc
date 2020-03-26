@@ -149,11 +149,6 @@ static void addFfmpegResourceFields(std::shared_ptr<CdsItem> item, AVFormatConte
     int64_t hours, mins, secs, us;
     int audioch = 0, samplefreq = 0;
     bool audioset, videoset;
-    std::string resolution;
-    char duration[15];
-
-    // Initialize the buffers
-    duration[0] = 0;
 
     // duration
     secs = pFormatCtx->duration / AV_TIME_BASE;
@@ -163,9 +158,9 @@ static void addFfmpegResourceFields(std::shared_ptr<CdsItem> item, AVFormatConte
     hours = mins / 60;
     mins %= 60;
     if ((hours + mins + secs) > 0) {
-        sprintf(duration, "%02" PRId64 ":%02" PRId64 ":%02" PRId64 ".%01" PRId64, hours, mins, secs, (10 * us) / AV_TIME_BASE);
+        auto duration = fmt::format("{:02}:{:02}:{:02}.{:01}", hours, mins, secs, (10 * us) / AV_TIME_BASE);
         log_debug("Added duration: {}", duration);
-        item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_DURATION), duration);
+        item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_DURATION), std::move(duration));
     }
 
     // bitrate
@@ -198,10 +193,10 @@ static void addFfmpegResourceFields(std::shared_ptr<CdsItem> item, AVFormatConte
             }
 
             if ((as_codecpar(st)->width > 0) && (as_codecpar(st)->height > 0)) {
-                resolution = std::to_string(as_codecpar(st)->width) + "x" + std::to_string(as_codecpar(st)->height);
+                auto resolution = fmt::format("{}x{}", as_codecpar(st)->width, as_codecpar(st)->height);
 
-                log_debug("Added resolution: {} pixel", resolution.c_str());
-                item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), resolution);
+                log_debug("Added resolution: {} pixel", resolution);
+                item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), std::move(resolution));
                 videoset = true;
             }
         }
