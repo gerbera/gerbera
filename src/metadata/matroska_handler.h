@@ -51,8 +51,8 @@ public:
 private:
     void parseMKV(const std::shared_ptr<CdsItem>& item, MemIOHandler** p_io_handler);
     void parseLevel1Element(const std::shared_ptr<CdsItem>& item, LIBEBML_NAMESPACE::EbmlStream& ebml_stream, LIBEBML_NAMESPACE::EbmlElement* el_l1, MemIOHandler** p_io_handler);
-    void parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream& ebml_stream, LIBMATROSKA_NAMESPACE::KaxInfo* info);
-    static void parseAttachments(const std::shared_ptr<CdsItem>& item, LIBEBML_NAMESPACE::EbmlStream& ebml_stream, LIBMATROSKA_NAMESPACE::KaxAttachments* attachments, MemIOHandler** io_handler);
+    void parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream& ebml_stream, LIBEBML_NAMESPACE::EbmlMaster* info);
+    static void parseAttachments(const std::shared_ptr<CdsItem>& item, LIBEBML_NAMESPACE::EbmlStream& ebml_stream, LIBEBML_NAMESPACE::EbmlMaster* attachments, MemIOHandler** io_handler);
     static std::string getContentTypeFromByteVector(const LIBMATROSKA_NAMESPACE::KaxFileData* data);
     static void addArtworkResource(const std::shared_ptr<CdsItem>& item, const std::string& art_mimetype);
 };

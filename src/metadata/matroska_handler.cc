@@ -160,27 +160,33 @@ void MatroskaHandler::parseMKV(const std::shared_ptr<CdsItem>& item, MemIOHandle
 
 void MatroskaHandler::parseLevel1Element(const std::shared_ptr<CdsItem>& item, EbmlStream& ebml_stream, EbmlElement* el_l1, MemIOHandler** p_io_handler)
 {
-    if (EbmlId(*el_l1) == KaxInfo::ClassInfos.GlobalId) {
-        parseInfo(item, ebml_stream, dynamic_cast<KaxInfo*>(el_l1));
-    } else if (EbmlId(*el_l1) == KaxAttachments::ClassInfos.GlobalId) {
-        parseAttachments(item, ebml_stream, dynamic_cast<KaxAttachments*>(el_l1), p_io_handler);
+    // Looking at just at EbmlId is not reliable since it can be a dummy element.
+    if (!el_l1->IsMaster())
+        return;
+    auto master = dynamic_cast<EbmlMaster*>(el_l1);
+    if (!master) {
+        log_debug("dynamic_cast unexpectedly returned nullpt, seems to be broken");
+        return;
+    }
+    if (EbmlId(*master) == KaxInfo::ClassInfos.GlobalId) {
+        parseInfo(item, ebml_stream, master);
+    } else if (EbmlId(*master) == KaxAttachments::ClassInfos.GlobalId) {
+        parseAttachments(item, ebml_stream, master, p_io_handler);
     }
 }
 
-void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream& ebml_stream, KaxInfo* info)
+void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream& ebml_stream, EbmlMaster* info)
 {
     EbmlElement* dummy_el;
     int i_upper_level = 0;
-    EbmlMaster* m;
 
     // master elements
-    m = static_cast<EbmlMaster*>(info);
-    m->Read(ebml_stream, EBML_CONTEXT(info), i_upper_level, dummy_el, true);
+    info->Read(ebml_stream, EBML_CONTEXT(info), i_upper_level, dummy_el, true);
 
     auto sc = StringConverter::i2i(config); // sure is sure
 
-    for (size_t i = 0; i < m->ListSize(); i++) {
-        EbmlElement* el = (*m)[i];
+    for (size_t i = 0; i < info->ListSize(); i++) {
+        EbmlElement* el = (*info)[i];
 
         if (EbmlId(*el) == KaxTitle::ClassInfos.GlobalId) {
             std::string title(UTFstring(*dynamic_cast<KaxTitle*>(el)).GetUTF8());
@@ -200,7 +206,7 @@ void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream
     }
 }
 
-void MatroskaHandler::parseAttachments(const std::shared_ptr<CdsItem>& item, EbmlStream& ebml_stream, KaxAttachments* attachments, MemIOHandler** p_io_handler)
+void MatroskaHandler::parseAttachments(const std::shared_ptr<CdsItem>& item, EbmlStream& ebml_stream, EbmlMaster* attachments, MemIOHandler** p_io_handler)
 {
     EbmlElement* dummy_el;
     int i_upper_level = 0;
