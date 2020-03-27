@@ -1,8 +1,11 @@
 find_package(Threads REQUIRED)
 
-add_executable(testhandler
-        test_http_protocol_helper.cc
-        )
+add_executable(testcore
+        main.cc
+        test_searchhandler.cc
+        test_server.cc
+        test_upnp_xml.cc
+)
 
 include_directories(
         "${CMAKE_SOURCE_DIR}/src"
@@ -25,7 +28,7 @@ include_directories(
         ${GMOCK_INCLUDE_DIRS}
 )
 
-target_link_libraries(testhandler PRIVATE
+target_link_libraries(testcore PRIVATE
         libgerbera
         ${UUID_LIBRARIES}
         ${UPNP_LIBRARIES}
@@ -46,8 +49,14 @@ target_link_libraries(testhandler PRIVATE
         ${GMOCK_BOTH_LIBRARIES}
         ${GERBERA_INTERFACE_LIBRARIES}
         ${CMAKE_THREAD_LIBS_INIT}
-)
+        )
 
-add_test(NAME testhandler
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/test/test_handler
-        COMMAND ./testhandler)
+add_test(NAME testcore
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/test/test_core
+        COMMAND ./testcore)
+
+add_custom_command(TARGET testcore POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/fixtures $<TARGET_FILE_DIR:testcore>/fixtures
+        )
+
+add_definitions(-DCMAKE_BINARY_DIR="${CMAKE_BINARY_DIR}")
