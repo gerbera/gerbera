@@ -55,6 +55,10 @@ public:
     std::string getMimeType() override;
 
 private:
+    // The ffmpegthumbnailer code (ffmpeg?) is not threading safe.
+    // Add a lock around the usage to avoid crashing randomly.
+    pthread_mutex_t thumb_lock;
+
     void addFfmpegAuxdataFields(std::shared_ptr<CdsItem> item, AVFormatContext* pFormatCtx) const;
     void addFfmpegMetadataFields(std::shared_ptr<CdsItem> item, AVFormatContext* pFormatCtx) const;
     fs::path getThumbnailCacheFilePath(const fs::path& movie_filename, bool create) const;

@@ -260,77 +260,6 @@ void FfmpegHandler::fillMetadata(std::shared_ptr<CdsItem> item)
 }
 
 #ifdef HAVE_FFMPEGTHUMBNAILER
-
-// The ffmpegthumbnailer code (ffmpeg?) is not threading safe.
-// Add a lock around the usage to avoid crashing randomly.
-static pthread_mutex_t thumb_lock;
-
-static int _mkdir(const char* path)
-{
-    int ret = mkdir(path, 0777);
-
-    if (ret == 0) {
-        // Make sure we are +x in case of restrictive umask that strips +x.
-        struct stat st;
-        if (stat(path, &st)) {
-            log_warning("could not stat({}): {}", path, strerror(errno));
-            return -1;
-        }
-        mode_t xbits = S_IXUSR | S_IXGRP | S_IXOTH;
-        if (!(st.st_mode & xbits)) {
-            if (chmod(path, st.st_mode | xbits)) {
-                log_warning("could not chmod({}, +x): {}", path, strerror(errno));
-                return -1;
-            }
-        }
-    }
-
-    return ret;
-}
-
-static bool makeThumbnailCacheDir(fs::path& path)
-{
-    char* path_temp = strdup(path.c_str());
-    char* last_slash = strrchr(path_temp, '/');
-    char* slash = last_slash;
-    bool ret = false;
-
-    if (!last_slash)
-        return ret;
-
-    // Assume most dirs exist, so scan backwards first.
-    // Avoid stat/access checks due to TOCTOU races.
-    errno = 0;
-    for (slash = last_slash; slash > path_temp; --slash) {
-        if (*slash != '/')
-            continue;
-        *slash = '\0';
-        if (_mkdir(path_temp) == 0) {
-            // Now we can forward scan.
-            while (slash < last_slash) {
-                *slash = DIR_SEPARATOR;
-                if (_mkdir(path_temp) < 0)
-                    // Allow EEXIST in case of someone else doing `mkdir`.
-                    if (errno != EEXIST)
-                        goto done;
-                slash += strlen(slash);
-            }
-            if (slash == last_slash)
-                ret = true;
-            break;
-        } else if (errno == EEXIST) {
-            ret = true;
-            break;
-        } else if (errno != ENOENT) {
-            break;
-        }
-    }
-
-done:
-    free(path_temp);
-    return ret;
-}
-
 fs::path FfmpegHandler::getThumbnailCacheFilePath(const fs::path& movie_filename, bool create) const
 {
     fs::path cache_dir = config->getOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR);
@@ -341,8 +270,11 @@ fs::path FfmpegHandler::getThumbnailCacheFilePath(const fs::path& movie_filename
     }
 
     cache_dir = cache_dir / (movie_filename.string() + "-thumb.jpg");
-    if (create && !makeThumbnailCacheDir(cache_dir))
+
+    std::error_code ec;
+    if (create && !fs::create_directories(cache_dir, ec))
         cache_dir = "";
+
     return cache_dir;
 }
 
