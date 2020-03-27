@@ -52,7 +52,7 @@ void TaskProcessor::run()
         this);
 
     if (ret != 0) {
-        throw std::runtime_error("Could not launch task processor thread!");
+        throw_std_runtime_error("Could not launch task processor thread");
     }
 }
 

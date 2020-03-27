@@ -39,9 +39,9 @@ CurlIOHandler::CurlIOHandler(const std::string& URL, CURL* curl_handle, size_t b
     : IOHandlerBufferHelper(bufSize, initialFillSize)
 {
     if (URL.empty())
-        throw std::runtime_error("URL has not been set correctly");
+        throw_std_runtime_error("URL has not been set correctly");
     if (bufSize < CURL_MAX_WRITE_SIZE)
-        throw std::runtime_error(fmt::format("bufSize must be at least CURL_MAX_WRITE_SIZE({})", CURL_MAX_WRITE_SIZE));
+        throw_std_runtime_error(fmt::format("bufSize must be at least CURL_MAX_WRITE_SIZE({})", CURL_MAX_WRITE_SIZE));
 
     this->URL = URL;
     this->external_curl_handle = (curl_handle != nullptr);
@@ -59,7 +59,7 @@ void CurlIOHandler::open(enum UpnpOpenFileMode mode)
     if (curl_handle == nullptr) {
         curl_handle = curl_easy_init();
         if (curl_handle == nullptr)
-            throw std::runtime_error("failed to init curl");
+            throw_std_runtime_error("failed to init curl");
     } else
         curl_easy_reset(curl_handle);
 

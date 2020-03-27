@@ -36,6 +36,17 @@
 #include <string>
 #include <utility>
 
+#ifdef __PRETTY_FUNCTION__
+// GCC + llvm
+#define PRETTY_FUNCTION __PRETTY_FUNCTION__
+#else
+// C99
+#define PRETTY_FUNCTION __func__
+#endif
+
+#define throw_std_runtime_error(msg) throw std::runtime_error(std::string(msg) \
+    + " file:" + std::string(__FILE__) + " line:" + std::to_string(__LINE__) + " function:" + std::string(PRETTY_FUNCTION))
+
 class ConfigParseException : public std::runtime_error {
 public:
     explicit inline ConfigParseException(const std::string& message)

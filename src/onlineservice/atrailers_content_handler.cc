@@ -53,7 +53,7 @@ void ATrailersContentHandler::setServiceContent(std::unique_ptr<pugi::xml_docume
     auto root = service_xml->document_element();
 
     if (std::string(root.name()) != "records")
-        throw std::runtime_error("Recieved invalid XML for Apple Trailers service");
+        throw_std_runtime_error("Recieved invalid XML for Apple Trailers service");
 
     trailer_it = root.begin();
 

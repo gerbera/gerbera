@@ -390,14 +390,14 @@ std::unique_ptr<IOHandler> LibExifHandler::serveContent(std::shared_ptr<CdsItem>
 
     std::string ctype = getValueOrDefault(res->getParameters(), RESOURCE_CONTENT_TYPE);
     if (ctype != EXIF_THUMBNAIL)
-        throw std::runtime_error("LibExifHandler: got unknown content type: " + ctype);
+        throw_std_runtime_error("got unknown content type: " + ctype);
 
     ExifData* ed = exif_data_new_from_file(item->getLocation().c_str());
     if (!ed)
-        throw std::runtime_error("LibExifHandler: resource has no exif information");
+        throw_std_runtime_error("resource has no exif information");
 
     if (!(ed->size))
-        throw std::runtime_error("LibExifHandler: resource has no exif thumbnail");
+        throw_std_runtime_error("resource has no exif thumbnail");
 
     auto h = std::make_unique<MemIOHandler>(ed->data, ed->size);
     exif_data_unref(ed);

@@ -38,9 +38,9 @@
 IOHandlerChainer::IOHandlerChainer(std::unique_ptr<IOHandler>& readFrom, std::unique_ptr<IOHandler>& writeTo, int chunkSize)
 {
     if (chunkSize <= 0)
-        throw std::runtime_error("chunkSize must be positive");
+        throw_std_runtime_error("chunkSize must be positive");
     if (readFrom == nullptr || writeTo == nullptr)
-        throw std::runtime_error("readFrom and writeTo need to be set");
+        throw_std_runtime_error("readFrom and writeTo need to be set");
     status = 0;
     this->chunkSize = chunkSize;
     this->readFrom = std::move(readFrom);

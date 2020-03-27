@@ -51,7 +51,7 @@ void web::edit_load::process()
     std::string objID = param("object_id");
     int objectID;
     if (objID.empty())
-        throw std::runtime_error("invalid object id");
+        throw_std_runtime_error("invalid object id");
 
     objectID = std::stoi(objID);
     auto obj = storage->loadObject(objectID);

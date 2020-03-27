@@ -138,7 +138,7 @@ Script::Script(const std::shared_ptr<ConfigManager>& config,
     Runtime::AutoLock lock(runtime->getMutex());
     ctx = runtime->createContext(name);
     if (!ctx)
-        throw std::runtime_error("Scripting: could not initialize js context");
+        throw_std_runtime_error("Scripting: could not initialize js context");
 
     _p2i = StringConverter::p2i(config);
     _j2i = StringConverter::j2i(config);
@@ -285,18 +285,18 @@ void Script::_load(const std::string& scriptPath)
     std::string scriptText = readTextFile(scriptPath);
 
     if (scriptText.empty())
-        throw std::runtime_error("empty script");
+        throw_std_runtime_error("empty script");
 
     auto j2i = StringConverter::j2i(config);
     try {
         scriptText = j2i->convert(scriptText, true);
     } catch (const std::runtime_error& e) {
-        throw std::runtime_error(std::string { "Failed to convert import script:" } + e.what());
+        throw_std_runtime_error(std::string { "Failed to convert import script:" } + e.what());
     }
 
     duk_push_string(ctx, scriptPath.c_str());
     if (duk_pcompile_lstring_filename(ctx, 0, scriptText.c_str(), scriptText.length()) != 0)
-        throw std::runtime_error("Scripting: failed to compile " + scriptPath);
+        throw_std_runtime_error("Scripting: failed to compile " + scriptPath);
 }
 
 void Script::load(const std::string& scriptPath)
@@ -312,7 +312,7 @@ void Script::_execute()
 {
     if (duk_pcall(ctx, 0) != DUK_EXEC_SUCCESS) {
         log_error("Failed to execute script: {}", duk_safe_to_string(ctx, -1));
-        throw std::runtime_error("Script: failed to execute script");
+        throw_std_runtime_error("Script: failed to execute script");
     }
     duk_pop(ctx);
 }

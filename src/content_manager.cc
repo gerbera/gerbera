@@ -248,7 +248,7 @@ void ContentManager::run()
         nullptr, //&attr, // attr
         ContentManager::staticThreadProc, this);
     if (ret != 0) {
-        throw std::runtime_error("Could not start task thread");
+        throw_std_runtime_error("Could not start task thread");
     }
 
     autoscan_timed->notifyAll(this);
@@ -427,13 +427,13 @@ void ContentManager::addVirtualItem(const std::shared_ptr<CdsObject>& obj, bool 
 
     std::error_code ec;
     if (!isRegularFile(path, ec))
-        throw std::runtime_error("Not a file: " + path.string());
+        throw_std_runtime_error("Not a file: " + path.string());
 
     auto pcdir = storage->findObjectByPath(path);
     if (pcdir == nullptr) {
         pcdir = createObjectFromFile(path, true, allow_fifo);
         if (pcdir == nullptr) {
-            throw std::runtime_error("Could not add " + path.string());
+            throw_std_runtime_error("Could not add " + path.string());
         }
         if (IS_CDS_ITEM(pcdir->getObjectType())) {
             this->addObject(pcdir);
@@ -501,11 +501,11 @@ int ContentManager::_addFile(const fs::path& path, fs::path rootPath, bool recur
 void ContentManager::_removeObject(int objectID, bool all)
 {
     if (objectID == CDS_ID_ROOT)
-        throw std::runtime_error("cannot remove root container");
+        throw_std_runtime_error("cannot remove root container");
     if (objectID == CDS_ID_FS_ROOT)
-        throw std::runtime_error("cannot remove PC-Directory container");
+        throw_std_runtime_error("cannot remove PC-Directory container");
     if (IS_FORBIDDEN_CDS_ID(objectID))
-        throw std::runtime_error("tried to remove illegal object id");
+        throw_std_runtime_error("tried to remove illegal object id");
 
     auto changedContainers = storage->removeObject(objectID, all);
     if (changedContainers != nullptr) {
@@ -537,7 +537,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
 
     std::shared_ptr<AutoscanDirectory> adir = getAutoscanDirectory(scanID, scanMode);
     if (adir == nullptr)
-        throw std::runtime_error("ID valid but nullptr returned? this should never happen");
+        throw_std_runtime_error("ID valid but nullptr returned? this should never happen");
 
     fs::path rootpath = adir->getLocation();
 
@@ -548,7 +548,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
         try {
             obj = storage->loadObject(containerID);
             if (!IS_CDS_CONTAINER(obj->getObjectType())) {
-                throw std::runtime_error("Not a container");
+                throw_std_runtime_error("Not a container");
             }
             if (containerID == CDS_ID_FS_ROOT)
                 location = FS_ROOT_DIRECTORY;
@@ -594,7 +594,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
         log_error("Container with ID {} has no location information", containerID);
         return;
         //        continue;
-        // throw std::runtime_error("Container has no location information!\n");
+        // throw_std_runtime_error("Container has no location information");
     }
 
     DIR* dir = opendir(location.c_str());
@@ -674,7 +674,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
                 } else if (scanLevel == ScanLevel::Basic)
                     continue;
                 else
-                    throw std::runtime_error("Unsupported scan level!");
+                    throw_std_runtime_error("Unsupported scan level");
 
             } else {
                 // add file, not recursive, not async
@@ -739,7 +739,7 @@ void ContentManager::addRecursive(const fs::path& path, bool hidden, const std::
 
     DIR* dir = opendir(path.c_str());
     if (!dir) {
-        throw std::runtime_error("could not list directory " + path.string() + " : " + strerror(errno));
+        throw_std_runtime_error("could not list directory " + path.string() + " : " + strerror(errno));
     }
 
     int parentID = storage->findObjectIDByPath(path);
@@ -994,7 +994,7 @@ int ContentManager::addContainerChain(const std::string& chain, const std::strin
     int containerID;
 
     if (chain.empty())
-        throw std::runtime_error("addContainerChain() called with empty chain parameter");
+        throw_std_runtime_error("addContainerChain() called with empty chain parameter");
 
     log_debug("received chain: {} ({}) [{}]", chain.c_str(), lastClass.c_str(), dict_encode_simple(lastMetadata).c_str());
     storage->addContainerChain(chain, lastClass, lastRefID, &containerID, &updateID, lastMetadata);
@@ -1030,7 +1030,7 @@ std::shared_ptr<CdsObject> ContentManager::convertObject(std::shared_ptr<CdsObje
     if (oldType == newType)
         return oldObj;
     if (!IS_CDS_ITEM(oldType) || !IS_CDS_ITEM(newType)) {
-        throw std::runtime_error("Cannot convert object type " + std::to_string(oldType) + " to " + std::to_string(newType));
+        throw_std_runtime_error("Cannot convert object type " + std::to_string(oldType) + " to " + std::to_string(newType));
     }
 
     auto newObj = CdsObject::createObject(storage, newType);
@@ -1045,7 +1045,7 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::path& 
     struct stat statbuf;
     int ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
-        throw std::runtime_error("Failed to stat " + path.string() + " , " + mt_strerror(errno));
+        throw_std_runtime_error("Failed to stat " + path.string() + " , " + mt_strerror(errno));
     }
 
     std::shared_ptr<CdsObject> obj;
@@ -1114,7 +1114,7 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::path& 
         */
     } else {
         // only regular files and directories are supported
-        throw std::runtime_error("ContentManager: skipping file " + path.string());
+        throw_std_runtime_error("ContentManager: skipping file " + path.string());
     }
     //    auto f2i = StringConverter::f2i();
     //    obj->setTitle(f2i->convert(filename));
@@ -1291,7 +1291,7 @@ void ContentManager::fetchOnlineContent(service_type_t serviceType, bool lowPrio
     auto service = online_services->getService(serviceType);
     if (service == nullptr) {
         log_debug("No surch service! {}", serviceType);
-        throw std::runtime_error("Service not found!");
+        throw_std_runtime_error("Service not found");
     }
 
     if (layout_enabled)
@@ -1529,7 +1529,7 @@ void ContentManager::removeAutoscanDirectory(int scanID, ScanMode scanMode)
     if (scanMode == ScanMode::Timed) {
         std::shared_ptr<AutoscanDirectory> adir = autoscan_timed->get(scanID);
         if (adir == nullptr)
-            throw std::runtime_error("can not remove autoscan directory - was not an autoscan");
+            throw_std_runtime_error("can not remove autoscan directory - was not an autoscan");
 
         autoscan_timed->remove(scanID);
         storage->removeAutoscanDirectory(adir->getStorageID());
@@ -1543,7 +1543,7 @@ void ContentManager::removeAutoscanDirectory(int scanID, ScanMode scanMode)
         if (scanMode == ScanMode::INotify) {
             std::shared_ptr<AutoscanDirectory> adir = autoscan_inotify->get(scanID);
             if (adir == nullptr)
-                throw std::runtime_error("can not remove autoscan directory - was not an autoscan");
+                throw_std_runtime_error("can not remove autoscan directory - was not an autoscan");
             autoscan_inotify->remove(scanID);
             storage->removeAutoscanDirectory(adir->getStorageID());
             session_manager->containerChangedUI(adir->getObjectID());
@@ -1557,7 +1557,7 @@ void ContentManager::removeAutoscanDirectory(int objectID)
 {
     std::shared_ptr<AutoscanDirectory> adir = storage->getAutoscanDirectory(objectID);
     if (adir == nullptr)
-        throw std::runtime_error("can not remove autoscan directory - was not an autoscan");
+        throw_std_runtime_error("can not remove autoscan directory - was not an autoscan");
 
     if (adir->getScanMode() == ScanMode::Timed) {
         autoscan_timed->remove(adir->getLocation());
@@ -1588,7 +1588,7 @@ void ContentManager::removeAutoscanDirectory(const fs::path& location)
     }
 #endif
     if (adir == nullptr)
-        throw std::runtime_error("can not remove autoscan directory - was not an autoscan");
+        throw_std_runtime_error("can not remove autoscan directory - was not an autoscan");
 
     removeAutoscanDirectory(adir->getObjectID());
 }
@@ -1639,12 +1639,12 @@ void ContentManager::setAutoscanDirectory(const std::shared_ptr<AutoscanDirector
             log_debug("objectID: {}", dir->getObjectID());
             auto obj = storage->loadObject(dir->getObjectID());
             if (obj == nullptr || !IS_CDS_CONTAINER(obj->getObjectType()) || obj->isVirtual())
-                throw std::runtime_error("tried to remove an illegal object (id) from the list of the autoscan directories");
+                throw_std_runtime_error("tried to remove an illegal object (id) from the list of the autoscan directories");
 
             log_debug("location: {}", obj->getLocation().c_str());
 
             if (obj->getLocation().empty())
-                throw std::runtime_error("tried to add an illegal object as autoscan - no location information available!");
+                throw_std_runtime_error("tried to add an illegal object as autoscan - no location information available");
 
             dir->setLocation(obj->getLocation());
         }

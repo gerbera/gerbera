@@ -104,7 +104,7 @@ void MetadataHandler::setMetadata(const std::shared_ptr<ConfigManager>& config, 
 {
     std::string location = item->getLocation();
     if (!isRegularFile(location))
-        throw std::runtime_error("Not a file: " + location);
+        throw_std_runtime_error("Not a file: " + location);
     auto filesize = getFileSize(location);
 
     std::string mimetype = item->getMimeType();
@@ -196,7 +196,7 @@ std::unique_ptr<MetadataHandler> MetadataHandler::createHandler(const std::share
     case CH_FANART:
         return std::make_unique<FanArtHandler>(config);
     default:
-        throw std::runtime_error("unknown content handler ID: " + std::to_string(handlerType));
+        throw_std_runtime_error("unknown content handler ID: " + std::to_string(handlerType));
     }
 }
 

@@ -52,7 +52,7 @@ void SopCastContentHandler::setServiceContent(std::unique_ptr<pugi::xml_document
     auto root = service_xml->document_element();
 
     if (std::string(root.name()) != "channels")
-        throw std::runtime_error("Invalid XML for SopCast service received");
+        throw_std_runtime_error("Invalid XML for SopCast service received");
 
     group_it = root.begin();
     if (group_it != root.end())

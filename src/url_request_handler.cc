@@ -72,7 +72,7 @@ void URLRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     auto objIdIt = params.find("object_id");
     if (objIdIt == params.end()) {
         //log_error("object_id not found in url");
-        throw std::runtime_error("getInfo: object_id not found");
+        throw_std_runtime_error("getInfo: object_id not found");
     }
     int objectID = std::stoi(objIdIt->second);
     //log_debug("got ObjectID: {}", objectID);
@@ -81,7 +81,7 @@ void URLRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
     int objectType = obj->getObjectType();
     if (!IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
-        throw std::runtime_error("getInfo: object is not an external url item");
+        throw_std_runtime_error("getInfo: object is not an external url item");
     }
 
     std::string tr_profile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
@@ -93,8 +93,7 @@ void URLRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         auto tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)
                       ->getByName(tr_profile);
         if (tp == nullptr)
-            throw std::runtime_error("Transcoding requested but no profile "
-                                     "matching the name "
+            throw_std_runtime_error("Transcoding requested but no profile matching the name "
                 + tr_profile + " found");
 
         mimeType = tp->getTargetMimeType();
@@ -154,7 +153,7 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
     // Currently we explicitly do not support UPNP_WRITE
     // due to security reasons.
     if (mode != UPNP_READ)
-        throw std::runtime_error("UPNP_WRITE unsupported");
+        throw_std_runtime_error("UPNP_WRITE unsupported");
 
     std::string parameters = (filename + strlen(LINK_URL_REQUEST_HANDLER));
 
@@ -165,7 +164,7 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
     auto objIdIt = params.find("object_id");
     if (objIdIt == params.end()) {
         //log_error("object_id not found in url");
-        throw std::runtime_error("getInfo: object_id not found");
+        throw_std_runtime_error("getInfo: object_id not found");
     }
     int objectID = std::stoi(objIdIt->second);
     //log_debug("got ObjectID: {}", objectID);
@@ -174,7 +173,7 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
 
     int objectType = obj->getObjectType();
     if (!IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
-        throw std::runtime_error("object is not an external url item");
+        throw_std_runtime_error("object is not an external url item");
     }
 
     auto item = std::static_pointer_cast<CdsItemExternalURL>(obj);
@@ -203,7 +202,7 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
         auto tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)
                       ->getByName(tr_profile);
         if (tp == nullptr)
-            throw std::runtime_error("Transcoding of file " + url + " but no profile matching the name " + tr_profile + " found");
+            throw_std_runtime_error("Transcoding of file " + url + " but no profile matching the name " + tr_profile + " found");
 
         auto tr_d = std::make_unique<TranscodeDispatcher>(config, content);
         return tr_d->open(tp, url, item, range);

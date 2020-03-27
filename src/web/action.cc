@@ -49,7 +49,7 @@ void web::action::process()
 
     std::string action = param("action");
     if (action.empty())
-        throw std::runtime_error("No action given!");
+        throw_std_runtime_error("No action given");
     log_debug("action: {}", action.c_str());
 
     log_debug("action: returning");

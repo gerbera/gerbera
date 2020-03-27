@@ -97,14 +97,14 @@ MysqlStorage::~MysqlStorage()
 void MysqlStorage::checkMysqlThreadInit()
 {
     if (!mysql_connection)
-        throw std::runtime_error("mysql connection is not open or already closed");
+        throw_std_runtime_error("mysql connection is not open or already closed");
     //log_debug("checkMysqlThreadInit; thread_id={}", pthread_self());
     if (pthread_getspecific(mysql_init_key) == nullptr) {
         log_debug("running mysql_thread_init(); thread_id={}", pthread_self());
         if (mysql_thread_init())
-            throw std::runtime_error("error while calling mysql_thread_init()");
+            throw_std_runtime_error("error while calling mysql_thread_init()");
         if (pthread_setspecific(mysql_init_key, (void*)1))
-            throw std::runtime_error("error while calling pthread_setspecific()");
+            throw_std_runtime_error("error while calling pthread_setspecific()");
     }
 }
 
@@ -125,13 +125,13 @@ void MysqlStorage::init()
     int ret;
 
     if (!mysql_thread_safe()) {
-        throw std::runtime_error("mysql library is not thread safe!");
+        throw_std_runtime_error("mysql library is not thread safe");
     }
 
     /// \todo write destructor function
     ret = pthread_key_create(&mysql_init_key, nullptr);
     if (ret) {
-        throw std::runtime_error("could not create pthread_key");
+        throw_std_runtime_error("could not create pthread_key");
     }
     mysql_server_init(0, nullptr, nullptr);
     pthread_setspecific(mysql_init_key, (void*)1);
@@ -147,7 +147,7 @@ void MysqlStorage::init()
 
     res_mysql = mysql_init(&db);
     if (!res_mysql) {
-        throw std::runtime_error("mysql_init failed");
+        throw_std_runtime_error("mysql_init failed");
     }
 
     mysql_init_key_initialized = true;
@@ -167,7 +167,7 @@ void MysqlStorage::init()
         0 // flags
     );
     if (!res_mysql) {
-        throw std::runtime_error("The connection to the MySQL database has failed: " + getError(&db));
+        throw_std_runtime_error("The connection to the MySQL database has failed: " + getError(&db));
     }
 
     /*
@@ -194,13 +194,13 @@ void MysqlStorage::init()
         unsigned long uncompressed_size = MS_CREATE_SQL_INFLATED_SIZE;
         int ret = uncompress(buf, &uncompressed_size, mysql_create_sql, MS_CREATE_SQL_DEFLATED_SIZE);
         if (ret != Z_OK || uncompressed_size != MS_CREATE_SQL_INFLATED_SIZE)
-            throw std::runtime_error("Error while uncompressing mysql create sql. returned: " + std::to_string(ret));
+            throw_std_runtime_error("Error while uncompressing mysql create sql. returned: " + std::to_string(ret));
         buf[MS_CREATE_SQL_INFLATED_SIZE] = '\0';
 
         auto sql_start = reinterpret_cast<char*>(buf);
         auto sql_end = strchr(sql_start, ';');
         if (sql_end == nullptr) {
-            throw std::runtime_error("';' not found in mysql create sql");
+            throw_std_runtime_error("';' not found in mysql create sql");
         }
         do {
             ret = mysql_real_query(&db, sql_start, sql_end - sql_start);
@@ -217,7 +217,7 @@ void MysqlStorage::init()
         dbVersion = getInternalSetting("db_version");
         if (dbVersion.empty()) {
             shutdown();
-            throw std::runtime_error("error while creating database");
+            throw_std_runtime_error("error while creating database");
         }
         log_info("database created successfully.");
     }
@@ -266,7 +266,7 @@ void MysqlStorage::init()
     /* --- --- ---*/
 
     if (dbVersion != "5")
-        throw std::runtime_error("The database seems to be from a newer version (database version " + dbVersion + ")!");
+        throw_std_runtime_error("The database seems to be from a newer version (database version " + dbVersion + ")");
 
     lock.unlock();
 

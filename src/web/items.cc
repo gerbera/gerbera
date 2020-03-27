@@ -52,9 +52,9 @@ void web::items::process()
     int start = intParam("start");
     int count = intParam("count");
     if (start < 0)
-        throw std::runtime_error("illegal start parameter");
+        throw_std_runtime_error("illegal start parameter");
     if (count < 0)
-        throw std::runtime_error("illegal count parameter");
+        throw_std_runtime_error("illegal count parameter");
 
     auto root = xmlDoc->document_element();
 

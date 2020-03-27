@@ -58,7 +58,7 @@ void web::add::process()
     else
         path = hex_decode_string(objID);
     if (path.empty())
-        throw std::runtime_error("web::add::process(): illegal path");
+        throw_std_runtime_error("illegal path");
 
     content->addFile(path, true);
     log_debug("add: returning");

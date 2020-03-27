@@ -286,14 +286,14 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(std::shared_ptr<CdsItem> 
         TagLib::MPEG::File f(&roStream, TagLib::ID3v2::FrameFactory::instance());
 
         if (!f.isValid())
-            throw std::runtime_error("TagLibHandler: could not open file: " + item->getLocation().string());
+            throw_std_runtime_error("could not open file: " + item->getLocation().string());
 
         if (!f.ID3v2Tag())
-            throw std::runtime_error("TagLibHandler: resource has no album information");
+            throw_std_runtime_error("resource has no album information");
 
         TagLib::ID3v2::FrameList list = f.ID3v2Tag()->frameList("APIC");
         if (list.isEmpty())
-            throw std::runtime_error("TagLibHandler: resource has no album information");
+            throw_std_runtime_error("resource has no album information");
 
         auto art = dynamic_cast<TagLib::ID3v2::AttachedPictureFrame*>(list.front());
 
@@ -304,10 +304,10 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(std::shared_ptr<CdsItem> 
         TagLib::FLAC::File f(&roStream, TagLib::ID3v2::FrameFactory::instance());
 
         if (!f.isValid())
-            throw std::runtime_error("TagLibHandler: could not open flac file: " + item->getLocation().string());
+            throw_std_runtime_error("could not open flac file: " + item->getLocation().string());
 
         if (f.pictureList().isEmpty())
-            throw std::runtime_error("TagLibHandler: flac resource has no picture information");
+            throw_std_runtime_error("flac resource has no picture information");
 
         TagLib::FLAC::Picture* pic = f.pictureList().front();
         const TagLib::ByteVector& data = pic->data();
@@ -319,23 +319,23 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(std::shared_ptr<CdsItem> 
         TagLib::MP4::File f(&roStream);
 
         if (!f.isValid()) {
-            throw std::runtime_error("TagLibHandler: could not open mp4 file: " + item->getLocation().string());
+            throw_std_runtime_error("could not open mp4 file: " + item->getLocation().string());
         }
 
         if (!f.hasMP4Tag()) {
-            throw std::runtime_error("TagLibHandler: mp4 resource has no tag information");
+            throw_std_runtime_error("mp4 resource has no tag information");
         }
 
         auto tag = f.tag();
 
         if (!tag->contains("covr")) {
-            throw std::runtime_error("TagLibHandler: mp4 file has no 'covr' item");
+            throw_std_runtime_error("mp4 file has no 'covr' item");
         }
 
         auto coverItem = tag->item("covr");
         TagLib::MP4::CoverArtList coverArtList = coverItem.toCoverArtList();
         if (coverArtList.isEmpty()) {
-            throw std::runtime_error("TagLibHandler: mp4 resource has no picture information");
+            throw_std_runtime_error("mp4 resource has no picture information");
         }
 
         const TagLib::MP4::CoverArt& coverArt = coverArtList.front();
@@ -348,19 +348,19 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(std::shared_ptr<CdsItem> 
         TagLib::ASF::File f(&roStream);
 
         if (!f.isValid())
-            throw std::runtime_error("TagLibHandler: could not open flac file: " + item->getLocation().string());
+            throw_std_runtime_error("could not open flac file: " + item->getLocation().string());
 
         const TagLib::ASF::AttributeListMap& attrListMap = f.tag()->attributeListMap();
         if (!attrListMap.contains("WM/Picture"))
-            throw std::runtime_error("TagLibHandler: wma file has no picture information");
+            throw_std_runtime_error("wma file has no picture information");
 
         const TagLib::ASF::AttributeList& attrList = attrListMap["WM/Picture"];
         if (attrList.isEmpty())
-            throw std::runtime_error("TagLibHandler: wma list has no picture information");
+            throw_std_runtime_error("wma list has no picture information");
 
         const TagLib::ASF::Picture& wmpic = attrList[0].toPicture();
         if (!wmpic.isValid())
-            throw std::runtime_error("TagLibHandler: wma pic not valid");
+            throw_std_runtime_error("wma pic not valid");
 
         const TagLib::ByteVector& data = wmpic.picture();
 
@@ -371,11 +371,11 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(std::shared_ptr<CdsItem> 
         TagLib::Ogg::Vorbis::File f(&roStream);
 
         if (!f.isValid() || !f.tag())
-            throw std::runtime_error("TagLibHandler: could not open vorbis file: " + item->getLocation().string());
+            throw_std_runtime_error("could not open vorbis file: " + item->getLocation().string());
 
         const TagLib::List<TagLib::FLAC::Picture*> picList = f.tag()->pictureList();
         if (picList.isEmpty())
-            throw std::runtime_error("TagLibHandler: vorbis file has no picture information");
+            throw_std_runtime_error("vorbis file has no picture information");
 
         const TagLib::FLAC::Picture* pic = picList.front();
         const TagLib::ByteVector& data = pic->data();
@@ -384,7 +384,7 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(std::shared_ptr<CdsItem> 
         return h;
     }
 
-    throw std::runtime_error("TagLibHandler: Unsupported content_type: " + content_type);
+    throw_std_runtime_error("Unsupported content_type: " + content_type);
 }
 
 void TagLibHandler::extractMP3(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item)
@@ -560,7 +560,7 @@ void TagLibHandler::extractFLAC(TagLib::IOStream* roStream, const std::shared_pt
             auto val = property[0];
             std::string value(val.toCString(true));
             value = sc->convert(value);
-            log_debug("Adding auxdata: {} with value {}\n", desiredTag.c_str(), value.c_str());
+            log_debug("Adding auxdata: {} with value {}", desiredTag.c_str(), value.c_str());
             item->setAuxData(desiredTag, value);
         }
     }

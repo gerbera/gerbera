@@ -57,7 +57,7 @@ ATrailersService::ATrailersService(const std::shared_ptr<ConfigManager>& config,
     pid = 0;
     curl_handle = curl_easy_init();
     if (!curl_handle)
-        throw std::runtime_error("failed to initialize curl!\n");
+        throw_std_runtime_error("failed to initialize curl");
 
     if (config->getOption(CFG_ONLINE_CONTENT_ATRAILERS_RESOLUTION) == "640")
         service_url = ATRAILERS_SERVICE_URL_640;
@@ -129,12 +129,12 @@ bool ATrailersService::refreshServiceData(std::shared_ptr<Layout> layout)
         pid = pthread_self();
 
     if (pid != pthread_self())
-        throw std::runtime_error("Not allowed to call refreshServiceData from different threads!");
+        throw_std_runtime_error("Not allowed to call refreshServiceData from different threads");
 
     auto reply = getData();
     if (reply == nullptr) {
         log_debug("Failed to get XML content from Trailers service");
-        throw std::runtime_error("Failed to get XML content from Trailers service");
+        throw_std_runtime_error("Failed to get XML content from Trailers service");
     }
 
     auto sc = std::make_unique<ATrailersContentHandler>(config, storage);

@@ -48,14 +48,12 @@ void FileIOHandler::open(enum UpnpOpenFileMode mode)
 {
     if (mode == UPNP_READ) {
         f = fopen(filename.c_str(), "rb");
-    } else if (mode == UPNP_WRITE) {
-        throw std::runtime_error("FileIOHandler::open: Write mode not supported");
     } else {
-        throw std::runtime_error("FileIOHandler::open: invalid UpnpOpenFileMode mode");
+        throw_std_runtime_error("open: UpnpOpenFileMode mode not supported");
     }
 
     if (f == nullptr) {
-        throw std::runtime_error("FileIOHandler::open: failed to open: " + filename.string());
+        throw_std_runtime_error("failed to open: " + filename.string());
     }
 }
 
@@ -87,7 +85,7 @@ size_t FileIOHandler::write(char* buf, size_t length)
 void FileIOHandler::seek(off_t offset, int whence)
 {
     if (fseeko(f, offset, whence) != 0) {
-        throw std::runtime_error("fseek failed");
+        throw_std_runtime_error("fseek failed");
     }
 }
 
@@ -99,7 +97,7 @@ off_t FileIOHandler::tell()
 void FileIOHandler::close()
 {
     if (fclose(f) != 0) {
-        throw std::runtime_error("fclose failed");
+        throw_std_runtime_error("fclose failed");
     }
     f = nullptr;
 }

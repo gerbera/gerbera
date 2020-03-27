@@ -61,7 +61,7 @@ std::string run_simple_process(const std::shared_ptr<ConfigManager>& cfg, const 
     if (fd == -1) {
         log_debug("Failed to open input file {}: {}", input_file.c_str(),
             strerror(errno));
-        throw std::runtime_error("Failed to open input file " + input_file + " " + strerror(errno));
+        throw_std_runtime_error("Failed to open input file " + input_file + " " + strerror(errno));
     }
     size_t ret = write(fd, input.c_str(), input.length());
     close(fd);
@@ -69,7 +69,7 @@ std::string run_simple_process(const std::shared_ptr<ConfigManager>& cfg, const 
 
         log_debug("Failed to write to {}: {}", input.c_str(),
             strerror(errno));
-        throw std::runtime_error("Failed to write to " + input + ": " + strerror(errno));
+        throw_std_runtime_error("Failed to write to " + input + ": " + strerror(errno));
     }
 
     /* touching output file */
@@ -78,7 +78,7 @@ std::string run_simple_process(const std::shared_ptr<ConfigManager>& cfg, const 
     if (fd == -1) {
         log_debug("Failed to open output file {}: {}", output_file.c_str(),
             strerror(errno));
-        throw std::runtime_error("Failed to open output file " + input_file + " " + strerror(errno));
+        throw_std_runtime_error("Failed to open output file " + input_file + " " + strerror(errno));
     }
     close(fd);
 
@@ -88,7 +88,7 @@ std::string run_simple_process(const std::shared_ptr<ConfigManager>& cfg, const 
     int sysret = system(command.c_str());
     if (sysret == -1) {
         log_debug("Failed to execute: {}", command.c_str());
-        throw std::runtime_error("Failed to execute: " + command);
+        throw_std_runtime_error("Failed to execute: " + command);
     }
 
     /* reading output file */
@@ -96,7 +96,7 @@ std::string run_simple_process(const std::shared_ptr<ConfigManager>& cfg, const 
     if (!file) {
         log_debug("Could not open output file {}: {}", output_file.c_str(),
             strerror(errno));
-        throw std::runtime_error("Failed to open output file " + output_file + " " + strerror(errno));
+        throw_std_runtime_error("Failed to open output file " + output_file + " " + strerror(errno));
     }
     std::ostringstream output;
 

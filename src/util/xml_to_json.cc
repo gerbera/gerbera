@@ -94,7 +94,7 @@ void Xml2Json::handleElement(std::ostringstream& buf, const pugi::xml_node& node
 
             if (array) {
                 if (nodeName != child.name())
-                    throw std::runtime_error("if an element is of arrayType, all children have to have the same name");
+                    throw_std_runtime_error("if an element is of arrayType, all children have to have the same name");
             } else
                 buf << getAsString(child.name()) << ':';
 

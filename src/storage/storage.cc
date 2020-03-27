@@ -67,7 +67,7 @@ std::shared_ptr<Storage> Storage::createInstance(const std::shared_ptr<ConfigMan
         }
 #endif
         // other database types...
-        throw std::runtime_error("Unknown storage type: " + type);
+        throw_std_runtime_error("Unknown storage type: " + type);
     } while (false);
 
     storage->init();
@@ -79,7 +79,7 @@ std::shared_ptr<Storage> Storage::createInstance(const std::shared_ptr<ConfigMan
 void Storage::stripAndUnescapeVirtualContainerFromPath(std::string virtualPath, std::string& first, std::string& last)
 {
     if (virtualPath.at(0) != VIRTUAL_CONTAINER_SEPARATOR) {
-        throw std::runtime_error(fmt::format("Got non-absolute virtual path; needs to start with: {}", VIRTUAL_CONTAINER_SEPARATOR));
+        throw_std_runtime_error(fmt::format("Got non-absolute virtual path; needs to start with: {}", VIRTUAL_CONTAINER_SEPARATOR));
     }
     size_t sep = virtualPath.rfind(VIRTUAL_CONTAINER_SEPARATOR);
     if (sep == 0) {

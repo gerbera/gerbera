@@ -81,7 +81,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     auto objIdIt = params.find("object_id");
     if (objIdIt == params.end()) {
         //log_error("object_id not found in url");
-        throw std::runtime_error("getInfo: object_id not found");
+        throw_std_runtime_error("getInfo: object_id not found");
     }
     int objectID = std::stoi(objIdIt->second);
     //log_debug("got ObjectID: {}", objectID);
@@ -90,7 +90,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
     int objectType = obj->getObjectType();
     if (!IS_CDS_ITEM(objectType)) {
-        throw std::runtime_error("requested object is not an item");
+        throw_std_runtime_error("requested object is not an item");
     }
     auto item = std::static_pointer_cast<CdsItem>(obj);
 
@@ -127,7 +127,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         if (is_srt)
             throw SubtitlesNotFoundException("Subtitle file " + path.string() + " is not available.");
 
-        throw std::runtime_error("Failed to open " + path.string() + " - " + strerror(errno));
+        throw_std_runtime_error("Failed to open " + path.string() + " - " + strerror(errno));
     }
 
     if (access(path.c_str(), R_OK) == 0) {
@@ -182,7 +182,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         auto tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)
                       ->getByName(tr_profile);
         if (tp == nullptr)
-            throw std::runtime_error("Transcoding of file " + path.string()
+            throw_std_runtime_error("Transcoding of file " + path.string()
                 + " but no profile matching the name "
                 + tr_profile + " found");
 
@@ -279,7 +279,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
 
     // We explicitly do not support UPNP_WRITE due to security reasons.
     if (mode != UPNP_READ) {
-        throw std::runtime_error("UPNP_WRITE unsupported");
+        throw_std_runtime_error("UPNP_WRITE unsupported");
     }
 
     std::string parameters = (filename + strlen(LINK_FILE_REQUEST_HANDLER));
@@ -290,7 +290,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
 
     auto objIdIt = params.find("object_id");
     if (objIdIt == params.end()) {
-        throw std::runtime_error("object_id not found in parameters");
+        throw_std_runtime_error("object_id not found in parameters");
     }
     int objectID = std::stoi(objIdIt->second);
 
@@ -299,7 +299,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
 
     int objectType = obj->getObjectType();
     if (!IS_CDS_ITEM(objectType)) {
-        throw std::runtime_error("requested object is not an item");
+        throw_std_runtime_error("requested object is not an item");
     }
 
     // determining which resource to serve
@@ -396,17 +396,17 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
         if (is_srt)
             throw SubtitlesNotFoundException("Subtitle file " + path.string() + " is not available.");
 
-        throw std::runtime_error("Failed to open " + path.string() + " - " + strerror(errno));
+        throw_std_runtime_error("Failed to open " + path.string() + " - " + strerror(errno));
     }
 
     // for transcoded resourecs res_id will always be negative
     auto tr_profile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
     if (!tr_profile.empty()) {
         if (res_id != -1)
-            throw std::runtime_error("Invalid resource ID given!");
+            throw_std_runtime_error("Invalid resource ID given");
     } else {
         if (res_id == -1)
-            throw std::runtime_error("Invalid resource ID given!");
+            throw_std_runtime_error("Invalid resource ID given");
     }
     log_debug("fetching resource id {}", res_id);
 

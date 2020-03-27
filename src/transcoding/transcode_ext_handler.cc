@@ -77,7 +77,7 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::open(std::shared_ptr<Transc
     log_debug("Start transcoding file: {}", location.c_str());
 
     if (profile == nullptr)
-        throw std::runtime_error("Transcoding of file " + location + "requested but no profile given");
+        throw_std_runtime_error("Transcoding of file " + location + "requested but no profile given");
 
     bool isURL = (IS_CDS_ITEM_INTERNAL_URL(obj->getObjectType()) || IS_CDS_ITEM_EXTERNAL_URL(obj->getObjectType()));
 
@@ -137,10 +137,8 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::open(std::shared_ptr<Transc
             location = tempName(config->getOption(CFG_SERVER_TMPDIR), fifo_template);
             log_debug("creating reader fifo: {}", location.c_str());
             if (mkfifo(location.c_str(), O_RDWR) == -1) {
-                log_error("Failed to create fifo for the remote content "
-                          "reading thread: {}\n",
-                    strerror(errno));
-                throw std::runtime_error("Could not create reader fifo!\n");
+                log_error("Failed to create fifo for the remote content reading thread: {}", strerror(errno));
+                throw_std_runtime_error("Could not create reader fifo");
             }
 
             try {
@@ -158,8 +156,7 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::open(std::shared_ptr<Transc
                 throw ex;
             }
 #else
-        throw std::runtime_error("MediaTomb was compiled without libcurl support,"
-                                 "data proxying is not available");
+        throw_std_runtime_error("Compiled without libcurl support, data proxying is not available");
 #endif
         }
 #ifdef SOPCAST
@@ -170,24 +167,24 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::open(std::shared_ptr<Transc
     if (profile->getCommand().is_absolute()) {
         std::error_code ec;
         if (!isRegularFile(profile->getCommand(), ec))
-            throw std::runtime_error("Could not find transcoder: " + profile->getCommand().string());
+            throw_std_runtime_error("Could not find transcoder: " + profile->getCommand().string());
 
         check = profile->getCommand();
     } else {
         check = find_in_path(profile->getCommand());
 
         if (check.empty())
-            throw std::runtime_error("Could not find transcoder " + profile->getCommand().string() + " in $PATH");
+            throw_std_runtime_error("Could not find transcoder " + profile->getCommand().string() + " in $PATH");
     }
 
     int err = 0;
     if (!is_executable(check, &err))
-        throw std::runtime_error("Transcoder " + profile->getCommand().string() + " is not executable: " + strerror(err));
+        throw_std_runtime_error("Transcoder " + profile->getCommand().string() + " is not executable: " + strerror(err));
 
     log_debug("creating fifo: {}", fifo_name.c_str());
     if (mkfifo(fifo_name.c_str(), O_RDWR) == -1) {
         log_error("Failed to create fifo for the transcoding process!: {}", strerror(errno));
-        throw std::runtime_error("Could not create fifo!\n");
+        throw_std_runtime_error("Could not create fifo");
     }
 
     chmod(fifo_name.c_str(), S_IWUSR | S_IRUSR);

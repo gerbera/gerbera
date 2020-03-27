@@ -178,20 +178,20 @@ void Sqlite3Storage::init()
                     dbVersion = getInternalSetting("db_version");
                 } catch (const std::runtime_error& e) {
                     shutdown();
-                    throw std::runtime_error(std::string { "error while creating database: " } + e.what());
+                    throw_std_runtime_error(std::string { "error while creating database: " } + e.what());
                 }
                 log_info("database created successfully.");
             }
         } else {
             // fail because restore option is false
             shutdown();
-            throw std::runtime_error("sqlite3 database seems to be corrupt and the 'on-error' option is set to 'fail'");
+            throw_std_runtime_error("sqlite3 database seems to be corrupt and the 'on-error' option is set to 'fail'");
         }
     }
 
     if (dbVersion.empty()) {
         shutdown();
-        throw std::runtime_error("sqlite3 database seems to be corrupt and restoring from backup failed");
+        throw_std_runtime_error("sqlite3 database seems to be corrupt and restoring from backup failed");
     }
 
     _exec("PRAGMA locking_mode = EXCLUSIVE");
@@ -244,7 +244,7 @@ void Sqlite3Storage::init()
     /* --- --- ---*/
 
     if (dbVersion != "5")
-        throw std::runtime_error("The database seems to be from a newer version!");
+        throw_std_runtime_error("The database seems to be from a newer version");
 
     // add timer for backups
     if (config->getBoolOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED)) {
@@ -364,10 +364,10 @@ void Sqlite3Storage::threadProc()
 void Sqlite3Storage::addTask(const std::shared_ptr<SLTask>& task, bool onlyIfDirty)
 {
     if (!taskQueueOpen)
-        throw std::runtime_error("sqlite3 task queue is already closed");
+        throw_std_runtime_error("sqlite3 task queue is already closed");
     AutoLock lock(sqliteMutex);
     if (!taskQueueOpen) {
-        throw std::runtime_error("sqlite3 task queue is already closed");
+        throw_std_runtime_error("sqlite3 task queue is already closed");
     }
     if (!onlyIfDirty || dirty) {
         taskQueue.push(task);
@@ -439,7 +439,7 @@ void SLTask::waitForTask()
 
     if (!getError().empty()) {
         log_debug("{}", getError().c_str());
-        throw std::runtime_error(getError());
+        throw_std_runtime_error(getError());
     }
 }
 

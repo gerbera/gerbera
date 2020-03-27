@@ -147,7 +147,7 @@ SQLStorage::SQLStorage(std::shared_ptr<ConfigManager> config)
 void SQLStorage::init()
 {
     if (table_quote_begin == '\0' || table_quote_end == '\0')
-        throw std::runtime_error("quote vars need to be overridden!");
+        throw_std_runtime_error("quote vars need to be overridden");
 
     std::ostringstream buf;
     buf << SQL_QUERY_FOR_STRINGBUFFER;
@@ -170,13 +170,13 @@ void SQLStorage::shutdown()
 std::shared_ptr<CdsObject> SQLStorage::checkRefID(const std::shared_ptr<CdsObject>& obj)
 {
     if (!obj->isVirtual())
-        throw std::runtime_error("checkRefID called for a non-virtual object");
+        throw_std_runtime_error("checkRefID called for a non-virtual object");
 
     int refID = obj->getRefID();
     std::string location = obj->getLocation();
 
     if (location.empty())
-        throw std::runtime_error("tried to check refID without a location set");
+        throw_std_runtime_error("tried to check refID without a location set");
 
     if (refID > 0) {
         try {
@@ -184,7 +184,7 @@ std::shared_ptr<CdsObject> SQLStorage::checkRefID(const std::shared_ptr<CdsObjec
             if (refObj != nullptr && refObj->getLocation() == location)
                 return refObj;
         } catch (const std::runtime_error& e) {
-            throw std::runtime_error("illegal refID was set");
+            throw_std_runtime_error("illegal refID was set");
         }
     }
 
@@ -203,28 +203,28 @@ std::vector<std::shared_ptr<SQLStorage::AddUpdateTable>> SQLStorage::_addUpdateO
     bool playlistRef = obj->getFlag(OBJECT_FLAG_PLAYLIST_REF);
     if (playlistRef) {
         if (IS_CDS_PURE_ITEM(objectType))
-            throw std::runtime_error("tried to add pure item with PLAYLIST_REF flag set");
+            throw_std_runtime_error("tried to add pure item with PLAYLIST_REF flag set");
         if (obj->getRefID() <= 0)
-            throw std::runtime_error("PLAYLIST_REF flag set but refId is <=0");
+            throw_std_runtime_error("PLAYLIST_REF flag set but refId is <=0");
         refObj = loadObject(obj->getRefID());
         if (refObj == nullptr)
-            throw std::runtime_error("PLAYLIST_REF flag set but refId doesn't point to an existing object");
+            throw_std_runtime_error("PLAYLIST_REF flag set but refId doesn't point to an existing object");
     } else if (obj->isVirtual() && IS_CDS_PURE_ITEM(objectType)) {
         hasReference = true;
         refObj = checkRefID(obj);
         if (refObj == nullptr)
-            throw std::runtime_error("tried to add or update a virtual object with illegal reference id and an illegal location");
+            throw_std_runtime_error("tried to add or update a virtual object with illegal reference id and an illegal location");
     } else if (obj->getRefID() > 0) {
         if (obj->getFlag(OBJECT_FLAG_ONLINE_SERVICE)) {
             hasReference = true;
             refObj = loadObject(obj->getRefID());
             if (refObj == nullptr)
-                throw std::runtime_error("OBJECT_FLAG_ONLINE_SERVICE and refID set but refID doesn't point to an existing object");
+                throw_std_runtime_error("OBJECT_FLAG_ONLINE_SERVICE and refID set but refID doesn't point to an existing object");
         } else if (IS_CDS_CONTAINER(objectType)) {
             // in this case it's a playlist-container. that's ok
             // we don't need to do anything
         } else
-            throw std::runtime_error("refId set, but it makes no sense");
+            throw_std_runtime_error("refId set, but it makes no sense");
     }
 
     std::map<std::string, std::string> cdsObjectSql;
@@ -276,7 +276,7 @@ std::vector<std::shared_ptr<SQLStorage::AddUpdateTable>> SQLStorage::_addUpdateO
 
     if (IS_CDS_CONTAINER(objectType)) {
         if (!(isUpdate && obj->isVirtual()))
-            throw std::runtime_error("tried to add a container or tried to update a non-virtual container via _addUpdateObject; is this correct?");
+            throw_std_runtime_error("tried to add a container or tried to update a non-virtual container via _addUpdateObject; is this correct?");
         std::string dbLocation = addLocationPrefix(LOC_VIRT_PREFIX, obj->getLocation());
         cdsObjectSql["location"] = quote(dbLocation);
         cdsObjectSql["location_hash"] = quote(stringHash(dbLocation));
@@ -288,7 +288,7 @@ std::vector<std::shared_ptr<SQLStorage::AddUpdateTable>> SQLStorage::_addUpdateO
         if (!hasReference) {
             fs::path loc = item->getLocation();
             if (loc.empty())
-                throw std::runtime_error("tried to create or update a non-referenced item without a location set");
+                throw_std_runtime_error("tried to create or update a non-referenced item without a location set");
             if (IS_CDS_PURE_ITEM(objectType)) {
                 int parentID = ensurePathExistence(loc.parent_path(), changedContainer);
                 item->setParentID(parentID);
@@ -348,7 +348,7 @@ std::vector<std::shared_ptr<SQLStorage::AddUpdateTable>> SQLStorage::_addUpdateO
     }
 
     if (obj->getParentID() == INVALID_OBJECT_ID)
-        throw std::runtime_error("tried to create or update an object with an illegal parent id");
+        throw_std_runtime_error("tried to create or update an object with an illegal parent id");
     cdsObjectSql["parent_id"] = std::to_string(obj->getParentID());
 
     returnVal.push_back(
@@ -376,7 +376,7 @@ std::vector<std::shared_ptr<SQLStorage::AddUpdateTable>> SQLStorage::_addUpdateO
 void SQLStorage::addObject(std::shared_ptr<CdsObject> obj, int* changedContainer)
 {
     if (obj->getID() != INVALID_OBJECT_ID)
-        throw std::runtime_error("tried to add an object with an object ID set");
+        throw_std_runtime_error("tried to add an object with an object ID set");
     //obj->setID(INVALID_OBJECT_ID);
     auto data = _addUpdateObject(obj, false, changedContainer);
 
@@ -402,7 +402,7 @@ void SQLStorage::updateObject(std::shared_ptr<CdsObject> obj, int* changedContai
         data.push_back(std::make_shared<AddUpdateTable>(CDS_OBJECT_TABLE, cdsObjectSql, "update"));
     } else {
         if (IS_FORBIDDEN_CDS_ID(obj->getID()))
-            throw std::runtime_error("tried to update an object with a forbidden ID (" + std::to_string(obj->getID()) + ")!");
+            throw_std_runtime_error("tried to update an object with a forbidden ID (" + std::to_string(obj->getID()) + ")");
         data = _addUpdateObject(obj, true, changedContainer);
     }
     for (const auto& addUpdateTable : data) {
@@ -461,7 +461,7 @@ std::unique_ptr<std::vector<int>> SQLStorage::getServiceObjectIDs(char servicePr
 
     auto res = select(qb);
     if (res == nullptr)
-        throw std::runtime_error("db error");
+        throw_std_runtime_error("db error");
 
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow()) != nullptr) {
@@ -592,7 +592,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLStorage::search(const std::unique_ptr
     std::shared_ptr<ASTNode> rootNode = searchParser->parse();
     std::string searchSQL(rootNode->emitSQL());
     if (!searchSQL.length())
-        throw std::runtime_error("failed to generate SQL for search");
+        throw_std_runtime_error("failed to generate SQL for search");
 
     std::ostringstream countSQL;
     countSQL << "select count(*) " << searchSQL << ';';
@@ -666,7 +666,7 @@ std::vector<std::string> SQLStorage::getMimeTypes()
        << TQ("mime_type");
     auto res = select(qb);
     if (res == nullptr)
-        throw std::runtime_error("db error");
+        throw_std_runtime_error("db error");
 
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow()) != nullptr) {
@@ -693,7 +693,7 @@ std::shared_ptr<CdsObject> SQLStorage::findObjectByPath(fs::path fullpath, bool 
 
     auto res = select(qb);
     if (res == nullptr)
-        throw std::runtime_error("error while doing select: " + qb.str());
+        throw_std_runtime_error("error while doing select: " + qb.str());
 
     std::unique_ptr<SQLRow> row = res->nextRow();
     if (row == nullptr)
@@ -735,7 +735,7 @@ int SQLStorage::createContainer(int parentID, std::string name, const std::strin
     if (refID > 0) {
         auto refObj = loadObject(refID);
         if (refObj == nullptr)
-            throw std::runtime_error("tried to create container with refID set, but refID doesn't point to an existing object");
+            throw_std_runtime_error("tried to create container with refID set, but refID doesn't point to an existing object");
     }
     std::string dbLocation = addLocationPrefix((isVirtual ? LOC_VIRT_PREFIX : LOC_DIR_PREFIX), virtualPath);
 
@@ -822,7 +822,7 @@ fs::path SQLStorage::buildContainerPath(int parentID, const std::string& title)
     char prefix;
     fs::path path = stripLocationPrefix(row->col(0) + VIRTUAL_CONTAINER_SEPARATOR + title, &prefix);
     if (prefix != LOC_VIRT_PREFIX)
-        throw std::runtime_error("tried to build a virtual container path with an non-virtual parentID");
+        throw_std_runtime_error("tried to build a virtual container path with an non-virtual parentID");
 
     return path;
 }
@@ -956,7 +956,7 @@ std::shared_ptr<CdsObject> SQLStorage::createObjectFromRow(const std::unique_ptr
 
     if (IS_CDS_ITEM(objectType)) {
         if (!resource_zero_ok)
-            throw std::runtime_error("tried to create object without at least one resource");
+            throw_std_runtime_error("tried to create object without at least one resource");
 
         auto item = std::static_pointer_cast<CdsItem>(obj);
         item->setMimeType(fallbackString(row->col(_mime_type), row->col(_ref_mime_type)));
@@ -994,7 +994,7 @@ std::shared_ptr<CdsObject> SQLStorage::createObjectFromRow(const std::unique_ptr
             aitem->setAction(rowAI->col(1));
             aitem->setState(rowAI->col(2));
         } else
-            throw std::runtime_error("Active Item in cds_objects, but not in cds_active_item");
+            throw_std_runtime_error("Active Item in cds_objects, but not in cds_active_item");
 
         matched_types++;
     }
@@ -1037,7 +1037,7 @@ std::shared_ptr<CdsObject> SQLStorage::createObjectFromSearchRow(const std::uniq
 
     if (IS_CDS_ITEM(objectType)) {
         if (!resource_zero_ok)
-            throw std::runtime_error("tried to create object without at least one resource");
+            throw_std_runtime_error("tried to create object without at least one resource");
 
         auto item = std::static_pointer_cast<CdsItem>(obj);
         item->setMimeType(row->col(SearchCol::mime_type));
@@ -1119,7 +1119,7 @@ std::string SQLStorage::incrementUpdateIDs(const std::unique_ptr<std::unordered_
     bufSelect << inBuf.str();
     auto res = select(bufSelect);
     if (res == nullptr)
-        throw std::runtime_error("Error while fetching update ids");
+        throw_std_runtime_error("Error while fetching update ids");
 
     std::unique_ptr<SQLRow> row;
     std::list<std::string> rows;
@@ -1191,7 +1191,7 @@ std::string SQLStorage::findFolderImage(int id, std::string trackArtBase)
     //log_debug("findFolderImage {}, {}", id, q->c_str());
     auto res = select(q);
     if (res == nullptr)
-        throw std::runtime_error("db error");
+        throw_std_runtime_error("db error");
 
     std::unique_ptr<SQLRow> row;
     if ((row = res->nextRow()) != nullptr) // we only care about the first result
@@ -1212,7 +1212,7 @@ std::unique_ptr<std::unordered_set<int>> SQLStorage::getObjects(int parentID, bo
     q << parentID;
     auto res = select(q);
     if (res == nullptr)
-        throw std::runtime_error("db error");
+        throw_std_runtime_error("db error");
     if (res->getNumRows() == 0)
         return nullptr;
 
@@ -1232,7 +1232,7 @@ std::unique_ptr<Storage::ChangedContainers> SQLStorage::removeObjects(const std:
 
     for (const auto& id : *list) {
         if (IS_FORBIDDEN_CDS_ID(id))
-            throw std::runtime_error("tried to delete a forbidden ID (" + std::to_string(id) + ")!");
+            throw_std_runtime_error("tried to delete a forbidden ID (" + std::to_string(id) + ")");
     }
 
     std::ostringstream idsBuf;
@@ -1242,7 +1242,7 @@ std::unique_ptr<Storage::ChangedContainers> SQLStorage::removeObjects(const std:
 
     auto res = select(idsBuf);
     if (res == nullptr)
-        throw std::runtime_error("sql error");
+        throw_std_runtime_error("sql error");
 
     std::vector<int32_t> items;
     std::vector<int32_t> containers;
@@ -1346,7 +1346,7 @@ std::unique_ptr<Storage::ChangedContainers> SQLStorage::removeObject(int objectI
         }
     }
     if (IS_FORBIDDEN_CDS_ID(objectID))
-        throw std::runtime_error("tried to delete a forbidden ID (" + std::to_string(objectID) + ")!");
+        throw_std_runtime_error("tried to delete a forbidden ID (" + std::to_string(objectID) + ")");
     std::vector<int32_t> itemIds;
     std::vector<int32_t> containerIds;
     if (isContainer) {
@@ -1468,7 +1468,7 @@ std::unique_ptr<Storage::ChangedContainers> SQLStorage::_recursiveRemove(
         }
 
         if (count++ > MAX_REMOVE_RECURSION)
-            throw std::runtime_error("there seems to be an infinite loop...");
+            throw_std_runtime_error("there seems to be an infinite loop...");
     }
 
     if (!removeIds.empty())
@@ -1530,7 +1530,7 @@ std::unique_ptr<Storage::ChangedContainers> SQLStorage::_purgeEmptyContainers(st
             res = select(sql.str());
             selUpnp.clear();
             if (res == nullptr)
-                throw std::runtime_error("db error");
+                throw_std_runtime_error("db error");
             while ((row = res->nextRow()) != nullptr) {
                 int flags = std::stoi(row->col(3));
                 if (flags & OBJECT_FLAG_PERSISTENT_CONTAINER)
@@ -1551,7 +1551,7 @@ std::unique_ptr<Storage::ChangedContainers> SQLStorage::_purgeEmptyContainers(st
             res = select(sql.str());
             selUi.clear();
             if (res == nullptr)
-                throw std::runtime_error("db error");
+                throw_std_runtime_error("db error");
             while ((row = res->nextRow()) != nullptr) {
                 int flags = std::stoi(row->col(3));
                 if (flags & OBJECT_FLAG_PERSISTENT_CONTAINER) {
@@ -1574,7 +1574,7 @@ std::unique_ptr<Storage::ChangedContainers> SQLStorage::_purgeEmptyContainers(st
                 again = true;
         }
         if (count++ >= MAX_REMOVE_RECURSION)
-            throw std::runtime_error("there seems to be an infinite loop...");
+            throw_std_runtime_error("there seems to be an infinite loop...");
     } while (again);
 
     auto& changedUi = changedContainers->ui;
@@ -1637,7 +1637,7 @@ void SQLStorage::updateAutoscanPersistentList(ScanMode scanmode, std::shared_ptr
 
         std::string location = ad->getLocation();
         if (location.empty())
-            throw std::runtime_error("AutoscanDirectoy with illegal location given to SQLStorage::updateAutoscanPersistentList");
+            throw_std_runtime_error("AutoscanDirectoy with illegal location given to SQLStorage::updateAutoscanPersistentList");
 
         std::ostringstream q;
         q << "SELECT " << TQ("id") << " FROM " << TQ(AUTOSCAN_TABLE)
@@ -1756,16 +1756,16 @@ std::shared_ptr<AutoscanDirectory> SQLStorage::_fillAutoscanDirectory(const std:
 void SQLStorage::addAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir)
 {
     if (adir == nullptr)
-        throw std::runtime_error("addAutoscanDirectory called with adir==nullptr");
+        throw_std_runtime_error("addAutoscanDirectory called with adir==nullptr");
     if (adir->getStorageID() >= 0)
-        throw std::runtime_error("tried to add autoscan directory with a storage id set");
+        throw_std_runtime_error("tried to add autoscan directory with a storage id set");
     int objectID;
     if (adir->getLocation() == FS_ROOT_DIRECTORY)
         objectID = CDS_ID_FS_ROOT;
     else
         objectID = findObjectIDByPath(adir->getLocation());
     if (!adir->persistent() && objectID < 0)
-        throw std::runtime_error("tried to add non-persistent autoscan directory with an illegal objectID or location");
+        throw_std_runtime_error("tried to add non-persistent autoscan directory with an illegal objectID or location");
 
     auto pathIds = _checkOverlappingAutoscans(adir);
 
@@ -1803,7 +1803,7 @@ void SQLStorage::updateAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir
     log_debug("id: {}, obj_id: {}", adir->getStorageID(), adir->getObjectID());
 
     if (adir == nullptr)
-        throw std::runtime_error("updateAutoscanDirectory called with adir==nullptr");
+        throw_std_runtime_error("updateAutoscanDirectory called with adir==nullptr");
 
     auto pathIds = _checkOverlappingAutoscans(adir);
 
@@ -1947,7 +1947,7 @@ void SQLStorage::checkOverlappingAutoscans(std::shared_ptr<AutoscanDirectory> ad
 std::unique_ptr<std::vector<int>> SQLStorage::_checkOverlappingAutoscans(const std::shared_ptr<AutoscanDirectory>& adir)
 {
     if (adir == nullptr)
-        throw std::runtime_error("_checkOverlappingAutoscans called with adir==nullptr");
+        throw_std_runtime_error("_checkOverlappingAutoscans called with adir==nullptr");
     int checkObjectID = adir->getObjectID();
     if (checkObjectID == INVALID_OBJECT_ID)
         return nullptr;
@@ -1963,15 +1963,15 @@ std::unique_ptr<std::vector<int>> SQLStorage::_checkOverlappingAutoscans(const s
 
     auto res = select(q);
     if (res == nullptr)
-        throw std::runtime_error("SQL error");
+        throw_std_runtime_error("SQL error");
 
     std::unique_ptr<SQLRow> row;
     if ((row = res->nextRow()) != nullptr) {
         auto obj = loadObject(checkObjectID);
         if (obj == nullptr)
-            throw std::runtime_error("Referenced object (by Autoscan) not found.");
+            throw_std_runtime_error("Referenced object (by Autoscan) not found.");
         log_error("There is already an Autoscan set on {}", obj->getLocation().c_str());
-        throw std::runtime_error("There is already an Autoscan set on " + obj->getLocation().string());
+        throw_std_runtime_error("There is already an Autoscan set on " + obj->getLocation().string());
     }
 
     if (adir->getRecursive()) {
@@ -1988,21 +1988,21 @@ std::unique_ptr<std::vector<int>> SQLStorage::_checkOverlappingAutoscans(const s
 
         res = select(q);
         if (res == nullptr)
-            throw std::runtime_error("SQL error");
+            throw_std_runtime_error("SQL error");
         if ((row = res->nextRow()) != nullptr) {
             int objectID = std::stoi(row->col(0));
             log_debug("-------------- {}", objectID);
             auto obj = loadObject(objectID);
             if (obj == nullptr)
-                throw std::runtime_error("Referenced object (by Autoscan) not found.");
+                throw_std_runtime_error("Referenced object (by Autoscan) not found.");
             log_error("Overlapping Autoscans are not allowed. There is already an Autoscan set on {}", obj->getLocation().c_str());
-            throw std::runtime_error("Overlapping Autoscans are not allowed. There is already an Autoscan set on " + obj->getLocation().string());
+            throw_std_runtime_error("Overlapping Autoscans are not allowed. There is already an Autoscan set on " + obj->getLocation().string());
         }
     }
 
     auto pathIDs = getPathIDs(checkObjectID);
     if (pathIDs == nullptr)
-        throw std::runtime_error("getPathIDs returned nullptr");
+        throw_std_runtime_error("getPathIDs returned nullptr");
     std::ostringstream q2;
     q2 << "SELECT " << TQ("obj_id")
        << " FROM " << TQ(AUTOSCAN_TABLE)
@@ -2015,16 +2015,16 @@ std::unique_ptr<std::vector<int>> SQLStorage::_checkOverlappingAutoscans(const s
 
     res = select(q2);
     if (res == nullptr)
-        throw std::runtime_error("SQL error");
+        throw_std_runtime_error("SQL error");
     if ((row = res->nextRow()) == nullptr)
         return pathIDs;
 
     int objectID = std::stoi(row->col(0));
     auto obj = loadObject(objectID);
     if (obj == nullptr)
-        throw std::runtime_error("Referenced object (by Autoscan) not found.");
+        throw_std_runtime_error("Referenced object (by Autoscan) not found.");
     log_error("Overlapping Autoscans are not allowed. There is already a recursive Autoscan set on {}", obj->getLocation().c_str());
-    throw std::runtime_error("Overlapping Autoscans are not allowed. There is already a recursive Autoscan set on " + obj->getLocation().string());
+    throw_std_runtime_error("Overlapping Autoscans are not allowed. There is already a recursive Autoscan set on " + obj->getLocation().string());
 }
 
 std::unique_ptr<std::vector<int>> SQLStorage::getPathIDs(int objectID)
@@ -2074,7 +2074,7 @@ int SQLStorage::getNextID()
 {
     log_debug("NextId: {}", lastID + 1);
     if (lastID < CDS_ID_FS_ROOT)
-        throw std::runtime_error("SQLStorage::getNextID() called, but lastID hasn't been loaded correctly yet");
+        throw_std_runtime_error("lastID hasn't been loaded correctly yet");
     AutoLock lock(nextIDMutex);
     return ++lastID;
 }
@@ -2089,15 +2089,15 @@ void SQLStorage::loadLastID()
        << " FROM " << TQ(CDS_OBJECT_TABLE);
     auto res = select(qb);
     if (res == nullptr)
-        throw std::runtime_error("could not load lastID (res==nullptr)");
+        throw_std_runtime_error("could not load lastID (res==nullptr)");
 
     std::unique_ptr<SQLRow> row = res->nextRow();
     if (row == nullptr)
-        throw std::runtime_error("could not load lastID (row==nullptr)");
+        throw_std_runtime_error("could not load lastID (row==nullptr)");
 
     lastID = std::stoi(row->col(0));
     if (lastID < CDS_ID_FS_ROOT)
-        throw std::runtime_error("could not load correct lastID (db not initialized?)");
+        throw_std_runtime_error("could not load correct lastID (db not initialized?)");
 
     log_debug("LoadedId: {}", lastID);
 }
@@ -2105,7 +2105,7 @@ void SQLStorage::loadLastID()
 int SQLStorage::getNextMetadataID()
 {
     if (lastMetadataID < CDS_ID_ROOT)
-        throw std::runtime_error("SQLStorage::getNextMetadataID() called, but lastMetadataID hasn't been loaded correctly yet");
+        throw_std_runtime_error("lastMetadataID hasn't been loaded correctly yet");
 
     AutoLock lock(nextIDMutex);
     return ++lastMetadataID;
@@ -2123,15 +2123,15 @@ void SQLStorage::loadLastMetadataID()
        << " FROM " << TQ(METADATA_TABLE);
     auto res = select(qb);
     if (res == nullptr)
-        throw std::runtime_error("could not load lastMetadataID (res==nullptr)");
+        throw_std_runtime_error("could not load lastMetadataID (res==nullptr)");
 
     std::unique_ptr<SQLRow> row = res->nextRow();
     if (row == nullptr)
-        throw std::runtime_error("could not load lastMetadataID (row==nullptr)");
+        throw_std_runtime_error("could not load lastMetadataID (row==nullptr)");
 
     lastMetadataID = stoi_string(row->col(0));
     if (lastMetadataID < CDS_ID_ROOT)
-        throw std::runtime_error("could not load correct lastMetadataID (db not initialized?)");
+        throw_std_runtime_error("could not load correct lastMetadataID (db not initialized?)");
 }
 
 void SQLStorage::clearFlagInDB(int flag)
@@ -2234,7 +2234,7 @@ std::unique_ptr<std::ostringstream> SQLStorage::sqlForUpdate(const std::shared_p
 {
     if (addUpdateTable == nullptr
         || (addUpdateTable->getTable() == METADATA_TABLE && addUpdateTable->getDict().size() != 2))
-        throw std::runtime_error("sqlForUpdate called with invalid arguments");
+        throw_std_runtime_error("sqlForUpdate called with invalid arguments");
 
     std::string tableName = addUpdateTable->getTable();
     auto dict = addUpdateTable->getDict();
@@ -2260,7 +2260,7 @@ std::unique_ptr<std::ostringstream> SQLStorage::sqlForDelete(const std::shared_p
 {
     if (addUpdateTable == nullptr
         || (addUpdateTable->getTable() == METADATA_TABLE && addUpdateTable->getDict().size() != 2))
-        throw std::runtime_error("sqlForDelete called with invalid arguments");
+        throw_std_runtime_error("sqlForDelete called with invalid arguments");
 
     std::string tableName = addUpdateTable->getTable();
     auto dict = addUpdateTable->getDict();
