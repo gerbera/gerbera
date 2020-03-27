@@ -1177,10 +1177,12 @@ ssize_t getValidUTF8CutPosition(std::string str, ssize_t cutpos)
     if ((len == 0) || (cutpos > static_cast<ssize_t>(len)))
         return pos;
 
+#if 0
     printf("Character at cut position: %0x\n", static_cast<char>(str.at(cutpos)));
     printf("Character at cut-1 position: %0x\n", static_cast<char>(str.at(cutpos - 1)));
     printf("Character at cut-2 position: %0x\n", static_cast<char>(str.at(cutpos - 2)));
     printf("Character at cut-3 position: %0x\n", static_cast<char>(str.at(cutpos - 3)));
+#endif
 
     // > 0x7f, we are dealing with a non-ascii character
     if (str.at(cutpos) & 0x80) {
