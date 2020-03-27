@@ -129,7 +129,7 @@ ProcessIOHandler::ProcessIOHandler(std::shared_ptr<ContentManager> content,
 
     if ((mainProc != nullptr) && ((!mainProc->isAlive() || abort()))) {
         killAll();
-        throw std::runtime_error("process terminated early");
+        throw_std_runtime_error("process terminated early");
     }
     /*
     if (mkfifo(filename.c_str(), O_RDWR) == -1)
@@ -139,7 +139,7 @@ ProcessIOHandler::ProcessIOHandler(std::shared_ptr<ContentManager> content,
         if (main_proc != nullptr)
             main_proc->kill();
 
-        throw std::runtime_error("Could not create reader fifo!\n");
+        throw_std_runtime_error("Could not create reader fifo");
     }
 */
     registerAll();
@@ -149,7 +149,7 @@ void ProcessIOHandler::open(enum UpnpOpenFileMode mode)
 {
     if ((mainProc != nullptr) && ((!mainProc->isAlive() || abort()))) {
         killAll();
-        throw std::runtime_error("process terminated early");
+        throw_std_runtime_error("process terminated early");
     }
 
     if (mode == UPNP_READ)
@@ -168,7 +168,7 @@ void ProcessIOHandler::open(enum UpnpOpenFileMode mode)
         if (mainProc != nullptr)
             mainProc->kill();
         unlink(filename.c_str());
-        throw std::runtime_error("open: failed to open: " + filename.string());
+        throw_std_runtime_error("open: failed to open: " + filename.string());
     }
 }
 
@@ -359,7 +359,7 @@ void ProcessIOHandler::seek(off_t offset, int whence)
 {
     // we know we can not seek in a fifo, but the PS3 asks for a hack...
     if (!ignoreSeek)
-        throw std::runtime_error("fseek failed");
+        throw_std_runtime_error("fseek failed");
 }
 
 void ProcessIOHandler::close()
@@ -381,7 +381,7 @@ void ProcessIOHandler::close()
     unlink(filename.c_str());
 
     if (!ret)
-        throw std::runtime_error("failed to kill process!");
+        throw_std_runtime_error("failed to kill process");
 }
 
 ProcessIOHandler::~ProcessIOHandler()

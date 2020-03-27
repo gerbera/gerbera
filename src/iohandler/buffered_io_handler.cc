@@ -39,9 +39,9 @@ BufferedIOHandler::BufferedIOHandler(std::unique_ptr<IOHandler>& underlyingHandl
     : IOHandlerBufferHelper(bufSize, initialFillSize)
 {
     if (underlyingHandler == nullptr)
-        throw std::runtime_error("underlyingHandler must not be nullptr");
+        throw_std_runtime_error("underlyingHandler must not be nullptr");
     if (maxChunkSize == 0)
-        throw std::runtime_error("maxChunkSize must be greater than 0");
+        throw_std_runtime_error("maxChunkSize must be greater than 0");
     this->underlyingHandler = std::move(underlyingHandler);
     this->maxChunkSize = maxChunkSize;
 

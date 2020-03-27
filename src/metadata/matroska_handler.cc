@@ -62,7 +62,7 @@ public:
     {
         file = fopen(path, "rb");
         if (file == nullptr) {
-            throw std::runtime_error(std::string("Could not fopen ") + path);
+            throw_std_runtime_error(std::string("Could not fopen ") + path);
         }
     }
 
@@ -84,7 +84,7 @@ public:
         assert(file != nullptr);
         assert(mode == SEEK_CUR || mode == SEEK_END || mode == SEEK_SET);
         if (fseeko(file, offset, mode) != 0) {
-            throw std::runtime_error("fseek failed");
+            throw_std_runtime_error("fseek failed");
         }
     }
 
@@ -105,7 +105,7 @@ public:
         if (file == nullptr)
             return;
         if (fclose(file) != 0) {
-            throw std::runtime_error("fclose failed");
+            throw_std_runtime_error("fclose failed");
         }
         file = nullptr;
     }

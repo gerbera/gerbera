@@ -120,7 +120,7 @@ std::string PlaylistParserScript::readln()
 {
     std::string ret;
     if (!currentHandle)
-        throw std::runtime_error("Readline not yet setup for use");
+        throw_std_runtime_error("Readline not yet setup for use");
 
     if ((currentTask != nullptr) && (!currentTask->isValid()))
         return "";
@@ -138,11 +138,11 @@ std::string PlaylistParserScript::readln()
 void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject>& obj, std::shared_ptr<GenericTask> task)
 {
     if ((currentObjectID != INVALID_OBJECT_ID) || (currentHandle != nullptr) || (currentLine != nullptr)) {
-        throw std::runtime_error("recursion not allowed!");
+        throw_std_runtime_error("recursion not allowed");
     }
 
     if (!IS_CDS_PURE_ITEM(obj->getObjectType())) {
-        throw std::runtime_error("only allowed for pure items");
+        throw_std_runtime_error("only allowed for pure items");
     }
 
     currentTask = std::move(task);
@@ -151,7 +151,7 @@ void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject
     if (!currentLine) {
         currentObjectID = INVALID_OBJECT_ID;
         currentTask = nullptr;
-        throw std::runtime_error("failed to allocate memory for playlist parsing!");
+        throw_std_runtime_error("failed to allocate memory for playlist parsing");
     }
 
     currentLine[0] = '\0';
@@ -161,7 +161,7 @@ void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject
         currentObjectID = INVALID_OBJECT_ID;
         currentTask = nullptr;
         free(currentLine);
-        throw std::runtime_error("failed to open file: " + obj->getLocation().string());
+        throw_std_runtime_error("failed to open file: " + obj->getLocation().string());
     }
 
     Runtime::AutoLock lock(runtime->getMutex());

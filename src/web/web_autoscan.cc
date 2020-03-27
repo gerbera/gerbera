@@ -54,7 +54,7 @@ void web::autoscan::process()
 
     std::string action = param("action");
     if (action.empty())
-        throw std::runtime_error("web:autoscan called with illegal action");
+        throw_std_runtime_error("web:autoscan called with illegal action");
 
     bool fromFs = boolParam("from_fs");
     std::string path;
@@ -104,7 +104,7 @@ void web::autoscan::process()
             scan_level = AutoscanDirectory::remapScanlevel(param("scan_level"));
             int interval = intParam("interval", 0);
             if (scan_mode == ScanMode::Timed && interval <= 0)
-                throw std::runtime_error("illegal interval given");
+                throw_std_runtime_error("illegal interval given");
 
             int objectID = INVALID_OBJECT_ID;
             if (fromFs)
@@ -150,7 +150,7 @@ void web::autoscan::process()
             //    .set_value(AutoscanDirectory::mapScanlevel(autoscanDir->getScanLevel()).c_str());
         }
     } else
-        throw std::runtime_error("web:autoscan called with illegal action");
+        throw_std_runtime_error("called with illegal action");
 }
 
 void web::autoscan::autoscan2XML(const std::shared_ptr<AutoscanDirectory>& adir, pugi::xml_node* element)

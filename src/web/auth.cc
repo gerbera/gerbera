@@ -138,7 +138,7 @@ void web::auth::process()
         std::string sid = param("sid");
         auto session = sessionManager->getSession(sid);
         if (session == nullptr)
-            throw std::runtime_error("illegal session id");
+            throw_std_runtime_error("illegal session id");
         sessionManager->removeSession(sid);
     } else if (action == "get_token") {
         check_request(false);
@@ -160,7 +160,7 @@ void web::auth::process()
 
         auto session = sessionManager->getSession(sid);
         if (session == nullptr)
-            throw std::runtime_error("illegal session id");
+            throw_std_runtime_error("illegal session id");
 
         std::string correctPassword = sessionManager->getUserPassword(username);
 
@@ -169,5 +169,5 @@ void web::auth::process()
 
         session->logIn();
     } else
-        throw std::runtime_error("illegal action given to req_type auth");
+        throw_std_runtime_error("illegal action given to req_type auth");
 }

@@ -105,13 +105,13 @@ void Server::run()
     std::string ip = config->getOption(CFG_SERVER_IP);
 
     if (!ip.empty() && !iface.empty())
-        throw std::runtime_error("You can not specify interface and IP at the same time!");
+        throw_std_runtime_error("You can not specify interface and IP at the same time");
 
     if (iface.empty())
         iface = ipToInterface(ip);
 
     if (!ip.empty() && iface.empty())
-        throw std::runtime_error("Could not find ip: " + ip);
+        throw_std_runtime_error("Could not find ip: " + ip);
 
     int port = config->getIntOption(CFG_SERVER_PORT);
 
@@ -139,7 +139,7 @@ void Server::run()
     std::string web_root = config->getOption(CFG_SERVER_WEBROOT);
 
     if (web_root.empty()) {
-        throw std::runtime_error("invalid web server root directory");
+        throw_std_runtime_error("invalid web server root directory");
     }
 
     ret = UpnpSetWebServerRootDir(web_root.c_str());
@@ -456,7 +456,7 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
         if (!config->getOption(CFG_SERVER_SERVEDIR).empty())
             ret = std::make_unique<ServeRequestHandler>(config, storage);
         else
-            throw std::runtime_error("Serving directories is not enabled in configuration");
+            throw_std_runtime_error("Serving directories is not enabled in configuration");
     }
 #if defined(HAVE_CURL)
     else if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_ONLINE_HANDLER)) {
@@ -464,7 +464,7 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
     }
 #endif
     else {
-        throw std::runtime_error(std::string("no valid handler type in ") + filename);
+        throw_std_runtime_error(std::string("no valid handler type in ") + filename);
     }
 
     return ret;

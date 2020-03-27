@@ -46,7 +46,7 @@ void web::tasks::process()
     check_request();
     std::string action = param("action");
     if (action.empty())
-        throw std::runtime_error("web:tasks called with illegal action");
+        throw_std_runtime_error("called with illegal action");
 
     auto root = xmlDoc->document_element();
 
@@ -61,5 +61,5 @@ void web::tasks::process()
         int taskID = intParam("task_id");
         content->invalidateTask(taskID);
     } else
-        throw std::runtime_error("web:tasks called with illegal action");
+        throw_std_runtime_error("called with illegal action");
 }

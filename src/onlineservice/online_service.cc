@@ -49,7 +49,7 @@ void OnlineServiceList::registerService(const std::shared_ptr<OnlineService>& se
         return;
 
     if (service->getServiceType() >= OS_Max) {
-        throw std::runtime_error("Requested service with illegal type!");
+        throw_std_runtime_error("Requested service with illegal type");
     }
 
     service_list.at(service->getServiceType()) = service;
@@ -73,7 +73,7 @@ OnlineService::OnlineService()
 char OnlineService::getStoragePrefix(service_type_t service)
 {
     if ((service < 0) || (service >= OS_Max))
-        throw std::runtime_error("Illegal service requested\n");
+        throw_std_runtime_error("Illegal service requested");
 
     return service_prefixes[service];
 }

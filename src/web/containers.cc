@@ -50,7 +50,7 @@ void web::containers::process()
 
     int parentID = intParam("parent_id", INVALID_OBJECT_ID);
     if (parentID == INVALID_OBJECT_ID)
-        throw std::runtime_error("web::containers: no parent_id given");
+        throw_std_runtime_error("no parent_id given");
 
     auto root = xmlDoc->document_element();
 

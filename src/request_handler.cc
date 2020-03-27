@@ -52,7 +52,7 @@ void RequestHandler::splitUrl(const char* url, char separator, std::string& path
     else if (separator == '?')
         i1 = url_s.rfind(separator);
     else
-        throw std::runtime_error(std::string("Forbidden separator: ") + separator);
+        throw_std_runtime_error(std::string("Forbidden separator: ") + separator);
 
     if (i1 == std::string::npos) {
         path = url_s;

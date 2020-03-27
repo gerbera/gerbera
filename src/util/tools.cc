@@ -165,7 +165,7 @@ time_t getLastWriteTime(const fs::path& path)
     struct stat statbuf;
     int ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
-        throw std::runtime_error(mt_strerror(errno) + ": " + path.string());
+        throw_std_runtime_error(mt_strerror(errno) + ": " + path.string());
     }
 
     return statbuf.st_mtime;
@@ -177,7 +177,7 @@ bool isRegularFile(const fs::path& path)
     struct stat statbuf;
     int ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
-        throw std::runtime_error(mt_strerror(errno) + ": " + path.string());
+        throw_std_runtime_error(mt_strerror(errno) + ": " + path.string());
     }
 
     return S_ISREG(statbuf.st_mode);
@@ -203,7 +203,7 @@ off_t getFileSize(const fs::path& path)
     struct stat statbuf;
     int ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
-        throw std::runtime_error(mt_strerror(errno) + ": " + path.string());
+        throw_std_runtime_error(mt_strerror(errno) + ": " + path.string());
     }
 
     return statbuf.st_size;
@@ -498,7 +498,7 @@ std::string readTextFile(const fs::path& path)
 {
     FILE* f = fopen(path.c_str(), "rt");
     if (!f) {
-        throw std::runtime_error("readTextFile: could not open " + path.string() + " : " + mt_strerror(errno));
+        throw_std_runtime_error("could not open " + path.string() + " : " + mt_strerror(errno));
     }
     std::ostringstream buf;
     char buffer[1024];
@@ -515,16 +515,16 @@ void writeTextFile(const fs::path& path, const std::string& contents)
     size_t bytesWritten;
     FILE* f = fopen(path.c_str(), "wt");
     if (!f) {
-        throw std::runtime_error("writeTextFile: could not open " + path.string() + " : " + mt_strerror(errno));
+        throw_std_runtime_error("could not open " + path.string() + " : " + mt_strerror(errno));
     }
 
     bytesWritten = fwrite(contents.c_str(), 1, contents.length(), f);
     if (bytesWritten < contents.length()) {
         fclose(f);
         if (bytesWritten >= 0)
-            throw std::runtime_error("writeTextFile: incomplete write to " + path.string() + " : ");
+            throw_std_runtime_error("incomplete write to " + path.string() + " : ");
 
-        throw std::runtime_error("writeTextFile: error writing to " + path.string() + " : " + mt_strerror(errno));
+        throw_std_runtime_error("error writing to " + path.string() + " : " + mt_strerror(errno));
     }
     fclose(f);
 }
@@ -646,7 +646,7 @@ void set_jpeg_resolution_resource(const std::shared_ptr<CdsItem>& item, int res_
         std::string resolution = get_jpeg_resolution(fio_h);
 
         if (res_num >= item->getResourceCount())
-            throw std::runtime_error("Invalid resource index");
+            throw_std_runtime_error("Invalid resource index");
 
         item->getResource(res_num)->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), resolution);
     } catch (const std::runtime_error& e) {
@@ -873,7 +873,7 @@ void getTimespecNow(struct timespec* ts)
     struct timeval tv;
     int ret = gettimeofday(&tv, nullptr);
     if (ret != 0)
-        throw std::runtime_error("gettimeofday failed: " + mt_strerror(errno));
+        throw_std_runtime_error("gettimeofday failed: " + mt_strerror(errno));
 
     ts->tv_sec = tv.tv_sec;
     ts->tv_nsec = tv.tv_usec * 1000;
@@ -1124,12 +1124,12 @@ bool isTheora(const fs::path& ogg_filename)
     f = fopen(ogg_filename.c_str(), "rb");
 
     if (!f) {
-        throw std::runtime_error("Error opening " + ogg_filename.string() + " : " + mt_strerror(errno));
+        throw_std_runtime_error("Error opening " + ogg_filename.string() + " : " + mt_strerror(errno));
     }
 
     if (fread(buffer, 1, 4, f) != 4) {
         fclose(f);
-        throw std::runtime_error("Error reading " + ogg_filename.string());
+        throw_std_runtime_error("Error reading " + ogg_filename.string());
     }
 
     if (memcmp(buffer, "OggS", 4) != 0) {
@@ -1139,12 +1139,12 @@ bool isTheora(const fs::path& ogg_filename)
 
     if (fseek(f, 28, SEEK_SET) != 0) {
         fclose(f);
-        throw std::runtime_error("Incomplete file " + ogg_filename.string());
+        throw_std_runtime_error("Incomplete file " + ogg_filename.string());
     }
 
     if (fread(buffer, 1, 7, f) != 7) {
         fclose(f);
-        throw std::runtime_error("Error reading " + ogg_filename.string());
+        throw_std_runtime_error("Error reading " + ogg_filename.string());
     }
 
     if (memcmp(buffer, "\x80theora", 7) != 0) {
@@ -1266,19 +1266,19 @@ std::string getAVIFourCC(const fs::path& avi_filename)
     char* buffer;
     FILE* f = fopen(avi_filename.c_str(), "rb");
     if (!f)
-        throw std::runtime_error("could not open file " + avi_filename.native() + " : " + mt_strerror(errno));
+        throw_std_runtime_error("could not open file " + avi_filename.native() + " : " + mt_strerror(errno));
 
     buffer = static_cast<char*>(malloc(FCC_OFFSET + 6));
     if (buffer == nullptr) {
         fclose(f);
-        throw std::runtime_error("Out of memory when allocating buffer for file " + avi_filename.native());
+        throw_std_runtime_error("Out of memory when allocating buffer for file " + avi_filename.native());
     }
 
     size_t rb = fread(buffer, 1, FCC_OFFSET + 4, f);
     fclose(f);
     if (rb != FCC_OFFSET + 4) {
         free(buffer);
-        throw std::runtime_error("could not read header of " + avi_filename.native() + " : " + mt_strerror(errno));
+        throw_std_runtime_error("could not read header of " + avi_filename.native() + " : " + mt_strerror(errno));
     }
 
     buffer[FCC_OFFSET + 5] = '\0';

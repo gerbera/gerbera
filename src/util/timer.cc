@@ -50,7 +50,7 @@ void Timer::run()
         this);
 
     if (ret)
-        throw std::runtime_error("failed to start timer thread: " + std::to_string(ret));
+        throw_std_runtime_error("failed to start timer thread: " + std::to_string(ret));
 }
 
 void* Timer::staticThreadProc(void* arg)
@@ -71,13 +71,13 @@ void Timer::addTimerSubscriber(Subscriber* timerSubscriber, unsigned int notifyI
 {
     log_debug("Adding subscriber... interval: {} once: {} ", notifyInterval, once);
     if (notifyInterval == 0)
-        throw std::runtime_error(fmt::format("Tried to add timer with illegal notifyInterval: {}", notifyInterval));
+        throw_std_runtime_error(fmt::format("Tried to add timer with illegal notifyInterval: {}", notifyInterval));
 
     AutoLock lock(mutex);
     TimerSubscriberElement element(timerSubscriber, notifyInterval, std::move(parameter), once);
     for (auto& subscriber : subscribers) {
         if (subscriber == element) {
-            throw std::runtime_error("Tried to add same timer twice");
+            throw_std_runtime_error("Tried to add same timer twice");
         }
     }
     subscribers.push_back(element);
@@ -94,7 +94,7 @@ void Timer::removeTimerSubscriber(Subscriber* timerSubscriber, std::shared_ptr<P
         subscribers.erase(it);
         signal();
     } else if (!dontFail) {
-        throw std::runtime_error("Tried to remove nonexistent timer");
+        throw_std_runtime_error("Tried to remove nonexistent timer");
     }
 }
 

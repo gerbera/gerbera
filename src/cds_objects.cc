@@ -111,10 +111,10 @@ int CdsObject::resourcesEqual(const std::shared_ptr<CdsObject>& obj)
 void CdsObject::validate()
 {
     if (this->title.empty())
-        throw std::runtime_error("Object validation failed: missing title!\n");
+        throw_std_runtime_error("Object validation failed: missing title");
 
     if (this->upnpClass.empty())
-        throw std::runtime_error("Object validation failed: missing upnp class\n");
+        throw_std_runtime_error("Object validation failed: missing upnp class");
 }
 
 std::shared_ptr<CdsObject> CdsObject::createObject(const std::shared_ptr<Storage>& storage, unsigned int objectType)
@@ -132,7 +132,7 @@ std::shared_ptr<CdsObject> CdsObject::createObject(const std::shared_ptr<Storage
     } else if (IS_CDS_ITEM(objectType)) {
         obj = std::make_shared<CdsItem>(storage);
     } else {
-        throw std::runtime_error("invalid object type: " + std::to_string(objectType));
+        throw_std_runtime_error("invalid object type: " + std::to_string(objectType));
     }
     return obj;
 }
@@ -173,14 +173,14 @@ void CdsItem::validate()
     CdsObject::validate();
     //    log_info("mime: [{}] loc [{}]", this->mimeType.c_str(), this->location.c_str());
     if (this->mimeType.empty())
-        throw std::runtime_error("Item validation failed: missing mimetype");
+        throw_std_runtime_error("Item validation failed: missing mimetype");
 
     if (this->location.empty())
-        throw std::runtime_error("Item validation failed: missing location");
+        throw_std_runtime_error("Item validation failed: missing location");
 
     std::error_code ec;
     if (!isRegularFile(location, ec))
-        throw std::runtime_error("Item validation failed: file " + location.string() + " not found");
+        throw_std_runtime_error("Item validation failed: file " + location.string() + " not found");
 }
 
 CdsActiveItem::CdsActiveItem(std::shared_ptr<Storage> storage)
@@ -215,11 +215,11 @@ void CdsActiveItem::validate()
 {
     CdsItem::validate();
     if (this->action.empty())
-        throw std::runtime_error("Active Item validation failed: missing action\n");
+        throw_std_runtime_error("Active Item validation failed: missing action");
 
     std::error_code ec;
     if (!isRegularFile(this->action, ec))
-        throw std::runtime_error("Active Item validation failed: action script " + action + " not found\n");
+        throw_std_runtime_error("Active Item validation failed: action script " + action + " not found");
 }
 //---------
 
@@ -236,10 +236,10 @@ void CdsItemExternalURL::validate()
 {
     CdsItem::validate();
     if (this->mimeType.empty())
-        throw std::runtime_error("URL Item validation failed: missing mimetype\n");
+        throw_std_runtime_error("URL Item validation failed: missing mimetype");
 
     if (this->location.empty())
-        throw std::runtime_error("URL Item validation failed: missing URL\n");
+        throw_std_runtime_error("URL Item validation failed: missing URL");
 }
 //---------
 
@@ -257,7 +257,7 @@ void CdsItemInternalURL::validate()
     CdsItemExternalURL::validate();
 
     if (startswith(this->location, "http://"))
-        throw std::runtime_error("Internal URL item validation failed: only realative URLs allowd\n");
+        throw_std_runtime_error("Internal URL item validation failed: only realative URLs allowd");
 }
 
 CdsContainer::CdsContainer(std::shared_ptr<Storage> storage)
@@ -291,7 +291,7 @@ void CdsContainer::validate()
     CdsObject::validate();
     /// \todo well.. we have to know if a container is a real directory or just a virtual container in the database
     /*    if (!fs::is_directory(this->location, true))
-        throw std::runtime_error("CdsContainer: validation failed"); */
+        throw_std_runtime_error("validation failed"); */
 }
 
 std::string CdsContainer::getVirtualPath() const
@@ -309,7 +309,7 @@ std::string CdsContainer::getVirtualPath() const
     }
 
     if (location.empty())
-        throw std::runtime_error("virtual location not available");
+        throw_std_runtime_error("virtual location not available");
 
     return location;
 }
@@ -321,7 +321,7 @@ std::string CdsItem::getVirtualPath() const
     location = location + VIRTUAL_CONTAINER_SEPARATOR + getTitle();
 
     if (location.empty())
-        throw std::runtime_error("virtual location not available");
+        throw_std_runtime_error("virtual location not available");
 
     return location;
 }
@@ -338,7 +338,7 @@ std::string CdsObject::mapObjectType(int type)
         return STRING_OBJECT_TYPE_EXTERNAL_URL;
     if (IS_CDS_ITEM_INTERNAL_URL(type))
         return STRING_OBJECT_TYPE_INTERNAL_URL;
-    throw std::runtime_error("illegal objectType: " + std::to_string(type));
+    throw_std_runtime_error("illegal objectType: " + std::to_string(type));
 }
 
 int CdsObject::remapObjectType(const std::string& objectType)
@@ -353,5 +353,5 @@ int CdsObject::remapObjectType(const std::string& objectType)
         return OBJECT_TYPE_ITEM | OBJECT_TYPE_ITEM_EXTERNAL_URL;
     if (objectType == STRING_OBJECT_TYPE_INTERNAL_URL)
         return OBJECT_TYPE_ITEM | OBJECT_TYPE_ITEM_EXTERNAL_URL | OBJECT_TYPE_ITEM_INTERNAL_URL;
-    throw std::runtime_error("illegal objectType: " + objectType);
+    throw_std_runtime_error("illegal objectType: " + objectType);
 }

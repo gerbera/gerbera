@@ -571,7 +571,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
             auto tp = it.second;
 
             if (tp == nullptr)
-                throw std::runtime_error("Invalid profile encountered!");
+                throw_std_runtime_error("Invalid profile encountered");
 
             std::string ct = getValueOrDefault(mappings, item->getMimeType());
             if (ct == CONTENT_TYPE_OGG) {
@@ -742,7 +742,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
         if ((i > 0) && (res->getHandlerType() == CH_EXTURL) && ((res->getOption(RESOURCE_CONTENT_TYPE) == THUMBNAIL) || (res->getOption(RESOURCE_CONTENT_TYPE) == ID3_ALBUM_ART))) {
             url = res->getOption(RESOURCE_OPTION_URL);
             if (url.empty())
-                throw std::runtime_error("missing thumbnail URL!");
+                throw_std_runtime_error("missing thumbnail URL");
 
             isExtThumbnail = true;
         }

@@ -54,7 +54,7 @@ SopCastService::SopCastService(std::shared_ptr<ConfigManager> config,
     pid = 0;
     curl_handle = curl_easy_init();
     if (!curl_handle)
-        throw std::runtime_error("failed to initialize curl!\n");
+        throw_std_runtime_error("failed to initialize curl");
 }
 
 SopCastService::~SopCastService()
@@ -122,12 +122,12 @@ bool SopCastService::refreshServiceData(std::shared_ptr<Layout> layout)
         pid = pthread_self();
 
     if (pid != pthread_self())
-        throw std::runtime_error("Not allowed to call refreshServiceData from different threads!");
+        throw_std_runtime_error("Not allowed to call refreshServiceData from different threads");
 
     auto reply = getData();
     if (reply == nullptr) {
         log_debug("Failed to get XML content from SopCast service");
-        throw std::runtime_error("Failed to get XML content from SopCast service");
+        throw_std_runtime_error("Failed to get XML content from SopCast service");
     }
 
     auto sc = std::make_unique<SopCastContentHandler>(config, storage);

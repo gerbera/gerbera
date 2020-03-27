@@ -50,7 +50,7 @@ void web::edit_save::process()
 
     std::string objID = param("object_id");
     if (objID.empty())
-        throw std::runtime_error("invalid object id");
+        throw_std_runtime_error("invalid object id");
 
     int objectID = std::stoi(objID);
     content->updateObject(objectID, params);

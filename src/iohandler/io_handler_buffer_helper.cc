@@ -38,9 +38,9 @@
 IOHandlerBufferHelper::IOHandlerBufferHelper(size_t bufSize, size_t initialFillSize)
 {
     if (bufSize == 0)
-        throw std::runtime_error("bufSize must be greater than 0");
+        throw_std_runtime_error("bufSize must be greater than 0");
     if (initialFillSize > bufSize)
-        throw std::runtime_error("initialFillSize must be lesser than or equal to the size of the buffer");
+        throw_std_runtime_error("initialFillSize must be lesser than or equal to the size of the buffer");
 
     this->bufSize = bufSize;
     this->initialFillSize = initialFillSize;
@@ -62,10 +62,10 @@ IOHandlerBufferHelper::IOHandlerBufferHelper(size_t bufSize, size_t initialFillS
 void IOHandlerBufferHelper::open(enum UpnpOpenFileMode mode)
 {
     if (isOpen)
-        throw std::runtime_error("tried to reopen an open IOHandlerBufferHelper");
+        throw_std_runtime_error("tried to reopen an open IOHandlerBufferHelper");
     buffer = static_cast<char*>(malloc(bufSize));
     if (buffer == nullptr)
-        throw std::runtime_error("Failed to allocate memory for transcoding buffer!");
+        throw_std_runtime_error("Failed to allocate memory for transcoding buffer");
 
     startBufferThread();
     isOpen = true;
@@ -145,7 +145,7 @@ void IOHandlerBufferHelper::seek(off_t offset, int whence)
 {
     log_debug("seek called: %lld {}", offset, whence);
     if (!seekEnabled)
-        throw std::runtime_error("seek currently disabled in this IOHandlerBufferHelper");
+        throw_std_runtime_error("seek currently disabled in this IOHandlerBufferHelper");
 
     assert(isOpen);
 
@@ -178,7 +178,7 @@ void IOHandlerBufferHelper::seek(off_t offset, int whence)
 void IOHandlerBufferHelper::close()
 {
     if (!isOpen)
-        throw std::runtime_error("close called on closed IOHandlerBufferHelper");
+        throw_std_runtime_error("close called on closed IOHandlerBufferHelper");
     isOpen = false;
     stopBufferThread();
     free(buffer);
