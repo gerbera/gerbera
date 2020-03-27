@@ -87,7 +87,8 @@ void web::directories::process()
     for (auto& it : fs::directory_iterator(path)) {
         const fs::path& filepath = it.path();
 
-        if (!it.is_directory())
+        std::error_code ec;
+        if (!it.is_directory(ec))
             continue;
         if (std::find(excludes_fullpath.begin(), excludes_fullpath.end(), filepath) != excludes_fullpath.end())
             continue;
@@ -97,7 +98,7 @@ void web::directories::process()
 
         bool hasContent = false;
         for (auto& subIt : fs::directory_iterator(path)) {
-            if (!subIt.is_directory() && !isRegularFile(subIt.path()))
+            if (!subIt.is_directory(ec) && !isRegularFile(subIt.path(), ec))
                 continue;
             hasContent = true;
             break;

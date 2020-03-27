@@ -90,7 +90,8 @@ ConfigManager::ConfigManager(fs::path filename,
         filename += home / DEFAULT_CONFIG_NAME;
     }
 
-    if (!isRegularFile(filename)) {
+    std::error_code ec;
+    if (!isRegularFile(filename, ec)) {
         std::ostringstream expErrMsg;
         expErrMsg << "\nThe server configuration file could not be found: ";
         expErrMsg << filename << "\n";
@@ -1341,17 +1342,18 @@ fs::path ConfigManager::resolvePath(fs::path path, bool isFile, bool mustExist)
         path = home / path;
 
     // verify that file/directory is there
+    std::error_code ec;
     if (isFile) {
         if (mustExist) {
-            if (!isRegularFile(path) && !fs::is_symlink(path))
+            if (!isRegularFile(path, ec) && !fs::is_symlink(path, ec))
                 throw std::runtime_error("File '" + path.string() + "' does not exist!");
         } else {
             std::string parent_path = path.parent_path();
-            if (!fs::is_directory(parent_path) && !fs::is_symlink(path))
+            if (!fs::is_directory(parent_path, ec) && !fs::is_symlink(path, ec))
                 throw std::runtime_error("Parent directory '" + path.string() + "' does not exist!");
         }
     } else if (mustExist) {
-        if (!fs::is_directory(path) && !fs::is_symlink(path))
+        if (!fs::is_directory(path, ec) && !fs::is_symlink(path, ec))
             throw std::runtime_error("Directory '" + path.string() + "' does not exist!");
     }
 

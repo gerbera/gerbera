@@ -425,7 +425,8 @@ void ContentManager::addVirtualItem(const std::shared_ptr<CdsObject>& obj, bool 
     obj->validate();
     fs::path path = obj->getLocation();
 
-    if (!isRegularFile(path))
+    std::error_code ec;
+    if (!isRegularFile(path, ec))
         throw std::runtime_error("Not a file: " + path.string());
 
     auto pcdir = storage->findObjectByPath(path);

@@ -176,9 +176,24 @@ bool isRegularFile(const fs::path& path)
     // unfortunately fs::is_regular_file(path, ec) does not to work for files >2GB on ARM 32bit systems (see #737)
     struct stat statbuf;
     int ret = stat(path.c_str(), &statbuf);
-    if (ret != 0)
-        return false;
+    if (ret != 0) {
+        throw std::runtime_error(mt_strerror(errno) + ": " + path.string());
+    }
 
+    return S_ISREG(statbuf.st_mode);
+}
+
+bool isRegularFile(const fs::path& path, std::error_code& ec) noexcept
+{
+    // unfortunately fs::is_regular_file(path, ec) does not to work for files >2GB on ARM 32bit systems (see #737)
+    struct stat statbuf;
+    int ret = stat(path.c_str(), &statbuf);
+    if (ret != 0) {
+        ec = std::make_error_code(static_cast<std::errc>(errno));
+        return false;
+    }
+
+    ec.clear();
     return S_ISREG(statbuf.st_mode);
 }
 
@@ -209,10 +224,11 @@ fs::path find_in_path(const fs::path& exec)
     if (PATH.empty())
         return "";
 
+    std::error_code ec;
     auto pathAr = split_string(PATH, ':');
     for (auto& path : pathAr) {
         fs::path check = fs::path(path) / exec;
-        if (isRegularFile(check))
+        if (isRegularFile(check, ec))
             return check;
     }
 

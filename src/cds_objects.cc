@@ -178,7 +178,8 @@ void CdsItem::validate()
     if (this->location.empty())
         throw std::runtime_error("Item validation failed: missing location");
 
-    if (!isRegularFile(location))
+    std::error_code ec;
+    if (!isRegularFile(location, ec))
         throw std::runtime_error("Item validation failed: file " + location.string() + " not found");
 }
 
@@ -216,7 +217,8 @@ void CdsActiveItem::validate()
     if (this->action.empty())
         throw std::runtime_error("Active Item validation failed: missing action\n");
 
-    if (!isRegularFile(this->action))
+    std::error_code ec;
+    if (!isRegularFile(this->action, ec))
         throw std::runtime_error("Active Item validation failed: action script " + action + " not found\n");
 }
 //---------
