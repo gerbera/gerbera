@@ -175,13 +175,14 @@ void web::addObject::process()
     std::shared_ptr<CdsObject> obj = nullptr;
 
     bool allow_fifo = false;
+    std::error_code ec;
 
     if (obj_type == STRING_OBJECT_TYPE_CONTAINER) {
         this->addContainer(parentID);
     } else if (obj_type == STRING_OBJECT_TYPE_ITEM) {
         if (location.empty())
             throw std::runtime_error("no location given");
-        if (!isRegularFile(location))
+        if (!isRegularFile(location, ec))
             throw std::runtime_error("file not found");
         obj = this->addItem(parentID, std::make_shared<CdsItem>(storage));
         allow_fifo = true;
@@ -190,7 +191,7 @@ void web::addObject::process()
             throw std::runtime_error("no action given");
         if (location.empty())
             throw std::runtime_error("no location given");
-        if (!isRegularFile(location))
+        if (!isRegularFile(location, ec))
             throw std::runtime_error("file not found");
         obj = this->addActiveItem(parentID);
         allow_fifo = true;

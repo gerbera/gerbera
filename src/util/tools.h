@@ -91,8 +91,9 @@ std::string reduce_string(std::string str, char ch);
 /// \return last modification time of the path or directory
 time_t getLastWriteTime(const fs::path& path);
 
-/// \brief Checks if the given file is a regular file
+/// \brief Checks if the given file is a regular file (imitate same behaviour as std::filesystem::is_regular_file)
 bool isRegularFile(const fs::path& path);
+bool isRegularFile(const fs::path& path, std::error_code& ec) noexcept;
 
 /// \brief Returns file size of give file, if it does not exist it will throw an exception
 off_t getFileSize(const fs::path& path);

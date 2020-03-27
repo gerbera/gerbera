@@ -58,7 +58,8 @@ fs::path FanArtHandler::getFanArtPath(const std::shared_ptr<CdsItem>& item)
     fs::path found;
     for (const auto& name : names) {
         auto found = folder / name;
-        bool exists = isRegularFile(found); // no error throwing, please
+        std::error_code ec;
+        bool exists = isRegularFile(found, ec); // no error throwing, please
         log_debug("{}: {}", name, exists ? "found" : "missing");
         if (!exists)
             continue;
