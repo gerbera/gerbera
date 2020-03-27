@@ -4,7 +4,7 @@ add_executable(testconfig
         main.cc
         test_configgenerator.cc
         test_configmanager.cc
-        )
+)
 
 include_directories(
         "${CMAKE_SOURCE_DIR}/src"

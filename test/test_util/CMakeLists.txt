@@ -1,10 +1,8 @@
 find_package(Threads REQUIRED)
 
-add_executable(testruntime
-        main.cc
-        test_runtime.h
-        test_runtime.cc
-        )
+add_executable(testutil
+        test_upnp_headers.cc
+)
 
 include_directories(
         "${CMAKE_SOURCE_DIR}/src"
@@ -24,9 +22,10 @@ include_directories(
         ${SQLITE3_INCLUDE_DIRS}
         ${ICONV_INCLUDE_DIR}
         ${GTEST_INCLUDE_DIRS}
+        ${GMOCK_INCLUDE_DIRS}
 )
 
-target_link_libraries(testruntime PRIVATE
+target_link_libraries(testutil PRIVATE
         libgerbera
         ${UUID_LIBRARIES}
         ${UPNP_LIBRARIES}
@@ -44,10 +43,11 @@ target_link_libraries(testruntime PRIVATE
         ${SQLITE3_LIBRARIES}
         ${ICONV_LIBRARIES}
         ${GTEST_LIBRARIES}
+        ${GMOCK_BOTH_LIBRARIES}
         ${GERBERA_INTERFACE_LIBRARIES}
         ${CMAKE_THREAD_LIBS_INIT}
 )
 
-add_test(NAME testruntime
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-        COMMAND ./test/test_runtime/testruntime)
+add_test(NAME testutil
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/test/test_util
+        COMMAND ./testutil)

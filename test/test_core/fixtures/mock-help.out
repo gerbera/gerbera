@@ -18,4 +18,3 @@ Usage:
       --create-config  Print a default config.xml file and exit
       --add-file FILE  Scan a file into the DB on startup, can be specified
                        multiple times
-
