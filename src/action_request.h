@@ -38,6 +38,7 @@
 #include <upnp.h>
 
 #include "common.h"
+#include "util/upnp_clients.h"
 
 /// \brief This class represents the Upnp_Action_Request type from the SDK.
 ///
@@ -67,6 +68,9 @@ protected:
     ///
     /// Returned by getServiceID()
     std::string serviceID;
+
+    /// \brief Client Info
+    ClientInfo clientInfo;
 
     /// \brief XML holding the response, we fill it in.
     ///

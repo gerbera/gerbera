@@ -47,6 +47,7 @@
 #include "storage/storage.h"
 #include "update_manager.h"
 #include "util/task_processor.h"
+#include "util/upnp_clients.h"
 #include "web/session_manager.h"
 #ifdef HAVE_JS
 #include "scripting/runtime.h"
@@ -197,32 +198,40 @@ void Server::run()
     //log_debug("Device Description: {}", deviceDescription.c_str());
 
     log_debug("Registering with UPnP...");
-    ret = UpnpRegisterRootDevice2(UPNPREG_BUF_DESC,
+    ret = UpnpRegisterRootDevice2(
+        UPNPREG_BUF_DESC,
         deviceDescription.c_str(),
         static_cast<size_t>(deviceDescription.length()) + 1,
         true,
-        handleUpnpEventCallback,
+        handleUpnpRootDeviceEventCallback,
         this,
-        &deviceHandle);
-
+        &rootDeviceHandle);
     if (ret != UPNP_E_SUCCESS) {
-        throw UpnpException(ret, "run: UpnpRegisterRootDevice failed");
+        throw UpnpException(ret, "run: UpnpRegisterRootDevice2 failed");
+    }
+
+    ret = UpnpRegisterClient(
+        handleUpnpClientEventCallback,
+        this,
+        &clientHandle);
+    if (ret != UPNP_E_SUCCESS) {
+        throw UpnpException(ret, "run: UpnpRegisterClient failed");
     }
 
     log_debug("Creating ContentDirectoryService");
-    cds = std::make_unique<ContentDirectoryService>(config, storage, xmlbuilder.get(), deviceHandle,
+    cds = std::make_unique<ContentDirectoryService>(config, storage, xmlbuilder.get(), rootDeviceHandle,
         config->getIntOption(CFG_SERVER_UPNP_TITLE_AND_DESC_STRING_LIMIT));
 
     log_debug("Creating ConnectionManagerService");
-    cmgr = std::make_unique<ConnectionManagerService>(config, storage, xmlbuilder.get(), deviceHandle);
+    cmgr = std::make_unique<ConnectionManagerService>(config, storage, xmlbuilder.get(), rootDeviceHandle);
 
     log_debug("Creating MRRegistrarService");
-    mrreg = std::make_unique<MRRegistrarService>(config, xmlbuilder.get(), deviceHandle);
+    mrreg = std::make_unique<MRRegistrarService>(config, xmlbuilder.get(), rootDeviceHandle);
 
     // The advertisement will be sent by LibUPnP every (A/2)-30 seconds, and will have a cache-control max-age of A where A is
     // the value configured here. Ex: A value of 62 will result in an SSDP advertisement being sent every second.
     log_debug("Sending UPnP Alive advertisements every {} seconds", (aliveAdvertisementInterval / 2) - 30);
-    ret = UpnpSendAdvertisement(deviceHandle, aliveAdvertisementInterval);
+    ret = UpnpSendAdvertisement(rootDeviceHandle, aliveAdvertisementInterval);
     if (ret != UPNP_E_SUCCESS) {
         throw UpnpException(ret, "run: UpnpSendAdvertisement failed");
     }
@@ -258,9 +267,14 @@ void Server::shutdown()
 
     log_debug("Server shutting down");
 
-    ret = UpnpUnRegisterRootDevice(deviceHandle);
+    ret = UpnpUnRegisterClient(clientHandle);
     if (ret != UPNP_E_SUCCESS) {
-        log_error("upnp_cleanup: UpnpUnRegisterRootDevice failed: %i", ret);
+        log_error("UpnpUnRegisterClient failed ({})", ret);
+    }
+
+    ret = UpnpUnRegisterRootDevice(rootDeviceHandle);
+    if (ret != UPNP_E_SUCCESS) {
+        log_error("UpnpUnRegisterRootDevice failed ({})", ret);
     }
 
 #ifdef HAVE_CURL
@@ -298,12 +312,12 @@ void Server::shutdown()
     timer = nullptr;
 }
 
-int Server::handleUpnpEventCallback(Upnp_EventType eventtype, const void* event, void* cookie)
+int Server::handleUpnpRootDeviceEventCallback(Upnp_EventType eventtype, const void* event, void* cookie)
 {
-    return static_cast<Server*>(cookie)->handleUpnpEvent(eventtype, event);
+    return static_cast<Server*>(cookie)->handleUpnpRootDeviceEvent(eventtype, event);
 }
 
-int Server::handleUpnpEvent(Upnp_EventType eventtype, const void* event)
+int Server::handleUpnpRootDeviceEvent(Upnp_EventType eventtype, const void* event)
 {
     int ret = UPNP_E_SUCCESS; // general purpose return code
 
@@ -311,7 +325,7 @@ int Server::handleUpnpEvent(Upnp_EventType eventtype, const void* event)
 
     // check parameters
     if (event == nullptr) {
-        log_debug("handleUpnpEvent: NULL event structure");
+        log_debug("handleUpnpRootDeviceEvent: NULL event structure");
         return UPNP_E_BAD_REQUEST;
     }
 
@@ -355,6 +369,50 @@ int Server::handleUpnpEvent(Upnp_EventType eventtype, const void* event)
 
     log_debug("returning {}", ret);
     return ret;
+}
+
+int Server::handleUpnpClientEventCallback(Upnp_EventType eventType, const void* event, void* cookie)
+{
+    return static_cast<Server*>(cookie)->handleUpnpClientEvent(eventType, event);
+}
+
+int Server::handleUpnpClientEvent(Upnp_EventType eventType, const void* event)
+{
+    // check parameters
+    if (event == nullptr) {
+        log_debug("handleUpnpClientEvent: NULL event structure");
+        return UPNP_E_BAD_REQUEST;
+    }
+
+    switch (eventType) {
+    case UPNP_DISCOVERY_ADVERTISEMENT_ALIVE:
+    case UPNP_DISCOVERY_SEARCH_RESULT: {
+        const UpnpDiscovery* d_event = (UpnpDiscovery*)event;
+        const char* userAgent = UpnpString_get_String(UpnpDiscovery_get_Os(d_event));
+        const struct sockaddr_storage* destAddr = UpnpDiscovery_get_DestAddr(d_event);
+
+        IXML_Document* descDoc = nullptr;
+#if 0
+        const char* location = UpnpString_get_String(UpnpDiscovery_get_Location(d_event));
+        int errCode = UpnpDownloadXmlDoc(location, &descDoc);
+        if (errCode != UPNP_E_SUCCESS) {
+            log_debug("Error obtaining client description from {} -- error = {}", location, errCode);
+        } else {
+            DOMString cxml = ixmlPrintDocument(descDoc);
+        }
+#endif
+        Clients::addClient(destAddr, userAgent);
+
+        if (descDoc) {
+            ixmlDocument_free(descDoc);
+        }
+        break;
+    }
+    default:
+        break;
+    }
+
+    return 0;
 }
 
 std::string Server::getIP()

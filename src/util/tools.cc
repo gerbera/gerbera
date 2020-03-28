@@ -1300,6 +1300,34 @@ std::string getAVIFourCC(const fs::path& avi_filename)
 }
 #endif
 
+int sockAddrCmpAddr(const struct sockaddr* sa, const struct sockaddr* sb)
+{
+    if (sa->sa_family != sb->sa_family)
+        return sa->sa_family - sb->sa_family;
+
+    if (sa->sa_family == AF_INET) {
+        return SOCK_ADDR_IN_ADDR(sa).s_addr - SOCK_ADDR_IN_ADDR(sb).s_addr;
+    }
+
+    if (sa->sa_family == AF_INET6) {
+        return memcmp((char*)&(SOCK_ADDR_IN6_ADDR(sa)), (char*)&(SOCK_ADDR_IN6_ADDR(sb)), sizeof(SOCK_ADDR_IN6_ADDR(sa)));
+    }
+
+    throw_std_runtime_error("unsupported address family :" + std::to_string(sa->sa_family));
+}
+
+std::string sockAddrGetNameInfo(const struct sockaddr* sa)
+{
+    char hoststr[NI_MAXHOST];
+    char portstr[NI_MAXSERV];
+    int ret = getnameinfo(sa, sizeof(struct sockaddr), hoststr, sizeof(hoststr), portstr, sizeof(portstr), NI_NUMERICHOST | NI_NUMERICSERV);
+    if (ret != 0) {
+        throw_std_runtime_error("could not determine getnameinfo (" + mt_strerror(errno) + ")");
+    }
+
+    return std::string(hoststr) + ":" + std::string(portstr);
+}
+
 #ifdef SOPCAST
 /// \brief
 int find_local_port(unsigned short range_min, unsigned short range_max)
