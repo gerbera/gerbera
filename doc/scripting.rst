@@ -9,18 +9,18 @@ important features introduced since the version 0.8 (`mediatomb`) are the virtua
 
 Let's think of possible scenarios:
 
- * You may want to separate your content by music, photo, video, maybe create a special container with all non
-   playable stuff
+* You may want to separate your content by music, photo, video, maybe create a special container with all non
+  playable stuff
 
- * You may want your music to be sorted by genre, year, artist, album, or maybe by starting letters, so you can
-   more easily find your favorite song when browsing the server
+* You may want your music to be sorted by genre, year, artist, album, or maybe by starting letters, so you can
+  more easily find your favorite song when browsing the server
 
- * You want to have your photos that you took with your favorite digital camera to appear in a special folder, or
-   maybe you even want to separate the photos that you took with flash-on from the ones that you made without flash
+* You want to have your photos that you took with your favorite digital camera to appear in a special folder, or
+  maybe you even want to separate the photos that you took with flash-on from the ones that you made without flash
 
- * Your media player does not support video, so you do not even want to see the Video container
+* Your media player does not support video, so you do not even want to see the Video container
 
- * It's up to your imagination :)
+* It's up to your imagination :)
 
 The scenarios described above and much more can be achieved with the help of an import script.
 
@@ -33,11 +33,13 @@ How It Works
 This section will give you some overview on how virtual objects work and on how they are related to scripting.
 
 .. Note::
-      In order to use the import scripting feature you have to change the layout type from builtin to js in ``config.xml``
+
+    In order to use the import scripting feature you have to change the layout type from builtin to js in ``config.xml``
 
 .. Note::
-      The sorting of Video and Photo items using the ``rootpath`` object is still somewhat experimental and not
-      described here.
+
+    The sorting of Video and Photo items using the ``rootpath`` object is still somewhat experimental and not
+    described here.
 
 Understanding Virtual Objects
 -----------------------------
@@ -80,8 +82,9 @@ way a variable orig is always defined for every script invocation and represents
 Then the script is invoked.
 
 .. Note::
-   In the current implementation, if you modify the script then you will have to restart the server for the new logic to take
-   effect.
+
+    In the current implementation, if you modify the script then you will have to restart the server for the new logic to take
+    ffect.
 
 The script is only triggered when new objects are added to the database, also note that the script
 does not modify any objects that already exist in the database - it only processes new objects that are being added.
@@ -107,9 +110,10 @@ is made available to the playlist parser script in the form of the global variab
 only read from these variables and to create and only modify local copies.
 
 .. Note::
-   modifying the properties of the orig object will not
-   propagate the changes to the database, only a call to
-   the ``addCdsObject()`` will permanently add the object.
+
+    modifying the properties of the orig object will not
+    propagate the changes to the database, only a call to
+    the ``addCdsObject()`` will permanently add the object.
 
 General Properties
 ------------------
@@ -123,201 +127,201 @@ object.
 
 .. js:attribute:: orig.objectType
 
-**RW**
+    **RW**
 
-       This defines the object type, following types are available:
+    This defines the object type, following types are available:
 
-        +----------------------------------+-----------------------------------------------+
-        | Key                              | Description                                   |
-        +==================================+===============================================+
-        | OBJECT_TYPE_CONTAINER            | Object is a container                         |
-        +----------------------------------+-----------------------------------------------+
-        | OBJECT_TYPE_ITEM                 | Object is an item                             |
-        +----------------------------------+-----------------------------------------------+
-        | OBJECT_TYPE_ACTIVE_ITEM          | Object is an active item                      |
-        +----------------------------------+-----------------------------------------------+
-        | OBJECT_TYPE_ITEM_EXTERNAL_URL    | Object is a link to a resource on the Internet|
-        +----------------------------------+-----------------------------------------------+
-        | OBJECT_TYPE_ITEM_INTERNAL_URL    | Object is an internal link                    |
-        +----------------------------------+-----------------------------------------------+
+    +----------------------------------+-----------------------------------------------+
+    | Key                              | Description                                   |
+    +==================================+===============================================+
+    | OBJECT_TYPE_CONTAINER            | Object is a container                         |
+    +----------------------------------+-----------------------------------------------+
+    | OBJECT_TYPE_ITEM                 | Object is an item                             |
+    +----------------------------------+-----------------------------------------------+
+    | OBJECT_TYPE_ACTIVE_ITEM          | Object is an active item                      |
+    +----------------------------------+-----------------------------------------------+
+    | OBJECT_TYPE_ITEM_EXTERNAL_URL    | Object is a link to a resource on the Internet|
+    +----------------------------------+-----------------------------------------------+
+    | OBJECT_TYPE_ITEM_INTERNAL_URL    | Object is an internal link                    |
+    +----------------------------------+-----------------------------------------------+
 
 .. js:attribute:: orig.title
 
-       **RW**
+    **RW**
 
-       This is the title of the original object, since the object represents an entry in the PC-Directory, the title will be
-       set to it's file name. This field corresponds to dc:title in the DIDL-Lite XML.
+    This is the title of the original object, since the object represents an entry in the PC-Directory, the title will be
+    set to it's file name. This field corresponds to dc:title in the DIDL-Lite XML.
 
 .. js:attribute:: orig.id
 
-       **RO**
+    **RO**
 
-       The object ID, make sure to set all refID's (reference IDs) of your virtual objects to that ID.
+    The object ID, make sure to set all refID's (reference IDs) of your virtual objects to that ID.
 
 .. js:attribute:: orig.parentID
 
-       **RO**
+    **RO**
 
-       The object ID of the parent container.
+    The object ID of the parent container.
 
 .. js:attribute:: orig.upnpclass
 
-       **RW**
+    **RW**
 
-       The UPnP class of the item, this corresponds to ``upnp:class`` in the DIDL-Lite XML.
+    The UPnP class of the item, this corresponds to ``upnp:class`` in the DIDL-Lite XML.
 
 .. js:attribute:: orig.location
 
-       **RO**
+    **RO**
 
-       Location on disk, given by the absolute path and file name.
+    Location on disk, given by the absolute path and file name.
 
 .. js:attribute:: orig.theora
 
-       **RO**
+    **RO**
 
-       This property is a boolean value, it is non zero if the particular item is of type OGG Theora. This is useful to
-       allow proper sorting of media and thus placing OGG Vorbis into the Audio container and OGG Theora into the Video
-       container.
+    This property is a boolean value, it is non zero if the particular item is of type OGG Theora. This is useful to
+    allow proper sorting of media and thus placing OGG Vorbis into the Audio container and OGG Theora into the Video
+    container.
 
 .. js:attribute:: orig.onlineservice
 
-       **RO**
+    **RO**
 
-       Identifies if the item belongs to an online service and thus has extended properties. Following types are
-       available:
+    Identifies if the item belongs to an online service and thus has extended properties. Following types are
+    available:
 
-        +----------------------------------+--------------------------------------------------------+
-        | Key                              | Description                                            |
-        +==================================+========================================================+
-        | ONLINE_SERVICE_NONE              | The item does not belong to an online service and does |
-        |                                  | not have extended properties.                          |
-        +----------------------------------+--------------------------------------------------------+
-        | ONLINE_SERVICE_WEBORAMA          | The item belongs to the Weborama service and has       |
-        |                                  | extended properties.                                   |
-        +----------------------------------+--------------------------------------------------------+
-        | ONLINE_SERVICE_APPLE_TRAILERS    | The item belongs to the Apple Trailers service and has |
-        |                                  | extended properties.                                   |
-        +----------------------------------+--------------------------------------------------------+
+    +----------------------------------+--------------------------------------------------------+
+    | Key                              | Description                                            |
+    +==================================+========================================================+
+    | ONLINE_SERVICE_NONE              | The item does not belong to an online service and does |
+    |                                  | not have extended properties.                          |
+    +----------------------------------+--------------------------------------------------------+
+    | ONLINE_SERVICE_APPLE_TRAILERS    | The item belongs to the Apple Trailers service and has |
+    |                                  | extended properties.                                   |
+    +----------------------------------+--------------------------------------------------------+
 
 
 .. js:attribute:: orig.mimetype
 
-       **RW**
+    **RW**
 
-       Mimetype of the object.
+    Mimetype of the object.
 
 .. js:attribute:: orig.meta
 
-       **RW**
+    **RW**
 
-       Array holding the metadata that was extracted from the object (i.e. id3/exif/etc. information)
-
-
-        .. js:attribute:: orig.meta[M_TITLE]
-
-            **RW**
-
-            Extracted title (for example the id3 title if the object is an mp3 file), if you want that your new
-            virtual object is displayed under this title you will have to set `obj.title = orig.meta[M_TITLE]`
-
-        .. js:attribute:: orig.meta[M_ARTIST]
-
-            **RW**
-
-            Artist information, this corresponds to ``upnp:artist`` in the DIDL-Lite XML.
-
-        .. js:attribute:: orig.meta[M_ALBUM]
-
-            **RW**
-
-            Album information, this corresponds to ``upnp:album`` in the DIDL-Lite XML.
-
-        .. js:attribute:: orig.meta[M_DATE]
-
-            **RW**
-
-            Date, must be in the format of **YYYY-MM-DD** (required by the UPnP spec), this corresponds to dc:date in the
-            DIDL-Lite XML.
+    Array holding the metadata that was extracted from the object (i.e. id3/exif/etc. information)
 
 
-        .. js:attribute:: orig.meta[M_GENRE]
+    .. js:attribute:: orig.meta[M_TITLE]
 
-            **RW**
-            Genre of the item, this corresponds to ``upnp:genre`` in the DIDL-Lite XML.
+        **RW**
 
-        .. js:attribute:: orig.meta[M_DESCRIPTION]
+        Extracted title (for example the id3 title if the object is an mp3 file), if you want that your new
+        virtual object is displayed under this title you will have to set `obj.title = orig.meta[M_TITLE]`
 
-            **RW**
+    .. js:attribute:: orig.meta[M_ARTIST]
 
-            Description of the item, this corresponds to ``dc:description`` in the DIDL-Lite XML.
+        **RW**
 
-        .. js:attribute:: orig.meta[M_REGION]
+        Artist information, this corresponds to ``upnp:artist`` in the DIDL-Lite XML.
 
-            **RW**
+    .. js:attribute:: orig.meta[M_ALBUM]
 
-            Region description of the item, this corresponds to ``upnp:region`` in the DIDL-Lite XML.
+        **RW**
 
-        .. js:attribute:: orig.meta[M_TRACKNUMBER]
+        Album information, this corresponds to ``upnp:album`` in the DIDL-Lite XML.
 
-            **RW**
+    .. js:attribute:: orig.meta[M_DATE]
 
-            Track number of the item, this corresponds to ``upnp:originalTrackNumber`` in the DIDL-Lite XML.
+        **RW**
 
-        .. js:attribute:: orig.meta[M_AUTHOR]
+        Date, must be in the format of **YYYY-MM-DD** (required by the UPnP spec), this corresponds to dc:date in the
+        DIDL-Lite XML.
 
-            **RW**
 
-            Author of the media, this corresponds to ``upnp:author`` in the DIDL-Lite XML.
+    .. js:attribute:: orig.meta[M_GENRE]
 
-        .. js:attribute:: orig.meta[M_DIRECTOR]
+        **RW**
 
-            **RW**
+        Genre of the item, this corresponds to ``upnp:genre`` in the DIDL-Lite XML.
 
-            Director of the media, this corresponds to ``upnp:director`` in the DIDL-Lite XML.
+    .. js:attribute:: orig.meta[M_DESCRIPTION]
 
-        .. js:attribute:: orig.meta[M_PUBLISHER]
+        **RW**
 
-            **RW**
+        Description of the item, this corresponds to ``dc:description`` in the DIDL-Lite XML.
 
-            Director of the media, this corresponds to ``dc:publisher`` in the DIDL-Lite XML.
+    .. js:attribute:: orig.meta[M_REGION]
 
-        .. js:attribute:: orig.meta[M_RATING]
+        **RW**
 
-            **RW**
-            Director of the media, this corresponds to ``upnp:rating`` in the DIDL-Lite XML.
+        Region description of the item, this corresponds to ``upnp:region`` in the DIDL-Lite XML.
 
-        .. js:attribute:: orig.meta[M_ACTOR]
+    .. js:attribute:: orig.meta[M_TRACKNUMBER]
 
-            **RW**
-            Director of the media, this corresponds to ``upnp:actor`` in the DIDL-Lite XML.
+        **RW**
 
-        .. js:attribute:: orig.meta[M_PRODUCER]
+        Track number of the item, this corresponds to ``upnp:originalTrackNumber`` in the DIDL-Lite XML.
 
-            **RW**
+    .. js:attribute:: orig.meta[M_AUTHOR]
 
-            Director of the media, this corresponds to ``upnp:producer`` in the DIDL-Lite XML.
+        **RW**
+
+        Author of the media, this corresponds to ``upnp:author`` in the DIDL-Lite XML.
+
+    .. js:attribute:: orig.meta[M_DIRECTOR]
+
+        **RW**
+
+        Director of the media, this corresponds to ``upnp:director`` in the DIDL-Lite XML.
+
+    .. js:attribute:: orig.meta[M_PUBLISHER]
+
+        **RW**
+
+        Director of the media, this corresponds to ``dc:publisher`` in the DIDL-Lite XML.
+
+    .. js:attribute:: orig.meta[M_RATING]
+
+        **RW**
+    
+        Director of the media, this corresponds to ``upnp:rating`` in the DIDL-Lite XML.
+
+    .. js:attribute:: orig.meta[M_ACTOR]
+
+        **RW**
+    
+        Director of the media, this corresponds to ``upnp:actor`` in the DIDL-Lite XML.
+
+    .. js:attribute:: orig.meta[M_PRODUCER]
+
+        **RW**
+
+        Director of the media, this corresponds to ``upnp:producer`` in the DIDL-Lite XML.
 
 .. js:attribute:: orig.aux
 
-       **RO**
+    **RO**
 
-       Array holding the so called auxiliary data. Aux data is metadata that is not part of UPnP, for example -
-       this can be a camera model that was used to make a photo, or the information if the photo was taken with or without flash.
+    Array holding the so called auxiliary data. Aux data is metadata that is not part of UPnP, for example -
+    this can be a camera model that was used to make a photo, or the information if the photo was taken with or without flash.
 
 
-       Currently aux data can be gathered from **libexif** (see the Import section in the main
-       documentation for more details). So, this array will hold the tags that you specified in your config.xml, allowing
-       you to create your virtual structure according to your liking.
+    Currently aux data can be gathered from **libexif** (see the Import section in the main
+    documentation for more details). So, this array will hold the tags that you specified in your config.xml, allowing
+    you to create your virtual structure according to your liking.
 
 .. js:attribute:: orig.playlistOrder
 
-       **RW**
+    **RW**
 
-       This property is only available if the object is being created by the playlist script. It's similar to ID3 track
-       number, but is used to set the position of the newly created object inside a parsed playlist container. Usually
-       you will increment the number for each new object that you create while parsing the playlist, thus ensuring that the
-       resulting order is the same as in the original playlist.
+    This property is only available if the object is being created by the playlist script. It's similar to ID3 track
+    number, but is used to set the position of the newly created object inside a parsed playlist container. Usually
+    you will increment the number for each new object that you create while parsing the playlist, thus ensuring that the
+    resulting order is the same as in the original playlist.
 
 Constants
 ---------
@@ -389,14 +393,14 @@ within the import and/or the playlist script:
 
     Adds the object as a virtual object to the container chain
 
-   :param object object:
+    :param object object:
         A virtual object that is either a copy of or a reference to 'orig'
-   :param string containerChain:
+    :param string containerChain:
         A string, defining where the object will be added in the database hierarchy. The containers in the chain
         are separated by a slash '/', for example, a value of '/Audio/All Music' will add the object to the Audio,
         All Music container in the server hierarchy. Make sure to properly escape the slash characters in container
         names. You will find more information on container chain escaping later in this chapter.
-   :param string lastContainerClass:
+    :param string lastContainerClass:
         A string, defining the upnp:class of the container that appears last in the chain. This parameter can be
         omitted, in this case the default value ``object.container`` will be taken. Setting specific upnp container classes
         is useful to define the special meaning of a particular container; for example, the server will always sort
@@ -458,39 +462,10 @@ The following function is only available to the playlist script.
 
     :returns: string
 
-   This function reads and returns exactly one line of text from the playlist that is currently being processed, end of
-   line is identified by carriage return/line feed characters. Each subsequent call will return the next line, there is no
-   way to go back. The idea is, that you can process your playlist line by
-   line and gather the required information to create new objects which can be added to the database.
-
-Native Functions Available To The DVD Import Script
----------------------------------------------------
-
-The following function is only available to the DVD import
-   script.
-
-.. js:function:: addCdsObject(object, containerChain, lastContainerClass)
-
-    Adds a virtual object to the server database, the path in the database is defined by the containerChain
-    parameter. The third argument is optional, it allows to set the upnp:class of the last container in the chain.
-
-
-    :param object object:
-        A virtual object that is either a copy of or a reference to 'orig'
-    :param string containerChain:
-        A string, defining where the object will be added in the database hierarchy. The containers in the chain
-        are separated by a slash '/', for example, a value of '/Audio/All Music' will add the object to the Audio,
-        All Music container in the server hierarchy. Make sure to properly escape the slash characters in container
-        names. You will find more information on container chain escaping later in this chapter.
-    :param string lastContainerClass:
-        A string, defining the **upnp:class** of the container that appears last in the chain. This parameter can be
-        omitted, in this case the default value ``object.container`` will be taken. Setting specific
-        upnp container classes is useful to define the special meaning of a particular container; for example, the
-        server will always sort songs by track number if upnp class of a container is set to
-        **object.container.album.musicAlbum**.
-
-
-.. js:function:: addDVDObject(dvd, t, c, a, createContainerChain(chain))
+    This function reads and returns exactly one line of text from the playlist that is currently being processed, end of
+    line is identified by carriage return/line feed characters. Each subsequent call will return the next line, there is no
+    way to go back. The idea is, that you can process your playlist line by
+    line and gather the required information to create new objects which can be added to the database.
 
 
 Helper Functions
@@ -516,17 +491,17 @@ They can be used by the import and by the playlist script.
     :param array arr: An array of container names
     :returns: string formatted for use in ``addCdsObject``
 
-.. code-block:: js
+    .. code-block:: js
 
-   function createContainerChain(arr)
-   {
-     var path = '';
-     for (var i = 0; i < arr.length; i++)
-     {
-         path = path + '/' + escapeSlash(arr[i]);
-     }
-     return path;
-   }
+        function createContainerChain(arr)
+        {
+            var path = '';
+            for (var i = 0; i < arr.length; i++)
+            {
+                path = path + '/' + escapeSlash(arr[i]);
+            }
+            return path;
+        }
 
 
 .. js:function:: getYear(date)
@@ -585,314 +560,73 @@ Below are the import script functions that organize our content in the database 
 Each media type - audio, image and video is handled by a separate function.
 
 Audio Content Handler
----------------------
+:::::::::::::::::::::
 
 The biggest one is the function that handles audio - the reason
-   is simple: mp3 files offer a lot of metadata like album,
-   artist, genre, etc. information, this allows us to create a
-   nice container layout.
+is simple: mp3 files offer a lot of metadata like album,
+artist, genre, etc. information, this allows us to create a
+nice container layout.
 
-.. code-block:: js
-
-    function addAudio(obj) {
-
-        var desc = '';
-        var artist_full;
-        var album_full;
-
-
-        // First we will gather all the metadata that is provided by our
-        // object, of course it is possible that some fields are empty -
-        // we will have to check that to make sure that we handle this
-        // case correctly.
-
-        var title = obj.meta[M_TITLE];
-
-        // Note the difference between obj.title and obj.meta[M_TITLE] -
-        // while object.title will originally be set to the file name,
-        // obj.meta[M_TITLE] will contain the parsed title - in this
-        // particular example the ID3 title of an MP3.
-
-        if (!title) title = obj.title;
-        var artist = obj.meta[M_ARTIST];
-
-        if (!artist) {
-            artist = 'Unknown';
-            artist_full = null;
-        } else {
-            artist_full = artist;
-            desc = artist;
-        }
-        var album = obj.meta[M_ALBUM];
-        if (!album) {
-             album = 'Unknown';
-             album_full = null;
-        } else {
-             desc = desc + ', ' + album;
-             album_full = album;
-        }
-
-        if (desc)
-            desc = desc + ', ';
-
-        desc = desc + title;
-
-        var date = obj.meta[M_DATE];
-
-        if (!date) {
-            date = 'Unknown';
-        } else {
-            date = normalizeDate(date);
-            desc = desc + ', ' + date;
-        }
-
-        var genre = obj.meta[M_GENRE];
-
-        if (!genre) {
-            genre = 'Unknown';
-        } else {
-            desc = desc + ', ' + genre;
-        }
-
-        var description = obj.meta[M_DESCRIPTION];
-
-        if (!description) {
-            // Note how we are setting properties of an object - in this case
-            // we put together a description and we are setting for objects
-            // that did not already have one.
-
-            obj.meta[M_DESCRIPTION] = desc;
-        }
-
-        // We finally gathered all data that we need, so let's create a
-        // nice layout for our audio files. Note how we are constructing
-        // the chain, in the line below the array 'chain' will be
-        // converted to 'Audio/All audio' by the createContainerChain()
-        // function.
-
-        var chain = new Array('Audio', 'All audio');
-        obj.title = title;
-
-        // The UPnP class argument to addCdsObject() is optional, if it is
-        // not supplied the default UPnP class will be used. However, it
-        // is suggested to correctly set UPnP classes of containers and
-        // objects - this information may be used by some renderers to
-        // identify the type of the container and present the content in a
-        // different manner .
-
-        addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC);
-
-        chain = new Array('Audio', 'Artists', artist, 'All songs');
-        addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC);
-
-        chain = new Array('Audio', 'All - full name');
-        var temp = '';
-        if (artist_full)
-            temp = artist_full;
-
-        if (album_full)
-            temp = temp + ' - ' + album_full + ' - ';
-
-        obj.title = temp + title;
-
-        addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC);
-
-        chain = new Array('Audio', 'Artists', artist, 'All - full name');
-        addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC);
-
-        chain = new Array('Audio', 'Artists', artist, album);
-        obj.title = track + title;
-
-        // Remember, the server will sort all items by ID3 track if the
-        // container class is set to UPNP_CLASS_CONTAINER_MUSIC_ALBUM.
-
-        addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_ALBUM);
-
-        chain = new Array('Audio', 'Albums', album);
-        obj.title = track + title;
-        addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_ALBUM);
-
-        chain = new Array('Audio', 'Genres', genre);
-        addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_GENRE);
-
-        chain = new Array('Audio', 'Year', date);
-        addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC);
-    }
-
-Weborama Content Handler
-------------------------
-
-Weborama content handler is really simple, the service aims at providing 'radio on demand', so everything here maps to a
-search query that you specified in the config.xml:
-
-.. code-block:: js
-
-    function addWeborama(obj)
-    {
-        var req_name = obj.aux[WEBORAMA_AUXDATA_REQUEST_NAME];
-        if (req_name) {
-            var chain = new Array('Online Services', 'Weborama', req_name);
-            addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_PLAYLIST_CONTAINER);
-        }
-    }
+.. literalinclude:: ../scripts/js/import.js
+    :start-after: // doc-add-audio-begin
+    :end-before: // doc-add-audio-end
+    :language: js
 
 
 Image Content Handler
----------------------
+:::::::::::::::::::::
 
 This function takes care of images. Currently it does very little sorting, but could easily be extended - photos made by
 digital cameras provide lots of information in the Exif tag, so you could easily add code to sort your pictures by camera model
 or anything Exif field you might be interested in.
 
 .. Note::
-  if you want to use those additional Exif fields you need to compile MediaTomb with libexif support and also
-  specify the fields of interest in the import section of your configuration file
-  (See documentation about library-options).
 
-.. code-block:: js
+    if you want to use those additional Exif fields you need to compile MediaTomb with libexif support and also
+    specify the fields of interest in the import section of your configuration file
+    (See documentation about library-options).
 
-    function addImage(obj)
-    {
-        var chain = new Array('Photos', 'All Photos');
-        addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER);
-
-        var date = obj.meta[M_DATE];
-        if (date) {
-            chain = new Array('Photos', 'Date', date);
-            addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER);
-        }
-    }
+.. literalinclude:: ../scripts/js/import.js
+    :start-after: // doc-add-image-begin
+    :end-before: // doc-add-image-end
+    :language: js
 
 Just like in the addAudio() function - we construct our container chain and add the object.
 
 
 Video Content Handler
----------------------
+:::::::::::::::::::::
 
 Not much to say here... I think libextractor is capable of retrieving some information from video files, however I seldom
 encountered any video files populated with metadata. You could also try ffmpeg to get more information, however by default we
 keep it very simple - we just put everything into the 'All Video' container.
 
-.. code-block:: js
-
-   function addVideo(obj)
-   {
-       var chain = new Array('Video');
-       addCdsObject(obj, createContainerChain(chain));
-   }
+.. literalinclude:: ../scripts/js/import.js
+    :start-after: // doc-add-video-begin
+    :end-before: // doc-add-video-end
+    :language: js
 
 
 Apple Trailers Content Handler
-------------------------------
+::::::::::::::::::::::::::::::
 
 This function processes items that are importent via the Apple Trailers feature. We will organize the trailers by genre, post
 date and release date, additionally we will also add a container holding all trailers.
 
-.. code-block:: js
-
-   function addTrailer(obj)
-   {
-      var chain;
-
-      // First we will add the item to the 'All Trailers' container, so
-      // that we get a nice long playlist:
-
-      chain = new Array('Online Services', 'Apple Trailers', 'All Trailers');
-      addCdsObject(obj, createContainerChain(chain));
-
-      // We also want to sort the trailers by genre, however we need to
-      // take some extra care here: the genre property here is a comma
-      // separated value list, so one trailer can have several matching
-      // genres that will be returned as one string. We will split that
-      // string and create individual genre containers.
-
-      var genre = obj.meta[M_GENRE];
-      if (genre) {
-
-         // A genre string "Science Fiction, Thriller" will be split to
-         // "Science Fiction" and "Thriller" respectively.
-
-         genres = genre.split(', ');
-         for (var i = 0; i < genres.length; i++)
-         {
-            chain = new Array('Online Services', 'Apple Trailers', 'Genres', genres[i]);
-            addCdsObject(obj, createContainerChain(chain));
-         }
-      }
-
-      // The release date is offered in a YYYY-MM-DD format, we won't do
-      // too much extra checking regading validity, however we only want
-      // to group the trailers by year and month:
-
-      var reldate = obj.meta[M_DATE];
-
-      if ((reldate) && (reldate.length >= 7))
-      {
-         chain = new Array('Online Services', 'Apple Trailers', 'Release Date', reldate.slice(0, 7));
-         addCdsObject(obj, createContainerChain(chain));
-      }
-
-      // We also want to group the trailers by the date when they were
-      // originally posted, the post date is available via the aux
-      // array. Similar to the release date, we will cut off the day and
-      // create our containres in the YYYY-MM format.
-
-      var postdate = obj.aux[APPLE_TRAILERS_AUXDATA_POST_DATE];
-      if ((postdate) && (postdate.length >= 7))
-      {
-         chain = new Array('Online Services', 'Apple Trailers', 'Post Date', postdate.slice(0, 7));
-         addCdsObject(obj, createContainerChain(chain));
-      }
-   }
+.. literalinclude:: ../scripts/js/import.js
+    :start-after: // doc-add-trailer-begin
+    :end-before: // doc-add-trailer-end
+    :language: js
 
 Putting it all together
------------------------
+:::::::::::::::::::::::
 
 This is the main part of the script, it looks at the mimetype of the original object and feeds the object to the appropriate
 content handler.
 
-.. code-block:: js
-
-   if (getPlaylistType(orig.mimetype) == '')
-   {
-       var arr = orig.mimetype.split('/');
-       var mime = arr[0];
-
-       var obj = orig;
-
-      // All virtual objects are references to objects in the
-      // PC-Directory, so make sure to correctly set the reference ID!
-
-      obj.refID = orig.id;
-
-      if ((mime == 'audio'))
-      {
-
-         // We support the Weborama online radio service, so we will do
-         // some extra handling for those items:
-
-         if (obj.onlineservice == ONLINE_SERVICE_WEBORAMA)
-            addWeborama(obj);
-         else
-            addAudio(obj);
-      }
-
-
-      if (mime == 'image')
-      {
-         addImage(obj);
-      }
-
-      // We now also have OGG Theora recognition, so we can ensure that
-      // Vorbis
-      if (orig.mimetype == 'application/ogg')
-      {
-      if (obj.theora == 1)
-            addVideo(obj);
-        else
-            addAudio(obj);
-      }
-   }
+.. literalinclude:: ../scripts/js/import.js
+    :start-after: // main script part
+    :language: js
 
 
 Playlist Script
@@ -909,7 +643,7 @@ The default playlist script implementation supports parsing of m3u and pls forma
 ASCII based playlist format.
 
 Adding Items
-------------
+::::::::::::
 
 We will first look at a helper function:
 
@@ -924,72 +658,13 @@ that if the object that is being added by the playlist script is not yet in the 
 
 Below is the complete function with some comments:
 
-.. code-block:: js
-
-   function addPlaylistItem(location, title, playlistChain)
-   {
-
-       // Determine if the item that we got is an URL or a local file.
-
-       if (location.match(/^.*:\/\//))
-       {
-         var exturl = new Object();
-         var exturl = new Object();
-
-         // Setting the mimetype is crucial and tricky... if you get it
-         // wrong your renderer may show the item as unsupported and refuse
-         // to play it. Unfortunately most playlist formats do not provide
-         // any mimetype information.
-
-         exturl.mimetype = 'audio/mpeg';
-
-         // Make sure to correctly set the object type, then populate the
-         // remaining fields.
-
-         exturl.objectType = OBJECT_TYPE_ITEM_EXTERNAL_URL;
-         exturl.location = location;
-         exturl.title = (title ? title : location);
-         exturl.protocol = 'http-get';
-         exturl.upnpclass = UPNP_CLASS_ITEM_MUSIC_TRACK;
-         exturl.description = "Song from " + playlist.title;
-
-         // This is a special field which ensures that your playlist files
-         // will be displayed in the correct order inside a playlist
-         // container. It is similar to the id3 track number that is used
-         // to sort the media in album containers.
-
-         exturl.playlistOrder = playlistOrder++;
-
-         // Your item will be added to the container named by the playlist
-         // that you are currently parsing.
-
-         addCdsObject(exturl, playlistChain,  UPNP_CLASS_PLAYLIST_CONTAINER);
-       }
-
-      // Here we are dealing with a local file.
-
-      else
-      {
-        if (location.substr(0,1) != '/')
-            location = playlistLocation + location;
-        var item  = new Object();
-        item.location = location;
-        if (title) {
-         item.title = title;
-        } else {
-         var locationParts = location.split('/');
-         item.title = locationParts[locationParts.length - 1];
-         if (! item.title)
-             item.title = location;
-        }
-        item.objectType = OBJECT_TYPE_ITEM;
-        item.playlistOrder = playlistOrder++;
-        addCdsObject(item, playlistChain,  UPNP_CLASS_PLAYLIST_CONTAINER);
-      }
-   }
+.. literalinclude:: ../scripts/js/playlists.js
+    :start-after: // doc-add-playlist-item-begin
+    :end-before: // doc-add-playlist-item-end
+    :language: js
 
 Main Parsing
-------------
+::::::::::::
 
 The actual parsing is done in the main part of the script. First, the type of the playlist is determined (based on the
 playlist mimetype), then the correct parser is chosen. The parsing itself is a loop, where each call to readln() returns
@@ -999,36 +674,9 @@ the next line until end of file is reached.
 To keep things easy we will only list the m3u parsing here. Again, if you are not familiar with regular expressions, now is
 probably the time to take a closer look.
 
-.. code-block:: js
-
-   else if (type == 'm3u')
-   {
-      var line;
-      var title = null;
-
-      // Here is the do - while loop which will read the playlist line by line.
-      do
-      {
-         // Read the line:
-         line = readln();
-
-         // Perform m3u specific parsing:
-
-         var matches = line.match(/^#EXTINF:(-?\d+),\s?(\S.+)$/i);
-         if (matches) {
-             // duration = matches[1]; // currently unused
-             title = matches[2];
-         }
-         else if (! line.match(/^(#|\s*$)/))
-         {
-            // Call the helper function to add the item once you gathered the data:
-            addPlaylistItem(line, title, playlistChain);
-            title = null;
-         }
-      }
-
-      // We will exit the loop when end of the playlist file is reached.
-      while (line);
-   }
+.. literalinclude:: ../scripts/js/playlists.js
+    :start-after: // doc-playlist-m3u-parse-begin
+    :end-before: // doc-playlist-m3u-parse-end
+    :language: js
 
 **Happy scripting!**

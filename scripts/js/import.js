@@ -20,13 +20,22 @@
   $Id$
 */
 
+// doc-add-audio-begin
 function addAudio(obj) {
     var desc = '';
     var artist_full;
     var album_full;
     
-    // first gather data
+    // First we will gather all the metadata that is provided by our
+    // object, of course it is possible that some fields are empty -
+    // we will have to check that to make sure that we handle this
+    // case correctly.
     var title = obj.meta[M_TITLE];
+
+    // Note the difference between obj.title and obj.meta[M_TITLE] -
+    // while object.title will originally be set to the file name,
+    // obj.meta[M_TITLE] will contain the parsed title - in this
+    // particular example the ID3 title of an MP3.
     if (!title) {
         title = obj.title;
     }
@@ -90,9 +99,8 @@ function addAudio(obj) {
         orchestra = 'None';
     }
 
-// uncomment this if you want to have track numbers in front of the title
-// in album view
-    
+    // uncomment this if you want to have track numbers in front of the title
+    // in album view
 /*    
     var track = obj.meta[M_TRACKNUMBER];
     if (!track) {
@@ -120,8 +128,23 @@ function addAudio(obj) {
         }
     }
 */
+
+    // We finally gathered all data that we need, so let's create a
+    // nice layout for our audio files. Note how we are constructing
+    // the chain, in the line below the array 'chain' will be
+    // converted to 'Audio/All audio' by the createContainerChain()
+    // function.
+
     var chain = ['Audio', 'All Audio'];
     obj.title = title;
+
+    // The UPnP class argument to addCdsObject() is optional, if it is
+    // not supplied the default UPnP class will be used. However, it
+    // is suggested to correctly set UPnP classes of containers and
+    // objects - this information may be used by some renderers to
+    // identify the type of the container and present the content in a
+    // different manner .
+
     addCdsObject(obj, createContainerChain(chain));
     
     chain = ['Audio', 'Artists', artist, 'All Songs'];
@@ -151,6 +174,10 @@ function addAudio(obj) {
     
     chain = ['Audio', 'Albums', album];
     obj.title = track + title; 
+
+    // Remember, the server will sort all items by ID3 track if the
+    // container class is set to UPNP_CLASS_CONTAINER_MUSIC_ALBUM.
+
     addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_ALBUM);
     
     chain = ['Audio', 'Genres', genre];
@@ -162,7 +189,9 @@ function addAudio(obj) {
     chain = ['Audio', 'Composers', composer];
     addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_COMPOSER);
 }
+// doc-add-audio-end
 
+// doc-add-video-begin
 function addVideo(obj) {
     var chain = ['Video', 'All Video'];
     addCdsObject(obj, createContainerChain(chain));
@@ -175,7 +204,9 @@ function addVideo(obj) {
         addCdsObject(obj, createContainerChain(chain));
     }
 }
+// doc-add-video-end
 
+// doc-add-image-begin
 function addImage(obj) {
     var chain = ['Photos', 'All Photos'];
     addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER);
@@ -203,15 +234,30 @@ function addImage(obj) {
         addCdsObject(obj, createContainerChain(chain));
     }
 }
+// doc-add-image-end
 
+// doc-add-trailer-begin
 function addTrailer(obj) {
     var chain;
+
+    // First we will add the item to the 'All Trailers' container, so
+    // that we get a nice long playlist:
 
     chain = ['Online Services', 'Apple Trailers', 'All Trailers'];
     addCdsObject(obj, createContainerChain(chain));
 
+    // We also want to sort the trailers by genre, however we need to
+    // take some extra care here: the genre property here is a comma
+    // separated value list, so one trailer can have several matching
+    // genres that will be returned as one string. We will split that
+    // string and create individual genre containers.
+
     var genre = obj.meta[M_GENRE];
     if (genre) {
+
+        // A genre string "Science Fiction, Thriller" will be split to
+        // "Science Fiction" and "Thriller" respectively.
+
         genres = genre.split(', ');
         for (var i = 0; i < genres.length; i++) {
             chain = ['Online Services', 'Apple Trailers', 'Genres', genres[i]];
@@ -219,11 +265,20 @@ function addTrailer(obj) {
         }
     }
 
+    // The release date is offered in a YYYY-MM-DD format, we won't do
+    // too much extra checking regading validity, however we only want
+    // to group the trailers by year and month:
+
     var reldate = obj.meta[M_DATE];
     if ((reldate) && (reldate.length >= 7)) {
         chain = ['Online Services', 'Apple Trailers', 'Release Date', reldate.slice(0, 7)];
         addCdsObject(obj, createContainerChain(chain));
     }
+
+    // We also want to group the trailers by the date when they were
+    // originally posted, the post date is available via the aux
+    // array. Similar to the release date, we will cut off the day and
+    // create our containres in the YYYY-MM format.
 
     var postdate = obj.aux[APPLE_TRAILERS_AUXDATA_POST_DATE];
     if ((postdate) && (postdate.length >= 7)) {
@@ -231,6 +286,7 @@ function addTrailer(obj) {
         addCdsObject(obj, createContainerChain(chain));
     }
 }
+// doc-add-trailer-end
 
 // main script part
 
@@ -238,7 +294,8 @@ if (getPlaylistType(orig.mimetype) === '') {
     var arr = orig.mimetype.split('/');
     var mime = arr[0];
     
-    // var obj = copyObject(orig);
+    // All virtual objects are references to objects in the
+    // PC-Directory, so make sure to correctly set the reference ID!
     
     var obj = orig; 
     obj.refID = orig.id;
@@ -259,6 +316,8 @@ if (getPlaylistType(orig.mimetype) === '') {
         addImage(obj);
     }
 
+    // We now also have OGG Theora recognition, so we can ensure that
+    // Vorbis
     if (orig.mimetype === 'application/ogg') {
         if (orig.theora === 1) {
             addVideo(obj);
