@@ -126,7 +126,7 @@ void Clients::addClient(const struct sockaddr_storage* addr, const std::string& 
         }
 
         if (!found) {
-            assert(info->type == ClientType::Unknown);
+            assert(clientInfo[0].type == ClientType::Unknown);
             log_debug("client add: {} '{}' -> '{}'", sockAddrGetNameInfo((struct sockaddr*)addr), userAgent, info ? info->name : clientInfo[0].name);
             auto add = ClientCacheEntry();
             add.addr = *addr;
