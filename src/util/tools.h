@@ -201,11 +201,6 @@ std::string getMIME(const fs::path& filepath, const void* buffer, size_t length)
 
 #endif // HAVE_MAGIC
 
-#ifdef SOPCAST
-/// \brief Finds a free port between range_min and range_max on localhost.
-int find_local_port(unsigned short range_min,
-    unsigned short range_max);
-#endif
 /// \brief Extracts resolution from a JPEG image
 std::string get_jpeg_resolution(const std::unique_ptr<IOHandler>& ioh);
 
@@ -341,6 +336,21 @@ std::string getDLNAContentHeader(const std::shared_ptr<ConfigManager>& config, c
 /// This code is based on offsets, so we will use it only if ffmpeg is not
 /// available.
 std::string getAVIFourCC(const fs::path& avi_filename);
+#endif
+
+/// \brief Compare sockaddr
+/// inspired by: http://www.opensource.apple.com/source/postfix/postfix-197/postfix/src/util/sock_addr.c
+#define SOCK_ADDR_IN_PTR(sa) ((struct sockaddr_in*)(sa))
+#define SOCK_ADDR_IN_ADDR(sa) SOCK_ADDR_IN_PTR(sa)->sin_addr
+#define SOCK_ADDR_IN6_PTR(sa) ((struct sockaddr_in6*)(sa))
+#define SOCK_ADDR_IN6_ADDR(sa) SOCK_ADDR_IN6_PTR(sa)->sin6_addr
+int sockAddrCmpAddr(const struct sockaddr* sa, const struct sockaddr* sb);
+std::string sockAddrGetNameInfo(const struct sockaddr* sa);
+
+#ifdef SOPCAST
+/// \brief Finds a free port between range_min and range_max on localhost.
+int find_local_port(unsigned short range_min,
+    unsigned short range_max);
 #endif
 
 #ifdef TOMBDEBUG

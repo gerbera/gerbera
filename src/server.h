@@ -80,19 +80,6 @@ public:
     /// web callbacks. Starts the update manager task.
     void run();
 
-    /// \brief Dispatch incoming UPnP events.
-    /// \param eventtype Upnp_EventType, identifying what kind of event came in.
-    /// \param event Pointer to the event.
-    ///
-    /// This function is called when a UPnP event is received,
-    /// it then looks at the event type (either an action invocation or
-    /// a subscription request) and dispatches the event accordingly.
-    /// The event that is coming from the SDK is converted to our internal
-    /// data structures (ActionRequest or SubscriptionRequest) and is then
-    /// passed on to the appropriate request handler - to routeActionEvent() or
-    /// upnp_subscriptions()
-    int handleUpnpEvent(Upnp_EventType eventtype, const void* event);
-
     /// \brief Returns the IP address of the server.
     ///
     /// Returns a string representation of the IP where the server is
@@ -131,10 +118,9 @@ protected:
     /// \brief This flag is set to true by the upnp_cleanup() function.
     bool server_shutdown_flag;
 
-    /// \brief Handle for our upnp device.
-    ///
-    /// This variable is returned by the getDeviceHandle() function.
-    UpnpDevice_Handle deviceHandle;
+    /// \brief Handle for our upnp callbacks.
+    UpnpDevice_Handle rootDeviceHandle;
+    UpnpDevice_Handle clientHandle;
 
     /// \brief Unique Device Number of the server.
     ///
@@ -230,7 +216,26 @@ protected:
     /// \return UPNP_E_SUCCESS Callbacks registered successfully, else error code.
     static int registerVirtualDirCallbacks();
 
-    static int handleUpnpEventCallback(Upnp_EventType eventtype, const void* event, void* cookie);
+    /// \brief Dispatch incoming UPnP root device events.
+    /// \param eventtype Upnp_EventType, identifying what kind of event came in.
+    /// \param event Pointer to the event.
+    ///
+    /// This function is called when a UPnP root device event is received,
+    /// it then looks at the event type (either an action invocation or
+    /// a subscription request) and dispatches the event accordingly.
+    /// The event that is coming from the SDK is converted to our internal
+    /// data structures (ActionRequest or SubscriptionRequest) and is then
+    /// passed on to the appropriate request handler - to routeActionEvent() or
+    /// upnp_subscriptions()
+    static int handleUpnpRootDeviceEventCallback(Upnp_EventType eventType, const void* event, void* cookie);
+    int handleUpnpRootDeviceEvent(Upnp_EventType eventtype, const void* event);
+
+    /// \brief Dispatch incoming UPnP client events.
+    /// \param eventtype Upnp_EventType, identifying what kind of event came in.
+    /// \param event Pointer to the event.
+    ///
+    static int handleUpnpClientEventCallback(Upnp_EventType eventType, const void* event, void* cookie);
+    int handleUpnpClientEvent(Upnp_EventType eventType, const void* event);
 };
 
 #endif // __SERVER_H__

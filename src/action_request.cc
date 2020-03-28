@@ -33,6 +33,8 @@
 
 #include <sstream>
 
+#include "util/tools.h"
+
 ActionRequest::ActionRequest(UpnpActionRequest* upnp_request)
     : upnp_request(upnp_request)
     , errCode(UPNP_E_SUCCESS)
@@ -40,6 +42,8 @@ ActionRequest::ActionRequest(UpnpActionRequest* upnp_request)
     , UDN(UpnpActionRequest_get_DevUDN_cstr(upnp_request))
     , serviceID(UpnpActionRequest_get_ServiceID_cstr(upnp_request))
 {
+    const struct sockaddr_storage* ctrlPtIPAddr = UpnpActionRequest_get_CtrlPtIPAddr(upnp_request);
+    Clients::getInfo(ctrlPtIPAddr, &clientInfo);
 }
 
 std::string ActionRequest::getActionName() const

@@ -183,6 +183,8 @@ set(libgerberaFILES
         src/util/timer.h
         src/util/tools.cc
         src/util/tools.h
+        src/util/upnp_clients.h
+        src/util/upnp_clients.cc
         src/util/upnp_headers.h
         src/util/upnp_headers.cc
         src/util/xml_to_json.cc
