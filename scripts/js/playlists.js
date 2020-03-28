@@ -25,17 +25,41 @@ var title, line, matches, file, lastId, id,
     playlist_title, dot_index, playlistChain, playlistDirChain,
     last_path;
 
+// doc-add-playlist-item-begin
 function addPlaylistItem(location, title, playlistChain, order) {
+    // Determine if the item that we got is an URL or a local file.
+
     if (location.match(/^.*:\/\//)) {
         var exturl = {};
+
+        // Setting the mimetype is crucial and tricky... if you get it
+        // wrong your renderer may show the item as unsupported and refuse
+        // to play it. Unfortunately most playlist formats do not provide
+        // any mimetype information.
+
         exturl.mimetype = 'audio/mpeg';
+
+        // Make sure to correctly set the object type, then populate the
+        // remaining fields.
+
         exturl.objectType = OBJECT_TYPE_ITEM_EXTERNAL_URL;
+
         exturl.location = location;
         exturl.title = (title ? title : location);
         exturl.protocol = 'http-get';
         exturl.upnpclass = UPNP_CLASS_ITEM_MUSIC_TRACK;
         exturl.description = "Song from " + playlist.title;
+
+        // This is a special field which ensures that your playlist files
+        // will be displayed in the correct order inside a playlist
+        // container. It is similar to the id3 track number that is used
+        // to sort the media in album containers.
+
         exturl.playlistOrder = (order ? order : playlistOrder++);
+
+        // Your item will be added to the container named by the playlist
+        // that you are currently parsing.
+
         addCdsObject(exturl, playlistChain,  UPNP_CLASS_PLAYLIST_CONTAINER);
     } else {
         if (location.substr(0,1) !== '/') {
@@ -50,6 +74,7 @@ function addPlaylistItem(location, title, playlistChain, order) {
         addCdsObject(item, playlistChain,  UPNP_CLASS_PLAYLIST_CONTAINER);
     }
 }
+// doc-add-playlist-item-end
 
 print("Processing playlist: " + playlist.location);
 
@@ -74,9 +99,13 @@ if (last_path) {
 
 if (type === '') {
     print("Unknown playlist mimetype: '" + playlist.mimetype + "' of playlist '" + playlist.location + "'");
-} else if (type === 'm3u') {
+}
+// doc-playlist-m3u-parse-begin
+else if (type === 'm3u') {
     title = null;
     line = readln();
+
+    // Here is the do - while loop which will read the playlist line by line.
     do {
         var matches = line.match(/^#EXTINF:(-?\d+),\s?(\S.+)$/i);
         if (matches) {
@@ -84,7 +113,10 @@ if (type === '') {
             title = matches[2];
         }
         else if (!line.match(/^(#|\s*$)/)) {
+            // Call the helper function to add the item once you gathered the data:
             addPlaylistItem(line, title, playlistChain);
+
+            // Also add to "Directories"
             if (playlistDirChain)
                 addPlaylistItem(line, title, playlistDirChain);
 
@@ -93,7 +125,9 @@ if (type === '') {
         
         line = readln();
     } while (line);
-} else if (type === 'pls') {
+}
+// doc-playlist-m3u-parse-end
+else if (type === 'pls') {
     title = null;
     file = null;
     lastId = -1;
