@@ -35,12 +35,11 @@
 #ifndef __LASTFM_H__
 #define __LASTFM_H__
 
+#include <cds_objects.h>
+#include <config/config_manager.h>
 #include <cstdlib>
 #include <lastfmlib/lastfmscrobblerc.h>
 #include <memory>
-
-// forward declaration
-class CdsItem;
 
 class LastFm {
 public:
