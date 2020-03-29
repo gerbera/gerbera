@@ -120,6 +120,10 @@ void Clients::addClient(const struct sockaddr_storage* addr, const std::string& 
             if (sockAddrCmpAddr((struct sockaddr*)&entry.addr, (struct sockaddr*)addr) != 0)
                 continue;
             entry.age = std::chrono::steady_clock::now();
+            if (entry.pInfo != info) {
+                assert(clientInfo[0].type == ClientType::Unknown);
+                log_debug("client change: {} '{}' -> '{}'", sockAddrGetNameInfo((struct sockaddr*)addr), userAgent, info ? info->name : clientInfo[0].name);
+            }
             entry.pInfo = info;
             found = true;
             break;
