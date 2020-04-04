@@ -148,7 +148,21 @@ int main(int argc, char** argv, char** envp)
 #endif
     cxxopts::Options options("gerbera", "Gerbera UPnP Media Server - https://gerbera.io");
 
-    options.add_options()("D,debug", "Enable debugging", cxxopts::value<bool>()->default_value("false"))("e,interface", "Interface to bind with", cxxopts::value<std::string>())("p,port", "Port to bind with, must be >=49152", cxxopts::value<int>())("i,ip", "IP to bind with", cxxopts::value<std::string>())("c,config", "Path to config file", cxxopts::value<std::string>())("m,home", "Search this directory for a .gerbera folder containing a config file", cxxopts::value<std::string>())("f,cfgdir", "Override name of config folder (.config/gerbera) by default. -h must also be set.", cxxopts::value<std::string>())("l,logfile", "Set log location", cxxopts::value<std::string>())("compile-info", "Print compile info and exit")("v,version", "Print version info and exit")("h,help", "Print this help and exit")("create-config", "Print a default config.xml file and exit")("add-file", "Scan a file into the DB on startup, can be specified multiple times", cxxopts::value<std::vector<std::string>>(), "FILE");
+    options.add_options() //
+        ("D,debug", "Enable debugging", cxxopts::value<bool>()->default_value("false")) //
+        ("e,interface", "Interface to bind with", cxxopts::value<std::string>()) //
+        ("p,port", "Port to bind with, must be >=49152", cxxopts::value<int>()) //
+        ("i,ip", "IP to bind with", cxxopts::value<std::string>()) //
+        ("c,config", "Path to config file", cxxopts::value<std::string>()) //
+        ("m,home", "Search this directory for a .gerbera folder containing a config file", cxxopts::value<std::string>()) //
+        ("f,cfgdir", "Override name of config folder (.config/gerbera) by default. -h must also be set.", cxxopts::value<std::string>()) //
+        ("l,logfile", "Set log location", cxxopts::value<std::string>()) //
+        ("compile-info", "Print compile info and exit") //
+        ("v,version", "Print version info and exit") //
+        ("h,help", "Print this help and exit") //
+        ("create-config", "Print a default config.xml file and exit") //
+        ("add-file", "Scan a file into the DB on startup, can be specified multiple times", cxxopts::value<std::vector<std::string>>(), "FILE") //
+        ;
 
     try {
         cxxopts::ParseResult opts = options.parse(argc, argv);
