@@ -390,22 +390,9 @@ int Server::handleUpnpClientEvent(Upnp_EventType eventType, const void* event)
         const UpnpDiscovery* d_event = (UpnpDiscovery*)event;
         const char* userAgent = UpnpString_get_String(UpnpDiscovery_get_Os(d_event));
         const struct sockaddr_storage* destAddr = UpnpDiscovery_get_DestAddr(d_event);
-
-        IXML_Document* descDoc = nullptr;
-#if 0
         const char* location = UpnpString_get_String(UpnpDiscovery_get_Location(d_event));
-        int errCode = UpnpDownloadXmlDoc(location, &descDoc);
-        if (errCode != UPNP_E_SUCCESS) {
-            log_debug("Error obtaining client description from {} -- error = {}", location, errCode);
-        } else {
-            DOMString cxml = ixmlPrintDocument(descDoc);
-        }
-#endif
-        Clients::addClient(destAddr, userAgent);
 
-        if (descDoc) {
-            ixmlDocument_free(descDoc);
-        }
+        Clients::addClientByDiscovery(destAddr, userAgent, location);
         break;
     }
     default:

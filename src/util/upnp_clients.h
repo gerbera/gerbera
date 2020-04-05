@@ -31,6 +31,7 @@
 #include <chrono>
 #include <memory>
 #include <mutex>
+#include <pugixml.hpp>
 #include <sys/socket.h>
 #include <vector>
 
@@ -51,7 +52,7 @@ enum class ClientType {
 // specify what must match
 enum class ClientMatchType {
     None,
-    UserAgent,
+    UserAgent, // received via UpnpActionRequest, UpnpFileInfo and UpnpDiscovery (all might be slitely different)
     //FriendlyName,
     //ModelName,
 };
@@ -75,13 +76,18 @@ struct ClientCacheEntry {
 
 class Clients {
 public:
-    static void addClient(const struct sockaddr_storage* addr, const std::string& userAgent);
-    static void getInfo(const struct sockaddr_storage* addr, ClientInfo* info);
+    static void addClientByDiscovery(const struct sockaddr_storage* addr, const std::string& userAgent, const std::string& descLocation);
+
+    // always return something, 'Unknown' if we do not know better
+    static void getInfo(const struct sockaddr_storage* addr, const std::string& userAgent, const ClientInfo** ppInfo);
+
+private:
+    static bool getInfoByType(const std::string& match, ClientMatchType type, const ClientInfo** ppInfo);
+    static bool downloadDescription(const std::string& location, std::unique_ptr<pugi::xml_document>& xml);
 
 private:
     static std::mutex mutex;
     using AutoLock = std::lock_guard<std::mutex>;
-
     static std::unique_ptr<std::vector<struct ClientCacheEntry>> cache;
 };
 

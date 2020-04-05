@@ -65,9 +65,18 @@ FileRequestHandler::FileRequestHandler(std::shared_ptr<ConfigManager> config,
 
 void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 {
-    Headers headers;
     log_debug("start");
 
+    const ClientInfo* pClientInfo;
+#ifdef UPNP_HAS_IPADDR_AND_OS_IN_FILEINFO
+    const struct sockaddr_storage* ctrlPtIPAddr = UpnpFileInfo_get_CtrlPtIPAddr(info);
+    std::string userAgent = UpnpFileInfo_get_Os_cstr(info);
+    Clients::getInfo(ctrlPtIPAddr, userAgent, &pClientInfo);
+#else
+    Clients::getInfo(nullptr, "", &pClientInfo);
+#endif
+
+    Headers headers;
     std::string tr_profile;
     int ret = 0;
 

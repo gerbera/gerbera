@@ -42,8 +42,13 @@ ActionRequest::ActionRequest(UpnpActionRequest* upnp_request)
     , UDN(UpnpActionRequest_get_DevUDN_cstr(upnp_request))
     , serviceID(UpnpActionRequest_get_ServiceID_cstr(upnp_request))
 {
+#ifdef UPNP_HAS_IPADDR_AND_OS_IN_FILEINFO
     const struct sockaddr_storage* ctrlPtIPAddr = UpnpActionRequest_get_CtrlPtIPAddr(upnp_request);
-    Clients::getInfo(ctrlPtIPAddr, &clientInfo);
+    std::string userAgent = UpnpActionRequest_get_Os_cstr(upnp_request);
+    Clients::getInfo(ctrlPtIPAddr, userAgent, &pClientInfo);
+#else
+    Clients::getInfo(nullptr, "", &pClientInfo);
+#endif
 }
 
 std::string ActionRequest::getActionName() const
