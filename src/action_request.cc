@@ -34,21 +34,22 @@
 #include <sstream>
 
 #include "util/tools.h"
+#include "util/upnp_quirks.h"
 
-ActionRequest::ActionRequest(UpnpActionRequest* upnp_request)
+ActionRequest::ActionRequest(std::shared_ptr<ConfigManager> config, UpnpActionRequest* upnp_request)
     : upnp_request(upnp_request)
     , errCode(UPNP_E_SUCCESS)
     , actionName(UpnpActionRequest_get_ActionName_cstr(upnp_request))
     , UDN(UpnpActionRequest_get_DevUDN_cstr(upnp_request))
     , serviceID(UpnpActionRequest_get_ServiceID_cstr(upnp_request))
 {
+    const struct sockaddr_storage* ctrlPtIPAddr = nullptr;
+    std::string userAgent = "";
 #ifdef UPNP_HAS_IPADDR_AND_OS_IN_FILEINFO
-    const struct sockaddr_storage* ctrlPtIPAddr = UpnpActionRequest_get_CtrlPtIPAddr(upnp_request);
-    std::string userAgent = UpnpActionRequest_get_Os_cstr(upnp_request);
-    Clients::getInfo(ctrlPtIPAddr, userAgent, &pClientInfo);
-#else
-    Clients::getInfo(nullptr, "", &pClientInfo);
+    ctrlPtIPAddr = UpnpActionRequest_get_CtrlPtIPAddr(upnp_request);
+    userAgent = UpnpActionRequest_get_Os_cstr(upnp_request);
 #endif
+    quirks = std::make_shared<Quirks>(config, ctrlPtIPAddr, userAgent);
 }
 
 std::string ActionRequest::getActionName() const

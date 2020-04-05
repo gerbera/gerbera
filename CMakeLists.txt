@@ -187,6 +187,8 @@ set(libgerberaFILES
         src/util/upnp_clients.cc
         src/util/upnp_headers.h
         src/util/upnp_headers.cc
+        src/util/upnp_quirks.h
+        src/util/upnp_quirks.cc
         src/util/xml_to_json.cc
         src/util/xml_to_json.h
         src/web/action.cc

@@ -40,6 +40,7 @@
 #include "search_handler.h"
 #include "server.h"
 #include "storage/storage.h"
+#include "util/upnp_quirks.h"
 
 ContentDirectoryService::ContentDirectoryService(std::shared_ptr<ConfigManager> config,
     std::shared_ptr<Storage> storage,
@@ -109,10 +110,7 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
     didl_lite_root.append_attribute(XML_NAMESPACE_ATTR) = XML_DIDL_LITE_NAMESPACE;
     didl_lite_root.append_attribute(XML_DC_NAMESPACE_ATTR) = XML_DC_NAMESPACE;
     didl_lite_root.append_attribute(XML_UPNP_NAMESPACE_ATTR) = XML_UPNP_NAMESPACE;
-
-    if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK)) {
-        didl_lite_root.append_attribute(XML_SEC_NAMESPACE_ATTR) = XML_SEC_NAMESPACE;
-    }
+    request->GetQuirks()->appendSpecialNamespace(&didl_lite_root);
 
     for (const auto& obj : arr) {
         if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && obj->getFlag(OBJECT_FLAG_PLAYED)) {
@@ -162,10 +160,7 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
     didl_lite_root.append_attribute(XML_NAMESPACE_ATTR) = XML_DIDL_LITE_NAMESPACE;
     didl_lite_root.append_attribute(XML_DC_NAMESPACE_ATTR) = XML_DC_NAMESPACE;
     didl_lite_root.append_attribute(XML_UPNP_NAMESPACE_ATTR) = XML_UPNP_NAMESPACE;
-
-    if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK)) {
-        didl_lite_root.append_attribute(XML_SEC_NAMESPACE_ATTR) = XML_SEC_NAMESPACE;
-    }
+    request->GetQuirks()->appendSpecialNamespace(&didl_lite_root);
 
     auto searchParam = std::make_unique<SearchParam>(containerID, searchCriteria,
         std::stoi(startingIndex, nullptr), std::stoi(requestedCount, nullptr));

@@ -47,6 +47,7 @@
 
 #include "util/tools.h"
 #include "util/upnp_headers.h"
+#include "util/upnp_quirks.h"
 
 #include "transcoding/transcode_dispatcher.h"
 
@@ -67,16 +68,15 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 {
     log_debug("start");
 
-    const ClientInfo* pClientInfo;
+    const struct sockaddr_storage* ctrlPtIPAddr = nullptr;
+    std::string userAgent = "";
 #ifdef UPNP_HAS_IPADDR_AND_OS_IN_FILEINFO
-    const struct sockaddr_storage* ctrlPtIPAddr = UpnpFileInfo_get_CtrlPtIPAddr(info);
-    std::string userAgent = UpnpFileInfo_get_Os_cstr(info);
-    Clients::getInfo(ctrlPtIPAddr, userAgent, &pClientInfo);
-#else
-    Clients::getInfo(nullptr, "", &pClientInfo);
+    ctrlPtIPAddr = UpnpFileInfo_get_CtrlPtIPAddr(info);
+    userAgent = UpnpFileInfo_get_Os_cstr(info);
 #endif
+    auto quirks = std::make_unique<Quirks>(config, ctrlPtIPAddr, userAgent);
+    auto headers = std::make_unique<Headers>();
 
-    Headers headers;
     std::string tr_profile;
     int ret = 0;
 
@@ -115,10 +115,12 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     bool is_srt = false;
 
     std::string mimeType;
+
     std::string ext = getValueOrDefault(params, "ext");
     size_t edot = ext.rfind('.');
     if (edot != std::string::npos)
         ext = ext.substr(edot);
+
     if ((ext == ".srt") || (ext == ".ssa") || (ext == ".smi") || (ext == ".sub")) {
         // remove .ext
         std::string pathNoExt = path.parent_path() / path.stem();
@@ -216,45 +218,13 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     } else {
         UpnpFileInfo_set_FileLength(info, statbuf.st_size);
 
-        if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK)) {
-            if (startswith(item->getMimeType(), "video")) {
-                // Look for subtitle file and returns it's URL
-                // in CaptionInfo.sec response header.
-                // To be more compliant with original Samsung
-                // server we should check for getCaptionInfo.sec: 1
-                // request header.
-                std::vector<std::string> subexts;
-                subexts.reserve(4);
-                subexts.emplace_back(".srt");
-                subexts.emplace_back(".ssa");
-                subexts.emplace_back(".smi");
-                subexts.emplace_back(".sub");
+        quirks->addCaptionInfo(item, headers);
 
-                // remove .ext
-                std::string pathNoExt = path.parent_path() / path.stem();
-
-                std::string validext;
-                for (const auto& ext : subexts) {
-                    std::string fpath = pathNoExt + ext;
-                    if (access(fpath.c_str(), R_OK) == 0) {
-                        validext = ext;
-                        break;
-                    }
-                }
-
-                if (validext.length() > 0) {
-                    std::string burlpath = filename;
-                    burlpath = burlpath.substr(0, burlpath.rfind('.'));
-                    std::string url = "http://" + Server::getIP() + ":" + Server::getPort() + burlpath + validext;
-                    headers.addHeader("CaptionInfo.sec:", url);
-                }
-            }
-        }
         auto mappings = config->getDictionaryOption(
             CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
         std::string dlnaContentHeader = getDLNAContentHeader(config, getValueOrDefault(mappings, item->getMimeType()));
         if (!dlnaContentHeader.empty()) {
-            headers.addHeader(D_HTTP_CONTENT_FEATURES_HEADER, dlnaContentHeader);
+            headers->addHeader(D_HTTP_CONTENT_FEATURES_HEADER, dlnaContentHeader);
         }
     }
 
@@ -263,7 +233,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
     std::string dlnaTransferHeader = getDLNATransferHeader(config, mimeType);
     if (!dlnaTransferHeader.empty()) {
-        headers.addHeader(D_HTTP_TRANSFER_MODE_HEADER, dlnaTransferHeader);
+        headers->addHeader(D_HTTP_TRANSFER_MODE_HEADER, dlnaTransferHeader);
     }
 
     //log_debug("sizeof off_t {}, statbuf.st_size {}", sizeof(off_t), sizeof(statbuf.st_size));
@@ -273,7 +243,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     UpnpFileInfo_set_IsDirectory(info, S_ISDIR(statbuf.st_mode));
     UpnpFileInfo_set_ContentType(info, ixmlCloneDOMString(mimeType.c_str()));
 
-    headers.writeHeaders(info);
+    headers->writeHeaders(info);
 
     // log_debug("getInfo: Requested {}, ObjectID: {}, Location: {}, MimeType: {}",
     //      filename, object_id.c_str(), path.c_str(), info->content_type);

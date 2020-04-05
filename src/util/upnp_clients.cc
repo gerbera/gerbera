@@ -153,7 +153,7 @@ void Clients::getInfo(const struct sockaddr_storage* addr, const std::string& us
     // by userAgent
     bool found = getInfoByType(userAgent, ClientMatchType::UserAgent, &info);
 
-    // by addClient
+    // by addClientByDiscovery
     if (!found) {
         // always return something, 'Unknown' if we do not know better
         assert(clientInfo[0].type == ClientType::Unknown);

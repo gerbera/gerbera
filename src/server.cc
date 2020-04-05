@@ -336,7 +336,7 @@ int Server::handleUpnpRootDeviceEvent(Upnp_EventType eventtype, const void* even
         // a CP is invoking an action
         log_debug("UPNP_CONTROL_ACTION_REQUEST");
         try {
-            auto request = std::make_unique<ActionRequest>(static_cast<UpnpActionRequest*>(const_cast<void*>(event)));
+            auto request = std::make_unique<ActionRequest>(config, static_cast<UpnpActionRequest*>(const_cast<void*>(event)));
             routeActionRequest(request);
             request->update();
             // set in update() ((struct Upnp_Action_Request *)event)->ErrCode = ret;
