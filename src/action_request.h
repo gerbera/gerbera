@@ -38,7 +38,10 @@
 #include <upnp.h>
 
 #include "common.h"
-#include "util/upnp_clients.h"
+
+// forward declaration
+class ConfigManager;
+class Quirks;
 
 /// \brief This class represents the Upnp_Action_Request type from the SDK.
 ///
@@ -69,8 +72,8 @@ protected:
     /// Returned by getServiceID()
     std::string serviceID;
 
-    /// \brief Client Info
-    const ClientInfo* pClientInfo;
+    /// \brief Client quirks
+    std::shared_ptr<Quirks> quirks;
 
     /// \brief XML holding the response, we fill it in.
     ///
@@ -80,7 +83,7 @@ protected:
 public:
     /// \brief The Constructor takes the values from the upnp_request and fills in internal variables.
     /// \param *upnp_request Pointer to the Upnp_Action_Request structure.
-    explicit ActionRequest(UpnpActionRequest* upnp_request);
+    explicit ActionRequest(std::shared_ptr<ConfigManager> config, UpnpActionRequest* upnp_request);
 
     /// \brief Returns the name of the action.
     std::string getActionName() const;
@@ -110,6 +113,8 @@ public:
     /// This function writes all changed values into the upnp_request structure, and
     /// must be called at the very end before giving *upnp_request back to the SDK.
     void update();
+
+    std::shared_ptr<Quirks> GetQuirks() { return quirks; }
 };
 
 #endif // __ACTION_REQUEST_H__

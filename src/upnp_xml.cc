@@ -841,6 +841,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
 
             log_debug("extended protocolInfo: {}", protocolInfo.c_str());
         }
+
         // URL is path until now
         int objectType = item->getObjectType();
         if (!IS_CDS_ITEM_EXTERNAL_URL(objectType)) {

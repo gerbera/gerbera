@@ -26,9 +26,37 @@
 #ifndef __UPNP_QUIRKS_H__
 #define __UPNP_QUIRKS_H__
 
+#include <filesystem>
+#include <memory>
+#include <pugixml.hpp>
+namespace fs = std::filesystem;
+
 typedef uint32_t QuirkFlags;
 
 #define QUIRK_FLAG_NONE 0x00000000
 #define QUIRK_FLAG_SAMSUNG 0x00000001
+
+// forward declaration
+class ConfigManager;
+class CdsItem;
+class Headers;
+struct ClientInfo;
+
+class Quirks {
+public:
+    Quirks(std::shared_ptr<ConfigManager> config, const struct sockaddr_storage* addr, const std::string& userAgent);
+
+    // Look for subtitle file and returns it's URL in CaptionInfo.sec response header.
+    // To be more compliant with original Samsung server we should check for getCaptionInfo.sec: 1 request header.
+    void addCaptionInfo(std::shared_ptr<CdsItem> item, std::unique_ptr<Headers>& headers);
+
+    // add additional headers in DIDL-Lite when doing doBrowse or doSearch
+    // currentlly used for Samsung
+    void appendSpecialNamespace(pugi::xml_node* parent);
+
+private:
+    std::shared_ptr<ConfigManager> config;
+    const ClientInfo* pClientInfo;
+};
 
 #endif // __UPNP_QUIRKS_H__
