@@ -70,7 +70,7 @@ protected:
     std::string serviceID;
 
     /// \brief Client Info
-    ClientInfo clientInfo;
+    const ClientInfo* pClientInfo;
 
     /// \brief XML holding the response, we fill it in.
     ///
