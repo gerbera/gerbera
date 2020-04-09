@@ -521,8 +521,6 @@ void writeTextFile(const fs::path& path, const std::string& contents)
     bytesWritten = fwrite(contents.c_str(), 1, contents.length(), f);
     if (bytesWritten < contents.length()) {
         fclose(f);
-        if (bytesWritten >= 0)
-            throw_std_runtime_error("incomplete write to " + path.string() + " : ");
 
         throw_std_runtime_error("error writing to " + path.string() + " : " + mt_strerror(errno));
     }

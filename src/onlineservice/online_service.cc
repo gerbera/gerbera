@@ -57,7 +57,7 @@ void OnlineServiceList::registerService(const std::shared_ptr<OnlineService>& se
 
 std::shared_ptr<OnlineService> OnlineServiceList::getService(service_type_t service)
 {
-    if ((service > OS_Max) || (service < 0))
+    if (service > OS_Max)
         return nullptr;
 
     return service_list.at(service);
@@ -72,7 +72,7 @@ OnlineService::OnlineService()
 
 char OnlineService::getStoragePrefix(service_type_t service)
 {
-    if ((service < 0) || (service >= OS_Max))
+    if (service >= OS_Max)
         throw_std_runtime_error("Illegal service requested");
 
     return service_prefixes[service];
