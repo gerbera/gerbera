@@ -121,12 +121,12 @@ void Clients::addClientByDiscovery(const struct sockaddr_storage* addr, const st
         // even if not detect type we add entry, to log 'Found client' not to often
         bool found = false;
         for (auto& entry : *cache) {
-            if (sockAddrCmpAddr((struct sockaddr*)&entry.addr, (struct sockaddr*)addr) != 0)
+            if (sockAddrCmpAddr((const struct sockaddr*)&entry.addr, (const struct sockaddr*)addr) != 0)
                 continue;
             entry.age = std::chrono::steady_clock::now();
             if (entry.pInfo != info) {
                 assert(clientInfo[0].type == ClientType::Unknown);
-                log_debug("client update: {} '{}' -> '{}'", sockAddrGetNameInfo((struct sockaddr*)addr), userAgent, info ? info->name : clientInfo[0].name);
+                log_debug("client update: {} '{}' -> '{}'", sockAddrGetNameInfo((const struct sockaddr*)addr), userAgent, info ? info->name : clientInfo[0].name);
             }
             entry.pInfo = info;
             found = true;
@@ -135,7 +135,7 @@ void Clients::addClientByDiscovery(const struct sockaddr_storage* addr, const st
 
         if (!found) {
             assert(clientInfo[0].type == ClientType::Unknown);
-            log_debug("client add: {} '{}' -> '{}'", sockAddrGetNameInfo((struct sockaddr*)addr), userAgent, info ? info->name : clientInfo[0].name);
+            log_debug("client add: {} '{}' -> '{}'", sockAddrGetNameInfo((const struct sockaddr*)addr), userAgent, info ? info->name : clientInfo[0].name);
             auto add = ClientCacheEntry();
             add.addr = *addr;
             add.age = std::chrono::steady_clock::now();
