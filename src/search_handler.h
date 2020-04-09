@@ -131,7 +131,6 @@ public:
     {
     }
     std::string emit() const override;
-    ~ASTAsterisk() override = default;
 
 protected:
     std::string value;
@@ -145,7 +144,6 @@ public:
     {
     }
     std::string emit() const override;
-    ~ASTProperty() override = default;
 
 protected:
     std::string value;
@@ -159,7 +157,6 @@ public:
     {
     }
     std::string emit() const override;
-    ~ASTBoolean() override = default;
 
 protected:
     std::string value;
@@ -173,7 +170,6 @@ public:
     {
     }
     std::string emit() const override;
-    ~ASTParenthesis() override = default;
 
 protected:
     std::shared_ptr<ASTNode> bracketedNode;
@@ -187,7 +183,6 @@ public:
     {
     }
     std::string emit() const override;
-    ~ASTDQuote() override = default;
 
 protected:
     std::string value;
@@ -201,7 +196,6 @@ public:
     {
     }
     std::string emit() const override;
-    ~ASTEscapedString() override = default;
 
 protected:
     std::string value;
@@ -218,7 +212,6 @@ public:
     {
     }
     std::string emit() const override;
-    ~ASTQuotedString() override = default;
 
 protected:
     std::shared_ptr<ASTDQuote> openQuote;
@@ -237,7 +230,6 @@ public:
     std::string emit() const override;
     std::string emit(const std::string& property, const std::string& value) const;
     std::string getValue() const { return value; }
-    ~ASTCompareOperator() override = default;
 
 protected:
     std::string value;
@@ -255,7 +247,6 @@ public:
     {
     }
     std::string emit() const override;
-    ~ASTCompareExpression() override = default;
 
 protected:
     std::shared_ptr<ASTProperty> lhs;
@@ -274,7 +265,6 @@ public:
     std::string emit() const override;
     std::string emit(const std::string& property, const std::string& value) const;
     std::string getValue() const { return value; }
-    ~ASTStringOperator() override = default;
 
 protected:
     std::string value;
@@ -292,7 +282,6 @@ public:
     {
     }
     std::string emit() const override;
-    ~ASTStringExpression() override = default;
 
 protected:
     std::shared_ptr<ASTProperty> lhs;
@@ -309,7 +298,6 @@ public:
     }
     std::string emit() const override;
     std::string emit(const std::string& property, const std::string& value) const;
-    ~ASTExistsOperator() override = default;
 
 protected:
     std::string value;
@@ -327,7 +315,6 @@ public:
     {
     }
     std::string emit() const override;
-    ~ASTExistsExpression() override = default;
 
 protected:
     std::shared_ptr<ASTProperty> lhs;
@@ -345,7 +332,6 @@ public:
     {
     }
     std::string emit() const override;
-    ~ASTAndOperator() override = default;
 
 protected:
     std::shared_ptr<ASTNode> lhs;
@@ -362,7 +348,6 @@ public:
     {
     }
     std::string emit() const override;
-    ~ASTOrOperator() override = default;
 
 protected:
     std::shared_ptr<ASTNode> lhs;
