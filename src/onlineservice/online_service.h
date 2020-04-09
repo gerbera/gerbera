@@ -60,7 +60,8 @@ typedef enum {
 /// handles adding/refreshing content in the database.
 class OnlineService {
 public:
-    OnlineService();
+    explicit OnlineService();
+    virtual ~OnlineService() = default;
 
     /// \brief Retrieves user specified content from the service and adds
     /// the items to the database.

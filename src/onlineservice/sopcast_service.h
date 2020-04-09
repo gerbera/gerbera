@@ -53,7 +53,7 @@ public:
     SopCastService(std::shared_ptr<ConfigManager> config,
         std::shared_ptr<Storage> storage,
         std::shared_ptr<ContentManager> content);
-    ~SopCastService();
+    ~SopCastService() override;
 
     /// \brief Retrieves user specified content from the service and adds
     /// the items to the database.

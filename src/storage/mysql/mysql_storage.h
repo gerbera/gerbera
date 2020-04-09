@@ -44,7 +44,7 @@
 class MysqlStorage : public SQLStorage, public std::enable_shared_from_this<SQLStorage> {
 public:
     explicit MysqlStorage(std::shared_ptr<ConfigManager> config);
-    virtual ~MysqlStorage();
+    ~MysqlStorage() override;
 
 private:
     void init() override;
@@ -87,7 +87,7 @@ private:
 class MysqlResult : public SQLResult {
 public:
     explicit MysqlResult(MYSQL_RES* mysql_res);
-    virtual ~MysqlResult();
+    ~MysqlResult() override;
 
 private:
     int nullRead;

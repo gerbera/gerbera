@@ -62,6 +62,8 @@ public:
     /// parameters = "object_id=12345&transcode=wav"
     static void splitUrl(const char* url, char separator, std::string& path, std::string& parameters);
 
+    virtual ~RequestHandler() = default;
+
 protected:
     std::shared_ptr<ConfigManager> config;
     std::shared_ptr<Storage> storage;

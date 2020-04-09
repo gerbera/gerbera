@@ -63,12 +63,14 @@ public:
         return std::string(c);
     }
     virtual char* col_c_str(int index) const = 0;
+
+    virtual ~SQLRow() = default;
 };
 
 class SQLResult {
 public:
     //SQLResult();
-    //virtual ~SQLResult();
+    virtual ~SQLResult() = default;
     virtual std::unique_ptr<SQLRow> nextRow() = 0;
     virtual unsigned long long getNumRows() const = 0;
 };

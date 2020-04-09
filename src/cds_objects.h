@@ -128,6 +128,8 @@ protected:
     std::map<std::string, std::string> auxdata;
     std::vector<std::shared_ptr<CdsResource>> resources;
 
+    virtual ~CdsObject() = default;
+
 public:
     /// \brief Constructor. Sets the default values.
     explicit CdsObject(std::shared_ptr<Storage> storage);
