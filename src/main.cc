@@ -169,12 +169,15 @@ int main(int argc, char** argv, char** envp)
                       << "-------------" << std::endl
                       << COMPILE_INFO << std::endl
                       << std::endl;
-            if (strlen(GIT_BRANCH) > 0 || strlen(GIT_COMMIT_HASH) > 0) {
+            if (strlen(GIT_BRANCH) > 0) {
                 std::cout << "Git info:" << std::endl
                           << "-------------" << std::endl
-                          << "Git Branch: " << GIT_BRANCH << std::endl
-                          << "Git Commit: " << GIT_COMMIT_HASH << std::endl;
+                          << "Git Branch: " << GIT_BRANCH << std::endl;
             }
+            if (strlen(GIT_COMMIT_HASH) > 0) {
+                std::cout << "Git Commit: " << GIT_COMMIT_HASH << std::endl;
+            }
+
             exit(EXIT_SUCCESS);
         }
 
