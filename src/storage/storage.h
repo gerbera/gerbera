@@ -140,6 +140,7 @@ public:
 class Storage {
 public:
     Storage(std::shared_ptr<ConfigManager> config);
+    virtual ~Storage() = default;
     virtual void init() = 0;
 
     /// \brief shutdown the Storage with its possible threads

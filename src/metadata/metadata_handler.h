@@ -155,6 +155,8 @@ public:
     virtual void fillMetadata(std::shared_ptr<CdsItem> item) = 0;
     virtual std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsItem> item, int resNum) = 0;
     virtual std::string getMimeType();
+
+    virtual ~MetadataHandler() = default;
 };
 
 #endif // __METADATA_HANDLER_H__

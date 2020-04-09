@@ -77,6 +77,8 @@ public:
     {
         throw std::runtime_error("Wrong option type");
     }
+
+    virtual ~ConfigOption() = default;
 };
 
 class Option : public ConfigOption {

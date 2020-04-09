@@ -73,6 +73,8 @@ public:
 
     std::string getError() const { return error; }
 
+    virtual ~SLTask() = default;
+
 protected:
     /// \brief true as long as the task is not finished
     ///
@@ -212,7 +214,7 @@ private:
 class Sqlite3Result : public SQLResult {
 public:
     Sqlite3Result();
-    virtual ~Sqlite3Result();
+    ~Sqlite3Result() override;
 
 private:
     std::unique_ptr<SQLRow> nextRow() override;
