@@ -67,6 +67,7 @@ ProcessExecutor::ProcessExecutor(const std::string& command, const std::vector<s
         pthread_sigmask(SIG_SETMASK, &mask_set, nullptr);
         log_debug("Launching process: {}", command.c_str());
         execvp(command.c_str(), const_cast<char** const>(argv));
+        break;
     default:
         break;
     }
