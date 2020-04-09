@@ -65,7 +65,7 @@ void BufferedIOHandler::close()
 
 void BufferedIOHandler::threadProc()
 {
-    int readBytes;
+    int readBytes = 0;
     size_t maxWrite;
 
 #ifdef TOMBDEBUG
