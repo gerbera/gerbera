@@ -244,7 +244,7 @@ size_t ProcessIOHandler::read(char* buf, size_t length)
         }
     }
 
-    if (num_bytes < 0) {
+    if (num_bytes == 0) {
         // not sure what we return here since no way of knowing about feof
         // actually that will depend on the ret code of the process
         ret = -1;
@@ -332,7 +332,7 @@ size_t ProcessIOHandler::write(char* buf, size_t length)
         }
     }
 
-    if (num_bytes < 0) {
+    if (num_bytes == 0) {
         // not sure what we return here since no way of knowing about feof
         // actually that will depend on the ret code of the process
         ret = -1;
