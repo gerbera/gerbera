@@ -77,7 +77,7 @@ mt_key MT_KEYS[] = {
     { "M_RATING", "upnp:rating" },
     { "M_ACTOR", "upnp:actor" },
     { "M_PRODUCER", "upnp:producer" },
-    { "M_ALBUMARTIST", "upnp:artist@role[AlbumArtist]" },
+    { "M_ALBUMARTIST", "upnp:albumArtist" },
     { "M_COMPOSER", "upnp:composer" },
     { "M_CONDUCTOR", "upnp:conductor" },
     { "M_ORCHESTRA", "upnp:orchestra" },
