@@ -138,19 +138,25 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, bool re
 
             std::string creator = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_ALBUMARTIST));
             if (creator.empty())
-                creator = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_ARTIST), "None");
+                creator = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_ARTIST));
+            if (!creator.empty())
+                renderCreator(creator, &result);
 
-            std::string composer = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_COMPOSER), "None");
-            renderComposer(composer, &result);
+            std::string composer = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_COMPOSER));
+            if (!composer.empty())
+                renderComposer(composer, &result);
 
-            std::string conductor = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_CONDUCTOR), "None");
-            renderConductor(conductor, &result);
+            std::string conductor = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_CONDUCTOR));
+            if (!conductor.empty())
+                renderConductor(conductor, &result);
 
-            std::string orchestra = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_ORCHESTRA), "None");
-            renderOrchestra(orchestra, &result);
+            std::string orchestra = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_ORCHESTRA));
+            if (!orchestra.empty())
+                renderOrchestra(orchestra, &result);
 
-            std::string date = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_UPNP_DATE), "None");
-            renderAlbumDate(date, &result);
+            std::string date = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_UPNP_DATE));
+            if (!date.empty())
+                renderAlbumDate(date, &result);
         }
         if (upnp_class == UPNP_DEFAULT_CLASS_MUSIC_ALBUM || upnp_class == UPNP_DEFAULT_CLASS_CONTAINER) {
             std::string aa_id = storage->findFolderImage(cont->getID(), std::string());
