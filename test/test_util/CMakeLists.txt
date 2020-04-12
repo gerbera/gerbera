@@ -1,6 +1,7 @@
 find_package(Threads REQUIRED)
 
 add_executable(testutil
+        test_tools.cc
         test_upnp_headers.cc
 )
 

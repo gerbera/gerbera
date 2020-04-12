@@ -563,24 +563,13 @@ std::string getProtocol(const std::string& protocolInfo)
 
 std::string secondsToHMS(int seconds)
 {
-    int h, m, s;
-
-    s = seconds % 60;
+    auto s = seconds % 60;
     seconds /= 60;
 
-    m = seconds % 60;
-    h = seconds / 60;
+    auto m = seconds % 60;
+    auto h = std::min(seconds / 60, 999);
 
-    // XXX:XX:XX
-    // This fails if h goes over 999
-    if (h > 999)
-        h = 999;
-
-    char buf[10];
-    snprintf(buf, sizeof(buf), "%02d:%02d:%02d", h, m, s);
-    std::string res = buf;
-
-    return res;
+    return fmt::format("{:02}:{:02}:{:02}", h, m, s);
 }
 
 int HMSToSeconds(const std::string& time)
