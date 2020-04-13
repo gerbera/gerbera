@@ -18,6 +18,6 @@ if [ -d build ]; then
 fi
 mkdir build
 cd build && \
-cmake .. && \
+cmake .. -DSPDLOG_FMT_EXTERNAL=ON && \
 make spdlog && \
 make install/fast
