@@ -31,7 +31,11 @@ jobs:
     addons:
       chrome: stable
     before_install: skip
+    env:
+      - DETECT_CHROMEDRIVER_VERSION=true
     install:
+      - nvm install --lts
+      - nvm use --lts
       - npm --prefix $TRAVIS_BUILD_DIR/gerbera-web/ install $TRAVIS_BUILD_DIR/gerbera-web/
     script:
       - npm --prefix $TRAVIS_BUILD_DIR/gerbera-web run lint
