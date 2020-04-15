@@ -269,7 +269,7 @@
 
     modal.find('#editMime')
       .val(item['mime-type'].value)
-      .prop('disabled', true)
+      .prop('disabled', !item['mime-type'].editable)
       .closest('.form-group').show();
 
     modal.find('#editProtocol')
@@ -366,6 +366,7 @@
           title: editTitle.val(),
           description: editDesc.val(),
           location: editLocation.val(),
+          'mime-type': editMime.val(),
           protocol: editProtocol.val()
         };
         break;
@@ -440,6 +441,7 @@
           title: editTitle.val(),
           description: editDesc.val(),
           location: editLocation.val(),
+          'mime-type': editMime.val(),
           protocol: editProtocol.val()
         };
         break;
