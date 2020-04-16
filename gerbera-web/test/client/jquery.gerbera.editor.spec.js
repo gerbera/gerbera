@@ -262,7 +262,7 @@ describe('The jQuery Gerbera Editor Overlay', () => {
       expect(editLocation.val()).toEqual('http://localhost');
       expect(editClass.val()).toEqual('object.item');
       expect(editDesc.val()).toEqual('description');
-      expect(editMime.val()).toEqual('text/plain');
+      expect(editMime.val()).toEqual('video/ts');
       expect(editActionScript.val()).toEqual('');
       expect(editState.val()).toEqual('');
       expect(editProtocol.val()).toEqual('http-get');
@@ -353,6 +353,7 @@ describe('The jQuery Gerbera Editor Overlay', () => {
         title: 'title',
         location: 'http://localhost',
         description: 'description',
+        'mime-type': 'video/ts',
         protocol: 'http-get'
       });
     });
@@ -441,6 +442,7 @@ describe('The jQuery Gerbera Editor Overlay', () => {
         title: '',
         location: '',
         description: '',
+        'mime-type': '',
         protocol: 'http-get'
       });
     });
