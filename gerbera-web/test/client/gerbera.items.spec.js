@@ -412,6 +412,7 @@ describe('Gerbera Items', () => {
         title: 'title',
         location: 'http://localhost',
         description: 'description',
+        'mime-type': 'video/ts',
         protocol: 'http-get',
         updates: 'check'
       });
@@ -678,6 +679,7 @@ describe('Gerbera Items', () => {
         title: '',
         location: '',
         description: '',
+        'mime-type': '',
         protocol: 'http-get',
         updates: 'check'
       });
