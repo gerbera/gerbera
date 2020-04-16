@@ -28,7 +28,7 @@ suite(() => {
     loginPage = new LoginPage(driver);
     homePage = new HomePage(driver);
   });
- 
+
   describe('The screenshot documentation spec takes screenshots', () => {
 
     beforeEach(async() => {
