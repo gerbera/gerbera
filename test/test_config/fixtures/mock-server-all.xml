@@ -28,8 +28,6 @@
       <database>gerbera</database>
     </mysql>
   </storage>
-  <!-- For PS3 support change "extend" to "yes" -->
-  <protocolInfo extend="no" dlna-seek="yes" />
   <!-- Uncomment the line below if you have a Telegent TG100 -->
   <!--
        <upnp-string-limit>101</upnp-string-limit>

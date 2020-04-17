@@ -101,13 +101,6 @@ void ConfigGenerator::generateServer(const fs::path& userHome, const fs::path& c
 
     generateStorage(&server);
 
-    auto ps3protinfo = server.append_child(pugi::node_comment);
-    ps3protinfo.set_value(R"( For PS3 support change "extend" to "yes" )");
-
-    auto protocolinfo = server.append_child("protocolInfo");
-    protocolinfo.append_attribute("extend") = DEFAULT_EXTEND_PROTOCOLINFO;
-    protocolinfo.append_attribute("dlna-seek") = DEFAULT_EXTEND_PROTOCOLINFO_DLNA_SEEK;
-
     auto tg100info = server.append_child(pugi::node_comment);
     tg100info.set_value(" Uncomment the line below if you have a Telegent TG100 ");
 

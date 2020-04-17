@@ -1215,37 +1215,27 @@ std::string getDLNAprofileString(const std::string& contentType)
 
 std::string getDLNAContentHeader(const std::shared_ptr<ConfigManager>& config, const std::string& contentType)
 {
-    if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO)) {
-        std::string content_parameter;
-        content_parameter = getDLNAprofileString(contentType);
-        if (!content_parameter.empty())
-            content_parameter = D_PROFILE + std::string("=") + content_parameter + ";";
-        // enabling or disabling seek
-        if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_DLNA_SEEK))
-            content_parameter = content_parameter + D_OP + "=" + D_OP_SEEK_ENABLED + ";";
-        else
-            content_parameter = content_parameter + D_OP + "=" + D_OP_SEEK_DISABLED + ";";
-        content_parameter = content_parameter + D_CONVERSION_INDICATOR + "=" + D_NO_CONVERSION + ";";
-        content_parameter = content_parameter + D_FLAGS "=" D_TR_FLAGS_AV;
-        return content_parameter;
-    }
-    return "";
+    std::string content_parameter;
+    content_parameter = getDLNAprofileString(contentType);
+    if (!content_parameter.empty())
+        content_parameter = D_PROFILE + std::string("=") + content_parameter + ";";
+    content_parameter = content_parameter + D_OP + "=" + D_OP_SEEK_ENABLED + ";";
+    content_parameter = content_parameter + D_CONVERSION_INDICATOR + "=" + D_NO_CONVERSION + ";";
+    content_parameter = content_parameter + D_FLAGS "=" D_TR_FLAGS_AV;
+    return content_parameter;
 }
 
 std::string getDLNATransferHeader(const std::shared_ptr<ConfigManager>& config, const std::string& mimeType)
 {
-    if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO)) {
-        std::string transfer_parameter;
-        if (startswith(mimeType, "image"))
-            transfer_parameter = D_HTTP_TRANSFER_MODE_INTERACTIVE;
-        else if (startswith(mimeType, "audio") || startswith(mimeType, "video"))
-            transfer_parameter = D_HTTP_TRANSFER_MODE_STREAMING;
+    std::string transfer_parameter;
+    if (startswith(mimeType, "image"))
+        transfer_parameter = D_HTTP_TRANSFER_MODE_INTERACTIVE;
+    else if (startswith(mimeType, "audio") || startswith(mimeType, "video"))
+        transfer_parameter = D_HTTP_TRANSFER_MODE_STREAMING;
 
-        if (!transfer_parameter.empty()) {
-            return transfer_parameter;
-        }
+    if (!transfer_parameter.empty()) {
+        return transfer_parameter;
     }
-    return "";
 }
 
 #ifndef HAVE_FFMPEG
