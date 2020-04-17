@@ -297,8 +297,8 @@ find_package (LibUpnp REQUIRED)
 include_directories(${UPNP_INCLUDE_DIRS})
 target_link_libraries (gerbera ${UPNP_LIBRARIES})
 
-if (UPNP_VERSION_STRING VERSION_LESS "1.8.6")
-    message(FATAL_ERROR "gerbera requires libupnp 1.8.6 or above.")
+if (UPNP_VERSION_STRING VERSION_LESS "1.12.1")
+    message(FATAL_ERROR "gerbera requires libupnp 1.12.1 or above.")
 endif()
 
 if (NOT UPNP_HAS_IPV6)
@@ -307,20 +307,6 @@ endif()
 
 if (NOT UPNP_HAS_REUSEADDR)
     message(WARNING "\n !! It is strongly recommended to build libupnp with --enable-reuseaddr !!\nWithout this option Gerbera will be unable to restart with the same port number.")
-endif()
-
-if (UPNP_VERSION_STRING VERSION_GREATER_EQUAL "1.10.0")
-    add_definitions(-DUPNP_HAS_REQUEST_COOKIES)
-endif()
-
-if (UPNP_VERSION_STRING VERSION_GREATER_EQUAL "1.12.1")
-    add_definitions(-DUPNP_HAS_IPADDR_AND_OS_IN_FILEINFO)
-endif()
-
-if (UPNP_VERSION_STRING VERSION_GREATER_EQUAL "1.12.0")
-    add_definitions(-DUPNP_1_12_LIST)
-else()
-    add_definitions(-DUPNP_HAS_EXTRA_HEADERS_LIST)
 endif()
 
 find_package(fmt REQUIRED)

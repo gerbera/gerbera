@@ -1,4 +1,4 @@
-# - Try to find LibUPnP (pupnp) 1.8
+# - Try to find LibUPnP (pupnp) 1.12
 # Once done this will define
 #  UPNP_FOUND - System has LibUPnP
 #  UPNP_INCLUDE_DIRS - The LibUPnP include directories
@@ -7,18 +7,18 @@
 #  UPNP_HAS_IPV6 - If LinUPnP was built with IPv6 support
 #  UPNP_HAS_REUSEADDR - If LinUPnP was built with SO_REUSEADDR support
 find_package(PkgConfig QUIET)
-pkg_search_module (PC_UPNP QUIET libupnp libupnp-1.8)
+pkg_search_module (PC_UPNP QUIET libupnp)
 
 find_path(UPNP_INCLUDE_DIR upnp.h
     HINTS ${PC_UPNP_INCLUDEDIR} ${PC_UPNP_INCLUDE_DIRS}
-    PATH_SUFFIXES upnp upnp-1.8)
+    PATH_SUFFIXES upnp)
 
 find_library(UPNP_UPNP_LIBRARY
-    NAMES libupnp upnp libupnp-1.8 upnp-1.8 upnp4
+    NAMES libupnp upnp
     HINTS ${PC_UPNP_LIBDIR} ${PC_UPNP_LIBRARY_DIRS})
 
 find_library(UPNP_IXML_LIBRARY
-    NAMES libixml ixml libixml-1.8 ixml-1.8
+    NAMES libixml ixml
     HINTS ${PC_UPNP_LIBDIR} ${PC_UPNP_LIBRARY_DIRS})
 
 if(EXISTS ${UPNP_INCLUDE_DIR}/upnpconfig.h)
