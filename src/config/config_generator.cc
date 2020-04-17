@@ -100,15 +100,6 @@ void ConfigGenerator::generateServer(const fs::path& userHome, const fs::path& c
     server.append_child("alive").append_child(pugi::node_pcdata).set_value(std::to_string(DEFAULT_ALIVE_INTERVAL).c_str());
 
     generateStorage(&server);
-
-    auto tg100info = server.append_child(pugi::node_comment);
-    tg100info.set_value(" Uncomment the line below if you have a Telegent TG100 ");
-
-    auto tg100 = server.append_child(pugi::node_comment);
-    tg100.set_value("\n\
-       <upnp-string-limit>101</upnp-string-limit>\n\
-    ");
-
     generateExtendedRuntime(&server);
 }
 

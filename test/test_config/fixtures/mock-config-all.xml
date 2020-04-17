@@ -34,10 +34,6 @@
         <database>gerbera</database>
       </mysql>
     </storage>
-    <!-- Uncomment the line below if you have a Telegent TG100 -->
-    <!--
-       <upnp-string-limit>101</upnp-string-limit>
-    -->
     <extended-runtime-options>
       <ffmpegthumbnailer enabled="no">
         <thumbnail-size>128</thumbnail-size>

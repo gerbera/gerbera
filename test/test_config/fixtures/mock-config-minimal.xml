@@ -29,10 +29,6 @@
         <database-file>gerbera.db</database-file>
       </sqlite3>
     </storage>
-    <!-- Uncomment the line below if you have a Telegent TG100 -->
-    <!--
-       <upnp-string-limit>101</upnp-string-limit>
-    -->
     <extended-runtime-options>
       <mark-played-items enabled="no" suppress-cds-updates="yes">
         <string mode="prepend">*</string>
