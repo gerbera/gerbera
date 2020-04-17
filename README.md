@@ -122,8 +122,8 @@ The Gerbera Team maintains a Homebrew Tap to allow for easy installation of Gerb
 | curl         	|         	| Optional  	| Enables web services 	     | WITH_CURL           | Enabled  |
 | [taglib]      | 1.11.1  	| Optional  	| Audio tag support          | WITH_TAGLIB         | Enabled  |
 | libmagic     	|         	| Optional  	| File type detection  	     | WITH_MAGIC          | Enabled  |
-| libmatroska 	|         	| Optional  	| MKV metadata               | WITH_MATROSKA       | Disabled |
-| ffmpeg/libav 	|         	| Optional  	| File metadata              | WITH_AVCODEC        | Enabled  |
+| libmatroska 	|         	| Optional  	| MKV metadata               | WITH_MATROSKA       | Enabled  |
+| ffmpeg/libav 	|         	| Optional  	| File metadata              | WITH_AVCODEC        | Disabled |
 | libexif      	|         	| Optional  	| JPEG Exif metadata         | WITH_EXIF           | Enabled  |
 | libexiv2    	|         	| Optional  	| Exif, IPTC, XMP metadata   | WITH_EXIV2          | Disabled |
 | lastfmlib    	| 0.4.0   	| Optional  	| Enables scrobbling   	     | WITH_LASTFM         | Disabled |
