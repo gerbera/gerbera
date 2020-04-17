@@ -43,12 +43,8 @@ ActionRequest::ActionRequest(std::shared_ptr<ConfigManager> config, UpnpActionRe
     , UDN(UpnpActionRequest_get_DevUDN_cstr(upnp_request))
     , serviceID(UpnpActionRequest_get_ServiceID_cstr(upnp_request))
 {
-    const struct sockaddr_storage* ctrlPtIPAddr = nullptr;
-    std::string userAgent = "";
-#ifdef UPNP_HAS_IPADDR_AND_OS_IN_FILEINFO
-    ctrlPtIPAddr = UpnpActionRequest_get_CtrlPtIPAddr(upnp_request);
-    userAgent = UpnpActionRequest_get_Os_cstr(upnp_request);
-#endif
+    const struct sockaddr_storage* ctrlPtIPAddr = UpnpActionRequest_get_CtrlPtIPAddr(upnp_request);
+    std::string userAgent = UpnpActionRequest_get_Os_cstr(upnp_request);
     quirks = std::make_shared<Quirks>(config, ctrlPtIPAddr, userAgent);
 }
 

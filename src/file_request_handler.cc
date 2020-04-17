@@ -68,13 +68,10 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 {
     log_debug("start");
 
-    const struct sockaddr_storage* ctrlPtIPAddr = nullptr;
-    std::string userAgent = "";
-#ifdef UPNP_HAS_IPADDR_AND_OS_IN_FILEINFO
-    ctrlPtIPAddr = UpnpFileInfo_get_CtrlPtIPAddr(info);
-    userAgent = UpnpFileInfo_get_Os_cstr(info);
-#endif
+    const struct sockaddr_storage* ctrlPtIPAddr = UpnpFileInfo_get_CtrlPtIPAddr(info);
+    std::string userAgent = UpnpFileInfo_get_Os_cstr(info);
     auto quirks = std::make_unique<Quirks>(config, ctrlPtIPAddr, userAgent);
+
     auto headers = std::make_unique<Headers>();
 
     std::string tr_profile;

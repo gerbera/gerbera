@@ -26,13 +26,11 @@
 #ifndef GERBERA_HEADERS_H
 #define GERBERA_HEADERS_H
 
+#include <ExtraHeaders.h>
 #include <map>
 #include <memory>
 #include <upnp.h>
 #include <vector>
-#if defined(UPNP_HAS_EXTRA_HEADERS_LIST) || defined(UPNP_1_12_LIST)
-#include <ExtraHeaders.h>
-#endif
 
 class Headers {
 public:

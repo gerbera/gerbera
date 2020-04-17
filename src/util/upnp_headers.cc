@@ -96,34 +96,18 @@ void Headers::writeHeaders(UpnpFileInfo* fileInfo) const
     if (headers == nullptr)
         return;
 
-#ifdef UPNP_1_12_LIST
     auto head = const_cast<UpnpListHead*>(UpnpFileInfo_get_ExtraHeadersList(fileInfo));
     for (auto iter : *headers) {
         UpnpExtraHeaders* h = UpnpExtraHeaders_new();
         UpnpExtraHeaders_set_resp(h, formatHeader(iter, false).c_str());
         UpnpListInsert(head, UpnpListEnd(head), const_cast<UpnpListHead*>(UpnpExtraHeaders_get_node(h)));
     }
-#elif UPNP_HAS_EXTRA_HEADERS_LIST
-    auto head = const_cast<list_head*>(UpnpFileInfo_get_ExtraHeadersList(fileInfo));
-    for (auto iter : *headers) {
-        UpnpExtraHeaders* h = UpnpExtraHeaders_new();
-        UpnpExtraHeaders_set_resp(h, formatHeader(iter, false).c_str());
-        UpnpExtraHeaders_add_to_list_node(h, head);
-    }
-#else
-    std::string result;
-    for (auto iter : *headers) {
-        result += formatHeader(*iter, true);
-    }
-    UpnpFileInfo_set_ExtraHeaders(fileInfo, ixmlCloneDOMString(result.c_str()));
-#endif
 }
 
 std::unique_ptr<std::map<std::string, std::string>> Headers::readHeaders(UpnpFileInfo* fileInfo)
 {
     auto ret = std::make_unique<std::map<std::string, std::string>>();
 
-#ifdef UPNP_1_12_LIST
     auto head = const_cast<UpnpListHead*>(UpnpFileInfo_get_ExtraHeadersList(fileInfo));
     UpnpListIter pos;
     for (pos = UpnpListBegin(head); pos != UpnpListEnd(head); pos = UpnpListNext(head, pos)) {
@@ -132,25 +116,6 @@ std::unique_ptr<std::map<std::string, std::string>> Headers::readHeaders(UpnpFil
         auto add = parseHeader(header);
         ret->insert(add);
     }
-#elif UPNP_HAS_EXTRA_HEADERS_LIST
-    auto head = const_cast<list_head*>(UpnpFileInfo_get_ExtraHeadersList(fileInfo));
-    list_head* pos;
-    list_for_each(pos, head)
-    {
-        UpnpExtraHeaders* extra = (UpnpExtraHeaders*)pos;
-        std::string header = UpnpExtraHeaders_get_resp(extra);
-        auto add = parseHeader(header);
-        ret->insert(add);
-    }
-#else
-    // each header line should be followed by "\r\n"
-    std::string str = UpnpFileInfo_get_ExtraHeaders_cstr();
-    auto header_list = split_string(str, '\n');
-    for (const auto& header : header_list) {
-        auto add = parseHeader(header);
-        ret->insert(add);
-    }
-#endif
 
     return ret;
 }

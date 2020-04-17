@@ -181,11 +181,7 @@ void Clients::getInfo(const struct sockaddr_storage* addr, const std::string& us
     }
 
     *ppInfo = info;
-#ifdef UPNP_HAS_IPADDR_AND_OS_IN_FILEINFO
     log_debug("client info: {} '{}' -> '{}'", sockAddrGetNameInfo((struct sockaddr*)addr), userAgent, (*ppInfo)->name);
-#else
-    log_debug("client info: N/A -> '{}'", (*ppInfo)->name);
-#endif
 }
 
 bool Clients::getInfoByType(const std::string& match, ClientMatchType type, const ClientInfo** ppInfo)
