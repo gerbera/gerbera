@@ -40,7 +40,7 @@ Quirks::Quirks(std::shared_ptr<ConfigManager> config, const struct sockaddr_stor
 
 void Quirks::addCaptionInfo(std::shared_ptr<CdsItem> item, std::unique_ptr<Headers>& headers)
 {
-    if (!config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK))
+    if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG) == 0)
         return;
 
     if (!startswith(item->getMimeType(), "video"))
@@ -75,7 +75,7 @@ void Quirks::addCaptionInfo(std::shared_ptr<CdsItem> item, std::unique_ptr<Heade
 
 void Quirks::appendSpecialNamespace(pugi::xml_node* didlLiteRoot)
 {
-    if (!config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK))
+    if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG) == 0)
         return;
 
     didlLiteRoot->append_attribute(XML_SEC_NAMESPACE_ATTR) = XML_SEC_NAMESPACE;
