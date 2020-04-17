@@ -57,14 +57,7 @@ D-Link
 -  DSM-510
 -  DSM-520
 
-Some additional settings in Gerbera configuration are required to enable special features for the DSM renderers. If you have a DSM-320 and are experiencing problems during AVI playback, add the following to the server section of your config.xml:
-
-.. code-block:: xml
-
-    <custom-http-headers>
-        <add header="X-User-Agent: redsonic"/>
-    </custom-http-headers>
-
+Some additional settings in Gerbera configuration are required to enable special features for the DSM renderers. If you have a DSM-320 and are experiencing problems during AVI playback.
 Further, the DSM-320 behaves differently if it thinks that it is dealing with the D-Link server. Add the following to the server section of your configuration to enable srt subtitle support:
 
 .. code-block:: xml

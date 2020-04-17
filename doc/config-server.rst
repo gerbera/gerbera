@@ -286,32 +286,6 @@ not configured to run on a fixed port. Each time the server is started, the book
 redirect to the servers current IP address and port. To use it, simply bookmark this file in your browser,
 the default location is ``~/.config/gerbera/gerbera.html``
 
-``custom-http-headers``
-~~~~~~~~~~~~~~~~~~~~~~~
-
-`Not yet supported with` **pupnp 1.8.x**
-
-.. code-block:: xml
-
-    <custom-http-headers>
-
-* Optional
-
-This section holds the user defined HTTP headers that will be added to all HTTP responses that come from the server.
-
-    **Child tags:**
-
-       .. code-block:: xml
-
-            <add header="..."/>
-            <add header="..."/>
-
-    * Optional
-
-    | Specify a header to be added to the response.
-    | If you have a DSM-320 use ``<add header="X-User-Agent: redsonic"/>``
-    | to fix the .AVI playback problem.
-
 ``upnp-string-limit``
 ~~~~~~~~~~~~~~~~~~~~~
 
