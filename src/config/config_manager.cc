@@ -587,49 +587,6 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     NEW_OPTION(charset);
     SET_OPTION(CFG_IMPORT_PLAYLIST_CHARSET);
 
-    temp = getOption("/server/protocolInfo/attribute::extend",
-        DEFAULT_EXTEND_PROTOCOLINFO);
-    if (!validateYesNo(temp))
-        throw std::runtime_error("Error in config file: extend attribute of the "
-                                 "protocolInfo tag must be either \"yes\" or \"no\"");
-
-    NEW_BOOL_OPTION(temp == "yes");
-    SET_BOOL_OPTION(CFG_SERVER_EXTEND_PROTOCOLINFO);
-
-    /*
-    temp = getOption("/server/protocolInfo/attribute::ps3-hack",
-                     DEFAULT_EXTEND_PROTOCOLINFO_CL_HACK);
-    if (!validateYesNo(temp))
-        throw std::runtime_error("Error in config file: ps3-hack attribute of the "
-                                 "protocolInfo tag must be either \"yes\" or \"no\"");
-
-    NEW_BOOL_OPTION(temp == "yes" ? true : false);
-    SET_BOOL_OPTION(CFG_SERVER_EXTEND_PROTOCOLINFO_CL_HACK);
-*/
-    temp = getOption("/server/protocolInfo/attribute::samsung-hack",
-        DEFAULT_EXTEND_PROTOCOLINFO_SM_HACK);
-    if (!validateYesNo(temp))
-        throw std::runtime_error("Error in config file: samsung-hack attribute of the "
-                                 "protocolInfo tag must be either \"yes\" or \"no\"");
-
-    NEW_BOOL_OPTION(temp == "yes");
-    SET_BOOL_OPTION(CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK);
-
-    temp = getOption("/server/protocolInfo/attribute::dlna-seek",
-        DEFAULT_EXTEND_PROTOCOLINFO_DLNA_SEEK);
-    if (!validateYesNo(temp))
-        throw std::runtime_error("Error in config file: dlna-seek attribute of the "
-                                 "protocolInfo tag must be either \"yes\" or \"no\"");
-
-    NEW_BOOL_OPTION(temp == "yes");
-    SET_BOOL_OPTION(CFG_SERVER_EXTEND_PROTOCOLINFO_DLNA_SEEK);
-
-    temp = getOption("/server/pc-directory/attribute::upnp-hide",
-        DEFAULT_HIDE_PC_DIRECTORY);
-    if (!validateYesNo(temp))
-        throw std::runtime_error("Error in config file: hide attribute of the "
-                                 "pc-directory tag must be either \"yes\" or \"no\"");
-
     NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_SERVER_HIDE_PC_DIRECTORY);
 

@@ -287,13 +287,10 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription()
 
     auto device = root.append_child("device");
 
-    if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO)) {
-        // we do not do DLNA yet but this is needed for bravia tv (v5500)
-        auto dlnaDoc = device.append_child("dlna:X_DLNADOC");
-        dlnaDoc.append_attribute("xmlns:dlna") = "urn:schemas-dlna-org:device-1-0";
-        dlnaDoc.append_child(pugi::node_pcdata).set_value("DMS-1.50");
-        // dlnaDoc.append_child(pugi::node_pcdata).set_value("M-DMS-1.50");
-    }
+    auto dlnaDoc = device.append_child("dlna:X_DLNADOC");
+    dlnaDoc.append_attribute("xmlns:dlna") = "urn:schemas-dlna-org:device-1-0";
+    dlnaDoc.append_child(pugi::node_pcdata).set_value("DMS-1.50");
+    // dlnaDoc.append_child(pugi::node_pcdata).set_value("M-DMS-1.50");
 
     device.append_child("deviceType").append_child(pugi::node_pcdata).set_value(DESC_DEVICE_TYPE);
     if (presentationURL.empty())
@@ -770,12 +767,11 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
                 if (rct == ID3_ALBUM_ART) {
                     auto aa = parent->append_child(MetadataHandler::getMetaFieldName(M_ALBUMARTURI).c_str());
                     aa.append_child(pugi::node_pcdata).set_value((virtualURL + url).c_str());
-                    if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO)) {
-                        /// \todo clean this up, make sure to check the mimetype and
-                        /// provide the profile correctly
-                        aa.append_attribute("xmlns:dlna") = "urn:schemas-dlna-org:metadata-1-0";
-                        aa.append_attribute("dlna:profileID") = "JPEG_TN";
-                    }
+
+                    /// \todo clean this up, make sure to check the mimetype and
+                    /// provide the profile correctly
+                    aa.append_attribute("xmlns:dlna") = "urn:schemas-dlna-org:metadata-1-0";
+                    aa.append_attribute("dlna:profileID") = "JPEG_TN";
                     continue;
                 }
             }
@@ -793,54 +789,50 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
                     url.append(renderExtension(contentType, item->getLocation()));
             }
         }
-        if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO)) {
-            std::string extend;
-            if (contentType == CONTENT_TYPE_JPG) {
-                std::string resolution = getValueOrDefault(res_attrs, MetadataHandler::getResAttrName(R_RESOLUTION));
-                int x;
-                int y;
-                if (!resolution.empty() && check_resolution(resolution, &x, &y)) {
 
-                    if ((i > 0) && (((item->getResource(i)->getHandlerType() == CH_LIBEXIF) && (item->getResource(i)->getParameter(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL)) || (item->getResource(i)->getOption(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL) || (item->getResource(i)->getOption(RESOURCE_CONTENT_TYPE) == THUMBNAIL)) && (x <= 160) && (y <= 160))
-                        extend = std::string(D_PROFILE) + "=" + D_JPEG_TN + ";";
-                    else if ((x <= 640) && (y <= 420))
-                        extend = std::string(D_PROFILE) + "=" + D_JPEG_SM + ";";
-                    else if ((x <= 1024) && (y <= 768))
-                        extend = std::string(D_PROFILE) + "=" + D_JPEG_MED + ";";
-                    else if ((x <= 4096) && (y <= 4096))
-                        extend = std::string(D_PROFILE) + "=" + D_JPEG_LRG + ";";
-                }
-            } else {
-                /* handle audio/video content */
-                extend = getDLNAprofileString(contentType);
-                if (!extend.empty())
-                    extend.append(";");
+        std::string extend;
+        if (contentType == CONTENT_TYPE_JPG) {
+            std::string resolution = getValueOrDefault(res_attrs, MetadataHandler::getResAttrName(R_RESOLUTION));
+            int x;
+            int y;
+            if (!resolution.empty() && check_resolution(resolution, &x, &y)) {
+
+                if ((i > 0) && (((item->getResource(i)->getHandlerType() == CH_LIBEXIF) && (item->getResource(i)->getParameter(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL)) || (item->getResource(i)->getOption(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL) || (item->getResource(i)->getOption(RESOURCE_CONTENT_TYPE) == THUMBNAIL)) && (x <= 160) && (y <= 160))
+                    extend = std::string(D_PROFILE) + "=" + D_JPEG_TN + ";";
+                else if ((x <= 640) && (y <= 420))
+                    extend = std::string(D_PROFILE) + "=" + D_JPEG_SM + ";";
+                else if ((x <= 1024) && (y <= 768))
+                    extend = std::string(D_PROFILE) + "=" + D_JPEG_MED + ";";
+                else if ((x <= 4096) && (y <= 4096))
+                    extend = std::string(D_PROFILE) + "=" + D_JPEG_LRG + ";";
             }
-
-            // we do not support seeking at all, so 00
-            // and the media is converted, so set CI to 1
-            if (!isExtThumbnail && transcoded) {
-                extend.append(D_OP).append("=").append(D_OP_SEEK_DISABLED).append(";").append(D_CONVERSION_INDICATOR).append("=" D_CONVERSION);
-
-                if (startswith(mimeType, "audio") || startswith(mimeType, "video"))
-                    extend.append(";" D_FLAGS "=" D_TR_FLAGS_AV);
-            } else {
-                if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_DLNA_SEEK))
-                    extend.append(D_OP).append("=").append(D_OP_SEEK_ENABLED).append(";");
-                else
-                    extend.append(D_OP).append("=").append(D_OP_SEEK_DISABLED).append(";");
-                extend.append(D_CONVERSION_INDICATOR).append("=").append(D_NO_CONVERSION);
-            }
-
-            protocolInfo = protocolInfo.substr(0, protocolInfo.rfind(':') + 1).append(extend);
-            res_attrs[MetadataHandler::getResAttrName(R_PROTOCOLINFO)] = protocolInfo;
-
-            if (startswith(mimeType, "video")) {
-                renderCaptionInfo(url, parent);
-            }
-
-            log_debug("extended protocolInfo: {}", protocolInfo.c_str());
+        } else {
+            /* handle audio/video content */
+            extend = getDLNAprofileString(contentType);
+            if (!extend.empty())
+                extend.append(";");
         }
+
+        // we do not support seeking at all, so 00
+        // and the media is converted, so set CI to 1
+        if (!isExtThumbnail && transcoded) {
+            extend.append(D_OP).append("=").append(D_OP_SEEK_DISABLED).append(";").append(D_CONVERSION_INDICATOR).append("=" D_CONVERSION);
+
+            if (startswith(mimeType, "audio") || startswith(mimeType, "video"))
+                extend.append(";" D_FLAGS "=" D_TR_FLAGS_AV);
+        } else {
+            extend.append(D_OP).append("=").append(D_OP_SEEK_ENABLED).append(";");
+            extend.append(D_CONVERSION_INDICATOR).append("=").append(D_NO_CONVERSION);
+        }
+
+        protocolInfo = protocolInfo.substr(0, protocolInfo.rfind(':') + 1).append(extend);
+        res_attrs[MetadataHandler::getResAttrName(R_PROTOCOLINFO)] = protocolInfo;
+
+        if (startswith(mimeType, "video")) {
+            renderCaptionInfo(url, parent);
+        }
+
+        log_debug("protocolInfo: {}", protocolInfo.c_str());
 
         // URL is path until now
         int objectType = item->getObjectType();

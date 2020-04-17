@@ -232,18 +232,6 @@ but they are also not served via UPnP browse requests. Directory listing is not 
 
 Interval for broadcasting SSDP:alive messages
 
-``protocolInfo``
-~~~~~~~~~~~~~~~~
-
-.. code-block:: xml
-
-    <protocolInfo extend="no"/>
-
-* Optional
-* Default: **no**
-
-Adds specific tags to the protocolInfo attribute, this is required to enable MP3 and MPEG4 playback on Playstation 3.
-
 ``pc-directory``
 ~~~~~~~~~~~~~~~~
 

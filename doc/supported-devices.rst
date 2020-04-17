@@ -241,10 +241,6 @@ Sony
 
 Firmware 1.80 introduces UPnP/DLNA support, add the following to the <server> section of your configuration file to enable Gerbera PS3 compatibility:
 
-.. code-block:: xml
-
-    <protocolInfo extend="yes"/>
-
 Syabas
 ~~~~~~
 

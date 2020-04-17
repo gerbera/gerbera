@@ -33,8 +33,7 @@ options take effect, however after that they are immediately active.
 
 Ffmpegthumbnailer is a nice, easy to use library that allows to generate thumbnails from video files.
 Some DLNA compliant devices support video thumbnails, if you think that your device may be one of those you
-can try enabling this option. It would also make sense to enable the protocolInfo option, since it will
-add specific DLNA tags to tell your device that a video thumbnail is being offered by the server.
+can try enabling this option.
 
 The following options allow to control the ffmpegthumbnailer library (these are basically the same options as the
 ones offered by the ffmpegthumbnailer command line application). All tags below are optional and have sane default values.
