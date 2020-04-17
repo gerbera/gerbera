@@ -150,19 +150,6 @@ void Server::run()
 
     log_debug("webroot: {}", web_root.c_str());
 
-    std::vector<std::string> arr = config->getStringArrayOption(CFG_SERVER_CUSTOM_HTTP_HEADERS);
-    for (const auto& tmp : arr) {
-        if (!tmp.empty()) {
-            log_info("(NOT) Adding HTTP header \"{}\"", tmp.c_str());
-            // FIXME upstream upnp
-            //ret = UpnpAddCustomHTTPHeader(tmp.c_str());
-            //if (ret != UPNP_E_SUCCESS)
-            //{
-            //    throw UpnpException(ret, "run: UpnpAddCustomHTTPHeader failed");
-            //}
-        }
-    }
-
     log_debug("Setting virtual dir to: {}", virtual_directory.c_str());
     ret = UpnpAddVirtualDir(virtual_directory.c_str(), this, nullptr);
     if (ret != UPNP_E_SUCCESS) {

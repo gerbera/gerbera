@@ -30,18 +30,6 @@
   </storage>
   <!-- For PS3 support change "extend" to "yes" -->
   <protocolInfo extend="no" dlna-seek="yes" />
-  <!--
-       Uncomment the lines below to get rid of jerky avi playback on the
-       DSM320 or to enable subtitles support on the DSM units
-    -->
-  <!--
-    <custom-http-headers>
-      <add header="X-User-Agent: redsonic" />
-    </custom-http-headers>
-
-    <manufacturerURL>redsonic.com</manufacturerURL>
-    <modelNumber>105</modelNumber>
-    -->
   <!-- Uncomment the line below if you have a Telegent TG100 -->
   <!--
        <upnp-string-limit>101</upnp-string-limit>

@@ -892,10 +892,6 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 
 #endif //HAVE_CURL
 
-    el = getElement("/server/custom-http-headers");
-    NEW_STRARR_OPTION(createArrayFromNode(el, "add", "header"));
-    SET_STRARR_OPTION(CFG_SERVER_CUSTOM_HTTP_HEADERS);
-
 #ifdef HAVE_LIBEXIF
 
     el = getElement("/import/library-options/libexif/auxdata");

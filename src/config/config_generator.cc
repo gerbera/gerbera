@@ -108,22 +108,6 @@ void ConfigGenerator::generateServer(const fs::path& userHome, const fs::path& c
     protocolinfo.append_attribute("extend") = DEFAULT_EXTEND_PROTOCOLINFO;
     protocolinfo.append_attribute("dlna-seek") = DEFAULT_EXTEND_PROTOCOLINFO_DLNA_SEEK;
 
-    auto redinfo = server.append_child(pugi::node_comment);
-    redinfo.set_value("\n\
-       Uncomment the lines below to get rid of jerky avi playback on the\n\
-       DSM320 or to enable subtitles support on the DSM units\n\
-    ");
-
-    auto redsonic = server.append_child(pugi::node_comment);
-    redsonic.set_value("\n\
-    <custom-http-headers>\n\
-      <add header=\"X-User-Agent: redsonic\" />\n\
-    </custom-http-headers>\n\
-\n\
-    <manufacturerURL>redsonic.com</manufacturerURL>\n\
-    <modelNumber>105</modelNumber>\n\
-    ");
-
     auto tg100info = server.append_child(pugi::node_comment);
     tg100info.set_value(" Uncomment the line below if you have a Telegent TG100 ");
 

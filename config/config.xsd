@@ -74,7 +74,6 @@
                 <xs:element ref="presentationURL" minOccurs="0"/>
                 <xs:element ref="upnp-string-limit" minOccurs="0"/>
                 <xs:element ref="alive" minOccurs="0"/>
-                <xs:element ref="custom-http-headers" minOccurs="0"/>
                 <xs:element ref="modelDescription" minOccurs="0"/>
                 <xs:element ref="serialNumber" minOccurs="0"/>
                 <xs:element ref="protocolInfo" minOccurs="0"/>
@@ -128,14 +127,6 @@
     <xs:element name="servedir" type="xs:string" default=""/>
 
     <xs:element name="alive" type="xs:positiveInteger" default="180"/>
-
-    <xs:element name="custom-http-headers">
-        <xs:complexType>
-            <xs:sequence>
-                <xs:element ref="add" minOccurs="0" maxOccurs="unbounded"/>
-            </xs:sequence>
-        </xs:complexType>
-    </xs:element>
 
     <xs:element name="serialNumber" type="xs:string"/>
 
