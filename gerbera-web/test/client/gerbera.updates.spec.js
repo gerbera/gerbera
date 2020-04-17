@@ -152,7 +152,7 @@ describe('Gerbera Updates', function () {
 
       const promisedResponse = await Updates.updateTask(updatesWithTaskId);
 
-      expect($('#grb-toast-msg').text()).toEqual('Performing full scan: /Movies');
+      expect($('#grb-toast-msg').text()).toEqual('Scan: /Movies');
       expect(promisedResponse).toEqual(updatesWithTaskId);
     });
 

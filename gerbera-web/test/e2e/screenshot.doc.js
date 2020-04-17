@@ -176,7 +176,7 @@ suite(() => {
       await homePage.clickMenu('nav-fs');
       await homePage.clickTree('etc');
 
-      await homePage.mockTaskMessage('Performing scan of /movies');
+      await homePage.mockTaskMessage('Scan of /movies');
       await driver.sleep(1000);
       await homePage.takeScreenshot(fileName);
 

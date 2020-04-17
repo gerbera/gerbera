@@ -11,7 +11,6 @@ describe('Gerbera Autoscan', () => {
     let autoscanId;
     let autoscanFromFs;
     let autoscanMode;
-    let autoscanLevel;
     let autoscanPersistent;
     let autoscanRecursive;
     let autoscanHidden;
@@ -24,7 +23,6 @@ describe('Gerbera Autoscan', () => {
       fixture.load('index.html');
       autoscanId = $('#autoscanId');
       autoscanMode = $('input[name=autoscanMode]');
-      autoscanLevel = $('input[name=autoscanLevel]');
       autoscanFromFs = $('#autoscanFromFs');
       autoscanPersistent = $('#autoscanPersistent');
       autoscanRecursive = $('#autoscanRecursive');
@@ -45,7 +43,6 @@ describe('Gerbera Autoscan', () => {
       expect(autoscanId.val()).toBe('');
       expect(autoscanFromFs.is(':checked')).toBeFalsy();
       expect(autoscanMode.val()).toBe('none');
-      expect(autoscanLevel.val()).toBe('basic');
       expect(autoscanPersistent.is(':checked')).toBeFalsy();
       expect(autoscanRecursive.is(':checked')).toBeFalsy();
       expect(autoscanHidden.is(':checked')).toBeFalsy();
@@ -110,7 +107,6 @@ describe('Gerbera Autoscan', () => {
     let autoscanId;
     let autoscanFromFs;
     let autoscanMode;
-    let autoscanLevel;
     let autoscanPersistent;
     let autoscanRecursive;
     let autoscanHidden;
@@ -124,7 +120,6 @@ describe('Gerbera Autoscan', () => {
       autoscanId = $('#autoscanId');
       autoscanFromFs = $('#autoscanFromFs');
       autoscanMode = $('input[name=autoscanMode]');
-      autoscanLevel = $('input[name=autoscanLevel]');
       autoscanPersistent = $('#autoscanPersistent');
       autoscanRecursive = $('#autoscanRecursive');
       autoscanHidden = $('#autoscanHidden');
@@ -147,11 +142,9 @@ describe('Gerbera Autoscan', () => {
       Autoscan.loadNewAutoscan(autoscanResponse);
 
       autoscanMode = $('input[name=autoscanMode][value=timed]');
-      autoscanLevel = $('input[name=autoscanLevel][value=full]');
       expect(autoscanId.val()).toBe('2f6d6');
       expect(autoscanFromFs.is(':checked')).toBeTruthy();
       expect(autoscanMode.is(':checked')).toBeTruthy();
-      expect(autoscanLevel.is(':checked')).toBeTruthy();
       expect(autoscanPersistent.is(':checked')).toBeFalsy();
       expect(autoscanRecursive.is(':checked')).toBeTruthy();
       expect(autoscanHidden.is(':checked')).toBeFalsy();
@@ -202,7 +195,6 @@ describe('Gerbera Autoscan', () => {
         object_id: '2f6d6',
         from_fs: true,
         scan_mode: 'timed',
-        scan_level: 'full',
         recursive: true,
         hidden: false,
         interval: '1800'
@@ -227,7 +219,7 @@ describe('Gerbera Autoscan', () => {
 
       Autoscan.submitComplete(submitCompleteResponse);
 
-      expect(Updates.showMessage).toHaveBeenCalledWith('Performing full scan: /Movies', undefined, 'success', 'fa-check');
+      expect(Updates.showMessage).toHaveBeenCalledWith('Scan: /Movies', undefined, 'success', 'fa-check');
     });
 
     it('when successful for one-time scan reports message to user', () => {

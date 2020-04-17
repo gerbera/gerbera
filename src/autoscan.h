@@ -45,12 +45,6 @@ class AutoscanDirectory;
 
 #define INVALID_SCAN_ID -1
 
-///\brief Scan level - the way how exactly directories should be scanned.
-enum class ScanLevel {
-    Basic, // file was added or removed from the directory
-    Full // file was modified/added/removed
-};
-
 ///\brief Scan mode - type of scan (timed, inotify, fam, etc.)
 enum class ScanMode {
     Timed,
@@ -125,14 +119,11 @@ public:
     /// \brief Creates a new AutoscanDirectory object.
     /// \param location autoscan path
     /// \param mode scan mode
-    /// \param level scan level
     /// \param recursive process directories recursively
     /// \param interval rescan interval in seconds (only for timed scan mode)
     /// \param hidden include hidden files
     /// zero means none.
-    AutoscanDirectory(fs::path location, ScanMode mode,
-        ScanLevel level, bool recursive,
-        bool persistent,
+    AutoscanDirectory(fs::path location, ScanMode mode, bool recursive, bool persistent,
         int id = INVALID_SCAN_ID, unsigned int interval = 0, bool hidden = false);
 
     void setStorageID(int storageID) { this->storageID = storageID; }
@@ -147,10 +138,6 @@ public:
     ScanMode getScanMode() const { return mode; }
 
     void setScanMode(ScanMode mode) { this->mode = mode; }
-
-    ScanLevel getScanLevel() const { return level; }
-
-    void setScanLevel(ScanLevel level) { this->level = level; }
 
     bool getRecursive() const { return recursive; }
 
@@ -224,13 +211,10 @@ public:
     /* helpers for autoscan stuff */
     static std::string mapScanmode(ScanMode scanmode);
     static ScanMode remapScanmode(const std::string& scanmode);
-    static std::string mapScanlevel(ScanLevel scanlevel);
-    static ScanLevel remapScanlevel(const std::string& scanlevel);
 
 protected:
     fs::path location;
     ScanMode mode;
-    ScanLevel level;
     bool recursive;
     bool hidden;
     bool persistent_flag;

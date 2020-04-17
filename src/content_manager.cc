@@ -528,7 +528,7 @@ int ContentManager::ensurePathExistence(fs::path path)
     return containerID;
 }
 
-void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scanMode, ScanLevel scanLevel, const std::shared_ptr<GenericTask>& task)
+void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scanMode, const std::shared_ptr<GenericTask>& task)
 {
     log_debug("start");
 
@@ -661,21 +661,15 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
                 if (list != nullptr)
                     list->erase(objectID);
 
-                if (scanLevel == ScanLevel::Full) {
-                    // check modification time and update file if chagned
-                    if (last_modified_current_max < statbuf.st_mtime) {
-                        // readd object - we have to do this in order to trigger
-                        // layout
-                        removeObject(objectID, false);
-                        addFileInternal(newPath, rootpath, false, false, adir->getHidden());
-                        // update time variable
-                        last_modified_current_max = statbuf.st_mtime;
-                    }
-                } else if (scanLevel == ScanLevel::Basic)
-                    continue;
-                else
-                    throw_std_runtime_error("Unsupported scan level");
-
+                // check modification time and update file if chagned
+                if (last_modified_current_max < statbuf.st_mtime) {
+                    // readd object - we have to do this in order to trigger
+                    // layout
+                    removeObject(objectID, false);
+                    addFileInternal(newPath, rootpath, false, false, adir->getHidden());
+                    // update time variable
+                    last_modified_current_max = statbuf.st_mtime;
+                }
             } else {
                 // add file, not recursive, not async
                 addFileInternal(newPath, rootpath, false, false, adir->getHidden());
@@ -1460,16 +1454,11 @@ void ContentManager::rescanDirectory(int objectID, int scanID, ScanMode scanMode
         return;
 
     dir->incTaskCount();
-    std::string level;
-    if (dir->getScanLevel() == ScanLevel::Basic)
-        level = "basic";
-    else
-        level = "full";
 
     if (descPath.empty())
         descPath = dir->getLocation();
 
-    task->setDescription("Performing " + level + " scan: " + descPath);
+    task->setDescription("Scan: " + descPath);
     addTask(task, true); // adding with low priority
 }
 
@@ -1679,15 +1668,6 @@ void ContentManager::setAutoscanDirectory(const std::shared_ptr<AutoscanDirector
     auto copy = std::make_shared<AutoscanDirectory>();
     original->copyTo(copy);
 
-    // changing from full scan to basic scan need to reset last modification time
-    if ((copy->getScanLevel() == ScanLevel::Full) && (dir->getScanLevel() == ScanLevel::Basic)) {
-        copy->setScanLevel(ScanLevel::Basic);
-        copy->resetLMT();
-    } else if (((copy->getScanLevel() == ScanLevel::Full) && (dir->getScanLevel() == ScanLevel::Full)) && (!copy->getRecursive() && dir->getRecursive())) {
-        copy->resetLMT();
-    }
-
-    copy->setScanLevel(dir->getScanLevel());
     copy->setHidden(dir->getHidden());
     copy->setRecursive(dir->getRecursive());
     copy->setInterval(dir->getInterval());
@@ -1808,7 +1788,7 @@ void CMRescanDirectoryTask::run()
         return;
 
     auto self = shared_from_this();
-    content->_rescanDirectory(objectID, dir->getScanID(), dir->getScanMode(), dir->getScanLevel(), self);
+    content->_rescanDirectory(objectID, dir->getScanID(), dir->getScanMode(), self);
     dir->decTaskCount();
 
     if (dir->getTaskCount() == 0) {

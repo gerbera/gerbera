@@ -27,7 +27,6 @@
     const autoscanIdTxt = modal.find('#autoscanIdTxt');
     const autoscanFromFs = modal.find('#autoscanFromFs');
     const autoscanMode = modal.find('input[name=autoscanMode]');
-    const autoscanLevel = modal.find('input[name=autoscanLevel]');
     const autoscanPersistent = modal.find('#autoscanPersistent');
     const autoscanRecursive = modal.find('#autoscanRecursive');
     const autoscanHidden = modal.find('#autoscanHidden');
@@ -52,7 +51,6 @@
       autoscanIdTxt.prop('title', item.object_id);
       autoscanFromFs.prop('checked', item.from_fs);
       autoscanMode.val([item.scan_mode]);
-      autoscanLevel.val([item.scan_level]);
       autoscanPersistent.prop('checked', item.persistent);
       autoscanRecursive.prop('checked', item.recursive);
       autoscanHidden.prop('checked', item.hidden);
@@ -68,7 +66,6 @@
 
   const adjustFieldApplicability = function (modal) {
     const autoscanMode = modal.find('input[name=autoscanMode]:checked');
-    const autoscanLevel = modal.find('input[name=autoscanLevel]');
     const autoscanRecursive = modal.find('#autoscanRecursive');
     const autoscanHidden = modal.find('#autoscanHidden');
     const autoscanInterval = modal.find('#autoscanInterval');
@@ -81,8 +78,6 @@
     } else {
       switch (autoscanMode.val()) {
         case 'timed':
-          autoscanLevel.closest('.form-check').removeClass('disabled').show();
-          autoscanLevel.prop('disabled', false);
           autoscanRecursive.closest('.form-check').removeClass('disabled').show();
           autoscanRecursive.prop('disabled', false);
           autoscanHidden.closest('.form-check').removeClass('disabled').show();
@@ -91,8 +86,6 @@
           autoscanInterval.prop('disabled', false);
           break;
         case 'inotify':
-          autoscanLevel.closest('.form-check').removeClass('disabled').show();
-          autoscanLevel.prop('disabled', false);
           autoscanRecursive.closest('.form-check').removeClass('disabled').show();
           autoscanRecursive.prop('disabled', false);
           autoscanHidden.closest('.form-check').removeClass('disabled').show();
@@ -101,8 +94,6 @@
           autoscanInterval.prop('disabled', true);
           break;
         case 'none':
-          autoscanLevel.closest('.form-check').addClass('disabled').show();
-          autoscanLevel.prop('disabled', true);
           autoscanRecursive.closest('.form-check').addClass('disabled').show();
           autoscanRecursive.prop('disabled', true);
           autoscanHidden.closest('.form-check').addClass('disabled').show();
@@ -119,7 +110,6 @@
     const autoscanIdTxt = modal.find('#autoscanIdTxt');
     const autoscanFromFs = modal.find('#autoscanFromFs');
     const autoscanMode = modal.find('input[name=autoscanMode]');
-    const autoscanLevel = modal.find('input[name=autoscanLevel]');
     const autoscanPersistent = modal.find('#autoscanPersistent');
     const autoscanRecursive = modal.find('#autoscanRecursive');
     const autoscanHidden = modal.find('#autoscanHidden');
@@ -135,7 +125,6 @@
     autoscanIdTxt.text('');
     autoscanFromFs.prop('checked', false);
     autoscanMode.val(['']);
-    autoscanLevel.val(['']);
     autoscanPersistent.prop('checked', false);
     autoscanRecursive.prop('checked', false);
     autoscanHidden.prop('checked', false);
@@ -148,7 +137,6 @@
     const objectId = modal.find('#autoscanId');
     const fromFs = modal.find('#autoscanFromFs');
     const autoscanMode = modal.find('input:radio[name=autoscanMode]:checked');
-    const autoscanLevel = modal.find('input:radio[name=autoscanLevel]:checked');
     const autoscanRecursive = modal.find('#autoscanRecursive');
     const autoscanHidden = modal.find('#autoscanHidden');
     const autoscanInterval = modal.find('#autoscanInterval');
@@ -162,7 +150,6 @@
     switch (autoscanMode.val()) {
       case 'timed':
         item = $.extend({}, item, {
-          scan_level: autoscanLevel.val(),
           recursive: autoscanRecursive.is(':checked'),
           hidden: autoscanHidden.is(':checked'),
           interval: autoscanInterval.val()
@@ -170,7 +157,6 @@
         break;
       case 'inotify':
         item = $.extend({}, item, {
-          scan_level: autoscanLevel.val(),
           recursive: autoscanRecursive.is(':checked'),
           hidden: autoscanHidden.is(':checked')
         });

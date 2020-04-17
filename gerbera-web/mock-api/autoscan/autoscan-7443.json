@@ -4,7 +4,6 @@
     "from_fs": true,
     "object_id": "7443",
     "scan_mode": "timed",
-    "scan_level": "basic",
     "recursive": true,
     "hidden": true,
     "interval": 1800,

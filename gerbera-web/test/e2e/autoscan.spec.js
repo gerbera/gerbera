@@ -38,9 +38,6 @@ describe('Autoscan Suite', () => {
       result = await homePage.getAutoscanModeTimed();
       expect(result).to.equal('true');
 
-      result = await homePage.getAutoscanLevelBasic();
-      expect(result).to.equal('true');
-
       result = await homePage.getAutoscanRecursive();
       expect(result).to.equal('true');
 
@@ -67,7 +64,7 @@ describe('Autoscan Suite', () => {
       expect(result).to.be.false;
 
       result = await homePage.getToastMessage();
-      expect(result).to.equal('Performing full scan: /Movies');
+      expect(result).to.equal('Scan: /Movies');
 
       await homePage.closeToast();
     });

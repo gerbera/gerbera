@@ -1733,7 +1733,6 @@ std::shared_ptr<AutoscanDirectory> SQLStorage::_fillAutoscanDirectory(const std:
             return nullptr;
     }
 
-    ScanLevel level = AutoscanDirectory::remapScanlevel(row->col(2));
     ScanMode mode = AutoscanDirectory::remapScanmode(row->col(3));
     bool recursive = remapBool(row->col(4));
     bool hidden = remapBool(row->col(5));
@@ -1745,7 +1744,7 @@ std::shared_ptr<AutoscanDirectory> SQLStorage::_fillAutoscanDirectory(const std:
 
     //log_debug("adding autoscan location: {}; recursive: {}", location.c_str(), recursive);
 
-    auto dir = std::make_shared<AutoscanDirectory>(location, mode, level, recursive, persistent, INVALID_SCAN_ID, interval, hidden);
+    auto dir = std::make_shared<AutoscanDirectory>(location, mode, recursive, persistent, INVALID_SCAN_ID, interval, hidden);
     dir->setObjectID(objectID);
     dir->setStorageID(storageID);
     dir->setCurrentLMT(last_modified);
@@ -1785,7 +1784,7 @@ void SQLStorage::addAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir)
       << TQ("path_ids")
       << ") VALUES ("
       << (objectID >= 0 ? quote(objectID) : SQL_NULL) << ','
-      << quote(AutoscanDirectory::mapScanlevel(adir->getScanLevel())) << ','
+      << quote("full") << ','
       << quote(AutoscanDirectory::mapScanmode(adir->getScanMode())) << ','
       << mapBool(adir->getRecursive()) << ','
       << mapBool(adir->getHidden()) << ','
@@ -1817,7 +1816,7 @@ void SQLStorage::updateAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir
     q << "UPDATE " << TQ(AUTOSCAN_TABLE)
       << " SET " << TQ("obj_id") << '=' << (objectID >= 0 ? quote(objectID) : SQL_NULL)
       << ',' << TQ("scan_level") << '='
-      << quote(AutoscanDirectory::mapScanlevel(adir->getScanLevel()))
+      << quote("full")
       << ',' << TQ("scan_mode") << '='
       << quote(AutoscanDirectory::mapScanmode(adir->getScanMode()))
       << ',' << TQ("recursive") << '=' << mapBool(adir->getRecursive())
