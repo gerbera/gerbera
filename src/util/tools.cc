@@ -1232,10 +1232,7 @@ std::string getDLNATransferHeader(const std::shared_ptr<ConfigManager>& config, 
         transfer_parameter = D_HTTP_TRANSFER_MODE_INTERACTIVE;
     else if (startswith(mimeType, "audio") || startswith(mimeType, "video"))
         transfer_parameter = D_HTTP_TRANSFER_MODE_STREAMING;
-
-    if (!transfer_parameter.empty()) {
-        return transfer_parameter;
-    }
+    return transfer_parameter;
 }
 
 #ifndef HAVE_FFMPEG
