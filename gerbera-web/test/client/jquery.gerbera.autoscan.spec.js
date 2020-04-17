@@ -6,7 +6,6 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
   let autoscanId;
   let autoscanFromFs;
   let autoscanMode;
-  let autoscanLevel;
   let autoscanPersistent;
   let autoscanRecursive;
   let autoscanHidden;
@@ -22,7 +21,6 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
     autoscanId = $('#autoscanId');
     autoscanFromFs = $('#autoscanFromFs');
     autoscanMode = $('input[name=autoscanMode]');
-    autoscanLevel = $('input[name=autoscanLevel]');
     autoscanPersistent = $('#autoscanPersistent');
     autoscanRecursive = $('#autoscanRecursive');
     autoscanHidden = $('#autoscanHidden');
@@ -41,11 +39,9 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
       autoScanModal.autoscanmodal('loadItem', {item: item});
 
       autoscanMode = $('input[name=autoscanMode][value=timed]');
-      autoscanLevel = $('input[name=autoscanLevel][value=full]');
       expect(autoscanId.val()).toBe('2f6d');
       expect(autoscanFromFs.is(':checked')).toBeTruthy();
       expect(autoscanMode.is(':checked')).toBeTruthy();
-      expect(autoscanLevel.is(':checked')).toBeTruthy();
       expect(autoscanPersistent.is(':checked')).toBeFalsy();
       expect(autoscanRecursive.is(':checked')).toBeTruthy();
       expect(autoscanHidden.is(':checked')).toBeTruthy();
@@ -59,9 +55,7 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
       autoScanModal.autoscanmodal('loadItem', {item: item});
 
       autoscanMode = $(':radio[value=' + item.scan_mode + ']');
-      autoscanLevel = $(':radio[value=' + item.scan_level + ']');
       expect(autoscanMode.is(':disabled')).toBeTruthy();
-      expect(autoscanLevel.is(':disabled')).toBeTruthy();
       expect(autoscanRecursive.is(':disabled')).toBeTruthy();
       expect(autoscanHidden.is(':disabled')).toBeTruthy();
       expect(autoscanInterval.is(':disabled')).toBeTruthy();
@@ -85,7 +79,6 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
       autoScanModal.autoscanmodal('loadItem', {item: item});
 
       expect(autoscanMode.is(':disabled')).toBeFalsy();
-      expect(autoscanLevel.is(':disabled')).toBeFalsy();
       expect(autoscanRecursive.is(':disabled')).toBeFalsy();
       expect(autoscanHidden.is(':disabled')).toBeFalsy();
       expect(autoscanInterval.is(':disabled')).toBeFalsy();
@@ -98,7 +91,6 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
       autoScanModal.autoscanmodal('loadItem', {item: item});
 
       expect(autoscanMode.is(':disabled')).toBeFalsy();
-      expect(autoscanLevel.is(':disabled')).toBeTruthy();
       expect(autoscanRecursive.is(':disabled')).toBeTruthy();
       expect(autoscanHidden.is(':disabled')).toBeTruthy();
       expect(autoscanInterval.is(':disabled')).toBeTruthy();
@@ -111,7 +103,6 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
       autoScanModal.autoscanmodal('loadItem', {item: item});
 
       expect(autoscanMode.is(':disabled')).toBeFalsy();
-      expect(autoscanLevel.is(':disabled')).toBeFalsy();
       expect(autoscanRecursive.is(':disabled')).toBeFalsy();
       expect(autoscanHidden.is(':disabled')).toBeFalsy();
       expect(autoscanInterval.is(':disabled')).toBeTruthy();
@@ -123,14 +114,12 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
     it('resets all fields to empty', () => {
       autoScanModal.autoscanmodal('loadItem', {item: item});
       autoscanMode = $(':radio[name=autoscanMode]');
-      autoscanLevel = $(':radio[name=autoscanLevel]');
 
       autoScanModal.autoscanmodal('reset');
 
       expect(autoscanId.val()).toBe('');
       expect(autoscanFromFs.is(':checked')).toBeFalsy();
       expect(autoscanMode.is(':checked')).toBeFalsy();
-      expect(autoscanLevel.is(':checked')).toBeFalsy();
       expect(autoscanPersistent.is(':checked')).toBeFalsy();
       expect(autoscanRecursive.is(':checked')).toBeFalsy();
       expect(autoscanHidden.is(':checked')).toBeFalsy();
@@ -152,7 +141,6 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
         object_id: '2f6d',
         from_fs: true,
         scan_mode: 'timed',
-        scan_level: 'full',
         recursive: true,
         hidden: true,
         interval: '1800'
@@ -171,7 +159,6 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
         object_id: '2f6d',
         from_fs: true,
         scan_mode: 'inotify',
-        scan_level: 'full',
         recursive: true,
         hidden: true
       });

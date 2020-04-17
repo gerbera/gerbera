@@ -46,12 +46,10 @@ AutoscanDirectory::AutoscanDirectory()
     timer_parameter = std::make_shared<Timer::Parameter>(Timer::Parameter::IDAutoscan, INVALID_SCAN_ID);
 }
 
-AutoscanDirectory::AutoscanDirectory(fs::path location, ScanMode mode,
-    ScanLevel level, bool recursive, bool persistent,
+AutoscanDirectory::AutoscanDirectory(fs::path location, ScanMode mode, bool recursive, bool persistent,
     int id, unsigned int interval, bool hidden)
     : location(std::move(location))
     , mode(mode)
-    , level(level)
     , recursive(recursive)
     , hidden(hidden)
     , persistent_flag(persistent)
@@ -278,37 +276,10 @@ ScanMode AutoscanDirectory::remapScanmode(const std::string& scanmode)
     throw_std_runtime_error("illegal scanmode (" + scanmode + ") given to remapScanmode()");
 }
 
-std::string AutoscanDirectory::mapScanlevel(ScanLevel scanlevel)
-{
-    std::string scanlevel_str;
-    switch (scanlevel) {
-    case ScanLevel::Basic:
-        scanlevel_str = "basic";
-        break;
-    case ScanLevel::Full:
-        scanlevel_str = "full";
-        break;
-    default:
-        throw_std_runtime_error("illegal scanlevel given to mapScanlevel()");
-    }
-    return scanlevel_str;
-}
-
-ScanLevel AutoscanDirectory::remapScanlevel(const std::string& scanlevel)
-{
-    if (scanlevel == "basic")
-        return ScanLevel::Basic;
-    if (scanlevel == "full")
-        return ScanLevel::Full;
-
-    throw_std_runtime_error("illegal scanlevel (" + scanlevel + ") given to remapScanlevel()");
-}
-
 void AutoscanDirectory::copyTo(const std::shared_ptr<AutoscanDirectory>& copy) const
 {
     copy->location = location;
     copy->mode = mode;
-    copy->level = level;
     copy->recursive = recursive;
     copy->hidden = hidden;
     copy->persistent_flag = persistent_flag;

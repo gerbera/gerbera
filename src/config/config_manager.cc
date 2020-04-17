@@ -1720,36 +1720,16 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNode(const st
         }
 
         unsigned int interval = 0;
-        ScanLevel level;
-
         if (mode == ScanMode::Timed) {
-            temp = child.attribute("level").as_string();
-            if (temp.empty()) {
-                throw std::runtime_error("autoscan directory " + location.string() + ": level attribute is missing or invalid");
-            }
-
-            if (temp == "basic")
-                level = ScanLevel::Basic;
-            else if (temp == "full")
-                level = ScanLevel::Full;
-            else {
-                throw std::runtime_error("autoscan directory " + location.string() + ": level attribute " + temp + "is invalid");
-            }
-
             temp = child.attribute("interval").as_string();
             if (temp.empty()) {
                 throw std::runtime_error("autoscan directory " + location.string() + ": interval attribute is required for timed mode");
             }
 
             interval = std::stoi(temp);
-
             if (interval == 0) {
                 throw std::runtime_error("autoscan directory " + location.string() + ": invalid interval attribute");
             }
-        } else {
-            // level is irrelevant for inotify scan, nevertheless we will set
-            // it to something valid
-            level = ScanLevel::Full;
         }
 
         temp = child.attribute("recursive").as_string();
@@ -1777,7 +1757,7 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNode(const st
         else
             throw std::runtime_error("autoscan directory " + location.string() + ": hidden attribute " + temp + " is invalid");
 
-        auto dir = std::make_shared<AutoscanDirectory>(location, mode, level, recursive, true, -1, interval, hidden);
+        auto dir = std::make_shared<AutoscanDirectory>(location, mode, recursive, true, INVALID_SCAN_ID, interval, hidden);
         try {
             list->add(dir);
         } catch (const std::runtime_error& e) {

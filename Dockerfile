@@ -26,7 +26,7 @@ RUN mkdir -p /root/.config/gerbera &&\
     gerbera --create-config > /root/.config/gerbera/config.xml &&\
     sed 's/<import hidden-files="no">/<import hidden-files="no">\n\
 <autoscan use-inotify="yes">\n\
-<directory location="\/root" mode="inotify" level="full" \
+<directory location="\/root" mode="inotify" \
 recursive="yes" hidden-files="no"\/>\n\
 <\/autoscan>/' -i /root/.config/gerbera/config.xml
 

@@ -100,8 +100,6 @@ void web::autoscan::process()
             //bool persistent = boolParam("persistent");
 
             ScanMode scan_mode = AutoscanDirectory::remapScanmode(scan_mode_str);
-            ScanLevel scan_level;
-            scan_level = AutoscanDirectory::remapScanlevel(param("scan_level"));
             int interval = intParam("interval", 0);
             if (scan_mode == ScanMode::Timed && interval <= 0)
                 throw_std_runtime_error("illegal interval given");
@@ -112,14 +110,13 @@ void web::autoscan::process()
             else
                 objectID = intParam("object_id");
 
-            //log_debug("adding autoscan: location={}, scan_mode={}, scan_level={}, recursive={}, interval={}, hidden={}",
+            //log_debug("adding autoscan: location={}, scan_mode={}, recursive={}, interval={}, hidden={}",
             //    location.c_str(), AutoscanDirectory::mapScanmode(scan_mode).c_str(),
-            //    AutoscanDirectory::mapScanlevel(scan_level).c_str(), recursive, interval, hidden);
+            //    recursive, interval, hidden);
 
             auto autoscan = std::make_shared<AutoscanDirectory>(
                 "", //location
                 scan_mode,
-                scan_level,
                 recursive,
                 false, // persistent
                 INVALID_SCAN_ID, // autoscan id - used only internally by CM
@@ -157,14 +154,12 @@ void web::autoscan::autoscan2XML(const std::shared_ptr<AutoscanDirectory>& adir,
 {
     if (adir == nullptr) {
         element->append_child("scan_mode").append_child(pugi::node_pcdata).set_value("none");
-        element->append_child("scan_level").append_child(pugi::node_pcdata).set_value("full");
         element->append_child("recursive").append_child(pugi::node_pcdata).set_value("0");
         element->append_child("hidden").append_child(pugi::node_pcdata).set_value("0");
         element->append_child("interval").append_child(pugi::node_pcdata).set_value("1800");
         element->append_child("persistent").append_child(pugi::node_pcdata).set_value("0");
     } else {
         element->append_child("scan_mode").append_child(pugi::node_pcdata).set_value(AutoscanDirectory::mapScanmode(adir->getScanMode()).c_str());
-        element->append_child("scan_level").append_child(pugi::node_pcdata).set_value(AutoscanDirectory::mapScanlevel(adir->getScanLevel()).c_str());
         element->append_child("recursive").append_child(pugi::node_pcdata).set_value(adir->getRecursive() ? "1" : "0");
         element->append_child("hidden").append_child(pugi::node_pcdata).set_value(adir->getHidden() ? "1" : "0");
         element->append_child("interval").append_child(pugi::node_pcdata).set_value(std::to_string(adir->getInterval()).c_str());

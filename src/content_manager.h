@@ -358,7 +358,7 @@ protected:
     //void _addFile2(std::string path, bool recursive=0);
     void _removeObject(int objectID, bool all);
 
-    void _rescanDirectory(int containerID, int scanID, ScanMode scanMode, ScanLevel scanLevel, const std::shared_ptr<GenericTask>& task = nullptr);
+    void _rescanDirectory(int containerID, int scanID, ScanMode scanMode, const std::shared_ptr<GenericTask>& task = nullptr);
     /* for recursive addition */
     void addRecursive(const fs::path& path, bool hidden, const std::shared_ptr<CMAddFileTask>& task);
 

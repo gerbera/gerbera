@@ -212,10 +212,6 @@ module.exports = function (driver) {
     return await driver.findElement(By.id('autoscanModeTimed')).getAttribute('checked');
   };
 
-  this.getAutoscanLevelBasic = async () => {
-    return await driver.findElement(By.id('autoscanLevelBasic')).getAttribute('checked');
-  };
-
   this.getAutoscanRecursive = async () => {
     return await driver.findElement(By.id('autoscanRecursive')).getAttribute('checked');
   };

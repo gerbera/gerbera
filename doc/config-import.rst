@@ -194,7 +194,7 @@ the removed directory if it becomes available/gets created again.
     ::
 
         <directory location="/media" mode="timed" interval="3600"
-          level="full" recursive="no" hidden-files="no"/>
+          recursive="no" hidden-files="no"/>
         <directory location="/audio" mode="inotify"
           recursive="yes" hidden-files="no"/>
 
@@ -228,16 +228,6 @@ the removed directory if it becomes available/gets created again.
         * Required: **for ”timed” mode**
 
         Scan interval in seconds.
-
-        ::
-
-            level="full|basic"
-
-        * Required: **for ”timed” mode**
-
-        Either ``full`` or ``basic``. Basic mode will only check if any files have been added or were deleted from
-        the monitored directory, full mode will remember the last modification time and re add the media that has changed.
-        Full mode might be useful when you want to monitor changes in the media, like id3 tags and alike.
 
         ::
 
