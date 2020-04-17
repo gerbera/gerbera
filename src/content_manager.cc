@@ -952,9 +952,6 @@ void ContentManager::addObject(const std::shared_ptr<CdsObject>& obj)
 
     int containerChanged = INVALID_OBJECT_ID;
     log_debug("Adding: parent ID is {}", obj->getParentID());
-    if (!IS_CDS_ITEM_EXTERNAL_URL(obj->getObjectType())) {
-        obj->setLocation(obj->getLocation());
-    }
 
     storage->addObject(obj, &containerChanged);
     log_debug("After adding: parent ID is {}", obj->getParentID());
