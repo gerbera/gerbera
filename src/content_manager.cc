@@ -1048,6 +1048,8 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::path& 
         std::string mimetype;
         std::string upnp_class;
         std::string extension = path.extension();
+        if (!extension.empty())
+            extension.erase(0, 1); // remove leading .
 
         if (magic) {
             mimetype = extension2mimetype(extension);
