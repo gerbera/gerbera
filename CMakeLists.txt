@@ -312,14 +312,8 @@ endif()
 find_package(fmt REQUIRED)
 target_link_libraries(libgerbera fmt::fmt)
 
-# See if it's just installed as a library first, as not all installs have .cmake files
-find_library(SPDLOG_LIBRARY spdlog)
-if(SPDLOG_LIBRARY)
-    set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${SPDLOG_LIBRARY})
-    target_link_libraries(libgerbera ${SPDLOG_LIBRARY})
-else()
-    # Didn't find it, so try the .cmake file, fail if not found
-    find_package(spdlog REQUIRED)
+find_package(spdlog)
+if(spdlog_FOUND)
     target_link_libraries(libgerbera spdlog::spdlog)
 
     if(NOT SPDLOG_FMT_EXTERNAL)
@@ -333,6 +327,14 @@ The version of spdlog >= 1.4 bundles fmt version 6, but an older version of fmt 
 The current combination won't link.
 Please upgrade fmt or build spdlog with SPDLOG_FMT_EXTERNAL=ON]=])
         endif()
+    endif()
+else()
+    # See if it's just installed as a library, as not all installs have .cmake files
+    find_library(SPDLOG_LIBRARY spdlog)
+    if(SPDLOG_LIBRARY)
+        target_link_libraries(libgerbera ${SPDLOG_LIBRARY})
+    else()
+        message(FATAL_ERROR "spdlog library is required")
     endif()
 endif()
 
