@@ -1294,6 +1294,7 @@ std::string sockAddrGetNameInfo(const struct sockaddr* sa)
 {
     char hoststr[NI_MAXHOST];
     char portstr[NI_MAXSERV];
+
     int ret = getnameinfo(sa, sizeof(struct sockaddr), hoststr, sizeof(hoststr), portstr, sizeof(portstr), NI_NUMERICHOST | NI_NUMERICSERV);
     if (ret != 0) {
         throw_std_runtime_error("could not determine getnameinfo (" + mt_strerror(errno) + ")");
