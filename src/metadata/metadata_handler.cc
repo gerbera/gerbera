@@ -103,7 +103,8 @@ MetadataHandler::MetadataHandler(std::shared_ptr<Config> config)
 void MetadataHandler::setMetadata(const std::shared_ptr<Config>& config, const std::shared_ptr<CdsItem>& item)
 {
     std::string location = item->getLocation();
-    if (!isRegularFile(location))
+    std::error_code ec;
+    if (!isRegularFile(location, ec))
         throw_std_runtime_error("Not a file: " + location);
     auto filesize = getFileSize(location);
 
