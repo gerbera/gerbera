@@ -84,7 +84,10 @@ void web::items::process()
     bool protectItems = false;
     std::string autoscanMode = "none";
 
-    int autoscanType = storage->getAutoscanDirectoryType(parentID);
+    auto adir = storage->getAutoscanDirectory(parentID);
+    int autoscanType = 0;
+    if (adir != nullptr)
+        autoscanType = adir->persistent() ? 2 : 1;
     if (autoscanType > 0)
         autoscanMode = "timed";
 
@@ -92,14 +95,23 @@ void web::items::process()
     if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
         int startpoint_id = INVALID_OBJECT_ID;
         if (autoscanType == 0) {
-            startpoint_id = storage->isAutoscanChild(parentID);
+            auto pathIDs = storage->getPathIDs(parentID);
+            if (pathIDs != nullptr) {
+                for (int pathId : *pathIDs) {
+                    auto adir = storage->getAutoscanDirectory(pathId);
+                    if (adir != nullptr && adir->getRecursive()) {
+                        startpoint_id = pathId;
+                        break;
+                    }
+                }
+            }
         } else {
             startpoint_id = parentID;
         }
 
         if (startpoint_id != INVALID_OBJECT_ID) {
             std::shared_ptr<AutoscanDirectory> adir = storage->getAutoscanDirectory(startpoint_id);
-            if ((adir != nullptr) && (adir->getScanMode() == ScanMode::INotify)) {
+            if (adir != nullptr && adir->getScanMode() == ScanMode::INotify) {
                 protectItems = true;
                 if (autoscanType == 0 || adir->persistent())
                     protectContainer = true;

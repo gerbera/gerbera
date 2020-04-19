@@ -142,17 +142,13 @@ public:
     std::string getInternalSetting(const std::string& key) override;
     void storeInternalSetting(const std::string& key, const std::string& value) override = 0;
 
-    void updateAutoscanPersistentList(ScanMode scanmode, std::shared_ptr<AutoscanList> list) override;
     std::shared_ptr<AutoscanList> getAutoscanList(ScanMode scanmode) override;
+    void updateAutoscanList(ScanMode scanmode, std::shared_ptr<AutoscanList> list) override;
+
+    std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(int objectID) override;
     void addAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir) override;
     void updateAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir) override;
-    void removeAutoscanDirectoryByObjectID(int objectID) override;
-    void removeAutoscanDirectory(int autoscanID) override;
-    int getAutoscanDirectoryType(int objectId) override;
-    int isAutoscanDirectoryRecursive(int objectId) override;
-    void autoscanUpdateLM(std::shared_ptr<AutoscanDirectory> adir) override;
-    std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(int objectID) override;
-    int isAutoscanChild(int objectID) override;
+    void removeAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir) override;
     void checkOverlappingAutoscans(std::shared_ptr<AutoscanDirectory> adir) override;
 
     std::unique_ptr<std::vector<int>> getPathIDs(int objectID) override;
@@ -226,6 +222,7 @@ private:
     virtual std::unique_ptr<ChangedContainers> _purgeEmptyContainers(std::unique_ptr<ChangedContainers>& maybeEmpty);
 
     /* helpers for autoscan */
+    void _removeAutoscanDirectory(int autoscanID);
     int _getAutoscanObjectID(int autoscanID);
     void _autoscanChangePersistentFlag(int objectID, bool persistent);
     std::shared_ptr<AutoscanDirectory> _fillAutoscanDirectory(const std::unique_ptr<SQLRow>& row);

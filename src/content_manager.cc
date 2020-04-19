@@ -130,7 +130,7 @@ ContentManager::ContentManager(const std::shared_ptr<Config>& config, const std:
         }
     }
 
-    storage->updateAutoscanPersistentList(ScanMode::Timed, config_timed_list);
+    storage->updateAutoscanList(ScanMode::Timed, config_timed_list);
     autoscan_timed = storage->getAutoscanList(ScanMode::Timed);
 }
 
@@ -152,7 +152,7 @@ void ContentManager::run()
             }
         }
 
-        storage->updateAutoscanPersistentList(ScanMode::INotify, config_inotify_list);
+        storage->updateAutoscanList(ScanMode::INotify, config_inotify_list);
         autoscan_inotify = storage->getAutoscanList(ScanMode::INotify);
     } else {
         // make an empty list so we do not have to do extra checks on shutdown
@@ -564,7 +564,6 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
             } else {
                 adir->setTaskCount(-1);
                 removeAutoscanDirectory(scanID, scanMode);
-                storage->removeAutoscanDirectory(adir->getStorageID());
                 return;
             }
         }
@@ -580,7 +579,6 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
 
             adir->setTaskCount(-1);
             removeAutoscanDirectory(scanID, scanMode);
-            storage->removeAutoscanDirectory(adir->getStorageID());
             return;
         }
 
@@ -613,7 +611,6 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
         adir->setTaskCount(-1);
         removeObject(containerID, false);
         removeAutoscanDirectory(scanID, scanMode);
-        storage->removeAutoscanDirectory(adir->getStorageID());
         return;
     }
 
@@ -1530,7 +1527,7 @@ void ContentManager::removeAutoscanDirectory(int scanID, ScanMode scanMode)
             throw_std_runtime_error("can not remove autoscan directory - was not an autoscan");
 
         autoscan_timed->remove(scanID);
-        storage->removeAutoscanDirectory(adir->getStorageID());
+        storage->removeAutoscanDirectory(adir);
         session_manager->containerChangedUI(adir->getObjectID());
 
         // if 3rd parameter is true: won't fail if scanID doesn't exist
@@ -1543,7 +1540,7 @@ void ContentManager::removeAutoscanDirectory(int scanID, ScanMode scanMode)
             if (adir == nullptr)
                 throw_std_runtime_error("can not remove autoscan directory - was not an autoscan");
             autoscan_inotify->remove(scanID);
-            storage->removeAutoscanDirectory(adir->getStorageID());
+            storage->removeAutoscanDirectory(adir);
             session_manager->containerChangedUI(adir->getObjectID());
             inotify->unmonitor(adir);
         }
@@ -1559,7 +1556,7 @@ void ContentManager::removeAutoscanDirectory(int objectID)
 
     if (adir->getScanMode() == ScanMode::Timed) {
         autoscan_timed->remove(adir->getLocation());
-        storage->removeAutoscanDirectoryByObjectID(objectID);
+        storage->removeAutoscanDirectory(adir);
         session_manager->containerChangedUI(objectID);
         timer->removeTimerSubscriber(this, adir->getTimerParameter(), true);
     }
@@ -1567,7 +1564,7 @@ void ContentManager::removeAutoscanDirectory(int objectID)
     if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
         if (adir->getScanMode() == ScanMode::INotify) {
             autoscan_inotify->remove(adir->getLocation());
-            storage->removeAutoscanDirectoryByObjectID(objectID);
+            storage->removeAutoscanDirectory(adir);
             session_manager->containerChangedUI(objectID);
             inotify->unmonitor(adir);
         }
@@ -1599,7 +1596,7 @@ void ContentManager::handlePeristentAutoscanRemove(int scanID, ScanMode scanMode
         storage->updateAutoscanDirectory(adir);
     } else {
         removeAutoscanDirectory(adir->getScanID(), adir->getScanMode());
-        storage->removeAutoscanDirectory(adir->getStorageID());
+        storage->removeAutoscanDirectory(adir);
     }
 }
 
