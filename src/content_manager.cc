@@ -559,7 +559,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
                 containerID = INVALID_OBJECT_ID;
             } else {
                 adir->setTaskCount(-1);
-                removeAutoscanDirectory(scanID, scanMode);
+                removeAutoscanDirectory(adir);
                 return;
             }
         }
@@ -574,7 +574,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
             }
 
             adir->setTaskCount(-1);
-            removeAutoscanDirectory(scanID, scanMode);
+            removeAutoscanDirectory(adir);
             return;
         }
 
@@ -606,7 +606,7 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
         }
         adir->setTaskCount(-1);
         removeObject(containerID, false);
-        removeAutoscanDirectory(scanID, scanMode);
+        removeAutoscanDirectory(adir);
         return;
     }
 
@@ -1475,18 +1475,20 @@ std::shared_ptr<AutoscanDirectory> ContentManager::getAutoscanDirectory(int scan
     return nullptr;
 }
 
-std::vector<std::shared_ptr<AutoscanDirectory>> ContentManager::getAutoscanDirectories(ScanMode scanMode) const
+std::shared_ptr<AutoscanDirectory> ContentManager::getAutoscanDirectory(int objectID)
 {
-    if (scanMode == ScanMode::Timed) {
-        return autoscan_timed->getArrayCopy();
-    }
+    return storage->getAutoscanDirectory(objectID);
+}
 
+std::shared_ptr<AutoscanDirectory> ContentManager::getAutoscanDirectory(const fs::path& location) const
+{
+    // \todo change this when more scanmodes become available
+    std::shared_ptr<AutoscanDirectory> adir = autoscan_timed->get(location);
 #if HAVE_INOTIFY
-    if (scanMode == ScanMode::INotify) {
-        return autoscan_inotify->getArrayCopy();
-    }
+    if (adir == nullptr)
+        adir = autoscan_inotify->get(location);
 #endif
-    return std::vector<std::shared_ptr<AutoscanDirectory>>();
+    return adir;
 }
 
 std::vector<std::shared_ptr<AutoscanDirectory>> ContentManager::getAutoscanDirectories() const
@@ -1501,25 +1503,13 @@ std::vector<std::shared_ptr<AutoscanDirectory>> ContentManager::getAutoscanDirec
     return all;
 }
 
-std::shared_ptr<AutoscanDirectory> ContentManager::getAutoscanDirectory(const fs::path& location) const
+void ContentManager::removeAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir)
 {
-    // \todo change this when more scanmodes become available
-    std::shared_ptr<AutoscanDirectory> dir = autoscan_timed->get(location);
-#if HAVE_INOTIFY
-    if (dir == nullptr)
-        dir = autoscan_inotify->get(location);
-#endif
-    return dir;
-}
+    if (adir == nullptr)
+        throw_std_runtime_error("can not remove autoscan directory - was not an autoscan");
 
-void ContentManager::removeAutoscanDirectory(int scanID, ScanMode scanMode)
-{
-    if (scanMode == ScanMode::Timed) {
-        std::shared_ptr<AutoscanDirectory> adir = autoscan_timed->get(scanID);
-        if (adir == nullptr)
-            throw_std_runtime_error("can not remove autoscan directory - was not an autoscan");
-
-        autoscan_timed->remove(scanID);
+    if (adir->getScanMode() == ScanMode::Timed) {
+        autoscan_timed->remove(adir->getScanID());
         storage->removeAutoscanDirectory(adir);
         session_manager->containerChangedUI(adir->getObjectID());
 
@@ -1528,11 +1518,8 @@ void ContentManager::removeAutoscanDirectory(int scanID, ScanMode scanMode)
     }
 #ifdef HAVE_INOTIFY
     if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
-        if (scanMode == ScanMode::INotify) {
-            std::shared_ptr<AutoscanDirectory> adir = autoscan_inotify->get(scanID);
-            if (adir == nullptr)
-                throw_std_runtime_error("can not remove autoscan directory - was not an autoscan");
-            autoscan_inotify->remove(scanID);
+        if (adir->getScanMode() == ScanMode::INotify) {
+            autoscan_inotify->remove(adir->getScanID());
             storage->removeAutoscanDirectory(adir);
             session_manager->containerChangedUI(adir->getObjectID());
             inotify->unmonitor(adir);
@@ -1541,61 +1528,18 @@ void ContentManager::removeAutoscanDirectory(int scanID, ScanMode scanMode)
 #endif
 }
 
-void ContentManager::removeAutoscanDirectory(int objectID)
+void ContentManager::handlePeristentAutoscanRemove(std::shared_ptr<AutoscanDirectory> adir)
 {
-    std::shared_ptr<AutoscanDirectory> adir = storage->getAutoscanDirectory(objectID);
-    if (adir == nullptr)
-        throw_std_runtime_error("can not remove autoscan directory - was not an autoscan");
-
-    if (adir->getScanMode() == ScanMode::Timed) {
-        autoscan_timed->remove(adir->getLocation());
-        storage->removeAutoscanDirectory(adir);
-        session_manager->containerChangedUI(objectID);
-        timer->removeTimerSubscriber(this, adir->getTimerParameter(), true);
-    }
-#ifdef HAVE_INOTIFY
-    if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
-        if (adir->getScanMode() == ScanMode::INotify) {
-            autoscan_inotify->remove(adir->getLocation());
-            storage->removeAutoscanDirectory(adir);
-            session_manager->containerChangedUI(objectID);
-            inotify->unmonitor(adir);
-        }
-    }
-#endif
-}
-
-void ContentManager::removeAutoscanDirectory(const fs::path& location)
-{
-    /// \todo change this when more scanmodes become avaiable
-    std::shared_ptr<AutoscanDirectory> adir = autoscan_timed->get(location);
-#ifdef HAVE_INOTIFY
-    if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
-        if (adir == nullptr)
-            adir = autoscan_inotify->get(location);
-    }
-#endif
-    if (adir == nullptr)
-        throw_std_runtime_error("can not remove autoscan directory - was not an autoscan");
-
-    removeAutoscanDirectory(adir->getObjectID());
-}
-
-void ContentManager::handlePeristentAutoscanRemove(int scanID, ScanMode scanMode)
-{
-    std::shared_ptr<AutoscanDirectory> adir = getAutoscanDirectory(scanID, scanMode);
     if (adir->persistent()) {
         adir->setObjectID(INVALID_OBJECT_ID);
         storage->updateAutoscanDirectory(adir);
     } else {
-        removeAutoscanDirectory(adir->getScanID(), adir->getScanMode());
-        storage->removeAutoscanDirectory(adir);
+        removeAutoscanDirectory(adir);
     }
 }
 
-void ContentManager::handlePersistentAutoscanRecreate(int scanID, ScanMode scanMode)
+void ContentManager::handlePersistentAutoscanRecreate(std::shared_ptr<AutoscanDirectory> adir)
 {
-    std::shared_ptr<AutoscanDirectory> adir = getAutoscanDirectory(scanID, scanMode);
     int id = ensurePathExistence(adir->getLocation());
     adir->setObjectID(id);
     storage->updateAutoscanDirectory(adir);

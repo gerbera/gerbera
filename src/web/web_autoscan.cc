@@ -86,10 +86,12 @@ void web::autoscan::process()
         if (scan_mode_str == "none") {
             // remove...
             try {
+                std::shared_ptr<AutoscanDirectory> adir;
                 if (fromFs)
-                    content->removeAutoscanDirectory(path);
+                    adir = content->getAutoscanDirectory(path);
                 else
-                    content->removeAutoscanDirectory(intParam("object_id"));
+                    adir = content->getAutoscanDirectory(intParam("object_id"));
+                content->removeAutoscanDirectory(adir);
             } catch (const std::runtime_error& e) {
                 // didn't work, well we don't care in this case
             }
