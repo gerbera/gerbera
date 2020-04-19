@@ -80,12 +80,10 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, bool re
         auto item = std::static_pointer_cast<CdsItem>(obj);
 
         auto meta = obj->getMetadata();
-
-        std::string key;
         std::string upnp_class = obj->getClass();
 
         for (const auto& it : meta) {
-            key = it.first;
+            std::string key = it.first;
             if (key == MetadataHandler::getMetaFieldName(M_DESCRIPTION)) {
                 tmp = it.second;
                 if ((stringLimit > 0) && (tmp.length() > stringLimit)) {
@@ -96,8 +94,23 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, bool re
             } else if (key == MetadataHandler::getMetaFieldName(M_TRACKNUMBER)) {
                 if (upnp_class == UPNP_DEFAULT_CLASS_MUSIC_TRACK)
                     result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(it.second.c_str());
-            } else if (key != MetadataHandler::getMetaFieldName(M_TITLE))
-                result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(it.second.c_str());
+            } else if (key != MetadataHandler::getMetaFieldName(M_TITLE)) {
+                // e.g. used for M_ALBUMARTIST
+                // name@attr[val] => <name attr="val">
+                std::size_t i, j;
+                if (((i = key.find('@')) != std::string::npos)
+                    && ((j = key.find('[', i + 1)) != std::string::npos)
+                    && (key[key.length() - 1] == ']')) {
+                    std::string attr_name = key.substr(i + 1, j - i - 1);
+                    std::string attr_value = key.substr(j + 1, key.length() - j - 2);
+                    std::string name = key.substr(0, i);
+                    auto node = result.append_child(name.c_str());
+                    node.append_attribute(attr_name.c_str()) = attr_value.c_str();
+                    node.append_child(pugi::node_pcdata).set_value(it.second.c_str());
+                } else {
+                    result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(it.second.c_str());
+                }
+            }
         }
 
         addResources(item, &result);
