@@ -76,13 +76,13 @@ public:
     /// \param option option to retrieve.
     bool getBoolOption(config_option_t option) override;
 
-    /// \brief returns a config option of type Dictionary
+    /// \brief returns a config option of type dictionary
     /// \param option option to retrieve.
     std::map<std::string, std::string> getDictionaryOption(config_option_t option) override;
 
-    /// \brief returns a config option of type Array of StringBase
+    /// \brief returns a config option of type array of string
     /// \param option option to retrieve.
-    std::vector<std::string> getStringArrayOption(config_option_t option) override;
+    std::vector<std::string> getArrayOption(config_option_t option) override;
 
     /// \brief returns a config option of type AutoscanList
     /// \param option to retrieve

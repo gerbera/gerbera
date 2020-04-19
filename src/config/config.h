@@ -178,13 +178,13 @@ public:
     /// \param option option to retrieve.
     virtual bool getBoolOption(config_option_t option) = 0;
 
-    /// \brief returns a config option of type Dictionary
+    /// \brief returns a config option of type dictionary
     /// \param option option to retrieve.
     virtual std::map<std::string, std::string> getDictionaryOption(config_option_t option) = 0;
 
-    /// \brief returns a config option of type Array of StringBase
+    /// \brief returns a config option of type array of string
     /// \param option option to retrieve.
-    virtual std::vector<std::string> getStringArrayOption(config_option_t option) = 0;
+    virtual std::vector<std::string> getArrayOption(config_option_t option) = 0;
 
     /// \brief returns a config option of type AutoscanList
     /// \param option to retrieve

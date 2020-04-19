@@ -68,7 +68,7 @@ public:
         throw std::runtime_error("Wrong option type");
     }
 
-    virtual std::vector<std::string> getStringArrayOption() const
+    virtual std::vector<std::string> getArrayOption() const
     {
         throw std::runtime_error("Wrong option type");
     }
@@ -122,14 +122,14 @@ protected:
     std::map<std::string, std::string> option;
 };
 
-class StringArrayOption : public ConfigOption {
+class ArrayOption : public ConfigOption {
 public:
-    explicit StringArrayOption(const std::vector<std::string>& option)
+    explicit ArrayOption(const std::vector<std::string>& option)
     {
         this->option = option;
     }
 
-    std::vector<std::string> getStringArrayOption() const override
+    std::vector<std::string> getArrayOption() const override
     {
         return option;
     }
