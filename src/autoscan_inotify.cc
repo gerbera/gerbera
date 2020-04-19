@@ -208,7 +208,7 @@ void AutoscanInotify::threadProc()
                             if (watch != nullptr) {
                                 if (adir->persistent()) {
                                     monitorNonexisting(path, watch->getAutoscanDirectory());
-                                    content->handlePeristentAutoscanRemove(adir->getScanID(), ScanMode::INotify);
+                                    content->handlePeristentAutoscanRemove(adir);
                                 }
                             }
                         }
@@ -337,7 +337,7 @@ void AutoscanInotify::recheckNonexistingMonitor(int curWd, std::vector<std::stri
                 removeNonexistingMonitor(curWd, watches->at(curWd), pathAr);
             if (first) {
                 monitorDirectory(path, adir, true);
-                content->handlePersistentAutoscanRecreate(adir->getScanID(), adir->getScanMode());
+                content->handlePersistentAutoscanRecreate(adir);
             } else {
                 monitorDirectory(path, adir, false, &pathAr);
             }
@@ -377,7 +377,7 @@ void AutoscanInotify::checkMoveWatches(int wd, const std::shared_ptr<Wd>& wdObj)
                     std::shared_ptr<AutoscanDirectory> adir = watch->getAutoscanDirectory();
                     if (adir->persistent()) {
                         monitorNonexisting(path, adir);
-                        content->handlePeristentAutoscanRemove(adir->getScanID(), ScanMode::INotify);
+                        content->handlePeristentAutoscanRemove(adir);
                     }
 
                     int objectID = storage->findObjectIDByPath(path, true);

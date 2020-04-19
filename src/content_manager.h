@@ -264,32 +264,27 @@ public:
     /// \brief Gets an AutocsanDirectrory from the watch list.
     std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(int scanID, ScanMode scanMode) const;
 
+    /// \brief Gets an AutoscanDirectory (by objectID) from the watch list.
+    std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(int objectID);
+
     /// \brief Get an AutoscanDirectory given by location on disk from the watch list.
     std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(const fs::path& location) const;
+
+    /// \brief returns an array of all autoscan directories
+    std::vector<std::shared_ptr<AutoscanDirectory>> getAutoscanDirectories() const;
+
     /// \brief Removes an AutoscanDirectrory (found by scanID) from the watch list.
-    void removeAutoscanDirectory(int scanID, ScanMode scanMode);
-
-    /// \brief Removes an AutoscanDirectrory (found by location) from the watch list.
-    void removeAutoscanDirectory(const fs::path& location);
-
-    /// \brief Removes an AutoscanDirectory (by objectID) from the watch list.
-    void removeAutoscanDirectory(int objectID);
+    void removeAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir);
 
     /// \brief Update autoscan parameters for an existing autoscan directory
     /// or add a new autoscan directory
     void setAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>& dir);
 
     /// \brief handles the removal of a persistent autoscan directory
-    void handlePeristentAutoscanRemove(int scanID, ScanMode scanMode);
+    void handlePeristentAutoscanRemove(std::shared_ptr<AutoscanDirectory> adir);
 
     /// \brief handles the recreation of a persistent autoscan directory
-    void handlePersistentAutoscanRecreate(int scanID, ScanMode scanMode);
-
-    /// \brief returns an array of autoscan directories for the given scan mode
-    std::vector<std::shared_ptr<AutoscanDirectory>> getAutoscanDirectories(ScanMode scanMode) const;
-
-    /// \brief returns an array of all autoscan directories
-    std::vector<std::shared_ptr<AutoscanDirectory>> getAutoscanDirectories() const;
+    void handlePersistentAutoscanRecreate(std::shared_ptr<AutoscanDirectory> adir);
 
     /// \brief instructs ContentManager to reload scripting environment
     void reloadLayout();
