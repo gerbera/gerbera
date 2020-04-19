@@ -129,7 +129,7 @@ ConfigManager::~ConfigManager()
 #define NEW_DICT_OPTION(optval) dict_opt = std::make_shared<DictionaryOption>(optval)
 #define SET_DICT_OPTION(opttype) options->at(opttype) = dict_opt
 
-#define NEW_STRARR_OPTION(optval) str_array_opt = std::make_shared<StringArrayOption>(optval)
+#define NEW_STRARR_OPTION(optval) str_array_opt = std::make_shared<ArrayOption>(optval)
 #define SET_STRARR_OPTION(opttype) options->at(opttype) = str_array_opt
 
 #define NEW_AUTOSCANLIST_OPTION(optval) alist_opt = std::make_shared<AutoscanListOption>(optval)
@@ -148,7 +148,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     std::shared_ptr<BoolOption> bool_opt;
     std::shared_ptr<IntOption> int_opt;
     std::shared_ptr<DictionaryOption> dict_opt;
-    std::shared_ptr<StringArrayOption> str_array_opt;
+    std::shared_ptr<ArrayOption> str_array_opt;
     std::shared_ptr<AutoscanListOption> alist_opt;
     std::shared_ptr<TranscodingProfileListOption> trlist_opt;
 
@@ -1772,9 +1772,9 @@ std::map<std::string, std::string> ConfigManager::getDictionaryOption(config_opt
     return options->at(option)->getDictionaryOption();
 }
 
-std::vector<std::string> ConfigManager::getStringArrayOption(config_option_t option)
+std::vector<std::string> ConfigManager::getArrayOption(config_option_t option)
 {
-    return options->at(option)->getStringArrayOption();
+    return options->at(option)->getArrayOption();
 }
 
 std::shared_ptr<AutoscanList> ConfigManager::getAutoscanListOption(config_option_t option)

@@ -1710,7 +1710,7 @@ void ContentManager::triggerPlayHook(const std::shared_ptr<CdsObject>& obj)
     log_debug("start");
 
     if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && !obj->getFlag(OBJECT_FLAG_PLAYED)) {
-        std::vector<std::string> mark_list = config->getStringArrayOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST);
+        std::vector<std::string> mark_list = config->getArrayOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST);
         for (const auto& i : mark_list) {
             if (startswith(std::static_pointer_cast<CdsItem>(obj)->getMimeType(), i)) {
                 obj->setFlag(OBJECT_FLAG_PLAYED);

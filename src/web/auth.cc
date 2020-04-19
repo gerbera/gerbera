@@ -93,7 +93,7 @@ void web::auth::process()
         xml2JsonHints->setArrayName(ipp, "option");
         ipp.append_attribute("default") = config->getIntOption(CFG_SERVER_UI_DEFAULT_ITEMS_PER_PAGE);
 
-        auto menu_opts = config->getStringArrayOption(CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN);
+        auto menu_opts = config->getArrayOption(CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN);
         for (const auto& menu_opt : menu_opts) {
             ipp.append_child("option").append_child(pugi::node_pcdata).set_value(menu_opt.c_str());
         }

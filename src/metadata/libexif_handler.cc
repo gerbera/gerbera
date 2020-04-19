@@ -350,7 +350,7 @@ void LibExifHandler::fillMetadata(std::shared_ptr<CdsItem> item)
         return;
     }
 
-    std::vector<std::string> aux = config->getStringArrayOption(CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST);
+    std::vector<std::string> aux = config->getArrayOption(CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST);
     for (const auto& i : ed->ifd) {
         if (i)
             process_ifd(i, item, sc, aux);
