@@ -52,6 +52,11 @@ UpnpXMLBuilder::UpnpXMLBuilder(std::shared_ptr<Config> config,
 std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createResponse(const std::string& actionName, const std::string& serviceType)
 {
     auto response = std::make_unique<pugi::xml_document>();
+
+    auto decl = response->prepend_child(pugi::node_declaration);
+    decl.append_attribute("version") = "1.0";
+    decl.append_attribute("encoding") = "UTF-8";
+
     auto root = response->append_child(("u:" + actionName + "Response").c_str());
     root.append_attribute("xmlns:u") = serviceType.c_str();
 
