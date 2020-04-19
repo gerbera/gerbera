@@ -1,7 +1,13 @@
-#include "gtest/gtest.h"
-#include <cds_objects.h>
-#include <common.h>
-#include <upnp_xml.h>
+#include <gtest/gtest.h>
+
+#include "cds_objects.h"
+#include "common.h"
+#include "metadata/metadata_handler.h"
+#include "transcoding/transcoding.h"
+#include "upnp_xml.h"
+
+#include "../mock/config_mock.h"
+#include "../mock/storage_mock.h"
 
 using namespace ::testing;
 
@@ -13,9 +19,11 @@ public:
 
     virtual void SetUp()
     {
+        auto config = std::make_shared<ConfigMock>();
+        storage = std::make_shared<StorageMock>(config);
         std::string virtualDir = "http://server/content";
         std::string presentationURl = "http://someurl/";
-        subject = new UpnpXMLBuilder(nullptr, nullptr, virtualDir, presentationURl);
+        subject = new UpnpXMLBuilder(config, storage, virtualDir, presentationURl);
     }
 
     virtual void TearDown()
@@ -24,66 +32,87 @@ public:
     };
 
     UpnpXMLBuilder* subject;
+    std::shared_ptr<StorageMock> storage;
 };
 
-TEST_F(UpnpXmlTest, CreatesUpnpDateElement)
+TEST_F(UpnpXmlTest, RenderObjectContainer)
 {
-    pugi::xml_document doc;
-    auto container = doc.append_child("container");
-    subject->renderAlbumDate("2001-01-01", &container);
-    auto result = container.first_child();
+    // arrange
+    pugi::xml_document didl_lite;
+    auto root = didl_lite.append_child("DIDL-Lite");
+    auto obj = std::make_shared<CdsContainer>(nullptr);
+    obj->setID(1);
+    obj->setParentID(2);
+    obj->setRestricted(false);
+    obj->setTitle("Title");
+    obj->setClass(UPNP_DEFAULT_CLASS_MUSIC_ALBUM);
+    obj->setMetadata(MetadataHandler::getMetaFieldName(M_ALBUMARTIST), "Creator");
+    obj->setMetadata(MetadataHandler::getMetaFieldName(M_COMPOSER), "Composer");
+    obj->setMetadata(MetadataHandler::getMetaFieldName(M_CONDUCTOR), "Conductor");
+    obj->setMetadata(MetadataHandler::getMetaFieldName(M_ORCHESTRA), "Orchestra");
+    obj->setMetadata(MetadataHandler::getMetaFieldName(M_UPNP_DATE), "2001-01-01");
+    // albumArtURI
+    storage->findFolderImageMap.clear();
+    storage->findFolderImageMap[std::to_string(obj->getID())] = "10";
 
-    EXPECT_NE(result, nullptr);
-    EXPECT_STREQ(result.text().as_string(), "2001-01-01");
-    EXPECT_STREQ(result.name(), "upnp:date");
+    std::ostringstream expectedXml;
+    expectedXml << "<DIDL-Lite>\n";
+    expectedXml << "<container id=\"1\" parentID=\"2\" restricted=\"0\">\n";
+    expectedXml << "<dc:title>Title</dc:title>\n";
+    expectedXml << "<upnp:class>object.container.album.musicAlbum</upnp:class>\n";
+    expectedXml << "<dc:creator>Creator</dc:creator>\n";
+    expectedXml << "<upnp:composer>Composer</upnp:composer>\n";
+    expectedXml << "<upnp:Conductor>Conductor</upnp:Conductor>\n";
+    expectedXml << "<upnp:orchestra>Orchestra</upnp:orchestra>\n";
+    expectedXml << "<upnp:date>2001-01-01</upnp:date>\n";
+    expectedXml << "<upnp:albumArtURI>http://server/content/media/object_id/10/res_id/0</upnp:albumArtURI>\n";
+    expectedXml << "</container>\n";
+    expectedXml << "</DIDL-Lite>\n";
+
+    // act
+    subject->renderObject(obj, false, std::string::npos, &root);
+
+    // assert
+    std::ostringstream buf;
+    didl_lite.print(buf, "", 0);
+    std::string didl_lite_xml = buf.str();
+    EXPECT_STREQ(didl_lite_xml.c_str(), expectedXml.str().c_str());
 }
 
-TEST_F(UpnpXmlTest, CreatesUpnpOrchestraElement)
+TEST_F(UpnpXmlTest, RenderObjectItem)
 {
-    pugi::xml_document doc;
-    auto container = doc.append_child("container");
-    subject->renderOrchestra("Orchestra", &container);
-    auto result = container.first_child();
+    // arrange
+    pugi::xml_document didl_lite;
+    auto root = didl_lite.append_child("DIDL-Lite");
+    auto obj = std::make_shared<CdsActiveItem>(nullptr);
+    obj->setID(1);
+    obj->setParentID(2);
+    obj->setRestricted(false);
+    obj->setTitle("Title");
+    obj->setClass(UPNP_DEFAULT_CLASS_MUSIC_TRACK);
+    obj->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), "Description");
+    obj->setMetadata(MetadataHandler::getMetaFieldName(M_TRACKNUMBER), "10");
+    obj->setMetadata(MetadataHandler::getMetaFieldName(M_ALBUM), "Album");
 
-    EXPECT_NE(result, nullptr);
-    EXPECT_STREQ(result.text().as_string(), "Orchestra");
-    EXPECT_STREQ(result.name(), "upnp:orchestra");
-}
+    std::ostringstream expectedXml;
+    expectedXml << "<DIDL-Lite>\n";
+    expectedXml << "<item id=\"1\" parentID=\"2\" restricted=\"0\">\n";
+    expectedXml << "<dc:title>Title</dc:title>\n";
+    expectedXml << "<upnp:class>object.item.audioItem.musicTrack</upnp:class>\n";
+    expectedXml << "<dc:description>Description</dc:description>\n";
+    expectedXml << "<upnp:album>Album</upnp:album>\n";
+    expectedXml << "<upnp:originalTrackNumber>10</upnp:originalTrackNumber>\n";
+    expectedXml << "</item>\n";
+    expectedXml << "</DIDL-Lite>\n";
 
-TEST_F(UpnpXmlTest, CreatesUpnpConductorElement)
-{
-    pugi::xml_document doc;
-    auto container = doc.append_child("container");
-    subject->renderConductor("Conductor", &container);
-    auto result = container.first_child();
+    // act
+    subject->renderObject(obj, false, std::string::npos, &root);
 
-    EXPECT_NE(result, nullptr);
-    EXPECT_STREQ(result.text().as_string(), "Conductor");
-    EXPECT_STREQ(result.name(), "upnp:Conductor");
-}
-
-TEST_F(UpnpXmlTest, CreatesUpnpAlbumArtUriElement)
-{
-    pugi::xml_document doc;
-    auto container = doc.append_child("container");
-    subject->renderAlbumArtURI("/some/uri", &container);
-    auto result = container.first_child();
-
-    EXPECT_NE(result, nullptr);
-    EXPECT_STREQ(result.text().as_string(), "/some/uri");
-    EXPECT_STREQ(result.name(), "upnp:albumArtURI");
-}
-
-TEST_F(UpnpXmlTest, CreatesDcCreatorElement)
-{
-    pugi::xml_document doc;
-    auto container = doc.append_child("container");
-    subject->renderCreator("Creator", &container);
-    auto result = container.first_child();
-
-    EXPECT_NE(result, nullptr);
-    EXPECT_STREQ(result.text().as_string(), "Creator");
-    EXPECT_STREQ(result.name(), "dc:creator");
+    // assert
+    std::ostringstream buf;
+    didl_lite.print(buf, "", 0);
+    std::string didl_lite_xml = buf.str();
+    EXPECT_STREQ(didl_lite_xml.c_str(), expectedXml.str().c_str());
 }
 
 TEST_F(UpnpXmlTest, CreatesSecCaptionInfoElement)
