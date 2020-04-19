@@ -106,6 +106,9 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
     }
 
     pugi::xml_document didl_lite;
+    auto decl = didl_lite.prepend_child(pugi::node_declaration);
+    decl.append_attribute("version") = "1.0";
+    decl.append_attribute("encoding") = "UTF-8";
     auto didl_lite_root = didl_lite.append_child("DIDL-Lite");
     didl_lite_root.append_attribute(XML_NAMESPACE_ATTR) = XML_DIDL_LITE_NAMESPACE;
     didl_lite_root.append_attribute(XML_DC_NAMESPACE_ATTR) = XML_DC_NAMESPACE;
@@ -156,6 +159,9 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
         containerID.c_str(), searchCriteria.c_str(), startingIndex.c_str(), requestedCount.c_str());
 
     pugi::xml_document didl_lite;
+    auto decl = didl_lite.prepend_child(pugi::node_declaration);
+    decl.append_attribute("version") = "1.0";
+    decl.append_attribute("encoding") = "UTF-8";
     auto didl_lite_root = didl_lite.append_child("DIDL-Lite");
     didl_lite_root.append_attribute(XML_NAMESPACE_ATTR) = XML_DIDL_LITE_NAMESPACE;
     didl_lite_root.append_attribute(XML_DC_NAMESPACE_ATTR) = XML_DC_NAMESPACE;
