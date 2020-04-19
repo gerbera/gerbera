@@ -313,12 +313,11 @@ void ContentManager::timerNotify(std::shared_ptr<Timer::Parameter> parameter)
         return;
 
     if (parameter->whoami() == Timer::Parameter::IDAutoscan) {
-        std::shared_ptr<AutoscanDirectory> dir = autoscan_timed->get(parameter->getID());
-        if (dir == nullptr)
+        std::shared_ptr<AutoscanDirectory> adir = autoscan_timed->get(parameter->getID());
+        if (adir == nullptr)
             return;
 
-        int objectID = dir->getObjectID();
-        rescanDirectory(objectID, dir->getScanID(), dir->getScanMode());
+        rescanDirectory(adir);
     }
 #ifdef ONLINE_SERVICES
     else if (parameter->whoami() == Timer::Parameter::IDOnlineContent) {
@@ -532,17 +531,14 @@ int ContentManager::ensurePathExistence(fs::path path)
     return containerID;
 }
 
-void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scanMode, const std::shared_ptr<GenericTask>& task)
+void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory> adir, const std::shared_ptr<GenericTask>& task)
 {
     log_debug("start");
 
-    if (scanID == INVALID_SCAN_ID)
-        return;
-
-    std::shared_ptr<AutoscanDirectory> adir = getAutoscanDirectory(scanID, scanMode);
     if (adir == nullptr)
         throw_std_runtime_error("ID valid but nullptr returned? this should never happen");
 
+    int containerID = adir->getObjectID();
     fs::path rootpath = adir->getLocation();
 
     fs::path location;
@@ -683,7 +679,8 @@ void ContentManager::_rescanDirectory(int containerID, int scanID, ScanMode scan
                 if (list != nullptr)
                     list->erase(objectID);
                 // add a task to rescan the directory that was found
-                rescanDirectory(objectID, scanID, scanMode, newPath, task->isCancellable());
+                auto adir2 = getAutoscanDirectory(objectID);
+                rescanDirectory(adir2, newPath, task->isCancellable());
             } else {
                 // we have to make sure that we will never add a path to the task list
                 // if it is going to be removed by a pending remove task.
@@ -1450,19 +1447,16 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
     }
 }
 
-void ContentManager::rescanDirectory(int objectID, int scanID, ScanMode scanMode, std::string descPath, bool cancellable)
+void ContentManager::rescanDirectory(std::shared_ptr<AutoscanDirectory> adir, std::string descPath, bool cancellable)
 {
     // building container path for the description
     auto self = shared_from_this();
-    auto task = std::make_shared<CMRescanDirectoryTask>(self, objectID, scanID, scanMode, cancellable);
-    std::shared_ptr<AutoscanDirectory> dir = getAutoscanDirectory(scanID, scanMode);
-    if (dir == nullptr)
-        return;
+    auto task = std::make_shared<CMRescanDirectoryTask>(self, adir, cancellable);
 
-    dir->incTaskCount();
+    adir->incTaskCount();
 
     if (descPath.empty())
-        descPath = dir->getLocation();
+        descPath = adir->getLocation();
 
     task->setDescription("Scan: " + descPath);
     addTask(task, true); // adding with low priority
@@ -1720,12 +1714,10 @@ void CMRemoveObjectTask::run()
 }
 
 CMRescanDirectoryTask::CMRescanDirectoryTask(std::shared_ptr<ContentManager> content,
-    int objectID, int scanID, ScanMode scanMode, bool cancellable)
+    std::shared_ptr<AutoscanDirectory> adir, bool cancellable)
     : GenericTask(ContentManagerTask)
     , content(std::move(content))
-    , objectID(objectID)
-    , scanID(scanID)
-    , scanMode(scanMode)
+    , adir(adir)
 {
     this->cancellable = cancellable;
     this->taskType = RescanDirectory;
@@ -1733,16 +1725,15 @@ CMRescanDirectoryTask::CMRescanDirectoryTask(std::shared_ptr<ContentManager> con
 
 void CMRescanDirectoryTask::run()
 {
-    std::shared_ptr<AutoscanDirectory> dir = content->getAutoscanDirectory(scanID, scanMode);
-    if (dir == nullptr)
+    if (adir == nullptr)
         return;
 
     auto self = shared_from_this();
-    content->_rescanDirectory(objectID, dir->getScanID(), dir->getScanMode(), self);
-    dir->decTaskCount();
+    content->_rescanDirectory(adir, self);
+    adir->decTaskCount();
 
-    if (dir->getTaskCount() == 0) {
-        dir->updateLMT();
+    if (adir->getTaskCount() == 0) {
+        adir->updateLMT();
     }
 }
 
