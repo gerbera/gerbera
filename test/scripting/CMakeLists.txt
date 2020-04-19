@@ -1,10 +1,20 @@
 find_package(Threads REQUIRED)
 
-add_executable(testcore
+add_executable(testscripting
         main.cc
-        test_searchhandler.cc
-        test_server.cc
-        test_upnp_xml.cc
+        mock/duk_helper.h
+        mock/duk_helper.cc
+        mock/common_script_mock.h
+        mock/script_test_fixture.h
+        mock/script_test_fixture.cc
+        test_common_script.cc
+        test_external_m3u_playlist.cc
+        test_external_pls_playlist.cc
+        test_import_script.cc
+        test_import_struct_script.cc
+        test_internal_m3u_playlist.cc
+        test_internal_pls_playlist.cc
+        test_runtime.cc
 )
 
 include_directories(
@@ -28,7 +38,7 @@ include_directories(
         ${GMOCK_INCLUDE_DIRS}
 )
 
-target_link_libraries(testcore PRIVATE
+target_link_libraries(testscripting PRIVATE
         libgerbera
         ${UUID_LIBRARIES}
         ${UPNP_LIBRARIES}
@@ -51,12 +61,8 @@ target_link_libraries(testcore PRIVATE
         ${CMAKE_THREAD_LIBS_INIT}
         )
 
-add_test(NAME testcore
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/test/test_core
-        COMMAND ./testcore)
+add_test(NAME testscripting
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/test/scripting
+        COMMAND ./testscripting)
 
-add_custom_command(TARGET testcore POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/fixtures $<TARGET_FILE_DIR:testcore>/fixtures
-        )
-
-add_definitions(-DCMAKE_BINARY_DIR="${CMAKE_BINARY_DIR}")
+add_definitions(-DSCRIPTS_DIR="${CMAKE_SOURCE_DIR}/scripts")

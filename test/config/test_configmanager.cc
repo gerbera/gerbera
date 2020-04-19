@@ -69,7 +69,7 @@ public:
         uuid_unparse(uuid, uuid_str);
 #endif
 
-        fs::path ss = fs::path(CMAKE_BINARY_DIR) / "test" / "test_config" / uuid_str;
+        fs::path ss = fs::path(CMAKE_BINARY_DIR) / "test" / "config" / uuid_str;
         create_directory(ss);
         return ss;
     }

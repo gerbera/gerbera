@@ -1,8 +1,10 @@
 find_package(Threads REQUIRED)
 
-add_executable(testutil
-        test_tools.cc
-        test_upnp_headers.cc
+add_executable(testcore
+        main.cc
+        test_searchhandler.cc
+        test_server.cc
+        test_upnp_xml.cc
 )
 
 include_directories(
@@ -26,7 +28,7 @@ include_directories(
         ${GMOCK_INCLUDE_DIRS}
 )
 
-target_link_libraries(testutil PRIVATE
+target_link_libraries(testcore PRIVATE
         libgerbera
         ${UUID_LIBRARIES}
         ${UPNP_LIBRARIES}
@@ -47,8 +49,14 @@ target_link_libraries(testutil PRIVATE
         ${GMOCK_BOTH_LIBRARIES}
         ${GERBERA_INTERFACE_LIBRARIES}
         ${CMAKE_THREAD_LIBS_INIT}
-)
+        )
 
-add_test(NAME testutil
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/test/test_util
-        COMMAND ./testutil)
+add_test(NAME testcore
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/test/core
+        COMMAND ./testcore)
+
+add_custom_command(TARGET testcore POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/fixtures $<TARGET_FILE_DIR:testcore>/fixtures
+        )
+
+add_definitions(-DCMAKE_BINARY_DIR="${CMAKE_BINARY_DIR}")

@@ -1,9 +1,8 @@
 find_package(Threads REQUIRED)
 
-add_executable(testconfig
-        main.cc
-        test_configgenerator.cc
-        test_configmanager.cc
+add_executable(testutil
+        test_tools.cc
+        test_upnp_headers.cc
 )
 
 include_directories(
@@ -24,9 +23,10 @@ include_directories(
         ${SQLITE3_INCLUDE_DIRS}
         ${ICONV_INCLUDE_DIR}
         ${GTEST_INCLUDE_DIRS}
+        ${GMOCK_INCLUDE_DIRS}
 )
 
-target_link_libraries(testconfig PRIVATE
+target_link_libraries(testutil PRIVATE
         libgerbera
         ${UUID_LIBRARIES}
         ${UPNP_LIBRARIES}
@@ -44,16 +44,11 @@ target_link_libraries(testconfig PRIVATE
         ${SQLITE3_LIBRARIES}
         ${ICONV_LIBRARIES}
         ${GTEST_LIBRARIES}
+        ${GMOCK_BOTH_LIBRARIES}
         ${GERBERA_INTERFACE_LIBRARIES}
         ${CMAKE_THREAD_LIBS_INIT}
-        )
-
-add_custom_command(TARGET testconfig POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/fixtures $<TARGET_FILE_DIR:testconfig>/fixtures
 )
 
-add_test(NAME testconfig
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/test/test_config
-        COMMAND ./testconfig)
-
-add_definitions(-DCMAKE_BINARY_DIR="${CMAKE_BINARY_DIR}")
+add_test(NAME testutil
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/test/util
+        COMMAND ./testutil)
