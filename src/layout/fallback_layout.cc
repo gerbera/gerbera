@@ -351,7 +351,7 @@ void FallbackLayout::addATrailers(const std::shared_ptr<CdsObject>& obj)
 }
 #endif
 
-FallbackLayout::FallbackLayout(std::shared_ptr<ConfigManager> config,
+FallbackLayout::FallbackLayout(std::shared_ptr<Config> config,
     std::shared_ptr<Storage> storage,
     std::shared_ptr<ContentManager> content)
     : config(std::move(config))

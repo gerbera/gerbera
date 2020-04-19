@@ -40,7 +40,7 @@
 
 // forward declaration
 class CdsObject;
-class ConfigManager;
+class Config;
 class Storage;
 
 #define ATRAILERS_SERVICE "Apple Trailers"
@@ -52,7 +52,7 @@ class Storage;
 /// metadata XML.
 class ATrailersContentHandler {
 public:
-    ATrailersContentHandler(std::shared_ptr<ConfigManager> config,
+    ATrailersContentHandler(std::shared_ptr<Config> config,
         std::shared_ptr<Storage> storage);
 
     /// \brief Sets the service XML from which we will extract the objects.
@@ -72,7 +72,7 @@ protected:
     std::shared_ptr<CdsObject> getObject(const pugi::xml_node& trailer) const;
 
 protected:
-    std::shared_ptr<ConfigManager> config;
+    std::shared_ptr<Config> config;
     std::shared_ptr<Storage> storage;
 
     std::unique_ptr<pugi::xml_document> service_xml;

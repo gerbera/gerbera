@@ -141,7 +141,7 @@ protected:
 
 public:
     /// \brief Constructor, currently empty.
-    WebRequestHandler(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
+    WebRequestHandler(std::shared_ptr<Config> config, std::shared_ptr<Storage> storage,
         std::shared_ptr<ContentManager> content, std::shared_ptr<web::SessionManager> sessionManager);
 
     /// \brief Returns information about the requested content.

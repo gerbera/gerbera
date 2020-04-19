@@ -42,7 +42,7 @@
 #include "online_service.h"
 
 // forward declaration
-class ConfigManager;
+class Config;
 class ContentManager;
 class Storage;
 
@@ -50,7 +50,7 @@ class Storage;
 /// handles adding/refreshing content in the database.
 class SopCastService : public OnlineService {
 public:
-    SopCastService(std::shared_ptr<ConfigManager> config,
+    SopCastService(std::shared_ptr<Config> config,
         std::shared_ptr<Storage> storage,
         std::shared_ptr<ContentManager> content);
     ~SopCastService() override;
@@ -66,7 +66,7 @@ public:
     std::string getServiceName() const override;
 
 protected:
-    std::shared_ptr<ConfigManager> config;
+    std::shared_ptr<Config> config;
     std::shared_ptr<Storage> storage;
     std::shared_ptr<ContentManager> content;
 

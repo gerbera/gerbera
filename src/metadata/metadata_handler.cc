@@ -95,12 +95,12 @@ res_key RES_KEYS[] = {
     { "R_PROTOCOLINFO", "protocolInfo" }
 };
 
-MetadataHandler::MetadataHandler(std::shared_ptr<ConfigManager> config)
+MetadataHandler::MetadataHandler(std::shared_ptr<Config> config)
     : config(std::move(config))
 {
 }
 
-void MetadataHandler::setMetadata(const std::shared_ptr<ConfigManager>& config, const std::shared_ptr<CdsItem>& item)
+void MetadataHandler::setMetadata(const std::shared_ptr<Config>& config, const std::shared_ptr<CdsItem>& item)
 {
     std::string location = item->getLocation();
     if (!isRegularFile(location))
@@ -174,7 +174,7 @@ std::string MetadataHandler::getResAttrName(resource_attributes_t attr)
     return RES_KEYS[attr].upnp;
 }
 
-std::unique_ptr<MetadataHandler> MetadataHandler::createHandler(const std::shared_ptr<ConfigManager>& config, int handlerType)
+std::unique_ptr<MetadataHandler> MetadataHandler::createHandler(const std::shared_ptr<Config>& config, int handlerType)
 {
     switch (handlerType) {
 #ifdef HAVE_LIBEXIF

@@ -40,7 +40,7 @@
 #include "util/string_converter.h"
 #include "util/tools.h"
 
-Exiv2Handler::Exiv2Handler(std::shared_ptr<ConfigManager> config)
+Exiv2Handler::Exiv2Handler(std::shared_ptr<Config> config)
     : MetadataHandler(config)
 {
 }

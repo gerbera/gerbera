@@ -52,7 +52,7 @@ extern "C" {
 #include "common.h"
 
 // forward declaration
-class ConfigManager;
+class Config;
 class CdsItem;
 class IOHandler;
 
@@ -326,9 +326,9 @@ fs::path get_last_path(const fs::path& path);
 /// \return Caclulated position or -1 in case of an error.
 ssize_t getValidUTF8CutPosition(std::string str, ssize_t cutpos);
 
-std::string getDLNATransferHeader(const std::shared_ptr<ConfigManager>& config, const std::string& mimeType);
+std::string getDLNATransferHeader(const std::shared_ptr<Config>& config, const std::string& mimeType);
 std::string getDLNAprofileString(const std::string& contentType);
-std::string getDLNAContentHeader(const std::shared_ptr<ConfigManager>& config, const std::string& contentType);
+std::string getDLNAContentHeader(const std::shared_ptr<Config>& config, const std::string& contentType);
 
 #ifndef HAVE_FFMPEG
 /// \brief Fallback code to retrieve the used fourcc from an AVI file.

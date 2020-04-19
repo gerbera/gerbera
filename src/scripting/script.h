@@ -39,7 +39,7 @@
 
 // forward declaration
 class CdsObject;
-class ConfigManager;
+class Config;
 class ContentManager;
 class Runtime;
 class Storage;
@@ -88,12 +88,12 @@ public:
 
     static Script* getContextScript(duk_context* ctx);
 
-    std::shared_ptr<ConfigManager> getConfig() const { return config; }
+    std::shared_ptr<Config> getConfig() const { return config; }
     std::shared_ptr<Storage> getStorage() const { return storage; }
     std::shared_ptr<ContentManager> getContent() const { return content; }
 
 protected:
-    Script(const std::shared_ptr<ConfigManager>& config,
+    Script(const std::shared_ptr<Config>& config,
         std::shared_ptr<Storage> storage,
         std::shared_ptr<ContentManager> content,
         const std::shared_ptr<Runtime>& runtime, const std::string& name);
@@ -107,7 +107,7 @@ protected:
     duk_context* ctx;
 
 protected:
-    std::shared_ptr<ConfigManager> config;
+    std::shared_ptr<Config> config;
     std::shared_ptr<Storage> storage;
     std::shared_ptr<ContentManager> content;
     std::shared_ptr<Runtime> runtime;

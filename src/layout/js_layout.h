@@ -37,7 +37,7 @@
 #include "layout.h"
 
 // forward declaration
-class ConfigManager;
+class Config;
 class ContentManager;
 class ImportScript;
 class Runtime;
@@ -45,13 +45,13 @@ class Storage;
 
 class JSLayout : public Layout {
 protected:
-    std::shared_ptr<ConfigManager> config;
+    std::shared_ptr<Config> config;
     std::shared_ptr<Runtime> runtime;
 
     std::unique_ptr<ImportScript> import_script;
 
 public:
-    JSLayout(const std::shared_ptr<ConfigManager>& config,
+    JSLayout(const std::shared_ptr<Config>& config,
         const std::shared_ptr<Storage>& storage,
         const std::shared_ptr<ContentManager>& content,
         const std::shared_ptr<Runtime>& runtime);

@@ -287,14 +287,14 @@ int main(int argc, char** argv, char** envp)
             interface = opts["interface"].as<std::string>();
         }
 
-        std::shared_ptr<ConfigManager> config;
+        std::shared_ptr<ConfigManager> configManager;
         try {
-            config = std::make_shared<ConfigManager>(
+            configManager = std::make_shared<ConfigManager>(
                 config_file.value_or(""), home.value_or(""), confdir.value_or(""),
                 prefix.value_or(""), magic.value_or(""),
                 ip.value_or(""), interface.value_or(""), portnum.value_or(-1),
                 debug);
-            portnum = config->getIntOption(CFG_SERVER_PORT);
+            portnum = configManager->getIntOption(CFG_SERVER_PORT);
         } catch (const ConfigParseException& ce) {
             log_error("Error parsing config file '{}': {}", (*config_file).c_str(), ce.what());
             exit(EXIT_FAILURE);
@@ -311,6 +311,7 @@ int main(int argc, char** argv, char** envp)
 
         std::shared_ptr<Server> server;
         try {
+            auto config = std::static_pointer_cast<Config>(configManager);
             server = std::make_shared<Server>(config);
             server->init();
             server->run();
@@ -335,7 +336,7 @@ int main(int argc, char** argv, char** envp)
                 if (server)
                     server->shutdown();
                 server = nullptr;
-                config = nullptr;
+                configManager = nullptr;
             } catch (const std::runtime_error& e) {
                 log_error("{}", e.what());
             }
@@ -352,7 +353,7 @@ int main(int argc, char** argv, char** envp)
                 try {
                     // add file/directory recursively and asynchronously
                     server->getContent()->addFile(std::string(f), true, true,
-                        config->getBoolOption(CFG_IMPORT_HIDDEN_FILES));
+                        configManager->getBoolOption(CFG_IMPORT_HIDDEN_FILES));
                 } catch (const std::runtime_error& e) {
                     log_error("{}", e.what());
                     exit(EXIT_FAILURE);
@@ -372,10 +373,10 @@ int main(int argc, char** argv, char** envp)
                 try {
                     server->shutdown();
                     server = nullptr;
-                    config = nullptr;
+                    configManager = nullptr;
 
                     try {
-                        config = std::make_shared<ConfigManager>(
+                        configManager = std::make_shared<ConfigManager>(
                             config_file.value_or(""), home.value_or(""), confdir.value_or(""),
                             prefix.value_or(""), magic.value_or(""),
                             ip.value_or(""), interface.value_or(""), portnum.value_or(-1),
@@ -393,6 +394,7 @@ int main(int argc, char** argv, char** envp)
                     }
 
                     ///  \todo fix this for SIGHUP
+                    auto config = std::static_pointer_cast<Config>(configManager);
                     server = std::make_shared<Server>(config);
                     server->init();
                     server->run();
@@ -413,7 +415,7 @@ int main(int argc, char** argv, char** envp)
         try {
             server->shutdown();
             server = nullptr;
-            config = nullptr;
+            configManager = nullptr;
         } catch (const UpnpException& upnp_e) {
             log_error("main: upnp error {}", upnp_e.getErrorCode());
             ret = EXIT_FAILURE;

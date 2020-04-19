@@ -43,7 +43,7 @@
 
 class MysqlStorage : public SQLStorage, public std::enable_shared_from_this<SQLStorage> {
 public:
-    explicit MysqlStorage(std::shared_ptr<ConfigManager> config);
+    explicit MysqlStorage(std::shared_ptr<Config> config);
     ~MysqlStorage() override;
 
 private:

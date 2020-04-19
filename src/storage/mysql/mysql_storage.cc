@@ -72,7 +72,7 @@
 ) ENGINE=MyISAM CHARSET=utf8"
 #define MYSQL_UPDATE_4_5_2 "UPDATE `mt_internal_setting` SET `value`='5' WHERE `key`='db_version' AND `value`='4'"
 
-MysqlStorage::MysqlStorage(std::shared_ptr<ConfigManager> config)
+MysqlStorage::MysqlStorage(std::shared_ptr<Config> config)
     : SQLStorage(config)
 {
     mysql_init_key_initialized = false;

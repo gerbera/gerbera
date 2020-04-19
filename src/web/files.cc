@@ -37,7 +37,7 @@
 #include "util/string_converter.h"
 #include "util/tools.h"
 
-web::files::files(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
+web::files::files(std::shared_ptr<Config> config, std::shared_ptr<Storage> storage,
     std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
     : WebRequestHandler(std::move(config), std::move(storage), std::move(content), std::move(sessionManager))
 {

@@ -167,7 +167,7 @@ public:
     void clearFlagInDB(int flag) override;
 
 protected:
-    SQLStorage(std::shared_ptr<ConfigManager> config);
+    SQLStorage(std::shared_ptr<Config> config);
     //virtual ~SQLStorage();
     void init() override;
 

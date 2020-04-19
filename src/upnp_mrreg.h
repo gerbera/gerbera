@@ -41,7 +41,7 @@
 #include "upnp_xml.h"
 
 // forward declaration
-class ConfigManager;
+class Config;
 
 /// \brief This class is responsible for the UPnP Connection Manager Service operations.
 ///
@@ -81,7 +81,7 @@ protected:
     /// IsValidated(string DeviceID, i4 Result)
     static void doIsValidated(const std::unique_ptr<ActionRequest>& request);
 
-    std::shared_ptr<ConfigManager> config;
+    std::shared_ptr<Config> config;
 
     UpnpXMLBuilder* xmlBuilder;
     UpnpDevice_Handle deviceHandle;
@@ -89,7 +89,7 @@ protected:
 public:
     /// \brief Constructor for MRReg
     /// in internal variables.
-    MRRegistrarService(std::shared_ptr<ConfigManager> config,
+    MRRegistrarService(std::shared_ptr<Config> config,
         UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle);
     ~MRRegistrarService();
 

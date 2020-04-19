@@ -40,7 +40,7 @@
 #include "upnp_mrreg.h"
 
 // forward declaration
-class ConfigManager;
+class Config;
 class Storage;
 class UpdateManager;
 class Timer;
@@ -56,7 +56,7 @@ class ContentManager;
 /// and to retrieve various information about the server.
 class Server : public std::enable_shared_from_this<Server> {
 public:
-    explicit Server(std::shared_ptr<ConfigManager> config);
+    explicit Server(std::shared_ptr<Config> config);
 
     /// \brief Initializes the server.
     ///
@@ -105,7 +105,7 @@ public:
     std::shared_ptr<ContentManager> getContent() const { return content; }
 
 protected:
-    std::shared_ptr<ConfigManager> config;
+    std::shared_ptr<Config> config;
     std::shared_ptr<Storage> storage;
     std::shared_ptr<UpdateManager> update_manager;
     std::shared_ptr<Timer> timer;
@@ -236,6 +236,11 @@ protected:
     ///
     static int handleUpnpClientEventCallback(Upnp_EventType eventType, const void* event, void* cookie);
     int handleUpnpClientEvent(Upnp_EventType eventType, const void* event);
+
+    /// \brief Creates a html file that is a redirector to the current server i
+    /// instance
+    void writeBookmark(const std::string& ip, const std::string& port);
+    void emptyBookmark();
 };
 
 #endif // __SERVER_H__

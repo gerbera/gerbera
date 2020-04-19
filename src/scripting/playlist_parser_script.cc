@@ -94,7 +94,7 @@ js_getCdsObject(duk_context* ctx)
 
 } // extern "C"
 
-PlaylistParserScript::PlaylistParserScript(const std::shared_ptr<ConfigManager>& config,
+PlaylistParserScript::PlaylistParserScript(const std::shared_ptr<Config>& config,
     std::shared_ptr<Storage> storage,
     std::shared_ptr<ContentManager> content,
     const std::shared_ptr<Runtime>& runtime)

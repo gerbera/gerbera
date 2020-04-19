@@ -39,13 +39,13 @@
 
 // forward declaration
 class CdsObject;
-class ConfigManager;
+class Config;
 class ContentManager;
 class GenericTask;
 
 class PlaylistParserScript : public Script {
 public:
-    PlaylistParserScript(const std::shared_ptr<ConfigManager>& config,
+    PlaylistParserScript(const std::shared_ptr<Config>& config,
         std::shared_ptr<Storage> storage,
         std::shared_ptr<ContentManager> content,
         const std::shared_ptr<Runtime>& runtime);

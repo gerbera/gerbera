@@ -37,7 +37,7 @@
 #include "config/config_manager.h"
 #include "js_functions.h"
 
-ImportScript::ImportScript(const std::shared_ptr<ConfigManager>& config,
+ImportScript::ImportScript(const std::shared_ptr<Config>& config,
     std::shared_ptr<Storage> storage,
     std::shared_ptr<ContentManager> content,
     const std::shared_ptr<Runtime>& runtime)

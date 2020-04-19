@@ -42,7 +42,7 @@ static bool WebAutoscanProcessListComparator(const std::shared_ptr<AutoscanDirec
     return strcmp(a1->getLocation().c_str(), a2->getLocation().c_str()) < 0;
 }
 
-web::autoscan::autoscan(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
+web::autoscan::autoscan(std::shared_ptr<Config> config, std::shared_ptr<Storage> storage,
     std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
     : WebRequestHandler(std::move(config), std::move(storage), std::move(content), std::move(sessionManager))
 {

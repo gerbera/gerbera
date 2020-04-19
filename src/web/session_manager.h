@@ -39,7 +39,7 @@
 #include "util/timer.h"
 
 // forward declaration
-class ConfigManager;
+class Config;
 
 namespace web {
 
@@ -140,7 +140,7 @@ protected:
 
 public:
     /// \brief Constructor, initializes the array.
-    SessionManager(const std::shared_ptr<ConfigManager>& config, std::shared_ptr<Timer> timer);
+    SessionManager(const std::shared_ptr<Config>& config, std::shared_ptr<Timer> timer);
     ~SessionManager() override { log_debug("SessionManager destroyed"); }
 
     /// \brief Creates a Session with a given timeout.

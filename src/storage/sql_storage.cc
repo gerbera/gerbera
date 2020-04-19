@@ -135,7 +135,7 @@ enum MetadataCol {
 
 /* enum for createObjectFromRow's mode parameter */
 
-SQLStorage::SQLStorage(std::shared_ptr<ConfigManager> config)
+SQLStorage::SQLStorage(std::shared_ptr<Config> config)
     : Storage(std::move(config))
 {
     table_quote_begin = '\0';

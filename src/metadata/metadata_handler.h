@@ -36,7 +36,7 @@
 
 // forward declaration
 class CdsItem;
-class ConfigManager;
+class Config;
 class IOHandler;
 
 // content handler Id's
@@ -140,17 +140,17 @@ extern res_key RES_KEYS[];
 /// of various media.
 class MetadataHandler {
 protected:
-    std::shared_ptr<ConfigManager> config;
+    std::shared_ptr<Config> config;
 
 public:
     /// \brief Definition of the supported metadata fields.
 
-    explicit MetadataHandler(std::shared_ptr<ConfigManager> config);
+    explicit MetadataHandler(std::shared_ptr<Config> config);
 
-    static void setMetadata(const std::shared_ptr<ConfigManager>& config, const std::shared_ptr<CdsItem>& item);
+    static void setMetadata(const std::shared_ptr<Config>& config, const std::shared_ptr<CdsItem>& item);
     static std::string getMetaFieldName(metadata_fields_t field);
     static std::string getResAttrName(resource_attributes_t attr);
-    static std::unique_ptr<MetadataHandler> createHandler(const std::shared_ptr<ConfigManager>& config, int handlerType);
+    static std::unique_ptr<MetadataHandler> createHandler(const std::shared_ptr<Config>& config, int handlerType);
 
     virtual void fillMetadata(std::shared_ptr<CdsItem> item) = 0;
     virtual std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsItem> item, int resNum) = 0;

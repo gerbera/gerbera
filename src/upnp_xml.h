@@ -39,12 +39,12 @@
 #include "common.h"
 
 // forward declaration
-class ConfigManager;
+class Config;
 class Storage;
 
 class UpnpXMLBuilder {
 public:
-    explicit UpnpXMLBuilder(std::shared_ptr<ConfigManager> config,
+    explicit UpnpXMLBuilder(std::shared_ptr<Config> config,
         std::shared_ptr<Storage> storage,
         std::string virtualUrl, std::string presentationURL);
 
@@ -105,7 +105,7 @@ public:
     static std::string getFirstResourcePath(const std::shared_ptr<CdsItem>& item);
 
 protected:
-    std::shared_ptr<ConfigManager> config;
+    std::shared_ptr<Config> config;
     std::shared_ptr<Storage> storage;
 
     const std::string virtualURL;

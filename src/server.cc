@@ -59,7 +59,7 @@
 #include "serve_request_handler.h"
 #include "web/pages.h"
 
-Server::Server(std::shared_ptr<ConfigManager> config)
+Server::Server(std::shared_ptr<Config> config)
     : config(std::move(config))
 {
     server_shutdown_flag = false;
@@ -234,10 +234,33 @@ void Server::run()
 #endif
     content->run();
 
-    config->writeBookmark(ip, std::to_string(port));
+    writeBookmark(ip, std::to_string(port));
     log_info("The Web UI can be reached by following this link: http://{}:{}/", ip.c_str(), port);
 
     log_debug("end");
+}
+
+void Server::writeBookmark(const std::string& ip, const std::string& port)
+{
+    std::string data;
+    if (!config->getBoolOption(CFG_SERVER_UI_ENABLED)) {
+        data = http_redirect_to(ip, port, "disabled.html");
+    } else {
+        data = http_redirect_to(ip, port);
+    }
+
+    fs::path path = config->getOption(CFG_SERVER_BOOKMARK_FILE);
+    log_debug("Writing bookmark file to: {}", path.c_str());
+    writeTextFile(path, data);
+}
+
+void Server::emptyBookmark()
+{
+    std::string data = "<html><body><h1>Gerbera Media Server is not running.</h1><p>Please start it and try again.</p></body></html>";
+
+    fs::path path = config->getOption(CFG_SERVER_BOOKMARK_FILE);
+    log_debug("Clearing bookmark file at: {}", path.c_str());
+    writeTextFile(path, data);
 }
 
 bool Server::getShutdownStatus() const
@@ -249,7 +272,7 @@ void Server::shutdown()
 {
     int ret = 0; // return code
 
-    config->emptyBookmark();
+    emptyBookmark();
     server_shutdown_flag = true;
 
     log_debug("Server shutting down");

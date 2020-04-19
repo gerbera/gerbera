@@ -40,7 +40,7 @@
 #include "util/string_converter.h"
 #include "util/tools.h"
 
-LibExifHandler::LibExifHandler(std::shared_ptr<ConfigManager> config)
+LibExifHandler::LibExifHandler(std::shared_ptr<Config> config)
     : MetadataHandler(std::move(config))
 {
 }

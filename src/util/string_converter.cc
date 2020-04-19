@@ -181,20 +181,20 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
 }
 
 /// \todo iconv caching
-std::unique_ptr<StringConverter> StringConverter::i2f(const std::shared_ptr<ConfigManager>& cm)
+std::unique_ptr<StringConverter> StringConverter::i2f(const std::shared_ptr<Config>& cm)
 {
     auto conv = std::make_unique<StringConverter>(
         DEFAULT_INTERNAL_CHARSET, cm->getOption(CFG_IMPORT_FILESYSTEM_CHARSET));
     //        INTERNAL_CHARSET, cm->getFilesystemCharset()));
     return conv;
 }
-std::unique_ptr<StringConverter> StringConverter::f2i(const std::shared_ptr<ConfigManager>& cm)
+std::unique_ptr<StringConverter> StringConverter::f2i(const std::shared_ptr<Config>& cm)
 {
     auto conv = std::make_unique<StringConverter>(
         cm->getOption(CFG_IMPORT_FILESYSTEM_CHARSET), DEFAULT_INTERNAL_CHARSET);
     return conv;
 }
-std::unique_ptr<StringConverter> StringConverter::m2i(const std::shared_ptr<ConfigManager>& cm)
+std::unique_ptr<StringConverter> StringConverter::m2i(const std::shared_ptr<Config>& cm)
 {
     auto conv = std::make_unique<StringConverter>(
         cm->getOption(CFG_IMPORT_METADATA_CHARSET),
@@ -203,7 +203,7 @@ std::unique_ptr<StringConverter> StringConverter::m2i(const std::shared_ptr<Conf
 }
 
 #ifdef HAVE_JS
-std::unique_ptr<StringConverter> StringConverter::j2i(const std::shared_ptr<ConfigManager>& cm)
+std::unique_ptr<StringConverter> StringConverter::j2i(const std::shared_ptr<Config>& cm)
 {
     auto conv = std::make_unique<StringConverter>(
         cm->getOption(CFG_IMPORT_SCRIPTING_CHARSET),
@@ -211,7 +211,7 @@ std::unique_ptr<StringConverter> StringConverter::j2i(const std::shared_ptr<Conf
     return conv;
 }
 
-std::unique_ptr<StringConverter> StringConverter::p2i(const std::shared_ptr<ConfigManager>& cm)
+std::unique_ptr<StringConverter> StringConverter::p2i(const std::shared_ptr<Config>& cm)
 {
     auto conv = std::make_unique<StringConverter>(
         cm->getOption(CFG_IMPORT_PLAYLIST_CHARSET),
@@ -221,7 +221,7 @@ std::unique_ptr<StringConverter> StringConverter::p2i(const std::shared_ptr<Conf
 #endif
 
 #if defined(HAVE_JS) || defined(HAVE_TAGLIB) || defined(ATRAILERS) || defined(HAVE_MATROSKA)
-std::unique_ptr<StringConverter> StringConverter::i2i(const std::shared_ptr<ConfigManager>& cm)
+std::unique_ptr<StringConverter> StringConverter::i2i(const std::shared_ptr<Config>& cm)
 {
     auto conv = std::make_unique<StringConverter>(
         DEFAULT_INTERNAL_CHARSET,

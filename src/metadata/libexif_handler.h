@@ -57,7 +57,7 @@ protected:
     void process_ifd(ExifContent* content, const std::shared_ptr<CdsItem>& item, const std::unique_ptr<StringConverter>& sc, const std::vector<std::string>& auxtags);
 
 public:
-    explicit LibExifHandler(std::shared_ptr<ConfigManager> config);
+    explicit LibExifHandler(std::shared_ptr<Config> config);
     void fillMetadata(std::shared_ptr<CdsItem> item) override;
     std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsItem> item, int resNum) override;
 };

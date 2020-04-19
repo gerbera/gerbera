@@ -34,7 +34,7 @@
 namespace web {
 
 std::unique_ptr<WebRequestHandler> createWebRequestHandler(
-    const std::shared_ptr<ConfigManager>& config, const std::shared_ptr<Storage>& storage,
+    const std::shared_ptr<Config>& config, const std::shared_ptr<Storage>& storage,
     const std::shared_ptr<ContentManager>& content, const std::shared_ptr<SessionManager>& sessionManager,
     const std::string& page)
 {

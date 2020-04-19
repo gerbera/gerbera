@@ -46,7 +46,7 @@
 /// \brief This class is responsible for reading id3 or ogg tags metadata
 class TagLibHandler : public MetadataHandler {
 public:
-    explicit TagLibHandler(std::shared_ptr<ConfigManager> config);
+    explicit TagLibHandler(std::shared_ptr<Config> config);
     void fillMetadata(std::shared_ptr<CdsItem> item) override;
     std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsItem> item, int resNum) override;
 

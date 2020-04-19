@@ -80,7 +80,7 @@ extern "C" {
 static struct magic_set* ms = nullptr;
 #endif
 
-ContentManager::ContentManager(const std::shared_ptr<ConfigManager>& config, const std::shared_ptr<Storage>& storage,
+ContentManager::ContentManager(const std::shared_ptr<Config>& config, const std::shared_ptr<Storage>& storage,
     std::shared_ptr<UpdateManager> update_manager, std::shared_ptr<web::SessionManager> session_manager,
     std::shared_ptr<Timer> timer, std::shared_ptr<TaskProcessor> task_processor,
     std::shared_ptr<Runtime> scripting_runtime, std::shared_ptr<LastFm> last_fm)

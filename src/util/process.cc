@@ -47,7 +47,7 @@
 
 #define BUF_SIZE 256
 
-std::string run_simple_process(const std::shared_ptr<ConfigManager>& cfg, const std::string& prog, const std::string& param, const std::string& input)
+std::string run_simple_process(const std::shared_ptr<Config>& cfg, const std::string& prog, const std::string& param, const std::string& input)
 {
     FILE* file;
     int fd;

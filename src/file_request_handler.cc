@@ -51,7 +51,7 @@
 
 #include "transcoding/transcode_dispatcher.h"
 
-FileRequestHandler::FileRequestHandler(std::shared_ptr<ConfigManager> config,
+FileRequestHandler::FileRequestHandler(std::shared_ptr<Config> config,
     std::shared_ptr<Storage> storage,
     std::shared_ptr<ContentManager> content,
     std::shared_ptr<UpdateManager> updateManager, std::shared_ptr<web::SessionManager> sessionManager,

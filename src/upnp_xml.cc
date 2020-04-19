@@ -39,7 +39,7 @@
 #include "storage/storage.h"
 #include "transcoding/transcoding.h"
 
-UpnpXMLBuilder::UpnpXMLBuilder(std::shared_ptr<ConfigManager> config,
+UpnpXMLBuilder::UpnpXMLBuilder(std::shared_ptr<Config> config,
     std::shared_ptr<Storage> storage,
     std::string virtualUrl, std::string presentationURL)
     : config(std::move(config))

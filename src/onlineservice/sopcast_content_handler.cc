@@ -40,7 +40,7 @@
 #include "online_service.h"
 #include "util/tools.h"
 
-SopCastContentHandler::SopCastContentHandler(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage)
+SopCastContentHandler::SopCastContentHandler(std::shared_ptr<Config> config, std::shared_ptr<Storage> storage)
     : config(std::move(config))
     , storage(std::move(storage))
 {

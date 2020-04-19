@@ -32,7 +32,7 @@
 #include "util/upnp_clients.h"
 #include "util/upnp_headers.h"
 
-Quirks::Quirks(std::shared_ptr<ConfigManager> config, const struct sockaddr_storage* addr, const std::string& userAgent)
+Quirks::Quirks(std::shared_ptr<Config> config, const struct sockaddr_storage* addr, const std::string& userAgent)
     : config(std::move(config))
 {
     Clients::getInfo(addr, userAgent, &pClientInfo);

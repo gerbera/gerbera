@@ -35,7 +35,7 @@
 #include "scripting/import_script.h"
 #include "scripting/runtime.h"
 
-JSLayout::JSLayout(const std::shared_ptr<ConfigManager>& config,
+JSLayout::JSLayout(const std::shared_ptr<Config>& config,
     const std::shared_ptr<Storage>& storage,
     const std::shared_ptr<ContentManager>& content,
     const std::shared_ptr<Runtime>& runtime)
