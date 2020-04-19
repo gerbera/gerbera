@@ -43,7 +43,7 @@
 
 class LastFm {
 public:
-    explicit LastFm(std::shared_ptr<ConfigManager> config);
+    explicit LastFm(std::shared_ptr<Config> config);
     ~LastFm();
 
     /// \brief Initializes the LastFm client.
@@ -67,7 +67,7 @@ public:
     void startedPlaying(std::shared_ptr<CdsItem> item);
 
 private:
-    std::shared_ptr<ConfigManager> config;
+    std::shared_ptr<Config> config;
 
     lastfm_scrobbler* scrobbler;
     int currentTrackId;

@@ -110,7 +110,7 @@ public:
     }
 };
 
-MatroskaHandler::MatroskaHandler(std::shared_ptr<ConfigManager> config)
+MatroskaHandler::MatroskaHandler(std::shared_ptr<Config> config)
     : MetadataHandler(std::move(config))
 {
 }

@@ -38,12 +38,12 @@
 #include <memory>
 
 // forward declaration
-class ConfigManager;
+class Config;
 class Storage;
 
 class RequestHandler {
 public:
-    RequestHandler(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage);
+    RequestHandler(std::shared_ptr<Config> config, std::shared_ptr<Storage> storage);
 
     virtual void getInfo(const char* filename, UpnpFileInfo* info) = 0;
 
@@ -65,7 +65,7 @@ public:
     virtual ~RequestHandler() = default;
 
 protected:
-    std::shared_ptr<ConfigManager> config;
+    std::shared_ptr<Config> config;
     std::shared_ptr<Storage> storage;
 };
 

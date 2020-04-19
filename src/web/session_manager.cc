@@ -135,7 +135,7 @@ void Session::clearUpdateIDs()
     updateAll = false;
 }
 
-SessionManager::SessionManager(const std::shared_ptr<ConfigManager>& config, std::shared_ptr<Timer> timer)
+SessionManager::SessionManager(const std::shared_ptr<Config>& config, std::shared_ptr<Timer> timer)
 {
     this->timer = std::move(timer);
     accounts = config->getDictionaryOption(CFG_SERVER_UI_ACCOUNT_LIST);

@@ -42,13 +42,13 @@
 
 // forward declaration
 class CdsObject;
-class ConfigManager;
+class Config;
 class ContentManager;
 class Storage;
 
 class FallbackLayout : public Layout {
 public:
-    FallbackLayout(std::shared_ptr<ConfigManager> config,
+    FallbackLayout(std::shared_ptr<Config> config,
         std::shared_ptr<Storage> storage,
         std::shared_ptr<ContentManager> content);
     void processCdsObject(std::shared_ptr<CdsObject> obj, fs::path rootpath) override;
@@ -68,7 +68,7 @@ protected:
     void addATrailers(const std::shared_ptr<CdsObject>& obj);
 #endif
 
-    std::shared_ptr<ConfigManager> config;
+    std::shared_ptr<Config> config;
     std::shared_ptr<Storage> storage;
     std::shared_ptr<ContentManager> content;
 

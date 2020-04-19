@@ -38,14 +38,14 @@
 #include "script.h"
 
 // forward declaration
-class ConfigManager;
+class Config;
 class ContentManager;
 class Runtime;
 class Storage;
 
 class ImportScript : public Script {
 public:
-    ImportScript(const std::shared_ptr<ConfigManager>& config,
+    ImportScript(const std::shared_ptr<Config>& config,
         std::shared_ptr<Storage> storage,
         std::shared_ptr<ContentManager> content,
         const std::shared_ptr<Runtime>& runtime);

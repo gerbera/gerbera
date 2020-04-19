@@ -54,7 +54,7 @@
 #include "util/string_converter.h"
 #include "util/tools.h"
 
-TagLibHandler::TagLibHandler(std::shared_ptr<ConfigManager> config)
+TagLibHandler::TagLibHandler(std::shared_ptr<Config> config)
     : MetadataHandler(std::move(config))
 {
 }

@@ -40,7 +40,7 @@
 #include "upnp_xml.h"
 
 // forward declaration
-class ConfigManager;
+class Config;
 class Storage;
 
 /// \brief This class is responsible for the UPnP Connection Manager Service operations.
@@ -72,7 +72,7 @@ protected:
     /// GetProtocolInfo(string Source, string Sink)
     void doGetProtocolInfo(const std::unique_ptr<ActionRequest>& request);
 
-    std::shared_ptr<ConfigManager> config;
+    std::shared_ptr<Config> config;
     std::shared_ptr<Storage> storage;
 
     UpnpXMLBuilder* xmlBuilder;
@@ -82,7 +82,7 @@ public:
     /// \brief Constructor for the CMS, saves the service type and service id
     /// in internal variables.
     /// \todo Check if it makes sense to use it as it is done now...why not define them as constants?
-    ConnectionManagerService(std::shared_ptr<ConfigManager> config,
+    ConnectionManagerService(std::shared_ptr<Config> config,
         std::shared_ptr<Storage> storage,
         UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle handle);
     ~ConnectionManagerService();

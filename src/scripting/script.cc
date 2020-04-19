@@ -120,7 +120,7 @@ void Script::setIntProperty(const std::string& name, int value)
 
 /* **************** */
 
-Script::Script(const std::shared_ptr<ConfigManager>& config,
+Script::Script(const std::shared_ptr<Config>& config,
     std::shared_ptr<Storage> storage,
     std::shared_ptr<ContentManager> content,
     const std::shared_ptr<Runtime>& runtime, const std::string& name)

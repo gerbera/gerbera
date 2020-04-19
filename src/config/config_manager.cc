@@ -1293,29 +1293,6 @@ fs::path ConfigManager::resolvePath(fs::path path, bool isFile, bool mustExist)
     return path;
 }
 
-void ConfigManager::writeBookmark(const std::string& ip, const std::string& port)
-{
-    std::string data;
-    if (!getBoolOption(CFG_SERVER_UI_ENABLED)) {
-        data = http_redirect_to(ip, port, "disabled.html");
-    } else {
-        data = http_redirect_to(ip, port);
-    }
-
-    fs::path path = getOption(CFG_SERVER_BOOKMARK_FILE);
-    log_debug("Writing bookmark file to: {}", path.c_str());
-    writeTextFile(path, data);
-}
-
-void ConfigManager::emptyBookmark()
-{
-    std::string data = "<html><body><h1>Gerbera Media Server is not running.</h1><p>Please start it and try again.</p></body></html>";
-
-    fs::path path = getOption(CFG_SERVER_BOOKMARK_FILE);
-    log_debug("Clearing bookmark file at: {}", path.c_str());
-    writeTextFile(path, data);
-}
-
 std::map<std::string, std::string> ConfigManager::createDictionaryFromNode(const pugi::xml_node& element,
     const std::string& nodeName, const std::string& keyAttr, const std::string& valAttr, bool tolower)
 {

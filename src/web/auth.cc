@@ -65,7 +65,7 @@ static bool check_token(const std::string& token, const std::string& password, c
     return (checksum == encPassword);
 }
 
-web::auth::auth(const std::shared_ptr<ConfigManager>& config, std::shared_ptr<Storage> storage,
+web::auth::auth(const std::shared_ptr<Config>& config, std::shared_ptr<Storage> storage,
     std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
     : WebRequestHandler(config, std::move(storage), std::move(content), std::move(sessionManager))
 {

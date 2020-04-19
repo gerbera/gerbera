@@ -39,7 +39,7 @@
 #include "upnp_xml.h"
 
 // forward declaration
-class ConfigManager;
+class Config;
 class ContentManager;
 class UpdateManager;
 namespace web {
@@ -54,7 +54,7 @@ protected:
     UpnpXMLBuilder* xmlBuilder;
 
 public:
-    explicit FileRequestHandler(std::shared_ptr<ConfigManager> config,
+    explicit FileRequestHandler(std::shared_ptr<Config> config,
         std::shared_ptr<Storage> storage,
         std::shared_ptr<ContentManager> content,
         std::shared_ptr<UpdateManager> updateManager, std::shared_ptr<web::SessionManager> sessionManager,

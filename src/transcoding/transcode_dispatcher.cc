@@ -39,7 +39,7 @@
 #include "transcoding.h"
 #include "util/tools.h"
 
-TranscodeDispatcher::TranscodeDispatcher(std::shared_ptr<ConfigManager> config,
+TranscodeDispatcher::TranscodeDispatcher(std::shared_ptr<Config> config,
     std::shared_ptr<ContentManager> content)
     : TranscodeHandler(std::move(config), std::move(content))
 {

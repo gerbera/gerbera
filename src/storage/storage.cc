@@ -42,12 +42,12 @@
 #error "need at least one storage (mysql or sqlite3)"
 #endif
 
-Storage::Storage(std::shared_ptr<ConfigManager> config)
+Storage::Storage(std::shared_ptr<Config> config)
     : config(std::move(config))
 {
 }
 
-std::shared_ptr<Storage> Storage::createInstance(const std::shared_ptr<ConfigManager>& config, const std::shared_ptr<Timer>& timer)
+std::shared_ptr<Storage> Storage::createInstance(const std::shared_ptr<Config>& config, const std::shared_ptr<Timer>& timer)
 {
     std::shared_ptr<Storage> storage;
 

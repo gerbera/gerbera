@@ -40,14 +40,14 @@
 
 // forward declaration
 class CdsObject;
-class ConfigManager;
+class Config;
 class ContentManager;
 class IOHandler;
 class TranscodingProfile;
 
 class TranscodeHandler {
 public:
-    TranscodeHandler(std::shared_ptr<ConfigManager> config,
+    TranscodeHandler(std::shared_ptr<Config> config,
         std::shared_ptr<ContentManager> content)
         : config(config)
         , content(content)
@@ -62,7 +62,7 @@ public:
     virtual ~TranscodeHandler() = default;
 
 protected:
-    std::shared_ptr<ConfigManager> config;
+    std::shared_ptr<Config> config;
     std::shared_ptr<ContentManager> content;
 
     enum { UNKNOWN_CONTENT_LENGTH = -1 };

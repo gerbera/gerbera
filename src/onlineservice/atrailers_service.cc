@@ -47,7 +47,7 @@
 #define ATRAILERS_SERVICE_URL_640 "https://trailers.apple.com/trailers/home/xml/current.xml"
 #define ATRAILERS_SERVICE_URL_720P "https://trailers.apple.com/trailers/home/xml/current_720p.xml"
 
-ATrailersService::ATrailersService(const std::shared_ptr<ConfigManager>& config,
+ATrailersService::ATrailersService(const std::shared_ptr<Config>& config,
     std::shared_ptr<Storage> storage,
     std::shared_ptr<ContentManager> content)
     : config(config)

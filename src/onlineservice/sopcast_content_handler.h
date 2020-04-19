@@ -49,14 +49,14 @@
 
 // forward declaration
 class CdsObject;
-class ConfigManager;
+class Config;
 class Storage;
 
 /// \brief this class is responsible for creating objects from the SopCast
 /// metadata XML.
 class SopCastContentHandler {
 public:
-    SopCastContentHandler(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage);
+    SopCastContentHandler(std::shared_ptr<Config> config, std::shared_ptr<Storage> storage);
 
     /// \brief Sets the service XML from which we will extract the objects.
     /// \return false if service XML contained an error status.
@@ -75,7 +75,7 @@ protected:
     std::shared_ptr<CdsObject> getObject(const std::string& groupName, const pugi::xml_node& channel) const;
 
 protected:
-    std::shared_ptr<ConfigManager> config;
+    std::shared_ptr<Config> config;
     std::shared_ptr<Storage> storage;
 
     std::unique_ptr<pugi::xml_document> service_xml;

@@ -67,7 +67,7 @@ class PlaylistParserScript;
 #include "util/executor.h"
 
 // forward declaration
-class ConfigManager;
+class Config;
 class Storage;
 class UpdateManager;
 namespace web {
@@ -143,7 +143,7 @@ public:
 
 class ContentManager : public Timer::Subscriber, public std::enable_shared_from_this<ContentManager> {
 public:
-    ContentManager(const std::shared_ptr<ConfigManager>& config, const std::shared_ptr<Storage>& storage,
+    ContentManager(const std::shared_ptr<Config>& config, const std::shared_ptr<Storage>& storage,
         std::shared_ptr<UpdateManager> update_manager, std::shared_ptr<web::SessionManager> session_manager,
         std::shared_ptr<Timer> timer, std::shared_ptr<TaskProcessor> task_processor,
         std::shared_ptr<Runtime> scripting_runtime, std::shared_ptr<LastFm> last_fm);
@@ -320,7 +320,7 @@ protected:
     void destroyJS();
 #endif
 
-    std::shared_ptr<ConfigManager> config;
+    std::shared_ptr<Config> config;
     std::shared_ptr<Storage> storage;
     std::shared_ptr<UpdateManager> update_manager;
     std::shared_ptr<web::SessionManager> session_manager;

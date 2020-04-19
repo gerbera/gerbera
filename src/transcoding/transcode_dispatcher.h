@@ -37,7 +37,7 @@
 
 class TranscodeDispatcher : public TranscodeHandler {
 public:
-    TranscodeDispatcher(std::shared_ptr<ConfigManager> config,
+    TranscodeDispatcher(std::shared_ptr<Config> config,
         std::shared_ptr<ContentManager> content);
     std::unique_ptr<IOHandler> open(std::shared_ptr<TranscodingProfile> profile,
         std::string location,

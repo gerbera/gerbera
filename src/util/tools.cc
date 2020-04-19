@@ -1211,7 +1211,7 @@ std::string getDLNAprofileString(const std::string& contentType)
     return profile;
 }
 
-std::string getDLNAContentHeader(const std::shared_ptr<ConfigManager>& config, const std::string& contentType)
+std::string getDLNAContentHeader(const std::shared_ptr<Config>& config, const std::string& contentType)
 {
     std::string content_parameter;
     content_parameter = getDLNAprofileString(contentType);
@@ -1223,7 +1223,7 @@ std::string getDLNAContentHeader(const std::shared_ptr<ConfigManager>& config, c
     return content_parameter;
 }
 
-std::string getDLNATransferHeader(const std::shared_ptr<ConfigManager>& config, const std::string& mimeType)
+std::string getDLNATransferHeader(const std::shared_ptr<Config>& config, const std::string& mimeType)
 {
     std::string transfer_parameter;
     if (startswith(mimeType, "image"))

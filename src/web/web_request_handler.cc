@@ -44,7 +44,7 @@
 
 namespace web {
 
-WebRequestHandler::WebRequestHandler(std::shared_ptr<ConfigManager> config,
+WebRequestHandler::WebRequestHandler(std::shared_ptr<Config> config,
     std::shared_ptr<Storage> storage,
     std::shared_ptr<ContentManager> content,
     std::shared_ptr<SessionManager> sessionManager)

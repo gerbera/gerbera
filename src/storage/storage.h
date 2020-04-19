@@ -44,7 +44,7 @@ namespace fs = std::filesystem;
 class AutoscanDirectory;
 class AutoscanList;
 class CdsObject;
-class ConfigManager;
+class Config;
 enum class ScanMode;
 class Timer;
 
@@ -139,7 +139,7 @@ public:
 
 class Storage {
 public:
-    Storage(std::shared_ptr<ConfigManager> config);
+    Storage(std::shared_ptr<Config> config);
     virtual ~Storage() = default;
     virtual void init() = 0;
 
@@ -319,13 +319,13 @@ protected:
     /* helper for addContainerChain */
     static void stripAndUnescapeVirtualContainerFromPath(std::string path, std::string& first, std::string& last);
 
-    static std::shared_ptr<Storage> createInstance(const std::shared_ptr<ConfigManager>& config, const std::shared_ptr<Timer>& timer);
+    static std::shared_ptr<Storage> createInstance(const std::shared_ptr<Config>& config, const std::shared_ptr<Timer>& timer);
     friend class Server;
 
     virtual std::shared_ptr<Storage> getSelf() = 0;
 
 protected:
-    std::shared_ptr<ConfigManager> config;
+    std::shared_ptr<Config> config;
 };
 
 #endif // __STORAGE_H__

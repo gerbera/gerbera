@@ -41,7 +41,7 @@
 #include <string>
 
 // forward declaration
-class ConfigManager;
+class Config;
 class Storage;
 
 /// \brief This class is responsible for the UPnP Content Directory Service operations.
@@ -95,7 +95,7 @@ protected:
     /// GetSystemUpdateID(ui4 Id)
     void doGetSystemUpdateID(const std::unique_ptr<ActionRequest>& request);
 
-    std::shared_ptr<ConfigManager> config;
+    std::shared_ptr<Config> config;
     std::shared_ptr<Storage> storage;
 
     UpnpDevice_Handle deviceHandle;
@@ -104,7 +104,7 @@ protected:
 public:
     /// \brief Constructor for the CDS, saves the service type and service id
     /// in internal variables.
-    explicit ContentDirectoryService(std::shared_ptr<ConfigManager> config,
+    explicit ContentDirectoryService(std::shared_ptr<Config> config,
         std::shared_ptr<Storage> storage,
         UpnpXMLBuilder* builder, UpnpDevice_Handle deviceHandle, int stringLimit);
     ~ContentDirectoryService();

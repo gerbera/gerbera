@@ -42,7 +42,7 @@
 #include "storage/storage.h"
 #include "util/upnp_quirks.h"
 
-ContentDirectoryService::ContentDirectoryService(std::shared_ptr<ConfigManager> config,
+ContentDirectoryService::ContentDirectoryService(std::shared_ptr<Config> config,
     std::shared_ptr<Storage> storage,
     UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle, int stringLimit)
     : systemUpdateID(0)

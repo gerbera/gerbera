@@ -38,7 +38,7 @@
 #include "common.h"
 
 // forward declaration
-class ConfigManager;
+class Config;
 
 class StringConverter {
 public:
@@ -55,25 +55,25 @@ public:
     bool validate(const std::string& str);
 
     /// \brief internal (UTF-8) to filesystem
-    static std::unique_ptr<StringConverter> i2f(const std::shared_ptr<ConfigManager>& cm);
+    static std::unique_ptr<StringConverter> i2f(const std::shared_ptr<Config>& cm);
 
     /// \brief filesystem to internal
-    static std::unique_ptr<StringConverter> f2i(const std::shared_ptr<ConfigManager>& cm);
+    static std::unique_ptr<StringConverter> f2i(const std::shared_ptr<Config>& cm);
 
     /// \brief metadata to internal
-    static std::unique_ptr<StringConverter> m2i(const std::shared_ptr<ConfigManager>& cm);
+    static std::unique_ptr<StringConverter> m2i(const std::shared_ptr<Config>& cm);
 #ifdef HAVE_JS
     /// \brief scripting to internal
-    static std::unique_ptr<StringConverter> j2i(const std::shared_ptr<ConfigManager>& cm);
+    static std::unique_ptr<StringConverter> j2i(const std::shared_ptr<Config>& cm);
 
     /// \brief playlist to internal
-    static std::unique_ptr<StringConverter> p2i(const std::shared_ptr<ConfigManager>& cm);
+    static std::unique_ptr<StringConverter> p2i(const std::shared_ptr<Config>& cm);
 #endif
 #if defined(HAVE_JS) || defined(HAVE_TAGLIB) || defined(ATRAILERS) || defined(HAVE_MATROSKA)
     /// \brief safeguard - internal to internal - needed to catch some
     /// scenarious where the user may have forgotten to add proper conversion
     /// in the script.
-    static std::unique_ptr<StringConverter> i2i(const std::shared_ptr<ConfigManager>& cm);
+    static std::unique_ptr<StringConverter> i2i(const std::shared_ptr<Config>& cm);
 #endif
 
 protected:

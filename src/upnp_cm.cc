@@ -38,7 +38,7 @@
 #include "storage/storage.h"
 #include "util/tools.h"
 
-ConnectionManagerService::ConnectionManagerService(std::shared_ptr<ConfigManager> config,
+ConnectionManagerService::ConnectionManagerService(std::shared_ptr<Config> config,
     std::shared_ptr<Storage> storage,
     UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle)
     : config(std::move(config))

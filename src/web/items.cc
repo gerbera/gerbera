@@ -38,7 +38,7 @@
 #include "storage/storage.h"
 #include "upnp_xml.h"
 
-web::items::items(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
+web::items::items(std::shared_ptr<Config> config, std::shared_ptr<Storage> storage,
     std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
     : WebRequestHandler(std::move(config), std::move(storage), std::move(content), std::move(sessionManager))
 {

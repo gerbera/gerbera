@@ -101,7 +101,7 @@ PRAGMA foreign_keys = ON;"
 
 #define SL3_INITITAL_QUEUE_SIZE 20
 
-Sqlite3Storage::Sqlite3Storage(std::shared_ptr<ConfigManager> config, std::shared_ptr<Timer> timer)
+Sqlite3Storage::Sqlite3Storage(std::shared_ptr<Config> config, std::shared_ptr<Timer> timer)
     : SQLStorage(std::move(config))
     , timer(std::move(timer))
 {
@@ -444,7 +444,7 @@ void SLTask::waitForTask()
 }
 
 /* SLInitTask */
-SLInitTask::SLInitTask(std::shared_ptr<ConfigManager> config)
+SLInitTask::SLInitTask(std::shared_ptr<Config> config)
     : SLTask()
     , config(std::move(config))
 {
@@ -555,7 +555,7 @@ void SLExecTask::run(sqlite3** db, Sqlite3Storage* sl)
 }
 
 /* SLBackupTask */
-SLBackupTask::SLBackupTask(std::shared_ptr<ConfigManager> config, bool restore)
+SLBackupTask::SLBackupTask(std::shared_ptr<Config> config, bool restore)
     : config(std::move(config))
     , restore(restore)
 {

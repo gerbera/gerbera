@@ -37,14 +37,14 @@ typedef uint32_t QuirkFlags;
 #define QUIRK_FLAG_SAMSUNG 0x00000001
 
 // forward declaration
-class ConfigManager;
+class Config;
 class CdsItem;
 class Headers;
 struct ClientInfo;
 
 class Quirks {
 public:
-    Quirks(std::shared_ptr<ConfigManager> config, const struct sockaddr_storage* addr, const std::string& userAgent);
+    Quirks(std::shared_ptr<Config> config, const struct sockaddr_storage* addr, const std::string& userAgent);
 
     // Look for subtitle file and returns it's URL in CaptionInfo.sec response header.
     // To be more compliant with original Samsung server we should check for getCaptionInfo.sec: 1 request header.
@@ -55,7 +55,7 @@ public:
     void appendSpecialNamespace(pugi::xml_node* parent);
 
 private:
-    std::shared_ptr<ConfigManager> config;
+    std::shared_ptr<Config> config;
     const ClientInfo* pClientInfo;
 };
 

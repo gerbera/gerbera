@@ -97,11 +97,11 @@ protected:
 class SLInitTask : public SLTask {
 public:
     /// \brief Constructor for the sqlite3 init task
-    explicit SLInitTask(std::shared_ptr<ConfigManager> config);
+    explicit SLInitTask(std::shared_ptr<Config> config);
     void run(sqlite3** db, Sqlite3Storage* sl) override;
 
 protected:
-    std::shared_ptr<ConfigManager> config;
+    std::shared_ptr<Config> config;
 };
 
 /// \brief A task for the sqlite3 thread to do a SQL select.
@@ -141,11 +141,11 @@ protected:
 class SLBackupTask : public SLTask {
 public:
     /// \brief Constructor for the sqlite3 backup task
-    SLBackupTask(std::shared_ptr<ConfigManager> config, bool restore);
+    SLBackupTask(std::shared_ptr<Config> config, bool restore);
     void run(sqlite3** db, Sqlite3Storage* sl) override;
 
 protected:
-    std::shared_ptr<ConfigManager> config;
+    std::shared_ptr<Config> config;
     bool restore;
 };
 
@@ -153,7 +153,7 @@ protected:
 class Sqlite3Storage : public Timer::Subscriber, public SQLStorage, public std::enable_shared_from_this<SQLStorage> {
 public:
     void timerNotify(std::shared_ptr<Timer::Parameter> param) override;
-    Sqlite3Storage(std::shared_ptr<ConfigManager> config, std::shared_ptr<Timer> timer);
+    Sqlite3Storage(std::shared_ptr<Config> config, std::shared_ptr<Timer> timer);
 
 private:
     void init() override;

@@ -44,7 +44,7 @@
 
 #define SOPCAST_CHANNEL_URL "http://www.sopcast.com/gchlxml"
 
-SopCastService::SopCastService(std::shared_ptr<ConfigManager> config,
+SopCastService::SopCastService(std::shared_ptr<Config> config,
     std::shared_ptr<Storage> storage,
     std::shared_ptr<ContentManager> content)
     : config(std::move(config))

@@ -50,7 +50,7 @@
 #include "transcoding/transcode_dispatcher.h"
 #include "url.h"
 
-URLRequestHandler::URLRequestHandler(std::shared_ptr<ConfigManager> config,
+URLRequestHandler::URLRequestHandler(std::shared_ptr<Config> config,
     std::shared_ptr<Storage> storage,
     std::shared_ptr<ContentManager> content)
     : RequestHandler(std::move(config), std::move(storage))

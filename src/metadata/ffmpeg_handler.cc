@@ -74,7 +74,7 @@ extern "C" {
 #endif
 
 // Default constructor
-FfmpegHandler::FfmpegHandler(std::shared_ptr<ConfigManager> config)
+FfmpegHandler::FfmpegHandler(std::shared_ptr<Config> config)
     : MetadataHandler(config)
 {
 }

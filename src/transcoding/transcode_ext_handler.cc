@@ -63,7 +63,7 @@
 #include "iohandler/curl_io_handler.h"
 #endif
 
-TranscodeExternalHandler::TranscodeExternalHandler(std::shared_ptr<ConfigManager> config,
+TranscodeExternalHandler::TranscodeExternalHandler(std::shared_ptr<Config> config,
     std::shared_ptr<ContentManager> content)
     : TranscodeHandler(std::move(config), std::move(content))
 {
