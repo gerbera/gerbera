@@ -81,7 +81,7 @@ void AutoscanList::updateLMinDB()
     for (size_t i = 0; i < list.size(); i++) {
         log_debug("i: {}", i);
         auto ad = list[i];
-        storage->autoscanUpdateLM(ad);
+        storage->updateAutoscanDirectory(ad);
     }
 }
 

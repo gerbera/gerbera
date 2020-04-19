@@ -1609,7 +1609,7 @@ std::string SQLStorage::getInternalSetting(const std::string& key)
     return row->col(0);
 }
 
-void SQLStorage::updateAutoscanPersistentList(ScanMode scanmode, std::shared_ptr<AutoscanList> list)
+void SQLStorage::updateAutoscanList(ScanMode scanmode, std::shared_ptr<AutoscanList> list)
 {
 
     log_debug("setting persistent autoscans untouched - scanmode: {};", AutoscanDirectory::mapScanmode(scanmode).c_str());
@@ -1686,11 +1686,11 @@ std::shared_ptr<AutoscanList> SQLStorage::getAutoscanList(ScanMode scanmode)
     auto ret = std::make_shared<AutoscanList>(self);
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow()) != nullptr) {
-        std::shared_ptr<AutoscanDirectory> dir = _fillAutoscanDirectory(row);
-        if (dir == nullptr)
-            removeAutoscanDirectory(std::stoi(row->col(0)));
+        std::shared_ptr<AutoscanDirectory> adir = _fillAutoscanDirectory(row);
+        if (adir == nullptr)
+            _removeAutoscanDirectory(std::stoi(row->col(0)));
         else
-            ret->add(dir);
+            ret->add(adir);
     }
     return ret;
 }
@@ -1832,19 +1832,12 @@ void SQLStorage::updateAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir
     exec(q);
 }
 
-void SQLStorage::removeAutoscanDirectoryByObjectID(int objectID)
+void SQLStorage::removeAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir)
 {
-    if (objectID == INVALID_OBJECT_ID)
-        return;
-    std::ostringstream q;
-    q << "DELETE FROM " << TQ(AUTOSCAN_TABLE)
-      << " WHERE " << TQ("obj_id") << '=' << quote(objectID);
-    exec(q);
-
-    _autoscanChangePersistentFlag(objectID, false);
+    _removeAutoscanDirectory(adir->getStorageID());
 }
 
-void SQLStorage::removeAutoscanDirectory(int autoscanID)
+void SQLStorage::_removeAutoscanDirectory(int autoscanID)
 {
     if (autoscanID == INVALID_OBJECT_ID)
         return;
@@ -1855,34 +1848,6 @@ void SQLStorage::removeAutoscanDirectory(int autoscanID)
     exec(q);
     if (objectID != INVALID_OBJECT_ID)
         _autoscanChangePersistentFlag(objectID, false);
-}
-
-int SQLStorage::getAutoscanDirectoryType(int objectID)
-{
-    return _getAutoscanDirectoryInfo(objectID, "persistent");
-}
-
-int SQLStorage::isAutoscanDirectoryRecursive(int objectID)
-{
-    return _getAutoscanDirectoryInfo(objectID, "recursive");
-}
-
-int SQLStorage::_getAutoscanDirectoryInfo(int objectID, const std::string& field)
-{
-    if (objectID == INVALID_OBJECT_ID)
-        return 0;
-    std::ostringstream q;
-    q << "SELECT " << TQ(field) << " FROM " << TQ(AUTOSCAN_TABLE)
-      << " WHERE " << TQ("obj_id") << '=' << quote(objectID);
-    auto res = select(q);
-    std::unique_ptr<SQLRow> row;
-    if (res == nullptr || (row = res->nextRow()) == nullptr)
-        return 0;
-
-    if (!remapBool(row->col(0)))
-        return 1;
-
-    return 2;
 }
 
 int SQLStorage::_getAutoscanObjectID(int autoscanID)
@@ -1914,33 +1879,9 @@ void SQLStorage::_autoscanChangePersistentFlag(int objectID, bool persistent)
     exec(q);
 }
 
-void SQLStorage::autoscanUpdateLM(std::shared_ptr<AutoscanDirectory> adir)
-{
-    log_debug("id: {}; last_modified: {}", adir->getStorageID(), adir->getPreviousLMT());
-    std::ostringstream q;
-    q << "UPDATE " << TQ(AUTOSCAN_TABLE)
-      << " SET " << TQ("last_modified") << '=' << quote(adir->getPreviousLMT())
-      << " WHERE " << TQ("id") << '=' << quote(adir->getStorageID());
-    exec(q);
-}
-
-int SQLStorage::isAutoscanChild(int objectID)
-{
-    auto pathIDs = getPathIDs(objectID);
-    if (pathIDs == nullptr)
-        return INVALID_OBJECT_ID;
-
-    for (int pathId : *pathIDs) {
-        int recursive = isAutoscanDirectoryRecursive(pathId);
-        if (recursive == 2)
-            return pathId;
-    }
-    return INVALID_OBJECT_ID;
-}
-
 void SQLStorage::checkOverlappingAutoscans(std::shared_ptr<AutoscanDirectory> adir)
 {
-    _checkOverlappingAutoscans(adir);
+    (void)_checkOverlappingAutoscans(adir);
 }
 
 std::unique_ptr<std::vector<int>> SQLStorage::_checkOverlappingAutoscans(const std::shared_ptr<AutoscanDirectory>& adir)

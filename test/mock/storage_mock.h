@@ -52,17 +52,13 @@ public:
     std::string getInternalSetting(const std::string& key) override { return ""; }
     void storeInternalSetting(const std::string& key, const std::string& value) override { }
 
-    void updateAutoscanPersistentList(ScanMode scanmode, std::shared_ptr<AutoscanList> list) override { }
     std::shared_ptr<AutoscanList> getAutoscanList(ScanMode scanode) override { return nullptr; }
+    void updateAutoscanList(ScanMode scanmode, std::shared_ptr<AutoscanList> list) override { }
+
+    std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(int objectID) override { return nullptr; }
     void addAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir) override { }
     void updateAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir) override { }
-    void removeAutoscanDirectoryByObjectID(int objectID) override { }
-    void removeAutoscanDirectory(int autoscanID) override { }
-    int isAutoscanChild(int objectID) override { return 0; }
-    int getAutoscanDirectoryType(int objectId) override { return 0; }
-    int isAutoscanDirectoryRecursive(int objectId) override { return 0; }
-    std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(int objectID) override { return nullptr; }
-    void autoscanUpdateLM(std::shared_ptr<AutoscanDirectory> adir) override { }
+    void removeAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir) override { }
     void checkOverlappingAutoscans(std::shared_ptr<AutoscanDirectory> adir) override { }
 
     std::unique_ptr<std::vector<int>> getPathIDs(int objectID) override { return nullptr; }
