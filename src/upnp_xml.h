@@ -92,13 +92,6 @@ public:
     /// \param URL download location of the video item
     void renderCaptionInfo(const std::string& URL, pugi::xml_node* parent);
 
-    static void renderCreator(const std::string& creator, pugi::xml_node* parent);
-    static void renderAlbumArtURI(const std::string& uri, pugi::xml_node* parent);
-    static void renderComposer(const std::string& composer, pugi::xml_node* parent);
-    static void renderConductor(const std::string& conductor, pugi::xml_node* parent);
-    static void renderOrchestra(const std::string& orchestra, pugi::xml_node* parent);
-    static void renderAlbumDate(const std::string& date, pugi::xml_node* parent);
-
     void addResources(const std::shared_ptr<CdsItem>& item, pugi::xml_node* parent);
 
     // FIXME: This needs to go, once we sort a nicer way for the webui code to access this

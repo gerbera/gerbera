@@ -96,7 +96,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, bool re
             } else if (key == MetadataHandler::getMetaFieldName(M_TRACKNUMBER)) {
                 if (upnp_class == UPNP_DEFAULT_CLASS_MUSIC_TRACK)
                     result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(it.second.c_str());
-            } else if ((key != MetadataHandler::getMetaFieldName(M_TITLE)) || ((key == MetadataHandler::getMetaFieldName(M_TRACKNUMBER)) && (upnp_class == UPNP_DEFAULT_CLASS_MUSIC_TRACK)))
+            } else if (key != MetadataHandler::getMetaFieldName(M_TITLE))
                 result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(it.second.c_str());
         }
 
@@ -140,36 +140,34 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, bool re
             if (creator.empty())
                 creator = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_ARTIST));
             if (!creator.empty())
-                renderCreator(creator, &result);
+                result.append_child("dc:creator").append_child(pugi::node_pcdata).set_value(creator.c_str());
 
             std::string composer = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_COMPOSER));
             if (!composer.empty())
-                renderComposer(composer, &result);
+                result.append_child("upnp:composer").append_child(pugi::node_pcdata).set_value(composer.c_str());
 
             std::string conductor = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_CONDUCTOR));
             if (!conductor.empty())
-                renderConductor(conductor, &result);
+                result.append_child("upnp:Conductor").append_child(pugi::node_pcdata).set_value(conductor.c_str());
 
             std::string orchestra = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_ORCHESTRA));
             if (!orchestra.empty())
-                renderOrchestra(orchestra, &result);
+                result.append_child("upnp:orchestra").append_child(pugi::node_pcdata).set_value(orchestra.c_str());
 
             std::string date = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_UPNP_DATE));
             if (!date.empty())
-                renderAlbumDate(date, &result);
+                result.append_child("upnp:date").append_child(pugi::node_pcdata).set_value(date.c_str());
         }
         if (upnp_class == UPNP_DEFAULT_CLASS_MUSIC_ALBUM || upnp_class == UPNP_DEFAULT_CLASS_CONTAINER) {
             std::string aa_id = storage->findFolderImage(cont->getID(), std::string());
 
             if (!aa_id.empty()) {
                 log_debug("Using folder image as artwork for container");
-
-                std::string url;
                 std::map<std::string, std::string> dict;
                 dict[URL_OBJECT_ID] = aa_id;
 
-                url = virtualURL + _URL_PARAM_SEPARATOR + CONTENT_MEDIA_HANDLER + _URL_PARAM_SEPARATOR + dict_encode_simple(dict) + _URL_PARAM_SEPARATOR + URL_RESOURCE_ID + _URL_PARAM_SEPARATOR + "0";
-                renderAlbumArtURI(url, &result);
+                std::string url = virtualURL + _URL_PARAM_SEPARATOR + CONTENT_MEDIA_HANDLER + _URL_PARAM_SEPARATOR + dict_encode_simple(dict) + _URL_PARAM_SEPARATOR + URL_RESOURCE_ID + _URL_PARAM_SEPARATOR + "0";
+                result.append_child("upnp:albumArtURI").append_child(pugi::node_pcdata).set_value(url.c_str());
 
             } else if (upnp_class == UPNP_DEFAULT_CLASS_MUSIC_ALBUM) {
                 // try to find the first track and use its artwork
@@ -194,7 +192,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, bool re
                             if ((res->getHandlerType() == CH_ID3) || (res->getHandlerType() == CH_MP4) || (res->getHandlerType() == CH_FLAC) || (res->getHandlerType() == CH_FANART) || (res->getHandlerType() == CH_EXTURL)) {
 
                                 std::string url = getArtworkUrl(item);
-                                renderAlbumArtURI(url, &result);
+                                result.append_child("upnp:albumArtURI").append_child(pugi::node_pcdata).set_value(url.c_str());
 
                                 artAdded = true;
                                 break;
@@ -400,36 +398,6 @@ void UpnpXMLBuilder::renderCaptionInfo(const std::string& URL, pugi::xml_node* p
     size_t endp = URL.rfind('.');
     cap.append_child(pugi::node_pcdata).set_value((virtualURL + URL.substr(0, endp) + ".srt").c_str());
     cap.append_attribute("sec:type") = "srt";
-}
-
-void UpnpXMLBuilder::renderCreator(const std::string& creator, pugi::xml_node* parent)
-{
-    parent->append_child("dc:creator").append_child(pugi::node_pcdata).set_value(creator.c_str());
-}
-
-void UpnpXMLBuilder::renderAlbumArtURI(const std::string& uri, pugi::xml_node* parent)
-{
-    parent->append_child("upnp:albumArtURI").append_child(pugi::node_pcdata).set_value(uri.c_str());
-}
-
-void UpnpXMLBuilder::renderComposer(const std::string& composer, pugi::xml_node* parent)
-{
-    parent->append_child("upnp:composer").append_child(pugi::node_pcdata).set_value(composer.c_str());
-}
-
-void UpnpXMLBuilder::renderConductor(const std::string& conductor, pugi::xml_node* parent)
-{
-    parent->append_child("upnp:Conductor").append_child(pugi::node_pcdata).set_value(conductor.c_str());
-}
-
-void UpnpXMLBuilder::renderOrchestra(const std::string& orchestra, pugi::xml_node* parent)
-{
-    parent->append_child("upnp:orchestra").append_child(pugi::node_pcdata).set_value(orchestra.c_str());
-}
-
-void UpnpXMLBuilder::renderAlbumDate(const std::string& date, pugi::xml_node* parent)
-{
-    parent->append_child("upnp:date").append_child(pugi::node_pcdata).set_value(date.c_str());
 }
 
 std::unique_ptr<UpnpXMLBuilder::PathBase> UpnpXMLBuilder::getPathBase(const std::shared_ptr<CdsItem>& item, bool forceLocal)
