@@ -110,14 +110,11 @@ public:
 class CMRescanDirectoryTask : public GenericTask, public std::enable_shared_from_this<CMRescanDirectoryTask> {
 protected:
     std::shared_ptr<ContentManager> content;
-    int objectID;
-    int scanID;
-    ScanMode scanMode;
+    std::shared_ptr<AutoscanDirectory> adir;
 
 public:
     CMRescanDirectoryTask(std::shared_ptr<ContentManager> content,
-        int objectID, int scanID, ScanMode scanMode,
-        bool cancellable);
+        std::shared_ptr<AutoscanDirectory> adir, bool cancellable);
     void run() override;
 };
 
@@ -191,8 +188,6 @@ public:
 
     int ensurePathExistence(fs::path path);
     void removeObject(int objectID, bool async = true, bool all = false);
-    void rescanDirectory(int objectID, int scanID, ScanMode scanMode,
-        std::string descPath = "", bool cancellable = true);
 
     /// \brief Updates an object in the database using the given parameters.
     /// \param objectID ID of the object to update
@@ -285,6 +280,8 @@ public:
     /// \brief handles the recreation of a persistent autoscan directory
     void handlePersistentAutoscanRecreate(std::shared_ptr<AutoscanDirectory> adir);
 
+    void rescanDirectory(std::shared_ptr<AutoscanDirectory> adir, std::string descPath = "", bool cancellable = true);
+
     /// \brief instructs ContentManager to reload scripting environment
     void reloadLayout();
 
@@ -353,7 +350,7 @@ protected:
     //void _addFile2(std::string path, bool recursive=0);
     void _removeObject(int objectID, bool all);
 
-    void _rescanDirectory(int containerID, int scanID, ScanMode scanMode, const std::shared_ptr<GenericTask>& task = nullptr);
+    void _rescanDirectory(std::shared_ptr<AutoscanDirectory> adir, const std::shared_ptr<GenericTask>& task = nullptr);
     /* for recursive addition */
     void addRecursive(const fs::path& path, bool hidden, const std::shared_ptr<CMAddFileTask>& task);
 
