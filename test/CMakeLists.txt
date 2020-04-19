@@ -6,7 +6,7 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 get_target_property(GERBERA_INTERFACE_LIBRARIES gerbera INTERFACE_LINK_LIBRARIES)
 
 ## Add tests below
-add_subdirectory(test_config)
-add_subdirectory(test_core)
-add_subdirectory(test_scripting)
-add_subdirectory(test_util)
+add_subdirectory(config)
+add_subdirectory(core)
+add_subdirectory(scripting)
+add_subdirectory(util)

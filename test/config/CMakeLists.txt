@@ -1,20 +1,9 @@
 find_package(Threads REQUIRED)
 
-add_executable(testscripting
+add_executable(testconfig
         main.cc
-        mock/duk_helper.h
-        mock/duk_helper.cc
-        mock/common_script_mock.h
-        mock/script_test_fixture.h
-        mock/script_test_fixture.cc
-        test_common_script.cc
-        test_external_m3u_playlist.cc
-        test_external_pls_playlist.cc
-        test_import_script.cc
-        test_import_struct_script.cc
-        test_internal_m3u_playlist.cc
-        test_internal_pls_playlist.cc
-        test_runtime.cc
+        test_configgenerator.cc
+        test_configmanager.cc
 )
 
 include_directories(
@@ -35,10 +24,9 @@ include_directories(
         ${SQLITE3_INCLUDE_DIRS}
         ${ICONV_INCLUDE_DIR}
         ${GTEST_INCLUDE_DIRS}
-        ${GMOCK_INCLUDE_DIRS}
 )
 
-target_link_libraries(testscripting PRIVATE
+target_link_libraries(testconfig PRIVATE
         libgerbera
         ${UUID_LIBRARIES}
         ${UPNP_LIBRARIES}
@@ -56,13 +44,16 @@ target_link_libraries(testscripting PRIVATE
         ${SQLITE3_LIBRARIES}
         ${ICONV_LIBRARIES}
         ${GTEST_LIBRARIES}
-        ${GMOCK_BOTH_LIBRARIES}
         ${GERBERA_INTERFACE_LIBRARIES}
         ${CMAKE_THREAD_LIBS_INIT}
         )
 
-add_test(NAME testscripting
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/test/test_scripting
-        COMMAND ./testscripting)
+add_custom_command(TARGET testconfig POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/fixtures $<TARGET_FILE_DIR:testconfig>/fixtures
+)
 
-add_definitions(-DSCRIPTS_DIR="${CMAKE_SOURCE_DIR}/scripts")
+add_test(NAME testconfig
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/test/config
+        COMMAND ./testconfig)
+
+add_definitions(-DCMAKE_BINARY_DIR="${CMAKE_BINARY_DIR}")
