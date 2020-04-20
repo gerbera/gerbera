@@ -260,6 +260,10 @@ void ContentManager::run()
             std::shared_ptr<AutoscanDirectory> dir = autoscan_inotify->get(i);
             if (dir != nullptr)
                 inotify->monitor(dir);
+
+            auto param = std::make_shared<Timer::Parameter>(Timer::Parameter::timer_param_t::IDAutoscan, dir->getScanID());
+            log_debug("Adding one-shot inotify scan");
+            timer->addTimerSubscriber(this, 60, param, true);
         }
     }
 #endif
