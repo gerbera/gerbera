@@ -36,12 +36,10 @@ function addPlaylistItem(location, title, playlistChain, order) {
         // wrong your renderer may show the item as unsupported and refuse
         // to play it. Unfortunately most playlist formats do not provide
         // any mimetype information.
-
         exturl.mimetype = 'audio/mpeg';
 
         // Make sure to correctly set the object type, then populate the
         // remaining fields.
-
         exturl.objectType = OBJECT_TYPE_ITEM_EXTERNAL_URL;
 
         exturl.location = location;
@@ -54,23 +52,26 @@ function addPlaylistItem(location, title, playlistChain, order) {
         // will be displayed in the correct order inside a playlist
         // container. It is similar to the id3 track number that is used
         // to sort the media in album containers.
-
         exturl.playlistOrder = (order ? order : playlistOrder++);
 
         // Your item will be added to the container named by the playlist
         // that you are currently parsing.
-
         addCdsObject(exturl, playlistChain,  UPNP_CLASS_PLAYLIST_CONTAINER);
     } else {
         if (location.substr(0,1) !== '/') {
             location = playlistLocation + location;
         }
-
         var cds = getCdsObject(location);
+        if (!cds) {
+            print("Skipping item: " + location);
+            return
+        }
+
         var item = copyObject(cds);
 
         item.playlistOrder = (order ? order : playlistOrder++);
         item.title = item.meta[M_TITLE];
+
         addCdsObject(item, playlistChain,  UPNP_CLASS_PLAYLIST_CONTAINER);
     }
 }
