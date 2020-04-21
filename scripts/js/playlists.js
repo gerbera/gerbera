@@ -67,11 +67,13 @@ function addPlaylistItem(location, title, playlistChain, order) {
         }
 
         var cds = getCdsObject(location);
-        var item = copyObject(cds);
+        if (cds) {
+            var item = copyObject(cds);
 
-        item.playlistOrder = (order ? order : playlistOrder++);
-        item.title = item.meta[M_TITLE];
-        addCdsObject(item, playlistChain,  UPNP_CLASS_PLAYLIST_CONTAINER);
+            item.playlistOrder = (order ? order : playlistOrder++);
+            item.title = item.meta[M_TITLE];
+            addCdsObject(item, playlistChain,  UPNP_CLASS_PLAYLIST_CONTAINER);
+        }
     }
 }
 // doc-add-playlist-item-end

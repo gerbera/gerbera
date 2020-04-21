@@ -679,11 +679,17 @@ std::vector<std::string> SQLStorage::getMimeTypes()
 std::shared_ptr<CdsObject> SQLStorage::findObjectByPath(fs::path fullpath, bool wasRegularFile)
 {
     std::string dbLocation;
-    if (isRegularFile(fullpath) || wasRegularFile)
-        dbLocation = addLocationPrefix(LOC_FILE_PREFIX, fullpath);
-    else
-        dbLocation = addLocationPrefix(LOC_DIR_PREFIX, fullpath);
-
+    try {
+        if (isRegularFile(fullpath) || wasRegularFile)
+            dbLocation = addLocationPrefix(LOC_FILE_PREFIX, fullpath);
+        else
+            dbLocation = addLocationPrefix(LOC_DIR_PREFIX, fullpath);
+    }
+    catch(std::runtime_error&)
+    {
+        return nullptr;
+    }
+    
     std::ostringstream qb;
     qb << SQL_QUERY
        << " WHERE " << TQD('f', "location_hash") << '=' << quote(stringHash(dbLocation))

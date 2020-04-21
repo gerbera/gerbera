@@ -1043,7 +1043,8 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::path& 
     struct stat statbuf;
     int ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
-        throw_std_runtime_error("Failed to stat " + path.string() + " , " + mt_strerror(errno));
+        log_warning("File not found: Failed to stat " + path.string() + " , " + mt_strerror(errno));
+	return nullptr;
     }
 
     std::shared_ptr<CdsObject> obj;
