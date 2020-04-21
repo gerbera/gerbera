@@ -199,6 +199,7 @@ public:
     /// \param parameters key value pairs of fields to be updated
     void updateObject(int objectID, const std::map<std::string, std::string>& parameters);
 
+    // returns nullptr if file does not exist or is ignored due to configuration
     std::shared_ptr<CdsObject> createObjectFromFile(const fs::path& path,
         bool magic = true,
         bool allow_fifo = false);

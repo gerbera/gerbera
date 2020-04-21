@@ -679,7 +679,8 @@ std::vector<std::string> SQLStorage::getMimeTypes()
 std::shared_ptr<CdsObject> SQLStorage::findObjectByPath(fs::path fullpath, bool wasRegularFile)
 {
     std::string dbLocation;
-    if (isRegularFile(fullpath) || wasRegularFile)
+    std::error_code ec;
+    if (isRegularFile(fullpath, ec) || wasRegularFile)
         dbLocation = addLocationPrefix(LOC_FILE_PREFIX, fullpath);
     else
         dbLocation = addLocationPrefix(LOC_DIR_PREFIX, fullpath);
