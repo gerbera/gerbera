@@ -166,7 +166,7 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
     didl_lite_root.append_attribute(XML_NAMESPACE_ATTR) = XML_DIDL_LITE_NAMESPACE;
     didl_lite_root.append_attribute(XML_DC_NAMESPACE_ATTR) = XML_DC_NAMESPACE;
     didl_lite_root.append_attribute(XML_UPNP_NAMESPACE_ATTR) = XML_UPNP_NAMESPACE;
-    request->GetQuirks()->appendSpecialNamespace(&didl_lite_root);
+    didl_lite_root.append_attribute(XML_SEC_NAMESPACE_ATTR) = XML_SEC_NAMESPACE;
 
     auto searchParam = std::make_unique<SearchParam>(containerID, searchCriteria,
         std::stoi(startingIndex, nullptr), std::stoi(requestedCount, nullptr));
