@@ -50,10 +50,6 @@ public:
     // To be more compliant with original Samsung server we should check for getCaptionInfo.sec: 1 request header.
     void addCaptionInfo(std::shared_ptr<CdsItem> item, std::unique_ptr<Headers>& headers);
 
-    // add additional headers in DIDL-Lite when doing doBrowse or doSearch
-    // currentlly used for Samsung
-    void appendSpecialNamespace(pugi::xml_node* parent);
-
 private:
     std::shared_ptr<Config> config;
     const ClientInfo* pClientInfo;
