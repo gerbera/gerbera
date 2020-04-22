@@ -393,7 +393,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
             val = getProperty(MT_KEYS[i].upnp);
             if (!val.empty()) {
                 if (i == M_TRACKNUMBER) {
-                    int j = std::stoi(val);
+                    int j = stoi_string(val, 0);
                     if (j > 0) {
                         obj->setMetadata(MT_KEYS[i].upnp, val);
                         std::static_pointer_cast<CdsItem>(obj)->setTrackNumber(j);
