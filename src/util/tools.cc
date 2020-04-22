@@ -140,7 +140,7 @@ std::string tolower_string(std::string str)
 
 int stoi_string(const std::string& str, int def)
 {
-    if (str.empty())
+    if (str.empty() || !std::isdigit(*str.c_str()))
         return def;
 
     return std::stoi(str);
