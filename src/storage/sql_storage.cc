@@ -1014,10 +1014,10 @@ std::shared_ptr<CdsObject> SQLStorage::createObjectFromSearchRow(const std::uniq
     auto obj = CdsObject::createObject(self, objectType);
 
     /* set common properties */
-    obj->setID(std::stoi(row->col(SearchCol::id)));
+    obj->setID(stoi_string(row->col(SearchCol::id)));
     obj->setRefID(stoi_string(row->col(SearchCol::ref_id)));
 
-    obj->setParentID(std::stoi(row->col(SearchCol::parent_id)));
+    obj->setParentID(stoi_string(row->col(SearchCol::parent_id)));
     obj->setTitle(row->col(SearchCol::dc_title));
     obj->setClass(row->col(SearchCol::upnp_class));
 
@@ -1048,7 +1048,7 @@ std::shared_ptr<CdsObject> SQLStorage::createObjectFromSearchRow(const std::uniq
             item->setLocation(row->col(SearchCol::location));
         }
 
-        item->setTrackNumber(std::stoi(row->col(SearchCol::track_number)));
+        item->setTrackNumber(stoi_string(row->col(SearchCol::track_number)));
     } else {
         throw StorageException("", "unknown object type: " + std::to_string(objectType));
     }
