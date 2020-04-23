@@ -191,7 +191,7 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
             cdsObject->setTitle(title);
         }
 
-        xmlBuilder->renderObject(cdsObject, false, stringLimit, &didl_lite);
+        xmlBuilder->renderObject(cdsObject, false, stringLimit, &didl_lite_root);
     }
 
     std::ostringstream buf;
