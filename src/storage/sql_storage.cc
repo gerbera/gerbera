@@ -1048,7 +1048,7 @@ std::shared_ptr<CdsObject> SQLStorage::createObjectFromSearchRow(const std::uniq
             item->setLocation(row->col(SearchCol::location));
         }
 
-        item->setTrackNumber(std::stoi(row->col(SearchCol::track_number)));
+        item->setTrackNumber(stoi_string(row->col(SearchCol::track_number)));
     } else {
         throw StorageException("", "unknown object type: " + std::to_string(objectType));
     }
