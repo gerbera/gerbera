@@ -303,9 +303,10 @@ bool validateYesNo(const std::string& value);
 /// strings.
 /// \todo add escaping
 std::vector<std::string> populateCommandLine(const std::string& line,
-    const std::string& in,
-    const std::string& out,
-    const std::string& range);
+    const std::string& in = "",
+    const std::string& out = "",
+    const std::string& range = "",
+    const std::string& title = "");
 
 /// \brief this is the mkstemp routine from glibc, the only difference is that
 /// it does not return an fd but just the name that we could use.
