@@ -188,11 +188,21 @@ void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream
         EbmlElement* el = (*info)[i];
 
         if (EbmlId(*el) == KaxTitle::ClassInfos.GlobalId) {
-            std::string title(UTFstring(*dynamic_cast<KaxTitle*>(el)).GetUTF8());
+            KaxTitle* title_el = dynamic_cast<KaxTitle*>(el);
+            if (title_el == nullptr) {
+                log_error("Malformed MKV file; KaxTitle cast failed!");
+                continue;
+            }
+            std::string title(UTFstring(*title_el).GetUTF8());
             // printf("KaxTitle = %s\n", title.c_str());
             item->setMetadata(MT_KEYS[M_TITLE].upnp, sc->convert(title));
         } else if (EbmlId(*el) == KaxDateUTC::ClassInfos.GlobalId) {
-            KaxDateUTC& date = *dynamic_cast<KaxDateUTC*>(el);
+            KaxDateUTC* date_el = dynamic_cast<KaxDateUTC*>(el);
+            if (date_el == nullptr) {
+                log_error("Malformed MKV file; KaxDateUTC cast failed!");
+                continue;
+            }
+            KaxDateUTC& date = *date_el;
             time_t i_date;
             struct tm tmres;
             char buffer[25];
