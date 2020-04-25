@@ -998,9 +998,13 @@ bool validateYesNo(const std::string& value)
     return !((value != "yes") && (value != "no"));
 }
 
-std::vector<std::string> populateCommandLine(const std::string& line, const std::string& in, const std::string& out, const std::string& range)
+std::vector<std::string> populateCommandLine(const std::string& line,
+    const std::string& in,
+    const std::string& out,
+    const std::string& range,
+    const std::string& title)
 {
-    log_debug("Template: '{}', in: '{}', out: '{}', range: '{}'", line, in, out, range);
+    log_debug("Template: '{}', in: '{}', out: '{}', range: '{}', title: '{}'", line, in, out, range, title);
     std::vector<std::string> params = split_string(line, ' ');
     if (in.empty() && out.empty())
         return params;
@@ -1018,7 +1022,12 @@ std::vector<std::string> populateCommandLine(const std::string& line, const std:
 
         size_t rangePos = param.find("%range");
         if (rangePos != std::string::npos) {
-            std::string newParam = param.replace(rangePos, 5, range);
+            std::string newParam = param.replace(rangePos, 6, range);
+        }
+
+        size_t titlePos = param.find("%title");
+        if (titlePos != std::string::npos) {
+            std::string newParam = param.replace(titlePos, 6, title);
         }
     }
 
