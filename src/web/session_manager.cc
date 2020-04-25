@@ -45,11 +45,11 @@
 namespace web {
 
 Session::Session(long timeout)
+    : uiUpdateIDs(std::make_shared<std::unordered_set<int>>())
+    , sessionID("")
 {
     this->timeout = timeout;
     loggedIn = false;
-    sessionID = "";
-    uiUpdateIDs = std::make_shared<std::unordered_set<int>>();
     //(new DBRHash<int>(UI_UPDATE_ID_HASH_SIZE, MAX_UI_UPDATE_IDS + 5, INVALID_OBJECT_ID, INVALID_OBJECT_ID_2));
     updateAll = false;
     access();

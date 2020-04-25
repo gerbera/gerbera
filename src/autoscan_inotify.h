@@ -138,8 +138,8 @@ private:
     class Wd {
     public:
         Wd(fs::path path, int wd, int parentWd)
+            : wdWatches(std::make_shared<std::vector<std::shared_ptr<Watch>>>())
         {
-            wdWatches = std::make_shared<std::vector<std::shared_ptr<Watch>>>();
             this->path = path;
             this->wd = wd;
             this->parentWd = parentWd;

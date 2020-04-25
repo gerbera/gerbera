@@ -39,11 +39,11 @@
 
 CdsObject::CdsObject(std::shared_ptr<Storage> storage)
     : storage(std::move(storage))
+    , mtime(0)
 {
     id = INVALID_OBJECT_ID;
     parentID = INVALID_OBJECT_ID;
     refID = INVALID_OBJECT_ID;
-    mtime = 0;
     sizeOnDisk = 0;
     virt = false;
     sortPriority = 0;
@@ -141,12 +141,12 @@ std::shared_ptr<CdsObject> CdsObject::createObject(const std::shared_ptr<Storage
 
 CdsItem::CdsItem(std::shared_ptr<Storage> storage)
     : CdsObject(std::move(storage))
+    , serviceID("")
 {
     objectType = OBJECT_TYPE_ITEM;
     upnpClass = "object.item";
     mimeType = MIMETYPE_DEFAULT;
     trackNumber = 0;
-    serviceID = "";
 }
 
 void CdsItem::copyTo(const std::shared_ptr<CdsObject>& obj)
@@ -247,9 +247,8 @@ CdsItemInternalURL::CdsItemInternalURL(std::shared_ptr<Storage> storage)
     : CdsItemExternalURL(std::move(storage))
 {
     objectType |= OBJECT_TYPE_ITEM_INTERNAL_URL;
-
-    upnpClass = "object.item";
     mimeType = MIMETYPE_DEFAULT;
+    upnpClass = "object.item";
 }
 
 void CdsItemInternalURL::validate()
