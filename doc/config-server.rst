@@ -230,6 +230,9 @@ but they are also not served via UPnP browse requests. Directory listing is not 
 * Optional
 * Default: **180**, `this is according to the UPnP specification.`
 
+If you experience disconnection problems from your device, e.g. Playstation 4, when streaming videos after about 5 minutes, 
+you can try changing the alive value to 86400 (which is 24 hours)
+
 Interval for broadcasting SSDP:alive messages
 
 ``pc-directory``
