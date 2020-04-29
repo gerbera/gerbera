@@ -25,11 +25,11 @@
 /// client info initially taken from https://sourceforge.net/p/minidlna/git/ci/master/tree/clients.cc
 
 #include "upnp_clients.h" // API
-#include "config/config.h"
 #include "config/client_config.h"
+#include "config/config.h"
+#include "util/tools.h"
 
 #include <upnp.h>
-#include "util/tools.h"
 
 // table of supported clients (sequence of entries matters!)
 static const struct ClientInfo clientInfo[] = {
