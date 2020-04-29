@@ -32,6 +32,7 @@ namespace fs = std::filesystem;
 
 // forward declaration
 class AutoscanList;
+class ClientConfigList;
 class AutoscanDirectory;
 class TranscodingProfileList;
 
@@ -158,6 +159,9 @@ typedef enum {
 #if defined(HAVE_FFMPEG)
     CFG_IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST,
 #endif
+    CFG_CLIENTS_LIST,
+    CFG_CLIENTS_LIST_ENABLED,
+
     CFG_MAX
 } config_option_t;
 
@@ -189,6 +193,10 @@ public:
     /// \brief returns a config option of type AutoscanList
     /// \param option to retrieve
     virtual std::shared_ptr<AutoscanList> getAutoscanListOption(config_option_t option) = 0;
+
+    /// \brief returns a config option of type AutoscanList
+    /// \param option to retrieve
+    virtual std::shared_ptr<ClientConfigList> getClientConfigListOption(config_option_t option) = 0;
 
     /// \brief returns a config option of type TranscodingProfileList
     /// \param option to retrieve
