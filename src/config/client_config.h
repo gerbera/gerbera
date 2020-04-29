@@ -27,9 +27,9 @@
 #ifndef __CLIENTCONFIG_H__
 #define __CLIENTCONFIG_H__
 
+#include "util/upnp_clients.h"
 #include <filesystem>
 #include <mutex>
-#include "util/upnp_clients.h"
 
 // forward declaration
 class ClientConfig;
@@ -105,7 +105,6 @@ public:
 protected:
     std::string ip;
     std::string userAgent;
-    
     struct ClientInfo clientInfo;
 };
 
