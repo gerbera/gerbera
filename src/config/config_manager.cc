@@ -53,8 +53,8 @@
 #endif
 
 #include "autoscan.h"
-#include "config_options.h"
 #include "client_config.h"
+#include "config_options.h"
 #include "metadata/metadata_handler.h"
 #include "storage/storage.h"
 #include "transcoding/transcoding.h"
