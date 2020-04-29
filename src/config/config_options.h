@@ -39,6 +39,7 @@
 
 // forward declaration
 class AutoscanList;
+class ClientConfigList;
 class TranscodingProfileList;
 
 class ConfigOption {
@@ -64,6 +65,11 @@ public:
     }
 
     virtual std::shared_ptr<AutoscanList> getAutoscanListOption() const
+    {
+        throw std::runtime_error("Wrong option type");
+    }
+
+    virtual std::shared_ptr<ClientConfigList> getClientConfigListOption() const
     {
         throw std::runtime_error("Wrong option type");
     }
@@ -150,6 +156,21 @@ public:
 protected:
     std::shared_ptr<AutoscanList> option;
 };
+
+
+class ClientConfigListOption : public ConfigOption {
+public:
+    explicit ClientConfigListOption(std::shared_ptr<ClientConfigList> option)
+    {
+        this->option = option;
+    }
+
+    std::shared_ptr<ClientConfigList> getClientConfigListOption() const override { return option; }
+
+protected:
+    std::shared_ptr<ClientConfigList> option;
+};
+
 
 class TranscodingProfileListOption : public ConfigOption {
 public:
