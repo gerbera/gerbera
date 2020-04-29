@@ -24,8 +24,8 @@
 /// \file client_config.cc
 
 #include "client_config.h" // API
-#include "util/upnp_clients.h"
 #include "content_manager.h"
+#include "util/upnp_clients.h"
 
 #include <utility>
 
