@@ -239,7 +239,7 @@ Sony
 
 -  Playstation 3
 
-Firmware 1.80 introduces UPnP/DLNA support, add the following to the <server> section of your configuration file to enable Gerbera PS3 compatibility.
+Firmware 1.80 introduces UPnP/DLNA support.
 
 -  Playstation 4
 
