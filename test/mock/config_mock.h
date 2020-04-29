@@ -17,6 +17,7 @@ public:
     std::map<std::string, std::string> getDictionaryOption(config_option_t option) { return std::map<std::string, std::string>(); }
     std::vector<std::string> getArrayOption(config_option_t option) { return std::vector<std::string>(); }
     std::shared_ptr<AutoscanList> getAutoscanListOption(config_option_t option) { return nullptr; }
+    std::shared_ptr<ClientConfigList> getClientConfigListOption(config_option_t option) { return nullptr; }
     std::shared_ptr<TranscodingProfileList> getTranscodingProfileListOption(config_option_t option) { return std::make_shared<TranscodingProfileList>(); }
 };
 
