@@ -54,6 +54,7 @@
 
 #include "autoscan.h"
 #include "config_options.h"
+#include "client_config.h"
 #include "metadata/metadata_handler.h"
 #include "storage/storage.h"
 #include "transcoding/transcoding.h"
@@ -135,6 +136,9 @@ ConfigManager::~ConfigManager()
 #define NEW_AUTOSCANLIST_OPTION(optval) alist_opt = std::make_shared<AutoscanListOption>(optval)
 #define SET_AUTOSCANLIST_OPTION(opttype) options->at(opttype) = alist_opt
 
+#define NEW_CLIENTCONFIGLIST_OPTION(optval) cclist_opt = std::make_shared<ClientConfigListOption>(optval)
+#define SET_CLIENTCONFIGLIST_OPTION(opttype) options->at(opttype) = cclist_opt
+
 #define NEW_TRANSCODING_PROFILELIST_OPTION(optval) trlist_opt = std::make_shared<TranscodingProfileListOption>(optval)
 #define SET_TRANSCODING_PROFILELIST_OPTION(opttype) options->at(opttype) = trlist_opt
 
@@ -150,6 +154,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     std::shared_ptr<DictionaryOption> dict_opt;
     std::shared_ptr<ArrayOption> str_array_opt;
     std::shared_ptr<AutoscanListOption> alist_opt;
+    std::shared_ptr<ClientConfigListOption> cclist_opt;
     std::shared_ptr<TranscodingProfileListOption> trlist_opt;
 
     log_info("Loading configuration from: {}", filename.c_str());
@@ -465,6 +470,21 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     }
     NEW_INT_OPTION(temp_int);
     SET_INT_OPTION(CFG_SERVER_UI_SESSION_TIMEOUT);
+
+    temp = getOption("/clients/attribute::enabled",
+        DEFAULT_CLIENTS_EN_VALUE);
+    if (!validateYesNo(temp))
+        throw std::runtime_error("Error in config file: incorrect parameter for "
+                                 "<clients enabled=\"\" /> attribute");
+
+    NEW_BOOL_OPTION(temp == "yes");
+    SET_BOOL_OPTION(CFG_CLIENTS_LIST_ENABLED);
+
+    tmpEl = getElement("/clients");
+    if (tmpEl != nullptr && temp == "yes") {
+        NEW_CLIENTCONFIGLIST_OPTION(createClientConfigListFromNode(tmpEl));
+        SET_CLIENTCONFIGLIST_OPTION(CFG_CLIENTS_LIST);
+    }
 
     temp = getOption("/import/attribute::hidden-files",
         DEFAULT_HIDDEN_FILES_VALUE);
@@ -1698,6 +1718,43 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNode(const st
     return list;
 }
 
+std::shared_ptr<ClientConfigList> ConfigManager::createClientConfigListFromNode(const pugi::xml_node& element)
+{
+    auto list = std::make_shared<ClientConfigList>();
+
+    if (element == nullptr)
+        return list;
+
+    for (const pugi::xml_node& child : element.children()) {
+
+        // We only want directories
+        if (std::string(child.name()) != "client")
+            continue;
+
+        int flags = child.attribute("flags").as_int();
+        std::string ip = child.attribute("ip").as_string();
+        std::string userAgent = child.attribute("userAgent").as_string();
+
+        ClientType clientType;
+        std::string temp = child.attribute("clientType").as_string();
+        if (temp.empty()) {
+            throw std::runtime_error("clientType invalid");
+        }
+
+        clientType = ClientConfig::remapClientType(temp);
+
+        auto client = std::make_shared<ClientConfig>(flags, ip, userAgent, clientType);
+
+        try {
+            list->add(client);
+        } catch (const std::runtime_error& e) {
+            throw std::runtime_error("Could not add " + ip + " client: " + e.what());
+        }
+    }
+
+    return list;
+}
+
 void ConfigManager::dumpOptions()
 {
 #ifdef TOMBDEBUG
@@ -1780,6 +1837,11 @@ std::vector<std::string> ConfigManager::getArrayOption(config_option_t option)
 std::shared_ptr<AutoscanList> ConfigManager::getAutoscanListOption(config_option_t option)
 {
     return options->at(option)->getAutoscanListOption();
+}
+
+std::shared_ptr<ClientConfigList> ConfigManager::getClientConfigListOption(config_option_t option)
+{
+    return options->at(option)->getClientConfigListOption();
 }
 
 std::shared_ptr<TranscodingProfileList> ConfigManager::getTranscodingProfileListOption(config_option_t option)

@@ -45,7 +45,10 @@ namespace fs = std::filesystem;
 // forward declaration
 class AutoscanList;
 class AutoscanDirectory;
+class ClientConfigList;
+class ClientConfig;
 enum class ScanMode;
+enum class ClientType;
 class ConfigOption;
 class Storage;
 class TranscodingProfileList;
@@ -87,6 +90,10 @@ public:
     /// \brief returns a config option of type AutoscanList
     /// \param option to retrieve
     std::shared_ptr<AutoscanList> getAutoscanListOption(config_option_t option) override;
+
+    /// \brief returns a config option of type ClientConfigList
+    /// \param option to retrieve
+    std::shared_ptr<ClientConfigList> getClientConfigListOption(config_option_t option) override;
 
     /// \brief returns a config option of type TranscodingProfileList
     /// \param option to retrieve
@@ -171,6 +178,10 @@ protected:
     /// \param scanmode add only directories with the specified scanmode to the array
     std::shared_ptr<AutoscanList> createAutoscanListFromNode(const std::shared_ptr<Storage>& storage, const pugi::xml_node& element,
         ScanMode scanmode);
+
+    /// \brief Creates an array of ClientConfig objects from a XML nodeset.
+    /// \param element starting element of the nodeset.
+    std::shared_ptr<ClientConfigList> createClientConfigListFromNode(const pugi::xml_node& element);
 
     /// \brief Creates ab aray of TranscodingProfile objects from an XML
     /// nodeset.
