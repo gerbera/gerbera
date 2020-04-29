@@ -24,10 +24,10 @@
 /// \file client_config.cc
 
 #include "client_config.h" // API
-
-#include <utility>
 #include "util/upnp_clients.h"
 #include "content_manager.h"
+
+#include <utility>
 
 ClientConfig::ClientConfig()
 {
@@ -70,7 +70,7 @@ std::vector<std::shared_ptr<ClientConfig>> ClientConfigList::getArrayCopy()
 std::shared_ptr<ClientConfig> ClientConfigList::get(size_t id)
 {
     AutoLock lock(mutex);
-    
+
     if (id >= list.size())
         return nullptr;
 
@@ -80,7 +80,7 @@ std::shared_ptr<ClientConfig> ClientConfigList::get(size_t id)
 void ClientConfigList::remove(size_t id)
 {
     AutoLock lock(mutex);
-    
+
     if (id >= list.size()) {
         log_debug("No such ID {}!", id);
         return;
