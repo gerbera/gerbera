@@ -25,11 +25,10 @@
 /// client info initially taken from https://sourceforge.net/p/minidlna/git/ci/master/tree/clients.cc
 
 #include "upnp_clients.h" // API
-
-#include <upnp.h>
 #include "config/config.h"
 #include "config/client_config.h"
 
+#include <upnp.h>
 #include "util/tools.h"
 
 // table of supported clients (sequence of entries matters!)
@@ -203,7 +202,7 @@ bool Clients::getInfoByConfig(const struct sockaddr_storage* addr, const std::st
                 if (clientIp.find(".") != std::string::npos) {
                     struct sockaddr_in clientAddr;
                     clientAddr.sin_family = AF_INET;
-                    clientAddr.sin_addr.s_addr = inet_addr (clientIp.c_str());
+                    clientAddr.sin_addr.s_addr = inet_addr(clientIp.c_str());
                     if (sockAddrCmpAddr((struct sockaddr*)&clientAddr, (struct sockaddr*)addr) == 0) {
                         manualClient = client;
                     } else {
