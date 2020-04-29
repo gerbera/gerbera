@@ -27,6 +27,8 @@
 #include "upnp_clients.h" // API
 
 #include <upnp.h>
+#include "config/config.h"
+#include "config/client_config.h"
 
 #include "util/tools.h"
 
@@ -146,12 +148,16 @@ void Clients::addClientByDiscovery(const struct sockaddr_storage* addr, const st
 #endif
 }
 
-void Clients::getInfo(const struct sockaddr_storage* addr, const std::string& userAgent, const ClientInfo** ppInfo)
+void Clients::getInfo(std::shared_ptr<Config> config, const struct sockaddr_storage* addr, const std::string& userAgent, const ClientInfo** ppInfo)
 {
     const ClientInfo* info = nullptr;
 
     // by userAgent
-    bool found = getInfoByType(userAgent, ClientMatchType::UserAgent, &info);
+    bool found = getInfoByConfig(addr, userAgent, config, &info);
+
+    if (!found) {
+        found = getInfoByType(userAgent, ClientMatchType::UserAgent, &info);
+    }
 
     // by addClientByDiscovery
     if (!found) {
@@ -181,7 +187,66 @@ void Clients::getInfo(const struct sockaddr_storage* addr, const std::string& us
     }
 
     *ppInfo = info;
-    log_debug("client info: {} '{}' -> '{}'", sockAddrGetNameInfo((struct sockaddr*)addr), userAgent, (*ppInfo)->name);
+    log_debug("client info: {} '{}' -> '{}' as {}", sockAddrGetNameInfo((struct sockaddr*)addr), userAgent, (*ppInfo)->name, ClientConfig::mapClientType((*ppInfo)->type));
+}
+
+bool Clients::getInfoByConfig(const struct sockaddr_storage* addr, const std::string& userAgent, std::shared_ptr<Config> config, const ClientInfo** ppInfo)
+{
+    std::shared_ptr<ClientConfigList> client_list = config != nullptr ? config->getClientConfigListOption(CFG_CLIENTS_LIST) : nullptr;
+
+    std::shared_ptr<ClientConfig> manualClient = nullptr;
+    for (size_t i = 0; i < client_list->size(); i++) {
+        auto client = client_list->get(i);
+        if (client != nullptr) {
+            auto clientIp = client->getIp();
+            if (!clientIp.empty()) {
+                if (clientIp.find(".") != std::string::npos) {
+                    struct sockaddr_in clientAddr;
+                    clientAddr.sin_family = AF_INET;
+                    clientAddr.sin_addr.s_addr = inet_addr (clientIp.c_str());
+                    if (sockAddrCmpAddr((struct sockaddr*)&clientAddr, (struct sockaddr*)addr) == 0) {
+                        manualClient = client;
+                    } else {
+                        manualClient = nullptr;
+                    }
+                } else if (clientIp.find(":") != std::string::npos) {
+                    struct sockaddr_in6 clientAddr;
+                    clientAddr.sin6_family = AF_INET6;
+                    if (inet_pton(AF_INET6, clientIp.c_str(), &clientAddr.sin6_addr) == 1) {
+                        if (sockAddrCmpAddr((struct sockaddr*)&clientAddr, (struct sockaddr*)addr) == 0) {
+                            manualClient = client;
+                        } else {
+                            manualClient = nullptr;
+                        }
+                    }
+                }
+            }
+            auto clientUa = client->getUserAgent();
+            if (!clientUa.empty()) {
+                if (userAgent.find(clientUa) != std::string::npos) {
+                    manualClient = client;
+                } else {
+                    manualClient = nullptr;
+                }
+            }
+        }
+        if (manualClient != nullptr) {
+            break;
+        }
+    }
+    if (manualClient != nullptr) {
+        auto manualClientInfo = manualClient->getClientInfo();
+        for (const auto& i : clientInfo) {
+            if (i.type == manualClientInfo->type) {
+                *ppInfo = manualClientInfo;
+                manualClientInfo->flags |= i.flags;
+                return true;
+            }
+        }
+    }
+
+    *ppInfo = nullptr;
+    return false;
 }
 
 bool Clients::getInfoByType(const std::string& match, ClientMatchType type, const ClientInfo** ppInfo)

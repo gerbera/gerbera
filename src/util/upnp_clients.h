@@ -58,7 +58,7 @@ enum class ClientMatchType {
 };
 
 struct ClientInfo {
-    const char* name; // used for logging/debugging proposes only
+    std::string name; // used for logging/debugging proposes only
     ClientType type;
     QuirkFlags flags;
 
@@ -79,10 +79,11 @@ public:
     static void addClientByDiscovery(const struct sockaddr_storage* addr, const std::string& userAgent, const std::string& descLocation);
 
     // always return something, 'Unknown' if we do not know better
-    static void getInfo(const struct sockaddr_storage* addr, const std::string& userAgent, const ClientInfo** ppInfo);
+    static void getInfo(std::shared_ptr<Config> config, const struct sockaddr_storage* addr, const std::string& userAgent, const ClientInfo** ppInfo);
 
 private:
     static bool getInfoByType(const std::string& match, ClientMatchType type, const ClientInfo** ppInfo);
+    static bool getInfoByConfig(const struct sockaddr_storage* addr, const std::string& userAgent, std::shared_ptr<Config> config, const ClientInfo** ppInfo);
     static bool downloadDescription(const std::string& location, std::unique_ptr<pugi::xml_document>& xml);
 
 private:
