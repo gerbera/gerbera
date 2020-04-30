@@ -381,7 +381,6 @@ void MysqlStorage::_exec(const char* query, int length)
 /* MysqlResult */
 
 MysqlResult::MysqlResult(MYSQL_RES* mysql_res)
-    : SQLResult()
 {
     this->mysql_res = mysql_res;
     nullRead = false;
