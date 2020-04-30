@@ -78,7 +78,7 @@ std::vector<std::string> split_string(const std::string& str, char sep, bool emp
     const char* data = str.c_str();
     const char* end = data + str.length();
     while (data < end) {
-        const char* pos = strchr(data, sep);
+        auto pos = std::strchr(data, sep);
         if (pos == nullptr) {
             std::string part = data;
             ret.push_back(part);
@@ -265,8 +265,8 @@ std::string hex_decode_string(const std::string& encoded)
 
     std::ostringstream buf;
     for (int i = 0; i < len; i += 2) {
-        const char* chi = strchr(const_cast<char*>(HEX_CHARS), ptr[i]);
-        const char* clo = strchr(const_cast<char*>(HEX_CHARS), ptr[i + 1]);
+        auto chi = std::strchr(HEX_CHARS, ptr[i]);
+        auto clo = std::strchr(HEX_CHARS, ptr[i + 1]);
         int hi, lo;
 
         if (chi)
@@ -364,13 +364,13 @@ std::string urlUnescape(const std::string& str)
 
             const char* pos;
 
-            pos = strchr(const_cast<char*>(HEX_CHARS2), chi);
+            pos = std::strchr(HEX_CHARS2, chi);
             if (!pos)
                 hi = 0;
             else
                 hi = pos - HEX_CHARS2;
 
-            pos = strchr(const_cast<char*>(HEX_CHARS2), clo);
+            pos = std::strchr(HEX_CHARS2, clo);
             if (!pos)
                 lo = 0;
             else
@@ -411,14 +411,14 @@ std::string dict_encode_simple(const std::map<std::string, std::string>& dict)
 
 void dict_decode(const std::string& url, std::map<std::string, std::string>* dict)
 {
-    const char* data = url.c_str();
-    const char* dataEnd = data + url.length();
+    auto data = url.c_str();
+    auto dataEnd = data + url.length();
     while (data < dataEnd) {
-        const char* ampPos = strchr(data, '&');
+        auto ampPos = reinterpret_cast<const char*>(std::strchr(data, '&'));
         if (!ampPos) {
             ampPos = dataEnd;
         }
-        const char* eqPos = strchr(data, '=');
+        auto eqPos = std::strchr(data, '=');
         if (eqPos && eqPos < ampPos) {
             std::string key(data, eqPos - data);
             std::string value(eqPos + 1, ampPos - eqPos - 1);
