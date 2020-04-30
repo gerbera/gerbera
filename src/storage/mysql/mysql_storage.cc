@@ -181,7 +181,7 @@ void MysqlStorage::init()
 
     mysql_connection = true;
 
-    std::string dbVersion = "";
+    std::string dbVersion;
     try {
         dbVersion = getInternalSetting("db_version");
     } catch (const std::runtime_error& e) {
