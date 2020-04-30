@@ -235,7 +235,7 @@ protected:
     /// \param event Pointer to the event.
     ///
     static int handleUpnpClientEventCallback(Upnp_EventType eventType, const void* event, void* cookie);
-    int handleUpnpClientEvent(Upnp_EventType eventType, const void* event);
+    static int handleUpnpClientEvent(Upnp_EventType eventType, const void* event);
 
     /// \brief Creates a html file that is a redirector to the current server i
     /// instance
