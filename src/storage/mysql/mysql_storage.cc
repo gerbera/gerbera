@@ -198,7 +198,7 @@ void MysqlStorage::init()
         buf[MS_CREATE_SQL_INFLATED_SIZE] = '\0';
 
         auto sql_start = reinterpret_cast<char*>(buf);
-        auto sql_end = strchr(sql_start, ';');
+        auto sql_end = std::strchr(sql_start, ';');
         if (sql_end == nullptr) {
             throw_std_runtime_error("';' not found in mysql create sql");
         }
@@ -212,7 +212,7 @@ void MysqlStorage::init()
             if (*sql_start == '\n') // skip newline
                 sql_start++;
 
-            sql_end = strchr(sql_start, ';');
+            sql_end = std::strchr(sql_start, ';');
         } while (sql_end != nullptr);
         dbVersion = getInternalSetting("db_version");
         if (dbVersion.empty()) {
