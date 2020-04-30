@@ -383,7 +383,7 @@ int Server::handleUpnpRootDeviceEvent(Upnp_EventType eventtype, const void* even
 
 int Server::handleUpnpClientEventCallback(Upnp_EventType eventType, const void* event, void* cookie)
 {
-    return static_cast<Server*>(cookie)->handleUpnpClientEvent(eventType, event);
+    return Server::handleUpnpClientEvent(eventType, event);
 }
 
 int Server::handleUpnpClientEvent(Upnp_EventType eventType, const void* event)
