@@ -34,7 +34,7 @@
 
 class Headers {
 public:
-    void addHeader(const std::string& header, const std::string& value);
+    void addHeader(const std::string& key, const std::string& value);
     void writeHeaders(UpnpFileInfo* fileInfo) const;
 
     static std::unique_ptr<std::map<std::string, std::string>> readHeaders(UpnpFileInfo* fileInfo);
