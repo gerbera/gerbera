@@ -69,7 +69,7 @@ This section defines the client behaviour for one client.
     * Optional
     * Default: empty
     
-    Assign a predefined client type to your client. For valid client types see Supported Devices.
+    Assign a predefined client type to your client. For valid client types see :doc:`Supported Devices </supported-devices>`.
 
     ::
     
@@ -79,4 +79,4 @@ This section defines the client behaviour for one client.
     * Default: 0
     
     Integer containing the flags you want to set. If ``clientType`` is set, the flags are enabled in addition to settings for the client type.
-    For valid client types see Supported Devices.
+    For valid client types see :doc:`Supported Devices </supported-devices>`.
