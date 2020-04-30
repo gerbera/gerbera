@@ -343,7 +343,7 @@ void SearchParser::checkIsExpected(TokenType tokenType, const std::string& token
 {
     if (currentToken->getType() != tokenType) {
         std::string errorMsg(std::string("Failed to parse search criteria - expecting ") + tokenTypeDescription);
-        throw_std_runtime_error(errorMsg.c_str());
+        throw_std_runtime_error(errorMsg);
     }
 }
 
