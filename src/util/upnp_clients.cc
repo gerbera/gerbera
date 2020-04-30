@@ -38,7 +38,7 @@ static const struct ClientInfo clientInfo[] = {
         ClientType::Unknown,
         QUIRK_FLAG_NONE,
         ClientMatchType::None,
-        NULL },
+        nullptr },
 
     // User-Agent(discovery): Linux/3.18.91-14843133-QB28034466 UPnP/1.0 BubbleUPnP/3.4.4
     // User-Agent(fileInfo ): BubbleUPnP UPnP/1.1
