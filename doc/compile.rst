@@ -172,7 +172,7 @@ Build and install libupnp with the ``--enable-ipv6`` and ``--enable-reuseaddr`` 
   cd ../..
 
 
-It is strongly recommendend to to rebuild spdlog without bundled fmt:
+It is strongly recommended to to rebuild spdlog without bundled fmt:
   
 ::
 
@@ -193,8 +193,8 @@ Now it's time to get the source of gerbera and compile it.
   cmake -DWITH_MAGIC=1 -DWITH_MYSQL=1 -DWITH_CURL=1 -DWITH_JS=1 -DWITH_TAGLIB=1 -DWITH_AVCODEC=1 -DWITH_EXIF=1 -DWITH_LASTFM=0 -DWITH_SYSTEMD=1 ../gerbera
   make 
   sudo make install
-  
- 	
+
+
 .. index:: FreeBSD
 
 Build On FreeBSD
