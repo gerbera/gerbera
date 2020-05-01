@@ -108,10 +108,10 @@ The following packages are too old in 16.04 and must be installed from source:
 Build On Ubuntu 18.04
 ~~~~~~~~~~~~~~~~~~~~~
 
-::
 To build gerbera on Ubuntu 18.04 you have to install a newer version of the gcc++ compiler and clang++:
 
 :: 
+
   sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
   sudo apt update
   sudo apt upgrade
@@ -131,6 +131,8 @@ To build gerbera on Ubuntu 18.04 you have to install a newer version of the gcc+
   sudo update-alternatives --set cc /usr/bin/clang
   sudo update-alternatives --set c++ /usr/bin/clang++
 
+::
+
   git clone https://github.com/Kitware/CMake
   cd CMake
   ./configure
@@ -138,18 +140,22 @@ To build gerbera on Ubuntu 18.04 you have to install a newer version of the gcc+
   sudo make install
   cd ..
  	
-::
+
 Install all libraries gerbera needs. Because they are to old libupnp, libfmt must be
 build and installed from the source:
   
+::
+
   sudo apt install -y uuid-dev libsqlite3-dev libmysqlclient-dev libmagic-dev \
   libexif-dev libcurl4-openssl-dev libspdlog-dev libpugixml-dev libavutil-dev \
   libavcodec-dev libavformat-dev libavdevice-dev libavfilter-dev libavresample-dev \
   libswscale-dev libswresample-dev libpostproc-dev duktape-dev libmatroska-dev \
   libsystemd-dev libtag1-dev ffmpeg
 
+
+Build and install libupnp with the ``--enable-ipv6`` and ``--enable-reuseaddr`` option and libfmt from sourcec
+
 ::
-Build and install libupnp, libfmt from sourcec
   
   wget "https://downloads.sourceforge.net/project/pupnp/pupnp/libupnp-1.12.1/libupnp-1.12.1.tar.bz2?r=https%3A%2F%2Fsourceforge.net%2Fprojects%2Fpupnp%2Ffiles%2Flatest%2Fdownload&ts=1588248015" -O libupnp-1.12.1.tar.bz2
   tar -xf libupnp-1.12.1.tar.bz2
@@ -165,17 +171,21 @@ Build and install libupnp, libfmt from sourcec
   sudo make install
   cd ../..
 
-::
+
 It is strongly recommendend to to rebuild spdlog without bundled fmt:
   
+::
+
   git clone https://github.com/gabime/spdlog
   cd spdlog
   cmake -D "SPDLOG_FMT_EXTERNAL:BOOL=true" .
   make
   sudo make install
 
-::
+
 Now it's time to get the source of gerbera and compile it.  
+
+::
 
   git clone https://github.com/gerbera/gerbera.git
   mkdir build
@@ -184,8 +194,7 @@ Now it's time to get the source of gerbera and compile it.
   make 
   sudo make install
   
-  
-	
+ 	
 .. index:: FreeBSD
 
 Build On FreeBSD
