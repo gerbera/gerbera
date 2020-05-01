@@ -105,6 +105,87 @@ The following packages are too old in 16.04 and must be installed from source:
 **libupnp** must be configured/built with ``--enable-ipv6``. See
 ``scripts/install-pupnp18.sh`` for details.
 
+Build On Ubuntu 18.04
+~~~~~~~~~~~~~~~~~~~~~
+
+::
+To build gerbera on Ubuntu 18.04 you have to install a newer version of the gcc++ compiler and clang++:
+
+:: 
+  sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+  sudo apt update
+  sudo apt upgrade
+  sudo apt install -y build-essential xz-utils curl gcc-8 g++-8 clang clang-9 libssl-dev  pkg-config
+  sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 30
+  sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60
+  sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 30
+  sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 60
+  sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-9 60
+  sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-6.0 30
+  sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-9 60
+  sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-6.0 30
+  sudo update-alternatives --config gcc
+  sudo update-alternatives --config g++
+  sudo update-alternatives --config clang
+  sudo update-alternatives --config clang++
+  sudo update-alternatives --set cc /usr/bin/clang
+  sudo update-alternatives --set c++ /usr/bin/clang++
+
+  git clone https://github.com/Kitware/CMake
+  cd CMake
+  ./configure
+  make
+  sudo make install
+  cd ..
+ 	
+::
+Install all libraries gerbera needs. Because they are to old libupnp, libfmt must be
+build and installed from the source:
+  
+  sudo apt install -y uuid-dev libsqlite3-dev libmysqlclient-dev libmagic-dev \
+  libexif-dev libcurl4-openssl-dev libspdlog-dev libpugixml-dev libavutil-dev \
+  libavcodec-dev libavformat-dev libavdevice-dev libavfilter-dev libavresample-dev \
+  libswscale-dev libswresample-dev libpostproc-dev duktape-dev libmatroska-dev \
+  libsystemd-dev libtag1-dev ffmpeg
+
+::
+Build and install libupnp, libfmt from sourcec
+  
+  wget "https://downloads.sourceforge.net/project/pupnp/pupnp/libupnp-1.12.1/libupnp-1.12.1.tar.bz2?r=https%3A%2F%2Fsourceforge.net%2Fprojects%2Fpupnp%2Ffiles%2Flatest%2Fdownload&ts=1588248015" -O libupnp-1.12.1.tar.bz2
+  tar -xf libupnp-1.12.1.tar.bz2
+  cd libupnp-1.12.1
+  ./configure --enable-ipv6 --enable-reuseaddr
+  make
+  sudo make install
+  cd ..
+  git clone https://github.com/fmtlib/fmt
+  cd fmt
+  cmake .
+  make
+  sudo make install
+  cd ../..
+
+::
+It is strongly recommendend to to rebuild spdlog without bundled fmt:
+  
+  git clone https://github.com/gabime/spdlog
+  cd spdlog
+  cmake -D "SPDLOG_FMT_EXTERNAL:BOOL=true" .
+  make
+  sudo make install
+
+::
+Now it's time to get the source of gerbera and compile it.  
+
+  git clone https://github.com/gerbera/gerbera.git
+  mkdir build
+  cd build
+  cmake -DWITH_MAGIC=1 -DWITH_MYSQL=1 -DWITH_CURL=1 -DWITH_JS=1 -DWITH_TAGLIB=1 -DWITH_AVCODEC=1 -DWITH_EXIF=1 -DWITH_LASTFM=0 -DWITH_SYSTEMD=1 ../gerbera
+  make 
+  sudo make install
+  
+  
+	
 .. index:: FreeBSD
 
 Build On FreeBSD
