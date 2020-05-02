@@ -169,7 +169,7 @@ Build and install libupnp with the ``--enable-ipv6`` and ``--enable-reuseaddr`` 
   cmake .
   make
   sudo make install
-  cd ../..
+  cd ..
 
 
 It is strongly recommended to to rebuild spdlog without bundled fmt:
@@ -181,7 +181,8 @@ It is strongly recommended to to rebuild spdlog without bundled fmt:
   cmake -D "SPDLOG_FMT_EXTERNAL:BOOL=true" .
   make
   sudo make install
-
+  cd ..
+  
 
 Now it's time to get the source of gerbera and compile it.  
 

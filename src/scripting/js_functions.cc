@@ -124,7 +124,7 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
                 return 0;
             }
 
-            if (!IS_CDS_ITEM_EXTERNAL_URL(otype) && !IS_CDS_ITEM_INTERNAL_URL(otype)) {
+            if (IS_CDS_PURE_ITEM(otype)) {
                 fs::path loc = self->getProperty("location");
                 pcd_id = cm->addFile(loc, false, false, true);
                 if (pcd_id == INVALID_OBJECT_ID) {
@@ -158,7 +158,7 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
         }
 
         cds_obj->setParentID(id);
-        if (!IS_CDS_ITEM_EXTERNAL_URL(cds_obj->getObjectType()) && !IS_CDS_ITEM_INTERNAL_URL(cds_obj->getObjectType())) {
+        if (IS_CDS_PURE_ITEM(cds_obj->getObjectType()) || IS_CDS_ACTIVE_ITEM(cds_obj->getObjectType())) {
             /// \todo get hidden file setting from config manager?
             /// what about same stuff in content manager, why is it not used
             /// there?
