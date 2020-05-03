@@ -821,7 +821,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
             url.insert(0, virtualURL);
         }
 
-		if (!hide_original_resource || transcoded || (hide_original_resource && (original_resource != i)))
-			renderResource(url, res_attrs, parent);
+        if (!hide_original_resource || transcoded || (hide_original_resource && (original_resource != i)))
+            renderResource(url, res_attrs, parent);
     }
 }

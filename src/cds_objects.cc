@@ -177,13 +177,13 @@ void CdsItem::validate()
 
     if (this->location.empty())
         throw_std_runtime_error("Item validation failed: missing location");
-	
+
     if (!IS_CDS_ITEM_EXTERNAL_URL(this->objectType) && !IS_CDS_ITEM_INTERNAL_URL(this->objectType)) {
         // BUGFIXING - Object-Types InternalURL and ExternalURL are not regular files
         std::error_code ec;
         if (!isRegularFile(location, ec))
             throw_std_runtime_error("Item validation failed: file " + location.string() + " not found");
-	}
+    }
 }
 
 CdsActiveItem::CdsActiveItem(std::shared_ptr<Storage> storage)
