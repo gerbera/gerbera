@@ -150,7 +150,7 @@ object.
     **RW**
 
     This is the title of the original object, since the object represents an entry in the PC-Directory, the title will be
-    set to it's file name. This field corresponds to dc:title in the DIDL-Lite XML.
+    set to it's file name. This field corresponds to ``dc:title`` in the DIDL-Lite XML.
 
 .. js:attribute:: orig.id
 
@@ -238,7 +238,7 @@ object.
 
         **RW**
 
-        Date, must be in the format of **YYYY-MM-DD** (required by the UPnP spec), this corresponds to dc:date in the
+        Date, must be in the format of **YYYY-MM-DD** (required by the UPnP spec), this corresponds to ``dc:date`` in the
         DIDL-Lite XML.
 
 
@@ -282,36 +282,39 @@ object.
 
         **RW**
 
-        Director of the media, this corresponds to ``dc:publisher`` in the DIDL-Lite XML.
+        Publisher of the media, this corresponds to ``dc:publisher`` in the DIDL-Lite XML.
 
     .. js:attribute:: orig.meta[M_RATING]
 
         **RW**
     
-        Director of the media, this corresponds to ``upnp:rating`` in the DIDL-Lite XML.
+        Rating of the media, this corresponds to ``upnp:rating`` in the DIDL-Lite XML.
 
     .. js:attribute:: orig.meta[M_ACTOR]
 
         **RW**
     
-        Director of the media, this corresponds to ``upnp:actor`` in the DIDL-Lite XML.
+        Actor of the media, this corresponds to ``upnp:actor`` in the DIDL-Lite XML.
 
     .. js:attribute:: orig.meta[M_PRODUCER]
 
         **RW**
 
-        Director of the media, this corresponds to ``upnp:producer`` in the DIDL-Lite XML.
+        Producer of the media, this corresponds to ``upnp:producer`` in the DIDL-Lite XML.
 
 .. js:attribute:: orig.aux
 
     **RO**
 
-    Array holding the so called auxiliary data. Aux data is metadata that is not part of UPnP, for example -
-    this can be a camera model that was used to make a photo, or the information if the photo was taken with or without flash.
+    Array holding the so called auxiliary data. Aux data is metadata that is not part of UPnP, for example - this 
+    can be a musical work, its performing artists and their instruments, the name of a personal video collection 
+    and the episode-ID of a TV show, a camera model that was used to make a photo, or the information if the photo 
+    was taken with or without flash.
 
 
-    Currently aux data can be gathered from **libexif** (see the Import section in the main
-    documentation for more details). So, this array will hold the tags that you specified in your config.xml, allowing
+    Currently aux data can be gathered from **taglib** (or id3lib if absent), **ffmpeg and libexif** (see the 
+    `Import section <http://docs.gerbera.io/en/latest/config-import.html?#library-options>`_ in the main documentation for 
+    more details). So, this array will hold the tags that you specified in your config.xml, allowing
     you to create your virtual structure according to your liking.
 
 .. js:attribute:: orig.playlistOrder
@@ -401,7 +404,7 @@ within the import and/or the playlist script:
         All Music container in the server hierarchy. Make sure to properly escape the slash characters in container
         names. You will find more information on container chain escaping later in this chapter.
     :param string lastContainerClass:
-        A string, defining the upnp:class of the container that appears last in the chain. This parameter can be
+        A string, defining the ``upnp:class`` of the container that appears last in the chain. This parameter can be
         omitted, in this case the default value ``object.container`` will be taken. Setting specific upnp container classes
         is useful to define the special meaning of a particular container; for example, the server will always sort
         songs by track number if upnp class of a container is set to ``object.container.album.musicAlbum``.
@@ -563,7 +566,7 @@ Audio Content Handler
 :::::::::::::::::::::
 
 The biggest one is the function that handles audio - the reason
-is simple: mp3 files offer a lot of metadata like album,
+is simple: flac and mp3 files offer a lot of metadata like album,
 artist, genre, etc. information, this allows us to create a
 nice container layout.
 
@@ -571,6 +574,15 @@ nice container layout.
     :start-after: // doc-add-audio-begin
     :end-before: // doc-add-audio-end
     :language: js
+
+Most music file taggers can handle additional metadata that is not part of UPnP, so you could add code to present your music to the
+renderer by musical works, their different interpretations, and the performing artists.
+
+.. Note::
+
+    if you want to use those additional metadata you need to compile Gerbera with taglib support and also
+    specify the fields of interest in the import section of your configuration file
+    (See documentation about library-options).
 
 
 Image Content Handler
@@ -582,7 +594,7 @@ or anything Exif field you might be interested in.
 
 .. Note::
 
-    if you want to use those additional Exif fields you need to compile MediaTomb with libexif support and also
+    if you want to use those additional Exif fields you need to compile Gerbera with libexif support and also
     specify the fields of interest in the import section of your configuration file
     (See documentation about library-options).
 
@@ -601,6 +613,12 @@ Not much to say here... I think libextractor is capable of retrieving some infor
 encountered any video files populated with metadata. You could also try ffmpeg to get more information, however by default we
 keep it very simple - we just put everything into the 'All Video' container.
 
+.. Note::
+
+    if you want to use additional metadata fields you need to compile Gerbera with ffmpeg support and also
+    specify the fields of interest in the import section of your configuration file
+    (See documentation about library-options).
+
 .. literalinclude:: ../scripts/js/import.js
     :start-after: // doc-add-video-begin
     :end-before: // doc-add-video-end
@@ -610,7 +628,7 @@ keep it very simple - we just put everything into the 'All Video' container.
 Apple Trailers Content Handler
 ::::::::::::::::::::::::::::::
 
-This function processes items that are importent via the Apple Trailers feature. We will organize the trailers by genre, post
+This function processes items that are imported via the Apple Trailers feature. We will organize the trailers by genre, post
 date and release date, additionally we will also add a container holding all trailers.
 
 .. literalinclude:: ../scripts/js/import.js
