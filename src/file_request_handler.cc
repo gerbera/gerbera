@@ -30,7 +30,7 @@
 /// \file file_request_handler.cc
 
 #include "file_request_handler.h" // API
-
+#include <unistd.h>
 #include <filesystem>
 #include <sys/stat.h>
 #include <utility>

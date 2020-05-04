@@ -24,7 +24,7 @@
 /// \file upnp_quirks.cc
 
 #include "upnp_quirks.h" // API
-
+#include <unistd.h>
 #include "cds_objects.h"
 #include "config/config_manager.h"
 #include "server.h"

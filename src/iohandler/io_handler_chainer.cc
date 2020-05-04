@@ -30,7 +30,7 @@
 /// \file io_handler_chainer.cc
 
 #include "io_handler_chainer.h" // API
-
+#include <unistd.h>
 #include <cstdlib>
 
 #include "exceptions.h"
