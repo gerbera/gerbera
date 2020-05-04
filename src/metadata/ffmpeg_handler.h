@@ -57,7 +57,7 @@ public:
 private:
     // The ffmpegthumbnailer code (ffmpeg?) is not threading safe.
     // Add a lock around the usage to avoid crashing randomly.
-    pthread_mutex_t thumb_lock;
+    std::mutex thumb_mutex;
 
     void addFfmpegAuxdataFields(std::shared_ptr<CdsItem> item, AVFormatContext* pFormatCtx) const;
     void addFfmpegMetadataFields(std::shared_ptr<CdsItem> item, AVFormatContext* pFormatCtx) const;
