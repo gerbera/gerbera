@@ -1037,13 +1037,13 @@ std::shared_ptr<CdsObject> ContentManager::convertObject(std::shared_ptr<CdsObje
     return newObj;
 }
 
-// returns nullptr if file ignored due to configuration
 std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::path& path, bool magic, bool allow_fifo)
 {
     struct stat statbuf;
     int ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
-        throw_std_runtime_error("Failed to stat " + path.string() + " , " + mt_strerror(errno));
+        log_warning("File or directory does not exist: {} ({})", path.string(), mt_strerror(errno));
+        return nullptr;
     }
 
     std::shared_ptr<CdsObject> obj;

@@ -120,7 +120,7 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::open(std::shared_ptr<Transc
         std::vector<std::string> sop_args;
         int p1 = find_local_port(45000, 65500);
         int p2 = find_local_port(45000, 65500);
-        sop_args = populateCommandLine(location + " " + std::to_string(p1) + " " + std::to_string(p2), nullptr, nullptr, nullptr);
+        sop_args = populateCommandLine(location + " " + std::to_string(p1) + " " + std::to_string(p2));
         auto spsc = std::make_shared<ProcessExecutor>("sp-sc-auth", sop_args);
         auto pr_item = std::make_shared<ProcListItem>(spsc);
         proc_list.push_back(pr_item);
@@ -191,7 +191,7 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::open(std::shared_ptr<Transc
 
     chmod(fifo_name.c_str(), S_IWUSR | S_IRUSR);
 
-    arglist = populateCommandLine(profile->getArguments(), location, fifo_name, range);
+    arglist = populateCommandLine(profile->getArguments(), location, fifo_name, range, obj->getTitle());
 
     log_debug("Command: {}", profile->getCommand().c_str());
     log_debug("Arguments: {}", profile->getArguments().c_str());

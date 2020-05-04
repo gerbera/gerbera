@@ -72,11 +72,3 @@ void Quirks::addCaptionInfo(std::shared_ptr<CdsItem> item, std::unique_ptr<Heade
     std::string url = "http://" + Server::getIP() + ":" + Server::getPort() + pathNoExt + validext;
     headers->addHeader("CaptionInfo.sec:", url);
 }
-
-void Quirks::appendSpecialNamespace(pugi::xml_node* didlLiteRoot)
-{
-    if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG) == 0)
-        return;
-
-    didlLiteRoot->append_attribute(XML_SEC_NAMESPACE_ATTR) = XML_SEC_NAMESPACE;
-}

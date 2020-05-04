@@ -679,7 +679,8 @@ std::vector<std::string> SQLStorage::getMimeTypes()
 std::shared_ptr<CdsObject> SQLStorage::findObjectByPath(fs::path fullpath, bool wasRegularFile)
 {
     std::string dbLocation;
-    if (isRegularFile(fullpath) || wasRegularFile)
+    std::error_code ec;
+    if (isRegularFile(fullpath, ec) || wasRegularFile)
         dbLocation = addLocationPrefix(LOC_FILE_PREFIX, fullpath);
     else
         dbLocation = addLocationPrefix(LOC_DIR_PREFIX, fullpath);
@@ -1047,7 +1048,7 @@ std::shared_ptr<CdsObject> SQLStorage::createObjectFromSearchRow(const std::uniq
             item->setLocation(row->col(SearchCol::location));
         }
 
-        item->setTrackNumber(std::stoi(row->col(SearchCol::track_number)));
+        item->setTrackNumber(stoi_string(row->col(SearchCol::track_number)));
     } else {
         throw StorageException("", "unknown object type: " + std::to_string(objectType));
     }

@@ -232,6 +232,10 @@ but they are also not served via UPnP browse requests. Directory listing is not 
 
 Interval for broadcasting SSDP:alive messages
 
+Note:
+   If you experience disconnection problems from your device, e.g. Playstation 4, when streaming videos after about 5 minutes, 
+   you can try changing the alive value to 86400 (which is 24 hours)
+
 ``pc-directory``
 ~~~~~~~~~~~~~~~~
 
