@@ -326,7 +326,7 @@ std::unique_ptr<IOHandler> FfmpegHandler::serveContent(std::shared_ptr<CdsItem> 
         }
     }
 
-    pthread_mutex_lock(&thumb_lock);
+    std::scoped_lock thumb_lock { thumb_mutex };
 
 #ifdef FFMPEGTHUMBNAILER_OLD_API
     video_thumbnailer* th = create_thumbnailer();
@@ -357,7 +357,6 @@ std::unique_ptr<IOHandler> FfmpegHandler::serveContent(std::shared_ptr<CdsItem> 
         != 0)
 #endif // old api
     {
-        pthread_mutex_unlock(&thumb_lock);
         throw_std_runtime_error("Could not generate thumbnail for " + item->getLocation().string());
     }
     if (config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED)) {
@@ -373,7 +372,6 @@ std::unique_ptr<IOHandler> FfmpegHandler::serveContent(std::shared_ptr<CdsItem> 
     video_thumbnailer_destroy_image_data(img);
     video_thumbnailer_destroy(th);
 #endif // old api
-    pthread_mutex_unlock(&thumb_lock);
     return h;
 #else
     return nullptr;
