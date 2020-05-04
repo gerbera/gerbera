@@ -431,11 +431,11 @@ Here is some information on the auxdata: UPnP defines certain tags to pass along
 (like title, artist, year, etc.), however some media provides more metadata and exceeds the scope of UPnP.
 This additional metadata can be used to fine tune the server layout, it allows the user to create a more
 complex container structure using a customized import script. The metadata that can be extracted depends on the
-library, currently we support libebexif which provides a default set of keys that can be passed in the options below.
-The data according to those keys will the be extracted from the media and imported into the database along with the item.
-When processing the item, the import script will have full access to the gathered metadata, thus allowing the
-user to organize the data with the use of the extracted information. A practical example would be: if have more
-than one digital camera in your family you could extract the camera model from the Exif tags and sort your photos
+library, currently we support **taglib** (or id3lib if absent), **ffmpeg and libexif** which provide a default set of keys 
+that can be passed in the options below. The data according to those keys will the be extracted from the media and imported 
+into the database along with the item. When processing the item, the import script will have full access to the gathered 
+metadata, thus allowing the user to organize the data with the use of the extracted information. A practical example would be: 
+having more than one digital camera in your family you could extract the camera model from the Exif tags and sort your photos
 in a structure of your choice, like:
 
 - Photos/MyCamera1/All Photos
@@ -521,22 +521,23 @@ These options apply to id3lib or taglib libraries.
 
 * Optional
 
-Currently only adding keywords to auxdata is supported. The keywords are those defined in the id3 specification,
-we do not perform any extra checking, so you could try to use any string as a keyword - if it does not exist in the tag nothing bad will happen.
+Currently only adding keywords to auxdata is supported. The keywords are those defined in the specifications, e.g. 
+`ID3v2.4 <https://id3.org/id3v2.4.0-frames>`_ or `Vorbis comments. <https://www.xiph.org/vorbis/doc/v-comment.htm>`_
+We do not perform any extra checking, so you could try to use any string as a keyword - if it does not exist in the tag 
+nothing bad will happen.
 
-Here is a list of some possible keywords:
+Here is a list of some extra keywords not beeing part of UPnP:
 
-* ID3v2 / MP3
+* ID3v2.4 / MP3
 
-TALB, TBPM, TCOM, TCON, TCOP, TDAT, TDLY, TENC, TEXT, TFLT, TIME, TIT1, TIT2, TIT3, TKEY, TLAN, TLEN, TMED, TOAL,
-TOFN, TOLY, TOPE, TORY, TOWN, TPE1, TPE2, TPE3, TPE4, TPOS, TPUB, TRCK, TRDA, TRSN, TRSO, TSIZ, TSRC, TSSE, TYER, 
-TXXX:CATALOGNUMBER, TXXX:MusicBrainz Album Type, ...
+TBPM, TCOP, TDLY, TENC, TEXT, TFLT, TIT1, TIT3, TKEY, TLAN, TLEN, TMCL, TMED, TOAL,
+TOFN, TOLY, TOPE, TOWN, TPE4, TPOS, TPUB, TRSN, TRSO, TSOA, TSRC, TSSE, TXXX:Artist, TXXX:Work, ...
 
 * Vorbis / FLAC
 
-ALBUMSORT, COMPOSER, ENCODEDBY, MUSICBRAINZ_ARTISTID, CATALOGNUMBER, RELEASETYPE, ...
+ALBUMSORT, ARTISTS, CATALOGNUMBER, COMPOSERSORT, ENCODEDBY, LYRICIST, ORIGINALDATE, PRODUCER, RELEASETYPE, REMIXER, TITLESORT, WORK, ...
 
-* any other user defined keyword, e.g. for APEv2 or iTunes MP4
+* any other user defined keyword, for APEv2 or iTunes MP4, see e.g. `table of mapping <https://picard.musicbrainz.org/docs/mappings>`_ between various tagging formats at MusicBrainz.
 
  **Child tags:**
 
@@ -545,10 +546,10 @@ ALBUMSORT, COMPOSER, ENCODEDBY, MUSICBRAINZ_ARTISTID, CATALOGNUMBER, RELEASETYPE
 
 .. code-block:: xml
 
-    <add-data tag="TCOM"/>
-    <add-data tag="COMPOSER"/>
-    <add-data tag="TENC"/>
-    <add-data tag="ENCODEDBY"/>
+    <add-data tag="TXXX:Work"/>
+    <add-data tag="WORK"/>
+    <add-data tag="TMCL"/>
+    <add-data tag="PERFORMER"/>
     ...
 
 * Optional
@@ -562,10 +563,67 @@ A sample configuration for the example described above would be:
 
   <id3>
       <auxdata>
-          <add-data tag="TCOM"/>
-          <add-data tag="COMPOSER"/>
-          <add-data tag="TENC"/>
-          <add-data tag="ENCODEDBY"/>
+          <add-data tag="TXXX:Work"/>
+          <add-data tag="WORK"/>
+          <add-data tag="TMCL"/>
+          <add-data tag="PERFORMER"/>
       </auxdata>
   </id3>
+
+
+``ffmpeg``
+----------
+
+.. code-block:: xml
+
+  <ffmpeg>
+
+* Optional
+
+These options apply to ffmpeg libraries.
+
+**Child tags:**
+
+``auxdata``
+-----------
+
+.. code-block:: xml
+
+     <auxdata>
+
+* Optional
+
+Currently only adding keywords to auxdata is supported. `This page <https://wiki.multimedia.cx/index.php?title=FFmpeg_Metadata>`_ 
+documents all of the metadata keys that FFmpeg honors, depending on the format being encoded.
+
+ **Child tags:**
+
+``add-data``
+------------
+
+.. code-block:: xml
+
+    <add-data tag="COLLECTION"/>
+    <add-data tag="SHOW"/>
+    <add-data tag="NETWORK"/>
+    <add-data tag="EPISODE-ID"/>
+    ...
+
+* Optional
+
+If the library was able to extract the data according to the given keyword, it will be added to auxdata.
+You can then use that data in your import scripts.
+
+A sample configuration for the example described above would be:
+
+.. code-block:: xml
+
+  <ffmpeg>
+      <auxdata>
+          <add-data tag="COLLECTION"/>
+          <add-data tag="SHOW"/>
+          <add-data tag="NETWORK"/>
+          <add-data tag="EPISODE-ID"/>
+      </auxdata>
+  </ffmpeg>
 
