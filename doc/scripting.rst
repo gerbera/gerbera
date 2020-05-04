@@ -312,7 +312,7 @@ object.
     was taken with or without flash.
 
 
-    Currently aux data can be gathered from **taglib** (or id3lib if absent), **ffmpeg and libexif** (see the 
+    Currently aux data can be gathered from **taglib, ffmpeg and libexif** (see the 
     `Import section <http://docs.gerbera.io/en/latest/config-import.html?#library-options>`_ in the main documentation for 
     more details). So, this array will hold the tags that you specified in your config.xml, allowing
     you to create your virtual structure according to your liking.
