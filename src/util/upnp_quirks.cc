@@ -24,13 +24,13 @@
 /// \file upnp_quirks.cc
 
 #include "upnp_quirks.h" // API
-
 #include "cds_objects.h"
 #include "config/config_manager.h"
 #include "server.h"
 #include "util/tools.h"
 #include "util/upnp_clients.h"
 #include "util/upnp_headers.h"
+#include <unistd.h>
 
 Quirks::Quirks(std::shared_ptr<Config> config, const struct sockaddr_storage* addr, const std::string& userAgent)
     : config(std::move(config))
