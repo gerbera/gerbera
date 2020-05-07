@@ -81,7 +81,7 @@ bool Inotify::supported()
     return true;
 }
 
-int Inotify::addWatch(const fs::path& path, int events)
+int Inotify::addWatch(const fs::path& path, int events) const
 {
     int wd = inotify_add_watch(inotify_fd, path.c_str(), events);
     if (wd < 0 && errno != ENOENT) {
@@ -96,7 +96,7 @@ int Inotify::addWatch(const fs::path& path, int events)
     return wd;
 }
 
-void Inotify::removeWatch(int wd)
+void Inotify::removeWatch(int wd) const
 {
     if (inotify_rm_watch(inotify_fd, wd) < 0) {
         log_debug("Error removing watch: {}", strerror(errno));
@@ -215,7 +215,7 @@ struct inotify_event* Inotify::nextEvent()
     return nullptr;
 }
 
-void Inotify::stop()
+void Inotify::stop() const
 {
     char stop = 's';
     if (write(stop_fd_write, &stop, 1) == -1) {

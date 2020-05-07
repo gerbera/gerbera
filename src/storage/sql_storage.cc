@@ -2171,7 +2171,7 @@ std::unique_ptr<std::ostringstream> SQLStorage::sqlForInsert(const std::shared_p
     return qb;
 }
 
-std::unique_ptr<std::ostringstream> SQLStorage::sqlForUpdate(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable)
+std::unique_ptr<std::ostringstream> SQLStorage::sqlForUpdate(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const
 {
     if (addUpdateTable == nullptr
         || (addUpdateTable->getTable() == METADATA_TABLE && addUpdateTable->getDict().size() != 2))
@@ -2197,7 +2197,7 @@ std::unique_ptr<std::ostringstream> SQLStorage::sqlForUpdate(const std::shared_p
     return qb;
 }
 
-std::unique_ptr<std::ostringstream> SQLStorage::sqlForDelete(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable)
+std::unique_ptr<std::ostringstream> SQLStorage::sqlForDelete(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const
 {
     if (addUpdateTable == nullptr
         || (addUpdateTable->getTable() == METADATA_TABLE && addUpdateTable->getDict().size() != 2))

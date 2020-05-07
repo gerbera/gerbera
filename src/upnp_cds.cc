@@ -233,7 +233,7 @@ void ContentDirectoryService::doGetSortCapabilities(const std::unique_ptr<Action
     log_debug("end");
 }
 
-void ContentDirectoryService::doGetSystemUpdateID(const std::unique_ptr<ActionRequest>& request)
+void ContentDirectoryService::doGetSystemUpdateID(const std::unique_ptr<ActionRequest>& request) const
 {
     log_debug("start");
 

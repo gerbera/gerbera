@@ -81,7 +81,7 @@ private:
     pthread_key_t mysql_init_key;
     bool mysql_init_key_initialized;
 
-    void checkMysqlThreadInit();
+    void checkMysqlThreadInit() const;
 };
 
 class MysqlResult : public SQLResult {

@@ -94,7 +94,7 @@ MysqlStorage::~MysqlStorage()
     log_debug("...ok");
 }
 
-void MysqlStorage::checkMysqlThreadInit()
+void MysqlStorage::checkMysqlThreadInit() const
 {
     if (!mysql_connection)
         throw_std_runtime_error("mysql connection is not open or already closed");
