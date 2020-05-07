@@ -18,10 +18,10 @@ The automatic detection supports the following devices and software:
 - StandardUPnP (all devices sending signature UPnP/1.0)
 - BubbleUPnP (running on smartphones)
 - SamsungAllShare (AllShare running on Windows)
-- SamsungSeriesQ (Samsung Series [Q] TVs), setting device flags to 1
-- SamsungSeriesCDE (Samsung other TVs), setting device flags to 1
-- SamsungBDP (Samsung Blu-ray Player BD-D5100), setting device flags to 1
-- SamsungBDJ5500 (Samsung Blu-ray Player J5500), setting device flags to 1
+- SamsungSeriesQ (Samsung Series [Q] TVs), setting device flags to ``SAMSUNG``
+- SamsungSeriesCDE (Samsung other TVs), setting device flags to ``SAMSUNG``
+- SamsungBDP (Samsung Blu-ray Player BD-D5100), setting device flags to ``SAMSUNG``
+- SamsungBDJ5500 (Samsung Blu-ray Player J5500), setting device flags to ``SAMSUNG``
 
 
 Device Flags
@@ -29,7 +29,7 @@ Device Flags
 
 The device flags have the following meaning
 
--  1: Add "CaptionInfo.sec" to video header
+-  ``SAMSUNG``: 0x01, add "CaptionInfo.sec" to video header
 
 Manual Overrides
 ~~~~~~~~~~~~~~~~
@@ -40,9 +40,8 @@ If your device needs one of the implemented special mechanisms you can define th
 .. code-block:: xml
 
     <clients enabled="yes">
-		<client ip="192.168.1.42" userAgent="foobar2000" clientType="BubbleUPnP"></client>
-		<client ip="192.168.1.42" userAgent="Microsoft-DLNA" clientType="SamsungBDP"></client>
-		<client ip="192.168.1.69" clientType="StandardUPnP" flags="1"></client>
+		<client userAgent="Microsoft-DLNA" flags="0"></client>
+		<client ip="192.168.1.69" flags="SAMSUNG"></client>
     </clients>
 
 
