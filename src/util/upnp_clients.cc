@@ -31,7 +31,7 @@
 #include "util/tools.h"
 
 // table of supported clients (sequence of entries matters!)
-static const struct ClientInfo clientInfo[] = {
+static constexpr struct ClientInfo clientInfo[] = {
     // Used for not explicitely listed clients, must be first entry
     {
         "Unknown",
@@ -156,7 +156,7 @@ void Clients::getInfo(const struct sockaddr_storage* addr, const std::string& us
     // by addClientByDiscovery
     if (!found) {
         // always return something, 'Unknown' if we do not know better
-        assert(clientInfo[0].type == ClientType::Unknown);
+        static_assert(clientInfo[0].type == ClientType::Unknown);
         info = &clientInfo[0];
 
 #if 0 // only needed if UserAgent is not good enough
