@@ -31,19 +31,27 @@
 
 ClientConfig::ClientConfig()
 {
-    clientInfo.flags = 0;
-    ip = nullptr;
-    userAgent = nullptr;
-    clientInfo.type = ClientType::Unknown;
+    clientInfo = std::make_shared<struct ClientInfo>();
+    clientInfo->matchType = ClientMatchType::None;
+    clientInfo->type = ClientType::Unknown;
+    clientInfo->flags = 0
 }
 
-ClientConfig::ClientConfig(int flags, std::string ip, std::string userAgent, ClientType clientType)
-    : ip(ip)
-    , userAgent(userAgent)
+ClientConfig::ClientConfig(int flags, std::string ip, std::string userAgent)
 {
-    clientInfo.type = clientType;
-    clientInfo.flags = flags;
-    clientInfo.name = fmt::format("Manual Setup for{}{}", !ip.empty() ? " IP " + ip : "", !userAgent.empty() ? " UserAgent " + userAgent : "");
+    clientInfo = std::make_shared<struct ClientInfo>();
+    clientInfo->type = ClientType::StandardUPnP;
+    if (!ip.empty()) {
+        clientInfo->matchType = ClientMatchType::IP;
+        clientInfo->match = ip;
+    } else if (!userAgent.empty()) {
+        clientInfo->matchType = ClientMatchType::UserAgent;
+        clientInfo->match = userAgent;
+    } else {
+        clientInfo->matchType = ClientMatchType::None;
+    }
+    clientInfo->flags = flags;
+    clientInfo->name = fmt::format("Manual Setup for{}{}", !ip.empty() ? " IP " + ip : "", !userAgent.empty() ? " UserAgent " + userAgent : "");
 }
 
 ClientConfigList::ClientConfigList()
@@ -147,13 +155,20 @@ ClientType ClientConfig::remapClientType(const std::string& clientType)
     }
 }
 
+int ClientConfig::remapFlag(const std::string& flag)
+{
+    if (flag == "SAMSUNG") {
+        return QUIRK_FLAG_SAMSUNG;
+    } else {
+        return stoi_string(flag);
+    }
+}
+
 void ClientConfig::copyTo(const std::shared_ptr<ClientConfig>& copy) const
 {
-    copy->ip = ip;
-    copy->userAgent = userAgent;
-    copy->clientInfo.name = clientInfo.name;
-    copy->clientInfo.type = clientInfo.type;
-    copy->clientInfo.flags = clientInfo.flags;
-    copy->clientInfo.matchType = clientInfo.matchType;
-    copy->clientInfo.match = clientInfo.match;
+    copy->clientInfo->name = clientInfo->name;
+    copy->clientInfo->type = clientInfo->type;
+    copy->clientInfo->flags = clientInfo->flags;
+    copy->clientInfo->matchType = clientInfo->matchType;
+    copy->clientInfo->match = clientInfo->match;
 }
