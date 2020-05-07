@@ -82,10 +82,18 @@ public:
     void setFlags(int flags) { this->clientInfo->flags = flags; }
 
     std::string getIp() const { return (this->clientInfo->matchType == ClientMatchType::IP) ? this->clientInfo->match : ""; }
-    void setIp(std::string ip) { this->clientInfo->matchType = ClientMatchType::IP ; this->clientInfo->match = ip; }
+    void setIp(std::string ip)
+    {
+        this->clientInfo->matchType = ClientMatchType::IP ;
+        this->clientInfo->match = ip;
+    }
 
     std::string getUserAgent() const { return (this->clientInfo->matchType == ClientMatchType::UserAgent) ? this->clientInfo->match : ""; }
-    void setUserAgent(std::string userAgent) { this->clientInfo->matchType = ClientMatchType::UserAgent ; this->clientInfo->match = userAgent; }
+    void setUserAgent(std::string userAgent)
+    {
+        this->clientInfo->matchType = ClientMatchType::UserAgent;
+        this->clientInfo->match = userAgent;
+    }
 
     /// \brief copies all properties to another object
     void copyTo(const std::shared_ptr<ClientConfig>& copy) const;
