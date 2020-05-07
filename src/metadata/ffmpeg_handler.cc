@@ -123,7 +123,7 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
             field = M_ALBUM;
         } else if (strcmp(e->key, "date") == 0) {
             if ((value.length() == 4) && (std::stoi(value) > 0)) {
-                value = value + "-01-01";
+                value.append("-01-01");
                 log_debug("Identified metadata date: {}", value.c_str());
             }
             /// \toto parse possible ISO8601 timestamp
