@@ -52,7 +52,7 @@ public:
     /// before the first read at the very beginning or after a seek returns;
     /// 0 disables the delay
     IOHandlerBufferHelper(size_t bufSize, size_t initialFillSize);
-    ~IOHandlerBufferHelper() override;
+    ~IOHandlerBufferHelper() noexcept override;
 
     // inherited from IOHandler
     void open(enum UpnpOpenFileMode mode) override;
