@@ -531,7 +531,7 @@ int ContentManager::ensurePathExistence(fs::path path)
     return containerID;
 }
 
-void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory> adir, const std::shared_ptr<GenericTask>& task)
+void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, const std::shared_ptr<GenericTask>& task)
 {
     log_debug("start");
 
@@ -1447,7 +1447,7 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
     }
 }
 
-void ContentManager::rescanDirectory(std::shared_ptr<AutoscanDirectory> adir, std::string descPath, bool cancellable)
+void ContentManager::rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, std::string descPath, bool cancellable)
 {
     // building container path for the description
     auto self = shared_from_this();
@@ -1504,7 +1504,7 @@ std::vector<std::shared_ptr<AutoscanDirectory>> ContentManager::getAutoscanDirec
     return all;
 }
 
-void ContentManager::removeAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir)
+void ContentManager::removeAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>& adir)
 {
     if (adir == nullptr)
         throw_std_runtime_error("can not remove autoscan directory - was not an autoscan");
@@ -1529,7 +1529,7 @@ void ContentManager::removeAutoscanDirectory(std::shared_ptr<AutoscanDirectory> 
 #endif
 }
 
-void ContentManager::handlePeristentAutoscanRemove(std::shared_ptr<AutoscanDirectory> adir)
+void ContentManager::handlePeristentAutoscanRemove(const std::shared_ptr<AutoscanDirectory>& adir)
 {
     if (adir->persistent()) {
         adir->setObjectID(INVALID_OBJECT_ID);
@@ -1539,7 +1539,7 @@ void ContentManager::handlePeristentAutoscanRemove(std::shared_ptr<AutoscanDirec
     }
 }
 
-void ContentManager::handlePersistentAutoscanRecreate(std::shared_ptr<AutoscanDirectory> adir)
+void ContentManager::handlePersistentAutoscanRecreate(const std::shared_ptr<AutoscanDirectory>& adir)
 {
     int id = ensurePathExistence(adir->getLocation());
     adir->setObjectID(id);
@@ -1717,7 +1717,7 @@ CMRescanDirectoryTask::CMRescanDirectoryTask(std::shared_ptr<ContentManager> con
     std::shared_ptr<AutoscanDirectory> adir, bool cancellable)
     : GenericTask(ContentManagerTask)
     , content(std::move(content))
-    , adir(adir)
+    , adir(std::move(adir))
 {
     this->cancellable = cancellable;
     this->taskType = RescanDirectory;

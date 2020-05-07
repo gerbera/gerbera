@@ -83,7 +83,7 @@ protected:
 public:
     /// \brief The Constructor takes the values from the upnp_request and fills in internal variables.
     /// \param *upnp_request Pointer to the Upnp_Action_Request structure.
-    explicit ActionRequest(std::shared_ptr<Config> config, UpnpActionRequest* upnp_request);
+    explicit ActionRequest(const std::shared_ptr<Config>& config, UpnpActionRequest* upnp_request);
 
     /// \brief Returns the name of the action.
     std::string getActionName() const;
