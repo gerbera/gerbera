@@ -69,5 +69,6 @@ This section defines the client behaviour for one client.
     * Optional
     * Default: 0
     
-    Integer containing the flags you want to set.
-    For valid flags types see :doc:`Supported Devices </supported-devices>`.
+    Containing the flags you want to set. Must be given in the following format ``SAMSUNG|0x100``, where the text either contains 
+    one of the known flags or an integer number if the flags has no name.
+    For valid flags see :doc:`Supported Devices </supported-devices>`.
