@@ -39,8 +39,6 @@ Gerbera - https://gerbera.io/
 
 ConfigGenerator::ConfigGenerator() = default;
 
-ConfigGenerator::~ConfigGenerator() = default;
-
 std::string ConfigGenerator::generate(const fs::path& userHome, const fs::path& configDir, const fs::path& prefixDir, const fs::path& magicFile)
 {
     pugi::xml_document doc;
