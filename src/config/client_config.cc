@@ -34,7 +34,7 @@ ClientConfig::ClientConfig()
     clientInfo = std::make_shared<struct ClientInfo>();
     clientInfo->matchType = ClientMatchType::None;
     clientInfo->type = ClientType::Unknown;
-    clientInfo->flags = 0
+    clientInfo->flags = 0;
 }
 
 ClientConfig::ClientConfig(int flags, std::string ip, std::string userAgent)
