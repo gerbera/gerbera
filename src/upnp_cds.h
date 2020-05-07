@@ -93,7 +93,7 @@ protected:
     /// \param request Incoming ActionRequest.
     ///
     /// GetSystemUpdateID(ui4 Id)
-    void doGetSystemUpdateID(const std::unique_ptr<ActionRequest>& request);
+    void doGetSystemUpdateID(const std::unique_ptr<ActionRequest>& request) const;
 
     std::shared_ptr<Config> config;
     std::shared_ptr<Storage> storage;

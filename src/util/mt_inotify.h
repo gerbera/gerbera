@@ -49,11 +49,11 @@ public:
     /// \param path file or directory to monitor.
     /// \param events inotify event mask
     /// \return watch descriptor or a negative value on error
-    int addWatch(const fs::path& path, int events);
+    int addWatch(const fs::path& path, int events) const;
 
     /// \brief Removes a previously added file or directory from the watch list
     /// \param wd watch descriptor that was returned by the add_watch function
-    void removeWatch(int wd);
+    void removeWatch(int wd) const;
 
     /// \brief Returns the next inotify event.
     ///
@@ -63,7 +63,7 @@ public:
     struct inotify_event* nextEvent();
 
     /// \brief Unblock the next_event function.
-    void stop();
+    void stop() const;
 
     /// \brief Checks if inotify is supported on the system.
     static bool supported();

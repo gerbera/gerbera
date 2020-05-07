@@ -207,8 +207,8 @@ private:
         std::vector<std::shared_ptr<AddUpdateTable>>& operations);
 
     std::unique_ptr<std::ostringstream> sqlForInsert(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable);
-    std::unique_ptr<std::ostringstream> sqlForUpdate(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable);
-    std::unique_ptr<std::ostringstream> sqlForDelete(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable);
+    std::unique_ptr<std::ostringstream> sqlForUpdate(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const;
+    std::unique_ptr<std::ostringstream> sqlForDelete(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const;
 
     /* helper for removeObject(s) */
     void _removeObjects(const std::vector<int32_t>& objectIDs);
