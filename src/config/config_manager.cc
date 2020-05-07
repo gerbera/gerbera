@@ -1731,25 +1731,20 @@ std::shared_ptr<ClientConfigList> ConfigManager::createClientConfigListFromNode(
         if (std::string(child.name()) != "client")
             continue;
 
-        int flags = child.attribute("flags").as_int();
+        std::string flags = child.attribute("flags").as_string();
         std::string ip = child.attribute("ip").as_string();
         std::string userAgent = child.attribute("userAgent").as_string();
 
-        ClientType clientType;
-        std::string temp = child.attribute("clientType").as_string();
-        if (temp.empty()) {
-            throw std::runtime_error("clientType invalid");
+        int flag;
+        std::vector<std::string> flagsVector = split_string(flags, '|', false);
+        for (const auto& i : flagsVector) {
+            flag |= ClientConfig::remapFlag(i);
         }
 
-        clientType = ClientConfig::remapClientType(temp);
-
-        auto client = std::make_shared<ClientConfig>(flags, ip, userAgent, clientType);
-
-        try {
-            list->add(client);
-        } catch (const std::runtime_error& e) {
-            throw std::runtime_error("Could not add " + ip + " client: " + e.what());
-        }
+        auto client = std::make_shared<ClientConfig>(flag, ip, userAgent);
+        auto clientInfo = client->getClientInfo();
+        Clients::addClientInfo(clientInfo);
+        list->add(client);
     }
 
     return list;
