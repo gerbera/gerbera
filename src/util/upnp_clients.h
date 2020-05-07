@@ -80,7 +80,7 @@ public:
     static void addClientByDiscovery(const struct sockaddr_storage* addr, const std::string& userAgent, const std::string& descLocation);
 
     // always return something, 'Unknown' if we do not know better
-    static void getInfo(std::shared_ptr<Config> config, const struct sockaddr_storage* addr, const std::string& userAgent, const ClientInfo** ppInfo);
+    static void getInfo(const struct sockaddr_storage* addr, const std::string& userAgent, const ClientInfo** ppInfo);
 
     static void addClientInfo(std::shared_ptr<ClientInfo> add);
 
