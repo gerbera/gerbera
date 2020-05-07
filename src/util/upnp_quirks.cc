@@ -35,7 +35,7 @@
 Quirks::Quirks(std::shared_ptr<Config> config, const struct sockaddr_storage* addr, const std::string& userAgent)
     : config(std::move(config))
 {
-    Clients::getInfo(this->config, addr, userAgent, &pClientInfo);
+    Clients::getInfo(addr, userAgent, &pClientInfo);
 }
 
 void Quirks::addCaptionInfo(std::shared_ptr<CdsItem> item, std::unique_ptr<Headers>& headers)
