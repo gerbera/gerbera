@@ -84,7 +84,7 @@ public:
     std::string getIp() const { return (this->clientInfo->matchType == ClientMatchType::IP) ? this->clientInfo->match : ""; }
     void setIp(std::string ip)
     {
-        this->clientInfo->matchType = ClientMatchType::IP ;
+        this->clientInfo->matchType = ClientMatchType::IP;
         this->clientInfo->match = ip;
     }
 
