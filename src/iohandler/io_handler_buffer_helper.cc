@@ -71,7 +71,7 @@ void IOHandlerBufferHelper::open(enum UpnpOpenFileMode mode)
     isOpen = true;
 }
 
-IOHandlerBufferHelper::~IOHandlerBufferHelper()
+IOHandlerBufferHelper::~IOHandlerBufferHelper() noexcept
 {
     if (isOpen)
         close();
