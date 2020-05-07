@@ -157,7 +157,7 @@ void Clients::getInfo(const struct sockaddr_storage* addr, const std::string& us
     const ClientInfo* info = nullptr;
 
     // by IP address
-    bool found = getInfoByAddr(addr, &info);;
+    bool found = getInfoByAddr(addr, &info);
 
     if (!found) {
         // by userAgent
@@ -204,11 +204,11 @@ bool Clients::getInfoByAddr(const struct sockaddr_storage* addr, const ClientInf
             if (i.match.find(".") != std::string::npos) {
                 struct sockaddr_in clientAddr;
                 clientAddr.sin_family = AF_INET;
-                clientAddr.sin_addr.s_addr = inet_addr (i.match.c_str());
+                clientAddr.sin_addr.s_addr = inet_addr(i.match.c_str());
                 if (sockAddrCmpAddr((struct sockaddr*)&clientAddr, (struct sockaddr*)addr) == 0) {
                     *ppInfo = &i;
                     return true;
-                } 
+                }
             } else if (i.match.find(":") != std::string::npos) {
                 struct sockaddr_in6 clientAddr;
                 clientAddr.sin6_family = AF_INET6;
