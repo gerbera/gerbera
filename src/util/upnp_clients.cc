@@ -152,7 +152,7 @@ void Clients::addClientByDiscovery(const struct sockaddr_storage* addr, const st
 #endif
 }
 
-void Clients::getInfo(std::shared_ptr<Config> config, const struct sockaddr_storage* addr, const std::string& userAgent, const ClientInfo** ppInfo)
+void Clients::getInfo(const struct sockaddr_storage* addr, const std::string& userAgent, const ClientInfo** ppInfo)
 {
     const ClientInfo* info = nullptr;
 
