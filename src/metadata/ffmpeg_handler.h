@@ -60,8 +60,8 @@ private:
     // Add a lock around the usage to avoid crashing randomly.
     std::mutex thumb_mutex;
 
-    void addFfmpegAuxdataFields(std::shared_ptr<CdsItem> item, AVFormatContext* pFormatCtx) const;
-    void addFfmpegMetadataFields(std::shared_ptr<CdsItem> item, AVFormatContext* pFormatCtx) const;
+    void addFfmpegAuxdataFields(const std::shared_ptr<CdsItem>& item, AVFormatContext* pFormatCtx) const;
+    void addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item, AVFormatContext* pFormatCtx) const;
     fs::path getThumbnailCacheFilePath(const fs::path& movie_filename, bool create) const;
     bool readThumbnailCacheFile(const fs::path& movie_filename, uint8_t** ptr_img, size_t* size_img) const;
     void writeThumbnailCacheFile(const fs::path& movie_filename, uint8_t* ptr_img, int size_img) const;

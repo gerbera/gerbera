@@ -269,19 +269,19 @@ public:
     std::vector<std::shared_ptr<AutoscanDirectory>> getAutoscanDirectories() const;
 
     /// \brief Removes an AutoscanDirectrory (found by scanID) from the watch list.
-    void removeAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir);
+    void removeAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>& adir);
 
     /// \brief Update autoscan parameters for an existing autoscan directory
     /// or add a new autoscan directory
     void setAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>& dir);
 
     /// \brief handles the removal of a persistent autoscan directory
-    void handlePeristentAutoscanRemove(std::shared_ptr<AutoscanDirectory> adir);
+    void handlePeristentAutoscanRemove(const std::shared_ptr<AutoscanDirectory>& adir);
 
     /// \brief handles the recreation of a persistent autoscan directory
-    void handlePersistentAutoscanRecreate(std::shared_ptr<AutoscanDirectory> adir);
+    void handlePersistentAutoscanRecreate(const std::shared_ptr<AutoscanDirectory>& adir);
 
-    void rescanDirectory(std::shared_ptr<AutoscanDirectory> adir, std::string descPath = "", bool cancellable = true);
+    void rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, std::string descPath = "", bool cancellable = true);
 
     /// \brief instructs ContentManager to reload scripting environment
     void reloadLayout();
@@ -351,7 +351,7 @@ protected:
     //void _addFile2(std::string path, bool recursive=0);
     void _removeObject(int objectID, bool all);
 
-    void _rescanDirectory(std::shared_ptr<AutoscanDirectory> adir, const std::shared_ptr<GenericTask>& task = nullptr);
+    void _rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, const std::shared_ptr<GenericTask>& task = nullptr);
     /* for recursive addition */
     void addRecursive(const fs::path& path, bool hidden, const std::shared_ptr<CMAddFileTask>& task);
 

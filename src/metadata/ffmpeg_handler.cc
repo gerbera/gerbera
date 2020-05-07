@@ -49,6 +49,8 @@
 #include <cinttypes>
 #include <cstdint>
 #include <cstring>
+#include <utility>
+
 #include <sys/stat.h>
 
 extern "C" {
@@ -75,11 +77,11 @@ extern "C" {
 
 // Default constructor
 FfmpegHandler::FfmpegHandler(std::shared_ptr<Config> config)
-    : MetadataHandler(config)
+    : MetadataHandler(std::move(config))
 {
 }
 
-void FfmpegHandler::addFfmpegAuxdataFields(std::shared_ptr<CdsItem> item, AVFormatContext* pFormatCtx) const
+void FfmpegHandler::addFfmpegAuxdataFields(const std::shared_ptr<CdsItem>& item, AVFormatContext* pFormatCtx) const
 {
     if (!pFormatCtx->metadata) {
         log_debug("no metadata");
@@ -100,7 +102,7 @@ void FfmpegHandler::addFfmpegAuxdataFields(std::shared_ptr<CdsItem> item, AVForm
     }
 } //addFfmpegAuxdataFields
 
-void FfmpegHandler::addFfmpegMetadataFields(std::shared_ptr<CdsItem> item, AVFormatContext* pFormatCtx) const
+void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item, AVFormatContext* pFormatCtx) const
 {
     AVDictionaryEntry* e = nullptr;
     auto sc = StringConverter::m2i(config);
@@ -144,7 +146,7 @@ void FfmpegHandler::addFfmpegMetadataFields(std::shared_ptr<CdsItem> item, AVFor
 }
 
 // ffmpeg library calls
-static void addFfmpegResourceFields(std::shared_ptr<CdsItem> item, AVFormatContext* pFormatCtx)
+static void addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item, AVFormatContext* pFormatCtx)
 {
     int64_t hours, mins, secs, us;
     int audioch = 0, samplefreq = 0;

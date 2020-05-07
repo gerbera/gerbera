@@ -33,6 +33,8 @@
 #include "mysql_storage.h"
 
 #include <cstdlib>
+#include <utility>
+
 #include <zlib.h>
 
 #include "config/config_manager.h"
@@ -73,7 +75,7 @@
 #define MYSQL_UPDATE_4_5_2 "UPDATE `mt_internal_setting` SET `value`='5' WHERE `key`='db_version' AND `value`='4'"
 
 MysqlStorage::MysqlStorage(std::shared_ptr<Config> config)
-    : SQLStorage(config)
+    : SQLStorage(std::move(config))
 {
     mysql_init_key_initialized = false;
     mysql_connection = false;
