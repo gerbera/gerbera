@@ -55,6 +55,7 @@ enum class ClientMatchType {
     UserAgent, // received via UpnpActionRequest, UpnpFileInfo and UpnpDiscovery (all might be slitely different)
     //FriendlyName,
     //ModelName,
+    IP, // use client's network address
 };
 
 struct ClientInfo {
@@ -64,7 +65,7 @@ struct ClientInfo {
 
     // to match the client
     ClientMatchType matchType;
-    const char* match;
+    std::string match;
 };
 
 struct ClientCacheEntry {
@@ -81,15 +82,18 @@ public:
     // always return something, 'Unknown' if we do not know better
     static void getInfo(std::shared_ptr<Config> config, const struct sockaddr_storage* addr, const std::string& userAgent, const ClientInfo** ppInfo);
 
+    static void addClientInfo(std::shared_ptr<ClientInfo> add);
+
 private:
     static bool getInfoByType(const std::string& match, ClientMatchType type, const ClientInfo** ppInfo);
-    static bool getInfoByConfig(const struct sockaddr_storage* addr, const std::string& userAgent, std::shared_ptr<Config> config, const ClientInfo** ppInfo);
+    static bool getInfoByAddr(const struct sockaddr_storage* addr, const ClientInfo** ppInfo);
     static bool downloadDescription(const std::string& location, std::unique_ptr<pugi::xml_document>& xml);
 
 private:
     static std::mutex mutex;
     using AutoLock = std::lock_guard<std::mutex>;
     static std::unique_ptr<std::vector<struct ClientCacheEntry>> cache;
+    static std::vector<struct ClientInfo> clientInfo;
 };
 
 #endif // __UPNP_CLIENTS_H__
