@@ -70,8 +70,6 @@ struct ClientInfo {
 struct ClientCacheEntry {
     struct sockaddr_storage addr;
     std::chrono::time_point<std::chrono::steady_clock> age;
-
-    const struct ClientInfo* pInfo;
 };
 
 class Clients {

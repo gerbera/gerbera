@@ -181,7 +181,7 @@ void Clients::getInfo(const struct sockaddr_storage* addr, const std::string& us
     }
 
     *ppInfo = info;
-    log_debug("client info: {} '{}' -> '{}'", sockAddrGetNameInfo((struct sockaddr*)addr), userAgent, (*ppInfo)->name);
+    log_debug("client info: {} '{}' -> '{}'", sockAddrGetNameInfo(reinterpret_cast<const struct sockaddr*>(addr)), userAgent, (*ppInfo)->name);
 }
 
 bool Clients::getInfoByType(const std::string& match, ClientMatchType type, const ClientInfo** ppInfo)
