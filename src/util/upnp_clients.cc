@@ -229,7 +229,7 @@ bool Clients::getInfoByAddr(const struct sockaddr_storage* addr, const ClientInf
 bool Clients::getInfoByType(const std::string& match, ClientMatchType type, const ClientInfo** ppInfo)
 {
     for (const auto& i : clientInfo) {
-        if (!i.match)
+        if (i.match.empty())
             continue;
         if (i.matchType == type) {
             if (match.find(i.match) != std::string::npos) {
