@@ -1147,10 +1147,10 @@ void ContentManager::initLayout()
 
     if (layout == nullptr) {
         AutoLock lock(mutex);
-        if (layout == nullptr)
+        if (layout == nullptr) {
+            std::string layout_type = config->getOption(CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
+            auto self = shared_from_this();
             try {
-                std::string layout_type = config->getOption(CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
-                auto self = shared_from_this();
                 if (layout_type == "js") {
 #ifdef HAVE_JS
                     layout = std::make_shared<JSLayout>(config, storage, self, scripting_runtime);
@@ -1163,7 +1163,10 @@ void ContentManager::initLayout()
             } catch (const std::runtime_error& e) {
                 layout = nullptr;
                 log_error("ContentManager virtual container layout: {}", e.what());
+                if (layout_type != "disabled")
+                    throw e;
             }
+        }
     }
 }
 
