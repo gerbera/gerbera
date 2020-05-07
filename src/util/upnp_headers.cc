@@ -111,7 +111,7 @@ std::unique_ptr<std::map<std::string, std::string>> Headers::readHeaders(UpnpFil
     auto head = const_cast<UpnpListHead*>(UpnpFileInfo_get_ExtraHeadersList(fileInfo));
     UpnpListIter pos;
     for (pos = UpnpListBegin(head); pos != UpnpListEnd(head); pos = UpnpListNext(head, pos)) {
-        UpnpExtraHeaders* extra = (UpnpExtraHeaders*)pos;
+        auto extra = (UpnpExtraHeaders*)pos;
         std::string header = UpnpExtraHeaders_get_resp(extra);
         auto add = parseHeader(header);
         ret->insert(add);

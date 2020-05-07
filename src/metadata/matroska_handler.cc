@@ -188,7 +188,7 @@ void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream
         EbmlElement* el = (*info)[i];
 
         if (EbmlId(*el) == KaxTitle::ClassInfos.GlobalId) {
-            KaxTitle* title_el = dynamic_cast<KaxTitle*>(el);
+            auto title_el = dynamic_cast<KaxTitle*>(el);
             if (title_el == nullptr) {
                 log_error("Malformed MKV file; KaxTitle cast failed!");
                 continue;
@@ -197,7 +197,7 @@ void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream
             // printf("KaxTitle = %s\n", title.c_str());
             item->setMetadata(MT_KEYS[M_TITLE].upnp, sc->convert(title));
         } else if (EbmlId(*el) == KaxDateUTC::ClassInfos.GlobalId) {
-            KaxDateUTC* date_el = dynamic_cast<KaxDateUTC*>(el);
+            auto date_el = dynamic_cast<KaxDateUTC*>(el);
             if (date_el == nullptr) {
                 log_error("Malformed MKV file; KaxDateUTC cast failed!");
                 continue;
