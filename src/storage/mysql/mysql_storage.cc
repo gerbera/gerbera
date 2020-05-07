@@ -103,7 +103,7 @@ void MysqlStorage::checkMysqlThreadInit() const
         log_debug("running mysql_thread_init(); thread_id={}", pthread_self());
         if (mysql_thread_init())
             throw_std_runtime_error("error while calling mysql_thread_init()");
-        if (pthread_setspecific(mysql_init_key, (void*)1))
+        if (pthread_setspecific(mysql_init_key, reinterpret_cast<void*>(1)))
             throw_std_runtime_error("error while calling pthread_setspecific()");
     }
 }
@@ -134,7 +134,7 @@ void MysqlStorage::init()
         throw_std_runtime_error("could not create pthread_key");
     }
     mysql_server_init(0, nullptr, nullptr);
-    pthread_setspecific(mysql_init_key, (void*)1);
+    pthread_setspecific(mysql_init_key, reinterpret_cast<void*>(1));
 
     std::string dbHost = config->getOption(CFG_SERVER_STORAGE_MYSQL_HOST);
     std::string dbName = config->getOption(CFG_SERVER_STORAGE_MYSQL_DATABASE);

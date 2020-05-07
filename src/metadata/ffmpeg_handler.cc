@@ -364,7 +364,7 @@ std::unique_ptr<IOHandler> FfmpegHandler::serveContent(std::shared_ptr<CdsItem> 
             img->image_data_ptr, img->image_data_size);
     }
 
-    auto h = std::make_unique<MemIOHandler>((void*)img->image_data_ptr, img->image_data_size);
+    auto h = std::make_unique<MemIOHandler>(reinterpret_cast<void*>(img->image_data_ptr), img->image_data_size);
 #ifdef FFMPEGTHUMBNAILER_OLD_API
     destroy_image_data(img);
     destroy_thumbnailer(th);
