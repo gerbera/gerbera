@@ -925,7 +925,7 @@ std::string interfaceToIP(const std::string& interface)
 
     while (iflist->if_index || iflist->if_name) {
         if (interface == iflist->if_name) {
-            strncpy(if_request.ifr_name, iflist->if_name, IF_NAMESIZE);
+            memcpy(if_request.ifr_name, iflist->if_name, IF_NAMESIZE);
             if (ioctl(local_socket, SIOCGIFADDR, &if_request) != 0) {
                 log_error("Could not determine interface address: {}",
                     mt_strerror(errno).c_str());
