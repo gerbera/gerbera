@@ -32,14 +32,14 @@
 #include <upnp.h>
 
 // table of supported clients (sequence of entries matters!)
-static const struct ClientInfo clientInfo[] = {
+std::vector<struct ClientInfo> Clients::clientInfo = std::vector<struct ClientInfo> {
     // Used for not explicitely listed clients, must be first entry
     {
         "Unknown",
         ClientType::Unknown,
         QUIRK_FLAG_NONE,
         ClientMatchType::None,
-        NULL },
+        "" },
 
     // User-Agent(discovery): Linux/3.18.91-14843133-QB28034466 UPnP/1.0 BubbleUPnP/3.4.4
     // User-Agent(fileInfo ): BubbleUPnP UPnP/1.1
@@ -105,6 +105,11 @@ static const struct ClientInfo clientInfo[] = {
         "UPnP/1.0" }
 };
 
+void Clients::addClientInfo(std::shared_ptr<ClientInfo> newClientInfo)
+{
+    clientInfo.push_back(*newClientInfo);
+}
+
 void Clients::addClientByDiscovery(const struct sockaddr_storage* addr, const std::string& userAgent, const std::string& descLocation)
 {
 #if 0 // only needed if UserAgent is not good enough
@@ -151,10 +156,11 @@ void Clients::getInfo(std::shared_ptr<Config> config, const struct sockaddr_stor
 {
     const ClientInfo* info = nullptr;
 
-    // by userAgent
-    bool found = getInfoByConfig(addr, userAgent, config, &info);
+    // by IP address
+    bool found = getInfoByAddr(addr, &info);;
 
     if (!found) {
+        // by userAgent
         found = getInfoByType(userAgent, ClientMatchType::UserAgent, &info);
     }
 
@@ -189,57 +195,29 @@ void Clients::getInfo(std::shared_ptr<Config> config, const struct sockaddr_stor
     log_debug("client info: {} '{}' -> '{}' as {}", sockAddrGetNameInfo((struct sockaddr*)addr), userAgent, (*ppInfo)->name, ClientConfig::mapClientType((*ppInfo)->type));
 }
 
-bool Clients::getInfoByConfig(const struct sockaddr_storage* addr, const std::string& userAgent, std::shared_ptr<Config> config, const ClientInfo** ppInfo)
+bool Clients::getInfoByAddr(const struct sockaddr_storage* addr, const ClientInfo** ppInfo)
 {
-    std::shared_ptr<ClientConfigList> client_list = config != nullptr ? config->getClientConfigListOption(CFG_CLIENTS_LIST) : nullptr;
-
-    std::shared_ptr<ClientConfig> manualClient = nullptr;
-    for (size_t i = 0; i < client_list->size(); i++) {
-        auto client = client_list->get(i);
-        if (client != nullptr) {
-            auto clientIp = client->getIp();
-            if (!clientIp.empty()) {
-                if (clientIp.find(".") != std::string::npos) {
-                    struct sockaddr_in clientAddr;
-                    clientAddr.sin_family = AF_INET;
-                    clientAddr.sin_addr.s_addr = inet_addr(clientIp.c_str());
+    for (const auto& i : clientInfo) {
+        if (i.match.empty())
+            continue;
+        if (i.matchType == ClientMatchType::IP) {
+            if (i.match.find(".") != std::string::npos) {
+                struct sockaddr_in clientAddr;
+                clientAddr.sin_family = AF_INET;
+                clientAddr.sin_addr.s_addr = inet_addr (i.match.c_str());
+                if (sockAddrCmpAddr((struct sockaddr*)&clientAddr, (struct sockaddr*)addr) == 0) {
+                    *ppInfo = &i;
+                    return true;
+                } 
+            } else if (i.match.find(":") != std::string::npos) {
+                struct sockaddr_in6 clientAddr;
+                clientAddr.sin6_family = AF_INET6;
+                if (inet_pton(AF_INET6, i.match.c_str(), &clientAddr.sin6_addr) == 1) {
                     if (sockAddrCmpAddr((struct sockaddr*)&clientAddr, (struct sockaddr*)addr) == 0) {
-                        manualClient = client;
-                    } else {
-                        manualClient = nullptr;
-                    }
-                } else if (clientIp.find(":") != std::string::npos) {
-                    struct sockaddr_in6 clientAddr;
-                    clientAddr.sin6_family = AF_INET6;
-                    if (inet_pton(AF_INET6, clientIp.c_str(), &clientAddr.sin6_addr) == 1) {
-                        if (sockAddrCmpAddr((struct sockaddr*)&clientAddr, (struct sockaddr*)addr) == 0) {
-                            manualClient = client;
-                        } else {
-                            manualClient = nullptr;
-                        }
+                        *ppInfo = &i;
+                        return true;
                     }
                 }
-            }
-            auto clientUa = client->getUserAgent();
-            if (!clientUa.empty()) {
-                if (userAgent.find(clientUa) != std::string::npos) {
-                    manualClient = client;
-                } else {
-                    manualClient = nullptr;
-                }
-            }
-        }
-        if (manualClient != nullptr) {
-            break;
-        }
-    }
-    if (manualClient != nullptr) {
-        auto manualClientInfo = manualClient->getClientInfo();
-        for (const auto& i : clientInfo) {
-            if (i.type == manualClientInfo->type) {
-                *ppInfo = manualClientInfo;
-                manualClientInfo->flags |= i.flags;
-                return true;
             }
         }
     }
