@@ -38,6 +38,13 @@ web::clients::clients(std::shared_ptr<Config> config, std::shared_ptr<Storage> s
 {
 }
 
+std::string steady_clock_to_string( std::chrono::steady_clock::time_point t )
+{
+    auto systime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()
+                                          + (t - std::chrono::steady_clock::now()));
+    return trim_string(std::asctime(std::localtime(&systime)));
+}
+
 void web::clients::process()
 {
     check_request();
@@ -51,8 +58,7 @@ void web::clients::process()
     for (const auto obj : *arr) {
         auto item = clients.append_child("client");
         item.append_attribute("ip") = sockAddrGetNameInfo((const struct sockaddr*)&obj.addr).c_str();
-
-        // item.append_attribute("age") = fmt::format("{}",obj.age);
+        item.append_attribute("time") = steady_clock_to_time_t(obj.age).c_str();
         item.append_attribute("userAgent") = obj.userAgent.c_str();
         item.append_attribute("name") = obj.pInfo->name.c_str();
         item.append_attribute("match") = obj.pInfo->match.c_str();
