@@ -132,6 +132,25 @@ std::string ClientConfig::mapClientType(ClientType clientType)
     return clientType_str;
 }
 
+std::string ClientConfig::mapMatchType(ClientMatchType matchType)
+{
+    std::string matchType_str;
+    switch (matchType) {
+    case ClientMatchType::None:
+        matchType_str = "None";
+        break;
+    case ClientMatchType::UserAgent:
+        matchType_str = "UserAgent";
+        break;
+    case ClientMatchType::IP:
+        matchType_str = "IP";
+        break;
+    default:
+        throw_std_runtime_error("illegal matchType given to mapMatchType()");
+    }
+    return matchType_str;
+}
+
 ClientType ClientConfig::remapClientType(const std::string& clientType)
 {
     if (clientType == "BubbleUPnP") {
