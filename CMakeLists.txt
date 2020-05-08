@@ -197,6 +197,7 @@ set(libgerberaFILES
         src/web/add.cc
         src/web/add_object.cc
         src/web/auth.cc
+        src/web/clients.cc
         src/web/containers.cc
         src/web/directories.cc
         src/web/edit_load.cc
