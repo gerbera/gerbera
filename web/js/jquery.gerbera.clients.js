@@ -32,6 +32,7 @@ $.widget('grb.dataitems', {
     let row, content, text;
     const headings = {
 	    ip: 'IP Address',
+	    time: 'First Seen',
 	    name: 'Profile',
 	    userAgent: 'User Agent',
 	    matchType: 'Match Type',
@@ -42,7 +43,7 @@ $.widget('grb.dataitems', {
 
     if (data.length > 0) {
 
-	const props = ['ip', 'name', 'userAgent', 'matchType', 'match', 'clientType', 'flags' ];
+	const props = ['ip', 'name', 'userAgent', 'matchType', 'match', 'clientType', 'time', 'flags' ];
 	row = $('<tr></tr>');
 	props.forEach( function(p) {
 	     content = $('<th></th>');
