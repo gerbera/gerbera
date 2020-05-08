@@ -27,7 +27,7 @@ import {Updates} from "./gerbera-updates.module.js";
 const destroy = () => {
   const datagrid = $('#clientgrid');
   if (datagrid.hasClass('grb-clients')) {
-    datagrid.dataitems('destroy');
+    datagrid.clients('destroy');
   } else {
     datagrid.html('');
   }
@@ -64,10 +64,10 @@ const loadItems = (response) => {
     const datagrid = $('#clientgrid');
 
     if (datagrid.hasClass('grb-clients')) {
-      datagrid.dataitems('destroy');
+      datagrid.clients('destroy');
     }
 
-    datagrid.dataitems({
+    datagrid.clients({
       data: items,
       itemType: 'clients'
     });
