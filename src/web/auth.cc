@@ -41,14 +41,14 @@
 
 #define LOGIN_TIMEOUT 10 // in seconds
 
-static long get_time()
+static time_t get_time()
 {
     return std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::system_clock::now()).time_since_epoch().count();
 }
 
 static std::string generate_token()
 {
-    long expiration = get_time() + LOGIN_TIMEOUT;
+    const time_t expiration = get_time() + LOGIN_TIMEOUT;
     std::string salt = generate_random_id();
     return std::to_string(expiration) + '_' + salt;
 }
@@ -58,7 +58,7 @@ static bool check_token(const std::string& token, const std::string& password, c
     std::vector<std::string> parts = split_string(token, '_');
     if (parts.size() != 2)
         return false;
-    long expiration = std::stol(parts[0]);
+    auto expiration = static_cast<time_t>(std::stol(parts[0]));
     if (expiration < get_time())
         return false;
     std::string checksum = hex_string_md5(token + password);
