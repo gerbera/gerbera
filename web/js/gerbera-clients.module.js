@@ -73,6 +73,7 @@ const loadItems = (response) => {
     });
   }
 };
+
 const iptoi = (addr) => {
   var parts = addr.split('.').map((str) => { return parseInt(str); });
   
@@ -99,16 +100,17 @@ const iptoi = (addr) => {
 const transformItems = (items) => {
   const widgetItems = [];
   const ipFilter = /:[0-9]+$/;
+
   for (let i = 0; i < items.length; i++) {
     const gItem = items[i];
     gItem.ip = gItem.ip.replace(ipFilter, '');
     if (!widgetItems.some((item) => {
-	    return item.ip === gItem.ip && item.userAgent === gItem.userAgent;
+        return item.ip === gItem.ip && item.userAgent === gItem.userAgent;
     })) {
         widgetItems.push(gItem);
     }
   }
-  
+
   return widgetItems.sort( (a,b) => { return iptoi(a.ip) - iptoi(b.ip) });
 };
 
