@@ -25,10 +25,10 @@
 
 #include "pages.h" // API
 
-#include "util/upnp_clients.h"
 #include "config/client_config.h"
 #include "storage/storage.h"
 #include "upnp_xml.h"
+#include "util/upnp_clients.h"
 
 #include <utility>
 
