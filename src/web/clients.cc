@@ -32,7 +32,6 @@
 
 #include <utility>
 
-
 web::clients::clients(std::shared_ptr<Config> config, std::shared_ptr<Storage> storage,
     std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
     : WebRequestHandler(std::move(config), std::move(storage), std::move(content), std::move(sessionManager))
@@ -41,16 +40,7 @@ web::clients::clients(std::shared_ptr<Config> config, std::shared_ptr<Storage> s
 
 void web::clients::process()
 {
-   check_request();
-
-    // int parentID = intParam("parent_id");
-    // int start = intParam("start");
-    // int count = intParam("count");
-    // if (start < 0)
-        // throw_std_runtime_error("illegal start parameter");
-    // if (count < 0)
-        // throw_std_runtime_error("illegal count parameter");
-
+    check_request();
     auto root = xmlDoc->document_element();
 
     auto clients = root.append_child("clients");
@@ -70,5 +60,4 @@ void web::clients::process()
         item.append_attribute("matchType") = ClientConfig::mapMatchType(obj.pInfo->matchType).c_str();
         item.append_attribute("clientType") = ClientConfig::mapClientType(obj.pInfo->type).c_str();
     }
-
 }
