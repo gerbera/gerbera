@@ -100,6 +100,7 @@ public:
 
     /* helpers for clientType stuff */
     static std::string mapClientType(ClientType clientType);
+    static std::string mapMatchType(ClientMatchType matchType);
     static ClientType remapClientType(const std::string& clientType);
     static int remapFlag(const std::string& flag);
 
