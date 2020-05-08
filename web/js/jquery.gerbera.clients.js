@@ -20,11 +20,11 @@
 
     $Id$
 */
-$.widget('grb.dataitems', {
+$.widget('grb.clients', {
 
   _create: function () {
     this.element.html('');
-    this.element.addClass('grb-dataitems');
+    this.element.addClass('grb-clients');
     const table = $('<table></table>').addClass('table');
     const tbody = $('<tbody></tbody>');
     const thead = $('<thead></thead>');
@@ -91,7 +91,7 @@ $.widget('grb.dataitems', {
 
   _destroy: function () {
     this.element.children('table').remove();
-    this.element.removeClass('grb-dataitems');
+    this.element.removeClass('grb-clients');
     this.element.removeClass('with-data');
   }
 
