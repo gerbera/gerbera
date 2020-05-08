@@ -143,7 +143,7 @@ int stoi_string(const std::string& str, int def)
     if (str.empty() || !std::isdigit(*str.c_str()))
         return def;
 
-    return std::stoi(str);
+    return std::stoi(str, nullptr, 0);
 }
 
 std::string reduce_string(std::string str, char ch)
