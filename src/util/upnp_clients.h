@@ -70,6 +70,7 @@ struct ClientInfo {
 
 struct ClientCacheEntry {
     struct sockaddr_storage addr;
+    std::string userAgent;
     std::chrono::time_point<std::chrono::steady_clock> age;
 
     const struct ClientInfo* pInfo;
@@ -83,6 +84,7 @@ public:
     static void getInfo(const struct sockaddr_storage* addr, const std::string& userAgent, const ClientInfo** ppInfo);
 
     static void addClientInfo(std::shared_ptr<ClientInfo> add);
+    static std::shared_ptr<std::vector<struct ClientCacheEntry>> getClientList() { return cache; }
 
 private:
     static bool getInfoByType(const std::string& match, ClientMatchType type, const ClientInfo** ppInfo);
@@ -92,7 +94,7 @@ private:
 private:
     static std::mutex mutex;
     using AutoLock = std::lock_guard<std::mutex>;
-    static std::unique_ptr<std::vector<struct ClientCacheEntry>> cache;
+    static std::shared_ptr<std::vector<struct ClientCacheEntry>> cache;
     static std::vector<struct ClientInfo> clientInfo;
 };
 
