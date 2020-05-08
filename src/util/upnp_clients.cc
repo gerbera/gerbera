@@ -191,6 +191,15 @@ void Clients::getInfo(const struct sockaddr_storage* addr, const std::string& us
 #endif
     }
 
+    if (info) {
+        auto add = ClientCacheEntry();
+        add.addr = *addr;
+        add.age = std::chrono::steady_clock::now();
+        add.userAgent = userAgent;
+        add.pInfo = info;
+        cache->push_back(add);
+    }
+
     *ppInfo = info;
     log_debug("client info: {} '{}' -> '{}' as {}", sockAddrGetNameInfo((struct sockaddr*)addr), userAgent, (*ppInfo)->name, ClientConfig::mapClientType((*ppInfo)->type));
 }
@@ -268,4 +277,4 @@ bool Clients::downloadDescription(const std::string& location, std::unique_ptr<p
 }
 
 std::mutex Clients::mutex;
-std::unique_ptr<std::vector<struct ClientCacheEntry>> Clients::cache = std::make_unique<std::vector<struct ClientCacheEntry>>();
+std::shared_ptr<std::vector<struct ClientCacheEntry>> Clients::cache = std::make_shared<std::vector<struct ClientCacheEntry>>();
