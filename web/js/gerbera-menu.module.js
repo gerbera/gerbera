@@ -72,6 +72,7 @@ const initialize = () => {
 const selectType = (menuItem) => {
   $('#home').hide();
   $('#content').show();
+  $('#clients').hide();
   const type = menuItem.data('gerbera-type');
   Tree.selectType(type, 0);
   GerberaApp.setType(type);
@@ -116,6 +117,7 @@ var click = (event) => {
 var home = function () {
   $('#home').show();
   $('#content').hide();
+  $('#clients').hide();
   Tree.destroy();
   Trail.destroy();
   Items.destroy();
