@@ -1649,15 +1649,14 @@ void ContentManager::triggerPlayHook(const std::shared_ptr<CdsObject>& obj)
 
     if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && !obj->getFlag(OBJECT_FLAG_PLAYED)) {
         std::vector<std::string> mark_list = config->getArrayOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST);
-        for (const auto& i : mark_list) {
-            if (startswith(std::static_pointer_cast<CdsItem>(obj)->getMimeType(), i)) {
-                obj->setFlag(OBJECT_FLAG_PLAYED);
 
-                bool supress = config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES);
-                log_debug("Marking object {} as played", obj->getTitle().c_str());
-                updateObject(obj, !supress);
-                break;
-            }
+        bool mark = std::any_of(mark_list.begin(), mark_list.end(), [&](const auto& i) { return startswith(std::static_pointer_cast<CdsItem>(obj)->getMimeType(), i); });
+        if (mark) {
+            obj->setFlag(OBJECT_FLAG_PLAYED);
+
+            bool supress = config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES);
+            log_debug("Marking object {} as played", obj->getTitle().c_str());
+            updateObject(obj, !supress);
         }
     }
 
