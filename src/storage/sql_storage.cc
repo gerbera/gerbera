@@ -1231,9 +1231,9 @@ std::unique_ptr<Storage::ChangedContainers> SQLStorage::removeObjects(const std:
     if (count <= 0)
         return nullptr;
 
-    for (const auto& id : *list) {
-        if (IS_FORBIDDEN_CDS_ID(id))
-            throw_std_runtime_error("tried to delete a forbidden ID (" + std::to_string(id) + ")");
+    bool forbidden = std::any_of(list->begin(), list->end(), [](const auto& id) { return IS_FORBIDDEN_CDS_ID(id); });
+    if (forbidden) {
+        throw_std_runtime_error("tried to delete a forbidden ID (" + std::to_string(id) + ")");
     }
 
     std::ostringstream idsBuf;

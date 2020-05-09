@@ -95,10 +95,10 @@ int AutoscanList::_add(const std::shared_ptr<AutoscanDirectory>& dir)
 {
     std::string loc = dir->getLocation();
 
-    for (const auto& i : list) {
-        if (loc == i->getLocation()) {
-            throw_std_runtime_error("Attempted to add same autoscan path twice");
-        }
+    bool err = std::any_of(list.begin(), list.end(), [&](const auto& i) { return loc == i->getLocation(); });
+
+    if (err) {
+        throw_std_runtime_error("Attempted to add same autoscan path twice");
     }
 
     dir->setScanID(list.size());

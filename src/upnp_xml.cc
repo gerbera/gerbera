@@ -199,17 +199,13 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, bool re
                         auto item = std::static_pointer_cast<CdsItem>(obj);
 
                         auto resources = item->getResources();
-                        for (size_t i = 1; i < resources.size(); i++) {
-                            auto res = resources[i];
-                            // only add upnp:AlbumArtURI if we have an AA, skip the resource
-                            if ((res->getHandlerType() == CH_ID3) || (res->getHandlerType() == CH_MP4) || (res->getHandlerType() == CH_FLAC) || (res->getHandlerType() == CH_FANART) || (res->getHandlerType() == CH_EXTURL)) {
 
-                                std::string url = getArtworkUrl(item);
-                                result.append_child("upnp:albumArtURI").append_child(pugi::node_pcdata).set_value(url.c_str());
+                        artAdded = std::any_of(resources.begin(), resources.end(),
+                            [](const auto& i) { return (i->getHandlerType() == CH_ID3) || (i->getHandlerType() == CH_MP4) || (i->getHandlerType() == CH_FLAC) || (i->getHandlerType() == CH_FANART) || (i->getHandlerType() == CH_EXTURL); });
 
-                                artAdded = true;
-                                break;
-                            }
+                        if (artAdded) {
+                            std::string url = getArtworkUrl(item);
+                            result.append_child("upnp:albumArtURI").append_child(pugi::node_pcdata).set_value(url.c_str());
                         }
                     }
                 }
@@ -584,11 +580,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
                     // we have the current and hopefully valid fcc string
                     // let's have a look if it matches the list
                     else {
-                        bool fcc_match = false;
-                        for (const auto& f : fcc_list) {
-                            if (current_fcc == f)
-                                fcc_match = true;
-                        }
+                        bool fcc_match = std::any_of(fcc_list.begin(), fcc_list.end(), [&](const auto& f) { return current_fcc == f; });
 
                         if (!fcc_match && (fcc_mode == FCC_Process))
                             continue;

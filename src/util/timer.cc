@@ -75,11 +75,12 @@ void Timer::addTimerSubscriber(Subscriber* timerSubscriber, unsigned int notifyI
 
     AutoLock lock(mutex);
     TimerSubscriberElement element(timerSubscriber, notifyInterval, std::move(parameter), once);
-    for (auto& subscriber : subscribers) {
-        if (subscriber == element) {
-            throw_std_runtime_error("Tried to add same timer twice");
-        }
+    bool err = std::any_of(subscribers.begin(), subscribers.end(), [&](const auto& subscriber) { return subscriber == element; });
+
+    if (err) {
+        throw_std_runtime_error("Tried to add same timer twice");
     }
+
     subscribers.push_back(element);
     signal();
 }
