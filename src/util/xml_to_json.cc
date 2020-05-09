@@ -86,11 +86,7 @@ void Xml2Json::handleElement(std::ostringstream& buf, const pugi::xml_node& node
             // look ahead
             auto childAttrs = child.attributes();
             size_t childAttributeCount = std::distance(childAttrs.begin(), childAttrs.end());
-            size_t childElementCount = 0;
-            for (const pugi::xml_node& el : child.children()) {
-                if (el.type() == pugi::node_element)
-                    childElementCount++;
-            }
+            size_t childElementCount = std::count_if(child.children().begin(), child.children().end(), [&](const auto& el) { return el.type() == pugi::node_element; });
 
             if (array) {
                 if (nodeName != child.name())
