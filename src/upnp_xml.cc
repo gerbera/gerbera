@@ -395,7 +395,7 @@ void UpnpXMLBuilder::renderResource(const std::string& URL, const std::map<std::
     }
 }
 
-void UpnpXMLBuilder::renderCaptionInfo(const std::string& URL, pugi::xml_node* parent)
+void UpnpXMLBuilder::renderCaptionInfo(const std::string& URL, pugi::xml_node* parent) const
 {
     auto cap = parent->append_child("sec:CaptionInfoEx");
 

@@ -90,7 +90,7 @@ public:
 
     /// \brief Renders a subtitle resource tag
     /// \param URL download location of the video item
-    void renderCaptionInfo(const std::string& URL, pugi::xml_node* parent);
+    void renderCaptionInfo(const std::string& URL, pugi::xml_node* parent) const;
 
     void addResources(const std::shared_ptr<CdsItem>& item, pugi::xml_node* parent);
 
