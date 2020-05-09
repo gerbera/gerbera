@@ -41,6 +41,7 @@
 #include <filesystem>
 namespace fs = std::filesystem;
 
+#include "iohandler/io_handler.h"
 #include "metadata_handler.h"
 
 // forward declaration
