@@ -677,7 +677,9 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
                     list->erase(objectID);
                 // add a task to rescan the directory that was found
                 auto adir2 = getAutoscanDirectory(objectID);
-                rescanDirectory(adir2, newPath, task->isCancellable());
+                if (adir2) {
+                    rescanDirectory(adir2, newPath, task->isCancellable());
+                }
             } else {
                 // we have to make sure that we will never add a path to the task list
                 // if it is going to be removed by a pending remove task.
