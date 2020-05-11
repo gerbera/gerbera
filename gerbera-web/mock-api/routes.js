@@ -8,6 +8,7 @@ const directoriesMock = new MockResponder('directories');
 const editLoadMock = new MockResponder('edit_load');
 const filesMock = new MockResponder('files');
 const itemsMock = new MockResponder('items');
+const clientsMock = new MockResponder('clients');
 const removeMock = new MockResponder('remove');
 const voidMock = new MockResponder('void');
 
@@ -41,6 +42,9 @@ module.exports = function (app) {
       case 'items':
         res.send(require(itemsMock.getResponse(req.query.parent_id, req.query.start)));
         break;
+      case 'clients':
+        res.send(require(clientsMock.getResponse('')));
+        break;
       case 'remove':
         res.send(require(removeMock.getResponse(req.query.object_id, req.query.all)));
         break;
@@ -53,6 +57,7 @@ module.exports = function (app) {
     const testName = req.query.testName;
     authMock.reset(testName);
     itemsMock.reset(testName);
+    clientsMock.reset(testName);
     containersMock.reset(testName);
     res.sendStatus(200);
   });

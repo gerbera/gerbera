@@ -240,7 +240,7 @@ bool Clients::getInfoByType(const std::string& match, ClientMatchType type, cons
     for (const auto& i : clientInfo) {
         if (i.match.empty())
             continue;
-        if (i.matchType == type) {
+        if (type != ClientMatchType::IP && i.matchType == type) {
             if (match.find(i.match) != std::string::npos) {
                 *ppInfo = &i;
                 return true;

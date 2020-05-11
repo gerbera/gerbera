@@ -10,6 +10,10 @@ module.exports = function (driver) {
     return await driver.findElement(By.id('nav-fs'));
   };
 
+  this.getClientsMenu = async () => {
+    return await driver.findElement(By.id('nav-clients'));
+  };
+
   this.getHomeMenu = async () => {
     return await driver.findElement(By.id('nav-home'));
   };
@@ -19,10 +23,10 @@ module.exports = function (driver) {
   };
 
   this.clickMenu = async (menuId) => {
-    const tree = await driver.findElement(By.id('tree'));
-    if (menuId === 'nav-home') {
+    if (menuId === 'nav-home' || menuId === 'nav-clients') {
       return await driver.findElement(By.id(menuId)).click()
     } else {
+      const tree = await driver.findElement(By.id('tree'));
       await driver.findElement(By.id(menuId)).click();
       return await driver.wait(until.elementIsVisible(tree), 5000)
     }
@@ -30,7 +34,7 @@ module.exports = function (driver) {
 
   this.clickMenuIcon = async (menuId) => {
     const tree = await driver.findElement(By.id('tree'));
-    if (menuId === 'nav-home') {
+    if (menuId === 'nav-home' || menuId === 'nav-clients') {
       return await driver.findElement(By.css('#'+ menuId + ' i')).click();
     } else {
       await driver.findElement(By.css('#'+ menuId + ' i')).click();
@@ -268,6 +272,17 @@ module.exports = function (driver) {
 
   this.getPages = async () => {
     return await driver.findElements(By.css('.page-item'));
+  };
+
+  this.clients = async () => {
+    await driver.wait(until.elementLocated(By.id('clientgrid')), 1000);
+    return await driver.findElements(By.className('grb-client'));
+  };
+
+  this.getClientColumn = async (idx, col) => {
+    await driver.wait(until.elementLocated(By.id('clientgrid'), 1000));
+    const clients = await driver.findElements(By.className('grb-client-' + col));
+    return clients[idx];
   };
 
   this.takeScreenshot = async (filename) => {

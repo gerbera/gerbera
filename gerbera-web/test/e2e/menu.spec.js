@@ -50,6 +50,12 @@ describe('Menu Suite', () => {
       expect(tree.length).to.equal(6);
     });
 
+    it('loads the clients list when clicking Clients', async () => {
+      await homePage.clickMenu('nav-clients');
+      const clients = await homePage.clients();
+      expect(clients.length).to.equal(2);
+    });
+
     it('loads the parent filesystem container list when clicking Filesystem', async () => {
       await homePage.clickMenu('nav-fs');
       const tree = await homePage.treeItems();
