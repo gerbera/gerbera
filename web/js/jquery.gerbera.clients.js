@@ -31,50 +31,48 @@ $.widget('grb.clients', {
     const data = this.options.data;
     let row, content, text;
     const headings = {
-	    ip: 'IP Address',
-	    time: 'First Seen',
-	    name: 'Profile',
-	    userAgent: 'User Agent',
-	    matchType: 'Match Type',
-	    match: 'Match Pattern',
-	    clientType: 'Client Type',
-	    flags: 'Quirk Flags'
+      ip: 'IP Address',
+      time: 'First Seen',
+      name: 'Profile',
+      userAgent: 'User Agent',
+      matchType: 'Match Type',
+      match: 'Match Pattern',
+      clientType: 'Client Type',
+      flags: 'Quirk Flags'
     };
 
     if (data.length > 0) {
 
-	const props = ['ip', 'name', 'userAgent', 'matchType', 'match', 'clientType', 'time', 'flags' ];
-	row = $('<tr></tr>');
-	props.forEach( function(p) {
-	     content = $('<th></th>');
-	     text = $('<span></span>');
-         text.text(headings[p]).appendTo(content);
-	     text.addClass('grb-item');
-	     content.addClass('grb-client-' + p);
-	     
-         row.append(content);
-	});
-	
-      //row.addClass('grb-item');
+      const props = ['ip', 'name', 'userAgent', 'matchType', 'match', 'clientType', 'time', 'flags' ];
+      row = $('<tr></tr>');
+      props.forEach( function(p) {
+          content = $('<th></th>');
+          text = $('<span></span>');
+          text.text(headings[p]).appendTo(content);
+          text.addClass('grb-item');
+          content.addClass('grb-client-' + p);
+
+          row.append(content);
+      });
+
       thead.append(row);
-	
+
       for (let i = 0; i < data.length; i++) {
         const item = data[i];
         row = $('<tr></tr>');
-        
-	props.forEach( function(p) {
-	     content = $('<td></td>');
 
-	     text = $('<span></span>');
-             text.text(item[p]).appendTo(content);
-	     
-	     content.addClass('grb-client-' + p);
-             row.append(content);
-	});
-	
+        props.forEach( function(p) {
+            content = $('<td></td>');
+            text = $('<span></span>');
+            text.text(item[p]).appendTo(content);
+            content.addClass('grb-client-' + p);
+            row.append(content);
+        });
+
         row.addClass('grb-item');
         tbody.append(row);
       }
+      thead.appendTo(table);
     } else {
       row = $('<tr></tr>');
       content = $('<td></td>');
@@ -82,7 +80,7 @@ $.widget('grb.clients', {
       row.append(content);
       tbody.append(row);
     }
-    thead.appendTo(table);
+
     tbody.appendTo(table);
 
     this.element.append(table);
@@ -94,5 +92,4 @@ $.widget('grb.clients', {
     this.element.removeClass('grb-clients');
     this.element.removeClass('with-data');
   }
-
 });

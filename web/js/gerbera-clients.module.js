@@ -22,7 +22,6 @@
 */
 import {GerberaApp} from './gerbera-app.module.js';
 import {Auth} from './gerbera-auth.module.js';
-import {Updates} from "./gerbera-updates.module.js";
 
 const destroy = () => {
   const datagrid = $('#clientgrid');
