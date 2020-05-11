@@ -37,7 +37,7 @@ describe('Clients Suite', () => {
         { col: 'userAgent', head: 'User Agent', index: 2, entry: 'UPnP/1.0 DLNADOC/1.50'},
       ];
 
-      expect(result.length).to.equal(2);
+      expect(result.length).to.equal(3); // head counts also
 
       for (let index = 0; index < values.length; index++) {
         const v = values[index];

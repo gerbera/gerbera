@@ -53,7 +53,7 @@ describe('Menu Suite', () => {
     it('loads the clients list when clicking Clients', async () => {
       await homePage.clickMenu('nav-clients');
       const clients = await homePage.clients();
-      expect(clients.length).to.equal(2);
+      expect(clients.length).to.equal(3);  // head counts also
     });
 
     it('loads the parent filesystem container list when clicking Filesystem', async () => {
