@@ -46,7 +46,7 @@ suite(() => {
 
       const image = await Jimp.read(fileName);
       image.resize(1440, 1080);
-      image.crop(0, 0, 1430, 100).write(fileName);
+      image.crop(650, 0, 780, 100).write(fileName);
     });
 
     it('for [menu bar]', async () => {
@@ -83,6 +83,19 @@ suite(() => {
       await loginPage.submitLogin();
       await homePage.clickMenu('nav-fs');
       await homePage.clickTree('etc');
+
+      await homePage.takeScreenshot(fileName);
+
+      const image = await Jimp.read(fileName);
+      image.resize(1280, Jimp.AUTO).write(fileName);
+    });
+
+    it('for [clients view]', async () => {
+      const fileName = DEFAULT_FOLDER_STORE + 'clients-view.png';
+      await loginPage.username('user');
+      await loginPage.password('pwd');
+      await loginPage.submitLogin();
+      await homePage.clickMenu('nav-clients');
 
       await homePage.takeScreenshot(fileName);
 

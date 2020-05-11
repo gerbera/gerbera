@@ -25,20 +25,21 @@
 /// client info initially taken from https://sourceforge.net/p/minidlna/git/ci/master/tree/clients.cc
 
 #include "upnp_clients.h" // API
+#include "config/client_config.h"
+#include "config/config.h"
+#include "util/tools.h"
 
 #include <upnp.h>
 
-#include "util/tools.h"
-
 // table of supported clients (sequence of entries matters!)
-static constexpr struct ClientInfo clientInfo[] = {
+std::vector<struct ClientInfo> Clients::clientInfo = std::vector<struct ClientInfo> {
     // Used for not explicitely listed clients, must be first entry
     {
         "Unknown",
         ClientType::Unknown,
         QUIRK_FLAG_NONE,
         ClientMatchType::None,
-        nullptr },
+        "" },
 
     // User-Agent(discovery): Linux/3.18.91-14843133-QB28034466 UPnP/1.0 BubbleUPnP/3.4.4
     // User-Agent(fileInfo ): BubbleUPnP UPnP/1.1
@@ -104,6 +105,11 @@ static constexpr struct ClientInfo clientInfo[] = {
         "UPnP/1.0" }
 };
 
+void Clients::addClientInfo(std::shared_ptr<ClientInfo> newClientInfo)
+{
+    clientInfo.push_back(*newClientInfo);
+}
+
 void Clients::addClientByDiscovery(const struct sockaddr_storage* addr, const std::string& userAgent, const std::string& descLocation)
 {
 #if 0 // only needed if UserAgent is not good enough
@@ -150,13 +156,18 @@ void Clients::getInfo(const struct sockaddr_storage* addr, const std::string& us
 {
     const ClientInfo* info = nullptr;
 
-    // by userAgent
-    bool found = getInfoByType(userAgent, ClientMatchType::UserAgent, &info);
+    // by IP address
+    bool found = getInfoByAddr(addr, &info);
+
+    if (!found) {
+        // by userAgent
+        found = getInfoByType(userAgent, ClientMatchType::UserAgent, &info);
+    }
 
     // by addClientByDiscovery
     if (!found) {
         // always return something, 'Unknown' if we do not know better
-        static_assert(clientInfo[0].type == ClientType::Unknown);
+        assert(clientInfo[0].type == ClientType::Unknown);
         info = &clientInfo[0];
 
 #if 0 // only needed if UserAgent is not good enough
@@ -180,16 +191,56 @@ void Clients::getInfo(const struct sockaddr_storage* addr, const std::string& us
 #endif
     }
 
+    if (info) {
+        auto add = ClientCacheEntry();
+        add.addr = *addr;
+        add.age = std::chrono::steady_clock::now();
+        add.userAgent = userAgent;
+        add.pInfo = info;
+        cache->push_back(add);
+    }
+
     *ppInfo = info;
-    log_debug("client info: {} '{}' -> '{}'", sockAddrGetNameInfo(reinterpret_cast<const struct sockaddr*>(addr)), userAgent, (*ppInfo)->name);
+    log_debug("client info: {} '{}' -> '{}' as {}", sockAddrGetNameInfo((struct sockaddr*)addr), userAgent, (*ppInfo)->name, ClientConfig::mapClientType((*ppInfo)->type));
+}
+
+bool Clients::getInfoByAddr(const struct sockaddr_storage* addr, const ClientInfo** ppInfo)
+{
+    for (const auto& i : clientInfo) {
+        if (i.match.empty())
+            continue;
+        if (i.matchType == ClientMatchType::IP) {
+            if (i.match.find(".") != std::string::npos) {
+                struct sockaddr_in clientAddr;
+                clientAddr.sin_family = AF_INET;
+                clientAddr.sin_addr.s_addr = inet_addr(i.match.c_str());
+                if (sockAddrCmpAddr((struct sockaddr*)&clientAddr, (struct sockaddr*)addr) == 0) {
+                    *ppInfo = &i;
+                    return true;
+                }
+            } else if (i.match.find(":") != std::string::npos) {
+                struct sockaddr_in6 clientAddr;
+                clientAddr.sin6_family = AF_INET6;
+                if (inet_pton(AF_INET6, i.match.c_str(), &clientAddr.sin6_addr) == 1) {
+                    if (sockAddrCmpAddr((struct sockaddr*)&clientAddr, (struct sockaddr*)addr) == 0) {
+                        *ppInfo = &i;
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+
+    *ppInfo = nullptr;
+    return false;
 }
 
 bool Clients::getInfoByType(const std::string& match, ClientMatchType type, const ClientInfo** ppInfo)
 {
     for (const auto& i : clientInfo) {
-        if (!i.match)
+        if (i.match.empty())
             continue;
-        if (i.matchType == type) {
+        if (type != ClientMatchType::IP && i.matchType == type) {
             if (match.find(i.match) != std::string::npos) {
                 *ppInfo = &i;
                 return true;
@@ -226,4 +277,4 @@ bool Clients::downloadDescription(const std::string& location, std::unique_ptr<p
 }
 
 std::mutex Clients::mutex;
-std::unique_ptr<std::vector<struct ClientCacheEntry>> Clients::cache = std::make_unique<std::vector<struct ClientCacheEntry>>();
+std::shared_ptr<std::vector<struct ClientCacheEntry>> Clients::cache = std::make_shared<std::vector<struct ClientCacheEntry>>();

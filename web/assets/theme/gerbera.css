@@ -232,13 +232,13 @@ body,
     flex-grow: 5;
 }
 
-#datagrid {
+#datagrid, #clientgrid {
     height: 100%;
     overflow: auto;
     background-color: #fefefe;
 }
 
-#datagrid table {
+#datagrid table, #clientgrid table {
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -246,10 +246,19 @@ body,
     vertical-align: middle;
 }
 
+#clientgrid table {
+    display: table;
+}
+
 #datagrid table tbody {
     flex: 1 0 auto;
     overflow-y: scroll;
     display: table;
+    width: 100%;
+}
+
+#clientgrid table tbody, #clientgrid table thead {
+    overflow-y: scroll;
     width: 100%;
 }
 
@@ -265,8 +274,12 @@ body,
     width: 100%;
 }
 
-#datagrid table tbody tr:hover {
+#datagrid table tbody tr:hover, #clientgrid table tbody tr:hover {
     background-color: #e9ecef;
+}
+
+#clientgrid {
+	margin: 30px;
 }
 
 .page-item.active .page-link {

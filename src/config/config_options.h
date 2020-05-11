@@ -157,7 +157,6 @@ protected:
     std::shared_ptr<AutoscanList> option;
 };
 
-
 class ClientConfigListOption : public ConfigOption {
 public:
     explicit ClientConfigListOption(std::shared_ptr<ClientConfigList> option)
@@ -170,7 +169,6 @@ public:
 protected:
     std::shared_ptr<ClientConfigList> option;
 };
-
 
 class TranscodingProfileListOption : public ConfigOption {
 public:

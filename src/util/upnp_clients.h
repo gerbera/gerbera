@@ -55,21 +55,25 @@ enum class ClientMatchType {
     UserAgent, // received via UpnpActionRequest, UpnpFileInfo and UpnpDiscovery (all might be slitely different)
     //FriendlyName,
     //ModelName,
+    IP, // use client's network address
 };
 
 struct ClientInfo {
-    const char* name; // used for logging/debugging proposes only
+    std::string name; // used for logging/debugging proposes only
     ClientType type;
     QuirkFlags flags;
 
     // to match the client
     ClientMatchType matchType;
-    const char* match;
+    std::string match;
 };
 
 struct ClientCacheEntry {
     struct sockaddr_storage addr;
+    std::string userAgent;
     std::chrono::time_point<std::chrono::steady_clock> age;
+
+    const struct ClientInfo* pInfo;
 };
 
 class Clients {
@@ -79,14 +83,19 @@ public:
     // always return something, 'Unknown' if we do not know better
     static void getInfo(const struct sockaddr_storage* addr, const std::string& userAgent, const ClientInfo** ppInfo);
 
+    static void addClientInfo(std::shared_ptr<ClientInfo> add);
+    static std::shared_ptr<std::vector<struct ClientCacheEntry>> getClientList() { return cache; }
+
 private:
     static bool getInfoByType(const std::string& match, ClientMatchType type, const ClientInfo** ppInfo);
+    static bool getInfoByAddr(const struct sockaddr_storage* addr, const ClientInfo** ppInfo);
     static bool downloadDescription(const std::string& location, std::unique_ptr<pugi::xml_document>& xml);
 
 private:
     static std::mutex mutex;
     using AutoLock = std::lock_guard<std::mutex>;
-    static std::unique_ptr<std::vector<struct ClientCacheEntry>> cache;
+    static std::shared_ptr<std::vector<struct ClientCacheEntry>> cache;
+    static std::vector<struct ClientInfo> clientInfo;
 };
 
 #endif // __UPNP_CLIENTS_H__

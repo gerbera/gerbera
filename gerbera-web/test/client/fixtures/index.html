@@ -18,6 +18,9 @@
                     <li class="nav-item">
                         <a id="nav-fs" class="nav-link disabled" href="#filesystem" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="fs"><i class="fa fa-folder-open"></i> File System</a>
                     </li>
+                    <li class="nav-item">
+                        <a id="nav-clients" class="nav-link disabled" href="#clients" data-gerbera-menu-cmd="SELECT_CLIENTS" data-gerbera-type="clients"><i class="fa fa-desktop"></i> Clients</a>
+                    </li>
                 </ul>
                 <ul class="navbar-nav">
                     <li class="nav-item">
@@ -55,6 +58,11 @@
                 <h4><i class="fa fa-files-o"></i> View indexed files</h4>
                 <p>View, update and remove files from Gerbera.</p>
             </a>
+
+            <a id="clientlink" href="javascript:;" onclick="$('#nav-clients').click(); // Replace with hashchange handling">
+                <h4><i class="fa fa-desktop"></i> Show connected clients</h4>
+                <p>Show clients detected by Gerbera and their profile details</p>
+            </a>
         </div>
     </div>
 
@@ -65,6 +73,13 @@
         </div>
         <div id="right">
             <div id="datagrid">
+            </div>
+        </div>
+    </div>
+
+    <div id="clients" style="display: none">
+        <div id="clientframe">
+            <div id="clientgrid">
             </div>
         </div>
     </div>

@@ -194,7 +194,7 @@ public:
     /// \param option to retrieve
     virtual std::shared_ptr<AutoscanList> getAutoscanListOption(config_option_t option) = 0;
 
-    /// \brief returns a config option of type AutoscanList
+    /// \brief returns a config option of type ClientConfigList
     /// \param option to retrieve
     virtual std::shared_ptr<ClientConfigList> getClientConfigListOption(config_option_t option) = 0;
 

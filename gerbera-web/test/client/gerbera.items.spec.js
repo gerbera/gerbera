@@ -104,7 +104,7 @@ describe('Gerbera Items', () => {
     it('does not load items if response is failure', () => {
       itemsResponse.success = false;
       Items.loadItems(itemsResponse);
-      expect($('#items').find('tr').length).toEqual(0);
+      expect($('#datagrid').find('tr').length).toEqual(0);
       itemsResponse.success = true;
     });
 
