@@ -53,8 +53,8 @@
 #endif
 
 #include "autoscan.h"
-#include "config_options.h"
 #include "client_config.h"
+#include "config_options.h"
 #include "metadata/metadata_handler.h"
 #include "storage/storage.h"
 #include "transcoding/transcoding.h"
@@ -1740,15 +1740,7 @@ std::shared_ptr<ClientConfigList> ConfigManager::createClientConfigListFromNode(
         for (const auto& i : flagsVector) {
             flag |= ClientConfig::remapFlag(i);
         }
-/*
-        ClientType clientType;
-        std::string temp = child.attribute("clientType").as_string();
-        if (temp.empty()) {
-            throw std::runtime_error("clientType invalid");
-        }
-
-        clientType = ClientConfig::remapClientType(temp);
-*/
+0
         auto client = std::make_shared<ClientConfig>(flag, ip, userAgent);
         auto clientInfo = client->getClientInfo();
         Clients::addClientInfo(clientInfo);
