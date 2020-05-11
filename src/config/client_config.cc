@@ -26,6 +26,7 @@
 #include "client_config.h" // API
 #include "content_manager.h"
 #include "util/upnp_clients.h"
+#include "util/upnp_quirks.h"
 
 #include <utility>
 
@@ -181,6 +182,25 @@ int ClientConfig::remapFlag(const std::string& flag)
     } else {
         return stoi_string(flag);
     }
+}
+
+std::string ClientConfig::mapFlags(QuirkFlags flags)
+{
+    if (!flags)
+        return "0";
+
+    std::vector<std::string> myFlags;
+
+    if (flags & QUIRK_FLAG_SAMSUNG) {
+        myFlags.push_back("SAMSUNG");
+        flags &= ~QUIRK_FLAG_SAMSUNG;
+    }
+
+    if (flags) {
+        myFlags.push_back(fmt::format("{:#04x}", flags));
+    }
+
+    return join(myFlags,'|');
 }
 
 void ClientConfig::copyTo(const std::shared_ptr<ClientConfig>& copy) const

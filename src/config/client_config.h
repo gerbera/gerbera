@@ -28,6 +28,7 @@
 #define __CLIENTCONFIG_H__
 
 #include "util/upnp_clients.h"
+#include "util/upnp_quirks.h"
 #include <filesystem>
 #include <mutex>
 
@@ -103,6 +104,7 @@ public:
     static std::string mapMatchType(ClientMatchType matchType);
     static ClientType remapClientType(const std::string& clientType);
     static int remapFlag(const std::string& flag);
+    static std::string mapFlags(QuirkFlags flags);
 
 protected:
     std::shared_ptr<struct ClientInfo> clientInfo;
