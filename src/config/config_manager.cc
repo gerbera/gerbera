@@ -1740,7 +1740,11 @@ std::shared_ptr<ClientConfigList> ConfigManager::createClientConfigListFromNode(
         for (const auto& i : flagsVector) {
             flag |= ClientConfig::remapFlag(i);
         }
+<<<<<<< HEAD
 
+=======
+0
+>>>>>>> 728a118e4deb01385671f61478bb17b88e191744
         auto client = std::make_shared<ClientConfig>(flag, ip, userAgent);
         auto clientInfo = client->getClientInfo();
         Clients::addClientInfo(clientInfo);
