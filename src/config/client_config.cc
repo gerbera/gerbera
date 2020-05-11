@@ -200,7 +200,7 @@ std::string ClientConfig::mapFlags(QuirkFlags flags)
         myFlags.push_back(fmt::format("{:#04x}", flags));
     }
 
-    return join(myFlags,'|');
+    return join(myFlags, '|');
 }
 
 void ClientConfig::copyTo(const std::shared_ptr<ClientConfig>& copy) const
