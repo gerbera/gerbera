@@ -27,9 +27,10 @@
 #ifndef __CLIENTCONFIG_H__
 #define __CLIENTCONFIG_H__
 
+#include "util/upnp_clients.h"
+#include "util/upnp_quirks.h"
 #include <filesystem>
 #include <mutex>
-#include "util/upnp_clients.h"
 
 // forward declaration
 class ClientConfig;
@@ -74,39 +75,39 @@ public:
     /// \param flags quirks flags
     /// \param ip ip address
     /// \param userAgent user agent
-    /// \param clientType client type
-    ClientConfig(int flags, std::string ip, std::string userAgent, ClientType clientType);
+    ClientConfig(int flags, std::string ip, std::string userAgent);
 
-    ClientInfo* getClientInfo() { return &clientInfo; }
+    std::shared_ptr<struct ClientInfo> getClientInfo() { return clientInfo; }
 
-    ClientType getClientType() const { return clientInfo.type; }
+    int getFlags() const { return clientInfo->flags; }
+    void setFlags(int flags) { this->clientInfo->flags = flags; }
 
-    void setClientType(ClientType type) { this->clientInfo.type = type; }
+    std::string getIp() const { return (this->clientInfo->matchType == ClientMatchType::IP) ? this->clientInfo->match : ""; }
+    void setIp(std::string ip)
+    {
+        this->clientInfo->matchType = ClientMatchType::IP;
+        this->clientInfo->match = ip;
+    }
 
-    int getFlags() const { return clientInfo.flags; }
-
-    void setFlags(int flags) { this->clientInfo.flags = flags; }
-
-    std::string getIp() const { return ip; }
-
-    void setIp(std::string ip) { this->ip = ip; }
-
-    std::string getUserAgent() const { return userAgent; }
-
-    void setUserAgent(std::string userAgent) { this->userAgent = userAgent; }
+    std::string getUserAgent() const { return (this->clientInfo->matchType == ClientMatchType::UserAgent) ? this->clientInfo->match : ""; }
+    void setUserAgent(std::string userAgent)
+    {
+        this->clientInfo->matchType = ClientMatchType::UserAgent;
+        this->clientInfo->match = userAgent;
+    }
 
     /// \brief copies all properties to another object
     void copyTo(const std::shared_ptr<ClientConfig>& copy) const;
 
     /* helpers for clientType stuff */
     static std::string mapClientType(ClientType clientType);
+    static std::string mapMatchType(ClientMatchType matchType);
     static ClientType remapClientType(const std::string& clientType);
+    static int remapFlag(const std::string& flag);
+    static std::string mapFlags(QuirkFlags flags);
 
 protected:
-    std::string ip;
-    std::string userAgent;
-    
-    struct ClientInfo clientInfo;
+    std::shared_ptr<struct ClientInfo> clientInfo;
 };
 
 #endif

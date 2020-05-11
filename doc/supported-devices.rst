@@ -9,6 +9,42 @@ Supported Devices
 If you want to improve compatibility between Gerbera and your renderer device or if you are interested in a port of
 Gerbera for your NAS device please contact Gerbera Contributors `https://github.com/gerbera <https://github.com/gerbera>`_
 
+Automatic Device Detection
+--------------------------
+
+With each Upnp request a device sends its signature which is used by gerbera to assign special functionality to the response.
+The automatic detection supports the following devices and software:
+
+- StandardUPnP (all devices sending signature UPnP/1.0)
+- BubbleUPnP (running on smartphones)
+- SamsungAllShare (AllShare running on Windows)
+- SamsungSeriesQ (Samsung Series [Q] TVs), setting device flags to ``SAMSUNG``
+- SamsungSeriesCDE (Samsung other TVs), setting device flags to ``SAMSUNG``
+- SamsungBDP (Samsung Blu-ray Player BD-D5100), setting device flags to ``SAMSUNG``
+- SamsungBDJ5500 (Samsung Blu-ray Player J5500), setting device flags to ``SAMSUNG``
+
+
+Device Flags
+~~~~~~~~~~~~
+
+The device flags have the following meaning
+
+-  ``SAMSUNG``: 0x01, add "CaptionInfo.sec" to video header
+
+Manual Overrides
+~~~~~~~~~~~~~~~~
+
+If your device needs one of the implemented special mechanisms you can define this in config.xml section 
+<clients>. This may look like:
+
+.. code-block:: xml
+
+    <clients enabled="yes">
+		<client userAgent="Microsoft-DLNA" flags="0"></client>
+		<client ip="192.168.1.69" flags="SAMSUNG"></client>
+    </clients>
+
+
 MediaRenderers
 --------------
 

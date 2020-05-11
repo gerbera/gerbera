@@ -24,26 +24,35 @@
 /// \file client_config.cc
 
 #include "client_config.h" // API
+#include "content_manager.h"
+#include "util/upnp_clients.h"
+#include "util/upnp_quirks.h"
 
 #include <utility>
-#include "util/upnp_clients.h"
-#include "content_manager.h"
 
 ClientConfig::ClientConfig()
 {
-    clientInfo.flags = 0;
-    ip = nullptr;
-    userAgent = nullptr;
-    clientInfo.type = ClientType::Unknown;
+    clientInfo = std::make_shared<struct ClientInfo>();
+    clientInfo->matchType = ClientMatchType::None;
+    clientInfo->type = ClientType::Unknown;
+    clientInfo->flags = 0;
 }
 
-ClientConfig::ClientConfig(int flags, std::string ip, std::string userAgent, ClientType clientType)
-    : ip(ip)
-    , userAgent(userAgent)
+ClientConfig::ClientConfig(int flags, std::string ip, std::string userAgent)
 {
-    clientInfo.type = clientType;
-    clientInfo.flags = flags;
-    clientInfo.name = fmt::format("Manual Setup for{}{}", !ip.empty() ? " IP " + ip : "", !userAgent.empty() ? " UserAgent " + userAgent : "");
+    clientInfo = std::make_shared<struct ClientInfo>();
+    clientInfo->type = ClientType::StandardUPnP;
+    if (!ip.empty()) {
+        clientInfo->matchType = ClientMatchType::IP;
+        clientInfo->match = ip;
+    } else if (!userAgent.empty()) {
+        clientInfo->matchType = ClientMatchType::UserAgent;
+        clientInfo->match = userAgent;
+    } else {
+        clientInfo->matchType = ClientMatchType::None;
+    }
+    clientInfo->flags = flags;
+    clientInfo->name = fmt::format("Manual Setup for{}{}", !ip.empty() ? " IP " + ip : "", !userAgent.empty() ? " UserAgent " + userAgent : "");
 }
 
 ClientConfigList::ClientConfigList()
@@ -70,7 +79,7 @@ std::vector<std::shared_ptr<ClientConfig>> ClientConfigList::getArrayCopy()
 std::shared_ptr<ClientConfig> ClientConfigList::get(size_t id)
 {
     AutoLock lock(mutex);
-    
+
     if (id >= list.size())
         return nullptr;
 
@@ -80,7 +89,7 @@ std::shared_ptr<ClientConfig> ClientConfigList::get(size_t id)
 void ClientConfigList::remove(size_t id)
 {
     AutoLock lock(mutex);
-    
+
     if (id >= list.size()) {
         log_debug("No such ID {}!", id);
         return;
@@ -124,6 +133,25 @@ std::string ClientConfig::mapClientType(ClientType clientType)
     return clientType_str;
 }
 
+std::string ClientConfig::mapMatchType(ClientMatchType matchType)
+{
+    std::string matchType_str;
+    switch (matchType) {
+    case ClientMatchType::None:
+        matchType_str = "None";
+        break;
+    case ClientMatchType::UserAgent:
+        matchType_str = "UserAgent";
+        break;
+    case ClientMatchType::IP:
+        matchType_str = "IP";
+        break;
+    default:
+        throw_std_runtime_error("illegal matchType given to mapMatchType()");
+    }
+    return matchType_str;
+}
+
 ClientType ClientConfig::remapClientType(const std::string& clientType)
 {
     if (clientType == "BubbleUPnP") {
@@ -147,13 +175,39 @@ ClientType ClientConfig::remapClientType(const std::string& clientType)
     }
 }
 
+int ClientConfig::remapFlag(const std::string& flag)
+{
+    if (flag == "SAMSUNG") {
+        return QUIRK_FLAG_SAMSUNG;
+    } else {
+        return stoi_string(flag);
+    }
+}
+
+std::string ClientConfig::mapFlags(QuirkFlags flags)
+{
+    if (!flags)
+        return "0";
+
+    std::vector<std::string> myFlags;
+
+    if (flags & QUIRK_FLAG_SAMSUNG) {
+        myFlags.push_back("SAMSUNG");
+        flags &= ~QUIRK_FLAG_SAMSUNG;
+    }
+
+    if (flags) {
+        myFlags.push_back(fmt::format("{:#04x}", flags));
+    }
+
+    return join(myFlags, '|');
+}
+
 void ClientConfig::copyTo(const std::shared_ptr<ClientConfig>& copy) const
 {
-    copy->ip = ip;
-    copy->userAgent = userAgent;
-    copy->clientInfo.name = clientInfo.name;
-    copy->clientInfo.type = clientInfo.type;
-    copy->clientInfo.flags = clientInfo.flags;
-    copy->clientInfo.matchType = clientInfo.matchType;
-    copy->clientInfo.match = clientInfo.match;
+    copy->clientInfo->name = clientInfo->name;
+    copy->clientInfo->type = clientInfo->type;
+    copy->clientInfo->flags = clientInfo->flags;
+    copy->clientInfo->matchType = clientInfo->matchType;
+    copy->clientInfo->match = clientInfo->match;
 }
