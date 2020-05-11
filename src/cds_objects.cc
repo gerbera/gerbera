@@ -40,11 +40,11 @@
 CdsObject::CdsObject(std::shared_ptr<Storage> storage)
     : storage(std::move(storage))
     , mtime(0)
+    , sizeOnDisk(0)
 {
     id = INVALID_OBJECT_ID;
     parentID = INVALID_OBJECT_ID;
     refID = INVALID_OBJECT_ID;
-    sizeOnDisk = 0;
     virt = false;
     sortPriority = 0;
     objectFlags = OBJECT_FLAG_RESTRICTED;
@@ -141,11 +141,11 @@ std::shared_ptr<CdsObject> CdsObject::createObject(const std::shared_ptr<Storage
 
 CdsItem::CdsItem(std::shared_ptr<Storage> storage)
     : CdsObject(std::move(storage))
+    , mimeType(MIMETYPE_DEFAULT)
     , serviceID("")
 {
     objectType = OBJECT_TYPE_ITEM;
     upnpClass = "object.item";
-    mimeType = MIMETYPE_DEFAULT;
     trackNumber = 0;
 }
 
