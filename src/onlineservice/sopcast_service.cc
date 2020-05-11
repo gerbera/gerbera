@@ -50,8 +50,8 @@ SopCastService::SopCastService(std::shared_ptr<Config> config,
     : config(std::move(config))
     , storage(std::move(storage))
     , content(std::move(content))
+    , pid(0)
 {
-    pid = 0;
     curl_handle = curl_easy_init();
     if (!curl_handle)
         throw_std_runtime_error("failed to initialize curl");

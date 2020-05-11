@@ -77,11 +77,11 @@ ConfigManager::ConfigManager(fs::path filename,
     , ip(std::move(ip))
     , interface(std::move(interface))
     , port(port)
+    , xmlDoc(std::make_unique<pugi::xml_document>())
+    , options(std::make_unique<std::vector<std::shared_ptr<ConfigOption>>>())
 {
     ConfigManager::debug_logging = debug_logging;
 
-    xmlDoc = std::make_unique<pugi::xml_document>();
-    options = std::make_unique<std::vector<std::shared_ptr<ConfigOption>>>();
     options->resize(CFG_MAX);
 
     if (filename.empty()) {

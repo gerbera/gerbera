@@ -103,12 +103,12 @@ PRAGMA foreign_keys = ON;"
 
 Sqlite3Storage::Sqlite3Storage(std::shared_ptr<Config> config, std::shared_ptr<Timer> timer)
     : SQLStorage(std::move(config))
+    , startupError("")
     , timer(std::move(timer))
 {
     shutdownFlag = false;
     table_quote_begin = '"';
     table_quote_end = '"';
-    startupError = "";
     dirty = false;
 }
 
@@ -404,9 +404,9 @@ void Sqlite3Storage::storeInternalSetting(const std::string& key, const std::str
 
 /* SLTask */
 SLTask::SLTask()
+    : error("")
 {
     running = true;
-    error = "";
     contamination = false;
     decontamination = false;
 }
