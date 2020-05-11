@@ -84,7 +84,7 @@ void web::directories::process()
     };
     bool exclude_config_dirs = true;
 
-    for (auto& it : fs::directory_iterator(path)) {
+    for (const auto& it : fs::directory_iterator(path)) {
         const fs::path& filepath = it.path();
 
         std::error_code ec;
