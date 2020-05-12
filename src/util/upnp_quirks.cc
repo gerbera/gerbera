@@ -57,14 +57,8 @@ void Quirks::addCaptionInfo(const std::shared_ptr<CdsItem>& item, std::unique_pt
     fs::path path = item->getLocation();
     std::string pathNoExt = path.parent_path() / path.stem();
 
-    std::string validext;
-    for (const auto& ext : exts) {
-        std::string captionPath = pathNoExt + ext;
-        if (access(captionPath.c_str(), R_OK) == 0) {
-            validext = ext;
-            break;
-        }
-    }
+    std::string validext = *std::find_if(exts.begin(), exts.end(), [=](const auto& ext) { std::string captionPath = pathNoExt + ext;
+          return access(captionPath.c_str(), R_OK) == 0; });
 
     if (validext.length() == 0)
         return;
