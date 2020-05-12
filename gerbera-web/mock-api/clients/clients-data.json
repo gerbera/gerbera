@@ -9,7 +9,7 @@
         "host": "BluRay",
         "name": "Standard UPnP",
         "match": "UPnP/1.0",
-        "flags": 0,
+        "flags": "None",
         "matchType": "UserAgent",
         "clientType": "StandardUPnP"
       },
@@ -20,7 +20,7 @@
         "host": "BluRay",
         "name": "Standard UPnP",
         "match": "UPnP/1.0",
-        "flags": 0,
+        "flags": "None",
         "matchType": "UserAgent",
         "clientType": "StandardUPnP"
       },
@@ -31,7 +31,7 @@
         "host": "BluRay",
         "name": "Standard UPnP",
         "match": "UPnP/1.0",
-        "flags": 0,
+        "flags": "None",
         "matchType": "UserAgent",
         "clientType": "StandardUPnP"
       },
@@ -42,7 +42,7 @@
         "host": "BluRay",
         "name": "Standard UPnP",
         "match": "UPnP/1.0",
-        "flags": 0,
+        "flags": "None",
         "matchType": "UserAgent",
         "clientType": "StandardUPnP"
       },
@@ -55,7 +55,7 @@
         "match": "192.168.1.12",
         "flags": "SAMSUNG",
         "matchType": "IP",
-        "clientType": "StandardUPnP"
+        "clientType": "None"
       },
       {
         "ip": "192.168.1.12:57690",
@@ -66,7 +66,7 @@
         "match": "192.168.1.12",
         "flags": "SAMSUNG",
         "matchType": "IP",
-        "clientType": "StandardUPnP"
+        "clientType": "None"
       }
     ]
   }
