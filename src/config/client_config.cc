@@ -41,7 +41,7 @@ ClientConfig::ClientConfig()
 ClientConfig::ClientConfig(int flags, std::string ip, std::string userAgent)
 {
     clientInfo = std::make_shared<struct ClientInfo>();
-    clientInfo->type = ClientType::StandardUPnP;
+    clientInfo->type = ClientType::Unknown;
     if (!ip.empty()) {
         clientInfo->matchType = ClientMatchType::IP;
         clientInfo->match = ip;
@@ -104,7 +104,7 @@ std::string ClientConfig::mapClientType(ClientType clientType)
     std::string clientType_str;
     switch (clientType) {
     case ClientType::Unknown:
-        clientType_str = "Unknown";
+        clientType_str = "None";
         break;
     case ClientType::BubbleUPnP:
         clientType_str = "BubbleUPnP";
@@ -168,7 +168,7 @@ ClientType ClientConfig::remapClientType(const std::string& clientType)
         return ClientType::SamsungBDJ5500;
     } else if (clientType == "StandardUPnP") {
         return ClientType::StandardUPnP;
-    } else if (clientType == "Unknown") {
+    } else if (clientType == "None") {
         return ClientType::Unknown;
     } else {
         throw_std_runtime_error("clientType " + clientType + " invalid");
@@ -187,7 +187,7 @@ int ClientConfig::remapFlag(const std::string& flag)
 std::string ClientConfig::mapFlags(QuirkFlags flags)
 {
     if (!flags)
-        return "0";
+        return "None";
 
     std::vector<std::string> myFlags;
 
