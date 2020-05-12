@@ -1735,7 +1735,7 @@ std::shared_ptr<ClientConfigList> ConfigManager::createClientConfigListFromNode(
         std::string ip = child.attribute("ip").as_string();
         std::string userAgent = child.attribute("userAgent").as_string();
 
-        int flag;
+        int flag = 0; // ensure no flag is set (optimizer)
         std::vector<std::string> flagsVector = split_string(flags, '|', false);
         for (const auto& i : flagsVector) {
             flag |= ClientConfig::remapFlag(i);

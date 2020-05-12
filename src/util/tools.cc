@@ -1283,6 +1283,19 @@ std::string getAVIFourCC(const fs::path& avi_filename)
 }
 #endif
 
+std::string getHostName(const struct sockaddr* addr)
+{
+    char hoststr[NI_MAXHOST];
+    char portstr[NI_MAXSERV];
+    int len =((struct sockaddr*) addr)->sa_family == AF_INET6 ? sizeof(struct sockaddr_in6) : sizeof(struct sockaddr_in);
+    int ret = getnameinfo((struct sockaddr*)addr, len, hoststr, sizeof(hoststr), portstr, sizeof(portstr), NI_NOFQDN );
+    if (ret != 0) {
+        log_info("could not determine getnameinfo (" + mt_strerror(errno) + ")");
+    }
+
+    return hoststr;
+}
+
 int sockAddrCmpAddr(const struct sockaddr* sa, const struct sockaddr* sb)
 {
     if (sa->sa_family != sb->sa_family)
