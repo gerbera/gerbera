@@ -213,6 +213,11 @@ body,
     overflow: auto;
 }
 
+#clients {
+    height: 100%;
+    overflow: auto;
+}
+
 #left {
     height: 100%;
     flex: 1;
@@ -279,7 +284,7 @@ body,
 }
 
 #clientgrid {
-	margin: 30px;
+    margin: 30px;
 }
 
 .page-item.active .page-link {
