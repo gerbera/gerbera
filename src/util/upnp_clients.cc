@@ -194,6 +194,7 @@ void Clients::getInfo(const struct sockaddr_storage* addr, const std::string& us
     if (info) {
         auto add = ClientCacheEntry();
         add.addr = *addr;
+        add.hostName = getHostName((struct sockaddr*)addr);
         add.age = std::chrono::steady_clock::now();
         add.userAgent = userAgent;
         add.pInfo = info;

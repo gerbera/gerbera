@@ -345,6 +345,7 @@ std::string getAVIFourCC(const fs::path& avi_filename);
 #define SOCK_ADDR_IN_ADDR(sa) SOCK_ADDR_IN_PTR(sa)->sin_addr
 #define SOCK_ADDR_IN6_PTR(sa) ((const struct sockaddr_in6*)(sa))
 #define SOCK_ADDR_IN6_ADDR(sa) SOCK_ADDR_IN6_PTR(sa)->sin6_addr
+std::string getHostName(const struct sockaddr* addr);
 int sockAddrCmpAddr(const struct sockaddr* sa, const struct sockaddr* sb);
 std::string sockAddrGetNameInfo(const struct sockaddr* sa);
 
