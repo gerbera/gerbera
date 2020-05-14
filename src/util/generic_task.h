@@ -31,7 +31,7 @@ protected:
     bool cancellable;
 
 public:
-    GenericTask(task_owner_t taskOwner);
+    explicit GenericTask(task_owner_t taskOwner);
     virtual void run() = 0;
     inline void setDescription(const std::string& description) { this->description = description; }
     inline std::string getDescription() const { return description; }

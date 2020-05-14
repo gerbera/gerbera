@@ -139,7 +139,7 @@ public:
 
 class Storage {
 public:
-    Storage(std::shared_ptr<Config> config);
+    explicit Storage(std::shared_ptr<Config> config);
     virtual ~Storage() = default;
     virtual void init() = 0;
 
