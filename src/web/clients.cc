@@ -65,6 +65,7 @@ void web::clients::process()
             item.append_attribute("host") = obj.hostName.c_str();
         }
         item.append_attribute("time") = steady_clock_to_string(obj.age).c_str();
+        item.append_attribute("last") = steady_clock_to_string(obj.last).c_str();
         item.append_attribute("userAgent") = obj.userAgent.c_str();
         item.append_attribute("name") = obj.pInfo->name.c_str();
         item.append_attribute("match") = obj.pInfo->match.c_str();
