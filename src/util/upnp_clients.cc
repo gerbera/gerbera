@@ -192,13 +192,27 @@ void Clients::getInfo(const struct sockaddr_storage* addr, const std::string& us
     }
 
     if (info) {
-        auto add = ClientCacheEntry();
-        add.addr = *addr;
-        add.hostName = getHostName((struct sockaddr*)addr);
-        add.age = std::chrono::steady_clock::now();
-        add.userAgent = userAgent;
-        add.pInfo = info;
-        cache->push_back(add);
+        bool update = false;
+        for (auto& entry : *cache) {
+            if (sockAddrCmpAddr((struct sockaddr*)&entry.addr, (struct sockaddr*)addr) == 0 && entry.userAgent == userAgent)
+            {
+                entry.last = std::chrono::steady_clock::now();
+                entry.userAgent = userAgent;
+                entry.hostName = getHostName((struct sockaddr*)addr);
+                update = true;
+                break;
+            }
+        }
+        if (!update)  {
+            auto add = ClientCacheEntry();
+            add.addr = *addr;
+            add.hostName = getHostName((struct sockaddr*)addr);
+            add.last = std::chrono::steady_clock::now();
+            add.age = std::chrono::steady_clock::now();
+            add.userAgent = userAgent;
+            add.pInfo = info;
+            cache->push_back(add);
+        }
     }
 
     *ppInfo = info;
