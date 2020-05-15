@@ -194,8 +194,7 @@ void Clients::getInfo(const struct sockaddr_storage* addr, const std::string& us
     if (info) {
         bool update = false;
         for (auto& entry : *cache) {
-            if (sockAddrCmpAddr((struct sockaddr*)&entry.addr, (struct sockaddr*)addr) == 0 && entry.userAgent == userAgent)
-            {
+            if (sockAddrCmpAddr((struct sockaddr*)&entry.addr, (struct sockaddr*)addr) == 0 && entry.userAgent == userAgent) {
                 entry.last = std::chrono::steady_clock::now();
                 entry.userAgent = userAgent;
                 entry.hostName = getHostName((struct sockaddr*)addr);
@@ -203,7 +202,7 @@ void Clients::getInfo(const struct sockaddr_storage* addr, const std::string& us
                 break;
             }
         }
-        if (!update)  {
+        if (!update) {
             auto add = ClientCacheEntry();
             add.addr = *addr;
             add.hostName = getHostName((struct sockaddr*)addr);
