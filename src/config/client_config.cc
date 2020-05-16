@@ -180,7 +180,7 @@ int ClientConfig::remapFlag(const std::string& flag)
     if (flag == "SAMSUNG") {
         return QUIRK_FLAG_SAMSUNG;
     } else {
-        return stoi_string(flag);
+        return stoi_string(flag, 0, 0);
     }
 }
 

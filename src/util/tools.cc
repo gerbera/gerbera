@@ -138,12 +138,12 @@ std::string tolower_string(std::string str)
     return str;
 }
 
-int stoi_string(const std::string& str, int def)
+int stoi_string(const std::string& str, int def, int base)
 {
     if (str.empty() || !std::isdigit(*str.c_str()))
         return def;
 
-    return std::stoi(str, nullptr, 0);
+    return std::stoi(str, nullptr, base);
 }
 
 std::string reduce_string(std::string str, char ch)

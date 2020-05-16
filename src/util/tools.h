@@ -81,7 +81,7 @@ bool startswith(const std::string& str, const std::string& check);
 /// \brief returns lowercase of str
 std::string tolower_string(std::string str);
 
-int stoi_string(const std::string& str, int def = 0);
+int stoi_string(const std::string& str, int def = 0, int base = 10);
 
 /// \brief  Used to replace potential multiple following //../ with single /
 std::string reduce_string(std::string str, char ch);
