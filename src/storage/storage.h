@@ -67,7 +67,7 @@ protected:
     int totalMatches;
 
 public:
-    inline BrowseParam(int objectID, unsigned int flags)
+    BrowseParam(int objectID, unsigned int flags)
     {
         this->objectID = objectID;
         this->flags = flags;
@@ -75,42 +75,42 @@ public:
         requestedCount = 0;
     }
 
-    inline int getFlags() const { return flags; }
-    inline unsigned int getFlag(unsigned int mask) const { return flags & mask; }
-    inline void setFlags(unsigned int flags) { this->flags = flags; }
-    inline void setFlag(unsigned int mask) { flags |= mask; }
-    inline void changeFlag(unsigned int mask, bool value)
+    int getFlags() const { return flags; }
+    unsigned int getFlag(unsigned int mask) const { return flags & mask; }
+    void setFlags(unsigned int flags) { this->flags = flags; }
+    void setFlag(unsigned int mask) { flags |= mask; }
+    void changeFlag(unsigned int mask, bool value)
     {
         if (value)
             setFlag(mask);
         else
             clearFlag(mask);
     }
-    inline void clearFlag(unsigned int mask) { flags &= !mask; }
+    void clearFlag(unsigned int mask) { flags &= !mask; }
 
-    inline int getObjectID() const { return objectID; }
+    int getObjectID() const { return objectID; }
 
-    inline void setRange(int startingIndex, int requestedCount)
+    void setRange(int startingIndex, int requestedCount)
     {
         this->startingIndex = startingIndex;
         this->requestedCount = requestedCount;
     }
-    inline void setStartingIndex(int startingIndex)
+    void setStartingIndex(int startingIndex)
     {
         this->startingIndex = startingIndex;
     }
 
-    inline void setRequestedCount(int requestedCount)
+    void setRequestedCount(int requestedCount)
     {
         this->requestedCount = requestedCount;
     }
 
-    inline int getStartingIndex() const { return startingIndex; }
-    inline int getRequestedCount() const { return requestedCount; }
+    int getStartingIndex() const { return startingIndex; }
+    int getRequestedCount() const { return requestedCount; }
 
-    inline int getTotalMatches() const { return totalMatches; }
+    int getTotalMatches() const { return totalMatches; }
 
-    inline void setTotalMatches(int totalMatches)
+    void setTotalMatches(int totalMatches)
     {
         this->totalMatches = totalMatches;
     }

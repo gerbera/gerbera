@@ -49,7 +49,7 @@
 
 class ConfigParseException : public std::runtime_error {
 public:
-    explicit inline ConfigParseException(const std::string& message)
+    explicit ConfigParseException(const std::string& message)
         : std::runtime_error(message)
     {
     }
@@ -61,7 +61,7 @@ protected:
 
 public:
     UpnpException(int errCode, const std::string& message);
-    [[nodiscard]] inline int getErrorCode() const { return errCode; }
+    [[nodiscard]] int getErrorCode() const { return errCode; }
 };
 
 class StorageException : public std::runtime_error {
@@ -69,7 +69,7 @@ protected:
     std::string userMessage;
 
 public:
-    inline StorageException(std::string _userMessage, const std::string& message)
+    StorageException(std::string _userMessage, const std::string& message)
         : std::runtime_error(message)
         , userMessage(std::move(_userMessage))
     {
@@ -79,7 +79,7 @@ public:
 
 class ObjectNotFoundException : public StorageException {
 public:
-    inline explicit ObjectNotFoundException(const std::string& message)
+    explicit ObjectNotFoundException(const std::string& message)
         : StorageException(message, message)
     {
     }
@@ -87,7 +87,7 @@ public:
 
 class SubtitlesNotFoundException : public std::runtime_error {
 public:
-    inline explicit SubtitlesNotFoundException(const std::string& message)
+    explicit SubtitlesNotFoundException(const std::string& message)
         : std::runtime_error(message)
     {
     }
@@ -95,7 +95,7 @@ public:
 
 class ServerShutdownException : public std::runtime_error {
 public:
-    inline explicit ServerShutdownException(const std::string& message)
+    explicit ServerShutdownException(const std::string& message)
         : std::runtime_error(message)
     {
     }
@@ -103,7 +103,7 @@ public:
 
 class TryAgainException : public std::runtime_error {
 public:
-    inline explicit TryAgainException(const std::string& message)
+    explicit TryAgainException(const std::string& message)
         : std::runtime_error(message)
     {
     }

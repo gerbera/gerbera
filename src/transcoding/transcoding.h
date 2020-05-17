@@ -210,7 +210,7 @@ public:
     std::shared_ptr<TranscodingProfileMap> get(const std::string& sourceMimeType);
     std::shared_ptr<TranscodingProfileMap> get(int index);
     std::shared_ptr<TranscodingProfile> getByName(const std::string& name);
-    inline int size() const { return list.size(); }
+    int size() const { return list.size(); }
 
 protected:
     // outer dictionary is keyed by the source mimetype, inner dictionary by

@@ -111,7 +111,7 @@ public:
     /// \param query The SQL query string
     explicit SLSelectTask(const char* query);
     void run(sqlite3** db, Sqlite3Storage* sl) override;
-    inline std::shared_ptr<SQLResult> getResult() const { return std::static_pointer_cast<SQLResult>(pres); }
+    std::shared_ptr<SQLResult> getResult() const { return std::static_pointer_cast<SQLResult>(pres); }
 
 protected:
     /// \brief The SQL query string
@@ -127,7 +127,7 @@ public:
     /// \param query The SQL query string
     SLExecTask(const char* query, bool getLastInsertId);
     void run(sqlite3** db, Sqlite3Storage* sl) override;
-    inline int getLastInsertId() const { return lastInsertId; }
+    int getLastInsertId() const { return lastInsertId; }
 
 protected:
     /// \brief The SQL query string
@@ -161,14 +161,14 @@ private:
     std::shared_ptr<Storage> getSelf() override;
 
     std::string quote(std::string value) const override;
-    inline std::string quote(const char* str) const override { return quote(std::string(str)); }
-    inline std::string quote(int val) const override { return std::to_string(val); }
-    inline std::string quote(unsigned int val) const override { return std::to_string(val); }
-    inline std::string quote(long val) const override { return std::to_string(val); }
-    inline std::string quote(unsigned long val) const override { return std::to_string(val); }
-    inline std::string quote(bool val) const override { return std::string(val ? "1" : "0"); }
-    inline std::string quote(char val) const override { return quote(std::string(1, val)); }
-    inline std::string quote(long long val) const override { return std::to_string(val); }
+    std::string quote(const char* str) const override { return quote(std::string(str)); }
+    std::string quote(int val) const override { return std::to_string(val); }
+    std::string quote(unsigned int val) const override { return std::to_string(val); }
+    std::string quote(long val) const override { return std::to_string(val); }
+    std::string quote(unsigned long val) const override { return std::to_string(val); }
+    std::string quote(bool val) const override { return std::string(val ? "1" : "0"); }
+    std::string quote(char val) const override { return quote(std::string(1, val)); }
+    std::string quote(long long val) const override { return std::to_string(val); }
     std::shared_ptr<SQLResult> select(const char* query, int length) override;
     int exec(const char* query, int length, bool getLastInsertId = false) override;
     void storeInternalSetting(const std::string& key, const std::string& value) override;
@@ -239,7 +239,7 @@ public:
     explicit Sqlite3Row(char** row);
 
 private:
-    inline char* col_c_str(int index) const override { return row[index]; }
+    char* col_c_str(int index) const override { return row[index]; }
     char** row;
 };
 

@@ -374,7 +374,7 @@ protected:
 
     void setLastModifiedTime(time_t lm);
 
-    inline void signal() { cond.notify_one(); }
+    void signal() { cond.notify_one(); }
     static void* staticThreadProc(void* arg);
     void threadProc();
 
