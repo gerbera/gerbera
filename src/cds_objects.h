@@ -137,96 +137,96 @@ public:
     /// \brief Set the object ID.
     ///
     /// ID is the object ID that is used by the UPnP Content Directory service.
-    inline void setID(int id) { this->id = id; }
+    void setID(int id) { this->id = id; }
 
     /// \brief Retrieve the object ID.
     ///
     /// ID is the object ID that is used by the UPnP Content Directory service.
-    inline int getID() const { return id; }
+    int getID() const { return id; }
 
     /// \brief Set the reference object ID.
     ///
     /// This is the reference ID that is used by the UPnP Content Directory service.
     /// It also links the reference and the original objects in the database.
-    inline void setRefID(int refID) { this->refID = refID; }
+    void setRefID(int refID) { this->refID = refID; }
 
     /// \brief Retrieve the reference object ID.
     ///
     /// This is the reference ID that is used by the UPnP Content Directory service.
     /// It also links the reference and the original objects in the database.
-    inline int getRefID() const { return refID; }
+    int getRefID() const { return refID; }
 
     /// \brief Set the parent ID of the object.
-    inline void setParentID(int parentID) { this->parentID = parentID; }
+    void setParentID(int parentID) { this->parentID = parentID; }
 
     /// \brief Retrieve the objects parent ID.
-    inline int getParentID() const { return parentID; }
+    int getParentID() const { return parentID; }
 
     /// \brief Set the restricted flag.
-    inline void setRestricted(bool restricted) { changeFlag(OBJECT_FLAG_RESTRICTED, restricted); }
+    void setRestricted(bool restricted) { changeFlag(OBJECT_FLAG_RESTRICTED, restricted); }
 
     /// \brief Query the restricted flag.
-    inline bool isRestricted() const { return getFlag(OBJECT_FLAG_RESTRICTED); }
+    bool isRestricted() const { return getFlag(OBJECT_FLAG_RESTRICTED); }
 
     /// \brief Set the object title (dc:title)
-    inline void setTitle(const std::string& title) { this->title = title; }
+    void setTitle(const std::string& title) { this->title = title; }
 
     /// \brief Retrieve the title.
-    inline std::string getTitle() const { return title; }
+    std::string getTitle() const { return title; }
 
     /// \brief set the upnp:class
-    inline void setClass(const std::string& upnpClass) { this->upnpClass = upnpClass; }
+    void setClass(const std::string& upnpClass) { this->upnpClass = upnpClass; }
 
     /// \brief Retrieve class
-    inline std::string getClass() const { return upnpClass; }
+    std::string getClass() const { return upnpClass; }
 
     /// \brief Set the physical location of the media (usually an absolute path)
-    inline void setLocation(fs::path location) { this->location = location; }
+    void setLocation(fs::path location) { this->location = location; }
 
     /// \brief Retrieve media location.
-    inline fs::path getLocation() const { return location; }
+    fs::path getLocation() const { return location; }
 
     /// \brief Set modification time of the media file.
-    inline void setMTime(time_t mtime) { this->mtime = mtime; }
+    void setMTime(time_t mtime) { this->mtime = mtime; }
 
     /// \brief Retrieve the file modification time (in seconds since UNIX epoch).
-    inline time_t getMTime() const { return mtime; }
+    time_t getMTime() const { return mtime; }
 
     /// \brief Set file size.
-    inline void setSizeOnDisk(off_t sizeOnDisk) { this->sizeOnDisk = sizeOnDisk; }
+    void setSizeOnDisk(off_t sizeOnDisk) { this->sizeOnDisk = sizeOnDisk; }
 
     /// \brief Retrieve the file size (in bytes).
-    inline off_t getSizeOnDisk() const { return sizeOnDisk; }
+    off_t getSizeOnDisk() const { return sizeOnDisk; }
 
     /// \brief Set the virtual flag.
-    inline void setVirtual(bool virt) { this->virt = virt; }
+    void setVirtual(bool virt) { this->virt = virt; }
 
     /// \brief Query the virtual flag.
-    inline bool isVirtual() const { return virt; }
+    bool isVirtual() const { return virt; }
 
     /// \brief Query information on object type: item, container, etc.
-    inline unsigned int getObjectType() const { return objectType; }
+    unsigned int getObjectType() const { return objectType; }
 
     /// \brief Retrieve sort priority setting.
-    inline int getSortPriority() const { return sortPriority; }
+    int getSortPriority() const { return sortPriority; }
 
     /// \brief Set the sort priority of an object.
-    inline void setSortPriority(int sortPriority) { this->sortPriority = sortPriority; }
+    void setSortPriority(int sortPriority) { this->sortPriority = sortPriority; }
 
     /// \brief Get flags of an object.
-    inline unsigned int getFlags() const { return objectFlags; }
+    unsigned int getFlags() const { return objectFlags; }
 
     /// \brief Get a flag of an object.
-    inline unsigned int getFlag(unsigned int mask) const { return objectFlags & mask; }
+    unsigned int getFlag(unsigned int mask) const { return objectFlags & mask; }
 
     /// \brief Set flags for the object.
-    inline void setFlags(unsigned int objectFlags) { this->objectFlags = objectFlags; }
+    void setFlags(unsigned int objectFlags) { this->objectFlags = objectFlags; }
 
     /// \biref Set a flag of the object.
-    inline void setFlag(unsigned int mask) { objectFlags |= mask; }
+    void setFlag(unsigned int mask) { objectFlags |= mask; }
 
     /// \biref Set a flag of the object.
-    inline void changeFlag(unsigned int mask, bool value)
+    void changeFlag(unsigned int mask, bool value)
     {
         if (value)
             setFlag(mask);
@@ -235,91 +235,91 @@ public:
     }
 
     /// \biref Clears a flag of the object.
-    inline void clearFlag(unsigned int mask) { objectFlags &= ~mask; }
+    void clearFlag(unsigned int mask) { objectFlags &= ~mask; }
 
     /// \brief Query single metadata value.
-    inline std::string getMetadata(const std::string& key) const
+    std::string getMetadata(const std::string& key) const
     {
         return getValueOrDefault(metadata, key);
     }
 
     /// \brief Query entire metadata dictionary.
-    inline std::map<std::string, std::string> getMetadata() const { return metadata; }
+    std::map<std::string, std::string> getMetadata() const { return metadata; }
 
     /// \brief Set entire metadata dictionary.
-    inline void setMetadata(const std::map<std::string, std::string>& metadata)
+    void setMetadata(const std::map<std::string, std::string>& metadata)
     {
         this->metadata = metadata;
     }
 
     /// \brief Set a single metadata value.
-    inline void setMetadata(const std::string& key, const std::string& value)
+    void setMetadata(const std::string& key, const std::string& value)
     {
         metadata[key] = value;
     }
 
     /// \brief Removes metadata with the given key
-    inline void removeMetadata(std::string key)
+    void removeMetadata(std::string key)
     {
         metadata.erase(key);
     }
 
     /// \brief Query single auxdata value.
-    inline std::string getAuxData(const std::string& key) const
+    std::string getAuxData(const std::string& key) const
     {
         return getValueOrDefault(auxdata, key);
     }
 
     /// \brief Query entire auxdata dictionary.
-    inline std::map<std::string, std::string> getAuxData() const { return auxdata; }
+    std::map<std::string, std::string> getAuxData() const { return auxdata; }
 
     /// \brief Set a single auxdata value.
-    inline void setAuxData(std::string key, const std::string& value)
+    void setAuxData(std::string key, const std::string& value)
     {
         auxdata[key] = value;
     }
 
     /// \brief Set entire auxdata dictionary.
-    inline void setAuxData(const std::map<std::string, std::string>& auxdata)
+    void setAuxData(const std::map<std::string, std::string>& auxdata)
     {
         this->auxdata = auxdata;
     }
 
     /// \brief Removes auxdata with the given key
-    inline void removeAuxData(std::string key)
+    void removeAuxData(std::string key)
     {
         auxdata.erase(key);
     }
 
     /// \brief Get number of resource tags
-    inline int getResourceCount() const { return resources.size(); }
+    int getResourceCount() const { return resources.size(); }
 
     /// \brief Query resources
-    inline std::vector<std::shared_ptr<CdsResource>> getResources() const
+    std::vector<std::shared_ptr<CdsResource>> getResources() const
     {
         return resources;
     }
 
     /// \brief Set resources
-    inline void setResources(const std::vector<std::shared_ptr<CdsResource>>& res)
+    void setResources(const std::vector<std::shared_ptr<CdsResource>>& res)
     {
         resources = res;
     }
 
     /// \brief Query resource tag with the given index
-    inline std::shared_ptr<CdsResource> getResource(size_t index) const
+    std::shared_ptr<CdsResource> getResource(size_t index) const
     {
         return resources.at(index);
     }
 
     /// \brief Add resource tag
-    inline void addResource(std::shared_ptr<CdsResource> resource)
+    void addResource(std::shared_ptr<CdsResource> resource)
     {
         resources.push_back(resource);
     }
 
     /// \brief Insert resource tag at index
-    inline void insertResource(int index, std::shared_ptr<CdsResource> resource)
+    void insertResource(int index, std::shared_ptr<CdsResource> resource)
     {
         resources.insert(resources.begin() + index, resource);
     }
@@ -369,15 +369,15 @@ public:
     explicit CdsItem(std::shared_ptr<Storage> storage);
 
     /// \brief Set mime-type information of the media.
-    inline void setMimeType(const std::string& mimeType) { this->mimeType = mimeType; }
+    void setMimeType(const std::string& mimeType) { this->mimeType = mimeType; }
 
     /// \brief Query mime-type information.
-    inline std::string getMimeType() const { return mimeType; }
+    std::string getMimeType() const { return mimeType; }
 
     /// \brief Sets the upnp:originalTrackNumber property
-    inline void setTrackNumber(int trackNumber) { this->trackNumber = trackNumber; }
+    void setTrackNumber(int trackNumber) { this->trackNumber = trackNumber; }
 
-    inline int getTrackNumber() const { return trackNumber; }
+    int getTrackNumber() const { return trackNumber; }
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)`
     void copyTo(const std::shared_ptr<CdsObject>& obj) override;
@@ -394,10 +394,10 @@ public:
     std::string getVirtualPath() const override;
 
     /// \brief Set the unique service ID.
-    inline void setServiceID(const std::string& serviceID) { this->serviceID = serviceID; }
+    void setServiceID(const std::string& serviceID) { this->serviceID = serviceID; }
 
     /// \brief Retrieve the unique service ID.
-    inline std::string getServiceID() const { return serviceID; }
+    std::string getServiceID() const { return serviceID; }
 };
 
 /// \brief An Active Item in the content directory.
@@ -436,20 +436,20 @@ public:
 
     /// \brief Sets the action for the item.
     /// \param action absolute path to the script that will process the XML data.
-    inline void setAction(const std::string& action) { this->action = action; }
+    void setAction(const std::string& action) { this->action = action; }
 
     /// \brief Get the path of the action script.
-    inline std::string getAction() const { return action; }
+    std::string getAction() const { return action; }
 
     /// \brief Set action state.
     /// \param state any string you want.
     ///
     /// This is quite useful to let the script identify what state the item is in.
     /// Think of it as a cookie (did I already mention that I hate web cookies?)
-    inline void setState(const std::string& state) { this->state = state; }
+    void setState(const std::string& state) { this->state = state; }
 
     /// \brief Retrieve the item state.
-    inline std::string getState() const { return state; }
+    std::string getState() const { return state; }
 
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)
@@ -472,10 +472,10 @@ public:
 
     /// \brief Sets the URL for the item.
     /// \param URL full url to the item: http://somewhere.com/something.mpg
-    inline void setURL(const std::string& URL) { this->location = URL; }
+    void setURL(const std::string& URL) { this->location = URL; }
 
     /// \brief Get the URL of the item.
-    inline std::string getURL() const { return location; }
+    std::string getURL() const { return location; }
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)
     //void copyTo(std::shared_ptr<CdsObject> obj) override;
@@ -575,28 +575,28 @@ public:
     explicit CdsContainer(std::shared_ptr<Storage> storage);
 
     /// \brief Set the searchable flag.
-    inline void setSearchable(bool searchable) { changeFlag(OBJECT_FLAG_SEARCHABLE, searchable); }
+    void setSearchable(bool searchable) { changeFlag(OBJECT_FLAG_SEARCHABLE, searchable); }
 
     /// \brief Query searchable flag.
-    inline int isSearchable() const { return getFlag(OBJECT_FLAG_SEARCHABLE); }
+    int isSearchable() const { return getFlag(OBJECT_FLAG_SEARCHABLE); }
 
     /// \brief Set the container update ID value.
-    inline void setUpdateID(int updateID) { this->updateID = updateID; }
+    void setUpdateID(int updateID) { this->updateID = updateID; }
 
     /// \brief Query container update ID value.
-    inline int getUpdateID() const { return updateID; }
+    int getUpdateID() const { return updateID; }
 
     /// \brief Set container childCount attribute.
-    inline void setChildCount(int childCount) { this->childCount = childCount; }
+    void setChildCount(int childCount) { this->childCount = childCount; }
 
     /// \brief Retrieve number of children
-    inline int getChildCount() const { return childCount; }
+    int getChildCount() const { return childCount; }
 
     /// \brief returns whether this container is an autoscan start point.
-    inline int getAutoscanType() const { return autoscanType; }
+    int getAutoscanType() const { return autoscanType; }
 
     /// \brief sets whether this container is an autoscan start point.
-    inline void setAutoscanType(int type) { autoscanType = type; }
+    void setAutoscanType(int type) { autoscanType = type; }
 
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)

@@ -389,7 +389,7 @@ class DefaultSQLEmitter : public SQLEmitter {
     std::string emit(const ASTAndOperator* node, const std::string& lhs, const std::string& rhs) const override;
     std::string emit(const ASTOrOperator* node, const std::string& lhs, const std::string& rhs) const override;
 
-    inline char tableQuote() const override { return '"'; }
+    char tableQuote() const override { return '"'; }
 };
 
 class SearchParser {

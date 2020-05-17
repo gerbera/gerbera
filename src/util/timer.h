@@ -90,7 +90,7 @@ public:
     void addTimerSubscriber(Subscriber* timerSubscriber, unsigned int notifyInterval, std::shared_ptr<Parameter> parameter = nullptr, bool once = false);
     void removeTimerSubscriber(Subscriber* timerSubscriber, std::shared_ptr<Parameter> parameter = nullptr, bool dontFail = false);
     void triggerWait();
-    inline void signal() { cond.notify_one(); }
+    void signal() { cond.notify_one(); }
 
 protected:
     class TimerSubscriberElement {
@@ -111,13 +111,13 @@ protected:
                 log_error("timer caught exception!\n");
             }
         }
-        inline void updateNextNotify()
+        void updateNextNotify()
         {
             getTimespecAfterMillis(notifyInterval * 1000, &nextNotify);
         }
-        inline struct timespec* getNextNotify() { return &nextNotify; }
+        struct timespec* getNextNotify() { return &nextNotify; }
 
-        inline std::shared_ptr<Parameter> getParameter() const { return parameter; }
+        std::shared_ptr<Parameter> getParameter() const { return parameter; }
 
         bool operator==(const TimerSubscriberElement& other) const
         {

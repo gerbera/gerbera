@@ -64,23 +64,23 @@ public:
 
     /// \brief Returns the time of last access to the session.
     /// \return pointer to a timespec
-    inline struct timespec* getLastAccessTime() { return &last_access; }
+    struct timespec* getLastAccessTime() { return &last_access; }
 
-    inline long getTimeout() const { return timeout; }
+    long getTimeout() const { return timeout; }
 
     /// \brief Returns the session identifier.
-    inline std::string getID() const { return sessionID; }
+    std::string getID() const { return sessionID; }
 
     /// \brief Sets the session identifier.
-    inline void setID(const std::string& sessionID) { this->sessionID = sessionID; }
+    void setID(const std::string& sessionID) { this->sessionID = sessionID; }
 
-    inline bool isLoggedIn() const { return loggedIn; }
+    bool isLoggedIn() const { return loggedIn; }
 
-    inline void logIn() { loggedIn = true; }
+    void logIn() { loggedIn = true; }
 
-    inline void logOut() { loggedIn = false; }
+    void logOut() { loggedIn = false; }
 
-    inline void access() { getTimespecNow(&last_access); }
+    void access() { getTimespecNow(&last_access); }
 
     /// \brief Returns the updateIDs, collected for the sessions,
     /// and flushes the storage for the ids
