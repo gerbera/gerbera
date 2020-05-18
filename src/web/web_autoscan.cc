@@ -106,11 +106,7 @@ void web::autoscan::process()
             if (scan_mode == ScanMode::Timed && interval <= 0)
                 throw_std_runtime_error("illegal interval given");
 
-            int objectID = INVALID_OBJECT_ID;
-            if (fromFs)
-                objectID = content->ensurePathExistence(path);
-            else
-                objectID = intParam("object_id");
+            int objectID = fromFs ? content->ensurePathExistence(path) : intParam("object_id");
 
             //log_debug("adding autoscan: location={}, scan_mode={}, recursive={}, interval={}, hidden={}",
             //    location.c_str(), AutoscanDirectory::mapScanmode(scan_mode).c_str(),

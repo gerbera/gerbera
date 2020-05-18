@@ -109,10 +109,7 @@ void web::directories::process()
 
         auto ce = containers.append_child("container");
         ce.append_attribute("id") = id.c_str();
-        if (hasContent)
-            ce.append_attribute("child_count") = 1;
-        else
-            ce.append_attribute("child_count") = 0;
+        ce.append_attribute("child_count") = hasContent;
 
         auto f2i = StringConverter::f2i(config);
         ce.append_attribute("title") = f2i->convert(filepath.filename()).c_str();

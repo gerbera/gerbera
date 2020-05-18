@@ -108,17 +108,9 @@ void WebRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     UpnpFileInfo_set_IsDirectory(info, 0);
     UpnpFileInfo_set_IsReadable(info, 1);
 
-    std::string contentType;
-
-    std::string mimetype;
     std::string returnType = param("return_type");
-
-    if (returnType == "xml")
-        mimetype = MIMETYPE_XML;
-    else
-        mimetype = MIMETYPE_JSON;
-
-    contentType = mimetype + "; charset=" + DEFAULT_INTERNAL_CHARSET;
+    std::string mimetype = (returnType == "xml") ? MIMETYPE_XML : MIMETYPE_JSON;
+    std::string contentType = mimetype + "; charset=" + DEFAULT_INTERNAL_CHARSET;
 
     UpnpFileInfo_set_ContentType(info, ixmlCloneDOMString(contentType.c_str()));
     Headers headers;
