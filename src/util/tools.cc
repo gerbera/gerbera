@@ -267,17 +267,9 @@ std::string hex_decode_string(const std::string& encoded)
     for (int i = 0; i < len; i += 2) {
         auto chi = std::strchr(HEX_CHARS, ptr[i]);
         auto clo = std::strchr(HEX_CHARS, ptr[i + 1]);
-        int hi, lo;
+        int hi = chi ? chi - HEX_CHARS : 0;
+        int lo = clo ? clo - HEX_CHARS : 0;
 
-        if (chi)
-            hi = chi - HEX_CHARS;
-        else
-            hi = 0;
-
-        if (clo)
-            lo = clo - HEX_CHARS;
-        else
-            lo = 0;
         auto ch = static_cast<char>(hi << 4 | lo);
         buf << ch;
     }
@@ -330,11 +322,8 @@ static const char* HEX_CHARS2 = "0123456789ABCDEF";
 
 std::string url_escape(const std::string& str)
 {
-    const char* data = str.c_str();
-    int len = str.length();
     std::ostringstream buf;
-    for (int i = 0; i < len; i++) {
-        auto c = static_cast<unsigned char>(data[i]);
+    for (auto c : str) {
         if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '_' || c == '-') {
             buf << static_cast<char>(c);
         } else {
@@ -365,16 +354,10 @@ std::string urlUnescape(const std::string& str)
             const char* pos;
 
             pos = std::strchr(HEX_CHARS2, chi);
-            if (!pos)
-                hi = 0;
-            else
-                hi = pos - HEX_CHARS2;
+            hi = pos ? pos - HEX_CHARS2 : 0;
 
             pos = std::strchr(HEX_CHARS2, clo);
-            if (!pos)
-                lo = 0;
-            else
-                lo = pos - HEX_CHARS2;
+            lo = pos ? pos - HEX_CHARS2 : 0;
 
             int ascii = (hi << 4) | lo;
             buf << static_cast<char>(ascii);
@@ -549,14 +532,8 @@ std::string getMTFromProtocolInfo(const std::string& protocol)
 
 std::string getProtocol(const std::string& protocolInfo)
 {
-    std::string protocol;
     size_t pos = protocolInfo.find(':');
-    if (pos == std::string::npos || pos == 0)
-        protocol = "http-get";
-    else
-        protocol = protocolInfo.substr(0, pos);
-
-    return protocol;
+    return (pos == std::string::npos || pos == 0) ? "http-get" : protocolInfo.substr(0, pos);
 }
 
 std::string secondsToHMS(int seconds)
@@ -612,13 +589,7 @@ std::string getMIME(const fs::path& filepath, const void* buffer, size_t length)
         return "";
     }
 
-    const char* mime;
-    if (filepath.empty()) {
-        mime = magic_buffer(magic_cookie, buffer, length);
-    } else {
-        mime = magic_file(magic_cookie, filepath.c_str());
-    }
-
+    const char* mime = filepath.empty() ? magic_buffer(magic_cookie, buffer, length) : magic_file(magic_cookie, filepath.c_str());
     std::string out = mime;
     magic_close(magic_cookie);
     return out;
@@ -828,9 +799,7 @@ std::string unescape_amp(std::string string)
 
 std::string fallbackString(std::string first, std::string fallback)
 {
-    if (first.empty())
-        return fallback;
-    return first;
+    return first.empty() ? fallback : first;
 }
 
 unsigned int stringHash(const std::string& str)
@@ -850,9 +819,7 @@ std::string getValueOrDefault(const std::map<std::string, std::string>& m, const
 
 std::string toCSV(const std::shared_ptr<std::unordered_set<int>>& array)
 {
-    if (array->empty())
-        return "";
-    return join(*array, ",");
+    return array->empty() ? "" : join(*array, ",");
 }
 
 void getTimespecNow(struct timespec* ts)

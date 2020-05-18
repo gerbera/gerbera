@@ -1653,18 +1653,12 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNode(const st
             continue;
         }
 
-        ScanMode mode;
         std::string temp = child.attribute("mode").as_string();
         if (temp.empty() || ((temp != "timed") && (temp != "inotify"))) {
             throw std::runtime_error("autoscan directory " + location.string() + ": mode attribute is missing or invalid");
         }
 
-        if (temp == "timed") {
-            mode = ScanMode::Timed;
-        } else {
-            mode = ScanMode::INotify;
-        }
-
+        ScanMode mode = (temp == "timed") ? ScanMode::Timed : ScanMode::INotify;
         if (mode != scanmode) {
             continue; // skip scan modes that we are not interested in (content manager needs one mode type per array)
         }

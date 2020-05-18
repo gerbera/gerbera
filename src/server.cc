@@ -117,9 +117,7 @@ void Server::run()
     int port = config->getIntOption(CFG_SERVER_PORT);
 
     log_debug("Initialising libupnp with interface: '{}', port: {}", iface.c_str(), port);
-    const char* IfName = nullptr;
-    if (!iface.empty())
-        IfName = iface.c_str();
+    const char* IfName = iface.empty() ? nullptr : iface.c_str();
     ret = UpnpInit2(IfName, port);
     if (ret != UPNP_E_SUCCESS) {
         throw UpnpException(ret, "run: UpnpInit failed");
@@ -242,12 +240,9 @@ void Server::run()
 
 void Server::writeBookmark(const std::string& ip, const std::string& port)
 {
-    std::string data;
-    if (!config->getBoolOption(CFG_SERVER_UI_ENABLED)) {
-        data = http_redirect_to(ip, port, "disabled.html");
-    } else {
-        data = http_redirect_to(ip, port);
-    }
+    const std::string data = config->getBoolOption(CFG_SERVER_UI_ENABLED)
+        ? http_redirect_to(ip, port)
+        : http_redirect_to(ip, port, "disabled.html");
 
     fs::path path = config->getOption(CFG_SERVER_BOOKMARK_FILE);
     log_debug("Writing bookmark file to: {}", path.c_str());
@@ -256,7 +251,7 @@ void Server::writeBookmark(const std::string& ip, const std::string& port)
 
 void Server::emptyBookmark()
 {
-    std::string data = "<html><body><h1>Gerbera Media Server is not running.</h1><p>Please start it and try again.</p></body></html>";
+    const std::string data = "<html><body><h1>Gerbera Media Server is not running.</h1><p>Please start it and try again.</p></body></html>";
 
     fs::path path = config->getOption(CFG_SERVER_BOOKMARK_FILE);
     log_debug("Clearing bookmark file at: {}", path.c_str());

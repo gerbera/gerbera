@@ -86,10 +86,10 @@ void web::items::process()
 
     auto adir = storage->getAutoscanDirectory(parentID);
     int autoscanType = 0;
-    if (adir != nullptr)
+    if (adir != nullptr) {
         autoscanType = adir->persistent() ? 2 : 1;
-    if (autoscanType > 0)
         autoscanMode = "timed";
+    }
 
 #ifdef HAVE_INOTIFY
     if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {

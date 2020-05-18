@@ -1067,10 +1067,9 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::path& 
         if (upnp_class.empty()) {
             std::string content_type = getValueOrDefault(mimetype_contenttype_map, mimetype);
             if (content_type == CONTENT_TYPE_OGG) {
-                if (isTheora(path))
-                    upnp_class = UPNP_DEFAULT_CLASS_VIDEO_ITEM;
-                else
-                    upnp_class = UPNP_DEFAULT_CLASS_MUSIC_TRACK;
+                upnp_class = isTheora(path)
+                    ? UPNP_DEFAULT_CLASS_VIDEO_ITEM
+                    : UPNP_DEFAULT_CLASS_MUSIC_TRACK;
             }
         }
 

@@ -122,8 +122,6 @@ std::unique_ptr<URL::Stat> URL::getInfo(const std::string& URL, CURL* curl_handl
     char* ct;
     char* c_url;
     char error_buffer[CURL_ERROR_SIZE] = { '\0' };
-    std::string mt;
-    std::string used_url;
 
     if (curl_handle == nullptr) {
         curl_handle = curl_easy_init();
@@ -155,11 +153,7 @@ std::unique_ptr<URL::Stat> URL::getInfo(const std::string& URL, CURL* curl_handl
         throw_std_runtime_error(error_buffer);
     }
 
-    if (ct == nullptr)
-        mt = MIMETYPE_DEFAULT;
-    else
-        mt = ct;
-
+    std::string mt = ct ? ct : MIMETYPE_DEFAULT;
     log_debug("Extracted content length: %lld", (long long)cl);
 
     res = curl_easy_getinfo(curl_handle, CURLINFO_EFFECTIVE_URL, &c_url);
@@ -170,11 +164,7 @@ std::unique_ptr<URL::Stat> URL::getInfo(const std::string& URL, CURL* curl_handl
         throw_std_runtime_error(error_buffer);
     }
 
-    if (c_url == nullptr)
-        used_url = URL;
-    else
-        used_url = c_url;
-
+    std::string used_url = c_url ? c_url : URL;
     auto st = std::make_unique<Stat>(used_url, static_cast<off_t>(cl), mt);
 
     if (cleanup)

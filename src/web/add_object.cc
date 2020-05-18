@@ -55,15 +55,13 @@ void web::addObject::addContainer(int parentID)
 
 std::shared_ptr<CdsObject> web::addObject::addItem(int parentID, std::shared_ptr<CdsItem> item)
 {
-    std::string tmp;
-
     item->setParentID(parentID);
 
     item->setTitle(param("title"));
     item->setLocation(param("location"));
     item->setClass(param("class"));
 
-    tmp = param("description");
+    std::string tmp = param("description");
     if (!tmp.empty())
         item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), tmp);
 
@@ -80,13 +78,12 @@ std::shared_ptr<CdsObject> web::addObject::addItem(int parentID, std::shared_ptr
 
 std::shared_ptr<CdsObject> web::addObject::addActiveItem(int parentID)
 {
-    std::string tmp;
     auto item = std::make_shared<CdsActiveItem>(storage);
 
     item->setAction(param("action"));
 
     /// \todo is there a default setting? autoscan? import settings?
-    tmp = param("state");
+    std::string tmp = param("state");
     if (!tmp.empty())
         item->setState(tmp);
 
@@ -121,7 +118,6 @@ std::shared_ptr<CdsObject> web::addObject::addActiveItem(int parentID)
 
 std::shared_ptr<CdsObject> web::addObject::addUrl(int parentID, std::shared_ptr<CdsItemExternalURL> item, bool addProtocol)
 {
-    std::string tmp;
     std::string protocolInfo;
 
     item->setParentID(parentID);
@@ -130,7 +126,7 @@ std::shared_ptr<CdsObject> web::addObject::addUrl(int parentID, std::shared_ptr<
     item->setURL(param("location"));
     item->setClass(param("class"));
 
-    tmp = param("description");
+    std::string tmp = param("description");
     if (!tmp.empty())
         item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), tmp);
 
