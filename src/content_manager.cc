@@ -410,7 +410,7 @@ std::deque<std::shared_ptr<GenericTask>> ContentManager::getTasklist()
     if (t != nullptr)
         taskList.push_back(t);
 
-    std::copy_if(taskQueue1.begin(), taskQueue1.end(), taskList.begin(), [](const auto& task) { return task->isValid(); });
+    std::copy_if(taskQueue1.begin(), taskQueue1.end(), std::back_inserter(taskList), [](const auto& task) { return task->isValid(); });
 
     for (const auto& t : taskQueue2) {
         if (t->isValid())
@@ -1496,7 +1496,7 @@ std::vector<std::shared_ptr<AutoscanDirectory>> ContentManager::getAutoscanDirec
 
 #if HAVE_INOTIFY
     auto ino = autoscan_inotify->getArrayCopy();
-    std::copy(ino.begin(), ino.end(), all.begin());
+    std::copy(ino.begin(), ino.end(), std::back_inserter(all));
 #endif
     return all;
 }
