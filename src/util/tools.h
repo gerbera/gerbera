@@ -166,6 +166,13 @@ std::string readTextFile(const fs::path& path);
 /// \brief writes a string into a text file
 void writeTextFile(const fs::path& path, const std::string& contents);
 
+/// \brief Reads entire contents of a binary file into a buffer.
+/// \return an empty optional if file can't be open and throws if read fails.
+std::optional<std::vector<std::byte>> readBinaryFile(const fs::path& path);
+
+/// \brief Writes data into a file. Throws if file can't be open or if write fails.
+void writeBinaryFile(const fs::path& path, const std::byte* data, std::size_t size);
+
 /// \brief Renders a string that can be used as the protocolInfo resource
 /// attribute: "http-get:*:mimetype:*"
 ///

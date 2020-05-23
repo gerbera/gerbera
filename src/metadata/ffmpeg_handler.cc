@@ -53,6 +53,8 @@
 
 #include <sys/stat.h>
 
+#include <fmt/ostream.h>
+
 extern "C" {
 
 #include <libavformat/avformat.h>
@@ -261,55 +263,52 @@ void FfmpegHandler::fillMetadata(std::shared_ptr<CdsItem> item)
     avformat_close_input(&pFormatCtx);
 }
 
+fs::path getThumbnailCacheBasePath(Config& config)
+{
+    if (auto configuredDir = config.getOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR);
+        !configuredDir.empty()) {
+        return fs::path(std::move(configuredDir));
+    }
+    auto home = config.getOption(CFG_SERVER_HOME);
+    return fs::path(std::move(home)) / "cache-dir";
+}
+
+fs::path getThumbnailCachePath(const fs::path& base, const fs::path movie)
+{
+    assert(movie.is_absolute());
+
+    auto path = base / movie.relative_path();
+    path += "-thumb.jpg";
+    return path;
+}
+
 #ifdef HAVE_FFMPEGTHUMBNAILER
-fs::path FfmpegHandler::getThumbnailCacheFilePath(const fs::path& movie_filename, bool create) const
+std::optional<std::vector<std::byte>> FfmpegHandler::readThumbnailCacheFile(const fs::path& movie_filename) const
 {
-    fs::path cache_dir = config->getOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR);
-
-    if (cache_dir.empty()) {
-        fs::path home_dir = config->getOption(CFG_SERVER_HOME);
-        cache_dir = home_dir / "cache-dir";
-    }
-
-    cache_dir = cache_dir / (movie_filename.string() + "-thumb.jpg");
-
-    std::error_code ec;
-    if (create && !fs::create_directories(cache_dir, ec))
-        cache_dir = "";
-
-    return cache_dir;
+    auto path = getThumbnailCachePath(getThumbnailCacheBasePath(*config), movie_filename);
+    return readBinaryFile(path);
 }
 
-bool FfmpegHandler::readThumbnailCacheFile(const fs::path& movie_filename, uint8_t** ptr_img, size_t* size_img) const
+void FfmpegHandler::writeThumbnailCacheFile(const fs::path& movie_filename, const std::byte* data, std::size_t size) const
 {
-    fs::path path = getThumbnailCacheFilePath(movie_filename, false);
-    FILE* fp = fopen(path.c_str(), "rb");
-    if (!fp)
-        return false;
-
-    size_t bytesRead;
-    uint8_t buffer[1024];
-    *ptr_img = nullptr;
-    *size_img = 0;
-    while ((bytesRead = fread(buffer, 1, sizeof(buffer), fp)) > 0) {
-        *ptr_img = static_cast<uint8_t*>(realloc(*ptr_img, *size_img + bytesRead));
-        memcpy(*ptr_img + *size_img, buffer, bytesRead);
-        *size_img += bytesRead;
+    try {
+        auto path = getThumbnailCachePath(getThumbnailCacheBasePath(*config), movie_filename);
+        fs::create_directories(path.parent_path());
+        writeBinaryFile(path, data, size);
+    } catch (const std::runtime_error& e) {
+        log_error("Failed to write thumbnail cache: {}", e.what());
     }
-    fclose(fp);
-    return true;
-}
-
-void FfmpegHandler::writeThumbnailCacheFile(const fs::path& movie_filename, uint8_t* ptr_img, int size_img) const
-{
-    fs::path path = getThumbnailCacheFilePath(movie_filename, true);
-    FILE* fp = fopen(path.c_str(), "wb");
-    if (!fp)
-        return;
-    fwrite(ptr_img, sizeof(uint8_t), size_img, fp);
-    fclose(fp);
 }
 #endif
+
+namespace {
+template <auto C, auto D>
+inline auto wrap_unique_ptr()
+{
+    auto raw_ptr = C();
+    return std::unique_ptr<std::remove_pointer_t<decltype(raw_ptr)>, decltype(D)>(raw_ptr, D);
+}
+}
 
 std::unique_ptr<IOHandler> FfmpegHandler::serveContent(std::shared_ptr<CdsItem> item, int resNum)
 {
@@ -317,25 +316,23 @@ std::unique_ptr<IOHandler> FfmpegHandler::serveContent(std::shared_ptr<CdsItem> 
     if (!config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED))
         return nullptr;
 
-    if (config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED)) {
-        uint8_t* ptr_image;
-        size_t size_image;
-        if (readThumbnailCacheFile(item->getLocation(), &ptr_image, &size_image)) {
-            auto h = std::make_unique<MemIOHandler>(ptr_image, size_image);
-            free(ptr_image);
-            log_debug("Returning cached thumbnail for file: {}", item->getLocation().c_str());
-            return h;
+    const auto cache_enabled = config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED);
+
+    if (cache_enabled) {
+        if (auto data = readThumbnailCacheFile(item->getLocation())) {
+            log_debug("Returning cached thumbnail for file: {}", item->getLocation());
+            return std::make_unique<MemIOHandler>(data->data(), data->size());
         }
     }
 
     std::scoped_lock thumb_lock { thumb_mutex };
 
 #ifdef FFMPEGTHUMBNAILER_OLD_API
-    video_thumbnailer* th = create_thumbnailer();
-    image_data* img = create_image_data();
+    auto th = wrap_unique_ptr<create_thumbnailer, destroy_thumbnailer>();
+    auto img = wrap_unique_ptr<create_image_data, destroy_image_data>();
 #else
-    video_thumbnailer* th = video_thumbnailer_create();
-    image_data* img = video_thumbnailer_create_image_data();
+    auto th = wrap_unique_ptr<video_thumbnailer_create, video_thumbnailer_destroy>();
+    auto img = wrap_unique_ptr<video_thumbnailer_create_image_data, video_thumbnailer_destroy_image_data>();
 #endif // old api
 
     th->seek_percentage = config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE);
@@ -349,32 +346,22 @@ std::unique_ptr<IOHandler> FfmpegHandler::serveContent(std::shared_ptr<CdsItem> 
     th->thumbnail_image_quality = config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_IMAGE_QUALITY);
     th->thumbnail_image_type = Jpeg;
 
-    log_debug("Generating thumbnail for file: {}", item->getLocation().c_str());
+    log_debug("Generating thumbnail for file: {}", item->getLocation());
 
 #ifdef FFMPEGTHUMBNAILER_OLD_API
-    if (generate_thumbnail_to_buffer(th, item->getLocation().c_str(), img) != 0)
+    if (generate_thumbnail_to_buffer(th.get(), item->getLocation().c_str(), img.get()) != 0)
 #else
-    if (video_thumbnailer_generate_thumbnail_to_buffer(th,
-            item->getLocation().c_str(), img)
-        != 0)
+    if (video_thumbnailer_generate_thumbnail_to_buffer(th.get(), item->getLocation().c_str(), img.get()) != 0)
 #endif // old api
     {
-        throw_std_runtime_error("Could not generate thumbnail for " + item->getLocation().string());
+        throw_std_runtime_error(fmt::format("Could not generate thumbnail for {}", item->getLocation()));
     }
-    if (config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED)) {
+    if (cache_enabled) {
         writeThumbnailCacheFile(item->getLocation(),
-            img->image_data_ptr, img->image_data_size);
+            reinterpret_cast<std::byte*>(img->image_data_ptr), img->image_data_size);
     }
 
-    auto h = std::make_unique<MemIOHandler>(reinterpret_cast<void*>(img->image_data_ptr), img->image_data_size);
-#ifdef FFMPEGTHUMBNAILER_OLD_API
-    destroy_image_data(img);
-    destroy_thumbnailer(th);
-#else
-    video_thumbnailer_destroy_image_data(img);
-    video_thumbnailer_destroy(th);
-#endif // old api
-    return h;
+    return std::make_unique<MemIOHandler>(reinterpret_cast<void*>(img->image_data_ptr), img->image_data_size);
 #else
     return nullptr;
 #endif

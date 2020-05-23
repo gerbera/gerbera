@@ -5,6 +5,7 @@ add_executable(testcore
         test_searchhandler.cc
         test_server.cc
         test_upnp_xml.cc
+        test_ffmpeg_cache_paths.cc
 )
 
 include_directories(
