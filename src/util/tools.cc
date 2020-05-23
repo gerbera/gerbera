@@ -37,6 +37,7 @@
 #include <climits>
 #include <cstdlib>
 #include <filesystem>
+#include <fstream>
 #include <iterator>
 #include <netdb.h>
 #include <netinet/in.h>
@@ -61,6 +62,8 @@
 #include <fcntl.h>
 #include <sys/sockio.h>
 #endif
+
+#include <fmt/ostream.h>
 
 #include "cds_objects.h"
 #include "config/config_manager.h"
@@ -508,6 +511,50 @@ void writeTextFile(const fs::path& path, const std::string& contents)
         throw_std_runtime_error("error writing to " + path.string() + " : " + mt_strerror(errno));
     }
     fclose(f);
+}
+
+std::optional<std::vector<std::byte>> readBinaryFile(const fs::path& path)
+{
+    static_assert(sizeof(std::byte) == sizeof(std::ifstream::char_type));
+
+    std::ifstream file { path, std::ios::in | std::ios::binary };
+    if (!file)
+        return {};
+
+    auto& fb = *file.rdbuf();
+
+    // Somewhat portable way to read file.
+    // sgetn loops internally, so we need to check only the final result.
+    // Also assume file size doesn't change while reading,
+    // and no line conversion happens (therefore lseek returns result close to file size).
+    auto size = fb.pubseekoff(0, std::ios::end);
+    if (size < 0)
+        throw_std_runtime_error(fmt::format("Can't determine file size of {}", path));
+
+    fb.pubseekoff(0, std::ios::beg);
+
+    std::vector<std::byte> result(size);
+    size = fb.sgetn(reinterpret_cast<char*>(result.data()), size);
+    if (size < 0 || !file)
+        throw_std_runtime_error(fmt::format("Failed to read from file {}", path));
+
+    result.resize(size);
+
+    return result;
+}
+
+void writeBinaryFile(const fs::path& path, const std::byte* data, std::size_t size)
+{
+    static_assert(sizeof(std::byte) == sizeof(std::ifstream::char_type));
+
+    std::ofstream file { path, std::ios::out | std::ios::binary | std::ios::trunc };
+    if (!file)
+        throw_std_runtime_error(fmt::format("Failed to open {}", path));
+
+    file.rdbuf()->sputn(reinterpret_cast<const char*>(data), size);
+
+    if (!file)
+        throw_std_runtime_error(fmt::format("Failed to write to file {}", path));
 }
 
 std::string renderProtocolInfo(const std::string& mimetype, const std::string& protocol, const std::string& extend)

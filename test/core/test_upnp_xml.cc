@@ -19,7 +19,7 @@ public:
 
     virtual void SetUp()
     {
-        auto config = std::make_shared<ConfigMock>();
+        config = std::make_shared<ConfigMock>();
         storage = std::make_shared<StorageMock>(config);
         std::string virtualDir = "http://server/content";
         std::string presentationURl = "http://someurl/";
@@ -32,6 +32,7 @@ public:
     };
 
     UpnpXMLBuilder* subject;
+    std::shared_ptr<ConfigMock> config;
     std::shared_ptr<StorageMock> storage;
 };
 
@@ -104,6 +105,9 @@ TEST_F(UpnpXmlTest, RenderObjectItem)
     expectedXml << "<upnp:originalTrackNumber>10</upnp:originalTrackNumber>\n";
     expectedXml << "</item>\n";
     expectedXml << "</DIDL-Lite>\n";
+
+    EXPECT_CALL(*config, getTranscodingProfileListOption(_))
+        .WillRepeatedly(Return(std::make_shared<TranscodingProfileList>()));
 
     // act
     subject->renderObject(obj, false, std::string::npos, &root);
