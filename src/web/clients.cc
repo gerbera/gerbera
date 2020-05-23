@@ -55,7 +55,7 @@ void web::clients::process()
 
     auto arr = Clients::getClientList();
 
-    for (const auto obj : *arr) {
+    for (const auto& obj : *arr) {
         auto item = clients.append_child("client");
         auto ip = sockAddrGetNameInfo((const struct sockaddr*)&obj.addr);
         item.append_attribute("ip") = ip.c_str();
