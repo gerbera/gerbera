@@ -37,7 +37,7 @@ class ClientConfig;
 
 class ClientConfigList {
 public:
-    explicit ClientConfigList();
+    explicit ClientConfigList() = default;
 
     /// \brief Adds a new ClientConfig to the list.
     ///
