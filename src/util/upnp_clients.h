@@ -85,7 +85,7 @@ public:
     // always return something, 'Unknown' if we do not know better
     static void getInfo(const struct sockaddr_storage* addr, const std::string& userAgent, const ClientInfo** ppInfo);
 
-    static void addClientInfo(std::shared_ptr<ClientInfo> add);
+    static void addClientInfo(const std::shared_ptr<ClientInfo>& add);
     static std::shared_ptr<std::vector<struct ClientCacheEntry>> getClientList() { return cache; }
 
 private:

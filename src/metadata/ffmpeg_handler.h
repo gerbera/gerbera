@@ -67,6 +67,6 @@ private:
 };
 
 fs::path getThumbnailCacheBasePath(Config& config);
-fs::path getThumbnailCachePath(const fs::path& base, const fs::path movie);
+fs::path getThumbnailCachePath(const fs::path& base, const fs::path& movie);
 
 #endif //__FFMPEG_HANDLER_H__

@@ -273,7 +273,7 @@ fs::path getThumbnailCacheBasePath(Config& config)
     return fs::path(std::move(home)) / "cache-dir";
 }
 
-fs::path getThumbnailCachePath(const fs::path& base, const fs::path movie)
+fs::path getThumbnailCachePath(const fs::path& base, const fs::path& movie)
 {
     assert(movie.is_absolute());
 

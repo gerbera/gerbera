@@ -105,7 +105,7 @@ std::vector<struct ClientInfo> Clients::clientInfo = std::vector<struct ClientIn
         "UPnP/1.0" }
 };
 
-void Clients::addClientInfo(std::shared_ptr<ClientInfo> newClientInfo)
+void Clients::addClientInfo(const std::shared_ptr<ClientInfo>& newClientInfo)
 {
     clientInfo.push_back(*newClientInfo);
 }

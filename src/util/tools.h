@@ -153,7 +153,7 @@ void dict_decode_simple(const std::string& url, std::map<std::string, std::strin
 /// \brief Convert an array of strings to a CSV list, with additional protocol information
 /// \param array that needs to be converted
 /// \return string containing the CSV list
-std::string mime_types_to_CSV(std::vector<std::string> mimeTypes);
+std::string mime_types_to_CSV(const std::vector<std::string>& mimeTypes);
 
 /// \brief a wrapper for the reentrant strerror_r() function
 /// \param mt_errno the errno to get the error string from
@@ -246,7 +246,7 @@ std::string unescape_amp(std::string string);
 /// \param first the string to return if it isn't nullptr
 /// \param fallback fallback string to return if first is nullptr
 /// \return return first if it isn't nullptr, otherwise fallback
-std::string fallbackString(std::string first, std::string fallback);
+std::string fallbackString(const std::string& first, const std::string& fallback);
 
 /// \brief computes an (unsigned int) hash for the given string
 /// \param str the string to compute the hash for
