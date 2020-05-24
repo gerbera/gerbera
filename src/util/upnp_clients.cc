@@ -194,7 +194,7 @@ void Clients::getInfo(const struct sockaddr_storage* addr, const std::string& us
     if (info) {
         bool update = false;
         for (auto& entry : *cache) {
-            if (sockAddrCmpAddr((struct sockaddr*)&entry.addr, (struct sockaddr*)addr) == 0 && entry.userAgent == userAgent) {
+            if (sockAddrCmpAddr(reinterpret_cast<struct sockaddr*>(&entry.addr), (struct sockaddr*)addr) == 0 && entry.userAgent == userAgent) {
                 entry.last = std::chrono::steady_clock::now();
                 entry.userAgent = userAgent;
                 entry.hostName = getHostName((struct sockaddr*)addr);
@@ -228,7 +228,7 @@ bool Clients::getInfoByAddr(const struct sockaddr_storage* addr, const ClientInf
                 struct sockaddr_in clientAddr;
                 clientAddr.sin_family = AF_INET;
                 clientAddr.sin_addr.s_addr = inet_addr(i.match.c_str());
-                if (sockAddrCmpAddr((struct sockaddr*)&clientAddr, (struct sockaddr*)addr) == 0) {
+                if (sockAddrCmpAddr(reinterpret_cast<struct sockaddr*>(&clientAddr), (struct sockaddr*)addr) == 0) {
                     *ppInfo = &i;
                     return true;
                 }
@@ -236,7 +236,7 @@ bool Clients::getInfoByAddr(const struct sockaddr_storage* addr, const ClientInf
                 struct sockaddr_in6 clientAddr;
                 clientAddr.sin6_family = AF_INET6;
                 if (inet_pton(AF_INET6, i.match.c_str(), &clientAddr.sin6_addr) == 1) {
-                    if (sockAddrCmpAddr((struct sockaddr*)&clientAddr, (struct sockaddr*)addr) == 0) {
+                    if (sockAddrCmpAddr(reinterpret_cast<struct sockaddr*>(&clientAddr), (struct sockaddr*)addr) == 0) {
                         *ppInfo = &i;
                         return true;
                     }

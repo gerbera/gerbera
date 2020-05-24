@@ -57,7 +57,7 @@ void web::clients::process()
 
     for (const auto& obj : *arr) {
         auto item = clients.append_child("client");
-        auto ip = sockAddrGetNameInfo((const struct sockaddr*)&obj.addr);
+        auto ip = sockAddrGetNameInfo(reinterpret_cast<const struct sockaddr*>(&obj.addr));
         item.append_attribute("ip") = ip.c_str();
         if (obj.hostName.empty()) {
             item.append_attribute("host") = "";
