@@ -55,10 +55,6 @@ ClientConfig::ClientConfig(int flags, std::string ip, std::string userAgent)
     clientInfo->name = fmt::format("Manual Setup for{}{}", !ip.empty() ? " IP " + ip : "", !userAgent.empty() ? " UserAgent " + userAgent : "");
 }
 
-ClientConfigList::ClientConfigList()
-{
-}
-
 void ClientConfigList::add(const std::shared_ptr<ClientConfig>& client)
 {
     AutoLock lock(mutex);
