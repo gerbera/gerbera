@@ -224,7 +224,7 @@ bool Clients::getInfoByAddr(const struct sockaddr_storage* addr, const ClientInf
         if (i.match.empty())
             continue;
         if (i.matchType == ClientMatchType::IP) {
-            if (i.match.find(".") != std::string::npos) {
+            if (i.match.find('.') != std::string::npos) {
                 struct sockaddr_in clientAddr;
                 clientAddr.sin_family = AF_INET;
                 clientAddr.sin_addr.s_addr = inet_addr(i.match.c_str());
@@ -232,7 +232,7 @@ bool Clients::getInfoByAddr(const struct sockaddr_storage* addr, const ClientInf
                     *ppInfo = &i;
                     return true;
                 }
-            } else if (i.match.find(":") != std::string::npos) {
+            } else if (i.match.find(':') != std::string::npos) {
                 struct sockaddr_in6 clientAddr;
                 clientAddr.sin6_family = AF_INET6;
                 if (inet_pton(AF_INET6, i.match.c_str(), &clientAddr.sin6_addr) == 1) {
