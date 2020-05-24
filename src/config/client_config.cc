@@ -156,32 +156,38 @@ ClientType ClientConfig::remapClientType(const std::string& clientType)
 {
     if (clientType == "BubbleUPnP") {
         return ClientType::BubbleUPnP;
-    } else if (clientType == "SamsungAllShare") {
-        return ClientType::SamsungAllShare;
-    } else if (clientType == "SamsungSeriesQ") {
-        return ClientType::SamsungSeriesQ;
-    } else if (clientType == "SamsungBDP") {
-        return ClientType::SamsungBDP;
-    } else if (clientType == "SamsungSeriesCDE") {
-        return ClientType::SamsungSeriesCDE;
-    } else if (clientType == "SamsungBDJ5500") {
-        return ClientType::SamsungBDJ5500;
-    } else if (clientType == "StandardUPnP") {
-        return ClientType::StandardUPnP;
-    } else if (clientType == "None") {
-        return ClientType::Unknown;
-    } else {
-        throw_std_runtime_error("clientType " + clientType + " invalid");
     }
+    if (clientType == "SamsungAllShare") {
+        return ClientType::SamsungAllShare;
+    }
+    if (clientType == "SamsungSeriesQ") {
+        return ClientType::SamsungSeriesQ;
+    }
+    if (clientType == "SamsungBDP") {
+        return ClientType::SamsungBDP;
+    }
+    if (clientType == "SamsungSeriesCDE") {
+        return ClientType::SamsungSeriesCDE;
+    }
+    if (clientType == "SamsungBDJ5500") {
+        return ClientType::SamsungBDJ5500;
+    }
+    if (clientType == "StandardUPnP") {
+        return ClientType::StandardUPnP;
+    }
+    if (clientType == "None") {
+        return ClientType::Unknown;
+    }
+
+    throw_std_runtime_error("clientType " + clientType + " invalid");
 }
 
 int ClientConfig::remapFlag(const std::string& flag)
 {
     if (flag == "SAMSUNG") {
         return QUIRK_FLAG_SAMSUNG;
-    } else {
-        return stoi_string(flag, 0, 0);
     }
+    return stoi_string(flag, 0, 0);
 }
 
 std::string ClientConfig::mapFlags(QuirkFlags flags)
