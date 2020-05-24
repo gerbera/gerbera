@@ -198,7 +198,7 @@ std::string ClientConfig::mapFlags(QuirkFlags flags)
     std::vector<std::string> myFlags;
 
     if (flags & QUIRK_FLAG_SAMSUNG) {
-        myFlags.push_back("SAMSUNG");
+        myFlags.emplace_back("SAMSUNG");
         flags &= ~QUIRK_FLAG_SAMSUNG;
     }
 
