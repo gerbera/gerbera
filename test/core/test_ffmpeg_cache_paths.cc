@@ -28,3 +28,12 @@ TEST(Thumbnailer_Cache, CachePathAppendsAbsolute)
     auto result = getThumbnailCachePath("/data/cache", "/data/video/file.avi");
     EXPECT_EQ(result, fs::path { "/data/cache/data/video/file.avi-thumb.jpg" });
 }
+
+TEST(Thumbnailer_Cache, CacheUniquePaths)
+{
+    const auto cache_base = fs::path { "/storage/cache" };
+    // 2 similar paths with same file name.
+    auto path1 = getThumbnailCachePath(cache_base, "/storage/images/2020/04/image-1.jpg");
+    auto path2 = getThumbnailCachePath(cache_base, "/storage/images/2020/05/image-1.jpg");
+    EXPECT_NE(path1, path2);
+}
