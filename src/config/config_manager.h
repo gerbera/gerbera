@@ -181,7 +181,7 @@ protected:
 
     /// \brief Creates an array of ClientConfig objects from a XML nodeset.
     /// \param element starting element of the nodeset.
-    std::shared_ptr<ClientConfigList> createClientConfigListFromNode(const pugi::xml_node& element);
+    static std::shared_ptr<ClientConfigList> createClientConfigListFromNode(const pugi::xml_node& element);
 
     /// \brief Creates ab aray of TranscodingProfile objects from an XML
     /// nodeset.
