@@ -444,7 +444,7 @@ void dict_decode_simple(const std::string& url, std::map<std::string, std::strin
     } while (last_pos < url.length());
 }
 
-std::string mime_types_to_CSV(std::vector<std::string> mimeTypes)
+std::string mime_types_to_CSV(const std::vector<std::string>& mimeTypes)
 {
     std::ostringstream buf;
     for (size_t i = 0; i < mimeTypes.size(); i++) {
@@ -844,7 +844,7 @@ std::string unescape_amp(std::string string)
     return buf.str();
 }
 
-std::string fallbackString(std::string first, std::string fallback)
+std::string fallbackString(const std::string& first, const std::string& fallback)
 {
     return first.empty() ? fallback : first;
 }

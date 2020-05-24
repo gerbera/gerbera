@@ -75,7 +75,7 @@ public:
     /// \param flags quirks flags
     /// \param ip ip address
     /// \param userAgent user agent
-    ClientConfig(int flags, std::string ip, std::string userAgent);
+    ClientConfig(int flags, const std::string& ip, const std::string& userAgent);
 
     std::shared_ptr<struct ClientInfo> getClientInfo() { return clientInfo; }
 
