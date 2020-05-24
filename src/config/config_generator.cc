@@ -273,13 +273,15 @@ void ConfigGenerator::generateMappings(pugi::xml_node* import)
 
 void ConfigGenerator::generateOnlineContent(pugi::xml_node* import)
 {
-    auto onlinecontent = import->append_child("online-content");
 #ifdef ATRAILERS
+    auto onlinecontent = import->append_child("online-content");
     auto at = onlinecontent.append_child("AppleTrailers");
     at.append_attribute("enabled") = DEFAULT_ATRAILERS_ENABLED;
     at.append_attribute("refresh") = DEFAULT_ATRAILERS_REFRESH;
     at.append_attribute("update-at-start") = DEFAULT_ATRAILERS_UPDATE_AT_START;
     at.append_attribute("resolution") = DEFAULT_ATRAILERS_RESOLUTION;
+#else
+    import->append_child("online-content");
 #endif
 }
 
