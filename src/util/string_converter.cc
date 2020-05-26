@@ -37,10 +37,10 @@
 #include "config/config_manager.h"
 
 StringConverter::StringConverter(const std::string& from, const std::string& to)
+    : cd(iconv_open(to.c_str(), from.c_str()))
 {
     dirty = false;
 
-    cd = iconv_open(to.c_str(), from.c_str());
     if (!cd) {
         cd = 0;
         throw_std_runtime_error(std::string("iconv: ") + strerror(errno));

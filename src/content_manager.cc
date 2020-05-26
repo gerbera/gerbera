@@ -92,6 +92,7 @@ ContentManager::ContentManager(const std::shared_ptr<Config>& config, const std:
     , task_processor(std::move(task_processor))
     , scripting_runtime(std::move(scripting_runtime))
     , last_fm(std::move(last_fm))
+    , extension_mimetype_map(config->getDictionaryOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST))
 {
     ignore_unknown_extensions = false;
     extension_map_case_sensitive = false;
@@ -103,7 +104,6 @@ ContentManager::ContentManager(const std::shared_ptr<Config>& config, const std:
 
     // loading extension - mimetype map
     // we can always be sure to get a valid element because everything was prepared by the config manager
-    extension_mimetype_map = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
 
     ignore_unknown_extensions = config->getBoolOption(CFG_IMPORT_MAPPINGS_IGNORE_UNKNOWN_EXTENSIONS);
 
