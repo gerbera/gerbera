@@ -31,16 +31,16 @@
 #include <utility>
 
 ClientConfig::ClientConfig()
+    : clientInfo(std::make_shared<struct ClientInfo>())
 {
-    clientInfo = std::make_shared<struct ClientInfo>();
     clientInfo->matchType = ClientMatchType::None;
     clientInfo->type = ClientType::Unknown;
     clientInfo->flags = 0;
 }
 
 ClientConfig::ClientConfig(int flags, const std::string& ip, const std::string& userAgent)
+    : clientInfo(std::make_shared<struct ClientInfo>())
 {
-    clientInfo = std::make_shared<struct ClientInfo>();
     clientInfo->type = ClientType::Unknown;
     if (!ip.empty()) {
         clientInfo->matchType = ClientMatchType::IP;
