@@ -83,14 +83,14 @@ public:
     void setFlags(int flags) { this->clientInfo->flags = flags; }
 
     std::string getIp() const { return (this->clientInfo->matchType == ClientMatchType::IP) ? this->clientInfo->match : ""; }
-    void setIp(std::string ip)
+    void setIp(const std::string& ip)
     {
         this->clientInfo->matchType = ClientMatchType::IP;
         this->clientInfo->match = ip;
     }
 
     std::string getUserAgent() const { return (this->clientInfo->matchType == ClientMatchType::UserAgent) ? this->clientInfo->match : ""; }
-    void setUserAgent(std::string userAgent)
+    void setUserAgent(const std::string& userAgent)
     {
         this->clientInfo->matchType = ClientMatchType::UserAgent;
         this->clientInfo->match = userAgent;
