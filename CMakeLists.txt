@@ -9,10 +9,9 @@ set(GERBERA_VERSION "${GERBERA_MAJOR_VERSION}.${GERBERA_MINOR_VERSION}.${GERBERA
 project(Gerbera
         VERSION "${GERBERA_MAJOR_VERSION}.${GERBERA_MINOR_VERSION}.${GERBERA_PATCH_VERSION}")
 
-# Leverage a modern C++
-set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake OPTIONAL RESULT_VARIABLE GERBERA_USES_CONAN)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 
@@ -32,6 +31,26 @@ set(WITH_SYSTEMD        1 CACHE BOOL "Install Systemd unit file")
 set(WITH_LASTFM         0 CACHE BOOL "Enable LastFM")
 set(WITH_DEBUG          1 CACHE BOOL "Enables debug logging")
 set(WITH_TESTS          0 CACHE BOOL "Enables Unit Tests")
+
+if (GERBERA_USES_CONAN)
+    conan_basic_setup(TARGETS)
+    set(GERBERA_FMT_LIB CONAN_PKG::fmt)
+    set(GERBERA_SPDLOG_LIB CONAN_PKG::spdlog)
+    set(GERBERA_PUGIXML_LIB CONAN_PKG::pugixml)
+    set(GERBERA_UUID_LIB CONAN_PKG::libuuid)
+    set(GERBERA_ICONV_LIB CONAN_PKG::libiconv)
+    set(GERBERA_SQLITE3_LIB CONAN_PKG::sqlite3)
+    set(GERBERA_ZLIB_LIB CONAN_PKG::zlib)
+
+    # TODO: sqlite3 is required, but there is a define for it...
+    add_definitions(-DHAVE_SQLITE3)
+else()
+    # Leverage a modern C++
+    set(CMAKE_CXX_STANDARD 17)
+    set(CMAKE_CXX_EXTENSIONS OFF)
+
+    include(GerberaFindSystemDependencies)
+endif()
 
 set(libgerberaFILES
         src/action_request.cc
@@ -217,13 +236,19 @@ set(libgerberaFILES
 
 add_library(libgerbera STATIC ${libgerberaFILES})
 target_include_directories(libgerbera PRIVATE "${CMAKE_SOURCE_DIR}/src")
+target_link_libraries(libgerbera
+    ${GERBERA_FMT_LIB}
+    ${GERBERA_SPDLOG_LIB}
+    ${GERBERA_PUGIXML_LIB}
+    ${GERBERA_UUID_LIB}
+    ${GERBERA_ICONV_LIB}
+    ${GERBERA_SQLITE3_LIB}
+    ${GERBERA_ZLIB_LIB}
+    )
 
 add_executable(gerbera src/main.cc)
 target_include_directories(gerbera PRIVATE "${CMAKE_SOURCE_DIR}/src")
 target_link_libraries(gerbera libgerbera)
-
-target_compile_features(gerbera PUBLIC cxx_std_17)
-target_compile_features(libgerbera PUBLIC cxx_std_17)
 
 # Warnings are nice
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
@@ -275,20 +300,6 @@ endif(HAVE_ATOMIC)
 find_package(Filesystem REQUIRED)
 target_link_libraries(gerbera std::filesystem)
 
-find_package(Iconv REQUIRED)
-include_directories(${ICONV_INCLUDE_DIR})
-target_link_libraries(gerbera ${ICONV_LIBRARIES})
-if (ICONV_SECOND_ARGUMENT_IS_CONST)
-    add_definitions(-DICONV_CONST)
-endif()
-
-find_package(UUID REQUIRED)
-include_directories(${UUID_INCLUDE_DIRS})
-target_link_libraries(gerbera ${UUID_LIBRARIES})
-if (FOUND_BSD_UUID)
-    add_definitions(-DBSD_NATIVE_UUID)
-endif()
-
 find_package(LFS REQUIRED)
 if (LFS_FOUND)
     add_definitions(${LFS_DEFINITIONS})
@@ -310,54 +321,6 @@ endif()
 
 if (NOT UPNP_HAS_REUSEADDR)
     message(WARNING "\n !! It is strongly recommended to build libupnp with --enable-reuseaddr !!\nWithout this option Gerbera will be unable to restart with the same port number.")
-endif()
-
-find_package(fmt REQUIRED)
-target_link_libraries(libgerbera fmt::fmt)
-
-find_package(spdlog)
-if(spdlog_FOUND)
-    target_link_libraries(libgerbera spdlog::spdlog)
-
-    if(NOT SPDLOG_FMT_EXTERNAL)
-        message(WARNING [=[
-spdlog is built without SPDLOG_FMT_EXTERNAL.
-Since Gerbera uses fmt library internally the spdlog's bundled version wlll be in conflict
-It is strongly recommended to rebuild spdlog without bundled fmt]=])
-        if(spdlog_VERSION VERSION_GREATER_EQUAL "1.4.0" AND fmt_VERSION VERSION_LESS "6.0.0")
-            message(FATAL_ERROR [=[
-The version of spdlog >= 1.4 bundles fmt version 6, but an older version of fmt was found.
-The current combination won't link.
-Please upgrade fmt or build spdlog with SPDLOG_FMT_EXTERNAL=ON]=])
-        endif()
-    endif()
-else()
-    # See if it's just installed as a library, as not all installs have .cmake files
-    message(STATUS "Looking for spdlog library")
-    find_library(SPDLOG_LIBRARY spdlog)
-    if(SPDLOG_LIBRARY)
-        message(STATUS "Found spdlog: ${SPDLOG_LIBRARY}")
-        target_link_libraries(libgerbera ${SPDLOG_LIBRARY})
-    else()
-        message(FATAL_ERROR "spdlog library is required")
-    endif()
-endif()
-
-find_package (Pugixml REQUIRED)
-if (PUGIXML_FOUND)
-    include_directories(${PUGIXML_INCLUDE_DIRS})
-    target_link_libraries (gerbera ${PUGIXML_LIBRARIES})
-else()
-    message(FATAL_ERROR "Pugixml not found!")
-endif()
-
-find_package (SQLite3 REQUIRED)
-if(SQLITE3_FOUND)
-    include_directories(${SQLITE3_INCLUDE_DIRS})
-    target_link_libraries (gerbera ${SQLITE3_LIBRARIES})
-    add_definitions(-DHAVE_SQLITE3)
-else()
-    message(FATAL_ERROR "SQLite3 not found!")
 endif()
 
 # We should probably move these two out to their own FindLocale
@@ -555,21 +518,8 @@ if(WITH_SYSTEMD)
     endif()
 endif()
 
-# Needs to be towards the end (after CURL, TagLib, etc...)
-find_package (ZLIB REQUIRED)
-include_directories(${ZLIB_INCLUDE_DIRS})
-target_link_libraries (gerbera ${ZLIB_LIBRARIES})
-
 if(WITH_TESTS)
-    find_package(GTest)
-    find_package(GMock)
-    if(GTEST_FOUND AND GMOCK_FOUND)
-        message(STATUS "Configuring unit tests")
-        enable_testing()
-        add_subdirectory(test)
-    else()
-        message(FATAL_ERROR "Google Test not found")
-    endif()
+    add_subdirectory(test)
 endif()
 
 INSTALL(TARGETS gerbera DESTINATION bin)

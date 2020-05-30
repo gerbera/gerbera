@@ -8,7 +8,6 @@ add_executable(testconfig
 
 include_directories(
         "${CMAKE_SOURCE_DIR}/src"
-        ${UPNP_INCLUDE_DIRS}
         ${UUID_INCLUDE_DIRS}
         ${MAGIC_INCLUDE_DIRS}
         ${ZLIB_INCLUDE_DIRS}
