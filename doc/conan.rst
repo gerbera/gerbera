@@ -110,9 +110,9 @@ A stand-alone binary with all static dependenceis
 
 .. code-block:: bash
 
-  $ conan install -o "*:shared=False" ...
+  $ conan install -o "*:shared=False" -o "*:fPIC=False" ...
 
-(Or put this into a profile)
+(Or put this into a profile, together with ``CXXFLAGS=-O3 -flto``)
 
 Searching for a package (or checking an update)
 :::::::::::::::::::::::::::::::::::::::::::::::

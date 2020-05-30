@@ -5,6 +5,8 @@
 
 using namespace testing;
 
+#if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
+
 TEST(Thumbnailer_Cache, BaseDirFromConfig)
 {
     auto cfg = ConfigMock {};
@@ -37,3 +39,5 @@ TEST(Thumbnailer_Cache, CacheUniquePaths)
     auto path2 = getThumbnailCachePath(cache_base, "/storage/images/2020/05/image-1.jpg");
     EXPECT_NE(path1, path2);
 }
+
+#endif
