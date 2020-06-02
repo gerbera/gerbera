@@ -10,7 +10,7 @@ add_executable(testcore
 
 target_link_libraries(testcore PRIVATE
         libgerbera
-        ${GERBERA_GTEST_LIB}
+        GTest::GTest
         )
 
 add_test(NAME testcore COMMAND testcore)

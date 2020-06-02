@@ -17,7 +17,7 @@ add_executable(testscripting
 
 target_link_libraries(testscripting PRIVATE
         libgerbera
-        ${GERBERA_GTEST_LIB}
+        GTest::GTest
         )
 
 add_test(NAME testscripting COMMAND testscripting)

@@ -8,7 +8,7 @@ add_executable(testconfig
 
 target_link_libraries(testconfig PRIVATE
         libgerbera
-        ${GERBERA_GTEST_LIB}
+        GTest::GTest
         )
 
 add_custom_command(TARGET testconfig POST_BUILD

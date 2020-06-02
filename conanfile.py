@@ -5,14 +5,18 @@ class GerberaConan(ConanFile):
     name = "gerbera"
     license = "GPLv2"
 
-    generators = ("cmake",)
+    generators = ("cmake", "cmake_find_package")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "js": [True, False],
         "debug_logging": [True, False],
         "tests": [True, False],
     }
-    default_options = {"js": True, "debug_logging": False, "tests": False}
+    default_options = {
+        "js": True,
+        "debug_logging": False,
+        "tests": False,
+    }
 
     scm = {"type": "git"}
 
@@ -28,6 +32,10 @@ class GerberaConan(ConanFile):
 
     def configure(self):
         tools.check_min_cppstd(self, "17")
+        if self.options.tests:
+            # We have our own main function,
+            # Moreover, if "shared" is True then main is an .so...
+            self.options["gtest"].no_main = True
 
     def requirements(self):
         if self.options.tests:

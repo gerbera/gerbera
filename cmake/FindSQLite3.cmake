@@ -1,85 +1,66 @@
-# - Try to find Sqlite3
-# Once done this will define
-#
-#  SQLITE3_FOUND - system has Sqlite3
-#  SQLITE3_INCLUDE_DIRS - the Sqlite3 include directory
-#  SQLITE3_LIBRARIES - Link these to use Sqlite3
-#  SQLITE3_DEFINITIONS - Compiler switches required for using Sqlite3
-#
-#  Copyright (c) 2008 Andreas Schneider <mail@cynapses.org>
-#
-#  Redistribution and use is allowed according to the terms of the New
-#  BSD license.
-#  For details see the accompanying COPYING-CMAKE-SCRIPTS file.
-#
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
 
-if (SQLITE3_LIBRARIES AND SQLITE3_INCLUDE_DIRS)
-  # in cache already
-  set(SQLITE3_FOUND TRUE)
-else (SQLITE3_LIBRARIES AND SQLITE3_INCLUDE_DIRS)
-  # use pkg-config to get the directories and then use these values
-  # in the FIND_PATH() and FIND_LIBRARY() calls
-  if (${CMAKE_MAJOR_VERSION} EQUAL 2 AND ${CMAKE_MINOR_VERSION} EQUAL 4)
-    include(UsePkgConfig)
-    pkgconfig(sqlite3 _SQLITE3_INCLUDEDIR _SQLITE3_LIBDIR _SQLITE3_LDFLAGS _SQLITE3_CFLAGS)
-  else (${CMAKE_MAJOR_VERSION} EQUAL 2 AND ${CMAKE_MINOR_VERSION} EQUAL 4)
-    find_package(PkgConfig)
-    if (PKG_CONFIG_FOUND)
-      pkg_check_modules(_SQLITE3 sqlite3 QUIET)
-    endif (PKG_CONFIG_FOUND)
-  endif (${CMAKE_MAJOR_VERSION} EQUAL 2 AND ${CMAKE_MINOR_VERSION} EQUAL 4)
-  find_path(SQLITE3_INCLUDE_DIR
-    NAMES
-      sqlite3.h
-    PATHS
-      ${_SQLITE3_INCLUDEDIR}
-      /usr/include
-      /usr/local/include
-      /opt/local/include
-      /sw/include
-  )
+#[=======================================================================[.rst:
+FindSQLite3
+-----------
 
-  find_library(SQLITE3_LIBRARY
-    NAMES
-      sqlite3
-    PATHS
-      ${_SQLITE3_LIBDIR}
-      /usr/lib
-      /usr/local/lib
-      /opt/local/lib
-      /sw/lib
-  )
+Find the SQLite libraries, v3
 
-  if (SQLITE3_LIBRARY)
-    set(SQLITE3_FOUND TRUE)
-  endif (SQLITE3_LIBRARY)
+IMPORTED targets
+^^^^^^^^^^^^^^^^
 
-  set(SQLITE3_INCLUDE_DIRS
-    ${SQLITE3_INCLUDE_DIR}
-  )
+This module defines the following :prop_tgt:`IMPORTED` target:
 
-  if (SQLITE3_FOUND)
-    set(SQLITE3_LIBRARIES
-      ${SQLITE3_LIBRARIES}
-      ${SQLITE3_LIBRARY}
-    )
-  endif (SQLITE3_FOUND)
+``SQLite::SQLite3``
 
-  if (SQLITE3_INCLUDE_DIRS AND SQLITE3_LIBRARIES)
-     set(SQLITE3_FOUND TRUE)
-  endif (SQLITE3_INCLUDE_DIRS AND SQLITE3_LIBRARIES)
+Result variables
+^^^^^^^^^^^^^^^^
 
-  if (SQLITE3_FOUND)
-    if (NOT Sqlite3_FIND_QUIETLY)
-      message(STATUS "Found Sqlite3: ${SQLITE3_LIBRARIES}")
-    endif (NOT Sqlite3_FIND_QUIETLY)
-  else (SQLITE3_FOUND)
-    if (Sqlite3_FIND_REQUIRED)
-      message(FATAL_ERROR "Could not find Sqlite3")
-    endif (Sqlite3_FIND_REQUIRED)
-  endif (SQLITE3_FOUND)
+This module will set the following variables if found:
 
-  # show the SQLITE3_INCLUDE_DIRS and SQLITE3_LIBRARIES variables only in the advanced view
-  mark_as_advanced(SQLITE3_INCLUDE_DIRS SQLITE3_LIBRARIES)
+``SQLite3_INCLUDE_DIRS``
+  where to find sqlite3.h, etc.
+``SQLite3_LIBRARIES``
+  the libraries to link against to use SQLite3.
+``SQLite3_VERSION``
+  version of the SQLite3 library found
+``SQLite3_FOUND``
+  TRUE if found
 
-endif (SQLITE3_LIBRARIES AND SQLITE3_INCLUDE_DIRS)
+#]=======================================================================]
+
+# Look for the necessary header
+find_path(SQLite3_INCLUDE_DIR NAMES sqlite3.h)
+mark_as_advanced(SQLite3_INCLUDE_DIR)
+
+# Look for the necessary library
+find_library(SQLite3_LIBRARY NAMES sqlite3 sqlite)
+mark_as_advanced(SQLite3_LIBRARY)
+
+# Extract version information from the header file
+if(SQLite3_INCLUDE_DIR)
+    file(STRINGS ${SQLite3_INCLUDE_DIR}/sqlite3.h _ver_line
+         REGEX "^#define SQLITE_VERSION  *\"[0-9]+\\.[0-9]+\\.[0-9]+\""
+         LIMIT_COUNT 1)
+    string(REGEX MATCH "[0-9]+\\.[0-9]+\\.[0-9]+"
+           SQLite3_VERSION "${_ver_line}")
+    unset(_ver_line)
+endif()
+
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(SQLite3
+    REQUIRED_VARS SQLite3_INCLUDE_DIR SQLite3_LIBRARY
+    VERSION_VAR SQLite3_VERSION)
+
+# Create the imported target
+if(SQLite3_FOUND)
+    set(SQLite3_INCLUDE_DIRS ${SQLite3_INCLUDE_DIR})
+    set(SQLite3_LIBRARIES ${SQLite3_LIBRARY})
+    if(NOT TARGET SQLite::SQLite3)
+        add_library(SQLite::SQLite3 UNKNOWN IMPORTED)
+        set_target_properties(SQLite::SQLite3 PROPERTIES
+            IMPORTED_LOCATION             "${SQLite3_LIBRARY}"
+            INTERFACE_INCLUDE_DIRECTORIES "${SQLite3_INCLUDE_DIR}")
+    endif()
+endif()

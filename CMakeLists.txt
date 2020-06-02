@@ -1,3 +1,4 @@
+# TODO: If we can raise required version to 3.11 there will be no need for iconv or 3.14 for sqlite
 cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
 
 set(GERBERA_MAJOR_VERSION 1)
@@ -9,11 +10,28 @@ set(GERBERA_VERSION "${GERBERA_MAJOR_VERSION}.${GERBERA_MINOR_VERSION}.${GERBERA
 project(Gerbera
         VERSION "${GERBERA_MAJOR_VERSION}.${GERBERA_MINOR_VERSION}.${GERBERA_PATCH_VERSION}")
 
+# Leverage a modern C++
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake OPTIONAL RESULT_VARIABLE GERBERA_USES_CONAN)
+set(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR} ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
+set(CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR} ${CMAKE_PREFIX_PATH})
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake OPTIONAL)
+
+if (CONAN_EXPORTED)
+    conan_message(STATUS "Conan: called by CMake conan helper")
+    # Propagate variables set by the helper
+    # Normally conan_basic_setup should be called, but we rely
+    # on cmake_find_package generator.
+    # Do only some checks and setup here.
+    conan_set_std()
+    conan_set_fpic()
+    conan_check_compiler()
+    conan_set_libcxx()
+    conan_set_vs_runtime()
+endif()
 
 set(CMAKE_VERBOSE_MAKEFILE off CACHE BOOL "Show verbose build commands")
 set(WITH_MAGIC          1 CACHE BOOL "Use libmagic to identify file mime types")
@@ -31,26 +49,6 @@ set(WITH_SYSTEMD        1 CACHE BOOL "Install Systemd unit file")
 set(WITH_LASTFM         0 CACHE BOOL "Enable LastFM")
 set(WITH_DEBUG          1 CACHE BOOL "Enables debug logging")
 set(WITH_TESTS          0 CACHE BOOL "Enables Unit Tests")
-
-if (GERBERA_USES_CONAN)
-    conan_basic_setup(TARGETS)
-    set(GERBERA_FMT_LIB CONAN_PKG::fmt)
-    set(GERBERA_SPDLOG_LIB CONAN_PKG::spdlog)
-    set(GERBERA_PUGIXML_LIB CONAN_PKG::pugixml)
-    set(GERBERA_UUID_LIB CONAN_PKG::libuuid)
-    set(GERBERA_ICONV_LIB CONAN_PKG::libiconv)
-    set(GERBERA_SQLITE3_LIB CONAN_PKG::sqlite3)
-    set(GERBERA_ZLIB_LIB CONAN_PKG::zlib)
-
-    # TODO: sqlite3 is required, but there is a define for it...
-    add_definitions(-DHAVE_SQLITE3)
-else()
-    # Leverage a modern C++
-    set(CMAKE_CXX_STANDARD 17)
-    set(CMAKE_CXX_EXTENSIONS OFF)
-
-    include(GerberaFindSystemDependencies)
-endif()
 
 set(libgerberaFILES
         src/action_request.cc
@@ -235,19 +233,9 @@ set(libgerberaFILES
         src/web/web_update.cc)
 
 add_library(libgerbera STATIC ${libgerberaFILES})
-target_include_directories(libgerbera PRIVATE "${CMAKE_SOURCE_DIR}/src")
-target_link_libraries(libgerbera
-    ${GERBERA_FMT_LIB}
-    ${GERBERA_SPDLOG_LIB}
-    ${GERBERA_PUGIXML_LIB}
-    ${GERBERA_UUID_LIB}
-    ${GERBERA_ICONV_LIB}
-    ${GERBERA_SQLITE3_LIB}
-    ${GERBERA_ZLIB_LIB}
-    )
+target_include_directories(libgerbera PUBLIC "${CMAKE_SOURCE_DIR}/src")
 
 add_executable(gerbera src/main.cc)
-target_include_directories(gerbera PRIVATE "${CMAKE_SOURCE_DIR}/src")
 target_link_libraries(gerbera libgerbera)
 
 # Warnings are nice
@@ -300,12 +288,20 @@ endif(HAVE_ATOMIC)
 find_package(Filesystem REQUIRED)
 target_link_libraries(libgerbera std::filesystem)
 
-find_package(LFS REQUIRED)
-if (LFS_FOUND)
-    add_definitions(${LFS_DEFINITIONS})
-    add_compile_options(${LFS_COMPILE_OPTIONS})
-    target_link_libraries(libgerbera ${LFS_LIBRARIES})
+find_package(Iconv REQUIRED)
+target_link_libraries(libgerbera Iconv::Iconv)
+
+find_package(libuuid REQUIRED)
+include_directories(${libuuid_INCLUDE_DIRS})
+target_link_libraries(libgerbera ${libuuid_LIBRARIES})
+if (FOUND_BSD_UUID)
+    add_definitions(-DBSD_NATIVE_UUID)
 endif()
+
+find_package(LFS REQUIRED)
+add_definitions(${LFS_DEFINITIONS})
+add_compile_options(${LFS_COMPILE_OPTIONS})
+target_link_libraries(libgerbera ${LFS_LIBRARIES})
 
 find_package (LibUpnp REQUIRED)
 if (UPNP_VERSION_STRING VERSION_LESS "1.12.1")
@@ -320,8 +316,48 @@ if (NOT UPNP_HAS_REUSEADDR)
     message(WARNING "\n !! It is strongly recommended to build libupnp with --enable-reuseaddr !!\nWithout this option Gerbera will be unable to restart with the same port number.")
 endif()
 
-include_directories(${UPNP_INCLUDE_DIRS})
+target_include_directories(libgerbera PUBLIC ${UPNP_INCLUDE_DIRS})
 target_link_libraries (libgerbera ${UPNP_LIBRARIES})
+
+find_package(fmt REQUIRED)
+target_link_libraries(libgerbera fmt::fmt)
+
+find_package(spdlog)
+if(spdlog_FOUND)
+    target_link_libraries(libgerbera spdlog::spdlog)
+
+    if(NOT SPDLOG_FMT_EXTERNAL AND NOT spdlog_COMPILE_DEFINITIONS MATCHES "SPDLOG_FMT_EXTERNAL")
+        message(WARNING [=[
+spdlog is built without SPDLOG_FMT_EXTERNAL.
+Since Gerbera uses fmt library internally the spdlog's bundled version wlll be in conflict
+It is strongly recommended to rebuild spdlog without bundled fmt]=])
+        if(spdlog_VERSION VERSION_GREATER_EQUAL "1.4.0" AND fmt_VERSION VERSION_LESS "6.0.0")
+            message(FATAL_ERROR [=[
+The version of spdlog >= 1.4 bundles fmt version 6, but an older version of fmt was found.
+The current combination won't link.
+Please upgrade fmt or build spdlog with SPDLOG_FMT_EXTERNAL=ON]=])
+        endif()
+    endif()
+else()
+    # See if it's just installed as a library, as not all installs have .cmake files
+    message(STATUS "Looking for spdlog library")
+    find_library(SPDLOG_LIBRARY spdlog)
+    if(SPDLOG_LIBRARY)
+        message(STATUS "Found spdlog: ${SPDLOG_LIBRARY}")
+        target_link_libraries(libgerbera ${SPDLOG_LIBRARY})
+    else()
+        message(FATAL_ERROR "spdlog library is required")
+    endif()
+endif()
+
+find_package(pugixml REQUIRED)
+target_include_directories(libgerbera PUBLIC ${pugixml_INCLUDE_DIRS})
+target_link_libraries(libgerbera ${pugixml_LIBRARIES})
+
+find_package (SQLite3 REQUIRED)
+target_include_directories(libgerbera PUBLIC ${SQLite3_INCLUDE_DIRS})
+target_link_libraries (libgerbera ${SQLite3_LIBRARIES})
+add_definitions(-DHAVE_SQLITE3)
 
 # We should probably move these two out to their own FindLocale
 include(CheckFunctionExists)
@@ -505,6 +541,10 @@ if(WITH_SYSTEMD)
         message(FATAL_ERROR "Systemd not found")
     endif()
 endif()
+
+# Needs to be towards the end (after CURL, TagLib, etc...)
+find_package (ZLIB REQUIRED)
+target_link_libraries (libgerbera ZLIB::ZLIB)
 
 if(WITH_TESTS)
     message(STATUS "Configuring unit tests")

@@ -31,11 +31,8 @@ Building Gerbera
   # Build directory of out of source build
   $ mkdir build && cd build
 
-  # Get dependencies
-  $ conan install ..
-
-  # Configure project
-  $ conan build --configure ..
+  # Get dependencies and generate build files:
+  $ conan install .. && conan build --configure ..
 
   # Now project is ready to build.
 
@@ -51,6 +48,11 @@ Building Gerbera
 
 Tweaking
 --------
+
+Use Ninja
+:::::::::
+Set environment variable ``CONAN_CMAKE_GENERATOR`` to ``Ninja``.
+
 
 Set up different compiler, add to your Conan profile:
 :::::::::::::::::::::::::::::::::::::::::::::::::::::
