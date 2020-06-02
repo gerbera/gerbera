@@ -35,6 +35,8 @@
 #include <memory>
 #include <string>
 
+#include <unistd.h>
+
 // forward declaration
 class Config;
 

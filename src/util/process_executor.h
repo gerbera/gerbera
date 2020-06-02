@@ -35,6 +35,8 @@
 #include <string>
 #include <vector>
 
+#include <unistd.h>
+
 #include "executor.h"
 
 class ProcessExecutor : public Executor {
