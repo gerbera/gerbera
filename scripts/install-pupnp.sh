@@ -8,7 +8,7 @@ set -ex
 VERSION="1.12.1"
 
 unamestr=$(uname)
-if [ "$unamestr" == 'FreeBSD' ]; then
+if [ "$unamestr" = 'FreeBSD' ]; then
    extraFlags=""
 else
    extraFlags="--prefix=/usr/local"

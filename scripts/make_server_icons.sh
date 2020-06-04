@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # run as
 # make_icons-mediatomb.sh mylogo.jpg
