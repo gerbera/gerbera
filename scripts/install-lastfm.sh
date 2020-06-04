@@ -1,5 +1,5 @@
-#!/bin/bash
-if ! [ "$(id -u)" = 0 ]; then
+#!/bin/sh
+if [ "$(id -u)" != 0 ]; then
     echo "Please run this script with superuser access!"
     exit 1
 fi
