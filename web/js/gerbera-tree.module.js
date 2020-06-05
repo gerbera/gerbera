@@ -144,7 +144,10 @@ const fetchChildren = (gerberaData) => {
       select_it: 0
     }
   })
-    .catch((err) => GerberaApp.error(err));
+    .catch((err) => {
+	console.log(err);
+	GerberaApp.error(err)
+	});
 };
 
 const transformContainers = (response, createParent) => {

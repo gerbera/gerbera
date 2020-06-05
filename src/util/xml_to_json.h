@@ -47,9 +47,11 @@ public:
     class Hints {
     public:
         void setArrayName(const pugi::xml_node& node, const std::string& name) { asArray[node] = name; }
+        void setFieldType(const std::string& node, const std::string& type) { asType[node] = type; }
 
     private:
         std::map<pugi::xml_node, std::string> asArray;
+        std::map<std::string, std::string> asType;
         friend class Xml2Json;
     };
 
@@ -58,7 +60,7 @@ public:
 private:
     static void handleElement(std::ostringstream& buf, const pugi::xml_node& node, const Hints* hints);
     static std::string getAsString(const char* str);
-    static std::string getValue(const char* text);
+    static std::string getValue(const char* at, const char* text, const Hints* hints);
     static bool isArray(const pugi::xml_node& node, const Hints* hints, std::string* arrayName);
 };
 

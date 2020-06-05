@@ -59,7 +59,7 @@ void Xml2Json::handleElement(std::ostringstream& buf, const pugi::xml_node& node
                 buf << ',';
             else
                 firstChild = false;
-            buf << getAsString(at.name()) << ':' << getValue(at.as_string());
+            buf << getAsString(at.name()) << ':' << getValue(at.name(), at.as_string(), hints);
         }
     }
 
@@ -91,15 +91,16 @@ void Xml2Json::handleElement(std::ostringstream& buf, const pugi::xml_node& node
             if (array) {
                 if (nodeName != child.name())
                     throw_std_runtime_error("if an element is of arrayType, all children have to have the same name");
-            } else
+            } else {
                 buf << getAsString(child.name()) << ':';
+            }
 
             if (childAttributeCount > 0 || childElementCount > 0 || isArray(child, hints, nullptr)) {
                 buf << '{';
                 handleElement(buf, child, hints);
                 buf << '}';
             } else {
-                buf << getValue(child.text().as_string());
+                buf << getValue(child.name(), child.text().as_string(), hints);
             }
         }
     }
@@ -113,10 +114,22 @@ std::string Xml2Json::getAsString(const char* str)
     return "\"" + escape(str, '\\', '"') + '"';
 }
 
-std::string Xml2Json::getValue(const char* text)
+std::string Xml2Json::getValue(const char* name, const char* text, const Hints* hints)
 {
-    // type information is gone, we need to guess...
+    std::string item = name;
     std::string str = text;
+
+    for (const auto& hint : hints->asType) {
+        if (hint.first == item) {
+            if (hint.second == "string") {
+                return getAsString(text);
+            } else if (hint.second == "bool") {
+                return str;
+            } else if (hint.second == "number") {
+                return str;
+            }
+        }
+    }
 
     // boolean
     if (str == "true" || str == "false")
