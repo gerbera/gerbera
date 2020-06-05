@@ -56,6 +56,7 @@ void web::containers::process()
 
     auto containers = root.append_child("containers");
     xml2JsonHints->setArrayName(containers, "container");
+    xml2JsonHints->setFieldType("title", "string");
     containers.append_attribute("parent_id") = parentID;
     containers.append_attribute("type") = "database";
     if (!param("select_it").empty())

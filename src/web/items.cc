@@ -60,6 +60,7 @@ void web::items::process()
 
     auto items = root.append_child("items");
     xml2JsonHints->setArrayName(items, "item");
+    xml2JsonHints->setFieldType("title", "string");
     items.append_attribute("parent_id") = parentID;
 
     auto obj = storage->loadObject(parentID);
