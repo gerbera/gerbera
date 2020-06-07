@@ -40,6 +40,7 @@
 #include <queue>
 #include <sqlite3.h>
 #include <sstream>
+#include <unistd.h>
 
 #include "storage/sql_storage.h"
 #include "util/timer.h"
