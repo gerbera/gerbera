@@ -187,7 +187,7 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(enum UpnpOpenFileMode mode)
             // make sure we can generate JSON w/o exceptions
             std::ostringstream buf;
             xmlDoc->print(buf, "    ");
-            output = Xml2Json::getJson(root, xml2JsonHints.get());
+            output = Xml2Json::getJson(root, *xml2JsonHints);
             log_debug("JSON-----------------------{}", output);
         } catch (const std::runtime_error& e) {
             log_error("Exception: {}", e.what());
@@ -205,7 +205,7 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(enum UpnpOpenFileMode mode)
             output = buf.str();
             log_debug("XML-----------------------{}", output);
 #endif
-            output = Xml2Json::getJson(root, xml2JsonHints.get());
+            output = Xml2Json::getJson(root, *xml2JsonHints);
         } catch (const std::runtime_error& e) {
             log_error("Exception: {}", e.what());
         }

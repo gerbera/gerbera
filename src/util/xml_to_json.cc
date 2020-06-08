@@ -38,7 +38,7 @@
 
 #include "util/tools.h"
 
-std::string Xml2Json::getJson(const pugi::xml_node& root, const Hints* hints)
+std::string Xml2Json::getJson(const pugi::xml_node& root, const Hints& hints)
 {
     std::ostringstream buf;
     buf << '{';
@@ -47,7 +47,7 @@ std::string Xml2Json::getJson(const pugi::xml_node& root, const Hints* hints)
     return buf.str();
 }
 
-void Xml2Json::handleElement(std::ostringstream& buf, const pugi::xml_node& node, const Hints* hints)
+void Xml2Json::handleElement(std::ostringstream& buf, const pugi::xml_node& node, const Hints& hints)
 {
     bool firstChild = true;
 
@@ -114,20 +114,20 @@ std::string Xml2Json::getAsString(const char* str)
     return "\"" + escape(str, '\\', '"') + '"';
 }
 
-std::string Xml2Json::getValue(const char* name, const char* text, const Hints* hints)
+std::string Xml2Json::getValue(const char* name, const char* text, const Hints& hints)
 {
-    std::string item = name;
     std::string str = text;
+    auto hintsType = hints.asType;
 
-    for (const auto& hint : hints->asType) {
-        if (hint.first == item) {
-            if (hint.second == "string") {
-                return getAsString(text);
-            } else if (hint.second == "bool") {
-                return str;
-            } else if (hint.second == "number") {
-                return str;
-            }
+    auto hint = std::find_if(hintsType.begin(), hintsType.end(), [=](const auto& entry) { return entry.first == name; } );
+
+    if (hint != hintsType.end()) {
+        if (hint->second == "string") {
+            return getAsString(text);
+        } else if (hint->second == "bool") {
+             return text;
+        } else if (hint->second == "number") {
+            return text;
         }
     }
 
@@ -142,15 +142,17 @@ std::string Xml2Json::getValue(const char* name, const char* text, const Hints* 
     return getAsString(text);
 }
 
-bool Xml2Json::isArray(const pugi::xml_node& node, const Hints* hints, std::string* arrayName)
+bool Xml2Json::isArray(const pugi::xml_node& node, const Hints& hints, std::string* arrayName)
 {
-    for (const auto& hint : hints->asArray) {
-        if (hint.first == node) {
-            if (arrayName != nullptr)
-                *arrayName = hint.second;
-            return true;
-        }
+    auto hintsArray = hints.asArray;
+    auto hint = std::find_if(hintsArray.begin(), hintsArray.end(), [=](const auto& entry) { return entry.first == node; } );
+
+    if (hint == hintsArray.end()) {
+        return false;
     }
 
-    return false;
+    if (arrayName != nullptr)
+        *arrayName = hint->second;
+
+    return true;
 }
