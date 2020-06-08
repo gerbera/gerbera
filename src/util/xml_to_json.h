@@ -55,13 +55,13 @@ public:
         friend class Xml2Json;
     };
 
-    static std::string getJson(const pugi::xml_node& root, const Hints* hints);
+    static std::string getJson(const pugi::xml_node& root, const Hints& hints);
 
 private:
-    static void handleElement(std::ostringstream& buf, const pugi::xml_node& node, const Hints* hints);
+    static void handleElement(std::ostringstream& buf, const pugi::xml_node& node, const Hints& hints);
     static std::string getAsString(const char* str);
-    static std::string getValue(const char* at, const char* text, const Hints* hints);
-    static bool isArray(const pugi::xml_node& node, const Hints* hints, std::string* arrayName);
+    static std::string getValue(const char* at, const char* text, const Hints& hints);
+    static bool isArray(const pugi::xml_node& node, const Hints& hints, std::string* arrayName);
 };
 
 #endif // __UTIL_XML_TO_JSON_H__
