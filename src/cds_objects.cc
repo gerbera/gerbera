@@ -81,7 +81,7 @@ int CdsObject::equals(const std::shared_ptr<CdsObject>& obj, bool exactly)
     if (!resourcesEqual(obj))
         return 0;
 
-    if (!std::equal(metadata.begin(), metadata.end(), obj->getMetadata().begin()))
+    if (metadata != obj->getMetadata())
         return 0;
 
     if (exactly
