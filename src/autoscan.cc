@@ -93,11 +93,7 @@ int AutoscanList::add(const std::shared_ptr<AutoscanDirectory>& dir)
 
 int AutoscanList::_add(const std::shared_ptr<AutoscanDirectory>& dir)
 {
-    std::string loc = dir->getLocation();
-
-    bool err = std::any_of(list.begin(), list.end(), [&](const auto& i) { return loc == i->getLocation(); });
-
-    if (err) {
+    if (std::any_of(list.begin(), list.end(), [loc = dir->getLocation()](const auto& item) { return loc == item->getLocation(); })) {
         throw_std_runtime_error("Attempted to add same autoscan path twice");
     }
 
@@ -137,21 +133,16 @@ std::shared_ptr<AutoscanDirectory> AutoscanList::getByObjectID(int objectID)
 {
     AutoLock lock(mutex);
 
-    for (const auto& i : list) {
-        if (objectID == i->getObjectID())
-            return i;
-    }
-    return nullptr;
+    auto it = std::find_if(list.begin(), list.end(), [=](const auto& item) { return objectID == item->getObjectID(); });
+    return it != list.end() ? *it : nullptr;
 }
 
 std::shared_ptr<AutoscanDirectory> AutoscanList::get(const fs::path& location)
 {
     AutoLock lock(mutex);
-    for (const auto& i : list) {
-        if (location == i->getLocation())
-            return i;
-    }
-    return nullptr;
+
+    auto it = std::find_if(list.begin(), list.end(), [=](const auto& item) { return location == item->getLocation(); });
+    return it != list.end() ? *it : nullptr;
 }
 
 void AutoscanList::remove(size_t id)
@@ -168,36 +159,6 @@ void AutoscanList::remove(size_t id)
 
     list.erase(list.begin() + id);
     log_debug("ID {} removed!", id);
-}
-
-int AutoscanList::removeByObjectID(int objectID)
-{
-    AutoLock lock(mutex);
-
-    for (size_t i = 0; i < list.size(); i++) {
-        if (objectID == list[i]->getObjectID()) {
-            auto dir = list[i];
-            dir->setScanID(INVALID_SCAN_ID);
-            list.erase(list.begin() + i);
-            return i;
-        }
-    }
-    return INVALID_SCAN_ID;
-}
-
-int AutoscanList::remove(const fs::path& location)
-{
-    AutoLock lock(mutex);
-
-    for (size_t i = 0; i < list.size(); i++) {
-        if (location == list[i]->getLocation()) {
-            auto dir = list[i];
-            dir->setScanID(INVALID_SCAN_ID);
-            list.erase(list.begin() + i);
-            return i;
-        }
-    }
-    return INVALID_SCAN_ID;
 }
 
 std::shared_ptr<AutoscanList> AutoscanList::removeIfSubdir(const fs::path& parent, bool persistent)

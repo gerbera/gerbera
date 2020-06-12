@@ -462,11 +462,9 @@ void dict_decode_simple(const std::string& url, std::map<std::string, std::strin
 std::string mime_types_to_CSV(const std::vector<std::string>& mimeTypes)
 {
     std::ostringstream buf;
-    for (size_t i = 0; i < mimeTypes.size(); i++) {
-        if (i > 0)
-            buf << ",";
-        std::string mimeType = mimeTypes[i];
-        buf << "http-get:*:" << mimeType << ":*";
+    for (const auto& mimeType : mimeTypes) {
+        buf << "http-get:*:" << mimeType << ":*"
+            << ",";
     }
 
     return buf.str();

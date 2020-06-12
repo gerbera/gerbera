@@ -192,17 +192,13 @@ void Clients::getInfo(const struct sockaddr_storage* addr, const std::string& us
     }
 
     if (info) {
-        bool update = false;
-        for (auto& entry : *cache) {
-            if (sockAddrCmpAddr(reinterpret_cast<struct sockaddr*>(&entry.addr), (struct sockaddr*)addr) == 0 && entry.userAgent == userAgent) {
-                entry.last = std::chrono::steady_clock::now();
-                entry.userAgent = userAgent;
-                entry.hostName = getHostName((struct sockaddr*)addr);
-                update = true;
-                break;
-            }
-        }
-        if (!update) {
+        auto it = std::find_if(cache->begin(), cache->end(), [=](auto& entry) { return sockAddrCmpAddr(reinterpret_cast<struct sockaddr*>(&entry.addr), (struct sockaddr*)addr) == 0 && entry.userAgent == userAgent; });
+
+        if (it != cache->end()) {
+            it->last = std::chrono::steady_clock::now();
+            it->userAgent = userAgent;
+            it->hostName = getHostName((struct sockaddr*)addr);
+        } else {
             auto add = ClientCacheEntry();
             add.addr = *addr;
             add.hostName = getHostName((struct sockaddr*)addr);
@@ -220,26 +216,25 @@ void Clients::getInfo(const struct sockaddr_storage* addr, const std::string& us
 
 bool Clients::getInfoByAddr(const struct sockaddr_storage* addr, const ClientInfo** ppInfo)
 {
-    for (const auto& i : clientInfo) {
-        if (i.match.empty())
-            continue;
-        if (i.matchType == ClientMatchType::IP) {
-            if (i.match.find('.') != std::string::npos) {
-                struct sockaddr_in clientAddr;
-                clientAddr.sin_family = AF_INET;
-                clientAddr.sin_addr.s_addr = inet_addr(i.match.c_str());
+    auto it = std::find_if(clientInfo.begin(), clientInfo.end(), [=](const auto& c) //
+        { return !c.match.empty() && c.matchType == ClientMatchType::IP; });
+
+    if (it != clientInfo.end()) {
+        if (it->match.find('.') != std::string::npos) {
+            struct sockaddr_in clientAddr;
+            clientAddr.sin_family = AF_INET;
+            clientAddr.sin_addr.s_addr = inet_addr(it->match.c_str());
+            if (sockAddrCmpAddr(reinterpret_cast<struct sockaddr*>(&clientAddr), (struct sockaddr*)addr) == 0) {
+                *ppInfo = &(*it);
+                return true;
+            }
+        } else if (it->match.find(':') != std::string::npos) {
+            struct sockaddr_in6 clientAddr;
+            clientAddr.sin6_family = AF_INET6;
+            if (inet_pton(AF_INET6, it->match.c_str(), &clientAddr.sin6_addr) == 1) {
                 if (sockAddrCmpAddr(reinterpret_cast<struct sockaddr*>(&clientAddr), (struct sockaddr*)addr) == 0) {
-                    *ppInfo = &i;
+                    *ppInfo = &(*it);
                     return true;
-                }
-            } else if (i.match.find(':') != std::string::npos) {
-                struct sockaddr_in6 clientAddr;
-                clientAddr.sin6_family = AF_INET6;
-                if (inet_pton(AF_INET6, i.match.c_str(), &clientAddr.sin6_addr) == 1) {
-                    if (sockAddrCmpAddr(reinterpret_cast<struct sockaddr*>(&clientAddr), (struct sockaddr*)addr) == 0) {
-                        *ppInfo = &i;
-                        return true;
-                    }
                 }
             }
         }
@@ -251,14 +246,13 @@ bool Clients::getInfoByAddr(const struct sockaddr_storage* addr, const ClientInf
 
 bool Clients::getInfoByType(const std::string& match, ClientMatchType type, const ClientInfo** ppInfo)
 {
-    for (const auto& i : clientInfo) {
-        if (i.match.empty())
-            continue;
-        if (type != ClientMatchType::IP && i.matchType == type) {
-            if (match.find(i.match) != std::string::npos) {
-                *ppInfo = &i;
-                return true;
-            }
+    auto it = std::find_if(clientInfo.begin(), clientInfo.end(), [=](const auto& c) //
+        { return !c.match.empty() && (type != ClientMatchType::IP && c.matchType == type); });
+
+    if (it != clientInfo.end()) {
+        if (match.find(it->match) != std::string::npos) {
+            *ppInfo = &(*it);
+            return true;
         }
     }
 
