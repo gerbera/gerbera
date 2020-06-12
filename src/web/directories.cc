@@ -114,7 +114,7 @@ void web::directories::process()
 
         /// \todo replace hex_encode with base64_encode?
         std::string id = hex_encode(filepath.c_str(), filepath.string().length());
-        filesMap[id] = {filepath.filename(), hasContent};
+        filesMap[id] = { filepath.filename(), hasContent };
     }
 
     for (const auto& entry : filesMap) {
