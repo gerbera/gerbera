@@ -31,6 +31,7 @@
 
 #include "pages.h" // API
 
+#include <set>
 #include <utility>
 
 #include "storage/storage.h"
@@ -64,7 +65,7 @@ void web::directories::process()
     containers.append_attribute("type") = "filesystem";
 
     // don't bother users with system directorties
-    std::vector<fs::path> excludes_fullpath = {
+    std::set<fs::path> excludes_fullpath = {
         "/bin",
         "/boot",
         "/dev",
@@ -78,35 +79,38 @@ void web::directories::process()
         "/usr",
         "/var"
     };
+
     // don't bother users with special or config directorties
-    std::vector<std::string> excludes_dirname = {
+    std::set<std::string> excludes_dirname = {
         "lost+found",
     };
-    bool exclude_config_dirs = true;
 
-    std::map<std::string, const fs::path*> filesMap;
+    auto f2i = StringConverter::f2i(config);
+    // Keep name first for sorting.
+    std::vector<std::pair<std::string, fs::path>> result;
 
     for (const auto& it : fs::directory_iterator(path)) {
-        const fs::path& filepath = it.path();
-
         std::error_code ec;
         if (!it.is_directory(ec))
             continue;
-        if (std::find(excludes_fullpath.begin(), excludes_fullpath.end(), filepath) != excludes_fullpath.end())
-            continue;
-        if (std::find(excludes_dirname.begin(), excludes_dirname.end(), filepath.filename()) != excludes_dirname.end()
-            || (exclude_config_dirs && startswith(filepath.filename(), ".")))
+
+        if (excludes_fullpath.count(it.path()))
             continue;
 
-        /// \todo replace hex_encode with base64_encode?
-        std::string id = hex_encode(filepath.c_str(), filepath.string().length());
-        filesMap[id] = &filepath;
+        auto fn = it.path().filename().string();
+
+        if (excludes_dirname.count(fn) || fn.compare(0, 1, ".") == 0)
+            continue;
+
+        result.emplace_back(f2i->convert(fn), it.path());
     }
 
-    for (const auto& entry : filesMap) {
+    std::sort(result.begin(), result.end());
+
+    for (const auto& [name, path] : result) {
         bool hasContent = false;
         std::error_code ec;
-        for (auto& subIt : fs::directory_iterator(path)) {
+        for (auto& subIt : fs::directory_iterator(path, ec)) {
             if (!subIt.is_directory(ec) && !isRegularFile(subIt.path(), ec))
                 continue;
             hasContent = true;
@@ -114,10 +118,9 @@ void web::directories::process()
         }
 
         auto ce = containers.append_child("container");
-        ce.append_attribute("id") = entry.first.c_str();
+        /// \todo replace hex_encode with base64_encode?
+        ce.append_attribute("id") = hex_encode(path.native().c_str(), path.native().length()).c_str();
         ce.append_attribute("child_count") = hasContent;
-
-        auto f2i = StringConverter::f2i(config);
-        ce.append_attribute("title") = f2i->convert(entry.second->filename()).c_str();
+        ce.append_attribute("title") = name.c_str();
     }
 }

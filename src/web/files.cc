@@ -57,28 +57,28 @@ void web::files::process()
     files.append_attribute("parent_id") = parentID.c_str();
     files.append_attribute("location") = path.c_str();
 
-    bool exclude_config_files = true;
-
-    std::map<std::string, const fs::path*> filesMap;
+    auto f2i = StringConverter::f2i(config);
+    std::vector<std::pair<std::string, std::string>> result;
 
     for (const auto& it : fs::directory_iterator(path)) {
-        const fs::path& filepath = it.path();
-
         std::error_code ec;
         if (!isRegularFile(it.path(), ec))
             continue;
-        if (exclude_config_files && startswith(filepath.filename(), "."))
+
+        auto fn = it.path().filename().string();
+
+        if (fn.compare(0, 1, ".") == 0)
             continue;
 
-        std::string id = hex_encode(filepath.c_str(), filepath.string().length());
-
-        filesMap[id] = &filepath;
+        result.emplace_back(f2i->convert(fn),
+            hex_encode(it.path().native().c_str(), it.path().native().length()));
     }
 
-    for (const auto& entry : filesMap) {
+    std::sort(result.begin(), result.end());
+
+    for (const auto& [name, id] : result) {
         auto fe = files.append_child("file");
-        fe.append_attribute("id") = entry.first.c_str();
-        auto f2i = StringConverter::f2i(config);
-        fe.append_attribute("filename") = f2i->convert(entry.second->filename()).c_str();
+        fe.append_attribute("id") = id.c_str();
+        fe.append_attribute("filename") = name.c_str();
     }
 }
