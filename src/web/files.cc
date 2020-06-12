@@ -74,12 +74,11 @@ void web::files::process()
 
         filesMap[id] = &filepath;
     }
-    
+
     for (const auto& entry : filesMap) {
         auto fe = files.append_child("file");
         fe.append_attribute("id") = entry.first.c_str();
         auto f2i = StringConverter::f2i(config);
         fe.append_attribute("filename") = f2i->convert(entry.second->filename()).c_str();
     }
-
 }
