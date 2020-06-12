@@ -104,7 +104,6 @@ void web::directories::process()
             continue;
 
         bool hasContent = false;
-        std::error_code ec;
         for (auto& subIt : fs::directory_iterator(path)) {
             if (!subIt.is_directory(ec) && !isRegularFile(subIt.path(), ec))
                 continue;
