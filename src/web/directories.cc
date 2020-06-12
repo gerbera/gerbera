@@ -43,6 +43,11 @@ web::directories::directories(std::shared_ptr<Config> config, std::shared_ptr<St
 {
 }
 
+struct dirInfo {
+    std::string name;
+    bool hasContent;
+};
+
 void web::directories::process()
 {
     check_request();
@@ -84,7 +89,7 @@ void web::directories::process()
     };
     bool exclude_config_dirs = true;
 
-    std::map<std::string, const fs::path*> filesMap;
+    std::map<std::string, struct dirInfo> filesMap;
 
     for (const auto& it : fs::directory_iterator(path)) {
         const fs::path& filepath = it.path();
@@ -98,12 +103,6 @@ void web::directories::process()
             || (exclude_config_dirs && startswith(filepath.filename(), ".")))
             continue;
 
-        /// \todo replace hex_encode with base64_encode?
-        std::string id = hex_encode(filepath.c_str(), filepath.string().length());
-        filesMap[id] = &filepath;
-    }
-
-    for (const auto& entry : filesMap) {
         bool hasContent = false;
         std::error_code ec;
         for (auto& subIt : fs::directory_iterator(path)) {
@@ -113,11 +112,17 @@ void web::directories::process()
             break;
         }
 
+        /// \todo replace hex_encode with base64_encode?
+        std::string id = hex_encode(filepath.c_str(), filepath.string().length());
+        filesMap[id] = {filepath.filename(), hasContent};
+    }
+
+    for (const auto& entry : filesMap) {
         auto ce = containers.append_child("container");
         ce.append_attribute("id") = entry.first.c_str();
-        ce.append_attribute("child_count") = hasContent;
+        ce.append_attribute("child_count") = entry.second.hasContent;
 
         auto f2i = StringConverter::f2i(config);
-        ce.append_attribute("title") = f2i->convert(entry.second->filename()).c_str();
+        ce.append_attribute("title") = f2i->convert(entry.second.filename).c_str();
     }
 }
