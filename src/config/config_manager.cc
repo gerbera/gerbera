@@ -607,6 +607,13 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     NEW_OPTION(charset);
     SET_OPTION(CFG_IMPORT_PLAYLIST_CHARSET);
 
+    temp = getOption("/server/pc-directory/attribute::upnp-hide",
+        DEFAULT_HIDE_PC_DIRECTORY);
+
+    if (!validateYesNo(temp))
+        throw std::runtime_error("Error in config file: hide attribute of the "
+                                 "pc-directory tag must be either \"yes\" or \"no\"");
+
     NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_SERVER_HIDE_PC_DIRECTORY);
 
