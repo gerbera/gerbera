@@ -43,6 +43,10 @@ web::files::files(std::shared_ptr<Config> config, std::shared_ptr<Storage> stora
 {
 }
 
+struct fileInfo {
+	std::string filename;
+};
+
 void web::files::process()
 {
     check_request();
@@ -59,7 +63,7 @@ void web::files::process()
 
     bool exclude_config_files = true;
 
-    std::map<std::string, const fs::path*> filesMap;
+    std::map<std::string, struct fileInfo> filesMap;
 
     for (const auto& it : fs::directory_iterator(path)) {
         const fs::path& filepath = it.path();
@@ -72,13 +76,13 @@ void web::files::process()
 
         std::string id = hex_encode(filepath.c_str(), filepath.string().length());
 
-        filesMap[id] = &filepath;
+        filesMap[id] = { filepath.filename() };
     }
 
     for (const auto& entry : filesMap) {
         auto fe = files.append_child("file");
         fe.append_attribute("id") = entry.first.c_str();
         auto f2i = StringConverter::f2i(config);
-        fe.append_attribute("filename") = f2i->convert(entry.second->filename()).c_str();
+        fe.append_attribute("filename") = f2i->convert(entry.second.filename).c_str();
     }
 }
