@@ -84,6 +84,8 @@ void web::directories::process()
     };
     bool exclude_config_dirs = true;
 
+    std::map<std::string, const fs::path*> filesMap;
+
     for (const auto& it : fs::directory_iterator(path)) {
         const fs::path& filepath = it.path();
 
@@ -96,7 +98,14 @@ void web::directories::process()
             || (exclude_config_dirs && startswith(filepath.filename(), ".")))
             continue;
 
+        /// \todo replace hex_encode with base64_encode?
+        std::string id = hex_encode(filepath.c_str(), filepath.string().length());
+        filesMap[id] = &filepath;
+    }
+
+    for (const auto& entry : filesMap) {
         bool hasContent = false;
+        std::error_code ec;
         for (auto& subIt : fs::directory_iterator(path)) {
             if (!subIt.is_directory(ec) && !isRegularFile(subIt.path(), ec))
                 continue;
@@ -104,14 +113,11 @@ void web::directories::process()
             break;
         }
 
-        /// \todo replace hex_encode with base64_encode?
-        std::string id = hex_encode(filepath.c_str(), filepath.string().length());
-
         auto ce = containers.append_child("container");
-        ce.append_attribute("id") = id.c_str();
+        ce.append_attribute("id") = entry.first.c_str();
         ce.append_attribute("child_count") = hasContent;
 
         auto f2i = StringConverter::f2i(config);
-        ce.append_attribute("title") = f2i->convert(filepath.filename()).c_str();
+        ce.append_attribute("title") = f2i->convert(entry.second->filename()).c_str();
     }
 }
