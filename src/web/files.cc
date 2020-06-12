@@ -63,19 +63,18 @@ void web::files::process()
 
     bool exclude_config_files = true;
 
+    std::error_code ec;
     std::map<std::string, struct fileInfo> filesMap;
 
-    for (const auto& it : fs::directory_iterator(path)) {
+    for (const auto& it : fs::directory_iterator(path, ec)) {
         const fs::path& filepath = it.path();
 
-        std::error_code ec;
         if (!isRegularFile(it.path(), ec))
             continue;
         if (exclude_config_files && startswith(filepath.filename(), "."))
             continue;
 
         std::string id = hex_encode(filepath.c_str(), filepath.string().length());
-
         filesMap[id] = { filepath.filename() };
     }
 
