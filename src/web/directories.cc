@@ -44,7 +44,7 @@ web::directories::directories(std::shared_ptr<Config> config, std::shared_ptr<St
 }
 
 struct dirInfo {
-    std::string name;
+    std::string filename;
     bool hasContent;
 };
 
