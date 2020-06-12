@@ -44,7 +44,7 @@ web::files::files(std::shared_ptr<Config> config, std::shared_ptr<Storage> stora
 }
 
 struct fileInfo {
-	std::string filename;
+    std::string filename;
 };
 
 void web::files::process()
