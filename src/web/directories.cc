@@ -89,22 +89,22 @@ void web::directories::process()
     };
     bool exclude_config_dirs = true;
 
+    std::error_code ec;
     std::map<std::string, struct dirInfo> filesMap;
 
-    for (const auto& it : fs::directory_iterator(path)) {
+    for (const auto& it : fs::directory_iterator(path, ec)) {
         const fs::path& filepath = it.path();
 
-        std::error_code ec;
         if (!it.is_directory(ec))
             continue;
         if (std::find(excludes_fullpath.begin(), excludes_fullpath.end(), filepath) != excludes_fullpath.end())
             continue;
-        if (std::find(excludes_dirname.begin(), excludes_dirname.end(), filepath.filename()) != excludes_dirname.end()
+        if ::find(excludes_dirname.begin(), excludes_dirname.end(), filepath.filename()) != excludes_dirname.end()
             || (exclude_config_dirs && startswith(filepath.filename(), ".")))
             continue;
 
         bool hasContent = false;
-        for (auto& subIt : fs::directory_iterator(path)) {
+        for (auto& subIt : fs::directory_iterator(path, ec)) {
             if (!subIt.is_directory(ec) && !isRegularFile(subIt.path(), ec))
                 continue;
             hasContent = true;
