@@ -14,5 +14,5 @@ jobs:
         repository: gerbera/gerbera
         tag_with_sha: true
         add_git_labels: true
-        tag_with_ref: ${{ startsWith(github.ref, 'refs/tags/') }}
-        push: ${{ startsWith(github.ref, 'refs/tags/') || github.ref == 'master' }}
+        tag_with_ref: true
+        push: ${{ startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' }}
