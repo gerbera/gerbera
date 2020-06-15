@@ -37,14 +37,20 @@ export class App {
     this.currentTreeItem = undefined;
     this.initDone = false;
     this.pageInfo = {
-      dbType: 'home'
+      dbType: 'home',
+      currentItem: {
+        'home': [],
+        'db': [],
+        'fs': [],
+        'clients': []
+      }
     };
     this.navLinks = {
       'home': '#nav-home',
       'db': '#nav-db',
       'fs': '#nav-fs',
       'clients': '#nav-clients'
-  };
+    };
   }
 
   isTypeDb() {
@@ -67,7 +73,10 @@ export class App {
   }
 
   currentItem() {
-    return this.pageInfo.currentItem;
+    if (this.pageInfo.currentItem && this.pageInfo.dbType in this.pageInfo.currentItem) {
+      return this.pageInfo.currentItem[this.pageInfo.dbType];
+    }
+    return [];
   }
 
   currentPage() {
@@ -90,7 +99,7 @@ export class App {
       }
       parentElement = parentElement.parentElement;
     }
-    this.pageInfo.currentItem = tree;
+    this.pageInfo.currentItem[this.pageInfo.dbType] = tree;
     this.writeLocalStorage();
   }
 
@@ -103,7 +112,15 @@ export class App {
   }
 
   initialize () {
-    this.pageInfo.dbType = 'home';
+    this.pageInfo = {
+      dbType: 'home',
+      currentItem: {
+        'home': [],
+        'db': [],
+        'fs': [],
+        'clients': []
+      }
+    };
     return Updates.initialize()
       .then(() => this.configureDefaults())
       .then(() => {
@@ -127,8 +144,8 @@ export class App {
           if(this.pageInfo.dbType && this.pageInfo.dbType in this.navLinks) {
             $(this.navLinks[this.pageInfo.dbType]).click();
           }
-          this.initDone = true;
         }
+        this.initDone = true;
       })
       .catch((error) => {
         this.error(error);

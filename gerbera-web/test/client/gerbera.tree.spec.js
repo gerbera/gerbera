@@ -12,7 +12,9 @@ import containerAsTree from './fixtures/container-data-astree';
 
 describe('Gerbera Tree', () => {
   let tree;
-
+  beforeAll(() => {
+    GerberaApp.initialize();
+  });
   beforeEach(() => {
     fixture.setBase('test/client/fixtures');
     fixture.load('index.html');
