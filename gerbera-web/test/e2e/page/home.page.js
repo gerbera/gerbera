@@ -61,7 +61,7 @@ module.exports = function (driver) {
   };
   this.expandTree = async (text) => {
     const items = await driver.findElements(By.xpath('//li[.//span[contains(text(),\'' + text + '\')]]'));
-    const folderTitle = await items[1].findElement(By.className('folder-title'));
+    const folderTitle = await items[0].findElement(By.className('folder-title'));
     await folderTitle.click();
     return await driver.sleep(500); // todo use wait...
   };

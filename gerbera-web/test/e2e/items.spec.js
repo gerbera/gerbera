@@ -94,6 +94,8 @@ describe('Items Suite', () => {
       const pages = await homePage.getPages();
       expect(pages).to.have.lengthOf(4);
 
+      const items = await homePage.items();
+      expect(items).to.have.lengthOf(26);
       await pages[2].click();
 
       const item = await homePage.getItem(0);
