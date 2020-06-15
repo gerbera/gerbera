@@ -27,7 +27,6 @@ describe('Gerbera UI App', () => {
 
     beforeEach(() => {
       cookieSpy = spyOn(Cookies, 'get').and.callFake((name) => {
-        if (name === 'TYPE') return 'db';
         if (name === 'SID') return 'A_MOCK_SID';
         return 'A_MOCK_COOKIE';
       });
@@ -42,10 +41,11 @@ describe('Gerbera UI App', () => {
       expect(GerberaApp).toBeDefined();
     });
 
-    it('provides access to the TYPE cookie', () => {
+    it('provides access to the localStorage', () => {
+      GerberaApp.initialize();
       const result = GerberaApp.getType();
 
-      expect(result).toEqual('db');
+      expect(result).toEqual('home');
     });
 
     it('retrieves the configuration from the server using AJAX', async () => {
@@ -97,20 +97,21 @@ describe('Gerbera UI App', () => {
       });
 
       await GerberaApp.initialize();
+      GerberaApp.setType('db');
 
       expect(GerberaApp.getType()).toEqual('db');
       expect(GerberaApp.isTypeDb()).toBeTruthy();
     });
 
-    it('defaults the TYPE to `db` when none is set', async () => {
+    it('defaults the TYPE to `home` when none is set', async () => {
       ajaxSpy.and.callFake(() => {
         return Promise.resolve(mockConfig);
       });
       cookieSpy.and.callThrough();
 
       await GerberaApp.initialize();
-      expect(GerberaApp.getType()).toEqual('db');
-      expect(GerberaApp.isTypeDb()).toBeTruthy();
+      expect(GerberaApp.getType()).toEqual('home');
+      expect(GerberaApp.isTypeDb()).toBeFalsy();
     });
 
     it('initializes all GERBERA components when logged in', async () => {

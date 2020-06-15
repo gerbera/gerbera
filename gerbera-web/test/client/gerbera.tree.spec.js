@@ -17,6 +17,8 @@ describe('Gerbera Tree', () => {
     fixture.setBase('test/client/fixtures');
     fixture.load('index.html');
     tree = $('#tree');
+    GerberaApp.setType('db');
+    GerberaApp.setCurrentItem([]);
   });
   afterEach(() => {
     fixture.cleanup();
@@ -240,7 +242,7 @@ describe('Gerbera Tree', () => {
       ajaxSpy.and.callThrough();
     });
 
-    it('calls for child items based on the response', () => {
+    it('calls for child items based on the response', async () => {
       ajaxSpy.and.callFake(() => {
         return Promise.resolve(childTreeResponse);
       });
@@ -249,12 +251,11 @@ describe('Gerbera Tree', () => {
         onSelection: onSelectionSpy
       };
       spyOn(GerberaApp, 'getType').and.returnValue('db');
-
       Tree.loadTree(treeResponse, treeViewConfig);
 
       // click an item
       const item = $($('#tree li').get(4));
-      item.children('span.folder-title').click();
+      await item.children('span.folder-title').click();
 
       expect(ajaxSpy.calls.count()).toBe(1);
       expect(ajaxSpy.calls.mostRecent().args[0].data.req_type).toBe('containers');

@@ -36,7 +36,9 @@ export class App {
     this.loggedIn = false;
     this.currentTreeItem = undefined;
     this.initDone = false;
-    this.pageInfo = {};
+    this.pageInfo = {
+      dbType: 'home'
+    };
     this.navLinks = {
       'home': '#nav-home',
       'db': '#nav-db',
@@ -101,6 +103,7 @@ export class App {
   }
 
   initialize () {
+    this.pageInfo.dbType = 'home';
     return Updates.initialize()
       .then(() => this.configureDefaults())
       .then(() => {
