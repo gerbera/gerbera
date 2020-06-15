@@ -17,6 +17,7 @@ const resetSuite = async (expectations, driver) => {
 
 const resetCookies = async (driver) => {
   await driver.get(mockWebServer + '/disabled.html');
+  await driver.executeScript("window.localStorage.clear()");
   return driver.manage().deleteAllCookies();
 };
 
