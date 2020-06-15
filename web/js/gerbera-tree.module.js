@@ -35,6 +35,7 @@ const treeViewCss = {
 
 let currentTree = [];
 let currentType = 'db';
+let pendingItems = [];
 
 const destroy = () => {
   currentTree = [];
@@ -74,6 +75,8 @@ const onItemSelected = (event) => {
   const folderList = event.target.parentElement;
   const item = event.data;
 
+  GerberaApp.setCurrentItem(event);
+
   selectTreeItem(folderList);
   Items.treeItemSelected(item);
 };
@@ -84,11 +87,15 @@ const onItemExpanded = (event) => {
   const folderList = event.target.parentElement;
   const item = event.data;
 
+  GerberaApp.setCurrentItem(event);
+
   if (item.gerbera && item.gerbera.id) {
     if (tree.tree('closed', folderName) && item.gerbera.childCount > 0) {
       fetchChildren(item.gerbera).then(function (response) {
         var childTree = transformContainers(response, false);
         tree.tree('append', $(folderList), childTree);
+
+        initSelection(pendingItems);
       })
     } else {
       tree.tree('collapse', $(folderList));
@@ -128,6 +135,31 @@ const loadTree = (response, config) => {
     });
 
     Trail.makeTrail($('#tree span.folder-title').first());
+
+    pendingItems = GerberaApp.currentItem();
+
+    if (pendingItems){
+      initSelection(pendingItems);
+    }
+  }
+};
+
+const initSelection = (currentItems) => {
+  pendingItems = [];
+  var success = false;
+  currentItems.forEach((item) => {
+    if (item.startsWith('grb-tree')) {
+      var jq = $('#' + item);
+      if (jq && jq.length > 0 && jq[0].children && jq[0].children.length > 1 && jq[0].children[1]) {
+        jq[0].children[1].click();
+        success = true;
+      } else {
+        pendingItems.push(item);
+      }
+    }
+  });
+  if (!success) { // avoid loop if no item was in tree (anymore)
+    pendingItems = [];
   }
 };
 
@@ -144,10 +176,10 @@ const fetchChildren = (gerberaData) => {
       select_it: 0
     }
   })
-    .catch((err) => {
-	console.log(err);
-	GerberaApp.error(err)
-	});
+  .catch((err) => {
+    console.log(err);
+    GerberaApp.error(err)
+  });
 };
 
 const transformContainers = (response, createParent) => {
