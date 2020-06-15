@@ -49,6 +49,7 @@ const errorCheck = (event, xhr) => {
 
 const showMessage = (message, callback, type, icon) => {
   const toast = {message: message, type: type, icon: icon};
+  console.log(message);
   if (callback) {
     toast.callback = callback;
   }
