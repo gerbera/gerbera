@@ -30,13 +30,19 @@ import {Updates} from './gerbera-updates.module.js';
 import {Clients} from './gerbera-clients.module.js';
 
 export class App {
-
   constructor(clientConfig, serverConfig) {
     this.clientConfig = clientConfig;
     this.serverConfig = serverConfig;
     this.loggedIn = false;
     this.currentTreeItem = undefined;
+    this.initDone = false;
     this.pageInfo = {};
+    this.navLinks = {
+      'home': '#nav-home',
+      'db': '#nav-db',
+      'fs': '#nav-fs',
+      'clients': '#nav-clients'
+  };
   }
 
   isTypeDb() {
@@ -44,11 +50,22 @@ export class App {
   }
 
   getType() {
-    return Cookies.get('TYPE');
+    return this.pageInfo.dbType;
+  }
+
+  writeLocalStorage() {
+    if (this.initDone) {
+      localStorage.setItem('pageInfo', JSON.stringify(this.pageInfo));
+    }
   }
 
   setType(type) {
-    Cookies.set('TYPE', type);
+    this.pageInfo.dbType = type;
+    this.writeLocalStorage();
+  }
+
+  currentItem() {
+    return this.pageInfo.currentItem;
   }
 
   currentPage() {
@@ -57,6 +74,22 @@ export class App {
 
   setCurrentPage(page) {
     this.pageInfo.currentPage = page;
+    this.writeLocalStorage();
+  }
+
+  setCurrentItem(item) {
+    var parentElement = item.target;
+    var tree = [];
+    var cnt = 0;
+    while (parentElement && cnt < 100) {
+      cnt++; // avoid inifinite loop
+      if (parentElement.id && parentElement.id !== '') {
+        tree.unshift(parentElement.id);
+      }
+      parentElement = parentElement.parentElement;
+    }
+    this.pageInfo.currentItem = tree;
+    this.writeLocalStorage();
   }
 
   isLoggedIn(){
@@ -84,6 +117,15 @@ export class App {
         this.loggedIn = loggedIn;
         this.displayLogin(loggedIn);
         Menu.initialize(this.serverConfig);
+      })
+      .then(() => {
+        if (localStorage.getItem('pageInfo')) {
+          this.pageInfo = JSON.parse(localStorage.getItem('pageInfo'));
+          if(this.pageInfo.dbType && this.pageInfo.dbType in this.navLinks) {
+            $(this.navLinks[this.pageInfo.dbType]).click();
+          }
+          this.initDone = true;
+        }
       })
       .catch((error) => {
         this.error(error);

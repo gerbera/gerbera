@@ -118,6 +118,7 @@ var home = function () {
   $('#home').show();
   $('#content').hide();
   $('#clients').hide();
+  GerberaApp.setType('home');
   Tree.destroy();
   Trail.destroy();
   Items.destroy();
