@@ -5,9 +5,13 @@ import clientsDataJson from './fixtures/clients-data';
 import gerberaEmptyClients from './fixtures/clients-empty';
 
 describe('Gerbera Clients', () => {
+  let lsSpy;
   beforeEach(() => {
     fixture.setBase('test/client/fixtures');
     fixture.load('index.html');
+    lsSpy = spyOn(window.localStorage, 'getItem').and.callFake((name) => {
+        return;
+    });
   });
   afterEach((done) => {
     $("body").on('transitionend', function(event){

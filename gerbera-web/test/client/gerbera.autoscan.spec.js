@@ -7,6 +7,13 @@ import autoscanResponse from './fixtures/autoscan-add-response';
 import submitCompleteResponse from './fixtures/submit-complete-2f6d';
 
 describe('Gerbera Autoscan', () => {
+  let lsSpy;
+  beforeEach(() => {
+    lsSpy = spyOn(window.localStorage, 'getItem').and.callFake((name) => {
+        return;
+    });
+  });
+
   describe('initialize()', () => {
     let autoscanId;
     let autoscanFromFs;

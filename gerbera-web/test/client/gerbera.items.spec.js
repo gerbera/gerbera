@@ -18,9 +18,13 @@ import containerMock from './fixtures/container';
 import treeDataJson from './fixtures/tree-data';
 
 describe('Gerbera Items', () => {
+  let lsSpy;
   beforeEach(() => {
     fixture.setBase('test/client/fixtures');
     fixture.load('index.html');
+    lsSpy = spyOn(window.localStorage, 'getItem').and.callFake((name) => {
+        return;
+    });
   });
   afterEach((done) => {
     $("body").on('transitionend', function(event){

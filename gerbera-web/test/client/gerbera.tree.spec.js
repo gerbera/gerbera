@@ -11,7 +11,8 @@ import containerAsTree from './fixtures/container-data-astree';
 
 
 describe('Gerbera Tree', () => {
-  let tree;
+  let tree, lsSpy;
+
   beforeAll(() => {
     GerberaApp.initialize();
   });
@@ -19,6 +20,9 @@ describe('Gerbera Tree', () => {
     fixture.setBase('test/client/fixtures');
     fixture.load('index.html');
     tree = $('#tree');
+    lsSpy = spyOn(window.localStorage, 'getItem').and.callFake((name) => {
+        return;
+    });
     GerberaApp.setType('db');
     GerberaApp.setCurrentItem([]);
   });

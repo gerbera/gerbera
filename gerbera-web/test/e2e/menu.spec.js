@@ -82,7 +82,7 @@ describe('Menu Suite', () => {
     it('shows the version in the menu', async () => {
       const version = await homePage.getVersion();
       const text = await version.getText();
-      expect(text).to.equal('1.4.0alpha');
+      expect(text).to.equal('1.6.0');
     });
 
     it('loads the parent database container list when clicking Database Icon', async () => {
