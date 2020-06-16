@@ -7,6 +7,13 @@ import {Updates} from "../../../web/js/gerbera-updates.module";
 import treeResponse from './fixtures/parent_id-0-select_it-0';
 
 describe('Gerbera Trail', () => {
+  let lsSpy;
+  beforeEach(() => {
+    lsSpy = spyOn(window.localStorage, 'getItem').and.callFake((name) => {
+        return;
+    });
+  });
+
   describe('initialize()', () => {
     beforeEach(() => {
       fixture.setBase('test/client/fixtures');

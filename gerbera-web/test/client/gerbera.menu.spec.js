@@ -8,6 +8,12 @@ import mockConfig from './fixtures/config';
 import treeMock from './fixtures/parent_id-0-select_it-0';
 
 describe('Gerbera Menu', () => {
+  let lsSpy;
+  beforeEach(() => {
+    lsSpy = spyOn(window.localStorage, 'getItem').and.callFake((name) => {
+        return;
+    });
+  });
   describe('initialize()', () => {
     let ajaxSpy;
 

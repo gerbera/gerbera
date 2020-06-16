@@ -12,6 +12,12 @@ import mockConfig from './fixtures/config';
 import uiDisabled from './fixtures/ui-disabled';
 
 describe('Gerbera UI App', () => {
+  let lsSpy;
+  beforeEach(() => {
+    lsSpy = spyOn(window.localStorage, 'getItem').and.callFake((name) => {
+        return;
+    });
+  });
 
   describe('initialize()', () => {
     let ajaxSpy, ajaxSetupSpy, cookieSpy;
@@ -107,7 +113,6 @@ describe('Gerbera UI App', () => {
       ajaxSpy.and.callFake(() => {
         return Promise.resolve(mockConfig);
       });
-      cookieSpy.and.callThrough();
 
       await GerberaApp.initialize();
       expect(GerberaApp.getType()).toEqual('home');

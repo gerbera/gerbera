@@ -5,7 +5,7 @@ import treeDataDiffJson from './fixtures/tree-data-diff';
 describe('The jQuery Tree', () => {
   'use strict';
 
-  let treeData, tree;
+  let treeData, tree, lsSpy;
   const treeConfig = {
     titleClass: 'folder-title',
     closedIcon: 'folder-closed',
@@ -13,6 +13,9 @@ describe('The jQuery Tree', () => {
   };
 
   beforeEach(() => {
+    lsSpy = spyOn(window.localStorage, 'getItem').and.callFake((name) => {
+        return;
+    });
     fixture.setBase('test/client/fixtures');
     fixture.load('index.html');
     treeData = treeDataJson;

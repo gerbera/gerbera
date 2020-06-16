@@ -16,9 +16,13 @@ import updateIds from './fixtures/update_ids';
 describe('Gerbera Updates', function () {
   'use strict';
 
+  let lsSpy;
   beforeEach(function () {
     fixture.setBase('test/client/fixtures');
     fixture.load('index.html');
+    lsSpy = spyOn(window.localStorage, 'getItem').and.callFake((name) => {
+        return;
+    });
     Updates.initialize();
   });
 

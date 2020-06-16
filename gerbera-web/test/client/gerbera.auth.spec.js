@@ -11,6 +11,13 @@ import mockToken from './fixtures/get_token.success';
 import mockLogin from './fixtures/login.success';
 
 describe('Gerbera Auth', () => {
+  let lsSpy;
+  beforeEach(() => {
+    lsSpy = spyOn(window.localStorage, 'getItem').and.callFake((name) => {
+        return;
+    });
+  });
+
   describe('checkSID()', () => {
     let ajaxSpy;
 
