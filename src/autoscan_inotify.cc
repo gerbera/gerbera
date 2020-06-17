@@ -188,10 +188,10 @@ void AutoscanInotify::threadProc()
                     if (adir != nullptr && adir->getRecursive()) {
                         if (mask & IN_CREATE) {
                             if (adir->getHidden() || name.at(0) != '.') {
-                                log_debug("new dir detected, adding to inotify: {}", path.c_str());
+                                log_debug("new dir detected, adding to inotify: {}", path.string());
                                 monitorUnmonitorRecursive(path, false, adir, false);
                             } else {
-                                log_debug("new dir detected, irgnoring because it's hidden: {}", path.c_str());
+                                log_debug("new dir detected, irgnoring because it's hidden: {}", path.string());
                             }
                         }
                     }
@@ -199,10 +199,10 @@ void AutoscanInotify::threadProc()
 
                 if (adir != nullptr && mask & (IN_DELETE | IN_DELETE_SELF | IN_MOVE_SELF | IN_CLOSE_WRITE | IN_MOVED_FROM | IN_MOVED_TO | IN_UNMOUNT | IN_CREATE)) {
                     if (!(mask & (IN_MOVED_TO | IN_CREATE))) {
-                        log_debug("deleting {}", path.string().c_str());
+                        log_debug("deleting {}", path.string());
 
                         if (mask & (IN_DELETE_SELF | IN_MOVE_SELF | IN_UNMOUNT)) {
-                            if (IN_MOVE_SELF)
+                            if (mask & IN_MOVE_SELF)
                                 inotify->removeWatch(wd);
                             auto watch = getStartPoint(wdObj);
                             if (watch != nullptr) {
@@ -213,12 +213,12 @@ void AutoscanInotify::threadProc()
                             }
                         }
 
-                        int objectID = storage->findObjectIDByPath(path, true);
+                        int objectID = storage->findObjectIDByPath(path,  !(mask & IN_ISDIR));
                         if (objectID != INVALID_OBJECT_ID)
                             content->removeObject(objectID);
                     }
                     if (mask & (IN_CLOSE_WRITE | IN_MOVED_TO | IN_CREATE)) {
-                        log_debug("adding {}", path.c_str());
+                        log_debug("adding {}", path.string());
                         // path, recursive, async, hidden, low priority, cancellable
                         content->addFile(path, adir->getLocation(), adir->getRecursive(), true, adir->getHidden(), true, false);
 
