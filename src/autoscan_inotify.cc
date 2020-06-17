@@ -188,10 +188,10 @@ void AutoscanInotify::threadProc()
                     if (adir != nullptr && adir->getRecursive()) {
                         if (mask & IN_CREATE) {
                             if (adir->getHidden() || name.at(0) != '.') {
-                                log_debug("new dir detected, adding to inotify: {}", path.string());
+                                log_debug("new dir detected, adding to inotify: {}", path.c_str());
                                 monitorUnmonitorRecursive(path, false, adir, false);
                             } else {
-                                log_debug("new dir detected, irgnoring because it's hidden: {}", path.string());
+                                log_debug("new dir detected, irgnoring because it's hidden: {}", path.c_str());
                             }
                         }
                     }
@@ -199,7 +199,7 @@ void AutoscanInotify::threadProc()
 
                 if (adir != nullptr && mask & (IN_DELETE | IN_DELETE_SELF | IN_MOVE_SELF | IN_CLOSE_WRITE | IN_MOVED_FROM | IN_MOVED_TO | IN_UNMOUNT | IN_CREATE)) {
                     if (!(mask & (IN_MOVED_TO | IN_CREATE))) {
-                        log_debug("deleting {}", path.string());
+                        log_debug("deleting {}", path.c_str());
 
                         if (mask & (IN_DELETE_SELF | IN_MOVE_SELF | IN_UNMOUNT)) {
                             if (mask & IN_MOVE_SELF)
@@ -218,7 +218,7 @@ void AutoscanInotify::threadProc()
                             content->removeObject(objectID);
                     }
                     if (mask & (IN_CLOSE_WRITE | IN_MOVED_TO | IN_CREATE)) {
-                        log_debug("adding {}", path.string());
+                        log_debug("adding {}", path.c_str());
                         // path, recursive, async, hidden, low priority, cancellable
                         content->addFile(path, adir->getLocation(), adir->getRecursive(), true, adir->getHidden(), true, false);
 
@@ -502,7 +502,7 @@ int AutoscanInotify::monitorDirectory(const fs::path& path, const std::shared_pt
 
             if (!startPoint) {
                 int startPointWd = inotify->addWatch(adir->getLocation(), events);
-                log_debug("getting start point for {} -> {} wd={}", path.string().c_str(), adir->getLocation().c_str(), startPointWd);
+                log_debug("getting start point for {} -> {} wd={}", path.c_str(), adir->getLocation().c_str(), startPointWd);
                 if (wd >= 0)
                     addDescendant(startPointWd, wd, adir);
             }
