@@ -213,7 +213,7 @@ void AutoscanInotify::threadProc()
                             }
                         }
 
-                        int objectID = storage->findObjectIDByPath(path,  !(mask & IN_ISDIR));
+                        int objectID = storage->findObjectIDByPath(path, !(mask & IN_ISDIR));
                         if (objectID != INVALID_OBJECT_ID)
                             content->removeObject(objectID);
                     }
