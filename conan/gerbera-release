@@ -1,0 +1,13 @@
+# Profile for release
+include(default)
+
+[settings]
+build_type=RelWithDebInfo
+
+[options]
+# Build isolated static binary.
+*:shared=Flase
+*:fPIC=False
+
+[env]
+CXXFLAGS=-O2 -Werror -Wall

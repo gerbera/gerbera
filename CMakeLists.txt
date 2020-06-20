@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
 
 set(GERBERA_MAJOR_VERSION 1)
 set(GERBERA_MINOR_VERSION 6)
@@ -14,7 +14,25 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
+set(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR} ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
+set(CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR} ${CMAKE_PREFIX_PATH})
+
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake OPTIONAL)
+
+include(CheckCXXSymbolExists)
+
+if (CONAN_EXPORTED)
+    conan_message(STATUS "Conan: called by CMake conan helper")
+    # Propagate variables set by the helper
+    # Normally conan_basic_setup should be called, but we rely
+    # on cmake_find_package generator.
+    # Do only some checks and setup here.
+    conan_set_std()
+    conan_set_fpic()
+    conan_check_compiler()
+    conan_set_libcxx()
+    conan_set_vs_runtime()
+endif()
 
 set(CMAKE_VERBOSE_MAKEFILE off CACHE BOOL "Show verbose build commands")
 set(WITH_MAGIC          1 CACHE BOOL "Use libmagic to identify file mime types")
@@ -33,7 +51,25 @@ set(WITH_LASTFM         0 CACHE BOOL "Enable LastFM")
 set(WITH_DEBUG          1 CACHE BOOL "Enables debug logging")
 set(WITH_TESTS          0 CACHE BOOL "Enables Unit Tests")
 
-set(libgerberaFILES
+# Warnings are nice
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+
+# Add the automatically determined parts of the RPATH which point to
+# directories outside the build tree to the install RPATH
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+# System specific stuff
+if (${CMAKE_SYSTEM_NAME} MATCHES ".*(SunOS|Solaris).*")
+    add_definitions(-DSOLARIS)
+elseif (${CMAKE_SYSTEM_NAME} MATCHES ".*BSD.*")
+    add_definitions(-DBSD)
+endif()
+
+add_definitions(-DPACKAGE_NAME="${PROJECT_NAME}")
+add_definitions(-DVERSION="${GERBERA_VERSION}")
+add_definitions(-DPACKAGE_DATADIR="${CMAKE_INSTALL_PREFIX}/share/gerbera")
+
+add_library(libgerbera STATIC 
         src/action_request.cc
         src/action_request.h
         src/autoscan.cc
@@ -213,35 +249,12 @@ set(libgerberaFILES
         src/web/session_manager.h
         src/web/tasks.cc
         src/web/web_autoscan.cc
-        src/web/web_update.cc)
-
-add_library(libgerbera STATIC ${libgerberaFILES})
-target_include_directories(libgerbera PRIVATE "${CMAKE_SOURCE_DIR}/src")
+        src/web/web_update.cc
+        )
+target_include_directories(libgerbera PUBLIC "${CMAKE_SOURCE_DIR}/src")
 
 add_executable(gerbera src/main.cc)
-target_include_directories(gerbera PRIVATE "${CMAKE_SOURCE_DIR}/src")
 target_link_libraries(gerbera libgerbera)
-
-target_compile_features(gerbera PUBLIC cxx_std_17)
-target_compile_features(libgerbera PUBLIC cxx_std_17)
-
-# Warnings are nice
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
-
-# Add the automatically determined parts of the RPATH which point to
-# directories outside the build tree to the install RPATH
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-
-# System specific stuff
-if (${CMAKE_SYSTEM_NAME} MATCHES ".*(SunOS|Solaris).*")
-    add_definitions(-DSOLARIS)
-elseif (${CMAKE_SYSTEM_NAME} MATCHES ".*BSD.*")
-    add_definitions(-DBSD)
-endif()
-
-add_definitions(-DPACKAGE_NAME="${PROJECT_NAME}")
-add_definitions(-DVERSION="${GERBERA_VERSION}")
-add_definitions(-DPACKAGE_DATADIR="${CMAKE_INSTALL_PREFIX}/share/gerbera")
 
 # Generate Compile Information
 include("GenCompileInfo")
@@ -265,98 +278,64 @@ else()
 endif()
 
 find_package(Threads REQUIRED)
-target_link_libraries(gerbera ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(libgerbera Threads::Threads)
 
 check_library_exists(atomic __atomic_fetch_add_4 "" HAVE_ATOMIC)
 if(HAVE_ATOMIC)
-    target_link_libraries(gerbera atomic)
+    target_link_libraries(libgerbera atomic)
 endif(HAVE_ATOMIC)
 
 find_package(Filesystem REQUIRED)
-target_link_libraries(gerbera std::filesystem)
+target_link_libraries(libgerbera std::filesystem)
 
 find_package(Iconv REQUIRED)
-include_directories(${ICONV_INCLUDE_DIR})
-target_link_libraries(gerbera ${ICONV_LIBRARIES})
-if (ICONV_SECOND_ARGUMENT_IS_CONST)
-    add_definitions(-DICONV_CONST)
-endif()
+target_link_libraries(libgerbera Iconv::Iconv)
 
-find_package(UUID REQUIRED)
-include_directories(${UUID_INCLUDE_DIRS})
-target_link_libraries(gerbera ${UUID_LIBRARIES})
+find_package(libuuid REQUIRED)
+include_directories(${libuuid_INCLUDE_DIRS})
+target_link_libraries(libgerbera ${libuuid_LIBRARIES})
 if (FOUND_BSD_UUID)
     add_definitions(-DBSD_NATIVE_UUID)
 endif()
 
 find_package(LFS REQUIRED)
-if (LFS_FOUND)
-    add_definitions(${LFS_DEFINITIONS})
-    add_compile_options(${LFS_COMPILE_OPTIONS})
-    target_link_libraries(gerbera ${LFS_LIBRARIES})
-endif()
+add_definitions(${LFS_DEFINITIONS})
+add_compile_options(${LFS_COMPILE_OPTIONS})
+target_link_libraries(libgerbera ${LFS_LIBRARIES})
 
-find_package (LibUpnp REQUIRED)
-include_directories(${UPNP_INCLUDE_DIRS})
-target_link_libraries (gerbera ${UPNP_LIBRARIES})
+find_package (pupnp "1.12.1" REQUIRED)
 
-if (UPNP_VERSION_STRING VERSION_LESS "1.12.1")
-    message(FATAL_ERROR "gerbera requires libupnp 1.12.1 or above.")
-endif()
+set(CMAKE_REQUIRED_LIBRARIES pupnp::pupnp)
 
+check_cxx_symbol_exists(UPNP_ENABLE_IPV6 "upnpconfig.h" UPNP_HAS_IPV6)
 if (NOT UPNP_HAS_IPV6)
     message(FATAL_ERROR "Gerbera requires libupnp with IPv6 support.")
 endif()
 
+check_cxx_symbol_exists(UPNP_MINISERVER_REUSEADDR "upnpconfig.h" UPNP_HAS_REUSEADDR)
 if (NOT UPNP_HAS_REUSEADDR)
-    message(WARNING "\n !! It is strongly recommended to build libupnp with --enable-reuseaddr !!\nWithout this option Gerbera will be unable to restart with the same port number.")
+    message(WARNING [=[
+!! It is strongly recommended to build libupnp with --enable-reuseaddr !!
+Without this option Gerbera will be unable to restart with the same port number.]=])
 endif()
+
+target_link_libraries (libgerbera pupnp::pupnp)
 
 find_package(fmt REQUIRED)
 target_link_libraries(libgerbera fmt::fmt)
 
-find_package(spdlog)
-if(spdlog_FOUND)
-    target_link_libraries(libgerbera spdlog::spdlog)
+find_package(spdlog REQUIRED)
+target_link_libraries(libgerbera spdlog::spdlog)
 
-    if(NOT SPDLOG_FMT_EXTERNAL)
-        message(WARNING [=[
-spdlog is built without SPDLOG_FMT_EXTERNAL.
-Since Gerbera uses fmt library internally the spdlog's bundled version wlll be in conflict
-It is strongly recommended to rebuild spdlog without bundled fmt]=])
-        if(spdlog_VERSION VERSION_GREATER_EQUAL "1.4.0" AND fmt_VERSION VERSION_LESS "6.0.0")
-            message(FATAL_ERROR [=[
-The version of spdlog >= 1.4 bundles fmt version 6, but an older version of fmt was found.
-The current combination won't link.
-Please upgrade fmt or build spdlog with SPDLOG_FMT_EXTERNAL=ON]=])
-        endif()
-    endif()
-else()
-    # See if it's just installed as a library, as not all installs have .cmake files
-    message(STATUS "Looking for spdlog library")
-    find_library(SPDLOG_LIBRARY spdlog)
-    if(SPDLOG_LIBRARY)
-        message(STATUS "Found spdlog: ${SPDLOG_LIBRARY}")
-        target_link_libraries(libgerbera ${SPDLOG_LIBRARY})
-    else()
-        message(FATAL_ERROR "spdlog library is required")
-    endif()
-endif()
+find_package(pugixml REQUIRED)
+target_link_libraries(libgerbera pugixml::pugixml)
 
-find_package (Pugixml REQUIRED)
-if (PUGIXML_FOUND)
-    include_directories(${PUGIXML_INCLUDE_DIRS})
-    target_link_libraries (gerbera ${PUGIXML_LIBRARIES})
+find_package(SQLite3 REQUIRED)
+# Unfortunately Conan and CMake Find module produce slightly different targets.
+if(TARGET SQLite::SQLite3)
+    target_link_libraries(libgerbera SQLite::SQLite3)
 else()
-    message(FATAL_ERROR "Pugixml not found!")
-endif()
-
-find_package (SQLite3 REQUIRED)
-if(SQLITE3_FOUND)
-    include_directories(${SQLITE3_INCLUDE_DIRS})
-    target_link_libraries (gerbera ${SQLITE3_LIBRARIES})
-else()
-    message(FATAL_ERROR "SQLite3 not found!")
+    target_link_libraries(libgerbera SQLite3::SQLite3)
 endif()
 
 # We should probably move these two out to their own FindLocale
@@ -374,14 +353,14 @@ endif()
 find_library(SOCKET_LIBRARY socket)
 if(SOCKET_LIBRARY)
     set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${SOCKET_LIBRARY})
-    target_link_libraries(gerbera ${SOCKET_LIBRARY})
+    target_link_libraries(libgerbera ${SOCKET_LIBRARY})
 endif()
 
 # Link to libnsl (Network services library) if it exists. This is something you need on Solaris/OmniOS/Joyent
 find_library(NSL_LIBRARY nsl)
 if(NSL_LIBRARY)
     set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${NSL_LIBRARY})
-    target_link_libraries(gerbera ${NSL_LIBRARY})
+    target_link_libraries(libgerbera ${NSL_LIBRARY})
 endif()
 
 if(WITH_INOTIFY)
@@ -391,31 +370,22 @@ if(WITH_INOTIFY)
         add_definitions(-DHAVE_INOTIFY)
         # FreeBSD INotify shim!
         if(INOTIFY_LIBRARY)
-            target_link_libraries(gerbera ${INOTIFY_LIBRARY})
+            target_link_libraries(libgerbera ${INOTIFY_LIBRARY})
         endif()
     endif ()
 endif()
 
 if(WITH_JS)
-    find_package(Duktape)
-    IF (DUKTAPE_FOUND)
-        include_directories(${DUKTAPE_INCLUDE_DIRS})
-        target_link_libraries (gerbera ${DUKTAPE_LIBRARIES})
-        add_definitions(-DHAVE_JS)
-    else()
-        message(FATAL_ERROR "Duktape not found!")
-    endif()
+    find_package(duktape REQUIRED)
+    target_link_libraries(libgerbera duktape::duktape)
+    add_definitions(-DHAVE_JS)
 endif()
 
 if(WITH_MYSQL)
     find_package(MySQL REQUIRED)
-    if (MYSQL_FOUND)
-        include_directories(${MYSQL_INCLUDE_DIRS})
-        target_link_libraries (gerbera ${MYSQL_CLIENT_LIBS})
-        add_definitions(-DHAVE_MYSQL)
-    else()
-        message(FATAL_ERROR "MySQL not found")
-    endif ()
+    include_directories(${MYSQL_INCLUDE_DIRS})
+    target_link_libraries (libgerbera ${MYSQL_CLIENT_LIBS})
+    add_definitions(-DHAVE_MYSQL)
 endif()
 
 if(WITH_CURL)
@@ -426,7 +396,7 @@ if(WITH_CURL)
     endif()
     if (CURL_FOUND)
         include_directories(${CURL_INCLUDE_DIRS})
-        target_link_libraries (gerbera ${CURL_LIBRARIES})
+        target_link_libraries (libgerbera ${CURL_LIBRARIES})
 
         add_definitions(-DHAVE_CURL)
         add_definitions(-DONLINE_SERVICES)
@@ -438,47 +408,37 @@ if(WITH_CURL)
 endif()
 
 if(WITH_TAGLIB)
-    find_package (Taglib)
-    if (TAGLIB_FOUND)
-        include_directories(${TAGLIB_INCLUDE_DIRS})
-        target_link_libraries (gerbera ${TAGLIB_LIBRARIES})
-        add_definitions(-DHAVE_TAGLIB)
-    else()
-        message(FATAL_ERROR "Taglib not found!")
-    endif()
+    find_package (Taglib REQUIRED)
+    include_directories(${TAGLIB_INCLUDE_DIRS})
+    target_link_libraries (libgerbera ${TAGLIB_LIBRARIES})
+    add_definitions(-DHAVE_TAGLIB)
 endif()
 
 if(WITH_MAGIC)
-    find_package (LibMagic)
-    if (MAGIC_FOUND)
-        include_directories(${MAGIC_INCLUDE_DIRS})
-        target_link_libraries (gerbera ${MAGIC_LIBRARIES})
-        add_definitions(-DHAVE_MAGIC)
-    else()
-        message(FATAL_ERROR "Magic not found")
-    endif ()
+    find_package (LibMagic REQUIRED)
+    include_directories(${MAGIC_INCLUDE_DIRS})
+    target_link_libraries (libgerbera ${MAGIC_LIBRARIES})
+    add_definitions(-DHAVE_MAGIC)
 endif()
 
 if(WITH_AVCODEC)
-    find_package (FFMPEG)
-    if (FFMPEG_FOUND)
-        include_directories(${FFMPEG_INCLUDE_DIR})
-        target_link_libraries (gerbera ${FFMPEG_LIBRARIES})
-        add_definitions(-DHAVE_FFMPEG)
-        if (HAVE_AVSTREAM_CODECPAR)
-            add_definitions(-DHAVE_AVSTREAM_CODECPAR)
-        endif()
+    find_package (FFMPEG REQUIRED)
+    target_link_libraries(libgerbera PkgConfig::FFMPEG)
+    add_definitions(-DHAVE_FFMPEG)
 
-    else()
-        message(FATAL_ERROR "FFMpeg/LibAV not found")
-    endif ()
+    include(CheckStructHasMember)
+    set(CMAKE_REQUIRED_LIBRARIES PkgConfig::FFMPEG)
+    check_struct_has_member("struct AVStream" codecpar libavformat/avformat.h HAVE_AVSTREAM_CODECPAR LANGUAGE C)
+    if (HAVE_AVSTREAM_CODECPAR)
+        add_definitions(-DHAVE_AVSTREAM_CODECPAR)
+    endif()
 endif()
 
 if(WITH_FFMPEGTHUMBNAILER)
     find_package (FFMpegThumbnailer)
     if (FFMPEGTHUMBNAILER_FOUND)
         include_directories(${FFMPEGTHUMBNAILER_INCLUDE_DIR})
-        target_link_libraries (gerbera ${FFMPEGTHUMBNAILER_LIBRARIES})
+        target_link_libraries (libgerbera ${FFMPEGTHUMBNAILER_LIBRARIES})
         add_definitions(-DHAVE_FFMPEGTHUMBNAILER)
     else()
         message(FATAL_ERROR "FFMpegThumbnailer not found")
@@ -486,21 +446,17 @@ if(WITH_FFMPEGTHUMBNAILER)
 endif()
 
 if(WITH_EXIF)
-    find_package (EXIF)
-    if (EXIF_FOUND)
-        include_directories(${EXIF_INCLUDE_DIRS})
-        target_link_libraries (gerbera ${EXIF_LIBRARIES})
-        add_definitions(-DHAVE_LIBEXIF)
-    else()
-        message(FATAL_ERROR "LibExif not found")
-    endif()
+    find_package (EXIF REQUIRED)
+    include_directories(${EXIF_INCLUDE_DIRS})
+    target_link_libraries (libgerbera ${EXIF_LIBRARIES})
+    add_definitions(-DHAVE_LIBEXIF)
 endif()
 
 if(WITH_EXIV2)
     find_package (EXIV2)
     if (EXIV2_FOUND)
         include_directories(${EXIV2_INCLUDE_DIRS})
-        target_link_libraries (gerbera ${EXIV2_LIBRARIES})
+        target_link_libraries (libgerbera ${EXIV2_LIBRARIES})
         add_definitions(-DHAVE_EXIV2)
         # Exiv still uses std::auto_ptr
         if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -515,9 +471,9 @@ if(WITH_MATROSKA)
     find_package (Matroska)
     if (MATROSKA_FOUND AND EBML_FOUND)
         include_directories(${MATROSKA_INCLUDE_DIRS})
-        target_link_libraries (gerbera ${MATROSKA_LIBRARIES})
+        target_link_libraries (libgerbera ${MATROSKA_LIBRARIES})
         include_directories(${EBML_INCLUDE_DIRS})
-        target_link_libraries (gerbera ${EBML_LIBRARIES})
+        target_link_libraries (libgerbera ${EBML_LIBRARIES})
         add_definitions(-DHAVE_MATROSKA)
     else()
         message(FATAL_ERROR "Matroska not found")
@@ -528,7 +484,7 @@ if(WITH_LASTFM)
     find_package (LastFMLib)
     if (LASTFMLIB_FOUND)
         include_directories(${LASTFMLIB_INCLUDE_DIRS})
-        target_link_libraries (gerbera ${LASTFMLIB_LIBRARIES})
+        target_link_libraries (libgerbera ${LASTFMLIB_LIBRARIES})
         add_definitions(-DHAVE_LASTFMLIB)
     else()
         message(FATAL_ERROR "LastFMLib not found")
@@ -556,19 +512,12 @@ endif()
 
 # Needs to be towards the end (after CURL, TagLib, etc...)
 find_package (ZLIB REQUIRED)
-include_directories(${ZLIB_INCLUDE_DIRS})
-target_link_libraries (gerbera ${ZLIB_LIBRARIES})
+target_link_libraries (libgerbera ZLIB::ZLIB)
 
 if(WITH_TESTS)
-    find_package(GTest)
-    find_package(GMock)
-    if(GTEST_FOUND AND GMOCK_FOUND)
-        message(STATUS "Configuring unit tests")
-        enable_testing()
-        add_subdirectory(test)
-    else()
-        message(FATAL_ERROR "Google Test not found")
-    endif()
+    message(STATUS "Configuring unit tests")
+    enable_testing()
+    add_subdirectory(test)
 endif()
 
 INSTALL(TARGETS gerbera DESTINATION bin)

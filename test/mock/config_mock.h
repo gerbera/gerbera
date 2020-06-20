@@ -8,16 +8,16 @@
 
 using namespace ::testing;
 
-class ConfigMock : public Config {
+class ConfigMock final : public Config {
 public:
     fs::path getConfigFilename() const override { return ""; }
     MOCK_METHOD(std::string, getOption, (config_option_t option), (override));
     int getIntOption(config_option_t option) override { return 0; }
     bool getBoolOption(config_option_t option) override { return false; }
-    std::map<std::string, std::string> getDictionaryOption(config_option_t option) { return std::map<std::string, std::string>(); }
-    std::vector<std::string> getArrayOption(config_option_t option) { return std::vector<std::string>(); }
-    std::shared_ptr<AutoscanList> getAutoscanListOption(config_option_t option) { return nullptr; }
-    std::shared_ptr<ClientConfigList> getClientConfigListOption(config_option_t option) { return nullptr; }
+    std::map<std::string, std::string> getDictionaryOption(config_option_t option) override { return std::map<std::string, std::string>(); }
+    std::vector<std::string> getArrayOption(config_option_t option) override { return std::vector<std::string>(); }
+    std::shared_ptr<AutoscanList> getAutoscanListOption(config_option_t option) override { return nullptr; }
+    std::shared_ptr<ClientConfigList> getClientConfigListOption(config_option_t option) override { return nullptr; }
     MOCK_METHOD(std::shared_ptr<TranscodingProfileList>, getTranscodingProfileListOption, (config_option_t option), (override));
 };
 

@@ -100,9 +100,7 @@ void MysqlStorage::checkMysqlThreadInit() const
 {
     if (!mysql_connection)
         throw_std_runtime_error("mysql connection is not open or already closed");
-    //log_debug("checkMysqlThreadInit; thread_id={}", pthread_self());
     if (pthread_getspecific(mysql_init_key) == nullptr) {
-        log_debug("running mysql_thread_init(); thread_id={}", pthread_self());
         if (mysql_thread_init())
             throw_std_runtime_error("error while calling mysql_thread_init()");
         if (pthread_setspecific(mysql_init_key, reinterpret_cast<void*>(1)))
@@ -112,7 +110,6 @@ void MysqlStorage::checkMysqlThreadInit() const
 
 void MysqlStorage::threadCleanup()
 {
-    log_debug("thread cleanup; thread_id={}", pthread_self());
     if (pthread_getspecific(mysql_init_key) != nullptr) {
         mysql_thread_end();
     }

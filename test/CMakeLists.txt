@@ -1,9 +1,11 @@
-include_directories (../src)
+find_package(GTest REQUIRED)
 
-# Prevent GoogleTest from overriding our compiler/linker options
-# when building with Visual Studio
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-get_target_property(GERBERA_INTERFACE_LIBRARIES gerbera INTERFACE_LINK_LIBRARIES)
+# CMake can't fix gmock support. https://gitlab.kitware.com/cmake/cmake/-/issues/17365
+# So for non-conan build we need to find it separately.
+if (NOT "${GTest_LIBRARY_LIST}" MATCHES "gmock")
+    find_package(GMock REQUIRED)
+    set_property(TARGET GTest::GTest APPEND PROPERTY INTERFACE_LINK_LIBRARIES ${GMOCK_LIBRARIES})
+endif()
 
 ## Add tests below
 add_subdirectory(config)

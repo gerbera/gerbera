@@ -3,10 +3,10 @@
 #include <array>
 #include <fstream>
 #include <ftw.h>
-#include <uuid/uuid.h>
 
 #include "config/config_generator.h"
 #include "config/config_manager.h"
+#include "util/tools.h"
 
 class ConfigManagerTest : public ::testing::Test {
 
@@ -57,19 +57,7 @@ public:
 
     fs::path createTempPath()
     {
-        uuid_t uuid;
-#ifdef BSD_NATIVE_UUID
-        char* uuid_str;
-        uint32_t status;
-        uuid_create(&uuid, &status);
-        uuid_to_string(&uuid, &uuid_str, &status);
-#else
-        char uuid_str[37];
-        uuid_generate(uuid);
-        uuid_unparse(uuid, uuid_str);
-#endif
-
-        fs::path ss = fs::path(CMAKE_BINARY_DIR) / "test" / "config" / uuid_str;
+        fs::path ss = fs::path(CMAKE_BINARY_DIR) / "test" / "config" / generate_random_id();
         create_directory(ss);
         return ss;
     }
