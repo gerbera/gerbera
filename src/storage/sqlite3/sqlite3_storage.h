@@ -30,8 +30,6 @@
 /// \file sqlite3_storage.h
 ///\brief Definitions of the Sqlite3Storage, Sqlite3Result, Sqlite3Row and SLTask classes.
 
-#ifdef HAVE_SQLITE3
-
 #ifndef __SQLITE3_STORAGE_H__
 #define __SQLITE3_STORAGE_H__
 
@@ -245,5 +243,3 @@ private:
 };
 
 #endif // __SQLITE3_STORAGE_H__
-
-#endif // HAVE_SQLITE3

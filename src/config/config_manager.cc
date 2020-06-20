@@ -284,8 +284,6 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     }
 #endif // HAVE_MYSQL
 
-#ifdef HAVE_SQLITE3
-
     if (sqlite3_en == "yes") {
         temp = getOption("/server/storage/sqlite3/database-file");
         temp = resolvePath(temp, true, false);
@@ -344,14 +342,6 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
         NEW_INT_OPTION(temp_int);
         SET_INT_OPTION(CFG_SERVER_STORAGE_SQLITE_BACKUP_INTERVAL);
     }
-#else
-    if (sqlite3_en == "yes") {
-        throw std::runtime_error("You enabled sqlite3 storage in configuration, "
-                                 "however this version of Gerbera was compiled "
-                                 "without sqlite3 support!");
-    }
-
-#endif // SQLITE3
 
     std::string dbDriver;
     if (sqlite3_en == "yes")

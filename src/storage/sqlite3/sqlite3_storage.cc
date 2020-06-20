@@ -29,7 +29,6 @@
 
 /// \file sqlite3_storage.cc
 
-#ifdef HAVE_SQLITE3
 #include "sqlite3_storage.h" // API
 
 #include <utility>
@@ -635,5 +634,3 @@ void Sqlite3Storage::timerNotify(std::shared_ptr<Timer::Parameter> param)
     auto btask = std::make_shared<SLBackupTask>(config, false);
     this->addTask(btask, true);
 }
-
-#endif // HAVE_SQLITE3
