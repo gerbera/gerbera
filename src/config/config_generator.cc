@@ -120,7 +120,6 @@ void ConfigGenerator::generateStorage(pugi::xml_node* server)
 {
     auto storage = server->append_child("storage");
 
-#ifdef HAVE_SQLITE3
     auto sqlite3 = storage.append_child("sqlite3");
     sqlite3.append_attribute("enabled") = DEFAULT_SQLITE_ENABLED;
     sqlite3.append_child("database-file").append_child(pugi::node_pcdata).set_value(DEFAULT_SQLITE3_DB_FILENAME);
@@ -130,16 +129,10 @@ void ConfigGenerator::generateStorage(pugi::xml_node* server)
     backup.append_attribute("enabled") = YES;
     backup.append_attribute("interval") = DEFAULT_SQLITE_BACKUP_INTERVAL;
 #endif
-#endif
 
 #ifdef HAVE_MYSQL
     auto mysql = storage.append_child("mysql");
-#ifndef HAVE_SQLITE3
-    mysql.append_attribute("enabled") = DEFAULT_MYSQL_ENABLED;
-    mysql_flag = true;
-#else
     mysql.append_attribute("enabled") = NO;
-#endif
     mysql.append_child("host").append_child(pugi::node_pcdata).set_value(DEFAULT_MYSQL_HOST);
     mysql.append_child("username").append_child(pugi::node_pcdata).set_value(DEFAULT_MYSQL_USER);
     mysql.append_child("database").append_child(pugi::node_pcdata).set_value(DEFAULT_MYSQL_DB);

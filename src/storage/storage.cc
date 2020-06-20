@@ -38,10 +38,6 @@
 #include "storage/sqlite3/sqlite3_storage.h"
 #include "util/tools.h"
 
-#if !defined(HAVE_MYSQL) && !defined(HAVE_SQLITE3)
-#error "need at least one storage (mysql or sqlite3)"
-#endif
-
 Storage::Storage(std::shared_ptr<Config> config)
     : config(std::move(config))
 {
@@ -53,12 +49,10 @@ std::shared_ptr<Storage> Storage::createInstance(const std::shared_ptr<Config>& 
 
     std::string type = config->getOption(CFG_SERVER_STORAGE_DRIVER);
     do {
-#ifdef HAVE_SQLITE3
         if (type == "sqlite3") {
             storage = std::static_pointer_cast<Storage>(std::make_shared<Sqlite3Storage>(config, timer));
             break;
         }
-#endif
 
 #ifdef HAVE_MYSQL
         if (type == "mysql") {

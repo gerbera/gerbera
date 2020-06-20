@@ -29,8 +29,6 @@
 
 /// \file sqlite3_create_sql.h
 
-#ifdef HAVE_SQLITE3
-
 #ifndef __SQLITE3_CREATE_SQL_H__
 #define __SQLITE3_CREATE_SQL_H__
 #define SL3_CREATE_SQL_INFLATED_SIZE 3283
@@ -42,5 +40,3 @@ const unsigned char sqlite3_create_sql[] = /* 804 */
 /* end binary data. size = 804 bytes */
 
 #endif // __SQLITE3_CREATE_SQL_H__
-
-#endif // HAVE_SQLITE3
