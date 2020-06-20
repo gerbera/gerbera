@@ -85,6 +85,14 @@ Alternatively, the options can be set using a GUI (make sure to press "c" to con
   sudo make install
 
 
+.. index:: Conan
+
+Using Conan
+~~~~~~~~~~~
+
+The simplest way to fetch dependencies and build Gerbera is to use Conan.
+Please read more :ref:`here <gerbera-conan>`.
+
 .. index:: Ubuntu
 
 Build On Ubuntu 16.04

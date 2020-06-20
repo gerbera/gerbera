@@ -245,10 +245,8 @@ void UpdateManager::threadProc()
 
 void* UpdateManager::staticThreadProc(void* arg)
 {
-    log_debug("starting update thread... thread: {}", pthread_self());
     auto inst = static_cast<UpdateManager*>(arg);
     inst->threadProc();
 
-    log_debug("update thread shut down. thread: {}", pthread_self());
     return nullptr;
 }

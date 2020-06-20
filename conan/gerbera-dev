@@ -1,0 +1,16 @@
+# Profile for gerbera development
+include(default)
+
+[settings]
+build_type=Debug
+
+[options]
+# Use shared libraries for faster link time
+*:shared=True
+gerbera:debug_logging=True
+gerbera:tests=True
+
+[env]
+CXXFLAGS=-Og -Werror -Wall
+# Requires CMake >= 3.17
+CMAKE_EXPORT_COMPILE_COMMANDS=ON

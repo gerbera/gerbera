@@ -2,9 +2,9 @@
 #
 # Supports e2fsprogs libuuid or BSD native UUID
 #
-# UUID_FOUND               True if a uuid got found
-# UUID_INCLUDE_DIRS        Location of uuid headers
-# UUID_LIBRARIES           List of libraries to use uuid
+# libuuid_FOUND               True if a uuid got found
+# libuuid_INCLUDE_DIRS        Location of uuid headers
+# libuuid_LIBRARIES           List of libraries to use uuid
 # FOUND_BSD_UUID           BSD UUID implementation found
 # FOUND_LIBUUID            e2fsprogs UUID found
 #
@@ -26,23 +26,23 @@ check_cxx_source_runs("
 
 if (FOUND_BSD_UUID)
 	message(STATUS "Looking for BSD native UUID - found")
-	set(UUID_FOUND 1)
+	set(libuuid_FOUND 1)
 endif()
 
-if(NOT UUID_FOUND)
+if(NOT libuuid_FOUND)
 	message(STATUS "Looking for libuuid")
 	pkg_search_module(_UUID libuuid QUIET)
 	if(NOT _UUID_FOUND)
-		FIND_PATH(UUID_INCLUDE_DIRS uuid/uuid.h)
-		FIND_LIBRARY(UUID_LIBRARIES uuid)
+		FIND_PATH(libuuid_INCLUDE_DIRS uuid/uuid.h)
+		FIND_LIBRARY(libuuid_LIBRARIES uuid)
 
-		if(UUID_INCLUDE_DIRS)
+		if(libuuid_INCLUDE_DIRS)
 			message(STATUS "Looking for libuuid - found")
-			set(UUID_FOUND 1)
+			set(libuuid_FOUND 1)
 			set(FOUND_LIBUUID 1)
 		endif()
 	endif()
 endif()
 
-find_package_handle_standard_args(UUID DEFAULT_MSG UUID_FOUND)
-MARK_AS_ADVANCED(UUID_LIBRARIES UUID_INCLUDE_DIRS)
+find_package_handle_standard_args(libuuid DEFAULT_MSG libuuid_FOUND)
+MARK_AS_ADVANCED(libuuid_LIBRARIES libuuid_INCLUDE_DIRS)

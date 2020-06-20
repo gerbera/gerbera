@@ -28,12 +28,6 @@ Gerbera - https://gerbera.io/
 #include <string>
 #include <utility>
 
-#ifdef BSD_NATIVE_UUID
-#include <uuid.h>
-#else
-#include <uuid/uuid.h>
-#endif
-
 #include "metadata/metadata_handler.h"
 #include "util/tools.h"
 
@@ -340,24 +334,9 @@ void ConfigGenerator::generateTranscoding(pugi::xml_node* config)
 
 void ConfigGenerator::generateUdn(pugi::xml_node* server)
 {
-    uuid_t uuid;
-#ifdef BSD_NATIVE_UUID
-    char* uuid_str;
-    uint32_t status;
-    uuid_create(&uuid, &status);
-    uuid_to_string(&uuid, &uuid_str, &status);
-#else
-    char uuid_str[37];
-    uuid_generate(uuid);
-    uuid_unparse(uuid, uuid_str);
-#endif
-
+    auto uuid_str = generate_random_id();
     log_debug("UUID generated: {}", uuid_str);
-    server->append_child("udn").append_child(pugi::node_pcdata).set_value(("uuid:" + std::string(uuid_str)).c_str());
-
-#ifdef BSD_NATIVE_UUID
-    free(uuid_str);
-#endif
+    server->append_child("udn").append_child(pugi::node_pcdata).set_value(fmt::format("uuid:{}", uuid_str).c_str());
 }
 
 void ConfigGenerator::map_from_to(const std::string& from, const std::string& to, pugi::xml_node* parent)

@@ -31,11 +31,6 @@
 
 #include "config_manager.h" // API
 
-#ifdef BSD_NATIVE_UUID
-#include <uuid.h>
-#else
-#include <uuid/uuid.h>
-#endif
 #include <cstdio>
 #include <filesystem>
 #include <iostream>

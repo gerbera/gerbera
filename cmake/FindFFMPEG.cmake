@@ -39,8 +39,6 @@
 # This is usefull to do it this way so that we can always add more libraries
 # if needed to FFMPEG_LIBRARIES if ffmpeg ever changes...
 
-include(CheckStructHasMember)
-
 # if ffmpeg headers are all in one directory
 FIND_PATH(FFMPEG_INCLUDE_DIR avformat.h
         PATHS
@@ -82,10 +80,8 @@ ENDIF (NOT FFMPEG_INCLUDE_DIR)
 # ffmpeg uses relative includes such as <ffmpeg/avformat.h> or <libavcodec/avformat.h>
 get_filename_component(FFMPEG_INCLUDE_DIR ${FFMPEG_INCLUDE_DIR} ABSOLUTE)
 
-CHECK_STRUCT_HAS_MEMBER("struct AVStream" codecpar libavformat/avformat.h HAVE_AVSTREAM_CODECPAR LANGUAGE C)
-
 FIND_PACKAGE(PkgConfig QUIET)
-PKG_CHECK_MODULES(FFMPEG libavformat libavutil)
+PKG_CHECK_MODULES(FFMPEG IMPORTED_TARGET GLOBAL libavformat libavutil)
 IF (NOT FFMPEG_FOUND)
 	FIND_LIBRARY(FFMPEG_avformat_LIBRARY avformat
 		/usr/local/lib
@@ -221,6 +217,14 @@ IF (FFMPEG_INCLUDE_DIR)
                 ENDIF (FFMPEG_bz2_LIBRARY)
 
                 SET(FFMPEG_LIBRARIES ${FFMPEG_LIBRARIES} CACHE INTERNAL "All presently found FFMPEG libraries.")
+
+                # It is probablu not a good idea to define a target in PkgConfig namespace,
+                # But alias targets are not correctly exported to try_compile
+                IF (NOT TARGET PkgConfig::FFMPEG)
+                    ADD_LIBRARY(PkgConfig::FFMPEG INTERFACE IMPORTED)
+                    SET_PROPERTY(TARGET PkgConfig::FFMPEG PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${FFMPEG_INCLUDE_DIRS}")
+                    SET_PROPERTY(TARGET PkgConfig::FFMPEG PROPERTY INTERFACE_LINK_LIBRARIES "${FFMPEG_LIBRARIES}")                  
+                ENDIF()
             ENDIF (FFMPEG_avutil_LIBRARY)
         ENDIF (FFMPEG_avcodec_LIBRARY)
     ENDIF (FFMPEG_avformat_LIBRARY)
