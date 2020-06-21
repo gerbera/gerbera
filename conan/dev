@@ -1,5 +1,6 @@
 # Profile for gerbera development
 include(default)
+include(./common)
 
 [settings]
 build_type=Debug

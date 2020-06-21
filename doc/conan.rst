@@ -12,7 +12,7 @@ To set up everything from scratch
 Setting up Conan
 ----------------
 
-From `Conan documentation <https://docs.conan.io/en/latest/installation.html>`_:
+From `Conan installation instructions <https://docs.conan.io/en/latest/installation.html>`_:
 
 .. code-block:: bash
 
@@ -21,7 +21,6 @@ From `Conan documentation <https://docs.conan.io/en/latest/installation.html>`_:
 
   # Auto-detect system settings
   $ conan profile new default --detect
-  $ conan profile update settings.compiler.cppstd=17 default
   # If using gcc:
   $ conan profile update settings.compiler.libcxx=libstdc++11 default
 
@@ -31,9 +30,9 @@ Building Gerbera
 
 .. code-block:: bash
 
-  # Get dependencies and generate build files:
+  # Get dependencies (building them if needed) and generate build files:
   # The commands generate build system in build/ subfolder
-  $ conan install -pr ./conan/gerbera-dev -if build . && conan build --configure -bf build .
+  $ conan install -pr ./conan/dev --build missing -if build . && conan build --configure -bf build .
 
   # Now project is ready to build.
 
@@ -80,10 +79,6 @@ Add to ``~/.conan/profiles/default``:
   CC=gcc-10
   CXX=g++-10
 
-.. note::
-
-  Most likely you need to add ``--build missing`` option to ``conan install``.
-
 If your system has an outdated CMake
 ::::::::::::::::::::::::::::::::::::
 
@@ -99,8 +94,15 @@ Then just clean the build directory and rerun ``conan install && conan build``.
 There may be no prebuilt pacakge with particular compiler / settings
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-Conan has prebuilt binaries for a fairly new Linux distro (and thus libc)
-which may not work on an old one.
+Conan has prebuilt binaries, but they may not be suitable.
+Some may be built with older C++ standard
+(`conan-center-index#1984 <https://github.com/conan-io/conan-center-index/issues/1984>`_),
+while others may require newer libc
+(`conan-docker-tools#205 <https://github.com/conan-io/conan-docker-tools/issues/205>`_).
+
+Therefore the most reasonable default is to build missing binary packages
+(which is handled nicely by Conan).
+
 
 Also you may want to build dependencies with some specific flags, for example
 ``-flto`` to get better codegen.
@@ -109,11 +111,11 @@ You need to run rebuild missing or all packages:
 
 .. code-block:: bash
 
-  # Build only missing pacakges
+  # Build only missing packages
   $ conan install --build=missing ...
 
   # Rebuild all packages
-  $ conan install --build ...
+  $ conan install --build=force ...
 
 See `Conan documentation <https://docs.conan.io/en/latest/reference/commands/consumer/install.html#build-options>`_.  
 
@@ -128,6 +130,13 @@ a text file used in ``install`` command.
 It is also possible to define custom compile / link flags in the profile.
 
 There is a number of profiles in the ``conan`` subfolder you can use for reference.
+
+Cleanup
+:::::::
+
+Conan stores all data in ``$HOME/.conan`` just remove this folder to free disk space.
+
+To remove only packages use ``conan remove -f '*'``
 
 Searching for a package (or checking an update)
 :::::::::::::::::::::::::::::::::::::::::::::::
@@ -171,3 +180,57 @@ Remaining system packages are managed by Conan.
 
   It is not a good idea to build with GCC on FreeBSD since resulting binaries crash
   because system uses CLang and its libc++ which is incompatible with gccs libstdc++.
+
+Cross-building
+::::::::::::::
+
+This is an example for Raspberry Pi 3 on Ubuntu host.
+
+.. code-block:: bash
+
+  $ apt install g++-10-aarch64-linux-gnu
+  $ conan profile new raspberry-pi3
+
+Populate file with content:
+
+.. code-block:: ini
+
+  toolchain=/usr/aarch64-linux-gnu
+  target_host=aarch64-linux-gnu
+  cc_compiler=gcc-10
+  cxx_compiler=g++-10
+
+  [env]
+  CONAN_CMAKE_FIND_ROOT_PATH=$toolchain
+  CHOST=$target_host
+  AR=$target_host-ar
+  AS=$target_host-as
+  RANLIB=$target_host-ranlib
+  CC=$target_host-$cc_compiler
+  CXX=$target_host-$cxx_compiler
+  STRIP=$target_host-strip
+
+  [settings]
+  os=Linux
+  arch=armv8
+  compiler=gcc
+
+  compiler.version=10
+  compiler.libcxx=libstdc++11
+
+.. code-block:: bash
+
+  $ conan install -pr:b default -pr:h ./conan/release -pr:h ./conan/minimal -pr:h raspberry-pi3 --build missing -if build . && conan build --configure -bf build .
+  $ cd build && make
+  ...
+  [100%] Linking CXX executable gerbera
+  [100%] Built target gerbera
+  build $ file gerbera 
+  gerbera: ELF 64-bit LSB shared object, ARM aarch64, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux-aarch64.so.1, BuildID[sha1]=7bfdb98dd51a1a5dda5101a0e9f090806fb35a41, for GNU/Linux 3.7.0, with debug_info, not stripped
+  $  aarch64-linux-gnu-strip -s -o gerbera-s gerbera 
+  $ du -hs gerbera-s 
+  3.9M    gerbera-s
+
+This is a minimal example to begin with.
+If you have packages from the target system you may omit the minimal profile
+or tune options on the command line.

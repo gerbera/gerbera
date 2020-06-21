@@ -36,7 +36,7 @@ class GerberaConan(ConanFile):
         "ffmpegthumbnailer": True,
     }
 
-    scm = {"type": "git"}
+    scm = {"type": "git", "url": "auto", "revision": "auto"}
 
     requires = [
         "fmt/6.2.1",
@@ -55,6 +55,14 @@ class GerberaConan(ConanFile):
             # Moreover, if "shared" is True then main is an .so...
             self.options["gtest"].no_main = True
 
+    @property
+    def _needs_system_uuid(self):
+        if self.options.ffmpeg:
+            os_info = tools.OSInfo()
+            # ffmpeg on Ubuntu has libuuid as a deep transitive dependency
+            # and fails to link otherwise.
+            return os_info.with_apt
+
     def requirements(self):
         if self.options.tests:
             self.requires("gtest/1.10.0")
@@ -62,12 +70,14 @@ class GerberaConan(ConanFile):
         if self.options.js:
             self.requires("duktape/2.5.0")
 
-        if not self.options.ffmpeg:
-            # ffmpeg has libuuid as a deep transitive dependency
-            # and fails to link otherwise.
+        if not self._needs_system_uuid:
             self.requires("libuuid/1.0.3")
 
     def system_requirements(self):
+        if tools.cross_building(self):
+            self.output.info("Cross-compiling, not installing system packages")
+            return
+
         os_info = tools.OSInfo()
         if os_info.with_apt:
             pm = "apt"
@@ -154,6 +164,11 @@ class GerberaConan(ConanFile):
                 }[pm]
             )
 
+        if self._needs_system_uuid:
+            installer.install(
+                {"apt": "uuid-dev", "pacman": [], "yum": [], "freebsd": []}[pm]
+            )
+
         if self.options.ffmpegthumbnailer:
             installer.install(
                 {
@@ -178,8 +193,12 @@ class GerberaConan(ConanFile):
         cmake.definitions["WITH_AVCODEC"] = self.options.ffmpeg
         cmake.definitions["WITH_FFMPEGTHUMBNAILER"] = self.options.ffmpegthumbnailer
 
-        if self.settings.os != "Linux":
+        if self.settings.os != "Linux" or tools.cross_building(self):
             cmake.definitions["WITH_SYSTEMD"] = False
 
         cmake.configure()
         cmake.build()
+
+        if tools.get_env("CONAN_RUN_TESTS", True):
+            with tools.run_environment(self):
+                cmake.test(output_on_failure=True)
