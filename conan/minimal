@@ -1,0 +1,11 @@
+[options]
+gerbera:debug_logging=True
+gerbera:tests=False
+gerbera:magic=False
+gerbera:taglib=False
+gerbera:exif=False
+gerbera:matroska=False
+gerbera:curl=False
+gerbera:mysql=False
+gerbera:ffmpeg=False
+gerbera:ffmpegthumbnailer=False
