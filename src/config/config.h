@@ -159,6 +159,8 @@ typedef enum {
 #endif
     CFG_CLIENTS_LIST,
     CFG_CLIENTS_LIST_ENABLED,
+    CFG_IMPORT_LAYOUT_PARENT_PATH,
+    CFG_IMPORT_LAYOUT_MAPPING,
 
     CFG_MAX
 } config_option_t;
