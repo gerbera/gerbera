@@ -246,6 +246,52 @@ the removed directory if it becomes available/gets created again.
 
         Allowed values: ``yes`` or ``no``, process hidden files, overrides the hidden-files value in the ``<import/>`` tag.
 
+``layout``
+~~~~~~~~~~
+
+::
+
+    <layout>
+
+* Optional
+
+Defines various layout options for generated virtual layout.
+
+        ::
+
+            parent-path="yes|no"
+
+        * Optional
+        * Default: **no**
+
+        Values of ``yes`` or ``no`` are allowed, specifies if parent path is added to virtual layout. If set to``no`` "/home/.../Videos/Action/a.mkv" with rootpath "/home/.../Videos" becomes "Action" otherwise "Videos/Action". Setting to ``yes`` produces the layout of gerbera before version 1.5.
+
+    **Child tags:**
+
+        ::
+
+            <path from="Videos/Action" to="Action-Videos"/>
+
+        * Optional
+
+        Map a virtual path element. This allows reducing path elements or merging different sources into a common tree.
+
+            ::
+
+                from="..."
+
+            * Required
+
+            Source path. Can be a regular expression.
+
+            ::
+
+                to="..."
+
+            * Required
+
+            Target path. / can be used to create sub structure.
+
 
 ``mappings``
 ~~~~~~~~~~~~
