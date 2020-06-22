@@ -1,0 +1,58 @@
+name: CI validation
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  cpp:
+    # ubuntu-latest is not latest....
+    # until https://github.com/conan-io/conan-docker-tools/issues/205 is fixed:
+    # libsqlite3.so: undefined reference to `fcntl64@GLIBC_2.28
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        compiler:
+          - name: gcc 9
+            cc: gcc-9
+            cxx: g++-9
+          - name: clang 9
+            cc: clang-9
+            cxx: clang++-9
+    env:
+      CC: ${{ matrix.compiler.cc }}
+      CXX: ${{ matrix.compiler.cxx }}
+      CONAN_RUN_TESTS: 1
+    steps:
+      - uses: actions/checkout@v1
+      # Alternatively: uses: docker://conanio/gcc9:latest
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.x"
+      - name: Install conan
+        run: |
+          pip install -U --no-cache-dir conan
+          conan profile new default --detect
+          conan profile update settings.compiler.libcxx=libstdc++11 default
+      - name: build and test
+        run: |
+          conan create -pr ./conan/dev --build=missing . gerbera/dev@
+  js:
+    runs-on: ubuntu-20.04
+    env:
+      DETECT_CHROMEDRIVER_VERSION: true
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+      - name: run tests
+        run: |
+          npm ci
+          npm run lint
+          npm run test
+          npm run test:e2e
+        working-directory: ./gerbera-web
