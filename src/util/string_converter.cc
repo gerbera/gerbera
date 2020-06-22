@@ -42,7 +42,7 @@ StringConverter::StringConverter(const std::string& from, const std::string& to)
     dirty = false;
 
     if (!cd) {
-        cd = 0;
+        cd = {};
         throw_std_runtime_error(std::string("iconv: ") + strerror(errno));
     }
 }
