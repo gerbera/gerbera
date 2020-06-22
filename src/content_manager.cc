@@ -35,6 +35,7 @@
 #include <cstring>
 #include <dirent.h>
 #include <filesystem>
+#include <regex>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -984,8 +985,13 @@ int ContentManager::addContainerChain(const std::string& chain, const std::strin
     if (chain.empty())
         throw_std_runtime_error("addContainerChain() called with empty chain parameter");
 
-    log_debug("received chain: {} ({}) [{}]", chain.c_str(), lastClass.c_str(), dict_encode_simple(lastMetadata).c_str());
-    storage->addContainerChain(chain, lastClass, lastRefID, &containerID, &updateID, lastMetadata);
+    std::string newChain = chain;
+    for (const auto& pattern : config->getDictionaryOption(CFG_IMPORT_LAYOUT_MAPPING)) {
+        newChain = std::regex_replace(newChain, std::regex(pattern.first), pattern.second);
+    }
+
+    log_debug("received chain: {} -> {} ({}) [{}]", chain.c_str(), newChain.c_str(), lastClass.c_str(), dict_encode_simple(lastMetadata).c_str());
+    storage->addContainerChain(newChain, lastClass, lastRefID, &containerID, &updateID, lastMetadata);
 
     // if (updateID != INVALID_OBJECT_ID)
     // an invalid updateID is checked by containerChanged()

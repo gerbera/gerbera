@@ -538,6 +538,31 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     NEW_DICT_OPTION(mime_content);
     SET_DICT_OPTION(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
 
+    temp = getOption(
+        "/import/layout/attribute::parent-path",
+        DEFAULT_IMPORT_LAYOUT_PARENT_PATH);
+
+    if (!validateYesNo(temp))
+        throw std::runtime_error("Error in config file: incorrect parameter for "
+                                 "<layout parent-path=\"\" /> attribute");
+
+    bool ppath = false;
+
+    if (temp == "yes")
+        ppath = true;
+
+    NEW_BOOL_OPTION(ppath);
+    SET_BOOL_OPTION(CFG_IMPORT_LAYOUT_PARENT_PATH);
+
+    tmpEl = getElement("/import/layout");
+    std::map<std::string, std::string> layout_mapping_content;
+    if (tmpEl != nullptr) {
+        layout_mapping_content = createDictionaryFromNode(tmpEl, "path", "from", "to");
+    }
+
+    NEW_DICT_OPTION(layout_mapping_content);
+    SET_DICT_OPTION(CFG_IMPORT_LAYOUT_MAPPING);
+
 #if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE)
     if (setlocale(LC_ALL, "") != nullptr) {
         temp = nl_langinfo(CODESET);
