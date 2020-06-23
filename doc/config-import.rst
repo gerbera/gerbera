@@ -274,7 +274,7 @@ Defines various layout options for generated virtual layout.
 
         * Optional
 
-        Map a virtual path element. This allows reducing path elements or merging different sources into a common tree.
+        Map a virtual path element. This allows reducing path elements or merging different sources into a common tree. Thema replacement is executed after calculation of virtual layout, i.e. after buildin or layout script.
 
             ::
 
