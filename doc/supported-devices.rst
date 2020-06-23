@@ -12,7 +12,7 @@ Gerbera for your NAS device please contact Gerbera Contributors `https://github.
 Automatic Device Detection
 --------------------------
 
-With each Upnp request a device sends its signature which is used by gerbera to assign special functionality to the response.
+With each UPnP request a device sends its signature which is used by gerbera to assign special functionality to the response.
 The automatic detection supports the following devices and software:
 
 - StandardUPnP (all devices sending signature UPnP/1.0)
@@ -40,8 +40,8 @@ If your device needs one of the implemented special mechanisms you can define th
 .. code-block:: xml
 
     <clients enabled="yes">
-		<client userAgent="Microsoft-DLNA" flags="0"></client>
-		<client ip="192.168.1.69" flags="SAMSUNG"></client>
+        <client userAgent="Microsoft-DLNA" flags="0"></client>
+        <client ip="192.168.1.69" flags="SAMSUNG"></client>
     </clients>
 
 
@@ -339,13 +339,13 @@ ZyXEL
 -  DMA-1000
 -  DMA-2500
 
-Some users reported problems where the DMA will show an error ”Failed to retrieve list” and the DMA disconnecting from the server. Incresing the alive interval seems to solve the problem - add the following option to the <server> section of your configuration file:
+Some users reported problems where the DMA will show an error ”Failed to retrieve list” and the DMA disconnecting from the server. Increasing the alive interval seems to solve the problem - add the following option to the <server> section of your configuration file:
 
 .. code-block:: xml
 
     <alive>600</alive>
 
-Additionally, the DMA expects that avi files are serverd with the mime type of video/avi, so add the following to the <extensoin-mimetype> section in your configuration file:
+Additionally, the DMA expects that avi files are serverd with the mime type of video/avi, so add the following to the <extension-mimetype> section in your configuration file:
 
 .. code-block:: xml
 
@@ -360,7 +360,8 @@ Also, add this to the <mimetype-contenttype> section:
 Network Attached Storage Devices
 --------------------------------
 
-We provide a bitbake metadata file for the OpenEmbedded environment, it allows to easily cross compile Gerbera for various platforms. We have successfully tested Gerbera on ARM and MIPSel based devices, so it should be possible to install and run the server on various Linux based NAS products that are available on the market.
+We have successfully tested Gerbera on ARM and MIPSel based devices, so it should be possible to install and run the server on various Linux based NAS products
+that are available on the market.
 
 So far two devices are shipped with a preinstalled version of Gerbera, community firmware versions are available for the rest.
 
@@ -368,8 +369,6 @@ Asus
 ~~~~
 
 -  WL500g
-
-Use the statically linked mips32el binary package that is provided on our download site.
 
 Buffalo
 ~~~~~~~
@@ -399,14 +398,12 @@ Maxtor
 
 -  MSS-I
 
-Either use the Optware feeds or the statically linked mips2el binary package that is provided on our download site.
+Use the Optware feeds.
 
 Raidsonic
 ~~~~~~~~~
 
 -  IB-NAS4200-B
-
-Use the statically linked binary armv4 package that is provided on our download site.
 
 Xtreamer
 ~~~~~~~~
