@@ -37,9 +37,23 @@ jobs:
           pip install -U --no-cache-dir conan
           conan profile new default --detect
           conan profile update settings.compiler.libcxx=libstdc++11 default
+      - name: Cache conan dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.conan/data
+          key: ${{ runner.os }}-conan-${{ matrix.compiler.name }}-${{ hashFiles('conanfile.py') }}-${{ hashFiles('conan/*') }}
+          restore-keys: |
+            - ${{ runner.os }}-conan-${{ matrix.compiler.name }}-
       - name: build and test
         run: |
+          # Remove existing package if it comes from the cache, otherwise
+          # Conan will skip building it (due to --build=missing policy)
+          conan remove 'gerbera/*' --force
           conan create -pr ./conan/dev --build=missing . gerbera/dev@
+      - name: cleanup
+        # Remvoe build directories before creating a cache.
+        run: |
+          conan remove '*' --force --builds --system-reqs
   js:
     runs-on: ubuntu-20.04
     env:
