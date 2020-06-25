@@ -205,3 +205,29 @@ std::string MetadataHandler::getMimeType()
 {
     return MIMETYPE_DEFAULT;
 }
+
+std::string MetadataHandler::mapContentHandler2String(int ch) {
+    switch(ch) {
+    case CH_DEFAULT:
+        return "Default";
+    case CH_LIBEXIF:
+        return "LibExif";
+    case CH_ID3:
+        return "Id3";
+    case CH_TRANSCODE:
+        return "Transcode";
+    case CH_EXTURL:
+        return "Exturl";
+    case CH_MP4:
+        return "MP4";
+    case CH_FFTH:
+        return "FFTH";
+    case CH_FLAC:
+        return "Flac";
+    case CH_FANART:
+        return "Fanart";
+    case CH_MATROSKA:
+        return "Matroska";
+    }
+    return "Unknown";
+}

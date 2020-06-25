@@ -282,7 +282,9 @@ const loadEditItem = (response) => {
   if (response.success) {
     editModal.editmodal('loadItem', {
       item: response.item,
-      onSave: saveItem
+      onSave: saveItem,
+      onDetails: showDetails,
+      onHide: hideDetails
     });
 
     editModal.editmodal('show');
@@ -355,6 +357,14 @@ const saveItem = () => {
       .then((response) => saveItemComplete(response))
       .catch((err) => GerberaApp.error(err))
   }
+};
+
+const showDetails = () => {
+  const item = $('#editModal').editmodal('showDetails');
+};
+
+const hideDetails = () => {
+  const item = $('#editModal').editmodal('hideDetails');
 };
 
 const saveItemComplete = (response) => {

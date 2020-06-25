@@ -119,6 +119,19 @@ li.nav-item.active a {
     color: #FFF;
 }
 
+.detail-table {
+    width: 500px;
+    margin-left: 1rem;
+    margin-bottom: 10px;
+}
+.detail-column {
+    width: 250px;
+}
+
+.details-visible {
+    max-width: calc( 1000px + 1rem );
+}
+
 .btn-danger {
     background-color: #ff7f00;
     border-color: #222;

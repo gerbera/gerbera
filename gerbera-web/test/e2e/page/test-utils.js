@@ -4,7 +4,7 @@ const mockWebServer = 'http://' + process.env.npm_package_config_webserver_host 
 
 const newChromeDriver = async () => {
   const chromeOptions = new chrome.Options();
-  chromeOptions.addArguments(['--headless', '--window-size=1280,1024']);
+  chromeOptions.addArguments(['--headless', '--window-size=1280,1024', '--incognito']);
   return new Builder()
     .forBrowser('chrome')
     .setChromeOptions(chromeOptions)
