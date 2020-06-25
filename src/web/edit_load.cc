@@ -58,6 +58,7 @@ void web::edit_load::process()
     auto obj = storage->loadObject(objectID);
 
     auto root = xmlDoc->document_element();
+    xml2JsonHints->setFieldType("value", "string");
 
     auto item = root.append_child("item");
     item.append_attribute("object_id") = objectID;
@@ -95,7 +96,7 @@ void web::edit_load::process()
         xml2JsonHints->setArrayName(metaData, "metadata");
         xml2JsonHints->setFieldType("metavalue", "string");
 
-        for (auto& metaItem : objItem->getMetadata() ) {
+        for (auto& metaItem : objItem->getMetadata()) {
             auto metaEntry = metaData.append_child("metadata");
             metaEntry.append_attribute("metaname") = metaItem.first.c_str();
             metaEntry.append_attribute("metavalue") = metaItem.second.c_str();
@@ -106,7 +107,7 @@ void web::edit_load::process()
         xml2JsonHints->setArrayName(auxData, "auxdata");
         xml2JsonHints->setFieldType("auxvalue", "string");
 
-        for (auto& auxItem : objItem->getAuxData() ) {
+        for (auto& auxItem : objItem->getAuxData()) {
             auto auxEntry = auxData.append_child("auxdata");
             auxEntry.append_attribute("auxname") = auxItem.first.c_str();
             auxEntry.append_attribute("auxvalue") = auxItem.second.c_str();

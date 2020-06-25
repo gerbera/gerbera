@@ -206,8 +206,9 @@ std::string MetadataHandler::getMimeType()
     return MIMETYPE_DEFAULT;
 }
 
-std::string MetadataHandler::mapContentHandler2String(int ch) {
-    switch(ch) {
+std::string MetadataHandler::mapContentHandler2String(int ch)
+{
+    switch (ch) {
     case CH_DEFAULT:
         return "Default";
     case CH_LIBEXIF:
