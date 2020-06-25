@@ -35,6 +35,7 @@
 #include <utility>
 
 #include "cds_objects.h"
+#include "metadata/metadata_handler.h"
 #include "storage/storage.h"
 #include "util/tools.h"
 
@@ -89,6 +90,65 @@ void web::edit_load::process()
         auto mimeType = item.append_child("mime-type");
         mimeType.append_attribute("value") = objItem->getMimeType().c_str();
         mimeType.append_attribute("editable") = true;
+
+        auto metaData = item.append_child("metadata");
+        xml2JsonHints->setArrayName(metaData, "metadata");
+        xml2JsonHints->setFieldType("metavalue", "string");
+
+        for (auto& metaItem : objItem->getMetadata() ) {
+            auto metaEntry = metaData.append_child("metadata");
+            metaEntry.append_attribute("metaname") = metaItem.first.c_str();
+            metaEntry.append_attribute("metavalue") = metaItem.second.c_str();
+            metaEntry.append_attribute("editable") = false;
+        }
+
+        auto auxData = item.append_child("auxdata");
+        xml2JsonHints->setArrayName(auxData, "auxdata");
+        xml2JsonHints->setFieldType("auxvalue", "string");
+
+        for (auto& auxItem : objItem->getAuxData() ) {
+            auto auxEntry = auxData.append_child("auxdata");
+            auxEntry.append_attribute("auxname") = auxItem.first.c_str();
+            auxEntry.append_attribute("auxvalue") = auxItem.second.c_str();
+            auxEntry.append_attribute("editable") = false;
+        }
+
+        auto resources = item.append_child("resources");
+        xml2JsonHints->setArrayName(resources, "resources");
+        xml2JsonHints->setFieldType("resvalue", "string");
+
+        int resIndex = 0;
+        for (auto& resItem : objItem->getResources()) {
+            auto resEntry = resources.append_child("resources");
+            resEntry.append_attribute("resname") = "----RESOURCE----";
+            resEntry.append_attribute("resvalue") = fmt::format("{}", resIndex).c_str();
+            resEntry.append_attribute("editable") = false;
+
+            resEntry = resources.append_child("resources");
+            resEntry.append_attribute("resname") = fmt::format("handlerType").c_str();
+            resEntry.append_attribute("resvalue") = fmt::format("{}", MetadataHandler::mapContentHandler2String(resItem->getHandlerType()).c_str()).c_str();
+            resEntry.append_attribute("editable") = false;
+
+            for (auto& resPar : resItem->getParameters()) {
+                auto resEntry = resources.append_child("resources");
+                resEntry.append_attribute("resname") = fmt::format(".{}", resPar.first.c_str()).c_str();
+                resEntry.append_attribute("resvalue") = resPar.second.c_str();
+                resEntry.append_attribute("editable") = false;
+            }
+            for (auto& resAtt : resItem->getAttributes()) {
+                auto resEntry = resources.append_child("resources");
+                resEntry.append_attribute("resname") = fmt::format(" {}", resAtt.first.c_str()).c_str();
+                resEntry.append_attribute("resvalue") = resAtt.second.c_str();
+                resEntry.append_attribute("editable") = false;
+            }
+            for (auto& resOpt : resItem->getOptions()) {
+                auto resEntry = resources.append_child("resources");
+                resEntry.append_attribute("resname") = fmt::format("-{}", resOpt.first.c_str()).c_str();
+                resEntry.append_attribute("resvalue") = resOpt.second.c_str();
+                resEntry.append_attribute("editable") = false;
+            }
+            resIndex++;
+        }
 
         if (IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
             auto protocol = item.append_child("protocol");

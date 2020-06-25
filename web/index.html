@@ -118,7 +118,8 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form>
+                <table><tbody><tr><td>
+                <form style="width: calc( 500px - 2rem );">
                     <div class="form-group" id="objectIdGroup" hidden>
                         <label for="editdObjectIdTxt">ID</label>
                         <span id="editdObjectIdTxt" class="h3"></span><input type="hidden" class="form-control" id="objectId" readonly disabled>
@@ -170,8 +171,16 @@
                         <input type="text" class="form-control" id="editProtocol">
                     </div>
                 </form>
+                </td><td>
+                <table id="metadata" class="detail-table"></table>
+                <table id="auxdata" class="detail-table"></table>
+                <table id="resdata" class="detail-table"></table>
+                </td></tr></tbody>
+                </table>
             </div>
             <div class="modal-footer">
+                <button id="hidebutton" type="button" class="btn btn-default">Hide Details</button>
+                <button id="detailbutton" type="button" class="btn btn-default">Show Details</button>
                 <button id="editCancel" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                 <button id="editSave" type="submit" class="btn btn-primary">Save Item</button>
             </div>

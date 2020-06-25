@@ -110,6 +110,47 @@
     modal.find('#editState').val('').prop('disabled', false);
     modal.find('#editProtocol').val('').prop('disabled', false);
     modal.find('#editSave').text('Save Item');
+
+    modal.find('#metadata').empty();
+    modal.find('#auxdata').empty();
+    modal.find('#resdata').empty();
+
+    hideDetails(modal);
+    modal.find('#detailbutton').hide();
+    modal.find('#hidebutton').hide();
+  }
+
+  function appendMetaItem(tbody, name, value) {
+    let row, content, text;
+    row = $('<tr></tr>');
+    content = $('<td></td>');
+    content.addClass('detail-column');
+    text = $('<span></span>');
+    text.text(name).appendTo(content);
+    row.append(content);
+    content = $('<td></td>');
+    text = $('<span></span>');
+    text.text(value).appendTo(content);
+    row.append(content);
+    tbody.append(row);
+  }
+
+  function showDetails(modal) {
+    modal.find('.modal-dialog').addClass('details-visible');
+    modal.find('#metadata').show();
+    modal.find('#auxdata').show();
+    modal.find('#resdata').show();
+    modal.find('#detailbutton').hide();
+    modal.find('#hidebutton').show();
+  }
+
+  function hideDetails(modal) {
+    modal.find('.modal-dialog').removeClass('details-visible');
+    modal.find('#detailbutton').show();
+    modal.find('#hidebutton').hide();
+    modal.find('#metadata').hide();
+    modal.find('#auxdata').hide();
+    modal.find('#resdata').hide();
   }
 
   function loadItem (modal, itemData) {
@@ -121,6 +162,45 @@
       modal.find('#editObjectType').prop('readonly', true);
       modal.find('#editdObjectIdTxt').text(item.object_id).closest('.form-group').show();
       modal.find('#objectId').val(item.object_id).prop('disabled', true);
+
+      const metatable = modal.find('#metadata');
+      const detailButton = modal.find('#detailbutton');
+      let thead, tbody;
+      if (item.metadata && item.metadata.metadata.length) {
+        detailButton.show();
+        $('<thead><tr><th colspan="2">Metadata</th></tr></thead>').appendTo(metatable);
+        tbody = $('<tbody></tbody>');
+        for (let i = 0; i < item.metadata.metadata.length; i++) {
+          appendMetaItem(tbody, item.metadata.metadata[i].metaname, item.metadata.metadata[i].metavalue)
+        }
+        metatable.append(tbody);
+      }
+
+      const auxtable = modal.find('#auxdata');
+      if (item.auxdata && item.auxdata.auxdata.length) {
+        detailButton.show();
+        $('<thead><tr><th colspan="2">Aux Data</th></tr></thead>').appendTo(auxtable);
+        tbody = $('<tbody></tbody>');
+        for (let i = 0; i < item.auxdata.auxdata.length; i++) {
+          appendMetaItem(tbody, item.auxdata.auxdata[i].auxname, item.auxdata.auxdata[i].auxvalue)
+        }
+        auxtable.append(tbody);
+      }
+
+      const restable = modal.find('#resdata');
+      if (item.resources && item.resources.resources.length) {
+        detailButton.show();
+        for (let i = 0; i < item.resources.resources.length; i++) {
+          if (item.resources.resources[i].resname === '----RESOURCE----') {
+            $(`<thead><tr><th>Resource</th><th>${item.resources.resources[i].resvalue}</th></tr></thead>`).appendTo(restable);
+            tbody = $('<tbody></tbody>');
+            restable.append(tbody);
+          }
+          else {
+            appendMetaItem(tbody, item.resources.resources[i].resname, item.resources.resources[i].resvalue)
+          }
+        }
+      }
 
       switch (item.obj_type) {
         case 'item': {
@@ -145,6 +225,8 @@
         }
       }
 
+      modal.find('#detailbutton').off('click').on('click', itemData.onDetails);
+      modal.find('#hidebutton').off('click').on('click', itemData.onHide);
       modal.find('#editSave').off('click').on('click', itemData.onSave);
       modal.find('#editSave').text('Save Item');
       modal.find('.modal-title').text('Edit Item');
@@ -483,6 +565,12 @@
     },
     reset: function () {
       return reset($(this._element));
+    },
+    showDetails: function () {
+      return showDetails($(this._element));
+    },
+    hideDetails: function () {
+      return hideDetails($(this._element));
     },
     loadItem: function (itemData) {
       return loadItem($(this._element), itemData);

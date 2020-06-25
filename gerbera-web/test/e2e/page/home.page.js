@@ -113,6 +113,10 @@ module.exports = function (driver) {
     return await driver.findElement(By.id('editSave')).getText();
   };
 
+  this.showDetails = async () => {
+    return await driver.findElement(By.id('detailbutton')).click();
+  };
+
   this.autoscanOverlayDisplayed = async () => {
     await driver.sleep(1000); // await animation
     return await driver.findElement(By.id('autoscanModal')).isDisplayed();

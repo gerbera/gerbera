@@ -18,7 +18,7 @@ suite(() => {
 
   before(async () => {
     const chromeOptions = new chrome.Options();
-    chromeOptions.addArguments(['--window-size=1440,1080']);
+    chromeOptions.addArguments(['--window-size=1440,1080', '--incognito']);
     driver = new Builder()
       .forBrowser('chrome')
       .setChromeOptions(chromeOptions)
@@ -34,6 +34,7 @@ suite(() => {
     beforeEach(async() => {
       await driver.get(mockWebServer + '/disabled.html');
       await driver.manage().deleteAllCookies();
+      await driver.executeScript("localStorage.clear()");
       await loginPage.get(mockWebServer + '/index.html');
     });
 
@@ -45,7 +46,7 @@ suite(() => {
       await loginPage.takeScreenshot(fileName);
 
       const image = await Jimp.read(fileName);
-      image.resize(1440, 1080);
+      image.resize(1440, Jimp.AUTO);
       image.crop(650, 0, 780, 100).write(fileName);
     });
 
@@ -58,8 +59,8 @@ suite(() => {
       await loginPage.takeScreenshot(fileName);
 
       const image = await Jimp.read(fileName);
-      image.resize(1440, 1080);
-      image.crop(0, 0, 1430, 100).write(fileName);
+      image.resize(1440, Jimp.AUTO);
+      image.crop(0, 0, 1430, 80).write(fileName);
     });
 
     it('for [database view]', async () => {
@@ -130,8 +131,26 @@ suite(() => {
       await homePage.takeScreenshot(fileName);
 
       const image = await Jimp.read(fileName);
-      image.resize(1440, 1080);
-      image.crop(390, 0, 656, 899).write(fileName);
+      image.resize(1440, Jimp.AUTO);
+      image.crop(400, 0, 636, 760).write(fileName);
+    });
+
+    it('for [edit item] from item list with details', async () => {
+      const fileName = DEFAULT_FOLDER_STORE + 'edit-item-details.png';
+      await loginPage.username('user');
+      await loginPage.password('pwd');
+      await loginPage.submitLogin();
+      await homePage.clickMenu('nav-db');
+      await homePage.clickTree('Video');
+      await homePage.editItem(0);
+      await driver.sleep(1000);
+      await homePage.showDetails();
+
+      await homePage.takeScreenshot(fileName);
+
+      const image = await Jimp.read(fileName);
+      image.resize(1440, Jimp.AUTO);
+      image.crop(195, 0, 1060, 760).write(fileName);
     });
 
     it('for [trail operations]', async () => {
@@ -145,7 +164,7 @@ suite(() => {
       await homePage.takeScreenshot(fileName);
 
       const image = await Jimp.read(fileName);
-      image.resize(1440, 1080);
+      image.resize(1440, Jimp.AUTO);
       image.crop(860, 0, 570, 140).write(fileName);
     });
 
@@ -161,7 +180,7 @@ suite(() => {
       await homePage.takeScreenshot(fileName);
 
       const image = await Jimp.read(fileName);
-      image.resize(1440, 1080);
+      image.resize(1440, Jimp.AUTO);
       image.crop(325, 125, 1135, 125).write(fileName);
     });
 
