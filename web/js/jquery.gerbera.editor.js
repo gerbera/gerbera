@@ -165,7 +165,7 @@
 
       const metatable = modal.find('#metadata');
       const detailButton = modal.find('#detailbutton');
-      let thead, tbody;
+      let tbody;
       if (item.metadata && item.metadata.metadata.length) {
         detailButton.show();
         $('<thead><tr><th colspan="2">Metadata</th></tr></thead>').appendTo(metatable);

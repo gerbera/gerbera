@@ -266,7 +266,7 @@ describe('Overlay Suite', () => {
     it('loads an simple item to edit with correct fields populated', async () => {
       await itemLoadTest(0, [
         { id : 'editObjectType',   visible : true, value : 'item'},
-        { id : 'editTitle',        visible : true, value : 'Test.mp4'},
+        { id : 'editTitle',        visible : true, value : 'My Title'},
         { id : 'editClass',        visible : true, value : 'object.item.videoItem'},
         { id : 'editLocation',     visible : true, value : '/folder/location/Test.mp4'},
         { id : 'editDesc',         visible : true, value : 'A description'},

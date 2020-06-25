@@ -126,8 +126,8 @@ void web::edit_load::process()
             resEntry.append_attribute("editable") = false;
 
             resEntry = resources.append_child("resources");
-            resEntry.append_attribute("resname") = fmt::format("handlerType").c_str();
-            resEntry.append_attribute("resvalue") = fmt::format("{}", MetadataHandler::mapContentHandler2String(resItem->getHandlerType()).c_str()).c_str();
+            resEntry.append_attribute("resname") = "handlerType";
+            resEntry.append_attribute("resvalue") = fmt::format("{}", MetadataHandler::mapContentHandler2String(resItem->getHandlerType())).c_str();
             resEntry.append_attribute("editable") = false;
 
             for (auto& resPar : resItem->getParameters()) {
