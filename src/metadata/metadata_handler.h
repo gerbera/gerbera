@@ -156,7 +156,7 @@ public:
     virtual std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsItem> item, int resNum) = 0;
     virtual std::string getMimeType();
 
-    static std::string mapContentHandler2String(int ch);
+    static const char* mapContentHandler2String(int ch);
 
     virtual ~MetadataHandler() = default;
 };

@@ -360,11 +360,11 @@ const saveItem = () => {
 };
 
 const showDetails = () => {
-  const item = $('#editModal').editmodal('showDetails');
+  $('#editModal').editmodal('showDetails');
 };
 
 const hideDetails = () => {
-  const item = $('#editModal').editmodal('hideDetails');
+  $('#editModal').editmodal('hideDetails');
 };
 
 const saveItemComplete = (response) => {
