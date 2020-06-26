@@ -43,6 +43,7 @@
         <xs:complexType>
             <xs:all>
                 <xs:element ref="server"/>
+                <xs:element ref="clients" minOccurs="0"/>
                 <xs:element ref="import" minOccurs="0"/>
                 <xs:element ref="transcoding" minOccurs="0"/>
             </xs:all>
@@ -359,6 +360,25 @@
     <xs:element name="database" type="xs:string" default="localhost"/>
     <xs:element name="socket" type="xs:string"/>
 
+    <!-- Clients -->
+
+    <xs:element name="clients">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="client" minOccurs="0"/>
+            </xs:sequence>
+            <xs:attribute name="enabled" type="boolean" default="no"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="client">
+        <xs:complexType>
+            <xs:attribute name="ip" type="xs:string" minOccurs="0"/>
+            <xs:attribute name="userAgent" type="xs:string" minOccurs="0"/>
+            <xs:attribute name="flags" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
     <!-- Import -->
 
     <xs:element name="import">
@@ -453,6 +473,22 @@
                     </xs:restriction>
                 </xs:simpleType>
             </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="layout">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="path" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="enabled" type="boolean" default="no"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="path">
+        <xs:complexType>
+            <xs:attribute name="from" type="xs:string" use="required"/>
+            <xs:attribute name="to" type="xs:string" use="required"/>
         </xs:complexType>
     </xs:element>
 
