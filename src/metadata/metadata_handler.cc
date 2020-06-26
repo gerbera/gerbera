@@ -211,24 +211,32 @@ const char* MetadataHandler::mapContentHandler2String(int ch)
     switch (ch) {
     case CH_DEFAULT:
         return "Default";
+#ifdef HAVE_LIBEXIF
     case CH_LIBEXIF:
         return "LibExif";
+#endif
+#ifdef HAVE_TAGLIB
     case CH_ID3:
-        return "Id3";
+        return "TagLib";
+#endif
     case CH_TRANSCODE:
         return "Transcode";
     case CH_EXTURL:
         return "Exturl";
     case CH_MP4:
         return "MP4";
+#if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
     case CH_FFTH:
-        return "FFTH";
+        return "FFmpegThumbnailer";
+#endif
     case CH_FLAC:
         return "Flac";
     case CH_FANART:
         return "Fanart";
+#ifdef HAVE_MATROSKA
     case CH_MATROSKA:
         return "Matroska";
+#endif
     }
     return "Unknown";
 }
