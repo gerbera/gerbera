@@ -245,13 +245,10 @@ std::vector<std::shared_ptr<SQLStorage::AddUpdateTable>> SQLStorage::_addUpdateO
     //else if (isUpdate)
     //    cdsObjectSql["dc_title"] = SQL_NULL;
 
-    auto dict = obj->getMetadata();
-
     if (isUpdate)
         cdsObjectSql["auxdata"] = SQL_NULL;
-    dict = obj->getAuxData();
-    if (!dict.empty() && (!hasReference || !std::equal(dict.begin(), dict.end(), refObj->getAuxData().begin()))) {
-        cdsObjectSql["auxdata"] = quote(dict_encode(obj->getAuxData()));
+    if (auto auxData = obj->getAuxData(); !auxData.empty() && (!hasReference || auxData != refObj->getAuxData())) {
+        cdsObjectSql["auxdata"] = quote(dict_encode(auxData));
     }
 
     if (!hasReference || (!obj->getFlag(OBJECT_FLAG_USE_RESOURCE_REF) && !refObj->resourcesEqual(obj))) {
@@ -354,7 +351,7 @@ std::vector<std::shared_ptr<SQLStorage::AddUpdateTable>> SQLStorage::_addUpdateO
     returnVal.push_back(
         std::make_shared<AddUpdateTable>(CDS_OBJECT_TABLE, cdsObjectSql, isUpdate ? "update" : "insert"));
 
-    if (!hasReference || !std::equal(dict.begin(), dict.end(), refObj->getMetadata().begin())) {
+    if (!hasReference || obj->getMetadata() != refObj->getMetadata()) {
         generateMetadataDBOperations(obj, isUpdate, returnVal);
     }
 
