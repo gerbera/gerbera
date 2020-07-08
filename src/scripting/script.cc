@@ -295,8 +295,10 @@ void Script::_load(const std::string& scriptPath)
     }
 
     duk_push_string(ctx, scriptPath.c_str());
-    if (duk_pcompile_lstring_filename(ctx, 0, scriptText.c_str(), scriptText.length()) != 0)
+    if (duk_pcompile_lstring_filename(ctx, 0, scriptText.c_str(), scriptText.length()) != 0) {
+        log_error("Failed to load script: {}", duk_safe_to_string(ctx, -1));
         throw_std_runtime_error("Scripting: failed to compile " + scriptPath);
+    }
 }
 
 void Script::load(const std::string& scriptPath)
