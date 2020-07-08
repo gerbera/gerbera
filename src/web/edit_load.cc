@@ -65,7 +65,7 @@ void web::edit_load::process()
 
     auto title = item.append_child("title");
     title.append_attribute("value") = obj->getTitle().c_str();
-    title.append_attribute("editable") = obj->isVirtual() || objectID == CDS_ID_FS_ROOT ? "1" : "0";
+    title.append_attribute("editable") = obj->isVirtual() || objectID == CDS_ID_FS_ROOT ? true : false;
 
     auto classEl = item.append_child("class");
     classEl.append_attribute("value") = obj->getClass().c_str();
