@@ -124,28 +124,28 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
         // https://mail.kde.org/pipermail/taglib-devel/2015-May/002729.html
         list = file.properties()["ALBUMARTIST"];
         if (!list.isEmpty())
-            val = list[0];
+            val = list.toString(", ");
         else
             return;
         break;
     case M_COMPOSER:
         list = file.properties()["COMPOSER"];
         if (!list.isEmpty())
-            val = list[0];
+            val = list.toString(", ");
         else
             return;
         break;
     case M_CONDUCTOR:
         list = file.properties()["CONDUCTOR"];
         if (!list.isEmpty())
-            val = list[0];
+            val = list.toString(", ");
         else
             return;
         break;
     case M_ORCHESTRA:
         list = file.properties()["ORCHESTRA"];
         if (!list.isEmpty())
-            val = list[0];
+            val = list.toString(", ");
         else
             return;
         break;
@@ -416,12 +416,16 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, const std::shared_ptr
             if (frameList.isEmpty())
                 continue;
 
-            const TagLib::ID3v2::Frame* frame = frameList.front();
-            const auto textFrame = dynamic_cast<const TagLib::ID3v2::TextIdentificationFrame*>(frame);
-
-            const TagLib::String frameContents = textFrame->toString();
-            std::string value(frameContents.toCString(true));
-            value = sc->convert(value);
+            std::string value;
+            for (const auto& frame : frameList) {
+                const auto textFrame = dynamic_cast<const TagLib::ID3v2::TextIdentificationFrame*>(frame);
+                if (textFrame == nullptr)
+                    continue;
+                const TagLib::String frameContents = textFrame->toString();
+                if (!value.empty())
+                    value += ", ";
+                value += sc->convert(frameContents.toCString(true));
+            }
             log_debug("Adding auxdata: {} with value {}", desiredFrame.c_str(), value.c_str());
             item->setAuxData(desiredFrame, value);
             continue;
@@ -437,6 +441,8 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, const std::shared_ptr
 
             for (const auto& frame : frameList) {
                 const auto textFrame = dynamic_cast<const TagLib::ID3v2::TextIdentificationFrame*>(frame);
+                if (textFrame == nullptr)
+                    continue;
                 const TagLib::String frameContents = textFrame->toString();
                 std::string value(frameContents.toCString(true));
 
@@ -557,7 +563,7 @@ void TagLibHandler::extractFLAC(TagLib::IOStream* roStream, const std::shared_pt
             if (property.isEmpty())
                 continue;
 
-            auto val = property[0];
+            auto val = property.toString(", ");
             std::string value(val.toCString(true));
             value = sc->convert(value);
             log_debug("Adding auxdata: {} with value {}", desiredTag.c_str(), value.c_str());
