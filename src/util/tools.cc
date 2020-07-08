@@ -326,14 +326,29 @@ static const char* HEX_CHARS2 = "0123456789ABCDEF";
 std::string url_escape(const std::string& str)
 {
     std::ostringstream buf;
-    for (auto c : str) {
+    for (size_t i = 0; i < str.length();) {
+        auto c = str[i];
+        int cplen = 1;
+        if ((c & 0xf8) == 0xf0)
+            cplen = 4;
+        else if ((c & 0xf0) == 0xe0)
+            cplen = 3;
+        else if ((c & 0xe0) == 0xc0)
+            cplen = 2;
+        if ((i + cplen) > str.length())
+            cplen = 1;
+
         if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '_' || c == '-') {
             buf << static_cast<char>(c);
         } else {
             int hi = c >> 4;
             int lo = c & 15;
-            buf << '%' << HEX_CHARS2[hi] << HEX_CHARS2[lo];
+            if (cplen > 1)
+                buf << str.substr(i, cplen);
+            else
+                buf << '%' << HEX_CHARS2[hi] << HEX_CHARS2[lo];
         }
+        i += cplen;
     }
     return buf.str();
 }
