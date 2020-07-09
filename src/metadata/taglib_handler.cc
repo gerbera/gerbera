@@ -408,10 +408,7 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, const std::shared_ptr
     for (const auto& desiredFrame : aux_tags_list) {
 
         if (desiredFrame.empty()) {
-            continue;
-        }
-
-        if (frameListMap.contains(desiredFrame.c_str())) {
+        } else if (frameListMap.contains(desiredFrame.c_str())) {
             const auto frameList = frameListMap[desiredFrame.c_str()];
             if (frameList.isEmpty())
                 continue;
@@ -428,10 +425,7 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, const std::shared_ptr
             }
             log_debug("Adding auxdata: {} with value {}", desiredFrame.c_str(), value.c_str());
             item->setAuxData(desiredFrame, value);
-            continue;
-        }
-
-        if (hasTXXXFrames && startswith(desiredFrame, "TXXX:")) {
+        } else if (hasTXXXFrames && startswith(desiredFrame, "TXXX:")) {
             const auto frameList = frameListMap["TXXX"];
             //log_debug("TXXX Frame list has {} elements", frameList.size());
 
