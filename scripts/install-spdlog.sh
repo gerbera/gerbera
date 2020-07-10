@@ -5,7 +5,7 @@ if ! [ "$(id -u)" = 0 ]; then
 fi
 set -ex
 
-VERSION="1.5.0"
+VERSION="1.7.0"
 
 unamestr=$(uname)
 if [ ! -f spdlog-$VERSION.tgz ]; then
