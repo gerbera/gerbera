@@ -887,14 +887,14 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 #endif //HAVE_CURL
 
     temp = getOption(
-        "/import/library-options/attribute::entry-separator",
+        "/import/library-options/attribute::multi-value-separator",
         DEFAULT_LIBOPTS_ENTRY_SEPARATOR, false);
 
     NEW_OPTION(temp);
     SET_OPTION(CFG_IMPORT_LIBOPTS_ENTRY_SEP);
 
     temp = getOption(
-        "/import/library-options/attribute::legacy-separator",
+        "/import/library-options/attribute::legacy-value-separator",
         "", false);
 
     NEW_OPTION(temp);
