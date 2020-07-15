@@ -121,7 +121,7 @@ protected:
     /// The xpath parameter has XPath syntax:
     /// "/path/to/option" will return the text value of the given "option" element
     /// "/path/to/option/attribute::attr" will return the value of the attribute "attr"
-    std::string getOption(std::string xpath, std::string def) const;
+    std::string getOption(std::string xpath, std::string def, bool trim = true) const;
 
     /// \brief same as getOption but returns an integer value of the option
     int getIntOption(std::string xpath, int def) const;

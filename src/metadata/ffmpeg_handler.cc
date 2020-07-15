@@ -143,7 +143,9 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
             continue;
         }
 
-        item->setMetadata(MT_KEYS[field].upnp, sc->convert(trim_string(value)));
+        // only use ffmpeg meta data if not found by other handler
+        if (item->getMetadata(MT_KEYS[field].upnp).empty())
+            item->setMetadata(MT_KEYS[field].upnp, sc->convert(trim_string(value)));
     }
 }
 

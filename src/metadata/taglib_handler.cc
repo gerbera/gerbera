@@ -57,6 +57,8 @@
 TagLibHandler::TagLibHandler(std::shared_ptr<Config> config)
     : MetadataHandler(std::move(config))
 {
+    entrySeparator = this->config->getOption(CFG_IMPORT_LIBOPTS_ENTRY_SEP);
+    legacyEntrySeparator = this->config->getOption(CFG_IMPORT_LIBOPTS_ENTRY_LEGACY_SEP);
 }
 
 void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, const TagLib::Tag* tag, const std::shared_ptr<CdsItem>& item) const
@@ -73,16 +75,19 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
     TagLib::StringList list;
     std::string value;
     unsigned int i;
+    bool checkLegacy = true;
 
     switch (field) {
     case M_TITLE:
         val = tag->title();
+        checkLegacy = false;
         break;
     case M_ARTIST:
         val = tag->artist();
         break;
     case M_ALBUM:
         val = tag->album();
+        checkLegacy = false;
         break;
     case M_DATE:
         i = tag->year();
@@ -106,9 +111,11 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
         break;
     case M_GENRE:
         val = tag->genre();
+        checkLegacy = false;
         break;
     case M_DESCRIPTION:
         val = tag->comment();
+        checkLegacy = false;
         break;
     case M_TRACKNUMBER:
         i = tag->track();
@@ -124,28 +131,28 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
         // https://mail.kde.org/pipermail/taglib-devel/2015-May/002729.html
         list = file.properties()["ALBUMARTIST"];
         if (!list.isEmpty())
-            val = list.toString(", ");
+            val = list.toString(entrySeparator);
         else
             return;
         break;
     case M_COMPOSER:
         list = file.properties()["COMPOSER"];
         if (!list.isEmpty())
-            val = list.toString(", ");
+            val = list.toString(entrySeparator);
         else
             return;
         break;
     case M_CONDUCTOR:
         list = file.properties()["CONDUCTOR"];
         if (!list.isEmpty())
-            val = list.toString(", ");
+            val = list.toString(entrySeparator);
         else
             return;
         break;
     case M_ORCHESTRA:
         list = file.properties()["ORCHESTRA"];
         if (!list.isEmpty())
-            val = list.toString(", ");
+            val = list.toString(entrySeparator);
         else
             return;
         break;
@@ -153,8 +160,11 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
         return;
     }
 
-    if ((field != M_DATE) && (field != M_TRACKNUMBER))
+    if ((field != M_DATE) && (field != M_TRACKNUMBER)) {
+        if (!legacyEntrySeparator.empty() && checkLegacy)
+            val = val.split(legacyEntrySeparator).toString(entrySeparator);
         value = val.toCString(true);
+    }
 
     value = trim_string(value);
 
@@ -418,9 +428,11 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, const std::shared_ptr
                 const auto textFrame = dynamic_cast<const TagLib::ID3v2::TextIdentificationFrame*>(frame);
                 if (textFrame == nullptr)
                     continue;
-                const TagLib::String frameContents = textFrame->toString();
+                TagLib::String frameContents = textFrame->toString();
                 if (!value.empty())
-                    value += ", ";
+                    value += entrySeparator;
+                if (!legacyEntrySeparator.empty())
+                    frameContents = frameContents.split(legacyEntrySeparator).toString(entrySeparator);
                 value += sc->convert(frameContents.toCString(true));
             }
             log_debug("Adding auxdata: {} with value {}", desiredFrame.c_str(), value.c_str());
@@ -557,7 +569,9 @@ void TagLibHandler::extractFLAC(TagLib::IOStream* roStream, const std::shared_pt
             if (property.isEmpty())
                 continue;
 
-            auto val = property.toString(", ");
+            auto val = property.toString(entrySeparator);
+            if (!legacyEntrySeparator.empty())
+                val = val.split(legacyEntrySeparator).toString(entrySeparator);
             std::string value(val.toCString(true));
             value = sc->convert(value);
             log_debug("Adding auxdata: {} with value {}", desiredTag.c_str(), value.c_str());
