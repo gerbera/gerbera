@@ -495,7 +495,7 @@ etc.
 
     ::
 
-        entry-separator="..."
+        multi-value-separator="..."
 
     * Optional
     * Default: **"; "**
@@ -504,12 +504,12 @@ etc.
 
     ::
 
-        legacy-separator="..."
+        legacy-value-separator="..."
 
     * Optional
     * Default: **empty**
 
-    This string is used to split items into lists before joining them with entry-separator.
+    This string is used to split items into lists before joining them with multi-value-separator.
     This option can be used to import files from legacy tools which did not support multi-valued items.
     The empty string is used to disable legacy handling.
 
