@@ -491,6 +491,28 @@ in a structure of your choice, like:
 
 etc.
 
+**Attributes:**
+
+    ::
+
+        entry-separator="..."
+
+    * Optional
+    * Default: **"; "**
+
+    This string is used to join multi-valued items (e.g. Composer, Performer) into one string.
+
+    ::
+
+        legacy-separator="..."
+
+    * Optional
+    * Default: **empty**
+
+    This string is used to split items into lists before joining them with entry-separator.
+    This option can be used to import files from legacy tools which did not support multi-valued items.
+    The empty string is used to disable legacy handling.
+
 **Child tags:**
 
 ``libexif``

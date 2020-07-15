@@ -886,6 +886,20 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 
 #endif //HAVE_CURL
 
+    temp = getOption(
+        "/import/library-options/attribute::entry-separator",
+        DEFAULT_LIBOPTS_ENTRY_SEPARATOR, false);
+
+    NEW_OPTION(temp);
+    SET_OPTION(CFG_IMPORT_LIBOPTS_ENTRY_SEP);
+
+    temp = getOption(
+        "/import/library-options/attribute::legacy-separator",
+        "", false);
+
+    NEW_OPTION(temp);
+    SET_OPTION(CFG_IMPORT_LIBOPTS_ENTRY_LEGACY_SEP);
+
 #ifdef HAVE_LIBEXIF
 
     el = getElement("/import/library-options/libexif/auxdata");
@@ -1241,18 +1255,18 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     log_debug("Config file dump after validation: {}", buf.str().c_str());
 }
 
-std::string ConfigManager::getOption(std::string xpath, std::string def) const
+std::string ConfigManager::getOption(std::string xpath, std::string def, bool trim) const
 {
     auto root = xmlDoc->document_element();
     xpath = "/config" + xpath;
     pugi::xpath_node xpathNode = root.select_node(xpath.c_str());
 
     if (xpathNode.node() != nullptr) {
-        return trim_string(xpathNode.node().text().as_string());
+        return trim ? trim_string(xpathNode.node().text().as_string()) : xpathNode.node().text().as_string();
     }
 
     if (xpathNode.attribute() != nullptr) {
-        return trim_string(xpathNode.attribute().value());
+        return trim ? trim_string(xpathNode.attribute().value()) : xpathNode.attribute().value();
     }
 
     log_debug("Config: option not found: '{}' using default value: '{}'",

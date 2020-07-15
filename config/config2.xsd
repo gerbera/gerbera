@@ -550,6 +550,8 @@
                 <xs:element ref="libextractor" minOccurs="0"/>
                 <xs:element ref="id3" minOccurs="0"/>
             </xs:all>
+            <xs:attribute name="entry-separator" type="xs:string" minOccurs="0" default="; "/>
+            <xs:attribute name="lagacy-separator" type="xs:string" minOccurs="0"/>
         </xs:complexType>
     </xs:element>
 
