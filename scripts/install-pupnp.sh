@@ -5,7 +5,7 @@ if ! [ "$(id -u)" = 0 ]; then
 fi
 set -ex
 
-VERSION="1.12.1"
+VERSION="1.14.0"
 
 unamestr=$(uname)
 if [ "$unamestr" = 'FreeBSD' ]; then
