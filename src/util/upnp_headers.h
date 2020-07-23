@@ -26,7 +26,6 @@
 #ifndef GERBERA_HEADERS_H
 #define GERBERA_HEADERS_H
 
-#include <ExtraHeaders.h>
 #include <map>
 #include <memory>
 #include <upnp.h>
