@@ -77,13 +77,6 @@ public:
     /// \brief removes the AutoscanDirectory given by its scan ID
     void remove(size_t id);
 
-    int removeByObjectID(int objectID);
-
-    /// \brief removes the AutoscanDirectory with the given location
-    /// \param location the location to remove
-    /// \return the scanID, that was removed; if nothing removed: INVALID_SCAN_ID
-    int remove(const fs::path& location);
-
     /// \brief removes the AutoscanDirectory if it is a subdirectory of a given location.
     /// \param parent parent directory.
     /// \param persistent also remove persistent directories.

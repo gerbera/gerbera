@@ -65,21 +65,9 @@ bool ProcListItem::abortOnDeath() const
 
 bool ProcessIOHandler::abort() const
 {
-    bool abort = false;
-
-    if (procList.empty())
-        return abort;
-
-    for (const auto& i : procList) {
-        auto exec = i->getExecutor();
-        if ((exec != nullptr) && (!exec->isAlive())) {
-            if (i->abortOnDeath())
-                abort = true;
-            break;
-        }
-    }
-
-    return abort;
+    return std::any_of(procList.begin(), procList.end(),
+        [=](const auto& proc) { auto exec = proc->getExecutor();
+            return exec != nullptr && !exec->isAlive() && proc->abortOnDeath(); });
 }
 
 void ProcessIOHandler::killAll() const

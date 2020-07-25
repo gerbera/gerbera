@@ -163,29 +163,31 @@ std::shared_ptr<Session> SessionManager::createSession(long timeout)
 
 std::shared_ptr<Session> SessionManager::getSession(const std::string& sessionID, bool doLock)
 {
-    std::unique_lock<decltype(mutex)> lock(mutex, std::defer_lock);
+    if (sessions.empty()) {
+        return nullptr;
+    }
+
+    std::unique_lock lock(mutex, std::defer_lock);
     if (doLock)
         lock.lock();
-    for (const auto& s : sessions) {
-        if (s->getID() == sessionID)
-            return s;
-    }
-    return nullptr;
+
+    auto it = std::find_if(sessions.begin(), sessions.end(), [&](const auto& s) { return s->getID() == sessionID; });
+    return it != sessions.end() ? *it : nullptr;
 }
 
 void SessionManager::removeSession(const std::string& sessionID)
 {
+    if (sessions.empty()) {
+        return;
+    }
+
     AutoLock lock(mutex);
 
-    for (auto it = sessions.begin(); it != sessions.end(); /*++it*/) {
-        auto& s = *it;
-
-        if (s->getID() == sessionID) {
-            it = sessions.erase(it);
-            checkTimer();
-            return;
-        }
-        ++it;
+    auto sess = std::find_if(sessions.begin(), sessions.end(), [&](const auto& s) { return s->getID() == sessionID; });
+    if (sess != sessions.end()) {
+        sess = sessions.erase(sess);
+        checkTimer();
+        return;
     }
 }
 

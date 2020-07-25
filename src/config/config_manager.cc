@@ -34,6 +34,7 @@
 #include <cstdio>
 #include <filesystem>
 #include <iostream>
+#include <numeric>
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -1760,11 +1761,9 @@ std::shared_ptr<ClientConfigList> ConfigManager::createClientConfigListFromNode(
         std::string ip = child.attribute("ip").as_string();
         std::string userAgent = child.attribute("userAgent").as_string();
 
-        int flag = 0; // ensure no flag is set (optimizer)
         std::vector<std::string> flagsVector = split_string(flags, '|', false);
-        for (const auto& i : flagsVector) {
-            flag |= ClientConfig::remapFlag(i);
-        }
+        int flag = std::accumulate(flagsVector.begin(), flagsVector.end(), 0, [](int flg, const auto& i) //
+            { return flg | ClientConfig::remapFlag(i); });
 
         auto client = std::make_shared<ClientConfig>(flag, ip, userAgent);
         auto clientInfo = client->getClientInfo();

@@ -90,8 +90,8 @@ void Timer::removeTimerSubscriber(Subscriber* timerSubscriber, std::shared_ptr<P
     log_debug("Removing subscriber...");
     AutoLock lock(mutex);
     TimerSubscriberElement element(timerSubscriber, 0, std::move(parameter));
-    auto it = std::find(subscribers.cbegin(), subscribers.cend(), element);
-    if (it != subscribers.cend()) {
+    auto it = std::find(subscribers.begin(), subscribers.end(), element);
+    if (it != subscribers.end()) {
         subscribers.erase(it);
         signal();
     } else if (!dontFail) {
