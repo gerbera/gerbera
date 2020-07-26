@@ -25,7 +25,7 @@
 
 #include "upnp_headers.h" // API
 
-#if (UPNP_VERSION > 11201)
+#if (UPNP_VERSION > 11299)
 #include <UpnpExtraHeaders.h>
 #else
 #include <ExtraHeaders.h>
