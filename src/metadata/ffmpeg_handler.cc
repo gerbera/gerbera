@@ -265,6 +265,8 @@ void FfmpegHandler::fillMetadata(std::shared_ptr<CdsItem> item)
     avformat_close_input(&pFormatCtx);
 }
 
+#ifdef HAVE_FFMPEGTHUMBNAILER
+
 fs::path getThumbnailCacheBasePath(Config& config)
 {
     if (auto configuredDir = config.getOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR);
@@ -284,7 +286,6 @@ fs::path getThumbnailCachePath(const fs::path& base, const fs::path& movie)
     return path;
 }
 
-#ifdef HAVE_FFMPEGTHUMBNAILER
 std::optional<std::vector<std::byte>> FfmpegHandler::readThumbnailCacheFile(const fs::path& movie_filename) const
 {
     auto path = getThumbnailCachePath(getThumbnailCacheBasePath(*config), movie_filename);
