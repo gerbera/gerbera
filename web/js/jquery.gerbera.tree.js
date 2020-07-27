@@ -66,21 +66,15 @@ $.widget('grb.tree', {
       }
 
       const badges = [];
-      const badgeData = data[i].badge;
-      if (badgeData && badgeData.length > 0) {
-        for (let x = 0; x < badgeData.length; x++) {
-          const aBadge = $('<span></span>').addClass('badge badge-pill badge-secondary').text(badgeData[x]);
-          aBadge.addClass('pull-right');
-
-          if (badgeData[x] === 'a') {
-            aBadge.addClass('autoscan');
-            aBadge.click({id: data[i].gerbera.id}, config.onAutoscanEdit);
-            aBadge.prop('title', 'Autoscan: ' + data[i].gerbera.autoScanType);
-          } else if (!isNaN(badgeData[x])) {
-            aBadge.prop('title', badgeData[x] + ' - children');
-          }
-
+      for (const badgeData of data[i].badge) {
+        if (badgeData === 'a') {
+          const aBadge = $('<span></span>').addClass('badge badge-pill badge-secondary').html("<i class=\"fa fa-refresh\"/> Autoscan Folder");
+          aBadge.addClass('pull-right autoscan');
+          aBadge.click({id: data[i].gerbera.id}, config.onAutoscanEdit);
+          aBadge.prop('title', 'Autoscan: ' + data[i].gerbera.autoScanType);
           badges.push(aBadge);
+        } else if (!isNaN(badgeData)) {
+          item.addClass("has-children");
         }
       }
 
