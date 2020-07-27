@@ -331,6 +331,11 @@ body,
     padding-bottom: 0px;
     border: 0px;
     background-color: transparent;
+    color: #3c3c3c;
+}
+
+.list-group-item.has-children > span.fa {
+    color: #ff7f00;
 }
 
 .list-group-item:first-child,
