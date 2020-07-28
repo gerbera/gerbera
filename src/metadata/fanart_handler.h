@@ -47,6 +47,7 @@ public:
 
 private:
     static fs::path getFanArtPath(const std::shared_ptr<CdsItem>& item);
+    static std::string expandName(const std::string& name, const std::shared_ptr<CdsItem>& item);
 };
 
 #endif // __METADATA_FANART_H__

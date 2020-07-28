@@ -913,6 +913,14 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 
 #endif // HAVE_LIBEXIF
 
+    el = getElement("/import/resources/fanart");
+    if (el == nullptr) {
+        getOption("/import/resources/fanart",
+            "");
+    }
+    NEW_STRARR_OPTION(createArrayFromNode(el, "add-file", "name"));
+    SET_STRARR_OPTION(CFG_IMPORT_RESOURCES_FANART_FILE_LIST);
+
 #ifdef HAVE_EXIV2
 
     el = getElement("/import/library-options/exiv2/auxdata");

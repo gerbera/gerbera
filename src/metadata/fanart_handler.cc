@@ -35,12 +35,13 @@
 #include <utility>
 
 #include "cds_objects.h"
+#include "config/config.h"
 #include "iohandler/file_io_handler.h"
 #include "util/tools.h"
 
 // These must not have a leading slash, or the "/" operator will produce
 // just this, not folder and this
-static const char* names[] = {
+static std::vector<std::string> names = {
     "folder.jpg",
     "poster.jpg"
 };
@@ -48,6 +49,8 @@ static const char* names[] = {
 FanArtHandler::FanArtHandler(std::shared_ptr<Config> config)
     : MetadataHandler(std::move(config))
 {
+    std::vector<std::string> files = this->config->getArrayOption(CFG_IMPORT_RESOURCES_FANART_FILE_LIST);
+    names.insert(names.end(), files.begin(), files.end());
 }
 
 fs::path FanArtHandler::getFanArtPath(const std::shared_ptr<CdsItem>& item)
@@ -55,17 +58,30 @@ fs::path FanArtHandler::getFanArtPath(const std::shared_ptr<CdsItem>& item)
     auto folder = item->getLocation().parent_path();
     log_debug("Folder name: {}", folder.c_str());
 
-    fs::path found;
     for (const auto& name : names) {
-        auto found = folder / name;
-        std::error_code ec;
-        bool exists = isRegularFile(found, ec); // no error throwing, please
-        log_debug("{}: {}", name, exists ? "found" : "missing");
-        if (!exists)
-            continue;
-        return found;
+        auto fileName = tolower_string(expandName(name, item));
+        for (auto& p : fs::directory_iterator(folder))
+            if (p.is_regular_file() && tolower_string(p.path().filename()) == fileName) {
+                log_debug("{}: found", p.path().filename().c_str());
+                return p.path();
+            }
     }
     return "";
+}
+
+static std::map<std::string, int> metaTags = {
+    { "%album%", M_ALBUM },
+    { "%title%", M_TITLE },
+};
+
+std::string FanArtHandler::expandName(const std::string& name, const std::shared_ptr<CdsItem>& item)
+{
+    std::string copy(name);
+
+    for (const auto& tag : metaTags)
+        replace_string(copy, tag.first, item->getMetadata(MT_KEYS[tag.second].upnp));
+
+    return copy;
 }
 
 void FanArtHandler::fillMetadata(std::shared_ptr<CdsItem> item)
