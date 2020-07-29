@@ -38,16 +38,36 @@ namespace fs = std::filesystem;
 
 #include "metadata_handler.h"
 
+/// \brief This class is responsible for populating filesystem based metadata
+class MetacontentHandler : public MetadataHandler {
+public:
+    explicit MetacontentHandler(std::shared_ptr<Config> config);
+
+protected:
+    static fs::path getContentPath(std::vector<std::string>& names, const std::shared_ptr<CdsItem>& item);
+    static std::string expandName(const std::string& name, const std::shared_ptr<CdsItem>& item);
+};
+
 /// \brief This class is responsible for populating filesystem based album and fan art
-class FanArtHandler : public MetadataHandler {
+class FanArtHandler : public MetacontentHandler {
 public:
     explicit FanArtHandler(std::shared_ptr<Config> config);
     void fillMetadata(std::shared_ptr<CdsItem> item) override;
     std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsItem> item, int resNum) override;
 
 private:
-    static fs::path getFanArtPath(const std::shared_ptr<CdsItem>& item);
-    static std::string expandName(const std::string& name, const std::shared_ptr<CdsItem>& item);
+    static std::vector<std::string> names;
+};
+
+/// \brief This class is responsible for populating filesystem based subtitles
+class SubtitleHandler : public MetacontentHandler {
+public:
+    explicit SubtitleHandler(std::shared_ptr<Config> config);
+    void fillMetadata(std::shared_ptr<CdsItem> item) override;
+    std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsItem> item, int resNum) override;
+
+private:
+    static std::vector<std::string> names;
 };
 
 #endif // __METADATA_FANART_H__

@@ -50,6 +50,7 @@ class IOHandler;
 #define CH_FLAC 7
 #define CH_FANART 8
 #define CH_MATROSKA 9
+#define CH_SUBTITLE 10
 
 #define CONTENT_TYPE_MP3 "mp3"
 #define CONTENT_TYPE_OGG "ogg"
@@ -75,6 +76,8 @@ class IOHandler;
 #define RESOURCE_HANDLER "rh"
 
 #define ID3_ALBUM_ART "aa"
+#define VIDEO_SUB "vs"
+
 #define EXIF_THUMBNAIL "EX_TH"
 #define THUMBNAIL "th" // thumbnail without need for special handling
 

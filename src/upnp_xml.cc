@@ -115,6 +115,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, bool re
 
         addResources(item, &result);
 
+        /*
         if (upnp_class == UPNP_DEFAULT_CLASS_MUSIC_TRACK) {
             // extract extension-less, lowercase track name to search for corresponding
             // image as cover alternative
@@ -135,6 +136,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, bool re
                 result.append_child(MetadataHandler::getMetaFieldName(M_ALBUMARTURI).c_str()).append_child(pugi::node_pcdata).set_value(url.c_str());
             }
         }
+        */
         result.set_name("item");
     } else if (IS_CDS_CONTAINER(objectType)) {
         auto cont = std::static_pointer_cast<CdsContainer>(obj);
@@ -715,7 +717,8 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
 
         // ok this really sucks, I guess another rewrite of the resource manager
         // is necessary
-        if ((i > 0) && (res->getHandlerType() == CH_EXTURL) && ((res->getOption(RESOURCE_CONTENT_TYPE) == THUMBNAIL) || (res->getOption(RESOURCE_CONTENT_TYPE) == ID3_ALBUM_ART))) {
+        int handlerType = res->getHandlerType();
+        if ((i > 0) && (handlerType == CH_EXTURL) && ((res->getOption(RESOURCE_CONTENT_TYPE) == THUMBNAIL) || (res->getOption(RESOURCE_CONTENT_TYPE) == ID3_ALBUM_ART))) {
             url = res->getOption(RESOURCE_OPTION_URL);
             if (url.empty())
                 throw_std_runtime_error("missing thumbnail URL");
@@ -727,9 +730,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
 
         // only add upnp:AlbumArtURI if we have an AA, skip the resource
         if (i > 0) {
-            int handlerType = res->getHandlerType();
-
-            if (handlerType == CH_ID3 || (handlerType == CH_MP4) || handlerType == CH_FLAC || handlerType == CH_FANART || handlerType == CH_EXTURL) {
+            if (handlerType == CH_ID3 || (handlerType == CH_MP4) || handlerType == CH_FLAC || handlerType == CH_FANART || handlerType == CH_EXTURL || handlerType == CH_SUBTITLE) {
 
                 std::string rct;
                 if (res->getHandlerType() == CH_EXTURL)
@@ -745,6 +746,11 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
                     /// provide the profile correctly
                     aa.append_attribute("xmlns:dlna") = "urn:schemas-dlna-org:metadata-1-0";
                     aa.append_attribute("dlna:profileID") = "JPEG_TN";
+                    continue;
+                } else if (rct == VIDEO_SUB) {
+                    auto vs = parent->append_child("sec:CaptionInfoEx");
+                    vs.append_child(pugi::node_pcdata).set_value((virtualURL + url).c_str());
+                    vs.append_attribute("sec:type") = res->getAttribute("type").c_str();
                     continue;
                 }
             }
@@ -801,9 +807,11 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
         protocolInfo = protocolInfo.substr(0, protocolInfo.rfind(':') + 1).append(extend);
         res_attrs[MetadataHandler::getResAttrName(R_PROTOCOLINFO)] = protocolInfo;
 
+/*
         if (startswith(mimeType, "video")) {
             renderCaptionInfo(url, parent);
         }
+*/
 
         log_debug("protocolInfo: {}", protocolInfo.c_str());
 

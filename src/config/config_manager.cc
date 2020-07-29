@@ -921,6 +921,14 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     NEW_STRARR_OPTION(createArrayFromNode(el, "add-file", "name"));
     SET_STRARR_OPTION(CFG_IMPORT_RESOURCES_FANART_FILE_LIST);
 
+    el = getElement("/import/resources/subtitle");
+    if (el == nullptr) {
+        getOption("/import/resources/subtitle",
+            "");
+    }
+    NEW_STRARR_OPTION(createArrayFromNode(el, "add-file", "name"));
+    SET_STRARR_OPTION(CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST);
+
 #ifdef HAVE_EXIV2
 
     el = getElement("/import/library-options/exiv2/auxdata");

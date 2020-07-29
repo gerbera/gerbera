@@ -41,19 +41,27 @@
 
 // These must not have a leading slash, or the "/" operator will produce
 // just this, not folder and this
-static std::vector<std::string> names = {
+std::vector<std::string> FanArtHandler::names = {
+    "%title%.jpg",
+    "%filename%.jpg",
     "folder.jpg",
-    "poster.jpg"
+    "poster.jpg",
+    "cover.jpg",
+    "albumartsmall.jpg",
+    "%album%.jpg",
 };
 
-FanArtHandler::FanArtHandler(std::shared_ptr<Config> config)
+std::vector<std::string> SubtitleHandler::names = {
+    "%title%.srt",
+    "%filename%.srt"
+};
+
+MetacontentHandler::MetacontentHandler(std::shared_ptr<Config> config)
     : MetadataHandler(std::move(config))
 {
-    std::vector<std::string> files = this->config->getArrayOption(CFG_IMPORT_RESOURCES_FANART_FILE_LIST);
-    names.insert(names.end(), files.begin(), files.end());
 }
 
-fs::path FanArtHandler::getFanArtPath(const std::shared_ptr<CdsItem>& item)
+fs::path MetacontentHandler::getContentPath(std::vector<std::string>& names, const std::shared_ptr<CdsItem>& item)
 {
     auto folder = item->getLocation().parent_path();
     log_debug("Folder name: {}", folder.c_str());
@@ -74,20 +82,29 @@ static std::map<std::string, int> metaTags = {
     { "%title%", M_TITLE },
 };
 
-std::string FanArtHandler::expandName(const std::string& name, const std::shared_ptr<CdsItem>& item)
+std::string MetacontentHandler::expandName(const std::string& name, const std::shared_ptr<CdsItem>& item)
 {
     std::string copy(name);
 
     for (const auto& tag : metaTags)
         replace_string(copy, tag.first, item->getMetadata(MT_KEYS[tag.second].upnp));
 
+    fs::path location = item->getLocation();
+    replace_string(copy, "%filename%", location.stem());
     return copy;
+}
+
+FanArtHandler::FanArtHandler(std::shared_ptr<Config> config)
+    : MetacontentHandler(std::move(config))
+{
+    std::vector<std::string> files = this->config->getArrayOption(CFG_IMPORT_RESOURCES_FANART_FILE_LIST);
+    names.insert(names.end(), files.begin(), files.end());
 }
 
 void FanArtHandler::fillMetadata(std::shared_ptr<CdsItem> item)
 {
     log_debug("Running fanart handler on {}", item->getLocation().c_str());
-    auto path = getFanArtPath(item);
+    auto path = getContentPath(names, item);
 
     if (!path.empty()) {
         auto resource = std::make_shared<CdsResource>(CH_FANART);
@@ -99,8 +116,39 @@ void FanArtHandler::fillMetadata(std::shared_ptr<CdsItem> item)
 
 std::unique_ptr<IOHandler> FanArtHandler::serveContent(std::shared_ptr<CdsItem> item, int resNum)
 {
-    auto path = getFanArtPath(item);
+    auto path = getContentPath(names, item);
     log_debug("FanArt: Opening name: {}", path.c_str());
+
+    auto io_handler = std::make_unique<FileIOHandler>(path);
+    return io_handler;
+}
+
+SubtitleHandler::SubtitleHandler(std::shared_ptr<Config> config)
+    : MetacontentHandler(std::move(config))
+{
+    std::vector<std::string> files = this->config->getArrayOption(CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST);
+    names.insert(names.end(), files.begin(), files.end());
+}
+
+void SubtitleHandler::fillMetadata(std::shared_ptr<CdsItem> item)
+{
+    log_debug("Running subtitle handler on {}", item->getLocation().c_str());
+    auto path = getContentPath(names, item);
+
+    if (!path.empty()) {
+        auto resource = std::make_shared<CdsResource>(CH_SUBTITLE);
+        std::string type = path.extension().string().substr(1);
+        resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(type));
+        resource->addAttribute("type", type.c_str());
+        resource->addParameter(RESOURCE_CONTENT_TYPE, VIDEO_SUB);
+        item->addResource(resource);
+    }
+}
+
+std::unique_ptr<IOHandler> SubtitleHandler::serveContent(std::shared_ptr<CdsItem> item, int resNum)
+{
+    auto path = getContentPath(names, item);
+    log_debug("Subtitle: Opening name: {}", path.c_str());
 
     auto io_handler = std::make_unique<FileIOHandler>(path);
     return io_handler;
