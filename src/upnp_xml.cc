@@ -807,11 +807,11 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
         protocolInfo = protocolInfo.substr(0, protocolInfo.rfind(':') + 1).append(extend);
         res_attrs[MetadataHandler::getResAttrName(R_PROTOCOLINFO)] = protocolInfo;
 
-/*
+        /*
         if (startswith(mimeType, "video")) {
             renderCaptionInfo(url, parent);
         }
-*/
+        */
 
         log_debug("protocolInfo: {}", protocolInfo.c_str());
 

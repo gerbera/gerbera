@@ -58,7 +58,7 @@
 #include "metadata/matroska_handler.h"
 #endif
 
-#include "metadata/fanart_handler.h"
+#include "metadata/metacontent_handler.h"
 
 mt_key MT_KEYS[] = {
     { "M_TITLE", "dc:title" },
