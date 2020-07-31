@@ -161,11 +161,13 @@ void MetadataHandler::setMetadata(const std::shared_ptr<Config>& config, const s
     }
 #endif // HAVE_FFMPEG
 
-    // Fanart for all things!
-    FanArtHandler(config).fillMetadata(item);
+    // Fanart for audio and video
+    if (startswith(mimetype, "video") || startswith(mimetype, "audio"))
+        FanArtHandler(config).fillMetadata(item);
     // Subtitles for videos
-    if (startswith(item->getMimeType(), "video"))
+    if (startswith(mimetype, "video"))
         SubtitleHandler(config).fillMetadata(item);
+    ResourceHandler(config).fillMetadata(item);
 }
 
 std::string MetadataHandler::getMetaFieldName(metadata_fields_t field)
@@ -201,6 +203,9 @@ std::unique_ptr<MetadataHandler> MetadataHandler::createHandler(const std::share
         return std::make_unique<FanArtHandler>(config);
     case CH_SUBTITLE:
         return std::make_unique<SubtitleHandler>(config);
+    case CH_RESOURCE:
+        return std::make_unique<ResourceHandler>(config);
+        break;
     default:
         throw_std_runtime_error("unknown content handler ID: " + std::to_string(handlerType));
     }
@@ -244,6 +249,8 @@ const char* MetadataHandler::mapContentHandler2String(int ch)
 #endif
     case CH_SUBTITLE:
         return "Subtitle";
+    case CH_RESOURCE:
+        return "Resource";
     }
     return "Unknown";
 }

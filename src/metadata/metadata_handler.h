@@ -51,6 +51,7 @@ class IOHandler;
 #define CH_FANART 8
 #define CH_MATROSKA 9
 #define CH_SUBTITLE 10
+#define CH_RESOURCE 20
 
 #define CONTENT_TYPE_MP3 "mp3"
 #define CONTENT_TYPE_OGG "ogg"

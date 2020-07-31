@@ -56,6 +56,15 @@ std::vector<std::string> SubtitleHandler::names = {
     "%filename%.srt"
 };
 
+std::vector<std::string> ResourceHandler::names = {
+    "%filename%.srt",
+    "folder.jpg",
+    "poster.jpg",
+    "cover.jpg",
+    "albumartsmall.jpg",
+    "%album%.jpg",
+};
+
 MetacontentHandler::MetacontentHandler(std::shared_ptr<Config> config)
     : MetadataHandler(std::move(config))
 {
@@ -132,15 +141,15 @@ SubtitleHandler::SubtitleHandler(std::shared_ptr<Config> config)
 
 void SubtitleHandler::fillMetadata(std::shared_ptr<CdsItem> item)
 {
-    log_debug("Running subtitle handler on {}", item->getLocation().c_str());
     auto path = getContentPath(names, item);
+    log_debug("Running subtitle handler on {} -> {}", item->getLocation().c_str(), path.c_str());
 
     if (!path.empty()) {
         auto resource = std::make_shared<CdsResource>(CH_SUBTITLE);
         std::string type = path.extension().string().substr(1);
         resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(type));
-        resource->addAttribute("type", type.c_str());
         resource->addParameter(RESOURCE_CONTENT_TYPE, VIDEO_SUB);
+        resource->addParameter("type", type.c_str());
         item->addResource(resource);
     }
 }
@@ -149,6 +158,36 @@ std::unique_ptr<IOHandler> SubtitleHandler::serveContent(std::shared_ptr<CdsItem
 {
     auto path = getContentPath(names, item);
     log_debug("Subtitle: Opening name: {}", path.c_str());
+
+    auto io_handler = std::make_unique<FileIOHandler>(path);
+    return io_handler;
+}
+
+ResourceHandler::ResourceHandler(std::shared_ptr<Config> config)
+    : MetacontentHandler(std::move(config))
+{
+    std::vector<std::string> files = this->config->getArrayOption(CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST);
+    names.insert(names.end(), files.begin(), files.end());
+}
+
+void ResourceHandler::fillMetadata(std::shared_ptr<CdsItem> item)
+{
+    auto path = getContentPath(ResourceHandler::names, item);
+    log_debug("Running resource handler check on {} -> {}", item->getLocation().c_str(), path.c_str());
+
+    if (!path.empty()) {
+        if (tolower_string(path.c_str()) == tolower_string(item->getLocation().c_str())) {
+            auto resource = std::make_shared<CdsResource>(CH_RESOURCE);
+            resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo("res"));
+            item->addResource(resource);
+        }
+    }
+}
+
+std::unique_ptr<IOHandler> ResourceHandler::serveContent(std::shared_ptr<CdsItem> item, int resNum)
+{
+    auto path = getContentPath(ResourceHandler::names, item);
+    log_debug("Resource: Opening name: {}", path.c_str());
 
     auto io_handler = std::make_unique<FileIOHandler>(path);
     return io_handler;

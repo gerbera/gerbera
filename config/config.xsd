@@ -292,6 +292,7 @@
                 <xs:element ref="playlist-charset" minOccurs="0"/>
                 <xs:element ref="autoscan" minOccurs="0"/>
                 <xs:element ref="layout" minOccurs="0"/>
+                <xs:element ref="resources" minOccurs="0"/>
                 <xs:element ref="library-options" minOccurs="0"/>
                 <xs:element ref="magic-file" minOccurs="0"/>
                 <xs:element ref="online-content" minOccurs="0"/>
@@ -442,6 +443,46 @@
         <xs:complexType>
             <xs:attribute name="from" type="xs:string" use="required"/>
             <xs:attribute name="to" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="resources">
+        <xs:complexType>
+            <xs:all>
+                <xs:element ref="fanart" minOccurs="0"/>
+                <xs:element ref="subtitle" minOccurs="0"/>
+                <xs:element ref="resource" minOccurs="0"/>
+            </xs:all>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="fanart">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="add-file" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="subtitle">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="add-file" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="resource">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="add-file" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="add-file">
+        <xs:complexType>
+            <xs:attribute name="name" type="xs:string" use="required"/>
         </xs:complexType>
     </xs:element>
 

@@ -70,4 +70,15 @@ private:
     static std::vector<std::string> names;
 };
 
+/// \brief This class is responsible for reverse mapping filesystem based resources
+class ResourceHandler : public MetacontentHandler {
+public:
+    explicit ResourceHandler(std::shared_ptr<Config> config);
+    void fillMetadata(std::shared_ptr<CdsItem> item) override;
+    std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsItem> item, int resNum) override;
+
+private:
+    static std::vector<std::string> names;
+};
+
 #endif // __METADATA_CONTENT_H__

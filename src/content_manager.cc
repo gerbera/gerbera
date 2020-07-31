@@ -496,6 +496,19 @@ int ContentManager::_addFile(const fs::path& path, fs::path rootPath, bool recur
     if (recursive && IS_CDS_CONTAINER(obj->getObjectType())) {
         addRecursive(path, hidden, task);
     }
+
+    if (obj->hasResource(CH_RESOURCE)) {
+        std::string newPath = path.parent_path().c_str();
+        int objectID = storage->findObjectIDByPath(newPath, false);
+        if (objectID != INVALID_OBJECT_ID) {
+            // as there is no proper way to force refresh of unchanged files, delete whole dir and rescan it
+            removeObject(objectID);
+            auto adir = getAutoscanDirectory(objectID);
+            addFile(newPath, recursive, true, hidden, true, false);
+            log_debug("force rescan of {} for resource {}", newPath.c_str(), obj->getLocation().c_str());
+        }
+    }
+
     return obj->getID();
 }
 
