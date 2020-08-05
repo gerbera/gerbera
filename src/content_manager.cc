@@ -445,7 +445,45 @@ void ContentManager::addVirtualItem(const std::shared_ptr<CdsObject>& obj, bool 
     addObject(obj);
 }
 
-int ContentManager::_addFile(const fs::path& path, fs::path rootPath, bool recursive, bool hidden, const std::shared_ptr<CMAddFileTask>& task)
+std::shared_ptr<CdsObject> ContentManager::createSingleItem(const fs::path& path, fs::path& rootPath, bool checkStorage, bool processExisting, const std::shared_ptr<CMAddFileTask>& task)
+{
+    auto obj = checkStorage ? storage->findObjectByPath(path) : nullptr;
+    bool isNew = false;
+    if (obj == nullptr) {
+        obj = createObjectFromFile(path);
+        if (obj == nullptr) { // object ignored
+            log_warning("file ignored: {}", path.c_str());
+            return nullptr;
+        } else if (IS_CDS_ITEM(obj->getObjectType())) {
+            addObject(obj);
+            isNew = true;
+        }
+    }
+    if (IS_CDS_ITEM(obj->getObjectType()) && layout != nullptr && (processExisting || isNew)) {
+        try {
+            if (rootPath.empty() && (task != nullptr))
+                rootPath = task->getRootPath();
+
+            layout->processCdsObject(obj, rootPath);
+
+            std::string mimetype = std::static_pointer_cast<CdsItem>(obj)->getMimeType();
+            std::string content_type = getValueOrDefault(mimetype_contenttype_map, mimetype);
+
+#ifdef HAVE_JS
+            if ((playlist_parser_script != nullptr) && (content_type == CONTENT_TYPE_PLAYLIST))
+                playlist_parser_script->processPlaylistObject(obj, task);
+#else
+            if (content_type == CONTENT_TYPE_PLAYLIST)
+                log_warning("Playlist {} will not be parsed: Gerbera was compiled without JS support!", obj->getLocation().c_str());
+#endif // JS
+        } catch (const std::runtime_error& e) {
+            throw e;
+        }
+    }
+    return obj;
+}
+
+int ContentManager::_addFile(const fs::path& path, fs::path rootPath, bool recursive, bool hidden, bool rescanResource, const std::shared_ptr<CMAddFileTask>& task)
 {
     if (!hidden) {
         if (path.is_relative())
@@ -463,56 +501,38 @@ int ContentManager::_addFile(const fs::path& path, fs::path rootPath, bool recur
     initJS();
 #endif
 
-    auto obj = storage->findObjectByPath(path);
-    if (obj == nullptr) {
-        obj = createObjectFromFile(path);
-        if (obj == nullptr) // object ignored
-            return INVALID_OBJECT_ID;
-        if (IS_CDS_ITEM(obj->getObjectType())) {
-            addObject(obj);
-            if (layout != nullptr) {
-                try {
-                    if (rootPath.empty() && (task != nullptr))
-                        rootPath = task->getRootPath();
-
-                    layout->processCdsObject(obj, rootPath);
-
-                    std::string mimetype = std::static_pointer_cast<CdsItem>(obj)->getMimeType();
-                    std::string content_type = getValueOrDefault(mimetype_contenttype_map, mimetype);
-#ifdef HAVE_JS
-                    if ((playlist_parser_script != nullptr) && (content_type == CONTENT_TYPE_PLAYLIST))
-                        playlist_parser_script->processPlaylistObject(obj, task);
-#else
-                    if (content_type == CONTENT_TYPE_PLAYLIST)
-                        log_warning("Playlist {} will not be parsed: Gerbera was compiled without JS support!", obj->getLocation().c_str());
-#endif // JS
-                } catch (const std::runtime_error& e) {
-                    throw e;
-                }
-            }
-        }
-    }
+    // checkStorage, don't process existing
+    auto obj = createSingleItem(path, rootPath, true, false, task);
+    if (obj == nullptr) // object ignored
+        return INVALID_OBJECT_ID;
 
     if (recursive && IS_CDS_CONTAINER(obj->getObjectType())) {
         addRecursive(path, hidden, task);
     }
 
-    if (obj->hasResource(CH_RESOURCE)) {
-        std::string newPath = path.parent_path().c_str();
-        int objectID = storage->findObjectIDByPath(newPath, false);
-        if (objectID != INVALID_OBJECT_ID) {
-            // as there is no proper way to force refresh of unchanged files, delete whole dir and rescan it
-            removeObject(objectID);
-            auto adir = getAutoscanDirectory(objectID);
-            addFile(newPath, recursive, true, hidden, true, false);
-            log_debug("force rescan of {} for resource {}", newPath.c_str(), obj->getLocation().c_str());
-        }
+    if (rescanResource && obj->hasResource(CH_RESOURCE)) {
+        std::string parentPath = path.parent_path().c_str();
+        updateAttachedResources(obj->getLocation().c_str(), parentPath, true);
     }
 
     return obj->getID();
 }
 
-void ContentManager::_removeObject(int objectID, bool all)
+bool ContentManager::updateAttachedResources(const char* location, const std::string& parentPath, bool all)
+{
+    bool parentRemoved = false;
+    int parentID = storage->findObjectIDByPath(parentPath, false);
+    if (parentID != INVALID_OBJECT_ID) {
+        // as there is no proper way to force refresh of unchanged files, delete whole dir and rescan it
+        _removeObject(parentID, false, all);
+        addFile(parentPath, true, false, config->getBoolOption(CFG_IMPORT_HIDDEN_FILES), false, true, false);
+        log_debug("forced rescan of {} for resource {}", parentPath.c_str(), location);
+        parentRemoved = true;
+    }
+    return parentRemoved;
+}
+
+void ContentManager::_removeObject(int objectID, bool rescanResource, bool all)
 {
     if (objectID == CDS_ID_ROOT)
         throw_std_runtime_error("cannot remove root container");
@@ -521,12 +541,22 @@ void ContentManager::_removeObject(int objectID, bool all)
     if (IS_FORBIDDEN_CDS_ID(objectID))
         throw_std_runtime_error("tried to remove illegal object id");
 
-    auto changedContainers = storage->removeObject(objectID, all);
-    if (changedContainers != nullptr) {
-        session_manager->containerChangedUI(changedContainers->ui);
-        update_manager->containersChanged(changedContainers->upnp);
+    bool parentRemoved = false;
+    if (rescanResource) {
+        auto obj = storage->loadObject(objectID);
+        if (obj != nullptr && obj->hasResource(CH_RESOURCE)) {
+            std::string parentPath = obj->getLocation().parent_path().c_str();
+            parentRemoved = updateAttachedResources(obj->getLocation().c_str(), parentPath, all);
+        }
     }
 
+    if (!parentRemoved) {
+        auto changedContainers = storage->removeObject(objectID, all);
+        if (changedContainers != nullptr) {
+            session_manager->containerChangedUI(changedContainers->ui);
+            update_manager->containersChanged(changedContainers->upnp);
+        }
+    }
     // reload accounting
     // loadAccounting();
 }
@@ -674,13 +704,13 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
                     // readd object - we have to do this in order to trigger
                     // layout
                     removeObject(objectID, false);
-                    addFileInternal(newPath, rootpath, false, false, adir->getHidden());
+                    addFileInternal(newPath, rootpath, false, false, adir->getHidden(), false);
                     // update time variable
                     last_modified_current_max = statbuf.st_mtime;
                 }
             } else {
-                // add file, not recursive, not async
-                addFileInternal(newPath, rootpath, false, false, adir->getHidden());
+                // add file, not recursive, not async, not forced
+                addFileInternal(newPath, rootpath, false, false, adir->getHidden(), false);
                 if (last_modified_current_max < statbuf.st_mtime)
                     last_modified_current_max = statbuf.st_mtime;
             }
@@ -693,6 +723,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
                 auto adir2 = getAutoscanDirectory(objectID);
                 if (adir2) {
                     rescanDirectory(adir2, newPath, task->isCancellable());
+                    log_debug("rescanDirectory2 {}", newPath.c_str());
                 }
             } else {
                 // we have to make sure that we will never add a path to the task list
@@ -710,7 +741,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
                 }
 
                 // add directory, recursive, async, hidden flag, low priority
-                addFileInternal(newPath, rootpath, true, true, adir->getHidden(), true, thisTaskID, task->isCancellable());
+                addFileInternal(newPath, rootpath, true, true, adir->getHidden(), false, true, thisTaskID, task->isCancellable());
             }
         }
     } // while
@@ -782,55 +813,15 @@ void ContentManager::addRecursive(const fs::path& path, bool hidden, const std::
         }
 
         try {
-            std::shared_ptr<CdsObject> obj = nullptr;
-            if (parentID > 0)
-                obj = storage->findObjectByPath(newPath);
-            if (obj == nullptr) // create object
-            {
-                obj = createObjectFromFile(newPath);
+            fs::path rootPath("");
+            // check storage if parent, process existing
+            auto obj = createSingleItem(newPath, rootPath, (parentID > 0), true, task);
 
-                if (obj == nullptr) // object ignored
-                {
-                    log_warning("file ignored: {}", newPath.c_str());
-                } else {
-                    // obj->setParentID(parentID);
-                    if (IS_CDS_ITEM(obj->getObjectType())) {
-                        addObject(obj);
-                        parentID = obj->getParentID();
-                    }
-                }
-            }
-            if (obj != nullptr) {
-                //#ifdef HAVE_JS
-                if (IS_CDS_ITEM(obj->getObjectType())) {
-                    if (layout != nullptr) {
-                        try {
-                            std::string rootpath;
-                            if (task != nullptr)
-                                rootpath = task->getRootPath();
-                            layout->processCdsObject(obj, rootpath);
-#ifdef HAVE_JS
-                            auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-                            std::string mimetype = std::static_pointer_cast<CdsItem>(obj)->getMimeType();
-                            std::string content_type = getValueOrDefault(mappings, mimetype);
+            if (IS_CDS_ITEM(obj->getObjectType()))
+                parentID = obj->getParentID();
 
-                            if ((playlist_parser_script != nullptr) && (content_type == CONTENT_TYPE_PLAYLIST))
-                                playlist_parser_script->processPlaylistObject(obj, task);
-
-#endif // JS
-                        } catch (const std::runtime_error& e) {
-                            throw e;
-                        }
-                    }
-
-                    /// \todo Why was this statement here??? - It seems to be unnecessary
-                    // obj = createObjectFromFile(newPath);
-                }
-                //#endif
-                if (IS_CDS_CONTAINER(obj->getObjectType())) {
-                    addRecursive(newPath, hidden, task);
-                }
-            }
+            if (obj != nullptr && IS_CDS_CONTAINER(obj->getObjectType()))
+                addRecursive(newPath, hidden, task);
         } catch (const std::runtime_error& ex) {
             log_warning("skipping {} (ex:{})", newPath.c_str(), ex.what());
         }
@@ -1269,31 +1260,31 @@ void ContentManager::addTask(const std::shared_ptr<GenericTask>& task, bool lowP
     signal();
 }
 
-int ContentManager::addFile(const fs::path& path, bool recursive, bool async, bool hidden, bool lowPriority, bool cancellable)
+int ContentManager::addFile(const fs::path& path, bool recursive, bool async, bool hidden, bool rescanResource, bool lowPriority, bool cancellable)
 {
     fs::path rootpath;
     if (fs::is_directory(path))
         rootpath = path;
-    return addFileInternal(path, rootpath, recursive, async, hidden, lowPriority, 0, cancellable);
+    return addFileInternal(path, rootpath, recursive, async, hidden, rescanResource, lowPriority, 0, cancellable);
 }
 
-int ContentManager::addFile(const fs::path& path, const fs::path& rootpath, bool recursive, bool async, bool hidden, bool lowPriority, bool cancellable)
+int ContentManager::addFile(const fs::path& path, const fs::path& rootpath, bool recursive, bool async, bool hidden, bool rescanResource, bool lowPriority, bool cancellable)
 {
-    return addFileInternal(path, rootpath, recursive, async, hidden, lowPriority, 0, cancellable);
+    return addFileInternal(path, rootpath, recursive, async, hidden, rescanResource, lowPriority, 0, cancellable);
 }
 
 int ContentManager::addFileInternal(
-    const fs::path& path, const fs::path& rootpath, bool recursive, bool async, bool hidden, bool lowPriority, unsigned int parentTaskID, bool cancellable)
+    const fs::path& path, const fs::path& rootpath, bool recursive, bool async, bool hidden, bool rescanResource, bool lowPriority, unsigned int parentTaskID, bool cancellable)
 {
     if (async) {
         auto self = shared_from_this();
-        auto task = std::make_shared<CMAddFileTask>(self, path, rootpath, recursive, hidden, cancellable);
+        auto task = std::make_shared<CMAddFileTask>(self, path, rootpath, recursive, hidden, rescanResource, cancellable);
         task->setDescription("Importing: " + path.string());
         task->setParentID(parentTaskID);
         addTask(task, lowPriority);
         return INVALID_OBJECT_ID;
     }
-    return _addFile(path, rootpath, recursive, hidden);
+    return _addFile(path, rootpath, recursive, hidden, rescanResource);
 }
 
 #ifdef ONLINE_SERVICES
@@ -1392,7 +1383,7 @@ void ContentManager::invalidateTask(unsigned int taskID, task_owner_t taskOwner)
 #endif
 }
 
-void ContentManager::removeObject(int objectID, bool async, bool all)
+void ContentManager::removeObject(int objectID, bool rescanResource, bool async, bool all)
 {
     if (async) {
         /*
@@ -1405,7 +1396,7 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
             desc << '/' << objectPath->get(i)->getTitle();
         */
         auto self = shared_from_this();
-        auto task = std::make_shared<CMRemoveObjectTask>(self, objectID, all);
+        auto task = std::make_shared<CMRemoveObjectTask>(self, objectID, rescanResource, all);
         fs::path path;
         std::shared_ptr<CdsObject> obj;
 
@@ -1457,7 +1448,7 @@ void ContentManager::removeObject(int objectID, bool async, bool all)
 
         addTask(task);
     } else {
-        _removeObject(objectID, all);
+        _removeObject(objectID, rescanResource, all);
     }
 }
 
@@ -1686,13 +1677,14 @@ void ContentManager::triggerPlayHook(const std::shared_ptr<CdsObject>& obj)
 }
 
 CMAddFileTask::CMAddFileTask(std::shared_ptr<ContentManager> content,
-    fs::path path, fs::path rootpath, bool recursive, bool hidden, bool cancellable)
+    fs::path path, fs::path rootpath, bool recursive, bool hidden, bool rescanResource, bool cancellable)
     : GenericTask(ContentManagerTask)
     , content(std::move(content))
     , path(std::move(path))
     , rootpath(std::move(rootpath))
     , recursive(recursive)
     , hidden(hidden)
+    , rescanResource(rescanResource)
 {
     this->cancellable = cancellable;
     this->taskType = AddFile;
@@ -1706,15 +1698,16 @@ void CMAddFileTask::run()
 {
     log_debug("running add file task with path {} recursive: {}", path.c_str(), recursive);
     auto self = shared_from_this();
-    content->_addFile(path, rootpath, recursive, hidden, self);
+    content->_addFile(path, rootpath, recursive, hidden, rescanResource, self);
 }
 
 CMRemoveObjectTask::CMRemoveObjectTask(std::shared_ptr<ContentManager> content,
-    int objectID, bool all)
+    int objectID, bool rescanResource, bool all)
     : GenericTask(ContentManagerTask)
     , content(std::move(content))
     , objectID(objectID)
     , all(all)
+    , rescanResource(rescanResource)
 {
     this->taskType = RemoveObject;
     cancellable = false;
@@ -1722,7 +1715,7 @@ CMRemoveObjectTask::CMRemoveObjectTask(std::shared_ptr<ContentManager> content,
 
 void CMRemoveObjectTask::run()
 {
-    content->_removeObject(objectID, all);
+    content->_removeObject(objectID, rescanResource, all);
 }
 
 CMRescanDirectoryTask::CMRescanDirectoryTask(std::shared_ptr<ContentManager> content,

@@ -1,28 +1,22 @@
-/*MT*
+/*GRB*
 
-    MediaTomb - http://www.mediatomb.cc/
+    Gerbera - https://gerbera.io/
 
-    metacontent_handler.cc - this file is part of MediaTomb.
+    metacontent_handler.cc - this file is part of Gerbera.
 
-    Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
-                       Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
+    Copyright (C) 2020 Gerbera Contributors
 
-    Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
-                            Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
-                            Leonhard Wimmer <leo@mediatomb.cc>
-
-    MediaTomb is free software; you can redistribute it and/or modify
+    Gerbera is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
 
-    MediaTomb is distributed in the hope that it will be useful,
+    Gerbera is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    version 2 along with MediaTomb; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
+    along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
 
     $Id$
 */
@@ -39,32 +33,6 @@
 #include "iohandler/file_io_handler.h"
 #include "util/tools.h"
 
-// These must not have a leading slash, or the "/" operator will produce
-// just this, not folder and this
-std::vector<std::string> FanArtHandler::names = {
-    "%title%.jpg",
-    "%filename%.jpg",
-    "folder.jpg",
-    "poster.jpg",
-    "cover.jpg",
-    "albumartsmall.jpg",
-    "%album%.jpg",
-};
-
-std::vector<std::string> SubtitleHandler::names = {
-    "%title%.srt",
-    "%filename%.srt"
-};
-
-std::vector<std::string> ResourceHandler::names = {
-    "%filename%.srt",
-    "folder.jpg",
-    "poster.jpg",
-    "cover.jpg",
-    "albumartsmall.jpg",
-    "%album%.jpg",
-};
-
 MetacontentHandler::MetacontentHandler(std::shared_ptr<Config> config)
     : MetadataHandler(std::move(config))
 {
@@ -75,14 +43,21 @@ fs::path MetacontentHandler::getContentPath(std::vector<std::string>& names, con
     auto folder = item->getLocation().parent_path();
     log_debug("Folder name: {}", folder.c_str());
 
+    auto fileNames = std::map<std::string, fs::path>();
+    for (const auto& p : fs::directory_iterator(folder))
+        if (p.is_regular_file())
+            fileNames[tolower_string(p.path().filename())] = p;
+
     for (const auto& name : names) {
         auto fileName = tolower_string(expandName(name, item));
-        for (auto& p : fs::directory_iterator(folder))
-            if (p.is_regular_file() && tolower_string(p.path().filename()) == fileName) {
-                log_debug("{}: found", p.path().filename().c_str());
-                return p.path();
+        for (const auto& testFile : fileNames) {
+            if (testFile.first == fileName) {
+                log_debug("{}: found", testFile.first.c_str());
+                return testFile.second;
             }
+        }
     }
+
     return "";
 }
 
@@ -102,6 +77,16 @@ std::string MetacontentHandler::expandName(const std::string& name, const std::s
     replace_string(copy, "%filename%", location.stem());
     return copy;
 }
+
+std::vector<std::string> FanArtHandler::names = {
+    "%title%.jpg",
+    "%filename%.jpg",
+    "folder.jpg",
+    "poster.jpg",
+    "cover.jpg",
+    "albumartsmall.jpg",
+    "%album%.jpg",
+};
 
 FanArtHandler::FanArtHandler(std::shared_ptr<Config> config)
     : MetacontentHandler(std::move(config))
@@ -127,10 +112,20 @@ std::unique_ptr<IOHandler> FanArtHandler::serveContent(std::shared_ptr<CdsItem> 
 {
     auto path = getContentPath(names, item);
     log_debug("FanArt: Opening name: {}", path.c_str());
-
+    struct stat statbuf;
+    int ret = stat(path.c_str(), &statbuf);
+    if (ret != 0) {
+        log_warning("File does not exist: {} ({})", path.c_str(), mt_strerror(errno));
+        return nullptr;
+    }
     auto io_handler = std::make_unique<FileIOHandler>(path);
     return io_handler;
 }
+
+std::vector<std::string> SubtitleHandler::names = {
+    "%title%.srt",
+    "%filename%.srt"
+};
 
 SubtitleHandler::SubtitleHandler(std::shared_ptr<Config> config)
     : MetacontentHandler(std::move(config))
@@ -158,10 +153,21 @@ std::unique_ptr<IOHandler> SubtitleHandler::serveContent(std::shared_ptr<CdsItem
 {
     auto path = getContentPath(names, item);
     log_debug("Subtitle: Opening name: {}", path.c_str());
-
+    struct stat statbuf;
+    int ret = stat(path.c_str(), &statbuf);
+    if (ret != 0) {
+        log_warning("File does not exist: {} ({})", path.c_str(), mt_strerror(errno));
+        return nullptr;
+    }
     auto io_handler = std::make_unique<FileIOHandler>(path);
     return io_handler;
 }
+
+std::vector<std::string> ResourceHandler::names = {
+    "%filename%.srt",
+    "%filename%.jpg",
+    "%album%.jpg",
+};
 
 ResourceHandler::ResourceHandler(std::shared_ptr<Config> config)
     : MetacontentHandler(std::move(config))
@@ -172,7 +178,7 @@ ResourceHandler::ResourceHandler(std::shared_ptr<Config> config)
 
 void ResourceHandler::fillMetadata(std::shared_ptr<CdsItem> item)
 {
-    auto path = getContentPath(ResourceHandler::names, item);
+    auto path = getContentPath(names, item);
     log_debug("Running resource handler check on {} -> {}", item->getLocation().c_str(), path.c_str());
 
     if (!path.empty()) {
@@ -186,9 +192,14 @@ void ResourceHandler::fillMetadata(std::shared_ptr<CdsItem> item)
 
 std::unique_ptr<IOHandler> ResourceHandler::serveContent(std::shared_ptr<CdsItem> item, int resNum)
 {
-    auto path = getContentPath(ResourceHandler::names, item);
+    auto path = getContentPath(names, item);
     log_debug("Resource: Opening name: {}", path.c_str());
-
+    struct stat statbuf;
+    int ret = stat(path.c_str(), &statbuf);
+    if (ret != 0) {
+        log_warning("File does not exist: {} ({})", path.c_str(), mt_strerror(errno));
+        return nullptr;
+    }
     auto io_handler = std::make_unique<FileIOHandler>(path);
     return io_handler;
 }

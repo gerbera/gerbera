@@ -126,7 +126,7 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
 
             if (!IS_CDS_ITEM_EXTERNAL_URL(otype) && !IS_CDS_ITEM_INTERNAL_URL(otype)) {
                 fs::path loc = self->getProperty("location");
-                pcd_id = cm->addFile(loc, false, false, true);
+                pcd_id = cm->addFile(loc, false, false, true, false);
                 if (pcd_id == INVALID_OBJECT_ID) {
                     return 0;
                 }
