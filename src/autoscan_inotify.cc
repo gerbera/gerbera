@@ -136,7 +136,7 @@ void AutoscanInotify::threadProc()
                     log_debug("adding non-recursive watch: {}", location.c_str());
                     monitorDirectory(location, adir, true);
                 }
-                content->rescanDirectory(adir, "", false);
+                content->rescanDirectory(adir, adir->getObjectID(), location, false);
 
                 lock.lock();
             }

@@ -113,10 +113,11 @@ class CMRescanDirectoryTask : public GenericTask, public std::enable_shared_from
 protected:
     std::shared_ptr<ContentManager> content;
     std::shared_ptr<AutoscanDirectory> adir;
+    int containerID;
 
 public:
     CMRescanDirectoryTask(std::shared_ptr<ContentManager> content,
-        std::shared_ptr<AutoscanDirectory> adir, bool cancellable);
+        std::shared_ptr<AutoscanDirectory> adir, int containerId, bool cancellable);
     void run() override;
 };
 
@@ -285,7 +286,7 @@ public:
     /// \brief handles the recreation of a persistent autoscan directory
     void handlePersistentAutoscanRecreate(const std::shared_ptr<AutoscanDirectory>& adir);
 
-    void rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, std::string descPath = "", bool cancellable = true);
+    void rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, int objectId, std::string descPath = "", bool cancellable = true);
 
     /// \brief instructs ContentManager to reload scripting environment
     void reloadLayout();
@@ -356,7 +357,7 @@ protected:
     //void _addFile2(std::string path, bool recursive=0);
     void _removeObject(int objectID, bool rescanResource, bool all);
 
-    void _rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, const std::shared_ptr<GenericTask>& task = nullptr);
+    void _rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, int objectId, const std::shared_ptr<GenericTask>& task = nullptr);
     /* for recursive addition */
     void addRecursive(const fs::path& path, bool hidden, const std::shared_ptr<CMAddFileTask>& task);
     std::shared_ptr<CdsObject> createSingleItem(const fs::path& path, fs::path& rootPath, bool checkStorage, bool processExisting, const std::shared_ptr<CMAddFileTask>& task);

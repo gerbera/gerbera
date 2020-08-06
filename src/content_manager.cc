@@ -258,11 +258,11 @@ void ContentManager::run()
     if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
         /// \todo change this (we need a new autoscan architecture)
         for (size_t i = 0; i < autoscan_inotify->size(); i++) {
-            std::shared_ptr<AutoscanDirectory> dir = autoscan_inotify->get(i);
-            if (dir != nullptr)
-                inotify->monitor(dir);
+            std::shared_ptr<AutoscanDirectory> adir = autoscan_inotify->get(i);
+            if (adir != nullptr)
+                inotify->monitor(adir);
 
-            auto param = std::make_shared<Timer::Parameter>(Timer::Parameter::timer_param_t::IDAutoscan, dir->getScanID());
+            auto param = std::make_shared<Timer::Parameter>(Timer::Parameter::timer_param_t::IDAutoscan, adir->getScanID());
             log_debug("Adding one-shot inotify scan");
             timer->addTimerSubscriber(this, 60, param, true);
         }
@@ -270,10 +270,10 @@ void ContentManager::run()
 #endif
 
     for (size_t i = 0; i < autoscan_timed->size(); i++) {
-        std::shared_ptr<AutoscanDirectory> dir = autoscan_timed->get(i);
-        auto param = std::make_shared<Timer::Parameter>(Timer::Parameter::timer_param_t::IDAutoscan, dir->getScanID());
-        log_debug("Adding timed scan with interval {}", dir->getInterval());
-        timer->addTimerSubscriber(this, dir->getInterval(), param, false);
+        std::shared_ptr<AutoscanDirectory> adir = autoscan_timed->get(i);
+        auto param = std::make_shared<Timer::Parameter>(Timer::Parameter::timer_param_t::IDAutoscan, adir->getScanID());
+        log_debug("Adding timed scan with interval {}", adir->getInterval());
+        timer->addTimerSubscriber(this, adir->getInterval(), param, false);
     }
 }
 
@@ -318,7 +318,7 @@ void ContentManager::timerNotify(std::shared_ptr<Timer::Parameter> parameter)
         if (adir == nullptr)
             return;
 
-        rescanDirectory(adir);
+        rescanDirectory(adir, adir->getObjectID());
     }
 #ifdef ONLINE_SERVICES
     else if (parameter->whoami() == Timer::Parameter::IDOnlineContent) {
@@ -572,14 +572,13 @@ int ContentManager::ensurePathExistence(fs::path path)
     return containerID;
 }
 
-void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, const std::shared_ptr<GenericTask>& task)
+void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, int containerID, const std::shared_ptr<GenericTask>& task)
 {
     log_debug("start");
 
     if (adir == nullptr)
         throw_std_runtime_error("ID valid but nullptr returned? this should never happen");
 
-    int containerID = adir->getObjectID();
     fs::path rootpath = adir->getLocation();
 
     fs::path location;
@@ -626,6 +625,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
     }
 
     time_t last_modified_current_max = adir->getPreviousLMT();
+    time_t last_modified_new_max = adir->getPreviousLMT();
 
     log_debug("Rescanning location: {}", location.c_str());
 
@@ -706,25 +706,22 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
                     removeObject(objectID, false);
                     addFileInternal(newPath, rootpath, false, false, adir->getHidden(), false);
                     // update time variable
-                    last_modified_current_max = statbuf.st_mtime;
+                    last_modified_new_max = statbuf.st_mtime;
                 }
             } else {
                 // add file, not recursive, not async, not forced
                 addFileInternal(newPath, rootpath, false, false, adir->getHidden(), false);
-                if (last_modified_current_max < statbuf.st_mtime)
-                    last_modified_current_max = statbuf.st_mtime;
+                if (last_modified_new_max < statbuf.st_mtime)
+                    last_modified_new_max = statbuf.st_mtime;
             }
         } else if (S_ISDIR(statbuf.st_mode) && (adir->getRecursive())) {
             int objectID = storage->findObjectIDByPath(newPath);
             if (objectID > 0) {
+                log_debug("rescanSubDirectory {}", newPath.c_str());
                 if (list != nullptr)
                     list->erase(objectID);
                 // add a task to rescan the directory that was found
-                auto adir2 = getAutoscanDirectory(objectID);
-                if (adir2) {
-                    rescanDirectory(adir2, newPath, task->isCancellable());
-                    log_debug("rescanDirectory2 {}", newPath.c_str());
-                }
+                rescanDirectory(adir, objectID, newPath, task->isCancellable());
             } else {
                 // we have to make sure that we will never add a path to the task list
                 // if it is going to be removed by a pending remove task.
@@ -740,6 +737,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
                     return;
                 }
 
+                log_debug("addSubDirectory {}", newPath.c_str());
                 // add directory, recursive, async, hidden flag, low priority
                 addFileInternal(newPath, rootpath, true, true, adir->getHidden(), false, true, thisTaskID, task->isCancellable());
             }
@@ -759,7 +757,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
         }
     }
 
-    adir->setCurrentLMT(last_modified_current_max);
+    adir->setCurrentLMT(last_modified_new_max);
 }
 
 /* scans the given directory and adds everything recursively */
@@ -1452,11 +1450,11 @@ void ContentManager::removeObject(int objectID, bool rescanResource, bool async,
     }
 }
 
-void ContentManager::rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, std::string descPath, bool cancellable)
+void ContentManager::rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, int objectId, std::string descPath, bool cancellable)
 {
     // building container path for the description
     auto self = shared_from_this();
-    auto task = std::make_shared<CMRescanDirectoryTask>(self, adir, cancellable);
+    auto task = std::make_shared<CMRescanDirectoryTask>(self, adir, objectId, cancellable);
 
     adir->incTaskCount();
 
@@ -1719,10 +1717,11 @@ void CMRemoveObjectTask::run()
 }
 
 CMRescanDirectoryTask::CMRescanDirectoryTask(std::shared_ptr<ContentManager> content,
-    std::shared_ptr<AutoscanDirectory> adir, bool cancellable)
+    std::shared_ptr<AutoscanDirectory> adir, int containerId, bool cancellable)
     : GenericTask(ContentManagerTask)
     , content(std::move(content))
     , adir(std::move(adir))
+    , containerID(containerId)
 {
     this->cancellable = cancellable;
     this->taskType = RescanDirectory;
@@ -1734,7 +1733,7 @@ void CMRescanDirectoryTask::run()
         return;
 
     auto self = shared_from_this();
-    content->_rescanDirectory(adir, self);
+    content->_rescanDirectory(adir, containerID, self);
     adir->decTaskCount();
 
     if (adir->getTaskCount() == 0) {
