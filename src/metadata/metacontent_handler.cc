@@ -79,13 +79,13 @@ std::string MetacontentHandler::expandName(const std::string& name, const std::s
 }
 
 std::vector<std::string> FanArtHandler::names = {
-    "%title%.jpg",
-    "%filename%.jpg",
-    "folder.jpg",
-    "poster.jpg",
-    "cover.jpg",
-    "albumartsmall.jpg",
-    "%album%.jpg",
+    //    "%title%.jpg",
+    //    "%filename%.jpg",
+    //    "folder.jpg",
+    //    "poster.jpg",
+    //    "cover.jpg",
+    //    "albumartsmall.jpg",
+    //    "%album%.jpg",
 };
 
 FanArtHandler::FanArtHandler(std::shared_ptr<Config> config)
@@ -123,8 +123,8 @@ std::unique_ptr<IOHandler> FanArtHandler::serveContent(std::shared_ptr<CdsItem> 
 }
 
 std::vector<std::string> SubtitleHandler::names = {
-    "%title%.srt",
-    "%filename%.srt"
+    //    "%title%.srt",
+    //    "%filename%.srt"
 };
 
 SubtitleHandler::SubtitleHandler(std::shared_ptr<Config> config)
@@ -164,9 +164,9 @@ std::unique_ptr<IOHandler> SubtitleHandler::serveContent(std::shared_ptr<CdsItem
 }
 
 std::vector<std::string> ResourceHandler::names = {
-    "%filename%.srt",
-    "%filename%.jpg",
-    "%album%.jpg",
+    //    "%filename%.srt",
+    //    "cover.jpg",
+    //    "%album%.jpg",
 };
 
 ResourceHandler::ResourceHandler(std::shared_ptr<Config> config)

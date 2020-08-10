@@ -293,6 +293,71 @@ Defines various layout options for generated virtual layout.
             Target path. / can be used to create sub structure.
 
 
+``resources``
+~~~~~~~~~~~~~
+
+::
+
+    <resources>
+
+* Optional
+
+Defines various resource options for file based resources. Older versions of Gerbera added sereral files automatically. For performance reasons no pattern is added anymore. You can set up your correct fanart file by yourself, if no image is embedded in your media. If you have subtitle files, add the correct pattern, also.
+
+**Child tags:**
+
+    ::
+
+        <fanart>...</fanart>
+        <subtitle>...</subtitle>
+        <resource>...</resource>
+
+    * Optional
+
+    Define file patterns to search for fanart, subtitle and resources respectivly. Search is case insensitive so ``cover.png`` matches anything like ``Cover.PNG`` or ``cover.PNG``.
+
+    ``fanart`` and ``subtitle`` patterns are used to identify external resources which are added to each item if the pattern matches.
+
+    ``resource`` patterns are used to trigger rescan of the whole directory if such a file was changed, added or removed.
+
+    Each of these tags can contain the following
+
+**Child tags:**
+
+``add-file``
+------------
+
+    ::
+
+        <add-file name="cover.png"/>
+        <add-file name="%filename%.srt"/>
+
+    * Optional
+
+    Add search pattern to resource handler. The search pattern can contain variables:
+
+    - ``%filename%``: Name of the file without extension
+    - ``%album%``: Value of the album tag
+    - ``%title%``: Value of the title tag
+
+A sample configuration would be:
+
+.. code-block:: xml
+
+  <resources>
+      <fanart>
+          <add-file name="cover.png"/>
+      </fanart>
+      <subtitle>
+          <add-file name="%filename%.srt"/>
+      </subtitle>
+      <resource>
+          <add-file name="cover.png"/>
+          <add-file name="%filename%.srt""/>
+      </resource>
+  </resources>
+
+
 ``mappings``
 ~~~~~~~~~~~~
 

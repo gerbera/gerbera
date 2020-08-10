@@ -115,28 +115,6 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, bool re
 
         addResources(item, &result);
 
-        /*
-        if (upnp_class == UPNP_DEFAULT_CLASS_MUSIC_TRACK) {
-            // extract extension-less, lowercase track name to search for corresponding
-            // image as cover alternative
-            std::string dctl = tolower_string(item->getTitle());
-            std::string trackArtBase = std::string();
-            size_t doti = dctl.rfind('.');
-            if (doti != std::string::npos) {
-                trackArtBase = dctl.substr(0, doti);
-            }
-            std::string aa_id = storage->findFolderImage(item->getParentID(), trackArtBase);
-            if (!aa_id.empty()) {
-                std::string url;
-                std::map<std::string, std::string> dict;
-                dict[URL_OBJECT_ID] = aa_id;
-
-                url = virtualURL + _URL_PARAM_SEPARATOR + CONTENT_MEDIA_HANDLER + _URL_PARAM_SEPARATOR + dict_encode_simple(dict) + _URL_PARAM_SEPARATOR + URL_RESOURCE_ID + _URL_PARAM_SEPARATOR + "0";
-                log_debug("UpnpXMLRenderer::DIDLRenderObject: url: {}", url.c_str());
-                result.append_child(MetadataHandler::getMetaFieldName(M_ALBUMARTURI).c_str()).append_child(pugi::node_pcdata).set_value(url.c_str());
-            }
-        }
-        */
         result.set_name("item");
     } else if (IS_CDS_CONTAINER(objectType)) {
         auto cont = std::static_pointer_cast<CdsContainer>(obj);
@@ -806,12 +784,6 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
 
         protocolInfo = protocolInfo.substr(0, protocolInfo.rfind(':') + 1).append(extend);
         res_attrs[MetadataHandler::getResAttrName(R_PROTOCOLINFO)] = protocolInfo;
-
-        /*
-        if (startswith(mimeType, "video")) {
-            renderCaptionInfo(url, parent);
-        }
-        */
 
         log_debug("protocolInfo: {}", protocolInfo.c_str());
 

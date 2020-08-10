@@ -704,13 +704,13 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
                     // readd object - we have to do this in order to trigger
                     // layout
                     removeObject(objectID, false);
-                    addFileInternal(newPath, rootpath, false, false, adir->getHidden(), true);
+                    addFileInternal(newPath, rootpath, false, false, adir->getHidden(), false);
                     // update time variable
                     last_modified_new_max = statbuf.st_mtime;
                 }
             } else {
                 // add file, not recursive, not async, not forced
-                addFileInternal(newPath, rootpath, false, false, adir->getHidden(), true);
+                addFileInternal(newPath, rootpath, false, false, adir->getHidden(), false);
                 if (last_modified_new_max < statbuf.st_mtime)
                     last_modified_new_max = statbuf.st_mtime;
             }
