@@ -706,7 +706,8 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
                     removeObject(objectID, false);
                     addFileInternal(newPath, rootpath, false, false, adir->getHidden(), false);
                     // update time variable
-                    last_modified_new_max = statbuf.st_mtime;
+                    if (last_modified_new_max < statbuf.st_mtime)
+                        last_modified_new_max = statbuf.st_mtime;
                 }
             } else {
                 // add file, not recursive, not async, not forced
