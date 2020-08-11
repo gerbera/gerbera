@@ -360,6 +360,7 @@ protected:
     void _rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, int objectId, const std::shared_ptr<GenericTask>& task = nullptr);
     /* for recursive addition */
     void addRecursive(const fs::path& path, bool hidden, const std::shared_ptr<CMAddFileTask>& task);
+    bool isLink(const fs::path& path, bool allowLinks);
     std::shared_ptr<CdsObject> createSingleItem(const fs::path& path, fs::path& rootPath, bool checkStorage, bool processExisting, const std::shared_ptr<CMAddFileTask>& task);
     bool updateAttachedResources(const char* obj, const std::string& parentPath, bool all);
     std::string extension2mimetype(std::string extension);

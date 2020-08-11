@@ -11,7 +11,7 @@ The import settings define various options on how to aggregate the content.
 
 ::
 
-    <import hidden-files="no">
+    <import hidden-files="no" follow-symlinks="no">
 
 * Optional
 
@@ -29,6 +29,16 @@ This tag defines the import section.
 
     This attribute defines if files starting with a dot will be imported into the database (”yes”). Autoscan can
     override this attribute on a per directory basis.
+
+    ::
+
+        follow-symlinks="yes|no"
+
+    * Optional
+
+    * Default: **yes**
+
+    This attribute defines if symbolic links should be treated as regular items and imported into the database (”yes”). This can cause duplicate entries if the link target is also scanned.
 
 **Child tags:**
 

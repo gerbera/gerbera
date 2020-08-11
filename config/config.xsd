@@ -298,6 +298,7 @@
                 <xs:element ref="online-content" minOccurs="0"/>
             </xs:all>
             <xs:attribute name="hidden-files" type="boolean" default="no"/>
+            <xs:attribute name="follow-symlinks" type="boolean" default="yes"/>
         </xs:complexType>
     </xs:element>
 

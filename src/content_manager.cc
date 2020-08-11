@@ -449,6 +449,7 @@ std::shared_ptr<CdsObject> ContentManager::createSingleItem(const fs::path& path
 {
     auto obj = checkStorage ? storage->findObjectByPath(path) : nullptr;
     bool isNew = false;
+
     if (obj == nullptr) {
         obj = createObjectFromFile(path);
         if (obj == nullptr) { // object ignored
@@ -693,6 +694,17 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
             return;
         }
 
+        if (isLink(newPath, config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS))) {
+            int objectID = storage->findObjectIDByPath(newPath);
+            if (objectID > 0) {
+                if (list != nullptr)
+                    list->erase(objectID);
+                removeObject(objectID, false);
+            }
+            log_debug("link {} dropped", newPath.c_str());
+            continue;
+        }
+
         if (S_ISREG(statbuf.st_mode)) {
             int objectID = storage->findObjectIDByPath(newPath);
             if (objectID > 0) {
@@ -816,7 +828,7 @@ void ContentManager::addRecursive(const fs::path& path, bool hidden, const std::
             // check storage if parent, process existing
             auto obj = createSingleItem(newPath, rootPath, (parentID > 0), true, task);
 
-            if (IS_CDS_ITEM(obj->getObjectType()))
+            if (obj != nullptr && IS_CDS_ITEM(obj->getObjectType()))
                 parentID = obj->getParentID();
 
             if (obj != nullptr && IS_CDS_CONTAINER(obj->getObjectType()))
@@ -1036,6 +1048,25 @@ std::shared_ptr<CdsObject> ContentManager::convertObject(std::shared_ptr<CdsObje
     return newObj;
 }
 
+bool ContentManager::isLink(const fs::path& path, bool allowLinks)
+{
+    if (!allowLinks) {
+        struct stat statbuf;
+        int lret = lstat(path.c_str(), &statbuf);
+
+        if (lret != 0) {
+            log_warning("File or directory does not exist: {} ({})", path.string(), mt_strerror(errno));
+            return true;
+        }
+
+        if (S_ISLNK(statbuf.st_mode)) {
+            log_debug("link {} skipped", path.c_str());
+            return true;
+        }
+    }
+    return false;
+}
+
 std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::path& path, bool magic, bool allow_fifo)
 {
     struct stat statbuf;
@@ -1044,6 +1075,9 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::path& 
         log_warning("File or directory does not exist: {} ({})", path.string(), mt_strerror(errno));
         return nullptr;
     }
+
+    if (isLink(path, config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS)))
+        return nullptr;
 
     std::shared_ptr<CdsObject> obj;
     if (S_ISREG(statbuf.st_mode) || (allow_fifo && S_ISFIFO(statbuf.st_mode))) { // item

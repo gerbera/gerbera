@@ -480,6 +480,14 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_IMPORT_HIDDEN_FILES);
 
+    temp = getOption("/import/attribute::follow-symlinks",
+        DEFAULT_FOLLOW_SYMLINKS_VALUE);
+    if (!validateYesNo(temp))
+        throw std::runtime_error("Error in config file: incorrect parameter for "
+                                 "<import follow-symlinks=\"\" /> attribute");
+    NEW_BOOL_OPTION(temp == "yes");
+    SET_BOOL_OPTION(CFG_IMPORT_FOLLOW_SYMLINKS);
+
     temp = getOption(
         "/import/mappings/extension-mimetype/attribute::ignore-unknown",
         DEFAULT_IGNORE_UNKNOWN_EXTENSIONS);
