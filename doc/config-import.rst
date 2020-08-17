@@ -308,11 +308,21 @@ Defines various layout options for generated virtual layout.
 
 ::
 
-    <resources>
+    <resources case-sensitive="yes">
 
 * Optional
 
 Defines various resource options for file based resources. Older versions of Gerbera added sereral files automatically. For performance reasons no pattern is added anymore. You can set up your correct fanart file by yourself, if no image is embedded in your media. If you have subtitle files, add the correct pattern, also.
+
+    ::
+
+        case-sensitive="yes|no"
+
+    * Optional
+
+    * Default: **yes**
+
+    This attribute defines whether search patterns are treated case sensitive or not, i.e. if set to **no** ``cover.png`` matches anything like ``Cover.PNG`` or ``cover.PNG``.
 
 **Child tags:**
 
@@ -324,7 +334,7 @@ Defines various resource options for file based resources. Older versions of Ger
 
     * Optional
 
-    Define file patterns to search for fanart, subtitle and resources respectivly. Search is case insensitive so ``cover.png`` matches anything like ``Cover.PNG`` or ``cover.PNG``.
+    Define file patterns to search for fanart, subtitle and resources respectivly.
 
     ``fanart`` and ``subtitle`` patterns are used to identify external resources which are added to each item if the pattern matches.
 
@@ -354,7 +364,7 @@ A sample configuration would be:
 
 .. code-block:: xml
 
-  <resources>
+  <resources case-sensitive="no">
       <fanart>
           <add-file name="cover.png"/>
       </fanart>

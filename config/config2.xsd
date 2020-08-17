@@ -553,6 +553,7 @@
                 <xs:element ref="subtitle" minOccurs="0"/>
                 <xs:element ref="resource" minOccurs="0"/>
             </xs:all>
+            <xs:attribute name="case-sensitive" type="boolean" default="yes"/>
         </xs:complexType>
     </xs:element>
 

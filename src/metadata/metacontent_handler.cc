@@ -40,24 +40,38 @@ MetacontentHandler::MetacontentHandler(std::shared_ptr<Config> config)
 
 fs::path MetacontentHandler::getContentPath(std::vector<std::string>& names, const std::shared_ptr<CdsItem>& item)
 {
-    auto folder = item->getLocation().parent_path();
-    log_debug("Folder name: {}", folder.c_str());
+    if (!names.empty()) {
+        auto folder = item->getLocation().parent_path();
+        log_debug("Folder name: {}", folder.c_str());
 
-    auto fileNames = std::map<std::string, fs::path>();
-    for (const auto& p : fs::directory_iterator(folder))
-        if (p.is_regular_file())
-            fileNames[tolower_string(p.path().filename())] = p;
+        if (caseSensitive) {
+            for (const auto& name : names) {
+                auto found = folder / expandName(name, item);
+                std::error_code ec;
+                bool exists = isRegularFile(found, ec); // no error throwing, please
+                if (!exists)
+                    continue;
 
-    for (const auto& name : names) {
-        auto fileName = tolower_string(expandName(name, item));
-        for (const auto& testFile : fileNames) {
-            if (testFile.first == fileName) {
-                log_debug("{}: found", testFile.first.c_str());
-                return testFile.second;
+                log_debug("{}: found", found.c_str());
+                return found;
+            }
+        } else {
+            auto fileNames = std::map<std::string, fs::path>();
+            for (const auto& p : fs::directory_iterator(folder))
+                if (p.is_regular_file())
+                    fileNames[tolower_string(p.path().filename())] = p;
+
+            for (const auto& name : names) {
+                auto fileName = tolower_string(expandName(name, item));
+                for (const auto& testFile : fileNames) {
+                    if (testFile.first == fileName) {
+                        log_debug("{}: found", testFile.first.c_str());
+                        return testFile.second;
+                    }
+                }
             }
         }
     }
-
     return "";
 }
 
@@ -65,6 +79,7 @@ static std::map<std::string, int> metaTags = {
     { "%album%", M_ALBUM },
     { "%title%", M_TITLE },
 };
+bool MetacontentHandler::caseSensitive = true;
 
 std::string MetacontentHandler::expandName(const std::string& name, const std::shared_ptr<CdsItem>& item)
 {
@@ -87,12 +102,17 @@ std::vector<std::string> FanArtHandler::names = {
     //    "albumartsmall.jpg",
     //    "%album%.jpg",
 };
+bool FanArtHandler::initDone = false;
 
 FanArtHandler::FanArtHandler(std::shared_ptr<Config> config)
     : MetacontentHandler(std::move(config))
 {
-    std::vector<std::string> files = this->config->getArrayOption(CFG_IMPORT_RESOURCES_FANART_FILE_LIST);
-    names.insert(names.end(), files.begin(), files.end());
+    if (!initDone) {
+        std::vector<std::string> files = this->config->getArrayOption(CFG_IMPORT_RESOURCES_FANART_FILE_LIST);
+        names.insert(names.end(), files.begin(), files.end());
+        caseSensitive = this->config->getBoolOption(CFG_IMPORT_RESOURCES_CASE_SENSITIVE);
+        initDone = true;
+    }
 }
 
 void FanArtHandler::fillMetadata(std::shared_ptr<CdsItem> item)
@@ -126,12 +146,16 @@ std::vector<std::string> SubtitleHandler::names = {
     //    "%title%.srt",
     //    "%filename%.srt"
 };
+bool SubtitleHandler::initDone = false;
 
 SubtitleHandler::SubtitleHandler(std::shared_ptr<Config> config)
     : MetacontentHandler(std::move(config))
 {
-    std::vector<std::string> files = this->config->getArrayOption(CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST);
-    names.insert(names.end(), files.begin(), files.end());
+    if (!initDone) {
+        std::vector<std::string> files = this->config->getArrayOption(CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST);
+        names.insert(names.end(), files.begin(), files.end());
+        initDone = true;
+    }
 }
 
 void SubtitleHandler::fillMetadata(std::shared_ptr<CdsItem> item)
@@ -168,12 +192,16 @@ std::vector<std::string> ResourceHandler::names = {
     //    "cover.jpg",
     //    "%album%.jpg",
 };
+bool ResourceHandler::initDone = false;
 
 ResourceHandler::ResourceHandler(std::shared_ptr<Config> config)
     : MetacontentHandler(std::move(config))
 {
-    std::vector<std::string> files = this->config->getArrayOption(CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST);
-    names.insert(names.end(), files.begin(), files.end());
+    if (!initDone) {
+        std::vector<std::string> files = this->config->getArrayOption(CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST);
+        names.insert(names.end(), files.begin(), files.end());
+        initDone = true;
+    }
 }
 
 void ResourceHandler::fillMetadata(std::shared_ptr<CdsItem> item)

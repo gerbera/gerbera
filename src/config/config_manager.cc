@@ -921,6 +921,14 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 
 #endif // HAVE_LIBEXIF
 
+    temp = getOption("/import/resources/attribute::case-sensitive",
+        DEFAULT_RESOURCES_CASE_SENSITIVE);
+    if (!validateYesNo(temp))
+        throw std::runtime_error("Error in config file: incorrect parameter for "
+                                 "<resources case-sensitive=\"\" /> attribute");
+    NEW_BOOL_OPTION(temp == "yes");
+    SET_BOOL_OPTION(CFG_IMPORT_RESOURCES_CASE_SENSITIVE);
+
     el = getElement("/import/resources/fanart");
     if (el == nullptr) {
         getOption("/import/resources/fanart",
