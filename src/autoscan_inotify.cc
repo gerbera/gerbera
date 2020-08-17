@@ -136,7 +136,7 @@ void AutoscanInotify::threadProc()
                     log_debug("adding non-recursive watch: {}", location.c_str());
                     monitorDirectory(location, adir, true);
                 }
-                content->rescanDirectory(adir, "", false);
+                content->rescanDirectory(adir, adir->getObjectID(), location, false);
 
                 lock.lock();
             }
@@ -215,12 +215,12 @@ void AutoscanInotify::threadProc()
 
                         int objectID = storage->findObjectIDByPath(path, !(mask & IN_ISDIR));
                         if (objectID != INVALID_OBJECT_ID)
-                            content->removeObject(objectID);
+                            content->removeObject(objectID, !(mask & IN_MOVED_TO));
                     }
                     if (mask & (IN_CLOSE_WRITE | IN_MOVED_TO | IN_CREATE)) {
                         log_debug("adding {}", path.c_str());
-                        // path, recursive, async, hidden, low priority, cancellable
-                        content->addFile(path, adir->getLocation(), adir->getRecursive(), true, adir->getHidden(), true, false);
+                        // path, recursive, async, hidden, rescanResource, low priority, cancellable
+                        content->addFile(path, adir->getLocation(), adir->getRecursive(), true, adir->getHidden(), true, true, false);
 
                         if (mask & IN_ISDIR)
                             monitorUnmonitorRecursive(path, false, adir, false);
@@ -382,7 +382,7 @@ void AutoscanInotify::checkMoveWatches(int wd, const std::shared_ptr<Wd>& wdObj)
 
                     int objectID = storage->findObjectIDByPath(path, true);
                     if (objectID != INVALID_OBJECT_ID)
-                        content->removeObject(objectID);
+                        content->removeObject(objectID, false);
                 }
             } catch (const std::out_of_range& ex) {
             } // Not found in map

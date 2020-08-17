@@ -85,11 +85,12 @@ protected:
     fs::path rootpath;
     bool recursive;
     bool hidden;
+    bool rescanResource;
 
 public:
     CMAddFileTask(std::shared_ptr<ContentManager> content,
         fs::path path, fs::path rootpath, bool recursive = false,
-        bool hidden = false, bool cancellable = true);
+        bool hidden = false, bool rescanResource = false, bool cancellable = true);
     fs::path getPath();
     fs::path getRootPath();
     void run() override;
@@ -100,10 +101,11 @@ protected:
     std::shared_ptr<ContentManager> content;
     int objectID;
     bool all;
+    bool rescanResource;
 
 public:
     CMRemoveObjectTask(std::shared_ptr<ContentManager> content,
-        int objectID, bool all);
+        int objectID, bool rescanResource, bool all);
     void run() override;
 };
 
@@ -111,10 +113,11 @@ class CMRescanDirectoryTask : public GenericTask, public std::enable_shared_from
 protected:
     std::shared_ptr<ContentManager> content;
     std::shared_ptr<AutoscanDirectory> adir;
+    int containerID;
 
 public:
     CMRescanDirectoryTask(std::shared_ptr<ContentManager> content,
-        std::shared_ptr<AutoscanDirectory> adir, bool cancellable);
+        std::shared_ptr<AutoscanDirectory> adir, int containerId, bool cancellable);
     void run() override;
 };
 
@@ -168,10 +171,11 @@ public:
     /// \param recursive recursive add (process subdirecotories)
     /// \param async queue task or perform a blocking call
     /// \param hidden true allows to import hidden files, false ignores them
+    /// \param rescanResource true allows to reload a directory containing a resource
     /// \param queue for immediate processing or in normal order
     /// \return object ID of the added file - only in blockign mode, when used in async mode this function will return INVALID_OBJECT_ID
     int addFile(const fs::path& path, bool recursive = true, bool async = true,
-        bool hidden = false, bool lowPriority = false,
+        bool hidden = false, bool rescanResource = true, bool lowPriority = false,
         bool cancellable = true);
 
     /// \brief Adds a file or directory to the database.
@@ -180,14 +184,15 @@ public:
     /// \param recursive recursive add (process subdirecotories)
     /// \param async queue task or perform a blocking call
     /// \param hidden true allows to import hidden files, false ignores them
+    /// \param rescanResource true allows to reload a directory containing a resource
     /// \param queue for immediate processing or in normal order
     /// \return object ID of the added file - only in blockign mode, when used in async mode this function will return INVALID_OBJECT_ID
     int addFile(const fs::path& path, const fs::path& rootpath, bool recursive = true, bool async = true,
-        bool hidden = false, bool lowPriority = false,
+        bool hidden = false, bool rescanResource = true, bool lowPriority = false,
         bool cancellable = true);
 
     int ensurePathExistence(fs::path path);
-    void removeObject(int objectID, bool async = true, bool all = false);
+    void removeObject(int objectID, bool rescanResource, bool async = true, bool all = false);
 
     /// \brief Updates an object in the database using the given parameters.
     /// \param objectID ID of the object to update
@@ -281,7 +286,7 @@ public:
     /// \brief handles the recreation of a persistent autoscan directory
     void handlePersistentAutoscanRecreate(const std::shared_ptr<AutoscanDirectory>& adir);
 
-    void rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, std::string descPath = "", bool cancellable = true);
+    void rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, int objectId, std::string descPath = "", bool cancellable = true);
 
     /// \brief instructs ContentManager to reload scripting environment
     void reloadLayout();
@@ -344,17 +349,20 @@ protected:
     int addFileInternal(const fs::path& path, const fs::path& rootpath,
         bool recursive = true,
         bool async = true, bool hidden = false,
+        bool rescanResource = false,
         bool lowPriority = false,
         unsigned int parentTaskID = 0,
         bool cancellable = true);
-    int _addFile(const fs::path& path, fs::path rootPath, bool recursive = false, bool hidden = false, const std::shared_ptr<CMAddFileTask>& task = nullptr);
+    int _addFile(const fs::path& path, fs::path rootPath, bool recursive = false, bool hidden = false, bool rescanResource = false, const std::shared_ptr<CMAddFileTask>& task = nullptr);
     //void _addFile2(std::string path, bool recursive=0);
-    void _removeObject(int objectID, bool all);
+    void _removeObject(int objectID, bool rescanResource, bool all);
 
-    void _rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, const std::shared_ptr<GenericTask>& task = nullptr);
+    void _rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, int objectId, const std::shared_ptr<GenericTask>& task = nullptr);
     /* for recursive addition */
     void addRecursive(const fs::path& path, bool hidden, const std::shared_ptr<CMAddFileTask>& task);
-
+    bool isLink(const fs::path& path, bool allowLinks);
+    std::shared_ptr<CdsObject> createSingleItem(const fs::path& path, fs::path& rootPath, bool checkStorage, bool processExisting, const std::shared_ptr<CMAddFileTask>& task);
+    bool updateAttachedResources(const char* obj, const std::string& parentPath, bool all);
     std::string extension2mimetype(std::string extension);
     std::string mimetype2upnpclass(const std::string& mimeType);
 

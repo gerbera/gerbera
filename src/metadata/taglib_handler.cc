@@ -244,7 +244,7 @@ void TagLibHandler::fillMetadata(std::shared_ptr<CdsItem> item)
     } else if (content_type == CONTENT_TYPE_AIFF) {
         extractAiff(&fs, item);
     } else {
-        log_warning("TagLibHandler does not handle the {} content type", content_type.c_str());
+        log_warning("TagLibHandler {}: Does not handle the {} content type", item->getLocation().c_str(), content_type.c_str());
     }
     log_debug("TagLib handler done.");
 }
@@ -402,7 +402,7 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, const std::shared_ptr
     TagLib::MPEG::File mp3(roStream, TagLib::ID3v2::FrameFactory::instance());
 
     if (!mp3.isValid() || !mp3.hasID3v2Tag()) {
-        log_debug("TagLibHandler: could not open mp3 file: {}",
+        log_info("TagLibHandler {}: could not open mp3 file",
             item->getLocation().c_str());
         return;
     }
@@ -485,7 +485,7 @@ void TagLibHandler::extractOgg(TagLib::IOStream* roStream, const std::shared_ptr
     TagLib::Ogg::Vorbis::File vorbis(item->getLocation().c_str());
 
     if (!vorbis.isValid()) {
-        log_debug("TagLibHandler: could not open ogg file: {}",
+        log_info("TagLibHandler {}: could not open ogg file",
             item->getLocation().c_str());
         return;
     }
@@ -517,7 +517,7 @@ void TagLibHandler::extractASF(TagLib::IOStream* roStream, const std::shared_ptr
     TagLib::ASF::File asf(roStream);
 
     if (!asf.isValid()) {
-        log_debug("TagLibHandler: could not open asf/wma file: {}",
+        log_debug("TagLibHandler {}: could not open asf/wma file",
             item->getLocation().c_str());
         return;
     }
@@ -547,7 +547,7 @@ void TagLibHandler::extractFLAC(TagLib::IOStream* roStream, const std::shared_pt
     TagLib::FLAC::File flac(roStream, TagLib::ID3v2::FrameFactory::instance());
 
     if (!flac.isValid()) {
-        log_debug("TagLibHandler: could not open flac file: {}",
+        log_info("TagLibHandler {}: could not open flac file",
             item->getLocation().c_str());
         return;
     }
@@ -598,7 +598,7 @@ void TagLibHandler::extractAPE(TagLib::IOStream* roStream, const std::shared_ptr
     TagLib::APE::File ape(roStream);
 
     if (!ape.isValid()) {
-        log_debug("TagLibHandler: could not open APE file: {}",
+        log_info("TagLibHandler {}: could not open APE file",
             item->getLocation().c_str());
         return;
     }
@@ -610,7 +610,7 @@ void TagLibHandler::extractWavPack(TagLib::IOStream* roStream, const std::shared
     TagLib::WavPack::File wavpack(roStream);
 
     if (!wavpack.isValid()) {
-        log_debug("TagLibHandler: could not open WavPack file: {}",
+        log_info("TagLibHandler {}: could not open WavPack file",
             item->getLocation().c_str());
         return;
     }
@@ -620,16 +620,18 @@ void TagLibHandler::extractWavPack(TagLib::IOStream* roStream, const std::shared
 void TagLibHandler::extractMP4(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item) const
 {
     TagLib::MP4::File mp4(roStream);
-    populateGenericTags(item, mp4);
 
     if (!mp4.isValid()) {
-        log_debug("TagLibHandler: could not open mp4 file: {}",
+        log_info("TagLibHandler {}: could not open mp4 file",
             item->getLocation().c_str());
         return;
     }
 
+    populateGenericTags(item, mp4);
+
     if (!mp4.hasMP4Tag()) {
-        log_debug("TagLibHandler: mp4 file has no tag information");
+        log_info("TagLibHandler {}: mp4 file has no tag information",
+            item->getLocation().c_str());
         return;
     }
 
@@ -637,7 +639,8 @@ void TagLibHandler::extractMP4(TagLib::IOStream* roStream, const std::shared_ptr
         auto coverItem = mp4.tag()->item("covr");
         TagLib::MP4::CoverArtList coverArtList = coverItem.toCoverArtList();
         if (coverArtList.isEmpty()) {
-            log_debug("TagLibHandler: mp4 file has no coverart");
+            log_info("TagLibHandler {}: mp4 file has no coverart",
+                item->getLocation().c_str());
             return;
         }
 
@@ -647,7 +650,8 @@ void TagLibHandler::extractMP4(TagLib::IOStream* roStream, const std::shared_ptr
             addArtworkResource(item, art_mimetype);
         }
     } else {
-        log_debug("TagLibHandler: mp4 file has no 'covr' item");
+        log_debug("TagLibHandler {}: mp4 file has no 'covr' item",
+            item->getLocation().c_str());
     }
 }
 
@@ -656,7 +660,7 @@ void TagLibHandler::extractAiff(TagLib::IOStream* roStream, const std::shared_pt
     TagLib::RIFF::AIFF::File aiff(roStream);
 
     if (!aiff.isValid()) {
-        log_debug("TagLibHandler: could not open AIFF file: {}",
+        log_info("TagLibHandler {}: could not open AIFF file",
             item->getLocation().c_str());
         return;
     }

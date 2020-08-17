@@ -306,6 +306,12 @@ public:
         resources = res;
     }
 
+    /// \brief Search resources for given handler id
+    bool hasResource(int id) const
+    {
+        return std::any_of(resources.begin(), resources.end(), [=](const auto& res) { return id == res->getHandlerType(); });
+    }
+
     /// \brief Query resource tag with the given index
     std::shared_ptr<CdsResource> getResource(size_t index) const
     {

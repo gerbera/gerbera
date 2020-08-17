@@ -480,6 +480,14 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_IMPORT_HIDDEN_FILES);
 
+    temp = getOption("/import/attribute::follow-symlinks",
+        DEFAULT_FOLLOW_SYMLINKS_VALUE);
+    if (!validateYesNo(temp))
+        throw std::runtime_error("Error in config file: incorrect parameter for "
+                                 "<import follow-symlinks=\"\" /> attribute");
+    NEW_BOOL_OPTION(temp == "yes");
+    SET_BOOL_OPTION(CFG_IMPORT_FOLLOW_SYMLINKS);
+
     temp = getOption(
         "/import/mappings/extension-mimetype/attribute::ignore-unknown",
         DEFAULT_IGNORE_UNKNOWN_EXTENSIONS);
@@ -912,6 +920,30 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     SET_STRARR_OPTION(CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST);
 
 #endif // HAVE_LIBEXIF
+
+    el = getElement("/import/resources/fanart");
+    if (el == nullptr) {
+        getOption("/import/resources/fanart",
+            "");
+    }
+    NEW_STRARR_OPTION(createArrayFromNode(el, "add-file", "name"));
+    SET_STRARR_OPTION(CFG_IMPORT_RESOURCES_FANART_FILE_LIST);
+
+    el = getElement("/import/resources/subtitle");
+    if (el == nullptr) {
+        getOption("/import/resources/subtitle",
+            "");
+    }
+    NEW_STRARR_OPTION(createArrayFromNode(el, "add-file", "name"));
+    SET_STRARR_OPTION(CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST);
+
+    el = getElement("/import/resources/resource");
+    if (el == nullptr) {
+        getOption("/import/resources/resource",
+            "");
+    }
+    NEW_STRARR_OPTION(createArrayFromNode(el, "add-file", "name"));
+    SET_STRARR_OPTION(CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST);
 
 #ifdef HAVE_EXIV2
 

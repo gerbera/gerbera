@@ -129,8 +129,8 @@ add_library(libgerbera STATIC
         src/metadata/libexif_handler.h
         src/metadata/taglib_handler.cc
         src/metadata/taglib_handler.h
-        src/metadata/fanart_handler.cc
-        src/metadata/fanart_handler.h
+        src/metadata/metacontent_handler.cc
+        src/metadata/metacontent_handler.h
         src/metadata/matroska_handler.cc
         src/metadata/matroska_handler.h
         src/onlineservice/atrailers_content_handler.cc

@@ -367,7 +367,7 @@ int main(int argc, char** argv, char** envp)
                 try {
                     // add file/directory recursively and asynchronously
                     server->getContent()->addFile(std::string(f), true, true,
-                        configManager->getBoolOption(CFG_IMPORT_HIDDEN_FILES));
+                        configManager->getBoolOption(CFG_IMPORT_HIDDEN_FILES), false);
                 } catch (const std::runtime_error& e) {
                     log_error("{}", e.what());
                     exit(EXIT_FAILURE);
