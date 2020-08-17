@@ -33,6 +33,8 @@
 #include "iohandler/file_io_handler.h"
 #include "util/tools.h"
 
+#define RESOURCE_FILE "resFile"
+
 MetacontentHandler::MetacontentHandler(std::shared_ptr<Config> config)
     : MetadataHandler(std::move(config))
 {
@@ -123,6 +125,7 @@ void FanArtHandler::fillMetadata(std::shared_ptr<CdsItem> item)
     if (!path.empty()) {
         auto resource = std::make_shared<CdsResource>(CH_FANART);
         resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo("jpg"));
+        resource->addAttribute(RESOURCE_FILE, path.c_str());
         resource->addParameter(RESOURCE_CONTENT_TYPE, ID3_ALBUM_ART);
         item->addResource(resource);
     }
@@ -130,7 +133,10 @@ void FanArtHandler::fillMetadata(std::shared_ptr<CdsItem> item)
 
 std::unique_ptr<IOHandler> FanArtHandler::serveContent(std::shared_ptr<CdsItem> item, int resNum)
 {
-    auto path = getContentPath(names, item);
+    fs::path path = item->getResource(resNum)->getAttribute(RESOURCE_FILE);
+    if (path.empty()) {
+        path = getContentPath(names, item);
+    }
     log_debug("FanArt: Opening name: {}", path.c_str());
     struct stat statbuf;
     int ret = stat(path.c_str(), &statbuf);
@@ -167,6 +173,7 @@ void SubtitleHandler::fillMetadata(std::shared_ptr<CdsItem> item)
         auto resource = std::make_shared<CdsResource>(CH_SUBTITLE);
         std::string type = path.extension().string().substr(1);
         resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(type));
+        resource->addAttribute(RESOURCE_FILE, path.c_str());
         resource->addParameter(RESOURCE_CONTENT_TYPE, VIDEO_SUB);
         resource->addParameter("type", type.c_str());
         item->addResource(resource);
@@ -175,7 +182,10 @@ void SubtitleHandler::fillMetadata(std::shared_ptr<CdsItem> item)
 
 std::unique_ptr<IOHandler> SubtitleHandler::serveContent(std::shared_ptr<CdsItem> item, int resNum)
 {
-    auto path = getContentPath(names, item);
+    fs::path path = item->getResource(resNum)->getAttribute(RESOURCE_FILE);
+    if (path.empty()) {
+        path = getContentPath(names, item);
+    }
     log_debug("Subtitle: Opening name: {}", path.c_str());
     struct stat statbuf;
     int ret = stat(path.c_str(), &statbuf);
@@ -213,6 +223,7 @@ void ResourceHandler::fillMetadata(std::shared_ptr<CdsItem> item)
         if (tolower_string(path.c_str()) == tolower_string(item->getLocation().c_str())) {
             auto resource = std::make_shared<CdsResource>(CH_RESOURCE);
             resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo("res"));
+            resource->addAttribute(RESOURCE_FILE, path.c_str());
             item->addResource(resource);
         }
     }
@@ -220,7 +231,10 @@ void ResourceHandler::fillMetadata(std::shared_ptr<CdsItem> item)
 
 std::unique_ptr<IOHandler> ResourceHandler::serveContent(std::shared_ptr<CdsItem> item, int resNum)
 {
-    auto path = getContentPath(names, item);
+    fs::path path = item->getResource(resNum)->getAttribute(RESOURCE_FILE);
+    if (path.empty()) {
+        path = getContentPath(names, item);
+    }
     log_debug("Resource: Opening name: {}", path.c_str());
     struct stat statbuf;
     int ret = stat(path.c_str(), &statbuf);
