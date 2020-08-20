@@ -36,6 +36,7 @@ namespace fs = std::filesystem;
 class MetacontentHandler : public MetadataHandler {
 public:
     explicit MetacontentHandler(std::shared_ptr<Config> config);
+    static bool caseSensitive;
 
 protected:
     static fs::path getContentPath(std::vector<std::string>& names, const std::shared_ptr<CdsItem>& item);
@@ -51,6 +52,7 @@ public:
 
 private:
     static std::vector<std::string> names;
+    static bool initDone;
 };
 
 /// \brief This class is responsible for populating filesystem based subtitles
@@ -62,6 +64,7 @@ public:
 
 private:
     static std::vector<std::string> names;
+    static bool initDone;
 };
 
 /// \brief This class is responsible for reverse mapping filesystem based resources
@@ -73,6 +76,7 @@ public:
 
 private:
     static std::vector<std::string> names;
+    static bool initDone;
 };
 
 #endif // __METADATA_CONTENT_H__

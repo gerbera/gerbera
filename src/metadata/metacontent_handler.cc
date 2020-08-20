@@ -33,6 +33,8 @@
 #include "iohandler/file_io_handler.h"
 #include "util/tools.h"
 
+#define RESOURCE_FILE "resFile"
+
 MetacontentHandler::MetacontentHandler(std::shared_ptr<Config> config)
     : MetadataHandler(std::move(config))
 {
@@ -40,24 +42,38 @@ MetacontentHandler::MetacontentHandler(std::shared_ptr<Config> config)
 
 fs::path MetacontentHandler::getContentPath(std::vector<std::string>& names, const std::shared_ptr<CdsItem>& item)
 {
-    auto folder = item->getLocation().parent_path();
-    log_debug("Folder name: {}", folder.c_str());
+    if (!names.empty()) {
+        auto folder = item->getLocation().parent_path();
+        log_debug("Folder name: {}", folder.c_str());
 
-    auto fileNames = std::map<std::string, fs::path>();
-    for (const auto& p : fs::directory_iterator(folder))
-        if (p.is_regular_file())
-            fileNames[tolower_string(p.path().filename())] = p;
+        if (caseSensitive) {
+            for (const auto& name : names) {
+                auto found = folder / expandName(name, item);
+                std::error_code ec;
+                bool exists = isRegularFile(found, ec); // no error throwing, please
+                if (!exists)
+                    continue;
 
-    for (const auto& name : names) {
-        auto fileName = tolower_string(expandName(name, item));
-        for (const auto& testFile : fileNames) {
-            if (testFile.first == fileName) {
-                log_debug("{}: found", testFile.first.c_str());
-                return testFile.second;
+                log_debug("{}: found", found.c_str());
+                return found;
+            }
+        } else {
+            auto fileNames = std::map<std::string, fs::path>();
+            for (const auto& p : fs::directory_iterator(folder))
+                if (p.is_regular_file())
+                    fileNames[tolower_string(p.path().filename())] = p;
+
+            for (const auto& name : names) {
+                auto fileName = tolower_string(expandName(name, item));
+                for (const auto& testFile : fileNames) {
+                    if (testFile.first == fileName) {
+                        log_debug("{}: found", testFile.first.c_str());
+                        return testFile.second;
+                    }
+                }
             }
         }
     }
-
     return "";
 }
 
@@ -65,6 +81,7 @@ static std::map<std::string, int> metaTags = {
     { "%album%", M_ALBUM },
     { "%title%", M_TITLE },
 };
+bool MetacontentHandler::caseSensitive = true;
 
 std::string MetacontentHandler::expandName(const std::string& name, const std::shared_ptr<CdsItem>& item)
 {
@@ -87,12 +104,17 @@ std::vector<std::string> FanArtHandler::names = {
     //    "albumartsmall.jpg",
     //    "%album%.jpg",
 };
+bool FanArtHandler::initDone = false;
 
 FanArtHandler::FanArtHandler(std::shared_ptr<Config> config)
     : MetacontentHandler(std::move(config))
 {
-    std::vector<std::string> files = this->config->getArrayOption(CFG_IMPORT_RESOURCES_FANART_FILE_LIST);
-    names.insert(names.end(), files.begin(), files.end());
+    if (!initDone) {
+        std::vector<std::string> files = this->config->getArrayOption(CFG_IMPORT_RESOURCES_FANART_FILE_LIST);
+        names.insert(names.end(), files.begin(), files.end());
+        caseSensitive = this->config->getBoolOption(CFG_IMPORT_RESOURCES_CASE_SENSITIVE);
+        initDone = true;
+    }
 }
 
 void FanArtHandler::fillMetadata(std::shared_ptr<CdsItem> item)
@@ -103,6 +125,7 @@ void FanArtHandler::fillMetadata(std::shared_ptr<CdsItem> item)
     if (!path.empty()) {
         auto resource = std::make_shared<CdsResource>(CH_FANART);
         resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo("jpg"));
+        resource->addAttribute(RESOURCE_FILE, path.c_str());
         resource->addParameter(RESOURCE_CONTENT_TYPE, ID3_ALBUM_ART);
         item->addResource(resource);
     }
@@ -110,7 +133,10 @@ void FanArtHandler::fillMetadata(std::shared_ptr<CdsItem> item)
 
 std::unique_ptr<IOHandler> FanArtHandler::serveContent(std::shared_ptr<CdsItem> item, int resNum)
 {
-    auto path = getContentPath(names, item);
+    fs::path path = item->getResource(resNum)->getAttribute(RESOURCE_FILE);
+    if (path.empty()) {
+        path = getContentPath(names, item);
+    }
     log_debug("FanArt: Opening name: {}", path.c_str());
     struct stat statbuf;
     int ret = stat(path.c_str(), &statbuf);
@@ -126,12 +152,16 @@ std::vector<std::string> SubtitleHandler::names = {
     //    "%title%.srt",
     //    "%filename%.srt"
 };
+bool SubtitleHandler::initDone = false;
 
 SubtitleHandler::SubtitleHandler(std::shared_ptr<Config> config)
     : MetacontentHandler(std::move(config))
 {
-    std::vector<std::string> files = this->config->getArrayOption(CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST);
-    names.insert(names.end(), files.begin(), files.end());
+    if (!initDone) {
+        std::vector<std::string> files = this->config->getArrayOption(CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST);
+        names.insert(names.end(), files.begin(), files.end());
+        initDone = true;
+    }
 }
 
 void SubtitleHandler::fillMetadata(std::shared_ptr<CdsItem> item)
@@ -143,6 +173,7 @@ void SubtitleHandler::fillMetadata(std::shared_ptr<CdsItem> item)
         auto resource = std::make_shared<CdsResource>(CH_SUBTITLE);
         std::string type = path.extension().string().substr(1);
         resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(type));
+        resource->addAttribute(RESOURCE_FILE, path.c_str());
         resource->addParameter(RESOURCE_CONTENT_TYPE, VIDEO_SUB);
         resource->addParameter("type", type.c_str());
         item->addResource(resource);
@@ -151,7 +182,10 @@ void SubtitleHandler::fillMetadata(std::shared_ptr<CdsItem> item)
 
 std::unique_ptr<IOHandler> SubtitleHandler::serveContent(std::shared_ptr<CdsItem> item, int resNum)
 {
-    auto path = getContentPath(names, item);
+    fs::path path = item->getResource(resNum)->getAttribute(RESOURCE_FILE);
+    if (path.empty()) {
+        path = getContentPath(names, item);
+    }
     log_debug("Subtitle: Opening name: {}", path.c_str());
     struct stat statbuf;
     int ret = stat(path.c_str(), &statbuf);
@@ -168,12 +202,16 @@ std::vector<std::string> ResourceHandler::names = {
     //    "cover.jpg",
     //    "%album%.jpg",
 };
+bool ResourceHandler::initDone = false;
 
 ResourceHandler::ResourceHandler(std::shared_ptr<Config> config)
     : MetacontentHandler(std::move(config))
 {
-    std::vector<std::string> files = this->config->getArrayOption(CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST);
-    names.insert(names.end(), files.begin(), files.end());
+    if (!initDone) {
+        std::vector<std::string> files = this->config->getArrayOption(CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST);
+        names.insert(names.end(), files.begin(), files.end());
+        initDone = true;
+    }
 }
 
 void ResourceHandler::fillMetadata(std::shared_ptr<CdsItem> item)
@@ -185,6 +223,7 @@ void ResourceHandler::fillMetadata(std::shared_ptr<CdsItem> item)
         if (tolower_string(path.c_str()) == tolower_string(item->getLocation().c_str())) {
             auto resource = std::make_shared<CdsResource>(CH_RESOURCE);
             resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo("res"));
+            resource->addAttribute(RESOURCE_FILE, path.c_str());
             item->addResource(resource);
         }
     }
@@ -192,7 +231,10 @@ void ResourceHandler::fillMetadata(std::shared_ptr<CdsItem> item)
 
 std::unique_ptr<IOHandler> ResourceHandler::serveContent(std::shared_ptr<CdsItem> item, int resNum)
 {
-    auto path = getContentPath(names, item);
+    fs::path path = item->getResource(resNum)->getAttribute(RESOURCE_FILE);
+    if (path.empty()) {
+        path = getContentPath(names, item);
+    }
     log_debug("Resource: Opening name: {}", path.c_str());
     struct stat statbuf;
     int ret = stat(path.c_str(), &statbuf);
