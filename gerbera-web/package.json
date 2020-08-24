@@ -28,7 +28,7 @@
     "braces": "^3.0.2",
     "chai": "^4.2.0",
     "chromedriver": "^81.0.0",
-    "concurrently": "^4.1.2",
+    "concurrently": "^5.3.0",
     "eslint": "^6.7.2",
     "eslint-config-standard": "^14.1.1",
     "eslint-plugin-import": "^2.20.2",
