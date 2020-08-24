@@ -84,20 +84,6 @@ describe('The jQuery Tree', () => {
     expect(onExpand.calls.count()).toBe(1);
   });
 
-  it('appends badges to the item', () => {
-    tree.tree({
-      data: treeData,
-      config: {
-        titleClass: 'folder-title',
-        closedIcon: 'folder-closed'
-      }
-    });
-
-    const items = $('#tree').find('li');
-    const firstBadges = $(items.get(0)).find('span.badge');
-    expect(firstBadges.length).toBe(3);
-  });
-
   it('binds autoscan edit to the autoscan badge', () => {
     const onAutoscanEdit = jasmine.createSpy('onAutoscanEdit');
 
