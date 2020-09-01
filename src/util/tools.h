@@ -203,11 +203,11 @@ int HMSToSeconds(const std::string& time);
 
 #ifdef HAVE_MAGIC
 /// \brief Extracts mimetype from a file using filemagic
-std::string getMIMETypeFromFile(const fs::path& file);
+std::string getMIMETypeFromFile(const fs::path& file, bool allowSymlinks);
 /// \brief Extracts mimetype from a buffer using filemagic
 std::string getMIMETypeFromBuffer(const void* buffer, size_t length);
 /// \brief Extracts mimetype from a filepath OR buffer using filemagic
-std::string getMIME(const fs::path& filepath, const void* buffer, size_t length);
+std::string getMIME(const fs::path& filepath, const void* buffer, size_t length, bool allowSymlinks);
 
 #endif // HAVE_MAGIC
 

@@ -631,20 +631,22 @@ int HMSToSeconds(const std::string& time)
 }
 
 #ifdef HAVE_MAGIC
-std::string getMIMETypeFromFile(const fs::path& file)
+std::string getMIMETypeFromFile(const fs::path& file, bool allowSymlinks)
 {
-    return getMIME(file, nullptr, -1);
+    return getMIME(file, nullptr, -1, allowSymlinks);
 }
 
 std::string getMIMETypeFromBuffer(const void* buffer, size_t length)
 {
-    return getMIME("", buffer, length);
+    return getMIME("", buffer, length, false);
 }
 
-std::string getMIME(const fs::path& filepath, const void* buffer, size_t length)
+std::string getMIME(const fs::path& filepath, const void* buffer, size_t length, bool allowSymlinks)
 {
+    int magicFlags = allowSymlinks ? MAGIC_MIME_TYPE | MAGIC_SYMLINK : MAGIC_MIME_TYPE;
+
     /* MAGIC_MIME_TYPE tells magic to return ONLY the mimetype */
-    magic_t magic_cookie = magic_open(MAGIC_MIME_TYPE);
+    magic_t magic_cookie = magic_open(magicFlags);
 
     if (magic_cookie == nullptr) {
         log_warning("Failed to initialize libmagic");
