@@ -1095,7 +1095,7 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::path& 
                 if (ignore_unknown_extensions)
                     return nullptr; // item should be ignored
 #ifdef HAVE_MAGIC
-                mimetype = getMIMETypeFromFile(path);
+                mimetype = getMIMETypeFromFile(path, config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS));
 #endif
             }
         }

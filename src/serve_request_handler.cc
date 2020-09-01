@@ -79,7 +79,7 @@ void ServeRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     {
         std::string mimetype = MIMETYPE_DEFAULT;
 #ifdef HAVE_MAGIC
-        std::string mime = getMIMETypeFromFile(path);
+        std::string mime = getMIMETypeFromFile(path, config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS));
         if (!mime.empty())
             mimetype = mime;
 #endif // HAVE_MAGIC
@@ -137,7 +137,7 @@ std::unique_ptr<IOHandler> ServeRequestHandler::open(const char* filename,
     {
         std::string mimetype = MIMETYPE_DEFAULT;
 #ifdef HAVE_MAGIC
-        std::string mime = getMIMETypeFromFile(path);
+        std::string mime = getMIMETypeFromFile(path, config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS));
         if (!mime.empty())
             mimetype = mime;
 #endif // HAVE_MAGIC
