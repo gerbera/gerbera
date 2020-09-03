@@ -173,7 +173,7 @@ void SubtitleHandler::fillMetadata(std::shared_ptr<CdsItem> item)
         resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(type));
         resource->addAttribute(RESOURCE_FILE, path.c_str());
         resource->addParameter(RESOURCE_CONTENT_TYPE, VIDEO_SUB);
-        resource->addParameter("type", type.c_str());
+        resource->addParameter("type", type);
         item->addResource(resource);
     }
 }
