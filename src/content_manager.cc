@@ -455,7 +455,8 @@ std::shared_ptr<CdsObject> ContentManager::createSingleItem(const fs::path& path
         if (obj == nullptr) { // object ignored
             log_warning("file ignored: {}", path.c_str());
             return nullptr;
-        } else if (IS_CDS_ITEM(obj->getObjectType())) {
+        }
+        if (IS_CDS_ITEM(obj->getObjectType())) {
             addObject(obj);
             isNew = true;
         }
