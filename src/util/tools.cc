@@ -508,10 +508,10 @@ std::string readTextFile(const fs::path& path)
         throw_std_runtime_error("could not open " + path.string() + " : " + mt_strerror(errno));
     }
     std::ostringstream buf;
-    char buffer[1024];
+    std::array<char, 1024> buffer;
     size_t bytesRead;
-    while ((bytesRead = fread(buffer, 1, sizeof(buffer), f)) > 0) {
-        buf << std::string(buffer, bytesRead);
+    while ((bytesRead = fread(buffer.data(), 1, buffer.size(), f)) > 0) {
+        buf << std::string(buffer.data(), bytesRead);
     }
     fclose(f);
     return buf.str();

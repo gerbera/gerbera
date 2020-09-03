@@ -105,7 +105,7 @@ void Inotify::removeWatch(int wd) const
 
 struct inotify_event* Inotify::nextEvent()
 {
-    static struct inotify_event event[MAX_EVENTS];
+    static std::array<struct inotify_event, MAX_EVENTS> event;
     static struct inotify_event* ret;
     static int first_byte = 0;
     static ssize_t bytes;

@@ -205,11 +205,11 @@ void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream
             KaxDateUTC& date = *date_el;
             time_t i_date;
             struct tm tmres;
-            char buffer[25];
+            std::array<char, 25> buffer;
             i_date = date.GetEpochDate();
-            if (gmtime_r(&i_date, &tmres) && strftime(buffer, sizeof(buffer), "%Y-%m-%d", &tmres)) {
+            if (gmtime_r(&i_date, &tmres) && strftime(buffer.data(), buffer.size(), "%Y-%m-%d", &tmres)) {
                 // printf("KaxDateUTC = %s\n", buffer);
-                item->setMetadata(MT_KEYS[M_DATE].upnp, sc->convert(buffer));
+                item->setMetadata(MT_KEYS[M_DATE].upnp, sc->convert(buffer.data()));
             }
         }
     }

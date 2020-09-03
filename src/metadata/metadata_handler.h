@@ -117,7 +117,7 @@ struct mt_key {
     const char* upnp;
 };
 
-extern mt_key MT_KEYS[];
+extern std::array<mt_key, 21> MT_KEYS;
 
 // res tag attributes
 typedef enum {
@@ -138,7 +138,7 @@ struct res_key {
     const char* upnp;
 };
 
-extern res_key RES_KEYS[];
+extern std::array<res_key, 8> RES_KEYS;
 
 /// \brief This class is responsible for providing access to metadata information
 /// of various media.
