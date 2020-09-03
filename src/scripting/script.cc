@@ -50,7 +50,7 @@
 #include "onlineservice/atrailers_content_handler.h"
 #endif
 
-static duk_function_list_entry js_global_functions[] = {
+static std::array<duk_function_list_entry, 8> js_global_functions = { {
     { "print", js_print, DUK_VARARGS },
     { "addCdsObject", js_addCdsObject, 3 },
     { "copyObject", js_copyObject, 1 },
@@ -59,7 +59,7 @@ static duk_function_list_entry js_global_functions[] = {
     { "p2i", js_p2i, 1 },
     { "j2i", js_j2i, 1 },
     { nullptr, nullptr, 0 },
-};
+} };
 
 std::string Script::getProperty(const std::string& name)
 {
@@ -232,7 +232,7 @@ Script::Script(const std::shared_ptr<Config>& config,
     duk_push_string(ctx, UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER);
     duk_put_global_string(ctx, "UPNP_CLASS_PLAYLIST_CONTAINER");
 
-    defineFunctions(js_global_functions);
+    defineFunctions(js_global_functions.data());
 
     std::string common_scr_path = config->getOption(CFG_IMPORT_SCRIPTING_COMMON_SCRIPT);
 

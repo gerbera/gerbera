@@ -60,7 +60,7 @@
 
 #include "metadata/metacontent_handler.h"
 
-mt_key MT_KEYS[] = {
+std::array<mt_key, 21> MT_KEYS = { {
     { "M_TITLE", "dc:title" },
     { "M_ARTIST", "upnp:artist" },
     { "M_ALBUM", "upnp:album" },
@@ -82,18 +82,16 @@ mt_key MT_KEYS[] = {
     { "M_COMPOSER", "upnp:composer" },
     { "M_CONDUCTOR", "upnp:conductor" },
     { "M_ORCHESTRA", "upnp:orchestra" },
-};
+} };
 
-res_key RES_KEYS[] = {
-    { "R_SIZE", "size" },
+std::array<res_key, 8> RES_KEYS = { { { "R_SIZE", "size" },
     { "R_DURATION", "duration" },
     { "R_BITRATE", "bitrate" },
     { "R_SAMPLEFREQUENCY", "sampleFrequency" },
     { "R_NRAUDIOCHANNELS", "nrAudioChannels" },
     { "R_RESOLUTION", "resolution" },
     { "R_COLORDEPTH", "colorDepth" },
-    { "R_PROTOCOLINFO", "protocolInfo" }
-};
+    { "R_PROTOCOLINFO", "protocolInfo" } } };
 
 MetadataHandler::MetadataHandler(std::shared_ptr<Config> config)
     : config(std::move(config))

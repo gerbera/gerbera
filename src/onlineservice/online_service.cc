@@ -36,7 +36,7 @@
 
 // DO NOT FORGET TO ADD SERVICE STORAGE PREFIXES TO THIS ARRAY WHEN ADDING
 // NEW SERVICES!
-static char service_prefixes[] = { '\0', 'Y', 'S', 'W', 'T', '\0' };
+static std::array<char, 6> service_prefixes = { '\0', 'Y', 'S', 'W', 'T', '\0' };
 
 OnlineServiceList::OnlineServiceList()
 {
