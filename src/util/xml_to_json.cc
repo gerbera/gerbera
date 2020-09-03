@@ -124,9 +124,13 @@ std::string Xml2Json::getValue(std::string name, const char* text, const Hints& 
     if (hint != hintsType.end()) {
         if (hint->second == "string") {
             return getAsString(text);
-        } else if (hint->second == "bool") {
+        }
+
+        if (hint->second == "bool") {
             return text;
-        } else if (hint->second == "number") {
+        }
+
+        if (hint->second == "number") {
             return text;
         }
     }

@@ -725,7 +725,9 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
                     aa.append_attribute("xmlns:dlna") = "urn:schemas-dlna-org:metadata-1-0";
                     aa.append_attribute("dlna:profileID") = "JPEG_TN";
                     continue;
-                } else if (rct == VIDEO_SUB) {
+                }
+
+                if (rct == VIDEO_SUB) {
                     auto vs = parent->append_child("sec:CaptionInfoEx");
                     vs.append_child(pugi::node_pcdata).set_value((virtualURL + url).c_str());
                     vs.append_attribute("sec:type") = res->getAttribute("type").c_str();
