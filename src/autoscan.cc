@@ -37,9 +37,7 @@
 #include "storage/storage.h"
 
 AutoscanDirectory::AutoscanDirectory()
-    : last_mod_previous_scan(0)
-    , last_mod_current_scan(0)
-    , timer_parameter(std::make_shared<Timer::Parameter>(Timer::Parameter::IDAutoscan, INVALID_SCAN_ID))
+    : timer_parameter(std::make_shared<Timer::Parameter>(Timer::Parameter::IDAutoscan, INVALID_SCAN_ID))
 {
     taskCount = 0;
     objectID = INVALID_OBJECT_ID;

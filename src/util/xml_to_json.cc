@@ -114,7 +114,7 @@ std::string Xml2Json::getAsString(const char* str)
     return "\"" + escape(str, '\\', '"') + '"';
 }
 
-std::string Xml2Json::getValue(std::string name, const char* text, const Hints& hints)
+std::string Xml2Json::getValue(const std::string& name, const char* text, const Hints& hints)
 {
     std::string str = text;
     auto& hintsType = hints.asType;

@@ -216,8 +216,8 @@ protected:
     int scanID;
     int objectID;
     int storageID;
-    time_t last_mod_previous_scan;
-    time_t last_mod_current_scan;
+    time_t last_mod_previous_scan { 0 };
+    time_t last_mod_current_scan { 0 };
     std::shared_ptr<Timer::Parameter> timer_parameter;
 };
 

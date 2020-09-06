@@ -144,7 +144,7 @@ protected:
 private:
     static void* staticThreadProc(void* arg);
     void threadProc();
-    pthread_t thread;
+    pthread_t thread { 0 };
 
     std::mutex mutex;
     using AutoLock = std::lock_guard<decltype(mutex)>;

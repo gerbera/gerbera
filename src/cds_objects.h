@@ -181,7 +181,7 @@ public:
     std::string getClass() const { return upnpClass; }
 
     /// \brief Set the physical location of the media (usually an absolute path)
-    void setLocation(fs::path location) { this->location = location; }
+    void setLocation(fs::path location) { this->location = std::move(location); }
 
     /// \brief Retrieve media location.
     fs::path getLocation() const { return location; }
@@ -259,7 +259,7 @@ public:
     }
 
     /// \brief Removes metadata with the given key
-    void removeMetadata(std::string key)
+    void removeMetadata(const std::string& key)
     {
         metadata.erase(key);
     }
@@ -274,7 +274,7 @@ public:
     std::map<std::string, std::string> getAuxData() const { return auxdata; }
 
     /// \brief Set a single auxdata value.
-    void setAuxData(std::string key, const std::string& value)
+    void setAuxData(const std::string& key, const std::string& value)
     {
         auxdata[key] = value;
     }
@@ -286,7 +286,7 @@ public:
     }
 
     /// \brief Removes auxdata with the given key
-    void removeAuxData(std::string key)
+    void removeAuxData(const std::string& key)
     {
         auxdata.erase(key);
     }
@@ -319,13 +319,13 @@ public:
     }
 
     /// \brief Add resource tag
-    void addResource(std::shared_ptr<CdsResource> resource)
+    void addResource(const std::shared_ptr<CdsResource>& resource)
     {
         resources.push_back(resource);
     }
 
     /// \brief Insert resource tag at index
-    void insertResource(int index, std::shared_ptr<CdsResource> resource)
+    void insertResource(int index, const std::shared_ptr<CdsResource>& resource)
     {
         resources.insert(resources.begin() + index, resource);
     }

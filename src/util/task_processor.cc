@@ -37,14 +37,6 @@
 #include "content_manager.h"
 #include "layout/layout.h"
 
-TaskProcessor::TaskProcessor()
-    : taskThread(0)
-    , shutdownFlag(false)
-    , working(false)
-    , taskID(1)
-{
-}
-
 void TaskProcessor::run()
 {
     int ret;
@@ -166,8 +158,6 @@ std::deque<std::shared_ptr<GenericTask>> TaskProcessor::getTasklist()
 
     return taskList;
 }
-
-TaskProcessor::~TaskProcessor() = default;
 
 TPFetchOnlineContentTask::TPFetchOnlineContentTask(std::shared_ptr<ContentManager> content,
     std::shared_ptr<TaskProcessor> task_processor,

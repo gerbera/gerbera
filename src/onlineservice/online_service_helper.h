@@ -44,7 +44,7 @@ class CdsItemExternalURL;
 /// \brief This class will handle things that are specific to various services
 class OnlineServiceHelper {
 public:
-    OnlineServiceHelper();
+    OnlineServiceHelper() = default;
 
     /// \brief this function will determine the final URL for services that
     /// need extra steps to do that

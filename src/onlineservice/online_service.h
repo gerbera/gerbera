@@ -36,6 +36,7 @@
 #define __ONLINE_SERVICE_H__
 
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include "util/timer.h"
@@ -107,7 +108,7 @@ public:
     /// Parameter that can be used by timerNotify
     void setTimerParameter(std::shared_ptr<Timer::Parameter> param)
     {
-        timer_parameter = param;
+        timer_parameter = std::move(param);
     }
 
     std::shared_ptr<Timer::Parameter> getTimerParameter() const { return timer_parameter; }
