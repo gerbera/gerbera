@@ -364,7 +364,7 @@ namespace cxxopts
         option_exists_error(const std::string& option)
             : OptionSpecException("Option " + LQUOTE + option + RQUOTE + " already exists")
         {
-    }
+        }
   };
 
   class invalid_option_format_error : public OptionSpecException
@@ -390,7 +390,7 @@ namespace cxxopts
         option_not_exists_exception(const std::string& option)
             : OptionParseException("Option " + LQUOTE + option + RQUOTE + " does not exist")
         {
-    }
+        }
   };
 
   class missing_argument_exception : public OptionParseException
@@ -400,7 +400,7 @@ namespace cxxopts
             : OptionParseException(
                 "Option " + LQUOTE + option + RQUOTE + " is missing an argument")
         {
-    }
+        }
   };
 
   class option_requires_argument_exception : public OptionParseException
@@ -410,7 +410,7 @@ namespace cxxopts
             : OptionParseException(
                 "Option " + LQUOTE + option + RQUOTE + " requires an argument")
         {
-    }
+        }
   };
 
   class option_not_has_argument_exception : public OptionParseException
@@ -422,7 +422,7 @@ namespace cxxopts
             : OptionParseException(
                 "Option " + LQUOTE + option + RQUOTE + " does not take an argument, but argument " + LQUOTE + arg + RQUOTE + " given")
         {
-    }
+        }
   };
 
   class option_not_present_exception : public OptionParseException
@@ -431,7 +431,7 @@ namespace cxxopts
         option_not_present_exception(const std::string& option)
             : OptionParseException("Option " + LQUOTE + option + RQUOTE + " not present")
         {
-    }
+        }
   };
 
   class argument_incorrect_type : public OptionParseException
@@ -442,7 +442,7 @@ namespace cxxopts
             : OptionParseException(
                 "Argument " + LQUOTE + arg + RQUOTE + " failed to parse")
         {
-    }
+        }
   };
 
   class option_required_exception : public OptionParseException
@@ -452,7 +452,7 @@ namespace cxxopts
             : OptionParseException(
                 "Option " + LQUOTE + option + RQUOTE + " is required but not present")
         {
-    }
+        }
   };
 
   namespace values
@@ -558,19 +558,13 @@ namespace cxxopts
 
           if (*iter >= '0' && *iter <= '9') {
               digit = static_cast<US>(*iter - '0');
-        }
-        else if (base == 16 && *iter >= 'a' && *iter <= 'f')
-        {
-            digit = static_cast<US>(*iter - 'a' + 10);
-        }
-        else if (base == 16 && *iter >= 'A' && *iter <= 'F')
-        {
-            digit = static_cast<US>(*iter - 'A' + 10);
-        }
-        else
-        {
-          throw argument_incorrect_type(text);
-        }
+          } else if (base == 16 && *iter >= 'a' && *iter <= 'f') {
+              digit = static_cast<US>(*iter - 'a' + 10);
+          } else if (base == 16 && *iter >= 'A' && *iter <= 'F') {
+              digit = static_cast<US>(*iter - 'A' + 10);
+          } else {
+              throw argument_incorrect_type(text);
+          }
 
         US next = result * base + digit;
         if (result > next) {
@@ -1035,13 +1029,21 @@ namespace cxxopts
     parse_default(std::shared_ptr<const OptionDetails> details)
     {
       ensure_value(details);
+      m_default = true;
       m_value->parse();
     }
 
     size_t
-    count() const
+    count() const noexcept
     {
       return m_count;
+    }
+
+    // TODO: maybe default options should count towards the number of arguments
+    bool
+    has_default() const noexcept
+    {
+        return m_default;
     }
 
     template <typename T>
@@ -1071,6 +1073,7 @@ namespace cxxopts
 
     std::shared_ptr<Value> m_value;
     size_t m_count = 0;
+    bool m_default = false;
   };
 
   class KeyValue
@@ -1130,7 +1133,7 @@ namespace cxxopts
             auto riter = m_results.find(iter->second);
 
             return riter->second.count();
-    }
+        }
 
     const OptionValue&
     operator[](const std::string& option) const
@@ -1213,7 +1216,7 @@ namespace cxxopts
           , m_options(std::make_shared<OptionMap>())
           , m_next_positional(m_positional.end())
       {
-    }
+      }
 
     Options&
     positional_help(std::string help_text)
@@ -1446,6 +1449,7 @@ namespace cxxopts
                 stringAppend(result, "\n");
                 stringAppend(result, start, ' ');
                 startLine = lastSpace + 1;
+                lastSpace = startLine;
             }
             size = 0;
         } else {
@@ -1475,7 +1479,7 @@ namespace cxxopts
       , m_allow_unrecognised(allow_unrecognised)
   {
       parse(argc, argv);
-}
+  }
 
 inline
 OptionAdder
@@ -1805,7 +1809,7 @@ ParseResult::parse(int& argc, char**& argv)
 
       auto& store = m_results[detail];
 
-      if (!store.count() && value.has_default()) {
+      if (value.has_default() && !store.count() && !store.has_default()) {
           parse_default(detail);
       }
   }
@@ -1880,7 +1884,7 @@ Options::add_one_option
 
     if (!in.second) {
         throw option_exists_error(option);
-  }
+    }
 }
 
 inline
