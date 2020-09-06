@@ -42,7 +42,7 @@ public:
     /// will be removed once the class is destroyed.
     void removeFile(const std::string& filename);
 
-    virtual ~TranscodingProcessExecutor();
+    ~TranscodingProcessExecutor() override;
 
 protected:
     /// \brief The files in this list will be removed once the class is no
