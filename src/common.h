@@ -31,7 +31,7 @@
 #ifndef __COMMON_H__
 #define __COMMON_H__
 
-#include <errno.h>
+#include <cerrno>
 
 #include "exceptions.h"
 #include "util/logger.h"
