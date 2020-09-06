@@ -273,7 +273,7 @@ std::string join(const C& container, const D& delimiter)
 template <typename K, typename V>
 V getValueOrDefault(const std::map<K, V>& m, const K& key, const V& defval)
 {
-    typename std::map<K, V>::const_iterator it = m.find(key);
+    auto it = m.find(key);
     return (it == m.end()) ? defval : it->second;
 }
 std::string getValueOrDefault(const std::map<std::string, std::string>& m, const std::string& key, const std::string& defval = "");
