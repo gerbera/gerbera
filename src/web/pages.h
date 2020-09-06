@@ -32,6 +32,8 @@
 #ifndef __WEB_PAGES_H__
 #define __WEB_PAGES_H__
 
+#include <utility>
+
 #include "cds_objects.h"
 #include "common.h"
 #include "request_handler.h"
@@ -151,7 +153,7 @@ class voidType : public WebRequestHandler {
 public:
     voidType(std::shared_ptr<Config> config, std::shared_ptr<Storage> storage,
         std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
-        : WebRequestHandler(config, storage, content, sessionManager)
+        : WebRequestHandler(std::move(config), std::move(storage), std::move(content), std::move(sessionManager))
     {
     }
     void process() override;

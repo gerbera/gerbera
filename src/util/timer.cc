@@ -36,7 +36,6 @@
 
 Timer::Timer()
     : shutdownFlag(false)
-    , thread(0)
 {
 }
 

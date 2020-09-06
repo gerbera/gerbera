@@ -36,6 +36,7 @@
 #include <queue>
 #include <thread>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "autoscan.h"
@@ -102,7 +103,7 @@ private:
         WatchAutoscan(bool startPoint, std::shared_ptr<AutoscanDirectory> adir)
             : Watch(WatchType::Autoscan)
         {
-            this->adir = adir;
+            this->adir = std::move(adir);
             this->startPoint = startPoint;
         }
         std::shared_ptr<AutoscanDirectory> getAutoscanDirectory() const { return adir; }
@@ -140,7 +141,7 @@ private:
         Wd(fs::path path, int wd, int parentWd)
             : wdWatches(std::make_shared<std::vector<std::shared_ptr<Watch>>>())
         {
-            this->path = path;
+            this->path = std::move(path);
             this->wd = wd;
             this->parentWd = parentWd;
         }
@@ -150,7 +151,7 @@ private:
         void setParentWd(int parentWd) { this->parentWd = parentWd; }
 
         std::shared_ptr<std::vector<std::shared_ptr<Watch>>> getWdWatches() const { return wdWatches; }
-        void addWatch(std::shared_ptr<Watch> w) { wdWatches->push_back(w); }
+        void addWatch(const std::shared_ptr<Watch>& w) { wdWatches->push_back(w); }
 
     private:
         std::shared_ptr<std::vector<std::shared_ptr<Watch>>> wdWatches;

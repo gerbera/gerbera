@@ -31,12 +31,6 @@
 
 #include "thread_executor.h" // API
 
-ThreadExecutor::ThreadExecutor()
-    : threadShutdown(false)
-    , thread(0)
-{
-}
-
 ThreadExecutor::~ThreadExecutor()
 {
     kill();

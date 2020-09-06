@@ -37,6 +37,7 @@
 #include <memory>
 #include <string>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 namespace fs = std::filesystem;
 
@@ -124,10 +125,10 @@ protected:
     int requestedCount;
 
 public:
-    SearchParam(const std::string& containerID, const std::string& searchCriteria, int startingIndex,
+    SearchParam(std::string containerID, std::string searchCriteria, int startingIndex,
         int requestedCount)
-        : containerID(containerID)
-        , searchCrit(searchCriteria)
+        : containerID(std::move(containerID))
+        , searchCrit(std::move(searchCriteria))
         , startingIndex(startingIndex)
         , requestedCount(requestedCount)
     {

@@ -35,6 +35,7 @@
 
 #include <map>
 #include <string>
+#include <utility>
 #include <vector>
 
 // forward declaration
@@ -148,7 +149,7 @@ class AutoscanListOption : public ConfigOption {
 public:
     explicit AutoscanListOption(std::shared_ptr<AutoscanList> option)
     {
-        this->option = option;
+        this->option = std::move(option);
     }
 
     std::shared_ptr<AutoscanList> getAutoscanListOption() const override { return option; }
@@ -161,7 +162,7 @@ class ClientConfigListOption : public ConfigOption {
 public:
     explicit ClientConfigListOption(std::shared_ptr<ClientConfigList> option)
     {
-        this->option = option;
+        this->option = std::move(option);
     }
 
     std::shared_ptr<ClientConfigList> getClientConfigListOption() const override { return option; }
@@ -174,7 +175,7 @@ class TranscodingProfileListOption : public ConfigOption {
 public:
     explicit TranscodingProfileListOption(std::shared_ptr<TranscodingProfileList> option)
     {
-        this->option = option;
+        this->option = std::move(option);
     }
 
     std::shared_ptr<TranscodingProfileList> getTranscodingProfileListOption() const override

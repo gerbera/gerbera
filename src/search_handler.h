@@ -31,6 +31,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 class SearchParam;
@@ -53,9 +54,9 @@ enum class TokenType {
 
 class SearchToken {
 public:
-    SearchToken(TokenType type, const std::string& value)
+    SearchToken(TokenType type, std::string value)
         : type(type)
-        , value(value)
+        , value(std::move(value))
     {
     }
     virtual ~SearchToken() = default;
@@ -125,7 +126,7 @@ protected:
 
 class ASTAsterisk : public ASTNode {
 public:
-    ASTAsterisk(const SQLEmitter& sqlEmitter, const std::string& value)
+    ASTAsterisk(const SQLEmitter& sqlEmitter, std::string value)
         : ASTNode(sqlEmitter)
         , value(std::move(value))
     {
@@ -138,7 +139,7 @@ protected:
 
 class ASTProperty : public ASTNode {
 public:
-    ASTProperty(const SQLEmitter& sqlEmitter, const std::string& value)
+    ASTProperty(const SQLEmitter& sqlEmitter, std::string value)
         : ASTNode(sqlEmitter)
         , value(std::move(value))
     {
@@ -151,7 +152,7 @@ protected:
 
 class ASTBoolean : public ASTNode {
 public:
-    ASTBoolean(const SQLEmitter& sqlEmitter, const std::string& value)
+    ASTBoolean(const SQLEmitter& sqlEmitter, std::string value)
         : ASTNode(sqlEmitter)
         , value(std::move(value))
     {
@@ -177,7 +178,7 @@ protected:
 
 class ASTDQuote : public ASTNode {
 public:
-    ASTDQuote(const SQLEmitter& sqlEmitter, const std::string& value)
+    ASTDQuote(const SQLEmitter& sqlEmitter, std::string value)
         : ASTNode(sqlEmitter)
         , value(std::move(value))
     {
@@ -190,7 +191,7 @@ protected:
 
 class ASTEscapedString : public ASTNode {
 public:
-    ASTEscapedString(const SQLEmitter& sqlEmitter, const std::string& value)
+    ASTEscapedString(const SQLEmitter& sqlEmitter, std::string value)
         : ASTNode(sqlEmitter)
         , value(std::move(value))
     {
@@ -222,7 +223,7 @@ protected:
 /// \brief Represents a comparison operator such as =, >=, <
 class ASTCompareOperator : public ASTNode {
 public:
-    ASTCompareOperator(const SQLEmitter& sqlEmitter, const std::string& value)
+    ASTCompareOperator(const SQLEmitter& sqlEmitter, std::string value)
         : ASTNode(sqlEmitter)
         , value(std::move(value))
     {
@@ -257,7 +258,7 @@ protected:
 /// \brief Represents an operator defined by a string such as contains, derivedFrom
 class ASTStringOperator : public ASTNode {
 public:
-    ASTStringOperator(const SQLEmitter& sqlEmitter, const std::string& value)
+    ASTStringOperator(const SQLEmitter& sqlEmitter, std::string value)
         : ASTNode(sqlEmitter)
         , value(std::move(value))
     {
@@ -291,7 +292,7 @@ protected:
 
 class ASTExistsOperator : public ASTNode {
 public:
-    ASTExistsOperator(const SQLEmitter& sqlEmitter, const std::string& value)
+    ASTExistsOperator(const SQLEmitter& sqlEmitter, std::string value)
         : ASTNode(sqlEmitter)
         , value(std::move(value))
     {

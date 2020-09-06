@@ -36,8 +36,6 @@
 #include "config/config_manager.h"
 #include "online_service.h"
 
-OnlineServiceHelper::OnlineServiceHelper() = default;
-
 std::string OnlineServiceHelper::resolveURL(const std::shared_ptr<CdsItemExternalURL>& item)
 {
     if (!item->getFlag(OBJECT_FLAG_ONLINE_SERVICE))

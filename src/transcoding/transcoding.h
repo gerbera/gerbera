@@ -37,6 +37,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 namespace fs = std::filesystem;
 
@@ -80,7 +81,7 @@ public:
 
     /// \brief sets the program name, i.e. the command line name of the
     /// transcoder that will be executed.
-    void setCommand(fs::path command) { this->command = command; }
+    void setCommand(fs::path command) { this->command = std::move(command); }
 
     /// \brief gets the transcoders program name
     fs::path getCommand() const { return command; }

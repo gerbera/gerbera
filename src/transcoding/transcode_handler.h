@@ -35,6 +35,7 @@
 #include <memory>
 #include <string>
 #include <upnp.h>
+#include <utility>
 
 #include "common.h"
 
@@ -49,8 +50,8 @@ class TranscodeHandler {
 public:
     TranscodeHandler(std::shared_ptr<Config> config,
         std::shared_ptr<ContentManager> content)
-        : config(config)
-        , content(content)
+        : config(std::move(config))
+        , content(std::move(content))
     {
     }
     virtual std::unique_ptr<IOHandler> open(std::shared_ptr<TranscodingProfile> profile,

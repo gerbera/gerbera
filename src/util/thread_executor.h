@@ -43,7 +43,7 @@
 class ThreadExecutor : public Executor {
 public:
     /// \brief initialize the mutex and the cond
-    ThreadExecutor();
+    ThreadExecutor() = default;
     ~ThreadExecutor() override;
     bool isAlive() override { return threadRunning; }
 
@@ -55,7 +55,7 @@ public:
     int getStatus() override = 0;
 
 protected:
-    bool threadShutdown;
+    bool threadShutdown { false };
     /// \brief if the thread is currently running
     bool threadRunning;
 
@@ -73,7 +73,7 @@ protected:
     bool threadShutdownCheck() const { return threadShutdown; }
 
 private:
-    pthread_t thread;
+    pthread_t thread { 0 };
 
     static void* staticThreadProc(void* arg);
 };

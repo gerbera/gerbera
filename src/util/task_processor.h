@@ -19,9 +19,9 @@ class Timer;
 
 class TaskProcessor {
 public:
-    TaskProcessor();
+    TaskProcessor() = default;
     void run();
-    virtual ~TaskProcessor();
+    virtual ~TaskProcessor() = default;
     void shutdown();
 
     void addTask(const std::shared_ptr<GenericTask>& task);
@@ -30,15 +30,15 @@ public:
     void invalidateTask(unsigned int taskID);
 
 protected:
-    pthread_t taskThread;
+    pthread_t taskThread { 0 };
     std::condition_variable cond;
     std::mutex mutex;
     using AutoLock = std::lock_guard<decltype(mutex)>;
     using AutoLockU = std::unique_lock<decltype(mutex)>;
 
-    bool shutdownFlag;
-    bool working;
-    unsigned int taskID;
+    bool shutdownFlag { false };
+    bool working { false };
+    unsigned int taskID { 1 };
     std::deque<std::shared_ptr<GenericTask>> taskQueue;
     std::shared_ptr<GenericTask> currentTask;
 
