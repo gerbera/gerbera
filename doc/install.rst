@@ -94,6 +94,13 @@ Entware (Optware)
 Gerbera is available in `Entware <https://github.com/Entware/rtndev/tree/master/gerbera>`_ for your embedded device/router!
 
 
+OpenWrt (OpenWrt)
+~~~~~~~~~~~~~~~~~
+.. index:: OpenWrt
+
+Gerbera is available in `OpenWrt <https://github.com/openwrt/packages/tree/master/multimedia/gerbera>`_ for your embedded device/router!
+
+
 macOS
 ~~~~~
 .. index:: macOS
