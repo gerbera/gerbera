@@ -18,7 +18,9 @@ In order to compile Gerbera you will have to install the following packages:
 +-------------------+-----------+---------------+----------------------------+------------------------+----------+
 | Library           | Version   | Required?     | Note                       | Compile-time option    | Default  |
 +===================+===========+===============+============================+========================+==========+
-| libupnp           | >=1.8.6   | Required      | `pupnp <https://github.com/mrjimenez/pupnp>`_       |          |
+| libupnp           | >=1.12.1  | XOR libnpupnp | `pupnp <https://github.com/mrjimenez/pupnp>`_       |          |
++-------------------+-----------+---------------+----------------------------+------------------------+----------+
+| libnpupnp         | >=4.0.11  | XOR libupnp   | `npupnp <https://www.lesbonscomptes.com/upmpdcli>`_ |          |
 +-------------------+-----------+---------------+----------------------------+------------------------+----------+
 | libuuid           |           | Depends on OS | On BSD native libuuid is   |                        |          |
 |                   |           |               | used others require        |                        |          |
