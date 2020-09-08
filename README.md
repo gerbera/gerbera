@@ -109,7 +109,8 @@ The Gerbera Team maintains a Homebrew Tap to allow for easy installation of Gerb
 
 | Lib          	| Version 	| Required? 	| Note                 	     | Compile-time option | Default  |
 |--------------	|---------	|-----------	|--------------------------- | --------------------| -------- |
-| libupnp      	| >=1.12.1 	| Required  	| [pupnp]                    |                     |          |
+| libupnp      	| >=1.12.1 	| XOR libnpupnp | [pupnp]                    |                     |          |
+| libnpupnp     | >=4.0.11 	| XOR libupnp   | [nppupnp]                  |                     |          |
 | libuuid      	|         	| Depends on OS | On \*BSD native libuuid is used, others require e2fsprogs-libuuid | | |
 | pugixml     	|         	| Required  	| [pugixml]         	     |                     |          |
 | libiconv     	|         	| Required  	|                      	     |                     |          |
