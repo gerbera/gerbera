@@ -52,7 +52,7 @@ void Exiv2Handler::fillMetadata(std::shared_ptr<CdsItem> item)
         std::string value;
         auto sc = StringConverter::m2i(config);
 
-        Exiv2::Image::AutoPtr image = Exiv2::ImageFactory::open(std::string(item->getLocation().c_str()));
+        const auto image = Exiv2::ImageFactory::open(std::string(item->getLocation().c_str()));
         image->readMetadata();
         Exiv2::ExifData& exifData = image->exifData();
         Exiv2::XmpData& xmpData = image->xmpData();
