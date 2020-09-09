@@ -50,7 +50,7 @@ void Exiv2Handler::fillMetadata(std::shared_ptr<CdsItem> item)
 {
     try {
         std::string value;
-        auto sc = StringConverter::m2i(config);
+        const auto sc = StringConverter::m2i(config);
 
         const auto image = Exiv2::ImageFactory::open(std::string(item->getLocation().c_str()));
         image->readMetadata();
@@ -141,7 +141,7 @@ void Exiv2Handler::fillMetadata(std::shared_ptr<CdsItem> item)
             item->setMetadata(MT_KEYS[M_DESCRIPTION].upnp, sc->convert(comment));
 
         // if there are any auxilary tags that the user wants - add them
-        auto aux = config->getArrayOption(CFG_IMPORT_LIBOPTS_EXIV2_AUXDATA_TAGS_LIST);
+        const auto aux = config->getArrayOption(CFG_IMPORT_LIBOPTS_EXIV2_AUXDATA_TAGS_LIST);
         if (!aux.empty()) {
             std::string value;
             std::string auxtag;
@@ -151,11 +151,11 @@ void Exiv2Handler::fillMetadata(std::shared_ptr<CdsItem> item)
                 auxtag = j;
                 log_debug("auxtag: {} ", auxtag.c_str());
                 if (auxtag.substr(0, 4) == "Exif") {
-                    auto md = exifData.findKey(Exiv2::ExifKey(auxtag));
+                    const auto md = exifData.findKey(Exiv2::ExifKey(auxtag));
                     if (md != exifData.end())
                         value = const_cast<char*>(md->toString().c_str());
                 } else if (auxtag.substr(0, 3) == "Xmp") {
-                    auto md = xmpData.findKey(Exiv2::XmpKey(auxtag));
+                    const auto md = xmpData.findKey(Exiv2::XmpKey(auxtag));
                     if (md != xmpData.end())
                         value = const_cast<char*>(md->toString().c_str());
                 } else {
