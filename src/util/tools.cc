@@ -396,7 +396,7 @@ std::string urlUnescape(const std::string& str)
     return buf.str();
 }
 
-static std::string dict_encode(const std::map<std::string, std::string>& dict, char sep1, char sep2)
+static auto dict_encode(const std::map<std::string, std::string>& dict, char sep1, char sep2)
 {
     std::ostringstream buf;
     for (auto it = dict.begin(); it != dict.end(); it++) {

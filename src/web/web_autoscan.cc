@@ -37,7 +37,7 @@
 #include "content_manager.h"
 #include "storage/storage.h"
 
-static bool WebAutoscanProcessListComparator(const std::shared_ptr<AutoscanDirectory>& a1, const std::shared_ptr<AutoscanDirectory>& a2)
+static auto WebAutoscanProcessListComparator(const std::shared_ptr<AutoscanDirectory>& a1, const std::shared_ptr<AutoscanDirectory>& a2)
 {
     return strcmp(a1->getLocation().c_str(), a2->getLocation().c_str()) < 0;
 }

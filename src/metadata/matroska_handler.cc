@@ -227,11 +227,7 @@ void MatroskaHandler::parseAttachments(const std::shared_ptr<CdsItem>& item, Ebm
         std::string fileName(UTFstring(GetChild<KaxFileName>(*attachedFile)).GetUTF8());
         // printf("KaxFileName = %s\n", fileName.c_str());
 
-        bool isCoverArt = false;
-        if (startswith(fileName, "cover")) {
-            isCoverArt = true;
-        }
-
+        bool isCoverArt = startswith(fileName, "cover");
         if (isCoverArt) {
             auto& fileData = GetChild<KaxFileData>(*attachedFile);
             // printf("KaxFileData (size=%ld)\n", fileData.GetSize());

@@ -56,7 +56,7 @@ static std::unordered_map<std::string, TokenType> tokenTypes {
     { "or", TokenType::OR }
 };
 
-static std::string aslowercase(const std::string& src)
+static auto aslowercase(const std::string& src)
 {
     std::string copy = src;
     std::transform(copy.begin(), copy.end(), copy.begin(), ::tolower);

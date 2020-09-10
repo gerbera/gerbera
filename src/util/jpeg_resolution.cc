@@ -69,12 +69,12 @@ using uchar = unsigned char;
 #define M_DRI 0xDD
 
 #define ITEM_BUF_SIZE 16
-static int Get16m(const void* Short)
+static auto Get16m(const void* Short)
 {
     return (static_cast<uchar*>(const_cast<void*>(Short))[0] << 8) | static_cast<uchar*>(const_cast<void*>(Short))[1];
 }
 
-static int ioh_fgetc(const std::unique_ptr<IOHandler>& ioh)
+static auto ioh_fgetc(const std::unique_ptr<IOHandler>& ioh)
 {
     uchar c[1] = { 0 };
     int ret = ioh->read(reinterpret_cast<char*>(c), sizeof(char));

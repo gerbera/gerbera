@@ -54,7 +54,7 @@ duk_ret_t js_print(duk_context* ctx)
 
 duk_ret_t js_copyObject(duk_context* ctx)
 {
-    auto* self = Script::getContextScript(ctx);
+    auto self = Script::getContextScript(ctx);
     if (!duk_is_object(ctx, 0))
         return duk_error(ctx, DUK_ERR_TYPE_ERROR, "copyObject argument is not an object");
     auto cds_obj = self->dukObject2cdsObject(nullptr);
@@ -64,13 +64,13 @@ duk_ret_t js_copyObject(duk_context* ctx)
 
 duk_ret_t js_addCdsObject(duk_context* ctx)
 {
-    auto* self = Script::getContextScript(ctx);
+    auto self = Script::getContextScript(ctx);
 
     if (!duk_is_object(ctx, 0))
         return 0;
     duk_to_object(ctx, 0);
     //stack: js_cds_obj
-    const char* ts = duk_to_string(ctx, 1);
+    auto ts = duk_to_string(ctx, 1);
     if (!ts)
         ts = "/";
     fs::path path = ts;
@@ -199,14 +199,14 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
     return 0;
 }
 
-static duk_ret_t convert_charset_generic(duk_context* ctx, charset_convert_t chr)
+static auto convert_charset_generic(duk_context* ctx, charset_convert_t chr)
 {
-    auto* self = Script::getContextScript(ctx);
+    auto self = Script::getContextScript(ctx);
     if (duk_get_top(ctx) != 1)
         return DUK_RET_SYNTAX_ERROR;
     if (!duk_is_string(ctx, 0))
         return DUK_RET_TYPE_ERROR;
-    const char* ts = duk_to_string(ctx, 0);
+    const auto ts = duk_to_string(ctx, 0);
     duk_pop(ctx);
 
     try {

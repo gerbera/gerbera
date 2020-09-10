@@ -45,7 +45,7 @@ LibExifHandler::LibExifHandler(std::shared_ptr<Config> config)
 {
 }
 
-static int getTagFromString(const std::string& tag)
+static auto getTagFromString(const std::string& tag)
 {
     if (tag == "EXIF_TAG_INTEROPERABILITY_INDEX")
         return EXIF_TAG_INTEROPERABILITY_INDEX;
@@ -255,7 +255,7 @@ static int getTagFromString(const std::string& tag)
         return EXIF_TAG_IMAGE_UNIQUE_ID;
 
     log_warning("Ignoring unknown libexif tag: {}", tag.c_str());
-    return -1;
+    return ExifTag(-1);
 }
 
 #define BUFLEN 4096
