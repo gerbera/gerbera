@@ -111,7 +111,7 @@ typedef enum {
     M_MAX
 } metadata_fields_t;
 
-typedef struct mt_key mt_key;
+using mt_key = struct mt_key;
 struct mt_key {
     const char* sym;
     const char* upnp;
@@ -132,7 +132,7 @@ typedef enum {
     R_MAX
 } resource_attributes_t;
 
-typedef struct res_key res_key;
+using res_key = struct res_key;
 struct res_key {
     const char* sym;
     const char* upnp;

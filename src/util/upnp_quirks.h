@@ -31,7 +31,7 @@
 #include <pugixml.hpp>
 namespace fs = std::filesystem;
 
-typedef uint32_t QuirkFlags;
+using QuirkFlags = uint32_t;
 
 #define QUIRK_FLAG_NONE 0x00000000
 #define QUIRK_FLAG_SAMSUNG 0x00000001
