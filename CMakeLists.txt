@@ -235,6 +235,7 @@ add_library(libgerbera STATIC
         src/web/add_object.cc
         src/web/auth.cc
         src/web/clients.cc
+        src/web/config_load.cc
         src/web/containers.cc
         src/web/directories.cc
         src/web/edit_load.cc

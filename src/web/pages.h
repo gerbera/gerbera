@@ -183,10 +183,18 @@ std::unique_ptr<WebRequestHandler> createWebRequestHandler(
     const std::shared_ptr<ContentManager>& content, const std::shared_ptr<SessionManager>& sessionManager,
     const std::string& page);
 
-/// \brief Browser clients list
+/// \brief Browse clients list
 class clients : public WebRequestHandler {
 public:
     clients(std::shared_ptr<Config> config, std::shared_ptr<Storage> storage,
+        std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
+    void process() override;
+};
+
+/// \brief load configuration
+class configLoad : public WebRequestHandler {
+public:
+    configLoad(std::shared_ptr<Config> config, std::shared_ptr<Storage> storage,
         std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
     void process() override;
 };

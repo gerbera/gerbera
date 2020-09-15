@@ -28,6 +28,7 @@ import {Trail} from './gerbera-trail.module.js';
 import {Tree} from './gerbera-tree.module.js';
 import {Updates} from './gerbera-updates.module.js';
 import {Clients} from './gerbera-clients.module.js';
+import {Config} from './gerbera-config.module.js';
 
 export class App {
   constructor(clientConfig, serverConfig) {
@@ -42,14 +43,16 @@ export class App {
         'home': [],
         'db': [],
         'fs': [],
-        'clients': []
+        'clients': [],
+        'config': [],
       }
     };
     this.navLinks = {
       'home': '#nav-home',
       'db': '#nav-db',
       'fs': '#nav-fs',
-      'clients': '#nav-clients'
+      'clients': '#nav-clients',
+      'config': '#nav-config',
     };
   }
 
@@ -118,7 +121,8 @@ export class App {
         'home': [],
         'db': [],
         'fs': [],
-        'clients': []
+        'clients': [],
+        'config': [],
       }
     };
     return Updates.initialize()
@@ -218,6 +222,7 @@ export class App {
       Autoscan.initialize();
       Updates.initialize();
       Clients.initialize();
+      Config.initialize();
     } else {
       $('.login-field').show();
       $('#login-form').submit(function (event) {
@@ -259,6 +264,7 @@ export class App {
     Trail.destroy();
     Items.destroy();
     Clients.destroy();
+    Config.destroy();
   }
 
   reload(path) {

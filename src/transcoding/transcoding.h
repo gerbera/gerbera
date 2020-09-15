@@ -209,7 +209,7 @@ public:
     void add(const std::string& sourceMimeType, const std::shared_ptr<TranscodingProfile>& prof);
 
     std::shared_ptr<TranscodingProfileMap> get(const std::string& sourceMimeType);
-    std::shared_ptr<TranscodingProfileMap> get(int index);
+    const std::map<std::string, std::shared_ptr<TranscodingProfileMap>>& getList() { return list; }
     std::shared_ptr<TranscodingProfile> getByName(const std::string& name);
     int size() const { return list.size(); }
 

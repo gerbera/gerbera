@@ -138,6 +138,214 @@ ConfigManager::~ConfigManager()
 #define NEW_TRANSCODING_PROFILELIST_OPTION(optval) trlist_opt = std::make_shared<TranscodingProfileListOption>(optval)
 #define SET_TRANSCODING_PROFILELIST_OPTION(opttype) options->at(opttype) = trlist_opt
 
+static std::map<config_option_t, const char*> optionMap = {
+    { CFG_SERVER_PORT, "/server/port" },
+    { CFG_SERVER_IP, "/server/ip" },
+    { CFG_SERVER_NETWORK_INTERFACE, "/server/interface" },
+    { CFG_SERVER_NAME, "/server/name" },
+    { CFG_SERVER_MANUFACTURER, "/server/manufacturer" },
+    { CFG_SERVER_MANUFACTURER_URL, "/server/manufacturerURL" },
+    { CFG_SERVER_MODEL_NAME, "/server/modelName" },
+    { CFG_SERVER_MODEL_DESCRIPTION, "/server/modelDescription" },
+    { CFG_SERVER_MODEL_NUMBER, "/server/modelNumber" },
+    { CFG_SERVER_MODEL_URL, "/server/modelURL" },
+    { CFG_SERVER_SERIAL_NUMBER, "/server/serialNumber" },
+    { CFG_SERVER_PRESENTATION_URL, "/server/presentationURL" },
+    { CFG_SERVER_APPEND_PRESENTATION_URL_TO, "/server/presentationURL/attribute::append-to" },
+    { CFG_SERVER_UDN, "/server/udn" },
+    { CFG_SERVER_HOME, "/server/home" },
+    { CFG_SERVER_TMPDIR, "/server/tmpdir" },
+    { CFG_SERVER_WEBROOT, "/server/webroot" },
+    { CFG_SERVER_SERVEDIR, "/server/servedir" },
+    { CFG_SERVER_ALIVE_INTERVAL, "/server/alive" },
+    { CFG_SERVER_HIDE_PC_DIRECTORY, "/server/pc-directory/attribute::upnp-hide" },
+    { CFG_SERVER_BOOKMARK_FILE, "/server/bookmark" },
+    { CFG_SERVER_UPNP_TITLE_AND_DESC_STRING_LIMIT, "/server/upnp-string-limit" },
+    { CFG_SERVER_UI_ENABLED, "/server/ui/attribute::enabled" },
+    { CFG_SERVER_UI_POLL_INTERVAL, "/server/ui/attribute::poll-interval" },
+    { CFG_SERVER_UI_POLL_WHEN_IDLE, "/server/ui/attribute::poll-when-idle" },
+    { CFG_SERVER_UI_ACCOUNTS_ENABLED, "/server/ui/accounts/attribute::enabled" },
+    { CFG_SERVER_UI_ACCOUNT_LIST, "/server/ui/accounts" },
+    { CFG_SERVER_UI_SESSION_TIMEOUT, "/server/ui/accounts/attribute::session-timeout" },
+    { CFG_SERVER_UI_DEFAULT_ITEMS_PER_PAGE, "/server/ui/items-per-page/attribute::default" },
+    { CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN, "/server/ui/items-per-page" },
+    { CFG_SERVER_UI_SHOW_TOOLTIPS, "/server/ui/attribute::show-tooltips" },
+    { CFG_SERVER_STORAGE, "/server/storage" },
+    { CFG_SERVER_STORAGE_MYSQL, "/server/storage/mysql" },
+    { CFG_SERVER_STORAGE_SQLITE, "/server/storage/sqlite3" },
+    { CFG_SERVER_STORAGE_DRIVER, "/server/storage/driver" },
+    { CFG_SERVER_STORAGE_SQLITE_ENABLED, "/server/storage/sqlite3/attribute::enabled" },
+    { CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE, "/server/storage/sqlite3/database-file" },
+    { CFG_SERVER_STORAGE_SQLITE_SYNCHRONOUS, "/server/storage/sqlite3/synchronous" },
+    { CFG_SERVER_STORAGE_SQLITE_RESTORE, "/server/storage/sqlite3/on-error" },
+    { CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED, "/server/storage/sqlite3/backup/attribute::enabled" },
+    { CFG_SERVER_STORAGE_SQLITE_BACKUP_INTERVAL, "/server/storage/sqlite3/backup/attribute::interval" },
+#ifdef HAVE_MYSQL
+    { CFG_SERVER_STORAGE_MYSQL_ENABLED, "/server/storage/mysql/attribute::enabled" },
+    { CFG_SERVER_STORAGE_MYSQL_HOST, "/server/storage/mysql/host" },
+    { CFG_SERVER_STORAGE_MYSQL_PORT, "/server/storage/mysql/port" },
+    { CFG_SERVER_STORAGE_MYSQL_USERNAME, "/server/storage/mysql/username" },
+    { CFG_SERVER_STORAGE_MYSQL_SOCKET, "/server/storage/mysql/socket" },
+    { CFG_SERVER_STORAGE_MYSQL_PASSWORD, "/server/storage/mysql/password" },
+    { CFG_SERVER_STORAGE_MYSQL_DATABASE, "/server/storage/mysql/database" },
+#endif
+#if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
+    { CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED, "/server/extended-runtime-options/ffmpegthumbnailer/attribute::enabled" },
+    { CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE, "/server/extended-runtime-options/ffmpegthumbnailer/thumbnail-size" },
+    { CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE, "/server/extended-runtime-options/ffmpegthumbnailer/seek-percentage" },
+    { CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY, "/server/extended-runtime-options/ffmpegthumbnailer/filmstrip-overlay" },
+    { CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_WORKAROUND_BUGS, "/server/extended-runtime-options/ffmpegthumbnailer/workaround-bugs" },
+    { CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_IMAGE_QUALITY, "/server/extended-runtime-options/ffmpegthumbnailer/image-quality" },
+    { CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED, "/server/extended-runtime-options/ffmpegthumbnailer/cache-dir/attribute::enabled" },
+    { CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR, "/server/extended-runtime-options/ffmpegthumbnailer/cache-dir" },
+#endif
+    { CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED, "/server/extended-runtime-options/mark-played-items/attribute::enabled" },
+    { CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND, "/server/extended-runtime-options/mark-played-items/string/attribute::mode" },
+    { CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING, "/server/extended-runtime-options/mark-played-items/string" },
+    { CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES, "/server/extended-runtime-options/mark-played-items/attribute::suppress-cds-updates" },
+    { CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST, "/server/extended-runtime-options/mark-played-items/mark" },
+#ifdef HAVE_LASTFMLIB
+    { CFG_SERVER_EXTOPTS_LASTFM_ENABLED, "/server/extended-runtime-options/lastfm/attribute::enabled" },
+    { CFG_SERVER_EXTOPTS_LASTFM_USERNAME, "/server/extended-runtime-options/lastfm/username" },
+    { CFG_SERVER_EXTOPTS_LASTFM_PASSWORD, "/server/extended-runtime-options/lastfm/password" },
+#endif
+    { CFG_IMPORT_HIDDEN_FILES, "/import/attribute::hidden-files" },
+    { CFG_IMPORT_FOLLOW_SYMLINKS, "/import/attribute::follow-symlinks" },
+    { CFG_IMPORT_FILESYSTEM_CHARSET, "/import/filesystem-charset" },
+    { CFG_IMPORT_METADATA_CHARSET, "/import/metadata-charset" },
+    { CFG_IMPORT_PLAYLIST_CHARSET, "/import/playlist-charset" },
+#ifdef HAVE_JS
+    { CFG_IMPORT_SCRIPTING_CHARSET, "/import/scripting/attribute::script-charset" },
+    { CFG_IMPORT_SCRIPTING_COMMON_SCRIPT, "/import/scripting/common-script" },
+    { CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT, "/import/scripting/playlist-script" },
+    { CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS, "/import/scripting/playlist-script/attribute::create-link" },
+    { CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT, "/import/scripting/virtual-layout/import-script" },
+#endif // JS
+    { CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE, "/import/scripting/virtual-layout/attribute::type" },
+#ifdef HAVE_MAGIC
+    { CFG_IMPORT_MAGIC_FILE, "/import/magic-file" },
+#endif
+    { CFG_IMPORT_AUTOSCAN_TIMED_LIST, "/import/autoscan" },
+#ifdef HAVE_INOTIFY
+    { CFG_IMPORT_AUTOSCAN_USE_INOTIFY, "/import/autoscan/attribute::use-inotify" },
+    { CFG_IMPORT_AUTOSCAN_INOTIFY_LIST, "/import/autoscan" },
+#endif
+    { CFG_IMPORT_MAPPINGS_IGNORE_UNKNOWN_EXTENSIONS, "/import/mappings/extension-mimetype/attribute::ignore-unknown" },
+    { CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_CASE_SENSITIVE, "/import/mappings/extension-mimetype/attribute::case-sensitive" },
+    { CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST, "/import/mappings/extension-mimetype" },
+    { CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST, "/import/mappings/mimetype-upnpclass" },
+    { CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST, "/import/mappings/mimetype-contenttype" },
+#ifdef HAVE_LIBEXIF
+    { CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST, "/import/library-options/libexif/auxdata" },
+#endif
+#ifdef HAVE_EXIV2
+    { CFG_IMPORT_LIBOPTS_EXIV2_AUXDATA_TAGS_LIST, "/import/library-options/exiv2/auxdata" },
+#endif
+#if defined(HAVE_TAGLIB)
+    { CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST, "/import/library-options/id3/auxdata" },
+#endif
+    { CFG_TRANSCODING_TRANSCODING_ENABLED, "/transcoding/attribute::enabled" },
+    { CFG_TRANSCODING_PROFILE_LIST, "/transcoding" },
+#ifdef HAVE_CURL
+    { CFG_EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE, "/transcoding/attribute::fetch-buffer-size" },
+    { CFG_EXTERNAL_TRANSCODING_CURL_FILL_SIZE, "/transcoding/attribute::fetch-buffer-fill-size" },
+#endif //HAVE_CURL
+#ifdef SOPCAST
+    { CFG_ONLINE_CONTENT_SOPCAST_ENABLED, "/import/online-content/SopCast/attribute::enabled" },
+    { CFG_ONLINE_CONTENT_SOPCAST_REFRESH, "/import/online-content/SopCast/attribute::refresh" },
+    { CFG_ONLINE_CONTENT_SOPCAST_UPDATE_AT_START, "/import/online-content/SopCast/attribute::update-at-start" },
+    { CFG_ONLINE_CONTENT_SOPCAST_PURGE_AFTER, "/import/online-content/SopCast/attribute::purge-after" },
+#endif
+#ifdef ATRAILERS
+    { CFG_ONLINE_CONTENT_ATRAILERS_ENABLED, "/import/online-content/AppleTrailers/attribute::enabled" },
+    { CFG_ONLINE_CONTENT_ATRAILERS_REFRESH, "/import/online-content/AppleTrailers/attribute::refresh" },
+    { CFG_ONLINE_CONTENT_ATRAILERS_UPDATE_AT_START, "/import/online-content/AppleTrailers/attribute::update-at-start" },
+    { CFG_ONLINE_CONTENT_ATRAILERS_PURGE_AFTER, "/import/online-content/AppleTrailers/attribute::purge-after" },
+    { CFG_ONLINE_CONTENT_ATRAILERS_RESOLUTION, "/import/online-content/AppleTrailers/attribute::resolution" },
+#endif
+#if defined(HAVE_FFMPEG)
+    { CFG_IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST, "/import/library-options/ffmpeg/auxdata" },
+#endif
+    { CFG_CLIENTS_LIST, "/clients" },
+    { CFG_CLIENTS_LIST_ENABLED, "/clients/attribute::enabled" },
+    { CFG_IMPORT_LAYOUT_PARENT_PATH, "/import/layout/attribute::parent-path" },
+    { CFG_IMPORT_LAYOUT_MAPPING, "/import/layout" },
+    { CFG_IMPORT_LIBOPTS_ENTRY_SEP, "/import/library-options/attribute::multi-value-separator" },
+    { CFG_IMPORT_LIBOPTS_ENTRY_LEGACY_SEP, "/import/library-options/attribute::legacy-value-separator" },
+    { CFG_IMPORT_RESOURCES_CASE_SENSITIVE, "/import/resources/attribute::case-sensitive" },
+    { CFG_IMPORT_RESOURCES_FANART_FILE_LIST, "/import/resources/fanart" },
+    { CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST, "/import/resources/subtitle" },
+    { CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST, "/import/resources/resource" },
+
+    { CFG_MAX, "last_option" },
+
+    { ATTR_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN_OPTION, "option" },
+    { ATTR_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT, "content" },
+    { ATTR_SERVER_UI_ACCOUNT_LIST_ACCOUNT, "acount" },
+    { ATTR_SERVER_UI_ACCOUNT_LIST_USER, "user" },
+    { ATTR_SERVER_UI_ACCOUNT_LIST_PASSWORD, "password" },
+    { ATTR_IMPORT_MAPPINGS_MIMETYPE_MAP, "map" },
+    { ATTR_IMPORT_MAPPINGS_MIMETYPE_FROM, "from" },
+    { ATTR_IMPORT_MAPPINGS_MIMETYPE_TO, "to" },
+    { ATTR_IMPORT_RESOURCES_ADD_FILE, "add-file" },
+    { ATTR_IMPORT_RESOURCES_NAME, "name" },
+    { ATTR_IMPORT_LIBOPTS_AUXDATA_DATA, "add-data" },
+    { ATTR_IMPORT_LIBOPTS_AUXDATA_TAG, "tag" },
+
+    { ATTR_TRANSCODING_MIMETYPE_PROF_MAP, "mimetype-profile-mappings" },
+    { ATTR_TRANSCODING_MIMETYPE_PROF_MAP_TRANSCODE, "transcode" },
+    { ATTR_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE, "mimetype" },
+    { ATTR_TRANSCODING_MIMETYPE_PROF_MAP_USING, "using" },
+    { ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_TREAT, "treat" },
+    { ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_MIMETYPE, "mimetype" },
+    { ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_AS, "as" },
+    { ATTR_IMPORT_LAYOUT_MAPPING_PATH, "path" },
+    { ATTR_IMPORT_LAYOUT_MAPPING_FROM, "from" },
+    { ATTR_IMPORT_LAYOUT_MAPPING_TO, "to" },
+    { ATTR_TRANSCODING_PROFILES, "profiles" },
+    { ATTR_TRANSCODING_PROFILES_PROFLE, "profile" },
+    { ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED, "enabled" },
+    { ATTR_TRANSCODING_PROFILES_PROFLE_TYPE, "type" },
+    { ATTR_TRANSCODING_PROFILES_PROFLE_NAME, "name" },
+    { ATTR_TRANSCODING_PROFILES_PROFLE_MIMETYPE, "mimetype" },
+    { ATTR_TRANSCODING_PROFILES_PROFLE_RES, "resolution" },
+    { ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC, "avi-fourcc-list" },
+    { ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE, "mode" },
+    { ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_4CC, "fourcc" },
+    { ATTR_TRANSCODING_PROFILES_PROFLE_ACCURL, "accept-url" },
+    { ATTR_TRANSCODING_PROFILES_PROFLE_SAMPFREQ, "sample-frequency" },
+    { ATTR_TRANSCODING_PROFILES_PROFLE_NRCHAN, "audio-channels" },
+    { ATTR_TRANSCODING_PROFILES_PROFLE_HIDEORIG, "hide-original-resource" },
+    { ATTR_TRANSCODING_PROFILES_PROFLE_THUMB, "thumbnail" },
+    { ATTR_TRANSCODING_PROFILES_PROFLE_FIRST, "first-resource" },
+    { ATTR_TRANSCODING_PROFILES_PROFLE_ACCOGG, "accept-ogg-theora" },
+    { ATTR_TRANSCODING_PROFILES_PROFLE_USECHUNKEDENC, "use-chunked-encoding" },
+    { ATTR_TRANSCODING_PROFILES_PROFLE_AGENT, "agent" },
+    { ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND, "command" },
+    { ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS, "arguments" },
+    { ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER, "buffer" },
+    { ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE, "size" },
+    { ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK, "chunk-size" },
+    { ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL, "fill-size" },
+
+    { ATTR_AUTOSCAN_DIRECTORY, "directory" },
+    { ATTR_AUTOSCAN_DIRECTORY_LOCATION, "location" },
+    { ATTR_AUTOSCAN_DIRECTORY_MODE, "mode" },
+    { ATTR_AUTOSCAN_DIRECTORY_INTERVAL, "interval" },
+    { ATTR_AUTOSCAN_DIRECTORY_RECURSIVE, "recursive" },
+    { ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES, "hidden-files" },
+
+    { ATTR_CLIENTS_CLIENT, "client" },
+    { ATTR_CLIENTS_CLIENT_FLAGS, "flags" },
+    { ATTR_CLIENTS_CLIENT_IP, "ip" },
+    { ATTR_CLIENTS_CLIENT_USERAGENT, "userAgent" },
+};
+
+const char* ConfigManager::mapConfigOption(config_option_t option)
+{
+    return optionMap[option];
+}
+
 void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 {
     std::string temp;
@@ -183,51 +391,53 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
         // respect command line; ignore xml value
         temp = userHome;
     } else
-        temp = getOption("/server/home");
+        temp = getXmlOption(CFG_SERVER_HOME);
     if (!fs::is_directory(temp))
         throw std::runtime_error("Directory '" + temp + "' does not exist");
     NEW_OPTION(temp);
     SET_OPTION(CFG_SERVER_HOME);
 
-    temp = getOption("/server/webroot");
+    temp = getXmlOption(CFG_SERVER_WEBROOT);
     temp = resolvePath(temp);
     NEW_OPTION(temp);
     SET_OPTION(CFG_SERVER_WEBROOT);
 
-    temp = getOption("/server/tmpdir", DEFAULT_TMPDIR);
+    temp = getXmlOption(CFG_SERVER_TMPDIR, DEFAULT_TMPDIR);
     temp = resolvePath(temp);
     NEW_OPTION(temp);
     SET_OPTION(CFG_SERVER_TMPDIR);
 
-    temp = getOption("/server/servedir", "");
+    temp = getXmlOption(CFG_SERVER_SERVEDIR, "");
     temp = resolvePath(temp);
     NEW_OPTION(temp);
     SET_OPTION(CFG_SERVER_SERVEDIR);
 
     // udn should be already prepared
-    NEW_OPTION(getOption("/server/udn"));
+    NEW_OPTION(getXmlOption(CFG_SERVER_UDN));
     SET_OPTION(CFG_SERVER_UDN);
 
     // checking database driver options
     std::string mysql_en = "no";
     std::string sqlite3_en = "no";
 
-    tmpEl = getElement("/server/storage");
+    tmpEl = getXmlElement(CFG_SERVER_STORAGE);
     if (tmpEl == nullptr)
         throw std::runtime_error("Error in config file: <storage> tag not found");
 
-    tmpEl = getElement("/server/storage/mysql");
+    tmpEl = getXmlElement(CFG_SERVER_STORAGE_MYSQL);
     if (tmpEl != nullptr) {
-        mysql_en = getOption("/server/storage/mysql/attribute::enabled",
-            DEFAULT_MYSQL_ENABLED);
+        mysql_en = getXmlOption(CFG_SERVER_STORAGE_MYSQL_ENABLED, DEFAULT_MYSQL_ENABLED);
+        NEW_OPTION(mysql_en);
+        SET_OPTION(CFG_SERVER_STORAGE_MYSQL_ENABLED);
         if (!validateYesNo(mysql_en))
             throw std::runtime_error("Invalid <mysql enabled=\"\"> value");
     }
 
-    tmpEl = getElement("/server/storage/sqlite3");
+    tmpEl = getXmlElement(CFG_SERVER_STORAGE_SQLITE);
     if (tmpEl != nullptr) {
-        sqlite3_en = getOption("/server/storage/sqlite3/attribute::enabled",
-            DEFAULT_SQLITE_ENABLED);
+        sqlite3_en = getXmlOption(CFG_SERVER_STORAGE_SQLITE_ENABLED, DEFAULT_SQLITE_ENABLED);
+        NEW_OPTION(sqlite3_en);
+        SET_OPTION(CFG_SERVER_STORAGE_SQLITE_ENABLED);
         if (!validateYesNo(sqlite3_en))
             throw std::runtime_error("Invalid <sqlite3 enabled=\"\"> value");
     }
@@ -242,33 +452,30 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 
 #ifdef HAVE_MYSQL
     if (mysql_en == "yes") {
-        NEW_OPTION(getOption("/server/storage/mysql/host",
-            DEFAULT_MYSQL_HOST));
+        NEW_OPTION(getXmlOption(CFG_SERVER_STORAGE_MYSQL_HOST, DEFAULT_MYSQL_HOST));
         SET_OPTION(CFG_SERVER_STORAGE_MYSQL_HOST);
 
-        NEW_OPTION(getOption("/server/storage/mysql/database",
-            DEFAULT_MYSQL_DB));
+        NEW_OPTION(getXmlOption(CFG_SERVER_STORAGE_MYSQL_DATABASE, DEFAULT_MYSQL_DB));
         SET_OPTION(CFG_SERVER_STORAGE_MYSQL_DATABASE);
 
-        NEW_OPTION(getOption("/server/storage/mysql/username",
-            DEFAULT_MYSQL_USER));
+        NEW_OPTION(getXmlOption(CFG_SERVER_STORAGE_MYSQL_USERNAME, DEFAULT_MYSQL_USER));
         SET_OPTION(CFG_SERVER_STORAGE_MYSQL_USERNAME);
 
-        NEW_INT_OPTION(getIntOption("/server/storage/mysql/port", 0));
+        NEW_INT_OPTION(getXmlIntOption(CFG_SERVER_STORAGE_MYSQL_PORT, 0));
         SET_INT_OPTION(CFG_SERVER_STORAGE_MYSQL_PORT);
 
-        if (getElement("/server/storage/mysql/socket") == nullptr) {
+        if (getXmlElement(CFG_SERVER_STORAGE_MYSQL_SOCKET) == nullptr) {
             NEW_OPTION("");
         } else {
-            NEW_OPTION(getOption("/server/storage/mysql/socket"));
+            NEW_OPTION(getXmlOption(CFG_SERVER_STORAGE_MYSQL_SOCKET));
         }
 
         SET_OPTION(CFG_SERVER_STORAGE_MYSQL_SOCKET);
 
-        if (getElement("/server/storage/mysql/password") == nullptr) {
+        if (getXmlElement(CFG_SERVER_STORAGE_MYSQL_PASSWORD) == nullptr) {
             NEW_OPTION("");
         } else {
-            NEW_OPTION(getOption("/server/storage/mysql/password"));
+            NEW_OPTION(getXmlOption(CFG_SERVER_STORAGE_MYSQL_PASSWORD));
         }
         SET_OPTION(CFG_SERVER_STORAGE_MYSQL_PASSWORD);
     }
@@ -281,13 +488,12 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 #endif // HAVE_MYSQL
 
     if (sqlite3_en == "yes") {
-        temp = getOption("/server/storage/sqlite3/database-file");
+        temp = getXmlOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
         temp = resolvePath(temp, true, false);
         NEW_OPTION(temp);
         SET_OPTION(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
 
-        temp = getOption("/server/storage/sqlite3/synchronous",
-            DEFAULT_SQLITE_SYNC);
+        temp = getXmlOption(CFG_SERVER_STORAGE_SQLITE_SYNCHRONOUS, DEFAULT_SQLITE_SYNC);
 
         temp_int = 0;
 
@@ -303,7 +509,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
         NEW_INT_OPTION(temp_int);
         SET_INT_OPTION(CFG_SERVER_STORAGE_SQLITE_SYNCHRONOUS);
 
-        temp = getOption("/server/storage/sqlite3/on-error",
+        temp = getXmlOption(CFG_SERVER_STORAGE_SQLITE_RESTORE,
             DEFAULT_SQLITE_RESTORE);
 
         bool tmp_bool = true;
@@ -318,10 +524,10 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
         NEW_BOOL_OPTION(tmp_bool);
         SET_BOOL_OPTION(CFG_SERVER_STORAGE_SQLITE_RESTORE);
 #ifdef SQLITE_BACKUP_ENABLED
-        temp = getOption("/server/storage/sqlite3/backup/attribute::enabled",
+        temp = getXmlOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED,
             YES);
 #else
-        temp = getOption("/server/storage/sqlite3/backup/attribute::enabled",
+        temp = getXmlOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED,
             DEFAULT_SQLITE_BACKUP_ENABLED);
 #endif
         if (!validateYesNo(temp))
@@ -330,7 +536,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
         NEW_BOOL_OPTION(temp == "yes");
         SET_BOOL_OPTION(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED);
 
-        temp_int = getIntOption("/server/storage/sqlite3/backup/attribute::interval",
+        temp_int = getXmlIntOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_INTERVAL,
             DEFAULT_SQLITE_BACKUP_INTERVAL);
         if (temp_int < 1)
             throw std::runtime_error("Error in config file: incorrect parameter for "
@@ -351,15 +557,14 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 
     // now go through the optional settings and fix them if anything is missing
 
-    temp = getOption("/server/ui/attribute::enabled",
-        DEFAULT_UI_EN_VALUE);
+    temp = getXmlOption(CFG_SERVER_UI_ENABLED, DEFAULT_UI_EN_VALUE);
     if (!validateYesNo(temp))
         throw std::runtime_error("Error in config file: incorrect parameter "
                                  "for <ui enabled=\"\" /> attribute");
     NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_SERVER_UI_ENABLED);
 
-    temp = getOption("/server/ui/attribute::show-tooltips",
+    temp = getXmlOption(CFG_SERVER_UI_SHOW_TOOLTIPS,
         DEFAULT_UI_SHOW_TOOLTIPS_VALUE);
     if (!validateYesNo(temp))
         throw std::runtime_error("Error in config file: incorrect parameter "
@@ -367,7 +572,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_SERVER_UI_SHOW_TOOLTIPS);
 
-    temp = getOption("/server/ui/attribute::poll-when-idle",
+    temp = getXmlOption(CFG_SERVER_UI_POLL_WHEN_IDLE,
         DEFAULT_POLL_WHEN_IDLE_VALUE);
     if (!validateYesNo(temp))
         throw std::runtime_error("Error in config file: incorrect parameter "
@@ -375,7 +580,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_SERVER_UI_POLL_WHEN_IDLE);
 
-    temp_int = getIntOption("/server/ui/attribute::poll-interval",
+    temp_int = getXmlIntOption(CFG_SERVER_UI_POLL_INTERVAL,
         DEFAULT_POLL_INTERVAL);
     if (temp_int < 1)
         throw std::runtime_error("Error in config file: incorrect parameter for "
@@ -383,7 +588,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     NEW_INT_OPTION(temp_int);
     SET_INT_OPTION(CFG_SERVER_UI_POLL_INTERVAL);
 
-    temp_int = getIntOption("/server/ui/items-per-page/attribute::default",
+    temp_int = getXmlIntOption(CFG_SERVER_UI_DEFAULT_ITEMS_PER_PAGE,
         DEFAULT_ITEMS_PER_PAGE_2);
     if (temp_int < 1)
         throw std::runtime_error("Error in config file: incorrect parameter for "
@@ -392,7 +597,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     SET_INT_OPTION(CFG_SERVER_UI_DEFAULT_ITEMS_PER_PAGE);
 
     // now get the option list for the drop down menu
-    tmpEl = getElement("/server/ui/items-per-page");
+    tmpEl = getXmlElement(CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN);
     // create default structure
     if (std::distance(tmpEl.begin(), tmpEl.end()) == 0) {
         if ((temp_int != DEFAULT_ITEMS_PER_PAGE_1) && (temp_int != DEFAULT_ITEMS_PER_PAGE_2) && (temp_int != DEFAULT_ITEMS_PER_PAGE_3) && (temp_int != DEFAULT_ITEMS_PER_PAGE_4)) {
@@ -409,7 +614,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     {
         bool default_found = false;
         for (const pugi::xml_node& child : tmpEl.children()) {
-            if (std::string(child.name()) == "option") {
+            if (std::string(child.name()) == optionMap[ATTR_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN_OPTION]) {
                 int i = child.text().as_int();
                 if (i < 1)
                     throw std::runtime_error("Error in config file: incorrect "
@@ -435,8 +640,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     NEW_STRARR_OPTION(menu_opts);
     SET_STRARR_OPTION(CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN);
 
-    temp = getOption("/server/ui/accounts/attribute::enabled",
-        DEFAULT_ACCOUNTS_EN_VALUE);
+    temp = getXmlOption(CFG_SERVER_UI_ACCOUNTS_ENABLED, DEFAULT_ACCOUNTS_EN_VALUE);
     if (!validateYesNo(temp))
         throw std::runtime_error("Error in config file: incorrect parameter for "
                                  "<accounts enabled=\"\" /> attribute");
@@ -444,11 +648,11 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_SERVER_UI_ACCOUNTS_ENABLED);
 
-    tmpEl = getElement("/server/ui/accounts");
-    NEW_DICT_OPTION(createDictionaryFromNode(tmpEl, "account", "user", "password"));
+    tmpEl = getXmlElement(CFG_SERVER_UI_ACCOUNT_LIST);
+    NEW_DICT_OPTION(createDictionaryFromNode(tmpEl, ATTR_SERVER_UI_ACCOUNT_LIST_ACCOUNT, ATTR_SERVER_UI_ACCOUNT_LIST_USER, ATTR_SERVER_UI_ACCOUNT_LIST_PASSWORD));
     SET_DICT_OPTION(CFG_SERVER_UI_ACCOUNT_LIST);
 
-    temp_int = getIntOption("/server/ui/accounts/attribute::session-timeout",
+    temp_int = getXmlIntOption(CFG_SERVER_UI_SESSION_TIMEOUT,
         DEFAULT_SESSION_TIMEOUT);
     if (temp_int < 1) {
         throw std::runtime_error("Error in config file: invalid session-timeout "
@@ -457,7 +661,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     NEW_INT_OPTION(temp_int);
     SET_INT_OPTION(CFG_SERVER_UI_SESSION_TIMEOUT);
 
-    temp = getOption("/clients/attribute::enabled",
+    temp = getXmlOption(CFG_CLIENTS_LIST_ENABLED,
         DEFAULT_CLIENTS_EN_VALUE);
     if (!validateYesNo(temp))
         throw std::runtime_error("Error in config file: incorrect parameter for "
@@ -466,13 +670,13 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_CLIENTS_LIST_ENABLED);
 
-    tmpEl = getElement("/clients");
+    tmpEl = getXmlElement(CFG_CLIENTS_LIST);
     if (tmpEl != nullptr && temp == "yes") {
         NEW_CLIENTCONFIGLIST_OPTION(createClientConfigListFromNode(tmpEl));
         SET_CLIENTCONFIGLIST_OPTION(CFG_CLIENTS_LIST);
     }
 
-    temp = getOption("/import/attribute::hidden-files",
+    temp = getXmlOption(CFG_IMPORT_HIDDEN_FILES,
         DEFAULT_HIDDEN_FILES_VALUE);
     if (!validateYesNo(temp))
         throw std::runtime_error("Error in config file: incorrect parameter for "
@@ -480,7 +684,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_IMPORT_HIDDEN_FILES);
 
-    temp = getOption("/import/attribute::follow-symlinks",
+    temp = getXmlOption(CFG_IMPORT_FOLLOW_SYMLINKS,
         DEFAULT_FOLLOW_SYMLINKS_VALUE);
     if (!validateYesNo(temp))
         throw std::runtime_error("Error in config file: incorrect parameter for "
@@ -488,8 +692,8 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_IMPORT_FOLLOW_SYMLINKS);
 
-    temp = getOption(
-        "/import/mappings/extension-mimetype/attribute::ignore-unknown",
+    temp = getXmlOption(
+        CFG_IMPORT_MAPPINGS_IGNORE_UNKNOWN_EXTENSIONS,
         DEFAULT_IGNORE_UNKNOWN_EXTENSIONS);
 
     if (!validateYesNo(temp))
@@ -499,8 +703,8 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_IMPORT_MAPPINGS_IGNORE_UNKNOWN_EXTENSIONS);
 
-    temp = getOption(
-        "/import/mappings/extension-mimetype/attribute::case-sensitive",
+    temp = getXmlOption(
+        CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_CASE_SENSITIVE,
         DEFAULT_CASE_SENSITIVE_EXTENSION_MAPPINGS);
 
     if (!validateYesNo(temp))
@@ -515,14 +719,14 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     NEW_BOOL_OPTION(csens);
     SET_BOOL_OPTION(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_CASE_SENSITIVE);
 
-    tmpEl = getElement("/import/mappings/extension-mimetype");
-    NEW_DICT_OPTION(createDictionaryFromNode(tmpEl, "map", "from", "to", !csens));
+    tmpEl = getXmlElement(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
+    NEW_DICT_OPTION(createDictionaryFromNode(tmpEl, ATTR_IMPORT_MAPPINGS_MIMETYPE_MAP, ATTR_IMPORT_MAPPINGS_MIMETYPE_FROM, ATTR_IMPORT_MAPPINGS_MIMETYPE_TO, !csens));
     SET_DICT_OPTION(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
 
     std::map<std::string, std::string> mime_content;
-    tmpEl = getElement("/import/mappings/mimetype-contenttype");
+    tmpEl = getXmlElement(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
     if (tmpEl != nullptr) {
-        mime_content = createDictionaryFromNode(tmpEl, "treat", "mimetype", "as");
+        mime_content = createDictionaryFromNode(tmpEl, ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_TREAT, ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_MIMETYPE, ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_AS);
     } else {
         mime_content["audio/mpeg"] = CONTENT_TYPE_MP3;
         mime_content["audio/mp4"] = CONTENT_TYPE_MP4;
@@ -547,8 +751,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     NEW_DICT_OPTION(mime_content);
     SET_DICT_OPTION(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
 
-    temp = getOption(
-        "/import/layout/attribute::parent-path",
+    temp = getXmlOption(CFG_IMPORT_LAYOUT_PARENT_PATH,
         DEFAULT_IMPORT_LAYOUT_PARENT_PATH);
 
     if (!validateYesNo(temp))
@@ -563,10 +766,10 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     NEW_BOOL_OPTION(ppath);
     SET_BOOL_OPTION(CFG_IMPORT_LAYOUT_PARENT_PATH);
 
-    tmpEl = getElement("/import/layout");
+    tmpEl = getXmlElement(CFG_IMPORT_LAYOUT_MAPPING);
     std::map<std::string, std::string> layout_mapping_content;
     if (tmpEl != nullptr) {
-        layout_mapping_content = createDictionaryFromNode(tmpEl, "path", "from", "to");
+        layout_mapping_content = createDictionaryFromNode(tmpEl, ATTR_IMPORT_LAYOUT_MAPPING_PATH, ATTR_IMPORT_LAYOUT_MAPPING_FROM, ATTR_IMPORT_LAYOUT_MAPPING_TO);
     }
 
     NEW_DICT_OPTION(layout_mapping_content);
@@ -590,7 +793,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     } catch (const std::runtime_error& e) {
         temp = DEFAULT_FALLBACK_CHARSET;
     }
-    std::string charset = getOption("/import/filesystem-charset", temp);
+    std::string charset = getXmlOption(CFG_IMPORT_FILESYSTEM_CHARSET, temp);
     try {
         auto conv = std::make_unique<StringConverter>(charset,
             DEFAULT_INTERNAL_CHARSET);
@@ -602,7 +805,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     NEW_OPTION(charset);
     SET_OPTION(CFG_IMPORT_FILESYSTEM_CHARSET);
 
-    charset = getOption("/import/metadata-charset", temp);
+    charset = getXmlOption(CFG_IMPORT_METADATA_CHARSET, temp);
     try {
         auto conv = std::make_unique<StringConverter>(charset,
             DEFAULT_INTERNAL_CHARSET);
@@ -614,7 +817,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     NEW_OPTION(charset);
     SET_OPTION(CFG_IMPORT_METADATA_CHARSET);
 
-    charset = getOption("/import/playlist-charset", temp);
+    charset = getXmlOption(CFG_IMPORT_PLAYLIST_CHARSET, temp);
     try {
         auto conv = std::make_unique<StringConverter>(charset,
             DEFAULT_INTERNAL_CHARSET);
@@ -626,8 +829,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     NEW_OPTION(charset);
     SET_OPTION(CFG_IMPORT_PLAYLIST_CHARSET);
 
-    temp = getOption("/server/pc-directory/attribute::upnp-hide",
-        DEFAULT_HIDE_PC_DIRECTORY);
+    temp = getXmlOption(CFG_SERVER_HIDE_PC_DIRECTORY, DEFAULT_HIDE_PC_DIRECTORY);
 
     if (!validateYesNo(temp))
         throw std::runtime_error("Error in config file: hide attribute of the "
@@ -637,67 +839,66 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     SET_BOOL_OPTION(CFG_SERVER_HIDE_PC_DIRECTORY);
 
     if (interface.empty()) {
-        temp = getOption("/server/interface", "");
+        temp = getXmlOption(CFG_SERVER_NETWORK_INTERFACE, "");
     } else {
         temp = interface;
     }
-    if (!temp.empty() && !getOption("/server/ip", "").empty())
+    if (!temp.empty() && !getXmlOption(CFG_SERVER_IP, "").empty())
         throw std::runtime_error("Error in config file: you can not specify interface and ip at the same time");
 
     NEW_OPTION(temp);
     SET_OPTION(CFG_SERVER_NETWORK_INTERFACE);
 
     if (ip.empty()) {
-        temp = getOption("/server/ip", ""); // bind to any IP address
+        temp = getXmlOption(CFG_SERVER_IP, ""); // bind to any IP address
     } else {
         temp = ip;
     }
     NEW_OPTION(temp);
     SET_OPTION(CFG_SERVER_IP);
 
-    temp = getOption("/server/bookmark", DEFAULT_BOOKMARK_FILE);
+    temp = getXmlOption(CFG_SERVER_BOOKMARK_FILE, DEFAULT_BOOKMARK_FILE);
     temp = resolvePath(temp, true, false);
     NEW_OPTION(temp);
     SET_OPTION(CFG_SERVER_BOOKMARK_FILE);
 
-    temp = getOption("/server/name", DESC_FRIENDLY_NAME);
+    temp = getXmlOption(CFG_SERVER_NAME, DESC_FRIENDLY_NAME);
     NEW_OPTION(temp);
     SET_OPTION(CFG_SERVER_NAME);
 
-    temp = getOption("/server/modelName", DESC_MODEL_NAME);
+    temp = getXmlOption(CFG_SERVER_MODEL_NAME, DESC_MODEL_NAME);
     NEW_OPTION(temp);
     SET_OPTION(CFG_SERVER_MODEL_NAME);
 
-    temp = getOption("/server/modelDescription", DESC_MODEL_DESCRIPTION);
+    temp = getXmlOption(CFG_SERVER_MODEL_DESCRIPTION, DESC_MODEL_DESCRIPTION);
     NEW_OPTION(temp);
     SET_OPTION(CFG_SERVER_MODEL_DESCRIPTION);
 
-    temp = getOption("/server/modelNumber", DESC_MODEL_NUMBER);
+    temp = getXmlOption(CFG_SERVER_MODEL_NUMBER, DESC_MODEL_NUMBER);
     NEW_OPTION(temp);
     SET_OPTION(CFG_SERVER_MODEL_NUMBER);
 
-    temp = getOption("/server/modelURL", "");
+    temp = getXmlOption(CFG_SERVER_MODEL_URL, "");
     NEW_OPTION(temp);
     SET_OPTION(CFG_SERVER_MODEL_URL);
 
-    temp = getOption("/server/serialNumber", DESC_SERIAL_NUMBER);
+    temp = getXmlOption(CFG_SERVER_SERIAL_NUMBER, DESC_SERIAL_NUMBER);
     NEW_OPTION(temp);
     SET_OPTION(CFG_SERVER_SERIAL_NUMBER);
 
-    temp = getOption("/server/manufacturer", DESC_MANUFACTURER);
+    temp = getXmlOption(CFG_SERVER_MANUFACTURER, DESC_MANUFACTURER);
     NEW_OPTION(temp);
     SET_OPTION(CFG_SERVER_MANUFACTURER);
 
-    temp = getOption("/server/manufacturerURL", DESC_MANUFACTURER_URL);
+    temp = getXmlOption(CFG_SERVER_MANUFACTURER_URL, DESC_MANUFACTURER_URL);
     NEW_OPTION(temp);
     SET_OPTION(CFG_SERVER_MANUFACTURER_URL);
 
-    temp = getOption("/server/presentationURL", "");
+    temp = getXmlOption(CFG_SERVER_PRESENTATION_URL, "");
     NEW_OPTION(temp);
     SET_OPTION(CFG_SERVER_PRESENTATION_URL);
 
-    temp = getOption("/server/presentationURL/attribute::append-to",
-        DEFAULT_PRES_URL_APPENDTO_ATTR);
+    temp = getXmlOption(CFG_SERVER_APPEND_PRESENTATION_URL_TO, DEFAULT_PRES_URL_APPENDTO_ATTR);
 
     if ((temp != "none") && (temp != "ip") && (temp != "port")) {
         throw std::runtime_error("Error in config file: "
@@ -705,7 +906,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
                                  "<presentationURL> tag");
     }
 
-    if (((temp == "ip") || (temp == "port")) && getOption("/server/presentationURL").empty()) {
+    if (((temp == "ip") || (temp == "port")) && getXmlOption(CFG_SERVER_PRESENTATION_URL).empty()) {
         throw std::runtime_error("Error in config file: \"append-to\" attribute "
                                  "value in <presentationURL> tag is set to \""
             + temp + "\" but no URL is specified");
@@ -713,7 +914,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     NEW_OPTION(temp);
     SET_OPTION(CFG_SERVER_APPEND_PRESENTATION_URL_TO);
 
-    temp_int = getIntOption("/server/upnp-string-limit",
+    temp_int = getXmlIntOption(CFG_SERVER_UPNP_TITLE_AND_DESC_STRING_LIMIT,
         DEFAULT_UPNP_STRING_LIMIT);
     if ((temp_int != -1) && (temp_int < 4)) {
         throw std::runtime_error("Error in config file: invalid value for "
@@ -723,20 +924,20 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     SET_INT_OPTION(CFG_SERVER_UPNP_TITLE_AND_DESC_STRING_LIMIT);
 
 #ifdef HAVE_JS
-    temp = getOption("/import/scripting/playlist-script",
+    temp = getXmlOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT,
         prefix_dir / DEFAULT_JS_DIR / DEFAULT_PLAYLISTS_SCRIPT);
     temp = resolvePath(temp, true);
     NEW_OPTION(temp);
     SET_OPTION(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT);
 
-    temp = getOption("/import/scripting/common-script",
+    temp = getXmlOption(CFG_IMPORT_SCRIPTING_COMMON_SCRIPT,
         prefix_dir / DEFAULT_JS_DIR / DEFAULT_COMMON_SCRIPT);
     temp = resolvePath(temp, true);
     NEW_OPTION(temp);
     SET_OPTION(CFG_IMPORT_SCRIPTING_COMMON_SCRIPT);
 
-    temp = getOption(
-        "/import/scripting/playlist-script/attribute::create-link",
+    temp = getXmlOption(
+        CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS,
         DEFAULT_PLAYLIST_CREATE_LINK);
 
     if (!validateYesNo(temp))
@@ -747,7 +948,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     SET_BOOL_OPTION(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS);
 #endif
 
-    temp = getOption("/import/scripting/virtual-layout/attribute::type",
+    temp = getXmlOption(CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE,
         DEFAULT_LAYOUT_TYPE);
     if ((temp != "js") && (temp != "builtin") && (temp != "disabled"))
         throw std::runtime_error("Error in config file: invalid virtual layout type specified");
@@ -760,8 +961,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
                                  "however you specified \"js\" to be used for the "
                                  "virtual-layout.");
 #else
-    charset = getOption("/import/scripting/attribute::script-charset",
-        DEFAULT_JS_CHARSET);
+    charset = getXmlOption(CFG_IMPORT_SCRIPTING_CHARSET, DEFAULT_JS_CHARSET);
     if (temp == "js") {
         try {
             auto conv = std::make_unique<StringConverter>(charset,
@@ -774,8 +974,8 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     NEW_OPTION(charset);
     SET_OPTION(CFG_IMPORT_SCRIPTING_CHARSET);
 
-    std::string script_path = getOption(
-        "/import/scripting/virtual-layout/import-script",
+    std::string script_path = getXmlOption(
+        CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT,
         prefix_dir / DEFAULT_JS_DIR / DEFAULT_IMPORT_SCRIPT);
     script_path = resolvePath(script_path, true, temp == "js");
     if (temp == "js" && script_path.empty())
@@ -788,32 +988,32 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 
     // 0 means, that the SDK will any free port itself
     if (port <= 0) {
-        temp_int = getIntOption("/server/port", 0);
+        temp_int = getXmlIntOption(CFG_SERVER_PORT, 0);
     } else {
         temp_int = port;
     }
     NEW_INT_OPTION(temp_int);
     SET_INT_OPTION(CFG_SERVER_PORT);
 
-    temp_int = getIntOption("/server/alive", DEFAULT_ALIVE_INTERVAL);
+    temp_int = getXmlIntOption(CFG_SERVER_ALIVE_INTERVAL, DEFAULT_ALIVE_INTERVAL);
     if (temp_int < ALIVE_INTERVAL_MIN)
         throw std::runtime_error(fmt::format("Error in config file: incorrect parameter for /server/alive, must be at least {}",
             ALIVE_INTERVAL_MIN));
     NEW_INT_OPTION(temp_int);
     SET_INT_OPTION(CFG_SERVER_ALIVE_INTERVAL);
 
-    pugi::xml_node el = getElement("/import/mappings/mimetype-upnpclass");
+    pugi::xml_node el = getXmlElement(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST);
     if (el == nullptr) {
-        getOption("/import/mappings/mimetype-upnpclass", "");
+        getXmlOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST, "");
     }
-    NEW_DICT_OPTION(createDictionaryFromNode(el, "map", "from", "to"));
+    NEW_DICT_OPTION(createDictionaryFromNode(el, ATTR_IMPORT_MAPPINGS_MIMETYPE_MAP, ATTR_IMPORT_MAPPINGS_MIMETYPE_FROM, ATTR_IMPORT_MAPPINGS_MIMETYPE_TO));
     SET_DICT_OPTION(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST);
 
-    temp = getOption("/import/autoscan/attribute::use-inotify", "auto");
+    temp = getXmlOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY, "auto");
     if ((temp != "auto") && !validateYesNo(temp))
         throw std::runtime_error("Error in config file: incorrect parameter for \"<autoscan use-inotify=\" attribute");
 
-    el = getElement("/import/autoscan");
+    el = getXmlElement(CFG_IMPORT_AUTOSCAN_TIMED_LIST);
 
     NEW_AUTOSCANLIST_OPTION(createAutoscanListFromNode(nullptr, el, ScanMode::Timed));
     SET_AUTOSCANLIST_OPTION(CFG_IMPORT_AUTOSCAN_TIMED_LIST);
@@ -854,16 +1054,18 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     }
 #endif
 
-    temp = getOption(
-        "/transcoding/attribute::enabled",
+    temp = getXmlOption(
+        CFG_TRANSCODING_TRANSCODING_ENABLED,
         DEFAULT_TRANSCODING_ENABLED);
 
     if (!validateYesNo(temp))
         throw std::runtime_error("Error in config file: incorrect parameter "
                                  "for <transcoding enabled=\"\"> attribute");
 
+    SET_BOOL_OPTION(CFG_TRANSCODING_TRANSCODING_ENABLED);
+
     if (temp == "yes")
-        el = getElement("/transcoding");
+        el = getXmlElement(CFG_TRANSCODING_PROFILE_LIST);
     else
         el = pugi::xml_node(nullptr);
     NEW_TRANSCODING_PROFILELIST_OPTION(createTranscodingProfileListFromNode(el));
@@ -871,8 +1073,8 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 
 #ifdef HAVE_CURL
     if (temp == "yes") {
-        temp_int = getIntOption(
-            "/transcoding/attribute::fetch-buffer-size",
+        temp_int = getXmlIntOption(
+            CFG_EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE,
             DEFAULT_CURL_BUFFER_SIZE);
         if (temp_int < CURL_MAX_WRITE_SIZE)
             throw std::runtime_error(fmt::format("Error in config file: incorrect parameter "
@@ -882,8 +1084,8 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
         NEW_INT_OPTION(temp_int);
         SET_INT_OPTION(CFG_EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE);
 
-        temp_int = getIntOption(
-            "/transcoding/attribute::fetch-buffer-fill-size",
+        temp_int = getXmlIntOption(
+            CFG_EXTERNAL_TRANSCODING_CURL_FILL_SIZE,
             DEFAULT_CURL_INITIAL_FILL_SIZE);
         if (temp_int < 0)
             throw std::runtime_error("Error in config file: incorrect parameter "
@@ -895,33 +1097,28 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 
 #endif //HAVE_CURL
 
-    temp = getOption(
-        "/import/library-options/attribute::multi-value-separator",
-        DEFAULT_LIBOPTS_ENTRY_SEPARATOR, false);
+    temp = getXmlOption(CFG_IMPORT_LIBOPTS_ENTRY_SEP, DEFAULT_LIBOPTS_ENTRY_SEPARATOR, false);
 
     NEW_OPTION(temp);
     SET_OPTION(CFG_IMPORT_LIBOPTS_ENTRY_SEP);
 
-    temp = getOption(
-        "/import/library-options/attribute::legacy-value-separator",
-        "", false);
+    temp = getXmlOption(CFG_IMPORT_LIBOPTS_ENTRY_LEGACY_SEP, "", false);
 
     NEW_OPTION(temp);
     SET_OPTION(CFG_IMPORT_LIBOPTS_ENTRY_LEGACY_SEP);
 
 #ifdef HAVE_LIBEXIF
 
-    el = getElement("/import/library-options/libexif/auxdata");
+    el = getXmlElement(CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST);
     if (el == nullptr) {
-        getOption("/import/library-options/libexif/auxdata",
-            "");
+        getXmlOption(CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST, "");
     }
-    NEW_STRARR_OPTION(createArrayFromNode(el, "add-data", "tag"));
+    NEW_STRARR_OPTION(createArrayFromNode(el, ATTR_IMPORT_LIBOPTS_AUXDATA_DATA, ATTR_IMPORT_LIBOPTS_AUXDATA_TAG));
     SET_STRARR_OPTION(CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST);
 
 #endif // HAVE_LIBEXIF
 
-    temp = getOption("/import/resources/attribute::case-sensitive",
+    temp = getXmlOption(CFG_IMPORT_RESOURCES_CASE_SENSITIVE,
         DEFAULT_RESOURCES_CASE_SENSITIVE);
     if (!validateYesNo(temp))
         throw std::runtime_error("Error in config file: incorrect parameter for "
@@ -929,63 +1126,59 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_IMPORT_RESOURCES_CASE_SENSITIVE);
 
-    el = getElement("/import/resources/fanart");
+    el = getXmlElement(CFG_IMPORT_RESOURCES_FANART_FILE_LIST);
     if (el == nullptr) {
-        getOption("/import/resources/fanart",
-            "");
+        getXmlOption(CFG_IMPORT_RESOURCES_FANART_FILE_LIST, "");
     }
-    NEW_STRARR_OPTION(createArrayFromNode(el, "add-file", "name"));
+    NEW_STRARR_OPTION(createArrayFromNode(el, ATTR_IMPORT_RESOURCES_ADD_FILE, ATTR_IMPORT_RESOURCES_NAME));
     SET_STRARR_OPTION(CFG_IMPORT_RESOURCES_FANART_FILE_LIST);
 
-    el = getElement("/import/resources/subtitle");
+    el = getXmlElement(CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST);
     if (el == nullptr) {
-        getOption("/import/resources/subtitle",
-            "");
+        getXmlOption(CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST, "");
     }
-    NEW_STRARR_OPTION(createArrayFromNode(el, "add-file", "name"));
+    NEW_STRARR_OPTION(createArrayFromNode(el, ATTR_IMPORT_RESOURCES_ADD_FILE, ATTR_IMPORT_RESOURCES_NAME));
     SET_STRARR_OPTION(CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST);
 
-    el = getElement("/import/resources/resource");
+    el = getXmlElement(CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST);
     if (el == nullptr) {
-        getOption("/import/resources/resource",
-            "");
+        getXmlOption(CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST, "");
     }
-    NEW_STRARR_OPTION(createArrayFromNode(el, "add-file", "name"));
+    NEW_STRARR_OPTION(createArrayFromNode(el, ATTR_IMPORT_RESOURCES_ADD_FILE, ATTR_IMPORT_RESOURCES_NAME));
     SET_STRARR_OPTION(CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST);
 
 #ifdef HAVE_EXIV2
 
-    el = getElement("/import/library-options/exiv2/auxdata");
+    el = getXmlElement(CFG_IMPORT_LIBOPTS_EXIV2_AUXDATA_TAGS_LIST);
     if (el == nullptr) {
-        getOption("/import/library-options/exiv2/auxdata",
+        getXmlOption(CFG_IMPORT_LIBOPTS_EXIV2_AUXDATA_TAGS_LIST,
             "");
     }
-    NEW_STRARR_OPTION(createArrayFromNode(el, "add-data", "tag"));
+    NEW_STRARR_OPTION(createArrayFromNode(el, ATTR_IMPORT_LIBOPTS_AUXDATA_DATA, ATTR_IMPORT_LIBOPTS_AUXDATA_TAG));
     SET_STRARR_OPTION(CFG_IMPORT_LIBOPTS_EXIV2_AUXDATA_TAGS_LIST);
 
 #endif // HAVE_EXIV2
 
 #if defined(HAVE_TAGLIB)
-    el = getElement("/import/library-options/id3/auxdata");
+    el = getXmlElement(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
     if (el == nullptr) {
-        getOption("/import/library-options/id3/auxdata", "");
+        getXmlOption(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST, "");
     }
-    NEW_STRARR_OPTION(createArrayFromNode(el, "add-data", "tag"));
+    NEW_STRARR_OPTION(createArrayFromNode(el, ATTR_IMPORT_LIBOPTS_AUXDATA_DATA, ATTR_IMPORT_LIBOPTS_AUXDATA_TAG));
     SET_STRARR_OPTION(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
 #endif
 
 #if defined(HAVE_FFMPEG)
-    el = getElement("/import/library-options/ffmpeg/auxdata");
+    el = getXmlElement(CFG_IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST);
     if (el == nullptr) {
-        getOption("/import/library-options/ffmpeg/auxdata", "");
+        getXmlOption(CFG_IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST, "");
     }
-    NEW_STRARR_OPTION(createArrayFromNode(el, "add-data", "tag"));
+    NEW_STRARR_OPTION(createArrayFromNode(el, ATTR_IMPORT_LIBOPTS_AUXDATA_DATA, ATTR_IMPORT_LIBOPTS_AUXDATA_TAG));
     SET_STRARR_OPTION(CFG_IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST);
 #endif
 
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
-    temp = getOption("/server/extended-runtime-options/ffmpegthumbnailer/"
-                     "attribute::enabled",
+    temp = getXmlOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED,
         DEFAULT_FFMPEGTHUMBNAILER_ENABLED);
 
     if (!validateYesNo(temp))
@@ -997,8 +1190,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED);
 
     if (temp == YES) {
-        temp_int = getIntOption("/server/extended-runtime-options/ffmpegthumbnailer/"
-                                "thumbnail-size",
+        temp_int = getXmlIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE,
             DEFAULT_FFMPEGTHUMBNAILER_THUMBSIZE);
 
         if (temp_int <= 0)
@@ -1009,8 +1201,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
         NEW_INT_OPTION(temp_int);
         SET_INT_OPTION(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE);
 
-        temp_int = getIntOption("/server/extended-runtime-options/ffmpegthumbnailer/"
-                                "seek-percentage",
+        temp_int = getXmlIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE,
             DEFAULT_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE);
 
         if (temp_int < 0)
@@ -1021,8 +1212,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
         NEW_INT_OPTION(temp_int);
         SET_INT_OPTION(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE);
 
-        temp = getOption("/server/extended-runtime-options/ffmpegthumbnailer/"
-                         "filmstrip-overlay",
+        temp = getXmlOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY,
             DEFAULT_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY);
 
         if (!validateYesNo(temp))
@@ -1032,8 +1222,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
         NEW_BOOL_OPTION(temp == YES);
         SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY);
 
-        temp = getOption("/server/extended-runtime-options/ffmpegthumbnailer/"
-                         "workaround-bugs",
+        temp = getXmlOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_WORKAROUND_BUGS,
             DEFAULT_FFMPEGTHUMBNAILER_WORKAROUND_BUGS);
 
         if (!validateYesNo(temp))
@@ -1043,8 +1232,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
         NEW_BOOL_OPTION(temp == YES);
         SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_WORKAROUND_BUGS);
 
-        temp_int = getIntOption("/server/extended-runtime-options/"
-                                "ffmpegthumbnailer/image-quality",
+        temp_int = getXmlIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_IMAGE_QUALITY,
             DEFAULT_FFMPEGTHUMBNAILER_IMAGE_QUALITY);
 
         if (temp_int < 0)
@@ -1060,15 +1248,13 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
         NEW_INT_OPTION(temp_int);
         SET_INT_OPTION(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_IMAGE_QUALITY);
 
-        temp = getOption("/server/extended-runtime-options/ffmpegthumbnailer/"
-                         "cache-dir",
+        temp = getXmlOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR,
             DEFAULT_FFMPEGTHUMBNAILER_CACHE_DIR);
 
         NEW_OPTION(temp);
         SET_OPTION(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR);
 
-        temp = getOption("/server/extended-runtime-options/ffmpegthumbnailer/"
-                         "cache-dir/attribute::enabled",
+        temp = getXmlOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED,
             DEFAULT_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED);
 
         if (!validateYesNo(temp))
@@ -1081,8 +1267,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     }
 #endif
 
-    temp = getOption("/server/extended-runtime-options/mark-played-items/"
-                     "attribute::enabled",
+    temp = getXmlOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED,
         DEFAULT_MARK_PLAYED_ITEMS_ENABLED);
 
     if (!validateYesNo(temp))
@@ -1094,8 +1279,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     NEW_BOOL_OPTION(markingEnabled);
     SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED);
 
-    temp = getOption("/server/extended-runtime-options/mark-played-items/"
-                     "attribute::suppress-cds-updates",
+    temp = getXmlOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES,
         DEFAULT_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES);
     if (!validateYesNo(temp))
         throw std::runtime_error("Error in config file: "
@@ -1105,9 +1289,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     NEW_BOOL_OPTION(temp == YES);
     SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES);
 
-    temp = getOption("/server/extended-runtime-options/mark-played-items/"
-                     "string/attribute::mode",
-        DEFAULT_MARK_PLAYED_ITEMS_STRING_MODE);
+    temp = getXmlOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND, DEFAULT_MARK_PLAYED_ITEMS_STRING_MODE);
 
     if ((temp != "prepend") && (temp != "append"))
         throw std::runtime_error("Error in config file: "
@@ -1117,9 +1299,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     NEW_BOOL_OPTION(temp == DEFAULT_MARK_PLAYED_ITEMS_STRING_MODE);
     SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND);
 
-    temp = getOption("/server/extended-runtime-options/mark-played-items/"
-                     "string",
-        DEFAULT_MARK_PLAYED_ITEMS_STRING);
+    temp = getXmlOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING, DEFAULT_MARK_PLAYED_ITEMS_STRING);
     if (temp.empty())
         throw std::runtime_error("Error in config file: "
                                  "empty string given for the <string> tag in the "
@@ -1128,12 +1308,12 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     SET_OPTION(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING);
 
     std::vector<std::string> mark_content_list;
-    tmpEl = getElement("/server/extended-runtime-options/mark-played-items/mark");
+    tmpEl = getXmlElement(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST);
 
     int contentElementCount = 0;
     if (tmpEl != nullptr) {
         for (const pugi::xml_node& content : tmpEl.children()) {
-            if (std::string(content.name()) != "content")
+            if (std::string(content.name()) != optionMap[ATTR_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT])
                 continue;
 
             contentElementCount++;
@@ -1156,7 +1336,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     }
 
 #if defined(HAVE_LASTFMLIB)
-    temp = getOption("/server/extended-runtime-options/lastfm/attribute::enabled", DEFAULT_LASTFM_ENABLED);
+    temp = getXmlOption(CFG_SERVER_EXTOPTS_LASTFM_ENABLED, DEFAULT_LASTFM_ENABLED);
 
     if (!validateYesNo(temp))
         throw std::runtime_error("Error in config file: "
@@ -1166,8 +1346,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     SET_BOOL_OPTION(CFG_SERVER_EXTOPTS_LASTFM_ENABLED);
 
     if (temp == YES) {
-        temp = getOption("/server/extended-runtime-options/lastfm/username",
-            DEFAULT_LASTFM_USERNAME);
+        temp = getXmlOption(CFG_SERVER_EXTOPTS_LASTFM_USERNAME, DEFAULT_LASTFM_USERNAME);
 
         if (temp.empty())
             throw std::runtime_error("Error in config file: lastfm - "
@@ -1176,8 +1355,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
         NEW_OPTION(temp);
         SET_OPTION(CFG_SERVER_EXTOPTS_LASTFM_USERNAME);
 
-        temp = getOption("/server/extended-runtime-options/lastfm/password",
-            DEFAULT_LASTFM_PASSWORD);
+        temp = getXmlOption(CFG_SERVER_EXTOPTS_LASTFM_PASSWORD, DEFAULT_LASTFM_PASSWORD);
 
         if (temp.empty())
             throw std::runtime_error("Error in config file: lastfm - "
@@ -1193,7 +1371,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
         // respect command line; ignore xml value
         magic_file = resolvePath(magic_file, true);
     } else {
-        magic_file = getOption("/import/magic-file", "");
+        magic_file = getXmlOption(CFG_IMPORT_MAGIC_FILE, "");
         if (!magic_file.empty())
             magic_file = resolvePath(magic_file, true);
     }
@@ -1202,7 +1380,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 #endif
 
 #ifdef HAVE_INOTIFY
-    tmpEl = getElement("/import/autoscan");
+    tmpEl = getXmlElement(CFG_IMPORT_AUTOSCAN_TIMED_LIST);
     auto config_timed_list = createAutoscanListFromNode(nullptr, tmpEl, ScanMode::Timed);
     auto config_inotify_list = createAutoscanListFromNode(nullptr, tmpEl, ScanMode::INotify);
 
@@ -1217,8 +1395,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 #endif
 
 #ifdef SOPCAST
-    temp = getOption("/import/online-content/SopCast/attribute::enabled",
-        DEFAULT_SOPCAST_ENABLED);
+    temp = getXmlOption(CFG_ONLINE_CONTENT_SOPCAST_ENABLED, DEFAULT_SOPCAST_ENABLED);
 
     if (!validateYesNo(temp))
         throw std::runtime_error("Error in config file: "
@@ -1227,11 +1404,11 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_ONLINE_CONTENT_SOPCAST_ENABLED);
 
-    int sopcast_refresh = getIntOption("/import/online-content/SopCast/attribute::refresh", 0);
+    int sopcast_refresh = getXmlIntOption(CFG_ONLINE_CONTENT_SOPCAST_REFRESH, 0);
     NEW_INT_OPTION(sopcast_refresh);
     SET_INT_OPTION(CFG_ONLINE_CONTENT_SOPCAST_REFRESH);
 
-    temp_int = getIntOption("/import/online-content/SopCast/attribute::purge-after", 0);
+    temp_int = getXmlIntOption(CFG_ONLINE_CONTENT_SOPCAST_PURGE_AFTER, 0);
     if (sopcast_refresh >= temp_int) {
         if (temp_int != 0)
             throw std::runtime_error("Error in config file: SopCast purge-after value must be greater than refresh interval");
@@ -1240,7 +1417,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     NEW_INT_OPTION(temp_int);
     SET_INT_OPTION(CFG_ONLINE_CONTENT_SOPCAST_PURGE_AFTER);
 
-    temp = getOption("/import/online-content/SopCast/attribute::update-at-start",
+    temp = getXmlOption(CFG_ONLINE_CONTENT_SOPCAST_UPDATE_AT_START,
         DEFAULT_SOPCAST_UPDATE_AT_START);
 
     if (!validateYesNo(temp))
@@ -1252,7 +1429,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
 #endif
 
 #ifdef ATRAILERS
-    temp = getOption("/import/online-content/AppleTrailers/attribute::enabled",
+    temp = getXmlOption(CFG_ONLINE_CONTENT_ATRAILERS_ENABLED,
         DEFAULT_ATRAILERS_ENABLED);
 
     if (!validateYesNo(temp))
@@ -1262,12 +1439,12 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_ONLINE_CONTENT_ATRAILERS_ENABLED);
 
-    temp_int = getIntOption("/import/online-content/AppleTrailers/attribute::refresh", DEFAULT_ATRAILERS_REFRESH);
+    temp_int = getXmlIntOption(CFG_ONLINE_CONTENT_ATRAILERS_REFRESH, DEFAULT_ATRAILERS_REFRESH);
     NEW_INT_OPTION(temp_int);
     SET_INT_OPTION(CFG_ONLINE_CONTENT_ATRAILERS_REFRESH);
     SET_INT_OPTION(CFG_ONLINE_CONTENT_ATRAILERS_PURGE_AFTER);
 
-    temp = getOption("/import/online-content/AppleTrailers/attribute::update-at-start",
+    temp = getXmlOption(CFG_ONLINE_CONTENT_ATRAILERS_UPDATE_AT_START,
         DEFAULT_ATRAILERS_UPDATE_AT_START);
 
     if (!validateYesNo(temp))
@@ -1277,7 +1454,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     NEW_BOOL_OPTION(temp == "yes");
     SET_BOOL_OPTION(CFG_ONLINE_CONTENT_ATRAILERS_UPDATE_AT_START);
 
-    temp = getOption("/import/online-content/AppleTrailers/attribute::resolution",
+    temp = getXmlOption(CFG_ONLINE_CONTENT_ATRAILERS_RESOLUTION,
         std::to_string(DEFAULT_ATRAILERS_RESOLUTION));
     if ((temp != "640") && (temp != "720p")) {
         throw std::runtime_error("Error in config file: "
@@ -1296,10 +1473,10 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     log_debug("Config file dump after validation: {}", buf.str().c_str());
 }
 
-std::string ConfigManager::getOption(std::string xpath, std::string def, bool trim) const
+std::string ConfigManager::getXmlOption(config_option_t option, std::string def, bool trim) const
 {
     auto root = xmlDoc->document_element();
-    xpath = "/config" + xpath;
+    std::string xpath = std::string("/config") + optionMap[option];
     pugi::xpath_node xpathNode = root.select_node(xpath.c_str());
 
     if (xpathNode.node() != nullptr) {
@@ -1316,17 +1493,17 @@ std::string ConfigManager::getOption(std::string xpath, std::string def, bool tr
     return def;
 }
 
-int ConfigManager::getIntOption(std::string xpath, int def) const
+int ConfigManager::getXmlIntOption(config_option_t option, int def) const
 {
     std::string sDef;
     sDef = std::to_string(def);
-    std::string sVal = getOption(std::move(xpath), sDef);
+    std::string sVal = getXmlOption(option, sDef);
     return std::stoi(sVal);
 }
 
-std::string ConfigManager::getOption(std::string xpath) const
+std::string ConfigManager::getXmlOption(config_option_t option) const
 {
-    xpath = "/config" + xpath;
+    std::string xpath = std::string("/config") + optionMap[option];
     auto root = xmlDoc->document_element();
     pugi::xpath_node xpathNode = root.select_node(xpath.c_str());
 
@@ -1341,15 +1518,15 @@ std::string ConfigManager::getOption(std::string xpath) const
     throw std::runtime_error(fmt::format("Option '{}' not found in configuration file", xpath));
 }
 
-int ConfigManager::getIntOption(std::string xpath) const
+int ConfigManager::getXmlIntOption(config_option_t option) const
 {
-    std::string sVal = getOption(std::move(xpath));
+    std::string sVal = getXmlOption(option);
     return std::stoi(sVal);
 }
 
-pugi::xml_node ConfigManager::getElement(std::string xpath) const
+pugi::xml_node ConfigManager::getXmlElement(config_option_t option) const
 {
-    xpath = "/config" + xpath;
+    std::string xpath = std::string("/config") + optionMap[option];
     auto root = xmlDoc->document_element();
     pugi::xpath_node xpathNode = root.select_node(xpath.c_str());
     return xpathNode.node();
@@ -1386,15 +1563,15 @@ fs::path ConfigManager::resolvePath(fs::path path, bool isFile, bool mustExist)
 }
 
 std::map<std::string, std::string> ConfigManager::createDictionaryFromNode(const pugi::xml_node& element,
-    const std::string& nodeName, const std::string& keyAttr, const std::string& valAttr, bool tolower)
+    config_option_t nodeName, config_option_t keyAttr, config_option_t valAttr, bool tolower)
 {
     std::map<std::string, std::string> dict;
 
     if (element != nullptr) {
         for (const pugi::xml_node& child : element.children()) {
-            if (child.name() == nodeName) {
-                std::string key = child.attribute(keyAttr.c_str()).as_string();
-                std::string value = child.attribute(valAttr.c_str()).as_string();
+            if (std::string(child.name()) == optionMap[nodeName]) {
+                std::string key = child.attribute(optionMap[keyAttr]).as_string();
+                std::string value = child.attribute(optionMap[valAttr]).as_string();
 
                 if (!key.empty() && !value.empty()) {
                     if (tolower) {
@@ -1420,12 +1597,12 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
 
     std::map<std::string, std::string> mt_mappings;
 
-    auto mtype_profile = element.child("mimetype-profile-mappings");
+    auto mtype_profile = element.child(optionMap[ATTR_TRANSCODING_MIMETYPE_PROF_MAP]);
     if (mtype_profile != nullptr) {
         for (const pugi::xml_node& child : mtype_profile.children()) {
-            if (std::string(child.name()) == "transcode") {
-                std::string mt = child.attribute("mimetype").as_string();
-                std::string pname = child.attribute("using").as_string();
+            if (std::string(optionMap[ATTR_TRANSCODING_MIMETYPE_PROF_MAP_TRANSCODE]) == child.name()) {
+                std::string mt = child.attribute(optionMap[ATTR_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE]).as_string();
+                std::string pname = child.attribute(optionMap[ATTR_TRANSCODING_MIMETYPE_PROF_MAP_USING]).as_string();
 
                 if (!mt.empty() && !pname.empty()) {
                     mt_mappings[mt] = pname;
@@ -1436,15 +1613,15 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
         }
     }
 
-    auto profiles = element.child("profiles");
+    auto profiles = element.child(optionMap[ATTR_TRANSCODING_PROFILES]);
     if (profiles == nullptr)
         return list;
 
     for (const pugi::xml_node& child : profiles.children()) {
-        if (std::string(child.name()) != "profile")
+        if (std::string(child.name()) != optionMap[ATTR_TRANSCODING_PROFILES_PROFLE])
             continue;
 
-        param = child.attribute("enabled").as_string();
+        param = child.attribute(optionMap[ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED]).as_string();
         if (!validateYesNo(param))
             throw std::runtime_error("Error in config file: incorrect parameter "
                                      "for <profile enabled=\"\" /> attribute");
@@ -1452,7 +1629,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
         if (param == "no")
             continue;
 
-        param = child.attribute("type").as_string();
+        param = child.attribute(optionMap[ATTR_TRANSCODING_PROFILES_PROFLE_TYPE]).as_string();
         if (param.empty())
             throw std::runtime_error("error in configuration: missing transcoding type in profile");
 
@@ -1466,20 +1643,20 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
         else
             throw std::runtime_error("error in configuration: invalid transcoding type " + param + " in profile");
 
-        param = child.attribute("name").as_string();
+        param = child.attribute(optionMap[ATTR_TRANSCODING_PROFILES_PROFLE_NAME]).as_string();
         if (param.empty())
             throw std::runtime_error("error in configuration: invalid transcoding profile name");
 
         auto prof = std::make_shared<TranscodingProfile>(tr_type, param);
 
         pugi::xml_node sub;
-        sub = child.child("mimetype");
+        sub = child.child(optionMap[ATTR_TRANSCODING_PROFILES_PROFLE_MIMETYPE]);
         param = sub.text().as_string();
         if (param.empty())
             throw std::runtime_error("error in configuration: invalid target mimetype in transcoding profile");
         prof->setTargetMimeType(param);
 
-        sub = child.child("resolution");
+        sub = child.child(optionMap[ATTR_TRANSCODING_PROFILES_PROFLE_RES]);
         if (sub != nullptr) {
             param = sub.text().as_string();
             if (!param.empty()) {
@@ -1488,9 +1665,9 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
             }
         }
 
-        sub = child.child("avi-fourcc-list");
+        sub = child.child(optionMap[ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC]);
         if (sub != nullptr) {
-            std::string mode = sub.attribute("mode").as_string();
+            std::string mode = sub.attribute(optionMap[ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE]).as_string();
             if (mode.empty())
                 throw std::runtime_error("error in configuration: avi-fourcc-list requires a valid \"mode\" attribute");
 
@@ -1507,7 +1684,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
             if (fcc_mode != FCC_None) {
                 std::vector<std::string> fcc_list;
                 for (const pugi::xml_node& fourcc : sub.children()) {
-                    if (std::string(fourcc.name()) != "fourcc")
+                    if (std::string(fourcc.name()) != optionMap[ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_4CC])
                         continue;
 
                     std::string fcc = fourcc.text().as_string();
@@ -1520,7 +1697,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
             }
         }
 
-        sub = child.child("accept-url");
+        sub = child.child(optionMap[ATTR_TRANSCODING_PROFILES_PROFLE_ACCURL]);
         if (sub != nullptr) {
             param = sub.text().as_string();
             if (!validateYesNo(param))
@@ -1531,7 +1708,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
                 prof->setAcceptURL(false);
         }
 
-        sub = child.child("sample-frequency");
+        sub = child.child(optionMap[ATTR_TRANSCODING_PROFILES_PROFLE_SAMPFREQ]);
         if (sub != nullptr) {
             param = sub.text().as_string();
             if (param == "source")
@@ -1547,7 +1724,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
             }
         }
 
-        sub = child.child("audio-channels");
+        sub = child.child(optionMap[ATTR_TRANSCODING_PROFILES_PROFLE_NRCHAN]);
         if (sub != nullptr) {
             param = sub.text().as_string();
             if (param == "source")
@@ -1562,7 +1739,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
             }
         }
 
-        sub = child.child("hide-original-resource");
+        sub = child.child(optionMap[ATTR_TRANSCODING_PROFILES_PROFLE_HIDEORIG]);
         if (sub != nullptr) {
             param = sub.text().as_string();
             if (!validateYesNo(param))
@@ -1573,7 +1750,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
                 prof->setHideOriginalResource(false);
         }
 
-        sub = child.child("thumbnail");
+        sub = child.child(optionMap[ATTR_TRANSCODING_PROFILES_PROFLE_THUMB]);
         if (sub != nullptr) {
             param = sub.text().as_string();
             if (!validateYesNo(param))
@@ -1584,7 +1761,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
                 prof->setThumbnail(false);
         }
 
-        sub = child.child("first-resource");
+        sub = child.child(optionMap[ATTR_TRANSCODING_PROFILES_PROFLE_FIRST]);
         if (sub != nullptr) {
             param = sub.text().as_string();
             if (!validateYesNo(param))
@@ -1596,7 +1773,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
                 prof->setFirstResource(false);
         }
 
-        sub = child.child("use-chunked-encoding");
+        sub = child.child(optionMap[ATTR_TRANSCODING_PROFILES_PROFLE_USECHUNKEDENC]);
         if (sub != nullptr) {
             param = sub.text().as_string();
             if (!validateYesNo(param))
@@ -1608,12 +1785,24 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
                 prof->setChunked(false);
         }
 
-        sub = child.child("agent");
+        sub = child.child(optionMap[ATTR_TRANSCODING_PROFILES_PROFLE_ACCOGG]);
+        if (sub != nullptr) {
+            param = sub.text().as_string();
+            if (!validateYesNo(param))
+                throw std::runtime_error("Error in config file: incorrect parameter for accept-ogg-theora tag");
+
+            if (param == "yes")
+                prof->setTheora(true);
+            else
+                prof->setTheora(false);
+        }
+
+        sub = child.child(optionMap[ATTR_TRANSCODING_PROFILES_PROFLE_AGENT]);
         if (sub == nullptr)
             throw std::runtime_error("error in configuration: transcoding profile \""
                 + prof->getName() + "\" is missing the <agent> option");
 
-        param = sub.attribute("command").as_string();
+        param = sub.attribute(optionMap[ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND]).as_string();
         if (param.empty())
             throw std::runtime_error("error in configuration: transcoding profile \""
                 + prof->getName() + "\" has an invalid command setting");
@@ -1637,24 +1826,24 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
             throw std::runtime_error("error in configuration, transcoding profile "
                 + prof->getName() + ": transcoder " + param + "is not executable - " + strerror(err));
 
-        param = sub.attribute("arguments").as_string();
+        param = sub.attribute(optionMap[ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS]).as_string();
         if (param.empty())
             throw std::runtime_error("error in configuration: transcoding profile " + prof->getName() + " has an empty argument string");
 
         prof->setArguments(param);
 
-        sub = child.child("buffer");
+        sub = child.child(optionMap[ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER]);
         if (sub == nullptr)
             throw std::runtime_error("error in configuration: transcoding profile \""
                 + prof->getName() + "\" is missing the <buffer> option");
 
-        param_int = sub.attribute("size").as_int();
+        param_int = sub.attribute(optionMap[ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE]).as_int();
         if (param_int < 0)
             throw std::runtime_error("error in configuration: transcoding profile \""
                 + prof->getName() + "\" buffer size can not be negative");
         size_t bs = param_int;
 
-        param_int = sub.attribute("chunk-size").as_int();
+        param_int = sub.attribute(optionMap[ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK]).as_int();
         if (param_int < 0)
             throw std::runtime_error("error in configuration: transcoding profile \""
                 + prof->getName() + "\" chunk size can not be negative");
@@ -1664,7 +1853,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
             throw std::runtime_error("error in configuration: transcoding profile \""
                 + prof->getName() + "\" chunk size can not be greater than buffer size");
 
-        param_int = sub.attribute("fill-size").as_int();
+        param_int = sub.attribute(optionMap[ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL]).as_int();
         if (param_int < 0)
             throw std::runtime_error("error in configuration: transcoding profile \""
                 + prof->getName() + "\" fill size can not be negative");
@@ -1711,10 +1900,10 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNode(const st
     for (const pugi::xml_node& child : element.children()) {
 
         // We only want directories
-        if (std::string(child.name()) != "directory")
+        if (std::string(child.name()) != optionMap[ATTR_AUTOSCAN_DIRECTORY])
             continue;
 
-        fs::path location = child.attribute("location").as_string();
+        fs::path location = child.attribute(optionMap[ATTR_AUTOSCAN_DIRECTORY_LOCATION]).as_string();
         if (location.empty()) {
             log_warning("Found an Autoscan directory with invalid location!");
             continue;
@@ -1725,7 +1914,7 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNode(const st
             continue;
         }
 
-        std::string temp = child.attribute("mode").as_string();
+        std::string temp = child.attribute(optionMap[ATTR_AUTOSCAN_DIRECTORY_MODE]).as_string();
         if (temp.empty() || ((temp != "timed") && (temp != "inotify"))) {
             throw std::runtime_error("autoscan directory " + location.string() + ": mode attribute is missing or invalid");
         }
@@ -1737,7 +1926,7 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNode(const st
 
         unsigned int interval = 0;
         if (mode == ScanMode::Timed) {
-            temp = child.attribute("interval").as_string();
+            temp = child.attribute(optionMap[ATTR_AUTOSCAN_DIRECTORY_INTERVAL]).as_string();
             if (temp.empty()) {
                 throw std::runtime_error("autoscan directory " + location.string() + ": interval attribute is required for timed mode");
             }
@@ -1748,7 +1937,7 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNode(const st
             }
         }
 
-        temp = child.attribute("recursive").as_string();
+        temp = child.attribute(optionMap[ATTR_AUTOSCAN_DIRECTORY_RECURSIVE]).as_string();
         if (temp.empty())
             throw std::runtime_error("autoscan directory " + location.string() + ": recursive attribute is missing or invalid");
 
@@ -1758,13 +1947,13 @@ std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNode(const st
         else if (temp == "no")
             recursive = false;
         else {
-            throw std::runtime_error("autoscan directory " + location.string() + ": recusrive attribute " + temp + " is invalid");
+            throw std::runtime_error("autoscan directory " + location.string() + ": recursive attribute " + temp + " is invalid");
         }
 
         bool hidden;
-        temp = child.attribute("hidden-files").as_string();
+        temp = child.attribute(optionMap[ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES]).as_string();
         if (temp.empty())
-            temp = getOption("/import/attribute::hidden-files");
+            temp = getXmlOption(CFG_IMPORT_HIDDEN_FILES);
 
         if (temp == "yes")
             hidden = true;
@@ -1794,12 +1983,12 @@ std::shared_ptr<ClientConfigList> ConfigManager::createClientConfigListFromNode(
     for (const pugi::xml_node& child : element.children()) {
 
         // We only want directories
-        if (std::string(child.name()) != "client")
+        if (std::string(child.name()) != optionMap[ATTR_CLIENTS_CLIENT])
             continue;
 
-        std::string flags = child.attribute("flags").as_string();
-        std::string ip = child.attribute("ip").as_string();
-        std::string userAgent = child.attribute("userAgent").as_string();
+        std::string flags = child.attribute(optionMap[ATTR_CLIENTS_CLIENT_FLAGS]).as_string();
+        std::string ip = child.attribute(optionMap[ATTR_CLIENTS_CLIENT_IP]).as_string();
+        std::string userAgent = child.attribute(optionMap[ATTR_CLIENTS_CLIENT_USERAGENT]).as_string();
 
         std::vector<std::string> flagsVector = split_string(flags, '|', false);
         int flag = std::accumulate(flagsVector.begin(), flagsVector.end(), 0, [](int flg, const auto& i) //
@@ -1842,14 +2031,14 @@ void ConfigManager::dumpOptions()
 #endif
 }
 
-std::vector<std::string> ConfigManager::createArrayFromNode(const pugi::xml_node& element, const std::string& nodeName, const std::string& attrName)
+std::vector<std::string> ConfigManager::createArrayFromNode(const pugi::xml_node& element, config_option_t nodeName, config_option_t attrName)
 {
     std::vector<std::string> arr;
 
     if (element != nullptr) {
         for (const pugi::xml_node& child : element.children()) {
-            if (child.name() == nodeName) {
-                std::string attrValue = child.attribute(attrName.c_str()).as_string();
+            if (std::string(child.name()) == optionMap[nodeName]) {
+                std::string attrValue = child.attribute(optionMap[attrName]).as_string();
                 if (!attrValue.empty())
                     arr.push_back(attrValue);
             }

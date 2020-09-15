@@ -65,6 +65,8 @@ public:
     /// \brief Returns the name of the config file that was used to launch the server.
     fs::path getConfigFilename() const override { return filename; }
 
+    static const char* mapConfigOption(config_option_t option);
+
     void load(const fs::path& filename, const fs::path& userHome);
 
     /// \brief returns a config option of type std::string
@@ -121,10 +123,10 @@ protected:
     /// The xpath parameter has XPath syntax:
     /// "/path/to/option" will return the text value of the given "option" element
     /// "/path/to/option/attribute::attr" will return the value of the attribute "attr"
-    std::string getOption(std::string xpath, std::string def, bool trim = true) const;
+    std::string getXmlOption(config_option_t option, std::string def, bool trim = true) const;
 
     /// \brief same as getOption but returns an integer value of the option
-    int getIntOption(std::string xpath, int def) const;
+    int getXmlIntOption(config_option_t option, int def) const;
 
     /// \brief Returns a config option with the given xpath, an exception is raised if option does not exist.
     /// \param xpath option xpath.
@@ -132,7 +134,7 @@ protected:
     /// The xpath parameter has XPath syntax:
     /// "/path/to/option" will return the text value of the given "option" element
     /// "/path/to/option/attribute::attr" will return the value of the attribute "attr"
-    std::string getOption(std::string xpath) const;
+    std::string getXmlOption(config_option_t option) const;
 
     /// \brief Returns an integer value of the option with the given xpath, an exception is raised if option does not exist.
     /// \param xpath option xpath.
@@ -140,14 +142,14 @@ protected:
     /// The xpath parameter has XPath syntax:
     /// "/path/to/option" will return the text value of the given "option" element
     /// "/path/to/option/attribute::attr" will return the value of the attribute "attr"
-    int getIntOption(std::string xpath) const;
+    int getXmlIntOption(config_option_t option) const;
 
     /// \brief Returns a config XML element with the given xpath, an exception is raised if element does not exist.
     /// \param xpath option xpath.
     ///
     /// The xpath parameter has XPath syntax:
     /// "/path/to/element" will return the text value of the given "element" element
-    pugi::xml_node getElement(std::string xpath) const;
+    pugi::xml_node getXmlElement(config_option_t option) const;
 
     /// \brief resolve path against home, an exception is raised if path does not exist on filesystem.
     /// \param path path to be resolved
@@ -171,7 +173,7 @@ protected:
     /// This function will create a dictionary with the following
     /// key:value paris: "1":"2", "3":"4"
     static std::map<std::string, std::string> createDictionaryFromNode(const pugi::xml_node& element,
-        const std::string& nodeName, const std::string& keyAttr, const std::string& valAttr, bool tolower = false);
+        config_option_t nodeName, config_option_t keyAttr, config_option_t valAttr, bool tolower = false);
 
     /// \brief Creates an array of AutoscanDirectory objects from a XML nodeset.
     /// \param element starting element of the nodeset.
@@ -201,7 +203,7 @@ protected:
     /// <some-section>
     ///
     /// This function will create an array like that: ["data", "otherdata"]
-    static std::vector<std::string> createArrayFromNode(const pugi::xml_node& element, const std::string& nodeName, const std::string& attrName);
+    static std::vector<std::string> createArrayFromNode(const pugi::xml_node& element, config_option_t nodeName, config_option_t attrName);
 
     void dumpOptions();
 };

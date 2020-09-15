@@ -231,6 +231,10 @@ body,
     overflow: auto;
 }
 
+#config {
+    height: 100%;
+}
+
 #left {
     height: 100%;
     flex: 1;
@@ -253,6 +257,16 @@ body,
 #datagrid, #clientgrid {
     height: 100%;
     overflow: auto;
+    background-color: #fefefe;
+}
+
+#configframe {
+    height: calc(100% - 80px);
+}
+
+#configgrid {
+    height: calc(100% - 50px);
+    overflow-y: auto;
     background-color: #fefefe;
 }
 
@@ -296,8 +310,15 @@ body,
     background-color: #e9ecef;
 }
 
-#clientgrid {
+#clientgrid, #configgrid {
     margin: 30px;
+}
+
+#configgrid {
+}
+
+#configgrid .configListItem {
+    margin-left: 40px; list-style:none;
 }
 
 .page-item.active .page-link {

@@ -26,6 +26,7 @@ import {GerberaApp} from "./gerbera-app.module.js";
 import {Trail} from "./gerbera-trail.module.js";
 import {Tree} from "./gerbera-tree.module.js";
 import {Clients} from "./gerbera-clients.module.js";
+import {Config} from "./gerbera-config.module.js";
 
 const disable = () => {
   const allLinks = $('nav li a');
@@ -73,23 +74,41 @@ const selectType = (menuItem) => {
   $('#home').hide();
   $('#content').show();
   $('#clients').hide();
+  $('#config').hide();
   const type = menuItem.data('gerbera-type');
   Tree.selectType(type, 0);
   GerberaApp.setType(type);
   Items.destroy();
   Clients.destroy();
+  Config.destroy();
 };
 
 const selectClients = (menuItem) => {
   $('#home').hide();
   $('#content').hide();
   $('#clients').show();
+  $('#config').hide();
   Trail.destroy();
   const type = menuItem.data('gerbera-type');
   GerberaApp.setType(type);
   Clients.menuSelected();
   Items.destroy();
   Clients.destroy();
+  Config.destroy();
+};
+
+const selectConfig = (menuItem) => {
+  $('#home').hide();
+  $('#content').hide();
+  $('#clients').hide();
+  $('#config').show();
+  Trail.destroy();
+  const type = menuItem.data('gerbera-type');
+  GerberaApp.setType(type);
+  Config.menuSelected();
+  Items.destroy();
+  Clients.destroy();
+  Config.destroy();
 };
 
 var click = (event) => {
@@ -108,6 +127,9 @@ var click = (event) => {
     case 'SELECT_CLIENTS':
       selectClients(menuItem);
       break;
+    case 'SELECT_CONFIG':
+      selectConfig(menuItem);
+      break;
     case 'HOME':
       home();
       break
@@ -118,11 +140,13 @@ var home = function () {
   $('#home').show();
   $('#content').hide();
   $('#clients').hide();
+  $('#config').hide();
   GerberaApp.setType('home');
   Tree.destroy();
   Trail.destroy();
   Items.destroy();
   Clients.destroy();
+  Config.destroy();
 };
 
 
