@@ -39,6 +39,7 @@
 #ifdef HAVE_INOTIFY
 #include "mt_inotify.h"
 
+#include <array>
 #include <cassert>
 #include <cerrno>
 #include <sys/ioctl.h>

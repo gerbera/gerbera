@@ -34,6 +34,8 @@
 
 #include "common.h"
 
+#include <array>
+
 // forward declaration
 class CdsItem;
 class Config;
