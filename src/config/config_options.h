@@ -47,42 +47,42 @@ class ConfigOption {
 public:
     virtual std::string getOption() const
     {
-        throw std::runtime_error("Wrong option type");
+        throw std::runtime_error("Wrong option type string");
     }
 
     virtual int getIntOption() const
     {
-        throw std::runtime_error("Wrong option type");
+        throw std::runtime_error("Wrong option type int");
     }
 
     virtual bool getBoolOption() const
     {
-        throw std::runtime_error("Wrong option type");
+        throw std::runtime_error("Wrong option type bool");
     }
 
     virtual std::map<std::string, std::string> getDictionaryOption() const
     {
-        throw std::runtime_error("Wrong option type");
+        throw std::runtime_error("Wrong option type dictionary");
     }
 
     virtual std::shared_ptr<AutoscanList> getAutoscanListOption() const
     {
-        throw std::runtime_error("Wrong option type");
+        throw std::runtime_error("Wrong option type autoscan list");
     }
 
     virtual std::shared_ptr<ClientConfigList> getClientConfigListOption() const
     {
-        throw std::runtime_error("Wrong option type");
+        throw std::runtime_error("Wrong option type client list");
     }
 
     virtual std::vector<std::string> getArrayOption() const
     {
-        throw std::runtime_error("Wrong option type");
+        throw std::runtime_error("Wrong option type array");
     }
 
     virtual std::shared_ptr<TranscodingProfileList> getTranscodingProfileListOption() const
     {
-        throw std::runtime_error("Wrong option type");
+        throw std::runtime_error("Wrong option type transcoding list");
     }
 
     virtual ~ConfigOption() = default;

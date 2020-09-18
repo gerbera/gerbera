@@ -73,7 +73,7 @@
 				},
 				{
 					"item": "/server/ip",
-					"caption": "IP Adress",
+					"caption": "IP Address",
 					"type": "String",
 					"editable": false
 				},
@@ -112,6 +112,176 @@
 					"caption": "Alive Interval",
 					"type": "Number",
 					"editable": true
+				}
+			]
+		},
+		{
+			"item": "/server/storage",
+			"caption": "Storage",
+			"type": "Element",
+			"children": [
+				{
+					"item": "/server/storage/driver",
+					"caption": "DB Driver",
+					"type": "String",
+					"editable": false
+				},
+				{
+					"item": "/server/storage/sqlite3",
+					"caption": "SQLite",
+					"type": "Element",
+					"children": [
+						{
+							"item": "/server/storage/sqlite3/attribute::enabled",
+							"caption": "SQLite enabled",
+							"type": "Boolean",
+							"editable": false
+						},
+						{
+							"item": "/server/storage/sqlite3/database-file",
+							"caption": "SQLite database-file",
+							"type": "String",
+							"editable": false
+						},
+						{
+							"item": "/server/storage/sqlite3/on-error",
+							"caption": "SQLite restore",
+							"type": "Boolean",
+							"editable": false
+						},
+						{
+							"item": "/server/storage/sqlite3/synchronous",
+							"caption": "SQLite synchronous",
+							"type": "Number",
+							"editable": false
+						},
+						{
+							"item": "/server/storage/sqlite3/backup/attribute::enabled",
+							"caption": "SQLite backup",
+							"type": "Boolean",
+							"editable": false
+						},
+						{
+							"item": "/server/storage/sqlite3/backup/attribute::interval",
+							"caption": "SQLite backup interval",
+							"type": "Number",
+							"editable": false
+						}
+					]
+				},
+				{
+					"item": "/server/storage/mysql",
+					"caption": "MySQL",
+					"type": "Element",
+					"children": [
+						{
+							"item": "/server/storage/mysql/attribute::enabled",
+							"caption": "MySQL enabled",
+							"type": "Boolean",
+							"editable": false
+						},
+						{
+							"item": "/server/storage/mysql/host",
+							"caption": "MySQL host",
+							"type": "String",
+							"editable": false
+						},
+						{
+							"item": "/server/storage/mysql/port",
+							"caption": "MySQL port",
+							"type": "Number",
+							"editable": false
+						},
+						{
+							"item": "/server/storage/mysql/username",
+							"caption": "MySQL username",
+							"type": "String",
+							"editable": false
+						},
+						{
+							"item": "/server/storage/mysql/password",
+							"caption": "MySQL password",
+							"type": "Password",
+							"editable": false
+						},
+						{
+							"item": "/server/storage/mysql/socket",
+							"caption": "MySQL socket",
+							"type": "String",
+							"editable": false
+						},
+						{
+							"item": "/server/storage/mysql/database",
+							"caption": "MySQL database",
+							"type": "String",
+							"editable": false
+						}
+					]
+				}
+			]
+		},
+		{
+			"item": "/server/ui",
+			"caption": "UI",
+			"type": "Element",
+			"children": [
+				{
+					"item": "/server/ui/attribute::enabled",
+					"caption": "UI enabled",
+					"type": "Boolean",
+					"editable": true
+				},
+				{
+					"item": "/server/ui/attribute::poll-interval",
+					"caption": "poll-interval",
+					"type": "Number",
+					"editable": true
+				},
+				{
+					"item": "/server/ui/attribute::show-tooltips",
+					"caption": "show-tooltips",
+					"type": "Boolean",
+					"editable": true
+				},
+				{
+					"item": "/server/ui/attribute::poll-when-idle",
+					"caption": "poll-when-idle",
+					"type": "Boolean",
+					"editable": true
+				},
+				{
+					"item": "/server/ui/accounts/attribute::enabled",
+					"caption": "Accounts enabled",
+					"type": "Boolean",
+					"editable": true
+				},
+				{
+					"item": "/server/ui/accounts/attribute::session-timeout",
+					"caption": "Accounts session-timeout",
+					"type": "Number",
+					"editable": true
+				},
+				{
+					"item": "/server/ui/accounts",
+					"caption": "Accounts",
+					"type": "List",
+					"editable": true,
+					"children": [
+					]
+				},
+				{
+					"item": "/server/ui/items-per-page/attribute::default",
+					"caption": "Items Per Page Default",
+					"type": "Number",
+					"editable": true
+				},
+				{
+					"item": "/server/ui/items-per-page",
+					"caption": "Items Per Page",
+					"type": "List",
+					"editable": true,
+					"children": [
+					]
 				}
 			]
 		},
@@ -596,48 +766,48 @@
 							"type": "Boolean",
 							"editable": true
 						},
-								{
-									"item": "/transcoding/profiles/profile/agent/attribute::command",
-									"caption": "Agent Command",
-									"type": "String",
-									"editable": true
-								},
-								{
-									"item": "/transcoding/profiles/profile/agent/attribute::arguments",
-									"caption": "Agent Arguments",
-									"type": "String",
-									"editable": true
-								},
-								{
-									"item": "/transcoding/profiles/profile/avi-fourcc-list/attribute::mode",
-									"caption": "AVI 4CC Mode",
-									"type": "String",
-									"editable": true
-								},
-								{
-									"item": "/transcoding/profiles/profile/avi-fourcc-list/attribute::fourcc",
-									"caption": "AVI 4CC String",
-									"type": "String",
-									"editable": true
-								},
-								{
-									"item": "/transcoding/profiles/profile/buffer/attribute::size",
-									"caption": "Buffer Size",
-									"type": "Number",
-									"editable": true
-								},
-								{
-									"item": "/transcoding/profiles/profile/buffer/attribute::chunk-size",
-									"caption": "Buffer Chunk Size",
-									"type": "Number",
-									"editable": true
-								},
-								{
-									"item": "/transcoding/profiles/profile/buffer/attribute::fill-size",
-									"caption": "Buffer Initial Fill Size",
-									"type": "Number",
-									"editable": true
-								}
+						{
+							"item": "/transcoding/profiles/profile/agent/attribute::command",
+							"caption": "Agent Command",
+							"type": "String",
+							"editable": true
+						},
+						{
+							"item": "/transcoding/profiles/profile/agent/attribute::arguments",
+							"caption": "Agent Arguments",
+							"type": "String",
+							"editable": true
+						},
+						{
+							"item": "/transcoding/profiles/profile/avi-fourcc-list/attribute::mode",
+							"caption": "AVI 4CC Mode",
+							"type": "String",
+							"editable": true
+						},
+						{
+							"item": "/transcoding/profiles/profile/avi-fourcc-list/attribute::fourcc",
+							"caption": "AVI 4CC String",
+							"type": "String",
+							"editable": true
+						},
+						{
+							"item": "/transcoding/profiles/profile/buffer/attribute::size",
+							"caption": "Buffer Size",
+							"type": "Number",
+							"editable": true
+						},
+						{
+							"item": "/transcoding/profiles/profile/buffer/attribute::chunk-size",
+							"caption": "Buffer Chunk Size",
+							"type": "Number",
+							"editable": true
+						},
+						{
+							"item": "/transcoding/profiles/profile/buffer/attribute::fill-size",
+							"caption": "Buffer Initial Fill Size",
+							"type": "Number",
+							"editable": true
+						}
 					]
 				}
 			]

@@ -210,6 +210,11 @@ $.widget('grb.config', {
               input.val(itemValue.value);
             }
             break;
+            case 'Password': {
+              input.attr('type', 'password');
+              input.val(itemValue.value);
+            }
+            break;
             case 'Comment': {
               input.hide();
             }
