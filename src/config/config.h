@@ -33,6 +33,7 @@ namespace fs = std::filesystem;
 // forward declaration
 class AutoscanList;
 class ClientConfigList;
+class ConfigOption;
 class AutoscanDirectory;
 class TranscodingProfileList;
 
@@ -241,6 +242,11 @@ class Config {
 public:
     /// \brief Returns the name of the config file that was used to launch the server.
     virtual fs::path getConfigFilename() const = 0;
+
+    /// \brief add a config option
+    /// \param option option type to add.
+    /// \param option option to add.
+    virtual void addOption(config_option_t option, std::shared_ptr<ConfigOption> optionValue) = 0;
 
     /// \brief returns a config option of type std::string
     /// \param option option to retrieve.

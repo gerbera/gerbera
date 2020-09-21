@@ -47,6 +47,7 @@ class AutoscanList;
 class AutoscanDirectory;
 class ClientConfigList;
 class ClientConfig;
+class ConfigSetup;
 enum class ScanMode;
 enum class ClientType;
 class ConfigOption;
@@ -67,7 +68,14 @@ public:
 
     static const char* mapConfigOption(config_option_t option);
 
+    static std::shared_ptr<ConfigSetup> findConfigSetup(config_option_t option);
+
     void load(const fs::path& filename, const fs::path& userHome);
+
+    /// \brief add a config option
+    /// \param option option type to add.
+    /// \param option option to add.
+    void addOption(config_option_t option, std::shared_ptr<ConfigOption> optionValue) override;
 
     /// \brief returns a config option of type std::string
     /// \param option option to retrieve.
@@ -117,6 +125,8 @@ protected:
     std::unique_ptr<std::vector<std::shared_ptr<ConfigOption>>> options;
 
     std::shared_ptr<ConfigOption> setOption(const pugi::xml_node& root, config_option_t option, const std::map<std::string, std::string>* arguments = nullptr);
+
+    Config* getSelf();
 
     void dumpOptions();
 };

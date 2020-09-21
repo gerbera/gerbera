@@ -12,6 +12,7 @@ class ConfigMock final : public Config {
 public:
     fs::path getConfigFilename() const override { return ""; }
     MOCK_METHOD(std::string, getOption, (config_option_t option), (override));
+    void addOption(config_option_t option, std::shared_ptr<ConfigOption> optionValue) override { }
     int getIntOption(config_option_t option) override { return 0; }
     bool getBoolOption(config_option_t option) override { return false; }
     std::map<std::string, std::string> getDictionaryOption(config_option_t option) override { return std::map<std::string, std::string>(); }

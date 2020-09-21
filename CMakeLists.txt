@@ -89,6 +89,8 @@ add_library(libgerbera STATIC
         src/config/config_manager.cc
         src/config/config_manager.h
         src/config/config_options.h
+        src/config/config_setup.cc
+        src/config/config_setup.h
         src/content_manager.cc
         src/content_manager.h
         src/contrib/md5.c
