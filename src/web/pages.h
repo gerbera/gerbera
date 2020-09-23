@@ -199,6 +199,14 @@ public:
     void process() override;
 };
 
+/// \brief save configuration
+class configSave : public WebRequestHandler {
+public:
+    configSave(std::shared_ptr<Config> config, std::shared_ptr<Storage> storage,
+        std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
+    void process() override;
+};
+
 } // namespace
 
 #endif // __WEB_PAGES_H__

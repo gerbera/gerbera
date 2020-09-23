@@ -28,7 +28,8 @@ $.widget('grb.config', {
     const list = $('<ul></ul>').addClass('list');
     const data = this.options.meta;
     let line;
-    this.subElements = [],
+    this.subElements = [];
+    this.result = {};
 
     console.log(this.options);
 
@@ -88,6 +89,33 @@ $.widget('grb.config', {
     } catch (e) {
       console.log(e);
     }
+  },
+
+  setEntryChanged: function (itemValue) {
+    this.result[itemValue.item] = itemValue;
+    this.options.addResultItem(itemValue);
+    itemValue.value = itemValue.editor.val();
+    switch(itemValue.config.type){
+      case 'Boolean': {
+        itemValue.value = itemValue.editor[0].checked;
+        break;
+      }
+      case 'String':
+      case 'Password':
+      case 'Number': {
+        itemValue.value = itemValue.editor.val();
+        break;
+      }
+      case 'Element':
+      case 'List':
+        // nothing to do
+      break;
+      default:
+        console.log('Unknown item type ' + itemValue.config.type);
+    }
+    $(itemValue.editor[0].parentElement).removeClass(itemValue.status);
+    itemValue.status = 'changed';
+    $(itemValue.editor[0].parentElement).addClass(itemValue.status);
   },
 
   createSection: function (list, xpath, section, values, level) {
@@ -180,9 +208,6 @@ $.widget('grb.config', {
           input.attr('id', "value_" + item.item.replaceAll("/","_") + "_" + i +  "_" + count);
           input.attr('style', 'margin-left: 20px; min-width: 400px');
           let itemValue = {value: item.value, source: 'default', status: 'unchanged'};
-          if(!item.editable) {
-            input.attr('disabled', '');
-          }
 
           values.forEach(v => {
             if (v.item === item.item) {
@@ -196,8 +221,17 @@ $.widget('grb.config', {
               }
             }
           });
-          input.addClass(itemValue.status);
-          input.data = itemValue;
+          itemLine.addClass(itemValue.status);
+
+          if(item.editable) {
+            itemValue.setEntryChanged = function (event) { itemValue.target.setEntryChanged(itemValue, event); }
+            itemValue.target = this;
+            itemValue.config = item;
+            itemValue.editor = input;
+            input.off('change').on('change', itemValue.setEntryChanged);
+          } else {
+            input.attr('disabled', '');
+          }
 
           switch(item.type){
             case 'Boolean': {

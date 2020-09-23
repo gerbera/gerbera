@@ -22,6 +22,7 @@
 */
 import {GerberaApp} from './gerbera-app.module.js';
 import {Auth} from './gerbera-auth.module.js';
+import {Trail} from './gerbera-trail.module.js';
 
 const destroy = () => {
   const datagrid = $('#configgrid');
@@ -32,7 +33,7 @@ const destroy = () => {
   }
 };
 
-let current_config = { config: null, values: null };
+let current_config = { config: null, values: null, changedItems: {} };
 
 const initialize = () => {
   $('#configgrid').html('');
@@ -84,14 +85,56 @@ console.log(response);
     datagrid.config({
       meta: current_config.config,
       values: current_config.values,
+      addResultItem: setChangedItem,
       itemType: 'config'
     });
+    Trail.makeTrailFromItem({
+      parent_id: -1
+    });
+  }
+};
+
+const setChangedItem = (itemValue) => {
+  current_config.changedItems[itemValue.item] = itemValue;
+}
+
+const saveConfig = () => {
+  console.log(current_config.changedItems);
+  const changedKeys = Object.getOwnPropertyNames(current_config.changedItems);
+  if (changedKeys.length > 0 ) {
+    const saveData = {
+    req_type: 'config_save',
+    sid: Auth.getSessionId(),
+    data: [],
+    changedCount: changedKeys.length,
+    updates: 'check'
+  };
+  changedKeys.forEach((key) => {
+    let i = current_config.changedItems[key];
+    saveData.data.push({item: i.item, id: i.id, value: i.value, status: i.status});
+  });
+  console.log(saveData);
+
+    try {
+      $.ajax({
+        url: GerberaApp.clientConfig.api,
+        type: 'get',
+        data: saveData
+      })
+        .then((response) => {console.log(response);})
+        .catch((err) => GerberaApp.error(err));
+    } catch (e) {
+      console.log(e);
+    }
+  } else {
+    console.log("Nothing to save");
   }
 };
 
 export const Config = {
   destroy,
   loadConfig,
+  saveConfig,
   initialize,
   menuSelected,
 };

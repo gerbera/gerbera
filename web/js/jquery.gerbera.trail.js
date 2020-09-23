@@ -126,6 +126,16 @@ $.widget('grb.trail', {
       deleteAllIcon.appendTo(buttons);
     }
 
+    if (config.enableSave && config.onSave) {
+      const saveIcon = this.generateItemButton(item, {
+        title: 'Save Config',
+        class: 'grb-trail-save-config',
+        iconClass: 'fa-save',
+        click: config.onSave ? config.onSave : noOp
+      });
+      saveIcon.appendTo(buttons);
+    }
+
     buttons.appendTo(buttonContainer);
     trailContainer.addClass('col-md-7 col-sm-7 col-xs-7');
 

@@ -2,7 +2,7 @@
 
     Gerbera - https://gerbera.io/
 
-    upnp_clients.cc - this file is part of Gerbera.
+    config_load.cc - this file is part of Gerbera.
 
     Copyright (C) 2020 Gerbera Contributors
 
@@ -29,6 +29,7 @@
 
 #include "autoscan.h"
 #include "config/client_config.h"
+#include "config/config_setup.h"
 #include "metadata/metadata_handler.h"
 #include "storage/storage.h"
 #include "transcoding/transcoding.h"
@@ -41,9 +42,9 @@ web::configLoad::configLoad(std::shared_ptr<Config> config, std::shared_ptr<Stor
 {
 }
 
-static void createItem(pugi::xml_node& item, const char* name, config_option_t id)
+static void createItem(pugi::xml_node& item, const std::string& name, config_option_t id)
 {
-    item.append_attribute("item") = name; // fmt::format("{:02d}", i).c_str();
+    item.append_attribute("item") = name.c_str(); // fmt::format("{:02d}", i).c_str();
     item.append_attribute("id") = fmt::format("{:02d}", id).c_str();
     item.append_attribute("status") = "unchanaged";
     item.append_attribute("source") = "config.xml";
@@ -60,26 +61,28 @@ void web::configLoad::process()
     xml2JsonHints->setFieldType("id", "string");
     xml2JsonHints->setFieldType("value", "string");
 
+    std::shared_ptr<ConfigSetup> cs;
     log_debug("Sending Config to web!");
     for (int i = 0; i < static_cast<int>(CFG_MAX); i++) {
         auto item = values.append_child("item");
-        createItem(item, ConfigManager::mapConfigOption(static_cast<config_option_t>(i)), static_cast<config_option_t>(i));
+        cs = ConfigManager::findConfigSetup(static_cast<config_option_t>(i));
+        createItem(item, cs->getItemPath(), static_cast<config_option_t>(i));
 
         try {
             std::string opt = config->getOption(static_cast<config_option_t>(i));
-            log_debug("    Option {:02d} {} = {}", i, ConfigManager::mapConfigOption(static_cast<config_option_t>(i)), opt.c_str());
+            log_debug("    Option {:02d} {} = {}", i, cs->getItemPath(), opt.c_str());
             item.append_attribute("value") = opt.c_str();
         } catch (const std::runtime_error& e) {
         }
         try {
             int opt = config->getIntOption(static_cast<config_option_t>(i));
-            log_debug(" IntOption {:02d} {} = {}", i, ConfigManager::mapConfigOption(static_cast<config_option_t>(i)), opt);
+            log_debug(" IntOption {:02d} {} = {}", i, cs->getItemPath(), opt);
             item.append_attribute("value") = fmt::format("{}", opt).c_str();
         } catch (const std::runtime_error& e) {
         }
         try {
             bool opt = config->getBoolOption(static_cast<config_option_t>(i));
-            log_debug("BoolOption {:02d} {} = {}", i, ConfigManager::mapConfigOption(static_cast<config_option_t>(i)), opt ? "true" : "false");
+            log_debug("BoolOption {:02d} {} = {}", i, cs->getItemPath(), opt ? "true" : "false");
             item.append_attribute("value") = opt ? "true" : "false";
         } catch (const std::runtime_error& e) {
         }
@@ -248,140 +251,160 @@ void web::configLoad::process()
 
     int i = 0;
     auto dictionary = config->getDictionaryOption(CFG_SERVER_UI_ACCOUNT_LIST);
+    cs = ConfigManager::findConfigSetup(CFG_SERVER_UI_ACCOUNT_LIST);
     for (const auto& entry : dictionary) {
         auto item = values.append_child("item");
-        createItem(item, fmt::format("{}/{}[{}]/attribute::{}", ConfigManager::mapConfigOption(CFG_SERVER_UI_ACCOUNT_LIST), ConfigManager::mapConfigOption(ATTR_SERVER_UI_ACCOUNT_LIST_ACCOUNT), i, ConfigManager::mapConfigOption(ATTR_SERVER_UI_ACCOUNT_LIST_USER)).c_str(), CFG_SERVER_UI_ACCOUNT_LIST);
+        createItem(item, cs->getItemPath(i, ATTR_SERVER_UI_ACCOUNT_LIST_USER).c_str(), CFG_SERVER_UI_ACCOUNT_LIST);
         item.append_attribute("value") = entry.first.c_str();
 
         item = values.append_child("item");
-        createItem(item, fmt::format("{}/{}[{}]/attribute::{}", ConfigManager::mapConfigOption(CFG_SERVER_UI_ACCOUNT_LIST), ConfigManager::mapConfigOption(ATTR_SERVER_UI_ACCOUNT_LIST_ACCOUNT), i, ConfigManager::mapConfigOption(ATTR_SERVER_UI_ACCOUNT_LIST_PASSWORD)).c_str(), CFG_SERVER_UI_ACCOUNT_LIST);
+        createItem(item, cs->getItemPath(i, ATTR_SERVER_UI_ACCOUNT_LIST_PASSWORD).c_str(), CFG_SERVER_UI_ACCOUNT_LIST);
         item.append_attribute("value") = entry.second.c_str();
         i++;
     }
 
     i = 0;
     dictionary = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
+    cs = ConfigManager::findConfigSetup(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
     for (const auto& entry : dictionary) {
         auto item = values.append_child("item");
-        createItem(item, fmt::format("{}/{}[{}]/attribute::{}", ConfigManager::mapConfigOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST), ConfigManager::mapConfigOption(ATTR_IMPORT_MAPPINGS_MIMETYPE_MAP), i, ConfigManager::mapConfigOption(ATTR_IMPORT_MAPPINGS_MIMETYPE_FROM)).c_str(), CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
+        createItem(item, cs->getItemPath(i, ATTR_IMPORT_MAPPINGS_MIMETYPE_FROM).c_str(), CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
         item.append_attribute("value") = entry.first.c_str();
 
         item = values.append_child("item");
-        createItem(item, fmt::format("{}/{}[{}]/attribute::{}", ConfigManager::mapConfigOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST), ConfigManager::mapConfigOption(ATTR_IMPORT_MAPPINGS_MIMETYPE_MAP), i, ConfigManager::mapConfigOption(ATTR_IMPORT_MAPPINGS_MIMETYPE_TO)).c_str(), CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
+        createItem(item, cs->getItemPath(i, ATTR_IMPORT_MAPPINGS_MIMETYPE_TO).c_str(), CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
         item.append_attribute("value") = entry.second.c_str();
         i++;
     }
 
     i = 0;
     dictionary = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+    cs = ConfigManager::findConfigSetup(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
     for (const auto& entry : dictionary) {
         auto item = values.append_child("item");
-        createItem(item, fmt::format("{}/{}[{}]/attribute::{}", ConfigManager::mapConfigOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST), ConfigManager::mapConfigOption(ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_TREAT), i, ConfigManager::mapConfigOption(ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_MIMETYPE)).c_str(), CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+        createItem(item, cs->getItemPath(i, ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_MIMETYPE).c_str(), CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
         item.append_attribute("value") = entry.first.c_str();
 
         item = values.append_child("item");
-        createItem(item, fmt::format("{}/{}[{}]/attribute::{}", ConfigManager::mapConfigOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST), ConfigManager::mapConfigOption(ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_TREAT), i, ConfigManager::mapConfigOption(ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_AS)).c_str(), CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+        createItem(item, cs->getItemPath(i, ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_AS).c_str(), CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
         item.append_attribute("value") = entry.second.c_str();
         i++;
     }
 
     i = 0;
     dictionary = config->getDictionaryOption(CFG_IMPORT_LAYOUT_MAPPING);
+    cs = ConfigManager::findConfigSetup(CFG_IMPORT_LAYOUT_MAPPING);
     for (const auto& entry : dictionary) {
         auto item = values.append_child("item");
-        createItem(item, fmt::format("{}/{}[{}]/attribute::{}", ConfigManager::mapConfigOption(CFG_IMPORT_LAYOUT_MAPPING), ConfigManager::mapConfigOption(ATTR_IMPORT_LAYOUT_MAPPING_PATH), i, ConfigManager::mapConfigOption(ATTR_IMPORT_LAYOUT_MAPPING_FROM)).c_str(), CFG_IMPORT_LAYOUT_MAPPING);
+        createItem(item, cs->getItemPath(i, ATTR_IMPORT_LAYOUT_MAPPING_FROM).c_str(), CFG_IMPORT_LAYOUT_MAPPING);
         item.append_attribute("value") = entry.first.c_str();
 
         item = values.append_child("item");
-        createItem(item, fmt::format("{}/{}[{}]/attribute::{}", ConfigManager::mapConfigOption(CFG_IMPORT_LAYOUT_MAPPING), ConfigManager::mapConfigOption(ATTR_IMPORT_LAYOUT_MAPPING_PATH), i, ConfigManager::mapConfigOption(ATTR_IMPORT_LAYOUT_MAPPING_TO)).c_str(), CFG_IMPORT_LAYOUT_MAPPING);
+        createItem(item, cs->getItemPath(i, ATTR_IMPORT_LAYOUT_MAPPING_TO).c_str(), CFG_IMPORT_LAYOUT_MAPPING);
         item.append_attribute("value") = entry.second.c_str();
         i++;
     }
 
     i = 0;
     dictionary = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST);
+    cs = ConfigManager::findConfigSetup(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST);
     for (const auto& entry : dictionary) {
         auto item = values.append_child("item");
-        createItem(item, fmt::format("{}/{}[{}]/attribute::{}", ConfigManager::mapConfigOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST), ConfigManager::mapConfigOption(ATTR_IMPORT_MAPPINGS_MIMETYPE_MAP), i, ConfigManager::mapConfigOption(ATTR_IMPORT_MAPPINGS_MIMETYPE_FROM)).c_str(), CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST);
+        createItem(item, cs->getItemPath(i, ATTR_IMPORT_MAPPINGS_MIMETYPE_MAP).c_str(), CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST);
         item.append_attribute("value") = entry.first.c_str();
 
         item = values.append_child("item");
-        createItem(item, fmt::format("{}/{}[{}]/attribute::{}", ConfigManager::mapConfigOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST), ConfigManager::mapConfigOption(ATTR_IMPORT_MAPPINGS_MIMETYPE_MAP), i, ConfigManager::mapConfigOption(ATTR_IMPORT_MAPPINGS_MIMETYPE_TO)).c_str(), CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST);
+        createItem(item, cs->getItemPath(i, ATTR_IMPORT_MAPPINGS_MIMETYPE_TO).c_str(), CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST);
         item.append_attribute("value") = entry.second.c_str();
         i++;
     }
 
     auto array = config->getArrayOption(CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN);
+    cs = ConfigManager::findConfigSetup(CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN);
     for (size_t i = 0; i < array.size(); i++) {
         auto entry = array[i];
         auto item = values.append_child("item");
-        createItem(item, fmt::format("{}/{}[{}]", ConfigManager::mapConfigOption(CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN), ConfigManager::mapConfigOption(ATTR_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN_OPTION), i).c_str(), CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN);
+        createItem(item, cs->getItemPath(i).c_str(), CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN);
         item.append_attribute("value") = entry.c_str();
     }
 
 #ifdef HAVE_LIBEXIF
     array = config->getArrayOption(CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST);
+    cs = ConfigManager::findConfigSetup(CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST);
     for (size_t i = 0; i < array.size(); i++) {
         auto entry = array[i];
         auto item = values.append_child("item");
-        createItem(item, fmt::format("{}/{}[{}]/attribute::{}", ConfigManager::mapConfigOption(CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST), ConfigManager::mapConfigOption(ATTR_IMPORT_LIBOPTS_AUXDATA_DATA), i, ConfigManager::mapConfigOption(ATTR_IMPORT_LIBOPTS_AUXDATA_TAG)).c_str(), CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST);
+        createItem(item, cs->getItemPath(i).c_str(), CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST);
         item.append_attribute("value") = entry.c_str();
     }
 #endif // HAVE_LIBEXIF
 
 #ifdef HAVE_EXIV2
     array = config->getArrayOption(CFG_IMPORT_LIBOPTS_EXIV2_AUXDATA_TAGS_LIST);
+    cs = ConfigManager::findConfigSetup(CFG_IMPORT_LIBOPTS_EXIV2_AUXDATA_TAGS_LIST);
     for (size_t i = 0; i < array.size(); i++) {
         auto entry = array[i];
         auto item = values.append_child("item");
-        createItem(item, fmt::format("{}/{}[{}]/attribute::{}", ConfigManager::mapConfigOption(CFG_IMPORT_LIBOPTS_EXIV2_AUXDATA_TAGS_LIST), ConfigManager::mapConfigOption(ATTR_IMPORT_LIBOPTS_AUXDATA_DATA), i, ConfigManager::mapConfigOption(ATTR_IMPORT_LIBOPTS_AUXDATA_TAG)).c_str(), CFG_IMPORT_LIBOPTS_EXIV2_AUXDATA_TAGS_LIST);
+        createItem(item, cs->getItemPath(i).c_str(), CFG_IMPORT_LIBOPTS_EXIV2_AUXDATA_TAGS_LIST);
         item.append_attribute("value") = entry.c_str();
     }
 #endif // HAVE_EXIV2
 
 #ifdef HAVE_TAGLIB
     array = config->getArrayOption(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
+    cs = ConfigManager::findConfigSetup(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
     for (size_t i = 0; i < array.size(); i++) {
         auto entry = array[i];
         auto item = values.append_child("item");
-        createItem(item, fmt::format("{}/{}[{}]/attribute::{}", ConfigManager::mapConfigOption(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST), ConfigManager::mapConfigOption(ATTR_IMPORT_LIBOPTS_AUXDATA_DATA), i, ConfigManager::mapConfigOption(ATTR_IMPORT_LIBOPTS_AUXDATA_TAG)).c_str(), CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
+        createItem(item, cs->getItemPath(i).c_str(), CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
         item.append_attribute("value") = entry.c_str();
     }
 #endif // HAVE_TAGLIB
 
 #ifdef HAVE_FFMPEG
     array = config->getArrayOption(CFG_IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST);
+    cs = ConfigManager::findConfigSetup(CFG_IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST);
     for (size_t i = 0; i < array.size(); i++) {
         auto entry = array[i];
         auto item = values.append_child("item");
-        createItem(item, fmt::format("{}/{}[{}]/attribute::{}", ConfigManager::mapConfigOption(CFG_IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST), ConfigManager::mapConfigOption(ATTR_IMPORT_LIBOPTS_AUXDATA_DATA), i, ConfigManager::mapConfigOption(ATTR_IMPORT_LIBOPTS_AUXDATA_TAG)).c_str(), CFG_IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST);
+        createItem(item, cs->getItemPath(i).c_str(), CFG_IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST);
         item.append_attribute("value") = entry.c_str();
     }
 #endif // HAVE_FFMPEG
 
     array = config->getArrayOption(CFG_IMPORT_RESOURCES_FANART_FILE_LIST);
+    cs = ConfigManager::findConfigSetup(CFG_IMPORT_RESOURCES_FANART_FILE_LIST);
     for (size_t i = 0; i < array.size(); i++) {
         auto entry = array[i];
         auto item = values.append_child("item");
-        createItem(item, fmt::format("{}/{}[{}]/attribute::{}", ConfigManager::mapConfigOption(CFG_IMPORT_RESOURCES_FANART_FILE_LIST), ConfigManager::mapConfigOption(ATTR_IMPORT_RESOURCES_ADD_FILE), i, ConfigManager::mapConfigOption(ATTR_IMPORT_RESOURCES_NAME)).c_str(), CFG_IMPORT_RESOURCES_FANART_FILE_LIST);
+        createItem(item, cs->getItemPath(i).c_str(), CFG_IMPORT_RESOURCES_FANART_FILE_LIST);
         item.append_attribute("value") = entry.c_str();
     }
 
     array = config->getArrayOption(CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST);
+    cs = ConfigManager::findConfigSetup(CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST);
     for (size_t i = 0; i < array.size(); i++) {
         auto entry = array[i];
         auto item = values.append_child("item");
-        createItem(item, fmt::format("{}/{}[{}]/attribute::{}", ConfigManager::mapConfigOption(CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST), ConfigManager::mapConfigOption(ATTR_IMPORT_RESOURCES_ADD_FILE), i, ConfigManager::mapConfigOption(ATTR_IMPORT_RESOURCES_NAME)).c_str(), CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST);
+        createItem(item, cs->getItemPath(i).c_str(), CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST);
         item.append_attribute("value") = entry.c_str();
     }
 
     array = config->getArrayOption(CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST);
+    cs = ConfigManager::findConfigSetup(CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST);
     for (size_t i = 0; i < array.size(); i++) {
         auto entry = array[i];
         auto item = values.append_child("item");
-        createItem(item, fmt::format("{}/{}[{}]/attribute::{}", ConfigManager::mapConfigOption(CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST), ConfigManager::mapConfigOption(ATTR_IMPORT_RESOURCES_ADD_FILE), i, ConfigManager::mapConfigOption(ATTR_IMPORT_RESOURCES_NAME)).c_str(), CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST);
+        createItem(item, cs->getItemPath(i).c_str(), CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST);
         item.append_attribute("value") = entry.c_str();
     }
 
     array = config->getArrayOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST);
+    cs = ConfigManager::findConfigSetup(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST);
+    for (size_t i = 0; i < array.size(); i++) {
+        auto entry = array[i];
+        auto item = values.append_child("item");
+        createItem(item, cs->getItemPath(i).c_str(), CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST);
+        item.append_attribute("value") = entry.c_str();
+    }
 }

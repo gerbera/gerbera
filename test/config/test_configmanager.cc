@@ -93,12 +93,13 @@ public:
 
 TEST_F(ConfigManagerTest, LoadsWebUIDefaultValues)
 {
-    subject = new ConfigManager(config_file, home, confdir, prefix, magic, "", "", 0, false);
+    auto shared = std::shared_ptr<ConfigManager>(new ConfigManager(config_file, home, confdir, prefix, magic, "", "", 0, false));
+    shared->load(home);
 
-    ASSERT_TRUE(subject->getBoolOption(CFG_SERVER_UI_ENABLED));
-    ASSERT_TRUE(subject->getBoolOption(CFG_SERVER_UI_SHOW_TOOLTIPS));
-    ASSERT_FALSE(subject->getBoolOption(CFG_SERVER_UI_ACCOUNTS_ENABLED));
-    ASSERT_EQ(30, subject->getIntOption(CFG_SERVER_UI_SESSION_TIMEOUT));
+    ASSERT_TRUE(shared->getBoolOption(CFG_SERVER_UI_ENABLED));
+    ASSERT_TRUE(shared->getBoolOption(CFG_SERVER_UI_SHOW_TOOLTIPS));
+    ASSERT_FALSE(shared->getBoolOption(CFG_SERVER_UI_ACCOUNTS_ENABLED));
+    ASSERT_EQ(30, shared->getIntOption(CFG_SERVER_UI_SESSION_TIMEOUT));
 }
 
 TEST_F(ConfigManagerTest, ThrowsExceptionWhenMissingConfigFileAndNoDefault)
@@ -116,7 +117,8 @@ TEST_F(ConfigManagerTest, ThrowsExceptionWhenMissingConfigFileAndNoDefault)
     config_file = "";
 
     try {
-        subject = new ConfigManager(config_file, notExistsDir, confdir, prefix, magic, "", "", 0, false);
+        auto shared = std::shared_ptr<ConfigManager>(new ConfigManager(config_file, notExistsDir, confdir, prefix, magic, "", "", 0, false));
+        shared->load(notExistsDir);
     } catch (const std::runtime_error& err) {
         EXPECT_EQ(err.what(), expErrMsg.str());
     }
@@ -125,10 +127,11 @@ TEST_F(ConfigManagerTest, ThrowsExceptionWhenMissingConfigFileAndNoDefault)
 TEST_F(ConfigManagerTest, LoadsConfigFromDefaultHomeWhenExistsButNotSpecified)
 {
     config_file = "";
-    subject = new ConfigManager(config_file, home, confdir, prefix, magic, "", "", 0, false);
+    auto shared = std::shared_ptr<ConfigManager>(new ConfigManager(config_file, home, confdir, prefix, magic, "", "", 0, false));
+    shared->load(home);
 
-    ASSERT_TRUE(subject->getBoolOption(CFG_SERVER_UI_ENABLED));
-    ASSERT_TRUE(subject->getBoolOption(CFG_SERVER_UI_SHOW_TOOLTIPS));
-    ASSERT_FALSE(subject->getBoolOption(CFG_SERVER_UI_ACCOUNTS_ENABLED));
-    ASSERT_EQ(30, subject->getIntOption(CFG_SERVER_UI_SESSION_TIMEOUT));
+    ASSERT_TRUE(shared->getBoolOption(CFG_SERVER_UI_ENABLED));
+    ASSERT_TRUE(shared->getBoolOption(CFG_SERVER_UI_SHOW_TOOLTIPS));
+    ASSERT_FALSE(shared->getBoolOption(CFG_SERVER_UI_ACCOUNTS_ENABLED));
+    ASSERT_EQ(30, shared->getIntOption(CFG_SERVER_UI_SESSION_TIMEOUT));
 }

@@ -125,6 +125,18 @@ public:
 
     std::map<std::string, std::string> getDictionaryOption() const override { return option; }
 
+    void setKey(const std::string& oldKey, const std::string& newKey)
+    {
+        auto oldValue = option[oldKey];
+        option.erase(oldKey);
+        option[newKey] = oldValue;
+    }
+
+    void setValue(const std::string& key, const std::string& value)
+    {
+        option[key] = value;
+    }
+
 protected:
     std::map<std::string, std::string> option;
 };
@@ -139,6 +151,11 @@ public:
     std::vector<std::string> getArrayOption() const override
     {
         return option;
+    }
+
+    void setItem(int index, const std::string& value)
+    {
+        option.at(index) = value;
     }
 
 protected:

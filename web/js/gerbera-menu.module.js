@@ -102,7 +102,6 @@ const selectConfig = (menuItem) => {
   $('#content').hide();
   $('#clients').hide();
   $('#config').show();
-  Trail.destroy();
   const type = menuItem.data('gerbera-type');
   GerberaApp.setType(type);
   Config.menuSelected();

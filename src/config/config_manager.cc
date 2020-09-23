@@ -76,32 +76,23 @@ ConfigManager::ConfigManager(fs::path filename,
 
     options->resize(CFG_MAX);
 
-    if (filename.empty()) {
+    if (this->filename.empty()) {
         // No config file path provided, so lets find one.
         fs::path home = userhome / config_dir;
-        filename += home / DEFAULT_CONFIG_NAME;
+        this->filename += home / DEFAULT_CONFIG_NAME;
     }
 
     std::error_code ec;
-    if (!isRegularFile(filename, ec)) {
+    if (!isRegularFile(this->filename, ec)) {
         std::ostringstream expErrMsg;
         expErrMsg << "\nThe server configuration file could not be found: ";
-        expErrMsg << filename << "\n";
+        expErrMsg << this->filename << "\n";
         expErrMsg << "Gerbera could not find a default configuration file.\n";
         expErrMsg << "Try specifying an alternative configuration file on the command line.\n";
         expErrMsg << "For a list of options run: gerbera -h\n";
 
         throw std::runtime_error(expErrMsg.str());
     }
-
-    load(filename, userhome);
-
-#ifdef TOMBDEBUG
-    dumpOptions();
-#endif
-
-    // now the XML is no longer needed we can destroy it
-    xmlDoc = nullptr;
 }
 
 ConfigManager::~ConfigManager()
@@ -109,9 +100,9 @@ ConfigManager::~ConfigManager()
     log_debug("ConfigManager destroyed");
 }
 
-Config* ConfigManager::getSelf()
+std::shared_ptr<Config> ConfigManager::getSelf()
 {
-    return this;
+    return shared_from_this();
 }
 
 static std::vector<std::shared_ptr<ConfigSetup>> complexOptions = {
@@ -169,7 +160,7 @@ static std::vector<std::shared_ptr<ConfigSetup>> complexOptions = {
     std::make_shared<ConfigDictionarySetup>(CFG_SERVER_UI_ACCOUNT_LIST, "/server/ui/accounts", ATTR_SERVER_UI_ACCOUNT_LIST_ACCOUNT, ATTR_SERVER_UI_ACCOUNT_LIST_USER, ATTR_SERVER_UI_ACCOUNT_LIST_PASSWORD),
     std::make_shared<ConfigIntSetup>(CFG_SERVER_UI_SESSION_TIMEOUT, "/server/ui/accounts/attribute::session-timeout", DEFAULT_SESSION_TIMEOUT, 1, ConfigIntSetup::CheckMinValue),
     std::make_shared<ConfigIntSetup>(CFG_SERVER_UI_DEFAULT_ITEMS_PER_PAGE, "/server/ui/items-per-page/attribute::default", DEFAULT_ITEMS_PER_PAGE_2, 1, ConfigIntSetup::CheckMinValue),
-    std::make_shared<ConfigArraySetup>(CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN, "/server/ui/items-per-page", ConfigArraySetup::InitItemsPerPage, true),
+    std::make_shared<ConfigArraySetup>(CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN, "/server/ui/items-per-page", ATTR_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN_OPTION, ConfigArraySetup::InitItemsPerPage, true),
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_UI_SHOW_TOOLTIPS, "/server/ui/attribute::show-tooltips", DEFAULT_UI_SHOW_TOOLTIPS_VALUE),
     std::make_shared<ConfigClientSetup>(CFG_CLIENTS_LIST, "/clients"),
     std::make_shared<ConfigBoolSetup>(CFG_CLIENTS_LIST_ENABLED, "/clients/attribute::enabled", DEFAULT_CLIENTS_EN_VALUE),
@@ -217,7 +208,7 @@ static std::vector<std::shared_ptr<ConfigSetup>> complexOptions = {
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND, "/server/extended-runtime-options/mark-played-items/string/attribute::mode", DEFAULT_MARK_PLAYED_ITEMS_STRING_MODE, ConfigBoolSetup::CheckMarkPlayedValue),
     std::make_shared<ConfigStringSetup>(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING, "/server/extended-runtime-options/mark-played-items/string", false, DEFAULT_MARK_PLAYED_ITEMS_STRING, true),
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES, "/server/extended-runtime-options/mark-played-items/attribute::suppress-cds-updates", DEFAULT_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES),
-    std::make_shared<ConfigArraySetup>(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST, "/server/extended-runtime-options/mark-played-items/mark", ConfigArraySetup::InitPlayedItemsMark),
+    std::make_shared<ConfigArraySetup>(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST, "/server/extended-runtime-options/mark-played-items/mark", ATTR_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT, ConfigArraySetup::InitPlayedItemsMark),
 #ifdef HAVE_LASTFMLIB
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_EXTOPTS_LASTFM_ENABLED, "/server/extended-runtime-options/lastfm/attribute::enabled", DEFAULT_LASTFM_ENABLED),
     std::make_shared<ConfigStringSetup>(CFG_SERVER_EXTOPTS_LASTFM_USERNAME, "/server/extended-runtime-options/lastfm/username", false, DEFAULT_LASTFM_USERNAME, true),
@@ -347,13 +338,16 @@ const char* ConfigManager::mapConfigOption(config_option_t option)
     return "";
 }
 
-std::shared_ptr<ConfigSetup> ConfigManager::findConfigSetup(config_option_t option)
+std::shared_ptr<ConfigSetup> ConfigManager::findConfigSetup(config_option_t option, bool save)
 {
     auto co = std::find_if(complexOptions.begin(), complexOptions.end(), [&](const auto& s) { return s->option == option; });
     if (co != complexOptions.end()) {
         log_debug("Config: option found: '{}'", (*co)->xpath);
         return *co;
     }
+
+    if (save)
+        return nullptr;
 
     throw std::runtime_error(fmt::format("Error in config code: {} tag not found", static_cast<int>(option)));
 }
@@ -372,7 +366,7 @@ void ConfigManager::addOption(config_option_t option, std::shared_ptr<ConfigOpti
     options->at(option) = optionValue;
 }
 
-void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
+void ConfigManager::load(const fs::path& userHome)
 {
     std::string temp;
     pugi::xml_node tmpEl;
@@ -382,7 +376,6 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     std::shared_ptr<ConfigSetup> co;
 
     log_info("Loading configuration from: {}", filename.c_str());
-    this->filename = filename;
     pugi::xml_parse_result result = xmlDoc->load_file(filename.c_str());
     if (result.status != pugi::xml_parse_status::status_ok) {
         throw ConfigParseException(result.description());
@@ -793,6 +786,13 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     std::ostringstream buf;
     xmlDoc->print(buf, "  ");
     log_debug("Config file dump after validation: {}", buf.str().c_str());
+
+#ifdef TOMBDEBUG
+    dumpOptions();
+#endif
+
+    // now the XML is no longer needed we can destroy it
+    xmlDoc = nullptr;
 }
 
 void ConfigManager::dumpOptions()

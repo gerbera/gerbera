@@ -308,6 +308,7 @@ int main(int argc, char** argv, char** envp)
                 prefix.value_or(""), magic.value_or(""),
                 ip.value_or(""), interface.value_or(""), portnum.value_or(-1),
                 debug);
+            configManager->load(home.value_or(""));
             portnum = configManager->getIntOption(CFG_SERVER_PORT);
         } catch (const ConfigParseException& ce) {
             log_error("Error parsing config file '{}': {}", (*config_file).c_str(), ce.what());

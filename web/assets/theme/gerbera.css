@@ -261,11 +261,15 @@ body,
 }
 
 #configframe {
-    height: calc(100% - 80px);
+    min-height: calc(100% - 130px);
+    max-height: calc(100% - 130px);
+    height: calc(100% - 130px);
 }
 
 #configgrid {
-    height: calc(100% - 50px);
+    min-height: calc(100% - 40px);
+    max-height: calc(100% - 40px);
+    height: calc(100% - 40px);
     overflow-y: auto;
     background-color: #fefefe;
 }
@@ -319,6 +323,13 @@ body,
 
 #configgrid .configListItem {
     margin-left: 40px; list-style:none;
+}
+
+#configgrid .changed {
+    background-color: #ff7f0060;
+}
+#configgrid .changed input {
+    background-color: #ff7f0030;
 }
 
 .page-item.active .page-link {

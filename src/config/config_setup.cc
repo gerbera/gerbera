@@ -43,16 +43,6 @@
 #include "util/mt_inotify.h"
 #endif
 
-template <class CS>
-static std::shared_ptr<CS> findConfigSetup(config_option_t option)
-{
-    std::shared_ptr<CS> result = std::dynamic_pointer_cast<CS>(ConfigManager::findConfigSetup(option));
-    if (result == nullptr) {
-        throw std::runtime_error(fmt::format("Error in config code: {} has wrong class", static_cast<int>(option)));
-    }
-    return result;
-}
-
 pugi::xml_node ConfigSetup::getXmlElement(const pugi::xml_node& root) const
 {
     pugi::xpath_node xpathNode = root.select_node(cpath.c_str());
@@ -122,13 +112,13 @@ std::string ConfigSetup::getXmlContent(const pugi::xml_node& root, bool trim) co
     return defaultValue;
 }
 
-void ConfigSetup::makeOption(const pugi::xml_node& root, Config* config, const std::map<std::string, std::string>* arguments)
+void ConfigSetup::makeOption(const pugi::xml_node& root, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments)
 {
     optionValue = std::make_shared<Option>("");
     setOption(config);
 }
 
-void ConfigSetup::makeOption(std::string optValue, Config* config, const std::map<std::string, std::string>* arguments)
+void ConfigSetup::makeOption(std::string optValue, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments)
 {
     optionValue = std::make_shared<Option>(optValue);
     setOption(config);
@@ -136,7 +126,7 @@ void ConfigSetup::makeOption(std::string optValue, Config* config, const std::ma
 
 const char* ConfigSetup::ROOT_NAME = "config";
 
-void ConfigStringSetup::makeOption(const pugi::xml_node& root, Config* config, const std::map<std::string, std::string>* arguments)
+void ConfigStringSetup::makeOption(const pugi::xml_node& root, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments)
 {
     bool trim = true;
     if (arguments != nullptr && arguments->find("trim") != arguments->end()) {
@@ -209,14 +199,14 @@ void ConfigPathSetup::loadArguments(const std::map<std::string, std::string>* ar
     }
 }
 
-void ConfigPathSetup::makeOption(const pugi::xml_node& root, Config* config, const std::map<std::string, std::string>* arguments)
+void ConfigPathSetup::makeOption(const pugi::xml_node& root, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments)
 {
     loadArguments(arguments);
     newOption(getXmlContent(root, true));
     setOption(config);
 }
 
-void ConfigPathSetup::makeOption(std::string optValue, Config* config, const std::map<std::string, std::string>* arguments)
+void ConfigPathSetup::makeOption(std::string optValue, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments)
 {
     loadArguments(arguments);
     newOption(optValue);
@@ -236,13 +226,13 @@ std::shared_ptr<ConfigOption> ConfigPathSetup::newOption(const std::string& optV
 
 fs::path ConfigPathSetup::Home = "";
 
-void ConfigIntSetup::makeOption(const pugi::xml_node& root, Config* config, const std::map<std::string, std::string>* arguments)
+void ConfigIntSetup::makeOption(const pugi::xml_node& root, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments)
 {
     newOption(getXmlContent(root));
     setOption(config);
 }
 
-void ConfigIntSetup::makeOption(std::string optValue, Config* config, const std::map<std::string, std::string>* arguments)
+void ConfigIntSetup::makeOption(std::string optValue, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments)
 {
     if (rawCheck != nullptr) {
         if (!rawCheck(optValue)) {
@@ -348,32 +338,37 @@ bool ConfigIntSetup::CheckUpnpStringLimitValue(int value)
     return (value != -1) && (value < 4) ? false : true;
 }
 
-void ConfigBoolSetup::makeOption(const pugi::xml_node& root, Config* config, const std::map<std::string, std::string>* arguments)
+void ConfigBoolSetup::makeOption(const pugi::xml_node& root, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments)
 {
     newOption(getXmlContent(root));
     setOption(config);
 }
 
-void ConfigBoolSetup::makeOption(std::string optValue, Config* config, const std::map<std::string, std::string>* arguments)
+bool validateTrueFalse(const std::string& optValue)
 {
-    if (!validateYesNo(optValue))
+    return (optValue == "true" || optValue == "false");
+}
+
+void ConfigBoolSetup::makeOption(std::string optValue, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments)
+{
+    if (!validateTrueFalse(optValue) && !validateYesNo(optValue))
         throw std::runtime_error(fmt::format("Invalid {} value {}", xpath, optValue));
-    optionValue = std::make_shared<BoolOption>(optValue == YES);
+    optionValue = std::make_shared<BoolOption>(optValue == YES || optValue == "true");
     setOption(config);
 };
 
 bool ConfigBoolSetup::getXmlContent(const pugi::xml_node& root) const
 {
-    std::string sVal = ConfigSetup::getXmlContent(root, true);
+    std::string optValue = ConfigSetup::getXmlContent(root, true);
     if (rawCheck != nullptr) {
-        if (!rawCheck(sVal)) {
-            throw std::runtime_error(fmt::format("Invalid {}/{} value '{}'", root.path(), xpath, sVal));
+        if (!rawCheck(optValue)) {
+            throw std::runtime_error(fmt::format("Invalid {}/{} value '{}'", root.path(), xpath, optValue));
         }
     }
 
-    if (!validateYesNo(sVal))
-        throw std::runtime_error(fmt::format("Invalid {}/{} value {}", root.path(), xpath, sVal));
-    return sVal == YES;
+    if (!validateTrueFalse(optValue) && !validateYesNo(optValue))
+        throw std::runtime_error(fmt::format("Invalid {}/{} value {}", root.path(), xpath, optValue));
+    return optValue == YES || optValue == "true";
 }
 
 std::shared_ptr<ConfigOption> ConfigBoolSetup::newOption(bool optValue)
@@ -472,17 +467,35 @@ bool ConfigArraySetup::createArrayFromNode(const pugi::xml_node& element, std::v
     return true;
 }
 
-void ConfigArraySetup::makeOption(const pugi::xml_node& root, Config* config, const std::map<std::string, std::string>* arguments)
+void ConfigArraySetup::makeOption(const pugi::xml_node& root, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments)
 {
     newOption(getXmlContent(getXmlElement(root)));
     setOption(config);
+}
+
+bool ConfigArraySetup::updateDetail(const std::string& optItem, const std::string& optValue, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments)
+{
+    if (optItem.substr(0, strlen(xpath)) == xpath && optionValue != nullptr) {
+        std::shared_ptr<ArrayOption> value = std::dynamic_pointer_cast<ArrayOption>(optionValue);
+        log_info("Updating Array Detail {} {} {}", xpath, optItem, optValue);
+        for (size_t i = 0; i < value->getArrayOption().size(); i++) {
+            auto index = getItemPath(i);
+            if (optItem == index) {
+                log_info("Old Array Detail {} {}", index, value->getArrayOption()[i]);
+                value->setItem(i, optValue);
+                log_info("New Array Detail {} {}", index, config->getArrayOption(option)[i]);
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 std::vector<std::string> ConfigArraySetup::getXmlContent(const pugi::xml_node& optValue) const
 {
     std::vector<std::string> result;
     if (initArray != nullptr) {
-        if (!initArray(optValue, result)) {
+        if (!initArray(optValue, result, ConfigManager::mapConfigOption(nodeOption))) {
             throw std::runtime_error(fmt::format("Invalid {} array value '{}'", xpath, optValue));
         }
     } else {
@@ -502,11 +515,11 @@ std::shared_ptr<ConfigOption> ConfigArraySetup::newOption(const std::vector<std:
     return optionValue;
 }
 
-bool ConfigArraySetup::InitPlayedItemsMark(const pugi::xml_node& value, std::vector<std::string>& result)
+bool ConfigArraySetup::InitPlayedItemsMark(const pugi::xml_node& value, std::vector<std::string>& result, const char* node_name)
 {
     if (value != nullptr) {
         for (const pugi::xml_node& content : value.children()) {
-            if (std::string(content.name()) != ConfigManager::mapConfigOption(ATTR_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT))
+            if (std::string(content.name()) != node_name)
                 continue;
 
             std::string mark_content = content.text().as_string();
@@ -526,7 +539,7 @@ bool ConfigArraySetup::InitPlayedItemsMark(const pugi::xml_node& value, std::vec
     return true;
 }
 
-bool ConfigArraySetup::InitItemsPerPage(const pugi::xml_node& value, std::vector<std::string>& result)
+bool ConfigArraySetup::InitItemsPerPage(const pugi::xml_node& value, std::vector<std::string>& result, const char* node_name)
 {
     // create default structure
     if (std::distance(value.begin(), value.end()) == 0) {
@@ -537,7 +550,7 @@ bool ConfigArraySetup::InitItemsPerPage(const pugi::xml_node& value, std::vector
     } else {
         // create the array from either user settings
         for (const pugi::xml_node& child : value.children()) {
-            if (std::string(child.name()) == ConfigManager::mapConfigOption(ATTR_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN_OPTION)) {
+            if (std::string(child.name()) == node_name) {
                 int i = child.text().as_int();
                 if (i < 1) {
                     log_error("Error in config file: incorrect <option> value for <items-per-page>");
@@ -605,13 +618,40 @@ bool ConfigDictionarySetup::createDictionaryFromNode(const pugi::xml_node& optVa
     return true;
 }
 
-void ConfigDictionarySetup::makeOption(const pugi::xml_node& root, Config* config, const std::map<std::string, std::string>* arguments)
+void ConfigDictionarySetup::makeOption(const pugi::xml_node& root, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments)
 {
     if (arguments != nullptr && arguments->find("tolower") != arguments->end()) {
         tolower = arguments->find("tolower")->second == "true";
     }
     newOption(getXmlContent(getXmlElement(root)));
     setOption(config);
+}
+
+bool ConfigDictionarySetup::updateDetail(const std::string& optItem, const std::string& optValue, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments)
+{
+    if (optItem.substr(0, strlen(xpath)) == xpath && optionValue != nullptr) {
+        std::shared_ptr<DictionaryOption> value = std::dynamic_pointer_cast<DictionaryOption>(optionValue);
+        log_info("Updating Dictionary Detail {} {} {}", xpath, optItem, optValue);
+        int i = 0;
+        for (const auto& entry : value->getDictionaryOption()) {
+            auto index = getItemPath(i, ATTR_IMPORT_MAPPINGS_MIMETYPE_FROM);
+            if (optItem == index) {
+                log_info("Old Dictionary Detail {} {}", index, entry.first);
+                value->setKey(entry.first, optValue);
+                log_info("New Dictionary Detail {} {}", index, config->getDictionaryOption(option)[optValue]);
+                return true;
+            }
+            index = getItemPath(i, ATTR_IMPORT_MAPPINGS_MIMETYPE_TO);
+            if (optItem == index) {
+                log_info("Old Dictionary Detail {} {}", index, value->getDictionaryOption()[entry.first]);
+                value->setValue(entry.first, optValue);
+                log_info("New Dictionary Detail {} {}", index, config->getDictionaryOption(option)[entry.first]);
+                return true;
+            }
+            i++;
+        }
+    }
+    return false;
 }
 
 std::map<std::string, std::string> ConfigDictionarySetup::getXmlContent(const pugi::xml_node& optValue) const
@@ -687,7 +727,16 @@ bool ConfigAutoscanSetup::createAutoscanListFromNode(const pugi::xml_node& eleme
     return true;
 }
 
-void ConfigAutoscanSetup::makeOption(const pugi::xml_node& root, Config* config, const std::map<std::string, std::string>* arguments)
+bool ConfigAutoscanSetup::updateDetail(const std::string& optItem, const std::string& optValue, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments)
+{
+    if (optItem.substr(0, strlen(xpath)) == xpath) {
+        log_info("Updating Autoscan Detail {} {} {}", xpath, optItem, optValue);
+        return true;
+    }
+    return false;
+}
+
+void ConfigAutoscanSetup::makeOption(const pugi::xml_node& root, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments)
 {
     if (arguments != nullptr && arguments->find("hiddenFiles") != arguments->end()) {
         hiddenFiles = arguments->find("hiddenFiles")->second == "true";
@@ -861,13 +910,22 @@ bool ConfigTranscodingSetup::createTranscodingProfileListFromNode(const pugi::xm
     return true;
 }
 
-void ConfigTranscodingSetup::makeOption(const pugi::xml_node& root, Config* config, const std::map<std::string, std::string>* arguments)
+void ConfigTranscodingSetup::makeOption(const pugi::xml_node& root, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments)
 {
     if (arguments != nullptr && arguments->find("isEnabled") != arguments->end()) {
         isEnabled = arguments->find("isEnabled")->second == "true";
     }
     newOption(getXmlElement(root));
     setOption(config);
+}
+
+bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, const std::string& optValue, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments)
+{
+    if (optItem.substr(0, strlen(xpath)) == xpath) {
+        log_info("Updating Transcoding Detail {} {} {}", xpath, optItem, optValue);
+        return true;
+    }
+    return false;
 }
 
 std::shared_ptr<ConfigOption> ConfigTranscodingSetup::newOption(const pugi::xml_node& optValue)
@@ -915,13 +973,22 @@ bool ConfigClientSetup::createClientConfigListFromNode(const pugi::xml_node& ele
     return true;
 }
 
-void ConfigClientSetup::makeOption(const pugi::xml_node& root, Config* config, const std::map<std::string, std::string>* arguments)
+void ConfigClientSetup::makeOption(const pugi::xml_node& root, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments)
 {
     if (arguments != nullptr && arguments->find("isEnabled") != arguments->end()) {
         isEnabled = arguments->find("isEnabled")->second == "true";
     }
     newOption(getXmlElement(root));
     setOption(config);
+}
+
+bool ConfigClientSetup::updateDetail(const std::string& optItem, const std::string& optValue, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments)
+{
+    if (optItem.substr(0, strlen(xpath)) == xpath) {
+        log_info("Updating Client Detail {} {} {}", xpath, optItem, optValue);
+        return true;
+    }
+    return false;
 }
 
 std::shared_ptr<ConfigOption> ConfigClientSetup::newOption(const pugi::xml_node& optValue)

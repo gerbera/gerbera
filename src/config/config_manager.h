@@ -54,7 +54,7 @@ class ConfigOption;
 class Storage;
 class TranscodingProfileList;
 
-class ConfigManager : public Config {
+class ConfigManager : public Config, public std::enable_shared_from_this<Config> {
 public:
     ConfigManager(fs::path filename,
         const fs::path& userhome, const fs::path& config_dir,
@@ -68,9 +68,9 @@ public:
 
     static const char* mapConfigOption(config_option_t option);
 
-    static std::shared_ptr<ConfigSetup> findConfigSetup(config_option_t option);
+    static std::shared_ptr<ConfigSetup> findConfigSetup(config_option_t option, bool save = false);
 
-    void load(const fs::path& filename, const fs::path& userHome);
+    void load(const fs::path& userHome);
 
     /// \brief add a config option
     /// \param option option type to add.
@@ -126,7 +126,7 @@ protected:
 
     std::shared_ptr<ConfigOption> setOption(const pugi::xml_node& root, config_option_t option, const std::map<std::string, std::string>* arguments = nullptr);
 
-    Config* getSelf();
+    std::shared_ptr<Config> getSelf();
 
     void dumpOptions();
 };

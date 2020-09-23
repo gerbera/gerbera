@@ -21,6 +21,7 @@
     $Id$
 */
 import {Autoscan} from "./gerbera-autoscan.module.js";
+import {Config} from "./gerbera-config.module.js";
 import {GerberaApp} from "./gerbera-app.module.js";
 import {Items} from "./gerbera-items.module.js";
 import {Tree} from "./gerbera-tree.module.js";
@@ -41,7 +42,7 @@ const initialize = () => {
 };
 
 const makeTrail = (selectedItem, config) => {
-  const items = gatherTrail(selectedItem);
+  const items = (selectedItem !== null) ? gatherTrail(selectedItem) : [{text: "current configuration"}];
   const configDefaults = {
     itemType: GerberaApp.getType()
   };
@@ -79,17 +80,19 @@ const createTrail = (items, config) => {
 };
 
 const makeTrailFromItem = (items) => {
-  const treeElement = Tree.getTreeElementById(items.parent_id);
   const itemType = GerberaApp.getType();
+  const treeElement = (itemType !== 'config') ? Tree.getTreeElementById(items.parent_id) : null;
   let enableAdd = false;
   let enableEdit = false;
   let enableDelete = false;
   let enableDeleteAll = false;
   let enableAddAutoscan = false;
   let enableEditAutoscan = false;
+  let enableSave = false;
   let onAdd;
   let onDelete;
   let onEdit;
+  let onSave;
   let onAddAutoscan;
   let onEditAutoscan;
   let onDeleteAll;
@@ -114,6 +117,8 @@ const makeTrailFromItem = (items) => {
   } else if (itemType === 'fs') {
     enableAddAutoscan = true;
     enableAdd = true;
+  } else if (itemType === 'config') {
+    enableSave = true;
   }
 
   onAdd = enableAdd ? addItem : noOp;
@@ -122,6 +127,7 @@ const makeTrailFromItem = (items) => {
   onDeleteAll = enableDeleteAll ? deleteAllItems : noOp;
   onAddAutoscan = enableAddAutoscan ? addAutoscan : noOp;
   onEditAutoscan = enableEditAutoscan ? addAutoscan : noOp;
+  onSave = enableSave ? saveConfig : noOp;
 
   const config = {
     enableAdd: enableAdd,
@@ -135,7 +141,9 @@ const makeTrailFromItem = (items) => {
     enableAddAutoscan: enableAddAutoscan,
     onAddAutoscan: onAddAutoscan,
     enableEditAutoscan: enableEditAutoscan,
-    onEditAutoscan: onEditAutoscan
+    onEditAutoscan: onEditAutoscan,
+    enableSave: enableSave,
+    onSave: onSave
   };
 
   makeTrail(treeElement, config)
@@ -156,6 +164,10 @@ const editItem = (event) => {
 
 const addAutoscan = (event) => {
   Autoscan.addAutoscan(event);
+};
+
+const saveConfig = (event) => {
+  Config.saveConfig(event);
 };
 
 const deleteItem = (event) => {

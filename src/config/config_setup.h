@@ -33,13 +33,14 @@
 
 #include "common.h"
 #include "config.h"
+#include "config_manager.h"
 #include "config_options.h"
 
 class ConfigOption;
 enum class ScanMode;
 
 typedef bool (*StringCheckFunction)(std::string& value);
-typedef bool (*ArrayInitFunction)(const pugi::xml_node& value, std::vector<std::string>& result);
+typedef bool (*ArrayInitFunction)(const pugi::xml_node& value, std::vector<std::string>& result, const char* node_name);
 typedef bool (*DictionaryInitFunction)(const pugi::xml_node& value, std::map<std::string, std::string>& result);
 typedef bool (*IntCheckFunction)(int value);
 typedef bool (*IntMinFunction)(int value, int minValue);
@@ -52,7 +53,7 @@ protected:
     StringCheckFunction rawCheck;
     std::string defaultValue;
 
-    void setOption(Config* config)
+    void setOption(std::shared_ptr<Config> config)
     {
         config->addOption(option, optionValue);
     }
@@ -104,9 +105,23 @@ public:
     /// "/path/to/option/attribute::attr" will return the value of the attribute "attr"
     std::string getXmlContent(const pugi::xml_node& root, bool trim = true) const;
 
-    virtual void makeOption(const pugi::xml_node& root, Config* config, const std::map<std::string, std::string>* arguments = nullptr);
+    virtual void makeOption(const pugi::xml_node& root, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments = nullptr);
 
-    virtual void makeOption(std::string optValue, Config* config, const std::map<std::string, std::string>* arguments = nullptr);
+    virtual void makeOption(std::string optValue, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments = nullptr);
+
+    virtual bool updateDetail(const std::string& optItem, const std::string& optValue, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments = nullptr) { return false; }
+
+    virtual std::string getItemPath(int index = 0, config_option_t prop = CFG_MAX) { return xpath; }
+
+    template <class CS>
+    static std::shared_ptr<CS> findConfigSetup(config_option_t option)
+    {
+        std::shared_ptr<CS> result = std::dynamic_pointer_cast<CS>(ConfigManager::findConfigSetup(option));
+        if (result == nullptr) {
+            throw std::runtime_error(fmt::format("Error in config code: {} has wrong class", static_cast<int>(option)));
+        }
+        return result;
+    }
 };
 
 class ConfigStringSetup : public ConfigSetup {
@@ -128,7 +143,7 @@ public:
 
     virtual ~ConfigStringSetup() = default;
 
-    virtual void makeOption(const pugi::xml_node& root, Config* config, const std::map<std::string, std::string>* arguments = nullptr) override;
+    virtual void makeOption(const pugi::xml_node& root, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments = nullptr) override;
 
     std::shared_ptr<ConfigOption> newOption(const std::string& optValue);
 };
@@ -165,7 +180,7 @@ public:
 
     virtual ~ConfigEnumSetup() = default;
 
-    virtual void makeOption(const pugi::xml_node& root, Config* config, const std::map<std::string, std::string>* arguments = nullptr) override
+    virtual void makeOption(const pugi::xml_node& root, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments = nullptr) override
     {
         if (arguments != nullptr && arguments->find("notEmpty") != arguments->end()) {
             notEmpty = arguments->find("notEmpty")->second == "true";
@@ -228,9 +243,9 @@ public:
     {
     }
 
-    virtual void makeOption(const pugi::xml_node& root, Config* config, const std::map<std::string, std::string>* arguments = nullptr) override;
+    virtual void makeOption(const pugi::xml_node& root, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments = nullptr) override;
 
-    virtual void makeOption(std::string optValue, Config* config, const std::map<std::string, std::string>* arguments = nullptr) override;
+    virtual void makeOption(std::string optValue, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments = nullptr) override;
 
     virtual ~ConfigPathSetup() = default;
 
@@ -302,9 +317,9 @@ public:
 
     virtual ~ConfigIntSetup() = default;
 
-    virtual void makeOption(const pugi::xml_node& root, Config* config, const std::map<std::string, std::string>* arguments = nullptr) override;
+    virtual void makeOption(const pugi::xml_node& root, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments = nullptr) override;
 
-    virtual void makeOption(std::string optValue, Config* config, const std::map<std::string, std::string>* arguments = nullptr) override;
+    virtual void makeOption(std::string optValue, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments = nullptr) override;
 
     int getXmlContent(const pugi::xml_node& root) const;
 
@@ -347,9 +362,9 @@ public:
 
     virtual ~ConfigBoolSetup() = default;
 
-    virtual void makeOption(const pugi::xml_node& root, Config* config, const std::map<std::string, std::string>* arguments = nullptr) override;
+    virtual void makeOption(const pugi::xml_node& root, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments = nullptr) override;
 
-    virtual void makeOption(std::string optValue, Config* config, const std::map<std::string, std::string>* arguments = nullptr) override;
+    virtual void makeOption(std::string optValue, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments = nullptr) override;
 
     bool getXmlContent(const pugi::xml_node& root) const;
 
@@ -368,7 +383,7 @@ protected:
     bool itemNotEmpty = false;
     ArrayInitFunction initArray = nullptr;
     config_option_t nodeOption;
-    config_option_t attrOption;
+    config_option_t attrOption = CFG_MAX;
 
     /// \brief Creates an array of strings from an XML nodeset.
     /// \param element starting element of the nodeset.
@@ -386,10 +401,11 @@ protected:
     bool createArrayFromNode(const pugi::xml_node& element, std::vector<std::string>& result) const;
 
 public:
-    ConfigArraySetup(config_option_t option, const char* xpath, ArrayInitFunction init = nullptr, bool notEmpty = false)
+    ConfigArraySetup(config_option_t option, const char* xpath, config_option_t nodeOption, ArrayInitFunction init = nullptr, bool notEmpty = false)
         : ConfigSetup(option, xpath)
         , notEmpty(notEmpty)
         , initArray(init)
+        , nodeOption(nodeOption)
     {
     }
 
@@ -405,15 +421,22 @@ public:
 
     virtual ~ConfigArraySetup() = default;
 
-    virtual void makeOption(const pugi::xml_node& root, Config* config, const std::map<std::string, std::string>* arguments = nullptr) override;
+    virtual void makeOption(const pugi::xml_node& root, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments = nullptr) override;
+
+    virtual bool updateDetail(const std::string& optItem, const std::string& optValue, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments = nullptr) override;
+
+    virtual std::string getItemPath(int index = 0, config_option_t prop = CFG_MAX) override
+    {
+        return attrOption != CFG_MAX ? fmt::format("{}/{}[{}]/attribute::{}", xpath, ConfigManager::mapConfigOption(nodeOption), index, ConfigManager::mapConfigOption(attrOption)) : fmt::format("{}/{}[{}]", xpath, ConfigManager::mapConfigOption(nodeOption), index);
+    }
 
     std::vector<std::string> getXmlContent(const pugi::xml_node& optValue) const;
 
     std::shared_ptr<ConfigOption> newOption(const std::vector<std::string>& optValue);
 
-    static bool InitPlayedItemsMark(const pugi::xml_node& value, std::vector<std::string>& result);
+    static bool InitPlayedItemsMark(const pugi::xml_node& value, std::vector<std::string>& result, const char* node_name);
 
-    static bool InitItemsPerPage(const pugi::xml_node& value, std::vector<std::string>& result);
+    static bool InitItemsPerPage(const pugi::xml_node& value, std::vector<std::string>& result, const char* node_name);
 };
 
 class ConfigDictionarySetup : public ConfigSetup {
@@ -465,7 +488,15 @@ public:
 
     virtual ~ConfigDictionarySetup() = default;
 
-    virtual void makeOption(const pugi::xml_node& root, Config* config, const std::map<std::string, std::string>* arguments = nullptr) override;
+    virtual void makeOption(const pugi::xml_node& root, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments = nullptr) override;
+
+    virtual bool updateDetail(const std::string& optItem, const std::string& optValue, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments = nullptr) override;
+
+    virtual std::string getItemPath(int index = 0, config_option_t propOption = CFG_MAX) override
+    {
+        return fmt::format("{}/{}[{}]/attribute::{}", xpath, ConfigManager::mapConfigOption(nodeOption), index, ConfigManager::mapConfigOption(propOption));
+    }
+
     std::map<std::string, std::string> getXmlContent(const pugi::xml_node& optValue) const;
 
     std::shared_ptr<ConfigOption> newOption(const std::map<std::string, std::string>& optValue);
@@ -490,7 +521,9 @@ public:
 
     virtual ~ConfigAutoscanSetup() = default;
 
-    virtual void makeOption(const pugi::xml_node& root, Config* config, const std::map<std::string, std::string>* arguments = nullptr) override;
+    virtual void makeOption(const pugi::xml_node& root, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments = nullptr) override;
+
+    virtual bool updateDetail(const std::string& optItem, const std::string& optValue, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments = nullptr) override;
 
     std::shared_ptr<ConfigOption> newOption(const pugi::xml_node& optValue);
 };
@@ -512,7 +545,9 @@ public:
 
     virtual ~ConfigTranscodingSetup() = default;
 
-    virtual void makeOption(const pugi::xml_node& root, Config* config, const std::map<std::string, std::string>* arguments = nullptr) override;
+    virtual void makeOption(const pugi::xml_node& root, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments = nullptr) override;
+
+    virtual bool updateDetail(const std::string& optItem, const std::string& optValue, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments = nullptr) override;
 
     std::shared_ptr<ConfigOption> newOption(const pugi::xml_node& optValue);
 };
@@ -533,7 +568,9 @@ public:
 
     virtual ~ConfigClientSetup() = default;
 
-    virtual void makeOption(const pugi::xml_node& root, Config* config, const std::map<std::string, std::string>* arguments = nullptr) override;
+    virtual void makeOption(const pugi::xml_node& root, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments = nullptr) override;
+
+    virtual bool updateDetail(const std::string& optItem, const std::string& optValue, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments = nullptr) override;
 
     std::shared_ptr<ConfigOption> newOption(const pugi::xml_node& optValue);
 };
