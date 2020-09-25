@@ -116,14 +116,12 @@ std::unique_ptr<IOHandler> ServeRequestHandler::open(const char* filename,
     if (mode != UPNP_READ)
         throw_std_runtime_error("UPNP_WRITE unsupported");
 
-    size_t len = (std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_SERVE_HANDLER).length();
     std::string url_path, parameters;
     splitUrl(filename, URL_PARAM_SEPARATOR, url_path, parameters);
 
     log_debug("url_path: {}, parameters: {}", url_path.c_str(), parameters.c_str());
 
-    len = (std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_SERVE_HANDLER).length();
-
+    size_t len = (std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_SERVE_HANDLER).length();
     if (len > url_path.length()) {
         throw_std_runtime_error("There is something wrong with the link " + url_path);
     }

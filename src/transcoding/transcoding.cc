@@ -67,7 +67,6 @@ TranscodingProfile::TranscodingProfile(transcoding_type_t tr_type, std::string n
     buffer_size = 0;
     chunk_size = 0;
     initial_fill_size = 0;
-    tr_type = TR_None;
     fourcc_mode = FCC_None;
 }
 

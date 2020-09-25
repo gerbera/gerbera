@@ -481,24 +481,19 @@ std::vector<std::shared_ptr<CdsObject>> SQLStorage::browse(const std::unique_ptr
     std::shared_ptr<SQLResult> res;
     std::unique_ptr<SQLRow> row;
 
-    bool haveObjectType = false;
-
-    if (!haveObjectType) {
-        std::ostringstream qb;
-        qb << "SELECT " << TQ("object_type")
-           << " FROM " << TQ(CDS_OBJECT_TABLE)
-           << " WHERE " << TQ("id") << '=' << objectID;
-        res = select(qb);
-        if (res != nullptr && (row = res->nextRow()) != nullptr) {
-            objectType = std::stoi(row->col(0));
-            haveObjectType = true;
-        } else {
-            throw ObjectNotFoundException("Object not found: " + std::to_string(objectID));
-        }
-
-        row = nullptr;
-        res = nullptr;
+    std::ostringstream qb;
+    qb << "SELECT " << TQ("object_type")
+       << " FROM " << TQ(CDS_OBJECT_TABLE)
+       << " WHERE " << TQ("id") << '=' << objectID;
+    res = select(qb);
+    if (res != nullptr && (row = res->nextRow()) != nullptr) {
+        objectType = std::stoi(row->col(0));
+    } else {
+        throw ObjectNotFoundException("Object not found: " + std::to_string(objectID));
     }
+
+    row = nullptr;
+    res = nullptr;
 
     bool hideFsRoot = param->getFlag(BROWSE_HIDE_FS_ROOT);
 
@@ -517,7 +512,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLStorage::browse(const std::unique_ptr
         return qb.str();
     };
 
-    std::ostringstream qb;
+    qb = {};
     qb << SQL_QUERY << " WHERE ";
 
     if (param->getFlag(BROWSE_DIRECT_CHILDREN) && IS_CDS_CONTAINER(objectType)) {
