@@ -192,16 +192,17 @@ void Clients::getInfo(const struct sockaddr_storage* addr, const std::string& us
     }
 
     if (info) {
-        auto it = std::find_if(cache->begin(), cache->end(), [=](auto& entry) { return sockAddrCmpAddr(reinterpret_cast<struct sockaddr*>(&entry.addr), (struct sockaddr*)addr) == 0 && entry.userAgent == userAgent; });
+        auto it = std::find_if(cache->begin(), cache->end(), [=](const auto& entry) //
+            { return sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&entry.addr), reinterpret_cast<const struct sockaddr*>(addr)) == 0 && entry.userAgent == userAgent; });
 
         if (it != cache->end()) {
             it->last = std::chrono::steady_clock::now();
             it->userAgent = userAgent;
-            it->hostName = getHostName((struct sockaddr*)addr);
+            it->hostName = getHostName(reinterpret_cast<const struct sockaddr*>(addr));
         } else {
             auto add = ClientCacheEntry();
             add.addr = *addr;
-            add.hostName = getHostName((struct sockaddr*)addr);
+            add.hostName = getHostName(reinterpret_cast<const struct sockaddr*>(addr));
             add.last = std::chrono::steady_clock::now();
             add.age = std::chrono::steady_clock::now();
             add.userAgent = userAgent;
@@ -211,7 +212,7 @@ void Clients::getInfo(const struct sockaddr_storage* addr, const std::string& us
     }
 
     *ppInfo = info;
-    log_debug("client info: {} '{}' -> '{}' as {}", sockAddrGetNameInfo((struct sockaddr*)addr), userAgent, (*ppInfo)->name, ClientConfig::mapClientType((*ppInfo)->type));
+    log_debug("client info: {} '{}' -> '{}' as {}", sockAddrGetNameInfo(reinterpret_cast<const struct sockaddr*>(addr)), userAgent, (*ppInfo)->name, ClientConfig::mapClientType((*ppInfo)->type));
 }
 
 bool Clients::getInfoByAddr(const struct sockaddr_storage* addr, const ClientInfo** ppInfo)
@@ -224,7 +225,7 @@ bool Clients::getInfoByAddr(const struct sockaddr_storage* addr, const ClientInf
             struct sockaddr_in clientAddr;
             clientAddr.sin_family = AF_INET;
             clientAddr.sin_addr.s_addr = inet_addr(it->match.c_str());
-            if (sockAddrCmpAddr(reinterpret_cast<struct sockaddr*>(&clientAddr), (struct sockaddr*)addr) == 0) {
+            if (sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&clientAddr), reinterpret_cast<const struct sockaddr*>(addr)) == 0) {
                 *ppInfo = &(*it);
                 return true;
             }
@@ -232,7 +233,7 @@ bool Clients::getInfoByAddr(const struct sockaddr_storage* addr, const ClientInf
             struct sockaddr_in6 clientAddr;
             clientAddr.sin6_family = AF_INET6;
             if (inet_pton(AF_INET6, it->match.c_str(), &clientAddr.sin6_addr) == 1) {
-                if (sockAddrCmpAddr(reinterpret_cast<struct sockaddr*>(&clientAddr), (struct sockaddr*)addr) == 0) {
+                if (sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&clientAddr), reinterpret_cast<const struct sockaddr*>(addr)) == 0) {
                     *ppInfo = &(*it);
                     return true;
                 }
