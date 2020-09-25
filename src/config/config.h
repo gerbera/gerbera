@@ -174,6 +174,8 @@ typedef enum {
 
 class Config {
 public:
+    virtual ~Config() = default;
+
     /// \brief Returns the name of the config file that was used to launch the server.
     virtual fs::path getConfigFilename() const = 0;
 
