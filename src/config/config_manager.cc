@@ -289,8 +289,6 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
         temp = getOption("/server/storage/sqlite3/synchronous",
             DEFAULT_SQLITE_SYNC);
 
-        temp_int = 0;
-
         if (temp == "off")
             temp_int = MT_SQLITE_SYNC_OFF;
         else if (temp == "normal")
@@ -1693,8 +1691,6 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
             throw std::runtime_error("error in configuration: you specified a mimetype to transcoding profile mapping, "
                                      "but no match for profile \""
                 + prof->getName() + "\" exists");
-
-        set = false;
     }
 
     return list;
