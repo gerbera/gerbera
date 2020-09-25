@@ -37,7 +37,7 @@
     "eslint-plugin-standard": "^4.0.1",
     "express": "^4.17.1",
     "jasmine-core": "^3.5.0",
-    "jimp": "^0.9.8",
+    "jimp": "^0.16.1",
     "jquery": "^3.5.0",
     "jquery-ui": "^1.12.1",
     "js-cookie": "^2.2.1",
