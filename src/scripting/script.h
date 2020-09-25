@@ -73,7 +73,7 @@ public:
     void setIntProperty(const std::string& name, int value);
 
     void defineFunction(const std::string& name, duk_c_function function, uint32_t numParams);
-    void defineFunctions(duk_function_list_entry* functions);
+    void defineFunctions(const duk_function_list_entry* functions);
     void load(const std::string& scriptPath);
     void load(std::string scriptText, std::string scriptPath);
 

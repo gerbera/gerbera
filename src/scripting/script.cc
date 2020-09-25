@@ -50,7 +50,7 @@
 #include "onlineservice/atrailers_content_handler.h"
 #endif
 
-static std::array<duk_function_list_entry, 8> js_global_functions = { {
+static constexpr std::array<duk_function_list_entry, 8> js_global_functions = { {
     { "print", js_print, DUK_VARARGS },
     { "addCdsObject", js_addCdsObject, 3 },
     { "copyObject", js_copyObject, 1 },
@@ -197,14 +197,14 @@ Script::Script(const std::shared_ptr<Config>& config,
     duk_put_global_string(ctx, "ONLINE_SERVICE_SOPCAST");
 #endif //ONLINE_SERVICES
 
-    for (int i = 0; i < M_MAX; i++) {
-        duk_push_string(ctx, MT_KEYS[i].upnp);
-        duk_put_global_string(ctx, MT_KEYS[i].sym);
+    for (const auto& key : MT_KEYS) {
+        duk_push_string(ctx, key.upnp);
+        duk_put_global_string(ctx, key.sym);
     }
 
-    for (int i = 0; i < R_MAX; i++) {
-        duk_push_string(ctx, RES_KEYS[i].upnp);
-        duk_put_global_string(ctx, RES_KEYS[i].sym);
+    for (const auto& key : RES_KEYS) {
+        duk_push_string(ctx, key.upnp);
+        duk_put_global_string(ctx, key.sym);
     }
 
     duk_push_string(ctx, UPNP_DEFAULT_CLASS_MUSIC_ALBUM);
@@ -273,7 +273,7 @@ void Script::defineFunction(const std::string& name, duk_c_function function, ui
     duk_put_global_string(ctx, name.c_str());
 }
 
-void Script::defineFunctions(duk_function_list_entry* functions)
+void Script::defineFunctions(const duk_function_list_entry* functions)
 {
     duk_push_global_object(ctx);
     duk_put_function_list(ctx, -1, functions);
@@ -391,19 +391,19 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
     if (duk_is_object(ctx, -1)) {
         duk_to_object(ctx, -1);
         /// \todo: only metadata enumerated in MT_KEYS is taken
-        for (int i = 0; i < M_MAX; i++) {
-            val = getProperty(MT_KEYS[i].upnp);
+        for (const auto& key : MT_KEYS) {
+            val = getProperty(key.upnp);
             if (!val.empty()) {
-                if (i == M_TRACKNUMBER) {
+                if (std::strcmp(key.sym, "M_TRACKNUMBER") == 0) {
                     int j = stoi_string(val, 0);
                     if (j > 0) {
-                        obj->setMetadata(MT_KEYS[i].upnp, val);
+                        obj->setMetadata(key.upnp, val);
                         std::static_pointer_cast<CdsItem>(obj)->setTrackNumber(j);
                     } else
                         std::static_pointer_cast<CdsItem>(obj)->setTrackNumber(0);
                 } else {
                     val = sc->convert(val);
-                    obj->setMetadata(MT_KEYS[i].upnp, val);
+                    obj->setMetadata(key.upnp, val);
                 }
             }
         }

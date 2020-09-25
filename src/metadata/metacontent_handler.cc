@@ -86,7 +86,7 @@ std::string MetacontentHandler::expandName(const std::string& name, const std::s
     std::string copy(name);
 
     for (const auto& tag : metaTags)
-        replace_string(copy, tag.first, item->getMetadata(MT_KEYS[tag.second].upnp));
+        replace_string(copy, tag.first, item->getMetadata(MT_KEYS.at(tag.second).upnp));
 
     fs::path location = item->getLocation();
     replace_string(copy, "%filename%", location.stem());

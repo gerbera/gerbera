@@ -169,7 +169,7 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
     value = trim_string(value);
 
     if (!value.empty()) {
-        item->setMetadata(MT_KEYS[field].upnp, sc->convert(value));
+        item->setMetadata(MT_KEYS.at(field).upnp, sc->convert(value));
         //        log_debug("Setting metadata on item: {}, {}", field, sc->convert(value).c_str());
     }
 }
@@ -181,8 +181,8 @@ void TagLibHandler::populateGenericTags(const std::shared_ptr<CdsItem>& item, co
 
     const TagLib::Tag* tag = file.tag();
 
-    for (int i = 0; i < M_MAX; i++)
-        addField(static_cast<metadata_fields_t>(i), file, tag, item);
+    for (size_t i = 0; i < MT_KEYS.size(); i++)
+        addField(metadata_fields_t(i), file, tag, item);
 
     int temp;
 
