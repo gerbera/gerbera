@@ -852,7 +852,7 @@ void ContentManager::updateObject(int objectID, const std::map<std::string, std:
     std::string protocol = getValueOrDefault(parameters, "protocol");
 
     auto obj = storage->loadObject(objectID);
-    int objectType = obj->getObjectType();
+    unsigned int objectType = obj->getObjectType();
 
     /// \todo if we have an active item, does it mean we first go through IS_ITEM and then thorugh IS_ACTIVE item? ask Gena
     if (IS_CDS_ITEM(objectType)) {
@@ -876,7 +876,7 @@ void ContentManager::updateObject(int objectID, const std::map<std::string, std:
         } else if (mimetype.empty() && !protocol.empty()) {
             auto resource = cloned_item->getResource(0);
             resource->addAttribute("protocolInfo", renderProtocolInfo(cloned_item->getMimeType(), protocol));
-        } else {
+        } else if (!mimetype.empty()) {
             cloned_item->setMimeType(mimetype);
             auto resource = cloned_item->getResource(0);
             std::vector<std::string> parts = split_string(resource->getAttribute("protocolInfo"), ':');
