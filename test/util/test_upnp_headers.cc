@@ -10,12 +10,20 @@ public:
     HeadersHelperTest()
     {
         subject = new Headers();
+#if defined(USING_NPUPNP)
+        info = new UpnpFileInfo;
+#else
         info = UpnpFileInfo_new();
+#endif
     };
     virtual ~HeadersHelperTest() override
     {
+#if defined(USING_NPUPNP)
+        delete info;
+#else
         UpnpFileInfo_delete(info);
 
+#endif
         delete subject;
     };
 
@@ -23,6 +31,7 @@ public:
     Headers* subject;
 };
 
+#if !defined(USING_NPUPNP)
 TEST_F(HeadersHelperTest, TerminatesTheHeaderWithCarriageNewLine)
 {
     // arrange
@@ -261,3 +270,4 @@ TEST_F(HeadersHelperTest, HandlesExtraContentTwo)
     auto actual = Headers::readHeaders(info);
     EXPECT_EQ(*actual, expected);
 }
+#endif
