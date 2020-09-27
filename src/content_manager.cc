@@ -716,7 +716,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
                 if (last_modified_current_max < statbuf.st_mtime) {
                     // readd object - we have to do this in order to trigger
                     // layout
-                    removeObject(objectID, false);
+                    removeObject(objectID, false, false);
                     addFileInternal(newPath, rootpath, false, false, adir->getHidden(), false);
                     // update time variable
                     if (last_modified_new_max < statbuf.st_mtime)
