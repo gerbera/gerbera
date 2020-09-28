@@ -253,6 +253,8 @@ static std::vector<std::shared_ptr<ConfigSetup>> complexOptions = {
 #endif
     std::make_shared<ConfigAutoscanSetup>(CFG_IMPORT_AUTOSCAN_TIMED_LIST, "/import/autoscan", ScanMode::Timed),
 
+    std::make_shared<ConfigBoolSetup>(CFG_TRANSCODING_MIMETYPE_PROF_MAP_ALLOW_UNUSED, "/transcoding/mimetype-profile-mappings/attribute::allow-unused", NO),
+    std::make_shared<ConfigBoolSetup>(CFG_TRANSCODING_PROFILES_PROFILE_ALLOW_UNUSED, "/transcoding/profiles/attribute::allow-unused", NO),
     std::make_shared<ConfigEnumSetup<transcoding_type_t>>(ATTR_TRANSCODING_PROFILES_PROFLE_TYPE, "type",
         std::map<std::string, transcoding_type_t>({ { "external", TR_External }, /* for the future...{"remote", TR_Remote}*/ })),
     std::make_shared<ConfigEnumSetup<avi_fourcc_listmode_t>>(ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE, "mode",
@@ -667,6 +669,8 @@ void ConfigManager::load(const fs::path& userHome)
     args.clear();
 
     auto tr_en = setOption(root, CFG_TRANSCODING_TRANSCODING_ENABLED)->getBoolOption();
+    setOption(root, CFG_TRANSCODING_MIMETYPE_PROF_MAP_ALLOW_UNUSED);
+    setOption(root, CFG_TRANSCODING_PROFILES_PROFILE_ALLOW_UNUSED);
     args["isEnabled"] = tr_en ? "true" : "false";
     setOption(root, CFG_TRANSCODING_PROFILE_LIST, &args);
     args.clear();

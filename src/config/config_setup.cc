@@ -764,16 +764,23 @@ bool ConfigTranscodingSetup::createTranscodingProfileListFromNode(const pugi::xm
         return true;
 
     std::map<std::string, std::string> mt_mappings;
-
     {
         auto cs = findConfigSetup<ConfigDictionarySetup>(ATTR_TRANSCODING_MIMETYPE_PROF_MAP);
         if (cs->hasXmlElement(element)) {
             mt_mappings = cs->getXmlContent(cs->getXmlElement(element));
         }
     }
+
     auto profiles = element.child(ConfigManager::mapConfigOption(ATTR_TRANSCODING_PROFILES));
     if (profiles == nullptr)
         return true;
+
+    bool allow_unused_profiles = !findConfigSetup<ConfigBoolSetup>(CFG_TRANSCODING_PROFILES_PROFILE_ALLOW_UNUSED)->getXmlContent(element.root());
+    if (!allow_unused_profiles && mt_mappings.empty() && !profiles.empty()) {
+        log_error("error in configuration: transcoding "
+                  "profiles exist, but no mimetype to profile mappings specified");
+        return false;
+    }
 
     for (const pugi::xml_node& child : profiles.children()) {
         if (std::string(child.name()) != ConfigManager::mapConfigOption(ATTR_TRANSCODING_PROFILES_PROFLE))
@@ -854,21 +861,27 @@ bool ConfigTranscodingSetup::createTranscodingProfileListFromNode(const pugi::xm
 
         std::string tmp_path;
         if (fs::path(command).is_absolute()) {
-            if (!isRegularFile(command) && !fs::is_symlink(command))
-                throw std::runtime_error("error in configuration, transcoding profile \""
+            if (!isRegularFile(command) && !fs::is_symlink(command)) {
+                log_error("error in configuration, transcoding profile \""
                     + prof->getName() + "\" could not find transcoding command " + command);
+                return false;
+            }
             tmp_path = command;
         } else {
             tmp_path = find_in_path(command);
-            if (tmp_path.empty())
-                throw std::runtime_error("error in configuration, transcoding profile \""
+            if (tmp_path.empty()) {
+                log_error("error in configuration, transcoding profile \""
                     + prof->getName() + "\" could not find transcoding command " + command + " in $PATH");
+                return false;
+            }
         }
 
         int err = 0;
-        if (!is_executable(tmp_path, &err))
-            throw std::runtime_error("error in configuration, transcoding profile "
+        if (!is_executable(tmp_path, &err)) {
+            log_error("error in configuration, transcoding profile "
                 + prof->getName() + ": transcoder " + command + "is not executable - " + strerror(err));
+            return false;
+        }
 
         prof->setArguments(findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS)->getXmlContent(sub));
 
@@ -877,19 +890,18 @@ bool ConfigTranscodingSetup::createTranscodingProfileListFromNode(const pugi::xm
         size_t chunk = findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK)->getXmlContent(sub);
         size_t fill = findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL)->getXmlContent(sub);
 
-        if (chunk > buffer)
-            throw std::runtime_error("error in configuration: transcoding profile \""
+        if (chunk > buffer) {
+            log_error("error in configuration: transcoding profile \""
                 + prof->getName() + "\" chunk size can not be greater than buffer size");
-        if (fill > buffer)
-            throw std::runtime_error("error in configuration: transcoding profile \""
+            return false;
+        }
+        if (fill > buffer) {
+            log_error("error in configuration: transcoding profile \""
                 + prof->getName() + "\" fill size can not be greater than buffer size");
+            return false;
+        }
 
         prof->setBufferOptions(buffer, chunk, fill);
-
-        if (mt_mappings.empty()) {
-            throw std::runtime_error("error in configuration: transcoding "
-                                     "profiles exist, but no mimetype to profile mappings specified");
-        }
 
         bool set = false;
         for (const auto& mt_mapping : mt_mappings) {
@@ -899,12 +911,27 @@ bool ConfigTranscodingSetup::createTranscodingProfileListFromNode(const pugi::xm
             }
         }
 
-        if (!set)
-            throw std::runtime_error("error in configuration: you specified a mimetype to transcoding profile mapping, "
-                                     "but no match for profile \""
+        if (!set) {
+            log_error("error in configuration: you specified a mimetype to transcoding profile mapping, "
+                      "but no match for profile \""
                 + prof->getName() + "\" exists");
+            if (!allow_unused_profiles) {
+                return false;
+            }
+        }
     }
 
+    auto tpl = result->getList();
+    for (const auto& mt_mapping : mt_mappings) {
+        if (tpl.find(mt_mapping.first) == tpl.end()) {
+            log_error("error in configuration: you specified a mimetype to transcoding profile mapping, "
+                      "but the profile \""
+                + mt_mapping.second + "\" for mimetype \"" + mt_mapping.first + "\" does not exists");
+            if (!findConfigSetup<ConfigBoolSetup>(CFG_TRANSCODING_MIMETYPE_PROF_MAP_ALLOW_UNUSED)->getXmlContent(element.root())) {
+                return false;
+            }
+        }
+    }
     return true;
 }
 

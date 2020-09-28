@@ -656,6 +656,7 @@
             <xs:sequence>
                 <xs:element ref="transcode" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
+            <xs:attribute name="allow-unused" type="boolean" default="no"/>
         </xs:complexType>
     </xs:element>
 
@@ -671,6 +672,7 @@
             <xs:sequence>
                 <xs:element ref="profile" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
+            <xs:attribute name="allow-unused" type="boolean" default="no"/>
         </xs:complexType>
     </xs:element>
 

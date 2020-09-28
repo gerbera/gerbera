@@ -651,6 +651,20 @@
 					"editable": true
 				},
 				{
+					"item": "/transcoding/mimetype-profile-mappings/attribute::allow-unused",
+					"caption": "Allow unused mimetypes",
+					"type": "Boolean",
+					"value": "false",
+					"editable": true
+				},
+				{
+					"item": "/transcoding/profiles/attribute::allow-unused",
+					"caption": "Allow unused profiles",
+					"type": "Boolean",
+					"value": "false",
+					"editable": true
+				},
+				{
 					"item": "/transcoding/attribute::fetch-buffer-size",
 					"caption": "Fetch Buffer Size",
 					"type": "Number",
