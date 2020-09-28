@@ -319,38 +319,71 @@
 					"editable": true
 				},
 				{
-					"item": "/import/autoscan/directory",
-					"caption": "Autoscan Directories",
+					"item": "/import/autoscan/timed/directory",
+					"caption": "Timed Autoscan Directories",
 					"type": "List",
 					"children": [
 						{
-							"item": "/import/autoscan/directory/attribute::location",
+							"item": "/import/autoscan/timed/directory/attribute::location",
 							"caption": "Location",
 							"type": "String",
 							"editable": true
 						},
 						{
-							"item": "/import/autoscan/directory/attribute::mode",
+							"item": "/import/autoscan/timed/directory/attribute::mode",
 							"caption": "Mode",
 							"type": "String",
-							"editable": true
+							"editable": false
 						},
 						{
-							"item": "/import/autoscan/directory/attribute::interval",
+							"item": "/import/autoscan/timed/directory/attribute::interval",
 							"caption": "Scan Interval",
 							"type": "Number",
 							"value": "0",
 							"editable": true
 						},
 						{
-							"item": "/import/autoscan/directory/attribute::recursive",
+							"item": "/import/autoscan/timed/directory/attribute::recursive",
 							"caption": "Recursive",
 							"type": "Boolean",
 							"value": "false",
 							"editable": true
 						},
 						{
-							"item": "/import/autoscan/directory/attribute::hidden",
+							"item": "/import/autoscan/timed/directory/attribute::hidden-files",
+							"caption": "Import Hidden Files",
+							"type": "Boolean",
+							"value": "false",
+							"editable": true
+						}
+					]
+				},
+				{
+					"item": "/import/autoscan/inotify/directory",
+					"caption": "INotify Autoscan Directories",
+					"type": "List",
+					"children": [
+						{
+							"item": "/import/autoscan/inotify/directory/attribute::location",
+							"caption": "Location",
+							"type": "String",
+							"editable": true
+						},
+						{
+							"item": "/import/autoscan/inotify/directory/attribute::mode",
+							"caption": "Mode",
+							"type": "String",
+							"editable": false
+						},
+						{
+							"item": "/import/autoscan/inotify/directory/attribute::recursive",
+							"caption": "Recursive",
+							"type": "Boolean",
+							"value": "false",
+							"editable": true
+						},
+						{
+							"item": "/import/autoscan/inotify/directory/attribute::hidden-files",
 							"caption": "Import Hidden Files",
 							"type": "Boolean",
 							"value": "false",

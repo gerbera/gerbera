@@ -38,10 +38,11 @@
 #include <utility>
 #include <vector>
 
+#include "transcoding/transcoding.h"
+
 // forward declaration
 class AutoscanList;
 class ClientConfigList;
-class TranscodingProfileList;
 
 class ConfigOption {
 public:
@@ -198,6 +199,11 @@ public:
     std::shared_ptr<TranscodingProfileList> getTranscodingProfileListOption() const override
     {
         return option;
+    }
+
+    void setKey(const std::string& oldKey, const std::string& newKey)
+    {
+        option->setKey(oldKey, newKey);
     }
 
 protected:

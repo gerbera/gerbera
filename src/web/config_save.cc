@@ -54,43 +54,48 @@ void web::configSave::process()
     int count = std::stoi(param("changedCount"));
 
     for (int i = 0; i < count; i++) {
-        auto key = fmt::format("data[{}][{}]", i, "id");
-        log_info("{} = {}", key, std::stoi(param(key)));
-        config_option_t option = static_cast<config_option_t>(std::stoi(param(key)));
-        auto cs = ConfigManager::findConfigSetup(option, true);
+        try {
+            auto key = fmt::format("data[{}][{}]", i, "id");
+            log_info("{} = {}", key, std::stoi(param(key)));
+            config_option_t option = static_cast<config_option_t>(std::stoi(param(key)));
+            auto cs = ConfigManager::findConfigSetup(option, true);
 
-        if (cs != nullptr) {
-            auto value = fmt::format("data[{}][{}]", i, "value");
-            auto item = fmt::format("data[{}][{}]", i, "item");
-            log_info("found option {}", cs->xpath);
+            if (cs != nullptr) {
+                auto value = fmt::format("data[{}][{}]", i, "value");
+                auto item = fmt::format("data[{}][{}]", i, "item");
+                log_info("found option {}", cs->xpath);
 
-            //try {
-            //    log_info("old string option {}", config->getOption(option));
-            //} catch (const std::runtime_error& e) { }
-            //try {
-            //    log_info("old int option {}", config->getIntOption(option));
-            //} catch (const std::runtime_error& e) { }
-            //try {
-            //    log_info("old bool option {}", config->getBoolOption(option));
-            //} catch (const std::runtime_error& e) { }
+                //try {
+                //    log_info("old string option {}", config->getOption(option));
+                //} catch (const std::runtime_error& e) { }
+                //try {
+                //    log_info("old int option {}", config->getIntOption(option));
+                //} catch (const std::runtime_error& e) { }
+                //try {
+                //    log_info("old bool option {}", config->getBoolOption(option));
+                //} catch (const std::runtime_error& e) { }
 
-            if (param(item) == cs->xpath) {
-                cs->makeOption(param(value), config);
-            } else {
-                if (!cs->updateDetail(param(item), param(value), config)) {
-                    log_info("wrong option id {} != {}", param(item), cs->xpath);
+                if (param(item) == cs->xpath) {
+                    cs->makeOption(param(value), config);
+                } else {
+                    std::string parValue = param(value);
+                    if (!cs->updateDetail(param(item), parValue, config)) {
+                        log_info("unhandled option {} != {}", param(item), cs->xpath);
+                    }
                 }
-            }
 
-            //try {
-            //    log_info("found string option {}", config->getOption(option));
-            //} catch (const std::runtime_error& e) { }
-            //try {
-            //    log_info("found int option {}", config->getIntOption(option));
-            //} catch (const std::runtime_error& e) { }
-            //try {
-            //    log_info("found bool option {}", config->getBoolOption(option));
-            //} catch (const std::runtime_error& e) { }
+                //try {
+                //    log_info("found string option {}", config->getOption(option));
+                //} catch (const std::runtime_error& e) { }
+                //try {
+                //    log_info("found int option {}", config->getIntOption(option));
+                //} catch (const std::runtime_error& e) { }
+                //try {
+                //    log_info("found bool option {}", config->getBoolOption(option));
+                //} catch (const std::runtime_error& e) { }
+            }
+        } catch (const std::runtime_error& e) {
+            log_error("error setting option {}. Exception {}", i, e.what());
         }
     }
 }

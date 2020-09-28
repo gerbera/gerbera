@@ -64,6 +64,9 @@ public:
     /// \brief returns the transcoding type.
     transcoding_type_t getType() const { return tr_type; }
 
+    /// \brief set type of the transcoding profile
+    void setType(transcoding_type_t type) { this->tr_type = type; }
+
     /// \brief set name of the transcoding profile
     void setName(const std::string& name) { this->name = name; }
 
@@ -167,6 +170,10 @@ public:
     avi_fourcc_listmode_t getAVIFourCCListMode() const { return fourcc_mode; }
 
     /// \brief Send out the data in chunked encoding
+    void setEnabled(bool new_enabled) { enabled = new_enabled; }
+    bool getEnabled() const { return enabled; }
+
+    /// \brief Send out the data in chunked encoding
     void setChunked(bool chunked) { force_chunked = chunked; }
     bool getChunked() const { return force_chunked; }
 
@@ -183,6 +190,7 @@ protected:
     std::string tm;
     fs::path command;
     std::string args;
+    bool enabled;
     bool first_resource;
     bool theora;
     bool accept_url;
@@ -210,8 +218,14 @@ public:
 
     std::shared_ptr<TranscodingProfileMap> get(const std::string& sourceMimeType);
     const std::map<std::string, std::shared_ptr<TranscodingProfileMap>>& getList() { return list; }
-    std::shared_ptr<TranscodingProfile> getByName(const std::string& name);
+    std::shared_ptr<TranscodingProfile> getByName(const std::string& name, bool getAll = false);
     int size() const { return list.size(); }
+    void setKey(const std::string& oldKey, const std::string& newKey)
+    {
+        auto oldValue = list[oldKey];
+        list.erase(oldKey);
+        list[newKey] = oldValue;
+    }
 
 protected:
     // outer dictionary is keyed by the source mimetype, inner dictionary by

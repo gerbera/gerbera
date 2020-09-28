@@ -73,7 +73,7 @@ std::string ConfigSetup::getXmlContent(const pugi::xml_node& root, bool trim) co
 
     if (xpathNode.node() != nullptr) {
         std::string optValue = trim ? trim_string(xpathNode.node().text().as_string()) : xpathNode.node().text().as_string();
-        if (rawCheck != nullptr && !rawCheck(optValue)) {
+        if (!checkValue(optValue)) {
             throw std::runtime_error(fmt::format("Invalid {}{} value '{}'", root.path(), xpath, optValue));
         }
         return optValue;
@@ -81,7 +81,7 @@ std::string ConfigSetup::getXmlContent(const pugi::xml_node& root, bool trim) co
 
     if (xpathNode.attribute() != nullptr) {
         std::string optValue = trim ? trim_string(xpathNode.attribute().value()) : xpathNode.attribute().value();
-        if (rawCheck != nullptr && !rawCheck(optValue)) {
+        if (!checkValue(optValue)) {
             throw std::runtime_error(fmt::format("Invalid {}/attribute::{} value '{}'", root.path(), xpath, optValue));
         }
         return optValue;
@@ -89,7 +89,7 @@ std::string ConfigSetup::getXmlContent(const pugi::xml_node& root, bool trim) co
 
     if (root.attribute(xpath) != nullptr) {
         std::string optValue = trim ? trim_string(root.attribute(xpath).as_string()) : root.attribute(xpath).as_string();
-        if (rawCheck != nullptr && !rawCheck(optValue)) {
+        if (!checkValue(optValue)) {
             throw std::runtime_error(fmt::format("Invalid {}/attribute::{} value '{}'", root.path(), xpath, optValue));
         }
         return optValue;
@@ -97,7 +97,7 @@ std::string ConfigSetup::getXmlContent(const pugi::xml_node& root, bool trim) co
 
     if (root.child(xpath) != nullptr) {
         std::string optValue = trim ? trim_string(root.child(xpath).text().as_string()) : root.child(xpath).text().as_string();
-        if (rawCheck != nullptr && !rawCheck(optValue)) {
+        if (!checkValue(optValue)) {
             throw std::runtime_error(fmt::format("Invalid {}/{} value '{}'", root.path(), xpath, optValue));
         }
         return optValue;
@@ -145,11 +145,48 @@ std::shared_ptr<ConfigOption> ConfigStringSetup::newOption(const std::string& op
     return optionValue;
 }
 
+bool ConfigPathSetup::checkPathValue(std::string& optValue, std::string& pathValue) const
+{
+    if (rawCheck != nullptr && !rawCheck(optValue)) {
+        return false;
+    }
+    pathValue.assign(resolvePath(optValue));
+    if (notEmpty && pathValue.empty()) {
+        return false;
+    }
+    return true;
+}
+
+bool ConfigPathSetup::checkAgentPath(std::string& optValue)
+{
+    std::string tmp_path;
+    if (fs::path(optValue).is_absolute()) {
+        if (!isRegularFile(optValue) && !fs::is_symlink(optValue)) {
+            log_error("error in configuration, transcoding profile: could not find transcoding command \"" + optValue + "\"");
+            return false;
+        }
+        tmp_path = optValue;
+    } else {
+        tmp_path = find_in_path(optValue);
+        if (tmp_path.empty()) {
+            log_error("error in configuration, transcoding profile: could not find transcoding command \"" + optValue + "\" in $PATH");
+            return false;
+        }
+    }
+
+    int err = 0;
+    if (!is_executable(tmp_path, &err)) {
+        log_error("error in configuration, transcoding profile: transcoder " + optValue + "is not executable - " + strerror(err));
+        return false;
+    }
+    return true;
+}
+
 /// \brief resolve path against home, an exception is raised if path does not exist on filesystem.
 /// \param path path to be resolved
 /// \param isFile file or directory
 /// \param mustExist file/directory must exist
-fs::path ConfigPathSetup::resolvePath(fs::path path)
+fs::path ConfigPathSetup::resolvePath(fs::path path) const
 {
     if (!resolveEmpty && path.string().empty()) {
         return path;
@@ -202,7 +239,8 @@ void ConfigPathSetup::loadArguments(const std::map<std::string, std::string>* ar
 void ConfigPathSetup::makeOption(const pugi::xml_node& root, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments)
 {
     loadArguments(arguments);
-    newOption(getXmlContent(root, true));
+    auto optValue = getXmlContent(root, true);
+    newOption(optValue);
     setOption(config);
 }
 
@@ -213,11 +251,10 @@ void ConfigPathSetup::makeOption(std::string optValue, std::shared_ptr<Config> c
     setOption(config);
 }
 
-std::shared_ptr<ConfigOption> ConfigPathSetup::newOption(const std::string& optValue)
+std::shared_ptr<ConfigOption> ConfigPathSetup::newOption(std::string& optValue)
 {
-    std::string pathValue = resolvePath(optValue);
-
-    if (notEmpty && pathValue.empty()) {
+    auto pathValue = optValue;
+    if (!checkPathValue(optValue, pathValue)) {
         throw std::runtime_error(fmt::format("Invalid {} resolves to empty value '{}'", xpath, optValue));
     }
     optionValue = std::make_shared<Option>(pathValue);
@@ -255,29 +292,34 @@ void ConfigIntSetup::makeOption(std::string optValue, std::shared_ptr<Config> co
     }
 }
 
-int ConfigIntSetup::getXmlContent(const pugi::xml_node& root) const
+int ConfigIntSetup::checkIntValue(std::string& sVal, const std::string& pathName) const
 {
-    std::string sVal = ConfigSetup::getXmlContent(root, true);
-    log_debug("Config: option: '{}/{}' value: '{}'", root.path(), xpath, sVal.c_str());
     if (rawCheck != nullptr) {
         if (!rawCheck(sVal)) {
-            throw std::runtime_error(fmt::format("Invalid {}/{} value '{}'", root.path(), xpath, sVal));
+            throw std::runtime_error(fmt::format("Invalid {}/{} value '{}'", pathName, xpath, sVal));
         }
     } else if (valueCheck != nullptr) {
         if (!valueCheck(std::stoi(sVal))) {
-            throw std::runtime_error(fmt::format("Invalid {}/{} value {}", root.path(), xpath, sVal));
+            throw std::runtime_error(fmt::format("Invalid {}/{} value {}", pathName, xpath, sVal));
         }
     } else if (minCheck != nullptr) {
         if (!minCheck(std::stoi(sVal), minValue)) {
-            throw std::runtime_error(fmt::format("Invalid {}/{} value '{}', must be at least {}", root.path(), xpath, sVal, minValue));
+            throw std::runtime_error(fmt::format("Invalid {}/{} value '{}', must be at least {}", pathName, xpath, sVal, minValue));
         }
     }
 
     try {
         return std::stoi(sVal);
     } catch (const std::runtime_error& e) {
-        throw std::runtime_error(fmt::format("Error in config file: {}/{} unsupported int value '{}'", root.path(), xpath, sVal).c_str());
+        throw std::runtime_error(fmt::format("Error in config file: {}/{} unsupported int value '{}'", pathName, xpath, sVal).c_str());
     }
+}
+
+int ConfigIntSetup::getXmlContent(const pugi::xml_node& root) const
+{
+    std::string sVal = ConfigSetup::getXmlContent(root, true);
+    log_debug("Config: option: '{}/{}' value: '{}'", root.path(), xpath, sVal.c_str());
+    return checkIntValue(sVal, root.path());
 }
 
 std::shared_ptr<ConfigOption> ConfigIntSetup::newOption(int optValue)
@@ -360,14 +402,19 @@ void ConfigBoolSetup::makeOption(std::string optValue, std::shared_ptr<Config> c
 bool ConfigBoolSetup::getXmlContent(const pugi::xml_node& root) const
 {
     std::string optValue = ConfigSetup::getXmlContent(root, true);
+    return checkValue(optValue, root.path());
+}
+
+bool ConfigBoolSetup::checkValue(std::string& optValue, const std::string& pathName) const
+{
     if (rawCheck != nullptr) {
         if (!rawCheck(optValue)) {
-            throw std::runtime_error(fmt::format("Invalid {}/{} value '{}'", root.path(), xpath, optValue));
+            throw std::runtime_error(fmt::format("Invalid {}/{} value '{}'", pathName, xpath, optValue));
         }
     }
 
     if (!validateTrueFalse(optValue) && !validateYesNo(optValue))
-        throw std::runtime_error(fmt::format("Invalid {}/{} value {}", root.path(), xpath, optValue));
+        throw std::runtime_error(fmt::format("Invalid {}/{} value {}", pathName, xpath, optValue));
     return optValue == YES || optValue == "true";
 }
 
@@ -473,7 +520,7 @@ void ConfigArraySetup::makeOption(const pugi::xml_node& root, std::shared_ptr<Co
     setOption(config);
 }
 
-bool ConfigArraySetup::updateDetail(const std::string& optItem, const std::string& optValue, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments)
+bool ConfigArraySetup::updateDetail(const std::string& optItem, std::string& optValue, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments)
 {
     if (optItem.substr(0, strlen(xpath)) == xpath && optionValue != nullptr) {
         std::shared_ptr<ArrayOption> value = std::dynamic_pointer_cast<ArrayOption>(optionValue);
@@ -507,6 +554,19 @@ std::vector<std::string> ConfigArraySetup::getXmlContent(const pugi::xml_node& o
         throw std::runtime_error(fmt::format("Invalid array {} empty '{}'", xpath, optValue));
     }
     return result;
+}
+
+bool ConfigArraySetup::checkArrayValue(const std::string& value, std::vector<std::string>& result) const
+{
+    for (auto& attrValue : split_string(value, ',')) {
+        attrValue = trim_string(attrValue);
+        if (itemNotEmpty && attrValue.empty()) {
+            return false;
+        }
+        if (!attrValue.empty())
+            result.push_back(attrValue);
+    }
+    return true;
 }
 
 std::shared_ptr<ConfigOption> ConfigArraySetup::newOption(const std::vector<std::string>& optValue)
@@ -627,7 +687,7 @@ void ConfigDictionarySetup::makeOption(const pugi::xml_node& root, std::shared_p
     setOption(config);
 }
 
-bool ConfigDictionarySetup::updateDetail(const std::string& optItem, const std::string& optValue, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments)
+bool ConfigDictionarySetup::updateDetail(const std::string& optItem, std::string& optValue, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments)
 {
     if (optItem.substr(0, strlen(xpath)) == xpath && optionValue != nullptr) {
         std::shared_ptr<DictionaryOption> value = std::dynamic_pointer_cast<DictionaryOption>(optionValue);
@@ -702,7 +762,7 @@ bool ConfigAutoscanSetup::createAutoscanListFromNode(const pugi::xml_node& eleme
 
         ScanMode mode = findConfigSetup<ConfigEnumSetup<ScanMode>>(ATTR_AUTOSCAN_DIRECTORY_MODE)->getXmlContent(child);
 
-        if (mode != scanmode) {
+        if (mode != scanMode) {
             continue; // skip scan modes that we are not interested in (content manager needs one mode type per array)
         }
 
@@ -712,7 +772,7 @@ bool ConfigAutoscanSetup::createAutoscanListFromNode(const pugi::xml_node& eleme
         }
 
         bool recursive = findConfigSetup<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_RECURSIVE)->getXmlContent(child);
-        auto cs = findConfigSetup<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_RECURSIVE);
+        auto cs = findConfigSetup<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES);
         bool hidden = cs->hasXmlElement(child) ? cs->getXmlContent(child) : hiddenFiles;
 
         auto dir = std::make_shared<AutoscanDirectory>(location, mode, recursive, true, INVALID_SCAN_ID, interval, hidden);
@@ -727,10 +787,55 @@ bool ConfigAutoscanSetup::createAutoscanListFromNode(const pugi::xml_node& eleme
     return true;
 }
 
-bool ConfigAutoscanSetup::updateDetail(const std::string& optItem, const std::string& optValue, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments)
+bool ConfigAutoscanSetup::updateDetail(const std::string& optItem, std::string& optValue, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments)
 {
     if (optItem.substr(0, strlen(xpath)) == xpath) {
+        std::shared_ptr<AutoscanListOption> value = std::dynamic_pointer_cast<AutoscanListOption>(optionValue);
         log_info("Updating Autoscan Detail {} {} {}", xpath, optItem, optValue);
+        for (size_t i = 0; i < value->getAutoscanListOption()->size(); i++) {
+            const auto& entry = value->getAutoscanListOption()->get(i);
+
+            auto index = getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_LOCATION);
+            if (optItem == index) {
+                log_info("Old Autoscan location {} {}", index, entry->getLocation().string());
+                auto pathValue = optValue;
+                if (findConfigSetup<ConfigPathSetup>(ATTR_AUTOSCAN_DIRECTORY_LOCATION)->checkPathValue(optValue, optValue)) {
+                    entry->setLocation(pathValue);
+                }
+                log_info("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)->get(i)->getLocation().string());
+                return true;
+            }
+
+            index = getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_MODE);
+            if (optItem == index) {
+                log_error("Autoscan Mode cannot be changed {} {}", index, AutoscanDirectory::mapScanmode(entry->getScanMode()));
+                return false;
+            }
+
+            index = getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_INTERVAL);
+            if (optItem == index) {
+                log_info("Old Autoscan interval {} {}", index, entry->getInterval());
+                entry->setInterval(findConfigSetup<ConfigIntSetup>(ATTR_AUTOSCAN_DIRECTORY_INTERVAL)->checkIntValue(optValue));
+                log_info("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)->get(i)->getInterval());
+                return true;
+            }
+
+            index = getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_RECURSIVE);
+            if (optItem == index) {
+                log_info("Old Autoscan recursive {} {}", index, entry->getRecursive());
+                entry->setRecursive(findConfigSetup<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_RECURSIVE)->checkValue(optValue));
+                log_info("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)->get(i)->getRecursive());
+                return true;
+            }
+
+            index = getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES);
+            if (optItem == index) {
+                log_info("Old Autoscan hidden {} {}", index, entry->getHidden());
+                entry->setHidden(findConfigSetup<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES)->checkValue(optValue));
+                log_info("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)->get(i)->getHidden());
+                return true;
+            }
+        }
         return true;
     }
     return false;
@@ -856,33 +961,7 @@ bool ConfigTranscodingSetup::createTranscodingProfileListFromNode(const pugi::xm
         }
 
         sub = findConfigSetup<ConfigSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT)->getXmlElement(child);
-        auto command = findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND)->getXmlContent(sub);
-        prof->setCommand(command);
-
-        std::string tmp_path;
-        if (fs::path(command).is_absolute()) {
-            if (!isRegularFile(command) && !fs::is_symlink(command)) {
-                log_error("error in configuration, transcoding profile \""
-                    + prof->getName() + "\" could not find transcoding command " + command);
-                return false;
-            }
-            tmp_path = command;
-        } else {
-            tmp_path = find_in_path(command);
-            if (tmp_path.empty()) {
-                log_error("error in configuration, transcoding profile \""
-                    + prof->getName() + "\" could not find transcoding command " + command + " in $PATH");
-                return false;
-            }
-        }
-
-        int err = 0;
-        if (!is_executable(tmp_path, &err)) {
-            log_error("error in configuration, transcoding profile "
-                + prof->getName() + ": transcoder " + command + "is not executable - " + strerror(err));
-            return false;
-        }
-
+        prof->setCommand(findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND)->getXmlContent(sub));
         prof->setArguments(findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS)->getXmlContent(sub));
 
         sub = findConfigSetup<ConfigSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER)->getXmlElement(child);
@@ -944,11 +1023,215 @@ void ConfigTranscodingSetup::makeOption(const pugi::xml_node& root, std::shared_
     setOption(config);
 }
 
-bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, const std::string& optValue, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments)
+bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::string& optValue, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments)
 {
     if (optItem.substr(0, strlen(xpath)) == xpath) {
+        std::shared_ptr<TranscodingProfileListOption> value = std::dynamic_pointer_cast<TranscodingProfileListOption>(optionValue);
         log_info("Updating Transcoding Detail {} {} {}", xpath, optItem, optValue);
-        return true;
+        std::map<std::string, int> profiles;
+        int i = 0;
+        for (const auto& entry : value->getTranscodingProfileListOption()->getList()) {
+            for (auto it = entry.second->begin(); it != entry.second->end(); it++) {
+                profiles[it->second->getName()] = i;
+                auto index = getItemPath(i, ATTR_TRANSCODING_MIMETYPE_PROF_MAP, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_TRANSCODE, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE);
+                if (optItem == index) {
+                    log_info("Old Transcoding Detail {} {}", index, entry.first);
+                    value->setKey(entry.first, optValue);
+                    log_info("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->get(optValue)->begin()->first);
+                    return true;
+                }
+                index = getItemPath(i, ATTR_TRANSCODING_MIMETYPE_PROF_MAP, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_TRANSCODE, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_USING);
+                if (optItem == index) {
+                    log_error("Cannot change profile name in Transcoding Detail {} {}", index, entry.second->begin()->first);
+                    //value->setKey(entry.first, optValue);
+                    //log_info("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->get(optValue)->begin()->first);
+                    return false;
+                }
+                i++;
+            }
+        }
+        i = 0;
+        for (const auto& prof : profiles) {
+            auto entry = value->getTranscodingProfileListOption()->getByName(prof.first, true);
+            auto index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_NAME);
+            if (optItem == index) {
+                log_error("Cannot change profile name in Transcoding Detail {} {}", index, entry->getName());
+                //value->setKey(entry.first, optValue);
+                //log_info("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->get(optValue)->begin()->first);
+                return false;
+            }
+            index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED);
+            if (optItem == index) {
+                log_info("Old profile status in Transcoding Detail {}.{} {}", index, entry->getName(), entry->getEnabled());
+                entry->setEnabled(findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED)->checkValue(optValue));
+                log_info("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getEnabled());
+                return true;
+            }
+            index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_TYPE);
+            if (optItem == index) {
+                log_info("Old profile type in Transcoding Detail {}.{} {}", index, entry->getName(), entry->getType());
+                transcoding_type_t type;
+                if (findConfigSetup<ConfigEnumSetup<transcoding_type_t>>(ATTR_TRANSCODING_PROFILES_PROFLE_TYPE)->checkEnumValue(optValue, type)) {
+                    entry->setType(type);
+                    log_info("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getType());
+                    return true;
+                }
+            }
+            index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_MIMETYPE);
+            if (optItem == index) {
+                log_info("Old profile mimetype in Transcoding Detail {}.{} {}", index, entry->getName(), entry->getTargetMimeType());
+                if (findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_MIMETYPE)->checkValue(optValue)) {
+                    entry->setTargetMimeType(optValue);
+                    log_info("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getTargetMimeType());
+                    return true;
+                }
+            }
+            index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_RES);
+            if (optItem == index) {
+                log_info("Old profile mimetype in Transcoding Detail {}.{} {}", index, entry->getName(), entry->getTargetMimeType());
+                if (findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_RES)->checkValue(optValue)) {
+                    entry->getAttributes()[MetadataHandler::getResAttrName(R_RESOLUTION)] = optValue;
+                    log_info("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getAttributes()[MetadataHandler::getResAttrName(R_RESOLUTION)]);
+                    return true;
+                }
+            }
+            index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_ACCURL);
+            if (optItem == index) {
+                log_info("Old profile mimetype in Transcoding Detail {}.{} {}", index, entry->getName(), entry->acceptURL());
+                entry->setAcceptURL(findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_ACCURL)->checkValue(optValue));
+                log_info("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->acceptURL());
+                return true;
+            }
+            index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_SAMPFREQ);
+            if (optItem == index) {
+                log_info("Old profile getSampleFreq in Transcoding Detail {}.{} {}", index, entry->getName(), entry->getSampleFreq());
+                entry->setSampleFreq(findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_SAMPFREQ)->checkIntValue(optValue));
+                log_info("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getSampleFreq());
+                return true;
+            }
+            index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_NRCHAN);
+            if (optItem == index) {
+                log_info("Old profile getNumChannels in Transcoding Detail {}.{} {}", index, entry->getName(), entry->getNumChannels());
+                entry->setNumChannels(findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_NRCHAN)->checkIntValue(optValue));
+                log_info("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getNumChannels());
+                return true;
+            }
+            index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_HIDEORIG);
+            if (optItem == index) {
+                log_info("Old profile hideOriginalResource in Transcoding Detail {}.{} {}", index, entry->getName(), entry->hideOriginalResource());
+                entry->setHideOriginalResource(findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_HIDEORIG)->checkValue(optValue));
+                log_info("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->hideOriginalResource());
+                return true;
+            }
+            index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_THUMB);
+            if (optItem == index) {
+                log_info("Old profile isThumbnail in Transcoding Detail {}.{} {}", index, entry->getName(), entry->isThumbnail());
+                entry->setThumbnail(findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_THUMB)->checkValue(optValue));
+                log_info("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->isThumbnail());
+                return true;
+            }
+            index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_FIRST);
+            if (optItem == index) {
+                log_info("Old profile firstResource in Transcoding Detail {}.{} {}", index, entry->getName(), entry->firstResource());
+                entry->setFirstResource(findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_FIRST)->checkValue(optValue));
+                log_info("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->firstResource());
+                return true;
+            }
+            index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_ACCOGG);
+            if (optItem == index) {
+                log_info("Old profile isTheora in Transcoding Detail {}.{} {}", index, entry->getName(), entry->isTheora());
+                entry->setTheora(findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_ACCOGG)->checkValue(optValue));
+                log_info("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->isTheora());
+                return true;
+            }
+            index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_USECHUNKEDENC);
+            if (optItem == index) {
+                log_info("Old profile getChunked in Transcoding Detail {}.{} {}", index, entry->getName(), entry->getChunked());
+                entry->setChunked(findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_USECHUNKEDENC)->checkValue(optValue));
+                log_info("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getChunked());
+                return true;
+            }
+
+            size_t buffer = entry->getBufferSize();
+            size_t chunk = entry->getBufferChunkSize();
+            size_t fill = entry->getBufferInitialFillSize();
+            bool setBuffer = false;
+            index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE);
+            if (optItem == index) {
+                log_info("Old profile buffer in Transcoding Detail {}.{} {}", index, entry->getName(), buffer);
+                buffer = findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE)->checkIntValue(optValue);
+                setBuffer = true;
+            }
+            index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK);
+            if (optItem == index) {
+                log_info("Old profile chunk in Transcoding Detail {}.{} {}", index, entry->getName(), chunk);
+                chunk = findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK)->checkIntValue(optValue);
+                setBuffer = true;
+            }
+            index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL);
+            if (optItem == index) {
+                log_info("Old profile chunk in Transcoding Detail {}.{} {}", index, entry->getName(), fill);
+                fill = findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL)->checkIntValue(optValue);
+                setBuffer = true;
+            }
+            if (setBuffer && chunk > buffer) {
+                log_error("error in configuration: transcoding profile \""
+                    + entry->getName() + "\" chunk size can not be greater than buffer size");
+                return false;
+            }
+            if (setBuffer && fill > buffer) {
+                log_error("error in configuration: transcoding profile \""
+                    + entry->getName() + "\" fill size can not be greater than buffer size");
+                return false;
+            }
+            if (setBuffer) {
+                entry->setBufferOptions(buffer, chunk, fill);
+                return true;
+            }
+
+            index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND);
+            if (optItem == index) {
+                log_info("Old profile command in Transcoding Detail {}.{} {}", index, entry->getName(), entry->getCommand().string());
+                if (findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND)->checkValue(optValue)) {
+                    entry->setCommand(optValue);
+                    log_info("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getCommand().string());
+                    return true;
+                }
+            }
+            index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS);
+            if (optItem == index) {
+                log_info("Old profile args in Transcoding Detail {}.{} {}", index, entry->getName(), entry->getArguments());
+                if (findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS)->checkValue(optValue)) {
+                    entry->setArguments(optValue);
+                    log_info("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getArguments());
+                    return true;
+                }
+            }
+
+            avi_fourcc_listmode_t fcc_mode = entry->getAVIFourCCListMode();
+            auto fcc_list = entry->getAVIFourCCList();
+            bool set4cc = false;
+            index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE);
+            if (optItem == index) {
+                log_info("Old profile 4cc-mode in Transcoding Detail {}.{} {}", index, entry->getName(), fcc_mode);
+                if (findConfigSetup<ConfigEnumSetup<avi_fourcc_listmode_t>>(ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE)->checkEnumValue(optValue, fcc_mode)) {
+                    set4cc = true;
+                }
+            }
+            index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_4CC);
+            if (optItem == index) {
+                log_info("Old profile 4cc-list in Transcoding Detail {}.{} {}", index, entry->getName(), entry->getAVIFourCCListMode());
+                fcc_list.clear();
+                if (findConfigSetup<ConfigArraySetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC)->checkArrayValue(optValue, fcc_list)) {
+                    set4cc = true;
+                }
+            }
+            if (set4cc) {
+                entry->setAVIFourCCList(fcc_list, fcc_mode);
+                return true;
+            }
+            i++;
+        }
     }
     return false;
 }
@@ -1007,11 +1290,47 @@ void ConfigClientSetup::makeOption(const pugi::xml_node& root, std::shared_ptr<C
     setOption(config);
 }
 
-bool ConfigClientSetup::updateDetail(const std::string& optItem, const std::string& optValue, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments)
+bool ConfigClientSetup::updateDetail(const std::string& optItem, std::string& optValue, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments)
 {
     if (optItem.substr(0, strlen(xpath)) == xpath) {
         log_info("Updating Client Detail {} {} {}", xpath, optItem, optValue);
-        return true;
+        std::shared_ptr<ClientConfigListOption> value = std::dynamic_pointer_cast<ClientConfigListOption>(optionValue);
+
+        for (size_t i = 0; i < value->getClientConfigListOption()->size(); i++) {
+            const auto& entry = value->getClientConfigListOption()->get(i);
+
+            auto index = getItemPath(i, ATTR_CLIENTS_CLIENT_FLAGS);
+            if (optItem == index) {
+                log_info("Old Client flags {} {}", index, ClientConfig::mapFlags(entry->getFlags()));
+                auto pathValue = optValue;
+                if (findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_FLAGS)->checkValue(optValue)) {
+                    std::vector<std::string> flagsVector = split_string(optValue, '|', false);
+                    int flag = std::accumulate(flagsVector.begin(), flagsVector.end(), 0, [](int flg, const auto& i) //
+                        { return flg | ClientConfig::remapFlag(i); });
+                    entry->setFlags(flag);
+                    log_info("New Client Detail {} {}", index, ClientConfig::mapFlags(config->getClientConfigListOption(option)->get(i)->getFlags()));
+                    return true;
+                }
+            }
+            index = getItemPath(i, ATTR_CLIENTS_CLIENT_IP);
+            if (optItem == index) {
+                log_info("Old Client flags {} {}", index, entry->getIp());
+                if (findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_IP)->checkValue(optValue)) {
+                    entry->setIp(optValue);
+                    log_info("New Client Detail {} {}", index, config->getClientConfigListOption(option)->get(i)->getIp());
+                    return true;
+                }
+            }
+            index = getItemPath(i, ATTR_CLIENTS_CLIENT_USERAGENT);
+            if (optItem == index) {
+                log_info("Old Client flags {} {}", index, entry->getUserAgent());
+                if (findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_USERAGENT)->checkValue(optValue)) {
+                    entry->setUserAgent(optValue);
+                    log_info("New Client Detail {} {}", index, config->getClientConfigListOption(option)->get(i)->getUserAgent());
+                    return true;
+                }
+            }
+        }
     }
     return false;
 }
