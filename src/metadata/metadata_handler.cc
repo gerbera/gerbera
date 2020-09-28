@@ -60,39 +60,6 @@
 
 #include "metadata/metacontent_handler.h"
 
-std::array<mt_key, 21> MT_KEYS = { {
-    { "M_TITLE", "dc:title" },
-    { "M_ARTIST", "upnp:artist" },
-    { "M_ALBUM", "upnp:album" },
-    { "M_DATE", "dc:date" },
-    { "M_UPNP_DATE", "upnp:date" },
-    { "M_GENRE", "upnp:genre" },
-    { "M_DESCRIPTION", "dc:description" },
-    { "M_LONGDESCRIPTION", "upnp:longDescription" },
-    { "M_TRACKNUMBER", "upnp:originalTrackNumber" },
-    { "M_ALBUMARTURI", "upnp:albumArtURI" },
-    { "M_REGION", "upnp:region" },
-    { "M_AUTHOR", "upnp:author" },
-    { "M_DIRECTOR", "upnp:director" },
-    { "M_PUBLISHER", "dc:publisher" },
-    { "M_RATING", "upnp:rating" },
-    { "M_ACTOR", "upnp:actor" },
-    { "M_PRODUCER", "upnp:producer" },
-    { "M_ALBUMARTIST", "upnp:artist@role[AlbumArtist]" },
-    { "M_COMPOSER", "upnp:composer" },
-    { "M_CONDUCTOR", "upnp:conductor" },
-    { "M_ORCHESTRA", "upnp:orchestra" },
-} };
-
-std::array<res_key, 8> RES_KEYS = { { { "R_SIZE", "size" },
-    { "R_DURATION", "duration" },
-    { "R_BITRATE", "bitrate" },
-    { "R_SAMPLEFREQUENCY", "sampleFrequency" },
-    { "R_NRAUDIOCHANNELS", "nrAudioChannels" },
-    { "R_RESOLUTION", "resolution" },
-    { "R_COLORDEPTH", "colorDepth" },
-    { "R_PROTOCOLINFO", "protocolInfo" } } };
-
 MetadataHandler::MetadataHandler(std::shared_ptr<Config> config)
     : config(std::move(config))
 {
@@ -170,12 +137,12 @@ void MetadataHandler::setMetadata(const std::shared_ptr<Config>& config, const s
 
 std::string MetadataHandler::getMetaFieldName(metadata_fields_t field)
 {
-    return MT_KEYS[field].upnp;
+    return MT_KEYS.at(field).upnp;
 }
 
 std::string MetadataHandler::getResAttrName(resource_attributes_t attr)
 {
-    return RES_KEYS[attr].upnp;
+    return RES_KEYS.at(attr).upnp;
 }
 
 std::unique_ptr<MetadataHandler> MetadataHandler::createHandler(const std::shared_ptr<Config>& config, int handlerType)

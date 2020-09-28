@@ -903,8 +903,6 @@ bool ConfigTranscodingSetup::createTranscodingProfileListFromNode(const pugi::xm
             throw std::runtime_error("error in configuration: you specified a mimetype to transcoding profile mapping, "
                                      "but no match for profile \""
                 + prof->getName() + "\" exists");
-
-        set = false;
     }
 
     return true;

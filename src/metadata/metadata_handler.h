@@ -119,7 +119,29 @@ struct mt_key {
     const char* upnp;
 };
 
-extern std::array<mt_key, 21> MT_KEYS;
+constexpr std::array<mt_key, 21> MT_KEYS = { {
+    { "M_TITLE", "dc:title" },
+    { "M_ARTIST", "upnp:artist" },
+    { "M_ALBUM", "upnp:album" },
+    { "M_DATE", "dc:date" },
+    { "M_UPNP_DATE", "upnp:date" },
+    { "M_GENRE", "upnp:genre" },
+    { "M_DESCRIPTION", "dc:description" },
+    { "M_LONGDESCRIPTION", "upnp:longDescription" },
+    { "M_TRACKNUMBER", "upnp:originalTrackNumber" },
+    { "M_ALBUMARTURI", "upnp:albumArtURI" },
+    { "M_REGION", "upnp:region" },
+    { "M_AUTHOR", "upnp:author" },
+    { "M_DIRECTOR", "upnp:director" },
+    { "M_PUBLISHER", "dc:publisher" },
+    { "M_RATING", "upnp:rating" },
+    { "M_ACTOR", "upnp:actor" },
+    { "M_PRODUCER", "upnp:producer" },
+    { "M_ALBUMARTIST", "upnp:artist@role[AlbumArtist]" },
+    { "M_COMPOSER", "upnp:composer" },
+    { "M_CONDUCTOR", "upnp:conductor" },
+    { "M_ORCHESTRA", "upnp:orchestra" },
+} };
 
 // res tag attributes
 typedef enum {
@@ -140,7 +162,14 @@ struct res_key {
     const char* upnp;
 };
 
-extern std::array<res_key, 8> RES_KEYS;
+constexpr std::array<res_key, 8> RES_KEYS = { { { "R_SIZE", "size" },
+    { "R_DURATION", "duration" },
+    { "R_BITRATE", "bitrate" },
+    { "R_SAMPLEFREQUENCY", "sampleFrequency" },
+    { "R_NRAUDIOCHANNELS", "nrAudioChannels" },
+    { "R_RESOLUTION", "resolution" },
+    { "R_COLORDEPTH", "colorDepth" },
+    { "R_PROTOCOLINFO", "protocolInfo" } } };
 
 /// \brief This class is responsible for providing access to metadata information
 /// of various media.
