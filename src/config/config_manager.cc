@@ -52,6 +52,7 @@
 #include "client_config.h"
 #include "config_options.h"
 #include "config_setup.h"
+#include "storage/storage.h"
 #include "transcoding/transcoding.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
@@ -352,6 +353,21 @@ std::shared_ptr<ConfigSetup> ConfigManager::findConfigSetup(config_option_t opti
         return nullptr;
 
     throw std::runtime_error(fmt::format("Error in config code: {} tag not found", static_cast<int>(option)));
+}
+
+std::shared_ptr<ConfigSetup> ConfigManager::findConfigSetup(const std::string& key, bool save)
+{
+    auto co = std::find_if(complexOptions.begin(), complexOptions.end(), [&](const auto& s) { return s->getUniquePath() == key; });
+
+    if (co != complexOptions.end()) {
+        log_debug("Config: option found: '{}'", (*co)->xpath);
+        return *co;
+    }
+
+    if (save)
+        return nullptr;
+
+    throw std::runtime_error(fmt::format("Error in config code: {} tag not found", key));
 }
 
 std::shared_ptr<ConfigOption> ConfigManager::setOption(const pugi::xml_node& root, config_option_t option, const std::map<std::string, std::string>* arguments)
@@ -797,6 +813,35 @@ void ConfigManager::load(const fs::path& userHome)
 
     // now the XML is no longer needed we can destroy it
     xmlDoc = nullptr;
+}
+
+void ConfigManager::updateConfigFromDatabase(std::shared_ptr<Storage> storage)
+{
+    auto values = storage->getConfigValues();
+    auto self = getSelf();
+
+    for (const auto& cfgValue : values) {
+        try {
+            auto cs = ConfigManager::findConfigSetup(cfgValue.key, true);
+
+            if (cs != nullptr) {
+                if (cfgValue.item == cs->xpath) {
+                    cs->makeOption(cfgValue.value, self);
+                } else {
+                    std::string parValue = cfgValue.value;
+                    if (cfgValue.status == "unchanged") {
+                        if (!cs->updateDetail(cfgValue.item, parValue, self)) {
+                            log_error("unhandled option {} != {}", cfgValue.item, cs->xpath);
+                        }
+                    } else if (cfgValue.status == "added") {
+                    } else if (cfgValue.status == "removed") {
+                    }
+                }
+            }
+        } catch (const std::runtime_error& e) {
+            log_error("error setting option {}. Exception {}", cfgValue.key, e.what());
+        }
+    }
 }
 
 void ConfigManager::dumpOptions()

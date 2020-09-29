@@ -36,6 +36,7 @@
 
 #include "cds_objects.h"
 #include "common.h"
+#include "config/config_setup.h"
 #include "request_handler.h"
 #include "web_request_handler.h"
 
@@ -193,6 +194,10 @@ public:
 
 /// \brief load configuration
 class configLoad : public WebRequestHandler {
+protected:
+    std::vector<ConfigValue> dbEntries;
+    void createItem(pugi::xml_node& item, const std::string& name, config_option_t id);
+
 public:
     configLoad(std::shared_ptr<Config> config, std::shared_ptr<Storage> storage,
         std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);

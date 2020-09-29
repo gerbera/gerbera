@@ -29,7 +29,5 @@
 
 /// \file sqlite3_create_sql.h
 
-#ifdef HAVE_SQLITE3
-
 #ifndef __SQLITE3_CREATE_SQL_H__
 #define __SQLITE3_CREATE_SQL_H__

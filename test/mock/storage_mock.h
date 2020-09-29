@@ -5,6 +5,7 @@
 
 #include "storage/storage.h"
 #include "config/config.h"
+#include "config/config_setup.h"
 
 using namespace ::testing;
 
@@ -51,6 +52,13 @@ public:
 
     std::string getInternalSetting(const std::string& key) override { return ""; }
     void storeInternalSetting(const std::string& key, const std::string& value) override { }
+
+    std::vector<ConfigValue> getConfigValues() override
+    {
+        std::vector<ConfigValue> result;
+        return result;
+    }
+    void updateConfigValue(const std::string& key, const std::string& item, const std::string& value) override { }
 
     std::shared_ptr<AutoscanList> getAutoscanList(ScanMode scanode) override { return nullptr; }
     void updateAutoscanList(ScanMode scanmode, std::shared_ptr<AutoscanList> list) override { }

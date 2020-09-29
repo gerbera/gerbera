@@ -46,6 +46,7 @@ class AutoscanDirectory;
 class AutoscanList;
 class CdsObject;
 class Config;
+class ConfigValue;
 enum class ScanMode;
 class Timer;
 
@@ -261,6 +262,10 @@ public:
     /* autoscan methods */
     virtual std::shared_ptr<AutoscanList> getAutoscanList(ScanMode scanode) = 0;
     virtual void updateAutoscanList(ScanMode scanmode, std::shared_ptr<AutoscanList> list) = 0;
+
+    /* config methods */
+    virtual std::vector<ConfigValue> getConfigValues() = 0;
+    virtual void updateConfigValue(const std::string& key, const std::string& item, const std::string& value) = 0;
 
     /// \brief returns the AutoscanDirectory for the given objectID or nullptr if
     /// it's not an autoscan start point - scan id will be invalid

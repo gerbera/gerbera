@@ -49,50 +49,44 @@ void web::configSave::process()
 {
     check_request();
     //auto root = xmlDoc->document_element();
-    log_info("configSave");
+    log_debug("configSave");
 
     int count = std::stoi(param("changedCount"));
 
     for (int i = 0; i < count; i++) {
         try {
             auto key = fmt::format("data[{}][{}]", i, "id");
-            log_info("{} = {}", key, std::stoi(param(key)));
+            bool success = false;
             config_option_t option = static_cast<config_option_t>(std::stoi(param(key)));
+            log_info("{} = {}", key, option);
             auto cs = ConfigManager::findConfigSetup(option, true);
 
             if (cs != nullptr) {
                 auto value = fmt::format("data[{}][{}]", i, "value");
                 auto item = fmt::format("data[{}][{}]", i, "item");
-                log_info("found option {}", cs->xpath);
-
-                //try {
-                //    log_info("old string option {}", config->getOption(option));
-                //} catch (const std::runtime_error& e) { }
-                //try {
-                //    log_info("old int option {}", config->getIntOption(option));
-                //} catch (const std::runtime_error& e) { }
-                //try {
-                //    log_info("old bool option {}", config->getBoolOption(option));
-                //} catch (const std::runtime_error& e) { }
+                auto status = fmt::format("data[{}][{}]", i, "status");
+                log_debug("found option to update {}", cs->xpath);
 
                 if (param(item) == cs->xpath) {
                     cs->makeOption(param(value), config);
+                    success = true;
                 } else {
                     std::string parValue = param(value);
-                    if (!cs->updateDetail(param(item), parValue, config)) {
-                        log_info("unhandled option {} != {}", param(item), cs->xpath);
+                    if (param(status) == "changed") {
+                        if (!cs->updateDetail(param(item), parValue, config)) {
+                            log_error("unhandled option {} != {}", param(item), cs->xpath);
+                        } else {
+                            success = true;
+                        }
+                    } else if (param(status) == "added") {
+                        success = true;
+                    } else if (param(status) == "removed") {
+                        success = true;
                     }
                 }
-
-                //try {
-                //    log_info("found string option {}", config->getOption(option));
-                //} catch (const std::runtime_error& e) { }
-                //try {
-                //    log_info("found int option {}", config->getIntOption(option));
-                //} catch (const std::runtime_error& e) { }
-                //try {
-                //    log_info("found bool option {}", config->getBoolOption(option));
-                //} catch (const std::runtime_error& e) { }
+                if (success) {
+                    storage->updateConfigValue(cs->getUniquePath(), param(item), param(value));
+                }
             }
         } catch (const std::runtime_error& e) {
             log_error("error setting option {}. Exception {}", i, e.what());

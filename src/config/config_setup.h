@@ -46,6 +46,14 @@ typedef bool (*DictionaryInitFunction)(const pugi::xml_node& value, std::map<std
 typedef bool (*IntCheckFunction)(int value);
 typedef bool (*IntMinFunction)(int value, int minValue);
 
+class ConfigValue {
+public:
+    std::string key;
+    std::string item;
+    std::string value;
+    std::string status;
+};
+
 class ConfigSetup {
 protected:
     std::shared_ptr<ConfigOption> optionValue;
@@ -118,6 +126,8 @@ public:
     virtual bool updateDetail(const std::string& optItem, std::string& optValue, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments = nullptr) { return false; }
 
     virtual std::string getItemPath(int index = 0, config_option_t propOption = CFG_MAX, config_option_t propOption2 = CFG_MAX, config_option_t propOption3 = CFG_MAX, config_option_t propOption4 = CFG_MAX) const { return xpath; }
+
+    virtual std::string getUniquePath() const { return xpath; }
 
     template <class CS>
     static std::shared_ptr<CS> findConfigSetup(config_option_t option)
@@ -540,6 +550,8 @@ public:
     virtual void makeOption(const pugi::xml_node& root, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments = nullptr) override;
 
     virtual bool updateDetail(const std::string& optItem, std::string& optValue, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments = nullptr) override;
+
+    virtual std::string getUniquePath() const override { return fmt::format("{}/{}", xpath, AutoscanDirectory::mapScanmode(scanMode)); }
 
     virtual std::string getItemPath(int index = 0, config_option_t propOption = CFG_MAX, config_option_t propOption2 = CFG_MAX, config_option_t propOption3 = CFG_MAX, config_option_t propOption4 = CFG_MAX) const override
     {

@@ -40,21 +40,29 @@ web::configLoad::configLoad(std::shared_ptr<Config> config, std::shared_ptr<Stor
     std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
     : WebRequestHandler(std::move(config), std::move(storage), std::move(content), std::move(sessionManager))
 {
+    try {
+        if (this->storage != nullptr) {
+            dbEntries = this->storage->getConfigValues();
+        } else {
+            log_error("configLoad storage missing");
+        }
+    } catch (const std::runtime_error& e) {
+        log_error("configLoad {}", e.what());
+    }
 }
 
-static void createItem(pugi::xml_node& item, const std::string& name, config_option_t id)
+void web::configLoad::createItem(pugi::xml_node& item, const std::string& name, config_option_t id)
 {
     item.append_attribute("item") = name.c_str(); // fmt::format("{:02d}", i).c_str();
     item.append_attribute("id") = fmt::format("{:02d}", id).c_str();
     item.append_attribute("status") = "unchanaged";
-    item.append_attribute("source") = "config.xml";
+    item.append_attribute("source") = std::find_if(dbEntries.begin(), dbEntries.end(), [&](const auto& s) { return s.item == name; }) != dbEntries.end() ? "database" : "config.xml";
 }
 
 void web::configLoad::process()
 {
     check_request();
     auto root = xmlDoc->document_element();
-
     auto values = root.append_child("values");
     xml2JsonHints->setArrayName(values, "item");
     xml2JsonHints->setFieldType("item", "string");
