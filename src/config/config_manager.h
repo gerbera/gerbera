@@ -111,6 +111,15 @@ public:
     /// \param option to retrieve
     std::shared_ptr<TranscodingProfileList> getTranscodingProfileListOption(config_option_t option) override;
 
+    std::string getOrigValue(const std::string& item) override
+    {
+        return (origValues.find(item) == origValues.end()) ? "" : origValues[item];
+    }
+
+    void setOrigValue(const std::string& item, const std::string& value) override;
+    void setOrigValue(const std::string& item, bool value) override;
+    void setOrigValue(const std::string& item, int value) override;
+
     static bool isDebugLogging() { return debug_logging; }
 
 protected:
@@ -121,6 +130,7 @@ protected:
     std::string interface;
     int port;
     static bool debug_logging;
+    std::map<std::string, std::string> origValues;
 
     std::unique_ptr<pugi::xml_document> xmlDoc;
 

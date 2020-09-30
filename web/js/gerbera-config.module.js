@@ -111,7 +111,7 @@ const saveConfig = () => {
   };
   changedKeys.forEach((key) => {
     let i = current_config.changedItems[key];
-    saveData.data.push({item: i.item, id: i.id, value: i.value, status: i.status});
+    saveData.data.push({item: i.item, id: i.id, value: i.value, origValue: i.origValue, status: i.status});
   });
   console.log(saveData);
 
@@ -121,7 +121,10 @@ const saveConfig = () => {
         type: 'get',
         data: saveData
       })
-        .then((response) => {console.log(response);})
+        .then((response) => {
+          menuSelected();
+          console.log(response);
+        })
         .catch((err) => GerberaApp.error(err));
     } catch (e) {
       console.log(e);

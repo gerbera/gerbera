@@ -819,6 +819,7 @@ void ConfigManager::updateConfigFromDatabase(std::shared_ptr<Storage> storage)
 {
     auto values = storage->getConfigValues();
     auto self = getSelf();
+    origValues.clear();
 
     for (const auto& cfgValue : values) {
         try {
@@ -826,10 +827,11 @@ void ConfigManager::updateConfigFromDatabase(std::shared_ptr<Storage> storage)
 
             if (cs != nullptr) {
                 if (cfgValue.item == cs->xpath) {
+                    origValues[cfgValue.item] = cs->getCurrentValue();
                     cs->makeOption(cfgValue.value, self);
                 } else {
                     std::string parValue = cfgValue.value;
-                    if (cfgValue.status == "unchanged") {
+                    if (cfgValue.status == "changed" || cfgValue.status == "unchanged") {
                         if (!cs->updateDetail(cfgValue.item, parValue, self)) {
                             log_error("unhandled option {} != {}", cfgValue.item, cs->xpath);
                         }
@@ -841,6 +843,27 @@ void ConfigManager::updateConfigFromDatabase(std::shared_ptr<Storage> storage)
         } catch (const std::runtime_error& e) {
             log_error("error setting option {}. Exception {}", cfgValue.key, e.what());
         }
+    }
+}
+
+void ConfigManager::setOrigValue(const std::string& item, const std::string& value)
+{
+    if (origValues.find(item) == origValues.end()) {
+        origValues[item] = value;
+    }
+}
+
+void ConfigManager::setOrigValue(const std::string& item, bool value)
+{
+    if (origValues.find(item) == origValues.end()) {
+        origValues[item] = value ? "true" : "false";
+    }
+}
+
+void ConfigManager::setOrigValue(const std::string& item, int value)
+{
+    if (origValues.find(item) == origValues.end()) {
+        origValues[item] = fmt::format("{}", value);
     }
 }
 

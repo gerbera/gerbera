@@ -265,6 +265,7 @@ public:
 
     /* config methods */
     virtual std::vector<ConfigValue> getConfigValues() = 0;
+    virtual void removeConfigValue(const std::string& item) = 0;
     virtual void updateConfigValue(const std::string& key, const std::string& item, const std::string& value) = 0;
 
     /// \brief returns the AutoscanDirectory for the given objectID or nullptr if

@@ -53,9 +53,11 @@ web::configLoad::configLoad(std::shared_ptr<Config> config, std::shared_ptr<Stor
 
 void web::configLoad::createItem(pugi::xml_node& item, const std::string& name, config_option_t id)
 {
-    item.append_attribute("item") = name.c_str(); // fmt::format("{:02d}", i).c_str();
+    item.append_attribute("item") = name.c_str();
     item.append_attribute("id") = fmt::format("{:02d}", id).c_str();
     item.append_attribute("status") = "unchanaged";
+
+    item.append_attribute("origValue") = config->getOrigValue(name).c_str();
     item.append_attribute("source") = std::find_if(dbEntries.begin(), dbEntries.end(), [&](const auto& s) { return s.item == name; }) != dbEntries.end() ? "database" : "config.xml";
 }
 
@@ -68,30 +70,18 @@ void web::configLoad::process()
     xml2JsonHints->setFieldType("item", "string");
     xml2JsonHints->setFieldType("id", "string");
     xml2JsonHints->setFieldType("value", "string");
+    xml2JsonHints->setFieldType("origValue", "string");
 
     std::shared_ptr<ConfigSetup> cs;
     log_debug("Sending Config to web!");
     for (int i = 0; i < static_cast<int>(CFG_MAX); i++) {
         auto item = values.append_child("item");
         cs = ConfigManager::findConfigSetup(static_cast<config_option_t>(i));
-        createItem(item, cs->getItemPath(), static_cast<config_option_t>(i));
+        createItem(item, cs->getItemPath(-1), static_cast<config_option_t>(i));
 
         try {
-            std::string opt = config->getOption(static_cast<config_option_t>(i));
-            log_debug("    Option {:02d} {} = {}", i, cs->getItemPath(), opt.c_str());
-            item.append_attribute("value") = opt.c_str();
-        } catch (const std::runtime_error& e) {
-        }
-        try {
-            int opt = config->getIntOption(static_cast<config_option_t>(i));
-            log_debug(" IntOption {:02d} {} = {}", i, cs->getItemPath(), opt);
-            item.append_attribute("value") = fmt::format("{}", opt).c_str();
-        } catch (const std::runtime_error& e) {
-        }
-        try {
-            bool opt = config->getBoolOption(static_cast<config_option_t>(i));
-            log_debug("BoolOption {:02d} {} = {}", i, cs->getItemPath(), opt ? "true" : "false");
-            item.append_attribute("value") = opt ? "true" : "false";
+            log_debug("    Option {:03d} {} = {}", i, cs->getItemPath(), cs->getCurrentValue().c_str());
+            item.append_attribute("value") = cs->getCurrentValue().c_str();
         } catch (const std::runtime_error& e) {
         }
     }
@@ -211,7 +201,7 @@ void web::configLoad::process()
         if (fourCCMode != FCC_None) {
             item = values.append_child("item");
             createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE), CFG_TRANSCODING_PROFILE_LIST);
-            item.append_attribute("value") = fourCCMode == FCC_Ignore ? "ignore" : (fourCCMode == FCC_Process ? "process" : "disabled");
+            item.append_attribute("value") = TranscodingProfile::mapFourCcMode(fourCCMode).c_str();
 
             const auto fourCCList = entry->getAVIFourCCList();
             if (fourCCList.size() > 0) {
@@ -321,7 +311,7 @@ void web::configLoad::process()
     cs = ConfigManager::findConfigSetup(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST);
     for (const auto& entry : dictionary) {
         auto item = values.append_child("item");
-        createItem(item, cs->getItemPath(i, ATTR_IMPORT_MAPPINGS_MIMETYPE_MAP), CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST);
+        createItem(item, cs->getItemPath(i, ATTR_IMPORT_MAPPINGS_MIMETYPE_FROM), CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST);
         item.append_attribute("value") = entry.first.c_str();
 
         item = values.append_child("item");

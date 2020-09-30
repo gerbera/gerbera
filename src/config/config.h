@@ -244,6 +244,11 @@ class Config {
 public:
     virtual ~Config() = default;
 
+    virtual std::string getOrigValue(const std::string& item) = 0;
+    virtual void setOrigValue(const std::string& item, const std::string& value) = 0;
+    virtual void setOrigValue(const std::string& item, bool value) = 0;
+    virtual void setOrigValue(const std::string& item, int value) = 0;
+
     /// \brief Returns the name of the config file that was used to launch the server.
     virtual fs::path getConfigFilename() const = 0;
 

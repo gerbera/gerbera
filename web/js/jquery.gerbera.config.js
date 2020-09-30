@@ -91,9 +91,38 @@ $.widget('grb.config', {
     }
   },
 
+  resetEntry: function (itemValue) {
+    this.result[itemValue.item] = itemValue;
+    this.options.addResultItem(itemValue);
+    itemValue.value = itemValue.editor.val();
+    switch(itemValue.config.type){
+      case 'Boolean': {
+        itemValue.value = itemValue.editor[0].checked;
+        break;
+      }
+      case 'String':
+      case 'Password':
+      case 'Number': {
+        itemValue.value = itemValue.editor.val();
+        break;
+      }
+      case 'Element':
+      case 'List':
+        // nothing to do
+      break;
+      default:
+        console.log('Unknown item type ' + itemValue.config.type);
+    }
+    $(itemValue.editor[0].parentElement).removeClass(itemValue.status);
+    itemValue.status = 'reset';
+    $(itemValue.editor[0].parentElement).addClass(itemValue.status);
+  },
+
   setEntryChanged: function (itemValue) {
     this.result[itemValue.item] = itemValue;
     this.options.addResultItem(itemValue);
+    itemValue.origValue = itemValue.source === "config.xml" ? itemValue.value : itemValue.origValue;
+    itemValue.source = "ui";
     itemValue.value = itemValue.editor.val();
     switch(itemValue.config.type){
       case 'Boolean': {
@@ -129,7 +158,7 @@ $.widget('grb.config', {
         line.addClass('configListItem');
         // recursive call
         let subList = null;
-        if (item.children.length>0) {
+        if (item.children.length > 0) {
           subList = $('<ul></ul>').addClass('list');
           subList.attr('id', "list_" + item.item.replaceAll("/","_"));
           this.addTextLine(line,item);
@@ -144,7 +173,7 @@ $.widget('grb.config', {
         line.attr('id', "line_" + item.item.replaceAll("/","_"));
         line.addClass('configListItem');
         // recursive call
-        if (item.children.length>0) {
+        if (item.children.length > 0) {
           const subList = $('<ul></ul>').addClass('list');
           subList.attr('id', "list_" + item.item.replaceAll("/","_"));
           this.addTextLine(line,item);
@@ -175,7 +204,6 @@ $.widget('grb.config', {
           line = $('<li></li>');
           line.attr('id', "item_" + item.item.replaceAll("/","_"));
         }
-
         if (itemCount < 1) {
           $('<span>No Entries</span>').appendTo(list);
         }
@@ -202,7 +230,7 @@ $.widget('grb.config', {
             xpathList.append(itemLine);
           }
 
-          this.addTextLine(itemLine,item);
+          this.addTextLine(itemLine, item);
 
           let input = $('<input>');
           input.attr('id', "value_" + item.item.replaceAll("/","_") + "_" + i +  "_" + count);
@@ -267,6 +295,15 @@ $.widget('grb.config', {
           }
 
           itemLine.append(input);
+          if (itemValue.source === 'database') {
+            const link = $('<a>', {"title": "reset", "style": "margin-left: 20px", "class": "", "href": "javascript:;"});
+            const icon = $('<i></i>', {"class": "fa " + "fa-undo" });
+            link.append(icon);
+            link.append(` reset to ${itemValue.origValue}`);
+            itemValue.resetEntry = function (event) { itemValue.target.resetEntry(itemValue, event); }
+            link.click(itemValue, itemValue.resetEntry);
+            link.appendTo(itemLine);
+          }
         }
       }
 

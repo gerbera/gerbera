@@ -185,6 +185,8 @@ public:
     void setNumChannels(int chans) { number_of_channels = chans; }
     int getNumChannels() const { return number_of_channels; }
 
+    static std::string mapFourCcMode(avi_fourcc_listmode_t mode);
+
 protected:
     std::string name;
     std::string tm;

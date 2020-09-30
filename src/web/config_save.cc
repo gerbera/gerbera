@@ -65,27 +65,40 @@ void web::configSave::process()
                 auto value = fmt::format("data[{}][{}]", i, "value");
                 auto item = fmt::format("data[{}][{}]", i, "item");
                 auto status = fmt::format("data[{}][{}]", i, "status");
+                auto orig = fmt::format("data[{}][{}]", i, "origValue");
                 log_debug("found option to update {}", cs->xpath);
 
-                if (param(item) == cs->xpath) {
-                    cs->makeOption(param(value), config);
-                    success = true;
-                } else {
-                    std::string parValue = param(value);
-                    if (param(status) == "changed") {
+                config->setOrigValue(param(item), param(orig));
+                std::string parValue = param(value);
+                std::string parStatus = param(status);
+                bool update = param(status) == "changed";
+                if (parStatus == "reset") {
+                    storage->removeConfigValue(param(item));
+                    parValue = config->getOrigValue(param(item));
+                    log_info("reset {}", param(item));
+                    success = false;
+                    update = true;
+                } else if (parStatus == "added") {
+                    log_info("added {}", param(item));
+                    success = false;
+                } else if (parStatus == "removed") {
+                    log_info("removed {}", param(item));
+                    success = false;
+                }
+                if (update) {
+                    if (param(item) == cs->xpath) {
+                        cs->makeOption(parValue, config);
+                        success = true;
+                    } else {
                         if (!cs->updateDetail(param(item), parValue, config)) {
                             log_error("unhandled option {} != {}", param(item), cs->xpath);
                         } else {
                             success = true;
                         }
-                    } else if (param(status) == "added") {
-                        success = true;
-                    } else if (param(status) == "removed") {
-                        success = true;
                     }
-                }
-                if (success) {
-                    storage->updateConfigValue(cs->getUniquePath(), param(item), param(value));
+                    if (parStatus == "changed" && success) {
+                        storage->updateConfigValue(cs->getUniquePath(), param(item), param(value));
+                    }
                 }
             }
         } catch (const std::runtime_error& e) {

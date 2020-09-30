@@ -726,7 +726,7 @@
 							"item": "/transcoding/mimetype-profile-mappings/transcode/attribute::using",
 							"caption": "Profile",
 							"type": "String",
-							"editable": true
+							"editable": false
 						}
 					]
 				},
@@ -745,7 +745,7 @@
 							"item": "/transcoding/profiles/profile/attribute::name",
 							"caption": "Profile",
 							"type": "String",
-							"editable": true
+							"editable": false
 						},
 						{
 							"item": "/transcoding/profiles/profile/attribute::type",

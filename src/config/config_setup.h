@@ -128,6 +128,7 @@ public:
     virtual std::string getItemPath(int index = 0, config_option_t propOption = CFG_MAX, config_option_t propOption2 = CFG_MAX, config_option_t propOption3 = CFG_MAX, config_option_t propOption4 = CFG_MAX) const { return xpath; }
 
     virtual std::string getUniquePath() const { return xpath; }
+    virtual std::string getCurrentValue() const { return optionValue == nullptr ? "" : optionValue->getOption(); }
 
     template <class CS>
     static std::shared_ptr<CS> findConfigSetup(config_option_t option)
@@ -347,6 +348,8 @@ public:
 
     int checkIntValue(std::string& sVal, const std::string& pathName = "") const;
 
+    std::string getCurrentValue() const override { return optionValue == nullptr ? "" : fmt::format("{}", optionValue->getIntOption()); }
+
     static bool CheckSqlLiteSyncValue(std::string& value);
 
     static bool CheckProfleNumberValue(std::string& value);
@@ -393,6 +396,8 @@ public:
     bool checkValue(std::string& optValue, const std::string& pathName = "") const;
 
     std::shared_ptr<ConfigOption> newOption(bool optValue);
+
+    std::string getCurrentValue() const override { return optionValue == nullptr ? "" : (optionValue->getBoolOption() ? "true" : "false"); }
 
     static bool CheckSqlLiteRestoreValue(std::string& value);
 
@@ -451,6 +456,9 @@ public:
 
     virtual std::string getItemPath(int index = 0, config_option_t propOption = CFG_MAX, config_option_t propOption2 = CFG_MAX, config_option_t propOption3 = CFG_MAX, config_option_t propOption4 = CFG_MAX) const override
     {
+        if (index < 0) {
+            return fmt::format("{}/{}", xpath, ConfigManager::mapConfigOption(nodeOption));
+        }
         return attrOption != CFG_MAX ? fmt::format("{}/{}[{}]/attribute::{}", xpath, ConfigManager::mapConfigOption(nodeOption), index, ConfigManager::mapConfigOption(attrOption)) : fmt::format("{}/{}[{}]", xpath, ConfigManager::mapConfigOption(nodeOption), index);
     }
 
@@ -459,6 +467,8 @@ public:
     bool checkArrayValue(const std::string& value, std::vector<std::string>& result) const;
 
     std::shared_ptr<ConfigOption> newOption(const std::vector<std::string>& optValue);
+
+    std::string getCurrentValue() const override { return ""; }
 
     static bool InitPlayedItemsMark(const pugi::xml_node& value, std::vector<std::string>& result, const char* node_name);
 
@@ -520,12 +530,14 @@ public:
 
     virtual std::string getItemPath(int index = 0, config_option_t propOption = CFG_MAX, config_option_t propOption2 = CFG_MAX, config_option_t propOption3 = CFG_MAX, config_option_t propOption4 = CFG_MAX) const override
     {
-        return fmt::format("{}/{}[{}]/attribute::{}", xpath, ConfigManager::mapConfigOption(nodeOption), index, ConfigManager::mapConfigOption(propOption));
+        return index >= 0 ? fmt::format("{}/{}[{}]/attribute::{}", xpath, ConfigManager::mapConfigOption(nodeOption), index, ConfigManager::mapConfigOption(propOption)) : fmt::format("{}/{}", xpath, ConfigManager::mapConfigOption(nodeOption));
     }
 
     std::map<std::string, std::string> getXmlContent(const pugi::xml_node& optValue) const;
 
     std::shared_ptr<ConfigOption> newOption(const std::map<std::string, std::string>& optValue);
+
+    std::string getCurrentValue() const override { return ""; }
 };
 
 class ConfigAutoscanSetup : public ConfigSetup {
@@ -555,10 +567,12 @@ public:
 
     virtual std::string getItemPath(int index = 0, config_option_t propOption = CFG_MAX, config_option_t propOption2 = CFG_MAX, config_option_t propOption3 = CFG_MAX, config_option_t propOption4 = CFG_MAX) const override
     {
-        return fmt::format("{}/{}/{}[{}]/attribute::{}", xpath, AutoscanDirectory::mapScanmode(scanMode), ConfigManager::mapConfigOption(ATTR_AUTOSCAN_DIRECTORY), index, ConfigManager::mapConfigOption(propOption));
+        return index >= 0 ? fmt::format("{}/{}/{}[{}]/attribute::{}", xpath, AutoscanDirectory::mapScanmode(scanMode), ConfigManager::mapConfigOption(ATTR_AUTOSCAN_DIRECTORY), index, ConfigManager::mapConfigOption(propOption)) : fmt::format("{}/{}/{}", xpath, AutoscanDirectory::mapScanmode(scanMode), ConfigManager::mapConfigOption(ATTR_AUTOSCAN_DIRECTORY));
     }
 
     std::shared_ptr<ConfigOption> newOption(const pugi::xml_node& optValue);
+
+    std::string getCurrentValue() const override { return ""; }
 };
 
 class ConfigTranscodingSetup : public ConfigSetup {
@@ -584,10 +598,17 @@ public:
 
     virtual std::string getItemPath(int index = 0, config_option_t propOption = CFG_MAX, config_option_t propOption2 = CFG_MAX, config_option_t propOption3 = CFG_MAX, config_option_t propOption4 = CFG_MAX) const override
     {
-        return propOption4 == CFG_MAX ? fmt::format("{}/{}/{}[{}]/attribute::{}", xpath, ConfigManager::mapConfigOption(propOption), ConfigManager::mapConfigOption(propOption2), index, ConfigManager::mapConfigOption(propOption3)) : fmt::format("{}/{}/{}[{}]/{}/attribute::{}", xpath, ConfigManager::mapConfigOption(propOption), ConfigManager::mapConfigOption(propOption2), index, ConfigManager::mapConfigOption(propOption3), ConfigManager::mapConfigOption(propOption4));
+        if (index < 0) {
+            return fmt::format("{}", xpath);
+        } else if (propOption4 == CFG_MAX) {
+            return fmt::format("{}/{}/{}[{}]/attribute::{}", xpath, ConfigManager::mapConfigOption(propOption), ConfigManager::mapConfigOption(propOption2), index, ConfigManager::mapConfigOption(propOption3));
+        }
+        return fmt::format("{}/{}/{}[{}]/{}/attribute::{}", xpath, ConfigManager::mapConfigOption(propOption), ConfigManager::mapConfigOption(propOption2), index, ConfigManager::mapConfigOption(propOption3), ConfigManager::mapConfigOption(propOption4));
     }
 
     std::shared_ptr<ConfigOption> newOption(const pugi::xml_node& optValue);
+
+    std::string getCurrentValue() const override { return ""; }
 };
 
 class ConfigClientSetup : public ConfigSetup {
@@ -612,10 +633,12 @@ public:
 
     virtual std::string getItemPath(int index = 0, config_option_t propOption = CFG_MAX, config_option_t propOption2 = CFG_MAX, config_option_t propOption3 = CFG_MAX, config_option_t propOption4 = CFG_MAX) const override
     {
-        return fmt::format("{}/{}[{}]/attribute::{}", xpath, ConfigManager::mapConfigOption(ATTR_CLIENTS_CLIENT), index, ConfigManager::mapConfigOption(propOption));
+        return index >= 0 ? fmt::format("{}/{}[{}]/attribute::{}", xpath, ConfigManager::mapConfigOption(ATTR_CLIENTS_CLIENT), index, ConfigManager::mapConfigOption(propOption)) : fmt::format("{}/{}", xpath, ConfigManager::mapConfigOption(ATTR_CLIENTS_CLIENT));
     }
 
     std::shared_ptr<ConfigOption> newOption(const pugi::xml_node& optValue);
+
+    std::string getCurrentValue() const override { return ""; }
 };
 
 #endif // __CONFIG_SETUP_H__

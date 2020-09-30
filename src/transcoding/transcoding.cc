@@ -134,3 +134,17 @@ std::shared_ptr<TranscodingProfile> TranscodingProfileList::getByName(const std:
     }
     return nullptr;
 }
+
+std::string TranscodingProfile::mapFourCcMode(avi_fourcc_listmode_t mode)
+{
+    switch (mode) {
+    case FCC_None:
+        return "disabled";
+    case FCC_Ignore:
+        return "ignore";
+    case FCC_Process:
+        return "process";
+    default:
+        return "disabled";
+    }
+}

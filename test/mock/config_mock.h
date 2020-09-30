@@ -19,6 +19,10 @@ public:
     std::vector<std::string> getArrayOption(config_option_t option) override { return std::vector<std::string>(); }
     std::shared_ptr<AutoscanList> getAutoscanListOption(config_option_t option) override { return nullptr; }
     std::shared_ptr<ClientConfigList> getClientConfigListOption(config_option_t option) override { return nullptr; }
+    std::string getOrigValue(const std::string& item) override { return ""; }
+    void setOrigValue(const std::string& item, const std::string& value) override { }
+    void setOrigValue(const std::string& item, bool value) override { }
+    void setOrigValue(const std::string& item, int value) override { }
     MOCK_METHOD(std::shared_ptr<TranscodingProfileList>, getTranscodingProfileListOption, (config_option_t option), (override));
 };
 

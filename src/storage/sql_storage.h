@@ -153,8 +153,9 @@ public:
     void checkOverlappingAutoscans(std::shared_ptr<AutoscanDirectory> adir) override;
 
     /* config methods */
-    virtual std::vector<ConfigValue> getConfigValues() override;
-    virtual void updateConfigValue(const std::string& key, const std::string& item, const std::string& value) override;
+    std::vector<ConfigValue> getConfigValues() override;
+    void removeConfigValue(const std::string& item) override;
+    void updateConfigValue(const std::string& key, const std::string& item, const std::string& value) override;
 
     std::unique_ptr<std::vector<int>> getPathIDs(int objectID) override;
 

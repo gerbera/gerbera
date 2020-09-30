@@ -332,6 +332,20 @@ body,
     background-color: #ff7f0030;
 }
 
+#configgrid .removed {
+    background-color: #ff7ff060;
+}
+#configgrid .removed input {
+    background-color: #ff7ff030;
+}
+
+#configgrid .reset {
+    background-color: lightgreen;
+}
+#configgrid .reset input {
+    background-color: lightgreen;
+}
+
 .page-item.active .page-link {
     background-color: #ff7f00;
     border-color: #BF5F00;
