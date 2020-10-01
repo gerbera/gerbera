@@ -19,6 +19,7 @@ public:
     std::vector<std::string> getArrayOption(config_option_t option) override { return std::vector<std::string>(); }
     std::shared_ptr<AutoscanList> getAutoscanListOption(config_option_t option) override { return nullptr; }
     std::shared_ptr<ClientConfigList> getClientConfigListOption(config_option_t option) override { return nullptr; }
+    void updateConfigFromDatabase(std::shared_ptr<Storage> storage) override {};
     std::string getOrigValue(const std::string& item) override { return ""; }
     void setOrigValue(const std::string& item, const std::string& value) override { }
     void setOrigValue(const std::string& item, bool value) override { }

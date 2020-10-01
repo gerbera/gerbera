@@ -72,7 +72,7 @@ public:
     static std::shared_ptr<ConfigSetup> findConfigSetup(const std::string& key, bool save = false);
 
     void load(const fs::path& userHome);
-    void updateConfigFromDatabase(std::shared_ptr<Storage> storage);
+    void updateConfigFromDatabase(std::shared_ptr<Storage> storage) override;
 
     /// \brief add a config option
     /// \param option option type to add.

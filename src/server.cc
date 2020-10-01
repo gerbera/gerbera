@@ -86,7 +86,7 @@ void Server::init()
     scripting_runtime = std::make_shared<Runtime>();
 #endif
     storage = Storage::createInstance(config, timer);
-    std::static_pointer_cast<ConfigManager>(config)->updateConfigFromDatabase(storage);
+    config->updateConfigFromDatabase(storage);
     update_manager = std::make_shared<UpdateManager>(storage, self);
     session_manager = std::make_shared<web::SessionManager>(config, timer);
 #ifdef HAVE_LASTFMLIB

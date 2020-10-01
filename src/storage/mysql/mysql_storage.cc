@@ -76,13 +76,13 @@
 #define MYSQL_UPDATE_4_5_2 "UPDATE `mt_internal_setting` SET `value`='5' WHERE `key`='db_version' AND `value`='4'"
 
 // updates 5->6: add config value table
-#define MYSQL_UPDATE_5_6_1 "CREATE TABLE `mt_config_value` ( \
+#define MYSQL_UPDATE_5_6_1 "CREATE TABLE `grb_config_value` ( \
   `item` varchar(255) primary key, \
   `key` varchar(255) NOT NULL, \
   `item_value` varchar(255) NOT NULL, \
   `status` varchar(20) NOT NULL) \
   ENGINE=MyISAM CHARSET=utf8"
-#define MYSQL_UPDATE_5_6_2 "CREATE INDEX mt_config_value_item ON mt_config_value(item)"
+#define MYSQL_UPDATE_5_6_2 "CREATE INDEX grb_config_value_item ON grb_config_value(item)"
 #define MYSQL_UPDATE_5_6_3 "UPDATE `mt_internal_setting` SET `value`='6' WHERE `key`='db_version' AND `value`='5'"
 
 MysqlStorage::MysqlStorage(std::shared_ptr<Config> config)

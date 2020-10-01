@@ -50,7 +50,7 @@ class SQLEmitter;
 #define INTERNAL_SETTINGS_TABLE "mt_internal_setting"
 #define AUTOSCAN_TABLE "mt_autoscan"
 #define METADATA_TABLE "mt_metadata"
-#define CONFIG_VALUE_TABLE "mt_config_value"
+#define CONFIG_VALUE_TABLE "grb_config_value"
 
 class SQLRow {
 public:
