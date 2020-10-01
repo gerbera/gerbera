@@ -34,7 +34,7 @@ $.widget('grb.config', {
     console.log(this.options);
 
     if (data.length > 0) {
-      this.createSection(list, '', data, this.options.values, 0);
+      this.createSection(list, '', data, this.options.values, 0, null);
     } else {
       line = $('<li></li>');
       $('<span>No config found</span>').appendTo(line);
@@ -147,7 +147,56 @@ $.widget('grb.config', {
     $(itemValue.editor[0].parentElement).addClass(itemValue.status);
   },
 
-  createSection: function (list, xpath, section, values, level) {
+  removeItemClicked: function (listValue) {
+console.log({removeItemClicked: listValue});
+    this.result[listValue.item] = listValue;
+    this.options.addResultItem(listValue);
+    listValue.source = "ui";
+    listValue.editor.removeClass(listValue.status);
+    const icon = $(listValue.editor).find('i')[0];
+    if (listValue.status === 'removed') {
+        listValue.status = 'reset';
+        $(icon).removeClass('fa-undo');
+        $(icon).addClass('fa-ban');
+    } else if (listValue.status === 'added') {
+        listValue.editor[0].hidden = true;
+        listValue.status = 'killed';
+        $(icon).removeClass('fa-ban');
+        $(icon).addClass('fa-undo');
+    } else {
+        listValue.status = 'removed';
+        $(icon).removeClass('fa-ban');
+        $(icon).addClass('fa-undo');
+    }
+
+    listValue.editor.addClass(listValue.status);
+  },
+
+  addItemClicked: function (listValue) {
+console.log({addItemClicked: listValue});
+    this.result[listValue.item] = listValue;
+    this.options.addResultItem(listValue);
+    listValue.source = "ui";
+    if (listValue.parentItem.children.length > 0) {
+      let values = [];
+      listValue.parentItem.children.forEach(child => {
+        values.push({
+          config: child,
+          id: "-1",
+          item: listValue.parentItem.item + `[${listValue.index}]` + child.item.replace(listValue.parentItem.item, ''),
+          status: 'added',
+          value: '',
+          source: 'ui',
+          origValue: ''
+         });
+      });
+      this.createSection($(listValue.editor[0].parentElement), listValue.parentItem.item, listValue.parentItem.children, values, -1, listValue.parentItem, 'added');
+      this.subElements.push({item: listValue.editor, child: listValue.editor[0].parentElement});
+    }
+    listValue.index++;
+  },
+
+  createSection: function (list, xpath, section, values, level, parentItem, status = 'unchanged') {
     for (let i = 0; i < section.length; i++) {
       const item = section[i];
       let line;
@@ -159,10 +208,10 @@ $.widget('grb.config', {
         // recursive call
         let subList = null;
         if (item.children.length > 0) {
-          subList = $('<ul></ul>').addClass('list');
+          subList = $('<ul></ul>').addClass('element');
           subList.attr('id', "list_" + item.item.replaceAll("/","_"));
           this.addTextLine(line,item);
-          this.createSection (subList, xpath, item.children, values, level+1);
+          this.createSection (subList, xpath, item.children, values, level+1, item);
           subList.appendTo(line);
           this.subElements.push({item: line, child: subList});
         }
@@ -177,7 +226,7 @@ $.widget('grb.config', {
           const subList = $('<ul></ul>').addClass('list');
           subList.attr('id', "list_" + item.item.replaceAll("/","_"));
           this.addTextLine(line,item);
-          this.createSection (subList, item.item, item.children, values, level+1);
+          this.createSection (subList, item.item, item.children, values, level+1, item);
           subList.appendTo(line);
           this.subElements.push({item: line, child: subList});
         }
@@ -204,26 +253,58 @@ $.widget('grb.config', {
           line = $('<li></li>');
           line.attr('id', "item_" + item.item.replaceAll("/","_"));
         }
-        if (itemCount < 1) {
-          $('<span>No Entries</span>').appendTo(list);
+        if (itemCount < 1 && list[0].childElementCount === 0 ) {
+          list.removeClass('fa-ul');
+          list.addClass('fa-ul');
+          const itemId = "item_" + xpath.replaceAll("/","_") + "_new";
+          this.addNewListItemBlock(list, item, parentItem, 0, xpath, itemId);
+        }
+        let startCount = 0;
+        if (level === -1 && itemCount > 0) {
+          startCount = itemCount - 1;
         }
 
-        for (let count = 0; count < itemCount; count++) {
-          var itemLine = line;
+        for (let count = startCount; count < itemCount; count++) {
+          let itemLine = line;
 
           if (xpath && xpath.length > 0) {
             const itemId = "item_" + xpath.replaceAll("/","_") + "_" + count
-            var xpathList = list.find("#" + itemId);
-            if (xpathList.length === 0) {
+            let xpathList = list.find("#" + itemId);
+            if (xpathList === null || xpathList.length === 0) {
               line = $('<li></li>');
+              line.attr('style', 'padding-top: 20px');
               line.attr('id', "line_" + item.item.replaceAll("/","_"));
-              let text = $('<span></span>');
-              text.text(count).appendTo(line);
-              text.attr('title', item.item);
+              list.removeClass('fa-ul');
+              list.addClass('fa-ul');
+              let symbol = $('<span></span>').addClass('fa-li');
+              $('<i class="fa"></i>').addClass('fa-ban').appendTo(symbol);
+              symbol.appendTo(line);
+              const listValue = {
+                item: xpath + `[${count}]`,
+                index: count,
+                target: this,
+                editor: line,
+                status: status,
+                parentItem: parentItem };
+              listValue.removeItemClicked = function(event) {
+                listValue.target.removeItemClicked (listValue, event);
+              }
+              symbol.off('click').on('click', listValue.removeItemClicked);
+              //let text = $('<span></span>');
+              //text.text(count).appendTo(line);
+              //text.attr('title', item.item);
               xpathList = $('<ul></ul>');
               xpathList.attr('id', itemId);
               line.append(xpathList);
-              list.append(line);
+              xpathList.addClass(listValue.status);
+              if (level === -1) {
+                line.insertBefore(list[0].lastChild);
+              } else {
+                list.append(line);
+              }
+              if (count === itemCount - 1 && level !== -1) {
+                  this.addNewListItemBlock(list, item, parentItem, itemCount, xpath, itemId);
+              }
             }
             itemLine =  $('<li></li>');
             itemLine.attr('id', "line_" + xpath.replaceAll("/","_") + "_" + count);
@@ -235,7 +316,7 @@ $.widget('grb.config', {
           let input = $('<input>');
           input.attr('id', "value_" + item.item.replaceAll("/","_") + "_" + i +  "_" + count);
           input.attr('style', 'margin-left: 20px; min-width: 400px');
-          let itemValue = {value: item.value, source: 'default', status: 'unchanged'};
+          let itemValue = {value: item.value, source: 'default', status: status};
 
           values.forEach(v => {
             if (v.item === item.item) {
@@ -252,7 +333,9 @@ $.widget('grb.config', {
           itemLine.addClass(itemValue.status);
 
           if(item.editable) {
-            itemValue.setEntryChanged = function (event) { itemValue.target.setEntryChanged(itemValue, event); }
+            itemValue.setEntryChanged = function (event) {
+              itemValue.target.setEntryChanged(itemValue, event);
+            }
             itemValue.target = this;
             itemValue.config = item;
             itemValue.editor = input;
@@ -312,6 +395,32 @@ $.widget('grb.config', {
         list.append(line);
       }
     }
+  },
+
+  addNewListItemBlock: function (list, item, parentItem, itemCount, xpath, itemId) {
+    let lineNew = $('<li></li>');
+    lineNew.attr('id', "line_" + item.item.replaceAll("/","_"));
+    let textNew = $('<span></span>');
+    let symbolNew = $('<span></span>').addClass('fa-li');
+    $('<i class="fa"></i>').addClass('fa-plus').appendTo(symbolNew);
+    symbolNew.appendTo(lineNew);
+    const listValueNew = {
+      item: xpath + `[${itemCount}]`,
+      index: itemCount,
+      target: this,
+      editor: lineNew,
+      status: 'added',
+      parentItem: parentItem };
+    listValueNew.addItemClicked = function(event) {
+      listValueNew.target.addItemClicked (listValueNew, event);
+    }
+    symbolNew.off('click').on('click', listValueNew.addItemClicked);
+    textNew.text('Add New Entry').appendTo(lineNew);
+    //textNew.attr('title', item.item);
+    let xpathListNew = $('<ul></ul>');
+    xpathListNew.attr('id', itemId + '_New');
+    lineNew.append(xpathListNew);
+    list.append(lineNew);
   },
 
   addTextLine: function (line, item) {

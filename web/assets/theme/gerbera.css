@@ -339,6 +339,13 @@ body,
     background-color: #ff7ff030;
 }
 
+#configgrid .added {
+    background-color: lightyellow;
+}
+#configgrid .added input {
+    background-color: lightyellow;
+}
+
 #configgrid .reset {
     background-color: lightgreen;
 }
