@@ -1366,11 +1366,15 @@ std::string sockAddrGetNameInfo(const struct sockaddr* sa)
 /// \brief
 int find_local_port(unsigned short range_min, unsigned short range_max)
 {
-    int fd;
     int retry_count = 0;
     int port;
-    struct sockaddr_in server_addr;
-    struct hostent* server;
+    struct addrinfo* result;
+    struct addrinfo* rp;
+
+    struct addrinfo hints;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
 
     if (range_min > range_max) {
         log_error("min port range > max port range!");
@@ -1380,28 +1384,26 @@ int find_local_port(unsigned short range_min, unsigned short range_max)
     do {
         port = rand() % (range_max - range_min) + range_min;
 
-        fd = socket(AF_INET, SOCK_STREAM, 0);
+        int ret = getaddrinfo("127.0.0.1", std::to_string(port).c_str(), &hints, &result);
+        if (ret != 0) {
+            log_error("could not resolve localhost");
+            return -1;
+        }
+
+        for (rp = result; rp != NULL; rp = rp->ai_next) {
+            if (rp->ai_family == AF_INET || rp->ai_family == AF_INET6) {
+                break;
+            }
+        }
+
+        int fd = socket(rp->ai_family, SOCK_STREAM, 0);
         if (fd < 0) {
             log_error("could not determine free port: error creating socket ({})\n",
                 mt_strerror(errno).c_str());
             return -1;
         }
 
-        server = gethostbyname("127.0.0.1");
-        if (server == nullptr) {
-            log_error("could not resolve localhost");
-            close(fd);
-            return -1;
-        }
-
-        memset(&server_addr, 0, sizeof(server_addr));
-        server_addr.sin_family = AF_INET;
-        memcpy(&server_addr.sin_addr.s_addr, server->h_addr, server->h_length);
-        server_addr.sin_port = htons(port);
-
-        if (connect(fd, reinterpret_cast<struct sockaddr*>(&server_addr),
-                sizeof(server_addr))
-            == -1) {
+        if (connect(fd, rp->ai_addr, rp->ai_addrlen) == 0) {
             close(fd);
             return port;
         }
