@@ -95,6 +95,11 @@ protected:
     /// GetSystemUpdateID(ui4 Id)
     void doGetSystemUpdateID(const std::unique_ptr<ActionRequest>& request) const;
 
+    /// \brief Samsung Extension X_SetBookmark
+    /// \param request Incoming ActionRequest.
+    ///
+    void doSamsungBookmark(const std::unique_ptr<ActionRequest>& request) const;
+
     std::shared_ptr<Config> config;
     std::shared_ptr<Storage> storage;
 
