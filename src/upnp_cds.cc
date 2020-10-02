@@ -245,6 +245,11 @@ void ContentDirectoryService::doGetSystemUpdateID(const std::unique_ptr<ActionRe
     log_debug("end");
 }
 
+void ContentDirectoryService::doSamsungBookmark(const std::unique_ptr<ActionRequest>& request) const
+{
+    log_warning("Stub method for Samsung extension: X_SetBookmark");
+}
+
 void ContentDirectoryService::processActionRequest(const std::unique_ptr<ActionRequest>& request)
 {
     log_debug("start");
@@ -259,9 +264,11 @@ void ContentDirectoryService::processActionRequest(const std::unique_ptr<ActionR
         doGetSystemUpdateID(request);
     } else if (request->getActionName() == "Search") {
         doSearch(request);
+    } else if (request->getActionName() == "X_SetBookmark") {
+        doSamsungBookmark(request);
     } else {
         // invalid or unsupported action
-        log_info("unrecognized action {}", request->getActionName().c_str());
+        log_warning("Unrecognized action {}", request->getActionName().c_str());
         request->setErrorCode(UPNP_E_INVALID_ACTION);
         // throw UpnpException(UPNP_E_INVALID_ACTION, "unrecognized action");
     }
