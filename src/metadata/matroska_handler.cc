@@ -189,9 +189,7 @@ void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream
 
     auto sc = StringConverter::i2i(config); // sure is sure
 
-    for (size_t i = 0; i < info->ListSize(); i++) {
-        EbmlElement* el = (*info)[i];
-
+    for (const auto& el : *info) {
         if (EbmlId(*el) == KaxTitle::ClassInfos.GlobalId) {
             auto title_el = dynamic_cast<KaxTitle*>(el);
             if (title_el == nullptr) {
