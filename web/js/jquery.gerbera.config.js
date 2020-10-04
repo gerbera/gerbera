@@ -382,7 +382,11 @@ console.log({addItemClicked: listValue});
             const link = $('<a>', {"title": "reset", "style": "margin-left: 20px", "class": "", "href": "javascript:;"});
             const icon = $('<i></i>', {"class": "fa " + "fa-undo" });
             link.append(icon);
-            link.append(` reset to ${itemValue.origValue}`);
+            if (itemValue.origValue !== '') {
+                link.append(` reset to ${itemValue.origValue}`);
+            } else {
+                link.append(' reset');
+            }
             itemValue.resetEntry = function (event) { itemValue.target.resetEntry(itemValue, event); }
             link.click(itemValue, itemValue.resetEntry);
             link.appendTo(itemLine);

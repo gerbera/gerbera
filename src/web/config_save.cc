@@ -57,6 +57,7 @@ void web::configSave::process()
         try {
             auto key = fmt::format("data[{}][{}]", i, "id");
             auto item = fmt::format("data[{}][{}]", i, "item");
+            auto status = fmt::format("data[{}][{}]", i, "status");
             bool success = false;
             std::shared_ptr<ConfigSetup> cs = nullptr;
             log_info("id {}='{}'", param(item), param(key));
@@ -65,15 +66,17 @@ void web::configSave::process()
                 option = static_cast<config_option_t>(std::stoi(param(key)));
                 cs = ConfigManager::findConfigSetup(option, true);
                 log_info("{} = {}", key, option);
+            } else if (!param(item).empty()) {
+                cs = ConfigManager::findConfigSetupByPath(param(item), true);
+                //option = cs->option;
+                log_info("{} = '{}' status {}", param(item), cs != nullptr ? cs->xpath : "", param(status));
             } else {
-                cs = ConfigManager::findConfigSetup(param(item), true);
-                log_info("{} = {}", param(item), cs != nullptr ? cs->xpath : "");
+                log_error("{} has empty value", item);
                 continue;
             }
 
             if (cs != nullptr) {
                 auto value = fmt::format("data[{}][{}]", i, "value");
-                auto status = fmt::format("data[{}][{}]", i, "status");
                 auto orig = fmt::format("data[{}][{}]", i, "origValue");
                 log_debug("found option to update {}", cs->xpath);
 

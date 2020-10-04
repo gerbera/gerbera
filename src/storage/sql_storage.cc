@@ -1628,7 +1628,7 @@ std::vector<ConfigValue> SQLStorage::getConfigValues()
             row->col(3) });
     }
 
-    log_info("loading {} items", result.size());
+    log_debug("loading {} items", result.size());
     return result;
 }
 

@@ -111,7 +111,14 @@ const saveConfig = () => {
   };
   changedKeys.forEach((key) => {
     let i = current_config.changedItems[key];
-    saveData.data.push({item: i.item, id: i.id, value: i.value, origValue: i.origValue, status: i.status});
+    if (i.status != 'killed' && i.status != 'added') {
+      saveData.data.push({
+        item: i.item,
+        id: i.id,
+        value: i.value,
+        origValue: i.origValue,
+        status: i.status});
+    }
   });
   console.log(saveData);
 

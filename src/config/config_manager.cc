@@ -355,7 +355,7 @@ std::shared_ptr<ConfigSetup> ConfigManager::findConfigSetup(config_option_t opti
     throw std::runtime_error(fmt::format("Error in config code: {} tag not found", static_cast<int>(option)));
 }
 
-std::shared_ptr<ConfigSetup> ConfigManager::findConfigSetup(const std::string& key, bool save)
+std::shared_ptr<ConfigSetup> ConfigManager::findConfigSetupByPath(const std::string& key, bool save)
 {
     auto co = std::find_if(complexOptions.begin(), complexOptions.end(), [&](const auto& s) { return s->getUniquePath() == key; });
 
@@ -364,8 +364,14 @@ std::shared_ptr<ConfigSetup> ConfigManager::findConfigSetup(const std::string& k
         return *co;
     }
 
-    if (save)
-        return nullptr;
+    if (save) {
+        co = std::find_if(complexOptions.begin(), complexOptions.end(),
+          [&](const auto& s) {
+            size_t len = std::min(strlen(s->xpath), key.length());
+            return key.substr(0, len) == std::string(s->xpath).substr(0, len);
+          });
+        return (co != complexOptions.end()) ? *co : nullptr;
+    }
 
     throw std::runtime_error(fmt::format("Error in config code: {} tag not found", key));
 }
@@ -820,10 +826,11 @@ void ConfigManager::updateConfigFromDatabase(std::shared_ptr<Storage> storage)
     auto values = storage->getConfigValues();
     auto self = getSelf();
     origValues.clear();
+    log_info("Loading {} configuration items from storage", values.size());
 
     for (const auto& cfgValue : values) {
         try {
-            auto cs = ConfigManager::findConfigSetup(cfgValue.key, true);
+            auto cs = ConfigManager::findConfigSetupByPath(cfgValue.key, true);
 
             if (cs != nullptr) {
                 if (cfgValue.item == cs->xpath) {

@@ -69,7 +69,7 @@ public:
     static const char* mapConfigOption(config_option_t option);
 
     static std::shared_ptr<ConfigSetup> findConfigSetup(config_option_t option, bool save = false);
-    static std::shared_ptr<ConfigSetup> findConfigSetup(const std::string& key, bool save = false);
+    static std::shared_ptr<ConfigSetup> findConfigSetupByPath(const std::string& key, bool save = false);
 
     void load(const fs::path& userHome);
     void updateConfigFromDatabase(std::shared_ptr<Storage> storage) override;

@@ -429,6 +429,8 @@ protected:
     /// This function will create an array like that: ["data", "otherdata"]
     bool createArrayFromNode(const pugi::xml_node& element, std::vector<std::string>& result) const;
 
+    bool updateItem(size_t i, const std::string& optItem, std::shared_ptr<Config> config, std::shared_ptr<ArrayOption> value, std::string& optValue) const;
+
 public:
     ConfigArraySetup(config_option_t option, const char* xpath, config_option_t nodeOption, ArrayInitFunction init = nullptr, bool notEmpty = false)
         : ConfigSetup(option, xpath)
@@ -481,8 +483,6 @@ protected:
     bool itemNotEmpty = false;
     DictionaryInitFunction initDict = nullptr;
     config_option_t nodeOption;
-    config_option_t keyOption;
-    config_option_t valOption;
     bool tolower = false;
 
     /// \brief Creates a dictionary from an XML nodeset.
@@ -503,6 +503,9 @@ protected:
     bool createDictionaryFromNode(const pugi::xml_node& optValue, std::map<std::string, std::string>& result) const;
 
 public:
+    config_option_t keyOption;
+    config_option_t valOption;
+
     ConfigDictionarySetup(config_option_t option, const char* xpath, DictionaryInitFunction init = nullptr, bool notEmpty = false, bool itemNotEmpty = false)
         : ConfigSetup(option, xpath)
         , notEmpty(notEmpty)

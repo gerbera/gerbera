@@ -46,6 +46,7 @@ class ClientConfigList;
 
 class ConfigOption {
 public:
+
     virtual std::string getOption() const
     {
         throw std::runtime_error("Wrong option type string");
@@ -76,7 +77,7 @@ public:
         throw std::runtime_error("Wrong option type client list");
     }
 
-    virtual std::vector<std::string> getArrayOption() const
+    virtual std::vector<std::string> getArrayOption(bool forEdit = false) const
     {
         throw std::runtime_error("Wrong option type array");
     }
@@ -145,22 +146,69 @@ protected:
 class ArrayOption : public ConfigOption {
 public:
     explicit ArrayOption(const std::vector<std::string>& option)
+    : option(option), origSize(), indexMap()
     {
-        this->option = option;
+        this->origSize = this->option.size();
+        for (size_t i = 0; i < this->origSize; i++) {
+            this->indexMap[i] = i;
+        }
     }
 
-    std::vector<std::string> getArrayOption() const override
+    std::vector<std::string> getArrayOption(bool forEdit = false) const override
     {
-        return option;
+        if (!forEdit)
+            return option;
+
+        std::vector<std::string> editOption;
+        auto editSize = getEditSize();
+        for (size_t i = 0; i < editSize; i++) {
+            if (indexMap.at(i) < SIZE_MAX) {
+                editOption.push_back(option[indexMap.at(i)]);
+            } else {
+                editOption.push_back("");
+            }
+        }
+        return editOption;
     }
 
-    void setItem(int index, const std::string& value)
+    size_t getEditSize() const
     {
-        option.at(index) = value;
+        if (indexMap.empty()) {
+            return 0;
+        }
+        return (*std::max_element(indexMap.begin(), indexMap.end(), [&] (auto a, auto b) { return (a.first < b.first);})).first + 1;
+    }
+
+    void setItem(size_t index, const std::string& value)
+    {
+        if (indexMap.find(index) != indexMap.end() && value.empty()) {
+            option.erase(option.begin() + index);
+            indexMap[index] = SIZE_MAX;
+            auto editSize = getEditSize();
+            for (size_t i = index + 1; i < editSize; i++) {
+                if (indexMap[i] < SIZE_MAX) {
+                    indexMap[i]--;
+                }
+            }
+            for (size_t i = editSize - 1; i >= origSize; i--) {
+                if (indexMap[i] == SIZE_MAX)
+                    indexMap.erase(i);
+                else {
+                    break;
+                }
+            }
+        } else if (indexMap.find(index) != indexMap.end()) {
+            option.at(indexMap[index]) = value;
+        } else if (!value.empty()) {
+            option.push_back(value);
+            indexMap[index] = option.size() - 1;
+        }
     }
 
 protected:
     std::vector<std::string> option;
+    size_t origSize;
+    std::map<size_t, size_t> indexMap;
 };
 
 class AutoscanListOption : public ConfigOption {

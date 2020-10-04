@@ -520,17 +520,34 @@ void ConfigArraySetup::makeOption(const pugi::xml_node& root, std::shared_ptr<Co
     setOption(config);
 }
 
+bool ConfigArraySetup::updateItem(size_t i, const std::string& optItem, std::shared_ptr<Config> config, std::shared_ptr<ArrayOption> value, std::string& optValue) const
+{
+    auto index = getItemPath(i);
+    if (optItem == index) {
+        config->setOrigValue(index, value->getArrayOption()[i]);
+        value->setItem(i, optValue);
+        return true;
+    }
+    return false;
+}
+
 bool ConfigArraySetup::updateDetail(const std::string& optItem, std::string& optValue, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments)
 {
     if (optItem.substr(0, strlen(xpath)) == xpath && optionValue != nullptr) {
         std::shared_ptr<ArrayOption> value = std::dynamic_pointer_cast<ArrayOption>(optionValue);
         log_info("Updating Array Detail {} {} {}", xpath, optItem, optValue);
-        for (size_t i = 0; i < value->getArrayOption().size(); i++) {
-            auto index = getItemPath(i);
-            if (optItem == index) {
-                config->setOrigValue(index, value->getArrayOption()[i]);
-                value->setItem(i, optValue);
-                log_info("New Array Detail {} {}", index, config->getArrayOption(option)[i]);
+        if (optItem.find_first_of('[') != std::string::npos && optItem.find_first_of(']', optItem.find_first_of('[')) != std::string::npos ) {
+            auto startPos = optItem.find_first_of('[') + 1;
+            auto endPos = optItem.find_first_of(']', startPos);
+            auto i = std::stoi(optItem.substr(startPos, endPos - startPos));
+            if (updateItem(i, optItem, config, value, optValue)) {
+                return true;
+            }
+        }
+
+        auto editSize = value->getEditSize();
+        for (size_t i = 0; i < editSize; i++) {
+            if (updateItem(i, optItem, config, value, optValue)) {
                 return true;
             }
         }
