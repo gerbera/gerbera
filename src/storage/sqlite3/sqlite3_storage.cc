@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     sqlite3_storage.cc - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -126,7 +126,7 @@ void Sqlite3Storage::init()
 
     // check for db-file
     if (access(dbFilePath.c_str(), R_OK | W_OK) != 0 && errno != ENOENT)
-        throw StorageException("", "Error while accessing sqlite database file (" + dbFilePath + "): " + mt_strerror(errno));
+        throw StorageException("", "Error while accessing sqlite database file (" + dbFilePath + "): " + strerror(errno));
 
     taskQueueOpen = true;
 
@@ -137,7 +137,7 @@ void Sqlite3Storage::init()
         this);
 
     if (ret != 0) {
-        throw StorageException("", "Could not start sqlite thread: " + mt_strerror(errno));
+        throw StorageException("", fmt::format("Could not start sqlite thread: {}", strerror(errno)));
     }
 
     // wait for sqlite3 thread to become ready
@@ -456,17 +456,17 @@ void SLInitTask::run(sqlite3** db, Sqlite3Storage* sl)
     sqlite3_close(*db);
 
     if (unlink(dbFilePath.c_str()) != 0)
-        throw StorageException("", "error while autocreating sqlite3 database: could not unlink old database file: " + mt_strerror(errno));
+        throw StorageException("", fmt::format("SQLite: Failed to unlink old database file: {}", strerror(errno)));
 
     int res = sqlite3_open(dbFilePath.c_str(), db);
     if (res != SQLITE_OK)
-        throw StorageException("", "error while autocreating sqlite3 database: could not create new database");
+        throw StorageException("", "SQLite: Failed to create new database");
 
     unsigned char buf[SL3_CREATE_SQL_INFLATED_SIZE + 1]; // +1 for '\0' at the end of the string
     unsigned long uncompressed_size = SL3_CREATE_SQL_INFLATED_SIZE;
     int ret = uncompress(buf, &uncompressed_size, sqlite3_create_sql, SL3_CREATE_SQL_DEFLATED_SIZE);
     if (ret != Z_OK || uncompressed_size != SL3_CREATE_SQL_INFLATED_SIZE)
-        throw StorageException("", "Error while uncompressing sqlite3 create sql. returned: " + std::to_string(ret));
+        throw StorageException("", "SQLite: Error decompressing create SQL: " + std::to_string(ret));
     buf[SL3_CREATE_SQL_INFLATED_SIZE] = '\0';
 
     char* err = nullptr;

@@ -183,7 +183,7 @@ int ClientConfig::remapFlag(const std::string& flag)
     if (flag == "SAMSUNG") {
         return QUIRK_FLAG_SAMSUNG;
     }
-    return stoi_string(flag, 0, 0);
+    return stoiString(flag, 0, 0);
 }
 
 std::string ClientConfig::mapFlags(QuirkFlags flags)

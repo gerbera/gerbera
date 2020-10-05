@@ -241,8 +241,8 @@ void Server::run()
 void Server::writeBookmark(const std::string& ip, const std::string& port)
 {
     const std::string data = config->getBoolOption(CFG_SERVER_UI_ENABLED)
-        ? http_redirect_to(ip, port)
-        : http_redirect_to(ip, port, "disabled.html");
+        ? httpRedirectTo(ip, port)
+        : httpRedirectTo(ip, port, "disabled.html");
 
     fs::path path = config->getOption(CFG_SERVER_BOOKMARK_FILE);
     log_debug("Writing bookmark file to: {}", path.c_str());
@@ -502,7 +502,7 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
         RequestHandler::splitUrl(filename, URL_UI_PARAM_SEPARATOR, path, parameters);
 
         std::map<std::string, std::string> params;
-        dict_decode(parameters, &params);
+        dictDecode(parameters, &params);
 
         auto it = params.find(URL_REQUEST_TYPE);
         std::string r_type = it != params.end() && !it->second.empty() ? it->second : "index";

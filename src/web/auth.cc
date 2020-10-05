@@ -49,19 +49,19 @@ static time_t get_time()
 static std::string generate_token()
 {
     const time_t expiration = get_time() + LOGIN_TIMEOUT;
-    std::string salt = generate_random_id();
+    std::string salt = generateRandomId();
     return std::to_string(expiration) + '_' + salt;
 }
 
 static bool check_token(const std::string& token, const std::string& password, const std::string& encPassword)
 {
-    std::vector<std::string> parts = split_string(token, '_');
+    std::vector<std::string> parts = splitString(token, '_');
     if (parts.size() != 2)
         return false;
     auto expiration = static_cast<time_t>(std::stol(parts[0]));
     if (expiration < get_time())
         return false;
-    std::string checksum = hex_string_md5(token + password);
+    std::string checksum = hexStringMd5(token + password);
     return (checksum == encPassword);
 }
 

@@ -135,17 +135,17 @@ std::string CdsResource::encode()
     std::ostringstream buf;
     buf << handlerType;
     buf << RESOURCE_PART_SEP;
-    buf << dict_encode(attributes);
+    buf << dictEncode(attributes);
     buf << RESOURCE_PART_SEP;
-    buf << dict_encode(parameters);
+    buf << dictEncode(parameters);
     buf << RESOURCE_PART_SEP;
-    buf << dict_encode(options);
+    buf << dictEncode(options);
     return buf.str();
 }
 
 std::shared_ptr<CdsResource> CdsResource::decode(const std::string& serial)
 {
-    std::vector<std::string> parts = split_string(serial, RESOURCE_PART_SEP, true);
+    std::vector<std::string> parts = splitString(serial, RESOURCE_PART_SEP, true);
     int size = parts.size();
     if (size < 2 || size > 4)
         throw_std_runtime_error("Could not parse resources");
@@ -153,15 +153,15 @@ std::shared_ptr<CdsResource> CdsResource::decode(const std::string& serial)
     int handlerType = std::stoi(parts[0]);
 
     std::map<std::string, std::string> attr;
-    dict_decode(parts[1], &attr);
+    dictDecode(parts[1], &attr);
 
     std::map<std::string, std::string> par;
     if (size >= 3)
-        dict_decode(parts[2], &par);
+        dictDecode(parts[2], &par);
 
     std::map<std::string, std::string> opt;
     if (size >= 4)
-        dict_decode(parts[3], &opt);
+        dictDecode(parts[3], &opt);
 
     auto resource = std::make_shared<CdsResource>(handlerType, attr, par, opt);
     return resource;

@@ -61,7 +61,7 @@ class IOHandler;
 /// \param sep separator character
 /// \param treat subsequent separators as empty array elements
 /// \return array of strings
-std::vector<std::string> split_string(const std::string& str, char sep, bool empty = false);
+std::vector<std::string> splitString(const std::string& str, char sep, bool empty = false);
 
 /// \brief trim from start (in place)
 void leftTrimStringInPlace(std::string& str);
@@ -73,21 +73,21 @@ void rightTrimStringInPlace(std::string& str);
 void trimStringInPlace(std::string& str);
 
 /// \brief returns str with leading and trailing whitespace removed (copy)
-std::string trim_string(std::string str);
+std::string trimString(std::string str);
 
 /// \brief returns true if str starts with check
 bool startswith(const std::string& str, const std::string& check);
 
 /// \brief returns lowercase of str
-std::string tolower_string(std::string str);
+std::string toLower(std::string str);
 
-int stoi_string(const std::string& str, int def = 0, int base = 10);
+int stoiString(const std::string& str, int def = 0, int base = 10);
 
 /// \brief  Used to replace potential multiple following //../ with single /
-std::string reduce_string(std::string str, char ch);
+std::string reduceString(std::string str, char ch);
 
 /// \brief  Used to replace parts of string with other value
-std::string& replace_string(std::string& str, const std::string& from, const std::string& to);
+std::string& replaceString(std::string& str, const std::string& from, const std::string& to);
 
 /// \brief Get last write time of the specified file or path, if it does not exist it will throw an exception
 /// \param path file or directory to be checked.
@@ -105,63 +105,58 @@ off_t getFileSize(const fs::path& path);
 /// \param path absolute path of the binary
 /// \param err if not NULL err will contain the errno result of the check
 /// \return true if the given binary is executable by our process, otherwise false
-bool is_executable(const fs::path& path, int* err = nullptr);
+bool isExecutable(const fs::path& path, int* err = nullptr);
 
 /// \brief Checks if the given executable exists in $PATH
 /// \param exec filename of the executable that needs to be checked
 /// \return aboslute path to the given executable or nullptr of it was not found
-fs::path find_in_path(const fs::path& exec);
+fs::path findInPath(const fs::path& exec);
 
 /// \brief Render HTML that is doing a redirect to the given ip, port and html page.
 /// \param ip IP address as string.
 /// \param port Port as string.
 /// \param page HTML document to redirect to.
 /// \return string representing the desired HTML document.
-std::string http_redirect_to(const std::string& ip, const std::string& port, const std::string& page = "");
+std::string httpRedirectTo(const std::string& ip, const std::string& port, const std::string& page = "");
 
 /// \brief Encodes arbitrary data to a hex string.
 /// \param data Buffer that is holding the data
 /// \param len Length of the buffer.
 /// \return string of the data in hex representation.
-std::string hex_encode(const void* data, int len);
+std::string hexEncode(const void* data, int len);
 
 /// \brief Decodes hex encoded string.
 /// \param encoded hex-encoded string.
 /// \return decoded string
-std::string hex_decode_string(const std::string& encoded);
+std::string hexDecodeString(const std::string& encoded);
 
 /// \brief Generates random id.
 /// \return String representing the newly created id.
-std::string generate_random_id();
+std::string generateRandomId();
 
 /// \brief Generates hex md5 sum of the given data.
-std::string hex_md5(const void* data, int length);
+std::string hexMd5(const void* data, int length);
 
 /// \brief Generates hex md5 sum of the given string.
-std::string hex_string_md5(const std::string& str);
+std::string hexStringMd5(const std::string& str);
 
 /// \brief Converts a string to a URL (meaning: %20 instead of space and so on)
 /// \param str String to be converted.
 /// \return string that contains the url-escaped representation of the original string.
-std::string url_escape(const std::string& str);
+std::string urlEscape(const std::string& str);
 
-/// \brief Opposite of url_escape :)
+/// \brief Opposite of urlEscape :)
 std::string urlUnescape(const std::string& str);
 
-std::string dict_encode(const std::map<std::string, std::string>& dict);
-std::string dict_encode_simple(const std::map<std::string, std::string>& dict);
-void dict_decode(const std::string& url, std::map<std::string, std::string>* dict);
-void dict_decode_simple(const std::string& url, std::map<std::string, std::string>* dict);
+std::string dictEncode(const std::map<std::string, std::string>& dict);
+std::string dictEncodeSimple(const std::map<std::string, std::string>& dict);
+void dictDecode(const std::string& url, std::map<std::string, std::string>* dict);
+void dictDecodeSimple(const std::string& url, std::map<std::string, std::string>* dict);
 
 /// \brief Convert an array of strings to a CSV list, with additional protocol information
 /// \param array that needs to be converted
 /// \return string containing the CSV list
-std::string mime_types_to_CSV(const std::vector<std::string>& mimeTypes);
-
-/// \brief a wrapper for the reentrant strerror_r() function
-/// \param mt_errno the errno to get the error string from
-/// \return the error string
-std::string mt_strerror(int mt_errno);
+std::string mimeTypesToCsv(const std::vector<std::string>& mimeTypes);
 
 /// \brief Reads the entire contents of a text file and returns it as a string.
 std::string readTextFile(const fs::path& path);
@@ -214,11 +209,8 @@ std::string getMIME(const fs::path& filepath, const void* buffer, size_t length,
 /// \brief Extracts resolution from a JPEG image
 std::string get_jpeg_resolution(const std::unique_ptr<IOHandler>& ioh);
 
-/// \brief Sets resolution for a given resource index, item must be a JPEG image
-void set_jpeg_resolution_resource(const std::shared_ptr<CdsItem>& item, int res_num);
-
 /// \brief checks if the given string has the format xr x yr (i.e. 320x200 etc.)
-bool check_resolution(const std::string& resolution, int* x = nullptr, int* y = nullptr);
+bool checkResolution(const std::string& resolution, int* x = nullptr, int* y = nullptr);
 
 std::string escape(std::string string, char escape_char, char to_escape);
 
@@ -236,14 +228,6 @@ std::string unescape(std::string string, char escape);
 /// \return the unescaped string
 std::string xml_unescape(std::string string);
 */
-
-/// brief Unescape all &amp; occurances in a given string.
-///
-/// This function will look for &amp; in a string and convert it to '&',
-/// all other tokens are not touched.
-/// \param string that should be unescaped
-/// \return the unescaped string
-std::string unescape_amp(std::string string);
 
 /// \brief Returns the first string if it isn't "nullptr", otherwise the fallback string.
 /// \param first the string to return if it isn't nullptr
@@ -289,11 +273,6 @@ long getDeltaMillis(struct timespec* first, struct timespec* second);
 
 void getTimespecAfterMillis(long delta, struct timespec* ret, struct timespec* start = nullptr);
 
-/// \brief Finds the IP address of the specified network interface.
-/// \param interface i.e. eth0, lo, etc.
-/// \return IP address or nullptr if interface was not found.
-std::string interfaceToIP(const std::string& interface);
-
 /// \brief Finds the Interface with the specified IP address.
 /// \param ip i.e. 192.168.4.56.
 /// \return Interface name or nullptr if IP was not found.
@@ -329,7 +308,7 @@ bool isTheora(const fs::path& ogg_filename);
 /// \brief Gets an absolute filename as a parameter and returns the last parent
 ///
 /// "/some/path/to/file.txt" -> "to"
-fs::path get_last_path(const fs::path& path);
+fs::path getLastPath(const fs::path& path);
 
 /// \brief Calculates a position where it is safe to cut an UTF-8 string.
 /// \return Caclulated position or -1 in case of an error.

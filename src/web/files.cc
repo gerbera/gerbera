@@ -52,7 +52,7 @@ void web::files::process()
     check_request();
 
     std::string parentID = param("parent_id");
-    std::string path = (parentID == "0") ? FS_ROOT_DIRECTORY : hex_decode_string(parentID);
+    std::string path = (parentID == "0") ? FS_ROOT_DIRECTORY : hexDecodeString(parentID);
 
     auto root = xmlDoc->document_element();
 
@@ -74,7 +74,7 @@ void web::files::process()
         if (exclude_config_files && startswith(filepath.filename(), "."))
             continue;
 
-        std::string id = hex_encode(filepath.c_str(), filepath.string().length());
+        std::string id = hexEncode(filepath.c_str(), filepath.string().length());
         filesMap[id] = { filepath.filename() };
     }
 

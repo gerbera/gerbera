@@ -75,7 +75,7 @@
 
 static const char* HEX_CHARS = "0123456789abcdef";
 
-std::vector<std::string> split_string(const std::string& str, char sep, bool empty)
+std::vector<std::string> splitString(const std::string& str, char sep, bool empty)
 {
     std::vector<std::string> ret;
     const char* data = str.c_str();
@@ -120,7 +120,7 @@ void trimStringInPlace(std::string& str)
     rightTrimStringInPlace(str);
 }
 
-std::string trim_string(std::string str)
+std::string trimString(std::string str)
 {
     if (str.empty())
         return str;
@@ -135,13 +135,13 @@ bool startswith(const std::string& str, const std::string& check)
     return str.rfind(check, 0) == 0;
 }
 
-std::string tolower_string(std::string str)
+std::string toLower(std::string str)
 {
     std::transform(str.begin(), str.end(), str.begin(), ::tolower);
     return str;
 }
 
-int stoi_string(const std::string& str, int def, int base)
+int stoiString(const std::string& str, int def, int base)
 {
     if (str.empty() || !std::isdigit(*str.c_str()))
         return def;
@@ -149,7 +149,7 @@ int stoi_string(const std::string& str, int def, int base)
     return std::stoi(str, nullptr, base);
 }
 
-std::string reduce_string(std::string str, char ch)
+std::string reduceString(std::string str, char ch)
 {
     std::string::iterator new_end = std::unique(
         str.begin(), str.end(),
@@ -159,7 +159,7 @@ std::string reduce_string(std::string str, char ch)
     return str;
 }
 
-std::string& replace_string(std::string& str, const std::string& from, const std::string& to)
+std::string& replaceString(std::string& str, const std::string& from, const std::string& to)
 {
     size_t start_pos = str.find(from);
     if (start_pos != std::string::npos)
@@ -173,10 +173,10 @@ time_t getLastWriteTime(const fs::path& path)
     // auto ftime = fs::last_write_time(p);
     // time_t cftime = decltype(ftime)::clock::to_time_t(ftime);
 
-    struct stat statbuf;
+    struct stat statbuf{};
     int ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
-        throw_std_runtime_error(mt_strerror(errno) + ": " + path.string());
+        throw_std_runtime_error(fmt::format("{}: {}", strerror(errno), path.string()));
     }
 
     return statbuf.st_mtime;
@@ -188,7 +188,7 @@ bool isRegularFile(const fs::path& path)
     struct stat statbuf;
     int ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
-        throw_std_runtime_error(mt_strerror(errno) + ": " + path.string());
+        throw_std_runtime_error(fmt::format("{}: {}", strerror(errno), path.string()));
     }
 
     return S_ISREG(statbuf.st_mode);
@@ -211,16 +211,16 @@ bool isRegularFile(const fs::path& path, std::error_code& ec) noexcept
 off_t getFileSize(const fs::path& path)
 {
     // unfortunately fs::file_size(path) does not to work for files >2GB on ARM 32bit systems (see #737)
-    struct stat statbuf;
+    struct stat statbuf{};
     int ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
-        throw_std_runtime_error(mt_strerror(errno) + ": " + path.string());
+        throw_std_runtime_error(fmt::format("{}: {}", strerror(errno), path.string()));
     }
 
     return statbuf.st_size;
 }
 
-bool is_executable(const fs::path& path, int* err)
+bool isExecutable(const fs::path& path, int* err)
 {
     int ret = access(path.c_str(), R_OK | X_OK);
     if (err != nullptr)
@@ -229,14 +229,14 @@ bool is_executable(const fs::path& path, int* err)
     return ret == 0;
 }
 
-fs::path find_in_path(const fs::path& exec)
+fs::path findInPath(const fs::path& exec)
 {
     std::string PATH = getenv("PATH");
     if (PATH.empty())
         return "";
 
     std::error_code ec;
-    auto pathAr = split_string(PATH, ':');
+    auto pathAr = splitString(PATH, ':');
     for (auto& path : pathAr) {
         fs::path check = fs::path(path) / exec;
         if (isRegularFile(check, ec))
@@ -246,12 +246,12 @@ fs::path find_in_path(const fs::path& exec)
     return "";
 }
 
-std::string http_redirect_to(const std::string& ip, const std::string& port, const std::string& page)
+std::string httpRedirectTo(const std::string& ip, const std::string& port, const std::string& page)
 {
     return R"(<html><head><meta http-equiv="Refresh" content="0;URL=http://)" + ip + ":" + port + "/" + page + R"("></head><body bgcolor="#dddddd"></body></html>)";
 }
 
-std::string hex_encode(const void* data, int len)
+std::string hexEncode(const void* data, int len)
 {
     const unsigned char* chars;
     int i;
@@ -269,7 +269,7 @@ std::string hex_encode(const void* data, int len)
     return buf.str();
 }
 
-std::string hex_decode_string(const std::string& encoded)
+std::string hexDecodeString(const std::string& encoded)
 {
     auto ptr = const_cast<char*>(encoded.c_str());
     int len = encoded.length();
@@ -287,7 +287,7 @@ std::string hex_decode_string(const std::string& encoded)
     return buf.str();
 }
 
-std::string hex_md5(const void* data, int length)
+std::string hexMd5(const void* data, int length)
 {
     char md5buf[16];
 
@@ -296,13 +296,13 @@ std::string hex_md5(const void* data, int length)
     md5_append(&ctx, static_cast<unsigned char*>(const_cast<void*>(data)), length);
     md5_finish(&ctx, reinterpret_cast<unsigned char*>(md5buf));
 
-    return hex_encode(md5buf, 16);
+    return hexEncode(md5buf, 16);
 }
-std::string hex_string_md5(const std::string& str)
+std::string hexStringMd5(const std::string& str)
 {
-    return hex_md5(str.c_str(), str.length());
+    return hexMd5(str.c_str(), str.length());
 }
-std::string generate_random_id()
+std::string generateRandomId()
 {
 #ifdef BSD_NATIVE_UUID
     char* uuid_str;
@@ -331,7 +331,7 @@ std::string generate_random_id()
 
 static const char* HEX_CHARS2 = "0123456789ABCDEF";
 
-std::string url_escape(const std::string& str)
+std::string urlEscape(const std::string& str)
 {
     std::ostringstream buf;
     for (size_t i = 0; i < str.length();) {
@@ -396,29 +396,29 @@ std::string urlUnescape(const std::string& str)
     return buf.str();
 }
 
-static std::string dict_encode(const std::map<std::string, std::string>& dict, char sep1, char sep2)
+static std::string dictEncode(const std::map<std::string, std::string>& dict, char sep1, char sep2)
 {
     std::ostringstream buf;
     for (auto it = dict.begin(); it != dict.end(); it++) {
         if (it != dict.begin())
             buf << sep1;
-        buf << url_escape(it->first) << sep2
-            << url_escape(it->second);
+        buf << urlEscape(it->first) << sep2
+            << urlEscape(it->second);
     }
     return buf.str();
 }
 
-std::string dict_encode(const std::map<std::string, std::string>& dict)
+std::string dictEncode(const std::map<std::string, std::string>& dict)
 {
-    return dict_encode(dict, '&', '=');
+    return dictEncode(dict, '&', '=');
 }
 
-std::string dict_encode_simple(const std::map<std::string, std::string>& dict)
+std::string dictEncodeSimple(const std::map<std::string, std::string>& dict)
 {
-    return dict_encode(dict, '/', '/');
+    return dictEncode(dict, '/', '/');
 }
 
-void dict_decode(const std::string& url, std::map<std::string, std::string>* dict)
+void dictDecode(const std::string& url, std::map<std::string, std::string>* dict)
 {
     auto data = url.c_str();
     auto dataEnd = data + url.length();
@@ -442,7 +442,7 @@ void dict_decode(const std::string& url, std::map<std::string, std::string>* dic
 
 // this is somewhat tricky as we need an exact amount of pairs
 // object_id=720&res_id=0
-void dict_decode_simple(const std::string& url, std::map<std::string, std::string>* dict)
+void dictDecodeSimple(const std::string& url, std::map<std::string, std::string>* dict)
 {
     std::string encoded;
     size_t pos;
@@ -467,7 +467,7 @@ void dict_decode_simple(const std::string& url, std::map<std::string, std::strin
     } while (last_pos < url.length());
 }
 
-std::string mime_types_to_CSV(const std::vector<std::string>& mimeTypes)
+std::string mimeTypesToCsv(const std::vector<std::string>& mimeTypes)
 {
     std::ostringstream buf;
     for (const auto& mimeType : mimeTypes) {
@@ -478,37 +478,14 @@ std::string mime_types_to_CSV(const std::vector<std::string>& mimeTypes)
     return buf.str();
 }
 
-std::string mt_strerror(int mt_errno)
-{
-#ifdef DONT_USE_YET_HAVE_STRERROR_R
-    char* buffer = (char*)malloc(512);
-    char* err_str;
-#ifdef STRERROR_R_CHAR_P
-    err_str = strerror_r(errno, buffer, 512);
-    if (err_str == NULL)
-        err_str = buffer;
-#else
-    int ret = strerror_r(errno, buffer, 512);
-    if (ret < 0)
-        return "cannot get error string: error while calling XSI-compliant strerror_r";
-    err_str = buffer;
-#endif
-    std::string errStr(err_str);
-    free(buffer);
-    return errStr;
-#else
-    return strerror(errno);
-#endif
-}
-
 std::string readTextFile(const fs::path& path)
 {
     FILE* f = fopen(path.c_str(), "rt");
     if (!f) {
-        throw_std_runtime_error("could not open " + path.string() + " : " + mt_strerror(errno));
+        throw_std_runtime_error("could not open " + path.string() + " : " + strerror(errno));
     }
     std::ostringstream buf;
-    std::array<char, 1024> buffer;
+    std::array<char, 1024> buffer{};
     size_t bytesRead;
     while ((bytesRead = fread(buffer.data(), 1, buffer.size(), f)) > 0) {
         buf << std::string(buffer.data(), bytesRead);
@@ -522,14 +499,14 @@ void writeTextFile(const fs::path& path, const std::string& contents)
     size_t bytesWritten;
     FILE* f = fopen(path.c_str(), "wt");
     if (!f) {
-        throw_std_runtime_error("could not open " + path.string() + " : " + mt_strerror(errno));
+        throw_std_runtime_error("could not open " + path.string() + " : " + strerror(errno));
     }
 
     bytesWritten = fwrite(contents.c_str(), 1, contents.length(), f);
     if (bytesWritten < contents.length()) {
         fclose(f);
 
-        throw_std_runtime_error("error writing to " + path.string() + " : " + mt_strerror(errno));
+        throw_std_runtime_error("error writing to " + path.string() + " : " + strerror(errno));
     }
     fclose(f);
 }
@@ -591,7 +568,7 @@ std::string renderProtocolInfo(const std::string& mimetype, const std::string& p
 
 std::string getMTFromProtocolInfo(const std::string& protocol)
 {
-    std::vector<std::string> parts = split_string(protocol, ':');
+    std::vector<std::string> parts = splitString(protocol, ':');
     if (parts.size() > 2)
         return parts[2];
 
@@ -666,23 +643,7 @@ std::string getMIME(const fs::path& filepath, const void* buffer, size_t length,
 }
 #endif
 
-void set_jpeg_resolution_resource(const std::shared_ptr<CdsItem>& item, int res_num)
-{
-    try {
-        std::unique_ptr<IOHandler> fio_h = std::make_unique<FileIOHandler>(item->getLocation());
-        fio_h->open(UPNP_READ);
-        std::string resolution = get_jpeg_resolution(fio_h);
-
-        if (res_num >= item->getResourceCount())
-            throw_std_runtime_error("Invalid resource index");
-
-        item->getResource(res_num)->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), resolution);
-    } catch (const std::runtime_error& e) {
-        log_error("Exception! {}", e.what());
-    }
-}
-
-bool check_resolution(const std::string& resolution, int* x, int* y)
+bool checkResolution(const std::string& resolution, int* x, int* y)
 {
     if (x != nullptr)
         *x = 0;
@@ -690,7 +651,7 @@ bool check_resolution(const std::string& resolution, int* x, int* y)
     if (y != nullptr)
         *y = 0;
 
-    std::vector<std::string> parts = split_string(resolution, 'x');
+    std::vector<std::string> parts = splitString(resolution, 'x');
     if (parts.size() != 2)
         return false;
 
@@ -779,94 +740,6 @@ std::string unescape(std::string string, char escape)
     return buf.str();
 }
 
-/*
-std::string xml_unescape(std::string_view sv)
-{
-    std::ostringstream buf;
-    signed char *ptr = (signed char *)sv.data();
-    while (*ptr)
-    {
-        if (*ptr == '&')
-        {
-            if ((*(ptr + 1) == 'l') && (*(ptr + 2) == 't') && 
-                (*(ptr + 3) == ';'))
-            {
-                buf << '<';
-                ptr = ptr + 3;
-            }
-            else if ((*(ptr + 1) == 'g') && (*(ptr + 2) == 't') && 
-                     (*(ptr + 3) == ';'))
-            {
-                buf << '>';
-                ptr = ptr + 3;
-            }
-            else if ((*(ptr + 1) == 'q') && (*(ptr + 2) == 'u') && 
-                     (*(ptr + 3) == 'o') && (*(ptr + 4) == 't') &&
-                     (*(ptr + 5) == ';'))
-            {
-                buf << '"';
-                ptr = ptr + 5;
-            }
-            else if (*(ptr + 1) == 'a')
-            {
-                if ((*(ptr + 2) == 'm') && (*(ptr + 3) == 'p') && 
-                    (*(ptr + 4) == ';'))
-                    {
-                        buf << '&';
-                        ptr = ptr + 4;
-                    }
-                else if ((*(ptr + 2) == 'p') && (*(ptr + 3) == 'o') &&
-                         (*(ptr + 4) == 's') && (*(ptr + 5) == ';'))
-                {
-                    buf << '\'';
-                    ptr = ptr + 5;
-                }
-            }
-            else
-                buf << *ptr;
-        }
-        else
-            buf << *ptr;
-
-        ptr++;
-    }
-
-    return buf.str();
-}
-*/
-
-std::string unescape_amp(std::string string)
-{
-    if (string.empty())
-        return "";
-
-    std::ostringstream buf;
-    size_t len = string.length();
-
-    size_t last = 0;
-    do {
-        int skip = 0;
-        size_t next = last - 1;
-        do {
-            next = string.find('&', next + 1);
-            if (next == std::string::npos)
-                break;
-            if ((next < len) && (string.at(next + 1) == 'a') && (string.at(next + 2) == 'm') && (string.at(next + 3) == 'p') && (string.at(next + 4) == ';')) {
-                skip = 4;
-            }
-        } while (next > 0 && skip == 0);
-
-        if (next == std::string::npos)
-            next = len;
-
-        int cpLen = next - last + 1;
-        buf.write(&string[last], cpLen);
-        last = next + skip + 1;
-    } while (last <= len);
-
-    return buf.str();
-}
-
 std::string fallbackString(const std::string& first, const std::string& fallback)
 {
     return first.empty() ? fallback : first;
@@ -897,7 +770,7 @@ void getTimespecNow(struct timespec* ts)
     struct timeval tv;
     int ret = gettimeofday(&tv, nullptr);
     if (ret != 0)
-        throw_std_runtime_error("gettimeofday failed: " + mt_strerror(errno));
+        throw_std_runtime_error(fmt::format("gettimeofday failed: {}", strerror(errno)));
 
     ts->tv_sec = tv.tv_sec;
     ts->tv_nsec = tv.tv_usec * 1000;
@@ -933,58 +806,6 @@ void getTimespecAfterMillis(long delta, struct timespec* ret, struct timespec* s
     // log_debug("timespec: sec: {}, nsec: {}", ret->tv_sec, ret->tv_nsec);
 }
 
-std::string interfaceToIP(const std::string& interface)
-{
-
-    struct if_nameindex* iflist = nullptr;
-    struct if_nameindex* iflist_free = nullptr;
-    struct ifreq if_request;
-    struct sockaddr_in local_address;
-    int local_socket;
-
-    if (interface.empty())
-        return "";
-
-    local_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-    if (local_socket < 0) {
-        log_error("Could not create local socket: {}",
-            mt_strerror(errno).c_str());
-        return "";
-    }
-
-    iflist = iflist_free = if_nameindex();
-    if (iflist == nullptr) {
-        log_error("Could not get interface list: {}",
-            mt_strerror(errno).c_str());
-        close(local_socket);
-        return "";
-    }
-
-    while (iflist->if_index || iflist->if_name) {
-        if (interface == iflist->if_name) {
-            memcpy(if_request.ifr_name, iflist->if_name, IF_NAMESIZE);
-            if (ioctl(local_socket, SIOCGIFADDR, &if_request) != 0) {
-                log_error("Could not determine interface address: {}",
-                    mt_strerror(errno).c_str());
-                close(local_socket);
-                if_freenameindex(iflist_free);
-                return "";
-            }
-
-            memcpy(&local_address, &if_request.ifr_addr, sizeof(if_request.ifr_addr));
-            std::string ip = inet_ntoa(local_address.sin_addr);
-            if_freenameindex(iflist_free);
-            close(local_socket);
-            return ip;
-        }
-        iflist++;
-    }
-
-    close(local_socket);
-    if_freenameindex(iflist_free);
-    return "";
-}
-
 std::string ipToInterface(const std::string& ip)
 {
     if (ip.empty()) {
@@ -998,7 +819,7 @@ std::string ipToInterface(const std::string& ip)
     char host[NI_MAXHOST];
 
     if (getifaddrs(&ifaddr) == -1) {
-        log_error("Could not getifaddrs: {}", mt_strerror(errno).c_str());
+        log_error("Could not getifaddrs: {}", strerror(errno));
     }
 
     for (ifa = ifaddr, n = 0; ifa != nullptr; ifa = ifa->ifa_next, n++) {
@@ -1042,7 +863,7 @@ std::vector<std::string> populateCommandLine(const std::string& line,
     const std::string& title)
 {
     log_debug("Template: '{}', in: '{}', out: '{}', range: '{}', title: '{}'", line, in, out, range, title);
-    std::vector<std::string> params = split_string(line, ' ');
+    std::vector<std::string> params = splitString(line, ' ');
     if (in.empty() && out.empty())
         return params;
 
@@ -1157,7 +978,7 @@ bool isTheora(const fs::path& ogg_filename)
     f = fopen(ogg_filename.c_str(), "rb");
 
     if (!f) {
-        throw_std_runtime_error("Error opening " + ogg_filename.string() + " : " + mt_strerror(errno));
+        throw_std_runtime_error("Error opening " + ogg_filename.string() + " : " + strerror(errno));
     }
 
     if (fread(buffer, 1, 4, f) != 4) {
@@ -1189,7 +1010,7 @@ bool isTheora(const fs::path& ogg_filename)
     return true;
 }
 
-fs::path get_last_path(const fs::path& path)
+fs::path getLastPath(const fs::path& path)
 {
     fs::path ret;
 
@@ -1286,7 +1107,7 @@ std::string getAVIFourCC(const fs::path& avi_filename)
     char* buffer;
     FILE* f = fopen(avi_filename.c_str(), "rb");
     if (!f)
-        throw_std_runtime_error("could not open file " + avi_filename.native() + " : " + mt_strerror(errno));
+        throw_std_runtime_error("could not open file " + avi_filename.native() + " : " + strerror(errno));
 
     buffer = static_cast<char*>(malloc(FCC_OFFSET + 6));
     if (buffer == nullptr) {
@@ -1298,7 +1119,7 @@ std::string getAVIFourCC(const fs::path& avi_filename)
     fclose(f);
     if (rb != FCC_OFFSET + 4) {
         free(buffer);
-        throw_std_runtime_error("could not read header of " + avi_filename.native() + " : " + mt_strerror(errno));
+        throw_std_runtime_error("could not read header of " + avi_filename.native() + " : " + strerror(errno));
     }
 
     buffer[FCC_OFFSET + 5] = '\0';
@@ -1327,7 +1148,7 @@ std::string getHostName(const struct sockaddr* addr)
     int len = addr->sa_family == AF_INET6 ? sizeof(struct sockaddr_in6) : sizeof(struct sockaddr_in);
     int ret = getnameinfo(addr, len, hoststr, sizeof(hoststr), portstr, sizeof(portstr), NI_NOFQDN);
     if (ret != 0) {
-        log_debug("could not determine getnameinfo (" + mt_strerror(errno) + ")");
+        log_debug("could not determine getnameinfo: {}", strerror(errno));
     }
 
     return hoststr;
@@ -1356,7 +1177,7 @@ std::string sockAddrGetNameInfo(const struct sockaddr* sa)
     int len = sa->sa_family == AF_INET6 ? sizeof(struct sockaddr_in6) : sizeof(struct sockaddr_in);
     int ret = getnameinfo(sa, len, hoststr, sizeof(hoststr), portstr, sizeof(portstr), NI_NUMERICHOST | NI_NUMERICSERV);
     if (ret != 0) {
-        throw_std_runtime_error("could not determine getnameinfo (" + mt_strerror(errno) + ")");
+        throw_std_runtime_error(fmt::format("could not determine getnameinfo: {}", strerror(errno)));
     }
 
     return std::string(hoststr) + ":" + std::string(portstr);
@@ -1382,8 +1203,7 @@ int find_local_port(unsigned short range_min, unsigned short range_max)
 
         fd = socket(AF_INET, SOCK_STREAM, 0);
         if (fd < 0) {
-            log_error("could not determine free port: error creating socket ({})\n",
-                mt_strerror(errno).c_str());
+            log_error("could not determine free port: error creating socket: {}", strerror(errno));
             return -1;
         }
 

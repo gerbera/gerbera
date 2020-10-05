@@ -1301,11 +1301,11 @@ std::string ConfigManager::getOption(std::string xpath, std::string def, bool tr
     pugi::xpath_node xpathNode = root.select_node(xpath.c_str());
 
     if (xpathNode.node() != nullptr) {
-        return trim ? trim_string(xpathNode.node().text().as_string()) : xpathNode.node().text().as_string();
+        return trim ? trimString(xpathNode.node().text().as_string()) : xpathNode.node().text().as_string();
     }
 
     if (xpathNode.attribute() != nullptr) {
-        return trim ? trim_string(xpathNode.attribute().value()) : xpathNode.attribute().value();
+        return trim ? trimString(xpathNode.attribute().value()) : xpathNode.attribute().value();
     }
 
     log_debug("Config: option not found: '{}' using default value: '{}'",
@@ -1329,11 +1329,11 @@ std::string ConfigManager::getOption(std::string xpath) const
     pugi::xpath_node xpathNode = root.select_node(xpath.c_str());
 
     if (xpathNode.node() != nullptr) {
-        return trim_string(xpathNode.node().text().as_string());
+        return trimString(xpathNode.node().text().as_string());
     }
 
     if (xpathNode.attribute() != nullptr) {
-        return trim_string(xpathNode.attribute().value());
+        return trimString(xpathNode.attribute().value());
     }
 
     throw std::runtime_error(fmt::format("Option '{}' not found in configuration file", xpath));
@@ -1396,7 +1396,7 @@ std::map<std::string, std::string> ConfigManager::createDictionaryFromNode(const
 
                 if (!key.empty() && !value.empty()) {
                     if (tolower) {
-                        key = tolower_string(key);
+                        key = toLower(key);
                     }
                     dict[key] = value;
                 }
@@ -1481,7 +1481,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
         if (sub != nullptr) {
             param = sub.text().as_string();
             if (!param.empty()) {
-                if (check_resolution(param))
+                if (checkResolution(param))
                     prof->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), param);
             }
         }
@@ -1624,14 +1624,14 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
                     + prof->getName() + "\" could not find transcoding command " + param);
             tmp_path = param;
         } else {
-            tmp_path = find_in_path(param);
+            tmp_path = findInPath(param);
             if (tmp_path.empty())
                 throw std::runtime_error("error in configuration, transcoding profile \""
                     + prof->getName() + "\" could not find transcoding command " + param + " in $PATH");
         }
 
         int err = 0;
-        if (!is_executable(tmp_path, &err))
+        if (!isExecutable(tmp_path, &err))
             throw std::runtime_error("error in configuration, transcoding profile "
                 + prof->getName() + ": transcoder " + param + "is not executable - " + strerror(err));
 
@@ -1797,7 +1797,7 @@ std::shared_ptr<ClientConfigList> ConfigManager::createClientConfigListFromNode(
         std::string ip = child.attribute("ip").as_string();
         std::string userAgent = child.attribute("userAgent").as_string();
 
-        std::vector<std::string> flagsVector = split_string(flags, '|', false);
+        std::vector<std::string> flagsVector = splitString(flags, '|', false);
         int flag = std::accumulate(flagsVector.begin(), flagsVector.end(), 0, [](int flg, const auto& i) //
             { return flg | ClientConfig::remapFlag(i); });
 

@@ -129,7 +129,7 @@ std::string PlaylistParserScript::readln()
         if (fgets(currentLine, ONE_TEXTLINE_BYTES, currentHandle) == nullptr)
             return "";
 
-        ret = trim_string(currentLine);
+        ret = trimString(currentLine);
         if (!ret.empty())
             return ret;
     }

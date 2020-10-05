@@ -100,7 +100,7 @@ void WebRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     std::string path, parameters;
     splitUrl(filename, URL_UI_PARAM_SEPARATOR, path, parameters);
 
-    dict_decode(parameters, &params);
+    dictDecode(parameters, &params);
 
     UpnpFileInfo_set_FileLength(info, -1); // length is unknown
 
@@ -232,7 +232,7 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(const char* filename,
     std::string path, parameters;
     splitUrl(filename, URL_UI_PARAM_SEPARATOR, path, parameters);
 
-    dict_decode(parameters, &params);
+    dictDecode(parameters, &params);
 
     return open(mode);
 }

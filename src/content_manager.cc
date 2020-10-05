@@ -684,7 +684,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
         struct stat statbuf;
         int ret = stat(newPath.c_str(), &statbuf);
         if (ret != 0) {
-            log_error("Failed to stat {}, {}", newPath.c_str(), mt_strerror(errno).c_str());
+            log_error("Failed to stat {}, {}", newPath.c_str(), strerror(errno));
             continue;
         }
 
@@ -879,7 +879,7 @@ void ContentManager::updateObject(int objectID, const std::map<std::string, std:
         } else if (!mimetype.empty()) {
             cloned_item->setMimeType(mimetype);
             auto resource = cloned_item->getResource(0);
-            std::vector<std::string> parts = split_string(resource->getAttribute("protocolInfo"), ':');
+            std::vector<std::string> parts = splitString(resource->getAttribute("protocolInfo"), ':');
             protocol = parts[0];
             resource->addAttribute("protocolInfo", renderProtocolInfo(mimetype, protocol));
         }
@@ -1006,7 +1006,7 @@ int ContentManager::addContainerChain(const std::string& chain, const std::strin
         newChain = std::regex_replace(newChain, std::regex(pattern.first), pattern.second);
     }
 
-    log_debug("received chain: {} -> {} ({}) [{}]", chain.c_str(), newChain.c_str(), lastClass.c_str(), dict_encode_simple(lastMetadata).c_str());
+    log_debug("received chain: {} -> {} ({}) [{}]", chain.c_str(), newChain.c_str(), lastClass.c_str(), dictEncodeSimple(lastMetadata).c_str());
     storage->addContainerChain(newChain, lastClass, lastRefID, &containerID, &updateID, lastMetadata);
 
     // if (updateID != INVALID_OBJECT_ID)
@@ -1056,7 +1056,7 @@ bool ContentManager::isLink(const fs::path& path, bool allowLinks)
         int lret = lstat(path.c_str(), &statbuf);
 
         if (lret != 0) {
-            log_warning("File or directory does not exist: {} ({})", path.string(), mt_strerror(errno));
+            log_warning("File or directory does not exist: {} ({})", path.string(), strerror(errno));
             return true;
         }
 
@@ -1073,7 +1073,7 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::path& 
     struct stat statbuf;
     int ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
-        log_warning("File or directory does not exist: {} ({})", path.string(), mt_strerror(errno));
+        log_warning("File or directory does not exist: {} ({})", path.string(), strerror(errno));
         return nullptr;
     }
 
@@ -1157,7 +1157,7 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::path& 
 std::string ContentManager::extension2mimetype(std::string extension)
 {
     if (!extension_map_case_sensitive)
-        extension = tolower_string(extension);
+        extension = toLower(extension);
 
     return getValueOrDefault(extension_mimetype_map, extension);
 }
@@ -1169,7 +1169,7 @@ std::string ContentManager::mimetype2upnpclass(const std::string& mimeType)
         return it->second;
 
     // try to match foo
-    std::vector<std::string> parts = split_string(mimeType, '/');
+    std::vector<std::string> parts = splitString(mimeType, '/');
     if (parts.size() != 2)
         return "";
     return getValueOrDefault(mimetype_upnpclass_map, parts[0] + "/*");

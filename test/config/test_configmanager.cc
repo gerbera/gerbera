@@ -57,7 +57,7 @@ public:
 
     fs::path createTempPath()
     {
-        fs::path ss = fs::path(CMAKE_BINARY_DIR) / "test" / "config" / generate_random_id();
+        fs::path ss = fs::path(CMAKE_BINARY_DIR) / "test" / "config" / generateRandomId();
         create_directory(ss);
         return ss;
     }

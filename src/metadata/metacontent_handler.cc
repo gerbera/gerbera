@@ -61,10 +61,10 @@ fs::path MetacontentHandler::getContentPath(std::vector<std::string>& names, con
             auto fileNames = std::map<std::string, fs::path>();
             for (const auto& p : fs::directory_iterator(folder))
                 if (p.is_regular_file())
-                    fileNames[tolower_string(p.path().filename())] = p;
+                    fileNames[toLower(p.path().filename())] = p;
 
             for (const auto& name : names) {
-                auto it = std::find_if(fileNames.begin(), fileNames.end(), [fileName = tolower_string(expandName(name, item))](const auto& testFile) { return testFile.first == fileName; });
+                auto it = std::find_if(fileNames.begin(), fileNames.end(), [fileName = toLower(expandName(name, item))](const auto& testFile) { return testFile.first == fileName; });
                 if (it != fileNames.end()) {
                     log_debug("{}: found", it->first.c_str());
                     return it->second;
@@ -86,10 +86,10 @@ std::string MetacontentHandler::expandName(const std::string& name, const std::s
     std::string copy(name);
 
     for (const auto& tag : metaTags)
-        replace_string(copy, tag.first, item->getMetadata(MT_KEYS.at(tag.second).upnp));
+        replaceString(copy, tag.first, item->getMetadata(MT_KEYS.at(tag.second).upnp));
 
     fs::path location = item->getLocation();
-    replace_string(copy, "%filename%", location.stem());
+    replaceString(copy, "%filename%", location.stem());
     return copy;
 }
 
@@ -139,7 +139,7 @@ std::unique_ptr<IOHandler> FanArtHandler::serveContent(std::shared_ptr<CdsItem> 
     struct stat statbuf;
     int ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
-        log_warning("File does not exist: {} ({})", path.c_str(), mt_strerror(errno));
+        log_warning("File does not exist: {} ({})", path.c_str(), strerror(errno));
         return nullptr;
     }
     auto io_handler = std::make_unique<FileIOHandler>(path);
@@ -188,7 +188,7 @@ std::unique_ptr<IOHandler> SubtitleHandler::serveContent(std::shared_ptr<CdsItem
     struct stat statbuf;
     int ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
-        log_warning("File does not exist: {} ({})", path.c_str(), mt_strerror(errno));
+        log_warning("File does not exist: {} ({})", path.c_str(), strerror(errno));
         return nullptr;
     }
     auto io_handler = std::make_unique<FileIOHandler>(path);
@@ -218,7 +218,7 @@ void ResourceHandler::fillMetadata(std::shared_ptr<CdsItem> item)
     log_debug("Running resource handler check on {} -> {}", item->getLocation().c_str(), path.c_str());
 
     if (!path.empty()) {
-        if (tolower_string(path.c_str()) == tolower_string(item->getLocation().c_str())) {
+        if (toLower(path.c_str()) == toLower(item->getLocation().c_str())) {
             auto resource = std::make_shared<CdsResource>(CH_RESOURCE);
             resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo("res"));
             resource->addAttribute(RESOURCE_FILE, path.c_str());
@@ -237,7 +237,7 @@ std::unique_ptr<IOHandler> ResourceHandler::serveContent(std::shared_ptr<CdsItem
     struct stat statbuf;
     int ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
-        log_warning("File does not exist: {} ({})", path.c_str(), mt_strerror(errno));
+        log_warning("File does not exist: {} ({})", path.c_str(), strerror(errno));
         return nullptr;
     }
     auto io_handler = std::make_unique<FileIOHandler>(path);

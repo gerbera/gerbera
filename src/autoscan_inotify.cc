@@ -50,7 +50,7 @@ AutoscanInotify::AutoscanInotify(std::shared_ptr<Storage> storage, std::shared_p
     std::error_code ec;
     if (isRegularFile(INOTIFY_MAX_USER_WATCHES_FILE, ec)) {
         try {
-            [[maybe_unused]] int max_watches = std::stoi(trim_string(readTextFile(INOTIFY_MAX_USER_WATCHES_FILE)));
+            [[maybe_unused]] int max_watches = std::stoi(trimString(readTextFile(INOTIFY_MAX_USER_WATCHES_FILE)));
             log_debug("Max watches on the system: {}", max_watches);
         } catch (const std::runtime_error& ex) {
             log_error("Could not determine maximum number of inotify user watches: {}", ex.what());
@@ -311,7 +311,7 @@ int AutoscanInotify::addMoveWatch(const fs::path& path, int removeWd, int parent
 
 void AutoscanInotify::monitorNonexisting(const fs::path& path, const std::shared_ptr<AutoscanDirectory>& adir)
 {
-    auto pathAr = split_string(path, DIR_SEPARATOR);
+    auto pathAr = splitString(path, DIR_SEPARATOR);
     recheckNonexistingMonitor(-1, pathAr, adir);
 }
 

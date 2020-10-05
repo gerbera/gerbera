@@ -56,7 +56,7 @@ void web::add::process()
     if (objID == "0")
         path = FS_ROOT_DIRECTORY;
     else
-        path = hex_decode_string(objID);
+        path = hexDecodeString(objID);
     if (path.empty())
         throw_std_runtime_error("illegal path");
 

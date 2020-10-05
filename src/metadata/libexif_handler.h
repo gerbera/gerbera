@@ -32,6 +32,8 @@
 #ifndef __METADATA_LIBEXIF_H__
 #define __METADATA_LIBEXIF_H__
 
+#ifdef HAVE_LIBEXIF
+
 #include <libexif/exif-content.h>
 #include <libexif/exif-data.h>
 #include <vector>
@@ -43,7 +45,7 @@ class CdsItem;
 class StringConverter;
 
 /// \brief This class is responsible for reading exif header metadata via the
-/// libefix library
+/// libexif library
 class LibExifHandler : public MetadataHandler {
 protected:
     // image resolution in pixels
@@ -62,4 +64,5 @@ public:
     std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsItem> item, int resNum) override;
 };
 
+#endif
 #endif // __METADATA_LIBEXIF_H__
