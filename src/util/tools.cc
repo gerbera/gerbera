@@ -173,7 +173,7 @@ time_t getLastWriteTime(const fs::path& path)
     // auto ftime = fs::last_write_time(p);
     // time_t cftime = decltype(ftime)::clock::to_time_t(ftime);
 
-    struct stat statbuf{};
+    struct stat statbuf;
     int ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
         throw_std_runtime_error(fmt::format("{}: {}", strerror(errno), path.string()));
@@ -211,7 +211,7 @@ bool isRegularFile(const fs::path& path, std::error_code& ec) noexcept
 off_t getFileSize(const fs::path& path)
 {
     // unfortunately fs::file_size(path) does not to work for files >2GB on ARM 32bit systems (see #737)
-    struct stat statbuf{};
+    struct stat statbuf;
     int ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
         throw_std_runtime_error(fmt::format("{}: {}", strerror(errno), path.string()));
@@ -485,7 +485,7 @@ std::string readTextFile(const fs::path& path)
         throw_std_runtime_error("could not open " + path.string() + " : " + strerror(errno));
     }
     std::ostringstream buf;
-    std::array<char, 1024> buffer{};
+    std::array<char, 1024> buffer;
     size_t bytesRead;
     while ((bytesRead = fread(buffer.data(), 1, buffer.size(), f)) > 0) {
         buf << std::string(buffer.data(), bytesRead);
