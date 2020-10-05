@@ -170,14 +170,14 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::open(std::shared_ptr<Transc
 
         check = profile->getCommand();
     } else {
-        check = find_in_path(profile->getCommand());
+        check = findInPath(profile->getCommand());
 
         if (check.empty())
             throw_std_runtime_error("Could not find transcoder " + profile->getCommand().string() + " in $PATH");
     }
 
     int err = 0;
-    if (!is_executable(check, &err))
+    if (!isExecutable(check, &err))
         throw_std_runtime_error("Transcoder " + profile->getCommand().string() + " is not executable: " + strerror(err));
 
     log_debug("creating fifo: {}", fifo_name.c_str());

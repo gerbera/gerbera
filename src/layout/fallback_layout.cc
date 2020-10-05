@@ -86,7 +86,7 @@ void FallbackLayout::addVideo(const std::shared_ptr<CdsObject>& obj, const fs::p
         dir = fs::relative(obj->getLocation().parent_path(), config->getBoolOption(CFG_IMPORT_LAYOUT_PARENT_PATH) ? rootpath.parent_path() : rootpath);
         dir = f2i->convert(dir);
     } else
-        dir = esc(f2i->convert(get_last_path(obj->getLocation())));
+        dir = esc(f2i->convert(getLastPath(obj->getLocation())));
 
     if (!dir.empty()) {
         id = content->addContainerChain("/Video/Directories/" + dir);
@@ -141,7 +141,7 @@ void FallbackLayout::addImage(const std::shared_ptr<CdsObject>& obj, const fs::p
         dir = fs::relative(obj->getLocation().parent_path(), config->getBoolOption(CFG_IMPORT_LAYOUT_PARENT_PATH) ? rootpath.parent_path() : rootpath);
         dir = f2i->convert(dir);
     } else
-        dir = esc(f2i->convert(get_last_path(obj->getLocation())));
+        dir = esc(f2i->convert(getLastPath(obj->getLocation())));
 
     if (!dir.empty()) {
         id = content->addContainerChain("/Photos/Directories/" + dir);
@@ -327,9 +327,9 @@ void FallbackLayout::addATrailers(const std::shared_ptr<CdsObject>& obj)
     auto meta = obj->getMetadata();
 
     std::string temp = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_GENRE));
-    auto genreAr = split_string(temp, ',');
+    auto genreAr = splitString(temp, ',');
     for (auto& genre : genreAr) {
-        genre = trim_string(genre);
+        genre = trimString(genre);
         if (genre.empty())
             continue;
 

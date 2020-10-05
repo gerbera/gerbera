@@ -80,7 +80,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     std::string parameters = (filename + strlen(LINK_FILE_REQUEST_HANDLER));
 
     std::map<std::string, std::string> params;
-    dict_decode_simple(parameters, &params);
+    dictDecodeSimple(parameters, &params);
 
     log_debug("full url (filename): {}, parameters: {}", filename, parameters.c_str());
 
@@ -265,7 +265,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
     std::string parameters = (filename + strlen(LINK_FILE_REQUEST_HANDLER));
 
     std::map<std::string, std::string> params;
-    dict_decode_simple(parameters, &params);
+    dictDecodeSimple(parameters, &params);
     log_debug("full url (filename): {}, parameters: {}", filename, parameters.c_str());
 
     auto objIdIt = params.find("object_id");

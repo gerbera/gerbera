@@ -334,7 +334,7 @@ void ConfigGenerator::generateTranscoding(pugi::xml_node* config)
 
 void ConfigGenerator::generateUdn(pugi::xml_node* server)
 {
-    auto uuid_str = generate_random_id();
+    auto uuid_str = generateRandomId();
     log_debug("UUID generated: {}", uuid_str);
     server->append_child("udn").append_child(pugi::node_pcdata).set_value(fmt::format("uuid:{}", uuid_str).c_str());
 }

@@ -32,6 +32,7 @@
 #ifdef HAVE_LIBEXIF
 #include "libexif_handler.h" // API
 
+#include <iohandler/file_io_handler.h>
 #include <utility>
 
 #include "cds_objects.h"
@@ -43,6 +44,23 @@
 LibExifHandler::LibExifHandler(std::shared_ptr<Config> config)
     : MetadataHandler(std::move(config))
 {
+}
+
+/// \brief Sets resolution for a given resource index, item must be a JPEG image
+static void setJpegResolutionResource(const std::shared_ptr<CdsItem>& item, int res_num)
+{
+    try {
+        std::unique_ptr<IOHandler> fio_h = std::make_unique<FileIOHandler>(item->getLocation());
+        fio_h->open(UPNP_READ);
+        std::string resolution = get_jpeg_resolution(fio_h);
+
+        if (res_num >= item->getResourceCount())
+            throw_std_runtime_error("Invalid resource index");
+
+        item->getResource(res_num)->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), resolution);
+    } catch (const std::runtime_error& e) {
+        log_error("Exception! {}", e.what());
+    }
 }
 
 static int getTagFromString(const std::string& tag)
@@ -276,10 +294,10 @@ void LibExifHandler::process_ifd(ExifContent* content, const std::shared_ptr<Cds
         switch (e->tag) {
         case EXIF_TAG_DATE_TIME_ORIGINAL:
             value = const_cast<char*>(exif_egv(e));
-            value = trim_string(value);
+            value = trimString(value);
             if (!value.empty()) {
                 value = sc->convert(value);
-                //value = split_string(value, ' ');
+                //value = splitString(value, ' ');
                 /// \todo convert date to ISO 8601 as required in the UPnP spec
                 // from YYYY:MM:DD to YYYY-MM-DD
                 if (value.length() >= 11) {
@@ -291,7 +309,7 @@ void LibExifHandler::process_ifd(ExifContent* content, const std::shared_ptr<Cds
 
         case EXIF_TAG_USER_COMMENT:
             value = const_cast<char*>(exif_egv(e));
-            value = trim_string(value);
+            value = trimString(value);
             if (!value.empty()) {
                 value = sc->convert(value);
                 item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), value);
@@ -300,7 +318,7 @@ void LibExifHandler::process_ifd(ExifContent* content, const std::shared_ptr<Cds
 
         case EXIF_TAG_PIXEL_X_DIMENSION:
             value = const_cast<char*>(exif_egv(e));
-            value = trim_string(value);
+            value = trimString(value);
             if (!value.empty()) {
                 value = sc->convert(value);
                 imageX = value;
@@ -309,7 +327,7 @@ void LibExifHandler::process_ifd(ExifContent* content, const std::shared_ptr<Cds
 
         case EXIF_TAG_PIXEL_Y_DIMENSION:
             value = const_cast<char*>(exif_egv(e));
-            value = trim_string(value);
+            value = trimString(value);
             if (!value.empty()) {
                 value = sc->convert(value);
                 imageY = value;
@@ -324,7 +342,7 @@ void LibExifHandler::process_ifd(ExifContent* content, const std::shared_ptr<Cds
             if (!tmp.empty()) {
                 if (e->tag == getTagFromString(tmp)) {
                     value = const_cast<char*>(exif_egv(e));
-                    value = trim_string(value);
+                    value = trimString(value);
                     if (!value.empty()) {
                         value = sc->convert(value);
                         item->setAuxData(tmp, value);
@@ -346,7 +364,7 @@ void LibExifHandler::fillMetadata(std::shared_ptr<CdsItem> item)
 
     if (!ed) {
         log_debug("Exif data not found, attempting to set resolution internally...");
-        set_jpeg_resolution_resource(item, 0);
+        setJpegResolutionResource(item, 0);
         return;
     }
 
@@ -361,7 +379,7 @@ void LibExifHandler::fillMetadata(std::shared_ptr<CdsItem> item)
         item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION),
             imageX + "x" + imageY);
     } else {
-        set_jpeg_resolution_resource(item, 0);
+        setJpegResolutionResource(item, 0);
     }
 
     if (ed->size) {
@@ -403,5 +421,4 @@ std::unique_ptr<IOHandler> LibExifHandler::serveContent(std::shared_ptr<CdsItem>
     exif_data_unref(ed);
     return h;
 }
-
 #endif // HAVE_LIBEXIF

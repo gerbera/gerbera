@@ -57,7 +57,7 @@ void web::directories::process()
     if (parentID.empty() || parentID == "0")
         path = FS_ROOT_DIRECTORY;
     else
-        path = hex_decode_string(parentID);
+        path = hexDecodeString(parentID);
 
     auto root = xmlDoc->document_element();
 
@@ -111,8 +111,8 @@ void web::directories::process()
             break;
         }
 
-        /// \todo replace hex_encode with base64_encode?
-        std::string id = hex_encode(filepath.c_str(), filepath.string().length());
+        /// \todo replace hexEncode with base64_encode?
+        std::string id = hexEncode(filepath.c_str(), filepath.string().length());
         filesMap[id] = { filepath.filename(), hasContent };
     }
 
