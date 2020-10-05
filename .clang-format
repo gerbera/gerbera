@@ -1,1 +1,3 @@
 BasedOnStyle: Webkit
+DeriveLineEnding: false
+UseCRLF: false
