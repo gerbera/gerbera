@@ -490,7 +490,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
         int x;
         int y;
 
-        if (!videoresolution.empty() && check_resolution(videoresolution, &x, &y)) {
+        if (!videoresolution.empty() && checkResolution(videoresolution, &x, &y)) {
             auto it = mappings.find(CONTENT_TYPE_JPG);
             std::string thumb_mimetype = it != mappings.end() && !it->second.empty() ? it->second : "image/jpeg";
 
