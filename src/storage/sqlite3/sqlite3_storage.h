@@ -198,7 +198,7 @@ private:
     std::queue<std::shared_ptr<SLTask>> taskQueue;
     bool taskQueueOpen;
 
-    void threadCleanup() override {}
+    void threadCleanup() override { }
     bool threadCleanupRequired() const override { return false; }
 
     bool dirty;
