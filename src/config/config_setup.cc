@@ -520,10 +520,10 @@ void ConfigArraySetup::makeOption(const pugi::xml_node& root, std::shared_ptr<Co
     setOption(config);
 }
 
-bool ConfigArraySetup::updateItem(size_t i, const std::string& optItem, std::shared_ptr<Config> config, std::shared_ptr<ArrayOption> value, std::string& optValue) const
+bool ConfigArraySetup::updateItem(size_t i, const std::string& optItem, std::shared_ptr<Config> config, std::shared_ptr<ArrayOption> value, const std::string& optValue, bool remove) const
 {
     auto index = getItemPath(i);
-    if (optItem == index) {
+    if (optItem == index || remove) {
         config->setOrigValue(index, value->getArrayOption()[i]);
         value->setItem(i, optValue);
         return true;
@@ -541,6 +541,9 @@ bool ConfigArraySetup::updateDetail(const std::string& optItem, std::string& opt
             auto endPos = optItem.find_first_of(']', startPos);
             auto i = std::stoi(optItem.substr(startPos, endPos - startPos));
             if (updateItem(i, optItem, config, value, optValue)) {
+                return true;
+            }
+            if (arguments != nullptr && arguments->find("status") != arguments->end() && arguments->at("status") == "removed" && updateItem(i, optItem, config, value, "", true)) {
                 return true;
             }
         }

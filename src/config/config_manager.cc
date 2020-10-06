@@ -844,6 +844,10 @@ void ConfigManager::updateConfigFromDatabase(std::shared_ptr<Storage> storage)
                         }
                     } else if (cfgValue.status == "added") {
                     } else if (cfgValue.status == "removed") {
+                        std::map<std::string, std::string> arguments = {{"status", cfgValue.status}};
+                        if (!cs->updateDetail(cfgValue.item, parValue, self)) {
+                            log_error("unhandled option {} != {}", cfgValue.item, cs->xpath);
+                        }
                     }
                 }
             }

@@ -155,7 +155,7 @@ public:
     /* config methods */
     std::vector<ConfigValue> getConfigValues() override;
     void removeConfigValue(const std::string& item) override;
-    void updateConfigValue(const std::string& key, const std::string& item, const std::string& value) override;
+    void updateConfigValue(const std::string& key, const std::string& item, const std::string& value, const std::string& status = "unchanged") override;
 
     std::unique_ptr<std::vector<int>> getPathIDs(int objectID) override;
 

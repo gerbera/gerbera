@@ -94,6 +94,9 @@ void web::configSave::process()
                     log_info("added {}", param(item));
                     success = false;
                 } else if (parStatus == "removed") {
+                    std::map<std::string, std::string> arguments = {{"status", parStatus}};
+                    cs->updateDetail(param(item), parValue, config, &arguments);
+                    storage->updateConfigValue(cs->getUniquePath(), param(item), parValue, parStatus);
                     log_info("removed {}", param(item));
                     success = false;
                 }

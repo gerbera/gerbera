@@ -1641,7 +1641,7 @@ void SQLStorage::removeConfigValue(const std::string& item)
     exec(del);
 }
 
-void SQLStorage::updateConfigValue(const std::string& key, const std::string& item, const std::string& value)
+void SQLStorage::updateConfigValue(const std::string& key, const std::string& item, const std::string& value, const std::string& status)
 {
     std::ostringstream query;
     query << "SELECT "
@@ -1665,7 +1665,7 @@ void SQLStorage::updateConfigValue(const std::string& key, const std::string& it
                << quote(item) << ','
                << quote(key) << ','
                << quote(value) << ','
-               << quote("unchanged")
+               << quote(status)
                << ')';
         exec(insert);
         log_info("inserted for {} as {} {}", key, item, value);
