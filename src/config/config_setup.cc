@@ -72,7 +72,7 @@ std::string ConfigSetup::getXmlContent(const pugi::xml_node& root, bool trim) co
     pugi::xpath_node xpathNode = root.select_node(cpath.c_str());
 
     if (xpathNode.node() != nullptr) {
-        std::string optValue = trim ? trim_string(xpathNode.node().text().as_string()) : xpathNode.node().text().as_string();
+        std::string optValue = trim ? trimString(xpathNode.node().text().as_string()) : xpathNode.node().text().as_string();
         if (!checkValue(optValue)) {
             throw std::runtime_error(fmt::format("Invalid {}{} value '{}'", root.path(), xpath, optValue));
         }
@@ -80,7 +80,7 @@ std::string ConfigSetup::getXmlContent(const pugi::xml_node& root, bool trim) co
     }
 
     if (xpathNode.attribute() != nullptr) {
-        std::string optValue = trim ? trim_string(xpathNode.attribute().value()) : xpathNode.attribute().value();
+        std::string optValue = trim ? trimString(xpathNode.attribute().value()) : xpathNode.attribute().value();
         if (!checkValue(optValue)) {
             throw std::runtime_error(fmt::format("Invalid {}/attribute::{} value '{}'", root.path(), xpath, optValue));
         }
@@ -88,7 +88,7 @@ std::string ConfigSetup::getXmlContent(const pugi::xml_node& root, bool trim) co
     }
 
     if (root.attribute(xpath) != nullptr) {
-        std::string optValue = trim ? trim_string(root.attribute(xpath).as_string()) : root.attribute(xpath).as_string();
+        std::string optValue = trim ? trimString(root.attribute(xpath).as_string()) : root.attribute(xpath).as_string();
         if (!checkValue(optValue)) {
             throw std::runtime_error(fmt::format("Invalid {}/attribute::{} value '{}'", root.path(), xpath, optValue));
         }
@@ -96,7 +96,7 @@ std::string ConfigSetup::getXmlContent(const pugi::xml_node& root, bool trim) co
     }
 
     if (root.child(xpath) != nullptr) {
-        std::string optValue = trim ? trim_string(root.child(xpath).text().as_string()) : root.child(xpath).text().as_string();
+        std::string optValue = trim ? trimString(root.child(xpath).text().as_string()) : root.child(xpath).text().as_string();
         if (!checkValue(optValue)) {
             throw std::runtime_error(fmt::format("Invalid {}/{} value '{}'", root.path(), xpath, optValue));
         }
@@ -167,7 +167,7 @@ bool ConfigPathSetup::checkAgentPath(std::string& optValue)
         }
         tmp_path = optValue;
     } else {
-        tmp_path = find_in_path(optValue);
+        tmp_path = findInPath(optValue);
         if (tmp_path.empty()) {
             log_error("error in configuration, transcoding profile: could not find transcoding command \"" + optValue + "\" in $PATH");
             return false;
@@ -175,7 +175,7 @@ bool ConfigPathSetup::checkAgentPath(std::string& optValue)
     }
 
     int err = 0;
-    if (!is_executable(tmp_path, &err)) {
+    if (!isExecutable(tmp_path, &err)) {
         log_error("error in configuration, transcoding profile: transcoder " + optValue + "is not executable - " + strerror(err));
         return false;
     }
@@ -578,8 +578,8 @@ std::vector<std::string> ConfigArraySetup::getXmlContent(const pugi::xml_node& o
 
 bool ConfigArraySetup::checkArrayValue(const std::string& value, std::vector<std::string>& result) const
 {
-    for (auto& attrValue : split_string(value, ',')) {
-        attrValue = trim_string(attrValue);
+    for (auto& attrValue : splitString(value, ',')) {
+        attrValue = trimString(attrValue);
         if (itemNotEmpty && attrValue.empty()) {
             return false;
         }
@@ -667,7 +667,7 @@ bool ConfigDictionarySetup::createDictionaryFromNode(const pugi::xml_node& optVa
                 std::string value = child.attribute(ConfigManager::mapConfigOption(valOption)).as_string();
                 if (!key.empty() && !value.empty()) {
                     if (tolower) {
-                        key = tolower_string(key);
+                        key = toLower(key);
                     }
                     result[key] = value;
                 } else if (itemNotEmpty) {
@@ -924,7 +924,7 @@ bool ConfigTranscodingSetup::createTranscodingProfileListFromNode(const pugi::xm
         if (sub != nullptr) {
             std::string param = sub.text().as_string();
             if (!param.empty()) {
-                if (check_resolution(param))
+                if (checkResolution(param))
                     prof->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), param);
             }
         }
@@ -1284,7 +1284,7 @@ bool ConfigClientSetup::createClientConfigListFromNode(const pugi::xml_node& ele
         auto ip = findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_IP)->getXmlContent(child);
         auto userAgent = findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_USERAGENT)->getXmlContent(child);
 
-        std::vector<std::string> flagsVector = split_string(flags, '|', false);
+        std::vector<std::string> flagsVector = splitString(flags, '|', false);
         int flag = std::accumulate(flagsVector.begin(), flagsVector.end(), 0, [](int flg, const auto& i) //
             { return flg | ClientConfig::remapFlag(i); });
 
@@ -1324,7 +1324,7 @@ bool ConfigClientSetup::updateDetail(const std::string& optItem, std::string& op
                 config->setOrigValue(index, ClientConfig::mapFlags(entry->getFlags()));
                 auto pathValue = optValue;
                 if (findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_FLAGS)->checkValue(optValue)) {
-                    std::vector<std::string> flagsVector = split_string(optValue, '|', false);
+                    std::vector<std::string> flagsVector = splitString(optValue, '|', false);
                     int flag = std::accumulate(flagsVector.begin(), flagsVector.end(), 0, [](int flg, const auto& i) //
                         { return flg | ClientConfig::remapFlag(i); });
                     entry->setFlags(flag);

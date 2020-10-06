@@ -159,7 +159,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, bool re
                 std::map<std::string, std::string> dict;
                 dict[URL_OBJECT_ID] = aa_id;
 
-                std::string url = virtualURL + _URL_PARAM_SEPARATOR + CONTENT_MEDIA_HANDLER + _URL_PARAM_SEPARATOR + dict_encode_simple(dict) + _URL_PARAM_SEPARATOR + URL_RESOURCE_ID + _URL_PARAM_SEPARATOR + "0";
+                std::string url = virtualURL + _URL_PARAM_SEPARATOR + CONTENT_MEDIA_HANDLER + _URL_PARAM_SEPARATOR + dictEncodeSimple(dict) + _URL_PARAM_SEPARATOR + URL_RESOURCE_ID + _URL_PARAM_SEPARATOR + "0";
                 result.append_child("upnp:albumArtURI").append_child(pugi::node_pcdata).set_value(url.c_str());
 
             } else if (upnp_class == UPNP_DEFAULT_CLASS_MUSIC_ALBUM) {
@@ -413,13 +413,13 @@ std::unique_ptr<UpnpXMLBuilder::PathBase> UpnpXMLBuilder::getPathBase(const std:
         }
 
         if ((item->getFlag(OBJECT_FLAG_ONLINE_SERVICE) && item->getFlag(OBJECT_FLAG_PROXY_URL)) || forceLocal) {
-            pathBase->pathBase = std::string(_URL_PARAM_SEPARATOR) + CONTENT_ONLINE_HANDLER + _URL_PARAM_SEPARATOR + dict_encode_simple(dict) + _URL_PARAM_SEPARATOR + URL_RESOURCE_ID + _URL_PARAM_SEPARATOR;
+            pathBase->pathBase = std::string(_URL_PARAM_SEPARATOR) + CONTENT_ONLINE_HANDLER + _URL_PARAM_SEPARATOR + dictEncodeSimple(dict) + _URL_PARAM_SEPARATOR + URL_RESOURCE_ID + _URL_PARAM_SEPARATOR;
             pathBase->addResID = true;
             return pathBase;
         }
     }
 
-    pathBase->pathBase = std::string(_URL_PARAM_SEPARATOR) + CONTENT_MEDIA_HANDLER + _URL_PARAM_SEPARATOR + dict_encode_simple(dict) + _URL_PARAM_SEPARATOR + URL_RESOURCE_ID + _URL_PARAM_SEPARATOR;
+    pathBase->pathBase = std::string(_URL_PARAM_SEPARATOR) + CONTENT_MEDIA_HANDLER + _URL_PARAM_SEPARATOR + dictEncodeSimple(dict) + _URL_PARAM_SEPARATOR + URL_RESOURCE_ID + _URL_PARAM_SEPARATOR;
     pathBase->addResID = true;
     return pathBase;
 }
@@ -490,7 +490,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
         int x;
         int y;
 
-        if (!videoresolution.empty() && check_resolution(videoresolution, &x, &y)) {
+        if (!videoresolution.empty() && checkResolution(videoresolution, &x, &y)) {
             auto it = mappings.find(CONTENT_TYPE_JPG);
             std::string thumb_mimetype = it != mappings.end() && !it->second.empty() ? it->second : "image/jpeg";
 
@@ -690,7 +690,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
         }
         if (!res_params.empty()) {
             url.append(_URL_PARAM_SEPARATOR);
-            url.append(dict_encode_simple(res_params));
+            url.append(dictEncodeSimple(res_params));
         }
 
         // ok this really sucks, I guess another rewrite of the resource manager
@@ -754,7 +754,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
             std::string resolution = getValueOrDefault(res_attrs, MetadataHandler::getResAttrName(R_RESOLUTION));
             int x;
             int y;
-            if (!resolution.empty() && check_resolution(resolution, &x, &y)) {
+            if (!resolution.empty() && checkResolution(resolution, &x, &y)) {
 
                 if ((i > 0) && (((item->getResource(i)->getHandlerType() == CH_LIBEXIF) && (item->getResource(i)->getParameter(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL)) || (item->getResource(i)->getOption(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL) || (item->getResource(i)->getOption(RESOURCE_CONTENT_TYPE) == THUMBNAIL)) && (x <= 160) && (y <= 160))
                     extend = std::string(D_PROFILE) + "=" + D_JPEG_TN + ";";

@@ -92,7 +92,7 @@ int Inotify::addWatch(const fs::path& path, int events) const
             log_warning("Cannot add inotify watch for {}: {}", path.c_str(), strerror(errno));
             return -1;
         }
-        throw_std_runtime_error(mt_strerror(errno));
+        throw_std_runtime_error(strerror(errno));
     }
     return wd;
 }
@@ -174,8 +174,7 @@ struct inotify_event* Inotify::nextEvent()
     if (FD_ISSET(stop_fd_read, &read_fds)) {
         char buf;
         if (read(stop_fd_read, &buf, 1) == -1) {
-            log_error("Inotify: could not read stop: {}",
-                mt_strerror(errno).c_str());
+            log_error("Inotify: could not read stop: {}", strerror(errno));
         }
     }
 
@@ -220,8 +219,7 @@ void Inotify::stop() const
 {
     char stop = 's';
     if (write(stop_fd_write, &stop, 1) == -1) {
-        log_error("Inotify: could not send stop: {}",
-            mt_strerror(errno).c_str());
+        log_error("inotify: could not send stop: {}", strerror(errno));
     }
 }
 

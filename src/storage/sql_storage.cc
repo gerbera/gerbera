@@ -249,7 +249,7 @@ std::vector<std::shared_ptr<SQLStorage::AddUpdateTable>> SQLStorage::_addUpdateO
     if (isUpdate)
         cdsObjectSql["auxdata"] = SQL_NULL;
     if (auto auxData = obj->getAuxData(); !auxData.empty() && (!hasReference || auxData != refObj->getAuxData())) {
-        cdsObjectSql["auxdata"] = quote(dict_encode(auxData));
+        cdsObjectSql["auxdata"] = quote(dictEncode(auxData));
     }
 
     if (!hasReference || (!obj->getFlag(OBJECT_FLAG_USE_RESOURCE_REF) && !refObj->resourcesEqual(obj))) {
@@ -825,7 +825,7 @@ void SQLStorage::addContainerChain(std::string virtualPath, const std::string& l
 {
     log_debug("Adding container Chain for path: {}, lastRefId: {}, containerId: {}", virtualPath.c_str(), lastRefID, *containerID);
 
-    virtualPath = reduce_string(virtualPath, VIRTUAL_CONTAINER_SEPARATOR);
+    virtualPath = reduceString(virtualPath, VIRTUAL_CONTAINER_SEPARATOR);
     if (virtualPath == std::string(1, VIRTUAL_CONTAINER_SEPARATOR)) {
         *containerID = CDS_ID_ROOT;
         return;
@@ -882,7 +882,7 @@ std::shared_ptr<CdsObject> SQLStorage::createObjectFromRow(const std::unique_ptr
 
     /* set common properties */
     obj->setID(std::stoi(row->col(_id)));
-    obj->setRefID(stoi_string(row->col(_ref_id)));
+    obj->setRefID(stoiString(row->col(_ref_id)));
 
     obj->setParentID(std::stoi(row->col(_parent_id)));
     obj->setTitle(row->col(_dc_title));
@@ -901,19 +901,19 @@ std::shared_ptr<CdsObject> SQLStorage::createObjectFromRow(const std::unique_ptr
         // fallback to metadata that might be in mt_cds_object, which
         // will be useful if retrieving for schema upgrade
         std::string metadataStr = row->col(_metadata);
-        dict_decode(metadataStr, &meta);
+        dictDecode(metadataStr, &meta);
         obj->setMetadata(meta);
     }
 
     std::string auxdataStr = fallbackString(row->col(_auxdata), row->col(_ref_auxdata));
     std::map<std::string, std::string> aux;
-    dict_decode(auxdataStr, &aux);
+    dictDecode(auxdataStr, &aux);
     obj->setAuxData(aux);
 
     std::string resources_str = fallbackString(row->col(_resources), row->col(_ref_resources));
     bool resource_zero_ok = false;
     if (!resources_str.empty()) {
-        std::vector<std::string> resources = split_string(resources_str,
+        std::vector<std::string> resources = splitString(resources_str,
             RESOURCE_SEP);
         for (size_t i = 0; i < resources.size(); i++) {
             if (i == 0)
@@ -964,7 +964,7 @@ std::shared_ptr<CdsObject> SQLStorage::createObjectFromRow(const std::unique_ptr
             item->setLocation(fallbackString(row->col(_location), row->col(_ref_location)));
         }
 
-        item->setTrackNumber(stoi_string(row->col(_track_number)));
+        item->setTrackNumber(stoiString(row->col(_track_number)));
 
         if (!row->col(_ref_service_id).empty())
             item->setServiceID(row->col(_ref_service_id));
@@ -1008,7 +1008,7 @@ std::shared_ptr<CdsObject> SQLStorage::createObjectFromSearchRow(const std::uniq
 
     /* set common properties */
     obj->setID(std::stoi(row->col(SearchCol::id)));
-    obj->setRefID(stoi_string(row->col(SearchCol::ref_id)));
+    obj->setRefID(stoiString(row->col(SearchCol::ref_id)));
 
     obj->setParentID(std::stoi(row->col(SearchCol::parent_id)));
     obj->setTitle(row->col(SearchCol::dc_title));
@@ -1021,7 +1021,7 @@ std::shared_ptr<CdsObject> SQLStorage::createObjectFromSearchRow(const std::uniq
     std::string resources_str = row->col(SearchCol::resources);
     bool resource_zero_ok = false;
     if (!resources_str.empty()) {
-        std::vector<std::string> resources = split_string(resources_str, RESOURCE_SEP);
+        std::vector<std::string> resources = splitString(resources_str, RESOURCE_SEP);
         for (size_t i = 0; i < resources.size(); i++) {
             if (i == 0)
                 resource_zero_ok = true;
@@ -1041,7 +1041,7 @@ std::shared_ptr<CdsObject> SQLStorage::createObjectFromSearchRow(const std::uniq
             item->setLocation(row->col(SearchCol::location));
         }
 
-        item->setTrackNumber(stoi_string(row->col(SearchCol::track_number)));
+        item->setTrackNumber(stoiString(row->col(SearchCol::track_number)));
     } else {
         throw StorageException("", "unknown object type: " + std::to_string(objectType));
     }
@@ -2142,7 +2142,7 @@ void SQLStorage::loadLastMetadataID()
     if (row == nullptr)
         throw_std_runtime_error("could not load lastMetadataID (row==nullptr)");
 
-    lastMetadataID = stoi_string(row->col(0));
+    lastMetadataID = stoiString(row->col(0));
     if (lastMetadataID < CDS_ID_ROOT)
         throw_std_runtime_error("could not load correct lastMetadataID (db not initialized?)");
 }

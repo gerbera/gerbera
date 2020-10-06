@@ -166,7 +166,7 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
         value = val.toCString(true);
     }
 
-    value = trim_string(value);
+    value = trimString(value);
 
     if (!value.empty()) {
         item->setMetadata(MT_KEYS.at(field).upnp, sc->convert(value));

@@ -3,15 +3,18 @@
 
 #include <gtest/gtest.h>
 
-#include "storage/storage.h"
 #include "config/config.h"
 #include "config/config_setup.h"
+#include "storage/storage.h"
 
 using namespace ::testing;
 
 class StorageMock : public Storage {
 public:
-    StorageMock(std::shared_ptr<Config> config) : Storage(config) { }
+    StorageMock(std::shared_ptr<Config> config)
+        : Storage(config)
+    {
+    }
 
     void init() override { }
     void shutdown() override { }
@@ -37,7 +40,8 @@ public:
     std::string findFolderImage(int id, std::string trackArtBase) override
     {
         auto it = findFolderImageMap.find(std::to_string(id) + trackArtBase);
-        if (it != findFolderImageMap.end()) return it->second;
+        if (it != findFolderImageMap.end())
+            return it->second;
         return "";
     }
 
