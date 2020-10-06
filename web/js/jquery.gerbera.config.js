@@ -92,6 +92,7 @@ $.widget('grb.config', {
   },
 
   resetEntry: function (itemValue) {
+console.log({resetEntry: itemValue});
     this.result[itemValue.item] = itemValue;
     this.options.addResultItem(itemValue);
     itemValue.value = itemValue.editor.val();
@@ -119,6 +120,7 @@ $.widget('grb.config', {
   },
 
   setEntryChanged: function (itemValue) {
+console.log({setEntryChanged: itemValue});
     this.result[itemValue.item] = itemValue;
     this.options.addResultItem(itemValue);
     itemValue.origValue = itemValue.source === "config.xml" ? itemValue.value : itemValue.origValue;
@@ -266,6 +268,7 @@ console.log({addItemClicked: listValue});
 
         for (let count = startCount; count < itemCount; count++) {
           let itemLine = line;
+          let lineStatus = status;
 
           if (xpath && xpath.length > 0) {
             const itemId = "item_" + xpath.replaceAll("/","_") + "_" + count
@@ -277,15 +280,30 @@ console.log({addItemClicked: listValue});
               list.removeClass('fa-ul');
               list.addClass('fa-ul');
               let symbol = $('<span></span>').addClass('fa-li');
-              $('<i class="fa"></i>').addClass('fa-ban').appendTo(symbol);
+              let icon = $('<i class="fa"></i>').addClass('fa-ban');
+              icon.appendTo(symbol);
               symbol.appendTo(line);
               const listValue = {
                 item: xpath + `[${count}]`,
                 index: count,
                 target: this,
                 editor: line,
-                status: status,
+                status: lineStatus,
                 parentItem: parentItem };
+              values.filter((v) => { return v.item == listValue.item; }).forEach((v) => {
+                listValue.status = v.status;
+                listValue.id = v.id;
+                listValue.editor.removeClass(lineStatus);
+                lineStatus = listValue.status;
+                if (listValue.status === 'added') {
+                    icon.removeClass('fa-undo');
+                    icon.addClass('fa-ban');
+                } else if (listValue.status === 'removed') {
+                    icon.removeClass('fa-ban');
+                    icon.addClass('fa-undo');
+                }
+                listValue.editor.addClass(listValue.status);
+              });
               listValue.removeItemClicked = function(event) {
                 listValue.target.removeItemClicked (listValue, event);
               }
@@ -316,7 +334,7 @@ console.log({addItemClicked: listValue});
           let input = $('<input>');
           input.attr('id', "value_" + item.item.replaceAll("/","_") + "_" + i +  "_" + count);
           input.attr('style', 'margin-left: 20px; min-width: 400px');
-          let itemValue = {value: item.value, source: 'default', status: status};
+          let itemValue = {value: item.value, source: 'default', status: lineStatus};
 
           values.forEach(v => {
             if (v.item === item.item) {
@@ -330,6 +348,7 @@ console.log({addItemClicked: listValue});
               }
             }
           });
+          itemValue.status = lineStatus;
           itemLine.addClass(itemValue.status);
 
           if(item.editable) {
@@ -389,6 +408,14 @@ console.log({addItemClicked: listValue});
             }
             itemValue.resetEntry = function (event) { itemValue.target.resetEntry(itemValue, event); }
             link.click(itemValue, itemValue.resetEntry);
+            link.appendTo(itemLine);
+          } else if (itemValue.status !== 'unchanged') {
+            const link = $('<a>', {"title": "reset", "style": "margin-left: 20px"});
+            if (itemValue.origValue !== '') {
+                link.append(` config.xml value is "${itemValue.origValue}"`);
+            } else {
+                link.append(' no config.xml entry');
+            }
             link.appendTo(itemLine);
           }
         }

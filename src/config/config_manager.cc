@@ -845,7 +845,7 @@ void ConfigManager::updateConfigFromDatabase(std::shared_ptr<Storage> storage)
                     } else if (cfgValue.status == "added") {
                     } else if (cfgValue.status == "removed") {
                         std::map<std::string, std::string> arguments = {{"status", cfgValue.status}};
-                        if (!cs->updateDetail(cfgValue.item, parValue, self)) {
+                        if (!cs->updateDetail(cfgValue.item, parValue, self, &arguments)) {
                             log_error("unhandled option {} != {}", cfgValue.item, cs->xpath);
                         }
                     }
@@ -860,6 +860,7 @@ void ConfigManager::updateConfigFromDatabase(std::shared_ptr<Storage> storage)
 void ConfigManager::setOrigValue(const std::string& item, const std::string& value)
 {
     if (origValues.find(item) == origValues.end()) {
+        log_info("Caching {}='{}'", item, value);
         origValues[item] = value;
     }
 }

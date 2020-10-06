@@ -520,11 +520,17 @@ void ConfigArraySetup::makeOption(const pugi::xml_node& root, std::shared_ptr<Co
     setOption(config);
 }
 
-bool ConfigArraySetup::updateItem(size_t i, const std::string& optItem, std::shared_ptr<Config> config, std::shared_ptr<ArrayOption> value, const std::string& optValue, bool remove) const
+bool ConfigArraySetup::updateItem(size_t i, const std::string& optItem, std::shared_ptr<Config> config, std::shared_ptr<ArrayOption> value, const std::string& optValue, const std::string& status) const
 {
     auto index = getItemPath(i);
-    if (optItem == index || remove) {
-        config->setOrigValue(index, value->getArrayOption()[i]);
+    if (optItem == index || !status.empty()) {
+        auto realIndex = value->getIndex(i);
+        if (realIndex < SIZE_MAX) {
+            config->setOrigValue(index, value->getArrayOption()[realIndex]);
+            if (status == STATUS_REMOVED) {
+                config->setOrigValue(optItem, value->getArrayOption()[realIndex]);
+            }
+        }
         value->setItem(i, optValue);
         return true;
     }
@@ -543,7 +549,11 @@ bool ConfigArraySetup::updateDetail(const std::string& optItem, std::string& opt
             if (updateItem(i, optItem, config, value, optValue)) {
                 return true;
             }
-            if (arguments != nullptr && arguments->find("status") != arguments->end() && arguments->at("status") == "removed" && updateItem(i, optItem, config, value, "", true)) {
+            std::string status = arguments != nullptr && arguments->find("status") != arguments->end() ? arguments->at("status") : "";
+            if (status == STATUS_REMOVED && updateItem(i, optItem, config, value, "", status)) {
+                return true;
+            }
+            if (status == STATUS_RESET && updateItem(i, optItem, config, value, config->getOrigValue(optItem), status)) {
                 return true;
             }
         }
@@ -707,25 +717,62 @@ void ConfigDictionarySetup::makeOption(const pugi::xml_node& root, std::shared_p
     setOption(config);
 }
 
+bool ConfigDictionarySetup::updateItem(size_t i, const std::string& optItem, std::shared_ptr<Config> config, std::shared_ptr<DictionaryOption> value, const std::string& optKey, const std::string& optValue, const std::string& status) const
+{
+    auto keyIndex = getItemPath(i, keyOption);
+    auto valIndex = getItemPath(i, valOption);
+    if (optItem == keyIndex || !status.empty()) {
+        config->setOrigValue(keyIndex, optKey);
+        if (status == STATUS_REMOVED) {
+            config->setOrigValue(optItem, optKey);
+            config->setOrigValue(valIndex, value->getDictionaryOption()[optKey]);
+        }
+        value->setKey(i, optValue);
+        if (status == STATUS_RESET && !optValue.empty()) {
+            value->setValue(i, config->getOrigValue(valIndex));
+            log_info("Reset Dictionary value {} {}", valIndex, config->getDictionaryOption(option)[optKey]);
+        }
+        log_info("New Dictionary key {} {}", keyIndex, optValue);
+        return true;
+    }
+    if (optItem == valIndex) {
+        config->setOrigValue(valIndex, value->getDictionaryOption()[optKey]);
+        value->setValue(i, optValue);
+        log_info("New Dictionary value {} {}", valIndex, config->getDictionaryOption(option)[optKey]);
+        return true;
+    }
+    return false;
+}
+
 bool ConfigDictionarySetup::updateDetail(const std::string& optItem, std::string& optValue, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments)
 {
     if (optItem.substr(0, strlen(xpath)) == xpath && optionValue != nullptr) {
         std::shared_ptr<DictionaryOption> value = std::dynamic_pointer_cast<DictionaryOption>(optionValue);
         log_info("Updating Dictionary Detail {} {} {}", xpath, optItem, optValue);
-        int i = 0;
-        for (const auto& entry : value->getDictionaryOption()) {
-            auto index = getItemPath(i, ATTR_IMPORT_MAPPINGS_MIMETYPE_FROM);
-            if (optItem == index) {
-                config->setOrigValue(index, entry.first);
-                value->setKey(entry.first, optValue);
-                log_info("New Dictionary Detail {} {}", index, config->getDictionaryOption(option)[optValue]);
+
+        if (optItem.find_first_of('[') != std::string::npos && optItem.find_first_of(']', optItem.find_first_of('[')) != std::string::npos ) {
+            auto startPos = optItem.find_first_of('[') + 1;
+            auto endPos = optItem.find_first_of(']', startPos);
+            size_t i = std::stoi(optItem.substr(startPos, endPos - startPos));
+            if (updateItem(i, optItem, config, value, value->getKey(i), optValue)) {
                 return true;
             }
-            index = getItemPath(i, ATTR_IMPORT_MAPPINGS_MIMETYPE_TO);
-            if (optItem == index) {
-                config->setOrigValue(index, value->getDictionaryOption()[entry.first]);
-                value->setValue(entry.first, optValue);
-                log_info("New Dictionary Detail {} {}", index, config->getDictionaryOption(option)[entry.first]);
+            std::string status = arguments != nullptr && arguments->find("status") != arguments->end() ? arguments->at("status") : "";
+            if (status == STATUS_REMOVED) {
+                if (updateItem(i, optItem, config, value, value->getKey(i), "", status)) {
+                    return true;
+                }
+            }
+            if (status == STATUS_RESET) {
+                if (updateItem(i, optItem, config, value, optValue, optValue, status)) {
+                    return true;
+                }
+            }
+        }
+
+        int i = 0;
+        for (const auto& entry : value->getDictionaryOption()) {
+            if (updateItem(i, optItem, config, value, entry.first, optValue)) {
                 return true;
             }
             i++;

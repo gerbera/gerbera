@@ -54,6 +54,7 @@ web::configLoad::configLoad(std::shared_ptr<Config> config, std::shared_ptr<Stor
 
 void web::configLoad::createItem(pugi::xml_node& item, const std::string& name, config_option_t id)
 {
+    allItems[name] = &item;
     item.append_attribute("item") = name.c_str();
     item.append_attribute("id") = fmt::format("{:02d}", id).c_str();
     item.append_attribute("status") = "unchanaged";
@@ -255,11 +256,11 @@ void web::configLoad::process()
     for (auto dict_option : dict_options) {
         int i = 0;
         auto dcs = ConfigSetup::findConfigSetup<ConfigDictionarySetup>(dict_option);
-        auto dictionary = dcs->getValue()->getDictionaryOption();
+        auto dictionary = dcs->getValue()->getDictionaryOption(true);
         for (const auto& entry : dictionary) {
             auto item = values.append_child("item");
             createItem(item, dcs->getItemPath(i, dcs->keyOption), dcs->option);
-            item.append_attribute("value") = entry.first.c_str();
+            item.append_attribute("value") = entry.first.substr(5).c_str();
 
             item = values.append_child("item");
             createItem(item, dcs->getItemPath(i, dcs->valOption), dcs->option);
@@ -292,6 +293,25 @@ void web::configLoad::process()
             auto item = values.append_child("item");
             createItem(item, acs->getItemPath(i), acs->option);
             item.append_attribute("value") = entry.c_str();
+        }
+    }
+
+    for (auto entry : dbEntries) {
+        auto exItem = allItems.find(entry.item);
+        if (exItem != allItems.end()) {
+            auto item = (*exItem).second;
+            item->attribute("source") = "database";
+            item->attribute("status") = entry.status.c_str();
+        } else {
+            auto cs = ConfigManager::findConfigSetupByPath(entry.item, true);
+            if (cs != nullptr) {
+                auto item = values.append_child("item");
+                createItem(item, entry.item, cs->option);
+                item.append_attribute("value") = entry.value.c_str();
+                item.attribute("status") = entry.status.c_str();
+                item.attribute("origValue") = config->getOrigValue(entry.item).c_str();
+                item.attribute("source") = "database";
+            }
         }
     }
 }

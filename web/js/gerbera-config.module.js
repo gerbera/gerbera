@@ -73,6 +73,7 @@ const loadConfig = (response, item) => {
 
 console.log(`loadConfig ${item}`);
 console.log(response);
+
   if (response.success && item in response && response[item]) {
      current_config[item] = response[item];
   }
@@ -82,6 +83,7 @@ console.log(response);
     if (datagrid.hasClass('grb-config')) {
       datagrid.config('destroy');
     }
+    current_config.changedItems = {};
     datagrid.config({
       meta: current_config.config,
       values: current_config.values,

@@ -54,6 +54,12 @@ public:
     std::string status;
 };
 
+const std::string STATUS_REMOVED = "removed";
+const std::string STATUS_RESET = "reset";
+const std::string STATUS_ADDED = "added";
+const std::string STATUS_CHANGED = "changed";
+const std::string STATUS_UNCHANGED = "unchanged";
+
 class ConfigSetup {
 protected:
     std::shared_ptr<ConfigOption> optionValue;
@@ -429,7 +435,7 @@ protected:
     /// This function will create an array like that: ["data", "otherdata"]
     bool createArrayFromNode(const pugi::xml_node& element, std::vector<std::string>& result) const;
 
-    bool updateItem(size_t i, const std::string& optItem, std::shared_ptr<Config> config, std::shared_ptr<ArrayOption> value, const std::string& optValue, bool remove = false) const;
+    bool updateItem(size_t i, const std::string& optItem, std::shared_ptr<Config> config, std::shared_ptr<ArrayOption> value, const std::string& optValue, const std::string& status = "") const;
 
 public:
     ConfigArraySetup(config_option_t option, const char* xpath, config_option_t nodeOption, ArrayInitFunction init = nullptr, bool notEmpty = false)
@@ -501,6 +507,8 @@ protected:
     /// This function will create a dictionary with the following
     /// key:value paris: "1":"2", "3":"4"
     bool createDictionaryFromNode(const pugi::xml_node& optValue, std::map<std::string, std::string>& result) const;
+
+    bool updateItem(size_t i, const std::string& optItem, std::shared_ptr<Config> config, std::shared_ptr<DictionaryOption> value, const std::string& optKey, const std::string& optValue, const std::string& status = "") const;
 
 public:
     config_option_t keyOption;

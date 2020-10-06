@@ -62,7 +62,7 @@ public:
         throw std::runtime_error("Wrong option type bool");
     }
 
-    virtual std::map<std::string, std::string> getDictionaryOption() const
+    virtual std::map<std::string, std::string> getDictionaryOption(bool forEdit = false) const
     {
         throw std::runtime_error("Wrong option type dictionary");
     }
@@ -123,24 +123,73 @@ protected:
 
 class DictionaryOption : public ConfigOption {
 public:
-    explicit DictionaryOption(const std::map<std::string, std::string>& option) { this->option = option; }
-
-    std::map<std::string, std::string> getDictionaryOption() const override { return option; }
-
-    void setKey(const std::string& oldKey, const std::string& newKey)
+    explicit DictionaryOption(const std::map<std::string, std::string>& option)
+    : option(option)
     {
-        auto oldValue = option[oldKey];
-        option.erase(oldKey);
-        option[newKey] = oldValue;
+        this->origSize = this->option.size();
+        size_t i = 0;
+        for (const auto& entry : this->option) {
+            this->indexMap[i] = entry.first;
+            i++;
+        }
     }
 
-    void setValue(const std::string& key, const std::string& value)
+    std::map<std::string, std::string> getDictionaryOption(bool forEdit = false) const override
     {
-        option[key] = value;
+        if (!forEdit)
+            return option;
+
+        std::map<std::string, std::string> editOption;
+        auto editSize = getEditSize();
+        for (size_t i = 0; i < editSize; i++) {
+            // add index in front of key to get items correct sorting in map
+            if (!indexMap.at(i).empty()) {
+                editOption[fmt::format("{:05d}{}", i, indexMap.at(i))] = option.at(indexMap.at(i));
+            } else {
+                editOption[fmt::format("{:05d}", i)] = "";
+            }
+        }
+        return editOption;
+    }
+
+    std::string getKey(size_t index)
+    {
+        return indexMap[index];
+    }
+
+    size_t getEditSize() const
+    {
+        if (indexMap.empty()) {
+            return 0;
+        }
+        return (*std::max_element(indexMap.begin(), indexMap.end(), [&] (auto a, auto b) { return (a.first < b.first);})).first + 1;
+    }
+
+    void setKey(size_t keyIndex, const std::string& newKey)
+    {
+        if (!indexMap[keyIndex].empty()) {
+            auto oldValue = option[indexMap[keyIndex]];
+            option.erase(indexMap[keyIndex]);
+            indexMap[keyIndex] = newKey;
+            if (!newKey.empty()) {
+                option[newKey] = oldValue;
+            }
+        } else if (!newKey.empty()) {
+            indexMap[keyIndex] = newKey;
+        }
+    }
+
+    void setValue(size_t keyIndex, const std::string& value)
+    {
+        if (!indexMap[keyIndex].empty()) {
+            option[indexMap[keyIndex]] = value;
+        }
     }
 
 protected:
     std::map<std::string, std::string> option;
+    size_t origSize;
+    std::map<size_t, std::string> indexMap;
 };
 
 class ArrayOption : public ConfigOption {
@@ -171,6 +220,11 @@ public:
         return editOption;
     }
 
+    size_t getIndex(size_t index)
+    {
+        return indexMap[index];
+    }
+
     size_t getEditSize() const
     {
         if (indexMap.empty()) {
@@ -181,10 +235,10 @@ public:
 
     void setItem(size_t index, const std::string& value)
     {
+        auto editSize = getEditSize();
         if (indexMap.find(index) != indexMap.end() && value.empty()) {
-            option.erase(option.begin() + index);
+            option.erase(option.begin() + indexMap[index]);
             indexMap[index] = SIZE_MAX;
-            auto editSize = getEditSize();
             for (size_t i = index + 1; i < editSize; i++) {
                 if (indexMap[i] < SIZE_MAX) {
                     indexMap[i]--;
@@ -198,7 +252,27 @@ public:
                 }
             }
         } else if (indexMap.find(index) != indexMap.end()) {
-            option.at(indexMap[index]) = value;
+            if (indexMap[index] == SIZE_MAX) {
+                for (size_t i = editSize - 1; i > index; i--) {
+                    if (indexMap[i] < SIZE_MAX) {
+                        indexMap[index] = indexMap[i];
+                        indexMap[i]++;
+                    }
+                }
+                if (indexMap[index] == SIZE_MAX) {
+                    for (size_t i = 0; i < index; i++) {
+                        if (indexMap[i] < SIZE_MAX) {
+                            indexMap[index] = indexMap[i] + 1;
+                        }
+                    }
+                }
+                if (indexMap[index] == SIZE_MAX) {
+                    indexMap[index] = 0;
+                }
+                option.insert(option.begin() + indexMap[index], value);
+            } else {
+                option.at(indexMap[index]) = value;
+            }
         } else if (!value.empty()) {
             option.push_back(value);
             indexMap[index] = option.size() - 1;
