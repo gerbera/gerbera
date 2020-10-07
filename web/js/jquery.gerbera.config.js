@@ -227,7 +227,7 @@ console.log({addItemClicked: listValue});
         if (item.children.length > 0) {
           const subList = $('<ul></ul>').addClass('list');
           subList.attr('id', "list_" + item.item.replaceAll("/","_"));
-          this.addTextLine(line,item);
+          this.addTextLine(line, item);
           this.createSection (subList, item.item, item.children, values, level+1, item);
           subList.appendTo(line);
           this.subElements.push({item: line, child: subList});
@@ -259,7 +259,21 @@ console.log({addItemClicked: listValue});
           list.removeClass('fa-ul');
           list.addClass('fa-ul');
           const itemId = "item_" + xpath.replaceAll("/","_") + "_new";
-          this.addNewListItemBlock(list, item, parentItem, 0, xpath, itemId);
+          if (parentItem.editable) {
+            this.addNewListItemBlock(list, item, parentItem, 0, xpath, itemId);
+          } else {
+            let lineNew = $('<li></li>');
+            lineNew.attr('id', "line_" + item.item.replaceAll("/","_"));
+            let textNew = $('<span></span>');
+            let symbolNew = $('<span></span>').addClass('fa-li');
+            $('<i class="fa"></i>').addClass('fa-circle').appendTo(symbolNew);
+            symbolNew.appendTo(lineNew);
+            textNew.text('No Entries').appendTo(lineNew);
+            let xpathListNew = $('<ul></ul>');
+            xpathListNew.attr('id', itemId + '_New');
+            lineNew.append(xpathListNew);
+            list.append(lineNew);
+          }
         }
         let startCount = 0;
         if (level === -1 && itemCount > 0) {
@@ -289,12 +303,15 @@ console.log({addItemClicked: listValue});
                 target: this,
                 editor: line,
                 status: lineStatus,
-                parentItem: parentItem };
+                parentItem: parentItem,
+                editable: parentItem.editable};
               values.filter((v) => { return v.item == listValue.item; }).forEach((v) => {
                 listValue.status = v.status;
                 listValue.id = v.id;
-                listValue.editor.removeClass(lineStatus);
-                lineStatus = listValue.status;
+              });
+              listValue.editor.removeClass(lineStatus);
+              lineStatus = listValue.status;
+              if (listValue.editable) {
                 if (listValue.status === 'added') {
                     icon.removeClass('fa-undo');
                     icon.addClass('fa-ban');
@@ -303,11 +320,14 @@ console.log({addItemClicked: listValue});
                     icon.addClass('fa-undo');
                 }
                 listValue.editor.addClass(listValue.status);
-              });
-              listValue.removeItemClicked = function(event) {
-                listValue.target.removeItemClicked (listValue, event);
+                listValue.removeItemClicked = function(event) {
+                  listValue.target.removeItemClicked (listValue, event);
+                }
+                symbol.off('click').on('click', listValue.removeItemClicked);
+              } else {
+                icon.removeClass('fa-ban');
+                icon.addClass('fa-circle');
               }
-              symbol.off('click').on('click', listValue.removeItemClicked);
               //let text = $('<span></span>');
               //text.text(count).appendTo(line);
               //text.attr('title', item.item);
@@ -320,7 +340,7 @@ console.log({addItemClicked: listValue});
               } else {
                 list.append(line);
               }
-              if (count === itemCount - 1 && level !== -1) {
+              if (count === itemCount - 1 && level !== -1 && listValue.editable) {
                   this.addNewListItemBlock(list, item, parentItem, itemCount, xpath, itemId);
               }
             }
@@ -463,7 +483,7 @@ console.log({addItemClicked: listValue});
       text.attr('style', 'min-width: 200px; display: inline-block;');
       text.attr('title', item.item);
     } else {
-    text.text(item.item).appendTo(line);
+      text.text(item.item).appendTo(line);
     }
   }
 });

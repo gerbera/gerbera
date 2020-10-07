@@ -4,6 +4,7 @@
 			"item": "/server",
 			"caption": "Server",
 			"type": "Element",
+			"editable": true,
 			"children": [
 				{
 					"item": "/server/name",
@@ -119,6 +120,7 @@
 			"item": "/server/storage",
 			"caption": "Storage",
 			"type": "Element",
+			"editable": true,
 			"children": [
 				{
 					"item": "/server/storage/driver",
@@ -130,6 +132,7 @@
 					"item": "/server/storage/sqlite3",
 					"caption": "SQLite",
 					"type": "Element",
+					"editable": true,
 					"children": [
 						{
 							"item": "/server/storage/sqlite3/attribute::enabled",
@@ -173,6 +176,7 @@
 					"item": "/server/storage/mysql",
 					"caption": "MySQL",
 					"type": "Element",
+					"editable": true,
 					"children": [
 						{
 							"item": "/server/storage/mysql/attribute::enabled",
@@ -224,6 +228,7 @@
 			"item": "/server/ui",
 			"caption": "UI",
 			"type": "Element",
+			"editable": true,
 			"children": [
 				{
 					"item": "/server/ui/attribute::enabled",
@@ -289,6 +294,7 @@
 			"item": "/import",
 			"caption": "Import",
 			"type": "Element",
+			"editable": true,
 			"children": [
 				{
 					"item": "/import/attribute::hidden-files",
@@ -322,6 +328,7 @@
 					"item": "/import/autoscan/timed/directory",
 					"caption": "Timed Autoscan Directories",
 					"type": "List",
+					"editable": false,
 					"children": [
 						{
 							"item": "/import/autoscan/timed/directory/attribute::location",
@@ -362,6 +369,7 @@
 					"item": "/import/autoscan/inotify/directory",
 					"caption": "INotify Autoscan Directories",
 					"type": "List",
+					"editable": true,
 					"children": [
 						{
 							"item": "/import/autoscan/inotify/directory/attribute::location",
@@ -395,6 +403,7 @@
 					"item": "/import/layout/path",
 					"caption": "Path Mappings",
 					"type": "List",
+					"editable": true,
 					"children": [
 						{
 							"item": "/import/layout/path/attribute::from",
@@ -416,6 +425,7 @@
 			"item": "/import/scripting",
 			"caption": "Scripting",
 			"type": "Element",
+			"editable": true,
 			"children": [
 				{
 					"item": "/import/scripting/common-script",
@@ -471,6 +481,7 @@
 			"item": "/import/resources",
 			"type": "Element",
 			"caption": "Resource Handling",
+			"editable": true,
 			"children": [
 				{
 					"item": "/import/resources/attribute::case-sensitive",
@@ -483,6 +494,7 @@
 					"item": "/import/resources/fanart/add-file",
 					"caption": "Fanart Files",
 					"type": "List",
+					"editable": true,
 					"children": [
 						{
 							"item": "/import/resources/fanart/add-file/attribute::name",
@@ -496,6 +508,7 @@
 					"item": "/import/resources/subtitle/add-file",
 					"caption": "Subtitle Files",
 					"type": "List",
+					"editable": true,
 					"children": [
 						{
 							"item": "/import/resources/subtitle/add-file/attribute::name",
@@ -509,6 +522,7 @@
 					"item": "/import/resources/resource/add-file",
 					"caption": "Resource Files",
 					"type": "List",
+					"editable": true,
 					"children": [
 						{
 							"item": "/import/resources/resource/add-file/attribute::name",
@@ -524,6 +538,7 @@
 			"item": "/import/library-options",
 			"type": "Element",
 			"caption": "Library Options",
+			"editable": true,
 			"children": [
 				{
 					"item": "/import/library-options/attribute::multi-value-separator",
@@ -543,6 +558,7 @@
 					"item": "/import/library-options/libexif/auxdata/add-data",
 					"caption": "libexif",
 					"type": "List",
+					"editable": true,
 					"children": [
 						{
 							"item": "/import/library-options/libexif/auxdata/add-data/attribute::tag",
@@ -556,6 +572,7 @@
 					"item": "/import/library-options/id3/auxdata/add-data",
 					"caption": "taglib",
 					"type": "List",
+					"editable": true,
 					"children": [
 						{
 							"item": "/import/library-options/id3/auxdata/add-data/attribute::tag",
@@ -569,6 +586,7 @@
 					"item": "/import/library-options/exiv2/auxdata/add-data",
 					"caption": "exiv2",
 					"type": "List",
+					"editable": true,
 					"children": [
 						{
 							"item": "/import/library-options/exiv2/auxdata/add-data/attribute::tag",
@@ -582,6 +600,7 @@
 					"item": "/import/library-options/ffmpeg/auxdata/add-data",
 					"caption": "ffmpeg",
 					"type": "List",
+					"editable": true,
 					"children": [
 						{
 							"item": "/import/library-options/ffmpeg/auxdata/add-data/attribute::tag",
@@ -597,6 +616,7 @@
 			"item": "/import/mappings",
 			"type": "Element",
 			"caption": "Import Mappings",
+			"editable": true,
 			"children": [
 				{
 					"item": "/import/mappings/extension-mimetype/attribute::ignore-unknown",
@@ -616,6 +636,7 @@
 					"item": "/import/mappings/extension-mimetype/map",
 					"caption": "Extensions",
 					"type": "List",
+					"editable": true,
 					"children": [
 						{
 							"item": "/import/mappings/extension-mimetype/map/attribute::from",
@@ -635,6 +656,7 @@
 					"item": "/import/mappings/mimetype-contenttype/treat",
 					"caption": "Content Types",
 					"type": "List",
+					"editable": true,
 					"children": [
 						{
 							"item": "/import/mappings/mimetype-contenttype/treat/attribute::mimetype",
@@ -654,6 +676,7 @@
 					"item": "/import/mappings/mimetype-upnpclass/map",
 					"caption": "UPnP Classes",
 					"type": "List",
+					"editable": true,
 					"children": [
 						{
 							"item": "/import/mappings/mimetype-upnpclass/map/attribute::from",
@@ -675,6 +698,7 @@
 			"item": "/transcoding",
 			"caption": "Transcoding",
 			"type": "Element",
+			"editable": true,
 			"children": [
 				{
 					"item": "/transcoding/attribute::enabled",
@@ -715,6 +739,7 @@
 					"item": "/transcoding/mimetype-profile-mappings/transcode",
 					"caption": "Mimetype to Profile",
 					"type": "List",
+					"editable": false,
 					"children": [
 						{
 							"item": "/transcoding/mimetype-profile-mappings/transcode/attribute::mimetype",
@@ -734,6 +759,7 @@
 					"item": "/transcoding/profiles/profile",
 					"caption": "Profiles",
 					"type": "List",
+					"editable": false,
 					"children": [
 						{
 							"item": "/transcoding/profiles/profile/attribute::enabled",
@@ -863,6 +889,7 @@
 			"item": "/clients",
 			"caption": "Client Detection",
 			"type": "Element",
+			"editable": true,
 			"children": [
 				{
 					"item": "/clients/attribute::enabled",
@@ -874,6 +901,7 @@
 				{
 					"item": "/clients/client",
 					"type": "List",
+					"editable": true,
 					"children": [
 						{
 							"item": "/clients/client/attribute::ip",

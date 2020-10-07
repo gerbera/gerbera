@@ -288,8 +288,8 @@ protected:
 class AutoscanListOption : public ConfigOption {
 public:
     explicit AutoscanListOption(std::shared_ptr<AutoscanList> option)
+    : option(std::move(option))
     {
-        this->option = std::move(option);
     }
 
     std::shared_ptr<AutoscanList> getAutoscanListOption() const override { return option; }
