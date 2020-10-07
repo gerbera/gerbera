@@ -61,10 +61,15 @@ a:hover {
     border-bottom: 1px solid #ff7f00;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
-}
 
 li.nav-item > a {
     color: #bbb;
+}
+
+@media (max-width: 1110px) and (min-width: 768px) {
+    .nav-link span {
+        display: none;
+    }
 }
 
 .navbar-brand,
@@ -232,7 +237,7 @@ body,
 }
 
 #config {
-    height: 100%;
+    height: calc( 100% - 115px );
 }
 
 #left {
@@ -254,22 +259,19 @@ body,
     flex-grow: 5;
 }
 
-#datagrid, #clientgrid {
+#datagrid,
+#clientgrid {
     height: 100%;
     overflow: auto;
     background-color: #fefefe;
 }
 
 #configframe {
-    min-height: calc(100% - 130px);
-    max-height: calc(100% - 130px);
-    height: calc(100% - 130px);
+    height: 100%;
 }
 
 #configgrid {
-    min-height: calc(100% - 40px);
-    max-height: calc(100% - 40px);
-    height: calc(100% - 40px);
+    height: calc(100% - 60px);
     overflow-y: auto;
     background-color: #fefefe;
 }
@@ -293,7 +295,8 @@ body,
     width: 100%;
 }
 
-#clientgrid table tbody, #clientgrid table thead {
+#clientgrid table tbody,
+#clientgrid table thead {
     overflow-y: scroll;
     width: 100%;
 }
@@ -310,19 +313,23 @@ body,
     width: 100%;
 }
 
-#datagrid table tbody tr:hover, #clientgrid table tbody tr:hover {
+#datagrid table tbody tr:hover,
+#clientgrid table tbody tr:hover {
     background-color: #e9ecef;
 }
 
-#clientgrid, #configgrid {
+#clientgrid,
+#configgrid {
     margin: 30px;
 }
 
 #configgrid {
+    margin-left: 0px;
 }
 
 #configgrid .configListItem {
-    margin-left: 40px; list-style:none;
+    margin-left: 20px;
+    list-style:none;
 }
 
 #configgrid .changed {
@@ -439,7 +446,7 @@ body,
 .grb-item-buttons {
 }
 
-.grb-trail  .breadcrumb > li + li:before {
+.grb-trail .breadcrumb > li + li:before {
     content: ">";
     padding: 0 5px;
     color: rgba(255, 255, 255, 0.5);
@@ -466,6 +473,8 @@ body,
 .grb-trail-buttons li a {
     color: #ededed;
 }
+
+.grb-trail-button,
 .grb-trail-add,
 .grb-trail-add-autoscan,
 .grb-trail-edit-autoscan,
@@ -475,6 +484,7 @@ body,
     text-decoration: none;
 }
 
+.grb-trail-button:hover,
 .grb-trail-add:hover,
 .grb-trail-add-autoscan:hover,
 .grb-trail-edit-autoscan:hover,

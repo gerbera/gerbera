@@ -24,6 +24,7 @@ public:
     void setOrigValue(const std::string& item, const std::string& value) override { }
     void setOrigValue(const std::string& item, bool value) override { }
     void setOrigValue(const std::string& item, int value) override { }
+    bool hasOrigValue(const std::string& item) const override { return false; }
     MOCK_METHOD(std::shared_ptr<TranscodingProfileList>, getTranscodingProfileListOption, (config_option_t option), (override));
 };
 

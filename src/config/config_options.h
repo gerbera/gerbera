@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     config_options.h - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -134,57 +134,18 @@ public:
         }
     }
 
-    std::map<std::string, std::string> getDictionaryOption(bool forEdit = false) const override
-    {
-        if (!forEdit)
-            return option;
-
-        std::map<std::string, std::string> editOption;
-        auto editSize = getEditSize();
-        for (size_t i = 0; i < editSize; i++) {
-            // add index in front of key to get items correct sorting in map
-            if (!indexMap.at(i).empty()) {
-                editOption[fmt::format("{:05d}{}", i, indexMap.at(i))] = option.at(indexMap.at(i));
-            } else {
-                editOption[fmt::format("{:05d}", i)] = "";
-            }
-        }
-        return editOption;
-    }
+    std::map<std::string, std::string> getDictionaryOption(bool forEdit = false) const override;
 
     std::string getKey(size_t index)
     {
         return indexMap[index];
     }
 
-    size_t getEditSize() const
-    {
-        if (indexMap.empty()) {
-            return 0;
-        }
-        return (*std::max_element(indexMap.begin(), indexMap.end(), [&] (auto a, auto b) { return (a.first < b.first);})).first + 1;
-    }
+    size_t getEditSize() const;
 
-    void setKey(size_t keyIndex, const std::string& newKey)
-    {
-        if (!indexMap[keyIndex].empty()) {
-            auto oldValue = option[indexMap[keyIndex]];
-            option.erase(indexMap[keyIndex]);
-            indexMap[keyIndex] = newKey;
-            if (!newKey.empty()) {
-                option[newKey] = oldValue;
-            }
-        } else if (!newKey.empty()) {
-            indexMap[keyIndex] = newKey;
-        }
-    }
+    void setKey(size_t keyIndex, const std::string& newKey);
 
-    void setValue(size_t keyIndex, const std::string& value)
-    {
-        if (!indexMap[keyIndex].empty()) {
-            option[indexMap[keyIndex]] = value;
-        }
-    }
+    void setValue(size_t keyIndex, const std::string& value);
 
 protected:
     std::map<std::string, std::string> option;
@@ -203,81 +164,16 @@ public:
         }
     }
 
-    std::vector<std::string> getArrayOption(bool forEdit = false) const override
-    {
-        if (!forEdit)
-            return option;
-
-        std::vector<std::string> editOption;
-        auto editSize = getEditSize();
-        for (size_t i = 0; i < editSize; i++) {
-            if (indexMap.at(i) < SIZE_MAX) {
-                editOption.push_back(option[indexMap.at(i)]);
-            } else {
-                editOption.push_back("");
-            }
-        }
-        return editOption;
-    }
+    std::vector<std::string> getArrayOption(bool forEdit = false) const override;
 
     size_t getIndex(size_t index)
     {
-        return indexMap[index];
+        return index < indexMap.size() ? indexMap[index] : indexMap.size();
     }
 
-    size_t getEditSize() const
-    {
-        if (indexMap.empty()) {
-            return 0;
-        }
-        return (*std::max_element(indexMap.begin(), indexMap.end(), [&] (auto a, auto b) { return (a.first < b.first);})).first + 1;
-    }
+    size_t getEditSize() const;
 
-    void setItem(size_t index, const std::string& value)
-    {
-        auto editSize = getEditSize();
-        if (indexMap.find(index) != indexMap.end() && value.empty()) {
-            option.erase(option.begin() + indexMap[index]);
-            indexMap[index] = SIZE_MAX;
-            for (size_t i = index + 1; i < editSize; i++) {
-                if (indexMap[i] < SIZE_MAX) {
-                    indexMap[i]--;
-                }
-            }
-            for (size_t i = editSize - 1; i >= origSize; i--) {
-                if (indexMap[i] == SIZE_MAX)
-                    indexMap.erase(i);
-                else {
-                    break;
-                }
-            }
-        } else if (indexMap.find(index) != indexMap.end()) {
-            if (indexMap[index] == SIZE_MAX) {
-                for (size_t i = editSize - 1; i > index; i--) {
-                    if (indexMap[i] < SIZE_MAX) {
-                        indexMap[index] = indexMap[i];
-                        indexMap[i]++;
-                    }
-                }
-                if (indexMap[index] == SIZE_MAX) {
-                    for (size_t i = 0; i < index; i++) {
-                        if (indexMap[i] < SIZE_MAX) {
-                            indexMap[index] = indexMap[i] + 1;
-                        }
-                    }
-                }
-                if (indexMap[index] == SIZE_MAX) {
-                    indexMap[index] = 0;
-                }
-                option.insert(option.begin() + indexMap[index], value);
-            } else {
-                option.at(indexMap[index]) = value;
-            }
-        } else if (!value.empty()) {
-            option.push_back(value);
-            indexMap[index] = option.size() - 1;
-        }
-    }
+    void setItem(size_t index, const std::string& value);
 
 protected:
     std::vector<std::string> option;

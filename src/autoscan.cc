@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     autoscan.cc - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -37,17 +37,21 @@
 #include "storage/storage.h"
 
 AutoscanDirectory::AutoscanDirectory()
-    : timer_parameter(std::make_shared<Timer::Parameter>(Timer::Parameter::IDAutoscan, INVALID_SCAN_ID))
+    : isOrig (false)
+    , interval(0)
+    , taskCount(0)
+    , scanID(INVALID_SCAN_ID)
+    , objectID(INVALID_OBJECT_ID)
+    , storageID(INVALID_OBJECT_ID)
+    , timer_parameter(std::make_shared<Timer::Parameter>(Timer::Parameter::IDAutoscan, INVALID_SCAN_ID))
 {
-    taskCount = 0;
-    objectID = INVALID_OBJECT_ID;
-    storageID = INVALID_OBJECT_ID;
 }
 
 AutoscanDirectory::AutoscanDirectory(fs::path location, ScanMode mode, bool recursive, bool persistent,
     int id, unsigned int interval, bool hidden)
     : location(std::move(location))
     , mode(mode)
+    , isOrig (false)
     , recursive(recursive)
     , hidden(hidden)
     , persistent_flag(persistent)
@@ -69,7 +73,8 @@ void AutoscanDirectory::setCurrentLMT(time_t lmt)
 }
 
 AutoscanList::AutoscanList(std::shared_ptr<Storage> storage)
-    : storage(std::move(storage))
+    : origSize(0)
+    , storage(std::move(storage))
 {
 }
 
@@ -83,20 +88,27 @@ void AutoscanList::updateLMinDB()
     }
 }
 
-int AutoscanList::add(const std::shared_ptr<AutoscanDirectory>& dir)
+int AutoscanList::add(const std::shared_ptr<AutoscanDirectory>& dir, size_t index)
 {
     AutoLock lock(mutex);
-    return _add(dir);
+    return _add(dir, index);
 }
 
-int AutoscanList::_add(const std::shared_ptr<AutoscanDirectory>& dir)
+int AutoscanList::_add(const std::shared_ptr<AutoscanDirectory>& dir, size_t index)
 {
     if (std::any_of(list.begin(), list.end(), [loc = dir->getLocation()](const auto& item) { return loc == item->getLocation(); })) {
         throw_std_runtime_error("Attempted to add same autoscan path twice");
     }
-
-    dir->setScanID(list.size());
+    if (index == SIZE_MAX) {
+        index = getEditSize();
+        origSize = list.size() + 1;
+        dir->setOrig(true);
+    } else {
+        dir->setPersistent(true);
+    }
+    dir->setScanID(index);
     list.push_back(dir);
+    indexMap[dir->getScanID()] = dir;
 
     return dir->getScanID();
 }
@@ -105,9 +117,17 @@ void AutoscanList::addList(const std::shared_ptr<AutoscanList>& list)
 {
     AutoLock lock(mutex);
 
-    for (const auto& i : list->list) {
-        _add(i);
+    for (const auto& dir : list->list) {
+        _add(dir, SIZE_MAX);
     }
+}
+
+size_t AutoscanList::getEditSize() const
+{
+    if (indexMap.empty()) {
+        return 0;
+    }
+    return (*std::max_element(indexMap.begin(), indexMap.end(), [&] (auto a, auto b) { return (a.first < b.first);})).first + 1;
 }
 
 std::vector<std::shared_ptr<AutoscanDirectory>> AutoscanList::getArrayCopy()
@@ -117,14 +137,19 @@ std::vector<std::shared_ptr<AutoscanDirectory>> AutoscanList::getArrayCopy()
     return list;
 }
 
-std::shared_ptr<AutoscanDirectory> AutoscanList::get(size_t id)
+std::shared_ptr<AutoscanDirectory> AutoscanList::get(size_t id, bool edit)
 {
     AutoLock lock(mutex);
+    if (!edit) {
+        if (id >= list.size())
+            return nullptr;
 
-    if (id >= list.size())
-        return nullptr;
-
-    return list[id];
+        return list[id];
+    }
+    if (indexMap.find(id) != indexMap.end()) {
+        return indexMap[id];
+    }
+    return nullptr;
 }
 
 std::shared_ptr<AutoscanDirectory> AutoscanList::getByObjectID(int objectID)
@@ -143,20 +168,35 @@ std::shared_ptr<AutoscanDirectory> AutoscanList::get(const fs::path& location)
     return it != list.end() ? *it : nullptr;
 }
 
-void AutoscanList::remove(size_t id)
+void AutoscanList::remove(size_t id, bool edit)
 {
     AutoLock lock(mutex);
 
-    if (id >= list.size()) {
-        log_debug("No such ID {}!", id);
-        return;
+    if (!edit) {
+        if (id >= list.size()) {
+            log_debug("No such ID {}!", id);
+            return;
+        }
+        auto dir = list[id];
+        dir->setScanID(INVALID_SCAN_ID);
+
+        list.erase(list.begin() + id);
+        log_debug("ID {} removed!", id);
+    } else {
+        if (indexMap.find(id) == indexMap.end()) {
+            log_debug("No such index ID {}!", id);
+            return;
+        }
+        const auto& dir = indexMap[id];
+        auto entry = std::find_if(list.begin(), list.end(), [=](const auto& item) { return dir->getScanID() == item->getScanID(); });
+        dir->setScanID(INVALID_SCAN_ID);
+        list.erase(entry);
+
+        if (id >= origSize) {
+            indexMap.erase(id);
+        }
+        log_debug("ID {} removed!", id);
     }
-
-    auto dir = list[id];
-    dir->setScanID(INVALID_SCAN_ID);
-
-    list.erase(list.begin() + id);
-    log_debug("ID {} removed!", id);
 }
 
 std::shared_ptr<AutoscanList> AutoscanList::removeIfSubdir(const fs::path& parent, bool persistent)
@@ -173,6 +213,7 @@ std::shared_ptr<AutoscanList> AutoscanList::removeIfSubdir(const fs::path& paren
                 ++it;
                 continue;
             }
+            indexMap[dir->getScanID()] = nullptr;
             auto copy = std::make_shared<AutoscanDirectory>();
             dir->copyTo(copy);
             copy->setScanID(dir->getScanID());

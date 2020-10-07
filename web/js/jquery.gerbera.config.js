@@ -34,7 +34,7 @@ $.widget('grb.config', {
     console.log(this.options);
 
     if (data.length > 0) {
-      this.createSection(list, '', data, this.options.values, 0, null);
+      this.createSection(list, '', data, this.options.values, 0, this);
     } else {
       line = $('<li></li>');
       $('<span>No config found</span>').appendTo(line);
@@ -160,7 +160,7 @@ console.log({removeItemClicked: listValue});
         listValue.status = 'reset';
         $(icon).removeClass('fa-undo');
         $(icon).addClass('fa-ban');
-    } else if (listValue.status === 'added') {
+    } else if (listValue.status === 'added' || listValue.status === 'manual') {
         listValue.editor[0].hidden = true;
         listValue.status = 'killed';
         $(icon).removeClass('fa-ban');
@@ -171,6 +171,18 @@ console.log({removeItemClicked: listValue});
         $(icon).addClass('fa-undo');
     }
 
+    const changedChildren = (listValue.parentItem.childList !== undefined) ? Object.getOwnPropertyNames(listValue.parentItem.childList) : [];
+    if (changedChildren.length > 0) {
+      changedChildren.forEach((child) => {
+        let childValue = listValue.parentItem.childList[child];
+        if (childValue &&  childValue.length > 0) {
+          childValue.forEach((j) => {
+            j.status = listValue.status;
+            this.options.addResultItem(j);
+          });
+        }
+      });
+    }
     listValue.editor.addClass(listValue.status);
   },
 
@@ -178,19 +190,24 @@ console.log({removeItemClicked: listValue});
 console.log({addItemClicked: listValue});
     this.result[listValue.item] = listValue;
     this.options.addResultItem(listValue);
+
     listValue.source = "ui";
     if (listValue.parentItem.children.length > 0) {
       let values = [];
       listValue.parentItem.children.forEach(child => {
-        values.push({
+        const newValue = {
           config: child,
           id: "-1",
           item: listValue.parentItem.item + `[${listValue.index}]` + child.item.replace(listValue.parentItem.item, ''),
           status: 'added',
-          value: '',
+          value: child.value ? child.value : '',
           source: 'ui',
           origValue: ''
-         });
+         };
+        if (child.editable) {
+          this.options.addResultItem(newValue);
+        }
+        values.push(newValue);
       });
       this.createSection($(listValue.editor[0].parentElement), listValue.parentItem.item, listValue.parentItem.children, values, -1, listValue.parentItem, 'added');
       this.subElements.push({item: listValue.editor, child: listValue.editor[0].parentElement});
@@ -199,6 +216,8 @@ console.log({addItemClicked: listValue});
   },
 
   createSection: function (list, xpath, section, values, level, parentItem, status = 'unchanged') {
+    parentItem.childList = {};
+    parentItem.childList[0] = [];
     for (let i = 0; i < section.length; i++) {
       const item = section[i];
       let line;
@@ -305,6 +324,7 @@ console.log({addItemClicked: listValue});
                 status: lineStatus,
                 parentItem: parentItem,
                 editable: parentItem.editable};
+              parentItem.childList[count] = [];
               values.filter((v) => { return v.item == listValue.item; }).forEach((v) => {
                 listValue.status = v.status;
                 listValue.id = v.id;
@@ -368,6 +388,7 @@ console.log({addItemClicked: listValue});
               }
             }
           });
+          parentItem.childList[count].push(itemValue);
           itemValue.status = lineStatus;
           itemLine.addClass(itemValue.status);
 

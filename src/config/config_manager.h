@@ -111,6 +111,11 @@ public:
     /// \param option to retrieve
     std::shared_ptr<TranscodingProfileList> getTranscodingProfileListOption(config_option_t option) override;
 
+    bool hasOrigValue(const std::string& item) const override
+    {
+        return origValues.find(item) != origValues.end();
+    }
+
     std::string getOrigValue(const std::string& item) override
     {
         return (origValues.find(item) == origValues.end()) ? "" : origValues[item];

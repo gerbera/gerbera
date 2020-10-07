@@ -1,9 +1,9 @@
 /*GRB*
 
     Gerbera - https://gerbera.io/
-    
+
     client_config.h - this file is part of Gerbera.
-    
+
     Copyright (C) 2020 Gerbera Contributors
     
     Gerbera is free software; you can redistribute it and/or modify
@@ -30,6 +30,7 @@
 #include "util/upnp_clients.h"
 #include "util/upnp_quirks.h"
 #include <filesystem>
+#include <map>
 #include <mutex>
 
 // forward declaration
@@ -46,24 +47,29 @@ public:
     ///
     /// \param dir ClientConfig to add to the list.
     /// \return scanID of the newly added ClientConfig
-    void add(const std::shared_ptr<ClientConfig>& client);
+    void add(const std::shared_ptr<ClientConfig>& client, size_t index = SIZE_MAX);
 
-    std::shared_ptr<ClientConfig> get(size_t id);
+    std::shared_ptr<ClientConfig> get(size_t id, bool edit = false);
+
+    size_t getEditSize() const;
 
     size_t size() const { return list.size(); }
 
     /// \brief removes the ClientConfig given by its scan ID
-    void remove(size_t id);
+    void remove(size_t id, bool edit = false);
 
     /// \brief returns a copy of the autoscan list in the form of an array
     std::vector<std::shared_ptr<ClientConfig>> getArrayCopy();
 
 protected:
+    size_t origSize;
+    std::map<size_t, std::shared_ptr<ClientConfig>> indexMap;
+
     std::recursive_mutex mutex;
     using AutoLock = std::lock_guard<std::recursive_mutex>;
 
     std::vector<std::shared_ptr<ClientConfig>> list;
-    void _add(const std::shared_ptr<ClientConfig>& client);
+    void _add(const std::shared_ptr<ClientConfig>& client, size_t index);
 };
 
 /// \brief Provides information about one manual client.
@@ -106,7 +112,12 @@ public:
     static int remapFlag(const std::string& flag);
     static std::string mapFlags(QuirkFlags flags);
 
+    void setOrig(bool orig) { this->isOrig = orig; }
+
+    bool getOrig() const { return isOrig; }
+
 protected:
+    bool isOrig;
     std::shared_ptr<struct ClientInfo> clientInfo;
 };
 

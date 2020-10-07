@@ -52,6 +52,10 @@ void web::configSave::process()
     log_debug("configSave");
 
     int count = std::stoi(param("changedCount"));
+    if (count == -1) {
+        storage->removeConfigValue("*"); // remove all
+        return;
+    }
 
     for (int i = 0; i < count; i++) {
         try {
@@ -60,16 +64,13 @@ void web::configSave::process()
             auto status = fmt::format("data[{}][{}]", i, "status");
             bool success = false;
             std::shared_ptr<ConfigSetup> cs = nullptr;
-            log_info("id {}='{}'", param(item), param(key));
+            log_debug("save item {}='{}' {}", param(item), param(key), param(status));
             if (!param(key).empty() && param(key) != "-1") {
                 config_option_t option = CFG_MAX;
                 option = static_cast<config_option_t>(std::stoi(param(key)));
                 cs = ConfigManager::findConfigSetup(option, true);
-                log_info("{} = {}", key, option);
             } else if (!param(item).empty()) {
                 cs = ConfigManager::findConfigSetupByPath(param(item), true);
-                //option = cs->option;
-                log_info("{} = '{}' status {}", param(item), cs != nullptr ? cs->xpath : "", param(status));
             } else {
                 log_error("{} has empty value", item);
                 continue;
@@ -78,7 +79,7 @@ void web::configSave::process()
             if (cs != nullptr) {
                 auto value = fmt::format("data[{}][{}]", i, "value");
                 auto orig = fmt::format("data[{}][{}]", i, "origValue");
-                log_debug("found option to update {}", cs->xpath);
+                log_debug("found option to update {}", cs->getUniquePath());
 
                 if (!param(orig).empty()) {
                     config->setOrigValue(param(item), param(orig));
@@ -87,20 +88,31 @@ void web::configSave::process()
                 std::string parStatus = param(status);
                 bool update = param(status) == STATUS_CHANGED;
                 std::map<std::string, std::string> arguments = {{"status", parStatus}};
-                if (parStatus == STATUS_RESET) {
+                if (parStatus == STATUS_RESET || parStatus == STATUS_KILLED) {
                     storage->removeConfigValue(param(item));
-                    parValue = config->getOrigValue(param(item));
-                    log_info("reset {} to '{}'", param(item), parValue);
+                    if (config->hasOrigValue(param(item))) {
+                        parValue = config->getOrigValue(param(item));
+                        log_info("reset {} to '{}'", param(item), parValue);
+                        success = false;
+                        update = true;
+                    } else if (param(item).substr(param(item).length() - 1) == "]") {
+                        parValue = "";
+                        log_info("dropping {}", param(item));
+                        success = false;
+                        update = true;
+                    } else {
+                        success = true;
+                    }
+                } else if (parStatus == STATUS_ADDED || parStatus == STATUS_MANUAL) {
+                    storage->updateConfigValue(cs->getUniquePath(), param(item), parValue, STATUS_MANUAL);
+                    log_debug("added {}", param(item));
                     success = false;
                     update = true;
-                } else if (parStatus == STATUS_ADDED) {
-                    log_info("added {}", param(item));
-                    success = false;
                 } else if (parStatus == STATUS_REMOVED) {
                     cs->updateDetail(param(item), parValue, config, &arguments);
                     storage->updateConfigValue(cs->getUniquePath(), param(item), parValue, parStatus);
-                    log_info("removed {}", param(item));
-                    success = false;
+                    log_debug("removed {}", param(item));
+                    success = true;
                 }
                 if (update) {
                     if (param(item) == cs->xpath) {
@@ -108,7 +120,7 @@ void web::configSave::process()
                         success = true;
                     } else {
                         if (!cs->updateDetail(param(item), parValue, config, &arguments)) {
-                            log_error("unhandled option {} != {}", param(item), cs->xpath);
+                            log_error("unhandled option {} != {}", param(item), cs->getUniquePath());
                         } else {
                             success = true;
                         }

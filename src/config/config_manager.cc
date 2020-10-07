@@ -367,8 +367,9 @@ std::shared_ptr<ConfigSetup> ConfigManager::findConfigSetupByPath(const std::str
     if (save) {
         co = std::find_if(complexOptions.begin(), complexOptions.end(),
           [&](const auto& s) {
-            size_t len = std::min(strlen(s->xpath), key.length());
-            return key.substr(0, len) == std::string(s->xpath).substr(0, len);
+            auto uPath = s->getUniquePath();
+            size_t len = std::min(uPath.length(), key.length());
+            return key.substr(0, len) == uPath.substr(0, len);
           });
         return (co != complexOptions.end()) ? *co : nullptr;
     }
@@ -838,12 +839,11 @@ void ConfigManager::updateConfigFromDatabase(std::shared_ptr<Storage> storage)
                     cs->makeOption(cfgValue.value, self);
                 } else {
                     std::string parValue = cfgValue.value;
-                    if (cfgValue.status == "changed" || cfgValue.status == "unchanged") {
+                    if (cfgValue.status == STATUS_CHANGED || cfgValue.status == STATUS_UNCHANGED) {
                         if (!cs->updateDetail(cfgValue.item, parValue, self)) {
                             log_error("unhandled option {} != {}", cfgValue.item, cs->xpath);
                         }
-                    } else if (cfgValue.status == "added") {
-                    } else if (cfgValue.status == "removed") {
+                    } else if (cfgValue.status == STATUS_REMOVED || cfgValue.status == STATUS_ADDED || cfgValue.status == STATUS_MANUAL) {
                         std::map<std::string, std::string> arguments = {{"status", cfgValue.status}};
                         if (!cs->updateDetail(cfgValue.item, parValue, self, &arguments)) {
                             log_error("unhandled option {} != {}", cfgValue.item, cs->xpath);

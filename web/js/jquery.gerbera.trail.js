@@ -126,13 +126,21 @@ $.widget('grb.trail', {
       deleteAllIcon.appendTo(buttons);
     }
 
-    if (config.enableSave && config.onSave) {
+    if (config.enableConfig && config.onSave && config.onClear) {
+      const clearIcon = this.generateItemButton(item, {
+        title: 'Clear Saved Config',
+        class: 'grb-trail-clear-config',
+        iconClass: 'fa-trash',
+        click: config.onClear ? config.onClear : noOp
+      });
       const saveIcon = this.generateItemButton(item, {
         title: 'Save Config',
         class: 'grb-trail-save-config',
         iconClass: 'fa-save',
         click: config.onSave ? config.onSave : noOp
       });
+
+      clearIcon.appendTo(buttons);
       saveIcon.appendTo(buttons);
     }
 
@@ -145,7 +153,7 @@ $.widget('grb.trail', {
 
   generateItemButton: function (item, config) {
     const button = $('<li>');
-    const link = $('<a>', {"title": config.title, "class": config.class, "href": "javascript:;"});
+    const link = $('<a>', {"title": config.title, "class": "grb-trail-button " + config.class, "href": "javascript:;"});
     const icon = $('<i></i>', {"class": "fa " + config.iconClass });
     link.append(icon);
     link.append(" " + config.title);

@@ -124,6 +124,17 @@ void ConfigSetup::makeOption(std::string optValue, std::shared_ptr<Config> confi
     setOption(config);
 };
 
+size_t ConfigSetup::extractIndex(const std::string& item)
+{
+    size_t i = SIZE_MAX;
+    if (item.find_first_of('[') != std::string::npos && item.find_first_of(']', item.find_first_of('[')) != std::string::npos ) {
+        auto startPos = item.find_first_of('[') + 1;
+        auto endPos = item.find_first_of(']', startPos);
+        i = std::stoi(item.substr(startPos, endPos - startPos));
+    }
+    return i;
+}
+
 const char* ConfigSetup::ROOT_NAME = "config";
 
 void ConfigStringSetup::makeOption(const pugi::xml_node& root, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments)
@@ -294,21 +305,20 @@ void ConfigIntSetup::makeOption(std::string optValue, std::shared_ptr<Config> co
 
 int ConfigIntSetup::checkIntValue(std::string& sVal, const std::string& pathName) const
 {
-    if (rawCheck != nullptr) {
-        if (!rawCheck(sVal)) {
-            throw std::runtime_error(fmt::format("Invalid {}/{} value '{}'", pathName, xpath, sVal));
-        }
-    } else if (valueCheck != nullptr) {
-        if (!valueCheck(std::stoi(sVal))) {
-            throw std::runtime_error(fmt::format("Invalid {}/{} value {}", pathName, xpath, sVal));
-        }
-    } else if (minCheck != nullptr) {
-        if (!minCheck(std::stoi(sVal), minValue)) {
-            throw std::runtime_error(fmt::format("Invalid {}/{} value '{}', must be at least {}", pathName, xpath, sVal, minValue));
-        }
-    }
-
     try {
+        if (rawCheck != nullptr) {
+            if (!rawCheck(sVal)) {
+                throw std::runtime_error(fmt::format("Invalid {}/{} value '{}'", pathName, xpath, sVal));
+            }
+        } else if (valueCheck != nullptr) {
+            if (!valueCheck(std::stoi(sVal))) {
+                throw std::runtime_error(fmt::format("Invalid {}/{} value {}", pathName, xpath, sVal));
+            }
+        } else if (minCheck != nullptr) {
+            if (!minCheck(std::stoi(sVal), minValue)) {
+                throw std::runtime_error(fmt::format("Invalid {}/{} value '{}', must be at least {}", pathName, xpath, sVal, minValue));
+            }
+        }
         return std::stoi(sVal);
     } catch (const std::runtime_error& e) {
         throw std::runtime_error(fmt::format("Error in config file: {}/{} unsupported int value '{}'", pathName, xpath, sVal).c_str());
@@ -526,9 +536,10 @@ bool ConfigArraySetup::updateItem(size_t i, const std::string& optItem, std::sha
     if (optItem == index || !status.empty()) {
         auto realIndex = value->getIndex(i);
         if (realIndex < SIZE_MAX) {
-            config->setOrigValue(index, value->getArrayOption()[realIndex]);
+            const auto& array = value->getArrayOption();
+            config->setOrigValue(index, array.size() > realIndex ? array[realIndex] : "");
             if (status == STATUS_REMOVED) {
-                config->setOrigValue(optItem, value->getArrayOption()[realIndex]);
+                config->setOrigValue(optItem, array.size() > realIndex ? array[realIndex] : "");
             }
         }
         value->setItem(i, optValue);
@@ -542,10 +553,9 @@ bool ConfigArraySetup::updateDetail(const std::string& optItem, std::string& opt
     if (optItem.substr(0, strlen(xpath)) == xpath && optionValue != nullptr) {
         std::shared_ptr<ArrayOption> value = std::dynamic_pointer_cast<ArrayOption>(optionValue);
         log_info("Updating Array Detail {} {} {}", xpath, optItem, optValue);
-        if (optItem.find_first_of('[') != std::string::npos && optItem.find_first_of(']', optItem.find_first_of('[')) != std::string::npos ) {
-            auto startPos = optItem.find_first_of('[') + 1;
-            auto endPos = optItem.find_first_of(']', startPos);
-            auto i = std::stoi(optItem.substr(startPos, endPos - startPos));
+
+        size_t i = extractIndex(optItem);
+        if (i < SIZE_MAX) {
             if (updateItem(i, optItem, config, value, optValue)) {
                 return true;
             }
@@ -559,7 +569,7 @@ bool ConfigArraySetup::updateDetail(const std::string& optItem, std::string& opt
         }
 
         auto editSize = value->getEditSize();
-        for (size_t i = 0; i < editSize; i++) {
+        for (i = 0; i < editSize; i++) {
             if (updateItem(i, optItem, config, value, optValue)) {
                 return true;
             }
@@ -750,10 +760,8 @@ bool ConfigDictionarySetup::updateDetail(const std::string& optItem, std::string
         std::shared_ptr<DictionaryOption> value = std::dynamic_pointer_cast<DictionaryOption>(optionValue);
         log_info("Updating Dictionary Detail {} {} {}", xpath, optItem, optValue);
 
-        if (optItem.find_first_of('[') != std::string::npos && optItem.find_first_of(']', optItem.find_first_of('[')) != std::string::npos ) {
-            auto startPos = optItem.find_first_of('[') + 1;
-            auto endPos = optItem.find_first_of(']', startPos);
-            size_t i = std::stoi(optItem.substr(startPos, endPos - startPos));
+        size_t i = extractIndex(optItem);
+        if (i < SIZE_MAX) {
             if (updateItem(i, optItem, config, value, value->getKey(i), optValue)) {
                 return true;
             }
@@ -770,7 +778,7 @@ bool ConfigDictionarySetup::updateDetail(const std::string& optItem, std::string
             }
         }
 
-        int i = 0;
+        i = 0;
         for (const auto& entry : value->getDictionaryOption()) {
             if (updateItem(i, optItem, config, value, entry.first, optValue)) {
                 return true;
@@ -854,56 +862,94 @@ bool ConfigAutoscanSetup::createAutoscanListFromNode(const pugi::xml_node& eleme
     return true;
 }
 
+bool ConfigAutoscanSetup::updateItem(size_t i, const std::string& optItem, std::shared_ptr<Config> config, std::shared_ptr<AutoscanDirectory>& entry, std::string& optValue, const std::string& status) const
+{
+    auto index = getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_LOCATION);
+    if (optItem == getUniquePath() && status != STATUS_CHANGED) {
+        return true;
+    }
+
+    if (optItem == index) {
+        if (entry->getOrig())
+            config->setOrigValue(index, entry->getLocation().string());
+        auto pathValue = optValue;
+        if (findConfigSetup<ConfigPathSetup>(ATTR_AUTOSCAN_DIRECTORY_LOCATION)->checkPathValue(optValue, pathValue)) {
+            entry->setLocation(pathValue);
+        }
+        log_info("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)->get(i)->getLocation().string());
+        return true;
+    }
+
+    index = getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_MODE);
+    if (optItem == index) {
+        log_error("Autoscan Mode cannot be changed {} {}", index, AutoscanDirectory::mapScanmode(entry->getScanMode()));
+        return true;
+    }
+
+    index = getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_INTERVAL);
+    if (optItem == index) {
+        if (entry->getOrig())
+            config->setOrigValue(index, fmt::format("{}", entry->getInterval()));
+        entry->setInterval(findConfigSetup<ConfigIntSetup>(ATTR_AUTOSCAN_DIRECTORY_INTERVAL)->checkIntValue(optValue));
+        log_info("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)->get(i)->getInterval());
+        return true;
+    }
+
+    index = getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_RECURSIVE);
+    if (optItem == index) {
+        if (entry->getOrig())
+            config->setOrigValue(index, entry->getRecursive());
+        entry->setRecursive(findConfigSetup<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_RECURSIVE)->checkValue(optValue));
+        log_info("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)->get(i)->getRecursive());
+        return true;
+    }
+
+    index = getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES);
+    if (optItem == index) {
+        if (entry->getOrig())
+            config->setOrigValue(index, entry->getHidden());
+        entry->setHidden(findConfigSetup<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES)->checkValue(optValue));
+        log_info("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)->get(i)->getHidden());
+        return true;
+    }
+    return false;
+}
+
 bool ConfigAutoscanSetup::updateDetail(const std::string& optItem, std::string& optValue, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments)
 {
-    if (optItem.substr(0, strlen(xpath)) == xpath) {
+    auto uPath = getUniquePath();
+    if (optItem.substr(0, uPath.length()) == uPath) {
+        log_info("Updating Autoscan Detail {} {} {}", uPath, optItem, optValue);
         std::shared_ptr<AutoscanListOption> value = std::dynamic_pointer_cast<AutoscanListOption>(optionValue);
-        log_info("Updating Autoscan Detail {} {} {}", xpath, optItem, optValue);
-        for (size_t i = 0; i < value->getAutoscanListOption()->size(); i++) {
-            const auto& entry = value->getAutoscanListOption()->get(i);
 
-            auto index = getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_LOCATION);
-            if (optItem == index) {
-                config->setOrigValue(index, entry->getLocation().string());
-                auto pathValue = optValue;
-                if (findConfigSetup<ConfigPathSetup>(ATTR_AUTOSCAN_DIRECTORY_LOCATION)->checkPathValue(optValue, optValue)) {
-                    entry->setLocation(pathValue);
-                }
-                log_info("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)->get(i)->getLocation().string());
+        auto list = value->getAutoscanListOption();
+        auto i = extractIndex(optItem);
+
+        if (i < SIZE_MAX) {
+            auto entry = list->get(i, true);
+            std::string status = arguments != nullptr && arguments->find("status") != arguments->end() ? arguments->at("status") : "";
+            if (entry == nullptr && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
+                entry = std::make_shared<AutoscanDirectory>();
+                entry->setScanMode(scanMode);
+                list->add(entry, i);
+            }
+            if (entry != nullptr && (status == STATUS_REMOVED || status == STATUS_KILLED)) {
+                list->remove(i, true);
                 return true;
             }
-
-            index = getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_MODE);
-            if (optItem == index) {
-                log_error("Autoscan Mode cannot be changed {} {}", index, AutoscanDirectory::mapScanmode(entry->getScanMode()));
-                return false;
+            if (entry != nullptr && status == STATUS_RESET) {
+                list->add(entry, i);
             }
-
-            index = getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_INTERVAL);
-            if (optItem == index) {
-                config->setOrigValue(index, fmt::format("{}", entry->getInterval()));
-                entry->setInterval(findConfigSetup<ConfigIntSetup>(ATTR_AUTOSCAN_DIRECTORY_INTERVAL)->checkIntValue(optValue));
-                log_info("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)->get(i)->getInterval());
-                return true;
-            }
-
-            index = getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_RECURSIVE);
-            if (optItem == index) {
-                config->setOrigValue(index, entry->getRecursive());
-                entry->setRecursive(findConfigSetup<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_RECURSIVE)->checkValue(optValue));
-                log_info("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)->get(i)->getRecursive());
-                return true;
-            }
-
-            index = getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES);
-            if (optItem == index) {
-                config->setOrigValue(index, entry->getHidden());
-                entry->setHidden(findConfigSetup<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES)->checkValue(optValue));
-                log_info("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)->get(i)->getHidden());
+            if (entry != nullptr && updateItem(i, optItem, config, entry, optValue)) {
                 return true;
             }
         }
-        return true;
+        for (i = 0; i < list->getEditSize(); i++) {
+            auto entry = list->get(i, true);
+            if (updateItem(i, optItem, config, entry, optValue)) {
+                return true;
+            }
+        }
     }
     return false;
 }
@@ -1357,45 +1403,79 @@ void ConfigClientSetup::makeOption(const pugi::xml_node& root, std::shared_ptr<C
     setOption(config);
 }
 
+bool ConfigClientSetup::updateItem(size_t i, const std::string& optItem, std::shared_ptr<Config> config, std::shared_ptr<ClientConfig>& entry, std::string& optValue, const std::string& status) const
+{
+    if (optItem == getUniquePath() && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
+        return true;
+    }
+    auto index = getItemPath(i, ATTR_CLIENTS_CLIENT_FLAGS);
+    if (optItem == index) {
+        if (entry->getOrig())
+            config->setOrigValue(index, ClientConfig::mapFlags(entry->getFlags()));
+        auto pathValue = optValue;
+        if (findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_FLAGS)->checkValue(optValue)) {
+            std::vector<std::string> flagsVector = splitString(optValue, '|', false);
+            int flag = std::accumulate(flagsVector.begin(), flagsVector.end(), 0, [](int flg, const auto& i) //
+                { return flg | ClientConfig::remapFlag(i); });
+            entry->setFlags(flag);
+            log_info("New Client Detail {} {}", index, ClientConfig::mapFlags(config->getClientConfigListOption(option)->get(i)->getFlags()));
+            return true;
+        }
+    }
+    index = getItemPath(i, ATTR_CLIENTS_CLIENT_IP);
+    if (optItem == index) {
+        if (entry->getOrig())
+            config->setOrigValue(index, entry->getIp());
+        if (findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_IP)->checkValue(optValue)) {
+            entry->setIp(optValue);
+            log_info("New Client Detail {} {}", index, config->getClientConfigListOption(option)->get(i)->getIp());
+            return true;
+        }
+    }
+    index = getItemPath(i, ATTR_CLIENTS_CLIENT_USERAGENT);
+    if (optItem == index) {
+        if (entry->getOrig())
+            config->setOrigValue(index, entry->getUserAgent());
+        if (findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_USERAGENT)->checkValue(optValue)) {
+            entry->setUserAgent(optValue);
+            log_info("New Client Detail {} {}", index, config->getClientConfigListOption(option)->get(i)->getUserAgent());
+            return true;
+        }
+    }
+    return false;
+}
+
 bool ConfigClientSetup::updateDetail(const std::string& optItem, std::string& optValue, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments)
 {
     if (optItem.substr(0, strlen(xpath)) == xpath) {
         log_info("Updating Client Detail {} {} {}", xpath, optItem, optValue);
         std::shared_ptr<ClientConfigListOption> value = std::dynamic_pointer_cast<ClientConfigListOption>(optionValue);
+        auto list = value->getClientConfigListOption();
+        auto i = extractIndex(optItem);
 
-        for (size_t i = 0; i < value->getClientConfigListOption()->size(); i++) {
-            const auto& entry = value->getClientConfigListOption()->get(i);
+        if (i < SIZE_MAX) {
+            auto entry = list->get(i, true);
+            std::string status = arguments != nullptr && arguments->find("status") != arguments->end() ? arguments->at("status") : "";
 
-            auto index = getItemPath(i, ATTR_CLIENTS_CLIENT_FLAGS);
-            if (optItem == index) {
-                config->setOrigValue(index, ClientConfig::mapFlags(entry->getFlags()));
-                auto pathValue = optValue;
-                if (findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_FLAGS)->checkValue(optValue)) {
-                    std::vector<std::string> flagsVector = splitString(optValue, '|', false);
-                    int flag = std::accumulate(flagsVector.begin(), flagsVector.end(), 0, [](int flg, const auto& i) //
-                        { return flg | ClientConfig::remapFlag(i); });
-                    entry->setFlags(flag);
-                    log_info("New Client Detail {} {}", index, ClientConfig::mapFlags(config->getClientConfigListOption(option)->get(i)->getFlags()));
-                    return true;
-                }
+            if (entry == nullptr && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
+                entry = std::make_shared<ClientConfig>();
+                list->add(entry, i);
             }
-            index = getItemPath(i, ATTR_CLIENTS_CLIENT_IP);
-            if (optItem == index) {
-                config->setOrigValue(index, entry->getIp());
-                if (findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_IP)->checkValue(optValue)) {
-                    entry->setIp(optValue);
-                    log_info("New Client Detail {} {}", index, config->getClientConfigListOption(option)->get(i)->getIp());
-                    return true;
-                }
+            if (entry != nullptr && (status == STATUS_REMOVED || status == STATUS_KILLED)) {
+                list->remove(i, true);
+                return true;
             }
-            index = getItemPath(i, ATTR_CLIENTS_CLIENT_USERAGENT);
-            if (optItem == index) {
-                config->setOrigValue(index, entry->getUserAgent());
-                if (findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_USERAGENT)->checkValue(optValue)) {
-                    entry->setUserAgent(optValue);
-                    log_info("New Client Detail {} {}", index, config->getClientConfigListOption(option)->get(i)->getUserAgent());
-                    return true;
-                }
+            if (entry != nullptr && status == STATUS_RESET) {
+                list->add(entry, i);
+            }
+            if (entry != nullptr && updateItem(i, optItem, config, entry, optValue)) {
+                return true;
+            }
+        }
+        for (size_t i = 0; i < list->size(); i++) {
+            auto entry = value->getClientConfigListOption()->get(i);
+            if (updateItem(i, optItem, config, entry, optValue)) {
+                return true;
             }
         }
     }

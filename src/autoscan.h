@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     autoscan.h - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -62,20 +62,22 @@ public:
     ///
     /// \param dir AutoscanDirectory to add to the list.
     /// \return scanID of the newly added AutoscanDirectory
-    int add(const std::shared_ptr<AutoscanDirectory>& dir);
+    int add(const std::shared_ptr<AutoscanDirectory>& dir, size_t index = SIZE_MAX);
 
     void addList(const std::shared_ptr<AutoscanList>& list);
 
-    std::shared_ptr<AutoscanDirectory> get(size_t id);
+    std::shared_ptr<AutoscanDirectory> get(size_t id, bool edit = false);
 
     std::shared_ptr<AutoscanDirectory> get(const fs::path& location);
 
     std::shared_ptr<AutoscanDirectory> getByObjectID(int objectID);
 
+    size_t getEditSize() const;
+
     size_t size() const { return list.size(); }
 
     /// \brief removes the AutoscanDirectory given by its scan ID
-    void remove(size_t id);
+    void remove(size_t id, bool edit = false);
 
     /// \brief removes the AutoscanDirectory if it is a subdirectory of a given location.
     /// \param parent parent directory.
@@ -95,13 +97,16 @@ public:
     std::vector<std::shared_ptr<AutoscanDirectory>> getArrayCopy();
 
 protected:
+    size_t origSize;
+    std::map<size_t, std::shared_ptr<AutoscanDirectory>> indexMap;
+
     std::shared_ptr<Storage> storage;
 
     std::recursive_mutex mutex;
     using AutoLock = std::lock_guard<std::recursive_mutex>;
 
     std::vector<std::shared_ptr<AutoscanDirectory>> list;
-    int _add(const std::shared_ptr<AutoscanDirectory>& dir);
+    int _add(const std::shared_ptr<AutoscanDirectory>& dir, size_t index);
 };
 
 /// \brief Provides information about one autoscan directory.
@@ -133,6 +138,10 @@ public:
     void setScanMode(ScanMode mode) { this->mode = mode; }
 
     bool getRecursive() const { return recursive; }
+
+    void setOrig(bool orig) { this->isOrig = orig; }
+
+    bool getOrig() const { return isOrig; }
 
     void setHidden(bool hidden) { this->hidden = hidden; }
 
@@ -175,6 +184,8 @@ public:
 
     bool persistent() const { return persistent_flag; }
 
+    void setPersistent(bool persistent_flag) { this->persistent_flag = persistent_flag; }
+
     /// \brief Sets the last modification time of the current ongoing scan.
     ///
     /// When doing a FullScan we look at modification times of the files.
@@ -208,6 +219,7 @@ public:
 protected:
     fs::path location;
     ScanMode mode;
+    bool isOrig;
     bool recursive;
     bool hidden;
     bool persistent_flag;

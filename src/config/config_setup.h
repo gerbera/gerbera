@@ -59,6 +59,8 @@ const std::string STATUS_RESET = "reset";
 const std::string STATUS_ADDED = "added";
 const std::string STATUS_CHANGED = "changed";
 const std::string STATUS_UNCHANGED = "unchanged";
+const std::string STATUS_KILLED = "killed";
+const std::string STATUS_MANUAL = "manual";
 
 class ConfigSetup {
 protected:
@@ -67,6 +69,8 @@ protected:
     bool required = false;
     StringCheckFunction rawCheck;
     std::string defaultValue;
+
+    static size_t extractIndex(const std::string& item);
 
     void setOption(std::shared_ptr<Config> config)
     {
@@ -561,6 +565,8 @@ protected:
     /// \param scanmode add only directories with the specified scanmode to the array
     bool createAutoscanListFromNode(const pugi::xml_node& element, std::shared_ptr<AutoscanList>& result);
 
+    bool updateItem(size_t i, const std::string& optItem, std::shared_ptr<Config> config, std::shared_ptr<AutoscanDirectory>& entry, std::string& optValue, const std::string& status = "") const;
+
 public:
     ConfigAutoscanSetup(config_option_t option, const char* xpath, ScanMode scanmode)
         : ConfigSetup(option, xpath)
@@ -629,6 +635,8 @@ protected:
     /// \brief Creates an array of ClientConfig objects from a XML nodeset.
     /// \param element starting element of the nodeset.
     bool createClientConfigListFromNode(const pugi::xml_node& element, std::shared_ptr<ClientConfigList>& result);
+
+    bool updateItem(size_t i, const std::string& optItem, std::shared_ptr<Config> config, std::shared_ptr<ClientConfig>& entry, std::string& optValue, const std::string& status = "") const;
 
 public:
     ConfigClientSetup(config_option_t option, const char* xpath)

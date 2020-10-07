@@ -88,11 +88,12 @@ const makeTrailFromItem = (items) => {
   let enableDeleteAll = false;
   let enableAddAutoscan = false;
   let enableEditAutoscan = false;
-  let enableSave = false;
+  let enableConfig = false;
   let onAdd;
   let onDelete;
   let onEdit;
   let onSave;
+  let onClear;
   let onAddAutoscan;
   let onEditAutoscan;
   let onDeleteAll;
@@ -118,7 +119,7 @@ const makeTrailFromItem = (items) => {
     enableAddAutoscan = true;
     enableAdd = true;
   } else if (itemType === 'config') {
-    enableSave = true;
+    enableConfig = true;
   }
 
   onAdd = enableAdd ? addItem : noOp;
@@ -127,7 +128,8 @@ const makeTrailFromItem = (items) => {
   onDeleteAll = enableDeleteAll ? deleteAllItems : noOp;
   onAddAutoscan = enableAddAutoscan ? addAutoscan : noOp;
   onEditAutoscan = enableEditAutoscan ? addAutoscan : noOp;
-  onSave = enableSave ? saveConfig : noOp;
+  onSave = enableConfig ? saveConfig : noOp;
+  onClear = enableConfig ? clearConfig : noOp;
 
   const config = {
     enableAdd: enableAdd,
@@ -142,8 +144,9 @@ const makeTrailFromItem = (items) => {
     onAddAutoscan: onAddAutoscan,
     enableEditAutoscan: enableEditAutoscan,
     onEditAutoscan: onEditAutoscan,
-    enableSave: enableSave,
-    onSave: onSave
+    enableConfig: enableConfig,
+    onSave: onSave,
+    onClear: onClear
   };
 
   makeTrail(treeElement, config)
@@ -168,6 +171,10 @@ const addAutoscan = (event) => {
 
 const saveConfig = (event) => {
   Config.saveConfig(event);
+};
+
+const clearConfig = (event) => {
+  Config.clearConfig(event);
 };
 
 const deleteItem = (event) => {

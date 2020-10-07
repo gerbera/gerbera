@@ -31,7 +31,8 @@
 #include <utility>
 
 ClientConfig::ClientConfig()
-    : clientInfo(std::make_shared<struct ClientInfo>())
+    : isOrig(false)
+    , clientInfo(std::make_shared<struct ClientInfo>())
 {
     clientInfo->matchType = ClientMatchType::None;
     clientInfo->type = ClientType::Unknown;
@@ -39,7 +40,8 @@ ClientConfig::ClientConfig()
 }
 
 ClientConfig::ClientConfig(int flags, const std::string& ip, const std::string& userAgent)
-    : clientInfo(std::make_shared<struct ClientInfo>())
+    : isOrig(false)
+    , clientInfo(std::make_shared<struct ClientInfo>())
 {
     clientInfo->type = ClientType::Unknown;
     if (!ip.empty()) {
@@ -55,15 +57,29 @@ ClientConfig::ClientConfig(int flags, const std::string& ip, const std::string& 
     clientInfo->name = fmt::format("Manual Setup for{}{}", !ip.empty() ? " IP " + ip : "", !userAgent.empty() ? " UserAgent " + userAgent : "");
 }
 
-void ClientConfigList::add(const std::shared_ptr<ClientConfig>& client)
+void ClientConfigList::add(const std::shared_ptr<ClientConfig>& client, size_t index)
 {
     AutoLock lock(mutex);
-    _add(client);
+    _add(client, index);
 }
 
-void ClientConfigList::_add(const std::shared_ptr<ClientConfig>& client)
+void ClientConfigList::_add(const std::shared_ptr<ClientConfig>& client, size_t index)
 {
+    if (index == SIZE_MAX) {
+        index = getEditSize();
+        origSize = list.size() + 1;
+        client->setOrig(true);
+    }
     list.push_back(client);
+    indexMap[index] = client;
+}
+
+size_t ClientConfigList::getEditSize() const
+{
+    if (indexMap.empty()) {
+        return 0;
+    }
+    return (*std::max_element(indexMap.begin(), indexMap.end(), [&] (auto a, auto b) { return (a.first < b.first);})).first + 1;
 }
 
 std::vector<std::shared_ptr<ClientConfig>> ClientConfigList::getArrayCopy()
@@ -72,27 +88,46 @@ std::vector<std::shared_ptr<ClientConfig>> ClientConfigList::getArrayCopy()
     return list;
 }
 
-std::shared_ptr<ClientConfig> ClientConfigList::get(size_t id)
+std::shared_ptr<ClientConfig> ClientConfigList::get(size_t id, bool edit)
 {
     AutoLock lock(mutex);
+    if (!edit) {
+        if (id >= list.size())
+            return nullptr;
 
-    if (id >= list.size())
-        return nullptr;
-
-    return list[id];
+        return list[id];
+    }
+    if (indexMap.find(id) != indexMap.end()) {
+        return indexMap[id];
+    }
+    return nullptr;
 }
 
-void ClientConfigList::remove(size_t id)
+void ClientConfigList::remove(size_t id, bool edit)
 {
     AutoLock lock(mutex);
 
-    if (id >= list.size()) {
-        log_debug("No such ID {}!", id);
-        return;
-    }
+    if (!edit) {
+        if (id >= list.size()) {
+            log_debug("No such ID {}!", id);
+            return;
+        }
 
-    list.erase(list.begin() + id);
-    log_debug("ID {} removed!", id);
+        list.erase(list.begin() + id);
+        log_debug("ID {} removed!", id);
+    } else {
+        if (indexMap.find(id) == indexMap.end()) {
+            log_debug("No such index ID {}!", id);
+            return;
+        }
+        const auto& client = indexMap[id];
+        auto entry = std::find_if(list.begin(), list.end(), [=](const auto& item) { return client->getIp() == item->getIp() && client->getUserAgent() == item->getUserAgent();});
+        list.erase(entry);
+        if (id >= origSize) {
+            indexMap.erase(id);
+        }
+        log_debug("ID {} removed!", id);
+    }
 }
 
 std::string ClientConfig::mapClientType(ClientType clientType)

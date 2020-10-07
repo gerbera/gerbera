@@ -1635,8 +1635,10 @@ std::vector<ConfigValue> SQLStorage::getConfigValues()
 void SQLStorage::removeConfigValue(const std::string& item)
 {
     std::ostringstream del;
-    del << "DELETE FROM " << TQ(CONFIG_VALUE_TABLE)
-        << " WHERE " << TQ("item") << '=' << quote(item);
+    del << "DELETE FROM " << TQ(CONFIG_VALUE_TABLE);
+    if (item != "*") {
+        del << " WHERE " << TQ("item") << '=' << quote(item);
+    }
     log_info("deleting {} item", item);
     exec(del);
 }

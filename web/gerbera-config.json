@@ -328,7 +328,7 @@
 					"item": "/import/autoscan/timed/directory",
 					"caption": "Timed Autoscan Directories",
 					"type": "List",
-					"editable": false,
+					"editable": true,
 					"children": [
 						{
 							"item": "/import/autoscan/timed/directory/attribute::location",
@@ -340,6 +340,7 @@
 							"item": "/import/autoscan/timed/directory/attribute::mode",
 							"caption": "Mode",
 							"type": "String",
+							"value": "timed",
 							"editable": false
 						},
 						{
@@ -380,6 +381,7 @@
 						{
 							"item": "/import/autoscan/inotify/directory/attribute::mode",
 							"caption": "Mode",
+							"value": "inotify",
 							"type": "String",
 							"editable": false
 						},
