@@ -512,7 +512,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLStorage::browse(const std::unique_ptr
         return qb.str();
     };
 
-    qb = {};
+    qb.clear();
     qb << SQL_QUERY << " WHERE ";
 
     if (param->getFlag(BROWSE_DIRECT_CHILDREN) && IS_CDS_CONTAINER(objectType)) {
