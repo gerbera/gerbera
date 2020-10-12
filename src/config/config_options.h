@@ -43,6 +43,7 @@
 // forward declaration
 class AutoscanList;
 class ClientConfigList;
+class DirectoryConfigList;
 
 class ConfigOption {
 public:
@@ -85,6 +86,11 @@ public:
     virtual std::shared_ptr<TranscodingProfileList> getTranscodingProfileListOption() const
     {
         throw std::runtime_error("Wrong option type transcoding list");
+    }
+
+    virtual std::shared_ptr<DirectoryConfigList> getDirectoryTweakOption() const
+    {
+        throw std::runtime_error("Wrong option type directory list");
     }
 
     virtual ~ConfigOption() = default;
@@ -205,6 +211,19 @@ public:
 
 protected:
     std::shared_ptr<ClientConfigList> option;
+};
+
+class DirectoryTweakOption : public ConfigOption {
+public:
+    explicit DirectoryTweakOption(std::shared_ptr<DirectoryConfigList> option)
+    {
+        this->option = std::move(option);
+    }
+
+    std::shared_ptr<DirectoryConfigList> getDirectoryTweakOption() const override { return option; }
+
+protected:
+    std::shared_ptr<DirectoryConfigList> option;
 };
 
 class TranscodingProfileListOption : public ConfigOption {

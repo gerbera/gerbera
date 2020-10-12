@@ -30,6 +30,7 @@
 #include "autoscan.h"
 #include "config/client_config.h"
 #include "config/config_setup.h"
+#include "config/directory_tweak.h"
 #include "metadata/metadata_handler.h"
 #include "storage/storage.h"
 #include "transcoding/transcoding.h"
@@ -63,6 +64,31 @@ void web::configLoad::createItem(pugi::xml_node& item, const std::string& name, 
     item.append_attribute("source") = std::find_if(dbEntries.begin(), dbEntries.end(), [&](const auto& s) { return s.item == name; }) != dbEntries.end() ? "database" : "config.xml";
 }
 
+void web::configLoad::setValue(pugi::xml_node& item, bool value)
+{
+    item.append_attribute("value") = fmt::format("{}", value).c_str();
+}
+
+void web::configLoad::setValue(pugi::xml_node& item, const std::string& value)
+{
+    item.append_attribute("value") = value.c_str();
+}
+
+void web::configLoad::setValue(pugi::xml_node& item, int value)
+{
+    item.append_attribute("value") = fmt::format("{}", value).c_str();
+}
+
+void web::configLoad::setValue(pugi::xml_node& item, unsigned int value)
+{
+    item.append_attribute("value") = fmt::format("{}", value).c_str();
+}
+
+void web::configLoad::setValue(pugi::xml_node& item, size_t value)
+{
+    item.append_attribute("value") = fmt::format("{}", value).c_str();
+}
+
 void web::configLoad::process()
 {
     check_request();
@@ -82,7 +108,7 @@ void web::configLoad::process()
 
         try {
             log_debug("    Option {:03d} {} = {}", i, scs->getItemPath(), scs->getCurrentValue().c_str());
-            item.append_attribute("value") = scs->getCurrentValue().c_str();
+            setValue(item, scs->getCurrentValue());
         } catch (const std::runtime_error& e) {
         }
     }
@@ -95,15 +121,53 @@ void web::configLoad::process()
 
         auto item = values.append_child("item");
         createItem(item, cs->getItemPath(i, ATTR_CLIENTS_CLIENT_FLAGS), CFG_CLIENTS_LIST);
-        item.append_attribute("value") = ClientConfig::mapFlags(client->getFlags()).c_str();
+        setValue(item, ClientConfig::mapFlags(client->getFlags()));
 
         item = values.append_child("item");
         createItem(item, cs->getItemPath(i, ATTR_CLIENTS_CLIENT_IP), CFG_CLIENTS_LIST);
-        item.append_attribute("value") = client->getIp().c_str();
+        setValue(item, client->getIp());
 
         item = values.append_child("item");
         createItem(item, cs->getItemPath(i, ATTR_CLIENTS_CLIENT_USERAGENT), CFG_CLIENTS_LIST);
-        item.append_attribute("value") = client->getUserAgent().c_str();
+        setValue(item, client->getUserAgent());
+    }
+
+    cs = ConfigManager::findConfigSetup(CFG_IMPORT_DIRECTORIES_LIST);
+    auto directoryConfig = cs->getValue()->getDirectoryTweakOption();
+    for (size_t i = 0; i < directoryConfig->size(); i++) {
+        auto dir = directoryConfig->get(i);
+
+        auto item = values.append_child("item");
+        createItem(item, cs->getItemPath(i, ATTR_DIRECTORIES_TWEAK_LOCATION), CFG_IMPORT_DIRECTORIES_LIST);
+        setValue(item, dir->getLocation().string());
+
+        item = values.append_child("item");
+        createItem(item, cs->getItemPath(i, ATTR_DIRECTORIES_TWEAK_RECURSIVE), CFG_IMPORT_DIRECTORIES_LIST);
+        setValue(item, dir->getRecursive());
+
+        item = values.append_child("item");
+        createItem(item, cs->getItemPath(i, ATTR_DIRECTORIES_TWEAK_HIDDEN), CFG_IMPORT_DIRECTORIES_LIST);
+        setValue(item, dir->getHidden());
+
+        item = values.append_child("item");
+        createItem(item, cs->getItemPath(i, ATTR_DIRECTORIES_TWEAK_CASE_SENSITIVE), CFG_IMPORT_DIRECTORIES_LIST);
+        setValue(item, dir->getCaseSensitive());
+
+        item = values.append_child("item");
+        createItem(item, cs->getItemPath(i, ATTR_DIRECTORIES_TWEAK_FOLLOW_SYMLINKS), CFG_IMPORT_DIRECTORIES_LIST);
+        setValue(item, dir->getFollowSymlinks());
+
+        item = values.append_child("item");
+        createItem(item, cs->getItemPath(i, ATTR_DIRECTORIES_TWEAK_FANART_FILE), CFG_IMPORT_DIRECTORIES_LIST);
+        setValue(item, dir->getFanArtFile());
+
+        item = values.append_child("item");
+        createItem(item, cs->getItemPath(i, ATTR_DIRECTORIES_TWEAK_RESOURCE_FILE), CFG_IMPORT_DIRECTORIES_LIST);
+        setValue(item, dir->getResourceFile());
+
+        item = values.append_child("item");
+        createItem(item, cs->getItemPath(i, ATTR_DIRECTORIES_TWEAK_SUBTILTE_FILE), CFG_IMPORT_DIRECTORIES_LIST);
+        setValue(item, dir->getSubTitleFile());
     }
 
     cs = ConfigManager::findConfigSetup(CFG_TRANSCODING_PROFILE_LIST);
@@ -114,11 +178,11 @@ void web::configLoad::process()
         for (auto it = entry.second->begin(); it != entry.second->end(); it++) {
             auto item = values.append_child("item");
             createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_MIMETYPE_PROF_MAP, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_TRANSCODE, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE), CFG_TRANSCODING_PROFILE_LIST);
-            item.append_attribute("value") = entry.first.c_str();
+            setValue(item, entry.first);
 
             item = values.append_child("item");
             createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_MIMETYPE_PROF_MAP, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_TRANSCODE, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_USING), CFG_TRANSCODING_PROFILE_LIST);
-            item.append_attribute("value") = it->second->getName().c_str();
+            setValue(item, it->second->getName());
             profiles[it->second->getName()] = pr;
 
             pr++;
@@ -129,90 +193,89 @@ void web::configLoad::process()
         auto entry = transcoding->getByName(prof.first, true);
         auto item = values.append_child("item");
         createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_NAME), CFG_TRANSCODING_PROFILE_LIST);
-        item.append_attribute("value") = entry->getName().c_str();
+        setValue(item, entry->getName());
 
         item = values.append_child("item");
         createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED), CFG_TRANSCODING_PROFILE_LIST);
-        item.append_attribute("value") = fmt::format("{}", entry->getEnabled()).c_str();
+        setValue(item, entry->getEnabled());
 
         item = values.append_child("item");
         createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_TYPE), CFG_TRANSCODING_PROFILE_LIST);
-        item.append_attribute("value") = entry->getType() == TR_External ? "external" : "none";
+        setValue(item, entry->getType() == TR_External ? "external" : "none");
 
         item = values.append_child("item");
         createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_MIMETYPE), CFG_TRANSCODING_PROFILE_LIST);
-        item.append_attribute("value") = entry->getTargetMimeType().c_str();
+        setValue(item, entry->getTargetMimeType());
 
         item = values.append_child("item");
         createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_RES), CFG_TRANSCODING_PROFILE_LIST);
-        item.append_attribute("value") = entry->getAttributes()[MetadataHandler::getResAttrName(R_RESOLUTION)].c_str();
+        setValue(item, entry->getAttributes()[MetadataHandler::getResAttrName(R_RESOLUTION)]);
 
         item = values.append_child("item");
         createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_ACCURL), CFG_TRANSCODING_PROFILE_LIST);
-        item.append_attribute("value") = fmt::format("{}", entry->acceptURL()).c_str();
+        setValue(item, entry->acceptURL());
 
         item = values.append_child("item");
         createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_SAMPFREQ), CFG_TRANSCODING_PROFILE_LIST);
-        item.append_attribute("value") = fmt::format("{}", entry->getSampleFreq()).c_str();
+        setValue(item, entry->getSampleFreq());
 
         item = values.append_child("item");
         createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_NRCHAN), CFG_TRANSCODING_PROFILE_LIST);
-        item.append_attribute("value") = fmt::format("{}", entry->getNumChannels()).c_str();
+        setValue(item, entry->getNumChannels());
 
         item = values.append_child("item");
         createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_HIDEORIG), CFG_TRANSCODING_PROFILE_LIST);
-        item.append_attribute("value") = fmt::format("{}", entry->hideOriginalResource()).c_str();
+        setValue(item, entry->hideOriginalResource());
 
         item = values.append_child("item");
         createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_THUMB), CFG_TRANSCODING_PROFILE_LIST);
-        item.append_attribute("value") = fmt::format("{}", entry->isThumbnail()).c_str();
+        setValue(item, entry->isThumbnail());
 
         item = values.append_child("item");
         createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_FIRST), CFG_TRANSCODING_PROFILE_LIST);
-        item.append_attribute("value") = fmt::format("{}", entry->firstResource()).c_str();
+        setValue(item, entry->firstResource());
 
         item = values.append_child("item");
         createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_ACCOGG), CFG_TRANSCODING_PROFILE_LIST);
-        item.append_attribute("value") = fmt::format("{}", entry->isTheora()).c_str();
+        setValue(item, entry->isTheora());
 
         item = values.append_child("item");
         createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_USECHUNKEDENC), CFG_TRANSCODING_PROFILE_LIST);
-        item.append_attribute("value") = fmt::format("{}", entry->getChunked()).c_str();
+        setValue(item, entry->getChunked());
 
         item = values.append_child("item");
         createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND), CFG_TRANSCODING_PROFILE_LIST);
-        item.append_attribute("value") = entry->getCommand().c_str();
+        setValue(item, entry->getCommand());
 
         item = values.append_child("item");
         createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS), CFG_TRANSCODING_PROFILE_LIST);
-        item.append_attribute("value") = entry->getArguments().c_str();
+        setValue(item,entry->getArguments());
 
         item = values.append_child("item");
         createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE), CFG_TRANSCODING_PROFILE_LIST);
-        item.append_attribute("value") = fmt::format("{}", entry->getBufferSize()).c_str();
+        setValue(item, entry->getBufferSize());
 
         item = values.append_child("item");
         createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK), CFG_TRANSCODING_PROFILE_LIST);
-        item.append_attribute("value") = fmt::format("{}", entry->getBufferChunkSize()).c_str();
+        setValue(item, entry->getBufferChunkSize());
 
         item = values.append_child("item");
         createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL), CFG_TRANSCODING_PROFILE_LIST);
-        item.append_attribute("value") = fmt::format("{}", entry->getBufferInitialFillSize()).c_str();
+        setValue(item, entry->getBufferInitialFillSize());
 
         auto fourCCMode = entry->getAVIFourCCListMode();
         if (fourCCMode != FCC_None) {
             item = values.append_child("item");
             createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE), CFG_TRANSCODING_PROFILE_LIST);
-            item.append_attribute("value") = TranscodingProfile::mapFourCcMode(fourCCMode).c_str();
+            setValue(item, TranscodingProfile::mapFourCcMode(fourCCMode));
 
             const auto fourCCList = entry->getAVIFourCCList();
             if (fourCCList.size() > 0) {
                 item = values.append_child("item");
                 createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_4CC), CFG_TRANSCODING_PROFILE_LIST);
-                item.append_attribute("value") = std::accumulate(std::next(fourCCList.begin()),
+                setValue(item, std::accumulate(std::next(fourCCList.begin()),
                     fourCCList.end(), fourCCList[0],
-                    [](std::string a, std::string b) { return a + ", " + b; })
-                                                     .c_str();
+                    [](std::string a, std::string b) { return a + ", " + b; }));
             }
         }
         pr++;
@@ -231,23 +294,23 @@ void web::configLoad::process()
             const auto& entry = autoscan->get(i);
             auto item = values.append_child("item");
             createItem(item, cs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_LOCATION), cs->option);
-            item.append_attribute("value") = entry->getLocation().c_str();
+            setValue(item, entry->getLocation());
 
             item = values.append_child("item");
             createItem(item, cs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_MODE), cs->option);
-            item.append_attribute("value") = AutoscanDirectory::mapScanmode(entry->getScanMode()).c_str();
+            setValue(item, AutoscanDirectory::mapScanmode(entry->getScanMode()));
 
             item = values.append_child("item");
             createItem(item, cs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_INTERVAL), cs->option);
-            item.append_attribute("value") = fmt::format("{}", entry->getInterval()).c_str();
+            setValue(item, entry->getInterval());
 
             item = values.append_child("item");
             createItem(item, cs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_RECURSIVE), cs->option);
-            item.append_attribute("value") = fmt::format("{}", entry->getRecursive()).c_str();
+            setValue(item, entry->getRecursive());
 
             item = values.append_child("item");
             createItem(item, cs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES), cs->option);
-            item.append_attribute("value") = fmt::format("{}", entry->getHidden()).c_str();
+            setValue(item, entry->getHidden());
         }
     }
 
@@ -260,11 +323,11 @@ void web::configLoad::process()
         for (const auto& entry : dictionary) {
             auto item = values.append_child("item");
             createItem(item, dcs->getItemPath(i, dcs->keyOption), dcs->option);
-            item.append_attribute("value") = entry.first.substr(5).c_str();
+            setValue(item, entry.first.substr(5));
 
             item = values.append_child("item");
             createItem(item, dcs->getItemPath(i, dcs->valOption), dcs->option);
-            item.append_attribute("value") = entry.second.c_str();
+            setValue(item, entry.second);
             i++;
         }
     }
@@ -292,7 +355,7 @@ void web::configLoad::process()
             auto entry = array[i];
             auto item = values.append_child("item");
             createItem(item, acs->getItemPath(i), acs->option);
-            item.append_attribute("value") = entry.c_str();
+            setValue(item, entry);
         }
     }
 
@@ -307,7 +370,7 @@ void web::configLoad::process()
             if (cs != nullptr) {
                 auto item = values.append_child("item");
                 createItem(item, entry.item, cs->option);
-                item.append_attribute("value") = entry.value.c_str();
+                setValue(item, entry.value);
                 item.attribute("status") = entry.status.c_str();
                 item.attribute("origValue") = config->getOrigValue(entry.item).c_str();
                 item.attribute("source") = "database";

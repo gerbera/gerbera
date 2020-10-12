@@ -33,9 +33,10 @@ namespace fs = std::filesystem;
 // forward declaration
 class Storage;
 class AutoscanList;
+class AutoscanDirectory;
 class ClientConfigList;
 class ConfigOption;
-class AutoscanDirectory;
+class DirectoryConfigList;
 class TranscodingProfileList;
 
 typedef enum {
@@ -172,6 +173,7 @@ typedef enum {
     CFG_IMPORT_LAYOUT_MAPPING,
     CFG_IMPORT_LIBOPTS_ENTRY_SEP,
     CFG_IMPORT_LIBOPTS_ENTRY_LEGACY_SEP,
+    CFG_IMPORT_DIRECTORIES_LIST,
     CFG_IMPORT_RESOURCES_CASE_SENSITIVE,
     CFG_IMPORT_RESOURCES_FANART_FILE_LIST,
     CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST,
@@ -239,13 +241,22 @@ typedef enum {
     ATTR_CLIENTS_CLIENT_FLAGS,
     ATTR_CLIENTS_CLIENT_IP,
     ATTR_CLIENTS_CLIENT_USERAGENT,
+    ATTR_DIRECTORIES_TWEAK,
+    ATTR_DIRECTORIES_TWEAK_LOCATION,
+    ATTR_DIRECTORIES_TWEAK_RECURSIVE,
+    ATTR_DIRECTORIES_TWEAK_HIDDEN,
+    ATTR_DIRECTORIES_TWEAK_CASE_SENSITIVE,
+    ATTR_DIRECTORIES_TWEAK_FOLLOW_SYMLINKS,
+    ATTR_DIRECTORIES_TWEAK_FANART_FILE,
+    ATTR_DIRECTORIES_TWEAK_SUBTILTE_FILE,
+    ATTR_DIRECTORIES_TWEAK_RESOURCE_FILE,
 } config_option_t;
 
 class Config {
 public:
     virtual ~Config() = default;
     virtual void updateConfigFromDatabase(std::shared_ptr<Storage> storage) = 0;
-    virtual std::string getOrigValue(const std::string& item) = 0;
+    virtual std::string getOrigValue(const std::string& item) const = 0;
     virtual void setOrigValue(const std::string& item, const std::string& value) = 0;
     virtual void setOrigValue(const std::string& item, bool value) = 0;
     virtual void setOrigValue(const std::string& item, int value) = 0;
@@ -261,35 +272,39 @@ public:
 
     /// \brief returns a config option of type std::string
     /// \param option option to retrieve.
-    virtual std::string getOption(config_option_t option) = 0;
+    virtual std::string getOption(config_option_t option) const = 0;
 
     /// \brief returns a config option of type int
     /// \param option option to retrieve.
-    virtual int getIntOption(config_option_t option) = 0;
+    virtual int getIntOption(config_option_t option) const = 0;
 
     /// \brief returns a config option of type bool
     /// \param option option to retrieve.
-    virtual bool getBoolOption(config_option_t option) = 0;
+    virtual bool getBoolOption(config_option_t option) const = 0;
 
     /// \brief returns a config option of type dictionary
     /// \param option option to retrieve.
-    virtual std::map<std::string, std::string> getDictionaryOption(config_option_t option) = 0;
+    virtual std::map<std::string, std::string> getDictionaryOption(config_option_t option) const = 0;
 
     /// \brief returns a config option of type array of string
     /// \param option option to retrieve.
-    virtual std::vector<std::string> getArrayOption(config_option_t option) = 0;
+    virtual std::vector<std::string> getArrayOption(config_option_t option) const = 0;
 
     /// \brief returns a config option of type AutoscanList
     /// \param option to retrieve
-    virtual std::shared_ptr<AutoscanList> getAutoscanListOption(config_option_t option) = 0;
+    virtual std::shared_ptr<AutoscanList> getAutoscanListOption(config_option_t option) const = 0;
 
     /// \brief returns a config option of type ClientConfigList
     /// \param option to retrieve
-    virtual std::shared_ptr<ClientConfigList> getClientConfigListOption(config_option_t option) = 0;
+    virtual std::shared_ptr<ClientConfigList> getClientConfigListOption(config_option_t option) const = 0;
+
+    /// \brief returns a config option of type DirectoryConfigList
+    /// \param option to retrieve
+    virtual std::shared_ptr<DirectoryConfigList> getDirectoryTweakOption(config_option_t option) const = 0;
 
     /// \brief returns a config option of type TranscodingProfileList
     /// \param option to retrieve
-    virtual std::shared_ptr<TranscodingProfileList> getTranscodingProfileListOption(config_option_t option) = 0;
+    virtual std::shared_ptr<TranscodingProfileList> getTranscodingProfileListOption(config_option_t option) const = 0;
 };
 
 #endif // __CONFIG_H__

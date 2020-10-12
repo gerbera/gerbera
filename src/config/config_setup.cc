@@ -36,6 +36,7 @@
 #include "config_manager.h"
 #include "config_options.h"
 #include "config_setup.h"
+#include "directory_tweak.h"
 #include "metadata/metadata_handler.h"
 #include "transcoding/transcoding.h"
 
@@ -1412,7 +1413,6 @@ bool ConfigClientSetup::updateItem(size_t i, const std::string& optItem, std::sh
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, ClientConfig::mapFlags(entry->getFlags()));
-        auto pathValue = optValue;
         if (findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_FLAGS)->checkValue(optValue)) {
             std::vector<std::string> flagsVector = splitString(optValue, '|', false);
             int flag = std::accumulate(flagsVector.begin(), flagsVector.end(), 0, [](int flg, const auto& i) //
@@ -1490,5 +1490,175 @@ std::shared_ptr<ConfigOption> ConfigClientSetup::newOption(const pugi::xml_node&
         throw std::runtime_error(fmt::format("Init {} client config failed '{}'", xpath, optValue));
     }
     optionValue = std::make_shared<ClientConfigListOption>(result);
+    return optionValue;
+}
+
+/// \brief Creates an array of ClientConfig objects from a XML nodeset.
+/// \param element starting element of the nodeset.
+bool ConfigDirectorySetup::createDirectoryTweakListFromNode(const pugi::xml_node& element, std::shared_ptr<DirectoryConfigList>& result)
+{
+    if (element == nullptr)
+        return true;
+
+    for (const pugi::xml_node& child : element.children()) {
+
+        // We only want directories
+        if (std::string(child.name()) != ConfigManager::mapConfigOption(ATTR_DIRECTORIES_TWEAK))
+            continue;
+        fs::path location = findConfigSetup<ConfigPathSetup>(ATTR_DIRECTORIES_TWEAK_LOCATION)->getXmlContent(child);
+
+        auto recursive = findConfigSetup<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_RECURSIVE)->getXmlContent(child);
+        auto hidden = findConfigSetup<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_HIDDEN)->getXmlContent(child);
+        auto caseSens = findConfigSetup<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_CASE_SENSITIVE)->getXmlContent(child);
+        auto symlinks = findConfigSetup<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_FOLLOW_SYMLINKS)->getXmlContent(child);
+        auto fanart = findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_FANART_FILE)->getXmlContent(child);
+        auto subtitle = findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_SUBTILTE_FILE)->getXmlContent(child);
+        auto resource = findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_RESOURCE_FILE)->getXmlContent(child);
+
+        auto dir = std::make_shared<DirectoryTweak>(location, recursive, hidden, caseSens, symlinks, fanart, subtitle, resource);
+        try {
+            result->add(dir);
+        } catch (const std::runtime_error& e) {
+            throw std::runtime_error("Could not add " + location.string() + " directory: " + e.what());
+        }
+    }
+
+    return true;
+}
+
+void ConfigDirectorySetup::makeOption(const pugi::xml_node& root, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments)
+{
+    newOption(getXmlElement(root));
+    setOption(config);
+}
+
+bool ConfigDirectorySetup::updateItem(size_t i, const std::string& optItem, std::shared_ptr<Config> config, std::shared_ptr<DirectoryTweak>& entry, std::string& optValue, const std::string& status) const
+{
+    if (optItem == getUniquePath() && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
+        return true;
+    }
+
+    auto index = getItemPath(i, ATTR_DIRECTORIES_TWEAK_LOCATION);
+    if (optItem == index) {
+        if (entry->getOrig())
+            config->setOrigValue(index, entry->getLocation().string());
+        auto pathValue = optValue;
+        if (findConfigSetup<ConfigPathSetup>(ATTR_DIRECTORIES_TWEAK_LOCATION)->checkPathValue(optValue, pathValue)) {
+            entry->setLocation(pathValue);
+            log_info("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getLocation().string());
+            return true;
+        }
+    }
+    index = getItemPath(i, ATTR_DIRECTORIES_TWEAK_RECURSIVE);
+    if (optItem == index) {
+        if (entry->getOrig())
+            config->setOrigValue(index, entry->getRecursive());
+        entry->setRecursive(findConfigSetup<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_RECURSIVE)->checkValue(optValue));
+        log_info("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getRecursive());
+        return true;
+    }
+    index = getItemPath(i, ATTR_DIRECTORIES_TWEAK_HIDDEN);
+    if (optItem == index) {
+        if (entry->getOrig())
+            config->setOrigValue(index, entry->getHidden());
+        entry->setHidden(findConfigSetup<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_HIDDEN)->checkValue(optValue));
+        log_info("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getHidden());
+        return true;
+    }
+    index = getItemPath(i, ATTR_DIRECTORIES_TWEAK_CASE_SENSITIVE);
+    if (optItem == index) {
+        if (entry->getOrig())
+            config->setOrigValue(index, entry->getCaseSensitive());
+        entry->setCaseSensitive(findConfigSetup<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_CASE_SENSITIVE)->checkValue(optValue));
+        log_info("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getCaseSensitive());
+        return true;
+    }
+    index = getItemPath(i, ATTR_DIRECTORIES_TWEAK_FOLLOW_SYMLINKS);
+    if (optItem == index) {
+        if (entry->getOrig())
+            config->setOrigValue(index, entry->getFollowSymlinks());
+        entry->setFollowSymlinks(findConfigSetup<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_FOLLOW_SYMLINKS)->checkValue(optValue));
+        log_info("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getFollowSymlinks());
+        return true;
+    }
+    index = getItemPath(i, ATTR_DIRECTORIES_TWEAK_FANART_FILE);
+    if (optItem == index) {
+        if (entry->getOrig())
+            config->setOrigValue(index, entry->getFanArtFile());
+        if (findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_FANART_FILE)->checkValue(optValue)) {
+            entry->setFanArtFile(optValue);
+            log_info("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getFanArtFile());
+            return true;
+        }
+    }
+    index = getItemPath(i, ATTR_DIRECTORIES_TWEAK_RESOURCE_FILE);
+    if (optItem == index) {
+        if (entry->getOrig())
+            config->setOrigValue(index, entry->getResourceFile());
+        if (findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_RESOURCE_FILE)->checkValue(optValue)) {
+            entry->setResourceFile(optValue);
+            log_info("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getResourceFile());
+            return true;
+        }
+    }
+    index = getItemPath(i, ATTR_DIRECTORIES_TWEAK_SUBTILTE_FILE);
+    if (optItem == index) {
+        if (entry->getOrig())
+            config->setOrigValue(index, entry->getSubTitleFile());
+        if (findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_SUBTILTE_FILE)->checkValue(optValue)) {
+            entry->setSubTitleFile(optValue);
+            log_info("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getSubTitleFile());
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool ConfigDirectorySetup::updateDetail(const std::string& optItem, std::string& optValue, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments)
+{
+    if (optItem.substr(0, strlen(xpath)) == xpath) {
+        log_info("Updating Client Detail {} {} {}", xpath, optItem, optValue);
+        std::shared_ptr<DirectoryTweakOption> value = std::dynamic_pointer_cast<DirectoryTweakOption>(optionValue);
+        auto list = value->getDirectoryTweakOption();
+        auto i = extractIndex(optItem);
+
+        if (i < SIZE_MAX) {
+            auto entry = list->get(i, true);
+            std::string status = arguments != nullptr && arguments->find("status") != arguments->end() ? arguments->at("status") : "";
+
+            if (entry == nullptr && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
+                entry = std::make_shared<DirectoryTweak>();
+                list->add(entry, i);
+            }
+            if (entry != nullptr && (status == STATUS_REMOVED || status == STATUS_KILLED)) {
+                list->remove(i, true);
+                return true;
+            }
+            if (entry != nullptr && status == STATUS_RESET) {
+                list->add(entry, i);
+            }
+            if (entry != nullptr && updateItem(i, optItem, config, entry, optValue)) {
+                return true;
+            }
+        }
+        for (size_t i = 0; i < list->size(); i++) {
+            auto entry = value->getDirectoryTweakOption()->get(i);
+            if (updateItem(i, optItem, config, entry, optValue)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+std::shared_ptr<ConfigOption> ConfigDirectorySetup::newOption(const pugi::xml_node& optValue)
+{
+    std::shared_ptr<DirectoryConfigList> result = std::make_shared<DirectoryConfigList>();
+
+    if (!createDirectoryTweakListFromNode(optValue, result)) {
+        throw std::runtime_error(fmt::format("Init {} DirectoryConfigList failed '{}'", xpath, optValue));
+    }
+    optionValue = std::make_shared<DirectoryTweakOption>(result);
     return optionValue;
 }

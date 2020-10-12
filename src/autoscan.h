@@ -125,33 +125,26 @@ public:
         int id = INVALID_SCAN_ID, unsigned int interval = 0, bool hidden = false);
 
     void setStorageID(int storageID) { this->storageID = storageID; }
-
     int getStorageID() const { return storageID; }
 
     /// \brief The location can only be set once!
     void setLocation(fs::path location);
-
     fs::path getLocation() const { return location; }
 
+    void setScanMode(ScanMode mode) { this->mode = mode; }
     ScanMode getScanMode() const { return mode; }
 
-    void setScanMode(ScanMode mode) { this->mode = mode; }
-
+    void setRecursive(bool recursive) { this->recursive = recursive; }
     bool getRecursive() const { return recursive; }
 
     void setOrig(bool orig) { this->isOrig = orig; }
-
     bool getOrig() const { return isOrig; }
 
     void setHidden(bool hidden) { this->hidden = hidden; }
-
     bool getHidden() const { return hidden; }
 
-    void setRecursive(bool recursive) { this->recursive = recursive; }
-
-    unsigned int getInterval() const { return interval; }
-
     void setInterval(unsigned int interval) { this->interval = interval; }
+    unsigned int getInterval() const { return interval; }
 
     /// \brief Increments the task count.
     ///
@@ -162,11 +155,8 @@ public:
     /// done the count will be decremented. When timer gets to zero,
     /// we will resubscribe.
     void incTaskCount() { taskCount++; }
-
     void decTaskCount() { taskCount--; }
-
     int getTaskCount() const { return taskCount; }
-
     void setTaskCount(int taskCount) { this->taskCount = taskCount; }
 
     /// \brief Sets the task ID.
@@ -175,16 +165,13 @@ public:
     /// belongs. Recursive scans spawn new tasks - they all should have
     /// the same id.
     void setScanID(int id);
-
     int getScanID() const { return scanID; }
 
     void setObjectID(int id) { objectID = id; }
-
     int getObjectID() const { return objectID; }
 
-    bool persistent() const { return persistent_flag; }
-
     void setPersistent(bool persistent_flag) { this->persistent_flag = persistent_flag; }
+    bool persistent() const { return persistent_flag; }
 
     /// \brief Sets the last modification time of the current ongoing scan.
     ///
@@ -195,7 +182,6 @@ public:
     /// overwrite it until we are done.
     /// The time will be only set if it is higher than the previous value!
     void setCurrentLMT(time_t lmt);
-
     time_t getPreviousLMT() const { return last_mod_previous_scan; }
 
     void updateLMT() { last_mod_previous_scan = last_mod_current_scan; }

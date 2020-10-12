@@ -198,6 +198,11 @@ protected:
     std::vector<ConfigValue> dbEntries;
     std::map<std::string, pugi::xml_node*> allItems;
     void createItem(pugi::xml_node& item, const std::string& name, config_option_t id);
+    void setValue(pugi::xml_node& item, bool value);
+    void setValue(pugi::xml_node& item, const std::string& value);
+    void setValue(pugi::xml_node& item, int value);
+    void setValue(pugi::xml_node& item, unsigned int value);
+    void setValue(pugi::xml_node& item, size_t value);
 
 public:
     configLoad(std::shared_ptr<Config> config, std::shared_ptr<Storage> storage,

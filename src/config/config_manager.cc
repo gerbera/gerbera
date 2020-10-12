@@ -292,10 +292,21 @@ static std::vector<std::shared_ptr<ConfigSetup>> complexOptions = {
     std::make_shared<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_FLAGS, "flags", true),
     std::make_shared<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_IP, "ip", ""),
     std::make_shared<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_USERAGENT, "userAgent", ""),
+
+    std::make_shared<ConfigDirectorySetup>(CFG_IMPORT_DIRECTORIES_LIST, "directories"),
+    std::make_shared<ConfigPathSetup>(ATTR_DIRECTORIES_TWEAK_LOCATION, "location", "", false, true, true),
+    std::make_shared<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_RECURSIVE, "recursive", false, true),
+    std::make_shared<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_HIDDEN, "hidden-files"),
+    std::make_shared<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_CASE_SENSITIVE, "case-sensitive", DEFAULT_RESOURCES_CASE_SENSITIVE),
+    std::make_shared<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_FOLLOW_SYMLINKS, "follow-symlinks", DEFAULT_FOLLOW_SYMLINKS_VALUE),
+    std::make_shared<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_FANART_FILE, "fanart-file", ""),
+    std::make_shared<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_SUBTILTE_FILE, "subtitle-file", ""),
+    std::make_shared<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_RESOURCE_FILE, "resource-file", ""),
 };
 
 static std::map<config_option_t, const char*> simpleOptions = {
     { CFG_MAX, "max_option" },
+
     { ATTR_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN_OPTION, "option" },
     { ATTR_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT, "content" },
     { ATTR_SERVER_UI_ACCOUNT_LIST_ACCOUNT, "acount" },
@@ -323,8 +334,8 @@ static std::map<config_option_t, const char*> simpleOptions = {
     { ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_4CC, "fourcc" },
 
     { ATTR_AUTOSCAN_DIRECTORY, "directory" },
-
     { ATTR_CLIENTS_CLIENT, "client" },
+    { ATTR_DIRECTORIES_TWEAK, "tweak" },
 };
 
 const char* ConfigManager::mapConfigOption(config_option_t option)
@@ -705,6 +716,12 @@ void ConfigManager::load(const fs::path& userHome)
     }
 #endif //HAVE_CURL
 
+    setOption(root, CFG_IMPORT_RESOURCES_CASE_SENSITIVE);
+    setOption(root, CFG_IMPORT_RESOURCES_FANART_FILE_LIST);
+    setOption(root, CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST);
+    setOption(root, CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST);
+    setOption(root, CFG_IMPORT_DIRECTORIES_LIST);
+
     args["trim"] = "false";
     setOption(root, CFG_IMPORT_LIBOPTS_ENTRY_SEP, &args);
     setOption(root, CFG_IMPORT_LIBOPTS_ENTRY_LEGACY_SEP, &args);
@@ -713,11 +730,6 @@ void ConfigManager::load(const fs::path& userHome)
 #ifdef HAVE_LIBEXIF
     setOption(root, CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST);
 #endif // HAVE_LIBEXIF
-
-    setOption(root, CFG_IMPORT_RESOURCES_CASE_SENSITIVE);
-    setOption(root, CFG_IMPORT_RESOURCES_FANART_FILE_LIST);
-    setOption(root, CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST);
-    setOption(root, CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST);
 
 #ifdef HAVE_EXIV2
     setOption(root, CFG_IMPORT_LIBOPTS_EXIV2_AUXDATA_TAGS_LIST);
@@ -904,7 +916,7 @@ void ConfigManager::dumpOptions()
 }
 
 // The validate function ensures that the array is completely filled!
-std::string ConfigManager::getOption(config_option_t option)
+std::string ConfigManager::getOption(config_option_t option) const
 {
     auto o = options->at(option);
     if (o == nullptr) {
@@ -913,7 +925,7 @@ std::string ConfigManager::getOption(config_option_t option)
     return o->getOption();
 }
 
-int ConfigManager::getIntOption(config_option_t option)
+int ConfigManager::getIntOption(config_option_t option) const
 {
     auto o = options->at(option);
     if (o == nullptr) {
@@ -922,7 +934,7 @@ int ConfigManager::getIntOption(config_option_t option)
     return o->getIntOption();
 }
 
-bool ConfigManager::getBoolOption(config_option_t option)
+bool ConfigManager::getBoolOption(config_option_t option) const
 {
     auto o = options->at(option);
     if (o == nullptr) {
@@ -931,27 +943,32 @@ bool ConfigManager::getBoolOption(config_option_t option)
     return o->getBoolOption();
 }
 
-std::map<std::string, std::string> ConfigManager::getDictionaryOption(config_option_t option)
+std::map<std::string, std::string> ConfigManager::getDictionaryOption(config_option_t option) const
 {
     return options->at(option)->getDictionaryOption();
 }
 
-std::vector<std::string> ConfigManager::getArrayOption(config_option_t option)
+std::vector<std::string> ConfigManager::getArrayOption(config_option_t option) const
 {
     return options->at(option)->getArrayOption();
 }
 
-std::shared_ptr<AutoscanList> ConfigManager::getAutoscanListOption(config_option_t option)
+std::shared_ptr<AutoscanList> ConfigManager::getAutoscanListOption(config_option_t option) const
 {
     return options->at(option)->getAutoscanListOption();
 }
 
-std::shared_ptr<ClientConfigList> ConfigManager::getClientConfigListOption(config_option_t option)
+std::shared_ptr<ClientConfigList> ConfigManager::getClientConfigListOption(config_option_t option) const
 {
     return options->at(option)->getClientConfigListOption();
 }
 
-std::shared_ptr<TranscodingProfileList> ConfigManager::getTranscodingProfileListOption(config_option_t option)
+std::shared_ptr<DirectoryConfigList> ConfigManager::getDirectoryTweakOption(config_option_t option) const
+{
+    return options->at(option)->getDirectoryTweakOption();
+}
+
+std::shared_ptr<TranscodingProfileList> ConfigManager::getTranscodingProfileListOption(config_option_t option) const
 {
     return options->at(option)->getTranscodingProfileListOption();
 }

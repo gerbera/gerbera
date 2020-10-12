@@ -420,6 +420,69 @@
 							"editable": true
 						}
 					]
+				},
+				{
+					"item": "/import/directories/tweak",
+					"caption": "Directory Tweaks",
+					"type": "List",
+					"editable": true,
+					"children": [
+						{
+							"item": "/import/directories/tweak/attribute::location",
+							"caption": "Location",
+							"type": "String",
+							"editable": true
+						},
+						{
+							"item": "/import/directories/tweak/attribute::recursive",
+							"caption": "Recursive",
+							"type": "Boolean",
+							"value": "true",
+							"editable": true
+						},
+						{
+							"item": "/import/directories/tweak/attribute::hidden-files",
+							"caption": "Import Hidden Files",
+							"type": "Boolean",
+							"value": "false",
+							"editable": true
+						},
+						{
+							"item": "/import/directories/tweak/attribute::follow-symlinks",
+							"caption": "Follow Symlinks",
+							"type": "Boolean",
+							"value": "true",
+							"editable": true
+						},
+						{
+							"item": "/import/directories/tweak/attribute::case-sensitive",
+							"caption": "Case Sensitive Resources",
+							"type": "Boolean",
+							"value": "true",
+							"editable": true
+						},
+						{
+							"item": "/import/directories/tweak/attribute::fanart-file",
+							"caption": "FanArt Resource Pattern",
+							"type": "String",
+							"value": "",
+							"editable": true
+						},
+						{
+							"item": "/import/directories/tweak/attribute::subtitle-file",
+							"caption": "Subtitle Resource Pattern",
+							"type": "String",
+							"value": "",
+							"editable": true
+						},
+						{
+							"item": "/import/directories/tweak/attribute::resource-file",
+							"caption": "Directory Resource Pattern",
+							"type": "String",
+							"value": "",
+							"editable": true
+						}
+					]
 				}
 			]
 		},

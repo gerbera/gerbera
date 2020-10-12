@@ -48,6 +48,7 @@ class AutoscanDirectory;
 class ClientConfigList;
 class ClientConfig;
 class ConfigSetup;
+class DirectoryConfigList;
 enum class ScanMode;
 enum class ClientType;
 class ConfigOption;
@@ -81,44 +82,48 @@ public:
 
     /// \brief returns a config option of type std::string
     /// \param option option to retrieve.
-    std::string getOption(config_option_t option) override;
+    std::string getOption(config_option_t option) const override;
 
     /// \brief returns a config option of type int
     /// \param option option to retrieve.
-    int getIntOption(config_option_t option) override;
+    int getIntOption(config_option_t option) const override;
 
     /// \brief returns a config option of type bool
     /// \param option option to retrieve.
-    bool getBoolOption(config_option_t option) override;
+    bool getBoolOption(config_option_t option) const override;
 
     /// \brief returns a config option of type dictionary
     /// \param option option to retrieve.
-    std::map<std::string, std::string> getDictionaryOption(config_option_t option) override;
+    std::map<std::string, std::string> getDictionaryOption(config_option_t option) const override;
 
     /// \brief returns a config option of type array of string
     /// \param option option to retrieve.
-    std::vector<std::string> getArrayOption(config_option_t option) override;
+    std::vector<std::string> getArrayOption(config_option_t option) const override;
 
     /// \brief returns a config option of type AutoscanList
     /// \param option to retrieve
-    std::shared_ptr<AutoscanList> getAutoscanListOption(config_option_t option) override;
+    std::shared_ptr<AutoscanList> getAutoscanListOption(config_option_t option) const override;
 
     /// \brief returns a config option of type ClientConfigList
     /// \param option to retrieve
-    std::shared_ptr<ClientConfigList> getClientConfigListOption(config_option_t option) override;
+    std::shared_ptr<ClientConfigList> getClientConfigListOption(config_option_t option) const override;
+
+    /// \brief returns a config option of type DirectoryConfigList
+    /// \param option to retrieve
+    std::shared_ptr<DirectoryConfigList> getDirectoryTweakOption(config_option_t option) const override;
 
     /// \brief returns a config option of type TranscodingProfileList
     /// \param option to retrieve
-    std::shared_ptr<TranscodingProfileList> getTranscodingProfileListOption(config_option_t option) override;
+    std::shared_ptr<TranscodingProfileList> getTranscodingProfileListOption(config_option_t option) const override;
 
     bool hasOrigValue(const std::string& item) const override
     {
         return origValues.find(item) != origValues.end();
     }
 
-    std::string getOrigValue(const std::string& item) override
+    std::string getOrigValue(const std::string& item) const override
     {
-        return (origValues.find(item) == origValues.end()) ? "" : origValues[item];
+        return (origValues.find(item) == origValues.end()) ? "" : origValues.at(item);
     }
 
     void setOrigValue(const std::string& item, const std::string& value) override;

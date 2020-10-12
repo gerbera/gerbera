@@ -38,6 +38,7 @@
 #include "config_options.h"
 
 class ConfigOption;
+class DirectoryTweak;
 enum class ScanMode;
 
 typedef bool (*StringCheckFunction)(std::string& value);
@@ -645,6 +646,36 @@ public:
     }
 
     virtual ~ConfigClientSetup() = default;
+
+    virtual void makeOption(const pugi::xml_node& root, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments = nullptr) override;
+
+    virtual bool updateDetail(const std::string& optItem, std::string& optValue, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments = nullptr) override;
+
+    virtual std::string getItemPath(int index = 0, config_option_t propOption = CFG_MAX, config_option_t propOption2 = CFG_MAX, config_option_t propOption3 = CFG_MAX, config_option_t propOption4 = CFG_MAX) const override
+    {
+        return index >= 0 ? fmt::format("{}/{}[{}]/attribute::{}", xpath, ConfigManager::mapConfigOption(ATTR_CLIENTS_CLIENT), index, ConfigManager::mapConfigOption(propOption)) : fmt::format("{}/{}", xpath, ConfigManager::mapConfigOption(ATTR_CLIENTS_CLIENT));
+    }
+
+    std::shared_ptr<ConfigOption> newOption(const pugi::xml_node& optValue);
+
+    std::string getCurrentValue() const override { return ""; }
+};
+
+class ConfigDirectorySetup : public ConfigSetup {
+protected:
+    /// \brief Creates an array of ClientConfig objects from a XML nodeset.
+    /// \param element starting element of the nodeset.
+    bool createDirectoryTweakListFromNode(const pugi::xml_node& element, std::shared_ptr<DirectoryConfigList>& result);
+
+    bool updateItem(size_t i, const std::string& optItem, std::shared_ptr<Config> config, std::shared_ptr<DirectoryTweak>& entry, std::string& optValue, const std::string& status = "") const;
+
+public:
+    ConfigDirectorySetup(config_option_t option, const char* xpath)
+        : ConfigSetup(option, xpath)
+    {
+    }
+
+    virtual ~ConfigDirectorySetup() = default;
 
     virtual void makeOption(const pugi::xml_node& root, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments = nullptr) override;
 
