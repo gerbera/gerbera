@@ -142,6 +142,10 @@ void web::configLoad::process()
         setValue(item, dir->getLocation().string());
 
         item = values.append_child("item");
+        createItem(item, cs->getItemPath(i, ATTR_DIRECTORIES_TWEAK_INHERIT), CFG_IMPORT_DIRECTORIES_LIST);
+        setValue(item, dir->getInherit());
+
+        item = values.append_child("item");
         createItem(item, cs->getItemPath(i, ATTR_DIRECTORIES_TWEAK_RECURSIVE), CFG_IMPORT_DIRECTORIES_LIST);
         setValue(item, dir->getRecursive());
 

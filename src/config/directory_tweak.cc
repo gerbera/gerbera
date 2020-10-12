@@ -24,27 +24,47 @@
 /// \file directory_tweak.cc
 
 #include "directory_tweak.h" // API
+#include "config/config.h"
 #include "content_manager.h"
 #include "util/upnp_clients.h"
 #include "util/upnp_quirks.h"
 
 #include <utility>
 
-void DirectoryConfigList::add(const std::shared_ptr<DirectoryTweak>& client, size_t index)
+void AutoScanSetting::mergeOptions(const std::shared_ptr<Config>& config, const fs::path location)
 {
-    AutoLock lock(mutex);
-    _add(client, index);
+   auto tweak = config->getDirectoryTweakOption(CFG_IMPORT_DIRECTORIES_LIST)->get(location);
+   if (tweak == nullptr)
+       return;
+
+   if (tweak->hasFollowSymlinks())
+       followSymlinks = tweak->getFollowSymlinks();
+   if (tweak->hasHidden())
+       hidden = tweak->getHidden();
+   if (tweak->hasRecursive())
+       recursive = tweak->getRecursive();
 }
 
-void DirectoryConfigList::_add(const std::shared_ptr<DirectoryTweak>& client, size_t index)
+void DirectoryConfigList::add(const std::shared_ptr<DirectoryTweak>& dir, size_t index)
+{
+    AutoLock lock(mutex);
+    _add(dir, index);
+}
+
+void DirectoryConfigList::_add(const std::shared_ptr<DirectoryTweak>& dir, size_t index)
 {
     if (index == SIZE_MAX) {
         index = getEditSize();
         origSize = list.size() + 1;
-        client->setOrig(true);
+        dir->setOrig(true);
     }
-    list.push_back(client);
-    indexMap[index] = client;
+    auto entry = std::find_if(list.begin(), list.end(), [=] (const auto& d) { return (d->getLocation() == dir->getLocation()); });
+    if (entry != list.end()) {
+        log_error("Duplicate tweak entry[{}] {}", index, dir->getLocation().string());
+        return;
+    }
+    list.push_back(dir);
+    indexMap[index] = dir;
 }
 
 size_t DirectoryConfigList::getEditSize() const
@@ -72,6 +92,18 @@ std::shared_ptr<DirectoryTweak> DirectoryConfigList::get(size_t id, bool edit)
     }
     if (indexMap.find(id) != indexMap.end()) {
         return indexMap[id];
+    }
+    return nullptr;
+}
+
+std::shared_ptr<DirectoryTweak> DirectoryConfigList::get(const fs::path& location)
+{
+    AutoLock lock(mutex);
+    for(auto testLoc = location.has_filename() ? location.parent_path() : location; testLoc.has_parent_path() && testLoc != "/"; testLoc = testLoc.parent_path()) {
+        auto entry = std::find_if(list.begin(), list.end(), [=] (const auto& d) { return ((d->getLocation() == location || d->getInherit() == true) && d->getLocation() == testLoc); }); 
+        if (entry != list.end() && *entry != nullptr) {
+            return *entry;
+        }
     }
     return nullptr;
 }

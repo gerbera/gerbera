@@ -58,6 +58,7 @@ class PlaylistParserScript;
 #include "autoscan_inotify.h"
 #endif
 
+#include "config/directory_tweak.h"
 #include "transcoding/transcoding.h"
 
 #ifdef ONLINE_SERVICES
@@ -83,14 +84,11 @@ protected:
     std::shared_ptr<ContentManager> content;
     fs::path path;
     fs::path rootpath;
-    bool recursive;
-    bool hidden;
-    bool rescanResource;
+    AutoScanSetting asSetting;
 
 public:
     CMAddFileTask(std::shared_ptr<ContentManager> content,
-        fs::path path, fs::path rootpath, bool recursive = false,
-        bool hidden = false, bool rescanResource = false, bool cancellable = true);
+        fs::path path, fs::path rootpath, const AutoScanSetting& asSetting, bool cancellable = true);
     fs::path getPath();
     fs::path getRootPath();
     void run() override;
@@ -174,9 +172,8 @@ public:
     /// \param rescanResource true allows to reload a directory containing a resource
     /// \param queue for immediate processing or in normal order
     /// \return object ID of the added file - only in blockign mode, when used in async mode this function will return INVALID_OBJECT_ID
-    int addFile(const fs::path& path, bool recursive = true, bool async = true,
-        bool hidden = false, bool rescanResource = true, bool lowPriority = false,
-        bool cancellable = true);
+    int addFile(const fs::path& path, const AutoScanSetting& asSetting,
+        bool async = true, bool lowPriority = false, bool cancellable = true);
 
     /// \brief Adds a file or directory to the database.
     /// \param path absolute path to the file
@@ -187,9 +184,8 @@ public:
     /// \param rescanResource true allows to reload a directory containing a resource
     /// \param queue for immediate processing or in normal order
     /// \return object ID of the added file - only in blockign mode, when used in async mode this function will return INVALID_OBJECT_ID
-    int addFile(const fs::path& path, const fs::path& rootpath, bool recursive = true, bool async = true,
-        bool hidden = false, bool rescanResource = true, bool lowPriority = false,
-        bool cancellable = true);
+    int addFile(const fs::path& path, const fs::path& rootpath, const AutoScanSetting& asSetting,
+        bool async = true, bool lowPriority = false, bool cancellable = true);
 
     int ensurePathExistence(fs::path path);
     void removeObject(int objectID, bool rescanResource, bool async = true, bool all = false);
@@ -200,7 +196,7 @@ public:
     void updateObject(int objectID, const std::map<std::string, std::string>& parameters);
 
     // returns nullptr if file does not exist or is ignored due to configuration
-    std::shared_ptr<CdsObject> createObjectFromFile(const fs::path& path,
+    std::shared_ptr<CdsObject> createObjectFromFile(const fs::path& path, bool followSymlinks,
         bool magic = true,
         bool allow_fifo = false);
 
@@ -346,22 +342,21 @@ protected:
 
     std::vector<std::shared_ptr<Executor>> process_list;
 
-    int addFileInternal(const fs::path& path, const fs::path& rootpath,
-        bool recursive = true,
-        bool async = true, bool hidden = false,
-        bool rescanResource = false,
+    int addFileInternal(const fs::path& path, const fs::path& rootpath, const AutoScanSetting& asSetting,
+        bool async = true,
         bool lowPriority = false,
         unsigned int parentTaskID = 0,
         bool cancellable = true);
-    int _addFile(const fs::path& path, fs::path rootPath, bool recursive = false, bool hidden = false, bool rescanResource = false, const std::shared_ptr<CMAddFileTask>& task = nullptr);
-    //void _addFile2(std::string path, bool recursive=0);
+    int _addFile(const fs::path& path, fs::path rootPath, const AutoScanSetting& asSetting,
+        const std::shared_ptr<CMAddFileTask>& task = nullptr);
+
     void _removeObject(int objectID, bool rescanResource, bool all);
 
     void _rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, int objectId, const std::shared_ptr<GenericTask>& task = nullptr);
     /* for recursive addition */
-    void addRecursive(const fs::path& path, bool hidden, const std::shared_ptr<CMAddFileTask>& task);
+    void addRecursive(const fs::path& path, bool followSymlinks, bool hidden, const std::shared_ptr<CMAddFileTask>& task);
     bool isLink(const fs::path& path, bool allowLinks);
-    std::shared_ptr<CdsObject> createSingleItem(const fs::path& path, fs::path& rootPath, bool checkStorage, bool processExisting, const std::shared_ptr<CMAddFileTask>& task);
+    std::shared_ptr<CdsObject> createSingleItem(const fs::path& path, fs::path& rootPath, bool followSymlinks, bool checkStorage, bool processExisting, const std::shared_ptr<CMAddFileTask>& task);
     bool updateAttachedResources(const char* obj, const std::string& parentPath, bool all);
     std::string extension2mimetype(std::string extension);
     std::string mimetype2upnpclass(const std::string& mimeType);

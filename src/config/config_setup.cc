@@ -1507,15 +1507,42 @@ bool ConfigDirectorySetup::createDirectoryTweakListFromNode(const pugi::xml_node
             continue;
         fs::path location = findConfigSetup<ConfigPathSetup>(ATTR_DIRECTORIES_TWEAK_LOCATION)->getXmlContent(child);
 
-        auto recursive = findConfigSetup<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_RECURSIVE)->getXmlContent(child);
-        auto hidden = findConfigSetup<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_HIDDEN)->getXmlContent(child);
-        auto caseSens = findConfigSetup<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_CASE_SENSITIVE)->getXmlContent(child);
-        auto symlinks = findConfigSetup<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_FOLLOW_SYMLINKS)->getXmlContent(child);
-        auto fanart = findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_FANART_FILE)->getXmlContent(child);
-        auto subtitle = findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_SUBTILTE_FILE)->getXmlContent(child);
-        auto resource = findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_RESOURCE_FILE)->getXmlContent(child);
+        auto inherit = findConfigSetup<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_INHERIT)->getXmlContent(child);
 
-        auto dir = std::make_shared<DirectoryTweak>(location, recursive, hidden, caseSens, symlinks, fanart, subtitle, resource);
+        auto dir = std::make_shared<DirectoryTweak>(location, inherit);
+
+        {
+            auto cs = findConfigSetup<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_RECURSIVE);
+            if (cs->hasXmlElement(child)) {
+                dir->setRecursive(cs->getXmlContent(child));
+            }
+            cs = findConfigSetup<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_HIDDEN);
+            if (cs->hasXmlElement(child)) {
+                dir->setHidden(cs->getXmlContent(child));
+            }
+            cs = findConfigSetup<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_CASE_SENSITIVE);
+            if (cs->hasXmlElement(child)) {
+                dir->setCaseSensitive(cs->getXmlContent(child));
+            }
+            cs = findConfigSetup<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_FOLLOW_SYMLINKS);
+            if (cs->hasXmlElement(child)) {
+                dir->setFollowSymlinks(cs->getXmlContent(child));
+            }
+        }
+        {
+            auto cs = findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_FANART_FILE);
+            if (cs->hasXmlElement(child)) {
+                dir->setFanArtFile(cs->getXmlContent(child));
+            }
+            cs = findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_SUBTILTE_FILE);
+            if (cs->hasXmlElement(child)) {
+                dir->setSubTitleFile(cs->getXmlContent(child));
+            }
+            cs = findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_RESOURCE_FILE);
+            if (cs->hasXmlElement(child)) {
+                dir->setResourceFile(cs->getXmlContent(child));
+            }
+        }
         try {
             result->add(dir);
         } catch (const std::runtime_error& e) {
@@ -1548,6 +1575,14 @@ bool ConfigDirectorySetup::updateItem(size_t i, const std::string& optItem, std:
             log_info("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getLocation().string());
             return true;
         }
+    }
+    index = getItemPath(i, ATTR_DIRECTORIES_TWEAK_INHERIT);
+    if (optItem == index) {
+        if (entry->getOrig())
+            config->setOrigValue(index, entry->getInherit());
+        entry->setInherit(findConfigSetup<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_INHERIT)->checkValue(optValue));
+        log_info("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getInherit());
+        return true;
     }
     index = getItemPath(i, ATTR_DIRECTORIES_TWEAK_RECURSIVE);
     if (optItem == index) {

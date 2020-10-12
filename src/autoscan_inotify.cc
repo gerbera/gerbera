@@ -43,9 +43,10 @@
 
 #define INOTIFY_MAX_USER_WATCHES_FILE "/proc/sys/fs/inotify/max_user_watches"
 
-AutoscanInotify::AutoscanInotify(std::shared_ptr<Storage> storage, std::shared_ptr<ContentManager> content)
+AutoscanInotify::AutoscanInotify(std::shared_ptr<Storage> storage, std::shared_ptr<ContentManager> content, std::shared_ptr<Config> config)
     : storage(std::move(storage))
     , content(std::move(content))
+    , config(std::move(config))
 {
     std::error_code ec;
     if (isRegularFile(INOTIFY_MAX_USER_WATCHES_FILE, ec)) {
@@ -220,7 +221,13 @@ void AutoscanInotify::threadProc()
                     if (mask & (IN_CLOSE_WRITE | IN_MOVED_TO | IN_CREATE)) {
                         log_debug("adding {}", path.c_str());
                         // path, recursive, async, hidden, rescanResource, low priority, cancellable
-                        content->addFile(path, adir->getLocation(), adir->getRecursive(), true, adir->getHidden(), true, true, false);
+                        AutoScanSetting asSetting;
+                        asSetting.followSymlinks = config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS);
+                        asSetting.recursive = adir->getRecursive();
+                        asSetting.hidden = adir->getHidden();
+                        asSetting.rescanResource = true;
+                        asSetting.mergeOptions(config, path);
+                        content->addFile(path, adir->getLocation(), asSetting, true, true, false);
 
                         if (mask & IN_ISDIR)
                             monitorUnmonitorRecursive(path, false, adir, false);

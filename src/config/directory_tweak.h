@@ -34,7 +34,18 @@
 namespace fs = std::filesystem;
 
 // forward declaration
+class Config;
 class DirectoryTweak;
+
+class AutoScanSetting {
+public:
+    bool followSymlinks = false;
+    bool recursive = true;
+    bool hidden = false;
+    bool rescanResource = true;
+
+    void mergeOptions(const std::shared_ptr<Config>& config, const fs::path location);
+};
 
 class DirectoryConfigList {
 public:
@@ -44,9 +55,11 @@ public:
     ///
     /// \param dir DirectoryTweak to add to the list.
     /// \return scanID of the newly added DirectoryTweak
-    void add(const std::shared_ptr<DirectoryTweak>& client, size_t index = SIZE_MAX);
+    void add(const std::shared_ptr<DirectoryTweak>& dir, size_t index = SIZE_MAX);
 
     std::shared_ptr<DirectoryTweak> get(size_t id, bool edit = false);
+
+    std::shared_ptr<DirectoryTweak> get(const fs::path& location);
 
     size_t getEditSize() const;
 
@@ -66,7 +79,7 @@ protected:
     using AutoLock = std::lock_guard<std::recursive_mutex>;
 
     std::vector<std::shared_ptr<DirectoryTweak>> list;
-    void _add(const std::shared_ptr<DirectoryTweak>& client, size_t index);
+    void _add(const std::shared_ptr<DirectoryTweak>& dir, size_t index);
 };
 
 /// \brief Provides information about one directory.
@@ -75,66 +88,60 @@ public:
     explicit DirectoryTweak()
     : location ("")
     , isOrig(false)
-    , recursive(false)
-    , hidden(false)
-    , caseSensitive(true)
-    , followSymlinks(true)
-    , fanArtFile("")
-    , subTitleFile("")
-    , resourceFile("")
+    , inherit(true)
     {
     }
 
-    explicit DirectoryTweak(const fs::path& location, bool recursive, bool hidden, bool caseSens, bool symlinks, const std::string& fanart, const std::string& subtitle, const std::string& resource)
+    explicit DirectoryTweak(const fs::path& location, bool inherit)
     : location (location)
     , isOrig(false)
-    , recursive(recursive)
-    , hidden(hidden)
-    , caseSensitive(caseSens)
-    , followSymlinks(symlinks)
-    , fanArtFile(fanart)
-    , subTitleFile(subtitle)
-    , resourceFile(resource)
+    , inherit(inherit)
     {
     }
 
     void setLocation(const fs::path& location) { this->location = location; };
     fs::path getLocation() const { return location; }
 
-    void setRecursive(bool recursive) { this->recursive = recursive; }
-    bool getRecursive() const { return recursive; }
+    void setInherit(bool inherit) { this->inherit = inherit; }
+    bool getInherit() const { return inherit; }
 
     void setOrig(bool orig) { this->isOrig = orig; }
     bool getOrig() const { return isOrig; }
 
-    void setHidden(bool hidden) { this->hidden = hidden; }
-    bool getHidden() const { return hidden; }
+    void setRecursive(bool recursive) { this->flags["Recursive"] = recursive; }
+    bool hasRecursive() const { return flags.find("Recursive") != flags.end(); }
+    bool getRecursive() const { return flags.at("Recursive"); }
 
-    void setCaseSensitive(bool caseSensitive) { this->caseSensitive = caseSensitive; }
-    bool getCaseSensitive() const { return caseSensitive; }
+    void setHidden(bool hidden) { this->flags["Hidden"] = hidden; }
+    bool hasHidden() const { return flags.find("Hidden") != flags.end(); }
+    bool getHidden() const { return flags.at("Hidden"); }
 
-    void setFollowSymlinks(bool followSymlinks) { this->followSymlinks = followSymlinks; }
-    bool getFollowSymlinks() const { return followSymlinks; }
+    void setCaseSensitive(bool caseSensitive) { this->flags["CaseSens"] = caseSensitive; }
+    bool hasCaseSensitive() const { return flags.find("CaseSens") != flags.end(); }
+    bool getCaseSensitive() const { return flags.at("CaseSens"); }
 
-    void setFanArtFile(const std::string& fanArtFile) { this->fanArtFile = fanArtFile; }
-    std::string getFanArtFile() const { return fanArtFile; }
+    void setFollowSymlinks(bool followSymlinks) { this->flags["FollowSymlinks"] = followSymlinks; }
+    bool hasFollowSymlinks() const { return flags.find("FollowSymlinks") != flags.end(); }
+    bool getFollowSymlinks() const { return flags.at("FollowSymlinks"); }
 
-    void setSubTitleFile(const std::string& subTitleFile) { this->subTitleFile = subTitleFile; }
-    std::string getSubTitleFile() const { return subTitleFile; }
+    void setFanArtFile(const std::string& fanArtFile) { this->resourceFiles["FanArt"] = fanArtFile; }
+    bool hasFanArtFile() const { return resourceFiles.find("FanArt") != resourceFiles.end(); }
+    std::string getFanArtFile() const { return resourceFiles.at("FanArt"); }
 
-    void setResourceFile(const std::string& resourceFile) { this->resourceFile = resourceFile; }
-    std::string getResourceFile() const { return resourceFile; }
+    void setSubTitleFile(const std::string& subTitleFile) { this->resourceFiles["SubTitle"] = subTitleFile; }
+    bool hasSubTitleFile() const { return resourceFiles.find("SubTitle") != resourceFiles.end(); }
+    std::string getSubTitleFile() const { return resourceFiles.at("SubTitle"); }
+
+    void setResourceFile(const std::string& resourceFile) { this->resourceFiles["Resource"] = resourceFile; }
+    bool hasResourceFile() const { return resourceFiles.find("Resource") != resourceFiles.end(); }
+    std::string getResourceFile() const { return resourceFiles.at("Resource"); }
 
 protected:
     fs::path location;
     bool isOrig;
-    bool recursive;
-    bool hidden;
-    bool caseSensitive;
-    bool followSymlinks;
-    std::string fanArtFile;
-    std::string subTitleFile;
-    std::string resourceFile;
+    bool inherit;
+    std::map<std::string, std::string> resourceFiles;
+    std::map<std::string, bool> flags;
 };
 
 #endif

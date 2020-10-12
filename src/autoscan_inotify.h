@@ -40,6 +40,7 @@
 #include <vector>
 
 #include "autoscan.h"
+#include "config/config.h"
 #include "util/mt_inotify.h"
 
 // forward declaration
@@ -51,7 +52,7 @@ class ContentManager;
 
 class AutoscanInotify {
 public:
-    AutoscanInotify(std::shared_ptr<Storage> storage, std::shared_ptr<ContentManager> content);
+    AutoscanInotify(std::shared_ptr<Storage> storage, std::shared_ptr<ContentManager> content, std::shared_ptr<Config> config);
     ~AutoscanInotify();
 
     void run();
@@ -65,6 +66,7 @@ public:
 private:
     std::shared_ptr<Storage> storage;
     std::shared_ptr<ContentManager> content;
+    std::shared_ptr<Config> config;
 
     void threadProc();
 

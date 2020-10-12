@@ -60,6 +60,10 @@ void web::add::process()
     if (path.empty())
         throw_std_runtime_error("illegal path");
 
-    content->addFile(path, true);
+    AutoScanSetting asSetting;
+    asSetting.recursive = true;
+    asSetting.mergeOptions(config, path);
+
+    content->addFile(path, asSetting);
     log_debug("add: returning");
 }

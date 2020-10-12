@@ -367,8 +367,13 @@ int main(int argc, char** argv, char** envp)
             for (const auto& f : files) {
                 try {
                     // add file/directory recursively and asynchronously
-                    server->getContent()->addFile(std::string(f), true, true,
-                        configManager->getBoolOption(CFG_IMPORT_HIDDEN_FILES), false);
+                    AutoScanSetting asSetting;
+                    asSetting.followSymlinks = configManager->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS);
+                    asSetting.recursive = true;
+                    asSetting.hidden = configManager->getBoolOption(CFG_IMPORT_HIDDEN_FILES);
+                    asSetting.rescanResource = false;
+                    asSetting.mergeOptions(configManager, f);
+                    server->getContent()->addFile(std::string(f), asSetting, true);
                 } catch (const std::runtime_error& e) {
                     log_error("{}", e.what());
                     exit(EXIT_FAILURE);

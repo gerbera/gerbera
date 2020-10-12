@@ -295,6 +295,7 @@ static std::vector<std::shared_ptr<ConfigSetup>> complexOptions = {
 
     std::make_shared<ConfigDirectorySetup>(CFG_IMPORT_DIRECTORIES_LIST, "directories"),
     std::make_shared<ConfigPathSetup>(ATTR_DIRECTORIES_TWEAK_LOCATION, "location", "", false, true, true),
+    std::make_shared<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_INHERIT, "inherit", false, true),
     std::make_shared<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_RECURSIVE, "recursive", false, true),
     std::make_shared<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_HIDDEN, "hidden-files"),
     std::make_shared<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_CASE_SENSITIVE, "case-sensitive", DEFAULT_RESOURCES_CASE_SENSITIVE),

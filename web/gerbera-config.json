@@ -434,6 +434,13 @@
 							"editable": true
 						},
 						{
+							"item": "/import/directories/tweak/attribute::inherit",
+							"caption": "Inherit Settings",
+							"type": "Boolean",
+							"value": "true",
+							"editable": true
+						},
+						{
 							"item": "/import/directories/tweak/attribute::recursive",
 							"caption": "Recursive",
 							"type": "Boolean",

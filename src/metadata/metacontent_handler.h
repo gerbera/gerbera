@@ -39,7 +39,7 @@ public:
     static bool caseSensitive;
 
 protected:
-    static fs::path getContentPath(std::vector<std::string>& names, const std::shared_ptr<CdsItem>& item);
+    static fs::path getContentPath(const std::vector<std::string>& names, const std::shared_ptr<CdsItem>& item, bool isCaseSensitive);
     static std::string expandName(const std::string& name, const std::shared_ptr<CdsItem>& item);
 };
 
