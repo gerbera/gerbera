@@ -34,14 +34,26 @@ const destroy = () => {
   }
 };
 
-let current_config = { config: null, values: null, changedItems: {} };
+let current_config = {
+  config: null,
+  values: null,
+  changedItems: {},
+  choice: 'expert',
+  chooser: {
+    minimal: {caption: 'Minimal', fileName: 'gerbera-config-minimal.json'},
+    standard: {caption: 'Standard', fileName: 'gerbera-config-standard.json'},
+    expert: {caption: 'Expert', fileName: 'gerbera-config-expert.json'}
+  }
+};
 
 const initialize = () => {
+  current_config.choice = GerberaApp.configMode();
   $('#configgrid').html('');
   return Promise.resolve();
 };
 
 const menuSelected = () => {
+  current_config.choice = GerberaApp.configMode();
   retrieveGerberaConfig()
     .then((response) => {
       loadConfig(JSON.parse(response), 'config');
@@ -55,7 +67,7 @@ const menuSelected = () => {
 
 const retrieveGerberaConfig = () => {
   return $.ajax({
-    url: 'gerbera-config.json'
+    url: current_config.chooser[current_config.choice].fileName
   });
 };
 
@@ -69,6 +81,17 @@ const retrieveGerberaValues = (type) => {
      }
   });
 };
+
+const configModeChanged = (mode) => {
+  current_config.choice = mode;
+  GerberaApp.setCurrentConfig(mode);
+  initialize();
+  retrieveGerberaConfig()
+    .then((response) => {
+      loadConfig(JSON.parse(response), 'config');
+    })
+    .catch((err) => GerberaApp.error(err));
+}
 
 const loadConfig = (response, item) => {
 
@@ -88,7 +111,10 @@ console.log(response);
     datagrid.config({
       meta: current_config.config,
       values: current_config.values,
+      choice: current_config.choice,
+      chooser: current_config.chooser,
       addResultItem: setChangedItem,
+      configModeChanged: configModeChanged,
       itemType: 'config'
     });
     Trail.makeTrailFromItem({

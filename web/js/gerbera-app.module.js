@@ -39,6 +39,7 @@ export class App {
     this.initDone = false;
     this.pageInfo = {
       dbType: 'home',
+      configMode: 'minimal',
       currentItem: {
         'home': [],
         'db': [],
@@ -86,8 +87,17 @@ export class App {
     return this.pageInfo.currentPage;
   }
 
+  configMode() {
+    return this.pageInfo.configMode;
+  }
+
   setCurrentPage(page) {
     this.pageInfo.currentPage = page;
+    this.writeLocalStorage();
+  }
+
+  setCurrentConfig(mode) {
+    this.pageInfo.configMode = mode;
     this.writeLocalStorage();
   }
 
@@ -117,6 +127,7 @@ export class App {
   initialize () {
     this.pageInfo = {
       dbType: 'home',
+      configMode: 'minimal',
       currentItem: {
         'home': [],
         'db': [],
@@ -145,6 +156,9 @@ export class App {
       .then(() => {
         if (localStorage.getItem('pageInfo')) {
           this.pageInfo = JSON.parse(localStorage.getItem('pageInfo'));
+          if (!('configMode' in this.pageInfo)) {
+            this.pageInfo.configMode = 'minimal';
+          }
           if(this.pageInfo.dbType && this.pageInfo.dbType in this.navLinks) {
             $(this.navLinks[this.pageInfo.dbType]).click();
           }

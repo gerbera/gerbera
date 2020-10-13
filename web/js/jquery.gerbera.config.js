@@ -26,13 +26,44 @@ $.widget('grb.config', {
     this.element.html('');
     this.element.addClass('grb-config');
     const list = $('<ul></ul>').addClass('list');
+    const chooser = this.options.chooser;
     const data = this.options.meta;
     let line;
     this.subElements = [];
     this.result = {};
+    this.configModeChanged = this.options.configModeChanged;
 
     console.log(this.options);
+    const cBox = $('<div></div>');
+    cBox.attr('style', 'display: block; margin-top: -25px; position: absolute; right: 0px;');
+    let tBox = $('<div></div>').addClass('small');
+    tBox.append($('<span>List Mode: </span>'));
+    cBox.append(tBox);
 
+    Object.getOwnPropertyNames(chooser).forEach((choice) => {
+      let mBox = $('<div></div>').addClass('form-check').addClass('form-check-inline');
+      let label = $('<label></label>').addClass('form-check-label');
+      label.attr('for', 'configMode_' + choice);
+      label.text(chooser[choice].caption + " ");
+      let input = $('<input type="radio" name="configMode"></input>').addClass("form-check-input");
+      input.attr('value', choice);
+      input.attr('id', 'configMode_' + choice)
+      let selection = {
+        target: this
+      };
+      selection.configModeChanged = function(event) {
+        selection.target.configModeChanged(choice, event);
+      }
+
+      input.off('change').on('change', selection.configModeChanged);
+      label.append(input);
+      mBox.append(label);
+      tBox.append(mBox);
+    });
+    this.element.append(cBox);
+
+    const configMode = this.element.find('input[name=configMode]');
+    configMode.val([this.options.choice]);
     if (data.length > 0) {
       this.createSection(list, '', data, this.options.values, 0, this);
     } else {
