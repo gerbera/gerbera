@@ -513,7 +513,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLStorage::browse(const std::unique_ptr
         return qb.str();
     };
 
-    qb = {};
+    qb.clear();
     qb << SQL_QUERY << " WHERE ";
 
     if (param->getFlag(BROWSE_DIRECT_CHILDREN) && IS_CDS_CONTAINER(objectType)) {
@@ -915,10 +915,9 @@ std::shared_ptr<CdsObject> SQLStorage::createObjectFromRow(const std::unique_ptr
     if (!resources_str.empty()) {
         std::vector<std::string> resources = splitString(resources_str,
             RESOURCE_SEP);
-        for (size_t i = 0; i < resources.size(); i++) {
-            if (i == 0)
-                resource_zero_ok = true;
-            obj->addResource(CdsResource::decode(resources[i]));
+        resource_zero_ok = resources.empty();
+        for (const auto& resource : resources) {
+            obj->addResource(CdsResource::decode(resource));
         }
     }
 
@@ -1022,10 +1021,9 @@ std::shared_ptr<CdsObject> SQLStorage::createObjectFromSearchRow(const std::uniq
     bool resource_zero_ok = false;
     if (!resources_str.empty()) {
         std::vector<std::string> resources = splitString(resources_str, RESOURCE_SEP);
-        for (size_t i = 0; i < resources.size(); i++) {
-            if (i == 0)
-                resource_zero_ok = true;
-            obj->addResource(CdsResource::decode(resources[i]));
+        resource_zero_ok = resources.empty();
+        for (const auto& resource : resources) {
+            obj->addResource(CdsResource::decode(resource));
         }
     }
 
