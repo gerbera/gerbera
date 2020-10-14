@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
 
-set(GERBERA_VERSION 1.7.0_git)
+set(GERBERA_VERSION 1.6.4)
 project(Gerbera)
 
 # Leverage a modern C++
