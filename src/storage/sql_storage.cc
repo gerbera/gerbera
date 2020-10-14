@@ -915,7 +915,7 @@ std::shared_ptr<CdsObject> SQLStorage::createObjectFromRow(const std::unique_ptr
     if (!resources_str.empty()) {
         std::vector<std::string> resources = splitString(resources_str,
             RESOURCE_SEP);
-        resource_zero_ok = resources.empty();
+        resource_zero_ok = !resources.empty();
         for (const auto& resource : resources) {
             obj->addResource(CdsResource::decode(resource));
         }
@@ -1021,7 +1021,7 @@ std::shared_ptr<CdsObject> SQLStorage::createObjectFromSearchRow(const std::uniq
     bool resource_zero_ok = false;
     if (!resources_str.empty()) {
         std::vector<std::string> resources = splitString(resources_str, RESOURCE_SEP);
-        resource_zero_ok = resources.empty();
+        resource_zero_ok = !resources.empty();
         for (const auto& resource : resources) {
             obj->addResource(CdsResource::decode(resource));
         }
