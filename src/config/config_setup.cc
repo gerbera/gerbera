@@ -131,7 +131,11 @@ size_t ConfigSetup::extractIndex(const std::string& item)
     if (item.find_first_of('[') != std::string::npos && item.find_first_of(']', item.find_first_of('[')) != std::string::npos ) {
         auto startPos = item.find_first_of('[') + 1;
         auto endPos = item.find_first_of(']', startPos);
-        i = std::stoi(item.substr(startPos, endPos - startPos));
+        try {
+            i = std::stoi(item.substr(startPos, endPos - startPos));
+        } catch (const std::invalid_argument& ex) {
+            log_error(ex.what());
+        }
     }
     return i;
 }
@@ -941,7 +945,7 @@ bool ConfigAutoscanSetup::updateDetail(const std::string& optItem, std::string& 
             if (entry != nullptr && status == STATUS_RESET) {
                 list->add(entry, i);
             }
-            if (entry != nullptr && updateItem(i, optItem, config, entry, optValue)) {
+            if (entry != nullptr && updateItem(i, optItem, config, entry, optValue, status)) {
                 return true;
             }
         }
@@ -1406,7 +1410,7 @@ void ConfigClientSetup::makeOption(const pugi::xml_node& root, std::shared_ptr<C
 
 bool ConfigClientSetup::updateItem(size_t i, const std::string& optItem, std::shared_ptr<Config> config, std::shared_ptr<ClientConfig>& entry, std::string& optValue, const std::string& status) const
 {
-    if (optItem == getUniquePath() && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
+    if (optItem == getItemPath(i) && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
         return true;
     }
     auto index = getItemPath(i, ATTR_CLIENTS_CLIENT_FLAGS);
@@ -1468,7 +1472,7 @@ bool ConfigClientSetup::updateDetail(const std::string& optItem, std::string& op
             if (entry != nullptr && status == STATUS_RESET) {
                 list->add(entry, i);
             }
-            if (entry != nullptr && updateItem(i, optItem, config, entry, optValue)) {
+            if (entry != nullptr && updateItem(i, optItem, config, entry, optValue, status)) {
                 return true;
             }
         }
@@ -1561,7 +1565,7 @@ void ConfigDirectorySetup::makeOption(const pugi::xml_node& root, std::shared_pt
 
 bool ConfigDirectorySetup::updateItem(size_t i, const std::string& optItem, std::shared_ptr<Config> config, std::shared_ptr<DirectoryTweak>& entry, std::string& optValue, const std::string& status) const
 {
-    if (optItem == getUniquePath() && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
+    if (optItem == getItemPath(i) && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
         return true;
     }
 
@@ -1673,7 +1677,7 @@ bool ConfigDirectorySetup::updateDetail(const std::string& optItem, std::string&
             if (entry != nullptr && status == STATUS_RESET) {
                 list->add(entry, i);
             }
-            if (entry != nullptr && updateItem(i, optItem, config, entry, optValue)) {
+            if (entry != nullptr && updateItem(i, optItem, config, entry, optValue, status)) {
                 return true;
             }
         }

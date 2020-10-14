@@ -144,6 +144,16 @@ $.widget('grb.trail', {
       saveIcon.appendTo(buttons);
     }
 
+    if (config.enableAddTweak && config.onAddTweak) {
+      const tweakIcon = this.generateItemButton(item, {
+        title: 'Tweak Directory',
+        class: 'grb-trail-tweak-dir',
+        iconClass: 'fa-address-card-o',
+        click: config.onAddTweak ? config.onAddTweak : noOp
+      });
+      tweakIcon.appendTo(buttons);
+    }
+
     buttons.appendTo(buttonContainer);
     trailContainer.addClass('col-md-7 col-sm-7 col-xs-7');
 

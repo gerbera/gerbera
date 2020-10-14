@@ -653,7 +653,15 @@ public:
 
     virtual std::string getItemPath(int index = 0, config_option_t propOption = CFG_MAX, config_option_t propOption2 = CFG_MAX, config_option_t propOption3 = CFG_MAX, config_option_t propOption4 = CFG_MAX) const override
     {
-        return index >= 0 ? fmt::format("{}/{}[{}]/attribute::{}", xpath, ConfigManager::mapConfigOption(ATTR_CLIENTS_CLIENT), index, ConfigManager::mapConfigOption(propOption)) : fmt::format("{}/{}", xpath, ConfigManager::mapConfigOption(ATTR_CLIENTS_CLIENT));
+        if (index >= 0) {
+            if (propOption != CFG_MAX) {
+                return fmt::format("{}/{}[{}]/attribute::{}", xpath, ConfigManager::mapConfigOption(ATTR_CLIENTS_CLIENT), index, ConfigManager::mapConfigOption(propOption)) ;
+            } else {
+                return fmt::format("{}/{}[{}]", xpath, ConfigManager::mapConfigOption(ATTR_CLIENTS_CLIENT), index) ;
+            }
+        } else {
+            return fmt::format("{}/{}", xpath, ConfigManager::mapConfigOption(ATTR_CLIENTS_CLIENT));
+        }
     }
 
     std::shared_ptr<ConfigOption> newOption(const pugi::xml_node& optValue);
@@ -683,7 +691,15 @@ public:
 
     virtual std::string getItemPath(int index = 0, config_option_t propOption = CFG_MAX, config_option_t propOption2 = CFG_MAX, config_option_t propOption3 = CFG_MAX, config_option_t propOption4 = CFG_MAX) const override
     {
-        return index >= 0 ? fmt::format("{}/{}[{}]/attribute::{}", xpath, ConfigManager::mapConfigOption(ATTR_CLIENTS_CLIENT), index, ConfigManager::mapConfigOption(propOption)) : fmt::format("{}/{}", xpath, ConfigManager::mapConfigOption(ATTR_CLIENTS_CLIENT));
+        if (index >= 0) {
+            if (propOption != CFG_MAX) {
+                return fmt::format("{}/{}[{}]/attribute::{}", xpath, ConfigManager::mapConfigOption(ATTR_DIRECTORIES_TWEAK), index, ConfigManager::mapConfigOption(propOption)) ;
+            } else {
+                return fmt::format("{}/{}[{}]", xpath, ConfigManager::mapConfigOption(ATTR_DIRECTORIES_TWEAK), index) ;
+            }
+        } else {
+            return fmt::format("{}/{}", xpath, ConfigManager::mapConfigOption(ATTR_DIRECTORIES_TWEAK));
+        }
     }
 
     std::shared_ptr<ConfigOption> newOption(const pugi::xml_node& optValue);

@@ -25,6 +25,7 @@ import {Config} from "./gerbera-config.module.js";
 import {GerberaApp} from "./gerbera-app.module.js";
 import {Items} from "./gerbera-items.module.js";
 import {Tree} from "./gerbera-tree.module.js";
+import {Tweaks} from "./gerbera-tweak.module.js";
 import {Updates} from "./gerbera-updates.module.js";
 
 const destroy = () => {
@@ -52,11 +53,15 @@ const makeTrail = (selectedItem, config) => {
 
 const gatherTrail = (treeElement) => {
   const items = [];
+  let lastItem = {};
   if ($(treeElement).data('grb-id') !== undefined) {
-    items.push({
+    const title = $(treeElement).children('span.folder-title').text();
+    lastItem = {
       id: $(treeElement).data('grb-id'),
-      text: $(treeElement).children('span.folder-title').text()
-    });
+      text: title,
+      fullPath: "/" + title
+    };
+    items.push(lastItem);
   }
 
   $(treeElement).parents('ul li').each(function (index, element) {
@@ -66,6 +71,9 @@ const gatherTrail = (treeElement) => {
       id: gerberaId,
       text: title
     };
+    if (gerberaId != 0) {
+      lastItem.fullPath = "/" + title + lastItem.fullPath;
+    }
     items.push(item);
   });
   return items.reverse();
@@ -88,6 +96,7 @@ const makeTrailFromItem = (items) => {
   let enableDeleteAll = false;
   let enableAddAutoscan = false;
   let enableEditAutoscan = false;
+  let enableAddTweak = false;
   let enableConfig = false;
   let onAdd;
   let onDelete;
@@ -96,6 +105,7 @@ const makeTrailFromItem = (items) => {
   let onClear;
   let onAddAutoscan;
   let onEditAutoscan;
+  let onAddTweak;
   let onDeleteAll;
   const noOp = function () { return false };
 
@@ -105,6 +115,7 @@ const makeTrailFromItem = (items) => {
     } else if (items.parent_id === 1) {
       enableEdit = true;
       enableAddAutoscan = true;
+      enableAddTweak = true;
     } else {
       const isVirtual = ('virtual' in items) && items.virtual === true;
       const isNotProtected = ('protect_container' in items) && items.protect_container !== true;
@@ -116,8 +127,9 @@ const makeTrailFromItem = (items) => {
       enableEditAutoscan = allowsAutoscan && isNotProtected;
     }
   } else if (itemType === 'fs') {
-    enableAddAutoscan = true;
-    enableAdd = true;
+    enableAddTweak = items.parent_id !== 0;
+    enableAddAutoscan = items.parent_id !== 0;
+    enableAdd = items.parent_id !== 0;
   } else if (itemType === 'config') {
     enableConfig = true;
   }
@@ -128,6 +140,7 @@ const makeTrailFromItem = (items) => {
   onDeleteAll = enableDeleteAll ? deleteAllItems : noOp;
   onAddAutoscan = enableAddAutoscan ? addAutoscan : noOp;
   onEditAutoscan = enableEditAutoscan ? addAutoscan : noOp;
+  onAddTweak = enableAddTweak ? addTweak : noOp;
   onSave = enableConfig ? saveConfig : noOp;
   onClear = enableConfig ? clearConfig : noOp;
 
@@ -145,6 +158,8 @@ const makeTrailFromItem = (items) => {
     enableEditAutoscan: enableEditAutoscan,
     onEditAutoscan: onEditAutoscan,
     enableConfig: enableConfig,
+    onAddTweak: onAddTweak,
+    enableAddTweak: enableAddTweak,
     onSave: onSave,
     onClear: onClear
   };
@@ -167,6 +182,10 @@ const editItem = (event) => {
 
 const addAutoscan = (event) => {
   Autoscan.addAutoscan(event);
+};
+
+const addTweak = (event) => {
+  Tweaks.addDirTweak(event);
 };
 
 const saveConfig = (event) => {
@@ -195,6 +214,9 @@ const deleteItem = (event) => {
 
 const deleteAllItems = (event) => {
   const item = event.data;
+  if ('fullPath' in item) {
+    delete item.fullPath;
+  }
   return Items.deleteGerberaItem(item, true)
     .then((response) => {
       if (response.success) {
@@ -214,6 +236,11 @@ export const Trail = {
   deleteAllItems,
   deleteItem,
   destroy,
+  addItem,
+  addAutoscan,
+  addTweak,
+  saveConfig,
+  clearConfig,
   gatherTrail,
   initialize,
   makeTrail,

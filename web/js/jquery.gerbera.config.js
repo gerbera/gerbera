@@ -432,7 +432,7 @@ console.log({addItemClicked: listValue});
             itemValue.editor = input;
             input.off('change').on('change', itemValue.setEntryChanged);
           } else {
-            input.attr('disabled', '');
+            input.prop('disabled', true);
           }
 
           switch(item.type){

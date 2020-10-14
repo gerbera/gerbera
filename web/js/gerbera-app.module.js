@@ -25,6 +25,7 @@ import {Autoscan} from './gerbera-autoscan.module.js';
 import {Items} from './gerbera-items.module.js';
 import {Menu} from './gerbera-menu.module.js';
 import {Trail} from './gerbera-trail.module.js';
+import {Tweaks} from "./gerbera-tweak.module.js";
 import {Tree} from './gerbera-tree.module.js';
 import {Updates} from './gerbera-updates.module.js';
 import {Clients} from './gerbera-clients.module.js';
@@ -237,6 +238,7 @@ export class App {
       Updates.initialize();
       Clients.initialize();
       Config.initialize();
+      Tweaks.initialize();
     } else {
       $('.login-field').show();
       $('#login-form').submit(function (event) {

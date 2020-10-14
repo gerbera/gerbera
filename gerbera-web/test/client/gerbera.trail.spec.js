@@ -80,7 +80,7 @@ describe('Gerbera Trail', () => {
       const expected = [
         { id: 111, text: 'first' },
         { id: 1111, text: 'first.child.one' },
-        { id: 11111, text: 'first.child.one.one' }
+        { id: 11111, text: 'first.child.one.one', fullPath: '/first/first.child.one/first.child.one.one' }
       ];
 
       const result = Trail.gatherTrail(treeElement);
@@ -94,7 +94,7 @@ describe('Gerbera Trail', () => {
       const expected = [
         { id: 'aaa', text: 'first' },
         { id: 'aaaa', text: 'first.child.one' },
-        { id: 'aaaaa', text: 'first.child.one.one' }
+        { id: 'aaaaa', text: 'first.child.one.one', fullPath: '/first/first.child.one/first.child.one.one' }
       ];
 
       const result = Trail.gatherTrail(treeElement);

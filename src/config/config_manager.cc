@@ -293,7 +293,7 @@ static std::vector<std::shared_ptr<ConfigSetup>> complexOptions = {
     std::make_shared<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_IP, "ip", ""),
     std::make_shared<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_USERAGENT, "userAgent", ""),
 
-    std::make_shared<ConfigDirectorySetup>(CFG_IMPORT_DIRECTORIES_LIST, "directories"),
+    std::make_shared<ConfigDirectorySetup>(CFG_IMPORT_DIRECTORIES_LIST, "/import/directories"),
     std::make_shared<ConfigPathSetup>(ATTR_DIRECTORIES_TWEAK_LOCATION, "location", "", false, true, true),
     std::make_shared<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_INHERIT, "inherit", false, true),
     std::make_shared<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_RECURSIVE, "recursive", false, true),
