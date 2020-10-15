@@ -126,21 +126,31 @@ $.widget('grb.trail', {
       deleteAllIcon.appendTo(buttons);
     }
 
-    if (config.enableConfig && config.onSave && config.onClear) {
+    if (config.enableClearConfig && config.onClear) {
       const clearIcon = this.generateItemButton(item, {
         title: 'Clear Saved Config',
         class: 'grb-trail-clear-config',
         iconClass: 'fa-trash',
         click: config.onClear ? config.onClear : noOp
       });
+
+      clearIcon.appendTo(buttons);
+    }
+    if (config.enableConfig && config.onSave && config.onRescan) {
       const saveIcon = this.generateItemButton(item, {
         title: 'Save Config',
         class: 'grb-trail-save-config',
         iconClass: 'fa-save',
         click: config.onSave ? config.onSave : noOp
       });
+      const rescanIcon = this.generateItemButton(item, {
+        title: 'Rescan Library',
+        class: 'grb-trail-rescan',
+        iconClass: 'fa-retweet',
+        click: config.onRescan ? config.onRescan : noOp
+      });
 
-      clearIcon.appendTo(buttons);
+      rescanIcon.appendTo(buttons);
       saveIcon.appendTo(buttons);
     }
 

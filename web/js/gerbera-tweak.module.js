@@ -65,6 +65,8 @@ const submitDirTweak = () => {
     sid: Auth.getSessionId(),
     data: [],
     changedCount: 0,
+    action: 'rescan',
+    target: '',
     updates: 'check'
   };
   saveData.data.push({
@@ -81,6 +83,9 @@ const submitDirTweak = () => {
           value: item[key].toString(),
           origValue: '',
           status: 'changed'});
+        if (key === 'location') {
+          saveData.target = item[key].toString();
+        }
       }
   });
   saveData.changedCount = saveData.data.length;

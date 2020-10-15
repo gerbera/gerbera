@@ -176,6 +176,36 @@ const clearConfig = () => {
     req_type: 'config_save',
     sid: Auth.getSessionId(),
     data: [],
+    action: 'clear',
+    changedCount: -1,
+    updates: 'check'
+  };
+
+  console.log(saveData);
+
+  try {
+    $.ajax({
+      url: GerberaApp.clientConfig.api,
+      type: 'get',
+      data: saveData
+    })
+      .then((response) => {
+        menuSelected();
+        console.log(response);
+      })
+      .catch((err) => GerberaApp.error(err));
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+const reScanLibrary = () => {
+  const saveData = {
+    req_type: 'config_save',
+    sid: Auth.getSessionId(),
+    data: [],
+    action: 'rescan',
+    target: '--all',
     changedCount: -1,
     updates: 'check'
   };
@@ -203,6 +233,7 @@ export const Config = {
   loadConfig,
   saveConfig,
   clearConfig,
+  reScanLibrary,
   initialize,
   menuSelected,
 };

@@ -98,6 +98,7 @@ const makeTrailFromItem = (items) => {
   let enableEditAutoscan = false;
   let enableAddTweak = false;
   let enableConfig = false;
+  let enableClearConfig = false;
   let onAdd;
   let onDelete;
   let onEdit;
@@ -107,6 +108,7 @@ const makeTrailFromItem = (items) => {
   let onEditAutoscan;
   let onAddTweak;
   let onDeleteAll;
+  let onRescan;
   const noOp = function () { return false };
 
   if (itemType === 'db') {
@@ -132,6 +134,7 @@ const makeTrailFromItem = (items) => {
     enableAdd = items.parent_id !== 0;
   } else if (itemType === 'config') {
     enableConfig = true;
+    enableClearConfig = GerberaApp.configMode() == 'expert';
   }
 
   onAdd = enableAdd ? addItem : noOp;
@@ -142,7 +145,8 @@ const makeTrailFromItem = (items) => {
   onEditAutoscan = enableEditAutoscan ? addAutoscan : noOp;
   onAddTweak = enableAddTweak ? addTweak : noOp;
   onSave = enableConfig ? saveConfig : noOp;
-  onClear = enableConfig ? clearConfig : noOp;
+  onClear = enableClearConfig  ? clearConfig : noOp;
+  onRescan = enableConfig ? reScanLibrary : noOp;
 
   const config = {
     enableAdd: enableAdd,
@@ -157,11 +161,13 @@ const makeTrailFromItem = (items) => {
     onAddAutoscan: onAddAutoscan,
     enableEditAutoscan: enableEditAutoscan,
     onEditAutoscan: onEditAutoscan,
-    enableConfig: enableConfig,
     onAddTweak: onAddTweak,
     enableAddTweak: enableAddTweak,
+    enableConfig: enableConfig,
+    enableClearConfig: enableClearConfig,
     onSave: onSave,
-    onClear: onClear
+    onClear: onClear,
+    onRescan: onRescan
   };
 
   makeTrail(treeElement, config)
@@ -194,6 +200,10 @@ const saveConfig = (event) => {
 
 const clearConfig = (event) => {
   Config.clearConfig(event);
+};
+
+const reScanLibrary = (event) => {
+  Config.reScanLibrary(event);
 };
 
 const deleteItem = (event) => {

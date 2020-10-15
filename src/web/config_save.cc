@@ -33,6 +33,7 @@
 #include "config/config_manager.h"
 #include "config/config_options.h"
 #include "config/config_setup.h"
+#include "content_manager.h"
 #include "metadata/metadata_handler.h"
 #include "storage/storage.h"
 #include "transcoding/transcoding.h"
@@ -50,9 +51,15 @@ void web::configSave::process()
     check_request();
     //auto root = xmlDoc->document_element();
     log_debug("configSave");
+    std::string action = param("action");
 
-    int count = std::stoi(param("changedCount"));
-    if (count == -1) {
+    int count = 0;
+    try {
+        count = std::stoi(param("changedCount"));
+    } catch (const std::invalid_argument& ex) {
+        log_error(ex.what());
+    }
+    if (count == -1 && action == "clear") {
         storage->removeConfigValue("*"); // remove all
         return;
     }
@@ -132,6 +139,29 @@ void web::configSave::process()
             }
         } catch (const std::runtime_error& e) {
             log_error("error setting option {}. Exception {}", i, e.what());
+        }
+    }
+
+    std::string target = param("target");
+    if (action == "rescan" && !target.empty()) {
+        if (target != "--all") {
+            fs::path targetPath(target);
+            std::shared_ptr<AutoscanDirectory> autoscan = nullptr;
+            while (targetPath != "/" && autoscan == nullptr) {
+                autoscan = content->getAutoscanDirectory(targetPath);
+                targetPath = targetPath.parent_path();
+            }
+            int objectID = storage->findObjectIDByPath(target);
+            if (objectID > 0 && autoscan != nullptr) {
+                content->rescanDirectory(autoscan, objectID, target);
+            } else {
+                log_error("No such autoscan or dir: {} ({})", target, objectID);
+            }
+        } else {
+            auto autoScans = content->getAutoscanDirectories();
+            for (const auto& autoscan : autoScans) {
+                 content->rescanDirectory(autoscan, autoscan->getObjectID());
+            }
         }
     }
 }
