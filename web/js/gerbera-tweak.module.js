@@ -51,7 +51,7 @@ const addDirTweak = (event) => {
 const loadNewDirTweak = (response, path) => {
   const dirtweakModal = $('#dirTweakModal');
   if (response.success) {
-    dirtweakModal.dirtweakmodal('loadItem', {values: response.values, path: path, onSave: submitDirTweak});
+    dirtweakModal.dirtweakmodal('loadItem', {values: response.values, path: path, onSave: submitDirTweak, onDelete: deleteDirTweak});
     dirtweakModal.dirtweakmodal('show');
   }
 };
@@ -104,6 +104,54 @@ console.log(saveData);
   }
 };
 
+const deleteDirTweak = () => {
+  const dirtweakModal = $('#dirTweakModal');
+  const item = dirtweakModal.dirtweakmodal('deleteItem');
+
+  const saveData = {
+    req_type: 'config_save',
+    sid: Auth.getSessionId(),
+    data: [],
+    changedCount: 0,
+    action: 'rescan',
+    target: '',
+    updates: 'check'
+  };
+  saveData.data.push({
+    item: `/import/directories/tweak[${item.index}]`,
+    id: item.id,
+    value: '',
+    origValue: '',
+    status: item.status});
+  Object.getOwnPropertyNames(item).forEach((key) => {
+      if (key != "id" && key != "status" && key != "index") {
+        saveData.data.push({
+          item: `/import/directories/tweak[${item.index}]/attribute::${key}`,
+          id: item.id,
+          value: item[key].toString(),
+          origValue: '',
+          status: item.status});
+        if (key === 'location') {
+          saveData.target = item[key].toString();
+        }
+      }
+  });
+  saveData.changedCount = saveData.data.length;
+console.log(saveData);
+
+  if (item) {
+    $.ajax({
+      url: GerberaApp.clientConfig.api,
+      type: 'get',
+      data: saveData
+    }).then((response) => {
+      submitDirTweakComplete(response);
+    }).catch((err) => {
+      GerberaApp.error(err);
+    });
+  }
+};
+
 const submitDirTweakComplete = (response) => {
   let msg;
   if (response.success) {
@@ -124,5 +172,6 @@ export const Tweaks = {
   initialize,
   loadNewDirTweak,
   submitDirTweak,
+  deleteDirTweak,
   submitDirTweakComplete,
 };

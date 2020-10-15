@@ -49,7 +49,7 @@ web::configSave::configSave(std::shared_ptr<Config> config, std::shared_ptr<Stor
 void web::configSave::process()
 {
     check_request();
-    //auto root = xmlDoc->document_element();
+    auto root = xmlDoc->document_element();
     log_debug("configSave");
     std::string action = param("action");
 
@@ -61,6 +61,8 @@ void web::configSave::process()
     }
     if (count == -1 && action == "clear") {
         storage->removeConfigValue("*"); // remove all
+        auto taskEl = root.append_child("task");
+        taskEl.append_attribute("text") = "Removed all config values from database";
         return;
     }
 
@@ -140,6 +142,9 @@ void web::configSave::process()
         } catch (const std::runtime_error& e) {
             log_error("error setting option {}. Exception {}", i, e.what());
         }
+
+        auto taskEl = root.append_child("task");
+        taskEl.append_attribute("text") = fmt::format("Successfully updated {} items", count).c_str();
     }
 
     std::string target = param("target");
@@ -154,13 +159,17 @@ void web::configSave::process()
             int objectID = storage->findObjectIDByPath(target);
             if (objectID > 0 && autoscan != nullptr) {
                 content->rescanDirectory(autoscan, objectID, target);
+                auto taskEl = root.append_child("task");
+                taskEl.append_attribute("text") = fmt::format("Rescanning directory {}", target).c_str();
+                log_info("Rescanning directory {}", target);
             } else {
-                log_error("No such autoscan or dir: {} ({})", target, objectID);
+                log_error("No such autoscan or dir: {} ({})", target.c_str(), objectID);
             }
         } else {
             auto autoScans = content->getAutoscanDirectories();
             for (const auto& autoscan : autoScans) {
-                 content->rescanDirectory(autoscan, autoscan->getObjectID());
+                content->rescanDirectory(autoscan, autoscan->getObjectID());
+                log_info("Rescanning directory {}", autoscan->getLocation().string().c_str());
             }
         }
     }

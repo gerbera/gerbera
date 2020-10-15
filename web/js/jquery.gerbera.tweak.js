@@ -35,6 +35,7 @@
     const dirTweakFanArt = modal.find('#dirTweakFanArt');
     const dirTweakSubtitle = modal.find('#dirTweakSubtitle');
     const dirTweakResource = modal.find('#dirTweakResource');
+    const dirTweakDelete = modal.find('#dirTweakDelete');
     const dirTweakSave = modal.find('#dirTweakSave');
 
     let item = null;
@@ -74,6 +75,9 @@
     
     if (itemData.path in tweakMap) {
       item = tweakList[tweakMap[itemData.path]];
+      dirTweakDelete.prop('hidden', false);
+      dirTweakDelete.prop('disabled', false);
+      dirTweakDelete.off('click').on('click', itemData.onDelete);
     } else {
       item = {
         id: -1,
@@ -113,6 +117,7 @@
     const dirTweakFanArt = modal.find('#dirTweakFanArt');
     const dirTweakSubtitle = modal.find('#dirTweakSubtitle');
     const dirTweakResource = modal.find('#dirTweakResource');
+    const dirTweakDelete = modal.find('#dirTweakDelete');
     const dirTweakSave = modal.find('#dirTweakSave');
 
     modal.find('form :input').each(function () {
@@ -132,6 +137,8 @@
     dirTweakFanArt.val('');
     dirTweakSubtitle.val('');
     dirTweakResource.val('');
+    dirTweakDelete.prop('disabled', true);
+    dirTweakDelete.prop('hidden', true);
     dirTweakSave.prop('disabled', true);
   };
 
@@ -167,6 +174,38 @@ console.log(item);
     return item;
   }
 
+  function deleteItem (modal) {
+    const dirTweakLocation = modal.find('#dirTweakLocation');
+    const dirTweakId = modal.find('#dirTweakId');
+    const dirTweakIndex = modal.find('#dirTweakIndex');
+    const dirTweakStatus = modal.find('#dirTweakStatus');
+    const dirTweakInherit = modal.find('#dirTweakInherit');
+    const dirTweakSymLinks = modal.find('#dirTweakSymLinks');
+    const dirTweakRecursive = modal.find('#dirTweakRecursive');
+    const dirTweakCaseSens = modal.find('#dirTweakCaseSens');
+    const dirTweakHidden = modal.find('#dirTweakHidden');
+    const dirTweakFanArt = modal.find('#dirTweakFanArt');
+    const dirTweakSubtitle = modal.find('#dirTweakSubtitle');
+    const dirTweakResource = modal.find('#dirTweakResource');
+
+    let item = {
+      location: dirTweakLocation.val(),
+      id: dirTweakId.val(),
+      index: dirTweakIndex.val(),
+      status: dirTweakStatus.val() === 'manual' ? 'killed' : 'reset',
+      inherit: dirTweakInherit.is(':checked'),
+      'follow-symlinks': dirTweakSymLinks.is(':checked'),
+      recursive: dirTweakRecursive.is(':checked'),
+      'case-sensitive': dirTweakCaseSens.is(':checked'),
+      'hidden-files': dirTweakHidden.is(':checked'),
+      'fanart-file': dirTweakFanArt.val(),
+      'subtitle-file': dirTweakSubtitle.val(),
+      'resource-file': dirTweakResource.val(),
+    };
+console.log(item);
+    return item;
+  }
+
   let _super = $.fn.modal;
 
   // create a new constructor
@@ -188,6 +227,9 @@ console.log(item);
     },
     saveItem: function () {
       return saveItem($(this._element));
+    },
+    deleteItem: function () {
+      return deleteItem($(this._element));
     }
   });
 
