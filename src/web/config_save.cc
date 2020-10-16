@@ -101,12 +101,12 @@ void web::configSave::process()
                     storage->removeConfigValue(param(item));
                     if (config->hasOrigValue(param(item))) {
                         parValue = config->getOrigValue(param(item));
-                        log_info("reset {} to '{}'", param(item), parValue);
+                        log_debug("reset {} to '{}'", param(item), parValue);
                         success = false;
                         update = true;
                     } else if (param(item).substr(param(item).length() - 1) == "]") {
                         parValue = "";
-                        log_info("dropping {}", param(item));
+                        log_debug("dropping {}", param(item));
                         success = false;
                         update = true;
                     } else {

@@ -176,7 +176,7 @@ $.widget('grb.trail', {
     const link = $('<a>', {"title": config.title, "class": "grb-trail-button " + config.class, "href": "javascript:;"});
     const icon = $('<i></i>', {"class": "fa " + config.iconClass });
     link.append(icon);
-    link.append(" " + config.title);
+    link.append('<span> ' + config.title + '</span>');
     button.append(link);
     link.click(item, config.click);
     return button

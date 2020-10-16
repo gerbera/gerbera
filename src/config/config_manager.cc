@@ -577,7 +577,7 @@ void ConfigManager::load(const fs::path& userHome)
     } catch (const std::runtime_error& e) {
         throw std::runtime_error("Error in config file: unsupported filesystem-charset specified: " + charset);
     }
-    log_info("Setting filesystem import charset to {}", charset.c_str());
+    log_debug("Setting filesystem import charset to {}", charset.c_str());
     co->makeOption(charset, self);
 
     co = findConfigSetup(CFG_IMPORT_METADATA_CHARSET);
@@ -589,7 +589,7 @@ void ConfigManager::load(const fs::path& userHome)
     } catch (const std::runtime_error& e) {
         throw std::runtime_error("Error in config file: unsupported metadata-charset specified: " + charset);
     }
-    log_info("Setting metadata import charset to {}", charset.c_str());
+    log_debug("Setting metadata import charset to {}", charset.c_str());
     co->makeOption(charset, self);
 
     co = findConfigSetup(CFG_IMPORT_PLAYLIST_CHARSET);
@@ -601,7 +601,7 @@ void ConfigManager::load(const fs::path& userHome)
     } catch (const std::runtime_error& e) {
         throw std::runtime_error("Error in config file: unsupported playlist-charset specified: " + charset);
     }
-    log_info("Setting playlist charset to {}", charset.c_str());
+    log_debug("Setting playlist charset to {}", charset.c_str());
     co->makeOption(charset, self);
 
     setOption(root, CFG_SERVER_HIDE_PC_DIRECTORY);
@@ -873,7 +873,7 @@ void ConfigManager::updateConfigFromDatabase(std::shared_ptr<Storage> storage)
 void ConfigManager::setOrigValue(const std::string& item, const std::string& value)
 {
     if (origValues.find(item) == origValues.end()) {
-        log_info("Caching {}='{}'", item, value);
+        log_debug("Caching {}='{}'", item, value);
         origValues[item] = value;
     }
 }

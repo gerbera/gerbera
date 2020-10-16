@@ -557,7 +557,7 @@ bool ConfigArraySetup::updateDetail(const std::string& optItem, std::string& opt
 {
     if (optItem.substr(0, strlen(xpath)) == xpath && optionValue != nullptr) {
         std::shared_ptr<ArrayOption> value = std::dynamic_pointer_cast<ArrayOption>(optionValue);
-        log_info("Updating Array Detail {} {} {}", xpath, optItem, optValue);
+        log_debug("Updating Array Detail {} {} {}", xpath, optItem, optValue);
 
         size_t i = extractIndex(optItem);
         if (i < SIZE_MAX) {
@@ -745,15 +745,15 @@ bool ConfigDictionarySetup::updateItem(size_t i, const std::string& optItem, std
         value->setKey(i, optValue);
         if (status == STATUS_RESET && !optValue.empty()) {
             value->setValue(i, config->getOrigValue(valIndex));
-            log_info("Reset Dictionary value {} {}", valIndex, config->getDictionaryOption(option)[optKey]);
+            log_debug("Reset Dictionary value {} {}", valIndex, config->getDictionaryOption(option)[optKey]);
         }
-        log_info("New Dictionary key {} {}", keyIndex, optValue);
+        log_debug("New Dictionary key {} {}", keyIndex, optValue);
         return true;
     }
     if (optItem == valIndex) {
         config->setOrigValue(valIndex, value->getDictionaryOption()[optKey]);
         value->setValue(i, optValue);
-        log_info("New Dictionary value {} {}", valIndex, config->getDictionaryOption(option)[optKey]);
+        log_debug("New Dictionary value {} {}", valIndex, config->getDictionaryOption(option)[optKey]);
         return true;
     }
     return false;
@@ -763,7 +763,7 @@ bool ConfigDictionarySetup::updateDetail(const std::string& optItem, std::string
 {
     if (optItem.substr(0, strlen(xpath)) == xpath && optionValue != nullptr) {
         std::shared_ptr<DictionaryOption> value = std::dynamic_pointer_cast<DictionaryOption>(optionValue);
-        log_info("Updating Dictionary Detail {} {} {}", xpath, optItem, optValue);
+        log_debug("Updating Dictionary Detail {} {} {}", xpath, optItem, optValue);
 
         size_t i = extractIndex(optItem);
         if (i < SIZE_MAX) {
@@ -881,7 +881,7 @@ bool ConfigAutoscanSetup::updateItem(size_t i, const std::string& optItem, std::
         if (findConfigSetup<ConfigPathSetup>(ATTR_AUTOSCAN_DIRECTORY_LOCATION)->checkPathValue(optValue, pathValue)) {
             entry->setLocation(pathValue);
         }
-        log_info("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)->get(i)->getLocation().string());
+        log_debug("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)->get(i)->getLocation().string());
         return true;
     }
 
@@ -896,7 +896,7 @@ bool ConfigAutoscanSetup::updateItem(size_t i, const std::string& optItem, std::
         if (entry->getOrig())
             config->setOrigValue(index, fmt::format("{}", entry->getInterval()));
         entry->setInterval(findConfigSetup<ConfigIntSetup>(ATTR_AUTOSCAN_DIRECTORY_INTERVAL)->checkIntValue(optValue));
-        log_info("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)->get(i)->getInterval());
+        log_debug("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)->get(i)->getInterval());
         return true;
     }
 
@@ -905,7 +905,7 @@ bool ConfigAutoscanSetup::updateItem(size_t i, const std::string& optItem, std::
         if (entry->getOrig())
             config->setOrigValue(index, entry->getRecursive());
         entry->setRecursive(findConfigSetup<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_RECURSIVE)->checkValue(optValue));
-        log_info("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)->get(i)->getRecursive());
+        log_debug("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)->get(i)->getRecursive());
         return true;
     }
 
@@ -914,7 +914,7 @@ bool ConfigAutoscanSetup::updateItem(size_t i, const std::string& optItem, std::
         if (entry->getOrig())
             config->setOrigValue(index, entry->getHidden());
         entry->setHidden(findConfigSetup<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES)->checkValue(optValue));
-        log_info("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)->get(i)->getHidden());
+        log_debug("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)->get(i)->getHidden());
         return true;
     }
     return false;
@@ -924,7 +924,7 @@ bool ConfigAutoscanSetup::updateDetail(const std::string& optItem, std::string& 
 {
     auto uPath = getUniquePath();
     if (optItem.substr(0, uPath.length()) == uPath) {
-        log_info("Updating Autoscan Detail {} {} {}", uPath, optItem, optValue);
+        log_debug("Updating Autoscan Detail {} {} {}", uPath, optItem, optValue);
         std::shared_ptr<AutoscanListOption> value = std::dynamic_pointer_cast<AutoscanListOption>(optionValue);
 
         auto list = value->getAutoscanListOption();
@@ -1145,7 +1145,7 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
 {
     if (optItem.substr(0, strlen(xpath)) == xpath) {
         std::shared_ptr<TranscodingProfileListOption> value = std::dynamic_pointer_cast<TranscodingProfileListOption>(optionValue);
-        log_info("Updating Transcoding Detail {} {} {}", xpath, optItem, optValue);
+        log_debug("Updating Transcoding Detail {} {} {}", xpath, optItem, optValue);
         std::map<std::string, int> profiles;
         int i = 0;
         for (const auto& entry : value->getTranscodingProfileListOption()->getList()) {
@@ -1155,14 +1155,14 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
                 if (optItem == index) {
                     config->setOrigValue(index, entry.first);
                     value->setKey(entry.first, optValue);
-                    log_info("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->get(optValue)->begin()->first);
+                    log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->get(optValue)->begin()->first);
                     return true;
                 }
                 index = getItemPath(i, ATTR_TRANSCODING_MIMETYPE_PROF_MAP, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_TRANSCODE, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_USING);
                 if (optItem == index) {
                     log_error("Cannot change profile name in Transcoding Detail {} {}", index, entry.second->begin()->first);
                     //value->setKey(entry.first, optValue);
-                    //log_info("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->get(optValue)->begin()->first);
+                    //log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->get(optValue)->begin()->first);
                     return false;
                 }
                 i++;
@@ -1175,14 +1175,14 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
             if (optItem == index) {
                 log_error("Cannot change profile name in Transcoding Detail {} {}", index, entry->getName());
                 //value->setKey(entry.first, optValue);
-                //log_info("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->get(optValue)->begin()->first);
+                //log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->get(optValue)->begin()->first);
                 return false;
             }
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED);
             if (optItem == index) {
                 config->setOrigValue(index, entry->getEnabled());
                 entry->setEnabled(findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED)->checkValue(optValue));
-                log_info("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getEnabled());
+                log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getEnabled());
                 return true;
             }
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_TYPE);
@@ -1191,7 +1191,7 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
                 if (findConfigSetup<ConfigEnumSetup<transcoding_type_t>>(ATTR_TRANSCODING_PROFILES_PROFLE_TYPE)->checkEnumValue(optValue, type)) {
                     config->setOrigValue(index, entry->getType());
                     entry->setType(type);
-                    log_info("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getType());
+                    log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getType());
                     return true;
                 }
             }
@@ -1200,7 +1200,7 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
                 if (findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_MIMETYPE)->checkValue(optValue)) {
                     config->setOrigValue(index, entry->getTargetMimeType());
                     entry->setTargetMimeType(optValue);
-                    log_info("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getTargetMimeType());
+                    log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getTargetMimeType());
                     return true;
                 }
             }
@@ -1209,7 +1209,7 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
                 if (findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_RES)->checkValue(optValue)) {
                     config->setOrigValue(index, entry->getAttributes()[MetadataHandler::getResAttrName(R_RESOLUTION)]);
                     entry->getAttributes()[MetadataHandler::getResAttrName(R_RESOLUTION)] = optValue;
-                    log_info("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getAttributes()[MetadataHandler::getResAttrName(R_RESOLUTION)]);
+                    log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getAttributes()[MetadataHandler::getResAttrName(R_RESOLUTION)]);
                     return true;
                 }
             }
@@ -1217,56 +1217,56 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
             if (optItem == index) {
                 config->setOrigValue(index, entry->acceptURL());
                 entry->setAcceptURL(findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_ACCURL)->checkValue(optValue));
-                log_info("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->acceptURL());
+                log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->acceptURL());
                 return true;
             }
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_SAMPFREQ);
             if (optItem == index) {
                 config->setOrigValue(index, entry->getSampleFreq());
                 entry->setSampleFreq(findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_SAMPFREQ)->checkIntValue(optValue));
-                log_info("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getSampleFreq());
+                log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getSampleFreq());
                 return true;
             }
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_NRCHAN);
             if (optItem == index) {
                 config->setOrigValue(index, entry->getNumChannels());
                 entry->setNumChannels(findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_NRCHAN)->checkIntValue(optValue));
-                log_info("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getNumChannels());
+                log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getNumChannels());
                 return true;
             }
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_HIDEORIG);
             if (optItem == index) {
                 config->setOrigValue(index, entry->hideOriginalResource());
                 entry->setHideOriginalResource(findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_HIDEORIG)->checkValue(optValue));
-                log_info("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->hideOriginalResource());
+                log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->hideOriginalResource());
                 return true;
             }
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_THUMB);
             if (optItem == index) {
                 config->setOrigValue(index, entry->isThumbnail());
                 entry->setThumbnail(findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_THUMB)->checkValue(optValue));
-                log_info("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->isThumbnail());
+                log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->isThumbnail());
                 return true;
             }
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_FIRST);
             if (optItem == index) {
                 config->setOrigValue(index, entry->firstResource());
                 entry->setFirstResource(findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_FIRST)->checkValue(optValue));
-                log_info("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->firstResource());
+                log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->firstResource());
                 return true;
             }
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_ACCOGG);
             if (optItem == index) {
                 config->setOrigValue(index, entry->isTheora());
                 entry->setTheora(findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_ACCOGG)->checkValue(optValue));
-                log_info("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->isTheora());
+                log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->isTheora());
                 return true;
             }
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_USECHUNKEDENC);
             if (optItem == index) {
                 config->setOrigValue(index, entry->getChunked());
                 entry->setChunked(findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_USECHUNKEDENC)->checkValue(optValue));
-                log_info("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getChunked());
+                log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getChunked());
                 return true;
             }
 
@@ -1312,7 +1312,7 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
                 if (findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND)->checkValue(optValue)) {
                     config->setOrigValue(index, entry->getCommand().string());
                     entry->setCommand(optValue);
-                    log_info("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getCommand().string());
+                    log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getCommand().string());
                     return true;
                 }
             }
@@ -1321,7 +1321,7 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
                 if (findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS)->checkValue(optValue)) {
                     config->setOrigValue(index, entry->getArguments());
                     entry->setArguments(optValue);
-                    log_info("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getArguments());
+                    log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getArguments());
                     return true;
                 }
             }
@@ -1422,7 +1422,7 @@ bool ConfigClientSetup::updateItem(size_t i, const std::string& optItem, std::sh
             int flag = std::accumulate(flagsVector.begin(), flagsVector.end(), 0, [](int flg, const auto& i) //
                 { return flg | ClientConfig::remapFlag(i); });
             entry->setFlags(flag);
-            log_info("New Client Detail {} {}", index, ClientConfig::mapFlags(config->getClientConfigListOption(option)->get(i)->getFlags()));
+            log_debug("New Client Detail {} {}", index, ClientConfig::mapFlags(config->getClientConfigListOption(option)->get(i)->getFlags()));
             return true;
         }
     }
@@ -1432,7 +1432,7 @@ bool ConfigClientSetup::updateItem(size_t i, const std::string& optItem, std::sh
             config->setOrigValue(index, entry->getIp());
         if (findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_IP)->checkValue(optValue)) {
             entry->setIp(optValue);
-            log_info("New Client Detail {} {}", index, config->getClientConfigListOption(option)->get(i)->getIp());
+            log_debug("New Client Detail {} {}", index, config->getClientConfigListOption(option)->get(i)->getIp());
             return true;
         }
     }
@@ -1442,7 +1442,7 @@ bool ConfigClientSetup::updateItem(size_t i, const std::string& optItem, std::sh
             config->setOrigValue(index, entry->getUserAgent());
         if (findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_USERAGENT)->checkValue(optValue)) {
             entry->setUserAgent(optValue);
-            log_info("New Client Detail {} {}", index, config->getClientConfigListOption(option)->get(i)->getUserAgent());
+            log_debug("New Client Detail {} {}", index, config->getClientConfigListOption(option)->get(i)->getUserAgent());
             return true;
         }
     }
@@ -1452,7 +1452,7 @@ bool ConfigClientSetup::updateItem(size_t i, const std::string& optItem, std::sh
 bool ConfigClientSetup::updateDetail(const std::string& optItem, std::string& optValue, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments)
 {
     if (optItem.substr(0, strlen(xpath)) == xpath) {
-        log_info("Updating Client Detail {} {} {}", xpath, optItem, optValue);
+        log_debug("Updating Client Detail {} {} {}", xpath, optItem, optValue);
         std::shared_ptr<ClientConfigListOption> value = std::dynamic_pointer_cast<ClientConfigListOption>(optionValue);
         auto list = value->getClientConfigListOption();
         auto i = extractIndex(optItem);
@@ -1576,7 +1576,7 @@ bool ConfigDirectorySetup::updateItem(size_t i, const std::string& optItem, std:
         auto pathValue = optValue;
         if (findConfigSetup<ConfigPathSetup>(ATTR_DIRECTORIES_TWEAK_LOCATION)->checkPathValue(optValue, pathValue)) {
             entry->setLocation(pathValue);
-            log_info("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getLocation().string());
+            log_debug("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getLocation().string());
             return true;
         }
     }
@@ -1585,7 +1585,7 @@ bool ConfigDirectorySetup::updateItem(size_t i, const std::string& optItem, std:
         if (entry->getOrig())
             config->setOrigValue(index, entry->getInherit());
         entry->setInherit(findConfigSetup<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_INHERIT)->checkValue(optValue));
-        log_info("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getInherit());
+        log_debug("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getInherit());
         return true;
     }
     index = getItemPath(i, ATTR_DIRECTORIES_TWEAK_RECURSIVE);
@@ -1593,7 +1593,7 @@ bool ConfigDirectorySetup::updateItem(size_t i, const std::string& optItem, std:
         if (entry->getOrig())
             config->setOrigValue(index, entry->getRecursive());
         entry->setRecursive(findConfigSetup<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_RECURSIVE)->checkValue(optValue));
-        log_info("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getRecursive());
+        log_debug("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getRecursive());
         return true;
     }
     index = getItemPath(i, ATTR_DIRECTORIES_TWEAK_HIDDEN);
@@ -1601,7 +1601,7 @@ bool ConfigDirectorySetup::updateItem(size_t i, const std::string& optItem, std:
         if (entry->getOrig())
             config->setOrigValue(index, entry->getHidden());
         entry->setHidden(findConfigSetup<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_HIDDEN)->checkValue(optValue));
-        log_info("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getHidden());
+        log_debug("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getHidden());
         return true;
     }
     index = getItemPath(i, ATTR_DIRECTORIES_TWEAK_CASE_SENSITIVE);
@@ -1609,7 +1609,7 @@ bool ConfigDirectorySetup::updateItem(size_t i, const std::string& optItem, std:
         if (entry->getOrig())
             config->setOrigValue(index, entry->getCaseSensitive());
         entry->setCaseSensitive(findConfigSetup<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_CASE_SENSITIVE)->checkValue(optValue));
-        log_info("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getCaseSensitive());
+        log_debug("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getCaseSensitive());
         return true;
     }
     index = getItemPath(i, ATTR_DIRECTORIES_TWEAK_FOLLOW_SYMLINKS);
@@ -1617,7 +1617,7 @@ bool ConfigDirectorySetup::updateItem(size_t i, const std::string& optItem, std:
         if (entry->getOrig())
             config->setOrigValue(index, entry->getFollowSymlinks());
         entry->setFollowSymlinks(findConfigSetup<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_FOLLOW_SYMLINKS)->checkValue(optValue));
-        log_info("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getFollowSymlinks());
+        log_debug("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getFollowSymlinks());
         return true;
     }
     index = getItemPath(i, ATTR_DIRECTORIES_TWEAK_FANART_FILE);
@@ -1626,7 +1626,7 @@ bool ConfigDirectorySetup::updateItem(size_t i, const std::string& optItem, std:
             config->setOrigValue(index, entry->getFanArtFile());
         if (findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_FANART_FILE)->checkValue(optValue)) {
             entry->setFanArtFile(optValue);
-            log_info("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getFanArtFile());
+            log_debug("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getFanArtFile());
             return true;
         }
     }
@@ -1636,7 +1636,7 @@ bool ConfigDirectorySetup::updateItem(size_t i, const std::string& optItem, std:
             config->setOrigValue(index, entry->getResourceFile());
         if (findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_RESOURCE_FILE)->checkValue(optValue)) {
             entry->setResourceFile(optValue);
-            log_info("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getResourceFile());
+            log_debug("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getResourceFile());
             return true;
         }
     }
@@ -1646,7 +1646,7 @@ bool ConfigDirectorySetup::updateItem(size_t i, const std::string& optItem, std:
             config->setOrigValue(index, entry->getSubTitleFile());
         if (findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_SUBTILTE_FILE)->checkValue(optValue)) {
             entry->setSubTitleFile(optValue);
-            log_info("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getSubTitleFile());
+            log_debug("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getSubTitleFile());
             return true;
         }
     }
@@ -1657,7 +1657,7 @@ bool ConfigDirectorySetup::updateItem(size_t i, const std::string& optItem, std:
 bool ConfigDirectorySetup::updateDetail(const std::string& optItem, std::string& optValue, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments)
 {
     if (optItem.substr(0, strlen(xpath)) == xpath) {
-        log_info("Updating Client Detail {} {} {}", xpath, optItem, optValue);
+        log_debug("Updating Client Detail {} {} {}", xpath, optItem, optValue);
         std::shared_ptr<DirectoryTweakOption> value = std::dynamic_pointer_cast<DirectoryTweakOption>(optionValue);
         auto list = value->getDirectoryTweakOption();
         auto i = extractIndex(optItem);

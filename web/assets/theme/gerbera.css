@@ -237,6 +237,8 @@ body,
 }
 
 #config {
+    display: flex;
+    flex: 1;
     height: calc( 100% - 115px );
 }
 
@@ -271,7 +273,7 @@ body,
 }
 
 #configgrid {
-    height: calc(100% - 60px);
+    height: calc( 100% - 60px );
     overflow-y: auto;
     background-color: #fefefe;
 }
@@ -491,7 +493,14 @@ body,
 .grb-trail-edit:hover,
 .grb-trail-delete:hover,
 .grb-trail-delete-all:hover {
+    cursor: pointer;
     text-decoration: underline;
+}
+
+@media (max-width: 1110px) {
+    .grb-trail-button span {
+        display: none;
+    }
 }
 
 .overflow {

@@ -44,7 +44,6 @@ web::configLoad::configLoad(std::shared_ptr<Config> config, std::shared_ptr<Stor
     try {
         if (this->storage != nullptr) {
             dbEntries = this->storage->getConfigValues();
-    log_info("Loading {} configuration items from storage", dbEntries.size());
         } else {
             log_error("configLoad storage missing");
         }
