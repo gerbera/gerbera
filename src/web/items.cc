@@ -35,12 +35,12 @@
 
 #include "autoscan.h"
 #include "cds_objects.h"
-#include "storage/storage.h"
+#include "database/database.h"
 #include "upnp_xml.h"
 
-web::items::items(std::shared_ptr<Config> config, std::shared_ptr<Storage> storage,
+web::items::items(std::shared_ptr<Config> config, std::shared_ptr<Database> database,
     std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
-    : WebRequestHandler(std::move(config), std::move(storage), std::move(content), std::move(sessionManager))
+    : WebRequestHandler(std::move(config), std::move(database), std::move(content), std::move(sessionManager))
 {
 }
 
@@ -63,14 +63,14 @@ void web::items::process()
     xml2JsonHints->setFieldType("title", "string");
     items.append_attribute("parent_id") = parentID;
 
-    auto obj = storage->loadObject(parentID);
+    auto obj = database->loadObject(parentID);
     auto param = std::make_unique<BrowseParam>(parentID, BROWSE_DIRECT_CHILDREN | BROWSE_ITEMS);
     param->setRange(start, count);
 
     if ((obj->getClass() == UPNP_DEFAULT_CLASS_MUSIC_ALBUM) || (obj->getClass() == UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER))
         param->setFlag(BROWSE_TRACK_SORT);
 
-    auto arr = storage->browse(param);
+    auto arr = database->browse(param);
 
     std::string location = obj->getVirtualPath();
     if (!location.empty())
@@ -85,7 +85,7 @@ void web::items::process()
     bool protectItems = false;
     std::string autoscanMode = "none";
 
-    auto adir = storage->getAutoscanDirectory(parentID);
+    auto adir = database->getAutoscanDirectory(parentID);
     int autoscanType = 0;
     if (adir != nullptr) {
         autoscanType = adir->persistent() ? 2 : 1;
@@ -96,10 +96,10 @@ void web::items::process()
     if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
         int startpoint_id = INVALID_OBJECT_ID;
         if (autoscanType == 0) {
-            auto pathIDs = storage->getPathIDs(parentID);
+            auto pathIDs = database->getPathIDs(parentID);
             if (pathIDs != nullptr) {
                 for (int pathId : *pathIDs) {
-                    auto adir = storage->getAutoscanDirectory(pathId);
+                    auto adir = database->getAutoscanDirectory(pathId);
                     if (adir != nullptr && adir->getRecursive()) {
                         startpoint_id = pathId;
                         break;
@@ -111,7 +111,7 @@ void web::items::process()
         }
 
         if (startpoint_id != INVALID_OBJECT_ID) {
-            std::shared_ptr<AutoscanDirectory> adir = storage->getAutoscanDirectory(startpoint_id);
+            std::shared_ptr<AutoscanDirectory> adir = database->getAutoscanDirectory(startpoint_id);
             if (adir != nullptr && adir->getScanMode() == ScanMode::INotify) {
                 protectItems = true;
                 if (autoscanType == 0 || adir->persistent())

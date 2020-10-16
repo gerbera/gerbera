@@ -2,7 +2,7 @@
     
     MediaTomb - http://www.mediatomb.cc/
     
-    sql_storage.h - this file is part of MediaTomb.
+    sql_database.h - this file is part of MediaTomb.
     
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -27,7 +27,7 @@
     $Id$
 */
 
-/// \file sql_storage.h
+/// \file sql_database.h
 
 #ifndef __SQL_STORAGE_H__
 #define __SQL_STORAGE_H__
@@ -36,7 +36,7 @@
 #include <sstream>
 #include <unordered_set>
 
-#include "storage.h"
+#include "database.h"
 
 // forward declaration
 class SQLResult;
@@ -75,7 +75,7 @@ public:
     virtual unsigned long long getNumRows() const = 0;
 };
 
-class SQLStorage : public Storage {
+class SQLDatabase : public Database {
 public:
     /* methods to override in subclasses */
     virtual std::string quote(std::string str) const = 0;
@@ -163,8 +163,8 @@ public:
     void clearFlagInDB(int flag) override;
 
 protected:
-    explicit SQLStorage(std::shared_ptr<Config> config);
-    //virtual ~SQLStorage();
+    explicit SQLDatabase(std::shared_ptr<Config> config);
+    //virtual ~SQLDatabase();
     void init() override;
 
     void doMetadataMigration() override;

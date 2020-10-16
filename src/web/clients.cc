@@ -26,15 +26,15 @@
 #include "pages.h" // API
 
 #include "config/client_config.h"
-#include "storage/storage.h"
+#include "database/database.h"
 #include "upnp_xml.h"
 #include "util/upnp_clients.h"
 
 #include <utility>
 
-web::clients::clients(std::shared_ptr<Config> config, std::shared_ptr<Storage> storage,
+web::clients::clients(std::shared_ptr<Config> config, std::shared_ptr<Database> database,
     std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
-    : WebRequestHandler(std::move(config), std::move(storage), std::move(content), std::move(sessionManager))
+    : WebRequestHandler(std::move(config), std::move(database), std::move(content), std::move(sessionManager))
 {
 }
 

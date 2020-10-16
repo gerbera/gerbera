@@ -52,7 +52,7 @@
 #include "client_config.h"
 #include "config_options.h"
 #include "metadata/metadata_handler.h"
-#include "storage/storage.h"
+#include "database/database.h"
 #include "transcoding/transcoding.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
@@ -237,7 +237,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
                                  "only one database driver may be active at a time");
 
     if ((sqlite3_en == "no") && (mysql_en == "no"))
-        throw std::runtime_error("You disabled both, sqlite3 and mysql but "
+        throw std::runtime_error("You disabled both sqlite3 and mysql but "
                                  "one database driver must be active");
 
 #ifdef HAVE_MYSQL
@@ -274,7 +274,7 @@ void ConfigManager::load(const fs::path& filename, const fs::path& userHome)
     }
 #else
     if (mysql_en == "yes") {
-        throw std::runtime_error("You enabled MySQL storage in configuration, "
+        throw std::runtime_error("You enabled MySQL database in configuration, "
                                  "however this version of Gerbera was compiled "
                                  "without MySQL support!");
     }
@@ -1696,10 +1696,10 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::createTranscodingProfileL
     return list;
 }
 
-std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNode(const std::shared_ptr<Storage>& storage, const pugi::xml_node& element,
+std::shared_ptr<AutoscanList> ConfigManager::createAutoscanListFromNode(const std::shared_ptr<Database>& database, const pugi::xml_node& element,
     ScanMode scanmode)
 {
-    auto list = std::make_shared<AutoscanList>(storage);
+    auto list = std::make_shared<AutoscanList>(database);
 
     if (element == nullptr)
         return list;

@@ -38,7 +38,7 @@
 #include "content_manager.h"
 #include "metadata/metadata_handler.h"
 #include "script.h"
-#include "storage/storage.h"
+#include "database/database.h"
 #include "util/string_converter.h"
 
 //extern "C" {
@@ -131,7 +131,7 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
                     return 0;
                 }
 
-                auto mainObj = self->getStorage()->loadObject(pcd_id);
+                auto mainObj = self->getDatabase()->loadObject(pcd_id);
                 cds_obj = self->dukObject2cdsObject(mainObj);
             } else
                 cds_obj = self->dukObject2cdsObject(self->getProcessedObject());

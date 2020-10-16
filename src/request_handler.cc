@@ -35,9 +35,9 @@
 
 #include "util/tools.h"
 
-RequestHandler::RequestHandler(std::shared_ptr<Config> config, std::shared_ptr<Storage> storage)
+RequestHandler::RequestHandler(std::shared_ptr<Config> config, std::shared_ptr<Database> database)
     : config(std::move(config))
-    , storage(std::move(storage))
+    , database(std::move(database))
 {
 }
 

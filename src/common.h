@@ -305,7 +305,7 @@
 #define INVALID_OBJECT_ID_2 (-666)
 #define CHECK_SOCKET (-666)
 
-// storage
+// database
 #define LOC_DIR_PREFIX 'D'
 #define LOC_FILE_PREFIX 'F'
 #define LOC_VIRT_PREFIX 'V'

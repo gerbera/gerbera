@@ -39,8 +39,8 @@
 #include "server.h"
 #include "util/tools.h"
 
-ServeRequestHandler::ServeRequestHandler(std::shared_ptr<Config> config, std::shared_ptr<Storage> storage)
-    : RequestHandler(std::move(config), std::move(storage))
+ServeRequestHandler::ServeRequestHandler(std::shared_ptr<Config> config, std::shared_ptr<Database> database)
+    : RequestHandler(std::move(config), std::move(database))
 {
 }
 

@@ -39,7 +39,7 @@
 #include "content_manager.h"
 #include "js_functions.h"
 #include "runtime.h"
-#include "storage/storage.h"
+#include "database/database.h"
 
 #define ONE_TEXTLINE_BYTES 1024
 
@@ -80,8 +80,8 @@ js_getCdsObject(duk_context* ctx)
     if (path.empty())
         return 0;
 
-    auto storage = self->getStorage();
-    auto obj = storage->findObjectByPath(path);
+    auto database = self->getDatabase();
+    auto obj = database->findObjectByPath(path);
     if (obj == nullptr) {
         auto cm = self->getContent();
         obj = cm->createObjectFromFile(path);
@@ -95,10 +95,10 @@ js_getCdsObject(duk_context* ctx)
 } // extern "C"
 
 PlaylistParserScript::PlaylistParserScript(const std::shared_ptr<Config>& config,
-    std::shared_ptr<Storage> storage,
+    std::shared_ptr<Database> database,
     std::shared_ptr<ContentManager> content,
     const std::shared_ptr<Runtime>& runtime)
-    : Script(config, std::move(storage), std::move(content), runtime, "playlist")
+    : Script(config, std::move(database), std::move(content), runtime, "playlist")
 {
     currentHandle = nullptr;
     currentObjectID = INVALID_OBJECT_ID;

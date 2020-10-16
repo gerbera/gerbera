@@ -352,10 +352,10 @@ void FallbackLayout::addATrailers(const std::shared_ptr<CdsObject>& obj)
 #endif
 
 FallbackLayout::FallbackLayout(std::shared_ptr<Config> config,
-    std::shared_ptr<Storage> storage,
+    std::shared_ptr<Database> database,
     std::shared_ptr<ContentManager> content)
     : config(std::move(config))
-    , storage(std::move(storage))
+    , database(std::move(database))
     , content(std::move(content))
 {
 #ifdef ENABLE_PROFILING
@@ -369,7 +369,7 @@ void FallbackLayout::processCdsObject(std::shared_ptr<CdsObject> obj, fs::path r
 #ifdef ENABLE_PROFILING
     PROF_START(&layout_profiling);
 #endif
-    auto clone = CdsObject::createObject(storage, obj->getObjectType());
+    auto clone = CdsObject::createObject(database, obj->getObjectType());
     obj->copyTo(clone);
     clone->setVirtual(true);
 

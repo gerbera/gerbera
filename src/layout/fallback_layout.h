@@ -44,12 +44,12 @@
 class CdsObject;
 class Config;
 class ContentManager;
-class Storage;
+class Database;
 
 class FallbackLayout : public Layout {
 public:
     FallbackLayout(std::shared_ptr<Config> config,
-        std::shared_ptr<Storage> storage,
+        std::shared_ptr<Database> database,
         std::shared_ptr<ContentManager> content);
     void processCdsObject(std::shared_ptr<CdsObject> obj, fs::path rootpath) override;
 #ifdef ENABLE_PROFILING
@@ -69,7 +69,7 @@ protected:
 #endif
 
     std::shared_ptr<Config> config;
-    std::shared_ptr<Storage> storage;
+    std::shared_ptr<Database> database;
     std::shared_ptr<ContentManager> content;
 
 #ifdef ENABLE_PROFILING

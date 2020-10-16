@@ -39,11 +39,11 @@
 
 // forward declaration
 class Config;
-class Storage;
+class Database;
 
 class RequestHandler {
 public:
-    RequestHandler(std::shared_ptr<Config> config, std::shared_ptr<Storage> storage);
+    RequestHandler(std::shared_ptr<Config> config, std::shared_ptr<Database> database);
 
     virtual void getInfo(const char* filename, UpnpFileInfo* info) = 0;
 
@@ -66,7 +66,7 @@ public:
 
 protected:
     std::shared_ptr<Config> config;
-    std::shared_ptr<Storage> storage;
+    std::shared_ptr<Database> database;
 };
 
 #endif // __REQUEST_HANDLER_H__

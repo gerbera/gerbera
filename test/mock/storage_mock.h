@@ -4,14 +4,14 @@
 #include <gtest/gtest.h>
 
 #include "config/config.h"
-#include "storage/storage.h"
+#include "database/database.h"
 
 using namespace ::testing;
 
-class StorageMock : public Storage {
+class StorageMock : public Database {
 public:
     StorageMock(std::shared_ptr<Config> config)
-        : Storage(config)
+        : Database(config)
     {
     }
 
@@ -76,7 +76,7 @@ public:
     void doMetadataMigration() override { }
 
 protected:
-    std::shared_ptr<Storage> getSelf() override { return nullptr; }
+    std::shared_ptr<Database> getSelf() override { return nullptr; }
 
 public:
     // mock data

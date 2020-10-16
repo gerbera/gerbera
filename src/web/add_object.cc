@@ -42,9 +42,9 @@
 #include "server.h"
 #include "util/tools.h"
 
-web::addObject::addObject(std::shared_ptr<Config> config, std::shared_ptr<Storage> storage,
+web::addObject::addObject(std::shared_ptr<Config> config, std::shared_ptr<Database> database,
     std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
-    : WebRequestHandler(std::move(config), std::move(storage), std::move(content), std::move(sessionManager))
+    : WebRequestHandler(std::move(config), std::move(database), std::move(content), std::move(sessionManager))
 {
 }
 
@@ -78,7 +78,7 @@ std::shared_ptr<CdsObject> web::addObject::addItem(int parentID, std::shared_ptr
 
 std::shared_ptr<CdsObject> web::addObject::addActiveItem(int parentID)
 {
-    auto item = std::make_shared<CdsActiveItem>(storage);
+    auto item = std::make_shared<CdsActiveItem>(database);
 
     item->setAction(param("action"));
 
@@ -180,7 +180,7 @@ void web::addObject::process()
             throw_std_runtime_error("no location given");
         if (!isRegularFile(location, ec))
             throw_std_runtime_error("file not found");
-        obj = this->addItem(parentID, std::make_shared<CdsItem>(storage));
+        obj = this->addItem(parentID, std::make_shared<CdsItem>(database));
         allow_fifo = true;
     } else if (obj_type == STRING_OBJECT_TYPE_ACTIVE_ITEM) {
         if (param("action").empty())
@@ -194,11 +194,11 @@ void web::addObject::process()
     } else if (obj_type == STRING_OBJECT_TYPE_EXTERNAL_URL) {
         if (location.empty())
             throw_std_runtime_error("No URL given");
-        obj = this->addUrl(parentID, std::make_shared<CdsItemExternalURL>(storage), true);
+        obj = this->addUrl(parentID, std::make_shared<CdsItemExternalURL>(database), true);
     } else if (obj_type == STRING_OBJECT_TYPE_INTERNAL_URL) {
         if (location.empty())
             throw_std_runtime_error("No URL given");
-        obj = this->addUrl(parentID, std::make_shared<CdsItemInternalURL>(storage), false);
+        obj = this->addUrl(parentID, std::make_shared<CdsItemInternalURL>(database), false);
     } else {
         throw_std_runtime_error("unknown object type: " + obj_type);
     }

@@ -30,7 +30,7 @@ Gerbera - https://gerbera.io/
 
 class DeviceDescriptionHandler : public RequestHandler {
 public:
-    explicit DeviceDescriptionHandler(std::shared_ptr<Config> config, std::shared_ptr<Storage> storage,
+    explicit DeviceDescriptionHandler(std::shared_ptr<Config> config, std::shared_ptr<Database> database,
         UpnpXMLBuilder* xmlBuilder);
 
     void getInfo(const char* filename, UpnpFileInfo* info) override;

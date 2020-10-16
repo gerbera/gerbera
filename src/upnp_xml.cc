@@ -36,14 +36,14 @@
 #include "config/config_manager.h"
 #include "metadata/metadata_handler.h"
 #include "server.h"
-#include "storage/storage.h"
+#include "database/database.h"
 #include "transcoding/transcoding.h"
 
 UpnpXMLBuilder::UpnpXMLBuilder(std::shared_ptr<Config> config,
-    std::shared_ptr<Storage> storage,
+    std::shared_ptr<Database> database,
     std::string virtualUrl, std::string presentationURL)
     : config(std::move(config))
-    , storage(std::move(storage))
+    , database(std::move(database))
     , virtualURL(std::move(virtualUrl))
     , presentationURL(std::move(presentationURL))
 {
@@ -152,7 +152,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, bool re
                 result.append_child("upnp:date").append_child(pugi::node_pcdata).set_value(date.c_str());
         }
         if (upnp_class == UPNP_DEFAULT_CLASS_MUSIC_ALBUM || upnp_class == UPNP_DEFAULT_CLASS_CONTAINER) {
-            std::string aa_id = storage->findFolderImage(cont->getID(), std::string());
+            std::string aa_id = database->findFolderImage(cont->getID(), std::string());
 
             if (!aa_id.empty()) {
                 log_debug("Using folder image as artwork for container");
@@ -164,7 +164,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, bool re
 
             } else if (upnp_class == UPNP_DEFAULT_CLASS_MUSIC_ALBUM) {
                 // try to find the first track and use its artwork
-                auto items = storage->getObjects(cont->getID(), true);
+                auto items = database->getObjects(cont->getID(), true);
                 if (items != nullptr) {
 
                     bool artAdded = false;
@@ -172,7 +172,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, bool re
                         if (artAdded)
                             break;
 
-                        auto obj = storage->loadObject(id);
+                        auto obj = database->loadObject(id);
                         if (obj->getClass() != UPNP_DEFAULT_CLASS_MUSIC_TRACK)
                             continue;
 
@@ -664,7 +664,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
 
         // ok, here is the tricky part:
         // we add transcoded resources dynamically, that means that when
-        // the object is loaded from storage those resources are not there;
+        // the object is loaded from database those resources are not there;
         // this again means, that we have to add the res_id parameter
         // accounting for those dynamic resources: i.e. the parameter should
         // still only count the "real" resources, because that's what the

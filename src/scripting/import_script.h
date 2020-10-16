@@ -41,12 +41,12 @@
 class Config;
 class ContentManager;
 class Runtime;
-class Storage;
+class Database;
 
 class ImportScript : public Script {
 public:
     ImportScript(const std::shared_ptr<Config>& config,
-        std::shared_ptr<Storage> storage,
+        std::shared_ptr<Database> database,
         std::shared_ptr<ContentManager> content,
         const std::shared_ptr<Runtime>& runtime);
     ~ImportScript() override;

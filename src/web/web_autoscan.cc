@@ -35,16 +35,16 @@
 
 #include "autoscan.h"
 #include "content_manager.h"
-#include "storage/storage.h"
+#include "database/database.h"
 
 static bool WebAutoscanProcessListComparator(const std::shared_ptr<AutoscanDirectory>& a1, const std::shared_ptr<AutoscanDirectory>& a2)
 {
     return strcmp(a1->getLocation().c_str(), a2->getLocation().c_str()) < 0;
 }
 
-web::autoscan::autoscan(std::shared_ptr<Config> config, std::shared_ptr<Storage> storage,
+web::autoscan::autoscan(std::shared_ptr<Config> config, std::shared_ptr<Database> database,
     std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
-    : WebRequestHandler(std::move(config), std::move(storage), std::move(content), std::move(sessionManager))
+    : WebRequestHandler(std::move(config), std::move(database), std::move(content), std::move(sessionManager))
 {
 }
 
@@ -78,7 +78,7 @@ void web::autoscan::process()
         } else {
             autoscan.append_child("from_fs").append_child(pugi::node_pcdata).set_value("0");
             autoscan.append_child("object_id").append_child(pugi::node_pcdata).set_value(objID.c_str());
-            std::shared_ptr<AutoscanDirectory> adir = storage->getAutoscanDirectory(intParam("object_id"));
+            std::shared_ptr<AutoscanDirectory> adir = database->getAutoscanDirectory(intParam("object_id"));
             autoscan2XML(adir, &autoscan);
         }
     } else if (action == "as_edit_save") {

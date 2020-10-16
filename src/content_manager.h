@@ -68,7 +68,7 @@ class PlaylistParserScript;
 
 // forward declaration
 class Config;
-class Storage;
+class Database;
 class UpdateManager;
 namespace web {
 class SessionManager;
@@ -143,7 +143,7 @@ public:
 
 class ContentManager : public Timer::Subscriber, public std::enable_shared_from_this<ContentManager> {
 public:
-    ContentManager(const std::shared_ptr<Config>& config, const std::shared_ptr<Storage>& storage,
+    ContentManager(const std::shared_ptr<Config>& config, const std::shared_ptr<Database>& database,
         std::shared_ptr<UpdateManager> update_manager, std::shared_ptr<web::SessionManager> session_manager,
         std::shared_ptr<Timer> timer, std::shared_ptr<TaskProcessor> task_processor,
         std::shared_ptr<Runtime> scripting_runtime, std::shared_ptr<LastFm> last_fm);
@@ -319,7 +319,7 @@ protected:
 #endif
 
     std::shared_ptr<Config> config;
-    std::shared_ptr<Storage> storage;
+    std::shared_ptr<Database> database;
     std::shared_ptr<UpdateManager> update_manager;
     std::shared_ptr<web::SessionManager> session_manager;
     std::shared_ptr<Timer> timer;
@@ -361,7 +361,7 @@ protected:
     /* for recursive addition */
     void addRecursive(const fs::path& path, bool hidden, const std::shared_ptr<CMAddFileTask>& task);
     bool isLink(const fs::path& path, bool allowLinks);
-    std::shared_ptr<CdsObject> createSingleItem(const fs::path& path, fs::path& rootPath, bool checkStorage, bool processExisting, const std::shared_ptr<CMAddFileTask>& task);
+    std::shared_ptr<CdsObject> createSingleItem(const fs::path& path, fs::path& rootPath, bool checkDatabase, bool processExisting, const std::shared_ptr<CMAddFileTask>& task);
     bool updateAttachedResources(const char* obj, const std::string& parentPath, bool all);
     std::string extension2mimetype(std::string extension);
     std::string mimetype2upnpclass(const std::string& mimeType);

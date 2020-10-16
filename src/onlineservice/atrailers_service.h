@@ -44,14 +44,14 @@
 // forward declaration
 class Config;
 class ContentManager;
-class Storage;
+class Database;
 
 /// \brief This is an interface for all online services, the function
 /// handles adding/refreshing content in the database.
 class ATrailersService : public OnlineService {
 public:
     ATrailersService(const std::shared_ptr<Config>& config,
-        std::shared_ptr<Storage> storage,
+        std::shared_ptr<Database> database,
         std::shared_ptr<ContentManager> content);
     ~ATrailersService() override;
 
@@ -67,7 +67,7 @@ public:
 
 protected:
     std::shared_ptr<Config> config;
-    std::shared_ptr<Storage> storage;
+    std::shared_ptr<Database> database;
     std::shared_ptr<ContentManager> content;
 
     // the handle *must never be used from multiple threads*

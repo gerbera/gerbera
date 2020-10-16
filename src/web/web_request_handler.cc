@@ -45,10 +45,10 @@
 namespace web {
 
 WebRequestHandler::WebRequestHandler(std::shared_ptr<Config> config,
-    std::shared_ptr<Storage> storage,
+    std::shared_ptr<Database> database,
     std::shared_ptr<ContentManager> content,
     std::shared_ptr<SessionManager> sessionManager)
-    : RequestHandler(std::move(config), std::move(storage))
+    : RequestHandler(std::move(config), std::move(database))
     , content(std::move(content))
     , sessionManager(std::move(sessionManager))
     , checkRequestCalled(false)
@@ -161,7 +161,7 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(enum UpnpOpenFileMode mode)
     } catch (const SessionException& e) {
         error = e.what();
         error_code = 400;
-    } catch (const StorageException& e) {
+    } catch (const DatabaseException& e) {
         error = e.getUserMessage();
         error_code = 500;
     } catch (const std::runtime_error& e) {

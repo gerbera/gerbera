@@ -83,7 +83,7 @@ public:
     void access() { getTimespecNow(&last_access); }
 
     /// \brief Returns the updateIDs, collected for the sessions,
-    /// and flushes the storage for the ids
+    /// and flushes the database for the ids
     /// \return the container ids to be updated as String (comma separated)
     std::string getUIUpdateIDs();
 

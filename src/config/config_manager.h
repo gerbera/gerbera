@@ -50,7 +50,7 @@ class ClientConfig;
 enum class ScanMode;
 enum class ClientType;
 class ConfigOption;
-class Storage;
+class Database;
 class TranscodingProfileList;
 
 class ConfigManager : public Config {
@@ -176,7 +176,7 @@ protected:
     /// \brief Creates an array of AutoscanDirectory objects from a XML nodeset.
     /// \param element starting element of the nodeset.
     /// \param scanmode add only directories with the specified scanmode to the array
-    std::shared_ptr<AutoscanList> createAutoscanListFromNode(const std::shared_ptr<Storage>& storage, const pugi::xml_node& element,
+    std::shared_ptr<AutoscanList> createAutoscanListFromNode(const std::shared_ptr<Database>& database, const pugi::xml_node& element,
         ScanMode scanmode);
 
     /// \brief Creates an array of ClientConfig objects from a XML nodeset.
