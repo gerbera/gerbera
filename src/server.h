@@ -41,7 +41,7 @@
 
 // forward declaration
 class Config;
-class Storage;
+class Database;
 class UpdateManager;
 class Timer;
 namespace web {
@@ -69,7 +69,7 @@ public:
     /// \brief Cleanup routine to shutdown the server.
     ///
     /// Unregisters the device with the SDK, shuts down the
-    /// update manager task, storage task, content manager.
+    /// update manager task, database task, content manager.
     void shutdown();
 
     /// \brief Initializes UPnP portion, only ip or interface can be given
@@ -106,7 +106,7 @@ public:
 
 protected:
     std::shared_ptr<Config> config;
-    std::shared_ptr<Storage> storage;
+    std::shared_ptr<Database> database;
     std::shared_ptr<UpdateManager> update_manager;
     std::shared_ptr<Timer> timer;
     std::shared_ptr<web::SessionManager> session_manager;

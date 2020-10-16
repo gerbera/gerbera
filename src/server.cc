@@ -44,7 +44,7 @@
 #include "config/config_manager.h"
 #include "content_manager.h"
 #include "file_request_handler.h"
-#include "storage/storage.h"
+#include "database/database.h"
 #include "update_manager.h"
 #include "util/task_processor.h"
 #include "util/upnp_clients.h"
@@ -76,7 +76,7 @@ void Server::init()
     curl_global_init(CURL_GLOBAL_ALL);
 #endif
 
-    // initalize what is needed
+    // initialize what is needed
     auto self = shared_from_this();
     timer = std::make_shared<Timer>();
 #ifdef ONLINE_SERVICES
@@ -85,14 +85,14 @@ void Server::init()
 #ifdef HAVE_JS
     scripting_runtime = std::make_shared<Runtime>();
 #endif
-    storage = Storage::createInstance(config, timer);
-    update_manager = std::make_shared<UpdateManager>(storage, self);
+    database = Database::createInstance(config, timer);
+    update_manager = std::make_shared<UpdateManager>(database, self);
     session_manager = std::make_shared<web::SessionManager>(config, timer);
 #ifdef HAVE_LASTFMLIB
     last_fm = std::make_shared<LastFm>(config);
 #endif
     content = std::make_shared<ContentManager>(
-        config, storage, update_manager, session_manager, timer, task_processor, scripting_runtime, last_fm);
+        config, database, update_manager, session_manager, timer, task_processor, scripting_runtime, last_fm);
 }
 
 Server::~Server() { log_debug("Server destroyed"); }
@@ -116,7 +116,7 @@ void Server::run()
 
     int port = config->getIntOption(CFG_SERVER_PORT);
 
-    log_debug("Initialising libupnp with interface: '{}', port: {}", iface.c_str(), port);
+    log_info("Initialising libupnp with interface: '{}', port: {}", iface.c_str(), port);
     const char* IfName = iface.empty() ? nullptr : iface.c_str();
     ret = UpnpInit2(IfName, port);
     if (ret != UPNP_E_SUCCESS) {
@@ -173,7 +173,7 @@ void Server::run()
     }
 
     log_debug("Creating UpnpXMLBuilder");
-    xmlbuilder = std::make_unique<UpnpXMLBuilder>(config, storage, virtualUrl, presentationURL);
+    xmlbuilder = std::make_unique<UpnpXMLBuilder>(config, database, virtualUrl, presentationURL);
 
     // register root device with the library
     auto desc = xmlbuilder->renderDeviceDescription();
@@ -204,11 +204,11 @@ void Server::run()
     }
 
     log_debug("Creating ContentDirectoryService");
-    cds = std::make_unique<ContentDirectoryService>(config, storage, xmlbuilder.get(), rootDeviceHandle,
+    cds = std::make_unique<ContentDirectoryService>(config, database, xmlbuilder.get(), rootDeviceHandle,
         config->getIntOption(CFG_SERVER_UPNP_TITLE_AND_DESC_STRING_LIMIT));
 
     log_debug("Creating ConnectionManagerService");
-    cmgr = std::make_unique<ConnectionManagerService>(config, storage, xmlbuilder.get(), rootDeviceHandle);
+    cmgr = std::make_unique<ConnectionManagerService>(config, database, xmlbuilder.get(), rootDeviceHandle);
 
     log_debug("Creating MRRegistrarService");
     mrreg = std::make_unique<MRRegistrarService>(config, xmlbuilder.get(), rootDeviceHandle);
@@ -299,14 +299,14 @@ void Server::shutdown()
     update_manager->shutdown();
     update_manager = nullptr;
 
-    if (storage->threadCleanupRequired()) {
+    if (database->threadCleanupRequired()) {
         try {
-            storage->threadCleanup();
+            database->threadCleanup();
         } catch (const std::runtime_error& ex) {
         }
     }
-    storage->shutdown();
-    storage = nullptr;
+    database->shutdown();
+    database = nullptr;
 
     scripting_runtime = nullptr;
 #ifdef ONLINE_SERVICES
@@ -495,7 +495,7 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
     std::unique_ptr<RequestHandler> ret = nullptr;
 
     if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_MEDIA_HANDLER)) {
-        ret = std::make_unique<FileRequestHandler>(config, storage, content, update_manager, session_manager, xmlbuilder.get());
+        ret = std::make_unique<FileRequestHandler>(config, database, content, update_manager, session_manager, xmlbuilder.get());
     } else if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_UI_HANDLER)) {
         std::string parameters;
         std::string path;
@@ -507,18 +507,18 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
         auto it = params.find(URL_REQUEST_TYPE);
         std::string r_type = it != params.end() && !it->second.empty() ? it->second : "index";
 
-        ret = web::createWebRequestHandler(config, storage, content, session_manager, r_type);
+        ret = web::createWebRequestHandler(config, database, content, session_manager, r_type);
     } else if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + DEVICE_DESCRIPTION_PATH)) {
-        ret = std::make_unique<DeviceDescriptionHandler>(config, storage, xmlbuilder.get());
+        ret = std::make_unique<DeviceDescriptionHandler>(config, database, xmlbuilder.get());
     } else if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_SERVE_HANDLER)) {
         if (!config->getOption(CFG_SERVER_SERVEDIR).empty())
-            ret = std::make_unique<ServeRequestHandler>(config, storage);
+            ret = std::make_unique<ServeRequestHandler>(config, database);
         else
             throw_std_runtime_error("Serving directories is not enabled in configuration");
     }
 #if defined(HAVE_CURL)
     else if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_ONLINE_HANDLER)) {
-        ret = std::make_unique<URLRequestHandler>(config, storage, content);
+        ret = std::make_unique<URLRequestHandler>(config, database, content);
     }
 #endif
     else {

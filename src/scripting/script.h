@@ -42,7 +42,7 @@ class CdsObject;
 class Config;
 class ContentManager;
 class Runtime;
-class Storage;
+class Database;
 class StringConverter;
 
 // perform garbage collection after script has been run for x times
@@ -89,12 +89,12 @@ public:
     static Script* getContextScript(duk_context* ctx);
 
     std::shared_ptr<Config> getConfig() const { return config; }
-    std::shared_ptr<Storage> getStorage() const { return storage; }
+    std::shared_ptr<Database> getDatabase() const { return database; }
     std::shared_ptr<ContentManager> getContent() const { return content; }
 
 protected:
     Script(const std::shared_ptr<Config>& config,
-        std::shared_ptr<Storage> storage,
+        std::shared_ptr<Database> database,
         std::shared_ptr<ContentManager> content,
         const std::shared_ptr<Runtime>& runtime, const std::string& name);
     void execute();
@@ -108,7 +108,7 @@ protected:
 
 protected:
     std::shared_ptr<Config> config;
-    std::shared_ptr<Storage> storage;
+    std::shared_ptr<Database> database;
     std::shared_ptr<ContentManager> content;
     std::shared_ptr<Runtime> runtime;
 

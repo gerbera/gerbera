@@ -40,7 +40,7 @@
 #include "common.h"
 
 // forward declaration
-class Storage;
+class Database;
 class Server;
 
 #define FLUSH_ASAP 2
@@ -48,7 +48,7 @@ class Server;
 
 class UpdateManager {
 public:
-    UpdateManager(std::shared_ptr<Storage> storage, std::shared_ptr<Server> server);
+    UpdateManager(std::shared_ptr<Database> database, std::shared_ptr<Server> server);
     void run();
     virtual ~UpdateManager();
     void shutdown();
@@ -57,7 +57,7 @@ public:
     void containersChanged(const std::vector<int>& objectIDs, int flushPolicy = FLUSH_SPEC);
 
 protected:
-    std::shared_ptr<Storage> storage;
+    std::shared_ptr<Database> database;
     std::shared_ptr<Server> server;
 
     pthread_t updateThread;

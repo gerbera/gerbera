@@ -35,11 +35,11 @@
 
 #include "autoscan.h"
 #include "cds_objects.h"
-#include "storage/storage.h"
+#include "database/database.h"
 
-web::containers::containers(std::shared_ptr<Config> config, std::shared_ptr<Storage> storage,
+web::containers::containers(std::shared_ptr<Config> config, std::shared_ptr<Database> database,
     std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
-    : WebRequestHandler(std::move(config), std::move(storage), std::move(content), std::move(sessionManager))
+    : WebRequestHandler(std::move(config), std::move(database), std::move(content), std::move(sessionManager))
 {
 }
 
@@ -63,7 +63,7 @@ void web::containers::process()
         containers.append_attribute("select_it") = param("select_it").c_str();
 
     auto param = std::make_unique<BrowseParam>(parentID, BROWSE_DIRECT_CHILDREN | BROWSE_CONTAINERS);
-    auto arr = storage->browse(param);
+    auto arr = database->browse(param);
 
     for (const auto& obj : arr) {
         //if (IS_CDS_CONTAINER(obj->getObjectType()))
@@ -81,7 +81,7 @@ void web::containers::process()
             autoscanMode = "timed";
 #ifdef HAVE_INOTIFY
             if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
-                std::shared_ptr<AutoscanDirectory> adir = storage->getAutoscanDirectory(cont->getID());
+                std::shared_ptr<AutoscanDirectory> adir = database->getAutoscanDirectory(cont->getID());
                 if ((adir != nullptr) && (adir->getScanMode() == ScanMode::INotify))
                     autoscanMode = "inotify";
             }

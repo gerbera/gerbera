@@ -121,11 +121,11 @@ void Script::setIntProperty(const std::string& name, int value)
 /* **************** */
 
 Script::Script(const std::shared_ptr<Config>& config,
-    std::shared_ptr<Storage> storage,
+    std::shared_ptr<Database> database,
     std::shared_ptr<ContentManager> content,
     const std::shared_ptr<Runtime>& runtime, const std::string& name)
     : config(config)
-    , storage(std::move(storage))
+    , database(std::move(database))
     , content(std::move(content))
     , runtime(runtime)
     , name(name)
@@ -347,7 +347,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         return nullptr;
     }
 
-    auto obj = CdsObject::createObject(storage, objectType);
+    auto obj = CdsObject::createObject(database, objectType);
     objectType = obj->getObjectType(); // this is important, because the
     // type will be changed appropriately
     // by the create function

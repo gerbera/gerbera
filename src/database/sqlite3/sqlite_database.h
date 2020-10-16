@@ -2,7 +2,7 @@
     
     MediaTomb - http://www.mediatomb.cc/
     
-    sqlite3_storage.h - this file is part of MediaTomb.
+    sqlite3_database.h - this file is part of MediaTomb.
     
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -27,8 +27,8 @@
     $Id$
 */
 
-/// \file sqlite3_storage.h
-///\brief Definitions of the Sqlite3Storage, Sqlite3Result, Sqlite3Row and SLTask classes.
+/// \file sqlite3_database.h
+///\brief Definitions of the Sqlite3Database, Sqlite3Result, Sqlite3Row and SLTask classes.
 
 #ifndef __SQLITE3_STORAGE_H__
 #define __SQLITE3_STORAGE_H__
@@ -40,10 +40,10 @@
 #include <sstream>
 #include <unistd.h>
 
-#include "storage/sql_storage.h"
+#include "database/sql_database.h"
 #include "util/timer.h"
 
-class Sqlite3Storage;
+class Sqlite3Database;
 class Sqlite3Result;
 
 /// \brief A virtual class that represents a task to be done by the sqlite3 thread.
@@ -53,8 +53,8 @@ public:
     SLTask();
 
     /// \brief run the sqlite3 task
-    /// \param sl The instance of Sqlite3Storage to do the queries with.
-    virtual void run(sqlite3** db, Sqlite3Storage* sl) = 0;
+    /// \param sl The instance of Sqlite3Database to do the queries with.
+    virtual void run(sqlite3** db, Sqlite3Database* sl) = 0;
 
     /// \brief returns true if the task is not completed
     /// \return true if the task is not completed yet, false if the task is finished and the results are ready.
@@ -97,7 +97,7 @@ class SLInitTask : public SLTask {
 public:
     /// \brief Constructor for the sqlite3 init task
     explicit SLInitTask(std::shared_ptr<Config> config);
-    void run(sqlite3** db, Sqlite3Storage* sl) override;
+    void run(sqlite3** db, Sqlite3Database* sl) override;
 
 protected:
     std::shared_ptr<Config> config;
@@ -109,7 +109,7 @@ public:
     /// \brief Constructor for the sqlite3 select task
     /// \param query The SQL query string
     explicit SLSelectTask(const char* query);
-    void run(sqlite3** db, Sqlite3Storage* sl) override;
+    void run(sqlite3** db, Sqlite3Database* sl) override;
     std::shared_ptr<SQLResult> getResult() const { return std::static_pointer_cast<SQLResult>(pres); }
 
 protected:
@@ -125,7 +125,7 @@ public:
     /// \brief Constructor for the sqlite3 exec task
     /// \param query The SQL query string
     SLExecTask(const char* query, bool getLastInsertId);
-    void run(sqlite3** db, Sqlite3Storage* sl) override;
+    void run(sqlite3** db, Sqlite3Database* sl) override;
     int getLastInsertId() const { return lastInsertId; }
 
 protected:
@@ -141,23 +141,23 @@ class SLBackupTask : public SLTask {
 public:
     /// \brief Constructor for the sqlite3 backup task
     SLBackupTask(std::shared_ptr<Config> config, bool restore);
-    void run(sqlite3** db, Sqlite3Storage* sl) override;
+    void run(sqlite3** db, Sqlite3Database* sl) override;
 
 protected:
     std::shared_ptr<Config> config;
     bool restore;
 };
 
-/// \brief The Storage class for using SQLite3
-class Sqlite3Storage : public Timer::Subscriber, public SQLStorage, public std::enable_shared_from_this<SQLStorage> {
+/// \brief The Database class for using SQLite3
+class Sqlite3Database : public Timer::Subscriber, public SQLDatabase, public std::enable_shared_from_this<SQLDatabase> {
 public:
     void timerNotify(std::shared_ptr<Timer::Parameter> param) override;
-    Sqlite3Storage(std::shared_ptr<Config> config, std::shared_ptr<Timer> timer);
+    Sqlite3Database(std::shared_ptr<Config> config, std::shared_ptr<Timer> timer);
 
 private:
     void init() override;
     void shutdownDriver() override;
-    std::shared_ptr<Storage> getSelf() override;
+    std::shared_ptr<Database> getSelf() override;
 
     std::string quote(std::string value) const override;
     std::string quote(const char* str) const override { return quote(std::string(str)); }
@@ -229,7 +229,7 @@ private:
 
     friend class SLSelectTask;
     friend class Sqlite3Row;
-    friend class Sqlite3Storage;
+    friend class Sqlite3Database;
 };
 
 /// \brief Represents a row of a result of a sqlite3 select

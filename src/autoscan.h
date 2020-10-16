@@ -40,7 +40,7 @@ namespace fs = std::filesystem;
 #include "util/timer.h"
 
 // forward declaration
-class Storage;
+class Database;
 class AutoscanDirectory;
 
 #define INVALID_SCAN_ID -1
@@ -53,7 +53,7 @@ enum class ScanMode {
 
 class AutoscanList {
 public:
-    explicit AutoscanList(std::shared_ptr<Storage> storage);
+    explicit AutoscanList(std::shared_ptr<Database> database);
 
     /// \brief Adds a new AutoscanDirectory to the list.
     ///
@@ -95,7 +95,7 @@ public:
     std::vector<std::shared_ptr<AutoscanDirectory>> getArrayCopy();
 
 protected:
-    std::shared_ptr<Storage> storage;
+    std::shared_ptr<Database> database;
 
     std::recursive_mutex mutex;
     using AutoLock = std::lock_guard<std::recursive_mutex>;
@@ -119,9 +119,9 @@ public:
     AutoscanDirectory(fs::path location, ScanMode mode, bool recursive, bool persistent,
         int id = INVALID_SCAN_ID, unsigned int interval = 0, bool hidden = false);
 
-    void setStorageID(int storageID) { this->storageID = storageID; }
+    void setDatabaseID(int databaseID) { this->databaseID = databaseID; }
 
-    int getStorageID() const { return storageID; }
+    int getDatabaseID() const { return databaseID; }
 
     /// \brief The location can only be set once!
     void setLocation(fs::path location);
@@ -215,7 +215,7 @@ protected:
     int taskCount;
     int scanID;
     int objectID;
-    int storageID;
+    int databaseID;
     time_t last_mod_previous_scan { 0 };
     time_t last_mod_current_scan { 0 };
     std::shared_ptr<Timer::Parameter> timer_parameter;

@@ -36,12 +36,12 @@
 
 #include "cds_objects.h"
 #include "metadata/metadata_handler.h"
-#include "storage/storage.h"
+#include "database/database.h"
 #include "util/tools.h"
 
-web::edit_load::edit_load(std::shared_ptr<Config> config, std::shared_ptr<Storage> storage,
+web::edit_load::edit_load(std::shared_ptr<Config> config, std::shared_ptr<Database> database,
     std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
-    : WebRequestHandler(std::move(config), std::move(storage), std::move(content), std::move(sessionManager))
+    : WebRequestHandler(std::move(config), std::move(database), std::move(content), std::move(sessionManager))
 {
 }
 
@@ -55,7 +55,7 @@ void web::edit_load::process()
         throw_std_runtime_error("invalid object id");
 
     objectID = std::stoi(objID);
-    auto obj = storage->loadObject(objectID);
+    auto obj = database->loadObject(objectID);
 
     auto root = xmlDoc->document_element();
     xml2JsonHints->setFieldType("value", "string");

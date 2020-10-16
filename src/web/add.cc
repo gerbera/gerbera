@@ -39,9 +39,9 @@
 #include "server.h"
 #include "util/tools.h"
 
-web::add::add(std::shared_ptr<Config> config, std::shared_ptr<Storage> storage,
+web::add::add(std::shared_ptr<Config> config, std::shared_ptr<Database> database,
     std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
-    : WebRequestHandler(std::move(config), std::move(storage), std::move(content), std::move(sessionManager))
+    : WebRequestHandler(std::move(config), std::move(database), std::move(content), std::move(sessionManager))
 {
 }
 

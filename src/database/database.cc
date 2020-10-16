@@ -2,7 +2,7 @@
     
     MediaTomb - http://www.mediatomb.cc/
     
-    storage.cc - this file is part of MediaTomb.
+    database.cc - this file is part of MediaTomb.
     
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -27,50 +27,50 @@
     $Id$
 */
 
-/// \file storage.cc
+/// \file database.cc
 
-#include "storage.h" // API
+#include "database.h" // API
 
 #include <utility>
 
 #include "config/config_manager.h"
-#include "storage/mysql/mysql_storage.h"
-#include "storage/sqlite3/sqlite3_storage.h"
+#include "database//sqlite3/sqlite_database.h"
+#include "database/mysql/mysql_database.h"
 #include "util/tools.h"
 
-Storage::Storage(std::shared_ptr<Config> config)
+Database::Database(std::shared_ptr<Config> config)
     : config(std::move(config))
 {
 }
 
-std::shared_ptr<Storage> Storage::createInstance(const std::shared_ptr<Config>& config, const std::shared_ptr<Timer>& timer)
+std::shared_ptr<Database> Database::createInstance(const std::shared_ptr<Config>& config, const std::shared_ptr<Timer>& timer)
 {
-    std::shared_ptr<Storage> storage;
+    std::shared_ptr<Database> database;
 
     std::string type = config->getOption(CFG_SERVER_STORAGE_DRIVER);
     do {
         if (type == "sqlite3") {
-            storage = std::static_pointer_cast<Storage>(std::make_shared<Sqlite3Storage>(config, timer));
+            database = std::static_pointer_cast<Database>(std::make_shared<Sqlite3Database>(config, timer));
             break;
         }
 
 #ifdef HAVE_MYSQL
         if (type == "mysql") {
-            storage = std::static_pointer_cast<Storage>(std::make_shared<MysqlStorage>(config));
+            database = std::static_pointer_cast<Database>(std::make_shared<MySQLDatabase>(config));
             break;
         }
 #endif
         // other database types...
-        throw_std_runtime_error("Unknown storage type: " + type);
+        throw_std_runtime_error("Unknown database type: " + type);
     } while (false);
 
-    storage->init();
-    storage->doMetadataMigration();
+    database->init();
+    database->doMetadataMigration();
 
-    return storage;
+    return database;
 }
 
-void Storage::stripAndUnescapeVirtualContainerFromPath(std::string virtualPath, std::string& first, std::string& last)
+void Database::stripAndUnescapeVirtualContainerFromPath(std::string virtualPath, std::string& first, std::string& last)
 {
     if (virtualPath.at(0) != VIRTUAL_CONTAINER_SEPARATOR) {
         throw_std_runtime_error(fmt::format("Got non-absolute virtual path; needs to start with: {}", VIRTUAL_CONTAINER_SEPARATOR));

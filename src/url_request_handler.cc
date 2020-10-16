@@ -37,7 +37,7 @@
 #include "config/config_manager.h"
 #include "content_manager.h"
 #include "server.h"
-#include "storage/storage.h"
+#include "database/database.h"
 
 #include "cds_objects.h"
 #include "iohandler/buffered_io_handler.h"
@@ -50,9 +50,9 @@
 #include "url.h"
 
 URLRequestHandler::URLRequestHandler(std::shared_ptr<Config> config,
-    std::shared_ptr<Storage> storage,
+    std::shared_ptr<Database> database,
     std::shared_ptr<ContentManager> content)
-    : RequestHandler(std::move(config), std::move(storage))
+    : RequestHandler(std::move(config), std::move(database))
     , content(std::move(content))
 {
 }
@@ -76,7 +76,7 @@ void URLRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     int objectID = std::stoi(objIdIt->second);
     //log_debug("got ObjectID: {}", objectID);
 
-    auto obj = storage->loadObject(objectID);
+    auto obj = database->loadObject(objectID);
 
     int objectType = obj->getObjectType();
     if (!IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
@@ -172,7 +172,7 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
     int objectID = std::stoi(objIdIt->second);
     //log_debug("got ObjectID: {}", objectID);
 
-    auto obj = storage->loadObject(objectID);
+    auto obj = database->loadObject(objectID);
 
     int objectType = obj->getObjectType();
     if (!IS_CDS_ITEM_EXTERNAL_URL(objectType)) {

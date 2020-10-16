@@ -72,7 +72,7 @@ OnlineService::OnlineService()
     purge_interval = 0;
 }
 
-char OnlineService::getStoragePrefix(service_type_t service)
+char OnlineService::getDatabasePrefix(service_type_t service)
 {
     if (service >= OS_Max)
         throw_std_runtime_error("Illegal service requested");
@@ -80,9 +80,9 @@ char OnlineService::getStoragePrefix(service_type_t service)
     return service_prefixes.at(service);
 }
 
-char OnlineService::getStoragePrefix()
+char OnlineService::getDatabasePrefix()
 {
-    return getStoragePrefix(getServiceType());
+    return getDatabasePrefix(getServiceType());
 }
 
 #endif //ONLINE_SERVICES

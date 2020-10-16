@@ -170,7 +170,7 @@ TEST_F(ConfigGeneratorTest, GeneratesStorageXmlWithMySQLAndSqlLite)
 #if !defined(HAVE_MYSQL)
 TEST_F(ConfigGeneratorTest, GeneratesStorageXmlWithSqlLiteOnly)
 {
-    std::string mockXml = mockConfigXml("fixtures/mock-storage-sqlite.xml");
+    std::string mockXml = mockConfigXml("fixtures/mock-database-sqlite.xml");
 
     pugi::xml_document doc;
     auto server = doc.append_child("server");

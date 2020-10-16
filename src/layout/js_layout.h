@@ -41,7 +41,7 @@ class Config;
 class ContentManager;
 class ImportScript;
 class Runtime;
-class Storage;
+class Database;
 
 class JSLayout : public Layout {
 protected:
@@ -52,7 +52,7 @@ protected:
 
 public:
     JSLayout(const std::shared_ptr<Config>& config,
-        const std::shared_ptr<Storage>& storage,
+        const std::shared_ptr<Database>& database,
         const std::shared_ptr<ContentManager>& content,
         const std::shared_ptr<Runtime>& runtime);
     ~JSLayout() override;

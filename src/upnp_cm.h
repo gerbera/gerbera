@@ -41,7 +41,7 @@
 
 // forward declaration
 class Config;
-class Storage;
+class Database;
 
 /// \brief This class is responsible for the UPnP Connection Manager Service operations.
 ///
@@ -73,7 +73,7 @@ protected:
     void doGetProtocolInfo(const std::unique_ptr<ActionRequest>& request);
 
     std::shared_ptr<Config> config;
-    std::shared_ptr<Storage> storage;
+    std::shared_ptr<Database> database;
 
     UpnpXMLBuilder* xmlBuilder;
     UpnpDevice_Handle deviceHandle;
@@ -83,7 +83,7 @@ public:
     /// in internal variables.
     /// \todo Check if it makes sense to use it as it is done now...why not define them as constants?
     ConnectionManagerService(std::shared_ptr<Config> config,
-        std::shared_ptr<Storage> storage,
+        std::shared_ptr<Database> database,
         UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle handle);
     ~ConnectionManagerService();
 

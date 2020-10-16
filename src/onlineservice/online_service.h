@@ -47,7 +47,7 @@ class Layout;
 #define ONLINE_SERVICE_AUX_ID "ols"
 #define ONLINE_SERVICE_LAST_UPDATE "lu"
 
-// make sure to add the storage prefixes when adding new services
+// make sure to add the database prefixes when adding new services
 typedef enum {
     OS_None = 0,
     OS_YouTube = 1,
@@ -83,11 +83,11 @@ public:
     /// \brief Returns the service name
     virtual std::string getServiceName() const = 0;
 
-    /// \brief Get the storage service prefix for a particular service
-    char getStoragePrefix();
+    /// \brief Get the database service prefix for a particular service
+    char getDatabasePrefix();
 
-    /// \brief Get the storage prefix for a given service type
-    static char getStoragePrefix(service_type_t service);
+    /// \brief Get the database prefix for a given service type
+    static char getDatabasePrefix(service_type_t service);
 
     /// \brief Increments the task count.
     ///

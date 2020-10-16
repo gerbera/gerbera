@@ -55,7 +55,7 @@ protected:
 
 public:
     explicit FileRequestHandler(std::shared_ptr<Config> config,
-        std::shared_ptr<Storage> storage,
+        std::shared_ptr<Database> database,
         std::shared_ptr<ContentManager> content,
         std::shared_ptr<UpdateManager> updateManager, std::shared_ptr<web::SessionManager> sessionManager,
         UpnpXMLBuilder* xmlBuilder);

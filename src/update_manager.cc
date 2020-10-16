@@ -37,7 +37,7 @@
 #include <utility>
 
 #include "server.h"
-#include "storage/storage.h"
+#include "database/database.h"
 #include "upnp_cds.h"
 #include "util/tools.h"
 
@@ -49,8 +49,8 @@
 #define MAX_OBJECT_IDS_OVERLOAD 30
 #define OBJECT_ID_HASH_CAPACITY 3109
 
-UpdateManager::UpdateManager(std::shared_ptr<Storage> storage, std::shared_ptr<Server> server)
-    : storage(std::move(storage))
+UpdateManager::UpdateManager(std::shared_ptr<Database> database, std::shared_ptr<Server> server)
+    : database(std::move(database))
     , server(std::move(server))
     , objectIDHash(std::make_unique<std::unordered_set<int>>())
     , shutdownFlag(false)
@@ -211,7 +211,7 @@ void UpdateManager::threadProc()
                 std::string updateString;
 
                 try {
-                    updateString = storage->incrementUpdateIDs(objectIDHash);
+                    updateString = database->incrementUpdateIDs(objectIDHash);
                     objectIDHash->clear(); // hash_data_array will be invalid after clear()
                 } catch (const std::runtime_error& e) {
                     log_error("Fatal error when sending updates: {}", e.what());
@@ -240,7 +240,7 @@ void UpdateManager::threadProc()
         }
     }
 
-    storage->threadCleanup();
+    database->threadCleanup();
 }
 
 void* UpdateManager::staticThreadProc(void* arg)

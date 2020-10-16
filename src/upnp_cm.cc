@@ -35,14 +35,14 @@
 
 #include "config/config_manager.h"
 #include "server.h"
-#include "storage/storage.h"
+#include "database/database.h"
 #include "util/tools.h"
 
 ConnectionManagerService::ConnectionManagerService(std::shared_ptr<Config> config,
-    std::shared_ptr<Storage> storage,
+    std::shared_ptr<Database> database,
     UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle)
     : config(std::move(config))
-    , storage(std::move(storage))
+    , database(std::move(database))
     , xmlBuilder(xmlBuilder)
     , deviceHandle(deviceHandle)
 {
@@ -79,7 +79,7 @@ void ConnectionManagerService::doGetProtocolInfo(const std::unique_ptr<ActionReq
 
     auto response = UpnpXMLBuilder::createResponse(request->getActionName(), DESC_CM_SERVICE_TYPE);
 
-    std::vector<std::string> mimeTypes = storage->getMimeTypes();
+    std::vector<std::string> mimeTypes = database->getMimeTypes();
     std::string CSV = mimeTypesToCsv(mimeTypes);
 
     auto root = response->document_element();
@@ -114,7 +114,7 @@ void ConnectionManagerService::processActionRequest(const std::unique_ptr<Action
 
 void ConnectionManagerService::processSubscriptionRequest(const std::unique_ptr<SubscriptionRequest>& request)
 {
-    std::vector<std::string> mimeTypes = storage->getMimeTypes();
+    std::vector<std::string> mimeTypes = database->getMimeTypes();
     std::string CSV = mimeTypesToCsv(mimeTypes);
 
     auto propset = UpnpXMLBuilder::createEventPropertySet();

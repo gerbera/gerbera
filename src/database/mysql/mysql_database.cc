@@ -2,7 +2,7 @@
     
     MediaTomb - http://www.mediatomb.cc/
     
-    mysql_storage.cc - this file is part of MediaTomb.
+    mysql_database.cc - this file is part of MediaTomb.
     
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -27,10 +27,10 @@
     $Id$
 */
 
-/// \file mysql_storage.cc
+/// \file mysql_database.cc
 
 #ifdef HAVE_MYSQL
-#include "mysql_storage.h"
+#include "mysql_database.h"
 
 #include <cstdlib>
 #include <utility>
@@ -74,15 +74,15 @@
 ) ENGINE=MyISAM CHARSET=utf8"
 #define MYSQL_UPDATE_4_5_2 "UPDATE `mt_internal_setting` SET `value`='5' WHERE `key`='db_version' AND `value`='4'"
 
-MysqlStorage::MysqlStorage(std::shared_ptr<Config> config)
-    : SQLStorage(std::move(config))
+MySQLDatabase::MySQLDatabase(std::shared_ptr<Config> config)
+    : SQLDatabase(std::move(config))
 {
     mysql_init_key_initialized = false;
     mysql_connection = false;
     table_quote_begin = '`';
     table_quote_end = '`';
 }
-MysqlStorage::~MysqlStorage()
+MySQLDatabase::~MySQLDatabase()
 {
     AutoLock lock(mysqlMutex); // just to ensure, that we don't close while another thread
     // is executing a query
@@ -96,7 +96,7 @@ MysqlStorage::~MysqlStorage()
     log_debug("...ok");
 }
 
-void MysqlStorage::checkMysqlThreadInit() const
+void MySQLDatabase::checkMysqlThreadInit() const
 {
     if (!mysql_connection)
         throw_std_runtime_error("mysql connection is not open or already closed");
@@ -108,17 +108,17 @@ void MysqlStorage::checkMysqlThreadInit() const
     }
 }
 
-void MysqlStorage::threadCleanup()
+void MySQLDatabase::threadCleanup()
 {
     if (pthread_getspecific(mysql_init_key) != nullptr) {
         mysql_thread_end();
     }
 }
 
-void MysqlStorage::init()
+void MySQLDatabase::init()
 {
     log_debug("start");
-    SQLStorage::init();
+    SQLDatabase::init();
 
     std::unique_lock<decltype(mysqlMutex)> lock(mysqlMutex);
     int ret;
@@ -174,7 +174,7 @@ void MysqlStorage::init()
     if(res)
     {
         std::string myError = getError(&db);
-        throw StorageException("", "MySQL query 'SET NAMES' failed!");
+        throw DatabaseException("", "MySQL query 'SET NAMES' failed!");
     }
     */
 
@@ -205,7 +205,7 @@ void MysqlStorage::init()
             ret = mysql_real_query(&db, sql_start, sql_end - sql_start);
             if (ret) {
                 std::string myError = getError(&db);
-                throw StorageException(myError, "Mysql: error while creating db: " + myError);
+                throw DatabaseException(myError, "Mysql: error while creating db: " + myError);
             }
             sql_start = sql_end + 1; // skip ';'
             if (*sql_start == '\n') // skip newline
@@ -274,12 +274,12 @@ void MysqlStorage::init()
     dbReady();
 }
 
-std::shared_ptr<Storage> MysqlStorage::getSelf()
+std::shared_ptr<Database> MySQLDatabase::getSelf()
 {
     return shared_from_this();
 }
 
-std::string MysqlStorage::quote(std::string value) const
+std::string MySQLDatabase::quote(std::string value) const
 {
     /* note: mysql_real_escape_string returns a maximum of (length * 2 + 1)
      * chars; we need +1 for the first ' - the second ' will be written over
@@ -295,7 +295,7 @@ std::string MysqlStorage::quote(std::string value) const
     return ret;
 }
 
-std::string MysqlStorage::getError(MYSQL* db)
+std::string MySQLDatabase::getError(MYSQL* db)
 {
     std::ostringstream err_buf;
     err_buf << "mysql_error (" << mysql_errno(db);
@@ -304,7 +304,7 @@ std::string MysqlStorage::getError(MYSQL* db)
     return err_buf.str();
 }
 
-std::shared_ptr<SQLResult> MysqlStorage::select(const char* query, int length)
+std::shared_ptr<SQLResult> MySQLDatabase::select(const char* query, int length)
 {
 #ifdef MYSQL_SELECT_DEBUG
     log_debug("{}", query);
@@ -318,20 +318,20 @@ std::shared_ptr<SQLResult> MysqlStorage::select(const char* query, int length)
     res = mysql_real_query(&db, query, length);
     if (res) {
         std::string myError = getError(&db);
-        throw StorageException(myError, "Mysql: mysql_real_query() failed: " + myError + "; query: " + query);
+        throw DatabaseException(myError, "Mysql: mysql_real_query() failed: " + myError + "; query: " + query);
     }
 
     MYSQL_RES* mysql_res;
     mysql_res = mysql_store_result(&db);
     if (!mysql_res) {
         std::string myError = getError(&db);
-        throw StorageException(myError, "Mysql: mysql_store_result() failed: " + myError + "; query: " + query);
+        throw DatabaseException(myError, "Mysql: mysql_store_result() failed: " + myError + "; query: " + query);
     }
 
     return std::static_pointer_cast<SQLResult>(std::make_shared<MysqlResult>(mysql_res));
 }
 
-int MysqlStorage::exec(const char* query, int length, bool getLastInsertId)
+int MySQLDatabase::exec(const char* query, int length, bool getLastInsertId)
 {
 #ifdef MYSQL_EXEC_DEBUG
     log_debug("{}", query);
@@ -345,7 +345,7 @@ int MysqlStorage::exec(const char* query, int length, bool getLastInsertId)
     res = mysql_real_query(&db, query, length);
     if (res) {
         std::string myError = getError(&db);
-        throw StorageException(myError, "Mysql: mysql_real_query() failed: " + myError + "; query: " + query);
+        throw DatabaseException(myError, "Mysql: mysql_real_query() failed: " + myError + "; query: " + query);
     }
     int insert_id = -1;
     if (getLastInsertId)
@@ -353,11 +353,11 @@ int MysqlStorage::exec(const char* query, int length, bool getLastInsertId)
     return insert_id;
 }
 
-void MysqlStorage::shutdownDriver()
+void MySQLDatabase::shutdownDriver()
 {
 }
 
-void MysqlStorage::storeInternalSetting(const std::string& key, const std::string& value)
+void MySQLDatabase::storeInternalSetting(const std::string& key, const std::string& value)
 {
     std::string quotedValue = quote(value);
     std::ostringstream q;
@@ -366,14 +366,14 @@ void MysqlStorage::storeInternalSetting(const std::string& key, const std::strin
       << quote(key) << ", " << quotedValue << ") "
                                               "ON DUPLICATE KEY UPDATE `value` = "
       << quotedValue;
-    SQLStorage::exec(q);
+    SQLDatabase::exec(q);
 }
 
-void MysqlStorage::_exec(const char* query, int length)
+void MySQLDatabase::_exec(const char* query, int length)
 {
     if (mysql_real_query(&db, query, (length > 0 ? length : strlen(query)))) {
         std::string myError = getError(&db);
-        throw StorageException(myError, "Mysql: error while updating db: " + myError);
+        throw DatabaseException(myError, "Mysql: error while updating db: " + myError);
     }
 }
 

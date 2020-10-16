@@ -35,7 +35,7 @@
 
 #include "config/config_manager.h"
 #include "server.h"
-#include "storage/storage.h"
+#include "database/database.h"
 #include "upnp_xml.h"
 #include "util/tools.h"
 

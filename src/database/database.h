@@ -2,7 +2,7 @@
     
     MediaTomb - http://www.mediatomb.cc/
     
-    storage.h - this file is part of MediaTomb.
+    database.h - this file is part of MediaTomb.
     
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -27,7 +27,7 @@
     $Id$
 */
 
-/// \file storage.h
+/// \file database.h
 
 #ifndef __STORAGE_H__
 #define __STORAGE_H__
@@ -138,13 +138,13 @@ public:
     int getRequestedCount() const { return requestedCount; }
 };
 
-class Storage {
+class Database {
 public:
-    explicit Storage(std::shared_ptr<Config> config);
-    virtual ~Storage() = default;
+    explicit Database(std::shared_ptr<Config> config);
+    virtual ~Database() = default;
     virtual void init() = 0;
 
-    /// \brief shutdown the Storage with its possible threads
+    /// \brief shutdown the Database with its possible threads
     virtual void shutdown() = 0;
 
     virtual void addObject(std::shared_ptr<CdsObject> object, int* changedContainer) = 0;
@@ -297,10 +297,10 @@ protected:
     /* helper for addContainerChain */
     static void stripAndUnescapeVirtualContainerFromPath(std::string path, std::string& first, std::string& last);
 
-    static std::shared_ptr<Storage> createInstance(const std::shared_ptr<Config>& config, const std::shared_ptr<Timer>& timer);
+    static std::shared_ptr<Database> createInstance(const std::shared_ptr<Config>& config, const std::shared_ptr<Timer>& timer);
     friend class Server;
 
-    virtual std::shared_ptr<Storage> getSelf() = 0;
+    virtual std::shared_ptr<Database> getSelf() = 0;
 
 protected:
     std::shared_ptr<Config> config;

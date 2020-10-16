@@ -40,7 +40,7 @@
 #include "iohandler/file_io_handler.h"
 #include "metadata/metadata_handler.h"
 #include "server.h"
-#include "storage/storage.h"
+#include "database/database.h"
 #include "update_manager.h"
 #include "util/process.h"
 #include "web/session_manager.h"
@@ -52,11 +52,11 @@
 #include "transcoding/transcode_dispatcher.h"
 
 FileRequestHandler::FileRequestHandler(std::shared_ptr<Config> config,
-    std::shared_ptr<Storage> storage,
+    std::shared_ptr<Database> database,
     std::shared_ptr<ContentManager> content,
     std::shared_ptr<UpdateManager> updateManager, std::shared_ptr<web::SessionManager> sessionManager,
     UpnpXMLBuilder* xmlBuilder)
-    : RequestHandler(std::move(config), std::move(storage))
+    : RequestHandler(std::move(config), std::move(database))
     , content(std::move(content))
     , updateManager(std::move(updateManager))
     , sessionManager(std::move(sessionManager))
@@ -92,7 +92,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     int objectID = std::stoi(objIdIt->second);
     //log_debug("got ObjectID: {}", objectID);
 
-    auto obj = storage->loadObject(objectID);
+    auto obj = database->loadObject(objectID);
 
     int objectType = obj->getObjectType();
     if (!IS_CDS_ITEM(objectType)) {
@@ -275,7 +275,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
     int objectID = std::stoi(objIdIt->second);
 
     log_debug("Opening media file with object id {}", objectID);
-    auto obj = storage->loadObject(objectID);
+    auto obj = database->loadObject(objectID);
 
     int objectType = obj->getObjectType();
     if (!IS_CDS_ITEM(objectType)) {
@@ -325,7 +325,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
         }
         log_debug("Script output: {}", output.c_str());
 
-        auto clone = CdsObject::createObject(storage, objectType);
+        auto clone = CdsObject::createObject(database, objectType);
         aitem->copyTo(clone);
 
         UpnpXMLBuilder::updateObject(clone, output);
@@ -334,7 +334,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
         {
             log_debug("Item changed, updating database");
             int containerChanged = INVALID_OBJECT_ID;
-            storage->updateObject(clone, &containerChanged);
+            database->updateObject(clone, &containerChanged);
             updateManager->containerChanged(containerChanged);
             sessionManager->containerChangedUI(containerChanged);
 
