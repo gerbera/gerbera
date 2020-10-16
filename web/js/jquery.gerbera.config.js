@@ -255,13 +255,13 @@ console.log({addItemClicked: listValue});
 
       if (item.type === 'Element') {
         line = $('<li></li>');
-        line.attr('id', "line_" + item.item.replaceAll("/","_"));
+        line.attr('id', "line_" + item.item.replace(RegExp('/','g'),"_"));
         line.addClass('configListItem');
         // recursive call
         let subList = null;
         if (item.children.length > 0) {
           subList = $('<ul></ul>').addClass('element');
-          subList.attr('id', "list_" + item.item.replaceAll("/","_"));
+          subList.attr('id', "list_" + item.item.replace(RegExp('/','g'),"_"));
           this.addTextLine(line,item);
           this.createSection (subList, xpath, item.children, values, level+1, item);
           subList.appendTo(line);
@@ -271,12 +271,12 @@ console.log({addItemClicked: listValue});
         list.append(line);
       } else if (item.type === 'List') {
         line = $('<li></li>');
-        line.attr('id', "line_" + item.item.replaceAll("/","_"));
+        line.attr('id', "line_" + item.item.replace(RegExp('/','g'),"_"));
         line.addClass('configListItem');
         // recursive call
         if (item.children.length > 0) {
           const subList = $('<ul></ul>').addClass('list');
-          subList.attr('id', "list_" + item.item.replaceAll("/","_"));
+          subList.attr('id', "list_" + item.item.replace(RegExp('/','g'),"_"));
           this.addTextLine(line, item);
           this.createSection (subList, item.item, item.children, values, level+1, item);
           subList.appendTo(line);
@@ -287,7 +287,7 @@ console.log({addItemClicked: listValue});
 
         if (xpath && xpath.length > 0) {
           line = $('<li></li>');
-          line.attr('id', "line_" + item.item.replaceAll("/","_"));
+          line.attr('id', "line_" + item.item.replace(RegExp('/','g'),"_"));
           values.forEach(v => {
             if (v.item.startsWith(xpath)) {
               var entry = v.item.replace(xpath, '');
@@ -303,17 +303,17 @@ console.log({addItemClicked: listValue});
         } else {
           itemCount = 1;
           line = $('<li></li>');
-          line.attr('id', "item_" + item.item.replaceAll("/","_"));
+          line.attr('id', "item_" + item.item.replace(RegExp('/','g'),"_"));
         }
         if (itemCount < 1 && list[0].childElementCount === 0 ) {
           list.removeClass('fa-ul');
           list.addClass('fa-ul');
-          const itemId = "item_" + xpath.replaceAll("/","_") + "_new";
+          const itemId = "item_" + xpath.replace(RegExp('/','g'), "_") + "_new";
           if (parentItem.editable) {
             this.addNewListItemBlock(list, item, parentItem, 0, xpath, itemId);
           } else {
             let lineNew = $('<li></li>');
-            lineNew.attr('id', "line_" + item.item.replaceAll("/","_"));
+            lineNew.attr('id', "line_" + item.item.replace(RegExp('/','g'), "_"));
             let textNew = $('<span></span>');
             let symbolNew = $('<span></span>').addClass('fa-li');
             $('<i class="fa"></i>').addClass('fa-circle').appendTo(symbolNew);
@@ -335,12 +335,12 @@ console.log({addItemClicked: listValue});
           let lineStatus = status;
 
           if (xpath && xpath.length > 0) {
-            const itemId = "item_" + xpath.replaceAll("/","_") + "_" + count
+            const itemId = "item_" + xpath.replace(RegExp('/','g'), "_") + "_" + count
             let xpathList = list.find("#" + itemId);
             if (xpathList === null || xpathList.length === 0) {
               line = $('<li></li>');
               line.attr('style', 'padding-top: 20px');
-              line.attr('id', "line_" + item.item.replaceAll("/","_"));
+              line.attr('id', "line_" + item.item.replace("RegExp('/','g')","_"));
               list.removeClass('fa-ul');
               list.addClass('fa-ul');
               let symbol = $('<span></span>').addClass('fa-li');
@@ -396,14 +396,14 @@ console.log({addItemClicked: listValue});
               }
             }
             itemLine =  $('<li></li>');
-            itemLine.attr('id', "line_" + xpath.replaceAll("/","_") + "_" + count);
+            itemLine.attr('id', "line_" + xpath.replace(RegExp('/','g'), "_") + "_" + count);
             xpathList.append(itemLine);
           }
 
           this.addTextLine(itemLine, item);
 
           let input = $('<input>');
-          input.attr('id', "value_" + item.item.replaceAll("/","_") + "_" + i +  "_" + count);
+          input.attr('id', "value_" + item.item.replace(RegExp('/','g'), "_") + "_" + i +  "_" + count);
           input.attr('style', 'margin-left: 20px; min-width: 400px');
           let itemValue = {value: item.value, source: 'default', status: lineStatus};
 
@@ -502,7 +502,7 @@ console.log({addItemClicked: listValue});
 
   addNewListItemBlock: function (list, item, parentItem, itemCount, xpath, itemId) {
     let lineNew = $('<li></li>');
-    lineNew.attr('id', "line_" + item.item.replaceAll("/","_"));
+    lineNew.attr('id', "line_" + item.item.replace("RegExp('/','g')","_"));
     let textNew = $('<span></span>');
     let symbolNew = $('<span></span>').addClass('fa-li');
     $('<i class="fa"></i>').addClass('fa-plus').appendTo(symbolNew);

@@ -9,6 +9,8 @@ const editLoadMock = new MockResponder('edit_load');
 const filesMock = new MockResponder('files');
 const itemsMock = new MockResponder('items');
 const clientsMock = new MockResponder('clients');
+const configLoadMock = new MockResponder('config_load');
+const configSaveMock = new MockResponder('config_save');
 const removeMock = new MockResponder('remove');
 const voidMock = new MockResponder('void');
 
@@ -45,6 +47,12 @@ module.exports = function (app) {
       case 'clients':
         res.send(require(clientsMock.getResponse('')));
         break;
+      case 'config_save':
+        res.send(require(configSaveMock.getResponse('')));
+        break;
+      case 'config_load':
+        res.send(require(configLoadMock.getResponse('')));
+        break;
       case 'remove':
         res.send(require(removeMock.getResponse(req.query.object_id, req.query.all)));
         break;
@@ -52,6 +60,18 @@ module.exports = function (app) {
         res.send(require(voidMock.getResponse((req.query.updates || ''))));
         break;
     }
+  });
+  app.get('/gerbera-config-minimal.json', (req, res) => {
+console.log(req.query);
+        res.send(require(configLoadMock.getResponse('')));
+  });
+  app.get('/gerbera-config-standard.json', (req, res) => {
+console.log(req.query);
+        res.send(require(configLoadMock.getResponse('')));
+  });
+  app.get('/gerbera-config-expert.json', (req, res) => {
+console.log(req.query);
+        res.send(require(configLoadMock.getResponse('')));
   });
   app.get('/reset', (req, res) => {
     const testName = req.query.testName;

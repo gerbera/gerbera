@@ -56,7 +56,11 @@ const menuSelected = () => {
   current_config.choice = GerberaApp.configMode();
   retrieveGerberaConfig()
     .then((response) => {
-      loadConfig(JSON.parse(response), 'config');
+      if (typeof response === 'string') {
+        loadConfig(JSON.parse(response), 'config');
+      } else {
+        loadConfig(response, 'config');
+      }
       //loadConfig(JSON.parse(response), 'values');
     })
     .catch((err) => GerberaApp.error(err));

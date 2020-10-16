@@ -312,7 +312,7 @@
 				},
 				{
 					"item": "/import/autoscan/attribute::use-inotify",
-					"caption": "Use Inotify",
+					"caption": "use-inotify",
 					"type": "Boolean",
 					"value": "false",
 					"editable": true
@@ -996,6 +996,50 @@
 					]
 				}
 			]
+		}
+	],
+	"values": [
+		{
+			"item": "/import/resources/attribute::case-sensitive",
+			"source": "config.xml",
+			"status": "unchanged",
+			"value": "true"
+		},
+		{
+			"item": "/import/resources/fanart/add-file[0]/attribute::file-name",
+			"source": "config.xml",
+			"status": "changed",
+			"value": "cover.png"
+		},
+		{
+			"item": "/import/resources/fanart/add-file[1]/attribute::file-name",
+			"source": "config.xml",
+			"status": "changed",
+			"value": "cover.jpg"
+		},
+		{
+			"item": "/clients/client[0]/attribute::ip",
+			"source": "config.xml",
+			"status": "changed",
+			"value": "192.168.1.60"
+		},
+		{
+			"item": "/clients/client[1]/attribute::ip",
+			"source": "config.xml",
+			"status": "changed",
+			"value": "192.168.1.61"
+		},
+		{
+			"item": "/clients/client[0]/attribute::flags",
+			"source": "config.xml",
+			"status": "changed",
+			"value": "SAMSUNG"
+		},
+		{
+			"item": "/clients/client[1]/attribute::flags",
+			"source": "config.xml",
+			"status": "changed",
+			"value": "0x1"
 		}
 	],
 	"success": true

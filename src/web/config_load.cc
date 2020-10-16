@@ -57,7 +57,7 @@ void web::configLoad::createItem(pugi::xml_node& item, const std::string& name, 
     allItems[name] = &item;
     item.append_attribute("item") = name.c_str();
     item.append_attribute("id") = fmt::format("{:02d}", id).c_str();
-    item.append_attribute("status") = "unchanaged";
+    item.append_attribute("status") = "unchanged";
 
     item.append_attribute("origValue") = config->getOrigValue(name).c_str();
     item.append_attribute("source") = std::find_if(dbEntries.begin(), dbEntries.end(), [&](const auto& s) { return s.item == name; }) != dbEntries.end() ? "database" : "config.xml";

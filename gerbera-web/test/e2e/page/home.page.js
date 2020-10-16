@@ -14,6 +14,10 @@ module.exports = function (driver) {
     return await driver.findElement(By.id('nav-clients'));
   };
 
+  this.getConfigMenu = async () => {
+    return await driver.findElement(By.id('nav-config'));
+  };
+
   this.getHomeMenu = async () => {
     return await driver.findElement(By.id('nav-home'));
   };
@@ -23,7 +27,7 @@ module.exports = function (driver) {
   };
 
   this.clickMenu = async (menuId) => {
-    if (menuId === 'nav-home' || menuId === 'nav-clients') {
+    if (menuId === 'nav-home' || menuId === 'nav-clients' || menuId == 'nav-config') {
       return await driver.findElement(By.id(menuId)).click()
     } else {
       const tree = await driver.findElement(By.id('tree'));
@@ -34,7 +38,7 @@ module.exports = function (driver) {
 
   this.clickMenuIcon = async (menuId) => {
     const tree = await driver.findElement(By.id('tree'));
-    if (menuId === 'nav-home' || menuId === 'nav-clients') {
+    if (menuId === 'nav-home' || menuId === 'nav-clients'|| menuId == 'nav-config') {
       return await driver.findElement(By.css('#'+ menuId + ' i')).click();
     } else {
       await driver.findElement(By.css('#'+ menuId + ' i')).click();
@@ -53,11 +57,22 @@ module.exports = function (driver) {
       // the xpath finds both <database> and <Video>  TODO: needs work
     return await items[1].findElements(By.css('li.list-group-item'));
   };
+  this.showConfig = async (text) => {
+    const elem = await driver.findElement(By.xpath('//span[contains(text(),\'' + text + '\')]'));
+    await driver.wait(until.elementIsVisible(elem), 5000);
+    await elem.click();
+    return await driver.sleep(500); // todo use wait...
+  };
   this.clickTree = async (text) => {
     const elem = await driver.findElement(By.xpath('//span[contains(text(),\'' + text + '\')]'));
     await driver.wait(until.elementIsVisible(elem), 5000);
     await elem.click();
     return await driver.sleep(500); // todo use wait...
+  };
+  this.clickTrail = async (index) => {
+    const elem = await driver.findElements(By.css('.grb-trail-button'));
+    await elem[index].click();
+    return await driver.sleep(500)
   };
   this.expandTree = async (text) => {
     const items = await driver.findElements(By.xpath('//li[.//span[contains(text(),\'' + text + '\')]]'));

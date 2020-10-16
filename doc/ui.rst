@@ -62,10 +62,12 @@ The menu is activated with successful login and you can choose from the followin
     *Loads the Gerbera database*
 * Filesystem
     *Loads the local filesystem tree*
+* Client
+    *Shows all connected clients*
+* Config
+    *View and update Gerbera settings*
 * Report an Issue
     *Opens URL to Gerbera's GitHub Issues*
-* Leave Beta
-    *Return to old frameset UI*
 
 Features
 ~~~~~~~~
@@ -74,6 +76,8 @@ The Gerbera web UI has several features to maintain your media.
 
 * Filesystem Items View
 * Database Items View
+* Clients View
+* Config View
 * Item Operations
 * Trail Operations
 * Notifications
@@ -109,6 +113,32 @@ database view structure by using the available scripts written using javascript.
 You can maintain the database view removing items and edit existing items to keep your media library up to date.
 
 
+Clients View
+~~~~~~~~~~~~
+
+The clients view is accessible through the `Clients` menu item.  The view contains details on all clients that contacted the server. 
+
+.. image:: _static/clients-view.png
+   :alt: Clients view
+   :target: _static/clients-view.png
+
+The clients list is purged when restarting the server.
+
+
+Config View
+~~~~~~~~~~~
+
+The config view is accessible through the `Config` menu item.  The view contains the current gerbera settings.
+
+.. image:: _static/config-view.png
+   :alt: Config view
+   :target: _static/config-view.png
+
+You can switch between three different levels of details. Only `expert´ mode gives you all config values and modification options.
+Be careful when changing values you do not fully understand. The server may fail to restart or become inaccessible.
+The new values are stored in Gerbera database and overwrite values from `config.xml`.
+
+
 Item Operations
 ~~~~~~~~~~~~~~~
 
@@ -136,6 +166,7 @@ The Gerbera Trail shows the current database/filesystem path and provides a numb
 
 * Add New Item
 * Add Autoscan
+* Add Tweak
 * Edit Container
 * Delete Container
 * Delete All
@@ -143,6 +174,14 @@ The Gerbera Trail shows the current database/filesystem path and provides a numb
 .. image:: _static/trail-operations.png
    :alt: Trail operations
    :target: _static/trail-operations.png
+
+.. image:: _static/trail-fs-operations.png
+   :alt: Trail operations in Filesystem view
+   :target: _static/trail-fs-operations.png
+
+.. image:: _static/trail-config-operations.png
+   :alt: Trail operations in Config view
+   :target: _static/trail-config-operations.png
 
 The Gerbera Trail supports adding virtual item types including containers, items, active items, internal urls, external urls.
 Adding an `autoscan` triggers the scan of a complete directory.  Autoscan adds valid mime-type items to the Gerbera database.
