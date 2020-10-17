@@ -25,7 +25,7 @@ $.widget('grb.config', {
   _create: function () {
     this.element.html('');
     this.element.addClass('grb-config');
-    const list = $('<ul></ul>').addClass('list');
+    const list = $('<ul></ul>').addClass('grb-config-list');
     const chooser = this.options.chooser;
     const data = this.options.meta;
     let line;
@@ -33,7 +33,6 @@ $.widget('grb.config', {
     this.result = {};
     this.configModeChanged = this.options.configModeChanged;
 
-    console.log(this.options);
     const cBox = $('<div></div>');
     cBox.attr('style', 'display: block; margin-top: -25px; position: absolute; right: 0px;');
     let tBox = $('<div></div>').addClass('small');
@@ -123,7 +122,6 @@ $.widget('grb.config', {
   },
 
   resetEntry: function (itemValue) {
-console.log({resetEntry: itemValue});
     this.result[itemValue.item] = itemValue;
     this.options.addResultItem(itemValue);
     itemValue.value = itemValue.editor.val();
@@ -151,7 +149,6 @@ console.log({resetEntry: itemValue});
   },
 
   setEntryChanged: function (itemValue) {
-console.log({setEntryChanged: itemValue});
     this.result[itemValue.item] = itemValue;
     this.options.addResultItem(itemValue);
     itemValue.origValue = itemValue.source === "config.xml" ? itemValue.value : itemValue.origValue;
@@ -181,7 +178,6 @@ console.log({setEntryChanged: itemValue});
   },
 
   removeItemClicked: function (listValue) {
-console.log({removeItemClicked: listValue});
     this.result[listValue.item] = listValue;
     this.options.addResultItem(listValue);
     listValue.source = "ui";
@@ -218,7 +214,6 @@ console.log({removeItemClicked: listValue});
   },
 
   addItemClicked: function (listValue) {
-console.log({addItemClicked: listValue});
     this.result[listValue.item] = listValue;
     this.options.addResultItem(listValue);
 
@@ -260,7 +255,7 @@ console.log({addItemClicked: listValue});
         // recursive call
         let subList = null;
         if (item.children.length > 0) {
-          subList = $('<ul></ul>').addClass('element');
+          subList = $('<ul></ul>').addClass('grb-config-element');
           subList.attr('id', "list_" + item.item.replace(RegExp('/','g'),"_"));
           this.addTextLine(line,item);
           this.createSection (subList, xpath, item.children, values, level+1, item);
@@ -275,7 +270,7 @@ console.log({addItemClicked: listValue});
         line.addClass('configListItem');
         // recursive call
         if (item.children.length > 0) {
-          const subList = $('<ul></ul>').addClass('list');
+          const subList = $('<ul></ul>').addClass('grb-config-list');
           subList.attr('id', "list_" + item.item.replace(RegExp('/','g'),"_"));
           this.addTextLine(line, item);
           this.createSection (subList, item.item, item.children, values, level+1, item);
@@ -413,7 +408,6 @@ console.log({addItemClicked: listValue});
               input.attr('title', item.item);
             } else if (xpath && xpath.length > 0) {
               if (xpath + `[${count}]` +  item.item.replace(xpath,'') === v.item) {
-                //console.log(xpath + `[${count}]` +  item.item.replace(xpath,''));
                 itemValue = v;
                 input.attr('title', v.item);
               }

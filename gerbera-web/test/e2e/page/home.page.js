@@ -110,6 +110,11 @@ module.exports = function (driver) {
     return await el.getAttribute('value');
   };
 
+  this.editOverlayFieldAttribute = async (fieldName, attName) => {
+    const el = await driver.findElement(By.id(fieldName));
+    return await el.getAttribute(attName);
+  };
+
   this.editorOverlayField = async (fieldName) => {
     return await driver.findElement(By.id(fieldName));
   };
@@ -135,6 +140,11 @@ module.exports = function (driver) {
   this.autoscanOverlayDisplayed = async () => {
     await driver.sleep(1000); // await animation
     return await driver.findElement(By.id('autoscanModal')).isDisplayed();
+  };
+
+  this.tweaksOverlayDisplayed = async () => {
+    await driver.sleep(1000); // await animation
+    return await driver.findElement(By.id('dirTweakModal')).isDisplayed();
   };
 
   this.cancelEdit = async () => {
@@ -216,6 +226,12 @@ module.exports = function (driver) {
     return await driver.wait(until.elementIsVisible(driver.findElement(By.id('autoscanModal'))), 5000);
   };
 
+  this.clickTrailTweak = async () => {
+    const el = await driver.findElement(By.css('.grb-trail-tweak-dir'));
+    await el.click();
+    return await driver.wait(until.elementIsVisible(driver.findElement(By.id('dirTweakModal'))), 5000);
+  };
+
   this.clickTrailEdit = async () => {
     const el = await driver.findElement(By.css('.grb-trail-edit'));
     await el.click();
@@ -253,9 +269,20 @@ module.exports = function (driver) {
     return await driver.wait(until.elementIsNotVisible(driver.findElement(By.id('autoscanModal'))), 5000);
   };
 
+  this.cancelTweaks = async () => {
+    await driver.findElement(By.id('dirTweakCancel')).click();
+    await driver.sleep(1000);
+    return await driver.wait(until.elementIsNotVisible(driver.findElement(By.id('dirTweakModal'))), 5000);
+  };
+
   this.submitAutoscan = async () => {
     await driver.findElement(By.id('autoscanSave')).click();
     return await driver.wait(until.elementIsNotVisible(driver.findElement(By.id('autoscanModal'))), 5000);
+  };
+
+  this.submitTweaks = async () => {
+    await driver.findElement(By.id('dirTweakSave')).click();
+    return await driver.wait(until.elementIsNotVisible(driver.findElement(By.id('dirTweakModal'))), 5000);
   };
 
   this.clickAutoscanEdit = async (idx) => {

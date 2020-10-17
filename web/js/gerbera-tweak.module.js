@@ -75,7 +75,7 @@ const submitDirTweak = () => {
     value: '',
     origValue: '',
     status: item.status});
-  Object.getOwnPropertyNames(item).forEach((key) => {
+  Object.getOwnPropertyNames(item).sort().forEach((key) => {
       if (key != "id" && key != "status" && key != "index") {
         saveData.data.push({
           item: `/import/directories/tweak[${item.index}]/attribute::${key}`,
@@ -89,7 +89,6 @@ const submitDirTweak = () => {
       }
   });
   saveData.changedCount = saveData.data.length;
-console.log(saveData);
 
   if (item) {
     $.ajax({
@@ -123,7 +122,7 @@ const deleteDirTweak = () => {
     value: '',
     origValue: '',
     status: item.status});
-  Object.getOwnPropertyNames(item).forEach((key) => {
+  Object.getOwnPropertyNames(item).sort().forEach((key) => {
       if (key != "id" && key != "status" && key != "index") {
         saveData.data.push({
           item: `/import/directories/tweak[${item.index}]/attribute::${key}`,
@@ -137,7 +136,6 @@ const deleteDirTweak = () => {
       }
   });
   saveData.changedCount = saveData.data.length;
-console.log(saveData);
 
   if (item) {
     $.ajax({
@@ -158,12 +156,12 @@ const submitDirTweakComplete = (response) => {
     if (response.task) {
       msg = response.task.text;
     } else {
-      msg = 'Successfully submitted dirtweak';
+      msg = 'Successfully submitted directory tweak';
     }
     Updates.showMessage(msg, undefined, 'success', 'fa-check');
     Updates.getUpdates(false);
   } else {
-    GerberaApp.error('Failed to submit dirtweak');
+    GerberaApp.error('Failed to submit directory tweak');
   }
 };
 

@@ -170,7 +170,6 @@
       'subtitle-file': dirTweakSubtitle.val(),
       'resource-file': dirTweakResource.val(),
     };
-console.log(item);
     return item;
   }
 
@@ -202,7 +201,6 @@ console.log(item);
       'subtitle-file': dirTweakSubtitle.val(),
       'resource-file': dirTweakResource.val(),
     };
-console.log(item);
     return item;
   }
 

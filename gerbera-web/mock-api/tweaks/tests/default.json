@@ -2,7 +2,7 @@
   "" : {
     "count" : 0,
     "responses" : {
-      "default" : "./config_save/config_save-data.json"
+      "default" : "./tweaks/tweaks-data.json"
     }
   }
 }

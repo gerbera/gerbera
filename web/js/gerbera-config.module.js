@@ -47,6 +47,8 @@ let current_config = {
 };
 
 const initialize = () => {
+  current_config.config = null;
+  current_config.values = null;
   current_config.choice = GerberaApp.configMode();
   $('#configgrid').html('');
   return Promise.resolve();
@@ -61,7 +63,6 @@ const menuSelected = () => {
       } else {
         loadConfig(response, 'config');
       }
-      //loadConfig(JSON.parse(response), 'values');
     })
     .catch((err) => GerberaApp.error(err));
   retrieveGerberaValues('config_load')
@@ -88,24 +89,26 @@ const retrieveGerberaValues = (type) => {
 
 const configModeChanged = (mode) => {
   current_config.choice = mode;
+  const oldValues = current_config.values;
   GerberaApp.setCurrentConfig(mode);
   initialize();
   retrieveGerberaConfig()
     .then((response) => {
-      loadConfig(JSON.parse(response), 'config');
+      if (typeof response === 'string') {
+        loadConfig(JSON.parse(response), 'config');
+      } else {
+        loadConfig(response, 'config');
+      }
+      loadConfig({success: true, values: oldValues}, 'values');
     })
     .catch((err) => GerberaApp.error(err));
 }
 
 const loadConfig = (response, item) => {
-
-console.log(`loadConfig ${item}`);
-console.log(response);
-
   if (response.success && item in response && response[item]) {
      current_config[item] = response[item];
   }
-  if (current_config.config && current_config.values) {
+  if (current_config.config !== null && current_config.values !== null) {
     const datagrid = $('#configgrid');
 
     if (datagrid.hasClass('grb-config')) {
@@ -132,7 +135,6 @@ const setChangedItem = (itemValue) => {
 };
 
 const saveConfig = () => {
-  console.log(current_config.changedItems);
   const changedKeys = Object.getOwnPropertyNames(current_config.changedItems);
   if (changedKeys.length > 0 ) {
     const saveData = {
@@ -153,7 +155,6 @@ const saveConfig = () => {
           status: i.status});
       }
     });
-    console.log(saveData);
 
     try {
       $.ajax({
@@ -161,10 +162,9 @@ const saveConfig = () => {
         type: 'get',
         data: saveData
       })
-        .then((response) => {
+        .then(() => {
           menuSelected();
           Updates.showMessage('Successfully saved ' + saveData.data.length + ' config items', undefined, 'success', 'fa-check');
-          console.log(response);
         })
         .catch((err) => GerberaApp.error(err));
     } catch (e) {
@@ -185,17 +185,14 @@ const clearConfig = () => {
     updates: 'check'
   };
 
-  console.log(saveData);
-
   try {
     $.ajax({
       url: GerberaApp.clientConfig.api,
       type: 'get',
       data: saveData
     })
-      .then((response) => {
+      .then(() => {
         menuSelected();
-        console.log(response);
       })
       .catch((err) => GerberaApp.error(err));
   } catch (e) {
@@ -214,19 +211,19 @@ const reScanLibrary = () => {
     updates: 'check'
   };
 
-  console.log(saveData);
-
   try {
     $.ajax({
       url: GerberaApp.clientConfig.api,
       type: 'get',
       data: saveData
     })
-      .then((response) => {
+      .then(() => {
         menuSelected();
-        console.log(response);
       })
-      .catch((err) => GerberaApp.error(err));
+      .catch((err) => {
+        GerberaApp.error(err)
+        console.log(err);
+      });
   } catch (e) {
     console.log(e);
   }
