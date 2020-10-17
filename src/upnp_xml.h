@@ -40,12 +40,12 @@
 
 // forward declaration
 class Config;
-class Storage;
+class Database;
 
 class UpnpXMLBuilder {
 public:
     explicit UpnpXMLBuilder(std::shared_ptr<Config> config,
-        std::shared_ptr<Storage> storage,
+        std::shared_ptr<Database> database,
         std::string virtualUrl, std::string presentationURL);
 
     /// \brief Renders XML for the action response header.
@@ -99,7 +99,7 @@ public:
 
 protected:
     std::shared_ptr<Config> config;
-    std::shared_ptr<Storage> storage;
+    std::shared_ptr<Database> database;
 
     const std::string virtualURL;
     const std::string presentationURL;

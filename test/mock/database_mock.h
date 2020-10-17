@@ -1,18 +1,18 @@
-#ifndef __STORAGE_MOCK_H__
-#define __STORAGE_MOCK_H__
+#ifndef __DATABASE_MOCK_H__
+#define __DATABASE_MOCK_H__
 
 #include <gtest/gtest.h>
 
 #include "config/config.h"
 #include "config/config_setup.h"
-#include "storage/storage.h"
+#include "database/database.h"
 
 using namespace ::testing;
 
-class StorageMock : public Storage {
+class DatabaseMock : public Database {
 public:
-    StorageMock(std::shared_ptr<Config> config)
-        : Storage(config)
+    DatabaseMock(std::shared_ptr<Config> config)
+        : Database(config)
     {
     }
 
@@ -85,11 +85,11 @@ public:
     void doMetadataMigration() override { }
 
 protected:
-    std::shared_ptr<Storage> getSelf() override { return nullptr; }
+    std::shared_ptr<Database> getSelf() override { return nullptr; }
 
 public:
     // mock data
     std::map<std::string, std::string> findFolderImageMap;
 };
 
-#endif // __STORAGE_MOCK_H__
+#endif // __DATABASE_MOCK_H__

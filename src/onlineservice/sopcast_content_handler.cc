@@ -40,9 +40,9 @@
 #include "online_service.h"
 #include "util/tools.h"
 
-SopCastContentHandler::SopCastContentHandler(std::shared_ptr<Config> config, std::shared_ptr<Storage> storage)
+SopCastContentHandler::SopCastContentHandler(std::shared_ptr<Config> config, std::shared_ptr<Database> database)
     : config(std::move(config))
-    , storage(std::move(storage))
+    , database(std::move(database))
 {
 }
 
@@ -123,7 +123,7 @@ std::shared_ptr<CdsObject> SopCastContentHandler::getNextObject()
 
 std::shared_ptr<CdsObject> SopCastContentHandler::getObject(const std::string& groupName, const pugi::xml_node& channel) const
 {
-    auto item = std::make_shared<CdsItemExternalURL>(storage);
+    auto item = std::make_shared<CdsItemExternalURL>(database);
     auto resource = std::make_shared<CdsResource>(CH_DEFAULT);
     item->addResource(resource);
 
@@ -138,7 +138,7 @@ std::shared_ptr<CdsObject> SopCastContentHandler::getObject(const std::string& g
         return nullptr;
     }
 
-    temp.insert(temp.begin(), OnlineService::getStoragePrefix(OS_SopCast));
+    temp.insert(temp.begin(), OnlineService::getDatabasePrefix(OS_SopCast));
     item->setServiceID(temp);
 
     temp = channel.child("stream_type").text().as_string();

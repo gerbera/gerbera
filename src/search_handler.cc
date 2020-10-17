@@ -31,7 +31,7 @@
 #include <stack>
 
 #include "config/config_manager.h"
-#include "storage/storage.h"
+#include "database/database.h"
 #include "util/tools.h"
 
 static std::unordered_map<std::string, TokenType> tokenTypes {

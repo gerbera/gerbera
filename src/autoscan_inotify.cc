@@ -39,12 +39,12 @@
 #include <utility>
 
 #include "content_manager.h"
-#include "storage/storage.h"
+#include "database/database.h"
 
 #define INOTIFY_MAX_USER_WATCHES_FILE "/proc/sys/fs/inotify/max_user_watches"
 
-AutoscanInotify::AutoscanInotify(std::shared_ptr<Storage> storage, std::shared_ptr<ContentManager> content, std::shared_ptr<Config> config)
-    : storage(std::move(storage))
+AutoscanInotify::AutoscanInotify(std::shared_ptr<Database> database, std::shared_ptr<ContentManager> content, std::shared_ptr<Config> config)
+    : database(std::move(database))
     , content(std::move(content))
     , config(std::move(config))
 {
@@ -214,7 +214,7 @@ void AutoscanInotify::threadProc()
                             }
                         }
 
-                        int objectID = storage->findObjectIDByPath(path, !(mask & IN_ISDIR));
+                        int objectID = database->findObjectIDByPath(path, !(mask & IN_ISDIR));
                         if (objectID != INVALID_OBJECT_ID)
                             content->removeObject(objectID, !(mask & IN_MOVED_TO));
                     }
@@ -387,7 +387,7 @@ void AutoscanInotify::checkMoveWatches(int wd, const std::shared_ptr<Wd>& wdObj)
                         content->handlePeristentAutoscanRemove(adir);
                     }
 
-                    int objectID = storage->findObjectIDByPath(path, true);
+                    int objectID = database->findObjectIDByPath(path, true);
                     if (objectID != INVALID_OBJECT_ID)
                         content->removeObject(objectID, false);
                 }

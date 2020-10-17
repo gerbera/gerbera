@@ -52,7 +52,7 @@
 #include "client_config.h"
 #include "config_options.h"
 #include "config_setup.h"
-#include "storage/storage.h"
+#include "database/database.h"
 #include "transcoding/transcoding.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
@@ -478,7 +478,7 @@ void ConfigManager::load(const fs::path& userHome)
                                  "only one database driver may be active at a time");
 
     if (!sqlite3_en && !mysql_en)
-        throw std::runtime_error("You disabled both, sqlite3 and mysql but "
+        throw std::runtime_error("You disabled both sqlite3 and mysql but "
                                  "one database driver must be active");
 
 #ifdef HAVE_MYSQL
@@ -492,7 +492,7 @@ void ConfigManager::load(const fs::path& userHome)
     }
 #else
     if (mysql_en) {
-        throw std::runtime_error("You enabled MySQL storage in configuration, "
+        throw std::runtime_error("You enabled MySQL database in configuration, "
                                  "however this version of Gerbera was compiled "
                                  "without MySQL support!");
     }
@@ -835,12 +835,12 @@ void ConfigManager::load(const fs::path& userHome)
     xmlDoc = nullptr;
 }
 
-void ConfigManager::updateConfigFromDatabase(std::shared_ptr<Storage> storage)
+void ConfigManager::updateConfigFromDatabase(std::shared_ptr<Database> database)
 {
-    auto values = storage->getConfigValues();
+    auto values = database->getConfigValues();
     auto self = getSelf();
     origValues.clear();
-    log_info("Loading {} configuration items from storage", values.size());
+    log_info("Loading {} configuration items from database", values.size());
 
     for (const auto& cfgValue : values) {
         try {

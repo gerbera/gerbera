@@ -2,7 +2,7 @@
     
     MediaTomb - http://www.mediatomb.cc/
     
-    mysql_storage.h - this file is part of MediaTomb.
+    mysql_database.h - this file is part of MediaTomb.
     
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -27,29 +27,29 @@
     $Id$
 */
 
-/// \file mysql_storage.h
+/// \file mysql_database.h
 
 #ifdef HAVE_MYSQL
 
-#ifndef __MYSQL_STORAGE_H__
-#define __MYSQL_STORAGE_H__
+#ifndef __mysql_database_H__
+#define __mysql_database_H__
 
 #include "common.h"
-#include "storage/sql_storage.h"
+#include "database/sql_database.h"
 #include <mutex>
 #include <mysql.h>
 #include <string>
 #include <vector>
 
-class MysqlStorage : public SQLStorage, public std::enable_shared_from_this<SQLStorage> {
+class MySQLDatabase : public SQLDatabase, public std::enable_shared_from_this<SQLDatabase> {
 public:
-    explicit MysqlStorage(std::shared_ptr<Config> config);
-    ~MysqlStorage() override;
+    explicit MySQLDatabase(std::shared_ptr<Config> config);
+    ~MySQLDatabase() override;
 
 private:
     void init() override;
     void shutdownDriver() override;
-    std::shared_ptr<Storage> getSelf() override;
+    std::shared_ptr<Database> getSelf() override;
 
     std::string quote(std::string value) const override;
     std::string quote(const char* str) const override { return quote(std::string(str)); }
@@ -96,7 +96,7 @@ private:
     MYSQL_RES* mysql_res;
 
     friend class MysqlRow;
-    friend class MysqlStorage;
+    friend class MySQLDatabase;
 };
 
 class MysqlRow : public SQLRow {
@@ -111,6 +111,6 @@ private:
     friend std::unique_ptr<SQLRow> MysqlResult::nextRow();
 };
 
-#endif // __MYSQL_STORAGE_H__
+#endif // __mysql_database_H__
 
 #endif // HAVE_MYSQL

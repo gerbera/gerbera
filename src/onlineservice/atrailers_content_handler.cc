@@ -41,9 +41,9 @@
 #include "util/tools.h"
 
 ATrailersContentHandler::ATrailersContentHandler(std::shared_ptr<Config> config,
-    std::shared_ptr<Storage> storage)
+    std::shared_ptr<Database> database)
     : config(std::move(config))
-    , storage(std::move(storage))
+    , database(std::move(database))
 {
 }
 
@@ -90,7 +90,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getNextObject()
 
 std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_node& trailer) const
 {
-    auto item = std::make_shared<CdsItemExternalURL>(storage);
+    auto item = std::make_shared<CdsItemExternalURL>(database);
     auto resource = std::make_shared<CdsResource>(CH_DEFAULT);
     item->addResource(resource);
 
@@ -117,7 +117,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
         return nullptr;
     }
 
-    temp = std::to_string(OnlineService::getStoragePrefix(OS_ATrailers)) + temp;
+    temp = std::to_string(OnlineService::getDatabasePrefix(OS_ATrailers)) + temp;
     item->setServiceID(temp);
 
     auto preview = trailer.child("preview");

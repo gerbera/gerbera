@@ -36,13 +36,13 @@
 #include "request_handler.h"
 
 // forward declaration
-class Storage;
+class Database;
 class ContentManager;
 
 class URLRequestHandler : public RequestHandler {
 public:
     URLRequestHandler(std::shared_ptr<Config> config,
-        std::shared_ptr<Storage> storage,
+        std::shared_ptr<Database> database,
         std::shared_ptr<ContentManager> content);
     void getInfo(const char* filename, UpnpFileInfo* info) override;
     std::unique_ptr<IOHandler> open(const char* filename,

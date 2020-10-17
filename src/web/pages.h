@@ -42,7 +42,7 @@
 
 // forward declaration
 class Config;
-class Storage;
+class Database;
 
 namespace web {
 
@@ -55,7 +55,7 @@ protected:
     int timeout;
 
 public:
-    auth(const std::shared_ptr<Config>& config, std::shared_ptr<Storage> storage,
+    auth(const std::shared_ptr<Config>& config, std::shared_ptr<Database> database,
         std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
     void process() override;
 };
@@ -63,7 +63,7 @@ public:
 /// \brief Browser container tree
 class containers : public WebRequestHandler {
 public:
-    containers(std::shared_ptr<Config> config, std::shared_ptr<Storage> storage,
+    containers(std::shared_ptr<Config> config, std::shared_ptr<Database> database,
         std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
     void process() override;
 };
@@ -71,7 +71,7 @@ public:
 /// \brief Browser directory tree
 class directories : public WebRequestHandler {
 public:
-    directories(std::shared_ptr<Config> config, std::shared_ptr<Storage> storage,
+    directories(std::shared_ptr<Config> config, std::shared_ptr<Database> database,
         std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
     void process() override;
 };
@@ -79,7 +79,7 @@ public:
 /// \brief Browser file list
 class files : public WebRequestHandler {
 public:
-    files(std::shared_ptr<Config> config, std::shared_ptr<Storage> storage,
+    files(std::shared_ptr<Config> config, std::shared_ptr<Database> database,
         std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
     void process() override;
 };
@@ -87,7 +87,7 @@ public:
 /// \brief Browser item list
 class items : public WebRequestHandler {
 public:
-    items(std::shared_ptr<Config> config, std::shared_ptr<Storage> storage,
+    items(std::shared_ptr<Config> config, std::shared_ptr<Database> database,
         std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
     void process() override;
 };
@@ -95,7 +95,7 @@ public:
 /// \brief Browser add item
 class add : public WebRequestHandler {
 public:
-    add(std::shared_ptr<Config> config, std::shared_ptr<Storage> storage,
+    add(std::shared_ptr<Config> config, std::shared_ptr<Database> database,
         std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
     void process() override;
 };
@@ -103,7 +103,7 @@ public:
 /// \brief Browser remove item
 class remove : public WebRequestHandler {
 public:
-    remove(std::shared_ptr<Config> config, std::shared_ptr<Storage> storage,
+    remove(std::shared_ptr<Config> config, std::shared_ptr<Database> database,
         std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
     void process() override;
 };
@@ -111,7 +111,7 @@ public:
 /// \brief Browser remove item
 class edit_load : public WebRequestHandler {
 public:
-    edit_load(std::shared_ptr<Config> config, std::shared_ptr<Storage> storage,
+    edit_load(std::shared_ptr<Config> config, std::shared_ptr<Database> database,
         std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
     void process() override;
 };
@@ -119,7 +119,7 @@ public:
 /// \brief Browser remove item
 class edit_save : public WebRequestHandler {
 public:
-    edit_save(std::shared_ptr<Config> config, std::shared_ptr<Storage> storage,
+    edit_save(std::shared_ptr<Config> config, std::shared_ptr<Database> database,
         std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
     void process() override;
 };
@@ -127,7 +127,7 @@ public:
 /// \brief Browser add object.
 class addObject : public WebRequestHandler {
 public:
-    addObject(std::shared_ptr<Config> config, std::shared_ptr<Storage> storage,
+    addObject(std::shared_ptr<Config> config, std::shared_ptr<Database> database,
         std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
     void process() override;
 
@@ -141,7 +141,7 @@ protected:
 /// \brief autoscan add and remove
 class autoscan : public WebRequestHandler {
 public:
-    autoscan(std::shared_ptr<Config> config, std::shared_ptr<Storage> storage,
+    autoscan(std::shared_ptr<Config> config, std::shared_ptr<Database> database,
         std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
     void process() override;
 
@@ -152,9 +152,9 @@ protected:
 /// \brief nothing :)
 class voidType : public WebRequestHandler {
 public:
-    voidType(std::shared_ptr<Config> config, std::shared_ptr<Storage> storage,
+    voidType(std::shared_ptr<Config> config, std::shared_ptr<Database> database,
         std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
-        : WebRequestHandler(std::move(config), std::move(storage), std::move(content), std::move(sessionManager))
+        : WebRequestHandler(std::move(config), std::move(database), std::move(content), std::move(sessionManager))
     {
     }
     void process() override;
@@ -163,7 +163,7 @@ public:
 /// \brief task list and task cancel
 class tasks : public WebRequestHandler {
 public:
-    tasks(std::shared_ptr<Config> config, std::shared_ptr<Storage> storage,
+    tasks(std::shared_ptr<Config> config, std::shared_ptr<Database> database,
         std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
     void process() override;
 };
@@ -171,7 +171,7 @@ public:
 /// \brief UI action button
 class action : public WebRequestHandler {
 public:
-    action(std::shared_ptr<Config> config, std::shared_ptr<Storage> storage,
+    action(std::shared_ptr<Config> config, std::shared_ptr<Database> database,
         std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
     void process() override;
 };
@@ -180,14 +180,14 @@ public:
 /// \param page identifies what type of the request we are dealing with.
 /// \return the appropriate request handler.
 std::unique_ptr<WebRequestHandler> createWebRequestHandler(
-    const std::shared_ptr<Config>& config, const std::shared_ptr<Storage>& storage,
+    const std::shared_ptr<Config>& config, const std::shared_ptr<Database>& database,
     const std::shared_ptr<ContentManager>& content, const std::shared_ptr<SessionManager>& sessionManager,
     const std::string& page);
 
 /// \brief Browse clients list
 class clients : public WebRequestHandler {
 public:
-    clients(std::shared_ptr<Config> config, std::shared_ptr<Storage> storage,
+    clients(std::shared_ptr<Config> config, std::shared_ptr<Database> database,
         std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
     void process() override;
 };
@@ -205,7 +205,7 @@ protected:
     void setValue(pugi::xml_node& item, size_t value);
 
 public:
-    configLoad(std::shared_ptr<Config> config, std::shared_ptr<Storage> storage,
+    configLoad(std::shared_ptr<Config> config, std::shared_ptr<Database> database,
         std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
     void process() override;
 };
@@ -213,7 +213,7 @@ public:
 /// \brief save configuration
 class configSave : public WebRequestHandler {
 public:
-    configSave(std::shared_ptr<Config> config, std::shared_ptr<Storage> storage,
+    configSave(std::shared_ptr<Config> config, std::shared_ptr<Database> database,
         std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
     void process() override;
 };

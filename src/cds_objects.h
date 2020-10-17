@@ -46,7 +46,7 @@ namespace fs = std::filesystem;
 #include "util/tools.h"
 
 // forward declaration
-class Storage;
+class Database;
 
 // ATTENTION: These values need to be changed in web/js/items.js too.
 #define OBJECT_TYPE_CONTAINER 0x00000001u
@@ -85,7 +85,7 @@ class Storage;
 /// \brief Generic object in the Content Directory.
 class CdsObject {
 protected:
-    std::shared_ptr<Storage> storage;
+    std::shared_ptr<Database> database;
 
     /// \brief ID of the object in the content directory
     int id;
@@ -132,7 +132,7 @@ protected:
 
 public:
     /// \brief Constructor. Sets the default values.
-    explicit CdsObject(std::shared_ptr<Storage> storage);
+    explicit CdsObject(std::shared_ptr<Database> database);
 
     /// \brief Set the object ID.
     ///
@@ -350,7 +350,7 @@ public:
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
     virtual void validate();
 
-    static std::shared_ptr<CdsObject> createObject(const std::shared_ptr<Storage>& storage, unsigned int objectType);
+    static std::shared_ptr<CdsObject> createObject(const std::shared_ptr<Database>& database, unsigned int objectType);
 
     /// \brief Returns the path to the object as it appears in the database tree.
     virtual std::string getVirtualPath() const = 0;
@@ -372,7 +372,7 @@ protected:
 
 public:
     /// \brief Constructor, sets the object type and default upnp:class (object.item)
-    explicit CdsItem(std::shared_ptr<Storage> storage);
+    explicit CdsItem(std::shared_ptr<Database> database);
 
     /// \brief Set mime-type information of the media.
     void setMimeType(const std::string& mimeType) { this->mimeType = mimeType; }
@@ -438,7 +438,7 @@ protected:
 
 public:
     /// \brief Constructor, sets the object type.
-    explicit CdsActiveItem(std::shared_ptr<Storage> storage);
+    explicit CdsActiveItem(std::shared_ptr<Database> database);
 
     /// \brief Sets the action for the item.
     /// \param action absolute path to the script that will process the XML data.
@@ -474,7 +474,7 @@ public:
 class CdsItemExternalURL : public CdsItem {
 public:
     /// \brief Constructor, sets the object type.
-    explicit CdsItemExternalURL(std::shared_ptr<Storage> storage);
+    explicit CdsItemExternalURL(std::shared_ptr<Database> database);
 
     /// \brief Sets the URL for the item.
     /// \param URL full url to the item: http://somewhere.com/something.mpg
@@ -507,7 +507,7 @@ public:
 class CdsItemInternalURL : public CdsItemExternalURL {
 public:
     /// \brief Constructor, sets the object type.
-    explicit CdsItemInternalURL(std::shared_ptr<Storage> storage);
+    explicit CdsItemInternalURL(std::shared_ptr<Database> database);
 
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
     void validate() override;
@@ -578,7 +578,7 @@ protected:
 
 public:
     /// \brief Constructor, initializes default values for the flags and sets the object type.
-    explicit CdsContainer(std::shared_ptr<Storage> storage);
+    explicit CdsContainer(std::shared_ptr<Database> database);
 
     /// \brief Set the searchable flag.
     void setSearchable(bool searchable) { changeFlag(OBJECT_FLAG_SEARCHABLE, searchable); }

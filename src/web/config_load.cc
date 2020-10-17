@@ -31,21 +31,21 @@
 #include "config/client_config.h"
 #include "config/config_setup.h"
 #include "config/directory_tweak.h"
+#include "database/database.h"
 #include "metadata/metadata_handler.h"
-#include "storage/storage.h"
 #include "transcoding/transcoding.h"
 #include "upnp_xml.h"
 #include "util/upnp_clients.h"
 
-web::configLoad::configLoad(std::shared_ptr<Config> config, std::shared_ptr<Storage> storage,
+web::configLoad::configLoad(std::shared_ptr<Config> config, std::shared_ptr<Database> database,
     std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
-    : WebRequestHandler(std::move(config), std::move(storage), std::move(content), std::move(sessionManager))
+    : WebRequestHandler(std::move(config), std::move(database), std::move(content), std::move(sessionManager))
 {
     try {
-        if (this->storage != nullptr) {
-            dbEntries = this->storage->getConfigValues();
+        if (this->database != nullptr) {
+            dbEntries = this->database->getConfigValues();
         } else {
-            log_error("configLoad storage missing");
+            log_error("configLoad database missing");
         }
     } catch (const std::runtime_error& e) {
         log_error("configLoad {}", e.what());

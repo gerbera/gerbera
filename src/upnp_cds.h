@@ -42,7 +42,7 @@
 
 // forward declaration
 class Config;
-class Storage;
+class Database;
 
 /// \brief This class is responsible for the UPnP Content Directory Service operations.
 ///
@@ -101,7 +101,7 @@ protected:
     void doSamsungBookmark(const std::unique_ptr<ActionRequest>& request) const;
 
     std::shared_ptr<Config> config;
-    std::shared_ptr<Storage> storage;
+    std::shared_ptr<Database> database;
 
     UpnpDevice_Handle deviceHandle;
     UpnpXMLBuilder* xmlBuilder;
@@ -110,7 +110,7 @@ public:
     /// \brief Constructor for the CDS, saves the service type and service id
     /// in internal variables.
     explicit ContentDirectoryService(std::shared_ptr<Config> config,
-        std::shared_ptr<Storage> storage,
+        std::shared_ptr<Database> database,
         UpnpXMLBuilder* builder, UpnpDevice_Handle deviceHandle, int stringLimit);
     ~ContentDirectoryService();
 

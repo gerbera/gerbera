@@ -31,11 +31,11 @@
 namespace fs = std::filesystem;
 
 // forward declaration
-class Storage;
 class AutoscanList;
 class AutoscanDirectory;
 class ClientConfigList;
 class ConfigOption;
+class Database;
 class DirectoryConfigList;
 class TranscodingProfileList;
 
@@ -256,7 +256,7 @@ typedef enum {
 class Config {
 public:
     virtual ~Config() = default;
-    virtual void updateConfigFromDatabase(std::shared_ptr<Storage> storage) = 0;
+    virtual void updateConfigFromDatabase(std::shared_ptr<Database> database) = 0;
     virtual std::string getOrigValue(const std::string& item) const = 0;
     virtual void setOrigValue(const std::string& item, const std::string& value) = 0;
     virtual void setOrigValue(const std::string& item, bool value) = 0;

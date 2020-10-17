@@ -33,7 +33,7 @@
 
 #include "autoscan.h"
 #include "content_manager.h"
-#include "storage/storage.h"
+#include "database/database.h"
 
 void web::voidType::process()
 {

@@ -34,7 +34,7 @@
 #include <utility>
 
 #include "content_manager.h"
-#include "storage/storage.h"
+#include "database/database.h"
 
 AutoscanDirectory::AutoscanDirectory()
     : isOrig (false)
@@ -42,7 +42,7 @@ AutoscanDirectory::AutoscanDirectory()
     , taskCount(0)
     , scanID(INVALID_SCAN_ID)
     , objectID(INVALID_OBJECT_ID)
-    , storageID(INVALID_OBJECT_ID)
+    , databaseID(INVALID_OBJECT_ID)
     , timer_parameter(std::make_shared<Timer::Parameter>(Timer::Parameter::IDAutoscan, INVALID_SCAN_ID))
 {
 }
@@ -59,7 +59,7 @@ AutoscanDirectory::AutoscanDirectory(fs::path location, ScanMode mode, bool recu
     , taskCount(0)
     , scanID(id)
     , objectID(INVALID_OBJECT_ID)
-    , storageID(INVALID_OBJECT_ID)
+    , databaseID(INVALID_OBJECT_ID)
     , timer_parameter(std::make_shared<Timer::Parameter>(Timer::Parameter::IDAutoscan, INVALID_SCAN_ID))
 {
 }
@@ -70,9 +70,9 @@ void AutoscanDirectory::setCurrentLMT(time_t lmt)
         last_mod_current_scan = lmt;
 }
 
-AutoscanList::AutoscanList(std::shared_ptr<Storage> storage)
+AutoscanList::AutoscanList(std::shared_ptr<Database> database)
     : origSize(0)
-    , storage(std::move(storage))
+    , database(std::move(database))
 {
 }
 
@@ -82,7 +82,7 @@ void AutoscanList::updateLMinDB()
     for (size_t i = 0; i < list.size(); i++) {
         log_debug("i: {}", i);
         auto ad = list[i];
-        storage->updateAutoscanDirectory(ad);
+        database->updateAutoscanDirectory(ad);
     }
 }
 
@@ -201,7 +201,7 @@ std::shared_ptr<AutoscanList> AutoscanList::removeIfSubdir(const fs::path& paren
 {
     AutoLock lock(mutex);
 
-    auto rm_id_list = std::make_shared<AutoscanList>(storage);
+    auto rm_id_list = std::make_shared<AutoscanList>(database);
 
     for (auto it = list.begin(); it != list.end(); /*++it*/) {
         auto& dir = *it;
@@ -285,7 +285,7 @@ void AutoscanDirectory::copyTo(const std::shared_ptr<AutoscanDirectory>& copy) c
     copy->taskCount = taskCount;
     copy->scanID = scanID;
     copy->objectID = objectID;
-    copy->storageID = storageID;
+    copy->databaseID = databaseID;
     copy->last_mod_previous_scan = last_mod_previous_scan;
     copy->last_mod_current_scan = last_mod_current_scan;
     copy->timer_parameter = timer_parameter;

@@ -45,7 +45,7 @@
 #include "config/directory_tweak.h"
 #include "layout/fallback_layout.h"
 #include "metadata/metadata_handler.h"
-#include "storage/storage.h"
+#include "database/database.h"
 #include "update_manager.h"
 #include "util/process.h"
 #include "util/string_converter.h"
@@ -82,12 +82,12 @@ extern "C" {
 static struct magic_set* ms = nullptr;
 #endif
 
-ContentManager::ContentManager(const std::shared_ptr<Config>& config, const std::shared_ptr<Storage>& storage,
+ContentManager::ContentManager(const std::shared_ptr<Config>& config, const std::shared_ptr<Database>& database,
     std::shared_ptr<UpdateManager> update_manager, std::shared_ptr<web::SessionManager> session_manager,
     std::shared_ptr<Timer> timer, std::shared_ptr<TaskProcessor> task_processor,
     std::shared_ptr<Runtime> scripting_runtime, std::shared_ptr<LastFm> last_fm)
     : config(config)
-    , storage(storage)
+    , database(database)
     , update_manager(std::move(update_manager))
     , session_manager(std::move(session_manager))
     , timer(std::move(timer))
@@ -132,15 +132,15 @@ ContentManager::ContentManager(const std::shared_ptr<Config>& config, const std:
         }
     }
 
-    storage->updateAutoscanList(ScanMode::Timed, config_timed_list);
-    autoscan_timed = storage->getAutoscanList(ScanMode::Timed);
+    database->updateAutoscanList(ScanMode::Timed, config_timed_list);
+    autoscan_timed = database->getAutoscanList(ScanMode::Timed);
 }
 
 void ContentManager::run()
 {
 #ifdef HAVE_INOTIFY
     auto self = shared_from_this();
-    inotify = std::make_unique<AutoscanInotify>(storage, self, config);
+    inotify = std::make_unique<AutoscanInotify>(database, self, config);
 
     if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
         auto config_inotify_list = config->getAutoscanListOption(CFG_IMPORT_AUTOSCAN_INOTIFY_LIST);
@@ -154,11 +154,11 @@ void ContentManager::run()
             }
         }
 
-        storage->updateAutoscanList(ScanMode::INotify, config_inotify_list);
-        autoscan_inotify = storage->getAutoscanList(ScanMode::INotify);
+        database->updateAutoscanList(ScanMode::INotify, config_inotify_list);
+        autoscan_inotify = database->getAutoscanList(ScanMode::INotify);
     } else {
         // make an empty list so we do not have to do extra checks on shutdown
-        autoscan_inotify = std::make_shared<AutoscanList>(storage);
+        autoscan_inotify = std::make_shared<AutoscanList>(database);
     }
 
     // Start INotify thread
@@ -195,7 +195,7 @@ void ContentManager::run()
     if (config->getBoolOption(CFG_ONLINE_CONTENT_SOPCAST_ENABLED)) {
         try {
             auto self = shared_from_this();
-            auto sc = std::make_shared<SopCastService>(config, storage, self);
+            auto sc = std::make_shared<SopCastService>(config, database, self);
 
             int i = config->getIntOption(CFG_ONLINE_CONTENT_SOPCAST_REFRESH);
             sc->setRefreshInterval(i);
@@ -222,7 +222,7 @@ void ContentManager::run()
     if (config->getBoolOption(CFG_ONLINE_CONTENT_ATRAILERS_ENABLED)) {
         try {
             auto self = shared_from_this();
-            auto at = std::make_shared<ATrailersService>(config, storage, self);
+            auto at = std::make_shared<ATrailersService>(config, database, self);
 
             int i = config->getIntOption(CFG_ONLINE_CONTENT_ATRAILERS_REFRESH);
             at->setRefreshInterval(i);
@@ -341,7 +341,7 @@ void ContentManager::shutdown()
     destroyLayout();
 
 #ifdef HAVE_INOTIFY
-    // update mofification time for storage
+    // update mofification time for database
     for (size_t i = 0; i < autoscan_inotify->size(); i++) {
         log_debug("AutoDir {}", i);
         std::shared_ptr<AutoscanDirectory> dir = autoscan_inotify->get(i);
@@ -431,7 +431,7 @@ void ContentManager::addVirtualItem(const std::shared_ptr<CdsObject>& obj, bool 
     if (!isRegularFile(path, ec))
         throw_std_runtime_error("Not a file: " + path.string());
 
-    auto pcdir = storage->findObjectByPath(path);
+    auto pcdir = database->findObjectByPath(path);
     if (pcdir == nullptr) {
         pcdir = createObjectFromFile(path, true, allow_fifo);
         if (pcdir == nullptr) {
@@ -446,9 +446,9 @@ void ContentManager::addVirtualItem(const std::shared_ptr<CdsObject>& obj, bool 
     addObject(obj);
 }
 
-std::shared_ptr<CdsObject> ContentManager::createSingleItem(const fs::path& path, fs::path& rootPath, bool followSymlinks, bool checkStorage, bool processExisting, const std::shared_ptr<CMAddFileTask>& task)
+std::shared_ptr<CdsObject> ContentManager::createSingleItem(const fs::path& path, fs::path& rootPath, bool followSymlinks, bool checkDatabase, bool processExisting, const std::shared_ptr<CMAddFileTask>& task)
 {
-    auto obj = checkStorage ? storage->findObjectByPath(path) : nullptr;
+    auto obj = checkDatabase ? database->findObjectByPath(path) : nullptr;
     bool isNew = false;
 
     if (obj == nullptr) {
@@ -504,7 +504,7 @@ int ContentManager::_addFile(const fs::path& path, fs::path rootPath, const Auto
     initJS();
 #endif
 
-    // checkStorage, don't process existing
+    // checkDatabase, don't process existing
     auto obj = createSingleItem(path, rootPath, asSetting.followSymlinks, true, false, task);
     if (obj == nullptr) // object ignored
         return INVALID_OBJECT_ID;
@@ -524,7 +524,7 @@ int ContentManager::_addFile(const fs::path& path, fs::path rootPath, const Auto
 bool ContentManager::updateAttachedResources(const char* location, const std::string& parentPath, bool all)
 {
     bool parentRemoved = false;
-    int parentID = storage->findObjectIDByPath(parentPath, false);
+    int parentID = database->findObjectIDByPath(parentPath, false);
     if (parentID != INVALID_OBJECT_ID) {
         // as there is no proper way to force refresh of unchanged files, delete whole dir and rescan it
         _removeObject(parentID, false, all);
@@ -552,7 +552,7 @@ void ContentManager::_removeObject(int objectID, bool rescanResource, bool all)
 
     bool parentRemoved = false;
     if (rescanResource) {
-        auto obj = storage->loadObject(objectID);
+        auto obj = database->loadObject(objectID);
         if (obj != nullptr && obj->hasResource(CH_RESOURCE)) {
             std::string parentPath = obj->getLocation().parent_path().c_str();
             parentRemoved = updateAttachedResources(obj->getLocation().c_str(), parentPath, all);
@@ -560,7 +560,7 @@ void ContentManager::_removeObject(int objectID, bool rescanResource, bool all)
     }
 
     if (!parentRemoved) {
-        auto changedContainers = storage->removeObject(objectID, all);
+        auto changedContainers = database->removeObject(objectID, all);
         if (changedContainers != nullptr) {
             session_manager->containerChangedUI(changedContainers->ui);
             update_manager->containersChanged(changedContainers->upnp);
@@ -573,7 +573,7 @@ void ContentManager::_removeObject(int objectID, bool rescanResource, bool all)
 int ContentManager::ensurePathExistence(fs::path path)
 {
     int updateID;
-    int containerID = storage->ensurePathExistence(std::move(path), &updateID);
+    int containerID = database->ensurePathExistence(std::move(path), &updateID);
     if (updateID != INVALID_OBJECT_ID) {
         update_manager->containerChanged(updateID);
         session_manager->containerChangedUI(updateID);
@@ -595,7 +595,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
 
     if (containerID != INVALID_OBJECT_ID) {
         try {
-            obj = storage->loadObject(containerID);
+            obj = database->loadObject(containerID);
             if (!IS_CDS_CONTAINER(obj->getObjectType())) {
                 throw_std_runtime_error("Not a container");
             }
@@ -617,7 +617,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
     if (containerID == INVALID_OBJECT_ID) {
         if (!fs::is_directory(adir->getLocation())) {
             adir->setObjectID(INVALID_OBJECT_ID);
-            storage->updateAutoscanDirectory(adir);
+            database->updateAutoscanDirectory(adir);
             if (adir->persistent()) {
                 return;
             }
@@ -629,7 +629,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
 
         containerID = ensurePathExistence(adir->getLocation());
         adir->setObjectID(containerID);
-        storage->updateAutoscanDirectory(adir);
+        database->updateAutoscanDirectory(adir);
         location = adir->getLocation();
     }
 
@@ -651,7 +651,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
         if (adir->persistent()) {
             removeObject(containerID, false);
             adir->setObjectID(INVALID_OBJECT_ID);
-            storage->updateAutoscanDirectory(adir);
+            database->updateAutoscanDirectory(adir);
             return;
         }
         adir->setTaskCount(-1);
@@ -668,7 +668,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
     log_debug("Rescanning options: recursive={} hidden={} followSymlinks={}", asSetting.recursive, asSetting.hidden, asSetting.followSymlinks);
 
     // request only items if non-recursive scan is wanted
-    auto list = storage->getObjects(containerID, !asSetting.recursive);
+    auto list = database->getObjects(containerID, !asSetting.recursive);
 
     unsigned int thisTaskID;
     if (task != nullptr) {
@@ -710,7 +710,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
         }
 
         if (isLink(newPath, asSetting.followSymlinks)) {
-            int objectID = storage->findObjectIDByPath(newPath);
+            int objectID = database->findObjectIDByPath(newPath);
             if (objectID > 0) {
                 if (list != nullptr)
                     list->erase(objectID);
@@ -721,7 +721,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
         }
 
         if (S_ISREG(statbuf.st_mode)) {
-            int objectID = storage->findObjectIDByPath(newPath);
+            int objectID = database->findObjectIDByPath(newPath);
             if (objectID > 0) {
                 if (list != nullptr)
                     list->erase(objectID);
@@ -747,7 +747,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
                     last_modified_new_max = statbuf.st_mtime;
             }
         } else if (S_ISDIR(statbuf.st_mode) && asSetting.recursive) {
-            int objectID = storage->findObjectIDByPath(newPath);
+            int objectID = database->findObjectIDByPath(newPath);
             if (objectID > 0) {
                 log_debug("rescanSubDirectory {}", newPath.c_str());
                 if (list != nullptr)
@@ -784,7 +784,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
         return;
 
     if (list != nullptr && !list->empty()) {
-        auto changedContainers = storage->removeObjects(list);
+        auto changedContainers = database->removeObjects(list);
         if (changedContainers != nullptr) {
             session_manager->containerChangedUI(changedContainers->ui);
             update_manager->containersChanged(changedContainers->upnp);
@@ -810,7 +810,7 @@ void ContentManager::addRecursive(const fs::path& path, bool followSymlinks, boo
         throw_std_runtime_error("could not list directory " + path.string() + " : " + strerror(errno));
     }
 
-    int parentID = storage->findObjectIDByPath(path);
+    int parentID = database->findObjectIDByPath(path);
 
     // abort loop if either:
     // no valid directory returned, server is about to shutdown, the task is there and was invalidated
@@ -846,7 +846,7 @@ void ContentManager::addRecursive(const fs::path& path, bool followSymlinks, boo
 
         try {
             fs::path rootPath("");
-            // check storage if parent, process existing
+            // check database if parent, process existing
             auto obj = createSingleItem(newPath, rootPath, followSymlinks, (parentID > 0), true, task);
 
             if (obj != nullptr && IS_CDS_ITEM(obj->getObjectType()))
@@ -871,13 +871,13 @@ void ContentManager::updateObject(int objectID, const std::map<std::string, std:
     std::string location = getValueOrDefault(parameters, "location");
     std::string protocol = getValueOrDefault(parameters, "protocol");
 
-    auto obj = storage->loadObject(objectID);
+    auto obj = database->loadObject(objectID);
     unsigned int objectType = obj->getObjectType();
 
     /// \todo if we have an active item, does it mean we first go through IS_ITEM and then thorugh IS_ACTIVE item? ask Gena
     if (IS_CDS_ITEM(objectType)) {
         auto item = std::static_pointer_cast<CdsItem>(obj);
-        auto clone = CdsObject::createObject(storage, objectType);
+        auto clone = CdsObject::createObject(database, objectType);
         item->copyTo(clone);
 
         if (!title.empty())
@@ -914,7 +914,7 @@ void ContentManager::updateObject(int objectID, const std::map<std::string, std:
         if (!item->equals(cloned_item, true)) {
             cloned_item->validate();
             int containerChanged = INVALID_OBJECT_ID;
-            storage->updateObject(clone, &containerChanged);
+            database->updateObject(clone, &containerChanged);
             update_manager->containerChanged(containerChanged);
             session_manager->containerChangedUI(containerChanged);
             log_debug("updateObject: calling containerChanged on item {}", item->getTitle().c_str());
@@ -926,7 +926,7 @@ void ContentManager::updateObject(int objectID, const std::map<std::string, std:
         std::string state = getValueOrDefault(parameters, "state");
 
         auto item = std::static_pointer_cast<CdsActiveItem>(obj);
-        auto clone = CdsObject::createObject(storage, objectType);
+        auto clone = CdsObject::createObject(database, objectType);
         item->copyTo(clone);
 
         if (!title.empty())
@@ -954,14 +954,14 @@ void ContentManager::updateObject(int objectID, const std::map<std::string, std:
         if (!item->equals(cloned_item, true)) {
             cloned_item->validate();
             int containerChanged = INVALID_OBJECT_ID;
-            storage->updateObject(clone, &containerChanged);
+            database->updateObject(clone, &containerChanged);
             update_manager->containerChanged(containerChanged);
             session_manager->containerChangedUI(containerChanged);
             update_manager->containerChanged(item->getParentID());
         }
     } else if (IS_CDS_CONTAINER(objectType)) {
         auto cont = std::static_pointer_cast<CdsContainer>(obj);
-        auto clone = CdsObject::createObject(storage, objectType);
+        auto clone = CdsObject::createObject(database, objectType);
         cont->copyTo(clone);
 
         if (!title.empty())
@@ -974,7 +974,7 @@ void ContentManager::updateObject(int objectID, const std::map<std::string, std:
         if (!cont->equals(cloned_item, true)) {
             clone->validate();
             int containerChanged = INVALID_OBJECT_ID;
-            storage->updateObject(clone, &containerChanged);
+            database->updateObject(clone, &containerChanged);
             update_manager->containerChanged(containerChanged);
             session_manager->containerChangedUI(containerChanged);
             update_manager->containerChanged(cont->getParentID());
@@ -990,15 +990,15 @@ void ContentManager::addObject(const std::shared_ptr<CdsObject>& obj)
     int containerChanged = INVALID_OBJECT_ID;
     log_debug("Adding: parent ID is {}", obj->getParentID());
 
-    storage->addObject(obj, &containerChanged);
+    database->addObject(obj, &containerChanged);
     log_debug("After adding: parent ID is {}", obj->getParentID());
 
     update_manager->containerChanged(containerChanged);
     session_manager->containerChangedUI(containerChanged);
 
     int parent_id = obj->getParentID();
-    if ((parent_id != -1) && (storage->getChildCount(parent_id) == 1)) {
-        auto parent = storage->loadObject(parent_id);
+    if ((parent_id != -1) && (database->getChildCount(parent_id) == 1)) {
+        auto parent = database->loadObject(parent_id);
         log_debug("Will update ID {}", parent->getParentID());
         update_manager->containerChanged(parent->getParentID());
     }
@@ -1010,7 +1010,7 @@ void ContentManager::addObject(const std::shared_ptr<CdsObject>& obj)
 
 void ContentManager::addContainer(int parentID, std::string title, const std::string& upnpClass)
 {
-    addContainerChain(storage->buildContainerPath(parentID, escape(std::move(title), VIRTUAL_CONTAINER_ESCAPE, VIRTUAL_CONTAINER_SEPARATOR)), upnpClass);
+    addContainerChain(database->buildContainerPath(parentID, escape(std::move(title), VIRTUAL_CONTAINER_ESCAPE, VIRTUAL_CONTAINER_SEPARATOR)), upnpClass);
 }
 
 int ContentManager::addContainerChain(const std::string& chain, const std::string& lastClass, int lastRefID, const std::map<std::string, std::string>& lastMetadata)
@@ -1027,7 +1027,7 @@ int ContentManager::addContainerChain(const std::string& chain, const std::strin
     }
 
     log_debug("received chain: {} -> {} ({}) [{}]", chain.c_str(), newChain.c_str(), lastClass.c_str(), dictEncodeSimple(lastMetadata).c_str());
-    storage->addContainerChain(newChain, lastClass, lastRefID, &containerID, &updateID, lastMetadata);
+    database->addContainerChain(newChain, lastClass, lastRefID, &containerID, &updateID, lastMetadata);
 
     // if (updateID != INVALID_OBJECT_ID)
     // an invalid updateID is checked by containerChanged()
@@ -1042,7 +1042,7 @@ void ContentManager::updateObject(const std::shared_ptr<CdsObject>& obj, bool se
     obj->validate();
 
     int containerChanged = INVALID_OBJECT_ID;
-    storage->updateObject(obj, &containerChanged);
+    database->updateObject(obj, &containerChanged);
 
     if (send_updates) {
         update_manager->containerChanged(containerChanged);
@@ -1063,7 +1063,7 @@ std::shared_ptr<CdsObject> ContentManager::convertObject(std::shared_ptr<CdsObje
         throw_std_runtime_error("Cannot convert object type " + std::to_string(oldType) + " to " + std::to_string(newType));
     }
 
-    auto newObj = CdsObject::createObject(storage, newType);
+    auto newObj = CdsObject::createObject(database, newType);
     oldObj->copyTo(newObj);
 
     return newObj;
@@ -1134,7 +1134,7 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::path& 
             }
         }
 
-        auto item = std::make_shared<CdsItem>(storage);
+        auto item = std::make_shared<CdsItem>(database);
         obj = item;
         item->setLocation(path);
         item->setMTime(statbuf.st_mtime);
@@ -1154,9 +1154,9 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::path& 
             MetadataHandler::setMetadata(config, item);
         }
     } else if (S_ISDIR(statbuf.st_mode)) {
-        auto cont = std::make_shared<CdsContainer>(storage);
+        auto cont = std::make_shared<CdsContainer>(database);
         obj = cont;
-        /* adding containers is done by Storage now
+        /* adding containers is done by Database now
          * this exists only to inform the caller that
          * this is a container
          */
@@ -1206,12 +1206,12 @@ void ContentManager::initLayout()
             try {
                 if (layout_type == "js") {
 #ifdef HAVE_JS
-                    layout = std::make_shared<JSLayout>(config, storage, self, scripting_runtime);
+                    layout = std::make_shared<JSLayout>(config, database, self, scripting_runtime);
 #else
                     log_error("Cannot init layout: Gerbera compiled without JS support, but JS was requested.");
 #endif
                 } else if (layout_type == "builtin") {
-                    layout = std::make_shared<FallbackLayout>(config, storage, self);
+                    layout = std::make_shared<FallbackLayout>(config, database, self);
                 }
             } catch (const std::runtime_error& e) {
                 layout = nullptr;
@@ -1228,7 +1228,7 @@ void ContentManager::initJS()
 {
     if (playlist_parser_script == nullptr) {
         auto self = shared_from_this();
-        playlist_parser_script = std::make_unique<PlaylistParserScript>(config, storage, self, scripting_runtime);
+        playlist_parser_script = std::make_unique<PlaylistParserScript>(config, database, self, scripting_runtime);
     }
 }
 
@@ -1291,7 +1291,7 @@ void ContentManager::threadProc()
         }
     }
 
-    storage->threadCleanup();
+    database->threadCleanup();
 }
 
 void* ContentManager::staticThreadProc(void* arg)
@@ -1368,7 +1368,7 @@ void ContentManager::cleanupOnlineServiceObjects(const std::shared_ptr<OnlineSer
     log_debug("Finished fetch cycle for service: {}", service->getServiceName().c_str());
 
     if (service->getItemPurgeInterval() > 0) {
-        auto ids = storage->getServiceObjectIDs(service->getStoragePrefix());
+        auto ids = database->getServiceObjectIDs(service->getDatabasePrefix());
 
         struct timespec current, last;
         getTimespecNow(&current);
@@ -1376,7 +1376,7 @@ void ContentManager::cleanupOnlineServiceObjects(const std::shared_ptr<OnlineSer
         std::string temp;
 
         for (int object_id : *ids) {
-            auto obj = storage->loadObject(object_id);
+            auto obj = database->loadObject(object_id);
             if (obj == nullptr)
                 continue;
 
@@ -1442,7 +1442,7 @@ void ContentManager::removeObject(int objectID, bool rescanResource, bool async,
     if (async) {
         /*
         // building container path for the description
-        auto objectPath = storage->getObjectPath(objectID);
+        auto objectPath = database->getObjectPath(objectID);
         std::ostringstream desc;
         desc << "Removing ";
         // skip root container, start from 1
@@ -1455,7 +1455,7 @@ void ContentManager::removeObject(int objectID, bool rescanResource, bool async,
         std::shared_ptr<CdsObject> obj;
 
         try {
-            obj = storage->loadObject(objectID);
+            obj = database->loadObject(objectID);
             path = obj->getLocation();
 
             std::string vpath = obj->getVirtualPath();
@@ -1537,7 +1537,7 @@ std::shared_ptr<AutoscanDirectory> ContentManager::getAutoscanDirectory(int scan
 
 std::shared_ptr<AutoscanDirectory> ContentManager::getAutoscanDirectory(int objectID)
 {
-    return storage->getAutoscanDirectory(objectID);
+    return database->getAutoscanDirectory(objectID);
 }
 
 std::shared_ptr<AutoscanDirectory> ContentManager::getAutoscanDirectory(const fs::path& location) const
@@ -1569,7 +1569,7 @@ void ContentManager::removeAutoscanDirectory(const std::shared_ptr<AutoscanDirec
 
     if (adir->getScanMode() == ScanMode::Timed) {
         autoscan_timed->remove(adir->getScanID());
-        storage->removeAutoscanDirectory(adir);
+        database->removeAutoscanDirectory(adir);
         session_manager->containerChangedUI(adir->getObjectID());
 
         // if 3rd parameter is true: won't fail if scanID doesn't exist
@@ -1579,7 +1579,7 @@ void ContentManager::removeAutoscanDirectory(const std::shared_ptr<AutoscanDirec
     if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
         if (adir->getScanMode() == ScanMode::INotify) {
             autoscan_inotify->remove(adir->getScanID());
-            storage->removeAutoscanDirectory(adir);
+            database->removeAutoscanDirectory(adir);
             session_manager->containerChangedUI(adir->getObjectID());
             inotify->unmonitor(adir);
         }
@@ -1591,7 +1591,7 @@ void ContentManager::handlePeristentAutoscanRemove(const std::shared_ptr<Autosca
 {
     if (adir->persistent()) {
         adir->setObjectID(INVALID_OBJECT_ID);
-        storage->updateAutoscanDirectory(adir);
+        database->updateAutoscanDirectory(adir);
     } else {
         removeAutoscanDirectory(adir);
     }
@@ -1601,7 +1601,7 @@ void ContentManager::handlePersistentAutoscanRecreate(const std::shared_ptr<Auto
 {
     int id = ensurePathExistence(adir->getLocation());
     adir->setObjectID(id);
-    storage->updateAutoscanDirectory(adir);
+    database->updateAutoscanDirectory(adir);
 }
 
 void ContentManager::setAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>& dir)
@@ -1618,9 +1618,9 @@ void ContentManager::setAutoscanDirectory(const std::shared_ptr<AutoscanDirector
 #endif
 
     if (original != nullptr)
-        dir->setStorageID(original->getStorageID());
+        dir->setDatabaseID(original->getDatabaseID());
 
-    storage->checkOverlappingAutoscans(dir);
+    database->checkOverlappingAutoscans(dir);
 
     // adding a new autoscan directory
     if (original == nullptr) {
@@ -1628,7 +1628,7 @@ void ContentManager::setAutoscanDirectory(const std::shared_ptr<AutoscanDirector
             dir->setLocation(FS_ROOT_DIRECTORY);
         else {
             log_debug("objectID: {}", dir->getObjectID());
-            auto obj = storage->loadObject(dir->getObjectID());
+            auto obj = database->loadObject(dir->getObjectID());
             if (obj == nullptr || !IS_CDS_CONTAINER(obj->getObjectType()) || obj->isVirtual())
                 throw_std_runtime_error("tried to remove an illegal object (id) from the list of the autoscan directories");
 
@@ -1640,7 +1640,7 @@ void ContentManager::setAutoscanDirectory(const std::shared_ptr<AutoscanDirector
             dir->setLocation(obj->getLocation());
         }
         dir->resetLMT();
-        storage->addAutoscanDirectory(dir);
+        database->addAutoscanDirectory(dir);
         if (dir->getScanMode() == ScanMode::Timed) {
             autoscan_timed->add(dir);
             timerNotify(dir->getTimerParameter());
@@ -1700,7 +1700,7 @@ void ContentManager::setAutoscanDirectory(const std::shared_ptr<AutoscanDirector
     }
 #endif
 
-    storage->updateAutoscanDirectory(copy);
+    database->updateAutoscanDirectory(copy);
     if (original->getScanMode() != copy->getScanMode())
         session_manager->containerChangedUI(copy->getObjectID());
 }

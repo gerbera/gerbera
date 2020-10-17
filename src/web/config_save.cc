@@ -34,15 +34,15 @@
 #include "config/config_options.h"
 #include "config/config_setup.h"
 #include "content_manager.h"
+#include "database/database.h"
 #include "metadata/metadata_handler.h"
-#include "storage/storage.h"
 #include "transcoding/transcoding.h"
 #include "upnp_xml.h"
 #include "util/upnp_clients.h"
 
-web::configSave::configSave(std::shared_ptr<Config> config, std::shared_ptr<Storage> storage,
+web::configSave::configSave(std::shared_ptr<Config> config, std::shared_ptr<Database> database,
     std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
-    : WebRequestHandler(std::move(config), std::move(storage), std::move(content), std::move(sessionManager))
+    : WebRequestHandler(std::move(config), std::move(database), std::move(content), std::move(sessionManager))
 {
 }
 
@@ -60,7 +60,7 @@ void web::configSave::process()
         log_error(ex.what());
     }
     if (count == -1 && action == "clear") {
-        storage->removeConfigValue("*"); // remove all
+        database->removeConfigValue("*"); // remove all
         auto taskEl = root.append_child("task");
         taskEl.append_attribute("text") = "Removed all config values from database";
         return;
@@ -98,7 +98,7 @@ void web::configSave::process()
                 bool update = param(status) == STATUS_CHANGED;
                 std::map<std::string, std::string> arguments = {{"status", parStatus}};
                 if (parStatus == STATUS_RESET || parStatus == STATUS_KILLED) {
-                    storage->removeConfigValue(param(item));
+                    database->removeConfigValue(param(item));
                     if (config->hasOrigValue(param(item))) {
                         parValue = config->getOrigValue(param(item));
                         log_debug("reset {} to '{}'", param(item), parValue);
@@ -113,13 +113,13 @@ void web::configSave::process()
                         success = true;
                     }
                 } else if (parStatus == STATUS_ADDED || parStatus == STATUS_MANUAL) {
-                    storage->updateConfigValue(cs->getUniquePath(), param(item), parValue, STATUS_MANUAL);
+                    database->updateConfigValue(cs->getUniquePath(), param(item), parValue, STATUS_MANUAL);
                     log_debug("added {}", param(item));
                     success = false;
                     update = true;
                 } else if (parStatus == STATUS_REMOVED) {
                     cs->updateDetail(param(item), parValue, config, &arguments);
-                    storage->updateConfigValue(cs->getUniquePath(), param(item), parValue, parStatus);
+                    database->updateConfigValue(cs->getUniquePath(), param(item), parValue, parStatus);
                     log_debug("removed {}", param(item));
                     success = true;
                 }
@@ -135,7 +135,7 @@ void web::configSave::process()
                         }
                     }
                     if (parStatus == STATUS_CHANGED && success) {
-                        storage->updateConfigValue(cs->getUniquePath(), param(item), param(value));
+                        database->updateConfigValue(cs->getUniquePath(), param(item), param(value));
                     }
                 }
             }
@@ -156,7 +156,7 @@ void web::configSave::process()
                 autoscan = content->getAutoscanDirectory(targetPath);
                 targetPath = targetPath.parent_path();
             }
-            int objectID = storage->findObjectIDByPath(target);
+            int objectID = database->findObjectIDByPath(target);
             if (objectID > 0 && autoscan != nullptr) {
                 content->rescanDirectory(autoscan, objectID, target);
                 auto taskEl = root.append_child("task");

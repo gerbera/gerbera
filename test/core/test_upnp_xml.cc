@@ -7,7 +7,7 @@
 #include "upnp_xml.h"
 
 #include "../mock/config_mock.h"
-#include "../mock/storage_mock.h"
+#include "../mock/database_mock.h"
 
 using namespace ::testing;
 
@@ -20,10 +20,10 @@ public:
     virtual void SetUp()
     {
         config = std::make_shared<ConfigMock>();
-        storage = std::make_shared<StorageMock>(config);
+        database = std::make_shared<DatabaseMock>(config);
         std::string virtualDir = "http://server/content";
         std::string presentationURl = "http://someurl/";
-        subject = new UpnpXMLBuilder(config, storage, virtualDir, presentationURl);
+        subject = new UpnpXMLBuilder(config, database, virtualDir, presentationURl);
     }
 
     virtual void TearDown()
@@ -33,7 +33,7 @@ public:
 
     UpnpXMLBuilder* subject;
     std::shared_ptr<ConfigMock> config;
-    std::shared_ptr<StorageMock> storage;
+    std::shared_ptr<DatabaseMock> database;
 };
 
 TEST_F(UpnpXmlTest, RenderObjectContainer)
@@ -53,8 +53,8 @@ TEST_F(UpnpXmlTest, RenderObjectContainer)
     obj->setMetadata(MetadataHandler::getMetaFieldName(M_ORCHESTRA), "Orchestra");
     obj->setMetadata(MetadataHandler::getMetaFieldName(M_UPNP_DATE), "2001-01-01");
     // albumArtURI
-    storage->findFolderImageMap.clear();
-    storage->findFolderImageMap[std::to_string(obj->getID())] = "10";
+    database->findFolderImageMap.clear();
+    database->findFolderImageMap[std::to_string(obj->getID())] = "10";
 
     std::ostringstream expectedXml;
     expectedXml << "<DIDL-Lite>\n";

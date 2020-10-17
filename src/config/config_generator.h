@@ -40,7 +40,7 @@ public:
     static void generateServer(const fs::path& userHome, const fs::path& configDir, const fs::path& prefixDir, pugi::xml_node* config);
     static void generateUi(pugi::xml_node* server);
     static void generateExtendedRuntime(pugi::xml_node* server);
-    static void generateStorage(pugi::xml_node* server);
+    static void generateDatabase(pugi::xml_node* server);
     static void generateImport(const fs::path& prefixDir, const fs::path& magicFile, pugi::xml_node* config);
     static void generateMappings(pugi::xml_node* import);
     static void generateOnlineContent(pugi::xml_node* import);

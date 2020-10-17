@@ -39,16 +39,16 @@
 #include "config/config_manager.h"
 #include "search_handler.h"
 #include "server.h"
-#include "storage/storage.h"
+#include "database/database.h"
 #include "util/upnp_quirks.h"
 
 ContentDirectoryService::ContentDirectoryService(std::shared_ptr<Config> config,
-    std::shared_ptr<Storage> storage,
+    std::shared_ptr<Database> database,
     UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle, int stringLimit)
     : systemUpdateID(0)
     , stringLimit(stringLimit)
     , config(std::move(config))
-    , storage(std::move(storage))
+    , database(std::move(database))
     , deviceHandle(deviceHandle)
     , xmlBuilder(xmlBuilder)
 {
@@ -86,7 +86,7 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
         throw UpnpException(UPNP_SOAP_E_INVALID_ARGS,
             "invalid browse flag: " + BrowseFlag);
 
-    auto parent = storage->loadObject(objectID);
+    auto parent = database->loadObject(objectID);
     if ((parent->getClass() == UPNP_DEFAULT_CLASS_MUSIC_ALBUM) || (parent->getClass() == UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER))
         flag |= BROWSE_TRACK_SORT;
 
@@ -100,7 +100,7 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
 
     std::vector<std::shared_ptr<CdsObject>> arr;
     try {
-        arr = storage->browse(param);
+        arr = database->browse(param);
     } catch (const std::runtime_error& e) {
         throw UpnpException(UPNP_E_NO_SUCH_ID, "no such object");
     }
@@ -174,7 +174,7 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
     std::vector<std::shared_ptr<CdsObject>> results;
     int numMatches = 0;
     try {
-        results = storage->search(searchParam, &numMatches);
+        results = database->search(searchParam, &numMatches);
     } catch (const std::runtime_error& e) {
         log_debug(e.what());
         throw UpnpException(UPNP_E_NO_SUCH_ID, "no such object");
@@ -283,7 +283,7 @@ void ContentDirectoryService::processSubscriptionRequest(const std::unique_ptr<S
     auto propset = UpnpXMLBuilder::createEventPropertySet();
     auto property = propset->document_element().first_child();
     property.append_child("SystemUpdateID").append_child(pugi::node_pcdata).set_value(std::to_string(systemUpdateID).c_str());
-    auto obj = storage->loadObject(0);
+    auto obj = database->loadObject(0);
     auto cont = std::static_pointer_cast<CdsContainer>(obj);
     property.append_child("ContainerUpdateIDs").append_child(pugi::node_pcdata).set_value(fmt::format("0,{}", +cont->getUpdateID()).c_str());
 

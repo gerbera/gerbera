@@ -64,12 +64,12 @@ public:
     [[nodiscard]] int getErrorCode() const { return errCode; }
 };
 
-class StorageException : public std::runtime_error {
+class DatabaseException : public std::runtime_error {
 protected:
     std::string userMessage;
 
 public:
-    StorageException(std::string _userMessage, const std::string& message)
+    DatabaseException(std::string _userMessage, const std::string& message)
         : std::runtime_error(message)
         , userMessage(std::move(_userMessage))
     {
@@ -77,10 +77,10 @@ public:
     std::string getUserMessage() const { return (!userMessage.empty() ? userMessage : what()); }
 };
 
-class ObjectNotFoundException : public StorageException {
+class ObjectNotFoundException : public DatabaseException {
 public:
     explicit ObjectNotFoundException(const std::string& message)
-        : StorageException(message, message)
+        : DatabaseException(message, message)
     {
     }
 };

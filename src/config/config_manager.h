@@ -52,7 +52,7 @@ class DirectoryConfigList;
 enum class ScanMode;
 enum class ClientType;
 class ConfigOption;
-class Storage;
+class Database;
 class TranscodingProfileList;
 
 class ConfigManager : public Config, public std::enable_shared_from_this<Config> {
@@ -73,7 +73,7 @@ public:
     static std::shared_ptr<ConfigSetup> findConfigSetupByPath(const std::string& key, bool save = false);
 
     void load(const fs::path& userHome);
-    void updateConfigFromDatabase(std::shared_ptr<Storage> storage) override;
+    void updateConfigFromDatabase(std::shared_ptr<Database> database) override;
 
     /// \brief add a config option
     /// \param option option type to add.

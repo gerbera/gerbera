@@ -289,7 +289,7 @@
 
     <xs:element name="option" type="xs:positiveInteger"/>
 
-    <!--  Storage -->
+    <!-- Storage -->
 
     <xs:element name="storage">
         <xs:complexType>

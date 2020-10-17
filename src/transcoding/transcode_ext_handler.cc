@@ -51,7 +51,7 @@
 #include "iohandler/process_io_handler.h"
 #include "metadata/metadata_handler.h"
 #include "server.h"
-#include "storage/storage.h"
+#include "database/database.h"
 #include "transcoding_process_executor.h"
 #include "update_manager.h"
 #include "util/process.h"

@@ -165,16 +165,16 @@ add_library(libgerbera STATIC
         src/serve_request_handler.cc
         src/serve_request_handler.h
         src/server.h
-        src/storage/mysql/mysql_create_sql.h
-        src/storage/mysql/mysql_storage.cc
-        src/storage/mysql/mysql_storage.h
-        src/storage/sqlite3/sqlite3_create_sql.h
-        src/storage/sqlite3/sqlite3_storage.cc
-        src/storage/sqlite3/sqlite3_storage.h
-        src/storage/sql_storage.cc
-        src/storage/sql_storage.h
-        src/storage/storage.cc
-        src/storage/storage.h
+        src/database/mysql/mysql_create_sql.h
+        src/database/mysql/mysql_database.cc
+        src/database/mysql/mysql_database.h
+        src/database/sqlite3/sqlite3_create_sql.h
+        src/database/sqlite3/sqlite_database.cc
+        src/database/sqlite3/sqlite_database.h
+        src/database/sql_database.cc
+        src/database/sql_database.h
+        src/database/database.cc
+        src/database/database.h
         src/subscription_request.cc
         src/subscription_request.h
         src/transcoding/transcode_dispatcher.cc

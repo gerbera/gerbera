@@ -34,11 +34,11 @@
 #include <filesystem>
 #include <utility>
 
-#include "storage/storage.h"
+#include "database/database.h"
 #include "util/tools.h"
 
-CdsObject::CdsObject(std::shared_ptr<Storage> storage)
-    : storage(std::move(storage))
+CdsObject::CdsObject(std::shared_ptr<Database> database)
+    : database(std::move(database))
     , mtime(0)
     , sizeOnDisk(0)
 {
@@ -114,20 +114,20 @@ void CdsObject::validate()
         throw_std_runtime_error("Object validation failed: missing upnp class");
 }
 
-std::shared_ptr<CdsObject> CdsObject::createObject(const std::shared_ptr<Storage>& storage, unsigned int objectType)
+std::shared_ptr<CdsObject> CdsObject::createObject(const std::shared_ptr<Database>& database, unsigned int objectType)
 {
     std::shared_ptr<CdsObject> obj;
 
     if (IS_CDS_CONTAINER(objectType)) {
-        obj = std::make_shared<CdsContainer>(storage);
+        obj = std::make_shared<CdsContainer>(database);
     } else if (IS_CDS_ITEM_INTERNAL_URL(objectType)) {
-        obj = std::make_shared<CdsItemInternalURL>(storage);
+        obj = std::make_shared<CdsItemInternalURL>(database);
     } else if (IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
-        obj = std::make_shared<CdsItemExternalURL>(storage);
+        obj = std::make_shared<CdsItemExternalURL>(database);
     } else if (IS_CDS_ACTIVE_ITEM(objectType)) {
-        obj = std::make_shared<CdsActiveItem>(storage);
+        obj = std::make_shared<CdsActiveItem>(database);
     } else if (IS_CDS_ITEM(objectType)) {
-        obj = std::make_shared<CdsItem>(storage);
+        obj = std::make_shared<CdsItem>(database);
     } else {
         throw_std_runtime_error("invalid object type: " + std::to_string(objectType));
     }
@@ -136,8 +136,8 @@ std::shared_ptr<CdsObject> CdsObject::createObject(const std::shared_ptr<Storage
 
 /* CdsItem */
 
-CdsItem::CdsItem(std::shared_ptr<Storage> storage)
-    : CdsObject(std::move(storage))
+CdsItem::CdsItem(std::shared_ptr<Database> database)
+    : CdsObject(std::move(database))
     , mimeType(MIMETYPE_DEFAULT)
     , serviceID("")
 {
@@ -183,8 +183,8 @@ void CdsItem::validate()
         throw_std_runtime_error("Item validation failed: file " + location.string() + " not found");
 }
 
-CdsActiveItem::CdsActiveItem(std::shared_ptr<Storage> storage)
-    : CdsItem(std::move(storage))
+CdsActiveItem::CdsActiveItem(std::shared_ptr<Database> database)
+    : CdsItem(std::move(database))
 {
     objectType |= OBJECT_TYPE_ACTIVE_ITEM;
 
@@ -223,8 +223,8 @@ void CdsActiveItem::validate()
 }
 //---------
 
-CdsItemExternalURL::CdsItemExternalURL(std::shared_ptr<Storage> storage)
-    : CdsItem(std::move(storage))
+CdsItemExternalURL::CdsItemExternalURL(std::shared_ptr<Database> database)
+    : CdsItem(std::move(database))
 {
     objectType |= OBJECT_TYPE_ITEM_EXTERNAL_URL;
 
@@ -243,8 +243,8 @@ void CdsItemExternalURL::validate()
 }
 //---------
 
-CdsItemInternalURL::CdsItemInternalURL(std::shared_ptr<Storage> storage)
-    : CdsItemExternalURL(std::move(storage))
+CdsItemInternalURL::CdsItemInternalURL(std::shared_ptr<Database> database)
+    : CdsItemExternalURL(std::move(database))
 {
     objectType |= OBJECT_TYPE_ITEM_INTERNAL_URL;
     mimeType = MIMETYPE_DEFAULT;
@@ -259,8 +259,8 @@ void CdsItemInternalURL::validate()
         throw_std_runtime_error("Internal URL item validation failed: only realative URLs allowd");
 }
 
-CdsContainer::CdsContainer(std::shared_ptr<Storage> storage)
-    : CdsObject(std::move(storage))
+CdsContainer::CdsContainer(std::shared_ptr<Database> database)
+    : CdsObject(std::move(database))
 {
     objectType = OBJECT_TYPE_CONTAINER;
     updateID = 0;
@@ -299,11 +299,11 @@ std::string CdsContainer::getVirtualPath() const
     if (getID() == CDS_ID_ROOT) {
         location = std::string(1, VIRTUAL_CONTAINER_SEPARATOR);
     } else if (getID() == CDS_ID_FS_ROOT) {
-        location = std::string(1, VIRTUAL_CONTAINER_SEPARATOR) + storage->getFsRootName();
+        location = std::string(1, VIRTUAL_CONTAINER_SEPARATOR) + database->getFsRootName();
     } else if (!getLocation().empty()) {
         location = getLocation();
         if (!isVirtual()) {
-            location = std::string(1, VIRTUAL_CONTAINER_SEPARATOR) + storage->getFsRootName() + location;
+            location = std::string(1, VIRTUAL_CONTAINER_SEPARATOR) + database->getFsRootName() + location;
         }
     }
 
@@ -315,7 +315,7 @@ std::string CdsContainer::getVirtualPath() const
 
 std::string CdsItem::getVirtualPath() const
 {
-    auto cont = storage->loadObject(getParentID());
+    auto cont = database->loadObject(getParentID());
     std::string location = cont->getVirtualPath();
     location = location + VIRTUAL_CONTAINER_SEPARATOR + getTitle();
 

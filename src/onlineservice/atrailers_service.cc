@@ -40,7 +40,7 @@
 #include "config/config_options.h"
 #include "content_manager.h"
 #include "server.h"
-#include "storage/storage.h"
+#include "database/database.h"
 #include "url.h"
 #include "util/string_converter.h"
 
@@ -48,10 +48,10 @@
 #define ATRAILERS_SERVICE_URL_720P "https://trailers.apple.com/trailers/home/xml/current_720p.xml"
 
 ATrailersService::ATrailersService(const std::shared_ptr<Config>& config,
-    std::shared_ptr<Storage> storage,
+    std::shared_ptr<Database> database,
     std::shared_ptr<ContentManager> content)
     : config(config)
-    , storage(std::move(storage))
+    , database(std::move(database))
     , content(std::move(content))
     , pid(0)
 {
@@ -137,7 +137,7 @@ bool ATrailersService::refreshServiceData(std::shared_ptr<Layout> layout)
         throw_std_runtime_error("Failed to get XML content from Trailers service");
     }
 
-    auto sc = std::make_unique<ATrailersContentHandler>(config, storage);
+    auto sc = std::make_unique<ATrailersContentHandler>(config, database);
     sc->setServiceContent(reply);
 
     std::shared_ptr<CdsObject> obj;
@@ -148,7 +148,7 @@ bool ATrailersService::refreshServiceData(std::shared_ptr<Layout> layout)
 
         obj->setVirtual(true);
 
-        auto old = storage->loadObjectByServiceID(std::static_pointer_cast<CdsItem>(obj)->getServiceID());
+        auto old = database->loadObjectByServiceID(std::static_pointer_cast<CdsItem>(obj)->getServiceID());
         if (old == nullptr) {
             log_debug("Adding new Trailers object");
 

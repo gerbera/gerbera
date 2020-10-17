@@ -38,10 +38,10 @@
 #include "js_functions.h"
 
 ImportScript::ImportScript(const std::shared_ptr<Config>& config,
-    std::shared_ptr<Storage> storage,
+    std::shared_ptr<Database> database,
     std::shared_ptr<ContentManager> content,
     const std::shared_ptr<Runtime>& runtime)
-    : Script(config, std::move(storage), std::move(content), runtime, "import")
+    : Script(config, std::move(database), std::move(content), runtime, "import")
 {
     std::string scriptPath = config->getOption(CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT);
 
