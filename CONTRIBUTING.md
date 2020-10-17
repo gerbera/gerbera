@@ -2,9 +2,9 @@
 
 We welcome pull requests from everyone!
 
-MediaTomb is an old project that we are working on modernising - there are a lot of cobwebs 🕸 .
+Gerbera was originally based on MediaTomb which is an old project that we are working on modernising - there are a lot of cobwebs 🕸 .
 
-For new code please use modern C++ (up to 17) constructs where possible, and avoid the `zmm` namespace.
+For new code please use "modern" C++ (up to 17) constructs where possible.
 
 1. Fork this repo.
 
@@ -21,6 +21,8 @@ For new code please use modern C++ (up to 17) constructs where possible, and avo
 Some things that will increase the chance that your pull request is accepted:
 
 * Stick to [Webkit style](https://webkit.org/code-style-guidelines/).
+* Format your code with `clang-format`.
+* Ensure your code works as expected by running it.
 * Write a [good commit message](http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html).
 
 It is also a good idea to run cmake with`-DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_CXX_FLAGS="-Werror"`
