@@ -106,7 +106,7 @@ std::shared_ptr<Config> ConfigManager::getSelf()
     return shared_from_this();
 }
 
-static std::vector<std::shared_ptr<ConfigSetup>> complexOptions = {
+std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = {
     std::make_shared<ConfigIntSetup>(CFG_SERVER_PORT, "/server/port", 0),
     std::make_shared<ConfigStringSetup>(CFG_SERVER_IP, "/server/ip", ""),
     std::make_shared<ConfigStringSetup>(CFG_SERVER_NETWORK_INTERFACE, "/server/interface", ""),
@@ -254,7 +254,7 @@ static std::vector<std::shared_ptr<ConfigSetup>> complexOptions = {
 #endif
     std::make_shared<ConfigAutoscanSetup>(CFG_IMPORT_AUTOSCAN_TIMED_LIST, "/import/autoscan", ScanMode::Timed),
 
-    std::make_shared<ConfigBoolSetup>(CFG_TRANSCODING_MIMETYPE_PROF_MAP_ALLOW_UNUSED, "/transcoding/mimetype-profile-mappings/attribute::allow-unused", NO),
+    std::make_shared<ConfigBoolSetup>(CFG_TRANSCODING_MIMETYPE_PROF_MAP_ALLOW_UNUSED,+ "/transcoding/mimetype-profile-mappings/attribute::allow-unused", NO),
     std::make_shared<ConfigBoolSetup>(CFG_TRANSCODING_PROFILES_PROFILE_ALLOW_UNUSED, "/transcoding/profiles/attribute::allow-unused", NO),
     std::make_shared<ConfigEnumSetup<transcoding_type_t>>(ATTR_TRANSCODING_PROFILES_PROFLE_TYPE, "type",
         std::map<std::string, transcoding_type_t>({ { "none", TR_None }, { "external", TR_External }, /* for the future...{"remote", TR_Remote}*/ })),
@@ -303,33 +303,68 @@ static std::vector<std::shared_ptr<ConfigSetup>> complexOptions = {
     std::make_shared<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_FANART_FILE, "fanart-file", ""),
     std::make_shared<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_SUBTILTE_FILE, "subtitle-file", ""),
     std::make_shared<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_RESOURCE_FILE, "resource-file", ""),
+
+    std::make_shared<ConfigStringSetup>(ATTR_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE, "mimetype", ""),
+
+    std::make_shared<ConfigStringSetup>(ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_MIMETYPE, "mimetype", ""),
+    std::make_shared<ConfigStringSetup>(ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_TREAT, "treat", ""),
+    std::make_shared<ConfigStringSetup>(ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_AS, "as", ""),
+    std::make_shared<ConfigStringSetup>(ATTR_IMPORT_MAPPINGS_MIMETYPE_FROM, "from", ""),
+    std::make_shared<ConfigStringSetup>(ATTR_IMPORT_MAPPINGS_MIMETYPE_TO, "to", ""),
+
+    std::make_shared<ConfigStringSetup>(ATTR_IMPORT_RESOURCES_NAME, "name", ""),
+
+    std::make_shared<ConfigStringSetup>(ATTR_IMPORT_LAYOUT_MAPPING_FROM, "from", ""),
+    std::make_shared<ConfigStringSetup>(ATTR_IMPORT_LAYOUT_MAPPING_TO, "to", ""),
+
+    std::make_shared<ConfigStringSetup>(ATTR_IMPORT_LIBOPTS_AUXDATA_TAG, "tag", ""),
+    std::make_shared<ConfigStringSetup>(ATTR_SERVER_UI_ACCOUNT_LIST_PASSWORD, "password", ""),
+    std::make_shared<ConfigStringSetup>(ATTR_SERVER_UI_ACCOUNT_LIST_USER, "user", ""),
 };
 
-static std::map<config_option_t, const char*> simpleOptions = {
+std::map<config_option_t, std::vector<config_option_t>> ConfigManager::parentOptions = {
+    { ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED, { CFG_TRANSCODING_PROFILE_LIST } },
+    { ATTR_TRANSCODING_PROFILES_PROFLE_ACCURL, { CFG_TRANSCODING_PROFILE_LIST } },
+    { ATTR_TRANSCODING_PROFILES_PROFLE_TYPE, { CFG_TRANSCODING_PROFILE_LIST } },
+
+    { ATTR_AUTOSCAN_DIRECTORY_LOCATION, { CFG_IMPORT_AUTOSCAN_TIMED_LIST, CFG_IMPORT_AUTOSCAN_INOTIFY_LIST } },
+    { ATTR_AUTOSCAN_DIRECTORY_MODE, { CFG_IMPORT_AUTOSCAN_TIMED_LIST, CFG_IMPORT_AUTOSCAN_INOTIFY_LIST } },
+    { ATTR_AUTOSCAN_DIRECTORY_RECURSIVE, { CFG_IMPORT_AUTOSCAN_TIMED_LIST, CFG_IMPORT_AUTOSCAN_INOTIFY_LIST } },
+    { ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES, { CFG_IMPORT_AUTOSCAN_TIMED_LIST, CFG_IMPORT_AUTOSCAN_INOTIFY_LIST } },
+
+    { ATTR_DIRECTORIES_TWEAK_LOCATION, { CFG_IMPORT_DIRECTORIES_LIST } },
+    { ATTR_DIRECTORIES_TWEAK_RECURSIVE, { CFG_IMPORT_DIRECTORIES_LIST } },
+    { ATTR_DIRECTORIES_TWEAK_HIDDEN, { CFG_IMPORT_DIRECTORIES_LIST } },
+    { ATTR_DIRECTORIES_TWEAK_CASE_SENSITIVE, { CFG_IMPORT_DIRECTORIES_LIST } },
+    { ATTR_DIRECTORIES_TWEAK_FOLLOW_SYMLINKS, { CFG_IMPORT_DIRECTORIES_LIST } },
+
+    { ATTR_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE, {  } },
+
+    { ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_MIMETYPE, { CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST } },
+    { ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_TREAT, { CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST } },
+    { ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_AS, { CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST } },
+    { ATTR_IMPORT_MAPPINGS_MIMETYPE_FROM, { CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST, CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST, CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST } },
+    { ATTR_IMPORT_MAPPINGS_MIMETYPE_TO, { CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST,CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST, CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST } },
+
+    { ATTR_IMPORT_RESOURCES_NAME, { CFG_IMPORT_RESOURCES_FANART_FILE_LIST, CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST, CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST } },
+
+    { ATTR_IMPORT_LAYOUT_MAPPING_FROM, { CFG_IMPORT_LAYOUT_MAPPING } },
+    { ATTR_IMPORT_LAYOUT_MAPPING_TO, { CFG_IMPORT_LAYOUT_MAPPING } },
+    };
+
+std::map<config_option_t, const char*> ConfigManager::simpleOptions = {
     { CFG_MAX, "max_option" },
 
     { ATTR_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN_OPTION, "option" },
     { ATTR_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT, "content" },
     { ATTR_SERVER_UI_ACCOUNT_LIST_ACCOUNT, "acount" },
-    { ATTR_SERVER_UI_ACCOUNT_LIST_USER, "user" },
-    { ATTR_SERVER_UI_ACCOUNT_LIST_PASSWORD, "password" },
     { ATTR_IMPORT_MAPPINGS_MIMETYPE_MAP, "map" },
-    { ATTR_IMPORT_MAPPINGS_MIMETYPE_FROM, "from" },
-    { ATTR_IMPORT_MAPPINGS_MIMETYPE_TO, "to" },
     { ATTR_IMPORT_RESOURCES_ADD_FILE, "add-file" },
-    { ATTR_IMPORT_RESOURCES_NAME, "name" },
     { ATTR_IMPORT_LIBOPTS_AUXDATA_DATA, "add-data" },
-    { ATTR_IMPORT_LIBOPTS_AUXDATA_TAG, "tag" },
 
     { ATTR_TRANSCODING_MIMETYPE_PROF_MAP_TRANSCODE, "transcode" },
-    { ATTR_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE, "mimetype" },
     { ATTR_TRANSCODING_MIMETYPE_PROF_MAP_USING, "using" },
-    { ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_TREAT, "treat" },
-    { ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_MIMETYPE, "mimetype" },
-    { ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_AS, "as" },
     { ATTR_IMPORT_LAYOUT_MAPPING_PATH, "path" },
-    { ATTR_IMPORT_LAYOUT_MAPPING_FROM, "from" },
-    { ATTR_IMPORT_LAYOUT_MAPPING_TO, "to" },
     { ATTR_TRANSCODING_PROFILES, "profiles" },
     { ATTR_TRANSCODING_PROFILES_PROFLE, "profile" },
     { ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_4CC, "fourcc" },
@@ -367,13 +402,29 @@ std::shared_ptr<ConfigSetup> ConfigManager::findConfigSetup(config_option_t opti
     throw std::runtime_error(fmt::format("Error in config code: {} tag not found", static_cast<int>(option)));
 }
 
-std::shared_ptr<ConfigSetup> ConfigManager::findConfigSetupByPath(const std::string& key, bool save)
+std::shared_ptr<ConfigSetup> ConfigManager::findConfigSetupByPath(const std::string& key, bool save, const std::shared_ptr<ConfigSetup> parent)
 {
     auto co = std::find_if(complexOptions.begin(), complexOptions.end(), [&](const auto& s) { return s->getUniquePath() == key; });
 
     if (co != complexOptions.end()) {
         log_debug("Config: option found: '{}'", (*co)->xpath);
         return *co;
+    }
+
+    if (parent != nullptr) {
+        auto attrKey = key.substr(parent->getUniquePath().length());
+        if (attrKey.find_first_of(']') != std::string::npos) {
+            attrKey = attrKey.substr(attrKey.find_first_of(']') + 1);
+        }
+        if (attrKey.find_first_of("attribute::") != std::string::npos) {
+            attrKey = attrKey.substr(attrKey.find_first_of("attribute::") + 11);
+        }
+        co = std::find_if(complexOptions.begin(), complexOptions.end(), [&](const auto& s) { return s->getUniquePath() == attrKey && (parentOptions.find(s->option) == parentOptions.end() || parentOptions.at(s->option).end() != std::find_if(parentOptions.at(s->option).begin(), parentOptions.at(s->option).end(), [&] (const auto& o) {return o == s->option; })); });
+
+        if (co != complexOptions.end()) {
+            log_debug("Config: attribute option found: '{}'", (*co)->xpath);
+            return *co;
+        }
     }
 
     if (save) {

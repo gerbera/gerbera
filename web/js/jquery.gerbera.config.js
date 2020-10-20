@@ -27,7 +27,9 @@ $.widget('grb.config', {
     this.element.addClass('grb-config');
     const list = $('<ul></ul>').addClass('grb-config-list');
     const chooser = this.options.chooser;
-    const data = this.options.meta;
+    this.setup = this.options.setup;
+    this.meta = this.options.meta;
+
     let line;
     this.subElements = [];
     this.result = {};
@@ -63,8 +65,8 @@ $.widget('grb.config', {
 
     const configMode = this.element.find('input[name=configMode]');
     configMode.val([this.options.choice]);
-    if (data.length > 0) {
-      this.createSection(list, '', data, this.options.values, 0, this);
+    if (this.setup.length > 0) {
+      this.createSection(list, '', this.setup, this.options.values, 0, this);
     } else {
       line = $('<li></li>');
       $('<span>No config found</span>').appendTo(line);
@@ -132,6 +134,8 @@ $.widget('grb.config', {
       }
       case 'String':
       case 'Password':
+      case 'Path':
+      case 'Enum':
       case 'Number': {
         itemValue.value = itemValue.editor.val();
         break;
@@ -244,6 +248,16 @@ $.widget('grb.config', {
   createSection: function (list, xpath, section, values, level, parentItem, status = 'unchanged') {
     parentItem.childList = {};
     parentItem.childList[0] = [];
+
+    this.meta.forEach((m) => {
+      section.filter((s) => s.item === m.item ).forEach((s) => {
+        if (!('type' in s) || s.type == undefined || s.type === null || s.type === '') {
+          s.type = m.type;
+          if (!('value' in s) || s.value == undefined || s.value === null)
+            s.value = m.value;
+        }
+      });
+    });
     for (let i = 0; i < section.length; i++) {
       const item = section[i];
       let line;
@@ -428,14 +442,25 @@ $.widget('grb.config', {
           } else {
             input.prop('disabled', true);
           }
+          if (!('type' in item) || item.type == undefined || item.type === null || item.type === '') {
+            this.meta.forEach((m) => {
+              if(Number.parseInt(itemValue.aid) === Number.parseInt(m.id)) {
+                item.type = m.type;
+                if (!('value' in item) || item.value == undefined || item.value === null)
+                  item.value = m.value;
+              }
+            });
+          }
 
           switch(item.type){
             case 'Boolean': {
               input.attr('type', 'checkbox');
-              input.attr('checked', itemValue.value === "true");
+              input.attr('checked', itemValue.value === "true" || itemValue.value === "on");
             }
             break;
-            case 'String': {
+            case 'Enum':
+            case 'String':
+            case 'Path': {
               input.attr('type', 'text');
               input.val(itemValue.value);
             }
@@ -459,7 +484,7 @@ $.widget('grb.config', {
               // already handled
             break;
             default:
-              console.log('Unknown item type ' + item.type);
+              console.log(`${item.item}: Unknown type '${item.type}'`);
           }
 
           itemLine.append(input);

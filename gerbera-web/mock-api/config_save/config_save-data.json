@@ -271,8 +271,7 @@
 					"caption": "Accounts",
 					"type": "List",
 					"editable": true,
-					"children": [
-					]
+					"children": []
 				},
 				{
 					"item": "/server/ui/items-per-page/attribute::default",
@@ -285,8 +284,7 @@
 					"caption": "Items Per Page",
 					"type": "List",
 					"editable": true,
-					"children": [
-					]
+					"children": []
 				}
 			]
 		},
@@ -1042,5 +1040,7 @@
 			"value": "0x1"
 		}
 	],
+	"types": [],
+	"meta": [],
 	"success": true
 }

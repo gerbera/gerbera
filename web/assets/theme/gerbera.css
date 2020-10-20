@@ -238,8 +238,8 @@ body,
 
 #config {
     display: flex;
-    flex: 1;
     height: calc( 100% - 115px );
+    width: 100%;
 }
 
 #left {
@@ -270,6 +270,7 @@ body,
 
 #configframe {
     height: 100%;
+    width: 100%;
 }
 
 #configgrid {

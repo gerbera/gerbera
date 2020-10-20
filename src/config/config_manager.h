@@ -67,10 +67,15 @@ public:
     /// \brief Returns the name of the config file that was used to launch the server.
     fs::path getConfigFilename() const override { return filename; }
 
+    static const std::vector<std::shared_ptr<ConfigSetup>>& getOptionList()
+    {
+        return complexOptions;
+    }
+
     static const char* mapConfigOption(config_option_t option);
 
     static std::shared_ptr<ConfigSetup> findConfigSetup(config_option_t option, bool save = false);
-    static std::shared_ptr<ConfigSetup> findConfigSetupByPath(const std::string& key, bool save = false);
+    static std::shared_ptr<ConfigSetup> findConfigSetupByPath(const std::string& key, bool save = false, const std::shared_ptr<ConfigSetup> parent = nullptr);
 
     void load(const fs::path& userHome);
     void updateConfigFromDatabase(std::shared_ptr<Database> database) override;
@@ -133,6 +138,10 @@ public:
     static bool isDebugLogging() { return debug_logging; }
 
 protected:
+    static std::vector<std::shared_ptr<ConfigSetup>> complexOptions;
+    static std::map<config_option_t, const char*> simpleOptions;
+    static std::map<config_option_t, std::vector<config_option_t>> parentOptions;
+
     fs::path filename;
     fs::path prefix_dir;
     fs::path magic_file;

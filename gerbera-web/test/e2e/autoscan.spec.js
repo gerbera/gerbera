@@ -28,6 +28,7 @@ describe('Autoscan Suite', () => {
 
     it('a gerbera tree fs item container opens autoscan overlay when trail add autoscan is clicked', async () => {
       await homePage.clickMenu('nav-fs');
+      driver.sleep(500); // allow for load
       await homePage.clickTree('etc');
 
       await homePage.clickTrailAddAutoscan();
@@ -52,6 +53,7 @@ describe('Autoscan Suite', () => {
 
     it('autoscan displays message when properly submitted to server', async () => {
       await homePage.clickMenu('nav-fs');
+      driver.sleep(500); // allow for load
       await homePage.clickTree('etc');
       await homePage.clickTrailAddAutoscan();
 
@@ -71,6 +73,7 @@ describe('Autoscan Suite', () => {
 
     it('an existing autoscan item loads edit overlay', async () => {
       await homePage.clickMenu('nav-db');
+      driver.sleep(500); // allow for load
       await homePage.clickTree('Playlists');
       await homePage.clickAutoscanEdit(1);
 

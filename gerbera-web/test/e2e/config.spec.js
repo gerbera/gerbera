@@ -28,7 +28,7 @@ describe('Config Suite', () => {
 
     it('a gerbera config item is changed', async () => {
       await homePage.clickMenu('nav-config');
-      await driver.sleep(500); // allow for load
+      await driver.sleep(1000); // allow for load
       await homePage.showConfig('Server');
 
       let result = await homePage.editOverlayFieldValue('value__server_modelNumber_7_0');

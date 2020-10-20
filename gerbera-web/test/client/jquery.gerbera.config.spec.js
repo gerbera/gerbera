@@ -17,8 +17,9 @@ describe('The jQuery Configgrid', () => {
 
   it('creates a tree base on config and values', () => {
     dataGrid.config({
-      meta: configMetaJson.config,
+      setup: configMetaJson.config,
       values: configValueJson.values,
+      meta: configValueJson.meta,
       choice: 'standard',
       chooser: {
         minimal: {caption: 'Minimal', fileName: './fixtures/config_meta.json'}

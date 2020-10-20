@@ -37,18 +37,20 @@ const destroy = () => {
 let current_config = {
   config: null,
   values: null,
+  meta: null,
   changedItems: {},
   choice: 'expert',
   chooser: {
-    minimal: {caption: 'Minimal', fileName: 'gerbera-config-minimal.json'},
-    standard: {caption: 'Standard', fileName: 'gerbera-config-standard.json'},
-    expert: {caption: 'Expert', fileName: 'gerbera-config-expert.json'}
+    minimal: {caption: 'Minimal', fileName: './gerbera-config-minimal.json'},
+    standard: {caption: 'Standard', fileName: './gerbera-config-standard.json'},
+    expert: {caption: 'Expert', fileName: './gerbera-config-expert.json'}
   }
 };
 
 const initialize = () => {
   current_config.config = null;
   current_config.values = null;
+  current_config.meta = null;
   current_config.choice = GerberaApp.configMode();
   $('#configgrid').html('');
   return Promise.resolve();
@@ -66,7 +68,14 @@ const menuSelected = () => {
     })
     .catch((err) => GerberaApp.error(err));
   retrieveGerberaValues('config_load')
-    .then((response) => loadConfig({success: response.success, values: response.values.item}, 'values'))
+    .then((response) => {
+      loadConfig({success: response.success, values: response.values.item}, 'values');
+      if ('types' in response) {
+        loadConfig({success: response.success, meta: response.types.item}, 'meta');
+      } else {
+        loadConfig({success: response.success, meta: []}, 'meta');
+      }
+    })
     .catch((err) => GerberaApp.error(err));
 };
 
@@ -90,6 +99,7 @@ const retrieveGerberaValues = (type) => {
 const configModeChanged = (mode) => {
   current_config.choice = mode;
   const oldValues = current_config.values;
+  const oldMeta = current_config.meta;
   GerberaApp.setCurrentConfig(mode);
   initialize();
   retrieveGerberaConfig()
@@ -100,6 +110,7 @@ const configModeChanged = (mode) => {
         loadConfig(response, 'config');
       }
       loadConfig({success: true, values: oldValues}, 'values');
+      loadConfig({success: true, meta: oldMeta}, 'meta');
     })
     .catch((err) => GerberaApp.error(err));
 }
@@ -108,7 +119,7 @@ const loadConfig = (response, item) => {
   if (response.success && item in response && response[item]) {
      current_config[item] = response[item];
   }
-  if (current_config.config !== null && current_config.values !== null) {
+  if (current_config.config !== null && current_config.values !== null && current_config.meta !== null) {
     const datagrid = $('#configgrid');
 
     if (datagrid.hasClass('grb-config')) {
@@ -116,8 +127,9 @@ const loadConfig = (response, item) => {
     }
     current_config.changedItems = {};
     datagrid.config({
-      meta: current_config.config,
+      setup: current_config.config,
       values: current_config.values,
+      meta: current_config.meta,
       choice: current_config.choice,
       chooser: current_config.chooser,
       addResultItem: setChangedItem,

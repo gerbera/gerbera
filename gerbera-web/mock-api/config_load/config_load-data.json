@@ -1001,6 +1001,7 @@
 			{
 				"item": "/server/port",
 				"id": "00",
+				"aid": "00",
 				"status": "unchanged",
 				"origValue": "",
 				"source": "config.xml",
@@ -1009,6 +1010,7 @@
 			{
 				"item": "/server/ip",
 				"id": "01",
+				"aid": "01",
 				"status": "unchanged",
 				"origValue": "",
 				"source": "config.xml",
@@ -1017,6 +1019,7 @@
 			{
 				"item": "/server/interface",
 				"id": "02",
+				"aid": "02",
 				"status": "unchanged",
 				"origValue": "",
 				"source": "config.xml",
@@ -1025,6 +1028,7 @@
 			{
 				"item": "/server/name",
 				"id": "03",
+				"aid": "03",
 				"status": "unchanged",
 				"origValue": "",
 				"source": "config.xml",
@@ -1033,6 +1037,7 @@
 			{
 				"item": "/server/manufacturer",
 				"id": "04",
+				"aid": "04",
 				"status": "unchanged",
 				"origValue": "",
 				"source": "config.xml",
@@ -1041,6 +1046,7 @@
 			{
 				"item": "/server/manufacturerURL",
 				"id": "05",
+				"aid": "05",
 				"status": "unchanged",
 				"origValue": "",
 				"source": "config.xml",
@@ -1049,6 +1055,7 @@
 			{
 				"item": "/server/modelName",
 				"id": "06",
+				"aid": "06",
 				"status": "unchanged",
 				"origValue": "",
 				"source": "config.xml",
@@ -1057,6 +1064,7 @@
 			{
 				"item": "/server/modelDescription",
 				"id": "07",
+				"aid": "07",
 				"status": "unchanged",
 				"origValue": "",
 				"source": "config.xml",
@@ -1065,6 +1073,7 @@
 			{
 				"item": "/server/modelNumber",
 				"id": "08",
+				"aid": "08",
 				"status": "unchanged",
 				"origValue": "",
 				"source": "config.xml",
@@ -1073,6 +1082,7 @@
 			{
 				"item": "/server/modelURL",
 				"id": "09",
+				"aid": "09",
 				"status": "unchanged",
 				"origValue": "",
 				"source": "config.xml",
@@ -1081,6 +1091,7 @@
 			{
 				"item": "/server/serialNumber",
 				"id": "10",
+				"aid": "10",
 				"status": "unchanged",
 				"origValue": "",
 				"source": "config.xml",
@@ -1089,6 +1100,7 @@
 			{
 				"item": "/server/presentationURL",
 				"id": "11",
+				"aid": "11",
 				"status": "unchanged",
 				"origValue": "",
 				"source": "config.xml",
@@ -1097,6 +1109,7 @@
 			{
 				"item": "/server/presentationURL/attribute::append-to",
 				"id": "12",
+				"aid": "12",
 				"status": "unchanged",
 				"origValue": "",
 				"source": "config.xml",
@@ -1105,6 +1118,7 @@
 			{
 				"item": "/server/udn",
 				"id": "13",
+				"aid": "13",
 				"status": "unchanged",
 				"origValue": "",
 				"source": "config.xml",
@@ -1113,6 +1127,7 @@
 			{
 				"item": "/server/home",
 				"id": "14",
+				"aid": "14",
 				"status": "unchanged",
 				"origValue": "",
 				"source": "config.xml",
@@ -1121,6 +1136,7 @@
 			{
 				"item": "/server/tmpdir",
 				"id": "15",
+				"aid": "15",
 				"status": "unchanged",
 				"origValue": "",
 				"source": "config.xml",
@@ -1129,6 +1145,7 @@
 			{
 				"item": "/server/webroot",
 				"id": "16",
+				"aid": "16",
 				"status": "unchanged",
 				"origValue": "",
 				"source": "config.xml",
@@ -1137,6 +1154,7 @@
 			{
 				"item": "/server/servedir",
 				"id": "17",
+				"aid": "17",
 				"status": "unchanged",
 				"origValue": "",
 				"source": "config.xml",
@@ -1145,6 +1163,7 @@
 			{
 				"item": "/server/alive",
 				"id": "18",
+				"aid": "18",
 				"status": "unchanged",
 				"origValue": "",
 				"source": "config.xml",
@@ -1177,6 +1196,7 @@
 			{
 				"item": "/import/library-options/attribute::multi-value-separator",
 				"id": "102",
+				"aid": "102",
 				"status": "unchanged",
 				"origValue": "",
 				"source": "config.xml",
@@ -1185,6 +1205,7 @@
 			{
 				"item": "/import/library-options/attribute::legacy-value-separator",
 				"id": "103",
+				"aid": "103",
 				"status": "unchanged",
 				"origValue": "",
 				"source": "config.xml",
@@ -1193,6 +1214,7 @@
 			{
 				"item": "/import/library-options/libexif/auxdata/add-data[0]/attribute::tag",
 				"id": "81",
+				"aid": "129",
 				"status": "unchanged",
 				"origValue": "",
 				"source": "config.xml",
@@ -1201,6 +1223,7 @@
 			{
 				"item": "/import/library-options/libexif/auxdata/add-data[1]/attribute::tag",
 				"id": "81",
+				"aid": "129",
 				"status": "unchanged",
 				"origValue": "",
 				"source": "config.xml",
@@ -1209,6 +1232,7 @@
 			{
 				"item": "/import/library-options/libexif/auxdata/add-data[2]/attribute::tag",
 				"id": "81",
+				"aid": "129",
 				"status": "unchanged",
 				"origValue": "",
 				"source": "config.xml",
@@ -1217,6 +1241,7 @@
 			{
 				"item": "/import/library-options/libexif/auxdata/add-data[3]/attribute::tag",
 				"id": "81",
+				"aid": "129",
 				"status": "unchanged",
 				"origValue": "",
 				"source": "config.xml",
@@ -1225,6 +1250,7 @@
 			{
 				"item": "/import/library-options/id3/auxdata/add-data[0]/attribute::tag",
 				"id": "83",
+				"aid": "129",
 				"status": "unchanged",
 				"origValue": "",
 				"source": "config.xml",
@@ -1233,6 +1259,7 @@
 			{
 				"item": "/import/library-options/id3/auxdata/add-data[1]/attribute::tag",
 				"id": "83",
+				"aid": "129",
 				"status": "unchanged",
 				"origValue": "",
 				"source": "config.xml",
@@ -1241,6 +1268,7 @@
 			{
 				"item": "/import/library-options/id3/auxdata/add-data[2]/attribute::tag",
 				"id": "83",
+				"aid": "129",
 				"status": "unchanged",
 				"origValue": "",
 				"source": "config.xml",
@@ -1249,6 +1277,7 @@
 			{
 				"item": "/import/library-options/id3/auxdata/add-data[3]/attribute::tag",
 				"id": "83",
+				"aid": "129",
 				"status": "unchanged",
 				"origValue": "",
 				"source": "config.xml",
@@ -1257,6 +1286,7 @@
 			{
 				"item": "/import/library-options/id3/auxdata/add-data[4]/attribute::tag",
 				"id": "83",
+				"aid": "129",
 				"status": "unchanged",
 				"origValue": "",
 				"source": "config.xml",
@@ -1265,6 +1295,7 @@
 			{
 				"item": "/import/library-options/id3/auxdata/add-data[5]/attribute::tag",
 				"id": "83",
+				"aid": "129",
 				"status": "unchanged",
 				"origValue": "",
 				"source": "config.xml",
@@ -1273,6 +1304,7 @@
 			{
 				"item": "/import/library-options/id3/auxdata/add-data[6]/attribute::tag",
 				"id": "83",
+				"aid": "129",
 				"status": "unchanged",
 				"origValue": "",
 				"source": "config.xml",
@@ -1281,6 +1313,7 @@
 			{
 				"item": "/import/library-options/id3/auxdata/add-data[7]/attribute::tag",
 				"id": "83",
+				"aid": "129",
 				"status": "unchanged",
 				"origValue": "",
 				"source": "config.xml",
@@ -1289,6 +1322,7 @@
 			{
 				"item": "/import/library-options/id3/auxdata/add-data[8]/attribute::tag",
 				"id": "83",
+				"aid": "129",
 				"status": "unchanged",
 				"origValue": "",
 				"source": "config.xml",
@@ -1297,6 +1331,7 @@
 			{
 				"item": "/import/library-options/id3/auxdata/add-data[9]/attribute::tag",
 				"id": "83",
+				"aid": "129",
 				"status": "unchanged",
 				"origValue": "",
 				"source": "config.xml",
@@ -1305,6 +1340,7 @@
 			{
 				"item": "/import/library-options/id3/auxdata/add-data[10]/attribute::tag",
 				"id": "83",
+				"aid": "129",
 				"status": "unchanged",
 				"origValue": "",
 				"source": "config.xml",
@@ -1320,6 +1356,7 @@
 			{
 				"item": "/import/directories/tweak[0]/attribute::location",
 				"id": "-1",
+				"aid": "129",
 				"value": "/etc",
 				"origValue": "",
 				"status": "changed"
@@ -1327,6 +1364,7 @@
 			{
 				"item": "/import/directories/tweak[0]/attribute::inherit",
 				"id": "-1",
+				"aid": "171",
 				"value": "true",
 				"origValue": "",
 				"status": "changed"
@@ -1334,6 +1372,7 @@
 			{
 				"item": "/import/directories/tweak[0]/attribute::follow-symlinks",
 				"id": "-1",
+				"aid": "172",
 				"value": "true",
 				"origValue": "",
 				"status": "changed"
@@ -1341,6 +1380,7 @@
 			{
 				"item": "/import/directories/tweak[0]/attribute::recursive",
 				"id": "-1",
+				"aid": "173",
 				"value": "false",
 				"origValue": "",
 				"status": "changed"
@@ -1348,6 +1388,7 @@
 			{
 				"item": "/import/directories/tweak[0]/attribute::case-sensitive",
 				"id": "-1",
+				"aid": "174",
 				"value": "false",
 				"origValue": "",
 				"status": "changed"
@@ -1355,6 +1396,7 @@
 			{
 				"item": "/import/directories/tweak[0]/attribute::hidden-files",
 				"id": "-1",
+				"aid": "175",
 				"value": "true",
 				"origValue": "",
 				"status": "changed"
@@ -1362,6 +1404,7 @@
 			{
 				"item": "/import/directories/tweak[0]/attribute::fanart-file",
 				"id": "-1",
+				"aid": "176",
 				"value": "cover.jpg",
 				"origValue": "",
 				"status": "changed"
@@ -1369,6 +1412,7 @@
 			{
 				"item": "/import/directories/tweak[0]/attribute::subtitle-file",
 				"id": "-1",
+				"aid": "177",
 				"value": "",
 				"origValue": "",
 				"status": "changed"
@@ -1376,9 +1420,482 @@
 			{
 				"item": "/import/directories/tweak[0]/attribute::resource-file",
 				"id": "-1",
+				"aid": "178",
 				"value": "",
 				"origValue": "",
 				"status": "changed"
+			}
+		]
+	},
+	"types": {
+		"item": [
+			{
+				"item": "/server/port",
+				"id": "0",
+				"type": "Number",
+				"value": "0"
+			},
+			{
+				"item": "/server/ip",
+				"id": "1",
+				"type": "String",
+				"value": ""
+			},
+			{
+				"item": "/server/interface",
+				"id": "2",
+				"type": "String",
+				"value": ""
+			},
+			{
+				"item": "/server/name",
+				"id": "3",
+				"type": "String",
+				"value": "Gerbera"
+			},
+			{
+				"item": "/server/manufacturer",
+				"id": "4",
+				"type": "String",
+				"value": "Gerbera Contributors"
+			},
+			{
+				"item": "/server/manufacturerURL",
+				"id": "5",
+				"type": "String",
+				"value": "http://gerbera.io/"
+			},
+			{
+				"item": "/server/modelName",
+				"id": "6",
+				"type": "String",
+				"value": "Gerbera"
+			},
+			{
+				"item": "/server/modelDescription",
+				"id": "7",
+				"type": "String",
+				"value": "Free UPnP AV MediaServer, GNU GPL"
+			},
+			{
+				"item": "/server/modelNumber",
+				"id": "8",
+				"type": "String",
+				"value": "1.7.0_git"
+			},
+			{
+				"item": "/server/modelURL",
+				"id": "9",
+				"type": "String",
+				"value": ""
+			},
+			{
+				"item": "/server/serialNumber",
+				"id": "10",
+				"type": "String",
+				"value": "1"
+			},
+			{
+				"item": "/server/presentationURL",
+				"id": "11",
+				"type": "String",
+				"value": ""
+			},
+			{
+				"item": "/server/presentationURL/attribute::append-to",
+				"id": "12",
+				"type": "Enum",
+				"value": "none"
+			},
+			{
+				"item": "/server/udn",
+				"id": "13",
+				"type": "String",
+				"value": ""
+			},
+			{
+				"item": "/server/home",
+				"id": "14",
+				"type": "String",
+				"value": ""
+			},
+			{
+				"item": "/server/tmpdir",
+				"id": "15",
+				"type": "Path",
+				"value": "/tmp/"
+			},
+			{
+				"item": "/server/webroot",
+				"id": "16",
+				"type": "Path",
+				"value": ""
+			},
+			{
+				"item": "/server/servedir",
+				"id": "17",
+				"type": "Path",
+				"value": ""
+			},
+			{
+				"item": "/server/alive",
+				"id": "18",
+				"type": "Number",
+				"value": "1800"
+			},
+			{
+				"item": "/import/library-options/attribute::multi-value-separator",
+				"id": "102",
+				"type": "String",
+				"value": "; "
+			},
+			{
+				"item": "/import/library-options/attribute::legacy-value-separator",
+				"id": "103",
+				"type": "String",
+				"value": ""
+			},
+			{
+				"item": "/import/resources/attribute::case-sensitive",
+				"id": "105",
+				"type": "Boolean",
+				"value": "yes"
+			},
+			{
+				"item": "/import/resources/fanart",
+				"id": "106",
+				"type": "List",
+				"value": ""
+			},
+			{
+				"item": "/import/resources/subtitle",
+				"id": "107",
+				"type": "List",
+				"value": ""
+			},
+			{
+				"item": "/import/resources/resource",
+				"id": "108",
+				"type": "List",
+				"value": ""
+			},
+			{
+				"item": "type",
+				"id": "137",
+				"type": "Enum",
+				"value": ""
+			},
+			{
+				"item": "mode",
+				"id": "142",
+				"type": "Enum",
+				"value": ""
+			},
+			{
+				"item": "enabled",
+				"id": "136",
+				"type": "Boolean",
+				"value": ""
+			},
+			{
+				"item": "accept-url",
+				"id": "144",
+				"type": "Boolean",
+				"value": ""
+			},
+			{
+				"item": "hide-original-resource",
+				"id": "147",
+				"type": "Boolean",
+				"value": ""
+			},
+			{
+				"item": "thumbnail",
+				"id": "148",
+				"type": "Boolean",
+				"value": ""
+			},
+			{
+				"item": "first-resource",
+				"id": "149",
+				"type": "Boolean",
+				"value": ""
+			},
+			{
+				"item": "use-chunked-encoding",
+				"id": "151",
+				"type": "Boolean",
+				"value": ""
+			},
+			{
+				"item": "accept-ogg-theora",
+				"id": "150",
+				"type": "Boolean",
+				"value": ""
+			},
+			{
+				"item": "avi-fourcc-list",
+				"id": "141",
+				"type": "List",
+				"value": ""
+			},
+			{
+				"item": "size",
+				"id": "156",
+				"type": "Number",
+				"value": "0"
+			},
+			{
+				"item": "chunk-size",
+				"id": "157",
+				"type": "Number",
+				"value": "0"
+			},
+			{
+				"item": "fill-size",
+				"id": "158",
+				"type": "Number",
+				"value": "0"
+			},
+			{
+				"item": "sample-frequency",
+				"id": "145",
+				"type": "Number",
+				"value": "-1"
+			},
+			{
+				"item": "audio-channels",
+				"id": "146",
+				"type": "Number",
+				"value": "-1"
+			},
+			{
+				"item": "mimetype-profile-mappings",
+				"id": "130",
+				"type": "List",
+				"value": ""
+			},
+			{
+				"item": "name",
+				"id": "138",
+				"type": "String",
+				"value": ""
+			},
+			{
+				"item": "mimetype",
+				"id": "139",
+				"type": "String",
+				"value": ""
+			},
+			{
+				"item": "command",
+				"id": "153",
+				"type": "String",
+				"value": ""
+			},
+			{
+				"item": "arguments",
+				"id": "154",
+				"type": "String",
+				"value": ""
+			},
+			{
+				"item": "resolution",
+				"id": "140",
+				"type": "String",
+				"value": ""
+			},
+			{
+				"item": "agent",
+				"id": "152",
+				"type": "Unset",
+				"value": ""
+			},
+			{
+				"item": "buffer",
+				"id": "155",
+				"type": "Unset",
+				"value": ""
+			},
+			{
+				"item": "location",
+				"id": "160",
+				"type": "Path",
+				"value": ""
+			},
+			{
+				"item": "mode",
+				"id": "161",
+				"type": "Enum",
+				"value": ""
+			},
+			{
+				"item": "interval",
+				"id": "162",
+				"type": "Number",
+				"value": "-1"
+			},
+			{
+				"item": "recursive",
+				"id": "163",
+				"type": "Boolean",
+				"value": "no"
+			},
+			{
+				"item": "hidden-files",
+				"id": "164",
+				"type": "Boolean",
+				"value": ""
+			},
+			{
+				"item": "flags",
+				"id": "166",
+				"type": "String",
+				"value": ""
+			},
+			{
+				"item": "ip",
+				"id": "167",
+				"type": "String",
+				"value": ""
+			},
+			{
+				"item": "userAgent",
+				"id": "168",
+				"type": "String",
+				"value": ""
+			},
+			{
+				"item": "/import/directories",
+				"id": "104",
+				"type": "List",
+				"value": ""
+			},
+			{
+				"item": "location",
+				"id": "170",
+				"type": "Path",
+				"value": ""
+			},
+			{
+				"item": "inherit",
+				"id": "171",
+				"type": "Boolean",
+				"value": "no"
+			},
+			{
+				"item": "recursive",
+				"id": "172",
+				"type": "Boolean",
+				"value": "no"
+			},
+			{
+				"item": "hidden-files",
+				"id": "173",
+				"type": "Boolean",
+				"value": ""
+			},
+			{
+				"item": "case-sensitive",
+				"id": "174",
+				"type": "Boolean",
+				"value": "yes"
+			},
+			{
+				"item": "follow-symlinks",
+				"id": "175",
+				"type": "Boolean",
+				"value": "yes"
+			},
+			{
+				"item": "fanart-file",
+				"id": "176",
+				"type": "String",
+				"value": ""
+			},
+			{
+				"item": "subtitle-file",
+				"id": "177",
+				"type": "String",
+				"value": ""
+			},
+			{
+				"item": "resource-file",
+				"id": "178",
+				"type": "String",
+				"value": ""
+			},
+			{
+				"item": "mimetype",
+				"id": "132",
+				"type": "String",
+				"value": ""
+			},
+			{
+				"item": "mimetype",
+				"id": "121",
+				"type": "String",
+				"value": ""
+			},
+			{
+				"item": "treat",
+				"id": "120",
+				"type": "String",
+				"value": ""
+			},
+			{
+				"item": "as",
+				"id": "122",
+				"type": "String",
+				"value": ""
+			},
+			{
+				"item": "from",
+				"id": "118",
+				"type": "String",
+				"value": ""
+			},
+			{
+				"item": "to",
+				"id": "119",
+				"type": "String",
+				"value": ""
+			},
+			{
+				"item": "name",
+				"id": "127",
+				"type": "String",
+				"value": ""
+			},
+			{
+				"item": "from",
+				"id": "124",
+				"type": "String",
+				"value": ""
+			},
+			{
+				"item": "to",
+				"id": "125",
+				"type": "String",
+				"value": ""
+			},
+			{
+				"item": "tag",
+				"id": "129",
+				"type": "String",
+				"value": ""
+			},
+			{
+				"item": "password",
+				"id": "116",
+				"type": "String",
+				"value": ""
+			},
+			{
+				"item": "user",
+				"id": "115",
+				"type": "String",
+				"value": ""
 			}
 		]
 	},

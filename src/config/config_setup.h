@@ -109,6 +109,10 @@ public:
     {
         this->defaultValue.assign(defaultValue);
     }
+    std::string getDefaultValue() const
+    {
+        return this->defaultValue;
+    }
 
     bool checkValue(std::string& optValue) const
     {
@@ -116,6 +120,7 @@ public:
     }
 
     std::shared_ptr<ConfigOption> getValue() const { return optionValue; }
+    virtual std::string getTypeString() const { return "Unset"; }
 
     pugi::xml_node getXmlElement(const pugi::xml_node& root) const;
 
@@ -170,6 +175,7 @@ public:
     }
 
     virtual ~ConfigStringSetup() = default;
+    virtual std::string getTypeString() const override { return "String"; }
 
     virtual void makeOption(const pugi::xml_node& root, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments = nullptr) override;
 
@@ -198,6 +204,7 @@ public:
     }
 
     virtual ~ConfigEnumSetup() = default;
+    virtual std::string getTypeString() const override { return "Enum"; }
 
     virtual void makeOption(const pugi::xml_node& root, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments = nullptr) override
     {
@@ -271,11 +278,13 @@ public:
     {
     }
 
+    virtual ~ConfigPathSetup() = default;
+    virtual std::string getTypeString() const override { return "Path"; }
+
     virtual void makeOption(const pugi::xml_node& root, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments = nullptr) override;
 
     virtual void makeOption(std::string optValue, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments = nullptr) override;
 
-    virtual ~ConfigPathSetup() = default;
 
     std::shared_ptr<ConfigOption> newOption(std::string& optValue);
 
@@ -348,6 +357,7 @@ public:
     }
 
     virtual ~ConfigIntSetup() = default;
+    virtual std::string getTypeString() const override { return "Number"; }
 
     virtual void makeOption(const pugi::xml_node& root, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments = nullptr) override;
 
@@ -397,6 +407,7 @@ public:
     }
 
     virtual ~ConfigBoolSetup() = default;
+    virtual std::string getTypeString() const override { return "Boolean"; }
 
     virtual void makeOption(const pugi::xml_node& root, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments = nullptr) override;
 
@@ -422,8 +433,6 @@ protected:
     bool notEmpty = false;
     bool itemNotEmpty = false;
     ArrayInitFunction initArray = nullptr;
-    config_option_t nodeOption;
-    config_option_t attrOption = CFG_MAX;
 
     /// \brief Creates an array of strings from an XML nodeset.
     /// \param element starting element of the nodeset.
@@ -443,6 +452,9 @@ protected:
     bool updateItem(size_t i, const std::string& optItem, std::shared_ptr<Config> config, std::shared_ptr<ArrayOption> value, const std::string& optValue, const std::string& status = "") const;
 
 public:
+    config_option_t nodeOption;
+    config_option_t attrOption = CFG_MAX;
+
     ConfigArraySetup(config_option_t option, const char* xpath, config_option_t nodeOption, ArrayInitFunction init = nullptr, bool notEmpty = false)
         : ConfigSetup(option, xpath)
         , notEmpty(notEmpty)
@@ -462,6 +474,7 @@ public:
     }
 
     virtual ~ConfigArraySetup() = default;
+    virtual std::string getTypeString() const override { return "List"; }
 
     virtual void makeOption(const pugi::xml_node& root, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments = nullptr) override;
 
@@ -539,6 +552,7 @@ public:
     }
 
     virtual ~ConfigDictionarySetup() = default;
+    virtual std::string getTypeString() const override { return "List"; }
 
     virtual void makeOption(const pugi::xml_node& root, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments = nullptr) override;
 
@@ -576,6 +590,7 @@ public:
     }
 
     virtual ~ConfigAutoscanSetup() = default;
+    virtual std::string getTypeString() const override { return "List"; }
 
     virtual void makeOption(const pugi::xml_node& root, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments = nullptr) override;
 
@@ -609,6 +624,7 @@ public:
     }
 
     virtual ~ConfigTranscodingSetup() = default;
+    virtual std::string getTypeString() const override { return "List"; }
 
     virtual void makeOption(const pugi::xml_node& root, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments = nullptr) override;
 
@@ -646,6 +662,7 @@ public:
     }
 
     virtual ~ConfigClientSetup() = default;
+    virtual std::string getTypeString() const override { return "List"; }
 
     virtual void makeOption(const pugi::xml_node& root, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments = nullptr) override;
 
@@ -684,6 +701,7 @@ public:
     }
 
     virtual ~ConfigDirectorySetup() = default;
+    virtual std::string getTypeString() const override { return "List"; }
 
     virtual void makeOption(const pugi::xml_node& root, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments = nullptr) override;
 
