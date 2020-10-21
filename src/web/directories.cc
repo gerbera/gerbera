@@ -116,12 +116,12 @@ void web::directories::process()
         filesMap[id] = { filepath.filename(), hasContent };
     }
 
-    for (const auto& entry : filesMap) {
+    for (const auto& [key, val] : filesMap) {
         auto ce = containers.append_child("container");
-        ce.append_attribute("id") = entry.first.c_str();
-        ce.append_attribute("child_count") = entry.second.hasContent;
+        ce.append_attribute("id") = key.c_str();
+        ce.append_attribute("child_count") = val.hasContent;
 
         auto f2i = StringConverter::f2i(config);
-        ce.append_attribute("title") = f2i->convert(entry.second.filename).c_str();
+        ce.append_attribute("title") = f2i->convert(val.filename).c_str();
     }
 }

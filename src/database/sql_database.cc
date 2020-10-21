@@ -772,7 +772,7 @@ int SQLDatabase::createContainer(int parentID, std::string name, const std::stri
     exec(qb);
 
     if (!itemMetadata.empty()) {
-        for (const auto& it : itemMetadata) {
+        for (const auto& [key, val] : itemMetadata) {
             int newMetadataID = getNextMetadataID();
             std::ostringstream ib;
             ib << "INSERT INTO"
@@ -784,8 +784,8 @@ int SQLDatabase::createContainer(int parentID, std::string name, const std::stri
                << TQ("property_value") << ") VALUES ("
                << newMetadataID << ','
                << newID << ","
-               << quote(it.first) << ","
-               << quote(it.second)
+               << quote(key) << ","
+               << quote(val)
                << ")";
             exec(ib);
         }
@@ -2168,28 +2168,28 @@ void SQLDatabase::generateMetadataDBOperations(const std::shared_ptr<CdsObject>&
 {
     auto dict = obj->getMetadata();
     if (!isUpdate) {
-        for (const auto& it : dict) {
+        for (const auto& [key, val] : dict) {
             std::map<std::string, std::string> metadataSql;
-            metadataSql["property_name"] = quote(it.first);
-            metadataSql["property_value"] = quote(it.second);
+            metadataSql["property_name"] = quote(key);
+            metadataSql["property_value"] = quote(val);
             operations.push_back(std::make_shared<AddUpdateTable>(METADATA_TABLE, metadataSql, "insert"));
         }
     } else {
         // get current metadata from DB: if only it really was a dictionary...
         auto dbMetadata = retrieveMetadataForObject(obj->getID());
-        for (const auto& it : dict) {
-            std::string operation = dbMetadata.find(it.first) == dbMetadata.end() ? "insert" : "update";
+        for (const auto& [key, val] : dict) {
+            std::string operation = dbMetadata.find(key) == dbMetadata.end() ? "insert" : "update";
             std::map<std::string, std::string> metadataSql;
-            metadataSql["property_name"] = quote(it.first);
-            metadataSql["property_value"] = quote(it.second);
+            metadataSql["property_name"] = quote(key);
+            metadataSql["property_value"] = quote(val);
             operations.push_back(std::make_shared<AddUpdateTable>(METADATA_TABLE, metadataSql, operation));
         }
-        for (const auto& it : dbMetadata) {
-            if (dict.find(it.first) == dict.end()) {
+        for (const auto& [key, val] : dbMetadata) {
+            if (dict.find(key) == dict.end()) {
                 // key in db metadata but not obj metadata, so needs a delete
                 std::map<std::string, std::string> metadataSql;
-                metadataSql["property_name"] = quote(it.first);
-                metadataSql["property_value"] = quote(it.second);
+                metadataSql["property_name"] = quote(key);
+                metadataSql["property_value"] = quote(val);
                 operations.push_back(std::make_shared<AddUpdateTable>(METADATA_TABLE, metadataSql, "delete"));
             }
         }
@@ -2342,11 +2342,11 @@ void SQLDatabase::migrateMetadata(const std::shared_ptr<CdsObject>& object)
     if (!dict.empty()) {
         log_debug("Migrating metadata for cds object {}", object->getID());
         std::map<std::string, std::string> metadataSQLVals;
-        for (auto& it : dict) {
-            metadataSQLVals[quote(it.first)] = quote(it.second);
+        for (const auto& [key, val] : dict) {
+            metadataSQLVals[quote(key)] = quote(val);
         }
 
-        for (auto& metadataSQLVal : metadataSQLVals) {
+        for (const auto& [key, val] : metadataSQLVals) {
             std::ostringstream fields, values;
             fields << TQ("id") << ','
                    << TQ("item_id") << ','
@@ -2354,8 +2354,8 @@ void SQLDatabase::migrateMetadata(const std::shared_ptr<CdsObject>& object)
                    << TQ("property_value");
             values << getNextMetadataID() << ','
                    << object->getID() << ','
-                   << metadataSQLVal.first << ','
-                   << metadataSQLVal.second;
+                   << key << ','
+                   << val;
             std::ostringstream qb;
             qb << "INSERT INTO " << TQ(METADATA_TABLE)
                << " (" << fields.str()

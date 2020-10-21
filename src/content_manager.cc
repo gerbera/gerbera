@@ -1022,8 +1022,8 @@ int ContentManager::addContainerChain(const std::string& chain, const std::strin
         throw_std_runtime_error("addContainerChain() called with empty chain parameter");
 
     std::string newChain = chain;
-    for (const auto& pattern : config->getDictionaryOption(CFG_IMPORT_LAYOUT_MAPPING)) {
-        newChain = std::regex_replace(newChain, std::regex(pattern.first), pattern.second);
+    for (const auto& [key, val] : config->getDictionaryOption(CFG_IMPORT_LAYOUT_MAPPING)) {
+        newChain = std::regex_replace(newChain, std::regex(key), val);
     }
 
     log_debug("received chain: {} -> {} ({}) [{}]", chain.c_str(), newChain.c_str(), lastClass.c_str(), dictEncodeSimple(lastMetadata).c_str());

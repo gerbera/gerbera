@@ -196,11 +196,11 @@ void web::configLoad::process()
     auto transcoding = cs->getValue()->getTranscodingProfileListOption();
     int pr = 0;
     std::map<std::string, int> profiles;
-    for (const auto& entry : transcoding->getList()) {
-        for (auto it = entry.second->begin(); it != entry.second->end(); it++) {
+    for (const auto& [key, val] : transcoding->getList()) {
+        for (auto it = val->begin(); it != val->end(); it++) {
             auto item = values.append_child("item");
             createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_MIMETYPE_PROF_MAP, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_TRANSCODE, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE), cs->option, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE);
-            setValue(item, entry.first);
+            setValue(item, key);
 
             item = values.append_child("item");
             createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_MIMETYPE_PROF_MAP, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_TRANSCODE, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_USING), cs->option, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_USING);
@@ -211,8 +211,8 @@ void web::configLoad::process()
         }
     }
     pr = 0;
-    for (const auto& prof : profiles) {
-        auto entry = transcoding->getByName(prof.first, true);
+    for (const auto& [key, val] : profiles) {
+        auto entry = transcoding->getByName(key, true);
         auto item = values.append_child("item");
         createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_NAME), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_NAME);
         setValue(item, entry->getName());
@@ -338,18 +338,18 @@ void web::configLoad::process()
 
     std::vector<config_option_t> dict_options = {CFG_SERVER_UI_ACCOUNT_LIST, CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST, CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST, CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST, CFG_IMPORT_LAYOUT_MAPPING};
 
-    for (auto dict_option : dict_options) {
+    for (const auto& dict_option : dict_options) {
         int i = 0;
         auto dcs = ConfigSetup::findConfigSetup<ConfigDictionarySetup>(dict_option);
         auto dictionary = dcs->getValue()->getDictionaryOption(true);
-        for (const auto& entry : dictionary) {
+        for (const auto& [key, val] : dictionary) {
             auto item = values.append_child("item");
             createItem(item, dcs->getItemPath(i, dcs->keyOption), dcs->option, dcs->keyOption);
-            setValue(item, entry.first.substr(5));
+            setValue(item, key.substr(5));
 
             item = values.append_child("item");
             createItem(item, dcs->getItemPath(i, dcs->valOption), dcs->option, dcs->valOption);
-            setValue(item, entry.second);
+            setValue(item, val);
             i++;
         }
     }

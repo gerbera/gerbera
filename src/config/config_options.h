@@ -134,8 +134,8 @@ public:
     {
         this->origSize = this->option.size();
         size_t i = 0;
-        for (const auto& entry : this->option) {
-            this->indexMap[i] = entry.first;
+        for (const auto& [key, val] : this->option) {
+            this->indexMap[i] = key;
             i++;
         }
     }

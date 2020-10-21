@@ -784,8 +784,8 @@ bool ConfigDictionarySetup::updateDetail(const std::string& optItem, std::string
         }
 
         i = 0;
-        for (const auto& entry : value->getDictionaryOption()) {
-            if (updateItem(i, optItem, config, value, entry.first, optValue)) {
+        for (const auto& [key, val] : value->getDictionaryOption()) {
+            if (updateItem(i, optItem, config, value, key, optValue)) {
                 return true;
             }
             i++;
@@ -1101,9 +1101,9 @@ bool ConfigTranscodingSetup::createTranscodingProfileListFromNode(const pugi::xm
         prof->setBufferOptions(buffer, chunk, fill);
 
         bool set = false;
-        for (const auto& mt_mapping : mt_mappings) {
-            if (mt_mapping.second == prof->getName()) {
-                result->add(mt_mapping.first, prof);
+        for (const auto& [key, val] : mt_mappings) {
+            if (val == prof->getName()) {
+                result->add(key, prof);
                 set = true;
             }
         }
@@ -1119,11 +1119,11 @@ bool ConfigTranscodingSetup::createTranscodingProfileListFromNode(const pugi::xm
     }
 
     auto tpl = result->getList();
-    for (const auto& mt_mapping : mt_mappings) {
-        if (tpl.find(mt_mapping.first) == tpl.end()) {
+    for (const auto& [key, val] : mt_mappings) {
+        if (tpl.find(key) == tpl.end()) {
             log_error("error in configuration: you specified a mimetype to transcoding profile mapping, "
                       "but the profile \""
-                + mt_mapping.second + "\" for mimetype \"" + mt_mapping.first + "\" does not exists");
+                + val + "\" for mimetype \"" + key + "\" does not exists");
             if (!findConfigSetup<ConfigBoolSetup>(CFG_TRANSCODING_MIMETYPE_PROF_MAP_ALLOW_UNUSED)->getXmlContent(element.root())) {
                 return false;
             }
@@ -1148,20 +1148,20 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
         log_debug("Updating Transcoding Detail {} {} {}", xpath, optItem, optValue);
         std::map<std::string, int> profiles;
         int i = 0;
-        for (const auto& entry : value->getTranscodingProfileListOption()->getList()) {
-            for (auto it = entry.second->begin(); it != entry.second->end(); it++) {
+        for (const auto& [key, val] : value->getTranscodingProfileListOption()->getList()) {
+            for (auto it = val->begin(); it != val->end(); it++) {
                 profiles[it->second->getName()] = i;
                 auto index = getItemPath(i, ATTR_TRANSCODING_MIMETYPE_PROF_MAP, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_TRANSCODE, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE);
                 if (optItem == index) {
-                    config->setOrigValue(index, entry.first);
-                    value->setKey(entry.first, optValue);
+                    config->setOrigValue(index, key);
+                    value->setKey(key, optValue);
                     log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->get(optValue)->begin()->first);
                     return true;
                 }
                 index = getItemPath(i, ATTR_TRANSCODING_MIMETYPE_PROF_MAP, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_TRANSCODE, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_USING);
                 if (optItem == index) {
-                    log_error("Cannot change profile name in Transcoding Detail {} {}", index, entry.second->begin()->first);
-                    //value->setKey(entry.first, optValue);
+                    log_error("Cannot change profile name in Transcoding Detail {} {}", index, val->begin()->first);
+                    //value->setKey(key, optValue);
                     //log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->get(optValue)->begin()->first);
                     return false;
                 }
@@ -1169,12 +1169,12 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
             }
         }
         i = 0;
-        for (const auto& prof : profiles) {
-            auto entry = value->getTranscodingProfileListOption()->getByName(prof.first, true);
+        for (const auto& [key, val] : profiles) {
+            auto entry = value->getTranscodingProfileListOption()->getByName(key, true);
             auto index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_NAME);
             if (optItem == index) {
                 log_error("Cannot change profile name in Transcoding Detail {} {}", index, entry->getName());
-                //value->setKey(entry.first, optValue);
+                //value->setKey(key, optValue);
                 //log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->get(optValue)->begin()->first);
                 return false;
             }
