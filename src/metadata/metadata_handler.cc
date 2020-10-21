@@ -170,7 +170,6 @@ std::unique_ptr<MetadataHandler> MetadataHandler::createHandler(const std::share
         return std::make_unique<SubtitleHandler>(config);
     case CH_RESOURCE:
         return std::make_unique<ResourceHandler>(config);
-        break;
     default:
         throw_std_runtime_error("unknown content handler ID: " + std::to_string(handlerType));
     }
