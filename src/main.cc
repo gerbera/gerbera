@@ -308,6 +308,7 @@ int main(int argc, char** argv, char** envp)
                 prefix.value_or(""), magic.value_or(""),
                 ip.value_or(""), interface.value_or(""), portnum.value_or(-1),
                 debug);
+            configManager->load(home.value_or(""));
             portnum = configManager->getIntOption(CFG_SERVER_PORT);
         } catch (const ConfigParseException& ce) {
             log_error("Error parsing config file '{}': {}", (*config_file).c_str(), ce.what());
@@ -366,8 +367,13 @@ int main(int argc, char** argv, char** envp)
             for (const auto& f : files) {
                 try {
                     // add file/directory recursively and asynchronously
-                    server->getContent()->addFile(std::string(f), true, true,
-                        configManager->getBoolOption(CFG_IMPORT_HIDDEN_FILES), false);
+                    AutoScanSetting asSetting;
+                    asSetting.followSymlinks = configManager->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS);
+                    asSetting.recursive = true;
+                    asSetting.hidden = configManager->getBoolOption(CFG_IMPORT_HIDDEN_FILES);
+                    asSetting.rescanResource = false;
+                    asSetting.mergeOptions(configManager, f);
+                    server->getContent()->addFile(std::string(f), asSetting, true);
                 } catch (const std::runtime_error& e) {
                     log_error("{}", e.what());
                     exit(EXIT_FAILURE);

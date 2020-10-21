@@ -1,0 +1,98 @@
+{
+	"values": {
+		"item": [
+			{
+				"item": "/import/directories/tweak",
+				"id": "104",
+				"status": "unchanged",
+				"origValue": "",
+				"source": "config.xml",
+				"value": ""
+			},
+			{
+				"item": "/import/directories/tweak[0]/attribute::location",
+				"id": "104",
+				"status": "unchanged",
+				"origValue": "",
+				"source": "database",
+				"value": "/home/gerbera/Music"
+			},
+			{
+				"item": "/import/directories/tweak[0]/attribute::inherit",
+				"id": "104",
+				"status": "unchanged",
+				"origValue": "",
+				"source": "database",
+				"value": "false"
+			},
+			{
+				"item": "/import/directories/tweak[0]/attribute::recursive",
+				"id": "104",
+				"status": "unchanged",
+				"origValue": "",
+				"source": "database",
+				"value": "true"
+			},
+			{
+				"item": "/import/directories/tweak[0]/attribute::hidden-files",
+				"id": "104",
+				"status": "unchanged",
+				"origValue": "",
+				"source": "database",
+				"value": "true"
+			},
+			{
+				"item": "/import/directories/tweak[0]/attribute::case-sensitive",
+				"id": "104",
+				"status": "unchanged",
+				"origValue": "",
+				"source": "database",
+				"value": "false"
+			},
+			{
+				"item": "/import/directories/tweak[0]/attribute::follow-symlinks",
+				"id": "104",
+				"status": "unchanged",
+				"origValue": "",
+				"source": "database",
+				"value": "true"
+			},
+			{
+				"item": "/import/directories/tweak[0]/attribute::fanart-file",
+				"id": "104",
+				"status": "unchanged",
+				"origValue": "",
+				"source": "database",
+				"value": "cover.jpg"
+			},
+			{
+				"item": "/import/directories/tweak[0]/attribute::resource-file",
+				"id": "104",
+				"status": "unchanged",
+				"origValue": "",
+				"source": "database",
+				"value": ""
+			},
+			{
+				"item": "/import/directories/tweak[0]/attribute::subtitle-file",
+				"id": "104",
+				"status": "unchanged",
+				"origValue": "",
+				"source": "database",
+				"value": ""
+			},
+			{
+				"item": "/import/directories/tweak[0]",
+				"id": "104",
+				"status": "manual",
+				"origValue": "",
+				"source": "database",
+				"value": ""
+			}
+		]
+	},
+	"path": "/home/gerbera/Music",
+	"onDelete": null,
+	"onSave": null,
+	"success": true
+}

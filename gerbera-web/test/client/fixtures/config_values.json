@@ -1,0 +1,388 @@
+{
+	"values": [
+		{
+			"item": "/server/port",
+			"id": "00",
+			"status": "unchanged",
+			"origValue": "",
+			"source": "config.xml",
+			"value": "50600"
+		},
+		{
+			"item": "/server/ip",
+			"id": "01",
+			"status": "unchanged",
+			"origValue": "",
+			"source": "config.xml",
+			"value": ""
+		},
+		{
+			"item": "/server/interface",
+			"id": "02",
+			"status": "unchanged",
+			"origValue": "",
+			"source": "config.xml",
+			"value": "eth0"
+		},
+		{
+			"item": "/server/name",
+			"id": "03",
+			"status": "unchanged",
+			"origValue": "",
+			"source": "config.xml",
+			"value": "Gerbera-TEST"
+		},
+		{
+			"item": "/server/manufacturer",
+			"id": "04",
+			"status": "unchanged",
+			"origValue": "",
+			"source": "config.xml",
+			"value": "Gerbera Team"
+		},
+		{
+			"item": "/server/manufacturerURL",
+			"id": "05",
+			"status": "unchanged",
+			"origValue": "",
+			"source": "config.xml",
+			"value": "https://gerbera.io/"
+		},
+		{
+			"item": "/server/modelName",
+			"id": "06",
+			"status": "unchanged",
+			"origValue": "",
+			"source": "config.xml",
+			"value": "gerbera"
+		},
+		{
+			"item": "/server/modelDescription",
+			"id": "07",
+			"status": "unchanged",
+			"origValue": "",
+			"source": "config.xml",
+			"value": "Free UPnP AV MediaServer, GNU GPL"
+		},
+		{
+			"item": "/server/modelNumber",
+			"id": "08",
+			"status": "unchanged",
+			"origValue": "",
+			"source": "config.xml",
+			"value": "1.7.0"
+		},
+		{
+			"item": "/server/modelURL",
+			"id": "09",
+			"status": "unchanged",
+			"origValue": "",
+			"source": "config.xml",
+			"value": "https://gerbera.io"
+		},
+		{
+			"item": "/server/serialNumber",
+			"id": "10",
+			"status": "unchanged",
+			"origValue": "",
+			"source": "config.xml",
+			"value": "42"
+		},
+		{
+			"item": "/server/presentationURL",
+			"id": "11",
+			"status": "unchanged",
+			"origValue": "",
+			"source": "config.xml",
+			"value": ""
+		},
+		{
+			"item": "/server/presentationURL/attribute::append-to",
+			"id": "12",
+			"status": "unchanged",
+			"origValue": "",
+			"source": "config.xml",
+			"value": "none"
+		},
+		{
+			"item": "/server/udn",
+			"id": "13",
+			"status": "unchanged",
+			"origValue": "",
+			"source": "config.xml",
+			"value": "uuid:faa3b17d-beab-41c6-88cb-068868464a3d"
+		},
+		{
+			"item": "/server/home",
+			"id": "14",
+			"status": "unchanged",
+			"origValue": "",
+			"source": "config.xml",
+			"value": "/etc/gerbera"
+		},
+		{
+			"item": "/server/tmpdir",
+			"id": "15",
+			"status": "unchanged",
+			"origValue": "",
+			"source": "config.xml",
+			"value": "/tmp/"
+		},
+		{
+			"item": "/server/webroot",
+			"id": "16",
+			"status": "unchanged",
+			"origValue": "",
+			"source": "config.xml",
+			"value": "/usr/local/share/gerbera/web"
+		},
+		{
+			"item": "/server/servedir",
+			"id": "17",
+			"status": "unchanged",
+			"origValue": "",
+			"source": "config.xml",
+			"value": "/etc/gerbera/"
+		},
+		{
+			"item": "/server/alive",
+			"id": "18",
+			"status": "unchanged",
+			"origValue": "",
+			"source": "config.xml",
+			"value": "86400"
+		},
+		{
+			"item": "/import/library-options/libexif/auxdata/add-data",
+			"id": "81",
+			"status": "unchanged",
+			"origValue": "",
+			"source": "config.xml",
+			"value": ""
+		},
+		{
+			"item": "/import/library-options/exiv2/auxdata/add-data",
+			"id": "82",
+			"status": "unchanged",
+			"origValue": "",
+			"source": "config.xml",
+			"value": ""
+		},
+		{
+			"item": "/import/library-options/id3/auxdata/add-data",
+			"id": "83",
+			"status": "unchanged",
+			"origValue": "",
+			"source": "config.xml",
+			"value": ""
+		},
+		{
+			"item": "/import/library-options/attribute::multi-value-separator",
+			"id": "102",
+			"status": "unchanged",
+			"origValue": "",
+			"source": "config.xml",
+			"value": "; "
+		},
+		{
+			"item": "/import/library-options/attribute::legacy-value-separator",
+			"id": "103",
+			"status": "unchanged",
+			"origValue": "",
+			"source": "config.xml",
+			"value": " / "
+		},
+		{
+			"item": "/import/library-options/libexif/auxdata/add-data[0]/attribute::tag",
+			"id": "81",
+			"status": "unchanged",
+			"origValue": "",
+			"source": "config.xml",
+			"value": "EXIF_TAG_MODEL"
+		},
+		{
+			"item": "/import/library-options/libexif/auxdata/add-data[1]/attribute::tag",
+			"id": "81",
+			"status": "unchanged",
+			"origValue": "",
+			"source": "config.xml",
+			"value": "EXIF_TAG_DATE_TIME"
+		},
+		{
+			"item": "/import/library-options/libexif/auxdata/add-data[2]/attribute::tag",
+			"id": "81",
+			"status": "unchanged",
+			"origValue": "",
+			"source": "config.xml",
+			"value": "EXIF_TAG_DATE_TIME_ORIGINAL"
+		},
+		{
+			"item": "/import/library-options/libexif/auxdata/add-data[3]/attribute::tag",
+			"id": "81",
+			"status": "unchanged",
+			"origValue": "",
+			"source": "config.xml",
+			"value": "EXIF_TAG_ARTIST"
+		},
+		{
+			"item": "/import/library-options/id3/auxdata/add-data[0]/attribute::tag",
+			"id": "83",
+			"status": "unchanged",
+			"origValue": "",
+			"source": "config.xml",
+			"value": "DISCNUMBER"
+		},
+		{
+			"item": "/import/library-options/id3/auxdata/add-data[1]/attribute::tag",
+			"id": "83",
+			"status": "unchanged",
+			"origValue": "",
+			"source": "config.xml",
+			"value": "TPE2"
+		},
+		{
+			"item": "/import/library-options/id3/auxdata/add-data[2]/attribute::tag",
+			"id": "83",
+			"status": "unchanged",
+			"origValue": "",
+			"source": "config.xml",
+			"value": "TPOS"
+		},
+		{
+			"item": "/import/library-options/id3/auxdata/add-data[3]/attribute::tag",
+			"id": "83",
+			"status": "unchanged",
+			"origValue": "",
+			"source": "config.xml",
+			"value": "TCOM"
+		},
+		{
+			"item": "/import/library-options/id3/auxdata/add-data[4]/attribute::tag",
+			"id": "83",
+			"status": "unchanged",
+			"origValue": "",
+			"source": "config.xml",
+			"value": "COMPOSER"
+		},
+		{
+			"item": "/import/library-options/id3/auxdata/add-data[5]/attribute::tag",
+			"id": "83",
+			"status": "unchanged",
+			"origValue": "",
+			"source": "config.xml",
+			"value": "ENCODEDBY"
+		},
+		{
+			"item": "/import/library-options/id3/auxdata/add-data[6]/attribute::tag",
+			"id": "83",
+			"status": "unchanged",
+			"origValue": "",
+			"source": "config.xml",
+			"value": "PERFORMER"
+		},
+		{
+			"item": "/import/library-options/id3/auxdata/add-data[7]/attribute::tag",
+			"id": "83",
+			"status": "unchanged",
+			"origValue": "",
+			"source": "config.xml",
+			"value": "WORK"
+		},
+		{
+			"item": "/import/library-options/id3/auxdata/add-data[8]/attribute::tag",
+			"id": "83",
+			"status": "unchanged",
+			"origValue": "",
+			"source": "config.xml",
+			"value": "WRITER"
+		},
+		{
+			"item": "/import/library-options/id3/auxdata/add-data[9]/attribute::tag",
+			"id": "83",
+			"status": "unchanged",
+			"origValue": "",
+			"source": "config.xml",
+			"value": "LABEL"
+		},
+		{
+			"item": "/import/library-options/id3/auxdata/add-data[10]/attribute::tag",
+			"id": "83",
+			"status": "unchanged",
+			"origValue": "",
+			"source": "config.xml",
+			"value": "RELEASETYPE"
+		},
+		{
+			"item": "/import/directories/tweak[0]",
+			"id": "-1",
+			"value": "",
+			"origValue": "",
+			"status": "added"
+		},
+		{
+			"item": "/import/directories/tweak[0]/attribute::location",
+			"id": "-1",
+			"value": "/etc",
+			"origValue": "",
+			"status": "changed"
+		},
+		{
+			"item": "/import/directories/tweak[0]/attribute::inherit",
+			"id": "-1",
+			"value": "true",
+			"origValue": "",
+			"status": "changed"
+		},
+		{
+			"item": "/import/directories/tweak[0]/attribute::follow-symlinks",
+			"id": "-1",
+			"value": "true",
+			"origValue": "",
+			"status": "changed"
+		},
+		{
+			"item": "/import/directories/tweak[0]/attribute::recursive",
+			"id": "-1",
+			"value": "false",
+			"origValue": "",
+			"status": "changed"
+		},
+		{
+			"item": "/import/directories/tweak[0]/attribute::case-sensitive",
+			"id": "-1",
+			"value": "false",
+			"origValue": "",
+			"status": "changed"
+		},
+		{
+			"item": "/import/directories/tweak[0]/attribute::hidden-files",
+			"id": "-1",
+			"value": "true",
+			"origValue": "",
+			"status": "changed"
+		},
+		{
+			"item": "/import/directories/tweak[0]/attribute::fanart-file",
+			"id": "-1",
+			"value": "cover.jpg",
+			"origValue": "",
+			"status": "changed"
+		},
+		{
+			"item": "/import/directories/tweak[0]/attribute::subtitle-file",
+			"id": "-1",
+			"value": "",
+			"origValue": "",
+			"status": "changed"
+		},
+		{
+			"item": "/import/directories/tweak[0]/attribute::resource-file",
+			"id": "-1",
+			"value": "",
+			"origValue": "",
+			"status": "changed"
+		}
+	],
+	"meta": [],
+	"success": true
+}

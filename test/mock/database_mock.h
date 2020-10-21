@@ -1,16 +1,17 @@
-#ifndef __STORAGE_MOCK_H__
-#define __STORAGE_MOCK_H__
+#ifndef __DATABASE_MOCK_H__
+#define __DATABASE_MOCK_H__
 
 #include <gtest/gtest.h>
 
 #include "config/config.h"
+#include "config/config_setup.h"
 #include "database/database.h"
 
 using namespace ::testing;
 
-class StorageMock : public Database {
+class DatabaseMock : public Database {
 public:
-    StorageMock(std::shared_ptr<Config> config)
+    DatabaseMock(std::shared_ptr<Config> config)
         : Database(config)
     {
     }
@@ -56,6 +57,14 @@ public:
     std::string getInternalSetting(const std::string& key) override { return ""; }
     void storeInternalSetting(const std::string& key, const std::string& value) override { }
 
+    std::vector<ConfigValue> getConfigValues() override
+    {
+        std::vector<ConfigValue> result;
+        return result;
+    }
+    void removeConfigValue(const std::string& item) override {}
+    void updateConfigValue(const std::string& key, const std::string& item, const std::string& value, const std::string& status = "unchanged") override { }
+
     std::shared_ptr<AutoscanList> getAutoscanList(ScanMode scanode) override { return nullptr; }
     void updateAutoscanList(ScanMode scanmode, std::shared_ptr<AutoscanList> list) override { }
 
@@ -83,4 +92,4 @@ public:
     std::map<std::string, std::string> findFolderImageMap;
 };
 
-#endif // __STORAGE_MOCK_H__
+#endif // __DATABASE_MOCK_H__

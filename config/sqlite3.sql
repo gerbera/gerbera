@@ -32,7 +32,7 @@ CREATE TABLE "mt_internal_setting" (
   "key" varchar(40) primary key NOT NULL,
   "value" varchar(255) NOT NULL
 );
-INSERT INTO "mt_internal_setting" VALUES('db_version', '5');
+INSERT INTO "mt_internal_setting" VALUES('db_version', '6');
 CREATE TABLE "mt_autoscan" (
   "id" integer primary key,
   "obj_id" integer default NULL,
@@ -55,6 +55,11 @@ CREATE TABLE "mt_metadata" (
   "property_value" text NOT NULL,
   CONSTRAINT "mt_metadata_idfk1" FOREIGN KEY ("item_id") REFERENCES "mt_cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
+CREATE TABLE "grb_config_value" (
+  "item" varchar(255) primary key,
+  "key" varchar(255) NOT NULL,
+  "item_value" varchar(255) NOT NULL,
+  "status" varchar(20) NOT NULL);
 CREATE INDEX mt_cds_object_ref_id ON mt_cds_object(ref_id);
 CREATE INDEX mt_cds_object_parent_id ON mt_cds_object(parent_id,object_type,dc_title);
 CREATE INDEX mt_object_type ON mt_cds_object(object_type);
@@ -64,4 +69,5 @@ CREATE INDEX mt_internal_setting_key ON mt_internal_setting(key);
 CREATE UNIQUE INDEX mt_autoscan_obj_id ON mt_autoscan(obj_id);
 CREATE INDEX mt_cds_object_service_id ON mt_cds_object(service_id);
 CREATE INDEX mt_metadata_item_id ON mt_metadata(item_id);
+CREATE INDEX grb_config_value_item ON grb_config_value(item);
 COMMIT;

@@ -25,9 +25,11 @@ import {Autoscan} from './gerbera-autoscan.module.js';
 import {Items} from './gerbera-items.module.js';
 import {Menu} from './gerbera-menu.module.js';
 import {Trail} from './gerbera-trail.module.js';
+import {Tweaks} from "./gerbera-tweak.module.js";
 import {Tree} from './gerbera-tree.module.js';
 import {Updates} from './gerbera-updates.module.js';
 import {Clients} from './gerbera-clients.module.js';
+import {Config} from './gerbera-config.module.js';
 
 export class App {
   constructor(clientConfig, serverConfig) {
@@ -38,18 +40,21 @@ export class App {
     this.initDone = false;
     this.pageInfo = {
       dbType: 'home',
+      configMode: 'minimal',
       currentItem: {
         'home': [],
         'db': [],
         'fs': [],
-        'clients': []
+        'clients': [],
+        'config': [],
       }
     };
     this.navLinks = {
       'home': '#nav-home',
       'db': '#nav-db',
       'fs': '#nav-fs',
-      'clients': '#nav-clients'
+      'clients': '#nav-clients',
+      'config': '#nav-config',
     };
   }
 
@@ -83,8 +88,17 @@ export class App {
     return this.pageInfo.currentPage;
   }
 
+  configMode() {
+    return this.pageInfo.configMode;
+  }
+
   setCurrentPage(page) {
     this.pageInfo.currentPage = page;
+    this.writeLocalStorage();
+  }
+
+  setCurrentConfig(mode) {
+    this.pageInfo.configMode = mode;
     this.writeLocalStorage();
   }
 
@@ -114,11 +128,13 @@ export class App {
   initialize () {
     this.pageInfo = {
       dbType: 'home',
+      configMode: 'minimal',
       currentItem: {
         'home': [],
         'db': [],
         'fs': [],
-        'clients': []
+        'clients': [],
+        'config': [],
       }
     };
     return Updates.initialize()
@@ -141,6 +157,9 @@ export class App {
       .then(() => {
         if (localStorage.getItem('pageInfo')) {
           this.pageInfo = JSON.parse(localStorage.getItem('pageInfo'));
+          if (!('configMode' in this.pageInfo)) {
+            this.pageInfo.configMode = 'minimal';
+          }
           if(this.pageInfo.dbType && this.pageInfo.dbType in this.navLinks) {
             $(this.navLinks[this.pageInfo.dbType]).click();
           }
@@ -218,6 +237,8 @@ export class App {
       Autoscan.initialize();
       Updates.initialize();
       Clients.initialize();
+      Config.initialize();
+      Tweaks.initialize();
     } else {
       $('.login-field').show();
       $('#login-form').submit(function (event) {
@@ -259,6 +280,7 @@ export class App {
     Trail.destroy();
     Items.destroy();
     Clients.destroy();
+    Config.destroy();
   }
 
   reload(path) {

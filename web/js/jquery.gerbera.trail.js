@@ -126,6 +126,44 @@ $.widget('grb.trail', {
       deleteAllIcon.appendTo(buttons);
     }
 
+    if (config.enableClearConfig && config.onClear) {
+      const clearIcon = this.generateItemButton(item, {
+        title: 'Clear Saved Config',
+        class: 'grb-trail-clear-config',
+        iconClass: 'fa-trash',
+        click: config.onClear ? config.onClear : noOp
+      });
+
+      clearIcon.appendTo(buttons);
+    }
+    if (config.enableConfig && config.onSave && config.onRescan) {
+      const saveIcon = this.generateItemButton(item, {
+        title: 'Save Config',
+        class: 'grb-trail-save-config',
+        iconClass: 'fa-save',
+        click: config.onSave ? config.onSave : noOp
+      });
+      const rescanIcon = this.generateItemButton(item, {
+        title: 'Rescan Library',
+        class: 'grb-trail-rescan',
+        iconClass: 'fa-retweet',
+        click: config.onRescan ? config.onRescan : noOp
+      });
+
+      rescanIcon.appendTo(buttons);
+      saveIcon.appendTo(buttons);
+    }
+
+    if (config.enableAddTweak && config.onAddTweak) {
+      const tweakIcon = this.generateItemButton(item, {
+        title: 'Tweak Directory',
+        class: 'grb-trail-tweak-dir',
+        iconClass: 'fa-address-card-o',
+        click: config.onAddTweak ? config.onAddTweak : noOp
+      });
+      tweakIcon.appendTo(buttons);
+    }
+
     buttons.appendTo(buttonContainer);
     trailContainer.addClass('col-md-7 col-sm-7 col-xs-7');
 
@@ -135,10 +173,10 @@ $.widget('grb.trail', {
 
   generateItemButton: function (item, config) {
     const button = $('<li>');
-    const link = $('<a>', {"title": config.title, "class": config.class, "href": "javascript:;"});
+    const link = $('<a>', {"title": config.title, "class": "grb-trail-button " + config.class, "href": "javascript:;"});
     const icon = $('<i></i>', {"class": "fa " + config.iconClass });
     link.append(icon);
-    link.append(" " + config.title);
+    link.append('<span> ' + config.title + '</span>');
     button.append(link);
     link.click(item, config.click);
     return button

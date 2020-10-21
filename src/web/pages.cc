@@ -68,6 +68,10 @@ std::unique_ptr<WebRequestHandler> createWebRequestHandler(
         return std::make_unique<web::action>(config, database, content, sessionManager);
     if (page == "clients")
         return std::make_unique<web::clients>(config, database, content, sessionManager);
+    if (page == "config_load")
+        return std::make_unique<web::configLoad>(config, database, content, sessionManager);
+    if (page == "config_save")
+        return std::make_unique<web::configSave>(config, database, content, sessionManager);
 
     throw_std_runtime_error("Unknown page: " + page);
 }

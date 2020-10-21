@@ -30,6 +30,7 @@
 
 #include "cds_objects.h"
 #include "config/config.h"
+#include "config/directory_tweak.h"
 #include "iohandler/file_io_handler.h"
 #include "util/tools.h"
 
@@ -40,13 +41,13 @@ MetacontentHandler::MetacontentHandler(std::shared_ptr<Config> config)
 {
 }
 
-fs::path MetacontentHandler::getContentPath(std::vector<std::string>& names, const std::shared_ptr<CdsItem>& item)
+fs::path MetacontentHandler::getContentPath(const std::vector<std::string>& names, const std::shared_ptr<CdsItem>& item, bool isCaseSensitive)
 {
     if (!names.empty()) {
         auto folder = item->getLocation().parent_path();
         log_debug("Folder name: {}", folder.c_str());
 
-        if (caseSensitive) {
+        if (isCaseSensitive) {
             for (const auto& name : names) {
                 auto found = folder / expandName(name, item);
                 std::error_code ec;
@@ -118,7 +119,8 @@ FanArtHandler::FanArtHandler(std::shared_ptr<Config> config)
 void FanArtHandler::fillMetadata(std::shared_ptr<CdsItem> item)
 {
     log_debug("Running fanart handler on {}", item->getLocation().c_str());
-    auto path = getContentPath(names, item);
+    auto tweak = config->getDirectoryTweakOption(CFG_IMPORT_DIRECTORIES_LIST)->get(item->getLocation());
+    auto path = getContentPath(tweak == nullptr || !tweak->hasFanArtFile() ? names : std::vector<std::string>{ tweak->getFanArtFile() }, item, tweak != nullptr && tweak->hasCaseSensitive() ? tweak->getCaseSensitive() : caseSensitive);
 
     if (!path.empty()) {
         auto resource = std::make_shared<CdsResource>(CH_FANART);
@@ -133,7 +135,8 @@ std::unique_ptr<IOHandler> FanArtHandler::serveContent(std::shared_ptr<CdsItem> 
 {
     fs::path path = item->getResource(resNum)->getAttribute(RESOURCE_FILE);
     if (path.empty()) {
-        path = getContentPath(names, item);
+        auto tweak = config->getDirectoryTweakOption(CFG_IMPORT_DIRECTORIES_LIST)->get(item->getLocation());
+        path = getContentPath(tweak == nullptr && !tweak->hasFanArtFile() ? names : std::vector<std::string>{ tweak->getFanArtFile() }, item, tweak != nullptr && tweak->hasCaseSensitive() ? tweak->getCaseSensitive() : caseSensitive);
     }
     log_debug("FanArt: Opening name: {}", path.c_str());
     struct stat statbuf;
@@ -164,7 +167,8 @@ SubtitleHandler::SubtitleHandler(std::shared_ptr<Config> config)
 
 void SubtitleHandler::fillMetadata(std::shared_ptr<CdsItem> item)
 {
-    auto path = getContentPath(names, item);
+    auto tweak = config->getDirectoryTweakOption(CFG_IMPORT_DIRECTORIES_LIST)->get(item->getLocation());
+    auto path = getContentPath(tweak == nullptr || !tweak->hasSubTitleFile() ? names : std::vector<std::string>{ tweak->getSubTitleFile() }, item, tweak != nullptr && tweak->hasCaseSensitive() ? tweak->getCaseSensitive() : caseSensitive);
     log_debug("Running subtitle handler on {} -> {}", item->getLocation().c_str(), path.c_str());
 
     if (!path.empty()) {
@@ -182,7 +186,8 @@ std::unique_ptr<IOHandler> SubtitleHandler::serveContent(std::shared_ptr<CdsItem
 {
     fs::path path = item->getResource(resNum)->getAttribute(RESOURCE_FILE);
     if (path.empty()) {
-        path = getContentPath(names, item);
+        auto tweak = config->getDirectoryTweakOption(CFG_IMPORT_DIRECTORIES_LIST)->get(item->getLocation());
+        path = getContentPath(tweak == nullptr || !tweak->hasSubTitleFile() ? names : std::vector<std::string>{ tweak->getSubTitleFile() }, item, tweak != nullptr && tweak->hasCaseSensitive() ? tweak->getCaseSensitive() : caseSensitive);
     }
     log_debug("Subtitle: Opening name: {}", path.c_str());
     struct stat statbuf;
@@ -214,7 +219,8 @@ ResourceHandler::ResourceHandler(std::shared_ptr<Config> config)
 
 void ResourceHandler::fillMetadata(std::shared_ptr<CdsItem> item)
 {
-    auto path = getContentPath(names, item);
+    auto tweak = config->getDirectoryTweakOption(CFG_IMPORT_DIRECTORIES_LIST)->get(item->getLocation());
+    auto path = getContentPath(tweak == nullptr || !tweak->hasResourceFile() ? names : std::vector<std::string>{ tweak->getResourceFile() }, item, tweak != nullptr && tweak->hasCaseSensitive() ? tweak->getCaseSensitive() : caseSensitive);
     log_debug("Running resource handler check on {} -> {}", item->getLocation().c_str(), path.c_str());
 
     if (!path.empty()) {
@@ -231,7 +237,8 @@ std::unique_ptr<IOHandler> ResourceHandler::serveContent(std::shared_ptr<CdsItem
 {
     fs::path path = item->getResource(resNum)->getAttribute(RESOURCE_FILE);
     if (path.empty()) {
-        path = getContentPath(names, item);
+        auto tweak = config->getDirectoryTweakOption(CFG_IMPORT_DIRECTORIES_LIST)->get(item->getLocation());
+        path = getContentPath(tweak == nullptr || !tweak->hasResourceFile() ? names : std::vector<std::string>{ tweak->getResourceFile() }, item, tweak != nullptr && tweak->hasCaseSensitive() ? tweak->getCaseSensitive() : caseSensitive);
     }
     log_debug("Resource: Opening name: {}", path.c_str());
     struct stat statbuf;

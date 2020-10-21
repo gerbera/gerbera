@@ -37,6 +37,7 @@
 
 TranscodingProfile::TranscodingProfile()
 {
+    enabled = true;
     first_resource = false;
     buffer_size = 0;
     chunk_size = 0;
@@ -56,6 +57,7 @@ TranscodingProfile::TranscodingProfile(transcoding_type_t tr_type, std::string n
 {
     this->name = std::move(name);
     this->tr_type = tr_type;
+    enabled = true;
     theora = false;
     first_resource = false;
     accept_url = true;
@@ -122,13 +124,27 @@ std::shared_ptr<TranscodingProfileMap> TranscodingProfileList::get(const std::st
     return nullptr;
 }
 
-std::shared_ptr<TranscodingProfile> TranscodingProfileList::getByName(const std::string& name)
+std::shared_ptr<TranscodingProfile> TranscodingProfileList::getByName(const std::string& name, bool getAll)
 {
     for (const auto& it : list) {
         auto inner = it.second;
         auto tp = inner->find(name);
-        if (tp != inner->end())
+        if (tp != inner->end() && (getAll || tp->second->getEnabled()))
             return tp->second;
     }
     return nullptr;
+}
+
+std::string TranscodingProfile::mapFourCcMode(avi_fourcc_listmode_t mode)
+{
+    switch (mode) {
+    case FCC_None:
+        return "disabled";
+    case FCC_Ignore:
+        return "ignore";
+    case FCC_Process:
+        return "process";
+    default:
+        return "disabled";
+    }
 }

@@ -152,13 +152,13 @@ TEST_F(ConfigGeneratorTest, GeneratesExtendedRuntimeXmlWithoutFFMPEG)
 #endif
 
 #if defined(HAVE_MYSQL)
-TEST_F(ConfigGeneratorTest, GeneratesStorageXmlWithMySQLAndSqlLite)
+TEST_F(ConfigGeneratorTest, GeneratesDatabaseXmlWithMySQLAndSqlLite)
 {
-    std::string mockXml = mockConfigXml("fixtures/mock-storage-mysql.xml");
+    std::string mockXml = mockConfigXml("fixtures/mock-database-mysql.xml");
 
     pugi::xml_document doc;
     auto server = doc.append_child("server");
-    subject->generateStorage(&server);
+    subject->generateDatabase(&server);
 
     std::ostringstream result;
     server.first_child().print(result, "  ");
@@ -168,13 +168,13 @@ TEST_F(ConfigGeneratorTest, GeneratesStorageXmlWithMySQLAndSqlLite)
 #endif
 
 #if !defined(HAVE_MYSQL)
-TEST_F(ConfigGeneratorTest, GeneratesStorageXmlWithSqlLiteOnly)
+TEST_F(ConfigGeneratorTest, GeneratesDatabaseXmlWithSqlLiteOnly)
 {
     std::string mockXml = mockConfigXml("fixtures/mock-database-sqlite.xml");
 
     pugi::xml_document doc;
     auto server = doc.append_child("server");
-    subject->generateStorage(&server);
+    subject->generateDatabase(&server);
 
     std::ostringstream result;
     server.first_child().print(result, "  ");

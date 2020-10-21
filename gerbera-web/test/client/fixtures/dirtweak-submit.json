@@ -1,0 +1,80 @@
+{
+	"sid": "SESSION_ID",
+	"req_type": "config_save",
+	"action": "rescan",
+	"changedCount": 10,
+	"target": "/home/gerbera/Music",
+	"updates": "check",
+	"data": [
+		{
+			"item": "/import/directories/tweak[0]",
+			"id": "104",
+			"status": "manual",
+			"origValue": "",
+			"value": ""
+		},
+		{
+			"item": "/import/directories/tweak[0]/attribute::case-sensitive",
+			"id": "104",
+			"status": "changed",
+			"origValue": "",
+			"value": "false"
+		},
+		{
+			"item": "/import/directories/tweak[0]/attribute::fanart-file",
+			"id": "104",
+			"status": "changed",
+			"origValue": "",
+			"value": "cover.jpg"
+		},
+		{
+			"item": "/import/directories/tweak[0]/attribute::follow-symlinks",
+			"id": "104",
+			"status": "changed",
+			"origValue": "",
+			"value": "true"
+		},
+		{
+			"item": "/import/directories/tweak[0]/attribute::hidden-files",
+			"id": "104",
+			"status": "changed",
+			"origValue": "",
+			"value": "false"
+		},
+		{
+			"item": "/import/directories/tweak[0]/attribute::inherit",
+			"id": "104",
+			"status": "changed",
+			"origValue": "",
+			"value": "false"
+		},
+		{
+			"item": "/import/directories/tweak[0]/attribute::location",
+			"id": "104",
+			"status": "changed",
+			"origValue": "",
+			"value": "/home/gerbera/Music"
+		},
+		{
+			"item": "/import/directories/tweak[0]/attribute::recursive",
+			"id": "104",
+			"status": "changed",
+			"origValue": "",
+			"value": "true"
+		},
+		{
+			"item": "/import/directories/tweak[0]/attribute::resource-file",
+			"id": "104",
+			"status": "changed",
+			"origValue": "",
+			"value": ""
+		},
+		{
+			"item": "/import/directories/tweak[0]/attribute::subtitle-file",
+			"id": "104",
+			"status": "changed",
+			"origValue": "",
+			"value": ""
+		}
+	]
+}

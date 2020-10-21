@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     database.h - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -46,6 +46,7 @@ class AutoscanDirectory;
 class AutoscanList;
 class CdsObject;
 class Config;
+class ConfigValue;
 enum class ScanMode;
 class Timer;
 
@@ -261,6 +262,11 @@ public:
     /* autoscan methods */
     virtual std::shared_ptr<AutoscanList> getAutoscanList(ScanMode scanode) = 0;
     virtual void updateAutoscanList(ScanMode scanmode, std::shared_ptr<AutoscanList> list) = 0;
+
+    /* config methods */
+    virtual std::vector<ConfigValue> getConfigValues() = 0;
+    virtual void removeConfigValue(const std::string& item) = 0;
+    virtual void updateConfigValue(const std::string& key, const std::string& item, const std::string& value, const std::string& status = "unchanged") = 0;
 
     /// \brief returns the AutoscanDirectory for the given objectID or nullptr if
     /// it's not an autoscan start point - scan id will be invalid

@@ -5,7 +5,7 @@ let driver;
 const HomePage = require('./page/home.page');
 const LoginPage = require('./page/login.page');
 
-describe('Overlay Suite', () => {
+describe('Edit Overlay Suite', () => {
   let loginPage, homePage;
 
   before(async () => {
@@ -24,7 +24,7 @@ describe('Overlay Suite', () => {
 
   after(() => driver && driver.quit());
 
-  describe('The overlay page', () => {
+  describe('The edit overlay page', () => {
 
     afterEach(async () => {
       await homePage.cancelEdit();
@@ -92,7 +92,7 @@ describe('Overlay Suite', () => {
     });
   });
 
-  describe('The overlay item type selection', () => {
+  describe('The edit overlay item type selection', () => {
 
     afterEach(async () => {
       await homePage.cancelEdit();
@@ -191,7 +191,7 @@ describe('Overlay Suite', () => {
     });
   });
 
-  describe('The overlay load item', () => {
+  describe('The edit overlay load item', () => {
 
     afterEach(async () => {
       await homePage.cancelEdit();

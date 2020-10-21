@@ -126,7 +126,15 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
 
             if (!IS_CDS_ITEM_EXTERNAL_URL(otype) && !IS_CDS_ITEM_INTERNAL_URL(otype)) {
                 fs::path loc = self->getProperty("location");
-                pcd_id = cm->addFile(loc, false, false, true, false);
+
+                AutoScanSetting asSetting;
+                asSetting.followSymlinks = config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS);
+                asSetting.recursive = false;
+                asSetting.hidden = config->getBoolOption(CFG_IMPORT_HIDDEN_FILES);
+                asSetting.rescanResource = false;
+                asSetting.mergeOptions(config, loc);
+
+                pcd_id = cm->addFile(loc, asSetting, false);
                 if (pcd_id == INVALID_OBJECT_ID) {
                     return 0;
                 }

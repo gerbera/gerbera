@@ -2,7 +2,7 @@
 
     Gerbera - https://gerbera.io/
 
-    gerbera-items.module.js - this file is part of Gerbera.
+    gerbera-clients.module.js - this file is part of Gerbera.
 
     Copyright (C) 2016-2020 Gerbera Contributors
 

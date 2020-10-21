@@ -32,8 +32,11 @@ namespace fs = std::filesystem;
 
 // forward declaration
 class AutoscanList;
-class ClientConfigList;
 class AutoscanDirectory;
+class ClientConfigList;
+class ConfigOption;
+class Database;
+class DirectoryConfigList;
 class TranscodingProfileList;
 
 typedef enum {
@@ -68,13 +71,18 @@ typedef enum {
     CFG_SERVER_UI_DEFAULT_ITEMS_PER_PAGE,
     CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN,
     CFG_SERVER_UI_SHOW_TOOLTIPS,
+    CFG_SERVER_STORAGE,
+    CFG_SERVER_STORAGE_MYSQL,
+    CFG_SERVER_STORAGE_SQLITE,
     CFG_SERVER_STORAGE_DRIVER,
+    CFG_SERVER_STORAGE_SQLITE_ENABLED,
     CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE,
     CFG_SERVER_STORAGE_SQLITE_SYNCHRONOUS,
     CFG_SERVER_STORAGE_SQLITE_RESTORE,
     CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED,
     CFG_SERVER_STORAGE_SQLITE_BACKUP_INTERVAL,
 #ifdef HAVE_MYSQL
+    CFG_SERVER_STORAGE_MYSQL_ENABLED,
     CFG_SERVER_STORAGE_MYSQL_HOST,
     CFG_SERVER_STORAGE_MYSQL_PORT,
     CFG_SERVER_STORAGE_MYSQL_USERNAME,
@@ -119,8 +127,8 @@ typedef enum {
     CFG_IMPORT_MAGIC_FILE,
 #endif
     CFG_IMPORT_AUTOSCAN_TIMED_LIST,
-#ifdef HAVE_INOTIFY
     CFG_IMPORT_AUTOSCAN_USE_INOTIFY,
+#ifdef HAVE_INOTIFY
     CFG_IMPORT_AUTOSCAN_INOTIFY_LIST,
 #endif
     CFG_IMPORT_MAPPINGS_IGNORE_UNKNOWN_EXTENSIONS,
@@ -137,6 +145,7 @@ typedef enum {
 #if defined(HAVE_TAGLIB)
     CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST,
 #endif
+    CFG_TRANSCODING_TRANSCODING_ENABLED,
     CFG_TRANSCODING_PROFILE_LIST,
 #ifdef HAVE_CURL
     CFG_EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE,
@@ -164,52 +173,139 @@ typedef enum {
     CFG_IMPORT_LAYOUT_MAPPING,
     CFG_IMPORT_LIBOPTS_ENTRY_SEP,
     CFG_IMPORT_LIBOPTS_ENTRY_LEGACY_SEP,
+    CFG_IMPORT_DIRECTORIES_LIST,
     CFG_IMPORT_RESOURCES_CASE_SENSITIVE,
     CFG_IMPORT_RESOURCES_FANART_FILE_LIST,
     CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST,
     CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST,
+    CFG_TRANSCODING_MIMETYPE_PROF_MAP_ALLOW_UNUSED,
+    CFG_TRANSCODING_PROFILES_PROFILE_ALLOW_UNUSED,
 
-    CFG_MAX
+    CFG_MAX,
+
+    // only attributes are allowed beyond CFG_MAX
+    ATTR_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT,
+    ATTR_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN_OPTION,
+    ATTR_SERVER_UI_ACCOUNT_LIST_ACCOUNT,
+    ATTR_SERVER_UI_ACCOUNT_LIST_USER,
+    ATTR_SERVER_UI_ACCOUNT_LIST_PASSWORD,
+    ATTR_IMPORT_MAPPINGS_MIMETYPE_MAP,
+    ATTR_IMPORT_MAPPINGS_MIMETYPE_FROM,
+    ATTR_IMPORT_MAPPINGS_MIMETYPE_TO,
+    ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_TREAT,
+    ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_MIMETYPE,
+    ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_AS,
+    ATTR_IMPORT_LAYOUT_MAPPING_PATH,
+    ATTR_IMPORT_LAYOUT_MAPPING_FROM,
+    ATTR_IMPORT_LAYOUT_MAPPING_TO,
+    ATTR_IMPORT_RESOURCES_ADD_FILE,
+    ATTR_IMPORT_RESOURCES_NAME,
+    ATTR_IMPORT_LIBOPTS_AUXDATA_DATA,
+    ATTR_IMPORT_LIBOPTS_AUXDATA_TAG,
+    ATTR_TRANSCODING_MIMETYPE_PROF_MAP,
+    ATTR_TRANSCODING_MIMETYPE_PROF_MAP_TRANSCODE,
+    ATTR_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE,
+    ATTR_TRANSCODING_MIMETYPE_PROF_MAP_USING,
+    ATTR_TRANSCODING_PROFILES,
+    ATTR_TRANSCODING_PROFILES_PROFLE,
+    ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED,
+    ATTR_TRANSCODING_PROFILES_PROFLE_TYPE,
+    ATTR_TRANSCODING_PROFILES_PROFLE_NAME,
+    ATTR_TRANSCODING_PROFILES_PROFLE_MIMETYPE,
+    ATTR_TRANSCODING_PROFILES_PROFLE_RES,
+    ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC,
+    ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE,
+    ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_4CC,
+    ATTR_TRANSCODING_PROFILES_PROFLE_ACCURL,
+    ATTR_TRANSCODING_PROFILES_PROFLE_SAMPFREQ,
+    ATTR_TRANSCODING_PROFILES_PROFLE_NRCHAN,
+    ATTR_TRANSCODING_PROFILES_PROFLE_HIDEORIG,
+    ATTR_TRANSCODING_PROFILES_PROFLE_THUMB,
+    ATTR_TRANSCODING_PROFILES_PROFLE_FIRST,
+    ATTR_TRANSCODING_PROFILES_PROFLE_ACCOGG,
+    ATTR_TRANSCODING_PROFILES_PROFLE_USECHUNKEDENC,
+    ATTR_TRANSCODING_PROFILES_PROFLE_AGENT,
+    ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND,
+    ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS,
+    ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER,
+    ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE,
+    ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK,
+    ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL,
+    ATTR_AUTOSCAN_DIRECTORY,
+    ATTR_AUTOSCAN_DIRECTORY_LOCATION,
+    ATTR_AUTOSCAN_DIRECTORY_MODE,
+    ATTR_AUTOSCAN_DIRECTORY_INTERVAL,
+    ATTR_AUTOSCAN_DIRECTORY_RECURSIVE,
+    ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES,
+    ATTR_CLIENTS_CLIENT,
+    ATTR_CLIENTS_CLIENT_FLAGS,
+    ATTR_CLIENTS_CLIENT_IP,
+    ATTR_CLIENTS_CLIENT_USERAGENT,
+    ATTR_DIRECTORIES_TWEAK,
+    ATTR_DIRECTORIES_TWEAK_LOCATION,
+    ATTR_DIRECTORIES_TWEAK_INHERIT,
+    ATTR_DIRECTORIES_TWEAK_RECURSIVE,
+    ATTR_DIRECTORIES_TWEAK_HIDDEN,
+    ATTR_DIRECTORIES_TWEAK_CASE_SENSITIVE,
+    ATTR_DIRECTORIES_TWEAK_FOLLOW_SYMLINKS,
+    ATTR_DIRECTORIES_TWEAK_FANART_FILE,
+    ATTR_DIRECTORIES_TWEAK_SUBTILTE_FILE,
+    ATTR_DIRECTORIES_TWEAK_RESOURCE_FILE,
 } config_option_t;
 
 class Config {
 public:
     virtual ~Config() = default;
+    virtual void updateConfigFromDatabase(std::shared_ptr<Database> database) = 0;
+    virtual std::string getOrigValue(const std::string& item) const = 0;
+    virtual void setOrigValue(const std::string& item, const std::string& value) = 0;
+    virtual void setOrigValue(const std::string& item, bool value) = 0;
+    virtual void setOrigValue(const std::string& item, int value) = 0;
+    virtual bool hasOrigValue(const std::string& item) const = 0;
 
     /// \brief Returns the name of the config file that was used to launch the server.
     virtual fs::path getConfigFilename() const = 0;
 
+    /// \brief add a config option
+    /// \param option option type to add.
+    /// \param option option to add.
+    virtual void addOption(config_option_t option, std::shared_ptr<ConfigOption> optionValue) = 0;
+
     /// \brief returns a config option of type std::string
     /// \param option option to retrieve.
-    virtual std::string getOption(config_option_t option) = 0;
+    virtual std::string getOption(config_option_t option) const = 0;
 
     /// \brief returns a config option of type int
     /// \param option option to retrieve.
-    virtual int getIntOption(config_option_t option) = 0;
+    virtual int getIntOption(config_option_t option) const = 0;
 
     /// \brief returns a config option of type bool
     /// \param option option to retrieve.
-    virtual bool getBoolOption(config_option_t option) = 0;
+    virtual bool getBoolOption(config_option_t option) const = 0;
 
     /// \brief returns a config option of type dictionary
     /// \param option option to retrieve.
-    virtual std::map<std::string, std::string> getDictionaryOption(config_option_t option) = 0;
+    virtual std::map<std::string, std::string> getDictionaryOption(config_option_t option) const = 0;
 
     /// \brief returns a config option of type array of string
     /// \param option option to retrieve.
-    virtual std::vector<std::string> getArrayOption(config_option_t option) = 0;
+    virtual std::vector<std::string> getArrayOption(config_option_t option) const = 0;
 
     /// \brief returns a config option of type AutoscanList
     /// \param option to retrieve
-    virtual std::shared_ptr<AutoscanList> getAutoscanListOption(config_option_t option) = 0;
+    virtual std::shared_ptr<AutoscanList> getAutoscanListOption(config_option_t option) const = 0;
 
     /// \brief returns a config option of type ClientConfigList
     /// \param option to retrieve
-    virtual std::shared_ptr<ClientConfigList> getClientConfigListOption(config_option_t option) = 0;
+    virtual std::shared_ptr<ClientConfigList> getClientConfigListOption(config_option_t option) const = 0;
+
+    /// \brief returns a config option of type DirectoryConfigList
+    /// \param option to retrieve
+    virtual std::shared_ptr<DirectoryConfigList> getDirectoryTweakOption(config_option_t option) const = 0;
 
     /// \brief returns a config option of type TranscodingProfileList
     /// \param option to retrieve
-    virtual std::shared_ptr<TranscodingProfileList> getTranscodingProfileListOption(config_option_t option) = 0;
+    virtual std::shared_ptr<TranscodingProfileList> getTranscodingProfileListOption(config_option_t option) const = 0;
 };
 
 #endif // __CONFIG_H__

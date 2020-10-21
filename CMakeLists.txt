@@ -82,7 +82,12 @@ add_library(libgerbera STATIC
         src/config/config_generator.cc
         src/config/config_manager.cc
         src/config/config_manager.h
+        src/config/config_options.cc
         src/config/config_options.h
+        src/config/config_setup.cc
+        src/config/config_setup.h
+        src/config/directory_tweak.h
+        src/config/directory_tweak.cc
         src/content_manager.cc
         src/content_manager.h
         src/contrib/md5.c
@@ -229,6 +234,8 @@ add_library(libgerbera STATIC
         src/web/add_object.cc
         src/web/auth.cc
         src/web/clients.cc
+        src/web/config_load.cc
+        src/web/config_save.cc
         src/web/containers.cc
         src/web/directories.cc
         src/web/edit_load.cc

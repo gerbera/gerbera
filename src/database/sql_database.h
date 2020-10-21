@@ -50,6 +50,7 @@ class SQLEmitter;
 #define INTERNAL_SETTINGS_TABLE "mt_internal_setting"
 #define AUTOSCAN_TABLE "mt_autoscan"
 #define METADATA_TABLE "mt_metadata"
+#define CONFIG_VALUE_TABLE "grb_config_value"
 
 class SQLRow {
 public:
@@ -150,6 +151,11 @@ public:
     void updateAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir) override;
     void removeAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir) override;
     void checkOverlappingAutoscans(std::shared_ptr<AutoscanDirectory> adir) override;
+
+    /* config methods */
+    std::vector<ConfigValue> getConfigValues() override;
+    void removeConfigValue(const std::string& item) override;
+    void updateConfigValue(const std::string& key, const std::string& item, const std::string& value, const std::string& status = "unchanged") override;
 
     std::unique_ptr<std::vector<int>> getPathIDs(int objectID) override;
 

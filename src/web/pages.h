@@ -36,6 +36,7 @@
 
 #include "cds_objects.h"
 #include "common.h"
+#include "config/config_setup.h"
 #include "request_handler.h"
 #include "web_request_handler.h"
 
@@ -183,10 +184,38 @@ std::unique_ptr<WebRequestHandler> createWebRequestHandler(
     const std::shared_ptr<ContentManager>& content, const std::shared_ptr<SessionManager>& sessionManager,
     const std::string& page);
 
-/// \brief Browser clients list
+/// \brief Browse clients list
 class clients : public WebRequestHandler {
 public:
     clients(std::shared_ptr<Config> config, std::shared_ptr<Database> database,
+        std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
+    void process() override;
+};
+
+/// \brief load configuration
+class configLoad : public WebRequestHandler {
+protected:
+    std::vector<ConfigValue> dbEntries;
+    std::map<std::string, pugi::xml_node*> allItems;
+    void createItem(pugi::xml_node& item, const std::string& name, config_option_t id, config_option_t aid);
+    void setValue(pugi::xml_node& item, bool value);
+    void setValue(pugi::xml_node& item, const std::string& value);
+    void setValue(pugi::xml_node& item, int value);
+    void setValue(pugi::xml_node& item, unsigned int value);
+    void setValue(pugi::xml_node& item, size_t value);
+
+    void addTypeMeta(pugi::xml_node& meta, const std::shared_ptr<ConfigSetup> cs) const;
+
+public:
+    configLoad(std::shared_ptr<Config> config, std::shared_ptr<Database> database,
+        std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
+    void process() override;
+};
+
+/// \brief save configuration
+class configSave : public WebRequestHandler {
+public:
+    configSave(std::shared_ptr<Config> config, std::shared_ptr<Database> database,
         std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
     void process() override;
 };

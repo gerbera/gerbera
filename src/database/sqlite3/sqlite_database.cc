@@ -98,6 +98,15 @@ CREATE INDEX mt_track_number on mt_cds_object (track_number); \
 PRAGMA foreign_keys = ON;"
 #define SQLITE3_UPDATE_4_5_2 "UPDATE mt_internal_setting SET value='5' WHERE key='db_version' AND value='4'"
 
+// updates 5->6: add config value table
+#define SQLITE3_UPDATE_5_6_1 "CREATE TABLE \"grb_config_value\" ( \
+  \"item\" varchar(255) primary key, \
+  \"key\" varchar(255) NOT NULL, \
+  \"item_value\" varchar(255) NOT NULL, \
+  \"status\" varchar(20) NOT NULL)"
+#define SQLITE3_UPDATE_5_6_2 "CREATE INDEX grb_config_value_item ON grb_config_value(item)"
+#define SQLITE3_UPDATE_5_6_3 "UPDATE \"mt_internal_setting\" SET \"value\"='6' WHERE \"key\"='db_version' AND \"value\"='5'"
+
 #define SL3_INITITAL_QUEUE_SIZE 20
 
 Sqlite3Database::Sqlite3Database(std::shared_ptr<Config> config, std::shared_ptr<Timer> timer)
@@ -126,7 +135,7 @@ void Sqlite3Database::init()
 
     // check for db-file
     if (access(dbFilePath.c_str(), R_OK | W_OK) != 0 && errno != ENOENT)
-        throw DatabaseException("", "Error while accessing sqlite database file (" + dbFilePath + "): " + strerror(errno));
+        throw DatabaseException("", fmt::format("Error while accessing sqlite database file ({}): {}", dbFilePath.c_str(), strerror(errno)));
 
     taskQueueOpen = true;
 
@@ -193,70 +202,83 @@ void Sqlite3Database::init()
         throw_std_runtime_error("sqlite3 database seems to be corrupt and restoring from backup failed");
     }
 
-    _exec("PRAGMA locking_mode = EXCLUSIVE");
-    _exec("PRAGMA foreign_keys = ON");
-    int synchronousOption = config->getIntOption(CFG_SERVER_STORAGE_SQLITE_SYNCHRONOUS);
-    std::ostringstream buf;
-    buf << "PRAGMA synchronous = " << synchronousOption;
-    SQLDatabase::exec(buf);
+    try {
+        _exec("PRAGMA locking_mode = EXCLUSIVE");
+        _exec("PRAGMA foreign_keys = ON");
+        int synchronousOption = config->getIntOption(CFG_SERVER_STORAGE_SQLITE_SYNCHRONOUS);
+        std::ostringstream buf;
+        buf << "PRAGMA synchronous = " << synchronousOption;
+        SQLDatabase::exec(buf);
 
-    log_debug("db_version: {}", dbVersion.c_str());
+        log_debug("db_version: {}", dbVersion.c_str());
 
-    /* --- database upgrades --- */
+        /* --- database upgrades --- */
 
-    if (dbVersion == "1") {
-        log_info("Running an automatic database upgrade from database version 1 to version 2...");
-        _exec(SQLITE3_UPDATE_1_2_1);
-        _exec(SQLITE3_UPDATE_1_2_2);
-        _exec(SQLITE3_UPDATE_1_2_3);
-        _exec(SQLITE3_UPDATE_1_2_4);
-        log_info("Database upgrade successful.");
-        dbVersion = "2";
+        if (dbVersion == "1") {
+            log_info("Running an automatic database upgrade from database version 1 to version 2...");
+            _exec(SQLITE3_UPDATE_1_2_1);
+            _exec(SQLITE3_UPDATE_1_2_2);
+            _exec(SQLITE3_UPDATE_1_2_3);
+            _exec(SQLITE3_UPDATE_1_2_4);
+            log_info("Database upgrade successful.");
+            dbVersion = "2";
+        }
+
+        if (dbVersion == "2") {
+            log_info("Running an automatic database upgrade from database version 2 to version 3...");
+            _exec(SQLITE3_UPDATE_2_3_1);
+            _exec(SQLITE3_UPDATE_2_3_2);
+            _exec(SQLITE3_UPDATE_2_3_3);
+            log_info("Database upgrade successful.");
+            dbVersion = "3";
+        }
+
+        if (dbVersion == "3") {
+            log_info("Running an automatic database upgrade from database version 3 to version 4...");
+            _exec(SQLITE3_UPDATE_3_4_1);
+            _exec(SQLITE3_UPDATE_3_4_2);
+            _exec(SQLITE3_UPDATE_3_4_3);
+            log_info("Database upgrade successful.");
+            dbVersion = "4";
+        }
+
+        if (dbVersion == "4") {
+            log_info("Running an automatic database upgrade from database version 4 to version 5...");
+            _exec(SQLITE3_UPDATE_4_5_1);
+            _exec(SQLITE3_UPDATE_4_5_2);
+            log_info("Database upgrade successful.");
+            dbVersion = "5";
+        }
+
+        if (dbVersion == "5") {
+            log_info("Running an automatic database upgrade from database version 5 to version 6...");
+            _exec(SQLITE3_UPDATE_5_6_1);
+            _exec(SQLITE3_UPDATE_5_6_2);
+            _exec(SQLITE3_UPDATE_5_6_3);
+            log_info("Database upgrade successful.");
+            dbVersion = "6";
+        }
+
+        if (dbVersion != "6")
+            throw_std_runtime_error("The database seems to be from a newer version");
+
+        // add timer for backups
+        if (config->getBoolOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED)) {
+            int backupInterval = config->getIntOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_INTERVAL);
+            timer->addTimerSubscriber(this, backupInterval, nullptr);
+
+            // do a backup now
+            auto btask = std::make_shared<SLBackupTask>(config, false);
+            this->addTask(btask);
+            btask->waitForTask();
+        }
+
+        dbReady();
+    } catch (const std::runtime_error& e) {
+        log_error("prematurely shutting down.");
+        shutdown();
+        throw_std_runtime_error(e.what());
     }
-
-    if (dbVersion == "2") {
-        log_info("Running an automatic database upgrade from database version 2 to version 3...");
-        _exec(SQLITE3_UPDATE_2_3_1);
-        _exec(SQLITE3_UPDATE_2_3_2);
-        _exec(SQLITE3_UPDATE_2_3_3);
-        log_info("Database upgrade successful.");
-        dbVersion = "3";
-    }
-
-    if (dbVersion == "3") {
-        log_info("Running an automatic database upgrade from database version 3 to version 4...");
-        _exec(SQLITE3_UPDATE_3_4_1);
-        _exec(SQLITE3_UPDATE_3_4_2);
-        _exec(SQLITE3_UPDATE_3_4_3);
-        log_info("Database upgrade successful.");
-        dbVersion = "4";
-    }
-
-    if (dbVersion == "4") {
-        log_info("Running an automatic database upgrade from database version 4 to version 5...");
-        _exec(SQLITE3_UPDATE_4_5_1);
-        _exec(SQLITE3_UPDATE_4_5_2);
-        log_info("Database upgrade successful.");
-        dbVersion = "5";
-    }
-
-    /* --- --- ---*/
-
-    if (dbVersion != "5")
-        throw_std_runtime_error("The database seems to be from a newer version");
-
-    // add timer for backups
-    if (config->getBoolOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED)) {
-        int backupInterval = config->getIntOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_INTERVAL);
-        timer->addTimerSubscriber(this, backupInterval, nullptr);
-
-        // do a backup now
-        auto btask = std::make_shared<SLBackupTask>(config, false);
-        this->addTask(btask);
-        btask->waitForTask();
-    }
-
-    dbReady();
 }
 
 std::shared_ptr<Database> Sqlite3Database::getSelf()
@@ -285,21 +307,33 @@ std::string Sqlite3Database::getError(const std::string& query, const std::strin
 
 std::shared_ptr<SQLResult> Sqlite3Database::select(const char* query, int length)
 {
-    //fprintf(stdout, "%s\n",query);
-    //fflush(stdout);
-    auto stask = std::make_shared<SLSelectTask>(query);
-    addTask(stask);
-    stask->waitForTask();
-    return stask->getResult();
+    try {
+        //fprintf(stdout, "%s\n",query);
+        //fflush(stdout);
+        auto stask = std::make_shared<SLSelectTask>(query);
+        addTask(stask);
+        stask->waitForTask();
+        return stask->getResult();
+    } catch (const std::runtime_error& e) {
+        log_error("prematurely shutting down.");
+        shutdown();
+        throw_std_runtime_error(e.what());
+    }
 }
 
 int Sqlite3Database::exec(const char* query, int length, bool getLastInsertId)
 {
-    log_debug("Adding query to Queue: {}", query);
-    auto etask = std::make_shared<SLExecTask>(query, getLastInsertId);
-    addTask(etask);
-    etask->waitForTask();
-    return getLastInsertId ? etask->getLastInsertId() : -1;
+    try {
+        log_debug("Adding query to Queue: {}", query);
+        auto etask = std::make_shared<SLExecTask>(query, getLastInsertId);
+        addTask(etask);
+        etask->waitForTask();
+        return getLastInsertId ? etask->getLastInsertId() : -1;
+    } catch (const std::runtime_error& e) {
+        log_error("prematurely shutting down.");
+        shutdown();
+        throw_std_runtime_error(e.what());
+    }
 }
 
 void* Sqlite3Database::staticThreadProc(void* arg)
@@ -409,6 +443,7 @@ SLTask::SLTask()
     contamination = false;
     decontamination = false;
 }
+
 bool SLTask::is_running() const
 {
     return running;
@@ -466,7 +501,7 @@ void SLInitTask::run(sqlite3** db, Sqlite3Database* sl)
     unsigned long uncompressed_size = SL3_CREATE_SQL_INFLATED_SIZE;
     int ret = uncompress(buf, &uncompressed_size, sqlite3_create_sql, SL3_CREATE_SQL_DEFLATED_SIZE);
     if (ret != Z_OK || uncompressed_size != SL3_CREATE_SQL_INFLATED_SIZE)
-        throw DatabaseException("", "SQLite: Error decompressing create SQL: " + std::to_string(ret));
+        throw DatabaseException("", fmt::format("SQLite: Error decompressing create SQL: {}",ret));
     buf[SL3_CREATE_SQL_INFLATED_SIZE] = '\0';
 
     char* err = nullptr;

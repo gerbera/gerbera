@@ -291,6 +291,7 @@
                 <xs:element ref="metadata-charset" minOccurs="0"/>
                 <xs:element ref="playlist-charset" minOccurs="0"/>
                 <xs:element ref="autoscan" minOccurs="0"/>
+                <xs:element ref="directories" minOccurs="0"/>
                 <xs:element ref="layout" minOccurs="0"/>
                 <xs:element ref="resources" minOccurs="0"/>
                 <xs:element ref="library-options" minOccurs="0"/>
@@ -377,6 +378,28 @@
                     </xs:restriction>
                 </xs:simpleType>
             </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="directories">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="tweak" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="tweak">
+        <xs:complexType>
+            <xs:attribute name="location" type="xs:string" use="required"/>
+
+            <xs:attribute name="inherit" type="boolean" use="required"/>
+            <xs:attribute name="hidden-files"/>
+            <xs:attribute name="recursive" type="boolean"/>
+            <xs:attribute name="case-sensitive" type="boolean"/>
+            <xs:attribute name="fanart-file" type="xs:string"/>
+            <xs:attribute name="subtitle-file" type="xs:string"/>
+            <xs:attribute name="resource-file" type="xs:string"/>
         </xs:complexType>
     </xs:element>
 
@@ -557,6 +580,7 @@
             <xs:sequence>
                 <xs:element ref="transcode" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
+            <xs:attribute name="allow-unused" type="boolean" default="no"/>
         </xs:complexType>
     </xs:element>
 
@@ -572,6 +596,7 @@
             <xs:sequence>
                 <xs:element ref="profile" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
+            <xs:attribute name="allow-unused" type="boolean" default="no"/>
         </xs:complexType>
     </xs:element>
 

@@ -58,7 +58,7 @@ This tag defines the transcoding section.
 
 .. code-block:: xml
 
-    <mimetype-profile-mappings>
+    <mimetype-profile-mappings allow-unused="no">
 
 The mime type to profile mappings define which mime type is handled by which profile.
 
@@ -67,6 +67,12 @@ The same mime type can also map to several profiles, in this case multiple resou
 allowing the player to decide which one to take.
 
 The mappings under mimetype-profile are defined in the following manner:
+
+    ::
+
+        allow-unused=...
+
+    Suppress errors when loading profiles. Default **no**: Unused mappings are not allowed in config.
 
 ``transcode``
 -------------
@@ -99,9 +105,15 @@ profile which is defined below.
 
 .. code-block:: xml
 
-    <profiles>
+    <profiles allow-unused="no">
 
 This section defines the various transcoding profiles.
+
+    ::
+
+        allow-unused=...
+
+    Suppress errors when loading profiles. Default **no**: Unused profiles are not allowed in config.
 
     .. code-block:: xml
 

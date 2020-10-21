@@ -49,7 +49,7 @@ CREATE TABLE `mt_internal_setting` (
   `value` varchar(255) NOT NULL,
   PRIMARY KEY  (`key`)
 ) ENGINE=MyISAM CHARSET=utf8;
-INSERT INTO `mt_internal_setting` VALUES ('db_version','5');
+INSERT INTO `mt_internal_setting` VALUES ('db_version','6');
 CREATE TABLE `mt_autoscan` (
   `id` int(11) NOT NULL auto_increment,
   `obj_id` int(11) default NULL,
@@ -76,6 +76,13 @@ CREATE TABLE `mt_metadata` (
   KEY `metadata_item_id` (`item_id`),
   CONSTRAINT `mt_metadata_idfk1` FOREIGN KEY (`item_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=MyISAM CHARSET=utf8;
+CREATE TABLE `grb_config_value` ( \
+  `item` varchar(255) primary key, \
+  `key` varchar(255) NOT NULL, \
+  `item_value` varchar(255) NOT NULL, \
+  `status` varchar(20) NOT NULL) \
+  ENGINE=MyISAM CHARSET=utf8;
+CREATE INDEX grb_config_value_item ON grb_config_value(item);
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 /*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;

@@ -91,7 +91,7 @@ void ConfigGenerator::generateServer(const fs::path& userHome, const fs::path& c
             .c_str());
     server.append_child("alive").append_child(pugi::node_pcdata).set_value(std::to_string(DEFAULT_ALIVE_INTERVAL).c_str());
 
-    generateStorage(&server);
+    generateDatabase(&server);
     generateExtendedRuntime(&server);
 }
 
@@ -110,7 +110,7 @@ void ConfigGenerator::generateUi(pugi::xml_node* server)
     account.append_attribute("password") = DEFAULT_ACCOUNT_PASSWORD;
 }
 
-void ConfigGenerator::generateStorage(pugi::xml_node* server)
+void ConfigGenerator::generateDatabase(pugi::xml_node* server)
 {
     auto database = server->append_child("storage");
 

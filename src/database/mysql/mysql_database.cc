@@ -63,6 +63,7 @@
 #define MYSQL_UPDATE_3_4_2 "ALTER TABLE `mt_cds_object` ADD KEY `cds_object_service_id` (`service_id`)"
 #define MYSQL_UPDATE_3_4_3 "UPDATE `mt_internal_setting` SET `value`='4' WHERE `key`='db_version' AND `value`='3'"
 
+// updates 4->5
 #define MYSQL_UPDATE_4_5_1 "CREATE TABLE `mt_metadata` ( \
   `id` int(11) NOT NULL auto_increment, \
   `item_id` int(11) NOT NULL, \
@@ -73,6 +74,16 @@
   CONSTRAINT `mt_metadata_idfk1` FOREIGN KEY (`item_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE \
 ) ENGINE=MyISAM CHARSET=utf8"
 #define MYSQL_UPDATE_4_5_2 "UPDATE `mt_internal_setting` SET `value`='5' WHERE `key`='db_version' AND `value`='4'"
+
+// updates 5->6: add config value table
+#define MYSQL_UPDATE_5_6_1 "CREATE TABLE `grb_config_value` ( \
+  `item` varchar(255) primary key, \
+  `key` varchar(255) NOT NULL, \
+  `item_value` varchar(255) NOT NULL, \
+  `status` varchar(20) NOT NULL) \
+  ENGINE=MyISAM CHARSET=utf8"
+#define MYSQL_UPDATE_5_6_2 "CREATE INDEX grb_config_value_item ON grb_config_value(item)"
+#define MYSQL_UPDATE_5_6_3 "UPDATE `mt_internal_setting` SET `value`='6' WHERE `key`='db_version' AND `value`='5'"
 
 MySQLDatabase::MySQLDatabase(std::shared_ptr<Config> config)
     : SQLDatabase(std::move(config))
@@ -262,9 +273,18 @@ void MySQLDatabase::init()
         dbVersion = "5";
     }
 
+    if (dbVersion == "5") {
+        log_info("Doing an automatic database upgrade from database version 5 to version 6...");
+        _exec(MYSQL_UPDATE_5_6_1);
+        _exec(MYSQL_UPDATE_5_6_2);
+        _exec(MYSQL_UPDATE_5_6_3);
+        log_info("database upgrade successful.");
+        dbVersion = "6";
+    }
+
     /* --- --- ---*/
 
-    if (dbVersion != "5")
+    if (dbVersion != "6")
         throw_std_runtime_error("The database seems to be from a newer version (database version " + dbVersion + ")");
 
     lock.unlock();

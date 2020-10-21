@@ -22,24 +22,27 @@
             <div class="collapse navbar-collapse" id="navbarContent">
                 <ul class="navbar-nav mr-auto">
                     <li class="nav-item">
-                        <a id="nav-home" class="nav-link" href="#" data-gerbera-menu-cmd="HOME"><i class="fa fa-home"></i> Home <span class="sr-only">(current)</span></a>
+                        <a id="nav-home" class="nav-link" href="#" data-gerbera-menu-cmd="HOME"><i class="fa fa-home"></i><span> Home</span> <span class="sr-only">(current)</span></a>
                     </li>
                     <li class="nav-item">
-                        <a id="nav-db" class="nav-link disabled" href="#database" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="db"><i class="fa fa-database"></i> Database</a>
+                        <a id="nav-db" class="nav-link disabled" href="#database" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="db"><i class="fa fa-database"></i><span> Database</span></a>
                     </li>
                     <li class="nav-item">
-                        <a id="nav-fs" class="nav-link disabled" href="#filesystem" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="fs"><i class="fa fa-folder-open"></i> File System</a>
+                        <a id="nav-fs" class="nav-link disabled" href="#filesystem" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="fs"><i class="fa fa-folder-open"></i><span> File System</span></a>
                     </li>
                     <li class="nav-item">
-                        <a id="nav-clients" class="nav-link disabled" href="#clients" data-gerbera-menu-cmd="SELECT_CLIENTS" data-gerbera-type="clients"><i class="fa fa-desktop"></i> Clients</a>
+                        <a id="nav-clients" class="nav-link disabled" href="#clients" data-gerbera-menu-cmd="SELECT_CLIENTS" data-gerbera-type="clients"><i class="fa fa-desktop"></i><span> Clients</span></a>
+                    </li>
+                    <li class="nav-item">
+                        <a id="nav-config" class="nav-link disabled" href="#config" data-gerbera-menu-cmd="SELECT_CONFIG" data-gerbera-type="config"><i class="fa fa-sliders"></i><span> Config</span></a>
                     </li>
                 </ul>
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a id="docs" class="nav-link disabled noactive" href="http://docs.gerbera.io/en/latest/" target="_blank"><i class="fa fa-question-circle"></i> Documentation</a>
+                        <a id="docs" class="nav-link disabled noactive" href="http://docs.gerbera.io/en/latest/" target="_blank"><i class="fa fa-question-circle"></i><span> Documentation</span></a>
                     </li>
                     <li class="nav-item">
-                        <a id="report-issue" class="nav-link noactive" href="http://github.com/gerbera/gerbera/issues" target="_blank"><i class="fa fa-bug"></i> Report an Issue <i class="fa fa-external-link" aria-hidden="true"></i></a>
+                        <a id="report-issue" class="nav-link noactive" href="http://github.com/gerbera/gerbera/issues" target="_blank"><i class="fa fa-bug"></i><span> Report an Issue <i class="fa fa-external-link" aria-hidden="true"></i></span></a>
                     </li>
                     <li class="nav-item" hidden>
                         <div class="nav-link disabled noactive" id="gerbera-version"><i class="fa fa-code-fork"></i><span></span></div>
@@ -78,9 +81,14 @@
                     <span>View, update and remove files from Gerbera.</span>
                 </a>
 
-                <a id="clientlink" href="javascript:;" onclick="$('#nav-clients').click(); // Replace with hashchange handling">
+                <a id="clientlink" href="javascript:;" onclick="$('#nav-clients').click();">
                     <h4><i class="fa fa-desktop"></i> Show connected clients</h4>
                     <span>Show clients detected by Gerbera and their profile details</span>
+                </a>
+
+                <a id="configlink" href="javascript:;" onclick="$('#nav-config').click();">
+                    <h4><i class="fa fa-sliders"></i> Edit Configuration</h4>
+                    <span>Change settings for Gerbera</span>
                 </a>
             </div>
         </div>
@@ -100,6 +108,13 @@
     <div id="clients" style="display: none">
         <div id="clientframe">
             <div id="clientgrid">
+            </div>
+        </div>
+    </div>
+
+    <div id="config" style="display: none">
+        <div id="configframe">
+            <div id="configgrid">
             </div>
         </div>
     </div>
@@ -273,6 +288,115 @@
     </div><!-- /.modal-dialog -->
 </div>
 
+<div id="dirTweakModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Add Directory Tweak</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                <form>
+                    <div class="form-group row">
+                        <div class="col-md-4">
+                            <label for="dirTweakLocation">Location:</label>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="text" id="dirTweakLocation" name="location" class="form-control" disabled />
+                            <input type="number" id="dirTweakId" name="id" class="form-control" hidden />
+                            <input type="number" id="dirTweakIndex" name="status" class="form-control" hidden />
+                            <input type="text" id="dirTweakStatus" name="status" class="form-control" hidden />
+                        </div>
+                    </div>
+                    <div class="form-check form-check-inline row">
+                        <div class="col-md-4">
+                            <label for="dirTweakInherit" class="form-check-label">Inherit settings to subdirs:</label>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-check-inline">
+                                <input type="checkbox" name="dirTweakInherit" id="dirTweakInherit" class="form-check-input"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-check form-check-inline row">
+                        <div class="col-md-4">
+                            <label for="dirTweakSymLinks" class="form-check-label">Follow Symbolic Links:</label>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-check-inline">
+                                <input type="checkbox" name="dirTweakSymLinks" id="dirTweakSymLinks" class="form-check-input"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-check form-check-inline row">
+                        <div class="col-md-4">
+                            <label for="dirTweakRecursive" class="form-check-label">Recursive import:</label>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-check-inline">
+                                <input type="checkbox" name="dirTweakRecursive" id="dirTweakRecursive" class="form-check-input"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-check form-check-inline row">
+                        <div class="col-md-4">
+                            <label for="dirTweakHidden" class="form-check-label">Include hidden files/directories:</label>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-check-inline">
+                                <input type="checkbox" name="dirTweakHidden" id="dirTweakHidden" class="form-check-input"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-check form-check-inline row">
+                        <div class="col-md-4">
+                            <label for="dirTweakCaseSens" class="form-check-label">Case sensitive resources:</label>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-check-inline">
+                                <input type="checkbox" name="dirTweakCaseSens" id="dirTweakCaseSens" class="form-check-input"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-4">
+                            <label for="dirTweakFanArt">Fan Art File</label>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="text" id="dirTweakFanArt" class="form-control"/>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-4">
+                            <label for="dirTweakSubtitle">Subtitle File</label>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="text" id="dirTweakSubtitle" class="form-control"/>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-4">
+                            <label for="dirTweakResource">Resource File</label>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="text" id="dirTweakResource" class="form-control"/>
+                        </div>
+                    </div>
+                </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="dirTweakCancel" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button id="dirTweakDelete" type="submit" class="btn btn-primary" data-dismiss="modal" hidden>Delete Directory Tweak</button>
+                <button id="dirTweakSave" type="submit" class="btn btn-primary" data-dismiss="modal">Save Directory Tweak</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
 <div id="toast" class="alert">
     <div id="grb-toast-wrapper">
         <i id="grb-toast-icon" class="fa fa-star"></i>
@@ -302,6 +426,8 @@
 <script src="js/gerbera-autoscan.module.js" type="module"></script>
 <script src="js/gerbera-updates.module.js" type="module"></script>
 <script src="js/gerbera-clients.module.js" type="module"></script>
+<script src="js/gerbera-config.module.js" type="module"></script>
+<script src="js/gerbera-tweak.module.js" type="module"></script>
 <script src="js/jquery.gerbera.items.js" type="text/javascript"></script>
 <script src="js/jquery.gerbera.toast.js" type="text/javascript"></script>
 <script src="js/jquery.gerbera.tree.js" type="text/javascript"></script>
@@ -309,6 +435,8 @@
 <script src="js/jquery.gerbera.editor.js" type="text/javascript"></script>
 <script src="js/jquery.gerbera.autoscan.js" type="text/javascript"></script>
 <script src="js/jquery.gerbera.clients.js" type="text/javascript"></script>
+<script src="js/jquery.gerbera.config.js" type="text/javascript"></script>
+<script src="js/jquery.gerbera.tweak.js" type="text/javascript"></script>
 
 <script type="module">
     import {GerberaApp} from "./js/gerbera-app.module.js";

@@ -61,10 +61,15 @@ a:hover {
     border-bottom: 1px solid #ff7f00;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
-}
 
 li.nav-item > a {
     color: #bbb;
+}
+
+@media (max-width: 1110px) and (min-width: 768px) {
+    .nav-link span {
+        display: none;
+    }
 }
 
 .navbar-brand,
@@ -231,6 +236,12 @@ body,
     overflow: auto;
 }
 
+#config {
+    display: flex;
+    height: calc( 100% - 115px );
+    width: 100%;
+}
+
 #left {
     height: 100%;
     flex: 1;
@@ -250,9 +261,21 @@ body,
     flex-grow: 5;
 }
 
-#datagrid, #clientgrid {
+#datagrid,
+#clientgrid {
     height: 100%;
     overflow: auto;
+    background-color: #fefefe;
+}
+
+#configframe {
+    height: 100%;
+    width: 100%;
+}
+
+#configgrid {
+    height: calc( 100% - 60px );
+    overflow-y: auto;
     background-color: #fefefe;
 }
 
@@ -275,7 +298,8 @@ body,
     width: 100%;
 }
 
-#clientgrid table tbody, #clientgrid table thead {
+#clientgrid table tbody,
+#clientgrid table thead {
     overflow-y: scroll;
     width: 100%;
 }
@@ -292,12 +316,51 @@ body,
     width: 100%;
 }
 
-#datagrid table tbody tr:hover, #clientgrid table tbody tr:hover {
+#datagrid table tbody tr:hover,
+#clientgrid table tbody tr:hover {
     background-color: #e9ecef;
 }
 
-#clientgrid {
+#clientgrid,
+#configgrid {
     margin: 30px;
+}
+
+#configgrid {
+    margin-left: 0px;
+}
+
+#configgrid .configListItem {
+    margin-left: 20px;
+    list-style:none;
+}
+
+#configgrid .changed {
+    background-color: #ff7f0060;
+}
+#configgrid .changed input {
+    background-color: #ff7f0030;
+}
+
+#configgrid .removed {
+    background-color: #ff7ff060;
+}
+#configgrid .removed input {
+    background-color: #ff7ff030;
+}
+
+#configgrid .added {
+    background-color: lightyellow;
+}
+#configgrid .added input {
+    background-color: lightyellow;
+}
+
+#configgrid .reset {
+    background-color: lightgreen;
+}
+#configgrid .reset input {
+    background-color: lightgreen;
 }
 
 .page-item.active .page-link {
@@ -386,7 +449,7 @@ body,
 .grb-item-buttons {
 }
 
-.grb-trail  .breadcrumb > li + li:before {
+.grb-trail .breadcrumb > li + li:before {
     content: ">";
     padding: 0 5px;
     color: rgba(255, 255, 255, 0.5);
@@ -413,6 +476,8 @@ body,
 .grb-trail-buttons li a {
     color: #ededed;
 }
+
+.grb-trail-button,
 .grb-trail-add,
 .grb-trail-add-autoscan,
 .grb-trail-edit-autoscan,
@@ -422,13 +487,21 @@ body,
     text-decoration: none;
 }
 
+.grb-trail-button:hover,
 .grb-trail-add:hover,
 .grb-trail-add-autoscan:hover,
 .grb-trail-edit-autoscan:hover,
 .grb-trail-edit:hover,
 .grb-trail-delete:hover,
 .grb-trail-delete-all:hover {
+    cursor: pointer;
     text-decoration: underline;
+}
+
+@media (max-width: 1110px) {
+    .grb-trail-button span {
+        display: none;
+    }
 }
 
 .overflow {

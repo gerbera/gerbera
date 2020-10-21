@@ -43,6 +43,7 @@
 #include "autoscan.h"
 #include "cds_objects.h"
 #include "config/config_manager.h"
+#include "config/config_setup.h"
 #include "search_handler.h"
 #include "update_manager.h"
 #include "util/string_converter.h"
@@ -1598,6 +1599,87 @@ std::string SQLDatabase::getInternalSetting(const std::string& key)
     if (row == nullptr)
         return "";
     return row->col(0);
+}
+
+/* config methods */
+std::vector<ConfigValue> SQLDatabase::getConfigValues()
+{
+    std::ostringstream query;
+    query << "SELECT DISTINCT "
+          << TQ("item") << ','
+          << TQ("key") << ','
+          << TQ("item_value") << ','
+          << TQ("status")
+          << " FROM "
+          << TQ(CONFIG_VALUE_TABLE);
+    auto res = select(query);
+
+    std::vector<ConfigValue> result;
+    if (res == nullptr)
+        return result;
+
+    std::unique_ptr<SQLRow> row;
+    while ((row = res->nextRow()) != nullptr) {
+        result.push_back({ row->col(1),
+            row->col(0),
+            row->col(2),
+            row->col(3) });
+    }
+
+    log_debug("loading {} items", result.size());
+    return result;
+}
+
+void SQLDatabase::removeConfigValue(const std::string& item)
+{
+    std::ostringstream del;
+    del << "DELETE FROM " << TQ(CONFIG_VALUE_TABLE);
+    if (item != "*") {
+        del << " WHERE " << TQ("item") << '=' << quote(item);
+    }
+    log_info("deleting {} item", item);
+    exec(del);
+}
+
+void SQLDatabase::updateConfigValue(const std::string& key, const std::string& item, const std::string& value, const std::string& status)
+{
+    std::ostringstream query;
+    query << "SELECT "
+          << TQ("item")
+          << " FROM "
+          << TQ(CONFIG_VALUE_TABLE)
+          << " WHERE "
+          << TQ("item") << '=' << quote(item)
+          << " LIMIT 1";
+    auto res = select(query);
+    if (res == nullptr || res->nextRow() == nullptr) {
+        std::ostringstream insert;
+        insert << "INSERT INTO "
+               << TQ(CONFIG_VALUE_TABLE)
+               << " ("
+               << TQ("item") << ','
+               << TQ("key") << ','
+               << TQ("item_value") << ','
+               << TQ("status")
+               << ") VALUES ("
+               << quote(item) << ','
+               << quote(key) << ','
+               << quote(value) << ','
+               << quote(status)
+               << ')';
+        exec(insert);
+        log_info("inserted for {} as {} {}", key, item, value);
+    } else {
+        std::ostringstream update;
+        update << "UPDATE "
+               << TQ(CONFIG_VALUE_TABLE)
+               << " SET "
+               << TQ("item_value") << '=' << quote(value)
+               << " WHERE "
+               << TQ("item") << '=' << quote(item);
+        exec(update);
+        log_info("updated for {} as {} {}", key, item, value);
+    }
 }
 
 void SQLDatabase::updateAutoscanList(ScanMode scanmode, std::shared_ptr<AutoscanList> list)

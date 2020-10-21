@@ -84,7 +84,7 @@ js_getCdsObject(duk_context* ctx)
     auto obj = database->findObjectByPath(path);
     if (obj == nullptr) {
         auto cm = self->getContent();
-        obj = cm->createObjectFromFile(path);
+        obj = cm->createObjectFromFile(path, false);
         if (obj == nullptr) // object ignored
             return 0;
     }

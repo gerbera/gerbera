@@ -104,6 +104,21 @@ suite(() => {
       image.resize(1280, Jimp.AUTO).write(fileName);
     });
 
+    it('for [config view]', async () => {
+      const fileName = DEFAULT_FOLDER_STORE + 'config-view.png';
+      await loginPage.username('user');
+      await loginPage.password('pwd');
+      await loginPage.submitLogin();
+      await homePage.clickMenu('nav-config');
+      await driver.sleep(500);
+      await homePage.showConfig('Server (/server)');
+
+      await homePage.takeScreenshot(fileName);
+
+      const image = await Jimp.read(fileName);
+      image.resize(1280, Jimp.AUTO).write(fileName);
+    });
+
     it('for [items view]', async () => {
       const fileName = DEFAULT_FOLDER_STORE + 'items-view.png';
       await loginPage.username('user');
@@ -168,6 +183,69 @@ suite(() => {
       image.crop(860, 0, 570, 140).write(fileName);
     });
 
+    it('for [trail filesystem operations]', async () => {
+      const fileName = DEFAULT_FOLDER_STORE + 'trail-fs-operations.png';
+      await loginPage.username('user');
+      await loginPage.password('pwd');
+      await loginPage.submitLogin();
+      await homePage.clickMenu('nav-fs');
+      await homePage.clickTree('etc');
+
+      await homePage.takeScreenshot(fileName);
+
+      const image = await Jimp.read(fileName);
+      image.resize(1440, Jimp.AUTO);
+      image.crop(860, 0, 570, 140).write(fileName);
+    });
+
+    it('for [edit autoscan] from filesystem list', async () => {
+      const fileName = DEFAULT_FOLDER_STORE + 'edit-autoscan-details.png';
+      await loginPage.username('user');
+      await loginPage.password('pwd');
+      await loginPage.submitLogin();
+      await homePage.clickMenu('nav-fs');
+      await homePage.clickTree('etc');
+      await homePage.clickTrail(1);
+      await driver.sleep(1000);
+
+      await homePage.takeScreenshot(fileName);
+
+      const image = await Jimp.read(fileName);
+      image.resize(1440, Jimp.AUTO);
+      image.crop(290, 0, 860, 360).write(fileName);
+    });
+
+    it('for [edit tweak] from filesystem list', async () => {
+      const fileName = DEFAULT_FOLDER_STORE + 'edit-tweak-details.png';
+      await loginPage.username('user');
+      await loginPage.password('pwd');
+      await loginPage.submitLogin();
+      await homePage.clickMenu('nav-fs');
+      await homePage.clickTree('etc');
+      await homePage.clickTrail(2);
+      await driver.sleep(1000);
+
+      await homePage.takeScreenshot(fileName);
+
+      const image = await Jimp.read(fileName);
+      image.resize(1440, Jimp.AUTO);
+      image.crop(290, 0, 860, 570).write(fileName);
+    });
+
+    it('for [trail config operations]', async () => {
+      const fileName = DEFAULT_FOLDER_STORE + 'trail-config-operations.png';
+      await loginPage.username('user');
+      await loginPage.password('pwd');
+      await loginPage.submitLogin();
+      await homePage.clickMenu('nav-config');
+
+      await homePage.takeScreenshot(fileName);
+
+      const image = await Jimp.read(fileName);
+      image.resize(1440, Jimp.AUTO);
+      image.crop(860, 0, 570, 140).write(fileName);
+    });
+
     it('for [item edit operations]', async () => {
       const fileName = DEFAULT_FOLDER_STORE + 'item-operations.png';
       await loginPage.username('user');
@@ -181,7 +259,7 @@ suite(() => {
 
       const image = await Jimp.read(fileName);
       image.resize(1440, Jimp.AUTO);
-      image.crop(325, 125, 1135, 125).write(fileName);
+      image.crop(325, 125, 1115, 125).write(fileName);
     });
 
     it('for [toast message]', async () => {
@@ -215,6 +293,7 @@ suite(() => {
       const image = await Jimp.read(fileName);
       image.resize(1280, Jimp.AUTO).write(fileName);
     });
+
   });
 });
 
