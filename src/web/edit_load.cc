@@ -96,10 +96,10 @@ void web::edit_load::process()
         xml2JsonHints->setArrayName(metaData, "metadata");
         xml2JsonHints->setFieldType("metavalue", "string");
 
-        for (auto& metaItem : objItem->getMetadata()) {
+        for (const auto& [key, val] : objItem->getMetadata()) {
             auto metaEntry = metaData.append_child("metadata");
-            metaEntry.append_attribute("metaname") = metaItem.first.c_str();
-            metaEntry.append_attribute("metavalue") = metaItem.second.c_str();
+            metaEntry.append_attribute("metaname") = key.c_str();
+            metaEntry.append_attribute("metavalue") = val.c_str();
             metaEntry.append_attribute("editable") = false;
         }
 
@@ -107,10 +107,10 @@ void web::edit_load::process()
         xml2JsonHints->setArrayName(auxData, "auxdata");
         xml2JsonHints->setFieldType("auxvalue", "string");
 
-        for (auto& auxItem : objItem->getAuxData()) {
+        for (const auto& [key, val] : objItem->getAuxData()) {
             auto auxEntry = auxData.append_child("auxdata");
-            auxEntry.append_attribute("auxname") = auxItem.first.c_str();
-            auxEntry.append_attribute("auxvalue") = auxItem.second.c_str();
+            auxEntry.append_attribute("auxname") = key.c_str();
+            auxEntry.append_attribute("auxvalue") = val.c_str();
             auxEntry.append_attribute("editable") = false;
         }
 
@@ -119,7 +119,7 @@ void web::edit_load::process()
         xml2JsonHints->setFieldType("resvalue", "string");
 
         int resIndex = 0;
-        for (auto& resItem : objItem->getResources()) {
+        for (const auto& resItem : objItem->getResources()) {
             auto resEntry = resources.append_child("resources");
             resEntry.append_attribute("resname") = "----RESOURCE----";
             resEntry.append_attribute("resvalue") = fmt::format("{}", resIndex).c_str();
@@ -130,22 +130,22 @@ void web::edit_load::process()
             resEntry.append_attribute("resvalue") = fmt::format("{}", MetadataHandler::mapContentHandler2String(resItem->getHandlerType())).c_str();
             resEntry.append_attribute("editable") = false;
 
-            for (auto& resPar : resItem->getParameters()) {
+            for (const auto& [key, val] : resItem->getParameters()) {
                 auto resEntry = resources.append_child("resources");
-                resEntry.append_attribute("resname") = fmt::format(".{}", resPar.first.c_str()).c_str();
-                resEntry.append_attribute("resvalue") = resPar.second.c_str();
+                resEntry.append_attribute("resname") = fmt::format(".{}", key.c_str()).c_str();
+                resEntry.append_attribute("resvalue") = val.c_str();
                 resEntry.append_attribute("editable") = false;
             }
-            for (auto& resAtt : resItem->getAttributes()) {
+            for (const auto& [key, val] : resItem->getAttributes()) {
                 auto resEntry = resources.append_child("resources");
-                resEntry.append_attribute("resname") = fmt::format(" {}", resAtt.first.c_str()).c_str();
-                resEntry.append_attribute("resvalue") = resAtt.second.c_str();
+                resEntry.append_attribute("resname") = fmt::format(" {}", key.c_str()).c_str();
+                resEntry.append_attribute("resvalue") = val.c_str();
                 resEntry.append_attribute("editable") = false;
             }
-            for (auto& resOpt : resItem->getOptions()) {
+            for (const auto& [key, val] : resItem->getOptions()) {
                 auto resEntry = resources.append_child("resources");
-                resEntry.append_attribute("resname") = fmt::format("-{}", resOpt.first.c_str()).c_str();
-                resEntry.append_attribute("resvalue") = resOpt.second.c_str();
+                resEntry.append_attribute("resname") = fmt::format("-{}", key.c_str()).c_str();
+                resEntry.append_attribute("resvalue") = val.c_str();
                 resEntry.append_attribute("editable") = false;
             }
             resIndex++;

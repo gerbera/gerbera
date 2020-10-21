@@ -65,8 +65,8 @@ void CdsResource::removeAttribute(const std::string& name)
 
 void CdsResource::mergeAttributes(const std::map<std::string, std::string>& additional)
 {
-    for (const auto& it : additional) {
-        attributes[it.first] = it.second;
+    for (const auto& [key, val] : additional) {
+        attributes[key] = val;
     }
 }
 

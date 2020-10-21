@@ -82,10 +82,9 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, bool re
         auto meta = obj->getMetadata();
         std::string upnp_class = obj->getClass();
 
-        for (const auto& it : meta) {
-            std::string key = it.first;
+        for (const auto& [key, val] : meta) {
             if (key == MetadataHandler::getMetaFieldName(M_DESCRIPTION)) {
-                tmp = it.second;
+                tmp = val;
                 if ((stringLimit > 0) && (tmp.length() > stringLimit)) {
                     tmp = tmp.substr(0, getValidUTF8CutPosition(tmp, stringLimit - 3));
                     tmp.append("...");
@@ -93,7 +92,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, bool re
                 result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(tmp.c_str());
             } else if (key == MetadataHandler::getMetaFieldName(M_TRACKNUMBER)) {
                 if (upnp_class == UPNP_DEFAULT_CLASS_MUSIC_TRACK)
-                    result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(it.second.c_str());
+                    result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(val.c_str());
             } else if (key != MetadataHandler::getMetaFieldName(M_TITLE)) {
                 // e.g. used for M_ALBUMARTIST
                 // name@attr[val] => <name attr="val">
@@ -106,9 +105,9 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, bool re
                     std::string name = key.substr(0, i);
                     auto node = result.append_child(name.c_str());
                     node.append_attribute(attr_name.c_str()) = attr_value.c_str();
-                    node.append_child(pugi::node_pcdata).set_value(it.second.c_str());
+                    node.append_child(pugi::node_pcdata).set_value(val.c_str());
                 } else {
-                    result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(it.second.c_str());
+                    result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(val.c_str());
                 }
             }
         }
@@ -370,8 +369,8 @@ void UpnpXMLBuilder::renderResource(const std::string& URL, const std::map<std::
     auto res = parent->append_child("res");
     res.append_child(pugi::node_pcdata).set_value(URL.c_str());
 
-    for (const auto& attribute : attributes) {
-        res.append_attribute(attribute.first.c_str()) = attribute.second.c_str();
+    for (const auto& [key, val] : attributes) {
+        res.append_attribute(key.c_str()) = val.c_str();
     }
 }
 
