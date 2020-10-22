@@ -59,6 +59,7 @@ void web::configLoad::addTypeMeta(pugi::xml_node& meta, const std::shared_ptr<Co
     info.append_attribute("id") = fmt::format("{}", cs->option).c_str();
     info.append_attribute("type") = cs->getTypeString().c_str();
     info.append_attribute("value") = cs->getDefaultValue().c_str();
+    info.append_attribute("help") = cs->getHelp();
 }
 
 void web::configLoad::createItem(pugi::xml_node& item, const std::string& name, config_option_t id, config_option_t aid)

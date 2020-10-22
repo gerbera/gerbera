@@ -68,8 +68,8 @@ should specify that here. The server uses UTF-8 internally, this import paramete
 
 Same as above, but defines the charset of the metadata (i.e. id3 tags, Exif information, etc.)
 
-``scripting script-charset``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+``scripting``
+~~~~~~~~~~~~~
 
 ::
 
