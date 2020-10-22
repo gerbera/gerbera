@@ -526,9 +526,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
     auto tlist = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST);
     auto tp_mt = tlist->get(item->getMimeType());
     if (tp_mt != nullptr) {
-        for (const auto& it : *tp_mt) {
-            auto tp = it.second;
-
+        for (const auto& [key, tp] : *tp_mt) {
             if (tp == nullptr)
                 throw_std_runtime_error("Invalid profile encountered");
 
