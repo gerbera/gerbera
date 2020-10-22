@@ -64,7 +64,7 @@ ConfigManager::ConfigManager(fs::path filename,
     fs::path prefix_dir, fs::path magic_file,
     std::string ip, std::string interface, int port,
     bool debug_logging)
-    : filename(filename)
+    : filename(std::move(filename))
     , prefix_dir(std::move(prefix_dir))
     , magic_file(std::move(magic_file))
     , ip(std::move(ip))
