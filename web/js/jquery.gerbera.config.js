@@ -256,6 +256,8 @@ $.widget('grb.config', {
           if (!('value' in s) || s.value == undefined || s.value === null)
             s.value = m.value;
         }
+        if (!('help' in s) || s.help == undefined || s.help === null || s.help === '')
+          s.help = m.help;
       });
     });
     for (let i = 0; i < section.length; i++) {
@@ -442,15 +444,17 @@ $.widget('grb.config', {
           } else {
             input.prop('disabled', true);
           }
-          if (!('type' in item) || item.type == undefined || item.type === null || item.type === '') {
-            this.meta.forEach((m) => {
-              if(Number.parseInt(itemValue.aid) === Number.parseInt(m.id)) {
+          this.meta.forEach((m) => {
+            if(Number.parseInt(itemValue.aid) === Number.parseInt(m.id)) {
+              if (!('type' in item) || item.type == undefined || item.type === null || item.type === '') {
                 item.type = m.type;
                 if (!('value' in item) || item.value == undefined || item.value === null)
                   item.value = m.value;
               }
-            });
-          }
+              if (!('help' in item) || item.help == undefined || item.help === null || item.help === '')
+                item.help = m.help;
+            }
+          });
 
           switch(item.type){
             case 'Boolean': {
@@ -488,6 +492,12 @@ $.widget('grb.config', {
           }
 
           itemLine.append(input);
+          if (item.help) {
+            const link = $('<a>', {"title": "help",  "target": "_blank", "style": "margin-left: 20px", "class": "", "href": "https://docs.gerbera.io/en/latest/" + item.help});
+            const icon = $('<i></i>', {"class": "fa " + "fa-info" });
+            link.append(icon);
+            link.appendTo(itemLine);
+          }
           if (itemValue.source === 'database') {
             const link = $('<a>', {"title": "reset", "style": "margin-left: 20px", "class": "", "href": "javascript:;"});
             const icon = $('<i></i>', {"class": "fa " + "fa-undo" });

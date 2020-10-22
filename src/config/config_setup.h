@@ -70,6 +70,7 @@ protected:
     bool required = false;
     StringCheckFunction rawCheck;
     std::string defaultValue;
+    const char* help;
 
     static size_t extractIndex(const std::string& item);
 
@@ -83,21 +84,23 @@ public:
     config_option_t option;
     const char* xpath;
 
-    ConfigSetup(config_option_t option, const char* xpath, bool required = false, const char* defaultValue = "")
+    ConfigSetup(config_option_t option, const char* xpath, const char* help, bool required = false, const char* defaultValue = "")
         : cpath(std::string("/") + ROOT_NAME + xpath)
         , required(required)
         , rawCheck(nullptr)
         , defaultValue(defaultValue)
+        , help(help)
         , option(option)
         , xpath(xpath)
     {
     }
 
-    ConfigSetup(config_option_t option, const char* xpath, StringCheckFunction check, const char* defaultValue = "", bool required = false)
+    ConfigSetup(config_option_t option, const char* xpath, const char* help, StringCheckFunction check, const char* defaultValue = "", bool required = false)
         : cpath(std::string("/") + ROOT_NAME + xpath)
         , required(required)
         , rawCheck(check)
         , defaultValue(defaultValue)
+        , help(help)
         , option(option)
         , xpath(xpath)
     {
@@ -118,7 +121,7 @@ public:
     {
         return (rawCheck != nullptr && !rawCheck(optValue)) ? false : true;
     }
-
+    const char* getHelp() const { return help; }
     std::shared_ptr<ConfigOption> getValue() const { return optionValue; }
     virtual std::string getTypeString() const { return "Unset"; }
 
@@ -162,14 +165,14 @@ protected:
     bool notEmpty = false;
 
 public:
-    ConfigStringSetup(config_option_t option, const char* xpath, bool required = false, const char* defaultValue = "", bool notEmpty = false)
-        : ConfigSetup(option, xpath, required, defaultValue)
+    ConfigStringSetup(config_option_t option, const char* xpath, const char* help, bool required = false, const char* defaultValue = "", bool notEmpty = false)
+        : ConfigSetup(option, xpath, help, required, defaultValue)
         , notEmpty(notEmpty)
     {
     }
 
-    ConfigStringSetup(config_option_t option, const char* xpath, const char* defaultValue, StringCheckFunction check = nullptr, bool notEmpty = false, bool required = false)
-        : ConfigSetup(option, xpath, check, defaultValue, required)
+    ConfigStringSetup(config_option_t option, const char* xpath, const char* help, const char* defaultValue, StringCheckFunction check = nullptr, bool notEmpty = false, bool required = false)
+        : ConfigSetup(option, xpath, help, check, defaultValue, required)
         , notEmpty(notEmpty)
     {
     }
@@ -189,15 +192,15 @@ protected:
     std::map<std::string, En> valueMap;
 
 public:
-    ConfigEnumSetup(config_option_t option, const char* xpath, const std::map<std::string, En>& valueMap, bool notEmpty = false)
-        : ConfigSetup(option, xpath, false, "")
+    ConfigEnumSetup(config_option_t option, const char* xpath, const char* help, const std::map<std::string, En>& valueMap, bool notEmpty = false)
+        : ConfigSetup(option, xpath, help, false, "")
         , valueMap(valueMap)
     {
         this->notEmpty = notEmpty;
     }
 
-    ConfigEnumSetup(config_option_t option, const char* xpath, const char* defaultValue, const std::map<std::string, En>& valueMap, bool notEmpty = false)
-        : ConfigSetup(option, xpath, false, defaultValue)
+    ConfigEnumSetup(config_option_t option, const char* xpath, const char* help, const char* defaultValue, const std::map<std::string, En>& valueMap, bool notEmpty = false)
+        : ConfigSetup(option, xpath, help, false, defaultValue)
         , valueMap(valueMap)
     {
         this->notEmpty = notEmpty;
@@ -270,8 +273,8 @@ protected:
 public:
     static fs::path Home;
 
-    ConfigPathSetup(config_option_t option, const char* xpath, const char* defaultValue = "", bool isFile = false, bool mustExist = true, bool notEmpty = false)
-        : ConfigSetup(option, xpath, nullptr, defaultValue)
+    ConfigPathSetup(config_option_t option, const char* xpath, const char* help, const char* defaultValue = "", bool isFile = false, bool mustExist = true, bool notEmpty = false)
+        : ConfigSetup(option, xpath, help, nullptr, defaultValue)
         , isFile(isFile)
         , mustExist(mustExist)
         , notEmpty(notEmpty)
@@ -300,40 +303,40 @@ protected:
     int minValue;
 
 public:
-    ConfigIntSetup(config_option_t option, const char* xpath)
-        : ConfigSetup(option, xpath)
+    ConfigIntSetup(config_option_t option, const char* xpath, const char* help)
+        : ConfigSetup(option, xpath, help)
         , valueCheck(nullptr)
         , minCheck(nullptr)
     {
         this->defaultValue = std::to_string(0);
     }
 
-    ConfigIntSetup(config_option_t option, const char* xpath, int defaultValue)
-        : ConfigSetup(option, xpath)
+    ConfigIntSetup(config_option_t option, const char* xpath, const char* help, int defaultValue)
+        : ConfigSetup(option, xpath, help)
         , valueCheck(nullptr)
         , minCheck(nullptr)
     {
         this->defaultValue = std::to_string(defaultValue);
     }
 
-    ConfigIntSetup(config_option_t option, const char* xpath, IntCheckFunction check)
-        : ConfigSetup(option, xpath)
+    ConfigIntSetup(config_option_t option, const char* xpath, const char* help, IntCheckFunction check)
+        : ConfigSetup(option, xpath, help)
         , valueCheck(check)
         , minCheck(nullptr)
     {
         this->defaultValue = std::to_string(0);
     }
 
-    ConfigIntSetup(config_option_t option, const char* xpath, int defaultValue, IntCheckFunction check)
-        : ConfigSetup(option, xpath)
+    ConfigIntSetup(config_option_t option, const char* xpath, const char* help, int defaultValue, IntCheckFunction check)
+        : ConfigSetup(option, xpath, help)
         , valueCheck(check)
         , minCheck(nullptr)
     {
         this->defaultValue = std::to_string(defaultValue);
     }
 
-    ConfigIntSetup(config_option_t option, const char* xpath, int defaultValue, int minValue, IntMinFunction check)
-        : ConfigSetup(option, xpath)
+    ConfigIntSetup(config_option_t option, const char* xpath, const char* help, int defaultValue, int minValue, IntMinFunction check)
+        : ConfigSetup(option, xpath, help)
         , valueCheck(nullptr)
         , minCheck(check)
         , minValue(minValue)
@@ -341,16 +344,16 @@ public:
         this->defaultValue = std::to_string(defaultValue);
     }
 
-    ConfigIntSetup(config_option_t option, const char* xpath, const char* defaultValue, IntCheckFunction check = nullptr)
-        : ConfigSetup(option, xpath)
+    ConfigIntSetup(config_option_t option, const char* xpath, const char* help, const char* defaultValue, IntCheckFunction check = nullptr)
+        : ConfigSetup(option, xpath, help)
         , valueCheck(check)
         , minCheck(nullptr)
     {
         this->defaultValue = defaultValue;
     }
 
-    ConfigIntSetup(config_option_t option, const char* xpath, const char* defaultValue, StringCheckFunction check)
-        : ConfigSetup(option, xpath, check, defaultValue)
+    ConfigIntSetup(config_option_t option, const char* xpath, const char* help, const char* defaultValue, StringCheckFunction check)
+        : ConfigSetup(option, xpath, help, check, defaultValue)
         , valueCheck(nullptr)
         , minCheck(nullptr)
     {
@@ -384,24 +387,24 @@ public:
 
 class ConfigBoolSetup : public ConfigSetup {
 public:
-    ConfigBoolSetup(config_option_t option, const char* xpath)
-        : ConfigSetup(option, xpath)
+    ConfigBoolSetup(config_option_t option, const char* xpath, const char* help)
+        : ConfigSetup(option, xpath, help)
     {
     }
 
-    ConfigBoolSetup(config_option_t option, const char* xpath, const char* defaultValue, StringCheckFunction check = nullptr)
-        : ConfigSetup(option, xpath, check, defaultValue)
+    ConfigBoolSetup(config_option_t option, const char* xpath, const char* help, const char* defaultValue, StringCheckFunction check = nullptr)
+        : ConfigSetup(option, xpath, help, check, defaultValue)
     {
     }
 
-    ConfigBoolSetup(config_option_t option, const char* xpath, bool defaultValue, StringCheckFunction check = nullptr)
-        : ConfigSetup(option, xpath, check)
+    ConfigBoolSetup(config_option_t option, const char* xpath, const char* help, bool defaultValue, StringCheckFunction check = nullptr)
+        : ConfigSetup(option, xpath, help, check)
     {
         this->defaultValue = defaultValue ? YES : NO;
     }
 
-    ConfigBoolSetup(config_option_t option, const char* xpath, bool defaultValue, bool required)
-        : ConfigSetup(option, xpath, required)
+    ConfigBoolSetup(config_option_t option, const char* xpath, const char* help, bool defaultValue, bool required)
+        : ConfigSetup(option, xpath, help, required)
     {
         this->defaultValue = defaultValue ? YES : NO;
     }
@@ -455,16 +458,16 @@ public:
     config_option_t nodeOption;
     config_option_t attrOption = CFG_MAX;
 
-    ConfigArraySetup(config_option_t option, const char* xpath, config_option_t nodeOption, ArrayInitFunction init = nullptr, bool notEmpty = false)
-        : ConfigSetup(option, xpath)
+    ConfigArraySetup(config_option_t option, const char* xpath, const char* help, config_option_t nodeOption, ArrayInitFunction init = nullptr, bool notEmpty = false)
+        : ConfigSetup(option, xpath, help)
         , notEmpty(notEmpty)
         , initArray(init)
         , nodeOption(nodeOption)
     {
     }
 
-    ConfigArraySetup(config_option_t option, const char* xpath, config_option_t nodeOption, config_option_t attrOption, bool notEmpty = false, bool itemNotEmpty = false)
-        : ConfigSetup(option, xpath)
+    ConfigArraySetup(config_option_t option, const char* xpath, const char* help, config_option_t nodeOption, config_option_t attrOption, bool notEmpty = false, bool itemNotEmpty = false)
+        : ConfigSetup(option, xpath, help)
         , notEmpty(notEmpty)
         , itemNotEmpty(itemNotEmpty)
         , initArray(nullptr)
@@ -532,16 +535,16 @@ public:
     config_option_t keyOption;
     config_option_t valOption;
 
-    ConfigDictionarySetup(config_option_t option, const char* xpath, DictionaryInitFunction init = nullptr, bool notEmpty = false, bool itemNotEmpty = false)
-        : ConfigSetup(option, xpath)
+    ConfigDictionarySetup(config_option_t option, const char* xpath, const char* help, DictionaryInitFunction init = nullptr, bool notEmpty = false, bool itemNotEmpty = false)
+        : ConfigSetup(option, xpath, help)
         , notEmpty(notEmpty)
         , itemNotEmpty(itemNotEmpty)
         , initDict(init)
     {
     }
 
-    ConfigDictionarySetup(config_option_t option, const char* xpath, config_option_t nodeOption, config_option_t keyOption, config_option_t valOption, bool notEmpty = false, bool itemNotEmpty = false)
-        : ConfigSetup(option, xpath)
+    ConfigDictionarySetup(config_option_t option, const char* xpath, const char* help, config_option_t nodeOption, config_option_t keyOption, config_option_t valOption, bool notEmpty = false, bool itemNotEmpty = false)
+        : ConfigSetup(option, xpath, help)
         , notEmpty(notEmpty)
         , itemNotEmpty(itemNotEmpty)
         , initDict(nullptr)
@@ -583,8 +586,8 @@ protected:
     bool updateItem(size_t i, const std::string& optItem, std::shared_ptr<Config> config, std::shared_ptr<AutoscanDirectory>& entry, std::string& optValue, const std::string& status = "") const;
 
 public:
-    ConfigAutoscanSetup(config_option_t option, const char* xpath, ScanMode scanmode)
-        : ConfigSetup(option, xpath)
+    ConfigAutoscanSetup(config_option_t option, const char* xpath, const char* help, ScanMode scanmode)
+        : ConfigSetup(option, xpath, help)
         , scanMode(scanmode)
     {
     }
@@ -618,8 +621,8 @@ protected:
     bool createTranscodingProfileListFromNode(const pugi::xml_node& element, std::shared_ptr<TranscodingProfileList>& result);
 
 public:
-    ConfigTranscodingSetup(config_option_t option, const char* xpath)
-        : ConfigSetup(option, xpath)
+    ConfigTranscodingSetup(config_option_t option, const char* xpath, const char* help)
+        : ConfigSetup(option, xpath, help)
     {
     }
 
@@ -656,8 +659,8 @@ protected:
     bool updateItem(size_t i, const std::string& optItem, std::shared_ptr<Config> config, std::shared_ptr<ClientConfig>& entry, std::string& optValue, const std::string& status = "") const;
 
 public:
-    ConfigClientSetup(config_option_t option, const char* xpath)
-        : ConfigSetup(option, xpath)
+    ConfigClientSetup(config_option_t option, const char* xpath, const char* help)
+        : ConfigSetup(option, xpath, help)
     {
     }
 
@@ -695,8 +698,8 @@ protected:
     bool updateItem(size_t i, const std::string& optItem, std::shared_ptr<Config> config, std::shared_ptr<DirectoryTweak>& entry, std::string& optValue, const std::string& status = "") const;
 
 public:
-    ConfigDirectorySetup(config_option_t option, const char* xpath)
-        : ConfigSetup(option, xpath)
+    ConfigDirectorySetup(config_option_t option, const char* xpath, const char* help)
+        : ConfigSetup(option, xpath, help)
     {
     }
 

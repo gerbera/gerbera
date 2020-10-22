@@ -9,109 +9,91 @@
 				{
 					"item": "/server/name",
 					"caption": "Name",
-					"type": "String",
 					"editable": false
 				},
 				{
 					"item": "/server/interface",
 					"caption": "Network Interface",
-					"type": "String",
 					"editable": false
 				},
 				{
 					"item": "/server/port",
 					"caption": "Network Port",
-					"type": "String",
 					"editable": false
 				},
 				{
 					"item": "/server/manufacturer",
 					"caption": "Manufacturer Name",
-					"type": "String",
 					"editable": true
 				},
 				{
 					"item": "/server/manufacturerURL",
 					"caption": "Manufacturer Url",
-					"type": "String",
 					"editable": true
 				},
 				{
 					"item": "/server/modelDescription",
 					"caption": "Model Description",
-					"type": "String",
 					"editable": true
 				},
 				{
 					"item": "/server/modelName",
 					"caption": "Model Name",
-					"type": "String",
 					"editable": true
 				},
 				{
 					"item": "/server/modelNumber",
 					"caption": "Model Number",
-					"type": "String",
 					"editable": true
 				},
 				{
 					"item": "/server/serialNumber",
 					"caption": "Serial Number",
-					"type": "String",
 					"editable": true
 				},
 				{
 					"item": "/server/presentationURL",
 					"caption": "Presentation Url",
-					"type": "String",
 					"editable": true
 				},
 				{
 					"item": "/server/modelURL",
 					"caption": "Model Url",
-					"type": "String",
 					"editable": true
 				},
 				{
 					"item": "/server/ip",
 					"caption": "IP Address",
-					"type": "String",
 					"editable": false
 				},
 				{
 					"item": "/server/udn",
 					"caption": "UDN",
-					"type": "String",
 					"editable": false
 				},
 				{
 					"item": "/server/home",
 					"caption": "Home",
-					"type": "String",
 					"editable": false
 				},
 				{
 					"item": "/server/webroot",
 					"caption": "Web Root",
-					"type": "String",
 					"editable": true
 				},
 				{
 					"item": "/server/tmpdir",
 					"caption": "Temporary Dir",
-					"type": "String",
 					"editable": false
 				},
 				{
 					"item": "/server/servedir",
 					"caption": "Serve Dir",
-					"type": "String",
 					"editable": false
 				},
 				{
 					"item": "/server/alive",
 					"caption": "Alive Interval",
-					"type": "Number",
 					"editable": true
 				}
 			]
@@ -125,7 +107,6 @@
 				{
 					"item": "/server/storage/driver",
 					"caption": "DB Driver",
-					"type": "String",
 					"editable": false
 				},
 				{
@@ -137,37 +118,31 @@
 						{
 							"item": "/server/storage/sqlite3/attribute::enabled",
 							"caption": "SQLite enabled",
-							"type": "Boolean",
 							"editable": false
 						},
 						{
 							"item": "/server/storage/sqlite3/database-file",
 							"caption": "SQLite database-file",
-							"type": "String",
 							"editable": false
 						},
 						{
 							"item": "/server/storage/sqlite3/on-error",
 							"caption": "SQLite restore",
-							"type": "Boolean",
 							"editable": false
 						},
 						{
 							"item": "/server/storage/sqlite3/synchronous",
 							"caption": "SQLite synchronous",
-							"type": "Number",
 							"editable": false
 						},
 						{
 							"item": "/server/storage/sqlite3/backup/attribute::enabled",
 							"caption": "SQLite backup",
-							"type": "Boolean",
 							"editable": false
 						},
 						{
 							"item": "/server/storage/sqlite3/backup/attribute::interval",
 							"caption": "SQLite backup interval",
-							"type": "Number",
 							"editable": false
 						}
 					]
@@ -181,25 +156,21 @@
 						{
 							"item": "/server/storage/mysql/attribute::enabled",
 							"caption": "MySQL enabled",
-							"type": "Boolean",
 							"editable": false
 						},
 						{
 							"item": "/server/storage/mysql/host",
 							"caption": "MySQL host",
-							"type": "String",
 							"editable": false
 						},
 						{
 							"item": "/server/storage/mysql/port",
 							"caption": "MySQL port",
-							"type": "Number",
 							"editable": false
 						},
 						{
 							"item": "/server/storage/mysql/username",
 							"caption": "MySQL username",
-							"type": "String",
 							"editable": false
 						},
 						{
@@ -211,13 +182,11 @@
 						{
 							"item": "/server/storage/mysql/socket",
 							"caption": "MySQL socket",
-							"type": "String",
 							"editable": false
 						},
 						{
 							"item": "/server/storage/mysql/database",
 							"caption": "MySQL database",
-							"type": "String",
 							"editable": false
 						}
 					]
@@ -233,37 +202,31 @@
 				{
 					"item": "/server/ui/attribute::enabled",
 					"caption": "UI enabled",
-					"type": "Boolean",
 					"editable": true
 				},
 				{
 					"item": "/server/ui/attribute::poll-interval",
 					"caption": "poll-interval",
-					"type": "Number",
 					"editable": true
 				},
 				{
 					"item": "/server/ui/attribute::show-tooltips",
 					"caption": "show-tooltips",
-					"type": "Boolean",
 					"editable": true
 				},
 				{
 					"item": "/server/ui/attribute::poll-when-idle",
 					"caption": "poll-when-idle",
-					"type": "Boolean",
 					"editable": true
 				},
 				{
 					"item": "/server/ui/accounts/attribute::enabled",
 					"caption": "Accounts enabled",
-					"type": "Boolean",
 					"editable": true
 				},
 				{
 					"item": "/server/ui/accounts/attribute::session-timeout",
 					"caption": "Accounts session-timeout",
-					"type": "Number",
 					"editable": true
 				},
 				{
@@ -277,7 +240,6 @@
 				{
 					"item": "/server/ui/items-per-page/attribute::default",
 					"caption": "Items Per Page Default",
-					"type": "Number",
 					"editable": true
 				},
 				{
@@ -299,29 +261,21 @@
 				{
 					"item": "/import/attribute::hidden-files",
 					"caption": "Import Hidden Files",
-					"type": "Boolean",
-					"value": "false",
 					"editable": true
 				},
 				{
 					"item": "/import/attribute::follow-symlinks",
 					"caption": "Follow Symlinks",
-					"type": "Boolean",
-					"value": "false",
 					"editable": true
 				},
 				{
 					"item": "/import/autoscan/attribute::use-inotify",
 					"caption": "Use Inotify",
-					"type": "Boolean",
-					"value": "false",
 					"editable": true
 				},
 				{
 					"item": "/import/layout/attribute::parent-path",
 					"caption": "Create Parent in Path",
-					"type": "Boolean",
-					"value": "false",
 					"editable": true
 				},
 				{
@@ -333,7 +287,6 @@
 						{
 							"item": "/import/autoscan/timed/directory/attribute::location",
 							"caption": "Location",
-							"type": "String",
 							"editable": true
 						},
 						{
@@ -346,22 +299,16 @@
 						{
 							"item": "/import/autoscan/timed/directory/attribute::interval",
 							"caption": "Scan Interval",
-							"type": "Number",
-							"value": "0",
 							"editable": true
 						},
 						{
 							"item": "/import/autoscan/timed/directory/attribute::recursive",
 							"caption": "Recursive",
-							"type": "Boolean",
-							"value": "false",
 							"editable": true
 						},
 						{
 							"item": "/import/autoscan/timed/directory/attribute::hidden-files",
 							"caption": "Import Hidden Files",
-							"type": "Boolean",
-							"value": "false",
 							"editable": true
 						}
 					]
@@ -375,28 +322,22 @@
 						{
 							"item": "/import/autoscan/inotify/directory/attribute::location",
 							"caption": "Location",
-							"type": "String",
 							"editable": true
 						},
 						{
 							"item": "/import/autoscan/inotify/directory/attribute::mode",
 							"caption": "Mode",
 							"value": "inotify",
-							"type": "String",
 							"editable": false
 						},
 						{
 							"item": "/import/autoscan/inotify/directory/attribute::recursive",
 							"caption": "Recursive",
-							"type": "Boolean",
-							"value": "false",
 							"editable": true
 						},
 						{
 							"item": "/import/autoscan/inotify/directory/attribute::hidden-files",
 							"caption": "Import Hidden Files",
-							"type": "Boolean",
-							"value": "false",
 							"editable": true
 						}
 					]
@@ -410,13 +351,11 @@
 						{
 							"item": "/import/layout/path/attribute::from",
 							"caption": "From",
-							"type": "String",
 							"editable": true
 						},
 						{
 							"item": "/import/layout/path/attribute::to",
 							"caption": "To",
-							"type": "String",
 							"editable": true
 						}
 					]
@@ -430,63 +369,46 @@
 						{
 							"item": "/import/directories/tweak/attribute::location",
 							"caption": "Location",
-							"type": "String",
 							"editable": true
 						},
 						{
 							"item": "/import/directories/tweak/attribute::inherit",
 							"caption": "Inherit Settings",
-							"type": "Boolean",
-							"value": "true",
 							"editable": true
 						},
 						{
 							"item": "/import/directories/tweak/attribute::recursive",
 							"caption": "Recursive",
-							"type": "Boolean",
-							"value": "true",
 							"editable": true
 						},
 						{
 							"item": "/import/directories/tweak/attribute::hidden-files",
 							"caption": "Import Hidden Files",
-							"type": "Boolean",
-							"value": "false",
 							"editable": true
 						},
 						{
 							"item": "/import/directories/tweak/attribute::follow-symlinks",
 							"caption": "Follow Symlinks",
-							"type": "Boolean",
-							"value": "true",
 							"editable": true
 						},
 						{
 							"item": "/import/directories/tweak/attribute::case-sensitive",
 							"caption": "Case Sensitive Resources",
-							"type": "Boolean",
-							"value": "true",
 							"editable": true
 						},
 						{
 							"item": "/import/directories/tweak/attribute::fanart-file",
 							"caption": "FanArt Resource Pattern",
-							"type": "String",
-							"value": "",
 							"editable": true
 						},
 						{
 							"item": "/import/directories/tweak/attribute::subtitle-file",
 							"caption": "Subtitle Resource Pattern",
-							"type": "String",
-							"value": "",
 							"editable": true
 						},
 						{
 							"item": "/import/directories/tweak/attribute::resource-file",
 							"caption": "Directory Resource Pattern",
-							"type": "String",
-							"value": "",
 							"editable": true
 						}
 					]
@@ -502,49 +424,41 @@
 				{
 					"item": "/import/scripting/common-script",
 					"caption": "Common Script",
-					"type": "String",
 					"editable": true
 				},
 				{
 					"item": "/import/scripting/playlist-script",
 					"caption": "Playlist Script",
-					"type": "String",
 					"editable": true
 				},
 				{
 					"item": "/import/scripting/virtual-layout/import-script",
 					"caption": "Import Script",
-					"type": "String",
 					"editable": true
 				},
 				{
 					"item": "/import/scripting/virtual-layout/attribute::type",
 					"caption": "Virtual Layout Type",
-					"type": "String",
 					"editable": false
 				},
 				{
 					"item": "/import/scripting/playlist-script/attribute::create-link",
 					"caption": "Create Playlist Link",
-					"type": "Boolean",
 					"editable": false
 				},
 				{
 					"item": "/import/filesystem-charset",
 					"caption": "Filesystem Charset",
-					"type": "String",
 					"editable": false
 				},
 				{
 					"item": "/import/metadata-charset",
 					"caption": "Metadata Charset",
-					"type": "String",
 					"editable": false
 				},
 				{
 					"item": "/import/playlist-charset",
 					"caption": "Playlist Charset",
-					"type": "String",
 					"editable": false
 				}
 			]
@@ -558,8 +472,6 @@
 				{
 					"item": "/import/resources/attribute::case-sensitive",
 					"caption": "Case Sensitive",
-					"type": "Boolean",
-					"value": "false",
 					"editable": true
 				},
 				{
@@ -571,7 +483,6 @@
 						{
 							"item": "/import/resources/fanart/add-file/attribute::name",
 							"caption": "File Name",
-							"type": "String",
 							"editable": true
 						}
 					]
@@ -585,7 +496,6 @@
 						{
 							"item": "/import/resources/subtitle/add-file/attribute::name",
 							"caption": "File Name",
-							"type": "String",
 							"editable": true
 						}
 					]
@@ -599,7 +509,6 @@
 						{
 							"item": "/import/resources/resource/add-file/attribute::name",
 							"caption": "File Name",
-							"type": "String",
 							"editable": true
 						}
 					]
@@ -615,15 +524,11 @@
 				{
 					"item": "/import/library-options/attribute::multi-value-separator",
 					"caption": "Multi Value Separator",
-					"type": "String",
-					"value": "false",
 					"editable": true
 				},
 				{
 					"item": "/import/library-options/attribute::legacy-value-separator",
 					"caption": "Legacy Value Separator",
-					"type": "String",
-					"value": "false",
 					"editable": true
 				},
 				{
@@ -635,7 +540,6 @@
 						{
 							"item": "/import/library-options/libexif/auxdata/add-data/attribute::tag",
 							"caption": "Tag Name",
-							"type": "String",
 							"editable": true
 						}
 					]
@@ -649,7 +553,6 @@
 						{
 							"item": "/import/library-options/id3/auxdata/add-data/attribute::tag",
 							"caption": "Tag Name",
-							"type": "String",
 							"editable": true
 						}
 					]
@@ -663,7 +566,6 @@
 						{
 							"item": "/import/library-options/exiv2/auxdata/add-data/attribute::tag",
 							"caption": "Tag Name",
-							"type": "String",
 							"editable": true
 						}
 					]
@@ -677,7 +579,6 @@
 						{
 							"item": "/import/library-options/ffmpeg/auxdata/add-data/attribute::tag",
 							"caption": "Tag Name",
-							"type": "String",
 							"editable": true
 						}
 					]
@@ -693,15 +594,11 @@
 				{
 					"item": "/import/mappings/extension-mimetype/attribute::ignore-unknown",
 					"caption": "Ignore Unknown Extensions",
-					"type": "Boolean",
-					"value": "false",
 					"editable": true
 				},
 				{
 					"item": "/import/mappings/extension-mimetype/attribute::case-sensitive",
 					"caption": "Extensions Case Sensitive",
-					"type": "Boolean",
-					"value": "false",
 					"editable": true
 				},
 				{
@@ -713,13 +610,11 @@
 						{
 							"item": "/import/mappings/extension-mimetype/map/attribute::from",
 							"caption": "From",
-							"type": "String",
 							"editable": true
 						},
 						{
 							"item": "/import/mappings/extension-mimetype/map/attribute::to",
 							"caption": "To",
-							"type": "String",
 							"editable": true
 						}
 					]
@@ -733,13 +628,11 @@
 						{
 							"item": "/import/mappings/mimetype-contenttype/treat/attribute::mimetype",
 							"caption": "Mimetype",
-							"type": "String",
 							"editable": true
 						},
 						{
 							"item": "/import/mappings/mimetype-contenttype/treat/attribute::as",
 							"caption": "Treated as",
-							"type": "String",
 							"editable": true
 						}
 					]
@@ -753,13 +646,11 @@
 						{
 							"item": "/import/mappings/mimetype-upnpclass/map/attribute::from",
 							"caption": "From",
-							"type": "String",
 							"editable": true
 						},
 						{
 							"item": "/import/mappings/mimetype-upnpclass/map/attribute::to",
 							"caption": "To",
-							"type": "String",
 							"editable": true
 						}
 					]
