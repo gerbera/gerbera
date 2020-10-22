@@ -8,8 +8,8 @@ Gerbera is an UPnP Media Server.
 
 It allows you to stream your digital media through your home network and listen to/watch it on a variety of UPnP compatible devices.
 
-Gerbera should work with any UPnP compliant client, please tell us if you experience difficulties with
-particular models, also take a look at the :ref:`Supported Devices <supported-devices>` list for more information.
+Gerbera should work with any UPnP compliant client.  Please tell us if you experience difficulties with
+particular models. Please see the the :ref:`Supported Devices <supported-devices>` list for related information.
 
 Features
 ~~~~~~~~
