@@ -293,7 +293,7 @@ void web::configLoad::process()
             setValue(item, TranscodingProfile::mapFourCcMode(fourCCMode));
 
             const auto fourCCList = entry->getAVIFourCCList();
-            if (fourCCList.size() > 0) {
+            if (!fourCCList.empty()) {
                 item = values.append_child("item");
                 createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_4CC), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_4CC);
                 setValue(item, std::accumulate(std::next(fourCCList.begin()),
