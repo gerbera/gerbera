@@ -472,9 +472,8 @@ bool ConfigBoolSetup::CheckInotifyValue(std::string& value)
             log_error("You specified \"yes\" in \"<autoscan use-inotify=\"\">"
                       " however your system does not have inotify support");
             return false;
-        } else {
-            temp_bool = true;
         }
+        temp_bool = true;
 #else
         log_error("You specified \"yes\" in \"<autoscan use-inotify=\"\">"
                   " however this version of Gerbera was compiled without inotify support");
