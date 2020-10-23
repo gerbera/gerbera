@@ -720,7 +720,7 @@ std::shared_ptr<ConfigSetup> ConfigManager::findConfigSetup(config_option_t opti
     throw std::runtime_error(fmt::format("Error in config code: {} tag not found", static_cast<int>(option)));
 }
 
-std::shared_ptr<ConfigSetup> ConfigManager::findConfigSetupByPath(const std::string& key, bool save, const std::shared_ptr<ConfigSetup> parent)
+std::shared_ptr<ConfigSetup> ConfigManager::findConfigSetupByPath(const std::string& key, bool save, const std::shared_ptr<ConfigSetup>& parent)
 {
     auto co = std::find_if(complexOptions.begin(), complexOptions.end(), [&](const auto& s) { return s->getUniquePath() == key; });
 

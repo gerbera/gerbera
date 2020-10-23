@@ -28,6 +28,8 @@
 #include <filesystem>
 #include <iostream>
 #include <numeric>
+#include <utility>
+
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -116,13 +118,13 @@ std::string ConfigSetup::getXmlContent(const pugi::xml_node& root, bool trim) co
 void ConfigSetup::makeOption(const pugi::xml_node& root, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments)
 {
     optionValue = std::make_shared<Option>("");
-    setOption(config);
+    setOption(std::move(config));
 }
 
 void ConfigSetup::makeOption(std::string optValue, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments)
 {
     optionValue = std::make_shared<Option>(optValue);
-    setOption(config);
+    setOption(std::move(config));
 };
 
 size_t ConfigSetup::extractIndex(const std::string& item)
@@ -531,7 +533,7 @@ void ConfigArraySetup::makeOption(const pugi::xml_node& root, std::shared_ptr<Co
     setOption(config);
 }
 
-bool ConfigArraySetup::updateItem(size_t i, const std::string& optItem, std::shared_ptr<Config> config, std::shared_ptr<ArrayOption> value, const std::string& optValue, const std::string& status) const
+bool ConfigArraySetup::updateItem(size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<ArrayOption>& value, const std::string& optValue, const std::string& status) const
 {
     auto index = getItemPath(i);
     if (optItem == index || !status.empty()) {
@@ -728,7 +730,7 @@ void ConfigDictionarySetup::makeOption(const pugi::xml_node& root, std::shared_p
     setOption(config);
 }
 
-bool ConfigDictionarySetup::updateItem(size_t i, const std::string& optItem, std::shared_ptr<Config> config, std::shared_ptr<DictionaryOption> value, const std::string& optKey, const std::string& optValue, const std::string& status) const
+bool ConfigDictionarySetup::updateItem(size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<DictionaryOption>& value, const std::string& optKey, const std::string& optValue, const std::string& status) const
 {
     auto keyIndex = getItemPath(i, keyOption);
     auto valIndex = getItemPath(i, valOption);
@@ -863,7 +865,7 @@ bool ConfigAutoscanSetup::createAutoscanListFromNode(const pugi::xml_node& eleme
     return true;
 }
 
-bool ConfigAutoscanSetup::updateItem(size_t i, const std::string& optItem, std::shared_ptr<Config> config, std::shared_ptr<AutoscanDirectory>& entry, std::string& optValue, const std::string& status) const
+bool ConfigAutoscanSetup::updateItem(size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, std::shared_ptr<AutoscanDirectory>& entry, std::string& optValue, const std::string& status) const
 {
     auto index = getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_LOCATION);
     if (optItem == getUniquePath() && status != STATUS_CHANGED) {
@@ -1334,7 +1336,7 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
             }
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_4CC);
             if (optItem == index) {
-                config->setOrigValue(index, std::accumulate(std::next(fcc_list.begin()), fcc_list.end(), fcc_list[0], [](std::string a, std::string b) { return a + ", " + b; }));
+                config->setOrigValue(index, std::accumulate(std::next(fcc_list.begin()), fcc_list.end(), fcc_list[0], [](const std::string& a, const std::string& b) { return a + ", " + b; }));
                 fcc_list.clear();
                 if (findConfigSetup<ConfigArraySetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC)->checkArrayValue(optValue, fcc_list)) {
                     set4cc = true;
@@ -1404,7 +1406,7 @@ void ConfigClientSetup::makeOption(const pugi::xml_node& root, std::shared_ptr<C
     setOption(config);
 }
 
-bool ConfigClientSetup::updateItem(size_t i, const std::string& optItem, std::shared_ptr<Config> config, std::shared_ptr<ClientConfig>& entry, std::string& optValue, const std::string& status) const
+bool ConfigClientSetup::updateItem(size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, std::shared_ptr<ClientConfig>& entry, std::string& optValue, const std::string& status) const
 {
     if (optItem == getItemPath(i) && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
         return true;
@@ -1559,7 +1561,7 @@ void ConfigDirectorySetup::makeOption(const pugi::xml_node& root, std::shared_pt
     setOption(config);
 }
 
-bool ConfigDirectorySetup::updateItem(size_t i, const std::string& optItem, std::shared_ptr<Config> config, std::shared_ptr<DirectoryTweak>& entry, std::string& optValue, const std::string& status) const
+bool ConfigDirectorySetup::updateItem(size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, std::shared_ptr<DirectoryTweak>& entry, std::string& optValue, const std::string& status) const
 {
     if (optItem == getItemPath(i) && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
         return true;

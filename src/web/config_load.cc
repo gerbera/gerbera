@@ -52,7 +52,7 @@ web::configLoad::configLoad(std::shared_ptr<Config> config, std::shared_ptr<Data
     }
 }
 
-void web::configLoad::addTypeMeta(pugi::xml_node& meta, const std::shared_ptr<ConfigSetup> cs)
+void web::configLoad::addTypeMeta(pugi::xml_node& meta, const std::shared_ptr<ConfigSetup>& cs)
 {
     auto info = meta.append_child("item");
     info.append_attribute("item") = cs->getUniquePath().c_str();
@@ -296,9 +296,7 @@ void web::configLoad::process()
             if (!fourCCList.empty()) {
                 item = values.append_child("item");
                 createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_4CC), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_4CC);
-                setValue(item, std::accumulate(std::next(fourCCList.begin()),
-                    fourCCList.end(), fourCCList[0],
-                    [](std::string a, std::string b) { return a + ", " + b; }));
+                setValue(item, std::accumulate(std::next(fourCCList.begin()), fourCCList.end(), fourCCList[0], [](const std::string& a, const std::string& b) { return a + ", " + b; }));
             }
         }
         pr++;

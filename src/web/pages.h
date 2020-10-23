@@ -204,7 +204,7 @@ protected:
     static void setValue(pugi::xml_node& item, unsigned int value);
     static void setValue(pugi::xml_node& item, size_t value);
 
-    static void addTypeMeta(pugi::xml_node& meta, const std::shared_ptr<ConfigSetup> cs);
+    static void addTypeMeta(pugi::xml_node& meta, const std::shared_ptr<ConfigSetup>& cs);
 
 public:
     configLoad(std::shared_ptr<Config> config, std::shared_ptr<Database> database,
