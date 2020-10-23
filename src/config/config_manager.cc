@@ -1261,7 +1261,7 @@ void ConfigManager::setOrigValue(const std::string& item, int value)
     }
 }
 
-void ConfigManager::dumpOptions()
+void ConfigManager::dumpOptions() const
 {
 #ifdef TOMBDEBUG
     log_debug("Dumping options!");

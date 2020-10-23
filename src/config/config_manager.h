@@ -159,7 +159,7 @@ protected:
 
     std::shared_ptr<Config> getSelf();
 
-    void dumpOptions();
+    void dumpOptions() const;
 };
 
 #endif // __CONFIG_MANAGER_H__
