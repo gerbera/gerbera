@@ -198,15 +198,15 @@ void web::configLoad::process()
     int pr = 0;
     std::map<std::string, int> profiles;
     for (const auto& [key, val] : transcoding->getList()) {
-        for (auto it = val->begin(); it != val->end(); it++) {
+        for (const auto& [a, name] : *val) {
             auto item = values.append_child("item");
             createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_MIMETYPE_PROF_MAP, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_TRANSCODE, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE), cs->option, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE);
             setValue(item, key);
 
             item = values.append_child("item");
             createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_MIMETYPE_PROF_MAP, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_TRANSCODE, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_USING), cs->option, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_USING);
-            setValue(item, it->second->getName());
-            profiles[it->second->getName()] = pr;
+            setValue(item, name->getName());
+            profiles[name->getName()] = pr;
 
             pr++;
         }
