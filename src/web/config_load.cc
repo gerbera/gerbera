@@ -380,7 +380,7 @@ void web::configLoad::process()
         }
     }
 
-    for (auto entry : dbEntries) {
+    for (const auto& entry : dbEntries) {
         auto exItem = allItems.find(entry.item);
         if (exItem != allItems.end()) {
             auto item = (*exItem).second;
