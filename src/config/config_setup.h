@@ -618,7 +618,7 @@ protected:
     /// \brief Creates an array of TranscodingProfile objects from an XML
     /// nodeset.
     /// \param element starting element of the nodeset.
-    bool createTranscodingProfileListFromNode(const pugi::xml_node& element, std::shared_ptr<TranscodingProfileList>& result);
+    static bool createTranscodingProfileListFromNode(const pugi::xml_node& element, std::shared_ptr<TranscodingProfileList>& result);
 
 public:
     ConfigTranscodingSetup(config_option_t option, const char* xpath, const char* help)
@@ -654,7 +654,7 @@ protected:
 
     /// \brief Creates an array of ClientConfig objects from a XML nodeset.
     /// \param element starting element of the nodeset.
-    bool createClientConfigListFromNode(const pugi::xml_node& element, std::shared_ptr<ClientConfigList>& result);
+    static bool createClientConfigListFromNode(const pugi::xml_node& element, std::shared_ptr<ClientConfigList>& result);
 
     bool updateItem(size_t i, const std::string& optItem, std::shared_ptr<Config> config, std::shared_ptr<ClientConfig>& entry, std::string& optValue, const std::string& status = "") const;
 
@@ -693,7 +693,7 @@ class ConfigDirectorySetup : public ConfigSetup {
 protected:
     /// \brief Creates an array of ClientConfig objects from a XML nodeset.
     /// \param element starting element of the nodeset.
-    bool createDirectoryTweakListFromNode(const pugi::xml_node& element, std::shared_ptr<DirectoryConfigList>& result);
+    static bool createDirectoryTweakListFromNode(const pugi::xml_node& element, std::shared_ptr<DirectoryConfigList>& result);
 
     bool updateItem(size_t i, const std::string& optItem, std::shared_ptr<Config> config, std::shared_ptr<DirectoryTweak>& entry, std::string& optValue, const std::string& status = "") const;
 

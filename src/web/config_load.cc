@@ -52,7 +52,7 @@ web::configLoad::configLoad(std::shared_ptr<Config> config, std::shared_ptr<Data
     }
 }
 
-void web::configLoad::addTypeMeta(pugi::xml_node& meta, const std::shared_ptr<ConfigSetup> cs) const
+void web::configLoad::addTypeMeta(pugi::xml_node& meta, const std::shared_ptr<ConfigSetup> cs)
 {
     auto info = meta.append_child("item");
     info.append_attribute("item") = cs->getUniquePath().c_str();
