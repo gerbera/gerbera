@@ -100,7 +100,7 @@ std::shared_ptr<DirectoryTweak> DirectoryConfigList::get(const fs::path& locatio
 {
     AutoLock lock(mutex);
     for(auto testLoc = location.has_filename() ? location.parent_path() : location; testLoc.has_parent_path() && testLoc != "/"; testLoc = testLoc.parent_path()) {
-        auto entry = std::find_if(list.begin(), list.end(), [=] (const auto& d) { return ((d->getLocation() == location || d->getInherit() == true) && d->getLocation() == testLoc); }); 
+        auto entry = std::find_if(list.begin(), list.end(), [=](const auto& d) { return (d->getLocation() == location || d->getInherit()) && d->getLocation() == testLoc; });
         if (entry != list.end() && *entry != nullptr) {
             return *entry;
         }
