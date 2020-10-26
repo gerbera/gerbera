@@ -137,12 +137,12 @@ void MetadataHandler::setMetadata(const std::shared_ptr<Config>& config, const s
 
 std::string MetadataHandler::getMetaFieldName(metadata_fields_t field)
 {
-    return MT_KEYS.at(field).upnp;
+    return mt_keys.at(field).second;
 }
 
 std::string MetadataHandler::getResAttrName(resource_attributes_t attr)
 {
-    return RES_KEYS.at(attr).upnp;
+    return mt_keys.at(attr).second;
 }
 
 std::unique_ptr<MetadataHandler> MetadataHandler::createHandler(const std::shared_ptr<Config>& config, int handlerType)

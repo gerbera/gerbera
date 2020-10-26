@@ -113,13 +113,7 @@ typedef enum {
     M_MAX
 } metadata_fields_t;
 
-using mt_key = struct mt_key;
-struct mt_key {
-    const char* sym;
-    const char* upnp;
-};
-
-constexpr std::array<mt_key, 21> MT_KEYS = { {
+constexpr std::array<std::pair<const char*, const char*>, 21> mt_keys = { {
     { "M_TITLE", "dc:title" },
     { "M_ARTIST", "upnp:artist" },
     { "M_ALBUM", "upnp:album" },
@@ -156,20 +150,16 @@ typedef enum {
     R_MAX
 } resource_attributes_t;
 
-using res_key = struct res_key;
-struct res_key {
-    const char* sym;
-    const char* upnp;
-};
-
-constexpr std::array<res_key, 8> RES_KEYS = { { { "R_SIZE", "size" },
+constexpr std::array<std::pair<const char*, const char*>, 8> res_keys = { {
+    { "R_SIZE", "size" },
     { "R_DURATION", "duration" },
     { "R_BITRATE", "bitrate" },
     { "R_SAMPLEFREQUENCY", "sampleFrequency" },
     { "R_NRAUDIOCHANNELS", "nrAudioChannels" },
     { "R_RESOLUTION", "resolution" },
     { "R_COLORDEPTH", "colorDepth" },
-    { "R_PROTOCOLINFO", "protocolInfo" } } };
+    { "R_PROTOCOLINFO", "protocolInfo" },
+} };
 
 /// \brief This class is responsible for providing access to metadata information
 /// of various media.

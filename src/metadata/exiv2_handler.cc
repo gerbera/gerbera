@@ -138,7 +138,7 @@ void Exiv2Handler::fillMetadata(std::shared_ptr<CdsItem> item)
         }  */
 
         if (!comment.empty())
-            item->setMetadata(MT_KEYS[M_DESCRIPTION].upnp, sc->convert(comment));
+            item->setMetadata(mt_keys[M_DESCRIPTION].second, sc->convert(comment));
 
         // if there are any auxilary tags that the user wants - add them
         const auto aux = config->getArrayOption(CFG_IMPORT_LIBOPTS_EXIV2_AUXDATA_TAGS_LIST);
