@@ -111,14 +111,14 @@ duk_ret_t ScriptTestFixture::dukMockPlaylist(duk_context* ctx, string title, str
 
 void ScriptTestFixture::addGlobalFunctions(duk_context* ctx, const duk_function_list_entry* funcs)
 {
-    for (const auto& key : MT_KEYS) {
-        duk_push_string(ctx, key.upnp);
-        duk_put_global_string(ctx, key.sym);
+    for (const auto& [sym, upnp] : mt_keys) {
+        duk_push_string(ctx, upnp);
+        duk_put_global_string(ctx, sym);
     }
 
-    for (const auto& key : RES_KEYS) {
-        duk_push_string(ctx, key.upnp);
-        duk_put_global_string(ctx, key.sym);
+    for (const auto& [sym, upnp] : res_keys) {
+        duk_push_string(ctx, upnp);
+        duk_put_global_string(ctx, sym);
     }
 
     duk_push_int(ctx, OBJECT_TYPE_ITEM_EXTERNAL_URL);

@@ -197,14 +197,14 @@ Script::Script(const std::shared_ptr<Config>& config,
     duk_put_global_string(ctx, "ONLINE_SERVICE_SOPCAST");
 #endif //ONLINE_SERVICES
 
-    for (const auto& key : MT_KEYS) {
-        duk_push_string(ctx, key.upnp);
-        duk_put_global_string(ctx, key.sym);
+    for (const auto& [sym, upnp] : mt_keys) {
+        duk_push_string(ctx, upnp);
+        duk_put_global_string(ctx, sym);
     }
 
-    for (const auto& key : RES_KEYS) {
-        duk_push_string(ctx, key.upnp);
-        duk_put_global_string(ctx, key.sym);
+    for (const auto& [sym, upnp] : res_keys) {
+        duk_push_string(ctx, upnp);
+        duk_put_global_string(ctx, sym);
     }
 
     duk_push_string(ctx, UPNP_DEFAULT_CLASS_MUSIC_ALBUM);
@@ -390,20 +390,20 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
     duk_get_prop_string(ctx, -1, "meta");
     if (duk_is_object(ctx, -1)) {
         duk_to_object(ctx, -1);
-        /// \todo: only metadata enumerated in MT_KEYS is taken
-        for (const auto& key : MT_KEYS) {
-            val = getProperty(key.upnp);
+        /// \todo: only metadata enumerated in mt_keys is taken
+        for (const auto& [sym, upnp] : mt_keys) {
+            val = getProperty(upnp);
             if (!val.empty()) {
-                if (std::strcmp(key.sym, "M_TRACKNUMBER") == 0) {
+                if (std::strcmp(sym, "M_TRACKNUMBER") == 0) {
                     int j = stoiString(val, 0);
                     if (j > 0) {
-                        obj->setMetadata(key.upnp, val);
+                        obj->setMetadata(upnp, val);
                         std::static_pointer_cast<CdsItem>(obj)->setTrackNumber(j);
                     } else
                         std::static_pointer_cast<CdsItem>(obj)->setTrackNumber(0);
                 } else {
                     val = sc->convert(val);
-                    obj->setMetadata(key.upnp, val);
+                    obj->setMetadata(upnp, val);
                 }
             }
         }
@@ -441,7 +441,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         }
 
         /// \todo check what this is doing here, wasn't it already handled
-        /// in the MT_KEYS loop?
+        /// in the mt_keys loop?
         val = getProperty("description");
         if (!val.empty()) {
             val = sc->convert(val);
