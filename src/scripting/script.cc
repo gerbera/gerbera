@@ -39,6 +39,7 @@
 #include "js_functions.h"
 #include "metadata/metadata_handler.h"
 #include "runtime.h"
+#include "script_names.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
 
@@ -152,16 +153,10 @@ Script::Script(const std::shared_ptr<Config>& config,
     duk_pop(ctx);
 
     /* initialize contstants */
-    duk_push_int(ctx, OBJECT_TYPE_CONTAINER);
-    duk_put_global_string(ctx, "OBJECT_TYPE_CONTAINER");
-    duk_push_int(ctx, OBJECT_TYPE_ITEM);
-    duk_put_global_string(ctx, "OBJECT_TYPE_ITEM");
-    duk_push_int(ctx, OBJECT_TYPE_ACTIVE_ITEM);
-    duk_put_global_string(ctx, "OBJECT_TYPE_ACTIVE_ITEM");
-    duk_push_int(ctx, OBJECT_TYPE_ITEM_EXTERNAL_URL);
-    duk_put_global_string(ctx, "OBJECT_TYPE_ITEM_EXTERNAL_URL");
-    duk_push_int(ctx, OBJECT_TYPE_ITEM_INTERNAL_URL);
-    duk_put_global_string(ctx, "OBJECT_TYPE_ITEM_INTERNAL_URL");
+    for (const auto& [field, sym] : ot_names)  {
+        duk_push_int(ctx, field);
+        duk_put_global_string(ctx, sym);
+    }
 #ifdef ONLINE_SERVICES
     duk_push_int(ctx, static_cast<int>(OS_None));
     duk_put_global_string(ctx, "ONLINE_SERVICE_NONE");
@@ -197,9 +192,11 @@ Script::Script(const std::shared_ptr<Config>& config,
     duk_put_global_string(ctx, "ONLINE_SERVICE_SOPCAST");
 #endif //ONLINE_SERVICES
 
-    for (const auto& [sym, upnp] : mt_keys) {
-        duk_push_string(ctx, upnp);
-        duk_put_global_string(ctx, sym);
+    for (const auto& entry : mt_keys) {
+        duk_push_string(ctx, entry.second);
+        auto sym = std::find_if(mt_names.begin(), mt_names.end(), [=](const auto& n) { return n.first == entry.first; });
+        if (sym != mt_names.end())
+            duk_put_global_string(ctx, sym->second);
     }
 
     for (const auto& [sym, upnp] : res_keys) {
@@ -207,30 +204,10 @@ Script::Script(const std::shared_ptr<Config>& config,
         duk_put_global_string(ctx, sym);
     }
 
-    duk_push_string(ctx, UPNP_DEFAULT_CLASS_MUSIC_ALBUM);
-    duk_put_global_string(ctx, "UPNP_CLASS_CONTAINER_MUSIC_ALBUM");
-    duk_push_string(ctx, UPNP_DEFAULT_CLASS_MUSIC_ARTIST);
-    duk_put_global_string(ctx, "UPNP_CLASS_CONTAINER_MUSIC_ARTIST");
-    duk_push_string(ctx, UPNP_DEFAULT_CLASS_MUSIC_GENRE);
-    duk_put_global_string(ctx, "UPNP_CLASS_CONTAINER_MUSIC_GENRE");
-    duk_push_string(ctx, UPNP_DEFAULT_CLASS_MUSIC_COMPOSER);
-    duk_put_global_string(ctx, "UPNP_CLASS_CONTAINER_MUSIC_COMPOSER");
-    duk_push_string(ctx, UPNP_DEFAULT_CLASS_MUSIC_CONDUCTOR);
-    duk_put_global_string(ctx, "UPNP_CLASS_CONTAINER_MUSIC_CONDUCTOR");
-    duk_push_string(ctx, UPNP_DEFAULT_CLASS_MUSIC_ORCHESTRA);
-    duk_put_global_string(ctx, "UPNP_CLASS_CONTAINER_MUSIC_ORCHESTRA");
-    duk_push_string(ctx, UPNP_DEFAULT_CLASS_CONTAINER);
-    duk_put_global_string(ctx, "UPNP_CLASS_CONTAINER");
-    duk_push_string(ctx, UPNP_DEFAULT_CLASS_ITEM);
-    duk_put_global_string(ctx, "UPNP_CLASS_ITEM");
-    duk_push_string(ctx, UPNP_DEFAULT_CLASS_MUSIC_TRACK);
-    duk_put_global_string(ctx, "UPNP_CLASS_ITEM_MUSIC_TRACK");
-    duk_push_string(ctx, UPNP_DEFAULT_CLASS_VIDEO_ITEM);
-    duk_put_global_string(ctx, "UPNP_CLASS_CONTAINER_ITEM_VIDEO");
-    duk_push_string(ctx, UPNP_DEFAULT_CLASS_IMAGE_ITEM);
-    duk_put_global_string(ctx, "UPNP_CLASS_CONTAINER_ITEM_IMAGE");
-    duk_push_string(ctx, UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER);
-    duk_put_global_string(ctx, "UPNP_CLASS_PLAYLIST_CONTAINER");
+    for (const auto& [field, sym] : upnp_classes)  {
+        duk_push_string(ctx, field);
+        duk_put_global_string(ctx, sym);
+    }
 
     defineFunctions(js_global_functions.data());
 
@@ -394,16 +371,16 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         for (const auto& [sym, upnp] : mt_keys) {
             val = getProperty(upnp);
             if (!val.empty()) {
-                if (std::strcmp(sym, "M_TRACKNUMBER") == 0) {
+                if (sym == M_TRACKNUMBER) {
                     int j = stoiString(val, 0);
                     if (j > 0) {
-                        obj->setMetadata(upnp, val);
+                        obj->setMetadata(sym, val);
                         std::static_pointer_cast<CdsItem>(obj)->setTrackNumber(j);
                     } else
                         std::static_pointer_cast<CdsItem>(obj)->setTrackNumber(0);
                 } else {
                     val = sc->convert(val);
-                    obj->setMetadata(upnp, val);
+                    obj->setMetadata(sym, val);
                 }
             }
         }
@@ -445,11 +422,10 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         val = getProperty("description");
         if (!val.empty()) {
             val = sc->convert(val);
-            item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), val);
+            item->setMetadata(M_DESCRIPTION, val);
         } else {
             if (pcd != nullptr)
-                item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION),
-                    pcd_item->getMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION)));
+                item->setMetadata(M_DESCRIPTION, pcd_item->getMetadata(M_DESCRIPTION));
         }
         if (this->whoami() == S_PLAYLIST) {
             item->setTrackNumber(getIntProperty("playlistOrder", 0));

@@ -113,29 +113,30 @@ typedef enum {
     M_MAX
 } metadata_fields_t;
 
-constexpr std::array<std::pair<const char*, const char*>, 21> mt_keys = { {
-    { "M_TITLE", "dc:title" },
-    { "M_ARTIST", "upnp:artist" },
-    { "M_ALBUM", "upnp:album" },
-    { "M_DATE", "dc:date" },
-    { "M_UPNP_DATE", "upnp:date" },
-    { "M_GENRE", "upnp:genre" },
-    { "M_DESCRIPTION", "dc:description" },
-    { "M_LONGDESCRIPTION", "upnp:longDescription" },
-    { "M_TRACKNUMBER", "upnp:originalTrackNumber" },
-    { "M_ALBUMARTURI", "upnp:albumArtURI" },
-    { "M_REGION", "upnp:region" },
-    { "M_AUTHOR", "upnp:author" },
-    { "M_DIRECTOR", "upnp:director" },
-    { "M_PUBLISHER", "dc:publisher" },
-    { "M_RATING", "upnp:rating" },
-    { "M_ACTOR", "upnp:actor" },
-    { "M_PRODUCER", "upnp:producer" },
-    { "M_ALBUMARTIST", "upnp:artist@role[AlbumArtist]" },
-    { "M_COMPOSER", "upnp:composer" },
-    { "M_CONDUCTOR", "upnp:conductor" },
-    { "M_ORCHESTRA", "upnp:orchestra" },
+constexpr std::array<std::pair<metadata_fields_t, const char*>, 21> mt_keys = { {
+    { M_TITLE, "dc:title" },
+    { M_ARTIST, "upnp:artist" },
+    { M_ALBUM, "upnp:album" },
+    { M_DATE, "dc:date" },
+    { M_UPNP_DATE, "upnp:date" },
+    { M_GENRE, "upnp:genre" },
+    { M_DESCRIPTION, "dc:description" },
+    { M_LONGDESCRIPTION, "upnp:longDescription" },
+    { M_TRACKNUMBER, "upnp:originalTrackNumber" },
+    { M_ALBUMARTURI, "upnp:albumArtURI" },
+    { M_REGION, "upnp:region" },
+    { M_AUTHOR, "upnp:author" },
+    { M_DIRECTOR, "upnp:director" },
+    { M_PUBLISHER, "dc:publisher" },
+    { M_RATING, "upnp:rating" },
+    { M_ACTOR, "upnp:actor" },
+    { M_PRODUCER, "upnp:producer" },
+    { M_ALBUMARTIST, "upnp:artist@role[AlbumArtist]" },
+    { M_COMPOSER, "upnp:composer" },
+    { M_CONDUCTOR, "upnp:conductor" },
+    { M_ORCHESTRA, "upnp:orchestra" },
 } };
+
 
 // res tag attributes
 typedef enum {

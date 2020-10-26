@@ -10,6 +10,7 @@ namespace fs = std::filesystem;
 #include "cds_objects.h"
 #include "metadata/metadata_handler.h"
 #include "onlineservice/atrailers_content_handler.h"
+#include "scripting/script_names.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
 
@@ -111,9 +112,11 @@ duk_ret_t ScriptTestFixture::dukMockPlaylist(duk_context* ctx, string title, str
 
 void ScriptTestFixture::addGlobalFunctions(duk_context* ctx, const duk_function_list_entry* funcs)
 {
-    for (const auto& [sym, upnp] : mt_keys) {
-        duk_push_string(ctx, upnp);
-        duk_put_global_string(ctx, sym);
+    for (const auto& entry : mt_keys) {
+        duk_push_string(ctx, entry.second);
+        auto sym = std::find_if(mt_names.begin(), mt_names.end(), [=](const auto& n) { return n.first == entry.first; });
+        if (sym != mt_names.end())
+            duk_put_global_string(ctx, sym->second);
     }
 
     for (const auto& [sym, upnp] : res_keys) {
@@ -121,30 +124,15 @@ void ScriptTestFixture::addGlobalFunctions(duk_context* ctx, const duk_function_
         duk_put_global_string(ctx, sym);
     }
 
-    duk_push_int(ctx, OBJECT_TYPE_ITEM_EXTERNAL_URL);
-    duk_put_global_string(ctx, "OBJECT_TYPE_ITEM_EXTERNAL_URL");
-    duk_push_int(ctx, OBJECT_TYPE_ITEM_INTERNAL_URL);
-    duk_put_global_string(ctx, "OBJECT_TYPE_ITEM_INTERNAL_URL");
-    duk_push_int(ctx, OBJECT_TYPE_ITEM);
-    duk_put_global_string(ctx, "OBJECT_TYPE_ITEM");
-    duk_push_string(ctx, UPNP_DEFAULT_CLASS_MUSIC_TRACK);
-    duk_put_global_string(ctx, "UPNP_CLASS_ITEM_MUSIC_TRACK");
-    duk_push_string(ctx, UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER);
-    duk_put_global_string(ctx, "UPNP_CLASS_PLAYLIST_CONTAINER");
-    duk_push_string(ctx, UPNP_DEFAULT_CLASS_MUSIC_ALBUM);
-    duk_put_global_string(ctx, "UPNP_CLASS_CONTAINER_MUSIC_ALBUM");
-    duk_push_string(ctx, UPNP_DEFAULT_CLASS_MUSIC_ARTIST);
-    duk_put_global_string(ctx, "UPNP_CLASS_CONTAINER_MUSIC_ARTIST");
-    duk_push_string(ctx, UPNP_DEFAULT_CLASS_MUSIC_GENRE);
-    duk_put_global_string(ctx, "UPNP_CLASS_CONTAINER_MUSIC_GENRE");
-    duk_push_string(ctx, UPNP_DEFAULT_CLASS_MUSIC_COMPOSER);
-    duk_put_global_string(ctx, "UPNP_CLASS_CONTAINER_MUSIC_COMPOSER");
-    duk_push_string(ctx, UPNP_DEFAULT_CLASS_MUSIC_CONDUCTOR);
-    duk_put_global_string(ctx, "UPNP_CLASS_CONTAINER_MUSIC_CONDUCTOR");
-    duk_push_string(ctx, UPNP_DEFAULT_CLASS_MUSIC_ORCHESTRA);
-    duk_put_global_string(ctx, "UPNP_CLASS_CONTAINER_MUSIC_ORCHESTRA");
-    duk_push_string(ctx, UPNP_DEFAULT_CLASS_CONTAINER);
-    duk_put_global_string(ctx, "UPNP_CLASS_CONTAINER");
+    for (const auto& [field, sym] : ot_names)  {
+        duk_push_int(ctx, field);
+        duk_put_global_string(ctx, sym);
+    }
+
+    for (const auto& [field, sym] : upnp_classes)  {
+        duk_push_string(ctx, field);
+        duk_put_global_string(ctx, sym);
+    }
 
     duk_push_int(ctx, 0);
     duk_put_global_string(ctx, "ONLINE_SERVICE_NONE");

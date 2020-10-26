@@ -905,9 +905,9 @@ void ContentManager::updateObject(int objectID, const std::map<std::string, std:
         }
 
         if (!description.empty()) {
-            cloned_item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), description);
+            cloned_item->setMetadata(M_DESCRIPTION, description);
         } else {
-            cloned_item->removeMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION));
+            cloned_item->removeMetadata(M_DESCRIPTION);
         }
 
         log_debug("updateObject: checking equality of item {}", item->getTitle().c_str());
@@ -938,9 +938,9 @@ void ContentManager::updateObject(int objectID, const std::map<std::string, std:
 
         // state and description can be an empty strings - if you want to clear it
         if (!description.empty()) {
-            cloned_item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), description);
+            cloned_item->setMetadata(M_DESCRIPTION, description);
         } else {
-            cloned_item->removeMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION));
+            cloned_item->removeMetadata(M_DESCRIPTION);
         }
 
         if (!state.empty())

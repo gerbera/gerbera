@@ -159,6 +159,7 @@ add_library(libgerbera STATIC
         src/scripting/runtime.h
         src/scripting/script.cc
         src/scripting/script.h
+        src/scripting/script_names.h
         src/search_handler.cc
         src/search_handler.h
         src/server.cc

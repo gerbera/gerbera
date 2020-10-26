@@ -169,7 +169,7 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
     value = trimString(value);
 
     if (!value.empty()) {
-        item->setMetadata(mt_keys.at(field).second, sc->convert(value));
+        item->setMetadata(field, sc->convert(value));
         //        log_debug("Setting metadata on item: {}, {}", field, sc->convert(value).c_str());
     }
 }

@@ -76,7 +76,7 @@ fs::path MetacontentHandler::getContentPath(const std::vector<std::string>& name
     return "";
 }
 
-static std::map<std::string, int> metaTags = {
+static std::map<std::string, metadata_fields_t> metaTags = {
     { "%album%", M_ALBUM },
     { "%title%", M_TITLE },
 };
@@ -87,7 +87,7 @@ std::string MetacontentHandler::expandName(const std::string& name, const std::s
     std::string copy(name);
 
     for (const auto& [key, val] : metaTags)
-        replaceString(copy, key, item->getMetadata(mt_keys.at(val).second));
+        replaceString(copy, key, item->getMetadata(val));
 
     fs::path location = item->getLocation();
     replaceString(copy, "%filename%", location.stem());

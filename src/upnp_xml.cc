@@ -224,8 +224,7 @@ void UpnpXMLBuilder::updateObject(const std::shared_ptr<CdsObject>& obj, const s
 
         /// \todo description should be taken from the dictionary
         std::string description = root.child("dc:description").text().as_string();
-        aitem->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION),
-            description);
+        aitem->setMetadata(M_DESCRIPTION, description);
 
         std::string location = root.child("location").text().as_string();
         if (!location.empty())
