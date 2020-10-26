@@ -78,7 +78,7 @@ void web::edit_load::process()
         auto objItem = std::static_pointer_cast<CdsItem>(obj);
 
         auto description = item.append_child("description");
-        description.append_attribute("value") = objItem->getMetadata("dc:description").c_str();
+        description.append_attribute("value") = objItem->getMetadata(M_DESCRIPTION).c_str();
         description.append_attribute("editable") = true;
 
         auto location = item.append_child("location");

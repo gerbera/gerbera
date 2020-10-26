@@ -142,18 +142,15 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
 
     temp = info.child("rating").text().as_string();
     if (!temp.empty())
-        item->setMetadata(MetadataHandler::getMetaFieldName(M_RATING),
-            temp);
+        item->setMetadata(M_RATING, temp);
 
     temp = info.child("studio").text().as_string();
     if (!temp.empty())
-        item->setMetadata(MetadataHandler::getMetaFieldName(M_PRODUCER),
-            temp);
+        item->setMetadata(M_PRODUCER, temp);
 
     temp = info.child("director").text().as_string();
     if (!temp.empty())
-        item->setMetadata(MetadataHandler::getMetaFieldName(M_DIRECTOR),
-            temp);
+        item->setMetadata(M_DIRECTOR, temp);
 
     temp = info.child("postdate").text().as_string();
     if (!temp.empty())
@@ -161,13 +158,12 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
 
     temp = info.child("releasedate").text().as_string();
     if (!temp.empty())
-        item->setMetadata(MetadataHandler::getMetaFieldName(M_DATE),
-            temp);
+        item->setMetadata(M_DATE, temp);
 
     temp = info.child("description").text().as_string();
     if (!temp.empty()) {
         /// \todo cut out a small part for the usual description
-        item->setMetadata(MetadataHandler::getMetaFieldName(M_LONGDESCRIPTION), temp);
+        item->setMetadata(M_LONGDESCRIPTION, temp);
     }
 
     auto cast = trailer.child("cast");
@@ -189,8 +185,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
         }
 
         if (!actors.empty())
-            item->setMetadata(MetadataHandler::getMetaFieldName(M_GENRE),
-                temp);
+            item->setMetadata(M_GENRE, temp);
     }
 
     auto genre = trailer.child("genre");
@@ -212,8 +207,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
         }
 
         if (!genres.empty())
-            item->setMetadata(MetadataHandler::getMetaFieldName(M_GENRE),
-                temp);
+            item->setMetadata(M_GENRE, temp);
     }
 
     /*

@@ -302,7 +302,7 @@ void LibExifHandler::process_ifd(ExifContent* content, const std::shared_ptr<Cds
                 // from YYYY:MM:DD to YYYY-MM-DD
                 if (value.length() >= 11) {
                     value = value.substr(0, 4) + "-" + value.substr(5, 2) + "-" + value.substr(8, 2);
-                    item->setMetadata(MetadataHandler::getMetaFieldName(M_DATE), value);
+                    item->setMetadata(M_DATE, value);
                 }
             }
             break;
@@ -312,7 +312,7 @@ void LibExifHandler::process_ifd(ExifContent* content, const std::shared_ptr<Cds
             value = trimString(value);
             if (!value.empty()) {
                 value = sc->convert(value);
-                item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), value);
+                item->setMetadata(M_DESCRIPTION, value);
             }
             break;
 

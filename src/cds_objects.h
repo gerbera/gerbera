@@ -43,6 +43,7 @@ namespace fs = std::filesystem;
 
 #include "cds_resource.h"
 #include "common.h"
+#include "metadata/metadata_handler.h"
 #include "util/tools.h"
 
 // forward declaration
@@ -238,9 +239,9 @@ public:
     void clearFlag(unsigned int mask) { objectFlags &= ~mask; }
 
     /// \brief Query single metadata value.
-    std::string getMetadata(const std::string& key) const
+    std::string getMetadata(const metadata_fields_t key) const
     {
-        return getValueOrDefault(metadata, key);
+        return getValueOrDefault(metadata, MetadataHandler::getMetaFieldName(key));
     }
 
     /// \brief Query entire metadata dictionary.
@@ -253,15 +254,15 @@ public:
     }
 
     /// \brief Set a single metadata value.
-    void setMetadata(const std::string& key, const std::string& value)
+    void setMetadata(const metadata_fields_t key, const std::string& value)
     {
-        metadata[key] = value;
+        metadata[MetadataHandler::getMetaFieldName(key)] = value;
     }
 
     /// \brief Removes metadata with the given key
-    void removeMetadata(const std::string& key)
+    void removeMetadata(const metadata_fields_t key)
     {
-        metadata.erase(key);
+        metadata.erase(MetadataHandler::getMetaFieldName(key));
     }
 
     /// \brief Query single auxdata value.

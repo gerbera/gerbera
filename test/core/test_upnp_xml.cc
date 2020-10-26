@@ -47,11 +47,11 @@ TEST_F(UpnpXmlTest, RenderObjectContainer)
     obj->setRestricted(false);
     obj->setTitle("Title");
     obj->setClass(UPNP_DEFAULT_CLASS_MUSIC_ALBUM);
-    obj->setMetadata(MetadataHandler::getMetaFieldName(M_ALBUMARTIST), "Creator");
-    obj->setMetadata(MetadataHandler::getMetaFieldName(M_COMPOSER), "Composer");
-    obj->setMetadata(MetadataHandler::getMetaFieldName(M_CONDUCTOR), "Conductor");
-    obj->setMetadata(MetadataHandler::getMetaFieldName(M_ORCHESTRA), "Orchestra");
-    obj->setMetadata(MetadataHandler::getMetaFieldName(M_UPNP_DATE), "2001-01-01");
+    obj->setMetadata(M_ALBUMARTIST, "Creator");
+    obj->setMetadata(M_COMPOSER, "Composer");
+    obj->setMetadata(M_CONDUCTOR, "Conductor");
+    obj->setMetadata(M_ORCHESTRA, "Orchestra");
+    obj->setMetadata(M_UPNP_DATE, "2001-01-01");
     // albumArtURI
     database->findFolderImageMap.clear();
     database->findFolderImageMap[std::to_string(obj->getID())] = "10";
@@ -91,9 +91,9 @@ TEST_F(UpnpXmlTest, RenderObjectItem)
     obj->setRestricted(false);
     obj->setTitle("Title");
     obj->setClass(UPNP_DEFAULT_CLASS_MUSIC_TRACK);
-    obj->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), "Description");
-    obj->setMetadata(MetadataHandler::getMetaFieldName(M_TRACKNUMBER), "10");
-    obj->setMetadata(MetadataHandler::getMetaFieldName(M_ALBUM), "Album");
+    obj->setMetadata(M_DESCRIPTION, "Description");
+    obj->setMetadata(M_TRACKNUMBER, "10");
+    obj->setMetadata(M_ALBUM, "Album");
 
     std::ostringstream expectedXml;
     expectedXml << "<DIDL-Lite>\n";
@@ -161,7 +161,7 @@ TEST_F(UpnpXmlTest, UpdatesObjectActiveItem)
     auto aitem = std::static_pointer_cast<CdsActiveItem>(obj);
     EXPECT_NE(aitem, nullptr);
     EXPECT_STREQ(aitem->getTitle().c_str(), "Title");
-    EXPECT_STREQ(aitem->getMetadata("dc:description").c_str(), "description");
+    EXPECT_STREQ(aitem->getMetadata(M_DESCRIPTION).c_str(), "description");
     EXPECT_STREQ(aitem->getLocation().c_str(), "/location");
     EXPECT_STREQ(aitem->getMimeType().c_str(), "audio/mpeg");
     EXPECT_STREQ(aitem->getAction().c_str(), "action");

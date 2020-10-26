@@ -63,7 +63,7 @@ std::shared_ptr<CdsObject> web::addObject::addItem(int parentID, std::shared_ptr
 
     std::string tmp = param("description");
     if (!tmp.empty())
-        item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), tmp);
+        item->setMetadata(M_DESCRIPTION, tmp);
 
     /// \todo is there a default setting? autoscan? import settings?
     tmp = param("mime-type");
@@ -102,7 +102,7 @@ std::shared_ptr<CdsObject> web::addObject::addActiveItem(int parentID)
 
     tmp = param("description");
     if (!tmp.empty())
-        item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), tmp);
+        item->setMetadata(M_DESCRIPTION, tmp);
 
     /// \todo is there a default setting? autoscan? import settings?
 
@@ -128,7 +128,7 @@ std::shared_ptr<CdsObject> web::addObject::addUrl(int parentID, std::shared_ptr<
 
     std::string tmp = param("description");
     if (!tmp.empty())
-        item->setMetadata(MetadataHandler::getMetaFieldName(M_DESCRIPTION), tmp);
+        item->setMetadata(M_DESCRIPTION, tmp);
 
     /// \todo is there a default setting? autoscan? import settings?
     tmp = param("mime-type");
