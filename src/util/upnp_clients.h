@@ -96,7 +96,7 @@ private:
 private:
     static std::mutex mutex;
     using AutoLock = std::lock_guard<std::mutex>;
-    static std::shared_ptr<std::vector<struct ClientCacheEntry>> cache;
+    static const std::shared_ptr<std::vector<struct ClientCacheEntry>> cache;
     static std::vector<struct ClientInfo> clientInfo;
 };
 

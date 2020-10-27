@@ -73,7 +73,7 @@
 
 #define WHITE_SPACE " \t\r\n"
 
-static const char* HEX_CHARS = "0123456789abcdef";
+static constexpr const char* HEX_CHARS = "0123456789abcdef";
 
 std::vector<std::string> splitString(const std::string& str, char sep, bool empty)
 {
@@ -329,7 +329,7 @@ std::string generateRandomId()
     return uuid_String;
 }
 
-static const char* HEX_CHARS2 = "0123456789ABCDEF";
+static constexpr const char* HEX_CHARS2 = "0123456789ABCDEF";
 
 std::string urlEscape(const std::string& str)
 {

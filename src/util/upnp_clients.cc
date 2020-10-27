@@ -297,4 +297,4 @@ bool Clients::downloadDescription(const std::string& location, std::unique_ptr<p
 }
 
 std::mutex Clients::mutex;
-std::shared_ptr<std::vector<struct ClientCacheEntry>> Clients::cache = std::make_shared<std::vector<struct ClientCacheEntry>>();
+const std::shared_ptr<std::vector<struct ClientCacheEntry>> Clients::cache = std::make_shared<std::vector<struct ClientCacheEntry>>();
