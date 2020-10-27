@@ -36,9 +36,9 @@
 
 #include "config/config_manager.h"
 #include "content_manager.h"
+#include "database/database.h"
 #include "server.h"
 #include "sopcast_content_handler.h"
-#include "database/database.h"
 #include "url.h"
 #include "util/string_converter.h"
 

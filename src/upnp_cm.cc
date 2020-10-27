@@ -34,8 +34,8 @@
 #include <utility>
 
 #include "config/config_manager.h"
-#include "server.h"
 #include "database/database.h"
+#include "server.h"
 #include "util/tools.h"
 
 ConnectionManagerService::ConnectionManagerService(std::shared_ptr<Config> config,
