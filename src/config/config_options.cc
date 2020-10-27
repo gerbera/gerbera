@@ -92,9 +92,9 @@ std::vector<std::string> ArrayOption::getArrayOption(bool forEdit) const
     auto editSize = getEditSize();
     for (size_t i = 0; i < editSize; i++) {
         if (indexMap.at(i) < SIZE_MAX) {
-            editOption.push_back(option[indexMap.at(i)]);
+            editOption.emplace_back(option[indexMap.at(i)]);
         } else {
-            editOption.push_back("");
+            editOption.emplace_back("");
         }
     }
     return editOption;

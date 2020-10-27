@@ -452,7 +452,7 @@ protected:
     /// This function will create an array like that: ["data", "otherdata"]
     bool createArrayFromNode(const pugi::xml_node& element, std::vector<std::string>& result) const;
 
-    bool updateItem(size_t i, const std::string& optItem, std::shared_ptr<Config> config, std::shared_ptr<ArrayOption> value, const std::string& optValue, const std::string& status = "") const;
+    bool updateItem(size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<ArrayOption>& value, const std::string& optValue, const std::string& status = "") const;
 
 public:
     config_option_t nodeOption;
@@ -529,7 +529,7 @@ protected:
     /// key:value paris: "1":"2", "3":"4"
     bool createDictionaryFromNode(const pugi::xml_node& optValue, std::map<std::string, std::string>& result) const;
 
-    bool updateItem(size_t i, const std::string& optItem, std::shared_ptr<Config> config, std::shared_ptr<DictionaryOption> value, const std::string& optKey, const std::string& optValue, const std::string& status = "") const;
+    bool updateItem(size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<DictionaryOption>& value, const std::string& optKey, const std::string& optValue, const std::string& status = "") const;
 
 public:
     config_option_t keyOption;
@@ -583,7 +583,7 @@ protected:
     /// \param scanmode add only directories with the specified scanmode to the array
     bool createAutoscanListFromNode(const pugi::xml_node& element, std::shared_ptr<AutoscanList>& result);
 
-    bool updateItem(size_t i, const std::string& optItem, std::shared_ptr<Config> config, std::shared_ptr<AutoscanDirectory>& entry, std::string& optValue, const std::string& status = "") const;
+    bool updateItem(size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, std::shared_ptr<AutoscanDirectory>& entry, std::string& optValue, const std::string& status = "") const;
 
 public:
     ConfigAutoscanSetup(config_option_t option, const char* xpath, const char* help, ScanMode scanmode)
@@ -618,7 +618,7 @@ protected:
     /// \brief Creates an array of TranscodingProfile objects from an XML
     /// nodeset.
     /// \param element starting element of the nodeset.
-    bool createTranscodingProfileListFromNode(const pugi::xml_node& element, std::shared_ptr<TranscodingProfileList>& result);
+    static bool createTranscodingProfileListFromNode(const pugi::xml_node& element, std::shared_ptr<TranscodingProfileList>& result);
 
 public:
     ConfigTranscodingSetup(config_option_t option, const char* xpath, const char* help)
@@ -654,9 +654,9 @@ protected:
 
     /// \brief Creates an array of ClientConfig objects from a XML nodeset.
     /// \param element starting element of the nodeset.
-    bool createClientConfigListFromNode(const pugi::xml_node& element, std::shared_ptr<ClientConfigList>& result);
+    static bool createClientConfigListFromNode(const pugi::xml_node& element, std::shared_ptr<ClientConfigList>& result);
 
-    bool updateItem(size_t i, const std::string& optItem, std::shared_ptr<Config> config, std::shared_ptr<ClientConfig>& entry, std::string& optValue, const std::string& status = "") const;
+    bool updateItem(size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, std::shared_ptr<ClientConfig>& entry, std::string& optValue, const std::string& status = "") const;
 
 public:
     ConfigClientSetup(config_option_t option, const char* xpath, const char* help)
@@ -693,9 +693,9 @@ class ConfigDirectorySetup : public ConfigSetup {
 protected:
     /// \brief Creates an array of ClientConfig objects from a XML nodeset.
     /// \param element starting element of the nodeset.
-    bool createDirectoryTweakListFromNode(const pugi::xml_node& element, std::shared_ptr<DirectoryConfigList>& result);
+    static bool createDirectoryTweakListFromNode(const pugi::xml_node& element, std::shared_ptr<DirectoryConfigList>& result);
 
-    bool updateItem(size_t i, const std::string& optItem, std::shared_ptr<Config> config, std::shared_ptr<DirectoryTweak>& entry, std::string& optValue, const std::string& status = "") const;
+    bool updateItem(size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, std::shared_ptr<DirectoryTweak>& entry, std::string& optValue, const std::string& status = "") const;
 
 public:
     ConfigDirectorySetup(config_option_t option, const char* xpath, const char* help)

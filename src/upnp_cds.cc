@@ -245,7 +245,7 @@ void ContentDirectoryService::doGetSystemUpdateID(const std::unique_ptr<ActionRe
     log_debug("end");
 }
 
-void ContentDirectoryService::doSamsungBookmark(const std::unique_ptr<ActionRequest>& request) const
+void ContentDirectoryService::doSamsungBookmark(const std::unique_ptr<ActionRequest>& request)
 {
     log_warning("Stub method for Samsung extension: X_SetBookmark");
 }

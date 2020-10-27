@@ -311,7 +311,7 @@ inline auto wrap_unique_ptr()
     auto raw_ptr = C();
     return std::unique_ptr<std::remove_pointer_t<decltype(raw_ptr)>, decltype(D)>(raw_ptr, D);
 }
-}
+} // namespace
 
 std::unique_ptr<IOHandler> FfmpegHandler::serveContent(std::shared_ptr<CdsItem> item, int resNum)
 {

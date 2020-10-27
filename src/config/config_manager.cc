@@ -64,7 +64,7 @@ ConfigManager::ConfigManager(fs::path filename,
     fs::path prefix_dir, fs::path magic_file,
     std::string ip, std::string interface, int port,
     bool debug_logging)
-    : filename(filename)
+    : filename(std::move(filename))
     , prefix_dir(std::move(prefix_dir))
     , magic_file(std::move(magic_file))
     , ip(std::move(ip))
@@ -720,7 +720,7 @@ std::shared_ptr<ConfigSetup> ConfigManager::findConfigSetup(config_option_t opti
     throw std::runtime_error(fmt::format("Error in config code: {} tag not found", static_cast<int>(option)));
 }
 
-std::shared_ptr<ConfigSetup> ConfigManager::findConfigSetupByPath(const std::string& key, bool save, const std::shared_ptr<ConfigSetup> parent)
+std::shared_ptr<ConfigSetup> ConfigManager::findConfigSetupByPath(const std::string& key, bool save, const std::shared_ptr<ConfigSetup>& parent)
 {
     auto co = std::find_if(complexOptions.begin(), complexOptions.end(), [&](const auto& s) { return s->getUniquePath() == key; });
 
@@ -1261,7 +1261,7 @@ void ConfigManager::setOrigValue(const std::string& item, int value)
     }
 }
 
-void ConfigManager::dumpOptions()
+void ConfigManager::dumpOptions() const
 {
 #ifdef TOMBDEBUG
     log_debug("Dumping options!");

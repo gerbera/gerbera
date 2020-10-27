@@ -60,7 +60,7 @@ public:
 private:
     static void handleElement(std::ostringstream& buf, const pugi::xml_node& node, const Hints& hints);
     static std::string getAsString(const char* str);
-    static std::string getValue(const std::string& at, const char* text, const Hints& hints);
+    static std::string getValue(const std::string& name, const char* text, const Hints& hints);
     static bool isArray(const pugi::xml_node& node, const Hints& hints, std::string* arrayName);
 };
 

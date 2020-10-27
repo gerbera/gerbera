@@ -75,7 +75,7 @@ public:
     static const char* mapConfigOption(config_option_t option);
 
     static std::shared_ptr<ConfigSetup> findConfigSetup(config_option_t option, bool save = false);
-    static std::shared_ptr<ConfigSetup> findConfigSetupByPath(const std::string& key, bool save = false, const std::shared_ptr<ConfigSetup> parent = nullptr);
+    static std::shared_ptr<ConfigSetup> findConfigSetupByPath(const std::string& key, bool save = false, const std::shared_ptr<ConfigSetup>& parent = nullptr);
 
     void load(const fs::path& userHome);
     void updateConfigFromDatabase(std::shared_ptr<Database> database) override;
@@ -159,7 +159,7 @@ protected:
 
     std::shared_ptr<Config> getSelf();
 
-    void dumpOptions();
+    void dumpOptions() const;
 };
 
 #endif // __CONFIG_MANAGER_H__

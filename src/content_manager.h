@@ -352,12 +352,12 @@ protected:
 
     void _removeObject(int objectID, bool rescanResource, bool all);
 
-    void _rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, int objectId, const std::shared_ptr<GenericTask>& task = nullptr);
+    void _rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, int containerID, const std::shared_ptr<GenericTask>& task = nullptr);
     /* for recursive addition */
     void addRecursive(const fs::path& path, bool followSymlinks, bool hidden, const std::shared_ptr<CMAddFileTask>& task);
-    bool isLink(const fs::path& path, bool allowLinks);
+    static bool isLink(const fs::path& path, bool allowLinks);
     std::shared_ptr<CdsObject> createSingleItem(const fs::path& path, fs::path& rootPath, bool followSymlinks, bool checkDatabase, bool processExisting, const std::shared_ptr<CMAddFileTask>& task);
-    bool updateAttachedResources(const char* obj, const std::string& parentPath, bool all);
+    bool updateAttachedResources(const char* location, const std::string& parentPath, bool all);
     std::string extension2mimetype(std::string extension);
     std::string mimetype2upnpclass(const std::string& mimeType);
 

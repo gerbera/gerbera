@@ -44,7 +44,7 @@ public:
     bool hidden = false;
     bool rescanResource = true;
 
-    void mergeOptions(const std::shared_ptr<Config>& config, const fs::path location);
+    void mergeOptions(const std::shared_ptr<Config>& config, const fs::path& location);
 };
 
 class DirectoryConfigList {
