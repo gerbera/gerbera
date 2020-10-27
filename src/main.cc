@@ -286,9 +286,9 @@ int main(int argc, char** argv, char** envp)
             exit(EXIT_SUCCESS);
         }
 
-        std::optional<int> portnum;
+        std::optional<unsigned short> portnum;
         if (opts.count("port") > 0) {
-            portnum = opts["port"].as<int>();
+            portnum = opts["port"].as<unsigned short>();
         }
 
         std::optional<std::string> ip;
@@ -306,10 +306,10 @@ int main(int argc, char** argv, char** envp)
             configManager = std::make_shared<ConfigManager>(
                 config_file.value_or(""), home.value_or(""), confdir.value_or(""),
                 prefix.value_or(""), magic.value_or(""),
-                ip.value_or(""), interface.value_or(""), portnum.value_or(-1),
+                ip.value_or(""), interface.value_or(""), portnum.value_or(0),
                 debug);
             configManager->load(home.value_or(""));
-            portnum = configManager->getIntOption(CFG_SERVER_PORT);
+            portnum = (unsigned short)configManager->getIntOption(CFG_SERVER_PORT);
         } catch (const ConfigParseException& ce) {
             log_error("Error parsing config file '{}': {}", (*config_file).c_str(), ce.what());
             exit(EXIT_FAILURE);

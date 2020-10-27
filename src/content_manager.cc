@@ -1446,7 +1446,7 @@ void ContentManager::removeObject(int objectID, bool rescanResource, bool async,
         std::ostringstream desc;
         desc << "Removing ";
         // skip root container, start from 1
-        for (int i = 1; i < objectPath->size(); i++)
+        for (size_t i = 1; i < objectPath->size(); i++)
             desc << '/' << objectPath->get(i)->getTitle();
         */
         auto self = shared_from_this();

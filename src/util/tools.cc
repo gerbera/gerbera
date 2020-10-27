@@ -1189,7 +1189,7 @@ int find_local_port(unsigned short range_min, unsigned short range_max)
 {
     int fd;
     int retry_count = 0;
-    int port;
+    unsigned short port;
     struct sockaddr_in server_addr;
     struct hostent* server;
 

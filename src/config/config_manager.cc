@@ -62,7 +62,7 @@ bool ConfigManager::debug_logging = false;
 ConfigManager::ConfigManager(fs::path filename,
     const fs::path& userhome, const fs::path& config_dir,
     fs::path prefix_dir, fs::path magic_file,
-    std::string ip, std::string interface, int port,
+    std::string ip, std::string interface, unsigned short port,
     bool debug_logging)
     : filename(std::move(filename))
     , prefix_dir(std::move(prefix_dir))
@@ -109,7 +109,7 @@ std::shared_ptr<Config> ConfigManager::getSelf()
 std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = {
     std::make_shared<ConfigIntSetup>(CFG_SERVER_PORT,
         "/server/port", "config-server.html#port",
-        0),
+        0, ConfigIntSetup::CheckPortValue),
     std::make_shared<ConfigStringSetup>(CFG_SERVER_IP,
         "/server/ip", "config-server.html#ip",
         ""),
@@ -185,7 +185,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = {
         DEFAULT_MYSQL_HOST),
     std::make_shared<ConfigIntSetup>(CFG_SERVER_STORAGE_MYSQL_PORT,
         "/server/storage/mysql/port", "config-server.html#storage",
-        0),
+        0, ConfigIntSetup::CheckPortValue),
     std::make_shared<ConfigStringSetup>(CFG_SERVER_STORAGE_MYSQL_USERNAME,
         "/server/storage/mysql/username", "config-server.html#storage",
         DEFAULT_MYSQL_USER),
@@ -541,10 +541,10 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = {
         0, 0, ConfigIntSetup::CheckMinValue),
     std::make_shared<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_SAMPFREQ,
         "sample-frequency", "config-transcode.html#profiles",
-        "-1", ConfigIntSetup::CheckProfleNumberValue),
+        "-1", ConfigIntSetup::CheckProfileNumberValue),
     std::make_shared<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_NRCHAN,
         "audio-channels", "config-transcode.html#profiles",
-        "-1", ConfigIntSetup::CheckProfleNumberValue),
+        "-1", ConfigIntSetup::CheckProfileNumberValue),
     std::make_shared<ConfigDictionarySetup>(ATTR_TRANSCODING_MIMETYPE_PROF_MAP,
         "mimetype-profile-mappings", "config-transcode.html#profiles",
         ATTR_TRANSCODING_MIMETYPE_PROF_MAP_TRANSCODE, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_USING),
@@ -1055,7 +1055,7 @@ void ConfigManager::load(const fs::path& userHome)
 #endif
     co = findConfigSetup(CFG_SERVER_PORT);
     // 0 means, that the SDK will any free port itself
-    co->makeOption((port <= 0) ? co->getXmlContent(root) : std::to_string(port), self);
+    co->makeOption((port == 0) ? co->getXmlContent(root) : std::to_string(port), self);
 
     setOption(root, CFG_SERVER_ALIVE_INTERVAL);
     setOption(root, CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST);

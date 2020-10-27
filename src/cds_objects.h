@@ -293,7 +293,7 @@ public:
     }
 
     /// \brief Get number of resource tags
-    int getResourceCount() const { return resources.size(); }
+    size_t getResourceCount() const { return resources.size(); }
 
     /// \brief Query resources
     std::vector<std::shared_ptr<CdsResource>> getResources() const
@@ -326,7 +326,7 @@ public:
     }
 
     /// \brief Insert resource tag at index
-    void insertResource(int index, const std::shared_ptr<CdsResource>& resource)
+    void insertResource(size_t index, const std::shared_ptr<CdsResource>& resource)
     {
         resources.insert(resources.begin() + index, resource);
     }

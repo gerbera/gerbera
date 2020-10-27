@@ -101,12 +101,12 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     auto item = std::static_pointer_cast<CdsItem>(obj);
 
     // determining which resource to serve
-    int res_id = 0;
+    size_t res_id = 0;
     auto res_id_it = params.find(URL_RESOURCE_ID);
     if (res_id_it != params.end() && res_id_it->second != URL_VALUE_TRANSCODE_NO_RES_ID)
         res_id = std::stoi(res_id_it->second);
     else
-        res_id = -1;
+        res_id = SIZE_MAX;
 
     fs::path path = item->getLocation();
     bool is_srt = false;
@@ -283,12 +283,12 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
     }
 
     // determining which resource to serve
-    int res_id = 0;
+    size_t res_id = 0;
     auto res_id_it = params.find(URL_RESOURCE_ID);
     if (res_id_it != params.end() && res_id_it->second != URL_VALUE_TRANSCODE_NO_RES_ID)
         res_id = std::stoi(res_id_it->second);
     else
-        res_id = -1;
+        res_id = SIZE_MAX;
 
     // update item info by running action
     if (IS_CDS_ACTIVE_ITEM(objectType) && (res_id == 0)) { // check - if thumbnails, then no action, just show
@@ -382,10 +382,10 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
     // for transcoded resourecs res_id will always be negative
     auto tr_profile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
     if (!tr_profile.empty()) {
-        if (res_id != -1)
+        if (res_id != SIZE_MAX)
             throw_std_runtime_error("Invalid resource ID given");
     } else {
-        if (res_id == -1)
+        if (res_id == SIZE_MAX)
             throw_std_runtime_error("Invalid resource ID given");
     }
     log_debug("fetching resource id {}", res_id);

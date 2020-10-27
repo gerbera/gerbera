@@ -512,7 +512,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
     // transcoded ones
     int realCount = 0;
     bool hide_original_resource = false;
-    int original_resource = 0;
+    size_t original_resource = 0;
 
     std::unique_ptr<PathBase> urlBase_tr;
 
@@ -632,8 +632,8 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
             urlBase_tr = getPathBase(item, true);
     }
 
-    int resCount = item->getResourceCount();
-    for (int i = 0; i < resCount; i++) {
+    size_t resCount = item->getResourceCount();
+    for (size_t i = 0; i < resCount; i++) {
 
         /// \todo what if the resource has a different mimetype than the item??
         /*        std::string mimeType = item->getMimeType();

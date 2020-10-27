@@ -255,7 +255,7 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
     if (!hasReference || (!obj->getFlag(OBJECT_FLAG_USE_RESOURCE_REF) && !refObj->resourcesEqual(obj))) {
         // encode resources
         std::ostringstream resBuf;
-        for (int i = 0; i < obj->getResourceCount(); i++) {
+        for (size_t i = 0; i < obj->getResourceCount(); i++) {
             if (i > 0)
                 resBuf << RESOURCE_SEP;
             resBuf << obj->getResource(i)->encode();
@@ -1218,7 +1218,7 @@ std::unique_ptr<std::unordered_set<int>> SQLDatabase::getObjects(int parentID, b
 
 std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObjects(const std::unique_ptr<std::unordered_set<int>>& list, bool all)
 {
-    int count = list->size();
+    size_t count = list->size();
     if (count <= 0)
         return nullptr;
 
@@ -1695,9 +1695,9 @@ void SQLDatabase::updateAutoscanList(ScanMode scanmode, std::shared_ptr<Autoscan
            << quote(AutoscanDirectory::mapScanmode(scanmode));
     exec(update);
 
-    int listSize = list->size();
+    size_t listSize = list->size();
     log_debug("updating/adding persistent autoscans (count: {})", listSize);
-    for (int i = 0; i < listSize; i++) {
+    for (size_t i = 0; i < listSize; i++) {
         log_debug("getting ad {} from list..", i);
         std::shared_ptr<AutoscanDirectory> ad = list->get(i);
         if (ad == nullptr)

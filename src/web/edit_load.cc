@@ -59,6 +59,7 @@ void web::edit_load::process()
 
     auto root = xmlDoc->document_element();
     xml2JsonHints->setFieldType("value", "string");
+    xml2JsonHints->setFieldType("title", "string");
 
     auto item = root.append_child("item");
     item.append_attribute("object_id") = objectID;
