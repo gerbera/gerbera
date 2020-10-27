@@ -38,7 +38,7 @@ web::clients::clients(std::shared_ptr<Config> config, std::shared_ptr<Database> 
 {
 }
 
-std::string steady_clock_to_string(std::chrono::steady_clock::time_point t)
+static std::string steady_clock_to_string(std::chrono::steady_clock::time_point t)
 {
     auto systime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()
         + std::chrono::duration_cast<std::chrono::system_clock::duration>(t - std::chrono::steady_clock::now()));

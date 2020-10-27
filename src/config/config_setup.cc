@@ -400,7 +400,7 @@ void ConfigBoolSetup::makeOption(const pugi::xml_node& root, std::shared_ptr<Con
     setOption(config);
 }
 
-bool validateTrueFalse(const std::string& optValue)
+static bool validateTrueFalse(const std::string& optValue)
 {
     return (optValue == "true" || optValue == "false");
 }
