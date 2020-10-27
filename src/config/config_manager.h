@@ -62,7 +62,7 @@ public:
         fs::path prefix_dir, fs::path magic_file,
         std::string ip, std::string interface, int port,
         bool debug_logging);
-    virtual ~ConfigManager();
+    virtual ~ConfigManager() override;
 
     /// \brief Returns the name of the config file that was used to launch the server.
     fs::path getConfigFilename() const override { return filename; }
