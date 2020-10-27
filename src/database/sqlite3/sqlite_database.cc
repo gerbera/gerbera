@@ -111,7 +111,6 @@ PRAGMA foreign_keys = ON;"
 
 Sqlite3Database::Sqlite3Database(std::shared_ptr<Config> config, std::shared_ptr<Timer> timer)
     : SQLDatabase(std::move(config))
-    , startupError("")
     , timer(std::move(timer))
 {
     shutdownFlag = false;
@@ -437,7 +436,6 @@ void Sqlite3Database::storeInternalSetting(const std::string& key, const std::st
 
 /* SLTask */
 SLTask::SLTask()
-    : error("")
 {
     running = true;
     contamination = false;
