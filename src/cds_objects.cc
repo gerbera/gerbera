@@ -139,7 +139,6 @@ std::shared_ptr<CdsObject> CdsObject::createObject(const std::shared_ptr<Databas
 CdsItem::CdsItem(std::shared_ptr<Database> database)
     : CdsObject(std::move(database))
     , mimeType(MIMETYPE_DEFAULT)
-    , serviceID("")
 {
     objectType = OBJECT_TYPE_ITEM;
     upnpClass = "object.item";

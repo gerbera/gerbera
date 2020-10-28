@@ -215,6 +215,7 @@ const char* MetadataHandler::mapContentHandler2String(int ch)
         return "Subtitle";
     case CH_RESOURCE:
         return "Resource";
+    default:
+        return "Unknown";
     }
-    return "Unknown";
 }

@@ -35,8 +35,8 @@
 #include <utility>
 
 #include "content_manager.h"
-#include "server.h"
 #include "database/database.h"
+#include "server.h"
 #include "util/tools.h"
 
 web::remove::remove(std::shared_ptr<Config> config, std::shared_ptr<Database> database,

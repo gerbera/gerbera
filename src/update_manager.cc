@@ -36,8 +36,8 @@
 #include <sys/types.h>
 #include <utility>
 
-#include "server.h"
 #include "database/database.h"
+#include "server.h"
 #include "upnp_cds.h"
 #include "util/tools.h"
 

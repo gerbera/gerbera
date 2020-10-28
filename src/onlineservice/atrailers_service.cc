@@ -39,8 +39,8 @@
 #include "config/config_manager.h"
 #include "config/config_options.h"
 #include "content_manager.h"
-#include "server.h"
 #include "database/database.h"
+#include "server.h"
 #include "url.h"
 #include "util/string_converter.h"
 

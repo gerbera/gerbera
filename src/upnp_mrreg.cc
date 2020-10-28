@@ -34,8 +34,8 @@
 #include <utility>
 
 #include "config/config_manager.h"
-#include "server.h"
 #include "database/database.h"
+#include "server.h"
 #include "upnp_xml.h"
 #include "util/tools.h"
 

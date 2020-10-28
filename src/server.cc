@@ -43,8 +43,8 @@
 
 #include "config/config_manager.h"
 #include "content_manager.h"
-#include "file_request_handler.h"
 #include "database/database.h"
+#include "file_request_handler.h"
 #include "update_manager.h"
 #include "util/task_processor.h"
 #include "util/upnp_clients.h"

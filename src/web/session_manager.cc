@@ -46,7 +46,6 @@ namespace web {
 
 Session::Session(long timeout)
     : uiUpdateIDs(std::make_shared<std::unordered_set<int>>())
-    , sessionID("")
 {
     this->timeout = timeout;
     loggedIn = false;

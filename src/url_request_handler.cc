@@ -36,8 +36,8 @@
 
 #include "config/config_manager.h"
 #include "content_manager.h"
-#include "server.h"
 #include "database/database.h"
+#include "server.h"
 
 #include "cds_objects.h"
 #include "iohandler/buffered_io_handler.h"

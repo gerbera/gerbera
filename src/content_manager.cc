@@ -43,9 +43,9 @@
 
 #include "config/config_manager.h"
 #include "config/directory_tweak.h"
+#include "database/database.h"
 #include "layout/fallback_layout.h"
 #include "metadata/metadata_handler.h"
-#include "database/database.h"
 #include "update_manager.h"
 #include "util/process.h"
 #include "util/string_converter.h"

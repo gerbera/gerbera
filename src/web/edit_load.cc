@@ -35,8 +35,8 @@
 #include <utility>
 
 #include "cds_objects.h"
-#include "metadata/metadata_handler.h"
 #include "database/database.h"
+#include "metadata/metadata_handler.h"
 #include "util/tools.h"
 
 web::edit_load::edit_load(std::shared_ptr<Config> config, std::shared_ptr<Database> database,

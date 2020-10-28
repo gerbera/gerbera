@@ -37,9 +37,9 @@
 
 #include "config/config_manager.h"
 #include "content_manager.h"
+#include "database/database.h"
 #include "js_functions.h"
 #include "runtime.h"
-#include "database/database.h"
 
 #define ONE_TEXTLINE_BYTES 1024
 
