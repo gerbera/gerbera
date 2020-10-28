@@ -109,8 +109,7 @@ static void installSignalHandler()
 {
     _ctx.main_thread_id = pthread_self();
 
-    struct sigaction action;
-    memset(&action, 0, sizeof(action));
+    struct sigaction action = {};
     action.sa_handler = signalHandler;
     action.sa_flags = 0;
     sigfillset(&action.sa_mask);
