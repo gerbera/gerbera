@@ -47,7 +47,7 @@ LibExifHandler::LibExifHandler(std::shared_ptr<Config> config)
 }
 
 /// \brief Sets resolution for a given resource index, item must be a JPEG image
-static void setJpegResolutionResource(const std::shared_ptr<CdsItem>& item, int res_num)
+static void setJpegResolutionResource(const std::shared_ptr<CdsItem>& item, size_t res_num)
 {
     try {
         std::unique_ptr<IOHandler> fio_h = std::make_unique<FileIOHandler>(item->getLocation());

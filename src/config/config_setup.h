@@ -376,11 +376,13 @@ public:
 
     static bool CheckSqlLiteSyncValue(std::string& value);
 
-    static bool CheckProfleNumberValue(std::string& value);
+    static bool CheckProfileNumberValue(std::string& value);
 
     static bool CheckMinValue(int value, int minValue);
 
     static bool CheckImageQualityValue(int value);
+
+    static bool CheckPortValue(int value);
 
     static bool CheckUpnpStringLimitValue(int value);
 };

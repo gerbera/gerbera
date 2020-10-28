@@ -118,10 +118,12 @@ Sqlite3Database::Sqlite3Database(std::shared_ptr<Config> config, std::shared_ptr
     table_quote_begin = '"';
     table_quote_end = '"';
     dirty = false;
+    dbInitDone = false;
 }
 
 void Sqlite3Database::init()
 {
+    dbInitDone = false;
     SQLDatabase::init();
 
     AutoLockU lock(sqliteMutex);
@@ -274,6 +276,7 @@ void Sqlite3Database::init()
         }
 
         dbReady();
+        dbInitDone = true;
     } catch (const std::runtime_error& e) {
         log_error("prematurely shutting down.");
         shutdown();
@@ -308,15 +311,15 @@ std::string Sqlite3Database::getError(const std::string& query, const std::strin
 std::shared_ptr<SQLResult> Sqlite3Database::select(const char* query, int length)
 {
     try {
-        //fprintf(stdout, "%s\n",query);
-        //fflush(stdout);
         auto stask = std::make_shared<SLSelectTask>(query);
         addTask(stask);
         stask->waitForTask();
         return stask->getResult();
     } catch (const std::runtime_error& e) {
-        log_error("prematurely shutting down.");
-        shutdown();
+        if (dbInitDone) {
+            log_error("prematurely shutting down.");
+            shutdown();
+        }
         throw_std_runtime_error(e.what());
     }
 }
@@ -330,8 +333,10 @@ int Sqlite3Database::exec(const char* query, int length, bool getLastInsertId)
         etask->waitForTask();
         return getLastInsertId ? etask->getLastInsertId() : -1;
     } catch (const std::runtime_error& e) {
-        log_error("prematurely shutting down.");
-        shutdown();
+        if (dbInitDone) {
+            log_error("prematurely shutting down.");
+            shutdown();
+        }
         throw_std_runtime_error(e.what());
     }
 }

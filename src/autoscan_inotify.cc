@@ -322,16 +322,17 @@ void AutoscanInotify::monitorNonexisting(const fs::path& path, const std::shared
     recheckNonexistingMonitor(-1, pathAr, adir);
 }
 
-void AutoscanInotify::recheckNonexistingMonitor(int curWd, std::vector<std::string> pathAr, const std::shared_ptr<AutoscanDirectory>& adir)
+void AutoscanInotify::recheckNonexistingMonitor(int curWd, const std::vector<std::string>& pathAr, const std::shared_ptr<AutoscanDirectory>& adir)
 {
     bool first = true;
-    for (int i = pathAr.size(); i >= 0; i--) {
+    for (size_t i = pathAr.size() + 1; i > 0;) {
+        i--;
         std::ostringstream buf;
         if (i == 0)
             buf << DIR_SEPARATOR;
         else {
-            for (int j = 0; j < i; j++) {
-                buf << DIR_SEPARATOR << pathAr[j];
+            for (size_t j = 0; j < i; j++) {
+                buf << DIR_SEPARATOR << pathAr.at(j);
                 //                log_debug("adding: {}", pathAr->get(j)->data);
             }
         }
@@ -470,7 +471,7 @@ void AutoscanInotify::monitorUnmonitorRecursive(const fs::path& startPath, bool 
     closedir(dir);
 }
 
-int AutoscanInotify::monitorDirectory(const fs::path& path, const std::shared_ptr<AutoscanDirectory>& adir, bool startPoint, std::vector<std::string>* pathArray)
+int AutoscanInotify::monitorDirectory(const fs::path& path, const std::shared_ptr<AutoscanDirectory>& adir, bool startPoint, const std::vector<std::string>* pathArray)
 {
     int wd = inotify->addWatch(path, events);
     if (wd < 0) {

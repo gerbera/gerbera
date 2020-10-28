@@ -363,7 +363,7 @@ bool ConfigIntSetup::CheckSqlLiteSyncValue(std::string& value)
     return true;
 }
 
-bool ConfigIntSetup::CheckProfleNumberValue(std::string& value)
+bool ConfigIntSetup::CheckProfileNumberValue(std::string& value)
 {
     auto temp_int = 0;
     if (value == "source" || value == std::to_string(SOURCE))
@@ -392,6 +392,11 @@ bool ConfigIntSetup::CheckImageQualityValue(int value)
 bool ConfigIntSetup::CheckUpnpStringLimitValue(int value)
 {
     return !((value != -1) && (value < 4));
+}
+
+bool ConfigIntSetup::CheckPortValue(int value)
+{
+    return !(value < 0 || value > 65535);
 }
 
 void ConfigBoolSetup::makeOption(const pugi::xml_node& root, std::shared_ptr<Config> config, const std::map<std::string, std::string>* arguments)

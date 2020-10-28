@@ -202,6 +202,7 @@ private:
     bool threadCleanupRequired() const override { return false; }
 
     bool dirty;
+    bool dbInitDone;
 
     friend class SLSelectTask;
     friend class SLExecTask;

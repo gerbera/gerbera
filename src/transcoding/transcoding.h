@@ -221,7 +221,7 @@ public:
     std::shared_ptr<TranscodingProfileMap> get(const std::string& sourceMimeType);
     const std::map<std::string, std::shared_ptr<TranscodingProfileMap>>& getList() { return list; }
     std::shared_ptr<TranscodingProfile> getByName(const std::string& name, bool getAll = false);
-    int size() const { return list.size(); }
+    size_t size() const { return list.size(); }
     void setKey(const std::string& oldKey, const std::string& newKey)
     {
         auto oldValue = list[oldKey];
