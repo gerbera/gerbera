@@ -720,6 +720,11 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
             continue;
         }
 
+        asSetting.recursive = adir->getRecursive();
+        asSetting.followSymlinks = config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS);
+        asSetting.hidden = adir->getHidden();
+        asSetting.mergeOptions(config, location);
+
         if (S_ISREG(statbuf.st_mode)) {
             int objectID = database->findObjectIDByPath(newPath);
             if (objectID > 0) {
@@ -773,6 +778,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
                 // add directory, recursive, async, hidden flag, low priority
                 asSetting.recursive = true;
                 asSetting.rescanResource = false;
+                asSetting.mergeOptions(config, newPath);
                 addFileInternal(newPath, rootpath, asSetting, true, true, thisTaskID, task->isCancellable());
             }
         }
