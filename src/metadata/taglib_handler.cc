@@ -197,26 +197,22 @@ void TagLibHandler::populateGenericTags(const std::shared_ptr<CdsItem>& item, co
     auto res = item->getResource(0);
 
     if (temp > 0) {
-        res->addAttribute(MetadataHandler::getResAttrName(R_BITRATE),
-            std::to_string(temp));
+        res->addAttribute(R_BITRATE, std::to_string(temp));
     }
 
     temp = audioProps->length();
     if (temp > 0) {
-        res->addAttribute(MetadataHandler::getResAttrName(R_DURATION),
-            secondsToHMS(temp));
+        res->addAttribute(R_DURATION, secondsToHMS(temp));
     }
 
     temp = audioProps->sampleRate();
     if (temp > 0) {
-        res->addAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY),
-            std::to_string(temp));
+        res->addAttribute(R_SAMPLEFREQUENCY, std::to_string(temp));
     }
 
     temp = audioProps->channels();
     if (temp > 0) {
-        res->addAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS),
-            std::to_string(temp));
+        res->addAttribute(R_NRAUDIOCHANNELS, std::to_string(temp));
     }
 }
 
@@ -275,11 +271,8 @@ void TagLibHandler::addArtworkResource(const std::shared_ptr<CdsItem>& item, con
 
     if (art_mimetype != MIMETYPE_DEFAULT) {
         auto resource = std::make_shared<CdsResource>(CH_ID3);
-        resource->addAttribute(MetadataHandler::getResAttrName(
-                                   R_PROTOCOLINFO),
-            renderProtocolInfo(art_mimetype));
-        resource->addParameter(RESOURCE_CONTENT_TYPE,
-            ID3_ALBUM_ART);
+        resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(art_mimetype));
+        resource->addParameter(RESOURCE_CONTENT_TYPE, ID3_ALBUM_ART);
         item->addResource(resource);
     }
 }

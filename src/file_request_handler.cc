@@ -199,12 +199,8 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         auto mappings = config->getDictionaryOption(
             CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
         if (getValueOrDefault(mappings, mimeType) == CONTENT_TYPE_PCM) {
-            std::string freq = item->getResource(0)
-                                   ->getAttribute(MetadataHandler::getResAttrName(
-                                       R_SAMPLEFREQUENCY));
-            std::string nrch = item->getResource(0)
-                                   ->getAttribute(MetadataHandler::getResAttrName(
-                                       R_NRAUDIOCHANNELS));
+            std::string freq = item->getResource(0)->getAttribute(R_SAMPLEFREQUENCY);
+            std::string nrch = item->getResource(0)->getAttribute(R_NRAUDIOCHANNELS);
             if (!freq.empty())
                 mimeType = mimeType + ";rate=" + freq;
             if (!nrch.empty())

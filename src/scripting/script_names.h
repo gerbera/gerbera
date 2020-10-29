@@ -30,6 +30,19 @@
 
 #include "metadata/metadata_handler.h"
 
+constexpr std::array<std::pair<resource_attributes_t, const char*>, 10> res_names = { {
+    { R_SIZE, "R_SIZE" },
+    { R_DURATION, "R_DURATION" },
+    { R_BITRATE, "R_BITRATE" },
+    { R_SAMPLEFREQUENCY, "R_SAMPLEFREQUENCY" },
+    { R_NRAUDIOCHANNELS, "R_NRAUDIOCHANNELS" },
+    { R_RESOLUTION, "R_RESOLUTION" },
+    { R_COLORDEPTH, "R_COLORDEPTH" },
+    { R_PROTOCOLINFO, "R_PROTOCOLINFO" },
+    { R_RESOURCE_FILE, "R_RESOURCE_FILE" },
+    { R_TYPE, "R_TYPE" },
+} };
+
 constexpr std::array<std::pair<metadata_fields_t, const char*>, 21> mt_names = { {
     { M_TITLE, "M_TITLE" },
     { M_ARTIST, "M_ARTIST" },

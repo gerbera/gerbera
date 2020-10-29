@@ -163,8 +163,7 @@ std::shared_ptr<CdsObject> SopCastContentHandler::getObject(const std::string& g
         mt = "application/sopcast-stream";
     }
 
-    resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
-        renderProtocolInfo(mt, SOPCAST_PROTOCOL));
+    resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(mt, SOPCAST_PROTOCOL));
     item->setMimeType(mt);
 
     auto tmp_el = channel.child("sop_address");

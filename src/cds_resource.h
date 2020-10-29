@@ -37,6 +37,7 @@
 #include <string>
 
 #include "common.h"
+#include "metadata/metadata_handler.h"
 
 /// \brief name for external urls that can appear in object resources (i.e.
 /// a YouTube thumbnail)
@@ -73,12 +74,12 @@ public:
     ///
     /// \param name attribute name
     /// \param value attribute value
-    void addAttribute(const std::string& name, std::string value);
+    void addAttribute(resource_attributes_t res, std::string value);
 
     /// \brief Removes a resource attribute.
     ///
     /// \param name attribute name
-    void removeAttribute(const std::string& name);
+    void removeAttribute(resource_attributes_t res);
 
     /// \brief Merge existing attributes with new ones
     void mergeAttributes(const std::map<std::string, std::string>& additional);
@@ -105,7 +106,7 @@ public:
     std::map<std::string, std::string> getAttributes() const;
     std::map<std::string, std::string> getParameters() const;
     std::map<std::string, std::string> getOptions() const;
-    std::string getAttribute(const std::string& name) const;
+    std::string getAttribute(resource_attributes_t res) const;
     std::string getParameter(const std::string& name) const;
     std::string getOption(const std::string& name) const;
 

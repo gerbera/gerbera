@@ -105,7 +105,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
         item->setTitle(temp);
 
     item->setMimeType(trailer_mimetype);
-    resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(trailer_mimetype));
+    resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(trailer_mimetype));
 
     item->setAuxData(ONLINE_SERVICE_AUX_ID, std::to_string(OS_ATrailers));
 

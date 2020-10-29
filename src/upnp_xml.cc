@@ -484,7 +484,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
 
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
     if (config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED) && (startswith(item->getMimeType(), "video") || item->getFlag(OBJECT_FLAG_OGG_THEORA))) {
-        std::string videoresolution = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_RESOLUTION));
+        std::string videoresolution = item->getResource(0)->getAttribute(R_RESOLUTION);
         int x;
         int y;
 
@@ -494,14 +494,13 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
 
             auto ffres = std::make_shared<CdsResource>(CH_FFTH);
             ffres->addParameter(RESOURCE_HANDLER, std::to_string(CH_FFTH));
-            ffres->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
-                renderProtocolInfo(thumb_mimetype));
+            ffres->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(thumb_mimetype));
             ffres->addOption(RESOURCE_CONTENT_TYPE, THUMBNAIL);
 
             y = config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE) * y / x;
             x = config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE);
             std::string resolution = std::to_string(x) + "x" + std::to_string(y);
-            ffres->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), resolution);
+            ffres->addAttribute(R_RESOLUTION, resolution);
             item->addResource(ffres);
             log_debug("Adding resource for video thumbnail");
         }
@@ -580,38 +579,36 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
             if (!tp->isThumbnail()) {
                 // duration should be the same for transcoded media, so we can
                 // take the value from the original resource
-                std::string duration = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_DURATION));
+                std::string duration = item->getResource(0)->getAttribute(R_DURATION);
                 if (!duration.empty())
-                    t_res->addAttribute(MetadataHandler::getResAttrName(R_DURATION),
-                        duration);
+                    t_res->addAttribute(R_DURATION, duration);
 
                 int freq = tp->getSampleFreq();
                 if (freq == SOURCE) {
-                    std::string frequency = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY));
+                    std::string frequency = item->getResource(0)->getAttribute(R_SAMPLEFREQUENCY);
                     if (!frequency.empty()) {
-                        t_res->addAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY), frequency);
+                        t_res->addAttribute(R_SAMPLEFREQUENCY, frequency);
                         targetMimeType.append(";rate=").append(frequency);
                     }
                 } else if (freq != OFF) {
-                    t_res->addAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY), std::to_string(freq));
+                    t_res->addAttribute(R_SAMPLEFREQUENCY, std::to_string(freq));
                     targetMimeType.append(";rate=").append(std::to_string(freq));
                 }
 
                 int chan = tp->getNumChannels();
                 if (chan == SOURCE) {
-                    std::string nchannels = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS));
+                    std::string nchannels = item->getResource(0)->getAttribute(R_NRAUDIOCHANNELS);
                     if (!nchannels.empty()) {
-                        t_res->addAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS), nchannels);
+                        t_res->addAttribute(R_NRAUDIOCHANNELS, nchannels);
                         targetMimeType.append(";channels=").append(nchannels);
                     }
                 } else if (chan != OFF) {
-                    t_res->addAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS), std::to_string(chan));
+                    t_res->addAttribute(R_NRAUDIOCHANNELS, std::to_string(chan));
                     targetMimeType.append(";channels=").append(std::to_string(chan));
                 }
             }
 
-            t_res->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
-                renderProtocolInfo(targetMimeType));
+            t_res->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(targetMimeType));
 
             if (tp->isThumbnail())
                 t_res->addOption(RESOURCE_CONTENT_TYPE, EXIF_THUMBNAIL);
@@ -726,7 +723,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
                 if (rct == VIDEO_SUB) {
                     auto vs = parent->append_child("sec:CaptionInfoEx");
                     vs.append_child(pugi::node_pcdata).set_value((virtualURL + url).c_str());
-                    vs.append_attribute("sec:type") = res->getAttribute("type").c_str();
+                    vs.append_attribute("sec:type") = res->getAttribute(R_TYPE).c_str();
                     continue;
                 }
             }

@@ -166,7 +166,7 @@ static void addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item, AVForm
     if ((hours + mins + secs) > 0) {
         auto duration = fmt::format("{:02}:{:02}:{:02}.{:01}", hours, mins, secs, (10 * us) / AV_TIME_BASE);
         log_debug("Added duration: {}", duration);
-        item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_DURATION), std::move(duration));
+        item->getResource(0)->addAttribute(R_DURATION, std::move(duration));
     }
 
     // bitrate
@@ -174,7 +174,7 @@ static void addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item, AVForm
         // ffmpeg's bit_rate is in bits/sec, upnp wants it in bytes/sec
         // See http://www.upnp.org/schemas/av/didl-lite-v3.xsd
         log_debug("Added overall bitrate: {} kb/s", pFormatCtx->bit_rate / 8);
-        item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_BITRATE), std::to_string(pFormatCtx->bit_rate / 8));
+        item->getResource(0)->addAttribute(R_BITRATE, std::to_string(pFormatCtx->bit_rate / 8));
     }
 
     // video resolution, audio sampling rate, nr of audio channels
@@ -202,7 +202,7 @@ static void addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item, AVForm
                 auto resolution = fmt::format("{}x{}", as_codecpar(st)->width, as_codecpar(st)->height);
 
                 log_debug("Added resolution: {} pixel", resolution);
-                item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), std::move(resolution));
+                item->getResource(0)->addAttribute(R_RESOLUTION, std::move(resolution));
                 videoset = true;
             }
         }
@@ -211,13 +211,13 @@ static void addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item, AVForm
             if (as_codecpar(st)->sample_rate > 0) {
                 samplefreq = as_codecpar(st)->sample_rate;
                 log_debug("Added sample frequency: {} Hz", samplefreq);
-                item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY), std::to_string(samplefreq));
+                item->getResource(0)->addAttribute(R_SAMPLEFREQUENCY, std::to_string(samplefreq));
                 audioset = true;
 
                 audioch = as_codecpar(st)->channels;
                 if (audioch > 0) {
                     log_debug("Added number of audio channels: {}", audioch);
-                    item->getResource(0)->addAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS), std::to_string(audioch));
+                    item->getResource(0)->addAttribute(R_NRAUDIOCHANNELS, std::to_string(audioch));
                 }
             }
         }

@@ -109,8 +109,7 @@ std::shared_ptr<CdsObject> web::addObject::addActiveItem(int parentID)
     //    auto resource = std::make_shared<CdsResource>(CH_DEFAULT);
 
     //    auto resource = item->getResource(0); // added by m-handler
-    //    resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
-    //                           renderProtocolInfo(tmp));
+    //    resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(tmp));
     //    item->addResource(resource);
 
     return item;
@@ -146,8 +145,7 @@ std::shared_ptr<CdsObject> web::addObject::addUrl(int parentID, std::shared_ptr<
         protocolInfo = renderProtocolInfo(tmp);
 
     auto resource = std::make_shared<CdsResource>(CH_DEFAULT);
-    resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO),
-        protocolInfo);
+    resource->addAttribute(R_PROTOCOLINFO, protocolInfo);
     item->addResource(resource);
 
     return item;

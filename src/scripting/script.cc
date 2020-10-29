@@ -199,9 +199,11 @@ Script::Script(const std::shared_ptr<Config>& config,
             duk_put_global_string(ctx, sym->second);
     }
 
-    for (const auto& [sym, upnp] : res_keys) {
-        duk_push_string(ctx, upnp);
-        duk_put_global_string(ctx, sym);
+    for (const auto& entry : res_keys) {
+        duk_push_string(ctx, entry.second);
+        auto sym = std::find_if(res_names.begin(), res_names.end(), [=](const auto& n) { return n.first == entry.first; });
+        if (sym != res_names.end())
+            duk_put_global_string(ctx, sym->second);
     }
 
     for (const auto& [field, sym] : upnp_classes)  {
@@ -479,9 +481,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
 
             if (item->getResourceCount() == 0) {
                 auto resource = std::make_shared<CdsResource>(CH_DEFAULT);
-                resource->addAttribute(MetadataHandler::getResAttrName(
-                                           R_PROTOCOLINFO),
-                    protocolInfo);
+                resource->addAttribute(R_PROTOCOLINFO, protocolInfo);
 
                 item->addResource(resource);
             }
