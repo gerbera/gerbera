@@ -898,16 +898,16 @@ void ContentManager::updateObject(int objectID, const std::map<std::string, std:
         if (!mimetype.empty() && !protocol.empty()) {
             cloned_item->setMimeType(mimetype);
             auto resource = cloned_item->getResource(0);
-            resource->addAttribute("protocolInfo", renderProtocolInfo(mimetype, protocol));
+            resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(mimetype, protocol));
         } else if (mimetype.empty() && !protocol.empty()) {
             auto resource = cloned_item->getResource(0);
-            resource->addAttribute("protocolInfo", renderProtocolInfo(cloned_item->getMimeType(), protocol));
+            resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(cloned_item->getMimeType(), protocol));
         } else if (!mimetype.empty()) {
             cloned_item->setMimeType(mimetype);
             auto resource = cloned_item->getResource(0);
-            std::vector<std::string> parts = splitString(resource->getAttribute("protocolInfo"), ':');
+            std::vector<std::string> parts = splitString(resource->getAttribute(R_PROTOCOLINFO), ':');
             protocol = parts[0];
-            resource->addAttribute("protocolInfo", renderProtocolInfo(mimetype, protocol));
+            resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(mimetype, protocol));
         }
 
         if (!description.empty()) {

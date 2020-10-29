@@ -76,8 +76,8 @@ void MetadataHandler::setMetadata(const std::shared_ptr<Config>& config, const s
     std::string mimetype = item->getMimeType();
 
     auto resource = std::make_shared<CdsResource>(CH_DEFAULT);
-    resource->addAttribute(getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(mimetype));
-    resource->addAttribute(getResAttrName(R_SIZE), std::to_string(filesize));
+    resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(mimetype));
+    resource->addAttribute(R_SIZE, std::to_string(filesize));
 
     item->addResource(resource);
 
@@ -142,7 +142,7 @@ std::string MetadataHandler::getMetaFieldName(metadata_fields_t field)
 
 std::string MetadataHandler::getResAttrName(resource_attributes_t attr)
 {
-    return mt_keys.at(attr).second;
+    return res_keys.at(attr).second;
 }
 
 std::unique_ptr<MetadataHandler> MetadataHandler::createHandler(const std::shared_ptr<Config>& config, int handlerType)

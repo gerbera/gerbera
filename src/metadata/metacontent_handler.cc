@@ -34,8 +34,6 @@
 #include "iohandler/file_io_handler.h"
 #include "util/tools.h"
 
-#define RESOURCE_FILE "resFile"
-
 MetacontentHandler::MetacontentHandler(std::shared_ptr<Config> config)
     : MetadataHandler(std::move(config))
 {
@@ -124,8 +122,8 @@ void FanArtHandler::fillMetadata(std::shared_ptr<CdsItem> item)
 
     if (!path.empty()) {
         auto resource = std::make_shared<CdsResource>(CH_FANART);
-        resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo("jpg"));
-        resource->addAttribute(RESOURCE_FILE, path.c_str());
+        resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo("jpg"));
+        resource->addAttribute(R_RESOURCE_FILE, path.c_str());
         resource->addParameter(RESOURCE_CONTENT_TYPE, ID3_ALBUM_ART);
         item->addResource(resource);
     }
@@ -133,7 +131,7 @@ void FanArtHandler::fillMetadata(std::shared_ptr<CdsItem> item)
 
 std::unique_ptr<IOHandler> FanArtHandler::serveContent(std::shared_ptr<CdsItem> item, int resNum)
 {
-    fs::path path = item->getResource(resNum)->getAttribute(RESOURCE_FILE);
+    fs::path path = item->getResource(resNum)->getAttribute(R_RESOURCE_FILE);
     if (path.empty()) {
         auto tweak = config->getDirectoryTweakOption(CFG_IMPORT_DIRECTORIES_LIST)->get(item->getLocation());
         path = getContentPath(tweak == nullptr && !tweak->hasFanArtFile() ? names : std::vector<std::string>{ tweak->getFanArtFile() }, item, tweak != nullptr && tweak->hasCaseSensitive() ? tweak->getCaseSensitive() : caseSensitive);
@@ -174,8 +172,8 @@ void SubtitleHandler::fillMetadata(std::shared_ptr<CdsItem> item)
     if (!path.empty()) {
         auto resource = std::make_shared<CdsResource>(CH_SUBTITLE);
         std::string type = path.extension().string().substr(1);
-        resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo(type));
-        resource->addAttribute(RESOURCE_FILE, path.c_str());
+        resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(type));
+        resource->addAttribute(R_RESOURCE_FILE, path.c_str());
         resource->addParameter(RESOURCE_CONTENT_TYPE, VIDEO_SUB);
         resource->addParameter("type", type);
         item->addResource(resource);
@@ -184,7 +182,7 @@ void SubtitleHandler::fillMetadata(std::shared_ptr<CdsItem> item)
 
 std::unique_ptr<IOHandler> SubtitleHandler::serveContent(std::shared_ptr<CdsItem> item, int resNum)
 {
-    fs::path path = item->getResource(resNum)->getAttribute(RESOURCE_FILE);
+    fs::path path = item->getResource(resNum)->getAttribute(R_RESOURCE_FILE);
     if (path.empty()) {
         auto tweak = config->getDirectoryTweakOption(CFG_IMPORT_DIRECTORIES_LIST)->get(item->getLocation());
         path = getContentPath(tweak == nullptr || !tweak->hasSubTitleFile() ? names : std::vector<std::string>{ tweak->getSubTitleFile() }, item, tweak != nullptr && tweak->hasCaseSensitive() ? tweak->getCaseSensitive() : caseSensitive);
@@ -226,8 +224,8 @@ void ResourceHandler::fillMetadata(std::shared_ptr<CdsItem> item)
     if (!path.empty()) {
         if (toLower(path.c_str()) == toLower(item->getLocation().c_str())) {
             auto resource = std::make_shared<CdsResource>(CH_RESOURCE);
-            resource->addAttribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO), renderProtocolInfo("res"));
-            resource->addAttribute(RESOURCE_FILE, path.c_str());
+            resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo("res"));
+            resource->addAttribute(R_RESOURCE_FILE, path.c_str());
             item->addResource(resource);
         }
     }
@@ -235,7 +233,7 @@ void ResourceHandler::fillMetadata(std::shared_ptr<CdsItem> item)
 
 std::unique_ptr<IOHandler> ResourceHandler::serveContent(std::shared_ptr<CdsItem> item, int resNum)
 {
-    fs::path path = item->getResource(resNum)->getAttribute(RESOURCE_FILE);
+    fs::path path = item->getResource(resNum)->getAttribute(R_RESOURCE_FILE);
     if (path.empty()) {
         auto tweak = config->getDirectoryTweakOption(CFG_IMPORT_DIRECTORIES_LIST)->get(item->getLocation());
         path = getContentPath(tweak == nullptr || !tweak->hasResourceFile() ? names : std::vector<std::string>{ tweak->getResourceFile() }, item, tweak != nullptr && tweak->hasCaseSensitive() ? tweak->getCaseSensitive() : caseSensitive);

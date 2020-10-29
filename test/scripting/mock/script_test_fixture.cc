@@ -119,9 +119,11 @@ void ScriptTestFixture::addGlobalFunctions(duk_context* ctx, const duk_function_
             duk_put_global_string(ctx, sym->second);
     }
 
-    for (const auto& [sym, upnp] : res_keys) {
-        duk_push_string(ctx, upnp);
-        duk_put_global_string(ctx, sym);
+    for (const auto& entry : res_keys) {
+        duk_push_string(ctx, entry.second);
+        auto sym = std::find_if(res_names.begin(), res_names.end(), [=](const auto& n) { return n.first == entry.first; });
+        if (sym != res_names.end())
+            duk_put_global_string(ctx, sym->second);
     }
 
     for (const auto& [field, sym] : ot_names)  {

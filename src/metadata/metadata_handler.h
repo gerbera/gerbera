@@ -113,7 +113,7 @@ typedef enum {
     M_MAX
 } metadata_fields_t;
 
-constexpr std::array<std::pair<metadata_fields_t, const char*>, 21> mt_keys = { {
+constexpr std::array<std::pair<metadata_fields_t, const char*>, M_MAX> mt_keys = { {
     { M_TITLE, "dc:title" },
     { M_ARTIST, "upnp:artist" },
     { M_ALBUM, "upnp:album" },
@@ -148,18 +148,22 @@ typedef enum {
     R_RESOLUTION,
     R_COLORDEPTH,
     R_PROTOCOLINFO,
+    R_RESOURCE_FILE,
+    R_TYPE,
     R_MAX
 } resource_attributes_t;
 
-constexpr std::array<std::pair<const char*, const char*>, 8> res_keys = { {
-    { "R_SIZE", "size" },
-    { "R_DURATION", "duration" },
-    { "R_BITRATE", "bitrate" },
-    { "R_SAMPLEFREQUENCY", "sampleFrequency" },
-    { "R_NRAUDIOCHANNELS", "nrAudioChannels" },
-    { "R_RESOLUTION", "resolution" },
-    { "R_COLORDEPTH", "colorDepth" },
-    { "R_PROTOCOLINFO", "protocolInfo" },
+constexpr std::array<std::pair<resource_attributes_t, const char*>, R_MAX> res_keys = { {
+    { R_SIZE, "size" },
+    { R_DURATION, "duration" },
+    { R_BITRATE, "bitrate" },
+    { R_SAMPLEFREQUENCY, "sampleFrequency" },
+    { R_NRAUDIOCHANNELS, "nrAudioChannels" },
+    { R_RESOLUTION, "resolution" },
+    { R_COLORDEPTH, "colorDepth" },
+    { R_PROTOCOLINFO, "protocolInfo" },
+    { R_RESOURCE_FILE, "resFile" },
+    { R_TYPE, "type" },
 } };
 
 /// \brief This class is responsible for providing access to metadata information

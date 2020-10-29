@@ -154,7 +154,7 @@ void web::edit_load::process()
 
         if (IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
             auto protocol = item.append_child("protocol");
-            protocol.append_attribute("value") = getProtocol(objItem->getResource(0)->getAttribute("protocolInfo")).c_str();
+            protocol.append_attribute("value") = getProtocol(objItem->getResource(0)->getAttribute(R_PROTOCOLINFO)).c_str();
             protocol.append_attribute("editable") = true;
         } else if (IS_CDS_ACTIVE_ITEM(objectType)) {
             auto objActiveItem = std::static_pointer_cast<CdsActiveItem>(objItem);
