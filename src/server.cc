@@ -115,7 +115,7 @@ void Server::run()
     if (!ip.empty() && iface.empty())
         throw_std_runtime_error("Could not find ip: " + ip);
 
-    unsigned short port = (unsigned short)(config->getIntOption(CFG_SERVER_PORT));
+    auto port = uint16_t(config->getIntOption(CFG_SERVER_PORT));
 
     log_info("Initialising libupnp with interface: '{}', port: {}", iface.c_str(), port);
     const char* IfName = iface.empty() ? nullptr : iface.c_str();
