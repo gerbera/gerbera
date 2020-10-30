@@ -62,7 +62,7 @@ bool ConfigManager::debug_logging = false;
 ConfigManager::ConfigManager(fs::path filename,
     const fs::path& userhome, const fs::path& config_dir,
     fs::path prefix_dir, fs::path magic_file,
-    std::string ip, std::string interface, unsigned short port,
+    std::string ip, std::string interface, in_port_t port,
     bool debug_logging)
     : filename(std::move(filename))
     , prefix_dir(std::move(prefix_dir))

@@ -150,7 +150,7 @@ int main(int argc, char** argv, char** envp)
     options.add_options() //
         ("D,debug", "Enable debugging", cxxopts::value<bool>()->default_value("false")) //
         ("e,interface", "Interface to bind with", cxxopts::value<std::string>()) //
-        ("p,port", "Port to bind with, must be >=49152", cxxopts::value<int>()) //
+        ("p,port", "Port to bind with, must be >=49152", cxxopts::value<in_port_t>()) //
         ("i,ip", "IP to bind with", cxxopts::value<std::string>()) //
         ("c,config", "Path to config file", cxxopts::value<std::string>()) //
         ("m,home", "Search this directory for a .gerbera folder containing a config file", cxxopts::value<std::string>()) //
@@ -285,9 +285,9 @@ int main(int argc, char** argv, char** envp)
             exit(EXIT_SUCCESS);
         }
 
-        std::optional<unsigned short> portnum;
+        std::optional<in_port_t> portnum;
         if (opts.count("port") > 0) {
-            portnum = opts["port"].as<unsigned short>();
+            portnum = opts["port"].as<in_port_t>();
         }
 
         std::optional<std::string> ip;
@@ -308,7 +308,7 @@ int main(int argc, char** argv, char** envp)
                 ip.value_or(""), interface.value_or(""), portnum.value_or(0),
                 debug);
             configManager->load(home.value_or(""));
-            portnum = (unsigned short)configManager->getIntOption(CFG_SERVER_PORT);
+            portnum = in_port_t(configManager->getIntOption(CFG_SERVER_PORT));
         } catch (const ConfigParseException& ce) {
             log_error("Error parsing config file '{}': {}", (*config_file).c_str(), ce.what());
             exit(EXIT_FAILURE);

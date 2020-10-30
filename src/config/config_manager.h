@@ -36,6 +36,7 @@
 #include <filesystem>
 #include <map>
 #include <memory>
+#include <netinet/in.h>
 #include <pugixml.hpp>
 namespace fs = std::filesystem;
 
@@ -60,7 +61,7 @@ public:
     ConfigManager(fs::path filename,
         const fs::path& userhome, const fs::path& config_dir,
         fs::path prefix_dir, fs::path magic_file,
-        std::string ip, std::string interface, unsigned short port,
+        std::string ip, std::string interface, in_port_t port,
         bool debug_logging);
     virtual ~ConfigManager() override;
 
@@ -147,7 +148,7 @@ protected:
     fs::path magic_file;
     std::string ip;
     std::string interface;
-    unsigned short port;
+    in_port_t port;
     static bool debug_logging;
     std::map<std::string, std::string> origValues;
 
