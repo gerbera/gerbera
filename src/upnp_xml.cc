@@ -333,17 +333,14 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription()
             const char* controlURL;
             const char* eventSubURL;
         };
-        std::vector<ServiceInfo> services;
-
-        // cm
-        services.push_back({ DESC_CM_SERVICE_TYPE, DESC_CM_SERVICE_ID,
-            DESC_CM_SCPD_URL, DESC_CM_CONTROL_URL, DESC_CM_EVENT_URL });
-        // cds
-        services.push_back({ DESC_CDS_SERVICE_TYPE, DESC_CDS_SERVICE_ID,
-            DESC_CDS_SCPD_URL, DESC_CDS_CONTROL_URL, DESC_CDS_EVENT_URL });
-        // media receiver registrar service for the Xbox 360
-        services.push_back({ DESC_MRREG_SERVICE_TYPE, DESC_MRREG_SERVICE_ID,
-            DESC_MRREG_SCPD_URL, DESC_MRREG_CONTROL_URL, DESC_MRREG_EVENT_URL });
+        constexpr std::array<ServiceInfo, 3> services { {
+            // cm
+            { DESC_CM_SERVICE_TYPE, DESC_CM_SERVICE_ID, DESC_CM_SCPD_URL, DESC_CM_CONTROL_URL, DESC_CM_EVENT_URL },
+            // cds
+            { DESC_CDS_SERVICE_TYPE, DESC_CDS_SERVICE_ID, DESC_CDS_SCPD_URL, DESC_CDS_CONTROL_URL, DESC_CDS_EVENT_URL },
+            // media receiver registrar service for the Xbox 360
+            { DESC_MRREG_SERVICE_TYPE, DESC_MRREG_SERVICE_ID, DESC_MRREG_SCPD_URL, DESC_MRREG_CONTROL_URL, DESC_MRREG_EVENT_URL },
+        } };
 
         for (auto const& s : services) {
             auto service = serviceList.append_child("service");
