@@ -297,17 +297,17 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription()
     {
         auto iconList = device.append_child("iconList");
 
-        const std::vector<std::pair<const char*, const char*>> iconDims {
+        constexpr std::array<std::pair<const char*, const char*>, 3> iconDims { {
             { "120", "24" },
             { "48", "24" },
             { "32", "8" },
-        };
+        } };
 
-        const std::vector<std::pair<const char*, const char*>> iconTypes {
+        constexpr std::array<std::pair<const char*, const char*>, 3> iconTypes { {
             { DESC_ICON_PNG_MIMETYPE, ".png" },
             { DESC_ICON_BMP_MIMETYPE, ".bmp" },
             { DESC_ICON_JPG_MIMETYPE, ".jpg" },
-        };
+        } };
 
         for (const auto& [dim, depth] : iconDims) {
             for (const auto& [mimetype, ext] : iconTypes) {
