@@ -74,29 +74,23 @@ void web::configLoad::createItem(pugi::xml_node& item, const std::string& name, 
     item.append_attribute("source") = std::find_if(dbEntries.begin(), dbEntries.end(), [&](const auto& s) { return s.item == name; }) != dbEntries.end() ? "database" : "config.xml";
 }
 
-void web::configLoad::setValue(pugi::xml_node& item, bool value)
+template <typename T>
+void web::configLoad::setValue(pugi::xml_node& item, const T& value)
 {
+    static_assert(fmt::has_formatter<T, fmt::format_context>::value, "T must be formattable");
     item.append_attribute("value") = fmt::format("{}", value).c_str();
 }
 
+template <>
 void web::configLoad::setValue(pugi::xml_node& item, const std::string& value)
 {
     item.append_attribute("value") = value.c_str();
 }
 
-void web::configLoad::setValue(pugi::xml_node& item, int value)
+template <>
+void web::configLoad::setValue(pugi::xml_node& item, const fs::path& value)
 {
-    item.append_attribute("value") = fmt::format("{}", value).c_str();
-}
-
-void web::configLoad::setValue(pugi::xml_node& item, unsigned int value)
-{
-    item.append_attribute("value") = fmt::format("{}", value).c_str();
-}
-
-void web::configLoad::setValue(pugi::xml_node& item, size_t value)
-{
-    item.append_attribute("value") = fmt::format("{}", value).c_str();
+    item.append_attribute("value") = value.c_str();
 }
 
 void web::configLoad::process()

@@ -198,11 +198,8 @@ protected:
     std::vector<ConfigValue> dbEntries;
     std::map<std::string, pugi::xml_node*> allItems;
     void createItem(pugi::xml_node& item, const std::string& name, config_option_t id, config_option_t aid);
-    static void setValue(pugi::xml_node& item, bool value);
-    static void setValue(pugi::xml_node& item, const std::string& value);
-    static void setValue(pugi::xml_node& item, int value);
-    static void setValue(pugi::xml_node& item, unsigned int value);
-    static void setValue(pugi::xml_node& item, size_t value);
+    template <typename T>
+    static void setValue(pugi::xml_node& item, const T& value);
 
     static void addTypeMeta(pugi::xml_node& meta, const std::shared_ptr<ConfigSetup>& cs);
 
