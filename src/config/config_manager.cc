@@ -206,7 +206,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = {
     std::make_shared<ConfigStringSetup>(CFG_SERVER_STORAGE_SQLITE,
         "/server/storage/sqlite3", "config-server.html#storage"),
     std::make_shared<ConfigStringSetup>(CFG_SERVER_STORAGE_DRIVER,
-         "/server/storage/driver", "config-server.html#storage"),
+        "/server/storage/driver", "config-server.html#storage"),
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_STORAGE_SQLITE_ENABLED,
         "/server/storage/sqlite3/attribute::enabled", "config-server.html#storage",
         DEFAULT_SQLITE_ENABLED),
@@ -249,7 +249,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = {
         ATTR_SERVER_UI_ACCOUNT_LIST_ACCOUNT, ATTR_SERVER_UI_ACCOUNT_LIST_USER, ATTR_SERVER_UI_ACCOUNT_LIST_PASSWORD),
     std::make_shared<ConfigIntSetup>(CFG_SERVER_UI_SESSION_TIMEOUT,
         "/server/ui/accounts/attribute::session-timeout", "config-server.html#ui",
-         DEFAULT_SESSION_TIMEOUT, 1, ConfigIntSetup::CheckMinValue),
+        DEFAULT_SESSION_TIMEOUT, 1, ConfigIntSetup::CheckMinValue),
     std::make_shared<ConfigIntSetup>(CFG_SERVER_UI_DEFAULT_ITEMS_PER_PAGE,
         "/server/ui/items-per-page/attribute::default", "config-server.html#ui",
         DEFAULT_ITEMS_PER_PAGE_2, 1, ConfigIntSetup::CheckMinValue),
@@ -391,7 +391,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = {
         DEFAULT_MARK_PLAYED_ITEMS_STRING_MODE, ConfigBoolSetup::CheckMarkPlayedValue),
     std::make_shared<ConfigStringSetup>(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING,
         "/server/extended-runtime-options/mark-played-items/string", "config-extended.html#extended-runtime-options",
-         false, DEFAULT_MARK_PLAYED_ITEMS_STRING, true),
+        false, DEFAULT_MARK_PLAYED_ITEMS_STRING, true),
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES,
         "/server/extended-runtime-options/mark-played-items/attribute::suppress-cds-updates", "config-extended.html#extended-runtime-options",
         DEFAULT_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES),
@@ -523,7 +523,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = {
         "thumbnail", "config-transcode.html#profiles"),
     std::make_shared<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_FIRST,
         "first-resource", "config-transcode.html#profiles"),
-    std::make_shared<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_USECHUNKEDENC, 
+    std::make_shared<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_USECHUNKEDENC,
         "use-chunked-encoding", "config-transcode.html#profiles"),
     std::make_shared<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_ACCOGG,
         "accept-ogg-theora", "config-transcode.html#profiles"),
@@ -656,19 +656,19 @@ std::map<config_option_t, std::vector<config_option_t>> ConfigManager::parentOpt
     { ATTR_DIRECTORIES_TWEAK_CASE_SENSITIVE, { CFG_IMPORT_DIRECTORIES_LIST } },
     { ATTR_DIRECTORIES_TWEAK_FOLLOW_SYMLINKS, { CFG_IMPORT_DIRECTORIES_LIST } },
 
-    { ATTR_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE, {  } },
+    { ATTR_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE, {} },
 
     { ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_MIMETYPE, { CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST } },
     { ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_TREAT, { CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST } },
     { ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_AS, { CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST } },
     { ATTR_IMPORT_MAPPINGS_MIMETYPE_FROM, { CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST, CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST, CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST } },
-    { ATTR_IMPORT_MAPPINGS_MIMETYPE_TO, { CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST,CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST, CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST } },
+    { ATTR_IMPORT_MAPPINGS_MIMETYPE_TO, { CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST, CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST, CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST } },
 
     { ATTR_IMPORT_RESOURCES_NAME, { CFG_IMPORT_RESOURCES_FANART_FILE_LIST, CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST, CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST } },
 
     { ATTR_IMPORT_LAYOUT_MAPPING_FROM, { CFG_IMPORT_LAYOUT_MAPPING } },
     { ATTR_IMPORT_LAYOUT_MAPPING_TO, { CFG_IMPORT_LAYOUT_MAPPING } },
-    };
+};
 
 std::map<config_option_t, const char*> ConfigManager::simpleOptions = {
     { CFG_MAX, "max_option" },
@@ -737,7 +737,7 @@ std::shared_ptr<ConfigSetup> ConfigManager::findConfigSetupByPath(const std::str
         if (attrKey.find_first_of("attribute::") != std::string::npos) {
             attrKey = attrKey.substr(attrKey.find_first_of("attribute::") + 11);
         }
-        co = std::find_if(complexOptions.begin(), complexOptions.end(), [&](const auto& s) { return s->getUniquePath() == attrKey && (parentOptions.find(s->option) == parentOptions.end() || parentOptions.at(s->option).end() != std::find_if(parentOptions.at(s->option).begin(), parentOptions.at(s->option).end(), [&] (const auto& o) {return o == s->option; })); });
+        co = std::find_if(complexOptions.begin(), complexOptions.end(), [&](const auto& s) { return s->getUniquePath() == attrKey && (parentOptions.find(s->option) == parentOptions.end() || parentOptions.at(s->option).end() != std::find_if(parentOptions.at(s->option).begin(), parentOptions.at(s->option).end(), [&](const auto& o) { return o == s->option; })); });
 
         if (co != complexOptions.end()) {
             log_debug("Config: attribute option found: '{}'", (*co)->xpath);
@@ -747,11 +747,11 @@ std::shared_ptr<ConfigSetup> ConfigManager::findConfigSetupByPath(const std::str
 
     if (save) {
         co = std::find_if(complexOptions.begin(), complexOptions.end(),
-          [&](const auto& s) {
-            auto uPath = s->getUniquePath();
-            size_t len = std::min(uPath.length(), key.length());
-            return key.substr(0, len) == uPath.substr(0, len);
-          });
+            [&](const auto& s) {
+                auto uPath = s->getUniquePath();
+                size_t len = std::min(uPath.length(), key.length());
+                return key.substr(0, len) == uPath.substr(0, len);
+            });
         return (co != complexOptions.end()) ? *co : nullptr;
     }
 
@@ -1226,7 +1226,7 @@ void ConfigManager::updateConfigFromDatabase(std::shared_ptr<Database> database)
                             log_error("unhandled option {} != {}", cfgValue.item, cs->xpath);
                         }
                     } else if (cfgValue.status == STATUS_REMOVED || cfgValue.status == STATUS_ADDED || cfgValue.status == STATUS_MANUAL) {
-                        std::map<std::string, std::string> arguments = {{"status", cfgValue.status}};
+                        std::map<std::string, std::string> arguments = { { "status", cfgValue.status } };
                         if (!cs->updateDetail(cfgValue.item, parValue, self, &arguments)) {
                             log_error("unhandled option {} != {}", cfgValue.item, cs->xpath);
                         }

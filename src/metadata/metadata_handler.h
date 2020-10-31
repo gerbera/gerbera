@@ -137,7 +137,6 @@ constexpr std::array<std::pair<metadata_fields_t, const char*>, M_MAX> mt_keys =
     { M_ORCHESTRA, "upnp:orchestra" },
 } };
 
-
 // res tag attributes
 typedef enum {
     R_SIZE = 0,

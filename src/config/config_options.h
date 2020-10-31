@@ -47,7 +47,6 @@ class DirectoryConfigList;
 
 class ConfigOption {
 public:
-
     virtual std::string getOption() const
     {
         throw std::runtime_error("Wrong option type string");
@@ -130,7 +129,7 @@ protected:
 class DictionaryOption : public ConfigOption {
 public:
     explicit DictionaryOption(const std::map<std::string, std::string>& option)
-    : option(option)
+        : option(option)
     {
         this->origSize = this->option.size();
         size_t i = 0;
@@ -162,7 +161,9 @@ protected:
 class ArrayOption : public ConfigOption {
 public:
     explicit ArrayOption(const std::vector<std::string>& option)
-    : option(option), origSize(), indexMap()
+        : option(option)
+        , origSize()
+        , indexMap()
     {
         this->origSize = this->option.size();
         for (size_t i = 0; i < this->origSize; i++) {
@@ -190,7 +191,7 @@ protected:
 class AutoscanListOption : public ConfigOption {
 public:
     explicit AutoscanListOption(std::shared_ptr<AutoscanList> option)
-    : option(std::move(option))
+        : option(std::move(option))
     {
     }
 

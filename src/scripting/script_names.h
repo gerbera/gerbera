@@ -64,7 +64,7 @@ constexpr std::array<std::pair<metadata_fields_t, const char*>, 21> mt_names = {
     { M_ALBUMARTIST, "M_ALBUMARTIST" },
     { M_COMPOSER, "M_COMPOSER" },
     { M_CONDUCTOR, "M_CONDUCTOR" },
-    { M_ORCHESTRA, "M_ORCHESTRA" }
+    { M_ORCHESTRA, "M_ORCHESTRA" },
 } };
 
 constexpr std::array<std::pair<int, const char*>, 5> ot_names = { {
@@ -72,7 +72,7 @@ constexpr std::array<std::pair<int, const char*>, 5> ot_names = { {
     { OBJECT_TYPE_ITEM, "OBJECT_TYPE_ITEM" },
     { OBJECT_TYPE_ACTIVE_ITEM, "OBJECT_TYPE_ACTIVE_ITEM" },
     { OBJECT_TYPE_ITEM_EXTERNAL_URL, "OBJECT_TYPE_ITEM_EXTERNAL_URL" },
-    { OBJECT_TYPE_ITEM_INTERNAL_URL, "OBJECT_TYPE_ITEM_INTERNAL_URL" }
+    { OBJECT_TYPE_ITEM_INTERNAL_URL, "OBJECT_TYPE_ITEM_INTERNAL_URL" },
 } };
 
 constexpr std::array<std::pair<const char*, const char*>, 12> upnp_classes = { {
@@ -87,7 +87,7 @@ constexpr std::array<std::pair<const char*, const char*>, 12> upnp_classes = { {
     { UPNP_DEFAULT_CLASS_MUSIC_TRACK, "UPNP_CLASS_ITEM_MUSIC_TRACK" },
     { UPNP_DEFAULT_CLASS_VIDEO_ITEM, "UPNP_CLASS_CONTAINER_ITEM_VIDEO" },
     { UPNP_DEFAULT_CLASS_IMAGE_ITEM, "UPNP_CLASS_CONTAINER_ITEM_IMAGE" },
-    { UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER, "UPNP_CLASS_PLAYLIST_CONTAINER" }
+    { UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER, "UPNP_CLASS_PLAYLIST_CONTAINER" },
 } };
 
 #endif

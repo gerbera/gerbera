@@ -86,16 +86,16 @@ protected:
 class DirectoryTweak {
 public:
     explicit DirectoryTweak()
-    : location ("")
-    , isOrig(false)
-    , inherit(true)
+        : location("")
+        , isOrig(false)
+        , inherit(true)
     {
     }
 
     explicit DirectoryTweak(const fs::path& location, bool inherit)
-    : location (location)
-    , isOrig(false)
-    , inherit(inherit)
+        : location(location)
+        , isOrig(false)
+        , inherit(inherit)
     {
     }
 

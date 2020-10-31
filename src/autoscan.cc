@@ -37,7 +37,7 @@
 #include "database/database.h"
 
 AutoscanDirectory::AutoscanDirectory()
-    : isOrig (false)
+    : isOrig(false)
     , interval(0)
     , taskCount(0)
     , scanID(INVALID_SCAN_ID)
@@ -51,7 +51,7 @@ AutoscanDirectory::AutoscanDirectory(fs::path location, ScanMode mode, bool recu
     int id, unsigned int interval, bool hidden)
     : location(std::move(location))
     , mode(mode)
-    , isOrig (false)
+    , isOrig(false)
     , recursive(recursive)
     , hidden(hidden)
     , persistent_flag(persistent)
@@ -125,7 +125,7 @@ size_t AutoscanList::getEditSize() const
     if (indexMap.empty()) {
         return 0;
     }
-    return (*std::max_element(indexMap.begin(), indexMap.end(), [&] (auto a, auto b) { return (a.first < b.first);})).first + 1;
+    return (*std::max_element(indexMap.begin(), indexMap.end(), [&](auto a, auto b) { return (a.first < b.first); })).first + 1;
 }
 
 std::vector<std::shared_ptr<AutoscanDirectory>> AutoscanList::getArrayCopy()

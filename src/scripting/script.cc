@@ -153,7 +153,7 @@ Script::Script(const std::shared_ptr<Config>& config,
     duk_pop(ctx);
 
     /* initialize contstants */
-    for (const auto& [field, sym] : ot_names)  {
+    for (const auto& [field, sym] : ot_names) {
         duk_push_int(ctx, field);
         duk_put_global_string(ctx, sym);
     }
@@ -206,7 +206,7 @@ Script::Script(const std::shared_ptr<Config>& config,
             duk_put_global_string(ctx, sym->second);
     }
 
-    for (const auto& [field, sym] : upnp_classes)  {
+    for (const auto& [field, sym] : upnp_classes) {
         duk_push_string(ctx, field);
         duk_put_global_string(ctx, sym);
     }

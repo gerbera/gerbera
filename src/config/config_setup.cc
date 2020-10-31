@@ -130,7 +130,7 @@ void ConfigSetup::makeOption(std::string optValue, std::shared_ptr<Config> confi
 size_t ConfigSetup::extractIndex(const std::string& item)
 {
     size_t i = SIZE_MAX;
-    if (item.find_first_of('[') != std::string::npos && item.find_first_of(']', item.find_first_of('[')) != std::string::npos ) {
+    if (item.find_first_of('[') != std::string::npos && item.find_first_of(']', item.find_first_of('[')) != std::string::npos) {
         auto startPos = item.find_first_of('[') + 1;
         auto endPos = item.find_first_of(']', startPos);
         try {

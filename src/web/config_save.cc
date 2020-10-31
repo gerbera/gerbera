@@ -96,7 +96,7 @@ void web::configSave::process()
                 std::string parValue = param(value);
                 std::string parStatus = param(status);
                 bool update = param(status) == STATUS_CHANGED;
-                std::map<std::string, std::string> arguments = {{"status", parStatus}};
+                std::map<std::string, std::string> arguments = { { "status", parStatus } };
                 if (parStatus == STATUS_RESET || parStatus == STATUS_KILLED) {
                     database->removeConfigValue(param(item));
                     if (config->hasOrigValue(param(item))) {
