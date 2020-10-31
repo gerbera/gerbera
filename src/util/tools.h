@@ -88,7 +88,7 @@ int stoiString(const std::string& str, int def = 0, int base = 10);
 std::string reduceString(std::string str, char ch);
 
 /// \brief  Used to replace parts of string with other value
-std::string& replaceString(std::string& str, const std::string& from, const std::string& to);
+std::string& replaceString(std::string& str, std::string_view from, const std::string& to);
 
 /// \brief Get last write time of the specified file or path, if it does not exist it will throw an exception
 /// \param path file or directory to be checked.

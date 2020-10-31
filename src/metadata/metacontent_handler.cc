@@ -74,7 +74,7 @@ fs::path MetacontentHandler::getContentPath(const std::vector<std::string>& name
     return "";
 }
 
-static constexpr std::array<std::pair<const char*, metadata_fields_t>, 2> metaTags = { {
+static constexpr std::array<std::pair<std::string_view, metadata_fields_t>, 2> metaTags { {
     { "%album%", M_ALBUM },
     { "%title%", M_TITLE },
 } };
