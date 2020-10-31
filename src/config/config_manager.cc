@@ -670,7 +670,7 @@ std::map<config_option_t, std::vector<config_option_t>> ConfigManager::parentOpt
     { ATTR_IMPORT_LAYOUT_MAPPING_TO, { CFG_IMPORT_LAYOUT_MAPPING } },
 };
 
-std::map<config_option_t, const char*> ConfigManager::simpleOptions = {
+constexpr std::array<std::pair<config_option_t, const char*>, 16> ConfigManager::simpleOptions { {
     { CFG_MAX, "max_option" },
 
     { ATTR_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN_OPTION, "option" },
@@ -690,7 +690,7 @@ std::map<config_option_t, const char*> ConfigManager::simpleOptions = {
     { ATTR_AUTOSCAN_DIRECTORY, "directory" },
     { ATTR_CLIENTS_CLIENT, "client" },
     { ATTR_DIRECTORIES_TWEAK, "tweak" },
-};
+} };
 
 const char* ConfigManager::mapConfigOption(config_option_t option)
 {

@@ -140,7 +140,7 @@ public:
 
 protected:
     static std::vector<std::shared_ptr<ConfigSetup>> complexOptions;
-    static std::map<config_option_t, const char*> simpleOptions;
+    static const std::array<std::pair<config_option_t, const char*>, 16> simpleOptions;
     static std::map<config_option_t, std::vector<config_option_t>> parentOptions;
 
     fs::path filename;
