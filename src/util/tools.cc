@@ -1185,11 +1185,11 @@ std::string sockAddrGetNameInfo(const struct sockaddr* sa)
 
 #ifdef SOPCAST
 /// \brief
-int find_local_port(unsigned short range_min, unsigned short range_max)
+int find_local_port(in_port_t range_min, in_port_t range_max)
 {
     int fd;
     int retry_count = 0;
-    unsigned short port;
+    in_port_t port;
     struct sockaddr_in server_addr;
     struct hostent* server;
 

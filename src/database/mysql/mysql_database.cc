@@ -35,6 +35,7 @@
 #include <cstdlib>
 #include <utility>
 
+#include <netinet/in.h>
 #include <zlib.h>
 
 #include "config/config_manager.h"
@@ -149,7 +150,7 @@ void MySQLDatabase::init()
     std::string dbHost = config->getOption(CFG_SERVER_STORAGE_MYSQL_HOST);
     std::string dbName = config->getOption(CFG_SERVER_STORAGE_MYSQL_DATABASE);
     std::string dbUser = config->getOption(CFG_SERVER_STORAGE_MYSQL_USERNAME);
-    unsigned short dbPort = (unsigned short)config->getIntOption(CFG_SERVER_STORAGE_MYSQL_PORT);
+    auto dbPort = in_port_t(config->getIntOption(CFG_SERVER_STORAGE_MYSQL_PORT));
     std::string dbPass = config->getOption(CFG_SERVER_STORAGE_MYSQL_PASSWORD);
     std::string dbSock = config->getOption(CFG_SERVER_STORAGE_MYSQL_SOCKET);
 

@@ -40,6 +40,7 @@
 #include <vector>
 namespace fs = std::filesystem;
 
+#include <netinet/in.h>
 #include <sys/time.h>
 
 #ifdef HAVE_MAGIC
@@ -338,8 +339,7 @@ std::string sockAddrGetNameInfo(const struct sockaddr* sa);
 
 #ifdef SOPCAST
 /// \brief Finds a free port between range_min and range_max on localhost.
-int find_local_port(unsigned short range_min,
-    unsigned short range_max);
+int find_local_port(in_port_t range_min, in_port_t range_max);
 #endif
 
 #ifdef TOMBDEBUG

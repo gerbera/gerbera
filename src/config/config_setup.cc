@@ -1152,8 +1152,8 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
         std::map<std::string, int> profiles;
         int i = 0;
         for (const auto& [key, val] : value->getTranscodingProfileListOption()->getList()) {
-            for (auto it = val->begin(); it != val->end(); it++) {
-                profiles[it->second->getName()] = i;
+            for (const auto& [a, name] : *val) {
+                profiles[name->getName()] = i;
                 auto index = getItemPath(i, ATTR_TRANSCODING_MIMETYPE_PROF_MAP, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_TRANSCODE, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE);
                 if (optItem == index) {
                     config->setOrigValue(index, key);
