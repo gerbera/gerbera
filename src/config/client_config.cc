@@ -31,8 +31,7 @@
 #include <utility>
 
 ClientConfig::ClientConfig()
-    : isOrig(false)
-    , clientInfo(std::make_shared<struct ClientInfo>())
+    : clientInfo(std::make_shared<struct ClientInfo>())
 {
     clientInfo->matchType = ClientMatchType::None;
     clientInfo->type = ClientType::Unknown;

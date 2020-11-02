@@ -205,13 +205,13 @@ public:
 protected:
     fs::path location;
     ScanMode mode;
-    bool isOrig;
+    bool isOrig { false };
     bool recursive;
     bool hidden;
     bool persistent_flag;
-    unsigned int interval;
-    int taskCount;
-    int scanID;
+    unsigned int interval { 0 };
+    int taskCount { 0 };
+    int scanID { INVALID_SCAN_ID };
     int objectID;
     int databaseID;
     time_t last_mod_previous_scan { 0 };
