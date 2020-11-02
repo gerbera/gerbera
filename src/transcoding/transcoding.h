@@ -212,7 +212,7 @@ protected:
 };
 
 /// \brief this class allows access to available transcoding profiles.
-typedef std::map<std::string, std::shared_ptr<TranscodingProfile>> TranscodingProfileMap;
+using TranscodingProfileMap = std::map<std::string, std::shared_ptr<TranscodingProfile>>;
 class TranscodingProfileList {
 public:
     TranscodingProfileList();
