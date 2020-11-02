@@ -77,7 +77,7 @@ protected:
     static void* staticThreadProc(void* arg);
     void threadProc();
 
-    bool haveUpdates() const { return (objectIDHash->size() > 0); }
+    bool haveUpdates() const { return !objectIDHash->empty(); }
 };
 
 #endif // __UPDATE_MANAGER_H__
