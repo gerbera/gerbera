@@ -46,7 +46,7 @@ class UpdateManager;
 class Timer;
 namespace web {
 class SessionManager;
-}
+} // namespace web
 class TaskProcessor;
 class Runtime;
 class LastFm;

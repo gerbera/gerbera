@@ -217,6 +217,6 @@ public:
     void process() override;
 };
 
-} // namespace
+} // namespace web
 
 #endif // __WEB_PAGES_H__

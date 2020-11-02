@@ -44,7 +44,7 @@ class ContentManager;
 class UpdateManager;
 namespace web {
 class SessionManager;
-}
+} // namespace web
 
 class FileRequestHandler : public RequestHandler {
 protected:
