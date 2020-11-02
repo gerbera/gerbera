@@ -163,7 +163,6 @@ public:
     explicit ArrayOption(std::vector<std::string> option)
         : option(std::move(option))
         , origSize()
-        , indexMap()
     {
         this->origSize = this->option.size();
         for (size_t i = 0; i < this->origSize; i++) {
