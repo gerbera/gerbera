@@ -93,7 +93,6 @@ public:
 
     explicit DirectoryTweak(fs::path location, bool inherit)
         : location(std::move(location))
-        , isOrig(false)
         , inherit(inherit)
     {
     }

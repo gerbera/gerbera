@@ -39,8 +39,7 @@ ClientConfig::ClientConfig()
 }
 
 ClientConfig::ClientConfig(int flags, const std::string& ip, const std::string& userAgent)
-    : isOrig(false)
-    , clientInfo(std::make_shared<struct ClientInfo>())
+    : clientInfo(std::make_shared<struct ClientInfo>())
 {
     clientInfo->type = ClientType::Unknown;
     if (!ip.empty()) {
