@@ -632,7 +632,8 @@ public:
     {
         if (index < 0) {
             return fmt::format("{}", xpath);
-        } else if (propOption4 == CFG_MAX) {
+        }
+        if (propOption4 == CFG_MAX) {
             return fmt::format("{}/{}/{}[{}]/attribute::{}", xpath, ConfigManager::mapConfigOption(propOption), ConfigManager::mapConfigOption(propOption2), index, ConfigManager::mapConfigOption(propOption3));
         }
         return fmt::format("{}/{}/{}[{}]/{}/attribute::{}", xpath, ConfigManager::mapConfigOption(propOption), ConfigManager::mapConfigOption(propOption2), index, ConfigManager::mapConfigOption(propOption3), ConfigManager::mapConfigOption(propOption4));
@@ -668,15 +669,13 @@ public:
 
     std::string getItemPath(int index = 0, config_option_t propOption = CFG_MAX, config_option_t propOption2 = CFG_MAX, config_option_t propOption3 = CFG_MAX, config_option_t propOption4 = CFG_MAX) const override
     {
-        if (index >= 0) {
-            if (propOption != CFG_MAX) {
-                return fmt::format("{}/{}[{}]/attribute::{}", xpath, ConfigManager::mapConfigOption(ATTR_CLIENTS_CLIENT), index, ConfigManager::mapConfigOption(propOption));
-            } else {
-                return fmt::format("{}/{}[{}]", xpath, ConfigManager::mapConfigOption(ATTR_CLIENTS_CLIENT), index);
-            }
-        } else {
+        if (index < 0) {
             return fmt::format("{}/{}", xpath, ConfigManager::mapConfigOption(ATTR_CLIENTS_CLIENT));
         }
+        if (propOption != CFG_MAX) {
+            return fmt::format("{}/{}[{}]/attribute::{}", xpath, ConfigManager::mapConfigOption(ATTR_CLIENTS_CLIENT), index, ConfigManager::mapConfigOption(propOption));
+        }
+        return fmt::format("{}/{}[{}]", xpath, ConfigManager::mapConfigOption(ATTR_CLIENTS_CLIENT), index);
     }
 
     std::shared_ptr<ConfigOption> newOption(const pugi::xml_node& optValue);
@@ -707,15 +706,13 @@ public:
 
     std::string getItemPath(int index = 0, config_option_t propOption = CFG_MAX, config_option_t propOption2 = CFG_MAX, config_option_t propOption3 = CFG_MAX, config_option_t propOption4 = CFG_MAX) const override
     {
-        if (index >= 0) {
-            if (propOption != CFG_MAX) {
-                return fmt::format("{}/{}[{}]/attribute::{}", xpath, ConfigManager::mapConfigOption(ATTR_DIRECTORIES_TWEAK), index, ConfigManager::mapConfigOption(propOption));
-            } else {
-                return fmt::format("{}/{}[{}]", xpath, ConfigManager::mapConfigOption(ATTR_DIRECTORIES_TWEAK), index);
-            }
-        } else {
+        if (index < 0) {
             return fmt::format("{}/{}", xpath, ConfigManager::mapConfigOption(ATTR_DIRECTORIES_TWEAK));
         }
+        if (propOption != CFG_MAX) {
+            return fmt::format("{}/{}[{}]/attribute::{}", xpath, ConfigManager::mapConfigOption(ATTR_DIRECTORIES_TWEAK), index, ConfigManager::mapConfigOption(propOption));
+        }
+        return fmt::format("{}/{}[{}]", xpath, ConfigManager::mapConfigOption(ATTR_DIRECTORIES_TWEAK), index);
     }
 
     std::shared_ptr<ConfigOption> newOption(const pugi::xml_node& optValue);
