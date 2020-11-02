@@ -128,8 +128,8 @@ protected:
 
 class DictionaryOption : public ConfigOption {
 public:
-    explicit DictionaryOption(const std::map<std::string, std::string>& option)
-        : option(option)
+    explicit DictionaryOption(std::map<std::string, std::string> option)
+        : option(std::move(option))
     {
         this->origSize = this->option.size();
         size_t i = 0;
@@ -160,8 +160,8 @@ protected:
 
 class ArrayOption : public ConfigOption {
 public:
-    explicit ArrayOption(const std::vector<std::string>& option)
-        : option(option)
+    explicit ArrayOption(std::vector<std::string> option)
+        : option(std::move(option))
         , origSize()
         , indexMap()
     {

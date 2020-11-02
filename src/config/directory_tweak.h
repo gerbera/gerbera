@@ -91,8 +91,8 @@ public:
     {
     }
 
-    explicit DirectoryTweak(const fs::path& location, bool inherit)
-        : location(location)
+    explicit DirectoryTweak(fs::path location, bool inherit)
+        : location(std::move(location))
         , isOrig(false)
         , inherit(inherit)
     {

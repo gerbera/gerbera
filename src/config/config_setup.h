@@ -74,7 +74,7 @@ protected:
 
     static size_t extractIndex(const std::string& item);
 
-    void setOption(std::shared_ptr<Config> config)
+    void setOption(const std::shared_ptr<Config>& config)
     {
         config->addOption(option, optionValue);
     }
@@ -108,7 +108,7 @@ public:
 
     virtual ~ConfigSetup() = default;
 
-    void setDefaultValue(std::string defaultValue)
+    void setDefaultValue(const std::string& defaultValue)
     {
         this->defaultValue.assign(defaultValue);
     }
@@ -192,16 +192,16 @@ protected:
     std::map<std::string, En> valueMap;
 
 public:
-    ConfigEnumSetup(config_option_t option, const char* xpath, const char* help, const std::map<std::string, En>& valueMap, bool notEmpty = false)
+    ConfigEnumSetup(config_option_t option, const char* xpath, const char* help, std::map<std::string, En> valueMap, bool notEmpty = false)
         : ConfigSetup(option, xpath, help, false, "")
-        , valueMap(valueMap)
+        , valueMap(std::move(valueMap))
     {
         this->notEmpty = notEmpty;
     }
 
-    ConfigEnumSetup(config_option_t option, const char* xpath, const char* help, const char* defaultValue, const std::map<std::string, En>& valueMap, bool notEmpty = false)
+    ConfigEnumSetup(config_option_t option, const char* xpath, const char* help, const char* defaultValue, std::map<std::string, En> valueMap, bool notEmpty = false)
         : ConfigSetup(option, xpath, help, false, defaultValue)
-        , valueMap(valueMap)
+        , valueMap(std::move(valueMap))
     {
         this->notEmpty = notEmpty;
     }
