@@ -96,10 +96,10 @@
 #define D_PN_AVC_MP4_EU "AVC_MP4_EU"
 #define D_PN_AVI "AVI"
 // fixed CdsObjectIDs
-#define CDS_ID_BLACKHOLE -1
+#define CDS_ID_BLACKHOLE (-1)
 #define CDS_ID_ROOT 0
 #define CDS_ID_FS_ROOT 1
-#define IS_FORBIDDEN_CDS_ID(id) (id <= CDS_ID_FS_ROOT)
+static constexpr bool IS_FORBIDDEN_CDS_ID(int id) { return id <= CDS_ID_FS_ROOT; }
 
 // internal setting keys
 #define SET_LAST_MODIFIED "last_modified"

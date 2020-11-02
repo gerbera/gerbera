@@ -47,8 +47,8 @@
 class Database;
 class ContentManager;
 
-#define INOTIFY_ROOT -1
-#define INOTIFY_UNKNOWN_PARENT_WD -2
+#define INOTIFY_ROOT (-1)
+#define INOTIFY_UNKNOWN_PARENT_WD (-2)
 
 class AutoscanInotify {
 public:
