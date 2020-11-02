@@ -43,7 +43,7 @@ namespace fs = std::filesystem;
 class Database;
 class AutoscanDirectory;
 
-#define INVALID_SCAN_ID -1
+#define INVALID_SCAN_ID (-1)
 
 ///\brief Scan mode - type of scan (timed, inotify, fam, etc.)
 enum class ScanMode {
