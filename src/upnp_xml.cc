@@ -297,31 +297,26 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription()
     {
         auto iconList = device.append_child("iconList");
 
-        struct IconDim {
-            const char* dim;
-            const char* depth;
-        };
-        std::vector<IconDim> iconDims;
-        iconDims.push_back({ "120", "24" });
-        iconDims.push_back({ "48", "24" });
-        iconDims.push_back({ "32", "8" });
-        struct IconType {
-            const char* mimetype;
-            const char* ext;
-        };
-        std::vector<IconType> iconTypes;
-        iconTypes.push_back({ DESC_ICON_PNG_MIMETYPE, ".png" });
-        iconTypes.push_back({ DESC_ICON_BMP_MIMETYPE, ".bmp" });
-        iconTypes.push_back({ DESC_ICON_JPG_MIMETYPE, ".jpg" });
+        constexpr std::array<std::pair<const char*, const char*>, 3> iconDims { {
+            { "120", "24" },
+            { "48", "24" },
+            { "32", "8" },
+        } };
 
-        for (auto const& d : iconDims) {
-            for (auto const& t : iconTypes) {
+        constexpr std::array<std::pair<const char*, const char*>, 3> iconTypes { {
+            { DESC_ICON_PNG_MIMETYPE, ".png" },
+            { DESC_ICON_BMP_MIMETYPE, ".bmp" },
+            { DESC_ICON_JPG_MIMETYPE, ".jpg" },
+        } };
+
+        for (const auto& [dim, depth] : iconDims) {
+            for (const auto& [mimetype, ext] : iconTypes) {
                 auto icon = iconList.append_child("icon");
-                icon.append_child("mimetype").append_child(pugi::node_pcdata).set_value(t.mimetype);
-                icon.append_child("width").append_child(pugi::node_pcdata).set_value(d.dim);
-                icon.append_child("height").append_child(pugi::node_pcdata).set_value(d.dim);
-                icon.append_child("depth").append_child(pugi::node_pcdata).set_value(d.depth);
-                std::string url = fmt::format("/icons/mt-icon{}{}", d.dim, t.ext);
+                icon.append_child("mimetype").append_child(pugi::node_pcdata).set_value(mimetype);
+                icon.append_child("width").append_child(pugi::node_pcdata).set_value(dim);
+                icon.append_child("height").append_child(pugi::node_pcdata).set_value(dim);
+                icon.append_child("depth").append_child(pugi::node_pcdata).set_value(depth);
+                std::string url = fmt::format("/icons/mt-icon{}{}", dim, ext);
                 icon.append_child("url").append_child(pugi::node_pcdata).set_value(url.c_str());
             }
         }
@@ -338,17 +333,14 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription()
             const char* controlURL;
             const char* eventSubURL;
         };
-        std::vector<ServiceInfo> services;
-
-        // cm
-        services.push_back({ DESC_CM_SERVICE_TYPE, DESC_CM_SERVICE_ID,
-            DESC_CM_SCPD_URL, DESC_CM_CONTROL_URL, DESC_CM_EVENT_URL });
-        // cds
-        services.push_back({ DESC_CDS_SERVICE_TYPE, DESC_CDS_SERVICE_ID,
-            DESC_CDS_SCPD_URL, DESC_CDS_CONTROL_URL, DESC_CDS_EVENT_URL });
-        // media receiver registrar service for the Xbox 360
-        services.push_back({ DESC_MRREG_SERVICE_TYPE, DESC_MRREG_SERVICE_ID,
-            DESC_MRREG_SCPD_URL, DESC_MRREG_CONTROL_URL, DESC_MRREG_EVENT_URL });
+        constexpr std::array<ServiceInfo, 3> services { {
+            // cm
+            { DESC_CM_SERVICE_TYPE, DESC_CM_SERVICE_ID, DESC_CM_SCPD_URL, DESC_CM_CONTROL_URL, DESC_CM_EVENT_URL },
+            // cds
+            { DESC_CDS_SERVICE_TYPE, DESC_CDS_SERVICE_ID, DESC_CDS_SCPD_URL, DESC_CDS_CONTROL_URL, DESC_CDS_EVENT_URL },
+            // media receiver registrar service for the Xbox 360
+            { DESC_MRREG_SERVICE_TYPE, DESC_MRREG_SERVICE_ID, DESC_MRREG_SCPD_URL, DESC_MRREG_CONTROL_URL, DESC_MRREG_EVENT_URL },
+        } };
 
         for (auto const& s : services) {
             auto service = serviceList.append_child("service");

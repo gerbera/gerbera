@@ -126,12 +126,12 @@ void ScriptTestFixture::addGlobalFunctions(duk_context* ctx, const duk_function_
             duk_put_global_string(ctx, sym->second);
     }
 
-    for (const auto& [field, sym] : ot_names)  {
+    for (const auto& [field, sym] : ot_names) {
         duk_push_int(ctx, field);
         duk_put_global_string(ctx, sym);
     }
 
-    for (const auto& [field, sym] : upnp_classes)  {
+    for (const auto& [field, sym] : upnp_classes) {
         duk_push_string(ctx, field);
         duk_put_global_string(ctx, sym);
     }

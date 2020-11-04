@@ -86,16 +86,14 @@ protected:
 class DirectoryTweak {
 public:
     explicit DirectoryTweak()
-    : location ("")
-    , isOrig(false)
-    , inherit(true)
+        : location("")
+
     {
     }
 
-    explicit DirectoryTweak(const fs::path& location, bool inherit)
-    : location (location)
-    , isOrig(false)
-    , inherit(inherit)
+    explicit DirectoryTweak(fs::path location, bool inherit)
+        : location(std::move(location))
+        , inherit(inherit)
     {
     }
 
@@ -138,8 +136,8 @@ public:
 
 protected:
     fs::path location;
-    bool isOrig;
-    bool inherit;
+    bool isOrig { false };
+    bool inherit { true };
     std::map<std::string, std::string> resourceFiles;
     std::map<std::string, bool> flags;
 };

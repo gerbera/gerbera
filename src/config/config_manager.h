@@ -63,7 +63,7 @@ public:
         fs::path prefix_dir, fs::path magic_file,
         std::string ip, std::string interface, in_port_t port,
         bool debug_logging);
-    virtual ~ConfigManager() override;
+    ~ConfigManager() override;
 
     /// \brief Returns the name of the config file that was used to launch the server.
     fs::path getConfigFilename() const override { return filename; }
@@ -140,7 +140,7 @@ public:
 
 protected:
     static std::vector<std::shared_ptr<ConfigSetup>> complexOptions;
-    static std::map<config_option_t, const char*> simpleOptions;
+    static const std::array<std::pair<config_option_t, const char*>, 16> simpleOptions;
     static std::map<config_option_t, std::vector<config_option_t>> parentOptions;
 
     fs::path filename;

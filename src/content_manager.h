@@ -73,7 +73,7 @@ class Database;
 class UpdateManager;
 namespace web {
 class SessionManager;
-}
+} // namespace web
 class Runtime;
 class LastFm;
 class ContentManager;

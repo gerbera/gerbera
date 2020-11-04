@@ -33,7 +33,7 @@ size_t DictionaryOption::getEditSize() const
     if (indexMap.empty()) {
         return 0;
     }
-    return (*std::max_element(indexMap.begin(), indexMap.end(), [&] (auto a, auto b) { return (a.first < b.first);})).first + 1;
+    return (*std::max_element(indexMap.begin(), indexMap.end(), [&](auto a, auto b) { return (a.first < b.first); })).first + 1;
 }
 
 std::map<std::string, std::string> DictionaryOption::getDictionaryOption(bool forEdit) const
@@ -63,7 +63,7 @@ void DictionaryOption::setKey(size_t keyIndex, const std::string& newKey)
         if (!newKey.empty()) {
             option[newKey] = oldValue;
         } else {
-            for (size_t i = getEditSize() - 1; i >= origSize; i --) {
+            for (size_t i = getEditSize() - 1; i >= origSize; i--) {
                 if (indexMap.find(i) != indexMap.end() && indexMap[keyIndex].empty()) {
                     option.erase(indexMap[i]);
                 } else {
@@ -156,5 +156,5 @@ size_t ArrayOption::getEditSize() const
     if (indexMap.empty()) {
         return 0;
     }
-    return (*std::max_element(indexMap.begin(), indexMap.end(), [&] (auto a, auto b) { return (a.first < b.first);})).first + 1;
+    return (*std::max_element(indexMap.begin(), indexMap.end(), [&](auto a, auto b) { return (a.first < b.first); })).first + 1;
 }

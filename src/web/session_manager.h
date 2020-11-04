@@ -168,6 +168,6 @@ public:
     void timerNotify(std::shared_ptr<Timer::Parameter> parameter) override;
 };
 
-} // namespace
+} // namespace web
 
 #endif //  __SESSION_MANAGER_H__

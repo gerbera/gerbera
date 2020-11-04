@@ -166,6 +166,6 @@ public:
     virtual void process() = 0;
 };
 
-} // namespace
+} // namespace web
 
 #endif // __WEB_REQUEST_HANDLER_H__

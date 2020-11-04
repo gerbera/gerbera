@@ -31,8 +31,7 @@
 #include <utility>
 
 ClientConfig::ClientConfig()
-    : isOrig(false)
-    , clientInfo(std::make_shared<struct ClientInfo>())
+    : clientInfo(std::make_shared<struct ClientInfo>())
 {
     clientInfo->matchType = ClientMatchType::None;
     clientInfo->type = ClientType::Unknown;
@@ -40,8 +39,7 @@ ClientConfig::ClientConfig()
 }
 
 ClientConfig::ClientConfig(int flags, const std::string& ip, const std::string& userAgent)
-    : isOrig(false)
-    , clientInfo(std::make_shared<struct ClientInfo>())
+    : clientInfo(std::make_shared<struct ClientInfo>())
 {
     clientInfo->type = ClientType::Unknown;
     if (!ip.empty()) {
@@ -79,7 +77,7 @@ size_t ClientConfigList::getEditSize() const
     if (indexMap.empty()) {
         return 0;
     }
-    return (*std::max_element(indexMap.begin(), indexMap.end(), [&] (auto a, auto b) { return (a.first < b.first);})).first + 1;
+    return (*std::max_element(indexMap.begin(), indexMap.end(), [&](auto a, auto b) { return (a.first < b.first); })).first + 1;
 }
 
 std::vector<std::shared_ptr<ClientConfig>> ClientConfigList::getArrayCopy()
@@ -121,7 +119,7 @@ void ClientConfigList::remove(size_t id, bool edit)
             return;
         }
         const auto& client = indexMap[id];
-        auto entry = std::find_if(list.begin(), list.end(), [=](const auto& item) { return client->getIp() == item->getIp() && client->getUserAgent() == item->getUserAgent();});
+        auto entry = std::find_if(list.begin(), list.end(), [=](const auto& item) { return client->getIp() == item->getIp() && client->getUserAgent() == item->getUserAgent(); });
         list.erase(entry);
         if (id >= origSize) {
             indexMap.erase(id);

@@ -70,24 +70,27 @@ void web::directories::process()
     containers.append_attribute("type") = "filesystem";
 
     // don't bother users with system directorties
-    std::vector<fs::path> excludes_fullpath = {
+    constexpr std::array<std::string_view, 15> excludes_fullpath { {
         "/bin",
         "/boot",
         "/dev",
         "/etc",
-        "/lib", "/lib32", "/lib64", "/libx32",
+        "/lib",
+        "/lib32",
+        "/lib64",
+        "/libx32",
         "/proc",
         "/run",
         "/sbin",
         "/sys",
         "/tmp",
         "/usr",
-        "/var"
-    };
+        "/var",
+    } };
     // don't bother users with special or config directorties
-    std::vector<std::string> excludes_dirname = {
+    constexpr std::array<std::string_view, 1> excludes_dirname = { {
         "lost+found",
-    };
+    } };
     bool exclude_config_dirs = true;
 
     std::error_code ec;

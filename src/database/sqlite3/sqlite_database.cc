@@ -504,7 +504,7 @@ void SLInitTask::run(sqlite3** db, Sqlite3Database* sl)
     unsigned long uncompressed_size = SL3_CREATE_SQL_INFLATED_SIZE;
     int ret = uncompress(buf, &uncompressed_size, sqlite3_create_sql, SL3_CREATE_SQL_DEFLATED_SIZE);
     if (ret != Z_OK || uncompressed_size != SL3_CREATE_SQL_INFLATED_SIZE)
-        throw DatabaseException("", fmt::format("SQLite: Error decompressing create SQL: {}",ret));
+        throw DatabaseException("", fmt::format("SQLite: Error decompressing create SQL: {}", ret));
     buf[SL3_CREATE_SQL_INFLATED_SIZE] = '\0';
 
     char* err = nullptr;

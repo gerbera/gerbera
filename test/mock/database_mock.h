@@ -62,7 +62,7 @@ public:
         std::vector<ConfigValue> result;
         return result;
     }
-    void removeConfigValue(const std::string& item) override {}
+    void removeConfigValue(const std::string& item) override { }
     void updateConfigValue(const std::string& key, const std::string& item, const std::string& value, const std::string& status = "unchanged") override { }
 
     std::shared_ptr<AutoscanList> getAutoscanList(ScanMode scanode) override { return nullptr; }
