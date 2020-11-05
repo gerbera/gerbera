@@ -46,7 +46,7 @@ void Quirks::addCaptionInfo(const std::shared_ptr<CdsItem>& item, std::unique_pt
     if (!startswith(item->getMimeType(), "video"))
         return;
 
-    std::vector<std::string> exts {
+    constexpr std::array<const char*, 4> exts {
         ".srt",
         ".ssa",
         ".smi",
