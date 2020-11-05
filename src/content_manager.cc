@@ -299,14 +299,7 @@ void ContentManager::unregisterExecutor(const std::shared_ptr<Executor>& exec)
 
     AutoLock lock(mutex);
 
-    for (auto it = process_list.begin(); it != process_list.end(); /*++it*/) {
-        auto& e = *it;
-
-        if (e == exec)
-            it = process_list.erase(it);
-        else
-            ++it;
-    }
+    process_list.erase(std::remove_if(process_list.begin(), process_list.end(), [&](const auto& e) { return e == exec; }), process_list.end());
 }
 
 void ContentManager::timerNotify(std::shared_ptr<Timer::Parameter> parameter)
