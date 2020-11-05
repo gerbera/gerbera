@@ -296,12 +296,11 @@ void web::configLoad::process()
         pr++;
     }
 
-    std::vector<config_option_t> autoscanList = {
-        CFG_IMPORT_AUTOSCAN_TIMED_LIST,
 #ifdef HAVE_INOTIFY
-        CFG_IMPORT_AUTOSCAN_INOTIFY_LIST
+    constexpr auto autoscanList = std::array<config_option_t, 2> { CFG_IMPORT_AUTOSCAN_TIMED_LIST, CFG_IMPORT_AUTOSCAN_INOTIFY_LIST };
+#else
+    constexpr auto autoscanList = std::array<config_option_t, 1> { CFG_IMPORT_AUTOSCAN_TIMED_LIST };
 #endif
-    };
     for (const auto& autoscanOption : autoscanList) {
         cs = ConfigManager::findConfigSetup(autoscanOption);
         auto autoscan = cs->getValue()->getAutoscanListOption();
@@ -329,7 +328,13 @@ void web::configLoad::process()
         }
     }
 
-    std::vector<config_option_t> dict_options = { CFG_SERVER_UI_ACCOUNT_LIST, CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST, CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST, CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST, CFG_IMPORT_LAYOUT_MAPPING };
+    constexpr std::array<config_option_t, 5> dict_options {
+        CFG_SERVER_UI_ACCOUNT_LIST,
+        CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST,
+        CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST,
+        CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST,
+        CFG_IMPORT_LAYOUT_MAPPING,
+    };
 
     for (const auto& dict_option : dict_options) {
         int i = 0;
@@ -347,7 +352,7 @@ void web::configLoad::process()
         }
     }
 
-    std::vector<config_option_t> array_options = {
+    constexpr config_option_t array_options[] = {
         CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN,
         CFG_IMPORT_RESOURCES_FANART_FILE_LIST,
         CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST,
