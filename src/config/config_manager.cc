@@ -31,6 +31,7 @@
 
 #include "config_manager.h" // API
 
+#include <array>
 #include <cstdio>
 #include <filesystem>
 #include <iostream>
