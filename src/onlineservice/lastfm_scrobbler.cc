@@ -80,12 +80,12 @@ void LastFm::startedPlaying(std::shared_ptr<CdsItem> item)
     currentTrackId = item->getID();
 
     log_debug("Artist:\t{}",
-        item->getMetadata(MetadataHandler::getMetaFieldName(M_ARTIST)).c_str());
+        item->getMetadata(M_ARTIST).c_str());
     log_debug("Title:\t{}",
-        item->getMetadata(MetadataHandler::getMetaFieldName(M_TITLE)).c_str());
+        item->getMetadata(M_TITLE).c_str());
 
-    std::string artist = item->getMetadata(MetadataHandler::getMetaFieldName(M_ARTIST));
-    std::string title = item->getMetadata(MetadataHandler::getMetaFieldName(M_TITLE));
+    std::string artist = item->getMetadata(M_ARTIST);
+    std::string title = item->getMetadata(M_TITLE);
 
     if (artist.empty() || title.empty()) {
         finished_playing(scrobbler);
@@ -97,17 +97,17 @@ void LastFm::startedPlaying(std::shared_ptr<CdsItem> item)
     info->artist = const_cast<char*>(artist.c_str());
     info->track = const_cast<char*>(title.c_str());
 
-    std::string album = item->getMetadata(MetadataHandler::getMetaFieldName(M_ALBUM));
+    std::string album = item->getMetadata(M_ALBUM);
     if (!album.empty())
         info->album = const_cast<char*>(album.c_str());
 
-    std::string trackNr = item->getMetadata(MetadataHandler::getMetaFieldName(M_TRACKNUMBER));
+    std::string trackNr = item->getMetadata(M_TRACKNUMBER);
     if (!trackNr.empty())
         info->track_nr = atoi(trackNr.c_str());
 
     if (item->getResourceCount() > 0) {
         auto resource = item->getResource(0);
-        std::string duration = resource->getAttribute(MetadataHandler::getResAttrName(R_DURATION));
+        std::string duration = resource->getAttribute(R_DURATION);
         info->track_length_in_secs = HMSToSeconds(duration.c_str());
     }
 
