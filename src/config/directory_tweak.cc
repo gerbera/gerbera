@@ -58,8 +58,7 @@ void DirectoryConfigList::_add(const std::shared_ptr<DirectoryTweak>& dir, size_
         origSize = list.size() + 1;
         dir->setOrig(true);
     }
-    auto entry = std::find_if(list.begin(), list.end(), [=](const auto& d) { return (d->getLocation() == dir->getLocation()); });
-    if (entry != list.end()) {
+    if (std::any_of(list.begin(), list.end(), [=](const auto& d) { return (d->getLocation() == dir->getLocation()); })) {
         log_error("Duplicate tweak entry[{}] {}", index, dir->getLocation().string());
         return;
     }
