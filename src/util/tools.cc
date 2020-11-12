@@ -480,14 +480,18 @@ std::string mimeTypesToCsv(const std::vector<std::string>& mimeTypes)
 
 std::string readTextFile(const fs::path& path)
 {
-    FILE* f = fopen(path.c_str(), "rt");
+#ifdef __linux__
+    auto f = ::fopen(path.c_str(), "rte");
+#else
+    auto f = ::fopen(path.c_str(), "rt");
+#endif
     if (!f) {
         throw_std_runtime_error("could not open " + path.string() + " : " + strerror(errno));
     }
     std::ostringstream buf;
     std::array<char, 1024> buffer;
     size_t bytesRead;
-    while ((bytesRead = fread(buffer.data(), 1, buffer.size(), f)) > 0) {
+    while ((bytesRead = std::fread(buffer.data(), 1, buffer.size(), f)) > 0) {
         buf << std::string(buffer.data(), bytesRead);
     }
     fclose(f);
@@ -496,13 +500,16 @@ std::string readTextFile(const fs::path& path)
 
 void writeTextFile(const fs::path& path, const std::string& contents)
 {
-    size_t bytesWritten;
-    FILE* f = fopen(path.c_str(), "wt");
+#ifdef __linux__
+    auto f = ::fopen(path.c_str(), "wte");
+#else
+    auto f = ::fopen(path.c_str(), "wt");
+#endif
     if (!f) {
         throw_std_runtime_error("could not open " + path.string() + " : " + strerror(errno));
     }
 
-    bytesWritten = fwrite(contents.c_str(), 1, contents.length(), f);
+    size_t bytesWritten = std::fwrite(contents.c_str(), 1, contents.length(), f);
     if (bytesWritten < contents.length()) {
         fclose(f);
 
@@ -973,15 +980,18 @@ fs::path tempName(const fs::path& leadPath, char* tmpl)
 
 bool isTheora(const fs::path& ogg_filename)
 {
-    FILE* f;
     char buffer[7];
-    f = fopen(ogg_filename.c_str(), "rb");
 
+#ifdef __linux__
+    auto f = ::fopen(ogg_filename.c_str(), "rbe");
+#else
+    auto f = ::fopen(ogg_filename.c_str(), "rb");
+#endif
     if (!f) {
         throw_std_runtime_error("Error opening " + ogg_filename.string() + " : " + strerror(errno));
     }
 
-    if (fread(buffer, 1, 4, f) != 4) {
+    if (std::fread(buffer, 1, 4, f) != 4) {
         fclose(f);
         throw_std_runtime_error("Error reading " + ogg_filename.string());
     }
@@ -996,7 +1006,7 @@ bool isTheora(const fs::path& ogg_filename)
         throw_std_runtime_error("Incomplete file " + ogg_filename.string());
     }
 
-    if (fread(buffer, 1, 7, f) != 7) {
+    if (std::fread(buffer, 1, 7, f) != 7) {
         fclose(f);
         throw_std_runtime_error("Error reading " + ogg_filename.string());
     }
@@ -1105,7 +1115,12 @@ std::string getAVIFourCC(const fs::path& avi_filename)
 {
 #define FCC_OFFSET 0xbc
     char* buffer;
-    FILE* f = fopen(avi_filename.c_str(), "rb");
+
+#ifdef __linux__
+    auto f = ::fopen(avi_filename.c_str(), "rbe");
+#else
+    auto f = ::fopen(avi_filename.c_str(), "rb");
+#endif
     if (!f)
         throw_std_runtime_error("could not open file " + avi_filename.native() + " : " + strerror(errno));
 
@@ -1115,7 +1130,7 @@ std::string getAVIFourCC(const fs::path& avi_filename)
         throw_std_runtime_error("Out of memory when allocating buffer for file " + avi_filename.native());
     }
 
-    size_t rb = fread(buffer, 1, FCC_OFFSET + 4, f);
+    size_t rb = std::fread(buffer, 1, FCC_OFFSET + 4, f);
     fclose(f);
     if (rb != FCC_OFFSET + 4) {
         free(buffer);

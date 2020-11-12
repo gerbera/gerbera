@@ -42,6 +42,7 @@
 #include <array>
 #include <cassert>
 #include <cerrno>
+#include <sys/inotify.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
 #ifdef SOLARIS
@@ -55,11 +56,19 @@
 
 Inotify::Inotify()
 {
+#ifdef __linux__
+    inotify_fd = inotify_init1(IN_CLOEXEC);
+#else
     inotify_fd = inotify_init();
+#endif
     if (inotify_fd < 0)
         throw_std_runtime_error("Unable to initialize inotify");
 
+#ifdef __linux__
+    if (pipe2(stop_fds_pipe, IN_CLOEXEC) < 0)
+#else
     if (pipe(stop_fds_pipe) < 0)
+#endif
         throw_std_runtime_error("Unable to create pipe");
 
     stop_fd_read = stop_fds_pipe[0];
@@ -74,7 +83,11 @@ Inotify::~Inotify()
 
 bool Inotify::supported()
 {
+#ifdef __linux__
+    int test_fd = inotify_init1(IN_CLOEXEC);
+#else
     int test_fd = inotify_init();
+#endif
     if (test_fd < 0)
         return false;
 

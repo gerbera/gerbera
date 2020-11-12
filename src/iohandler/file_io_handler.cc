@@ -46,7 +46,11 @@ FileIOHandler::FileIOHandler(fs::path filename)
 void FileIOHandler::open(enum UpnpOpenFileMode mode)
 {
     if (mode == UPNP_READ) {
-        f = fopen(filename.c_str(), "rb");
+#ifdef __linux__
+        f = ::fopen(filename.c_str(), "rbe");
+#else
+        f = ::fopen(filename.c_str(), "rb");
+#endif
     } else {
         throw_std_runtime_error("open: UpnpOpenFileMode mode not supported");
     }

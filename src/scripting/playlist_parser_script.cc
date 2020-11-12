@@ -156,7 +156,11 @@ void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject
 
     currentLine[0] = '\0';
 
-    currentHandle = fopen(obj->getLocation().c_str(), "r");
+#ifdef __linux__
+    currentHandle = ::fopen(obj->getLocation().c_str(), "re");
+#else
+    currentHandle = ::fopen(obj->getLocation().c_str(), "r");
+#endif
     if (!currentHandle) {
         currentObjectID = INVALID_OBJECT_ID;
         currentTask = nullptr;

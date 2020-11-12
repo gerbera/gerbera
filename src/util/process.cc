@@ -57,7 +57,11 @@ std::string run_simple_process(const std::shared_ptr<Config>& cfg, const std::st
     char temp_out[] = "mt_out_XXXXXX";
 
     std::string input_file = tempName(cfg->getOption(CFG_SERVER_TMPDIR), temp_in);
+#ifdef __linux__
+    fd = open(input_file.c_str(), O_RDWR | O_CREAT | O_EXCL | O_CLOEXEC, S_IRUSR | S_IWUSR);
+#else
     fd = open(input_file.c_str(), O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
+#endif
     if (fd == -1) {
         log_debug("Failed to open input file {}: {}", input_file.c_str(),
             strerror(errno));
@@ -74,7 +78,11 @@ std::string run_simple_process(const std::shared_ptr<Config>& cfg, const std::st
 
     /* touching output file */
     std::string output_file = tempName(cfg->getOption(CFG_SERVER_TMPDIR), temp_out);
+#ifdef __linux__
+    fd = open(output_file.c_str(), O_RDWR | O_CREAT | O_EXCL | O_CLOEXEC, S_IRUSR | S_IWUSR);
+#else
     fd = open(output_file.c_str(), O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
+#endif
     if (fd == -1) {
         log_debug("Failed to open output file {}: {}", output_file.c_str(),
             strerror(errno));
@@ -92,7 +100,11 @@ std::string run_simple_process(const std::shared_ptr<Config>& cfg, const std::st
     }
 
     /* reading output file */
-    file = fopen(output_file.c_str(), "r");
+#ifdef __linux__
+    file = ::fopen(output_file.c_str(), "re");
+#else
+    file = ::fopen(output_file.c_str(), "r");
+#endif
     if (!file) {
         log_debug("Could not open output file {}: {}", output_file.c_str(),
             strerror(errno));
