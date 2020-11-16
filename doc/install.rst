@@ -55,6 +55,22 @@ Gerbera is available in Fedora 29 or later.
 
     sudo dnf install gerbera
 
+FreeBSD
+~~~~~~~~~~~~~~~~~
+.. index:: FreeBSD
+
+Gerbera is available via packages and ports collection.
+
+.. code-block:: sh
+
+    pkg install gerbera
+
+or
+
+.. code-block:: sh
+
+   cd /usr/ports/net/gerbera/ && make install clean
+
 CentOS
 ~~~~~~~~~~~~~~~~~
 .. index:: CentOS
