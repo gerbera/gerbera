@@ -437,7 +437,7 @@ protected:
     /// \brief action to be executed (an absolute path to a script that will process the XML)
     std::string action;
 
-    /// \brief a field where you can save any string you wnat.
+    /// \brief a field where you can save any string you want.
     std::string state;
 
 public:
@@ -502,7 +502,7 @@ public:
 /// \brief An item that is pointing to a file located in the "servedir"
 /// directory.
 ///
-/// This implementation will alow to easily launch Java games on the
+/// This implementation will allow to easily launch Java games on the
 /// Streamium media renderer. Why "internal URL"? The port of the server
 /// can change upon restarts, I have seen that the SDK often binds to
 /// a new port (no matter what is configured). The location of an

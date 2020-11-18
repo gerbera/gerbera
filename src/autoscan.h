@@ -148,7 +148,7 @@ public:
 
     /// \brief Increments the task count.
     ///
-    /// When recursive autoscan is in progress, we only want to subcribe to
+    /// When recursive autoscan is in progress, we only want to subscribe to
     /// a timer event when the scan is finished. However, recursive scans
     /// spawn tasks for each directory. When adding a rescan task for
     /// subdirectories, the taskCount will be incremented. When a task is

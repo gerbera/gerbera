@@ -47,7 +47,7 @@ public:
     /// in libupnp.
     class Stat {
     public:
-        /// \brief Initalizes the class with given values, the values
+        /// \brief Initializes the class with given values, the values
         /// can not be changed afterwards.
         ///
         /// \param size size of the media in bytes
