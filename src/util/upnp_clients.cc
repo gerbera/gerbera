@@ -33,7 +33,7 @@
 
 // table of supported clients (sequence of entries matters!)
 std::vector<struct ClientInfo> Clients::clientInfo = std::vector<struct ClientInfo> {
-    // Used for not explicitely listed clients, must be first entry
+    // Used for not explicitly listed clients, must be first entry
     {
         "Unknown",
         ClientType::Unknown,

@@ -133,7 +133,7 @@ public:
     ///
     /// When something in the content directory chagnes, we will send out
     /// an event to all subscribed devices. Container updates are supported,
-    /// and of course the mimimum required - systemUpdateID.
+    /// and of course the minimum required - systemUpdateID.
     void sendSubscriptionUpdate(const std::string& containerUpdateIDs_CSV);
 };
 

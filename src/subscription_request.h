@@ -70,7 +70,7 @@ public:
     /// \brief Returns the service ID (should be one of the services that we support).
     std::string getServiceID() const;
 
-    /// \brief Returns the UDN of the recepient device (should be ours)
+    /// \brief Returns the UDN of the recipient device (should be ours)
     std::string getUDN() const;
 
     /// \brief Returns the subscription ID.

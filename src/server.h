@@ -76,7 +76,7 @@ public:
     ///
     /// Reads information from the config and creates a
     /// device description document. Initializes the UPnP SDK,
-    /// sets up the virutal web server directories and registers
+    /// sets up the virtual web server directories and registers
     /// web callbacks. Starts the update manager task.
     void run();
 
@@ -88,7 +88,7 @@ public:
 
     /// \brief Returns the port of the server.
     ///
-    /// Returns a string representation of the server port. Allthough
+    /// Returns a string representation of the server port. Although
     /// the port is also specified in the config, we can never be sure
     /// that we actually get that port after startup. This function
     /// returns the port on which the server is actually running.
