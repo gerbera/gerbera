@@ -59,7 +59,11 @@ private:
 public:
     explicit file_io_callback(const char* path)
     {
-        file = fopen(path, "rb");
+#ifdef __linux__
+        file = ::fopen(path, "rbe");
+#else
+        file = ::fopen(path, "rb");
+#endif
         if (file == nullptr) {
             throw_std_runtime_error(std::string("Could not fopen ") + path);
         }

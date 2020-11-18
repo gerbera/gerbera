@@ -141,9 +141,17 @@ void ProcessIOHandler::open(enum UpnpOpenFileMode mode)
     }
 
     if (mode == UPNP_READ)
+#ifdef __linux__
+        fd = ::open(filename.c_str(), O_RDONLY | O_NONBLOCK | O_CLOEXEC);
+#else
         fd = ::open(filename.c_str(), O_RDONLY | O_NONBLOCK);
+#endif
     else if (mode == UPNP_WRITE)
+#ifdef __linux__
+        fd = ::open(filename.c_str(), O_WRONLY | O_NONBLOCK | O_CLOEXEC);
+#else
         fd = ::open(filename.c_str(), O_WRONLY | O_NONBLOCK);
+#endif
     else
         fd = -1;
 

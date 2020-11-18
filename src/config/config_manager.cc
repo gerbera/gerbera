@@ -895,7 +895,7 @@ void ConfigManager::load(const fs::path& userHome)
 
     // now get the option list for the drop down menu
     auto menu_opts = setOption(root, CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN)->getArrayOption();
-    if (std::find_if(menu_opts.begin(), menu_opts.end(), [=](const auto& s) { return s == std::to_string(def_ipp); }) == menu_opts.end())
+    if (std::none_of(menu_opts.begin(), menu_opts.end(), [=](const auto& s) { return s == std::to_string(def_ipp); }))
         throw std::runtime_error("Error in config file: at least one <option> "
                                  "under <items-per-page> must match the "
                                  "<items-per-page default=\"\" /> attribute");

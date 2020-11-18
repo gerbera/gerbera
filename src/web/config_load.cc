@@ -71,7 +71,7 @@ void web::configLoad::createItem(pugi::xml_node& item, const std::string& name, 
     item.append_attribute("status") = "unchanged";
 
     item.append_attribute("origValue") = config->getOrigValue(name).c_str();
-    item.append_attribute("source") = std::find_if(dbEntries.begin(), dbEntries.end(), [&](const auto& s) { return s.item == name; }) != dbEntries.end() ? "database" : "config.xml";
+    item.append_attribute("source") = std::any_of(dbEntries.begin(), dbEntries.end(), [&](const auto& s) { return s.item == name; }) ? "database" : "config.xml";
 }
 
 template <typename T>
