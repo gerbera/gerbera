@@ -50,7 +50,7 @@ std::string ConfigGenerator::generate(const fs::path& userHome, const fs::path& 
     auto docinfo = config.append_child(pugi::node_comment);
     docinfo.set_value("\n\
      See http://gerbera.io or read the docs for more\n\
-     information on creating and using config.xml configration files.\n\
+     information on creating and using config.xml configuration files.\n\
     ");
 
     generateServer(userHome, configDir, prefixDir, &config);
