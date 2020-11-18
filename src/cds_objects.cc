@@ -255,7 +255,7 @@ void CdsItemInternalURL::validate()
     CdsItemExternalURL::validate();
 
     if (startswith(this->location, "http://"))
-        throw_std_runtime_error("Internal URL item validation failed: only realative URLs allowed");
+        throw_std_runtime_error("Internal URL item validation failed: only relative URLs allowed");
 }
 
 CdsContainer::CdsContainer(std::shared_ptr<Database> database)
