@@ -13,15 +13,20 @@ if [ -d "$pwd/gtest" ]; then rm -Rf "$pwd/gtest"; fi
 
 ## Download GoogleTest from GitHub
 wget https://github.com/google/googletest/archive/release-1.10.0.tar.gz -O gtest.tgz
-mkdir gtest || exit
-tar -xf gtest.tgz --strip 1 -C gtest|| exit 1
+mkdir gtest || exit 1
+tar -xf gtest.tgz --strip 1 -C gtest || exit 1
 cd gtest || exit 1
 
 ## Build GoogleTest using CMake
 mkdir build && cd build || exit 1
 cmake -DCMAKE_CXX_FLAGS="$CMAKE_CXX_FLAGS -std=c++17" ../ || exit 1
 
-make -j$(nproc) && make install
+if command -v nproc >/dev/null 2>&1; then
+    make -j$(nproc)
+else
+    make
+fi
+make install
 
 if [ "$unamestr" != 'Darwin' ]; then
     ldconfig
