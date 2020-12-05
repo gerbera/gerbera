@@ -182,9 +182,6 @@ protected:
 private:
     std::string sql_query;
 
-    /* helper for createObjectFromRow() */
-    std::string getRealLocation(int parentID, std::string location);
-
     std::shared_ptr<CdsObject> createObjectFromRow(const std::unique_ptr<SQLRow>& row);
     std::shared_ptr<CdsObject> createObjectFromSearchRow(const std::unique_ptr<SQLRow>& row);
     std::map<std::string, std::string> retrieveMetadataForObject(int objectId);
