@@ -131,9 +131,6 @@ enum MetadataCol {
 
 #define SELECT_METADATA "SELECT id, item_id, property_name, property_value "
 
-#define SQL_QUERY sql_query
-#define SQL_QUERY sql_query
-
 /* enum for createObjectFromRow's mode parameter */
 
 SQLDatabase::SQLDatabase(std::shared_ptr<Config> config)
@@ -424,7 +421,7 @@ std::shared_ptr<CdsObject> SQLDatabase::loadObject(int objectID)
     std::ostringstream qb;
     //log_debug("sql_query = {}",sql_query.c_str());
 
-    qb << SQL_QUERY << " WHERE " << TQD('f', "id") << '=' << objectID;
+    qb << sql_query << " WHERE " << TQD('f', "id") << '=' << objectID;
 
     auto res = select(qb);
     std::unique_ptr<SQLRow> row;
@@ -437,7 +434,7 @@ std::shared_ptr<CdsObject> SQLDatabase::loadObject(int objectID)
 std::shared_ptr<CdsObject> SQLDatabase::loadObjectByServiceID(const std::string& serviceID)
 {
     std::ostringstream qb;
-    qb << SQL_QUERY << " WHERE " << TQD('f', "service_id") << '=' << quote(serviceID);
+    qb << sql_query << " WHERE " << TQD('f', "service_id") << '=' << quote(serviceID);
     auto res = select(qb);
     std::unique_ptr<SQLRow> row;
     if (res != nullptr && (row = res->nextRow()) != nullptr) {
@@ -514,7 +511,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_pt
     };
 
     qb.str("");
-    qb << SQL_QUERY << " WHERE ";
+    qb << sql_query << " WHERE ";
 
     if (param->getFlag(BROWSE_DIRECT_CHILDREN) && IS_CDS_CONTAINER(objectType)) {
         int count = param->getRequestedCount();
@@ -679,7 +676,7 @@ std::shared_ptr<CdsObject> SQLDatabase::findObjectByPath(fs::path fullpath, bool
         dbLocation = addLocationPrefix(LOC_DIR_PREFIX, fullpath);
 
     std::ostringstream qb;
-    qb << SQL_QUERY
+    qb << sql_query
        << " WHERE " << TQD('f', "location_hash") << '=' << quote(stringHash(dbLocation))
        << " AND " << TQD('f', "location") << '=' << quote(dbLocation)
        << " AND " << TQD('f', "ref_id") << " IS NULL "
