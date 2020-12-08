@@ -73,7 +73,10 @@
 
 #define WHITE_SPACE " \t\r\n"
 
-static constexpr const char* HEX_CHARS = "0123456789abcdef";
+namespace {
+constexpr const char* HEX_CHARS = "0123456789abcdef";
+constexpr const char* HEX_CHARS2 = "0123456789ABCDEF";
+} //namespace
 
 std::vector<std::string> splitString(const std::string& str, char sep, bool empty)
 {
@@ -340,8 +343,6 @@ std::string generateRandomId()
     return uuid_String;
 }
 
-static constexpr const char* HEX_CHARS2 = "0123456789ABCDEF";
-
 std::string urlEscape(const std::string& str)
 {
     std::ostringstream buf;
@@ -407,7 +408,8 @@ std::string urlUnescape(const std::string& str)
     return buf.str();
 }
 
-static std::string dictEncode(const std::map<std::string, std::string>& dict, char sep1, char sep2)
+namespace {
+std::string dictEncode(const std::map<std::string, std::string>& dict, char sep1, char sep2)
 {
     std::ostringstream buf;
     for (auto it = dict.begin(); it != dict.end(); it++) {
@@ -418,6 +420,7 @@ static std::string dictEncode(const std::map<std::string, std::string>& dict, ch
     }
     return buf.str();
 }
+} // namespace
 
 std::string dictEncode(const std::map<std::string, std::string>& dict)
 {

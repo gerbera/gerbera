@@ -207,7 +207,8 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
     return 0;
 }
 
-static duk_ret_t convert_charset_generic(duk_context* ctx, charset_convert_t chr)
+namespace {
+duk_ret_t convert_charset_generic(duk_context* ctx, charset_convert_t chr)
 {
     auto* self = Script::getContextScript(ctx);
     if (duk_get_top(ctx) != 1)
@@ -229,6 +230,7 @@ static duk_ret_t convert_charset_generic(duk_context* ctx, charset_convert_t chr
     }
     return 0;
 }
+} //namespace
 
 duk_ret_t js_f2i(duk_context* ctx)
 {

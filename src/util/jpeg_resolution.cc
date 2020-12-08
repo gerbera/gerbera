@@ -68,13 +68,14 @@ using uchar = unsigned char;
 #define M_DHT 0xC4
 #define M_DRI 0xDD
 
+namespace {
 #define ITEM_BUF_SIZE 16
-static int Get16m(const void* Short)
+int Get16m(const void* Short)
 {
     return (static_cast<uchar*>(const_cast<void*>(Short))[0] << 8) | static_cast<uchar*>(const_cast<void*>(Short))[1];
 }
 
-static int ioh_fgetc(const std::unique_ptr<IOHandler>& ioh)
+int ioh_fgetc(const std::unique_ptr<IOHandler>& ioh)
 {
     uchar c[1] = { 0 };
     int ret = ioh->read(reinterpret_cast<char*>(c), sizeof(char));
@@ -83,7 +84,7 @@ static int ioh_fgetc(const std::unique_ptr<IOHandler>& ioh)
     return static_cast<int>(c[0]);
 }
 
-static void get_jpeg_resolution(const std::unique_ptr<IOHandler>& ioh, int* w, int* h)
+void get_jpeg_resolution(const std::unique_ptr<IOHandler>& ioh, int* w, int* h)
 {
     int a;
 
@@ -162,6 +163,7 @@ static void get_jpeg_resolution(const std::unique_ptr<IOHandler>& ioh, int* w, i
     }
     throw_std_runtime_error("get_jpeg_resolution: resolution not found");
 }
+} // namespace
 
 // IOHandler must be opened
 std::string get_jpeg_resolution(const std::unique_ptr<IOHandler>& ioh)

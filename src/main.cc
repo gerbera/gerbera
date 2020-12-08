@@ -52,7 +52,8 @@
 #include "contrib/cxxopts.hpp"
 #include "server.h"
 
-static struct {
+namespace {
+struct {
     int shutdown_flag = 0;
     int restart_flag = 0;
     pthread_t main_thread_id;
@@ -62,7 +63,7 @@ static struct {
     std::condition_variable cond;
 } _ctx;
 
-static void printCopyright()
+void printCopyright()
 {
     printf("\nGerbera UPnP Server version %s - %s\n\n", VERSION, DESC_MANUFACTURER_URL);
     printf("===============================================================================\n");
@@ -72,7 +73,7 @@ static void printCopyright()
     printf("===============================================================================\n");
 }
 
-static void logCopyright()
+void logCopyright()
 {
     log_info("Gerbera UPnP Server version {} - {}", VERSION, DESC_MANUFACTURER_URL);
     log_info("===============================================================================");
@@ -82,7 +83,7 @@ static void logCopyright()
     log_info("===============================================================================");
 }
 
-static void signalHandler(int signum)
+void signalHandler(int signum)
 {
     if (_ctx.main_thread_id != pthread_self()) {
         return;
@@ -105,7 +106,7 @@ static void signalHandler(int signum)
     _ctx.cond.notify_one();
 }
 
-static void installSignalHandler()
+void installSignalHandler()
 {
     _ctx.main_thread_id = pthread_self();
 
@@ -129,6 +130,7 @@ static void installSignalHandler()
         log_error("Could not register SIGPIPE handler!");
     }
 }
+} // namespace
 
 int main(int argc, char** argv, char** envp)
 {

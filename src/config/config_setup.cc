@@ -46,6 +46,13 @@
 #include "util/mt_inotify.h"
 #endif
 
+namespace {
+bool validateTrueFalse(const std::string& optValue)
+{
+    return (optValue == "true" || optValue == "false");
+}
+} // namespace
+
 pugi::xml_node ConfigSetup::getXmlElement(const pugi::xml_node& root) const
 {
     pugi::xpath_node xpathNode = root.select_node(cpath.c_str());
@@ -403,11 +410,6 @@ void ConfigBoolSetup::makeOption(const pugi::xml_node& root, const std::shared_p
 {
     newOption(getXmlContent(root));
     setOption(config);
-}
-
-static bool validateTrueFalse(const std::string& optValue)
-{
-    return (optValue == "true" || optValue == "false");
 }
 
 void ConfigBoolSetup::makeOption(std::string optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)

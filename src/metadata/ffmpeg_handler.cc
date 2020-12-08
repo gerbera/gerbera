@@ -149,8 +149,9 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
     }
 }
 
+namespace {
 // ffmpeg library calls
-static void addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item, AVFormatContext* pFormatCtx)
+void addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item, AVFormatContext* pFormatCtx)
 {
     int64_t hours, mins, secs, us;
     int audioch = 0, samplefreq = 0;
@@ -225,10 +226,11 @@ static void addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item, AVForm
 }
 
 // Stub for suppressing ffmpeg error messages during matadata extraction
-static void FfmpegNoOutputStub(void* ptr, int level, const char* fmt, va_list vl)
+void FfmpegNoOutputStub(void* ptr, int level, const char* fmt, va_list vl)
 {
     // do nothing
 }
+} //namespace
 
 void FfmpegHandler::fillMetadata(std::shared_ptr<CdsItem> item)
 {

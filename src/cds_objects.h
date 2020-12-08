@@ -46,9 +46,7 @@ namespace fs = std::filesystem;
 #include "metadata/metadata_handler.h"
 #include "util/tools.h"
 
-// forward declaration
-class Database;
-
+namespace {
 // ATTENTION: These values need to be changed in web/js/items.js too.
 #define OBJECT_TYPE_CONTAINER 0x00000001u
 #define OBJECT_TYPE_ITEM 0x00000002u
@@ -62,15 +60,15 @@ class Database;
 #define STRING_OBJECT_TYPE_EXTERNAL_URL "external_url"
 #define STRING_OBJECT_TYPE_INTERNAL_URL "internal_url"
 
-static constexpr bool IS_CDS_CONTAINER(unsigned int type)
+constexpr bool IS_CDS_CONTAINER(unsigned int type)
 {
     return type & OBJECT_TYPE_CONTAINER;
 };
-static constexpr bool IS_CDS_ITEM(unsigned int type) { return type & OBJECT_TYPE_ITEM; };
-static constexpr bool IS_CDS_ACTIVE_ITEM(unsigned int type) { return type & OBJECT_TYPE_ACTIVE_ITEM; };
-static constexpr bool IS_CDS_ITEM_EXTERNAL_URL(unsigned int type) { return type & OBJECT_TYPE_ITEM_EXTERNAL_URL; };
-static constexpr bool IS_CDS_ITEM_INTERNAL_URL(unsigned int type) { return type & OBJECT_TYPE_ITEM_INTERNAL_URL; };
-static constexpr bool IS_CDS_PURE_ITEM(unsigned int type) { return type == OBJECT_TYPE_ITEM; };
+constexpr bool IS_CDS_ITEM(unsigned int type) { return type & OBJECT_TYPE_ITEM; };
+constexpr bool IS_CDS_ACTIVE_ITEM(unsigned int type) { return type & OBJECT_TYPE_ACTIVE_ITEM; };
+constexpr bool IS_CDS_ITEM_EXTERNAL_URL(unsigned int type) { return type & OBJECT_TYPE_ITEM_EXTERNAL_URL; };
+constexpr bool IS_CDS_ITEM_INTERNAL_URL(unsigned int type) { return type & OBJECT_TYPE_ITEM_INTERNAL_URL; };
+constexpr bool IS_CDS_PURE_ITEM(unsigned int type) { return type == OBJECT_TYPE_ITEM; };
 
 #define OBJECT_FLAG_RESTRICTED 0x00000001u
 #define OBJECT_FLAG_SEARCHABLE 0x00000002u
@@ -85,6 +83,10 @@ static constexpr bool IS_CDS_PURE_ITEM(unsigned int type) { return type == OBJEC
 #define OBJECT_AUTOSCAN_NONE 0u
 #define OBJECT_AUTOSCAN_UI 1u
 #define OBJECT_AUTOSCAN_CFG 2u
+} // namespace
+
+// forward declaration
+class Database;
 
 /// \brief Generic object in the Content Directory.
 class CdsObject {

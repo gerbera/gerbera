@@ -51,7 +51,8 @@
 #include "onlineservice/atrailers_content_handler.h"
 #endif
 
-static constexpr std::array<duk_function_list_entry, 8> js_global_functions = { {
+namespace {
+constexpr std::array<duk_function_list_entry, 8> js_global_functions = { {
     { "print", js_print, DUK_VARARGS },
     { "addCdsObject", js_addCdsObject, 3 },
     { "copyObject", js_copyObject, 1 },
@@ -61,6 +62,7 @@ static constexpr std::array<duk_function_list_entry, 8> js_global_functions = { 
     { "j2i", js_j2i, 1 },
     { nullptr, nullptr, 0 },
 } };
+}
 
 std::string Script::getProperty(const std::string& name)
 {

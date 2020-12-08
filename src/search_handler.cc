@@ -34,7 +34,8 @@
 #include "database/database.h"
 #include "util/tools.h"
 
-static const std::unordered_map<std::string, TokenType> tokenTypes {
+namespace {
+const std::unordered_map<std::string_view, TokenType> tokenTypes {
     { "(", TokenType::LPAREN },
     { ")", TokenType::RPAREN },
     { "*", TokenType::ASTERISK },
@@ -56,12 +57,13 @@ static const std::unordered_map<std::string, TokenType> tokenTypes {
     { "or", TokenType::OR }
 };
 
-static std::string aslowercase(const std::string& src)
+std::string aslowercase(const std::string& src)
 {
     std::string copy = src;
     std::transform(copy.begin(), copy.end(), copy.begin(), ::tolower);
     return copy;
 }
+} // namespace
 
 std::unique_ptr<SearchToken> SearchLexer::nextToken()
 {

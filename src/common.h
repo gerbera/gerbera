@@ -36,6 +36,7 @@
 #include "exceptions.h"
 #include "util/logger.h"
 
+namespace {
 #define CONFIG_XML_VERSION_0_11_0 1
 #define CONFIG_XML_VERSION 2
 
@@ -99,7 +100,10 @@
 #define CDS_ID_BLACKHOLE (-1)
 #define CDS_ID_ROOT 0
 #define CDS_ID_FS_ROOT 1
-static constexpr bool IS_FORBIDDEN_CDS_ID(int id) { return id <= CDS_ID_FS_ROOT; }
+constexpr bool IS_FORBIDDEN_CDS_ID(int id)
+{
+    return id <= CDS_ID_FS_ROOT;
+}
 
 // internal setting keys
 #define SET_LAST_MODIFIED "last_modified"
@@ -354,4 +358,5 @@ static constexpr bool IS_FORBIDDEN_CDS_ID(int id) { return id <= CDS_ID_FS_ROOT;
 #define LINK_WEB_REQUEST_HANDLER "/" SERVER_VIRTUAL_DIR "/" CONTENT_UI_HANDLER "/"
 #define LINK_SERVE_REQUEST_HANDLER "/" SERVER_VIRTUAL_DIR "/" CONTENT_SERVE_HANDLER "/"
 #define LINK_URL_REQUEST_HANDLER "/" SERVER_VIRTUAL_DIR "/" CONTENT_ONLINE_HANDLER "/"
+} // namespace
 #endif // __COMMON_H__

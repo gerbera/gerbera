@@ -32,17 +32,19 @@
 
 #include <utility>
 
-web::clients::clients(std::shared_ptr<Config> config, std::shared_ptr<Database> database,
-    std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
-    : WebRequestHandler(std::move(config), std::move(database), std::move(content), std::move(sessionManager))
-{
-}
-
-static std::string steady_clock_to_string(std::chrono::steady_clock::time_point t)
+namespace {
+std::string steady_clock_to_string(std::chrono::steady_clock::time_point t)
 {
     auto systime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()
         + std::chrono::duration_cast<std::chrono::system_clock::duration>(t - std::chrono::steady_clock::now()));
     return trimString(std::asctime(std::localtime(&systime)));
+}
+} // namespace
+
+web::clients::clients(std::shared_ptr<Config> config, std::shared_ptr<Database> database,
+    std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
+    : WebRequestHandler(std::move(config), std::move(database), std::move(content), std::move(sessionManager))
+{
 }
 
 void web::clients::process()

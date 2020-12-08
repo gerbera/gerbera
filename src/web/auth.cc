@@ -41,19 +41,20 @@
 
 #define LOGIN_TIMEOUT 10 // in seconds
 
-static time_t get_time()
+namespace {
+time_t get_time()
 {
     return std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::system_clock::now()).time_since_epoch().count();
 }
 
-static std::string generate_token()
+std::string generate_token()
 {
     const time_t expiration = get_time() + LOGIN_TIMEOUT;
     std::string salt = generateRandomId();
     return std::to_string(expiration) + '_' + salt;
 }
 
-static bool check_token(const std::string& token, const std::string& password, const std::string& encPassword)
+bool check_token(const std::string& token, const std::string& password, const std::string& encPassword)
 {
     std::vector<std::string> parts = splitString(token, '_');
     if (parts.size() != 2)
@@ -64,6 +65,7 @@ static bool check_token(const std::string& token, const std::string& password, c
     std::string checksum = hexStringMd5(token + password);
     return (checksum == encPassword);
 }
+} // namespace
 
 web::auth::auth(const std::shared_ptr<Config>& config, std::shared_ptr<Database> database,
     std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)

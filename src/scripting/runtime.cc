@@ -32,11 +32,13 @@
 #ifdef HAVE_JS
 #include "runtime.h" // API
 
-[[noreturn]] static void fatal_handler(void* udata, const char* msg)
+namespace {
+[[noreturn]] void fatal_handler(void* udata, const char* msg)
 {
     log_error("Fatal Duktape error: {}", msg ? msg : "no message");
     abort();
 }
+} // namespace
 
 Runtime::Runtime()
 {

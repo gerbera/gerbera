@@ -46,8 +46,9 @@ LibExifHandler::LibExifHandler(std::shared_ptr<Config> config)
 {
 }
 
+namespace {
 /// \brief Sets resolution for a given resource index, item must be a JPEG image
-static void setJpegResolutionResource(const std::shared_ptr<CdsItem>& item, size_t res_num)
+void setJpegResolutionResource(const std::shared_ptr<CdsItem>& item, size_t res_num)
 {
     try {
         std::unique_ptr<IOHandler> fio_h = std::make_unique<FileIOHandler>(item->getLocation());
@@ -63,7 +64,7 @@ static void setJpegResolutionResource(const std::shared_ptr<CdsItem>& item, size
     }
 }
 
-static int getTagFromString(const std::string& tag)
+int getTagFromString(const std::string& tag)
 {
     if (tag == "EXIF_TAG_INTEROPERABILITY_INDEX")
         return EXIF_TAG_INTEROPERABILITY_INDEX;
@@ -275,6 +276,7 @@ static int getTagFromString(const std::string& tag)
     log_warning("Ignoring unknown libexif tag: {}", tag.c_str());
     return -1;
 }
+} // namespace
 
 void LibExifHandler::process_ifd(ExifContent* content, const std::shared_ptr<CdsItem>& item, const std::unique_ptr<StringConverter>& sc, const std::vector<std::string>& auxtags)
 {
