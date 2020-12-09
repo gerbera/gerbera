@@ -189,18 +189,18 @@ private:
     /* helper class and helper function for addObject and updateObject */
     class AddUpdateTable {
     public:
-        AddUpdateTable(const std::string& table, const std::map<std::string, std::string>& dict, const std::string& operation)
+        AddUpdateTable(const std::string& tableName, const std::map<std::string, std::string>& dict, const std::string& operation)
         {
-            this->table = table;
+            this->tableName = tableName;
             this->dict = dict;
             this->operation = operation;
         }
-        std::string getTable() const { return table; }
+        std::string getTableName() const { return tableName; }
         std::map<std::string, std::string> getDict() const { return dict; }
         std::string getOperation() const { return operation; }
 
     protected:
-        std::string table;
+        std::string tableName;
         std::map<std::string, std::string> dict;
         std::string operation;
     };
@@ -209,7 +209,7 @@ private:
     void generateMetadataDBOperations(const std::shared_ptr<CdsObject>& obj, bool isUpdate,
         std::vector<std::shared_ptr<AddUpdateTable>>& operations);
 
-    std::unique_ptr<std::ostringstream> sqlForInsert(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable);
+    std::unique_ptr<std::ostringstream> sqlForInsert(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const;
     std::unique_ptr<std::ostringstream> sqlForUpdate(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const;
     std::unique_ptr<std::ostringstream> sqlForDelete(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const;
 
@@ -246,20 +246,8 @@ private:
     void setFsRootName(const std::string& rootName = "");
 
     std::string fsRootName;
-
-    int lastID;
-
-    int getNextID();
-    void loadLastID();
-
-    int lastMetadataID;
-
-    int getNextMetadataID();
-    void loadLastMetadataID();
-
     std::shared_ptr<SQLEmitter> sqlEmitter;
 
-    std::mutex nextIDMutex;
     using AutoLock = std::lock_guard<std::mutex>;
 };
 

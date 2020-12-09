@@ -104,7 +104,7 @@ enum {
                                              << '=' << TQD("rf", "id") << " LEFT JOIN " << TQ(AUTOSCAN_TABLE) << ' '                                \
                                              << TQ("as") << " ON " << TQD("as", "obj_id") << '=' << TQD('f', "id") << ' '
 
-enum SearchCol {
+enum class SearchCol {
     id = 0,
     ref_id,
     parent_id,
@@ -118,11 +118,17 @@ enum SearchCol {
     location
 };
 
+template <typename E>
+constexpr auto to_underlying(E e) noexcept
+{
+    return static_cast<std::underlying_type_t<E>>(e);
+}
+
 #define SELECT_DATA_FOR_SEARCH "SELECT distinct c.id, c.ref_id, c.parent_id," \
     << " c.object_type, c.upnp_class, c.dc_title, c.metadata,"                \
     << " c.resources, c.mime_type, c.track_number, c.location"
 
-enum MetadataCol {
+enum class MetadataCol {
     m_id = 0,
     m_item_id,
     m_property_name,
@@ -138,8 +144,6 @@ SQLDatabase::SQLDatabase(std::shared_ptr<Config> config)
 {
     table_quote_begin = '\0';
     table_quote_end = '\0';
-    lastID = INVALID_OBJECT_ID;
-    lastMetadataID = INVALID_OBJECT_ID;
 }
 
 void SQLDatabase::init()
@@ -152,12 +156,6 @@ void SQLDatabase::init()
     this->sql_query = buf.str();
 
     sqlEmitter = std::make_shared<DefaultSQLEmitter>();
-}
-
-void SQLDatabase::dbReady()
-{
-    loadLastID();
-    loadLastMetadataID();
 }
 
 void SQLDatabase::shutdown()
@@ -373,14 +371,21 @@ void SQLDatabase::addObject(std::shared_ptr<CdsObject> obj, int* changedContaine
     if (obj->getID() != INVALID_OBJECT_ID)
         throw_std_runtime_error("tried to add an object with an object ID set");
     //obj->setID(INVALID_OBJECT_ID);
-    auto data = _addUpdateObject(obj, false, changedContainer);
+    std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> tables = _addUpdateObject(obj, false, changedContainer);
 
-    // int lastInsertID = INVALID_OBJECT_ID;
-    // int lastMetadataInsertID = INVALID_OBJECT_ID;
-    for (const auto& addUpdateTable : data) {
+    for (const auto& addUpdateTable : tables) {
+
         std::shared_ptr<std::ostringstream> qb = sqlForInsert(obj, addUpdateTable);
-        log_debug("insert_query: {}", qb->str().c_str());
-        exec(*qb);
+        log_debug("Generated insert: {}", qb->str().c_str());
+
+        if (addUpdateTable->getTableName() == CDS_OBJECT_TABLE) {
+            int newId = exec(*qb, true);
+            obj->setID(newId);
+        } else {
+            exec(*qb, false);
+        }
+
+
     }
 }
 
@@ -738,13 +743,10 @@ int SQLDatabase::createContainer(int parentID, std::string name, const std::stri
         }
     }*/
 
-    int newID = getNextID();
-
     std::ostringstream qb;
     qb << "INSERT INTO "
        << TQ(CDS_OBJECT_TABLE)
        << " ("
-       << TQ("id") << ','
        << TQ("parent_id") << ','
        << TQ("object_type") << ','
        << TQ("upnp_class") << ','
@@ -752,7 +754,6 @@ int SQLDatabase::createContainer(int parentID, std::string name, const std::stri
        << TQ("location") << ','
        << TQ("location_hash") << ','
        << TQ("ref_id") << ") VALUES ("
-       << newID << ','
        << parentID << ','
        << OBJECT_TYPE_CONTAINER << ','
        << (!upnpClass.empty() ? quote(upnpClass) : quote(UPNP_DEFAULT_CLASS_CONTAINER)) << ','
@@ -766,30 +767,28 @@ int SQLDatabase::createContainer(int parentID, std::string name, const std::stri
     }
     qb << ')';
 
-    exec(qb);
+    int newId = exec(qb, true); // true = get last id#
+    log_debug("Created object row, id: {}", newId);
 
     if (!itemMetadata.empty()) {
         for (const auto& [key, val] : itemMetadata) {
-            int newMetadataID = getNextMetadataID();
             std::ostringstream ib;
-            ib << "INSERT INTO"
+            ib << "INSERT INTO "
                << TQ(METADATA_TABLE)
                << " ("
-               << TQ("id") << ','
                << TQ("item_id") << ','
                << TQ("property_name") << ','
                << TQ("property_value") << ") VALUES ("
-               << newMetadataID << ','
-               << newID << ","
+               << newId << ","
                << quote(key) << ","
                << quote(val)
                << ")";
             exec(ib);
         }
-        log_debug("Wrote metadata for cds_object {}", newID);
+        log_debug("Wrote metadata for cds_object {}", newId);
     }
 
-    return newID;
+    return newId;
 }
 
 fs::path SQLDatabase::buildContainerPath(int parentID, const std::string& title)
@@ -1003,18 +1002,18 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromSearchRow(const std::uni
     auto obj = CdsObject::createObject(self, objectType);
 
     /* set common properties */
-    obj->setID(std::stoi(row->col(SearchCol::id)));
-    obj->setRefID(stoiString(row->col(SearchCol::ref_id)));
+    obj->setID(std::stoi(row->col(to_underlying(SearchCol::id))));
+    obj->setRefID(stoiString(row->col(to_underlying(SearchCol::ref_id))));
 
-    obj->setParentID(std::stoi(row->col(SearchCol::parent_id)));
-    obj->setTitle(row->col(SearchCol::dc_title));
-    obj->setClass(row->col(SearchCol::upnp_class));
+    obj->setParentID(std::stoi(row->col(to_underlying(SearchCol::parent_id))));
+    obj->setTitle(row->col(to_underlying(SearchCol::dc_title)));
+    obj->setClass(row->col(to_underlying(SearchCol::upnp_class)));
 
     auto meta = retrieveMetadataForObject(obj->getID());
     if (!meta.empty())
         obj->setMetadata(meta);
 
-    std::string resources_str = row->col(SearchCol::resources);
+    std::string resources_str = row->col(to_underlying(SearchCol::resources));
     bool resource_zero_ok = false;
     if (!resources_str.empty()) {
         std::vector<std::string> resources = splitString(resources_str, RESOURCE_SEP);
@@ -1029,14 +1028,14 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromSearchRow(const std::uni
             throw_std_runtime_error("tried to create object without at least one resource");
 
         auto item = std::static_pointer_cast<CdsItem>(obj);
-        item->setMimeType(row->col(SearchCol::mime_type));
+        item->setMimeType(row->col(to_underlying(SearchCol::mime_type)));
         if (IS_CDS_PURE_ITEM(objectType)) {
-            item->setLocation(stripLocationPrefix(row->col(SearchCol::location)));
+            item->setLocation(stripLocationPrefix(row->col(to_underlying(SearchCol::location))));
         } else { // URLs and active items
-            item->setLocation(row->col(SearchCol::location));
+            item->setLocation(row->col(to_underlying(SearchCol::location)));
         }
 
-        item->setTrackNumber(stoiString(row->col(SearchCol::track_number)));
+        item->setTrackNumber(stoiString(row->col(to_underlying(SearchCol::track_number))));
     } else {
         throw DatabaseException("", "unknown object type: " + std::to_string(objectType));
     }
@@ -1059,7 +1058,7 @@ std::map<std::string, std::string> SQLDatabase::retrieveMetadataForObject(int ob
 
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow()) != nullptr) {
-        metadata[row->col(MetadataCol::m_property_name)] = row->col(MetadataCol::m_property_value);
+        metadata[row->col(to_underlying(MetadataCol::m_property_name))] = row->col(to_underlying(MetadataCol::m_property_value));
     }
     return metadata;
 }
@@ -1219,9 +1218,10 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObjects(const st
     if (count <= 0)
         return nullptr;
 
-    bool forbidden = std::any_of(list->begin(), list->end(), [](const auto& id) { return IS_FORBIDDEN_CDS_ID(id); });
-    if (forbidden) {
-        throw_std_runtime_error("tried to delete a forbidden ID (" + std::to_string(id) + ")");
+    for (int id : *list) {
+        if (IS_FORBIDDEN_CDS_ID(id)) {
+            throw_std_runtime_error("tried to delete a forbidden ID (" + std::to_string(id) + ")");
+        }
     }
 
     std::ostringstream idsBuf;
@@ -2080,70 +2080,6 @@ void SQLDatabase::setFsRootName(const std::string& rootName)
     }
 }
 
-int SQLDatabase::getNextID()
-{
-    log_debug("NextId: {}", lastID + 1);
-    if (lastID < CDS_ID_FS_ROOT)
-        throw_std_runtime_error("lastID hasn't been loaded correctly yet");
-    AutoLock lock(nextIDMutex);
-    return ++lastID;
-}
-
-void SQLDatabase::loadLastID()
-{
-    AutoLock lock(nextIDMutex);
-
-    // we don't rely on automatic db generated ids, because of our caching
-    std::ostringstream qb;
-    qb << "SELECT MAX(" << TQ("id") << ')'
-       << " FROM " << TQ(CDS_OBJECT_TABLE);
-    auto res = select(qb);
-    if (res == nullptr)
-        throw_std_runtime_error("could not load lastID (res==nullptr)");
-
-    std::unique_ptr<SQLRow> row = res->nextRow();
-    if (row == nullptr)
-        throw_std_runtime_error("could not load lastID (row==nullptr)");
-
-    lastID = std::stoi(row->col(0));
-    if (lastID < CDS_ID_FS_ROOT)
-        throw_std_runtime_error("could not load correct lastID (db not initialized?)");
-
-    log_debug("LoadedId: {}", lastID);
-}
-
-int SQLDatabase::getNextMetadataID()
-{
-    if (lastMetadataID < CDS_ID_ROOT)
-        throw_std_runtime_error("lastMetadataID hasn't been loaded correctly yet");
-
-    AutoLock lock(nextIDMutex);
-    return ++lastMetadataID;
-}
-
-// if metadata table becomes first-class then should have a parameterized loadLastID()
-// to be called for either mt_cds_object or mt_metadata
-void SQLDatabase::loadLastMetadataID()
-{
-    AutoLock lock(nextIDMutex);
-
-    // we don't rely on automatic db generated ids, because of our caching
-    std::ostringstream qb;
-    qb << "SELECT MAX(" << TQ("id") << ')'
-       << " FROM " << TQ(METADATA_TABLE);
-    auto res = select(qb);
-    if (res == nullptr)
-        throw_std_runtime_error("could not load lastMetadataID (res==nullptr)");
-
-    std::unique_ptr<SQLRow> row = res->nextRow();
-    if (row == nullptr)
-        throw_std_runtime_error("could not load lastMetadataID (row==nullptr)");
-
-    lastMetadataID = stoiString(row->col(0));
-    if (lastMetadataID < CDS_ID_ROOT)
-        throw_std_runtime_error("could not load correct lastMetadataID (db not initialized?)");
-}
-
 void SQLDatabase::clearFlagInDB(int flag)
 {
     std::ostringstream qb;
@@ -2193,12 +2129,9 @@ void SQLDatabase::generateMetadataDBOperations(const std::shared_ptr<CdsObject>&
     }
 }
 
-std::unique_ptr<std::ostringstream> SQLDatabase::sqlForInsert(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable)
+std::unique_ptr<std::ostringstream> SQLDatabase::sqlForInsert(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const
 {
-    int lastInsertID = INVALID_OBJECT_ID;
-    int lastMetadataInsertID = INVALID_OBJECT_ID;
-
-    std::string tableName = addUpdateTable->getTable();
+    std::string tableName = addUpdateTable->getTableName();
     auto dict = addUpdateTable->getDict();
 
     std::ostringstream fields;
@@ -2210,28 +2143,14 @@ std::unique_ptr<std::ostringstream> SQLDatabase::sqlForInsert(const std::shared_
             values << ',';
         }
         fields << TQ(it->first);
-        if (lastInsertID != INVALID_OBJECT_ID && it->first == "id" && std::stoi(it->second) == INVALID_OBJECT_ID) {
-            if (tableName == METADATA_TABLE)
-                values << lastMetadataInsertID;
-            else
-                values << lastInsertID;
-        } else
-            values << it->second;
+        values << it->second;
     }
 
-    /* manually generate ID */
-    if (lastInsertID == INVALID_OBJECT_ID && tableName == CDS_OBJECT_TABLE) {
-        lastInsertID = getNextID();
-        obj->setID(lastInsertID);
-        fields << ',' << TQ("id");
-        values << ',' << quote(lastInsertID);
-    }
-    if (tableName == METADATA_TABLE) {
-        lastMetadataInsertID = getNextMetadataID();
-        fields << ',' << TQ("id");
-        values << ',' << quote(lastMetadataInsertID);
-        fields << ',' << TQ("item_id");
-        values << ',' << quote(obj->getID());
+    if (tableName == CDS_OBJECT_TABLE && obj->getID() != INVALID_OBJECT_ID) {
+        throw_std_runtime_error("Attempted to insert new object with ID!");
+    } else if (tableName == METADATA_TABLE) {
+        fields << "," << TQ("item_id");
+        values << "," << obj->getID();
     }
 
     auto qb = std::make_unique<std::ostringstream>();
@@ -2243,10 +2162,10 @@ std::unique_ptr<std::ostringstream> SQLDatabase::sqlForInsert(const std::shared_
 std::unique_ptr<std::ostringstream> SQLDatabase::sqlForUpdate(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const
 {
     if (addUpdateTable == nullptr
-        || (addUpdateTable->getTable() == METADATA_TABLE && addUpdateTable->getDict().size() != 2))
+        || (addUpdateTable->getTableName() == METADATA_TABLE && addUpdateTable->getDict().size() != 2))
         throw_std_runtime_error("sqlForUpdate called with invalid arguments");
 
-    std::string tableName = addUpdateTable->getTable();
+    std::string tableName = addUpdateTable->getTableName();
     auto dict = addUpdateTable->getDict();
 
     auto qb = std::make_unique<std::ostringstream>();
@@ -2259,7 +2178,7 @@ std::unique_ptr<std::ostringstream> SQLDatabase::sqlForUpdate(const std::shared_
     }
     *qb << " WHERE " << TQ("id") << " = " << obj->getID();
 
-    // relying on only one element when table is mt_metadata
+    // relying on only one element when tableName is mt_metadata
     if (tableName == METADATA_TABLE)
         *qb << " AND " << TQ("property_name") << " = " << dict.begin()->first;
 
@@ -2269,17 +2188,17 @@ std::unique_ptr<std::ostringstream> SQLDatabase::sqlForUpdate(const std::shared_
 std::unique_ptr<std::ostringstream> SQLDatabase::sqlForDelete(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const
 {
     if (addUpdateTable == nullptr
-        || (addUpdateTable->getTable() == METADATA_TABLE && addUpdateTable->getDict().size() != 2))
+        || (addUpdateTable->getTableName() == METADATA_TABLE && addUpdateTable->getDict().size() != 2))
         throw_std_runtime_error("sqlForDelete called with invalid arguments");
 
-    std::string tableName = addUpdateTable->getTable();
+    std::string tableName = addUpdateTable->getTableName();
     auto dict = addUpdateTable->getDict();
 
     auto qb = std::make_unique<std::ostringstream>();
     *qb << "DELETE FROM " << TQ(tableName)
         << " WHERE " << TQ("id") << " = " << obj->getID();
 
-    // relying on only one element when table is mt_metadata
+    // relying on only one element when tableName is mt_metadata
     if (tableName == METADATA_TABLE)
         *qb << " AND " << TQ("property_name") << " = " << dict.begin()->first;
 
@@ -2345,12 +2264,10 @@ void SQLDatabase::migrateMetadata(const std::shared_ptr<CdsObject>& object)
 
         for (const auto& [key, val] : metadataSQLVals) {
             std::ostringstream fields, values;
-            fields << TQ("id") << ','
-                   << TQ("item_id") << ','
+            fields << TQ("item_id") << ','
                    << TQ("property_name") << ','
                    << TQ("property_value");
-            values << getNextMetadataID() << ','
-                   << object->getID() << ','
+            values << object->getID() << ','
                    << key << ','
                    << val;
             std::ostringstream qb;
