@@ -291,8 +291,6 @@ void MySQLDatabase::init()
     lock.unlock();
 
     log_debug("end");
-
-    dbReady();
 }
 
 std::shared_ptr<Database> MySQLDatabase::getSelf()

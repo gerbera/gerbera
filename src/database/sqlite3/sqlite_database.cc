@@ -273,8 +273,6 @@ void Sqlite3Database::init()
             this->addTask(btask);
             btask->waitForTask();
         }
-
-        dbReady();
         dbInitDone = true;
     } catch (const std::runtime_error& e) {
         log_error("prematurely shutting down.");
