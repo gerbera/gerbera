@@ -51,3 +51,13 @@ TEST(ToolsTest, writeFileThrowsIfCantOpenFile)
 
     EXPECT_THROW(writeBinaryFile(test_file, data.data(), data.size()), std::runtime_error);
 }
+
+TEST(ToolsTest, renderWebUriV4)
+{
+    EXPECT_EQ(renderWebUri("192.168.5.5", 7777), "192.168.5.5:7777");
+}
+
+TEST(ToolsTest, renderWebUriV6)
+{
+    EXPECT_EQ(renderWebUri("2001:0db8:85a3:0000:0000:8a2e:0370:7334", 7777), "[2001:0db8:85a3:0000:0000:8a2e:0370:7334]:7777");
+}

@@ -239,7 +239,7 @@ protected:
 
     /// \brief Creates a html file that is a redirector to the current server i
     /// instance
-    void writeBookmark(const std::string& ip, const std::string& port);
+    void writeBookmark(const std::string& addr);
     void emptyBookmark();
 };
 

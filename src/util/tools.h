@@ -113,12 +113,15 @@ bool isExecutable(const fs::path& path, int* err = nullptr);
 /// \return aboslute path to the given executable or nullptr of it was not found
 fs::path findInPath(const fs::path& exec);
 
+/// \brief Render browser friendly uri (handle IPv6)
+std::string renderWebUri(const std::string& ip, int port);
+
 /// \brief Render HTML that is doing a redirect to the given ip, port and html page.
 /// \param ip IP address as string.
 /// \param port Port as string.
 /// \param page HTML document to redirect to.
 /// \return string representing the desired HTML document.
-std::string httpRedirectTo(const std::string& ip, const std::string& port, const std::string& page = "");
+std::string httpRedirectTo(const std::string& addr, const std::string& page = "");
 
 /// \brief Encodes arbitrary data to a hex string.
 /// \param data Buffer that is holding the data

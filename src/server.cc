@@ -233,17 +233,17 @@ void Server::run()
 #endif
     content->run();
 
-    writeBookmark(ip, std::to_string(port));
-    log_info("The Web UI can be reached by following this link: http://{}:{}/", ip.c_str(), port);
-
+    std::string url = renderWebUri(ip, port);
+    writeBookmark(url);
+    log_info("The Web UI can be reached by following this link: http://{}/", url);
     log_debug("end");
 }
 
-void Server::writeBookmark(const std::string& ip, const std::string& port)
+void Server::writeBookmark(const std::string& addr)
 {
     const std::string data = config->getBoolOption(CFG_SERVER_UI_ENABLED)
-        ? httpRedirectTo(ip, port)
-        : httpRedirectTo(ip, port, "disabled.html");
+        ? httpRedirectTo(addr)
+        : httpRedirectTo(addr, "disabled.html");
 
     fs::path path = config->getOption(CFG_SERVER_BOOKMARK_FILE);
     log_debug("Writing bookmark file to: {}", path.c_str());
