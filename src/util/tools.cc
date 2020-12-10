@@ -246,9 +246,20 @@ fs::path findInPath(const fs::path& exec)
     return "";
 }
 
-std::string httpRedirectTo(const std::string& ip, const std::string& port, const std::string& page)
+std::string renderWebUri(const std::string& ip, int port) {
+    std::ostringstream webUIAddr;
+    if (ip.find(':') != std::string::npos) {
+        webUIAddr << '[' << ip << ']';
+    } else {
+        webUIAddr << ip;
+    }
+    webUIAddr << ':' << port;
+    return webUIAddr.str();
+}
+
+std::string httpRedirectTo(const std::string& addr, const std::string& page)
 {
-    return R"(<html><head><meta http-equiv="Refresh" content="0;URL=http://)" + ip + ":" + port + "/" + page + R"("></head><body bgcolor="#dddddd"></body></html>)";
+    return R"(<html><head><meta http-equiv="Refresh" content="0;URL=http://)" + addr + "/" + page + R"("></head><body bgcolor="#dddddd"></body></html>)";
 }
 
 std::string hexEncode(const void* data, int len)
