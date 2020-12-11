@@ -1,3 +1,4 @@
 BasedOnStyle: Webkit
 DeriveLineEnding: false
+FixNamespaceComments: true
 UseCRLF: false
