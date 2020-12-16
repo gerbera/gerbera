@@ -67,7 +67,6 @@ static constexpr bool IS_CDS_CONTAINER(unsigned int type)
     return type & OBJECT_TYPE_CONTAINER;
 };
 static constexpr bool IS_CDS_ITEM(unsigned int type) { return type & OBJECT_TYPE_ITEM; };
-static constexpr bool IS_CDS_ACTIVE_ITEM(unsigned int type) { return type & OBJECT_TYPE_ACTIVE_ITEM; };
 static constexpr bool IS_CDS_ITEM_EXTERNAL_URL(unsigned int type) { return type & OBJECT_TYPE_ITEM_EXTERNAL_URL; };
 static constexpr bool IS_CDS_ITEM_INTERNAL_URL(unsigned int type) { return type & OBJECT_TYPE_ITEM_INTERNAL_URL; };
 static constexpr bool IS_CDS_PURE_ITEM(unsigned int type) { return type == OBJECT_TYPE_ITEM; };
@@ -410,70 +409,6 @@ public:
     std::string getServiceID() const { return serviceID; }
 };
 
-/// \brief An Active Item in the content directory.
-///
-/// An active item is something very special, and it is not defined within UPnP.
-/// From the UPnP point of view it is a normal Item, but internally it does
-/// a little more.
-/// When an ActiveItem is played back (HTTP GET request for it's URL), a
-/// script is executed on the server.
-/// The script gets an XML representation of the item (actually a DIDL-Lite render)
-/// to the standard input, and has to return an appropriate XML to the standard
-/// output. The script may change most of the values of the Item. The only
-/// protected fields are object ID and parent ID. In case changes have taken
-/// place, a container update is issued.
-///
-/// You could use ActiveItems for a variety of things, implementing
-/// "toggle" items (ones that change between "on" and "off" with each activation)
-/// or just "trigger" items that do not change visible but trigger events on the
-/// server. For example, you could write a script and create an item to
-/// shutdown your PC when this item is played.
-///
-/// We plan to extend the ActiveItem functionality, allowing to control
-/// various server settings, and also being more flexible on the time
-/// of script execution (execute script before or after serving the media, etc.)
-class CdsActiveItem : public CdsItem {
-protected:
-    /// \brief action to be executed (an absolute path to a script that will process the XML)
-    std::string action;
-
-    /// \brief a field where you can save any string you want.
-    std::string state;
-
-public:
-    /// \brief Constructor, sets the object type.
-    explicit CdsActiveItem(std::shared_ptr<Database> database);
-
-    /// \brief Sets the action for the item.
-    /// \param action absolute path to the script that will process the XML data.
-    void setAction(const std::string& action) { this->action = action; }
-
-    /// \brief Get the path of the action script.
-    std::string getAction() const { return action; }
-
-    /// \brief Set action state.
-    /// \param state any string you want.
-    ///
-    /// This is quite useful to let the script identify what state the item is in.
-    /// Think of it as a cookie (did I already mention that I hate web cookies?)
-    void setState(const std::string& state) { this->state = state; }
-
-    /// \brief Retrieve the item state.
-    std::string getState() const { return state; }
-
-    /// \brief Copies all object properties to another object.
-    /// \param obj target object (clone)
-    void copyTo(const std::shared_ptr<CdsObject>& obj) override;
-
-    /// \brief Checks if current object is equal to obj.
-    ///
-    /// See description for CdsObject::equals() for details.
-    int equals(const std::shared_ptr<CdsObject>& obj, bool exactly = false) override;
-
-    /// \brief Checks if the minimum required parameters for the object have been set and are valid.
-    void validate() override;
-};
-
 /// \brief An item that is accessible via a URL.
 class CdsItemExternalURL : public CdsItem {
 public:
@@ -516,57 +451,6 @@ public:
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
     void validate() override;
 };
-
-/*
-/// \brief A Dynamic Item in the content directory.
-///
-/// A Dynamic Item differs from a regular Item in the way that
-/// it's content is entirely dynamic and is being built on the fly
-/// during request
-class CdsDynamicItem : public CdsItem
-{
-protected:
-    /// \brief action to be executed (an absolute path to a script that will process the XML)
-    std::string ;
-
-    /// \brief a field where you can save any string you wnat.
-    std::string properties;
-public:
-
-    /// \brief Constructor, sets the object type.
-    CdsActiveItem();
-
-    /// \brief Sets the action for the item.
-    /// \param action absolute path to the script that will process the XML data.
-    void setAction(std::string action);
-
-    /// \brief Get the path of the action script.
-    std::string getAction();
-
-    /// \brief Set action state.
-    /// \param state any string you want.
-    ///
-    /// This is quite useful to let the script identify what state the item is in.
-    /// Think of it as a cookie (did I already mention that I hate web cookies?)
-    void setState(std::string state);
-
-    /// \brief Retrieve the item state.
-    std::string getState();
-
-    /// \brief Copies all object properties to another object.
-    /// \param obj target object (clone)
-    void copyTo(std::shared_ptr<CdsObject> obj) override;
-
-    /// \brief Checks if current object is equal to obj.
-    ///
-    /// See description for CdsObject::equals() for details.
-    int equals(std::shared_ptr<CdsObject> obj, bool exactly=false) override;
-
-    /// \brief Checks if the minimum required parameters for the object have been set and are valid.
-    void validate();
-};
-
-*/
 
 /// \brief A container in the content directory.
 class CdsContainer final : public CdsObject {

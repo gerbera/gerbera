@@ -919,45 +919,6 @@ void ContentManager::updateObject(int objectID, const std::map<std::string, std:
             log_debug("updateObject: calling containerChanged on item {}", item->getTitle().c_str());
             update_manager->containerChanged(item->getParentID());
         }
-    }
-    if (IS_CDS_ACTIVE_ITEM(objectType)) {
-        std::string action = getValueOrDefault(parameters, "action");
-        std::string state = getValueOrDefault(parameters, "state");
-
-        auto item = std::static_pointer_cast<CdsActiveItem>(obj);
-        auto clone = CdsObject::createObject(database, objectType);
-        item->copyTo(clone);
-
-        if (!title.empty())
-            clone->setTitle(title);
-        if (!upnp_class.empty())
-            clone->setClass(upnp_class);
-
-        auto cloned_item = std::static_pointer_cast<CdsActiveItem>(clone);
-
-        // state and description can be an empty strings - if you want to clear it
-        if (!description.empty()) {
-            cloned_item->setMetadata(M_DESCRIPTION, description);
-        } else {
-            cloned_item->removeMetadata(M_DESCRIPTION);
-        }
-
-        if (!state.empty())
-            cloned_item->setState(state);
-
-        if (!mimetype.empty())
-            cloned_item->setMimeType(mimetype);
-        if (!action.empty())
-            cloned_item->setAction(action);
-
-        if (!item->equals(cloned_item, true)) {
-            cloned_item->validate();
-            int containerChanged = INVALID_OBJECT_ID;
-            database->updateObject(clone, &containerChanged);
-            update_manager->containerChanged(containerChanged);
-            session_manager->containerChangedUI(containerChanged);
-            update_manager->containerChanged(item->getParentID());
-        }
     } else if (IS_CDS_CONTAINER(objectType)) {
         auto cont = std::static_pointer_cast<CdsContainer>(obj);
         auto clone = CdsObject::createObject(database, objectType);

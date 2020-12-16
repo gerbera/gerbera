@@ -191,56 +191,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, bool re
             }
         }
     }
-
-    if (renderActions && IS_CDS_ACTIVE_ITEM(objectType)) {
-        auto aitem = std::static_pointer_cast<CdsActiveItem>(obj);
-        result.append_child("action").append_child(pugi::node_pcdata).set_value(aitem->getAction().c_str());
-        result.append_child("state").append_child(pugi::node_pcdata).set_value(aitem->getState().c_str());
-        result.append_child("location").append_child(pugi::node_pcdata).set_value(aitem->getLocation().c_str());
-        result.append_child("mime-type").append_child(pugi::node_pcdata).set_value(aitem->getMimeType().c_str());
-    }
-
     // log_debug("Rendered DIDL: {}", result->print().c_str());
-}
-
-void UpnpXMLBuilder::updateObject(const std::shared_ptr<CdsObject>& obj, const std::string& text)
-{
-    pugi::xml_document doc;
-    pugi::xml_parse_result result = doc.load_string(text.c_str());
-    if (result.status != pugi::xml_parse_status::status_ok) {
-        log_error("Error parsing object XML: {}", result.description());
-        return;
-    }
-
-    auto root = doc.document_element();
-    int objectType = obj->getObjectType();
-
-    if (IS_CDS_ACTIVE_ITEM(objectType)) {
-        auto aitem = std::static_pointer_cast<CdsActiveItem>(obj);
-
-        std::string title = root.child("dc:title").text().as_string();
-        if (!title.empty())
-            aitem->setTitle(title);
-
-        /// \todo description should be taken from the dictionary
-        std::string description = root.child("dc:description").text().as_string();
-        aitem->setMetadata(M_DESCRIPTION, description);
-
-        std::string location = root.child("location").text().as_string();
-        if (!location.empty())
-            aitem->setLocation(location);
-
-        std::string mimeType = root.child("mime-type").text().as_string();
-        if (!mimeType.empty())
-            aitem->setMimeType(mimeType);
-
-        std::string action = root.child("action").text().as_string();
-        if (!action.empty())
-            aitem->setAction(action);
-
-        std::string state = root.child("state").text().as_string();
-        aitem->setState(state);
-    }
 }
 
 std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createEventPropertySet()

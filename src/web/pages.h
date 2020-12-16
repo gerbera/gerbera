@@ -135,7 +135,6 @@ protected:
     void addContainer(int parentID);
     std::shared_ptr<CdsObject> addItem(int parentID, std::shared_ptr<CdsItem> item);
     std::shared_ptr<CdsObject> addUrl(int parentID, std::shared_ptr<CdsItemExternalURL> item, bool addProtocol);
-    std::shared_ptr<CdsObject> addActiveItem(int parentID);
 };
 
 /// \brief autoscan add and remove

@@ -124,8 +124,6 @@ std::shared_ptr<CdsObject> CdsObject::createObject(const std::shared_ptr<Databas
         obj = std::make_shared<CdsItemInternalURL>(database);
     } else if (IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
         obj = std::make_shared<CdsItemExternalURL>(database);
-    } else if (IS_CDS_ACTIVE_ITEM(objectType)) {
-        obj = std::make_shared<CdsActiveItem>(database);
     } else if (IS_CDS_ITEM(objectType)) {
         obj = std::make_shared<CdsItem>(database);
     } else {
@@ -182,44 +180,6 @@ void CdsItem::validate()
         throw_std_runtime_error("Item validation failed: file " + location.string() + " not found");
 }
 
-CdsActiveItem::CdsActiveItem(std::shared_ptr<Database> database)
-    : CdsItem(std::move(database))
-{
-    objectType |= OBJECT_TYPE_ACTIVE_ITEM;
-
-    upnpClass = UPNP_DEFAULT_CLASS_ACTIVE_ITEM;
-    mimeType = MIMETYPE_DEFAULT;
-}
-
-void CdsActiveItem::copyTo(const std::shared_ptr<CdsObject>& obj)
-{
-    CdsItem::copyTo(obj);
-    if (!IS_CDS_ACTIVE_ITEM(obj->getObjectType()))
-        return;
-    auto item = std::static_pointer_cast<CdsActiveItem>(obj);
-    item->setAction(action);
-    item->setState(state);
-}
-int CdsActiveItem::equals(const std::shared_ptr<CdsObject>& obj, bool exactly)
-{
-    auto item = std::static_pointer_cast<CdsActiveItem>(obj);
-    if (!CdsItem::equals(obj, exactly))
-        return 0;
-    if (exactly && (action != item->getAction() || state != item->getState()))
-        return 0;
-    return 1;
-}
-
-void CdsActiveItem::validate()
-{
-    CdsItem::validate();
-    if (this->action.empty())
-        throw_std_runtime_error("Active Item validation failed: missing action");
-
-    std::error_code ec;
-    if (!isRegularFile(this->action, ec))
-        throw_std_runtime_error("Active Item validation failed: action script " + action + " not found");
-}
 //---------
 
 CdsItemExternalURL::CdsItemExternalURL(std::shared_ptr<Database> database)
@@ -330,8 +290,6 @@ std::string CdsObject::mapObjectType(int type)
         return STRING_OBJECT_TYPE_CONTAINER;
     if (IS_CDS_PURE_ITEM(type))
         return STRING_OBJECT_TYPE_ITEM;
-    if (IS_CDS_ACTIVE_ITEM(type))
-        return STRING_OBJECT_TYPE_ACTIVE_ITEM;
     if (IS_CDS_ITEM_EXTERNAL_URL(type))
         return STRING_OBJECT_TYPE_EXTERNAL_URL;
     if (IS_CDS_ITEM_INTERNAL_URL(type))
