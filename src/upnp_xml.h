@@ -69,9 +69,6 @@ public:
     /// providing the XML representation of an active item to a trigger/toggle script.
     void renderObject(const std::shared_ptr<CdsObject>& obj, bool renderActions, size_t stringLimit, pugi::xml_node* parent);
 
-    /// \todo change the text string to element, parsing should be done outside
-    static void updateObject(const std::shared_ptr<CdsObject>& obj, const std::string& text);
-
     /// \brief Renders XML for the event property set.
     /// \return pugi::xml_document representing the newly created XML.
     static std::unique_ptr<pugi::xml_document> createEventPropertySet();

@@ -175,10 +175,6 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
                 if (pcd_id == INVALID_OBJECT_ID) {
                     return 0;
                 }
-
-                /// \todo check why this if is needed?
-                if (IS_CDS_ACTIVE_ITEM(cds_obj->getObjectType()))
-                    cds_obj->setFlag(OBJECT_FLAG_PLAYLIST_REF);
                 cds_obj->setRefID(pcd_id);
             } else
                 cds_obj->setRefID(orig_object->getID());

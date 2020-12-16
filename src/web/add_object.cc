@@ -76,45 +76,6 @@ std::shared_ptr<CdsObject> web::addObject::addItem(int parentID, std::shared_ptr
     return item;
 }
 
-std::shared_ptr<CdsObject> web::addObject::addActiveItem(int parentID)
-{
-    auto item = std::make_shared<CdsActiveItem>(database);
-
-    item->setAction(param("action"));
-
-    /// \todo is there a default setting? autoscan? import settings?
-    std::string tmp = param("state");
-    if (!tmp.empty())
-        item->setState(tmp);
-
-    item->setParentID(parentID);
-    item->setLocation(param("location"));
-
-    tmp = param("mime-type");
-    if (tmp.empty())
-        tmp = MIMETYPE_DEFAULT;
-    item->setMimeType(tmp);
-
-    MetadataHandler::setMetadata(config, item);
-
-    item->setTitle(param("title"));
-    item->setClass(param("class"));
-
-    tmp = param("description");
-    if (!tmp.empty())
-        item->setMetadata(M_DESCRIPTION, tmp);
-
-    /// \todo is there a default setting? autoscan? import settings?
-
-    //    auto resource = std::make_shared<CdsResource>(CH_DEFAULT);
-
-    //    auto resource = item->getResource(0); // added by m-handler
-    //    resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(tmp));
-    //    item->addResource(resource);
-
-    return item;
-}
-
 std::shared_ptr<CdsObject> web::addObject::addUrl(int parentID, std::shared_ptr<CdsItemExternalURL> item, bool addProtocol)
 {
     std::string protocolInfo;
@@ -179,15 +140,6 @@ void web::addObject::process()
         if (!isRegularFile(location, ec))
             throw_std_runtime_error("file not found");
         obj = this->addItem(parentID, std::make_shared<CdsItem>(database));
-        allow_fifo = true;
-    } else if (obj_type == STRING_OBJECT_TYPE_ACTIVE_ITEM) {
-        if (param("action").empty())
-            throw_std_runtime_error("no action given");
-        if (location.empty())
-            throw_std_runtime_error("no location given");
-        if (!isRegularFile(location, ec))
-            throw_std_runtime_error("file not found");
-        obj = this->addActiveItem(parentID);
         allow_fifo = true;
     } else if (obj_type == STRING_OBJECT_TYPE_EXTERNAL_URL) {
         if (location.empty())

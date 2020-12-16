@@ -351,18 +351,6 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
         generateMetadataDBOperations(obj, isUpdate, returnVal);
     }
 
-    if (IS_CDS_ACTIVE_ITEM(objectType)) {
-        std::map<std::string, std::string> cdsActiveItemSql;
-        auto aitem = std::static_pointer_cast<CdsActiveItem>(obj);
-
-        cdsActiveItemSql["id"] = std::to_string(aitem->getID());
-        cdsActiveItemSql["action"] = quote(aitem->getAction());
-        cdsActiveItemSql["state"] = quote(aitem->getState());
-
-        returnVal.push_back(
-            std::make_shared<AddUpdateTable>(CDS_ACTIVE_ITEM_TABLE, cdsActiveItemSql, isUpdate ? "update" : "insert"));
-    }
-
     return returnVal;
 }
 
@@ -965,25 +953,6 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::unique_pt
             item->setServiceID(row->col(_ref_service_id));
         else
             item->setServiceID(row->col(_service_id));
-
-        matched_types++;
-    }
-
-    if (IS_CDS_ACTIVE_ITEM(objectType)) {
-        auto aitem = std::static_pointer_cast<CdsActiveItem>(obj);
-
-        std::ostringstream query;
-        query << "SELECT " << TQ("id") << ',' << TQ("action") << ','
-              << TQ("state") << " FROM " << TQ(CDS_ACTIVE_ITEM_TABLE)
-              << " WHERE " << TQ("id") << '=' << quote(aitem->getID());
-        auto resAI = select(query);
-
-        std::unique_ptr<SQLRow> rowAI;
-        if (resAI != nullptr && (rowAI = resAI->nextRow()) != nullptr) {
-            aitem->setAction(rowAI->col(1));
-            aitem->setState(rowAI->col(2));
-        } else
-            throw_std_runtime_error("Active Item in cds_objects, but not in cds_active_item");
 
         matched_types++;
     }

@@ -156,16 +156,6 @@ void web::edit_load::process()
             auto protocol = item.append_child("protocol");
             protocol.append_attribute("value") = getProtocol(objItem->getResource(0)->getAttribute(R_PROTOCOLINFO)).c_str();
             protocol.append_attribute("editable") = true;
-        } else if (IS_CDS_ACTIVE_ITEM(objectType)) {
-            auto objActiveItem = std::static_pointer_cast<CdsActiveItem>(objItem);
-
-            auto action = item.append_child("action");
-            action.append_attribute("value") = objActiveItem->getAction().c_str();
-            action.append_attribute("editable") = true;
-
-            auto state = item.append_child("state");
-            state.append_attribute("value") = objActiveItem->getState().c_str();
-            state.append_attribute("editable") = true;
         }
     }
 }

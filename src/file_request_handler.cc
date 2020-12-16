@@ -286,65 +286,6 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
     else
         res_id = SIZE_MAX;
 
-    // update item info by running action
-    if (IS_CDS_ACTIVE_ITEM(objectType) && (res_id == 0)) { // check - if thumbnails, then no action, just show
-        auto aitem = std::static_pointer_cast<CdsActiveItem>(obj);
-
-        pugi::xml_document doc;
-        auto root = doc.document_element();
-        root.append_attribute(XML_DC_NAMESPACE_ATTR) = XML_DC_NAMESPACE;
-        root.append_attribute(XML_UPNP_NAMESPACE_ATTR) = XML_UPNP_NAMESPACE;
-        xmlBuilder->renderObject(obj, true, std::string::npos, &root);
-
-        std::ostringstream buf;
-        doc.print(buf, "", 0);
-
-        std::string input = buf.str();
-        std::string action = aitem->getAction();
-        std::string output;
-
-        log_debug("Script input: {}", input.c_str());
-        if (strncmp(action.c_str(), "http://", 7) != 0) {
-#ifdef TOMBDEBUG
-            struct timespec before;
-            getTimespecNow(&before);
-#endif
-            output = run_simple_process(config, action, "run", input);
-#ifdef TOMBDEBUG
-            long delta = getDeltaMillis(&before);
-            log_debug("script executed in {} milliseconds", delta);
-#endif
-        } else {
-            /// \todo actually fetch...
-            log_debug("fetching {}", action.c_str());
-            output = input;
-        }
-        log_debug("Script output: {}", output.c_str());
-
-        auto clone = CdsObject::createObject(database, objectType);
-        aitem->copyTo(clone);
-
-        UpnpXMLBuilder::updateObject(clone, output);
-
-        if (!aitem->equals(clone, true)) // check for all differences
-        {
-            log_debug("Item changed, updating database");
-            int containerChanged = INVALID_OBJECT_ID;
-            database->updateObject(clone, &containerChanged);
-            updateManager->containerChanged(containerChanged);
-            sessionManager->containerChangedUI(containerChanged);
-
-            if (!aitem->equals(clone)) // check for visible differences
-            {
-                log_debug("Item changed visually, updating parent");
-                updateManager->containerChanged(clone->getParentID(), FLUSH_ASAP);
-            }
-            obj = clone;
-        } else {
-            log_debug("Item untouched...");
-        }
-    }
-
     auto item = std::static_pointer_cast<CdsItem>(obj);
 
     fs::path path = item->getLocation();

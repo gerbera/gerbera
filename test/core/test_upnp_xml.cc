@@ -85,7 +85,7 @@ TEST_F(UpnpXmlTest, RenderObjectItem)
     // arrange
     pugi::xml_document didl_lite;
     auto root = didl_lite.append_child("DIDL-Lite");
-    auto obj = std::make_shared<CdsActiveItem>(nullptr);
+    auto obj = std::make_shared<CdsItem>(nullptr);
     obj->setID(1);
     obj->setParentID(2);
     obj->setRestricted(false);
@@ -141,31 +141,6 @@ TEST_F(UpnpXmlTest, CreatesEventPropertySet)
     EXPECT_STREQ(root.name(), "e:propertyset");
     EXPECT_STREQ(root.attribute("xmlns:e").as_string(), "urn:schemas-upnp-org:event-1-0");
     EXPECT_NE(root.child("e:property"), nullptr);
-}
-
-TEST_F(UpnpXmlTest, UpdatesObjectActiveItem)
-{
-    auto obj = std::make_shared<CdsActiveItem>(nullptr);
-    std::ostringstream inputXml;
-    inputXml << "<item>"; // this is not valid UPNP, but just enough to test with
-    inputXml << "<dc:title>Title</dc:title>";
-    inputXml << "<dc:description>description</dc:description>";
-    inputXml << "<location>/location</location>";
-    inputXml << "<mime-type>audio/mpeg</mime-type>";
-    inputXml << "<action>action</action>";
-    inputXml << "<state>state</state>";
-    inputXml << "</item>";
-
-    subject->updateObject(obj, inputXml.str());
-
-    auto aitem = std::static_pointer_cast<CdsActiveItem>(obj);
-    EXPECT_NE(aitem, nullptr);
-    EXPECT_STREQ(aitem->getTitle().c_str(), "Title");
-    EXPECT_STREQ(aitem->getMetadata(M_DESCRIPTION).c_str(), "description");
-    EXPECT_STREQ(aitem->getLocation().c_str(), "/location");
-    EXPECT_STREQ(aitem->getMimeType().c_str(), "audio/mpeg");
-    EXPECT_STREQ(aitem->getAction().c_str(), "action");
-    EXPECT_STREQ(aitem->getState().c_str(), "state");
 }
 
 TEST_F(UpnpXmlTest, CreateResponse)

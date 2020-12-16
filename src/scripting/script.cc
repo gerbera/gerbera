@@ -442,30 +442,6 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
                 obj->setLocation(pcd->getLocation());
         }
 
-        if (IS_CDS_ACTIVE_ITEM(objectType)) {
-            auto aitem = std::static_pointer_cast<CdsActiveItem>(obj);
-            std::shared_ptr<CdsActiveItem> pcd_aitem;
-            if (pcd != nullptr)
-                pcd_aitem = std::static_pointer_cast<CdsActiveItem>(pcd);
-
-            /// \todo what about character conversion for action and state fields?
-            val = getProperty("action");
-            if (!val.empty())
-                aitem->setAction(val);
-            else {
-                if (pcd != nullptr)
-                    aitem->setAction(pcd_aitem->getAction());
-            }
-
-            val = getProperty("state");
-            if (!val.empty())
-                aitem->setState(val);
-            else {
-                if (pcd != nullptr)
-                    aitem->setState(pcd_aitem->getState());
-            }
-        }
-
         if (IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
             std::string protocolInfo;
 
@@ -621,16 +597,6 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
         val = item->getServiceID();
         if (!val.empty())
             setProperty("serviceID", val);
-
-        if (IS_CDS_ACTIVE_ITEM(objectType)) {
-            auto aitem = std::static_pointer_cast<CdsActiveItem>(obj);
-            val = aitem->getAction();
-            if (!val.empty())
-                setProperty("action", val);
-            val = aitem->getState();
-            if (!val.empty())
-                setProperty("state", val);
-        }
     }
 
     // CdsDirectory
