@@ -19,7 +19,7 @@ sources:
   - https://github.com/gerbera/gerbera
 tasks:
   - install-deps: |
-      sudo sh ./gerbera/scripts/install-googletest.sh
+      sudo bash ./gerbera/scripts/install-googletest.sh
   - build: |
       mkdir build
       cd build
