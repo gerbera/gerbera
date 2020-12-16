@@ -1,4 +1,4 @@
-# Find a UUID Implementaion
+# Find a UUID Implementation
 #
 # Supports e2fsprogs libuuid or BSD native UUID
 #
@@ -9,7 +9,6 @@
 # FOUND_LIBUUID            e2fsprogs UUID found
 #
 
-INCLUDE(FindPkgConfig)
 INCLUDE(CheckCXXSourceRuns)
 INCLUDE(FindPackageHandleStandardArgs)
 
@@ -31,8 +30,9 @@ endif()
 
 if(NOT libuuid_FOUND)
 	message(STATUS "Looking for libuuid")
-	pkg_search_module(_UUID libuuid QUIET)
-	if(NOT _UUID_FOUND)
+	find_package(PkgConfig QUIET)
+	pkg_search_module(PC_UUID libuuid QUIET)
+	if(NOT PC_UUID_FOUND)
 		FIND_PATH(libuuid_INCLUDE_DIRS uuid/uuid.h)
 		FIND_LIBRARY(libuuid_LIBRARIES uuid)
 

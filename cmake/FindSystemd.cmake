@@ -6,8 +6,8 @@
 # SYSTEMD_UNIT_DIR: path to install system unit files
 
 include(FindPackageHandleStandardArgs)
-include(FindPkgConfig)
 
+find_package(PkgConfig QUIET)
 pkg_check_modules(SYSTEMD systemd QUIET)
 
 if (SYSTEMD_FOUND)
