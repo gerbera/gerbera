@@ -289,7 +289,7 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
                 cdsObjectSql["location"] = quote(dbLocation);
                 cdsObjectSql["location_hash"] = quote(stringHash(dbLocation));
             } else {
-                // URLs and active items
+                // URLs
                 cdsObjectSql["location"] = quote(loc);
                 cdsObjectSql["location_hash"] = SQL_NULL;
             }
@@ -942,7 +942,7 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::unique_pt
                 item->setLocation(stripLocationPrefix(row->col(_location)));
             else
                 item->setLocation(stripLocationPrefix(row->col(_ref_location)));
-        } else // URLs and active items
+        } else // URLs
         {
             item->setLocation(fallbackString(row->col(_location), row->col(_ref_location)));
         }
@@ -1000,7 +1000,7 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromSearchRow(const std::uni
         item->setMimeType(row->col(to_underlying(SearchCol::mime_type)));
         if (IS_CDS_PURE_ITEM(objectType)) {
             item->setLocation(stripLocationPrefix(row->col(to_underlying(SearchCol::location))));
-        } else { // URLs and active items
+        } else { // URLs
             item->setLocation(row->col(to_underlying(SearchCol::location)));
         }
 

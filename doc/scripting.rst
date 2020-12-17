@@ -51,8 +51,7 @@ interface several things happen.
    Any media file added will have an entry inside the PC Directory tree. PC Directory's hierarchy reflects the file
    system hierarchy, all objects inside the PC Directory including itself are NON-VIRTUAL objects. All virtual objects
    may have a different title, description, etc., but they are still references to objects in the PC-Directory.
-   That's why it is not possible to change a location of a virtual object - the only exceptions are URL items and
-   Active items.
+   That's why it is not possible to change a location of a virtual object - the only exceptions are URL items.
 
 2. Once an item is added to the PC Directory it is forwarded to the virtual object engine. The virtual object engine's
    mission is to organize and present the media database in a logical hierarchy based on the available metadata of the
@@ -137,8 +136,6 @@ object.
     | OBJECT_TYPE_CONTAINER            | Object is a container                         |
     +----------------------------------+-----------------------------------------------+
     | OBJECT_TYPE_ITEM                 | Object is an item                             |
-    +----------------------------------+-----------------------------------------------+
-    | OBJECT_TYPE_ACTIVE_ITEM          | Object is an active item                      |
     +----------------------------------+-----------------------------------------------+
     | OBJECT_TYPE_ITEM_EXTERNAL_URL    | Object is a link to a resource on the Internet|
     +----------------------------------+-----------------------------------------------+

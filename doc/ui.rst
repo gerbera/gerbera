@@ -183,7 +183,7 @@ The Gerbera Trail shows the current database/filesystem path and provides a numb
    :alt: Trail operations in Config view
    :target: _static/trail-config-operations.png
 
-The Gerbera Trail supports adding virtual item types including containers, items, active items, internal urls, external urls.
+The Gerbera Trail supports adding virtual item types including containers, items, internal urls, external urls.
 Adding an `autoscan` triggers the scan of a complete directory.  Autoscan adds valid mime-type items to the Gerbera database.
 Edit and Delete of container removes the container.  The `Delete All` icon removes a container and all sub-items from the
 Gerbera database.
