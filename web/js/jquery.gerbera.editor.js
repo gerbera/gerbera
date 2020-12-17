@@ -44,8 +44,6 @@
     const editClass = modal.find('#editClass');
     const editDesc = modal.find('#editDesc');
     const editMime = modal.find('#editMime');
-    const editActionScript = modal.find('#editActionScript');
-    const editState = modal.find('#editState');
     const editProtocol = modal.find('#editProtocol');
     const saveButton = modal.find('#editSave');
 
@@ -74,20 +72,19 @@
     if (itemType === 'container') {
       editClass.val('object.container');
       showFields([editObjectType, editTitle, editClass]);
-      hideFields([editLocation, editDesc, editMime, editActionScript, editState, editProtocol]);
+      hideFields([editLocation, editDesc, editMime, editProtocol]);
     } else if (itemType === 'item') {
       editClass.val('object.item');
       showFields([editObjectType, editTitle, editLocation, editClass, editDesc, editMime]);
-      hideFields([editActionScript, editState, editProtocol]);
+      hideFields([editProtocol]);
     } else if (itemType === 'external_url') {
       editClass.val('object.item');
       editProtocol.val('http-get');
       showFields([editObjectType, editTitle, editLocation, editClass, editDesc, editMime, editProtocol]);
-      hideFields([editActionScript, editState]);
     } else if (itemType === 'internal_url') {
       editClass.val('object.item');
       showFields([editObjectType, editTitle, editLocation, editClass, editDesc, editMime]);
-      hideFields([editActionScript, editState, editProtocol]);
+      hideFields([editProtocol]);
     }
   }
 
@@ -102,8 +99,6 @@
     modal.find('#editClass').val('').prop('disabled', false);
     modal.find('#editDesc').val('').prop('disabled', false);
     modal.find('#editMime').val('').prop('disabled', false);
-    modal.find('#editActionScript').val('').prop('disabled', false);
-    modal.find('#editState').val('').prop('disabled', false);
     modal.find('#editProtocol').val('').prop('disabled', false);
     modal.find('#editSave').text('Save Item');
 
@@ -252,8 +247,6 @@
       .closest('.form-group').show();
 
     hideFields([
-      modal.find('#editActionScript'),
-      modal.find('#editState'),
       modal.find('#editProtocol')
     ]);
   }
@@ -273,8 +266,6 @@
       modal.find('#editLocation'),
       modal.find('#editMime'),
       modal.find('#editDesc'),
-      modal.find('#editActionScript'),
-      modal.find('#editState'),
       modal.find('#editProtocol')
     ]);
   }
@@ -309,11 +300,6 @@
       .val(item.protocol.value)
       .prop('disabled', !item.protocol.editable)
       .closest('.form-group').show();
-
-    hideFields([
-      modal.find('#editActionScript'),
-      modal.find('#editState')
-    ]);
   }
 
   function loadInternalUrl (modal, item) {
@@ -346,11 +332,6 @@
       .val(item.protocol.value)
       .prop('disabled', !item.protocol.editable)
       .closest('.form-group').show();
-
-    hideFields([
-      modal.find('#editActionScript'),
-      modal.find('#editState')
-    ]);
   }
 
   function saveItem (modal) {
@@ -361,8 +342,6 @@
     const editLocation = modal.find('#editLocation');
     const editDesc = modal.find('#editDesc');
     const editMime = modal.find('#editMime');
-    const editActionScript = modal.find('#editActionScript');
-    const editState = modal.find('#editState');
     const editProtocol = modal.find('#editProtocol');
 
     switch (editObjectType.val()) {
@@ -415,8 +394,6 @@
     const editLocation = modal.find('#editLocation');
     const editDesc = modal.find('#editDesc');
     const editMime = modal.find('#editMime');
-    const editActionScript = modal.find('#editActionScript');
-    const editState = modal.find('#editState');
     const editProtocol = modal.find('#editProtocol');
 
     switch (editObjectType.val()) {
