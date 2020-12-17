@@ -11,8 +11,6 @@ describe('The jQuery Gerbera Editor Overlay', () => {
   let editClass;
   let editDesc;
   let editMime;
-  let editActionScript;
-  let editState;
   let editProtocol;
   let editSaveButton;
   let addParentId;
@@ -35,10 +33,6 @@ describe('The jQuery Gerbera Editor Overlay', () => {
     editDesc.val('TEST');
     editMime = $('#editMime');
     editMime.val('TEST');
-    editActionScript = $('#editActionScript');
-    editActionScript.val('TEST');
-    editState = $('#editState');
-    editState.val('TEST');
     editProtocol = $('#editProtocol');
     editProtocol.val('TEST');
     editSaveButton = $('#editSave');
@@ -139,8 +133,6 @@ describe('The jQuery Gerbera Editor Overlay', () => {
       expect(editClass.val()).toEqual('');
       expect(editDesc.val()).toEqual('');
       expect(editMime.val()).toEqual('');
-      expect(editActionScript.val()).toEqual('');
-      expect(editState.val()).toEqual('');
       expect(editProtocol.val()).toEqual('');
       expect(editSaveButton.text()).toEqual('Save Item');
       expect(addParentId.val()).toBe('');
@@ -179,8 +171,6 @@ describe('The jQuery Gerbera Editor Overlay', () => {
       expect(editClass.val()).toEqual('object.container');
       expect(editDesc.val()).toEqual('');
       expect(editMime.val()).toEqual('');
-      expect(editActionScript.val()).toEqual('');
-      expect(editState.val()).toEqual('');
       expect(editProtocol.val()).toEqual('');
       expect(editSaveButton.text()).toEqual('Save Item');
       expect(addParentId.val()).toBe('');
@@ -202,8 +192,6 @@ describe('The jQuery Gerbera Editor Overlay', () => {
       expect(editClass.val()).toEqual('object.item.videoItem');
       expect(editDesc.val()).toEqual('A description');
       expect(editMime.val()).toEqual('video/mp4');
-      expect(editActionScript.val()).toEqual('');
-      expect(editState.val()).toEqual('');
       expect(editProtocol.val()).toEqual('');
       expect(editSaveButton.text()).toEqual('Save Item');
       expect(addParentId.val()).toBe('');
@@ -225,8 +213,6 @@ describe('The jQuery Gerbera Editor Overlay', () => {
       expect(editClass.val()).toEqual('object.item');
       expect(editDesc.val()).toEqual('description');
       expect(editMime.val()).toEqual('video/ts');
-      expect(editActionScript.val()).toEqual('');
-      expect(editState.val()).toEqual('');
       expect(editProtocol.val()).toEqual('http-get');
       expect(editSaveButton.text()).toEqual('Save Item');
       expect(addParentId.val()).toBe('');
@@ -248,8 +234,6 @@ describe('The jQuery Gerbera Editor Overlay', () => {
       expect(editClass.val()).toEqual('object.item');
       expect(editDesc.val()).toEqual('description');
       expect(editMime.val()).toEqual('text/plain');
-      expect(editActionScript.val()).toEqual('');
-      expect(editState.val()).toEqual('');
       expect(editProtocol.val()).toEqual('http-get');
       expect(editSaveButton.text()).toEqual('Save Item');
       expect(addParentId.val()).toBe('');

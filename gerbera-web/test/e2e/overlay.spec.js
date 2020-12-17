@@ -126,8 +126,6 @@ describe('Edit Overlay Suite', () => {
         { id : 'editLocation',     visible : false},
         { id : 'editDesc',         visible : false},
         { id : 'editMime',         visible : false},
-        { id : 'editActionScript', visible : false},
-        { id : 'editState',        visible : false},
         { id : 'editProtocol',     visible : false}
       ]);
     });
@@ -140,8 +138,6 @@ describe('Edit Overlay Suite', () => {
         { id : 'editLocation',     visible : true},
         { id : 'editDesc',         visible : true},
         { id : 'editMime',         visible : true},
-        { id : 'editActionScript', visible : false},
-        { id : 'editState',        visible : false},
         { id : 'editProtocol',     visible : false}
       ]);
     });
@@ -154,8 +150,6 @@ describe('Edit Overlay Suite', () => {
         { id : 'editLocation',     visible : true},
         { id : 'editDesc',         visible : true},
         { id : 'editMime',         visible : true},
-        { id : 'editActionScript', visible : false},
-        { id : 'editState',        visible : false},
         { id : 'editProtocol',     visible : true}
       ]);
       const editProtocol = await homePage.editOverlayFieldValue('editProtocol');
@@ -170,8 +164,6 @@ describe('Edit Overlay Suite', () => {
         { id : 'editLocation',     visible : true},
         { id : 'editDesc',         visible : true},
         { id : 'editMime',         visible : true},
-        { id : 'editActionScript', visible : false},
-        { id : 'editState',        visible : false},
         { id : 'editProtocol',     visible : false}
       ]);
     });
@@ -215,8 +207,6 @@ describe('Edit Overlay Suite', () => {
         { id : 'editLocation',     visible : false},
         { id : 'editDesc',         visible : false},
         { id : 'editMime',         visible : false},
-        { id : 'editActionScript', visible : false},
-        { id : 'editState',        visible : false},
         { id : 'editProtocol',     visible : false}
       ]);
     });
@@ -229,8 +219,6 @@ describe('Edit Overlay Suite', () => {
         { id : 'editLocation',     visible : true, value : 'http://localhost'},
         { id : 'editDesc',         visible : true, value : 'description'},
         { id : 'editMime',         visible : true, value : 'text/plain'},
-        { id : 'editActionScript', visible : false},
-        { id : 'editState',        visible : false},
         { id : 'editProtocol',     visible : true, value : 'http-get'}
       ]);
     });
@@ -243,8 +231,6 @@ describe('Edit Overlay Suite', () => {
         { id : 'editLocation',     visible : true, value : '/folder/location/Test.mp4'},
         { id : 'editDesc',         visible : true, value : 'A description'},
         { id : 'editMime',         visible : true, value : 'video/mp4'},
-        { id : 'editActionScript', visible : false},
-        { id : 'editState',        visible : false},
         { id : 'editProtocol',     visible : false}
       ]);
     });
@@ -257,8 +243,6 @@ describe('Edit Overlay Suite', () => {
         { id : 'editLocation',     visible : true, value : './test'},
         { id : 'editDesc',         visible : true, value : 'description'},
         { id : 'editMime',         visible : true, value : 'text/plain'},
-        { id : 'editActionScript', visible : false},
-        { id : 'editState',        visible : false},
         { id : 'editProtocol',     visible : true, value : 'http-get'}
       ]);
     });
