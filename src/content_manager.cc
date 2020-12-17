@@ -873,7 +873,6 @@ void ContentManager::updateObject(int objectID, const std::map<std::string, std:
     auto obj = database->loadObject(objectID);
     unsigned int objectType = obj->getObjectType();
 
-    /// \todo if we have an active item, does it mean we first go through IS_ITEM and then thorugh IS_ACTIVE item? ask Gena
     if (IS_CDS_ITEM(objectType)) {
         auto item = std::static_pointer_cast<CdsItem>(obj);
         auto clone = CdsObject::createObject(database, objectType);

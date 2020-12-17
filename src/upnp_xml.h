@@ -61,13 +61,10 @@ public:
 
     /// \brief Renders the DIDL-Lite representation of an object in the content directory.
     /// \param obj Object to be rendered as XML.
-    /// \param renderActions If true, also render special elements of an active item.
     ///
     /// This function looks at the object, and renders the DIDL-Lite representation of it -
-    /// either a container or an item. The renderActions parameter tells us whether to also
-    /// show the special fields of an active item in the XML. This is currently used when
-    /// providing the XML representation of an active item to a trigger/toggle script.
-    void renderObject(const std::shared_ptr<CdsObject>& obj, bool renderActions, size_t stringLimit, pugi::xml_node* parent);
+    /// either a container or an item
+    void renderObject(const std::shared_ptr<CdsObject>& obj, size_t stringLimit, pugi::xml_node* parent);
 
     /// \brief Renders XML for the event property set.
     /// \return pugi::xml_document representing the newly created XML.
