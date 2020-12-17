@@ -11,7 +11,6 @@ import fileItems from './fixtures/items-for-files';
 import editItemResponse from './fixtures/object_id-39479';
 import editDisabled from './fixtures/edit_load_disabled';
 import itemMock from './fixtures/item';
-import activeItemMock from './fixtures/active-item';
 import externalUrl from './fixtures/external-url';
 import internalUrl from './fixtures/internal-url';
 import containerMock from './fixtures/container';
@@ -445,31 +444,6 @@ describe('Gerbera Items', () => {
       });
       editModal.remove();
     });
-
-    it('calls the server with the `active_item` details', () => {
-      const itemData = {
-        item: activeItemMock
-      };
-
-      editModal.editmodal('loadItem', itemData);
-
-      Items.saveItem();
-
-      expect(ajaxSpy.calls.count()).toBe(1);
-      expect(ajaxSpy.calls.mostRecent().args[0].data).toEqual({
-        sid: 'SESSION_ID',
-        req_type: 'edit_save',
-        object_id: '1306',
-        title: 'Test Active Item',
-        location: '/home/test.txt',
-        description: 'test',
-        'mime-type': 'text/plain',
-        action: '/home/echoText.sh',
-        state: 'test-state',
-        updates: 'check'
-      });
-      editModal.remove();
-    });
   });
   describe('saveItemComplete()', () => {
     let response;
@@ -709,30 +683,8 @@ describe('Gerbera Items', () => {
       });
     });
 
-    it('calls the server with the `active_item` details', async () => {
-      editModal.editmodal('addNewItem', {type: 'active_item', item: item});
-
-      await Items.addObject();
-
-      expect(ajaxSpy.calls.count()).toBe(1);
-      expect(ajaxSpy.calls.mostRecent().args[0].data).toEqual({
-        sid: 'SESSION_ID',
-        req_type: 'add_object',
-        parent_id: '9999',
-        obj_type: 'active_item',
-        class: 'object.item.activeItem',
-        title: '',
-        location: '',
-        description: '',
-        'mime-type': '',
-        action: '',
-        state: '',
-        updates: 'check'
-      });
-    });
-
     it('when successful adds a GERBERA.Updates UI timer to check for updates later', async () => {
-      editModal.editmodal('addNewItem', {type: 'active_item', item: item});
+      editModal.editmodal('addNewItem', {type: 'item', item: item});
       GerberaApp.currentTreeItem = {};
       await Items.addObject();
 
