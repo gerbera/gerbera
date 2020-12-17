@@ -79,10 +79,6 @@
       editClass.val('object.item');
       showFields([editObjectType, editTitle, editLocation, editClass, editDesc, editMime]);
       hideFields([editActionScript, editState, editProtocol]);
-    } else if (itemType === 'active_item') {
-      editClass.val('object.item.activeItem');
-      showFields([editObjectType, editTitle, editLocation, editClass, editDesc, editMime, editActionScript, editState]);
-      hideFields([editProtocol]);
     } else if (itemType === 'external_url') {
       editClass.val('object.item');
       editProtocol.val('http-get');
@@ -207,10 +203,6 @@
           loadSimpleItem(modal, item);
           break;
         }
-        case 'active_item': {
-          loadActiveItem(modal, item);
-          break;
-        }
         case 'container': {
           loadContainer(modal, item);
           break;
@@ -262,47 +254,6 @@
     hideFields([
       modal.find('#editActionScript'),
       modal.find('#editState'),
-      modal.find('#editProtocol')
-    ]);
-  }
-
-  function loadActiveItem (modal, item) {
-    modal.find('#editTitle')
-      .val(item.title.value)
-      .prop('disabled', !item.title.editable)
-      .closest('.form-group').show();
-
-    modal.find('#editLocation')
-      .val(item.location.value)
-      .prop('disabled', !item.location.editable)
-      .closest('.form-group').show();
-
-    modal.find('#editClass')
-      .val(item.class.value)
-      .prop('disabled', true)
-      .closest('.form-group').show();
-
-    modal.find('#editDesc')
-      .val(item.description.value)
-      .prop('disabled', !item.description.editable)
-      .closest('.form-group').show();
-
-    modal.find('#editMime')
-      .val(item['mime-type'].value)
-      .prop('disabled', true)
-      .closest('.form-group').show();
-
-    modal.find('#editActionScript')
-      .val(item.action.value)
-      .prop('disabled', !item.action.editable)
-      .closest('.form-group').show();
-
-    modal.find('#editState')
-      .val(item.state.value)
-      .prop('disabled', !item.state.editable)
-      .closest('.form-group').show();
-
-    hideFields([
       modal.find('#editProtocol')
     ]);
   }
@@ -423,18 +374,6 @@
         };
         break;
       }
-      case 'active_item': {
-        item = {
-          object_id: objectId.val(),
-          title: editTitle.val(),
-          description: editDesc.val(),
-          location: editLocation.val(),
-          'mime-type': editMime.val(),
-          action: editActionScript.val(),
-          state: editState.val()
-        };
-        break;
-      }
       case 'container': {
         item = {
           object_id: objectId.val(),
@@ -489,20 +428,6 @@
           title: editTitle.val(),
           location: editLocation.val(),
           description: editDesc.val()
-        };
-        break;
-      }
-      case 'active_item': {
-        item = {
-          parent_id: parentId.val(),
-          obj_type: editObjectType.val(),
-          class: editClass.val(),
-          title: editTitle.val(),
-          description: editDesc.val(),
-          location: editLocation.val(),
-          'mime-type': editMime.val(),
-          action: editActionScript.val(),
-          state: editState.val()
         };
         break;
       }

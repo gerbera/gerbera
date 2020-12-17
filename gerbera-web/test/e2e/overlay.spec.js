@@ -146,20 +146,6 @@ describe('Edit Overlay Suite', () => {
       ]);
     });
 
-    it('only shows title, location, class, desc, mime, actionScript, state when adding activeItem type', async () => {
-      await itemSelectionTest('active_item', 'object.item.activeItem', [
-        { id : 'editObjectType',   visible : true},
-        { id : 'editTitle',        visible : true},
-        { id : 'editClass',        visible : true},
-        { id : 'editLocation',     visible : true},
-        { id : 'editDesc',         visible : true},
-        { id : 'editMime',         visible : true},
-        { id : 'editActionScript', visible : true},
-        { id : 'editState',        visible : true},
-        { id : 'editProtocol',     visible : false}
-      ]);
-    });
-
     it('only shows title, location, class, desc, mime, protocol when adding external_url type', async () => {
       await itemSelectionTest('external_url', 'object.item', [
         { id : 'editObjectType',   visible : true},
@@ -231,20 +217,6 @@ describe('Edit Overlay Suite', () => {
         { id : 'editMime',         visible : false},
         { id : 'editActionScript', visible : false},
         { id : 'editState',        visible : false},
-        { id : 'editProtocol',     visible : false}
-      ]);
-    });
-
-    it('loads an active item to edit with correct fields populated', async () => {
-      await itemLoadTest(10, [
-        { id : 'editObjectType',   visible : true, value : 'active_item'},
-        { id : 'editTitle',        visible : true, value : 'Test Active Item'},
-        { id : 'editClass',        visible : true, value : 'object.item.activeItem'},
-        { id : 'editLocation',     visible : true, value : '/home/test.txt'},
-        { id : 'editDesc',         visible : true, value : 'test'},
-        { id : 'editMime',         visible : true, value : 'text/plain'},
-        { id : 'editActionScript', visible : true, value : '/home/echoText.sh'},
-        { id : 'editState',        visible : true, value : 'test-state'},
         { id : 'editProtocol',     visible : false}
       ]);
     });

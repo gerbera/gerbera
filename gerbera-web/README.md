@@ -22,7 +22,7 @@ The Gerbera Web UI is written with the following tools:
 
 ## Developing the UI
 
-### Setup the enviornment
+### Setup the environment
 
 Using the `/gerbera-web` as the root folder setup the NodeJS environment.
 
