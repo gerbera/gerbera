@@ -46,7 +46,6 @@ class SQLEmitter;
 #define QTE table_quote_end
 
 #define CDS_OBJECT_TABLE "mt_cds_object"
-#define CDS_ACTIVE_ITEM_TABLE "mt_cds_active_item"
 #define INTERNAL_SETTINGS_TABLE "mt_internal_setting"
 #define AUTOSCAN_TABLE "mt_autoscan"
 #define METADATA_TABLE "mt_metadata"

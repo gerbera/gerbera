@@ -1265,12 +1265,6 @@ void SQLDatabase::_removeObjects(const std::vector<int32_t>& objectIDs)
         }
     }
 
-    std::ostringstream qActiveItem;
-    qActiveItem << "DELETE FROM " << TQ(CDS_ACTIVE_ITEM_TABLE)
-                << " WHERE " << TQ("id")
-                << " IN (" << objectIdsStr << ')';
-    exec(qActiveItem);
-
     std::ostringstream qObject;
     qObject << "DELETE FROM " << TQ(CDS_OBJECT_TABLE)
             << " WHERE " << TQ("id")

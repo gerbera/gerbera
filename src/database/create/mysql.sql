@@ -37,19 +37,12 @@ INSERT INTO `mt_cds_object` VALUES (-1,NULL,-1,0,NULL,NULL,NULL,NULL,NULL,NULL,N
 INSERT INTO `mt_cds_object` VALUES (0,NULL,-1,1,'object.container','Root',NULL,NULL,NULL,NULL,NULL,0,NULL,9,NULL,NULL);
 UPDATE `mt_cds_object` SET `id`='0' WHERE `id`='1';
 INSERT INTO `mt_cds_object` VALUES (1,NULL,0,1,'object.container','PC Directory',NULL,NULL,NULL,NULL,NULL,0,NULL,9,NULL,NULL);
-CREATE TABLE `mt_cds_active_item` (
-  `id` int(11) NOT NULL,
-  `action` varchar(255) NOT NULL,
-  `state` varchar(255) NOT NULL,
-  PRIMARY KEY  (`id`),
-  CONSTRAINT `mt_cds_active_item_ibfk_1` FOREIGN KEY (`id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=MyISAM CHARSET=utf8;
 CREATE TABLE `mt_internal_setting` (
   `key` varchar(40) NOT NULL,
   `value` varchar(255) NOT NULL,
   PRIMARY KEY  (`key`)
 ) ENGINE=MyISAM CHARSET=utf8;
-INSERT INTO `mt_internal_setting` VALUES ('db_version','6');
+INSERT INTO `mt_internal_setting` VALUES ('db_version','7');
 CREATE TABLE `mt_autoscan` (
   `id` int(11) NOT NULL auto_increment,
   `obj_id` int(11) default NULL,

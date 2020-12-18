@@ -52,13 +52,11 @@ class Database;
 // ATTENTION: These values need to be changed in web/js/items.js too.
 #define OBJECT_TYPE_CONTAINER 0x00000001u
 #define OBJECT_TYPE_ITEM 0x00000002u
-#define OBJECT_TYPE_ACTIVE_ITEM 0x00000004u
 #define OBJECT_TYPE_ITEM_EXTERNAL_URL 0x00000008u
 #define OBJECT_TYPE_ITEM_INTERNAL_URL 0x00000010u
 
 #define STRING_OBJECT_TYPE_CONTAINER "container"
 #define STRING_OBJECT_TYPE_ITEM "item"
-#define STRING_OBJECT_TYPE_ACTIVE_ITEM "active_item"
 #define STRING_OBJECT_TYPE_EXTERNAL_URL "external_url"
 #define STRING_OBJECT_TYPE_INTERNAL_URL "internal_url"
 
