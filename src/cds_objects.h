@@ -28,7 +28,7 @@
 */
 
 /// \file cds_objects.h
-/// \brief Definition for the CdsObject, CdsItem, CdsActiveItem and CdsContainer classes.
+/// \brief Definition for the CdsObject, CdsItem and CdsContainer classes.
 #ifndef __CDS_OBJECTS_H__
 #define __CDS_OBJECTS_H__
 
