@@ -107,6 +107,9 @@ PRAGMA foreign_keys = ON;"
 #define SQLITE3_UPDATE_5_6_2 "CREATE INDEX grb_config_value_item ON grb_config_value(item)"
 #define SQLITE3_UPDATE_5_6_3 "UPDATE \"mt_internal_setting\" SET \"value\"='6' WHERE \"key\"='db_version' AND \"value\"='5'"
 
+#define SQLITE3_UPDATE_6_7_1 "DROP TABLE mt_cds_active_item;"
+#define SQLITE3_UPDATE_6_7_2 "UPDATE \"mt_internal_setting\" SET \"value\"='7' WHERE \"key\"='db_version' AND \"value\"='6'"
+
 #define SL3_INITITAL_QUEUE_SIZE 20
 
 Sqlite3Database::Sqlite3Database(std::shared_ptr<Config> config, std::shared_ptr<Timer> timer)
@@ -179,7 +182,7 @@ void Sqlite3Database::init()
             }
 
             if (dbVersion.empty()) {
-                log_info("no sqlite3 backup is available or backup is corrupt. automatically creating database...");
+                log_info("No sqlite3 backup is available or backup is corrupt. automatically creating database...");
                 auto itask = std::make_shared<SLInitTask>(config);
                 addTask(itask);
                 try {
@@ -189,7 +192,7 @@ void Sqlite3Database::init()
                     shutdown();
                     throw_std_runtime_error(std::string { "error while creating database: " } + e.what());
                 }
-                log_info("database created successfully.");
+                log_info("Database created successfully.");
             }
         } else {
             // fail because restore option is false
@@ -260,7 +263,15 @@ void Sqlite3Database::init()
             dbVersion = "6";
         }
 
-        if (dbVersion != "6")
+        if (dbVersion == "6") {
+            log_info("Running an automatic database upgrade from database version 6 to version 7...");
+            _exec(SQLITE3_UPDATE_6_7_1);
+            _exec(SQLITE3_UPDATE_6_7_2);
+            log_info("Database upgrade successful.");
+            dbVersion = "7";
+        }
+
+        if (dbVersion != "7")
             throw_std_runtime_error("The database seems to be from a newer version");
 
         // add timer for backups

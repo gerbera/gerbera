@@ -275,7 +275,6 @@ static constexpr bool IS_FORBIDDEN_CDS_ID(int id) { return id <= CDS_ID_FS_ROOT;
 #define URL_VALUE_TRANSCODE_NO_RES_ID "none"
 
 #define URL_VALUE_TRANSCODE "1"
-#define DEFAULT_STORAGE_CACHING_ENABLED YES
 #define MT_SQLITE_SYNC_FULL 2
 #define MT_SQLITE_SYNC_NORMAL 1
 #define MT_SQLITE_SYNC_OFF 0
@@ -284,7 +283,6 @@ static constexpr bool IS_FORBIDDEN_CDS_ID(int id) { return id <= CDS_ID_FS_ROOT;
 #define DEFAULT_SQLITE_BACKUP_ENABLED NO
 #define DEFAULT_SQLITE_BACKUP_INTERVAL 600
 #define DEFAULT_SQLITE_ENABLED YES
-#define DEFAULT_STORAGE_DRIVER "sqlite3"
 
 #ifdef HAVE_MYSQL
 #define DEFAULT_MYSQL_HOST "localhost"
@@ -298,7 +296,6 @@ static constexpr bool IS_FORBIDDEN_CDS_ID(int id) { return id <= CDS_ID_FS_ROOT;
 
 #define DEFAULT_SQLITE3_DB_FILENAME "gerbera.db"
 
-#define CONFIG_MAPPINGS_TEMPLATE "mappings.xml"
 // misc
 #define INVALID_OBJECT_ID (-333)
 #define INVALID_OBJECT_ID_2 (-666)

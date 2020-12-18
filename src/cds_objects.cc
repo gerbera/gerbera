@@ -303,8 +303,6 @@ int CdsObject::remapObjectType(const std::string& objectType)
         return OBJECT_TYPE_CONTAINER;
     if (objectType == STRING_OBJECT_TYPE_ITEM)
         return OBJECT_TYPE_ITEM;
-    if (objectType == STRING_OBJECT_TYPE_ACTIVE_ITEM)
-        return OBJECT_TYPE_ITEM | OBJECT_TYPE_ACTIVE_ITEM;
     if (objectType == STRING_OBJECT_TYPE_EXTERNAL_URL)
         return OBJECT_TYPE_ITEM | OBJECT_TYPE_ITEM_EXTERNAL_URL;
     if (objectType == STRING_OBJECT_TYPE_INTERNAL_URL)

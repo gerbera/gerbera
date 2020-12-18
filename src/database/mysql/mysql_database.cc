@@ -86,6 +86,9 @@
 #define MYSQL_UPDATE_5_6_2 "CREATE INDEX grb_config_value_item ON grb_config_value(item)"
 #define MYSQL_UPDATE_5_6_3 "UPDATE `mt_internal_setting` SET `value`='6' WHERE `key`='db_version' AND `value`='5'"
 
+#define MYSQL_UPDATE_6_7_1 "DROP TABLE mt_cds_active_item;"
+#define MYSQL_UPDATE_6_7_2 "UPDATE `mt_internal_setting` SET `value`='7' WHERE `key`='db_version' AND `value`='6'"
+
 MySQLDatabase::MySQLDatabase(std::shared_ptr<Config> config)
     : SQLDatabase(std::move(config))
 {
@@ -283,9 +286,15 @@ void MySQLDatabase::init()
         dbVersion = "6";
     }
 
-    /* --- --- ---*/
+    if (dbVersion == "6") {
+        log_info("Doing an automatic database upgrade from database version 6 to version 7...");
+        _exec(MYSQL_UPDATE_6_7_1);
+        _exec(MYSQL_UPDATE_6_7_2);
+        log_info("database upgrade successful.");
+        dbVersion = "7";
+    }
 
-    if (dbVersion != "6")
+    if (dbVersion != "7")
         throw_std_runtime_error("The database seems to be from a newer version (database version " + dbVersion + ")");
 
     lock.unlock();

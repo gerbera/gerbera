@@ -70,7 +70,6 @@ constexpr std::array<std::pair<metadata_fields_t, const char*>, 21> mt_names = {
 constexpr std::array<std::pair<int, const char*>, 5> ot_names = { {
     { OBJECT_TYPE_CONTAINER, "OBJECT_TYPE_CONTAINER" },
     { OBJECT_TYPE_ITEM, "OBJECT_TYPE_ITEM" },
-    { OBJECT_TYPE_ACTIVE_ITEM, "OBJECT_TYPE_ACTIVE_ITEM" },
     { OBJECT_TYPE_ITEM_EXTERNAL_URL, "OBJECT_TYPE_ITEM_EXTERNAL_URL" },
     { OBJECT_TYPE_ITEM_INTERNAL_URL, "OBJECT_TYPE_ITEM_INTERNAL_URL" },
 } };

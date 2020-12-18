@@ -18,27 +18,9 @@
     You should have received a copy of the GNU General Public License
     along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
 */
+/// \file mysql_create_sql.h
 
-/// \file device_description_handler.h
+#ifdef HAVE_MYSQL
 
-#ifndef GERBERA_DEVICE_DESCRIPTION_HANDLER_H
-#define GERBERA_DEVICE_DESCRIPTION_HANDLER_H
-
-#include "request_handler.h"
-#include "upnp_xml.h"
-#include <memory>
-
-class DeviceDescriptionHandler : public RequestHandler {
-public:
-    explicit DeviceDescriptionHandler(std::shared_ptr<Config> config, std::shared_ptr<Database> database,
-        UpnpXMLBuilder* xmlBuilder);
-
-    void getInfo(const char* filename, UpnpFileInfo* info) override;
-    std::unique_ptr<IOHandler> open(const char* filename, enum UpnpOpenFileMode mode, const std::string& range) override;
-
-protected:
-    UpnpXMLBuilder* xmlBuilder;
-    std::string deviceDescription;
-};
-
-#endif //GERBERA_DEVICE_DESCRIPTION_HANDLER_H
+#ifndef __MYSQL_CREATE_SQL_H__
+#define __MYSQL_CREATE_SQL_H__
