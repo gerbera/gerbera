@@ -86,8 +86,6 @@ static constexpr bool IS_CDS_PURE_ITEM(unsigned int type) { return type == OBJEC
 /// \brief Generic object in the Content Directory.
 class CdsObject {
 protected:
-    std::shared_ptr<Database> database;
-
     /// \brief ID of the object in the content directory
     int id;
 
@@ -133,7 +131,7 @@ protected:
 
 public:
     /// \brief Constructor. Sets the default values.
-    explicit CdsObject(std::shared_ptr<Database> database);
+    explicit CdsObject();
 
     /// \brief Set the object ID.
     ///
@@ -353,9 +351,6 @@ public:
 
     static std::shared_ptr<CdsObject> createObject(const std::shared_ptr<Database>& database, unsigned int objectType);
 
-    /// \brief Returns the path to the object as it appears in the database tree.
-    virtual std::string getVirtualPath() const = 0;
-
     static std::string mapObjectType(int objectType);
     static int remapObjectType(const std::string& objectType);
 };
@@ -373,7 +368,7 @@ protected:
 
 public:
     /// \brief Constructor, sets the object type and default upnp:class (object.item)
-    explicit CdsItem(std::shared_ptr<Database> database);
+    explicit CdsItem();
 
     /// \brief Set mime-type information of the media.
     void setMimeType(const std::string& mimeType) { this->mimeType = mimeType; }
@@ -397,9 +392,6 @@ public:
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
     void validate() override;
 
-    /// \brief Returns the path to the object as it appears in the database tree.
-    std::string getVirtualPath() const override;
-
     /// \brief Set the unique service ID.
     void setServiceID(const std::string& serviceID) { this->serviceID = serviceID; }
 
@@ -411,7 +403,7 @@ public:
 class CdsItemExternalURL : public CdsItem {
 public:
     /// \brief Constructor, sets the object type.
-    explicit CdsItemExternalURL(std::shared_ptr<Database> database);
+    explicit CdsItemExternalURL();
 
     /// \brief Sets the URL for the item.
     /// \param URL full url to the item: http://somewhere.com/something.mpg
@@ -444,7 +436,7 @@ public:
 class CdsItemInternalURL : public CdsItemExternalURL {
 public:
     /// \brief Constructor, sets the object type.
-    explicit CdsItemInternalURL(std::shared_ptr<Database> database);
+    explicit CdsItemInternalURL();
 
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
     void validate() override;
@@ -464,7 +456,7 @@ protected:
 
 public:
     /// \brief Constructor, initializes default values for the flags and sets the object type.
-    explicit CdsContainer(std::shared_ptr<Database> database);
+    explicit CdsContainer();
 
     /// \brief Set the searchable flag.
     void setSearchable(bool searchable) { changeFlag(OBJECT_FLAG_SEARCHABLE, searchable); }
@@ -501,9 +493,6 @@ public:
 
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
     void validate() override;
-
-    /// \brief Returns the path to the object as it appears in the database tree.
-    std::string getVirtualPath() const override;
 };
 
 #endif // __CDS_OBJECTS_H__

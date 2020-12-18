@@ -37,9 +37,8 @@
 #include "database/database.h"
 #include "util/tools.h"
 
-CdsObject::CdsObject(std::shared_ptr<Database> database)
-    : database(std::move(database))
-    , mtime(0)
+CdsObject::CdsObject()
+    : mtime(0)
     , sizeOnDisk(0)
 {
     id = INVALID_OBJECT_ID;
@@ -119,13 +118,13 @@ std::shared_ptr<CdsObject> CdsObject::createObject(const std::shared_ptr<Databas
     std::shared_ptr<CdsObject> obj;
 
     if (IS_CDS_CONTAINER(objectType)) {
-        obj = std::make_shared<CdsContainer>(database);
+        obj = std::make_shared<CdsContainer>();
     } else if (IS_CDS_ITEM_INTERNAL_URL(objectType)) {
-        obj = std::make_shared<CdsItemInternalURL>(database);
+        obj = std::make_shared<CdsItemInternalURL>();
     } else if (IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
-        obj = std::make_shared<CdsItemExternalURL>(database);
+        obj = std::make_shared<CdsItemExternalURL>();
     } else if (IS_CDS_ITEM(objectType)) {
-        obj = std::make_shared<CdsItem>(database);
+        obj = std::make_shared<CdsItem>();
     } else {
         throw_std_runtime_error("invalid object type: " + std::to_string(objectType));
     }
@@ -134,8 +133,8 @@ std::shared_ptr<CdsObject> CdsObject::createObject(const std::shared_ptr<Databas
 
 /* CdsItem */
 
-CdsItem::CdsItem(std::shared_ptr<Database> database)
-    : CdsObject(std::move(database))
+CdsItem::CdsItem()
+    : CdsObject()
     , mimeType(MIMETYPE_DEFAULT)
 {
     objectType = OBJECT_TYPE_ITEM;
@@ -182,8 +181,8 @@ void CdsItem::validate()
 
 //---------
 
-CdsItemExternalURL::CdsItemExternalURL(std::shared_ptr<Database> database)
-    : CdsItem(std::move(database))
+CdsItemExternalURL::CdsItemExternalURL()
+    : CdsItem()
 {
     objectType |= OBJECT_TYPE_ITEM_EXTERNAL_URL;
 
@@ -202,8 +201,8 @@ void CdsItemExternalURL::validate()
 }
 //---------
 
-CdsItemInternalURL::CdsItemInternalURL(std::shared_ptr<Database> database)
-    : CdsItemExternalURL(std::move(database))
+CdsItemInternalURL::CdsItemInternalURL()
+    : CdsItemExternalURL()
 {
     objectType |= OBJECT_TYPE_ITEM_INTERNAL_URL;
     mimeType = MIMETYPE_DEFAULT;
@@ -218,8 +217,8 @@ void CdsItemInternalURL::validate()
         throw_std_runtime_error("Internal URL item validation failed: only relative URLs allowed");
 }
 
-CdsContainer::CdsContainer(std::shared_ptr<Database> database)
-    : CdsObject(std::move(database))
+CdsContainer::CdsContainer()
+    : CdsObject()
 {
     objectType = OBJECT_TYPE_CONTAINER;
     updateID = 0;
@@ -250,38 +249,6 @@ void CdsContainer::validate()
     /// \todo well.. we have to know if a container is a real directory or just a virtual container in the database
     /*    if (!fs::is_directory(this->location, true))
         throw_std_runtime_error("validation failed"); */
-}
-
-std::string CdsContainer::getVirtualPath() const
-{
-    std::string location;
-    if (getID() == CDS_ID_ROOT) {
-        location = std::string(1, VIRTUAL_CONTAINER_SEPARATOR);
-    } else if (getID() == CDS_ID_FS_ROOT) {
-        location = std::string(1, VIRTUAL_CONTAINER_SEPARATOR) + database->getFsRootName();
-    } else if (!getLocation().empty()) {
-        location = getLocation();
-        if (!isVirtual()) {
-            location = std::string(1, VIRTUAL_CONTAINER_SEPARATOR) + database->getFsRootName() + location;
-        }
-    }
-
-    if (location.empty())
-        throw_std_runtime_error("virtual location not available");
-
-    return location;
-}
-
-std::string CdsItem::getVirtualPath() const
-{
-    auto cont = database->loadObject(getParentID());
-    std::string location = cont->getVirtualPath();
-    location = location + VIRTUAL_CONTAINER_SEPARATOR + getTitle();
-
-    if (location.empty())
-        throw_std_runtime_error("virtual location not available");
-
-    return location;
 }
 
 std::string CdsObject::mapObjectType(int type)

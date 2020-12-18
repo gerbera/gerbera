@@ -139,16 +139,16 @@ void web::addObject::process()
             throw_std_runtime_error("no location given");
         if (!isRegularFile(location, ec))
             throw_std_runtime_error("file not found");
-        obj = this->addItem(parentID, std::make_shared<CdsItem>(database));
+        obj = this->addItem(parentID, std::make_shared<CdsItem>());
         allow_fifo = true;
     } else if (obj_type == STRING_OBJECT_TYPE_EXTERNAL_URL) {
         if (location.empty())
             throw_std_runtime_error("No URL given");
-        obj = this->addUrl(parentID, std::make_shared<CdsItemExternalURL>(database), true);
+        obj = this->addUrl(parentID, std::make_shared<CdsItemExternalURL>(), true);
     } else if (obj_type == STRING_OBJECT_TYPE_INTERNAL_URL) {
         if (location.empty())
             throw_std_runtime_error("No URL given");
-        obj = this->addUrl(parentID, std::make_shared<CdsItemInternalURL>(database), false);
+        obj = this->addUrl(parentID, std::make_shared<CdsItemInternalURL>(), false);
     } else {
         throw_std_runtime_error("unknown object type: " + obj_type);
     }

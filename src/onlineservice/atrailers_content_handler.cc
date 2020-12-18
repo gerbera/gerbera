@@ -90,7 +90,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getNextObject()
 
 std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_node& trailer) const
 {
-    auto item = std::make_shared<CdsItemExternalURL>(database);
+    auto item = std::make_shared<CdsItemExternalURL>();
     auto resource = std::make_shared<CdsResource>(CH_DEFAULT);
     item->addResource(resource);
 

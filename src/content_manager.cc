@@ -1093,7 +1093,7 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::path& 
             }
         }
 
-        auto item = std::make_shared<CdsItem>(database);
+        auto item = std::make_shared<CdsItem>();
         obj = item;
         item->setLocation(path);
         item->setMTime(statbuf.st_mtime);
@@ -1113,7 +1113,7 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::path& 
             MetadataHandler::setMetadata(config, item);
         }
     } else if (S_ISDIR(statbuf.st_mode)) {
-        auto cont = std::make_shared<CdsContainer>(database);
+        auto cont = std::make_shared<CdsContainer>();
         obj = cont;
         /* adding containers is done by Database now
          * this exists only to inform the caller that
@@ -1416,10 +1416,6 @@ void ContentManager::removeObject(int objectID, bool rescanResource, bool async,
         try {
             obj = database->loadObject(objectID);
             path = obj->getLocation();
-
-            std::string vpath = obj->getVirtualPath();
-            if (!vpath.empty())
-                task->setDescription("Removing: " + obj->getVirtualPath());
         } catch (const std::runtime_error& e) {
             log_debug("trying to remove an object ID which is no longer in the database! {}", objectID);
             return;
