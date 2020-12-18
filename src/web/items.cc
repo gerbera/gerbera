@@ -71,10 +71,6 @@ void web::items::process()
         param->setFlag(BROWSE_TRACK_SORT);
 
     auto arr = database->browse(param);
-
-    std::string location = obj->getVirtualPath();
-    if (!location.empty())
-        items.append_attribute("location") = location.c_str();
     items.append_attribute("virtual") = obj->isVirtual();
 
     items.append_attribute("start") = start;

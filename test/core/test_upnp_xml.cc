@@ -41,7 +41,7 @@ TEST_F(UpnpXmlTest, RenderObjectContainer)
     // arrange
     pugi::xml_document didl_lite;
     auto root = didl_lite.append_child("DIDL-Lite");
-    auto obj = std::make_shared<CdsContainer>(nullptr);
+    auto obj = std::make_shared<CdsContainer>();
     obj->setID(1);
     obj->setParentID(2);
     obj->setRestricted(false);
@@ -85,7 +85,7 @@ TEST_F(UpnpXmlTest, RenderObjectItem)
     // arrange
     pugi::xml_document didl_lite;
     auto root = didl_lite.append_child("DIDL-Lite");
-    auto obj = std::make_shared<CdsItem>(nullptr);
+    auto obj = std::make_shared<CdsItem>();
     obj->setID(1);
     obj->setParentID(2);
     obj->setRestricted(false);
@@ -158,7 +158,7 @@ TEST_F(UpnpXmlTest, CreateResponse)
 
 TEST_F(UpnpXmlTest, FirstResourceRendersPureWhenExternalUrl)
 {
-    auto obj = std::make_shared<CdsItemExternalURL>(nullptr);
+    auto obj = std::make_shared<CdsItemExternalURL>();
     obj->setLocation("http://localhost/external/url");
 
     auto item = std::static_pointer_cast<CdsItem>(obj);
@@ -171,7 +171,7 @@ TEST_F(UpnpXmlTest, FirstResourceRendersPureWhenExternalUrl)
 
 TEST_F(UpnpXmlTest, FirstResourceAddsLocalResourceIdToExternalUrlWhenOnlineWithProxy)
 {
-    auto obj = std::make_shared<CdsItemExternalURL>(nullptr);
+    auto obj = std::make_shared<CdsItemExternalURL>();
     obj->setLocation("http://localhost/external/url");
     obj->setID(12345);
     obj->setFlag(OBJECT_FLAG_ONLINE_SERVICE);
@@ -187,7 +187,7 @@ TEST_F(UpnpXmlTest, FirstResourceAddsLocalResourceIdToExternalUrlWhenOnlineWithP
 
 TEST_F(UpnpXmlTest, FirstResourceAddsLocalResourceIdToItem)
 {
-    auto obj = std::make_shared<CdsItem>(nullptr);
+    auto obj = std::make_shared<CdsItem>();
     obj->setLocation("local/content");
     obj->setID(12345);
 
@@ -201,7 +201,7 @@ TEST_F(UpnpXmlTest, FirstResourceAddsLocalResourceIdToItem)
 
 TEST_F(UpnpXmlTest, FirstResourceAddsContentServeToInternalUrlItem)
 {
-    auto obj = std::make_shared<CdsItemInternalURL>(nullptr);
+    auto obj = std::make_shared<CdsItemInternalURL>();
     obj->setLocation("local/content");
     obj->setID(12345);
 
