@@ -36,7 +36,6 @@
 #include "exceptions.h"
 #include "util/logger.h"
 
-#define CONFIG_XML_VERSION_0_11_0 1
 #define CONFIG_XML_VERSION 2
 
 // ERROR CODES
@@ -95,13 +94,9 @@
 #define D_PN_AVC_MP4_EU "AVC_MP4_EU"
 #define D_PN_AVI "AVI"
 // fixed CdsObjectIDs
-#define CDS_ID_BLACKHOLE (-1)
 #define CDS_ID_ROOT 0
 #define CDS_ID_FS_ROOT 1
 static constexpr bool IS_FORBIDDEN_CDS_ID(int id) { return id <= CDS_ID_FS_ROOT; }
-
-// internal setting keys
-#define SET_LAST_MODIFIED "last_modified"
 
 #define YES "yes"
 #define NO "no"
@@ -114,18 +109,12 @@ static constexpr bool IS_FORBIDDEN_CDS_ID(int id) { return id <= CDS_ID_FS_ROOT;
 #define URL_PARAM_SEPARATOR '/'
 #define _URL_PARAM_SEPARATOR "/"
 #define URL_UI_PARAM_SEPARATOR '?'
-#define URL_ARG_SEPARATOR '&'
-#define _URL_ARG_SEPARATOR "&"
 #define SERVER_VIRTUAL_DIR "content"
 #define CONTENT_MEDIA_HANDLER "media"
 #define CONTENT_SERVE_HANDLER "serve"
 #define CONTENT_ONLINE_HANDLER "online"
 #define CONTENT_UI_HANDLER "interface"
 #define DEVICE_DESCRIPTION_PATH "description.xml"
-
-// REQUEST TYPES
-#define REQ_TYPE_BROWSE "browse"
-#define REQ_TYPE_LOGIN "login"
 
 // SEPARATOR
 #define FS_ROOT_DIRECTORY "/"
@@ -135,14 +124,10 @@ static constexpr bool IS_FORBIDDEN_CDS_ID(int id) { return id <= CDS_ID_FS_ROOT;
 
 // MIME TYPES FOR WEB UI
 #define MIMETYPE_XML "text/xml"
-#define MIMETYPE_HTML "text/html"
 #define MIMETYPE_TEXT "text/plain"
 #define MIMETYPE_JSON "application/json" // RFC 4627
 // default mime types for items in the cds
 #define MIMETYPE_DEFAULT "application/octet-stream"
-
-// regexp for mimetype matching
-#define MIMETYPE_REGEXP "^([a-z0-9_-]+/[a-z0-9_-]+)"
 
 // default protocol
 #define PROTOCOL "http-get"
@@ -178,15 +163,6 @@ static constexpr bool IS_FORBIDDEN_CDS_ID(int id) { return id <= CDS_ID_FS_ROOT;
 #define DESC_ICON_PNG_MIMETYPE "image/png"
 #define DESC_ICON_BMP_MIMETYPE "image/x-ms-bmp"
 #define DESC_ICON_JPG_MIMETYPE "image/jpeg"
-#define DESC_ICON32_PNG "/icons/mt-icon32.png"
-#define DESC_ICON32_BMP "/icons/mt-icon32.bmp"
-#define DESC_ICON32_JPG "/icons/mt-icon32.jpg"
-#define DESC_ICON48_PNG "/icons/mt-icon48.png"
-#define DESC_ICON48_BMP "/icons/mt-icon48.bmp"
-#define DESC_ICON48_JPG "/icons/mt-icon48.jpg"
-#define DESC_ICON120_JPG "/icons/mt-icon120.jpg"
-#define DESC_ICON120_PNG "/icons/mt-icon120.png"
-#define DESC_ICON120_BMP "/icons/mt-icon120.bmp"
 
 // media receiver registrar (xbox 360)
 #define DESC_MRREG_SERVICE_TYPE "urn:microsoft.com:service:X_MS_MediaReceiverRegistrar:1"
@@ -247,19 +223,23 @@ static constexpr bool IS_FORBIDDEN_CDS_ID(int id) { return id <= CDS_ID_FS_ROOT;
 #define DEFAULT_LAYOUT_TYPE "builtin"
 #define DEFAULT_HIDE_PC_DIRECTORY NO
 #define DEFAULT_CLIENTS_EN_VALUE NO
+
 #ifdef SOPCAST
 #define DEFAULT_SOPCAST_ENABLED NO
 #define DEFAULT_SOPCAST_UPDATE_AT_START NO
 #endif
+
 #ifdef ATRAILERS
 #define DEFAULT_ATRAILERS_ENABLED NO
 #define DEFAULT_ATRAILERS_UPDATE_AT_START NO
 #define DEFAULT_ATRAILERS_REFRESH 43200
 #define DEFAULT_ATRAILERS_RESOLUTION 640
 #endif
+
 #ifdef ONLINE_SERVICES
 #define CFG_DEFAULT_UPDATE_AT_START 10 // seconds
 #endif
+
 #define DEFAULT_TRANSCODING_ENABLED NO
 #define DEFAULT_AUDIO_BUFFER_SIZE 1048576
 #define DEFAULT_AUDIO_CHUNK_SIZE 131072
@@ -271,7 +251,6 @@ static constexpr bool IS_FORBIDDEN_CDS_ID(int id) { return id <= CDS_ID_FS_ROOT;
 
 #define URL_PARAM_TRANSCODE_PROFILE_NAME "pr_name"
 #define URL_PARAM_TRANSCODE "tr"
-#define URL_PARAM_TRANSCODE_TARGET_MIMETYPE "tmt"
 #define URL_VALUE_TRANSCODE_NO_RES_ID "none"
 
 #define URL_VALUE_TRANSCODE "1"
@@ -347,7 +326,5 @@ static constexpr bool IS_FORBIDDEN_CDS_ID(int id) { return id <= CDS_ID_FS_ROOT;
 #define DEFAULT_MARK_PLAYED_CONTENT_IMAGE "image"
 
 #define LINK_FILE_REQUEST_HANDLER "/" SERVER_VIRTUAL_DIR "/" CONTENT_MEDIA_HANDLER "/"
-#define LINK_WEB_REQUEST_HANDLER "/" SERVER_VIRTUAL_DIR "/" CONTENT_UI_HANDLER "/"
-#define LINK_SERVE_REQUEST_HANDLER "/" SERVER_VIRTUAL_DIR "/" CONTENT_SERVE_HANDLER "/"
 #define LINK_URL_REQUEST_HANDLER "/" SERVER_VIRTUAL_DIR "/" CONTENT_ONLINE_HANDLER "/"
 #endif // __COMMON_H__
