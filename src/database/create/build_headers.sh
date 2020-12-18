@@ -6,7 +6,6 @@ trap cleanup SIGINT SIGTERM ERR EXIT
 cleanup() {
   trap - SIGINT SIGTERM ERR EXIT
   rm "$FN.Z"
-  rm "$FN.Z.c"
 }
 
 readonly DB_TYPE="$1"
@@ -39,9 +38,12 @@ $ZPIPE_PATH< ${FN} > "${FN}.Z"
 REAL_SIZE=$(wc -c < ${FN})
 GZIPPED_SIZE=$(wc -c < ${FN}.Z)
 
-echo "#define ${DEF}_INFLATED_SIZE ${REAL_SIZE}" > "${FN}.Z.c"
-echo "#define ${DEF}_DEFLATED_SIZE ${GZIPPED_SIZE}" >> "${FN}.Z.c"
-
-./bin2hex.pl ${FN}.Z 1 | sed "s/char bin_data/const unsigned char ${VARIABLE}/" >> "${FN}.Z.c"
-
-cat "${FN}.tmpl.h" "${FN}.Z.c" "${FN}.tmpl.f" > "${DEST_DIR}"/${FN_FINAL}
+{
+  cat "${FN}.tmpl.h"
+  echo "#define ${DEF}_INFLATED_SIZE ${REAL_SIZE}"
+  echo "#define ${DEF}_DEFLATED_SIZE ${GZIPPED_SIZE}"
+  echo "const unsigned char ${VARIABLE}[] = {"
+  hexdump -ve '/1 "0x%02x,"' < ${FN}.Z
+  echo "};"
+  cat "${FN}.tmpl.f"
+} > "${DEST_DIR}"/${FN_FINAL}

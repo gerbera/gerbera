@@ -551,10 +551,10 @@ add_custom_command(OUTPUT sqlite3_create_sql.h
         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/src/database/create
         DEPENDS
             zpipe
+            src/database/create/build_headers.sh
             src/database/create/sqlite3.sql
             src/database/create/sqlite3.sql.tmpl.f
-            src/database/create/sqlite3.sql.tmpl.h
-            src/database/create/bin2hex.pl)
+            src/database/create/sqlite3.sql.tmpl.h)
 target_sources(libgerbera PRIVATE sqlite3_create_sql.h)
 
 if (WITH_MYSQL)
@@ -563,10 +563,10 @@ if (WITH_MYSQL)
             WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/src/database/create
             DEPENDS
                 zpipe
+                src/database/create/build_headers.sh
                 src/database/create/mysql.sql
                 src/database/create/mysql.sql.tmpl.f
-                src/database/create/mysql.sql.tmpl.h
-                src/database/create/bin2hex.pl)
+                src/database/create/mysql.sql.tmpl.h)
     target_sources(libgerbera PRIVATE mysql_create_sql.h)
 endif()
 target_include_directories(libgerbera PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
