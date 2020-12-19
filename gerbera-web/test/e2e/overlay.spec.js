@@ -155,18 +155,6 @@ describe('Edit Overlay Suite', () => {
       const editProtocol = await homePage.editOverlayFieldValue('editProtocol');
       expect(editProtocol).to.equal('http-get');
     });
-
-    it('only shows title, location, class, desc, mime when adding internal_url type', async () => {
-      await itemSelectionTest('internal_url', 'object.item', [
-        { id : 'editObjectType',   visible : true},
-        { id : 'editTitle',        visible : true},
-        { id : 'editClass',        visible : true},
-        { id : 'editLocation',     visible : true},
-        { id : 'editDesc',         visible : true},
-        { id : 'editMime',         visible : true},
-        { id : 'editProtocol',     visible : false}
-      ]);
-    });
   });
 
   describe('The edit overlay load item', () => {
@@ -232,18 +220,6 @@ describe('Edit Overlay Suite', () => {
         { id : 'editDesc',         visible : true, value : 'A description'},
         { id : 'editMime',         visible : true, value : 'video/mp4'},
         { id : 'editProtocol',     visible : false}
-      ]);
-    });
-
-    it('loads an internal url to edit with correct fields populated', async () => {
-      await itemLoadTest(12, [
-        { id : 'editObjectType',   visible : true, value : 'internal_url'},
-        { id : 'editTitle',        visible : true, value : 'title'},
-        { id : 'editClass',        visible : true, value : 'object.item'},
-        { id : 'editLocation',     visible : true, value : './test'},
-        { id : 'editDesc',         visible : true, value : 'description'},
-        { id : 'editMime',         visible : true, value : 'text/plain'},
-        { id : 'editProtocol',     visible : true, value : 'http-get'}
       ]);
     });
   });

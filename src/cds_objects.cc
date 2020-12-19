@@ -119,8 +119,6 @@ std::shared_ptr<CdsObject> CdsObject::createObject(unsigned int objectType)
 
     if (IS_CDS_CONTAINER(objectType)) {
         obj = std::make_shared<CdsContainer>();
-    } else if (IS_CDS_ITEM_INTERNAL_URL(objectType)) {
-        obj = std::make_shared<CdsItemInternalURL>();
     } else if (IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
         obj = std::make_shared<CdsItemExternalURL>();
     } else if (IS_CDS_ITEM(objectType)) {
@@ -171,7 +169,7 @@ void CdsItem::validate()
     if (this->location.empty())
         throw_std_runtime_error("Item validation failed: missing location");
 
-    if (IS_CDS_ITEM_EXTERNAL_URL(objectType) || IS_CDS_ITEM_INTERNAL_URL(objectType))
+    if (IS_CDS_ITEM_EXTERNAL_URL(objectType))
         return;
 
     std::error_code ec;
@@ -200,22 +198,6 @@ void CdsItemExternalURL::validate()
         throw_std_runtime_error("URL Item validation failed: missing URL");
 }
 //---------
-
-CdsItemInternalURL::CdsItemInternalURL()
-    : CdsItemExternalURL()
-{
-    objectType |= OBJECT_TYPE_ITEM_INTERNAL_URL;
-    mimeType = MIMETYPE_DEFAULT;
-    upnpClass = "object.item";
-}
-
-void CdsItemInternalURL::validate()
-{
-    CdsItemExternalURL::validate();
-
-    if (startswith(this->location, "http://"))
-        throw_std_runtime_error("Internal URL item validation failed: only relative URLs allowed");
-}
 
 CdsContainer::CdsContainer()
     : CdsObject()
@@ -259,7 +241,5 @@ std::string CdsObject::mapObjectType(int type)
         return STRING_OBJECT_TYPE_ITEM;
     if (IS_CDS_ITEM_EXTERNAL_URL(type))
         return STRING_OBJECT_TYPE_EXTERNAL_URL;
-    if (IS_CDS_ITEM_INTERNAL_URL(type))
-        return STRING_OBJECT_TYPE_INTERNAL_URL;
     throw_std_runtime_error("illegal objectType: " + std::to_string(type));
 }

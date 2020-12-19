@@ -81,10 +81,6 @@
       editClass.val('object.item');
       editProtocol.val('http-get');
       showFields([editObjectType, editTitle, editLocation, editClass, editDesc, editMime, editProtocol]);
-    } else if (itemType === 'internal_url') {
-      editClass.val('object.item');
-      showFields([editObjectType, editTitle, editLocation, editClass, editDesc, editMime]);
-      hideFields([editProtocol]);
     }
   }
 
@@ -206,10 +202,6 @@
           loadExternalUrl(modal, item);
           break;
         }
-        case 'internal_url': {
-          loadInternalUrl(modal, item);
-          break;
-        }
       }
 
       modal.find('#detailbutton').off('click').on('click', itemData.onDetails);
@@ -302,38 +294,6 @@
       .closest('.form-group').show();
   }
 
-  function loadInternalUrl (modal, item) {
-    modal.find('#editTitle')
-      .val(item.title.value)
-      .prop('disabled', !item.title.editable)
-      .closest('.form-group').show();
-
-    modal.find('#editLocation')
-      .val(item.location.value)
-      .prop('disabled', !item.location.editable)
-      .closest('.form-group').show();
-
-    modal.find('#editClass')
-      .val(item.class.value)
-      .prop('disabled', true)
-      .closest('.form-group').show();
-
-    modal.find('#editDesc')
-      .val(item.description.value)
-      .prop('disabled', !item.description.editable)
-      .closest('.form-group').show();
-
-    modal.find('#editMime')
-      .val(item['mime-type'].value)
-      .prop('disabled', true)
-      .closest('.form-group').show();
-
-    modal.find('#editProtocol')
-      .val(item.protocol.value)
-      .prop('disabled', !item.protocol.editable)
-      .closest('.form-group').show();
-  }
-
   function saveItem (modal) {
     let item;
     const objectId = modal.find('#objectId');
@@ -367,16 +327,6 @@
           description: editDesc.val(),
           location: editLocation.val(),
           'mime-type': editMime.val(),
-          protocol: editProtocol.val()
-        };
-        break;
-      }
-      case 'internal_url': {
-        item = {
-          object_id: objectId.val(),
-          title: editTitle.val(),
-          description: editDesc.val(),
-          location: editLocation.val(),
           protocol: editProtocol.val()
         };
         break;
@@ -426,18 +376,6 @@
           description: editDesc.val(),
           location: editLocation.val(),
           'mime-type': editMime.val(),
-          protocol: editProtocol.val()
-        };
-        break;
-      }
-      case 'internal_url': {
-        item = {
-          parent_id: parentId.val(),
-          obj_type: editObjectType.val(),
-          class: editClass.val(),
-          title: editTitle.val(),
-          description: editDesc.val(),
-          location: editLocation.val(),
           protocol: editProtocol.val()
         };
         break;

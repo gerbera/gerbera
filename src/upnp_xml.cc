@@ -342,11 +342,6 @@ std::unique_ptr<UpnpXMLBuilder::PathBase> UpnpXMLBuilder::getPathBase(const std:
     /// \todo move this down into the "for" loop and create different urls
     /// for each resource once the io handlers are ready
     int objectType = item->getObjectType();
-    if (IS_CDS_ITEM_INTERNAL_URL(objectType)) {
-        pathBase->pathBase = std::string(_URL_PARAM_SEPARATOR) + CONTENT_SERVE_HANDLER + _URL_PARAM_SEPARATOR + item->getLocation().string();
-        return pathBase;
-    }
-
     if (IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
         if (!item->getFlag(OBJECT_FLAG_PROXY_URL) && (!forceLocal)) {
             pathBase->pathBase = item->getLocation();
@@ -420,7 +415,7 @@ std::string UpnpXMLBuilder::renderExtension(const std::string& contentType, cons
 void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xml_node* parent)
 {
     auto urlBase = getPathBase(item);
-    bool skipURL = ((IS_CDS_ITEM_INTERNAL_URL(item->getObjectType()) || IS_CDS_ITEM_EXTERNAL_URL(item->getObjectType())) && (!item->getFlag(OBJECT_FLAG_PROXY_URL)));
+    bool skipURL = (IS_CDS_ITEM_EXTERNAL_URL(item->getObjectType()) && !item->getFlag(OBJECT_FLAG_PROXY_URL));
 
     bool isExtThumbnail = false; // this sucks
     auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);

@@ -198,17 +198,3 @@ TEST_F(UpnpXmlTest, FirstResourceAddsLocalResourceIdToItem)
     EXPECT_NE(result, "");
     EXPECT_STREQ(result.c_str(), "content/media/object_id/12345/res_id/0");
 }
-
-TEST_F(UpnpXmlTest, FirstResourceAddsContentServeToInternalUrlItem)
-{
-    auto obj = std::make_shared<CdsItemInternalURL>();
-    obj->setLocation("local/content");
-    obj->setID(12345);
-
-    auto item = std::static_pointer_cast<CdsItem>(obj);
-
-    std::string result = subject->getFirstResourcePath(item);
-
-    EXPECT_NE(result, "");
-    EXPECT_STREQ(result.c_str(), "/serve/local/content");
-}

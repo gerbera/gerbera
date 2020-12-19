@@ -12,7 +12,6 @@ import editItemResponse from './fixtures/object_id-39479';
 import editDisabled from './fixtures/edit_load_disabled';
 import itemMock from './fixtures/item';
 import externalUrl from './fixtures/external-url';
-import internalUrl from './fixtures/internal-url';
 import containerMock from './fixtures/container';
 import treeDataJson from './fixtures/tree-data';
 
@@ -421,29 +420,6 @@ describe('Gerbera Items', () => {
       });
       editModal.remove();
     });
-
-    it('calls the server with the `internal_url` details', () => {
-      const itemData = {
-        item: internalUrl
-      };
-
-      editModal.editmodal('loadItem', itemData);
-
-      Items.saveItem();
-
-      expect(ajaxSpy.calls.count()).toBe(1);
-      expect(ajaxSpy.calls.mostRecent().args[0].data).toEqual({
-        sid: 'SESSION_ID',
-        req_type: 'edit_save',
-        object_id: '1470',
-        title: 'title',
-        location: './test',
-        description: 'description',
-        protocol: 'http-get',
-        updates: 'check'
-      });
-      editModal.remove();
-    });
   });
   describe('saveItemComplete()', () => {
     let response;
@@ -659,26 +635,6 @@ describe('Gerbera Items', () => {
         description: '',
         'mime-type': '',
         protocol: 'http-get',
-        updates: 'check'
-      });
-    });
-
-    it('calls the server with the `internal_url` details', async () => {
-      editModal.editmodal('addNewItem', {type: 'internal_url', item: item});
-
-      await Items.addObject();
-
-      expect(ajaxSpy.calls.count()).toBe(1);
-      expect(ajaxSpy.calls.mostRecent().args[0].data).toEqual({
-        sid: 'SESSION_ID',
-        req_type: 'add_object',
-        parent_id: '9999',
-        obj_type: 'internal_url',
-        class: 'object.item',
-        title: '',
-        location: '',
-        description: '',
-        protocol: '',
         updates: 'check'
       });
     });

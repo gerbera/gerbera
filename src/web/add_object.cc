@@ -145,10 +145,6 @@ void web::addObject::process()
         if (location.empty())
             throw_std_runtime_error("No URL given");
         obj = this->addUrl(parentID, std::make_shared<CdsItemExternalURL>(), true);
-    } else if (obj_type == STRING_OBJECT_TYPE_INTERNAL_URL) {
-        if (location.empty())
-            throw_std_runtime_error("No URL given");
-        obj = this->addUrl(parentID, std::make_shared<CdsItemInternalURL>(), false);
     } else {
         throw_std_runtime_error("unknown object type: " + obj_type);
     }
