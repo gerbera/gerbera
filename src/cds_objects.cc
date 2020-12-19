@@ -113,7 +113,7 @@ void CdsObject::validate()
         throw_std_runtime_error("Object validation failed: missing upnp class");
 }
 
-std::shared_ptr<CdsObject> CdsObject::createObject(const std::shared_ptr<Database>& database, unsigned int objectType)
+std::shared_ptr<CdsObject> CdsObject::createObject(unsigned int objectType)
 {
     std::shared_ptr<CdsObject> obj;
 
@@ -262,17 +262,4 @@ std::string CdsObject::mapObjectType(int type)
     if (IS_CDS_ITEM_INTERNAL_URL(type))
         return STRING_OBJECT_TYPE_INTERNAL_URL;
     throw_std_runtime_error("illegal objectType: " + std::to_string(type));
-}
-
-int CdsObject::remapObjectType(const std::string& objectType)
-{
-    if (objectType == STRING_OBJECT_TYPE_CONTAINER)
-        return OBJECT_TYPE_CONTAINER;
-    if (objectType == STRING_OBJECT_TYPE_ITEM)
-        return OBJECT_TYPE_ITEM;
-    if (objectType == STRING_OBJECT_TYPE_EXTERNAL_URL)
-        return OBJECT_TYPE_ITEM | OBJECT_TYPE_ITEM_EXTERNAL_URL;
-    if (objectType == STRING_OBJECT_TYPE_INTERNAL_URL)
-        return OBJECT_TYPE_ITEM | OBJECT_TYPE_ITEM_EXTERNAL_URL | OBJECT_TYPE_ITEM_INTERNAL_URL;
-    throw_std_runtime_error("illegal objectType: " + objectType);
 }

@@ -249,14 +249,6 @@ public:
     /// \param obj the object to update
     void updateObject(const std::shared_ptr<CdsObject>& obj, bool send_updates = true);
 
-    /// \brief Updates an object in the database using the given parameters.
-    /// \param objectID ID of the object to update
-    ///
-    /// Note: no actions should be performed on the object given as the parameter.
-    /// Only the returned object should be processed. This method does not save
-    /// the returned object in the database. To do so updateObject must be called
-    std::shared_ptr<CdsObject> convertObject(std::shared_ptr<CdsObject> obj, int newType);
-
     /// \brief Gets an AutocsanDirectrory from the watch list.
     std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(int scanID, ScanMode scanMode) const;
 

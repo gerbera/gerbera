@@ -349,10 +349,9 @@ public:
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
     virtual void validate();
 
-    static std::shared_ptr<CdsObject> createObject(const std::shared_ptr<Database>& database, unsigned int objectType);
+    static std::shared_ptr<CdsObject> createObject(unsigned int objectType);
 
     static std::string mapObjectType(int objectType);
-    static int remapObjectType(const std::string& objectType);
 };
 
 /// \brief An Item in the content directory.

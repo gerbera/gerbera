@@ -369,7 +369,7 @@ void FallbackLayout::processCdsObject(std::shared_ptr<CdsObject> obj, fs::path r
 #ifdef ENABLE_PROFILING
     PROF_START(&layout_profiling);
 #endif
-    auto clone = CdsObject::createObject(database, obj->getObjectType());
+    auto clone = CdsObject::createObject(obj->getObjectType());
     obj->copyTo(clone);
     clone->setVirtual(true);
 

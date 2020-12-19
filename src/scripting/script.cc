@@ -326,7 +326,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         return nullptr;
     }
 
-    auto obj = CdsObject::createObject(database, objectType);
+    auto obj = CdsObject::createObject(objectType);
     objectType = obj->getObjectType(); // this is important, because the
     // type will be changed appropriately
     // by the create function

@@ -875,7 +875,7 @@ void ContentManager::updateObject(int objectID, const std::map<std::string, std:
 
     if (IS_CDS_ITEM(objectType)) {
         auto item = std::static_pointer_cast<CdsItem>(obj);
-        auto clone = CdsObject::createObject(database, objectType);
+        auto clone = CdsObject::createObject(objectType);
         item->copyTo(clone);
 
         if (!title.empty())
@@ -920,7 +920,7 @@ void ContentManager::updateObject(int objectID, const std::map<std::string, std:
         }
     } else if (IS_CDS_CONTAINER(objectType)) {
         auto cont = std::static_pointer_cast<CdsContainer>(obj);
-        auto clone = CdsObject::createObject(database, objectType);
+        auto clone = CdsObject::createObject(objectType);
         cont->copyTo(clone);
 
         if (!title.empty())
@@ -1011,21 +1011,6 @@ void ContentManager::updateObject(const std::shared_ptr<CdsObject>& obj, bool se
         if (IS_CDS_CONTAINER(obj->getObjectType()))
             session_manager->containerChangedUI(obj->getParentID());
     }
-}
-
-std::shared_ptr<CdsObject> ContentManager::convertObject(std::shared_ptr<CdsObject> oldObj, int newType)
-{
-    int oldType = oldObj->getObjectType();
-    if (oldType == newType)
-        return oldObj;
-    if (!IS_CDS_ITEM(oldType) || !IS_CDS_ITEM(newType)) {
-        throw_std_runtime_error("Cannot convert object type " + std::to_string(oldType) + " to " + std::to_string(newType));
-    }
-
-    auto newObj = CdsObject::createObject(database, newType);
-    oldObj->copyTo(newObj);
-
-    return newObj;
 }
 
 bool ContentManager::isLink(const fs::path& path, bool allowLinks)
