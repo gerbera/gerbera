@@ -862,7 +862,7 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::unique_pt
 {
     int objectType = std::stoi(row->col(_object_type));
     auto self = getSelf();
-    auto obj = CdsObject::createObject(self, objectType);
+    auto obj = CdsObject::createObject(objectType);
 
     /* set common properties */
     obj->setID(std::stoi(row->col(_id)));
@@ -968,7 +968,7 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromSearchRow(const std::uni
 {
     int objectType = std::stoi(row->col(_object_type));
     auto self = getSelf();
-    auto obj = CdsObject::createObject(self, objectType);
+    auto obj = CdsObject::createObject(objectType);
 
     /* set common properties */
     obj->setID(std::stoi(row->col(to_underlying(SearchCol::id))));
