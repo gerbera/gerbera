@@ -46,19 +46,14 @@ namespace fs = std::filesystem;
 #include "metadata/metadata_handler.h"
 #include "util/tools.h"
 
-// forward declaration
-class Database;
-
 // ATTENTION: These values need to be changed in web/js/items.js too.
 #define OBJECT_TYPE_CONTAINER 0x00000001u
 #define OBJECT_TYPE_ITEM 0x00000002u
 #define OBJECT_TYPE_ITEM_EXTERNAL_URL 0x00000008u
-#define OBJECT_TYPE_ITEM_INTERNAL_URL 0x00000010u
 
 #define STRING_OBJECT_TYPE_CONTAINER "container"
 #define STRING_OBJECT_TYPE_ITEM "item"
 #define STRING_OBJECT_TYPE_EXTERNAL_URL "external_url"
-#define STRING_OBJECT_TYPE_INTERNAL_URL "internal_url"
 
 static constexpr bool IS_CDS_CONTAINER(unsigned int type)
 {
@@ -66,7 +61,6 @@ static constexpr bool IS_CDS_CONTAINER(unsigned int type)
 };
 static constexpr bool IS_CDS_ITEM(unsigned int type) { return type & OBJECT_TYPE_ITEM; };
 static constexpr bool IS_CDS_ITEM_EXTERNAL_URL(unsigned int type) { return type & OBJECT_TYPE_ITEM_EXTERNAL_URL; };
-static constexpr bool IS_CDS_ITEM_INTERNAL_URL(unsigned int type) { return type & OBJECT_TYPE_ITEM_INTERNAL_URL; };
 static constexpr bool IS_CDS_PURE_ITEM(unsigned int type) { return type == OBJECT_TYPE_ITEM; };
 
 #define OBJECT_FLAG_RESTRICTED 0x00000001u
@@ -418,24 +412,6 @@ public:
     ///
     /// See description for CdsObject::equals() for details.
     //int equals(std::shared_ptr<CdsObject> obj, bool exactly=false) override;
-
-    /// \brief Checks if the minimum required parameters for the object have been set and are valid.
-    void validate() override;
-};
-
-/// \brief An item that is pointing to a file located in the "servedir"
-/// directory.
-///
-/// This implementation will allow to easily launch Java games on the
-/// Streamium media renderer. Why "internal URL"? The port of the server
-/// can change upon restarts, I have seen that the SDK often binds to
-/// a new port (no matter what is configured). The location of an
-/// internal URL will be specified as /mystuff/myfile.txt and will
-/// resolve to http://serverip:serverport/content/serve/mystuff/myfile.txt
-class CdsItemInternalURL : public CdsItemExternalURL {
-public:
-    /// \brief Constructor, sets the object type.
-    explicit CdsItemInternalURL();
 
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
     void validate() override;

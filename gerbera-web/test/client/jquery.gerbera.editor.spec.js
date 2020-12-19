@@ -1,6 +1,5 @@
 import container from './fixtures/container';
 import externalUrl from './fixtures/external-url';
-import internalUrl from './fixtures/internal-url';
 import itemJson from './fixtures/item';
 
 describe('The jQuery Gerbera Editor Overlay', () => {
@@ -94,21 +93,9 @@ describe('The jQuery Gerbera Editor Overlay', () => {
       expect(editProtocol.val()).toBe('http-get');
     });
 
-    it('defaults editable fields when internal_url is selected', () => {
-      editModal.editmodal('addNewItem', {type: 'internal_url', item: item});
-
-      expect(editTitle.val()).toBe('');
-      expect(editLocation.val()).toBe('');
-      expect(editLocation.is(':disabled')).toBeFalsy();
-      expect(editClass.val()).toBe('object.item');
-      expect(editClass.is(':disabled')).toBeFalsy();
-      expect(editDesc.val()).toBe('');
-      expect(editMime.val()).toBe('');
-    });
-
     it('binds the onSave event to the Add button', () => {
       const saveSpy = jasmine.createSpy('save');
-      const itemData = {type: 'internal_url', item: item, onSave: saveSpy};
+      const itemData = {type: 'external_url', item: item, onSave: saveSpy};
 
       editModal.editmodal('addNewItem', itemData);
       $('#editSave').click();
@@ -221,31 +208,10 @@ describe('The jQuery Gerbera Editor Overlay', () => {
       expect(objectIdTxt.text()).toBe('1469');
     });
 
-    it('should set fields in editor for `internal_url`', () => {
-      const itemData = {
-        item: internalUrl
-      };
-
-      editModal.editmodal('loadItem', itemData);
-
-      expect(editObjectType.val()).toEqual('internal_url');
-      expect(editTitle.val()).toEqual('title');
-      expect(editLocation.val()).toEqual('./test');
-      expect(editClass.val()).toEqual('object.item');
-      expect(editDesc.val()).toEqual('description');
-      expect(editMime.val()).toEqual('text/plain');
-      expect(editProtocol.val()).toEqual('http-get');
-      expect(editSaveButton.text()).toEqual('Save Item');
-      expect(addParentId.val()).toBe('');
-      expect(addParentIdTxt.text()).toBe('');
-      expect(objectId.val()).toBe('1470');
-      expect(objectIdTxt.text()).toBe('1470');
-    });
-
     it('binds the onSave event to the save button', () => {
       const saveSpy = jasmine.createSpy('save');
       const itemData = {
-        item: internalUrl,
+        item: externalUrl,
         onSave: saveSpy
       };
 
@@ -300,21 +266,6 @@ describe('The jQuery Gerbera Editor Overlay', () => {
         location: 'http://localhost',
         description: 'description',
         'mime-type': 'video/ts',
-        protocol: 'http-get'
-      });
-    });
-
-    it('gives proper data for `internal_url` object to save', () => {
-      const itemData = { item: internalUrl };
-      editModal.editmodal('loadItem', itemData);
-
-      const result = editModal.editmodal('saveItem');
-
-      expect(result).toEqual({
-        object_id: '1470',
-        title: 'title',
-        location: './test',
-        description: 'description',
         protocol: 'http-get'
       });
     });
@@ -373,22 +324,6 @@ describe('The jQuery Gerbera Editor Overlay', () => {
         description: '',
         'mime-type': '',
         protocol: 'http-get'
-      });
-    });
-
-    it('gives proper data for `internal_url` object to add', () => {
-      editModal.editmodal('addNewItem', {type: 'internal_url', item: item});
-
-      const result = editModal.editmodal('addObject');
-
-      expect(result).toEqual({
-        parent_id: '9999',
-        obj_type: 'internal_url',
-        class: 'object.item',
-        title: '',
-        location: '',
-        description: '',
-        protocol: ''
       });
     });
   });

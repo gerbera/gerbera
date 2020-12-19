@@ -78,7 +78,7 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::open(std::shared_ptr<Transc
     if (profile == nullptr)
         throw_std_runtime_error("Transcoding of file " + location + "requested but no profile given");
 
-    bool isURL = (IS_CDS_ITEM_INTERNAL_URL(obj->getObjectType()) || IS_CDS_ITEM_EXTERNAL_URL(obj->getObjectType()));
+    bool isURL = IS_CDS_ITEM_EXTERNAL_URL(obj->getObjectType());
 
 #if 0
     std::string mimeType = profile->getTargetMimeType();
