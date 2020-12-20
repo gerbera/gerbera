@@ -1,0 +1,8 @@
+name: "Gerbera CodeQL config"
+
+queries:
+  - uses: security-and-quality
+
+# Ignore vendored JS
+paths-ignore:
+  - web/vendor/**
