@@ -126,6 +126,8 @@ void FanArtHandler::fillMetadata(std::shared_ptr<CdsItem> item)
         resource->addAttribute(R_RESOURCE_FILE, path.c_str());
         resource->addParameter(RESOURCE_CONTENT_TYPE, ID3_ALBUM_ART);
         item->addResource(resource);
+    } else {
+        item->removeResource(CH_FANART);
     }
 }
 
@@ -177,6 +179,8 @@ void SubtitleHandler::fillMetadata(std::shared_ptr<CdsItem> item)
         resource->addParameter(RESOURCE_CONTENT_TYPE, VIDEO_SUB);
         resource->addParameter("type", type);
         item->addResource(resource);
+    } else {
+        item->removeResource(CH_SUBTITLE);
     }
 }
 
@@ -221,13 +225,13 @@ void ResourceHandler::fillMetadata(std::shared_ptr<CdsItem> item)
     auto path = getContentPath(tweak == nullptr || !tweak->hasResourceFile() ? names : std::vector<std::string> { tweak->getResourceFile() }, item, tweak != nullptr && tweak->hasCaseSensitive() ? tweak->getCaseSensitive() : caseSensitive);
     log_debug("Running resource handler check on {} -> {}", item->getLocation().c_str(), path.c_str());
 
-    if (!path.empty()) {
-        if (toLower(path.c_str()) == toLower(item->getLocation().c_str())) {
-            auto resource = std::make_shared<CdsResource>(CH_RESOURCE);
-            resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo("res"));
-            resource->addAttribute(R_RESOURCE_FILE, path.c_str());
-            item->addResource(resource);
-        }
+    if (!path.empty()&& toLower(path.c_str()) == toLower(item->getLocation().c_str())) {
+        auto resource = std::make_shared<CdsResource>(CH_RESOURCE);
+        resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo("res"));
+        resource->addAttribute(R_RESOURCE_FILE, path.c_str());
+        item->addResource(resource);
+    } else {
+        item->removeResource(CH_RESOURCE);
     }
 }
 

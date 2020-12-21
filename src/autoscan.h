@@ -97,7 +97,7 @@ public:
     std::vector<std::shared_ptr<AutoscanDirectory>> getArrayCopy();
 
 protected:
-    size_t origSize;
+    size_t origSize { 0 };
     std::map<size_t, std::shared_ptr<AutoscanDirectory>> indexMap;
 
     std::shared_ptr<Database> database;
@@ -181,13 +181,25 @@ public:
     /// the last modification time of the starting point but we may not
     /// overwrite it until we are done.
     /// The time will be only set if it is higher than the previous value!
-    void setCurrentLMT(time_t lmt);
-    time_t getPreviousLMT() const { return last_mod_previous_scan; }
+    void setCurrentLMT(const std::string& location, time_t lmt);
 
-    void updateLMT() { last_mod_previous_scan = last_mod_current_scan; }
+    time_t getPreviousLMT(const std::string& location) const {
+        auto lmDir = lastModified.find(location);
+        if (lmDir != lastModified.end() && lastModified.at(location) > 0) {
+            return lastModified.at(location);
+        }
+        return last_mod_previous_scan;
+    }
+
+    void updateLMT() {
+        if (activeScanCount == 0) {
+            last_mod_previous_scan = last_mod_current_scan;
+        }
+    }
 
     void resetLMT()
     {
+        lastModified.clear();
         last_mod_previous_scan = 0;
         last_mod_current_scan = 0;
     }
@@ -212,11 +224,13 @@ protected:
     unsigned int interval { 0 };
     int taskCount { 0 };
     int scanID { INVALID_SCAN_ID };
-    int objectID;
-    int databaseID;
+    int objectID { INVALID_OBJECT_ID };
+    int databaseID { INVALID_OBJECT_ID };
     time_t last_mod_previous_scan { 0 };
     time_t last_mod_current_scan { 0 };
     std::shared_ptr<Timer::Parameter> timer_parameter;
+    std::map<std::string, time_t> lastModified;
+    unsigned int activeScanCount { 0 };
 };
 
 #endif

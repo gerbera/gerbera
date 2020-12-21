@@ -43,6 +43,12 @@ void AutoScanSetting::mergeOptions(const std::shared_ptr<Config>& config, const 
         hidden = tweak->getHidden();
     if (tweak->hasRecursive())
         recursive = tweak->getRecursive();
+    if (tweak->hasFanArtFile())
+        resourcePatterns.push_back(tweak->getFanArtFile());
+    if (tweak->hasSubTitleFile())
+        resourcePatterns.push_back(tweak->getSubTitleFile());
+    if (tweak->hasResourceFile())
+        resourcePatterns.push_back(tweak->getResourceFile());
 }
 
 void DirectoryConfigList::add(const std::shared_ptr<DirectoryTweak>& dir, size_t index)
@@ -98,8 +104,9 @@ std::shared_ptr<DirectoryTweak> DirectoryConfigList::get(size_t id, bool edit)
 std::shared_ptr<DirectoryTweak> DirectoryConfigList::get(const fs::path& location)
 {
     AutoLock lock(mutex);
-    for (auto testLoc = location.has_filename() ? location.parent_path() : location; testLoc.has_parent_path() && testLoc != "/"; testLoc = testLoc.parent_path()) {
-        auto entry = std::find_if(list.begin(), list.end(), [=](const auto& d) { return (d->getLocation() == location || d->getInherit()) && d->getLocation() == testLoc; });
+    const auto& myLocation = location.has_filename() ? location.parent_path() : location;
+    for (auto testLoc = myLocation; testLoc.has_parent_path() && testLoc != "/"; testLoc = testLoc.parent_path()) {
+        auto entry = std::find_if(list.begin(), list.end(), [=](const auto& d) { return (d->getLocation() == myLocation || d->getInherit()) && d->getLocation() == testLoc; });
         if (entry != list.end() && *entry != nullptr) {
             return *entry;
         }

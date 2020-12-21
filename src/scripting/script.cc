@@ -143,7 +143,7 @@ Script::Script(const std::shared_ptr<Config>& config,
 
     _p2i = StringConverter::p2i(config);
     _j2i = StringConverter::j2i(config);
-    _m2i = StringConverter::m2i(config);
+    _m2i = StringConverter::m2i(CFG_IMPORT_METADATA_CHARSET, "", config);
     _f2i = StringConverter::f2i(config);
     _i2i = StringConverter::i2i(config);
 

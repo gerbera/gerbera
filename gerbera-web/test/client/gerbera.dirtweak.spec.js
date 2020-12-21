@@ -26,6 +26,7 @@ describe('Gerbera DirTweaks', () => {
     let dirTweakRecursive;
     let dirTweakCaseSens;
     let dirTweakHidden;
+    let dirTweakMetaCharset;
     let dirTweakFanArt;
     let dirTweakSubtitle;
     let dirTweakResource;
@@ -46,6 +47,7 @@ describe('Gerbera DirTweaks', () => {
       dirTweakRecursive = $('#dirTweakRecursive');
       dirTweakCaseSens = $('#dirTweakCaseSens');
       dirTweakHidden = $('#dirTweakHidden');
+      dirTweakMetaCharset = $('#dirTweakMetaCharset');
       dirTweakFanArt = $('#dirTweakFanArt');
       dirTweakSubtitle = $('#dirTweakSubtitle');
       dirTweakResource = $('#dirTweakResource');
@@ -68,6 +70,7 @@ describe('Gerbera DirTweaks', () => {
       expect(dirTweakSymLinks.is(':checked')).toBeFalsy();
       expect(dirTweakRecursive.is(':checked')).toBeFalsy();
       expect(dirTweakCaseSens.is(':checked')).toBeFalsy();
+      expect(dirTweakMetaCharset.val()).toBe('');
       expect(dirTweakFanArt.val()).toBe('');
       expect(dirTweakSubtitle.val()).toBe('');
       expect(dirTweakResource.val()).toBe('');
@@ -119,6 +122,7 @@ describe('Gerbera DirTweaks', () => {
     let dirTweakRecursive;
     let dirTweakCaseSens;
     let dirTweakHidden;
+    let dirTweakMetaCharset;
     let dirTweakFanArt;
     let dirTweakSubtitle;
     let dirTweakResource;
@@ -139,6 +143,7 @@ describe('Gerbera DirTweaks', () => {
       dirTweakRecursive = $('#dirTweakRecursive');
       dirTweakCaseSens = $('#dirTweakCaseSens');
       dirTweakHidden = $('#dirTweakHidden');
+      dirTweakMetaCharset = $('#dirTweakMetaCharset');
       dirTweakFanArt = $('#dirTweakFanArt');
       dirTweakSubtitle = $('#dirTweakSubtitle');
       dirTweakResource = $('#dirTweakResource');
@@ -164,6 +169,7 @@ describe('Gerbera DirTweaks', () => {
       expect(dirTweakSymLinks.is(':checked')).toBeTruthy();
       expect(dirTweakRecursive.is(':checked')).toBeTruthy();
       expect(dirTweakCaseSens.is(':checked')).toBeFalsy();
+      expect(dirTweakMetaCharset.val()).toBe('');
       expect(dirTweakFanArt.val()).toBe('cover.jpg');
       expect(dirTweakSubtitle.val()).toBe('');
       expect(dirTweakResource.val()).toBe('');
@@ -194,7 +200,7 @@ describe('Gerbera DirTweaks', () => {
       });
     });
 
-    it('collects all the form data from the autoscan modal to call the server', () => {
+    it('collects all the form data from the dirtweak modal to call the server', () => {
       Tweaks.loadNewDirTweak(dirTweakItem, '/home/gerbera/Music');
       $('#dirTweakHidden').prop('checked', false);
       Tweaks.submitDirTweak();
@@ -218,7 +224,7 @@ describe('Gerbera DirTweaks', () => {
       spyOn(Auth, 'getSessionId').and.returnValue('SESSION_ID');
     });
 
-    it('collects all the form data from the autoscan modal to call the server', async () => {
+    it('collects all the form data from the dirtweak modal to call the server', async () => {
       Tweaks.loadNewDirTweak(dirTweakItem, '/home/gerbera/Music');
       expect(dirTweakDeleteButton.prop('hidden')).toBeFalsy();
       await dirTweakDeleteButton.click();

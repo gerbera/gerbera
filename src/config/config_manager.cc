@@ -463,21 +463,33 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = {
     std::make_shared<ConfigArraySetup>(CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST,
         "/import/library-options/libexif/auxdata", "config-import.html#auxdata",
         ATTR_IMPORT_LIBOPTS_AUXDATA_DATA, ATTR_IMPORT_LIBOPTS_AUXDATA_TAG),
+    std::make_shared<ConfigStringSetup>(CFG_IMPORT_LIBOPTS_EXIF_CHARSET,
+        "/import/library-options/libexif/attribute::charset", "config-import.html#charset",
+        ""),
 #endif
 #ifdef HAVE_EXIV2
     std::make_shared<ConfigArraySetup>(CFG_IMPORT_LIBOPTS_EXIV2_AUXDATA_TAGS_LIST,
         "/import/library-options/exiv2/auxdata", "config-import.html#library-options",
         ATTR_IMPORT_LIBOPTS_AUXDATA_DATA, ATTR_IMPORT_LIBOPTS_AUXDATA_TAG),
+    std::make_shared<ConfigStringSetup>(CFG_IMPORT_LIBOPTS_EXIV2_CHARSET,
+        "/import/library-options/exiv2/attribute::charset", "config-import.html#charset",
+        ""),
 #endif
 #ifdef HAVE_TAGLIB
     std::make_shared<ConfigArraySetup>(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST,
         "/import/library-options/id3/auxdata", "config-import.html#id2",
         ATTR_IMPORT_LIBOPTS_AUXDATA_DATA, ATTR_IMPORT_LIBOPTS_AUXDATA_TAG),
+    std::make_shared<ConfigStringSetup>(CFG_IMPORT_LIBOPTS_ID3_CHARSET,
+        "/import/library-options/id3/attribute::charset", "config-import.html#charset",
+        ""),
 #endif
 #ifdef HAVE_FFMPEG
     std::make_shared<ConfigArraySetup>(CFG_IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST,
         "/import/library-options/ffmpeg/auxdata", "config-import.html#id5",
         ATTR_IMPORT_LIBOPTS_AUXDATA_DATA, ATTR_IMPORT_LIBOPTS_AUXDATA_TAG),
+    std::make_shared<ConfigStringSetup>(CFG_IMPORT_LIBOPTS_FFMPEG_CHARSET,
+        "/import/library-options/ffmpeg/attribute::charset", "config-import.html#charset",
+        ""),
 #endif
 #ifdef HAVE_MAGIC
     std::make_shared<ConfigPathSetup>(CFG_IMPORT_MAGIC_FILE,
@@ -593,6 +605,9 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = {
     std::make_shared<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_FOLLOW_SYMLINKS,
         "follow-symlinks", "config-import.html#autoscan",
         DEFAULT_FOLLOW_SYMLINKS_VALUE),
+    std::make_shared<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_META_CHARSET,
+        "meta-charset", "config-import.html#charset",
+        ""),
     std::make_shared<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_FANART_FILE,
         "fanart-file", "config-import.html#resources",
         ""),
@@ -1116,18 +1131,22 @@ void ConfigManager::load(const fs::path& userHome)
 
 #ifdef HAVE_LIBEXIF
     setOption(root, CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST);
+    setOption(root, CFG_IMPORT_LIBOPTS_EXIF_CHARSET);
 #endif // HAVE_LIBEXIF
 
 #ifdef HAVE_EXIV2
     setOption(root, CFG_IMPORT_LIBOPTS_EXIV2_AUXDATA_TAGS_LIST);
+    setOption(root, CFG_IMPORT_LIBOPTS_EXIV2_CHARSET);
 #endif // HAVE_EXIV2
 
 #ifdef HAVE_TAGLIB
     setOption(root, CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
+    setOption(root, CFG_IMPORT_LIBOPTS_ID3_CHARSET);
 #endif
 
 #ifdef HAVE_FFMPEG
     setOption(root, CFG_IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST);
+    setOption(root, CFG_IMPORT_LIBOPTS_FFMPEG_CHARSET);
 #endif
 
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)

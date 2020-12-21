@@ -1,6 +1,38 @@
 {
 	"config": [
 		{
+			"item": "/status",
+			"caption": "Status",
+			"type": "Element",
+			"editable": false,
+			"children": [
+				{
+					"item": "/status/attribute::total",
+					"caption": "Total Media Files",
+					"editable": false,
+					"type": "Number"
+				},
+				{
+					"item": "/status/attribute::audio",
+					"caption": "Audio Files",
+					"editable": false,
+					"type": "Number"
+				},
+				{
+					"item": "/status/attribute::video",
+					"caption": "Video Files",
+					"editable": false,
+					"type": "Number"
+				},
+				{
+					"item": "/status/attribute::image",
+					"caption": "Image Files",
+					"editable": false,
+					"type": "Number"
+				}
+			]
+		},
+		{
 			"item": "/server",
 			"caption": "Server",
 			"type": "Element",
@@ -394,6 +426,11 @@
 						{
 							"item": "/import/directories/tweak/attribute::case-sensitive",
 							"caption": "Case Sensitive Resources",
+							"editable": true
+						},
+						{
+							"item": "/import/directories/tweak/attribute::meta-charset",
+							"caption": "Metadata Charset",
 							"editable": true
 						},
 						{

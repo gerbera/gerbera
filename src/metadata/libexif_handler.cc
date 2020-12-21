@@ -357,7 +357,7 @@ void LibExifHandler::fillMetadata(std::shared_ptr<CdsItem> item)
 {
     ExifData* ed;
 
-    auto sc = StringConverter::m2i(config);
+    auto sc = StringConverter::m2i(CFG_IMPORT_LIBOPTS_EXIF_CHARSET, item->getLocation(), config);
 
     ed = exif_data_new_from_file(item->getLocation().c_str());
 

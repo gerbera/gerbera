@@ -305,6 +305,15 @@ public:
         return std::any_of(resources.begin(), resources.end(), [=](const auto& res) { return id == res->getHandlerType(); });
     }
 
+    /// \brief Remove resource with given handler id
+    void removeResource(int id)
+    {
+        auto index = std::find_if(resources.begin(), resources.end(), [=](const auto& res) { return id == res->getHandlerType(); });
+        if (index != resources.end()) {
+            resources.erase(index);
+        }
+    }
+
     /// \brief Query resource tag with the given index
     std::shared_ptr<CdsResource> getResource(size_t index) const
     {

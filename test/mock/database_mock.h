@@ -52,7 +52,7 @@ public:
     std::shared_ptr<CdsObject> loadObjectByServiceID(const std::string& serviceID) override { return nullptr; }
     std::unique_ptr<std::vector<int>> getServiceObjectIDs(char servicePrefix) override { return nullptr; }
 
-    int getTotalFiles() override { return 0; }
+    int getTotalFiles(bool isVirtual = false, const std::string& mimeType = "", const std::string& upnpClass = "") override { return 0; }
 
     std::string getInternalSetting(const std::string& key) override { return ""; }
     void storeInternalSetting(const std::string& key, const std::string& value) override { }

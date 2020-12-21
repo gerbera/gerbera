@@ -34,6 +34,7 @@
 namespace fs = std::filesystem;
 
 // forward declaration
+class AutoscanDirectory;
 class Config;
 class DirectoryTweak;
 
@@ -43,6 +44,8 @@ public:
     bool recursive = true;
     bool hidden = false;
     bool rescanResource = true;
+    std::shared_ptr<AutoscanDirectory> adir;
+    std::vector<std::string> resourcePatterns;
 
     void mergeOptions(const std::shared_ptr<Config>& config, const fs::path& location);
 };
@@ -121,6 +124,10 @@ public:
     void setFollowSymlinks(bool followSymlinks) { this->flags["FollowSymlinks"] = followSymlinks; }
     bool hasFollowSymlinks() const { return flags.find("FollowSymlinks") != flags.end(); }
     bool getFollowSymlinks() const { return flags.at("FollowSymlinks"); }
+
+    void setMetaCharset(const std::string& metaCharset) { this->resourceFiles["MetaCharset"] = metaCharset; }
+    bool hasMetaCharset() const { return resourceFiles.find("MetaCharset") != resourceFiles.end(); }
+    std::string getMetaCharset() const { return resourceFiles.at("MetaCharset"); }
 
     void setFanArtFile(const std::string& fanArtFile) { this->resourceFiles["FanArt"] = fanArtFile; }
     bool hasFanArtFile() const { return resourceFiles.find("FanArt") != resourceFiles.end(); }

@@ -114,6 +114,35 @@ void web::configLoad::process()
         addTypeMeta(meta, cs);
     }
 
+    {
+        auto item = values.append_child("item");
+        createItem(item, "/status/attribute::total", CFG_MAX, CFG_MAX);
+        setValue(item, database->getTotalFiles());
+        item = values.append_child("item");
+        createItem(item, "/status/attribute::virtual", CFG_MAX, CFG_MAX);
+        setValue(item, database->getTotalFiles(true));
+
+        item = values.append_child("item");
+        createItem(item, "/status/attribute::audio", CFG_MAX, CFG_MAX);
+        setValue(item, database->getTotalFiles(false, "audio"));
+        item = values.append_child("item");
+        createItem(item, "/status/attribute::video", CFG_MAX, CFG_MAX);
+        setValue(item, database->getTotalFiles(false, "video"));
+        item = values.append_child("item");
+        createItem(item, "/status/attribute::image", CFG_MAX, CFG_MAX);
+        setValue(item, database->getTotalFiles(false, "image"));
+
+        item = values.append_child("item");
+        createItem(item, "/status/attribute::audioVirtual", CFG_MAX, CFG_MAX);
+        setValue(item, database->getTotalFiles(true, "audio"));
+        item = values.append_child("item");
+        createItem(item, "/status/attribute::videoVirtual", CFG_MAX, CFG_MAX);
+        setValue(item, database->getTotalFiles(true, "video"));
+        item = values.append_child("item");
+        createItem(item, "/status/attribute::imageVirtual", CFG_MAX, CFG_MAX);
+        setValue(item, database->getTotalFiles(true, "image"));
+    }
+
     for (int i = 0; i < static_cast<int>(CFG_MAX); i++) {
         auto scs = ConfigManager::findConfigSetup(static_cast<config_option_t>(i));
         auto item = values.append_child("item");
@@ -152,7 +181,7 @@ void web::configLoad::process()
 
         auto item = values.append_child("item");
         createItem(item, cs->getItemPath(i, ATTR_DIRECTORIES_TWEAK_LOCATION), cs->option, ATTR_DIRECTORIES_TWEAK_LOCATION);
-        setValue(item, dir->getLocation().string());
+        setValue(item, dir->getLocation());
 
         item = values.append_child("item");
         createItem(item, cs->getItemPath(i, ATTR_DIRECTORIES_TWEAK_INHERIT), cs->option, ATTR_DIRECTORIES_TWEAK_INHERIT);
@@ -175,16 +204,20 @@ void web::configLoad::process()
         setValue(item, dir->getFollowSymlinks());
 
         item = values.append_child("item");
+        createItem(item, cs->getItemPath(i, ATTR_DIRECTORIES_TWEAK_META_CHARSET), cs->option, ATTR_DIRECTORIES_TWEAK_META_CHARSET);
+        setValue(item, dir->hasMetaCharset() ? dir->getMetaCharset() : "");
+
+        item = values.append_child("item");
         createItem(item, cs->getItemPath(i, ATTR_DIRECTORIES_TWEAK_FANART_FILE), cs->option, ATTR_DIRECTORIES_TWEAK_FANART_FILE);
-        setValue(item, dir->getFanArtFile());
+        setValue(item, dir->hasFanArtFile() ? dir->getFanArtFile() : "");
 
         item = values.append_child("item");
         createItem(item, cs->getItemPath(i, ATTR_DIRECTORIES_TWEAK_RESOURCE_FILE), cs->option, ATTR_DIRECTORIES_TWEAK_RESOURCE_FILE);
-        setValue(item, dir->getResourceFile());
+        setValue(item, dir->hasResourceFile() ? dir->getResourceFile() : "");
 
         item = values.append_child("item");
         createItem(item, cs->getItemPath(i, ATTR_DIRECTORIES_TWEAK_SUBTILTE_FILE), cs->option, ATTR_DIRECTORIES_TWEAK_SUBTILTE_FILE);
-        setValue(item, dir->getSubTitleFile());
+        setValue(item, dir->hasSubTitleFile() ? dir->getSubTitleFile() : "");
     }
 
     cs = ConfigManager::findConfigSetup(CFG_TRANSCODING_PROFILE_LIST);

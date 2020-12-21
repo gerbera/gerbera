@@ -1032,12 +1032,24 @@ std::map<std::string, std::string> SQLDatabase::retrieveMetadataForObject(int ob
     return metadata;
 }
 
-int SQLDatabase::getTotalFiles()
+int SQLDatabase::getTotalFiles(bool isVirtual, const std::string& mimeType, const std::string& upnpClass)
 {
     std::ostringstream query;
     query << "SELECT COUNT(*) FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE "
           << TQ("object_type") << " != " << quote(OBJECT_TYPE_CONTAINER);
+    if (!mimeType.empty()) {
+        query << " AND " << TQ("mime_type") << " LIKE " << quote(mimeType + "%");
+    }
+    if (!upnpClass.empty()) {
+        query << " AND " << TQ("upnp_class") << " LIKE " << quote(upnpClass + "%");
+    }
+    if (isVirtual) {
+        query << " AND " << TQ("location") << " LIKE " << quote(fmt::format("{}%", LOC_VIRT_PREFIX));
+    } else {
+        query << " AND " << TQ("location") << " LIKE " << quote(fmt::format("{}%", LOC_FILE_PREFIX));
+    }
     //<< " AND is_virtual = 0";
+
     auto res = select(query);
 
     std::unique_ptr<SQLRow> row;
@@ -1780,7 +1792,7 @@ std::shared_ptr<AutoscanDirectory> SQLDatabase::_fillAutoscanDirectory(const std
     auto dir = std::make_shared<AutoscanDirectory>(location, mode, recursive, persistent, INVALID_SCAN_ID, interval, hidden);
     dir->setObjectID(objectID);
     dir->setDatabaseID(databaseID);
-    dir->setCurrentLMT(last_modified);
+    dir->setCurrentLMT(location, last_modified);
     dir->updateLMT();
     return dir;
 }
@@ -1822,7 +1834,7 @@ void SQLDatabase::addAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir)
       << mapBool(adir->getRecursive()) << ','
       << mapBool(adir->getHidden()) << ','
       << quote(adir->getInterval()) << ','
-      << quote(adir->getPreviousLMT()) << ','
+      << quote(adir->getPreviousLMT("")) << ','
       << mapBool(adir->persistent()) << ','
       << (objectID >= 0 ? SQL_NULL : quote(adir->getLocation())) << ','
       << (pathIds == nullptr ? SQL_NULL : quote("," + toCSV(*pathIds) + ','))
@@ -1855,8 +1867,8 @@ void SQLDatabase::updateAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adi
       << ',' << TQ("recursive") << '=' << mapBool(adir->getRecursive())
       << ',' << TQ("hidden") << '=' << mapBool(adir->getHidden())
       << ',' << TQ("interval") << '=' << quote(adir->getInterval());
-    if (adir->getPreviousLMT() > 0)
-        q << ',' << TQ("last_modified") << '=' << quote(adir->getPreviousLMT());
+    if (adir->getPreviousLMT("") > 0)
+        q << ',' << TQ("last_modified") << '=' << quote(adir->getPreviousLMT(""));
     q << ',' << TQ("persistent") << '=' << mapBool(adir->persistent())
       << ',' << TQ("location") << '=' << (objectID >= 0 ? SQL_NULL : quote(adir->getLocation()))
       << ',' << TQ("path_ids") << '=' << (pathIds == nullptr ? SQL_NULL : quote("," + toCSV(*pathIds) + ','))

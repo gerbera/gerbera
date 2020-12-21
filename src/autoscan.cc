@@ -37,9 +37,7 @@
 #include "database/database.h"
 
 AutoscanDirectory::AutoscanDirectory()
-    : objectID(INVALID_OBJECT_ID)
-    , databaseID(INVALID_OBJECT_ID)
-    , timer_parameter(std::make_shared<Timer::Parameter>(Timer::Parameter::IDAutoscan, INVALID_SCAN_ID))
+    : timer_parameter(std::make_shared<Timer::Parameter>(Timer::Parameter::IDAutoscan, INVALID_SCAN_ID))
 {
 }
 
@@ -52,21 +50,25 @@ AutoscanDirectory::AutoscanDirectory(fs::path location, ScanMode mode, bool recu
     , persistent_flag(persistent)
     , interval(interval)
     , scanID(id)
-    , objectID(INVALID_OBJECT_ID)
-    , databaseID(INVALID_OBJECT_ID)
     , timer_parameter(std::make_shared<Timer::Parameter>(Timer::Parameter::IDAutoscan, INVALID_SCAN_ID))
 {
 }
 
-void AutoscanDirectory::setCurrentLMT(time_t lmt)
+void AutoscanDirectory::setCurrentLMT(const std::string& location, time_t lmt)
 {
-    if (lmt > last_mod_current_scan)
-        last_mod_current_scan = lmt;
+    lastModified[location] = lmt;
+    if (lmt == 0) {
+        activeScanCount++;
+    } else {
+        activeScanCount--;
+        if (lmt > last_mod_current_scan) {
+            last_mod_current_scan = lmt;
+        }
+    }
 }
 
 AutoscanList::AutoscanList(std::shared_ptr<Database> database)
-    : origSize(0)
-    , database(std::move(database))
+    : database(std::move(database))
 {
 }
 

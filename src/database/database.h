@@ -253,7 +253,7 @@ public:
     virtual std::unique_ptr<std::vector<int>> getServiceObjectIDs(char servicePrefix) = 0;
 
     /* accounting methods */
-    virtual int getTotalFiles() = 0;
+    virtual int getTotalFiles(bool isVirtual = false, const std::string& mimeType = "", const std::string& upnpClass = "") = 0;
 
     /* internal setting methods */
     virtual std::string getInternalSetting(const std::string& key) = 0;

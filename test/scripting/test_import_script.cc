@@ -1,6 +1,7 @@
 #ifdef HAVE_JS
 
 #include "cds_objects.h"
+#include "config/config_manager.h"
 #include "metadata/metadata_handler.h"
 #include "onlineservice/online_service.h"
 #include "util/string_converter.h"

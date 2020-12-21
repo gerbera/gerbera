@@ -216,12 +216,13 @@ void AutoscanInotify::threadProc()
 
                         int objectID = database->findObjectIDByPath(path, !(mask & IN_ISDIR));
                         if (objectID != INVALID_OBJECT_ID)
-                            content->removeObject(objectID, !(mask & IN_MOVED_TO));
+                            content->removeObject(adir, objectID, !(mask & IN_MOVED_TO));
                     }
                     if (mask & (IN_CLOSE_WRITE | IN_MOVED_TO | IN_CREATE)) {
                         log_debug("adding {}", path.c_str());
                         // path, recursive, async, hidden, rescanResource, low priority, cancellable
                         AutoScanSetting asSetting;
+                        asSetting.adir = adir;
                         asSetting.followSymlinks = config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS);
                         asSetting.recursive = adir->getRecursive();
                         asSetting.hidden = adir->getHidden();
@@ -390,7 +391,7 @@ void AutoscanInotify::checkMoveWatches(int wd, const std::shared_ptr<Wd>& wdObj)
 
                     int objectID = database->findObjectIDByPath(path, true);
                     if (objectID != INVALID_OBJECT_ID)
-                        content->removeObject(objectID, false);
+                        content->removeObject(adir, objectID, false);
                 }
             } catch (const std::out_of_range& ex) {
             } // Not found in map

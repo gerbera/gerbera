@@ -636,7 +636,8 @@
         <xs:complexType>
             <xs:all>
                 <xs:element ref="libexif" minOccurs="0"/>
-                <xs:element ref="libextractor" minOccurs="0"/>
+                <xs:element ref="exiv2" minOccurs="0"/>
+                <xs:element ref="ffmpeg" minOccurs="0"/>
                 <xs:element ref="id3" minOccurs="0"/>
             </xs:all>
             <xs:attribute name="multi-value-separator" type="xs:string" minOccurs="0" default="; "/>
@@ -650,14 +651,25 @@
                 <xs:element ref="auxdata" minOccurs="0"/>
             </xs:sequence>
         </xs:complexType>
+       <xs:attribute name="charset" type="xs:string" minOccurs="0"/>
     </xs:element>
 
-    <xs:element name="libextractor">
+    <xs:element name="exiv2">
         <xs:complexType>
             <xs:sequence>
                 <xs:element ref="auxdata" minOccurs="0"/>
             </xs:sequence>
         </xs:complexType>
+       <xs:attribute name="charset" type="xs:string" minOccurs="0"/>
+    </xs:element>
+
+    <xs:element name="ffmpeg">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="auxdata" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+       <xs:attribute name="charset" type="xs:string" minOccurs="0"/>
     </xs:element>
 
     <xs:element name="id3">
@@ -666,6 +678,7 @@
                 <xs:element ref="auxdata" minOccurs="0"/>
             </xs:sequence>
         </xs:complexType>
+       <xs:attribute name="charset" type="xs:string" minOccurs="0"/>
     </xs:element>
 
     <xs:element name="auxdata">

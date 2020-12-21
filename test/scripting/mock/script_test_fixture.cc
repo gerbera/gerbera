@@ -8,6 +8,7 @@
 namespace fs = std::filesystem;
 
 #include "cds_objects.h"
+#include "config/config_manager.h"
 #include "metadata/metadata_handler.h"
 #include "onlineservice/atrailers_content_handler.h"
 #include "scripting/script_names.h"
