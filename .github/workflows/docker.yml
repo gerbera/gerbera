@@ -12,6 +12,9 @@ on:
 
 jobs:
   build:
+    strategy:
+      matrix:
+        docker-arch: [ linux/386, linux/amd64, linux/arm/v6, linux/arm/v7, linux/arm64 ]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -42,7 +45,7 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
-          platforms: linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+          platforms: ${{ matrix.docker-arch }}
           push: ${{ github.repository == 'gerbera/gerbera' && ( startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' ) }}"
           tags: ${{ steps.docker_meta.outputs.tags }}
           labels: ${{ steps.docker_meta.outputs.labels }}
