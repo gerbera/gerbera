@@ -90,7 +90,7 @@ void FfmpegHandler::addFfmpegAuxdataFields(const std::shared_ptr<CdsItem>& item,
         return;
     }
 
-    auto sc = StringConverter::m2i(config);
+    auto sc = StringConverter::m2i(CFG_IMPORT_LIBOPTS_FFMPEG_CHARSET, item->getLocation(), config);
     std::vector<std::string> aux = config->getArrayOption(CFG_IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST);
     for (const std::string& desiredTag : aux) {
         if (!desiredTag.empty()) {
@@ -107,7 +107,7 @@ void FfmpegHandler::addFfmpegAuxdataFields(const std::shared_ptr<CdsItem>& item,
 void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item, AVFormatContext* pFormatCtx) const
 {
     AVDictionaryEntry* e = nullptr;
-    auto sc = StringConverter::m2i(config);
+    auto sc = StringConverter::m2i(CFG_IMPORT_LIBOPTS_FFMPEG_CHARSET, item->getLocation(), config);
     metadata_fields_t field;
     std::string value;
 

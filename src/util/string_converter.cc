@@ -31,10 +31,11 @@
 
 #include "string_converter.h" // API
 
+#include "config/config_manager.h"
+#include "config/directory_tweak.h"
 #include <cstdlib>
 #include <utility>
 
-#include "config/config_manager.h"
 
 StringConverter::StringConverter(const std::string& from, const std::string& to)
     : cd(iconv_open(to.c_str(), from.c_str()))
@@ -194,10 +195,20 @@ std::unique_ptr<StringConverter> StringConverter::f2i(const std::shared_ptr<Conf
         cm->getOption(CFG_IMPORT_FILESYSTEM_CHARSET), DEFAULT_INTERNAL_CHARSET);
     return conv;
 }
-std::unique_ptr<StringConverter> StringConverter::m2i(const std::shared_ptr<Config>& cm)
+std::unique_ptr<StringConverter> StringConverter::m2i(config_option_t option, const fs::path& location, const std::shared_ptr<Config>& cm)
 {
+    auto charset = cm->getOption(option);
+    if (charset.empty()) {
+        charset = cm->getOption(CFG_IMPORT_METADATA_CHARSET);
+    }
+    auto tweak = cm->getDirectoryTweakOption(CFG_IMPORT_DIRECTORIES_LIST)->get(!location.empty() ? location : "/");
+    if (tweak != nullptr && tweak->hasMetaCharset()) {
+        charset = tweak->getMetaCharset();
+        log_debug("Using charset {} for {}", charset, location.string());
+    }
+
     auto conv = std::make_unique<StringConverter>(
-        cm->getOption(CFG_IMPORT_METADATA_CHARSET),
+        charset,
         DEFAULT_INTERNAL_CHARSET);
     return conv;
 }

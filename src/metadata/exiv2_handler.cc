@@ -50,7 +50,7 @@ void Exiv2Handler::fillMetadata(std::shared_ptr<CdsItem> item)
 {
     try {
         std::string value;
-        const auto sc = StringConverter::m2i(config);
+        const auto sc = StringConverter::m2i(CFG_IMPORT_LIBOPTS_EXIV2_CHARSET, item->getLocation(), config);
 
         const auto image = Exiv2::ImageFactory::open(std::string(item->getLocation().c_str()));
         image->readMetadata();

@@ -36,9 +36,7 @@
 #include <memory>
 
 #include "common.h"
-
-// forward declaration
-class Config;
+#include "config/config.h"
 
 class StringConverter {
 public:
@@ -61,7 +59,7 @@ public:
     static std::unique_ptr<StringConverter> f2i(const std::shared_ptr<Config>& cm);
 
     /// \brief metadata to internal
-    static std::unique_ptr<StringConverter> m2i(const std::shared_ptr<Config>& cm);
+    static std::unique_ptr<StringConverter> m2i(config_option_t option, const fs::path& location, const std::shared_ptr<Config>& cm);
 #ifdef HAVE_JS
     /// \brief scripting to internal
     static std::unique_ptr<StringConverter> j2i(const std::shared_ptr<Config>& cm);

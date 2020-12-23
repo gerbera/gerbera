@@ -2,7 +2,7 @@
 	"sid": "SESSION_ID",
 	"req_type": "config_save",
 	"action": "rescan",
-	"changedCount": 10,
+	"changedCount": 11,
 	"target": "/home/gerbera/Music",
 	"updates": "check",
 	"data": [
@@ -54,6 +54,13 @@
 			"status": "changed",
 			"origValue": "",
 			"value": "/home/gerbera/Music"
+		},
+		{
+			"item": "/import/directories/tweak[0]/attribute::meta-charset",
+			"id": "104",
+			"status": "changed",
+			"origValue": "",
+			"value": ""
 		},
 		{
 			"item": "/import/directories/tweak[0]/attribute::recursive",

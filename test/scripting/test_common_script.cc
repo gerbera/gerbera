@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 namespace fs = std::filesystem;
 
+#include "config/config_manager.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
 

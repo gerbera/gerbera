@@ -160,6 +160,7 @@ void Sqlite3Database::init()
         throw DatabaseException("", startupError);
 
     std::string dbVersion;
+            std::string dbFilePathbackup = dbFilePath + ".backup";
     try {
         dbVersion = getInternalSetting("db_version");
     } catch (const std::runtime_error& e) {
@@ -169,7 +170,6 @@ void Sqlite3Database::init()
             // try to restore database
 
             // checking for backup file
-            std::string dbFilePathbackup = dbFilePath + ".backup";
             if (access(dbFilePathbackup.c_str(), R_OK) == 0) {
                 try {
                     // trying to copy backup file
@@ -180,25 +180,25 @@ void Sqlite3Database::init()
                 } catch (const std::runtime_error& e) {
                 }
             }
-
-            if (dbVersion.empty()) {
-                log_info("No sqlite3 backup is available or backup is corrupt. automatically creating database...");
-                auto itask = std::make_shared<SLInitTask>(config);
-                addTask(itask);
-                try {
-                    itask->waitForTask();
-                    dbVersion = getInternalSetting("db_version");
-                } catch (const std::runtime_error& e) {
-                    shutdown();
-                    throw_std_runtime_error(std::string { "error while creating database: " } + e.what());
-                }
-                log_info("Database created successfully.");
-            }
         } else {
             // fail because restore option is false
             shutdown();
             throw_std_runtime_error("sqlite3 database seems to be corrupt and the 'on-error' option is set to 'fail'");
         }
+    }
+
+    if (dbVersion.empty() && access(dbFilePathbackup.c_str(), R_OK) != 0) {
+        log_info("no sqlite3 backup is available or backup is corrupt. automatically creating database...");
+        auto itask = std::make_shared<SLInitTask>(config);
+        addTask(itask);
+        try {
+            itask->waitForTask();
+            dbVersion = getInternalSetting("db_version");
+        } catch (const std::runtime_error& e) {
+            shutdown();
+            throw_std_runtime_error(std::string { "error while creating database: " } + e.what());
+        }
+        log_info("database created successfully.");
     }
 
     if (dbVersion.empty()) {

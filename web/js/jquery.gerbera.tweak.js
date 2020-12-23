@@ -32,6 +32,7 @@
     const dirTweakRecursive = modal.find('#dirTweakRecursive');
     const dirTweakCaseSens = modal.find('#dirTweakCaseSens');
     const dirTweakHidden = modal.find('#dirTweakHidden');
+    const dirTweakMetaCharset = modal.find('#dirTweakMetaCharset');
     const dirTweakFanArt = modal.find('#dirTweakFanArt');
     const dirTweakSubtitle = modal.find('#dirTweakSubtitle');
     const dirTweakResource = modal.find('#dirTweakResource');
@@ -98,6 +99,7 @@
       dirTweakRecursive.prop('checked', item.recursive === 'true');
       dirTweakHidden.prop('checked', item['hidden-files'] === 'true');
       dirTweakCaseSens.prop('checked', item['case-sensitive'] === 'true');
+      dirTweakMetaCharset.val(item['meta-charset']);
       dirTweakFanArt.val(item['fanart-file']);
       dirTweakResource.val(item['subtitle-file']);
       dirTweakSubtitle.val(item['resource-file']);
@@ -114,6 +116,7 @@
     const dirTweakRecursive = modal.find('#dirTweakRecursive');
     const dirTweakCaseSens = modal.find('#dirTweakCaseSens');
     const dirTweakHidden = modal.find('#dirTweakHidden');
+    const dirTweakMetaCharset = modal.find('#dirTweakMetaCharset');
     const dirTweakFanArt = modal.find('#dirTweakFanArt');
     const dirTweakSubtitle = modal.find('#dirTweakSubtitle');
     const dirTweakResource = modal.find('#dirTweakResource');
@@ -134,6 +137,7 @@
     dirTweakRecursive.prop('checked', false);
     dirTweakCaseSens.prop('checked', false);
     dirTweakHidden.prop('checked', false);
+    dirTweakMetaCharset.val('');
     dirTweakFanArt.val('');
     dirTweakSubtitle.val('');
     dirTweakResource.val('');
@@ -152,6 +156,7 @@
     const dirTweakRecursive = modal.find('#dirTweakRecursive');
     const dirTweakCaseSens = modal.find('#dirTweakCaseSens');
     const dirTweakHidden = modal.find('#dirTweakHidden');
+    const dirTweakMetaCharset = modal.find('#dirTweakMetaCharset');
     const dirTweakFanArt = modal.find('#dirTweakFanArt');
     const dirTweakSubtitle = modal.find('#dirTweakSubtitle');
     const dirTweakResource = modal.find('#dirTweakResource');
@@ -166,6 +171,7 @@
       recursive: dirTweakRecursive.is(':checked'),
       'case-sensitive': dirTweakCaseSens.is(':checked'),
       'hidden-files': dirTweakHidden.is(':checked'),
+      'meta-charset': dirTweakMetaCharset.val(),
       'fanart-file': dirTweakFanArt.val(),
       'subtitle-file': dirTweakSubtitle.val(),
       'resource-file': dirTweakResource.val(),
@@ -183,6 +189,7 @@
     const dirTweakRecursive = modal.find('#dirTweakRecursive');
     const dirTweakCaseSens = modal.find('#dirTweakCaseSens');
     const dirTweakHidden = modal.find('#dirTweakHidden');
+    const dirTweakMetaCharset = modal.find('#dirTweakMetaCharset');
     const dirTweakFanArt = modal.find('#dirTweakFanArt');
     const dirTweakSubtitle = modal.find('#dirTweakSubtitle');
     const dirTweakResource = modal.find('#dirTweakResource');
@@ -197,6 +204,7 @@
       recursive: dirTweakRecursive.is(':checked'),
       'case-sensitive': dirTweakCaseSens.is(':checked'),
       'hidden-files': dirTweakHidden.is(':checked'),
+      'meta-charset': dirTweakMetaCharset.val(),
       'fanart-file': dirTweakFanArt.val(),
       'subtitle-file': dirTweakSubtitle.val(),
       'resource-file': dirTweakResource.val(),

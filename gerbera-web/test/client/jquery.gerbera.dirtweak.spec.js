@@ -15,6 +15,7 @@ describe('The jQuery Gerbera DirTweak Overlay', () => {
   let dirTweakRecursive;
   let dirTweakCaseSens;
   let dirTweakHidden;
+  let dirTweakMetaCharset;
   let dirTweakFanArt;
   let dirTweakSubtitle;
   let dirTweakResource;
@@ -35,6 +36,7 @@ describe('The jQuery Gerbera DirTweak Overlay', () => {
     dirTweakRecursive = $('#dirTweakRecursive');
     dirTweakCaseSens = $('#dirTweakCaseSens');
     dirTweakHidden = $('#dirTweakHidden');
+    dirTweakMetaCharset = $('#dirTweakMetaCharset');
     dirTweakFanArt = $('#dirTweakFanArt');
     dirTweakSubtitle = $('#dirTweakSubtitle');
     dirTweakResource = $('#dirTweakResource');
@@ -57,6 +59,7 @@ describe('The jQuery Gerbera DirTweak Overlay', () => {
       expect(dirTweakSymLinks.is(':checked')).toBeTruthy();
       expect(dirTweakRecursive.is(':checked')).toBeTruthy();
       expect(dirTweakCaseSens.is(':checked')).toBeFalsy();
+      expect(dirTweakMetaCharset.val()).toBe('');
       expect(dirTweakFanArt.val()).toBe('cover.jpg');
       expect(dirTweakSubtitle.val()).toBe('');
       expect(dirTweakResource.val()).toBe('');
@@ -71,6 +74,7 @@ describe('The jQuery Gerbera DirTweak Overlay', () => {
       expect(dirTweakSymLinks.is(':checked')).toBeFalsy();
       expect(dirTweakRecursive.is(':checked')).toBeFalsy();
       expect(dirTweakCaseSens.is(':checked')).toBeFalsy();
+      expect(dirTweakMetaCharset.val()).toBe('');
       expect(dirTweakFanArt.val()).toBe('');
       expect(dirTweakSubtitle.val()).toBe('');
       expect(dirTweakResource.val()).toBe('');

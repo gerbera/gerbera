@@ -1,6 +1,7 @@
 #ifdef HAVE_JS
 
 #include "cds_objects.h"
+#include "config/config_manager.h"
 #include "util/string_converter.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"

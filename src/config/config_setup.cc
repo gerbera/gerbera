@@ -1537,7 +1537,11 @@ bool ConfigDirectorySetup::createDirectoryTweakListFromNode(const pugi::xml_node
             }
         }
         {
-            auto cs = findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_FANART_FILE);
+            auto cs = findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_META_CHARSET);
+            if (cs->hasXmlElement(child)) {
+                dir->setMetaCharset(cs->getXmlContent(child));
+            }
+            cs = findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_FANART_FILE);
             if (cs->hasXmlElement(child)) {
                 dir->setFanArtFile(cs->getXmlContent(child));
             }
@@ -1623,10 +1627,20 @@ bool ConfigDirectorySetup::updateItem(size_t i, const std::string& optItem, cons
         log_debug("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getFollowSymlinks());
         return true;
     }
+    index = getItemPath(i, ATTR_DIRECTORIES_TWEAK_META_CHARSET);
+    if (optItem == index) {
+        if (entry->getOrig())
+            config->setOrigValue(index, entry->hasMetaCharset() ? entry->getMetaCharset() : "");
+        if (findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_META_CHARSET)->checkValue(optValue)) {
+            entry->setMetaCharset(optValue);
+            log_debug("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getMetaCharset());
+            return true;
+        }
+    }
     index = getItemPath(i, ATTR_DIRECTORIES_TWEAK_FANART_FILE);
     if (optItem == index) {
         if (entry->getOrig())
-            config->setOrigValue(index, entry->getFanArtFile());
+            config->setOrigValue(index, entry->hasFanArtFile() ? entry->getFanArtFile() : "");
         if (findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_FANART_FILE)->checkValue(optValue)) {
             entry->setFanArtFile(optValue);
             log_debug("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getFanArtFile());
@@ -1636,7 +1650,7 @@ bool ConfigDirectorySetup::updateItem(size_t i, const std::string& optItem, cons
     index = getItemPath(i, ATTR_DIRECTORIES_TWEAK_RESOURCE_FILE);
     if (optItem == index) {
         if (entry->getOrig())
-            config->setOrigValue(index, entry->getResourceFile());
+            config->setOrigValue(index, entry->hasResourceFile() ? entry->getResourceFile() : "");
         if (findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_RESOURCE_FILE)->checkValue(optValue)) {
             entry->setResourceFile(optValue);
             log_debug("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getResourceFile());
@@ -1646,7 +1660,7 @@ bool ConfigDirectorySetup::updateItem(size_t i, const std::string& optItem, cons
     index = getItemPath(i, ATTR_DIRECTORIES_TWEAK_SUBTILTE_FILE);
     if (optItem == index) {
         if (entry->getOrig())
-            config->setOrigValue(index, entry->getSubTitleFile());
+            config->setOrigValue(index, entry->hasSubTitleFile() ? entry->getSubTitleFile() : "");
         if (findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_SUBTILTE_FILE)->checkValue(optValue)) {
             entry->setSubTitleFile(optValue);
             log_debug("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getSubTitleFile());

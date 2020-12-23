@@ -26,6 +26,14 @@
 				"value": "false"
 			},
 			{
+				"item": "/import/directories/tweak[0]/attribute::meta-charset",
+				"id": "104",
+				"status": "changed",
+				"origValue": "",
+				"source": "database",
+				"value": ""
+			},
+			{
 				"item": "/import/directories/tweak[0]/attribute::recursive",
 				"id": "104",
 				"status": "unchanged",
