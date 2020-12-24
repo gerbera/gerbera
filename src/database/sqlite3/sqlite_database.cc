@@ -160,7 +160,7 @@ void Sqlite3Database::init()
         throw DatabaseException("", startupError);
 
     std::string dbVersion;
-            std::string dbFilePathbackup = dbFilePath + ".backup";
+    std::string dbFilePathbackup = dbFilePath + ".backup";
     try {
         dbVersion = getInternalSetting("db_version");
     } catch (const std::runtime_error& e) {

@@ -183,7 +183,8 @@ public:
     /// The time will be only set if it is higher than the previous value!
     void setCurrentLMT(const std::string& location, time_t lmt);
 
-    time_t getPreviousLMT(const std::string& location) const {
+    time_t getPreviousLMT(const std::string& location) const
+    {
         auto lmDir = lastModified.find(location);
         if (lmDir != lastModified.end() && lastModified.at(location) > 0) {
             return lastModified.at(location);
@@ -191,7 +192,8 @@ public:
         return last_mod_previous_scan;
     }
 
-    void updateLMT() {
+    void updateLMT()
+    {
         if (activeScanCount == 0) {
             last_mod_previous_scan = last_mod_current_scan;
         }

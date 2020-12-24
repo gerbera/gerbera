@@ -246,7 +246,8 @@ fs::path findInPath(const fs::path& exec)
     return "";
 }
 
-std::string renderWebUri(const std::string& ip, int port) {
+std::string renderWebUri(const std::string& ip, int port)
+{
     std::ostringstream webUIAddr;
     if (ip.find(':') != std::string::npos) {
         webUIAddr << '[' << ip << ']';

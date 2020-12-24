@@ -225,7 +225,7 @@ void ResourceHandler::fillMetadata(std::shared_ptr<CdsItem> item)
     auto path = getContentPath(tweak == nullptr || !tweak->hasResourceFile() ? names : std::vector<std::string> { tweak->getResourceFile() }, item, tweak != nullptr && tweak->hasCaseSensitive() ? tweak->getCaseSensitive() : caseSensitive);
     log_debug("Running resource handler check on {} -> {}", item->getLocation().c_str(), path.c_str());
 
-    if (!path.empty()&& toLower(path.c_str()) == toLower(item->getLocation().c_str())) {
+    if (!path.empty() && toLower(path.c_str()) == toLower(item->getLocation().c_str())) {
         auto resource = std::make_shared<CdsResource>(CH_RESOURCE);
         resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo("res"));
         resource->addAttribute(R_RESOURCE_FILE, path.c_str());
