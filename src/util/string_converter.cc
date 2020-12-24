@@ -36,7 +36,6 @@
 #include <cstdlib>
 #include <utility>
 
-
 StringConverter::StringConverter(const std::string& from, const std::string& to)
     : cd(iconv_open(to.c_str(), from.c_str()))
 {

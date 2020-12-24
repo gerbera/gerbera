@@ -372,8 +372,6 @@ void SQLDatabase::addObject(std::shared_ptr<CdsObject> obj, int* changedContaine
         } else {
             exec(*qb, false);
         }
-
-
     }
 }
 
