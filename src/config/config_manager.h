@@ -139,9 +139,9 @@ public:
     static bool isDebugLogging() { return debug_logging; }
 
 protected:
-    static std::vector<std::shared_ptr<ConfigSetup>> complexOptions;
+    static const std::vector<std::shared_ptr<ConfigSetup>> complexOptions;
     static const std::array<std::pair<config_option_t, const char*>, 16> simpleOptions;
-    static std::map<config_option_t, std::vector<config_option_t>> parentOptions;
+    static const std::map<config_option_t, std::vector<config_option_t>> parentOptions;
 
     fs::path filename;
     fs::path prefix_dir;
