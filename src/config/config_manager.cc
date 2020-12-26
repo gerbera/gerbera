@@ -107,7 +107,7 @@ std::shared_ptr<Config> ConfigManager::getSelf()
     return shared_from_this();
 }
 
-std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = {
+const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = {
     std::make_shared<ConfigIntSetup>(CFG_SERVER_PORT,
         "/server/port", "config-server.html#port",
         0, ConfigIntSetup::CheckPortValue),
@@ -656,7 +656,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = {
         ""),
 };
 
-std::map<config_option_t, std::vector<config_option_t>> ConfigManager::parentOptions = {
+const std::map<config_option_t, std::vector<config_option_t>> ConfigManager::parentOptions = {
     { ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED, { CFG_TRANSCODING_PROFILE_LIST } },
     { ATTR_TRANSCODING_PROFILES_PROFLE_ACCURL, { CFG_TRANSCODING_PROFILE_LIST } },
     { ATTR_TRANSCODING_PROFILES_PROFLE_TYPE, { CFG_TRANSCODING_PROFILE_LIST } },

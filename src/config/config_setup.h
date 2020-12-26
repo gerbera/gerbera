@@ -80,7 +80,7 @@ protected:
     }
 
 public:
-    static const char* ROOT_NAME;
+    static const char* const ROOT_NAME;
     config_option_t option;
     const char* xpath;
 
