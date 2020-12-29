@@ -323,12 +323,12 @@ else()
 
     set(CMAKE_REQUIRED_LIBRARIES pupnp::pupnp)
 
-    check_cxx_symbol_exists(UPNP_ENABLE_IPV6 "upnpconfig.h" UPNP_HAS_IPV6)
+    check_cxx_symbol_exists(UPNP_ENABLE_IPV6 "${UPNP_INCLUDE_DIR}/upnpconfig.h" UPNP_HAS_IPV6)
     if (NOT UPNP_HAS_IPV6)
         message(FATAL_ERROR "Gerbera requires libupnp with IPv6 support.")
     endif()
 
-    check_cxx_symbol_exists(UPNP_MINISERVER_REUSEADDR "upnpconfig.h" UPNP_HAS_REUSEADDR)
+    check_cxx_symbol_exists(UPNP_MINISERVER_REUSEADDR "${UPNP_INCLUDE_DIR}/upnpconfig.h" UPNP_HAS_REUSEADDR)
     if (NOT UPNP_HAS_REUSEADDR)
         message(WARNING [=[
     !! It is strongly recommended to build libupnp with --enable-reuseaddr !!
