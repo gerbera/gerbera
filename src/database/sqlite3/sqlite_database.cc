@@ -110,8 +110,6 @@ PRAGMA foreign_keys = ON;"
 #define SQLITE3_UPDATE_6_7_1 "DROP TABLE mt_cds_active_item;"
 #define SQLITE3_UPDATE_6_7_2 "UPDATE \"mt_internal_setting\" SET \"value\"='7' WHERE \"key\"='db_version' AND \"value\"='6'"
 
-#define SL3_INITITAL_QUEUE_SIZE 20
-
 Sqlite3Database::Sqlite3Database(std::shared_ptr<Config> config, std::shared_ptr<Timer> timer)
     : SQLDatabase(std::move(config))
     , timer(std::move(timer))

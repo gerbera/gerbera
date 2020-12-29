@@ -363,7 +363,7 @@ void SQLDatabase::addObject(std::shared_ptr<CdsObject> obj, int* changedContaine
 
     for (const auto& addUpdateTable : tables) {
 
-        std::shared_ptr<std::ostringstream> qb = sqlForInsert(obj, addUpdateTable);
+        auto qb = sqlForInsert(obj, addUpdateTable);
         log_debug("Generated insert: {}", qb->str().c_str());
 
         if (addUpdateTable->getTableName() == CDS_OBJECT_TABLE) {
@@ -859,7 +859,6 @@ fs::path SQLDatabase::stripLocationPrefix(std::string dbLocation, char* prefix)
 std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::unique_ptr<SQLRow>& row)
 {
     int objectType = std::stoi(row->col(_object_type));
-    auto self = getSelf();
     auto obj = CdsObject::createObject(objectType);
 
     /* set common properties */
@@ -965,7 +964,6 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::unique_pt
 std::shared_ptr<CdsObject> SQLDatabase::createObjectFromSearchRow(const std::unique_ptr<SQLRow>& row)
 {
     int objectType = std::stoi(row->col(_object_type));
-    auto self = getSelf();
     auto obj = CdsObject::createObject(objectType);
 
     /* set common properties */

@@ -166,7 +166,7 @@ void MySQLDatabase::init()
 
     mysql_init_key_initialized = true;
 
-    mysql_options(&db, MYSQL_SET_CHARSET_NAME, "utf8");
+    mysql_options(&db, MYSQL_SET_CHARSET_NAME, "utf8mb4");
 
     bool my_bool_var = true;
     mysql_options(&db, MYSQL_OPT_RECONNECT, &my_bool_var);
@@ -203,7 +203,7 @@ void MySQLDatabase::init()
     }
 
     if (dbVersion.empty()) {
-        log_info("database doesn't seem to exist. automatically creating database...");
+        log_info("Database doesn't seem to exist. Creating database...");
         unsigned char buf[MS_CREATE_SQL_INFLATED_SIZE + 1]; // + 1 for '\0' at the end of the string
         unsigned long uncompressed_size = MS_CREATE_SQL_INFLATED_SIZE;
         int ret = uncompress(buf, &uncompressed_size, mysql_create_sql, MS_CREATE_SQL_DEFLATED_SIZE);
@@ -233,7 +233,7 @@ void MySQLDatabase::init()
             shutdown();
             throw_std_runtime_error("error while creating database");
         }
-        log_info("database created successfully.");
+        log_info("Database created successfully!");
     }
     log_debug("db_version: {}", dbVersion.c_str());
 
