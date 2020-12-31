@@ -64,7 +64,7 @@ static struct {
 
 static void printCopyright()
 {
-    printf("\nGerbera UPnP Server version %s - %s\n\n", VERSION, DESC_MANUFACTURER_URL);
+    printf("\nGerbera UPnP Server version %s - %s\n\n", GERBERA_VERSION, DESC_MANUFACTURER_URL);
     printf("===============================================================================\n");
     printf("Gerbera is free software, covered by the GNU General Public License version 2\n\n");
     printf("Copyright 2016-2021 Gerbera Contributors.\n");
@@ -74,7 +74,7 @@ static void printCopyright()
 
 static void logCopyright()
 {
-    log_info("Gerbera UPnP Server version {} - {}", VERSION, DESC_MANUFACTURER_URL);
+    log_info("Gerbera UPnP Server version {} - {}", GERBERA_VERSION, DESC_MANUFACTURER_URL);
     log_info("===============================================================================");
     log_info("Gerbera is free software, covered by the GNU General Public License version 2");
     log_info("Copyright 2016-2021 Gerbera Contributors.");

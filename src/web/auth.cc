@@ -113,7 +113,7 @@ void web::auth::process()
         friendlyName.set_value(config->getOption(CFG_SERVER_NAME).c_str());
 
         auto gerberaVersion = cfg.append_child("version").append_child(pugi::node_pcdata);
-        gerberaVersion.set_value(VERSION);
+        gerberaVersion.set_value(GERBERA_VERSION);
     } else if (action == "get_sid") {
         log_debug("checking/getting sid...");
         std::shared_ptr<Session> session = nullptr;

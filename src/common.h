@@ -137,12 +137,12 @@ static constexpr bool IS_FORBIDDEN_CDS_ID(int id) { return id <= CDS_ID_FS_ROOT;
 #define DESC_DEVICE_TYPE "urn:schemas-upnp-org:device:MediaServer:1"
 #define DESC_SPEC_VERSION_MAJOR "1"
 #define DESC_SPEC_VERSION_MINOR "0"
-#define DESC_FRIENDLY_NAME PACKAGE_NAME
+#define DESC_FRIENDLY_NAME "Gerbera"
 #define DESC_MANUFACTURER "Gerbera Contributors"
 #define DESC_MANUFACTURER_URL "http://gerbera.io/"
 #define DESC_MODEL_DESCRIPTION "Free UPnP AV MediaServer, GNU GPL"
-#define DESC_MODEL_NAME PACKAGE_NAME
-#define DESC_MODEL_NUMBER VERSION
+#define DESC_MODEL_NAME "Gerbera"
+#define DESC_MODEL_NUMBER GERBERA_VERSION
 #define DESC_SERIAL_NUMBER "1"
 
 //services
