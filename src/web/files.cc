@@ -58,6 +58,7 @@ void web::files::process()
 
     auto files = root.append_child("files");
     xml2JsonHints->setArrayName(files, "file");
+    xml2JsonHints->setFieldType("filename", "string");
     files.append_attribute("parent_id") = parentID.c_str();
     files.append_attribute("location") = path.c_str();
 
@@ -78,10 +79,10 @@ void web::files::process()
         filesMap[id] = { filepath.filename() };
     }
 
+    auto f2i = StringConverter::f2i(config);
     for (const auto& [key, val] : filesMap) {
         auto fe = files.append_child("file");
         fe.append_attribute("id") = key.c_str();
-        auto f2i = StringConverter::f2i(config);
         fe.append_attribute("filename") = f2i->convert(val.filename).c_str();
     }
 }
