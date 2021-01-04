@@ -4,7 +4,7 @@
 
     client_config.cc - this file is part of Gerbera.
 
-    Copyright (C) 2020 Gerbera Contributors
+    Copyright (C) 2020-2021 Gerbera Contributors
 
     Gerbera is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
@@ -153,6 +153,9 @@ std::string ClientConfig::mapClientType(ClientType clientType)
     case ClientType::SamsungBDJ5500:
         clientType_str = "SamsungBDJ5500";
         break;
+    case ClientType::VLC:
+        clientType_str = "VLC";
+        break;
     case ClientType::StandardUPnP:
         clientType_str = "StandardUPnP";
         break;
@@ -203,6 +206,9 @@ ClientType ClientConfig::remapClientType(const std::string& clientType)
     }
     if (clientType == "StandardUPnP") {
         return ClientType::StandardUPnP;
+    }
+    if (clientType == "VLC") {
+        return ClientType::VLC;
     }
     if (clientType == "None") {
         return ClientType::Unknown;

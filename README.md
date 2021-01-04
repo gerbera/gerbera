@@ -123,7 +123,7 @@ The Gerbera Team maintains a Homebrew Tap to allow for easy installation of Gerb
        Sergey Bostandzhyan <jin at mediatomb dot cc>
        Leonhard Wimmer <leo at mediatomb dot cc>
 
-    Copyright (C) 2016-2020
+    Copyright (C) 2016-2021
         Gerbera Contributors
 
 [1]: https://sourceforge.net/p/mediatomb/discussion/440751/thread/258c3cf7/?limit=250

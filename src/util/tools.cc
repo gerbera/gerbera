@@ -1105,10 +1105,10 @@ std::string getDLNAContentHeader(const std::shared_ptr<Config>& config, const st
     std::string content_parameter;
     content_parameter = getDLNAprofileString(contentType);
     if (!content_parameter.empty())
-        content_parameter = D_PROFILE + std::string("=") + content_parameter + ";";
-    content_parameter = content_parameter + D_OP + "=" + D_OP_SEEK_ENABLED + ";";
-    content_parameter = content_parameter + D_CONVERSION_INDICATOR + "=" + D_NO_CONVERSION + ";";
-    content_parameter = content_parameter + D_FLAGS "=" D_TR_FLAGS_AV;
+        content_parameter += std::string(";");
+    content_parameter += std::string(D_OP) + "=" + D_OP_SEEK_ENABLED + ";";
+    content_parameter += std::string(D_CONVERSION_INDICATOR) + "=" + D_NO_CONVERSION + ";";
+    content_parameter += std::string(D_FLAGS "=" D_TR_FLAGS_AV);
     return content_parameter;
 }
 

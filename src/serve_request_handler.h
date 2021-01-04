@@ -38,10 +38,9 @@
 class ServeRequestHandler : public RequestHandler {
 public:
     ServeRequestHandler(std::shared_ptr<Config> config, std::shared_ptr<Database> database);
+
     void getInfo(const char* filename, UpnpFileInfo* info) override;
-    std::unique_ptr<IOHandler> open(const char* filename,
-        enum UpnpOpenFileMode mode,
-        const std::string& range) override;
+    std::unique_ptr<IOHandler> open(const char* filename, enum UpnpOpenFileMode mode) override;
 };
 
 #endif // __SERVE_REQUEST_HANDLER_H__

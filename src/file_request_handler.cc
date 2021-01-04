@@ -247,8 +247,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     log_debug("web_get_info(): end");
 }
 
-std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
-    enum UpnpOpenFileMode mode, const std::string& range)
+std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum UpnpOpenFileMode mode)
 {
     log_debug("start");
 
@@ -289,7 +288,6 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
     fs::path path = item->getLocation();
     bool is_srt = false;
 
-    std::string mimeType;
     std::string ext = getValueOrDefault(params, "ext");
     size_t edot = ext.rfind('.');
     if (edot != std::string::npos)
@@ -298,7 +296,6 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
         // remove .ext
         std::string pathNoExt = path.parent_path() / path.stem();
         path = pathNoExt + ext;
-        mimeType = MIMETYPE_TEXT;
 
         // reset resource id
         res_id = 0;
@@ -336,28 +333,9 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
         else {
             auto resource = item->getResource(res_id);
             res_handler = resource->getHandlerType();
-            // http-get:*:image/jpeg:*
-            std::string protocolInfo = getValueOrDefault(item->getResource(res_id)->getAttributes(), "protocolInfo");
-            if (!protocolInfo.empty()) {
-                mimeType = getMTFromProtocolInfo(protocolInfo);
-            }
         }
 
         auto h = MetadataHandler::createHandler(config, res_handler);
-        if (mimeType.empty())
-            mimeType = h->getMimeType();
-
-        /* FIXME Upstream upnp / DNLA
-#ifdef EXTEND_PROTOCOLINFO
-        header = getDLNAtransferHeader(mimeType, header);
-#endif
-
-        if (!header.empty())
-                info->http_header = ixmlCloneDOMString(header.c_str());
-        */
-
-        //info->content_type = ixmlCloneDOMString(mimeType.c_str());
-        //auto io_handler = h->serveContent(item, res_id, &(info->file_length));
 
         auto io_handler = h->serveContent(item, res_id);
         io_handler->open(mode);
@@ -373,32 +351,6 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
                       ->getByName(tr_profile);
         return tr_d->open(tp, path, item, range);
     }
-
-    if (mimeType.empty())
-        mimeType = item->getMimeType();
-
-    /* FIXME Upstream headers / DNLA
-    info->file_length = statbuf.st_size;
-    info->content_type = ixmlCloneDOMString(mimeType.c_str());
-
-    log_debug("Adding content disposition header: {}",
-              header.c_str());
-    // if we are dealing with a regular file we should add the
-    // Accept-Ranges: bytes header, in order to indicate that we support
-    // seeking
-    if (S_ISREG(statbuf.st_mode))
-    {
-        if (!header.empty())
-            header = header + "\r\n";
-
-         header = header + "Accept-Ranges: bytes";
-    }
-
-    header = getDLNAtransferHeader(mimeType, header);
-
-    if (!header.empty())
-        info->http_header = ixmlCloneDOMString(header.c_str());
-    */
 
     auto io_handler = std::make_unique<FileIOHandler>(path);
     io_handler->open(mode);

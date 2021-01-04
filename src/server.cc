@@ -555,7 +555,7 @@ int Server::registerVirtualDirCallbacks()
 
         try {
             auto reqHandler = static_cast<const Server*>(cookie)->createRequestHandler(filename);
-            auto ioHandler = reqHandler->open(link.c_str(), mode, "");
+            auto ioHandler = reqHandler->open(link.c_str(), mode);
             auto ioPtr = static_cast<UpnpWebFileHandle>(ioHandler.release());
             //log_debug("%p open({})", ioPtr, filename);
             return ioPtr;
