@@ -222,9 +222,7 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(enum UpnpOpenFileMode mode)
     return io_handler;
 }
 
-std::unique_ptr<IOHandler> WebRequestHandler::open(const char* filename,
-    enum UpnpOpenFileMode mode,
-    const std::string& range)
+std::unique_ptr<IOHandler> WebRequestHandler::open(const char* filename, enum UpnpOpenFileMode mode)
 {
     this->filename = filename;
     this->mode = mode;

@@ -104,9 +104,7 @@ void ServeRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     }
 }
 
-std::unique_ptr<IOHandler> ServeRequestHandler::open(const char* filename,
-    enum UpnpOpenFileMode mode,
-    const std::string& range)
+std::unique_ptr<IOHandler> ServeRequestHandler::open(const char* filename, enum UpnpOpenFileMode mode)
 {
     struct stat statbuf;
     int ret = 0;
