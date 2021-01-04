@@ -317,12 +317,15 @@ if (WITH_NPUPNP)
 else()
     find_package (pupnp "1.12.1" REQUIRED)
 
-    get_target_property(UPNP_HAS_IPV6 pupnp::pupnp UPNP_ENABLE_IPV6)
+    include(CheckCXXSymbolExists)
+
+    get_target_property(UPNP_INCLUDE_DIR pupnp::pupnp INTERFACE_INCLUDE_DIRECTORIES)
+    check_cxx_symbol_exists(UPNP_ENABLE_IPV6 "${UPNP_INCLUDE_DIR}/upnpconfig.h" UPNP_HAS_IPV6)
     if (NOT UPNP_HAS_IPV6)
         message(FATAL_ERROR "Gerbera requires libupnp with IPv6 support.")
     endif()
 
-    get_target_property(UPNP_HAS_REUSEADDR pupnp::pupnp UPNP_MINISERVER_REUSEADDR)
+    check_cxx_symbol_exists(UPNP_MINISERVER_REUSEADDR "${UPNP_INCLUDE_DIR}/upnpconfig.h" UPNP_HAS_REUSEADDR)
     if (NOT UPNP_HAS_REUSEADDR)
         message(WARNING [=[
     !! It is strongly recommended to build libupnp with --enable-reuseaddr !!
