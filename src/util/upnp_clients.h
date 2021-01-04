@@ -46,6 +46,7 @@ enum class ClientType {
     SamsungBDP,
     SamsungSeriesCDE,
     SamsungBDJ5500,
+    VLC,
     StandardUPnP
 };
 
