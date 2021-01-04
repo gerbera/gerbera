@@ -6,8 +6,6 @@
 #  UPNP_VERSION_STRING - The version of LinUPnP found
 #  UPNP_HAS_IPV6 - If LinUPnP was built with IPv6 support
 #  UPNP_HAS_REUSEADDR - If LinUPnP was built with SO_REUSEADDR support
-include(CheckCXXSymbolExists)
-
 find_package(PkgConfig QUIET)
 pkg_search_module (PC_UPNP QUIET libupnp)
 
@@ -29,9 +27,6 @@ if(EXISTS ${UPNP_INCLUDE_DIR}/upnpconfig.h)
     string (REGEX REPLACE ".*UPNP_VERSION_MINOR ([0-9]+).*" "\\1" UPNP_MINOR_VERSION "${_UPNP_DEFS}")
     string (REGEX REPLACE ".*UPNP_VERSION_PATCH ([0-9]+).*" "\\1" UPNP_PATCH_VERSION "${_UPNP_DEFS}")
     set (pupnp_VERSION "${UPNP_MAJOR_VERSION}.${UPNP_MINOR_VERSION}.${UPNP_PATCH_VERSION}")
-
-    check_cxx_symbol_exists(UPNP_ENABLE_IPV6 "${UPNP_INCLUDE_DIR}/upnpconfig.h" UPNP_HAS_IPV6)
-    check_cxx_symbol_exists(UPNP_MINISERVER_REUSEADDR "${UPNP_INCLUDE_DIR}/upnpconfig.h" UPNP_HAS_REUSEADDR)
 endif()
 
 include(FindPackageHandleStandardArgs)
