@@ -248,8 +248,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     log_debug("web_get_info(): end");
 }
 
-std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
-    enum UpnpOpenFileMode mode, const std::string& range)
+std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum UpnpOpenFileMode mode)
 {
     log_debug("start");
 
@@ -349,18 +348,6 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
         if (mimeType.empty())
             mimeType = h->getMimeType();
 
-        /* FIXME Upstream upnp / DNLA
-#ifdef EXTEND_PROTOCOLINFO
-        header = getDLNAtransferHeader(mimeType, header);
-#endif
-
-        if (!header.empty())
-                info->http_header = ixmlCloneDOMString(header.c_str());
-        */
-
-        //info->content_type = ixmlCloneDOMString(mimeType.c_str());
-        //auto io_handler = h->serveContent(item, res_id, &(info->file_length));
-
         auto io_handler = h->serveContent(item, res_id);
         io_handler->open(mode);
         log_debug("end");
@@ -378,29 +365,6 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
 
     if (mimeType.empty())
         mimeType = item->getMimeType();
-
-    /* FIXME Upstream headers / DNLA
-    info->file_length = statbuf.st_size;
-    info->content_type = ixmlCloneDOMString(mimeType.c_str());
-
-    log_debug("Adding content disposition header: {}",
-              header.c_str());
-    // if we are dealing with a regular file we should add the
-    // Accept-Ranges: bytes header, in order to indicate that we support
-    // seeking
-    if (S_ISREG(statbuf.st_mode))
-    {
-        if (!header.empty())
-            header = header + "\r\n";
-
-         header = header + "Accept-Ranges: bytes";
-    }
-
-    header = getDLNAtransferHeader(mimeType, header);
-
-    if (!header.empty())
-        info->http_header = ixmlCloneDOMString(header.c_str());
-    */
 
     auto io_handler = std::make_unique<FileIOHandler>(path);
     io_handler->open(mode);

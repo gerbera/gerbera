@@ -45,9 +45,14 @@ class RequestHandler {
 public:
     RequestHandler(std::shared_ptr<Config> config, std::shared_ptr<Database> database);
 
+    /// \brief Returns information about the requested content.
+    /// \param filename Requested URL
+    /// \param info File_Info structure, quite similar to statbuf.
     virtual void getInfo(const char* filename, UpnpFileInfo* info) = 0;
 
-    virtual std::unique_ptr<IOHandler> open(const char* filename, enum UpnpOpenFileMode mode, const std::string& range) = 0;
+    /// \brief Prepares the output buffer and calls the process function.
+    /// \return IOHandler
+    virtual std::unique_ptr<IOHandler> open(const char* filename, enum UpnpOpenFileMode mode) = 0;
 
     /// \brief Splits the url into a path and parameters string.
     /// Only '?' and '/' separators are allowed, otherwise an exception will

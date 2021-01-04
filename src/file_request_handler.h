@@ -61,10 +61,7 @@ public:
         UpnpXMLBuilder* xmlBuilder);
 
     void getInfo(const char* filename, UpnpFileInfo* info) override;
-    std::unique_ptr<IOHandler> open(
-        const char* filename,
-        enum UpnpOpenFileMode mode,
-        const std::string& range) override;
+    std::unique_ptr<IOHandler> open(const char* filename, enum UpnpOpenFileMode mode) override;
 };
 
 #endif // __FILE_REQUEST_HANDLER_H__

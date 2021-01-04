@@ -158,9 +158,7 @@ public:
     /// \param filename The requested URL
     /// \param mode either UPNP_READ or UPNP_WRITE
     /// \return the appropriate IOHandler for the request.
-    std::unique_ptr<IOHandler> open(const char* filename,
-        enum UpnpOpenFileMode mode,
-        const std::string& range) override;
+    std::unique_ptr<IOHandler> open(const char* filename, enum UpnpOpenFileMode mode) override;
 
     /// \brief This method must be overridden by the subclasses that actually process the given request.
     virtual void process() = 0;

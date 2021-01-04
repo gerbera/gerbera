@@ -147,9 +147,7 @@ void URLRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     /// \todo transcoding for get_info
 }
 
-std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
-    enum UpnpOpenFileMode mode,
-    const std::string& range)
+std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename, enum UpnpOpenFileMode mode)
 {
     log_debug("start");
 
@@ -194,13 +192,7 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
 
     log_debug("Online content url: {}", url.c_str());
 
-    //info->is_readable = 1;
-    //info->last_modified = 0;
-    //info->is_directory = 0;
-    //info->http_header = NULL;
-
     std::string tr_profile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
-
     if (!tr_profile.empty()) {
         auto tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)
                       ->getByName(tr_profile);
@@ -208,28 +200,8 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
             throw_std_runtime_error("Transcoding of file " + url + " but no profile matching the name " + tr_profile + " found");
 
         auto tr_d = std::make_unique<TranscodeDispatcher>(config, content);
-        return tr_d->open(tp, url, item, range);
+        return tr_d->open(tp, url, item, "");
     }
-
-    std::string header;
-    auto u = std::make_unique<URL>();
-    try {
-        auto st = u->getInfo(url);
-        // info->file_length = st->getSize();
-        header = "Accept-Ranges: bytes";
-        log_debug("URL used for request: {}", st->getURL().c_str());
-    } catch (const std::runtime_error& ex) {
-        log_warning("{}", ex.what());
-        //info->file_length = -1;
-    }
-
-    std::string mimeType = item->getMimeType();
-    // info->content_type = ixmlCloneDOMString(mimeType.c_str());
-
-    /* FIXME headers
-    if (!header.empty())
-        info->http_header = ixmlCloneDOMString(header.c_str());
-    */
 
     ///\todo make curl io handler configurable for url request handler
     auto io_handler = std::make_unique<CurlIOHandler>(url, nullptr, 1024 * 1024, 0);
