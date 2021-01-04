@@ -94,6 +94,14 @@ std::vector<struct ClientInfo> Clients::clientInfo = std::vector<struct ClientIn
         ClientMatchType::UserAgent,
         "[BD]J5500" },
 
+    // User-Agent: VLC/3.0.11.1 LibVLC/3.0.11.1
+    {
+        "VLC",
+        ClientType::VLC,
+        QUIRK_FLAG_NONE,
+        ClientMatchType::UserAgent,
+        "LibVLC" },
+
     // Gerbera, FRITZ!Box, etc...
     // User-Agent: Linux/5.4.0-4-amd64, UPnP/1.0, Portable SDK for UPnP devices/1.8.6
     // User-Agent: FRITZ!Box 5490 UPnP/1.0 AVM FRITZ!Box 5490 151.07.12
@@ -248,13 +256,11 @@ bool Clients::getInfoByAddr(const struct sockaddr_storage* addr, const ClientInf
 bool Clients::getInfoByType(const std::string& match, ClientMatchType type, const ClientInfo** ppInfo)
 {
     auto it = std::find_if(clientInfo.begin(), clientInfo.end(), [=](const auto& c) //
-        { return !c.match.empty() && (type != ClientMatchType::IP && c.matchType == type); });
+        { return c.matchType == type && match.find(c.match) != std::string::npos; });
 
     if (it != clientInfo.end()) {
-        if (match.find(it->match) != std::string::npos) {
-            *ppInfo = &(*it);
-            return true;
-        }
+        *ppInfo = &(*it);
+        return true;
     }
 
     *ppInfo = nullptr;
