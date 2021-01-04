@@ -94,8 +94,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
     auto obj = database->loadObject(objectID);
 
-    int objectType = obj->getObjectType();
-    if (!IS_CDS_ITEM(objectType)) {
+    if (!obj->isItem()) {
         throw_std_runtime_error("requested object is not an item");
     }
     auto item = std::static_pointer_cast<CdsItem>(obj);
@@ -273,8 +272,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename,
     log_debug("Opening media file with object id {}", objectID);
     auto obj = database->loadObject(objectID);
 
-    int objectType = obj->getObjectType();
-    if (!IS_CDS_ITEM(objectType)) {
+    if (!obj->isItem()) {
         throw_std_runtime_error("requested object is not an item");
     }
 

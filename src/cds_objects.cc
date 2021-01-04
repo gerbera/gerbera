@@ -37,6 +37,9 @@
 #include "database/database.h"
 #include "util/tools.h"
 
+static constexpr bool IS_CDS_ITEM(unsigned int type) { return type & OBJECT_TYPE_ITEM; };
+static constexpr bool IS_CDS_PURE_ITEM(unsigned int type) { return type == OBJECT_TYPE_ITEM; };
+
 CdsObject::CdsObject()
     : mtime(0)
     , sizeOnDisk(0)
@@ -143,7 +146,7 @@ CdsItem::CdsItem()
 void CdsItem::copyTo(const std::shared_ptr<CdsObject>& obj)
 {
     CdsObject::copyTo(obj);
-    if (!IS_CDS_ITEM(obj->getObjectType()))
+    if (!obj->isItem())
         return;
     auto item = std::static_pointer_cast<CdsItem>(obj);
     //    item->setDescription(description);
@@ -169,7 +172,7 @@ void CdsItem::validate()
     if (this->location.empty())
         throw_std_runtime_error("Item validation failed: missing location");
 
-    if (IS_CDS_ITEM_EXTERNAL_URL(objectType))
+    if (isExternalItem())
         return;
 
     std::error_code ec;
@@ -213,7 +216,7 @@ CdsContainer::CdsContainer()
 void CdsContainer::copyTo(const std::shared_ptr<CdsObject>& obj)
 {
     CdsObject::copyTo(obj);
-    if (!IS_CDS_CONTAINER(obj->getObjectType()))
+    if (!obj->isContainer())
         return;
     auto cont = std::static_pointer_cast<CdsContainer>(obj);
     cont->setUpdateID(updateID);
@@ -233,7 +236,7 @@ void CdsContainer::validate()
         throw_std_runtime_error("validation failed"); */
 }
 
-std::string CdsObject::mapObjectType(int type)
+std::string CdsObject::mapObjectType(unsigned int type)
 {
     if (IS_CDS_CONTAINER(type))
         return STRING_OBJECT_TYPE_CONTAINER;

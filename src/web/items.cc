@@ -124,7 +124,7 @@ void web::items::process()
     items.append_attribute("protect_items") = protectItems;
 
     for (const auto& obj : arr) {
-        //if (IS_CDS_ITEM(obj->getObjectType()))
+        //if (obj->isItem())
         //{
         auto item = items.append_child("item");
         item.append_attribute("id") = obj->getID();

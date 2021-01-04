@@ -75,8 +75,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
 
     result.append_child("upnp:class").append_child(pugi::node_pcdata).set_value(obj->getClass().c_str());
 
-    int objectType = obj->getObjectType();
-    if (IS_CDS_ITEM(objectType)) {
+    if (obj->isItem()) {
         auto item = std::static_pointer_cast<CdsItem>(obj);
 
         auto meta = obj->getMetadata();
@@ -115,7 +114,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
         addResources(item, &result);
 
         result.set_name("item");
-    } else if (IS_CDS_CONTAINER(objectType)) {
+    } else if (obj->isContainer()) {
         auto cont = std::static_pointer_cast<CdsContainer>(obj);
 
         result.set_name("container");
@@ -340,9 +339,8 @@ std::unique_ptr<UpnpXMLBuilder::PathBase> UpnpXMLBuilder::getPathBase(const std:
 
     pathBase->addResID = false;
     /// \todo move this down into the "for" loop and create different urls
-    /// for each resource once the io handlers are ready
-    int objectType = item->getObjectType();
-    if (IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
+    /// for each resource once the io handlers are ready    int objectType = ;
+    if (item->isExternalItem()) {
         if (!item->getFlag(OBJECT_FLAG_PROXY_URL) && (!forceLocal)) {
             pathBase->pathBase = item->getLocation();
             return pathBase;
@@ -364,9 +362,8 @@ std::string UpnpXMLBuilder::getFirstResourcePath(const std::shared_ptr<CdsItem>&
 {
     std::string result;
     auto urlBase = getPathBase(item);
-    int objectType = item->getObjectType();
 
-    if (IS_CDS_ITEM_EXTERNAL_URL(objectType) && !urlBase->addResID) { // a remote resource
+    if (item->isExternalItem() && !urlBase->addResID) { // a remote resource
         result = urlBase->pathBase;
     } else if (urlBase->addResID) { // a proxy, remote, resource
         result = SERVER_VIRTUAL_DIR + urlBase->pathBase + std::to_string(0);
@@ -415,7 +412,7 @@ std::string UpnpXMLBuilder::renderExtension(const std::string& contentType, cons
 void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xml_node* parent)
 {
     auto urlBase = getPathBase(item);
-    bool skipURL = (IS_CDS_ITEM_EXTERNAL_URL(item->getObjectType()) && !item->getFlag(OBJECT_FLAG_PROXY_URL));
+    bool skipURL = (item->isExternalItem() && !item->getFlag(OBJECT_FLAG_PROXY_URL));
 
     bool isExtThumbnail = false; // this sucks
     auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
@@ -721,8 +718,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
         log_debug("protocolInfo: {}", protocolInfo.c_str());
 
         // URL is path until now
-        int objectType = item->getObjectType();
-        if (!IS_CDS_ITEM_EXTERNAL_URL(objectType) || (hide_original_resource && IS_CDS_ITEM_EXTERNAL_URL(objectType))) {
+        if (!item->isExternalItem() || (hide_original_resource && item->isExternalItem())) {
             url.insert(0, virtualURL);
         }
 

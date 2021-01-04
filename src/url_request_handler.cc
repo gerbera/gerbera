@@ -78,8 +78,7 @@ void URLRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
     auto obj = database->loadObject(objectID);
 
-    int objectType = obj->getObjectType();
-    if (!IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
+    if (!obj->isExternalItem()) {
         throw_std_runtime_error("getInfo: object is not an external url item");
     }
 
@@ -174,8 +173,7 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
 
     auto obj = database->loadObject(objectID);
 
-    int objectType = obj->getObjectType();
-    if (!IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
+    if (!obj->isExternalItem()) {
         throw_std_runtime_error("object is not an external url item");
     }
 
