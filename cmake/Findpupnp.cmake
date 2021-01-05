@@ -35,13 +35,16 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(pupnp
     VERSION_VAR pupnp_VERSION)
 
 if (pupnp_FOUND)
-    set (UPNP_LIBRARIES ${UPNP_UPNP_LIBRARY} ${UPNP_IXML_LIBRARY} ${PC_UPNP_LIBRARIES})
-    set (UPNP_INCLUDE_DIRS ${UPNP_INCLUDE_DIR} )
-
     if(NOT TARGET pupnp::pupnp)
-        add_library(pupnp::pupnp INTERFACE IMPORTED)
-        set_target_properties(pupnp::pupnp PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${UPNP_INCLUDE_DIRS}")
-        set_property(TARGET pupnp::pupnp PROPERTY INTERFACE_LINK_LIBRARIES "${UPNP_LIBRARIES}")
+        add_library(pupnp::pupnp SHARED IMPORTED)
+        set_target_properties(pupnp::pupnp PROPERTIES
+                IMPORTED_LOCATION ${UPNP_UPNP_LIBRARY}
+                INTERFACE_INCLUDE_DIRECTORIES ${UPNP_INCLUDE_DIR}
+                INTERFACE_LINK_LIBRARIES ${UPNP_IXML_LIBRARY}
+                UPNP_ENABLE_IPV6 ${UPNP_HAS_IPV6}
+                UPNP_MINISERVER_REUSEADDR ${UPNP_HAS_REUSEADDR}
+        )
+
     endif()
 endif ()
 

@@ -67,7 +67,7 @@ void ConfigGenerator::generateServer(const fs::path& userHome, const fs::path& c
     auto server = config->append_child("server");
 
     generateUi(&server);
-    server.append_child("name").append_child(pugi::node_pcdata).set_value(PACKAGE_NAME);
+    server.append_child("name").append_child(pugi::node_pcdata).set_value("Gerbera");
 
     generateUdn(&server);
 
