@@ -357,6 +357,9 @@ protected:
 
     static void invalidateAddTask(const std::shared_ptr<GenericTask>& t, const fs::path& path);
 
+    template <typename T>
+    void updateCdsObject(std::shared_ptr<T>& item, const std::map<std::string, std::string>& parameters);
+
     std::shared_ptr<Layout> layout;
 
 #ifdef ONLINE_SERVICES
