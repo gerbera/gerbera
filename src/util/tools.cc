@@ -1108,7 +1108,7 @@ std::string getDLNAContentHeader(const std::shared_ptr<Config>& config, const st
         content_parameter += std::string(";");
     content_parameter += std::string(UPNP_DLNA_OP) + "=" + UPNP_DLNA_OP_SEEK_RANGE + ";";
     content_parameter += std::string(UPNP_DLNA_CONVERSION_INDICATOR) + "=" + UPNP_DLNA_NO_CONVERSION + ";";
-    content_parameter += std::string(UPNP_DLNA_FLAGS "=" UPNP_DLNA_TR_FLAGS_AV);
+    content_parameter += std::string(UPNP_DLNA_FLAGS "=" UPNP_DLNA_ORG_FLAGS_AV);
     return content_parameter;
 }
 
