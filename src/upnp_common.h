@@ -57,23 +57,43 @@
 #define UPNP_DLNA_CONTENT_FEATURES_HEADER "contentFeatures.dlna.org"
 #define UPNP_DLNA_PROFILE "DLNA.ORG_PN"
 #define UPNP_DLNA_CONVERSION_INDICATOR "DLNA.ORG_CI"
+#define UPNP_DLNA_OP "DLNA.ORG_OP"
+#define UPNP_DLNA_FLAGS "DLNA.ORG_FLAGS"
+
+// DLNA.ORG_CI flags
+//
+// 0 - media is not transcoded
+// 1 - media is transcoded
 #define UPNP_DLNA_NO_CONVERSION "0"
 #define UPNP_DLNA_CONVERSION "1"
-#define UPNP_DLNA_OP "DLNA.ORG_OP"
 
-// all seek modes
+// DLNA.ORG_OP flags
+//
+// Two booleans (binary digits) which determine what transport operations the renderer is allowed to
+// perform (in the form of HTTP request headers): the first digit allows the renderer to send
+// TimeSeekRange.DLNA.ORG (seek by time) headers; the second allows it to send RANGE (seek by byte)
+// headers.
+//
+// 0x00 - no seeking (or even pausing) allowed
+// 0x01 - seek by byte (exclusive)
+// 0x10 - seek by time (exclusive)
+// 0x11 - seek by both
+#define UPNP_DLNA_OP_SEEK_DISABLED "00"
 #define UPNP_DLNA_OP_SEEK_RANGE "01"
 #define UPNP_DLNA_OP_SEEK_TIME "10"
 #define UPNP_DLNA_OP_SEEK_BOTH "11"
-#define UPNP_DLNA_OP_SEEK_DISABLED "00"
 
-// since we are using only range seek
-#define UPNP_DLNA_OP_SEEK_ENABLED UPNP_DLNA_OP_SEEK_RANGE
-#define UPNP_DLNA_FLAGS "DLNA.ORG_FLAGS"
+// DLNA.ORG_FLAGS flags
+//
+// 0x00100000 - dlna V1.5
+// 0x00200000 - connection stalling
+// 0x00400000 - background transfer mode
+// 0x00800000 - interactive transfer mode
+// 0x01000000 - streaming transfer mode
 #define UPNP_DLNA_TR_FLAGS_AV "01200000000000000000000000000000"
 #define UPNP_DLNA_TR_FLAGS_IMAGE "00800000000000000000000000000000"
 
-// profiles
+// DLNA.ORG_PN flags
 #define UPNP_DLNA_PROFILE_MKV "MKV"
 #define UPNP_DLNA_PROFILE_AVC_MP4_EU "AVC_MP4_EU"
 #define UPNP_DLNA_PROFILE_AVI "AVI"
