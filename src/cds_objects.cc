@@ -184,7 +184,7 @@ CdsItemExternalURL::CdsItemExternalURL()
 {
     objectType |= OBJECT_TYPE_ITEM_EXTERNAL_URL;
 
-    upnpClass = UPNP_DEFAULT_CLASS_ITEM;
+    upnpClass = UPNP_CLASS_ITEM;
     mimeType = MIMETYPE_DEFAULT;
 }
 
@@ -206,7 +206,7 @@ CdsContainer::CdsContainer()
     updateID = 0;
     // searchable = 0; is now in objectFlags; by default all flags (except "restricted") are not set
     childCount = -1;
-    upnpClass = UPNP_DEFAULT_CLASS_CONTAINER;
+    upnpClass = UPNP_CLASS_CONTAINER;
     autoscanType = OBJECT_AUTOSCAN_NONE;
 }
 

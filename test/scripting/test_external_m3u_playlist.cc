@@ -148,7 +148,7 @@ TEST_F(ExternalUrlM3UPlaylistTest, AddsCdsObjectFromM3UPlaylistWithExternalUrlPl
         make_pair("playlistOrder", "1"),
         make_pair("protocol", "http-get"),
         make_pair("description", "Song from Playlist Title"),
-        make_pair("upnpclass", UPNP_DEFAULT_CLASS_MUSIC_TRACK)
+        make_pair("upnpclass", UPNP_CLASS_MUSIC_TRACK)
     };
 
     map<string, string> asPlaylistDirChain = {
@@ -159,7 +159,7 @@ TEST_F(ExternalUrlM3UPlaylistTest, AddsCdsObjectFromM3UPlaylistWithExternalUrlPl
         make_pair("playlistOrder", "2"),
         make_pair("protocol", "http-get"),
         make_pair("description", "Song from Playlist Title"),
-        make_pair("upnpclass", UPNP_DEFAULT_CLASS_MUSIC_TRACK)
+        make_pair("upnpclass", UPNP_CLASS_MUSIC_TRACK)
     };
 
     // Expecting the common script calls..and will proxy through the mock objects for verification.

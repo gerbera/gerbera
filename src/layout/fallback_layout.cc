@@ -246,19 +246,19 @@ void FallbackLayout::addAudio(const std::shared_ptr<CdsObject>& obj)
 
     album = esc(album);
     chain = "/Audio/Artists/" + artist + "/" + album;
-    id = content->addContainerChain(chain, UPNP_DEFAULT_CLASS_MUSIC_ALBUM, obj->getID(), obj->getMetadata());
+    id = content->addContainerChain(chain, UPNP_CLASS_MUSIC_ALBUM, obj->getID(), obj->getMetadata());
     add(obj, id);
 
     chain = "/Audio/Albums/" + album;
-    id = content->addContainerChain(chain, UPNP_DEFAULT_CLASS_MUSIC_ALBUM, obj->getID(), obj->getMetadata());
+    id = content->addContainerChain(chain, UPNP_CLASS_MUSIC_ALBUM, obj->getID(), obj->getMetadata());
     add(obj, id);
 
     chain = "/Audio/Genres/" + esc(genre);
-    id = content->addContainerChain(chain, UPNP_DEFAULT_CLASS_MUSIC_GENRE);
+    id = content->addContainerChain(chain, UPNP_CLASS_MUSIC_GENRE);
     add(obj, id);
 
     chain = "/Audio/Composers/" + esc(composer);
-    id = content->addContainerChain(chain, UPNP_DEFAULT_CLASS_MUSIC_COMPOSER);
+    id = content->addContainerChain(chain, UPNP_CLASS_MUSIC_COMPOSER);
     add(obj, id);
 
     chain = "/Audio/Year/" + esc(date);

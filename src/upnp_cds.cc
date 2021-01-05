@@ -87,7 +87,7 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
             "invalid browse flag: " + BrowseFlag);
 
     auto parent = database->loadObject(objectID);
-    if ((parent->getClass() == UPNP_DEFAULT_CLASS_MUSIC_ALBUM) || (parent->getClass() == UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER))
+    if ((parent->getClass() == UPNP_CLASS_MUSIC_ALBUM) || (parent->getClass() == UPNP_CLASS_PLAYLIST_CONTAINER))
         flag |= BROWSE_TRACK_SORT;
 
     if (config->getBoolOption(CFG_SERVER_HIDE_PC_DIRECTORY))
@@ -110,10 +110,10 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
     decl.append_attribute("version") = "1.0";
     decl.append_attribute("encoding") = "UTF-8";
     auto didl_lite_root = didl_lite.append_child("DIDL-Lite");
-    didl_lite_root.append_attribute(XML_NAMESPACE_ATTR) = XML_DIDL_LITE_NAMESPACE;
-    didl_lite_root.append_attribute(XML_DC_NAMESPACE_ATTR) = XML_DC_NAMESPACE;
-    didl_lite_root.append_attribute(XML_UPNP_NAMESPACE_ATTR) = XML_UPNP_NAMESPACE;
-    didl_lite_root.append_attribute(XML_SEC_NAMESPACE_ATTR) = XML_SEC_NAMESPACE;
+    didl_lite_root.append_attribute(UPNP_XML_NAMESPACE_ATTR) = UPNP_XML_DIDL_LITE_NAMESPACE;
+    didl_lite_root.append_attribute(UPNP_XML_DC_NAMESPACE_ATTR) = UPNP_XML_DC_NAMESPACE;
+    didl_lite_root.append_attribute(UPNP_XML_UPNP_NAMESPACE_ATTR) = UPNP_XML_UPNP_NAMESPACE;
+    didl_lite_root.append_attribute(UPNP_XML_SEC_NAMESPACE_ATTR) = UPNP_XML_SEC_NAMESPACE;
 
     for (const auto& obj : arr) {
         if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && obj->getFlag(OBJECT_FLAG_PLAYED)) {
@@ -133,7 +133,7 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
     didl_lite.print(buf, "", 0);
     std::string didl_lite_xml = buf.str();
 
-    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), DESC_CDS_SERVICE_TYPE);
+    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
     auto resp_root = response->document_element();
     resp_root.append_child("Result").append_child(pugi::node_pcdata).set_value(didl_lite_xml.c_str());
     resp_root.append_child("NumberReturned").append_child(pugi::node_pcdata).set_value(std::to_string(arr.size()).c_str());
@@ -163,10 +163,10 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
     decl.append_attribute("version") = "1.0";
     decl.append_attribute("encoding") = "UTF-8";
     auto didl_lite_root = didl_lite.append_child("DIDL-Lite");
-    didl_lite_root.append_attribute(XML_NAMESPACE_ATTR) = XML_DIDL_LITE_NAMESPACE;
-    didl_lite_root.append_attribute(XML_DC_NAMESPACE_ATTR) = XML_DC_NAMESPACE;
-    didl_lite_root.append_attribute(XML_UPNP_NAMESPACE_ATTR) = XML_UPNP_NAMESPACE;
-    didl_lite_root.append_attribute(XML_SEC_NAMESPACE_ATTR) = XML_SEC_NAMESPACE;
+    didl_lite_root.append_attribute(UPNP_XML_NAMESPACE_ATTR) = UPNP_XML_DIDL_LITE_NAMESPACE;
+    didl_lite_root.append_attribute(UPNP_XML_DC_NAMESPACE_ATTR) = UPNP_XML_DC_NAMESPACE;
+    didl_lite_root.append_attribute(UPNP_XML_UPNP_NAMESPACE_ATTR) = UPNP_XML_UPNP_NAMESPACE;
+    didl_lite_root.append_attribute(UPNP_XML_SEC_NAMESPACE_ATTR) = UPNP_XML_SEC_NAMESPACE;
 
     auto searchParam = std::make_unique<SearchParam>(containerID, searchCriteria,
         std::stoi(startingIndex, nullptr), std::stoi(requestedCount, nullptr));
@@ -198,7 +198,7 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
     didl_lite.print(buf, "", 0);
     std::string didl_lite_xml = buf.str();
 
-    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), DESC_CDS_SERVICE_TYPE);
+    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
     auto resp_root = response->document_element();
     resp_root.append_child("Result").append_child(pugi::node_pcdata).set_value(didl_lite_xml.c_str());
     resp_root.append_child("NumberReturned").append_child(pugi::node_pcdata).set_value(std::to_string(results.size()).c_str());
@@ -213,7 +213,7 @@ void ContentDirectoryService::doGetSearchCapabilities(const std::unique_ptr<Acti
 {
     log_debug("start");
 
-    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), DESC_CDS_SERVICE_TYPE);
+    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
     auto root = response->document_element();
     root.append_child("SearchCaps").append_child(pugi::node_pcdata).set_value("dc:title,upnp:class,upnp:artist,upnp:album");
     request->setResponse(response);
@@ -225,7 +225,7 @@ void ContentDirectoryService::doGetSortCapabilities(const std::unique_ptr<Action
 {
     log_debug("start");
 
-    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), DESC_CDS_SERVICE_TYPE);
+    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
     auto root = response->document_element();
     root.append_child("SortCaps").append_child(pugi::node_pcdata).set_value("");
     request->setResponse(response);
@@ -237,7 +237,7 @@ void ContentDirectoryService::doGetSystemUpdateID(const std::unique_ptr<ActionRe
 {
     log_debug("start");
 
-    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), DESC_CDS_SERVICE_TYPE);
+    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
     auto root = response->document_element();
     root.append_child("Id").append_child(pugi::node_pcdata).set_value(std::to_string(systemUpdateID).c_str());
     request->setResponse(response);
@@ -304,7 +304,7 @@ void ContentDirectoryService::processSubscriptionRequest(const std::unique_ptr<S
 
     UpnpAcceptSubscriptionExt(deviceHandle,
         config->getOption(CFG_SERVER_UDN).c_str(),
-        DESC_CDS_SERVICE_ID, event, request->getSubscriptionID().c_str());
+        UPNP_DESC_CDS_SERVICE_ID, event, request->getSubscriptionID().c_str());
 
     ixmlDocument_free(event);
 #endif
@@ -339,7 +339,7 @@ void ContentDirectoryService::sendSubscriptionUpdate(const std::string& containe
 
     UpnpNotifyExt(deviceHandle,
         config->getOption(CFG_SERVER_UDN).c_str(),
-        DESC_CDS_SERVICE_ID, event);
+        UPNP_DESC_CDS_SERVICE_ID, event);
 
     ixmlDocument_free(event);
 #endif

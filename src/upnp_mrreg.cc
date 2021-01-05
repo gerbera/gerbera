@@ -53,7 +53,7 @@ void MRRegistrarService::doIsAuthorized(const std::unique_ptr<ActionRequest>& re
 {
     log_debug("start");
 
-    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), DESC_MRREG_SERVICE_TYPE);
+    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_MRREG_SERVICE_TYPE);
     auto root = response->document_element();
     root.append_child("Result").append_child(pugi::node_pcdata).set_value("1");
 
@@ -76,7 +76,7 @@ void MRRegistrarService::doIsValidated(const std::unique_ptr<ActionRequest>& req
 {
     log_debug("start");
 
-    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), DESC_MRREG_SERVICE_TYPE);
+    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_MRREG_SERVICE_TYPE);
     auto root = response->document_element();
     root.append_child("Result").append_child(pugi::node_pcdata).set_value("1");
 
@@ -132,7 +132,7 @@ void MRRegistrarService::processSubscriptionRequest(const std::unique_ptr<Subscr
 
     UpnpAcceptSubscriptionExt(deviceHandle,
         config->getOption(CFG_SERVER_UDN).c_str(),
-        DESC_MRREG_SERVICE_ID, event, request->getSubscriptionID().c_str());
+        UPNP_DESC_MRREG_SERVICE_ID, event, request->getSubscriptionID().c_str());
 
     ixmlDocument_free(event);
 #endif

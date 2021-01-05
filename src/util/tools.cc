@@ -1081,22 +1081,22 @@ std::string getDLNAprofileString(const std::string& contentType)
 {
     std::string profile;
     if (contentType == CONTENT_TYPE_MP4)
-        profile = D_PN_AVC_MP4_EU;
+        profile = UPNP_DLNA_PROFILE_AVC_MP4_EU;
     else if (contentType == CONTENT_TYPE_MKV)
-        profile = D_PN_MKV;
+        profile = UPNP_DLNA_PROFILE_MKV;
     else if (contentType == CONTENT_TYPE_AVI)
-        profile = D_PN_AVI;
+        profile = UPNP_DLNA_PROFILE_AVI;
     else if (contentType == CONTENT_TYPE_MPEG)
-        profile = D_PN_MPEG_PS_PAL;
+        profile = UPNP_DLNA_PROFILE_MPEG_PS_PAL;
     else if (contentType == CONTENT_TYPE_MP3)
-        profile = D_MP3;
+        profile = UPNP_DLNA_PROFILE_MP3;
     else if (contentType == CONTENT_TYPE_PCM)
-        profile = D_LPCM;
+        profile = UPNP_DLNA_PROFILE_LPCM;
     else
         profile = "";
 
     if (!profile.empty())
-        profile = std::string(D_PROFILE) + "=" + profile;
+        profile = std::string(UPNP_DLNA_PROFILE) + "=" + profile;
     return profile;
 }
 
@@ -1106,9 +1106,9 @@ std::string getDLNAContentHeader(const std::shared_ptr<Config>& config, const st
     content_parameter = getDLNAprofileString(contentType);
     if (!content_parameter.empty())
         content_parameter += std::string(";");
-    content_parameter += std::string(D_OP) + "=" + D_OP_SEEK_ENABLED + ";";
-    content_parameter += std::string(D_CONVERSION_INDICATOR) + "=" + D_NO_CONVERSION + ";";
-    content_parameter += std::string(D_FLAGS "=" D_TR_FLAGS_AV);
+    content_parameter += std::string(UPNP_DLNA_OP) + "=" + UPNP_DLNA_OP_SEEK_ENABLED + ";";
+    content_parameter += std::string(UPNP_DLNA_CONVERSION_INDICATOR) + "=" + UPNP_DLNA_NO_CONVERSION + ";";
+    content_parameter += std::string(UPNP_DLNA_FLAGS "=" UPNP_DLNA_TR_FLAGS_AV);
     return content_parameter;
 }
 
@@ -1116,9 +1116,9 @@ std::string getDLNATransferHeader(const std::shared_ptr<Config>& config, const s
 {
     std::string transfer_parameter;
     if (startswith(mimeType, "image"))
-        transfer_parameter = D_HTTP_TRANSFER_MODE_INTERACTIVE;
+        transfer_parameter = UPNP_DLNA_TRANSFER_MODE_INTERACTIVE;
     else if (startswith(mimeType, "audio") || startswith(mimeType, "video"))
-        transfer_parameter = D_HTTP_TRANSFER_MODE_STREAMING;
+        transfer_parameter = UPNP_DLNA_TRANSFER_MODE_STREAMING;
     return transfer_parameter;
 }
 

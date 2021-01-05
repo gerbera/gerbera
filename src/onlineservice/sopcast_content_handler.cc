@@ -206,7 +206,7 @@ std::shared_ptr<CdsObject> SopCastContentHandler::getObject(const std::string& g
     if (!temp.empty())
         item->setAuxData(SOPCAST_AUXDATA_LANGUAGE, temp);
 
-    item->setClass(UPNP_DEFAULT_CLASS_VIDEO_BROADCAST);
+    item->setClass(UPNP_CLASS_VIDEO_BROADCAST);
 
     struct timespec ts;
     getTimespecNow(&ts);
