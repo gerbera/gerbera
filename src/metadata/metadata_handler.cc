@@ -60,12 +60,13 @@
 
 #include "metadata/metacontent_handler.h"
 
-MetadataHandler::MetadataHandler(std::shared_ptr<Config> config)
+MetadataHandler::MetadataHandler(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime)
     : config(std::move(config))
+    , mime(std::move(mime))
 {
 }
 
-void MetadataHandler::setMetadata(const std::shared_ptr<Config>& config, const std::shared_ptr<CdsItem>& item)
+void MetadataHandler::setMetadata(const std::shared_ptr<Config>& config, std::shared_ptr<Mime> mime, const std::shared_ptr<CdsItem>& item)
 {
     std::string location = item->getLocation();
     std::error_code ec;
@@ -90,31 +91,31 @@ void MetadataHandler::setMetadata(const std::shared_ptr<Config>& config, const s
 
 #ifdef HAVE_TAGLIB
     if ((content_type == CONTENT_TYPE_MP3) || ((content_type == CONTENT_TYPE_OGG) && (!item->getFlag(OBJECT_FLAG_OGG_THEORA))) || (content_type == CONTENT_TYPE_WMA) || (content_type == CONTENT_TYPE_WAVPACK) || (content_type == CONTENT_TYPE_FLAC) || (content_type == CONTENT_TYPE_PCM) || (content_type == CONTENT_TYPE_AIFF) || (content_type == CONTENT_TYPE_APE) || (content_type == CONTENT_TYPE_MP4)) {
-        TagLibHandler(config).fillMetadata(item);
+        TagLibHandler(config, mime).fillMetadata(item);
     }
 #endif // HAVE_TAGLIB
 
 #ifdef HAVE_EXIV2
     if (content_type == CONTENT_TYPE_JPG) {
-        Exiv2Handler(config).fillMetadata(item);
+        Exiv2Handler(config, mime).fillMetadata(item);
     }
 #endif
 
 #ifdef HAVE_LIBEXIF
     if (content_type == CONTENT_TYPE_JPG) {
-        LibExifHandler(config).fillMetadata(item);
+        LibExifHandler(config, mime).fillMetadata(item);
     }
 #endif // HAVE_LIBEXIF
 
 #ifdef HAVE_MATROSKA
     if (content_type == CONTENT_TYPE_MKV) {
-        MatroskaHandler(config).fillMetadata(item);
+        MatroskaHandler(config, mime).fillMetadata(item);
     }
 #endif
 
 #ifdef HAVE_FFMPEG
     if (content_type != CONTENT_TYPE_PLAYLIST && ((content_type == CONTENT_TYPE_OGG && item->getFlag(OBJECT_FLAG_OGG_THEORA)) || startswith(item->getMimeType(), "video") || startswith(item->getMimeType(), "audio"))) {
-        FfmpegHandler(config).fillMetadata(item);
+        FfmpegHandler(config, mime).fillMetadata(item);
     }
 #else
     if (content_type == CONTENT_TYPE_AVI) {
@@ -128,11 +129,11 @@ void MetadataHandler::setMetadata(const std::shared_ptr<Config>& config, const s
 
     // Fanart for audio and video
     if (startswith(mimetype, "video") || startswith(mimetype, "audio"))
-        FanArtHandler(config).fillMetadata(item);
+        FanArtHandler(config, mime).fillMetadata(item);
     // Subtitles for videos
     if (startswith(mimetype, "video"))
-        SubtitleHandler(config).fillMetadata(item);
-    ResourceHandler(config).fillMetadata(item);
+        SubtitleHandler(config, mime).fillMetadata(item);
+    ResourceHandler(config, mime).fillMetadata(item);
 }
 
 std::string MetadataHandler::getMetaFieldName(metadata_fields_t field)
@@ -145,31 +146,31 @@ std::string MetadataHandler::getResAttrName(resource_attributes_t attr)
     return res_keys.at(attr).second;
 }
 
-std::unique_ptr<MetadataHandler> MetadataHandler::createHandler(const std::shared_ptr<Config>& config, int handlerType)
+std::unique_ptr<MetadataHandler> MetadataHandler::createHandler(const std::shared_ptr<Config>& config, std::shared_ptr<Mime> mime, int handlerType)
 {
     switch (handlerType) {
 #ifdef HAVE_LIBEXIF
     case CH_LIBEXIF:
-        return std::make_unique<LibExifHandler>(config);
+        return std::make_unique<LibExifHandler>(config, mime);
 #endif
 #ifdef HAVE_TAGLIB
     case CH_ID3:
-        return std::make_unique<TagLibHandler>(config);
+        return std::make_unique<TagLibHandler>(config, mime);
 #endif
 #ifdef HAVE_MATROSKA
     case CH_MATROSKA:
-        return std::make_unique<MatroskaHandler>(config);
+        return std::make_unique<MatroskaHandler>(config, mime);
 #endif
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
     case CH_FFTH:
-        return std::make_unique<FfmpegHandler>(config);
+        return std::make_unique<FfmpegHandler>(config, mime);
 #endif
     case CH_FANART:
-        return std::make_unique<FanArtHandler>(config);
+        return std::make_unique<FanArtHandler>(config, mime);
     case CH_SUBTITLE:
-        return std::make_unique<SubtitleHandler>(config);
+        return std::make_unique<SubtitleHandler>(config, mime);
     case CH_RESOURCE:
-        return std::make_unique<ResourceHandler>(config);
+        return std::make_unique<ResourceHandler>(config, mime);
     default:
         throw_std_runtime_error("unknown content handler ID: " + std::to_string(handlerType));
     }

@@ -33,11 +33,14 @@
 
 #include <utility>
 
+#include "content_manager.h"
 #include "util/tools.h"
 
-RequestHandler::RequestHandler(std::shared_ptr<Config> config, std::shared_ptr<Database> database)
-    : config(std::move(config))
-    , database(std::move(database))
+RequestHandler::RequestHandler(std::shared_ptr<ContentManager> content)
+    : config(content->getConfig())
+    , mime(content->getMime())
+    , database(content->getDatabase())
+    , content(std::move(content))
 {
 }
 

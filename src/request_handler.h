@@ -39,11 +39,13 @@
 
 // forward declaration
 class Config;
+class Mime;
 class Database;
+class ContentManager;
 
 class RequestHandler {
 public:
-    RequestHandler(std::shared_ptr<Config> config, std::shared_ptr<Database> database);
+    RequestHandler(std::shared_ptr<ContentManager> content);
 
     /// \brief Returns information about the requested content.
     /// \param filename Requested URL
@@ -71,7 +73,9 @@ public:
 
 protected:
     std::shared_ptr<Config> config;
+    std::shared_ptr<Mime> mime;
     std::shared_ptr<Database> database;
+    std::shared_ptr<ContentManager> content;
 };
 
 #endif // __REQUEST_HANDLER_H__

@@ -49,11 +49,8 @@
 #include "transcoding/transcode_dispatcher.h"
 #include "url.h"
 
-URLRequestHandler::URLRequestHandler(std::shared_ptr<Config> config,
-    std::shared_ptr<Database> database,
-    std::shared_ptr<ContentManager> content)
-    : RequestHandler(std::move(config), std::move(database))
-    , content(std::move(content))
+URLRequestHandler::URLRequestHandler(std::shared_ptr<ContentManager> content)
+    : RequestHandler(std::move(content))
 {
 }
 

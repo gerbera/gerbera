@@ -32,33 +32,18 @@
 #ifndef __FILE_REQUEST_HANDLER_H__
 #define __FILE_REQUEST_HANDLER_H__
 
-#include <memory>
-
 #include "common.h"
 #include "request_handler.h"
 #include "upnp_xml.h"
-
-// forward declaration
-class Config;
-class ContentManager;
-class UpdateManager;
-namespace web {
-class SessionManager;
-} // namespace web
+#include <memory>
 
 class FileRequestHandler : public RequestHandler {
 protected:
     std::shared_ptr<ContentManager> content;
-    std::shared_ptr<UpdateManager> updateManager;
-    std::shared_ptr<web::SessionManager> sessionManager;
     UpnpXMLBuilder* xmlBuilder;
 
 public:
-    explicit FileRequestHandler(std::shared_ptr<Config> config,
-        std::shared_ptr<Database> database,
-        std::shared_ptr<ContentManager> content,
-        std::shared_ptr<UpdateManager> updateManager, std::shared_ptr<web::SessionManager> sessionManager,
-        UpnpXMLBuilder* xmlBuilder);
+    explicit FileRequestHandler(std::shared_ptr<ContentManager> content, UpnpXMLBuilder* xmlBuilder);
 
     void getInfo(const char* filename, UpnpFileInfo* info) override;
     std::unique_ptr<IOHandler> open(const char* filename, enum UpnpOpenFileMode mode) override;

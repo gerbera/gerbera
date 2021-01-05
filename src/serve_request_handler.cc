@@ -35,12 +35,14 @@
 #include <utility>
 
 #include "config/config_manager.h"
+#include "content_manager.h"
 #include "iohandler/file_io_handler.h"
 #include "server.h"
+#include "util/mime.h"
 #include "util/tools.h"
 
-ServeRequestHandler::ServeRequestHandler(std::shared_ptr<Config> config, std::shared_ptr<Database> database)
-    : RequestHandler(std::move(config), std::move(database))
+ServeRequestHandler::ServeRequestHandler(std::shared_ptr<ContentManager> content)
+    : RequestHandler(std::move(content))
 {
 }
 
@@ -77,11 +79,10 @@ void ServeRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
     if (S_ISREG(statbuf.st_mode)) // we have a regular file
     {
-        std::string mimetype = MIMETYPE_DEFAULT;
 #ifdef HAVE_MAGIC
-        std::string mime = getMIMETypeFromFile(path, config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS));
-        if (!mime.empty())
-            mimetype = mime;
+        std::string mimetype = mime->fileToMimeType(path, MIMETYPE_DEFAULT);
+#else
+        std::string mimetype = MIMETYPE_DEFAULT;
 #endif // HAVE_MAGIC
 
         UpnpFileInfo_set_FileLength(info, statbuf.st_size);
@@ -133,38 +134,7 @@ std::unique_ptr<IOHandler> ServeRequestHandler::open(const char* filename, enum 
         throw_std_runtime_error("Failed to stat " + path);
     }
 
-    if (S_ISREG(statbuf.st_mode)) // we have a regular file
-    {
-        std::string mimetype = MIMETYPE_DEFAULT;
-#ifdef HAVE_MAGIC
-        std::string mime = getMIMETypeFromFile(path, config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS));
-        if (!mime.empty())
-            mimetype = mime;
-#endif // HAVE_MAGIC
-
-        // FIXME upstream headers
-        /*
-        info->file_length = statbuf.st_size;
-        info->last_modified = statbuf.st_mtime;
-        info->is_directory = S_ISDIR(statbuf.st_mode);
-
-        if (access(path.c_str(), R_OK) == 0)
-        {
-            info->is_readable = 1;
-        }
-        else
-        {
-            info->is_readable = 0;
-        }
-
-
-#if defined(USING_NPUPNP)
-        info->content_type = mimetype;
-#else
-        info->content_type = ixmlCloneDOMString(mimetype.c_str());
-#endif
-        */
-    } else {
+    if (!S_ISREG(statbuf.st_mode)) {
         throw_std_runtime_error("Not a regular file: " + path);
     }
 

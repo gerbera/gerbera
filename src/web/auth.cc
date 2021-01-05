@@ -65,9 +65,8 @@ static bool check_token(const std::string& token, const std::string& password, c
     return (checksum == encPassword);
 }
 
-web::auth::auth(const std::shared_ptr<Config>& config, std::shared_ptr<Database> database,
-    std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
-    : WebRequestHandler(config, std::move(database), std::move(content), std::move(sessionManager))
+web::auth::auth(std::shared_ptr<ContentManager> content)
+    : WebRequestHandler(std::move(content))
 {
     timeout = 60 * config->getIntOption(CFG_SERVER_UI_SESSION_TIMEOUT);
 }

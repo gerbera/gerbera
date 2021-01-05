@@ -41,8 +41,8 @@
 #include "util/string_converter.h"
 #include "util/tools.h"
 
-LibExifHandler::LibExifHandler(std::shared_ptr<Config> config)
-    : MetadataHandler(std::move(config))
+LibExifHandler::LibExifHandler(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime)
+    : MetadataHandler(std::move(config), std::move(mime))
 {
 }
 

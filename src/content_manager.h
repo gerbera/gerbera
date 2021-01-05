@@ -51,9 +51,10 @@
 // vice versa
 class PlaylistParserScript;
 #include "scripting/playlist_parser_script.h"
-
 #endif
+
 #include "layout/layout.h"
+
 #ifdef HAVE_INOTIFY
 #include "autoscan_inotify.h"
 #endif
@@ -71,6 +72,7 @@ class PlaylistParserScript;
 class Config;
 class Database;
 class UpdateManager;
+class Mime;
 namespace web {
 class SessionManager;
 } // namespace web
@@ -298,7 +300,6 @@ public:
 
     void triggerPlayHook(const std::shared_ptr<CdsObject>& obj);
 
-protected:
     void initLayout();
     void destroyLayout();
 
@@ -307,7 +308,30 @@ protected:
     void destroyJS();
 #endif
 
+    std::shared_ptr<Config> getConfig() const
+    {
+        return config;
+    }
+    std::shared_ptr<Mime> getMime() const
+    {
+        return mime;
+    }
+    std::shared_ptr<Database> getDatabase() const
+    {
+        return database;
+    }
+    std::shared_ptr<UpdateManager> getUpdateManager() const
+    {
+        return update_manager;
+    }
+    std::shared_ptr<web::SessionManager> getSessionManager() const
+    {
+        return session_manager;
+    }
+
+protected:
     std::shared_ptr<Config> config;
+    std::shared_ptr<Mime> mime;
     std::shared_ptr<Database> database;
     std::shared_ptr<UpdateManager> update_manager;
     std::shared_ptr<web::SessionManager> session_manager;
@@ -321,10 +345,6 @@ protected:
     using AutoLockU = std::unique_lock<decltype(mutex)>;
 
     bool ignore_unknown_extensions;
-    bool extension_map_case_sensitive;
-
-    std::map<std::string, std::string> extension_mimetype_map;
-    std::map<std::string, std::string> mimetype_upnpclass_map;
     std::map<std::string, std::string> mimetype_contenttype_map;
 
     std::shared_ptr<AutoscanList> autoscan_timed;
@@ -352,8 +372,6 @@ protected:
     static bool isLink(const fs::path& path, bool allowLinks);
     std::shared_ptr<CdsObject> createSingleItem(const fs::path& path, fs::path& rootPath, bool followSymlinks, bool checkDatabase, bool processExisting, const std::shared_ptr<CMAddFileTask>& task);
     bool updateAttachedResources(std::shared_ptr<AutoscanDirectory> adir, const char* location, const std::string& parentPath, bool all);
-    std::string extension2mimetype(std::string extension);
-    std::string mimetype2upnpclass(const std::string& mimeType);
 
     static void invalidateAddTask(const std::shared_ptr<GenericTask>& t, const fs::path& path);
 

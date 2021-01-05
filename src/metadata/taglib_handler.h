@@ -46,7 +46,7 @@
 /// \brief This class is responsible for reading id3 or ogg tags metadata
 class TagLibHandler : public MetadataHandler {
 public:
-    explicit TagLibHandler(std::shared_ptr<Config> config);
+    explicit TagLibHandler(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime);
     void fillMetadata(std::shared_ptr<CdsItem> item) override;
     std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsItem> item, int resNum) override;
 
@@ -58,7 +58,7 @@ private:
 
     void populateGenericTags(const std::shared_ptr<CdsItem>& item, const TagLib::File& file) const;
     static bool isValidArtworkContentType(const std::string& art_mimetype);
-    static std::string getContentTypeFromByteVector(const TagLib::ByteVector& data);
+    std::string getContentTypeFromByteVector(const TagLib::ByteVector& data) const;
     static void addArtworkResource(const std::shared_ptr<CdsItem>& item, const std::string& art_mimetype);
     void extractMP3(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item) const;
     void extractOgg(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item) const;

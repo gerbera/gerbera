@@ -38,9 +38,8 @@
 #include "database/database.h"
 #include "upnp_xml.h"
 
-web::items::items(std::shared_ptr<Config> config, std::shared_ptr<Database> database,
-    std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
-    : WebRequestHandler(std::move(config), std::move(database), std::move(content), std::move(sessionManager))
+web::items::items(std::shared_ptr<ContentManager> content)
+    : WebRequestHandler(std::move(content))
 {
 }
 

@@ -28,12 +28,10 @@
 #include "iohandler/mem_io_handler.h"
 #include "util/tools.h"
 
-DeviceDescriptionHandler::DeviceDescriptionHandler(std::shared_ptr<Config> config, std::shared_ptr<Database> database,
-    UpnpXMLBuilder* xmlBuilder)
-    : RequestHandler(std::move(config), std::move(database))
+DeviceDescriptionHandler::DeviceDescriptionHandler(std::shared_ptr<ContentManager> content, UpnpXMLBuilder* xmlBuilder)
+    : RequestHandler(std::move(content))
     , xmlBuilder(xmlBuilder)
 {
-
     auto desc = xmlBuilder->renderDeviceDescription();
 
     std::ostringstream buf;
