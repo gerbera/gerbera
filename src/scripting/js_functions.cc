@@ -166,7 +166,7 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
         }
 
         cds_obj->setParentID(id);
-        if (!IS_CDS_ITEM_EXTERNAL_URL(cds_obj->getObjectType())) {
+        if (!cds_obj->isExternalItem()) {
             /// \todo get hidden file setting from config manager?
             /// what about same stuff in content manager, why is it not used
             /// there?
@@ -180,7 +180,7 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
                 cds_obj->setRefID(orig_object->getID());
 
             cds_obj->setFlag(OBJECT_FLAG_USE_RESOURCE_REF);
-        } else if (IS_CDS_ITEM_EXTERNAL_URL(cds_obj->getObjectType())) {
+        } else if (cds_obj->isExternalItem()) {
             if ((self->whoami() == S_PLAYLIST) && (self->getConfig()->getBoolOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS))) {
                 cds_obj->setFlag(OBJECT_FLAG_PLAYLIST_REF);
                 cds_obj->setRefID(orig_object->getID());

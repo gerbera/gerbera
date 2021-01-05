@@ -193,19 +193,18 @@ std::shared_ptr<CdsObject> SQLDatabase::checkRefID(const std::shared_ptr<CdsObje
 
 std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdateObject(const std::shared_ptr<CdsObject>& obj, bool isUpdate, int* changedContainer)
 {
-    int objectType = obj->getObjectType();
     std::shared_ptr<CdsObject> refObj = nullptr;
     bool hasReference = false;
     bool playlistRef = obj->getFlag(OBJECT_FLAG_PLAYLIST_REF);
     if (playlistRef) {
-        if (IS_CDS_PURE_ITEM(objectType))
+        if (obj->isPureItem())
             throw_std_runtime_error("tried to add pure item with PLAYLIST_REF flag set");
         if (obj->getRefID() <= 0)
             throw_std_runtime_error("PLAYLIST_REF flag set but refId is <=0");
         refObj = loadObject(obj->getRefID());
         if (refObj == nullptr)
             throw_std_runtime_error("PLAYLIST_REF flag set but refId doesn't point to an existing object");
-    } else if (obj->isVirtual() && IS_CDS_PURE_ITEM(objectType)) {
+    } else if (obj->isVirtual() && obj->isPureItem()) {
         hasReference = true;
         refObj = checkRefID(obj);
         if (refObj == nullptr)
@@ -216,7 +215,7 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
             refObj = loadObject(obj->getRefID());
             if (refObj == nullptr)
                 throw_std_runtime_error("OBJECT_FLAG_ONLINE_SERVICE and refID set but refID doesn't point to an existing object");
-        } else if (IS_CDS_CONTAINER(objectType)) {
+        } else if (obj->isContainer()) {
             // in this case it's a playlist-container. that's ok
             // we don't need to do anything
         } else
@@ -224,7 +223,7 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
     }
 
     std::map<std::string, std::string> cdsObjectSql;
-    cdsObjectSql["object_type"] = quote(objectType);
+    cdsObjectSql["object_type"] = quote(obj->getObjectType());
 
     if (hasReference || playlistRef)
         cdsObjectSql["ref_id"] = quote(refObj->getID());
@@ -267,7 +266,7 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
 
     cdsObjectSql["flags"] = quote(obj->getFlags());
 
-    if (IS_CDS_CONTAINER(objectType)) {
+    if (obj->isContainer()) {
         if (!(isUpdate && obj->isVirtual()))
             throw_std_runtime_error("tried to add a container or tried to update a non-virtual container via _addUpdateObject; is this correct?");
         std::string dbLocation = addLocationPrefix(LOC_VIRT_PREFIX, obj->getLocation());
@@ -275,14 +274,14 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
         cdsObjectSql["location_hash"] = quote(stringHash(dbLocation));
     }
 
-    if (IS_CDS_ITEM(objectType)) {
+    if (obj->isItem()) {
         auto item = std::static_pointer_cast<CdsItem>(obj);
 
         if (!hasReference) {
             fs::path loc = item->getLocation();
             if (loc.empty())
                 throw_std_runtime_error("tried to create or update a non-referenced item without a location set");
-            if (IS_CDS_PURE_ITEM(objectType)) {
+            if (obj->isPureItem()) {
                 int parentID = ensurePathExistence(loc.parent_path(), changedContainer);
                 item->setParentID(parentID);
                 std::string dbLocation = addLocationPrefix(LOC_FILE_PREFIX, loc);
@@ -558,7 +557,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_pt
 
     // update childCount fields
     for (const auto& obj : arr) {
-        if (IS_CDS_CONTAINER(obj->getObjectType())) {
+        if (obj->isContainer()) {
             auto cont = std::static_pointer_cast<CdsContainer>(obj);
             cont->setChildCount(getChildCount(cont->getID(), getContainers, getItems, hideFsRoot));
         }
@@ -902,14 +901,11 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::unique_pt
         }
     }
 
-    if ((obj->getRefID() && IS_CDS_PURE_ITEM(objectType)) || (IS_CDS_ITEM(objectType) && !IS_CDS_PURE_ITEM(objectType)))
-        obj->setVirtual(true);
-    else
-        obj->setVirtual(false); // gets set to true for virtual containers below
+    obj->setVirtual((obj->getRefID() && obj->isPureItem()) || (obj->isItem() && !obj->isPureItem())); // gets set to true for virtual containers below
 
     int matched_types = 0;
 
-    if (IS_CDS_CONTAINER(objectType)) {
+    if (obj->isContainer()) {
         auto cont = std::static_pointer_cast<CdsContainer>(obj);
         cont->setUpdateID(std::stoi(row->col(_update_id)));
         char locationPrefix;
@@ -928,13 +924,13 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::unique_pt
         matched_types++;
     }
 
-    if (IS_CDS_ITEM(objectType)) {
+    if (obj->isItem()) {
         if (!resource_zero_ok)
             throw_std_runtime_error("tried to create object without at least one resource");
 
         auto item = std::static_pointer_cast<CdsItem>(obj);
         item->setMimeType(fallbackString(row->col(_mime_type), row->col(_ref_mime_type)));
-        if (IS_CDS_PURE_ITEM(objectType)) {
+        if (obj->isPureItem()) {
             if (!obj->isVirtual())
                 item->setLocation(stripLocationPrefix(row->col(_location)));
             else
@@ -988,13 +984,13 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromSearchRow(const std::uni
         }
     }
 
-    if (IS_CDS_ITEM(objectType)) {
+    if (obj->isItem()) {
         if (!resource_zero_ok)
             throw_std_runtime_error("tried to create object without at least one resource");
 
         auto item = std::static_pointer_cast<CdsItem>(obj);
         item->setMimeType(row->col(to_underlying(SearchCol::mime_type)));
-        if (IS_CDS_PURE_ITEM(objectType)) {
+        if (obj->isPureItem()) {
             item->setLocation(stripLocationPrefix(row->col(to_underlying(SearchCol::location))));
         } else { // URLs
             item->setLocation(row->col(to_underlying(SearchCol::location)));

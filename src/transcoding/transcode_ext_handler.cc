@@ -78,11 +78,11 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::open(std::shared_ptr<Transc
     if (profile == nullptr)
         throw_std_runtime_error("Transcoding of file " + location + "requested but no profile given");
 
-    bool isURL = IS_CDS_ITEM_EXTERNAL_URL(obj->getObjectType());
+    bool isURL = obj->isExternalItem();
 
 #if 0
     std::string mimeType = profile->getTargetMimeType();
-    if (IS_CDS_ITEM(obj->getObjectType())) {
+    if (obj->isItem()) {
         auto item = std::static_pointer_cast<CdsItem>(obj);
         auto mappings = config->getDictionaryOption(
             CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);

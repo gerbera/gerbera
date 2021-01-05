@@ -66,7 +66,7 @@ void web::containers::process()
     auto arr = database->browse(param);
 
     for (const auto& obj : arr) {
-        //if (IS_CDS_CONTAINER(obj->getObjectType()))
+        //if (obj->isContainer())
         //{
         auto cont = std::static_pointer_cast<CdsContainer>(obj);
         auto ce = containers.append_child("container");

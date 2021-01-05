@@ -59,9 +59,7 @@ static constexpr bool IS_CDS_CONTAINER(unsigned int type)
 {
     return type & OBJECT_TYPE_CONTAINER;
 };
-static constexpr bool IS_CDS_ITEM(unsigned int type) { return type & OBJECT_TYPE_ITEM; };
 static constexpr bool IS_CDS_ITEM_EXTERNAL_URL(unsigned int type) { return type & OBJECT_TYPE_ITEM_EXTERNAL_URL; };
-static constexpr bool IS_CDS_PURE_ITEM(unsigned int type) { return type == OBJECT_TYPE_ITEM; };
 
 #define OBJECT_FLAG_RESTRICTED 0x00000001u
 #define OBJECT_FLAG_SEARCHABLE 0x00000002u
@@ -199,6 +197,10 @@ public:
 
     /// \brief Query information on object type: item, container, etc.
     unsigned int getObjectType() const { return objectType; }
+    virtual bool isItem() const { return false; }
+    virtual bool isPureItem() const { return false; }
+    virtual bool isExternalItem() const { return false; }
+    virtual bool isContainer() const { return false; }
 
     /// \brief Retrieve sort priority setting.
     int getSortPriority() const { return sortPriority; }
@@ -354,7 +356,7 @@ public:
 
     static std::shared_ptr<CdsObject> createObject(unsigned int objectType);
 
-    static std::string mapObjectType(int objectType);
+    static std::string mapObjectType(unsigned int objectType);
 };
 
 /// \brief An Item in the content directory.
@@ -374,6 +376,9 @@ public:
 
     /// \brief Set mime-type information of the media.
     void setMimeType(const std::string& mimeType) { this->mimeType = mimeType; }
+
+    bool isItem() const override { return true; }
+    bool isPureItem() const override { return true; }
 
     /// \brief Query mime-type information.
     std::string getMimeType() const { return mimeType; }
@@ -406,6 +411,8 @@ class CdsItemExternalURL : public CdsItem {
 public:
     /// \brief Constructor, sets the object type.
     explicit CdsItemExternalURL();
+    bool isPureItem() const override { return false; }
+    bool isExternalItem() const override { return true; }
 
     /// \brief Sets the URL for the item.
     /// \param URL full url to the item: http://somewhere.com/something.mpg
@@ -441,6 +448,7 @@ protected:
 public:
     /// \brief Constructor, initializes default values for the flags and sets the object type.
     explicit CdsContainer();
+    bool isContainer() const override { return true; }
 
     /// \brief Set the searchable flag.
     void setSearchable(bool searchable) { changeFlag(OBJECT_FLAG_SEARCHABLE, searchable); }

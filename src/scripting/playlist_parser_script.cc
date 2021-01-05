@@ -141,7 +141,7 @@ void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject
         throw_std_runtime_error("recursion not allowed");
     }
 
-    if (!IS_CDS_PURE_ITEM(obj->getObjectType())) {
+    if (!obj->isPureItem()) {
         throw_std_runtime_error("only allowed for pure items");
     }
 

@@ -310,7 +310,6 @@ void Script::execute()
 std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<CdsObject>& pcd)
 {
     std::string val;
-    int objectType;
     int b;
     int i;
     std::unique_ptr<StringConverter> sc;
@@ -320,16 +319,13 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
     } else
         sc = StringConverter::i2i(config);
 
-    objectType = getIntProperty("objectType", -1);
-    if (objectType == -1) {
+    int objType = getIntProperty("objectType", -1);
+    if (objType == -1) {
         log_error("missing objectType property");
         return nullptr;
     }
 
-    auto obj = CdsObject::createObject(objectType);
-    objectType = obj->getObjectType(); // this is important, because the
-    // type will be changed appropriately
-    // by the create function
+    auto obj = CdsObject::createObject(objType);
 
     // CdsObject
     obj->setVirtual(true); // JS creates only virtual objects
@@ -397,7 +393,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
     }
 
     // CdsItem
-    if (IS_CDS_ITEM(objectType)) {
+    if (obj->isItem()) {
         auto item = std::static_pointer_cast<CdsItem>(obj);
         std::shared_ptr<CdsItem> pcd_item;
 
@@ -442,7 +438,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
                 obj->setLocation(pcd->getLocation());
         }
 
-        if (IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
+        if (obj->isExternalItem()) {
             std::string protocolInfo;
 
             obj->setRestricted(true);
@@ -465,7 +461,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
     }
 
     // CdsDirectory
-    if (IS_CDS_CONTAINER(objectType)) {
+    if (obj->isContainer()) {
         auto cont = std::static_pointer_cast<CdsContainer>(obj);
         i = getIntProperty("updateID", -1);
         if (i >= 0)
@@ -486,10 +482,8 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
 
     duk_push_object(ctx);
 
-    int objectType = obj->getObjectType();
-
     // CdsObject
-    setIntProperty("objectType", objectType);
+    setIntProperty("objectType", obj->getObjectType());
 
     i = obj->getID();
 
@@ -588,7 +582,7 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
     }
 
     // CdsItem
-    if (IS_CDS_ITEM(objectType)) {
+    if (obj->isItem()) {
         auto item = std::static_pointer_cast<CdsItem>(obj);
         val = item->getMimeType();
         if (!val.empty())
@@ -600,7 +594,7 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
     }
 
     // CdsDirectory
-    if (IS_CDS_CONTAINER(objectType)) {
+    if (obj->isContainer()) {
         auto cont = std::static_pointer_cast<CdsContainer>(obj);
         // TODO: boolean type, hide updateID
         i = cont->getUpdateID();

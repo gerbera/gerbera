@@ -431,7 +431,7 @@ void ContentManager::addVirtualItem(const std::shared_ptr<CdsObject>& obj, bool 
         if (pcdir == nullptr) {
             throw_std_runtime_error("Could not add " + path.string());
         }
-        if (IS_CDS_ITEM(pcdir->getObjectType())) {
+        if (pcdir->isItem()) {
             this->addObject(pcdir);
             obj->setRefID(pcdir->getID());
         }
@@ -451,14 +451,14 @@ std::shared_ptr<CdsObject> ContentManager::createSingleItem(const fs::path& path
             log_debug("Link to file or directory ignored: {}", path.c_str());
             return nullptr;
         }
-        if (IS_CDS_ITEM(obj->getObjectType())) {
+        if (obj->isItem()) {
             addObject(obj);
             isNew = true;
         }
-    } else if (IS_CDS_ITEM(obj->getObjectType()) && processExisting) {
+    } else if (obj->isItem() && processExisting) {
         MetadataHandler::setMetadata(config, std::static_pointer_cast<CdsItem>(obj));
     }
-    if (IS_CDS_ITEM(obj->getObjectType()) && layout != nullptr && (processExisting || isNew)) {
+    if (obj->isItem() && layout != nullptr && (processExisting || isNew)) {
         try {
             if (rootPath.empty() && (task != nullptr))
                 rootPath = task->getRootPath();
@@ -506,7 +506,7 @@ int ContentManager::_addFile(const fs::path& path, fs::path rootPath, AutoScanSe
     if (obj == nullptr) // object ignored
         return INVALID_OBJECT_ID;
 
-    if (asSetting.recursive && IS_CDS_CONTAINER(obj->getObjectType())) {
+    if (asSetting.recursive && obj->isContainer()) {
         addRecursive(asSetting.adir, path, asSetting.followSymlinks, asSetting.hidden, task);
     }
 
@@ -597,7 +597,7 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
     if (containerID != INVALID_OBJECT_ID) {
         try {
             obj = database->loadObject(containerID);
-            if (!IS_CDS_CONTAINER(obj->getObjectType())) {
+            if (!obj->isContainer()) {
                 throw_std_runtime_error("Not a container");
             }
             if (containerID == CDS_ID_FS_ROOT)
@@ -886,14 +886,14 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
             // check database if parent, process existing
             auto obj = createSingleItem(newPath, rootPath, followSymlinks, (parentID > 0), true, task);
 
-            if (obj != nullptr && IS_CDS_ITEM(obj->getObjectType())) {
+            if (obj != nullptr && obj->isItem()) {
                 if (last_modified_current_max < statbuf.st_mtime) {
                     last_modified_new_max = statbuf.st_mtime;
                 }
                 parentID = obj->getParentID();
             }
 
-            if (obj != nullptr && IS_CDS_CONTAINER(obj->getObjectType()))
+            if (obj != nullptr && obj->isContainer())
                 addRecursive(adir, newPath, followSymlinks, hidden, task);
         } catch (const std::runtime_error& ex) {
             log_warning("skipping {} (ex:{})", newPath.c_str(), ex.what());
@@ -906,7 +906,8 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
     }
 }
 
-void ContentManager::updateObject(int objectID, const std::map<std::string, std::string>& parameters)
+template <typename T>
+void ContentManager::updateCdsObject(std::shared_ptr<T>& item, const std::map<std::string, std::string>& parameters)
 {
     std::string title = getValueOrDefault(parameters, "title");
     std::string upnp_class = getValueOrDefault(parameters, "class");
@@ -916,74 +917,107 @@ void ContentManager::updateObject(int objectID, const std::map<std::string, std:
     std::string location = getValueOrDefault(parameters, "location");
     std::string protocol = getValueOrDefault(parameters, "protocol");
 
+    log_error("updateCdsObject: CdsObject {} not updated", title);
+}
+
+template <>
+void ContentManager::updateCdsObject(std::shared_ptr<CdsContainer>& item, const std::map<std::string, std::string>& parameters)
+{
+    std::string title = getValueOrDefault(parameters, "title");
+    std::string upnp_class = getValueOrDefault(parameters, "class");
+
+    log_debug("updateCdsObject: CdsContainer {} updated", title);
+
+    auto clone = CdsObject::createObject(item->getObjectType());
+    item->copyTo(clone);
+
+    if (!title.empty())
+        clone->setTitle(title);
+    if (!upnp_class.empty())
+        clone->setClass(upnp_class);
+
+    auto cloned_item = std::static_pointer_cast<CdsContainer>(clone);
+
+    if (!item->equals(cloned_item, true)) {
+        clone->validate();
+        int containerChanged = INVALID_OBJECT_ID;
+        database->updateObject(clone, &containerChanged);
+        update_manager->containerChanged(containerChanged);
+        session_manager->containerChangedUI(containerChanged);
+        update_manager->containerChanged(item->getParentID());
+        session_manager->containerChangedUI(item->getParentID());
+    }
+}
+
+template <>
+void ContentManager::updateCdsObject(std::shared_ptr<CdsItem>& item, const std::map<std::string, std::string>& parameters)
+{
+    std::string title = getValueOrDefault(parameters, "title");
+    std::string upnp_class = getValueOrDefault(parameters, "class");
+    std::string mimetype = getValueOrDefault(parameters, "mime-type");
+    std::string description = getValueOrDefault(parameters, "description");
+    std::string location = getValueOrDefault(parameters, "location");
+    std::string protocol = getValueOrDefault(parameters, "protocol");
+
+    log_debug("updateCdsObject: CdsItem {} updated", title);
+
+    auto clone = CdsObject::createObject(item->getObjectType());
+    item->copyTo(clone);
+
+    if (!title.empty())
+        clone->setTitle(title);
+    if (!upnp_class.empty())
+        clone->setClass(upnp_class);
+    if (!location.empty())
+        clone->setLocation(location);
+
+    auto cloned_item = std::static_pointer_cast<CdsItem>(clone);
+
+    if (!mimetype.empty() && !protocol.empty()) {
+        cloned_item->setMimeType(mimetype);
+        auto resource = cloned_item->getResource(0);
+        resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(mimetype, protocol));
+    } else if (mimetype.empty() && !protocol.empty()) {
+        auto resource = cloned_item->getResource(0);
+        resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(cloned_item->getMimeType(), protocol));
+    } else if (!mimetype.empty()) {
+        cloned_item->setMimeType(mimetype);
+        auto resource = cloned_item->getResource(0);
+        std::vector<std::string> parts = splitString(resource->getAttribute(R_PROTOCOLINFO), ':');
+        protocol = parts[0];
+        resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(mimetype, protocol));
+    }
+
+    if (!description.empty()) {
+        cloned_item->setMetadata(M_DESCRIPTION, description);
+    } else {
+        cloned_item->removeMetadata(M_DESCRIPTION);
+    }
+
+    log_debug("updateCdsObject: checking equality of item {}", item->getTitle().c_str());
+    if (!item->equals(cloned_item, true)) {
+        cloned_item->validate();
+        int containerChanged = INVALID_OBJECT_ID;
+        database->updateObject(clone, &containerChanged);
+        update_manager->containerChanged(containerChanged);
+        session_manager->containerChangedUI(containerChanged);
+        log_debug("updateObject: calling containerChanged on item {}", item->getTitle().c_str());
+        update_manager->containerChanged(item->getParentID());
+    }
+}
+
+void ContentManager::updateObject(int objectID, const std::map<std::string, std::string>& parameters)
+{
     auto obj = database->loadObject(objectID);
-    unsigned int objectType = obj->getObjectType();
-
-    if (IS_CDS_ITEM(objectType)) {
-        auto item = std::static_pointer_cast<CdsItem>(obj);
-        auto clone = CdsObject::createObject(objectType);
-        item->copyTo(clone);
-
-        if (!title.empty())
-            clone->setTitle(title);
-        if (!upnp_class.empty())
-            clone->setClass(upnp_class);
-        if (!location.empty())
-            clone->setLocation(location);
-
-        auto cloned_item = std::static_pointer_cast<CdsItem>(clone);
-
-        if (!mimetype.empty() && !protocol.empty()) {
-            cloned_item->setMimeType(mimetype);
-            auto resource = cloned_item->getResource(0);
-            resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(mimetype, protocol));
-        } else if (mimetype.empty() && !protocol.empty()) {
-            auto resource = cloned_item->getResource(0);
-            resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(cloned_item->getMimeType(), protocol));
-        } else if (!mimetype.empty()) {
-            cloned_item->setMimeType(mimetype);
-            auto resource = cloned_item->getResource(0);
-            std::vector<std::string> parts = splitString(resource->getAttribute(R_PROTOCOLINFO), ':');
-            protocol = parts[0];
-            resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(mimetype, protocol));
-        }
-
-        if (!description.empty()) {
-            cloned_item->setMetadata(M_DESCRIPTION, description);
+    auto item = std::dynamic_pointer_cast<CdsItem>(obj);
+    if (item != nullptr) {
+        updateCdsObject(item, parameters);
+    } else {
+        auto cont = std::dynamic_pointer_cast<CdsContainer>(obj);
+        if (cont != nullptr) {
+            updateCdsObject(cont, parameters);
         } else {
-            cloned_item->removeMetadata(M_DESCRIPTION);
-        }
-
-        log_debug("updateObject: checking equality of item {}", item->getTitle().c_str());
-        if (!item->equals(cloned_item, true)) {
-            cloned_item->validate();
-            int containerChanged = INVALID_OBJECT_ID;
-            database->updateObject(clone, &containerChanged);
-            update_manager->containerChanged(containerChanged);
-            session_manager->containerChangedUI(containerChanged);
-            log_debug("updateObject: calling containerChanged on item {}", item->getTitle().c_str());
-            update_manager->containerChanged(item->getParentID());
-        }
-    } else if (IS_CDS_CONTAINER(objectType)) {
-        auto cont = std::static_pointer_cast<CdsContainer>(obj);
-        auto clone = CdsObject::createObject(objectType);
-        cont->copyTo(clone);
-
-        if (!title.empty())
-            clone->setTitle(title);
-        if (!upnp_class.empty())
-            clone->setClass(upnp_class);
-
-        auto cloned_item = std::static_pointer_cast<CdsContainer>(clone);
-
-        if (!cont->equals(cloned_item, true)) {
-            clone->validate();
-            int containerChanged = INVALID_OBJECT_ID;
-            database->updateObject(clone, &containerChanged);
-            update_manager->containerChanged(containerChanged);
-            session_manager->containerChangedUI(containerChanged);
-            update_manager->containerChanged(cont->getParentID());
-            session_manager->containerChangedUI(cont->getParentID());
+            updateCdsObject(obj, parameters);
         }
     }
 }
@@ -1009,7 +1043,7 @@ void ContentManager::addObject(const std::shared_ptr<CdsObject>& obj)
     }
 
     update_manager->containerChanged(obj->getParentID());
-    if (IS_CDS_CONTAINER(obj->getObjectType()))
+    if (obj->isContainer())
         session_manager->containerChangedUI(obj->getParentID());
 }
 
@@ -1054,7 +1088,7 @@ void ContentManager::updateObject(const std::shared_ptr<CdsObject>& obj, bool se
         session_manager->containerChangedUI(containerChanged);
 
         update_manager->containerChanged(obj->getParentID());
-        if (IS_CDS_CONTAINER(obj->getObjectType()))
+        if (obj->isContainer())
             session_manager->containerChangedUI(obj->getParentID());
     }
 }
@@ -1450,7 +1484,7 @@ void ContentManager::removeObject(std::shared_ptr<AutoscanDirectory> adir, int o
             return;
         }
 
-        if (IS_CDS_CONTAINER(obj->getObjectType())) {
+        if (obj->isContainer()) {
             // make sure to remove possible child autoscan directories from the scanlist
             std::shared_ptr<AutoscanList> rm_list = autoscan_timed->removeIfSubdir(path);
             for (size_t i = 0; i < rm_list->size(); i++) {
@@ -1613,7 +1647,7 @@ void ContentManager::setAutoscanDirectory(const std::shared_ptr<AutoscanDirector
         else {
             log_debug("objectID: {}", dir->getObjectID());
             auto obj = database->loadObject(dir->getObjectID());
-            if (obj == nullptr || !IS_CDS_CONTAINER(obj->getObjectType()) || obj->isVirtual())
+            if (obj == nullptr || !obj->isContainer() || obj->isVirtual())
                 throw_std_runtime_error("tried to remove an illegal object (id) from the list of the autoscan directories");
 
             log_debug("location: {}", obj->getLocation().c_str());
