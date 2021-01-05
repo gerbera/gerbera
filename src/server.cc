@@ -498,7 +498,7 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
     std::unique_ptr<RequestHandler> ret = nullptr;
 
     if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_MEDIA_HANDLER)) {
-        ret = std::make_unique<FileRequestHandler>(config, database, content, update_manager, session_manager, xmlbuilder.get());
+        ret = std::make_unique<FileRequestHandler>(content, xmlbuilder.get());
     } else if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_UI_HANDLER)) {
         std::string parameters;
         std::string path;
@@ -510,18 +510,18 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
         auto it = params.find(URL_REQUEST_TYPE);
         std::string r_type = it != params.end() && !it->second.empty() ? it->second : "index";
 
-        ret = web::createWebRequestHandler(config, database, content, session_manager, r_type);
+        ret = web::createWebRequestHandler(content, r_type);
     } else if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + DEVICE_DESCRIPTION_PATH)) {
-        ret = std::make_unique<DeviceDescriptionHandler>(config, database, xmlbuilder.get());
+        ret = std::make_unique<DeviceDescriptionHandler>(content, xmlbuilder.get());
     } else if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_SERVE_HANDLER)) {
         if (!config->getOption(CFG_SERVER_SERVEDIR).empty())
-            ret = std::make_unique<ServeRequestHandler>(config, database);
+            ret = std::make_unique<ServeRequestHandler>(content);
         else
             throw_std_runtime_error("Serving directories is not enabled in configuration");
     }
 #if defined(HAVE_CURL)
     else if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_ONLINE_HANDLER)) {
-        ret = std::make_unique<URLRequestHandler>(config, database, content);
+        ret = std::make_unique<URLRequestHandler>(content);
     }
 #endif
     else {

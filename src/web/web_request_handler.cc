@@ -44,13 +44,9 @@
 
 namespace web {
 
-WebRequestHandler::WebRequestHandler(std::shared_ptr<Config> config,
-    std::shared_ptr<Database> database,
-    std::shared_ptr<ContentManager> content,
-    std::shared_ptr<SessionManager> sessionManager)
-    : RequestHandler(std::move(config), std::move(database))
-    , content(std::move(content))
-    , sessionManager(std::move(sessionManager))
+WebRequestHandler::WebRequestHandler(std::shared_ptr<ContentManager> content)
+    : RequestHandler(std::move(content))
+    , sessionManager(content->getSessionManager())
     , checkRequestCalled(false)
 {
 }

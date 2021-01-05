@@ -37,9 +37,8 @@
 #include "cds_objects.h"
 #include "database/database.h"
 
-web::containers::containers(std::shared_ptr<Config> config, std::shared_ptr<Database> database,
-    std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
-    : WebRequestHandler(std::move(config), std::move(database), std::move(content), std::move(sessionManager))
+web::containers::containers(std::shared_ptr<ContentManager> content)
+    : WebRequestHandler(std::move(content))
 {
 }
 

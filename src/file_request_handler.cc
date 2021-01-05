@@ -51,15 +51,8 @@
 
 #include "transcoding/transcode_dispatcher.h"
 
-FileRequestHandler::FileRequestHandler(std::shared_ptr<Config> config,
-    std::shared_ptr<Database> database,
-    std::shared_ptr<ContentManager> content,
-    std::shared_ptr<UpdateManager> updateManager, std::shared_ptr<web::SessionManager> sessionManager,
-    UpnpXMLBuilder* xmlBuilder)
-    : RequestHandler(std::move(config), std::move(database))
-    , content(std::move(content))
-    , updateManager(std::move(updateManager))
-    , sessionManager(std::move(sessionManager))
+FileRequestHandler::FileRequestHandler(std::shared_ptr<ContentManager> content, UpnpXMLBuilder* xmlBuilder)
+    : RequestHandler(std::move(content))
     , xmlBuilder(xmlBuilder)
 {
 }
@@ -172,7 +165,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
             }
         }
 
-        auto h = MetadataHandler::createHandler(config, res_handler);
+        auto h = MetadataHandler::createHandler(config, mime, res_handler);
         if (mimeType.empty())
             mimeType = h->getMimeType();
 
@@ -335,7 +328,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum U
             res_handler = resource->getHandlerType();
         }
 
-        auto h = MetadataHandler::createHandler(config, res_handler);
+        auto h = MetadataHandler::createHandler(config, mime, res_handler);
 
         auto io_handler = h->serveContent(item, res_id);
         io_handler->open(mode);

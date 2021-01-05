@@ -36,9 +36,8 @@
 #include "config/config_manager.h"
 #include "content_manager.h"
 
-web::action::action(std::shared_ptr<Config> config, std::shared_ptr<Database> database,
-    std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
-    : WebRequestHandler(std::move(config), std::move(database), std::move(content), std::move(sessionManager))
+web::action::action(std::shared_ptr<ContentManager> content)
+    : WebRequestHandler(std::move(content))
 {
 }
 

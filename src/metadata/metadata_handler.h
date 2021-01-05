@@ -37,8 +37,9 @@
 #include <array>
 
 // forward declaration
-class CdsItem;
 class Config;
+class Mime;
+class CdsItem;
 class IOHandler;
 
 // content handler Id's
@@ -170,16 +171,17 @@ constexpr std::array<std::pair<resource_attributes_t, const char*>, R_MAX> res_k
 class MetadataHandler {
 protected:
     std::shared_ptr<Config> config;
+    std::shared_ptr<Mime> mime;
 
 public:
     /// \brief Definition of the supported metadata fields.
 
-    explicit MetadataHandler(std::shared_ptr<Config> config);
+    explicit MetadataHandler(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime);
 
-    static void setMetadata(const std::shared_ptr<Config>& config, const std::shared_ptr<CdsItem>& item);
+    static void setMetadata(const std::shared_ptr<Config>& config, std::shared_ptr<Mime> mime, const std::shared_ptr<CdsItem>& item);
     static std::string getMetaFieldName(metadata_fields_t field);
     static std::string getResAttrName(resource_attributes_t attr);
-    static std::unique_ptr<MetadataHandler> createHandler(const std::shared_ptr<Config>& config, int handlerType);
+    static std::unique_ptr<MetadataHandler> createHandler(const std::shared_ptr<Config>& config, std::shared_ptr<Mime> mime, int handlerType);
 
     virtual void fillMetadata(std::shared_ptr<CdsItem> item) = 0;
     virtual std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsItem> item, int resNum) = 0;

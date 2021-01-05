@@ -45,6 +45,7 @@
 #include "cds_objects.h"
 #include "config/config_manager.h"
 #include "iohandler/mem_io_handler.h"
+#include "util/mime.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
 
@@ -119,8 +120,8 @@ public:
     }
 };
 
-MatroskaHandler::MatroskaHandler(std::shared_ptr<Config> config)
-    : MetadataHandler(std::move(config))
+MatroskaHandler::MatroskaHandler(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime)
+    : MetadataHandler(std::move(config), std::move(mime))
 {
 }
 
@@ -222,7 +223,7 @@ void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream
     }
 }
 
-void MatroskaHandler::parseAttachments(const std::shared_ptr<CdsItem>& item, EbmlStream& ebml_stream, EbmlMaster* attachments, MemIOHandler** p_io_handler)
+void MatroskaHandler::parseAttachments(const std::shared_ptr<CdsItem>& item, EbmlStream& ebml_stream, EbmlMaster* attachments, MemIOHandler** p_io_handler) const
 {
     EbmlElement* dummy_el;
     int i_upper_level = 0;
@@ -258,11 +259,11 @@ void MatroskaHandler::parseAttachments(const std::shared_ptr<CdsItem>& item, Ebm
     }
 }
 
-std::string MatroskaHandler::getContentTypeFromByteVector(const KaxFileData* data)
+std::string MatroskaHandler::getContentTypeFromByteVector(const KaxFileData* data) const
 {
     std::string art_mimetype = MIMETYPE_DEFAULT;
 #ifdef HAVE_MAGIC
-    art_mimetype = getMIMETypeFromBuffer(data->GetBuffer(), data->GetSize());
+    art_mimetype = mime->bufferToMimeType(data->GetBuffer(), data->GetSize());
     if (art_mimetype.empty()) {
         return MIMETYPE_DEFAULT;
     }

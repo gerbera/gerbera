@@ -47,6 +47,7 @@
 #include "layout/fallback_layout.h"
 #include "metadata/metadata_handler.h"
 #include "update_manager.h"
+#include "util/mime.h"
 #include "util/process.h"
 #include "util/string_converter.h"
 #include "util/timer.h"
@@ -73,15 +74,6 @@
 #include "util/task_processor.h"
 #endif
 
-#ifdef HAVE_MAGIC
-// for older versions of filemagic
-extern "C" {
-#include <magic.h>
-}
-
-static struct magic_set* ms = nullptr;
-#endif
-
 ContentManager::ContentManager(const std::shared_ptr<Config>& config, const std::shared_ptr<Database>& database,
     std::shared_ptr<UpdateManager> update_manager, std::shared_ptr<web::SessionManager> session_manager,
     std::shared_ptr<Timer> timer, std::shared_ptr<TaskProcessor> task_processor,
@@ -94,30 +86,19 @@ ContentManager::ContentManager(const std::shared_ptr<Config>& config, const std:
     , task_processor(std::move(task_processor))
     , scripting_runtime(std::move(scripting_runtime))
     , last_fm(std::move(last_fm))
-    , extension_mimetype_map(config->getDictionaryOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST))
 {
-    ignore_unknown_extensions = false;
-    extension_map_case_sensitive = false;
-
     taskID = 1;
     working = false;
     shutdownFlag = false;
     layout_enabled = false;
 
-    // loading extension - mimetype map
-    // we can always be sure to get a valid element because everything was prepared by the config manager
-
     ignore_unknown_extensions = config->getBoolOption(CFG_IMPORT_MAPPINGS_IGNORE_UNKNOWN_EXTENSIONS);
-
+    auto extension_mimetype_map = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
     if (ignore_unknown_extensions && (extension_mimetype_map.empty())) {
         log_warning("Ignore unknown extensions set, but no mappings specified");
         log_warning("Please review your configuration!");
         ignore_unknown_extensions = false;
     }
-
-    extension_map_case_sensitive = config->getBoolOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_CASE_SENSITIVE);
-
-    mimetype_upnpclass_map = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST);
 
     mimetype_contenttype_map = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
 
@@ -164,25 +145,8 @@ void ContentManager::run()
     // Start INotify thread
     inotify->run();
 #endif
-/* init filemagic */
-#ifdef HAVE_MAGIC
-    if (!ignore_unknown_extensions) {
-        ms = magic_open(MAGIC_MIME);
-        if (ms == nullptr) {
-            log_error("magic_open failed");
-        } else {
-            std::string optMagicFile = config->getOption(CFG_IMPORT_MAGIC_FILE);
-            const char* magicFile = nullptr;
-            if (!optMagicFile.empty())
-                magicFile = optMagicFile.c_str();
-            if (magic_load(ms, magicFile) == -1) {
-                log_warning("magic_load: {}", magic_error(ms));
-                magic_close(ms);
-                ms = nullptr;
-            }
-        }
-    }
-#endif // HAVE_MAGIC
+
+    mime = std::make_shared<Mime>(config);
 
     std::string layout_type = config->getOption(CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
     if ((layout_type == "builtin") || (layout_type == "js"))
@@ -370,12 +334,10 @@ void ContentManager::shutdown()
         pthread_join(taskThread, nullptr);
     taskThread = 0;
 
-#ifdef HAVE_MAGIC
-    if (ms) {
-        magic_close(ms);
-        ms = nullptr;
+    if (mime) {
+        mime = nullptr;
     }
-#endif
+
     log_debug("end");
     log_debug("ContentManager destroyed");
 }
@@ -456,7 +418,7 @@ std::shared_ptr<CdsObject> ContentManager::createSingleItem(const fs::path& path
             isNew = true;
         }
     } else if (obj->isItem() && processExisting) {
-        MetadataHandler::setMetadata(config, std::static_pointer_cast<CdsItem>(obj));
+        MetadataHandler::setMetadata(config, mime, std::static_pointer_cast<CdsItem>(obj));
     }
     if (obj->isItem() && layout != nullptr && (processExisting || isNew)) {
         try {
@@ -1127,28 +1089,16 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::path& 
     std::shared_ptr<CdsObject> obj;
     if (S_ISREG(statbuf.st_mode) || (allow_fifo && S_ISFIFO(statbuf.st_mode))) { // item
         /* retrieve information about item and decide if it should be included */
-        std::string mimetype;
-        std::string upnp_class;
-        std::string extension = path.extension();
-        if (!extension.empty())
-            extension.erase(0, 1); // remove leading .
-
-        if (magic) {
-            mimetype = extension2mimetype(extension);
-
-            if (mimetype.empty()) {
-                if (ignore_unknown_extensions)
-                    return nullptr; // item should be ignored
+        std::string mimetype = mime->extensionToMimeType(path);
+        if (mimetype.empty()) {
+            if (ignore_unknown_extensions)
+                return nullptr; // item should be ignored
 #ifdef HAVE_MAGIC
-                mimetype = getMIMETypeFromFile(path, followSymlinks);
+            mimetype = mime->fileToMimeType(path);
 #endif
-            }
         }
 
-        if (!mimetype.empty()) {
-            upnp_class = mimetype2upnpclass(mimetype);
-        }
-
+        std::string upnp_class = mime->mimeTypeToUpnpClass(mimetype);
         if (upnp_class.empty()) {
             std::string content_type = getValueOrDefault(mimetype_contenttype_map, mimetype);
             if (content_type == CONTENT_TYPE_OGG) {
@@ -1174,7 +1124,7 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::path& 
         auto f2i = StringConverter::f2i(config);
         obj->setTitle(f2i->convert(path.filename()));
 
-        MetadataHandler::setMetadata(config, item);
+        MetadataHandler::setMetadata(config, mime, item);
     } else if (S_ISDIR(statbuf.st_mode)) {
         auto cont = std::make_shared<CdsContainer>();
         obj = cont;
@@ -1196,30 +1146,8 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::path& 
     return obj;
 }
 
-std::string ContentManager::extension2mimetype(std::string extension)
-{
-    if (!extension_map_case_sensitive)
-        extension = toLower(extension);
-
-    return getValueOrDefault(extension_mimetype_map, extension);
-}
-
-std::string ContentManager::mimetype2upnpclass(const std::string& mimeType)
-{
-    auto it = mimetype_upnpclass_map.find(mimeType);
-    if (it != mimetype_upnpclass_map.end())
-        return it->second;
-
-    // try to match foo
-    std::vector<std::string> parts = splitString(mimeType, '/');
-    if (parts.size() != 2)
-        return "";
-    return getValueOrDefault(mimetype_upnpclass_map, parts[0] + "/*");
-}
-
 void ContentManager::initLayout()
 {
-
     if (layout == nullptr) {
         AutoLock lock(mutex);
         if (layout == nullptr) {

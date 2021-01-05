@@ -177,6 +177,8 @@ add_library(libgerbera STATIC
         src/util/generic_task.h
         src/util/jpeg_resolution.cc
         src/util/logger.h
+        src/util/mime.cc
+        src/util/mime.h
         src/util/mt_inotify.cc
         src/util/mt_inotify.h
         src/util/process.cc

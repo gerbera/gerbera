@@ -34,44 +34,43 @@
 namespace web {
 
 std::unique_ptr<WebRequestHandler> createWebRequestHandler(
-    const std::shared_ptr<Config>& config, const std::shared_ptr<Database>& database,
-    const std::shared_ptr<ContentManager>& content, const std::shared_ptr<SessionManager>& sessionManager,
+    const std::shared_ptr<ContentManager>& content,
     const std::string& page)
 {
     if (page == "add")
-        return std::make_unique<web::add>(config, database, content, sessionManager);
+        return std::make_unique<web::add>(content);
     if (page == "remove")
-        return std::make_unique<web::remove>(config, database, content, sessionManager);
+        return std::make_unique<web::remove>(content);
     if (page == "add_object")
-        return std::make_unique<web::addObject>(config, database, content, sessionManager);
+        return std::make_unique<web::addObject>(content);
     if (page == "auth")
-        return std::make_unique<web::auth>(config, database, content, sessionManager);
+        return std::make_unique<web::auth>(content);
     if (page == "containers")
-        return std::make_unique<web::containers>(config, database, content, sessionManager);
+        return std::make_unique<web::containers>(content);
     if (page == "directories")
-        return std::make_unique<web::directories>(config, database, content, sessionManager);
+        return std::make_unique<web::directories>(content);
     if (page == "files")
-        return std::make_unique<web::files>(config, database, content, sessionManager);
+        return std::make_unique<web::files>(content);
     if (page == "items")
-        return std::make_unique<web::items>(config, database, content, sessionManager);
+        return std::make_unique<web::items>(content);
     if (page == "edit_load")
-        return std::make_unique<web::edit_load>(config, database, content, sessionManager);
+        return std::make_unique<web::edit_load>(content);
     if (page == "edit_save")
-        return std::make_unique<web::edit_save>(config, database, content, sessionManager);
+        return std::make_unique<web::edit_save>(content);
     if (page == "autoscan")
-        return std::make_unique<web::autoscan>(config, database, content, sessionManager);
+        return std::make_unique<web::autoscan>(content);
     if (page == "void")
-        return std::make_unique<web::voidType>(config, database, content, sessionManager);
+        return std::make_unique<web::voidType>(content);
     if (page == "tasks")
-        return std::make_unique<web::tasks>(config, database, content, sessionManager);
+        return std::make_unique<web::tasks>(content);
     if (page == "action")
-        return std::make_unique<web::action>(config, database, content, sessionManager);
+        return std::make_unique<web::action>(content);
     if (page == "clients")
-        return std::make_unique<web::clients>(config, database, content, sessionManager);
+        return std::make_unique<web::clients>(content);
     if (page == "config_load")
-        return std::make_unique<web::configLoad>(config, database, content, sessionManager);
+        return std::make_unique<web::configLoad>(content);
     if (page == "config_save")
-        return std::make_unique<web::configSave>(config, database, content, sessionManager);
+        return std::make_unique<web::configSave>(content);
 
     throw_std_runtime_error("Unknown page: " + page);
 }

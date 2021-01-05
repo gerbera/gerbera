@@ -630,42 +630,6 @@ int HMSFToMilliseconds(const std::string& time)
     return ((hours * 3600) + (minutes * 60) + seconds) * 1000 + ms;
 }
 
-#ifdef HAVE_MAGIC
-std::string getMIMETypeFromFile(const fs::path& file, bool allowSymlinks)
-{
-    return getMIME(file, nullptr, -1, allowSymlinks);
-}
-
-std::string getMIMETypeFromBuffer(const void* buffer, size_t length)
-{
-    return getMIME("", buffer, length, false);
-}
-
-std::string getMIME(const fs::path& filepath, const void* buffer, size_t length, bool allowSymlinks)
-{
-    int magicFlags = allowSymlinks ? MAGIC_MIME_TYPE | MAGIC_SYMLINK : MAGIC_MIME_TYPE;
-
-    /* MAGIC_MIME_TYPE tells magic to return ONLY the mimetype */
-    magic_t magic_cookie = magic_open(magicFlags);
-
-    if (magic_cookie == nullptr) {
-        log_warning("Failed to initialize libmagic");
-        return "";
-    }
-
-    if (magic_load(magic_cookie, nullptr) != 0) {
-        log_warning("Failed to load magic database: {}", magic_error(magic_cookie));
-        magic_close(magic_cookie);
-        return "";
-    }
-
-    const char* mime = filepath.empty() ? magic_buffer(magic_cookie, buffer, length) : magic_file(magic_cookie, filepath.c_str());
-    std::string out = mime;
-    magic_close(magic_cookie);
-    return out;
-}
-#endif
-
 bool checkResolution(const std::string& resolution, int* x, int* y)
 {
     if (x != nullptr)

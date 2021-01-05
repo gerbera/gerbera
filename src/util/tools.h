@@ -43,13 +43,6 @@ namespace fs = std::filesystem;
 #include <netinet/in.h>
 #include <sys/time.h>
 
-#ifdef HAVE_MAGIC
-// for older versions of filemagic
-extern "C" {
-#include <magic.h>
-}
-#endif
-
 #include "common.h"
 
 // forward declaration
@@ -198,16 +191,6 @@ std::string millisecondsToHMSF(int milliseconds);
 
 /// \brief converts a "H*:MM:SS.F*" representation to milliseconds
 int HMSFToMilliseconds(const std::string& time);
-
-#ifdef HAVE_MAGIC
-/// \brief Extracts mimetype from a file using filemagic
-std::string getMIMETypeFromFile(const fs::path& file, bool allowSymlinks);
-/// \brief Extracts mimetype from a buffer using filemagic
-std::string getMIMETypeFromBuffer(const void* buffer, size_t length);
-/// \brief Extracts mimetype from a filepath OR buffer using filemagic
-std::string getMIME(const fs::path& filepath, const void* buffer, size_t length, bool allowSymlinks);
-
-#endif // HAVE_MAGIC
 
 /// \brief Extracts resolution from a JPEG image
 std::string get_jpeg_resolution(const std::unique_ptr<IOHandler>& ioh);

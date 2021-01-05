@@ -51,11 +51,12 @@
 #include "cds_objects.h"
 #include "config/config_manager.h"
 #include "iohandler/mem_io_handler.h"
+#include "util/mime.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
 
-TagLibHandler::TagLibHandler(std::shared_ptr<Config> config)
-    : MetadataHandler(std::move(config))
+TagLibHandler::TagLibHandler(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime)
+    : MetadataHandler(std::move(config), std::move(mime))
 {
     entrySeparator = this->config->getOption(CFG_IMPORT_LIBOPTS_ENTRY_SEP);
     legacyEntrySeparator = this->config->getOption(CFG_IMPORT_LIBOPTS_ENTRY_LEGACY_SEP);
@@ -247,11 +248,11 @@ bool TagLibHandler::isValidArtworkContentType(const std::string& art_mimetype)
     return art_mimetype.find('/') != std::string::npos;
 }
 
-std::string TagLibHandler::getContentTypeFromByteVector(const TagLib::ByteVector& data)
+std::string TagLibHandler::getContentTypeFromByteVector(const TagLib::ByteVector& data) const
 {
     std::string art_mimetype = MIMETYPE_DEFAULT;
 #ifdef HAVE_MAGIC
-    art_mimetype = getMIMETypeFromBuffer(data.data(), data.size());
+    art_mimetype = mime->bufferToMimeType(data.data(), data.size());
     if (art_mimetype.empty())
         return MIMETYPE_DEFAULT;
 #endif

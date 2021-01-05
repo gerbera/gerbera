@@ -30,8 +30,7 @@
 
 class DeviceDescriptionHandler : public RequestHandler {
 public:
-    explicit DeviceDescriptionHandler(std::shared_ptr<Config> config, std::shared_ptr<Database> database,
-        UpnpXMLBuilder* xmlBuilder);
+    explicit DeviceDescriptionHandler(std::shared_ptr<ContentManager> content, UpnpXMLBuilder* xmlBuilder);
 
     void getInfo(const char* filename, UpnpFileInfo* info) override;
     std::unique_ptr<IOHandler> open(const char* filename, enum UpnpOpenFileMode mode) override;
