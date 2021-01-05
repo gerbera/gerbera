@@ -711,7 +711,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
             if (startswith(mimeType, "audio") || startswith(mimeType, "video"))
                 extend.append(";" UPNP_DLNA_FLAGS "=" UPNP_DLNA_TR_FLAGS_AV);
         } else {
-            extend.append(UPNP_DLNA_OP).append("=").append(UPNP_DLNA_OP_SEEK_ENABLED).append(";");
+            extend.append(UPNP_DLNA_OP).append("=").append(UPNP_DLNA_OP_SEEK_RANGE).append(";");
             extend.append(UPNP_DLNA_CONVERSION_INDICATOR).append("=").append(UPNP_DLNA_NO_CONVERSION);
         }
 
