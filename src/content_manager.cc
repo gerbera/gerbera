@@ -334,22 +334,24 @@ void ContentManager::shutdown()
     destroyLayout();
 
 #ifdef HAVE_INOTIFY
-    // update mofification time for database
-    for (size_t i = 0; i < autoscan_inotify->size(); i++) {
-        log_debug("AutoScanDir {}", i);
-        std::shared_ptr<AutoscanDirectory> dir = autoscan_inotify->get(i);
-        if (dir != nullptr) {
-            if (fs::is_directory(dir->getLocation())) {
-                auto t = getLastWriteTime(dir->getLocation());
-                dir->setCurrentLMT(dir->getLocation(), t);
+    if (autoscan_inotify) {
+        // update modification time for database
+        for (size_t i = 0; i < autoscan_inotify->size(); i++) {
+            log_debug("AutoScanDir {}", i);
+            std::shared_ptr<AutoscanDirectory> dir = autoscan_inotify->get(i);
+            if (dir != nullptr) {
+                if (fs::is_directory(dir->getLocation())) {
+                    auto t = getLastWriteTime(dir->getLocation());
+                    dir->setCurrentLMT(dir->getLocation(), t);
+                }
+                dir->updateLMT();
             }
-            dir->updateLMT();
         }
-    }
+        autoscan_inotify->updateLMinDB();
 
-    autoscan_inotify->updateLMinDB();
-    autoscan_inotify = nullptr;
-    inotify = nullptr;
+        autoscan_inotify = nullptr;
+        inotify = nullptr;
+    }
 #endif
 
     shutdownFlag = true;
