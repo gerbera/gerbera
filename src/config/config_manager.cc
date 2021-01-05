@@ -513,6 +513,10 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = 
         false, true),
     std::make_shared<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES,
         "hidden-files", "config-import.html#autoscan"),
+    std::make_shared<ConfigIntSetup>(ATTR_AUTOSCAN_DIRECTORY_SCANCOUNT,
+        "scan-count", "config-import.html#autoscan"),
+    std::make_shared<ConfigStringSetup>(ATTR_AUTOSCAN_DIRECTORY_LMT,
+        "last-modified", "config-import.html#autoscan"),
 
     std::make_shared<ConfigBoolSetup>(CFG_TRANSCODING_MIMETYPE_PROF_MAP_ALLOW_UNUSED,
         "/transcoding/mimetype-profile-mappings/attribute::allow-unused", "config-transcode.html#mimetype-profile-mappings",
@@ -681,6 +685,16 @@ const std::map<config_option_t, std::vector<config_option_t>> ConfigManager::par
                                                CFG_IMPORT_AUTOSCAN_INOTIFY_LIST
 #endif
                                            } },
+    { ATTR_AUTOSCAN_DIRECTORY_SCANCOUNT, { CFG_IMPORT_AUTOSCAN_TIMED_LIST,
+#ifdef HAVE_INOTIFY
+                                             CFG_IMPORT_AUTOSCAN_INOTIFY_LIST
+#endif
+                                         } },
+    { ATTR_AUTOSCAN_DIRECTORY_LMT, { CFG_IMPORT_AUTOSCAN_TIMED_LIST,
+#ifdef HAVE_INOTIFY
+                                       CFG_IMPORT_AUTOSCAN_INOTIFY_LIST
+#endif
+                                   } },
 
     { ATTR_DIRECTORIES_TWEAK_LOCATION, { CFG_IMPORT_DIRECTORIES_LIST } },
     { ATTR_DIRECTORIES_TWEAK_RECURSIVE, { CFG_IMPORT_DIRECTORIES_LIST } },

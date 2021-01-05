@@ -23,6 +23,7 @@
 
 /// \file config_load.cc
 
+#include <fmt/chrono.h>
 #include <numeric>
 
 #include "pages.h" // API
@@ -31,6 +32,7 @@
 #include "config/client_config.h"
 #include "config/config_setup.h"
 #include "config/directory_tweak.h"
+#include "content_manager.h"
 #include "database/database.h"
 #include "metadata/metadata_handler.h"
 #include "transcoding/transcoding.h"
@@ -238,6 +240,7 @@ void web::configLoad::process()
             pr++;
         }
     }
+
     pr = 0;
     for (const auto& [key, val] : profiles) {
         auto entry = transcoding->getByName(key, true);
@@ -339,25 +342,34 @@ void web::configLoad::process()
         auto autoscan = cs->getValue()->getAutoscanListOption();
         for (size_t i = 0; i < autoscan->size(); i++) {
             const auto& entry = autoscan->get(i);
+            const auto& adir = content->getAutoscanDirectory(entry->getLocation());
             auto item = values.append_child("item");
             createItem(item, cs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_LOCATION), cs->option, ATTR_AUTOSCAN_DIRECTORY_LOCATION);
-            setValue(item, entry->getLocation());
+            setValue(item, adir->getLocation());
 
             item = values.append_child("item");
             createItem(item, cs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_MODE), cs->option, ATTR_AUTOSCAN_DIRECTORY_MODE);
-            setValue(item, AutoscanDirectory::mapScanmode(entry->getScanMode()));
+            setValue(item, AutoscanDirectory::mapScanmode(adir->getScanMode()));
 
             item = values.append_child("item");
             createItem(item, cs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_INTERVAL), cs->option, ATTR_AUTOSCAN_DIRECTORY_INTERVAL);
-            setValue(item, entry->getInterval());
+            setValue(item, adir->getInterval());
 
             item = values.append_child("item");
             createItem(item, cs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_RECURSIVE), cs->option, ATTR_AUTOSCAN_DIRECTORY_RECURSIVE);
-            setValue(item, entry->getRecursive());
+            setValue(item, adir->getRecursive());
 
             item = values.append_child("item");
             createItem(item, cs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES), cs->option, ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES);
-            setValue(item, entry->getHidden());
+            setValue(item, adir->getHidden());
+
+            item = values.append_child("item");
+            createItem(item, cs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_SCANCOUNT), cs->option, ATTR_AUTOSCAN_DIRECTORY_SCANCOUNT);
+            setValue(item, adir->getActiveScanCount());
+
+            item = values.append_child("item");
+            createItem(item, cs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_LMT), cs->option, ATTR_AUTOSCAN_DIRECTORY_LMT);
+            setValue(item, fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(adir->getPreviousLMT(""))));
         }
     }
 
