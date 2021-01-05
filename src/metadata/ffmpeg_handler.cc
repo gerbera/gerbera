@@ -70,6 +70,7 @@ extern "C" {
 #include "cds_objects.h"
 #include "config/config_manager.h"
 #include "util/string_converter.h"
+#include "util/tools.h"
 
 #ifdef HAVE_AVSTREAM_CODECPAR
 #define as_codecpar(s) s->codecpar
@@ -152,19 +153,12 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
 // ffmpeg library calls
 static void addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item, AVFormatContext* pFormatCtx)
 {
-    int64_t hours, mins, secs, us;
     int audioch = 0, samplefreq = 0;
     bool audioset, videoset;
 
     // duration
-    secs = pFormatCtx->duration / AV_TIME_BASE;
-    us = pFormatCtx->duration % AV_TIME_BASE;
-    mins = secs / 60;
-    secs %= 60;
-    hours = mins / 60;
-    mins %= 60;
-    if ((hours + mins + secs) > 0) {
-        auto duration = fmt::format("{:02}:{:02}:{:02}.{:01}", hours, mins, secs, (10 * us) / AV_TIME_BASE);
+    if (pFormatCtx->duration > 0) {
+        auto duration = millisecondsToHMSF(pFormatCtx->duration / (AV_TIME_BASE / 1000));
         log_debug("Added duration: {}", duration);
         item->getResource(0)->addAttribute(R_DURATION, std::move(duration));
     }
@@ -173,8 +167,9 @@ static void addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item, AVForm
     if (pFormatCtx->bit_rate > 0) {
         // ffmpeg's bit_rate is in bits/sec, upnp wants it in bytes/sec
         // See http://www.upnp.org/schemas/av/didl-lite-v3.xsd
-        log_debug("Added overall bitrate: {} kb/s", pFormatCtx->bit_rate / 8);
-        item->getResource(0)->addAttribute(R_BITRATE, std::to_string(pFormatCtx->bit_rate / 8));
+        auto bitrate = pFormatCtx->bit_rate / 8;
+        log_debug("Added bitrate: {} kb/s", bitrate);
+        item->getResource(0)->addAttribute(R_BITRATE, std::to_string(bitrate));
     }
 
     // video resolution, audio sampling rate, nr of audio channels

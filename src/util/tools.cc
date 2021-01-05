@@ -600,18 +600,21 @@ std::string getProtocol(const std::string& protocolInfo)
     return (pos == std::string::npos || pos == 0) ? "http-get" : protocolInfo.substr(0, pos);
 }
 
-std::string secondsToHMS(int seconds)
+std::string millisecondsToHMSF(int milliseconds)
 {
-    auto s = seconds % 60;
-    seconds /= 60;
+    auto ms = milliseconds % 1000;
+    milliseconds /= 1000;
 
-    auto m = seconds % 60;
-    auto h = std::min(seconds / 60, 999);
+    auto s = milliseconds % 60;
+    milliseconds /= 60;
 
-    return fmt::format("{:02}:{:02}:{:02}", h, m, s);
+    auto m = milliseconds % 60;
+    auto h = milliseconds / 60;
+
+    return fmt::format("{:01}:{:02}:{:02}.{:03}", h, m, s, ms);
 }
 
-int HMSToSeconds(const std::string& time)
+int HMSFToMilliseconds(const std::string& time)
 {
     if (time.empty()) {
         log_warning("Could not convert time representation to seconds!");
@@ -621,9 +624,10 @@ int HMSToSeconds(const std::string& time)
     int hours = 0;
     int minutes = 0;
     int seconds = 0;
-    sscanf(time.c_str(), "%d:%d:%d", &hours, &minutes, &seconds);
+    int ms = 0;
+    sscanf(time.c_str(), "%d:%d:%d.%d", &hours, &minutes, &seconds, &ms);
 
-    return (hours * 3600) + (minutes * 60) + seconds;
+    return ((hours * 3600) + (minutes * 60) + seconds) * 1000 + ms;
 }
 
 #ifdef HAVE_MAGIC

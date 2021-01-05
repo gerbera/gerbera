@@ -108,7 +108,7 @@ void LastFm::startedPlaying(std::shared_ptr<CdsItem> item)
     if (item->getResourceCount() > 0) {
         auto resource = item->getResource(0);
         std::string duration = resource->getAttribute(R_DURATION);
-        info->track_length_in_secs = HMSToSeconds(duration.c_str());
+        info->track_length_in_secs = HMSFToMilliseconds(duration.c_str()) / 1000;
     }
 
     started_playing(scrobbler, info);
