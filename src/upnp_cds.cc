@@ -110,7 +110,7 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
     decl.append_attribute("version") = "1.0";
     decl.append_attribute("encoding") = "UTF-8";
     auto didl_lite_root = didl_lite.append_child("DIDL-Lite");
-    didl_lite_root.append_attribute(UPNP_XML_NAMESPACE_ATTR) = UPNP_XML_DIDL_LITE_NAMESPACE;
+    didl_lite_root.append_attribute(UPNP_XML_DIDL_LITE_NAMESPACE_ATTR) = UPNP_XML_DIDL_LITE_NAMESPACE;
     didl_lite_root.append_attribute(UPNP_XML_DC_NAMESPACE_ATTR) = UPNP_XML_DC_NAMESPACE;
     didl_lite_root.append_attribute(UPNP_XML_UPNP_NAMESPACE_ATTR) = UPNP_XML_UPNP_NAMESPACE;
     didl_lite_root.append_attribute(UPNP_XML_SEC_NAMESPACE_ATTR) = UPNP_XML_SEC_NAMESPACE;
@@ -163,7 +163,7 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
     decl.append_attribute("version") = "1.0";
     decl.append_attribute("encoding") = "UTF-8";
     auto didl_lite_root = didl_lite.append_child("DIDL-Lite");
-    didl_lite_root.append_attribute(UPNP_XML_NAMESPACE_ATTR) = UPNP_XML_DIDL_LITE_NAMESPACE;
+    didl_lite_root.append_attribute(UPNP_XML_DIDL_LITE_NAMESPACE_ATTR) = UPNP_XML_DIDL_LITE_NAMESPACE;
     didl_lite_root.append_attribute(UPNP_XML_DC_NAMESPACE_ATTR) = UPNP_XML_DC_NAMESPACE;
     didl_lite_root.append_attribute(UPNP_XML_UPNP_NAMESPACE_ATTR) = UPNP_XML_UPNP_NAMESPACE;
     didl_lite_root.append_attribute(UPNP_XML_SEC_NAMESPACE_ATTR) = UPNP_XML_SEC_NAMESPACE;

@@ -120,7 +120,7 @@
 #define UPNP_DESC_MRREG_EVENT_URL "/upnp/event/mr_reg"
 
 // xml namespaces
-#define UPNP_XML_NAMESPACE_ATTR "xmlns"
+#define UPNP_XML_DIDL_LITE_NAMESPACE_ATTR "xmlns"
 #define UPNP_XML_DIDL_LITE_NAMESPACE "urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/"
 #define UPNP_XML_DC_NAMESPACE_ATTR "xmlns:dc"
 #define UPNP_XML_DC_NAMESPACE "http://purl.org/dc/elements/1.1/"
