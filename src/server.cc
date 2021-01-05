@@ -290,8 +290,10 @@ void Server::shutdown()
     log_debug("now calling upnp finish");
     UpnpFinish();
 
-    content->shutdown();
-    content = nullptr;
+    if (content) {
+        content->shutdown();
+        content = nullptr;
+    }
 #ifdef HAVE_LASTFMLIB
     last_fm->shutdown();
     last_fm = nullptr;
