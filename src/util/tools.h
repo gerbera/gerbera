@@ -193,12 +193,11 @@ std::string getMTFromProtocolInfo(const std::string& protocol);
 /// \return Protocol (i.e. http-get).
 std::string getProtocol(const std::string& protocolInfo);
 
-/// \brief Converts a number of seconds to H+:MM:SS representation as required by
-/// the UPnP spec
-std::string secondsToHMS(int seconds);
+/// \brief Converts a number of milliseconds to "H*:MM:SS.F*" representation as required by the UPnP duration spec
+std::string millisecondsToHMSF(int milliseconds);
 
-/// \brief converts a "H:MM:SS:" representation to seconds
-int HMSToSeconds(const std::string& time);
+/// \brief converts a "H*:MM:SS.F*" representation to milliseconds
+int HMSFToMilliseconds(const std::string& time);
 
 #ifdef HAVE_MAGIC
 /// \brief Extracts mimetype from a file using filemagic

@@ -180,29 +180,24 @@ void TagLibHandler::populateGenericTags(const std::shared_ptr<CdsItem>& item, co
         return;
 
     const TagLib::Tag* tag = file.tag();
-
     for (size_t i = 0; i < mt_keys.size(); i++)
         addField(metadata_fields_t(i), file, tag, item);
 
-    int temp;
-
     const TagLib::AudioProperties* audioProps = file.audioProperties();
-
     if (!audioProps)
         return;
 
-    // note: UPnP requres bytes/second
-    temp = audioProps->bitrate() * 1024 / 8;
-
     auto res = item->getResource(0);
 
+    // UPnP bitrate is in bytes/second
+    int temp = audioProps->bitrate() * 1024 / 8; // kbit/second -> byte/second
     if (temp > 0) {
         res->addAttribute(R_BITRATE, std::to_string(temp));
     }
 
-    temp = audioProps->length();
+    temp = audioProps->lengthInMilliseconds();
     if (temp > 0) {
-        res->addAttribute(R_DURATION, secondsToHMS(temp));
+        res->addAttribute(R_DURATION, millisecondsToHMSF(temp));
     }
 
     temp = audioProps->sampleRate();

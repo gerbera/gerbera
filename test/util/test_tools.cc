@@ -4,17 +4,12 @@
 
 using namespace ::testing;
 
-TEST(ToolsTest, secondsToHMS)
+TEST(ToolsTest, millisecondsToHMSF)
 {
-    EXPECT_EQ(secondsToHMS(0), "00:00:00");
-    EXPECT_EQ(secondsToHMS(1), "00:00:01");
-    EXPECT_EQ(secondsToHMS(62), "00:01:02");
-    EXPECT_EQ(secondsToHMS(3662), "01:01:02");
-}
-
-TEST(ToolsTest, secondsToHMSOverflow)
-{
-    EXPECT_EQ(secondsToHMS(1000 * 3600 + 1), "999:00:01");
+    EXPECT_EQ(millisecondsToHMSF(0), "0:00:00.000");
+    EXPECT_EQ(millisecondsToHMSF(1 * 1000), "0:00:01.000");
+    EXPECT_EQ(millisecondsToHMSF(62 * 1000), "0:01:02.000");
+    EXPECT_EQ(millisecondsToHMSF((3600 + 60 + 2) * 1000 + 123), "1:01:02.123");
 }
 
 TEST(ToolsTest, readWriteBinaryFile)
