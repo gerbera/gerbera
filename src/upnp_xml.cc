@@ -91,7 +91,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
                 }
                 result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(tmp.c_str());
             } else if (key == MetadataHandler::getMetaFieldName(M_TRACKNUMBER)) {
-                if (upnp_class == UPNP_DEFAULT_CLASS_MUSIC_TRACK)
+                if (upnp_class == UPNP_CLASS_MUSIC_TRACK)
                     result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(val.c_str());
             } else if (key != MetadataHandler::getMetaFieldName(M_TITLE)) {
                 // e.g. used for M_ALBUMARTIST
@@ -125,7 +125,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
 
         std::string upnp_class = obj->getClass();
         log_debug("container is class: {}", upnp_class.c_str());
-        if (upnp_class == UPNP_DEFAULT_CLASS_MUSIC_ALBUM) {
+        if (upnp_class == UPNP_CLASS_MUSIC_ALBUM) {
             auto meta = obj->getMetadata();
 
             std::string creator = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_ALBUMARTIST));
@@ -150,7 +150,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
             if (!date.empty())
                 result.append_child("upnp:date").append_child(pugi::node_pcdata).set_value(date.c_str());
         }
-        if (upnp_class == UPNP_DEFAULT_CLASS_MUSIC_ALBUM || upnp_class == UPNP_DEFAULT_CLASS_CONTAINER) {
+        if (upnp_class == UPNP_CLASS_MUSIC_ALBUM || upnp_class == UPNP_CLASS_CONTAINER) {
             std::string aa_id = database->findFolderImage(cont->getID(), std::string());
 
             if (!aa_id.empty()) {
@@ -161,7 +161,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
                 std::string url = virtualURL + _URL_PARAM_SEPARATOR + CONTENT_MEDIA_HANDLER + _URL_PARAM_SEPARATOR + dictEncodeSimple(dict) + _URL_PARAM_SEPARATOR + URL_RESOURCE_ID + _URL_PARAM_SEPARATOR + "0";
                 result.append_child("upnp:albumArtURI").append_child(pugi::node_pcdata).set_value(url.c_str());
 
-            } else if (upnp_class == UPNP_DEFAULT_CLASS_MUSIC_ALBUM) {
+            } else if (upnp_class == UPNP_CLASS_MUSIC_ALBUM) {
                 // try to find the first track and use its artwork
                 auto items = database->getObjects(cont->getID(), true);
                 if (items != nullptr) {
@@ -172,7 +172,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
                             break;
 
                         auto obj = database->loadObject(id);
-                        if (obj->getClass() != UPNP_DEFAULT_CLASS_MUSIC_TRACK)
+                        if (obj->getClass() != UPNP_CLASS_MUSIC_TRACK)
                             continue;
 
                         auto item = std::static_pointer_cast<CdsItem>(obj);
@@ -215,11 +215,11 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription()
     decl.append_attribute("encoding") = "UTF-8";
 
     auto root = doc->append_child("root");
-    root.append_attribute("xmlns") = DESC_DEVICE_NAMESPACE;
+    root.append_attribute("xmlns") = UPNP_DESC_DEVICE_NAMESPACE;
 
     auto specVersion = root.append_child("specVersion");
-    specVersion.append_child("major").append_child(pugi::node_pcdata).set_value(DESC_SPEC_VERSION_MAJOR);
-    specVersion.append_child("minor").append_child(pugi::node_pcdata).set_value(DESC_SPEC_VERSION_MINOR);
+    specVersion.append_child("major").append_child(pugi::node_pcdata).set_value(UPNP_DESC_SPEC_VERSION_MAJOR);
+    specVersion.append_child("minor").append_child(pugi::node_pcdata).set_value(UPNP_DESC_SPEC_VERSION_MINOR);
 
     auto device = root.append_child("device");
 
@@ -228,7 +228,7 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription()
     dlnaDoc.append_child(pugi::node_pcdata).set_value("DMS-1.50");
     // dlnaDoc.append_child(pugi::node_pcdata).set_value("M-DMS-1.50");
 
-    device.append_child("deviceType").append_child(pugi::node_pcdata).set_value(DESC_DEVICE_TYPE);
+    device.append_child("deviceType").append_child(pugi::node_pcdata).set_value(UPNP_DESC_DEVICE_TYPE);
     if (presentationURL.empty())
         device.append_child("presentationURL").append_child(pugi::node_pcdata).set_value("/");
     else
@@ -255,9 +255,9 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription()
         } };
 
         constexpr std::array<std::pair<const char*, const char*>, 3> iconTypes { {
-            { DESC_ICON_PNG_MIMETYPE, ".png" },
-            { DESC_ICON_BMP_MIMETYPE, ".bmp" },
-            { DESC_ICON_JPG_MIMETYPE, ".jpg" },
+            { UPNP_DESC_ICON_PNG_MIMETYPE, ".png" },
+            { UPNP_DESC_ICON_BMP_MIMETYPE, ".bmp" },
+            { UPNP_DESC_ICON_JPG_MIMETYPE, ".jpg" },
         } };
 
         for (const auto& [dim, depth] : iconDims) {
@@ -286,11 +286,11 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription()
         };
         constexpr std::array<ServiceInfo, 3> services { {
             // cm
-            { DESC_CM_SERVICE_TYPE, DESC_CM_SERVICE_ID, DESC_CM_SCPD_URL, DESC_CM_CONTROL_URL, DESC_CM_EVENT_URL },
+            { UPNP_DESC_CM_SERVICE_TYPE, UPNP_DESC_CM_SERVICE_ID, UPNP_DESC_CM_SCPD_URL, UPNP_DESC_CM_CONTROL_URL, UPNP_DESC_CM_EVENT_URL },
             // cds
-            { DESC_CDS_SERVICE_TYPE, DESC_CDS_SERVICE_ID, DESC_CDS_SCPD_URL, DESC_CDS_CONTROL_URL, DESC_CDS_EVENT_URL },
+            { UPNP_DESC_CDS_SERVICE_TYPE, UPNP_DESC_CDS_SERVICE_ID, UPNP_DESC_CDS_SCPD_URL, UPNP_DESC_CDS_CONTROL_URL, UPNP_DESC_CDS_EVENT_URL },
             // media receiver registrar service for the Xbox 360
-            { DESC_MRREG_SERVICE_TYPE, DESC_MRREG_SERVICE_ID, DESC_MRREG_SCPD_URL, DESC_MRREG_CONTROL_URL, DESC_MRREG_EVENT_URL },
+            { UPNP_DESC_MRREG_SERVICE_TYPE, UPNP_DESC_MRREG_SERVICE_ID, UPNP_DESC_MRREG_SCPD_URL, UPNP_DESC_MRREG_CONTROL_URL, UPNP_DESC_MRREG_EVENT_URL },
         } };
 
         for (auto const& s : services) {
@@ -688,13 +688,13 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
             if (!resolution.empty() && checkResolution(resolution, &x, &y)) {
 
                 if ((i > 0) && (((item->getResource(i)->getHandlerType() == CH_LIBEXIF) && (item->getResource(i)->getParameter(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL)) || (item->getResource(i)->getOption(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL) || (item->getResource(i)->getOption(RESOURCE_CONTENT_TYPE) == THUMBNAIL)) && (x <= 160) && (y <= 160))
-                    extend = std::string(D_PROFILE) + "=" + D_JPEG_TN + ";";
+                    extend = std::string(UPNP_DLNA_PROFILE) + "=" + UPNP_DLNA_PROFILE_JPEG_TN + ";";
                 else if ((x <= 640) && (y <= 420))
-                    extend = std::string(D_PROFILE) + "=" + D_JPEG_SM + ";";
+                    extend = std::string(UPNP_DLNA_PROFILE) + "=" + UPNP_DLNA_PROFILE_JPEG_SM + ";";
                 else if ((x <= 1024) && (y <= 768))
-                    extend = std::string(D_PROFILE) + "=" + D_JPEG_MED + ";";
+                    extend = std::string(UPNP_DLNA_PROFILE) + "=" + UPNP_DLNA_PROFILE_JPEG_MED + ";";
                 else if ((x <= 4096) && (y <= 4096))
-                    extend = std::string(D_PROFILE) + "=" + D_JPEG_LRG + ";";
+                    extend = std::string(UPNP_DLNA_PROFILE) + "=" + UPNP_DLNA_PROFILE_JPEG_LRG + ";";
             }
         } else {
             /* handle audio/video content */
@@ -706,13 +706,13 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
         // we do not support seeking at all, so 00
         // and the media is converted, so set CI to 1
         if (!isExtThumbnail && transcoded) {
-            extend.append(D_OP).append("=").append(D_OP_SEEK_DISABLED).append(";").append(D_CONVERSION_INDICATOR).append("=" D_CONVERSION);
+            extend.append(UPNP_DLNA_OP).append("=").append(UPNP_DLNA_OP_SEEK_DISABLED).append(";").append(UPNP_DLNA_CONVERSION_INDICATOR).append("=" UPNP_DLNA_CONVERSION);
 
             if (startswith(mimeType, "audio") || startswith(mimeType, "video"))
-                extend.append(";" D_FLAGS "=" D_TR_FLAGS_AV);
+                extend.append(";" UPNP_DLNA_FLAGS "=" UPNP_DLNA_TR_FLAGS_AV);
         } else {
-            extend.append(D_OP).append("=").append(D_OP_SEEK_ENABLED).append(";");
-            extend.append(D_CONVERSION_INDICATOR).append("=").append(D_NO_CONVERSION);
+            extend.append(UPNP_DLNA_OP).append("=").append(UPNP_DLNA_OP_SEEK_ENABLED).append(";");
+            extend.append(UPNP_DLNA_CONVERSION_INDICATOR).append("=").append(UPNP_DLNA_NO_CONVERSION);
         }
 
         protocolInfo = protocolInfo.substr(0, protocolInfo.rfind(':') + 1).append(extend);

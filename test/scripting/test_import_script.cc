@@ -196,16 +196,16 @@ TEST_F(ImportScriptTest, AddsAudioItemToVariousCdsContainerChains)
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullName), "\\/Audio\\/Artists\\/Artist\\/All - full name", "undefined")).WillOnce(Return(0));
 
     EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Audio", "Artists", "Artist", "Album"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "\\/Audio\\/Artists\\/Artist\\/Album", UPNP_DEFAULT_CLASS_MUSIC_ALBUM)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "\\/Audio\\/Artists\\/Artist\\/Album", UPNP_CLASS_MUSIC_ALBUM)).WillOnce(Return(0));
 
     EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Audio", "Albums", "Album"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "\\/Audio\\/Albums\\/Album", UPNP_DEFAULT_CLASS_MUSIC_ALBUM)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "\\/Audio\\/Albums\\/Album", UPNP_CLASS_MUSIC_ALBUM)).WillOnce(Return(0));
 
     EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Audio", "Genres", "Genre"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "\\/Audio\\/Genres\\/Genre", UPNP_DEFAULT_CLASS_MUSIC_GENRE)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "\\/Audio\\/Genres\\/Genre", UPNP_CLASS_MUSIC_GENRE)).WillOnce(Return(0));
 
     EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Audio", "Composers", "Composer"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "\\/Audio\\/Composers\\/Composer", UPNP_DEFAULT_CLASS_MUSIC_COMPOSER)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "\\/Audio\\/Composers\\/Composer", UPNP_CLASS_MUSIC_COMPOSER)).WillOnce(Return(0));
 
     EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Audio", "Year", "2018"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "\\/Audio\\/Year\\/2018", "undefined")).WillOnce(Return(0));
@@ -329,13 +329,13 @@ TEST_F(ImportScriptTest, AddsImageItemToCdsContainerChains)
     EXPECT_CALL(*commonScriptMock, getPlaylistType(Eq("image/jpeg"))).WillOnce(Return(1));
 
     EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Photos", "All Photos"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asImagePhotos), "\\/Photos\\/All Photos", UPNP_DEFAULT_CLASS_CONTAINER)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asImagePhotos), "\\/Photos\\/All Photos", UPNP_CLASS_CONTAINER)).WillOnce(Return(0));
 
     EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Photos", "Year", "2018", "01"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asImagePhotos), "\\/Photos\\/Year\\/2018\\/01", UPNP_DEFAULT_CLASS_CONTAINER)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asImagePhotos), "\\/Photos\\/Year\\/2018\\/01", UPNP_CLASS_CONTAINER)).WillOnce(Return(0));
 
     EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Photos", "Date", "2018-01-01"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asImagePhotos), "\\/Photos\\/Date\\/2018-01-01", UPNP_DEFAULT_CLASS_CONTAINER)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asImagePhotos), "\\/Photos\\/Date\\/2018-01-01", UPNP_CLASS_CONTAINER)).WillOnce(Return(0));
 
     EXPECT_CALL(*commonScriptMock, getRootPath("object/script/path", location)).WillOnce(Return(1));
 
@@ -457,16 +457,16 @@ TEST_F(ImportScriptTest, AddsOggTheoraAudioItemToVariousCdsContainerChains)
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullName), "\\/Audio\\/Artists\\/Artist\\/All - full name", "undefined")).WillOnce(Return(0));
 
     EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Audio", "Artists", "Artist", "Album"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "\\/Audio\\/Artists\\/Artist\\/Album", UPNP_DEFAULT_CLASS_MUSIC_ALBUM)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "\\/Audio\\/Artists\\/Artist\\/Album", UPNP_CLASS_MUSIC_ALBUM)).WillOnce(Return(0));
 
     EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Audio", "Albums", "Album"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "\\/Audio\\/Albums\\/Album", UPNP_DEFAULT_CLASS_MUSIC_ALBUM)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "\\/Audio\\/Albums\\/Album", UPNP_CLASS_MUSIC_ALBUM)).WillOnce(Return(0));
 
     EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Audio", "Genres", "Genre"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "\\/Audio\\/Genres\\/Genre", UPNP_DEFAULT_CLASS_MUSIC_GENRE)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "\\/Audio\\/Genres\\/Genre", UPNP_CLASS_MUSIC_GENRE)).WillOnce(Return(0));
 
     EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Audio", "Composers", "Composer"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "\\/Audio\\/Composers\\/Composer", UPNP_DEFAULT_CLASS_MUSIC_COMPOSER)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "\\/Audio\\/Composers\\/Composer", UPNP_CLASS_MUSIC_COMPOSER)).WillOnce(Return(0));
 
     EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Audio", "Year", "2018"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "\\/Audio\\/Year\\/2018", "undefined")).WillOnce(Return(0));

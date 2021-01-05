@@ -67,7 +67,7 @@ void web::items::process()
     auto param = std::make_unique<BrowseParam>(parentID, BROWSE_DIRECT_CHILDREN | BROWSE_ITEMS);
     param->setRange(start, count);
 
-    if ((obj->getClass() == UPNP_DEFAULT_CLASS_MUSIC_ALBUM) || (obj->getClass() == UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER))
+    if ((obj->getClass() == UPNP_CLASS_MUSIC_ALBUM) || (obj->getClass() == UPNP_CLASS_PLAYLIST_CONTAINER))
         param->setFlag(BROWSE_TRACK_SORT);
 
     auto arr = database->browse(param);

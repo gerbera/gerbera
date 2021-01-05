@@ -742,7 +742,7 @@ int SQLDatabase::createContainer(int parentID, std::string name, const std::stri
        << TQ("ref_id") << ") VALUES ("
        << parentID << ','
        << OBJECT_TYPE_CONTAINER << ','
-       << (!upnpClass.empty() ? quote(upnpClass) : quote(UPNP_DEFAULT_CLASS_CONTAINER)) << ','
+       << (!upnpClass.empty() ? quote(upnpClass) : quote(UPNP_CLASS_CONTAINER)) << ','
        << quote(std::move(name)) << ','
        << quote(dbLocation) << ','
        << quote(stringHash(dbLocation)) << ',';
@@ -1122,7 +1122,7 @@ std::string SQLDatabase::findFolderImage(int id, std::string trackArtBase)
     q << TQ("dc_title") << "LIKE " << quote("front.jp%") << " OR ";
     q << TQ("dc_title") << "LIKE " << quote("folder.jp%");
     q << " ) AND ";
-    q << TQ("upnp_class") << '=' << quote(UPNP_DEFAULT_CLASS_IMAGE_ITEM) << " AND ";
+    q << TQ("upnp_class") << '=' << quote(UPNP_CLASS_IMAGE_ITEM) << " AND ";
 #ifndef ONLY_REAL_FOLDER_ART
     q << "( ";
     q << "( ";
@@ -1130,7 +1130,7 @@ std::string SQLDatabase::findFolderImage(int id, std::string trackArtBase)
     q << TQ("parent_id") << " IN ";
     q << "(";
     q << "SELECT " << TQ("parent_id") << " FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE ";
-    q << TQ("upnp_class") << '=' << quote(UPNP_DEFAULT_CLASS_MUSIC_TRACK) << " AND ";
+    q << TQ("upnp_class") << '=' << quote(UPNP_CLASS_MUSIC_TRACK) << " AND ";
     q << TQ("id") << " IN ";
     q << "(";
     q << "SELECT " << TQ("ref_id") << " FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE ";

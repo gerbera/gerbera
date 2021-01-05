@@ -217,7 +217,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
             CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
         std::string dlnaContentHeader = getDLNAContentHeader(config, getValueOrDefault(mappings, item->getMimeType()));
         if (!dlnaContentHeader.empty()) {
-            headers->addHeader(D_HTTP_CONTENT_FEATURES_HEADER, dlnaContentHeader);
+            headers->addHeader(UPNP_DLNA_CONTENT_FEATURES_HEADER, dlnaContentHeader);
         }
     }
 
@@ -226,7 +226,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
     std::string dlnaTransferHeader = getDLNATransferHeader(config, mimeType);
     if (!dlnaTransferHeader.empty()) {
-        headers->addHeader(D_HTTP_TRANSFER_MODE_HEADER, dlnaTransferHeader);
+        headers->addHeader(UPNP_DLNA_TRANSFER_MODE_HEADER, dlnaTransferHeader);
     }
 
     //log_debug("sizeof off_t {}, statbuf.st_size {}", sizeof(off_t), sizeof(statbuf.st_size));

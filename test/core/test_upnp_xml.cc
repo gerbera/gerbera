@@ -46,7 +46,7 @@ TEST_F(UpnpXmlTest, RenderObjectContainer)
     obj->setParentID(2);
     obj->setRestricted(false);
     obj->setTitle("Title");
-    obj->setClass(UPNP_DEFAULT_CLASS_MUSIC_ALBUM);
+    obj->setClass(UPNP_CLASS_MUSIC_ALBUM);
     obj->setMetadata(M_ALBUMARTIST, "Creator");
     obj->setMetadata(M_COMPOSER, "Composer");
     obj->setMetadata(M_CONDUCTOR, "Conductor");
@@ -90,7 +90,7 @@ TEST_F(UpnpXmlTest, RenderObjectItem)
     obj->setParentID(2);
     obj->setRestricted(false);
     obj->setTitle("Title");
-    obj->setClass(UPNP_DEFAULT_CLASS_MUSIC_TRACK);
+    obj->setClass(UPNP_CLASS_MUSIC_TRACK);
     obj->setMetadata(M_DESCRIPTION, "Description");
     obj->setMetadata(M_TRACKNUMBER, "10");
     obj->setMetadata(M_ALBUM, "Album");

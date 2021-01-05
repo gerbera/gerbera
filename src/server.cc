@@ -437,15 +437,15 @@ void Server::routeActionRequest(const std::unique_ptr<ActionRequest>& request) c
     }
 
     // we need to match the serviceID to one of our services
-    if (request->getServiceID() == DESC_CM_SERVICE_ID) {
+    if (request->getServiceID() == UPNP_DESC_CM_SERVICE_ID) {
         // this call is for the lifetime stats service
         // log_debug("request for connection manager service");
         cmgr->processActionRequest(request);
-    } else if (request->getServiceID() == DESC_CDS_SERVICE_ID) {
+    } else if (request->getServiceID() == UPNP_DESC_CDS_SERVICE_ID) {
         // this call is for the toaster control service
         //log_debug("routeActionRequest: request for content directory service");
         cds->processActionRequest(request);
-    } else if (request->getServiceID() == DESC_MRREG_SERVICE_ID) {
+    } else if (request->getServiceID() == UPNP_DESC_MRREG_SERVICE_ID) {
         mrreg->processActionRequest(request);
     } else {
         // cp is asking for a nonexistent service, or for a service
@@ -465,15 +465,15 @@ void Server::routeSubscriptionRequest(const std::unique_ptr<SubscriptionRequest>
     }
 
     // we need to match the serviceID to one of our services
-    if (request->getServiceID() == DESC_CDS_SERVICE_ID) {
+    if (request->getServiceID() == UPNP_DESC_CDS_SERVICE_ID) {
         // this call is for the content directory service
         //log_debug("routeSubscriptionRequest: request for content directory service");
         cds->processSubscriptionRequest(request);
-    } else if (request->getServiceID() == DESC_CM_SERVICE_ID) {
+    } else if (request->getServiceID() == UPNP_DESC_CM_SERVICE_ID) {
         // this call is for the connection manager service
         //log_debug("routeSubscriptionRequest: request for connection manager service");
         cmgr->processSubscriptionRequest(request);
-    } else if (request->getServiceID() == DESC_MRREG_SERVICE_ID) {
+    } else if (request->getServiceID() == UPNP_DESC_MRREG_SERVICE_ID) {
         mrreg->processSubscriptionRequest(request);
     } else {
         // cp asks for a nonexistent service or for a service that

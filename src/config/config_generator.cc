@@ -232,10 +232,10 @@ void ConfigGenerator::generateMappings(pugi::xml_node* import)
     ext2mt.append_child(pugi::node_comment).set_value(R"( <map from="avi" to="video/avi" /> )");
 
     auto mtupnp = mappings.append_child("mimetype-upnpclass");
-    map_from_to("audio/*", UPNP_DEFAULT_CLASS_MUSIC_TRACK, &mtupnp);
-    map_from_to("video/*", UPNP_DEFAULT_CLASS_VIDEO_ITEM, &mtupnp);
-    map_from_to("image/*", "object.item.imageItem", &mtupnp);
-    map_from_to("application/ogg", UPNP_DEFAULT_CLASS_MUSIC_TRACK, &mtupnp);
+    map_from_to("audio/*", UPNP_CLASS_MUSIC_TRACK, &mtupnp);
+    map_from_to("video/*", UPNP_CLASS_VIDEO_ITEM, &mtupnp);
+    map_from_to("image/*", UPNP_CLASS_IMAGE_ITEM, &mtupnp);
+    map_from_to("application/ogg", UPNP_CLASS_MUSIC_TRACK, &mtupnp);
 
     auto mtcontent = mappings.append_child("mimetype-contenttype");
     treat_as("audio/mpeg", CONTENT_TYPE_MP3, &mtcontent);
