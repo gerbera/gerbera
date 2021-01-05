@@ -127,6 +127,6 @@
 #define UPNP_XML_UPNP_NAMESPACE_ATTR "xmlns:upnp"
 #define UPNP_XML_UPNP_NAMESPACE "urn:schemas-upnp-org:metadata-1-0/upnp/"
 #define UPNP_XML_SEC_NAMESPACE_ATTR "xmlns:sec"
-#define UPNP_XML_SEC_NAMESPACE "http://www.sec.co.kr/"
+#define UPNP_XML_SEC_NAMESPACE "http://www.sec.co.kr/dlna"
 
 #endif // __UPNP_COMMON_H__
