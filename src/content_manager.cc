@@ -438,7 +438,7 @@ std::shared_ptr<CdsObject> ContentManager::createSingleItem(const fs::path& path
                 log_warning("Playlist {} will not be parsed: Gerbera was compiled without JS support!", obj->getLocation().c_str());
 #endif // JS
         } catch (const std::runtime_error& e) {
-            throw e;
+            log_error("{}", e.what());
         }
     }
     return obj;
@@ -671,7 +671,7 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
         // in this case we will invalidate the autoscan entry
         if (adir->getScanID() == INVALID_SCAN_ID) {
             log_info("lost autoscan for {}", newPath.c_str());
-            adir->setCurrentLMT(location, last_modified_new_max);
+            adir->setCurrentLMT(location, last_modified_new_max > 0 ? last_modified_new_max : (time_t)1);
             closedir(dir);
             return;
         }
@@ -720,6 +720,8 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
             }
         } else if (S_ISDIR(statbuf.st_mode) && asSetting.recursive) {
             int objectID = database->findObjectIDByPath(newPath);
+            if (last_modified_new_max < statbuf.st_mtime)
+                last_modified_new_max = statbuf.st_mtime;
             if (objectID > 0) {
                 log_debug("rescanSubDirectory {}", newPath.c_str());
                 if (list != nullptr)
@@ -740,7 +742,7 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
                 // in this case we will invalidate the autoscan entry
                 if (adir->getScanID() == INVALID_SCAN_ID) {
                     log_info("lost autoscan for {}", newPath.c_str());
-                    adir->setCurrentLMT(location, last_modified_new_max);
+                    adir->setCurrentLMT(location, last_modified_new_max > 0 ? last_modified_new_max : (time_t)1);
                     closedir(dir);
                     return;
                 }
@@ -755,7 +757,7 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
 
     closedir(dir);
 
-    adir->setCurrentLMT(location, last_modified_new_max);
+    adir->setCurrentLMT(location, last_modified_new_max > 0 ? last_modified_new_max : (time_t)1);
 
     if ((shutdownFlag) || ((task != nullptr) && !task->isValid())) {
         return;
@@ -848,15 +850,17 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
             // check database if parent, process existing
             auto obj = createSingleItem(newPath, rootPath, followSymlinks, (parentID > 0), true, task);
 
-            if (obj != nullptr && obj->isItem()) {
+            if (obj != nullptr) {
                 if (last_modified_current_max < statbuf.st_mtime) {
                     last_modified_new_max = statbuf.st_mtime;
                 }
-                parentID = obj->getParentID();
+                if (obj->isItem()) {
+                    parentID = obj->getParentID();
+                }
+                if (obj->isContainer()) {
+                    addRecursive(adir, newPath, followSymlinks, hidden, task);
+                }
             }
-
-            if (obj != nullptr && obj->isContainer())
-                addRecursive(adir, newPath, followSymlinks, hidden, task);
         } catch (const std::runtime_error& ex) {
             log_warning("skipping {} (ex:{})", newPath.c_str(), ex.what());
         }
@@ -864,7 +868,7 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
     closedir(dir);
 
     if (adir != nullptr) {
-        adir->setCurrentLMT(path, last_modified_new_max);
+        adir->setCurrentLMT(path, last_modified_new_max > 0 ? last_modified_new_max : (time_t)1);
     }
 }
 

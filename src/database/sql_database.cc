@@ -34,6 +34,7 @@
 #include <algorithm>
 #include <climits>
 #include <filesystem>
+#include <fmt/chrono.h>
 #include <list>
 #include <sstream>
 #include <string>
@@ -1779,12 +1780,15 @@ std::shared_ptr<AutoscanDirectory> SQLDatabase::_fillAutoscanDirectory(const std
         interval = std::stoi(row->col(6));
     time_t last_modified = std::stol(row->col(7));
 
-    //log_debug("adding autoscan location: {}; recursive: {}", location.c_str(), recursive);
+    log_info("Loading autoscan location: {}; recursive: {}, last_modified: {}", location.c_str(), recursive, fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(last_modified)));
 
     auto dir = std::make_shared<AutoscanDirectory>(location, mode, recursive, persistent, INVALID_SCAN_ID, interval, hidden);
     dir->setObjectID(objectID);
     dir->setDatabaseID(databaseID);
-    dir->setCurrentLMT(location, last_modified);
+    dir->setCurrentLMT("", last_modified);
+    if (last_modified > 0) {
+        dir->setCurrentLMT(location, last_modified);
+    }
     dir->updateLMT();
     return dir;
 }

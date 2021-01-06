@@ -182,29 +182,15 @@ public:
     /// overwrite it until we are done.
     /// The time will be only set if it is higher than the previous value!
     void setCurrentLMT(const std::string& location, time_t lmt);
-
-    time_t getPreviousLMT(const std::string& location) const
-    {
-        auto lmDir = lastModified.find(location);
-        if (lmDir != lastModified.end() && lastModified.at(location) > 0) {
-            return lastModified.at(location);
-        }
-        return last_mod_previous_scan;
-    }
-
-    void updateLMT()
-    {
-        if (activeScanCount == 0) {
-            last_mod_previous_scan = last_mod_current_scan;
-        }
-    }
-
+    time_t getPreviousLMT(const std::string& loc) const;
+    void updateLMT();
     void resetLMT()
     {
         lastModified.clear();
         last_mod_previous_scan = 0;
         last_mod_current_scan = 0;
     }
+    int getActiveScanCount() const { return activeScanCount; }
 
     /// \brief copies all properties to another object
     void copyTo(const std::shared_ptr<AutoscanDirectory>& copy) const;

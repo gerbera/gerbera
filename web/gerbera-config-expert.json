@@ -378,6 +378,16 @@
 							"item": "/import/autoscan/inotify/directory/attribute::hidden-files",
 							"caption": "Import Hidden Files",
 							"editable": true
+						},
+						{
+							"item": "/import/autoscan/inotify/directory/attribute::scan-count",
+							"caption": "Active Scan Count",
+							"editable": false
+						},
+						{
+							"item": "/import/autoscan/inotify/directory/attribute::last-modified",
+							"caption": "Last Modified",
+							"editable": false
 						}
 					]
 				},

@@ -54,17 +54,49 @@ AutoscanDirectory::AutoscanDirectory(fs::path location, ScanMode mode, bool recu
 {
 }
 
-void AutoscanDirectory::setCurrentLMT(const std::string& location, time_t lmt)
+void AutoscanDirectory::setCurrentLMT(const std::string& loc, time_t lmt)
 {
-    lastModified[location] = lmt;
+    bool firstScan = false;
+    bool activeScan = false;
+    if (!loc.empty()) {
+        auto lmDir = lastModified.find(loc);
+        if (lmDir == lastModified.end() || lastModified.at(loc) > 0) {
+            firstScan = true;
+        }
+        if (lmDir == lastModified.end() || lastModified.at(loc) == 0) {
+            activeScan = true;
+        }
+        lastModified[loc] = lmt;
+    }
     if (lmt == 0) {
-        activeScanCount++;
+        if (firstScan) {
+            activeScanCount++;
+        }
     } else {
-        activeScanCount--;
+        if (activeScan && activeScanCount > 0) {
+            activeScanCount--;
+        }
         if (lmt > last_mod_current_scan) {
             last_mod_current_scan = lmt;
         }
     }
+}
+
+void AutoscanDirectory::updateLMT()
+{
+    if (activeScanCount == 0) {
+        last_mod_previous_scan = last_mod_current_scan;
+        log_debug("set autoscan lmt location: {}; last_modified: {}", location.c_str(), last_mod_current_scan);
+    }
+}
+
+time_t AutoscanDirectory::getPreviousLMT(const std::string& loc) const
+{
+    auto lmDir = lastModified.find(loc);
+    if (!loc.empty() && lmDir != lastModified.end() && lastModified.at(loc) > 0) {
+        return lastModified.at(loc);
+    }
+    return last_mod_previous_scan;
 }
 
 AutoscanList::AutoscanList(std::shared_ptr<Database> database)
