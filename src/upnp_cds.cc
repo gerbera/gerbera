@@ -294,7 +294,7 @@ void ContentDirectoryService::processSubscriptionRequest(const std::unique_ptr<S
 #if defined(USING_NPUPNP)
     UpnpAcceptSubscriptionXML(
         deviceHandle, config->getOption(CFG_SERVER_UDN).c_str(),
-        DESC_CDS_SERVICE_ID, xml, request->getSubscriptionID().c_str());
+        UPNP_DESC_CDS_SERVICE_ID, xml, request->getSubscriptionID().c_str());
 #else
     IXML_Document* event = nullptr;
     int err = ixmlParseBufferEx(xml.c_str(), &event);
@@ -328,7 +328,7 @@ void ContentDirectoryService::sendSubscriptionUpdate(const std::string& containe
 
 #if defined(USING_NPUPNP)
     UpnpNotifyXML(deviceHandle, config->getOption(CFG_SERVER_UDN).c_str(),
-        DESC_CDS_SERVICE_ID, xml);
+        UPNP_DESC_CDS_SERVICE_ID, xml);
 #else
     IXML_Document* event = nullptr;
     int err = ixmlParseBufferEx(xml.c_str(), &event);
