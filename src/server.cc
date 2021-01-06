@@ -536,8 +536,10 @@ int Server::registerVirtualDirCallbacks()
     log_debug("Setting UpnpVirtualDir GetInfoCallback");
     int ret = UpnpVirtualDir_set_GetInfoCallback([](const char* filename, UpnpFileInfo* info, const void* cookie, const void** requestCookie) -> int {
         try {
-            auto reqHandler = static_cast<const Server *>(cookie)->createRequestHandler(filename);
-            reqHandler->getInfo(filename, info);
+            auto reqHandler = static_cast<const Server*>(cookie)->createRequestHandler(filename);
+            std::string link = urlUnescape(filename);
+            reqHandler->getInfo(link.c_str(), info);
+            return 0;
         } catch (const ServerShutdownException& se) {
             return -1;
         } catch (const SubtitlesNotFoundException& sex) {
@@ -547,16 +549,15 @@ int Server::registerVirtualDirCallbacks()
             log_error("{}", e.what());
             return -1;
         }
-        return 0; });
+    });
     if (ret != 0)
         return ret;
 
     log_debug("Setting UpnpVirtualDir OpenCallback");
     ret = UpnpVirtualDir_set_OpenCallback([](const char* filename, enum UpnpOpenFileMode mode, const void* cookie, const void* requestCookie) -> UpnpWebFileHandle {
-        std::string link = urlUnescape(filename);
-
         try {
             auto reqHandler = static_cast<const Server*>(cookie)->createRequestHandler(filename);
+            std::string link = urlUnescape(filename);
             auto ioHandler = reqHandler->open(link.c_str(), mode);
             auto ioPtr = static_cast<UpnpWebFileHandle>(ioHandler.release());
             //log_debug("%p open({})", ioPtr, filename);
@@ -600,20 +601,19 @@ int Server::registerVirtualDirCallbacks()
         try {
             auto handler = static_cast<IOHandler*>(f);
             handler->seek(offset, whence);
+            return 0;
         } catch (const std::runtime_error& e) {
             log_error("Exception during seek: {}", e.what());
             return -1;
         }
-
-        return 0;
     });
     if (ret != UPNP_E_SUCCESS)
         return ret;
 
     log_debug("Setting UpnpVirtualDir CloseCallback");
-    UpnpVirtualDir_set_CloseCallback([](UpnpWebFileHandle f, const void* cookie, const void* requestCookie) -> int {
-        int ret_close = 0;
+    ret = UpnpVirtualDir_set_CloseCallback([](UpnpWebFileHandle f, const void* cookie, const void* requestCookie) -> int {
         //log_debug("%p close()", f);
+        int ret_close = 0;
         auto handler = static_cast<IOHandler*>(f);
         try {
             handler->close();

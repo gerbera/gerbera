@@ -67,29 +67,13 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
     auto headers = std::make_unique<Headers>();
 
-    std::string tr_profile;
-    int ret = 0;
-
-    std::string parameters = (filename + strlen(LINK_FILE_REQUEST_HANDLER));
-
-    std::map<std::string, std::string> params;
-    dictDecodeSimple(parameters, &params);
-
-    log_debug("full url (filename): {}, parameters: {}", filename, parameters.c_str());
-
-    auto objIdIt = params.find("object_id");
-    if (objIdIt == params.end()) {
-        //log_error("object_id not found in url");
-        throw_std_runtime_error("getInfo: object_id not found");
-    }
-    int objectID = std::stoi(objIdIt->second);
-    //log_debug("got ObjectID: {}", objectID);
-
-    auto obj = database->loadObject(objectID);
+    auto params = parseParameters(filename, LINK_FILE_REQUEST_HANDLER);
+    auto obj = getObjectById(params);
 
     if (!obj->isItem()) {
         throw_std_runtime_error("requested object is not an item");
     }
+
     auto item = std::static_pointer_cast<CdsItem>(obj);
 
     // determining which resource to serve
@@ -122,7 +106,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     }
 
     struct stat statbuf;
-    ret = stat(path.c_str(), &statbuf);
+    int ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
         if (is_srt)
             throw SubtitlesNotFoundException("Subtitle file " + path.string() + " is not available.");
@@ -143,7 +127,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     }
 
     // for transcoded resourecs res_id will always be negative
-    tr_profile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
+    std::string tr_profile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
 
     log_debug("fetching resource id {}", res_id);
 
@@ -249,24 +233,14 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum U
         throw_std_runtime_error("UPNP_WRITE unsupported");
     }
 
-    std::string parameters = (filename + strlen(LINK_FILE_REQUEST_HANDLER));
-
-    std::map<std::string, std::string> params;
-    dictDecodeSimple(parameters, &params);
-    log_debug("full url (filename): {}, parameters: {}", filename, parameters.c_str());
-
-    auto objIdIt = params.find("object_id");
-    if (objIdIt == params.end()) {
-        throw_std_runtime_error("object_id not found in parameters");
-    }
-    int objectID = std::stoi(objIdIt->second);
-
-    log_debug("Opening media file with object id {}", objectID);
-    auto obj = database->loadObject(objectID);
+    auto params = parseParameters(filename, LINK_FILE_REQUEST_HANDLER);
+    auto obj = getObjectById(params);
 
     if (!obj->isItem()) {
         throw_std_runtime_error("requested object is not an item");
     }
+
+    auto item = std::static_pointer_cast<CdsItem>(obj);
 
     // determining which resource to serve
     size_t res_id = 0;
@@ -275,8 +249,6 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum U
         res_id = std::stoi(res_id_it->second);
     else
         res_id = SIZE_MAX;
-
-    auto item = std::static_pointer_cast<CdsItem>(obj);
 
     fs::path path = item->getLocation();
     bool is_srt = false;
@@ -329,9 +301,9 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum U
         }
 
         auto h = MetadataHandler::createHandler(config, mime, res_handler);
-
         auto io_handler = h->serveContent(item, res_id);
         io_handler->open(mode);
+
         log_debug("end");
         return io_handler;
     }
@@ -342,12 +314,18 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum U
         auto tr_d = std::make_unique<TranscodeDispatcher>(config, content);
         auto tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)
                       ->getByName(tr_profile);
-        return tr_d->open(tp, path, item, range);
+
+        auto io_handler = tr_d->serveContent(tp, path, item, range);
+        io_handler->open(mode);
+
+        log_debug("end");
+        return io_handler;
     }
 
     auto io_handler = std::make_unique<FileIOHandler>(path);
     io_handler->open(mode);
     content->triggerPlayHook(obj);
+
     log_debug("end");
     return io_handler;
 }

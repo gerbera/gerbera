@@ -35,13 +35,16 @@
 
 #include "common.h"
 #include "iohandler/io_handler.h"
+#include <map>
 #include <memory>
+#include <string>
 
 // forward declaration
 class Config;
 class Mime;
 class Database;
 class ContentManager;
+class CdsObject;
 
 class RequestHandler {
 public:
@@ -68,6 +71,9 @@ public:
     /// path = "content/media"
     /// parameters = "object_id=12345&transcode=wav"
     static void splitUrl(const char* url, char separator, std::string& path, std::string& parameters);
+
+    std::map<std::string, std::string> parseParameters(const char* filename, const char* baseLink);
+    std::shared_ptr<CdsObject> getObjectById(std::map<std::string, std::string> params);
 
     virtual ~RequestHandler() = default;
 

@@ -34,6 +34,7 @@
 #include <utility>
 
 #include "content_manager.h"
+#include "database/database.h"
 #include "util/tools.h"
 
 RequestHandler::RequestHandler(std::shared_ptr<ContentManager> content)
@@ -64,4 +65,28 @@ void RequestHandler::splitUrl(const char* url, char separator, std::string& path
         parameters = url_s.substr(i1 + 1);
         path = url_s.substr(0, i1);
     }
+}
+
+std::map<std::string, std::string> RequestHandler::parseParameters(const char* filename, const char* baseLink)
+{
+    std::map<std::string, std::string> params;
+
+    std::string parameters = (filename + strlen(baseLink));
+    dictDecodeSimple(parameters, &params);
+    log_debug("filename: {} -> parameters: {}", filename, parameters.c_str());
+
+    return params;
+}
+
+std::shared_ptr<CdsObject> RequestHandler::getObjectById(std::map<std::string, std::string> params)
+{
+    auto it = params.find("object_id");
+    if (it == params.end()) {
+        //log_error("object_id not found in url");
+        throw_std_runtime_error("getInfo: object_id not found");
+    }
+
+    int objectID = std::stoi(it->second);
+    //log_debug("load objectID: {}", objectID);
+    return database->loadObject(objectID);
 }

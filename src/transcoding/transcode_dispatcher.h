@@ -39,7 +39,8 @@ class TranscodeDispatcher : public TranscodeHandler {
 public:
     TranscodeDispatcher(std::shared_ptr<Config> config,
         std::shared_ptr<ContentManager> content);
-    std::unique_ptr<IOHandler> open(std::shared_ptr<TranscodingProfile> profile,
+
+    std::unique_ptr<IOHandler> serveContent(std::shared_ptr<TranscodingProfile> profile,
         std::string location,
         std::shared_ptr<CdsObject> obj,
         const std::string& range) override;

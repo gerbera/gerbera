@@ -68,7 +68,7 @@ TranscodeExternalHandler::TranscodeExternalHandler(std::shared_ptr<Config> confi
 {
 }
 
-std::unique_ptr<IOHandler> TranscodeExternalHandler::open(std::shared_ptr<TranscodingProfile> profile,
+std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(std::shared_ptr<TranscodingProfile> profile,
     std::string location,
     std::shared_ptr<CdsObject> obj,
     const std::string& range)
@@ -198,11 +198,11 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::open(std::shared_ptr<Transc
         main_proc->removeFile(location);
     }
 
+    content->triggerPlayHook(obj);
+
     std::unique_ptr<IOHandler> u_ioh = std::make_unique<ProcessIOHandler>(content, fifo_name, main_proc, proc_list);
     auto io_handler = std::make_unique<BufferedIOHandler>(
         u_ioh,
         profile->getBufferSize(), profile->getBufferChunkSize(), profile->getBufferInitialFillSize());
-    io_handler->open(UPNP_READ);
-    content->triggerPlayHook(obj);
     return io_handler;
 }
