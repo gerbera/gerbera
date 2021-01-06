@@ -122,7 +122,7 @@ void MRRegistrarService::processSubscriptionRequest(const std::unique_ptr<Subscr
 #if defined(USING_NPUPNP)
     UpnpAcceptSubscriptionXML(
         deviceHandle, config->getOption(CFG_SERVER_UDN).c_str(),
-        DESC_MRREG_SERVICE_ID, xml, request->getSubscriptionID().c_str());
+        UPNP_DESC_MRREG_SERVICE_ID, xml, request->getSubscriptionID().c_str());
 #else
     IXML_Document* event = nullptr;
     int err = ixmlParseBufferEx(xml.c_str(), &event);
