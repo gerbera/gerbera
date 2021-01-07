@@ -39,7 +39,6 @@
 
 class FileRequestHandler : public RequestHandler {
 protected:
-    std::shared_ptr<ContentManager> content;
     UpnpXMLBuilder* xmlBuilder;
 
 public:
