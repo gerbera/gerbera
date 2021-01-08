@@ -11,16 +11,17 @@ INCLUDE(FindPackageHandleStandardArgs)
 find_package(PkgConfig QUIET)
 
 # EBML
-pkg_check_modules(PC_EBM QUIET libebml)
-find_path(EBML_INCLUDE_DIR StdIOCallback.h
-        HINTS ${PC_EBM_INCLUDEDIR} ${PC_EBM_INCLUDE_DIRS}
+pkg_search_module(PC_EBML QUIET libebml)
+find_path(EBML_INCLUDE_DIR EbmlVersion.h
+        HINTS ${PC_EBML_INCLUDEDIR}
         PATH_SUFFIXES ebml)
 FIND_LIBRARY(EBML_LIBRARY ebml
-        HINTS ${PC_EBM_LIBDIR} ${PC_EBM_LIBRARY_DIRS})
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(EBML
-        REQUIRED_VARS EBML_LIBRARY EBML_INCLUDE_DIR)
+        HINTS ${PC_EBML_LIBDIR})
+
+find_package_handle_standard_args(EBML DEFAULT_MSG
+        EBML_LIBRARY EBML_INCLUDE_DIR)
 if (EBML_FOUND)
-    set(EBML_LIBRARIES ${EBML_LIBRARY} ${PC_EBM_LIBRARIES})
+    set(EBML_LIBRARIES ${EBML_LIBRARY})
     set(EBML_INCLUDE_DIRS ${EBML_INCLUDE_DIR})
 endif ()
 MARK_AS_ADVANCED(

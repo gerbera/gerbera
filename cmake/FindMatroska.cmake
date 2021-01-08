@@ -11,16 +11,17 @@ INCLUDE(FindPackageHandleStandardArgs)
 find_package(PkgConfig QUIET)
 
 # Matroska
-pkg_check_modules(PC_MAT QUIET libMatroska)
+pkg_search_module(PC_MAT QUIET libmatroska)
 find_path(Matroska_INCLUDE_DIR KaxVersion.h
-        HINTS ${PC_MAT_INCLUDEDIR} ${PC_MAT_INCLUDE_DIRS}
+        HINTS ${PC_MAT_INCLUDEDIR}
         PATH_SUFFIXES matroska)
 find_library(Matroska_LIBRARY matroska
-        HINTS ${PC_MAT_LIBDIR} ${PC_MAT_LIBRARY_DIRS})
-find_package_handle_standard_args(Matroska
-        REQUIRED_VARS Matroska_LIBRARY Matroska_INCLUDE_DIR)
+        HINTS ${PC_MAT_LIBDIR})
+
+find_package_handle_standard_args(Matroska DEFAULT_MSG
+        Matroska_LIBRARY Matroska_INCLUDE_DIR)
 if (Matroska_FOUND)
-    set(Matroska_LIBRARIES ${Matroska_LIBRARY} ${PC_MAT_LIBRARIES})
+    set(Matroska_LIBRARIES ${Matroska_LIBRARY})
     set(Matroska_INCLUDE_DIRS ${Matroska_INCLUDE_DIR})
 endif ()
 MARK_AS_ADVANCED(
