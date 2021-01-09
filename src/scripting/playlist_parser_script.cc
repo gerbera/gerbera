@@ -94,11 +94,9 @@ js_getCdsObject(duk_context* ctx)
 
 } // extern "C"
 
-PlaylistParserScript::PlaylistParserScript(const std::shared_ptr<Config>& config,
-    std::shared_ptr<Database> database,
-    std::shared_ptr<ContentManager> content,
+PlaylistParserScript::PlaylistParserScript(std::shared_ptr<ContentManager> content,
     const std::shared_ptr<Runtime>& runtime)
-    : Script(config, std::move(database), std::move(content), runtime, "playlist")
+    : Script(std::move(content), runtime, "playlist")
 {
     currentHandle = nullptr;
     currentObjectID = INVALID_OBJECT_ID;

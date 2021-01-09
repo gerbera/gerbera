@@ -37,15 +37,11 @@
 
 #include "cds_objects.h"
 #include "common.h"
-
-// forward declaration
-class Config;
-class Database;
+#include "context.h"
 
 class UpnpXMLBuilder {
 public:
-    explicit UpnpXMLBuilder(std::shared_ptr<Config> config,
-        std::shared_ptr<Database> database,
+    explicit UpnpXMLBuilder(std::shared_ptr<Context> context,
         std::string virtualUrl, std::string presentationURL);
 
     /// \brief Renders XML for the action response header.

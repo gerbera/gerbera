@@ -36,13 +36,23 @@
 #include <memory>
 namespace fs = std::filesystem;
 
+#include "context.h"
+
 // forward declaration
 class CdsObject;
+class ContentManager;
 
 class Layout {
 public:
+    Layout(std::shared_ptr<ContentManager> content);
+
     virtual ~Layout() = default;
     virtual void processCdsObject(std::shared_ptr<CdsObject> obj, fs::path rootpath) = 0;
+
+protected:
+    std::shared_ptr<Config> config;
+    std::shared_ptr<Database> database;
+    std::shared_ptr<ContentManager> content;
 };
 
 #endif // __LAYOUT_H__

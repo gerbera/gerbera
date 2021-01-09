@@ -42,19 +42,16 @@
 
 // forward declaration
 class CdsObject;
-class Config;
-class ContentManager;
-class Database;
 
 class FallbackLayout : public Layout {
 public:
-    FallbackLayout(std::shared_ptr<Config> config,
-        std::shared_ptr<Database> database,
-        std::shared_ptr<ContentManager> content);
-    void processCdsObject(std::shared_ptr<CdsObject> obj, fs::path rootpath) override;
+    FallbackLayout(std::shared_ptr<ContentManager> content);
 #ifdef ENABLE_PROFILING
     virtual ~FallbackLayout();
 #endif
+
+    void processCdsObject(std::shared_ptr<CdsObject> obj, fs::path rootpath) override;
+
 protected:
     void add(const std::shared_ptr<CdsObject>& obj, int parentID, bool use_ref = true);
     static std::string esc(std::string str);
@@ -67,10 +64,6 @@ protected:
 #ifdef ATRAILERS
     void addATrailers(const std::shared_ptr<CdsObject>& obj);
 #endif
-
-    std::shared_ptr<Config> config;
-    std::shared_ptr<Database> database;
-    std::shared_ptr<ContentManager> content;
 
 #ifdef ENABLE_PROFILING
     bool profiling_initialized;

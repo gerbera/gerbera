@@ -42,17 +42,13 @@
 #include "online_service.h"
 
 // forward declaration
-class Config;
 class ContentManager;
-class Database;
 
 /// \brief This is an interface for all online services, the function
 /// handles adding/refreshing content in the database.
 class ATrailersService : public OnlineService {
 public:
-    ATrailersService(const std::shared_ptr<Config>& config,
-        std::shared_ptr<Database> database,
-        std::shared_ptr<ContentManager> content);
+    ATrailersService(std::shared_ptr<ContentManager> content);
     ~ATrailersService() override;
 
     /// \brief Retrieves user specified content from the service and adds
@@ -66,10 +62,6 @@ public:
     std::string getServiceName() const override;
 
 protected:
-    std::shared_ptr<Config> config;
-    std::shared_ptr<Database> database;
-    std::shared_ptr<ContentManager> content;
-
     // the handle *must never be used from multiple threads*
     CURL* curl_handle;
     // safeguard to ensure the above

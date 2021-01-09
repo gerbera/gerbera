@@ -33,6 +33,7 @@
 #define __SERVER_H__
 
 #include "action_request.h"
+#include "context.h"
 #include "request_handler.h"
 #include "subscription_request.h"
 #include "upnp_cds.h"
@@ -40,13 +41,7 @@
 #include "upnp_mrreg.h"
 
 // forward declaration
-class Config;
-class Database;
-class UpdateManager;
 class Timer;
-namespace web {
-class SessionManager;
-} // namespace web
 class TaskProcessor;
 class Runtime;
 class LastFm;
@@ -106,10 +101,13 @@ public:
 
 protected:
     std::shared_ptr<Config> config;
+    std::shared_ptr<Mime> mime;
     std::shared_ptr<Database> database;
     std::shared_ptr<UpdateManager> update_manager;
-    std::shared_ptr<Timer> timer;
     std::shared_ptr<web::SessionManager> session_manager;
+    std::shared_ptr<Context> context;
+
+    std::shared_ptr<Timer> timer;
     std::shared_ptr<TaskProcessor> task_processor;
     std::shared_ptr<Runtime> scripting_runtime;
     std::shared_ptr<LastFm> last_fm;

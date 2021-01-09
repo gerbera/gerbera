@@ -36,13 +36,10 @@
 
 #include "action_request.h"
 #include "common.h"
+#include "context.h"
 #include "subscription_request.h"
 #include "upnp_xml.h"
 #include <string>
-
-// forward declaration
-class Config;
-class Database;
 
 /// \brief This class is responsible for the UPnP Content Directory Service operations.
 ///
@@ -109,8 +106,7 @@ protected:
 public:
     /// \brief Constructor for the CDS, saves the service type and service id
     /// in internal variables.
-    explicit ContentDirectoryService(std::shared_ptr<Config> config,
-        std::shared_ptr<Database> database,
+    explicit ContentDirectoryService(std::shared_ptr<Context> context,
         UpnpXMLBuilder* builder, UpnpDevice_Handle deviceHandle, int stringLimit);
     ~ContentDirectoryService();
 

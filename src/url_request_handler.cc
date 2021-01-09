@@ -166,7 +166,7 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename, enum Up
         if (tp == nullptr)
             throw_std_runtime_error("Transcoding of file " + url + " but no profile matching the name " + tr_profile + " found");
 
-        auto tr_d = std::make_unique<TranscodeDispatcher>(config, content);
+        auto tr_d = std::make_unique<TranscodeDispatcher>(content);
         auto io_handler = tr_d->serveContent(tp, url, item, "");
         io_handler->open(mode);
 

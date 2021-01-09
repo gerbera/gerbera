@@ -32,9 +32,11 @@
 #ifdef ONLINE_SERVICES
 
 #include "online_service.h" // API
-#include "util/tools.h"
 
 #include <array>
+
+#include "content_manager.h"
+#include "util/tools.h"
 
 // DO NOT FORGET TO ADD SERVICE STORAGE PREFIXES TO THIS ARRAY WHEN ADDING
 // NEW SERVICES!
@@ -65,7 +67,10 @@ std::shared_ptr<OnlineService> OnlineServiceList::getService(service_type_t serv
     return service_list.at(service);
 }
 
-OnlineService::OnlineService()
+OnlineService::OnlineService(std::shared_ptr<ContentManager> content)
+    : config(content->getContext()->getConfig())
+    , database(content->getContext()->getDatabase())
+    , content(std::move(content))
 {
     taskCount = 0;
     refresh_interval = 0;

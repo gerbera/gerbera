@@ -32,13 +32,12 @@
 #ifndef __METADATA_HANDLER_H__
 #define __METADATA_HANDLER_H__
 
-#include "common.h"
-
 #include <array>
 
+#include "common.h"
+#include "context.h"
+
 // forward declaration
-class Config;
-class Mime;
 class CdsItem;
 class IOHandler;
 
@@ -176,12 +175,12 @@ protected:
 public:
     /// \brief Definition of the supported metadata fields.
 
-    explicit MetadataHandler(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime);
+    explicit MetadataHandler(std::shared_ptr<Context> context);
 
-    static void setMetadata(const std::shared_ptr<Config>& config, std::shared_ptr<Mime> mime, const std::shared_ptr<CdsItem>& item);
+    static void setMetadata(const std::shared_ptr<Context>& context, const std::shared_ptr<CdsItem>& item);
     static std::string getMetaFieldName(metadata_fields_t field);
     static std::string getResAttrName(resource_attributes_t attr);
-    static std::unique_ptr<MetadataHandler> createHandler(const std::shared_ptr<Config>& config, std::shared_ptr<Mime> mime, int handlerType);
+    static std::unique_ptr<MetadataHandler> createHandler(const std::shared_ptr<Context>& context, int handlerType);
 
     virtual void fillMetadata(std::shared_ptr<CdsItem> item) = 0;
     virtual std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsItem> item, int resNum) = 0;

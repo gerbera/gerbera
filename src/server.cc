@@ -46,6 +46,7 @@
 #include "database/database.h"
 #include "file_request_handler.h"
 #include "update_manager.h"
+#include "util/mime.h"
 #include "util/task_processor.h"
 #include "util/upnp_clients.h"
 #include "web/session_manager.h"
@@ -79,21 +80,25 @@ void Server::init()
     // initialize what is needed
     auto self = shared_from_this();
     timer = std::make_shared<Timer>();
+
+    mime = std::make_shared<Mime>(config);
+    database = Database::createInstance(config, timer);
+    config->updateConfigFromDatabase(database);
+    update_manager = std::make_shared<UpdateManager>(database, self);
+    session_manager = std::make_shared<web::SessionManager>(config, timer);
+    context = std::make_shared<Context>(config, mime, database, update_manager, session_manager);
+
 #ifdef ONLINE_SERVICES
     task_processor = std::make_shared<TaskProcessor>();
 #endif
 #ifdef HAVE_JS
     scripting_runtime = std::make_shared<Runtime>();
 #endif
-    database = Database::createInstance(config, timer);
-    config->updateConfigFromDatabase(database);
-    update_manager = std::make_shared<UpdateManager>(database, self);
-    session_manager = std::make_shared<web::SessionManager>(config, timer);
 #ifdef HAVE_LASTFMLIB
-    last_fm = std::make_shared<LastFm>(config);
+    last_fm = std::make_shared<LastFm>(context);
 #endif
     content = std::make_shared<ContentManager>(
-        config, database, update_manager, session_manager, timer, task_processor, scripting_runtime, last_fm);
+        context, timer, task_processor, scripting_runtime, last_fm);
 }
 
 Server::~Server() { log_debug("Server destroyed"); }
@@ -174,7 +179,7 @@ void Server::run()
     }
 
     log_debug("Creating UpnpXMLBuilder");
-    xmlbuilder = std::make_unique<UpnpXMLBuilder>(config, database, virtualUrl, presentationURL);
+    xmlbuilder = std::make_unique<UpnpXMLBuilder>(context, virtualUrl, presentationURL);
 
     // register root device with the library
     auto desc = xmlbuilder->renderDeviceDescription();
@@ -205,14 +210,14 @@ void Server::run()
     }
 
     log_debug("Creating ContentDirectoryService");
-    cds = std::make_unique<ContentDirectoryService>(config, database, xmlbuilder.get(), rootDeviceHandle,
+    cds = std::make_unique<ContentDirectoryService>(context, xmlbuilder.get(), rootDeviceHandle,
         config->getIntOption(CFG_SERVER_UPNP_TITLE_AND_DESC_STRING_LIMIT));
 
     log_debug("Creating ConnectionManagerService");
-    cmgr = std::make_unique<ConnectionManagerService>(config, database, xmlbuilder.get(), rootDeviceHandle);
+    cmgr = std::make_unique<ConnectionManagerService>(context, xmlbuilder.get(), rootDeviceHandle);
 
     log_debug("Creating MRRegistrarService");
-    mrreg = std::make_unique<MRRegistrarService>(config, xmlbuilder.get(), rootDeviceHandle);
+    mrreg = std::make_unique<MRRegistrarService>(context, xmlbuilder.get(), rootDeviceHandle);
 
     // The advertisement will be sent by LibUPnP every (A/2)-30 seconds, and will have a cache-control max-age of A where A is
     // the value configured here. Ex: A value of 62 will result in an SSDP advertisement being sent every second.
@@ -298,6 +303,14 @@ void Server::shutdown()
     last_fm->shutdown();
     last_fm = nullptr;
 #endif
+#ifdef HAVE_JS
+    scripting_runtime = nullptr;
+#endif
+#ifdef ONLINE_SERVICES
+    task_processor->shutdown();
+    task_processor = nullptr;
+#endif
+
     session_manager = nullptr;
     update_manager->shutdown();
     update_manager = nullptr;
@@ -311,13 +324,12 @@ void Server::shutdown()
     database->shutdown();
     database = nullptr;
 
-    scripting_runtime = nullptr;
-#ifdef ONLINE_SERVICES
-    task_processor->shutdown();
-    task_processor = nullptr;
-#endif
     timer->shutdown();
     timer = nullptr;
+
+    if (mime) {
+        mime = nullptr;
+    }
 }
 
 int Server::handleUpnpRootDeviceEventCallback(Upnp_EventType eventtype, const void* event, void* cookie)

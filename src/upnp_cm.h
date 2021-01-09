@@ -36,12 +36,9 @@
 
 #include "action_request.h"
 #include "common.h"
+#include "context.h"
 #include "subscription_request.h"
 #include "upnp_xml.h"
-
-// forward declaration
-class Config;
-class Database;
 
 /// \brief This class is responsible for the UPnP Connection Manager Service operations.
 ///
@@ -82,8 +79,7 @@ public:
     /// \brief Constructor for the CMS, saves the service type and service id
     /// in internal variables.
     /// \todo Check if it makes sense to use it as it is done now...why not define them as constants?
-    ConnectionManagerService(std::shared_ptr<Config> config,
-        std::shared_ptr<Database> database,
+    explicit ConnectionManagerService(std::shared_ptr<Context> context,
         UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle handle);
     ~ConnectionManagerService();
 

@@ -42,6 +42,9 @@
 #include "util/timer.h"
 
 // forward declaration
+class Config;
+class Database;
+class ContentManager;
 class Layout;
 
 #define ONLINE_SERVICE_AUX_ID "ols"
@@ -61,7 +64,7 @@ typedef enum {
 /// handles adding/refreshing content in the database.
 class OnlineService {
 public:
-    explicit OnlineService();
+    explicit OnlineService(std::shared_ptr<ContentManager> content);
     virtual ~OnlineService() = default;
 
     /// \brief Retrieves user specified content from the service and adds
@@ -126,6 +129,10 @@ public:
     int getItemPurgeInterval() const { return purge_interval; }
 
 protected:
+    std::shared_ptr<Config> config;
+    std::shared_ptr<Database> database;
+    std::shared_ptr<ContentManager> content;
+
     int taskCount;
     int refresh_interval;
     int purge_interval;

@@ -40,10 +40,9 @@
 #include "online_service.h"
 #include "util/tools.h"
 
-ATrailersContentHandler::ATrailersContentHandler(std::shared_ptr<Config> config,
-    std::shared_ptr<Database> database)
-    : config(std::move(config))
-    , database(std::move(database))
+ATrailersContentHandler::ATrailersContentHandler(std::shared_ptr<Context> context)
+    : config(context->getConfig())
+    , database(context->getDatabase())
 {
 }
 

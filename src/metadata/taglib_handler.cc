@@ -55,8 +55,8 @@
 #include "util/string_converter.h"
 #include "util/tools.h"
 
-TagLibHandler::TagLibHandler(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime)
-    : MetadataHandler(std::move(config), std::move(mime))
+TagLibHandler::TagLibHandler(std::shared_ptr<Context> context)
+    : MetadataHandler(std::move(context))
 {
     entrySeparator = this->config->getOption(CFG_IMPORT_LIBOPTS_ENTRY_SEP);
     legacyEntrySeparator = this->config->getOption(CFG_IMPORT_LIBOPTS_ENTRY_LEGACY_SEP);

@@ -36,6 +36,7 @@
 
 #include "common.h"
 #include "config/config_manager.h"
+#include "context.h"
 #include "request_handler.h"
 #include "session_manager.h"
 #include "util/generic_task.h"

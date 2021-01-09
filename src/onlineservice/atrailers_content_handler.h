@@ -38,10 +38,10 @@
 #include <memory>
 #include <pugixml.hpp>
 
+#include "context.h"
+
 // forward declaration
 class CdsObject;
-class Config;
-class Database;
 
 #define ATRAILERS_SERVICE "Apple Trailers"
 #define ATRAILERS_SERVICE_ID "T"
@@ -52,8 +52,7 @@ class Database;
 /// metadata XML.
 class ATrailersContentHandler {
 public:
-    ATrailersContentHandler(std::shared_ptr<Config> config,
-        std::shared_ptr<Database> database);
+    ATrailersContentHandler(std::shared_ptr<Context> context);
 
     /// \brief Sets the service XML from which we will extract the objects.
     /// \return false if service XML contained an error status.

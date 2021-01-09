@@ -74,14 +74,15 @@
 #include "util/task_processor.h"
 #endif
 
-ContentManager::ContentManager(const std::shared_ptr<Config>& config, const std::shared_ptr<Database>& database,
-    std::shared_ptr<UpdateManager> update_manager, std::shared_ptr<web::SessionManager> session_manager,
+ContentManager::ContentManager(const std::shared_ptr<Context>& context,
     std::shared_ptr<Timer> timer, std::shared_ptr<TaskProcessor> task_processor,
     std::shared_ptr<Runtime> scripting_runtime, std::shared_ptr<LastFm> last_fm)
-    : config(config)
-    , database(database)
-    , update_manager(std::move(update_manager))
-    , session_manager(std::move(session_manager))
+    : config(context->getConfig())
+    , mime(context->getMime())
+    , database(context->getDatabase())
+    , update_manager(context->getUpdateManager())
+    , session_manager(context->getSessionManager())
+    , context(std::move(context))
     , timer(std::move(timer))
     , task_processor(std::move(task_processor))
     , scripting_runtime(std::move(scripting_runtime))
@@ -121,7 +122,7 @@ void ContentManager::run()
 {
 #ifdef HAVE_INOTIFY
     auto self = shared_from_this();
-    inotify = std::make_unique<AutoscanInotify>(database, self, config);
+    inotify = std::make_unique<AutoscanInotify>(self);
 
     if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
         auto config_inotify_list = config->getAutoscanListOption(CFG_IMPORT_AUTOSCAN_INOTIFY_LIST);
@@ -146,8 +147,6 @@ void ContentManager::run()
     inotify->run();
 #endif
 
-    mime = std::make_shared<Mime>(config);
-
     std::string layout_type = config->getOption(CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
     if ((layout_type == "builtin") || (layout_type == "js"))
         layout_enabled = true;
@@ -159,7 +158,7 @@ void ContentManager::run()
     if (config->getBoolOption(CFG_ONLINE_CONTENT_SOPCAST_ENABLED)) {
         try {
             auto self = shared_from_this();
-            auto sc = std::make_shared<SopCastService>(config, database, self);
+            auto sc = std::make_shared<SopCastService>(self);
 
             int i = config->getIntOption(CFG_ONLINE_CONTENT_SOPCAST_REFRESH);
             sc->setRefreshInterval(i);
@@ -186,7 +185,7 @@ void ContentManager::run()
     if (config->getBoolOption(CFG_ONLINE_CONTENT_ATRAILERS_ENABLED)) {
         try {
             auto self = shared_from_this();
-            auto at = std::make_shared<ATrailersService>(config, database, self);
+            auto at = std::make_shared<ATrailersService>(self);
 
             int i = config->getIntOption(CFG_ONLINE_CONTENT_ATRAILERS_REFRESH);
             at->setRefreshInterval(i);
@@ -334,10 +333,6 @@ void ContentManager::shutdown()
         pthread_join(taskThread, nullptr);
     taskThread = 0;
 
-    if (mime) {
-        mime = nullptr;
-    }
-
     log_debug("end");
     log_debug("ContentManager destroyed");
 }
@@ -418,7 +413,7 @@ std::shared_ptr<CdsObject> ContentManager::createSingleItem(const fs::path& path
             isNew = true;
         }
     } else if (obj->isItem() && processExisting) {
-        MetadataHandler::setMetadata(config, mime, std::static_pointer_cast<CdsItem>(obj));
+        MetadataHandler::setMetadata(context, std::static_pointer_cast<CdsItem>(obj));
     }
     if (obj->isItem() && layout != nullptr && (processExisting || isNew)) {
         try {
@@ -1128,7 +1123,7 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::path& 
         auto f2i = StringConverter::f2i(config);
         obj->setTitle(f2i->convert(path.filename()));
 
-        MetadataHandler::setMetadata(config, mime, item);
+        MetadataHandler::setMetadata(context, item);
     } else if (S_ISDIR(statbuf.st_mode)) {
         auto cont = std::make_shared<CdsContainer>();
         obj = cont;
@@ -1160,12 +1155,12 @@ void ContentManager::initLayout()
             try {
                 if (layout_type == "js") {
 #ifdef HAVE_JS
-                    layout = std::make_shared<JSLayout>(config, database, self, scripting_runtime);
+                    layout = std::make_shared<JSLayout>(self, scripting_runtime);
 #else
                     log_error("Cannot init layout: Gerbera compiled without JS support, but JS was requested.");
 #endif
                 } else if (layout_type == "builtin") {
-                    layout = std::make_shared<FallbackLayout>(config, database, self);
+                    layout = std::make_shared<FallbackLayout>(self);
                 }
             } catch (const std::runtime_error& e) {
                 layout = nullptr;
@@ -1182,7 +1177,7 @@ void ContentManager::initJS()
 {
     if (playlist_parser_script == nullptr) {
         auto self = shared_from_this();
-        playlist_parser_script = std::make_unique<PlaylistParserScript>(config, database, self, scripting_runtime);
+        playlist_parser_script = std::make_unique<PlaylistParserScript>(self, scripting_runtime);
     }
 }
 

@@ -21,9 +21,11 @@ public:
     {
         config = std::make_shared<ConfigMock>();
         database = std::make_shared<DatabaseMock>(config);
+        context = std::make_shared<Context>(config, nullptr, database, nullptr, nullptr);
+
         std::string virtualDir = "http://server/content";
         std::string presentationURl = "http://someurl/";
-        subject = new UpnpXMLBuilder(config, database, virtualDir, presentationURl);
+        subject = new UpnpXMLBuilder(context, virtualDir, presentationURl);
     }
 
     virtual void TearDown()
@@ -34,6 +36,7 @@ public:
     UpnpXMLBuilder* subject;
     std::shared_ptr<ConfigMock> config;
     std::shared_ptr<DatabaseMock> database;
+    std::shared_ptr<Context> context;
 };
 
 TEST_F(UpnpXmlTest, RenderObjectContainer)

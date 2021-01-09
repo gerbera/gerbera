@@ -41,10 +41,10 @@
 
 #include "autoscan.h"
 #include "config/config.h"
+#include "context.h"
 #include "util/mt_inotify.h"
 
 // forward declaration
-class Database;
 class ContentManager;
 
 #define INOTIFY_ROOT (-1)
@@ -52,7 +52,7 @@ class ContentManager;
 
 class AutoscanInotify {
 public:
-    AutoscanInotify(std::shared_ptr<Database> database, std::shared_ptr<ContentManager> content, std::shared_ptr<Config> config);
+    AutoscanInotify(std::shared_ptr<ContentManager> content);
     ~AutoscanInotify();
 
     void run();
@@ -64,9 +64,9 @@ public:
     void unmonitor(const std::shared_ptr<AutoscanDirectory>& dir);
 
 private:
+    std::shared_ptr<Config> config;
     std::shared_ptr<Database> database;
     std::shared_ptr<ContentManager> content;
-    std::shared_ptr<Config> config;
 
     void threadProc();
 

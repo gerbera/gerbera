@@ -37,25 +37,20 @@
 #include "layout.h"
 
 // forward declaration
-class Config;
 class ContentManager;
 class ImportScript;
 class Runtime;
-class Database;
 
 class JSLayout : public Layout {
 protected:
-    std::shared_ptr<Config> config;
     std::shared_ptr<Runtime> runtime;
-
     std::unique_ptr<ImportScript> import_script;
 
 public:
-    JSLayout(const std::shared_ptr<Config>& config,
-        const std::shared_ptr<Database>& database,
-        const std::shared_ptr<ContentManager>& content,
+    JSLayout(const std::shared_ptr<ContentManager>& content,
         const std::shared_ptr<Runtime>& runtime);
     ~JSLayout() override;
+
     void processCdsObject(std::shared_ptr<CdsObject> obj, fs::path rootpath) override;
 };
 

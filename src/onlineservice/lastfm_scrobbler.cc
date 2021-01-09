@@ -36,8 +36,8 @@
 #include "metadata/metadata_handler.h"
 #include "util/tools.h"
 
-LastFm::LastFm(std::shared_ptr<Config> config)
-    : config(config)
+LastFm::LastFm(std::shared_ptr<Context> context)
+    : config(context->getConfig())
     , scrobbler(NULL)
     , currentTrackId(-1)
 {

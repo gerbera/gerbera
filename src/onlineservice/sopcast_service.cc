@@ -44,12 +44,8 @@
 
 #define SOPCAST_CHANNEL_URL "http://www.sopcast.com/gchlxml"
 
-SopCastService::SopCastService(std::shared_ptr<Config> config,
-    std::shared_ptr<Database> database,
-    std::shared_ptr<ContentManager> content)
-    : config(std::move(config))
-    , database(std::move(database))
-    , content(std::move(content))
+SopCastService::SopCastService(std::shared_ptr<ContentManager> content)
+    : OnlineService(std::move(content))
     , pid(0)
 {
     curl_handle = curl_easy_init();
@@ -130,7 +126,7 @@ bool SopCastService::refreshServiceData(std::shared_ptr<Layout> layout)
         throw_std_runtime_error("Failed to get XML content from SopCast service");
     }
 
-    auto sc = std::make_unique<SopCastContentHandler>(config, database);
+    auto sc = std::make_unique<SopCastContentHandler>(content->getContext());
     sc->setServiceContent(reply);
 
     std::shared_ptr<CdsObject> obj;

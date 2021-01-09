@@ -35,11 +35,10 @@
 #include "scripting/import_script.h"
 #include "scripting/runtime.h"
 
-JSLayout::JSLayout(const std::shared_ptr<Config>& config,
-    const std::shared_ptr<Database>& database,
-    const std::shared_ptr<ContentManager>& content,
+JSLayout::JSLayout(const std::shared_ptr<ContentManager>& content,
     const std::shared_ptr<Runtime>& runtime)
-    : import_script(std::make_unique<ImportScript>(config, database, content, runtime))
+    : Layout(content)
+    , import_script(std::make_unique<ImportScript>(content, runtime))
 {
 }
 

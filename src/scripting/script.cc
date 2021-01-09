@@ -36,6 +36,7 @@
 
 #include "cds_objects.h"
 #include "config/config_manager.h"
+#include "content_manager.h"
 #include "js_functions.h"
 #include "metadata/metadata_handler.h"
 #include "runtime.h"
@@ -121,12 +122,10 @@ void Script::setIntProperty(const std::string& name, int value)
 
 /* **************** */
 
-Script::Script(const std::shared_ptr<Config>& config,
-    std::shared_ptr<Database> database,
-    std::shared_ptr<ContentManager> content,
+Script::Script(std::shared_ptr<ContentManager> content,
     const std::shared_ptr<Runtime>& runtime, const std::string& name)
-    : config(config)
-    , database(std::move(database))
+    : config(content->getContext()->getConfig())
+    , database(content->getContext()->getDatabase())
     , content(std::move(content))
     , runtime(runtime)
     , name(name)

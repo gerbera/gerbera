@@ -149,7 +149,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
             }
         }
 
-        auto h = MetadataHandler::createHandler(config, mime, res_handler);
+        auto h = MetadataHandler::createHandler(context, res_handler);
         if (mimeType.empty())
             mimeType = h->getMimeType();
 
@@ -300,7 +300,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum U
             res_handler = resource->getHandlerType();
         }
 
-        auto h = MetadataHandler::createHandler(config, mime, res_handler);
+        auto h = MetadataHandler::createHandler(context, res_handler);
         auto io_handler = h->serveContent(item, res_id);
         io_handler->open(mode);
 
@@ -311,7 +311,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum U
     if (!is_srt && !tr_profile.empty()) {
         std::string range = getValueOrDefault(params, "range");
 
-        auto tr_d = std::make_unique<TranscodeDispatcher>(config, content);
+        auto tr_d = std::make_unique<TranscodeDispatcher>(content);
         auto tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)
                       ->getByName(tr_profile);
 

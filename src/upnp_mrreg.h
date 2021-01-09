@@ -37,11 +37,9 @@
 
 #include "action_request.h"
 #include "common.h"
+#include "context.h"
 #include "subscription_request.h"
 #include "upnp_xml.h"
-
-// forward declaration
-class Config;
 
 /// \brief This class is responsible for the UPnP Connection Manager Service operations.
 ///
@@ -89,7 +87,7 @@ protected:
 public:
     /// \brief Constructor for MRReg
     /// in internal variables.
-    MRRegistrarService(std::shared_ptr<Config> config,
+    MRRegistrarService(std::shared_ptr<Context> context,
         UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle);
     ~MRRegistrarService();
 

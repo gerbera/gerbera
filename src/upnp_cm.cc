@@ -38,11 +38,10 @@
 #include "server.h"
 #include "util/tools.h"
 
-ConnectionManagerService::ConnectionManagerService(std::shared_ptr<Config> config,
-    std::shared_ptr<Database> database,
+ConnectionManagerService::ConnectionManagerService(std::shared_ptr<Context> context,
     UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle)
-    : config(std::move(config))
-    , database(std::move(database))
+    : config(context->getConfig())
+    , database(context->getDatabase())
     , xmlBuilder(xmlBuilder)
     , deviceHandle(deviceHandle)
 {
