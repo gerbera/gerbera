@@ -140,13 +140,26 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
         } else if (strcmp(e->key, "track") == 0) {
             log_debug("Identified metadata track: {}", e->value);
             field = M_TRACKNUMBER;
+        } else if (strcmp(e->key, "album_artist") == 0) {
+            log_debug("Identified metadata album_artist: {}", e->value);
+            field = M_ALBUMARTIST;
+        } else if (strcmp(e->key, "composer") == 0) {
+            log_debug("Identified metadata composer: {}", e->value);
+            field = M_COMPOSER;
+        } else if (strcmp(e->key, "performer") == 0) {
+            log_debug("Identified metadata performer: {}", e->value);
+            field = M_CONDUCTOR;
         } else {
             continue;
         }
 
         // only use ffmpeg meta data if not found by other handler
-        if (item->getMetadata(field).empty())
+        if (item->getMetadata(field).empty()) {
             item->setMetadata(field, sc->convert(trimString(value)));
+            if (field == M_TRACKNUMBER) {
+                item->setTrackNumber(std::stoi(value));
+            }
+        }
     }
 }
 
