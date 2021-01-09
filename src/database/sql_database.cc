@@ -46,7 +46,6 @@
 #include "config/config_manager.h"
 #include "config/config_setup.h"
 #include "search_handler.h"
-#include "update_manager.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
 
