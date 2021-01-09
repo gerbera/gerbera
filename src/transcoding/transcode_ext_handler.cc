@@ -53,7 +53,6 @@
 #include "metadata/metadata_handler.h"
 #include "server.h"
 #include "transcoding_process_executor.h"
-#include "update_manager.h"
 #include "util/process.h"
 #include "util/tools.h"
 #include "web/session_manager.h"

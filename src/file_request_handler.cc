@@ -41,7 +41,6 @@
 #include "iohandler/file_io_handler.h"
 #include "metadata/metadata_handler.h"
 #include "server.h"
-#include "update_manager.h"
 #include "util/process.h"
 #include "web/session_manager.h"
 

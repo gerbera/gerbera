@@ -39,11 +39,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "cds_objects.h"
-#include "server.h"
-#include "update_manager.h"
-#include "util/process.h"
-
 MemIOHandler::MemIOHandler(const void* buffer, int length)
     : buffer(static_cast<char*>(malloc(length)))
     , length(length)
