@@ -43,6 +43,7 @@
 #include "autoscan.h"
 #include "cds_objects.h"
 #include "common.h"
+#include "context.h"
 #include "util/generic_task.h"
 #include "util/timer.h"
 
@@ -69,13 +70,6 @@ class PlaylistParserScript;
 #include "util/executor.h"
 
 // forward declaration
-class Config;
-class Database;
-class UpdateManager;
-class Mime;
-namespace web {
-class SessionManager;
-} // namespace web
 class Runtime;
 class LastFm;
 class ContentManager;
@@ -144,8 +138,7 @@ public:
 
 class ContentManager : public Timer::Subscriber, public std::enable_shared_from_this<ContentManager> {
 public:
-    ContentManager(const std::shared_ptr<Config>& config, const std::shared_ptr<Database>& database,
-        std::shared_ptr<UpdateManager> update_manager, std::shared_ptr<web::SessionManager> session_manager,
+    ContentManager(const std::shared_ptr<Context>& context,
         std::shared_ptr<Timer> timer, std::shared_ptr<TaskProcessor> task_processor,
         std::shared_ptr<Runtime> scripting_runtime, std::shared_ptr<LastFm> last_fm);
     void run();
@@ -308,25 +301,9 @@ public:
     void destroyJS();
 #endif
 
-    std::shared_ptr<Config> getConfig() const
+    std::shared_ptr<Context> getContext() const
     {
-        return config;
-    }
-    std::shared_ptr<Mime> getMime() const
-    {
-        return mime;
-    }
-    std::shared_ptr<Database> getDatabase() const
-    {
-        return database;
-    }
-    std::shared_ptr<UpdateManager> getUpdateManager() const
-    {
-        return update_manager;
-    }
-    std::shared_ptr<web::SessionManager> getSessionManager() const
-    {
-        return session_manager;
+        return context;
     }
 
 protected:
@@ -335,6 +312,8 @@ protected:
     std::shared_ptr<Database> database;
     std::shared_ptr<UpdateManager> update_manager;
     std::shared_ptr<web::SessionManager> session_manager;
+    std::shared_ptr<Context> context;
+
     std::shared_ptr<Timer> timer;
     std::shared_ptr<TaskProcessor> task_processor;
     std::shared_ptr<Runtime> scripting_runtime;

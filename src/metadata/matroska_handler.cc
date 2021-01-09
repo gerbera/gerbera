@@ -120,8 +120,8 @@ public:
     }
 };
 
-MatroskaHandler::MatroskaHandler(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime)
-    : MetadataHandler(std::move(config), std::move(mime))
+MatroskaHandler::MatroskaHandler(std::shared_ptr<Context> context)
+    : MetadataHandler(std::move(context))
 {
 }
 

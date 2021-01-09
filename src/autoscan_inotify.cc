@@ -43,10 +43,10 @@
 
 #define INOTIFY_MAX_USER_WATCHES_FILE "/proc/sys/fs/inotify/max_user_watches"
 
-AutoscanInotify::AutoscanInotify(std::shared_ptr<Database> database, std::shared_ptr<ContentManager> content, std::shared_ptr<Config> config)
-    : database(std::move(database))
+AutoscanInotify::AutoscanInotify(std::shared_ptr<ContentManager> content)
+    : config(content->getContext()->getConfig())
+    , database(content->getContext()->getDatabase())
     , content(std::move(content))
-    , config(std::move(config))
 {
     std::error_code ec;
     if (isRegularFile(INOTIFY_MAX_USER_WATCHES_FILE, ec)) {

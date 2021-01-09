@@ -35,15 +35,17 @@
 #ifndef __LASTFM_H__
 #define __LASTFM_H__
 
-#include <cds_objects.h>
-#include <config/config_manager.h>
 #include <cstdlib>
 #include <lastfmlib/lastfmscrobblerc.h>
 #include <memory>
 
+#include "cds_objects.h"
+#include "config/config_manager.h"
+#include "context.h"
+
 class LastFm {
 public:
-    explicit LastFm(std::shared_ptr<Config> config);
+    explicit LastFm(std::shared_ptr<Context> context);
     ~LastFm();
 
     /// \brief Initializes the LastFm client.

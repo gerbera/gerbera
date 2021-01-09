@@ -29,7 +29,6 @@
 #include "util/tools.h"
 
 Mime::Mime(std::shared_ptr<Config> config)
-//    : config(std::move(config))
 {
     extension_map_case_sensitive = config->getBoolOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_CASE_SENSITIVE);
     extension_mimetype_map = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
@@ -82,12 +81,14 @@ std::string Mime::bufferToMimeType(const void* buffer, size_t length)
 
 std::string Mime::extensionToMimeType(const fs::path& path)
 {
+    log_debug("1");
     std::string extension = path.extension();
     if (!extension.empty())
         extension.erase(0, 1); // remove leading .
 
     if (!extension_map_case_sensitive)
         extension = toLower(extension);
+    log_debug("2");
 
     return getValueOrDefault(extension_mimetype_map, extension);
 }

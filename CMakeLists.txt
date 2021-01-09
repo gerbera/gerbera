@@ -63,6 +63,8 @@ add_library(libgerbera STATIC
         src/config/directory_tweak.cc
         src/content_manager.cc
         src/content_manager.h
+        src/context.cc
+        src/context.h
         src/contrib/md5.c
         src/contrib/md5.h
         src/device_description_handler.cc
@@ -91,6 +93,7 @@ add_library(libgerbera STATIC
         src/layout/fallback_layout.h
         src/layout/js_layout.cc
         src/layout/js_layout.h
+        src/layout/layout.cc
         src/layout/layout.h
         src/metadata/exiv2_handler.cc
         src/metadata/exiv2_handler.h
@@ -153,6 +156,7 @@ add_library(libgerbera STATIC
         src/transcoding/transcode_dispatcher.h
         src/transcoding/transcode_ext_handler.cc
         src/transcoding/transcode_ext_handler.h
+        src/transcoding/transcode_handler.cc
         src/transcoding/transcode_handler.h
         src/transcoding/transcoding.cc
         src/transcoding/transcoding.h

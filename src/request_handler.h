@@ -33,16 +33,19 @@
 #ifndef __REQUEST_HANDLER_H__
 #define __REQUEST_HANDLER_H__
 
-#include "common.h"
-#include "iohandler/io_handler.h"
 #include <map>
 #include <memory>
 #include <string>
+
+#include "common.h"
+#include "context.h"
+#include "iohandler/io_handler.h"
 
 // forward declaration
 class Config;
 class Mime;
 class Database;
+class Context;
 class ContentManager;
 class CdsObject;
 
@@ -81,6 +84,7 @@ protected:
     std::shared_ptr<Config> config;
     std::shared_ptr<Mime> mime;
     std::shared_ptr<Database> database;
+    std::shared_ptr<Context> context;
     std::shared_ptr<ContentManager> content;
 };
 

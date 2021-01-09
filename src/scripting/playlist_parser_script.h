@@ -39,15 +39,12 @@
 
 // forward declaration
 class CdsObject;
-class Config;
 class ContentManager;
 class GenericTask;
 
 class PlaylistParserScript : public Script {
 public:
-    PlaylistParserScript(const std::shared_ptr<Config>& config,
-        std::shared_ptr<Database> database,
-        std::shared_ptr<ContentManager> content,
+    PlaylistParserScript(std::shared_ptr<ContentManager> content,
         const std::shared_ptr<Runtime>& runtime);
     ~PlaylistParserScript() override;
 

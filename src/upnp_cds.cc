@@ -42,13 +42,12 @@
 #include "server.h"
 #include "util/upnp_quirks.h"
 
-ContentDirectoryService::ContentDirectoryService(std::shared_ptr<Config> config,
-    std::shared_ptr<Database> database,
+ContentDirectoryService::ContentDirectoryService(std::shared_ptr<Context> context,
     UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle, int stringLimit)
     : systemUpdateID(0)
     , stringLimit(stringLimit)
-    , config(std::move(config))
-    , database(std::move(database))
+    , config(context->getConfig())
+    , database(context->getDatabase())
     , deviceHandle(deviceHandle)
     , xmlBuilder(xmlBuilder)
 {

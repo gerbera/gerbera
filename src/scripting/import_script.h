@@ -38,18 +38,15 @@
 #include "script.h"
 
 // forward declaration
-class Config;
 class ContentManager;
 class Runtime;
-class Database;
 
 class ImportScript : public Script {
 public:
-    ImportScript(const std::shared_ptr<Config>& config,
-        std::shared_ptr<Database> database,
-        std::shared_ptr<ContentManager> content,
+    ImportScript(std::shared_ptr<ContentManager> content,
         const std::shared_ptr<Runtime>& runtime);
     ~ImportScript() override;
+
     void processCdsObject(const std::shared_ptr<CdsObject>& obj, const std::string& scriptpath);
     script_class_t whoami() override { return S_IMPORT; }
 };

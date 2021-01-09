@@ -351,12 +351,8 @@ void FallbackLayout::addATrailers(const std::shared_ptr<CdsObject>& obj)
 }
 #endif
 
-FallbackLayout::FallbackLayout(std::shared_ptr<Config> config,
-    std::shared_ptr<Database> database,
-    std::shared_ptr<ContentManager> content)
-    : config(std::move(config))
-    , database(std::move(database))
-    , content(std::move(content))
+FallbackLayout::FallbackLayout(std::shared_ptr<ContentManager> content)
+    : Layout(content)
 {
 #ifdef ENABLE_PROFILING
     PROF_INIT_GLOBAL(layout_profiling, "fallback layout");

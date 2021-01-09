@@ -36,13 +36,12 @@
 #include <mutex>
 
 #include "common.h"
+#include "context.h"
 
 // forward declaration
 class CdsObject;
-class Config;
 class ContentManager;
 class Runtime;
-class Database;
 class StringConverter;
 
 // perform garbage collection after script has been run for x times
@@ -93,10 +92,9 @@ public:
     std::shared_ptr<ContentManager> getContent() const { return content; }
 
 protected:
-    Script(const std::shared_ptr<Config>& config,
-        std::shared_ptr<Database> database,
-        std::shared_ptr<ContentManager> content,
+    Script(std::shared_ptr<ContentManager> content,
         const std::shared_ptr<Runtime>& runtime, const std::string& name);
+
     void execute();
     int gc_counter;
 

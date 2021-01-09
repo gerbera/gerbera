@@ -35,6 +35,11 @@
 #ifndef __SOPCAST_CONTENT_HANDLER_H__
 #define __SOPCAST_CONTENT_HANDLER_H__
 
+#include <memory>
+#include <pugixml.hpp>
+
+#include "context.h"
+
 #define SOPCAST_SERVICE "SopCast"
 #define SOPCAST_SERVICE_ID "S"
 #define SOPCAST_CHANNEL_ID "cid"
@@ -44,19 +49,14 @@
 #define SOPCAST_AUXDATA_LANGUAGE SOPCAST_SERVICE_ID "1"
 #define SOPCAST_AUXDATA_GROUP SOPCAST_SERVICE_ID "2"
 
-#include <memory>
-#include <pugixml.hpp>
-
 // forward declaration
 class CdsObject;
-class Config;
-class Database;
 
 /// \brief this class is responsible for creating objects from the SopCast
 /// metadata XML.
 class SopCastContentHandler {
 public:
-    SopCastContentHandler(std::shared_ptr<Config> config, std::shared_ptr<Database> database);
+    SopCastContentHandler(std::shared_ptr<Context> context);
 
     /// \brief Sets the service XML from which we will extract the objects.
     /// \return false if service XML contained an error status.

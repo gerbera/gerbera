@@ -38,9 +38,10 @@
 #include "util/tools.h"
 
 RequestHandler::RequestHandler(std::shared_ptr<ContentManager> content)
-    : config(content->getConfig())
-    , mime(content->getMime())
-    , database(content->getDatabase())
+    : config(content->getContext()->getConfig())
+    , mime(content->getContext()->getMime())
+    , database(content->getContext()->getDatabase())
+    , context(content->getContext())
     , content(std::move(content))
 {
 }

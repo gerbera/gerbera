@@ -50,9 +50,7 @@ class Database;
 /// handles adding/refreshing content in the database.
 class SopCastService : public OnlineService {
 public:
-    SopCastService(std::shared_ptr<Config> config,
-        std::shared_ptr<Database> database,
-        std::shared_ptr<ContentManager> content);
+    SopCastService(std::shared_ptr<ContentManager> content);
     ~SopCastService() override;
 
     /// \brief Retrieves user specified content from the service and adds
@@ -66,10 +64,6 @@ public:
     std::string getServiceName() const override;
 
 protected:
-    std::shared_ptr<Config> config;
-    std::shared_ptr<Database> database;
-    std::shared_ptr<ContentManager> content;
-
     // the handle *must never be used from multiple threads*
     CURL* curl_handle;
     // safeguard to ensure the above

@@ -34,8 +34,8 @@
 #include "iohandler/file_io_handler.h"
 #include "util/tools.h"
 
-MetacontentHandler::MetacontentHandler(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime)
-    : MetadataHandler(std::move(config), std::move(mime))
+MetacontentHandler::MetacontentHandler(std::shared_ptr<Context> context)
+    : MetadataHandler(std::move(context))
 {
 }
 
@@ -103,8 +103,8 @@ std::vector<std::string> FanArtHandler::names = {
 };
 bool FanArtHandler::initDone = false;
 
-FanArtHandler::FanArtHandler(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime)
-    : MetacontentHandler(std::move(config), std::move(mime))
+FanArtHandler::FanArtHandler(std::shared_ptr<Context> context)
+    : MetacontentHandler(std::move(context))
 {
     if (!initDone) {
         std::vector<std::string> files = this->config->getArrayOption(CFG_IMPORT_RESOURCES_FANART_FILE_LIST);
@@ -155,8 +155,8 @@ std::vector<std::string> SubtitleHandler::names = {
 };
 bool SubtitleHandler::initDone = false;
 
-SubtitleHandler::SubtitleHandler(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime)
-    : MetacontentHandler(std::move(config), std::move(mime))
+SubtitleHandler::SubtitleHandler(std::shared_ptr<Context> context)
+    : MetacontentHandler(std::move(context))
 {
     if (!initDone) {
         std::vector<std::string> files = this->config->getArrayOption(CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST);
@@ -209,8 +209,8 @@ std::vector<std::string> ResourceHandler::names = {
 };
 bool ResourceHandler::initDone = false;
 
-ResourceHandler::ResourceHandler(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime)
-    : MetacontentHandler(std::move(config), std::move(mime))
+ResourceHandler::ResourceHandler(std::shared_ptr<Context> context)
+    : MetacontentHandler(std::move(context))
 {
     if (!initDone) {
         std::vector<std::string> files = this->config->getArrayOption(CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST);

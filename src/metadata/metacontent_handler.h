@@ -35,7 +35,7 @@ namespace fs = std::filesystem;
 /// \brief This class is responsible for populating filesystem based metadata
 class MetacontentHandler : public MetadataHandler {
 public:
-    explicit MetacontentHandler(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime);
+    explicit MetacontentHandler(std::shared_ptr<Context> context);
     static bool caseSensitive;
 
 protected:
@@ -46,7 +46,7 @@ protected:
 /// \brief This class is responsible for populating filesystem based album and fan art
 class FanArtHandler : public MetacontentHandler {
 public:
-    explicit FanArtHandler(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime);
+    explicit FanArtHandler(std::shared_ptr<Context> context);
     void fillMetadata(std::shared_ptr<CdsItem> item) override;
     std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsItem> item, int resNum) override;
 
@@ -58,7 +58,7 @@ private:
 /// \brief This class is responsible for populating filesystem based subtitles
 class SubtitleHandler : public MetacontentHandler {
 public:
-    explicit SubtitleHandler(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime);
+    explicit SubtitleHandler(std::shared_ptr<Context> context);
     void fillMetadata(std::shared_ptr<CdsItem> item) override;
     std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsItem> item, int resNum) override;
 
@@ -70,7 +70,7 @@ private:
 /// \brief This class is responsible for reverse mapping filesystem based resources
 class ResourceHandler : public MetacontentHandler {
 public:
-    explicit ResourceHandler(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime);
+    explicit ResourceHandler(std::shared_ptr<Context> context);
     void fillMetadata(std::shared_ptr<CdsItem> item) override;
     std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsItem> item, int resNum) override;
 

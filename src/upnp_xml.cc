@@ -39,11 +39,10 @@
 #include "server.h"
 #include "transcoding/transcoding.h"
 
-UpnpXMLBuilder::UpnpXMLBuilder(std::shared_ptr<Config> config,
-    std::shared_ptr<Database> database,
+UpnpXMLBuilder::UpnpXMLBuilder(std::shared_ptr<Context> context,
     std::string virtualUrl, std::string presentationURL)
-    : config(std::move(config))
-    , database(std::move(database))
+    : config(context->getConfig())
+    , database(context->getDatabase())
     , virtualURL(std::move(virtualUrl))
     , presentationURL(std::move(presentationURL))
 {

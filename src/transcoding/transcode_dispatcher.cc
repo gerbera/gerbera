@@ -39,9 +39,8 @@
 #include "transcoding.h"
 #include "util/tools.h"
 
-TranscodeDispatcher::TranscodeDispatcher(std::shared_ptr<Config> config,
-    std::shared_ptr<ContentManager> content)
-    : TranscodeHandler(std::move(config), std::move(content))
+TranscodeDispatcher::TranscodeDispatcher(std::shared_ptr<ContentManager> content)
+    : TranscodeHandler(std::move(content))
 {
 }
 
@@ -54,7 +53,7 @@ std::unique_ptr<IOHandler> TranscodeDispatcher::serveContent(std::shared_ptr<Tra
         throw_std_runtime_error("Transcoding of file " + location + "requested but no profile given ");
 
     if (profile->getType() == TR_External) {
-        auto tr_ext = std::make_unique<TranscodeExternalHandler>(config, content);
+        auto tr_ext = std::make_unique<TranscodeExternalHandler>(content);
         return tr_ext->serveContent(profile, location, obj, range);
     }
 

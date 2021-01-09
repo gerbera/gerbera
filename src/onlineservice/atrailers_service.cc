@@ -47,12 +47,8 @@
 #define ATRAILERS_SERVICE_URL_640 "https://trailers.apple.com/trailers/home/xml/current.xml"
 #define ATRAILERS_SERVICE_URL_720P "https://trailers.apple.com/trailers/home/xml/current_720p.xml"
 
-ATrailersService::ATrailersService(const std::shared_ptr<Config>& config,
-    std::shared_ptr<Database> database,
-    std::shared_ptr<ContentManager> content)
-    : config(config)
-    , database(std::move(database))
-    , content(std::move(content))
+ATrailersService::ATrailersService(std::shared_ptr<ContentManager> content)
+    : OnlineService(std::move(content))
     , pid(0)
 {
     curl_handle = curl_easy_init();
@@ -137,7 +133,7 @@ bool ATrailersService::refreshServiceData(std::shared_ptr<Layout> layout)
         throw_std_runtime_error("Failed to get XML content from Trailers service");
     }
 
-    auto sc = std::make_unique<ATrailersContentHandler>(config, database);
+    auto sc = std::make_unique<ATrailersContentHandler>(content->getContext());
     sc->setServiceContent(reply);
 
     std::shared_ptr<CdsObject> obj;
