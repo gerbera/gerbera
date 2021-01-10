@@ -63,8 +63,8 @@ add_library(libgerbera STATIC
         src/content/autoscan_inotify.h
         src/content/content_manager.cc
         src/content/content_manager.h
-        src/content/layout/fallback_layout.cc
-        src/content/layout/fallback_layout.h
+        src/content/layout/builtin_layout.cc
+        src/content/layout/builtin_layout.h
         src/content/layout/js_layout.cc
         src/content/layout/js_layout.h
         src/content/layout/layout.cc

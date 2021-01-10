@@ -27,9 +27,9 @@
     $Id$
 */
 
-/// \file fallback_layout.cc
+/// \file builtin_layout.cc
 
-#include "fallback_layout.h" // API
+#include "builtin_layout.h" // API
 
 #include <utility>
 
@@ -52,7 +52,7 @@
 
 #endif //ONLINE_SERVICES
 
-void FallbackLayout::add(const std::shared_ptr<CdsObject>& obj, int parentID, bool use_ref)
+void BuiltinLayout::add(const std::shared_ptr<CdsObject>& obj, int parentID, bool use_ref)
 {
     obj->setParentID(parentID);
     if (use_ref)
@@ -62,12 +62,12 @@ void FallbackLayout::add(const std::shared_ptr<CdsObject>& obj, int parentID, bo
     content->addObject(obj);
 }
 
-std::string FallbackLayout::esc(std::string str)
+std::string BuiltinLayout::esc(std::string str)
 {
     return escape(std::move(str), VIRTUAL_CONTAINER_ESCAPE, VIRTUAL_CONTAINER_SEPARATOR);
 }
 
-void FallbackLayout::addVideo(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath)
+void BuiltinLayout::addVideo(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath)
 {
     auto f2i = StringConverter::f2i(config);
     int id = content->addContainerChain("/Video/All Video");
@@ -94,7 +94,7 @@ void FallbackLayout::addVideo(const std::shared_ptr<CdsObject>& obj, const fs::p
     }
 }
 
-void FallbackLayout::addImage(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath)
+void BuiltinLayout::addImage(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath)
 {
     int id;
     auto f2i = StringConverter::f2i(config);
@@ -149,7 +149,7 @@ void FallbackLayout::addImage(const std::shared_ptr<CdsObject>& obj, const fs::p
     }
 }
 
-void FallbackLayout::addAudio(const std::shared_ptr<CdsObject>& obj)
+void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj)
 {
     std::string desc;
 
@@ -276,7 +276,7 @@ void FallbackLayout::addAudio(const std::shared_ptr<CdsObject>& obj)
 }
 
 #ifdef SOPCAST
-void FallbackLayout::addSopCast(const std::shared_ptr<CdsObject>& obj)
+void BuiltinLayout::addSopCast(const std::shared_ptr<CdsObject>& obj)
 {
 #define SP_VPATH "/Online Services/SopCast"
     std::string chain;
@@ -311,7 +311,7 @@ void FallbackLayout::addSopCast(const std::shared_ptr<CdsObject>& obj)
 #endif
 
 #ifdef ATRAILERS
-void FallbackLayout::addATrailers(const std::shared_ptr<CdsObject>& obj)
+void BuiltinLayout::addATrailers(const std::shared_ptr<CdsObject>& obj)
 {
 #define AT_VPATH "/Online Services/Apple Trailers"
     int id = content->addContainerChain(AT_VPATH "/All Trailers");
@@ -351,7 +351,7 @@ void FallbackLayout::addATrailers(const std::shared_ptr<CdsObject>& obj)
 }
 #endif
 
-FallbackLayout::FallbackLayout(std::shared_ptr<ContentManager> content)
+BuiltinLayout::BuiltinLayout(std::shared_ptr<ContentManager> content)
     : Layout(content)
 {
 #ifdef ENABLE_PROFILING
@@ -359,7 +359,7 @@ FallbackLayout::FallbackLayout(std::shared_ptr<ContentManager> content)
 #endif
 }
 
-void FallbackLayout::processCdsObject(std::shared_ptr<CdsObject> obj, fs::path rootpath)
+void BuiltinLayout::processCdsObject(std::shared_ptr<CdsObject> obj, fs::path rootpath)
 {
     log_debug("Process CDS Object: {}", obj->getTitle().c_str());
 #ifdef ENABLE_PROFILING
@@ -419,7 +419,7 @@ void FallbackLayout::processCdsObject(std::shared_ptr<CdsObject> obj, fs::path r
 }
 
 #ifdef ENABLE_PROFILING
-FallbackLayout::~FallbackLayout()
+BuiltinLayout::~BuiltinLayout()
 {
     PROF_PRINT(&layout_profiling);
 }
