@@ -33,8 +33,8 @@
 
 #include <utility>
 
-#include "autoscan.h"
-#include "content_manager.h"
+#include "content/autoscan.h"
+#include "content/content_manager.h"
 #include "database/database.h"
 
 static bool WebAutoscanProcessListComparator(const std::shared_ptr<AutoscanDirectory>& a1, const std::shared_ptr<AutoscanDirectory>& a2)

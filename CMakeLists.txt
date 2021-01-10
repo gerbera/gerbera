@@ -40,10 +40,6 @@ set(WITH_TESTS          0 CACHE BOOL "Enables Unit Tests")
 add_library(libgerbera STATIC 
         src/action_request.cc
         src/action_request.h
-        src/autoscan.cc
-        src/autoscan.h
-        src/autoscan_inotify.cc
-        src/autoscan_inotify.h
         src/cds_objects.cc
         src/cds_objects.h
         src/cds_resource.cc
@@ -61,8 +57,47 @@ add_library(libgerbera STATIC
         src/config/config_setup.h
         src/config/directory_tweak.h
         src/config/directory_tweak.cc
-        src/content_manager.cc
-        src/content_manager.h
+        src/content/autoscan.cc
+        src/content/autoscan.h
+        src/content/autoscan_inotify.cc
+        src/content/autoscan_inotify.h
+        src/content/content_manager.cc
+        src/content/content_manager.h
+        src/content/layout/fallback_layout.cc
+        src/content/layout/fallback_layout.h
+        src/content/layout/js_layout.cc
+        src/content/layout/js_layout.h
+        src/content/layout/layout.cc
+        src/content/layout/layout.h
+        src/content/onlineservice/atrailers_content_handler.cc
+        src/content/onlineservice/atrailers_content_handler.h
+        src/content/onlineservice/atrailers_service.cc
+        src/content/onlineservice/atrailers_service.h
+        src/content/onlineservice/lastfm_scrobbler.cc
+        src/content/onlineservice/lastfm_scrobbler.h
+        src/content/onlineservice/online_service.cc
+        src/content/onlineservice/online_service.h
+        src/content/onlineservice/online_service_helper.cc
+        src/content/onlineservice/online_service_helper.h
+        src/content/onlineservice/sopcast_content_handler.cc
+        src/content/onlineservice/sopcast_content_handler.h
+        src/content/onlineservice/sopcast_service.cc
+        src/content/onlineservice/sopcast_service.h
+        src/content/onlineservice/task_processor.cc
+        src/content/onlineservice/task_processor.h
+        src/content/scripting/import_script.cc
+        src/content/scripting/import_script.h
+        src/content/scripting/js_functions.cc
+        src/content/scripting/js_functions.h
+        src/content/scripting/playlist_parser_script.cc
+        src/content/scripting/playlist_parser_script.h
+        src/content/scripting/runtime.cc
+        src/content/scripting/runtime.h
+        src/content/scripting/script.cc
+        src/content/scripting/script.h
+        src/content/scripting/script_names.h
+        src/content/update_manager.cc
+        src/content/update_manager.h
         src/context.cc
         src/context.h
         src/contrib/md5.c
@@ -89,12 +124,6 @@ add_library(libgerbera STATIC
         src/iohandler/mem_io_handler.h
         src/iohandler/process_io_handler.cc
         src/iohandler/process_io_handler.h
-        src/layout/fallback_layout.cc
-        src/layout/fallback_layout.h
-        src/layout/js_layout.cc
-        src/layout/js_layout.h
-        src/layout/layout.cc
-        src/layout/layout.h
         src/metadata/exiv2_handler.cc
         src/metadata/exiv2_handler.h
         src/metadata/ffmpeg_handler.cc
@@ -109,33 +138,8 @@ add_library(libgerbera STATIC
         src/metadata/metacontent_handler.h
         src/metadata/matroska_handler.cc
         src/metadata/matroska_handler.h
-        src/onlineservice/atrailers_content_handler.cc
-        src/onlineservice/atrailers_content_handler.h
-        src/onlineservice/atrailers_service.cc
-        src/onlineservice/atrailers_service.h
-        src/onlineservice/lastfm_scrobbler.cc
-        src/onlineservice/lastfm_scrobbler.h
-        src/onlineservice/online_service.cc
-        src/onlineservice/online_service.h
-        src/onlineservice/online_service_helper.cc
-        src/onlineservice/online_service_helper.h
-        src/onlineservice/sopcast_content_handler.cc
-        src/onlineservice/sopcast_content_handler.h
-        src/onlineservice/sopcast_service.cc
-        src/onlineservice/sopcast_service.h
         src/request_handler.cc
         src/request_handler.h
-        src/scripting/import_script.cc
-        src/scripting/import_script.h
-        src/scripting/js_functions.cc
-        src/scripting/js_functions.h
-        src/scripting/playlist_parser_script.cc
-        src/scripting/playlist_parser_script.h
-        src/scripting/runtime.cc
-        src/scripting/runtime.h
-        src/scripting/script.cc
-        src/scripting/script.h
-        src/scripting/script_names.h
         src/search_handler.cc
         src/search_handler.h
         src/server.cc
@@ -162,8 +166,6 @@ add_library(libgerbera STATIC
         src/transcoding/transcoding.h
         src/transcoding/transcoding_process_executor.cc
         src/transcoding/transcoding_process_executor.h
-        src/update_manager.cc
-        src/update_manager.h
         src/upnp_cds.cc
         src/upnp_cds.h
         src/upnp_cm.cc
@@ -191,8 +193,6 @@ add_library(libgerbera STATIC
         src/util/process.h
         src/util/string_converter.cc
         src/util/string_converter.h
-        src/util/task_processor.cc
-        src/util/task_processor.h
         src/util/thread_executor.cc
         src/util/thread_executor.h
         src/util/timer.cc

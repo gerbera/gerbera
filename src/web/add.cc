@@ -35,8 +35,7 @@
 #include <utility>
 
 #include "config/config_manager.h"
-#include "content_manager.h"
-#include "server.h"
+#include "content/content_manager.h"
 #include "util/tools.h"
 
 web::add::add(std::shared_ptr<ContentManager> content)

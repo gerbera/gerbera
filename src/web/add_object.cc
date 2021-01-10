@@ -37,9 +37,8 @@
 
 #include "cds_objects.h"
 #include "config/config_manager.h"
-#include "content_manager.h"
+#include "content/content_manager.h"
 #include "metadata/metadata_handler.h"
-#include "server.h"
 #include "util/tools.h"
 
 web::addObject::addObject(std::shared_ptr<ContentManager> content)

@@ -31,11 +31,11 @@
 #include <memory>
 #include <pugixml.hpp>
 
-#include "autoscan.h"
 #include "common.h"
 #include "config.h"
 #include "config_manager.h"
 #include "config_options.h"
+#include "content/autoscan.h"
 
 class ConfigOption;
 class DirectoryTweak;

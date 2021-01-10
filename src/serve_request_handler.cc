@@ -35,9 +35,8 @@
 #include <utility>
 
 #include "config/config_manager.h"
-#include "content_manager.h"
+#include "content/content_manager.h"
 #include "iohandler/file_io_handler.h"
-#include "server.h"
 #include "util/mime.h"
 #include "util/tools.h"
 

@@ -33,8 +33,8 @@
 
 #include <utility>
 
-#include "autoscan.h"
 #include "cds_objects.h"
+#include "content/autoscan.h"
 #include "database/database.h"
 
 web::containers::containers(std::shared_ptr<ContentManager> content)

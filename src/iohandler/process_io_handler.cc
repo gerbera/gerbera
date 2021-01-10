@@ -38,7 +38,7 @@
 #include <unistd.h>
 #include <utility>
 
-#include "content_manager.h"
+#include "content/content_manager.h"
 #include "util/process.h"
 
 // after MAX_TIMEOUTS we will tell libupnp to check the socket,

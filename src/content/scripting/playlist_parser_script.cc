@@ -36,7 +36,7 @@
 #include <utility>
 
 #include "config/config_manager.h"
-#include "content_manager.h"
+#include "content/content_manager.h"
 #include "database/database.h"
 #include "js_functions.h"
 #include "runtime.h"

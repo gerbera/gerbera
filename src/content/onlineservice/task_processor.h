@@ -9,7 +9,7 @@
 #include <memory>
 
 #include "common.h"
-#include "generic_task.h"
+#include "util/generic_task.h"
 
 // forward declaration
 class ContentManager;

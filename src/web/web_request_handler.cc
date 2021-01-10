@@ -35,7 +35,7 @@
 #include <utility>
 
 #include "config/config_manager.h"
-#include "content_manager.h"
+#include "content/content_manager.h"
 #include "iohandler/mem_io_handler.h"
 #include "util/tools.h"
 #include "util/upnp_headers.h"

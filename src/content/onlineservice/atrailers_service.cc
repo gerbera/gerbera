@@ -2,7 +2,7 @@
     
     MediaTomb - http://www.mediatomb.cc/
     
-    sopcast_service.cc - this file is part of MediaTomb.
+    atrailers_service.cc - this file is part of MediaTomb.
     
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -27,49 +27,56 @@
     $Id$
 */
 
-/// \file sopcast_service.cc
+/// \file atrailers_service.cc
 
-#ifdef SOPCAST
-#include "sopcast_service.h" // API
+#ifdef ATRAILERS
+#include "atrailers_service.h" // API
 
+#include <string>
 #include <utility>
 
+#include "atrailers_content_handler.h"
 #include "config/config_manager.h"
-#include "content_manager.h"
+#include "config/config_options.h"
+#include "content/content_manager.h"
 #include "database/database.h"
-#include "server.h"
-#include "sopcast_content_handler.h"
 #include "url.h"
 #include "util/string_converter.h"
 
-#define SOPCAST_CHANNEL_URL "http://www.sopcast.com/gchlxml"
+#define ATRAILERS_SERVICE_URL_640 "https://trailers.apple.com/trailers/home/xml/current.xml"
+#define ATRAILERS_SERVICE_URL_720P "https://trailers.apple.com/trailers/home/xml/current_720p.xml"
 
-SopCastService::SopCastService(std::shared_ptr<ContentManager> content)
+ATrailersService::ATrailersService(std::shared_ptr<ContentManager> content)
     : OnlineService(std::move(content))
     , pid(0)
 {
     curl_handle = curl_easy_init();
     if (!curl_handle)
         throw_std_runtime_error("failed to initialize curl");
+
+    if (config->getOption(CFG_ONLINE_CONTENT_ATRAILERS_RESOLUTION) == "640")
+        service_url = ATRAILERS_SERVICE_URL_640;
+    else
+        service_url = ATRAILERS_SERVICE_URL_720P;
 }
 
-SopCastService::~SopCastService()
+ATrailersService::~ATrailersService()
 {
     if (curl_handle)
         curl_easy_cleanup(curl_handle);
 }
 
-service_type_t SopCastService::getServiceType()
+service_type_t ATrailersService::getServiceType()
 {
-    return OS_SopCast;
+    return OS_ATrailers;
 }
 
-std::string SopCastService::getServiceName() const
+std::string ATrailersService::getServiceName() const
 {
-    return "SopCast";
+    return "Apple Trailers";
 }
 
-std::unique_ptr<pugi::xml_document> SopCastService::getData()
+std::unique_ptr<pugi::xml_document> ATrailersService::getData()
 {
     long retcode;
     auto sc = StringConverter::i2i(config);
@@ -77,12 +84,11 @@ std::unique_ptr<pugi::xml_document> SopCastService::getData()
     std::string buffer;
 
     try {
-        log_debug("DOWNLOADING URL: {}", SOPCAST_CHANNEL_URL);
-        buffer = URL::download(SOPCAST_CHANNEL_URL, &retcode,
+        log_debug("DOWNLOADING URL: {}", service_url.c_str());
+        buffer = URL::download(service_url, &retcode,
             curl_handle, false, true, true);
-
     } catch (const std::runtime_error& ex) {
-        log_error("Failed to download SopCast XML data: {}",
+        log_error("Failed to download Apple Trailers XML data: {}",
             ex.what());
         return nullptr;
     }
@@ -97,16 +103,16 @@ std::unique_ptr<pugi::xml_document> SopCastService::getData()
     auto doc = std::make_unique<pugi::xml_document>();
     pugi::xml_parse_result result = doc->load_string(sc->convert(buffer).c_str());
     if (result.status != pugi::xml_parse_status::status_ok) {
-        log_error("Error parsing SopCast XML: {}", result.description());
+        log_error("Error parsing Apple Trailers XML: {}", result.description());
         return nullptr;
     }
 
     return doc;
 }
 
-bool SopCastService::refreshServiceData(std::shared_ptr<Layout> layout)
+bool ATrailersService::refreshServiceData(std::shared_ptr<Layout> layout)
 {
-    log_debug("Refreshing SopCast service");
+    log_debug("Refreshing Apple Trailers");
     // the layout is in full control of the service items
 
     // this is a safeguard to ensure that this class is not called from
@@ -122,17 +128,15 @@ bool SopCastService::refreshServiceData(std::shared_ptr<Layout> layout)
 
     auto reply = getData();
     if (reply == nullptr) {
-        log_debug("Failed to get XML content from SopCast service");
-        throw_std_runtime_error("Failed to get XML content from SopCast service");
+        log_debug("Failed to get XML content from Trailers service");
+        throw_std_runtime_error("Failed to get XML content from Trailers service");
     }
 
-    auto sc = std::make_unique<SopCastContentHandler>(content->getContext());
+    auto sc = std::make_unique<ATrailersContentHandler>(content->getContext());
     sc->setServiceContent(reply);
 
     std::shared_ptr<CdsObject> obj;
     do {
-        /// \todo add try/catch here and a possibility do find out if we
-        /// may request more stuff or if we are at the end of the list
         obj = sc->getNextObject();
         if (obj == nullptr)
             break;
@@ -141,12 +145,12 @@ bool SopCastService::refreshServiceData(std::shared_ptr<Layout> layout)
 
         auto old = database->loadObjectByServiceID(std::static_pointer_cast<CdsItem>(obj)->getServiceID());
         if (old == nullptr) {
-            log_debug("Adding new SopCast object");
+            log_debug("Adding new Trailers object");
 
             if (layout != nullptr)
                 layout->processCdsObject(obj, "");
         } else {
-            log_debug("Updating existing SopCast object");
+            log_debug("Updating existing Trailers object");
             obj->setID(old->getID());
             obj->setParentID(old->getParentID());
             //            struct timespec oldt, newt;
@@ -165,4 +169,4 @@ bool SopCastService::refreshServiceData(std::shared_ptr<Layout> layout)
     return false;
 }
 
-#endif //SOPCAST
+#endif //ATRAILERS

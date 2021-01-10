@@ -34,20 +34,20 @@
 #include <utility>
 
 #include "config/config_manager.h"
-#include "content_manager.h"
+#include "content/content_manager.h"
 #include "metadata/metadata_handler.h"
 #include "util/string_converter.h"
 
 #ifdef ONLINE_SERVICES
 
-#include "onlineservice/online_service.h"
+#include "content/onlineservice/online_service.h"
 
 #ifdef SOPCAST
-#include "onlineservice/sopcast_content_handler.h"
+#include "content/onlineservice/sopcast_content_handler.h"
 #endif
 
 #ifdef ATRAILERS
-#include "onlineservice/atrailers_content_handler.h"
+#include "content/onlineservice/atrailers_content_handler.h"
 #endif
 
 #endif //ONLINE_SERVICES

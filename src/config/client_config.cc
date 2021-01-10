@@ -24,11 +24,12 @@
 /// \file client_config.cc
 
 #include "client_config.h" // API
-#include "content_manager.h"
-#include "util/upnp_clients.h"
-#include "util/upnp_quirks.h"
 
 #include <utility>
+
+#include "content/content_manager.h"
+#include "util/upnp_clients.h"
+#include "util/upnp_quirks.h"
 
 ClientConfig::ClientConfig()
     : clientInfo(std::make_shared<struct ClientInfo>())

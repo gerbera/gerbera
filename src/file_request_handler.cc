@@ -30,25 +30,23 @@
 /// \file file_request_handler.cc
 
 #include "file_request_handler.h" // API
+
 #include <filesystem>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <utility>
 
 #include "config/config_manager.h"
-#include "content_manager.h"
+#include "content/content_manager.h"
 #include "database/database.h"
 #include "iohandler/file_io_handler.h"
 #include "metadata/metadata_handler.h"
-#include "server.h"
+#include "transcoding/transcode_dispatcher.h"
 #include "util/process.h"
-#include "web/session_manager.h"
-
 #include "util/tools.h"
 #include "util/upnp_headers.h"
 #include "util/upnp_quirks.h"
-
-#include "transcoding/transcode_dispatcher.h"
+#include "web/session_manager.h"
 
 FileRequestHandler::FileRequestHandler(std::shared_ptr<ContentManager> content, UpnpXMLBuilder* xmlBuilder)
     : RequestHandler(std::move(content))

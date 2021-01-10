@@ -2,11 +2,12 @@
 #ifndef GERBERA_SCRIPTTESTFIXTURE_H
 #define GERBERA_SCRIPTTESTFIXTURE_H
 
-#include "util/string_converter.h"
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 #include <duktape.h>
 #include <memory>
+
+#include "util/string_converter.h"
 
 #include "common_script_mock.h"
 

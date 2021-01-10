@@ -38,7 +38,7 @@
 #endif
 
 #include "config/config_manager.h"
-#include "content_manager.h"
+#include "content/content_manager.h"
 #include "database/database.h"
 #include "device_description_handler.h"
 #include "file_request_handler.h"

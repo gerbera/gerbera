@@ -71,7 +71,7 @@
 #endif
 
 #ifdef ONLINE_SERVICES
-#include "util/task_processor.h"
+#include "onlineservice/task_processor.h"
 #endif
 
 #ifdef HAVE_JS

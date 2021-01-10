@@ -25,7 +25,7 @@
 
 #include "transcode_handler.h" // API
 
-#include "content_manager.h"
+#include "content/content_manager.h"
 #include "context.h"
 
 TranscodeHandler::TranscodeHandler(std::shared_ptr<ContentManager> content)

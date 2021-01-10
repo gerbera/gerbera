@@ -24,12 +24,13 @@
 /// \file directory_tweak.cc
 
 #include "directory_tweak.h" // API
-#include "config/config.h"
-#include "content_manager.h"
-#include "util/upnp_clients.h"
-#include "util/upnp_quirks.h"
 
 #include <utility>
+
+#include "config/config.h"
+#include "content/content_manager.h"
+#include "util/upnp_clients.h"
+#include "util/upnp_quirks.h"
 
 void AutoScanSetting::mergeOptions(const std::shared_ptr<Config>& config, const fs::path& location)
 {
