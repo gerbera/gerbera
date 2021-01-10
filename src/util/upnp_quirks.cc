@@ -67,6 +67,6 @@ void Quirks::addCaptionInfo(const std::shared_ptr<CdsItem>& item, std::unique_pt
     if (validext.length() == 0)
         return;
 
-    std::string url = "http://" + Server::getIP() + ":" + Server::getPort() + pathNoExt + validext;
-    headers->addHeader("CaptionInfo.sec:", url);
+    std::string url = "http://" + Server::getIP() + ":" + Server::getPort() + "/content/media/object_id/" + std::to_string(item->getID()) + "/res_id/0/ext/file" + validext;
+    headers->addHeader("CaptionInfo.sec", url);
 }
