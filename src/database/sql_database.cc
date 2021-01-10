@@ -41,10 +41,10 @@
 #include <utility>
 #include <vector>
 
-#include "autoscan.h"
 #include "cds_objects.h"
 #include "config/config_manager.h"
 #include "config/config_setup.h"
+#include "content/autoscan.h"
 #include "search_handler.h"
 #include "util/string_converter.h"
 #include "util/tools.h"

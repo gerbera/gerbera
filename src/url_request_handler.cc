@@ -34,20 +34,18 @@
 
 #include <utility>
 
-#include "config/config_manager.h"
-#include "content_manager.h"
-#include "database/database.h"
-#include "server.h"
-
 #include "cds_objects.h"
+#include "config/config_manager.h"
+#include "content/content_manager.h"
+#include "database/database.h"
 #include "iohandler/buffered_io_handler.h"
-
-#ifdef ONLINE_SERVICES
-#include "onlineservice/online_service_helper.h"
-#endif
 #include "iohandler/curl_io_handler.h"
 #include "transcoding/transcode_dispatcher.h"
 #include "url.h"
+
+#ifdef ONLINE_SERVICES
+#include "content/onlineservice/online_service_helper.h"
+#endif
 
 URLRequestHandler::URLRequestHandler(std::shared_ptr<ContentManager> content)
     : RequestHandler(std::move(content))

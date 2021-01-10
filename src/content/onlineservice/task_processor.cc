@@ -34,8 +34,8 @@
 
 #include <utility>
 
-#include "content_manager.h"
-#include "layout/layout.h"
+#include "content/content_manager.h"
+#include "content/layout/layout.h"
 
 void TaskProcessor::run()
 {

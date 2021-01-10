@@ -49,10 +49,10 @@
 #include <curl/curl.h>
 #endif
 
-#include "autoscan.h"
 #include "client_config.h"
 #include "config_options.h"
 #include "config_setup.h"
+#include "content/autoscan.h"
 #include "database/database.h"
 #include "transcoding/transcoding.h"
 #include "util/string_converter.h"

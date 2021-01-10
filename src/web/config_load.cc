@@ -23,16 +23,16 @@
 
 /// \file config_load.cc
 
+#include "pages.h" // API
+
 #include <fmt/chrono.h>
 #include <numeric>
 
-#include "pages.h" // API
-
-#include "autoscan.h"
 #include "config/client_config.h"
 #include "config/config_setup.h"
 #include "config/directory_tweak.h"
-#include "content_manager.h"
+#include "content/autoscan.h"
+#include "content/content_manager.h"
 #include "database/database.h"
 #include "metadata/metadata_handler.h"
 #include "transcoding/transcoding.h"

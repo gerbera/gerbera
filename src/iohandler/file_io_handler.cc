@@ -35,7 +35,6 @@
 #include <utility>
 
 #include "cds_objects.h"
-#include "server.h"
 
 FileIOHandler::FileIOHandler(fs::path filename)
     : filename(std::move(filename))

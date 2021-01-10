@@ -36,7 +36,6 @@
 #include "config/config_manager.h"
 #include "database/database.h"
 #include "metadata/metadata_handler.h"
-#include "server.h"
 #include "transcoding/transcoding.h"
 
 UpnpXMLBuilder::UpnpXMLBuilder(std::shared_ptr<Context> context,

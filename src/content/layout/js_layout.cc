@@ -32,8 +32,8 @@
 #ifdef HAVE_JS
 #include "js_layout.h" // API
 
-#include "scripting/import_script.h"
-#include "scripting/runtime.h"
+#include "content/scripting/import_script.h"
+#include "content/scripting/runtime.h"
 
 JSLayout::JSLayout(const std::shared_ptr<ContentManager>& content,
     const std::shared_ptr<Runtime>& runtime)

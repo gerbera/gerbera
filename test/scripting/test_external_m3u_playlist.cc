@@ -1,12 +1,12 @@
 #ifdef HAVE_JS
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
+#include <duktape.h>
+#include <memory>
 
 #include "cds_objects.h"
 #include "config/config_manager.h"
 #include "util/string_converter.h"
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
-#include <duktape.h>
-#include <memory>
 
 #include "mock/common_script_mock.h"
 #include "mock/duk_helper.h"

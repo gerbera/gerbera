@@ -35,7 +35,7 @@
 
 #include <array>
 
-#include "content_manager.h"
+#include "content/content_manager.h"
 #include "util/tools.h"
 
 // DO NOT FORGET TO ADD SERVICE STORAGE PREFIXES TO THIS ARRAY WHEN ADDING

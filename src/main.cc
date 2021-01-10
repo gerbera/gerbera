@@ -47,8 +47,7 @@
 #include "common.h"
 #include "config/config_generator.h"
 #include "config/config_manager.h"
-#include "content_manager.h"
-
+#include "content/content_manager.h"
 #include "contrib/cxxopts.hpp"
 #include "server.h"
 

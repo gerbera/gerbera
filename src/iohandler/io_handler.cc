@@ -33,8 +33,6 @@
 
 #include <unistd.h>
 
-#include "server.h"
-
 IOHandler::IOHandler() = default;
 
 IOHandler::~IOHandler() = default;

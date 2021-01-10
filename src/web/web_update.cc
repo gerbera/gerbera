@@ -31,8 +31,8 @@
 
 #include "pages.h" // API
 
-#include "autoscan.h"
-#include "content_manager.h"
+#include "content/autoscan.h"
+#include "content/content_manager.h"
 #include "database/database.h"
 
 void web::voidType::process()

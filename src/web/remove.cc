@@ -34,9 +34,8 @@
 #include <cstdio>
 #include <utility>
 
-#include "content_manager.h"
+#include "content/content_manager.h"
 #include "database/database.h"
-#include "server.h"
 #include "util/tools.h"
 
 web::remove::remove(std::shared_ptr<ContentManager> content)

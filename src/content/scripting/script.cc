@@ -36,7 +36,7 @@
 
 #include "cds_objects.h"
 #include "config/config_manager.h"
-#include "content_manager.h"
+#include "content/content_manager.h"
 #include "js_functions.h"
 #include "metadata/metadata_handler.h"
 #include "runtime.h"
@@ -45,11 +45,11 @@
 #include "util/tools.h"
 
 #ifdef ONLINE_SERVICES
-#include "onlineservice/online_service.h"
+#include "content/onlineservice/online_service.h"
 #endif
 
 #ifdef ATRAILERS
-#include "onlineservice/atrailers_content_handler.h"
+#include "content/onlineservice/atrailers_content_handler.h"
 #endif
 
 static constexpr std::array<duk_function_list_entry, 8> js_global_functions = { {

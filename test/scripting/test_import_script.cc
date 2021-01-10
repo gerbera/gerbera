@@ -1,14 +1,15 @@
 #ifdef HAVE_JS
 
-#include "cds_objects.h"
-#include "config/config_manager.h"
-#include "metadata/metadata_handler.h"
-#include "onlineservice/online_service.h"
-#include "util/string_converter.h"
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 #include <duktape.h>
 #include <memory>
+
+#include "cds_objects.h"
+#include "config/config_manager.h"
+#include "content/onlineservice/online_service.h"
+#include "metadata/metadata_handler.h"
+#include "util/string_converter.h"
 
 #include "mock/common_script_mock.h"
 #include "mock/duk_helper.h"

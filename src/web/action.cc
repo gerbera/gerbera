@@ -34,7 +34,7 @@
 #include <utility>
 
 #include "config/config_manager.h"
-#include "content_manager.h"
+#include "content/content_manager.h"
 
 web::action::action(std::shared_ptr<ContentManager> content)
     : WebRequestHandler(std::move(content))
