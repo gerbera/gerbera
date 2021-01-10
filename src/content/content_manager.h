@@ -316,7 +316,7 @@ protected:
 
     std::shared_ptr<Timer> timer;
     std::shared_ptr<TaskProcessor> task_processor;
-    std::shared_ptr<Runtime> scripting_runtime;
+    std::shared_ptr<ScriptingRuntime> scripting_runtime;
     std::shared_ptr<LastFm> last_fm;
 
     std::recursive_mutex mutex;

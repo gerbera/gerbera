@@ -75,7 +75,7 @@
 #endif
 
 #ifdef HAVE_JS
-#include "scripting/runtime.h"
+#include "scripting/scripting_runtime.h"
 #endif
 
 ContentManager::ContentManager(const std::shared_ptr<Context>& context,
@@ -118,7 +118,7 @@ ContentManager::ContentManager(const std::shared_ptr<Context>& context,
     task_processor = std::make_shared<TaskProcessor>();
 #endif
 #ifdef HAVE_JS
-    scripting_runtime = std::make_shared<Runtime>();
+    scripting_runtime = std::make_shared<ScriptingRuntime>();
 #endif
 #ifdef HAVE_LASTFMLIB
     last_fm = std::make_shared<LastFm>(context);

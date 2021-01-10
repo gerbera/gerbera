@@ -33,10 +33,9 @@
 #include "js_layout.h" // API
 
 #include "content/scripting/import_script.h"
-#include "content/scripting/runtime.h"
 
 JSLayout::JSLayout(const std::shared_ptr<ContentManager>& content,
-    const std::shared_ptr<Runtime>& runtime)
+    const std::shared_ptr<ScriptingRuntime>& runtime)
     : Layout(content)
     , import_script(std::make_unique<ImportScript>(content, runtime))
 {
