@@ -26,12 +26,11 @@
 #include "context.h" // API
 
 Context::Context(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime,
-    std::shared_ptr<Database> database, std::shared_ptr<UpdateManager> update_manager,
+    std::shared_ptr<Database> database,
     std::shared_ptr<web::SessionManager> session_manager)
     : config(std::move(config))
     , mime(std::move(mime))
     , database(std::move(database))
-    , update_manager(std::move(update_manager))
     , session_manager(std::move(session_manager))
 {
 }

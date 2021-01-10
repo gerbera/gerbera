@@ -21,7 +21,7 @@ public:
     {
         config = std::make_shared<ConfigMock>();
         database = std::make_shared<DatabaseMock>(config);
-        context = std::make_shared<Context>(config, nullptr, database, nullptr, nullptr);
+        context = std::make_shared<Context>(config, nullptr, database, nullptr);
 
         std::string virtualDir = "http://server/content";
         std::string presentationURl = "http://someurl/";

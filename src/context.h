@@ -40,7 +40,7 @@ class SessionManager;
 class Context {
 public:
     Context(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime,
-        std::shared_ptr<Database> database, std::shared_ptr<UpdateManager> update_manager,
+        std::shared_ptr<Database> database,
         std::shared_ptr<web::SessionManager> session_manager);
 
     virtual ~Context();
@@ -60,11 +60,6 @@ public:
         return database;
     }
 
-    std::shared_ptr<UpdateManager> getUpdateManager() const
-    {
-        return update_manager;
-    }
-
     std::shared_ptr<web::SessionManager> getSessionManager() const
     {
         return session_manager;
@@ -74,7 +69,6 @@ private:
     std::shared_ptr<Config> config;
     std::shared_ptr<Mime> mime;
     std::shared_ptr<Database> database;
-    std::shared_ptr<UpdateManager> update_manager;
     std::shared_ptr<web::SessionManager> session_manager;
 };
 
