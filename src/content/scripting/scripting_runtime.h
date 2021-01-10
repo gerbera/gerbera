@@ -2,7 +2,7 @@
     
     MediaTomb - http://www.mediatomb.cc/
     
-    runtime.cc - this file is part of MediaTomb.
+    runtime.h - this file is part of MediaTomb.
     
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -27,41 +27,33 @@
     $Id$
 */
 
-/// \file runtime.cc
+/// \file runtime.h
 
-#ifdef HAVE_JS
-#include "runtime.h" // API
+#ifndef __SCRIPTING_RUNTIME_H__
+#define __SCRIPTING_RUNTIME_H__
 
-[[noreturn]] static void fatal_handler(void* udata, const char* msg)
-{
-    log_error("Fatal Duktape error: {}", msg ? msg : "no message");
-    abort();
-}
+#include <duktape.h>
+#include <mutex>
+#include <pthread.h>
 
-Runtime::Runtime()
-{
-    ctx = duk_create_heap(nullptr, nullptr, nullptr, nullptr, fatal_handler);
-}
-Runtime::~Runtime()
-{
-    duk_destroy_heap(ctx);
-}
+#include "common.h"
 
-duk_context* Runtime::createContext(const std::string& name)
-{
-    duk_push_heap_stash(ctx);
-    duk_idx_t thread_idx = duk_push_thread_new_globalenv(ctx);
-    duk_context* newctx = duk_get_context(ctx, thread_idx);
-    duk_put_prop_string(ctx, -2, name.c_str());
-    duk_pop(ctx);
-    return newctx;
-}
+/// \brief ScriptingRuntime class definition.
+class ScriptingRuntime {
+protected:
+    duk_context* ctx;
+    std::recursive_mutex mutex;
 
-void Runtime::destroyContext(const std::string& name)
-{
-    duk_push_heap_stash(ctx);
-    duk_del_prop_string(ctx, -1, name.c_str());
-    duk_pop(ctx);
-}
+public:
+    ScriptingRuntime();
+    virtual ~ScriptingRuntime();
 
-#endif // HAVE_JS
+    /// \brief Returns a new (sub)context. !!! Not thread-safe !!!
+    duk_context* createContext(const std::string& name);
+    void destroyContext(const std::string& name);
+
+    using AutoLock = std::lock_guard<std::recursive_mutex>;
+    std::recursive_mutex& getMutex() { return mutex; }
+};
+
+#endif // __SCRIPTING_RUNTIME_H__

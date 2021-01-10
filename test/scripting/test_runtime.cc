@@ -20,11 +20,11 @@
     $Id$
 */
 #include "test_runtime.h"
-#include "content/scripting/runtime.h"
+#include "content/scripting/scripting_runtime.h"
 
 TEST_F(RuntimeTest, CheckTestCodeLinksAgainstDependencies)
 {
-    Runtime* runtime = new Runtime();
+    ScriptingRuntime* runtime = new ScriptingRuntime();
     duk_context* ctx = runtime->createContext("testCtx");
     EXPECT_NE(ctx, nullptr);
 }

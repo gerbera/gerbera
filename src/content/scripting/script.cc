@@ -39,8 +39,8 @@
 #include "content/content_manager.h"
 #include "js_functions.h"
 #include "metadata/metadata_handler.h"
-#include "runtime.h"
 #include "script_names.h"
+#include "scripting_runtime.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
 
@@ -123,7 +123,7 @@ void Script::setIntProperty(const std::string& name, int value)
 /* **************** */
 
 Script::Script(std::shared_ptr<ContentManager> content,
-    const std::shared_ptr<Runtime>& runtime, const std::string& name)
+    const std::shared_ptr<ScriptingRuntime>& runtime, const std::string& name)
     : config(content->getContext()->getConfig())
     , database(content->getContext()->getDatabase())
     , content(std::move(content))
@@ -135,7 +135,7 @@ Script::Script(std::shared_ptr<ContentManager> content,
     this->runtime = runtime;
 
     /* create a context and associate it with the JS run time */
-    Runtime::AutoLock lock(runtime->getMutex());
+    ScriptingRuntime::AutoLock lock(runtime->getMutex());
     ctx = runtime->createContext(name);
     if (!ctx)
         throw_std_runtime_error("Scripting: could not initialize js context");
@@ -281,7 +281,7 @@ void Script::_load(const std::string& scriptPath)
 
 void Script::load(const std::string& scriptPath)
 {
-    Runtime::AutoLock lock(runtime->getMutex());
+    ScriptingRuntime::AutoLock lock(runtime->getMutex());
     duk_push_thread_stash(ctx, ctx);
     _load(scriptPath);
     duk_put_prop_string(ctx, -2, "script");
@@ -299,7 +299,7 @@ void Script::_execute()
 
 void Script::execute()
 {
-    Runtime::AutoLock lock(runtime->getMutex());
+    ScriptingRuntime::AutoLock lock(runtime->getMutex());
     duk_push_thread_stash(ctx, ctx);
     duk_get_prop_string(ctx, -1, "script");
     duk_remove(ctx, -2);

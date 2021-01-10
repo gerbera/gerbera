@@ -39,7 +39,7 @@
 #include "content/content_manager.h"
 #include "database/database.h"
 #include "js_functions.h"
-#include "runtime.h"
+#include "scripting_runtime.h"
 
 #define ONE_TEXTLINE_BYTES 1024
 
@@ -95,7 +95,7 @@ js_getCdsObject(duk_context* ctx)
 } // extern "C"
 
 PlaylistParserScript::PlaylistParserScript(std::shared_ptr<ContentManager> content,
-    const std::shared_ptr<Runtime>& runtime)
+    const std::shared_ptr<ScriptingRuntime>& runtime)
     : Script(std::move(content), runtime, "playlist")
 {
     currentHandle = nullptr;
@@ -103,7 +103,7 @@ PlaylistParserScript::PlaylistParserScript(std::shared_ptr<ContentManager> conte
     currentLine = nullptr;
 
     try {
-        Runtime::AutoLock lock(runtime->getMutex());
+        ScriptingRuntime::AutoLock lock(runtime->getMutex());
         defineFunction("readln", js_readln, 0);
         defineFunction("getCdsObject", js_getCdsObject, 1);
 
@@ -166,7 +166,7 @@ void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject
         throw_std_runtime_error("failed to open file: " + obj->getLocation().string());
     }
 
-    Runtime::AutoLock lock(runtime->getMutex());
+    ScriptingRuntime::AutoLock lock(runtime->getMutex());
     try {
         cdsObject2dukObject(obj);
         duk_put_global_string(ctx, "playlist");

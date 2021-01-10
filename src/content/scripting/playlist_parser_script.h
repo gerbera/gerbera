@@ -45,7 +45,7 @@ class GenericTask;
 class PlaylistParserScript : public Script {
 public:
     PlaylistParserScript(std::shared_ptr<ContentManager> content,
-        const std::shared_ptr<Runtime>& runtime);
+        const std::shared_ptr<ScriptingRuntime>& runtime);
     ~PlaylistParserScript() override;
 
     std::string readln();

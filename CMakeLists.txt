@@ -91,8 +91,8 @@ add_library(libgerbera STATIC
         src/content/scripting/js_functions.h
         src/content/scripting/playlist_parser_script.cc
         src/content/scripting/playlist_parser_script.h
-        src/content/scripting/runtime.cc
-        src/content/scripting/runtime.h
+        src/content/scripting/scripting_runtime.cc
+        src/content/scripting/scripting_runtime.h
         src/content/scripting/script.cc
         src/content/scripting/script.h
         src/content/scripting/script_names.h

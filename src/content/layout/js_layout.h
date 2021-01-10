@@ -39,16 +39,16 @@
 // forward declaration
 class ContentManager;
 class ImportScript;
-class Runtime;
+class ScriptingRuntime;
 
 class JSLayout : public Layout {
 protected:
-    std::shared_ptr<Runtime> runtime;
+    std::shared_ptr<ScriptingRuntime> runtime;
     std::unique_ptr<ImportScript> import_script;
 
 public:
     JSLayout(const std::shared_ptr<ContentManager>& content,
-        const std::shared_ptr<Runtime>& runtime);
+        const std::shared_ptr<ScriptingRuntime>& runtime);
     ~JSLayout() override;
 
     void processCdsObject(std::shared_ptr<CdsObject> obj, fs::path rootpath) override;

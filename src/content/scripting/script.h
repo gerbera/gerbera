@@ -41,7 +41,7 @@
 // forward declaration
 class CdsObject;
 class ContentManager;
-class Runtime;
+class ScriptingRuntime;
 class StringConverter;
 
 // perform garbage collection after script has been run for x times
@@ -93,7 +93,7 @@ public:
 
 protected:
     Script(std::shared_ptr<ContentManager> content,
-        const std::shared_ptr<Runtime>& runtime, const std::string& name);
+        const std::shared_ptr<ScriptingRuntime>& runtime, const std::string& name);
 
     void execute();
     int gc_counter;
@@ -108,7 +108,7 @@ protected:
     std::shared_ptr<Config> config;
     std::shared_ptr<Database> database;
     std::shared_ptr<ContentManager> content;
-    std::shared_ptr<Runtime> runtime;
+    std::shared_ptr<ScriptingRuntime> runtime;
 
 private:
     std::string name;
