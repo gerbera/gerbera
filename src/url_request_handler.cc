@@ -41,7 +41,7 @@
 #include "iohandler/buffered_io_handler.h"
 #include "iohandler/curl_io_handler.h"
 #include "transcoding/transcode_dispatcher.h"
-#include "url.h"
+#include "util/url.h"
 
 #ifdef ONLINE_SERVICES
 #include "content/onlineservice/online_service_helper.h"

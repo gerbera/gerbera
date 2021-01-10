@@ -40,8 +40,8 @@
 #include "config/config_options.h"
 #include "content/content_manager.h"
 #include "database/database.h"
-#include "url.h"
 #include "util/string_converter.h"
+#include "util/url.h"
 
 #define ATRAILERS_SERVICE_URL_640 "https://trailers.apple.com/trailers/home/xml/current.xml"
 #define ATRAILERS_SERVICE_URL_720P "https://trailers.apple.com/trailers/home/xml/current_720p.xml"
