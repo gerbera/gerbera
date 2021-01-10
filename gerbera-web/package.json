@@ -27,7 +27,7 @@
     "bootstrap": "^4.4.1",
     "braces": "^3.0.2",
     "chai": "^4.2.0",
-    "chromedriver": "^81.0.0",
+    "chromedriver": "^87.0.0",
     "concurrently": "^5.3.0",
     "eslint": "^6.7.2",
     "eslint-config-standard": "^14.1.1",
@@ -58,7 +58,7 @@
     "popper.js": "^1.16.1",
     "rimraf": "^2.7.1",
     "selenium-webdriver": "^4.0.0-alpha.7",
-    "webpack": "^4.42.1",
+    "webpack": "^4.45.0",
     "yargs": "^15.3.1"
   }
 }
