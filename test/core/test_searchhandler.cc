@@ -19,11 +19,12 @@
 
   $Id$
 */
-#include "config/config_manager.h"
-#include "search_handler.h"
-#include "gtest/gtest.h"
 
+#include <gtest/gtest.h>
 #include <iostream>
+
+#include "config/config_manager.h"
+#include "database/search_handler.h"
 
 using upVecUpST = std::unique_ptr<std::vector<std::unique_ptr<SearchToken>>>;
 decltype(auto) getAllTokens(const std::string& input)
