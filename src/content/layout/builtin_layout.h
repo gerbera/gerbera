@@ -27,10 +27,10 @@
     $Id$
 */
 
-/// \file fallback_layout.h
+/// \file builtin_layout.h
 
-#ifndef __FALLBACK_LAYOUT_H__
-#define __FALLBACK_LAYOUT_H__
+#ifndef __BUILTIN_LAYOUT_H__
+#define __BUILTIN_LAYOUT_H__
 
 #include <memory>
 
@@ -43,11 +43,11 @@
 // forward declaration
 class CdsObject;
 
-class FallbackLayout : public Layout {
+class BuiltinLayout : public Layout {
 public:
-    FallbackLayout(std::shared_ptr<ContentManager> content);
+    BuiltinLayout(std::shared_ptr<ContentManager> content);
 #ifdef ENABLE_PROFILING
-    virtual ~FallbackLayout();
+    virtual ~BuiltinLayout();
 #endif
 
     void processCdsObject(std::shared_ptr<CdsObject> obj, fs::path rootpath) override;
@@ -71,4 +71,4 @@ protected:
 #endif
 };
 
-#endif // __FALLBACK_LAYOUT_H__
+#endif // __BUILTIN_LAYOUT_H__

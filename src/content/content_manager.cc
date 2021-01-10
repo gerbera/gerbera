@@ -44,7 +44,7 @@
 #include "config/config_manager.h"
 #include "config/directory_tweak.h"
 #include "database/database.h"
-#include "layout/fallback_layout.h"
+#include "layout/builtin_layout.h"
 #include "metadata/metadata_handler.h"
 #include "update_manager.h"
 #include "util/mime.h"
@@ -1192,7 +1192,7 @@ void ContentManager::initLayout()
                     log_error("Cannot init layout: Gerbera compiled without JS support, but JS was requested.");
 #endif
                 } else if (layout_type == "builtin") {
-                    layout = std::make_shared<FallbackLayout>(self);
+                    layout = std::make_shared<BuiltinLayout>(self);
                 }
             } catch (const std::runtime_error& e) {
                 layout = nullptr;
