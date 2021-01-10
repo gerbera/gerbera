@@ -174,8 +174,6 @@ add_library(libgerbera STATIC
         src/upnp_mrreg.h
         src/upnp_xml.cc
         src/upnp_xml.h
-        src/url.cc
-        src/url.h
         src/url_request_handler.cc
         src/url_request_handler.h
         src/util/executor.h
@@ -205,6 +203,8 @@ add_library(libgerbera STATIC
         src/util/upnp_headers.cc
         src/util/upnp_quirks.h
         src/util/upnp_quirks.cc
+        src/util/url.cc
+        src/util/url.h
         src/util/xml_to_json.cc
         src/util/xml_to_json.h
         src/web/action.cc
