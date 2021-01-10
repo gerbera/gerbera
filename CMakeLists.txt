@@ -140,8 +140,6 @@ add_library(libgerbera STATIC
         src/metadata/matroska_handler.h
         src/request_handler.cc
         src/request_handler.h
-        src/search_handler.cc
-        src/search_handler.h
         src/server.cc
         src/serve_request_handler.cc
         src/serve_request_handler.h
@@ -154,6 +152,8 @@ add_library(libgerbera STATIC
         src/database/sql_database.h
         src/database/database.cc
         src/database/database.h
+        src/database/search_handler.cc
+        src/database/search_handler.h
         src/subscription_request.cc
         src/subscription_request.h
         src/transcoding/transcode_dispatcher.cc

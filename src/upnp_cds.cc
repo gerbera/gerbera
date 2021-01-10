@@ -38,7 +38,6 @@
 
 #include "config/config_manager.h"
 #include "database/database.h"
-#include "search_handler.h"
 #include "util/upnp_quirks.h"
 
 ContentDirectoryService::ContentDirectoryService(std::shared_ptr<Context> context,
