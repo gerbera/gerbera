@@ -70,6 +70,7 @@ class PlaylistParserScript;
 #include "util/executor.h"
 
 // forward declaration
+class Server;
 class Runtime;
 class LastFm;
 class ContentManager;
@@ -139,8 +140,7 @@ public:
 class ContentManager : public Timer::Subscriber, public std::enable_shared_from_this<ContentManager> {
 public:
     ContentManager(const std::shared_ptr<Context>& context,
-        std::shared_ptr<Timer> timer, std::shared_ptr<TaskProcessor> task_processor,
-        std::shared_ptr<Runtime> scripting_runtime, std::shared_ptr<LastFm> last_fm);
+        std::shared_ptr<Server> server, std::shared_ptr<Timer> timer);
     void run();
     ~ContentManager() override;
     void shutdown();

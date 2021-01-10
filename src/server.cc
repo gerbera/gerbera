@@ -37,28 +37,20 @@
 #include <utility>
 #endif
 
-#ifdef HAVE_LASTFMLIB
-#include "onlineservice/lastfm_scrobbler.h"
-#endif
-
 #include "config/config_manager.h"
 #include "content_manager.h"
 #include "database/database.h"
+#include "device_description_handler.h"
 #include "file_request_handler.h"
-#include "update_manager.h"
+#include "serve_request_handler.h"
 #include "util/mime.h"
-#include "util/task_processor.h"
 #include "util/upnp_clients.h"
+#include "web/pages.h"
 #include "web/session_manager.h"
-#ifdef HAVE_JS
-#include "scripting/runtime.h"
-#endif
+
 #ifdef HAVE_CURL
 #include "url_request_handler.h"
 #endif
-#include "device_description_handler.h"
-#include "serve_request_handler.h"
-#include "web/pages.h"
 
 Server::Server(std::shared_ptr<Config> config)
     : config(std::move(config))
@@ -84,21 +76,10 @@ void Server::init()
     mime = std::make_shared<Mime>(config);
     database = Database::createInstance(config, timer);
     config->updateConfigFromDatabase(database);
-    update_manager = std::make_shared<UpdateManager>(database, self);
     session_manager = std::make_shared<web::SessionManager>(config, timer);
-    context = std::make_shared<Context>(config, mime, database, update_manager, session_manager);
+    context = std::make_shared<Context>(config, mime, database, session_manager);
 
-#ifdef ONLINE_SERVICES
-    task_processor = std::make_shared<TaskProcessor>();
-#endif
-#ifdef HAVE_JS
-    scripting_runtime = std::make_shared<Runtime>();
-#endif
-#ifdef HAVE_LASTFMLIB
-    last_fm = std::make_shared<LastFm>(context);
-#endif
-    content = std::make_shared<ContentManager>(
-        context, timer, task_processor, scripting_runtime, last_fm);
+    content = std::make_shared<ContentManager>(context, self, timer);
 }
 
 Server::~Server() { log_debug("Server destroyed"); }
@@ -228,14 +209,6 @@ void Server::run()
     }
 
     // run what is needed
-    timer->run();
-#ifdef ONLINE_SERVICES
-    task_processor->run();
-#endif
-    update_manager->run();
-#ifdef HAVE_LASTFMLIB
-    last_fm->run();
-#endif
     content->run();
 
     std::string url = renderWebUri(ip, port);
@@ -299,21 +272,8 @@ void Server::shutdown()
         content->shutdown();
         content = nullptr;
     }
-#ifdef HAVE_LASTFMLIB
-    last_fm->shutdown();
-    last_fm = nullptr;
-#endif
-#ifdef HAVE_JS
-    scripting_runtime = nullptr;
-#endif
-#ifdef ONLINE_SERVICES
-    task_processor->shutdown();
-    task_processor = nullptr;
-#endif
 
     session_manager = nullptr;
-    update_manager->shutdown();
-    update_manager = nullptr;
 
     if (database->threadCleanupRequired()) {
         try {

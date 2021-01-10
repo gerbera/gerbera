@@ -42,9 +42,6 @@
 
 // forward declaration
 class Timer;
-class TaskProcessor;
-class Runtime;
-class LastFm;
 class ContentManager;
 
 /// \brief Provides methods to initialize and shutdown
@@ -103,14 +100,10 @@ protected:
     std::shared_ptr<Config> config;
     std::shared_ptr<Mime> mime;
     std::shared_ptr<Database> database;
-    std::shared_ptr<UpdateManager> update_manager;
     std::shared_ptr<web::SessionManager> session_manager;
     std::shared_ptr<Context> context;
 
     std::shared_ptr<Timer> timer;
-    std::shared_ptr<TaskProcessor> task_processor;
-    std::shared_ptr<Runtime> scripting_runtime;
-    std::shared_ptr<LastFm> last_fm;
     std::shared_ptr<ContentManager> content;
 
     /// \brief This flag is set to true by the upnp_cleanup() function.

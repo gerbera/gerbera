@@ -74,19 +74,18 @@
 #include "util/task_processor.h"
 #endif
 
+#ifdef HAVE_JS
+#include "scripting/runtime.h"
+#endif
+
 ContentManager::ContentManager(const std::shared_ptr<Context>& context,
-    std::shared_ptr<Timer> timer, std::shared_ptr<TaskProcessor> task_processor,
-    std::shared_ptr<Runtime> scripting_runtime, std::shared_ptr<LastFm> last_fm)
+    std::shared_ptr<Server> server, std::shared_ptr<Timer> timer)
     : config(context->getConfig())
     , mime(context->getMime())
     , database(context->getDatabase())
-    , update_manager(context->getUpdateManager())
     , session_manager(context->getSessionManager())
     , context(std::move(context))
     , timer(std::move(timer))
-    , task_processor(std::move(task_processor))
-    , scripting_runtime(std::move(scripting_runtime))
-    , last_fm(std::move(last_fm))
 {
     taskID = 1;
     working = false;
@@ -114,12 +113,32 @@ ContentManager::ContentManager(const std::shared_ptr<Context>& context,
         }
     }
 
+    update_manager = std::make_shared<UpdateManager>(database, server);
+#ifdef ONLINE_SERVICES
+    task_processor = std::make_shared<TaskProcessor>();
+#endif
+#ifdef HAVE_JS
+    scripting_runtime = std::make_shared<Runtime>();
+#endif
+#ifdef HAVE_LASTFMLIB
+    last_fm = std::make_shared<LastFm>(context);
+#endif
+
     database->updateAutoscanList(ScanMode::Timed, config_timed_list);
     autoscan_timed = database->getAutoscanList(ScanMode::Timed);
 }
 
 void ContentManager::run()
 {
+    timer->run();
+#ifdef ONLINE_SERVICES
+    task_processor->run();
+#endif
+    update_manager->run();
+#ifdef HAVE_LASTFMLIB
+    last_fm->run();
+#endif
+
 #ifdef HAVE_INOTIFY
     auto self = shared_from_this();
     inotify = std::make_unique<AutoscanInotify>(self);
@@ -333,8 +352,21 @@ void ContentManager::shutdown()
         pthread_join(taskThread, nullptr);
     taskThread = 0;
 
+#ifdef HAVE_LASTFMLIB
+    last_fm->shutdown();
+    last_fm = nullptr;
+#endif
+#ifdef HAVE_JS
+    scripting_runtime = nullptr;
+#endif
+#ifdef ONLINE_SERVICES
+    task_processor->shutdown();
+    task_processor = nullptr;
+#endif
+    update_manager->shutdown();
+    update_manager = nullptr;
+
     log_debug("end");
-    log_debug("ContentManager destroyed");
 }
 
 std::shared_ptr<GenericTask> ContentManager::getCurrentTask()
