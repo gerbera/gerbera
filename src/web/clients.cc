@@ -53,16 +53,12 @@ void web::clients::process()
     xml2JsonHints->setArrayName(clients, "client");
 
     auto arr = Clients::getClientList();
-
     for (const auto& obj : *arr) {
         auto item = clients.append_child("client");
         auto ip = sockAddrGetNameInfo(reinterpret_cast<const struct sockaddr*>(&obj.addr));
         item.append_attribute("ip") = ip.c_str();
-        if (obj.hostName.empty()) {
-            item.append_attribute("host") = "";
-        } else {
-            item.append_attribute("host") = obj.hostName.c_str();
-        }
+        auto hostName = getHostName(reinterpret_cast<const struct sockaddr*>(&obj.addr));
+        item.append_attribute("host") = hostName.c_str();
         item.append_attribute("time") = steady_clock_to_string(obj.age).c_str();
         item.append_attribute("last") = steady_clock_to_string(obj.last).c_str();
         item.append_attribute("userAgent") = obj.userAgent.c_str();

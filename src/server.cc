@@ -317,13 +317,11 @@ int Server::handleUpnpRootDeviceEvent(Upnp_EventType eventtype, const void* even
     switch (eventtype) {
 
     case UPNP_CONTROL_ACTION_REQUEST:
-        // a CP is invoking an action
         log_debug("UPNP_CONTROL_ACTION_REQUEST");
         try {
             auto request = std::make_unique<ActionRequest>(config, static_cast<UpnpActionRequest*>(const_cast<void*>(event)));
             routeActionRequest(request);
             request->update();
-            // set in update() ((struct Upnp_Action_Request *)event)->ErrCode = ret;
         } catch (const UpnpException& upnp_e) {
             ret = upnp_e.getErrorCode();
             UpnpActionRequest_set_ErrCode(static_cast<UpnpActionRequest*>(const_cast<void*>(event)), ret);
@@ -333,7 +331,6 @@ int Server::handleUpnpRootDeviceEvent(Upnp_EventType eventtype, const void* even
         break;
 
     case UPNP_EVENT_SUBSCRIPTION_REQUEST:
-        // a cp wants a subscription
         log_debug("UPNP_EVENT_SUBSCRIPTION_REQUEST");
         try {
             auto request = std::make_unique<SubscriptionRequest>(static_cast<UpnpSubscriptionRequest*>(const_cast<void*>(event)));

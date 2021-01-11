@@ -46,7 +46,6 @@ enum class ClientType {
     SamsungBDP,
     SamsungSeriesCDE,
     SamsungBDJ5500,
-    VLC,
     StandardUPnP
 };
 
@@ -72,32 +71,34 @@ struct ClientInfo {
 struct ClientCacheEntry {
     struct sockaddr_storage addr;
     std::string userAgent;
-    std::string hostName;
     std::chrono::time_point<std::chrono::steady_clock> last;
     std::chrono::time_point<std::chrono::steady_clock> age;
-
     const struct ClientInfo* pInfo;
 };
 
 class Clients {
 public:
-    static void addClientByDiscovery(const struct sockaddr_storage* addr, const std::string& userAgent, const std::string& descLocation);
-
     // always return something, 'Unknown' if we do not know better
     static void getInfo(const struct sockaddr_storage* addr, const std::string& userAgent, const ClientInfo** ppInfo);
 
+    static void addClientByDiscovery(const struct sockaddr_storage* addr, const std::string& userAgent, const std::string& descLocation);
     static void addClientInfo(const std::shared_ptr<ClientInfo>& newClientInfo);
     static std::shared_ptr<std::vector<struct ClientCacheEntry>> getClientList() { return cache; }
 
 private:
-    static bool getInfoByType(const std::string& match, ClientMatchType type, const ClientInfo** ppInfo);
     static bool getInfoByAddr(const struct sockaddr_storage* addr, const ClientInfo** ppInfo);
+    static bool getInfoByType(const std::string& match, ClientMatchType type, const ClientInfo** ppInfo);
+
+    static bool getInfoByCache(const struct sockaddr_storage* addr, const ClientInfo** ppInfo);
+    static void updateCache(const struct sockaddr_storage* addr, const std::string& userAgent, const ClientInfo* pInfo);
+
     static bool downloadDescription(const std::string& location, std::unique_ptr<pugi::xml_document>& xml);
 
 private:
     static std::mutex mutex;
     using AutoLock = std::lock_guard<std::mutex>;
     static const std::shared_ptr<std::vector<struct ClientCacheEntry>> cache;
+
     static std::vector<struct ClientInfo> clientInfo;
 };
 

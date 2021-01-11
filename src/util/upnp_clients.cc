@@ -52,7 +52,7 @@ std::vector<struct ClientInfo> Clients::clientInfo = std::vector<struct ClientIn
         "BubbleUPnP" },
 
     // This is AllShare running on a PC. We don't want to respond with Samsung capabilities, or Windows (and AllShare) might get grumpy.
-    // User-Agent: DLNADOC/1.50 SEC_HHP_[PC]LPC001/1.0  MS-DeviceCaps/1024
+    // User-Agent(actionReq): DLNADOC/1.50 SEC_HHP_[PC]LPC001/1.0  MS-DeviceCaps/1024
     {
         "AllShare",
         ClientType::SamsungAllShare,
@@ -60,7 +60,7 @@ std::vector<struct ClientInfo> Clients::clientInfo = std::vector<struct ClientIn
         ClientMatchType::UserAgent,
         "SEC_HHP_[PC]" },
 
-    // User-Agent: DLNADOC/1.50 SEC_HHP_[TV] Samsung Q7 Series (49)/1.0
+    // User-Agent(actionReq): DLNADOC/1.50 SEC_HHP_[TV] Samsung Q7 Series (49)/1.0
     {
         "Samsung Series [Q] TVs",
         ClientType::SamsungSeriesQ,
@@ -68,7 +68,7 @@ std::vector<struct ClientInfo> Clients::clientInfo = std::vector<struct ClientIn
         ClientMatchType::UserAgent,
         "SEC_HHP_[TV] Samsung Q" },
 
-    // User-Agent: DLNADOC/1.50 SEC_HHP_BD-D5100/1.0
+    // User-Agent(actionReq): DLNADOC/1.50 SEC_HHP_BD-D5100/1.0
     {
         "Samsung Blu-ray Player BD-D5100",
         ClientType::SamsungBDP,
@@ -76,9 +76,9 @@ std::vector<struct ClientInfo> Clients::clientInfo = std::vector<struct ClientIn
         ClientMatchType::UserAgent,
         "SEC_HHP_BD" },
 
-    // User-Agent: DLNADOC/1.50 SEC_HHP_[TV]UE40D7000/1.0
-    // User-Agent: DLNADOC/1.50 SEC_HHP_ Family TV/1.0
-    // User-Agent: DLNADOC/1.50 SEC_HHP_[TV] UE65JU7000/1.0 UPnP/1.0
+    // User-Agent(actionReq): DLNADOC/1.50 SEC_HHP_[TV]UE40D7000/1.0
+    // User-Agent(actionReq): DLNADOC/1.50 SEC_HHP_ Family TV/1.0
+    // User-Agent(actionReq): DLNADOC/1.50 SEC_HHP_[TV] UE65JU7000/1.0 UPnP/1.0
     {
         "Samsung other TVs",
         ClientType::SamsungSeriesCDE,
@@ -94,17 +94,10 @@ std::vector<struct ClientInfo> Clients::clientInfo = std::vector<struct ClientIn
         ClientMatchType::UserAgent,
         "[BD]J5500" },
 
-    // User-Agent: VLC/3.0.11.1 LibVLC/3.0.11.1
-    {
-        "VLC",
-        ClientType::VLC,
-        QUIRK_FLAG_NONE,
-        ClientMatchType::UserAgent,
-        "LibVLC" },
-
-    // Gerbera, FRITZ!Box, etc...
-    // User-Agent: Linux/5.4.0-4-amd64, UPnP/1.0, Portable SDK for UPnP devices/1.8.6
-    // User-Agent: FRITZ!Box 5490 UPnP/1.0 AVM FRITZ!Box 5490 151.07.12
+    // Gerbera, FRITZ!Box, Windows 10, etc...
+    // User-Agent(actionReq): Linux/5.4.0-4-amd64, UPnP/1.0, Portable SDK for UPnP devices/1.8.6
+    // User-Agent(actionReq): FRITZ!Box 5490 UPnP/1.0 AVM FRITZ!Box 5490 151.07.12
+    // User-Agent(actionReq): Microsoft-Windows/10.0 UPnP/1.0 Microsoft-DLNA DLNADOC/1.50
     {
         "Standard UPnP",
         ClientType::StandardUPnP,
@@ -128,35 +121,6 @@ void Clients::addClientByDiscovery(const struct sockaddr_storage* addr, const st
         // TODO: search for FriendlyName + ModelName
         //(void)getInfoByType(userAgent, ClientMatchType::FriendlyName, &info);
     }
-
-    {
-        AutoLock lock(mutex);
-
-        // even if not detect type we add entry, to log 'Found client' not to often
-        bool found = false;
-        for (auto& entry : *cache) {
-            if (sockAddrCmpAddr((const struct sockaddr*)&entry.addr, (const struct sockaddr*)addr) != 0)
-                continue;
-            entry.age = std::chrono::steady_clock::now();
-            if (entry.pInfo != info) {
-                assert(clientInfo[0].type == ClientType::Unknown);
-                log_debug("client update: {} '{}' -> '{}'", sockAddrGetNameInfo((const struct sockaddr*)addr), userAgent, info ? info->name : clientInfo[0].name);
-            }
-            entry.pInfo = info;
-            found = true;
-            break;
-        }
-
-        if (!found) {
-            assert(clientInfo[0].type == ClientType::Unknown);
-            log_debug("client add: {} '{}' -> '{}'", sockAddrGetNameInfo((const struct sockaddr*)addr), userAgent, info ? info->name : clientInfo[0].name);
-            auto add = ClientCacheEntry();
-            add.addr = *addr;
-            add.age = std::chrono::steady_clock::now();
-            add.pInfo = info;
-            cache->push_back(add);
-        }
-    }
 #endif
 }
 
@@ -164,59 +128,32 @@ void Clients::getInfo(const struct sockaddr_storage* addr, const std::string& us
 {
     const ClientInfo* info = nullptr;
 
-    // by IP address
+    // 1. by IP address
     bool found = getInfoByAddr(addr, &info);
 
     if (!found) {
-        // by userAgent
+        // 2. by User-Agent
         found = getInfoByType(userAgent, ClientMatchType::UserAgent, &info);
     }
 
-    // by addClientByDiscovery
+    // update IP or User-Agent match in cache
+    if (found) {
+        updateCache(addr, userAgent, info);
+    }
+
+    if (!found) {
+        // 3. by cache
+        // HINT: most clients do not report exactly the same User-Agent for UPnP services and file request.
+        found = getInfoByCache(addr, &info);
+    }
+
     if (!found) {
         // always return something, 'Unknown' if we do not know better
         assert(clientInfo[0].type == ClientType::Unknown);
         info = &clientInfo[0];
 
-#if 0 // only needed if UserAgent is not good enough
-        AutoLock lock(mutex);
-
-        // house cleaning, remove old entries
-        auto now = std::chrono::steady_clock::now();
-        cache->erase(
-            std::remove_if(cache->begin(), cache->end(),
-                [now](const auto& entry) { return entry.age + std::chrono::hours(1) < now; }),
-            cache->end());
-
-        for (const auto& entry : *cache) {
-            if (sockAddrCmpAddr((struct sockaddr*)&entry.addr, (struct sockaddr*)addr) != 0)
-                continue;
-            if (entry.pInfo) {
-                info = entry.pInfo;
-            }
-            break;
-        }
-#endif
-    }
-
-    if (info) {
-        auto it = std::find_if(cache->begin(), cache->end(), [=](const auto& entry) //
-            { return sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&entry.addr), reinterpret_cast<const struct sockaddr*>(addr)) == 0 && entry.userAgent == userAgent; });
-
-        if (it != cache->end()) {
-            it->last = std::chrono::steady_clock::now();
-            it->userAgent = userAgent;
-            it->hostName = getHostName(reinterpret_cast<const struct sockaddr*>(addr));
-        } else {
-            auto add = ClientCacheEntry();
-            add.addr = *addr;
-            add.hostName = getHostName(reinterpret_cast<const struct sockaddr*>(addr));
-            add.last = std::chrono::steady_clock::now();
-            add.age = std::chrono::steady_clock::now();
-            add.userAgent = userAgent;
-            add.pInfo = info;
-            cache->push_back(add);
-        }
+        // also add to cache, for web-ui proposes only
+        updateCache(addr, userAgent, info);
     }
 
     *ppInfo = info;
@@ -225,28 +162,38 @@ void Clients::getInfo(const struct sockaddr_storage* addr, const std::string& us
 
 bool Clients::getInfoByAddr(const struct sockaddr_storage* addr, const ClientInfo** ppInfo)
 {
-    auto it = std::find_if(clientInfo.begin(), clientInfo.end(), [=](const auto& c) //
-        { return !c.match.empty() && c.matchType == ClientMatchType::IP; });
+    auto it = std::find_if(clientInfo.begin(), clientInfo.end(), [=](const auto& c) {
+        if (c.matchType != ClientMatchType::IP) {
+            return false;
+        }
 
-    if (it != clientInfo.end()) {
-        if (it->match.find('.') != std::string::npos) {
+        if (c.match.find('.') != std::string::npos) {
+            // IPv4
             struct sockaddr_in clientAddr;
             clientAddr.sin_family = AF_INET;
-            clientAddr.sin_addr.s_addr = inet_addr(it->match.c_str());
+            clientAddr.sin_addr.s_addr = inet_addr(c.match.c_str());
             if (sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&clientAddr), reinterpret_cast<const struct sockaddr*>(addr)) == 0) {
-                *ppInfo = &(*it);
                 return true;
             }
-        } else if (it->match.find(':') != std::string::npos) {
+        } else if (c.match.find(':') != std::string::npos) {
+            // IPv6
             struct sockaddr_in6 clientAddr;
             clientAddr.sin6_family = AF_INET6;
-            if (inet_pton(AF_INET6, it->match.c_str(), &clientAddr.sin6_addr) == 1) {
+            if (inet_pton(AF_INET6, c.match.c_str(), &clientAddr.sin6_addr) == 1) {
                 if (sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&clientAddr), reinterpret_cast<const struct sockaddr*>(addr)) == 0) {
-                    *ppInfo = &(*it);
                     return true;
                 }
             }
         }
+
+        return false;
+    });
+
+    if (it != clientInfo.end()) {
+        *ppInfo = &(*it);
+        auto ip = getHostName(reinterpret_cast<const struct sockaddr*>(addr));
+        log_debug("found client by IP (ip='{}')", ip.c_str());
+        return true;
     }
 
     *ppInfo = nullptr;
@@ -255,16 +202,69 @@ bool Clients::getInfoByAddr(const struct sockaddr_storage* addr, const ClientInf
 
 bool Clients::getInfoByType(const std::string& match, ClientMatchType type, const ClientInfo** ppInfo)
 {
-    auto it = std::find_if(clientInfo.begin(), clientInfo.end(), [=](const auto& c) //
-        { return c.matchType == type && match.find(c.match) != std::string::npos; });
+    if (!match.empty()) {
+        auto it = std::find_if(clientInfo.begin(), clientInfo.end(), [=](const auto& c) //
+            { return c.matchType == type && match.find(c.match) != std::string::npos; });
 
-    if (it != clientInfo.end()) {
-        *ppInfo = &(*it);
+        if (it != clientInfo.end()) {
+            *ppInfo = &(*it);
+            log_debug("found client by type (match='{}')", match.c_str());
+            return true;
+        }
+    }
+
+    *ppInfo = nullptr;
+    return false;
+}
+
+bool Clients::getInfoByCache(const struct sockaddr_storage* addr, const ClientInfo** ppInfo)
+{
+    AutoLock lock(mutex);
+
+    auto it = std::find_if(cache->begin(), cache->end(), [=](const auto& entry) //
+        { return sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&entry.addr), reinterpret_cast<const struct sockaddr*>(addr)) == 0; });
+
+    if (it != cache->end()) {
+        *ppInfo = it->pInfo;
+        auto hostName = getHostName(reinterpret_cast<const struct sockaddr*>(&it->addr));
+        log_debug("found client by cache (hostname='{}')", hostName.c_str());
         return true;
     }
 
     *ppInfo = nullptr;
     return false;
+}
+
+void Clients::updateCache(const struct sockaddr_storage* addr, const std::string& userAgent, const ClientInfo* pInfo)
+{
+    AutoLock lock(mutex);
+
+    // house cleaning, remove old entries
+    auto now = std::chrono::steady_clock::now();
+    cache->erase(std::remove_if(cache->begin(), cache->end(),
+                     [now](const auto& entry) { return entry.last + std::chrono::hours(6) < now; }),
+        cache->end());
+
+    auto it = std::find_if(cache->begin(), cache->end(), [=](const auto& entry) //
+        { return sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&entry.addr), reinterpret_cast<const struct sockaddr*>(addr)) == 0; });
+
+    if (it != cache->end()) {
+        it->last = now;
+        if (it->pInfo != pInfo) {
+            // client info changed, update all
+            it->age = now;
+            it->userAgent = userAgent;
+            it->pInfo = pInfo;
+        }
+    } else {
+        // add new client
+        auto add = ClientCacheEntry();
+        add.addr = *addr;
+        add.age = add.last = now;
+        add.userAgent = userAgent;
+        add.pInfo = pInfo;
+        cache->push_back(add);
+    }
 }
 
 bool Clients::downloadDescription(const std::string& location, std::unique_ptr<pugi::xml_document>& xml)
