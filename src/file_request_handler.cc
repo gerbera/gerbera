@@ -59,6 +59,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     log_debug("start");
 
     const struct sockaddr_storage* ctrlPtIPAddr = UpnpFileInfo_get_CtrlPtIPAddr(info);
+    // HINT: most clients do not report exactly the same User-Agent for UPnP services and file request.
     std::string userAgent = UpnpFileInfo_get_Os_cstr(info);
     auto quirks = std::make_unique<Quirks>(config, ctrlPtIPAddr, userAgent);
 
