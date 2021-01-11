@@ -104,7 +104,11 @@ void Server::run()
     auto port = in_port_t(config->getIntOption(CFG_SERVER_PORT));
 
     log_info("Initialising libupnp with interface: '{}', port: {}", iface.c_str(), port);
+#if defined(USING_NPUPNP)
+    const char* IfName = iface.empty() ? "*" : iface.c_str();
+#else
     const char* IfName = iface.empty() ? nullptr : iface.c_str();
+#endif
     ret = UpnpInit2(IfName, port);
     if (ret != UPNP_E_SUCCESS) {
         throw UpnpException(ret, "run: UpnpInit failed");
