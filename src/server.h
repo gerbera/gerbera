@@ -98,6 +98,7 @@ public:
 
 protected:
     std::shared_ptr<Config> config;
+    std::shared_ptr<Clients> clients;
     std::shared_ptr<Mime> mime;
     std::shared_ptr<Database> database;
     std::shared_ptr<web::SessionManager> session_manager;
@@ -226,7 +227,7 @@ protected:
     /// \param event Pointer to the event.
     ///
     static int handleUpnpClientEventCallback(Upnp_EventType eventType, const void* event, void* cookie);
-    static int handleUpnpClientEvent(Upnp_EventType eventType, const void* event);
+    int handleUpnpClientEvent(Upnp_EventType eventType, const void* event);
 
     /// \brief Creates a html file that is a redirector to the current server i
     /// instance

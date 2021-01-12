@@ -32,7 +32,7 @@
 #include <upnp.h>
 
 // table of supported clients (sequence of entries matters!)
-std::vector<struct ClientInfo> Clients::clientInfo = std::vector<struct ClientInfo> {
+static struct ClientInfo bultinClientInfo[] = {
     // Used for not explicitly listed clients, must be first entry
     {
         "Unknown",
@@ -106,9 +106,24 @@ std::vector<struct ClientInfo> Clients::clientInfo = std::vector<struct ClientIn
         "UPnP/1.0" }
 };
 
-void Clients::addClientInfo(const std::shared_ptr<ClientInfo>& newClientInfo)
+Clients::Clients(std::shared_ptr<Config> config)
 {
-    clientInfo.push_back(*newClientInfo);
+    for (const auto client : bultinClientInfo) {
+        clientInfo.push_back(client);
+    }
+
+    auto clientConfigList = config->getClientConfigListOption(CFG_CLIENTS_LIST);
+    for (size_t i = 0; i < clientConfigList->size(); i++) {
+        auto clientConfig = clientConfigList->get(i);
+        auto client = clientConfig->getClientInfo();
+        clientInfo.push_back(*client);
+    }
+
+    cache = std::make_shared<std::vector<struct ClientCacheEntry>>();
+}
+
+Clients::~Clients()
+{
 }
 
 void Clients::addClientByDiscovery(const struct sockaddr_storage* addr, const std::string& userAgent, const std::string& descLocation)
@@ -301,6 +316,3 @@ bool Clients::downloadDescription(const std::string& location, std::unique_ptr<p
 
     return true;
 }
-
-std::mutex Clients::mutex;
-const std::shared_ptr<std::vector<struct ClientCacheEntry>> Clients::cache = std::make_shared<std::vector<struct ClientCacheEntry>>();

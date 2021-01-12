@@ -34,10 +34,10 @@
 #include "util/upnp_clients.h"
 #include "util/upnp_headers.h"
 
-Quirks::Quirks(std::shared_ptr<Config> config, const struct sockaddr_storage* addr, const std::string& userAgent)
-    : config(std::move(config))
+Quirks::Quirks(std::shared_ptr<Context> context, const struct sockaddr_storage* addr, const std::string& userAgent)
+    : context(std::move(context))
 {
-    Clients::getInfo(addr, userAgent, &pClientInfo);
+    this->context->getClients()->getInfo(addr, userAgent, &pClientInfo);
 }
 
 void Quirks::addCaptionInfo(const std::shared_ptr<CdsItem>& item, std::unique_ptr<Headers>& headers) const

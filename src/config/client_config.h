@@ -27,11 +27,13 @@
 #ifndef __CLIENTCONFIG_H__
 #define __CLIENTCONFIG_H__
 
-#include "util/upnp_clients.h"
-#include "util/upnp_quirks.h"
 #include <filesystem>
 #include <map>
 #include <mutex>
+#include <vector>
+
+#include "util/upnp_clients.h"
+#include "util/upnp_quirks.h"
 
 // forward declaration
 class ClientConfig;

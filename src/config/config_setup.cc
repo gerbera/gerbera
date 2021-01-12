@@ -1376,7 +1376,6 @@ bool ConfigClientSetup::createClientConfigListFromNode(const pugi::xml_node& ele
         return true;
 
     for (const pugi::xml_node& child : element.children()) {
-
         // We only want directories
         if (std::string(child.name()) != ConfigManager::mapConfigOption(ATTR_CLIENTS_CLIENT))
             continue;
@@ -1390,8 +1389,6 @@ bool ConfigClientSetup::createClientConfigListFromNode(const pugi::xml_node& ele
             { return flg | ClientConfig::remapFlag(i); });
 
         auto client = std::make_shared<ClientConfig>(flag, ip, userAgent);
-        auto clientInfo = client->getClientInfo();
-        Clients::addClientInfo(clientInfo);
         try {
             result->add(client);
         } catch (const std::runtime_error& e) {
