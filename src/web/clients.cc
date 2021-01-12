@@ -26,6 +26,8 @@
 #include "pages.h" // API
 
 #include "config/client_config.h"
+#include "content/content_manager.h"
+#include "context.h"
 #include "database/database.h"
 #include "upnp_xml.h"
 #include "util/upnp_clients.h"
@@ -52,7 +54,7 @@ void web::clients::process()
     auto clients = root.append_child("clients");
     xml2JsonHints->setArrayName(clients, "client");
 
-    auto arr = Clients::getClientList();
+    auto arr = content->getContext()->getClients()->getClientList();
     for (const auto& obj : *arr) {
         auto item = clients.append_child("client");
         auto ip = sockAddrGetNameInfo(reinterpret_cast<const struct sockaddr*>(&obj.addr));

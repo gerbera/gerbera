@@ -73,11 +73,12 @@ void Server::init()
     auto self = shared_from_this();
     timer = std::make_shared<Timer>();
 
+    clients = std::make_shared<Clients>(config);
     mime = std::make_shared<Mime>(config);
     database = Database::createInstance(config, timer);
     config->updateConfigFromDatabase(database);
     session_manager = std::make_shared<web::SessionManager>(config, timer);
-    context = std::make_shared<Context>(config, mime, database, session_manager);
+    context = std::make_shared<Context>(config, clients, mime, database, session_manager);
 
     content = std::make_shared<ContentManager>(context, self, timer);
 }
@@ -291,17 +292,16 @@ void Server::shutdown()
     timer->shutdown();
     timer = nullptr;
 
-    if (mime) {
-        mime = nullptr;
-    }
+    mime = nullptr;
+    clients = nullptr;
 }
 
-int Server::handleUpnpRootDeviceEventCallback(Upnp_EventType eventtype, const void* event, void* cookie)
+int Server::handleUpnpRootDeviceEventCallback(Upnp_EventType eventType, const void* event, void* cookie)
 {
-    return static_cast<Server*>(cookie)->handleUpnpRootDeviceEvent(eventtype, event);
+    return static_cast<Server*>(cookie)->handleUpnpRootDeviceEvent(eventType, event);
 }
 
-int Server::handleUpnpRootDeviceEvent(Upnp_EventType eventtype, const void* event)
+int Server::handleUpnpRootDeviceEvent(Upnp_EventType eventType, const void* event)
 {
     int ret = UPNP_E_SUCCESS; // general purpose return code
 
@@ -314,12 +314,12 @@ int Server::handleUpnpRootDeviceEvent(Upnp_EventType eventtype, const void* even
     }
 
     // dispatch event based on event type
-    switch (eventtype) {
+    switch (eventType) {
 
     case UPNP_CONTROL_ACTION_REQUEST:
         log_debug("UPNP_CONTROL_ACTION_REQUEST");
         try {
-            auto request = std::make_unique<ActionRequest>(config, static_cast<UpnpActionRequest*>(const_cast<void*>(event)));
+            auto request = std::make_unique<ActionRequest>(context, static_cast<UpnpActionRequest*>(const_cast<void*>(event)));
             routeActionRequest(request);
             request->update();
         } catch (const UpnpException& upnp_e) {
@@ -343,7 +343,7 @@ int Server::handleUpnpRootDeviceEvent(Upnp_EventType eventtype, const void* even
 
     default:
         // unhandled event type
-        log_warning("unsupported event type: {}", eventtype);
+        log_warning("unsupported event type: {}", eventType);
         ret = UPNP_E_BAD_REQUEST;
         break;
     }
@@ -354,7 +354,7 @@ int Server::handleUpnpRootDeviceEvent(Upnp_EventType eventtype, const void* even
 
 int Server::handleUpnpClientEventCallback(Upnp_EventType eventType, const void* event, void* cookie)
 {
-    return Server::handleUpnpClientEvent(eventType, event);
+    return static_cast<Server*>(cookie)->handleUpnpClientEvent(eventType, event);
 }
 
 int Server::handleUpnpClientEvent(Upnp_EventType eventType, const void* event)
@@ -381,7 +381,7 @@ int Server::handleUpnpClientEvent(Upnp_EventType eventType, const void* event)
         const char* location = UpnpString_get_String(UpnpDiscovery_get_Location(d_event));
 #endif
 
-        Clients::addClientByDiscovery(destAddr, userAgent, location);
+        clients->addClientByDiscovery(destAddr, userAgent, location);
         break;
     }
     default:

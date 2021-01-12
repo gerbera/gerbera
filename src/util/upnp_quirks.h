@@ -37,21 +37,21 @@ using QuirkFlags = uint32_t;
 #define QUIRK_FLAG_SAMSUNG 0x00000001
 
 // forward declaration
-class Config;
+class Context;
 class CdsItem;
 class Headers;
 struct ClientInfo;
 
 class Quirks {
 public:
-    Quirks(std::shared_ptr<Config> config, const struct sockaddr_storage* addr, const std::string& userAgent);
+    Quirks(std::shared_ptr<Context> context, const struct sockaddr_storage* addr, const std::string& userAgent);
 
     // Look for subtitle file and returns it's URL in CaptionInfo.sec response header.
     // To be more compliant with original Samsung server we should check for getCaptionInfo.sec: 1 request header.
     void addCaptionInfo(const std::shared_ptr<CdsItem>& item, std::unique_ptr<Headers>& headers) const;
 
 private:
-    std::shared_ptr<Config> config;
+    std::shared_ptr<Context> context;
     const ClientInfo* pClientInfo;
 };
 

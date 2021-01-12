@@ -37,6 +37,9 @@
 
 #include "util/upnp_quirks.h"
 
+// forward declaration
+class Config;
+
 // specific customer products
 enum class ClientType {
     Unknown = 0, // if not listed otherwise
@@ -78,28 +81,30 @@ struct ClientCacheEntry {
 
 class Clients {
 public:
+    Clients(std::shared_ptr<Config> config);
+    virtual ~Clients();
+
     // always return something, 'Unknown' if we do not know better
-    static void getInfo(const struct sockaddr_storage* addr, const std::string& userAgent, const ClientInfo** ppInfo);
+    void getInfo(const struct sockaddr_storage* addr, const std::string& userAgent, const ClientInfo** ppInfo);
 
-    static void addClientByDiscovery(const struct sockaddr_storage* addr, const std::string& userAgent, const std::string& descLocation);
-    static void addClientInfo(const std::shared_ptr<ClientInfo>& newClientInfo);
-    static std::shared_ptr<std::vector<struct ClientCacheEntry>> getClientList() { return cache; }
-
-private:
-    static bool getInfoByAddr(const struct sockaddr_storage* addr, const ClientInfo** ppInfo);
-    static bool getInfoByType(const std::string& match, ClientMatchType type, const ClientInfo** ppInfo);
-
-    static bool getInfoByCache(const struct sockaddr_storage* addr, const ClientInfo** ppInfo);
-    static void updateCache(const struct sockaddr_storage* addr, const std::string& userAgent, const ClientInfo* pInfo);
-
-    static bool downloadDescription(const std::string& location, std::unique_ptr<pugi::xml_document>& xml);
+    void addClientByDiscovery(const struct sockaddr_storage* addr, const std::string& userAgent, const std::string& descLocation);
+    std::shared_ptr<std::vector<struct ClientCacheEntry>> getClientList() { return cache; }
 
 private:
-    static std::mutex mutex;
+    bool getInfoByAddr(const struct sockaddr_storage* addr, const ClientInfo** ppInfo);
+    bool getInfoByType(const std::string& match, ClientMatchType type, const ClientInfo** ppInfo);
+
+    bool getInfoByCache(const struct sockaddr_storage* addr, const ClientInfo** ppInfo);
+    void updateCache(const struct sockaddr_storage* addr, const std::string& userAgent, const ClientInfo* pInfo);
+
+    bool downloadDescription(const std::string& location, std::unique_ptr<pugi::xml_document>& xml);
+
+private:
+    std::mutex mutex;
     using AutoLock = std::lock_guard<std::mutex>;
-    static const std::shared_ptr<std::vector<struct ClientCacheEntry>> cache;
+    std::shared_ptr<std::vector<struct ClientCacheEntry>> cache;
 
-    static std::vector<struct ClientInfo> clientInfo;
+    std::vector<struct ClientInfo> clientInfo;
 };
 
 #endif // __UPNP_CLIENTS_H__

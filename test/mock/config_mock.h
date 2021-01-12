@@ -8,7 +8,7 @@
 
 using namespace ::testing;
 
-class ConfigMock final : public Config {
+class ConfigMock : public Config {
 public:
     fs::path getConfigFilename() const override { return ""; }
     MOCK_METHOD(std::string, getOption, (config_option_t option), (const override));
