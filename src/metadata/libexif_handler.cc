@@ -400,8 +400,11 @@ void LibExifHandler::fillMetadata(std::shared_ptr<CdsItem> item)
     exif_data_unref(ed);
 }
 
-std::unique_ptr<IOHandler> LibExifHandler::serveContent(std::shared_ptr<CdsItem> item, int resNum)
+std::unique_ptr<IOHandler> LibExifHandler::serveContent(std::shared_ptr<CdsObject> obj, int resNum)
 {
+    auto item = std::dynamic_pointer_cast<CdsItem>(obj);
+    if (item == nullptr)
+        return nullptr;
     auto res = item->getResource(resNum);
 
     std::string ctype = getValueOrDefault(res->getParameters(), RESOURCE_CONTENT_TYPE);

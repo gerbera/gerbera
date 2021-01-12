@@ -73,6 +73,65 @@ void web::edit_load::process()
 
     item.append_child("obj_type").append_child(pugi::node_pcdata).set_value(CdsObject::mapObjectType(obj->getObjectType()).c_str());
 
+    auto metaData = item.append_child("metadata");
+    xml2JsonHints->setArrayName(metaData, "metadata");
+    xml2JsonHints->setFieldType("metavalue", "string");
+
+    for (const auto& [key, val] : obj->getMetadata()) {
+        auto metaEntry = metaData.append_child("metadata");
+        metaEntry.append_attribute("metaname") = key.c_str();
+        metaEntry.append_attribute("metavalue") = val.c_str();
+        metaEntry.append_attribute("editable") = false;
+    }
+
+    auto auxData = item.append_child("auxdata");
+    xml2JsonHints->setArrayName(auxData, "auxdata");
+    xml2JsonHints->setFieldType("auxvalue", "string");
+
+    for (const auto& [key, val] : obj->getAuxData()) {
+        auto auxEntry = auxData.append_child("auxdata");
+        auxEntry.append_attribute("auxname") = key.c_str();
+        auxEntry.append_attribute("auxvalue") = val.c_str();
+        auxEntry.append_attribute("editable") = false;
+    }
+
+    auto resources = item.append_child("resources");
+    xml2JsonHints->setArrayName(resources, "resources");
+    xml2JsonHints->setFieldType("resvalue", "string");
+
+    int resIndex = 0;
+    for (const auto& resItem : obj->getResources()) {
+        auto resEntry = resources.append_child("resources");
+        resEntry.append_attribute("resname") = "----RESOURCE----";
+        resEntry.append_attribute("resvalue") = fmt::format("{}", resIndex).c_str();
+        resEntry.append_attribute("editable") = false;
+
+        resEntry = resources.append_child("resources");
+        resEntry.append_attribute("resname") = "handlerType";
+        resEntry.append_attribute("resvalue") = fmt::format("{}", MetadataHandler::mapContentHandler2String(resItem->getHandlerType())).c_str();
+        resEntry.append_attribute("editable") = false;
+
+        for (const auto& [key, val] : resItem->getParameters()) {
+            auto resEntry = resources.append_child("resources");
+            resEntry.append_attribute("resname") = fmt::format(".{}", key.c_str()).c_str();
+            resEntry.append_attribute("resvalue") = val.c_str();
+            resEntry.append_attribute("editable") = false;
+        }
+        for (const auto& [key, val] : resItem->getAttributes()) {
+            auto resEntry = resources.append_child("resources");
+            resEntry.append_attribute("resname") = fmt::format(" {}", key.c_str()).c_str();
+            resEntry.append_attribute("resvalue") = val.c_str();
+            resEntry.append_attribute("editable") = false;
+        }
+        for (const auto& [key, val] : resItem->getOptions()) {
+            auto resEntry = resources.append_child("resources");
+            resEntry.append_attribute("resname") = fmt::format("-{}", key.c_str()).c_str();
+            resEntry.append_attribute("resvalue") = val.c_str();
+            resEntry.append_attribute("editable") = false;
+        }
+        resIndex++;
+    }
+
     if (obj->isItem()) {
         auto objItem = std::static_pointer_cast<CdsItem>(obj);
 
@@ -90,65 +149,6 @@ void web::edit_load::process()
         auto mimeType = item.append_child("mime-type");
         mimeType.append_attribute("value") = objItem->getMimeType().c_str();
         mimeType.append_attribute("editable") = true;
-
-        auto metaData = item.append_child("metadata");
-        xml2JsonHints->setArrayName(metaData, "metadata");
-        xml2JsonHints->setFieldType("metavalue", "string");
-
-        for (const auto& [key, val] : objItem->getMetadata()) {
-            auto metaEntry = metaData.append_child("metadata");
-            metaEntry.append_attribute("metaname") = key.c_str();
-            metaEntry.append_attribute("metavalue") = val.c_str();
-            metaEntry.append_attribute("editable") = false;
-        }
-
-        auto auxData = item.append_child("auxdata");
-        xml2JsonHints->setArrayName(auxData, "auxdata");
-        xml2JsonHints->setFieldType("auxvalue", "string");
-
-        for (const auto& [key, val] : objItem->getAuxData()) {
-            auto auxEntry = auxData.append_child("auxdata");
-            auxEntry.append_attribute("auxname") = key.c_str();
-            auxEntry.append_attribute("auxvalue") = val.c_str();
-            auxEntry.append_attribute("editable") = false;
-        }
-
-        auto resources = item.append_child("resources");
-        xml2JsonHints->setArrayName(resources, "resources");
-        xml2JsonHints->setFieldType("resvalue", "string");
-
-        int resIndex = 0;
-        for (const auto& resItem : objItem->getResources()) {
-            auto resEntry = resources.append_child("resources");
-            resEntry.append_attribute("resname") = "----RESOURCE----";
-            resEntry.append_attribute("resvalue") = fmt::format("{}", resIndex).c_str();
-            resEntry.append_attribute("editable") = false;
-
-            resEntry = resources.append_child("resources");
-            resEntry.append_attribute("resname") = "handlerType";
-            resEntry.append_attribute("resvalue") = fmt::format("{}", MetadataHandler::mapContentHandler2String(resItem->getHandlerType())).c_str();
-            resEntry.append_attribute("editable") = false;
-
-            for (const auto& [key, val] : resItem->getParameters()) {
-                auto resEntry = resources.append_child("resources");
-                resEntry.append_attribute("resname") = fmt::format(".{}", key.c_str()).c_str();
-                resEntry.append_attribute("resvalue") = val.c_str();
-                resEntry.append_attribute("editable") = false;
-            }
-            for (const auto& [key, val] : resItem->getAttributes()) {
-                auto resEntry = resources.append_child("resources");
-                resEntry.append_attribute("resname") = fmt::format(" {}", key.c_str()).c_str();
-                resEntry.append_attribute("resvalue") = val.c_str();
-                resEntry.append_attribute("editable") = false;
-            }
-            for (const auto& [key, val] : resItem->getOptions()) {
-                auto resEntry = resources.append_child("resources");
-                resEntry.append_attribute("resname") = fmt::format("-{}", key.c_str()).c_str();
-                resEntry.append_attribute("resvalue") = val.c_str();
-                resEntry.append_attribute("editable") = false;
-            }
-            resIndex++;
-        }
 
         if (obj->isExternalItem()) {
             auto protocol = item.append_child("protocol");

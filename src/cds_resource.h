@@ -101,7 +101,6 @@ public:
     /// XML but can be used for any purpose.
     void addOption(const std::string& name, std::string value);
 
-    // urlencode into string
     int getHandlerType() const;
     std::map<std::string, std::string> getAttributes() const;
     std::map<std::string, std::string> getParameters() const;
@@ -109,10 +108,15 @@ public:
     std::string getAttribute(resource_attributes_t res) const;
     std::string getParameter(const std::string& name) const;
     std::string getOption(const std::string& name) const;
+    bool isMetaResource(const char* rct) const
+    {
+        return ((handlerType == CH_ID3 || handlerType == CH_MP4 || handlerType == CH_FLAC || handlerType == CH_FANART) && getParameter(RESOURCE_CONTENT_TYPE) == rct) || (handlerType == CH_EXTURL && getOption(RESOURCE_CONTENT_TYPE) == rct);
+    }
 
     bool equals(const std::shared_ptr<CdsResource>& other) const;
     std::shared_ptr<CdsResource> clone();
 
+    /// \brief urlencode into string
     std::string encode();
     static std::shared_ptr<CdsResource> decode(const std::string& serial);
 };

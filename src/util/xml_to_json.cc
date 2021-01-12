@@ -109,9 +109,23 @@ void Xml2Json::handleElement(std::ostringstream& buf, const pugi::xml_node& node
         buf << ']';
 }
 
+static std::string& replaceAllString(std::string& str, std::string_view from, const std::string& to)
+{
+    size_t start_pos = str.find(from);
+    while (start_pos != std::string::npos) {
+        str.replace(start_pos, from.length(), to);
+        start_pos = str.find(from, start_pos + to.length());
+    }
+    return str;
+}
+
 std::string Xml2Json::getAsString(const char* str)
 {
-    return "\"" + escape(str, '\\', '"') + '"';
+    auto escaped = escape(str, '\\', '"');
+
+    escaped = replaceAllString(escaped, "\n", "\\n");
+    escaped = replaceAllString(escaped, "\r", "\\r");
+    return "\"" + escaped + '"';
 }
 
 std::string Xml2Json::getValue(const std::string& name, const char* text, const Hints& hints)

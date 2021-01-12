@@ -39,6 +39,7 @@
 
 // forward declaration
 class CdsItem;
+class CdsObject;
 class IOHandler;
 
 // content handler Id's
@@ -149,6 +150,8 @@ typedef enum {
     R_PROTOCOLINFO,
     R_RESOURCE_FILE,
     R_TYPE,
+    R_FANART_OBJ_ID,
+    R_FANART_RES_ID,
     R_MAX
 } resource_attributes_t;
 
@@ -162,6 +165,8 @@ constexpr std::array<std::pair<resource_attributes_t, const char*>, R_MAX> res_k
     { R_COLORDEPTH, "colorDepth" },
     { R_PROTOCOLINFO, "protocolInfo" },
     { R_RESOURCE_FILE, "resFile" },
+    { R_FANART_OBJ_ID, "fanArtObject" },
+    { R_FANART_RES_ID, "fanArtResource" },
     { R_TYPE, "type" },
 } };
 
@@ -183,7 +188,7 @@ public:
     static std::unique_ptr<MetadataHandler> createHandler(const std::shared_ptr<Context>& context, int handlerType);
 
     virtual void fillMetadata(std::shared_ptr<CdsItem> item) = 0;
-    virtual std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsItem> item, int resNum) = 0;
+    virtual std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsObject> item, int resNum) = 0;
     virtual std::string getMimeType();
 
     static const char* mapContentHandler2String(int ch);

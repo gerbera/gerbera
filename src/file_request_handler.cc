@@ -67,12 +67,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
     auto params = parseParameters(filename, LINK_FILE_REQUEST_HANDLER);
     auto obj = getObjectById(params);
-
-    if (!obj->isItem()) {
-        throw_std_runtime_error("requested object is not an item");
-    }
-
-    auto item = std::static_pointer_cast<CdsItem>(obj);
+    std::string rh = getValueOrDefault(params, RESOURCE_HANDLER);
 
     // determining which resource to serve
     size_t res_id = 0;
@@ -82,7 +77,13 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     else
         res_id = SIZE_MAX;
 
-    fs::path path = item->getLocation();
+    if (!obj->isItem() && rh.empty()) {
+        throw_std_runtime_error(fmt::format("requested object {} is not an item", filename));
+    }
+
+    auto item = std::dynamic_pointer_cast<CdsItem>(obj);
+
+    fs::path path = item != nullptr ? item->getLocation() : "";
     bool is_srt = false;
 
     std::string mimeType;
@@ -105,6 +106,10 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
     struct stat statbuf;
     int ret = stat(path.c_str(), &statbuf);
+    if (ret != 0 && !rh.empty()) {
+        path = obj->getResource(res_id)->getAttribute(R_RESOURCE_FILE);
+        ret = stat(path.c_str(), &statbuf);
+    }
     if (ret != 0) {
         if (is_srt)
             throw SubtitlesNotFoundException("Subtitle file " + path.string() + " is not available.");
@@ -132,16 +137,15 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     // some resources are created dynamically and not saved in the database,
     // so we can not load such a resource for a particular item, we will have
     // to trust the resource handler parameter
-    std::string rh = getValueOrDefault(params, RESOURCE_HANDLER);
-    if (res_id > 0 && (res_id < item->getResourceCount() || !rh.empty())) {
+    if ((res_id > 0 && res_id < obj->getResourceCount()) || !rh.empty()) {
         int res_handler;
         if (!rh.empty())
             res_handler = std::stoi(rh);
         else {
-            auto resource = item->getResource(res_id);
+            auto resource = obj->getResource(res_id);
             res_handler = resource->getHandlerType();
             // http-get:*:image/jpeg:*
-            std::string protocolInfo = getValueOrDefault(item->getResource(res_id)->getAttributes(), "protocolInfo");
+            std::string protocolInfo = getValueOrDefault(obj->getResource(res_id)->getAttributes(), "protocolInfo");
             if (!protocolInfo.empty()) {
                 mimeType = getMTFromProtocolInfo(protocolInfo);
             }
@@ -151,7 +155,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         if (mimeType.empty())
             mimeType = h->getMimeType();
 
-        auto io_handler = h->serveContent(item, res_id);
+        auto io_handler = h->serveContent(obj, res_id);
 
         // get size
         io_handler->open(UPNP_READ);
@@ -173,8 +177,8 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         auto mappings = config->getDictionaryOption(
             CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
         if (getValueOrDefault(mappings, mimeType) == CONTENT_TYPE_PCM) {
-            std::string freq = item->getResource(0)->getAttribute(R_SAMPLEFREQUENCY);
-            std::string nrch = item->getResource(0)->getAttribute(R_NRAUDIOCHANNELS);
+            std::string freq = obj->getResource(0)->getAttribute(R_SAMPLEFREQUENCY);
+            std::string nrch = obj->getResource(0)->getAttribute(R_NRAUDIOCHANNELS);
             if (!freq.empty())
                 mimeType = mimeType + ";rate=" + freq;
             if (!nrch.empty())
@@ -182,7 +186,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         }
 
         UpnpFileInfo_set_FileLength(info, -1);
-    } else {
+    } else if (item != nullptr) {
         UpnpFileInfo_set_FileLength(info, statbuf.st_size);
 
         quirks->addCaptionInfo(item, headers);
@@ -195,7 +199,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         }
     }
 
-    if (mimeType.empty())
+    if (mimeType.empty() && item != nullptr)
         mimeType = item->getMimeType();
 
     std::string dlnaTransferHeader = getDLNATransferHeader(config, mimeType);
@@ -233,12 +237,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum U
 
     auto params = parseParameters(filename, LINK_FILE_REQUEST_HANDLER);
     auto obj = getObjectById(params);
-
-    if (!obj->isItem()) {
-        throw_std_runtime_error("requested object is not an item");
-    }
-
-    auto item = std::static_pointer_cast<CdsItem>(obj);
+    std::string rh = getValueOrDefault(params, RESOURCE_HANDLER);
 
     // determining which resource to serve
     size_t res_id = 0;
@@ -248,7 +247,14 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum U
     else
         res_id = SIZE_MAX;
 
-    fs::path path = item->getLocation();
+    if (!obj->isItem() && rh.empty()) {
+        throw_std_runtime_error(fmt::format("requested object {} is not an item", filename));
+    }
+
+    auto item = std::dynamic_pointer_cast<CdsItem>(obj);
+
+    fs::path path = item != nullptr ? item->getLocation() : "";
+
     bool is_srt = false;
 
     std::string ext = getValueOrDefault(params, "ext");
@@ -267,6 +273,10 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum U
 
     struct stat statbuf;
     int ret = stat(path.c_str(), &statbuf);
+    if (ret != 0 && !rh.empty()) {
+        path = obj->getResource(res_id)->getAttribute(R_RESOURCE_FILE);
+        ret = stat(path.c_str(), &statbuf);
+    }
     if (ret != 0) {
         if (is_srt)
             throw SubtitlesNotFoundException("Subtitle file " + path.string() + " is not available.");
@@ -288,18 +298,17 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum U
     // some resources are created dynamically and not saved in the database,
     // so we can not load such a resource for a particular item, we will have
     // to trust the resource handler parameter
-    std::string rh = getValueOrDefault(params, RESOURCE_HANDLER);
-    if (res_id > 0 && (res_id < item->getResourceCount() || !rh.empty())) {
+    if ((res_id > 0 && res_id < obj->getResourceCount()) || !rh.empty()) {
         int res_handler;
         if (!rh.empty())
             res_handler = std::stoi(rh);
         else {
-            auto resource = item->getResource(res_id);
+            auto resource = obj->getResource(res_id);
             res_handler = resource->getHandlerType();
         }
 
         auto h = MetadataHandler::createHandler(context, res_handler);
-        auto io_handler = h->serveContent(item, res_id);
+        auto io_handler = h->serveContent(obj, res_id);
         io_handler->open(mode);
 
         log_debug("end");

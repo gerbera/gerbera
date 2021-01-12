@@ -130,8 +130,12 @@ void MatroskaHandler::fillMetadata(std::shared_ptr<CdsItem> item)
     parseMKV(item, nullptr);
 }
 
-std::unique_ptr<IOHandler> MatroskaHandler::serveContent(std::shared_ptr<CdsItem> item, int resNum)
+std::unique_ptr<IOHandler> MatroskaHandler::serveContent(std::shared_ptr<CdsObject> obj, int resNum)
 {
+    auto item = std::dynamic_pointer_cast<CdsItem>(obj);
+    if (item == nullptr)
+        return nullptr;
+
     MemIOHandler* io_handler;
     parseMKV(item, &io_handler);
 

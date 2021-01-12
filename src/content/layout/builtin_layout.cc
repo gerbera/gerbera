@@ -246,11 +246,11 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj)
 
     album = esc(album);
     chain = "/Audio/Artists/" + artist + "/" + album;
-    id = content->addContainerChain(chain, UPNP_CLASS_MUSIC_ALBUM, obj->getID(), obj->getMetadata());
+    id = content->addContainerChain(chain, UPNP_CLASS_MUSIC_ALBUM, obj->getID(), obj);
     add(obj, id);
 
     chain = "/Audio/Albums/" + album;
-    id = content->addContainerChain(chain, UPNP_CLASS_MUSIC_ALBUM, obj->getID(), obj->getMetadata());
+    id = content->addContainerChain(chain, UPNP_CLASS_MUSIC_ALBUM, obj->getID(), obj);
     add(obj, id);
 
     chain = "/Audio/Genres/" + esc(genre);

@@ -116,8 +116,8 @@
     text.text(name).appendTo(content);
     row.append(content);
     content = $('<td></td>');
-    text = $('<span></span>');
-    text.text(value).appendTo(content);
+    text = $('<span>' + value.replaceAll('\n', '<br>') + '</span>');
+    text.appendTo(content);
     row.append(content);
     tbody.append(row);
   }

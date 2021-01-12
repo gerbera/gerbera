@@ -150,22 +150,21 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
             return 0;
         }
 
-        int id;
+        int parentId;
 
         if ((self->whoami() == S_PLAYLIST) && (self->getConfig()->getBoolOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS))) {
             path = p2i->convert(path);
-            id = cm->addContainerChain(path, containerclass,
-                orig_object->getID());
+            parentId = cm->addContainerChain(path, containerclass, orig_object->getID());
         } else {
             if (self->whoami() == S_PLAYLIST)
                 path = p2i->convert(path);
             else
                 path = i2i->convert(path);
 
-            id = cm->addContainerChain(path, containerclass, INVALID_OBJECT_ID, orig_object->getMetadata());
+            parentId = cm->addContainerChain(path, containerclass, INVALID_OBJECT_ID, orig_object);
         }
 
-        cds_obj->setParentID(id);
+        cds_obj->setParentID(parentId);
         if (!cds_obj->isExternalItem()) {
             /// \todo get hidden file setting from config manager?
             /// what about same stuff in content manager, why is it not used
@@ -191,7 +190,7 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
         cm->addObject(cds_obj);
 
         /* setting object ID as return value */
-        std::string tmp = std::to_string(id);
+        std::string tmp = std::to_string(parentId);
         duk_push_string(ctx, tmp.c_str());
         return 1;
     } catch (const ServerShutdownException& se) {
