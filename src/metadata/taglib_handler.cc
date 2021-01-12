@@ -273,8 +273,12 @@ void TagLibHandler::addArtworkResource(const std::shared_ptr<CdsItem>& item, con
     }
 }
 
-std::unique_ptr<IOHandler> TagLibHandler::serveContent(std::shared_ptr<CdsItem> item, int resNum)
+std::unique_ptr<IOHandler> TagLibHandler::serveContent(std::shared_ptr<CdsObject> obj, int resNum)
 {
+    auto item = std::dynamic_pointer_cast<CdsItem>(obj);
+    if (item == nullptr)
+        return nullptr;
+
     auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
     std::string content_type = getValueOrDefault(mappings, item->getMimeType());
 

@@ -39,8 +39,8 @@ public:
     static bool caseSensitive;
 
 protected:
-    static fs::path getContentPath(const std::vector<std::string>& names, const std::shared_ptr<CdsItem>& item, bool isCaseSensitive);
-    static std::string expandName(const std::string& name, const std::shared_ptr<CdsItem>& item);
+    static fs::path getContentPath(const std::vector<std::string>& names, const std::shared_ptr<CdsObject>& item, bool isCaseSensitive);
+    static std::string expandName(const std::string& name, const std::shared_ptr<CdsObject>& item);
 };
 
 /// \brief This class is responsible for populating filesystem based album and fan art
@@ -48,7 +48,7 @@ class FanArtHandler : public MetacontentHandler {
 public:
     explicit FanArtHandler(std::shared_ptr<Context> context);
     void fillMetadata(std::shared_ptr<CdsItem> item) override;
-    std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsItem> item, int resNum) override;
+    std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsObject> item, int resNum) override;
 
 private:
     static std::vector<std::string> names;
@@ -60,7 +60,7 @@ class SubtitleHandler : public MetacontentHandler {
 public:
     explicit SubtitleHandler(std::shared_ptr<Context> context);
     void fillMetadata(std::shared_ptr<CdsItem> item) override;
-    std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsItem> item, int resNum) override;
+    std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsObject> item, int resNum) override;
 
 private:
     static std::vector<std::string> names;
@@ -72,7 +72,7 @@ class ResourceHandler : public MetacontentHandler {
 public:
     explicit ResourceHandler(std::shared_ptr<Context> context);
     void fillMetadata(std::shared_ptr<CdsItem> item) override;
-    std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsItem> item, int resNum) override;
+    std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsObject> item, int resNum) override;
 
 private:
     static std::vector<std::string> names;

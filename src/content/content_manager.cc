@@ -1045,8 +1045,9 @@ void ContentManager::addContainer(int parentID, std::string title, const std::st
     addContainerChain(database->buildContainerPath(parentID, escape(std::move(title), VIRTUAL_CONTAINER_ESCAPE, VIRTUAL_CONTAINER_SEPARATOR)), upnpClass);
 }
 
-int ContentManager::addContainerChain(const std::string& chain, const std::string& lastClass, int lastRefID, const std::map<std::string, std::string>& lastMetadata)
+int ContentManager::addContainerChain(const std::string& chain, const std::string& lastClass, int lastRefID, const std::shared_ptr<CdsObject>& origObj)
 {
+    std::map<std::string, std::string> lastMetadata = origObj != nullptr ? origObj->getMetadata() : std::map<std::string, std::string>();
     int updateID = INVALID_OBJECT_ID;
     int containerID;
 
@@ -1059,10 +1060,31 @@ int ContentManager::addContainerChain(const std::string& chain, const std::strin
     }
 
     log_debug("received chain: {} -> {} ({}) [{}]", chain.c_str(), newChain.c_str(), lastClass.c_str(), dictEncodeSimple(lastMetadata).c_str());
+    const std::array<metadata_fields_t, 4> unwanted { M_DESCRIPTION, M_TITLE, M_TRACKNUMBER, M_ARTIST }; // not wanted for container!
+    for (const auto& unw : unwanted) {
+        const auto itm = lastMetadata.find(MetadataHandler::getMetaFieldName(unw));
+        if (itm != lastMetadata.end()) {
+            lastMetadata.erase(itm);
+        }
+    }
     database->addContainerChain(newChain, lastClass, lastRefID, &containerID, &updateID, lastMetadata);
 
-    // if (updateID != INVALID_OBJECT_ID)
-    // an invalid updateID is checked by containerChanged()
+    if (updateID != INVALID_OBJECT_ID && origObj != nullptr) {
+        const std::vector<std::shared_ptr<CdsResource>>& resources = origObj->getResources();
+        auto container = database->loadObject(containerID);
+
+        auto fanart = std::find_if(resources.begin(), resources.end(), [=](const auto& res) { return res->isMetaResource(ID3_ALBUM_ART); });
+        if (fanart != resources.end()) {
+            if ((*fanart)->getAttribute(R_RESOURCE_FILE).empty()) {
+                (*fanart)->addAttribute(R_FANART_OBJ_ID, std::to_string(origObj->getID()));
+                (*fanart)->addAttribute(R_FANART_RES_ID, std::to_string(fanart - resources.begin()));
+            }
+            container->addResource(*fanart);
+        }
+
+        int containerChanged = INVALID_OBJECT_ID;
+        database->updateObject(container, &containerChanged);
+    }
     update_manager->containerChanged(updateID);
     session_manager->containerChangedUI(updateID);
 

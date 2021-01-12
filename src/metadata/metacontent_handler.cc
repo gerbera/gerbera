@@ -39,7 +39,7 @@ MetacontentHandler::MetacontentHandler(std::shared_ptr<Context> context)
 {
 }
 
-fs::path MetacontentHandler::getContentPath(const std::vector<std::string>& names, const std::shared_ptr<CdsItem>& item, bool isCaseSensitive)
+fs::path MetacontentHandler::getContentPath(const std::vector<std::string>& names, const std::shared_ptr<CdsObject>& item, bool isCaseSensitive)
 {
     if (!names.empty()) {
         auto folder = item->getLocation().parent_path();
@@ -80,7 +80,7 @@ static constexpr std::array<std::pair<std::string_view, metadata_fields_t>, 2> m
 } };
 bool MetacontentHandler::caseSensitive = true;
 
-std::string MetacontentHandler::expandName(const std::string& name, const std::shared_ptr<CdsItem>& item)
+std::string MetacontentHandler::expandName(const std::string& name, const std::shared_ptr<CdsObject>& item)
 {
     std::string copy(name);
 
@@ -131,7 +131,7 @@ void FanArtHandler::fillMetadata(std::shared_ptr<CdsItem> item)
     }
 }
 
-std::unique_ptr<IOHandler> FanArtHandler::serveContent(std::shared_ptr<CdsItem> item, int resNum)
+std::unique_ptr<IOHandler> FanArtHandler::serveContent(std::shared_ptr<CdsObject> item, int resNum)
 {
     fs::path path = item->getResource(resNum)->getAttribute(R_RESOURCE_FILE);
     if (path.empty()) {
@@ -184,7 +184,7 @@ void SubtitleHandler::fillMetadata(std::shared_ptr<CdsItem> item)
     }
 }
 
-std::unique_ptr<IOHandler> SubtitleHandler::serveContent(std::shared_ptr<CdsItem> item, int resNum)
+std::unique_ptr<IOHandler> SubtitleHandler::serveContent(std::shared_ptr<CdsObject> item, int resNum)
 {
     fs::path path = item->getResource(resNum)->getAttribute(R_RESOURCE_FILE);
     if (path.empty()) {
@@ -235,7 +235,7 @@ void ResourceHandler::fillMetadata(std::shared_ptr<CdsItem> item)
     }
 }
 
-std::unique_ptr<IOHandler> ResourceHandler::serveContent(std::shared_ptr<CdsItem> item, int resNum)
+std::unique_ptr<IOHandler> ResourceHandler::serveContent(std::shared_ptr<CdsObject> item, int resNum)
 {
     fs::path path = item->getResource(resNum)->getAttribute(R_RESOURCE_FILE);
     if (path.empty()) {

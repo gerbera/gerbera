@@ -125,29 +125,60 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
         if (upnp_class == UPNP_CLASS_MUSIC_ALBUM) {
             auto meta = obj->getMetadata();
 
-            std::string creator = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_ALBUMARTIST));
-            if (creator.empty())
-                creator = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_ARTIST));
-            if (!creator.empty())
-                result.append_child("dc:creator").append_child(pugi::node_pcdata).set_value(creator.c_str());
-
-            std::string composer = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_COMPOSER));
-            if (!composer.empty())
-                result.append_child("upnp:composer").append_child(pugi::node_pcdata).set_value(composer.c_str());
-
-            std::string conductor = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_CONDUCTOR));
-            if (!conductor.empty())
-                result.append_child("upnp:Conductor").append_child(pugi::node_pcdata).set_value(conductor.c_str());
-
-            std::string orchestra = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_ORCHESTRA));
-            if (!orchestra.empty())
-                result.append_child("upnp:orchestra").append_child(pugi::node_pcdata).set_value(orchestra.c_str());
-
-            std::string date = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_UPNP_DATE));
-            if (!date.empty())
-                result.append_child("upnp:date").append_child(pugi::node_pcdata).set_value(date.c_str());
+            std::vector<std::pair<const char*, std::vector<metadata_fields_t>>> albumProperties {
+                { "dc:creator", { M_ALBUMARTIST, M_ARTIST } },
+                { "upnp:composer", { M_COMPOSER } },
+                { "upnp:Conductor", { M_CONDUCTOR } },
+                { "upnp:orchestra", { M_ORCHESTRA } },
+                { "upnp:date", { M_UPNP_DATE } },
+            };
+            for (const auto& [tag, fields] : albumProperties) {
+                std::string value = "";
+                for (const auto& field : fields) {
+                    value = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(field));
+                    if (!value.empty())
+                        break;
+                }
+                if (!value.empty()) {
+                    result.append_child(tag).append_child(pugi::node_pcdata).set_value(value.c_str());
+                }
+            }
         }
         if (upnp_class == UPNP_CLASS_MUSIC_ALBUM || upnp_class == UPNP_CLASS_CONTAINER) {
+            bool artAdded = false;
+            int resIdx = 0;
+            for (const auto& res : cont->getResources()) {
+                if (res->isMetaResource(ID3_ALBUM_ART)) {
+                    const auto& resFile = res->getAttribute(R_RESOURCE_FILE);
+                    const auto& resObj = res->getAttribute(R_FANART_OBJ_ID);
+                    if (!resFile.empty()) {
+                        // found, FanArtHandler deals already with file
+                        std::map<std::string, std::string> dict;
+                        dict[URL_OBJECT_ID] = std::to_string(cont->getID());
+
+                        auto res_params = res->getParameters();
+                        res_params[RESOURCE_HANDLER] = std::to_string(res->getHandlerType());
+                        std::string url = virtualURL + _URL_PARAM_SEPARATOR + CONTENT_MEDIA_HANDLER + _URL_PARAM_SEPARATOR + dictEncodeSimple(dict) + _URL_PARAM_SEPARATOR + URL_RESOURCE_ID + _URL_PARAM_SEPARATOR + std::to_string(resIdx) + _URL_PARAM_SEPARATOR + dictEncodeSimple(res_params);
+                        result.append_child(MetadataHandler::getMetaFieldName(M_ALBUMARTURI).c_str()).append_child(pugi::node_pcdata).set_value(url.c_str());
+
+                        artAdded = true;
+                        break;
+                    } else if (!resObj.empty()) {
+                        std::map<std::string, std::string> dict;
+                        dict[URL_OBJECT_ID] = resObj;
+
+                        auto res_params = res->getParameters();
+                        std::string url = virtualURL + _URL_PARAM_SEPARATOR + CONTENT_MEDIA_HANDLER + _URL_PARAM_SEPARATOR + dictEncodeSimple(dict) + _URL_PARAM_SEPARATOR + URL_RESOURCE_ID + _URL_PARAM_SEPARATOR + res->getAttribute(R_FANART_RES_ID) + _URL_PARAM_SEPARATOR + dictEncodeSimple(res_params);
+                        result.append_child(MetadataHandler::getMetaFieldName(M_ALBUMARTURI).c_str()).append_child(pugi::node_pcdata).set_value(url.c_str());
+                        artAdded = true;
+                        break;
+                    }
+                }
+                resIdx++;
+            }
+            if (artAdded)
+                return;
+
             std::string aa_id = database->findFolderImage(cont->getID(), std::string());
 
             if (!aa_id.empty()) {
@@ -156,18 +187,14 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
                 dict[URL_OBJECT_ID] = aa_id;
 
                 std::string url = virtualURL + _URL_PARAM_SEPARATOR + CONTENT_MEDIA_HANDLER + _URL_PARAM_SEPARATOR + dictEncodeSimple(dict) + _URL_PARAM_SEPARATOR + URL_RESOURCE_ID + _URL_PARAM_SEPARATOR + "0";
-                result.append_child("upnp:albumArtURI").append_child(pugi::node_pcdata).set_value(url.c_str());
+                result.append_child(MetadataHandler::getMetaFieldName(M_ALBUMARTURI).c_str()).append_child(pugi::node_pcdata).set_value(url.c_str());
 
             } else if (upnp_class == UPNP_CLASS_MUSIC_ALBUM) {
                 // try to find the first track and use its artwork
                 auto items = database->getObjects(cont->getID(), true);
                 if (items != nullptr) {
 
-                    bool artAdded = false;
                     for (const auto& id : *items) {
-                        if (artAdded)
-                            break;
-
                         auto obj = database->loadObject(id);
                         if (obj->getClass() != UPNP_CLASS_MUSIC_TRACK)
                             continue;
@@ -177,11 +204,12 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
                         auto resources = item->getResources();
 
                         artAdded = std::any_of(resources.begin(), resources.end(),
-                            [](const auto& i) { return (i->getHandlerType() == CH_ID3) || (i->getHandlerType() == CH_MP4) || (i->getHandlerType() == CH_FLAC) || (i->getHandlerType() == CH_FANART) || (i->getHandlerType() == CH_EXTURL); });
+                            [](const auto& i) { return i->isMetaResource(ID3_ALBUM_ART); });
 
                         if (artAdded) {
                             std::string url = getArtworkUrl(item);
-                            result.append_child("upnp:albumArtURI").append_child(pugi::node_pcdata).set_value(url.c_str());
+                            result.append_child(MetadataHandler::getMetaFieldName(M_ALBUMARTURI).c_str()).append_child(pugi::node_pcdata).set_value(url.c_str());
+                            break;
                         }
                     }
                 }
@@ -231,15 +259,22 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription()
     else
         device.append_child("presentationURL").append_child(pugi::node_pcdata).set_value(presentationURL.c_str());
 
-    device.append_child("friendlyName").append_child(pugi::node_pcdata).set_value(config->getOption(CFG_SERVER_NAME).c_str());
-    device.append_child("manufacturer").append_child(pugi::node_pcdata).set_value(config->getOption(CFG_SERVER_MANUFACTURER).c_str());
-    device.append_child("manufacturerURL").append_child(pugi::node_pcdata).set_value(config->getOption(CFG_SERVER_MANUFACTURER_URL).c_str());
-    device.append_child("modelDescription").append_child(pugi::node_pcdata).set_value(config->getOption(CFG_SERVER_MODEL_DESCRIPTION).c_str());
-    device.append_child("modelName").append_child(pugi::node_pcdata).set_value(config->getOption(CFG_SERVER_MODEL_NAME).c_str());
-    device.append_child("modelNumber").append_child(pugi::node_pcdata).set_value(config->getOption(CFG_SERVER_MODEL_NUMBER).c_str());
-    device.append_child("modelURL").append_child(pugi::node_pcdata).set_value(config->getOption(CFG_SERVER_MODEL_URL).c_str());
-    device.append_child("serialNumber").append_child(pugi::node_pcdata).set_value(config->getOption(CFG_SERVER_SERIAL_NUMBER).c_str());
-    device.append_child("UDN").append_child(pugi::node_pcdata).set_value(config->getOption(CFG_SERVER_UDN).c_str());
+    constexpr std::array<std::pair<const char*, config_option_t>, 9> deviceProperties { {
+        // { "deviceType", {} },
+        // { "presentationURL", {} },
+        { "friendlyName", CFG_SERVER_NAME },
+        { "manufacturer", CFG_SERVER_MANUFACTURER },
+        { "manufacturerURL", CFG_SERVER_MANUFACTURER_URL },
+        { "modelDescription", CFG_SERVER_MODEL_DESCRIPTION },
+        { "modelName", CFG_SERVER_MODEL_NAME },
+        { "modelNumber", CFG_SERVER_MODEL_NUMBER },
+        { "modelURL", CFG_SERVER_MODEL_URL },
+        { "serialNumber", CFG_SERVER_SERIAL_NUMBER },
+        { "UDN", CFG_SERVER_UDN },
+    } };
+    for (const auto& [tag, field] : deviceProperties) {
+        device.append_child(tag).append_child(pugi::node_pcdata).set_value(config->getOption(field).c_str());
+    }
 
     // add icons
     {
@@ -633,33 +668,21 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
         /// FIXME: currently resource is misused for album art
 
         // only add upnp:AlbumArtURI if we have an AA, skip the resource
-        if (i > 0) {
-            if (handlerType == CH_ID3 || (handlerType == CH_MP4) || handlerType == CH_FLAC || handlerType == CH_FANART || handlerType == CH_EXTURL || handlerType == CH_SUBTITLE) {
+        if (res->isMetaResource(ID3_ALBUM_ART)) {
+            auto aa = parent->append_child(MetadataHandler::getMetaFieldName(M_ALBUMARTURI).c_str());
+            aa.append_child(pugi::node_pcdata).set_value((virtualURL + url).c_str());
 
-                std::string rct;
-                if (res->getHandlerType() == CH_EXTURL)
-                    rct = res->getOption(RESOURCE_CONTENT_TYPE);
-                else
-                    rct = res->getParameter(RESOURCE_CONTENT_TYPE);
-
-                if (rct == ID3_ALBUM_ART) {
-                    auto aa = parent->append_child(MetadataHandler::getMetaFieldName(M_ALBUMARTURI).c_str());
-                    aa.append_child(pugi::node_pcdata).set_value((virtualURL + url).c_str());
-
-                    /// \todo clean this up, make sure to check the mimetype and
-                    /// provide the profile correctly
-                    aa.append_attribute("xmlns:dlna") = "urn:schemas-dlna-org:metadata-1-0";
-                    aa.append_attribute("dlna:profileID") = "JPEG_TN";
-                    continue;
-                }
-
-                if (rct == VIDEO_SUB) {
-                    auto vs = parent->append_child("sec:CaptionInfoEx");
-                    vs.append_child(pugi::node_pcdata).set_value((virtualURL + url).c_str());
-                    vs.append_attribute("sec:type") = res->getAttribute(R_TYPE).c_str();
-                    continue;
-                }
-            }
+            /// \todo clean this up, make sure to check the mimetype and
+            /// provide the profile correctly
+            aa.append_attribute("xmlns:dlna") = "urn:schemas-dlna-org:metadata-1-0";
+            aa.append_attribute("dlna:profileID") = "JPEG_TN";
+            continue;
+        }
+        if (res->isMetaResource(VIDEO_SUB)) {
+            auto vs = parent->append_child("sec:CaptionInfoEx");
+            vs.append_child(pugi::node_pcdata).set_value((virtualURL + url).c_str());
+            vs.append_attribute("sec:type") = res->getAttribute(R_TYPE).c_str();
+            continue;
         }
 
         if (!isExtThumbnail) {

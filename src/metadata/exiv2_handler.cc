@@ -178,7 +178,7 @@ void Exiv2Handler::fillMetadata(std::shared_ptr<CdsItem> item)
     }
 }
 
-std::unique_ptr<IOHandler> Exiv2Handler::serveContent(std::shared_ptr<CdsItem> item, int resNum)
+std::unique_ptr<IOHandler> Exiv2Handler::serveContent(std::shared_ptr<CdsObject> item, int resNum)
 {
     return nullptr;
 }

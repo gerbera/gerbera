@@ -157,7 +157,7 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
         if (item->getMetadata(field).empty()) {
             item->setMetadata(field, sc->convert(trimString(value)));
             if (field == M_TRACKNUMBER) {
-                item->setTrackNumber(std::stoi(value));
+                item->setTrackNumber(stoiString(value));
             }
         }
     }
@@ -321,8 +321,11 @@ inline auto wrap_unique_ptr()
 }
 } // namespace
 
-std::unique_ptr<IOHandler> FfmpegHandler::serveContent(std::shared_ptr<CdsItem> item, int resNum)
+std::unique_ptr<IOHandler> FfmpegHandler::serveContent(std::shared_ptr<CdsObject> obj, int resNum)
 {
+    auto item = std::dynamic_pointer_cast<CdsItem>(obj);
+    if (item == nullptr)
+        return nullptr;
 #ifdef HAVE_FFMPEGTHUMBNAILER
     if (!config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED))
         return nullptr;

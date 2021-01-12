@@ -48,7 +48,7 @@ class TagLibHandler : public MetadataHandler {
 public:
     explicit TagLibHandler(std::shared_ptr<Context> context);
     void fillMetadata(std::shared_ptr<CdsItem> item) override;
-    std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsItem> item, int resNum) override;
+    std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsObject> item, int resNum) override;
 
 private:
     std::string entrySeparator;

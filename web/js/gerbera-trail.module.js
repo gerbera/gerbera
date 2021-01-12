@@ -117,7 +117,6 @@ const makeTrailFromItem = (items) => {
     } else if (items.parent_id === 1) {
       enableEdit = true;
       enableAddAutoscan = true;
-      enableAddTweak = true;
     } else {
       const isVirtual = ('virtual' in items) && items.virtual === true;
       const isNotProtected = ('protect_container' in items) && items.protect_container !== true;

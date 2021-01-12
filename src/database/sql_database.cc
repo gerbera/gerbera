@@ -259,8 +259,9 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
             cdsObjectSql["resources"] = quote(resStr);
         else
             cdsObjectSql["resources"] = SQL_NULL;
-    } else if (isUpdate)
+    } else if (isUpdate) {
         cdsObjectSql["resources"] = SQL_NULL;
+    }
 
     obj->clearFlag(OBJECT_FLAG_USE_RESOURCE_REF);
 
@@ -1779,7 +1780,7 @@ std::shared_ptr<AutoscanDirectory> SQLDatabase::_fillAutoscanDirectory(const std
         interval = std::stoi(row->col(6));
     time_t last_modified = std::stol(row->col(7));
 
-    log_info("Loading autoscan location: {}; recursive: {}, last_modified: {}", location.c_str(), recursive, fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(last_modified)));
+    log_info("Loading autoscan location: {}; recursive: {}, last_modified: {}", location.c_str(), recursive, last_modified > 0 ? fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(last_modified)) : "unset");
 
     auto dir = std::make_shared<AutoscanDirectory>(location, mode, recursive, persistent, INVALID_SCAN_ID, interval, hidden);
     dir->setObjectID(objectID);
