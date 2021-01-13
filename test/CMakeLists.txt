@@ -9,6 +9,7 @@ endif()
 
 ## Add tests below
 add_subdirectory(config)
+add_subdirectory(content)
 add_subdirectory(core)
 add_subdirectory(scripting)
 add_subdirectory(util)
