@@ -55,12 +55,12 @@ public:
     std::string status;
 };
 
-const std::string STATUS_REMOVED = "removed";
-const std::string STATUS_RESET = "reset";
-const std::string STATUS_ADDED = "added";
-const std::string STATUS_CHANGED = "changed";
-const std::string STATUS_UNCHANGED = "unchanged";
-const std::string STATUS_KILLED = "killed";
+constexpr std::string_view STATUS_REMOVED = "removed";
+constexpr std::string_view STATUS_RESET = "reset";
+constexpr std::string_view STATUS_ADDED = "added";
+constexpr std::string_view STATUS_CHANGED = "changed";
+constexpr std::string_view STATUS_UNCHANGED = "unchanged";
+constexpr std::string_view STATUS_KILLED = "killed";
 const std::string STATUS_MANUAL = "manual";
 
 class ConfigSetup {
