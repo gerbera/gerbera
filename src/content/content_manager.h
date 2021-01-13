@@ -56,6 +56,7 @@ class PlaylistParserScript;
 
 #include "layout/layout.h"
 
+#include "autoscan_list.h"
 #ifdef HAVE_INOTIFY
 #include "autoscan_inotify.h"
 #endif
