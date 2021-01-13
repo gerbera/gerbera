@@ -143,7 +143,7 @@ size_t IOHandlerBufferHelper::read(char* buf, size_t length)
 
 void IOHandlerBufferHelper::seek(off_t offset, int whence)
 {
-    log_debug("seek called: %lld {}", offset, whence);
+    log_debug("seek called: {} {}", offset, whence);
     if (!seekEnabled)
         throw_std_runtime_error("seek currently disabled in this IOHandlerBufferHelper");
 

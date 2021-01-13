@@ -154,7 +154,7 @@ std::unique_ptr<URL::Stat> URL::getInfo(const std::string& URL, CURL* curl_handl
     }
 
     std::string mt = ct ? ct : MIMETYPE_DEFAULT;
-    log_debug("Extracted content length: %lld", (long long)cl);
+    log_debug("Extracted content length: {}", uint64_t(cl));
 
     res = curl_easy_getinfo(curl_handle, CURLINFO_EFFECTIVE_URL, &c_url);
     if (res != CURLE_OK) {

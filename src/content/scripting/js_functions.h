@@ -58,7 +58,7 @@ duk_ret_t js_j2i(duk_context* ctx);
 #define log_debug_stack(ctx)                            \
     do {                                                \
         duk_push_context_dump(ctx);                     \
-        log_debug("%s\n", duk_safe_to_string(ctx, -1)); \
+        log_debug("{}\n", duk_safe_to_string(ctx, -1)); \
         duk_pop(ctx);                                   \
     } while (0)
 } // extern "C"
