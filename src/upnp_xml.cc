@@ -125,12 +125,14 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
         if (upnp_class == UPNP_CLASS_MUSIC_ALBUM) {
             auto meta = obj->getMetadata();
 
-            std::vector<std::pair<const char*, std::vector<metadata_fields_t>>> albumProperties {
-                { "dc:creator", { M_ALBUMARTIST, M_ARTIST } },
-                { "upnp:composer", { M_COMPOSER } },
-                { "upnp:Conductor", { M_CONDUCTOR } },
-                { "upnp:orchestra", { M_ORCHESTRA } },
-                { "upnp:date", { M_UPNP_DATE } },
+            const auto albumProperties = std::array<std::pair<const char*, std::vector<metadata_fields_t>>, 5> {
+                {
+                    { "dc:creator", { M_ALBUMARTIST, M_ARTIST } },
+                    { "upnp:composer", { M_COMPOSER } },
+                    { "upnp:Conductor", { M_CONDUCTOR } },
+                    { "upnp:orchestra", { M_ORCHESTRA } },
+                    { "upnp:date", { M_UPNP_DATE } },
+                }
             };
             for (const auto& [tag, fields] : albumProperties) {
                 std::string value = "";
