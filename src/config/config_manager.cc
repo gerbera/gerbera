@@ -763,7 +763,7 @@ std::shared_ptr<ConfigSetup> ConfigManager::findConfigSetup(config_option_t opti
     if (save)
         return nullptr;
 
-    throw std::runtime_error(fmt::format("Error in config code: {} tag not found", static_cast<int>(option)));
+    throw std::runtime_error(fmt::format("Error in config code: {} tag not found", int(option)));
 }
 
 std::shared_ptr<ConfigSetup> ConfigManager::findConfigSetupByPath(const std::string& key, bool save, const std::shared_ptr<ConfigSetup>& parent)
@@ -1315,19 +1315,19 @@ void ConfigManager::dumpOptions() const
 {
 #ifdef TOMBDEBUG
     log_debug("Dumping options!");
-    for (int i = 0; i < static_cast<int>(CFG_MAX); i++) {
+    for (int i = 0; i < int(CFG_MAX); i++) {
         try {
-            std::string opt = getOption(static_cast<config_option_t>(i));
+            std::string opt = getOption(config_option_t(i));
             log_debug("    Option {:02d} {}", i, opt.c_str());
         } catch (const std::runtime_error& e) {
         }
         try {
-            int opt = getIntOption(static_cast<config_option_t>(i));
+            int opt = getIntOption(config_option_t(i));
             log_debug(" IntOption {:02d} {}", i, opt);
         } catch (const std::runtime_error& e) {
         }
         try {
-            bool opt = getBoolOption(static_cast<config_option_t>(i));
+            bool opt = getBoolOption(config_option_t(i));
             log_debug("BoolOption {:02d} {}", i, opt ? "true" : "false");
         } catch (const std::runtime_error& e) {
         }

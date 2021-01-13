@@ -75,12 +75,12 @@ size_t MemIOHandler::read(char* buf, size_t length)
     }
 
     off_t rest = this->length - pos;
-    if (length > static_cast<size_t>(rest))
+    if (length > size_t(rest))
         length = rest;
 
     memcpy(buf, buffer + pos, length);
     pos = pos + length;
-    ret = static_cast<int>(length);
+    ret = int(length);
 
     if (pos >= this->length) {
         pos = -1;

@@ -75,7 +75,7 @@ void web::configSave::process()
             log_debug("save item {}='{}' {}", param(item), param(key), param(status));
             if (!param(key).empty() && param(key) != "-1") {
                 config_option_t option = CFG_MAX;
-                option = static_cast<config_option_t>(std::stoi(param(key)));
+                option = config_option_t(std::stoi(param(key)));
                 cs = ConfigManager::findConfigSetup(option, true);
             } else if (!param(item).empty()) {
                 cs = ConfigManager::findConfigSetupByPath(param(item), true);

@@ -80,7 +80,7 @@ static int ioh_fgetc(const std::unique_ptr<IOHandler>& ioh)
     int ret = ioh->read(reinterpret_cast<char*>(c), sizeof(char));
     if (ret < 0)
         return ret;
-    return static_cast<int>(c[0]);
+    return int(c[0]);
 }
 
 static void get_jpeg_resolution(const std::unique_ptr<IOHandler>& ioh, int* w, int* h)
@@ -128,8 +128,8 @@ static void get_jpeg_resolution(const std::unique_ptr<IOHandler>& ioh, int* w, i
         }
 
         // Store first two pre-read bytes.
-        Data[0] = static_cast<uchar>(lh);
-        Data[1] = static_cast<uchar>(ll);
+        Data[0] = uchar(lh);
+        Data[1] = uchar(ll);
 
         got = ioh->read(reinterpret_cast<char*>(Data + 2), itemlen - 2);
         if (got != itemlen - 2)

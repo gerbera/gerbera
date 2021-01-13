@@ -178,7 +178,7 @@ void Server::run()
     ret = UpnpRegisterRootDevice2(
         UPNPREG_BUF_DESC,
         deviceDescription.c_str(),
-        static_cast<size_t>(deviceDescription.length()) + 1,
+        size_t(deviceDescription.length()) + 1,
         true,
         handleUpnpRootDeviceEventCallback,
         this,
@@ -532,7 +532,7 @@ int Server::registerVirtualDirCallbacks()
             auto reqHandler = static_cast<const Server*>(cookie)->createRequestHandler(filename);
             std::string link = urlUnescape(filename);
             auto ioHandler = reqHandler->open(link.c_str(), mode);
-            auto ioPtr = static_cast<UpnpWebFileHandle>(ioHandler.release());
+            auto ioPtr = UpnpWebFileHandle(ioHandler.release());
             //log_debug("%p open({})", ioPtr, filename);
             return ioPtr;
         } catch (const ServerShutdownException& se) {

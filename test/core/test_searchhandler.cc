@@ -57,9 +57,9 @@ decltype(auto) getAllTokens(const std::string& input)
 
         if (expectedTokens.at(i).second != tokens->at(i)->getType())
             return ::testing::AssertionFailure() << "Token type " << i << ": expected ["
-                                                 << static_cast<int>(expectedTokens.at(i).second)
+                                                 << int(expectedTokens.at(i).second)
                                                  << "], got ["
-                                                 << static_cast<int>(tokens->at(i)->getType()) << "]";
+                                                 << int(tokens->at(i)->getType()) << "]";
     }
     return ::testing::AssertionSuccess();
 }

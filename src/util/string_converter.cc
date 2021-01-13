@@ -67,7 +67,7 @@ std::string StringConverter::convert(std::string str, bool validate)
             break;
 
         ret = ret + "?";
-        if ((stoppedAt + 1) < static_cast<size_t>(str.length()))
+        if ((stoppedAt + 1) < size_t(str.length()))
             str = str.substr(stoppedAt + 1);
         else
             break;
@@ -108,8 +108,8 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
     const char** input_ptr = &input_copy;
     char** output_ptr = &output_copy;
 
-    auto input_bytes = static_cast<size_t>(str.length());
-    auto output_bytes = static_cast<size_t>(buf_size);
+    auto input_bytes = size_t(str.length());
+    auto output_bytes = size_t(buf_size);
 
     int ret;
 
@@ -145,7 +145,7 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
             }
 
             if (stoppedAt)
-                *stoppedAt = static_cast<size_t>(str.length()) - input_bytes;
+                *stoppedAt = size_t(str.length()) - input_bytes;
             ret_str = std::string(output, output_copy - output);
             dirty = true;
             *output_copy = 0;

@@ -200,7 +200,7 @@ bool isRegularFile(const fs::path& path, std::error_code& ec) noexcept
     struct stat statbuf;
     int ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
-        ec = std::make_error_code(static_cast<std::errc>(errno));
+        ec = std::make_error_code(std::errc(errno));
         return false;
     }
 
@@ -293,7 +293,7 @@ std::string hexDecodeString(const std::string& encoded)
         int hi = chi ? chi - HEX_CHARS : 0;
         int lo = clo ? clo - HEX_CHARS : 0;
 
-        auto ch = static_cast<char>(hi << 4 | lo);
+        auto ch = char(hi << 4 | lo);
         buf << ch;
     }
     return buf.str();
@@ -359,7 +359,7 @@ std::string urlEscape(const std::string& str)
             cplen = 1;
 
         if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '_' || c == '-') {
-            buf << static_cast<char>(c);
+            buf << char(c);
         } else {
             int hi = c >> 4;
             int lo = c & 15;
@@ -398,7 +398,7 @@ std::string urlUnescape(const std::string& str)
             lo = pos ? pos - HEX_CHARS2 : 0;
 
             int ascii = (hi << 4) | lo;
-            buf << static_cast<char>(ascii);
+            buf << char(ascii);
         } else if (c == '+') {
             buf << ' ';
         } else {
@@ -1018,14 +1018,14 @@ ssize_t getValidUTF8CutPosition(std::string str, ssize_t cutpos)
     ssize_t pos = -1;
     size_t len = str.length();
 
-    if ((len == 0) || (cutpos > static_cast<ssize_t>(len)))
+    if ((len == 0) || (cutpos > ssize_t(len)))
         return pos;
 
 #if 0
-    printf("Character at cut position: %0x\n", static_cast<char>(str.at(cutpos)));
-    printf("Character at cut-1 position: %0x\n", static_cast<char>(str.at(cutpos - 1)));
-    printf("Character at cut-2 position: %0x\n", static_cast<char>(str.at(cutpos - 2)));
-    printf("Character at cut-3 position: %0x\n", static_cast<char>(str.at(cutpos - 3)));
+    printf("Character at cut position: %0x\n", char(str.at(cutpos)));
+    printf("Character at cut-1 position: %0x\n", char(str.at(cutpos - 1)));
+    printf("Character at cut-2 position: %0x\n", char(str.at(cutpos - 2)));
+    printf("Character at cut-3 position: %0x\n", char(str.at(cutpos - 3)));
 #endif
 
     // > 0x7f, we are dealing with a non-ascii character
