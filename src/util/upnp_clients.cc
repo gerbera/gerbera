@@ -132,9 +132,7 @@ Clients::Clients(std::shared_ptr<Config> config)
     cache = std::make_shared<std::vector<struct ClientCacheEntry>>();
 }
 
-Clients::~Clients()
-{
-}
+Clients::~Clients() = default;
 
 void Clients::addClientByDiscovery(const struct sockaddr_storage* addr, const std::string& userAgent, const std::string& descLocation)
 {
