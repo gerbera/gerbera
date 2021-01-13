@@ -234,7 +234,7 @@ add_library(libgerbera STATIC
 target_include_directories(libgerbera PUBLIC "${CMAKE_SOURCE_DIR}/src")
 
 add_executable(gerbera src/main.cc)
-target_link_libraries(gerbera libgerbera)
+target_link_libraries(gerbera PRIVATE libgerbera)
 
 # Leverage a modern C++
 target_compile_features(gerbera PUBLIC cxx_std_17)
@@ -545,7 +545,6 @@ if (WITH_MYSQL)
     target_sources(libgerbera PRIVATE mysql_create_sql.h)
 endif()
 target_include_directories(libgerbera PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
-
 
 INSTALL(TARGETS gerbera DESTINATION bin)
 INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/scripts/js DESTINATION share/gerbera)
