@@ -38,6 +38,4 @@ Context::Context(std::shared_ptr<Config> config,
 {
 }
 
-Context::~Context()
-{
-}
+Context::~Context() = default;
