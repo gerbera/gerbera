@@ -108,7 +108,7 @@ void CurlIOHandler::threadProc()
     do {
         lock.lock();
         if (doSeek) {
-            log_debug("SEEK: %lld {}", seekOffset, seekWhence);
+            log_debug("SEEK: {} {}", seekOffset, seekWhence);
 
             if (seekWhence == SEEK_SET) {
                 posRead = seekOffset;

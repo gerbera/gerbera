@@ -533,7 +533,7 @@ int Server::registerVirtualDirCallbacks()
             std::string link = urlUnescape(filename);
             auto ioHandler = reqHandler->open(link.c_str(), mode);
             auto ioPtr = UpnpWebFileHandle(ioHandler.release());
-            //log_debug("%p open({})", ioPtr, filename);
+            //log_debug("{} open({})", ioPtr, filename);
             return ioPtr;
         } catch (const ServerShutdownException& se) {
             return nullptr;
@@ -550,7 +550,7 @@ int Server::registerVirtualDirCallbacks()
 
     log_debug("Setting UpnpVirtualDir ReadCallback");
     ret = UpnpVirtualDir_set_ReadCallback([](UpnpWebFileHandle f, char* buf, size_t length, const void* cookie, const void* requestCookie) -> int {
-        //log_debug("%p read({})", f, length);
+        //log_debug("{} read({})", f, length);
         if (static_cast<const Server*>(cookie)->getShutdownStatus())
             return -1;
 
@@ -562,7 +562,7 @@ int Server::registerVirtualDirCallbacks()
 
     log_debug("Setting UpnpVirtualDir WriteCallback");
     ret = UpnpVirtualDir_set_WriteCallback([](UpnpWebFileHandle f, char* buf, size_t length, const void* cookie, const void* requestCookie) -> int {
-        //log_debug("%p write({})", f, length);
+        //log_debug("{} write({})", f, length);
         return 0;
     });
     if (ret != UPNP_E_SUCCESS)
@@ -570,7 +570,7 @@ int Server::registerVirtualDirCallbacks()
 
     log_debug("Setting UpnpVirtualDir SeekCallback");
     ret = UpnpVirtualDir_set_SeekCallback([](UpnpWebFileHandle f, off_t offset, int whence, const void* cookie, const void* requestCookie) -> int {
-        //log_debug("%p seek({}, {})", f, offset, whence);
+        //log_debug("{} seek({}, {})", f, offset, whence);
         try {
             auto handler = static_cast<IOHandler*>(f);
             handler->seek(offset, whence);
@@ -585,7 +585,7 @@ int Server::registerVirtualDirCallbacks()
 
     log_debug("Setting UpnpVirtualDir CloseCallback");
     ret = UpnpVirtualDir_set_CloseCallback([](UpnpWebFileHandle f, const void* cookie, const void* requestCookie) -> int {
-        //log_debug("%p close()", f);
+        //log_debug("{} close()", f);
         int ret_close = 0;
         auto handler = static_cast<IOHandler*>(f);
         try {
