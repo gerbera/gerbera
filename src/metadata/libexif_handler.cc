@@ -41,7 +41,7 @@
 #include "util/string_converter.h"
 #include "util/tools.h"
 
-LibExifHandler::LibExifHandler(std::shared_ptr<Context> context)
+LibExifHandler::LibExifHandler(const std::shared_ptr<Context>& context)
     : MetadataHandler(std::move(context))
 {
 }

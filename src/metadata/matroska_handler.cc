@@ -120,7 +120,7 @@ public:
     }
 };
 
-MatroskaHandler::MatroskaHandler(std::shared_ptr<Context> context)
+MatroskaHandler::MatroskaHandler(const std::shared_ptr<Context>& context)
     : MetadataHandler(std::move(context))
 {
 }

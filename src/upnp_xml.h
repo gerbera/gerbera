@@ -41,7 +41,7 @@
 
 class UpnpXMLBuilder {
 public:
-    explicit UpnpXMLBuilder(std::shared_ptr<Context> context,
+    explicit UpnpXMLBuilder(const std::shared_ptr<Context>& context,
         std::string virtualUrl, std::string presentationURL);
 
     /// \brief Renders XML for the action response header.

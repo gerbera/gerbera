@@ -28,7 +28,7 @@
 #include "config/config_manager.h"
 #include "util/tools.h"
 
-Mime::Mime(std::shared_ptr<Config> config)
+Mime::Mime(const std::shared_ptr<Config>& config)
 {
     extension_map_case_sensitive = config->getBoolOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_CASE_SENSITIVE);
     extension_mimetype_map = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);

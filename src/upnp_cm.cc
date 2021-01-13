@@ -37,7 +37,7 @@
 #include "database/database.h"
 #include "util/tools.h"
 
-ConnectionManagerService::ConnectionManagerService(std::shared_ptr<Context> context,
+ConnectionManagerService::ConnectionManagerService(const std::shared_ptr<Context>& context,
     UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle)
     : config(context->getConfig())
     , database(context->getDatabase())

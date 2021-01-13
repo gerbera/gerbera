@@ -81,7 +81,7 @@ struct ClientCacheEntry {
 
 class Clients {
 public:
-    Clients(std::shared_ptr<Config> config);
+    Clients(const std::shared_ptr<Config>& config);
     virtual ~Clients();
 
     // always return something, 'Unknown' if we do not know better

@@ -87,7 +87,7 @@ protected:
 public:
     /// \brief Constructor for MRReg
     /// in internal variables.
-    MRRegistrarService(std::shared_ptr<Context> context,
+    MRRegistrarService(const std::shared_ptr<Context>& context,
         UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle);
     ~MRRegistrarService();
 

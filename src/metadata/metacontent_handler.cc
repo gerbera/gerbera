@@ -34,7 +34,7 @@
 #include "iohandler/file_io_handler.h"
 #include "util/tools.h"
 
-MetacontentHandler::MetacontentHandler(std::shared_ptr<Context> context)
+MetacontentHandler::MetacontentHandler(const std::shared_ptr<Context>& context)
     : MetadataHandler(std::move(context))
 {
 }
@@ -103,7 +103,7 @@ std::vector<std::string> FanArtHandler::names = {
 };
 bool FanArtHandler::initDone = false;
 
-FanArtHandler::FanArtHandler(std::shared_ptr<Context> context)
+FanArtHandler::FanArtHandler(const std::shared_ptr<Context>& context)
     : MetacontentHandler(std::move(context))
 {
     if (!initDone) {
@@ -155,7 +155,7 @@ std::vector<std::string> SubtitleHandler::names = {
 };
 bool SubtitleHandler::initDone = false;
 
-SubtitleHandler::SubtitleHandler(std::shared_ptr<Context> context)
+SubtitleHandler::SubtitleHandler(const std::shared_ptr<Context>& context)
     : MetacontentHandler(std::move(context))
 {
     if (!initDone) {
@@ -209,7 +209,7 @@ std::vector<std::string> ResourceHandler::names = {
 };
 bool ResourceHandler::initDone = false;
 
-ResourceHandler::ResourceHandler(std::shared_ptr<Context> context)
+ResourceHandler::ResourceHandler(const std::shared_ptr<Context>& context)
     : MetacontentHandler(std::move(context))
 {
     if (!initDone) {

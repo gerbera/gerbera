@@ -79,7 +79,7 @@
 #endif
 
 ContentManager::ContentManager(const std::shared_ptr<Context>& context,
-    std::shared_ptr<Server> server, std::shared_ptr<Timer> timer)
+    const std::shared_ptr<Server>& server, std::shared_ptr<Timer> timer)
     : config(context->getConfig())
     , mime(context->getMime())
     , database(context->getDatabase())
@@ -507,7 +507,7 @@ int ContentManager::_addFile(const fs::path& path, fs::path rootPath, AutoScanSe
     return obj->getID();
 }
 
-bool ContentManager::updateAttachedResources(std::shared_ptr<AutoscanDirectory> adir, const char* location, const std::string& parentPath, bool all)
+bool ContentManager::updateAttachedResources(const std::shared_ptr<AutoscanDirectory>& adir, const char* location, const std::string& parentPath, bool all)
 {
     bool parentRemoved = false;
     int parentID = database->findObjectIDByPath(parentPath, false);
@@ -531,7 +531,7 @@ bool ContentManager::updateAttachedResources(std::shared_ptr<AutoscanDirectory> 
     return parentRemoved;
 }
 
-void ContentManager::_removeObject(std::shared_ptr<AutoscanDirectory> adir, int objectID, bool rescanResource, bool all)
+void ContentManager::_removeObject(const std::shared_ptr<AutoscanDirectory>& adir, int objectID, bool rescanResource, bool all)
 {
     if (objectID == CDS_ID_ROOT)
         throw_std_runtime_error("cannot remove root container");
@@ -545,7 +545,7 @@ void ContentManager::_removeObject(std::shared_ptr<AutoscanDirectory> adir, int 
         auto obj = database->loadObject(objectID);
         if (obj != nullptr && obj->hasResource(CH_RESOURCE)) {
             auto parentPath = obj->getLocation().parent_path().string();
-            parentRemoved = updateAttachedResources(adir, obj->getLocation().c_str(), parentPath, all);
+            parentRemoved = updateAttachedResources(std::move(adir), obj->getLocation().c_str(), parentPath, all);
         }
     }
 
@@ -1440,7 +1440,7 @@ void ContentManager::invalidateTask(unsigned int taskID, task_owner_t taskOwner)
 #endif
 }
 
-void ContentManager::removeObject(std::shared_ptr<AutoscanDirectory> adir, int objectID, bool rescanResource, bool async, bool all)
+void ContentManager::removeObject(const std::shared_ptr<AutoscanDirectory>& adir, int objectID, bool rescanResource, bool async, bool all)
 {
     if (async) {
         /*

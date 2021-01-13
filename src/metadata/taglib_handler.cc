@@ -55,7 +55,7 @@
 #include "util/string_converter.h"
 #include "util/tools.h"
 
-TagLibHandler::TagLibHandler(std::shared_ptr<Context> context)
+TagLibHandler::TagLibHandler(const std::shared_ptr<Context>& context)
     : MetadataHandler(std::move(context))
 {
     entrySeparator = this->config->getOption(CFG_IMPORT_LIBOPTS_ENTRY_SEP);

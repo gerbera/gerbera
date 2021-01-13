@@ -38,7 +38,7 @@
 #include "metadata/metadata_handler.h"
 #include "transcoding/transcoding.h"
 
-UpnpXMLBuilder::UpnpXMLBuilder(std::shared_ptr<Context> context,
+UpnpXMLBuilder::UpnpXMLBuilder(const std::shared_ptr<Context>& context,
     std::string virtualUrl, std::string presentationURL)
     : config(context->getConfig())
     , database(context->getDatabase())

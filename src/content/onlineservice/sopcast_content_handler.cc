@@ -40,7 +40,7 @@
 #include "online_service.h"
 #include "util/tools.h"
 
-SopCastContentHandler::SopCastContentHandler(std::shared_ptr<Context> context)
+SopCastContentHandler::SopCastContentHandler(const std::shared_ptr<Context>& context)
     : config(context->getConfig())
     , database(context->getDatabase())
 {
