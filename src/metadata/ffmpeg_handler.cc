@@ -79,7 +79,7 @@ extern "C" {
 #endif
 
 // Default constructor
-FfmpegHandler::FfmpegHandler(std::shared_ptr<Context> context)
+FfmpegHandler::FfmpegHandler(const std::shared_ptr<Context>& context)
     : MetadataHandler(std::move(context))
 {
 }

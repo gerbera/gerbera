@@ -106,7 +106,7 @@ protected:
 public:
     /// \brief Constructor for the CDS, saves the service type and service id
     /// in internal variables.
-    explicit ContentDirectoryService(std::shared_ptr<Context> context,
+    explicit ContentDirectoryService(const std::shared_ptr<Context>& context,
         UpnpXMLBuilder* builder, UpnpDevice_Handle deviceHandle, int stringLimit);
     ~ContentDirectoryService();
 

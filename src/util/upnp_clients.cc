@@ -119,7 +119,7 @@ static const auto bultinClientInfo = std::array<struct ClientInfo, 8> {
     }
 };
 
-Clients::Clients(std::shared_ptr<Config> config)
+Clients::Clients(const std::shared_ptr<Config>& config)
 {
     std::copy(bultinClientInfo.begin(), bultinClientInfo.end(), std::back_inserter(clientInfo));
     auto clientConfigList = config->getClientConfigListOption(CFG_CLIENTS_LIST);

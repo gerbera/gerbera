@@ -140,7 +140,7 @@ public:
 class ContentManager : public Timer::Subscriber, public std::enable_shared_from_this<ContentManager> {
 public:
     ContentManager(const std::shared_ptr<Context>& context,
-        std::shared_ptr<Server> server, std::shared_ptr<Timer> timer);
+        const std::shared_ptr<Server>& server, std::shared_ptr<Timer> timer);
     void run();
     ~ContentManager() override;
     void shutdown();
@@ -184,7 +184,7 @@ public:
         bool async = true, bool lowPriority = false, bool cancellable = true);
 
     int ensurePathExistence(fs::path path);
-    void removeObject(std::shared_ptr<AutoscanDirectory> adir, int objectID, bool rescanResource, bool async = true, bool all = false);
+    void removeObject(const std::shared_ptr<AutoscanDirectory>& adir, int objectID, bool rescanResource, bool async = true, bool all = false);
 
     /// \brief Updates an object in the database using the given parameters.
     /// \param objectID ID of the object to update
@@ -343,14 +343,14 @@ protected:
     int _addFile(const fs::path& path, fs::path rootPath, AutoScanSetting& asSetting,
         const std::shared_ptr<CMAddFileTask>& task = nullptr);
 
-    void _removeObject(std::shared_ptr<AutoscanDirectory> adir, int objectID, bool rescanResource, bool all);
+    void _removeObject(const std::shared_ptr<AutoscanDirectory>& adir, int objectID, bool rescanResource, bool all);
 
     void _rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, int containerID, const std::shared_ptr<GenericTask>& task = nullptr);
     /* for recursive addition */
     void addRecursive(std::shared_ptr<AutoscanDirectory>& adir, const fs::path& path, bool followSymlinks, bool hidden, const std::shared_ptr<CMAddFileTask>& task);
     static bool isLink(const fs::path& path, bool allowLinks);
     std::shared_ptr<CdsObject> createSingleItem(const fs::path& path, fs::path& rootPath, bool followSymlinks, bool checkDatabase, bool processExisting, const std::shared_ptr<CMAddFileTask>& task);
-    bool updateAttachedResources(std::shared_ptr<AutoscanDirectory> adir, const char* location, const std::string& parentPath, bool all);
+    bool updateAttachedResources(const std::shared_ptr<AutoscanDirectory>& adir, const char* location, const std::string& parentPath, bool all);
 
     static void invalidateAddTask(const std::shared_ptr<GenericTask>& t, const fs::path& path);
 

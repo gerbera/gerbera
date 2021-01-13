@@ -38,7 +38,7 @@
 #include "upnp_xml.h"
 #include "util/tools.h"
 
-MRRegistrarService::MRRegistrarService(std::shared_ptr<Context> context,
+MRRegistrarService::MRRegistrarService(const std::shared_ptr<Context>& context,
     UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle)
     : config(context->getConfig())
     , xmlBuilder(xmlBuilder)

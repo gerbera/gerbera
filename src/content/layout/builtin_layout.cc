@@ -352,7 +352,7 @@ void BuiltinLayout::addATrailers(const std::shared_ptr<CdsObject>& obj)
 #endif
 
 BuiltinLayout::BuiltinLayout(std::shared_ptr<ContentManager> content)
-    : Layout(content)
+    : Layout(std::move(content))
 {
 #ifdef ENABLE_PROFILING
     PROF_INIT_GLOBAL(layout_profiling, "fallback layout");

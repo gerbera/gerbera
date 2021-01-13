@@ -180,7 +180,7 @@ protected:
 public:
     /// \brief Definition of the supported metadata fields.
 
-    explicit MetadataHandler(std::shared_ptr<Context> context);
+    explicit MetadataHandler(const std::shared_ptr<Context>& context);
 
     static void setMetadata(const std::shared_ptr<Context>& context, const std::shared_ptr<CdsItem>& item);
     static std::string getMetaFieldName(metadata_fields_t field);

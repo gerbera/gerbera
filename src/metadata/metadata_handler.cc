@@ -60,7 +60,7 @@
 
 #include "metadata/metacontent_handler.h"
 
-MetadataHandler::MetadataHandler(std::shared_ptr<Context> context)
+MetadataHandler::MetadataHandler(const std::shared_ptr<Context>& context)
     : config(context->getConfig())
     , mime(context->getMime())
 {

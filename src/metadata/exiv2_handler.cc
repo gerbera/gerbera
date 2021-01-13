@@ -41,7 +41,7 @@
 #include "util/string_converter.h"
 #include "util/tools.h"
 
-Exiv2Handler::Exiv2Handler(std::shared_ptr<Context> context)
+Exiv2Handler::Exiv2Handler(const std::shared_ptr<Context>& context)
     : MetadataHandler(std::move(context))
 {
 }

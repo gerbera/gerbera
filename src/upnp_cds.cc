@@ -40,7 +40,7 @@
 #include "database/database.h"
 #include "util/upnp_quirks.h"
 
-ContentDirectoryService::ContentDirectoryService(std::shared_ptr<Context> context,
+ContentDirectoryService::ContentDirectoryService(const std::shared_ptr<Context>& context,
     UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle, int stringLimit)
     : systemUpdateID(0)
     , stringLimit(stringLimit)
