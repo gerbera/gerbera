@@ -118,7 +118,7 @@ std::unique_ptr<URL::Stat> URL::getInfo(const std::string& URL, CURL* curl_handl
     long retcode;
     bool cleanup = false;
     CURLcode res;
-    double cl;
+    curl_off_t cl;
     char* ct;
     char* c_url;
     char error_buffer[CURL_ERROR_SIZE] = { '\0' };
@@ -137,7 +137,7 @@ std::unique_ptr<URL::Stat> URL::getInfo(const std::string& URL, CURL* curl_handl
         throw_std_runtime_error("Error retrieving information from " + URL + " HTTP return code: " + std::to_string(retcode));
     }
 
-    res = curl_easy_getinfo(curl_handle, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &cl);
+    res = curl_easy_getinfo(curl_handle, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &cl);
     if (res != CURLE_OK) {
         log_error("{}", error_buffer);
         if (cleanup)
@@ -154,7 +154,7 @@ std::unique_ptr<URL::Stat> URL::getInfo(const std::string& URL, CURL* curl_handl
     }
 
     std::string mt = ct ? ct : MIMETYPE_DEFAULT;
-    log_debug("Extracted content length: {}", uint64_t(cl));
+    log_debug("Extracted content length: {}", cl);
 
     res = curl_easy_getinfo(curl_handle, CURLINFO_EFFECTIVE_URL, &c_url);
     if (res != CURLE_OK) {
