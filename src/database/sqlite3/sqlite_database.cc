@@ -613,7 +613,8 @@ void SLBackupTask::run(sqlite3** db, Sqlite3Database* sl)
         try {
             fs::copy(
                 dbFilePath,
-                dbFilePath + ".backup");
+                dbFilePath + ".backup",
+                fs::copy_options::overwrite_existing);
             log_debug("sqlite3 backup successful");
             decontamination = true;
         } catch (const std::runtime_error& e) {
@@ -625,7 +626,8 @@ void SLBackupTask::run(sqlite3** db, Sqlite3Database* sl)
         try {
             fs::copy(
                 dbFilePath + ".backup",
-                dbFilePath);
+                dbFilePath,
+                fs::copy_options::overwrite_existing);
 
         } catch (const std::runtime_error& e) {
             throw DatabaseException(std::string { "Error while restoring sqlite3 backup: " } + e.what(), std::string { "Error while restoring sqlite3 backup: " } + e.what());
