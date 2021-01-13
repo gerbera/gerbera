@@ -157,13 +157,13 @@ Script::Script(std::shared_ptr<ContentManager> content,
         duk_put_global_string(ctx, sym);
     }
 #ifdef ONLINE_SERVICES
-    duk_push_int(ctx, static_cast<int>(OS_None));
+    duk_push_int(ctx, int(OS_None));
     duk_put_global_string(ctx, "ONLINE_SERVICE_NONE");
     duk_push_int(ctx, -1);
     duk_put_global_string(ctx, "ONLINE_SERVICE_YOUTUBE");
 
 #ifdef ATRAILERS
-    duk_push_int(ctx, static_cast<int>(OS_ATrailers));
+    duk_push_int(ctx, int(OS_ATrailers));
     duk_put_global_string(ctx, "ONLINE_SERVICE_APPLE_TRAILERS");
     duk_push_string(ctx, ATRAILERS_AUXDATA_POST_DATE);
     duk_put_global_string(ctx, "APPLE_TRAILERS_AUXDATA_POST_DATE");
@@ -173,7 +173,7 @@ Script::Script(std::shared_ptr<ContentManager> content,
 #endif //ATRAILERS
 
 #ifdef SOPCAST
-    duk_push_int(ctx, static_cast<int>(OS_SopCast));
+    duk_push_int(ctx, int(OS_SopCast));
     duk_put_global_string(ctx, "ONLINE_SERVICE_SOPCAST");
 #else
     duk_push_int(ctx, -1);
@@ -505,8 +505,8 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
     if (!val.empty())
         setProperty("location", val);
 
-    setIntProperty("mtime", static_cast<int>(obj->getMTime()));
-    setIntProperty("sizeOnDisk", static_cast<int>(obj->getSizeOnDisk()));
+    setIntProperty("mtime", int(obj->getMTime()));
+    setIntProperty("sizeOnDisk", int(obj->getSizeOnDisk()));
 
     // TODO: boolean type
     i = obj->isRestricted();
@@ -519,8 +519,8 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
 
 #ifdef ONLINE_SERVICES
     if (obj->getFlag(OBJECT_FLAG_ONLINE_SERVICE)) {
-        auto service = static_cast<service_type_t>(std::stoi(obj->getAuxData(ONLINE_SERVICE_AUX_ID)));
-        setIntProperty("onlineservice", static_cast<int>(service));
+        auto service = service_type_t(std::stoi(obj->getAuxData(ONLINE_SERVICE_AUX_ID)));
+        setIntProperty("onlineservice", int(service));
     } else
 #endif
         setIntProperty("onlineservice", 0);

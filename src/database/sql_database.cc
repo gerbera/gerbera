@@ -121,7 +121,7 @@ enum class SearchCol {
 template <typename E>
 constexpr auto to_underlying(E e) noexcept
 {
-    return static_cast<std::underlying_type_t<E>>(e);
+    return std::underlying_type_t<E>(e);
 }
 
 #define SELECT_DATA_FOR_SEARCH "SELECT distinct c.id, c.ref_id, c.parent_id," \

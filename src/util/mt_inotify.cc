@@ -128,7 +128,7 @@ struct inotify_event* Inotify::nextEvent()
 
     // first_byte is index into event buffer
     if (first_byte != 0
-        && first_byte <= static_cast<int>(bytes - sizeof(struct inotify_event))) {
+        && first_byte <= int(bytes - sizeof(struct inotify_event))) {
 
         ret = reinterpret_cast<struct inotify_event*>(reinterpret_cast<char*>(&event[0]) + first_byte);
         first_byte += sizeof(struct inotify_event) + ret->len;
@@ -144,7 +144,7 @@ struct inotify_event* Inotify::nextEvent()
             // oh, and they BETTER NOT overlap.
             // Boy I hope this code works.
             // But I think this can never happen due to how inotify is written.
-            assert((long)((char*)&event[0] + sizeof(struct inotify_event) + event[0].len) <= (long)ret);
+            assert(long(reinterpret_cast<char*>(&event[0]) + sizeof(struct inotify_event) + event[0].len) <= long(ret));
 
             // how much of the event do we have?
             bytes = reinterpret_cast<char*>(&event[0]) + bytes - reinterpret_cast<char*>(ret);

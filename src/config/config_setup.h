@@ -154,7 +154,7 @@ public:
     {
         std::shared_ptr<CS> result = std::dynamic_pointer_cast<CS>(ConfigManager::findConfigSetup(option));
         if (result == nullptr) {
-            throw std::runtime_error(fmt::format("Error in config code: {} has wrong class", static_cast<int>(option)));
+            throw std::runtime_error(fmt::format("Error in config code: {} has wrong class", int(option)));
         }
         return result;
     }

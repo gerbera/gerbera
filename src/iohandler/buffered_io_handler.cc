@@ -86,7 +86,7 @@ void BufferedIOHandler::threadProc()
                 int currentFillSize = b - a;
                 if (currentFillSize <= 0)
                     currentFillSize += bufSize;
-                percentFillLevel = (static_cast<float>(currentFillSize) / static_cast<float>(bufSize)) * 100;
+                percentFillLevel = (float(currentFillSize) / float(bufSize)) * 100;
             }
             log_debug("buffer fill level: {:03.2f}%  (bufSize: {}; a: {}; b: {})", percentFillLevel, bufSize, a, b);
         }
@@ -160,7 +160,7 @@ void BufferedIOHandler::threadProc()
                     int currentFillSize = b - a;
                     if (currentFillSize <= 0)
                         currentFillSize += bufSize;
-                    if (static_cast<size_t>(currentFillSize) >= initialFillSize) {
+                    if (size_t(currentFillSize) >= initialFillSize) {
                         log_debug("buffer: initial fillsize reached");
                         waitForInitialFillSize = false;
                         cond.notify_one();

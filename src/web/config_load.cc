@@ -144,10 +144,10 @@ void web::configLoad::process()
         setValue(item, database->getTotalFiles(true, "image"));
     }
 
-    for (int i = 0; i < static_cast<int>(CFG_MAX); i++) {
-        auto scs = ConfigManager::findConfigSetup(static_cast<config_option_t>(i));
+    for (int i = 0; i < int(CFG_MAX); i++) {
+        auto scs = ConfigManager::findConfigSetup(config_option_t(i));
         auto item = values.append_child("item");
-        createItem(item, scs->getItemPath(-1), static_cast<config_option_t>(i), static_cast<config_option_t>(i));
+        createItem(item, scs->getItemPath(-1), config_option_t(i), config_option_t(i));
 
         try {
             log_debug("    Option {:03d} {} = {}", i, scs->getItemPath(), scs->getCurrentValue().c_str());

@@ -41,7 +41,7 @@ std::string OnlineServiceHelper::resolveURL(const std::shared_ptr<CdsItemExterna
     if (!item->getFlag(OBJECT_FLAG_ONLINE_SERVICE))
         throw_std_runtime_error("The given item does not belong to an online service");
 
-    auto service = static_cast<service_type_t>(std::stoi(item->getAuxData(ONLINE_SERVICE_AUX_ID)));
+    auto service = service_type_t(std::stoi(item->getAuxData(ONLINE_SERVICE_AUX_ID)));
     if (service > OS_Max)
         throw_std_runtime_error("Invalid service id");
 

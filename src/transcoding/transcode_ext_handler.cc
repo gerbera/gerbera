@@ -107,7 +107,7 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(std::shared_pt
 #ifdef SOPCAST
     service_type_t service = OS_None;
     if (obj->getFlag(OBJECT_FLAG_ONLINE_SERVICE)) {
-        service = static_cast<service_type_t>(std::stoi(obj->getAuxData(ONLINE_SERVICE_AUX_ID)));
+        service = service_type_t(std::stoi(obj->getAuxData(ONLINE_SERVICE_AUX_ID)));
     }
 
     if (service == OS_SopCast) {

@@ -122,7 +122,7 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
         i = tag->track();
         if (i > 0) {
             value = std::to_string(i);
-            item->setTrackNumber(static_cast<int>(i));
+            item->setTrackNumber(int(i));
         } else
             return;
         break;

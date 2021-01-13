@@ -58,7 +58,7 @@ static bool check_token(const std::string& token, const std::string& password, c
     std::vector<std::string> parts = splitString(token, '_');
     if (parts.size() != 2)
         return false;
-    auto expiration = static_cast<time_t>(std::stol(parts[0]));
+    auto expiration = time_t(std::stol(parts[0]));
     if (expiration < get_time())
         return false;
     std::string checksum = hexStringMd5(token + password);
