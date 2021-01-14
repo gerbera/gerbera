@@ -29,6 +29,7 @@
 
 #include "cds_objects.h"
 #include "config/config_manager.h"
+#include "request_handler.h"
 #include "server.h"
 #include "util/tools.h"
 #include "util/upnp_clients.h"
@@ -67,6 +68,6 @@ void Quirks::addCaptionInfo(const std::shared_ptr<CdsItem>& item, std::unique_pt
     if (validext.length() == 0)
         return;
 
-    std::string url = "http://" + Server::getIP() + ":" + Server::getPort() + "/content/media/object_id/" + std::to_string(item->getID()) + "/res_id/0/ext/file" + validext;
+    std::string url = "http://" + Server::getIP() + ":" + Server::getPort() + RequestHandler::joinUrl({ SERVER_VIRTUAL_DIR, CONTENT_MEDIA_HANDLER, URL_OBJECT_ID, std::to_string(item->getID()), URL_RESOURCE_ID, "0" , URL_FILE_EXTENSION, "file" + validext });
     headers->addHeader("CaptionInfo.sec", url);
 }

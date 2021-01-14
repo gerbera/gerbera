@@ -36,6 +36,7 @@
 #include "config/config_manager.h"
 #include "database/database.h"
 #include "metadata/metadata_handler.h"
+#include "request_handler.h"
 #include "transcoding/transcoding.h"
 
 UpnpXMLBuilder::UpnpXMLBuilder(const std::shared_ptr<Context>& context,
@@ -54,6 +55,41 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createResponse(const std::st
     root.append_attribute("xmlns:u") = serviceType.c_str();
 
     return response;
+}
+
+bool UpnpXMLBuilder::renderContainerImage(const std::string virtualURL, const std::shared_ptr<CdsContainer>& cont, std::string& url)
+{
+    bool artAdded = false;
+    int resIdx = 0;
+    for (const auto& res : cont->getResources()) {
+        if (res->isMetaResource(ID3_ALBUM_ART)) {
+            const auto& resFile = res->getAttribute(R_RESOURCE_FILE);
+            const auto& resObj = res->getAttribute(R_FANART_OBJ_ID);
+            if (!resFile.empty()) {
+                // found, FanArtHandler deals already with file
+                std::map<std::string, std::string> dict;
+                dict[URL_OBJECT_ID] = std::to_string(cont->getID());
+
+                auto res_params = res->getParameters();
+                res_params[RESOURCE_HANDLER] = std::to_string(res->getHandlerType());
+                url.assign(virtualURL + RequestHandler::joinUrl({ CONTENT_MEDIA_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID, std::to_string(resIdx), dictEncodeSimple(res_params) }));
+
+                artAdded = true;
+                break;
+            } else if (!resObj.empty()) {
+                std::map<std::string, std::string> dict;
+                dict[URL_OBJECT_ID] = resObj;
+
+                auto res_params = res->getParameters();
+                url.assign(virtualURL + RequestHandler::joinUrl({ CONTENT_MEDIA_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID, res->getAttribute(R_FANART_RES_ID), dictEncodeSimple(res_params) }));
+
+                artAdded = true;
+                break;
+            }
+        }
+        resIdx++;
+    }
+    return artAdded;
 }
 
 void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t stringLimit, pugi::xml_node* parent)
@@ -147,39 +183,12 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
             }
         }
         if (upnp_class == UPNP_CLASS_MUSIC_ALBUM || upnp_class == UPNP_CLASS_CONTAINER) {
-            bool artAdded = false;
-            int resIdx = 0;
-            for (const auto& res : cont->getResources()) {
-                if (res->isMetaResource(ID3_ALBUM_ART)) {
-                    const auto& resFile = res->getAttribute(R_RESOURCE_FILE);
-                    const auto& resObj = res->getAttribute(R_FANART_OBJ_ID);
-                    if (!resFile.empty()) {
-                        // found, FanArtHandler deals already with file
-                        std::map<std::string, std::string> dict;
-                        dict[URL_OBJECT_ID] = std::to_string(cont->getID());
-
-                        auto res_params = res->getParameters();
-                        res_params[RESOURCE_HANDLER] = std::to_string(res->getHandlerType());
-                        std::string url = virtualURL + _URL_PARAM_SEPARATOR + CONTENT_MEDIA_HANDLER + _URL_PARAM_SEPARATOR + dictEncodeSimple(dict) + _URL_PARAM_SEPARATOR + URL_RESOURCE_ID + _URL_PARAM_SEPARATOR + std::to_string(resIdx) + _URL_PARAM_SEPARATOR + dictEncodeSimple(res_params);
-                        result.append_child(MetadataHandler::getMetaFieldName(M_ALBUMARTURI).c_str()).append_child(pugi::node_pcdata).set_value(url.c_str());
-
-                        artAdded = true;
-                        break;
-                    } else if (!resObj.empty()) {
-                        std::map<std::string, std::string> dict;
-                        dict[URL_OBJECT_ID] = resObj;
-
-                        auto res_params = res->getParameters();
-                        std::string url = virtualURL + _URL_PARAM_SEPARATOR + CONTENT_MEDIA_HANDLER + _URL_PARAM_SEPARATOR + dictEncodeSimple(dict) + _URL_PARAM_SEPARATOR + URL_RESOURCE_ID + _URL_PARAM_SEPARATOR + res->getAttribute(R_FANART_RES_ID) + _URL_PARAM_SEPARATOR + dictEncodeSimple(res_params);
-                        result.append_child(MetadataHandler::getMetaFieldName(M_ALBUMARTURI).c_str()).append_child(pugi::node_pcdata).set_value(url.c_str());
-                        artAdded = true;
-                        break;
-                    }
-                }
-                resIdx++;
-            }
-            if (artAdded)
+            std::string url;
+            bool artAdded = renderContainerImage(virtualURL, cont, url);
+            if (artAdded) {
+                result.append_child(MetadataHandler::getMetaFieldName(M_ALBUMARTURI).c_str()).append_child(pugi::node_pcdata).set_value(url.c_str());
                 return;
+            }
 
             std::string aa_id = database->findFolderImage(cont->getID(), std::string());
 
@@ -188,7 +197,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
                 std::map<std::string, std::string> dict;
                 dict[URL_OBJECT_ID] = aa_id;
 
-                std::string url = virtualURL + _URL_PARAM_SEPARATOR + CONTENT_MEDIA_HANDLER + _URL_PARAM_SEPARATOR + dictEncodeSimple(dict) + _URL_PARAM_SEPARATOR + URL_RESOURCE_ID + _URL_PARAM_SEPARATOR + "0";
+                std::string url = virtualURL + RequestHandler::joinUrl({ CONTENT_MEDIA_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID, "0" });
                 result.append_child(MetadataHandler::getMetaFieldName(M_ALBUMARTURI).c_str()).append_child(pugi::node_pcdata).set_value(url.c_str());
 
             } else if (upnp_class == UPNP_CLASS_MUSIC_ALBUM) {
@@ -382,13 +391,12 @@ std::unique_ptr<UpnpXMLBuilder::PathBase> UpnpXMLBuilder::getPathBase(const std:
         }
 
         if ((item->getFlag(OBJECT_FLAG_ONLINE_SERVICE) && item->getFlag(OBJECT_FLAG_PROXY_URL)) || forceLocal) {
-            pathBase->pathBase = std::string(_URL_PARAM_SEPARATOR) + CONTENT_ONLINE_HANDLER + _URL_PARAM_SEPARATOR + dictEncodeSimple(dict) + _URL_PARAM_SEPARATOR + URL_RESOURCE_ID + _URL_PARAM_SEPARATOR;
+            pathBase->pathBase = RequestHandler::joinUrl({ CONTENT_ONLINE_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID }, true);
             pathBase->addResID = true;
             return pathBase;
         }
     }
-
-    pathBase->pathBase = std::string(_URL_PARAM_SEPARATOR) + CONTENT_MEDIA_HANDLER + _URL_PARAM_SEPARATOR + dictEncodeSimple(dict) + _URL_PARAM_SEPARATOR + URL_RESOURCE_ID + _URL_PARAM_SEPARATOR;
+    pathBase->pathBase = RequestHandler::joinUrl({ CONTENT_MEDIA_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID }, true);
     pathBase->addResID = true;
     return pathBase;
 }
@@ -422,7 +430,7 @@ std::string UpnpXMLBuilder::getArtworkUrl(const std::shared_ptr<CdsItem>& item) 
 
 std::string UpnpXMLBuilder::renderExtension(const std::string& contentType, const std::string& location)
 {
-    std::string ext = std::string(_URL_PARAM_SEPARATOR) + URL_FILE_EXTENSION + _URL_PARAM_SEPARATOR + "file";
+    std::string ext = RequestHandler::joinUrl({ URL_FILE_EXTENSION, "file" });
 
     if (!contentType.empty() && (contentType != CONTENT_TYPE_PLAYLIST)) {
         ext = ext + "." + contentType;
