@@ -78,6 +78,8 @@ public:
     /// \param attributes Dictionary containing the <res> tag attributes (like resolution, etc.)
     static void renderResource(const std::string& URL, const std::map<std::string, std::string>& attributes, pugi::xml_node* parent);
 
+    static bool renderContainerImage(const std::string virtualURL, const std::shared_ptr<CdsContainer>& cont, std::string& url);
+
     /// \brief Renders a subtitle resource tag
     /// \param URL download location of the video item
     void renderCaptionInfo(const std::string& URL, pugi::xml_node* parent) const;

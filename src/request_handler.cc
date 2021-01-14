@@ -31,7 +31,9 @@
 
 #include "request_handler.h" // API
 
+#include <numeric>
 #include <utility>
+#include <vector>
 
 #include "content/content_manager.h"
 #include "database/database.h"
@@ -66,6 +68,13 @@ void RequestHandler::splitUrl(const char* url, char separator, std::string& path
         parameters = url_s.substr(i1 + 1);
         path = url_s.substr(0, i1);
     }
+}
+
+std::string RequestHandler::joinUrl(const std::vector<std::string>& components, bool addToEnd, const std::string& separator)
+{
+    return !components.empty()
+               ? (std::accumulate(std::next(components.begin()), components.end(), separator + components[0], [=](const std::string& a, const std::string& b) { return a + separator + b; }) + (addToEnd ? separator : ""))
+               : "/";
 }
 
 std::map<std::string, std::string> RequestHandler::parseParameters(const char* filename, const char* baseLink)

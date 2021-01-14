@@ -57,7 +57,7 @@ $.widget('grb.tree', {
       item.prop('id', 'grb-tree-' + data[i].gerbera.id);
 
       const icon = $('<span></span>').addClass(config.closedIcon).addClass('folder-icon');
-      const title = $('<span></span>').addClass(config.titleClass).text(data[i].title);
+      let title = $('<span></span>').addClass(config.titleClass).text(data[i].title);
       if (config.onSelection) {
         title.click(data[i], config.onSelection);
       }
@@ -78,6 +78,9 @@ $.widget('grb.tree', {
             item.addClass("has-children");
           }
         }
+      }
+      if (data[i].gerbera.image) {
+        title.prepend($('<img style="margin-right: 10px" width="36" src="' + data[i].gerbera.image + '"/>'));
       }
 
       item.append(icon);
