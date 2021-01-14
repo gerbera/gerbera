@@ -250,8 +250,6 @@ std::string getValueOrDefault(const std::map<std::string, std::string>& m, const
 
 std::string toCSV(const std::shared_ptr<std::unordered_set<int>>& array);
 
-//void getTimeval(struct timeval *now) { gettimeofday(now, NULL); }
-
 void getTimespecNow(struct timespec* ts);
 
 long getDeltaMillis(struct timespec* first);

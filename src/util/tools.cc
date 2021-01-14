@@ -754,13 +754,8 @@ std::string toCSV(const std::shared_ptr<std::unordered_set<int>>& array)
 
 void getTimespecNow(struct timespec* ts)
 {
-    struct timeval tv;
-    int ret = gettimeofday(&tv, nullptr);
-    if (ret != 0)
-        throw_std_runtime_error(fmt::format("gettimeofday failed: {}", strerror(errno)));
-
-    ts->tv_sec = tv.tv_sec;
-    ts->tv_nsec = tv.tv_usec * 1000;
+    if (timespec_get(ts, TIME_UTC) != 0)
+        throw_std_runtime_error(fmt::format("timespec_get failed: {}", strerror(errno)));
 }
 
 long getDeltaMillis(struct timespec* first)
@@ -912,7 +907,7 @@ fs::path tempName(const fs::path& leadPath, char* tmpl)
     static const char letters[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     static const int NLETTERS = sizeof(letters) - 1;
     long value;
-    struct timeval tv;
+    struct timespec ts;
     static int counter = 0;
     struct stat statbuf;
     int ret = 0;
@@ -925,8 +920,8 @@ fs::path tempName(const fs::path& leadPath, char* tmpl)
     }
 
     /* Get some more or less random data.  */
-    gettimeofday(&tv, nullptr);
-    value = (tv.tv_usec ^ tv.tv_sec) + counter++;
+    timespec_get(&ts, TIME_UTC);
+    value = (ts.tv_nsec ^ ts.tv_sec) + counter++;
 
     for (count = 0; count < 100; value += 7777, ++count) {
         long v = value;
