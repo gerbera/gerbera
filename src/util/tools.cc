@@ -766,7 +766,7 @@ std::string toCSV(const std::shared_ptr<std::unordered_set<int>>& array)
 
 void getTimespecNow(struct timespec* ts)
 {
-    if (timespec_get(ts, TIME_UTC) != 0)
+    if (timespec_get(ts, TIME_UTC) == 0)
         throw_std_runtime_error(fmt::format("timespec_get failed: {}", strerror(errno)));
 }
 
