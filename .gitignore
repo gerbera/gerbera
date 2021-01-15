@@ -10,6 +10,10 @@ cmake_install.cmake
 cmake-build-debug
 Makefile
 CTestTestfile.cmake
+build.ninja
+.ninja_deps
+.ninja_log
+compile_commands.json
 
 Testing/
 
@@ -23,3 +27,5 @@ config/*.sql.Z.c
 
 doc/_build
 build
+
+gerbera.service

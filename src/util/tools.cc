@@ -184,7 +184,8 @@ time_t getLastWriteTime(const fs::path& path)
 
 bool isRegularFile(const fs::path& path)
 {
-    // unfortunately fs::is_regular_file(path, ec) does not to work for files >2GB on ARM 32bit systems (see #737)
+    // unfortunately fs::is_regular_file(path) is broken with old libstdc++ on 32bit systems (see #737)
+#if defined(__GLIBCXX__) && (__GLIBCXX__ <= 20190406)
     struct stat statbuf;
     int ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
@@ -192,11 +193,15 @@ bool isRegularFile(const fs::path& path)
     }
 
     return S_ISREG(statbuf.st_mode);
+#else
+    return fs::is_regular_file(path);
+#endif
 }
 
 bool isRegularFile(const fs::path& path, std::error_code& ec) noexcept
 {
-    // unfortunately fs::is_regular_file(path, ec) does not to work for files >2GB on ARM 32bit systems (see #737)
+    // unfortunately fs::is_regular_file(path, ec) is broken with old libstdc++ on 32bit systems (see #737)
+#if defined(__GLIBCXX__) && (__GLIBCXX__ <= 20190406)
     struct stat statbuf;
     int ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
@@ -206,11 +211,15 @@ bool isRegularFile(const fs::path& path, std::error_code& ec) noexcept
 
     ec.clear();
     return S_ISREG(statbuf.st_mode);
+#else
+    return fs::is_regular_file(path, ec);
+#endif
 }
 
 off_t getFileSize(const fs::path& path)
 {
-    // unfortunately fs::file_size(path) does not to work for files >2GB on ARM 32bit systems (see #737)
+    // unfortunately fs::file_size(path) is broken with old libstdc++ on 32bit systems (see #737)
+#if defined(__GLIBCXX__) && (__GLIBCXX__ <= 20190406)
     struct stat statbuf;
     int ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
@@ -218,6 +227,9 @@ off_t getFileSize(const fs::path& path)
     }
 
     return statbuf.st_size;
+#else
+    return fs::file_size(path);
+#endif
 }
 
 bool isExecutable(const fs::path& path, int* err)
