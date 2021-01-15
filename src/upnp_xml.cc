@@ -57,41 +57,6 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createResponse(const std::st
     return response;
 }
 
-bool UpnpXMLBuilder::renderContainerImage(const std::string virtualURL, const std::shared_ptr<CdsContainer>& cont, std::string& url)
-{
-    bool artAdded = false;
-    int resIdx = 0;
-    for (const auto& res : cont->getResources()) {
-        if (res->isMetaResource(ID3_ALBUM_ART)) {
-            const auto& resFile = res->getAttribute(R_RESOURCE_FILE);
-            const auto& resObj = res->getAttribute(R_FANART_OBJ_ID);
-            if (!resFile.empty()) {
-                // found, FanArtHandler deals already with file
-                std::map<std::string, std::string> dict;
-                dict[URL_OBJECT_ID] = std::to_string(cont->getID());
-
-                auto res_params = res->getParameters();
-                res_params[RESOURCE_HANDLER] = std::to_string(res->getHandlerType());
-                url.assign(virtualURL + RequestHandler::joinUrl({ CONTENT_MEDIA_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID, std::to_string(resIdx), dictEncodeSimple(res_params) }));
-
-                artAdded = true;
-                break;
-            } else if (!resObj.empty()) {
-                std::map<std::string, std::string> dict;
-                dict[URL_OBJECT_ID] = resObj;
-
-                auto res_params = res->getParameters();
-                url.assign(virtualURL + RequestHandler::joinUrl({ CONTENT_MEDIA_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID, res->getAttribute(R_FANART_RES_ID), dictEncodeSimple(res_params) }));
-
-                artAdded = true;
-                break;
-            }
-        }
-        resIdx++;
-    }
-    return artAdded;
-}
-
 void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t stringLimit, pugi::xml_node* parent)
 {
     auto result = parent->append_child("");
@@ -426,6 +391,66 @@ std::string UpnpXMLBuilder::getArtworkUrl(const std::shared_ptr<CdsItem>& item) 
         return virtualURL + urlBase->pathBase + std::to_string(1) + "/rct/aa";
     }
     return virtualURL + urlBase->pathBase;
+}
+
+bool UpnpXMLBuilder::renderContainerImage(const std::string virtualURL, const std::shared_ptr<CdsContainer>& cont, std::string& url)
+{
+    bool artAdded = false;
+    int resIdx = 0;
+    for (const auto& res : cont->getResources()) {
+        if (res->isMetaResource(ID3_ALBUM_ART)) {
+            const auto& resFile = res->getAttribute(R_RESOURCE_FILE);
+            const auto& resObj = res->getAttribute(R_FANART_OBJ_ID);
+            if (!resFile.empty()) {
+                // found, FanArtHandler deals already with file
+                std::map<std::string, std::string> dict;
+                dict[URL_OBJECT_ID] = std::to_string(cont->getID());
+
+                auto res_params = res->getParameters();
+                res_params[RESOURCE_HANDLER] = std::to_string(res->getHandlerType());
+                url.assign(virtualURL + RequestHandler::joinUrl({ CONTENT_MEDIA_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID, std::to_string(resIdx), dictEncodeSimple(res_params) }));
+
+                artAdded = true;
+                break;
+            } else if (!resObj.empty()) {
+                std::map<std::string, std::string> dict;
+                dict[URL_OBJECT_ID] = resObj;
+
+                auto res_params = res->getParameters();
+                url.assign(virtualURL + RequestHandler::joinUrl({ CONTENT_MEDIA_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID, res->getAttribute(R_FANART_RES_ID), dictEncodeSimple(res_params) }));
+
+                artAdded = true;
+                break;
+            }
+        }
+        resIdx++;
+    }
+    return artAdded;
+}
+
+bool UpnpXMLBuilder::renderItemImage(const std::string virtualURL, const std::shared_ptr<CdsItem>& item, std::string& url)
+{
+    bool artAdded = false;
+    auto urlBase = getPathBase(item);
+    int realCount = 0;
+    for (const auto res : item->getResources()) {
+        if (res->isMetaResource(ID3_ALBUM_ART)) {
+            auto res_attrs = res->getAttributes();
+            auto res_params = res->getParameters();
+            if (urlBase->addResID) {
+                url = virtualURL + urlBase->pathBase + std::to_string(realCount) + _URL_PARAM_SEPARATOR;
+            } else
+                url = virtualURL + urlBase->pathBase;
+
+            if (!res_params.empty()) {
+                url.append(dictEncodeSimple(res_params));
+            }
+            artAdded = true;
+            break;
+        }
+        realCount++;
+    }
+    return artAdded;
 }
 
 std::string UpnpXMLBuilder::renderExtension(const std::string& contentType, const std::string& location)
