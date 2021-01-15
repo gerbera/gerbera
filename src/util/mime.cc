@@ -81,14 +81,12 @@ std::string Mime::bufferToMimeType(const void* buffer, size_t length)
 
 std::string Mime::extensionToMimeType(const fs::path& path)
 {
-    log_debug("1");
     std::string extension = path.extension();
     if (!extension.empty())
         extension.erase(0, 1); // remove leading .
 
     if (!extension_map_case_sensitive)
         extension = toLower(extension);
-    log_debug("2");
 
     return getValueOrDefault(extension_mimetype_map, extension);
 }
