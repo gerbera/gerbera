@@ -65,7 +65,7 @@ public:
     void create_directory(fs::path dir)
     {
         if (mkdir(dir.c_str(), 0777) < 0) {
-            throw_std_runtime_error("Failed to create test_config temporary directory for testing");
+            throw_std_runtime_error(fmt::format("Failed to create test_config temporary directory for testing: {}", dir.c_str()));
         };
     }
 

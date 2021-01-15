@@ -202,28 +202,33 @@ void ConfigGenerator::generateMappings(pugi::xml_node* import)
 
     auto ext2mt = mappings.append_child("extension-mimetype");
     ext2mt.append_attribute("ignore-unknown") = DEFAULT_IGNORE_UNKNOWN_EXTENSIONS;
+    map_from_to("asf", "video/x-ms-asf", &ext2mt);
+    map_from_to("asx", "video/x-ms-asf", &ext2mt);
+    map_from_to("dff", "audio/x-dsd", &ext2mt);
+    map_from_to("dsf", "audio/x-dsd", &ext2mt);
+    map_from_to("flv", "video/x-flv", &ext2mt);
+    map_from_to("m2ts", "video/mp2t", &ext2mt); // LibMagic fails to identify MPEG2 Transport Streams
+    map_from_to("m3u", "audio/x-mpegurl", &ext2mt);
+    map_from_to("mka", "audio/x-matroska", &ext2mt);
+    map_from_to("mkv", "video/x-matroska", &ext2mt);
     map_from_to("mp3", "audio/mpeg", &ext2mt);
-    map_from_to("ogx", "application/ogg", &ext2mt);
-    map_from_to("ogv", "video/ogg", &ext2mt);
+    map_from_to("mts", "video/mp2t", &ext2mt); // LibMagic fails to identify MPEG2 Transport Streams
     map_from_to("oga", "audio/ogg", &ext2mt);
     map_from_to("ogg", "audio/ogg", &ext2mt);
     map_from_to("ogm", "video/ogg", &ext2mt);
-    map_from_to("asf", "video/x-ms-asf", &ext2mt);
-    map_from_to("asx", "video/x-ms-asf", &ext2mt);
-    map_from_to("wma", "audio/x-ms-wma", &ext2mt);
-    map_from_to("wax", "audio/x-ms-wax", &ext2mt);
-    map_from_to("wmv", "video/x-ms-wmv", &ext2mt);
-    map_from_to("wvx", "video/x-ms-wvx", &ext2mt);
-    map_from_to("wm", "video/x-ms-wm", &ext2mt);
-    map_from_to("wmx", "video/x-ms-wmx", &ext2mt);
-    map_from_to("m3u", "audio/x-mpegurl", &ext2mt);
+    map_from_to("ogv", "video/ogg", &ext2mt);
+    map_from_to("ogx", "application/ogg", &ext2mt);
     map_from_to("pls", "audio/x-scpls", &ext2mt);
-    map_from_to("flv", "video/x-flv", &ext2mt);
-    map_from_to("mkv", "video/x-matroska", &ext2mt);
-    map_from_to("mka", "audio/x-matroska", &ext2mt);
-    map_from_to("dsf", "audio/x-dsd", &ext2mt);
-    map_from_to("dff", "audio/x-dsd", &ext2mt);
+    map_from_to("ts", "video/mp2t", &ext2mt); // LibMagic fails to identify MPEG2 Transport Streams
+    map_from_to("tsa", "audio/mp2t", &ext2mt); // LibMagic fails to identify MPEG2 Transport Streams
+    map_from_to("tsv", "video/mp2t", &ext2mt); // LibMagic fails to identify MPEG2 Transport Streams
+    map_from_to("wax", "audio/x-ms-wax", &ext2mt);
+    map_from_to("wm", "video/x-ms-wm", &ext2mt);
+    map_from_to("wma", "audio/x-ms-wma", &ext2mt);
+    map_from_to("wmv", "video/x-ms-wmv", &ext2mt);
+    map_from_to("wmx", "video/x-ms-wmx", &ext2mt);
     map_from_to("wv", "audio/x-wavpack", &ext2mt);
+    map_from_to("wvx", "video/x-ms-wvx", &ext2mt);
 
     ext2mt.append_child(pugi::node_comment).set_value(" Uncomment the line below for PS3 divx support ");
     ext2mt.append_child(pugi::node_comment).set_value(R"( <map from="avi" to="video/divx" /> )");

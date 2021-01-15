@@ -14,6 +14,8 @@ target_link_libraries(testcore PRIVATE
 )
 add_custom_command(TARGET testcore POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/fixtures ${CMAKE_CURRENT_BINARY_DIR}/fixtures
+        DEPENDS fixtures/*
+        COMMENT "Copying Fixtures"
 )
 target_compile_definitions(testcore PRIVATE CMAKE_BINARY_DIR="$<TARGET_FILE_DIR:gerbera>")
 
