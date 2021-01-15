@@ -101,8 +101,10 @@
     modal.find('#metadata').empty();
     modal.find('#auxdata').empty();
     modal.find('#resdata').empty();
+    modal.find('#mediaimage').empty();
 
     hideDetails(modal);
+    modal.find('#mediaimage').hide();
     modal.find('#detailbutton').hide();
     modal.find('#hidebutton').hide();
   }
@@ -144,6 +146,10 @@
     const item = itemData.item;
     if (item) {
       reset(modal);
+      if (item.image) {
+        modal.find('#mediaimage').prop('src', item.image.value);
+        modal.find('#mediaimage').show();
+      }
       modal.find('#editObjectType').val(item.obj_type);
       modal.find('#editObjectType').prop('disabled', true);
       modal.find('#editObjectType').prop('readonly', true);

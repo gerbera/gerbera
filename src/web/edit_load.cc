@@ -37,6 +37,8 @@
 #include "cds_objects.h"
 #include "database/database.h"
 #include "metadata/metadata_handler.h"
+#include "server.h"
+#include "upnp_xml.h"
 #include "util/tools.h"
 
 web::edit_load::edit_load(std::shared_ptr<ContentManager> content)
@@ -150,10 +152,27 @@ void web::edit_load::process()
         mimeType.append_attribute("value") = objItem->getMimeType().c_str();
         mimeType.append_attribute("editable") = true;
 
+        std::string url;
+        if (UpnpXMLBuilder::renderItemImage(server->getVirtualUrl(), objItem, url)) {
+            auto image = item.append_child("image");
+            image.append_attribute("value") = url.c_str();
+            image.append_attribute("editable") = false;
+        }
+
         if (obj->isExternalItem()) {
             auto protocol = item.append_child("protocol");
             protocol.append_attribute("value") = getProtocol(objItem->getResource(0)->getAttribute(R_PROTOCOLINFO)).c_str();
             protocol.append_attribute("editable") = true;
+        }
+    }
+
+    if (obj->isContainer()) {
+        auto cont = std::static_pointer_cast<CdsContainer>(obj);
+        std::string url;
+        if (UpnpXMLBuilder::renderContainerImage(server->getVirtualUrl(), cont, url)) {
+            auto image = item.append_child("image");
+            image.append_attribute("value") = url.c_str();
+            image.append_attribute("editable") = false;
         }
     }
 }
