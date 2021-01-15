@@ -31,8 +31,9 @@
 // forward declaration
 class Config;
 class Clients;
-class Mime;
 class Database;
+class Mime;
+class Server;
 class UpdateManager;
 namespace web {
 class SessionManager;
@@ -44,6 +45,7 @@ public:
         std::shared_ptr<Clients> clients,
         std::shared_ptr<Mime> mime,
         std::shared_ptr<Database> database,
+        std::shared_ptr<Server> server,
         std::shared_ptr<web::SessionManager> session_manager);
 
     virtual ~Context();
@@ -68,6 +70,11 @@ public:
         return database;
     }
 
+    std::shared_ptr<Server> getServer() const
+    {
+        return server;
+    }
+
     std::shared_ptr<web::SessionManager> getSessionManager() const
     {
         return session_manager;
@@ -78,6 +85,7 @@ private:
     std::shared_ptr<Clients> clients;
     std::shared_ptr<Mime> mime;
     std::shared_ptr<Database> database;
+    std::shared_ptr<Server> server;
     std::shared_ptr<web::SessionManager> session_manager;
 };
 

@@ -42,12 +42,13 @@
 #include "iohandler/io_handler.h"
 
 // forward declaration
+class CdsObject;
 class Config;
-class Mime;
-class Database;
 class Context;
 class ContentManager;
-class CdsObject;
+class Database;
+class Mime;
+class Server;
 
 class RequestHandler {
 public:
@@ -83,11 +84,12 @@ public:
     virtual ~RequestHandler() = default;
 
 protected:
+    std::shared_ptr<ContentManager> content;
+    std::shared_ptr<Context> context;
     std::shared_ptr<Config> config;
     std::shared_ptr<Mime> mime;
     std::shared_ptr<Database> database;
-    std::shared_ptr<Context> context;
-    std::shared_ptr<ContentManager> content;
+    std::shared_ptr<Server> server;
 };
 
 #endif // __REQUEST_HANDLER_H__

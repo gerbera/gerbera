@@ -78,7 +78,7 @@ void Server::init()
     database = Database::createInstance(config, timer);
     config->updateConfigFromDatabase(database);
     session_manager = std::make_shared<web::SessionManager>(config, timer);
-    context = std::make_shared<Context>(config, clients, mime, database, session_manager);
+    context = std::make_shared<Context>(config, clients, mime, database, self, session_manager);
 
     content = std::make_shared<ContentManager>(context, self, timer);
 }
@@ -389,16 +389,6 @@ int Server::handleUpnpClientEvent(Upnp_EventType eventType, const void* event)
     }
 
     return 0;
-}
-
-std::string Server::getIP()
-{
-    return UpnpGetServerIpAddress();
-}
-
-std::string Server::getPort()
-{
-    return std::to_string(UpnpGetServerPort());
 }
 
 void Server::routeActionRequest(const std::unique_ptr<ActionRequest>& request) const
