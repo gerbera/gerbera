@@ -1144,12 +1144,15 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::path& 
         /* retrieve information about item and decide if it should be included */
         std::string mimetype = mime->extensionToMimeType(path);
         if (mimetype.empty()) {
-            if (ignore_unknown_extensions)
-                return nullptr; // item should be ignored
+            if (ignore_unknown_extensions) {
+                // item should be ignored
+                return nullptr;
+            }
 #ifdef HAVE_MAGIC
             mimetype = mime->fileToMimeType(path);
 #endif
         }
+        log_debug("Mime '{}' for file {}", mimetype, path.c_str());
 
         std::string upnp_class = mime->mimeTypeToUpnpClass(mimetype);
         if (upnp_class.empty()) {
@@ -1160,6 +1163,7 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::path& 
                     : UPNP_CLASS_MUSIC_TRACK;
             }
         }
+        log_debug("UpnpClass '{}' for file {}", upnp_class, path.c_str());
 
         auto item = std::make_shared<CdsItem>();
         obj = item;
