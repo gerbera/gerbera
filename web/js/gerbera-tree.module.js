@@ -218,7 +218,7 @@ const transformContainers = (response, createParent) => {
       childCount: item.child_count,
       autoScanMode: item.autoscan_mode,
       autoScanType: item.autoscan_type,
-      image: item.image
+      image: ('image' in item) ? item.image : null
     };
     if (createParent) {
       parent.nodes.push(node);

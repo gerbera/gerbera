@@ -198,7 +198,7 @@ describe('Gerbera Tree', () => {
 
       expect(Items.treeItemSelected).toHaveBeenCalled();
       expect(Items.treeItemSelected.calls.mostRecent().args[0]).toEqual(
-        {title: 'Photos', badge: [2], nodes: [], gerbera: {id: 2779, childCount: 2, autoScanMode: 'none', autoScanType: 'none'}}
+        {title: 'Photos', badge: [2], nodes: [], gerbera: {id: 2779, childCount: 2, autoScanMode: 'none', autoScanType: 'none', image: null}}
       );
     });
 
@@ -217,7 +217,7 @@ describe('Gerbera Tree', () => {
 
       expect(Items.treeItemSelected).toHaveBeenCalled();
       expect(Items.treeItemSelected.calls.mostRecent().args[0]).toEqual(
-        {title: 'Photos', badge: [2], nodes: [], gerbera: {id: 2779, childCount: 2, autoScanMode: 'none', autoScanType: 'none'}}
+        {title: 'Photos', badge: [2], nodes: [], gerbera: {id: 2779, childCount: 2, autoScanMode: 'none', autoScanType: 'none', image: null}}
       );
     });
 
@@ -353,7 +353,7 @@ describe('Gerbera Tree', () => {
         title: 'Audio',
         badge: [6],
         nodes: [],
-        gerbera: { id: 8, childCount: 6, autoScanMode: 'none', autoScanType: 'none' }
+        gerbera: { id: 8, childCount: 6, autoScanMode: 'none', autoScanType: 'none', image: null }
       });
     });
   });

@@ -72,19 +72,13 @@ public:
     /// web callbacks. Starts the update manager task.
     void run();
 
-    /// \brief Returns the IP address of the server.
+    /// \brief Returns the content url of the server.
     ///
-    /// Returns a string representation of the IP where the server is
-    /// running. This is useful for constructing URL's, etc.
-    static std::string getIP();
-
-    /// \brief Returns the port of the server.
-    ///
-    /// Returns a string representation of the server port. Although
+    /// Returns a string representation of the server url. Although
     /// the port is also specified in the config, we can never be sure
     /// that we actually get that port after startup. This function
-    /// returns the port on which the server is actually running.
-    static std::string getPort();
+    /// contains the port on which the server is actually running.
+    std::string getVirtualUrl() { return virtualUrl; }
 
     /// \brief Tells if the server is about to be terminated.
     ///

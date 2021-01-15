@@ -40,11 +40,12 @@
 #include "util/tools.h"
 
 RequestHandler::RequestHandler(std::shared_ptr<ContentManager> content)
-    : config(content->getContext()->getConfig())
-    , mime(content->getContext()->getMime())
-    , database(content->getContext()->getDatabase())
-    , context(content->getContext())
-    , content(std::move(content))
+    : content(std::move(content))
+    , context(this->content->getContext())
+    , config(this->context->getConfig())
+    , mime(this->context->getMime())
+    , database(this->context->getDatabase())
+    , server(this->context->getServer())
 {
 }
 
@@ -73,8 +74,8 @@ void RequestHandler::splitUrl(const char* url, char separator, std::string& path
 std::string RequestHandler::joinUrl(const std::vector<std::string>& components, bool addToEnd, const std::string& separator)
 {
     return !components.empty()
-               ? (std::accumulate(std::next(components.begin()), components.end(), separator + components[0], [=](const std::string& a, const std::string& b) { return a + separator + b; }) + (addToEnd ? separator : ""))
-               : "/";
+        ? (std::accumulate(std::next(components.begin()), components.end(), separator + components[0], [=](const std::string& a, const std::string& b) { return a + separator + b; }) + (addToEnd ? separator : ""))
+        : "/";
 }
 
 std::map<std::string, std::string> RequestHandler::parseParameters(const char* filename, const char* baseLink)

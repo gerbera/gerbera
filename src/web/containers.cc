@@ -65,7 +65,6 @@ void web::containers::process()
 
     auto param = std::make_unique<BrowseParam>(parentID, BROWSE_DIRECT_CHILDREN | BROWSE_CONTAINERS);
     auto arr = database->browse(param);
-    std::string virtualUrl = "http://" + Server::getIP() + ":" + Server::getPort() + RequestHandler::joinUrl({ SERVER_VIRTUAL_DIR });
     for (const auto& obj : arr) {
         //if (obj->isContainer())
         //{
@@ -78,7 +77,7 @@ void web::containers::process()
         ce.append_attribute("autoscan_type") = mapAutoscanType(autoscanType).c_str();
 
         std::string url;
-        if (UpnpXMLBuilder::renderContainerImage(virtualUrl, cont, url)) {
+        if (UpnpXMLBuilder::renderContainerImage(server->getVirtualUrl(), cont, url)) {
             ce.append_attribute("image") = url.c_str();
         }
 
