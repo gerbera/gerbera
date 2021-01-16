@@ -49,28 +49,33 @@
     </scripting>
     <mappings>
       <extension-mimetype ignore-unknown="no">
+        <map from="asf" to="video/x-ms-asf" />
+        <map from="asx" to="video/x-ms-asf" />
+        <map from="dff" to="audio/x-dsd" />
+        <map from="dsf" to="audio/x-dsd" />
+        <map from="flv" to="video/x-flv" />
+        <map from="m2ts" to="video/mp2t" />
+        <map from="m3u" to="audio/x-mpegurl" />
+        <map from="mka" to="audio/x-matroska" />
+        <map from="mkv" to="video/x-matroska" />
         <map from="mp3" to="audio/mpeg" />
-        <map from="ogx" to="application/ogg" />
-        <map from="ogv" to="video/ogg" />
+        <map from="mts" to="video/mp2t" />
         <map from="oga" to="audio/ogg" />
         <map from="ogg" to="audio/ogg" />
         <map from="ogm" to="video/ogg" />
-        <map from="asf" to="video/x-ms-asf" />
-        <map from="asx" to="video/x-ms-asf" />
-        <map from="wma" to="audio/x-ms-wma" />
-        <map from="wax" to="audio/x-ms-wax" />
-        <map from="wmv" to="video/x-ms-wmv" />
-        <map from="wvx" to="video/x-ms-wvx" />
-        <map from="wm" to="video/x-ms-wm" />
-        <map from="wmx" to="video/x-ms-wmx" />
-        <map from="m3u" to="audio/x-mpegurl" />
+        <map from="ogv" to="video/ogg" />
+        <map from="ogx" to="application/ogg" />
         <map from="pls" to="audio/x-scpls" />
-        <map from="flv" to="video/x-flv" />
-        <map from="mkv" to="video/x-matroska" />
-        <map from="mka" to="audio/x-matroska" />
-        <map from="dsf" to="audio/x-dsd" />
-        <map from="dff" to="audio/x-dsd" />
+        <map from="ts" to="video/mp2t" />
+        <map from="tsa" to="audio/mp2t" />
+        <map from="tsv" to="video/mp2t" />
+        <map from="wax" to="audio/x-ms-wax" />
+        <map from="wm" to="video/x-ms-wm" />
+        <map from="wma" to="audio/x-ms-wma" />
+        <map from="wmv" to="video/x-ms-wmv" />
+        <map from="wmx" to="video/x-ms-wmx" />
         <map from="wv" to="audio/x-wavpack" />
+        <map from="wvx" to="video/x-ms-wvx" />
         <!-- Uncomment the line below for PS3 divx support -->
         <!-- <map from="avi" to="video/divx" /> -->
         <!-- Uncomment the line below for D-Link DSM / ZyXEL DMA-1000 -->
