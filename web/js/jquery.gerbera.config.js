@@ -493,7 +493,7 @@ $.widget('grb.config', {
 
           itemLine.append(input);
           if (item.help) {
-            const link = $('<a>', {"title": "help",  "target": "_blank", "style": "margin-left: 20px", "class": "", "href": "https://docs.gerbera.io/en/latest/" + item.help});
+            const link = $('<a>', {"title": "help",  "target": "_blank", "style": "margin-left: 20px", "class": "", "href": "https://docs.gerbera.io/en/stable/" + item.help});
             const icon = $('<i></i>', {"class": "fa " + "fa-info" });
             link.append(icon);
             link.appendTo(itemLine);
