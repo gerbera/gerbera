@@ -1333,16 +1333,12 @@ void ConfigManager::setOrigValue(const std::string& item, const std::string& val
 
 void ConfigManager::setOrigValue(const std::string& item, bool value)
 {
-    if (origValues.find(item) == origValues.end()) {
-        origValues[item] = value ? "true" : "false";
-    }
+    origValues.try_emplace(item, value ? "true" : "false");
 }
 
 void ConfigManager::setOrigValue(const std::string& item, int value)
 {
-    if (origValues.find(item) == origValues.end()) {
-        origValues[item] = fmt::format("{}", value);
-    }
+    origValues.try_emplace(item, fmt::format("{}", value));
 }
 
 void ConfigManager::dumpOptions() const
