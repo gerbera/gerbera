@@ -242,9 +242,11 @@ void ContentManager::run()
         /// \todo change this (we need a new autoscan architecture)
         for (size_t i = 0; i < autoscan_inotify->size(); i++) {
             std::shared_ptr<AutoscanDirectory> adir = autoscan_inotify->get(i);
-            if (adir != nullptr)
-                inotify->monitor(adir);
+            if (adir == nullptr) {
+                continue;
+            }
 
+            inotify->monitor(adir);
             auto param = std::make_shared<Timer::Parameter>(Timer::Parameter::timer_param_t::IDAutoscan, adir->getScanID());
             log_debug("Adding one-shot inotify scan");
             timer->addTimerSubscriber(this, 60, param, true);
