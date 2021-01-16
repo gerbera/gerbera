@@ -1111,33 +1111,29 @@ std::string getAVIFourCC(const fs::path& avi_filename)
     if (!f)
         throw_std_runtime_error("could not open file " + avi_filename.native() + " : " + strerror(errno));
 
-    buffer = static_cast<char*>(malloc(FCC_OFFSET + 6));
-    if (buffer == nullptr) {
-        fclose(f);
-        throw_std_runtime_error("Out of memory when allocating buffer for file " + avi_filename.native());
-    }
+    buffer = new char[FCC_OFFSET + 6];
 
     size_t rb = std::fread(buffer, 1, FCC_OFFSET + 4, f);
     fclose(f);
     if (rb != FCC_OFFSET + 4) {
-        free(buffer);
+        delete[] buffer;
         throw_std_runtime_error("could not read header of " + avi_filename.native() + " : " + strerror(errno));
     }
 
     buffer[FCC_OFFSET + 5] = '\0';
 
     if (strncmp(buffer, "RIFF", 4) != 0) {
-        free(buffer);
+        delete[] buffer;
         return "";
     }
 
     if (strncmp(buffer + 8, "AVI ", 4) != 0) {
-        free(buffer);
+        delete[] buffer;
         return "";
     }
 
     std::string fourcc = std::string(buffer + FCC_OFFSET, 4);
-    free(buffer);
+    delete[] buffer;
 
     return fourcc;
 }
