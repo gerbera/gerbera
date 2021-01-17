@@ -502,28 +502,6 @@
         </xs:complexType>
     </xs:element>
 
-    <xs:element name="directories">
-        <xs:complexType>
-            <xs:sequence>
-                <xs:element ref="tweak" minOccurs="0" maxOccurs="unbounded"/>
-            </xs:sequence>
-        </xs:complexType>
-    </xs:element>
-
-    <xs:element name="tweak">
-        <xs:complexType>
-            <xs:attribute name="location" type="xs:string" use="required"/>
-
-            <xs:attribute name="inherit" type="boolean" use="required"/>
-            <xs:attribute name="hidden-files"/>
-            <xs:attribute name="recursive" type="boolean"/>
-            <xs:attribute name="case-sensitive" type="boolean"/>
-            <xs:attribute name="fanart-file" type="xs:string"/>
-            <xs:attribute name="subtitle-file" type="xs:string"/>
-            <xs:attribute name="resource-file" type="xs:string"/>
-        </xs:complexType>
-    </xs:element>
-
     <xs:element name="layout">
         <xs:complexType>
             <xs:sequence>
@@ -594,11 +572,22 @@
     <xs:element name="resources">
         <xs:complexType>
             <xs:all>
+                <xs:element ref="container" minOccurs="0"/>
                 <xs:element ref="fanart" minOccurs="0"/>
                 <xs:element ref="subtitle" minOccurs="0"/>
                 <xs:element ref="resource" minOccurs="0"/>
             </xs:all>
             <xs:attribute name="case-sensitive" type="boolean" default="yes"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="container">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="add-file" minOccurs="0"/>
+            </xs:sequence>
+            <xs:attribute name="parentCount" default="2"/>
+            <xs:attribute name="minDepth" default="2"/>
         </xs:complexType>
     </xs:element>
 

@@ -803,7 +803,7 @@ fs::path SQLDatabase::buildContainerPath(int parentID, const std::string& title)
     return path;
 }
 
-void SQLDatabase::addContainerChain(std::string virtualPath, const std::string& lastClass, int lastRefID, int* containerID, int* updateID, const std::map<std::string, std::string>& lastMetadata)
+void SQLDatabase::addContainerChain(std::string virtualPath, const std::string& lastClass, int lastRefID, int* containerID, std::vector<int>& updateID, const std::map<std::string, std::string>& lastMetadata)
 {
     log_debug("Adding container Chain for path: {}, lastRefId: {}, containerId: {}", virtualPath.c_str(), lastRefID, *containerID);
 
@@ -834,9 +834,10 @@ void SQLDatabase::addContainerChain(std::string virtualPath, const std::string& 
     stripAndUnescapeVirtualContainerFromPath(virtualPath, newpath, container);
 
     addContainerChain(newpath, "", INVALID_OBJECT_ID, &parentContainerID, updateID, std::map<std::string, std::string>());
-    if (updateID != nullptr && *updateID == INVALID_OBJECT_ID)
-        *updateID = parentContainerID;
+
     *containerID = createContainer(parentContainerID, container, virtualPath, true, lastClass, lastRefID, lastMetadata);
+    updateID.emplace(updateID.begin(), *containerID);
+    return;
 }
 
 std::string SQLDatabase::addLocationPrefix(char prefix, const std::string& path)

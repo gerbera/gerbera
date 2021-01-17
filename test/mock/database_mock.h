@@ -21,7 +21,7 @@ public:
 
     void addObject(std::shared_ptr<CdsObject> object, int* changedContainer) override { }
     void addContainerChain(std::string path, const std::string& lastClass, int lastRefID, int* containerID,
-        int* updateID, const std::map<std::string, std::string>& lastMetadata) override { }
+        std::vector<int>& updateID, const std::map<std::string, std::string>& lastMetadata) override { }
     fs::path buildContainerPath(int parentID, const std::string& title) override { return ""; }
 
     void updateObject(std::shared_ptr<CdsObject> object, int* changedContainer) override { }

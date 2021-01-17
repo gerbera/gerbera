@@ -125,8 +125,12 @@ MatroskaHandler::MatroskaHandler(const std::shared_ptr<Context>& context)
 {
 }
 
-void MatroskaHandler::fillMetadata(std::shared_ptr<CdsItem> item)
+void MatroskaHandler::fillMetadata(std::shared_ptr<CdsObject> obj)
 {
+    auto item = std::dynamic_pointer_cast<CdsItem>(obj);
+    if (item == nullptr)
+        return;
+
     parseMKV(item, nullptr);
 }
 

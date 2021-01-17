@@ -39,10 +39,11 @@ MetacontentHandler::MetacontentHandler(const std::shared_ptr<Context>& context)
 {
 }
 
-fs::path MetacontentHandler::getContentPath(const std::vector<std::string>& names, const std::shared_ptr<CdsObject>& item, bool isCaseSensitive)
+fs::path MetacontentHandler::getContentPath(const std::vector<std::string>& names, const std::shared_ptr<CdsObject>& item, bool isCaseSensitive, fs::path folder)
 {
     if (!names.empty()) {
-        auto folder = item->getLocation().parent_path();
+        if (folder.empty())
+            folder = item->getLocation().parent_path();
         log_debug("Folder name: {}", folder.c_str());
 
         if (isCaseSensitive) {
@@ -74,8 +75,11 @@ fs::path MetacontentHandler::getContentPath(const std::vector<std::string>& name
     return "";
 }
 
-static constexpr std::array<std::pair<std::string_view, metadata_fields_t>, 2> metaTags { {
+static constexpr std::array<std::pair<std::string_view, metadata_fields_t>, 5> metaTags { {
     { "%album%", M_ALBUM },
+    { "%albumArtist%", M_ALBUMARTIST },
+    { "%artist%", M_ARTIST },
+    { "%genre%", M_GENRE },
     { "%title%", M_TITLE },
 } };
 bool MetacontentHandler::caseSensitive = true;
@@ -87,8 +91,14 @@ std::string MetacontentHandler::expandName(const std::string& name, const std::s
     for (const auto& [key, val] : metaTags)
         replaceString(copy, key, item->getMetadata(val));
 
-    fs::path location = item->getLocation();
-    replaceString(copy, "%filename%", location.stem());
+    if (item->isItem()) {
+        fs::path location = item->getLocation();
+        replaceString(copy, "%filename%", location.stem());
+    }
+    if (item->isContainer()) {
+        auto location = item->getTitle();
+        replaceString(copy, "%filename%", location);
+    }
     return copy;
 }
 
@@ -114,7 +124,7 @@ FanArtHandler::FanArtHandler(const std::shared_ptr<Context>& context)
     }
 }
 
-void FanArtHandler::fillMetadata(std::shared_ptr<CdsItem> item)
+void FanArtHandler::fillMetadata(std::shared_ptr<CdsObject> item)
 {
     log_debug("Running fanart handler on {}", item->getLocation().c_str());
     auto tweak = config->getDirectoryTweakOption(CFG_IMPORT_DIRECTORIES_LIST)->get(item->getLocation());
@@ -149,6 +159,65 @@ std::unique_ptr<IOHandler> FanArtHandler::serveContent(std::shared_ptr<CdsObject
     return io_handler;
 }
 
+std::vector<std::string> ContainerArtHandler::names = {
+    //    "%title%.jpg",
+    //    "%filename%.jpg",
+    //    "folder.jpg",
+    //    "poster.jpg",
+    //    "cover.jpg",
+    //    "albumartsmall.jpg",
+    //    "%album%.jpg",
+};
+bool ContainerArtHandler::initDone = false;
+
+ContainerArtHandler::ContainerArtHandler(const std::shared_ptr<Context>& context)
+    : MetacontentHandler(std::move(context))
+{
+    if (!initDone) {
+        std::vector<std::string> files = this->config->getArrayOption(CFG_IMPORT_RESOURCES_CONTAINERART_FILE_LIST);
+        names.insert(names.end(), files.begin(), files.end());
+        caseSensitive = this->config->getBoolOption(CFG_IMPORT_RESOURCES_CASE_SENSITIVE);
+        initDone = true;
+    }
+}
+
+void ContainerArtHandler::fillMetadata(std::shared_ptr<CdsObject> item)
+{
+    // auto tweak = config->getDirectoryTweakOption(CFG_IMPORT_DIRECTORIES_LIST)->get(item->getLocation());
+    // auto path = getContentPath(tweak == nullptr || !tweak->hasContainerArtFile() ? names : std::vector<std::string> { tweak->getContainerArtFile() }, item, tweak != nullptr && tweak->hasCaseSensitive() ? tweak->getCaseSensitive() : caseSensitive);
+    auto path = getContentPath(names, item, caseSensitive, config->getOption(CFG_IMPORT_RESOURCES_CONTAINERART_LOCATION));
+    log_debug("Running ContainerArt handler on {}", !path.empty() ? path.c_str() : item->getLocation().c_str());
+
+    if (!path.empty()) {
+        auto resource = std::make_shared<CdsResource>(CH_CONTAINERART);
+        resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo("jpg"));
+        resource->addAttribute(R_RESOURCE_FILE, path.c_str());
+        resource->addParameter(RESOURCE_CONTENT_TYPE, ID3_ALBUM_ART);
+        item->addResource(resource);
+    } else {
+        item->removeResource(CH_CONTAINERART);
+    }
+}
+
+std::unique_ptr<IOHandler> ContainerArtHandler::serveContent(std::shared_ptr<CdsObject> item, int resNum)
+{
+    fs::path path = item->getResource(resNum)->getAttribute(R_RESOURCE_FILE);
+    if (path.empty()) {
+        // auto tweak = config->getDirectoryTweakOption(CFG_IMPORT_DIRECTORIES_LIST)->get(item->getLocation());
+        // path = getContentPath(tweak == nullptr && !tweak->hasContainerArtFile() ? names : std::vector<std::string> { tweak->getContainerArtFile() }, item, tweak != nullptr && tweak->hasCaseSensitive() ? tweak->getCaseSensitive() : caseSensitive);
+        path = getContentPath(names, item, caseSensitive, config->getOption(CFG_IMPORT_RESOURCES_CONTAINERART_LOCATION));
+    }
+    log_debug("ContainerArt: Opening name: {}", path.c_str());
+    struct stat statbuf;
+    int ret = stat(path.c_str(), &statbuf);
+    if (ret != 0) {
+        log_warning("File does not exist: {} ({})", path.c_str(), strerror(errno));
+        return nullptr;
+    }
+    auto io_handler = std::make_unique<FileIOHandler>(path);
+    return io_handler;
+}
+
 std::vector<std::string> SubtitleHandler::names = {
     //    "%title%.srt",
     //    "%filename%.srt"
@@ -165,7 +234,7 @@ SubtitleHandler::SubtitleHandler(const std::shared_ptr<Context>& context)
     }
 }
 
-void SubtitleHandler::fillMetadata(std::shared_ptr<CdsItem> item)
+void SubtitleHandler::fillMetadata(std::shared_ptr<CdsObject> item)
 {
     auto tweak = config->getDirectoryTweakOption(CFG_IMPORT_DIRECTORIES_LIST)->get(item->getLocation());
     auto path = getContentPath(tweak == nullptr || !tweak->hasSubTitleFile() ? names : std::vector<std::string> { tweak->getSubTitleFile() }, item, tweak != nullptr && tweak->hasCaseSensitive() ? tweak->getCaseSensitive() : caseSensitive);
@@ -219,7 +288,7 @@ ResourceHandler::ResourceHandler(const std::shared_ptr<Context>& context)
     }
 }
 
-void ResourceHandler::fillMetadata(std::shared_ptr<CdsItem> item)
+void ResourceHandler::fillMetadata(std::shared_ptr<CdsObject> item)
 {
     auto tweak = config->getDirectoryTweakOption(CFG_IMPORT_DIRECTORIES_LIST)->get(item->getLocation());
     auto path = getContentPath(tweak == nullptr || !tweak->hasResourceFile() ? names : std::vector<std::string> { tweak->getResourceFile() }, item, tweak != nullptr && tweak->hasCaseSensitive() ? tweak->getCaseSensitive() : caseSensitive);

@@ -51,8 +51,8 @@ class AVFormatContext;
 class FfmpegHandler : public MetadataHandler {
 public:
     explicit FfmpegHandler(const std::shared_ptr<Context>& context);
-    void fillMetadata(std::shared_ptr<CdsItem> item) override;
-    std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsObject> item, int resNum) override;
+    void fillMetadata(std::shared_ptr<CdsObject> obj) override;
+    std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsObject> obj, int resNum) override;
     std::string getMimeType() override;
 
 private:

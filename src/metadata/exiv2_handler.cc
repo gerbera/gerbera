@@ -46,7 +46,7 @@ Exiv2Handler::Exiv2Handler(const std::shared_ptr<Context>& context)
 {
 }
 
-void Exiv2Handler::fillMetadata(std::shared_ptr<CdsItem> item)
+void Exiv2Handler::fillMetadata(std::shared_ptr<CdsObject> item)
 {
     try {
         std::string value;
