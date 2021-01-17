@@ -175,6 +175,8 @@ std::unique_ptr<MetadataHandler> MetadataHandler::createHandler(const std::share
 #endif
     case CH_FANART:
         return std::make_unique<FanArtHandler>(context);
+    case CH_CONTAINERART:
+        return std::make_unique<ContainerArtHandler>(context);
     case CH_SUBTITLE:
         return std::make_unique<SubtitleHandler>(context);
     case CH_RESOURCE:
@@ -216,6 +218,8 @@ const char* MetadataHandler::mapContentHandler2String(int ch)
         return "Flac";
     case CH_FANART:
         return "Fanart";
+    case CH_CONTAINERART:
+        return "ContainerArt";
 #ifdef HAVE_MATROSKA
     case CH_MATROSKA:
         return "Matroska";

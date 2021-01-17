@@ -473,11 +473,22 @@
     <xs:element name="resources">
         <xs:complexType>
             <xs:all>
+                <xs:element ref="container" minOccurs="0"/>
                 <xs:element ref="fanart" minOccurs="0"/>
                 <xs:element ref="subtitle" minOccurs="0"/>
                 <xs:element ref="resource" minOccurs="0"/>
             </xs:all>
             <xs:attribute name="case-sensitive" type="boolean" default="yes"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="container">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="add-file" minOccurs="0"/>
+            </xs:sequence>
+            <xs:attribute name="parentCount"/>
+            <xs:attribute name="minDepth"/>
         </xs:complexType>
     </xs:element>
 

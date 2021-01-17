@@ -150,7 +150,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = 
     std::make_shared<ConfigStringSetup>(CFG_SERVER_UDN,
         "/server/udn", "config-server.html#udn"),
     std::make_shared<ConfigStringSetup>(CFG_SERVER_HOME,
-        "/server/home", "config-server.html#jome"),
+        "/server/home", "config-server.html#home"),
     std::make_shared<ConfigPathSetup>(CFG_SERVER_TMPDIR,
         "/server/tmpdir", "config-server.html#tmpdir",
         DEFAULT_TMPDIR),
@@ -351,6 +351,20 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = 
     std::make_shared<ConfigArraySetup>(CFG_IMPORT_RESOURCES_FANART_FILE_LIST,
         "/import/resources/fanart", "config-import.html#resources",
         ATTR_IMPORT_RESOURCES_ADD_FILE, ATTR_IMPORT_RESOURCES_NAME),
+
+    std::make_shared<ConfigArraySetup>(CFG_IMPORT_RESOURCES_CONTAINERART_FILE_LIST,
+        "/import/resources/container", "config-import.html#container",
+        ATTR_IMPORT_RESOURCES_ADD_FILE, ATTR_IMPORT_RESOURCES_NAME),
+    std::make_shared<ConfigPathSetup>(CFG_IMPORT_RESOURCES_CONTAINERART_LOCATION,
+        "/import/resources/container/attribute::location", "config-import.html#container",
+        ""),
+    std::make_shared<ConfigIntSetup>(CFG_IMPORT_RESOURCES_CONTAINERART_PARENTCOUNT,
+        "/import/resources/container/attribute::parentCount", "config-import.html#container",
+        2, 0, ConfigIntSetup::CheckMinValue),
+    std::make_shared<ConfigIntSetup>(CFG_IMPORT_RESOURCES_CONTAINERART_MINDEPTH,
+        "/import/resources/container/attribute::minDepth", "config-import.html#container",
+        2, 0, ConfigIntSetup::CheckMinValue),
+
     std::make_shared<ConfigArraySetup>(CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST,
         "/import/resources/subtitle", "config-import.html#resources",
         ATTR_IMPORT_RESOURCES_ADD_FILE, ATTR_IMPORT_RESOURCES_NAME),
@@ -384,6 +398,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = 
         "/server/extended-runtime-options/ffmpegthumbnailer/cache-dir", "config-extended.html#ffmpegthumbnailer",
         DEFAULT_FFMPEGTHUMBNAILER_CACHE_DIR),
 #endif
+
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED,
         "/server/extended-runtime-options/mark-played-items/attribute::enabled", "config-extended.html#extended-runtime-options",
         DEFAULT_MARK_PLAYED_ITEMS_ENABLED),
@@ -710,7 +725,7 @@ const std::map<config_option_t, std::vector<config_option_t>> ConfigManager::par
     { ATTR_IMPORT_MAPPINGS_MIMETYPE_FROM, { CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST, CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST, CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST } },
     { ATTR_IMPORT_MAPPINGS_MIMETYPE_TO, { CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST, CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST, CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST } },
 
-    { ATTR_IMPORT_RESOURCES_NAME, { CFG_IMPORT_RESOURCES_FANART_FILE_LIST, CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST, CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST } },
+    { ATTR_IMPORT_RESOURCES_NAME, { CFG_IMPORT_RESOURCES_FANART_FILE_LIST, CFG_IMPORT_RESOURCES_CONTAINERART_FILE_LIST, CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST, CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST } },
 
     { ATTR_IMPORT_LAYOUT_MAPPING_FROM, { CFG_IMPORT_LAYOUT_MAPPING } },
     { ATTR_IMPORT_LAYOUT_MAPPING_TO, { CFG_IMPORT_LAYOUT_MAPPING } },
@@ -721,7 +736,7 @@ constexpr std::array<std::pair<config_option_t, const char*>, 16> ConfigManager:
 
     { ATTR_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN_OPTION, "option" },
     { ATTR_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT, "content" },
-    { ATTR_SERVER_UI_ACCOUNT_LIST_ACCOUNT, "acount" },
+    { ATTR_SERVER_UI_ACCOUNT_LIST_ACCOUNT, "account" },
     { ATTR_IMPORT_MAPPINGS_MIMETYPE_MAP, "map" },
     { ATTR_IMPORT_RESOURCES_ADD_FILE, "add-file" },
     { ATTR_IMPORT_LIBOPTS_AUXDATA_DATA, "add-data" },
@@ -1134,6 +1149,10 @@ void ConfigManager::load(const fs::path& userHome)
 
     setOption(root, CFG_IMPORT_RESOURCES_CASE_SENSITIVE);
     setOption(root, CFG_IMPORT_RESOURCES_FANART_FILE_LIST);
+    setOption(root, CFG_IMPORT_RESOURCES_CONTAINERART_FILE_LIST);
+    setOption(root, CFG_IMPORT_RESOURCES_CONTAINERART_LOCATION);
+    setOption(root, CFG_IMPORT_RESOURCES_CONTAINERART_PARENTCOUNT);
+    setOption(root, CFG_IMPORT_RESOURCES_CONTAINERART_MINDEPTH);
     setOption(root, CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST);
     setOption(root, CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST);
     setOption(root, CFG_IMPORT_DIRECTORIES_LIST);

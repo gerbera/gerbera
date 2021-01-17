@@ -238,8 +238,12 @@ static void FfmpegNoOutputStub(void* ptr, int level, const char* fmt, va_list vl
     // do nothing
 }
 
-void FfmpegHandler::fillMetadata(std::shared_ptr<CdsItem> item)
+void FfmpegHandler::fillMetadata(std::shared_ptr<CdsObject> obj)
 {
+    auto item = std::dynamic_pointer_cast<CdsItem>(obj);
+    if (item == nullptr)
+        return;
+
     log_debug("Running ffmpeg handler on {}", item->getLocation().c_str());
 
     AVFormatContext* pFormatCtx = nullptr;
@@ -326,6 +330,7 @@ std::unique_ptr<IOHandler> FfmpegHandler::serveContent(std::shared_ptr<CdsObject
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
     if (item == nullptr)
         return nullptr;
+
 #ifdef HAVE_FFMPEGTHUMBNAILER
     if (!config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED))
         return nullptr;

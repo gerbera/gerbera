@@ -54,6 +54,7 @@ class IOHandler;
 #define CH_FANART 8
 #define CH_MATROSKA 9
 #define CH_SUBTITLE 10
+#define CH_CONTAINERART 11
 #define CH_RESOURCE 20
 
 #define CONTENT_TYPE_MP3 "mp3"
@@ -187,8 +188,8 @@ public:
     static std::string getResAttrName(resource_attributes_t attr);
     static std::unique_ptr<MetadataHandler> createHandler(const std::shared_ptr<Context>& context, int handlerType);
 
-    virtual void fillMetadata(std::shared_ptr<CdsItem> item) = 0;
-    virtual std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsObject> item, int resNum) = 0;
+    virtual void fillMetadata(std::shared_ptr<CdsObject> obj) = 0;
+    virtual std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsObject> obj, int resNum) = 0;
     virtual std::string getMimeType();
 
     static const char* mapContentHandler2String(int ch);

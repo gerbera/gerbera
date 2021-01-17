@@ -42,7 +42,7 @@ class MemIOHandler;
 class MatroskaHandler : public MetadataHandler {
 public:
     explicit MatroskaHandler(const std::shared_ptr<Context>& context);
-    void fillMetadata(std::shared_ptr<CdsItem> item) override;
+    void fillMetadata(std::shared_ptr<CdsObject> obj) override;
     std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsObject> obj, int resNum) override;
 
 private:

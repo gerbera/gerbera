@@ -328,6 +328,7 @@ Defines various resource options for file based resources. Older versions of Ger
 
     ::
 
+        <container>...</container>
         <fanart>...</fanart>
         <subtitle>...</subtitle>
         <resource>...</resource>
@@ -336,13 +337,49 @@ Defines various resource options for file based resources. Older versions of Ger
 
     Define file patterns to search for fanart, subtitle and resources respectivly.
 
-    ``fanart`` and ``subtitle`` patterns are used to identify external resources which are added to each item if the pattern matches.
+    ``container``, ``fanart`` and ``subtitle`` patterns are used to identify external resources which are added to each item if the pattern matches.
 
     ``resource`` patterns are used to trigger rescan of the whole directory if such a file was changed, added or removed.
 
-    Each of these tags can contain the following
+    Each of these tags can contain multiple ``add-file`` entries. ``container`` has additional attributes.
 
 **Child tags:**
+
+``container``
+-------------
+
+    ::
+
+        <container location="image" parentCount="2" minDepth="2"/>
+
+    * Optional
+
+    Set up container images. Drop your artists' images or logos for default containers here and they are displayed as thumbnail when browsing with a compatible client.
+
+        ::
+
+            location="..."
+
+        * Optional
+
+        Path to the directory containing the images to load. Relative paths are assumed to be under the server's home.
+
+        ::
+
+            parentCount="..."
+
+        * Optional
+
+        Number of level which the fanart of a media file can be propagated upwards.
+
+        ::
+
+            minDepth="..."
+
+        * Optional
+
+        Minimum number of path elements for container using fanart from media files.
+
 
 ``add-file``
 ------------
@@ -356,8 +393,11 @@ Defines various resource options for file based resources. Older versions of Ger
 
     Add search pattern to resource handler. The search pattern can contain variables:
 
-    - ``%filename%``: Name of the file without extension
     - ``%album%``: Value of the album tag
+    - ``%albumArtist%``: Value of the albumArtist tag
+    - ``%artist%``: Value of the artist tag
+    - ``%filename%``: Name of the file without extension or name of the container
+    - ``%genre%``: Value of the genre tag
     - ``%title%``: Value of the title tag
 
 A sample configuration would be:

@@ -353,8 +353,12 @@ void LibExifHandler::process_ifd(ExifContent* content, const std::shared_ptr<Cds
     }
 }
 
-void LibExifHandler::fillMetadata(std::shared_ptr<CdsItem> item)
+void LibExifHandler::fillMetadata(std::shared_ptr<CdsObject> obj)
 {
+    auto item = std::dynamic_pointer_cast<CdsItem>(obj);
+    if (item == nullptr)
+        return;
+
     ExifData* ed;
 
     auto sc = StringConverter::m2i(CFG_IMPORT_LIBOPTS_EXIF_CHARSET, item->getLocation(), config);
@@ -405,6 +409,7 @@ std::unique_ptr<IOHandler> LibExifHandler::serveContent(std::shared_ptr<CdsObjec
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
     if (item == nullptr)
         return nullptr;
+
     auto res = item->getResource(resNum);
 
     std::string ctype = getValueOrDefault(res->getParameters(), RESOURCE_CONTENT_TYPE);

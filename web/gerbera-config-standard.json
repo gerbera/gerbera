@@ -512,6 +512,42 @@
 					"editable": true
 				},
 				{
+					"item": "/import/resources/container",
+					"type": "Element",
+					"caption": "Container Images",
+					"editable": true,
+					"children": [
+						{
+							"item": "/import/resources/container/attribute::location",
+							"caption": "Path to images",
+							"editable": true
+						},
+						{
+							"item": "/import/resources/container/attribute::parentCount",
+							"caption": "Parents inheriting fanart",
+							"editable": true
+						},
+						{
+							"item": "/import/resources/container/attribute::minDepth",
+							"caption": "Minimum depth for fanart",
+							"editable": true
+						},
+						{
+							"item": "/import/resources/container/add-file",
+							"caption": "Images Patterns",
+							"type": "List",
+							"editable": true,
+							"children": [
+								{
+									"item": "/import/resources/container/add-file/attribute::name",
+									"caption": "File Name",
+									"editable": true
+								}
+							]
+						}
+					]
+				},
+				{
 					"item": "/import/resources/fanart/add-file",
 					"caption": "Fanart Files",
 					"type": "List",

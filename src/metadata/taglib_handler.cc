@@ -212,8 +212,12 @@ void TagLibHandler::populateGenericTags(const std::shared_ptr<CdsItem>& item, co
     }
 }
 
-void TagLibHandler::fillMetadata(std::shared_ptr<CdsItem> item)
+void TagLibHandler::fillMetadata(std::shared_ptr<CdsObject> obj)
 {
+    auto item = std::dynamic_pointer_cast<CdsItem>(obj);
+    if (item == nullptr)
+        return;
+
     auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
     std::string content_type = getValueOrDefault(mappings, item->getMimeType());
 
