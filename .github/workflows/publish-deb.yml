@@ -1,0 +1,36 @@
+name: build-deb
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - v*
+
+jobs:
+  deb-package:
+    strategy:
+      fail-fast: false
+      matrix:
+        os-ver: ["ubuntu:18.04", "ubuntu:20.04", "ubuntu:20.10", "ubuntu:21.04", "debian:stable", "debian:testing", "debian:unstable"]
+    runs-on: ubuntu-latest
+    container:
+      image: "${{ matrix.os-ver }}"
+      env:
+        BINTRAY_API_KEY: ${{ secrets.BINTRAY_API_KEY }}
+        DEBIAN_FRONTEND: noninteractive
+        TZ: Etc/UTC
+    steps:
+      - uses: actions/checkout@v1
+      - name: Install script pre-reqs
+        run: |
+          ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+          apt-get update
+          apt-get install -y lsb-release sudo git wget curl
+      - name: Build and upload deb
+        run: |
+          bash scripts/build-deb.sh
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.ubuntu-ver }}.deb
+          path: build-deb/*.deb

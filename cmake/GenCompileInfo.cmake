@@ -17,7 +17,6 @@ function(generate_compile_info)
             "WITH_FFMPEGTHUMBNAILER=${WITH_FFMPEGTHUMBNAILER}"
             "WITH_EXIF=${WITH_EXIF}"
             "WITH_EXIV2=${WITH_EXIV2}"
-            "WITH_PROTOCOL_EXTENSIONS=${WITH_PROTOCOL_EXTENSIONS}"
             "WITH_SYSTEMD=${WITH_SYSTEMD}"
             "WITH_LASTFM=${WITH_LASTFM}"
             "WITH_DEBUG=${WITH_DEBUG}"
@@ -26,15 +25,22 @@ function(generate_compile_info)
     string (REPLACE ";" "\\n" COMPILE_INFO_STR "${COMPILE_INFO_LIST}")
     set(COMPILE_INFO "${COMPILE_INFO_STR}" PARENT_SCOPE)
 
-
+    # Git Info
     set(GIT_DIR "${CMAKE_SOURCE_DIR}/.git")
-
     if(EXISTS "${GIT_DIR}")
         # Get the current working branch
         execute_process(
                 COMMAND git rev-parse --symbolic-full-name HEAD
                 WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
                 OUTPUT_VARIABLE GIT_BRANCH
+                OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+
+        # Get the tag
+        execute_process(
+                COMMAND git describe --tags --dirty=+d
+                WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+                OUTPUT_VARIABLE GIT_TAG
                 OUTPUT_STRIP_TRAILING_WHITESPACE
         )
 
@@ -52,5 +58,6 @@ function(generate_compile_info)
 
     set(GIT_BRANCH ${GIT_BRANCH} PARENT_SCOPE)
     set(GIT_COMMIT_HASH ${GIT_COMMIT_HASH} PARENT_SCOPE)
+    set(GIT_TAG ${GIT_TAG} PARENT_SCOPE)
 
 endfunction()

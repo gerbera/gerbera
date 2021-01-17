@@ -38,7 +38,6 @@
 #include <filesystem>
 #include <mutex>
 #include <spdlog/sinks/basic_file_sink.h>
-#include <spdlog/spdlog.h>
 
 #ifdef SOLARIS
 #include <iso/limits_iso.h>
@@ -63,22 +62,18 @@ static struct {
 
 static void printCopyright()
 {
-    printf("\nGerbera UPnP Server version %s - %s\n\n", GERBERA_VERSION, DESC_MANUFACTURER_URL);
-    printf("===============================================================================\n");
-    printf("Gerbera is free software, covered by the GNU General Public License version 2\n\n");
-    printf("Copyright 2016-2021 Gerbera Contributors.\n");
-    printf("Gerbera is based on MediaTomb: Copyright 2005-2010 Gena Batsyan, Sergey Bostandzhyan, Leonhard Wimmer.\n");
-    printf("===============================================================================\n");
+    printf("\nGerbera UPnP Server %s\n"
+           "Copyright 2016-2021 Gerbera Contributors.\n"
+           "Licence GPLv2: GNU GPL version 2.\n"
+           "This is free software: you are free to change and redistribute it.\n\n",
+        GERBERA_VERSION);
 }
 
 static void logCopyright()
 {
-    log_info("Gerbera UPnP Server version {} - {}", GERBERA_VERSION, DESC_MANUFACTURER_URL);
-    log_info("===============================================================================");
-    log_info("Gerbera is free software, covered by the GNU General Public License version 2");
+    log_info("Gerbera UPnP Server {} - {}", GERBERA_VERSION, DESC_MANUFACTURER_URL);
     log_info("Copyright 2016-2021 Gerbera Contributors.");
-    log_info("Gerbera is based on MediaTomb: Copyright 2005-2010 Gena Batsyan, Sergey Bostandzhyan, Leonhard Wimmer.");
-    log_info("===============================================================================");
+    log_info("Gerbera is free software, covered by the GNU General Public License version 2");
 }
 
 static void signalHandler(int signum)
