@@ -362,7 +362,11 @@ std::unique_ptr<IOHandler> FfmpegHandler::serveContent(std::shared_ptr<CdsObject
     else
         th->overlay_film_strip = 0;
 
+#ifndef HAVE_FFMPEGTHUMBNAILER_SIZE_API
     th->thumbnail_size = config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE);
+#else
+    video_thumbnailer_set_size(th.get(), config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE), config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE));
+#endif // old api
     th->thumbnail_image_quality = config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_IMAGE_QUALITY);
     th->thumbnail_image_type = Jpeg;
 
