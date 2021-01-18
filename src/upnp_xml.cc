@@ -434,7 +434,7 @@ bool UpnpXMLBuilder::renderItemImage(const std::string virtualURL, const std::sh
     auto urlBase = getPathBase(item);
     int realCount = 0;
     for (const auto res : item->getResources()) {
-        if (res->isMetaResource(ID3_ALBUM_ART)) {
+        if (res->isMetaResource(ID3_ALBUM_ART) || (res->getHandlerType() == CH_LIBEXIF && res->getParameter(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL)) {
             auto res_attrs = res->getAttributes();
             auto res_params = res->getParameters();
             if (urlBase->addResID) {

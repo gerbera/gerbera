@@ -299,7 +299,8 @@ const transformItems = (items) => {
     const item = {
       id: gItem.id,
       text: gItem.title,
-      url: gItem.res
+      url: gItem.res,
+      image: ('image' in gItem) ? gItem.image : null
     };
 
     if (GerberaApp.serverConfig.enableThumbnail) {
