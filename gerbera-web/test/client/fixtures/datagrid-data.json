@@ -2,51 +2,61 @@
   {
     "id": 11111,
     "text": "Item Number 1",
-    "url": "http://localhost/item-number-1"
+    "url": "http://localhost/item-number-1",
+    "image": null
   },
   {
     "id": 22222,
     "text": "Item Number 2",
-    "url": "http://localhost/item-number-2"
+    "url": "http://localhost/item-number-2",
+    "image": null
   },
   {
     "id": 33333,
     "text": "Item Number 3",
-    "url": "http://localhost/item-number-3"
+    "url": "http://localhost/item-number-3",
+    "image": null
   },
   {
     "id": 44444,
     "text": "Item Number 4",
-    "url": "http://localhost/item-number-4"
+    "url": "http://localhost/item-number-4",
+    "image": null
   },
   {
     "id": 55555,
     "text": "Item Number 5",
-    "url": "http://localhost/item-number-5"
+    "url": "http://localhost/item-number-5",
+    "image": null
   },
   {
     "id": 66666,
     "text": "Item Number 6",
-    "url": "http://localhost/item-number-6"
+    "url": "http://localhost/item-number-6",
+    "image": null
   },
   {
     "id": 77777,
     "text": "Item Number 7",
-    "url": "http://localhost/item-number-7"
+    "url": "http://localhost/item-number-7",
+    "image": null
   },
   {
     "id": 88888,
     "text": "Item Number 8",
-    "url": "http://localhost/item-number-8"
+    "url": "http://localhost/item-number-8",
+    "image": null
   },
   {
     "id": 99999,
     "text": "Item Number 9",
-    "url": "http://localhost/item-number-9"
+    "url": "http://localhost/item-number-9",
+    "image": null
   },
   {
     "id": 101010,
     "text": "Item Number 10",
-    "url": "http://localhost/item-number-10"
+    "url": "http://localhost/item-number-10",
+    "image": null
   }
 ]

@@ -168,12 +168,14 @@ static void addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item, AVForm
 {
     int audioch = 0, samplefreq = 0;
     bool audioset, videoset;
+    auto resource = item->getResource(0);
+    auto resource2 = startswith(item->getMimeType(), "audio") && item->getResourceCount() > 1 && item->getResource(1)->isMetaResource(ID3_ALBUM_ART) ? item->getResource(1) : item->getResource(0);
 
     // duration
     if (pFormatCtx->duration > 0) {
         auto duration = millisecondsToHMSF(pFormatCtx->duration / (AV_TIME_BASE / 1000));
         log_debug("Added duration: {}", duration);
-        item->getResource(0)->addAttribute(R_DURATION, std::move(duration));
+        resource->addAttribute(R_DURATION, std::move(duration));
     }
 
     // bitrate
@@ -182,7 +184,7 @@ static void addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item, AVForm
         // See http://www.upnp.org/schemas/av/didl-lite-v3.xsd
         auto bitrate = pFormatCtx->bit_rate / 8;
         log_debug("Added bitrate: {} kb/s", bitrate);
-        item->getResource(0)->addAttribute(R_BITRATE, std::to_string(bitrate));
+        resource->addAttribute(R_BITRATE, std::to_string(bitrate));
     }
 
     // video resolution, audio sampling rate, nr of audio channels
@@ -199,18 +201,17 @@ static void addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item, AVForm
                 fourcc[3] = as_codecpar(st)->codec_tag >> 24;
                 fourcc[4] = '\0';
 
-                log_debug("FourCC: 0x{:x} = {}", as_codecpar(st)->codec_tag, fourcc);
+                log_debug("FourCC: 0x{:x} = {} from stream {}", as_codecpar(st)->codec_tag, fourcc, i);
                 std::string fcc = fourcc;
                 if (!fcc.empty())
-                    item->getResource(0)->addOption(RESOURCE_OPTION_FOURCC,
-                        fcc);
+                    resource->addOption(RESOURCE_OPTION_FOURCC, fcc);
             }
 
             if ((as_codecpar(st)->width > 0) && (as_codecpar(st)->height > 0)) {
                 auto resolution = fmt::format("{}x{}", as_codecpar(st)->width, as_codecpar(st)->height);
 
-                log_debug("Added resolution: {} pixel", resolution);
-                item->getResource(0)->addAttribute(R_RESOLUTION, std::move(resolution));
+                log_debug("Added resolution: {} pixel from stream {}", resolution, i);
+                resource2->addAttribute(R_RESOLUTION, std::move(resolution));
                 videoset = true;
             }
         }
@@ -218,14 +219,14 @@ static void addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item, AVForm
             // find the first stream that has a valid sample rate
             if (as_codecpar(st)->sample_rate > 0) {
                 samplefreq = as_codecpar(st)->sample_rate;
-                log_debug("Added sample frequency: {} Hz", samplefreq);
-                item->getResource(0)->addAttribute(R_SAMPLEFREQUENCY, std::to_string(samplefreq));
+                log_debug("Added sample frequency: {} Hz from stream {}", samplefreq, i);
+                resource->addAttribute(R_SAMPLEFREQUENCY, std::to_string(samplefreq));
                 audioset = true;
 
                 audioch = as_codecpar(st)->channels;
                 if (audioch > 0) {
-                    log_debug("Added number of audio channels: {}", audioch);
-                    item->getResource(0)->addAttribute(R_NRAUDIOCHANNELS, std::to_string(audioch));
+                    log_debug("Added number of audio channels: {} from stream {}", audioch, i);
+                    resource->addAttribute(R_NRAUDIOCHANNELS, std::to_string(audioch));
                 }
             }
         }

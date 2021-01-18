@@ -36,6 +36,7 @@
 #include "cds_objects.h"
 #include "content/autoscan.h"
 #include "database/database.h"
+#include "server.h"
 #include "upnp_xml.h"
 
 web::items::items(std::shared_ptr<ContentManager> content)
@@ -131,8 +132,14 @@ void web::items::process()
         /// \todo clean this up, should have more generic options for online
         /// services
         // FIXME
-        std::string res = UpnpXMLBuilder::getFirstResourcePath(std::static_pointer_cast<CdsItem>(obj));
+        auto objItem = std::static_pointer_cast<CdsItem>(obj);
+        std::string res = UpnpXMLBuilder::getFirstResourcePath(objItem);
         item.append_child("res").append_child(pugi::node_pcdata).set_value(res.c_str());
+
+        std::string url;
+        if (UpnpXMLBuilder::renderItemImage(server->getVirtualUrl(), objItem, url)) {
+            item.append_child("image").append_child(pugi::node_pcdata).set_value(url.c_str());
+        }
         //item.append_attribute("virtual") = obj->isVirtual();
         //}
     }

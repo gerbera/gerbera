@@ -57,6 +57,9 @@ $.widget('grb.dataitems', {
           text = $('<span></span>');
           text.text(item.text).appendTo(content);
         }
+      if (item.image) {
+        text.prepend($('<img style="margin-right: 10px" width="36" src="' + item.image + '"/>'));
+      }
         text.addClass('grb-item-url');
 
         let buttons;
