@@ -118,7 +118,8 @@
     text.text(name).appendTo(content);
     row.append(content);
     content = $('<td></td>');
-    text = $('<span>' + value.replaceAll('\n', '<br>') + '</span>');
+    const nl = '\n';
+    text = $('<span>' + value.replace(RegExp(nl, 'g'), '<br>') + '</span>');
     text.appendTo(content);
     row.append(content);
     tbody.append(row);
