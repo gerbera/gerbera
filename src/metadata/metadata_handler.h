@@ -153,6 +153,7 @@ typedef enum {
     R_TYPE,
     R_FANART_OBJ_ID,
     R_FANART_RES_ID,
+    R_BITS_PER_SAMPLE,
     R_MAX
 } resource_attributes_t;
 
@@ -168,6 +169,7 @@ constexpr std::array<std::pair<resource_attributes_t, const char*>, R_MAX> res_k
     { R_RESOURCE_FILE, "resFile" },
     { R_FANART_OBJ_ID, "fanArtObject" },
     { R_FANART_RES_ID, "fanArtResource" },
+    { R_BITS_PER_SAMPLE, "bitsPerSample" },
     { R_TYPE, "type" },
 } };
 
