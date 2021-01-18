@@ -30,7 +30,7 @@
 
 #include "metadata/metadata_handler.h"
 
-constexpr std::array<std::pair<resource_attributes_t, const char*>, 10> res_names = { {
+constexpr std::array<std::pair<resource_attributes_t, const char*>, 11> res_names = { {
     { R_SIZE, "R_SIZE" },
     { R_DURATION, "R_DURATION" },
     { R_BITRATE, "R_BITRATE" },
@@ -40,6 +40,7 @@ constexpr std::array<std::pair<resource_attributes_t, const char*>, 10> res_name
     { R_COLORDEPTH, "R_COLORDEPTH" },
     { R_PROTOCOLINFO, "R_PROTOCOLINFO" },
     { R_RESOURCE_FILE, "R_RESOURCE_FILE" },
+    { R_BITS_PER_SAMPLE, "R_BITS_PER_SAMPLE" },
     { R_TYPE, "R_TYPE" },
 } };
 

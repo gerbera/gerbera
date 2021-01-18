@@ -569,10 +569,13 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
         // stack: js res_js
 
         if (obj->getResourceCount() > 0) {
-            auto res = obj->getResource(0);
-            auto attributes = res->getAttributes();
-            for (const auto& [key, val] : attributes) {
-                setProperty(key, val);
+            int resCount = 0;
+            for (const auto& res : obj->getResources()) {
+                auto attributes = res->getAttributes();
+                for (const auto& [key, val] : attributes) {
+                    setProperty(resCount == 0 ? key : (std::to_string(resCount) + "-" + key), val);
+                }
+                resCount++;
             }
         }
 

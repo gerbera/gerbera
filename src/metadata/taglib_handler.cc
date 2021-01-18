@@ -520,6 +520,13 @@ void TagLibHandler::extractASF(TagLib::IOStream* roStream, const std::shared_ptr
     }
     populateGenericTags(item, asf);
 
+    auto audioProps = asf.audioProperties();
+    auto temp = audioProps->bitsPerSample();
+    auto res = item->getResource(0);
+    if (temp > 0) {
+        res->addAttribute(R_BITS_PER_SAMPLE, std::to_string(temp));
+    }
+
     const TagLib::ASF::AttributeListMap& attrListMap = asf.tag()->attributeListMap();
     if (attrListMap.contains("WM/Picture")) {
         const TagLib::ASF::AttributeList& attrList = attrListMap["WM/Picture"];
@@ -583,6 +590,13 @@ void TagLibHandler::extractFLAC(TagLib::IOStream* roStream, const std::shared_pt
     const TagLib::FLAC::Picture* pic = flac.pictureList().front();
     const TagLib::ByteVector& data = pic->data();
 
+    auto audioProps = flac.audioProperties();
+    auto temp = audioProps->bitsPerSample();
+    auto res = item->getResource(0);
+    if (temp > 0) {
+        res->addAttribute(R_BITS_PER_SAMPLE, std::to_string(temp));
+    }
+
     std::string art_mimetype = sc->convert(pic->mimeType().toCString(true));
     if (!isValidArtworkContentType(art_mimetype)) {
         art_mimetype = getContentTypeFromByteVector(data);
@@ -600,6 +614,13 @@ void TagLibHandler::extractAPE(TagLib::IOStream* roStream, const std::shared_ptr
         return;
     }
     populateGenericTags(item, ape);
+
+    auto audioProps = ape.audioProperties();
+    auto temp = audioProps->bitsPerSample();
+    auto res = item->getResource(0);
+    if (temp > 0) {
+        res->addAttribute(R_BITS_PER_SAMPLE, std::to_string(temp));
+    }
 }
 
 void TagLibHandler::extractWavPack(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item) const
@@ -612,6 +633,13 @@ void TagLibHandler::extractWavPack(TagLib::IOStream* roStream, const std::shared
         return;
     }
     populateGenericTags(item, wavpack);
+
+    auto audioProps = wavpack.audioProperties();
+    auto temp = audioProps->bitsPerSample();
+    auto res = item->getResource(0);
+    if (temp > 0) {
+        res->addAttribute(R_BITS_PER_SAMPLE, std::to_string(temp));
+    }
 }
 
 void TagLibHandler::extractMP4(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item) const
@@ -630,6 +658,13 @@ void TagLibHandler::extractMP4(TagLib::IOStream* roStream, const std::shared_ptr
         log_info("TagLibHandler {}: mp4 file has no tag information",
             item->getLocation().c_str());
         return;
+    }
+
+    auto audioProps = mp4.audioProperties();
+    auto temp = audioProps->bitsPerSample();
+    auto res = item->getResource(0);
+    if (temp > 0) {
+        res->addAttribute(R_BITS_PER_SAMPLE, std::to_string(temp));
     }
 
     if (mp4.tag()->contains("covr")) {
@@ -662,6 +697,13 @@ void TagLibHandler::extractAiff(TagLib::IOStream* roStream, const std::shared_pt
         return;
     }
     populateGenericTags(item, aiff);
+
+    auto audioProps = aiff.audioProperties();
+    auto temp = audioProps->bitsPerSample();
+    auto res = item->getResource(0);
+    if (temp > 0) {
+        res->addAttribute(R_BITS_PER_SAMPLE, std::to_string(temp));
+    }
 }
 
 #endif // HAVE_TAGLIB
