@@ -147,7 +147,7 @@ suite(() => {
 
       const image = await Jimp.read(fileName);
       image.resize(1440, Jimp.AUTO);
-      image.crop(400, 0, 636, 760).write(fileName);
+      image.crop(400, 0, 636, 900).write(fileName);
     });
 
     it('for [edit item] from item list with details', async () => {
@@ -165,7 +165,7 @@ suite(() => {
 
       const image = await Jimp.read(fileName);
       image.resize(1440, Jimp.AUTO);
-      image.crop(195, 0, 1060, 760).write(fileName);
+      image.crop(195, 0, 1060, 900).write(fileName);
     });
 
     it('for [trail operations]', async () => {
@@ -229,7 +229,7 @@ suite(() => {
 
       const image = await Jimp.read(fileName);
       image.resize(1440, Jimp.AUTO);
-      image.crop(290, 0, 860, 570).write(fileName);
+      image.crop(290, 0, 860, 600).write(fileName);
     });
 
     it('for [trail config operations]', async () => {

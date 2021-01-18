@@ -29,7 +29,7 @@ describe('Items Suite', () => {
       await homePage.clickMenu('nav-db');
       await homePage.clickTree('Video');
       const result = await homePage.items();
-      expect(result.length).to.equal(13);
+      expect(result.length).to.equal(12);
     });
 
     it('a gerbera item contains the edit icon', async () => {

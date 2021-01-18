@@ -19,6 +19,10 @@
       "editable": false,
       "value": "/folder/location/Test.mp4"
     },
+    "image": {
+      "editable": false,
+      "value": "/icons/mt-icon120.jpg"
+    },
     "mime-type": {
       "editable": true,
       "value": "video/mp4"

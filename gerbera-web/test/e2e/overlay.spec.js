@@ -200,7 +200,7 @@ describe('Edit Overlay Suite', () => {
     });
 
     it('loads an external url to edit with correct fields populated', async () => {
-      await itemLoadTest(11, [
+      await itemLoadTest(10, [
         { id : 'editObjectType',   visible : true, value : 'external_url'},
         { id : 'editTitle',        visible : true, value : 'title'},
         { id : 'editClass',        visible : true, value : 'object.item'},
