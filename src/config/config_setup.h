@@ -506,7 +506,6 @@ protected:
     bool notEmpty = false;
     bool itemNotEmpty = false;
     DictionaryInitFunction initDict = nullptr;
-    config_option_t nodeOption;
     bool tolower = false;
 
     /// \brief Creates a dictionary from an XML nodeset.
@@ -529,6 +528,7 @@ protected:
     bool updateItem(size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<DictionaryOption>& value, const std::string& optKey, const std::string& optValue, const std::string& status = "") const;
 
 public:
+    config_option_t nodeOption;
     config_option_t keyOption;
     config_option_t valOption;
 
