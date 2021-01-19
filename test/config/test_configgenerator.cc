@@ -17,6 +17,7 @@ public:
     virtual void SetUp()
     {
         subject = new ConfigGenerator();
+        subject->init();
         homePath = "/tmp";
         configDir = ".config/gerbera";
         prefixDir = "/usr/local/share/gerbera";
@@ -76,12 +77,10 @@ TEST_F(ConfigGeneratorTest, GeneratesFullServerXmlWithAllDefinitions)
 {
     std::string mockXml = mockConfigXml("fixtures/mock-server-all.xml");
 
-    pugi::xml_document doc;
-    auto config = doc.append_child("config");
-    subject->generateServer(homePath, configDir, prefixDir, &config);
-
+    subject->generateServer(homePath, configDir, prefixDir);
+    auto config = subject->getNode("");
     std::ostringstream result;
-    config.first_child().print(result, "  ");
+    config->first_child().print(result, "  ");
 
     // remove UUID, for simple compare...TODO: mock UUID?
     std::regex reg("<udn>uuid:[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}</udn>");
@@ -95,12 +94,11 @@ TEST_F(ConfigGeneratorTest, GeneratesUiAllTheTime)
 {
     std::string mockXml = mockConfigXml("fixtures/mock-ui.xml");
 
-    pugi::xml_document doc;
-    auto server = doc.append_child("server");
-    subject->generateUi(&server);
+    subject->generateUi();
+    auto server = subject->getNode("/server");
 
     std::ostringstream result;
-    server.first_child().print(result, "  ");
+    server->first_child().print(result, "  ");
 
     EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
 }
@@ -109,12 +107,11 @@ TEST_F(ConfigGeneratorTest, GeneratesImportMappingsAllTheTime)
 {
     std::string mockXml = mockConfigXml("fixtures/mock-import-mappings.xml");
 
-    pugi::xml_document doc;
-    auto import = doc.append_child("import");
-    subject->generateMappings(&import);
+    subject->generateMappings();
+    auto import = subject->getNode("/import");
 
     std::ostringstream result;
-    import.first_child().print(result, "  ");
+    import->first_child().print(result, "  ");
 
     EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
 }
@@ -124,12 +121,11 @@ TEST_F(ConfigGeneratorTest, GeneratesExtendedRuntimeXmlWithFFMPEG)
 {
     std::string mockXml = mockConfigXml("fixtures/mock-extended-ffmpeg.xml");
 
-    pugi::xml_document doc;
-    auto server = doc.append_child("server");
-    subject->generateExtendedRuntime(&server);
+    subject->generateExtendedRuntime();
+    auto server = subject->getNode("/server");
 
     std::ostringstream result;
-    server.first_child().print(result, "  ");
+    server->first_child().print(result, "  ");
 
     EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
 }
@@ -140,12 +136,11 @@ TEST_F(ConfigGeneratorTest, GeneratesExtendedRuntimeXmlWithoutFFMPEG)
 {
     std::string mockXml = mockConfigXml("fixtures/mock-extended.xml");
 
-    pugi::xml_document doc;
-    auto server = doc.append_child("server");
-    subject->generateExtendedRuntime(&server);
+    subject->generateExtendedRuntime();
+    auto server = subject->getNode("/server");
 
     std::ostringstream result;
-    server.first_child().print(result, "  ");
+    server->first_child().print(result, "  ");
 
     EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
 }
@@ -156,12 +151,11 @@ TEST_F(ConfigGeneratorTest, GeneratesDatabaseXmlWithMySQLAndSqlLite)
 {
     std::string mockXml = mockConfigXml("fixtures/mock-database-mysql.xml");
 
-    pugi::xml_document doc;
-    auto server = doc.append_child("server");
-    subject->generateDatabase(&server);
+    subject->generateDatabase();
+    auto server = subject->getNode("/server");
 
     std::ostringstream result;
-    server.first_child().print(result, "  ");
+    server->first_child().print(result, "  ");
 
     EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
 }
@@ -172,12 +166,11 @@ TEST_F(ConfigGeneratorTest, GeneratesDatabaseXmlWithSqlLiteOnly)
 {
     std::string mockXml = mockConfigXml("fixtures/mock-database-sqlite.xml");
 
-    pugi::xml_document doc;
-    auto server = doc.append_child("server");
-    subject->generateDatabase(&server);
+    subject->generateDatabase();
+    auto server = subject->getNode("/server");
 
     std::ostringstream result;
-    server.first_child().print(result, "  ");
+    server->first_child().print(result, "  ");
 
     EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
 }
@@ -188,12 +181,11 @@ TEST_F(ConfigGeneratorTest, GeneratesImportWithMagicFile)
 {
     std::string mockXml = mockConfigXml("fixtures/mock-import-magic.xml");
 
-    pugi::xml_document doc;
-    auto config = doc.append_child("config");
-    subject->generateImport(prefixDir, magicFile, &config);
+    subject->generateImport(prefixDir, magicFile);
+    auto config = subject->getNode("");
 
     std::ostringstream result;
-    config.first_child().print(result, "  ");
+    config->first_child().print(result, "  ");
 
     EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
 }
@@ -203,12 +195,11 @@ TEST_F(ConfigGeneratorTest, GeneratesImportWithMagicAndJS)
 {
     std::string mockXml = mockConfigXml("fixtures/mock-import-magic-js.xml");
 
-    pugi::xml_document doc;
-    auto config = doc.append_child("config");
-    subject->generateImport(prefixDir, magicFile, &config);
+    subject->generateImport(prefixDir, magicFile);
+    auto config = subject->getNode("");
 
     std::ostringstream result;
-    config.first_child().print(result, "  ");
+    config->first_child().print(result, "  ");
 
     EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
 }
@@ -218,12 +209,11 @@ TEST_F(ConfigGeneratorTest, GeneratesImportWithMagicJSandOnline)
 {
     std::string mockXml = mockConfigXml("fixtures/mock-import-magic-js-online.xml");
 
-    pugi::xml_document doc;
-    auto config = doc.append_child("config");
-    subject->generateImport(prefixDir, magicFile, &config);
+    subject->generateImport(prefixDir, magicFile);
+    auto config = subject->getNode("");
 
     std::ostringstream result;
-    config.first_child().print(result, "  ");
+    config->first_child().print(result, "  ");
 
     EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
 }
@@ -233,12 +223,11 @@ TEST_F(ConfigGeneratorTest, GeneratesImportNoMagicJSorOnline)
 {
     std::string mockXml = mockConfigXml("fixtures/mock-import-none.xml");
 
-    pugi::xml_document doc;
-    auto config = doc.append_child("config");
-    subject->generateImport(prefixDir, magicFile, &config);
+    subject->generateImport(prefixDir, magicFile);
+    auto config = subject->getNode("");
 
     std::ostringstream result;
-    config.first_child().print(result, "  ");
+    config->first_child().print(result, "  ");
 
     EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
 }
@@ -249,12 +238,11 @@ TEST_F(ConfigGeneratorTest, GeneratesOnlineContentWithAppleTrailers)
 {
     std::string mockXml = mockConfigXml("fixtures/mock-online-atrailers.xml");
 
-    pugi::xml_document doc;
-    auto import = doc.append_child("import");
-    subject->generateOnlineContent(&import);
+    subject->generateOnlineContent();
+    auto import = subject->getNode("/import");
 
     std::ostringstream result;
-    import.first_child().print(result, "  ");
+    import->first_child().print(result, "  ");
 
     EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
 }
@@ -263,12 +251,11 @@ TEST_F(ConfigGeneratorTest, GeneratesOnlineContentEmpty)
 {
     std::string mockXml = "<online-content/>";
 
-    pugi::xml_document doc;
-    auto import = doc.append_child("import");
-    subject->generateOnlineContent(&import);
+    subject->generateOnlineContent();
+    auto import = subject->getNode("/import");
 
     std::ostringstream result;
-    import.first_child().print(result, "  ");
+    import->first_child().print(result, "  ");
 
     EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
 }
@@ -278,25 +265,22 @@ TEST_F(ConfigGeneratorTest, GeneratesTranscodingProfilesAlways)
 {
     std::string mockXml = mockConfigXml("fixtures/mock-transcoding.xml");
 
-    pugi::xml_document doc;
-    auto config = doc.append_child("config");
-    subject->generateTranscoding(&config);
+    subject->generateTranscoding();
+    auto config = subject->getNode("");
 
     std::ostringstream result;
-    config.first_child().print(result, "  ");
+    config->first_child().print(result, "  ");
 
     EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
 }
 
 TEST_F(ConfigGeneratorTest, GeneratesUdnWithUUID)
 {
-
-    pugi::xml_document doc;
-    auto server = doc.append_child("server");
-    subject->generateUdn(&server);
+    subject->generateUdn();
+    auto server = subject->getNode("/server");
 
     std::ostringstream result;
-    server.first_child().first_child().print(result, "  ");
+    server->first_child().first_child().print(result, "  ");
 
     EXPECT_THAT(result.str(), MatchesRegex("^uuid:[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}"));
 }

@@ -213,7 +213,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = 
         DEFAULT_SQLITE_ENABLED),
     std::make_shared<ConfigPathSetup>(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE,
         "/server/storage/sqlite3/database-file", "config-server.html#storage",
-        "", true, false),
+        DEFAULT_SQLITE3_DB_FILENAME, true, false),
     std::make_shared<ConfigIntSetup>(CFG_SERVER_STORAGE_SQLITE_SYNCHRONOUS,
         "/server/storage/sqlite3/synchronous", "config-server.html#storage",
         DEFAULT_SQLITE_SYNC, ConfigIntSetup::CheckSqlLiteSyncValue),

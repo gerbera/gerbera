@@ -28,6 +28,9 @@
 
 #include <filesystem>
 #include <pugixml.hpp>
+
+#include "config/config_manager.h"
+
 namespace fs = std::filesystem;
 
 class ConfigGenerator {
@@ -37,19 +40,32 @@ public:
 
     static std::string generate(const fs::path& userHome, const fs::path& configDir, const fs::path& prefixDir, const fs::path& magicFile);
 
-    static void generateServer(const fs::path& userHome, const fs::path& configDir, const fs::path& prefixDir, pugi::xml_node* config);
-    static void generateUi(pugi::xml_node* server);
-    static void generateExtendedRuntime(pugi::xml_node* server);
-    static void generateDatabase(pugi::xml_node* server);
-    static void generateImport(const fs::path& prefixDir, const fs::path& magicFile, pugi::xml_node* config);
-    static void generateMappings(pugi::xml_node* import);
-    static void generateOnlineContent(pugi::xml_node* import);
-    static void generateTranscoding(pugi::xml_node* config);
-    static void generateUdn(pugi::xml_node* server);
+    static void generateServer(const fs::path& userHome, const fs::path& configDir, const fs::path& prefixDir);
+    static void generateUi();
+    static void generateExtendedRuntime();
+    static void generateDatabase();
+    static void generateImport(const fs::path& prefixDir, const fs::path& magicFile);
+    static void generateMappings();
+    static void generateOnlineContent();
+    static void generateTranscoding();
+    static void generateUdn();
+
+    static std::shared_ptr<pugi::xml_node> init();
+
+    static std::shared_ptr<pugi::xml_node> getNode(const std::string& tag);
 
 protected:
-    static void map_from_to(const std::string& from, const std::string& to, pugi::xml_node* parent);
-    static void treat_as(const std::string& mimetype, const std::string& as, pugi::xml_node* parent);
+    static std::map<std::string, std::shared_ptr<pugi::xml_node>> generated;
+    static pugi::xml_document doc;
+    static std::shared_ptr<pugi::xml_node> setValue(const std::string& tag, const std::string& value = "", bool makeLastChild = false);
+
+    static std::shared_ptr<pugi::xml_node> setValue(config_option_t option, const std::string& value = "");
+    static std::shared_ptr<pugi::xml_node> setValue(config_option_t option, config_option_t attr, const std::string& value);
+    static std::shared_ptr<pugi::xml_node> setValue(config_option_t option, const std::string& key, const std::string& value);
+    static std::shared_ptr<pugi::xml_node> setValue(config_option_t option, config_option_t subOption, const std::string& key, const std::string& value);
+    static std::shared_ptr<pugi::xml_node> setValue(config_option_t option, config_option_t dict, config_option_t attr, const std::string& value);
+
+    static std::shared_ptr<pugi::xml_node> setValue(std::shared_ptr<pugi::xml_node>& parent, config_option_t option, const std::string& value, bool asChild = false);
 };
 
 #endif //GERBERA_CONFIG_GENERATOR_H
