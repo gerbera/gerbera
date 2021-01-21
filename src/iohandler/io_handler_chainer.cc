@@ -30,8 +30,8 @@
 /// \file io_handler_chainer.cc
 
 #include "io_handler_chainer.h" // API
-#include <cstdlib>
-#include <unistd.h>
+
+#include <thread>
 
 #include "exceptions.h"
 
@@ -60,7 +60,7 @@ void IOHandlerChainer::threadProc()
                 again = false;
             } catch (const TryAgainException& e) {
                 again = true;
-                sleep(1);
+                std::this_thread::sleep_for(std::chrono::seconds(1));
             }
         } while (!threadShutdownCheck() && again);
 
