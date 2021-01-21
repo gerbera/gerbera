@@ -79,14 +79,42 @@ protected:
     {
         config->addOption(option, optionValue);
     }
+    static std::string buildCpath(const char* xpath)
+    {
+        std::string cPath(xpath);
+        if (cPath[0] != '/') {
+            cPath = cPath.insert(0, "/");
+        }
+        cPath = cPath.insert(0, ROOT_NAME);
+        cPath = cPath.insert(0, "/");
+        return cPath;
+    }
 
 public:
     static const char* const ROOT_NAME;
+    static const std::string ATTRIBUTE;
+
+    pugi::xpath_node_set getXmlTree(const pugi::xml_node& element) const;
+
+    static std::string ensureAttribute(config_option_t option, bool check = true)
+    {
+        auto attr = std::string(ConfigManager::mapConfigOption(option));
+        if (attr.substr(0, ATTRIBUTE.size()) != ATTRIBUTE && check)
+            attr.insert(0, ATTRIBUTE);
+        return attr;
+    }
+    static std::string removeAttribute(config_option_t option)
+    {
+        auto attr = std::string(ConfigManager::mapConfigOption(option));
+        if (attr.size() > ATTRIBUTE.size() && attr.substr(0, ATTRIBUTE.size()) == ATTRIBUTE)
+            attr = attr.substr(ATTRIBUTE.size());
+        return attr;
+    }
     config_option_t option;
     const char* xpath;
 
     ConfigSetup(config_option_t option, const char* xpath, const char* help, bool required = false, const char* defaultValue = "")
-        : cpath(std::string("/") + ROOT_NAME + xpath)
+        : cpath(buildCpath(xpath))
         , required(required)
         , rawCheck(nullptr)
         , defaultValue(defaultValue)
@@ -97,7 +125,7 @@ public:
     }
 
     ConfigSetup(config_option_t option, const char* xpath, const char* help, StringCheckFunction check, const char* defaultValue = "", bool required = false)
-        : cpath(std::string("/") + ROOT_NAME + xpath)
+        : cpath(buildCpath(xpath))
         , required(required)
         , rawCheck(check)
         , defaultValue(defaultValue)
@@ -485,7 +513,7 @@ public:
         if (index < 0) {
             return fmt::format("{}/{}", xpath, ConfigManager::mapConfigOption(nodeOption));
         }
-        return attrOption != CFG_MAX ? fmt::format("{}/{}[{}]/attribute::{}", xpath, ConfigManager::mapConfigOption(nodeOption), index, ConfigManager::mapConfigOption(attrOption)) : fmt::format("{}/{}[{}]", xpath, ConfigManager::mapConfigOption(nodeOption), index);
+        return attrOption != CFG_MAX ? fmt::format("{}/{}[{}]/{}", xpath, ConfigManager::mapConfigOption(nodeOption), index, ensureAttribute(attrOption)) : fmt::format("{}/{}[{}]", xpath, ConfigManager::mapConfigOption(nodeOption), index);
     }
 
     std::vector<std::string> getXmlContent(const pugi::xml_node& optValue) const;
@@ -557,10 +585,7 @@ public:
 
     bool updateDetail(const std::string& optItem, std::string& optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
 
-    std::string getItemPath(int index = 0, config_option_t propOption = CFG_MAX, config_option_t propOption2 = CFG_MAX, config_option_t propOption3 = CFG_MAX, config_option_t propOption4 = CFG_MAX) const override
-    {
-        return index >= 0 ? fmt::format("{}/{}[{}]/attribute::{}", xpath, ConfigManager::mapConfigOption(nodeOption), index, ConfigManager::mapConfigOption(propOption)) : fmt::format("{}/{}", xpath, ConfigManager::mapConfigOption(nodeOption));
-    }
+    std::string getItemPath(int index = 0, config_option_t propOption = CFG_MAX, config_option_t propOption2 = CFG_MAX, config_option_t propOption3 = CFG_MAX, config_option_t propOption4 = CFG_MAX) const override;
 
     std::map<std::string, std::string> getXmlContent(const pugi::xml_node& optValue) const;
 
@@ -597,10 +622,7 @@ public:
 
     std::string getUniquePath() const override { return fmt::format("{}/{}", xpath, AutoscanDirectory::mapScanmode(scanMode)); }
 
-    std::string getItemPath(int index = 0, config_option_t propOption = CFG_MAX, config_option_t propOption2 = CFG_MAX, config_option_t propOption3 = CFG_MAX, config_option_t propOption4 = CFG_MAX) const override
-    {
-        return index >= 0 ? fmt::format("{}/{}/{}[{}]/attribute::{}", xpath, AutoscanDirectory::mapScanmode(scanMode), ConfigManager::mapConfigOption(ATTR_AUTOSCAN_DIRECTORY), index, ConfigManager::mapConfigOption(propOption)) : fmt::format("{}/{}/{}", xpath, AutoscanDirectory::mapScanmode(scanMode), ConfigManager::mapConfigOption(ATTR_AUTOSCAN_DIRECTORY));
-    }
+    std::string getItemPath(int index = 0, config_option_t propOption = CFG_MAX, config_option_t propOption2 = CFG_MAX, config_option_t propOption3 = CFG_MAX, config_option_t propOption4 = CFG_MAX) const override;
 
     std::shared_ptr<ConfigOption> newOption(const pugi::xml_node& optValue);
 
@@ -629,16 +651,7 @@ public:
 
     bool updateDetail(const std::string& optItem, std::string& optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
 
-    std::string getItemPath(int index = 0, config_option_t propOption = CFG_MAX, config_option_t propOption2 = CFG_MAX, config_option_t propOption3 = CFG_MAX, config_option_t propOption4 = CFG_MAX) const override
-    {
-        if (index < 0) {
-            return fmt::format("{}", xpath);
-        }
-        if (propOption4 == CFG_MAX) {
-            return fmt::format("{}/{}/{}[{}]/attribute::{}", xpath, ConfigManager::mapConfigOption(propOption), ConfigManager::mapConfigOption(propOption2), index, ConfigManager::mapConfigOption(propOption3));
-        }
-        return fmt::format("{}/{}/{}[{}]/{}/attribute::{}", xpath, ConfigManager::mapConfigOption(propOption), ConfigManager::mapConfigOption(propOption2), index, ConfigManager::mapConfigOption(propOption3), ConfigManager::mapConfigOption(propOption4));
-    }
+    std::string getItemPath(int index = 0, config_option_t propOption = CFG_MAX, config_option_t propOption2 = CFG_MAX, config_option_t propOption3 = CFG_MAX, config_option_t propOption4 = CFG_MAX) const override;
 
     std::shared_ptr<ConfigOption> newOption(const pugi::xml_node& optValue);
 
@@ -668,16 +681,7 @@ public:
 
     bool updateDetail(const std::string& optItem, std::string& optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
 
-    std::string getItemPath(int index = 0, config_option_t propOption = CFG_MAX, config_option_t propOption2 = CFG_MAX, config_option_t propOption3 = CFG_MAX, config_option_t propOption4 = CFG_MAX) const override
-    {
-        if (index < 0) {
-            return fmt::format("{}/{}", xpath, ConfigManager::mapConfigOption(ATTR_CLIENTS_CLIENT));
-        }
-        if (propOption != CFG_MAX) {
-            return fmt::format("{}/{}[{}]/attribute::{}", xpath, ConfigManager::mapConfigOption(ATTR_CLIENTS_CLIENT), index, ConfigManager::mapConfigOption(propOption));
-        }
-        return fmt::format("{}/{}[{}]", xpath, ConfigManager::mapConfigOption(ATTR_CLIENTS_CLIENT), index);
-    }
+    std::string getItemPath(int index = 0, config_option_t propOption = CFG_MAX, config_option_t propOption2 = CFG_MAX, config_option_t propOption3 = CFG_MAX, config_option_t propOption4 = CFG_MAX) const override;
 
     std::shared_ptr<ConfigOption> newOption(const pugi::xml_node& optValue);
 
@@ -705,16 +709,7 @@ public:
 
     bool updateDetail(const std::string& optItem, std::string& optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
 
-    std::string getItemPath(int index = 0, config_option_t propOption = CFG_MAX, config_option_t propOption2 = CFG_MAX, config_option_t propOption3 = CFG_MAX, config_option_t propOption4 = CFG_MAX) const override
-    {
-        if (index < 0) {
-            return fmt::format("{}/{}", xpath, ConfigManager::mapConfigOption(ATTR_DIRECTORIES_TWEAK));
-        }
-        if (propOption != CFG_MAX) {
-            return fmt::format("{}/{}[{}]/attribute::{}", xpath, ConfigManager::mapConfigOption(ATTR_DIRECTORIES_TWEAK), index, ConfigManager::mapConfigOption(propOption));
-        }
-        return fmt::format("{}/{}[{}]", xpath, ConfigManager::mapConfigOption(ATTR_DIRECTORIES_TWEAK), index);
-    }
+    std::string getItemPath(int index = 0, config_option_t propOption = CFG_MAX, config_option_t propOption2 = CFG_MAX, config_option_t propOption3 = CFG_MAX, config_option_t propOption4 = CFG_MAX) const override;
 
     std::shared_ptr<ConfigOption> newOption(const pugi::xml_node& optValue);
 

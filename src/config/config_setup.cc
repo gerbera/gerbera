@@ -90,10 +90,12 @@ std::string ConfigSetup::getXmlContent(const pugi::xml_node& root, bool trim) co
         return optValue;
     }
 
-    if (root.attribute(xpath) != nullptr) {
-        std::string optValue = trim ? trimString(root.attribute(xpath).as_string()) : root.attribute(xpath).as_string();
+    auto xAttr = removeAttribute(option);
+
+    if (root.attribute(xAttr.c_str()) != nullptr) {
+        std::string optValue = trim ? trimString(root.attribute(xAttr.c_str()).as_string()) : root.attribute(xAttr.c_str()).as_string();
         if (!checkValue(optValue)) {
-            throw std::runtime_error(fmt::format("Invalid {}/attribute::{} value '{}'", root.path(), xpath, optValue));
+            throw std::runtime_error(fmt::format("Invalid {}/attribute::{} value '{}'", root.path(), xAttr.c_str(), optValue));
         }
         return optValue;
     }
@@ -113,6 +115,15 @@ std::string ConfigSetup::getXmlContent(const pugi::xml_node& root, bool trim) co
         root.path(), xpath, defaultValue.c_str());
 
     return defaultValue;
+}
+
+pugi::xpath_node_set ConfigSetup::getXmlTree(const pugi::xml_node& element) const
+{
+    if (xpath[0] == '/') {
+        return element.root().select_nodes(cpath.c_str());
+    } else {
+        return element.select_nodes(xpath);
+    }
 }
 
 void ConfigSetup::makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
@@ -143,6 +154,7 @@ size_t ConfigSetup::extractIndex(const std::string& item)
 }
 
 const char* const ConfigSetup::ROOT_NAME = "config";
+const std::string ConfigSetup::ATTRIBUTE = "attribute::";
 
 void ConfigStringSetup::makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
 {
@@ -518,15 +530,14 @@ bool ConfigBoolSetup::CheckMarkPlayedValue(std::string& value)
 bool ConfigArraySetup::createArrayFromNode(const pugi::xml_node& element, std::vector<std::string>& result) const
 {
     if (element != nullptr) {
-        for (const pugi::xml_node& child : element.children()) {
-            if (std::string(child.name()) == ConfigManager::mapConfigOption(nodeOption)) {
-                std::string attrValue = attrOption != CFG_MAX ? child.attribute(ConfigManager::mapConfigOption(attrOption)).as_string() : child.text().as_string();
-                if (itemNotEmpty && attrValue.empty()) {
-                    throw std::runtime_error(fmt::format("Invalid array {} value {} empty '{}'", element.path(), xpath, attrValue));
-                }
-                if (!attrValue.empty())
-                    result.push_back(attrValue);
+        for (const auto& it : element.select_nodes(ConfigManager::mapConfigOption(nodeOption))) {
+            const pugi::xml_node& child = it.node();
+            std::string attrValue = attrOption != CFG_MAX ? child.attribute(removeAttribute(attrOption).c_str()).as_string() : child.text().as_string();
+            if (itemNotEmpty && attrValue.empty()) {
+                throw std::runtime_error(fmt::format("Invalid array {} value {} empty '{}'", element.path(), xpath, attrValue));
             }
+            if (!attrValue.empty())
+                result.push_back(attrValue);
         }
     }
     return true;
@@ -626,10 +637,8 @@ std::shared_ptr<ConfigOption> ConfigArraySetup::newOption(const std::vector<std:
 bool ConfigArraySetup::InitPlayedItemsMark(const pugi::xml_node& value, std::vector<std::string>& result, const char* node_name)
 {
     if (value != nullptr) {
-        for (const pugi::xml_node& content : value.children()) {
-            if (std::string(content.name()) != node_name)
-                continue;
-
+        for (const auto& it : value.select_nodes(node_name)) {
+            const pugi::xml_node& content = it.node();
             std::string mark_content = content.text().as_string();
             if (mark_content.empty()) {
                 log_error("error in configuration, <mark-played-items>, empty <content> parameter");
@@ -657,15 +666,14 @@ bool ConfigArraySetup::InitItemsPerPage(const pugi::xml_node& value, std::vector
         result.emplace_back(std::to_string(DEFAULT_ITEMS_PER_PAGE_4));
     } else {
         // create the array from either user settings
-        for (const pugi::xml_node& child : value.children()) {
-            if (std::string(child.name()) == node_name) {
-                int i = child.text().as_int();
-                if (i < 1) {
-                    log_error("Error in config file: incorrect <option> value for <items-per-page>");
-                    return false;
-                }
-                result.emplace_back(child.text().as_string());
+        for (const auto& it : value.select_nodes(node_name)) {
+            const pugi::xml_node& child = it.node();
+            int i = child.text().as_int();
+            if (i < 1) {
+                log_error("Error in config file: incorrect <option> value for <items-per-page>");
+                return false;
             }
+            result.emplace_back(child.text().as_string());
         }
     }
     return true;
@@ -689,18 +697,21 @@ bool ConfigArraySetup::InitItemsPerPage(const pugi::xml_node& value, std::vector
 bool ConfigDictionarySetup::createDictionaryFromNode(const pugi::xml_node& optValue, std::map<std::string, std::string>& result) const
 {
     if (optValue != nullptr) {
-        for (const pugi::xml_node& child : optValue.children()) {
-            if (std::string(child.name()) == ConfigManager::mapConfigOption(nodeOption)) {
-                std::string key = child.attribute(ConfigManager::mapConfigOption(keyOption)).as_string();
-                std::string value = child.attribute(ConfigManager::mapConfigOption(valOption)).as_string();
-                if (!key.empty() && !value.empty()) {
-                    if (tolower) {
-                        key = toLower(key);
-                    }
-                    result[key] = value;
-                } else if (itemNotEmpty) {
-                    return false;
+        const auto dictNodes = optValue.select_nodes(ConfigManager::mapConfigOption(nodeOption));
+        auto keyAttr = removeAttribute(keyOption);
+        auto valAttr = removeAttribute(valOption);
+
+        for (const auto& it : dictNodes) {
+            const pugi::xml_node child = it.node();
+            std::string key = child.attribute(keyAttr.c_str()).as_string();
+            std::string value = child.attribute(valAttr.c_str()).as_string();
+            if (!key.empty() && !value.empty()) {
+                if (tolower) {
+                    key = toLower(key);
                 }
+                result[key] = value;
+            } else if (itemNotEmpty) {
+                return false;
             }
         }
     } else if (option == CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST) {
@@ -797,6 +808,15 @@ bool ConfigDictionarySetup::updateDetail(const std::string& optItem, std::string
     return false;
 }
 
+std::string ConfigDictionarySetup::getItemPath(int index, config_option_t propOption, config_option_t propOption2, config_option_t propOption3, config_option_t propOption4) const
+{
+    auto opt = ensureAttribute(propOption);
+
+    return index >= 0 //
+        ? fmt::format("{}/{}[{}]/{}", xpath, ConfigManager::mapConfigOption(nodeOption), index, opt) //
+        : fmt::format("{}/{}", xpath, ConfigManager::mapConfigOption(nodeOption));
+}
+
 std::map<std::string, std::string> ConfigDictionarySetup::getXmlContent(const pugi::xml_node& optValue) const
 {
     std::map<std::string, std::string> result;
@@ -821,6 +841,13 @@ std::shared_ptr<ConfigOption> ConfigDictionarySetup::newOption(const std::map<st
     return optionValue;
 }
 
+std::string ConfigAutoscanSetup::getItemPath(int index, config_option_t propOption, config_option_t propOption2, config_option_t propOption3, config_option_t propOption4) const
+{
+    return index >= 0 //
+        ? fmt::format("{}/{}/{}[{}]/{}", xpath, AutoscanDirectory::mapScanmode(scanMode), ConfigManager::mapConfigOption(ATTR_AUTOSCAN_DIRECTORY), index, ensureAttribute(propOption)) //
+        : fmt::format("{}/{}/{}", xpath, AutoscanDirectory::mapScanmode(scanMode), ConfigManager::mapConfigOption(ATTR_AUTOSCAN_DIRECTORY));
+}
+
 /// \brief Creates an array of AutoscanDirectory objects from a XML nodeset.
 /// \param element starting element of the nodeset.
 /// \param scanmode add only directories with the specified scanmode to the array
@@ -829,11 +856,9 @@ bool ConfigAutoscanSetup::createAutoscanListFromNode(const pugi::xml_node& eleme
     if (element == nullptr)
         return true;
 
-    for (const pugi::xml_node& child : element.children()) {
-
-        // We only want directories
-        if (std::string(child.name()) != ConfigManager::mapConfigOption(ATTR_AUTOSCAN_DIRECTORY))
-            continue;
+    const auto& cs = findConfigSetup<ConfigSetup>(ATTR_AUTOSCAN_DIRECTORY);
+    for (const auto& it : cs->getXmlTree(element)) {
+        const pugi::xml_node& child = it.node();
 
         fs::path location;
         try {
@@ -989,29 +1014,30 @@ bool ConfigTranscodingSetup::createTranscodingProfileListFromNode(const pugi::xm
     if (element == nullptr)
         return true;
 
+    const pugi::xml_node& root = element.root();
+
     std::map<std::string, std::string> mt_mappings;
     {
         auto cs = findConfigSetup<ConfigDictionarySetup>(ATTR_TRANSCODING_MIMETYPE_PROF_MAP);
-        if (cs->hasXmlElement(element)) {
-            mt_mappings = cs->getXmlContent(cs->getXmlElement(element));
+        if (cs->hasXmlElement(root)) {
+            mt_mappings = cs->getXmlContent(cs->getXmlElement(root));
         }
     }
 
-    auto profiles = element.child(ConfigManager::mapConfigOption(ATTR_TRANSCODING_PROFILES));
-    if (profiles == nullptr)
+    auto cs = findConfigSetup<ConfigSetup>(ATTR_TRANSCODING_PROFILES_PROFLE);
+    const auto profileNodes = cs->getXmlTree(element);
+    if (profileNodes.empty())
         return true;
 
-    bool allow_unused_profiles = !findConfigSetup<ConfigBoolSetup>(CFG_TRANSCODING_PROFILES_PROFILE_ALLOW_UNUSED)->getXmlContent(element.root());
-    if (!allow_unused_profiles && mt_mappings.empty() && !profiles.empty()) {
+    bool allow_unused_profiles = !findConfigSetup<ConfigBoolSetup>(CFG_TRANSCODING_PROFILES_PROFILE_ALLOW_UNUSED)->getXmlContent(root);
+    if (!allow_unused_profiles && mt_mappings.empty()) {
         log_error("error in configuration: transcoding "
                   "profiles exist, but no mimetype to profile mappings specified");
         return false;
     }
 
-    for (const pugi::xml_node& child : profiles.children()) {
-        if (std::string(child.name()) != ConfigManager::mapConfigOption(ATTR_TRANSCODING_PROFILES_PROFLE))
-            continue;
-
+    for (const auto& it : profileNodes) {
+        const pugi::xml_node child = it.node();
         if (!findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED)->getXmlContent(child))
             continue;
 
@@ -1127,7 +1153,7 @@ bool ConfigTranscodingSetup::createTranscodingProfileListFromNode(const pugi::xm
             log_error("error in configuration: you specified a mimetype to transcoding profile mapping, "
                       "but the profile \""
                 + val + "\" for mimetype \"" + key + "\" does not exists");
-            if (!findConfigSetup<ConfigBoolSetup>(CFG_TRANSCODING_MIMETYPE_PROF_MAP_ALLOW_UNUSED)->getXmlContent(element.root())) {
+            if (!findConfigSetup<ConfigBoolSetup>(CFG_TRANSCODING_MIMETYPE_PROF_MAP_ALLOW_UNUSED)->getXmlContent(root)) {
                 return false;
             }
         }
@@ -1142,6 +1168,34 @@ void ConfigTranscodingSetup::makeOption(const pugi::xml_node& root, const std::s
     }
     newOption(getXmlElement(root));
     setOption(config);
+}
+
+std::string ConfigTranscodingSetup::getItemPath(int index, config_option_t propOption, config_option_t propOption2, config_option_t propOption3, config_option_t propOption4) const
+{
+    if (index < 0) {
+        return fmt::format("{}", xpath);
+    }
+
+    auto opt2 = ensureAttribute(propOption2, propOption3 == CFG_MAX);
+    auto opt3 = ensureAttribute(propOption3, propOption4 == CFG_MAX);
+    auto opt4 = ensureAttribute(propOption4, propOption4 != CFG_MAX);
+
+    if (propOption == ATTR_TRANSCODING_PROFILES_PROFLE) {
+        if (propOption3 == CFG_MAX) {
+            return fmt::format("{}[{}]/{}", ConfigManager::mapConfigOption(propOption), index, opt2);
+        }
+        return fmt::format("{}[{}]/{}/{}", ConfigManager::mapConfigOption(propOption), index, opt2, opt3);
+    }
+    if (propOption == ATTR_TRANSCODING_MIMETYPE_PROF_MAP) {
+        if (propOption4 == CFG_MAX) {
+            return fmt::format("{}/{}[{}]/{}", ConfigManager::mapConfigOption(propOption), ConfigManager::mapConfigOption(propOption2), index, opt3);
+        }
+        return fmt::format("{}/{}[{}]/{}/{}", ConfigManager::mapConfigOption(propOption), ConfigManager::mapConfigOption(propOption2), index, opt3, opt4);
+    }
+    if (propOption4 == CFG_MAX) {
+        return fmt::format("{}/{}/{}[{}]/{}", xpath, ConfigManager::mapConfigOption(propOption), ConfigManager::mapConfigOption(propOption2), index, opt3);
+    }
+    return fmt::format("{}/{}/{}[{}]/{}/{}", xpath, ConfigManager::mapConfigOption(propOption), ConfigManager::mapConfigOption(propOption2), index, opt3, opt4);
 }
 
 bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::string& optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
@@ -1174,21 +1228,21 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
         i = 0;
         for (const auto& [key, val] : profiles) {
             auto entry = value->getTranscodingProfileListOption()->getByName(key, true);
-            auto index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_NAME);
+            auto index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_NAME);
             if (optItem == index) {
                 log_error("Cannot change profile name in Transcoding Detail {} {}", index, entry->getName());
                 //value->setKey(key, optValue);
                 //log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->get(optValue)->begin()->first);
                 return false;
             }
-            index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED);
+            index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED);
             if (optItem == index) {
                 config->setOrigValue(index, entry->getEnabled());
                 entry->setEnabled(findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED)->checkValue(optValue));
                 log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getEnabled());
                 return true;
             }
-            index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_TYPE);
+            index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_TYPE);
             if (optItem == index) {
                 transcoding_type_t type;
                 if (findConfigSetup<ConfigEnumSetup<transcoding_type_t>>(ATTR_TRANSCODING_PROFILES_PROFLE_TYPE)->checkEnumValue(optValue, type)) {
@@ -1198,7 +1252,7 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
                     return true;
                 }
             }
-            index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_MIMETYPE);
+            index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_MIMETYPE);
             if (optItem == index) {
                 if (findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_MIMETYPE)->checkValue(optValue)) {
                     config->setOrigValue(index, entry->getTargetMimeType());
@@ -1207,7 +1261,7 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
                     return true;
                 }
             }
-            index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_RES);
+            index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_RES);
             if (optItem == index) {
                 if (findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_RES)->checkValue(optValue)) {
                     config->setOrigValue(index, entry->getAttributes()[MetadataHandler::getResAttrName(R_RESOLUTION)]);
@@ -1216,56 +1270,56 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
                     return true;
                 }
             }
-            index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_ACCURL);
+            index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_ACCURL);
             if (optItem == index) {
                 config->setOrigValue(index, entry->acceptURL());
                 entry->setAcceptURL(findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_ACCURL)->checkValue(optValue));
                 log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->acceptURL());
                 return true;
             }
-            index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_SAMPFREQ);
+            index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_SAMPFREQ);
             if (optItem == index) {
                 config->setOrigValue(index, entry->getSampleFreq());
                 entry->setSampleFreq(findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_SAMPFREQ)->checkIntValue(optValue));
                 log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getSampleFreq());
                 return true;
             }
-            index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_NRCHAN);
+            index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_NRCHAN);
             if (optItem == index) {
                 config->setOrigValue(index, entry->getNumChannels());
                 entry->setNumChannels(findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_NRCHAN)->checkIntValue(optValue));
                 log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getNumChannels());
                 return true;
             }
-            index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_HIDEORIG);
+            index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_HIDEORIG);
             if (optItem == index) {
                 config->setOrigValue(index, entry->hideOriginalResource());
                 entry->setHideOriginalResource(findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_HIDEORIG)->checkValue(optValue));
                 log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->hideOriginalResource());
                 return true;
             }
-            index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_THUMB);
+            index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_THUMB);
             if (optItem == index) {
                 config->setOrigValue(index, entry->isThumbnail());
                 entry->setThumbnail(findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_THUMB)->checkValue(optValue));
                 log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->isThumbnail());
                 return true;
             }
-            index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_FIRST);
+            index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_FIRST);
             if (optItem == index) {
                 config->setOrigValue(index, entry->firstResource());
                 entry->setFirstResource(findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_FIRST)->checkValue(optValue));
                 log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->firstResource());
                 return true;
             }
-            index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_ACCOGG);
+            index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_ACCOGG);
             if (optItem == index) {
                 config->setOrigValue(index, entry->isTheora());
                 entry->setTheora(findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_ACCOGG)->checkValue(optValue));
                 log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->isTheora());
                 return true;
             }
-            index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_USECHUNKEDENC);
+            index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_USECHUNKEDENC);
             if (optItem == index) {
                 config->setOrigValue(index, entry->getChunked());
                 entry->setChunked(findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_USECHUNKEDENC)->checkValue(optValue));
@@ -1277,19 +1331,19 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
             size_t chunk = entry->getBufferChunkSize();
             size_t fill = entry->getBufferInitialFillSize();
             bool setBuffer = false;
-            index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE);
+            index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE);
             if (optItem == index) {
                 config->setOrigValue(index, int(buffer));
                 buffer = findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE)->checkIntValue(optValue);
                 setBuffer = true;
             }
-            index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK);
+            index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK);
             if (optItem == index) {
                 config->setOrigValue(index, int(chunk));
                 chunk = findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK)->checkIntValue(optValue);
                 setBuffer = true;
             }
-            index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL);
+            index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL);
             if (optItem == index) {
                 config->setOrigValue(index, int(fill));
                 fill = findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL)->checkIntValue(optValue);
@@ -1310,7 +1364,7 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
                 return true;
             }
 
-            index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND);
+            index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND);
             if (optItem == index) {
                 if (findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND)->checkValue(optValue)) {
                     config->setOrigValue(index, entry->getCommand().string());
@@ -1319,7 +1373,7 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
                     return true;
                 }
             }
-            index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS);
+            index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS);
             if (optItem == index) {
                 if (findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS)->checkValue(optValue)) {
                     config->setOrigValue(index, entry->getArguments());
@@ -1332,14 +1386,14 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
             avi_fourcc_listmode_t fcc_mode = entry->getAVIFourCCListMode();
             auto fcc_list = entry->getAVIFourCCList();
             bool set4cc = false;
-            index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE);
+            index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE);
             if (optItem == index) {
                 config->setOrigValue(index, TranscodingProfile::mapFourCcMode(fcc_mode));
                 if (findConfigSetup<ConfigEnumSetup<avi_fourcc_listmode_t>>(ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE)->checkEnumValue(optValue, fcc_mode)) {
                     set4cc = true;
                 }
             }
-            index = getItemPath(i, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_4CC);
+            index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_4CC);
             if (optItem == index) {
                 config->setOrigValue(index, std::accumulate(std::next(fcc_list.begin()), fcc_list.end(), fcc_list[0], [](const std::string& a, const std::string& b) { return a + ", " + b; }));
                 fcc_list.clear();
@@ -1375,10 +1429,9 @@ bool ConfigClientSetup::createClientConfigListFromNode(const pugi::xml_node& ele
     if (element == nullptr)
         return true;
 
-    for (const pugi::xml_node& child : element.children()) {
-        // We only want directories
-        if (std::string(child.name()) != ConfigManager::mapConfigOption(ATTR_CLIENTS_CLIENT))
-            continue;
+    const auto& cs = findConfigSetup<ConfigSetup>(ATTR_CLIENTS_CLIENT);
+    for (const auto& it : cs->getXmlTree(element)) {
+        const pugi::xml_node& child = it.node();
 
         auto flags = findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_FLAGS)->getXmlContent(child);
         auto ip = findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_IP)->getXmlContent(child);
@@ -1497,6 +1550,17 @@ std::shared_ptr<ConfigOption> ConfigClientSetup::newOption(const pugi::xml_node&
     return optionValue;
 }
 
+std::string ConfigClientSetup::getItemPath(int index, config_option_t propOption, config_option_t propOption2, config_option_t propOption3, config_option_t propOption4) const
+{
+    if (index < 0) {
+        return fmt::format("{}", ConfigManager::mapConfigOption(ATTR_CLIENTS_CLIENT));
+    }
+    if (propOption != CFG_MAX) {
+        return fmt::format("{}[{}]/{}", ConfigManager::mapConfigOption(ATTR_CLIENTS_CLIENT), index, ensureAttribute(propOption));
+    }
+    return fmt::format("{}[{}]", ConfigManager::mapConfigOption(ATTR_CLIENTS_CLIENT), index);
+}
+
 /// \brief Creates an array of ClientConfig objects from a XML nodeset.
 /// \param element starting element of the nodeset.
 bool ConfigDirectorySetup::createDirectoryTweakListFromNode(const pugi::xml_node& element, std::shared_ptr<DirectoryConfigList>& result)
@@ -1504,11 +1568,9 @@ bool ConfigDirectorySetup::createDirectoryTweakListFromNode(const pugi::xml_node
     if (element == nullptr)
         return true;
 
-    for (const pugi::xml_node& child : element.children()) {
-
-        // We only want directories
-        if (std::string(child.name()) != ConfigManager::mapConfigOption(ATTR_DIRECTORIES_TWEAK))
-            continue;
+    const auto& cs = findConfigSetup<ConfigSetup>(ATTR_DIRECTORIES_TWEAK);
+    for (const auto& it : cs->getXmlTree(element)) {
+        const pugi::xml_node& child = it.node();
         fs::path location = findConfigSetup<ConfigPathSetup>(ATTR_DIRECTORIES_TWEAK_LOCATION)->getXmlContent(child);
 
         auto inherit = findConfigSetup<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_INHERIT)->getXmlContent(child);
@@ -1714,4 +1776,15 @@ std::shared_ptr<ConfigOption> ConfigDirectorySetup::newOption(const pugi::xml_no
     }
     optionValue = std::make_shared<DirectoryTweakOption>(result);
     return optionValue;
+}
+
+std::string ConfigDirectorySetup::getItemPath(int index, config_option_t propOption, config_option_t propOption2, config_option_t propOption3, config_option_t propOption4) const
+{
+    if (index < 0) {
+        return fmt::format("{}", ConfigManager::mapConfigOption(ATTR_DIRECTORIES_TWEAK));
+    }
+    if (propOption != CFG_MAX) {
+        return fmt::format("{}[{}]/{}", ConfigManager::mapConfigOption(ATTR_DIRECTORIES_TWEAK), index, ensureAttribute(propOption));
+    }
+    return fmt::format("{}[{}]", ConfigManager::mapConfigOption(ATTR_DIRECTORIES_TWEAK), index);
 }

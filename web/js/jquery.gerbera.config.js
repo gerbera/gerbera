@@ -488,7 +488,9 @@ $.widget('grb.config', {
               // already handled
             break;
             default:
-              console.log(`${item.item}: Unknown type '${item.type}'`);
+              if (('aid' in item)) {
+                console.log(`${item.item}: Unknown type '${item.type}'`);
+              }
           }
 
           itemLine.append(input);
