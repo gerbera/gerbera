@@ -244,87 +244,87 @@ void web::configLoad::process()
     for (const auto& [key, val] : profiles) {
         auto entry = transcoding->getByName(key, true);
         auto item = values.append_child("item");
-        createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_NAME), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_NAME);
+        createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_NAME), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_NAME);
         setValue(item, entry->getName());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED);
+        createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED);
         setValue(item, entry->getEnabled());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_TYPE), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_TYPE);
+        createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_TYPE), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_TYPE);
         setValue(item, std::string((entry->getType() == TR_External) ? "external" : "none"));
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_MIMETYPE), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_MIMETYPE);
+        createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_MIMETYPE), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_MIMETYPE);
         setValue(item, entry->getTargetMimeType());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_RES), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_RES);
+        createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_RES), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_RES);
         setValue(item, entry->getAttributes()[MetadataHandler::getResAttrName(R_RESOLUTION)]);
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_ACCURL), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_ACCURL);
+        createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_ACCURL), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_ACCURL);
         setValue(item, entry->acceptURL());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_SAMPFREQ), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_SAMPFREQ);
+        createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_SAMPFREQ), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_SAMPFREQ);
         setValue(item, entry->getSampleFreq());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_NRCHAN), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_NRCHAN);
+        createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_NRCHAN), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_NRCHAN);
         setValue(item, entry->getNumChannels());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_HIDEORIG), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_HIDEORIG);
+        createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_HIDEORIG), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_HIDEORIG);
         setValue(item, entry->hideOriginalResource());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_THUMB), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_THUMB);
+        createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_THUMB), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_THUMB);
         setValue(item, entry->isThumbnail());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_FIRST), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_FIRST);
+        createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_FIRST), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_FIRST);
         setValue(item, entry->firstResource());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_ACCOGG), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_ACCOGG);
+        createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_ACCOGG), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_ACCOGG);
         setValue(item, entry->isTheora());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_USECHUNKEDENC), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_USECHUNKEDENC);
+        createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_USECHUNKEDENC), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_USECHUNKEDENC);
         setValue(item, entry->getChunked());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND);
+        createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND);
         setValue(item, entry->getCommand());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS);
+        createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS);
         setValue(item, entry->getArguments());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE);
+        createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE);
         setValue(item, entry->getBufferSize());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK);
+        createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK);
         setValue(item, entry->getBufferChunkSize());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL);
+        createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL);
         setValue(item, entry->getBufferInitialFillSize());
 
         auto fourCCMode = entry->getAVIFourCCListMode();
         if (fourCCMode != FCC_None) {
             item = values.append_child("item");
-            createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE);
+            createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE);
             setValue(item, TranscodingProfile::mapFourCcMode(fourCCMode));
 
             const auto fourCCList = entry->getAVIFourCCList();
             if (!fourCCList.empty()) {
                 item = values.append_child("item");
-                createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_4CC), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_4CC);
+                createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_4CC), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_4CC);
                 setValue(item, std::accumulate(std::next(fourCCList.begin()), fourCCList.end(), fourCCList[0], [](const std::string& a, const std::string& b) { return a + ", " + b; }));
             }
         }
