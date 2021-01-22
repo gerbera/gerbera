@@ -878,11 +878,15 @@
 						{
 							"item": "/transcoding/profiles/profile/avi-fourcc-list/attribute::mode",
 							"caption": "AVI 4CC Mode",
+							"type": "String",
+							"help": "config-transcode.html#profiles",
 							"editable": true
 						},
 						{
 							"item": "/transcoding/profiles/profile/avi-fourcc-list/attribute::fourcc",
 							"caption": "AVI 4CC String",
+							"type": "String",
+							"help": "config-transcode.html#profiles",
 							"editable": true
 						},
 						{

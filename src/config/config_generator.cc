@@ -117,7 +117,7 @@ std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(std::shared_ptr<pugi::
 std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(config_option_t option, config_option_t attr, const std::string& value)
 {
     auto cs = ConfigManager::findConfigSetup(option);
-    return setValue(std::string(cs->xpath) + "/" + ConfigManager::mapConfigOption(attr), value);
+    return setValue(fmt::format("{}/{}", cs->xpath, ConfigManager::mapConfigOption(attr)), value);
 }
 
 std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(config_option_t option, const std::string& key, const std::string& value)
@@ -127,19 +127,16 @@ std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(config_option_t option
         return nullptr;
 
     auto nodeKey = ConfigManager::mapConfigOption(cs->nodeOption);
-    auto csKey = ConfigSetup::ensureAttribute(cs->keyOption);
-    auto csVal = ConfigSetup::ensureAttribute(cs->valOption);
-    setValue(std::string(cs->xpath) + "/" + nodeKey + "/", "", true);
-    setValue(std::string(cs->xpath) + "/" + nodeKey + "/" + csKey, key);
-    setValue(std::string(cs->xpath) + "/" + nodeKey + "/" + csVal, value);
+    setValue(fmt::format("{}/{}/", cs->xpath, nodeKey), "", true);
+    setValue(fmt::format("{}/{}/{}", cs->xpath, nodeKey, ConfigSetup::ensureAttribute(cs->keyOption)), key);
+    setValue(fmt::format("{}/{}/{}", cs->xpath, nodeKey, ConfigSetup::ensureAttribute(cs->valOption)), value);
     return generated[cs->xpath];
 }
 
 std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(config_option_t option, config_option_t dict, config_option_t attr, const std::string& value)
 {
     auto cs = ConfigManager::findConfigSetup(option);
-    auto attrKey = ConfigSetup::ensureAttribute(attr);
-    return setValue(std::string(cs->xpath) + "/" + ConfigManager::mapConfigOption(dict) + "/" + attrKey, value);
+    return setValue(fmt::format("{}/{}/{}", cs->xpath, ConfigManager::mapConfigOption(dict), ConfigSetup::ensureAttribute(attr)), value);
 }
 
 std::string ConfigGenerator::generate(const fs::path& userHome, const fs::path& configDir, const fs::path& prefixDir, const fs::path& magicFile)
@@ -363,7 +360,9 @@ void ConfigGenerator::generateTranscoding()
     setValue(ATTR_TRANSCODING_MIMETYPE_PROF_MAP, "application/ogg", "vlcmpeg");
     setValue(ATTR_TRANSCODING_MIMETYPE_PROF_MAP, "audio/ogg", "ogg2mp3");
 
-    auto oggmp3 = setValue(std::string(ConfigManager::mapConfigOption(ATTR_TRANSCODING_PROFILES_PROFLE)) + "/", "", true);
+    const auto profileTag = ConfigManager::mapConfigOption(ATTR_TRANSCODING_PROFILES_PROFLE);
+
+    auto oggmp3 = setValue(fmt::format("{}/", profileTag), "", true);
     setValue(oggmp3, ATTR_TRANSCODING_PROFILES_PROFLE_NAME, "ogg2mp3");
     setValue(oggmp3, ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED, NO);
     setValue(oggmp3, ATTR_TRANSCODING_PROFILES_PROFLE_TYPE, "external");
@@ -372,16 +371,16 @@ void ConfigGenerator::generateTranscoding()
     setValue(oggmp3, ATTR_TRANSCODING_PROFILES_PROFLE_FIRST, YES);
     setValue(oggmp3, ATTR_TRANSCODING_PROFILES_PROFLE_ACCOGG, NO);
 
-    auto agent = setValue(std::string(ConfigManager::mapConfigOption(ATTR_TRANSCODING_PROFILES_PROFLE)) + "/agent/", "", true);
+    auto agent = setValue(fmt::format("{}/{}/", profileTag, ConfigManager::mapConfigOption(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT)), "", true);
     setValue(agent, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND, "ffmpeg");
     setValue(agent, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS, "-y -i %in -f mp3 %out");
 
-    auto buffer = setValue(std::string(ConfigManager::mapConfigOption(ATTR_TRANSCODING_PROFILES_PROFLE)) + "/buffer/", "", true);
+    auto buffer = setValue(fmt::format("{}/{}/", profileTag, ConfigManager::mapConfigOption(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER)), "", true);
     setValue(buffer, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE, std::to_string(DEFAULT_AUDIO_BUFFER_SIZE));
     setValue(buffer, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK, std::to_string(DEFAULT_AUDIO_CHUNK_SIZE));
     setValue(buffer, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL, std::to_string(DEFAULT_AUDIO_FILL_SIZE));
 
-    auto vlcmpeg = setValue(std::string(ConfigManager::mapConfigOption(ATTR_TRANSCODING_PROFILES_PROFLE)) + "/", "", true);
+    auto vlcmpeg = setValue(fmt::format("{}/", profileTag), "", true);
     setValue(vlcmpeg, ATTR_TRANSCODING_PROFILES_PROFLE_NAME, "vlcmpeg");
     setValue(vlcmpeg, ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED, NO);
     setValue(vlcmpeg, ATTR_TRANSCODING_PROFILES_PROFLE_TYPE, "external");
@@ -390,11 +389,11 @@ void ConfigGenerator::generateTranscoding()
     setValue(vlcmpeg, ATTR_TRANSCODING_PROFILES_PROFLE_FIRST, YES);
     setValue(vlcmpeg, ATTR_TRANSCODING_PROFILES_PROFLE_ACCOGG, YES);
 
-    agent = setValue(std::string(ConfigManager::mapConfigOption(ATTR_TRANSCODING_PROFILES_PROFLE)) + "/agent/", "", true);
+    agent = setValue(fmt::format("{}/{}/", profileTag, ConfigManager::mapConfigOption(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT)), "", true);
     setValue(agent, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND, "vlc");
     setValue(agent, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS, "-I dummy %in --sout #transcode{venc=ffmpeg,vcodec=mp2v,vb=4096,fps=25,aenc=ffmpeg,acodec=mpga,ab=192,samplerate=44100,channels=2}:standard{access=file,mux=ps,dst=%out} vlc:quit");
 
-    buffer = setValue(std::string(ConfigManager::mapConfigOption(ATTR_TRANSCODING_PROFILES_PROFLE)) + "/buffer/", "", true);
+    buffer = setValue(fmt::format("{}/{}/", profileTag, ConfigManager::mapConfigOption(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER)), "", true);
     setValue(buffer, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE, std::to_string(DEFAULT_VIDEO_BUFFER_SIZE));
     setValue(buffer, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK, std::to_string(DEFAULT_VIDEO_CHUNK_SIZE));
     setValue(buffer, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL, std::to_string(DEFAULT_VIDEO_FILL_SIZE));

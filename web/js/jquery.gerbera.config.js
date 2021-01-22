@@ -488,7 +488,8 @@ $.widget('grb.config', {
               // already handled
             break;
             default:
-              if (('aid' in item)) {
+              if ('aid' in item) {
+                // only log if dependent attribute is set and 'aid' is available, so type can be determined
                 console.log(`${item.item}: Unknown type '${item.type}'`);
               }
           }
