@@ -45,7 +45,7 @@ class CdsObject;
 
 class BuiltinLayout : public Layout {
 public:
-    BuiltinLayout(std::shared_ptr<ContentManager> content);
+    explicit BuiltinLayout(std::shared_ptr<ContentManager> content);
 #ifdef ENABLE_PROFILING
     virtual ~BuiltinLayout();
 #endif
