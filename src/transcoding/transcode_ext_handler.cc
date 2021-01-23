@@ -98,9 +98,6 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(std::shared_pt
 
     char fifo_template[] = "grb_transcode_XXXXXX";
     fs::path fifo_name = tempName(config->getOption(CFG_SERVER_TMPDIR), fifo_template);
-    std::string arguments;
-    std::string temp;
-    std::string command;
     std::vector<std::string> arglist;
     std::vector<std::shared_ptr<ProcListItem>> proc_list;
 

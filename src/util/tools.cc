@@ -468,7 +468,6 @@ void dictDecode(const std::string& url, std::map<std::string, std::string>* dict
 // object_id=720&res_id=0
 void dictDecodeSimple(const std::string& url, std::map<std::string, std::string>* dict)
 {
-    std::string encoded;
     size_t pos;
     size_t last_pos = 0;
     do {
