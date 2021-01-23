@@ -37,7 +37,7 @@
 
 class URLRequestHandler : public RequestHandler {
 public:
-    URLRequestHandler(std::shared_ptr<ContentManager> content);
+    explicit URLRequestHandler(std::shared_ptr<ContentManager> content);
 
     void getInfo(const char* filename, UpnpFileInfo* info) override;
     std::unique_ptr<IOHandler> open(const char* filename, enum UpnpOpenFileMode mode) override;

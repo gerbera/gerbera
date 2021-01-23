@@ -52,7 +52,7 @@ class ContentManager;
 
 class AutoscanInotify {
 public:
-    AutoscanInotify(std::shared_ptr<ContentManager> content);
+    explicit AutoscanInotify(std::shared_ptr<ContentManager> content);
     ~AutoscanInotify();
 
     void run();

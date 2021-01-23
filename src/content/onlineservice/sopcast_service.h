@@ -50,7 +50,7 @@ class Database;
 /// handles adding/refreshing content in the database.
 class SopCastService : public OnlineService {
 public:
-    SopCastService(std::shared_ptr<ContentManager> content);
+    explicit SopCastService(std::shared_ptr<ContentManager> content);
     ~SopCastService() override;
 
     /// \brief Retrieves user specified content from the service and adds

@@ -48,7 +48,7 @@ class ContentManager;
 /// handles adding/refreshing content in the database.
 class ATrailersService : public OnlineService {
 public:
-    ATrailersService(std::shared_ptr<ContentManager> content);
+    explicit ATrailersService(std::shared_ptr<ContentManager> content);
     ~ATrailersService() override;
 
     /// \brief Retrieves user specified content from the service and adds

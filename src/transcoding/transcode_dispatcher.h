@@ -37,7 +37,7 @@
 
 class TranscodeDispatcher : public TranscodeHandler {
 public:
-    TranscodeDispatcher(std::shared_ptr<ContentManager> content);
+    explicit TranscodeDispatcher(std::shared_ptr<ContentManager> content);
 
     std::unique_ptr<IOHandler> serveContent(std::shared_ptr<TranscodingProfile> profile,
         std::string location,
