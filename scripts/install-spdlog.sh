@@ -1,11 +1,14 @@
-#!/bin/sh
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+VERSION="1.7.0"
+UNAME=$(uname)
+
 if ! [ "$(id -u)" = 0 ]; then
     echo "Please run this script with superuser access!"
     exit 1
 fi
 set -ex
-
-VERSION="1.7.0"
 
 unamestr=$(uname)
 if [ ! -f spdlog-$VERSION.tgz ]; then
@@ -13,11 +16,11 @@ if [ ! -f spdlog-$VERSION.tgz ]; then
 fi
 tar -xzvf spdlog-$VERSION.tgz
 cd spdlog-$VERSION
-if [ -d build ]; then
-	rm -R build
+if [ -d spdlogbuild ]; then
+	rm -R spdlogbuild
 fi
-mkdir build
-cd build && \
-cmake .. -DSPDLOG_FMT_EXTERNAL=ON && \
-make spdlog && \
-make install/fast
+mkdir spdlogbuild
+cd spdlogbuild
+cmake .. -DSPDLOG_FMT_EXTERNAL=ON -DSPDLOG_BUILD_SHARED=OFF
+make
+make install
