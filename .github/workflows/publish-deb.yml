@@ -29,8 +29,14 @@ jobs:
           apt-get install -y lsb-release sudo git wget curl
       - name: Build and upload deb
         run: |
-          bash scripts/build-deb.sh
+          bash scripts/debian/build-deb.sh
+      - uses: frabert/replace-string-action@v1.2
+        id: replace
+        with:
+          pattern: '(\w+):([\w\.]+)'
+          string: ${{ matrix.os-ver }}
+          replace-with: $1-$2.deb
       - uses: actions/upload-artifact@v2
         with:
-          name: ${{ matrix.ubuntu-ver }}.deb
+          name: ${{ steps.replace.outputs.replaced }}
           path: build-deb/*.deb
