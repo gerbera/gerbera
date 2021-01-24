@@ -538,6 +538,11 @@ if(WITH_TESTS)
     add_subdirectory(test)
 endif()
 
+find_program(XXD NAMES xxd REQUIRED)
+if (NOT XXD)
+    message(FATAL_ERROR "xxd command not found")
+endif()
+
 add_executable(zpipe src/database/create/zpipe.c)
 target_link_libraries(zpipe ZLIB::ZLIB)
 

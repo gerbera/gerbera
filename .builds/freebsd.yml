@@ -15,6 +15,7 @@ packages:
   - libexif
   - libmatroska
   - libiconv
+  - vim # for xxd
 sources:
   - https://github.com/gerbera/gerbera
 tasks:

@@ -5,7 +5,7 @@ trap cleanup SIGINT SIGTERM ERR EXIT
 
 cleanup() {
   trap - SIGINT SIGTERM ERR EXIT
-  rm "$FN.Z"
+  rm "$VARIABLE"
 }
 
 readonly DB_TYPE="$1"
@@ -32,18 +32,16 @@ case "$DB_TYPE" in
 esac
 
 # zpipe path
-$ZPIPE_PATH< ${FN} > "${FN}.Z"
+$ZPIPE_PATH< ${FN} > "${VARIABLE}"
 
 # Because this needs to work on BSD too
 REAL_SIZE=$(wc -c < ${FN})
-GZIPPED_SIZE=$(wc -c < ${FN}.Z)
+GZIPPED_SIZE=$(wc -c < ${VARIABLE})
 
 {
   cat "${FN}.tmpl.h"
   echo "#define ${DEF}_INFLATED_SIZE ${REAL_SIZE}"
   echo "#define ${DEF}_DEFLATED_SIZE ${GZIPPED_SIZE}"
-  echo "const unsigned char ${VARIABLE}[] = {"
-  hexdump -ve '/1 "0x%02x,"' < ${FN}.Z
-  echo "};"
+  xxd -i "${VARIABLE}"
   cat "${FN}.tmpl.f"
 } > "${DEST_DIR}"/${FN_FINAL}
