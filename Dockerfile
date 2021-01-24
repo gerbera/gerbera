@@ -11,7 +11,7 @@ WORKDIR /gerbera_build
 COPY . .
 RUN mkdir build && \
     cd build && \
-    cmake ../ \
+    cmake .. \
         -DCMAKE_BUILD_TYPE=RelWithDebInfo \
         -DWITH_MAGIC=YES \
         -DWITH_MYSQL=YES \

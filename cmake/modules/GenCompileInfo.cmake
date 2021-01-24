@@ -38,7 +38,7 @@ function(generate_compile_info)
 
         # Get the tag
         execute_process(
-                COMMAND git describe --tags --dirty=+d
+                COMMAND git describe --tags
                 WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
                 OUTPUT_VARIABLE GIT_TAG
                 OUTPUT_STRIP_TRAILING_WHITESPACE
