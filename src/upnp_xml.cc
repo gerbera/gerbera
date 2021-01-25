@@ -681,7 +681,10 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
         /// FIXME: currently resource is misused for album art
 
         // only add upnp:AlbumArtURI if we have an AA, skip the resource
-        if (res->isMetaResource(ID3_ALBUM_ART)) {
+        if (res->isMetaResource(ID3_ALBUM_ART) //
+            || (res->getHandlerType() == CH_LIBEXIF && res->getParameter(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL) //
+            || (res->getHandlerType() == CH_FFTH && res->getOption(RESOURCE_CONTENT_TYPE) == THUMBNAIL) //
+        ) {
             auto aa = parent->append_child(MetadataHandler::getMetaFieldName(M_ALBUMARTURI).c_str());
             aa.append_child(pugi::node_pcdata).set_value((virtualURL + url).c_str());
 
@@ -689,7 +692,8 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
             /// provide the profile correctly
             aa.append_attribute("xmlns:dlna") = "urn:schemas-dlna-org:metadata-1-0";
             aa.append_attribute("dlna:profileID") = "JPEG_TN";
-            continue;
+            if (res->isMetaResource(ID3_ALBUM_ART))
+                continue;
         }
         if (res->isMetaResource(VIDEO_SUB)) {
             auto vs = parent->append_child("sec:CaptionInfoEx");
@@ -716,9 +720,8 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
             std::string resolution = getValueOrDefault(res_attrs, MetadataHandler::getResAttrName(R_RESOLUTION));
             int x;
             int y;
-            if (!resolution.empty() && checkResolution(resolution, &x, &y)) {
-
-                if ((i > 0) && (((res->getHandlerType() == CH_LIBEXIF) && (res->getParameter(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL)) || (res->getOption(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL) || (res->getOption(RESOURCE_CONTENT_TYPE) == THUMBNAIL)) && (x <= 160) && (y <= 160))
+            if ((i > 0) && !resolution.empty() && checkResolution(resolution, &x, &y)) {
+                if ((((res->getHandlerType() == CH_LIBEXIF) && (res->getParameter(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL)) || (res->getOption(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL) || (res->getOption(RESOURCE_CONTENT_TYPE) == THUMBNAIL)) && (x <= 160) && (y <= 160))
                     extend = fmt::format("{}={};", UPNP_DLNA_PROFILE, UPNP_DLNA_PROFILE_JPEG_TN);
                 else if ((x <= 640) && (y <= 420))
                     extend = fmt::format("{}={};", UPNP_DLNA_PROFILE, UPNP_DLNA_PROFILE_JPEG_SM);
@@ -737,12 +740,12 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
         // we do not support seeking at all, so 00
         // and the media is converted, so set CI to 1
         if (!isExtThumbnail && transcoded) {
-            extend.append(UPNP_DLNA_OP).append("=").append(UPNP_DLNA_OP_SEEK_DISABLED).append(";").append(UPNP_DLNA_CONVERSION_INDICATOR).append("=" UPNP_DLNA_CONVERSION);
+            extend.append(fmt::format("{}={};", UPNP_DLNA_OP, UPNP_DLNA_OP_SEEK_DISABLED)).append(fmt::format("{}={}", UPNP_DLNA_CONVERSION_INDICATOR, UPNP_DLNA_CONVERSION));
 
             if (startswith(mimeType, "audio") || startswith(mimeType, "video"))
                 extend.append(";" UPNP_DLNA_FLAGS "=" UPNP_DLNA_ORG_FLAGS_AV);
         } else {
-            extend.append(UPNP_DLNA_OP).append("=").append(UPNP_DLNA_OP_SEEK_RANGE).append(";");
+            extend.append(fmt::format("{}={};", UPNP_DLNA_OP, UPNP_DLNA_OP_SEEK_RANGE));
             extend.append(UPNP_DLNA_CONVERSION_INDICATOR).append("=").append(UPNP_DLNA_NO_CONVERSION);
         }
 
