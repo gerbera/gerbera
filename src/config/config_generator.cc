@@ -255,9 +255,9 @@ void ConfigGenerator::generateImport(const fs::path& prefixDir, const fs::path& 
     }
 #endif
 
+#ifdef HAVE_JS
     setValue(CFG_IMPORT_SCRIPTING_CHARSET);
 
-#ifdef HAVE_JS
     std::string script;
     script = prefixDir / DEFAULT_JS_DIR / DEFAULT_COMMON_SCRIPT;
     setValue(CFG_IMPORT_SCRIPTING_COMMON_SCRIPT, script);
