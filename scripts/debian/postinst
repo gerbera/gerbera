@@ -1,0 +1,26 @@
+#!/bin/sh
+set -e
+
+case "$1" in
+configure)
+    # creating gerbera group if it isn't already there
+    if ! getent group gerbera >/dev/null; then
+        # Adding system group: gerbera.
+        addgroup --system gerbera >/dev/null
+    fi
+
+    # creating gerbera user if it isn't already there
+    if ! getent passwd gerbera >/dev/null; then
+        # Adding system user: gerbera.
+        adduser \
+         --system \
+         --ingroup gerbera \
+         --home /var/lib/gerbera \
+         --no-create-home \
+         --gecos "Gerbera Media Server" \
+         --shell /usr/sbin/nologin \
+         --disabled-login \
+         --disabled-password \
+         gerbera  >/dev/null
+    fi
+esac
