@@ -164,7 +164,7 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
 }
 
 // ffmpeg library calls
-static void addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item, AVFormatContext* pFormatCtx)
+void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item, AVFormatContext* pFormatCtx) const
 {
     int audioch = 0, samplefreq = 0;
     bool audioset, videoset;
@@ -231,6 +231,33 @@ static void addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item, AVForm
             }
         }
     }
+
+#if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
+    if (config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED) && (startswith(item->getMimeType(), "video") || item->getFlag(OBJECT_FLAG_OGG_THEORA))) {
+        std::string videoresolution = item->getResource(0)->getAttribute(R_RESOLUTION);
+        int x;
+        int y;
+
+        if (!videoresolution.empty() && checkResolution(videoresolution, &x, &y)) {
+            auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+
+            auto it = mappings.find(CONTENT_TYPE_JPG);
+            std::string thumb_mimetype = it != mappings.end() && !it->second.empty() ? it->second : "image/jpeg";
+
+            auto ffres = std::make_shared<CdsResource>(CH_FFTH);
+            ffres->addParameter(RESOURCE_HANDLER, std::to_string(CH_FFTH));
+            ffres->addOption(RESOURCE_CONTENT_TYPE, THUMBNAIL);
+            ffres->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(thumb_mimetype));
+
+            y = config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE) * y / x;
+            x = config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE);
+            std::string resolution = fmt::format("{}x{}", x, y);
+            ffres->addAttribute(R_RESOLUTION, resolution);
+            item->addResource(ffres);
+            log_debug("Adding resource for video thumbnail");
+        }
+    }
+#endif // FFMPEGTHUMBNAILER
 }
 
 // Stub for suppressing ffmpeg error messages during matadata extraction

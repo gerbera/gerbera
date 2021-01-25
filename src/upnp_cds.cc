@@ -73,7 +73,7 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
     if (objID.empty())
         throw UpnpException(UPNP_E_NO_SUCH_ID, "empty object id");
 
-    objectID = std::stoi(objID);
+    objectID = stoiString(objID);
 
     unsigned int flag = BROWSE_ITEMS | BROWSE_CONTAINERS | BROWSE_EXACT_CHILDCOUNT;
 
@@ -92,8 +92,8 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
 
     auto param = std::make_unique<BrowseParam>(objectID, flag);
 
-    param->setStartingIndex(std::stoi(StartingIndex));
-    param->setRequestedCount(std::stoi(RequestedCount));
+    param->setStartingIndex(stoiString(StartingIndex));
+    param->setRequestedCount(stoiString(RequestedCount));
 
     std::vector<std::shared_ptr<CdsObject>> arr;
     try {
@@ -166,7 +166,7 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
     didl_lite_root.append_attribute(UPNP_XML_SEC_NAMESPACE_ATTR) = UPNP_XML_SEC_NAMESPACE;
 
     auto searchParam = std::make_unique<SearchParam>(containerID, searchCriteria,
-        std::stoi(startingIndex, nullptr), std::stoi(requestedCount, nullptr));
+        stoiString(startingIndex), stoiString(requestedCount));
 
     std::vector<std::shared_ptr<CdsObject>> results;
     int numMatches = 0;

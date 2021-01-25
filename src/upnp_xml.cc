@@ -434,7 +434,10 @@ bool UpnpXMLBuilder::renderItemImage(const std::string virtualURL, const std::sh
     auto urlBase = getPathBase(item);
     int realCount = 0;
     for (const auto res : item->getResources()) {
-        if (res->isMetaResource(ID3_ALBUM_ART) || (res->getHandlerType() == CH_LIBEXIF && res->getParameter(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL)) {
+        if (res->isMetaResource(ID3_ALBUM_ART) //
+            || (res->getHandlerType() == CH_LIBEXIF && res->getParameter(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL) //
+            || (res->getHandlerType() == CH_FFTH && res->getOption(RESOURCE_CONTENT_TYPE) == THUMBNAIL) //
+        ) {
             auto res_attrs = res->getAttributes();
             auto res_params = res->getParameters();
             if (urlBase->addResID) {
@@ -484,31 +487,6 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
 
     bool isExtThumbnail = false; // this sucks
     auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-
-#if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
-    if (config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED) && (startswith(item->getMimeType(), "video") || item->getFlag(OBJECT_FLAG_OGG_THEORA))) {
-        std::string videoresolution = item->getResource(0)->getAttribute(R_RESOLUTION);
-        int x;
-        int y;
-
-        if (!videoresolution.empty() && checkResolution(videoresolution, &x, &y)) {
-            auto it = mappings.find(CONTENT_TYPE_JPG);
-            std::string thumb_mimetype = it != mappings.end() && !it->second.empty() ? it->second : "image/jpeg";
-
-            auto ffres = std::make_shared<CdsResource>(CH_FFTH);
-            ffres->addParameter(RESOURCE_HANDLER, std::to_string(CH_FFTH));
-            ffres->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(thumb_mimetype));
-            ffres->addOption(RESOURCE_CONTENT_TYPE, THUMBNAIL);
-
-            y = config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE) * y / x;
-            x = config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE);
-            std::string resolution = std::to_string(x) + "x" + std::to_string(y);
-            ffres->addAttribute(R_RESOLUTION, resolution);
-            item->addResource(ffres);
-            log_debug("Adding resource for video thumbnail");
-        }
-    }
-#endif // FFMPEGTHUMBNAILER
 
     // this will be used to count only the "real" resources, omitting the
     // transcoded ones
@@ -740,14 +718,14 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
             int y;
             if (!resolution.empty() && checkResolution(resolution, &x, &y)) {
 
-                if ((i > 0) && (((item->getResource(i)->getHandlerType() == CH_LIBEXIF) && (item->getResource(i)->getParameter(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL)) || (item->getResource(i)->getOption(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL) || (item->getResource(i)->getOption(RESOURCE_CONTENT_TYPE) == THUMBNAIL)) && (x <= 160) && (y <= 160))
-                    extend = std::string(UPNP_DLNA_PROFILE) + "=" + UPNP_DLNA_PROFILE_JPEG_TN + ";";
+                if ((i > 0) && (((res->getHandlerType() == CH_LIBEXIF) && (res->getParameter(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL)) || (res->getOption(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL) || (res->getOption(RESOURCE_CONTENT_TYPE) == THUMBNAIL)) && (x <= 160) && (y <= 160))
+                    extend = fmt::format("{}={};", UPNP_DLNA_PROFILE, UPNP_DLNA_PROFILE_JPEG_TN);
                 else if ((x <= 640) && (y <= 420))
-                    extend = std::string(UPNP_DLNA_PROFILE) + "=" + UPNP_DLNA_PROFILE_JPEG_SM + ";";
+                    extend = fmt::format("{}={};", UPNP_DLNA_PROFILE, UPNP_DLNA_PROFILE_JPEG_SM);
                 else if ((x <= 1024) && (y <= 768))
-                    extend = std::string(UPNP_DLNA_PROFILE) + "=" + UPNP_DLNA_PROFILE_JPEG_MED + ";";
+                    extend = fmt::format("{}={};", UPNP_DLNA_PROFILE, UPNP_DLNA_PROFILE_JPEG_MED);
                 else if ((x <= 4096) && (y <= 4096))
-                    extend = std::string(UPNP_DLNA_PROFILE) + "=" + UPNP_DLNA_PROFILE_JPEG_LRG + ";";
+                    extend = fmt::format("{}={};", UPNP_DLNA_PROFILE, UPNP_DLNA_PROFILE_JPEG_LRG);
             }
         } else {
             /* handle audio/video content */
