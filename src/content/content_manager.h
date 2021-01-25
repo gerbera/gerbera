@@ -52,6 +52,8 @@
 // vice versa
 class PlaylistParserScript;
 #include "scripting/playlist_parser_script.h"
+#else
+class ScriptingRuntime;
 #endif
 
 #include "layout/layout.h"
