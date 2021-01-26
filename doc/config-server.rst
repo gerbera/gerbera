@@ -78,6 +78,19 @@ Server friendly name, you will see this on your devices that you use to access t
 This tag sets the manufacturer URL of a UPnP device, a custom setting may be necessary to trick some renderers in order
 to enable special features that otherwise are only active with the vendor implemented server.
 
+``virtualURL``
+~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: xml
+
+    <virtualURL>http://gerbera.io/</virtualURL>
+
+* Optional
+* Default: unset
+
+This tag sets the virtual URL of Gerbera web UI, a custom setting may be necessary if you want to access the web page via a reverse proxy.
+The value defaults to `http://<ip>:port`.
+
 ``modelName``
 ~~~~~~~~~~~~~
 
