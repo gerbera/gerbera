@@ -78,7 +78,7 @@ public:
     /// the port is also specified in the config, we can never be sure
     /// that we actually get that port after startup. This function
     /// contains the port on which the server is actually running.
-    std::string getVirtualUrl() { return virtualUrl; }
+    std::string getVirtualUrl();
 
     /// \brief Tells if the server is about to be terminated.
     ///

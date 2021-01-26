@@ -242,6 +242,12 @@ void Server::emptyBookmark()
     writeTextFile(path, data);
 }
 
+std::string Server::getVirtualUrl()
+{
+    auto cfgVirt = config->getOption(CFG_VIRTUAL_URL);
+    return cfgVirt.empty() ? virtualUrl : cfgVirt + "/" + virtual_directory;
+}
+
 bool Server::getShutdownStatus() const
 {
     return server_shutdown_flag;

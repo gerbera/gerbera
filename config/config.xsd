@@ -72,6 +72,7 @@
                 <xs:element ref="bookmark" minOccurs="0"/>
                 <xs:element ref="model" minOccurs="0"/>
                 <xs:element ref="manufacturerURL" minOccurs="0"/>
+                <xs:element ref="virtualURL" minOccurs="0"/>
                 <xs:element ref="presentationURL" minOccurs="0"/>
                 <xs:element ref="upnp-string-limit" minOccurs="0"/>
                 <xs:element ref="alive" minOccurs="0"/>

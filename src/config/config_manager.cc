@@ -126,6 +126,9 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = 
     std::make_shared<ConfigStringSetup>(CFG_SERVER_MANUFACTURER_URL,
         "/server/manufacturerURL", "config-server.html#manufacturerurl",
         DESC_MANUFACTURER_URL),
+    std::make_shared<ConfigStringSetup>(CFG_VIRTUAL_URL,
+        "/server/virtualURL", "config-server.html#virtualURL",
+        ""),
     std::make_shared<ConfigStringSetup>(CFG_SERVER_MODEL_NAME,
         "/server/modelName", "config-server.html#modelname",
         DESC_MODEL_NAME),
@@ -1075,6 +1078,7 @@ void ConfigManager::load(const fs::path& userHome)
     setOption(root, CFG_SERVER_SERIAL_NUMBER);
     setOption(root, CFG_SERVER_MANUFACTURER);
     setOption(root, CFG_SERVER_MANUFACTURER_URL);
+    setOption(root, CFG_VIRTUAL_URL);
     setOption(root, CFG_SERVER_PRESENTATION_URL);
     setOption(root, CFG_SERVER_UPNP_TITLE_AND_DESC_STRING_LIMIT);
 
