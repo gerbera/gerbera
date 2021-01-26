@@ -10,7 +10,7 @@ INCLUDE(FindPackageHandleStandardArgs)
 
 find_package(PkgConfig QUIET)
 
-pkg_check_modules(PC_EBM QUIET libpugixml)
+pkg_check_modules(PC_PUGIXML QUIET libpugixml)
 find_path(PUGIXML_INCLUDE_DIR pugixml.hpp
     HINTS ${PC_PUGIXML_INCLUDEDIR} ${PC_PUGIXML_INCLUDE_DIRS})
 FIND_LIBRARY(PUGIXML_LIBRARY pugixml
