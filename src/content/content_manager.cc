@@ -1060,7 +1060,14 @@ int ContentManager::addContainerChain(const std::string& chain, const std::strin
     }
 
     log_debug("received chain: {} -> {} ({}) [{}]", chain.c_str(), newChain.c_str(), lastClass.c_str(), dictEncodeSimple(lastMetadata).c_str());
-    const std::array<metadata_fields_t, 4> unwanted { M_DESCRIPTION, M_TITLE, M_TRACKNUMBER, M_ARTIST }; // not wanted for container!
+    // copy artist to album artist if empty
+    const auto aaItm = lastMetadata.find(MetadataHandler::getMetaFieldName(M_ALBUMARTIST));
+    const auto taItm = lastMetadata.find(MetadataHandler::getMetaFieldName(M_ARTIST));
+    if (aaItm == lastMetadata.end() && taItm != lastMetadata.end()) {
+        lastMetadata[MetadataHandler::getMetaFieldName(M_ALBUMARTIST)] = taItm->second;
+    }
+
+    constexpr std::array<metadata_fields_t, 4> unwanted { M_DESCRIPTION, M_TITLE, M_TRACKNUMBER, M_ARTIST }; // not wanted for container!
     for (const auto& unw : unwanted) {
         const auto itm = lastMetadata.find(MetadataHandler::getMetaFieldName(unw));
         if (itm != lastMetadata.end()) {
