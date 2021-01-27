@@ -389,7 +389,7 @@ std::string UpnpXMLBuilder::getArtworkUrl(const std::shared_ptr<CdsItem>& item) 
     return virtualURL + urlBase->pathBase;
 }
 
-bool UpnpXMLBuilder::renderContainerImage(const std::string virtualURL, const std::shared_ptr<CdsContainer>& cont, std::string& url)
+bool UpnpXMLBuilder::renderContainerImage(const std::string& virtualURL, const std::shared_ptr<CdsContainer>& cont, std::string& url)
 {
     bool artAdded = false;
     int resIdx = 0;
@@ -424,7 +424,7 @@ bool UpnpXMLBuilder::renderContainerImage(const std::string virtualURL, const st
     return artAdded;
 }
 
-bool UpnpXMLBuilder::renderItemImage(const std::string virtualURL, const std::shared_ptr<CdsItem>& item, std::string& url)
+bool UpnpXMLBuilder::renderItemImage(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item, std::string& url)
 {
     bool artAdded = false;
     auto urlBase = getPathBase(item);
