@@ -65,10 +65,13 @@ TEST_F(UpnpXmlTest, RenderObjectContainer)
     expectedXml << "<dc:title>Title</dc:title>\n";
     expectedXml << "<upnp:class>object.container.album.musicAlbum</upnp:class>\n";
     expectedXml << "<dc:creator>Creator</dc:creator>\n";
+    expectedXml << "<upnp:artist>Creator</upnp:artist>\n";
+    expectedXml << "<upnp:albumArtist>Creator</upnp:albumArtist>\n";
     expectedXml << "<upnp:composer>Composer</upnp:composer>\n";
-    expectedXml << "<upnp:Conductor>Conductor</upnp:Conductor>\n";
+    expectedXml << "<upnp:conductor>Conductor</upnp:conductor>\n";
     expectedXml << "<upnp:orchestra>Orchestra</upnp:orchestra>\n";
     expectedXml << "<upnp:date>2001-01-01</upnp:date>\n";
+    expectedXml << "<dc:date>2001-01-01</dc:date>\n";
     expectedXml << "<upnp:albumArtURI>http://server/content/media/object_id/10/res_id/0</upnp:albumArtURI>\n";
     expectedXml << "</container>\n";
     expectedXml << "</DIDL-Lite>\n";
