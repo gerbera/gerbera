@@ -125,19 +125,6 @@ TEST_F(UpnpXmlTest, RenderObjectItem)
     EXPECT_STREQ(didl_lite_xml.c_str(), expectedXml.str().c_str());
 }
 
-TEST_F(UpnpXmlTest, CreatesSecCaptionInfoElement)
-{
-    pugi::xml_document doc;
-    auto container = doc.append_child("container");
-    subject->renderCaptionInfo("/media/object_id/1/file.mp4", &container);
-    auto result = container.first_child();
-
-    EXPECT_NE(result, nullptr);
-    EXPECT_STREQ(result.text().as_string(), "http://server/content/media/object_id/1/file.srt");
-    EXPECT_STREQ(result.name(), "sec:CaptionInfoEx");
-    EXPECT_STREQ(result.attribute("sec:type").as_string(), "srt");
-}
-
 TEST_F(UpnpXmlTest, CreatesEventPropertySet)
 {
     auto result = subject->createEventPropertySet();

@@ -80,10 +80,7 @@ public:
 
     static bool renderContainerImage(const std::string& virtualURL, const std::shared_ptr<CdsContainer>& cont, std::string& url);
     static bool renderItemImage(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item, std::string& url);
-
-    /// \brief Renders a subtitle resource tag
-    /// \param URL download location of the video item
-    void renderCaptionInfo(const std::string& URL, pugi::xml_node* parent) const;
+    static bool renderSubtitle(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item, std::string& url);
 
     void addResources(const std::shared_ptr<CdsItem>& item, pugi::xml_node* parent);
 

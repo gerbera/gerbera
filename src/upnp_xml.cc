@@ -325,20 +325,6 @@ void UpnpXMLBuilder::renderResource(const std::string& URL, const std::map<std::
     }
 }
 
-void UpnpXMLBuilder::renderCaptionInfo(const std::string& URL, pugi::xml_node* parent) const
-{
-    auto cap = parent->append_child("sec:CaptionInfoEx");
-
-    // Samsung DLNA clients don't follow this URL and
-    // obtain subtitle location from video HTTP headers.
-    // However other software players (like VLC) use
-    // it to add a subtitle track.
-
-    size_t endp = URL.rfind('.');
-    cap.append_child(pugi::node_pcdata).set_value((virtualURL + URL.substr(0, endp) + ".srt").c_str());
-    cap.append_attribute("sec:type") = "srt";
-}
-
 std::unique_ptr<UpnpXMLBuilder::PathBase> UpnpXMLBuilder::getPathBase(const std::shared_ptr<CdsItem>& item, bool forceLocal)
 {
     auto pathBase = std::make_unique<PathBase>();
@@ -455,6 +441,31 @@ bool UpnpXMLBuilder::renderItemImage(const std::string& virtualURL, const std::s
         realCount++;
     }
     return artAdded;
+}
+
+bool UpnpXMLBuilder::renderSubtitle(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item, std::string& url)
+{
+    bool srtAdded = false;
+    auto urlBase = getPathBase(item);
+    int realCount = 0;
+    for (const auto& res : item->getResources()) {
+        if (res->isMetaResource(VIDEO_SUB)) {
+            auto res_attrs = res->getAttributes();
+            auto res_params = res->getParameters();
+            if (urlBase->addResID) {
+                url = virtualURL + urlBase->pathBase + std::to_string(realCount) + _URL_PARAM_SEPARATOR;
+            } else
+                url = virtualURL + urlBase->pathBase;
+
+            if (!res_params.empty()) {
+                url.append(dictEncodeSimple(res_params));
+            }
+            srtAdded = true;
+            break;
+        }
+        realCount++;
+    }
+    return srtAdded;
 }
 
 std::string UpnpXMLBuilder::renderExtension(const std::string& contentType, const std::string& location)
