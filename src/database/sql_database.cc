@@ -1841,10 +1841,10 @@ void SQLDatabase::addAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir)
 
 void SQLDatabase::updateAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir)
 {
-    log_debug("id: {}, obj_id: {}", adir->getDatabaseID(), adir->getObjectID());
-
     if (adir == nullptr)
         throw_std_runtime_error("updateAutoscanDirectory called with adir==nullptr");
+
+    log_debug("id: {}, obj_id: {}", adir->getDatabaseID(), adir->getObjectID());
 
     auto pathIds = _checkOverlappingAutoscans(adir);
 
