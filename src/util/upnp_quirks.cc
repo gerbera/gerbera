@@ -49,25 +49,28 @@ void Quirks::addCaptionInfo(const std::shared_ptr<CdsItem>& item, std::unique_pt
     if (!startswith(item->getMimeType(), "video"))
         return;
 
-    constexpr std::array<const char*, 4> exts {
-        ".srt",
-        ".ssa",
-        ".smi",
-        ".sub"
-    };
+    std::string url;
+    if (!UpnpXMLBuilder::renderSubtitle(context->getServer()->getVirtualUrl(), item, url)) {
+        constexpr std::array<const char*, 4> exts {
+            ".srt",
+            ".ssa",
+            ".smi",
+            ".sub"
+        };
 
-    // remove .ext
-    fs::path path = item->getLocation();
-    std::string pathNoExt = path.parent_path() / path.stem();
+        // remove .ext
+        fs::path path = item->getLocation();
+        std::string pathNoExt = path.parent_path() / path.stem();
 
-    auto it = std::find_if(exts.begin(), exts.end(), [=](const auto& ext) { std::string captionPath = pathNoExt + ext;
-          return access(captionPath.c_str(), R_OK) == 0; });
+        auto it = std::find_if(exts.begin(), exts.end(), [=](const auto& ext) { std::string captionPath = pathNoExt + ext;
+              return access(captionPath.c_str(), R_OK) == 0; });
 
-    std::string validext = (it != exts.end()) ? *it : "";
+        std::string validext = (it != exts.end()) ? *it : "";
 
-    if (validext.length() == 0)
-        return;
+        if (validext.length() == 0)
+            return;
 
-    std::string url = context->getServer()->getVirtualUrl() + RequestHandler::joinUrl({ CONTENT_MEDIA_HANDLER, URL_OBJECT_ID, std::to_string(item->getID()), URL_RESOURCE_ID, "0", URL_FILE_EXTENSION, "file" + validext });
+        url = context->getServer()->getVirtualUrl() + RequestHandler::joinUrl({ CONTENT_MEDIA_HANDLER, URL_OBJECT_ID, std::to_string(item->getID()), URL_RESOURCE_ID, "0", URL_FILE_EXTENSION, "file" + validext });
+    }
     headers->addHeader("CaptionInfo.sec", url);
 }
