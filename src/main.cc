@@ -35,6 +35,14 @@
 /// running "doxygen doxygen.conf" from the mediatomb/doc/ directory.
 
 #include <csignal>
+#include <stdio.h>
+#include <stdlib.h>
+#include <signal.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <pwd.h>
+#include <grp.h>
+#include <unistd.h>
 #include <filesystem>
 #include <mutex>
 #include <spdlog/sinks/basic_file_sink.h>
@@ -143,6 +151,8 @@ int main(int argc, char** argv, char** envp)
 
     options.add_options() //
         ("D,debug", "Enable debugging", cxxopts::value<bool>()->default_value("false")) //
+        ("d,daemon", "Daemonize after startup", cxxopts::value<bool>()->default_value("false")) //
+        ("u,user", "Drop privs to user", cxxopts::value<std::string>()) //
         ("e,interface", "Interface to bind with", cxxopts::value<std::string>()) //
         ("p,port", "Port to bind with, must be >=49152", cxxopts::value<in_port_t>()) //
         ("i,ip", "IP to bind with", cxxopts::value<std::string>()) //
@@ -214,6 +224,89 @@ int main(int argc, char** argv, char** envp)
             home = opts["home"].as<std::string>();
         }
 
+        // are we requested to drop privs? 
+        std::optional<std::string> user;
+        if (opts.count("user") > 0) {
+            user = opts["user"].as<std::string>();
+
+            // get actual euid/egid of process 
+            uid_t  actual_euid = geteuid();
+
+            // get user info of requested user from passwd 
+            struct passwd *user_id =  getpwnam( user->c_str() );
+
+            if ( user_id == NULL ) {
+                log_error("Invalid user requested.");
+                exit(EXIT_FAILURE);
+            }
+
+            // set home according to /etc/passwd entry 
+            if (!home.has_value()) {
+                home = user_id->pw_dir;
+            }
+
+            // we need to be euid root to become requested user/group 
+            if ( actual_euid != 0 ) {
+                log_error("Need to be root to change user.");
+                exit(EXIT_FAILURE);
+            }
+
+            // set all uids, gids and add. groups 
+            if ( 0 != setresgid(user_id->pw_gid, user_id->pw_gid, user_id->pw_gid) ||
+                 0 != initgroups( user_id->pw_name, user_id->pw_gid )              ||
+                 0 != setresuid(user_id->pw_uid, user_id->pw_uid, user_id->pw_uid) ) {
+                log_error("Unable to change user.");
+                exit(EXIT_FAILURE);
+            }
+            log_info("Dropped to User: {}", user->c_str() );
+        }
+
+        // are we requested to daemonize? 
+        bool daemon = opts["daemon"].as<bool>();
+        if (daemon) {
+            pid_t pid;
+
+            // fork 
+            pid = fork();
+            if ( pid < 0 ) {
+                log_error("Unable to fork.");
+                exit(EXIT_FAILURE);
+            }
+
+            // terminate parent 
+            if ( pid > 0) exit(EXIT_SUCCESS);
+
+            // become session leader 
+            if (setsid() < 0) {
+                log_error("Unable to setsid.");
+                exit(EXIT_FAILURE);
+            }
+
+            // second fork 
+            pid = fork();
+            if ( pid < 0 ) {
+                log_error("Unable to fork.");
+                exit(EXIT_FAILURE);
+            }
+
+            // terminate parent 
+            if ( pid > 0) exit(EXIT_SUCCESS);
+
+            // set new file permissions 
+            umask(0);
+
+            // change dir to / 
+            if ( chdir("/") ) {
+                log_error("Unable to chdir to root dir.");
+                exit(EXIT_FAILURE);
+            }
+            // close open filedescriptors belonging to a tty 
+            for ( int fd = sysconf(_SC_OPEN_MAX) ; fd>=0 ; fd-- ) {
+                if ( isatty(fd) ) close(fd);
+            }
+            log_info("Daemonized.");
+        }
+
         std::optional<std::string> config_file;
         if (opts.count("config") > 0) {
             config_file = opts["config"].as<std::string>();
@@ -224,12 +317,12 @@ int main(int argc, char** argv, char** envp)
             confdir = opts["cfgdir"].as<std::string>();
         }
 
+        if (!confdir.has_value()) {
+            confdir = DEFAULT_CONFIG_HOME;
+        }
+
         // If home is not given by the user, get it from the environment
         if (!config_file.has_value() && !home.has_value()) {
-            if (!confdir.has_value()) {
-                confdir = DEFAULT_CONFIG_HOME;
-            }
-
             // Check XDG first
             const char* h = std::getenv("XDG_CONFIG_HOME");
             if (h != nullptr) {
