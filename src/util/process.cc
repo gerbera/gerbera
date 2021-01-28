@@ -41,6 +41,7 @@
 
 #include <cerrno>
 #include <cstring>
+#include <thread>
 
 #include "config/config_manager.h"
 #include "util/tools.h"
@@ -137,26 +138,26 @@ bool is_alive(pid_t pid, int* status)
 
 bool kill_proc(pid_t kill_pid)
 {
-    if (is_alive(kill_pid)) {
-        log_debug("KILLING TERM PID: {}", kill_pid);
-        kill(kill_pid, SIGTERM);
-        sleep(1);
-    } else
+    if (!is_alive(kill_pid))
         return true;
 
-    if (is_alive(kill_pid)) {
-        log_debug("KILLING INT PID: {}", kill_pid);
-        kill(kill_pid, SIGINT);
-        sleep(1);
-    } else
+    log_debug("KILLING TERM PID: {}", kill_pid);
+    kill(kill_pid, SIGTERM);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    if (!is_alive(kill_pid))
         return true;
 
-    if (is_alive(kill_pid)) {
-        log_debug("KILLING KILL PID: {}", kill_pid);
-        kill(kill_pid, SIGKILL);
-        sleep(1);
-    } else
+    log_debug("KILLING INT PID: {}", kill_pid);
+    kill(kill_pid, SIGINT);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    if (!is_alive(kill_pid))
         return true;
+
+    log_debug("KILLING KILL PID: {}", kill_pid);
+    kill(kill_pid, SIGKILL);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
 
     return !is_alive(kill_pid);
 }

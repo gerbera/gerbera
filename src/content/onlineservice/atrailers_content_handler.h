@@ -52,7 +52,7 @@ class CdsObject;
 /// metadata XML.
 class ATrailersContentHandler {
 public:
-    ATrailersContentHandler(const std::shared_ptr<Context>& context);
+    explicit ATrailersContentHandler(const std::shared_ptr<Context>& context);
 
     /// \brief Sets the service XML from which we will extract the objects.
     /// \return false if service XML contained an error status.

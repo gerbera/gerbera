@@ -560,7 +560,7 @@ public:
     config_option_t keyOption;
     config_option_t valOption;
 
-    ConfigDictionarySetup(config_option_t option, const char* xpath, const char* help, DictionaryInitFunction init = nullptr, bool notEmpty = false, bool itemNotEmpty = false)
+    explicit ConfigDictionarySetup(config_option_t option, const char* xpath, const char* help, DictionaryInitFunction init = nullptr, bool notEmpty = false, bool itemNotEmpty = false)
         : ConfigSetup(option, xpath, help)
         , notEmpty(notEmpty)
         , itemNotEmpty(itemNotEmpty)
@@ -568,7 +568,7 @@ public:
     {
     }
 
-    ConfigDictionarySetup(config_option_t option, const char* xpath, const char* help, config_option_t nodeOption, config_option_t keyOption, config_option_t valOption, bool notEmpty = false, bool itemNotEmpty = false)
+    explicit ConfigDictionarySetup(config_option_t option, const char* xpath, const char* help, config_option_t nodeOption, config_option_t keyOption, config_option_t valOption, bool notEmpty = false, bool itemNotEmpty = false)
         : ConfigSetup(option, xpath, help)
         , notEmpty(notEmpty)
         , itemNotEmpty(itemNotEmpty)

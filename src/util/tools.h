@@ -312,9 +312,9 @@ std::string getAVIFourCC(const fs::path& avi_filename);
 
 /// \brief Compare sockaddr
 /// inspired by: http://www.opensource.apple.com/source/postfix/postfix-197/postfix/src/util/sock_addr.c
-#define SOCK_ADDR_IN_PTR(sa) ((const struct sockaddr_in*)(sa))
+#define SOCK_ADDR_IN_PTR(sa) reinterpret_cast<const struct sockaddr_in*>(sa)
 #define SOCK_ADDR_IN_ADDR(sa) SOCK_ADDR_IN_PTR(sa)->sin_addr
-#define SOCK_ADDR_IN6_PTR(sa) ((const struct sockaddr_in6*)(sa))
+#define SOCK_ADDR_IN6_PTR(sa) reinterpret_cast<const struct sockaddr_in6*>(sa)
 #define SOCK_ADDR_IN6_ADDR(sa) SOCK_ADDR_IN6_PTR(sa)->sin6_addr
 std::string getHostName(const struct sockaddr* addr);
 int sockAddrCmpAddr(const struct sockaddr* sa, const struct sockaddr* sb);

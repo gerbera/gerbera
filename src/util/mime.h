@@ -44,7 +44,7 @@ class Config;
 
 class Mime {
 public:
-    Mime(const std::shared_ptr<Config>& config);
+    explicit Mime(const std::shared_ptr<Config>& config);
     virtual ~Mime();
 
 #ifdef HAVE_MAGIC
