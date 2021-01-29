@@ -44,17 +44,17 @@ namespace fs = std::filesystem;
 #define SOURCE (-1)
 #define OFF 0
 
-typedef enum {
+enum transcoding_type_t {
     TR_None,
     TR_External,
     TR_Remote
-} transcoding_type_t;
+};
 
-typedef enum {
+enum avi_fourcc_listmode_t {
     FCC_None,
     FCC_Process,
     FCC_Ignore
-} avi_fourcc_listmode_t;
+};
 
 /// \brief this class keeps all data associated with one transcoding profile.
 class TranscodingProfile {

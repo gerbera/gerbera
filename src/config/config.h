@@ -39,7 +39,7 @@ class Database;
 class DirectoryConfigList;
 class TranscodingProfileList;
 
-typedef enum {
+enum config_option_t {
     CFG_SERVER_PORT = 0,
     CFG_SERVER_IP,
     CFG_SERVER_NETWORK_INTERFACE,
@@ -262,7 +262,7 @@ typedef enum {
     ATTR_DIRECTORIES_TWEAK_FANART_FILE,
     ATTR_DIRECTORIES_TWEAK_SUBTILTE_FILE,
     ATTR_DIRECTORIES_TWEAK_RESOURCE_FILE,
-} config_option_t;
+};
 
 class Config {
 public:

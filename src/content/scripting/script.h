@@ -47,18 +47,18 @@ class StringConverter;
 // perform garbage collection after script has been run for x times
 #define JS_CALL_GC_AFTER_NUM (1000)
 
-typedef enum {
+enum script_class_t {
     S_IMPORT = 0,
     S_PLAYLIST
-} script_class_t;
+};
 
-typedef enum {
+enum charset_convert_t {
     M2I,
     F2I,
     J2I,
     P2I,
     I2I,
-} charset_convert_t;
+};
 
 class Script {
 public:
