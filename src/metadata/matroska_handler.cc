@@ -140,7 +140,7 @@ std::unique_ptr<IOHandler> MatroskaHandler::serveContent(std::shared_ptr<CdsObje
     if (item == nullptr)
         return nullptr;
 
-    MemIOHandler* io_handler;
+    MemIOHandler* io_handler = nullptr;
     parseMKV(item, &io_handler);
 
     std::unique_ptr<IOHandler> h;

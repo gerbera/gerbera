@@ -42,10 +42,10 @@ IOHandlerChainer::IOHandlerChainer(std::unique_ptr<IOHandler>& readFrom, std::un
     if (readFrom == nullptr || writeTo == nullptr)
         throw_std_runtime_error("readFrom and writeTo need to be set");
     status = 0;
+    readFrom->open(UPNP_READ);
     this->chunkSize = chunkSize;
     this->readFrom = std::move(readFrom);
     this->writeTo = std::move(writeTo);
-    readFrom->open(UPNP_READ);
     buf = static_cast<char*>(malloc(chunkSize));
     startThread();
 }
