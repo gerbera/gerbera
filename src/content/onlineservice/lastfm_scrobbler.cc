@@ -103,7 +103,7 @@ void LastFm::startedPlaying(std::shared_ptr<CdsItem> item)
 
     std::string trackNr = item->getMetadata(M_TRACKNUMBER);
     if (!trackNr.empty())
-        info->track_nr = atoi(trackNr.c_str());
+        info->track_nr = std::stoi(trackNr);
 
     if (item->getResourceCount() > 0) {
         auto resource = item->getResource(0);
