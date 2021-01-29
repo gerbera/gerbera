@@ -1,16 +1,12 @@
-FROM alpine:3.12 AS builder
+FROM alpine:3.13 AS builder
 
-RUN apk add --no-cache tini gcc g++ pkgconf make automake autoconf libtool \
+RUN apk add --no-cache tini gcc g++ pkgconf make \
 	util-linux-dev sqlite-dev mariadb-connector-c-dev cmake zlib-dev fmt-dev \
-	file-dev libexif-dev curl-dev ffmpeg-dev ffmpegthumbnailer-dev wget xz \
+	file-dev libexif-dev curl-dev ffmpeg-dev ffmpegthumbnailer-dev \
 	libmatroska-dev libebml-dev taglib-dev pugixml-dev spdlog-dev \
-	tree
+	duktape-dev libupnp-dev git bash
 
 WORKDIR /gerbera_build
-
-COPY ./scripts ./scripts
-RUN bash scripts/install-pupnp.sh && \
-    bash scripts/install-duktape.sh
 
 COPY . .
 RUN mkdir build && \
@@ -20,15 +16,10 @@ RUN mkdir build && \
         -DWITH_EXIF=1 -DWITH_LASTFM=0 -DWITH_SYSTEMD=0 -DWITH_DEBUG=1 && \
     make -j`nproc`
 
-FROM alpine:3.12
+FROM alpine:3.13
 RUN apk add --no-cache tini util-linux sqlite mariadb-connector-c zlib fmt \
 	file libexif curl ffmpeg-libs ffmpegthumbnailer libmatroska libebml taglib \
-	pugixml spdlog sqlite-libs
-
-# Manually built libs
-COPY --from=builder /usr/local/lib/libupnp.so* /usr/local/lib/
-COPY --from=builder /usr/local/lib/libixml.so* /usr/local/lib/
-COPY --from=builder /usr/local/lib/libduktape.so* /usr/local/lib/
+	pugixml spdlog sqlite-libs libupnp duktape
 
 # Gerbera itself
 COPY --from=builder /gerbera_build/build/gerbera /bin/gerbera
