@@ -1493,18 +1493,18 @@ void ConfigManager::updateConfigFromDatabase(std::shared_ptr<Database> database)
                     std::string parValue = cfgValue.value;
                     if (cfgValue.status == STATUS_CHANGED || cfgValue.status == STATUS_UNCHANGED) {
                         if (!cs->updateDetail(cfgValue.item, parValue, self)) {
-                            log_error("unhandled option {} != {}", cfgValue.item, cs->xpath);
+                            log_error("unhandled option {} != {}", cfgValue.item.c_str(), cs->xpath);
                         }
                     } else if (cfgValue.status == STATUS_REMOVED || cfgValue.status == STATUS_ADDED || cfgValue.status == STATUS_MANUAL) {
                         std::map<std::string, std::string> arguments = { { "status", cfgValue.status } };
                         if (!cs->updateDetail(cfgValue.item, parValue, self, &arguments)) {
-                            log_error("unhandled option {} != {}", cfgValue.item, cs->xpath);
+                            log_error("unhandled option {} != {}", cfgValue.item.c_str(), cs->xpath);
                         }
                     }
                 }
             }
         } catch (const std::runtime_error& e) {
-            log_error("error setting option {}. Exception {}", cfgValue.key, e.what());
+            log_error("error setting option {}. Exception {}", cfgValue.key.c_str(), e.what());
         }
     }
 }
@@ -1512,7 +1512,7 @@ void ConfigManager::updateConfigFromDatabase(std::shared_ptr<Database> database)
 void ConfigManager::setOrigValue(const std::string& item, const std::string& value)
 {
     if (!origValues.count(item)) {
-        log_debug("Caching {}='{}'", item, value);
+        log_debug("Caching {}='{}'", item.c_str(), value.c_str());
         origValues[item] = value;
     }
 }

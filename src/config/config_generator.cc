@@ -41,7 +41,7 @@ std::shared_ptr<pugi::xml_node> ConfigGenerator::init()
 
 std::shared_ptr<pugi::xml_node> ConfigGenerator::getNode(const std::string& tag)
 {
-    log_debug("reading '{}' -> {}", tag, !generated.count(tag));
+    log_debug("reading '{}' -> {}", tag.c_str(), !generated.count(tag));
     return generated[tag];
 }
 
@@ -63,14 +63,14 @@ std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(const std::string& tag
                     auto newNode = generated[parent]->append_child(part.c_str());
                     generated[nodeKey] = std::make_shared<pugi::xml_node>(newNode);
                     result = generated[nodeKey]; // returns the last generated node even if there is an attribute
-                    log_debug("{}: added node '{}' to '{}'", nodeKey, part, parent);
+                    log_debug("{}: added node '{}' to '{}'", nodeKey.c_str(), part.c_str(), parent.c_str());
                     parent = nodeKey;
                 }
             } else {
                 if (makeLastChild && tag == nodeKey + "/") {
                     auto newNode = generated[parent]->append_child(part.c_str());
                     generated[nodeKey] = std::make_shared<pugi::xml_node>(newNode);
-                    log_debug("{}: added multi-node '{}' to '{}'", nodeKey, part, parent);
+                    log_debug("{}: added multi-node '{}' to '{}'", nodeKey.c_str(), part.c_str(), parent.c_str());
                 }
                 result = generated[nodeKey]; // returns the last generated node even if there is an attribute
                 parent = nodeKey;
@@ -78,10 +78,10 @@ std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(const std::string& tag
         }
         if (tag.back() != '/') { // create entries without content
             if (attribute.empty()) {
-                log_debug("setting value '{}' to {}", value, nodeKey);
+                log_debug("setting value '{}' to {}", value.c_str(), nodeKey.c_str());
                 generated[nodeKey]->append_child(pugi::node_pcdata).set_value(value.c_str());
             } else {
-                log_debug("setting value '{}' to {}:{}", value, parent, attribute);
+                log_debug("setting value '{}' to {}:{}", value.c_str(), parent.c_str(), attribute.c_str());
                 generated[parent]->append_attribute(attribute.c_str()) = value.c_str();
             }
         }
