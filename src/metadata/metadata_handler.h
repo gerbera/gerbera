@@ -86,7 +86,7 @@ class IOHandler;
 #define EXIF_THUMBNAIL "EX_TH"
 #define THUMBNAIL "th" // thumbnail without need for special handling
 
-typedef enum {
+enum metadata_fields_t {
     M_TITLE = 0,
     M_ARTIST,
     M_ALBUM,
@@ -113,7 +113,7 @@ typedef enum {
     M_ORCHESTRA,
 
     M_MAX
-} metadata_fields_t;
+};
 
 constexpr std::array<std::pair<metadata_fields_t, const char*>, M_MAX> mt_keys = { {
     { M_TITLE, "dc:title" },
@@ -140,7 +140,7 @@ constexpr std::array<std::pair<metadata_fields_t, const char*>, M_MAX> mt_keys =
 } };
 
 // res tag attributes
-typedef enum {
+enum resource_attributes_t {
     R_SIZE = 0,
     R_DURATION,
     R_BITRATE,
@@ -155,7 +155,7 @@ typedef enum {
     R_FANART_RES_ID,
     R_BITS_PER_SAMPLE,
     R_MAX
-} resource_attributes_t;
+};
 
 constexpr std::array<std::pair<resource_attributes_t, const char*>, R_MAX> res_keys = { {
     { R_SIZE, "size" },
