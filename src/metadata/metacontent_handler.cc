@@ -146,7 +146,7 @@ std::unique_ptr<IOHandler> FanArtHandler::serveContent(std::shared_ptr<CdsObject
     fs::path path = item->getResource(resNum)->getAttribute(R_RESOURCE_FILE);
     if (path.empty()) {
         auto tweak = config->getDirectoryTweakOption(CFG_IMPORT_DIRECTORIES_LIST)->get(item->getLocation());
-        path = getContentPath(tweak == nullptr && !tweak->hasFanArtFile() ? names : std::vector<std::string> { tweak->getFanArtFile() }, item, tweak != nullptr && tweak->hasCaseSensitive() ? tweak->getCaseSensitive() : caseSensitive);
+        path = getContentPath(tweak == nullptr || !tweak->hasFanArtFile() ? names : std::vector<std::string> { tweak->getFanArtFile() }, item, tweak != nullptr && tweak->hasCaseSensitive() ? tweak->getCaseSensitive() : caseSensitive);
     }
     log_debug("FanArt: Opening name: {}", path.c_str());
     struct stat statbuf;
