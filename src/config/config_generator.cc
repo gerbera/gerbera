@@ -138,7 +138,7 @@ std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(config_option_t option
     return setValue(fmt::format("{}/{}/{}", cs->xpath, ConfigManager::mapConfigOption(dict), ConfigSetup::ensureAttribute(attr)), value);
 }
 
-std::string ConfigGenerator::generate(const fs::path& userHome, const fs::path& configDir, const fs::path& prefixDir, const fs::path& magicFile)
+std::string ConfigGenerator::generate(const fs::path& userHome, const fs::path& configDir, const fs::path& dataDir, const fs::path& magicFile)
 {
     auto decl = doc.prepend_child(pugi::node_declaration);
     decl.append_attribute("version") = "1.0";
@@ -157,8 +157,8 @@ std::string ConfigGenerator::generate(const fs::path& userHome, const fs::path& 
      information on creating and using config.xml configuration files.\n\
     ");
 
-    generateServer(userHome, configDir, prefixDir);
-    generateImport(prefixDir, magicFile);
+    generateServer(userHome, configDir, dataDir);
+    generateImport(dataDir, magicFile);
     generateTranscoding();
 
     std::ostringstream buf;
@@ -166,7 +166,7 @@ std::string ConfigGenerator::generate(const fs::path& userHome, const fs::path& 
     return buf.str();
 }
 
-void ConfigGenerator::generateServer(const fs::path& userHome, const fs::path& configDir, const fs::path& prefixDir)
+void ConfigGenerator::generateServer(const fs::path& userHome, const fs::path& configDir, const fs::path& dataDir)
 {
     auto server = setValue("/server/");
     generateUi();
@@ -177,7 +177,7 @@ void ConfigGenerator::generateServer(const fs::path& userHome, const fs::path& c
     fs::path homepath = userHome / configDir;
     setValue(CFG_SERVER_HOME, homepath.string());
 
-    std::string webRoot = prefixDir / DEFAULT_WEB_DIR;
+    std::string webRoot = dataDir / DEFAULT_WEB_DIR;
     setValue(CFG_SERVER_WEBROOT, webRoot);
 
     auto aliveinfo = server->append_child(pugi::node_comment);

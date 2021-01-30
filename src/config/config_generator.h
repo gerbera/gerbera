@@ -38,9 +38,9 @@ public:
     ConfigGenerator();
     ~ConfigGenerator() = default;
 
-    static std::string generate(const fs::path& userHome, const fs::path& configDir, const fs::path& prefixDir, const fs::path& magicFile);
+    static std::string generate(const fs::path& userHome, const fs::path& configDir, const fs::path& dataDir, const fs::path& magicFile);
 
-    static void generateServer(const fs::path& userHome, const fs::path& configDir, const fs::path& prefixDir);
+    static void generateServer(const fs::path& userHome, const fs::path& configDir, const fs::path& dataDir);
     static void generateUi();
     static void generateExtendedRuntime();
     static void generateDatabase();

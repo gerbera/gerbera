@@ -56,29 +56,29 @@
 #include "util/string_converter.h"
 #include "util/tools.h"
 
-bool ConfigManager::debug_logging = false;
+bool ConfigManager::debug = false;
 
 ConfigManager::ConfigManager(fs::path filename,
-    const fs::path& userhome, const fs::path& config_dir,
-    fs::path prefix_dir, fs::path magic_file,
+    const fs::path& userHome, const fs::path& configDir,
+    fs::path dataDir, fs::path magicFile,
     std::string ip, std::string interface, in_port_t port,
-    bool debug_logging)
+    bool debug)
     : filename(std::move(filename))
-    , prefix_dir(std::move(prefix_dir))
-    , magic_file(std::move(magic_file))
+    , dataDir(std::move(dataDir))
+    , magicFile(std::move(magicFile))
     , ip(std::move(ip))
     , interface(std::move(interface))
     , port(port)
     , xmlDoc(std::make_unique<pugi::xml_document>())
     , options(std::make_unique<std::vector<std::shared_ptr<ConfigOption>>>())
 {
-    ConfigManager::debug_logging = debug_logging;
+    ConfigManager::debug = debug;
 
     options->resize(CFG_MAX);
 
     if (this->filename.empty()) {
         // No config file path provided, so lets find one.
-        fs::path home = userhome / config_dir;
+        fs::path home = userHome / configDir;
         this->filename += home / DEFAULT_CONFIG_NAME;
     }
 
@@ -200,6 +200,9 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = 
     std::make_shared<ConfigStringSetup>(CFG_SERVER_STORAGE_MYSQL_DATABASE,
         "/server/storage/mysql/database", "config-server.html#storage",
         DEFAULT_MYSQL_DB),
+    std::make_shared<ConfigStringSetup>(CFG_SERVER_STORAGE_MYSQL_INIT_SQL_PATH,
+        "/server/storage/mysql/init-sql-path", "config-server.html#storage",
+        ""), // This should really be "dataDir / mysql.sql"
 #else
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_STORAGE_MYSQL_ENABLED,
         "/server/storage/mysql/attribute::enabled", "config-server.html#storage",
@@ -233,6 +236,10 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = 
     std::make_shared<ConfigIntSetup>(CFG_SERVER_STORAGE_SQLITE_BACKUP_INTERVAL,
         "/server/storage/sqlite3/backup/attribute::interval", "config-server.html#storage",
         DEFAULT_SQLITE_BACKUP_INTERVAL, 1, ConfigIntSetup::CheckMinValue),
+
+    std::make_shared<ConfigStringSetup>(CFG_SERVER_STORAGE_SQLITE_INIT_SQL_PATH,
+        "/server/storage/sqlite3/init-sql-path", "config-server.html#storage",
+        ""), // This should really be "dataDir / sqlite3.sql"
 
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_UI_ENABLED,
         "/server/ui/attribute::enabled", "config-server.html#ui",
@@ -931,6 +938,13 @@ void ConfigManager::load(const fs::path& userHome)
         setOption(root, CFG_SERVER_STORAGE_MYSQL_PORT);
         setOption(root, CFG_SERVER_STORAGE_MYSQL_SOCKET);
         setOption(root, CFG_SERVER_STORAGE_MYSQL_PASSWORD);
+
+        co = findConfigSetup(CFG_SERVER_STORAGE_MYSQL_INIT_SQL_PATH);
+        temp = co->getXmlContent(root);
+        if (temp.empty()) {
+            temp = dataDir / "mysql.sql";
+        }
+        co->makeOption(temp, self);
     }
 #else
     if (mysql_en) {
@@ -946,6 +960,13 @@ void ConfigManager::load(const fs::path& userHome)
         setOption(root, CFG_SERVER_STORAGE_SQLITE_RESTORE);
         setOption(root, CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED);
         setOption(root, CFG_SERVER_STORAGE_SQLITE_BACKUP_INTERVAL);
+
+        co = findConfigSetup(CFG_SERVER_STORAGE_SQLITE_INIT_SQL_PATH);
+        temp = co->getXmlContent(root);
+        if (temp.empty()) {
+            temp = dataDir / "sqlite3.sql";
+        }
+        co->makeOption(temp, self);
     }
 
     std::string dbDriver;
@@ -1026,8 +1047,7 @@ void ConfigManager::load(const fs::path& userHome)
     co->setDefaultValue(temp);
     charset = co->getXmlContent(root);
     try {
-        auto conv = std::make_unique<StringConverter>(charset,
-            DEFAULT_INTERNAL_CHARSET);
+        auto conv = std::make_unique<StringConverter>(charset, DEFAULT_INTERNAL_CHARSET);
     } catch (const std::runtime_error& e) {
         throw std::runtime_error("Error in config file: unsupported metadata-charset specified: " + charset);
     }
@@ -1038,8 +1058,7 @@ void ConfigManager::load(const fs::path& userHome)
     co->setDefaultValue(temp);
     charset = co->getXmlContent(root);
     try {
-        auto conv = std::make_unique<StringConverter>(charset,
-            DEFAULT_INTERNAL_CHARSET);
+        auto conv = std::make_unique<StringConverter>(charset, DEFAULT_INTERNAL_CHARSET);
     } catch (const std::runtime_error& e) {
         throw std::runtime_error("Error in config file: unsupported playlist-charset specified: " + charset);
     }
@@ -1089,11 +1108,11 @@ void ConfigManager::load(const fs::path& userHome)
 
 #ifdef HAVE_JS
     co = findConfigSetup(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT);
-    co->setDefaultValue(prefix_dir / DEFAULT_JS_DIR / DEFAULT_PLAYLISTS_SCRIPT);
+    co->setDefaultValue(dataDir / DEFAULT_JS_DIR / DEFAULT_PLAYLISTS_SCRIPT);
     co->makeOption(root, self);
 
     co = findConfigSetup(CFG_IMPORT_SCRIPTING_COMMON_SCRIPT);
-    co->setDefaultValue(prefix_dir / DEFAULT_JS_DIR / DEFAULT_COMMON_SCRIPT);
+    co->setDefaultValue(dataDir / DEFAULT_JS_DIR / DEFAULT_COMMON_SCRIPT);
     co->makeOption(root, self);
 
     setOption(root, CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS);
@@ -1121,7 +1140,7 @@ void ConfigManager::load(const fs::path& userHome)
     args["isFile"] = std::to_string(true);
     args["mustExist"] = std::to_string(layoutType == "js");
     args["notEmpty"] = std::to_string(layoutType == "js");
-    co->setDefaultValue(prefix_dir / DEFAULT_JS_DIR / DEFAULT_IMPORT_SCRIPT);
+    co->setDefaultValue(dataDir / DEFAULT_JS_DIR / DEFAULT_IMPORT_SCRIPT);
     co->makeOption(root, self, &args);
     args.clear();
     auto script_path = co->getValue()->getOption();
@@ -1229,7 +1248,7 @@ void ConfigManager::load(const fs::path& userHome)
     co = findConfigSetup(CFG_IMPORT_MAGIC_FILE);
     args["isFile"] = "true";
     args["resolveEmpty"] = "false";
-    co->makeOption(!magic_file.empty() ? magic_file.string() : co->getXmlContent(root), self, &args);
+    co->makeOption(!magicFile.empty() ? magicFile.string() : co->getXmlContent(root), self, &args);
     args.clear();
 #endif
 
@@ -1277,10 +1296,6 @@ void ConfigManager::load(const fs::path& userHome)
     std::ostringstream buf;
     xmlDoc->print(buf, "  ");
     log_debug("Config file dump after validation: {}", buf.str().c_str());
-
-#ifdef TOMBDEBUG
-    dumpOptions();
-#endif
 
     // now the XML is no longer needed we can destroy it
     xmlDoc = nullptr;
@@ -1337,30 +1352,6 @@ void ConfigManager::setOrigValue(const std::string& item, bool value)
 void ConfigManager::setOrigValue(const std::string& item, int value)
 {
     origValues.try_emplace(item, fmt::format("{}", value));
-}
-
-void ConfigManager::dumpOptions() const
-{
-#ifdef TOMBDEBUG
-    log_debug("Dumping options!");
-    for (int i = 0; i < int(CFG_MAX); i++) {
-        try {
-            std::string opt = getOption(config_option_t(i));
-            log_debug("    Option {:02d} {}", i, opt.c_str());
-        } catch (const std::runtime_error& e) {
-        }
-        try {
-            int opt = getIntOption(config_option_t(i));
-            log_debug(" IntOption {:02d} {}", i, opt);
-        } catch (const std::runtime_error& e) {
-        }
-        try {
-            bool opt = getBoolOption(config_option_t(i));
-            log_debug("BoolOption {:02d} {}", i, opt ? "true" : "false");
-        } catch (const std::runtime_error& e) {
-        }
-    }
-#endif
 }
 
 // The validate function ensures that the array is completely filled!

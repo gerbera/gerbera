@@ -59,10 +59,10 @@ class TranscodingProfileList;
 class ConfigManager : public Config, public std::enable_shared_from_this<Config> {
 public:
     ConfigManager(fs::path filename,
-        const fs::path& userhome, const fs::path& config_dir,
-        fs::path prefix_dir, fs::path magic_file,
+        const fs::path& userHome, const fs::path& configDir,
+        fs::path dataDir, fs::path magicFile,
         std::string ip, std::string interface, in_port_t port,
-        bool debug_logging);
+        bool debug);
     ~ConfigManager() override;
 
     /// \brief Returns the name of the config file that was used to launch the server.
@@ -136,19 +136,20 @@ public:
     void setOrigValue(const std::string& item, bool value) override;
     void setOrigValue(const std::string& item, int value) override;
 
-    static bool isDebugLogging() { return debug_logging; }
+    static bool isDebugLogging() { return debug; }
+    fs::path getDataDir() const override { return dataDir; };
 
 protected:
     static const std::vector<std::shared_ptr<ConfigSetup>> complexOptions;
     static const std::map<config_option_t, std::vector<config_option_t>> parentOptions;
 
     fs::path filename;
-    fs::path prefix_dir;
-    fs::path magic_file;
+    fs::path dataDir;
+    fs::path magicFile;
     std::string ip;
     std::string interface;
     in_port_t port;
-    static bool debug_logging;
+    static bool debug;
     std::map<std::string, std::string> origValues;
 
     std::unique_ptr<pugi::xml_document> xmlDoc;
@@ -158,8 +159,6 @@ protected:
     std::shared_ptr<ConfigOption> setOption(const pugi::xml_node& root, config_option_t option, const std::map<std::string, std::string>* arguments = nullptr);
 
     std::shared_ptr<Config> getSelf();
-
-    void dumpOptions() const;
 };
 
 #endif // __CONFIG_MANAGER_H__

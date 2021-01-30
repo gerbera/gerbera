@@ -324,43 +324,4 @@ std::string sockAddrGetNameInfo(const struct sockaddr* sa);
 int find_local_port(in_port_t range_min, in_port_t range_max);
 #endif
 
-#ifdef TOMBDEBUG
-
-struct profiling_t {
-    struct timespec sum;
-    struct timespec last_start;
-    bool running;
-    pthread_t thread;
-};
-
-#define PROFILING_T_INIT                          \
-    {                                             \
-        { 0, 0 }, { 0, 0 }, false, pthread_self() \
-    }
-
-void profiling_start(struct profiling_t* data);
-void profiling_end(struct profiling_t* data);
-void profiling_print(struct profiling_t* data);
-
-#define PROF_INIT(var) profiling_t var = PROFILING_T_INIT
-#define PROF_START(var) profiling_start(var)
-#define PROF_END(var) profiling_end(var)
-#define PROF_PRINT(var) profiling_print(var)
-
-#else
-
-#define profiling_t int
-#define PROF_INIT(var) profiling_t var
-#define PROF_START(var)
-#define PROF_END(var)
-#define PROF_PRINT(var)
-
-/*
-#define profiling_start()
-#define profiling_end()
-#define profiling_get_time()
-*/
-
-#endif
-
 #endif // __TOOLS_H__
