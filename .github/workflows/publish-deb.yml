@@ -21,15 +21,23 @@ jobs:
         DEBIAN_FRONTEND: noninteractive
         TZ: Etc/UTC
     steps:
+      - name: Install script pre-reqs
+        shell: bash
+        run: |
+          ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+          apt-get update -y
+          apt-get install -y lsb-release sudo wget curl
+          # Actions needs 2.18, Bionic has 2.17....
+          if [[ $(lsb_release -c --short) == "bionic" ]]; then
+            sudo apt-get install -y software-properties-common
+            sudo add-apt-repository -y ppa:git-core/ppa
+            sudo apt-get update -y
+          fi
+          apt-get install -y git
+
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0 # We need history/tags to generate version info
-
-      - name: Install script pre-reqs
-        run: |
-          ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-          apt-get update
-          apt-get install -y lsb-release sudo git wget curl
 
       - name: Build and upload deb
         run: |
