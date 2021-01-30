@@ -35,12 +35,11 @@
 #include <csignal>
 #include <cstdio>
 #include <cstring>
-#include <fcntl.h>
 #include <filesystem>
+
+#include <fcntl.h>
 #include <sys/stat.h>
-#include <sys/types.h>
 #include <unistd.h>
-#include <utility>
 
 #include "cds_objects.h"
 #include "config/config_manager.h"

@@ -44,6 +44,7 @@
 #include <cerrno>
 #include <sys/inotify.h>
 #include <sys/ioctl.h>
+#include <sys/select.h>
 #include <unistd.h>
 #ifdef SOLARIS
 #include <sys/filio.h> // FIONREAD

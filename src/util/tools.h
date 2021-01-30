@@ -41,7 +41,6 @@
 namespace fs = std::filesystem;
 
 #include <netinet/in.h>
-#include <sys/time.h>
 
 #include "common.h"
 

@@ -33,8 +33,6 @@
 
 #include <chrono>
 #include <csignal>
-#include <sys/types.h>
-#include <utility>
 
 #include "database/database.h"
 #include "server.h"
