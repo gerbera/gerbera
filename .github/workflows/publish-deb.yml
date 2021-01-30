@@ -21,21 +21,27 @@ jobs:
         DEBIAN_FRONTEND: noninteractive
         TZ: Etc/UTC
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # We need history/tags to generate version info
+
       - name: Install script pre-reqs
         run: |
           ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
           apt-get update
           apt-get install -y lsb-release sudo git wget curl
+
       - name: Build and upload deb
         run: |
           bash scripts/debian/build-deb.sh
+
       - uses: frabert/replace-string-action@v1.2
         id: replace
         with:
           pattern: '(\w+):([\w\.]+)'
           string: ${{ matrix.os-ver }}
           replace-with: $1-$2.deb
+
       - uses: actions/upload-artifact@v2
         with:
           name: ${{ steps.replace.outputs.replaced }}
