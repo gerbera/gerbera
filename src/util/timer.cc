@@ -32,7 +32,6 @@
 #include "timer.h" // API
 
 #include <cassert>
-#include <utility>
 
 Timer::Timer()
     : shutdownFlag(false)

@@ -33,7 +33,6 @@
 #include "exiv2_handler.h" // API
 
 #include <exiv2/exiv2.hpp>
-#include <utility>
 
 #include "cds_objects.h"
 #include "config/config_manager.h"

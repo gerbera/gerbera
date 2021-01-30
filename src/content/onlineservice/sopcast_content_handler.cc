@@ -32,8 +32,6 @@
 #ifdef SOPCAST
 #include "sopcast_content_handler.h" // API
 
-#include <utility>
-
 #include "cds_objects.h"
 #include "config/config_manager.h"
 #include "metadata/metadata_handler.h"

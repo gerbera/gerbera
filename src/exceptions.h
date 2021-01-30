@@ -34,7 +34,6 @@
 
 #include <stdexcept>
 #include <string>
-#include <utility>
 
 #ifdef __PRETTY_FUNCTION__
 // GCC + llvm

@@ -32,7 +32,6 @@
 #include "pages.h" // API
 
 #include <cstdio>
-#include <utility>
 
 #include "config/config_manager.h"
 #include "content/content_manager.h"

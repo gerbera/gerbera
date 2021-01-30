@@ -31,8 +31,6 @@
 
 #include "upnp_cm.h" // API
 
-#include <utility>
-
 #include "config/config_manager.h"
 #include "database/database.h"
 #include "util/tools.h"

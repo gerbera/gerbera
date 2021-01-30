@@ -32,7 +32,6 @@
 #include "request_handler.h" // API
 
 #include <numeric>
-#include <utility>
 #include <vector>
 
 #include "content/content_manager.h"

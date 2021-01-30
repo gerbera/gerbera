@@ -34,7 +34,6 @@
 #ifdef HAVE_CURL
 #include <curl/curl.h>
 #include <iostream>
-#include <utility>
 #endif
 
 #include "config/config_manager.h"

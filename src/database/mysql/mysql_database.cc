@@ -33,7 +33,6 @@
 #include "mysql_database.h"
 
 #include <cstdlib>
-#include <utility>
 
 #include <netinet/in.h>
 #include <zlib.h>

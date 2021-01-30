@@ -33,10 +33,10 @@
 #include "autoscan_inotify.h" // API
 
 #include <cassert>
-#include <dirent.h>
 #include <filesystem>
+
+#include <dirent.h>
 #include <sys/stat.h>
-#include <utility>
 
 #include "content_manager.h"
 #include "database/database.h"

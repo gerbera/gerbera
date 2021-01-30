@@ -33,7 +33,6 @@
 #include "libexif_handler.h" // API
 
 #include <iohandler/file_io_handler.h>
-#include <utility>
 
 #include "cds_objects.h"
 #include "config/config_manager.h"

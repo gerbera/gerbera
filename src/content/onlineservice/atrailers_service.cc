@@ -33,7 +33,6 @@
 #include "atrailers_service.h" // API
 
 #include <string>
-#include <utility>
 
 #include "atrailers_content_handler.h"
 #include "config/config_manager.h"

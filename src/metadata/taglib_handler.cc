@@ -46,7 +46,6 @@
 #include <taglib/tpropertymap.h>
 #include <taglib/vorbisfile.h>
 #include <taglib/wavpackfile.h>
-#include <utility>
 
 #include "cds_objects.h"
 #include "config/config_manager.h"

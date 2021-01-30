@@ -33,7 +33,6 @@
 #include "playlist_parser_script.h" // API
 
 #include <cstdlib>
-#include <utility>
 
 #include "config/config_manager.h"
 #include "content/content_manager.h"

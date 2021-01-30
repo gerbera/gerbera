@@ -31,8 +31,6 @@
 
 #include "pages.h" // API
 
-#include <utility>
-
 #include "database/database.h"
 #include "util/string_converter.h"
 #include "util/tools.h"

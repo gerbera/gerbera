@@ -31,8 +31,6 @@
 
 #include "upnp_xml.h" // API
 
-#include <utility>
-
 #include "config/config_manager.h"
 #include "database/database.h"
 #include "metadata/metadata_handler.h"

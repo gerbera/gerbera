@@ -33,7 +33,6 @@
 
 #include <memory>
 #include <unordered_set>
-#include <utility>
 
 #include "config/config_manager.h"
 #include "util/timer.h"

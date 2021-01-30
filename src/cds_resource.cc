@@ -32,7 +32,6 @@
 #include "cds_resource.h" // API
 
 #include <sstream>
-#include <utility>
 
 #include "util/tools.h"
 

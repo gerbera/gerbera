@@ -36,7 +36,6 @@
 #define __ONLINE_SERVICE_H__
 
 #include <memory>
-#include <utility>
 #include <vector>
 
 #include "util/timer.h"

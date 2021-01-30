@@ -31,8 +31,6 @@
 
 #include "transcoding.h" // API
 
-#include <utility>
-
 #include "util/tools.h"
 
 TranscodingProfile::TranscodingProfile()

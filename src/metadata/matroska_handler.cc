@@ -27,7 +27,6 @@
 #include "matroska_handler.h" // API
 
 #include <iostream>
-#include <utility>
 #include <vector>
 
 #include <ebml/EbmlHead.h>
