@@ -406,17 +406,6 @@ target_link_libraries(libgerbera PUBLIC pugixml::pugixml)
 find_package(SQLite3 3.7.0 REQUIRED)
 target_link_libraries(libgerbera PUBLIC SQLite::SQLite3)
 
-# We should probably move these two out to their own FindLocale
-include(CheckFunctionExists)
-check_function_exists(nl_langinfo HAVE_NL_LANGINFO)
-if (HAVE_NL_LANGINFO)
-    target_compile_definitions(libgerbera PUBLIC HAVE_NL_LANGINFO)
-endif()
-check_function_exists(setlocale HAVE_SETLOCALE)
-if (HAVE_SETLOCALE)
-    target_compile_definitions(libgerbera PUBLIC HAVE_SETLOCALE)
-endif()
-
 # Link to the socket library if it exists. This is something you need on Solaris/OmniOS/Joyent
 find_library(SOCKET_LIBRARY socket)
 if(SOCKET_LIBRARY)
