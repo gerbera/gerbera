@@ -415,7 +415,7 @@ if(WITH_JS)
 endif()
 
 if(WITH_MYSQL)
-    find_package(mariadb-connector-c)
+    find_package(mariadb-connector-c QUIET)
     if(mariadb-connector-c_FOUND)
         target_include_directories(libgerbera PUBLIC ${mariadb-connector-c_INCLUDE_DIRS})
         target_link_libraries(libgerbera PUBLIC ${mariadb-connector-c_LIBS})

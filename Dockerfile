@@ -11,31 +11,41 @@ WORKDIR /gerbera_build
 COPY . .
 RUN mkdir build && \
     cd build && \
-    cmake ../ -DWITH_MAGIC=1 -DWITH_MYSQL=1 -DWITH_CURL=1 -DWITH_JS=1 \
-        -DWITH_TAGLIB=1 -DWITH_AVCODEC=1 -DWITH_FFMPEGTHUMBNAILER=1 \
-        -DWITH_EXIF=1 -DWITH_LASTFM=0 -DWITH_SYSTEMD=0 -DWITH_DEBUG=1 && \
-    make -j`nproc`
+    cmake ../ \
+        -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+        -DWITH_MAGIC=YES \
+        -DWITH_MYSQL=YES \
+        -DWITH_CURL=YES \
+        -DWITH_JS=YES \
+        -DWITH_TAGLIB=YES \
+        -DWITH_AVCODEC=YES \
+        -DWITH_FFMPEGTHUMBNAILER=YES \
+        -DWITH_EXIF=YES \
+        -DWITH_LASTFM=NO \
+        -DWITH_SYSTEMD=NO \
+        -DWITH_DEBUG=YES && \
+    make -j$(nproc)
 
 FROM alpine:3.13
 RUN apk add --no-cache tini util-linux sqlite mariadb-connector-c zlib fmt \
 	file libexif curl ffmpeg-libs ffmpegthumbnailer libmatroska libebml taglib \
-	pugixml spdlog sqlite-libs libupnp duktape
+	pugixml spdlog sqlite-libs libupnp duktape su-exec
 
 # Gerbera itself
 COPY --from=builder /gerbera_build/build/gerbera /bin/gerbera
 COPY --from=builder /gerbera_build/scripts/js /usr/local/share/gerbera/js
 COPY --from=builder /gerbera_build/web /usr/local/share/gerbera/web
+COPY --from=builder /gerbera_build/src/database/*/*.sql /usr/local/share/gerbera/
 
-RUN mkdir -p /root/.config/gerbera &&\
-    gerbera --create-config > /root/.config/gerbera/config.xml &&\
-    sed 's/<import hidden-files="no">/<import hidden-files="no">\n\
-<autoscan use-inotify="yes">\n\
-<directory location="\/root" mode="inotify" \
-recursive="yes" hidden-files="no"\/>\n\
-<\/autoscan>/' -i /root/.config/gerbera/config.xml
+COPY scripts/docker/docker-entrypoint.sh /usr/local/bin
 
-EXPOSE 49152
+RUN addgroup -S gerbera 2>/dev/null && \
+    adduser -S -D -H -h /var/run/gerbera -s /sbin/nologin -G gerbera -g gerbera gerbera 2>/dev/null && \
+    mkdir /var/run/gerbera/ && chmod 2775 /var/run/gerbera/ && \
+    mkdir /content && chmod 777 /content
+
+EXPOSE 49494
 EXPOSE 1900/udp
 
-ENTRYPOINT ["/sbin/tini", "--"]
-CMD [ "gerbera","-p", "49152" ]
+ENTRYPOINT ["/sbin/tini", "--", "docker-entrypoint.sh"]
+CMD ["gerbera","--port", "49494", "--config", "/var/run/gerbera/config.xml"]
