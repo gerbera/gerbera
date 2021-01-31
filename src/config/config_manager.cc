@@ -32,16 +32,12 @@
 #include "config_manager.h" // API
 
 #include <array>
+#include <clocale>
 #include <cstdio>
 #include <filesystem>
 #include <iostream>
 #include <numeric>
 #include <sys/stat.h>
-
-#if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE)
-#include <clocale>
-#include <langinfo.h>
-#endif
 
 #ifdef HAVE_CURL
 #include <curl/curl.h>
@@ -1013,17 +1009,15 @@ void ConfigManager::load(const fs::path& userHome)
     setOption(root, CFG_IMPORT_LAYOUT_PARENT_PATH);
     setOption(root, CFG_IMPORT_LAYOUT_MAPPING);
 
-#if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE)
-    if (setlocale(LC_ALL, "") != nullptr) {
-        temp = nl_langinfo(CODESET);
-        log_debug("received {} from nl_langinfo", temp.c_str());
+    auto gloc = std::locale::global(std::locale(""));
+    if (!gloc.name().empty()) {
+        temp = gloc.name();
+        log_debug("Global locale is: {}", temp.c_str());
     }
 
     if (temp.empty())
         temp = DEFAULT_FILESYSTEM_CHARSET;
-#else
-    temp = DEFAULT_FILESYSTEM_CHARSET;
-#endif
+
     // check if the one we take as default is actually available
     co = findConfigSetup(CFG_IMPORT_FILESYSTEM_CHARSET);
     try {
