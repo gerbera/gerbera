@@ -538,40 +538,12 @@ if(WITH_TESTS)
     add_subdirectory(test)
 endif()
 
-add_executable(zpipe src/database/create/zpipe.c)
-target_link_libraries(zpipe ZLIB::ZLIB)
-
-add_custom_command(OUTPUT sqlite3_create_sql.h
-        COMMAND bash ARGS build_headers.sh sqlite $<TARGET_FILE:zpipe> ${CMAKE_CURRENT_BINARY_DIR}
-        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/src/database/create
-        DEPENDS
-            zpipe
-            src/database/create/build_headers.sh
-            src/database/create/sqlite3.sql
-            src/database/create/sqlite3.sql.tmpl.f
-            src/database/create/sqlite3.sql.tmpl.h)
-target_sources(libgerbera PRIVATE sqlite3_create_sql.h)
-
-if (WITH_MYSQL)
-    add_custom_command(OUTPUT mysql_create_sql.h
-            COMMAND bash ARGS build_headers.sh mysql $<TARGET_FILE:zpipe> ${CMAKE_CURRENT_BINARY_DIR}
-            WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/src/database/create
-            DEPENDS
-                zpipe
-                src/database/create/build_headers.sh
-                src/database/create/mysql.sql
-                src/database/create/mysql.sql.tmpl.f
-                src/database/create/mysql.sql.tmpl.h)
-    target_sources(libgerbera PRIVATE mysql_create_sql.h)
-endif()
-target_include_directories(libgerbera PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
-
 INSTALL(TARGETS gerbera DESTINATION bin)
 INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/scripts/js DESTINATION share/gerbera)
 INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/web DESTINATION share/gerbera)
 INSTALL(FILES
-        src/database/create/mysql.sql
-        src/database/create/sqlite3.sql
+        src/database/mysql/mysql.sql
+        src/database/sqlite3/sqlite3.sql
         DESTINATION share/gerbera)
 INSTALL(FILES ${PROJECT_SOURCE_DIR}/doc/gerbera.1 DESTINATION share/man/man1)
 

@@ -38,7 +38,7 @@
 #include <zlib.h>
 
 #include "config/config_manager.h"
-#include "mysql_create_sql.h"
+#include "util/tools.h"
 
 //#define MYSQL_SET_NAMES "/*!40101 SET NAMES utf8 */"
 //#define MYSQL_SELECT_DEBUG
@@ -183,15 +183,6 @@ void MySQLDatabase::init()
         throw_std_runtime_error("The connection to the MySQL database has failed: " + getError(&db));
     }
 
-    /*
-    int res = mysql_real_query(&db, MYSQL_SET_NAMES, strlen(MYSQL_SET_NAMES));
-    if(res)
-    {
-        std::string myError = getError(&db);
-        throw DatabaseException("", "MySQL query 'SET NAMES' failed!");
-    }
-    */
-
     mysql_connection = true;
 
     std::string dbVersion;
@@ -203,30 +194,18 @@ void MySQLDatabase::init()
 
     if (dbVersion.empty()) {
         log_info("Database doesn't seem to exist. Creating database...");
-        unsigned char buf[MS_CREATE_SQL_INFLATED_SIZE + 1]; // + 1 for '\0' at the end of the string
-        unsigned long uncompressed_size = MS_CREATE_SQL_INFLATED_SIZE;
-        int ret = uncompress(buf, &uncompressed_size, mysql_create_sql, MS_CREATE_SQL_DEFLATED_SIZE);
-        if (ret != Z_OK || uncompressed_size != MS_CREATE_SQL_INFLATED_SIZE)
-            throw_std_runtime_error("Error while uncompressing mysql create sql. returned: " + std::to_string(ret));
-        buf[MS_CREATE_SQL_INFLATED_SIZE] = '\0';
+        auto sqlFilePath = config->getOption(CFG_SERVER_STORAGE_MYSQL_INIT_SQL_PATH);
+        log_debug("Loading initialisation SQL from: {}", sqlFilePath.c_str());
+        auto sql = readTextFile(sqlFilePath);
 
-        auto sql_start = reinterpret_cast<char*>(buf);
-        auto sql_end = std::strchr(sql_start, ';');
-        if (sql_end == nullptr) {
-            throw_std_runtime_error("';' not found in mysql create sql");
-        }
-        do {
-            ret = mysql_real_query(&db, sql_start, sql_end - sql_start);
+        for (const auto& statement : splitString(sql, ';')) {
+            ret = mysql_real_query(&db, statement.c_str(), statement.size());
             if (ret) {
                 std::string myError = getError(&db);
                 throw DatabaseException(myError, "Mysql: error while creating db: " + myError);
             }
-            sql_start = sql_end + 1; // skip ';'
-            if (*sql_start == '\n') // skip newline
-                sql_start++;
+        }
 
-            sql_end = std::strchr(sql_start, ';');
-        } while (sql_end != nullptr);
         dbVersion = getInternalSetting("db_version");
         if (dbVersion.empty()) {
             shutdown();

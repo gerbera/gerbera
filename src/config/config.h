@@ -81,6 +81,7 @@ enum config_option_t {
     CFG_SERVER_STORAGE_SQLITE_RESTORE,
     CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED,
     CFG_SERVER_STORAGE_SQLITE_BACKUP_INTERVAL,
+    CFG_SERVER_STORAGE_SQLITE_INIT_SQL_PATH,
     CFG_SERVER_STORAGE_MYSQL_ENABLED,
 #ifdef HAVE_MYSQL
     CFG_SERVER_STORAGE_MYSQL_HOST,
@@ -89,6 +90,7 @@ enum config_option_t {
     CFG_SERVER_STORAGE_MYSQL_SOCKET,
     CFG_SERVER_STORAGE_MYSQL_PASSWORD,
     CFG_SERVER_STORAGE_MYSQL_DATABASE,
+    CFG_SERVER_STORAGE_MYSQL_INIT_SQL_PATH,
 #endif
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
     CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED,
@@ -274,8 +276,11 @@ public:
     virtual void setOrigValue(const std::string& item, int value) = 0;
     virtual bool hasOrigValue(const std::string& item) const = 0;
 
-    /// \brief Returns the name of the config file that was used to launch the server.
+    /// \brief Returns the path of the config file that was used to launch the server.
     virtual fs::path getConfigFilename() const = 0;
+
+    /// \brief Returns the path of the directory holding gerbera data files (sql,web,js)
+    virtual fs::path getDataDir() const = 0;
 
     /// \brief add a config option
     /// \param option option type to add.

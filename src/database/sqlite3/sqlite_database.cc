@@ -34,7 +34,6 @@
 #include <zlib.h>
 
 #include "config/config_manager.h"
-#include "sqlite3_create_sql.h"
 
 // updates 1->2
 #define SQLITE3_UPDATE_1_2_1 "DROP INDEX mt_autoscan_obj_id"
@@ -133,6 +132,7 @@ void Sqlite3Database::init()
     */
 
     std::string dbFilePath = config->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
+    log_debug("SQLite path: {}", dbFilePath);
 
     // check for db-file
     if (access(dbFilePath.c_str(), R_OK | W_OK) != 0 && errno != ENOENT)
@@ -185,7 +185,7 @@ void Sqlite3Database::init()
     }
 
     if (dbVersion.empty() && access(dbFilePathbackup.c_str(), R_OK) != 0) {
-        log_info("no sqlite3 backup is available or backup is corrupt. automatically creating database...");
+        log_info("No sqlite3 backup is available or backup is corrupt. Automatically creating new database file...");
         auto itask = std::make_shared<SLInitTask>(config);
         addTask(itask);
         try {
@@ -499,24 +499,18 @@ void SLInitTask::run(sqlite3** db, Sqlite3Database* sl)
 
     sqlite3_close(*db);
 
-    if (unlink(dbFilePath.c_str()) != 0)
-        throw DatabaseException("", fmt::format("SQLite: Failed to unlink old database file: {}", strerror(errno)));
-
     int res = sqlite3_open(dbFilePath.c_str(), db);
     if (res != SQLITE_OK)
         throw DatabaseException("", "SQLite: Failed to create new database");
 
-    unsigned char buf[SL3_CREATE_SQL_INFLATED_SIZE + 1]; // +1 for '\0' at the end of the string
-    unsigned long uncompressed_size = SL3_CREATE_SQL_INFLATED_SIZE;
-    int ret = uncompress(buf, &uncompressed_size, sqlite3_create_sql, SL3_CREATE_SQL_DEFLATED_SIZE);
-    if (ret != Z_OK || uncompressed_size != SL3_CREATE_SQL_INFLATED_SIZE)
-        throw DatabaseException("", fmt::format("SQLite: Error decompressing create SQL: {}", ret));
-    buf[SL3_CREATE_SQL_INFLATED_SIZE] = '\0';
+    auto sqlFilePath = config->getOption(CFG_SERVER_STORAGE_SQLITE_INIT_SQL_PATH);
+    log_debug("Loading initialisation SQL from: {}", sqlFilePath.c_str());
+    auto sql = readTextFile(sqlFilePath);
 
     char* err = nullptr;
-    ret = sqlite3_exec(
+    int ret = sqlite3_exec(
         *db,
-        reinterpret_cast<const char*>(buf),
+        sql.c_str(),
         nullptr,
         nullptr,
         &err);
@@ -526,7 +520,7 @@ void SLInitTask::run(sqlite3** db, Sqlite3Database* sl)
         sqlite3_free(err);
     }
     if (ret != SQLITE_OK) {
-        throw DatabaseException("", sl->getError(reinterpret_cast<const char*>(buf), error, *db));
+        throw DatabaseException("", sl->getError(sql, error, *db));
     }
     contamination = true;
 }

@@ -249,17 +249,17 @@ int main(int argc, char** argv, char** envp)
             log_debug("Home detected as: {}", home->c_str());
         }
 
-        std::optional<std::string> prefix;
+        std::optional<std::string> dataDir;
         char* pref = std::getenv("GERBERA_DATADIR");
         if (pref != nullptr) {
-            prefix = pref;
+            dataDir = pref;
         } else {
             pref = std::getenv("MEDIATOMB_DATADIR");
             if (pref != nullptr)
-                prefix = pref;
+                dataDir = pref;
         }
-        if (!prefix.has_value())
-            prefix = PACKAGE_DATADIR;
+        if (!dataDir.has_value())
+            dataDir = PACKAGE_DATADIR;
 
         std::optional<std::string> magic;
         char* mgc = std::getenv("GERBERA_MAGIC_FILE");
@@ -274,7 +274,7 @@ int main(int argc, char** argv, char** envp)
         if (opts.count("create-config") > 0) {
             ConfigGenerator configGenerator;
 
-            std::string generated = ConfigGenerator::generate(home.value_or(""), confdir.value_or(""), prefix.value_or(""), magic.value_or(""));
+            std::string generated = ConfigGenerator::generate(home.value_or(""), confdir.value_or(""), dataDir.value_or(""), magic.value_or(""));
             std::cout << generated.c_str() << std::endl;
             exit(EXIT_SUCCESS);
         }
@@ -294,11 +294,13 @@ int main(int argc, char** argv, char** envp)
             interface = opts["interface"].as<std::string>();
         }
 
+        log_debug("Datadir is: {}", dataDir.value_or("unset"));
+
         std::shared_ptr<ConfigManager> configManager;
         try {
             configManager = std::make_shared<ConfigManager>(
                 config_file.value_or(""), home.value_or(""), confdir.value_or(""),
-                prefix.value_or(""), magic.value_or(""),
+                dataDir.value_or(""), magic.value_or(""),
                 ip.value_or(""), interface.value_or(""), portnum.value_or(0),
                 debug);
             configManager->load(home.value_or(""));
@@ -391,7 +393,7 @@ int main(int argc, char** argv, char** envp)
                     try {
                         configManager = std::make_shared<ConfigManager>(
                             config_file.value_or(""), home.value_or(""), confdir.value_or(""),
-                            prefix.value_or(""), magic.value_or(""),
+                            dataDir.value_or(""), magic.value_or(""),
                             ip.value_or(""), interface.value_or(""), portnum.value_or(-1),
                             debug);
                     } catch (const ConfigParseException& ce) {

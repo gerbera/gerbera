@@ -110,7 +110,7 @@ public:
     /// \param query The SQL query string
     explicit SLSelectTask(const char* query);
     void run(sqlite3** db, Sqlite3Database* sl) override;
-    std::shared_ptr<SQLResult> getResult() const { return std::static_pointer_cast<SQLResult>(pres); }
+    [[nodiscard]] std::shared_ptr<SQLResult> getResult() const { return std::static_pointer_cast<SQLResult>(pres); }
 
 protected:
     /// \brief The SQL query string
@@ -218,7 +218,7 @@ public:
 
 private:
     std::unique_ptr<SQLRow> nextRow() override;
-    unsigned long long getNumRows() const override { return nrow; }
+    [[nodiscard]] unsigned long long getNumRows() const override { return nrow; }
 
     char** table;
     char** row;
