@@ -26,6 +26,7 @@
 #ifdef HAVE_MATROSKA
 #include "matroska_handler.h" // API
 
+#include <fmt/chrono.h>
 #include <iostream>
 #include <utility>
 #include <vector>
@@ -218,14 +219,11 @@ void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream
                 log_error("Malformed MKV file; KaxDateUTC cast failed!");
                 continue;
             }
-            KaxDateUTC& date = *date_el;
-            time_t i_date;
-            struct tm tmres;
-            std::array<char, 25> buffer;
-            i_date = date.GetEpochDate();
-            if (gmtime_r(&i_date, &tmres) && strftime(buffer.data(), buffer.size(), "%Y-%m-%d", &tmres)) {
-                // printf("KaxDateUTC = %s\n", buffer);
-                item->setMetadata(M_DATE, sc->convert(buffer.data()));
+            time_t i_date = date_el->GetEpochDate();
+            auto f_date = fmt::format("%Y-%m-%d", fmt::gmtime(i_date));
+            if (!f_date.empty()) {
+                // fmt::print("KaxDateUTC = %s\n", f_date.c_str());
+                item->setMetadata(M_DATE, sc->convert(f_date));
             }
         }
     }
