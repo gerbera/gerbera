@@ -55,6 +55,14 @@ class GerberaConan(ConanFile):
             # Moreover, if "shared" is True then main is an .so...
             self.options["gtest"].no_main = True
 
+    @property
+    def _needs_system_uuid(self):
+        if self.options.ffmpeg:
+            os_info = tools.OSInfo()
+            # ffmpeg on Ubuntu has libuuid as a deep transitive dependency
+            # and fails to link otherwise.
+            return os_info.with_apt
+
     def requirements(self):
         if self.options.tests:
             self.requires("gtest/1.10.0")
@@ -69,7 +77,7 @@ class GerberaConan(ConanFile):
             self.requires("openssl/1.1.1i")
             self.requires("mariadb-connector-c/3.1.11")
 
-        if self.options.ffmpeg:
+        if not self._needs_system_uuid:
             self.requires("libuuid/1.0.3")
 
     def system_requirements(self):
@@ -139,6 +147,11 @@ class GerberaConan(ConanFile):
                     "yum": "ffmpeg-devel",
                     "freebsd": "ffmpeg",
                 }[pm]
+            )
+
+        if self._needs_system_uuid:
+            installer.install(
+                {"apt": "uuid-dev", "pacman": [], "yum": [], "freebsd": []}[pm]
             )
 
         if self.options.ffmpegthumbnailer:
