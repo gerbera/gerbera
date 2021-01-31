@@ -26,27 +26,33 @@ if (CONAN_EXPORTED)
     conan_set_vs_runtime()
 endif()
 
-set(WITH_NPUPNP         0 CACHE BOOL "Use npupnp instead of pupnp")
-set(WITH_MAGIC          1 CACHE BOOL "Use libmagic to identify file mime types")
-set(WITH_MYSQL          0 CACHE BOOL "Store media information in MySQL DB")
-set(WITH_CURL           1 CACHE BOOL "CURL required for online services")
-set(WITH_INOTIFY        1 CACHE BOOL "Enable Inotify file monitoring support")
-set(WITH_JS             1 CACHE BOOL "Enable JavaScript for custom import script")
-set(WITH_TAGLIB         1 CACHE BOOL "Use TagLib to extract audio file metadata")
-set(WITH_AVCODEC        0 CACHE BOOL "Enable ffmpeg/libav")
-set(WITH_FFMPEGTHUMBNAILER 0 CACHE BOOL "Enable Thumbnail generation")
-set(WITH_EXIF           1 CACHE BOOL "Use libexif to extract image metadata")
-set(WITH_EXIV2          0 CACHE BOOL "Use libexiv2 to extract image metadata")
-set(WITH_MATROSKA       1 CACHE BOOL "Use libmatroska to extract video/mkv metadata")
-set(WITH_SYSTEMD        1 CACHE BOOL "Install Systemd unit file")
-set(WITH_LASTFM         0 CACHE BOOL "Enable LastFM")
-set(WITH_DEBUG          1 CACHE BOOL "Enables debug logging")
-set(WITH_TESTS          0 CACHE BOOL "Enables Unit Tests")
+set(WITH_NPUPNP            NO  CACHE BOOL "Use npupnp instead of pupnp")
+set(WITH_MAGIC             YES CACHE BOOL "Use libmagic to identify file mime types")
+set(WITH_MYSQL             NO  CACHE BOOL "Store media informatiYESin MySQL DB")
+set(WITH_CURL              YES CACHE BOOL "CURL required for online services")
+set(WITH_INOTIFY           YES CACHE BOOL "Enable Inotify file monitoring support")
+set(WITH_JS                YES CACHE BOOL "Enable JavaScript for custom import script")
+set(WITH_TAGLIB            YES CACHE BOOL "Use TagLib to extract audio file metadata")
+set(WITH_AVCODEC           NO  CACHE BOOL "Enable ffmpeg/libav")
+set(WITH_FFMPEGTHUMBNAILER NO  CACHE BOOL "Enable Thumbnail generation")
+set(WITH_EXIF              YES CACHE BOOL "Use libexif to extract image metadata")
+set(WITH_EXIV2             NO  CACHE BOOL "Use libexiv2 to extract image metadata")
+set(WITH_MATROSKA          YES CACHE BOOL "Use libmatroska to extract video/mkv metadata")
+set(WITH_SYSTEMD           YES CACHE BOOL "Install Systemd unit file")
+set(WITH_LASTFM            NO  CACHE BOOL "Enable LastFM")
+set(WITH_DEBUG             YES CACHE BOOL "Enables debug logging")
+set(WITH_TESTS             NO  CACHE BOOL "Enables Unit Tests")
 
 # For building packages without depending on the old system libupnp
 set(STATIC_LIBUPNP 0 CACHE BOOL "Link to libupnp statically")
 
-add_library(libgerbera STATIC 
+# Leverage a modern C++
+# Set defaults here before we create targets
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED YES)
+set(CMAKE_CXX_EXTENSIONS NO)
+
+add_library(libgerbera STATIC
         src/action_request.cc
         src/action_request.h
         src/cds_objects.cc
@@ -246,12 +252,6 @@ target_include_directories(libgerbera PUBLIC "${CMAKE_SOURCE_DIR}/src")
 
 add_executable(gerbera src/main.cc)
 target_link_libraries(gerbera PRIVATE libgerbera)
-
-# Leverage a modern C++
-target_compile_features(gerbera PUBLIC cxx_std_17)
-set_target_properties(gerbera PROPERTIES
-        CXX_STANDARD_REQUIRED ON
-        CXX_EXTENSIONS NO)
 
 # Warnings are nice
 target_compile_options(gerbera PRIVATE -Wall)
