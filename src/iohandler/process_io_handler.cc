@@ -32,11 +32,10 @@
 #include "process_io_handler.h" // API
 
 #include <csignal>
+
 #include <fcntl.h>
 #include <sys/stat.h>
-#include <sys/types.h>
 #include <unistd.h>
-#include <utility>
 
 #include "content/content_manager.h"
 #include "util/process.h"

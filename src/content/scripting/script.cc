@@ -32,8 +32,6 @@
 #ifdef HAVE_JS
 #include "script.h" // API
 
-#include <utility>
-
 #include "cds_objects.h"
 #include "config/config_manager.h"
 #include "content/content_manager.h"

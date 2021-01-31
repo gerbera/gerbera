@@ -25,8 +25,6 @@
 
 #include "directory_tweak.h" // API
 
-#include <utility>
-
 #include "config/config.h"
 #include "content/content_manager.h"
 #include "util/upnp_clients.h"

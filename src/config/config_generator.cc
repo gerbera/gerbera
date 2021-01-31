@@ -26,7 +26,6 @@
 #include "config_generator.h"
 
 #include <string>
-#include <utility>
 
 #include "config/config_setup.h"
 #include "metadata/metadata_handler.h"

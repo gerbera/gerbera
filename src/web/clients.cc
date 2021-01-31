@@ -32,8 +32,6 @@
 #include "upnp_xml.h"
 #include "util/upnp_clients.h"
 
-#include <utility>
-
 web::clients::clients(std::shared_ptr<ContentManager> content)
     : WebRequestHandler(std::move(content))
 {

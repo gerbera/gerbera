@@ -31,17 +31,16 @@
 
 #include "process.h" // API
 
+#include <cerrno>
 #include <csignal>
 #include <cstdio>
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <unistd.h>
-
-#include <cerrno>
 #include <cstring>
 #include <thread>
+
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 #include "config/config_manager.h"
 #include "util/tools.h"

@@ -32,7 +32,6 @@
 #include "metadata_handler.h" // API
 
 #include <filesystem>
-#include <utility>
 
 #include "cds_objects.h"
 #include "config/config_manager.h"

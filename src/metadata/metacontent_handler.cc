@@ -26,7 +26,6 @@
 #include "metacontent_handler.h" // API
 
 #include <sys/stat.h>
-#include <utility>
 
 #include "cds_objects.h"
 #include "config/config.h"

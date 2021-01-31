@@ -32,7 +32,6 @@
 #include "pages.h" // API
 
 #include <cstdio>
-#include <utility>
 
 #include "cds_objects.h"
 #include "database/database.h"

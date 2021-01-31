@@ -32,8 +32,6 @@
 #ifndef __WEB_PAGES_H__
 #define __WEB_PAGES_H__
 
-#include <utility>
-
 #include "cds_objects.h"
 #include "common.h"
 #include "config/config_setup.h"

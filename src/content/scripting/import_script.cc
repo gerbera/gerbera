@@ -32,8 +32,6 @@
 #ifdef HAVE_JS
 #include "import_script.h" // API
 
-#include <utility>
-
 #include "config/config_manager.h"
 #include "js_functions.h"
 

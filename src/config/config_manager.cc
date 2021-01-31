@@ -37,12 +37,10 @@
 #include <iostream>
 #include <numeric>
 #include <sys/stat.h>
-#include <sys/types.h>
 
 #if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE)
 #include <clocale>
 #include <langinfo.h>
-#include <utility>
 #endif
 
 #ifdef HAVE_CURL

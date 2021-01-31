@@ -33,7 +33,6 @@
 
 #include <cstdio>
 #include <filesystem>
-#include <utility>
 
 #include "cds_objects.h"
 #include "config/config_manager.h"

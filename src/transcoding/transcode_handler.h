@@ -34,8 +34,8 @@
 
 #include <memory>
 #include <string>
+
 #include <upnp.h>
-#include <utility>
 
 #include "common.h"
 

@@ -32,9 +32,9 @@
 #include "file_request_handler.h" // API
 
 #include <filesystem>
+
 #include <sys/stat.h>
 #include <unistd.h>
-#include <utility>
 
 #include "config/config_manager.h"
 #include "content/content_manager.h"

@@ -47,7 +47,6 @@
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <utility>
 
 #include <ifaddrs.h>
 #include <net/if.h>

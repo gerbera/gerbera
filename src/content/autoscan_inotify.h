@@ -36,7 +36,6 @@
 #include <queue>
 #include <thread>
 #include <unordered_map>
-#include <utility>
 #include <vector>
 
 #include "autoscan.h"

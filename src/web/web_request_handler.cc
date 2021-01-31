@@ -32,7 +32,6 @@
 #include "web_request_handler.h" // API
 
 #include <ctime>
-#include <utility>
 
 #include "config/config_manager.h"
 #include "content/content_manager.h"

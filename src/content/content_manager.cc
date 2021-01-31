@@ -33,13 +33,12 @@
 
 #include <cerrno>
 #include <cstring>
-#include <dirent.h>
 #include <filesystem>
 #include <regex>
+
+#include <dirent.h>
 #include <sys/stat.h>
-#include <sys/types.h>
 #include <unistd.h>
-#include <utility>
 
 #include "config/config_manager.h"
 #include "config/directory_tweak.h"

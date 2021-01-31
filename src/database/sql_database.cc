@@ -38,7 +38,6 @@
 #include <list>
 #include <sstream>
 #include <string>
-#include <utility>
 #include <vector>
 
 #include "cds_objects.h"

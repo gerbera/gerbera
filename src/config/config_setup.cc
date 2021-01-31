@@ -28,10 +28,8 @@
 #include <filesystem>
 #include <iostream>
 #include <numeric>
-#include <utility>
 
 #include <sys/stat.h>
-#include <sys/types.h>
 
 #include "client_config.h"
 #include "config_manager.h"

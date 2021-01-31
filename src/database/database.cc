@@ -31,8 +31,6 @@
 
 #include "database.h" // API
 
-#include <utility>
-
 #include "config/config_manager.h"
 #include "database//sqlite3/sqlite_database.h"
 #include "database/mysql/mysql_database.h"

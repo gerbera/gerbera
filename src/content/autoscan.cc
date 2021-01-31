@@ -31,8 +31,6 @@
 
 #include "autoscan.h" // API
 
-#include <utility>
-
 #include "content_manager.h"
 #include "database/database.h"
 

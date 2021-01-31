@@ -32,7 +32,6 @@
 #include "process_executor.h" // API
 
 #include <csignal>
-#include <sys/types.h>
 #include <unistd.h>
 
 #include "exceptions.h"
