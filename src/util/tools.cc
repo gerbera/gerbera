@@ -1163,7 +1163,7 @@ int sockAddrCmpAddr(const struct sockaddr* sa, const struct sockaddr* sb)
         return memcmp(reinterpret_cast<const char*>(&(SOCK_ADDR_IN6_ADDR(sa))), reinterpret_cast<const char*>(&(SOCK_ADDR_IN6_ADDR(sb))), sizeof(SOCK_ADDR_IN6_ADDR(sa)));
     }
 
-    throw_std_runtime_error("unsupported address family :" + std::to_string(sa->sa_family));
+    throw_std_runtime_error("unsupported address family :" + fmt::to_string(sa->sa_family));
 }
 
 std::string sockAddrGetNameInfo(const struct sockaddr* sa)

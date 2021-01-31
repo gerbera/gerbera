@@ -48,7 +48,7 @@ void Timer::run()
         this);
 
     if (ret)
-        throw_std_runtime_error("failed to start timer thread: " + std::to_string(ret));
+        throw_std_runtime_error("failed to start timer thread: " + fmt::to_string(ret));
 }
 
 void* Timer::staticThreadProc(void* arg)

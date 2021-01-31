@@ -534,7 +534,7 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
         }
 
         if (std::static_pointer_cast<CdsItem>(obj)->getTrackNumber() > 0)
-            setProperty(MetadataHandler::getMetaFieldName(M_TRACKNUMBER), std::to_string(std::static_pointer_cast<CdsItem>(obj)->getTrackNumber()));
+            setProperty(MetadataHandler::getMetaFieldName(M_TRACKNUMBER), fmt::to_string(std::static_pointer_cast<CdsItem>(obj)->getTrackNumber()));
 
         duk_put_prop_string(ctx, -2, "meta");
         // stack: js
@@ -571,7 +571,7 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
             for (const auto& res : obj->getResources()) {
                 auto attributes = res->getAttributes();
                 for (const auto& [key, val] : attributes) {
-                    setProperty(resCount == 0 ? key : (std::to_string(resCount) + "-" + key), val);
+                    setProperty(resCount == 0 ? key : (fmt::to_string(resCount) + "-" + key), val);
                 }
                 resCount++;
             }

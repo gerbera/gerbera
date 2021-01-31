@@ -126,7 +126,7 @@ std::shared_ptr<CdsObject> CdsObject::createObject(unsigned int objectType)
     } else if (IS_CDS_ITEM(objectType)) {
         obj = std::make_shared<CdsItem>();
     } else {
-        throw_std_runtime_error("invalid object type: " + std::to_string(objectType));
+        throw_std_runtime_error("invalid object type: " + fmt::to_string(objectType));
     }
     return obj;
 }
@@ -243,5 +243,5 @@ std::string CdsObject::mapObjectType(unsigned int type)
         return STRING_OBJECT_TYPE_ITEM;
     if (IS_CDS_ITEM_EXTERNAL_URL(type))
         return STRING_OBJECT_TYPE_EXTERNAL_URL;
-    throw_std_runtime_error("illegal objectType: " + std::to_string(type));
+    throw_std_runtime_error("illegal objectType: " + fmt::to_string(type));
 }

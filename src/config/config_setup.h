@@ -335,14 +335,14 @@ public:
         : ConfigSetup(option, xpath, help)
 
     {
-        this->defaultValue = std::to_string(0);
+        this->defaultValue = fmt::to_string(0);
     }
 
     ConfigIntSetup(config_option_t option, const char* xpath, const char* help, int defaultValue)
         : ConfigSetup(option, xpath, help)
 
     {
-        this->defaultValue = std::to_string(defaultValue);
+        this->defaultValue = fmt::to_string(defaultValue);
     }
 
     ConfigIntSetup(config_option_t option, const char* xpath, const char* help, IntCheckFunction check)
@@ -350,7 +350,7 @@ public:
         , valueCheck(check)
 
     {
-        this->defaultValue = std::to_string(0);
+        this->defaultValue = fmt::to_string(0);
     }
 
     ConfigIntSetup(config_option_t option, const char* xpath, const char* help, int defaultValue, IntCheckFunction check)
@@ -358,7 +358,7 @@ public:
         , valueCheck(check)
 
     {
-        this->defaultValue = std::to_string(defaultValue);
+        this->defaultValue = fmt::to_string(defaultValue);
     }
 
     ConfigIntSetup(config_option_t option, const char* xpath, const char* help, int defaultValue, int minValue, IntMinFunction check)
@@ -366,7 +366,7 @@ public:
         , minCheck(check)
         , minValue(minValue)
     {
-        this->defaultValue = std::to_string(defaultValue);
+        this->defaultValue = fmt::to_string(defaultValue);
     }
 
     ConfigIntSetup(config_option_t option, const char* xpath, const char* help, const char* defaultValue, IntCheckFunction check = nullptr)

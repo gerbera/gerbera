@@ -134,7 +134,7 @@ std::unique_ptr<URL::Stat> URL::getInfo(const std::string& URL, CURL* curl_handl
     if (retcode != 200) {
         if (cleanup)
             curl_easy_cleanup(curl_handle);
-        throw_std_runtime_error("Error retrieving information from " + URL + " HTTP return code: " + std::to_string(retcode));
+        throw_std_runtime_error("Error retrieving information from " + URL + " HTTP return code: " + fmt::to_string(retcode));
     }
 
     res = curl_easy_getinfo(curl_handle, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &cl);

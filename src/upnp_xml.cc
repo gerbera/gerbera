@@ -329,7 +329,7 @@ std::unique_ptr<UpnpXMLBuilder::PathBase> UpnpXMLBuilder::getPathBase(const std:
     /// \todo resource options must be read from configuration files
 
     std::map<std::string, std::string> dict;
-    dict[URL_OBJECT_ID] = std::to_string(item->getID());
+    dict[URL_OBJECT_ID] = fmt::to_string(item->getID());
 
     pathBase->addResID = false;
     /// \todo move this down into the "for" loop and create different urls
@@ -359,7 +359,7 @@ std::string UpnpXMLBuilder::getFirstResourcePath(const std::shared_ptr<CdsItem>&
     if (item->isExternalItem() && !urlBase->addResID) { // a remote resource
         result = urlBase->pathBase;
     } else if (urlBase->addResID) { // a proxy, remote, resource
-        result = SERVER_VIRTUAL_DIR + urlBase->pathBase + std::to_string(0);
+        result = SERVER_VIRTUAL_DIR + urlBase->pathBase + fmt::to_string(0);
     } else { // a local resource
         result = SERVER_VIRTUAL_DIR + urlBase->pathBase;
     }
@@ -373,7 +373,7 @@ std::string UpnpXMLBuilder::getArtworkUrl(const std::shared_ptr<CdsItem>& item) 
 
     auto urlBase = getPathBase(item);
     if (urlBase->addResID) {
-        return virtualURL + urlBase->pathBase + std::to_string(1) + "/rct/aa";
+        return virtualURL + urlBase->pathBase + fmt::to_string(1) + "/rct/aa";
     }
     return virtualURL + urlBase->pathBase;
 }
@@ -389,11 +389,11 @@ bool UpnpXMLBuilder::renderContainerImage(const std::string& virtualURL, const s
             if (!resFile.empty()) {
                 // found, FanArtHandler deals already with file
                 std::map<std::string, std::string> dict;
-                dict[URL_OBJECT_ID] = std::to_string(cont->getID());
+                dict[URL_OBJECT_ID] = fmt::to_string(cont->getID());
 
                 auto res_params = res->getParameters();
-                res_params[RESOURCE_HANDLER] = std::to_string(res->getHandlerType());
-                url.assign(virtualURL + RequestHandler::joinUrl({ CONTENT_MEDIA_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID, std::to_string(resIdx), dictEncodeSimple(res_params) }));
+                res_params[RESOURCE_HANDLER] = fmt::to_string(res->getHandlerType());
+                url.assign(virtualURL + RequestHandler::joinUrl({ CONTENT_MEDIA_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID, fmt::to_string(resIdx), dictEncodeSimple(res_params) }));
 
                 artAdded = true;
                 break;
@@ -426,7 +426,7 @@ bool UpnpXMLBuilder::renderItemImage(const std::string& virtualURL, const std::s
             auto res_attrs = res->getAttributes();
             auto res_params = res->getParameters();
             if (urlBase->addResID) {
-                url = virtualURL + urlBase->pathBase + std::to_string(realCount) + _URL_PARAM_SEPARATOR;
+                url = virtualURL + urlBase->pathBase + fmt::to_string(realCount) + _URL_PARAM_SEPARATOR;
             } else
                 url = virtualURL + urlBase->pathBase;
 
@@ -451,7 +451,7 @@ bool UpnpXMLBuilder::renderSubtitle(const std::string& virtualURL, const std::sh
             auto res_attrs = res->getAttributes();
             auto res_params = res->getParameters();
             if (urlBase->addResID) {
-                url = virtualURL + urlBase->pathBase + std::to_string(realCount) + _URL_PARAM_SEPARATOR;
+                url = virtualURL + urlBase->pathBase + fmt::to_string(realCount) + _URL_PARAM_SEPARATOR;
             } else
                 url = virtualURL + urlBase->pathBase;
 
@@ -582,8 +582,8 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
                         targetMimeType.append(";rate=").append(frequency);
                     }
                 } else if (freq != OFF) {
-                    t_res->addAttribute(R_SAMPLEFREQUENCY, std::to_string(freq));
-                    targetMimeType.append(";rate=").append(std::to_string(freq));
+                    t_res->addAttribute(R_SAMPLEFREQUENCY, fmt::to_string(freq));
+                    targetMimeType.append(";rate=").append(fmt::to_string(freq));
                 }
 
                 int chan = tp->getNumChannels();
@@ -594,8 +594,8 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
                         targetMimeType.append(";channels=").append(nchannels);
                     }
                 } else if (chan != OFF) {
-                    t_res->addAttribute(R_NRAUDIOCHANNELS, std::to_string(chan));
-                    targetMimeType.append(";channels=").append(std::to_string(chan));
+                    t_res->addAttribute(R_NRAUDIOCHANNELS, fmt::to_string(chan));
+                    targetMimeType.append(";channels=").append(fmt::to_string(chan));
                 }
             }
 
@@ -659,7 +659,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
         bool transcoded = (getValueOrDefault(res_params, URL_PARAM_TRANSCODE) == URL_VALUE_TRANSCODE);
         if (!transcoded) {
             if (urlBase->addResID) {
-                url = urlBase->pathBase + std::to_string(realCount);
+                url = urlBase->pathBase + fmt::to_string(realCount);
             } else
                 url = urlBase->pathBase;
 

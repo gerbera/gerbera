@@ -190,7 +190,7 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
         cm->addObject(cds_obj);
 
         /* setting object ID as return value */
-        std::string tmp = std::to_string(parentId);
+        std::string tmp = fmt::to_string(parentId);
         duk_push_string(ctx, tmp.c_str());
         return 1;
     } catch (const ServerShutdownException& se) {

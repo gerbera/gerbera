@@ -465,7 +465,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = 
         DEFAULT_ATRAILERS_REFRESH),
     std::make_shared<ConfigEnumSetup<std::string>>(CFG_ONLINE_CONTENT_ATRAILERS_RESOLUTION,
         "/import/online-content/AppleTrailers/attribute::resolution", "config-online.html#appletrailers",
-        std::to_string(DEFAULT_ATRAILERS_RESOLUTION).c_str(),
+        fmt::to_string(DEFAULT_ATRAILERS_RESOLUTION).c_str(),
         std::map<std::string, std::string>({ { "640", "640" }, { "720", "720p" }, { "720p", "720p" } })),
 #endif
 
@@ -982,7 +982,7 @@ void ConfigManager::load(const fs::path& userHome)
 
     // now get the option list for the drop down menu
     auto menu_opts = setOption(root, CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN)->getArrayOption();
-    if (std::none_of(menu_opts.begin(), menu_opts.end(), [=](const auto& s) { return s == std::to_string(def_ipp); }))
+    if (std::none_of(menu_opts.begin(), menu_opts.end(), [=](const auto& s) { return s == fmt::to_string(def_ipp); }))
         throw std::runtime_error("Error in config file: at least one <option> "
                                  "under <items-per-page> must match the "
                                  "<items-per-page default=\"\" /> attribute");
@@ -1000,7 +1000,7 @@ void ConfigManager::load(const fs::path& userHome)
     setOption(root, CFG_IMPORT_FOLLOW_SYMLINKS);
     setOption(root, CFG_IMPORT_MAPPINGS_IGNORE_UNKNOWN_EXTENSIONS);
     bool csens = setOption(root, CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_CASE_SENSITIVE)->getBoolOption();
-    args["tolower"] = std::to_string(!csens);
+    args["tolower"] = fmt::to_string(!csens);
     setOption(root, CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST, &args);
     args.clear();
     setOption(root, CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
@@ -1131,9 +1131,9 @@ void ConfigManager::load(const fs::path& userHome)
     }
 
     co = findConfigSetup(CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT);
-    args["isFile"] = std::to_string(true);
-    args["mustExist"] = std::to_string(layoutType == "js");
-    args["notEmpty"] = std::to_string(layoutType == "js");
+    args["isFile"] = fmt::to_string(true);
+    args["mustExist"] = fmt::to_string(layoutType == "js");
+    args["notEmpty"] = fmt::to_string(layoutType == "js");
     co->setDefaultValue(dataDir / DEFAULT_JS_DIR / DEFAULT_IMPORT_SCRIPT);
     co->makeOption(root, self, &args);
     args.clear();
@@ -1142,7 +1142,7 @@ void ConfigManager::load(const fs::path& userHome)
 #endif
     co = findConfigSetup(CFG_SERVER_PORT);
     // 0 means, that the SDK will any free port itself
-    co->makeOption((port == 0) ? co->getXmlContent(root) : std::to_string(port), self);
+    co->makeOption((port == 0) ? co->getXmlContent(root) : fmt::to_string(port), self);
 
     setOption(root, CFG_SERVER_ALIVE_INTERVAL);
     setOption(root, CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST);
@@ -1279,7 +1279,7 @@ void ConfigManager::load(const fs::path& userHome)
     int atrailers_refresh = setOption(root, CFG_ONLINE_CONTENT_ATRAILERS_REFRESH)->getIntOption();
 
     co = findConfigSetup(CFG_ONLINE_CONTENT_ATRAILERS_PURGE_AFTER);
-    co->makeOption(std::to_string(atrailers_refresh), self);
+    co->makeOption(fmt::to_string(atrailers_refresh), self);
 
     setOption(root, CFG_ONLINE_CONTENT_ATRAILERS_UPDATE_AT_START);
     setOption(root, CFG_ONLINE_CONTENT_ATRAILERS_RESOLUTION);

@@ -44,7 +44,7 @@
 #endif
 
 #define throw_std_runtime_error(msg) throw std::runtime_error(std::string(msg) \
-    + " file:" + std::string(__FILE__) + " line:" + std::to_string(__LINE__) + " function:" + std::string(PRETTY_FUNCTION))
+    + " file:" + std::string(__FILE__) + " line:" + fmt::to_string(__LINE__) + " function:" + std::string(PRETTY_FUNCTION))
 
 class ConfigParseException : public std::runtime_error {
 public:

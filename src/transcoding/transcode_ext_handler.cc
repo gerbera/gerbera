@@ -110,11 +110,11 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(std::shared_pt
         std::vector<std::string> sop_args;
         int p1 = find_local_port(45000, 65500);
         int p2 = find_local_port(45000, 65500);
-        sop_args = populateCommandLine(location + " " + std::to_string(p1) + " " + std::to_string(p2));
+        sop_args = populateCommandLine(location + " " + fmt::to_string(p1) + " " + fmt::to_string(p2));
         auto spsc = std::make_shared<ProcessExecutor>("sp-sc-auth", sop_args);
         auto pr_item = std::make_shared<ProcListItem>(spsc);
         proc_list.push_back(pr_item);
-        location = "http://localhost:" + std::to_string(p2) + "/tv.asf";
+        location = "http://localhost:" + fmt::to_string(p2) + "/tv.asf";
 
         //FIXME: #warning check if socket is ready
         sleep(15);

@@ -123,7 +123,7 @@ void Server::run()
 
     log_info("Server bound to: {}", ip.c_str());
 
-    virtualUrl = "http://" + ip + ":" + std::to_string(port) + "/" + virtual_directory;
+    virtualUrl = "http://" + ip + ":" + fmt::to_string(port) + "/" + virtual_directory;
 
     // next set webroot directory
     std::string web_root = config->getOption(CFG_SERVER_WEBROOT);
@@ -153,13 +153,13 @@ void Server::run()
 
     std::string presentationURL = config->getOption(CFG_SERVER_PRESENTATION_URL);
     if (presentationURL.empty()) {
-        presentationURL = "http://" + ip + ":" + std::to_string(port) + "/";
+        presentationURL = "http://" + ip + ":" + fmt::to_string(port) + "/";
     } else {
         std::string appendto = config->getOption(CFG_SERVER_APPEND_PRESENTATION_URL_TO);
         if (appendto == "ip") {
             presentationURL = "http://" + ip + ":" + presentationURL;
         } else if (appendto == "port") {
-            presentationURL = "http://" + ip + ":" + std::to_string(port) + "/" + presentationURL;
+            presentationURL = "http://" + ip + ":" + fmt::to_string(port) + "/" + presentationURL;
         } // else appendto is none and we take the URL as it entered by user
     }
 

@@ -104,7 +104,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
     item->setMimeType(trailer_mimetype);
     resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(trailer_mimetype));
 
-    item->setAuxData(ONLINE_SERVICE_AUX_ID, std::to_string(OS_ATrailers));
+    item->setAuxData(ONLINE_SERVICE_AUX_ID, fmt::to_string(OS_ATrailers));
 
     temp = trailer.attribute("id").as_string();
     if (temp.empty()) {
@@ -114,7 +114,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
         return nullptr;
     }
 
-    temp = std::to_string(OnlineService::getDatabasePrefix(OS_ATrailers)) + temp;
+    temp = fmt::to_string(OnlineService::getDatabasePrefix(OS_ATrailers)) + temp;
     item->setServiceID(temp);
 
     auto preview = trailer.child("preview");
@@ -220,7 +220,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
 
     struct timespec ts;
     getTimespecNow(&ts);
-    item->setAuxData(ONLINE_SERVICE_LAST_UPDATE, std::to_string(ts.tv_sec));
+    item->setAuxData(ONLINE_SERVICE_LAST_UPDATE, fmt::to_string(ts.tv_sec));
 
     item->setFlag(OBJECT_FLAG_ONLINE_SERVICE);
     try {

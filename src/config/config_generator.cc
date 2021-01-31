@@ -147,9 +147,9 @@ std::string ConfigGenerator::generate(const fs::path& userHome, const fs::path& 
     auto config = init();
 
     config->append_attribute("version") = CONFIG_XML_VERSION;
-    config->append_attribute("xmlns") = (XML_XMLNS + std::to_string(CONFIG_XML_VERSION)).c_str();
+    config->append_attribute("xmlns") = (XML_XMLNS + fmt::to_string(CONFIG_XML_VERSION)).c_str();
     config->append_attribute("xmlns:xsi") = XML_XMLNS_XSI;
-    config->append_attribute("xsi:schemaLocation") = (std::string(XML_XMLNS) + std::to_string(CONFIG_XML_VERSION) + " " + XML_XMLNS + std::to_string(CONFIG_XML_VERSION) + ".xsd").c_str();
+    config->append_attribute("xsi:schemaLocation") = (std::string(XML_XMLNS) + fmt::to_string(CONFIG_XML_VERSION) + " " + XML_XMLNS + fmt::to_string(CONFIG_XML_VERSION) + ".xsd").c_str();
 
     auto docinfo = config->append_child(pugi::node_comment);
     docinfo.set_value("\n\
@@ -185,7 +185,7 @@ void ConfigGenerator::generateServer(const fs::path& userHome, const fs::path& c
         ("\n\
         How frequently (in seconds) to send ssdp:alive advertisements.\n\
         Minimum alive value accepted is: "
-            + std::to_string(ALIVE_INTERVAL_MIN) + "\n\n\
+            + fmt::to_string(ALIVE_INTERVAL_MIN) + "\n\n\
         The advertisement will be sent every (A/2)-30 seconds,\n\
         and will have a cache-control max-age of A where A is\n\
         the value configured here. Ex: A value of 62 will result\n\
@@ -375,9 +375,9 @@ void ConfigGenerator::generateTranscoding()
     setValue(agent, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS, "-y -i %in -f mp3 %out");
 
     auto buffer = setValue(fmt::format("{}/{}/", profileTag, ConfigManager::mapConfigOption(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER)), "", true);
-    setValue(buffer, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE, std::to_string(DEFAULT_AUDIO_BUFFER_SIZE));
-    setValue(buffer, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK, std::to_string(DEFAULT_AUDIO_CHUNK_SIZE));
-    setValue(buffer, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL, std::to_string(DEFAULT_AUDIO_FILL_SIZE));
+    setValue(buffer, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE, fmt::to_string(DEFAULT_AUDIO_BUFFER_SIZE));
+    setValue(buffer, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK, fmt::to_string(DEFAULT_AUDIO_CHUNK_SIZE));
+    setValue(buffer, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL, fmt::to_string(DEFAULT_AUDIO_FILL_SIZE));
 
     auto vlcmpeg = setValue(fmt::format("{}/", profileTag), "", true);
     setValue(vlcmpeg, ATTR_TRANSCODING_PROFILES_PROFLE_NAME, "vlcmpeg");
@@ -393,9 +393,9 @@ void ConfigGenerator::generateTranscoding()
     setValue(agent, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS, "-I dummy %in --sout #transcode{venc=ffmpeg,vcodec=mp2v,vb=4096,fps=25,aenc=ffmpeg,acodec=mpga,ab=192,samplerate=44100,channels=2}:standard{access=file,mux=ps,dst=%out} vlc:quit");
 
     buffer = setValue(fmt::format("{}/{}/", profileTag, ConfigManager::mapConfigOption(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER)), "", true);
-    setValue(buffer, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE, std::to_string(DEFAULT_VIDEO_BUFFER_SIZE));
-    setValue(buffer, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK, std::to_string(DEFAULT_VIDEO_CHUNK_SIZE));
-    setValue(buffer, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL, std::to_string(DEFAULT_VIDEO_FILL_SIZE));
+    setValue(buffer, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE, fmt::to_string(DEFAULT_VIDEO_BUFFER_SIZE));
+    setValue(buffer, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK, fmt::to_string(DEFAULT_VIDEO_CHUNK_SIZE));
+    setValue(buffer, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL, fmt::to_string(DEFAULT_VIDEO_FILL_SIZE));
 }
 
 void ConfigGenerator::generateUdn()

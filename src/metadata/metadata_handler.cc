@@ -77,7 +77,7 @@ void MetadataHandler::setMetadata(const std::shared_ptr<Context>& context, const
 
     auto resource = std::make_shared<CdsResource>(CH_DEFAULT);
     resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(mimetype));
-    resource->addAttribute(R_SIZE, std::to_string(filesize));
+    resource->addAttribute(R_SIZE, fmt::to_string(filesize));
 
     item->addResource(resource);
 
@@ -181,7 +181,7 @@ std::unique_ptr<MetadataHandler> MetadataHandler::createHandler(const std::share
     case CH_RESOURCE:
         return std::make_unique<ResourceHandler>(context);
     default:
-        throw_std_runtime_error("unknown content handler ID: " + std::to_string(handlerType));
+        throw_std_runtime_error("unknown content handler ID: " + fmt::to_string(handlerType));
     }
 }
 
