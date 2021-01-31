@@ -270,6 +270,7 @@ public:
     virtual void updateConfigFromDatabase(std::shared_ptr<Database> database) = 0;
     virtual std::string getOrigValue(const std::string& item) const = 0;
     virtual void setOrigValue(const std::string& item, const std::string& value) = 0;
+    virtual void setOrigValue(const std::string& item, std::string_view value) = 0;
     virtual void setOrigValue(const std::string& item, bool value) = 0;
     virtual void setOrigValue(const std::string& item, int value) = 0;
     virtual bool hasOrigValue(const std::string& item) const = 0;

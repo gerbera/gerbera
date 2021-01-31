@@ -1331,6 +1331,14 @@ void ConfigManager::setOrigValue(const std::string& item, const std::string& val
     }
 }
 
+void ConfigManager::setOrigValue(const std::string& item, std::string_view value)
+{
+    if (origValues.find(item) == origValues.end()) {
+        log_debug("Caching {}='{}'", item, value);
+        origValues[item] = value;
+    }
+}
+
 void ConfigManager::setOrigValue(const std::string& item, bool value)
 {
     origValues.try_emplace(item, value ? "true" : "false");

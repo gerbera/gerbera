@@ -133,6 +133,7 @@ public:
     }
 
     void setOrigValue(const std::string& item, const std::string& value) override;
+    void setOrigValue(const std::string& item, std::string_view value) override;
     void setOrigValue(const std::string& item, bool value) override;
     void setOrigValue(const std::string& item, int value) override;
 
