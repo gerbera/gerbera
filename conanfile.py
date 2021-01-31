@@ -141,11 +141,6 @@ class GerberaConan(ConanFile):
                 }[pm]
             )
 
-        if self._needs_system_uuid:
-            installer.install(
-                {"apt": "uuid-dev", "pacman": [], "yum": [], "freebsd": []}[pm]
-            )
-
         if self.options.ffmpegthumbnailer:
             installer.install(
                 {
