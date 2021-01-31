@@ -70,6 +70,13 @@ class GerberaConan(ConanFile):
         if self.options.js:
             self.requires("duktape/2.5.0")
 
+        if self.options.curl:
+            self.requires("libcurl/7.74.0")
+
+        if self.options.mysql:
+            self.requires("openssl/1.1.1i")
+            self.requires("mariadb-connector-c/3.1.11")
+
         if not self._needs_system_uuid:
             self.requires("libuuid/1.0.3")
 
@@ -96,7 +103,7 @@ class GerberaConan(ConanFile):
             installer.install(
                 {
                     "apt": "libmagic-dev",
-                    "pacman": "file-dev",
+                    "pacman": "file",
                     "yum": "file-devel",
                     "freebsd": [],
                 }[pm]
@@ -106,7 +113,7 @@ class GerberaConan(ConanFile):
             installer.install(
                 {
                     "apt": "libtag1-dev",
-                    "pacman": "taglib-dev",
+                    "pacman": "taglib",
                     "yum": "libtag-devel",
                     "freebsd": "taglib",
                 }[pm]
@@ -116,7 +123,7 @@ class GerberaConan(ConanFile):
             installer.install(
                 {
                     "apt": "libexif-dev",
-                    "pacman": "libexif-dev",
+                    "pacman": "libexif",
                     "yum": "libexif-devel",
                     "freebsd": "libexif",
                 }[pm]
@@ -126,31 +133,9 @@ class GerberaConan(ConanFile):
             installer.install(
                 {
                     "apt": "libmatroska-dev",
-                    "pacman": "libmatroska-dev",
+                    "pacman": "libmatroska",
                     "yum": "libmatroska-devel",
                     "freebsd": "libmatroska",
-                }[pm]
-            )
-
-        # Note: there is a CURL Conan package, but it depends on openssl
-        # which is also in Conan.
-        if self.options.curl:
-            installer.install(
-                {
-                    "apt": "libcurl4-openssl-dev",
-                    "pacman": "curl-dev",
-                    "yum": "libcurl-devel",
-                    "freebsd": "curl",
-                }[pm]
-            )
-
-        if self.options.mysql:
-            installer.install(
-                {
-                    "apt": "libmariadb-dev",
-                    "pacman": "mariadb-connector-c-dev",
-                    "yum": "mariadb-connector-c-devel",
-                    "freebsd": "mysql-connector-c",
                 }[pm]
             )
 
@@ -158,7 +143,7 @@ class GerberaConan(ConanFile):
             installer.install(
                 {
                     "apt": "libavformat-dev",
-                    "pacman": "ffmpeg-dev",
+                    "pacman": "ffmpeg",
                     "yum": "ffmpeg-devel",
                     "freebsd": "ffmpeg",
                 }[pm]
@@ -173,7 +158,7 @@ class GerberaConan(ConanFile):
             installer.install(
                 {
                     "apt": "libffmpegthumbnailer-dev",
-                    "pacman": "ffmpegthumbnailer-dev",
+                    "pacman": "ffmpegthumbnailer",
                     "yum": "ffmpegthumbnailer-devel",
                     "freebsd": "ffmpegthumbnailer",
                 }[pm]
