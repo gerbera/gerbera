@@ -361,31 +361,31 @@ std::shared_ptr<ConfigOption> ConfigIntSetup::newOption(int optValue)
 bool ConfigIntSetup::CheckSqlLiteSyncValue(std::string& value)
 {
     auto temp_int = 0;
-    if (value == "off" || value == std::to_string(MT_SQLITE_SYNC_OFF))
+    if (value == "off" || value == fmt::to_string(MT_SQLITE_SYNC_OFF))
         temp_int = MT_SQLITE_SYNC_OFF;
-    else if (value == "normal" || value == std::to_string(MT_SQLITE_SYNC_NORMAL))
+    else if (value == "normal" || value == fmt::to_string(MT_SQLITE_SYNC_NORMAL))
         temp_int = MT_SQLITE_SYNC_NORMAL;
-    else if (value == "full" || value == std::to_string(MT_SQLITE_SYNC_FULL))
+    else if (value == "full" || value == fmt::to_string(MT_SQLITE_SYNC_FULL))
         temp_int = MT_SQLITE_SYNC_FULL;
     else
         return false;
-    value.assign(std::to_string(temp_int));
+    value.assign(fmt::to_string(temp_int));
     return true;
 }
 
 bool ConfigIntSetup::CheckProfileNumberValue(std::string& value)
 {
     auto temp_int = 0;
-    if (value == "source" || value == std::to_string(SOURCE))
+    if (value == "source" || value == fmt::to_string(SOURCE))
         temp_int = SOURCE;
-    else if (value == "off" || value == std::to_string(OFF))
+    else if (value == "off" || value == fmt::to_string(OFF))
         temp_int = OFF;
     else {
         temp_int = std::stoi(value);
         if (temp_int <= 0)
             return false;
     }
-    value.assign(std::to_string(temp_int));
+    value.assign(fmt::to_string(temp_int));
     return true;
 }
 
@@ -658,10 +658,10 @@ bool ConfigArraySetup::InitItemsPerPage(const pugi::xml_node& value, std::vector
 {
     // create default structure
     if (std::distance(value.begin(), value.end()) == 0) {
-        result.emplace_back(std::to_string(DEFAULT_ITEMS_PER_PAGE_1));
-        result.emplace_back(std::to_string(DEFAULT_ITEMS_PER_PAGE_2));
-        result.emplace_back(std::to_string(DEFAULT_ITEMS_PER_PAGE_3));
-        result.emplace_back(std::to_string(DEFAULT_ITEMS_PER_PAGE_4));
+        result.emplace_back(fmt::to_string(DEFAULT_ITEMS_PER_PAGE_1));
+        result.emplace_back(fmt::to_string(DEFAULT_ITEMS_PER_PAGE_2));
+        result.emplace_back(fmt::to_string(DEFAULT_ITEMS_PER_PAGE_3));
+        result.emplace_back(fmt::to_string(DEFAULT_ITEMS_PER_PAGE_4));
     } else {
         // create the array from either user settings
         for (const auto& it : value.select_nodes(node_name)) {

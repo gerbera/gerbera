@@ -183,7 +183,7 @@ void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item
         // See http://www.upnp.org/schemas/av/didl-lite-v3.xsd
         auto bitrate = pFormatCtx->bit_rate / 8;
         log_debug("Added bitrate: {} kb/s", bitrate);
-        resource->addAttribute(R_BITRATE, std::to_string(bitrate));
+        resource->addAttribute(R_BITRATE, fmt::to_string(bitrate));
     }
 
     // video resolution, audio sampling rate, nr of audio channels
@@ -219,13 +219,13 @@ void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item
             if (as_codecpar(st)->sample_rate > 0) {
                 samplefreq = as_codecpar(st)->sample_rate;
                 log_debug("Added sample frequency: {} Hz from stream {}", samplefreq, i);
-                resource->addAttribute(R_SAMPLEFREQUENCY, std::to_string(samplefreq));
+                resource->addAttribute(R_SAMPLEFREQUENCY, fmt::to_string(samplefreq));
                 audioset = true;
 
                 audioch = as_codecpar(st)->channels;
                 if (audioch > 0) {
                     log_debug("Added number of audio channels: {} from stream {}", audioch, i);
-                    resource->addAttribute(R_NRAUDIOCHANNELS, std::to_string(audioch));
+                    resource->addAttribute(R_NRAUDIOCHANNELS, fmt::to_string(audioch));
                 }
             }
         }
@@ -244,7 +244,7 @@ void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item
             std::string thumb_mimetype = it != mappings.end() && !it->second.empty() ? it->second : "image/jpeg";
 
             auto ffres = std::make_shared<CdsResource>(CH_FFTH);
-            ffres->addParameter(RESOURCE_HANDLER, std::to_string(CH_FFTH));
+            ffres->addParameter(RESOURCE_HANDLER, fmt::to_string(CH_FFTH));
             ffres->addOption(RESOURCE_CONTENT_TYPE, THUMBNAIL);
             ffres->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(thumb_mimetype));
 

@@ -157,7 +157,7 @@ void web::autoscan::autoscan2XML(const std::shared_ptr<AutoscanDirectory>& adir,
         element->append_child("scan_mode").append_child(pugi::node_pcdata).set_value(AutoscanDirectory::mapScanmode(adir->getScanMode()).c_str());
         element->append_child("recursive").append_child(pugi::node_pcdata).set_value(adir->getRecursive() ? "1" : "0");
         element->append_child("hidden").append_child(pugi::node_pcdata).set_value(adir->getHidden() ? "1" : "0");
-        element->append_child("interval").append_child(pugi::node_pcdata).set_value(std::to_string(adir->getInterval()).c_str());
+        element->append_child("interval").append_child(pugi::node_pcdata).set_value(fmt::to_string(adir->getInterval()).c_str());
         element->append_child("persistent").append_child(pugi::node_pcdata).set_value(adir->persistent() ? "1" : "0");
     }
 }

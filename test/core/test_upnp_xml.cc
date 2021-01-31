@@ -57,7 +57,7 @@ TEST_F(UpnpXmlTest, RenderObjectContainer)
     obj->setMetadata(M_UPNP_DATE, "2001-01-01");
     // albumArtURI
     database->findFolderImageMap.clear();
-    database->findFolderImageMap[std::to_string(obj->getID())] = "10";
+    database->findFolderImageMap[fmt::to_string(obj->getID())] = "10";
 
     std::ostringstream expectedXml;
     expectedXml << "<DIDL-Lite>\n";

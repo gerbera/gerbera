@@ -1092,8 +1092,8 @@ int ContentManager::addContainerChain(const std::string& chain, const std::strin
                 fanart = std::find_if(origResources.begin(), origResources.end(), [=](const auto& res) { return res->isMetaResource(ID3_ALBUM_ART); });
                 if (fanart != origResources.end()) {
                     if ((*fanart)->getAttribute(R_RESOURCE_FILE).empty()) {
-                        (*fanart)->addAttribute(R_FANART_OBJ_ID, std::to_string(origObj->getID()));
-                        (*fanart)->addAttribute(R_FANART_RES_ID, std::to_string(fanart - origResources.begin()));
+                        (*fanart)->addAttribute(R_FANART_OBJ_ID, fmt::to_string(origObj->getID()));
+                        (*fanart)->addAttribute(R_FANART_RES_ID, fmt::to_string(fanart - origResources.begin()));
                     }
                     container->addResource(*fanart);
                 }

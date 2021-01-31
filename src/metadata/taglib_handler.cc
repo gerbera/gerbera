@@ -92,7 +92,7 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
     case M_DATE:
         i = tag->year();
         if (i > 0) {
-            value = std::to_string(i);
+            value = fmt::to_string(i);
 
             if (!value.empty())
                 value = value + "-01-01";
@@ -102,7 +102,7 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
     case M_UPNP_DATE:
         i = tag->year();
         if (i > 0) {
-            value = std::to_string(i);
+            value = fmt::to_string(i);
 
             if (!value.empty())
                 value = value + "-01-01";
@@ -120,7 +120,7 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
     case M_TRACKNUMBER:
         i = tag->track();
         if (i > 0) {
-            value = std::to_string(i);
+            value = fmt::to_string(i);
             item->setTrackNumber(int(i));
         } else
             return;
@@ -192,7 +192,7 @@ void TagLibHandler::populateGenericTags(const std::shared_ptr<CdsItem>& item, co
     // UPnP bitrate is in bytes/second
     int temp = audioProps->bitrate() * 1024 / 8; // kbit/second -> byte/second
     if (temp > 0) {
-        res->addAttribute(R_BITRATE, std::to_string(temp));
+        res->addAttribute(R_BITRATE, fmt::to_string(temp));
     }
 
     temp = audioProps->lengthInMilliseconds();
@@ -202,12 +202,12 @@ void TagLibHandler::populateGenericTags(const std::shared_ptr<CdsItem>& item, co
 
     temp = audioProps->sampleRate();
     if (temp > 0) {
-        res->addAttribute(R_SAMPLEFREQUENCY, std::to_string(temp));
+        res->addAttribute(R_SAMPLEFREQUENCY, fmt::to_string(temp));
     }
 
     temp = audioProps->channels();
     if (temp > 0) {
-        res->addAttribute(R_NRAUDIOCHANNELS, std::to_string(temp));
+        res->addAttribute(R_NRAUDIOCHANNELS, fmt::to_string(temp));
     }
 }
 
@@ -523,7 +523,7 @@ void TagLibHandler::extractASF(TagLib::IOStream* roStream, const std::shared_ptr
     auto temp = audioProps->bitsPerSample();
     auto res = item->getResource(0);
     if (temp > 0) {
-        res->addAttribute(R_BITS_PER_SAMPLE, std::to_string(temp));
+        res->addAttribute(R_BITS_PER_SAMPLE, fmt::to_string(temp));
     }
 
     const TagLib::ASF::AttributeListMap& attrListMap = asf.tag()->attributeListMap();
@@ -593,7 +593,7 @@ void TagLibHandler::extractFLAC(TagLib::IOStream* roStream, const std::shared_pt
     auto temp = audioProps->bitsPerSample();
     auto res = item->getResource(0);
     if (temp > 0) {
-        res->addAttribute(R_BITS_PER_SAMPLE, std::to_string(temp));
+        res->addAttribute(R_BITS_PER_SAMPLE, fmt::to_string(temp));
     }
 
     std::string art_mimetype = sc->convert(pic->mimeType().toCString(true));
@@ -618,7 +618,7 @@ void TagLibHandler::extractAPE(TagLib::IOStream* roStream, const std::shared_ptr
     auto temp = audioProps->bitsPerSample();
     auto res = item->getResource(0);
     if (temp > 0) {
-        res->addAttribute(R_BITS_PER_SAMPLE, std::to_string(temp));
+        res->addAttribute(R_BITS_PER_SAMPLE, fmt::to_string(temp));
     }
 }
 
@@ -637,7 +637,7 @@ void TagLibHandler::extractWavPack(TagLib::IOStream* roStream, const std::shared
     auto temp = audioProps->bitsPerSample();
     auto res = item->getResource(0);
     if (temp > 0) {
-        res->addAttribute(R_BITS_PER_SAMPLE, std::to_string(temp));
+        res->addAttribute(R_BITS_PER_SAMPLE, fmt::to_string(temp));
     }
 }
 
@@ -663,7 +663,7 @@ void TagLibHandler::extractMP4(TagLib::IOStream* roStream, const std::shared_ptr
     auto temp = audioProps->bitsPerSample();
     auto res = item->getResource(0);
     if (temp > 0) {
-        res->addAttribute(R_BITS_PER_SAMPLE, std::to_string(temp));
+        res->addAttribute(R_BITS_PER_SAMPLE, fmt::to_string(temp));
     }
 
     if (mp4.tag()->contains("covr")) {
@@ -701,7 +701,7 @@ void TagLibHandler::extractAiff(TagLib::IOStream* roStream, const std::shared_pt
     auto temp = audioProps->bitsPerSample();
     auto res = item->getResource(0);
     if (temp > 0) {
-        res->addAttribute(R_BITS_PER_SAMPLE, std::to_string(temp));
+        res->addAttribute(R_BITS_PER_SAMPLE, fmt::to_string(temp));
     }
 }
 

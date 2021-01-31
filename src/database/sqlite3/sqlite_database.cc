@@ -309,7 +309,7 @@ std::string Sqlite3Database::quote(std::string value) const
 
 std::string Sqlite3Database::getError(const std::string& query, const std::string& error, sqlite3* db)
 {
-    return std::string("SQLITE3: (") + std::to_string(sqlite3_errcode(db)) + " : " + std::to_string(sqlite3_extended_errcode(db)) + ") "
+    return std::string("SQLITE3: (") + fmt::to_string(sqlite3_errcode(db)) + " : " + fmt::to_string(sqlite3_extended_errcode(db)) + ") "
         + sqlite3_errmsg(db) + "\nQuery:" + (query.empty() ? "unknown" : query) + "\nerror: " + (error.empty() ? "unknown" : error);
 }
 

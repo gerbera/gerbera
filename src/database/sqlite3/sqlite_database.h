@@ -161,13 +161,13 @@ private:
 
     std::string quote(std::string value) const override;
     std::string quote(const char* str) const override { return quote(std::string(str)); }
-    std::string quote(int val) const override { return std::to_string(val); }
-    std::string quote(unsigned int val) const override { return std::to_string(val); }
-    std::string quote(long val) const override { return std::to_string(val); }
-    std::string quote(unsigned long val) const override { return std::to_string(val); }
+    std::string quote(int val) const override { return fmt::to_string(val); }
+    std::string quote(unsigned int val) const override { return fmt::to_string(val); }
+    std::string quote(long val) const override { return fmt::to_string(val); }
+    std::string quote(unsigned long val) const override { return fmt::to_string(val); }
     std::string quote(bool val) const override { return std::string(val ? "1" : "0"); }
     std::string quote(char val) const override { return quote(std::string(1, val)); }
-    std::string quote(long long val) const override { return std::to_string(val); }
+    std::string quote(long long val) const override { return fmt::to_string(val); }
     std::shared_ptr<SQLResult> select(const char* query, int length) override;
     int exec(const char* query, int length, bool getLastInsertId = false) override;
     void storeInternalSetting(const std::string& key, const std::string& value) override;
