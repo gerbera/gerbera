@@ -1069,7 +1069,7 @@ int ContentManager::addContainerChain(const std::string& chain, const std::strin
         lastMetadata[MetadataHandler::getMetaFieldName(M_ALBUMARTIST)] = taItm->second;
     }
 
-    constexpr std::array<metadata_fields_t, 4> unwanted { M_DESCRIPTION, M_TITLE, M_TRACKNUMBER, M_ARTIST }; // not wanted for container!
+    constexpr auto unwanted = std::array { M_DESCRIPTION, M_TITLE, M_TRACKNUMBER, M_ARTIST }; // not wanted for container!
     for (const auto& unw : unwanted) {
         const auto itm = lastMetadata.find(MetadataHandler::getMetaFieldName(unw));
         if (itm != lastMetadata.end()) {
