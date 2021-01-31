@@ -332,9 +332,9 @@ void web::configLoad::process()
     }
 
 #ifdef HAVE_INOTIFY
-    constexpr auto autoscanList = std::array<config_option_t, 2> { CFG_IMPORT_AUTOSCAN_TIMED_LIST, CFG_IMPORT_AUTOSCAN_INOTIFY_LIST };
+    constexpr auto autoscanList = std::array { CFG_IMPORT_AUTOSCAN_TIMED_LIST, CFG_IMPORT_AUTOSCAN_INOTIFY_LIST };
 #else
-    constexpr auto autoscanList = std::array<config_option_t, 1> { CFG_IMPORT_AUTOSCAN_TIMED_LIST };
+    constexpr auto autoscanList = std::array { CFG_IMPORT_AUTOSCAN_TIMED_LIST };
 #endif
     for (const auto& autoscanOption : autoscanList) {
         cs = ConfigManager::findConfigSetup(autoscanOption);
@@ -372,7 +372,7 @@ void web::configLoad::process()
         }
     }
 
-    constexpr std::array<config_option_t, 5> dict_options {
+    constexpr auto dict_options = std::array {
         CFG_SERVER_UI_ACCOUNT_LIST,
         CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST,
         CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST,
@@ -396,7 +396,7 @@ void web::configLoad::process()
         }
     }
 
-    constexpr config_option_t array_options[] = {
+    constexpr auto array_options = std::array {
         CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN,
         CFG_IMPORT_RESOURCES_FANART_FILE_LIST,
         CFG_IMPORT_RESOURCES_CONTAINERART_FILE_LIST,

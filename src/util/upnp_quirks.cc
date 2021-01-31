@@ -51,7 +51,7 @@ void Quirks::addCaptionInfo(const std::shared_ptr<CdsItem>& item, std::unique_pt
 
     std::string url;
     if (!UpnpXMLBuilder::renderSubtitle(context->getServer()->getVirtualUrl(), item, url)) {
-        constexpr std::array<const char*, 4> exts {
+        constexpr auto exts = std::array {
             ".srt",
             ".ssa",
             ".smi",
