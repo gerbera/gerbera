@@ -10,7 +10,7 @@ project(Gerbera
         HOMEPAGE_URL "https://gerbera.io"
         LANGUAGES CXX C)
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/common")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake OPTIONAL)
 if(CONAN_EXPORTED)
