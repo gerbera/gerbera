@@ -10,10 +10,10 @@ project(Gerbera
         HOMEPAGE_URL "https://gerbera.io"
         LANGUAGES CXX C)
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/common")
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake OPTIONAL)
-if (CONAN_EXPORTED)
+if(CONAN_EXPORTED)
     conan_message(STATUS "Conan: called by CMake conan helper")
     # Propagate variables set by the helper
     # Normally conan_basic_setup should be called, but we rely
@@ -24,6 +24,9 @@ if (CONAN_EXPORTED)
     conan_check_compiler()
     conan_set_libcxx()
     conan_set_vs_runtime()
+    list(APPEND CMAKE_MODULE_PATH "${CMAKE_BINARY_DIR}/")
+else()
+    list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 endif()
 
 set(WITH_NPUPNP            NO  CACHE BOOL "Use npupnp instead of libupnp")
@@ -412,10 +415,21 @@ if(WITH_JS)
 endif()
 
 if(WITH_MYSQL)
-    find_package(MySQL REQUIRED)
-    target_include_directories(libgerbera PUBLIC ${MYSQL_INCLUDE_DIRS})
-    target_link_libraries(libgerbera PUBLIC ${MYSQL_CLIENT_LIBS})
-    target_compile_definitions(libgerbera PUBLIC HAVE_MYSQL)
+    if(CONAN_EXPORTED)
+        find_package(mariadb-connector-c REQUIRED)
+        target_include_directories(libgerbera PUBLIC ${mariadb-connector-c_INCLUDE_DIRS})
+        target_link_libraries(libgerbera PUBLIC ${mariadb-connector-c_LIBS})
+        target_compile_definitions(libgerbera PUBLIC HAVE_MYSQL)
+
+        find_package(OpenSSL REQUIRED)
+        target_include_directories(libgerbera PUBLIC ${OpenSSL_INCLUDE_DIRS})
+        target_link_libraries(libgerbera PUBLIC ${OpenSSL_LIBS})
+    else()
+        find_package(MySQL REQUIRED)
+        target_include_directories(libgerbera PUBLIC ${MYSQL_INCLUDE_DIRS})
+        target_link_libraries(libgerbera PUBLIC ${MYSQL_CLIENT_LIBS})
+        target_compile_definitions(libgerbera PUBLIC HAVE_MYSQL)
+    endif()
 endif()
 
 if(WITH_CURL)
