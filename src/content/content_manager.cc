@@ -390,16 +390,14 @@ std::deque<std::shared_ptr<GenericTask>> ContentManager::getTasklist()
 
     // if there is no current task, then the queues are empty
     // and we do not have to allocate the array
-    if (t == nullptr && taskList.empty())
+    if (t == nullptr)
         return taskList;
 
-    if (t != nullptr)
-        taskList.push_back(t);
-
+    taskList.push_back(t);
     std::copy_if(taskQueue1.begin(), taskQueue1.end(), std::back_inserter(taskList), [](const auto& task) { return task->isValid(); });
 
-    for (const auto& t : taskQueue2) {
-        if (t->isValid())
+    for (const auto& task : taskQueue2) {
+        if (task->isValid())
             taskList.clear();
     }
 
