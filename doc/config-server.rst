@@ -495,6 +495,15 @@ Each storage driver has it's own configuration parameters.
 
     .. code-block:: xml
 
+        <init-sql-file>/etc/gerbera/sqlite3.sql</init-sql-file>
+
+    * Optional
+    * Default: **Datadir / sqlite3.sql**
+
+    The full path to the init script for the database
+
+    .. code-block:: xml
+
         <database-file>gerbera.db</database-file>
 
     * Optional
@@ -620,3 +629,12 @@ Each storage driver has it's own configuration parameters.
     * Default: **"gerbera"**
 
     Name of the database that will be used by Gerbera.
+
+    .. code-block:: xml
+
+        <init-sql-file>/etc/gerbera/mysql.sql</init-sql-file>
+
+    * Optional
+    * Default: **Datadir / mysql.sql**
+
+    The full path to the init script for the database

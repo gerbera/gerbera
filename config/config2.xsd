@@ -306,6 +306,7 @@
         <xs:complexType>
             <xs:all>
                 <xs:element ref="database-file" minOccurs="0"/>
+                <xs:element ref="init-sql-file" minOccurs="0"/>
                 <xs:element ref="synchronous" minOccurs="0"/>
                 <xs:element ref="on-error" minOccurs="0"/>
                 <xs:element ref="backup" minOccurs="0"/>
@@ -350,6 +351,7 @@
                 <xs:element ref="password" minOccurs="0"/>
                 <xs:element ref="database" minOccurs="0"/>
                 <xs:element ref="socket" minOccurs="0"/>
+                <xs:element ref="init-sql-file" minOccurs="0"/>
             </xs:all>
             <xs:attribute name="enabled" type="boolean" default="yes"/>
         </xs:complexType>
