@@ -52,8 +52,6 @@
 
 #include <sys/stat.h>
 
-#include <fmt/ostream.h>
-
 extern "C" {
 
 #include <libavformat/avformat.h>
@@ -366,7 +364,7 @@ std::unique_ptr<IOHandler> FfmpegHandler::serveContent(std::shared_ptr<CdsObject
 
     if (cache_enabled) {
         if (auto data = readThumbnailCacheFile(item->getLocation())) {
-            log_debug("Returning cached thumbnail for file: {}", item->getLocation());
+            log_debug("Returning cached thumbnail for file: {}", item->getLocation().c_str());
             return std::make_unique<MemIOHandler>(data->data(), data->size());
         }
     }
@@ -392,7 +390,7 @@ std::unique_ptr<IOHandler> FfmpegHandler::serveContent(std::shared_ptr<CdsObject
     th->thumbnail_image_quality = config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_IMAGE_QUALITY);
     th->thumbnail_image_type = Jpeg;
 
-    log_debug("Generating thumbnail for file: {}", item->getLocation());
+    log_debug("Generating thumbnail for file: {}", item->getLocation().c_str());
 
 #ifdef FFMPEGTHUMBNAILER_OLD_API
     if (generate_thumbnail_to_buffer(th.get(), item->getLocation().c_str(), img.get()) != 0)
@@ -400,7 +398,7 @@ std::unique_ptr<IOHandler> FfmpegHandler::serveContent(std::shared_ptr<CdsObject
     if (video_thumbnailer_generate_thumbnail_to_buffer(th.get(), item->getLocation().c_str(), img.get()) != 0)
 #endif // old api
     {
-        throw_std_runtime_error(fmt::format("Could not generate thumbnail for {}", item->getLocation()));
+        throw_std_runtime_error("Could not generate thumbnail for {}", item->getLocation().c_str());
     }
     if (cache_enabled) {
         writeThumbnailCacheFile(item->getLocation(),

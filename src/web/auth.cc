@@ -48,7 +48,7 @@ static std::string generate_token()
 {
     const time_t expiration = get_time() + LOGIN_TIMEOUT;
     std::string salt = generateRandomId();
-    return fmt::to_string(expiration) + '_' + salt;
+    return fmt::format("{}_{}", expiration, salt);
 }
 
 static bool check_token(const std::string& token, const std::string& password, const std::string& encPassword)

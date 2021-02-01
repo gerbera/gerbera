@@ -45,10 +45,10 @@ Mime::Mime(const std::shared_ptr<Config>& config)
     std::string optMagicFile = config->getOption(CFG_IMPORT_MAGIC_FILE);
     const char* magicFile = !optMagicFile.empty() ? optMagicFile.c_str() : nullptr;
     if (magic_load(magicCookie, magicFile) == -1) {
-        std::string errMsg = std::string(magic_error(magicCookie));
+        auto errMsg = magic_error(magicCookie);
         magic_close(magicCookie);
         magicCookie = nullptr;
-        throw_std_runtime_error("magic_load failed: " + errMsg);
+        throw_std_runtime_error("magic_load failed: {}", errMsg);
     }
 #endif // HAVE_MAGIC
 }

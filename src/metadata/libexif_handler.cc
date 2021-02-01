@@ -413,7 +413,7 @@ std::unique_ptr<IOHandler> LibExifHandler::serveContent(std::shared_ptr<CdsObjec
 
     std::string ctype = getValueOrDefault(res->getParameters(), RESOURCE_CONTENT_TYPE);
     if (ctype != EXIF_THUMBNAIL)
-        throw_std_runtime_error("got unknown content type: " + ctype);
+        throw_std_runtime_error("Got unknown content type: {}", ctype);
 
     ExifData* ed = exif_data_new_from_file(item->getLocation().c_str());
     if (!ed)

@@ -41,7 +41,7 @@ CurlIOHandler::CurlIOHandler(const std::string& URL, CURL* curl_handle, size_t b
     if (URL.empty())
         throw_std_runtime_error("URL has not been set correctly");
     if (bufSize < CURL_MAX_WRITE_SIZE)
-        throw_std_runtime_error(fmt::format("bufSize must be at least CURL_MAX_WRITE_SIZE({})", CURL_MAX_WRITE_SIZE));
+        throw_std_runtime_error("bufSize must be at least CURL_MAX_WRITE_SIZE({})", CURL_MAX_WRITE_SIZE);
 
     this->URL = URL;
     this->external_curl_handle = (curl_handle != nullptr);

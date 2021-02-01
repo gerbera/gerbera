@@ -411,13 +411,13 @@ void ContentManager::addVirtualItem(const std::shared_ptr<CdsObject>& obj, bool 
 
     std::error_code ec;
     if (!isRegularFile(path, ec))
-        throw_std_runtime_error("Not a file: " + path.string());
+        throw_std_runtime_error("Not a file: {}", path.c_str());
 
     auto pcdir = database->findObjectByPath(path);
     if (pcdir == nullptr) {
         pcdir = createObjectFromFile(path, true, allow_fifo);
         if (pcdir == nullptr) {
-            throw_std_runtime_error("Could not add " + path.string());
+            throw_std_runtime_error("Could not add {}", path.c_str());
         }
         if (pcdir->isItem()) {
             this->addObject(pcdir);
@@ -633,7 +633,7 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
 
     DIR* dir = opendir(location.c_str());
     if (!dir) {
-        log_warning("Could not open {}: {}", location.c_str(), strerror(errno));
+        log_warning("Could not open {}: {}", location.c_str(), std::strerror(errno));
         if (adir->persistent()) {
             removeObject(adir, containerID, false);
             adir->setObjectID(INVALID_OBJECT_ID);
@@ -689,7 +689,7 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
         struct stat statbuf;
         int ret = stat(newPath.c_str(), &statbuf);
         if (ret != 0) {
-            log_error("Failed to stat {}, {}", newPath.c_str(), strerror(errno));
+            log_error("Failed to stat {}, {}", newPath.c_str(), std::strerror(errno));
             continue;
         }
 
@@ -810,7 +810,7 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
 
     DIR* dir = opendir(path.c_str());
     if (!dir) {
-        throw_std_runtime_error("could not list directory " + path.string() + " : " + strerror(errno));
+        throw_std_runtime_error("Could not list directory {} : {}", path.c_str(), std::strerror(errno));
     }
 
     int parentID = database->findObjectIDByPath(path);
@@ -862,12 +862,12 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
 
         // For the Web UI
         if (task != nullptr) {
-            task->setDescription("Importing: " + newPath.string());
+            task->setDescription(fmt::format("Importing: {}", newPath.c_str()));
         }
         struct stat statbuf;
         int ret = stat(newPath.c_str(), &statbuf);
         if (ret != 0) {
-            log_error("Failed to stat {}, {}", newPath.c_str(), strerror(errno));
+            log_error("Failed to stat {}, {}", newPath.c_str(), std::strerror(errno));
             continue;
         }
 
@@ -1133,7 +1133,7 @@ bool ContentManager::isLink(const fs::path& path, bool allowLinks)
         int lret = lstat(path.c_str(), &statbuf);
 
         if (lret != 0) {
-            log_warning("File or directory does not exist: {} ({})", path.string(), strerror(errno));
+            log_warning("File or directory does not exist: {} ({})", path.c_str(), std::strerror(errno));
             return true;
         }
 
@@ -1150,7 +1150,7 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::path& 
     struct stat statbuf;
     int ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
-        log_warning("File or directory does not exist: {} ({})", path.string(), strerror(errno));
+        log_warning("File or directory does not exist: {} ({})", path.c_str(), std::strerror(errno));
         return nullptr;
     }
 
@@ -1214,7 +1214,7 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::path& 
         */
     } else {
         // only regular files and directories are supported
-        throw_std_runtime_error("ContentManager: skipping file " + path.string());
+        throw_std_runtime_error("ContentManager: skipping file {}", path.c_str());
     }
     //    auto f2i = StringConverter::f2i();
     //    obj->setTitle(f2i->convert(filename));
@@ -1358,7 +1358,7 @@ int ContentManager::addFileInternal(
     if (async) {
         auto self = shared_from_this();
         auto task = std::make_shared<CMAddFileTask>(self, path, rootpath, asSetting, cancellable);
-        task->setDescription("Importing: " + path.string());
+        task->setDescription(fmt::format("Importing: {}", path.c_str()));
         task->setParentID(parentTaskID);
         addTask(task, lowPriority);
         return INVALID_OBJECT_ID;

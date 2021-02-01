@@ -66,7 +66,7 @@ public:
         file = ::fopen(path, "rb");
 #endif
         if (file == nullptr) {
-            throw_std_runtime_error(std::string("Could not fopen ") + path);
+            throw_std_runtime_error("Could not fopen {}", path);
         }
     }
 

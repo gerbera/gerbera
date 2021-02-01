@@ -114,7 +114,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
         return nullptr;
     }
 
-    temp = fmt::to_string(OnlineService::getDatabasePrefix(OS_ATrailers)) + temp;
+    temp = fmt::format("{}{}", OnlineService::getDatabasePrefix(OS_ATrailers), temp);
     item->setServiceID(temp);
 
     auto preview = trailer.child("preview");

@@ -150,7 +150,7 @@ std::shared_ptr<Session> SessionManager::createSession(long timeout)
     do {
         sessionID = generateRandomId();
         if (count++ > 100)
-            throw_std_runtime_error("There seems to be something wrong with the random numbers. I tried to get a unique id 100 times and failed. last sessionID: " + sessionID);
+            throw_std_runtime_error("There seems to be something wrong with the random numbers. I tried to get a unique id 100 times and failed. last sessionID: {}", sessionID);
     } while (getSession(sessionID, false) != nullptr); // for the rare case, where we get a random id, that is already taken
 
     newSession->setID(sessionID);

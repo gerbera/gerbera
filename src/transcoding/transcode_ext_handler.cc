@@ -72,7 +72,7 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(std::shared_pt
     log_debug("Start transcoding file: {}", location.c_str());
 
     if (profile == nullptr)
-        throw_std_runtime_error("Transcoding of file " + location + "requested but no profile given");
+        throw_std_runtime_error("Transcoding of file {} requested but no profile given", location.c_str());
 
     bool isURL = obj->isExternalItem();
 
@@ -110,11 +110,11 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(std::shared_pt
         std::vector<std::string> sop_args;
         int p1 = find_local_port(45000, 65500);
         int p2 = find_local_port(45000, 65500);
-        sop_args = populateCommandLine(location + " " + fmt::to_string(p1) + " " + fmt::to_string(p2));
+        sop_args = populateCommandLine(fmt::format("{} {} {}", location.c_str(), p1, p2));
         auto spsc = std::make_shared<ProcessExecutor>("sp-sc-auth", sop_args);
         auto pr_item = std::make_shared<ProcListItem>(spsc);
         proc_list.push_back(pr_item);
-        location = "http://localhost:" + fmt::to_string(p2) + "/tv.asf";
+        location = fmt::format("http://localhost:{}/tv.asf", p2);
 
         //FIXME: #warning check if socket is ready
         sleep(15);
@@ -129,7 +129,7 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(std::shared_pt
             location = tempName(config->getOption(CFG_SERVER_TMPDIR), fifo_template);
             log_debug("creating reader fifo: {}", location.c_str());
             if (mkfifo(location.c_str(), O_RDWR) == -1) {
-                log_error("Failed to create fifo for the remote content reading thread: {}", strerror(errno));
+                log_error("Failed to create fifo for the remote content reading thread: {}", std::strerror(errno));
                 throw_std_runtime_error("Could not create reader fifo");
             }
 
@@ -159,23 +159,23 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(std::shared_pt
     if (profile->getCommand().is_absolute()) {
         std::error_code ec;
         if (!isRegularFile(profile->getCommand(), ec))
-            throw_std_runtime_error("Could not find transcoder: " + profile->getCommand().string());
+            throw_std_runtime_error("Could not find transcoder: {}", profile->getCommand().c_str());
 
         check = profile->getCommand();
     } else {
         check = findInPath(profile->getCommand());
 
         if (check.empty())
-            throw_std_runtime_error("Could not find transcoder " + profile->getCommand().string() + " in $PATH");
+            throw_std_runtime_error("Could not find transcoder {} in $PATH", profile->getCommand().c_str());
     }
 
     int err = 0;
     if (!isExecutable(check, &err))
-        throw_std_runtime_error("Transcoder " + profile->getCommand().string() + " is not executable: " + strerror(err));
+        throw_std_runtime_error("Transcoder {} is not executable: {}", profile->getCommand().c_str(), std::strerror(err));
 
     log_debug("creating fifo: {}", fifo_name.c_str());
     if (mkfifo(fifo_name.c_str(), O_RDWR) == -1) {
-        log_error("Failed to create fifo for the transcoding process!: {}", strerror(errno));
+        log_error("Failed to create fifo for the transcoding process!: {}", std::strerror(errno));
         throw_std_runtime_error("Could not create fifo");
     }
 

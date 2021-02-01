@@ -121,7 +121,7 @@ ProcessIOHandler::ProcessIOHandler(std::shared_ptr<ContentManager> content,
     /*
     if (mkfifo(filename.c_str(), O_RDWR) == -1)
     {
-        log_error("Failed to create fifo: {}", strerror(errno));
+        log_error("Failed to create fifo: {}", std::strerror(errno));
         killAll();
         if (main_proc != nullptr)
             main_proc->kill();
@@ -156,14 +156,14 @@ void ProcessIOHandler::open(enum UpnpOpenFileMode mode)
 
     if (fd == -1) {
         if (errno == ENXIO) {
-            throw TryAgainException(std::string("open failed: ") + strerror(errno));
+            throw TryAgainException(fmt::format("open failed: {}", std::strerror(errno)));
         }
 
         killAll();
         if (mainProc != nullptr)
             mainProc->kill();
         unlink(filename.c_str());
-        throw_std_runtime_error("open: failed to open: " + filename.string());
+        throw_std_runtime_error("open: failed to open: {}", filename.c_str());
     }
 }
 

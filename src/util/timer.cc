@@ -48,7 +48,7 @@ void Timer::run()
         this);
 
     if (ret)
-        throw_std_runtime_error("failed to start timer thread: " + fmt::to_string(ret));
+        throw_std_runtime_error("failed to start timer thread: {}", ret);
 }
 
 void* Timer::staticThreadProc(void* arg)
@@ -69,7 +69,7 @@ void Timer::addTimerSubscriber(Subscriber* timerSubscriber, unsigned int notifyI
 {
     log_debug("Adding subscriber... interval: {} once: {} ", notifyInterval, once);
     if (notifyInterval == 0)
-        throw_std_runtime_error(fmt::format("Tried to add timer with illegal notifyInterval: {}", notifyInterval));
+        throw_std_runtime_error("Tried to add timer with illegal notifyInterval: {}", notifyInterval);
 
     AutoLock lock(mutex);
     TimerSubscriberElement element(timerSubscriber, notifyInterval, std::move(parameter), once);

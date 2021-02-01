@@ -43,8 +43,7 @@
 #define PRETTY_FUNCTION __func__
 #endif
 
-#define throw_std_runtime_error(msg) throw std::runtime_error(std::string(msg) \
-    + " file:" + std::string(__FILE__) + " line:" + fmt::to_string(__LINE__) + " function:" + std::string(PRETTY_FUNCTION))
+#define throw_std_runtime_error(...) throw std::runtime_error(fmt::format("[{}:{}] {} Error: {}", __FILE__, __LINE__, PRETTY_FUNCTION, fmt::format(__VA_ARGS__)))
 
 class ConfigParseException : public std::runtime_error {
 public:

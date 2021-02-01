@@ -48,12 +48,12 @@ std::unique_ptr<IOHandler> TranscodeDispatcher::serveContent(std::shared_ptr<Tra
     const std::string& range)
 {
     if (profile == nullptr)
-        throw_std_runtime_error("Transcoding of file " + location + "requested but no profile given ");
+        throw_std_runtime_error("Transcoding of file {} requested but no profile given ", location.c_str());
 
     if (profile->getType() == TR_External) {
         auto tr_ext = std::make_unique<TranscodeExternalHandler>(content);
         return tr_ext->serveContent(profile, location, obj, range);
     }
 
-    throw_std_runtime_error("Unknown transcoding type for profile " + profile->getName());
+    throw_std_runtime_error("Unknown transcoding type for profile {}", profile->getName().c_str());
 }

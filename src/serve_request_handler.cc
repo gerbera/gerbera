@@ -61,7 +61,7 @@ void ServeRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     size_t len = (std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_SERVE_HANDLER).length();
 
     if (len > url_path.length()) {
-        throw_std_runtime_error("There is something wrong with the link " + url_path);
+        throw_std_runtime_error("There is something wrong with the link {}", url_path.c_str());
     }
 
     url_path = urlUnescape(url_path);
@@ -73,7 +73,7 @@ void ServeRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
     ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
-        throw_std_runtime_error("Failed to stat " + path);
+        throw_std_runtime_error("Failed to stat {}", path.c_str());
     }
 
     if (S_ISREG(statbuf.st_mode)) // we have a regular file
@@ -100,7 +100,7 @@ void ServeRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         UpnpFileInfo_set_ContentType(info, ixmlCloneDOMString(mimetype.c_str()));
 #endif
     } else {
-        throw_std_runtime_error("Not a regular file: " + path);
+        throw_std_runtime_error("Not a regular file: {}", path.c_str());
     }
 }
 
@@ -121,7 +121,7 @@ std::unique_ptr<IOHandler> ServeRequestHandler::open(const char* filename, enum 
 
     size_t len = (std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_SERVE_HANDLER).length();
     if (len > url_path.length()) {
-        throw_std_runtime_error("There is something wrong with the link " + url_path);
+        throw_std_runtime_error("There is something wrong with the link {}", url_path.c_str());
     }
 
     std::string path = config->getOption(CFG_SERVER_SERVEDIR)
@@ -130,11 +130,11 @@ std::unique_ptr<IOHandler> ServeRequestHandler::open(const char* filename, enum 
     log_debug("Constructed new path: {}", path.c_str());
     ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
-        throw_std_runtime_error("Failed to stat " + path);
+        throw_std_runtime_error("Failed to stat {}", path.c_str());
     }
 
     if (!S_ISREG(statbuf.st_mode)) {
-        throw_std_runtime_error("Not a regular file: " + path);
+        throw_std_runtime_error("Not a regular file: {}", path.c_str());
     }
 
     auto io_handler = std::make_unique<FileIOHandler>(path);

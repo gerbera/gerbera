@@ -180,7 +180,7 @@ void MySQLDatabase::init()
         0 // flags
     );
     if (!res_mysql) {
-        throw_std_runtime_error("The connection to the MySQL database has failed: " + getError(&db));
+        throw_std_runtime_error("The connection to the MySQL database has failed: {}", getError(&db));
     }
 
     mysql_connection = true;
@@ -202,7 +202,7 @@ void MySQLDatabase::init()
             ret = mysql_real_query(&db, statement.c_str(), statement.size());
             if (ret) {
                 std::string myError = getError(&db);
-                throw DatabaseException(myError, "Mysql: error while creating db: " + myError);
+                throw DatabaseException(myError, fmt::format("Mysql: error while creating db: {}", myError));
             }
         }
 
@@ -273,7 +273,7 @@ void MySQLDatabase::init()
     }
 
     if (dbVersion != "7")
-        throw_std_runtime_error("The database seems to be from a newer version (database version " + dbVersion + ")");
+        throw_std_runtime_error("The database seems to be from a newer version (database version {})", dbVersion);
 
     lock.unlock();
 

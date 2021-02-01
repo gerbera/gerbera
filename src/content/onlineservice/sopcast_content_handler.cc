@@ -125,9 +125,7 @@ std::shared_ptr<CdsObject> SopCastContentHandler::getObject(const std::string& g
     auto resource = std::make_shared<CdsResource>(CH_DEFAULT);
     item->addResource(resource);
 
-    item->setAuxData(ONLINE_SERVICE_AUX_ID,
-        fmt::to_string(OS_SopCast));
-
+    item->setAuxData(ONLINE_SERVICE_AUX_ID, fmt::to_string(OS_SopCast));
     item->setAuxData(SOPCAST_AUXDATA_GROUP, groupName);
 
     std::string temp = channel.attribute("id").as_string();

@@ -70,7 +70,7 @@ void MetadataHandler::setMetadata(const std::shared_ptr<Context>& context, const
     std::string location = item->getLocation();
     std::error_code ec;
     if (!isRegularFile(location, ec))
-        throw_std_runtime_error("Not a file: " + location);
+        throw_std_runtime_error("Not a file: {}", location.c_str());
     auto filesize = getFileSize(location);
 
     std::string mimetype = item->getMimeType();
@@ -181,7 +181,7 @@ std::unique_ptr<MetadataHandler> MetadataHandler::createHandler(const std::share
     case CH_RESOURCE:
         return std::make_unique<ResourceHandler>(context);
     default:
-        throw_std_runtime_error("unknown content handler ID: " + fmt::to_string(handlerType));
+        throw_std_runtime_error("Unknown content handler ID: {}", handlerType);
     }
 }
 

@@ -162,7 +162,7 @@ void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject
         currentObjectID = INVALID_OBJECT_ID;
         currentTask = nullptr;
         free(currentLine);
-        throw_std_runtime_error("failed to open file: " + obj->getLocation().string());
+        throw_std_runtime_error("Failed to open file: {}", obj->getLocation().c_str());
     }
 
     ScriptingRuntime::AutoLock lock(runtime->getMutex());

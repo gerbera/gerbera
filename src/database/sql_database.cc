@@ -387,7 +387,7 @@ void SQLDatabase::updateObject(std::shared_ptr<CdsObject> obj, int* changedConta
         data.push_back(std::make_shared<AddUpdateTable>(CDS_OBJECT_TABLE, cdsObjectSql, "update"));
     } else {
         if (IS_FORBIDDEN_CDS_ID(obj->getID()))
-            throw_std_runtime_error("tried to update an object with a forbidden ID (" + fmt::to_string(obj->getID()) + ")");
+            throw_std_runtime_error("Tried to update an object with a forbidden ID ({})", obj->getID());
         data = _addUpdateObject(obj, true, changedContainer);
     }
     for (const auto& addUpdateTable : data) {
@@ -418,7 +418,7 @@ std::shared_ptr<CdsObject> SQLDatabase::loadObject(int objectID)
     if (res != nullptr && (row = res->nextRow()) != nullptr) {
         return createObjectFromRow(row);
     }
-    throw ObjectNotFoundException("Object not found: " + fmt::to_string(objectID));
+    throw ObjectNotFoundException(fmt::format("Object not found: {}", objectID));
 }
 
 std::shared_ptr<CdsObject> SQLDatabase::loadObjectByServiceID(const std::string& serviceID)
@@ -477,7 +477,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_pt
     if (res != nullptr && (row = res->nextRow()) != nullptr) {
         objectType = std::stoi(row->col(0));
     } else {
-        throw ObjectNotFoundException("Object not found: " + fmt::to_string(objectID));
+        throw ObjectNotFoundException(fmt::format("Object not found: {}", objectID));
     }
 
     row = nullptr;
@@ -674,7 +674,7 @@ std::shared_ptr<CdsObject> SQLDatabase::findObjectByPath(fs::path fullpath, bool
 
     auto res = select(qb);
     if (res == nullptr)
-        throw_std_runtime_error("error while doing select: " + qb.str());
+        throw_std_runtime_error("error while doing select: {}", qb.str());
 
     std::unique_ptr<SQLRow> row = res->nextRow();
     if (row == nullptr)
@@ -952,7 +952,7 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::unique_pt
     }
 
     if (!matched_types) {
-        throw DatabaseException("", "unknown object type: " + fmt::to_string(objectType));
+        throw DatabaseException("", fmt::format("Unknown object type: {}", objectType));
     }
 
     return obj;
@@ -999,7 +999,7 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromSearchRow(const std::uni
 
         item->setTrackNumber(stoiString(row->col(to_underlying(SearchCol::track_number))));
     } else {
-        throw DatabaseException("", "unknown object type: " + fmt::to_string(objectType));
+        throw DatabaseException("", fmt::format("Unknown object type: {}", objectType));
     }
 
     return obj;
@@ -1194,7 +1194,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObjects(const st
 
     for (int id : *list) {
         if (IS_FORBIDDEN_CDS_ID(id)) {
-            throw_std_runtime_error("tried to delete a forbidden ID (" + fmt::to_string(id) + ")");
+            throw_std_runtime_error("Tried to delete a forbidden ID ({})", id);
         }
     }
 
@@ -1303,7 +1303,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObject(int objec
         }
     }
     if (IS_FORBIDDEN_CDS_ID(objectID))
-        throw_std_runtime_error("tried to delete a forbidden ID (" + fmt::to_string(objectID) + ")");
+        throw_std_runtime_error("Tried to delete a forbidden ID ({})", objectID);
     std::vector<int32_t> itemIds;
     std::vector<int32_t> containerIds;
     if (isContainer) {
@@ -1952,7 +1952,7 @@ std::unique_ptr<std::vector<int>> SQLDatabase::_checkOverlappingAutoscans(const 
         if (obj == nullptr)
             throw_std_runtime_error("Referenced object (by Autoscan) not found.");
         log_error("There is already an Autoscan set on {}", obj->getLocation().c_str());
-        throw_std_runtime_error("There is already an Autoscan set on " + obj->getLocation().string());
+        throw_std_runtime_error("There is already an Autoscan set on {}", obj->getLocation().c_str());
     }
 
     if (adir->getRecursive()) {
@@ -1960,7 +1960,7 @@ std::unique_ptr<std::vector<int>> SQLDatabase::_checkOverlappingAutoscans(const 
         q << "SELECT " << TQ("obj_id")
           << " FROM " << TQ(AUTOSCAN_TABLE)
           << " WHERE " << TQ("path_ids") << " LIKE "
-          << quote("%," + fmt::to_string(checkObjectID) + ",%");
+          << quote(fmt::format("%,{},%", checkObjectID));
         if (databaseID >= 0)
             q << " AND " << TQ("id") << " != " << quote(databaseID);
         q << " LIMIT 1";
@@ -1977,7 +1977,7 @@ std::unique_ptr<std::vector<int>> SQLDatabase::_checkOverlappingAutoscans(const 
             if (obj == nullptr)
                 throw_std_runtime_error("Referenced object (by Autoscan) not found.");
             log_error("Overlapping Autoscans are not allowed. There is already an Autoscan set on {}", obj->getLocation().c_str());
-            throw_std_runtime_error("Overlapping Autoscans are not allowed. There is already an Autoscan set on " + obj->getLocation().string());
+            throw_std_runtime_error("Overlapping Autoscans are not allowed. There is already an Autoscan set on {}", obj->getLocation().c_str());
         }
     }
 
@@ -2005,7 +2005,7 @@ std::unique_ptr<std::vector<int>> SQLDatabase::_checkOverlappingAutoscans(const 
     if (obj == nullptr)
         throw_std_runtime_error("Referenced object (by Autoscan) not found.");
     log_error("Overlapping Autoscans are not allowed. There is already a recursive Autoscan set on {}", obj->getLocation().c_str());
-    throw_std_runtime_error("Overlapping Autoscans are not allowed. There is already a recursive Autoscan set on " + obj->getLocation().string());
+    throw_std_runtime_error("Overlapping Autoscans are not allowed. There is already a recursive Autoscan set on {}", obj->getLocation().c_str());
 }
 
 std::unique_ptr<std::vector<int>> SQLDatabase::getPathIDs(int objectID)

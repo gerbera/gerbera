@@ -78,7 +78,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         res_id = SIZE_MAX;
 
     if (!obj->isItem() && rh.empty()) {
-        throw_std_runtime_error(fmt::format("requested object {} is not an item", filename));
+        throw_std_runtime_error("Requested object {} is not an item", filename);
     }
 
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
@@ -112,9 +112,9 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     }
     if (ret != 0) {
         if (is_srt)
-            throw SubtitlesNotFoundException("Subtitle file " + path.string() + " is not available.");
+            throw SubtitlesNotFoundException(fmt::format("Subtitle file {} is not available.", path.c_str()));
 
-        throw_std_runtime_error("Failed to open " + path.string() + " - " + strerror(errno));
+        throw_std_runtime_error("Failed to open {}: {}", path.c_str(), std::strerror(errno));
     }
 
     if (access(path.c_str(), R_OK) == 0) {
@@ -126,7 +126,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     std::string header;
     log_debug("path: {}", path.c_str());
     if (!path.filename().empty()) {
-        header = "Content-Disposition: attachment; filename=\"" + path.filename().string() + "\"";
+        header = fmt::format("Content-Disposition: attachment; filename=\"{}\"", path.filename().c_str());
     }
 
     // for transcoded resourecs res_id will always be negative
@@ -168,9 +168,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         auto tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)
                       ->getByName(tr_profile);
         if (tp == nullptr)
-            throw_std_runtime_error("Transcoding of file " + path.string()
-                + " but no profile matching the name "
-                + tr_profile + " found");
+            throw_std_runtime_error("Transcoding of file {} but no profile matching the name {} found", path.c_str(), tr_profile.c_str());
 
         mimeType = tp->getTargetMimeType();
 
@@ -248,7 +246,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum U
         res_id = SIZE_MAX;
 
     if (!obj->isItem() && rh.empty()) {
-        throw_std_runtime_error(fmt::format("requested object {} is not an item", filename));
+        throw_std_runtime_error("requested object {} is not an item", filename);
     }
 
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
@@ -279,9 +277,9 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum U
     }
     if (ret != 0) {
         if (is_srt)
-            throw SubtitlesNotFoundException("Subtitle file " + path.string() + " is not available.");
+            throw SubtitlesNotFoundException(fmt::format("Subtitle file {} is not available.", path.c_str()));
 
-        throw_std_runtime_error("Failed to open " + path.string() + " - " + strerror(errno));
+        throw_std_runtime_error("Failed to open {}: {}", path.c_str(), std::strerror(errno));
     }
 
     // for transcoded resourecs res_id will always be negative
