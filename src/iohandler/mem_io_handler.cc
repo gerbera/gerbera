@@ -40,7 +40,7 @@
 #include <unistd.h>
 
 MemIOHandler::MemIOHandler(const void* buffer, int length)
-    : buffer(static_cast<char*>(malloc(length)))
+    : buffer(new char[length])
     , length(length)
     , pos(-1)
 {
@@ -48,7 +48,7 @@ MemIOHandler::MemIOHandler(const void* buffer, int length)
 }
 
 MemIOHandler::MemIOHandler(const std::string& str)
-    : buffer(static_cast<char*>(malloc(str.length())))
+    : buffer(new char[str.length()])
     , length(str.length())
     , pos(-1)
 {
@@ -57,7 +57,7 @@ MemIOHandler::MemIOHandler(const std::string& str)
 
 MemIOHandler::~MemIOHandler()
 {
-    free(buffer);
+    delete[] buffer;
 }
 
 void MemIOHandler::open(enum UpnpOpenFileMode mode)
