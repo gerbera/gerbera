@@ -200,9 +200,9 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = 
     std::make_shared<ConfigStringSetup>(CFG_SERVER_STORAGE_MYSQL_DATABASE,
         "/server/storage/mysql/database", "config-server.html#storage",
         DEFAULT_MYSQL_DB),
-    std::make_shared<ConfigStringSetup>(CFG_SERVER_STORAGE_MYSQL_INIT_SQL_PATH,
-        "/server/storage/mysql/init-sql-path", "config-server.html#storage",
-        ""), // This should really be "dataDir / mysql.sql"
+    std::make_shared<ConfigPathSetup>(CFG_SERVER_STORAGE_MYSQL_INIT_SQL_FILE,
+        "/server/storage/mysql/init-sql-file", "config-server.html#storage",
+        "", true), // This should really be "dataDir / mysql.sql"
 #else
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_STORAGE_MYSQL_ENABLED,
         "/server/storage/mysql/attribute::enabled", "config-server.html#storage",
@@ -237,9 +237,9 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = 
         "/server/storage/sqlite3/backup/attribute::interval", "config-server.html#storage",
         DEFAULT_SQLITE_BACKUP_INTERVAL, 1, ConfigIntSetup::CheckMinValue),
 
-    std::make_shared<ConfigStringSetup>(CFG_SERVER_STORAGE_SQLITE_INIT_SQL_PATH,
-        "/server/storage/sqlite3/init-sql-path", "config-server.html#storage",
-        ""), // This should really be "dataDir / sqlite3.sql"
+    std::make_shared<ConfigPathSetup>(CFG_SERVER_STORAGE_SQLITE_INIT_SQL_FILE,
+        "/server/storage/sqlite3/init-sql-file", "config-server.html#storage",
+        "", true), // This should really be "dataDir / sqlite3.sql"
 
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_UI_ENABLED,
         "/server/ui/attribute::enabled", "config-server.html#ui",
@@ -939,12 +939,9 @@ void ConfigManager::load(const fs::path& userHome)
         setOption(root, CFG_SERVER_STORAGE_MYSQL_SOCKET);
         setOption(root, CFG_SERVER_STORAGE_MYSQL_PASSWORD);
 
-        co = findConfigSetup(CFG_SERVER_STORAGE_MYSQL_INIT_SQL_PATH);
-        temp = co->getXmlContent(root);
-        if (temp.empty()) {
-            temp = dataDir / "mysql.sql";
-        }
-        co->makeOption(temp, self);
+        co = findConfigSetup(CFG_SERVER_STORAGE_MYSQL_INIT_SQL_FILE);
+        co->setDefaultValue(dataDir / "mysql.sql");
+        co->makeOption(root, self);
     }
 #else
     if (mysql_en) {
@@ -961,12 +958,9 @@ void ConfigManager::load(const fs::path& userHome)
         setOption(root, CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED);
         setOption(root, CFG_SERVER_STORAGE_SQLITE_BACKUP_INTERVAL);
 
-        co = findConfigSetup(CFG_SERVER_STORAGE_SQLITE_INIT_SQL_PATH);
-        temp = co->getXmlContent(root);
-        if (temp.empty()) {
-            temp = dataDir / "sqlite3.sql";
-        }
-        co->makeOption(temp, self);
+        co = findConfigSetup(CFG_SERVER_STORAGE_SQLITE_INIT_SQL_FILE);
+        co->setDefaultValue(dataDir / "sqlite3.sql");
+        co->makeOption(root, self);
     }
 
     std::string dbDriver;
