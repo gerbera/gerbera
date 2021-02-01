@@ -200,7 +200,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = 
     std::make_shared<ConfigStringSetup>(CFG_SERVER_STORAGE_MYSQL_DATABASE,
         "/server/storage/mysql/database", "config-server.html#storage",
         DEFAULT_MYSQL_DB),
-    std::make_shared<ConfigPathSetup>(CFG_SERVER_STORAGE_MYSQL_INIT_SQL_PATH,
+    std::make_shared<ConfigPathSetup>(CFG_SERVER_STORAGE_MYSQL_INIT_SQL_FILE,
         "/server/storage/mysql/init-sql-file", "config-server.html#storage",
         "", true), // This should really be "dataDir / mysql.sql"
 #else
@@ -237,7 +237,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = 
         "/server/storage/sqlite3/backup/attribute::interval", "config-server.html#storage",
         DEFAULT_SQLITE_BACKUP_INTERVAL, 1, ConfigIntSetup::CheckMinValue),
 
-    std::make_shared<ConfigPathSetup>(CFG_SERVER_STORAGE_SQLITE_INIT_SQL_PATH,
+    std::make_shared<ConfigPathSetup>(CFG_SERVER_STORAGE_SQLITE_INIT_SQL_FILE,
         "/server/storage/sqlite3/init-sql-file", "config-server.html#storage",
         "", true), // This should really be "dataDir / sqlite3.sql"
 
@@ -939,7 +939,7 @@ void ConfigManager::load(const fs::path& userHome)
         setOption(root, CFG_SERVER_STORAGE_MYSQL_SOCKET);
         setOption(root, CFG_SERVER_STORAGE_MYSQL_PASSWORD);
 
-        co = findConfigSetup(CFG_SERVER_STORAGE_MYSQL_INIT_SQL_PATH);
+        co = findConfigSetup(CFG_SERVER_STORAGE_MYSQL_INIT_SQL_FILE);
         co->setDefaultValue(dataDir / "mysql.sql");
         co->makeOption(root, self);
     }
@@ -958,7 +958,7 @@ void ConfigManager::load(const fs::path& userHome)
         setOption(root, CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED);
         setOption(root, CFG_SERVER_STORAGE_SQLITE_BACKUP_INTERVAL);
 
-        co = findConfigSetup(CFG_SERVER_STORAGE_SQLITE_INIT_SQL_PATH);
+        co = findConfigSetup(CFG_SERVER_STORAGE_SQLITE_INIT_SQL_FILE);
         co->setDefaultValue(dataDir / "sqlite3.sql");
         co->makeOption(root, self);
     }

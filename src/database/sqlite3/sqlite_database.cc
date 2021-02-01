@@ -503,7 +503,7 @@ void SLInitTask::run(sqlite3** db, Sqlite3Database* sl)
     if (res != SQLITE_OK)
         throw DatabaseException("", "SQLite: Failed to create new database");
 
-    auto sqlFilePath = config->getOption(CFG_SERVER_STORAGE_SQLITE_INIT_SQL_PATH);
+    auto sqlFilePath = config->getOption(CFG_SERVER_STORAGE_SQLITE_INIT_SQL_FILE);
     log_debug("Loading initialisation SQL from: {}", sqlFilePath.c_str());
     auto sql = readTextFile(sqlFilePath);
 
