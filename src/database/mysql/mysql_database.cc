@@ -292,12 +292,12 @@ std::string MySQLDatabase::quote(std::string value) const
      * the \0; then the string won't be null-terminated, but that doesn't matter,
      * because we give the correct length to std::string()
      */
-    auto q = static_cast<char*>(malloc(value.length() * 2 + 2));
+    auto q = new char[value.length() * 2 + 2];
     *q = '\'';
     long size = mysql_real_escape_string(const_cast<MYSQL*>(&db), q + 1, value.c_str(), value.length());
     q[size + 1] = '\'';
     std::string ret(q, size + 2);
-    free(q);
+    delete[] q;
     return ret;
 }
 
