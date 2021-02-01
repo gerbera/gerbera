@@ -147,9 +147,9 @@ std::string ConfigGenerator::generate(const fs::path& userHome, const fs::path& 
     auto config = init();
 
     config->append_attribute("version") = CONFIG_XML_VERSION;
-    config->append_attribute("xmlns") = (XML_XMLNS + fmt::to_string(CONFIG_XML_VERSION)).c_str();
+    config->append_attribute("xmlns") = fmt::format("{}{}", XML_XMLNS, CONFIG_XML_VERSION).c_str();
     config->append_attribute("xmlns:xsi") = XML_XMLNS_XSI;
-    config->append_attribute("xsi:schemaLocation") = (std::string(XML_XMLNS) + fmt::to_string(CONFIG_XML_VERSION) + " " + XML_XMLNS + fmt::to_string(CONFIG_XML_VERSION) + ".xsd").c_str();
+    config->append_attribute("xsi:schemaLocation") = fmt::format("{}{} {}{}.xsd", XML_XMLNS, CONFIG_XML_VERSION, XML_XMLNS, CONFIG_XML_VERSION).c_str();
 
     auto docinfo = config->append_child(pugi::node_comment);
     docinfo.set_value("\n\
@@ -181,17 +181,16 @@ void ConfigGenerator::generateServer(const fs::path& userHome, const fs::path& c
     setValue(CFG_SERVER_WEBROOT, webRoot);
 
     auto aliveinfo = server->append_child(pugi::node_comment);
-    aliveinfo.set_value(
-        ("\n\
+    aliveinfo.set_value(fmt::format("\n\
         How frequently (in seconds) to send ssdp:alive advertisements.\n\
-        Minimum alive value accepted is: "
-            + fmt::to_string(ALIVE_INTERVAL_MIN) + "\n\n\
+        Minimum alive value accepted is: {}\n\n\
         The advertisement will be sent every (A/2)-30 seconds,\n\
         and will have a cache-control max-age of A where A is\n\
         the value configured here. Ex: A value of 62 will result\n\
         in an SSDP advertisement being sent every second.\n\
-    ")
-            .c_str());
+    ",
+        ALIVE_INTERVAL_MIN)
+                            .c_str());
     setValue(CFG_SERVER_ALIVE_INTERVAL);
 
     generateDatabase();

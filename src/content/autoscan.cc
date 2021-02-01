@@ -119,7 +119,7 @@ std::string AutoscanDirectory::mapScanmode(ScanMode scanmode)
         scanmode_str = "inotify";
         break;
     default:
-        throw_std_runtime_error("illegal scanmode given to mapScanmode()");
+        throw_std_runtime_error("Illegal scanmode ({}) given to mapScanmode()", scanmode);
     }
     return scanmode_str;
 }
@@ -131,7 +131,7 @@ ScanMode AutoscanDirectory::remapScanmode(const std::string& scanmode)
     if (scanmode == "inotify")
         return ScanMode::INotify;
 
-    throw_std_runtime_error("illegal scanmode (" + scanmode + ") given to remapScanmode()");
+    throw_std_runtime_error("Illegal scanmode ({}) given to remapScanmode()", scanmode.c_str());
 }
 
 void AutoscanDirectory::copyTo(const std::shared_ptr<AutoscanDirectory>& copy) const

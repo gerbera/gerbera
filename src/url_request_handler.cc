@@ -71,8 +71,7 @@ void URLRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         auto tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)
                       ->getByName(tr_profile);
         if (tp == nullptr)
-            throw_std_runtime_error("Transcoding requested but no profile matching the name "
-                + tr_profile + " found");
+            throw_std_runtime_error("Transcoding requested but no profile matching the name {} found", tr_profile.c_str());
 
         mimeType = tp->getTargetMimeType();
         UpnpFileInfo_set_FileLength(info, -1);
@@ -160,7 +159,7 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename, enum Up
         auto tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)
                       ->getByName(tr_profile);
         if (tp == nullptr)
-            throw_std_runtime_error("Transcoding of file " + url + " but no profile matching the name " + tr_profile + " found");
+            throw_std_runtime_error("Transcoding of file {} but no profile matching the name {} found", url.c_str(), tr_profile.c_str());
 
         auto tr_d = std::make_unique<TranscodeDispatcher>(content);
         auto io_handler = tr_d->serveContent(tp, url, item, "");

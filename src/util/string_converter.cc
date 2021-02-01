@@ -42,7 +42,7 @@ StringConverter::StringConverter(const std::string& from, const std::string& to)
 
     if (!cd) {
         cd = {};
-        throw_std_runtime_error(std::string("iconv: ") + strerror(errno));
+        throw_std_runtime_error("iconv: {}", std::strerror(errno));
     }
 }
 
@@ -129,7 +129,7 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
 #endif
 
     if (ret == -1) {
-        log_error("iconv: {}", strerror(errno));
+        log_error("iconv: {}", std::strerror(errno));
         std::string err;
         switch (errno) {
         case EILSEQ:
@@ -155,7 +155,7 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
             err = "iconv: Insufficient space in output buffer";
             break;
         default:
-            err = std::string("iconv: ") + strerror(errno);
+            err = fmt::format("iconv: {}", std::strerror(errno));
             break;
         }
         *output_copy = 0;

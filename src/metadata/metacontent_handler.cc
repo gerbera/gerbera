@@ -151,7 +151,7 @@ std::unique_ptr<IOHandler> FanArtHandler::serveContent(std::shared_ptr<CdsObject
     struct stat statbuf;
     int ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
-        log_warning("File does not exist: {} ({})", path.c_str(), strerror(errno));
+        log_warning("File does not exist: {} ({})", path.c_str(), std::strerror(errno));
         return nullptr;
     }
     auto io_handler = std::make_unique<FileIOHandler>(path);
@@ -210,7 +210,7 @@ std::unique_ptr<IOHandler> ContainerArtHandler::serveContent(std::shared_ptr<Cds
     struct stat statbuf;
     int ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
-        log_warning("File does not exist: {} ({})", path.c_str(), strerror(errno));
+        log_warning("File does not exist: {} ({})", path.c_str(), std::strerror(errno));
         return nullptr;
     }
     auto io_handler = std::make_unique<FileIOHandler>(path);
@@ -263,7 +263,7 @@ std::unique_ptr<IOHandler> SubtitleHandler::serveContent(std::shared_ptr<CdsObje
     struct stat statbuf;
     int ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
-        log_warning("File does not exist: {} ({})", path.c_str(), strerror(errno));
+        log_warning("File does not exist: {} ({})", path.c_str(), std::strerror(errno));
         return nullptr;
     }
     auto io_handler = std::make_unique<FileIOHandler>(path);
@@ -314,7 +314,7 @@ std::unique_ptr<IOHandler> ResourceHandler::serveContent(std::shared_ptr<CdsObje
     struct stat statbuf;
     int ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
-        log_warning("File does not exist: {} ({})", path.c_str(), strerror(errno));
+        log_warning("File does not exist: {} ({})", path.c_str(), std::strerror(errno));
         return nullptr;
     }
     auto io_handler = std::make_unique<FileIOHandler>(path);

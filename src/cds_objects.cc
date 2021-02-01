@@ -126,7 +126,7 @@ std::shared_ptr<CdsObject> CdsObject::createObject(unsigned int objectType)
     } else if (IS_CDS_ITEM(objectType)) {
         obj = std::make_shared<CdsItem>();
     } else {
-        throw_std_runtime_error("invalid object type: " + fmt::to_string(objectType));
+        throw_std_runtime_error("invalid object type: {}", objectType);
     }
     return obj;
 }
@@ -176,7 +176,7 @@ void CdsItem::validate()
 
     std::error_code ec;
     if (!isRegularFile(location, ec))
-        throw_std_runtime_error("Item validation failed: file " + location.string() + " not found");
+        throw_std_runtime_error("Item validation failed: file {} not found", location.c_str());
 }
 
 //---------
@@ -243,5 +243,5 @@ std::string CdsObject::mapObjectType(unsigned int type)
         return STRING_OBJECT_TYPE_ITEM;
     if (IS_CDS_ITEM_EXTERNAL_URL(type))
         return STRING_OBJECT_TYPE_EXTERNAL_URL;
-    throw_std_runtime_error("illegal objectType: " + fmt::to_string(type));
+    throw_std_runtime_error("illegal objectType: {}", type);
 }

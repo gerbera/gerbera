@@ -54,7 +54,7 @@ void FileIOHandler::open(enum UpnpOpenFileMode mode)
     }
 
     if (f == nullptr) {
-        throw_std_runtime_error("failed to open: " + filename.string());
+        throw_std_runtime_error("Failed to open: {}", filename.c_str());
     }
 }
 

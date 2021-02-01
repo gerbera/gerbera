@@ -103,10 +103,10 @@ int Inotify::addWatch(const fs::path& path, int events) const
         if (errno == ENOSPC)
             throw_std_runtime_error("The user limit on the total number of inotify watches was reached or the kernel failed to allocate a needed resource.");
         if (errno == EACCES) {
-            log_warning("Cannot add inotify watch for {}: {}", path.c_str(), strerror(errno));
+            log_warning("Cannot add inotify watch for {}: {}", path.c_str(), std::strerror(errno));
             return -1;
         }
-        throw_std_runtime_error(strerror(errno));
+        throw_std_runtime_error(std::strerror(errno));
     }
     return wd;
 }
@@ -114,7 +114,7 @@ int Inotify::addWatch(const fs::path& path, int events) const
 void Inotify::removeWatch(int wd) const
 {
     if (inotify_rm_watch(inotify_fd, wd) < 0) {
-        log_debug("Error removing watch: {}", strerror(errno));
+        log_debug("Error removing watch: {}", std::strerror(errno));
     }
 }
 
@@ -188,7 +188,7 @@ struct inotify_event* Inotify::nextEvent()
     if (FD_ISSET(stop_fd_read, &read_fds)) {
         char buf;
         if (read(stop_fd_read, &buf, 1) == -1) {
-            log_error("Inotify: could not read stop: {}", strerror(errno));
+            log_error("Inotify: could not read stop: {}", std::strerror(errno));
         }
     }
 
@@ -233,7 +233,7 @@ void Inotify::stop() const
 {
     char stop = 's';
     if (write(stop_fd_write, &stop, 1) == -1) {
-        log_error("inotify: could not send stop: {}", strerror(errno));
+        log_error("inotify: could not send stop: {}", std::strerror(errno));
     }
 }
 

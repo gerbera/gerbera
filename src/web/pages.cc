@@ -72,7 +72,7 @@ std::unique_ptr<WebRequestHandler> createWebRequestHandler(
     if (page == "config_save")
         return std::make_unique<web::configSave>(content);
 
-    throw_std_runtime_error("Unknown page: " + page);
+    throw_std_runtime_error("Unknown page: {}", page.c_str());
 }
 
 } // namespace web

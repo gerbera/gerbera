@@ -267,13 +267,13 @@ void Script::_load(const std::string& scriptPath)
     try {
         scriptText = j2i->convert(scriptText, true);
     } catch (const std::runtime_error& e) {
-        throw_std_runtime_error(std::string { "Failed to convert import script:" } + e.what());
+        throw_std_runtime_error("Failed to convert import script: {}", e.what());
     }
 
     duk_push_string(ctx, scriptPath.c_str());
     if (duk_pcompile_lstring_filename(ctx, 0, scriptText.c_str(), scriptText.length()) != 0) {
         log_error("Failed to load script: {}", duk_safe_to_string(ctx, -1));
-        throw_std_runtime_error("Scripting: failed to compile " + scriptPath);
+        throw_std_runtime_error("Scripting: failed to compile {}", scriptPath.c_str());
     }
 }
 
@@ -571,7 +571,7 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
             for (const auto& res : obj->getResources()) {
                 auto attributes = res->getAttributes();
                 for (const auto& [key, val] : attributes) {
-                    setProperty(resCount == 0 ? key : (fmt::to_string(resCount) + "-" + key), val);
+                    setProperty(resCount == 0 ? key : fmt::format("{}-{}", resCount, key), val);
                 }
                 resCount++;
             }

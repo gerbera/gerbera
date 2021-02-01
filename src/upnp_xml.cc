@@ -49,7 +49,7 @@ UpnpXMLBuilder::UpnpXMLBuilder(const std::shared_ptr<Context>& context,
 std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createResponse(const std::string& actionName, const std::string& serviceType)
 {
     auto response = std::make_unique<pugi::xml_document>();
-    auto root = response->append_child(("u:" + actionName + "Response").c_str());
+    auto root = response->append_child(fmt::format("u:{}Response", actionName.c_str()).c_str());
     root.append_attribute("xmlns:u") = serviceType.c_str();
 
     return response;
@@ -359,9 +359,9 @@ std::string UpnpXMLBuilder::getFirstResourcePath(const std::shared_ptr<CdsItem>&
     if (item->isExternalItem() && !urlBase->addResID) { // a remote resource
         result = urlBase->pathBase;
     } else if (urlBase->addResID) { // a proxy, remote, resource
-        result = SERVER_VIRTUAL_DIR + urlBase->pathBase + fmt::to_string(0);
+        result = fmt::format(SERVER_VIRTUAL_DIR "{}0", urlBase->pathBase.c_str());
     } else { // a local resource
-        result = SERVER_VIRTUAL_DIR + urlBase->pathBase;
+        result = fmt::format(SERVER_VIRTUAL_DIR "{}", urlBase->pathBase.c_str());
     }
     return result;
 }
@@ -373,7 +373,7 @@ std::string UpnpXMLBuilder::getArtworkUrl(const std::shared_ptr<CdsItem>& item) 
 
     auto urlBase = getPathBase(item);
     if (urlBase->addResID) {
-        return virtualURL + urlBase->pathBase + fmt::to_string(1) + "/rct/aa";
+        return fmt::format("{}{}1/rct/aa", virtualURL, urlBase->pathBase);
     }
     return virtualURL + urlBase->pathBase;
 }
@@ -426,7 +426,7 @@ bool UpnpXMLBuilder::renderItemImage(const std::string& virtualURL, const std::s
             auto res_attrs = res->getAttributes();
             auto res_params = res->getParameters();
             if (urlBase->addResID) {
-                url = virtualURL + urlBase->pathBase + fmt::to_string(realCount) + _URL_PARAM_SEPARATOR;
+                url = fmt::format("{}{}{}{}", virtualURL.c_str(), urlBase->pathBase.c_str(), realCount, _URL_PARAM_SEPARATOR);
             } else
                 url = virtualURL + urlBase->pathBase;
 
@@ -451,7 +451,7 @@ bool UpnpXMLBuilder::renderSubtitle(const std::string& virtualURL, const std::sh
             auto res_attrs = res->getAttributes();
             auto res_params = res->getParameters();
             if (urlBase->addResID) {
-                url = virtualURL + urlBase->pathBase + fmt::to_string(realCount) + _URL_PARAM_SEPARATOR;
+                url = fmt::format("{}{}{}{}", virtualURL.c_str(), urlBase->pathBase, realCount, _URL_PARAM_SEPARATOR);
             } else
                 url = virtualURL + urlBase->pathBase;
 
@@ -579,11 +579,11 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
                     std::string frequency = item->getResource(0)->getAttribute(R_SAMPLEFREQUENCY);
                     if (!frequency.empty()) {
                         t_res->addAttribute(R_SAMPLEFREQUENCY, frequency);
-                        targetMimeType.append(";rate=").append(frequency);
+                        targetMimeType.append(fmt::format(";rate={}", frequency));
                     }
                 } else if (freq != OFF) {
                     t_res->addAttribute(R_SAMPLEFREQUENCY, fmt::to_string(freq));
-                    targetMimeType.append(";rate=").append(fmt::to_string(freq));
+                    targetMimeType.append(fmt::format(";rate={}", freq));
                 }
 
                 int chan = tp->getNumChannels();
@@ -591,11 +591,11 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
                     std::string nchannels = item->getResource(0)->getAttribute(R_NRAUDIOCHANNELS);
                     if (!nchannels.empty()) {
                         t_res->addAttribute(R_NRAUDIOCHANNELS, nchannels);
-                        targetMimeType.append(";channels=").append(nchannels);
+                        targetMimeType.append(fmt::format(";channels={}", nchannels));
                     }
                 } else if (chan != OFF) {
                     t_res->addAttribute(R_NRAUDIOCHANNELS, fmt::to_string(chan));
-                    targetMimeType.append(";channels=").append(fmt::to_string(chan));
+                    targetMimeType.append(fmt::format(";channels={}", chan));
                 }
             }
 
@@ -659,7 +659,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
         bool transcoded = (getValueOrDefault(res_params, URL_PARAM_TRANSCODE) == URL_VALUE_TRANSCODE);
         if (!transcoded) {
             if (urlBase->addResID) {
-                url = urlBase->pathBase + fmt::to_string(realCount);
+                url = fmt::format("{}{}", urlBase->pathBase, realCount);
             } else
                 url = urlBase->pathBase;
 
@@ -718,10 +718,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
             // content type here and that we will not limit ourselves to the
             // first resource
             if (!skipURL) {
-                if (transcoded)
-                    url.append(renderExtension(contentType, ""));
-                else
-                    url.append(renderExtension(contentType, item->getLocation()));
+                url.append(renderExtension(contentType, transcoded ? "" : item->getLocation()));
             }
         }
 
@@ -750,13 +747,12 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
         // we do not support seeking at all, so 00
         // and the media is converted, so set CI to 1
         if (!isExtThumbnail && transcoded) {
-            extend.append(fmt::format("{}={};", UPNP_DLNA_OP, UPNP_DLNA_OP_SEEK_DISABLED)).append(fmt::format("{}={}", UPNP_DLNA_CONVERSION_INDICATOR, UPNP_DLNA_CONVERSION));
+            extend.append(fmt::format("{}={};{}={}", UPNP_DLNA_OP, UPNP_DLNA_OP_SEEK_DISABLED, UPNP_DLNA_CONVERSION_INDICATOR, UPNP_DLNA_CONVERSION));
 
             if (startswith(mimeType, "audio") || startswith(mimeType, "video"))
                 extend.append(";" UPNP_DLNA_FLAGS "=" UPNP_DLNA_ORG_FLAGS_AV);
         } else {
-            extend.append(fmt::format("{}={};", UPNP_DLNA_OP, UPNP_DLNA_OP_SEEK_RANGE));
-            extend.append(UPNP_DLNA_CONVERSION_INDICATOR).append("=").append(UPNP_DLNA_NO_CONVERSION);
+            extend.append(fmt::format("{}={};{}={}", UPNP_DLNA_OP, UPNP_DLNA_OP_SEEK_RANGE, UPNP_DLNA_CONVERSION_INDICATOR, UPNP_DLNA_NO_CONVERSION));
         }
 
         protocolInfo = protocolInfo.substr(0, protocolInfo.rfind(':') + 1).append(extend);

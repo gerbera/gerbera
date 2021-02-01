@@ -39,7 +39,7 @@ public:
 
     std::string findFolderImage(int id, std::string trackArtBase) override
     {
-        auto it = findFolderImageMap.find(fmt::to_string(id) + trackArtBase);
+        auto it = findFolderImageMap.find(fmt::format("{}{}", id, trackArtBase));
         if (it != findFolderImageMap.end())
             return it->second;
         return "";

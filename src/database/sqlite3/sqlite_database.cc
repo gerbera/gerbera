@@ -136,7 +136,7 @@ void Sqlite3Database::init()
 
     // check for db-file
     if (access(dbFilePath.c_str(), R_OK | W_OK) != 0 && errno != ENOENT)
-        throw DatabaseException("", fmt::format("Error while accessing sqlite database file ({}): {}", dbFilePath.c_str(), strerror(errno)));
+        throw DatabaseException("", fmt::format("Error while accessing sqlite database file ({}): {}", dbFilePath.c_str(), std::strerror(errno)));
 
     taskQueueOpen = true;
 
@@ -147,7 +147,7 @@ void Sqlite3Database::init()
         this);
 
     if (ret != 0) {
-        throw DatabaseException("", fmt::format("Could not start sqlite thread: {}", strerror(errno)));
+        throw DatabaseException("", fmt::format("Could not start sqlite thread: {}", std::strerror(errno)));
     }
 
     // wait for sqlite3 thread to become ready
@@ -193,7 +193,7 @@ void Sqlite3Database::init()
             dbVersion = getInternalSetting("db_version");
         } catch (const std::runtime_error& e) {
             shutdown();
-            throw_std_runtime_error(std::string { "error while creating database: " } + e.what());
+            throw_std_runtime_error("Error while creating database: {}", e.what());
         }
         log_info("database created successfully.");
     }
@@ -309,8 +309,7 @@ std::string Sqlite3Database::quote(std::string value) const
 
 std::string Sqlite3Database::getError(const std::string& query, const std::string& error, sqlite3* db)
 {
-    return std::string("SQLITE3: (") + fmt::to_string(sqlite3_errcode(db)) + " : " + fmt::to_string(sqlite3_extended_errcode(db)) + ") "
-        + sqlite3_errmsg(db) + "\nQuery:" + (query.empty() ? "unknown" : query) + "\nerror: " + (error.empty() ? "unknown" : error);
+    return fmt::format("SQLITE3: ({}, : {}) {}\nQuery: {}\nerror: {}", sqlite3_errcode(db), sqlite3_extended_errcode(db), sqlite3_errmsg(db), query.empty() ? "unknown" : query, error.empty() ? "unknown" : error);
 }
 
 std::shared_ptr<SQLResult> Sqlite3Database::select(const char* query, int length)
