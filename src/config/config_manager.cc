@@ -797,7 +797,7 @@ std::shared_ptr<ConfigSetup> ConfigManager::findConfigSetup(config_option_t opti
     if (save)
         return nullptr;
 
-    throw std::runtime_error(fmt::format("Error in config code: {} tag not found", int(option)));
+    throw_std_runtime_error("Error in config code: {} tag not found", option);
 }
 
 std::shared_ptr<ConfigSetup> ConfigManager::findConfigSetupByPath(const std::string& key, bool save, const std::shared_ptr<ConfigSetup>& parent)
@@ -835,7 +835,7 @@ std::shared_ptr<ConfigSetup> ConfigManager::findConfigSetupByPath(const std::str
         return (co != complexOptions.end()) ? *co : nullptr;
     }
 
-    throw std::runtime_error(fmt::format("Error in config code: {} tag not found", key));
+    throw_std_runtime_error("Error in config code: {} tag not found", key);
 }
 
 std::shared_ptr<ConfigOption> ConfigManager::setOption(const pugi::xml_node& root, config_option_t option, const std::map<std::string, std::string>* arguments)
@@ -894,7 +894,7 @@ void ConfigManager::load(const fs::path& userHome)
     }
 
     if (!fs::is_directory(temp))
-        throw std::runtime_error(fmt::format("Directory '{}' does not exist", temp));
+        throw_std_runtime_error("Directory '{}' does not exist", temp);
     co->makeOption(temp, self);
     ConfigPathSetup::Home = temp;
 

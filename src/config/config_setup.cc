@@ -51,7 +51,7 @@ pugi::xml_node ConfigSetup::getXmlElement(const pugi::xml_node& root) const
         xpathNode = root.select_node(xpath);
     }
     if (required && xpathNode.node() == nullptr) {
-        throw std::runtime_error(fmt::format("Error in config file: {}/{} tag not found", root.path(), xpath));
+        throw_std_runtime_error("Error in config file: {}/{} tag not found", root.path(), xpath);
     }
     return xpathNode.node();
 }
@@ -75,7 +75,7 @@ std::string ConfigSetup::getXmlContent(const pugi::xml_node& root, bool trim) co
     if (xpathNode.node() != nullptr) {
         std::string optValue = trim ? trimString(xpathNode.node().text().as_string()) : xpathNode.node().text().as_string();
         if (!checkValue(optValue)) {
-            throw std::runtime_error(fmt::format("Invalid {}{} value '{}'", root.path(), xpath, optValue));
+            throw_std_runtime_error("Invalid {}{} value '{}'", root.path(), xpath, optValue.c_str());
         }
         return optValue;
     }
@@ -83,7 +83,7 @@ std::string ConfigSetup::getXmlContent(const pugi::xml_node& root, bool trim) co
     if (xpathNode.attribute() != nullptr) {
         std::string optValue = trim ? trimString(xpathNode.attribute().value()) : xpathNode.attribute().value();
         if (!checkValue(optValue)) {
-            throw std::runtime_error(fmt::format("Invalid {}/attribute::{} value '{}'", root.path(), xpath, optValue));
+            throw_std_runtime_error("Invalid {}/attribute::{} value '{}'", root.path(), xpath, optValue.c_str());
         }
         return optValue;
     }
@@ -93,7 +93,7 @@ std::string ConfigSetup::getXmlContent(const pugi::xml_node& root, bool trim) co
     if (root.attribute(xAttr.c_str()) != nullptr) {
         std::string optValue = trim ? trimString(root.attribute(xAttr.c_str()).as_string()) : root.attribute(xAttr.c_str()).as_string();
         if (!checkValue(optValue)) {
-            throw std::runtime_error(fmt::format("Invalid {}/attribute::{} value '{}'", root.path(), xAttr.c_str(), optValue));
+            throw_std_runtime_error("Invalid {}/attribute::{} value '{}'", root.path(), xAttr.c_str(), optValue.c_str());
         }
         return optValue;
     }
@@ -101,13 +101,13 @@ std::string ConfigSetup::getXmlContent(const pugi::xml_node& root, bool trim) co
     if (root.child(xpath) != nullptr) {
         std::string optValue = trim ? trimString(root.child(xpath).text().as_string()) : root.child(xpath).text().as_string();
         if (!checkValue(optValue)) {
-            throw std::runtime_error(fmt::format("Invalid {}/{} value '{}'", root.path(), xpath, optValue));
+            throw_std_runtime_error("Invalid {}/{} value '{}'", root.path(), xpath, optValue.c_str());
         }
         return optValue;
     }
 
     if (required)
-        throw std::runtime_error(fmt::format("Error in config file: {}/{} not found", root.path(), xpath));
+        throw_std_runtime_error("Error in config file: {}/{} not found", root.path(), xpath);
 
     log_debug("Config: option not found: '{}/{}' using default value: '{}'", root.path(), xpath, defaultValue.c_str());
 
@@ -165,7 +165,7 @@ void ConfigStringSetup::makeOption(const pugi::xml_node& root, const std::shared
 std::shared_ptr<ConfigOption> ConfigStringSetup::newOption(const std::string& optValue)
 {
     if (notEmpty && optValue.empty()) {
-        throw std::runtime_error(fmt::format("Invalid {} empty value '{}'", xpath, optValue));
+        throw_std_runtime_error("Invalid {} empty value '{}'", xpath, optValue.c_str());
     }
     optionValue = std::make_shared<Option>(optValue);
     return optionValue;
@@ -278,7 +278,7 @@ std::shared_ptr<ConfigOption> ConfigPathSetup::newOption(std::string& optValue)
 {
     auto pathValue = optValue;
     if (!checkPathValue(optValue, pathValue)) {
-        throw std::runtime_error(fmt::format("Invalid {} resolves to empty value '{}'", xpath, optValue));
+        throw_std_runtime_error("Invalid {} resolves to empty value '{}'", xpath, optValue.c_str());
     }
     optionValue = std::make_shared<Option>(pathValue);
     return optionValue;
@@ -296,22 +296,22 @@ void ConfigIntSetup::makeOption(std::string optValue, const std::shared_ptr<Conf
 {
     if (rawCheck != nullptr) {
         if (!rawCheck(optValue)) {
-            throw std::runtime_error(fmt::format("Invalid {} value '{}'", xpath, optValue));
+            throw_std_runtime_error("Invalid {} value '{}'", xpath, optValue.c_str());
         }
     } else if (valueCheck != nullptr) {
         if (!valueCheck(std::stoi(optValue))) {
-            throw std::runtime_error(fmt::format("Invalid {} value '{}'", xpath, optValue));
+            throw_std_runtime_error("Invalid {} value '{}'", xpath, optValue.c_str());
         }
     } else if (minCheck != nullptr) {
         if (!minCheck(std::stoi(optValue), minValue)) {
-            throw std::runtime_error(fmt::format("Invalid {} value '{}', must be at least {}", xpath, optValue, minValue));
+            throw_std_runtime_error("Invalid {} value '{}', must be at least {}", xpath, optValue.c_str(), minValue);
         }
     }
     try {
         optionValue = std::make_shared<IntOption>(std::stoi(optValue));
         setOption(config);
     } catch (const std::runtime_error& e) {
-        throw std::runtime_error(fmt::format("Error in config file: {} unsupported int value '{}'", xpath, optValue).c_str());
+        throw_std_runtime_error("Error in config file: {} unsupported int value '{}'", xpath, optValue.c_str());
     }
 }
 
@@ -320,20 +320,20 @@ int ConfigIntSetup::checkIntValue(std::string& sVal, const std::string& pathName
     try {
         if (rawCheck != nullptr) {
             if (!rawCheck(sVal)) {
-                throw std::runtime_error(fmt::format("Invalid {}/{} value '{}'", pathName, xpath, sVal));
+                throw_std_runtime_error("Invalid {}/{} value '{}'", pathName, xpath, sVal);
             }
         } else if (valueCheck != nullptr) {
             if (!valueCheck(std::stoi(sVal))) {
-                throw std::runtime_error(fmt::format("Invalid {}/{} value {}", pathName, xpath, sVal));
+                throw_std_runtime_error("Invalid {}/{} value {}", pathName, xpath, sVal);
             }
         } else if (minCheck != nullptr) {
             if (!minCheck(std::stoi(sVal), minValue)) {
-                throw std::runtime_error(fmt::format("Invalid {}/{} value '{}', must be at least {}", pathName, xpath, sVal, minValue));
+                throw_std_runtime_error("Invalid {}/{} value '{}', must be at least {}", pathName, xpath, sVal, minValue);
             }
         }
         return std::stoi(sVal);
     } catch (const std::runtime_error& e) {
-        throw std::runtime_error(fmt::format("Error in config file: {}/{} unsupported int value '{}'", pathName, xpath, sVal).c_str());
+        throw_std_runtime_error("Error in config file: {}/{} unsupported int value '{}'", pathName, xpath, sVal);
     }
 }
 
@@ -347,10 +347,10 @@ int ConfigIntSetup::getXmlContent(const pugi::xml_node& root) const
 std::shared_ptr<ConfigOption> ConfigIntSetup::newOption(int optValue)
 {
     if (valueCheck != nullptr && !valueCheck(optValue)) {
-        throw std::runtime_error(fmt::format("Invalid {} value {}", xpath, optValue));
+        throw_std_runtime_error("Invalid {} value {}", xpath, optValue);
     }
     if (minCheck != nullptr && !minCheck(optValue, minValue)) {
-        throw std::runtime_error(fmt::format("Invalid {} value {}, must be at least {}", xpath, optValue, minValue));
+        throw_std_runtime_error("Invalid {} value {}, must be at least {}", xpath, optValue, minValue);
     }
     optionValue = std::make_shared<IntOption>(optValue);
     return optionValue;
@@ -421,7 +421,7 @@ static bool validateTrueFalse(const std::string& optValue)
 void ConfigBoolSetup::makeOption(std::string optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
 {
     if (!validateTrueFalse(optValue) && !validateYesNo(optValue))
-        throw std::runtime_error(fmt::format("Invalid {} value {}", xpath, optValue));
+        throw_std_runtime_error("Invalid {} value {}", xpath, optValue.c_str());
     optionValue = std::make_shared<BoolOption>(optValue == YES || optValue == "true");
     setOption(config);
 };
@@ -436,12 +436,12 @@ bool ConfigBoolSetup::checkValue(std::string& optValue, const std::string& pathN
 {
     if (rawCheck != nullptr) {
         if (!rawCheck(optValue)) {
-            throw std::runtime_error(fmt::format("Invalid {}/{} value '{}'", pathName, xpath, optValue));
+            throw_std_runtime_error("Invalid {}/{} value '{}'", pathName, xpath, optValue.c_str());
         }
     }
 
     if (!validateTrueFalse(optValue) && !validateYesNo(optValue))
-        throw std::runtime_error(fmt::format("Invalid {}/{} value {}", pathName, xpath, optValue));
+        throw_std_runtime_error("Invalid {}/{} value {}", pathName, xpath, optValue.c_str());
     return optValue == YES || optValue == "true";
 }
 
@@ -530,7 +530,7 @@ bool ConfigArraySetup::createArrayFromNode(const pugi::xml_node& element, std::v
             const pugi::xml_node& child = it.node();
             std::string attrValue = attrOption != CFG_MAX ? child.attribute(removeAttribute(attrOption).c_str()).as_string() : child.text().as_string();
             if (itemNotEmpty && attrValue.empty()) {
-                throw std::runtime_error(fmt::format("Invalid array {} value {} empty '{}'", element.path(), xpath, attrValue));
+                throw_std_runtime_error("Invalid array {} value {} empty '{}'", element.path(), xpath, attrValue);
             }
             if (!attrValue.empty())
                 result.push_back(attrValue);
@@ -567,7 +567,7 @@ bool ConfigArraySetup::updateDetail(const std::string& optItem, std::string& opt
 {
     if (optItem.substr(0, strlen(xpath)) == xpath && optionValue != nullptr) {
         std::shared_ptr<ArrayOption> value = std::dynamic_pointer_cast<ArrayOption>(optionValue);
-        log_debug("Updating Array Detail {} {} {}", xpath, optItem, optValue);
+        log_debug("Updating Array Detail {} {} {}", xpath, optItem, optValue.c_str());
 
         size_t i = extractIndex(optItem);
         if (i < SIZE_MAX) {
@@ -598,15 +598,15 @@ std::vector<std::string> ConfigArraySetup::getXmlContent(const pugi::xml_node& o
     std::vector<std::string> result;
     if (initArray != nullptr) {
         if (!initArray(optValue, result, ConfigManager::mapConfigOption(nodeOption))) {
-            throw std::runtime_error(fmt::format("Invalid {} array value '{}'", xpath, optValue));
+            throw_std_runtime_error("Invalid {} array value '{}'", xpath, optValue);
         }
     } else {
         if (!createArrayFromNode(optValue, result)) {
-            throw std::runtime_error(fmt::format("Invalid {} array value '{}'", xpath, optValue));
+            throw_std_runtime_error("Invalid {} array value '{}'", xpath, optValue);
         }
     }
     if (notEmpty && result.empty()) {
-        throw std::runtime_error(fmt::format("Invalid array {} empty '{}'", xpath, optValue));
+        throw_std_runtime_error("Invalid array {} empty '{}'", xpath, optValue);
     }
     return result;
 }
@@ -757,7 +757,7 @@ bool ConfigDictionarySetup::updateItem(size_t i, const std::string& optItem, con
             value->setValue(i, config->getOrigValue(valIndex));
             log_debug("Reset Dictionary value {} {}", valIndex, config->getDictionaryOption(option)[optKey]);
         }
-        log_debug("New Dictionary key {} {}", keyIndex, optValue);
+        log_debug("New Dictionary key {} {}", keyIndex, optValue.c_str());
         return true;
     }
     if (optItem == valIndex) {
@@ -773,7 +773,7 @@ bool ConfigDictionarySetup::updateDetail(const std::string& optItem, std::string
 {
     if (optItem.substr(0, strlen(xpath)) == xpath && optionValue != nullptr) {
         std::shared_ptr<DictionaryOption> value = std::dynamic_pointer_cast<DictionaryOption>(optionValue);
-        log_debug("Updating Dictionary Detail {} {} {}", xpath, optItem, optValue);
+        log_debug("Updating Dictionary Detail {} {} {}", xpath, optItem, optValue.c_str());
 
         size_t i = extractIndex(optItem);
         if (i < SIZE_MAX) {
@@ -818,15 +818,15 @@ std::map<std::string, std::string> ConfigDictionarySetup::getXmlContent(const pu
     std::map<std::string, std::string> result;
     if (initDict != nullptr) {
         if (!initDict(optValue, result)) {
-            throw std::runtime_error(fmt::format("Init {} dictionary failed '{}'", xpath, optValue));
+            throw_std_runtime_error("Init {} dictionary failed '{}'", xpath, optValue);
         }
     } else {
         if (!createDictionaryFromNode(optValue, result)) {
-            throw std::runtime_error(fmt::format("Init {} dictionary failed '{}'", xpath, optValue));
+            throw_std_runtime_error("Init {} dictionary failed '{}'", xpath, optValue);
         }
     }
     if (notEmpty && result.empty()) {
-        throw std::runtime_error(fmt::format("Invalid dictionary {} empty '{}'", xpath, optValue));
+        throw_std_runtime_error("Invalid dictionary {} empty '{}'", xpath, optValue);
     }
     return result;
 }
@@ -948,7 +948,7 @@ bool ConfigAutoscanSetup::updateDetail(const std::string& optItem, std::string& 
 {
     auto uPath = getUniquePath();
     if (optItem.substr(0, uPath.length()) == uPath) {
-        log_debug("Updating Autoscan Detail {} {} {}", uPath, optItem, optValue);
+        log_debug("Updating Autoscan Detail {} {} {}", uPath, optItem, optValue.c_str());
         std::shared_ptr<AutoscanListOption> value = std::dynamic_pointer_cast<AutoscanListOption>(optionValue);
 
         auto list = value->getAutoscanListOption();
@@ -996,7 +996,7 @@ std::shared_ptr<ConfigOption> ConfigAutoscanSetup::newOption(const pugi::xml_nod
 {
     std::shared_ptr<AutoscanList> result = std::make_shared<AutoscanList>(nullptr);
     if (!createAutoscanListFromNode(optValue, result)) {
-        throw std::runtime_error(fmt::format("Init {} autoscan failed '{}'", xpath, optValue));
+        throw_std_runtime_error("Init {} autoscan failed '{}'", xpath, optValue);
     }
     optionValue = std::make_shared<AutoscanListOption>(result);
     return optionValue;
@@ -1192,7 +1192,7 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
 {
     if (optItem.substr(0, strlen(xpath)) == xpath) {
         std::shared_ptr<TranscodingProfileListOption> value = std::dynamic_pointer_cast<TranscodingProfileListOption>(optionValue);
-        log_debug("Updating Transcoding Detail {} {} {}", xpath, optItem, optValue);
+        log_debug("Updating Transcoding Detail {} {} {}", xpath, optItem, optValue.c_str());
         std::map<std::string, int> profiles;
         int i = 0;
         for (const auto& [key, val] : value->getTranscodingProfileListOption()->getList()) {
@@ -1406,7 +1406,7 @@ std::shared_ptr<ConfigOption> ConfigTranscodingSetup::newOption(const pugi::xml_
     std::shared_ptr<TranscodingProfileList> result = std::make_shared<TranscodingProfileList>();
 
     if (!createTranscodingProfileListFromNode(isEnabled ? optValue : pugi::xml_node(nullptr), result)) {
-        throw std::runtime_error(fmt::format("Init {} transcoding failed '{}'", xpath, optValue));
+        throw_std_runtime_error("Init {} transcoding failed '{}'", xpath, optValue);
     }
     optionValue = std::make_shared<TranscodingProfileListOption>(result);
     return optionValue;
@@ -1534,7 +1534,7 @@ std::shared_ptr<ConfigOption> ConfigClientSetup::newOption(const pugi::xml_node&
     std::shared_ptr<ClientConfigList> result = std::make_shared<ClientConfigList>();
 
     if (!createClientConfigListFromNode(isEnabled ? optValue : pugi::xml_node(nullptr), result)) {
-        throw std::runtime_error(fmt::format("Init {} client config failed '{}'", xpath, optValue));
+        throw_std_runtime_error("Init {} client config failed '{}'", xpath, optValue);
     }
     optionValue = std::make_shared<ClientConfigListOption>(result);
     return optionValue;
@@ -1762,7 +1762,7 @@ std::shared_ptr<ConfigOption> ConfigDirectorySetup::newOption(const pugi::xml_no
     std::shared_ptr<DirectoryConfigList> result = std::make_shared<DirectoryConfigList>();
 
     if (!createDirectoryTweakListFromNode(optValue, result)) {
-        throw std::runtime_error(fmt::format("Init {} DirectoryConfigList failed '{}'", xpath, optValue));
+        throw_std_runtime_error("Init {} DirectoryConfigList failed '{}'", xpath, optValue);
     }
     optionValue = std::make_shared<DirectoryTweakOption>(result);
     return optionValue;
