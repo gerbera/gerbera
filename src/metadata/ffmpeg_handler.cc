@@ -382,11 +382,7 @@ std::unique_ptr<IOHandler> FfmpegHandler::serveContent(std::shared_ptr<CdsObject
 #endif // old api
 
     th->seek_percentage = config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE);
-
-    if (config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY))
-        th->overlay_film_strip = 1;
-    else
-        th->overlay_film_strip = 0;
+    th->overlay_film_strip = config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY);
 
 #ifndef HAVE_FFMPEGTHUMBNAILER_SIZE_API
     th->thumbnail_size = config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE);
