@@ -183,7 +183,7 @@ public:
     {
         std::shared_ptr<CS> result = std::dynamic_pointer_cast<CS>(ConfigManager::findConfigSetup(option));
         if (result == nullptr) {
-            throw std::runtime_error(fmt::format("Error in config code: {} has wrong class", int(option)));
+            throw_std_runtime_error("Error in config code: {} has wrong class", option);
         }
         return result;
     }
@@ -261,11 +261,11 @@ public:
         std::string optValue = ConfigSetup::getXmlContent(root, true);
         log_debug("Config: option: '{}' value: '{}'", xpath, optValue.c_str());
         if (notEmpty && optValue.empty()) {
-            throw std::runtime_error(fmt::format("Error in config file: Invalid {}/{} empty value '{}'", root.path(), xpath, optValue));
+            throw_std_runtime_error("Error in config file: Invalid {}/{} empty value '{}'", root.path(), xpath, optValue);
         }
         En result;
         if (!checkEnumValue(optValue, result)) {
-            throw std::runtime_error(fmt::format("Error in config file: {}/{} unsupported Enum value '{}'", root.path(), xpath, optValue).c_str());
+            throw_std_runtime_error("Error in config file: {}/{} unsupported Enum value '{}'", root.path(), xpath, optValue);
         }
         return result;
     }
@@ -273,11 +273,11 @@ public:
     std::shared_ptr<ConfigOption> newOption(const std::string& optValue)
     {
         if (notEmpty && optValue.empty()) {
-            throw std::runtime_error(fmt::format("Invalid {} empty value '{}'", xpath, optValue));
+            throw_std_runtime_error("Invalid {} empty value '{}'", xpath, optValue);
         }
         En result;
         if (!checkEnumValue(optValue, result)) {
-            throw std::runtime_error(fmt::format("Error in config file: {} unsupported Enum value '{}'", xpath, optValue).c_str());
+            throw_std_runtime_error("Error in config file: {} unsupported Enum value '{}'", xpath, optValue);
         }
         optionValue = std::make_shared<Option>(optValue);
         return optionValue;
