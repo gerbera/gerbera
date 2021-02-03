@@ -516,7 +516,7 @@ bool ContentManager::updateAttachedResources(const std::shared_ptr<AutoscanDirec
         // in order to rescan whole directory we have to set lmt to a very small value
         AutoScanSetting asSetting;
         asSetting.adir = adir;
-        adir->setCurrentLMT(parentPath, (time_t)1);
+        adir->setCurrentLMT(parentPath, time_t(1));
         asSetting.followSymlinks = config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS);
         asSetting.hidden = config->getBoolOption(CFG_IMPORT_HIDDEN_FILES);
         asSetting.recursive = true;
@@ -697,7 +697,7 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
         // in this case we will invalidate the autoscan entry
         if (adir->getScanID() == INVALID_SCAN_ID) {
             log_info("lost autoscan for {}", newPath.c_str());
-            adir->setCurrentLMT(location, last_modified_new_max > 0 ? last_modified_new_max : (time_t)1);
+            adir->setCurrentLMT(location, last_modified_new_max > 0 ? last_modified_new_max : time_t(1));
             closedir(dir);
             return;
         }
@@ -768,7 +768,7 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
                 // in this case we will invalidate the autoscan entry
                 if (adir->getScanID() == INVALID_SCAN_ID) {
                     log_info("lost autoscan for {}", newPath.c_str());
-                    adir->setCurrentLMT(location, last_modified_new_max > 0 ? last_modified_new_max : (time_t)1);
+                    adir->setCurrentLMT(location, last_modified_new_max > 0 ? last_modified_new_max : time_t(1));
                     closedir(dir);
                     return;
                 }
@@ -783,7 +783,7 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
 
     closedir(dir);
 
-    adir->setCurrentLMT(location, last_modified_new_max > 0 ? last_modified_new_max : (time_t)1);
+    adir->setCurrentLMT(location, last_modified_new_max > 0 ? last_modified_new_max : time_t(1));
 
     if ((shutdownFlag) || ((task != nullptr) && !task->isValid())) {
         return;
@@ -894,7 +894,7 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
     closedir(dir);
 
     if (adir != nullptr) {
-        adir->setCurrentLMT(path, last_modified_new_max > 0 ? last_modified_new_max : (time_t)1);
+        adir->setCurrentLMT(path, last_modified_new_max > 0 ? last_modified_new_max : time_t(1));
     }
 }
 
