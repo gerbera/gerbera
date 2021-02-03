@@ -34,7 +34,7 @@
 #include "util/tools.h"
 
 MetacontentHandler::MetacontentHandler(const std::shared_ptr<Context>& context)
-    : MetadataHandler(std::move(context))
+    : MetadataHandler(context)
 {
 }
 
@@ -113,7 +113,7 @@ std::vector<std::string> FanArtHandler::names = {
 bool FanArtHandler::initDone = false;
 
 FanArtHandler::FanArtHandler(const std::shared_ptr<Context>& context)
-    : MetacontentHandler(std::move(context))
+    : MetacontentHandler(context)
 {
     if (!initDone) {
         std::vector<std::string> files = this->config->getArrayOption(CFG_IMPORT_RESOURCES_FANART_FILE_LIST);
@@ -170,7 +170,7 @@ std::vector<std::string> ContainerArtHandler::names = {
 bool ContainerArtHandler::initDone = false;
 
 ContainerArtHandler::ContainerArtHandler(const std::shared_ptr<Context>& context)
-    : MetacontentHandler(std::move(context))
+    : MetacontentHandler(context)
 {
     if (!initDone) {
         std::vector<std::string> files = this->config->getArrayOption(CFG_IMPORT_RESOURCES_CONTAINERART_FILE_LIST);
@@ -224,7 +224,7 @@ std::vector<std::string> SubtitleHandler::names = {
 bool SubtitleHandler::initDone = false;
 
 SubtitleHandler::SubtitleHandler(const std::shared_ptr<Context>& context)
-    : MetacontentHandler(std::move(context))
+    : MetacontentHandler(context)
 {
     if (!initDone) {
         std::vector<std::string> files = this->config->getArrayOption(CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST);
@@ -278,7 +278,7 @@ std::vector<std::string> ResourceHandler::names = {
 bool ResourceHandler::initDone = false;
 
 ResourceHandler::ResourceHandler(const std::shared_ptr<Context>& context)
-    : MetacontentHandler(std::move(context))
+    : MetacontentHandler(context)
 {
     if (!initDone) {
         std::vector<std::string> files = this->config->getArrayOption(CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST);

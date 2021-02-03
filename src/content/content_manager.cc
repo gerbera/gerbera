@@ -83,7 +83,7 @@ ContentManager::ContentManager(const std::shared_ptr<Context>& context,
     , mime(context->getMime())
     , database(context->getDatabase())
     , session_manager(context->getSessionManager())
-    , context(std::move(context))
+    , context(context)
     , timer(std::move(timer))
 {
     taskID = 1;
@@ -544,7 +544,7 @@ void ContentManager::_removeObject(const std::shared_ptr<AutoscanDirectory>& adi
         auto obj = database->loadObject(objectID);
         if (obj != nullptr && obj->hasResource(CH_RESOURCE)) {
             auto parentPath = obj->getLocation().parent_path().string();
-            parentRemoved = updateAttachedResources(std::move(adir), obj->getLocation().c_str(), parentPath, all);
+            parentRemoved = updateAttachedResources(adir, obj->getLocation().c_str(), parentPath, all);
         }
     }
 
