@@ -63,10 +63,8 @@ void IOHandlerBufferHelper::open(enum UpnpOpenFileMode mode)
 {
     if (isOpen)
         throw_std_runtime_error("tried to reopen an open IOHandlerBufferHelper");
-    buffer = static_cast<char*>(malloc(bufSize));
-    if (buffer == nullptr)
-        throw_std_runtime_error("Failed to allocate memory for transcoding buffer");
 
+    buffer = new char[bufSize];
     startBufferThread();
     isOpen = true;
 }
@@ -181,7 +179,7 @@ void IOHandlerBufferHelper::close()
         throw_std_runtime_error("close called on closed IOHandlerBufferHelper");
     isOpen = false;
     stopBufferThread();
-    free(buffer);
+    delete[] buffer;
     buffer = nullptr;
 }
 
