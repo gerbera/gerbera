@@ -37,8 +37,7 @@ public:
 
     static void fillAddr(struct sockaddr_storage* addr, const char* ip)
     {
-        struct sockaddr_in sin;
-        memset(&sin, 0, sizeof (sin));
+        struct sockaddr_in sin = {};
         sin.sin_family = AF_INET;
         sin.sin_addr.s_addr = inet_addr(ip);
         memcpy(addr, &sin, sizeof (sin));

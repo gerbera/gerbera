@@ -1208,7 +1208,7 @@ int find_local_port(in_port_t range_min, in_port_t range_max)
             return -1;
         }
 
-        memset(&server_addr, 0, sizeof(server_addr));
+        server_addr = {};
         server_addr.sin_family = AF_INET;
         memcpy(&server_addr.sin_addr.s_addr, server->h_addr, server->h_length);
         server_addr.sin_port = htons(port);
