@@ -55,7 +55,7 @@
 #include "util/tools.h"
 
 TagLibHandler::TagLibHandler(const std::shared_ptr<Context>& context)
-    : MetadataHandler(std::move(context))
+    : MetadataHandler(context)
 {
     entrySeparator = this->config->getOption(CFG_IMPORT_LIBOPTS_ENTRY_SEP);
     legacyEntrySeparator = this->config->getOption(CFG_IMPORT_LIBOPTS_ENTRY_LEGACY_SEP);

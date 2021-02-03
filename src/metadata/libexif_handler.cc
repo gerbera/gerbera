@@ -41,7 +41,7 @@
 #include "util/tools.h"
 
 LibExifHandler::LibExifHandler(const std::shared_ptr<Context>& context)
-    : MetadataHandler(std::move(context))
+    : MetadataHandler(context)
 {
 }
 
