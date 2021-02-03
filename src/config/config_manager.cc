@@ -873,7 +873,7 @@ void ConfigManager::load(const fs::path& userHome)
 
     // first check if the config file itself looks ok, it must have a config
     // and a server tag
-    if (std::string(root.name()) != ConfigSetup::ROOT_NAME)
+    if (root.name() != ConfigSetup::ROOT_NAME)
         throw std::runtime_error("Error in config file: <config> tag not found");
 
     if (root.child("server") == nullptr)

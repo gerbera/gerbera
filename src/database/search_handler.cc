@@ -34,7 +34,7 @@
 #include "database/database.h"
 #include "util/tools.h"
 
-static const std::unordered_map<std::string, TokenType> tokenTypes {
+static const std::unordered_map<std::string_view, TokenType> tokenTypes {
     { "(", TokenType::LPAREN },
     { ")", TokenType::RPAREN },
     { "*", TokenType::ASTERISK },
