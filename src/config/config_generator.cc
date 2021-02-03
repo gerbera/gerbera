@@ -55,10 +55,10 @@ std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(const std::string& tag
 {
     auto split = splitString(tag, '/');
     std::shared_ptr<pugi::xml_node> result = nullptr;
-    if (split.size() > 0) {
-        std::string parent = "";
-        std::string nodeKey = "";
-        std::string attribute = "";
+    if (!split.empty()) {
+        std::string parent;
+        std::string nodeKey;
+        std::string attribute;
 
         for (const auto& part : split) {
             nodeKey += "/" + part;
