@@ -836,7 +836,6 @@ void SQLDatabase::addContainerChain(std::string virtualPath, const std::string& 
 
     *containerID = createContainer(parentContainerID, container, virtualPath, true, lastClass, lastRefID, lastMetadata);
     updateID.emplace(updateID.begin(), *containerID);
-    return;
 }
 
 std::string SQLDatabase::addLocationPrefix(char prefix, const std::string& path)
@@ -2119,7 +2118,9 @@ std::unique_ptr<std::ostringstream> SQLDatabase::sqlForInsert(const std::shared_
 
     if (tableName == CDS_OBJECT_TABLE && obj->getID() != INVALID_OBJECT_ID) {
         throw_std_runtime_error("Attempted to insert new object with ID!");
-    } else if (tableName == METADATA_TABLE) {
+    }
+
+    if (tableName == METADATA_TABLE) {
         fields << "," << TQ("item_id");
         values << "," << obj->getID();
     }

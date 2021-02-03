@@ -397,7 +397,9 @@ bool UpnpXMLBuilder::renderContainerImage(const std::string& virtualURL, const s
 
                 artAdded = true;
                 break;
-            } else if (!resObj.empty()) {
+            }
+
+            if (!resObj.empty()) {
                 std::map<std::string, std::string> dict;
                 dict[URL_OBJECT_ID] = resObj;
 
