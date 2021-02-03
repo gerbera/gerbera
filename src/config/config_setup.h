@@ -91,8 +91,8 @@ protected:
     }
 
 public:
-    static const char* const ROOT_NAME;
-    static const std::string ATTRIBUTE;
+    static const std::string_view ROOT_NAME;
+    static const std::string_view ATTRIBUTE;
 
     pugi::xpath_node_set getXmlTree(const pugi::xml_node& element) const;
 
