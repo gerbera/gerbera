@@ -144,13 +144,7 @@ void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject
 
     currentTask = std::move(task);
     currentObjectID = obj->getID();
-    currentLine = static_cast<char*>(malloc(ONE_TEXTLINE_BYTES));
-    if (!currentLine) {
-        currentObjectID = INVALID_OBJECT_ID;
-        currentTask = nullptr;
-        throw_std_runtime_error("failed to allocate memory for playlist parsing");
-    }
-
+    currentLine = new char[ONE_TEXTLINE_BYTES];
     currentLine[0] = '\0';
 
 #ifdef __linux__
@@ -161,7 +155,7 @@ void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject
     if (!currentHandle) {
         currentObjectID = INVALID_OBJECT_ID;
         currentTask = nullptr;
-        free(currentLine);
+        delete[] currentLine;
         throw_std_runtime_error("Failed to open file: {}", obj->getLocation().c_str());
     }
 
@@ -183,7 +177,7 @@ void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject
         fclose(currentHandle);
         currentHandle = nullptr;
 
-        free(currentLine);
+        delete[] currentLine;
         currentLine = nullptr;
 
         currentObjectID = INVALID_OBJECT_ID;
@@ -195,7 +189,7 @@ void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject
     fclose(currentHandle);
     currentHandle = nullptr;
 
-    free(currentLine);
+    delete[] currentLine;
     currentLine = nullptr;
 
     currentObjectID = INVALID_OBJECT_ID;

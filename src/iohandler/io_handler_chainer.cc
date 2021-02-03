@@ -46,7 +46,7 @@ IOHandlerChainer::IOHandlerChainer(std::unique_ptr<IOHandler>& readFrom, std::un
     this->chunkSize = chunkSize;
     this->readFrom = std::move(readFrom);
     this->writeTo = std::move(writeTo);
-    buf = static_cast<char*>(malloc(chunkSize));
+    buf = new char[chunkSize];
     startThread();
 }
 
