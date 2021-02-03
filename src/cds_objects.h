@@ -343,11 +343,11 @@ public:
     /// The difference between setting this flag to true or false is following:
     /// exactly=true checks all fields, also internal ones, exactly=false checks
     /// only the fields that will be visible in DIDL-Lite
-    virtual int equals(const std::shared_ptr<CdsObject>& obj, bool exactly = false);
+    virtual bool equals(const std::shared_ptr<CdsObject>& obj, bool exactly = false);
 
     /// \brief Checks if current object has the same resources as obj
     /// \param obj object to check against
-    int resourcesEqual(const std::shared_ptr<CdsObject>& obj);
+    bool resourcesEqual(const std::shared_ptr<CdsObject>& obj);
 
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
     virtual void validate();
@@ -392,7 +392,7 @@ public:
     /// \brief Checks if current object is equal to obj.
     ///
     /// See description for CdsObject::equals() for details.
-    int equals(const std::shared_ptr<CdsObject>& obj, bool exactly = false) override;
+    bool equals(const std::shared_ptr<CdsObject>& obj, bool exactly = false) override;
 
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
     void validate() override;
@@ -479,7 +479,7 @@ public:
     /// \brief Checks if current object is equal to obj.
     ///
     /// See description for CdsObject::equals() for details.
-    int equals(const std::shared_ptr<CdsObject>& obj, bool exactly = false) override;
+    bool equals(const std::shared_ptr<CdsObject>& obj, bool exactly = false) override;
 
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
     void validate() override;

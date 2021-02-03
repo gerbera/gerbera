@@ -69,7 +69,7 @@ void CdsObject::copyTo(const std::shared_ptr<CdsObject>& obj)
     for (auto& resource : resources)
         obj->addResource(resource->clone());
 }
-int CdsObject::equals(const std::shared_ptr<CdsObject>& obj, bool exactly)
+bool CdsObject::equals(const std::shared_ptr<CdsObject>& obj, bool exactly)
 {
     if (!(id == obj->getID()
             && parentID == obj->getParentID()
@@ -77,29 +77,27 @@ int CdsObject::equals(const std::shared_ptr<CdsObject>& obj, bool exactly)
             && title == obj->getTitle()
             && upnpClass == obj->getClass()
             && sortPriority == obj->getSortPriority()))
-        return 0;
+        return false;
 
     if (!resourcesEqual(obj))
-        return 0;
+        return false;
 
     if (metadata != obj->getMetadata())
-        return 0;
+        return false;
 
-    if (exactly
+    return !(exactly
         && !(location == obj->getLocation()
             && mtime == obj->getMTime()
             && sizeOnDisk == obj->getSizeOnDisk()
             && virt == obj->isVirtual()
             && std::equal(auxdata.begin(), auxdata.end(), obj->auxdata.begin())
-            && objectFlags == obj->getFlags()))
-        return 0;
-    return 1;
+            && objectFlags == obj->getFlags()));
 }
 
-int CdsObject::resourcesEqual(const std::shared_ptr<CdsObject>& obj)
+bool CdsObject::resourcesEqual(const std::shared_ptr<CdsObject>& obj)
 {
     if (resources.size() != obj->resources.size())
-        return 0;
+        return false;
 
     // compare all resources
     return std::equal(resources.begin(), resources.end(), obj->resources.begin(),
@@ -153,11 +151,11 @@ void CdsItem::copyTo(const std::shared_ptr<CdsObject>& obj)
     item->setTrackNumber(trackNumber);
     item->setServiceID(serviceID);
 }
-int CdsItem::equals(const std::shared_ptr<CdsObject>& obj, bool exactly)
+bool CdsItem::equals(const std::shared_ptr<CdsObject>& obj, bool exactly)
 {
     auto item = std::static_pointer_cast<CdsItem>(obj);
     if (!CdsObject::equals(obj, exactly))
-        return 0;
+        return false;
     return (mimeType == item->getMimeType() && trackNumber == item->getTrackNumber() && serviceID == item->getServiceID());
 }
 
@@ -220,11 +218,10 @@ void CdsContainer::copyTo(const std::shared_ptr<CdsObject>& obj)
     auto cont = std::static_pointer_cast<CdsContainer>(obj);
     cont->setUpdateID(updateID);
 }
-int CdsContainer::equals(const std::shared_ptr<CdsObject>& obj, bool exactly)
+bool CdsContainer::equals(const std::shared_ptr<CdsObject>& obj, bool exactly)
 {
     auto cont = std::static_pointer_cast<CdsContainer>(obj);
-    return (
-        CdsObject::equals(obj, exactly) && isSearchable() == cont->isSearchable());
+    return CdsObject::equals(obj, exactly) && isSearchable() == cont->isSearchable();
 }
 
 void CdsContainer::validate()
