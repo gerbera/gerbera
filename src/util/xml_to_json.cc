@@ -109,7 +109,7 @@ void Xml2Json::handleElement(std::ostringstream& buf, const pugi::xml_node& node
         buf << ']';
 }
 
-static std::string& replaceAllString(std::string& str, std::string_view from, const std::string& to)
+static const std::string& replaceAllString(std::string& str, std::string_view from, const std::string& to)
 {
     size_t start_pos = str.find(from);
     while (start_pos != std::string::npos) {
