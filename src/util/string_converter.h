@@ -71,7 +71,7 @@ public:
     /// \brief safeguard - internal to internal - needed to catch some
     /// scenarious where the user may have forgotten to add proper conversion
     /// in the script.
-    static std::unique_ptr<StringConverter> i2i(const std::shared_ptr<Config>& cm);
+    static std::unique_ptr<StringConverter> i2i([[maybe_unused]] const std::shared_ptr<Config>& cm);
 #endif
 
 protected:

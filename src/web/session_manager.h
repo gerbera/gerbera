@@ -165,7 +165,7 @@ public:
 
     void containerChangedUI(const std::vector<int>& objectIDs);
 
-    void timerNotify(std::shared_ptr<Timer::Parameter> parameter) override;
+    void timerNotify([[maybe_unused]] std::shared_ptr<Timer::Parameter> parameter) override;
 };
 
 } // namespace web

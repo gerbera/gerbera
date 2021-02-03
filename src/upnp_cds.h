@@ -95,7 +95,7 @@ protected:
     /// \brief Samsung Extension X_SetBookmark
     /// \param request Incoming ActionRequest.
     ///
-    static void doSamsungBookmark(const std::unique_ptr<ActionRequest>& request);
+    static void doSamsungBookmark([[maybe_unused]] const std::unique_ptr<ActionRequest>& request);
 
     std::shared_ptr<Config> config;
     std::shared_ptr<Database> database;
