@@ -220,7 +220,7 @@ off_t getFileSize(const fs::path& path)
     struct stat statbuf;
     int ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
-        throw_std_runtime_error("{}: {}", std::strerror(errno), path);
+        throw_std_runtime_error("{}: {}", std::strerror(errno), path.c_str());
     }
 
     return statbuf.st_size;
