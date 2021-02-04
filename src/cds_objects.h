@@ -56,8 +56,8 @@ namespace fs = std::filesystem;
 static constexpr bool IS_CDS_CONTAINER(unsigned int type)
 {
     return type & OBJECT_TYPE_CONTAINER;
-};
-static constexpr bool IS_CDS_ITEM_EXTERNAL_URL(unsigned int type) { return type & OBJECT_TYPE_ITEM_EXTERNAL_URL; };
+}
+static constexpr bool IS_CDS_ITEM_EXTERNAL_URL(unsigned int type) { return type & OBJECT_TYPE_ITEM_EXTERNAL_URL; }
 
 #define OBJECT_FLAG_RESTRICTED 0x00000001u
 #define OBJECT_FLAG_SEARCHABLE 0x00000002u

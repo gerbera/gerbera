@@ -132,7 +132,7 @@ void ConfigSetup::makeOption(std::string optValue, const std::shared_ptr<Config>
 {
     optionValue = std::make_shared<Option>(optValue);
     setOption(config);
-};
+}
 
 size_t ConfigSetup::extractIndex(const std::string& item)
 {
@@ -424,7 +424,7 @@ void ConfigBoolSetup::makeOption(std::string optValue, const std::shared_ptr<Con
         throw_std_runtime_error("Invalid {} value {}", xpath, optValue.c_str());
     optionValue = std::make_shared<BoolOption>(optValue == YES || optValue == "true");
     setOption(config);
-};
+}
 
 bool ConfigBoolSetup::getXmlContent(const pugi::xml_node& root) const
 {
