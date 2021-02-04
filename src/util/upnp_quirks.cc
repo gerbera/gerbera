@@ -65,12 +65,10 @@ void Quirks::addCaptionInfo(const std::shared_ptr<CdsItem>& item, std::unique_pt
         auto it = std::find_if(exts.begin(), exts.end(), [=](const auto& ext) { std::string captionPath = pathNoExt + ext;
               return access(captionPath.c_str(), R_OK) == 0; });
 
-        std::string validext = (it != exts.end()) ? *it : "";
-
-        if (validext.length() == 0)
+        if (it == exts.end())
             return;
 
-        url = context->getServer()->getVirtualUrl() + RequestHandler::joinUrl({ CONTENT_MEDIA_HANDLER, URL_OBJECT_ID, fmt::to_string(item->getID()), URL_RESOURCE_ID, "0", URL_FILE_EXTENSION, "file" + validext });
+        url = context->getServer()->getVirtualUrl() + RequestHandler::joinUrl({ CONTENT_MEDIA_HANDLER, URL_OBJECT_ID, fmt::to_string(item->getID()), URL_RESOURCE_ID, "0", URL_FILE_EXTENSION, "file" + fmt::to_string(*it) });
     }
     headers->addHeader("CaptionInfo.sec", url);
 }
