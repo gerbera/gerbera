@@ -100,7 +100,7 @@ public:
     {
     }
 
-    void setLocation(const fs::path& location) { this->location = location; };
+    void setLocation(const fs::path& location) { this->location = location; }
     fs::path getLocation() const { return location; }
 
     void setInherit(bool inherit) { this->inherit = inherit; }

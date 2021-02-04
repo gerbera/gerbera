@@ -137,7 +137,7 @@ public:
     void setOrigValue(const std::string& item, int value) override;
 
     static bool isDebugLogging() { return debug; }
-    fs::path getDataDir() const override { return dataDir; };
+    fs::path getDataDir() const override { return dataDir; }
 
 protected:
     static const std::vector<std::shared_ptr<ConfigSetup>> complexOptions;
