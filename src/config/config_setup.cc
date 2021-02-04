@@ -1385,7 +1385,7 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
             }
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_4CC);
             if (optItem == index) {
-                config->setOrigValue(index, std::accumulate(std::next(fcc_list.begin()), fcc_list.end(), fcc_list[0], [](const std::string& a, const std::string& b) { return a + ", " + b; }));
+                config->setOrigValue(index, std::accumulate(std::next(fcc_list.begin()), fcc_list.end(), fcc_list[0], [](const std::string& a, const std::string& b) { return fmt::format("{}, {}", a.c_str(), b.c_str()); }));
                 fcc_list.clear();
                 if (findConfigSetup<ConfigArraySetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC)->checkArrayValue(optValue, fcc_list)) {
                     set4cc = true;
