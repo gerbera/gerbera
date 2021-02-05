@@ -40,6 +40,10 @@
 #include "content/content_manager.h"
 #include "util/process.h"
 
+#ifndef FD_SET
+#include <sys/select.h>
+#endif
+
 // after MAX_TIMEOUTS we will tell libupnp to check the socket,
 // this will make sure that we do not block the read and allow libupnp to
 // call our close() callback
