@@ -828,7 +828,7 @@ void SQLDatabase::addContainerChain(std::string virtualPath, const std::string& 
         }
     }
 
-    int parentContainerID;
+    int parentContainerID = 0;
     std::string newpath, container;
     stripAndUnescapeVirtualContainerFromPath(virtualPath, newpath, container);
 
