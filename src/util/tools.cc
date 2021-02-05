@@ -48,6 +48,10 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#ifdef __HAIKU__
+#define _DEFAULT_SOURCE
+#endif
+
 #include <ifaddrs.h>
 #include <net/if.h>
 
