@@ -218,9 +218,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
     }
     */
 
-    struct timespec ts;
-    getTimespecNow(&ts);
-    item->setAuxData(ONLINE_SERVICE_LAST_UPDATE, fmt::to_string(ts.tv_sec));
+    item->setAuxData(ONLINE_SERVICE_LAST_UPDATE, fmt::to_string(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())));
 
     item->setFlag(OBJECT_FLAG_ONLINE_SERVICE);
     try {

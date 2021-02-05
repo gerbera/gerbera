@@ -1395,9 +1395,8 @@ void ContentManager::cleanupOnlineServiceObjects(const std::shared_ptr<OnlineSer
     if (service->getItemPurgeInterval() > 0) {
         auto ids = database->getServiceObjectIDs(service->getDatabasePrefix());
 
-        struct timespec current, last;
-        getTimespecNow(&current);
-        last.tv_nsec = 0;
+        auto current = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+        int64_t last = 0;
         std::string temp;
 
         for (int object_id : *ids) {
@@ -1409,9 +1408,9 @@ void ContentManager::cleanupOnlineServiceObjects(const std::shared_ptr<OnlineSer
             if (temp.empty())
                 continue;
 
-            last.tv_sec = std::stol(temp);
+            last = std::stoll(temp);
 
-            if ((service->getItemPurgeInterval() > 0) && ((current.tv_sec - last.tv_sec) > service->getItemPurgeInterval())) {
+            if ((service->getItemPurgeInterval() > 0) && ((current - last) > service->getItemPurgeInterval())) {
                 log_debug("Purging old online service object {}", obj->getTitle().c_str());
                 removeObject(nullptr, object_id, false);
             }
