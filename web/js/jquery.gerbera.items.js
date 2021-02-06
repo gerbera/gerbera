@@ -25,8 +25,7 @@ $.widget('grb.dataitems', {
   _create: function () {
     this.element.html('');
     this.element.addClass('grb-dataitems');
-    const table = $('<table></table>').addClass('table');
-    const tbody = $('<tbody></tbody>');
+    const table = $('<div class="d-flex justify-content-start flex-column h-100 bg-light"></div>');
     const data = this.options.data;
     const onDelete = this.options.onDelete;
     const onEdit = this.options.onEdit;
@@ -39,53 +38,39 @@ $.widget('grb.dataitems', {
     if (data.length > 0) {
       for (let i = 0; i < data.length; i++) {
         const item = data[i];
-        row = $('<tr></tr>');
-        content = $('<td></td>');
+        content = $('<div class="d-flex align-items-center border-bottom p-1 bg-white" />');
 
-        if (item.img) {
-          const img = $('<img src=""/>');
-          img.attr('src', item.img);
-          img.attr('style', 'height: 25px');
-          img.addClass('rounded float-left');
+        if (item.image) {
+          const img = $('<img class="float-left" src="" style="object-fit: contain" width="36px" height="36px"/>');
+          img.attr('src', item.image);
           img.appendTo(content)
         }
 
         if (item.url) {
-          text = $('<a></a>');
+          text = $('<a class="flex-grow-1 ml-2 grb-item-url"></a>');
           text.attr('href', item.url).text(item.text).appendTo(content);
         } else {
-          text = $('<span></span>');
+          text = $('<span class="flex-grow-1 grb-item-url"></span>');
           text.text(item.text).appendTo(content);
         }
-      if (item.image) {
-        text.prepend($('<img style="margin-right: 10px" width="36" src="' + item.image + '"/>'));
-      }
-        text.addClass('grb-item-url');
 
         let buttons;
         if (itemType === 'db') {
-          buttons = $('<div></div>');
-          buttons.addClass('grb-item-buttons pull-right');
+          buttons = $('<div class="grb-item-buttons"></div>');
 
-          const downloadIcon = $('<span></span>');
-          downloadIcon.prop('title', 'Download item');
-          downloadIcon.addClass('grb-item-download fa fa-download');
+          const downloadIcon = $('<a class="btn grb-item-download fa fa-download pl-0" title="Download Item"></a>');
           downloadIcon.appendTo(buttons);
           if (onDownload) {
             downloadIcon.click(item, onDownload);
           }
 
-          const editIcon = $('<span></span>');
-          editIcon.prop('title', 'Edit item');
-          editIcon.addClass('grb-item-edit fa fa-pencil');
+          const editIcon = $('<a class="btn grb-item-edit fa fa-pencil pl-0" title="Edit Item"></a>');
           editIcon.appendTo(buttons);
           if (onEdit) {
             editIcon.click(item, onEdit);
           }
 
-          const deleteIcon = $('<span></span>');
-          deleteIcon.prop('title', 'Delete item');
-          deleteIcon.addClass('grb-item-delete fa fa-trash-o');
+          const deleteIcon = $('<a class="btn grb-item-edit fa fa-trash-o pl-0" title="Delete Item"></a>');
           deleteIcon.appendTo(buttons);
           if (onDelete) {
             deleteIcon.click(item, function (event) {
@@ -98,9 +83,7 @@ $.widget('grb.dataitems', {
           buttons = $('<div></div>');
           buttons.addClass('grb-item-buttons pull-right');
 
-          const addIcon = $('<span></span>');
-          addIcon.prop('title', 'Add item');
-          addIcon.addClass('grb-item-add fa fa-plus');
+          const addIcon = $('<a class="btn grb-item-add fa fa-plus pl-0" title="Delete Item"></a>');
           addIcon.appendTo(buttons);
           if (onAdd) {
             addIcon.click(item, onAdd);
@@ -108,49 +91,50 @@ $.widget('grb.dataitems', {
           buttons.appendTo(content);
         }
 
-        row.addClass('grb-item');
-        row.append(content);
-        tbody.append(row);
+        content.addClass('grb-item');
+        table.append(content);
       }
     } else {
-      row = $('<tr></tr>');
       content = $('<td></td>');
       $('<span>No Items found</span>').appendTo(content);
-      row.append(content);
-      tbody.append(row);
+      table.append(content);
     }
-    tbody.appendTo(table);
 
-    const tfoot = this.buildFooter(pager);
+    const tfoot = this.buildPager(pager);
     table.append(tfoot);
 
     this.element.append(table);
     this.element.addClass('with-data');
   },
 
-  buildFooter: function (pager) {
-    const tfoot = $('<tfoot><tr><td></td></tr></tfoot>');
-    const grbPager = $('<nav class="grb-pager"></nav>');
-    const list = $('<ul class="pagination"></ul>');
-    const previous = $('<li class="page-item">' +
-        '<a class="page-link" href="#" aria-label="Previous">' +
-        '<span aria-hidden="true">&laquo;</span>' +
-        '<span class="sr-only">Previous</span></a>' +
-        '</li>');
-    const next = $('<li class="page-item">' +
-      '<a class="page-link" href="#" aria-label="Next">' +
-      '<span aria-hidden="true">&raquo;</span>' +
-      '<span class="sr-only">Next</span></a>' +
-      '</li>');
-    let maxPages;
-    let pageItem;
-    let pageLink;
-    let pageParams;
-
-    list.append(previous);
+  buildPager: function (pager) {
+    const outer = $('<div/>');
 
     if (pager && pager.pageCount) {
-      maxPages = Math.ceil(pager.totalMatches / pager.itemsPerPage);
+      let maxPages = Math.ceil(pager.totalMatches / pager.itemsPerPage);
+
+      // No point to have a pager on a single page!
+      if (maxPages < 2) {
+        return outer;
+      }
+
+      const grbPager = $('<nav class="grb-pager"></nav>');
+      const list = $('<ul class="pagination"></ul>');
+      const previous = $('<li class="page-item">' +
+          '<a class="page-link" href="#" aria-label="Previous">' +
+          '<span aria-hidden="true">&laquo;</span>' +
+          '<span class="sr-only">Previous</span></a>' +
+          '</li>');
+      const next = $('<li class="page-item">' +
+          '<a class="page-link" href="#" aria-label="Next">' +
+          '<span aria-hidden="true">&raquo;</span>' +
+          '<span class="sr-only">Next</span></a>' +
+          '</li>');
+      let pageItem;
+      let pageLink;
+      let pageParams;
+
+      list.append(previous);
 
       if (pager.onNext) {
         pageParams = {
@@ -192,10 +176,11 @@ $.widget('grb.dataitems', {
       }
       list.append(next);
       grbPager.append(list);
-      tfoot.find('td').append(grbPager);
+      outer.append(grbPager);
+      outer.addClass("py-2 d-flex flex-fill justify-content-center align-items-end");
     }
 
-    return tfoot;
+    return outer;
   },
 
   _destroy: function () {
