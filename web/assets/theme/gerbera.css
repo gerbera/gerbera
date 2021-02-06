@@ -98,32 +98,6 @@ li.nav-item.active a {
     box-shadow:inset 0px 3px 3px -1px #888;
 }
 
-.modal-header {
-    background-color: #222;
-    color: #FFF;
-    border: 1px solid #FFF;
-}
-
-.modal-footer {
-    background-color: #e9ecef;
-    border-bottom: 1px solid #FFF;
-    border-left: 1px solid #FFF;
-    border-right: 1px solid #FFF;
-}
-
-.modal-body {
-    background-color: #FFF;
-    border: 1px solid #FFF;
-}
-
-.modal-header .close {
-    opacity: 1;
-    color: white;
-}
-.close:hover {
-    color: #FFF;
-}
-
 .detail-table {
     width: 500px;
     margin-left: 1rem;
