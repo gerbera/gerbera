@@ -34,15 +34,12 @@
 #include <csignal>
 
 #include <fcntl.h>
+#include <sys/select.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
 #include "content/content_manager.h"
 #include "util/process.h"
-
-#ifndef FD_SET
-#include <sys/select.h>
-#endif
 
 // after MAX_TIMEOUTS we will tell libupnp to check the socket,
 // this will make sure that we do not block the read and allow libupnp to
