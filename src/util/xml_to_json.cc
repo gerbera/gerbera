@@ -31,12 +31,18 @@
 
 /// \file xml_to_json.cc
 
-#include "xml_to_json.h"
+#include "xml_to_json.h" // API
 
-#include <iostream>
-#include <regex>
+#include <algorithm> // for count_if
+#include <cstddef> // for size_t
+#include <iterator> // for distance
+#include <regex> // for regex_match, match_results<>::_Base_type, regex
+#include <string_view> // for string_view
+#include <utility> // for pair
+#include <vector> // for vector
 
-#include "util/tools.h"
+#include "exceptions.h" // for throw_std_runtime_error
+#include "util/tools.h" // for escape
 
 std::string Xml2Json::getJson(const pugi::xml_node& root, const Hints& hints)
 {

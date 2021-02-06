@@ -32,15 +32,15 @@
 #ifndef __SCRIPTING_SCRIPT_H__
 #define __SCRIPTING_SCRIPT_H__
 
-#include <duktape.h>
-#include <mutex>
-
-#include "common.h"
-#include "context.h"
+#include <duktape.h> // for duk_context, duk_c_function, duk_function_list_...
+#include <memory> // for shared_ptr, unique_ptr
+#include <string> // for string
 
 // forward declaration
 class CdsObject;
+class Config;
 class ContentManager;
+class Database;
 class ScriptingRuntime;
 class StringConverter;
 
@@ -71,7 +71,7 @@ public:
     void setProperty(const std::string& name, const std::string& value);
     void setIntProperty(const std::string& name, int value);
 
-    void defineFunction(const std::string& name, duk_c_function function, uint32_t numParams);
+    void defineFunction(const std::string& name, duk_c_function function, unsigned int numParams);
     void defineFunctions(const duk_function_list_entry* functions);
     void load(const std::string& scriptPath);
     void load(std::string scriptText, std::string scriptPath);

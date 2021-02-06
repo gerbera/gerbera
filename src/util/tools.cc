@@ -31,34 +31,43 @@
 
 #include "tools.h" // API
 
-#include <arpa/inet.h>
-#include <cctype>
-#include <cerrno>
-#include <climits>
-#include <cstdlib>
-#include <filesystem>
-#include <fstream>
-#include <iterator>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <queue>
-#include <sstream>
-#include <sys/ioctl.h>
-#include <sys/socket.h>
-#include <sys/stat.h>
-#include <unistd.h>
-
 #ifdef __HAIKU__
 #define _DEFAULT_SOURCE
 #endif
 
-#include <ifaddrs.h>
-#include <net/if.h>
+#include <algorithm> // for find_if, transform, unique
+#include <array> // for array
+#include <cctype> // for isspace, isdigit, tolower
+#include <cerrno> // for errno, ENOENT, ENOTDIR
+#include <cstddef> // for byte, size_t
+#include <cstdio> // for fclose, fopen, fread, fseek
+#include <cstdlib> // for getenv, rand
+#include <cstring> // for strerror, strchr, memcmp, memcpy
+#include <ctime> // for timespec, clock_gettime, CLOC...
+#include <filesystem> // for path, path::iterator, is_regu...
+#include <fmt/format.h> // for format
+#include <fstream> // for basic_filebuf, basic_ofstream...
+#include <ifaddrs.h> // for ifaddrs, freeifaddrs, getifaddrs
+#include <iterator> // for prev
+#include <limits> // for numeric_limits
+#include <memory> // for allocator, shared_ptr, __shar...
+#include <netdb.h> // for getnameinfo, NI_MAXHOST, gai_...
+#include <netinet/in.h> // for sockaddr_in, sockaddr_in6
+#include <optional> // for optional
+#include <sstream> // for operator<<, ostringstream
+#include <stdint.h> // for uint16_t
+#include <string_view> // for string_view
+#include <sys/socket.h> // for sockaddr, AF_INET, AF_INET6
+#include <sys/stat.h> // for stat, st_mtime
+#include <system_error> // for error_code
+#include <unistd.h> // for close, ssize_t, access, R_OK
+#include <utility> // for pair
+#include <vector> // for vector
 
 #ifdef BSD_NATIVE_UUID
 #include <uuid.h>
 #else
-#include <uuid/uuid.h>
+#include <uuid/uuid.h> // for uuid_generate, uuid_unparse
 #endif
 
 #ifdef SOLARIS
@@ -66,11 +75,12 @@
 #include <sys/sockio.h>
 #endif
 
-#include "cds_objects.h"
-#include "config/config_manager.h"
-#include "contrib/md5.h"
-#include "iohandler/file_io_handler.h"
-#include "metadata/metadata_handler.h"
+#include "contrib/md5.h" // for md5_append, md5_finish, md5_init
+#include "exceptions.h" // for throw_std_runtime_error
+#include "metadata/metadata_handler.h" // for CONTENT_TYPE_AVI, CONTENT_TYP...
+#include "upnp_common.h" // for UPNP_DLNA_CONVERSION_INDICATOR
+#include "util/logger.h" // for log_error, log_debug, log_war...
+#include "util/tools.h" // for getValueOrDefault, SOCK_ADDR_...
 
 #define WHITE_SPACE " \t\r\n"
 
@@ -1226,7 +1236,7 @@ int find_local_port(in_port_t range_min, in_port_t range_max)
 
         retry_count++;
 
-    } while (retry_count < USHRT_MAX);
+    } while (retry_count < std::numeric_limits<uint16_t>::max());
 
     log_error("Could not find free port on localhost");
 

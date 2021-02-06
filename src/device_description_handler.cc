@@ -23,8 +23,16 @@
 
 #include "device_description_handler.h" // API
 
-#include "iohandler/mem_io_handler.h"
-#include "util/tools.h"
+#include <pugixml.hpp> // for xml_document
+#include <sstream> // for ostringstream
+#include <utility> // for move
+
+#include "iohandler/mem_io_handler.h" // for MemIOHandler
+#include "upnp_xml.h" // for UpnpXMLBuilder
+#include "util/logger.h" // for log_debug
+
+class ContentManager;
+class IOHandler;
 
 DeviceDescriptionHandler::DeviceDescriptionHandler(std::shared_ptr<ContentManager> content, UpnpXMLBuilder* xmlBuilder)
     : RequestHandler(std::move(content))

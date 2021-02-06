@@ -33,15 +33,26 @@
 #ifndef __METADATA_TAGLIB_H__
 #define __METADATA_TAGLIB_H__
 
+#include <memory> // for shared_ptr, unique_ptr
+
+#include "metadata/metadata_handler.h" // for MetadataHandler, metadata_fie...
+
+class CdsItem;
+class CdsObject;
+class Context;
+class IOHandler;
+
+namespace TagLib {
+class IOStream;
+class Tag;
+} // namespace TagLib
 #ifdef HAVE_TAGLIB
 
-#include <string>
+#include <string> // for string
+#include <taglib/tbytevector.h> // for ByteVector
+#include <taglib/tfile.h> // for File
 
-#include <taglib/tbytevector.h>
-#include <taglib/tfile.h>
-#include <taglib/tiostream.h>
-
-#include "metadata_handler.h"
+#include "metadata_handler.h" // for MetadataHandler, metadata_fields_t
 
 /// \brief This class is responsible for reading id3 or ogg tags metadata
 class TagLibHandler : public MetadataHandler {

@@ -32,12 +32,8 @@
 #ifndef __TRANSCODE_HANDLER_H__
 #define __TRANSCODE_HANDLER_H__
 
-#include <memory>
-#include <string>
-
-#include <upnp.h>
-
-#include "common.h"
+#include <memory> // for shared_ptr, unique_ptr
+#include <string> // for string
 
 // forward declaration
 class CdsObject;

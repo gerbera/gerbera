@@ -32,7 +32,10 @@
 #ifndef __TRANSCODING_PROCESS_EXECUTOR_H__
 #define __TRANSCODING_PROCESS_EXECUTOR_H__
 
-#include "util/process_executor.h"
+#include <string> // for string
+#include <vector> // for vector
+
+#include "util/process_executor.h" // for ProcessExecutor
 
 class TranscodingProcessExecutor : public ProcessExecutor {
 public:

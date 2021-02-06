@@ -31,20 +31,24 @@
 #ifndef __AUTOSCAN_INOTIFY_H__
 #define __AUTOSCAN_INOTIFY_H__
 
-#include <memory>
-#include <mutex>
-#include <queue>
-#include <thread>
-#include <unordered_map>
-#include <vector>
+#include <filesystem> // for path
+#include <memory> // for shared_ptr, make_shared, unique_ptr, __shar...
+#include <mutex> // for mutex, lock_guard
+#include <queue> // for queue
+#include <string> // for string, basic_string
+#include <thread> // for thread
+#include <unordered_map> // for unordered_map
+#include <utility> // for move
+#include <vector> // for vector
 
-#include "autoscan.h"
-#include "config/config.h"
-#include "context.h"
-#include "util/mt_inotify.h"
+#include "autoscan.h" // API
 
 // forward declaration
+class AutoscanDirectory;
+class Config;
 class ContentManager;
+class Database;
+class Inotify;
 
 #define INOTIFY_ROOT (-1)
 #define INOTIFY_UNKNOWN_PARENT_WD (-2)

@@ -23,21 +23,39 @@
 
 /// \file config_load.cc
 
-#include "pages.h" // API
+#include <algorithm> // for any_of
+#include <array> // for array
+#include <cstddef> // for size_t
+#include <filesystem> // for path
+#include <fmt/chrono.h> // for localtime
+#include <fmt/format.h> // for format, format_context, has_f...
+#include <iterator> // for next
+#include <map> // for map, operator!=, _Rb_tree_ite...
+#include <memory> // for shared_ptr, __shared_ptr_access
+#include <numeric> // for accumulate
+#include <pugixml.hpp> // for xml_node, xml_attribute, xml_...
+#include <stdexcept> // for runtime_error
+#include <string> // for string, basic_string, char_tr...
+#include <type_traits> // for add_const<>::type
+#include <utility> // for move, tuple_element<>::type
+#include <vector> // for vector, vector<>::iterator
 
-#include <fmt/chrono.h>
-#include <numeric>
-
-#include "config/client_config.h"
-#include "config/config_setup.h"
-#include "config/directory_tweak.h"
-#include "content/autoscan.h"
-#include "content/content_manager.h"
-#include "database/database.h"
-#include "metadata/metadata_handler.h"
-#include "transcoding/transcoding.h"
-#include "upnp_xml.h"
-#include "util/upnp_clients.h"
+#include "config/client_config.h" // for ClientConfig, ClientConfigList
+#include "config/config.h" // for ATTR_TRANSCODING_PROFILES_PROFLE
+#include "config/config_manager.h" // for ConfigManager
+#include "config/config_options.h" // for ConfigOption
+#include "config/config_setup.h" // for ConfigSetup, ConfigValue, Con...
+#include "config/directory_tweak.h" // for DirectoryTweak, DirectoryConf...
+#include "content/autoscan.h" // for AutoscanDirectory
+#include "content/autoscan_list.h" // for AutoscanList
+#include "content/content_manager.h" // for ContentManager
+#include "database/database.h" // for Database
+#include "metadata/metadata_handler.h" // for MetadataHandler, R_RESOLUTION
+#include "pages.h" // for configLoad
+#include "transcoding/transcoding.h" // for TranscodingProfile, Transcodi...
+#include "util/logger.h" // for log_debug, log_error
+#include "util/xml_to_json.h" // for Xml2Json::Hints
+#include "web/web_request_handler.h" // for WebRequestHandler
 
 web::configLoad::configLoad(std::shared_ptr<ContentManager> content)
     : WebRequestHandler(std::move(content))

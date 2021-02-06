@@ -32,11 +32,12 @@
 #ifndef __LAYOUT_H__
 #define __LAYOUT_H__
 
-#include <filesystem>
-#include <memory>
+#include <filesystem> // for path
+#include <memory> // for shared_ptr
+
 namespace fs = std::filesystem;
 
-#include "context.h"
+#include "context.h" // for Config, Database
 
 // forward declaration
 class CdsObject;

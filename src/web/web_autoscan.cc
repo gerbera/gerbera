@@ -29,11 +29,26 @@
 
 /// \file web_autoscan.cc
 
-#include "pages.h" // API
+#include <algorithm> // for sort
+#include <cstring> // for strcmp
+#include <filesystem> // for path
+#include <fmt/format.h> // for to_string
+#include <memory> // for shared_ptr, __shared_ptr_access
+#include <pugixml.hpp> // for xml_node, node_pcdata, xml_attr...
+#include <stdexcept> // for runtime_error
+#include <string> // for string, operator==, basic_string
+#include <utility> // for move
+#include <vector> // for vector
 
-#include "content/autoscan.h"
-#include "content/content_manager.h"
-#include "database/database.h"
+#include "common.h" // for FS_ROOT_DIRECTORY
+#include "content/autoscan.h" // for AutoscanDirectory, ScanMode
+#include "content/content_manager.h" // for ContentManager
+#include "database/database.h" // for Database
+#include "exceptions.h" // for throw_std_runtime_error
+#include "pages.h" // for autoscan
+#include "util/tools.h" // for hexDecodeString
+#include "util/xml_to_json.h" // for Xml2Json::Hints
+#include "web/web_request_handler.h" // for WebRequestHandler
 
 static bool WebAutoscanProcessListComparator(const std::shared_ptr<AutoscanDirectory>& a1, const std::shared_ptr<AutoscanDirectory>& a2)
 {

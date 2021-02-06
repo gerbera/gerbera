@@ -29,13 +29,26 @@
 
 /// \file items.cc
 
-#include "pages.h" // API
+#include <memory> // for shared_ptr, __shared_ptr_access
+#include <pugixml.hpp> // for xml_node, xml_attribute, node_p...
+#include <string> // for string, operator==
+#include <utility> // for move
+#include <vector> // for vector
 
-#include "cds_objects.h"
-#include "content/autoscan.h"
-#include "database/database.h"
-#include "server.h"
-#include "upnp_xml.h"
+#include "cds_objects.h" // for CdsObject, CdsItem (ptr only)
+#include "common.h" // for INVALID_OBJECT_ID
+#include "config/config.h" // for CFG_IMPORT_AUTOSCAN_USE_INOTIFY
+#include "content/autoscan.h" // for AutoscanDirectory, ScanMode
+#include "database/database.h" // for BrowseParam, Database, BROWSE_D...
+#include "exceptions.h" // for throw_std_runtime_error
+#include "pages.h" // for items
+#include "server.h" // for Server
+#include "upnp_common.h" // for UPNP_CLASS_MUSIC_ALBUM, UPNP_CL...
+#include "upnp_xml.h" // for UpnpXMLBuilder
+#include "util/xml_to_json.h" // for Xml2Json::Hints
+#include "web/web_request_handler.h" // for WebRequestHandler
+
+class ContentManager;
 
 web::items::items(std::shared_ptr<ContentManager> content)
     : WebRequestHandler(std::move(content))

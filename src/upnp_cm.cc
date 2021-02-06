@@ -31,9 +31,19 @@
 
 #include "upnp_cm.h" // API
 
-#include "config/config_manager.h"
-#include "database/database.h"
-#include "util/tools.h"
+#include <pugixml.hpp> // for xml_node, xml_document, node_pcdata
+#include <sstream> // for ostringstream
+#include <vector> // for vector
+
+#include "action_request.h" // for ActionRequest
+#include "config/config.h" // for CFG_SERVER_UDN, Config
+#include "context.h" // for Context
+#include "database/database.h" // for Database
+#include "subscription_request.h" // for SubscriptionRequest
+#include "upnp_common.h" // for UPNP_DESC_CM_SERVICE_ID, UPNP_DESC...
+#include "upnp_xml.h" // for UpnpXMLBuilder
+#include "util/logger.h" // for log_debug
+#include "util/tools.h" // for mimeTypesToCsv
 
 ConnectionManagerService::ConnectionManagerService(const std::shared_ptr<Context>& context,
     UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle)

@@ -32,11 +32,21 @@
 #ifdef ATRAILERS
 #include "atrailers_content_handler.h" // API
 
-#include "cds_objects.h"
-#include "config/config_manager.h"
-#include "metadata/metadata_handler.h"
-#include "online_service.h"
-#include "util/tools.h"
+#include <chrono> // for system_clock
+#include <fmt/format.h> // for to_string, format
+#include <stdexcept> // for runtime_error
+#include <sys/types.h> // for time_t
+#include <utility> // for move
+
+#include "cds_objects.h" // for CdsItemExternalURL, CdsObject...
+#include "cds_resource.h" // for CdsResource
+#include "config/config.h" // for CFG_IMPORT_MAPPINGS_EXTENSION...
+#include "context.h" // for Context
+#include "exceptions.h" // for throw_std_runtime_error
+#include "metadata/metadata_handler.h" // for M_GENRE, CH_DEFAULT, M_DATE
+#include "online_service.h" // for OS_ATrailers, ONLINE_SERVICE_...
+#include "util/logger.h" // for log_warning, log_error
+#include "util/tools.h" // for getValueOrDefault, renderProt...
 
 ATrailersContentHandler::ATrailersContentHandler(const std::shared_ptr<Context>& context)
     : config(context->getConfig())

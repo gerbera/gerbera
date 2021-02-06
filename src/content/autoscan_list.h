@@ -26,11 +26,19 @@
 #ifndef __AUTOSCAN_LIST_H__
 #define __AUTOSCAN_LIST_H__
 
-#include "util/timer.h"
+#include <cstddef> // for size_t
+#include <filesystem> // for path
+#include <limits> // for numeric_limits
+#include <map> // for map
+#include <memory> // for shared_ptr
+#include <mutex> // for recursive_mutex, lock_guard
+#include <vector> // for vector
 
+#include "util/timer.h" // for Timer
+
+class AutoscanDirectory;
 // forward declaration
 class Database;
-class AutoscanDirectory;
 
 class AutoscanList {
 public:
@@ -43,7 +51,7 @@ public:
     ///
     /// \param dir AutoscanDirectory to add to the list.
     /// \return scanID of the newly added AutoscanDirectory
-    int add(const std::shared_ptr<AutoscanDirectory>& dir, size_t index = SIZE_MAX);
+    int add(const std::shared_ptr<AutoscanDirectory>& dir, size_t index = std::numeric_limits<size_t>::max());
 
     [[maybe_unused]] void addList(const std::shared_ptr<AutoscanList>& list);
 

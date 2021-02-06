@@ -31,10 +31,18 @@
 
 #include "database.h" // API
 
-#include "config/config_manager.h"
-#include "database//sqlite3/sqlite_database.h"
-#include "database/mysql/mysql_database.h"
-#include "util/tools.h"
+#include <cstddef> // for size_t
+#include <memory> // for shared_ptr, make_shared
+#include <string> // for string, operator==
+#include <utility> // for move
+
+#include "common.h" // for VIRTUAL_CONTAINER_SEP...
+#include "config/config.h" // for CFG_SERVER_STORAGE_DR...
+#include "database//sqlite3/sqlite_database.h" // for Sqlite3Database
+#include "database/database.h" // for Database
+#include "database/mysql/mysql_database.h" // for MySQLDatabase
+#include "exceptions.h" // for throw_std_runtime_error
+#include "util/tools.h" // for unescape
 
 Database::Database(std::shared_ptr<Config> config)
     : config(std::move(config))

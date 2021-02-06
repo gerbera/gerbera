@@ -25,10 +25,19 @@
 
 #include "directory_tweak.h" // API
 
-#include "config/config.h"
-#include "content/content_manager.h"
-#include "util/upnp_clients.h"
-#include "util/upnp_quirks.h"
+#include <algorithm> // for max, find_if, any_of, max_element
+#include <cstddef> // for size_t
+#include <filesystem> // for operator==, path, operator!=
+#include <limits> // for numeric_limits
+#include <map> // for map<>::const_iterator, map, oper...
+#include <memory> // for shared_ptr, __shared_ptr_access
+#include <string> // for string, basic_string
+#include <utility> // for pair
+#include <vector> // for vector<>::iterator, vector
+
+#include "config/config.h" // for CFG_IMPORT_DIRECTORIES_LIST, Config
+#include "config/directory_tweak.h" // for DirectoryConfigList, DirectoryTweak
+#include "util/logger.h" // for log_debug, log_error
 
 void AutoScanSetting::mergeOptions(const std::shared_ptr<Config>& config, const fs::path& location)
 {
@@ -58,7 +67,7 @@ void DirectoryConfigList::add(const std::shared_ptr<DirectoryTweak>& dir, size_t
 
 void DirectoryConfigList::_add(const std::shared_ptr<DirectoryTweak>& dir, size_t index)
 {
-    if (index == SIZE_MAX) {
+    if (index == std::numeric_limits<size_t>::max()) {
         index = getEditSize();
         origSize = list.size() + 1;
         dir->setOrig(true);

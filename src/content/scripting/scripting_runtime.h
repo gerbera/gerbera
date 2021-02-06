@@ -32,11 +32,9 @@
 #ifndef __SCRIPTING_RUNTIME_H__
 #define __SCRIPTING_RUNTIME_H__
 
-#include <duktape.h>
-#include <mutex>
-#include <pthread.h>
-
-#include "common.h"
+#include <duktape.h> // for duk_context
+#include <mutex> // for recursive_mutex, lock_guard
+#include <string> // for string
 
 /// \brief ScriptingRuntime class definition.
 class ScriptingRuntime {

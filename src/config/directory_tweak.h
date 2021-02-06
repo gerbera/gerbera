@@ -27,10 +27,11 @@
 #ifndef __DIRECTORYTWEAK_H__
 #define __DIRECTORYTWEAK_H__
 
-#include <filesystem>
-#include <map>
-#include <mutex>
-#include <vector>
+#include <filesystem> // for path
+#include <map> // for map
+#include <mutex> // for mutex
+#include <vector> // for vector
+
 namespace fs = std::filesystem;
 
 // forward declaration
@@ -58,7 +59,7 @@ public:
     ///
     /// \param dir DirectoryTweak to add to the list.
     /// \return scanID of the newly added DirectoryTweak
-    void add(const std::shared_ptr<DirectoryTweak>& dir, size_t index = SIZE_MAX);
+    void add(const std::shared_ptr<DirectoryTweak>& dir, size_t index = std::numeric_limits<size_t>::max());
 
     std::shared_ptr<DirectoryTweak> get(size_t id, bool edit = false);
 

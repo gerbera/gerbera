@@ -33,15 +33,21 @@
 #ifndef __AUTOSCAN_H__
 #define __AUTOSCAN_H__
 
-#include <filesystem>
-#include <mutex>
+#include <chrono> // for filesystem
+#include <ctime> // for time_t
+#include <filesystem> // for path
+#include <map> // for map
+#include <memory> // for shared_ptr
+#include <string> // for string, basic_string
+
 namespace fs = std::filesystem;
 
-#include "util/timer.h"
+#include "common.h" // for INVALID_OBJECT_ID
+#include "util/timer.h" // for Timer
 
+class AutoscanDirectory;
 // forward declaration
 class Database;
-class AutoscanDirectory;
 
 #define INVALID_SCAN_ID (-1)
 

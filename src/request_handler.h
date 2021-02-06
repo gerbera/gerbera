@@ -33,20 +33,22 @@
 #ifndef __REQUEST_HANDLER_H__
 #define __REQUEST_HANDLER_H__
 
-#include <map>
-#include <memory>
-#include <string>
+#include <map> // for map
+#include <memory> // for shared_ptr, unique_ptr
+#include <string> // for string
+#include <vector> // for vector
 
-#include "common.h"
-#include "context.h"
-#include "iohandler/io_handler.h"
+#include "common.h" // for _URL_PARAM_SEPARATOR
+#include "iohandler/io_handler.h" // for IOHandler
+#include "upnp.h" // for UpnpFileInfo, UpnpOpenFileMode
 
 // forward declaration
 class CdsObject;
 class Config;
-class Context;
 class ContentManager;
+class Context;
 class Database;
+class IOHandler;
 class Mime;
 class Server;
 

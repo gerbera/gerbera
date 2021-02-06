@@ -33,11 +33,15 @@
 #ifndef __TRANSCODING_H__
 #define __TRANSCODING_H__
 
-#include <filesystem>
-#include <map>
-#include <memory>
-#include <string>
-#include <vector>
+#include <chrono> // for filesystem
+#include <ctime> // for size_t, pid_t
+#include <filesystem> // for path
+#include <map> // for map, map<>::mapped_type
+#include <memory> // for shared_ptr
+#include <string> // for string, basic_string, operator<
+#include <utility> // for move
+#include <vector> // for vector
+
 namespace fs = std::filesystem;
 
 #define SOURCE (-1)

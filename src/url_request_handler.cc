@@ -32,17 +32,26 @@
 #ifdef HAVE_CURL
 #include "url_request_handler.h" // API
 
-#include "cds_objects.h"
-#include "config/config_manager.h"
-#include "content/content_manager.h"
-#include "database/database.h"
-#include "iohandler/buffered_io_handler.h"
-#include "iohandler/curl_io_handler.h"
-#include "transcoding/transcode_dispatcher.h"
-#include "util/url.h"
+#include <filesystem> // for path
+#include <stdexcept> // for runtime_error
+#include <string> // for string, bas...
+#include <utility> // for move
+
+#include "cds_objects.h" // for CdsItemExte...
+#include "common.h" // for LINK_URL_RE...
+#include "config/config.h" // for CFG_TRANSCO...
+#include "content/content_manager.h" // for ContentManager
+#include "exceptions.h" // for throw_std_r...
+#include "iohandler/curl_io_handler.h" // for CurlIOHandler
+#include "iohandler/io_handler.h" // for IOHandler
+#include "transcoding/transcode_dispatcher.h" // for TranscodeDi...
+#include "transcoding/transcoding.h" // for Transcoding...
+#include "util/logger.h" // for log_debug
+#include "util/tools.h" // for getValueOrD...
+#include "util/url.h" // for URL::Stat, URL
 
 #ifdef ONLINE_SERVICES
-#include "content/onlineservice/online_service_helper.h"
+#include "content/onlineservice/online_service_helper.h" // for OnlineServi...
 #endif
 
 URLRequestHandler::URLRequestHandler(std::shared_ptr<ContentManager> content)

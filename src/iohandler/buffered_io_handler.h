@@ -32,11 +32,13 @@
 #ifndef __BUFFERED_IO_HANDLER_H__
 #define __BUFFERED_IO_HANDLER_H__
 
-#include <memory>
-#include <upnp.h>
+#include <cstddef> // for size_t
+#include <memory> // for unique_ptr
+#include <upnp.h> // for UpnpOpenFileMode
 
-#include "common.h"
-#include "io_handler_buffer_helper.h"
+#include "io_handler_buffer_helper.h" // for IOHandlerBufferHelper
+#include "iohandler/io_handler.h" // for IOHandler
+#include "iohandler/io_handler_buffer_helper.h" // for IOHandlerBufferHelper
 
 /// \brief a IOHandler with buffer support
 /// the buffer is only for read(). write() is not supported

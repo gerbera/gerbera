@@ -31,11 +31,31 @@
 
 #include "upnp_xml.h" // API
 
-#include "config/config_manager.h"
-#include "database/database.h"
-#include "metadata/metadata_handler.h"
-#include "request_handler.h"
-#include "transcoding/transcoding.h"
+#include <algorithm> // for any_of
+#include <array> // for array
+#include <cassert> // for assert
+#include <cstddef> // for size_t
+#include <filesystem> // for path
+#include <fmt/format.h> // for format, to_string
+#include <pugixml.hpp> // for xml_node, node_pcdata, xml_do...
+#include <type_traits> // for add_const<>::type
+#include <unordered_set> // for _Node_iterator, operator!=
+#include <utility> // for tuple_element<>::type, move
+#include <vector> // for vector
+
+#include "cds_objects.h" // for CdsItem, CdsObject, CdsContainer
+#include "cds_resource.h" // for CdsResource, RESOURCE_OPTION_...
+#include "common.h" // for URL_RESOURCE_ID, CONTENT_MEDI...
+#include "config/config.h" // for config_option_t, CFG_SERVER_M...
+#include "context.h" // for Context
+#include "database/database.h" // for Database
+#include "exceptions.h" // for throw_std_runtime_error
+#include "metadata/metadata_handler.h" // for metadata_fields_t, M_ALBUMARTIST
+#include "request_handler.h" // for RequestHandler
+#include "transcoding/transcoding.h" // for TranscodingProfile, FCC_Process
+#include "upnp_common.h" // for UPNP_DLNA_PROFILE, UPNP_CLASS...
+#include "util/logger.h" // for log_debug
+#include "util/tools.h" // for dictEncodeSimple, getValueOrD...
 
 UpnpXMLBuilder::UpnpXMLBuilder(const std::shared_ptr<Context>& context,
     std::string virtualUrl, std::string presentationURL)

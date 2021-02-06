@@ -35,13 +35,11 @@
 #ifndef __LASTFM_H__
 #define __LASTFM_H__
 
-#include <cstdlib>
 #include <lastfmlib/lastfmscrobblerc.h>
-#include <memory>
+#include <memory> // for shared_ptr
 
 #include "cds_objects.h"
 #include "config/config_manager.h"
-#include "context.h"
 
 class LastFm {
 public:

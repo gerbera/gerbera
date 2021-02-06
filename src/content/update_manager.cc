@@ -31,13 +31,18 @@
 
 #include "update_manager.h" // API
 
-#include <chrono>
-#include <csignal>
+#include <chrono> // for milliseconds
+#include <csignal> // for kill, SIGINT
+#include <ctime> // for timespec, size_t
+#include <stdexcept> // for runtime_error
+#include <string> // for string
+#include <utility> // for move
 
-#include "database/database.h"
-#include "server.h"
-#include "upnp_cds.h"
-#include "util/tools.h"
+#include "common.h" // for INVALID_OBJECT_ID
+#include "database/database.h" // for Database
+#include "server.h" // for Server
+#include "util/logger.h" // for log_debug, log_error
+#include "util/tools.h" // for getTimespecNow, getDeltaMillis, getTi...
 
 /* following constants in milliseconds */
 #define SPEC_INTERVAL 2000

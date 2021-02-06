@@ -32,12 +32,20 @@
 #ifdef SOPCAST
 #include "sopcast_service.h" // API
 
-#include "config/config_manager.h"
-#include "content/content_manager.h"
-#include "database/database.h"
-#include "sopcast_content_handler.h"
-#include "util/string_converter.h"
-#include "util/url.h"
+#include <pugixml.hpp> // for xml_document, xml_...
+#include <stdexcept> // for runtime_error
+#include <utility> // for move
+
+#include "cds_objects.h" // for CdsObject, CdsItem
+#include "content/content_manager.h" // for ContentManager
+#include "content/layout/layout.h" // for Layout
+#include "content/onlineservice/online_service.h" // for OS_SopCast, Online...
+#include "database/database.h" // for Database
+#include "exceptions.h" // for throw_std_runtime_...
+#include "sopcast_content_handler.h" // for SopCastContentHandler
+#include "util/logger.h" // for log_debug, log_error
+#include "util/string_converter.h" // for StringConverter
+#include "util/url.h" // for URL
 
 #define SOPCAST_CHANNEL_URL "http://www.sopcast.com/gchlxml"
 

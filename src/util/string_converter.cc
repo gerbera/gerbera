@@ -31,9 +31,15 @@
 
 #include "string_converter.h" // API
 
-#include "config/config_manager.h"
-#include "config/directory_tweak.h"
-#include <cstdlib>
+#include <cerrno> // for errno, EILSEQ, E2BIG, EINVAL
+#include <cstring> // for strerror
+#include <fmt/format.h> // for format
+#include <stdexcept> // for runtime_error
+
+#include "common.h" // for DEFAULT_INTERNAL_CHARSET
+#include "config/directory_tweak.h" // for DirectoryTweak, DirectoryConfigList
+#include "exceptions.h" // for throw_std_runtime_error
+#include "util/logger.h" // for log_error, log_debug
 
 StringConverter::StringConverter(const std::string& from, const std::string& to)
     : cd(iconv_open(to.c_str(), from.c_str()))

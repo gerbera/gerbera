@@ -31,55 +31,68 @@
 #ifndef __CONTENT_MANAGER_H__
 #define __CONTENT_MANAGER_H__
 
-#include <condition_variable>
-#include <deque>
-#include <map>
-#include <memory>
-#include <mutex>
-#include <string>
-#include <unordered_set>
-#include <vector>
+#include <condition_variable> // for condition_variable_any
+#include <ctime> // for time_t
+#include <deque> // for deque
+#include <dirent.h> // for DIR
+#include <filesystem> // for path
+#include <map> // for map
+#include <memory> // for shared_ptr, allocator, ena...
+#include <mutex> // for lock_guard, recursive_mutex
+#include <pthread.h> // for pthread_t
+#include <string> // for string
+#include <vector> // for vector
 
-#include <dirent.h>
-
-#include "autoscan.h"
-#include "cds_objects.h"
-#include "common.h"
-#include "context.h"
-#include "util/generic_task.h"
-#include "util/timer.h"
+#include "autoscan.h" // for ScanMode
+#include "common.h" // for INVALID_OBJECT_ID
+#include "content/autoscan.h" // for AutoscanDirectory (ptr only)
+#include "content/onlineservice/online_service.h" // for OnlineService (ptr...
+#include "util/generic_task.h" // for GenericTask, ContentManage...
+#include "util/timer.h" // for Timer, Timer::Subscriber
 
 #ifdef HAVE_JS
+#include "scripting/playlist_parser_script.h"
+
 // this is somewhat not nice, the playlist header needs the cm header and
 // vice versa
 class PlaylistParserScript;
-#include "scripting/playlist_parser_script.h"
 #else
 class ScriptingRuntime;
 #endif
 
-#include "layout/layout.h"
-
-#include "autoscan_list.h"
 #ifdef HAVE_INOTIFY
 #include "autoscan_inotify.h"
 #endif
 
-#include "config/directory_tweak.h"
-#include "transcoding/transcoding.h"
+#include "config/directory_tweak.h" // for AutoScanSetting
 
 #ifdef ONLINE_SERVICES
-#include "onlineservice/online_service.h"
+#include "onlineservice/online_service.h" // for service_type_t
 #endif //ONLINE_SERVICES
 
 #include "util/executor.h"
 
 // forward declaration
-class Server;
-class Runtime;
-class LastFm;
+class AutoscanInotify;
+class AutoscanList;
+class CdsObject;
+class Config;
 class ContentManager;
+class Context;
+class Database;
+class Executor;
+class LastFm;
+class Layout;
+class Mime;
+class Runtime;
+class ScriptingRuntime;
+class Server;
 class TaskProcessor;
+class UpdateManager;
+
+namespace web {
+class SessionManager;
+} // namespace web
 
 class CMAddFileTask : public GenericTask, public std::enable_shared_from_this<CMAddFileTask> {
 protected:

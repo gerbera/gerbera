@@ -4,6 +4,7 @@
 #include "config/config_generator.h"
 #include "config/config_manager.h"
 #include <fstream>
+#include <pugixml.hpp>
 #include <regex>
 
 using namespace ::testing;

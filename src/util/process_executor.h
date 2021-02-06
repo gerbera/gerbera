@@ -35,9 +35,9 @@
 #include <string>
 #include <vector>
 
-#include <unistd.h>
+#include <unistd.h> // for pid_t
 
-#include "executor.h"
+#include "executor.h" // for Executor
 
 class ProcessExecutor : public Executor {
 public:

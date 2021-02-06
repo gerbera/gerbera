@@ -31,24 +31,50 @@
 
 #include "server.h" // API
 
+#include <cstddef> // for size_t
+#include <filesystem> // for path
+#include <fmt/format.h> // for format
+#include <map> // for map, operator!=, _Rb_tree_it...
+#include <netinet/in.h> // for in_port_t
+#include <pugixml.hpp> // for xml_document
+#include <stdexcept> // for runtime_error
+#include <sys/types.h> // for off_t
+#include <utility> // for move, pair
+
 #ifdef HAVE_CURL
-#include <curl/curl.h>
-#include <iostream>
+#include <curl/curl.h> // for curl_global_cleanup, curl_gl...
+#include <iostream> // for char_traits, ostringstream
 #endif
 
-#include "config/config_manager.h"
-#include "content/content_manager.h"
-#include "database/database.h"
-#include "device_description_handler.h"
-#include "file_request_handler.h"
-#include "serve_request_handler.h"
-#include "util/mime.h"
-#include "util/upnp_clients.h"
-#include "web/pages.h"
-#include "web/session_manager.h"
+#include "action_request.h" // for ActionRequest
+#include "common.h" // for SERVER_VIRTUAL_DIR, CONTENT_...
+#include "config/config.h" // for Config, CFG_SERVER_BOOKMARK_...
+#include "content/content_manager.h" // for ContentManager
+#include "context.h" // for Context
+#include "database/database.h" // for Database
+#include "device_description_handler.h" // for DeviceDescriptionHandler
+#include "exceptions.h" // for UpnpException, SubtitlesNotF...
+#include "file_request_handler.h" // for FileRequestHandler
+#include "iohandler/io_handler.h" // for IOHandler
+#include "request_handler.h" // for RequestHandler
+#include "serve_request_handler.h" // for ServeRequestHandler
+#include "subscription_request.h" // for SubscriptionRequest
+#include "upnp_cds.h" // for ContentDirectoryService
+#include "upnp_cm.h" // for ConnectionManagerService
+#include "upnp_common.h" // for UPNP_DESC_CDS_SERVICE_ID
+#include "upnp_mrreg.h" // for MRRegistrarService
+#include "upnp_xml.h" // for UpnpXMLBuilder
+#include "util/logger.h" // for log_debug, log_error, log_info
+#include "util/mime.h" // for Mime
+#include "util/timer.h" // for Timer
+#include "util/tools.h" // for startswith, urlUnescape, htt...
+#include "util/upnp_clients.h" // for Clients
+#include "web/pages.h" // for createWebRequestHandler
+#include "web/session_manager.h" // for SessionManager
+#include "web/web_request_handler.h" // for WebRequestHandler
 
 #ifdef HAVE_CURL
-#include "url_request_handler.h"
+#include "url_request_handler.h" // for URLRequestHandler
 #endif
 
 Server::Server(std::shared_ptr<Config> config)

@@ -31,13 +31,10 @@
 
 #include "mem_io_handler.h" // API
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <ctime>
+#include <cstdio> // for SEEK_CUR, SEEK_END, SEEK_SET
+#include <cstring> // for memcpy
 
-#include <sys/stat.h>
-#include <unistd.h>
+#include "exceptions.h" // for throw_std_runtime_error
 
 MemIOHandler::MemIOHandler(const void* buffer, int length)
     : buffer(new char[length])

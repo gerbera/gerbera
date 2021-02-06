@@ -32,9 +32,9 @@
 #ifndef __IO_HANDLER_H__
 #define __IO_HANDLER_H__
 
-#include <upnp.h>
-
-#include "common.h"
+#include <cstddef> // for size_t
+#include <sys/types.h> // for off_t
+#include <upnp.h> // for UpnpOpenFileMode
 
 class IOHandler {
 public:

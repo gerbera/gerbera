@@ -23,14 +23,23 @@
 
 /// \file clients.cc
 
-#include "pages.h" // API
+#include <chrono> // for system_clock::duration, duration
+#include <ctime> // for asctime, localtime
+#include <memory> // for shared_ptr, __shared_ptr_access
+#include <pugixml.hpp> // for xml_node, xml_attribute, xml_do...
+#include <ratio> // for ratio
+#include <string> // for string, basic_string
+#include <utility> // for move
+#include <vector> // for vector
 
-#include "config/client_config.h"
-#include "content/content_manager.h"
-#include "context.h"
-#include "database/database.h"
-#include "upnp_xml.h"
-#include "util/upnp_clients.h"
+#include "config/client_config.h" // for ClientConfig
+#include "content/content_manager.h" // for ContentManager
+#include "context.h" // for Context
+#include "pages.h" // for clients
+#include "util/tools.h" // for getHostName, sockAddrGetNameInfo
+#include "util/upnp_clients.h" // for ClientCacheEntry, ClientInfo
+#include "util/xml_to_json.h" // for Xml2Json::Hints
+#include "web/web_request_handler.h" // for WebRequestHandler
 
 web::clients::clients(std::shared_ptr<ContentManager> content)
     : WebRequestHandler(std::move(content))

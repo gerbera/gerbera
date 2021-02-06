@@ -31,21 +31,32 @@
 
 #include "builtin_layout.h" // API
 
-#include "config/config_manager.h"
-#include "content/content_manager.h"
-#include "metadata/metadata_handler.h"
-#include "util/string_converter.h"
+#include <cstddef> // for size_t
+#include <map> // for map
+#include <utility> // for move
+#include <vector> // for vector
+
+#include "cds_objects.h" // for CdsObject
+#include "common.h" // for INVALID...
+#include "config/config.h" // for Config
+#include "content/content_manager.h" // for Content...
+#include "content/layout/layout.h" // for Layout
+#include "metadata/metadata_handler.h" // for Metadat...
+#include "upnp_common.h" // for UPNP_CL...
+#include "util/logger.h" // for log_debug
+#include "util/string_converter.h" // for StringC...
+#include "util/tools.h" // for getValu...
 
 #ifdef ONLINE_SERVICES
 
-#include "content/onlineservice/online_service.h"
+#include "content/onlineservice/online_service.h" // for ONLINE_...
 
 #ifdef SOPCAST
-#include "content/onlineservice/sopcast_content_handler.h"
+#include "content/onlineservice/sopcast_content_handler.h" // for SOPCAST...
 #endif
 
 #ifdef ATRAILERS
-#include "content/onlineservice/atrailers_content_handler.h"
+#include "content/onlineservice/atrailers_content_handler.h" // for ATRAILE...
 #endif
 
 #endif //ONLINE_SERVICES

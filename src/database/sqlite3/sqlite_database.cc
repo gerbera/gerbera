@@ -31,9 +31,21 @@
 
 #include "sqlite_database.h" // API
 
-#include <zlib.h>
+#include <algorithm> // for copy, max
+#include <cerrno> // for errno, ENOENT
+#include <cstring> // for strerror, strlen
+#include <filesystem> // for copy, copy_options, copy_options::overwri...
+#include <sstream> // for operator<<, basic_ostream, ostringstream
+#include <stdexcept> // for runtime_error
+#include <unistd.h> // for access, R_OK, W_OK
+#include <utility> // for move
 
-#include "config/config_manager.h"
+#include "config/config.h" // for Config, CFG_SERVER_STORAGE_SQLITE_DATABAS...
+#include "exceptions.h" // for throw_std_runtime_error, DatabaseException
+#include "util/logger.h" // for log_info, log_debug, log_error, log_warning
+#include "util/tools.h" // for readTextFile
+
+class Database;
 
 // updates 1->2
 #define SQLITE3_UPDATE_1_2_1 "DROP INDEX mt_autoscan_obj_id"

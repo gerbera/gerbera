@@ -29,13 +29,26 @@
 
 /// \file containers.cc
 
-#include "pages.h" // API
+#include <memory> // for shared_ptr, __shared_ptr_access
+#include <pugixml.hpp> // for xml_node, xml_attribute, xml_do...
+#include <string> // for string
+#include <utility> // for move
+#include <vector> // for vector
 
-#include "cds_objects.h"
-#include "content/autoscan.h"
-#include "database/database.h"
-#include "server.h"
-#include "upnp_xml.h"
+#include "cds_objects.h" // for CdsContainer
+#include "common.h" // for INVALID_OBJECT_ID
+#include "config/config.h" // for CFG_IMPORT_AUTOSCAN_USE_INOTIFY
+#include "content/autoscan.h" // for AutoscanDirectory, ScanMode
+#include "database/database.h" // for BrowseParam, Database, BROWSE_C...
+#include "exceptions.h" // for throw_std_runtime_error
+#include "pages.h" // for containers
+#include "server.h" // for Server
+#include "upnp_xml.h" // for UpnpXMLBuilder
+#include "util/logger.h" // for log_debug
+#include "util/xml_to_json.h" // for Xml2Json::Hints
+#include "web/web_request_handler.h" // for WebRequestHandler
+
+class ContentManager;
 
 web::containers::containers(std::shared_ptr<ContentManager> content)
     : WebRequestHandler(std::move(content))

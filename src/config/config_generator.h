@@ -26,10 +26,18 @@
 #ifndef GERBERA_CONFIG_GENERATOR_H
 #define GERBERA_CONFIG_GENERATOR_H
 
-#include <filesystem>
-#include <pugixml.hpp>
+#include <chrono> // for filesystem
+#include <filesystem> // for path
+#include <map> // for map
+#include <memory> // for allocator, shared_ptr
+#include <string> // for string
 
-#include "config/config_manager.h"
+#include "config/config.h" // for config_option_t
+
+namespace pugi {
+class xml_document;
+class xml_node;
+} // namespace pugi
 
 namespace fs = std::filesystem;
 

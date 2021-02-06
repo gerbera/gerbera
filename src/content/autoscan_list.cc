@@ -22,10 +22,16 @@
 */
 
 /// \file autoscan_list.cc
-#include "autoscan_list.h"
+#include "autoscan_list.h" // API
 
-#include "autoscan.h"
-#include "database/database.h"
+#include <algorithm> // for find_if, max, any_of, max_element
+#include <utility> // for move, pair
+
+#include "autoscan.h" // for AutoscanDirectory, INVALID_SCAN_ID
+#include "database/database.h" // for Database
+#include "exceptions.h" // for throw_std_runtime_error
+#include "util/logger.h" // for log_debug
+#include "util/tools.h" // for startswith
 
 AutoscanList::AutoscanList(std::shared_ptr<Database> database)
     : database(std::move(database))
@@ -53,7 +59,7 @@ int AutoscanList::_add(const std::shared_ptr<AutoscanDirectory>& dir, size_t ind
     if (std::any_of(list.begin(), list.end(), [loc = dir->getLocation()](const auto& item) { return loc == item->getLocation(); })) {
         throw_std_runtime_error("Attempted to add same autoscan path twice");
     }
-    if (index == SIZE_MAX) {
+    if (index == std::numeric_limits<size_t>::max()) {
         index = getEditSize();
         origSize = list.size() + 1;
         dir->setOrig(true);
@@ -72,7 +78,7 @@ void AutoscanList::addList(const std::shared_ptr<AutoscanList>& list)
     AutoLock lock(mutex);
 
     for (const auto& dir : list->list) {
-        _add(dir, SIZE_MAX);
+        _add(dir, std::numeric_limits<size_t>::max());
     }
 }
 

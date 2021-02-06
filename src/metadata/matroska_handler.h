@@ -27,13 +27,31 @@
 #ifndef __METADATA_MATROSKA_H__
 #define __METADATA_MATROSKA_H__
 
+#include <memory> // for shared_ptr, unique_ptr
+#include <string> // for string
+
+#include "EbmlConfig.h" // for LIBEBML_NAMESPACE
+#include "KaxConfig.h" // for LIBMATROSKA_NAMESPACE
+#include "metadata/metadata_handler.h" // for MetadataHandler
+
+class CdsItem;
+class CdsObject;
+class Context;
+class IOHandler;
+
+namespace libebml {
+class EbmlElement;
+class EbmlMaster;
+class EbmlStream;
+} // namespace libebml
+namespace libmatroska {
+class KaxFileData;
+} // namespace libmatroska
 #ifdef HAVE_MATROSKA
 
-#include <ebml/EbmlStream.h>
-#include <matroska/KaxAttached.h>
 #include <matroska/KaxAttachments.h>
 
-#include "metadata_handler.h"
+#include "metadata_handler.h" // for MetadataHandler
 
 // forward declaration
 class MemIOHandler;

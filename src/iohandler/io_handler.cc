@@ -31,7 +31,7 @@
 
 #include "io_handler.h" // API
 
-#include <unistd.h>
+#include "upnp.h" // for UpnpOpenFileMode
 
 IOHandler::IOHandler() = default;
 

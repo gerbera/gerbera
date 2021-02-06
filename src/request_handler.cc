@@ -31,12 +31,18 @@
 
 #include "request_handler.h" // API
 
-#include <numeric>
-#include <vector>
+#include <cstring> // for strlen, size_t
+#include <iterator> // for next
+#include <numeric> // for accumulate
+#include <utility> // for move, pair
+#include <vector> // for vector
 
-#include "content/content_manager.h"
-#include "database/database.h"
-#include "util/tools.h"
+#include "content/content_manager.h" // for ContentManager
+#include "context.h" // for Context
+#include "database/database.h" // for Database
+#include "exceptions.h" // for throw_std_runtime_error
+#include "util/logger.h" // for log_debug
+#include "util/tools.h" // for dictDecodeSimple
 
 RequestHandler::RequestHandler(std::shared_ptr<ContentManager> content)
     : content(std::move(content))

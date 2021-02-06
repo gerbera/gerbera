@@ -32,14 +32,26 @@
 #ifdef HAVE_INOTIFY
 #include "autoscan_inotify.h" // API
 
-#include <cassert>
-#include <filesystem>
+#include <cassert> // for assert
+#include <cstddef> // for size_t
+#include <dirent.h> // for closedir, opendir, readdir, DIR
+#include <filesystem> // for path, path::iterator, is_directory
+#include <iterator> // for prev
+#include <ostream> // for operator<<, ostringstream, basic...
+#include <stdexcept> // for out_of_range, runtime_error
+#include <sys/inotify.h> // for IN_MOVE_SELF, IN_CREATE, IN_MOVE...
+#include <system_error> // for error_code
 
-#include <dirent.h>
-#include <sys/stat.h>
-
-#include "content_manager.h"
-#include "database/database.h"
+#include "common.h" // for DIR_SEPARATOR, INVALID_OBJECT_ID
+#include "config/config.h" // for CFG_IMPORT_FOLLOW_SYMLINKS, Config
+#include "config/directory_tweak.h" // for AutoScanSetting
+#include "content/autoscan.h" // for AutoscanDirectory, ScanMode, Sca...
+#include "content_manager.h" // for ContentManager
+#include "context.h" // for Context
+#include "database/database.h" // for Database
+#include "util/logger.h" // for log_debug, log_error, log_warning
+#include "util/mt_inotify.h" // for Inotify
+#include "util/tools.h" // for isRegularFile, readTextFile, spl...
 
 #define INOTIFY_MAX_USER_WATCHES_FILE "/proc/sys/fs/inotify/max_user_watches"
 

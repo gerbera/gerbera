@@ -26,15 +26,16 @@
 #ifndef __CONTEXT_H__
 #define __CONTEXT_H__
 
-#include <memory>
+#include <memory> // for shared_ptr
 
 // forward declaration
-class Config;
 class Clients;
+class Config;
 class Database;
 class Mime;
 class Server;
 class UpdateManager;
+
 namespace web {
 class SessionManager;
 } // namespace web

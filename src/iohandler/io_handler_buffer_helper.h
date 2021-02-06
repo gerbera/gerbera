@@ -32,13 +32,14 @@
 #ifndef __IO_HANDLER_BUFFER_HELPER_H__
 #define __IO_HANDLER_BUFFER_HELPER_H__
 
-#include <condition_variable>
-#include <mutex>
-#include <pthread.h>
-#include <upnp.h>
+#include <condition_variable> // for condition_variable
+#include <cstddef> // for size_t
+#include <mutex> // for mutex
+#include <pthread.h> // for pthread_t
+#include <sys/types.h> // for off_t
+#include <upnp.h> // for UpnpOpenFileMode
 
-#include "common.h"
-#include "io_handler.h"
+#include "io_handler.h" // for IOHandler
 
 /// \brief a IOHandler with buffer support
 /// the buffer is only for read(). write() is not supported

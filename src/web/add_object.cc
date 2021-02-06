@@ -29,16 +29,20 @@
 
 /// \file add_object.cc
 
-#include "pages.h" // API
+#include <memory> // for shared_ptr, allocator, __shar...
+#include <string> // for string, operator==, basic_string
+#include <system_error> // for error_code
+#include <utility> // for move
 
-#include <cstdio>
-#include <filesystem>
-
-#include "cds_objects.h"
-#include "config/config_manager.h"
-#include "content/content_manager.h"
-#include "metadata/metadata_handler.h"
-#include "util/tools.h"
+#include "cds_objects.h" // for CdsItem, CdsItemExternalURL
+#include "cds_resource.h" // for CdsResource
+#include "common.h" // for MIMETYPE_DEFAULT
+#include "content/content_manager.h" // for ContentManager
+#include "exceptions.h" // for throw_std_runtime_error
+#include "metadata/metadata_handler.h" // for M_DESCRIPTION, CH_DEFAULT
+#include "pages.h" // for addObject
+#include "util/tools.h" // for renderProtocolInfo, isRegular...
+#include "web/web_request_handler.h" // for WebRequestHandler
 
 web::addObject::addObject(std::shared_ptr<ContentManager> content)
     : WebRequestHandler(std::move(content))

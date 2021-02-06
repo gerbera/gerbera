@@ -32,11 +32,16 @@
 #ifndef __TRANSCODE_EXTERNAL_HANDLER_H__
 #define __TRANSCODE_EXTERNAL_HANDLER_H__
 
-#include <memory>
-#include <upnp.h>
+#include <memory> // for shared_ptr, unique_ptr
+#include <string> // for string
 
-#include "common.h"
-#include "transcode_handler.h"
+#include "transcode_handler.h" // for TranscodeHandler
+#include "transcoding/transcode_handler.h" // for TranscodeHandler
+
+class CdsObject;
+class ContentManager;
+class IOHandler;
+class TranscodingProfile;
 
 class TranscodeExternalHandler : public TranscodeHandler {
 public:

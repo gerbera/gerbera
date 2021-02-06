@@ -33,10 +33,16 @@
 
 #include "online_service.h" // API
 
-#include <array>
+#include <algorithm> // for max
+#include <array> // for array
+#include <memory> // for shared_ptr, __shar...
+#include <utility> // for move
+#include <vector> // for vector
 
-#include "content/content_manager.h"
-#include "util/tools.h"
+#include "content/content_manager.h" // for ContentManager
+#include "content/onlineservice/online_service.h" // for OnlineService, Onl...
+#include "context.h" // for Context
+#include "exceptions.h" // for throw_std_runtime_...
 
 // DO NOT FORGET TO ADD SERVICE STORAGE PREFIXES TO THIS ARRAY WHEN ADDING
 // NEW SERVICES!

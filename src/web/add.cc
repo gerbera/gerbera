@@ -29,13 +29,19 @@
 
 /// \file add.cc
 
-#include "pages.h" // API
+#include <filesystem> // for path
+#include <memory> // for allocator, shared_ptr, __shared...
+#include <string> // for operator==, basic_string, string
+#include <utility> // for move
 
-#include <cstdio>
-
-#include "config/config_manager.h"
-#include "content/content_manager.h"
-#include "util/tools.h"
+#include "common.h" // for FS_ROOT_DIRECTORY
+#include "config/directory_tweak.h" // for AutoScanSetting
+#include "content/content_manager.h" // for ContentManager
+#include "exceptions.h" // for throw_std_runtime_error
+#include "pages.h" // for add
+#include "util/logger.h" // for log_debug
+#include "util/tools.h" // for hexDecodeString
+#include "web/web_request_handler.h" // for WebRequestHandler
 
 web::add::add(std::shared_ptr<ContentManager> content)
     : WebRequestHandler(std::move(content))

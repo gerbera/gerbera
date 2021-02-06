@@ -32,14 +32,23 @@
 
 #ifdef SOPCAST
 
+#include <pthread.h> // for pthread_t
+#include <string> // for string
+
+#include "content/onlineservice/online_service.h" // for OnlineService, ser...
+
+class Layout;
+
+namespace pugi {
+class xml_document;
+} // namespace pugi
 #ifndef __SOPCAST_SERVICE_H__
 #define __SOPCAST_SERVICE_H__
 
-#include <curl/curl.h>
-#include <memory>
-#include <pugixml.hpp>
+#include <curl/curl.h> // for CURL
+#include <memory> // for shared_ptr, unique_ptr
 
-#include "online_service.h"
+#include "online_service.h" // for OnlineService, service_type_t
 
 // forward declaration
 class Config;

@@ -32,17 +32,28 @@
 #ifndef __WEB_REQUEST_HANDLER_H__
 #define __WEB_REQUEST_HANDLER_H__
 
-#include <pugixml.hpp>
+#include <map> // for map
+#include <memory> // for shared_ptr, unique_ptr, __shared_ptr_a...
+#include <stdexcept> // for runtime_error
+#include <string> // for string
 
-#include "common.h"
-#include "config/config_manager.h"
-#include "context.h"
-#include "request_handler.h"
-#include "session_manager.h"
-#include "util/generic_task.h"
-#include "util/xml_to_json.h"
+#include "config/config.h" // for CFG_SERVER_UI_ACCOUNTS_ENABLED, Config
+#include "request_handler.h" // for RequestHandler
+#include "upnp.h" // for UpnpOpenFileMode, UpnpFileInfo
+#include "util/tools.h" // for getValueOrDefault
+#include "util/xml_to_json.h" // for Xml2Json
+
+class ContentManager;
+class GenericTask;
+class IOHandler;
+
+namespace pugi {
+class xml_document;
+class xml_node;
+} // namespace pugi
 
 namespace web {
+class Session;
 
 class SessionException : public std::runtime_error {
 public:

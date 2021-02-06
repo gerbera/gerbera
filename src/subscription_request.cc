@@ -31,6 +31,8 @@
 
 #include "subscription_request.h" // API
 
+#include "upnp.h" // for UpnpSubscriptionRequest, UpnpSubscriptionRequest_g...
+
 SubscriptionRequest::SubscriptionRequest(UpnpSubscriptionRequest* upnp_request)
     : serviceID(UpnpSubscriptionRequest_get_ServiceId_cstr(upnp_request))
     , UDN(UpnpSubscriptionRequest_get_UDN_cstr(upnp_request))

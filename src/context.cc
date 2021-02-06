@@ -25,6 +25,8 @@
 
 #include "context.h" // API
 
+#include <utility> // for move
+
 Context::Context(std::shared_ptr<Config> config,
     std::shared_ptr<Clients> clients,
     std::shared_ptr<Mime> mime,

@@ -37,20 +37,22 @@
 /// \file mt_inotify.cc
 
 #ifdef HAVE_INOTIFY
-#include "mt_inotify.h"
+#include "mt_inotify.h" // API
 
-#include <array>
-#include <cassert>
-#include <cerrno>
-#include <sys/inotify.h>
-#include <sys/ioctl.h>
-#include <sys/select.h>
-#include <unistd.h>
+#include <array> // for array, array<>::value_type
+#include <cassert> // for assert
+#include <cerrno> // for errno, EACCES, ENOENT, ENOSPC
+#include <cstring> // for strerror, memcpy
+#include <sys/inotify.h> // for inotify_event, inotify_init1, IN_CLOEXEC
+#include <sys/ioctl.h> // for ioctl, FIONREAD
+#include <sys/select.h> // for select, FD_ISSET, FD_SET, FD_ZERO, fd_set
+#include <unistd.h> // for close, read, pipe2, write, ssize_t
+
+#include "exceptions.h" // for throw_std_runtime_error
+#include "util/logger.h" // for log_error, log_debug, log_warning
 #ifdef SOLARIS
 #include <sys/filio.h> // FIONREAD
 #endif
-
-#include "tools.h"
 
 #define MAX_EVENTS 4096
 #define MAX_STRLEN 4096

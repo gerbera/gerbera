@@ -24,24 +24,29 @@
 
 #include "config_setup.h" // API
 
-#include <cstdio>
-#include <filesystem>
-#include <iostream>
-#include <numeric>
+#include <algorithm> // for max
+#include <cstring> // for strlen, strerror
+#include <filesystem> // for path, is_symlink, is_directory
+#include <iterator> // for distance, next
+#include <limits> // for numeric_limits
+#include <numeric> // for accumulate
+#include <stdexcept> // for runtime_error, invalid_argument
+#include <system_error> // for error_code
+#include <type_traits> // for add_const<>::type
 
-#include <sys/stat.h>
-
-#include "client_config.h"
-#include "config_manager.h"
-#include "config_options.h"
-#include "config_setup.h"
-#include "content/autoscan.h"
-#include "directory_tweak.h"
-#include "metadata/metadata_handler.h"
-#include "transcoding/transcoding.h"
+#include "client_config.h" // for ClientConfig, ClientConfigList
+#include "config/config.h" // for Config, ATTR_TRANSCODING_PROF...
+#include "config_manager.h" // for ConfigManager
+#include "config_options.h" // for DictionaryOption, ArrayOption
+#include "content/autoscan.h" // for AutoscanDirectory, ScanMode
+#include "content/autoscan_list.h" // for AutoscanList
+#include "directory_tweak.h" // for DirectoryTweak, DirectoryConf...
+#include "metadata/metadata_handler.h" // for CONTENT_TYPE_PCM, MetadataHan...
+#include "transcoding/transcoding.h" // for TranscodingProfile, Transcodi...
+#include "util/tools.h" // for trimString, splitString, vali...
 
 #ifdef HAVE_INOTIFY
-#include "util/mt_inotify.h"
+#include "util/mt_inotify.h" // for Inotify
 #endif
 
 pugi::xml_node ConfigSetup::getXmlElement(const pugi::xml_node& root) const
@@ -136,7 +141,7 @@ void ConfigSetup::makeOption(std::string optValue, const std::shared_ptr<Config>
 
 size_t ConfigSetup::extractIndex(const std::string& item)
 {
-    size_t i = SIZE_MAX;
+    size_t i = std::numeric_limits<size_t>::max();
     if (item.find_first_of('[') != std::string::npos && item.find_first_of(']', item.find_first_of('[')) != std::string::npos) {
         auto startPos = item.find_first_of('[') + 1;
         auto endPos = item.find_first_of(']', startPos);
@@ -550,7 +555,7 @@ bool ConfigArraySetup::updateItem(size_t i, const std::string& optItem, const st
     auto index = getItemPath(i);
     if (optItem == index || !status.empty()) {
         auto realIndex = value->getIndex(i);
-        if (realIndex < SIZE_MAX) {
+        if (realIndex < std::numeric_limits<size_t>::max()) {
             const auto& array = value->getArrayOption();
             config->setOrigValue(index, array.size() > realIndex ? array[realIndex] : "");
             if (status == STATUS_REMOVED) {
@@ -570,7 +575,7 @@ bool ConfigArraySetup::updateDetail(const std::string& optItem, std::string& opt
         log_debug("Updating Array Detail {} {} {}", xpath, optItem, optValue.c_str());
 
         size_t i = extractIndex(optItem);
-        if (i < SIZE_MAX) {
+        if (i < std::numeric_limits<size_t>::max()) {
             if (updateItem(i, optItem, config, value, optValue)) {
                 return true;
             }
@@ -776,7 +781,7 @@ bool ConfigDictionarySetup::updateDetail(const std::string& optItem, std::string
         log_debug("Updating Dictionary Detail {} {} {}", xpath, optItem, optValue.c_str());
 
         size_t i = extractIndex(optItem);
-        if (i < SIZE_MAX) {
+        if (i < std::numeric_limits<size_t>::max()) {
             if (updateItem(i, optItem, config, value, value->getKey(i), optValue)) {
                 return true;
             }
@@ -808,9 +813,8 @@ std::string ConfigDictionarySetup::getItemPath(int index, config_option_t propOp
 {
     auto opt = ensureAttribute(propOption);
 
-    return index >= 0 //
-        ? fmt::format("{}/{}[{}]/{}", xpath, ConfigManager::mapConfigOption(nodeOption), index, opt) //
-        : fmt::format("{}/{}", xpath, ConfigManager::mapConfigOption(nodeOption));
+    return index >= 0 ? fmt::format("{}/{}[{}]/{}", xpath, ConfigManager::mapConfigOption(nodeOption), index, opt) //
+                      : fmt::format("{}/{}", xpath, ConfigManager::mapConfigOption(nodeOption));
 }
 
 std::map<std::string, std::string> ConfigDictionarySetup::getXmlContent(const pugi::xml_node& optValue) const
@@ -839,9 +843,8 @@ std::shared_ptr<ConfigOption> ConfigDictionarySetup::newOption(const std::map<st
 
 std::string ConfigAutoscanSetup::getItemPath(int index, config_option_t propOption, config_option_t propOption2, config_option_t propOption3, config_option_t propOption4) const
 {
-    return index >= 0 //
-        ? fmt::format("{}/{}/{}[{}]/{}", xpath, AutoscanDirectory::mapScanmode(scanMode), ConfigManager::mapConfigOption(ATTR_AUTOSCAN_DIRECTORY), index, ensureAttribute(propOption)) //
-        : fmt::format("{}/{}/{}", xpath, AutoscanDirectory::mapScanmode(scanMode), ConfigManager::mapConfigOption(ATTR_AUTOSCAN_DIRECTORY));
+    return index >= 0 ? fmt::format("{}/{}/{}[{}]/{}", xpath, AutoscanDirectory::mapScanmode(scanMode), ConfigManager::mapConfigOption(ATTR_AUTOSCAN_DIRECTORY), index, ensureAttribute(propOption)) //
+                      : fmt::format("{}/{}/{}", xpath, AutoscanDirectory::mapScanmode(scanMode), ConfigManager::mapConfigOption(ATTR_AUTOSCAN_DIRECTORY));
 }
 
 /// \brief Creates an array of AutoscanDirectory objects from a XML nodeset.
@@ -954,7 +957,7 @@ bool ConfigAutoscanSetup::updateDetail(const std::string& optItem, std::string& 
         auto list = value->getAutoscanListOption();
         auto i = extractIndex(optItem);
 
-        if (i < SIZE_MAX) {
+        if (i < std::numeric_limits<size_t>::max()) {
             auto entry = list->get(i, true);
             std::string status = arguments != nullptr && arguments->find("status") != arguments->end() ? arguments->at("status") : "";
             if (entry == nullptr && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
@@ -1500,7 +1503,7 @@ bool ConfigClientSetup::updateDetail(const std::string& optItem, std::string& op
         auto list = value->getClientConfigListOption();
         auto i = extractIndex(optItem);
 
-        if (i < SIZE_MAX) {
+        if (i < std::numeric_limits<size_t>::max()) {
             auto entry = list->get(i, true);
             std::string status = arguments != nullptr && arguments->find("status") != arguments->end() ? arguments->at("status") : "";
 
@@ -1728,7 +1731,7 @@ bool ConfigDirectorySetup::updateDetail(const std::string& optItem, std::string&
         auto list = value->getDirectoryTweakOption();
         auto i = extractIndex(optItem);
 
-        if (i < SIZE_MAX) {
+        if (i < std::numeric_limits<size_t>::max()) {
             auto entry = list->get(i, true);
             std::string status = arguments != nullptr && arguments->find("status") != arguments->end() ? arguments->at("status") : "";
 

@@ -31,12 +31,16 @@
 
 #include "session_manager.h" // API
 
-#include <memory>
-#include <unordered_set>
+#include <algorithm> // for find_if
+#include <memory> // for shared_ptr, __shared_ptr_access, make_shared
+#include <unordered_set> // for unordered_set
+#include <utility> // for move
 
-#include "config/config_manager.h"
-#include "util/timer.h"
-#include "util/tools.h"
+#include "common.h" // for INVALID_OBJECT_ID, SESSION_TIMEOUT_CHECK_...
+#include "config/config.h" // for CFG_SERVER_UI_ACCOUNT_LIST, Config
+#include "exceptions.h" // for throw_std_runtime_error
+#include "util/timer.h" // for Timer
+#include "util/tools.h" // for getDeltaMillis, getValueOrDefault, genera...
 
 #define UI_UPDATE_ID_HASH_SIZE 61
 #define MAX_UI_UPDATE_IDS 10

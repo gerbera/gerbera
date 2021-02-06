@@ -26,10 +26,11 @@
 #ifndef GERBERA_HEADERS_H
 #define GERBERA_HEADERS_H
 
-#include <map>
-#include <memory>
-#include <upnp.h>
-#include <vector>
+#include <map> // for map
+#include <memory> // for unique_ptr
+#include <string> // for string
+#include <upnp.h> // for UpnpFileInfo
+#include <utility> // for pair
 
 class Headers {
 public:

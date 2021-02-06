@@ -32,8 +32,17 @@
 #ifdef HAVE_CURL
 #include "curl_io_handler.h" // API
 
-#include "config/config_manager.h"
-#include "util/tools.h"
+#include <cassert> // for assert
+#include <condition_variable> // for condition_variable
+#include <cstdio> // for SEEK_SET, SEEK_CUR
+#include <cstring> // for size_t, memcpy
+#include <mutex> // for unique_lock, mutex
+
+#include "config/config_manager.h" // for ConfigManager
+#include "exceptions.h" // for throw_std_runtime_error
+#include "iohandler/io_handler_buffer_helper.h" // for IOHandlerBufferHelper
+#include "upnp.h" // for UpnpOpenFileMode
+#include "util/logger.h" // for log_debug, log_error
 
 CurlIOHandler::CurlIOHandler(const std::string& URL, CURL* curl_handle, size_t bufSize, size_t initialFillSize)
     : IOHandlerBufferHelper(bufSize, initialFillSize)

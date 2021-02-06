@@ -32,13 +32,26 @@
 #ifdef HAVE_JS
 #include "playlist_parser_script.h" // API
 
-#include <cstdlib>
+#include <cstdio> // for fclose, fgets
+#include <duktape.h> // for duk_pop, duk_d...
+#include <filesystem> // for path
+#include <memory> // for shared_ptr
+#include <stdexcept> // for runtime_error
+#include <string> // for string
+#include <utility> // for move
 
-#include "config/config_manager.h"
-#include "content/content_manager.h"
-#include "database/database.h"
-#include "js_functions.h"
-#include "scripting_runtime.h"
+#include "cds_objects.h" // for CdsObject
+#include "common.h" // for INVALID_OBJECT_ID
+#include "config/config.h" // for CFG_IMPORT_SCR...
+#include "content/content_manager.h" // for ContentManager
+#include "content/scripting/playlist_parser_script.h" // for PlaylistParser...
+#include "content/scripting/script.h" // for Script, JS_CAL...
+#include "database/database.h" // for Database
+#include "exceptions.h" // for throw_std_runt...
+#include "scripting_runtime.h" // for ScriptingRuntime
+#include "util/generic_task.h" // for GenericTask
+#include "util/logger.h" // for log_error, log...
+#include "util/tools.h" // for trimString
 
 #define ONE_TEXTLINE_BYTES 1024
 

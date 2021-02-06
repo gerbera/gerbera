@@ -32,10 +32,13 @@
 #ifndef __JS_LAYOUT_H__
 #define __JS_LAYOUT_H__
 
-#include <memory>
+#include <filesystem> // for path
+#include <memory> // for shared_ptr, unique_ptr
 
-#include "layout.h"
+#include "content/layout/layout.h" // for Layout
+#include "layout.h" // for Layout
 
+class CdsObject;
 // forward declaration
 class ContentManager;
 class ImportScript;

@@ -31,7 +31,12 @@
 
 #include "pages.h" // API
 
+#include "exceptions.h" // for throw_std_runtime_error
+
+class ContentManager;
+
 namespace web {
+class WebRequestHandler;
 
 std::unique_ptr<WebRequestHandler> createWebRequestHandler(
     const std::shared_ptr<ContentManager>& content,

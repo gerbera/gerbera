@@ -25,8 +25,10 @@
 
 #include "transcode_handler.h" // API
 
-#include "content/content_manager.h"
-#include "context.h"
+#include <utility> // for move
+
+#include "content/content_manager.h" // for ContentManager
+#include "context.h" // for Context
 
 TranscodeHandler::TranscodeHandler(std::shared_ptr<ContentManager> content)
     : config(content->getContext()->getConfig())

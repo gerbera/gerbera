@@ -33,11 +33,10 @@
 #ifndef __ACTION_REQUEST_H__
 #define __ACTION_REQUEST_H__
 
-#include <memory>
-#include <pugixml.hpp>
-#include <upnp.h>
-
-#include "common.h"
+#include <memory> // for shared_ptr, unique_ptr
+#include <pugixml.hpp> // for xml_document
+#include <string> // for string
+#include <upnp.h> // for UpnpActionRequest
 
 // forward declaration
 class Context;

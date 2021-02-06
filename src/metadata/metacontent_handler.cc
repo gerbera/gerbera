@@ -25,13 +25,27 @@
 
 #include "metacontent_handler.h" // API
 
-#include <sys/stat.h>
+#include <algorithm> // for find_if
+#include <array> // for array
+#include <cerrno> // for errno
+#include <cstring> // for strerror
+#include <map> // for operator!=, map, _Rb_tree_ite...
+#include <string_view> // for string_view
+#include <sys/stat.h> // for stat
+#include <system_error> // for error_code
+#include <utility> // for move, pair
 
-#include "cds_objects.h"
-#include "config/config.h"
-#include "config/directory_tweak.h"
-#include "iohandler/file_io_handler.h"
-#include "util/tools.h"
+#include "cds_objects.h" // for CdsObject
+#include "cds_resource.h" // for CdsResource
+#include "config/config.h" // for Config, CFG_IMPORT_DIRECTORIE...
+#include "config/directory_tweak.h" // for DirectoryTweak, DirectoryConf...
+#include "iohandler/file_io_handler.h" // for FileIOHandler
+#include "metadata/metadata_handler.h" // for metadata_fields_t, R_RESOURCE...
+#include "util/logger.h" // for log_debug, log_warning
+#include "util/tools.h" // for renderProtocolInfo, toLower
+
+class Context;
+class IOHandler;
 
 MetacontentHandler::MetacontentHandler(const std::shared_ptr<Context>& context)
     : MetadataHandler(context)

@@ -32,11 +32,17 @@
 #ifndef __SESSION_MANAGER_H__
 #define __SESSION_MANAGER_H__
 
-#include <memory>
-#include <unordered_set>
-#include <vector>
+#include <map> // for map
+#include <memory> // for shared_ptr
+#include <mutex> // for lock_guard, mutex, recursive_mutex
+#include <string> // for string
+#include <time.h> // for timespec
+#include <unordered_set> // for unordered_set
+#include <vector> // for vector
 
-#include "util/timer.h"
+#include "util/logger.h" // for log_debug
+#include "util/timer.h" // for Timer, Timer::Subscriber
+#include "util/tools.h" // for getTimespecNow
 
 // forward declaration
 class Config;

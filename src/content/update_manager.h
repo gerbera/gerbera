@@ -32,12 +32,12 @@
 #ifndef __UPDATE_MANAGER_H__
 #define __UPDATE_MANAGER_H__
 
-#include <condition_variable>
-#include <memory>
-#include <unordered_set>
-#include <vector>
-
-#include "common.h"
+#include <condition_variable> // for condition_variable
+#include <memory> // for shared_ptr, unique_ptr
+#include <mutex> // for lock_guard, mutex, unique_lock
+#include <pthread.h> // for pthread_t
+#include <unordered_set> // for unordered_set
+#include <vector> // for vector
 
 // forward declaration
 class Database;

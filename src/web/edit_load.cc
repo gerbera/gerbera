@@ -29,16 +29,30 @@
 
 /// \file edit_load.cc
 
-#include "pages.h" // API
+#include <filesystem> // for path
+#include <fmt/format.h> // for format
+#include <map> // for map, operator!=, _Rb_tree_ite...
+#include <memory> // for shared_ptr, __shared_ptr_access
+#include <pugixml.hpp> // for xml_node, xml_attribute, node...
+#include <string> // for string, basic_string, stoi
+#include <type_traits> // for add_const<>::type
+#include <utility> // for move
+#include <vector> // for vector
 
-#include <cstdio>
+#include "cds_objects.h" // for CdsObject, CdsItem, CdsContai...
+#include "cds_resource.h" // for CdsResource
+#include "common.h" // for CDS_ID_FS_ROOT
+#include "database/database.h" // for Database
+#include "exceptions.h" // for throw_std_runtime_error
+#include "metadata/metadata_handler.h" // for M_DESCRIPTION, MetadataHandler
+#include "pages.h" // for edit_load
+#include "server.h" // for Server
+#include "upnp_xml.h" // for UpnpXMLBuilder
+#include "util/tools.h" // for getProtocol
+#include "util/xml_to_json.h" // for Xml2Json::Hints
+#include "web/web_request_handler.h" // for WebRequestHandler
 
-#include "cds_objects.h"
-#include "database/database.h"
-#include "metadata/metadata_handler.h"
-#include "server.h"
-#include "upnp_xml.h"
-#include "util/tools.h"
+class ContentManager;
 
 web::edit_load::edit_load(std::shared_ptr<ContentManager> content)
     : WebRequestHandler(std::move(content))

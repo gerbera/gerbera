@@ -33,16 +33,20 @@
 #ifndef __SQLITE3_STORAGE_H__
 #define __SQLITE3_STORAGE_H__
 
-#include <condition_variable>
-#include <mutex>
-#include <queue>
-#include <sqlite3.h>
-#include <sstream>
-#include <unistd.h>
+#include <condition_variable> // for condition_variable
+#include <fmt/format.h> // for to_string
+#include <memory> // for shared_ptr, allocator, static_poi...
+#include <mutex> // for mutex, lock_guard, unique_lock
+#include <pthread.h> // for pthread_t
+#include <queue> // for queue
+#include <sqlite3.h> // for sqlite3
+#include <string> // for string
 
-#include "database/sql_database.h"
-#include "util/timer.h"
+#include "database/sql_database.h" // for SQLDatabase, SQLResult, SQLRow
+#include "util/timer.h" // for Timer, Timer::Subscriber
 
+class Config;
+class Database;
 class Sqlite3Database;
 class Sqlite3Result;
 

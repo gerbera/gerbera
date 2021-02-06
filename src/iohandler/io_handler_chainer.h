@@ -38,8 +38,11 @@
 #define IOHC_WRITE_ERROR 4
 #define IOHC_EXCEPTION 5
 
-#include "io_handler.h"
-#include "util/thread_executor.h"
+#include <memory> // for unique_ptr
+
+#include "io_handler.h" // for IOHandler
+#include "iohandler/io_handler.h" // for IOHandler
+#include "util/thread_executor.h" // for ThreadExecutor
 
 /// \brief gets two IOHandler, starts a thread which reads from one IOHandler
 /// and writes the data to the other IOHandler

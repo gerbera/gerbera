@@ -31,15 +31,22 @@
 
 #include "web_request_handler.h" // API
 
-#include <ctime>
+#include <pugixml.hpp> // for xml_node, xml_document, xml_at...
+#include <sstream> // for ostringstream
+#include <utility> // for move
 
-#include "config/config_manager.h"
-#include "content/content_manager.h"
-#include "iohandler/mem_io_handler.h"
-#include "util/tools.h"
-#include "util/upnp_headers.h"
-#include "util/xml_to_json.h"
-#include "web/pages.h"
+#include "common.h" // for DEFAULT_INTERNAL_CHARSET, URL_...
+#include "content/content_manager.h" // for ContentManager
+#include "context.h" // for Context
+#include "exceptions.h" // for ObjectNotFoundException, Datab...
+#include "iohandler/io_handler.h" // for IOHandler
+#include "iohandler/mem_io_handler.h" // for MemIOHandler
+#include "util/generic_task.h" // for GenericTask
+#include "util/logger.h" // for log_debug, log_error, log_warning
+#include "util/tools.h" // for dictDecode
+#include "util/upnp_headers.h" // for Headers
+#include "util/xml_to_json.h" // for Xml2Json::Hints, Xml2Json
+#include "web/session_manager.h" // for Session, SessionManager
 
 namespace web {
 

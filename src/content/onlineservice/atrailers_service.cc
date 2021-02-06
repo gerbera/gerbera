@@ -32,15 +32,22 @@
 #ifdef ATRAILERS
 #include "atrailers_service.h" // API
 
-#include <string>
+#include <pugixml.hpp> // for xml_document, xml_...
+#include <stdexcept> // for runtime_error
+#include <string> // for string, operator==
+#include <utility> // for move
 
-#include "atrailers_content_handler.h"
-#include "config/config_manager.h"
-#include "config/config_options.h"
-#include "content/content_manager.h"
-#include "database/database.h"
-#include "util/string_converter.h"
-#include "util/url.h"
+#include "atrailers_content_handler.h" // for ATrailersContentHa...
+#include "cds_objects.h" // for CdsObject, CdsItem
+#include "config/config.h" // for CFG_ONLINE_CONTENT...
+#include "content/content_manager.h" // for ContentManager
+#include "content/layout/layout.h" // for Layout
+#include "content/onlineservice/online_service.h" // for OS_ATrailers, Onli...
+#include "database/database.h" // for Database
+#include "exceptions.h" // for throw_std_runtime_...
+#include "util/logger.h" // for log_debug, log_error
+#include "util/string_converter.h" // for StringConverter
+#include "util/url.h" // for URL
 
 #define ATRAILERS_SERVICE_URL_640 "https://trailers.apple.com/trailers/home/xml/current.xml"
 #define ATRAILERS_SERVICE_URL_720P "https://trailers.apple.com/trailers/home/xml/current_720p.xml"

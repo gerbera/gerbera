@@ -32,12 +32,11 @@
 #ifndef __CDS_RESOURCE_H__
 #define __CDS_RESOURCE_H__
 
-#include <map>
-#include <memory>
-#include <string>
+#include <map> // for map
+#include <memory> // for shared_ptr
+#include <string> // for string, operator==
 
-#include "common.h"
-#include "metadata/metadata_handler.h"
+#include "metadata/metadata_handler.h" // for resource_attributes_t, RESOUR...
 
 /// \brief name for external urls that can appear in object resources (i.e.
 /// a YouTube thumbnail)

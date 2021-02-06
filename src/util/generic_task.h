@@ -1,7 +1,7 @@
 /*MT*
  */
 
-#include "common.h"
+#include <string> // for string
 
 #ifndef __GENERIC_TASK_H__
 #define __GENERIC_TASK_H__

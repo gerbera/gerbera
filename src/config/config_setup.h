@@ -26,20 +26,34 @@
 #ifndef __CONFIG_SETUP_H__
 #define __CONFIG_SETUP_H__
 
-#include <filesystem>
-#include <map>
-#include <memory>
-#include <pugixml.hpp>
+#include <cstddef> // for size_t
+#include <filesystem> // for path
+#include <fmt/format.h> // for format, to_string
+#include <map> // for map, operator!=, _Rb_tree_const_iterator
+#include <memory> // for shared_ptr, allocator, operator==, dyn...
+#include <pugixml.hpp> // for xml_node, xpath_node_set
+#include <string> // for string, basic_string, operator==, oper...
+#include <string_view> // for string_view
+#include <utility> // for pair
+#include <vector> // for vector
 
-#include "common.h"
-#include "config.h"
-#include "config_manager.h"
-#include "config_options.h"
-#include "content/autoscan.h"
-#include "content/autoscan_list.h"
+#include "common.h" // for NO, YES
+#include "config.h" // for CFG_MAX, config_option_t, Config
+#include "config/config.h" // for CFG_MAX, config_option_t, Config
+#include "config_manager.h" // for ConfigManager
+#include "config_options.h" // for Option, ConfigOption
+#include "content/autoscan.h" // for AutoscanDirectory
+#include "exceptions.h" // for throw_std_runtime_error
+#include "util/logger.h" // for log_debug
 
+class AutoscanList;
+class ClientConfig;
+class ClientConfigList;
 class ConfigOption;
+class DirectoryConfigList;
 class DirectoryTweak;
+class TranscodingProfileList;
+
 enum class ScanMode;
 
 typedef bool (*StringCheckFunction)(std::string& value);

@@ -29,13 +29,13 @@
 
 /// \file remove.cc
 
-#include "pages.h" // API
+#include <memory> // for allocator, shared_ptr, __shared...
+#include <utility> // for move
 
-#include <cstdio>
-
-#include "content/content_manager.h"
-#include "database/database.h"
-#include "util/tools.h"
+#include "content/content_manager.h" // for ContentManager
+#include "pages.h" // for remove
+#include "util/logger.h" // for log_debug
+#include "web/web_request_handler.h" // for WebRequestHandler
 
 web::remove::remove(std::shared_ptr<ContentManager> content)
     : WebRequestHandler(std::move(content))

@@ -32,10 +32,15 @@
 #include <ExtraHeaders.h>
 #endif
 #endif
-#include <string>
+#include <algorithm> // for copy
+#include <cstddef> // for size_t
+#include <iterator> // for back_insert_iterator, back_inserter
+#include <string> // for string, basic_string, operator<
+#include <vector> // for vector
 
-#include "common.h"
-#include "util/tools.h"
+#include "upnp.h" // for UpnpFileInfo
+#include "util/logger.h" // for log_debug
+#include "util/tools.h" // for trimStringInPlace
 
 std::string Headers::stripInvalid(const std::string& value)
 {

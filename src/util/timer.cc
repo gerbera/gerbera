@@ -31,7 +31,12 @@
 
 #include "timer.h" // API
 
-#include <cassert>
+#include <algorithm> // for any_of, find
+#include <cassert> // for assert
+#include <chrono> // for milliseconds
+
+#include "exceptions.h" // for throw_std_runtime_error
+#include "util/tools.h" // for getDeltaMillis, getTimespecNow
 
 Timer::Timer()
     : shutdownFlag(false)

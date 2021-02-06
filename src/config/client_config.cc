@@ -25,9 +25,16 @@
 
 #include "client_config.h" // API
 
-#include "content/content_manager.h"
-#include "util/upnp_clients.h"
-#include "util/upnp_quirks.h"
+#include <algorithm> // for max, find_if, max_element
+#include <cstddef> // for size_t
+#include <fmt/format.h> // for format
+#include <utility> // for pair
+
+#include "exceptions.h" // for throw_std_runtime_error
+#include "util/logger.h" // for log_debug
+#include "util/tools.h" // for join, stoiString
+#include "util/upnp_clients.h" // for ClientInfo, ClientType, ClientMatchType
+#include "util/upnp_quirks.h" // for QUIRK_FLAG_SAMSUNG, QuirkFlags
 
 ClientConfig::ClientConfig()
     : clientInfo(std::make_shared<struct ClientInfo>())
@@ -62,7 +69,7 @@ void ClientConfigList::add(const std::shared_ptr<ClientConfig>& client, size_t i
 
 void ClientConfigList::_add(const std::shared_ptr<ClientConfig>& client, size_t index)
 {
-    if (index == SIZE_MAX) {
+    if (index == std::numeric_limits<size_t>::max()) {
         index = getEditSize();
         origSize = list.size() + 1;
         client->setOrig(true);

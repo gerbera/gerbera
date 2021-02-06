@@ -32,8 +32,12 @@
 #ifndef __MEM_IO_HANDLER_H__
 #define __MEM_IO_HANDLER_H__
 
-#include "common.h"
-#include "io_handler.h"
+#include <cstddef> // for size_t
+#include <string> // for string
+#include <sys/types.h> // for off_t
+
+#include "io_handler.h" // for IOHandler
+#include "upnp.h" // for UpnpOpenFileMode
 
 /// \brief Allows the web server to read from a memory buffer instead of a file.
 class MemIOHandler : public IOHandler {

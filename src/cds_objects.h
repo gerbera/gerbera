@@ -32,17 +32,23 @@
 #ifndef __CDS_OBJECTS_H__
 #define __CDS_OBJECTS_H__
 
-#include <filesystem>
-#include <map>
-#include <memory>
-#include <string>
-#include <vector>
+#include <algorithm> // for max, any_of, find_if
+#include <chrono> // for filesystem
+#include <ctime> // for time_t
+#include <filesystem> // for path
+#include <map> // for map, map<>::mapped_type
+#include <memory> // for shared_ptr, allocator
+#include <string> // for string, basic_string, operator<
+#include <utility> // for move
+#include <vector> // for vector<>::const_iterator, vec...
+
 namespace fs = std::filesystem;
 
-#include "cds_resource.h"
-#include "common.h"
-#include "metadata/metadata_handler.h"
-#include "util/tools.h"
+#include "cds_resource.h" // for CdsResource
+#include "metadata/metadata_handler.h" // for MetadataHandler, metadata_fie...
+#include "util/tools.h" // for getValueOrDefault
+
+class CdsResource;
 
 // ATTENTION: These values need to be changed in web/js/items.js too.
 #define OBJECT_TYPE_CONTAINER 0x00000001u
@@ -96,10 +102,10 @@ protected:
 
     /// \brief Last modification time in the file system.
     /// In seconds since UNIX epoch.
-    time_t mtime;
+    std::time_t mtime;
 
     /// \brief File size on disk (in bytes).
-    off_t sizeOnDisk;
+    std::streamoff sizeOnDisk;
 
     /// \brief virtual object flag
     bool virt;
@@ -176,16 +182,16 @@ public:
     fs::path getLocation() const { return location; }
 
     /// \brief Set modification time of the media file.
-    void setMTime(time_t mtime) { this->mtime = mtime; }
+    void setMTime(std::time_t mtime) { this->mtime = mtime; }
 
     /// \brief Retrieve the file modification time (in seconds since UNIX epoch).
-    time_t getMTime() const { return mtime; }
+    std::time_t getMTime() const { return mtime; }
 
     /// \brief Set file size.
-    void setSizeOnDisk(off_t sizeOnDisk) { this->sizeOnDisk = sizeOnDisk; }
+    void setSizeOnDisk(std::streamoff sizeOnDisk) { this->sizeOnDisk = sizeOnDisk; }
 
     /// \brief Retrieve the file size (in bytes).
-    off_t getSizeOnDisk() const { return sizeOnDisk; }
+    std::streamoff getSizeOnDisk() const { return sizeOnDisk; }
 
     /// \brief Set the virtual flag.
     void setVirtual(bool virt) { this->virt = virt; }
@@ -285,7 +291,7 @@ public:
     }
 
     /// \brief Get number of resource tags
-    size_t getResourceCount() const { return resources.size(); }
+    std::size_t getResourceCount() const { return resources.size(); }
 
     /// \brief Query resources
     std::vector<std::shared_ptr<CdsResource>> getResources() const
@@ -315,7 +321,7 @@ public:
     }
 
     /// \brief Query resource tag with the given index
-    std::shared_ptr<CdsResource> getResource(size_t index) const
+    std::shared_ptr<CdsResource> getResource(std::size_t index) const
     {
         return resources.at(index);
     }
@@ -327,7 +333,7 @@ public:
     }
 
     /// \brief Insert resource tag at index
-    void insertResource(size_t index, const std::shared_ptr<CdsResource>& resource)
+    void insertResource(std::size_t index, const std::shared_ptr<CdsResource>& resource)
     {
         resources.insert(resources.begin() + index, resource);
     }

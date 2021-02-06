@@ -32,11 +32,13 @@
 #ifndef __SCRIPTING_IMPORT_SCRIPT_H__
 #define __SCRIPTING_IMPORT_SCRIPT_H__
 
-#include <memory>
+#include <memory> // for shared_ptr
+#include <string> // for string
 
-#include "common.h"
-#include "script.h"
+#include "content/scripting/script.h" // for S_IMPORT, Script, script_class_t
+#include "script.h" // for S_IMPORT, Script, script_class_t
 
+class CdsObject;
 // forward declaration
 class ContentManager;
 class ScriptingRuntime;

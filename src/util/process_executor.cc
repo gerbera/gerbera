@@ -31,12 +31,11 @@
 
 #include "process_executor.h" // API
 
-#include <csignal>
-#include <unistd.h>
+#include <csignal> // for SIG_SETMASK
 
-#include "exceptions.h"
-#include "logger.h"
-#include "process.h"
+#include "exceptions.h" // for throw_std_runtime_error
+#include "logger.h" // for log_debug
+#include "process.h" // for is_alive, kill_proc
 
 ProcessExecutor::ProcessExecutor(const std::string& command, const std::vector<std::string>& arglist)
 {

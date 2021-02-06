@@ -47,12 +47,32 @@
 #include <taglib/vorbisfile.h>
 #include <taglib/wavpackfile.h>
 
-#include "cds_objects.h"
-#include "config/config_manager.h"
-#include "iohandler/mem_io_handler.h"
-#include "util/mime.h"
-#include "util/string_converter.h"
-#include "util/tools.h"
+#include <array> // for array
+#include <cstddef> // for size_t
+#include <filesystem> // for path
+#include <fmt/format.h> // for to_string
+#include <list> // for operator!=, _List_const_...
+#include <utility> // for move
+#include <vector> // for vector
+
+#include "cds_objects.h" // for CdsItem, CdsObject (ptr ...
+#include "cds_resource.h" // for CdsResource
+#include "common.h" // for MIMETYPE_DEFAULT
+#include "config/config.h" // for Config, CFG_IMPORT_LIBOP...
+#include "exceptions.h" // for throw_std_runtime_error
+#include "iohandler/mem_io_handler.h" // for MemIOHandler
+#include "metadata/metadata_handler.h" // for R_BITS_PER_SAMPLE, CONTE...
+#include "util/logger.h" // for log_info, log_debug, log...
+#include "util/mime.h" // for Mime
+#include "util/string_converter.h" // for StringConverter
+#include "util/tools.h" // for getValueOrDefault, milli...
+
+class Context;
+class IOHandler;
+
+namespace TagLib {
+class IOStream;
+} // namespace TagLib
 
 TagLibHandler::TagLibHandler(const std::shared_ptr<Context>& context)
     : MetadataHandler(context)
@@ -195,7 +215,7 @@ void TagLibHandler::populateGenericTags(const std::shared_ptr<CdsItem>& item, co
         return;
 
     const TagLib::Tag* tag = file.tag();
-    for (size_t i = 0; i < mt_keys.size(); i++)
+    for (std::size_t i = 0; i < mt_keys.size(); i++)
         addField(metadata_fields_t(i), file, tag, item);
 
     const TagLib::AudioProperties* audioProps = file.audioProperties();
@@ -463,7 +483,7 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, const std::shared_ptr
                 const TagLib::String frameContents = textFrame->toString();
                 std::string value(frameContents.toCString(true));
 
-                size_t subTagEnd = value.find(']');
+                std::size_t subTagEnd = value.find(']');
                 std::string subTag = value.substr(1, subTagEnd - 1); // Cut out brackets
                 std::string content = value.substr(subTagEnd + 2); // Skip bracket and space
                 // log_debug("TXXX Tag: {}", subTag.c_str());

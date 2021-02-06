@@ -24,10 +24,9 @@
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
 
-#include <filesystem>
-#include <map>
-#include <memory>
-#include <vector>
+#include <filesystem> // for path
+#include <map> // for map
+#include <vector> // for vector
 namespace fs = std::filesystem;
 
 // forward declaration

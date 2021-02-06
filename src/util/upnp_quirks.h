@@ -26,12 +26,10 @@
 #ifndef __UPNP_QUIRKS_H__
 #define __UPNP_QUIRKS_H__
 
-#include <filesystem>
-#include <memory>
-#include <pugixml.hpp>
-namespace fs = std::filesystem;
+#include <memory> // for shared_ptr
+#include <pugixml.hpp> // for xml_document
 
-using QuirkFlags = uint32_t;
+using QuirkFlags = unsigned int;
 
 #define QUIRK_FLAG_NONE 0x00000000
 #define QUIRK_FLAG_SAMSUNG 0x00000001

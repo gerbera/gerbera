@@ -32,9 +32,11 @@
 #ifdef ONLINE_SERVICES
 #include "online_service_helper.h" // API
 
-#include "cds_objects.h"
-#include "config/config_manager.h"
-#include "online_service.h"
+#include <filesystem> // for path
+
+#include "cds_objects.h" // for CdsItemExternalURL, OBJECT_FLAG_ONLINE_S...
+#include "exceptions.h" // for throw_std_runtime_error
+#include "online_service.h" // for OS_Max, ONLINE_SERVICE_AUX_ID, OS_ATrailers
 
 std::string OnlineServiceHelper::resolveURL(const std::shared_ptr<CdsItemExternalURL>& item)
 {

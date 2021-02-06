@@ -24,9 +24,15 @@
 #ifndef GERBERA_DEVICE_DESCRIPTION_HANDLER_H
 #define GERBERA_DEVICE_DESCRIPTION_HANDLER_H
 
-#include "request_handler.h"
-#include "upnp_xml.h"
-#include <memory>
+#include <memory> // for unique_ptr, shared_ptr
+#include <string> // for string
+
+#include "request_handler.h" // for RequestHandler
+#include "upnp.h" // for UpnpFileInfo, UpnpOpenFileMode
+
+class ContentManager;
+class IOHandler;
+class UpnpXMLBuilder;
 
 class DeviceDescriptionHandler : public RequestHandler {
 public:

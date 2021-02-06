@@ -32,8 +32,18 @@
 #ifndef __TRANSCODE_DISPATCHER_H__
 #define __TRANSCODE_DISPATCHER_H__
 
-#include "common.h"
-#include "transcode_handler.h"
+#include <memory> // for shared_ptr, unique_ptr
+#include <string> // for string
+
+#include "iohandler/io_handler.h" // for IOHandler (ptr only)
+#include "transcode_handler.h" // for TranscodeHandler
+#include "transcoding/transcode_handler.h" // for TranscodeHandler
+
+class CdsObject;
+class ContentManager;
+class IOHandler;
+//class IOHandler;
+class TranscodingProfile;
 
 class TranscodeDispatcher : public TranscodeHandler {
 public:

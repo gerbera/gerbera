@@ -32,8 +32,10 @@
 #ifndef __EXCEPTIONS_H__
 #define __EXCEPTIONS_H__
 
-#include <stdexcept>
-#include <string>
+#include <fmt/core.h> // for format
+#include <stdexcept> // for runtime_error
+#include <string> // for string, allocator
+#include <utility> // for move
 
 #ifdef __PRETTY_FUNCTION__
 // GCC + llvm

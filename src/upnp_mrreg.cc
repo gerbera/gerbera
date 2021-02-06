@@ -31,10 +31,17 @@
 
 #include "upnp_mrreg.h" // API
 
-#include "config/config_manager.h"
-#include "database/database.h"
-#include "upnp_xml.h"
-#include "util/tools.h"
+#include <pugixml.hpp> // for xml_node, node_pcdata, xml_document
+#include <sstream> // for ostringstream
+
+#include "action_request.h" // for ActionRequest
+#include "config/config.h" // for CFG_SERVER_UDN, Config
+#include "context.h" // for Context
+#include "exceptions.h" // for UpnpException
+#include "subscription_request.h" // for SubscriptionRequest
+#include "upnp_common.h" // for UPNP_DESC_MRREG_SERVICE_TYPE, UPNP...
+#include "upnp_xml.h" // for UpnpXMLBuilder
+#include "util/logger.h" // for log_debug
 
 MRRegistrarService::MRRegistrarService(const std::shared_ptr<Context>& context,
     UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle)

@@ -38,14 +38,27 @@
 #ifndef __FFMPEG_HANDLER_H__
 #define __FFMPEG_HANDLER_H__
 
-#include <filesystem>
+#include <chrono> // for filesystem
+#include <cstddef> // for byte, size_t
+#include <filesystem> // for path
+#include <memory> // for shared_ptr, unique_ptr
+#include <mutex> // for mutex
+#include <optional> // for optional
+#include <string> // for string
+#include <vector> // for vector
+
 namespace fs = std::filesystem;
 
-#include "iohandler/io_handler.h"
-#include "metadata_handler.h"
+#include "metadata/metadata_handler.h" // for MetadataHandler
+#include "metadata_handler.h" // for MetadataHandler
 
 // forward declaration
 class AVFormatContext;
+class CdsItem;
+class CdsObject;
+class Config;
+class Context;
+class IOHandler;
 
 /// \brief This class is responsible for reading id3 tags metadata
 class FfmpegHandler : public MetadataHandler {

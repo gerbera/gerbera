@@ -33,23 +33,31 @@
 #ifndef __CONFIG_MANAGER_H__
 #define __CONFIG_MANAGER_H__
 
-#include <filesystem>
-#include <map>
-#include <memory>
-#include <netinet/in.h>
-#include <pugixml.hpp>
+#include <chrono> // for filesystem
+#include <filesystem> // for path
+#include <map> // for map, operator!=, operator==, map<>::const...
+#include <memory> // for shared_ptr, allocator, unique_ptr, enable...
+#include <netinet/in.h> // for in_port_t
+#include <string> // for string, basic_string, operator<
+#include <vector> // for vector
+
 namespace fs = std::filesystem;
 
-#include "common.h"
-#include "config.h"
+#include "config/config.h" // for config_option_t, Config
 
+class AutoscanDirectory;
 // forward declaration
 class AutoscanList;
-class AutoscanDirectory;
-class ClientConfigList;
 class ClientConfig;
+class ClientConfigList;
 class ConfigSetup;
 class DirectoryConfigList;
+
+namespace pugi {
+class xml_document;
+class xml_node;
+} // namespace pugi
+
 enum class ScanMode;
 enum class ClientType;
 class ConfigOption;

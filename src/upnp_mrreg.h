@@ -33,13 +33,16 @@
 #ifndef __UPNP_MRREG_H__
 #define __UPNP_MRREG_H__
 
-#include <memory>
+#include <memory> // for unique_ptr, shared_ptr
+#include <string> // for string
 
-#include "action_request.h"
-#include "common.h"
-#include "context.h"
-#include "subscription_request.h"
-#include "upnp_xml.h"
+#include "upnp.h" // for UpnpDevice_Handle
+
+class ActionRequest;
+class Config;
+class Context;
+class SubscriptionRequest;
+class UpnpXMLBuilder;
 
 /// \brief This class is responsible for the UPnP Connection Manager Service operations.
 ///

@@ -32,13 +32,30 @@
 #ifdef HAVE_LIBEXIF
 #include "libexif_handler.h" // API
 
-#include <iohandler/file_io_handler.h>
+#include <array> // for array
+#include <cstddef> // for size_t
+#include <filesystem> // for path
+#include <iohandler/file_io_handler.h> // for FileIOHandler
+#include <stdexcept> // for runtime_error
+#include <utility> // for move
 
-#include "cds_objects.h"
-#include "config/config_manager.h"
-#include "iohandler/mem_io_handler.h"
-#include "util/string_converter.h"
-#include "util/tools.h"
+#include "cds_objects.h" // for CdsItem, CdsObject (ptr only)
+#include "cds_resource.h" // for CdsResource
+#include "config/config.h" // for CFG_IMPORT_LIBOPTS_EXIF_AUXDA...
+#include "exceptions.h" // for throw_std_runtime_error
+#include "exif-content.h" // for ExifContent, _ExifContent (pt...
+#include "exif-data.h" // for ExifData, exif_data_new_from_...
+#include "exif-entry.h" // for exif_entry_get_value, ExifEntry
+#include "exif-tag.h" // for EXIF_TAG_CUSTOM_RENDERED, EXI...
+#include "iohandler/io_handler.h" // for IOHandler
+#include "iohandler/mem_io_handler.h" // for MemIOHandler
+#include "metadata/metadata_handler.h" // for R_RESOLUTION, EXIF_THUMBNAIL
+#include "upnp.h" // for UPNP_READ
+#include "util/logger.h" // for log_debug, log_error, log_war...
+#include "util/string_converter.h" // for StringConverter
+#include "util/tools.h" // for trimString, get_jpeg_resolution
+
+class Context;
 
 LibExifHandler::LibExifHandler(const std::shared_ptr<Context>& context)
     : MetadataHandler(context)

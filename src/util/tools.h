@@ -31,18 +31,17 @@
 #ifndef __TOOLS_H__
 #define __TOOLS_H__
 
-#include <filesystem>
-#include <map>
-#include <memory>
-#include <sstream>
-#include <string>
-#include <unordered_set>
-#include <vector>
+#include <filesystem> // for path
+#include <map> // for operator==
+#include <sstream> // for basic_ostream::operator<<, operator<<
+#include <string> // for operator<
+#include <unordered_set> // for operator!=
+
 namespace fs = std::filesystem;
 
 #include <netinet/in.h>
 
-#include "common.h"
+#include "common.h" // for PROTOCOL
 
 // forward declaration
 class Config;

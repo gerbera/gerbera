@@ -33,13 +33,19 @@
 #define __TIMER_H__
 
 #include <algorithm>
-#include <atomic>
-#include <condition_variable>
-#include <list>
-#include <memory>
+#include <atomic> // for atomic_bool
+#include <condition_variable> // for condition_variable
+#include <ctime> // for timespec
+#include <list> // for list
+#include <memory> // for shared_ptr, operator==
+#include <mutex> // for mutex, lock_guard
+#include <pthread.h> // for pthread_t
+#include <stdexcept> // for runtime_error
+#include <utility> // for move
 
-#include "common.h"
-#include "tools.h"
+#include "tools.h" // for getTimespecAfterMillis
+#include "util/logger.h" // for log_debug, log_error
+#include "util/tools.h" // for getTimespecAfterMillis
 
 class Timer {
 public:

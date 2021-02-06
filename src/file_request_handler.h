@@ -32,10 +32,14 @@
 #ifndef __FILE_REQUEST_HANDLER_H__
 #define __FILE_REQUEST_HANDLER_H__
 
-#include "common.h"
-#include "request_handler.h"
-#include "upnp_xml.h"
-#include <memory>
+#include <memory> // for unique_ptr, shared_ptr
+
+#include "request_handler.h" // for RequestHandler
+#include "upnp.h" // for UpnpFileInfo, UpnpOpenFileMode
+
+class ContentManager;
+class IOHandler;
+class UpnpXMLBuilder;
 
 class FileRequestHandler : public RequestHandler {
 protected:

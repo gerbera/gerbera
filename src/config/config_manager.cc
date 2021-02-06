@@ -31,30 +31,37 @@
 
 #include "config_manager.h" // API
 
-#include <array>
-#include <cstdio>
-#include <filesystem>
-#include <iostream>
-#include <numeric>
-#include <sys/stat.h>
+#include <algorithm> // for find_if, none_of, min
+#include <cstdio> // for size_t
+#include <filesystem> // for path, operator/, is_directory
+#include <fmt/format.h> // for to_string, format
+#include <pugixml.hpp> // for xml_document, xml_node, xml_par...
+#include <sstream> // for operator<<, ostringstream, basi...
+#include <stdexcept> // for runtime_error
+#include <string_view> // for operator==
+#include <system_error> // for error_code
+#include <utility> // for move
 
 #if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE)
-#include <clocale>
-#include <langinfo.h>
+#include <clocale> // for setlocale, LC_ALL
+#include <langinfo.h> // for nl_langinfo, CODESET
 #endif
 
 #ifdef HAVE_CURL
-#include <curl/curl.h>
+#include <curl/curl.h> // for CURL_MAX_WRITE_SIZE
 #endif
 
-#include "client_config.h"
-#include "config_options.h"
-#include "config_setup.h"
-#include "content/autoscan.h"
-#include "database/database.h"
-#include "transcoding/transcoding.h"
-#include "util/string_converter.h"
-#include "util/tools.h"
+#include "common.h" // for DEFAULT_INTERNAL_CHARSET, DEFAU...
+#include "config_options.h" // for ConfigOption
+#include "config_setup.h" // for ConfigStringSetup, ConfigBoolSetup
+#include "content/autoscan.h" // for ScanMode, ScanMode::INotify
+#include "content/autoscan_list.h" // for AutoscanList
+#include "database/database.h" // for Database
+#include "exceptions.h" // for throw_std_runtime_error, Config...
+#include "transcoding/transcoding.h" // for avi_fourcc_listmode_t, transcod...
+#include "util/logger.h" // for log_debug, log_info, log_error
+#include "util/string_converter.h" // for StringConverter
+#include "util/tools.h" // for isRegularFile
 
 bool ConfigManager::debug = false;
 

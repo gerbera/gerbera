@@ -25,8 +25,9 @@
 
 #include "config_options.h" // API
 
-#include <algorithm>
-#include <fmt/core.h>
+#include <algorithm> // for max, max_element
+#include <fmt/core.h> // for format
+#include <limits> // for numeric_limits
 
 size_t DictionaryOption::getEditSize() const
 {
@@ -91,7 +92,7 @@ std::vector<std::string> ArrayOption::getArrayOption(bool forEdit) const
     std::vector<std::string> editOption;
     auto editSize = getEditSize();
     for (size_t i = 0; i < editSize; i++) {
-        if (indexMap.at(i) < SIZE_MAX) {
+        if (indexMap.at(i) < std::numeric_limits<size_t>::max()) {
             editOption.emplace_back(option[indexMap.at(i)]);
         } else {
             editOption.emplace_back("");
@@ -105,40 +106,40 @@ void ArrayOption::setItem(size_t index, const std::string& value)
     auto editSize = getEditSize();
     if (indexMap.find(index) != indexMap.end() && value.empty()) {
         option.erase(option.begin() + indexMap[index]);
-        indexMap[index] = SIZE_MAX;
+        indexMap[index] = std::numeric_limits<size_t>::max();
         for (size_t i = index + 1; i < editSize; i++) {
-            if (indexMap[i] < SIZE_MAX) {
+            if (indexMap[i] < std::numeric_limits<size_t>::max()) {
                 indexMap[i]--;
             }
         }
         for (size_t i = editSize - 1; i >= origSize; i--) {
-            if (indexMap[i] == SIZE_MAX)
+            if (indexMap[i] == std::numeric_limits<size_t>::max())
                 indexMap.erase(i);
             else {
                 break;
             }
         }
     } else if (indexMap.find(index) != indexMap.end()) {
-        if (indexMap[index] == SIZE_MAX) {
+        if (indexMap[index] == std::numeric_limits<size_t>::max()) {
             for (size_t i = editSize - 1; i > index; i--) {
-                if (indexMap[i] < SIZE_MAX) {
+                if (indexMap[i] < std::numeric_limits<size_t>::max()) {
                     indexMap[index] = indexMap[i];
                     indexMap[i]++;
                 }
             }
-            if (indexMap[index] == SIZE_MAX) {
+            if (indexMap[index] == std::numeric_limits<size_t>::max()) {
                 for (size_t i = 0; i < index; i++) {
-                    if (indexMap[i] < SIZE_MAX) {
+                    if (indexMap[i] < std::numeric_limits<size_t>::max()) {
                         indexMap[index] = indexMap[i] + 1;
                     }
                 }
             }
-            if (indexMap[index] == SIZE_MAX || indexMap[index] > option.size()) {
+            if (indexMap[index] == std::numeric_limits<size_t>::max() || indexMap[index] > option.size()) {
                 indexMap[index] = option.size();
             }
             option.insert(option.begin() + indexMap[index], value);
         } else {
-            if (indexMap.find(index) == indexMap.end() || indexMap[index] == SIZE_MAX || indexMap[index] >= option.size()) {
+            if (indexMap.find(index) == indexMap.end() || indexMap[index] == std::numeric_limits<size_t>::max() || indexMap[index] >= option.size()) {
                 indexMap[index] = option.size();
                 option.push_back(value);
             } else {

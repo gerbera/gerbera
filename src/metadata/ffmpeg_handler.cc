@@ -40,34 +40,49 @@
 // in the ffmpeg sources
 
 #ifdef HAVE_FFMPEG
-#include "ffmpeg_handler.h"
+#include "ffmpeg_handler.h" // API
 
-// ffmpeg needs the following sources
-// INT64_C is not defined in ffmpeg/avformat.h but is needed
-// macro defines included via autoconfig.h
-#include <cerrno>
-#include <cinttypes>
-#include <cstdint>
-#include <cstring>
-
-#include <sys/stat.h>
+#include <algorithm> // for all_of
+#include <cstring> // for strcmp
+#include <map> // for operator!=, _Rb_...
+#include <sstream> // for size_t
+#include <stdexcept> // for runtime_error
+#include <type_traits> // for remove_pointer_t
+#include <utility> // for move, pair
 
 extern "C" {
 
-#include <libavformat/avformat.h>
-#include <libavutil/avutil.h>
+#include <cassert> // for assert
+#include <cctype> // for isdigit
+#include <cstdarg> // for va_list
+#include <fmt/format.h> // for to_string, format
+#include <libavformat/avformat.h> // for AVStream, AVForm...
+#include <libavformat/version.h> // for LIBAVFORMAT_VERS...
+#include <libavutil/avutil.h> // for AVMEDIA_TYPE_AUDIO
+#include <libavutil/dict.h> // for AVDictionaryEntry
+#include <libavutil/log.h> // for av_log_set_callback
+#include <libavutil/version.h> // for AV_VERSION_INT
 
 } // extern "C"
 
 #ifdef HAVE_FFMPEGTHUMBNAILER
-#include "iohandler/mem_io_handler.h"
-#include <libffmpegthumbnailer/videothumbnailerc.h>
+#include <libffmpegthumbnailer/imagetypes.h> // for Jpeg
+#include <libffmpegthumbnailer/videothumbnailerc.h> // for image_data_struct
+
+#include "iohandler/mem_io_handler.h" // for MemIOHandler
 #endif
 
-#include "cds_objects.h"
-#include "config/config_manager.h"
-#include "util/string_converter.h"
-#include "util/tools.h"
+#include "cds_objects.h" // for CdsItem, CdsObje...
+#include "cds_resource.h" // for CdsResource, RES...
+#include "config/config.h" // for Config, CFG_SERV...
+#include "exceptions.h" // for throw_std_runtim...
+#include "metadata/metadata_handler.h" // for R_RESOLUTION
+#include "util/logger.h" // for log_debug, log_e...
+#include "util/string_converter.h" // for StringConverter
+#include "util/tools.h" // for startswith, chec...
+
+class Context;
+class IOHandler;
 
 #ifdef HAVE_AVSTREAM_CODECPAR
 #define as_codecpar(s) s->codecpar

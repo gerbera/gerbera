@@ -31,10 +31,14 @@
 
 #include "action_request.h" // API
 
-#include <sstream>
+#include <sstream> // for ostringstream
+#include <utility> // for move
 
-#include "util/tools.h"
-#include "util/upnp_quirks.h"
+#include "exceptions.h" // for throw_std_runtime_error
+#include "upnp.h" // for UPNP_E_SUCCESS, UpnpActionRequest, Upn...
+#include "upnp_common.h" // for UPNP_E_ACTION_FAILED
+#include "util/logger.h" // for log_debug, log_error
+#include "util/upnp_quirks.h" // for Quirks
 
 ActionRequest::ActionRequest(const std::shared_ptr<Context>& context, UpnpActionRequest* upnp_request)
     : upnp_request(upnp_request)

@@ -32,9 +32,14 @@
 #ifndef __BUILTIN_LAYOUT_H__
 #define __BUILTIN_LAYOUT_H__
 
-#include <memory>
+#include <filesystem> // for path
+#include <memory> // for shared_ptr
+#include <string> // for string
 
-#include "layout.h"
+#include "content/layout/layout.h" // for Layout
+#include "layout.h" // for Layout
+
+class ContentManager;
 
 #ifdef ENABLE_PROFILING
 #include "util/tools.h"

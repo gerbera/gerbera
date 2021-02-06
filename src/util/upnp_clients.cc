@@ -25,13 +25,28 @@
 /// client info initially taken from https://sourceforge.net/p/minidlna/git/ci/master/tree/clients.cc
 
 #include "upnp_clients.h" // API
-#include "config/client_config.h"
-#include "config/config.h"
-#include "util/tools.h"
 
-#include <array>
+#include <algorithm> // for find_if, copy, remove_if
+#include <arpa/inet.h> // for inet_addr, inet_pton
+#include <array> // for array
+#include <cassert> // for assert
+#include <chrono> // for time_point, operator+, operator<
+#include <cstddef> // for size_t
+#include <iterator> // for back_insert_iterator, back_inserter
+#include <memory> // for allocator, shared_ptr, __shared_pt...
+#include <netinet/in.h> // for sockaddr_in, sockaddr_in6, in_addr
+#include <pugixml.hpp> // for xml_document, status_ok, xml_parse...
+#include <string> // for string, basic_string
+#include <sys/socket.h> // for AF_INET6, AF_INET, sockaddr_storage
+#include <upnp.h> // for UpnpDownloadUrlItem, UPNP_E_SUCCESS
+#include <vector> // for vector, vector<>::iterator
 
-#include <upnp.h>
+#include "config/client_config.h" // for ClientConfig, ClientConfigList
+#include "config/config.h" // for CFG_CLIENTS_LIST, Config
+#include "util/logger.h" // for log_debug
+#include "util/tools.h" // for sockAddrCmpAddr, getHostName, sock...
+#include "util/upnp_clients.h" // for ClientMatchType, ClientType, Clien...
+#include "util/upnp_quirks.h" // for QUIRK_FLAG_NONE, QUIRK_FLAG_SAMSUNG
 
 // table of supported clients (sequence of entries matters!)
 static const auto bultinClientInfo = std::array<struct ClientInfo, 8> {

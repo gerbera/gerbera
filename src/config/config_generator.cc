@@ -23,13 +23,21 @@
 
 /// \file config_generator.cc
 
-#include "config_generator.h"
+#include "config_generator.h" // API
 
-#include <string>
+#include <fmt/format.h> // for format, to_string
+#include <pugixml.hpp> // for xml_node, xml_attribute, xml_...
+#include <sstream> // for ostringstream
+#include <string> // for string, allocator, basic_string
+#include <vector> // for vector
 
-#include "config/config_setup.h"
-#include "metadata/metadata_handler.h"
-#include "util/tools.h"
+#include "common.h" // for NO, CONFIG_XML_VERSION, YES
+#include "config/config_manager.h" // for ConfigManager
+#include "config/config_setup.h" // for ConfigSetup, ConfigDictionary...
+#include "metadata/metadata_handler.h" // for CONTENT_TYPE_FLAC, CONTENT_TY...
+#include "upnp_common.h" // for UPNP_CLASS_MUSIC_TRACK, UPNP_...
+#include "util/logger.h" // for log_debug
+#include "util/tools.h" // for generateRandomId, splitString
 
 ConfigGenerator::ConfigGenerator() = default;
 

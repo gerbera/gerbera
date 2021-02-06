@@ -29,10 +29,16 @@
 
 /// \file action.cc
 
-#include "pages.h" // API
+#include <memory> // for allocator, shared_ptr
+#include <string> // for string
+#include <utility> // for move
 
-#include "config/config_manager.h"
-#include "content/content_manager.h"
+#include "exceptions.h" // for throw_std_runtime_error
+#include "pages.h" // for action
+#include "util/logger.h" // for log_debug
+#include "web/web_request_handler.h" // for WebRequestHandler
+
+class ContentManager;
 
 web::action::action(std::shared_ptr<ContentManager> content)
     : WebRequestHandler(std::move(content))

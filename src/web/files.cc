@@ -29,11 +29,23 @@
 
 /// \file files.cc
 
-#include "pages.h" // API
+#include <filesystem> // for path, directory_iterator, begin
+#include <map> // for map, operator!=, _Rb_tree_iterator
+#include <memory> // for allocator, shared_ptr, __shared...
+#include <pugixml.hpp> // for xml_node, xml_attribute, xml_do...
+#include <string> // for string, basic_string, operator==
+#include <system_error> // for error_code
+#include <type_traits> // for add_const<>::type
+#include <utility> // for move
 
-#include "database/database.h"
-#include "util/string_converter.h"
-#include "util/tools.h"
+#include "common.h" // for FS_ROOT_DIRECTORY
+#include "pages.h" // for files
+#include "util/string_converter.h" // for StringConverter
+#include "util/tools.h" // for hexDecodeString, hexEncode, isR...
+#include "util/xml_to_json.h" // for Xml2Json::Hints
+#include "web/web_request_handler.h" // for WebRequestHandler
+
+class ContentManager;
 
 web::files::files(std::shared_ptr<ContentManager> content)
     : WebRequestHandler(std::move(content))

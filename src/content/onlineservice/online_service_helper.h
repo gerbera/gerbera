@@ -35,8 +35,8 @@
 #ifndef __ONLINE_SERVICE_HELPER_H__
 #define __ONLINE_SERVICE_HELPER_H__
 
-#include <memory>
-#include <string>
+#include <memory> // for shared_ptr
+#include <string> // for string
 
 // forward declaration
 class CdsItemExternalURL;

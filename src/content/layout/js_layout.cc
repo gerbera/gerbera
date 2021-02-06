@@ -32,7 +32,10 @@
 #ifdef HAVE_JS
 #include "js_layout.h" // API
 
-#include "content/scripting/import_script.h"
+#include "content/layout/layout.h" // for Layout
+#include "content/scripting/import_script.h" // for ImportScript
+
+class CdsObject;
 
 JSLayout::JSLayout(const std::shared_ptr<ContentManager>& content,
     const std::shared_ptr<ScriptingRuntime>& runtime)

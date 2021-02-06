@@ -33,11 +33,15 @@
 #ifndef __CONFIG_OPTIONS_H__
 #define __CONFIG_OPTIONS_H__
 
-#include <map>
-#include <string>
-#include <vector>
+#include <cstddef> // for size_t
+#include <map> // for map, operator!=, _Rb_tree_iterator
+#include <memory> // for shared_ptr, __shared_ptr_access
+#include <stdexcept> // for runtime_error
+#include <string> // for string, basic_string
+#include <utility> // for move
+#include <vector> // for vector
 
-#include "transcoding/transcoding.h"
+#include "transcoding/transcoding.h" // for TranscodingProfileList
 
 // forward declaration
 class AutoscanList;

@@ -35,10 +35,10 @@
 #ifndef __ONLINE_SERVICE_H__
 #define __ONLINE_SERVICE_H__
 
-#include <memory>
-#include <vector>
+#include <memory> // for shared_ptr
+#include <vector> // for vector
 
-#include "util/timer.h"
+#include "util/timer.h" // for Timer
 
 // forward declaration
 class Config;

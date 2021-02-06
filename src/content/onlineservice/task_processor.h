@@ -4,17 +4,18 @@
 #ifndef __TASK_PROCESSOR_H__
 #define __TASK_PROCESSOR_H__
 
-#include <condition_variable>
-#include <deque>
-#include <memory>
+#include <condition_variable> // for condition_variable
+#include <deque> // for deque
+#include <memory> // for shared_ptr
+#include <mutex> // for lock_guard, mutex, unique_lock
+#include <pthread.h> // for pthread_t
 
-#include "common.h"
-#include "util/generic_task.h"
+#include "util/generic_task.h" // for GenericTask
 
 // forward declaration
 class ContentManager;
-class OnlineService;
 class Layout;
+class OnlineService;
 class Timer;
 
 class TaskProcessor {

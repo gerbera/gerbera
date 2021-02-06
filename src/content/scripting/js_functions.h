@@ -33,7 +33,7 @@
 #ifndef __SCRIPTING_JS_FUNCTIONS_H__
 #define __SCRIPTING_JS_FUNCTIONS_H__
 
-#include <duktape.h>
+#include <duktape.h> // for duk_ret_t, duk_context
 
 extern "C" {
 

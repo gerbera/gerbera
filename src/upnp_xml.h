@@ -32,12 +32,22 @@
 #ifndef __UPNP_XML_H__
 #define __UPNP_XML_H__
 
-#include <memory>
-#include <pugixml.hpp>
+#include <cstddef> // for size_t
+#include <map> // for map
+#include <memory> // for shared_ptr, unique_ptr
+#include <string> // for string
 
-#include "cds_objects.h"
-#include "common.h"
-#include "context.h"
+class CdsContainer;
+class CdsItem;
+class CdsObject;
+class Config;
+class Context;
+class Database;
+
+namespace pugi {
+class xml_document;
+class xml_node;
+} // namespace pugi
 
 class UpnpXMLBuilder {
 public:

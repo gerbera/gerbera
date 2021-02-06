@@ -32,11 +32,13 @@
 #ifdef HAVE_CURL
 #include "url.h" // API
 
-#include <pthread.h>
-#include <sstream>
+#include <curl/system.h> // for curl_off_t
+#include <sstream> // for ostringstream, basic_ostream, bas...
 
-#include "config/config_manager.h"
-#include "util/tools.h"
+#include "common.h" // for MIMETYPE_DEFAULT
+#include "config/config_manager.h" // for ConfigManager
+#include "exceptions.h" // for throw_std_runtime_error
+#include "util/logger.h" // for log_error, log_debug
 
 std::string URL::download(const std::string& URL, long* HTTP_retcode,
     CURL* curl_handle, bool only_header,

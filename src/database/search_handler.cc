@@ -24,15 +24,14 @@
 
 #include "search_handler.h" // API
 
-#include <algorithm>
-#include <cctype>
-#include <iostream>
-#include <sstream>
-#include <stack>
+#include <algorithm> // for copy, transform
+#include <cctype> // for isalnum, isspace, tolower
+#include <iostream> // for operator<<, basic_ostream, ostringstream, endl
+#include <sstream> // IWYU pragma: keep
+#include <stack> // for stack
+#include <unordered_map> // for unordered_map, operator!=, _Node_const_iter...
 
-#include "config/config_manager.h"
-#include "database/database.h"
-#include "util/tools.h"
+#include "exceptions.h" // for throw_std_runtime_error
 
 static const std::unordered_map<std::string_view, TokenType> tokenTypes {
     { "(", TokenType::LPAREN },

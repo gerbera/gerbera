@@ -32,13 +32,16 @@
 
 #ifdef SOPCAST
 
+#include <string> // for string
+
+class Config;
+class Context;
+class Database;
 #ifndef __SOPCAST_CONTENT_HANDLER_H__
 #define __SOPCAST_CONTENT_HANDLER_H__
 
-#include <memory>
-#include <pugixml.hpp>
-
-#include "context.h"
+#include <memory> // for shared_ptr, allocator, unique_ptr
+#include <pugixml.hpp> // for xml_document, xml_node_iterator, xml_node (pt...
 
 #define SOPCAST_SERVICE "SopCast"
 #define SOPCAST_SERVICE_ID "S"

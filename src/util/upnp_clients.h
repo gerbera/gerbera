@@ -28,14 +28,11 @@
 #ifndef __UPNP_CLIENTS_H__
 #define __UPNP_CLIENTS_H__
 
-#include <chrono>
-#include <memory>
-#include <mutex>
-#include <pugixml.hpp>
-#include <sys/socket.h>
-#include <vector>
+#include <mutex> // for mutex
+#include <sys/socket.h> // for sockaddr_storage
+#include <vector> // for vector
 
-#include "util/upnp_quirks.h"
+#include "util/upnp_quirks.h" // for QuirkFlags
 
 // forward declaration
 class Config;

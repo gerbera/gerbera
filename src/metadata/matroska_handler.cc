@@ -26,28 +26,38 @@
 #ifdef HAVE_MATROSKA
 #include "matroska_handler.h" // API
 
-#include <fmt/chrono.h>
-#include <iostream>
-#include <vector>
+#include <cassert> // for assert
+#include <cstdint> // for int64_t
+#include <cstdio> // for fclose, fopen, fread, fseeko
+#include <ebml/EbmlStream.h> // for EbmlStream
+#include <ebml/IOCallback.h> // for IOCallback, seek_beginning
+#include <filesystem> // for path
+#include <fmt/chrono.h> // for gmtime
+#include <fmt/format.h> // for format
+#include <matroska/KaxContexts.h> // for KaxSegment_Context
+#include <matroska/KaxSegment.h> // for KaxSegment, KaxSegment::Class...
+#include <utility> // for move
+#include <vector> // for vector
 
-#include <ebml/EbmlHead.h>
-#include <ebml/EbmlStream.h>
-#include <ebml/EbmlSubHead.h>
-#include <ebml/IOCallback.h>
+#include "EbmlElement.h" // for EbmlElement, EbmlCallbacks
+#include "EbmlId.h" // for EbmlId
+#include "EbmlMaster.h" // for EbmlMaster, GetChild, FindChild
+#include "EbmlUnicodeString.h" // for UTFstring
+#include "KaxSemantic.h" // for KaxFileData, KaxAttached, Kax...
+#include "c/libebml_t.h" // for uint32, uint64
+#include "cds_objects.h" // for CdsItem, CdsObject (ptr only)
+#include "cds_resource.h" // for CdsResource
+#include "common.h" // for MIMETYPE_DEFAULT
+#include "exceptions.h" // for throw_std_runtime_error
+#include "iohandler/io_handler.h" // for IOHandler
+#include "iohandler/mem_io_handler.h" // for MemIOHandler
+#include "metadata/metadata_handler.h" // for CH_MATROSKA, ID3_ALBUM_ART
+#include "util/logger.h" // for log_debug, log_error
+#include "util/mime.h" // for Mime
+#include "util/string_converter.h" // for StringConverter
+#include "util/tools.h" // for renderProtocolInfo, startswith
 
-#include <matroska/KaxAttached.h>
-#include <matroska/KaxAttachments.h>
-#include <matroska/KaxCluster.h>
-#include <matroska/KaxContexts.h>
-#include <matroska/KaxSeekHead.h>
-#include <matroska/KaxSegment.h>
-
-#include "cds_objects.h"
-#include "config/config_manager.h"
-#include "iohandler/mem_io_handler.h"
-#include "util/mime.h"
-#include "util/string_converter.h"
-#include "util/tools.h"
+class Context;
 
 using namespace LIBEBML_NAMESPACE;
 using namespace LIBMATROSKA_NAMESPACE;
@@ -218,8 +228,7 @@ void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream
                 log_error("Malformed MKV file; KaxDateUTC cast failed!");
                 continue;
             }
-            time_t i_date = date_el->GetEpochDate();
-            auto f_date = fmt::format("{:%Y-%m-%d}", fmt::gmtime(i_date));
+            auto f_date = fmt::format("{:%Y-%m-%d}", fmt::gmtime(date_el->GetEpochDate()));
             if (!f_date.empty()) {
                 // fmt::print("KaxDateUTC = %s\n", f_date.c_str());
                 item->setMetadata(M_DATE, sc->convert(f_date));

@@ -31,13 +31,25 @@
 
 #include "upnp_cds.h" // API
 
-#include <memory>
-#include <string>
-#include <vector>
+#include <fmt/format.h> // for to_string, format
+#include <memory> // for shared_ptr, unique_ptr, allocator
+#include <pugixml.hpp> // for xml_node, xml_document, node_pcdata
+#include <sstream> // for ostringstream
+#include <stdexcept> // for runtime_error
+#include <string> // for string, operator==, char_traits
+#include <vector> // for vector
 
-#include "config/config_manager.h"
-#include "database/database.h"
-#include "util/upnp_quirks.h"
+#include "action_request.h" // for ActionRequest
+#include "cds_objects.h" // for CdsObject, OBJECT_FLAG_PLAYED, Cds...
+#include "config/config.h" // for Config, CFG_SERVER_EXTOPTS_MARK_PL...
+#include "context.h" // for Context
+#include "database/database.h" // for BrowseParam, SearchParam, Database
+#include "exceptions.h" // for UpnpException
+#include "subscription_request.h" // for SubscriptionRequest
+#include "upnp_common.h" // for UPNP_DESC_CDS_SERVICE_TYPE, UPNP_E...
+#include "upnp_xml.h" // for UpnpXMLBuilder
+#include "util/logger.h" // for log_debug, log_warning
+#include "util/tools.h" // for stoiString
 
 ContentDirectoryService::ContentDirectoryService(const std::shared_ptr<Context>& context,
     UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle, int stringLimit)

@@ -31,9 +31,15 @@
 
 #include "io_handler_chainer.h" // API
 
-#include <thread>
+#include <chrono> // for seconds
+#include <stdexcept> // for runtime_error
+#include <thread> // for sleep_for
+#include <utility> // for move
 
-#include "exceptions.h"
+#include "exceptions.h" // for throw_std_runtime_error, TryAgainE...
+#include "iohandler/io_handler.h" // for IOHandler
+#include "upnp.h" // for UPNP_READ, UPNP_WRITE
+#include "util/logger.h" // for log_debug
 
 IOHandlerChainer::IOHandlerChainer(std::unique_ptr<IOHandler>& readFrom, std::unique_ptr<IOHandler>& writeTo, int chunkSize)
 {

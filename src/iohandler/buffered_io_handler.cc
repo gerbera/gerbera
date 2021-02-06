@@ -31,9 +31,20 @@
 
 #include "buffered_io_handler.h" // API
 
-#include <cassert>
+#include <cassert> // for assert
+#include <condition_variable> // for condition_variable
+#include <cstdio> // for size_t, SEEK_SET
+#include <ctime> // for timespec
+#include <mutex> // for unique_lock, mutex
+#include <stdexcept> // for runtime_error
+#include <utility> // for move
 
-#include "util/tools.h"
+#include "common.h" // for CHECK_SOCKET
+#include "exceptions.h" // for throw_std_runtime_error
+#include "iohandler/io_handler_buffer_helper.h" // for IOHandlerBufferHelper
+#include "upnp.h" // for UpnpOpenFileMode
+#include "util/logger.h" // for log_debug, log_error
+#include "util/tools.h" // for getDeltaMillis, getT...
 
 BufferedIOHandler::BufferedIOHandler(std::unique_ptr<IOHandler>& underlyingHandler, size_t bufSize, size_t maxChunkSize, size_t initialFillSize)
     : IOHandlerBufferHelper(bufSize, initialFillSize)

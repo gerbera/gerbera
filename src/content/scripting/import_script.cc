@@ -32,8 +32,14 @@
 #ifdef HAVE_JS
 #include "import_script.h" // API
 
-#include "config/config_manager.h"
-#include "js_functions.h"
+#include <duktape.h> // for duk_del_prop_string, duk_push_...
+#include <stdexcept> // for runtime_error
+#include <utility> // for move
+
+#include "config/config.h" // for CFG_IMPORT_SCRIPTING_IMPORT_SC...
+#include "content/scripting/script.h" // for JS_CALL_GC_AFTER_NUM, Script
+
+class CdsObject;
 
 ImportScript::ImportScript(std::shared_ptr<ContentManager> content,
     const std::shared_ptr<ScriptingRuntime>& runtime)

@@ -26,9 +26,9 @@
 #ifndef __SCRIPTING_SCRIPT_NAMES_H__
 #define __SCRIPTING_SCRIPT_NAMES_H__
 
-#include <array>
+#include <array> // for array
 
-#include "metadata/metadata_handler.h"
+#include "metadata/metadata_handler.h" // API
 
 constexpr std::array<std::pair<resource_attributes_t, const char*>, 11> res_names = { {
     { R_SIZE, "R_SIZE" },

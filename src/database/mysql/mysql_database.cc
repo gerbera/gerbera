@@ -30,15 +30,22 @@
 /// \file mysql_database.cc
 
 #ifdef HAVE_MYSQL
-#include "mysql_database.h"
+#include "mysql_database.h" // API
 
-#include <cstdlib>
+#include <cstring> // for strlen
+#include <netinet/in.h> // for in_port_t
+#include <ostream> // for operator<<, basic_ostream, ostringstream
+#include <stdexcept> // for runtime_error
+#include <utility> // for move
+#include <vector> // for vector
 
-#include <netinet/in.h>
-#include <zlib.h>
+#include "config/config.h" // for Config, CFG_SERVER_STORAGE_MYSQL_DATABASE
+#include "exceptions.h" // for throw_std_runtime_error, DatabaseException
+#include "mysql.h" // for mysql_real_query, mysql_fetch_row, mysql_...
+#include "util/logger.h" // for log_info, log_debug
+#include "util/tools.h" // for readTextFile, splitString
 
-#include "config/config_manager.h"
-#include "util/tools.h"
+class Database;
 
 //#define MYSQL_SET_NAMES "/*!40101 SET NAMES utf8 */"
 //#define MYSQL_SELECT_DEBUG

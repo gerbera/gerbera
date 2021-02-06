@@ -32,14 +32,22 @@
 #ifdef HAVE_JS
 #include "js_functions.h" // API
 
-#include <typeinfo>
+#include <filesystem> // for path
+#include <fmt/format.h> // for to_string
+#include <memory> // for shared_ptr, __shared_ptr_access
+#include <stdexcept> // for runtime_error
+#include <string> // for string
 
-#include "config/config_manager.h"
-#include "content/content_manager.h"
-#include "database/database.h"
-#include "metadata/metadata_handler.h"
-#include "script.h"
-#include "util/string_converter.h"
+#include "cds_objects.h" // for CdsObject, IS_CDS_ITEM_EXTERNAL...
+#include "common.h" // for INVALID_OBJECT_ID
+#include "config/config.h" // for Config, CFG_IMPORT_SCRIPTING_PL...
+#include "config/directory_tweak.h" // for AutoScanSetting
+#include "content/content_manager.h" // for ContentManager
+#include "database/database.h" // for Database
+#include "exceptions.h" // for ServerShutdownException
+#include "script.h" // for Script, S_PLAYLIST, F2I, J2I, M2I
+#include "util/logger.h" // for log_error, log_warning, log_debug
+#include "util/string_converter.h" // for StringConverter
 
 //extern "C" {
 

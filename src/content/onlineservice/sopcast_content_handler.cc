@@ -32,11 +32,20 @@
 #ifdef SOPCAST
 #include "sopcast_content_handler.h" // API
 
-#include "cds_objects.h"
-#include "config/config_manager.h"
-#include "metadata/metadata_handler.h"
-#include "online_service.h"
-#include "util/tools.h"
+#include <chrono> // for system_clock
+#include <fmt/format.h> // for to_string
+#include <stdexcept> // for runtime_error
+#include <utility> // for move
+
+#include "cds_objects.h" // for CdsItemExternalURL, CdsObject...
+#include "cds_resource.h" // for CdsResource
+#include "context.h" // for Context
+#include "exceptions.h" // for throw_std_runtime_error
+#include "metadata/metadata_handler.h" // for CH_DEFAULT, M_DESCRIPTION
+#include "online_service.h" // for OS_SopCast, ONLINE_SERVICE_AU...
+#include "upnp_common.h" // for UPNP_CLASS_VIDEO_BROADCAST
+#include "util/logger.h" // for log_warning
+#include "util/tools.h" // for renderProtocolInfo
 
 SopCastContentHandler::SopCastContentHandler(const std::shared_ptr<Context>& context)
     : config(context->getConfig())

@@ -28,10 +28,9 @@
 #ifndef __SEARCH_HANDLER_H__
 #define __SEARCH_HANDLER_H__
 
-#include <memory>
-#include <string>
-#include <unordered_map>
-#include <vector>
+#include <memory> // for shared_ptr, allocator, unique_ptr, make_unique
+#include <string> // for string, operator==
+#include <utility> // for move
 
 class SearchParam;
 

@@ -34,13 +34,10 @@
 #ifndef __UTIL_XML_TO_JSON_H__
 #define __UTIL_XML_TO_JSON_H__
 
-#include <map>
-#include <memory>
-#include <sstream>
-#include <stack>
-#include <string>
-
-#include <pugixml.hpp>
+#include <map> // for map, map<>::mapped_type
+#include <pugixml.hpp> // for xml_node
+#include <sstream> // for ostringstream
+#include <string> // for string, basic_string, operator<
 
 class Xml2Json {
 public:

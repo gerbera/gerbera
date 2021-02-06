@@ -26,16 +26,19 @@
 #ifndef __MIME_H__
 #define __MIME_H__
 
-#include <filesystem>
-#include <map>
-#include <memory>
-#include <string>
+#include <chrono> // for filesystem
+#include <cstddef> // for size_t
+#include <filesystem> // for path
+#include <map> // for map
+#include <memory> // for allocator, shared_ptr
+#include <string> // for string
+
 namespace fs = std::filesystem;
 
 #ifdef HAVE_MAGIC
 // for older versions of filemagic
 extern "C" {
-#include <magic.h>
+#include <magic.h> // for magic_set, magic_t
 }
 #endif
 

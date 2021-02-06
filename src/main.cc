@@ -34,21 +34,39 @@
 /// This documentation was generated using doxygen, you can reproduce it by
 /// running "doxygen doxygen.conf" from the mediatomb/doc/ directory.
 
-#include <csignal>
-#include <filesystem>
-#include <mutex>
-#include <spdlog/sinks/basic_file_sink.h>
+#include <condition_variable> // for condition_variable
+#include <csignal> // for sigaction, pthread_sigmask
+#include <cstdio> // for printf
+#include <cstdlib> // for exit, getenv, EXIT_FAILURE
+#include <cstring> // for strlen
+#include <iostream> // for operator<<, endl, basic_os...
+#include <memory> // for shared_ptr, allocator, mak...
+#include <mutex> // for mutex, unique_lock
+#include <netinet/in.h> // for in_port_t
+#include <optional> // for optional
+#include <pthread.h> // for pthread_self, pthread_t
+#include <spdlog/common.h> // for debug, info, trace
+#include <spdlog/sinks/basic_file_sink.h> // for basic_logger_mt
+#include <spdlog/spdlog.h> // for set_level, set_pattern
+#include <stdexcept> // for runtime_error
+#include <string> // for string, basic_string, char...
+#include <vector> // for vector
 
 #ifdef SOLARIS
 #include <iso/limits_iso.h>
 #endif
 
-#include "common.h"
-#include "config/config_generator.h"
-#include "config/config_manager.h"
-#include "content/content_manager.h"
-#include "contrib/cxxopts.hpp"
-#include "server.h"
+#include "common.h" // for DEFAULT_CONFIG_HOME, DESC_...
+#include "config/config.h" // for Config (ptr only), CFG_IMP...
+#include "config/config_generator.h" // for ConfigGenerator
+#include "config/config_manager.h" // for ConfigManager
+#include "config/directory_tweak.h" // for AutoScanSetting
+#include "content/content_manager.h" // for ContentManager
+#include "contrib/cxxopts.hpp" // for value, ParseResult, Option...
+#include "exceptions.h" // for ConfigParseException, Upnp...
+#include "server.h" // for Server
+#include "upnp.h" // for UPNP_E_SOCKET_BIND, UPNP_E...
+#include "util/logger.h" // for log_error, log_info, log_d...
 
 static struct {
     int shutdown_flag = 0;

@@ -27,10 +27,20 @@
 #ifndef __METADATA_CONTENT_H__
 #define __METADATA_CONTENT_H__
 
-#include <filesystem>
+#include <chrono> // for filesystem
+#include <filesystem> // for path
+#include <memory> // for shared_ptr, unique_ptr
+#include <string> // for string
+#include <vector> // for vector
+
 namespace fs = std::filesystem;
 
-#include "metadata_handler.h"
+#include "metadata/metadata_handler.h" // for MetadataHandler
+#include "metadata_handler.h" // for MetadataHandler
+
+class CdsObject;
+class Context;
+class IOHandler;
 
 /// \brief This class is responsible for populating filesystem based metadata
 class MetacontentHandler : public MetadataHandler {

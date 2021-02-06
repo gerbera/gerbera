@@ -31,19 +31,24 @@
 
 #include "process.h" // API
 
-#include <cerrno>
-#include <csignal>
-#include <cstdio>
-#include <cstring>
-#include <thread>
+#include <cerrno> // for errno
+#include <chrono> // for seconds
+#include <csignal> // for kill, SIGINT, SIGKILL, SIGTERM
+#include <cstdio> // for fclose, fopen, fread, FILE, size_t
+#include <cstdlib> // for system
+#include <cstring> // for strerror
+#include <fcntl.h> // for open, O_CLOEXEC, O_CREAT, O_EXCL, O_RDWR
+#include <filesystem> // for path
+#include <ostream> // for ostringstream, basic_ostream
+#include <sys/stat.h> // for S_IRUSR, S_IWUSR
+#include <sys/wait.h> // for waitpid, WNOHANG
+#include <thread> // for sleep_for
+#include <unistd.h> // for close, unlink, write, pid_t
 
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <sys/wait.h>
-#include <unistd.h>
-
-#include "config/config_manager.h"
-#include "util/tools.h"
+#include "config/config.h" // for CFG_SERVER_TMPDIR, Config
+#include "exceptions.h" // for throw_std_runtime_error
+#include "util/logger.h" // for log_debug
+#include "util/tools.h" // for tempName
 
 #define BUF_SIZE 256
 

@@ -32,16 +32,21 @@
 #ifndef __PROCESS_IO_HANDLER_H__
 #define __PROCESS_IO_HANDLER_H__
 
-#include <filesystem>
-#include <memory>
+#include <chrono> // for filesystem
+#include <cstddef> // for size_t
+#include <filesystem> // for path
+#include <memory> // for shared_ptr
+#include <sys/types.h> // for off_t
+#include <vector> // for vector
+
 namespace fs = std::filesystem;
 
-#include "common.h"
-#include "io_handler.h"
-#include "util/executor.h"
+#include "io_handler.h" // for IOHandler
+#include "upnp.h" // for UpnpOpenFileMode
 
 // forward declaration
 class ContentManager;
+class Executor;
 
 #define FIFO_READ_TIMEOUT 2
 #define FIFO_WRITE_TIMEOUT 2

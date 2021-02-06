@@ -31,9 +31,14 @@
 
 #include "io_handler_buffer_helper.h" // API
 
-#include <cstdlib>
+#include <cassert> // for assert
+#include <cstdio> // for SEEK_CUR, SEEK_END, SEEK_SET
+#include <cstring> // for memcpy
 
-#include "config/config_manager.h"
+#include "common.h" // for CHECK_SOCKET
+#include "exceptions.h" // for throw_std_runtime_error
+#include "upnp.h" // for UpnpOpenFileMode
+#include "util/logger.h" // for log_debug
 
 IOHandlerBufferHelper::IOHandlerBufferHelper(size_t bufSize, size_t initialFillSize)
 {

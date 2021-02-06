@@ -32,14 +32,14 @@
 
 #ifdef HAVE_CURL
 
+#include <cstddef> // for size_t
+#include <sys/types.h> // for off_t
 #ifndef __URL_H__
 #define __URL_H__
 
-#include <curl/curl.h>
-#include <memory>
-#include <string>
-
-#include "common.h"
+#include <curl/curl.h> // for CURL
+#include <memory> // for unique_ptr
+#include <string> // for string
 
 class URL {
 public:

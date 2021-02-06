@@ -32,8 +32,17 @@
 #ifdef ONLINE_SERVICES
 #include "task_processor.h" // API
 
-#include "content/content_manager.h"
-#include "content/layout/layout.h"
+#include <algorithm> // for copy_if
+#include <iterator> // for back_insert_iterator
+#include <stdexcept> // for runtime_error
+#include <string> // for string
+#include <utility> // for move
+
+#include "content/content_manager.h" // for ContentManager
+#include "content/onlineservice/online_service.h" // for OnlineService
+#include "exceptions.h" // for ServerShutdownExce...
+#include "util/logger.h" // for log_debug, log_error
+#include "util/timer.h" // for Timer
 
 void TaskProcessor::run()
 {

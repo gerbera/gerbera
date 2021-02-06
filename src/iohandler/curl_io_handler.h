@@ -31,14 +31,17 @@
 
 #ifdef HAVE_CURL
 
+#include <cstddef> // for size_t
+#include <string> // for string
+
+#include "iohandler/io_handler_buffer_helper.h" // for IOHandlerBufferHelper
 #ifndef __CURL_IO_HANDLER_H__
 #define __CURL_IO_HANDLER_H__
 
-#include <curl/curl.h>
-#include <upnp.h>
+#include <curl/curl.h> // for CURL
+#include <upnp.h> // for UpnpOpenFileMode
 
-#include "common.h"
-#include "io_handler_buffer_helper.h"
+#include "io_handler_buffer_helper.h" // for IOHandlerBufferHelper
 
 class CurlIOHandler : public IOHandlerBufferHelper {
 public:

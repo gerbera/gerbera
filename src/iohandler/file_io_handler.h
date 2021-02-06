@@ -32,11 +32,15 @@
 #ifndef __FILE_IO_HANDLER_H__
 #define __FILE_IO_HANDLER_H__
 
-#include <filesystem>
+#include <chrono> // for filesystem
+#include <cstdio> // for size_t, FILE
+#include <filesystem> // for path
+#include <sys/types.h> // for off_t
+
 namespace fs = std::filesystem;
 
-#include "common.h"
-#include "io_handler.h"
+#include "io_handler.h" // for IOHandler
+#include "upnp.h" // for UpnpOpenFileMode
 
 /// \brief Allows the web server to read from a file.
 class FileIOHandler : public IOHandler {

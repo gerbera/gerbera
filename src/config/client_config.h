@@ -27,13 +27,15 @@
 #ifndef __CLIENTCONFIG_H__
 #define __CLIENTCONFIG_H__
 
-#include <filesystem>
-#include <map>
-#include <mutex>
-#include <vector>
+#include <limits> // for numeric_limits
+#include <map> // for map
+#include <memory> // for shared_ptr, __shared_ptr_access, allo...
+#include <mutex> // for recursive_mutex, lock_guard
+#include <string> // for string
+#include <vector> // for vector
 
-#include "util/upnp_clients.h"
-#include "util/upnp_quirks.h"
+#include "util/upnp_clients.h" // for ClientInfo, ClientMatchType, ClientMa...
+#include "util/upnp_quirks.h" // for QuirkFlags
 
 // forward declaration
 class ClientConfig;
@@ -46,29 +48,29 @@ public:
     ///
     /// \param dir ClientConfig to add to the list.
     /// \return scanID of the newly added ClientConfig
-    void add(const std::shared_ptr<ClientConfig>& client, size_t index = SIZE_MAX);
+    void add(const std::shared_ptr<ClientConfig>& client, std::size_t index = std::numeric_limits<std::size_t>::max());
 
-    std::shared_ptr<ClientConfig> get(size_t id, bool edit = false);
+    std::shared_ptr<ClientConfig> get(std::size_t id, bool edit = false);
 
-    size_t getEditSize() const;
+    std::size_t getEditSize() const;
 
-    size_t size() const { return list.size(); }
+    std::size_t size() const { return list.size(); }
 
     /// \brief removes the ClientConfig given by its scan ID
-    void remove(size_t id, bool edit = false);
+    void remove(std::size_t id, bool edit = false);
 
     /// \brief returns a copy of the client config list in the form of an array
     std::vector<std::shared_ptr<ClientConfig>> getArrayCopy();
 
 protected:
-    size_t origSize;
-    std::map<size_t, std::shared_ptr<ClientConfig>> indexMap;
+    std::size_t origSize;
+    std::map<std::size_t, std::shared_ptr<ClientConfig>> indexMap;
 
     std::recursive_mutex mutex;
     using AutoLock = std::lock_guard<std::recursive_mutex>;
 
     std::vector<std::shared_ptr<ClientConfig>> list;
-    void _add(const std::shared_ptr<ClientConfig>& client, size_t index);
+    void _add(const std::shared_ptr<ClientConfig>& client, std::size_t index);
 };
 
 /// \brief Provides information about one manual client.

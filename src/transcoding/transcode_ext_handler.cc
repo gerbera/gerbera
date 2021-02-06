@@ -31,32 +31,36 @@
 
 #include "transcode_ext_handler.h" // API
 
-#include <climits>
-#include <csignal>
-#include <cstdio>
-#include <cstring>
-#include <filesystem>
+#include <cerrno> // for errno
+#include <cstring> // for strerror, strcpy
+#include <fcntl.h> // for O_RDWR
+#include <filesystem> // for path
+#include <fmt/format.h> // for format
+#include <stdexcept> // for runtime_error
+#include <sys/stat.h> // for chmod, mkfifo, S_I...
+#include <system_error> // for error_code
+#include <unistd.h> // for sleep, unlink
+#include <utility> // for move
+#include <vector> // for vector
 
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <unistd.h>
-
-#include "cds_objects.h"
-#include "config/config_manager.h"
-#include "content/content_manager.h"
-#include "database/database.h"
-#include "iohandler/buffered_io_handler.h"
-#include "iohandler/file_io_handler.h"
-#include "iohandler/io_handler_chainer.h"
-#include "iohandler/process_io_handler.h"
-#include "metadata/metadata_handler.h"
-#include "transcoding_process_executor.h"
-#include "util/process.h"
-#include "util/tools.h"
-#include "web/session_manager.h"
+#include "cds_objects.h" // for CdsObject, OBJECT_...
+#include "config/config.h" // for Config, CFG_SERVER...
+#include "content/content_manager.h" // for ContentManager
+#include "content/onlineservice/online_service.h" // for service_type_t
+#include "exceptions.h" // for throw_std_runtime_...
+#include "iohandler/buffered_io_handler.h" // for BufferedIOHandler
+#include "iohandler/io_handler.h" // for IOHandler
+#include "iohandler/io_handler_chainer.h" // for IOHandlerChainer
+#include "iohandler/process_io_handler.h" // for ProcListItem, Proc...
+#include "transcoding/transcode_handler.h" // for TranscodeHandler
+#include "transcoding/transcoding.h" // for TranscodingProfile
+#include "transcoding_process_executor.h" // for TranscodingProcess...
+#include "util/logger.h" // for log_debug, log_error
+#include "util/process_executor.h" // for ProcessExecutor
+#include "util/tools.h" // for find_local_port
 
 #ifdef HAVE_CURL
-#include "iohandler/curl_io_handler.h"
+#include "iohandler/curl_io_handler.h" // for CurlIOHandler
 #endif
 
 TranscodeExternalHandler::TranscodeExternalHandler(std::shared_ptr<ContentManager> content)

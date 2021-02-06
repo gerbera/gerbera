@@ -31,9 +31,9 @@
 
 #include "file_io_handler.h" // API
 
-#include <cstdio>
+#include <utility> // for move
 
-#include "cds_objects.h"
+#include "exceptions.h" // for throw_std_runtime_error
 
 FileIOHandler::FileIOHandler(fs::path filename)
     : filename(std::move(filename))

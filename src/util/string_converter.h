@@ -32,11 +32,13 @@
 #ifndef __STRING_CONVERTER_H__
 #define __STRING_CONVERTER_H__
 
-#include <iconv.h>
-#include <memory>
+#include <filesystem> // for path
+#include <iconv.h> // for iconv_t
+#include <memory> // for shared_ptr, unique_ptr
+#include <stddef.h> // for size_t
+#include <string> // for string
 
-#include "common.h"
-#include "config/config.h"
+#include "config/config.h" // for Config (ptr only), config_option_t
 
 class StringConverter {
 public:

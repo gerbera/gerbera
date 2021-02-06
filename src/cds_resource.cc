@@ -31,9 +31,14 @@
 
 #include "cds_resource.h" // API
 
-#include <sstream>
+#include <algorithm> // for equal
+#include <cstddef> // for size_t
+#include <sstream> // for operator<<, ostringstream, basic_ostream
+#include <utility> // for move
+#include <vector> // for vector
 
-#include "util/tools.h"
+#include "exceptions.h" // for throw_std_runtime_error
+#include "util/tools.h" // for dictDecode, dictEncode, getValueOrDefault
 
 #define RESOURCE_PART_SEP '~'
 

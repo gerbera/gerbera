@@ -32,11 +32,11 @@
 #ifndef __MT_INOTIFY_H__
 #define __MT_INOTIFY_H__
 
+#include <chrono> // for filesystem
 #ifdef HAVE_INOTIFY
 
-#include <filesystem>
-#include <string>
-#include <sys/inotify.h>
+#include <filesystem> // for path
+
 namespace fs = std::filesystem;
 
 /// \brief Inotify interface.

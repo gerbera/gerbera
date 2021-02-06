@@ -31,8 +31,6 @@
 
 #include "transcoding_process_executor.h" // API
 
-#include <unistd.h>
-
 TranscodingProcessExecutor::TranscodingProcessExecutor(const std::string& command, const std::vector<std::string>& arglist)
     : ProcessExecutor(command, arglist)
 {

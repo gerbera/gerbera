@@ -25,7 +25,12 @@
 
 #include "layout.h" // API
 
-#include "content/content_manager.h"
+#include <memory> // for shared_ptr, __shared_ptr_access
+#include <utility> // for move
+
+#include "content/content_manager.h" // for ContentManager
+#include "content/layout/layout.h" // for Layout
+#include "context.h" // for Context
 
 Layout::Layout(std::shared_ptr<ContentManager> content)
     : config(content->getContext()->getConfig())

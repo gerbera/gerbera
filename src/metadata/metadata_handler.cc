@@ -31,33 +31,45 @@
 
 #include "metadata_handler.h" // API
 
-#include <filesystem>
+#include <algorithm> // for find_if
+#include <array> // for array
+#include <filesystem> // for path
+#include <fmt/format.h> // for to_string
+#include <memory> // for make_unique, shared_ptr
+#include <string> // for string, operator==, basic_...
+#include <system_error> // for error_code
+#include <utility> // for pair
 
-#include "cds_objects.h"
-#include "config/config_manager.h"
-#include "util/tools.h"
+#include "cds_objects.h" // for CdsItem, OBJECT_FLAG_OGG_T...
+#include "cds_resource.h" // for CdsResource
+#include "common.h" // for MIMETYPE_DEFAULT
+#include "config/config.h" // for CFG_IMPORT_MAPPINGS_MIMETY...
+#include "context.h" // for Context
+#include "exceptions.h" // for throw_std_runtime_error
+#include "metadata/metadata_handler.h" // for MetadataHandler, metadata_...
+#include "util/tools.h" // for startswith, getFileSize
 
 #ifdef HAVE_EXIV2
-#include "metadata/exiv2_handler.h"
+#include "metadata/exiv2_handler.h" // for Exiv2Handler
 #endif
 
 #ifdef HAVE_TAGLIB
-#include "metadata/taglib_handler.h"
+#include "metadata/taglib_handler.h" // for TagLibHandler
 #endif // HAVE_TAGLIB
 
 #ifdef HAVE_FFMPEG
-#include "metadata/ffmpeg_handler.h"
+#include "metadata/ffmpeg_handler.h" // for FfmpegHandler
 #endif
 
 #ifdef HAVE_LIBEXIF
-#include "metadata/libexif_handler.h"
+#include "metadata/libexif_handler.h" // for LibExifHandler
 #endif
 
 #ifdef HAVE_MATROSKA
-#include "metadata/matroska_handler.h"
+#include "metadata/matroska_handler.h" // for MatroskaHandler
 #endif
 
-#include "metadata/metacontent_handler.h"
+#include "metadata/metacontent_handler.h" // for FanArtHandler, ResourceHan...
 
 MetadataHandler::MetadataHandler(const std::shared_ptr<Context>& context)
     : config(context->getConfig())

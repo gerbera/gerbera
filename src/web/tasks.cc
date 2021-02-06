@@ -29,9 +29,17 @@
 
 /// \file tasks.cc
 
-#include "pages.h" // API
+#include <deque> // for deque, operator!=, _Deque_iterator
+#include <memory> // for allocator, shared_ptr, __shared...
+#include <pugixml.hpp> // for xml_document, xml_node
+#include <string> // for operator==, basic_string, string
+#include <utility> // for move
 
-#include "content/content_manager.h"
+#include "content/content_manager.h" // for ContentManager
+#include "exceptions.h" // for throw_std_runtime_error
+#include "pages.h" // for tasks
+#include "util/xml_to_json.h" // for Xml2Json::Hints
+#include "web/web_request_handler.h" // for WebRequestHandler
 
 web::tasks::tasks(std::shared_ptr<ContentManager> content)
     : WebRequestHandler(std::move(content))

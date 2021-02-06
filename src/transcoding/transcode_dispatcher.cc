@@ -31,11 +31,15 @@
 
 #include "transcode_dispatcher.h" // API
 
-#include "cds_objects.h"
-#include "iohandler/io_handler.h"
-#include "transcode_ext_handler.h"
-#include "transcoding.h"
-#include "util/tools.h"
+#include <utility> // for move
+
+#include "exceptions.h" // for throw_std_runtime_error
+#include "transcode_ext_handler.h" // for TranscodeExternalHandler
+#include "transcoding.h" // for TranscodingProfile, TR_Ex...
+#include "transcoding/transcode_handler.h" // for TranscodeHandler
+
+class CdsObject;
+class ContentManager;
 
 TranscodeDispatcher::TranscodeDispatcher(std::shared_ptr<ContentManager> content)
     : TranscodeHandler(std::move(content))

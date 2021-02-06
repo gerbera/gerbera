@@ -32,12 +32,15 @@
 #ifndef __STORAGE_H__
 #define __STORAGE_H__
 
-#include <filesystem>
-#include <map>
-#include <memory>
-#include <string>
-#include <unordered_set>
-#include <vector>
+#include <chrono> // for filesystem
+#include <filesystem> // for path
+#include <map> // for map
+#include <memory> // for shared_ptr, unique_ptr, allocator
+#include <string> // for string
+#include <unordered_set> // for unordered_set
+#include <utility> // for move
+#include <vector> // for vector
+
 namespace fs = std::filesystem;
 
 // forward declaration
@@ -46,6 +49,7 @@ class AutoscanList;
 class CdsObject;
 class Config;
 class ConfigValue;
+
 enum class ScanMode;
 class Timer;
 
@@ -215,8 +219,8 @@ public:
     class ChangedContainers {
     public:
         // Signed because IDs start at -1.
-        std::vector<int32_t> upnp;
-        std::vector<int32_t> ui;
+        std::vector<int> upnp;
+        std::vector<int> ui;
     };
 
     /// \brief Removes the object identified by the objectID from the database.

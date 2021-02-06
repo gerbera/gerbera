@@ -29,16 +29,24 @@
 
 /// \file serve_request_handler.cc
 
-#include "serve_request_handler.h"
+#include "serve_request_handler.h" // API
 
-#include <sys/stat.h>
-#include <unistd.h>
+#include <cstddef> // for size_t
+#include <string> // for string, operator+, char_traits
+#include <sys/stat.h> // for stat, S_ISREG, S_ISDIR, st_mtime
+#include <unistd.h> // for access, R_OK
+#include <utility> // for move
 
-#include "config/config_manager.h"
-#include "content/content_manager.h"
-#include "iohandler/file_io_handler.h"
-#include "util/mime.h"
-#include "util/tools.h"
+#include "common.h" // for CONTENT_SERVE_HANDLER, SERVER...
+#include "config/config.h" // for CFG_SERVER_SERVEDIR, Config
+#include "exceptions.h" // for throw_std_runtime_error
+#include "iohandler/file_io_handler.h" // for FileIOHandler
+#include "util/logger.h" // for log_debug
+#include "util/mime.h" // for Mime
+#include "util/tools.h" // for urlUnescape
+
+class ContentManager;
+class IOHandler;
 
 ServeRequestHandler::ServeRequestHandler(std::shared_ptr<ContentManager> content)
     : RequestHandler(std::move(content))

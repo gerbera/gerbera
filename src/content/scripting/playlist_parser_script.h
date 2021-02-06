@@ -32,10 +32,9 @@
 #ifndef __SCRIPTING_PLAYLIST_PARSER_SCRIPT_H__
 #define __SCRIPTING_PLAYLIST_PARSER_SCRIPT_H__
 
-#include <memory>
+#include <memory> // for shared_ptr
 
-#include "common.h"
-#include "script.h"
+#include "script.h" // for script_class_t
 
 // forward declaration
 class CdsObject;

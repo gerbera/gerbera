@@ -31,15 +31,20 @@
 
 #ifdef HAVE_MYSQL
 
+#include <fmt/format.h> // for to_string
+#include <memory> // for shared_ptr, unique_ptr, allocator
+#include <pthread.h> // for pthread_key_t
+
+class Config;
+class Database;
 #ifndef __mysql_database_H__
 #define __mysql_database_H__
 
-#include "common.h"
-#include "database/sql_database.h"
-#include <mutex>
-#include <mysql.h>
-#include <string>
-#include <vector>
+#include <mutex> // for lock_guard, recursive_mutex
+#include <mysql.h> // for mysql_num_rows, MYSQL, MYSQL_RES
+#include <string> // for string
+
+#include "database/sql_database.h" // for SQLDatabase, SQLResult, SQLRow
 
 class MySQLDatabase : public SQLDatabase, public std::enable_shared_from_this<SQLDatabase> {
 public:

@@ -31,29 +31,52 @@
 
 #include "content_manager.h" // API
 
-#include <cerrno>
-#include <cstring>
-#include <filesystem>
-#include <regex>
+#include <algorithm> // for find_if, any_of
+#include <array> // for array
+#include <cerrno> // for errno
+#include <chrono> // for system_clock
+#include <cstdint> // for int64_t
+#include <cstring> // for strerror, size_t
+#include <cxxabi.h> // for __forced_unwind
+#include <dirent.h> // for closedir, opendir
+#include <filesystem> // for path, is_direc...
+#include <fmt/format.h> // for format, to_string
+#include <iterator> // for back_insert_it...
+#include <regex> // for regex_replace
+#include <sstream> // for basic_stringbu...
+#include <stdexcept> // for runtime_error
+#include <sys/stat.h> // for stat, st_mtime
+#include <system_error> // for error_code
+#include <unordered_set> // for unordered_set
+#include <utility> // for move, pair
 
-#include <sys/stat.h>
-#include <unistd.h>
-
-#include "config/config_manager.h"
-#include "config/directory_tweak.h"
-#include "database/database.h"
-#include "layout/builtin_layout.h"
-#include "metadata/metadata_handler.h"
-#include "update_manager.h"
-#include "util/mime.h"
-#include "util/process.h"
-#include "util/string_converter.h"
-#include "util/timer.h"
-#include "util/tools.h"
-#include "web/session_manager.h"
+#include "cds_objects.h" // for CdsObject, Cds...
+#include "cds_resource.h" // for CdsResource
+#include "config/config.h" // for Config, CFG_IM...
+#include "config/directory_tweak.h" // for AutoScanSetting
+#include "content/autoscan.h" // for AutoscanDirectory
+#include "content/autoscan_inotify.h" // for AutoscanInotify
+#include "content/autoscan_list.h" // for AutoscanList
+#include "content/layout/layout.h" // for Layout
+#include "content/onlineservice/online_service.h" // for OnlineServiceList
+#include "content/scripting/playlist_parser_script.h" // for PlaylistParser...
+#include "context.h" // for Context
+#include "database/database.h" // for Database, Data...
+#include "exceptions.h" // for throw_std_runt...
+#include "layout/builtin_layout.h" // for BuiltinLayout
+#include "metadata/metadata_handler.h" // for MetadataHandler
+#include "update_manager.h" // for UpdateManager
+#include "upnp_common.h" // for UPNP_CLASS_MUS...
+#include "util/executor.h" // for Executor
+#include "util/logger.h" // for log_debug, log...
+#include "util/mime.h" // for Mime
+#include "util/string_converter.h" // for StringConverter
+#include "util/timer.h" // for Timer::Parameter
+#include "util/tools.h" // for getValueOrDefault
+#include "web/session_manager.h" // for SessionManager
 
 #ifdef HAVE_JS
-#include "layout/js_layout.h"
+#include "layout/js_layout.h" // for JSLayout
 #endif
 
 #ifdef HAVE_LASTFMLIB
@@ -61,19 +84,19 @@
 #endif
 
 #ifdef SOPCAST
-#include "onlineservice/sopcast_service.h"
+#include "onlineservice/sopcast_service.h" // for SopCastService
 #endif
 
 #ifdef ATRAILERS
-#include "onlineservice/atrailers_service.h"
+#include "onlineservice/atrailers_service.h" // for ATrailersService
 #endif
 
 #ifdef ONLINE_SERVICES
-#include "onlineservice/task_processor.h"
+#include "onlineservice/task_processor.h" // for TaskProcessor
 #endif
 
 #ifdef HAVE_JS
-#include "scripting/scripting_runtime.h"
+#include "scripting/scripting_runtime.h" // for ScriptingRuntime
 #endif
 
 ContentManager::ContentManager(const std::shared_ptr<Context>& context,

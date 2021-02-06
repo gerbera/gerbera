@@ -29,24 +29,37 @@
 
 /// \file auth.cc
 
-#include "pages.h" // API
+#include <chrono> // for seconds, time_point_cast, duration
+#include <ctime> // for time_t
+#include <fmt/format.h> // for format
+#include <memory> // for shared_ptr, __shared_ptr_access
+#include <pugixml.hpp> // for xml_node, xml_attribute, node_p...
+#include <string> // for string, operator==, basic_string
+#include <type_traits> // for enable_if<>::type
+#include <utility> // for move
+#include <vector> // for vector
 
-#include <chrono>
+#include "config/config.h" // for Config, CFG_IMPORT_AUTOSCAN_USE...
+#include "exceptions.h" // for throw_std_runtime_error
+#include "pages.h" // for auth
+#include "session_manager.h" // for Session, SessionManager
+#include "util/logger.h" // for log_debug
+#include "util/tools.h" // for generateRandomId, hexStringMd5
+#include "util/xml_to_json.h" // for Xml2Json::Hints
+#include "web/web_request_handler.h" // for LoginException, WebRequestHandler
 
-#include "config/config_manager.h"
-#include "session_manager.h"
-#include "util/tools.h"
+class ContentManager;
 
 #define LOGIN_TIMEOUT 10 // in seconds
 
-static time_t get_time()
+static std::time_t get_time()
 {
     return std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::system_clock::now()).time_since_epoch().count();
 }
 
 static std::string generate_token()
 {
-    const time_t expiration = get_time() + LOGIN_TIMEOUT;
+    std::time_t expiration = get_time() + LOGIN_TIMEOUT;
     std::string salt = generateRandomId();
     return fmt::format("{}_{}", expiration, salt);
 }
@@ -56,7 +69,7 @@ static bool check_token(const std::string& token, const std::string& password, c
     std::vector<std::string> parts = splitString(token, '_');
     if (parts.size() != 2)
         return false;
-    auto expiration = time_t(std::stol(parts[0]));
+    auto expiration = std::time_t(std::stol(parts[0]));
     if (expiration < get_time())
         return false;
     std::string checksum = hexStringMd5(token + password);

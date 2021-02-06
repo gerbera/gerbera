@@ -31,22 +31,35 @@
 
 #include "sql_database.h" // API
 
-#include <algorithm>
-#include <climits>
-#include <filesystem>
-#include <fmt/chrono.h>
-#include <list>
-#include <sstream>
-#include <string>
-#include <vector>
+#include <cassert> // for assert
+#include <ctime> // for size_t, time_t
+#include <filesystem> // for path, operator==
+#include <fmt/chrono.h> // for localtime
+#include <fmt/format.h> // for to_string
+#include <limits> // for numeric_limits
+#include <list> // for list, operator!=
+#include <sstream> // for operator<<, basic_ostream, char_t...
+#include <stdexcept> // for runtime_error
+#include <string> // for string, operator<<, stoi, allocator
+#include <system_error> // for error_code
+#include <type_traits> // for underlying_type_t
+#include <utility> // for move, pair
+#include <vector> // for vector, vector<>::iterator
 
-#include "cds_objects.h"
-#include "config/config_manager.h"
-#include "config/config_setup.h"
-#include "content/autoscan.h"
-#include "search_handler.h"
-#include "util/string_converter.h"
-#include "util/tools.h"
+#include "cds_objects.h" // for CdsObject, CdsItem, IS_CDS_CONTAINER
+#include "cds_resource.h" // for CdsResource
+#include "common.h" // for INVALID_OBJECT_ID, IS_FORBIDDEN_C...
+#include "config/config.h" // for CFG_SERVER_STORAGE_DRIVER, Config
+#include "config/config_setup.h" // for ConfigValue
+#include "content/autoscan.h" // for AutoscanDirectory, ScanMode, INVA...
+#include "content/autoscan_list.h" // for AutoscanList
+#include "database/database.h" // for Database::ChangedContainers, Brow...
+#include "exceptions.h" // for throw_std_runtime_error, Database...
+#include "search_handler.h" // for DefaultSQLEmitter, SearchParser
+#include "upnp_common.h" // for UPNP_CLASS_CONTAINER, UPNP_CLASS_...
+#include "util/logger.h" // for log_debug, log_info, log_error
+#include "util/string_converter.h" // for StringConverter
+#include "util/tools.h" // for join, fallbackString, stringHash
 
 #define MAX_REMOVE_SIZE 1000
 #define MAX_REMOVE_RECURSION 500
@@ -518,7 +531,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_pt
         bool doLimit = true;
         if (!count) {
             if (param->getStartingIndex())
-                count = INT_MAX;
+                count = std::numeric_limits<int>::max();
             else
                 doLimit = false;
         }
@@ -1217,8 +1230,8 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObjects(const st
     if (res == nullptr)
         throw_std_runtime_error("sql error");
 
-    std::vector<int32_t> items;
-    std::vector<int32_t> containers;
+    std::vector<int> items;
+    std::vector<int> containers;
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow()) != nullptr) {
         int objectType = std::stoi(row->col(1));
@@ -1232,7 +1245,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObjects(const st
     return _purgeEmptyContainers(rr);
 }
 
-void SQLDatabase::_removeObjects(const std::vector<int32_t>& objectIDs)
+void SQLDatabase::_removeObjects(const std::vector<int>& objectIDs)
 {
     auto objectIdsStr = join(objectIDs, ',');
     std::ostringstream sel;
@@ -1314,8 +1327,8 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObject(int objec
     }
     if (IS_FORBIDDEN_CDS_ID(objectID))
         throw_std_runtime_error("Tried to delete a forbidden ID ({})", objectID);
-    std::vector<int32_t> itemIds;
-    std::vector<int32_t> containerIds;
+    std::vector<int> itemIds;
+    std::vector<int> containerIds;
     if (isContainer) {
         containerIds.push_back(objectID);
     } else {
@@ -1326,7 +1339,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObject(int objec
 }
 
 std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
-    const std::vector<int32_t>& items, const std::vector<int32_t>& containers,
+    const std::vector<int>& items, const std::vector<int>& containers,
     bool all)
 {
     log_debug("start");
@@ -1351,10 +1364,10 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
     std::shared_ptr<SQLResult> res;
     std::unique_ptr<SQLRow> row;
 
-    std::vector<int32_t> itemIds(items);
-    std::vector<int32_t> containerIds(containers);
-    std::vector<int32_t> parentIds(items);
-    std::vector<int32_t> removeIds(containers);
+    std::vector<int> itemIds(items);
+    std::vector<int> containerIds(containers);
+    std::vector<int> parentIds(items);
+    std::vector<int> removeIds(containers);
 
     if (!containers.empty()) {
         parentIds.insert(parentIds.end(), containers.begin(), containers.end());
@@ -1472,13 +1485,13 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
     std::ostringstream bufSelUpnp;
     bufSelUpnp << selectSql.str();
 
-    std::vector<int32_t> del;
+    std::vector<int> del;
 
     std::shared_ptr<SQLResult> res;
     std::unique_ptr<SQLRow> row;
 
-    std::vector<int32_t> selUi;
-    std::vector<int32_t> selUpnp;
+    std::vector<int> selUi;
+    std::vector<int> selUpnp;
 
     auto& uiV = maybeEmpty->ui;
     selUi.insert(selUi.end(), uiV.begin(), uiV.end());

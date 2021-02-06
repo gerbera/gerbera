@@ -29,13 +29,14 @@
 
 /// \file edit_save.cc
 
-#include "pages.h" // API
+#include <memory> // for allocator, shared_ptr, __shared...
+#include <string> // for stoi, string
+#include <utility> // for move
 
-#include <cstdio>
-
-#include "content/content_manager.h"
-#include "database/database.h"
-#include "util/tools.h"
+#include "content/content_manager.h" // for ContentManager
+#include "exceptions.h" // for throw_std_runtime_error
+#include "pages.h" // for edit_save
+#include "web/web_request_handler.h" // for WebRequestHandler
 
 web::edit_save::edit_save(std::shared_ptr<ContentManager> content)
     : WebRequestHandler(std::move(content))

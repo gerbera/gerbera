@@ -25,8 +25,12 @@
 
 #include "mime.h" // API
 
-#include "config/config_manager.h"
-#include "util/tools.h"
+#include <utility> // for pair
+#include <vector> // for vector
+
+#include "config/config.h" // for Config, CFG_IMPORT_FOLLOW_SYMLINKS, CFG_I...
+#include "exceptions.h" // for throw_std_runtime_error
+#include "util/tools.h" // for getValueOrDefault, splitString, toLower
 
 Mime::Mime(const std::shared_ptr<Config>& config)
 {

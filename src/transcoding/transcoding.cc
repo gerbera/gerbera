@@ -31,8 +31,6 @@
 
 #include "transcoding.h" // API
 
-#include "util/tools.h"
-
 TranscodingProfile::TranscodingProfile()
 {
     enabled = true;

@@ -31,22 +31,36 @@
 
 #include "file_request_handler.h" // API
 
-#include <filesystem>
+#include <cerrno> // for errno
+#include <cstdio> // for size_t, SEEK_END
+#include <cstring> // for strerror
+#include <filesystem> // for path, operator/
+#include <fmt/format.h> // for format
+#include <limits> // for numeric_limits
+#include <map> // for operator!=, _Rb_tree_i...
+#include <string> // for string, basic_string
+#include <sys/stat.h> // for stat, S_ISDIR, st_mtime
+#include <unistd.h> // for access, R_OK, off_t
+#include <utility> // for pair, move
 
-#include <sys/stat.h>
-#include <unistd.h>
+#include "cds_objects.h" // for CdsObject, CdsItem
+#include "cds_resource.h" // for CdsResource
+#include "common.h" // for LINK_FILE_REQUEST_HANDLER
+#include "config/config.h" // for Config, CFG_IMPORT_MAP...
+#include "content/content_manager.h" // for ContentManager
+#include "exceptions.h" // for throw_std_runtime_error
+#include "iohandler/file_io_handler.h" // for FileIOHandler
+#include "iohandler/io_handler.h" // for IOHandler
+#include "metadata/metadata_handler.h" // for MetadataHandler, RESOU...
+#include "transcoding/transcode_dispatcher.h" // for TranscodeDispatcher
+#include "transcoding/transcoding.h" // for TranscodingProfileList
+#include "upnp_common.h" // for UPNP_DLNA_CONTENT_FEAT...
+#include "util/logger.h" // for log_debug
+#include "util/tools.h" // for getValueOrDefault, get...
+#include "util/upnp_headers.h" // for Headers
+#include "util/upnp_quirks.h" // for Quirks
 
-#include "config/config_manager.h"
-#include "content/content_manager.h"
-#include "database/database.h"
-#include "iohandler/file_io_handler.h"
-#include "metadata/metadata_handler.h"
-#include "transcoding/transcode_dispatcher.h"
-#include "util/process.h"
-#include "util/tools.h"
-#include "util/upnp_headers.h"
-#include "util/upnp_quirks.h"
-#include "web/session_manager.h"
+class UpnpXMLBuilder;
 
 FileRequestHandler::FileRequestHandler(std::shared_ptr<ContentManager> content, UpnpXMLBuilder* xmlBuilder)
     : RequestHandler(std::move(content))
@@ -75,7 +89,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     if (res_id_it != params.end() && res_id_it->second != URL_VALUE_TRANSCODE_NO_RES_ID)
         res_id = std::stoi(res_id_it->second);
     else
-        res_id = SIZE_MAX;
+        res_id = std::numeric_limits<size_t>::max();
 
     if (!obj->isItem() && rh.empty()) {
         throw_std_runtime_error("Requested object {} is not an item", filename);
@@ -243,7 +257,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum U
     if (res_id_it != params.end() && res_id_it->second != URL_VALUE_TRANSCODE_NO_RES_ID)
         res_id = std::stoi(res_id_it->second);
     else
-        res_id = SIZE_MAX;
+        res_id = std::numeric_limits<size_t>::max();
 
     if (!obj->isItem() && rh.empty()) {
         throw_std_runtime_error("requested object {} is not an item", filename);
@@ -285,10 +299,10 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum U
     // for transcoded resourecs res_id will always be negative
     auto tr_profile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
     if (!tr_profile.empty()) {
-        if (res_id != SIZE_MAX)
+        if (res_id != std::numeric_limits<size_t>::max())
             throw_std_runtime_error("Invalid resource ID given");
     } else {
-        if (res_id == SIZE_MAX)
+        if (res_id == std::numeric_limits<size_t>::max())
             throw_std_runtime_error("Invalid resource ID given");
     }
     log_debug("fetching resource id {}", res_id);

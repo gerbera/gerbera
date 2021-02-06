@@ -32,13 +32,26 @@
 #ifdef HAVE_EXIV2
 #include "exiv2_handler.h" // API
 
-#include <exiv2/exiv2.hpp>
+#include <filesystem> // for path
+#include <list> // for operator!=, _List_iterator
+#include <string> // for string, char_traits, operator+
+#include <utility> // for move
+#include <vector> // for vector
 
-#include "cds_objects.h"
-#include "config/config_manager.h"
-#include "iohandler/io_handler.h"
-#include "util/string_converter.h"
-#include "util/tools.h"
+#include "cds_objects.h" // for CdsObject
+#include "config/config.h" // for CFG_IMPORT_LIBOPTS_EXIV2_AUXD...
+#include "error.hpp" // for AnyError
+#include "exif.hpp" // for ExifData, Exifdatum
+#include "image.hpp" // for Image, ImageFactory
+#include "metadata/metadata_handler.h" // for M_DATE, M_DESCRIPTION, Metada...
+#include "properties.hpp" // for XmpKey
+#include "tags.hpp" // for ExifKey
+#include "util/logger.h" // for log_debug, log_warning
+#include "util/string_converter.h" // for StringConverter
+#include "xmp_exiv2.hpp" // for XmpData, Xmpdatum
+
+class Context;
+class IOHandler;
 
 Exiv2Handler::Exiv2Handler(const std::shared_ptr<Context>& context)
     : MetadataHandler(context)

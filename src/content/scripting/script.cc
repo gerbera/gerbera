@@ -32,22 +32,36 @@
 #ifdef HAVE_JS
 #include "script.h" // API
 
-#include "cds_objects.h"
-#include "config/config_manager.h"
-#include "content/content_manager.h"
-#include "js_functions.h"
-#include "metadata/metadata_handler.h"
-#include "script_names.h"
-#include "scripting_runtime.h"
-#include "util/string_converter.h"
-#include "util/tools.h"
+#include <algorithm> // for find_if
+#include <array> // for array
+#include <filesystem> // for path
+#include <fmt/format.h> // for format
+#include <map> // for map
+#include <stdexcept> // for runtime...
+#include <utility> // for pair, move
+#include <vector> // for vector
+
+#include "cds_objects.h" // for CdsObject
+#include "cds_resource.h" // for CdsReso...
+#include "common.h" // for INVALID...
+#include "config/config.h" // for CFG_IMP...
+#include "content/content_manager.h" // for Content...
+#include "context.h" // for Context
+#include "exceptions.h" // for throw_s...
+#include "js_functions.h" // for js_addC...
+#include "metadata/metadata_handler.h" // for M_DESCR...
+#include "script_names.h" // for mt_names
+#include "scripting_runtime.h" // for Scripti...
+#include "util/logger.h" // for log_error
+#include "util/string_converter.h" // for StringC...
+#include "util/tools.h" // for renderP...
 
 #ifdef ONLINE_SERVICES
-#include "content/onlineservice/online_service.h"
+#include "content/onlineservice/online_service.h" // for ONLINE_...
 #endif
 
 #ifdef ATRAILERS
-#include "content/onlineservice/atrailers_content_handler.h"
+#include "content/onlineservice/atrailers_content_handler.h" // for ATRAILE...
 #endif
 
 static constexpr std::array<duk_function_list_entry, 8> js_global_functions = { {
@@ -243,7 +257,7 @@ Script* Script::getContextScript(duk_context* ctx)
     return self;
 }
 
-void Script::defineFunction(const std::string& name, duk_c_function function, uint32_t numParams)
+void Script::defineFunction(const std::string& name, duk_c_function function, unsigned int numParams)
 {
     duk_push_c_function(ctx, function, numParams);
     duk_put_global_string(ctx, name.c_str());

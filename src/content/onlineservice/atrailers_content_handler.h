@@ -32,13 +32,16 @@
 
 #ifdef ATRAILERS
 
+#include <string> // for string
+
+class Config;
+class Context;
+class Database;
 #ifndef __ATRAILERS_CONTENT_HANDLER_H__
 #define __ATRAILERS_CONTENT_HANDLER_H__
 
-#include <memory>
-#include <pugixml.hpp>
-
-#include "context.h"
+#include <memory> // for shared_ptr, unique_ptr, allocator
+#include <pugixml.hpp> // for xml_document, xml_node (ptr only), xml_node_i...
 
 // forward declaration
 class CdsObject;

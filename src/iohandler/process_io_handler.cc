@@ -31,15 +31,23 @@
 
 #include "process_io_handler.h" // API
 
-#include <csignal>
+#include <algorithm> // for any_of
+#include <cerrno> // for errno, EINTR, ENXIO
+#include <cstdlib> // for EXIT_SUCCESS, size_t
+#include <cstring> // for strerror
+#include <ctime> // for timespec
+#include <fcntl.h> // for open, O_CLOEXEC, O_NONBLOCK
+#include <fmt/format.h> // for format
+#include <stdexcept> // for runtime_error
+#include <sys/select.h> // for pselect, FD_ISSET, FD_SET, FD_ZERO
+#include <unistd.h> // for unlink, close, read, write, ssi...
+#include <utility> // for move
 
-#include <fcntl.h>
-#include <sys/select.h>
-#include <sys/stat.h>
-#include <unistd.h>
-
-#include "content/content_manager.h"
-#include "util/process.h"
+#include "common.h" // for CHECK_SOCKET
+#include "content/content_manager.h" // for ContentManager
+#include "exceptions.h" // for throw_std_runtime_error, TryAga...
+#include "util/executor.h" // for Executor
+#include "util/logger.h" // for log_debug
 
 // after MAX_TIMEOUTS we will tell libupnp to check the socket,
 // this will make sure that we do not block the read and allow libupnp to

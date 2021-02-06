@@ -32,15 +32,27 @@
 #ifndef __SQL_STORAGE_H__
 #define __SQL_STORAGE_H__
 
-#include <mutex>
-#include <sstream>
-#include <unordered_set>
+#include <filesystem> // for path
+#include <map> // for map
+#include <memory> // for shared_ptr, unique_ptr, allocator
+#include <mutex> // for lock_guard, mutex
+#include <sstream> // for ostringstream
+#include <string> // for string, basic_string, operator==
+#include <unordered_set> // for unordered_set
+#include <vector> // for vector
 
-#include "database.h"
+#include "content/autoscan.h" // for AutoscanDirectory (ptr only), ScanMode
+#include "database.h" // for Database
+#include "database/database.h" // for BrowseParam (ptr only), Database, Sea...
 
+class AutoscanList;
+class CdsObject;
+class Config;
+class ConfigValue;
+class SQLDatabase;
+class SQLEmitter;
 // forward declaration
 class SQLResult;
-class SQLEmitter;
 
 #define QTB table_quote_begin
 #define QTE table_quote_end
@@ -213,13 +225,13 @@ private:
     std::unique_ptr<std::ostringstream> sqlForDelete(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const;
 
     /* helper for removeObject(s) */
-    void _removeObjects(const std::vector<int32_t>& objectIDs);
+    void _removeObjects(const std::vector<int>& objectIDs);
 
     static std::string toCSV(const std::vector<int>& input);
 
     std::unique_ptr<ChangedContainers> _recursiveRemove(
-        const std::vector<int32_t>& items,
-        const std::vector<int32_t>& containers, bool all);
+        const std::vector<int>& items,
+        const std::vector<int>& containers, bool all);
 
     virtual std::unique_ptr<ChangedContainers> _purgeEmptyContainers(std::unique_ptr<ChangedContainers>& maybeEmpty);
 

@@ -25,15 +25,25 @@
 
 #include "upnp_quirks.h" // API
 
-#include <unistd.h>
+#include <algorithm> // for find_if
+#include <array> // for array
+#include <filesystem> // for path, operator/
+#include <fmt/format.h> // for to_string
+#include <memory> // for allocator, shared_ptr, __shared_ptr_a...
+#include <string> // for string, basic_string, operator+, char...
+#include <unistd.h> // for access, R_OK
+#include <utility> // for move
 
-#include "cds_objects.h"
-#include "config/config_manager.h"
-#include "request_handler.h"
-#include "server.h"
-#include "util/tools.h"
-#include "util/upnp_clients.h"
-#include "util/upnp_headers.h"
+#include "cds_objects.h" // for CdsItem
+#include "common.h" // for CONTENT_MEDIA_HANDLER, URL_FILE_EXTEN...
+#include "context.h" // for Context
+#include "request_handler.h" // for RequestHandler
+#include "server.h" // for Server
+#include "upnp_xml.h" // for UpnpXMLBuilder
+#include "util/tools.h" // for startswith
+#include "util/upnp_clients.h" // for ClientInfo, Clients
+#include "util/upnp_headers.h" // for Headers
+#include "util/upnp_quirks.h" // for Quirks, QUIRK_FLAG_SAMSUNG
 
 Quirks::Quirks(std::shared_ptr<Context> context, const struct sockaddr_storage* addr, const std::string& userAgent)
     : context(std::move(context))

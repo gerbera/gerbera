@@ -32,7 +32,14 @@
 #ifndef __METADATA_EXIV2_H__
 #define __METADATA_EXIV2_H__
 
-#include "metadata_handler.h"
+#include <memory> // for shared_ptr, unique_ptr
+
+#include "metadata/metadata_handler.h" // for MetadataHandler
+#include "metadata_handler.h" // for MetadataHandler
+
+class CdsObject;
+class Context;
+class IOHandler;
 
 /// \brief This class is responsible for reading exif header metadata
 class Exiv2Handler : public MetadataHandler {

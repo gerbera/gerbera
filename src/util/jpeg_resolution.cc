@@ -29,14 +29,16 @@
 
 /// \file jpeg_resolution.cc
 
-#include "tools.h" // API
+#include <cstdio> // for SEEK_CUR
+#include <fmt/format.h> // for format
+#include <memory> // for unique_ptr
+#include <stdexcept> // for runtime_error
+#include <string> // for string
+#include <sys/types.h> // for off_t
 
-#include <cerrno>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-
-#include "iohandler/io_handler.h"
+#include "exceptions.h" // for throw_std_runtime_error
+#include "iohandler/io_handler.h" // for IOHandler
+#include "tools.h" // for get_jpeg_resolution
 
 using uchar = unsigned char;
 

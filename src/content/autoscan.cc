@@ -31,8 +31,10 @@
 
 #include "autoscan.h" // API
 
-#include "content_manager.h"
-#include "database/database.h"
+#include <utility> // for move
+
+#include "exceptions.h" // for throw_std_runtime_error
+#include "util/logger.h" // for log_debug
 
 AutoscanDirectory::AutoscanDirectory()
     : timer_parameter(std::make_shared<Timer::Parameter>(Timer::Parameter::IDAutoscan, INVALID_SCAN_ID))

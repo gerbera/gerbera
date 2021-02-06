@@ -31,10 +31,14 @@
 
 #include "cds_objects.h" // API
 
-#include <filesystem>
+#include <filesystem> // for path, operator==
+#include <system_error> // for error_code
 
-#include "database/database.h"
-#include "util/tools.h"
+#include "cds_resource.h" // for CdsResource
+#include "common.h" // for INVALID_OBJECT_ID, MIMETYPE_DEFAULT
+#include "exceptions.h" // for throw_std_runtime_error
+#include "upnp_common.h" // for UPNP_CLASS_CONTAINER, UPNP_CLASS_ITEM
+#include "util/tools.h" // for isRegularFile
 
 static constexpr bool IS_CDS_ITEM(unsigned int type) { return type & OBJECT_TYPE_ITEM; }
 static constexpr bool IS_CDS_PURE_ITEM(unsigned int type) { return type == OBJECT_TYPE_ITEM; }

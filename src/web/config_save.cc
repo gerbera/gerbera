@@ -23,22 +23,26 @@
 
 /// \file config_load.cc
 
-#include "pages.h" // API
+#include <filesystem> // for path, operator!=
+#include <fmt/format.h> // for format
+#include <map> // for map
+#include <memory> // for shared_ptr, __shared_ptr_access
+#include <pugixml.hpp> // for xml_node, xml_attribute, xml_do...
+#include <stdexcept> // for invalid_argument, runtime_error
+#include <string> // for string, basic_string, operator==
+#include <string_view> // for operator==
+#include <utility> // for move
+#include <vector> // for vector
 
-#include <numeric>
-
-#include "config/client_config.h"
-#include "config/config.h"
-#include "config/config_manager.h"
-#include "config/config_options.h"
-#include "config/config_setup.h"
-#include "content/autoscan.h"
-#include "content/content_manager.h"
-#include "database/database.h"
-#include "metadata/metadata_handler.h"
-#include "transcoding/transcoding.h"
-#include "upnp_xml.h"
-#include "util/upnp_clients.h"
+#include "config/config.h" // for Config, config_option_t, CFG_MAX
+#include "config/config_manager.h" // for ConfigManager
+#include "config/config_setup.h" // for ConfigSetup, STATUS_CHANGED
+#include "content/autoscan.h" // for AutoscanDirectory
+#include "content/content_manager.h" // for ContentManager
+#include "database/database.h" // for Database
+#include "pages.h" // for configSave
+#include "util/logger.h" // for log_debug, log_error, log_info
+#include "web/web_request_handler.h" // for WebRequestHandler
 
 web::configSave::configSave(std::shared_ptr<ContentManager> content)
     : WebRequestHandler(std::move(content))

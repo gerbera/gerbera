@@ -32,10 +32,9 @@
 #ifndef __PROCESS_H__
 #define __PROCESS_H__
 
-#include <memory>
-#include <string>
-
-#include <unistd.h>
+#include <memory> // for shared_ptr
+#include <string> // for string
+#include <unistd.h> // for pid_t
 
 // forward declaration
 class Config;

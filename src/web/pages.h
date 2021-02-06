@@ -32,15 +32,28 @@
 #ifndef __WEB_PAGES_H__
 #define __WEB_PAGES_H__
 
-#include "cds_objects.h"
-#include "common.h"
-#include "config/config_setup.h"
-#include "request_handler.h"
-#include "web_request_handler.h"
+#include <map> // for map
+#include <memory> // for shared_ptr, unique_ptr
+#include <string> // for string
+#include <utility> // for move
+#include <vector> // for vector
 
+#include "config/config.h" // for config_option_t
+#include "config/config_setup.h" // for ConfigValue, ConfigSetup (ptr only)
+#include "web_request_handler.h" // for WebRequestHandler
+
+class AutoscanDirectory;
+class CdsItem;
+class CdsItemExternalURL;
+class CdsObject;
 // forward declaration
 class Config;
+class ContentManager;
 class Database;
+
+namespace pugi {
+class xml_node;
+} // namespace pugi
 
 namespace web {
 
