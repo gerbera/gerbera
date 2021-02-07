@@ -125,7 +125,7 @@ public:
     /// The time will be only set if it is higher than the previous value!
     void setCurrentLMT(const std::string& location, time_t lmt);
     time_t getPreviousLMT(const std::string& loc) const;
-    void updateLMT();
+    bool updateLMT();
     void resetLMT()
     {
         lastModified.clear();

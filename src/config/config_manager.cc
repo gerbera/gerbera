@@ -499,6 +499,8 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = 
         "attribute::hidden-files", "config-import.html#autoscan"),
     std::make_shared<ConfigIntSetup>(ATTR_AUTOSCAN_DIRECTORY_SCANCOUNT,
         "attribute::scan-count", "config-import.html#autoscan"),
+    std::make_shared<ConfigIntSetup>(ATTR_AUTOSCAN_DIRECTORY_TASKCOUNT,
+        "attribute::task-count", "config-import.html#autoscan"),
     std::make_shared<ConfigStringSetup>(ATTR_AUTOSCAN_DIRECTORY_LMT,
         "attribute::last-modified", "config-import.html#autoscan"),
 
