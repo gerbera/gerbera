@@ -177,7 +177,7 @@ $.widget('grb.dataitems', {
       list.append(next);
       grbPager.append(list);
       outer.append(grbPager);
-      outer.addClass("py-2 d-flex flex-fill justify-content-center align-items-end");
+      outer.addClass("py-2 d-flex flex-fill justify-content-center align-items-end bg-light");
     }
 
     return outer;

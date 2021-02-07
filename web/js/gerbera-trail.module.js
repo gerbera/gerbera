@@ -43,40 +43,12 @@ const initialize = () => {
 };
 
 const makeTrail = (selectedItem, config) => {
-  const items = (selectedItem !== null) ? gatherTrail(selectedItem) : [{text: "current configuration"}];
+  const items = (selectedItem !== null) ? Tree.gatherTrail(selectedItem) : [{text: "current configuration"}];
   const configDefaults = {
     itemType: GerberaApp.getType()
   };
   const trailConfig = $.extend({}, configDefaults, config);
   createTrail(items, trailConfig);
-};
-
-const gatherTrail = (treeElement) => {
-  const items = [];
-  let lastItem = {};
-  if ($(treeElement).data('grb-id') !== undefined) {
-    const title = $(treeElement).children('span.folder-title').text();
-    lastItem = {
-      id: $(treeElement).data('grb-id'),
-      text: title,
-      fullPath: "/" + title
-    };
-    items.push(lastItem);
-  }
-
-  $(treeElement).parents('ul li').each(function (index, element) {
-    const title = $(element).children('span.folder-title').text();
-    const gerberaId = $(element).data('grb-id');
-    const item = {
-      id: gerberaId,
-      text: title
-    };
-    if (gerberaId != 0) {
-      lastItem.fullPath = "/" + title + lastItem.fullPath;
-    }
-    items.push(item);
-  });
-  return items.reverse();
 };
 
 const createTrail = (items, config) => {
@@ -250,7 +222,6 @@ export const Trail = {
   addTweak,
   saveConfig,
   clearConfig,
-  gatherTrail,
   initialize,
   makeTrail,
   makeTrailFromItem,

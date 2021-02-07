@@ -402,5 +402,5 @@ export const Items = {
   nextPage,
   previousPage,
   transformItems,
-  treeItemSelected,
+  treeItemSelected
 };

@@ -28,7 +28,7 @@ import {Items} from "./gerbera-items.module.js";
 import {Updates} from "./gerbera-updates.module.js";
 
 const treeViewCss = {
-  titleClass: 'folder-title',
+  titleClass: 'folder-title text-truncate d-inline-block',
   closedIcon: 'fa fa-folder',
   openIcon: 'fa fa-folder-open'
 };
@@ -72,8 +72,17 @@ const selectType = (type, parentId) => {
 };
 
 const onItemSelected = (event) => {
-  const folderList = event.target.parentElement;
+  const folderList = event.target.closest("li.list-group-item");
   const item = event.data;
+
+  if ($(folderList).hasClass("selected-item")) {
+    console.debug("Item already selected!");
+    event.preventDefault();
+    return;
+  }
+
+  console.log("SELECTED ITEM", item);
+  console.log("SELECTED ITEM FOLDER LIST", folderList);
 
   GerberaApp.setCurrentItem(event);
 
@@ -84,13 +93,13 @@ const onItemSelected = (event) => {
 const onItemExpanded = (event) => {
   const tree = $('#tree');
   const folderName = event.target;
-  const folderList = event.target.parentElement;
+  const folderList = event.target.closest("li.list-group-item");
   const item = event.data;
 
   GerberaApp.setCurrentItem(event);
 
   if (item.gerbera && item.gerbera.id) {
-    if (tree.tree('closed', folderName) && item.gerbera.childCount > 0) {
+    if (tree.tree('isClosed', folderName) && item.gerbera.childCount > 0) {
       fetchChildren(item.gerbera).then(function (response) {
         var childTree = transformContainers(response, false);
         tree.tree('append', $(folderList), childTree);
@@ -280,6 +289,10 @@ const getTreeElementById = (id) => {
   return $('#tree').tree('getElement', id);
 };
 
+const gatherTrail = (element) => {
+  return $('#tree').tree('gatherTrail', element);
+};
+
 export const Tree = {
   destroy,
   getTreeElementById,
@@ -291,5 +304,6 @@ export const Tree = {
   reloadTreeItemById,
   selectType,
   transformContainers,
+  gatherTrail,
   currentTree,
 };

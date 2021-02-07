@@ -57,7 +57,7 @@ a:hover {
 
 .navbar {
     font-size: 1rem;
-    background-color: #222;
+    background-color: #2a2a2a;
     border-bottom: 1px solid #ff7f00;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
@@ -371,7 +371,7 @@ body,
     color: #3c3c3c;
 }
 
-.list-group-item.has-children > span.fa {
+.list-group-item.has-children > div > .fa {
     color: #ff7f00;
 }
 
@@ -389,8 +389,7 @@ body,
 
 }
 
-.folder-title {
-    padding-left: 10px;
+.grb-list-inner {
     cursor: pointer;
 }
 

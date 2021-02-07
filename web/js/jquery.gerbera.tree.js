@@ -46,8 +46,9 @@ $.widget('grb.tree', {
 
   generate: function (parent, data, config) {
     const items = [];
-    const newList = $('<ul></ul>');
-    newList.addClass('list-group');
+    const newList = $('<ul class="list-group"></ul>');
+
+    console.log(data);
 
     for (let i = 0; i < data.length; i++) {
       const item = $('<li></li>');
@@ -56,14 +57,17 @@ $.widget('grb.tree', {
       item.data('grb-item', data[i]);
       item.prop('id', 'grb-tree-' + data[i].gerbera.id);
 
-      const icon = $('<span></span>').addClass(config.closedIcon).addClass('folder-icon');
-      let title = $('<span></span>').addClass(config.titleClass).text(data[i].title);
-      if (config.onSelection) {
-        title.click(data[i], config.onSelection);
+      let img;
+      if (data[i].gerbera.image) {
+        img = $('<img style="height: 15px; width: 15px; object-fit: contain" src="' + data[i].gerbera.image + '"/>');
       }
-      if (config.onExpand) {
-        title.click(data[i], config.onExpand);
+
+      const icon = $('<i></i>').addClass(config.closedIcon).addClass('folder-icon');
+      if (img) {
+        icon.attr("style", "display: none;")
       }
+
+      let title = $('<span class="ml-1"></span>').addClass(config.titleClass).text(data[i].title);
 
       const badges = [];
       if (data[i].badge) {
@@ -79,16 +83,26 @@ $.widget('grb.tree', {
           }
         }
       }
-      if (data[i].gerbera.image) {
-        title.prepend($('<img style="margin-right: 10px" width="36" src="' + data[i].gerbera.image + '"/>'));
+
+
+      let inner = $('<div class="grb-list-inner d-flex align-items-center">');
+
+      if (config.onSelection) {
+        inner.click(data[i], config.onSelection);
+      }
+      if (config.onExpand) {
+        inner.click(data[i], config.onExpand);
       }
 
-      item.append(icon);
-      item.append(title);
-      item.append(badges);
+      inner.append(icon);
+      inner.append(img);
+      inner.append(title);
+      inner.append(badges);
+      item.append(inner)
       items.push(item);
       if (data[i].nodes && data[i].nodes.length > 0) {
         item.children('span').first().removeClass(config.closedIcon).addClass(config.openIcon);
+        console.log("generate -> ", data[i].nodes);
         this.generate(item, data[i].nodes, config);
       }
     }
@@ -97,16 +111,19 @@ $.widget('grb.tree', {
   },
 
   append: function (parent, data) {
-    parent.children('span').first().removeClass(this.options.config.closedIcon).addClass(this.options.config.openIcon);
+    parent.find(".folder-icon").first().removeClass(this.options.config.closedIcon).addClass(this.options.config.openIcon);
     this.generate(parent, data, this.options.config);
   },
 
-  closed: function (element) {
-    return $(element).prev('span.folder-icon').hasClass(this.options.config.closedIcon);
+  isClosed: function (element) {
+    return $(element).prev('.folder-icon').hasClass(this.options.config.closedIcon);
   },
 
   collapse: function (element) {
-    element.children('span').first().removeClass(this.options.config.openIcon).addClass(this.options.config.closedIcon);
+    console.log("COLLAPSE", element);
+    console.log($(element).prev('span.folder-icon'))
+    element.find('.folder-icon').first().removeClass(this.options.config.openIcon).addClass(this.options.config.closedIcon);
+    // Should probably just hide
     element.find('ul.list-group').remove();
   },
 
@@ -128,6 +145,37 @@ $.widget('grb.tree', {
 
   getElement: function (id) {
     return this.element.find('#grb-tree-' + id);
+  },
+
+  gatherTrail: function (element) {
+    const items = [];
+    let lastItem = {};
+    if ($(element).data('grb-id') !== undefined) {
+      const title = $(element).children('div.grb-list-inner:first-child').children("span.folder-title").text();
+      lastItem = {
+        id: $(element).data('grb-id'),
+        text: title,
+        fullPath: "/" + title
+      };
+      items.push(lastItem);
+    }
+
+    let parents = $(element).parents('ul.list-group li');
+
+    parents.each(function (index, parent) {
+      const title = $(parent).children('div.grb-list-inner:first-child').children("span.folder-title").text();
+      const gerberaId = $(parent).data('grb-id');
+
+      const item = {
+        id: gerberaId,
+        text: title
+      };
+      if (gerberaId !== 0) {
+        lastItem.fullPath = "/" + title + lastItem.fullPath;
+      }
+      items.push(item);
+    });
+    return items.reverse();
   }
 
 });
