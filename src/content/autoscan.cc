@@ -80,12 +80,15 @@ void AutoscanDirectory::setCurrentLMT(const std::string& loc, time_t lmt)
     }
 }
 
-void AutoscanDirectory::updateLMT()
+bool AutoscanDirectory::updateLMT()
 {
-    if (activeScanCount == 0) {
+    bool result = taskCount <= 0 && activeScanCount <= 0;
+    if (result) {
+        result = last_mod_previous_scan < last_mod_current_scan;
         last_mod_previous_scan = last_mod_current_scan;
         log_debug("set autoscan lmt location: {}; last_modified: {}", location.c_str(), last_mod_current_scan);
     }
+    return result;
 }
 
 time_t AutoscanDirectory::getPreviousLMT(const std::string& loc) const

@@ -367,6 +367,10 @@ void web::configLoad::process()
             setValue(item, adir->getActiveScanCount());
 
             item = values.append_child("item");
+            createItem(item, cs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_TASKCOUNT), cs->option, ATTR_AUTOSCAN_DIRECTORY_TASKCOUNT);
+            setValue(item, adir->getTaskCount());
+
+            item = values.append_child("item");
             createItem(item, cs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_LMT), cs->option, ATTR_AUTOSCAN_DIRECTORY_LMT);
             setValue(item, fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(adir->getPreviousLMT(""))));
         }

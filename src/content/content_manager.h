@@ -40,6 +40,8 @@
 #include <unordered_set>
 #include <vector>
 
+#include <dirent.h>
+
 #include "autoscan.h"
 #include "cds_objects.h"
 #include "common.h"
@@ -354,7 +356,7 @@ protected:
     static bool isLink(const fs::path& path, bool allowLinks);
     std::shared_ptr<CdsObject> createSingleItem(const fs::path& path, fs::path& rootPath, bool followSymlinks, bool checkDatabase, bool processExisting, const std::shared_ptr<CMAddFileTask>& task);
     bool updateAttachedResources(const std::shared_ptr<AutoscanDirectory>& adir, const char* location, const std::string& parentPath, bool all);
-
+    void finishScan(DIR* dir, const std::shared_ptr<AutoscanDirectory>& adir, const std::string& location, time_t lmt);
     static void invalidateAddTask(const std::shared_ptr<GenericTask>& t, const fs::path& path);
 
     template <typename T>
@@ -371,8 +373,6 @@ protected:
 #endif
 
     bool layout_enabled;
-
-    void setLastModifiedTime(time_t lm);
 
     void signal() { cond.notify_one(); }
     static void* staticThreadProc(void* arg);

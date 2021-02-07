@@ -36,7 +36,6 @@
 #include <filesystem>
 #include <regex>
 
-#include <dirent.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -596,7 +595,6 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
             if (adir->persistent()) {
                 containerID = INVALID_OBJECT_ID;
             } else {
-                adir->setTaskCount(-1);
                 removeAutoscanDirectory(adir);
                 return;
             }
@@ -611,7 +609,6 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
                 return;
             }
 
-            adir->setTaskCount(-1);
             removeAutoscanDirectory(adir);
             return;
         }
@@ -640,7 +637,6 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
             database->updateAutoscanDirectory(adir);
             return;
         }
-        adir->setTaskCount(-1);
         removeObject(adir, containerID, false);
         removeAutoscanDirectory(adir);
         return;
@@ -660,8 +656,9 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
     unsigned int thisTaskID;
     if (task != nullptr) {
         thisTaskID = task->getID();
-    } else
+    } else {
         thisTaskID = 0;
+    }
 
     time_t last_modified_current_max = adir->getPreviousLMT(location);
     time_t last_modified_new_max = last_modified_current_max;
@@ -697,8 +694,7 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
         // in this case we will invalidate the autoscan entry
         if (adir->getScanID() == INVALID_SCAN_ID) {
             log_info("lost autoscan for {}", newPath.c_str());
-            adir->setCurrentLMT(location, last_modified_new_max > 0 ? last_modified_new_max : time_t(1));
-            closedir(dir);
+            finishScan(dir, adir, location, last_modified_new_max);
             return;
         }
 
@@ -768,22 +764,20 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
                 // in this case we will invalidate the autoscan entry
                 if (adir->getScanID() == INVALID_SCAN_ID) {
                     log_info("lost autoscan for {}", newPath.c_str());
-                    adir->setCurrentLMT(location, last_modified_new_max > 0 ? last_modified_new_max : time_t(1));
-                    closedir(dir);
+                    finishScan(dir, adir, location, last_modified_new_max);
                     return;
                 }
                 // add directory, recursive, async, hidden flag, low priority
                 asSetting.recursive = true;
                 asSetting.rescanResource = false;
                 asSetting.mergeOptions(config, newPath);
+                // const fs::path& path, const fs::path& rootpath, AutoScanSetting& asSetting, bool async, bool lowPriority, unsigned int parentTaskID, bool cancellable
                 addFileInternal(newPath, rootpath, asSetting, true, true, thisTaskID, task->isCancellable());
             }
         }
     } // while
 
-    closedir(dir);
-
-    adir->setCurrentLMT(location, last_modified_new_max > 0 ? last_modified_new_max : time_t(1));
+    finishScan(dir, adir, location, last_modified_new_max);
 
     if ((shutdownFlag) || ((task != nullptr) && !task->isValid())) {
         return;
@@ -891,10 +885,15 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
             log_warning("skipping {} (ex:{})", newPath.c_str(), ex.what());
         }
     }
-    closedir(dir);
 
+    finishScan(dir, adir, path, last_modified_new_max);
+}
+
+void ContentManager::finishScan(DIR* dir, const std::shared_ptr<AutoscanDirectory>& adir, const std::string& location, time_t lmt)
+{
+    closedir(dir);
     if (adir != nullptr) {
-        adir->setCurrentLMT(path, last_modified_new_max > 0 ? last_modified_new_max : time_t(1));
+        adir->setCurrentLMT(location, lmt > 0 ? lmt : (time_t)1);
     }
 }
 
@@ -1588,6 +1587,8 @@ void ContentManager::removeAutoscanDirectory(const std::shared_ptr<AutoscanDirec
     if (adir == nullptr)
         throw_std_runtime_error("can not remove autoscan directory - was not an autoscan");
 
+    adir->setTaskCount(-1);
+
     if (adir->getScanMode() == ScanMode::Timed) {
         autoscan_timed->remove(adir->getScanID());
         database->removeAutoscanDirectory(adir);
@@ -1761,6 +1762,8 @@ CMAddFileTask::CMAddFileTask(std::shared_ptr<ContentManager> content,
 {
     this->cancellable = cancellable;
     this->taskType = AddFile;
+    if (this->asSetting.adir != nullptr)
+        this->asSetting.adir->incTaskCount();
 }
 
 fs::path CMAddFileTask::getPath() { return path; }
@@ -1772,6 +1775,13 @@ void CMAddFileTask::run()
     log_debug("running add file task with path {} recursive: {}", path.c_str(), asSetting.recursive);
     auto self = shared_from_this();
     content->_addFile(path, rootpath, asSetting, self);
+    if (asSetting.adir != nullptr) {
+        asSetting.adir->decTaskCount();
+        if (asSetting.adir->updateLMT()) {
+            log_debug("CMAddFileTask::run: Updating last_modified for autoscan directory {}", asSetting.adir->getLocation().c_str());
+            content->getContext()->getDatabase()->updateAutoscanDirectory(asSetting.adir);
+        }
+    }
 }
 
 CMRemoveObjectTask::CMRemoveObjectTask(std::shared_ptr<ContentManager> content, std::shared_ptr<AutoscanDirectory> adir,
@@ -1811,9 +1821,9 @@ void CMRescanDirectoryTask::run()
     auto self = shared_from_this();
     content->_rescanDirectory(adir, containerID, self);
     adir->decTaskCount();
-
-    if (adir->getTaskCount() == 0) {
-        adir->updateLMT();
+    if (adir->updateLMT()) {
+        log_debug("CMRescanDirectoryTask::run: Updating last_modified for autoscan directory {}", adir->getLocation().c_str());
+        content->getContext()->getDatabase()->updateAutoscanDirectory(adir);
     }
 }
 
