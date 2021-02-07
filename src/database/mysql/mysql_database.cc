@@ -85,8 +85,15 @@
 #define MYSQL_UPDATE_5_6_2 "CREATE INDEX grb_config_value_item ON grb_config_value(item)"
 #define MYSQL_UPDATE_5_6_3 "UPDATE `mt_internal_setting` SET `value`='6' WHERE `key`='db_version' AND `value`='5'"
 
+// updates 6->7
 #define MYSQL_UPDATE_6_7_1 "DROP TABLE mt_cds_active_item;"
 #define MYSQL_UPDATE_6_7_2 "UPDATE `mt_internal_setting` SET `value`='7' WHERE `key`='db_version' AND `value`='6'"
+
+// updates 7->8: part_number
+#define MYSQL_UPDATE_7_8_1 "ALTER TABLE `mt_cds_object` ADD `part_number` int(11) default NULL AFTER `flags`"
+#define MYSQL_UPDATE_7_8_2 "ALTER TABLE `mt_cds_object` DROP KEY `cds_object_track_number`"
+#define MYSQL_UPDATE_7_8_3 "ALTER TABLE `mt_cds_object` ADD KEY `cds_object_track_number` (`part_number`,`track_number`)"
+#define MYSQL_UPDATE_7_8_4 "UPDATE `mt_internal_setting` SET `value`='8' WHERE `key`='db_version' AND `value`='7'"
 
 MySQLDatabase::MySQLDatabase(std::shared_ptr<Config> config)
     : SQLDatabase(std::move(config))
@@ -272,7 +279,17 @@ void MySQLDatabase::init()
         dbVersion = "7";
     }
 
-    if (dbVersion != "7")
+    if (dbVersion == "7") {
+        log_info("Doing an automatic database upgrade from database version 7 to version 8...");
+        _exec(MYSQL_UPDATE_7_8_1);
+        _exec(MYSQL_UPDATE_7_8_2);
+        _exec(MYSQL_UPDATE_7_8_3);
+        _exec(MYSQL_UPDATE_7_8_4);
+        log_info("database upgrade successful.");
+        dbVersion = "8";
+    }
+
+    if (dbVersion != "8")
         throw_std_runtime_error("The database seems to be from a newer version (database version {})", dbVersion);
 
     lock.unlock();

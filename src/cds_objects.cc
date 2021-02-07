@@ -134,10 +134,11 @@ std::shared_ptr<CdsObject> CdsObject::createObject(unsigned int objectType)
 CdsItem::CdsItem()
     : CdsObject()
     , mimeType(MIMETYPE_DEFAULT)
+    , partNumber(0)
+    , trackNumber(0)
 {
     objectType = OBJECT_TYPE_ITEM;
     upnpClass = "object.item";
-    trackNumber = 0;
 }
 
 void CdsItem::copyTo(const std::shared_ptr<CdsObject>& obj)
@@ -149,6 +150,7 @@ void CdsItem::copyTo(const std::shared_ptr<CdsObject>& obj)
     //    item->setDescription(description);
     item->setMimeType(mimeType);
     item->setTrackNumber(trackNumber);
+    item->setPartNumber(partNumber);
     item->setServiceID(serviceID);
 }
 bool CdsItem::equals(const std::shared_ptr<CdsObject>& obj, bool exactly)
@@ -156,7 +158,7 @@ bool CdsItem::equals(const std::shared_ptr<CdsObject>& obj, bool exactly)
     auto item = std::static_pointer_cast<CdsItem>(obj);
     if (!CdsObject::equals(obj, exactly))
         return false;
-    return (mimeType == item->getMimeType() && trackNumber == item->getTrackNumber() && serviceID == item->getServiceID());
+    return (mimeType == item->getMimeType() && partNumber == item->getPartNumber() && trackNumber == item->getTrackNumber() && serviceID == item->getServiceID());
 }
 
 void CdsItem::validate()

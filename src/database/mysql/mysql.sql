@@ -21,6 +21,7 @@ CREATE TABLE `mt_cds_object` (
   `update_id` int(11) NOT NULL default '0',
   `mime_type` varchar(40) default NULL,
   `flags` int(11) unsigned NOT NULL default '1',
+  `part_number` int(11) default NULL,
   `track_number` int(11) default NULL,
   `service_id` varchar(255) default NULL,
   PRIMARY KEY  (`id`),
@@ -28,7 +29,7 @@ CREATE TABLE `mt_cds_object` (
   KEY `cds_object_parent_id` (`parent_id`,`object_type`,`dc_title`),
   KEY `cds_object_object_type` (`object_type`),
   KEY `location_parent` (`location_hash`,`parent_id`),
-  KEY `cds_object_track_number` (`track_number`),
+  KEY `cds_object_track_number` (`part_number`,`track_number`),
   KEY `cds_object_service_id` (`service_id`),
   CONSTRAINT `mt_cds_object_ibfk_1` FOREIGN KEY (`ref_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `mt_cds_object_ibfk_2` FOREIGN KEY (`parent_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
@@ -42,7 +43,7 @@ CREATE TABLE `mt_internal_setting` (
   `value` varchar(255) NOT NULL,
   PRIMARY KEY  (`key`)
 ) ENGINE=MyISAM CHARSET=utf8;
-INSERT INTO `mt_internal_setting` VALUES ('db_version','7');
+INSERT INTO `mt_internal_setting` VALUES ('db_version','8');
 CREATE TABLE `mt_autoscan` (
   `id` int(11) NOT NULL auto_increment,
   `obj_id` int(11) default NULL,
