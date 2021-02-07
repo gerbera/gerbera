@@ -327,8 +327,9 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = 
     std::make_shared<ConfigBoolSetup>(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS,
         "/import/scripting/playlist-script/attribute::create-link", "config-import.html#playlist-script",
         DEFAULT_PLAYLIST_CREATE_LINK),
-    std::make_shared<ConfigStringSetup>(CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT,
-        "/import/scripting/virtual-layout/import-script", "config-import.html#scripting"),
+    std::make_shared<ConfigPathSetup>(CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT,
+        "/import/scripting/virtual-layout/import-script", "config-import.html#scripting",
+        "", true),
 #endif // JS
     std::make_shared<ConfigStringSetup>(CFG_IMPORT_FILESYSTEM_CHARSET,
         "/import/filesystem-charset", "config-import.html#filesystem-charset",
@@ -1133,7 +1134,6 @@ void ConfigManager::load(const fs::path& userHome)
     }
 
     co = findConfigSetup(CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT);
-    args["isFile"] = fmt::to_string(true);
     args["mustExist"] = fmt::to_string(layoutType == "js");
     args["notEmpty"] = fmt::to_string(layoutType == "js");
     co->setDefaultValue(dataDir / DEFAULT_JS_DIR / DEFAULT_IMPORT_SCRIPT);
