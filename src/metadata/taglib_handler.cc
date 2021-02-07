@@ -125,6 +125,21 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
         } else
             return;
         break;
+    case M_PARTNUMBER:
+        list = file.properties()["DISCNUMBER"];
+        if (!list.isEmpty()) {
+            value = list[0].toCString(true);
+            item->setPartNumber(stoiString(value));
+        } else {
+            list = file.properties()["TPOS"];
+            if (!list.isEmpty()) {
+                value = list[0].toCString(true);
+                item->setPartNumber(stoiString(value));
+            } else {
+                return;
+            }
+        }
+        break;
     case M_ALBUMARTIST:
         // we have to use file.properties() instead of tag->properties()
         // because the latter returns incomplete properties
@@ -160,7 +175,7 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
         return;
     }
 
-    if ((field != M_DATE) && (field != M_TRACKNUMBER)) {
+    if ((field != M_DATE) && (field != M_TRACKNUMBER) && (field != M_PARTNUMBER)) {
         if (!legacyEntrySeparator.empty() && checkLegacy)
             val = val.split(legacyEntrySeparator).toString(entrySeparator);
         value = val.toCString(true);

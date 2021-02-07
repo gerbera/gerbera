@@ -363,6 +363,10 @@ protected:
     /// \brief mime-type of the media.
     std::string mimeType;
 
+    /// \brief number of part, e.g. disk or season
+    int partNumber;
+
+    /// \brief number of track e.g. track on disk or episode of season
     int trackNumber;
 
     /// \brief unique service ID
@@ -385,6 +389,12 @@ public:
     void setTrackNumber(int trackNumber) { this->trackNumber = trackNumber; }
 
     int getTrackNumber() const { return trackNumber; }
+
+    /// \brief Sets the part number property
+    void setPartNumber(int partNumber) { this->partNumber = partNumber; }
+
+    int getPartNumber() const { return partNumber; }
+
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)`
     void copyTo(const std::shared_ptr<CdsObject>& obj) override;

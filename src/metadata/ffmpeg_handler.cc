@@ -137,6 +137,9 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
         } else if (strcmp(e->key, "track") == 0) {
             log_debug("Identified metadata track: {}", e->value);
             field = M_TRACKNUMBER;
+        } else if (strcmp(e->key, "discnumber") == 0) {
+            log_debug("Identified metadata disk: {}", e->value);
+            field = M_PARTNUMBER;
         } else if (strcmp(e->key, "album_artist") == 0) {
             log_debug("Identified metadata album_artist: {}", e->value);
             field = M_ALBUMARTIST;
@@ -155,6 +158,9 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
             item->setMetadata(field, sc->convert(trimString(value)));
             if (field == M_TRACKNUMBER) {
                 item->setTrackNumber(stoiString(value));
+            }
+            if (field == M_PARTNUMBER) {
+                item->setPartNumber(stoiString(value));
             }
         }
     }

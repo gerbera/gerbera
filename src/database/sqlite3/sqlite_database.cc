@@ -105,8 +105,15 @@ PRAGMA foreign_keys = ON;"
 #define SQLITE3_UPDATE_5_6_2 "CREATE INDEX grb_config_value_item ON grb_config_value(item)"
 #define SQLITE3_UPDATE_5_6_3 "UPDATE \"mt_internal_setting\" SET \"value\"='6' WHERE \"key\"='db_version' AND \"value\"='5'"
 
+// updates 6->7
 #define SQLITE3_UPDATE_6_7_1 "DROP TABLE mt_cds_active_item;"
 #define SQLITE3_UPDATE_6_7_2 "UPDATE \"mt_internal_setting\" SET \"value\"='7' WHERE \"key\"='db_version' AND \"value\"='6'"
+
+// updates 7->8: part_number
+#define SQLITE3_UPDATE_7_8_1 "ALTER TABLE \"mt_cds_object\" ADD \"part_number\" integer default NULL"
+#define SQLITE3_UPDATE_7_8_2 "DROP INDEX mt_track_number"
+#define SQLITE3_UPDATE_7_8_3 "CREATE INDEX \"grb_track_number\" ON mt_cds_object (part_number,track_number)"
+#define SQLITE3_UPDATE_7_8_4 "UPDATE \"mt_internal_setting\" SET \"value\"='8' WHERE \"key\"='db_version' AND \"value\"='7'"
 
 Sqlite3Database::Sqlite3Database(std::shared_ptr<Config> config, std::shared_ptr<Timer> timer)
     : SQLDatabase(std::move(config))
@@ -268,7 +275,17 @@ void Sqlite3Database::init()
             dbVersion = "7";
         }
 
-        if (dbVersion != "7")
+        if (dbVersion == "7") {
+            log_info("Running an automatic database upgrade from database version 7 to version 8...");
+            _exec(SQLITE3_UPDATE_7_8_1);
+            _exec(SQLITE3_UPDATE_7_8_2);
+            _exec(SQLITE3_UPDATE_7_8_3);
+            _exec(SQLITE3_UPDATE_7_8_4);
+            log_info("Database upgrade successful.");
+            dbVersion = "8";
+        }
+
+        if (dbVersion != "8")
             throw_std_runtime_error("The database seems to be from a newer version");
 
         // add timer for backups
