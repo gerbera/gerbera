@@ -1043,7 +1043,7 @@ void ContentManager::addContainer(int parentID, std::string title, const std::st
     addContainerChain(database->buildContainerPath(parentID, escape(std::move(title), VIRTUAL_CONTAINER_ESCAPE, VIRTUAL_CONTAINER_SEPARATOR)), upnpClass);
 }
 
-int ContentManager::addContainerChain(const std::string& chain, const std::string& lastClass, int lastRefID, const std::shared_ptr<CdsObject>& origObj)
+int ContentManager::addContainerChain(const std::string& chain, const std::string& lastClass, int lastRefID, const std::shared_ptr<CdsObject>& origObj, std::shared_ptr<CdsObject> parent)
 {
     std::map<std::string, std::string> lastMetadata = origObj != nullptr ? origObj->getMetadata() : std::map<std::string, std::string>();
     std::vector<int> updateID;
@@ -1072,7 +1072,25 @@ int ContentManager::addContainerChain(const std::string& chain, const std::strin
             lastMetadata.erase(itm);
         }
     }
-    database->addContainerChain(newChain, lastClass, lastRefID, &containerID, updateID, lastMetadata);
+    if (parent != nullptr && parent->getClass().empty()) {
+        parent->setClass(lastClass);
+    }
+    std::string parentClass;
+    while (parent != nullptr) {
+        if (!parent->getClass().empty()) {
+            parentClass = fmt::format("{}/{}", parent->getClass(), parentClass);
+        } else {
+            parentClass = fmt::format("{}/{}", "", parentClass); // database uses default
+        }
+        parent = parent->getParent();
+    }
+    if (parentClass.empty()) {
+        parentClass = lastClass;
+    } else {
+        parentClass = parentClass.erase(parentClass.length() - 1, 1);
+        log_debug("ParentClass is {}", parentClass);
+    }
+    database->addContainerChain(newChain, parentClass, lastRefID, &containerID, updateID, lastMetadata);
 
     if (!updateID.empty() && origObj != nullptr) {
         int count = 0;

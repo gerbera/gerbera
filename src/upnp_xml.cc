@@ -121,9 +121,8 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
 
         std::string upnp_class = obj->getClass();
         log_debug("container is class: {}", upnp_class.c_str());
+        auto meta = obj->getMetadata();
         if (upnp_class == UPNP_CLASS_MUSIC_ALBUM) {
-            auto meta = obj->getMetadata();
-
             constexpr auto albumProperties = std::array<std::pair<const char*, metadata_fields_t>, 11> {
                 {
                     { "dc:creator", M_ALBUMARTIST },
@@ -145,8 +144,22 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
                     result.append_child(tag).append_child(pugi::node_pcdata).set_value(value.c_str());
                 }
             }
+        } else if (upnp_class == UPNP_CLASS_MUSIC_ARTIST) {
+            constexpr auto albumProperties = std::array<std::pair<const char*, metadata_fields_t>, 3> {
+                {
+                    { "upnp:artist", M_ALBUMARTIST },
+                    { "upnp:albumArtist", M_ALBUMARTIST },
+                    { "upnp:genre", M_GENRE },
+                }
+            };
+            for (const auto& [tag, field] : albumProperties) {
+                auto value = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(field));
+                if (!value.empty()) {
+                    result.append_child(tag).append_child(pugi::node_pcdata).set_value(value.c_str());
+                }
+            }
         }
-        if (upnp_class == UPNP_CLASS_MUSIC_ALBUM || upnp_class == UPNP_CLASS_CONTAINER) {
+        if (upnp_class == UPNP_CLASS_MUSIC_ALBUM || upnp_class == UPNP_CLASS_MUSIC_ARTIST || upnp_class == UPNP_CLASS_CONTAINER) {
             std::string url;
             bool artAdded = renderContainerImage(virtualURL, cont, url);
             if (artAdded) {

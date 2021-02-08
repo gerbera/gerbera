@@ -154,14 +154,14 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
 
         if ((self->whoami() == S_PLAYLIST) && (self->getConfig()->getBoolOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS))) {
             path = p2i->convert(path);
-            parentId = cm->addContainerChain(path, containerclass, orig_object->getID());
+            parentId = cm->addContainerChain(path, containerclass, orig_object->getID(), nullptr, cds_obj->getParent());
         } else {
             if (self->whoami() == S_PLAYLIST)
                 path = p2i->convert(path);
             else
                 path = i2i->convert(path);
 
-            parentId = cm->addContainerChain(path, containerclass, INVALID_OBJECT_ID, orig_object);
+            parentId = cm->addContainerChain(path, containerclass, INVALID_OBJECT_ID, orig_object, cds_obj->getParent());
         }
 
         cds_obj->setParentID(parentId);

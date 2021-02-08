@@ -35,6 +35,7 @@
 #include "cds_objects.h"
 #include "config/config_manager.h"
 #include "content/content_manager.h"
+#include "database/database.h"
 #include "js_functions.h"
 #include "metadata/metadata_handler.h"
 #include "script_names.h"
@@ -334,8 +335,21 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
     if (i != INVALID_OBJECT_ID)
         obj->setRefID(i);
     i = getIntProperty("parentID", INVALID_OBJECT_ID);
-    if (i != INVALID_OBJECT_ID)
+    if (i != INVALID_OBJECT_ID) {
         obj->setParentID(i);
+    }
+
+    duk_get_prop_string(ctx, -1, "parent");
+    if (duk_is_null_or_undefined(ctx, -1)) {
+        duk_pop(ctx);
+    } else if (duk_is_object(ctx, -1)) {
+        duk_to_object(ctx, -1);
+        auto parent = dukObject2cdsObject(nullptr);
+        if (parent != nullptr) {
+            obj->setParent(parent);
+            log_debug("dukObject2cdsObject: Parent {}", parent->getClass());
+        }
+    }
 
     val = getProperty("title");
     if (!val.empty()) {
@@ -360,7 +374,9 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         obj->setRestricted(b);
 
     duk_get_prop_string(ctx, -1, "meta");
-    if (duk_is_object(ctx, -1)) {
+    if (duk_is_null_or_undefined(ctx, -1)) {
+        duk_pop(ctx);
+    } else if (duk_is_object(ctx, -1)) {
         duk_to_object(ctx, -1);
         /// \todo: only metadata enumerated in mt_keys is taken
         for (const auto& [sym, upnp] : mt_keys) {
