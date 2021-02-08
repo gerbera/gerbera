@@ -44,7 +44,7 @@ constexpr std::array<std::pair<resource_attributes_t, const char*>, 11> res_name
     { R_TYPE, "R_TYPE" },
 } };
 
-constexpr std::array<std::pair<metadata_fields_t, const char*>, 21> mt_names = { {
+constexpr std::array<std::pair<metadata_fields_t, const char*>, 22> mt_names = { {
     { M_TITLE, "M_TITLE" },
     { M_ARTIST, "M_ARTIST" },
     { M_ALBUM, "M_ALBUM" },
@@ -54,6 +54,7 @@ constexpr std::array<std::pair<metadata_fields_t, const char*>, 21> mt_names = {
     { M_DESCRIPTION, "M_DESCRIPTION" },
     { M_LONGDESCRIPTION, "M_LONGDESCRIPTION" },
     { M_TRACKNUMBER, "M_TRACKNUMBER" },
+    { M_PARTNUMBER, "M_PARTNUMBER" },
     { M_ALBUMARTURI, "M_ALBUMARTURI" },
     { M_REGION, "M_REGION" },
     { M_AUTHOR, "M_AUTHOR" },

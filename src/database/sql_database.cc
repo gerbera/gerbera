@@ -70,6 +70,7 @@ enum {
     _update_id,
     _mime_type,
     _flags,
+    _part_number,
     _track_number,
     _service_id,
     _ref_upnp_class,
@@ -94,8 +95,8 @@ enum {
 #define SEL_EQ_SP_FQ_DT_BQ << QTE << ',' << TQ('f') << '.' << QTB <<
 #define SEL_EQ_SP_RFQ_DT_BQ << QTE << ',' << TQ("rf") << '.' << QTB <<
 
-#define SELECT_DATA_FOR_STRINGBUFFER                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   \
-    TQ('f') << '.' << QTB << "id" SEL_EQ_SP_FQ_DT_BQ "ref_id" SEL_EQ_SP_FQ_DT_BQ "parent_id" SEL_EQ_SP_FQ_DT_BQ "object_type" SEL_EQ_SP_FQ_DT_BQ "upnp_class" SEL_EQ_SP_FQ_DT_BQ "dc_title" SEL_EQ_SP_FQ_DT_BQ "location" SEL_EQ_SP_FQ_DT_BQ "location_hash" SEL_EQ_SP_FQ_DT_BQ "metadata" SEL_EQ_SP_FQ_DT_BQ "auxdata" SEL_EQ_SP_FQ_DT_BQ "resources" SEL_EQ_SP_FQ_DT_BQ "update_id" SEL_EQ_SP_FQ_DT_BQ "mime_type" SEL_EQ_SP_FQ_DT_BQ "flags" SEL_EQ_SP_FQ_DT_BQ "track_number" SEL_EQ_SP_FQ_DT_BQ "service_id" SEL_EQ_SP_RFQ_DT_BQ "upnp_class" SEL_EQ_SP_RFQ_DT_BQ "location" SEL_EQ_SP_RFQ_DT_BQ "metadata" SEL_EQ_SP_RFQ_DT_BQ "auxdata" SEL_EQ_SP_RFQ_DT_BQ "resources" SEL_EQ_SP_RFQ_DT_BQ "mime_type" SEL_EQ_SP_RFQ_DT_BQ "service_id" << QTE \
+#define SELECT_DATA_FOR_STRINGBUFFER                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    \
+    TQ('f') << '.' << QTB << "id" SEL_EQ_SP_FQ_DT_BQ "ref_id" SEL_EQ_SP_FQ_DT_BQ "parent_id" SEL_EQ_SP_FQ_DT_BQ "object_type" SEL_EQ_SP_FQ_DT_BQ "upnp_class" SEL_EQ_SP_FQ_DT_BQ "dc_title" SEL_EQ_SP_FQ_DT_BQ "location" SEL_EQ_SP_FQ_DT_BQ "location_hash" SEL_EQ_SP_FQ_DT_BQ "metadata" SEL_EQ_SP_FQ_DT_BQ "auxdata" SEL_EQ_SP_FQ_DT_BQ "resources" SEL_EQ_SP_FQ_DT_BQ "update_id" SEL_EQ_SP_FQ_DT_BQ "mime_type" SEL_EQ_SP_FQ_DT_BQ "flags" SEL_EQ_SP_FQ_DT_BQ "part_number" SEL_EQ_SP_FQ_DT_BQ "track_number" SEL_EQ_SP_FQ_DT_BQ "service_id" SEL_EQ_SP_RFQ_DT_BQ "upnp_class" SEL_EQ_SP_RFQ_DT_BQ "location" SEL_EQ_SP_RFQ_DT_BQ "metadata" SEL_EQ_SP_RFQ_DT_BQ "auxdata" SEL_EQ_SP_RFQ_DT_BQ "resources" SEL_EQ_SP_RFQ_DT_BQ "mime_type" SEL_EQ_SP_RFQ_DT_BQ "service_id" << QTE \
             << ',' << TQD("as", "persistent")
 
 #define SQL_QUERY_FOR_STRINGBUFFER "SELECT " << SELECT_DATA_FOR_STRINGBUFFER << " FROM " << TQ(CDS_OBJECT_TABLE) << ' ' << TQ('f') << " LEFT JOIN " \
@@ -306,6 +307,13 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
                 cdsObjectSql["track_number"] = SQL_NULL;
         }
 
+        if (item->getPartNumber() > 0) {
+            cdsObjectSql["part_number"] = quote(item->getPartNumber());
+        } else {
+            if (isUpdate)
+                cdsObjectSql["part_number"] = SQL_NULL;
+        }
+
         if (!item->getServiceID().empty()) {
             if (!hasReference || std::static_pointer_cast<CdsItem>(refObj)->getServiceID() != item->getServiceID())
                 cdsObjectSql["service_id"] = quote(item->getServiceID());
@@ -494,8 +502,10 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_pt
     // order by code..
     auto orderByCode = [&]() {
         std::ostringstream qb;
-        if (param->getFlag(BROWSE_TRACK_SORT))
+        if (param->getFlag(BROWSE_TRACK_SORT)) {
+            qb << TQD('f', "part_number") << ',';
             qb << TQD('f', "track_number") << ',';
+        }
         qb << TQD('f', "dc_title");
         return qb.str();
     };
@@ -945,6 +955,7 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::unique_pt
         }
 
         item->setTrackNumber(stoiString(row->col(_track_number)));
+        item->setPartNumber(stoiString(row->col(_part_number)));
 
         if (!row->col(_ref_service_id).empty())
             item->setServiceID(row->col(_ref_service_id));

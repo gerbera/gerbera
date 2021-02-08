@@ -389,6 +389,13 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
                         std::static_pointer_cast<CdsItem>(obj)->setTrackNumber(j);
                     } else
                         std::static_pointer_cast<CdsItem>(obj)->setTrackNumber(0);
+                } else if (sym == M_PARTNUMBER) {
+                    int j = stoiString(val, 0);
+                    if (j > 0) {
+                        obj->setMetadata(sym, val);
+                        std::static_pointer_cast<CdsItem>(obj)->setPartNumber(j);
+                    } else
+                        std::static_pointer_cast<CdsItem>(obj)->setPartNumber(0);
                 } else {
                     val = sc->convert(val);
                     obj->setMetadata(sym, val);

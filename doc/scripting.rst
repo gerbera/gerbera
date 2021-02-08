@@ -261,6 +261,12 @@ object.
 
         Track number of the item, this corresponds to ``upnp:originalTrackNumber`` in the DIDL-Lite XML.
 
+    .. js:attribute:: orig.meta[M_PARTNUMBER]
+
+        **RW**
+
+        Part number of the item. This contains the disc number for audio tracks.
+
     .. js:attribute:: orig.meta[M_AUTHOR]
 
         **RW**
@@ -339,8 +345,8 @@ values.
 +---------------------------------------+---------+--------------------------------------+-----------------------------------------------+
 | ``UPNP_CLASS_CONTAINER_MUSIC_ALBUM``  | string  | object.container.album.musicAlbum    | | This container class will be treated by the |
 |                                       |         |                                      | | server in a special way, all music items in |
-|                                       |         |                                      | | this container will be sorted by ID3 track  |
-|                                       |         |                                      | | number.                                     |
+|                                       |         |                                      | | this container will be sorted by ID3 disk   |
+|                                       |         |                                      | | number and track number.                                     |
 +---------------------------------------+---------+--------------------------------------+-----------------------------------------------+
 | ``UPNP_CLASS_PLAYLIST_CONTAINER``     | string  | object.container.playlistContainer   | | This container class will be treated by the |
 |                                       |         |                                      | | server in a special way, all items in this  |
@@ -398,7 +404,7 @@ within the import and/or the playlist script:
         A string, defining the ``upnp:class`` of the container that appears last in the chain. This parameter can be
         omitted, in this case the default value ``object.container`` will be taken. Setting specific upnp container classes
         is useful to define the special meaning of a particular container; for example, the server will always sort
-        songs by track number if upnp class of a container is set to ``object.container.album.musicAlbum``.
+        songs by disk number and track number if upnp class of a container is set to ``object.container.album.musicAlbum``.
 
 
 .. js:function:: copyObject(originalObject)
