@@ -839,12 +839,16 @@ void SQLDatabase::addContainerChain(std::string virtualPath, const std::string& 
     }
 
     int parentContainerID = 0;
-    std::string newpath, container;
+    std::string newpath, container, newClass;
     stripAndUnescapeVirtualContainerFromPath(virtualPath, newpath, container);
+    auto classes = splitString(lastClass, '/');
+    if (!classes.empty()) {
+        newClass = classes.back();
+        classes.pop_back();
+    }
+    addContainerChain(newpath, classes.empty() ? "" : join(classes, '/'), INVALID_OBJECT_ID, &parentContainerID, updateID, std::map<std::string, std::string>());
 
-    addContainerChain(newpath, "", INVALID_OBJECT_ID, &parentContainerID, updateID, std::map<std::string, std::string>());
-
-    *containerID = createContainer(parentContainerID, container, virtualPath, true, lastClass, lastRefID, lastMetadata);
+    *containerID = createContainer(parentContainerID, container, virtualPath, true, newClass, lastRefID, lastMetadata);
     updateID.emplace(updateID.begin(), *containerID);
 }
 

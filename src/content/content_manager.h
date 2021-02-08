@@ -238,7 +238,8 @@ public:
     /// INVALID_OBJECT_ID indicates that the id will not be set.
     /// \return ID of the last container in the chain.
     int addContainerChain(const std::string& chain, const std::string& lastClass = "",
-        int lastRefID = INVALID_OBJECT_ID, const std::shared_ptr<CdsObject>& origObj = nullptr);
+        int lastRefID = INVALID_OBJECT_ID, const std::shared_ptr<CdsObject>& origObj = nullptr,
+        std::shared_ptr<CdsObject> parent = nullptr);
 
     /// \brief Adds a virtual container specified by parentID and title
     /// \param parentID the id of the parent.

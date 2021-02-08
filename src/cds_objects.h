@@ -117,6 +117,9 @@ protected:
     std::map<std::string, std::string> auxdata;
     std::vector<std::shared_ptr<CdsResource>> resources;
 
+    /// \brief reference to parent, transporting details from import script
+    std::shared_ptr<CdsObject> parent;
+
     virtual ~CdsObject() = default;
 
 public:
@@ -147,9 +150,11 @@ public:
 
     /// \brief Set the parent ID of the object.
     void setParentID(int parentID) { this->parentID = parentID; }
+    void setParent(std::shared_ptr<CdsObject>& parent) { this->parent = parent; }
 
     /// \brief Retrieve the objects parent ID.
     int getParentID() const { return parentID; }
+    std::shared_ptr<CdsObject> getParent() const { return parent; }
 
     /// \brief Set the restricted flag.
     void setRestricted(bool restricted) { changeFlag(OBJECT_FLAG_RESTRICTED, restricted); }
