@@ -1072,8 +1072,15 @@ int ContentManager::addContainerChain(const std::string& chain, const std::strin
             lastMetadata.erase(itm);
         }
     }
-    if (parent != nullptr && parent->getClass().empty()) {
-        parent->setClass(lastClass);
+    if (parent != nullptr) {
+        // parent has no upnpclass
+        if (parent->getClass().empty()) {
+            parent->setClass(lastClass);
+        }
+        // overwrite metadata if set in parent
+        for (const auto& [key, val] : parent->getMetadata()) {
+            lastMetadata[key] = val;
+        }
     }
     std::string parentClass;
     while (parent != nullptr) {
