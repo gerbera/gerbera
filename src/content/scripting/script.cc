@@ -224,6 +224,16 @@ Script::Script(std::shared_ptr<ContentManager> content,
                 e.what());
         }
     }
+    std::string custom_scr_path = config->getOption(CFG_IMPORT_SCRIPTING_CUSTOM_SCRIPT);
+    if (!custom_scr_path.empty()) {
+        try {
+            _load(custom_scr_path);
+            _execute();
+        } catch (const std::runtime_error& e) {
+            log_js("Unable to load {}: {}", custom_scr_path.c_str(),
+                e.what());
+        }
+    }
 }
 
 Script::~Script()

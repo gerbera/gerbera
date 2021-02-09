@@ -409,6 +409,7 @@
         <xs:complexType>
             <xs:all>
                 <xs:element ref="common-script" minOccurs="0"/>
+                <xs:element ref="custom-script" minOccurs="0"/>
                 <xs:element ref="playlist-script" minOccurs="0"/>
                 <xs:element ref="virtual-layout" minOccurs="0"/>
             </xs:all>
@@ -417,6 +418,7 @@
     </xs:element>
 
     <xs:element name="common-script" type="xs:string"/>
+    <xs:element name="custom-script" type="xs:string"/>
 
     <xs:element name="playlist-script">
         <xs:complexType>

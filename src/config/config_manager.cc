@@ -320,6 +320,9 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = 
         DEFAULT_JS_CHARSET),
     std::make_shared<ConfigPathSetup>(CFG_IMPORT_SCRIPTING_COMMON_SCRIPT,
         "/import/scripting/common-script", "config-import.html#common-script",
+        "", true, false),
+    std::make_shared<ConfigPathSetup>(CFG_IMPORT_SCRIPTING_CUSTOM_SCRIPT,
+        "/import/scripting/custom-script", "config-import.html#common-script",
         "", true),
     std::make_shared<ConfigPathSetup>(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT,
         "/import/scripting/playlist-script", "config-import.html#playlist-script",
@@ -1111,6 +1114,11 @@ void ConfigManager::load(const fs::path& userHome)
     co = findConfigSetup(CFG_IMPORT_SCRIPTING_COMMON_SCRIPT);
     co->setDefaultValue(dataDir / DEFAULT_JS_DIR / DEFAULT_COMMON_SCRIPT);
     co->makeOption(root, self);
+
+    co = findConfigSetup(CFG_IMPORT_SCRIPTING_CUSTOM_SCRIPT);
+    args["resolveEmpty"] = "false";
+    co->makeOption(root, self, &args);
+    args.clear();
 
     setOption(root, CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS);
 #endif
