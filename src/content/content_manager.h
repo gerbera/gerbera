@@ -241,6 +241,9 @@ public:
         int lastRefID = INVALID_OBJECT_ID, const std::shared_ptr<CdsObject>& origObj = nullptr,
         std::shared_ptr<CdsObject> parent = nullptr);
 
+    /// \return ID of the last container in the chain.
+    int addContainerTree(const std::vector<std::shared_ptr<CdsObject>>& chain);
+
     /// \brief Adds a virtual container specified by parentID and title
     /// \param parentID the id of the parent.
     /// \param title the title of the container.

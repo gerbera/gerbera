@@ -62,6 +62,49 @@ duk_ret_t js_copyObject(duk_context* ctx)
     return 1;
 }
 
+duk_ret_t js_addContainerTree(duk_context* ctx)
+{
+    auto* self = Script::getContextScript(ctx);
+
+    if (!duk_is_array(ctx, 0)) {
+        log_js("js_addContainerTree: No Array");
+        return 0;
+    }
+
+    std::vector<std::shared_ptr<CdsObject>> result;
+    auto length = duk_get_length(ctx, -1);
+
+    for (duk_size_t i = 0; i < length; i++) {
+        if (duk_get_prop_index(ctx, -1, i)) {
+            if (!duk_is_object(ctx, -1)) {
+                log_js("js_addContainerTree: no object at {}", i);
+                break;
+            }
+            duk_to_object(ctx, -1);
+            auto cds_obj = self->dukObject2cdsObject(nullptr);
+            if (cds_obj != nullptr) {
+                result.emplace_back(cds_obj);
+            } else {
+                log_js("js_addContainerTree: no CdsObject at {}", i);
+            }
+        }
+        duk_pop(ctx);
+    }
+
+    if (!result.empty()) {
+        auto cm = self->getContent();
+        auto containerId = cm->addContainerTree(result);
+        if (containerId != INVALID_OBJECT_ID) {
+            /* setting last container ID as return value */
+            std::string tmp = fmt::to_string(containerId);
+            duk_push_string(ctx, tmp.c_str());
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
 duk_ret_t js_addCdsObject(duk_context* ctx)
 {
     auto* self = Script::getContextScript(ctx);
@@ -142,7 +185,7 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
                 auto mainObj = self->getDatabase()->loadObject(pcd_id);
                 cds_obj = self->dukObject2cdsObject(mainObj);
             } else
-                cds_obj = self->dukObject2cdsObject(self->getProcessedObject());
+                cds_obj = self->dukObject2cdsObject(orig_object);
         } else
             cds_obj = self->dukObject2cdsObject(orig_object);
 
