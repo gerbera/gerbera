@@ -1043,11 +1043,17 @@ void ContentManager::addContainer(int parentID, std::string title, const std::st
     addContainerChain(database->buildContainerPath(parentID, escape(std::move(title), VIRTUAL_CONTAINER_ESCAPE, VIRTUAL_CONTAINER_SEPARATOR)), upnpClass);
 }
 
+int ContentManager::addContainerTree(const std::vector<std::shared_ptr<CdsObject>>& chain)
+{
+    // ToDo: Implement
+    return INVALID_OBJECT_ID;
+}
+
 int ContentManager::addContainerChain(const std::string& chain, const std::string& lastClass, int lastRefID, const std::shared_ptr<CdsObject>& origObj, std::shared_ptr<CdsObject> parent)
 {
     std::map<std::string, std::string> lastMetadata = origObj != nullptr ? origObj->getMetadata() : std::map<std::string, std::string>();
     std::vector<int> updateID;
-    int containerID;
+    int containerID = stoiString(lastClass); // if chain was created before, lastClass contains containerID
 
     if (chain.empty())
         throw_std_runtime_error("addContainerChain() called with empty chain parameter");
@@ -1097,7 +1103,10 @@ int ContentManager::addContainerChain(const std::string& chain, const std::strin
         parentClass = parentClass.erase(parentClass.length() - 1, 1);
         log_debug("ParentClass is {}", parentClass);
     }
-    database->addContainerChain(newChain, parentClass, lastRefID, &containerID, updateID, lastMetadata);
+
+    if (containerID <= 0) {
+        database->addContainerChain(newChain, parentClass, lastRefID, &containerID, updateID, lastMetadata);
+    }
 
     if (!updateID.empty() && origObj != nullptr) {
         int count = 0;

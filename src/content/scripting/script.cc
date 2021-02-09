@@ -51,9 +51,10 @@
 #include "content/onlineservice/atrailers_content_handler.h"
 #endif
 
-static constexpr std::array<duk_function_list_entry, 8> js_global_functions = { {
+static constexpr std::array<duk_function_list_entry, 9> js_global_functions = { {
     { "print", js_print, DUK_VARARGS },
     { "addCdsObject", js_addCdsObject, 3 },
+    { "addContainerTree", js_addContainerTree, 1 },
     { "copyObject", js_copyObject, 1 },
     { "f2i", js_f2i, 1 },
     { "m2i", js_m2i, 1 },
@@ -350,9 +351,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
     }
 
     duk_get_prop_string(ctx, -1, "parent");
-    if (duk_is_null_or_undefined(ctx, -1)) {
-        duk_pop(ctx);
-    } else if (duk_is_object(ctx, -1)) {
+    if (duk_is_object(ctx, -1)) {
         duk_to_object(ctx, -1);
         auto parent = dukObject2cdsObject(nullptr);
         if (parent != nullptr) {
@@ -360,6 +359,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
             log_debug("dukObject2cdsObject: Parent {}", parent->getClass());
         }
     }
+    duk_pop(ctx);
 
     val = getProperty("title");
     if (!val.empty()) {
@@ -385,7 +385,6 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
 
     duk_get_prop_string(ctx, -1, "meta");
     if (duk_is_null_or_undefined(ctx, -1)) {
-        duk_pop(ctx);
     } else if (duk_is_object(ctx, -1)) {
         duk_to_object(ctx, -1);
         /// \todo: only metadata enumerated in mt_keys is taken
