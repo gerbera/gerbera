@@ -322,7 +322,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = 
         "/import/scripting/common-script", "config-import.html#common-script",
         "", true, false),
     std::make_shared<ConfigPathSetup>(CFG_IMPORT_SCRIPTING_CUSTOM_SCRIPT,
-        "/import/scripting/custom-script", "config-import.html#common-script",
+        "/import/scripting/custom-script", "config-import.html#custom-script",
         "", true),
     std::make_shared<ConfigPathSetup>(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT,
         "/import/scripting/playlist-script", "config-import.html#playlist-script",

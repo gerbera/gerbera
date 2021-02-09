@@ -133,8 +133,22 @@ Below are the available scripting options:
 * Optional
 * Default: ``${prefix}/share/gerbera/js/common.js``, **where ${prefix} is your installation prefix directory.**
 
-Points to the so called common script - think of it as a custom library of js helper functions, functions added
-there can be used in your import and in your playlist scripts. For more details read :ref:`scripting <scripting>`
+Points to the so called common script - it is a shared library of js helper functions.
+For more details read :ref:`scripting <scripting>`
+
+``custom-script``
+~~~~~~~~~~~~~~~~~
+
+::
+
+    <custom-script>/path/to/my/custom-script.js</custom-script>
+
+* Optional
+* Default: **empty**
+
+Points to the custom script - think of it as a custom library of js helper functions, functions added
+there can be used in your import and in your playlist scripts. Theses functions also overwrite functions from the common script.
+For more details read :ref:`scripting <scripting>`
 
 ``playlist-script``
 ~~~~~~~~~~~~~~~~~~~
