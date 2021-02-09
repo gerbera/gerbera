@@ -25,6 +25,14 @@ void ScriptTestFixture::SetUp()
 {
     ctx = duk_create_heap(nullptr, nullptr, nullptr, nullptr, nullptr);
 
+    if (scriptName!= "common.js") {
+        fs::path ss = fs::path(SCRIPTS_DIR) / "js" / "common.js";
+        std::string script = readTextFile(ss.c_str());
+        duk_push_string(ctx, ss.c_str());
+        duk_pcompile_lstring_filename(ctx, 0, script.c_str(), script.length());
+        duk_call(ctx, 0);
+    }
+
     fs::path scriptFile = fs::path(SCRIPTS_DIR) / "js" / scriptName;
     string scriptContent = readTextFile(scriptFile.c_str());
     duk_push_thread_stash(ctx, ctx);
