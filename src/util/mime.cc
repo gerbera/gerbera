@@ -55,10 +55,12 @@ Mime::Mime(const std::shared_ptr<Config>& config)
 
 Mime::~Mime()
 {
+#ifdef HAVE_MAGIC
     if (magicCookie) {
         magic_close(magicCookie);
         magicCookie = nullptr;
     }
+#endif
 }
 
 #ifdef HAVE_MAGIC

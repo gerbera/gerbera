@@ -766,8 +766,8 @@ std::string toCSV(const std::shared_ptr<std::unordered_set<int>>& array)
 
 void getTimespecNow(struct timespec* ts)
 {
-    if (timespec_get(ts, TIME_UTC) == 0)
-        throw_std_runtime_error("timespec_get failed: {}", std::strerror(errno));
+    if (clock_gettime(CLOCK_REALTIME, ts) != 0)
+        throw_std_runtime_error("clock_gettime failed: {}", std::strerror(errno));
 }
 
 long getDeltaMillis(struct timespec* first)
@@ -932,7 +932,7 @@ fs::path tempName(const fs::path& leadPath, char* tmpl)
     }
 
     /* Get some more or less random data.  */
-    timespec_get(&ts, TIME_UTC);
+    clock_gettime(CLOCK_REALTIME, &ts);
     value = (ts.tv_nsec ^ ts.tv_sec) + counter++;
 
     for (count = 0; count < 100; value += 7777, ++count) {
