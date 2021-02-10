@@ -194,7 +194,7 @@ describe('Gerbera Tree', () => {
 
       // click an item
       const item = $($('#tree li').get(3));
-      item.children('span.folder-title').click();
+      item.find('span.folder-title').click();
 
       expect(Items.treeItemSelected).toHaveBeenCalled();
       expect(Items.treeItemSelected.calls.mostRecent().args[0]).toEqual(
@@ -213,7 +213,7 @@ describe('Gerbera Tree', () => {
 
       // click an item
       const item = $($('#tree li').get(3));
-      item.children('span.folder-title').click();
+      item.find('span.folder-title').click();
 
       expect(Items.treeItemSelected).toHaveBeenCalled();
       expect(Items.treeItemSelected.calls.mostRecent().args[0]).toEqual(
@@ -232,7 +232,7 @@ describe('Gerbera Tree', () => {
 
       // click an item
       const item = $($('#tree li').get(3));
-      item.children('span.folder-title').click();
+      item.children('div.grb-list-inner').first().children('span.folder-title').click();
 
       expect(item.hasClass('selected-item')).toBeTruthy();
     });
@@ -261,7 +261,7 @@ describe('Gerbera Tree', () => {
 
       // click an item
       const item = $($('#tree li').get(4));
-      await item.children('span.folder-title').click();
+      await item.children('div.grb-list-inner').first().children('span.folder-title').click();
 
       expect(ajaxSpy.calls.count()).toBe(1);
       expect(ajaxSpy.calls.mostRecent().args[0].data.req_type).toBe('containers');

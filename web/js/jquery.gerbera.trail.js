@@ -189,5 +189,4 @@ $.widget('grb.trail', {
   items: function () {
     return this.element.find('li');
   }
-
 });

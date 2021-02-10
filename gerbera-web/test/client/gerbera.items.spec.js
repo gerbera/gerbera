@@ -113,15 +113,15 @@ describe('Gerbera Items', () => {
     it('loads the response as items in the datagrid', () => {
       itemsResponse.success = true;
       Items.loadItems(itemsResponse);
-      expect($('#datagrid').find('tr').length).toEqual(12);
+      expect($('#datagrid').find('div.grb-item').length).toEqual(11);
       itemsResponse.success = true;
     });
 
-    it('loads a pager for items', () => {
+    it('loads no pager for items', () => {
       itemsResponse.success = true;
       Items.loadItems(itemsResponse);
 
-      expect($('#datagrid nav.grb-pager').length).toBe(1);
+      expect($('#datagrid nav.grb-pager').length).toBe(0);
 
       itemsResponse.success = true;
     });
@@ -129,10 +129,10 @@ describe('Gerbera Items', () => {
     it('sets pager click to the callback method', () => {
       itemsResponse.success = true;
       spyOn(Items, 'retrieveItemsForPage');
-      spyOn(GerberaApp, 'viewItems').and.returnValue(25);
+      spyOn(GerberaApp, 'viewItems').and.returnValue(5);
 
       Items.loadItems(itemsResponse);
-      $($('#datagrid nav.grb-pager > ul > li').get(1)).find('a').click();
+      $('#datagrid nav.grb-pager > ul.pagination > li.page-item').eq(1).children('a').click();
 
       expect(Items.retrieveItemsForPage).toHaveBeenCalled();
     });
@@ -162,7 +162,7 @@ describe('Gerbera Items', () => {
 
     it('loads file items by transforming them', () => {
       Items.loadItems(fileItems);
-      expect($('#datagrid').find('tr').length).toEqual(33);
+      expect($('#datagrid').find('div.grb-item').length).toEqual(32);
     });
   });
   describe('deleteItemFromList()', () => {

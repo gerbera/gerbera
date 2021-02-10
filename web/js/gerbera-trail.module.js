@@ -43,7 +43,7 @@ const initialize = () => {
 };
 
 const makeTrail = (selectedItem, config) => {
-  const items = (selectedItem !== null) ? Tree.gatherTrail(selectedItem) : [{text: "current configuration"}];
+  const items = (selectedItem !== null) ? Trail.gatherTrail(selectedItem) : [{text: "current configuration"}];
   const configDefaults = {
     itemType: GerberaApp.getType()
   };
@@ -201,8 +201,8 @@ const deleteAllItems = (event) => {
   return Items.deleteGerberaItem(item, true)
     .then((response) => {
       if (response.success) {
-        Updates.showMessage('Successfully removed all items', undefined, 'success', 'fa-check');
         Updates.updateTreeByIds(response);
+        Updates.showMessage('Successfully removed all items', undefined, 'success', 'fa-check');
       } else {
         GerberaApp.error('Failed to remove all items');
       }
@@ -210,6 +210,37 @@ const deleteAllItems = (event) => {
     .catch((err) => { // eslint-disable-line
       GerberaApp.error('Failed to remove item');
     });
+};
+
+const gatherTrail = (element) => {
+  const items = [];
+  let lastItem = {};
+  if ($(element).data('grb-id') !== undefined) {
+    const title = $(element).children('div.grb-list-inner:first-child').children("span.folder-title").text();
+    lastItem = {
+      id: $(element).data('grb-id'),
+      text: title,
+      fullPath: "/" + title
+    };
+    items.push(lastItem);
+  }
+
+  let parents = $(element).parents('ul.list-group li');
+
+  parents.each(function (index, parent) {
+    const title = $(parent).children('div.grb-list-inner:first-child').children("span.folder-title").text();
+    const gerberaId = $(parent).data('grb-id');
+
+    const item = {
+      id: gerberaId,
+      text: title
+    };
+    if (gerberaId !== 0) {
+      lastItem.fullPath = "/" + title + lastItem.fullPath;
+    }
+    items.push(item);
+  });
+  return items.reverse();
 };
 
 export const Trail = {
@@ -225,4 +256,5 @@ export const Trail = {
   initialize,
   makeTrail,
   makeTrailFromItem,
+  gatherTrail
 };

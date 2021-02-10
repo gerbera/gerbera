@@ -145,37 +145,5 @@ $.widget('grb.tree', {
 
   getElement: function (id) {
     return this.element.find('#grb-tree-' + id);
-  },
-
-  gatherTrail: function (element) {
-    const items = [];
-    let lastItem = {};
-    if ($(element).data('grb-id') !== undefined) {
-      const title = $(element).children('div.grb-list-inner:first-child').children("span.folder-title").text();
-      lastItem = {
-        id: $(element).data('grb-id'),
-        text: title,
-        fullPath: "/" + title
-      };
-      items.push(lastItem);
-    }
-
-    let parents = $(element).parents('ul.list-group li');
-
-    parents.each(function (index, parent) {
-      const title = $(parent).children('div.grb-list-inner:first-child').children("span.folder-title").text();
-      const gerberaId = $(parent).data('grb-id');
-
-      const item = {
-        id: gerberaId,
-        text: title
-      };
-      if (gerberaId !== 0) {
-        lastItem.fullPath = "/" + title + lastItem.fullPath;
-      }
-      items.push(item);
-    });
-    return items.reverse();
   }
-
 });

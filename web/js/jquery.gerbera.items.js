@@ -33,12 +33,12 @@ $.widget('grb.dataitems', {
     const onAdd = this.options.onAdd;
     const itemType = this.options.itemType;
     const pager = this.options.pager;
-    let row, content, text;
+    let content, text;
 
     if (data.length > 0) {
       for (let i = 0; i < data.length; i++) {
         const item = data[i];
-        content = $('<div class="d-flex align-items-center border-bottom p-1 bg-white" />');
+        const content = $('<div class="d-flex align-items-center border-bottom p-1 bg-white" />');
 
         if (item.image) {
           const img = $('<img class="float-left" src="" style="object-fit: contain" width="36px" height="36px"/>');
@@ -70,11 +70,11 @@ $.widget('grb.dataitems', {
             editIcon.click(item, onEdit);
           }
 
-          const deleteIcon = $('<a class="btn grb-item-edit fa fa-trash-o pl-0" title="Delete Item"></a>');
+          const deleteIcon = $('<a class="btn grb-item-delete fa fa-trash-o pl-0" title="Delete Item"></a>');
           deleteIcon.appendTo(buttons);
           if (onDelete) {
             deleteIcon.click(item, function (event) {
-              row.remove();
+              content.remove();
               onDelete(event);
             });
           }
@@ -100,8 +100,8 @@ $.widget('grb.dataitems', {
       table.append(content);
     }
 
-    const tfoot = this.buildPager(pager);
-    table.append(tfoot);
+    const pagerWidget = this.buildPager(pager);
+    table.append(pagerWidget);
 
     this.element.append(table);
     this.element.addClass('with-data');
@@ -177,7 +177,7 @@ $.widget('grb.dataitems', {
       list.append(next);
       grbPager.append(list);
       outer.append(grbPager);
-      outer.addClass("py-2 d-flex flex-fill justify-content-center align-items-end bg-light");
+      outer.addClass("grb-pager-outer py-2 d-flex flex-fill justify-content-center align-items-end bg-light");
     }
 
     return outer;

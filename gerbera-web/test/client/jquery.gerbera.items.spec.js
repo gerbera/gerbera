@@ -19,8 +19,8 @@ describe('The jQuery Datagrid', () => {
       data: datagridData
     });
 
-    expect(dataGrid.find('tr').length).toBe(11);
-    expect(dataGrid.find('tr.grb-item').get(0).innerText).toContain(datagridData[0].text); // skip the header row
+    expect(dataGrid.find('.grb-item').length).toBe(10);
+    expect(dataGrid.find('.grb-item').get(0).innerText).toContain(datagridData[0].text); // skip the header row
     expect(dataGrid.find('a').get(0).href).toBe(datagridData[0].url);
   });
 
@@ -33,7 +33,7 @@ describe('The jQuery Datagrid', () => {
     });
     const beforeCount = dataGrid.find('.grb-item').length;
 
-    dataGrid.find('.grb-item span.grb-item-delete').first().click();
+    dataGrid.find('.grb-item a.grb-item-delete').first().click();
 
     const afterCount = dataGrid.find('.grb-item').length;
     expect(afterCount).toEqual(beforeCount - 1);
@@ -48,7 +48,7 @@ describe('The jQuery Datagrid', () => {
       itemType: 'fs'
     });
 
-    dataGrid.find('.grb-item span.grb-item-delete').first().click();
+    dataGrid.find('.grb-item a.grb-item-delete').first().click();
 
     expect(methodSpy).not.toHaveBeenCalled();
   });
@@ -61,7 +61,7 @@ describe('The jQuery Datagrid', () => {
       itemType: 'db'
     });
 
-    dataGrid.find('.grb-item span.grb-item-edit').first().click();
+    dataGrid.find('.grb-item a.grb-item-edit').first().click();
 
     expect(methodSpy).toHaveBeenCalled();
   });
@@ -74,7 +74,7 @@ describe('The jQuery Datagrid', () => {
       itemType: 'fs'
     });
 
-    dataGrid.find('.grb-item span.grb-item-edit').first().click();
+    dataGrid.find('.grb-item a.grb-item-edit').first().click();
 
     expect(methodSpy).not.toHaveBeenCalled();
   });
@@ -87,7 +87,7 @@ describe('The jQuery Datagrid', () => {
       itemType: 'db'
     });
 
-    dataGrid.find('.grb-item span.grb-item-download').first().click();
+    dataGrid.find('.grb-item a.grb-item-download').first().click();
 
     expect(methodSpy).toHaveBeenCalled();
   });
@@ -100,7 +100,7 @@ describe('The jQuery Datagrid', () => {
       itemType: 'fs'
     });
 
-    dataGrid.find('.grb-item span.grb-item-download').first().click();
+    dataGrid.find('.grb-item a.grb-item-download').first().click();
 
     expect(methodSpy).not.toHaveBeenCalled();
   });
@@ -113,7 +113,7 @@ describe('The jQuery Datagrid', () => {
       itemType: 'fs'
     });
 
-    dataGrid.find('.grb-item span.grb-item-add').first().click();
+    dataGrid.find('.grb-item a.grb-item-add').first().click();
 
     expect(methodSpy).toHaveBeenCalled();
   });
@@ -126,7 +126,7 @@ describe('The jQuery Datagrid', () => {
       itemType: 'db'
     });
 
-    dataGrid.find('.grb-item span.grb-item-add').first().click();
+    dataGrid.find('.grb-item a.grb-item-add').first().click();
 
     expect(methodSpy).not.toHaveBeenCalled();
   });
@@ -140,7 +140,7 @@ describe('The jQuery Datagrid', () => {
         itemsPerPage: 10}
     });
 
-    expect(dataGrid.find('tfoot').length).toBe(1);
+    expect(dataGrid.find('.grb-pager-outer').length).toBe(1);
     expect($('#datagrid nav.grb-pager > ul > li').length).toBe(102);
   });
 
@@ -153,7 +153,7 @@ describe('The jQuery Datagrid', () => {
         itemsPerPage: 10}
     });
 
-    expect(dataGrid.find('tfoot').length).toBe(1);
+    expect(dataGrid.find('.grb-pager-outer').length).toBe(1);
     expect($('#datagrid nav.grb-pager > ul > li').length).toBe(102);
   });
 
@@ -166,7 +166,7 @@ describe('The jQuery Datagrid', () => {
         itemsPerPage: 10}
     });
 
-    expect(dataGrid.find('tfoot').length).toBe(1);
+    expect(dataGrid.find('div.grb-pager-outer').length).toBe(1);
     expect($('#datagrid nav.grb-pager > ul > li').length).toBe(4);
   });
 
@@ -179,7 +179,6 @@ describe('The jQuery Datagrid', () => {
         itemsPerPage: 10}
     });
 
-    expect(dataGrid.find('tfoot').length).toBe(1);
     expect($('#datagrid nav.grb-pager > ul > li').length).toBe(4);
   });
 

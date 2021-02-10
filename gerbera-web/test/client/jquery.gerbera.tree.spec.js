@@ -43,7 +43,7 @@ describe('The jQuery Tree', () => {
     });
 
     const items = $('#tree').find('li');
-    const folder = items.children('span');
+    const folder = items.children('div').first().children('i');
 
     expect(folder.hasClass('folder-closed')).toBeTruthy();
   });
@@ -158,7 +158,7 @@ describe('The jQuery Tree', () => {
       const newList = parent.children('ul');
       expect(newList.length).toBe(1);
       expect(newList.children('li').length).toBe(4);
-      expect(tree.tree('closed', parent.children('span').first())).toBeFalsy();
+      expect(tree.tree('isClosed', parent.children('div').first().children("span").first())).toBeFalsy();
     });
   });
 
@@ -193,8 +193,10 @@ describe('The jQuery Tree', () => {
       });
 
       const item = tree.find('li').get(0);
-      const title = $(item).children('span').get(1);
-      expect(tree.tree('closed', title)).toBeTruthy();
+      console.log("LI", item);
+      const title = $(item).children('div.grb-list-inner').first().children('span')
+      console.log("LI TEXT", title);
+      expect(tree.tree('isClosed', title)).toBeTruthy();
     });
   });
 
@@ -219,10 +221,10 @@ describe('The jQuery Tree', () => {
       ];
       tree.tree('append', parent, children);
 
-      const title = parent.children('span').get(1);
+      const title = parent.children('div').first().children('span');
       tree.tree('collapse', parent);
 
-      expect(tree.tree('closed', title)).toBeTruthy();
+      expect(tree.tree('isClosed', title)).toBeTruthy();
       expect(parent.children('ul.list-group').length).toBe(0);
     });
   });
