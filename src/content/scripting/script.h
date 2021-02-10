@@ -70,6 +70,7 @@ public:
 
     void setProperty(const std::string& name, const std::string& value);
     void setIntProperty(const std::string& name, int value);
+    std::vector<std::string> getPropertyNames();
 
     void defineFunction(const std::string& name, duk_c_function function, uint32_t numParams);
     void defineFunctions(const duk_function_list_entry* functions);

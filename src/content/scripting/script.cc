@@ -108,6 +108,20 @@ int Script::getIntProperty(const std::string& name, int def)
     return ret;
 }
 
+std::vector<std::string> Script::getPropertyNames()
+{
+    std::vector<std::string> keys;
+    duk_enum(ctx, -1, 0);
+    while (duk_next(ctx, -1 /*enum_idx*/, 0 /*get_value*/)) {
+        /* [ ... enum key ] */
+        auto sym = duk_get_string(ctx, -1);
+        keys.emplace_back(sym);
+        duk_pop(ctx); /* pop_key */
+    }
+    duk_pop(ctx); // duk_enum
+    return keys;
+}
+
 void Script::setProperty(const std::string& name, const std::string& value)
 {
     duk_push_string(ctx, value.c_str());
@@ -388,10 +402,9 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         obj->setRestricted(b);
 
     duk_get_prop_string(ctx, -1, "meta");
-    if (duk_is_null_or_undefined(ctx, -1)) {
-    } else if (duk_is_object(ctx, -1)) {
+    if (!duk_is_null_or_undefined(ctx, -1) && duk_is_object(ctx, -1)) {
         duk_to_object(ctx, -1);
-        /// \todo: only metadata enumerated in mt_keys is taken
+        // only metadata enumerated in mt_keys is allowed
         for (const auto& [sym, upnp] : mt_keys) {
             val = getProperty(upnp);
             if (!val.empty()) {
@@ -423,6 +436,71 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         obj->setFlags(pcd->getFlags());
         obj->setResources(pcd->getResources());
         obj->setAuxData(pcd->getAuxData());
+    } else {
+        i = getIntProperty("flags", -1);
+        if (i >= 0)
+            obj->setFlags(i);
+
+        duk_get_prop_string(ctx, -1, "res");
+        if (!duk_is_null_or_undefined(ctx, -1) && duk_is_object(ctx, -1)) {
+            duk_to_object(ctx, -1);
+            auto keys = getPropertyNames();
+
+            int resCount = 0;
+            for (const auto& sym : keys) {
+                if (sym.find("handlerType") != std::string::npos) {
+                    resCount = stoiString(sym);
+                    i = getIntProperty(sym, -1);
+                    if (i >= 0) {
+                        std::shared_ptr<CdsResource> res = std::make_shared<CdsResource>(i);
+                        obj->addResource(res);
+                    }
+                }
+            }
+            resCount = 0;
+            for (const auto& res : obj->getResources()) {
+                // only attribute enumerated in res_keys is allowed
+                for (const auto& [key, upnp] : res_keys) {
+                    val = getProperty(resCount == 0 ? upnp : fmt::format("{}-{}", resCount, upnp));
+                    if (!val.empty()) {
+                        val = sc->convert(val);
+                        res->addAttribute(key, val);
+                    }
+                }
+                auto head = fmt::format("{}#", resCount);
+                for (const auto& sym : keys) {
+                    if (sym.find(head) != std::string::npos) {
+                        auto key = sym.substr(head.size());
+                        val = getProperty(sym);
+                        res->addParameter(key, val);
+                    }
+                }
+                head = fmt::format("{}%", resCount);
+                for (const auto& sym : keys) {
+                    if (sym.find(head) != std::string::npos) {
+                        auto key = sym.substr(head.size());
+                        val = getProperty(sym);
+                        res->addOption(key, val);
+                    }
+                }
+                resCount++;
+            }
+        }
+        duk_pop(ctx); // res
+
+        duk_get_prop_string(ctx, -1, "aux");
+        if (!duk_is_null_or_undefined(ctx, -1) && duk_is_object(ctx, -1)) {
+            duk_to_object(ctx, -1);
+            auto keys = getPropertyNames();
+            for (const auto& sym : keys) {
+                val = getProperty(sym);
+                if (!val.empty()) {
+                    val = sc->convert(val);
+                    obj->setAuxData(sym, val);
+                }
+            }
+        }
+        duk_pop(ctx); // aux
     }
 
     // CdsItem
@@ -541,6 +619,7 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
 
     setIntProperty("mtime", int(obj->getMTime()));
     setIntProperty("sizeOnDisk", int(obj->getSizeOnDisk()));
+    setIntProperty("flags", obj->getFlags());
 
     // TODO: boolean type
     i = obj->isRestricted();
@@ -605,9 +684,18 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
         if (obj->getResourceCount() > 0) {
             int resCount = 0;
             for (const auto& res : obj->getResources()) {
+                setProperty(fmt::format("{}:handlerType", resCount), fmt::format("{}", res->getHandlerType()));
                 auto attributes = res->getAttributes();
                 for (const auto& [key, val] : attributes) {
                     setProperty(resCount == 0 ? key : fmt::format("{}-{}", resCount, key), val);
+                }
+                auto parameters = res->getParameters();
+                for (const auto& [key, val] : parameters) {
+                    setProperty(fmt::format("{}#{}", resCount, key), val);
+                }
+                auto options = res->getOptions();
+                for (const auto& [key, val] : options) {
+                    setProperty(fmt::format("{}%{}", resCount, key), val);
                 }
                 resCount++;
             }
