@@ -790,7 +790,7 @@ fs::path SQLDatabase::buildContainerPath(int parentID, const std::string& title)
 {
     //title = escape(title, xxx);
     if (parentID == CDS_ID_ROOT)
-        return std::string(1, VIRTUAL_CONTAINER_SEPARATOR) + title;
+        return fmt::format("{}{}", VIRTUAL_CONTAINER_SEPARATOR, title);
 
     std::ostringstream qb;
     qb << "SELECT " << TQ("location") << " FROM " << TQ(CDS_OBJECT_TABLE)
@@ -805,9 +805,9 @@ fs::path SQLDatabase::buildContainerPath(int parentID, const std::string& title)
         return "";
 
     char prefix;
-    fs::path path = stripLocationPrefix(row->col(0) + VIRTUAL_CONTAINER_SEPARATOR + title, &prefix);
+    fs::path path = stripLocationPrefix(fmt::format("{}{}{}", row->col(0), VIRTUAL_CONTAINER_SEPARATOR, title), &prefix);
     if (prefix != LOC_VIRT_PREFIX)
-        throw_std_runtime_error("tried to build a virtual container path with an non-virtual parentID");
+        throw_std_runtime_error("Tried to build a virtual container path with an non-virtual parentID");
 
     return path;
 }

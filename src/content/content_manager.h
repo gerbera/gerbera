@@ -363,6 +363,8 @@ protected:
     void finishScan(DIR* dir, const std::shared_ptr<AutoscanDirectory>& adir, const std::string& location, time_t lmt);
     static void invalidateAddTask(const std::shared_ptr<GenericTask>& t, const fs::path& path);
 
+    void assignFanArt(const std::vector<int>& containerIds, const std::shared_ptr<CdsObject>& origObj);
+
     template <typename T>
     void updateCdsObject(std::shared_ptr<T>& item, const std::map<std::string, std::string>& parameters);
 
