@@ -238,8 +238,7 @@ public:
     /// INVALID_OBJECT_ID indicates that the id will not be set.
     /// \return ID of the last container in the chain.
     int addContainerChain(const std::string& chain, const std::string& lastClass = "",
-        int lastRefID = INVALID_OBJECT_ID, const std::shared_ptr<CdsObject>& origObj = nullptr,
-        std::shared_ptr<CdsObject> parent = nullptr);
+        int lastRefID = INVALID_OBJECT_ID, const std::shared_ptr<CdsObject>& origObj = nullptr);
 
     /// \return ID of the last container in the chain.
     int addContainerTree(const std::vector<std::shared_ptr<CdsObject>>& chain);

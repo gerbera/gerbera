@@ -1070,11 +1070,10 @@ int ContentManager::addContainerTree(const std::vector<std::shared_ptr<CdsObject
     return result;
 }
 
-int ContentManager::addContainerChain(const std::string& chain, const std::string& lastClass, int lastRefID, const std::shared_ptr<CdsObject>& origObj, std::shared_ptr<CdsObject> parent)
+int ContentManager::addContainerChain(const std::string& chain, const std::string& lastClass, int lastRefID, const std::shared_ptr<CdsObject>& origObj)
 {
     std::map<std::string, std::string> lastMetadata = origObj != nullptr ? origObj->getMetadata() : std::map<std::string, std::string>();
     std::vector<int> updateID;
-    int containerID = stoiString(lastClass); // if chain was created before, lastClass contains containerID
 
     if (chain.empty())
         throw_std_runtime_error("addContainerChain() called with empty chain parameter");
@@ -1099,38 +1098,11 @@ int ContentManager::addContainerChain(const std::string& chain, const std::strin
             lastMetadata.erase(itm);
         }
     }
-    if (parent != nullptr) {
-        // parent has no upnpclass
-        if (parent->getClass().empty()) {
-            parent->setClass(lastClass);
-        }
-        // overwrite metadata if set in parent
-        for (const auto& [key, val] : parent->getMetadata()) {
-            lastMetadata[key] = val;
-        }
-    }
-    std::string parentClass;
-    while (parent != nullptr) {
-        if (!parent->getClass().empty()) {
-            parentClass = fmt::format("{}/{}", parent->getClass(), parentClass);
-        } else {
-            parentClass = fmt::format("{}/{}", "", parentClass); // database uses default
-        }
-        parent = parent->getParent();
-    }
-    if (parentClass.empty()) {
-        parentClass = lastClass;
-    } else {
-        parentClass = parentClass.erase(parentClass.length() - 1, 1);
-        log_debug("ParentClass is {}", parentClass);
-    }
-
-    if (containerID <= 0) {
-        database->addContainerChain(newChain, parentClass, lastRefID, &containerID, updateID, lastMetadata);
-        assignFanArt(updateID, origObj);
-    }
+    int containerID = INVALID_OBJECT_ID;
+    database->addContainerChain(newChain, lastClass, lastRefID, &containerID, updateID, lastMetadata);
 
     if (!updateID.empty()) {
+        assignFanArt(updateID, origObj);
         update_manager->containerChanged(updateID.back());
         session_manager->containerChangedUI(updateID.back());
     }
@@ -1140,7 +1112,7 @@ int ContentManager::addContainerChain(const std::string& chain, const std::strin
 
 void ContentManager::assignFanArt(const std::vector<int>& containerIds, const std::shared_ptr<CdsObject>& origObj)
 {
-    if (!containerIds.empty() && origObj != nullptr) {
+    if (origObj != nullptr) {
         int count = 0;
         for (const auto& contId : containerIds) {
             auto container = database->loadObject(contId);
@@ -1149,7 +1121,18 @@ void ContentManager::assignFanArt(const std::vector<int>& containerIds, const st
             const std::vector<std::shared_ptr<CdsResource>>& resources = container->getResources();
             auto fanart = std::find_if(resources.begin(), resources.end(), [=](const auto& res) { return res->isMetaResource(ID3_ALBUM_ART); });
             auto location = container->getLocation().string();
-
+            if (fanart != resources.end()) {
+                // remove stale references
+                auto fanartObjId = stoiString((*fanart)->getAttribute(R_FANART_OBJ_ID));
+                try {
+                    if (fanartObjId > 0) {
+                        database->loadObject(fanartObjId);
+                    }
+                } catch (const ObjectNotFoundException& e) {
+                    container->removeResource((*fanart)->getHandlerType());
+                    fanart = resources.end();
+                }
+            }
             if (fanart == resources.end() && (origObj->isContainer() || (count < config->getIntOption(CFG_IMPORT_RESOURCES_CONTAINERART_PARENTCOUNT) && container->getParentID() != CDS_ID_ROOT && std::count(location.begin(), location.end(), '/') > config->getIntOption(CFG_IMPORT_RESOURCES_CONTAINERART_MINDEPTH)))) {
                 const std::vector<std::shared_ptr<CdsResource>>& origResources = origObj->getResources();
                 fanart = std::find_if(origResources.begin(), origResources.end(), [=](const auto& res) { return res->isMetaResource(ID3_ALBUM_ART); });
