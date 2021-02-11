@@ -193,18 +193,16 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
             return 0;
         }
 
-        int parentId;
+        int parentId = stoiString(ts);
 
-        if ((self->whoami() == S_PLAYLIST) && (self->getConfig()->getBoolOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS))) {
-            path = p2i->convert(path);
-            parentId = cm->addContainerChain(path, containerclass, orig_object->getID());
-        } else {
-            if (self->whoami() == S_PLAYLIST)
+        if (parentId <= 0) {
+            if ((self->whoami() == S_PLAYLIST) && (self->getConfig()->getBoolOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS))) {
                 path = p2i->convert(path);
-            else
-                path = i2i->convert(path);
-
-            parentId = cm->addContainerChain(path, containerclass, INVALID_OBJECT_ID, orig_object);
+                parentId = cm->addContainerChain(path, containerclass, orig_object->getID());
+            } else {
+                path = (self->whoami() == S_PLAYLIST)? p2i->convert(path) : i2i->convert(path);
+                parentId = cm->addContainerChain(path, containerclass, INVALID_OBJECT_ID, orig_object);
+            }
         }
 
         cds_obj->setParentID(parentId);
