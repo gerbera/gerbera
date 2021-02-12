@@ -179,9 +179,13 @@ public:
     virtual std::string getCurrentValue() const { return optionValue == nullptr ? "" : optionValue->getOption(); }
 
     template <class CS>
-    static std::shared_ptr<CS> findConfigSetup(config_option_t option)
+    static std::shared_ptr<CS> findConfigSetup(config_option_t option, bool save = false)
     {
-        std::shared_ptr<CS> result = std::dynamic_pointer_cast<CS>(ConfigManager::findConfigSetup(option));
+        std::shared_ptr<ConfigSetup> base = ConfigManager::findConfigSetup(option, save);
+        if (base == nullptr && save)
+            return nullptr;
+
+        std::shared_ptr<CS> result = std::dynamic_pointer_cast<CS>(base);
         if (result == nullptr) {
             throw_std_runtime_error("Error in config code: {} has wrong class", option);
         }

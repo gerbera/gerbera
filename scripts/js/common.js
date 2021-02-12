@@ -317,7 +317,6 @@ function addAudio(obj) {
     // converted to 'Audio/All audio' by the createContainerChain()
     // function.
 
-    var chain = ['Audio', 'All Audio'];
     obj.title = title;
 
     // The UPnP class argument to addCdsObject() is optional, if it is
@@ -326,11 +325,39 @@ function addAudio(obj) {
     // objects - this information may be used by some renderers to
     // identify the type of the container and present the content in a
     // different manner .
+    const chain = {
+        audio: { title: 'Audio', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+        allAudio: { title: 'All Audio', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+        allArtists: { title: 'Artists', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+        allGenres: { title: 'Genres', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+        allAlbums: { title: 'Albums', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+        allYears: { title: 'Year', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+        allComposers: { title: 'Composers', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+        allSongs: { title: 'All Songs', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+        allFull: { title: 'All - full name', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+        all000: { title: '000 All', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER, res: obj.res, aux: obj.aux, refID: obj.id },
+        artist: { title: artist, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_ARTIST, meta: {}, res: obj.res, aux: obj.aux, refID: obj.id },
+        album: { title: album, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_ALBUM, meta: {}, res: obj.res, aux: obj.aux, refID: obj.id },
+        genre: { title: genre, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_GENRE, meta: {}, res: obj.res, aux: obj.aux, refID: obj.id },
+        year: { title: date, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER, meta: {}, res: obj.res, aux: obj.aux, refID: obj.id },
+        composer: { title: composer, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_COMPOSER, meta: {}, res: obj.res, aux: obj.aux, refID: obj.id },
+    };
 
-    addCdsObject(obj, createContainerChain(chain));
+    chain.album.meta[M_ARTIST] = artist;
+    chain.album.meta[M_ALBUMARTIST] = artist;
+    chain.album.meta[M_GENRE] = genre;
+    chain.album.meta[M_DATE] = obj.meta[M_DATE];
+    chain.album.meta[M_ALBUM] = album;
+    chain.artist.meta[M_ARTIST] = artist;
+    chain.artist.meta[M_ALBUMARTIST] = artist;
+    chain.year.meta[M_DATE] = date;
+    chain.composer.meta[M_COMPOSER] = composer;
 
-    chain = ['Audio', 'Artists', artist, 'All Songs'];
-    addCdsObject(obj, createContainerChain(chain));
+    var container = addContainerTree([chain.audio, chain.allAudio]);
+    addCdsObject(obj, container);
+
+    container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.allSongs]);
+    addCdsObject(obj, container);
 
     chain = ['Audio', 'All - full name'];
     var temp = '';
@@ -345,30 +372,32 @@ function addAudio(obj) {
     }
 
     obj.title = temp + title;
-    addCdsObject(obj, createContainerChain(chain));
+    container = addContainerTree([chain.audio, chain.allFull]);
+    addCdsObject(obj, container);
 
-    chain = ['Audio', 'Artists', artist, 'All - full name'];
-    addCdsObject(obj, createContainerChain(chain));
+    container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.allFull]);
+    addCdsObject(obj, container);
 
-    chain = ['Audio', 'Artists', artist, album];
     obj.title = track + title;
-    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_ALBUM);
+    container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.album]);
+    addCdsObject(obj, container);
 
-    chain = ['Audio', 'Albums', album];
+    container = addContainerTree([chain.audio, chain.allAlbums, chain.album]);
     obj.title = track + title;
 
     // Remember, the server will sort all items by ID3 track if the
     // container class is set to UPNP_CLASS_CONTAINER_MUSIC_ALBUM.
 
-    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_ALBUM);
+    addCdsObject(obj, container);
 
-    chain = ['Audio', 'Genres', genre];
-    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_GENRE);
+    container = addContainerTree([chain.audio, chain.allGenres, chain.genre]);
+    addCdsObject(obj, container);
 
-    chain = ['Audio', 'Year', date];
-    addCdsObject(obj, createContainerChain(chain));
-    chain = ['Audio', 'Composers', composer];
-    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_COMPOSER);
+    container = addContainerTree([chain.audio, chain.allYears, chain.year]);
+    addCdsObject(obj, container);
+
+    container = addContainerTree([chain.audio, chain.allComposers, chain.composer]);
+    addCdsObject(obj, container);
 }
 // doc-add-audio-end
 
@@ -468,111 +497,175 @@ function addAudioStructured(obj) {
         }
     }
 
-    chain = ['-Album-', abcbox(album, 6, '-'), album.charAt(0).toUpperCase(), album_artist];
-    obj.title = tracktitle;
-    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_ALBUM);
+    const chain = {
+        allArtists: { title: '-Artist-', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+        allGenres: { title: '-Genre-', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+        allAlbums: { title: '-Album-', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+        allTracks: { title: '-Track-', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+        allYears: { title: '-Year-', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+        allFull: { title: 'All - full name', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+        abc: { title: abcbox(album, 6, '-'), objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+        init: { title: album.charAt(0).toUpperCase(), objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+        artist: { title: artist, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_ARTIST, meta: {}, res: obj.res, aux: obj.aux, refID: obj.id },
+        album_artist: { title: album_artist, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_ALBUM, meta: {}, res: obj.res, aux: obj.aux, refID: obj.id },
+        album: { title: album, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_ALBUM, meta: {}, res: obj.res, aux: obj.aux, refID: obj.id },
+        entryAll: { title: '-all-', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+        genre: { title: genre, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_GENRE, meta: {}, res: obj.res, aux: obj.aux, refID: obj.id },
+        decade: { title: decade, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+        date: { title: date, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+    };
 
-    chain = ['-Album-', abcbox(album, 6, '-'), '-all-', album_artist];
-    obj.title = tracktitle;
-    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_ALBUM);
+    chain.album.meta[M_ARTIST] = album_artist;
+    chain.album.meta[M_ALBUMARTIST] = album_artist;
+    chain.album.meta[M_GENRE] = genre;
+    chain.album.meta[M_DATE] = obj.meta[M_DATE];
+    chain.album.meta[M_ALBUM] = album;
+    chain.artist.meta[M_ARTIST] = artist;
+    chain.artist.meta[M_ALBUMARTIST] = artist;
+    chain.album_artist.meta[M_ARTIST] = album_artist;
+    chain.album_artist.meta[M_ALBUMARTIST] = album_artist;
+    chain.year.meta[M_DATE] = date;
 
-    chain = ['-Album-', '--all--', album_artist];
     obj.title = tracktitle;
-    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_ALBUM);
+    var container = addContainerTree([chain.allAlbums, chain.abc, chain.init, chain.album_artist]);
+    addCdsObject(obj, container);
+
+    container = addContainerTree([chain.allAlbums, chain.abc, chain.entryAll, chain.album_artist]);
+    addCdsObject(obj, container);
+
+    chain.entryAll.title = '--all--';
+    container = addContainerTree([chain.allAlbums, chain.entryAll, chain.album_artist]);
+    addCdsObject(obj, container);
 
     // Artist
+    obj.title = title + ' (' + album + ', ' + date + ')';
+    container = addContainerTree([chain.allArtists, chain.entryAll, chain.artist]);
+    addCdsObject(obj, container);
 
-    chain = ['-Artist-',  '--all--', artist];
-    obj.title = title + ' (' + album + ', ' + date + ')';
-    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_ARTIST);
+    chain.abc.title = abcbox(artist, 9, '-');
+    chain.entryAll.title = '-all-';
+    container = addContainerTree([chain.allArtists, chain.abc, chain.entryAll, chain.artist]);
+    addCdsObject(obj, container);
 
-    chain = ['-Artist-', abcbox(artist, 9, '-'), '-all-', artist];
     obj.title = title + ' (' + album + ', ' + date + ')';
-    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_ARTIST);
-    chain = ['-Artist-', abcbox(artist, 9, '-'), artist.charAt(0).toUpperCase(), artist, '-all-'];
-    obj.title = title + ' (' + album + ', ' + date + ')';
-    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_ARTIST);
+    chain.init.title = artist.charAt(0).toUpperCase();
+    chain.entryAll.upnpclass = UPNP_CLASS_CONTAINER_MUSIC_ARTIST;
+    container = addContainerTree([chain.allArtists, chain.abc, chain.init, chain.artist, chain.entryAll]);
+    addCdsObject(obj, container);
 
     obj.title = tracktitle;
-    chain = ['-Artist-', abcbox(artist, 9, '-'), artist.charAt(0).toUpperCase(), artist, album + ' (' + date + ')'];
-    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_ALBUM);
-
+    chain.album.title = album + ' (' + date + ')';
+    container = addContainerTree([chain.allArtists, chain.abc, chain.init, chain.artist, chain.album]);
+    addCdsObject(obj, container);
 
     // Genre
 
-    chain = ['-Genre-', genre, '--all--'];
     obj.title = title + ' - ' + artist_full;
-    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_GENRE);
+    chain.entryAll.title = '--all--';
+    chain.entryAll.upnpclass = UPNP_CLASS_CONTAINER_MUSIC_GENRE;
+    container = addContainerTree([chain.allGenres, chain.genre, chain.entryAll]);
+    addCdsObject(obj, container);
 
-    chain = ['-Genre-', genre, abcbox(artist, 6, '-'), artist.charAt(0).toUpperCase(), album_artist];
-    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_ALBUM);
-
+    chain.abc.title = abcbox(artist, 6, '-');
+    container = addContainerTree([chain.allGenres, chain.genre, chain.abc, chain.init, chain.album_artist]);
+    addCdsObject(obj, container);
 
     // Tracks
 
-    chain = ['-Track-', abcbox(title, 6, '-'), title.charAt(0).toUpperCase()];
     obj.title = title + ' - ' + artist + ' (' + album + ', ' + date + ')';
-    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_ARTIST);
+    chain.abc.title = abcbox(title, 6, '-');
+    chain.init.title = title.charAt(0).toUpperCase();
+    chain.init.upnpclass = UPNP_CLASS_CONTAINER_MUSIC_ARTIST;
+    container = addContainerTree([chain.allTracks, chain.abc, chain.init]);
+    addCdsObject(obj, container);
 
-    chain = ['-Track-', '--all--'];
     obj.title = title + ' - ' + artist_full;
-    addCdsObject(obj, createContainerChain(chain));
-
+    chain.entryAll.upnpclass = UPNP_CLASS_CONTAINER;
+    container = addContainerTree([chain.allTracks, chain.entryAll]);
+    addCdsObject(obj, container);
 
     // Sort years into decades
 
-    chain = ['-Year-', decade, '-all-'];
-    addCdsObject(obj, createContainerChain(chain));
+    chain.entryAll.title = '-all-';
+    container = addContainerTree([chain.allYears, chain.decade, chain.entryAll]);
+    addCdsObject(obj, container);
 
-    chain = ['-Year-', decade, date, '-all-'];
-    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_ARTIST);
+    chain.entryAll.upnpclass = UPNP_CLASS_CONTAINER_MUSIC_ARTIST;
+    container = addContainerTree([chain.allYears, chain.decade, chain.date, chain.entryAll]);
+    addCdsObject(obj, container);
 
-    chain = ['-Year-', decade, date, artist, album];
     obj.title = tracktitle;
-    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_ALBUM);
+    container = addContainerTree([chain.allYears, chain.decade, chain.date, chain.artist, chain.album]);
+    addCdsObject(obj, container);
 }
 
 // doc-add-video-begin
 function addVideo(obj) {
-    var chain = ['Video', 'All Video'];
-    addCdsObject(obj, createContainerChain(chain));
+    var path = getRootPath(object_script_path, obj.location);
 
-    var dir = getRootPath(object_script_path, obj.location);
+    const chain = {
+        video: { title: 'Video', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+        allVideo: { title: 'All Video', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+        allDirectories: { title: 'Directories', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+    };
+    addCdsObject(obj, addContainerTree([chain.video, chain.allVideo]));
 
-    if (dir.length > 0) {
-        chain = ['Video', 'Directories'];
-        chain = chain.concat(dir);
-        addCdsObject(obj, createContainerChain(chain));
+    if (path.length > 0) {
+        var tree = [chain.video, chain.allDirectories];
+        const dirList = path.split('/');
+        for (var i = 0; i < dirList.length; i++) {
+            tree = tree.concat({ title: dirList[i], objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER });
+        }
+        tree[tree.length-1].meta = {};
+        tree[tree.length-1].res = obj.res;
+        tree[tree.length-1].aux = obj.aux;
+        tree[tree.length-1].refID = obj.id;
+        addCdsObject(obj, addContainerTree(tree));
     }
 }
 // doc-add-video-end
 
 // doc-add-image-begin
 function addImage(obj) {
-    var chain = ['Photos', 'All Photos'];
-    addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER);
+    const chain = {
+        images: { title: 'Photos', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+        allImages: { title: 'All Photos', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
 
+        allDirectories: { title: 'Directories', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+        allYears: { title: 'Year', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+        allDates: { title: 'Date', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+
+        year: { title: 'Unbekannt', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+        month: { title: 'Unbekannt', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER, meta: {}, res: obj.res, aux: obj.aux, refID: obj.id  },
+        date: { title: 'Unbekannt', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER, meta: {}, res: obj.res, aux: obj.aux, refID: obj.id  },
+    };
+    addCdsObject(obj, addContainerTree([chain.images, chain.allImages]));
     var date = obj.meta[M_DATE];
     if (date) {
         var dateParts = date.split('-');
         if (dateParts.length > 1) {
-            var year = dateParts[0];
-            var month = dateParts[1];
-
-            chain = ['Photos', 'Year', year, month];
-            addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER);
+            chain.year.title = dateParts[0];
+            chain.month.title = dateParts[1];
+            addCdsObject(obj, createContainerTree([chain.images, chain.allYears, chain.year, chain.month]));
         }
 
-        chain = ['Photos', 'Date', date];
-        addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER);
+        chain.date.title = date;
+        addCdsObject(obj, createContainerTree([chain.images, chain.allDates, chain.date]));
     }
 
-    var dir = getRootPath(object_script_path, obj.location);
+    var path = getRootPath(object_script_path, obj.location);
 
-    if (dir.length > 0) {
-        chain = ['Photos', 'Directories'];
-        chain = chain.concat(dir);
-        addCdsObject(obj, createContainerChain(chain));
+    if (path.length > 0) {
+        var tree = [chain.images, chain.allDirectories];
+        const dirList = path.split('/');
+        for (var i = 0; i < dirList.length; i++) {
+            tree = tree.concat({ title: dirList[i], objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER });
+        }
+        tree[tree.length-1].meta = {};
+        tree[tree.length-1].res = obj.res;
+        tree[tree.length-1].aux = obj.aux;
+        tree[tree.length-1].refID = obj.id;
+        addCdsObject(obj, addContainerTree(tree));
     }
 }
 // doc-add-image-end
