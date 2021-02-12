@@ -200,7 +200,7 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
                 path = p2i->convert(path);
                 parentId = cm->addContainerChain(path, containerclass, orig_object->getID());
             } else {
-                path = (self->whoami() == S_PLAYLIST)? p2i->convert(path) : i2i->convert(path);
+                path = (self->whoami() == S_PLAYLIST) ? p2i->convert(path) : i2i->convert(path);
                 parentId = cm->addContainerChain(path, containerclass, INVALID_OBJECT_ID, orig_object);
             }
         }

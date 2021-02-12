@@ -34,6 +34,7 @@
 
 #include "cds_objects.h"
 #include "config/config_manager.h"
+#include "config/config_setup.h"
 #include "content/content_manager.h"
 #include "database/database.h"
 #include "js_functions.h"
@@ -223,6 +224,68 @@ Script::Script(std::shared_ptr<ContentManager> content,
         duk_push_string(ctx, field);
         duk_put_global_string(ctx, sym);
     }
+
+    duk_push_object(ctx);
+    for (int i = 0; i < int(CFG_MAX); i++) {
+        auto scs = ConfigManager::findConfigSetup(config_option_t(i));
+        auto value = scs->getCurrentValue();
+        if (!value.empty()) {
+            setProperty(scs->getItemPath(-1), value);
+        }
+    }
+
+    constexpr auto dict_options = std::array {
+        CFG_SERVER_UI_ACCOUNT_LIST,
+        CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST,
+        CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST,
+        CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST,
+        CFG_IMPORT_LAYOUT_MAPPING,
+    };
+
+    for (const auto& dict_option : dict_options) {
+        duk_push_object(ctx);
+        auto dcs = ConfigSetup::findConfigSetup<ConfigDictionarySetup>(dict_option);
+        auto dictionary = dcs->getValue()->getDictionaryOption(true);
+        for (const auto& [key, val] : dictionary) {
+            setProperty(key.substr(5), val);
+        }
+        duk_put_prop_string(ctx, -2, dcs->getItemPath(-1).c_str());
+    }
+
+    constexpr auto array_options = std::array {
+        CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN,
+        CFG_IMPORT_RESOURCES_FANART_FILE_LIST,
+        CFG_IMPORT_RESOURCES_CONTAINERART_FILE_LIST,
+        CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST,
+        CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST,
+        CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST,
+#ifdef HAVE_LIBEXIF
+        CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST,
+#endif
+#ifdef HAVE_EXIV2
+        CFG_IMPORT_LIBOPTS_EXIV2_AUXDATA_TAGS_LIST,
+#endif
+#ifdef HAVE_TAGLIB
+        CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST,
+#endif
+#ifdef HAVE_FFMPEG
+        CFG_IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST,
+#endif
+    };
+
+    for (auto array_option : array_options) {
+        auto acs = ConfigSetup::findConfigSetup<ConfigArraySetup>(array_option);
+        auto array = acs->getValue()->getArrayOption(true);
+        auto duk_array = duk_push_array(ctx);
+        for (size_t i = 0; i < array.size(); i++) {
+            auto entry = array[i];
+            duk_push_string(ctx, entry.c_str());
+            duk_put_prop_index(ctx, duk_array, i);
+        }
+        duk_put_prop_string(ctx, -2, acs->getItemPath(-1).c_str());
+    }
+
+    duk_put_global_string(ctx, "config");
 
     defineFunctions(js_global_functions.data());
 
