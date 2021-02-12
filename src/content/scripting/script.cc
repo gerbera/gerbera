@@ -227,7 +227,9 @@ Script::Script(std::shared_ptr<ContentManager> content,
 
     duk_push_object(ctx);
     for (int i = 0; i < int(CFG_MAX); i++) {
-        auto scs = ConfigManager::findConfigSetup(config_option_t(i));
+        auto scs = ConfigManager::findConfigSetup(config_option_t(i), true);
+        if (scs == nullptr)
+            continue;
         auto value = scs->getCurrentValue();
         if (!value.empty()) {
             setProperty(scs->getItemPath(-1), value);
@@ -243,8 +245,10 @@ Script::Script(std::shared_ptr<ContentManager> content,
     };
 
     for (const auto& dict_option : dict_options) {
+        auto dcs = ConfigSetup::findConfigSetup<ConfigDictionarySetup>(dict_option, true);
+        if (dcs == nullptr)
+            continue;
         duk_push_object(ctx);
-        auto dcs = ConfigSetup::findConfigSetup<ConfigDictionarySetup>(dict_option);
         auto dictionary = dcs->getValue()->getDictionaryOption(true);
         for (const auto& [key, val] : dictionary) {
             setProperty(key.substr(5), val);
@@ -274,7 +278,9 @@ Script::Script(std::shared_ptr<ContentManager> content,
     };
 
     for (auto array_option : array_options) {
-        auto acs = ConfigSetup::findConfigSetup<ConfigArraySetup>(array_option);
+        auto acs = ConfigSetup::findConfigSetup<ConfigArraySetup>(array_option, true);
+        if (acs == nullptr)
+            continue;
         auto array = acs->getValue()->getArrayOption(true);
         auto duk_array = duk_push_array(ctx);
         for (size_t i = 0; i < array.size(); i++) {
