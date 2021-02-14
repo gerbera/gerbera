@@ -63,10 +63,12 @@ fs::path MetacontentHandler::getContentPath(const std::vector<std::string>& name
                     fileNames[toLower(p.path().filename())] = p;
 
             for (const auto& name : names) {
-                auto it = std::find_if(fileNames.begin(), fileNames.end(), [fileName = toLower(expandName(name, item))](const auto& testFile) { return testFile.first == fileName; });
-                if (it != fileNames.end()) {
-                    log_debug("{}: found", it->first.c_str());
-                    return it->second;
+                auto fileName = toLower(expandName(name, item));
+                for (const auto& [f, s] : fileNames) {
+                    if (f == fileName) {
+                        log_debug("{}: found", f.c_str());
+                        return s;
+                    }
                 }
             }
         }
