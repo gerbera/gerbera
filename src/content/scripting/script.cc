@@ -206,18 +206,22 @@ Script::Script(std::shared_ptr<ContentManager> content,
     duk_put_global_string(ctx, "ONLINE_SERVICE_SOPCAST");
 #endif //ONLINE_SERVICES
 
-    for (const auto& entry : mt_keys) {
-        duk_push_string(ctx, entry.second);
-        auto sym = std::find_if(mt_names.begin(), mt_names.end(), [=](const auto& n) { return n.first == entry.first; });
-        if (sym != mt_names.end())
-            duk_put_global_string(ctx, sym->second);
+    for (const auto& [field, sym] : mt_keys) {
+        duk_push_string(ctx, sym);
+        for (const auto& [f, s] : mt_names) {
+            if (f == field) {
+                duk_put_global_string(ctx, s);
+            }
+        }
     }
 
-    for (const auto& entry : res_keys) {
-        duk_push_string(ctx, entry.second);
-        auto sym = std::find_if(res_names.begin(), res_names.end(), [=](const auto& n) { return n.first == entry.first; });
-        if (sym != res_names.end())
-            duk_put_global_string(ctx, sym->second);
+    for (const auto& [field, sym] : res_keys) {
+        duk_push_string(ctx, sym);
+        for (const auto& [f, s] : res_names) {
+            if (f == field) {
+                duk_put_global_string(ctx, s);
+            }
+        }
     }
 
     for (const auto& [field, sym] : upnp_classes) {
