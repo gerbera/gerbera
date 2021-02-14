@@ -40,10 +40,6 @@ web::files::files(std::shared_ptr<ContentManager> content)
 {
 }
 
-struct fileInfo {
-    std::string filename;
-};
-
 void web::files::process()
 {
     check_request();
@@ -62,7 +58,7 @@ void web::files::process()
     bool exclude_config_files = true;
 
     std::error_code ec;
-    std::map<std::string, struct fileInfo> filesMap;
+    std::map<std::string, std::string> filesMap;
 
     for (const auto& it : fs::directory_iterator(path, ec)) {
         const fs::path& filepath = it.path();
@@ -73,13 +69,13 @@ void web::files::process()
             continue;
 
         std::string id = hexEncode(filepath.c_str(), filepath.string().length());
-        filesMap[id] = { filepath.filename() };
+        filesMap[id] = { filepath.filename().native() };
     }
 
     auto f2i = StringConverter::f2i(config);
     for (const auto& [key, val] : filesMap) {
         auto fe = files.append_child("file");
         fe.append_attribute("id") = key.c_str();
-        fe.append_attribute("filename") = f2i->convert(val.filename).c_str();
+        fe.append_attribute("filename") = f2i->convert(val).c_str();
     }
 }
