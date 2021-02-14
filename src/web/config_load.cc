@@ -435,7 +435,7 @@ void web::configLoad::process()
     for (const auto& entry : dbEntries) {
         auto exItem = allItems.find(entry.item);
         if (exItem != allItems.end()) {
-            auto item = (*exItem).second;
+            auto item = exItem->second;
             item->attribute("source") = "database";
             item->attribute("status") = entry.status.c_str();
         } else {
