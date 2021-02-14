@@ -88,7 +88,7 @@ public:
     void getInfo(const struct sockaddr_storage* addr, const std::string& userAgent, const ClientInfo** ppInfo);
 
     void addClientByDiscovery(const struct sockaddr_storage* addr, const std::string& userAgent, const std::string& descLocation);
-    std::shared_ptr<std::vector<struct ClientCacheEntry>> getClientList() { return cache; }
+    std::shared_ptr<std::vector<ClientCacheEntry>> getClientList() { return cache; }
 
 private:
     bool getInfoByAddr(const struct sockaddr_storage* addr, const ClientInfo** ppInfo);
@@ -102,9 +102,9 @@ private:
 private:
     std::mutex mutex;
     using AutoLock = std::lock_guard<std::mutex>;
-    std::shared_ptr<std::vector<struct ClientCacheEntry>> cache;
+    std::shared_ptr<std::vector<ClientCacheEntry>> cache;
 
-    std::vector<struct ClientInfo> clientInfo;
+    std::vector<ClientInfo> clientInfo;
 };
 
 #endif // __UPNP_CLIENTS_H__

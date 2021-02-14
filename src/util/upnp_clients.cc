@@ -34,7 +34,7 @@
 #include <upnp.h>
 
 // table of supported clients (sequence of entries matters!)
-static const auto bultinClientInfo = std::array<struct ClientInfo, 8> {
+static const auto bultinClientInfo = std::array<ClientInfo, 8> {
     {
 
         // Used for not explicitly listed clients, must be first entry
@@ -129,7 +129,7 @@ Clients::Clients(const std::shared_ptr<Config>& config)
         clientInfo.push_back(*client);
     }
 
-    cache = std::make_shared<std::vector<struct ClientCacheEntry>>();
+    cache = std::make_shared<std::vector<ClientCacheEntry>>();
 }
 
 Clients::~Clients() = default;

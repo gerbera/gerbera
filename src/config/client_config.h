@@ -82,7 +82,7 @@ public:
     /// \param userAgent user agent
     ClientConfig(int flags, const std::string& ip, const std::string& userAgent);
 
-    std::shared_ptr<struct ClientInfo> getClientInfo() { return clientInfo; }
+    std::shared_ptr<ClientInfo> getClientInfo() { return clientInfo; }
 
     int getFlags() const { return clientInfo->flags; }
     void setFlags(int flags) { this->clientInfo->flags = flags; }
@@ -117,7 +117,7 @@ public:
 
 protected:
     bool isOrig { false };
-    std::shared_ptr<struct ClientInfo> clientInfo;
+    std::shared_ptr<ClientInfo> clientInfo;
 };
 
 #endif
