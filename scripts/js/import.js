@@ -30,28 +30,27 @@ if (getPlaylistType(orig.mimetype) === '') {
     // PC-Directory, so make sure to correctly set the reference ID!
     var obj = orig; 
     obj.refID = orig.id;
-    
-    if (mime === 'audio') {
-        addAudio(obj);
-    }
-    
-    if (mime === 'video') {
-        if (obj.onlineservice === ONLINE_SERVICE_APPLE_TRAILERS) {
-            addTrailer(obj);
-        } else {
-            addVideo(obj);
-        }
-    }
-    
-    if (mime === 'image') {
-        addImage(obj);
-    }
 
-    if (orig.mimetype === 'application/ogg') {
-        if (orig.theora === 1) {
-            addVideo(obj);
-        } else {
+    if (mime === 'video' && obj.onlineservice === ONLINE_SERVICE_APPLE_TRAILERS) {
+        mime = 'trailer';
+    } else if (orig.mimetype === 'application/ogg') {
+        mime = (orig.theora === 1) ? 'video' : 'audio';
+    }
+    switch (mime) {
+        case "audio":
             addAudio(obj);
-        }
+            break;
+        case "video":
+            addVideo(obj);
+            break;
+        case "trailer":
+            addTrailer(obj);
+            break;
+        case "image":
+            addImage(obj);
+            break;
+        default:
+            print("Unable to handle mime type " + orig.mimetype + " for " + obj.location);
+            break;
     }
 }
