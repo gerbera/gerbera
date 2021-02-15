@@ -716,3 +716,147 @@ function addTrailer(obj) {
     }
 }
 // doc-add-trailer-end
+
+// doc-add-playlist-item-begin
+function addPlaylistItem(playlist_title, location, title, playlistChain, order, playlistOrder) {
+    // Determine if the item that we got is an URL or a local file.
+
+    if (location.match(/^.*:\/\//)) {
+        var exturl = {};
+
+        // Setting the mimetype is crucial and tricky... if you get it
+        // wrong your renderer may show the item as unsupported and refuse
+        // to play it. Unfortunately most playlist formats do not provide
+        // any mimetype information.
+        exturl.mimetype = 'audio/mpeg';
+
+        // Make sure to correctly set the object type, then populate the
+        // remaining fields.
+        exturl.objectType = OBJECT_TYPE_ITEM_EXTERNAL_URL;
+
+        exturl.location = location;
+        exturl.title = (title ? title : location);
+        exturl.protocol = 'http-get';
+        exturl.upnpclass = UPNP_CLASS_ITEM_MUSIC_TRACK;
+        exturl.description = "Song from " + playlist_title;
+
+        // This is a special field which ensures that your playlist files
+        // will be displayed in the correct order inside a playlist
+        // container. It is similar to the id3 track number that is used
+        // to sort the media in album containers.
+        exturl.playlistOrder = (order ? order : playlistOrder++);
+
+        // Your item will be added to the container named by the playlist
+        // that you are currently parsing.
+        addCdsObject(exturl, playlistChain,  UPNP_CLASS_PLAYLIST_CONTAINER);
+    } else {
+        if (location.substr(0,1) !== '/') {
+            location = playlistLocation + location;
+        }
+        var cds = getCdsObject(location);
+        if (!cds) {
+            print("Skipping item: " + location);
+            return
+        }
+
+        var item = copyObject(cds);
+
+        item.playlistOrder = (order ? order : playlistOrder++);
+        item.title = item.meta[M_TITLE];
+
+        addCdsObject(item, playlistChain,  UPNP_CLASS_PLAYLIST_CONTAINER);
+    }
+    return playlistOrder;
+}
+// doc-add-playlist-item-end
+
+function readM3uPlaylist(playlist_title, playlistChain, playlistDirChain) {
+    var title = null;
+    var line = readln();
+    var playlistOrder = 1;
+
+    // Here is the do - while loop which will read the playlist line by line.
+    do {
+        var matches = line.match(/^#EXTINF:(-?\d+),\s?(\S.+)$/i);
+        if (matches) {
+            // duration = matches[1]; // currently unused
+            title = matches[2];
+        }
+        else if (!line.match(/^(#|\s*$)/)) {
+            // Call the helper function to add the item once you gathered the data:
+            playlistOrder = addPlaylistItem(playlist_title, line, title, playlistChain, 0, playlistOrder);
+
+            // Also add to "Directories"
+            if (playlistDirChain)
+                playlistOrder = addPlaylistItem(playlist_title, line, title, playlistDirChain, 0, playlistOrder);
+
+            title = null;
+        }
+        
+        line = readln();
+    } while (line);
+}
+
+function readPlsPlaylist(playlist_title, playlistChain, playlistDirChain) {
+    var title = null;
+    var file = null;
+    var lastId = -1;
+    var id = -1;
+    var line = readln();
+    var playlistOrder = 1;
+    
+    do {
+        if (line.match(/^\[playlist\]$/i)) {
+            // It seems to be a correct playlist, but we will try to parse it
+            // anyway even if this header is missing, so do nothing.
+        } else if (line.match(/^NumberOfEntries=(\d+)$/i)) {
+            // var numEntries = RegExp.$1;
+        } else if (line.match(/^Version=(\d+)$/i)) {
+            // var plsVersion =  RegExp.$1;
+        } else if (line.match(/^File\s*(\d+)\s*=\s*(\S.+)$/i)) {
+            matches = line.match(/^File\s*(\d+)\s*=\s*(\S.+)$/i);
+            var thisFile = matches[2];
+            id = parseInt(matches[1], 10);
+            if (lastId === -1)
+                lastId = id;
+            if (lastId !== id) {
+                if (file) {
+                    playlistOrder = addPlaylistItem(playlist_title, file, title, playlistChain, lastId, playlistOrder);
+                    if (playlistDirChain)
+                        playlistOrder = addPlaylistItem(playlist_title, file, title, playlistDirChain, lastId, playlistOrder);
+                }
+
+                title = null;
+                lastId = id;
+            }
+            file = thisFile
+        } else if (line.match(/^Title\s*(\d+)\s*=\s*(\S.+)$/i)) {
+            matches = line.match(/^Title\s*(\d+)\s*=\s*(\S.+)$/i);
+            var thisTitle = matches[2];
+            id = parseInt(matches[1], 10);
+            if (lastId === -1)
+                lastId = id;
+            if (lastId !== id) {
+                if (file) {
+                    playlistOrder = addPlaylistItem(playlist_title, file, title, playlistChain, lastId, playlistOrder);
+                    if (playlistDirChain)
+                        playlistOrder = addPlaylistItem(playlist_title, file, title, playlistDirChain, lastId, playlistOrder);
+                }
+
+                file = null;
+                lastId = id;
+            }
+            title = thisTitle;
+        } else if (line.match(/^Length\s*(\d+)\s*=\s*(\S.+)$/i)) {
+            // currently unused
+        }
+
+        line = readln();
+    } while (line);
+
+    if (file) {
+        playlistOrder = addPlaylistItem(playlist_title, file, title, playlistChain, lastId, playlistOrder);
+        if (playlistDirChain)
+            playlistOrder = addPlaylistItem(playlist_title, file, title, playlistDirChain, lastId, playlistOrder);
+    }
+}
