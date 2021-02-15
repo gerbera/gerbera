@@ -770,6 +770,7 @@ function addPlaylistItem(playlist_title, location, title, playlistChain, order, 
 }
 // doc-add-playlist-item-end
 
+// doc-playlist-m3u-parse-begin
 function readM3uPlaylist(playlist_title, playlistChain, playlistDirChain) {
     var title = null;
     var line = readln();
@@ -796,6 +797,7 @@ function readM3uPlaylist(playlist_title, playlistChain, playlistDirChain) {
         line = readln();
     } while (line);
 }
+// doc-playlist-m3u-parse-end
 
 function readPlsPlaylist(playlist_title, playlistChain, playlistDirChain) {
     var title = null;

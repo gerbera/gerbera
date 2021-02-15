@@ -294,7 +294,7 @@ object.
     .. js:attribute:: orig.meta[M_ACTOR]
 
         **RW**
-    
+
         Actor of the media, this corresponds to ``upnp:actor`` in the DIDL-Lite XML.
 
     .. js:attribute:: orig.meta[M_PRODUCER]
@@ -318,6 +318,17 @@ object.
     more details). So, this array will hold the tags that you specified in your config.xml, allowing
     you to create your virtual structure according to your liking.
 
+.. js:attribute:: orig.res
+
+    **RO**
+
+    Array holding the resources. Resources represent the files attached to the media item. Got the the web UI to see the names of available 
+    resources. The names of the first resource (number 0) are stored as they are. Further resources are prepended with `<number>-`.
+
+    Currently resources can be gathered during import process (see the
+    `Import section <https://docs.gerbera.io/en/stable/config-import.html?#library-options>`_ in the main documentation for
+    more details). So, this array will hold further data, allowing you to adjust the virtual structure according to your liking.
+
 .. js:attribute:: orig.playlistOrder
 
     **RW**
@@ -327,6 +338,21 @@ object.
     you will increment the number for each new object that you create while parsing the playlist, thus ensuring that the
     resulting order is the same as in the original playlist.
 
+
+Configuration
+-------------
+
+The configuration from `config.xml` and values changed via web UI are available in the global dictionary `config`. The key in the dictionary
+is the xpath as shown in brackets in the web UI. Array items can be accessed via index, Dictionaries with the key. Complex entries like autoscan
+and transcoding are not available. Example:
+
+    .. code-block:: js
+
+        print(config['/server/name']);
+        print(config['/import/library-options/id3/auxdata/add-data'][0]);
+        print(config['/import/layout/path']['Directories']);
+
+
 Constants
 ---------
 
@@ -334,41 +360,41 @@ Actually there are no such things as constants in JS, so those are actually pred
 engine initialization. Do not assign any values to them, otherwise following script invocation will be using wrong
 values.
 
-+---------------------------------------+---------+--------------------------------------+-----------------------------------------------+
-| Constant                              | Type    | Value                                | Notes                                         |
-+=======================================+=========+======================================+===============================================+
-| ``UPNP_CLASS_CONTAINER``              | string  | object.container                     |                                               |
-+---------------------------------------+---------+--------------------------------------+-----------------------------------------------+
-| ``UPNP_CLASS_CONTAINER_MUSIC_ARTIST`` | string  | object.container.person.musicArtist  |                                               |
-+---------------------------------------+---------+--------------------------------------+-----------------------------------------------+
-| ``UPNP_CLASS_CONTAINER_MUSIC_GENRE``  | string  | object.container.genre.musicGenre    |                                               |
-+---------------------------------------+---------+--------------------------------------+-----------------------------------------------+
-| ``UPNP_CLASS_CONTAINER_MUSIC_ALBUM``  | string  | object.container.album.musicAlbum    | | This container class will be treated by the |
-|                                       |         |                                      | | server in a special way, all music items in |
-|                                       |         |                                      | | this container will be sorted by ID3 disk   |
-|                                       |         |                                      | | number and track number.                                     |
-+---------------------------------------+---------+--------------------------------------+-----------------------------------------------+
-| ``UPNP_CLASS_PLAYLIST_CONTAINER``     | string  | object.container.playlistContainer   | | This container class will be treated by the |
-|                                       |         |                                      | | server in a special way, all items in this  |
-|                                       |         |                                      | | container will be sorted by the number      |
-|                                       |         |                                      | | specified in the playlistOrder property     |
-|                                       |         |                                      | | (this is set when an object is created by   |
-|                                       |         |                                      | | the playlist script).                       |
-+---------------------------------------+---------+--------------------------------------+-----------------------------------------------+
-| ``UPNP_CLASS_ITEM``                   | string  | object.item                          |                                               |
-+---------------------------------------+---------+--------------------------------------+-----------------------------------------------+
-| ``UPNP_CLASS_ITEM_MUSIC_TRACK``       | string  | object.item.audioItem.musicTrack     |                                               |
-+---------------------------------------+---------+--------------------------------------+-----------------------------------------------+
-| ``UPNP_CLASS_ITEM_VIDEO``             | string  | object.item.videoItem                |                                               |
-+---------------------------------------+---------+--------------------------------------+-----------------------------------------------+
-| ``UPNP_CLASS_ITEM_IMAGE``             | string  | object.item.imageItem                |                                               |
-+---------------------------------------+---------+--------------------------------------+-----------------------------------------------+
-| ``OBJECT_TYPE_CONTAINER``             | integer | 1                                    |                                               |
-+---------------------------------------+---------+--------------------------------------+-----------------------------------------------+
-| ``OBJECT_TYPE_ITEM``                  | integer | 2                                    |                                               |
-+---------------------------------------+---------+--------------------------------------+-----------------------------------------------+
-| ``OBJECT_TYPE_ITEM_EXTERNAL_URL``     | integer | 8                                    |                                               |
-+---------------------------------------+---------+--------------------------------------+-----------------------------------------------+
+    +---------------------------------------+---------+--------------------------------------+-----------------------------------------------+
+    | Constant                              | Type    | Value                                | Notes                                         |
+    +=======================================+=========+======================================+===============================================+
+    | ``UPNP_CLASS_CONTAINER``              | string  | object.container                     |                                               |
+    +---------------------------------------+---------+--------------------------------------+-----------------------------------------------+
+    | ``UPNP_CLASS_CONTAINER_MUSIC_ARTIST`` | string  | object.container.person.musicArtist  |                                               |
+    +---------------------------------------+---------+--------------------------------------+-----------------------------------------------+
+    | ``UPNP_CLASS_CONTAINER_MUSIC_GENRE``  | string  | object.container.genre.musicGenre    |                                               |
+    +---------------------------------------+---------+--------------------------------------+-----------------------------------------------+
+    | ``UPNP_CLASS_CONTAINER_MUSIC_ALBUM``  | string  | object.container.album.musicAlbum    | | This container class will be treated by the |
+    |                                       |         |                                      | | server in a special way, all music items in |
+    |                                       |         |                                      | | this container will be sorted by ID3 disk   |
+    |                                       |         |                                      | | number and track number.                    |
+    +---------------------------------------+---------+--------------------------------------+-----------------------------------------------+
+    | ``UPNP_CLASS_PLAYLIST_CONTAINER``     | string  | object.container.playlistContainer   | | This container class will be treated by the |
+    |                                       |         |                                      | | server in a special way, all items in this  |
+    |                                       |         |                                      | | container will be sorted by the number      |
+    |                                       |         |                                      | | specified in the playlistOrder property     |
+    |                                       |         |                                      | | (this is set when an object is created by   |
+    |                                       |         |                                      | | the playlist script).                       |
+    +---------------------------------------+---------+--------------------------------------+-----------------------------------------------+
+    | ``UPNP_CLASS_ITEM``                   | string  | object.item                          |                                               |
+    +---------------------------------------+---------+--------------------------------------+-----------------------------------------------+
+    | ``UPNP_CLASS_ITEM_MUSIC_TRACK``       | string  | object.item.audioItem.musicTrack     |                                               |
+    +---------------------------------------+---------+--------------------------------------+-----------------------------------------------+
+    | ``UPNP_CLASS_ITEM_VIDEO``             | string  | object.item.videoItem                |                                               |
+    +---------------------------------------+---------+--------------------------------------+-----------------------------------------------+
+    | ``UPNP_CLASS_ITEM_IMAGE``             | string  | object.item.imageItem                |                                               |
+    +---------------------------------------+---------+--------------------------------------+-----------------------------------------------+
+    | ``OBJECT_TYPE_CONTAINER``             | integer | 1                                    |                                               |
+    +---------------------------------------+---------+--------------------------------------+-----------------------------------------------+
+    | ``OBJECT_TYPE_ITEM``                  | integer | 2                                    |                                               |
+    +---------------------------------------+---------+--------------------------------------+-----------------------------------------------+
+    | ``OBJECT_TYPE_ITEM_EXTERNAL_URL``     | integer | 8                                    |                                               |
+    +---------------------------------------+---------+--------------------------------------+-----------------------------------------------+
 
 
 Functions
@@ -396,15 +422,33 @@ within the import and/or the playlist script:
     :param object object:
         A virtual object that is either a copy of or a reference to 'orig'
     :param string containerChain:
-        A string, defining where the object will be added in the database hierarchy. The containers in the chain
+        - A string, defining where the object will be added in the database hierarchy. The containers in the chain
         are separated by a slash '/', for example, a value of '/Audio/All Music' will add the object to the Audio,
         All Music container in the server hierarchy. Make sure to properly escape the slash characters in container
         names. You will find more information on container chain escaping later in this chapter.
+        - A string, containing the container id as optained from `addContainerTree`. In this case the third parameter is not used.
     :param string lastContainerClass:
         A string, defining the ``upnp:class`` of the container that appears last in the chain. This parameter can be
         omitted, in this case the default value ``object.container`` will be taken. Setting specific upnp container classes
         is useful to define the special meaning of a particular container; for example, the server will always sort
         songs by disk number and track number if upnp class of a container is set to ``object.container.album.musicAlbum``.
+
+
+.. js:function:: addContainerTree(arr)
+
+    Creates a hierarchy of containers
+
+    :param array arr: An array of container defintions. It has the object structure as described above.
+    :returns: container id formatted for use in ``addCdsObject``
+
+    .. code-block:: js
+
+        const chain = {
+            audio: { title: 'Audio', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+            allAudio: { title: 'All Audio', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER }
+        };
+        var container = addContainerTree([chain.audio, chain.allAudio]);
+        addCdsObject(obj, container);
 
 
 .. js:function:: copyObject(originalObject)
@@ -450,7 +494,6 @@ within the import and/or the playlist script:
     :param string string:
 
     `The 'from' charsets can be defined in the server configuration`
-
 
 
 Native Functions Available To The Playlist Script
@@ -509,16 +552,16 @@ They can be used by the import and by the playlist script.
     :param string: A date formatted in ``yyyy-mm-dd``
     :returns: string - Year value
 
-.. code-block:: js
+    .. code-block:: js
 
-  function getYear(date)
-  {
-      var matches = date.match(/^([0-9]{4})-/);
-      if (matches)
-          return matches[1];
-      else
-          return date;
-  }
+        function getYear(date)
+        {
+            var matches = date.match(/^([0-9]{4})-/);
+            if (matches)
+                return matches[1];
+            else
+                return date;
+        }
 
 .. js:function:: getPlaylistType(mimetype)
 
@@ -528,16 +571,16 @@ They can be used by the import and by the playlist script.
     :param string: A valid mime-type
     :returns: string - playlist type
 
-.. code-block:: js
+    .. code-block:: js
 
-  function getPlaylistType(mimetype)
-  {
-      if (mimetype == 'audio/x-mpegurl')
-          return 'm3u';
-      if (mimetype == 'audio/x-scpls')
-          return 'pls';
-      return '';
-  }
+        function getPlaylistType(mimetype)
+        {
+            if (mimetype == 'audio/x-mpegurl')
+                return 'm3u';
+            if (mimetype == 'audio/x-scpls')
+                return 'pls';
+            return '';
+        }
 
 
 
@@ -546,6 +589,9 @@ Walkthrough
 
 Now it is time to take a closer look at the default scripts that are supplied with Gerbera. Usually it is installed in
 the ``/usr/share/gerbera/js/`` directory, but you will also find it in ``scripts/js/`` in the Gerbera source tree.
+
+The functions are defined in `common.js` and can easily be overwritten in a file which is set in `custom-script` in `config.xml`.
+Compared to former versions of gerbera you do not have to copy the whole file to overwrite one function.
 
 .. Note::
   this is not a JavaScript tutorial, if you are new to JS you should probably make yourself familiar with the
@@ -567,7 +613,7 @@ is simple: flac and mp3 files offer a lot of metadata like album,
 artist, genre, etc. information, this allows us to create a
 nice container layout.
 
-.. literalinclude:: ../scripts/js/import.js
+.. literalinclude:: ../scripts/js/common.js
     :start-after: // doc-add-audio-begin
     :end-before: // doc-add-audio-end
     :language: js
@@ -595,7 +641,7 @@ or anything Exif field you might be interested in.
     specify the fields of interest in the import section of your configuration file
     (See documentation about library-options).
 
-.. literalinclude:: ../scripts/js/import.js
+.. literalinclude:: ../scripts/js/common.js
     :start-after: // doc-add-image-begin
     :end-before: // doc-add-image-end
     :language: js
@@ -616,7 +662,7 @@ keep it very simple - we just put everything into the 'All Video' container.
     specify the fields of interest in the import section of your configuration file
     (See documentation about library-options).
 
-.. literalinclude:: ../scripts/js/import.js
+.. literalinclude:: ../scripts/js/common.js
     :start-after: // doc-add-video-begin
     :end-before: // doc-add-video-end
     :language: js
@@ -628,7 +674,7 @@ Apple Trailers Content Handler
 This function processes items that are imported via the Apple Trailers feature. We will organize the trailers by genre, post
 date and release date, additionally we will also add a container holding all trailers.
 
-.. literalinclude:: ../scripts/js/import.js
+.. literalinclude:: ../scripts/js/common.js
     :start-after: // doc-add-trailer-begin
     :end-before: // doc-add-trailer-end
     :language: js
@@ -673,7 +719,7 @@ that if the object that is being added by the playlist script is not yet in the 
 
 Below is the complete function with some comments:
 
-.. literalinclude:: ../scripts/js/playlists.js
+.. literalinclude:: ../scripts/js/common.js
     :start-after: // doc-add-playlist-item-begin
     :end-before: // doc-add-playlist-item-end
     :language: js
@@ -689,7 +735,7 @@ the next line until end of file is reached.
 To keep things easy we will only list the m3u parsing here. Again, if you are not familiar with regular expressions, now is
 probably the time to take a closer look.
 
-.. literalinclude:: ../scripts/js/playlists.js
+.. literalinclude:: ../scripts/js/common.js
     :start-after: // doc-playlist-m3u-parse-begin
     :end-before: // doc-playlist-m3u-parse-end
     :language: js
@@ -702,8 +748,8 @@ Example: How to import and play CD-Images (CUE-File)
 
 Do you want to archive your CDs without loss? With ExactAudioCopy (EAC) you can easily create an image in FLAC format and a CUE file. The CUE file is a text file containing information about the individual tracks. Gerbera allows you to use scripts to read in the CUE file and play back the individual tracks.
 
-Prerequists
------------
+Prerequisits
+------------
 
 1) You have a image copy of your CD in the FLAC-format and a CUE-File. The FLAC-File may include the cover art.
 #) Gerbera with the External-Link-Patch.

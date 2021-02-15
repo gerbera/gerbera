@@ -43,9 +43,7 @@ if (last_path) {
 if (type === '') {
     print("Unknown playlist mimetype: '" + playlist.mimetype + "' of playlist '" + playlist.location + "'");
 } else if (type === 'm3u') {
-// doc-playlist-m3u-parse-begin
     readM3uPlaylist(playlist_title, playlistChain, playlistDirChain);
-// doc-playlist-m3u-parse-end
 } else if (type === 'pls') {
     readPlsPlaylist(playlist_title, playlistChain, playlistDirChain);
 }
