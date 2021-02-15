@@ -25,6 +25,37 @@ std::vector<std::string> DukTestHelper::arrayToVector(duk_context* ctx, duk_idx_
     return vctr;
 }
 
+std::vector<std::string> DukTestHelper::containerToPath(duk_context* ctx, duk_idx_t idx)
+{
+    std::vector<std::string> vctr;
+
+    if (!duk_is_array(ctx, idx)) {
+        return vctr;
+    }
+
+    duk_to_object(ctx, idx);
+    duk_size_t n = duk_get_length(ctx, idx);
+    for (duk_size_t i = 0; i < n; i++) {
+        if (duk_get_prop_index(ctx, idx, i)) {
+            if (!duk_is_object(ctx, -1)) {
+                duk_pop(ctx); // item
+                break;
+            } else {
+                //duk_to_object(ctx, -1);
+                duk_get_prop_string(ctx, -1, "title");
+                if (!duk_is_null_or_undefined(ctx, -1)) {
+                    std::string val = duk_to_string(ctx, -1);
+                    vctr.push_back(val);
+                }
+                duk_pop(ctx); // title
+            }
+        }
+        duk_pop(ctx); // item
+    }
+
+    return vctr;
+}
+
 std::map<std::string, std::string> DukTestHelper::extractValues(duk_context* ctx, std::vector<std::string> keys, duk_idx_t idx)
 {
     std::map<std::string, std::string> objValues;
@@ -36,14 +67,12 @@ std::map<std::string, std::string> DukTestHelper::extractValues(duk_context* ctx
             val = std::get<1>(complexValue);
         } else {
             duk_get_prop_string(ctx, idx, key.c_str());
-            if (duk_is_null_or_undefined(ctx, idx)) {
-                duk_pop(ctx);
-            } else {
+            if (!duk_is_null_or_undefined(ctx, idx)) {
                 val = duk_to_string(ctx, -1);
-                duk_pop(ctx);
             }
+            duk_pop(ctx);
         }
-        if (val.size() > 0) {
+        if (!val.empty()) {
             objValues.insert(make_pair(key, val));
         }
     }
@@ -74,10 +103,12 @@ std::tuple<std::string, std::string> DukTestHelper::extractObjectValues(duk_cont
                 duk_to_object(ctx, -1);
                 duk_get_prop_string(ctx, -1, objProp.c_str());
                 if (duk_is_null_or_undefined(ctx, -1)) {
-                    duk_pop(ctx);
+                    duk_pop(ctx); // objName
+                    duk_pop(ctx); // objProp
                 } else {
                     value = duk_get_string(ctx, -1);
-                    duk_pop(ctx);
+                    duk_pop(ctx); // objName
+                    duk_pop(ctx); // objProp
                     return make_tuple(key, value);
                 }
             }

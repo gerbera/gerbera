@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+#define UNDEFINED "undefined"
+
 // Provides generic helper methods to convert Duktape Context
 // data into c++ types
 class DukTestHelper {
@@ -18,6 +20,10 @@ public:
     // Convert an array at the top of the stack
     // to a c++ vector of strings
     std::vector<std::string> arrayToVector(duk_context* ctx, duk_idx_t idx);
+
+    // Convert an array of objects containing title property at the top of the stack
+    // to a c++ vector of strings
+    std::vector<std::string> containerToPath(duk_context* ctx, duk_idx_t idx);
 
     // Convert an object at the top of the stack
     // to a map of its properties using the property keys passed into

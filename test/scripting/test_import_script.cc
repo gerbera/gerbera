@@ -48,6 +48,30 @@ static duk_ret_t getPlaylistType(duk_context* ctx)
     return ImportScriptTest::commonScriptMock->getPlaylistType(playlistMimeType);
 }
 
+static duk_ret_t addContainerTree(duk_context* ctx)
+{
+    map<string,string> map = {
+        { "", "0" },
+        { "/Audio/All Audio", "42" },
+        { "/Audio/Artists/Artist/All Songs", "43" },
+        { "/Audio/All - full name", "44" },
+        { "/Audio/Artists/Artist/All - full name", "45" },
+        { "/Audio/Artists/Artist/Album", "46" },
+        { "/Audio/Albums/Album", "47" },
+        { "/Audio/Genres/Genre", "48" },
+        { "/Audio/Composers/Composer", "49" },
+        { "/Audio/Year/2018", "50" },
+        { "/Video/All Video", "60" },
+        { "/Video/Directories/home/gerbera", "61" },
+        { "/Photos/All Photos", "70" },
+        { "/Photos/Year/2018/01", "71" },
+        { "/Photos/Date/2018-01-01", "72" },
+        { "/Photos/Directories/home/gerbera", "73" },
+    };
+    vector<string> tree = ScriptTestFixture::addContainerTree(ctx, map);
+    return ImportScriptTest::commonScriptMock->addContainerTree(tree);
+}
+
 static duk_ret_t createContainerChain(duk_context* ctx)
 {
     vector<string> array = ScriptTestFixture::createContainerChain(ctx);
@@ -102,6 +126,7 @@ static duk_function_list_entry js_global_functions[] = {
     { "addCdsObject", addCdsObject, 3 },
     { "getYear", getYear, 1 },
     { "getRootPath", getRootPath, 2 },
+    { "addContainerTree", addContainerTree, 1 },
     { nullptr, nullptr, 0 },
 };
 
@@ -184,32 +209,32 @@ TEST_F(ImportScriptTest, AddsAudioItemToVariousCdsContainerChains)
     EXPECT_CALL(*commonScriptMock, getPlaylistType(Eq("audio/mpeg"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, getYear(Eq("2018-01-01"))).WillOnce(Return(1));
 
-    EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Audio", "All Audio"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "\\/Audio\\/All Audio", "undefined")).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "All Audio"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "42", UNDEFINED)).WillOnce(Return(0));
 
-    EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Audio", "Artists", "Artist", "All Songs"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "\\/Audio\\/Artists\\/Artist\\/All Songs", "undefined")).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Artists", "Artist", "All Songs"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "43", UNDEFINED)).WillOnce(Return(0));
 
-    EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Audio", "All - full name"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullName), "\\/Audio\\/All - full name", "undefined")).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "All - full name"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullName), "44", UNDEFINED)).WillOnce(Return(0));
 
-    EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Audio", "Artists", "Artist", "All - full name"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullName), "\\/Audio\\/Artists\\/Artist\\/All - full name", "undefined")).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Artists", "Artist", "All - full name"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullName), "45", UNDEFINED)).WillOnce(Return(0));
 
-    EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Audio", "Artists", "Artist", "Album"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "\\/Audio\\/Artists\\/Artist\\/Album", UPNP_CLASS_MUSIC_ALBUM)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Artists", "Artist", "Album"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "46", UNDEFINED)).WillOnce(Return(0));
 
-    EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Audio", "Albums", "Album"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "\\/Audio\\/Albums\\/Album", UPNP_CLASS_MUSIC_ALBUM)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Albums", "Album"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "47", UNDEFINED)).WillOnce(Return(0));
 
-    EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Audio", "Genres", "Genre"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "\\/Audio\\/Genres\\/Genre", UPNP_CLASS_MUSIC_GENRE)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Genres", "Genre"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "48", UNDEFINED)).WillOnce(Return(0));
 
-    EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Audio", "Composers", "Composer"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "\\/Audio\\/Composers\\/Composer", UPNP_CLASS_MUSIC_COMPOSER)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Composers", "Composer"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "49", UNDEFINED)).WillOnce(Return(0));
 
-    EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Audio", "Year", "2018"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "\\/Audio\\/Year\\/2018", "undefined")).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Year", "2018"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "50", UNDEFINED)).WillOnce(Return(0));
 
     addGlobalFunctions(ctx, js_global_functions);
     dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, online_service);
@@ -238,13 +263,13 @@ TEST_F(ImportScriptTest, AddsVideoItemToCdsContainerChainWithDirs)
     // for verification.
     EXPECT_CALL(*commonScriptMock, getPlaylistType(Eq("video/mpeg"))).WillOnce(Return(1));
 
-    EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Video", "All Video"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asVideoAllVideo), "\\/Video\\/All Video", "undefined")).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Video", "All Video"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asVideoAllVideo), "60", UNDEFINED)).WillOnce(Return(0));
 
     EXPECT_CALL(*commonScriptMock, getRootPath("object/script/path", location)).WillOnce(Return(1));
 
-    EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Video", "Directories", "home", "gerbera"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asVideoAllVideo), "\\/Video\\/Directories\\/home\\/gerbera", "undefined")).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Video", "Directories", "home", "gerbera"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asVideoAllVideo), "61", UNDEFINED)).WillOnce(Return(0));
 
     addGlobalFunctions(ctx, js_global_functions);
     dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, online_service);
@@ -329,19 +354,19 @@ TEST_F(ImportScriptTest, AddsImageItemToCdsContainerChains)
     // for verification.
     EXPECT_CALL(*commonScriptMock, getPlaylistType(Eq("image/jpeg"))).WillOnce(Return(1));
 
-    EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Photos", "All Photos"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asImagePhotos), "\\/Photos\\/All Photos", UPNP_CLASS_CONTAINER)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Photos", "All Photos"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asImagePhotos), "70", UNDEFINED)).WillOnce(Return(0));
 
-    EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Photos", "Year", "2018", "01"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asImagePhotos), "\\/Photos\\/Year\\/2018\\/01", UPNP_CLASS_CONTAINER)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Photos", "Year", "2018", "01"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asImagePhotos), "71", UNDEFINED)).WillOnce(Return(0));
 
-    EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Photos", "Date", "2018-01-01"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asImagePhotos), "\\/Photos\\/Date\\/2018-01-01", UPNP_CLASS_CONTAINER)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Photos", "Date", "2018-01-01"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asImagePhotos), "72", UNDEFINED)).WillOnce(Return(0));
 
     EXPECT_CALL(*commonScriptMock, getRootPath("object/script/path", location)).WillOnce(Return(1));
 
-    EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Photos", "Directories", "home", "gerbera"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asImagePhotos), "\\/Photos\\/Directories\\/home\\/gerbera", "undefined")).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Photos", "Directories", "home", "gerbera"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asImagePhotos), "73", UNDEFINED)).WillOnce(Return(0));
 
     addGlobalFunctions(ctx, js_global_functions);
     dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, online_service);
@@ -370,13 +395,13 @@ TEST_F(ImportScriptTest, AddsOggTheoraVideoItemToCdsContainerChainWithDirs)
     // for verification.
     EXPECT_CALL(*commonScriptMock, getPlaylistType(Eq("application/ogg"))).WillOnce(Return(1));
 
-    EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Video", "All Video"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asVideoAllVideo), "\\/Video\\/All Video", "undefined")).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Video", "All Video"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asVideoAllVideo), "60", UNDEFINED)).WillOnce(Return(0));
 
     EXPECT_CALL(*commonScriptMock, getRootPath("object/script/path", location)).WillOnce(Return(1));
 
-    EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Video", "Directories", "home", "gerbera"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asVideoAllVideo), "\\/Video\\/Directories\\/home\\/gerbera", "undefined")).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Video", "Directories", "home", "gerbera"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asVideoAllVideo), "61", UNDEFINED)).WillOnce(Return(0));
 
     addGlobalFunctions(ctx, js_global_functions);
     dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, online_service);
@@ -445,32 +470,32 @@ TEST_F(ImportScriptTest, AddsOggTheoraAudioItemToVariousCdsContainerChains)
     EXPECT_CALL(*commonScriptMock, getPlaylistType(Eq("application/ogg"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, getYear(Eq("2018-01-01"))).WillOnce(Return(1));
 
-    EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Audio", "All Audio"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "\\/Audio\\/All Audio", "undefined")).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "All Audio"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "42", UNDEFINED)).WillOnce(Return(0));
 
-    EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Audio", "Artists", "Artist", "All Songs"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "\\/Audio\\/Artists\\/Artist\\/All Songs", "undefined")).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Artists", "Artist", "All Songs"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "43", UNDEFINED)).WillOnce(Return(0));
 
-    EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Audio", "All - full name"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullName), "\\/Audio\\/All - full name", "undefined")).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "All - full name"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullName), "44", UNDEFINED)).WillOnce(Return(0));
 
-    EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Audio", "Artists", "Artist", "All - full name"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullName), "\\/Audio\\/Artists\\/Artist\\/All - full name", "undefined")).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Artists", "Artist", "All - full name"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullName), "45", UNDEFINED)).WillOnce(Return(0));
 
-    EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Audio", "Artists", "Artist", "Album"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "\\/Audio\\/Artists\\/Artist\\/Album", UPNP_CLASS_MUSIC_ALBUM)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Artists", "Artist", "Album"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "46", UNDEFINED)).WillOnce(Return(0));
 
-    EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Audio", "Albums", "Album"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "\\/Audio\\/Albums\\/Album", UPNP_CLASS_MUSIC_ALBUM)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Albums", "Album"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "47", UNDEFINED)).WillOnce(Return(0));
 
-    EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Audio", "Genres", "Genre"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "\\/Audio\\/Genres\\/Genre", UPNP_CLASS_MUSIC_GENRE)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Genres", "Genre"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "48", UNDEFINED)).WillOnce(Return(0));
 
-    EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Audio", "Composers", "Composer"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "\\/Audio\\/Composers\\/Composer", UPNP_CLASS_MUSIC_COMPOSER)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Composers", "Composer"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "49", UNDEFINED)).WillOnce(Return(0));
 
-    EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Audio", "Year", "2018"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "\\/Audio\\/Year\\/2018", "undefined")).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Year", "2018"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "50", UNDEFINED)).WillOnce(Return(0));
 
     addGlobalFunctions(ctx, js_global_functions);
     dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, online_service);

@@ -48,6 +48,8 @@ typedef struct _getCdsObjectParams getCdsObjectParams;
 // providing various c++ translations of script functions
 // useful for mocking said functions with expectations.
 class ScriptTestFixture : public ::testing::Test {
+    // Loads common.js if running test for another script
+    void loadCommon(duk_context* ctx);
 
 public:
     // Builds up the Duktape context
@@ -103,6 +105,10 @@ public:
     // Proxy the Duktape script with `addCdsObject` global function.
     // Translates the Duktape value stack to c++
     static addCdsObjectParams addCdsObject(duk_context* ctx, vector<string> objectKeys);
+
+    // Proxy the Duktape script with `addContainerTree` C function.
+    // Translates the Duktape value stack to c++
+    static vector<string> addContainerTree(duk_context* ctx, map<string, string> resMap);
 
     // Proxy the Duktape script with `abcbox` common.js function
     static abcBoxParams abcBox(duk_context* ctx);

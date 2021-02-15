@@ -25,26 +25,35 @@ void ScriptTestFixture::SetUp()
 {
     ctx = duk_create_heap(nullptr, nullptr, nullptr, nullptr, nullptr);
 
-    if (scriptName!= "common.js") {
-        fs::path ss = fs::path(SCRIPTS_DIR) / "js" / "common.js";
-        std::string script = readTextFile(ss.c_str());
-        duk_push_string(ctx, ss.c_str());
-        duk_pcompile_lstring_filename(ctx, 0, script.c_str(), script.length());
-        duk_call(ctx, 0);
-    }
+    loadCommon(ctx);
 
     fs::path scriptFile = fs::path(SCRIPTS_DIR) / "js" / scriptName;
     string scriptContent = readTextFile(scriptFile.c_str());
     duk_push_thread_stash(ctx, ctx);
     duk_push_string(ctx, scriptFile.c_str());
     duk_pcompile_lstring_filename(ctx, 0, scriptContent.c_str(), scriptContent.length());
-    duk_put_prop_string(ctx, -2, "script_under_test");
+    duk_put_global_string(ctx, "script_under_test");
     duk_pop(ctx);
 }
 
 void ScriptTestFixture::TearDown()
 {
     duk_destroy_heap(ctx);
+}
+
+void ScriptTestFixture::loadCommon(duk_context* ctx)
+{
+    if (scriptName != "common.js") {
+        fs::path commonScript = fs::path(SCRIPTS_DIR) / "js" / "common.js";
+        std::string script = readTextFile(commonScript.c_str());
+        duk_push_string(ctx, commonScript.c_str());
+        duk_pcompile_lstring_filename(ctx, 0, script.c_str(), script.length());
+
+        if (duk_pcall(ctx, 0) != DUK_EXEC_SUCCESS) {
+            cerr << "Failed to execute script: " << duk_safe_to_string(ctx, -1) << endl;
+        }
+        duk_pop(ctx); // commonScript
+    }
 }
 
 duk_ret_t ScriptTestFixture::dukMockItem(duk_context* ctx, string mimetype, string id, int theora, string title,
@@ -164,9 +173,12 @@ void ScriptTestFixture::addGlobalFunctions(duk_context* ctx, const duk_function_
 void ScriptTestFixture::executeScript(duk_context* ctx)
 {
     duk_push_thread_stash(ctx, ctx);
-    duk_get_prop_string(ctx, -1, "script_under_test");
+    duk_get_global_string(ctx, "script_under_test");
     if (duk_is_function(ctx, -1)) {
-        duk_pcall(ctx, 0);
+        if (duk_pcall(ctx, 0) != DUK_EXEC_SUCCESS) {
+            cerr << "Failed to execute script: " << duk_safe_to_string(ctx, -1) << endl;
+        }
+        duk_pop(ctx); // script_under_test
     };
 }
 
@@ -178,13 +190,13 @@ vector<string> ScriptTestFixture::createContainerChain(duk_context* ctx)
     for (auto const& value : array) {
         path.append("\\/" + value);
     }
-    duk_push_lstring(ctx, path.c_str(), path.length());
+    duk_push_string(ctx, path.c_str());
     return array;
 }
 
 string ScriptTestFixture::getLastPath(duk_context* ctx)
 {
-    string inputPath = duk_get_string(ctx, 0);
+    string inputPath = duk_to_string(ctx, 0);
     string path = inputPath;
     string delimiter = "/";
 
@@ -203,7 +215,7 @@ string ScriptTestFixture::getLastPath(duk_context* ctx)
 
 string ScriptTestFixture::getPlaylistType(duk_context* ctx)
 {
-    string playlistMimeType = duk_get_string(ctx, 0);
+    string playlistMimeType = duk_to_string(ctx, 0);
     string type;
     if (playlistMimeType == "audio/x-mpegurl") {
         type = "m3u";
@@ -212,22 +224,36 @@ string ScriptTestFixture::getPlaylistType(duk_context* ctx)
     } else {
         type = "";
     }
-    duk_push_lstring(ctx, type.c_str(), type.length());
+    duk_push_string(ctx, type.c_str());
     return playlistMimeType;
 }
 
 string ScriptTestFixture::print(duk_context* ctx)
 {
-    string result = duk_get_string(ctx, 0);
+    string result = duk_to_string(ctx, 0);
     return result;
 }
 
 string ScriptTestFixture::getYear(duk_context* ctx)
 {
-    string date = duk_get_string(ctx, 0);
+    string date = duk_to_string(ctx, 0);
     // TODO: parse YYYY...
     duk_push_string(ctx, "2018");
     return date;
+}
+
+vector<string> ScriptTestFixture::addContainerTree(duk_context* ctx, map<string,string> resMap)
+{
+    DukTestHelper dukHelper;
+    vector<string> array = dukHelper.containerToPath(ctx, 0);
+
+    string result;
+    for (auto const& value : array) {
+        result.append("/" + value);
+    }
+
+    duk_push_string(ctx, resMap[result].c_str());
+    return array;
 }
 
 addCdsObjectParams ScriptTestFixture::addCdsObject(duk_context* ctx, vector<string> keys)
@@ -264,7 +290,7 @@ copyObjectParams ScriptTestFixture::copyObject(duk_context* ctx, map<string, str
 
 getCdsObjectParams ScriptTestFixture::getCdsObject(duk_context* ctx, map<string, string> obj, map<string, string> meta)
 {
-    string location = duk_get_string(ctx, 0);
+    string location = duk_to_string(ctx, 0);
     getCdsObjectParams params;
     params.location = location;
 

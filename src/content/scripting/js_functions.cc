@@ -77,6 +77,7 @@ duk_ret_t js_addContainerTree(duk_context* ctx)
     for (duk_size_t i = 0; i < length; i++) {
         if (duk_get_prop_index(ctx, -1, i)) {
             if (!duk_is_object(ctx, -1)) {
+                duk_pop(ctx);
                 log_js("js_addContainerTree: no object at {}", i);
                 break;
             }

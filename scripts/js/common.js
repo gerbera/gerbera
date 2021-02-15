@@ -324,7 +324,11 @@ function addAudio(obj) {
     // is suggested to correctly set UPnP classes of containers and
     // objects - this information may be used by some renderers to
     // identify the type of the container and present the content in a
-    // different manner .
+    // different manner.
+
+    // Remember, the server will sort all items by ID3 track if the
+    // container class is set to UPNP_CLASS_CONTAINER_MUSIC_ALBUM.
+
     const chain = {
         audio: { title: 'Audio', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
         allAudio: { title: 'All Audio', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
@@ -335,7 +339,6 @@ function addAudio(obj) {
         allComposers: { title: 'Composers', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
         allSongs: { title: 'All Songs', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
         allFull: { title: 'All - full name', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
-        all000: { title: '000 All', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER, res: obj.res, aux: obj.aux, refID: obj.id },
         artist: { title: artist, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_ARTIST, meta: {}, res: obj.res, aux: obj.aux, refID: obj.id },
         album: { title: album, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_ALBUM, meta: {}, res: obj.res, aux: obj.aux, refID: obj.id },
         genre: { title: genre, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_GENRE, meta: {}, res: obj.res, aux: obj.aux, refID: obj.id },
@@ -359,7 +362,6 @@ function addAudio(obj) {
     container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.allSongs]);
     addCdsObject(obj, container);
 
-    chain = ['Audio', 'All - full name'];
     var temp = '';
     if (artist_full) {
         temp = artist_full;
@@ -384,10 +386,6 @@ function addAudio(obj) {
 
     container = addContainerTree([chain.audio, chain.allAlbums, chain.album]);
     obj.title = track + title;
-
-    // Remember, the server will sort all items by ID3 track if the
-    // container class is set to UPNP_CLASS_CONTAINER_MUSIC_ALBUM.
-
     addCdsObject(obj, container);
 
     container = addContainerTree([chain.audio, chain.allGenres, chain.genre]);
@@ -512,7 +510,7 @@ function addAudioStructured(obj) {
         entryAll: { title: '-all-', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
         genre: { title: genre, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_GENRE, meta: {}, res: obj.res, aux: obj.aux, refID: obj.id },
         decade: { title: decade, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
-        date: { title: date, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+        date: { title: date, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER }
     };
 
     chain.album.meta[M_ARTIST] = album_artist;
@@ -524,7 +522,6 @@ function addAudioStructured(obj) {
     chain.artist.meta[M_ALBUMARTIST] = artist;
     chain.album_artist.meta[M_ARTIST] = album_artist;
     chain.album_artist.meta[M_ALBUMARTIST] = album_artist;
-    chain.year.meta[M_DATE] = date;
 
     obj.title = tracktitle;
     var container = addContainerTree([chain.allAlbums, chain.abc, chain.init, chain.album_artist]);
@@ -595,26 +592,26 @@ function addAudioStructured(obj) {
     addCdsObject(obj, container);
 
     obj.title = tracktitle;
+    chain.album.title = album;
     container = addContainerTree([chain.allYears, chain.decade, chain.date, chain.artist, chain.album]);
     addCdsObject(obj, container);
 }
 
 // doc-add-video-begin
 function addVideo(obj) {
-    var path = getRootPath(object_script_path, obj.location);
-
+    const dir = getRootPath(object_script_path, obj.location);
     const chain = {
         video: { title: 'Video', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
         allVideo: { title: 'All Video', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
-        allDirectories: { title: 'Directories', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+        allDirectories: { title: 'Directories', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER }
     };
-    addCdsObject(obj, addContainerTree([chain.video, chain.allVideo]));
+    var container = addContainerTree([chain.video, chain.allVideo])
+    addCdsObject(obj, container);
 
-    if (path.length > 0) {
+    if (dir.length > 0) {
         var tree = [chain.video, chain.allDirectories];
-        const dirList = path.split('/');
-        for (var i = 0; i < dirList.length; i++) {
-            tree = tree.concat({ title: dirList[i], objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER });
+        for (var i = 0; i < dir.length; i++) {
+            tree = tree.concat({ title: dir[i], objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER });
         }
         tree[tree.length-1].meta = {};
         tree[tree.length-1].res = obj.res;
@@ -627,8 +624,10 @@ function addVideo(obj) {
 
 // doc-add-image-begin
 function addImage(obj) {
+    const dir = getRootPath(object_script_path, obj.location);
+
     const chain = {
-        images: { title: 'Photos', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+        imageRoot: { title: 'Photos', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
         allImages: { title: 'All Photos', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
 
         allDirectories: { title: 'Directories', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
@@ -637,29 +636,25 @@ function addImage(obj) {
 
         year: { title: 'Unbekannt', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
         month: { title: 'Unbekannt', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER, meta: {}, res: obj.res, aux: obj.aux, refID: obj.id  },
-        date: { title: 'Unbekannt', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER, meta: {}, res: obj.res, aux: obj.aux, refID: obj.id  },
+        date: { title: 'Unbekannt', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER, meta: {}, res: obj.res, aux: obj.aux, refID: obj.id  }
     };
-    addCdsObject(obj, addContainerTree([chain.images, chain.allImages]));
+    addCdsObject(obj, addContainerTree([chain.imageRoot, chain.allImages]));
     var date = obj.meta[M_DATE];
     if (date) {
         var dateParts = date.split('-');
         if (dateParts.length > 1) {
             chain.year.title = dateParts[0];
             chain.month.title = dateParts[1];
-            addCdsObject(obj, createContainerTree([chain.images, chain.allYears, chain.year, chain.month]));
+            addCdsObject(obj, addContainerTree([chain.imageRoot, chain.allYears, chain.year, chain.month]));
         }
 
         chain.date.title = date;
-        addCdsObject(obj, createContainerTree([chain.images, chain.allDates, chain.date]));
+        addCdsObject(obj, addContainerTree([chain.imageRoot, chain.allDates, chain.date]));
     }
-
-    var path = getRootPath(object_script_path, obj.location);
-
-    if (path.length > 0) {
-        var tree = [chain.images, chain.allDirectories];
-        const dirList = path.split('/');
-        for (var i = 0; i < dirList.length; i++) {
-            tree = tree.concat({ title: dirList[i], objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER });
+    if (dir.length > 0) {
+        var tree = [chain.imageRoot, chain.allDirectories];
+        for (var i = 0; i < dir.length; i++) {
+            tree = tree.concat([{ title: dir[i], objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER }]);
         }
         tree[tree.length-1].meta = {};
         tree[tree.length-1].res = obj.res;
