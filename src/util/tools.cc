@@ -590,8 +590,8 @@ std::string renderProtocolInfo(const std::string& mimetype, const std::string& p
 {
     if (!mimetype.empty() && !protocol.empty()) {
         if (!extend.empty())
-            return protocol + ":*:" + mimetype + ":" + extend;
-        return protocol + ":*:" + mimetype + ":*";
+            return fmt::format("{}:*:{}:{}", protocol, mimetype, extend);
+        return fmt::format("{}:*:{}:*", protocol, mimetype);
     }
 
     return "http-get:*:*:*";
@@ -609,7 +609,7 @@ std::string getMTFromProtocolInfo(const std::string& protocol)
 std::string getProtocol(const std::string& protocolInfo)
 {
     size_t pos = protocolInfo.find(':');
-    return (pos == std::string::npos || pos == 0) ? "http-get" : protocolInfo.substr(0, pos);
+    return (pos == std::string::npos || pos == 0) ? PROTOCOL : protocolInfo.substr(0, pos);
 }
 
 std::string millisecondsToHMSF(int milliseconds)
