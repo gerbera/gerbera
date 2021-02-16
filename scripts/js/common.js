@@ -108,18 +108,6 @@ function getRootPath(rootpath, location)
 // -T-           <-- tends to be big
 // -UVWXYZ-
 // -^&#'!-
-//
-// JS code:
-// chain = new Array('-Artist-',  '--all--', artist);
-// obj.title = title + ' (' + album + ', ' + date + ')';
-// addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_ARTIST);
-// chain = new Array('-Artist-', abcbox(artist, 9, '-'), '-all-', artist);
-// obj.title = title + ' (' + album + ', ' + date + ')';
-// addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_ARTIST);
-// chain = new Array('-Artist-', abcbox(artist, 9, '-'), artist.charAt(0).toUpperCase(), artist, '-all-');
-// obj.title = title + ' (' + album + ', ' + date + ')';
-// addCdsObject(obj, createContainerChain(chain), UPNP_CLASS_CONTAINER_MUSIC_ARTIST);
-
 function abcbox(stringtobox, boxtype, divchar)
 {
     // get ascii value of first character
@@ -136,57 +124,59 @@ function abcbox(stringtobox, boxtype, divchar)
         return divchar + '^\&#\'' + divchar;
     }
     // all other characters are letters
-
+    var boxwidth;
     // definition of box types, adjust to your own needs
     // as a start: the number is the same as the number of boxes, evenly spaced ... more or less.
     switch (boxtype)
     {
     case 1:
-        var boxwidth = new Array();
+        boxwidth = new Array();
         boxwidth[0] = 26;                             // one large box of 26 letters
         break;
     case 2:
-        var boxwidth = new Array(13,13);              // two boxes of 13 letters
+        boxwidth = new Array(13,13);              // two boxes of 13 letters
         break;
     case 3:
-        var boxwidth = new Array(8,9,9);              // and so on ...
+        boxwidth = new Array(8,9,9);              // and so on ...
         break;
     case 4:
-        var boxwidth = new Array(7,6,7,6);
+        boxwidth = new Array(7,6,7,6);
         break;
     case 5:
-        var boxwidth = new Array(5,5,5,6,5);
+        boxwidth = new Array(5,5,5,6,5);
         break;
     case 6:
-        var boxwidth = new Array(4,5,4,4,5,4);
+        boxwidth = new Array(4,5,4,4,5,4);
         break;
     case 7:
-        var boxwidth = new Array(4,3,4,4,4,3,4);
+        boxwidth = new Array(4,3,4,4,4,3,4);
         break;
     case 9:
-        var boxwidth = new Array(5,5,5,4,1,6);        // When T is a large box...
+        boxwidth = new Array(5,5,5,4,1,6);        // When T is a large box...
         break;
     default:
-        var boxwidth = new Array(5,5,5,6,5);
+        boxwidth = new Array(5,5,5,6,5);
         break;
     }
 
     // check for a total of 26 characters for all boxes
-    charttl = 0;
-    for (cb=0;cb<boxwidth.length;cb++) { charttl = charttl + boxwidth[cb]; }
+    var charttl = 0;
+    for (var cb = 0; cb < boxwidth.length; cb++) {
+        charttl = charttl + boxwidth[cb];
+    }
     if (charttl != 26) {
         print("Error in box-definition, length is " + charttl + ". Check the file common.js" );
         // maybe an exit call here to stop processing the media ??
-        end;
+        return "???";
     }
 
     // declaration of some variables
-    boxnum=0;                         // boxnumber start
-    sc=65;                            // first ascii character (corresponds to 'A')
-    ec=sc + boxwidth[boxnum] - 1;     // last character of first box
+    var boxnum = 0;                         // boxnumber start
+    var sc = 65;                            // first ascii character (corresponds to 'A')
+    var ec = sc + boxwidth[boxnum] - 1;     // last character of first box
 
     // loop that will define first and last character of the right box
-    while (intchar>ec)
+    while (intchar > ec)
     {
         boxnum++;                         // next boxnumber
         sc = ec + 1;                      // next startchar
@@ -194,8 +184,8 @@ function abcbox(stringtobox, boxtype, divchar)
     }
 
     // construction of output string
-    output = divchar;
-    for (i=sc;i<=ec;i++) {
+    var output = divchar;
+    for (var i = sc; i <= ec; i++) {
         output = output + String.fromCharCode(i);
     }
     output = output + divchar;
@@ -271,6 +261,7 @@ function addAudio(obj) {
         composer = 'None';
     }
 
+/*
     var conductor = obj.meta[M_CONDUCTOR];
     if (!conductor) {
         conductor = 'None';
@@ -280,7 +271,7 @@ function addAudio(obj) {
     if (!orchestra) {
         orchestra = 'None';
     }
-
+*/
     // uncomment this if you want to have track numbers in front of the title
     // in album view
 /*
@@ -312,10 +303,7 @@ function addAudio(obj) {
 */
 
     // We finally gathered all data that we need, so let's create a
-    // nice layout for our audio files. Note how we are constructing
-    // the chain, in the line below the array 'chain' will be
-    // converted to 'Audio/All audio' by the createContainerChain()
-    // function.
+    // nice layout for our audio files.
 
     obj.title = title;
 
@@ -400,10 +388,8 @@ function addAudio(obj) {
 // doc-add-audio-end
 
 function addAudioStructured(obj) {
-
     var desc = '';
     var artist_full;
-    var album_full;
 
     var decade = null;
 
@@ -423,10 +409,8 @@ function addAudioStructured(obj) {
     var album = obj.meta[M_ALBUM];
     if (!album) {
         album = 'Unknown';
-        album_full = null;
     } else {
         desc = desc + ', ' + album;
-        album_full = album;
     }
 
     if (desc) {
@@ -482,16 +466,12 @@ function addAudioStructured(obj) {
     // Album
 
     // Extra code for correct display of albums with various artists (usually collections)
-    if (!description) {
-        album_artist = album + ' - ' + artist;
-        tracktitle = track + title;
-    } else {
+    var tracktitle = track + title;
+    var album_artist = album + ' - ' + artist;
+    if (description) {
         if (description.toUpperCase() === 'VARIOUS') {
             album_artist = album + ' - Various';
-            tracktitle = track + title + ' - ' + artist;
-        } else {
-            album_artist = album + ' - ' + artist;
-            tracktitle = track + title;
+            tracktitle = tracktitle + ' - ' + artist;
         }
     }
 
@@ -605,7 +585,7 @@ function addVideo(obj) {
         allVideo: { title: 'All Video', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
         allDirectories: { title: 'Directories', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER }
     };
-    var container = addContainerTree([chain.video, chain.allVideo])
+    var container = addContainerTree([chain.video, chain.allVideo]);
     addCdsObject(obj, container);
 
     if (dir.length > 0) {
@@ -696,7 +676,7 @@ function addTrailer(obj) {
         // A genre string "Science Fiction, Thriller" will be split to
         // "Science Fiction" and "Thriller" respectively.
 
-        genres = genre.split(', ');
+        const genres = genre.split(', ');
         for (var i = 0; i < genres.length; i++) {
             chain.genre.title = genres[i];
             chain.genre.meta[M_GENRE] = genres[i];
@@ -760,7 +740,7 @@ function addPlaylistItem(playlist_title, location, title, playlistChain, order, 
 
         // Your item will be added to the container named by the playlist
         // that you are currently parsing.
-        addCdsObject(exturl, playlistChain, UPNP_CLASS_PLAYLIST_CONTAINER);
+        addCdsObject(exturl, playlistChain);
     } else {
         if (location.substr(0,1) !== '/') {
             location = playlistLocation + location;
@@ -768,7 +748,7 @@ function addPlaylistItem(playlist_title, location, title, playlistChain, order, 
         var cds = getCdsObject(location);
         if (!cds) {
             print("Skipping item: " + location);
-            return
+            return playlistOrder;
         }
 
         var item = copyObject(cds);
@@ -776,7 +756,7 @@ function addPlaylistItem(playlist_title, location, title, playlistChain, order, 
         item.playlistOrder = (order ? order : playlistOrder++);
         item.title = item.meta[M_TITLE];
 
-        addCdsObject(item, playlistChain, UPNP_CLASS_PLAYLIST_CONTAINER);
+        addCdsObject(item, playlistChain);
     }
     return playlistOrder;
 }
@@ -828,7 +808,7 @@ function readPlsPlaylist(playlist_title, playlistChain, playlistDirChain) {
         } else if (line.match(/^Version=(\d+)$/i)) {
             // var plsVersion =  RegExp.$1;
         } else if (line.match(/^File\s*(\d+)\s*=\s*(\S.+)$/i)) {
-            matches = line.match(/^File\s*(\d+)\s*=\s*(\S.+)$/i);
+            const matches = line.match(/^File\s*(\d+)\s*=\s*(\S.+)$/i);
             var thisFile = matches[2];
             id = parseInt(matches[1], 10);
             if (lastId === -1)
@@ -843,9 +823,9 @@ function readPlsPlaylist(playlist_title, playlistChain, playlistDirChain) {
                 title = null;
                 lastId = id;
             }
-            file = thisFile
+            file = thisFile;
         } else if (line.match(/^Title\s*(\d+)\s*=\s*(\S.+)$/i)) {
-            matches = line.match(/^Title\s*(\d+)\s*=\s*(\S.+)$/i);
+            const matches = line.match(/^Title\s*(\d+)\s*=\s*(\S.+)$/i);
             var thisTitle = matches[2];
             id = parseInt(matches[1], 10);
             if (lastId === -1)

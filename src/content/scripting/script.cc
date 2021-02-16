@@ -622,7 +622,6 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
             std::string protocolInfo;
 
             obj->setRestricted(true);
-            auto item = std::static_pointer_cast<CdsItemExternalURL>(obj);
             val = getProperty("protocol");
             if (!val.empty()) {
                 val = sc->convert(val);

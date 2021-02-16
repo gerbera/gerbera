@@ -15,8 +15,17 @@
 
 using namespace ::testing;
 
+// Extends ScriptTestFixture to allow
+// for unique testing of the External URL Playlist
+// processing
 class ExternalUrlPLSPlaylistTest : public ScriptTestFixture {
 public:
+    // As Duktape requires static methods, so must the mock expectations be
+    static unique_ptr<CommonScriptMock> commonScriptMock;
+
+    // Used to iterate through `readln` content
+    static int readLineCnt;
+
     ExternalUrlPLSPlaylistTest()
     {
         commonScriptMock.reset(new ::testing::NiceMock<CommonScriptMock>());
@@ -27,12 +36,6 @@ public:
     {
         commonScriptMock.reset();
     };
-
-    // As Duktape requires static methods, so must the mock expectations be
-    static unique_ptr<CommonScriptMock> commonScriptMock;
-
-    // Used to iterate through `readln` content
-    static int readLineCnt;
 };
 
 unique_ptr<CommonScriptMock> ExternalUrlPLSPlaylistTest::commonScriptMock;
@@ -48,6 +51,17 @@ static duk_ret_t print(duk_context* ctx)
 {
     string msg = ScriptTestFixture::print(ctx);
     return ExternalUrlPLSPlaylistTest::commonScriptMock->print(msg);
+}
+
+static duk_ret_t addContainerTree(duk_context* ctx)
+{
+    map<string,string> map = {
+        { "", "0" },
+        { "/Playlists/All Playlists/Playlist Title", "42" },
+        { "/Playlists/Directories/of/Playlist Title", "43" },
+    };
+    vector<string> tree = ScriptTestFixture::addContainerTree(ctx, map);
+    return ExternalUrlPLSPlaylistTest::commonScriptMock->addContainerTree(tree);
 }
 
 static duk_ret_t createContainerChain(duk_context* ctx)
@@ -110,6 +124,7 @@ static duk_function_list_entry js_global_functions[] = {
     { "getLastPath", getLastPath, 1 },
     { "readln", readln, 1 },
     { "addCdsObject", addCdsObject, 3 },
+    { "addContainerTree", addContainerTree, 1 },
     { nullptr, nullptr, 0 },
 };
 
@@ -118,6 +133,7 @@ bool map_compare(Map const& lhs, Map const& rhs)
 {
     return lhs.size() == rhs.size() && std::equal(lhs.begin(), lhs.end(), rhs.begin());
 }
+
 MATCHER_P(IsIdenticalMap, control, "Map to be identical")
 {
     {
@@ -135,9 +151,9 @@ TEST_F(ExternalUrlPLSPlaylistTest, PrintsWarningWhenPlaylistTypeIsNotFound)
     // Expecting the common script calls..and will proxy through the mock objects
     EXPECT_CALL(*commonScriptMock, getPlaylistType(Eq("no/type"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, print(Eq("Processing playlist: /location/of/playlist.pls"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Playlists", "All Playlists", "Playlist Title"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Playlists", "All Playlists", "Playlist Title"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, getLastPath(Eq("/location/of/playlist.pls"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Playlists", "Directories", "of", "Playlist Title"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Playlists", "Directories", "of", "Playlist Title"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, print(Eq("Unknown playlist mimetype: 'no/type' of playlist '/location/of/playlist.pls'"))).WillOnce(Return(1));
 
     addGlobalFunctions(ctx, js_global_functions);
@@ -165,9 +181,9 @@ TEST_F(ExternalUrlPLSPlaylistTest, AddsCdsObjectFromM3UPlaylistWithExternalUrlPl
     // Expecting the common script calls..and will proxy through the mock objects for verification.
     EXPECT_CALL(*commonScriptMock, getPlaylistType(Eq("audio/x-scpls"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, print(Eq("Processing playlist: /location/of/playlist.pls"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Playlists", "All Playlists", "Playlist Title"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Playlists", "All Playlists", "Playlist Title"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, getLastPath(Eq("/location/of/playlist.pls"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Playlists", "Directories", "of", "Playlist Title"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Playlists", "Directories", "of", "Playlist Title"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readln(Eq("[playlist]"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readln(Eq("\n"))).Times(2).WillRepeatedly(Return(1));
     EXPECT_CALL(*commonScriptMock, readln(Eq("File1=http://46.105.171.217:8024"))).WillOnce(Return(1));
@@ -176,8 +192,8 @@ TEST_F(ExternalUrlPLSPlaylistTest, AddsCdsObjectFromM3UPlaylistWithExternalUrlPl
     EXPECT_CALL(*commonScriptMock, readln(Eq("NumberOfEntries=1"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readln(Eq("Version=2"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readln(Eq("-EOF-"))).WillOnce(Return(0));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistChain), "\\/Playlists\\/All Playlists\\/Playlist Title", "object.container.playlistContainer")).WillOnce(Return(0));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistChain), "\\/Playlists\\/Directories\\/of\\/Playlist Title", "object.container.playlistContainer")).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistChain), "42", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistChain), "43", UNDEFINED)).WillOnce(Return(0));
 
     addGlobalFunctions(ctx, js_global_functions);
     dukMockPlaylist(ctx, "Playlist Title", "/location/of/playlist.pls", "audio/x-scpls");
