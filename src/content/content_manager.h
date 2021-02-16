@@ -331,7 +331,6 @@ protected:
     using AutoLock = std::lock_guard<decltype(mutex)>;
     using AutoLockU = std::unique_lock<decltype(mutex)>;
 
-    bool ignore_unknown_extensions;
     std::map<std::string, std::string> mimetype_contenttype_map;
 
     std::shared_ptr<AutoscanList> autoscan_timed;

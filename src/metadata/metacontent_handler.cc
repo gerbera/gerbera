@@ -135,12 +135,8 @@ void FanArtHandler::fillMetadata(std::shared_ptr<CdsObject> item)
     if (!path.empty()) {
         auto resource = std::make_shared<CdsResource>(CH_FANART);
         std::string type = path.extension().string().substr(1);
+        std::string mimeType = mime->getMimeType(path, fmt::format("image/{}", type));
 
-#ifdef HAVE_MAGIC
-        std::string mimeType = mime->fileToMimeType(path);
-#else
-        std::string mimeType = fmt::format("image/{}", type);
-#endif
         resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(mimeType));
         resource->addAttribute(R_RESOURCE_FILE, path.c_str());
         resource->addParameter(RESOURCE_CONTENT_TYPE, ID3_ALBUM_ART);
@@ -200,11 +196,8 @@ void ContainerArtHandler::fillMetadata(std::shared_ptr<CdsObject> item)
     if (!path.empty()) {
         auto resource = std::make_shared<CdsResource>(CH_CONTAINERART);
         std::string type = path.extension().string().substr(1);
-#ifdef HAVE_MAGIC
-        std::string mimeType = mime->fileToMimeType(path);
-#else
-        std::string mimeType = fmt::format("image/{}", type);
-#endif
+        std::string mimeType = mime->getMimeType(path, fmt::format("image/{}", type));
+
         resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(mimeType));
         resource->addAttribute(R_RESOURCE_FILE, path.c_str());
         resource->addParameter(RESOURCE_CONTENT_TYPE, ID3_ALBUM_ART);
@@ -258,15 +251,13 @@ void SubtitleHandler::fillMetadata(std::shared_ptr<CdsObject> item)
     if (!path.empty()) {
         auto resource = std::make_shared<CdsResource>(CH_SUBTITLE);
         std::string type = path.extension().string().substr(1);
-#ifdef HAVE_MAGIC
-        std::string mimeType = mime->fileToMimeType(path);
+
+        std::string mimeType = mime->getMimeType(path, fmt::format("text/{}", type));
         auto pos = mimeType.find("plain");
         if (pos != std::string::npos) {
             mimeType = fmt::format("{}{}", mimeType.substr(0, pos), type);
         }
-#else
-        std::string mimeType = fmt::format("text/{}", type);
-#endif
+
         resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(mimeType));
         resource->addAttribute(R_RESOURCE_FILE, path.c_str());
         resource->addParameter(RESOURCE_CONTENT_TYPE, VIDEO_SUB);
