@@ -635,8 +635,8 @@ function addImage(obj) {
         allDates: { title: 'Date', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
 
         year: { title: 'Unbekannt', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
-        month: { title: 'Unbekannt', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER, meta: {}, res: obj.res, aux: obj.aux, refID: obj.id  },
-        date: { title: 'Unbekannt', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER, meta: {}, res: obj.res, aux: obj.aux, refID: obj.id  }
+        month: { title: 'Unbekannt', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER, meta: {}, res: obj.res, aux: obj.aux, refID: obj.id },
+        date: { title: 'Unbekannt', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER, meta: {}, res: obj.res, aux: obj.aux, refID: obj.id }
     };
     addCdsObject(obj, addContainerTree([chain.imageRoot, chain.allImages]));
     var date = obj.meta[M_DATE];
@@ -667,13 +667,22 @@ function addImage(obj) {
 
 // doc-add-trailer-begin
 function addTrailer(obj) {
-    var chain;
+    const chain = {
+        trailerRoot: { title: 'Online Services', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+        appleTrailers: { title: 'Apple Trailers', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+        allTrailers: { title: 'All Trailers', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
 
+        allGenres: { title: 'Genres', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+        genre: { title: 'Unknown', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_GENRE, meta: {} },
+
+        relDate: { title: 'Release Date', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+        postDate: { title: 'Post Date', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER, meta: {}},
+        date: { title: 'Unbekannt', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER, meta: {}}
+    };
     // First we will add the item to the 'All Trailers' container, so
     // that we get a nice long playlist:
 
-    chain = ['Online Services', 'Apple Trailers', 'All Trailers'];
-    addCdsObject(obj, createContainerChain(chain));
+    addCdsObject(obj, addContainerTree([chain.trailerRoot , chain.appleTrailers, chain.allTrailers]));
 
     // We also want to sort the trailers by genre, however we need to
     // take some extra care here: the genre property here is a comma
@@ -689,8 +698,9 @@ function addTrailer(obj) {
 
         genres = genre.split(', ');
         for (var i = 0; i < genres.length; i++) {
-            chain = ['Online Services', 'Apple Trailers', 'Genres', genres[i]];
-            addCdsObject(obj, createContainerChain(chain));
+            chain.genre.title = genres[i];
+            chain.genre.meta[M_GENRE] = genres[i];
+            addCdsObject(obj, addContainerTree([chain.trailerRoot , chain.appleTrailers, chain.allGenres, chain.genre]));
         }
     }
 
@@ -700,8 +710,9 @@ function addTrailer(obj) {
 
     var reldate = obj.meta[M_DATE];
     if ((reldate) && (reldate.length >= 7)) {
-        chain = ['Online Services', 'Apple Trailers', 'Release Date', reldate.slice(0, 7)];
-        addCdsObject(obj, createContainerChain(chain));
+        chain.date.title = reldate.slice(0, 7);
+        chain.date.meta[M_DATE] = reldate.slice(0, 7);
+        addCdsObject(obj, addContainerTree([chain.trailerRoot , chain.appleTrailers, chain.relDate, chain.date]));
     }
 
     // We also want to group the trailers by the date when they were
@@ -711,8 +722,9 @@ function addTrailer(obj) {
 
     var postdate = obj.aux[APPLE_TRAILERS_AUXDATA_POST_DATE];
     if ((postdate) && (postdate.length >= 7)) {
-        chain = ['Online Services', 'Apple Trailers', 'Post Date', postdate.slice(0, 7)];
-        addCdsObject(obj, createContainerChain(chain));
+        chain.date.title = postdate.slice(0, 7);
+        chain.date.meta[M_DATE] = postdate.slice(0, 7);
+        addCdsObject(obj, addContainerTree([chain.trailerRoot , chain.appleTrailers, chain.postDate, chain.date]));
     }
 }
 // doc-add-trailer-end
@@ -748,7 +760,7 @@ function addPlaylistItem(playlist_title, location, title, playlistChain, order, 
 
         // Your item will be added to the container named by the playlist
         // that you are currently parsing.
-        addCdsObject(exturl, playlistChain,  UPNP_CLASS_PLAYLIST_CONTAINER);
+        addCdsObject(exturl, playlistChain, UPNP_CLASS_PLAYLIST_CONTAINER);
     } else {
         if (location.substr(0,1) !== '/') {
             location = playlistLocation + location;
@@ -764,7 +776,7 @@ function addPlaylistItem(playlist_title, location, title, playlistChain, order, 
         item.playlistOrder = (order ? order : playlistOrder++);
         item.title = item.meta[M_TITLE];
 
-        addCdsObject(item, playlistChain,  UPNP_CLASS_PLAYLIST_CONTAINER);
+        addCdsObject(item, playlistChain, UPNP_CLASS_PLAYLIST_CONTAINER);
     }
     return playlistOrder;
 }
