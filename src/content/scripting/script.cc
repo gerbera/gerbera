@@ -171,7 +171,7 @@ Script::Script(std::shared_ptr<ContentManager> content,
     /* initialize contstants */
     for (const auto& [field, sym] : ot_names) {
         duk_push_int(ctx, field);
-        duk_put_global_string(ctx, sym);
+        duk_put_global_string(ctx, sym.data());
     }
 #ifdef ONLINE_SERVICES
     duk_push_int(ctx, int(OS_None));
@@ -209,26 +209,26 @@ Script::Script(std::shared_ptr<ContentManager> content,
 #endif //ONLINE_SERVICES
 
     for (const auto& [field, sym] : mt_keys) {
-        duk_push_string(ctx, sym);
+        duk_push_string(ctx, sym.data());
         for (const auto& [f, s] : mt_names) {
             if (f == field) {
-                duk_put_global_string(ctx, s);
+                duk_put_global_string(ctx, s.data());
             }
         }
     }
 
     for (const auto& [field, sym] : res_keys) {
-        duk_push_string(ctx, sym);
+        duk_push_string(ctx, sym.data());
         for (const auto& [f, s] : res_names) {
             if (f == field) {
-                duk_put_global_string(ctx, s);
+                duk_put_global_string(ctx, s.data());
             }
         }
     }
 
     for (const auto& [field, sym] : upnp_classes) {
-        duk_push_string(ctx, field);
-        duk_put_global_string(ctx, sym);
+        duk_push_string(ctx, field.data());
+        duk_put_global_string(ctx, sym.data());
     }
 
     duk_push_object(ctx); // config
@@ -470,7 +470,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         duk_to_object(ctx, -1);
         // only metadata enumerated in mt_keys is allowed
         for (const auto& [sym, upnp] : mt_keys) {
-            val = getProperty(upnp);
+            val = getProperty(upnp.data());
             if (!val.empty()) {
                 if (sym == M_TRACKNUMBER) {
                     int j = stoiString(val, 0);
@@ -525,7 +525,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
             for (const auto& res : obj->getResources()) {
                 // only attribute enumerated in res_keys is allowed
                 for (const auto& [key, upnp] : res_keys) {
-                    val = getProperty(resCount == 0 ? upnp : fmt::format("{}-{}", resCount, upnp));
+                    val = getProperty(resCount == 0 ? std::string(upnp) : fmt::format("{}-{}", resCount, upnp));
                     if (!val.empty()) {
                         val = sc->convert(val);
                         res->addAttribute(key, val);

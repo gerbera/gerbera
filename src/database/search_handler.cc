@@ -31,10 +31,11 @@
 #include <stack>
 
 #include "config/config_manager.h"
+#include "contrib/eternal.hpp"
 #include "database/database.h"
 #include "util/tools.h"
 
-static const std::unordered_map<std::string_view, TokenType> tokenTypes {
+static constexpr auto tokenTypes = mapbox::eternal::map<std::string_view, TokenType>({
     { "(", TokenType::LPAREN },
     { ")", TokenType::RPAREN },
     { "*", TokenType::ASTERISK },
@@ -53,8 +54,8 @@ static const std::unordered_map<std::string_view, TokenType> tokenTypes {
     { ">", TokenType::COMPAREOP },
     { ">=", TokenType::COMPAREOP },
     { "and", TokenType::AND },
-    { "or", TokenType::OR }
-};
+    { "or", TokenType::OR },
+});
 
 static std::string aslowercase(const std::string& src)
 {

@@ -140,7 +140,7 @@ std::string MetadataHandler::getMetaFieldName(metadata_fields_t field)
 {
     for (const auto& [f, s] : mt_keys) {
         if (f == field) {
-            return s;
+            return s.data();
         }
     }
     return "unknown";
@@ -150,7 +150,7 @@ std::string MetadataHandler::getResAttrName(resource_attributes_t attr)
 {
     for (const auto& [f, s] : res_keys) {
         if (f == attr) {
-            return s;
+            return s.data();
         }
     }
     return "unknown";

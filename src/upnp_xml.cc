@@ -33,6 +33,7 @@
 
 #include "config/config_manager.h"
 #include "content/scripting/script_names.h"
+#include "contrib/eternal.hpp"
 #include "database/database.h"
 #include "metadata/metadata_handler.h"
 #include "request_handler.h"
@@ -219,7 +220,7 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription()
     else
         device.append_child("presentationURL").append_child(pugi::node_pcdata).set_value(presentationURL.c_str());
 
-    constexpr std::array<std::pair<const char*, config_option_t>, 9> deviceProperties { {
+    constexpr auto deviceProperties = mapbox::eternal::map<std::string_view, config_option_t>({
         // { "deviceType", {} },
         // { "presentationURL", {} },
         { "friendlyName", CFG_SERVER_NAME },
@@ -231,35 +232,35 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription()
         { "modelURL", CFG_SERVER_MODEL_URL },
         { "serialNumber", CFG_SERVER_SERIAL_NUMBER },
         { "UDN", CFG_SERVER_UDN },
-    } };
+    });
     for (const auto& [tag, field] : deviceProperties) {
-        device.append_child(tag).append_child(pugi::node_pcdata).set_value(config->getOption(field).c_str());
+        device.append_child(tag.data()).append_child(pugi::node_pcdata).set_value(config->getOption(field).c_str());
     }
 
     // add icons
     {
         auto iconList = device.append_child("iconList");
 
-        constexpr std::array<std::pair<const char*, const char*>, 3> iconDims { {
+        constexpr auto iconDims = mapbox::eternal::map<std::string_view, std::string_view>({
             { "120", "24" },
             { "48", "24" },
             { "32", "8" },
-        } };
+        });
 
-        constexpr std::array<std::pair<const char*, const char*>, 3> iconTypes { {
+        constexpr auto iconTypes = mapbox::eternal::map<std::string_view, std::string_view>({
             { UPNP_DESC_ICON_PNG_MIMETYPE, ".png" },
             { UPNP_DESC_ICON_BMP_MIMETYPE, ".bmp" },
             { UPNP_DESC_ICON_JPG_MIMETYPE, ".jpg" },
-        } };
+        });
 
         for (const auto& [dim, depth] : iconDims) {
             for (const auto& [mimetype, ext] : iconTypes) {
                 auto icon = iconList.append_child("icon");
-                icon.append_child("mimetype").append_child(pugi::node_pcdata).set_value(mimetype);
-                icon.append_child("width").append_child(pugi::node_pcdata).set_value(dim);
-                icon.append_child("height").append_child(pugi::node_pcdata).set_value(dim);
-                icon.append_child("depth").append_child(pugi::node_pcdata).set_value(depth);
-                std::string url = fmt::format("/icons/mt-icon{}{}", dim, ext);
+                icon.append_child("mimetype").append_child(pugi::node_pcdata).set_value(mimetype.data());
+                icon.append_child("width").append_child(pugi::node_pcdata).set_value(dim.data());
+                icon.append_child("height").append_child(pugi::node_pcdata).set_value(dim.data());
+                icon.append_child("depth").append_child(pugi::node_pcdata).set_value(depth.data());
+                std::string url = fmt::format("/icons/mt-icon{}{}", dim.data(), ext.data());
                 icon.append_child("url").append_child(pugi::node_pcdata).set_value(url.c_str());
             }
         }
@@ -276,7 +277,7 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription()
             const char* controlURL;
             const char* eventSubURL;
         };
-        constexpr std::array<ServiceInfo, 3> services { {
+        constexpr auto services = std::array<ServiceInfo, 3> { {
             // cm
             { UPNP_DESC_CM_SERVICE_TYPE, UPNP_DESC_CM_SERVICE_ID, UPNP_DESC_CM_SCPD_URL, UPNP_DESC_CM_CONTROL_URL, UPNP_DESC_CM_EVENT_URL },
             // cds
