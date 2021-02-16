@@ -129,8 +129,8 @@ void ContentManager::run()
     last_fm->run();
 #endif
 
-#ifdef HAVE_INOTIFY
     auto self = shared_from_this();
+#ifdef HAVE_INOTIFY
     inotify = std::make_unique<AutoscanInotify>(self);
 
     if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
@@ -166,7 +166,6 @@ void ContentManager::run()
 #ifdef SOPCAST
     if (config->getBoolOption(CFG_ONLINE_CONTENT_SOPCAST_ENABLED)) {
         try {
-            auto self = shared_from_this();
             auto sc = std::make_shared<SopCastService>(self);
 
             int i = config->getIntOption(CFG_ONLINE_CONTENT_SOPCAST_REFRESH);
@@ -193,7 +192,6 @@ void ContentManager::run()
 #ifdef ATRAILERS
     if (config->getBoolOption(CFG_ONLINE_CONTENT_ATRAILERS_ENABLED)) {
         try {
-            auto self = shared_from_this();
             auto at = std::make_shared<ATrailersService>(self);
 
             int i = config->getIntOption(CFG_ONLINE_CONTENT_ATRAILERS_REFRESH);

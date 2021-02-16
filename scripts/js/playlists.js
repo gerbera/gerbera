@@ -23,6 +23,7 @@
 print("Processing playlist: " + playlist.location);
 
 const playlistLocation = playlist.location.substring(0, playlist.location.lastIndexOf('/') + 1);
+
 // the function getPlaylistType is defined in common.js
 const type = getPlaylistType(playlist.mimetype);
 var playlist_title = playlist.title;
@@ -30,14 +31,22 @@ const dot_index = playlist_title.lastIndexOf('.');
 if (dot_index > 1) {
     playlist_title = playlist_title.substring(0, dot_index);
 }
-
-// the function createContainerChain is defined in common.js
-var playlistChain = createContainerChain(['Playlists', 'All Playlists', playlist_title]);
 var last_path = getLastPath(playlist.location);
+
+const chain = {
+    playlistRoot: { title: 'Playlists', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+    allPlaylists: { title: 'All Playlists', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+    allDirectories: { title: 'Directories', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+
+    title: { title: playlist_title, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_PLAYLIST_CONTAINER, meta: {}},
+    lastPath: { title: last_path, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER, meta: {}}
+};
+
+var playlistChain = addContainerTree([chain.playlistRoot, chain.allPlaylists, chain.title]);
 
 var playlistDirChain;
 if (last_path) {
-    playlistDirChain = createContainerChain(['Playlists', 'Directories', last_path, playlist_title]);
+    playlistDirChain = addContainerTree([chain.playlistRoot, chain.allDirectories, chain.lastPath, chain.title]);
 }
 
 if (type === '') {

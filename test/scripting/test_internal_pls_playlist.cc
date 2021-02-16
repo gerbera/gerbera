@@ -53,6 +53,17 @@ static duk_ret_t print(duk_context* ctx)
     return InternalUrlPLSPlaylistTest::commonScriptMock->print(msg);
 }
 
+static duk_ret_t addContainerTree(duk_context* ctx)
+{
+    map<string,string> map = {
+        { "", "0" },
+        { "/Playlists/All Playlists/Playlist Title", "42" },
+        { "/Playlists/Directories/of/Playlist Title", "43" },
+    };
+    vector<string> tree = ScriptTestFixture::addContainerTree(ctx, map);
+    return InternalUrlPLSPlaylistTest::commonScriptMock->addContainerTree(tree);
+}
+
 static duk_ret_t createContainerChain(duk_context* ctx)
 {
     vector<string> array = ScriptTestFixture::createContainerChain(ctx);
@@ -89,6 +100,11 @@ static duk_ret_t readln(duk_context* ctx)
     return InternalUrlPLSPlaylistTest::commonScriptMock->readln(line);
 }
 
+// Proxy the Duktape script with `addCdsObject`
+// global function.
+// Translates the Duktape value stack to c++
+// and uses the `CommonScriptMock` to track
+// expectations.
 static duk_ret_t addCdsObject(duk_context* ctx)
 {
     vector<string> keys = { "objectType", "location", "title", "playlistOrder" };
@@ -144,6 +160,7 @@ static duk_function_list_entry js_global_functions[] = {
     { "addCdsObject", addCdsObject, 3 },
     { "copyObject", copyObject, 1 },
     { "getCdsObject", getCdsObject, 1 },
+    { "addContainerTree", addContainerTree, 1 },
     { nullptr, nullptr, 0 },
 };
 
@@ -178,9 +195,9 @@ TEST_F(InternalUrlPLSPlaylistTest, AddsCdsObjectFromM3UPlaylistWithInternalUrlPl
     // for verification.
     EXPECT_CALL(*commonScriptMock, getPlaylistType(Eq("audio/x-scpls"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, print(Eq("Processing playlist: /location/of/playlist.pls"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Playlists", "All Playlists", "Playlist Title"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Playlists", "All Playlists", "Playlist Title"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, getLastPath(Eq("/location/of/playlist.pls"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Playlists", "Directories", "of", "Playlist Title"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Playlists", "Directories", "of", "Playlist Title"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readln(Eq("[playlist]"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readln(Eq("\n"))).Times(2).WillRepeatedly(Return(1));
     EXPECT_CALL(*commonScriptMock, readln(Eq("File1=/home/gerbera/example.mp3"))).WillOnce(Return(1));
@@ -189,8 +206,8 @@ TEST_F(InternalUrlPLSPlaylistTest, AddsCdsObjectFromM3UPlaylistWithInternalUrlPl
     EXPECT_CALL(*commonScriptMock, readln(Eq("NumberOfEntries=1"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readln(Eq("Version=2"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readln(Eq("-EOF-"))).WillOnce(Return(0));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistChain), "\\/Playlists\\/All Playlists\\/Playlist Title", "object.container.playlistContainer")).WillOnce(Return(0));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistChain), "\\/Playlists\\/Directories\\/of\\/Playlist Title", "object.container.playlistContainer")).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistChain), "42", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistChain), "43", UNDEFINED)).WillOnce(Return(0));
     EXPECT_CALL(*commonScriptMock, getCdsObject(Eq("/home/gerbera/example.mp3"))).WillRepeatedly(Return(1));
     EXPECT_CALL(*commonScriptMock, copyObject(Eq(true))).WillRepeatedly(Return(1));
 

@@ -174,7 +174,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
                 std::map<std::string, std::string> dict;
                 dict[URL_OBJECT_ID] = aa_id;
 
-                std::string url = virtualURL + RequestHandler::joinUrl({ CONTENT_MEDIA_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID, "0" });
+                url = virtualURL + RequestHandler::joinUrl({ CONTENT_MEDIA_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID, "0" });
                 result.append_child(MetadataHandler::getMetaFieldName(M_ALBUMARTURI).c_str()).append_child(pugi::node_pcdata).set_value(url.c_str());
 
             } else if (upnp_class == UPNP_CLASS_MUSIC_ALBUM) {
@@ -183,11 +183,11 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
                 if (items != nullptr) {
 
                     for (const auto& id : *items) {
-                        auto obj = database->loadObject(id);
-                        if (obj->getClass() != UPNP_CLASS_MUSIC_TRACK)
+                        auto objItem = database->loadObject(id);
+                        if (objItem->getClass() != UPNP_CLASS_MUSIC_TRACK)
                             continue;
 
-                        auto item = std::static_pointer_cast<CdsItem>(obj);
+                        auto item = std::static_pointer_cast<CdsItem>(objItem);
 
                         auto resources = item->getResources();
 
@@ -195,7 +195,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
                             [](const auto& i) { return i->isMetaResource(ID3_ALBUM_ART); });
 
                         if (artAdded) {
-                            std::string url = getArtworkUrl(item);
+                            url = getArtworkUrl(item);
                             result.append_child(MetadataHandler::getMetaFieldName(M_ALBUMARTURI).c_str()).append_child(pugi::node_pcdata).set_value(url.c_str());
                             break;
                         }
