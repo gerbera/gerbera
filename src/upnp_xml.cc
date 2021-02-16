@@ -724,6 +724,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
             auto vs = parent->append_child("sec:CaptionInfoEx");
             vs.append_child(pugi::node_pcdata).set_value((virtualURL + url).c_str());
             vs.append_attribute("sec:type") = res->getAttribute(R_TYPE).c_str();
+            vs.append_attribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO).c_str()) = protocolInfo.c_str();
             continue;
         }
 

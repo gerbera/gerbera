@@ -31,6 +31,7 @@
 #include "config/config.h"
 #include "config/directory_tweak.h"
 #include "iohandler/file_io_handler.h"
+#include "util/mime.h"
 #include "util/tools.h"
 
 MetacontentHandler::MetacontentHandler(const std::shared_ptr<Context>& context)
@@ -133,7 +134,14 @@ void FanArtHandler::fillMetadata(std::shared_ptr<CdsObject> item)
 
     if (!path.empty()) {
         auto resource = std::make_shared<CdsResource>(CH_FANART);
-        resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo("jpg"));
+        std::string type = path.extension().string().substr(1);
+
+#ifdef HAVE_MAGIC
+        std::string mimeType = mime->fileToMimeType(path);
+#else
+        std::string mimeType = fmt::format("image/{}", type);
+#endif
+        resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(mimeType));
         resource->addAttribute(R_RESOURCE_FILE, path.c_str());
         resource->addParameter(RESOURCE_CONTENT_TYPE, ID3_ALBUM_ART);
         item->addResource(resource);
@@ -191,7 +199,13 @@ void ContainerArtHandler::fillMetadata(std::shared_ptr<CdsObject> item)
 
     if (!path.empty()) {
         auto resource = std::make_shared<CdsResource>(CH_CONTAINERART);
-        resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo("jpg"));
+        std::string type = path.extension().string().substr(1);
+#ifdef HAVE_MAGIC
+        std::string mimeType = mime->fileToMimeType(path);
+#else
+        std::string mimeType = fmt::format("image/{}", type);
+#endif
+        resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(mimeType));
         resource->addAttribute(R_RESOURCE_FILE, path.c_str());
         resource->addParameter(RESOURCE_CONTENT_TYPE, ID3_ALBUM_ART);
         item->addResource(resource);
@@ -244,7 +258,16 @@ void SubtitleHandler::fillMetadata(std::shared_ptr<CdsObject> item)
     if (!path.empty()) {
         auto resource = std::make_shared<CdsResource>(CH_SUBTITLE);
         std::string type = path.extension().string().substr(1);
-        resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(type));
+#ifdef HAVE_MAGIC
+        std::string mimeType = mime->fileToMimeType(path);
+        auto pos = mimeType.find("plain");
+        if (pos != std::string::npos) {
+            mimeType = fmt::format("{}{}", mimeType.substr(0, pos), type);
+        }
+#else
+        std::string mimeType = fmt::format("text/{}", type);
+#endif
+        resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(mimeType));
         resource->addAttribute(R_RESOURCE_FILE, path.c_str());
         resource->addParameter(RESOURCE_CONTENT_TYPE, VIDEO_SUB);
         resource->addParameter("type", type);

@@ -1117,11 +1117,16 @@ void ContentManager::assignFanArt(const std::vector<int>& containerIds, const st
         for (const auto& contId : containerIds) {
             auto container = database->loadObject(contId);
 
-            MetadataHandler::createHandler(context, CH_CONTAINERART)->fillMetadata(container);
             const std::vector<std::shared_ptr<CdsResource>>& resources = container->getResources();
             auto fanart = std::find_if(resources.begin(), resources.end(), [=](const auto& res) { return res->isMetaResource(ID3_ALBUM_ART); });
+            if (fanart == resources.end()) {
+                MetadataHandler::createHandler(context, CH_CONTAINERART)->fillMetadata(container);
+                int containerChanged = INVALID_OBJECT_ID;
+                database->updateObject(container, &containerChanged);
+                fanart = std::find_if(resources.begin(), resources.end(), [=](const auto& res) { return res->isMetaResource(ID3_ALBUM_ART); });
+            }
             auto location = container->getLocation().string();
-            if (fanart != resources.end()) {
+            if (fanart != resources.end() && (*fanart)->getHandlerType() != CH_CONTAINERART) {
                 // remove stale references
                 auto fanartObjId = stoiString((*fanart)->getAttribute(R_FANART_OBJ_ID));
                 try {
