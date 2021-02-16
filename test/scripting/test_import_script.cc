@@ -67,6 +67,10 @@ static duk_ret_t addContainerTree(duk_context* ctx)
         { "/Photos/Year/2018/01", "71" },
         { "/Photos/Date/2018-01-01", "72" },
         { "/Photos/Directories/home/gerbera", "73" },
+        { "/Online Services/Apple Trailers/All Trailers", "80" },
+        { "/Online Services/Apple Trailers/Genres/Genre", "81" },
+        { "/Online Services/Apple Trailers/Release Date/2018-01", "82" },
+        { "/Online Services/Apple Trailers/Post Date/2018-01", "83" },
     };
     vector<string> tree = ScriptTestFixture::addContainerTree(ctx, map);
     return ImportScriptTest::commonScriptMock->addContainerTree(tree);
@@ -309,17 +313,17 @@ TEST_F(ImportScriptTest, AddsAppleTrailerVideoItemToCdsContainerChains)
     // for verification.
     EXPECT_CALL(*commonScriptMock, getPlaylistType(Eq("video/mpeg"))).WillOnce(Return(1));
 
-    EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Online Services", "Apple Trailers", "All Trailers"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asVideoAllVideo), "\\/Online Services\\/Apple Trailers\\/All Trailers", "undefined")).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Online Services", "Apple Trailers", "All Trailers"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asVideoAllVideo), "80", UNDEFINED)).WillOnce(Return(0));
 
-    EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Online Services", "Apple Trailers", "Genres", "Genre"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asVideoAllVideo), "\\/Online Services\\/Apple Trailers\\/Genres\\/Genre", "undefined")).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Online Services", "Apple Trailers", "Genres", "Genre"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asVideoAllVideo), "81", UNDEFINED)).WillOnce(Return(0));
 
-    EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Online Services", "Apple Trailers", "Release Date", "2018-01"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asVideoAllVideo), "\\/Online Services\\/Apple Trailers\\/Release Date\\/2018-01", "undefined")).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Online Services", "Apple Trailers", "Release Date", "2018-01"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asVideoAllVideo), "82", UNDEFINED)).WillOnce(Return(0));
 
-    EXPECT_CALL(*commonScriptMock, createContainerChain(ElementsAre("Online Services", "Apple Trailers", "Post Date", "2018-01"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asVideoAllVideo), "\\/Online Services\\/Apple Trailers\\/Post Date\\/2018-01", "undefined")).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Online Services", "Apple Trailers", "Post Date", "2018-01"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asVideoAllVideo), "83", UNDEFINED)).WillOnce(Return(0));
 
     addGlobalFunctions(ctx, js_global_functions);
     dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, online_service);
