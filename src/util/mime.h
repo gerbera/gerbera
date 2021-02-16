@@ -48,24 +48,26 @@ public:
     virtual ~Mime();
 
 #ifdef HAVE_MAGIC
-    /// \brief Extracts mimetype from a file using filemagic
-    std::string fileToMimeType(const fs::path& path, const std::string& defval = "");
-
     /// \brief Extracts mimetype from a buffer using filemagic
     std::string bufferToMimeType(const void* buffer, size_t length);
 #endif // HAVE_MAGIC
 
-    std::string extensionToMimeType(const fs::path& path);
+    std::string extensionToMimeType(const fs::path& path, const std::string& defval = "");
     std::string mimeTypeToUpnpClass(const std::string& mimeType);
+    std::string getMimeType(const fs::path& path, const std::string& defval = "");
 
 private:
     bool extension_map_case_sensitive;
+    bool ignore_unknown_extensions;
 
     std::map<std::string, std::string> extension_mimetype_map;
     std::map<std::string, std::string> mimetype_upnpclass_map;
 
 #ifdef HAVE_MAGIC
     magic_t magicCookie;
+
+    /// \brief Extracts mimetype from a file using filemagic
+    std::string fileToMimeType(const fs::path& path, const std::string& defval = "");
 #endif
 };
 

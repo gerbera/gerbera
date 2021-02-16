@@ -34,6 +34,13 @@ Mime::Mime(const std::shared_ptr<Config>& config)
     extension_mimetype_map = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
     mimetype_upnpclass_map = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST);
 
+    ignore_unknown_extensions = config->getBoolOption(CFG_IMPORT_MAPPINGS_IGNORE_UNKNOWN_EXTENSIONS);
+    if (ignore_unknown_extensions && (extension_mimetype_map.empty())) {
+        log_warning("Ignore unknown extensions set, but no mappings specified");
+        log_warning("Please review your configuration!");
+        ignore_unknown_extensions = false;
+    }
+
 #ifdef HAVE_MAGIC
     // init filemagic
     int magicFlags = config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS) ? MAGIC_MIME_TYPE | MAGIC_SYMLINK : MAGIC_MIME_TYPE;
@@ -81,7 +88,7 @@ std::string Mime::bufferToMimeType(const void* buffer, size_t length)
 }
 #endif
 
-std::string Mime::extensionToMimeType(const fs::path& path)
+std::string Mime::extensionToMimeType(const fs::path& path, const std::string& defval)
 {
     std::string extension = path.extension();
     if (!extension.empty())
@@ -90,7 +97,11 @@ std::string Mime::extensionToMimeType(const fs::path& path)
     if (!extension_map_case_sensitive)
         extension = toLower(extension);
 
-    return getValueOrDefault(extension_mimetype_map, extension);
+    std::string mimeType = getValueOrDefault(extension_mimetype_map, "");
+    if (mimeType.empty() && !ignore_unknown_extensions) {
+        mimeType = defval.empty() ? extension : defval;
+    }
+    return mimeType;
 }
 
 std::string Mime::mimeTypeToUpnpClass(const std::string& mimeType)
@@ -104,4 +115,13 @@ std::string Mime::mimeTypeToUpnpClass(const std::string& mimeType)
     if (parts.size() != 2)
         return "";
     return getValueOrDefault(mimetype_upnpclass_map, parts[0] + "/*");
+}
+
+std::string Mime::getMimeType(const fs::path& path, const std::string& defval)
+{
+#ifdef HAVE_MAGIC
+    return extensionToMimeType(path, fileToMimeType(path, defval));
+#else
+    return extensionToMimeType(path, defval);
+#endif
 }

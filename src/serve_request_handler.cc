@@ -78,11 +78,7 @@ void ServeRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
     if (S_ISREG(statbuf.st_mode)) // we have a regular file
     {
-#ifdef HAVE_MAGIC
-        std::string mimetype = mime->fileToMimeType(path, MIMETYPE_DEFAULT);
-#else
-        std::string mimetype = MIMETYPE_DEFAULT;
-#endif // HAVE_MAGIC
+        std::string mimetype = mime->getMimeType(path, MIMETYPE_DEFAULT);
 
         UpnpFileInfo_set_FileLength(info, statbuf.st_size);
         UpnpFileInfo_set_LastModified(info, statbuf.st_mtime);

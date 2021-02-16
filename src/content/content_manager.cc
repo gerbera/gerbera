@@ -90,14 +90,6 @@ ContentManager::ContentManager(const std::shared_ptr<Context>& context,
     shutdownFlag = false;
     layout_enabled = false;
 
-    ignore_unknown_extensions = config->getBoolOption(CFG_IMPORT_MAPPINGS_IGNORE_UNKNOWN_EXTENSIONS);
-    auto extension_mimetype_map = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
-    if (ignore_unknown_extensions && (extension_mimetype_map.empty())) {
-        log_warning("Ignore unknown extensions set, but no mappings specified");
-        log_warning("Please review your configuration!");
-        ignore_unknown_extensions = false;
-    }
-
     mimetype_contenttype_map = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
 
     auto config_timed_list = config->getAutoscanListOption(CFG_IMPORT_AUTOSCAN_TIMED_LIST);
@@ -1207,15 +1199,9 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::path& 
     std::shared_ptr<CdsObject> obj;
     if (S_ISREG(statbuf.st_mode) || (allow_fifo && S_ISFIFO(statbuf.st_mode))) { // item
         /* retrieve information about item and decide if it should be included */
-        std::string mimetype = mime->extensionToMimeType(path);
+        std::string mimetype = mime->getMimeType(path, MIMETYPE_DEFAULT);
         if (mimetype.empty()) {
-            if (ignore_unknown_extensions) {
-                // item should be ignored
-                return nullptr;
-            }
-#ifdef HAVE_MAGIC
-            mimetype = mime->fileToMimeType(path);
-#endif
+            return nullptr;
         }
         log_debug("Mime '{}' for file {}", mimetype, path.c_str());
 
