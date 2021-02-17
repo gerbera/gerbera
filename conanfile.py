@@ -40,7 +40,7 @@ class GerberaConan(ConanFile):
 
     requires = [
         "fmt/7.0.1",
-        "spdlog/1.7.0",
+        "spdlog/1.8.2",
         "pugixml/1.10",
         "libiconv/1.16",
         "sqlite3/3.31.1",
