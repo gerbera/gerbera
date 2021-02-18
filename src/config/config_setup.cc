@@ -841,7 +841,8 @@ std::string ConfigAutoscanSetup::getItemPath(int index, config_option_t propOpti
 {
     return index >= 0 //
         ? fmt::format("{}/{}/{}[{}]/{}", xpath, AutoscanDirectory::mapScanmode(scanMode), ConfigManager::mapConfigOption(ATTR_AUTOSCAN_DIRECTORY), index, ensureAttribute(propOption)) //
-        : fmt::format("{}/{}/{}", xpath, AutoscanDirectory::mapScanmode(scanMode), ConfigManager::mapConfigOption(ATTR_AUTOSCAN_DIRECTORY));
+        : index > -2 ? fmt::format("{}/{}/{}", xpath, AutoscanDirectory::mapScanmode(scanMode), ConfigManager::mapConfigOption(ATTR_AUTOSCAN_DIRECTORY)) //
+                     : fmt::format("{}/{}", xpath, ConfigManager::mapConfigOption(ATTR_AUTOSCAN_DIRECTORY));
 }
 
 /// \brief Creates an array of AutoscanDirectory objects from a XML nodeset.

@@ -459,18 +459,8 @@
 			"editable": true,
 			"children": [
 				{
-					"item": "/import/scripting/common-script",
-					"caption": "Common Script",
-					"editable": true
-				},
-				{
-					"item": "/import/scripting/playlist-script",
-					"caption": "Playlist Script",
-					"editable": true
-				},
-				{
-					"item": "/import/scripting/virtual-layout/import-script",
-					"caption": "Import Script",
+					"item": "/import/scripting/custom-script",
+					"caption": "Custom Script",
 					"editable": true
 				},
 				{
