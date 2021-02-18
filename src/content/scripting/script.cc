@@ -32,6 +32,8 @@
 #ifdef HAVE_JS
 #include "script.h" // API
 
+#include <fmt/chrono.h>
+
 #include "cds_objects.h"
 #include "config/config_manager.h"
 #include "config/config_setup.h"
@@ -229,7 +231,7 @@ Script::Script(std::shared_ptr<ContentManager> content,
         duk_put_global_string(ctx, sym);
     }
 
-    duk_push_object(ctx);
+    duk_push_object(ctx); // config
     for (int i = 0; i < int(CFG_MAX); i++) {
         auto scs = ConfigManager::findConfigSetup(config_option_t(i), true);
         if (scs == nullptr)
@@ -294,6 +296,36 @@ Script::Script(std::shared_ptr<ContentManager> content,
         }
         duk_put_prop_string(ctx, -2, acs->getItemPath(-1).c_str());
     }
+
+#ifdef HAVE_INOTIFY
+    constexpr auto autoscanList = std::array { CFG_IMPORT_AUTOSCAN_TIMED_LIST, CFG_IMPORT_AUTOSCAN_INOTIFY_LIST };
+#else
+    constexpr auto autoscanList = std::array { CFG_IMPORT_AUTOSCAN_TIMED_LIST };
+#endif
+    auto duk_array_autoscan = duk_push_array(ctx); // autoscan
+    std::shared_ptr<ConfigAutoscanSetup> ascs;
+    size_t total = 0;
+    for (const auto& autoscanOption : autoscanList) {
+        ascs = ConfigSetup::findConfigSetup<ConfigAutoscanSetup>(autoscanOption);
+        auto autoscan = ascs->getValue()->getAutoscanListOption();
+        for (size_t i = 0; i < autoscan->size(); i++) {
+            const auto& entry = autoscan->get(i);
+            const auto& adir = this->content->getAutoscanDirectory(entry->getLocation());
+
+            duk_push_object(ctx);
+            setProperty(ConfigSetup::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_LOCATION), adir->getLocation());
+            setProperty(ConfigSetup::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_MODE), AutoscanDirectory::mapScanmode(adir->getScanMode()));
+            setIntProperty(ConfigSetup::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_INTERVAL), adir->getInterval());
+            setIntProperty(ConfigSetup::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_RECURSIVE), adir->getRecursive());
+            setIntProperty(ConfigSetup::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES), adir->getHidden());
+            setIntProperty(ConfigSetup::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_SCANCOUNT), adir->getActiveScanCount());
+            setIntProperty(ConfigSetup::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_TASKCOUNT), adir->getTaskCount());
+            setProperty(ConfigSetup::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_LMT), fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(adir->getPreviousLMT(""))));
+
+            duk_put_prop_index(ctx, duk_array_autoscan, total++);
+        }
+    }
+    duk_put_prop_string(ctx, -2, ascs->getItemPath(-2).c_str()); // autoscan
 
     duk_put_global_string(ctx, "config");
 

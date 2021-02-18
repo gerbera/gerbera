@@ -484,6 +484,11 @@
 					"editable": true
 				},
 				{
+					"item": "/import/scripting/custom-script",
+					"caption": "Custom Script",
+					"editable": true
+				},
+				{
 					"item": "/import/scripting/playlist-script",
 					"caption": "Playlist Script",
 					"editable": true
