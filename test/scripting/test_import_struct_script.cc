@@ -22,7 +22,8 @@ public:
     ImportStructuredScriptTest()
     {
         commonScriptMock.reset(new ::testing::NiceMock<CommonScriptMock>());
-        scriptName = "import_structured.js";
+        scriptName = "import.js";
+        audioLayout = "Structured";
     };
 
     virtual ~ImportStructuredScriptTest()

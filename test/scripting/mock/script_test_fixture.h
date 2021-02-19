@@ -125,6 +125,8 @@ public:
     // Script file name under test
     // System defaults to known project path `/scripts/js/<scriptName>`
     string scriptName;
+    // Select audio layout to test
+    string audioLayout;
 
     // The Duktape Context
     duk_context* ctx;

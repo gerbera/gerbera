@@ -192,6 +192,22 @@ function abcbox(stringtobox, boxtype, divchar)
     return output;
 }
 
+function mapGenre(genre) {
+    const genreConfig = config['/import/scripting/virtual-layout/genre-map/genre'];
+    if (genreConfig) {
+        const genreNames = Object.getOwnPropertyNames(genreConfig);
+        for (var idx = 0; idx < genreNames.length; idx++) {
+            var re = new RegExp('(' + genreNames[idx] + ')', 'i');
+            var match = re.exec(genre);
+            if (match) {
+                genre = genreConfig[genreNames[idx]];
+                break;
+            }
+        }
+    }
+    return genre;
+}
+
 // doc-add-audio-begin
 function addAudio(obj) {
     var desc = '';
@@ -248,6 +264,7 @@ function addAudio(obj) {
     if (!genre) {
         genre = 'Unknown';
     } else {
+        genre = mapGenre(genre);
         desc = desc + ', ' + genre;
     }
 
@@ -435,6 +452,7 @@ function addAudioStructured(obj) {
     if (!genre) {
         genre = 'Unknown';
     } else {
+        genre = mapGenre(genre);
         desc = desc + ', ' + genre;
     }
 

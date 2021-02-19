@@ -36,9 +36,20 @@ if (getPlaylistType(orig.mimetype) === '') {
     } else if (orig.mimetype === 'application/ogg') {
         mime = (orig.theora === 1) ? 'video' : 'audio';
     }
+    var audioLayout = config['/import/scripting/virtual-layout/attribute::audio-layout'];
+    if (!audioLayout) {
+        audioLayout = 'Default';
+    }
     switch (mime) {
         case "audio":
-            addAudio(obj);
+            switch (audioLayout) {
+            case 'Structured':
+                addAudioStructured(obj);
+                break;
+            default:
+                addAudio(obj);
+                break;
+            }
             break;
         case "video":
             addVideo(obj);
