@@ -248,6 +248,8 @@ Script::Script(std::shared_ptr<ContentManager> content,
         CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST,
         CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST,
         CFG_IMPORT_LAYOUT_MAPPING,
+        CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT_OPTIONS,
+        CFG_IMPORT_SCRIPTING_IMPORT_GENRE_MAP,
     };
 
     for (const auto& dict_option : dict_options) {

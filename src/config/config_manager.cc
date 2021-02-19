@@ -333,6 +333,24 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = 
     std::make_shared<ConfigPathSetup>(CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT,
         "/import/scripting/virtual-layout/import-script", "config-import.html#scripting",
         "", true),
+    std::make_shared<ConfigStringSetup>(CFG_IMPORT_SCRIPTING_IMPORT_LAYOUT_AUDIO,
+        "/import/scripting/virtual-layout/attribute::audio-layout", "config-import.html#scripting",
+        ""),
+    std::make_shared<ConfigStringSetup>(CFG_IMPORT_SCRIPTING_IMPORT_LAYOUT_VIDEO,
+        "/import/scripting/virtual-layout/attribute::video-layout", "config-import.html#scripting",
+        ""),
+    std::make_shared<ConfigStringSetup>(CFG_IMPORT_SCRIPTING_IMPORT_LAYOUT_IMAGE,
+        "/import/scripting/virtual-layout/attribute::image-layout", "config-import.html#scripting",
+        ""),
+    std::make_shared<ConfigStringSetup>(CFG_IMPORT_SCRIPTING_IMPORT_LAYOUT_TRAILER,
+        "/import/scripting/virtual-layout/attribute::trailer-layout", "config-import.html#scripting",
+        ""),
+    std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT_OPTIONS,
+        "/import/scripting/virtual-layout/import-script/script-options", "config-import.html#layout",
+        ATTR_IMPORT_LAYOUT_SCRIPT_OPTION, ATTR_IMPORT_LAYOUT_SCRIPT_OPTION_NAME, ATTR_IMPORT_LAYOUT_SCRIPT_OPTION_VALUE),
+    std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_SCRIPTING_IMPORT_GENRE_MAP,
+        "/import/scripting/virtual-layout/genre-map", "config-import.html#layout",
+        ATTR_IMPORT_LAYOUT_GENRE, ATTR_IMPORT_LAYOUT_MAPPING_FROM, ATTR_IMPORT_LAYOUT_MAPPING_TO),
 #endif // JS
     std::make_shared<ConfigStringSetup>(CFG_IMPORT_FILESYSTEM_CHARSET,
         "/import/filesystem-charset", "config-import.html#filesystem-charset",
@@ -725,6 +743,10 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = 
         "transcode", ""),
     std::make_shared<ConfigSetup>(ATTR_IMPORT_LAYOUT_MAPPING_PATH,
         "path", ""),
+    std::make_shared<ConfigSetup>(ATTR_IMPORT_LAYOUT_SCRIPT_OPTION,
+        "script-option", ""),
+    std::make_shared<ConfigSetup>(ATTR_IMPORT_LAYOUT_GENRE,
+        "genre", ""),
 };
 
 const std::map<config_option_t, std::vector<config_option_t>> ConfigManager::parentOptions = {
@@ -779,8 +801,10 @@ const std::map<config_option_t, std::vector<config_option_t>> ConfigManager::par
 
     { ATTR_IMPORT_RESOURCES_NAME, { CFG_IMPORT_RESOURCES_FANART_FILE_LIST, CFG_IMPORT_RESOURCES_CONTAINERART_FILE_LIST, CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST, CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST } },
 
-    { ATTR_IMPORT_LAYOUT_MAPPING_FROM, { CFG_IMPORT_LAYOUT_MAPPING } },
-    { ATTR_IMPORT_LAYOUT_MAPPING_TO, { CFG_IMPORT_LAYOUT_MAPPING } },
+    { ATTR_IMPORT_LAYOUT_MAPPING_FROM, { CFG_IMPORT_LAYOUT_MAPPING, CFG_IMPORT_SCRIPTING_IMPORT_GENRE_MAP } },
+    { ATTR_IMPORT_LAYOUT_MAPPING_TO, { CFG_IMPORT_LAYOUT_MAPPING, CFG_IMPORT_SCRIPTING_IMPORT_GENRE_MAP } },
+    { ATTR_IMPORT_LAYOUT_SCRIPT_OPTION_NAME, { CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT_OPTIONS } },
+    { ATTR_IMPORT_LAYOUT_SCRIPT_OPTION_VALUE, { CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT_OPTIONS } },
 };
 
 const char* ConfigManager::mapConfigOption(config_option_t option)
@@ -1121,6 +1145,12 @@ void ConfigManager::load(const fs::path& userHome)
     args.clear();
 
     setOption(root, CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS);
+    setOption(root, CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT_OPTIONS);
+    setOption(root, CFG_IMPORT_SCRIPTING_IMPORT_GENRE_MAP);
+    setOption(root, CFG_IMPORT_SCRIPTING_IMPORT_LAYOUT_AUDIO);
+    setOption(root, CFG_IMPORT_SCRIPTING_IMPORT_LAYOUT_VIDEO);
+    setOption(root, CFG_IMPORT_SCRIPTING_IMPORT_LAYOUT_IMAGE);
+    setOption(root, CFG_IMPORT_SCRIPTING_IMPORT_LAYOUT_TRAILER);
 #endif
 
     auto layoutType = setOption(root, CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE)->getOption();

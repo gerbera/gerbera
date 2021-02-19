@@ -522,6 +522,42 @@
 					"item": "/import/playlist-charset",
 					"caption": "Playlist Charset",
 					"editable": false
+				},
+				{
+					"item": "/import/scripting/virtual-layout/import-script/script-option",
+					"caption": "Script Options",
+					"type": "List",
+					"editable": true,
+					"children": [
+						{
+							"item": "/import/scripting/virtual-layout/import-script/script-option/option/attribute::name",
+							"caption": "Name",
+							"editable": true
+						},
+						{
+							"item": "/import/scripting/virtual-layout/import-script/script-option/option/attribute::value",
+							"caption": "Value",
+							"editable": true
+						}
+					]
+				},
+				{
+					"item": "/import/scripting/virtual-layout/genre-map/genre",
+					"caption": "Genre Map",
+					"type": "List",
+					"editable": true,
+					"children": [
+						{
+							"item": "/import/scripting/virtual-layout/genre-map/genre/attribute::from",
+							"caption": "Name",
+							"editable": true
+						},
+						{
+							"item": "/import/scripting/virtual-layout/genre-map/genre/attribute::to",
+							"caption": "Value",
+							"editable": true
+						}
+					]
 				}
 			]
 		},

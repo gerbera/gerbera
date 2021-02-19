@@ -154,6 +154,11 @@ void ScriptTestFixture::addGlobalFunctions(duk_context* ctx, const duk_function_
         duk_put_global_string(ctx, sym);
     }
 
+    duk_push_object(ctx); // config
+    duk_push_string(ctx, audioLayout.c_str());
+    duk_put_prop_string(ctx, -2, "/import/scripting/virtual-layout/attribute::audio-layout");
+    duk_put_global_string(ctx, "config");
+
     duk_push_int(ctx, 0);
     duk_put_global_string(ctx, "ONLINE_SERVICE_NONE");
     duk_push_int(ctx, 1);
