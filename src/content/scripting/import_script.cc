@@ -33,6 +33,7 @@
 #include "import_script.h" // API
 
 #include "config/config_manager.h"
+#include "content/content_manager.h"
 #include "js_functions.h"
 
 ImportScript::ImportScript(std::shared_ptr<ContentManager> content,
@@ -56,15 +57,21 @@ void ImportScript::processCdsObject(const std::shared_ptr<CdsObject>& obj, const
         duk_put_global_string(ctx, "orig");
         duk_push_string(ctx, scriptpath.c_str());
         duk_put_global_string(ctx, "object_script_path");
+        if (!scriptpath.empty()) {
+            duk_push_string(ctx, fmt::format("{}", content->getAutoscanDirectory(scriptpath)->getScanID()).c_str());
+            duk_put_global_string(ctx, "object_autoscan_id");
+        }
         execute();
         duk_push_global_object(ctx);
         duk_del_prop_string(ctx, -1, "orig");
         duk_del_prop_string(ctx, -1, "object_script_path");
+        duk_del_prop_string(ctx, -1, "object_autoscan_id");
         duk_pop(ctx);
     } catch (const std::runtime_error& ex) {
         duk_push_global_object(ctx);
         duk_del_prop_string(ctx, -1, "orig");
         duk_del_prop_string(ctx, -1, "object_script_path");
+        duk_del_prop_string(ctx, -1, "object_autoscan_id");
         processed = nullptr;
         throw ex;
     }
