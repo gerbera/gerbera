@@ -304,9 +304,8 @@ Script::Script(std::shared_ptr<ContentManager> content,
 #else
     constexpr auto autoscanList = std::array { CFG_IMPORT_AUTOSCAN_TIMED_LIST };
 #endif
-    auto duk_array_autoscan = duk_push_array(ctx); // autoscan
+    duk_push_object(ctx); // autoscan
     std::shared_ptr<ConfigAutoscanSetup> ascs;
-    size_t total = 0;
     for (const auto& autoscanOption : autoscanList) {
         ascs = ConfigSetup::findConfigSetup<ConfigAutoscanSetup>(autoscanOption);
         auto autoscan = ascs->getValue()->getAutoscanListOption();
@@ -324,7 +323,7 @@ Script::Script(std::shared_ptr<ContentManager> content,
             setIntProperty(ConfigSetup::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_TASKCOUNT), adir->getTaskCount());
             setProperty(ConfigSetup::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_LMT), fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(adir->getPreviousLMT(""))));
 
-            duk_put_prop_index(ctx, duk_array_autoscan, total++);
+            duk_put_prop_string(ctx, -2, fmt::format("{}", adir->getScanID()).c_str());
         }
     }
     duk_put_prop_string(ctx, -2, ascs->getItemPath(-2).c_str()); // autoscan
