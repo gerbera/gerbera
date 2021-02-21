@@ -123,6 +123,79 @@ Below are the available scripting options:
 
         Points to the script invoked upon media import. For more details read about :ref:`scripting <scripting>`
 
+        ::
+
+            <script-options></script-options>
+
+        * Optional
+
+        Contains options to pass into scripts. All values are available in scripts as
+        `config['/import/scripting/virtual-layout/script-options/script-option'].test`.
+        For more details see :ref:`scripting <scripting>`
+
+
+        **Child tags:**
+
+            ::
+
+                <script-option name="test" value="42"/>
+
+            * Optional
+
+            Set option `value` for option `name`
+
+                ::
+
+                    name="..."
+
+                * Required
+
+                Name of the option.
+
+                ::
+
+                    to="..."
+
+                * Required
+
+                Value of the option.
+
+        ::
+
+            <genre-map></genre-map>
+
+        * Optional
+
+        Define mapping of genres to other text.
+
+
+        **Child tags:**
+
+            ::
+
+                <genre from="Disco" to="Pop"/>
+
+            * Optional
+
+            Set option `value` for option `name`
+
+                ::
+
+                    from="..."
+
+                * Required
+
+                Original genre value. Can be a regular expression.
+
+                ::
+
+                    to="..."
+
+                * Required
+
+                Target genre value.
+
+
 ``common-script``
 ~~~~~~~~~~~~~~~~~
 

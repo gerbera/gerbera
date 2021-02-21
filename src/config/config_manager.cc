@@ -346,7 +346,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = 
         "/import/scripting/virtual-layout/attribute::trailer-layout", "config-import.html#scripting",
         ""),
     std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT_OPTIONS,
-        "/import/scripting/virtual-layout/import-script/script-options", "config-import.html#layout",
+        "/import/scripting/virtual-layout/script-options", "config-import.html#layout",
         ATTR_IMPORT_LAYOUT_SCRIPT_OPTION, ATTR_IMPORT_LAYOUT_SCRIPT_OPTION_NAME, ATTR_IMPORT_LAYOUT_SCRIPT_OPTION_VALUE),
     std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_SCRIPTING_IMPORT_GENRE_MAP,
         "/import/scripting/virtual-layout/genre-map", "config-import.html#layout",
