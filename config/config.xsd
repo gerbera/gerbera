@@ -335,6 +335,8 @@
         <xs:complexType>
             <xs:sequence>
                 <xs:element ref="import-script" minOccurs="0"/>
+                <xs:element ref="script-options" minOccurs="0"/>
+                <xs:element ref="genre-map" minOccurs="0"/>
             </xs:sequence>
             <xs:attribute name="type" default="builtin">
                 <xs:simpleType>
@@ -345,10 +347,44 @@
                     </xs:restriction>
                 </xs:simpleType>
             </xs:attribute>
+            <xs:attribute name="audio-layout" type="string"/>
+            <xs:attribute name="video-layout" type="string"/>
+            <xs:attribute name="image-layout" type="string"/>
+            <xs:attribute name="trailer-layout" type="string"/>
         </xs:complexType>
     </xs:element>
 
     <xs:element name="import-script" type="xs:string"/>
+
+    <xs:element name="script-options">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="script-option" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="script-option">
+        <xs:complexType>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="value" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="genre-map">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="genre" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="genre">
+        <xs:complexType>
+            <xs:attribute name="from" type="xs:string" use="required"/>
+            <xs:attribute name="to" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
 
     <xs:element name="filesystem-charset" type="xs:string"/>
 

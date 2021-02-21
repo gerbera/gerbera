@@ -343,14 +343,15 @@ Configuration
 -------------
 
 The configuration from `config.xml` and values changed via web UI are available in the global dictionary `config`. The key in the dictionary
-is the xpath as shown in brackets in the web UI. Array items can be accessed via index, Dictionaries with the key. Complex entries like autoscan
-and transcoding are not available. Example:
+is the xpath as shown in brackets in the web UI. Array items can be accessed via index, Dictionaries with the key. Complex entries like
+transcoding are not available. The autoscan entry corresponding to the active object is stored in `object_autoscan_id`. Examples:
 
     .. code-block:: js
 
         print(config['/server/name']);
         print(config['/import/library-options/id3/auxdata/add-data'][0]);
         print(config['/import/layout/path']['Directories']);
+        print(config['/import/autoscan/directory'][object_autoscan_id].location);
 
 
 Constants
@@ -546,6 +547,30 @@ They can be used by the import and by the playlist script.
             return path;
         }
 
+.. js:function:: mapGenre(genre)
+
+    Map value of the genre in virtual layout
+
+    :param string: Source value of the genre
+    :returns: string - Modified value of the genre
+
+    .. code-block:: js
+
+        function mapGenre(genre) {
+            const genreConfig = config['/import/scripting/virtual-layout/genre-map/genre'];
+            if (genreConfig) {
+                const genreNames = Object.getOwnPropertyNames(genreConfig);
+                for (var idx = 0; idx < genreNames.length; idx++) {
+                    var re = new RegExp('(' + genreNames[idx] + ')', 'i');
+                    var match = re.exec(genre);
+                    if (match) {
+                        genre = genreConfig[genreNames[idx]];
+                        break;
+                    }
+                }
+            }
+            return genre;
+        }
 
 .. js:function:: getYear(date)
 
