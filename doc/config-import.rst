@@ -92,7 +92,7 @@ Below are the available scripting options:
 
     ::
 
-        <virtual-layout type="builtin">
+        <virtual-layout type="builtin" audio-layout="Default">
 
     * Optional
 
@@ -111,6 +111,22 @@ Below are the available scripting options:
         -  **builtin**: a default layout will be created by the server
         -  **js**: a user customizable javascript will be used (Gerbera must be compiled with js support)
         -  **disabled**: only PC-Directory structure will be created, i.e. no virtual layout
+        ::
+
+            audio-layout="Default|Structured"
+            video-layout="Default"
+            image-layout="Default"
+            trailer-layout="Default"
+
+        * Optional
+        * Default: **Default**
+
+        Specifies the virtual layout to be created:
+
+        -  **Default**: `addAudio` is used to create the virtual layout
+        -  **Structured**: `addAudioStructured` is used to create the virtual layout
+
+        `video-layout`, `image-layout` and `trailer-layout` are reserved for future use.
 
         The virtual layout can be adjusted using an import script which is defined as follows:
 
@@ -129,7 +145,7 @@ Below are the available scripting options:
 
         * Optional
 
-        Contains options to pass into scripts. All values are available in scripts as
+        Contains options to pass into scripts. All values are available in scripts as e.g.
         `config['/import/scripting/virtual-layout/script-options/script-option'].test`.
         For more details see :ref:`scripting <scripting>`
 
@@ -177,7 +193,7 @@ Below are the available scripting options:
 
             * Optional
 
-            Set option `value` for option `name`
+            Replace genre `from` by genre `to`.
 
                 ::
 
