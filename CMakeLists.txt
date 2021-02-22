@@ -356,7 +356,7 @@ else()
     target_link_libraries(libgerbera PUBLIC pupnp::pupnp)
 endif()
 
-find_package(fmt REQUIRED)
+find_package(fmt 5.3 REQUIRED)
 target_link_libraries(libgerbera PUBLIC fmt::fmt)
 
 find_package(spdlog REQUIRED)
