@@ -32,6 +32,7 @@
 #ifndef __BUILTIN_LAYOUT_H__
 #define __BUILTIN_LAYOUT_H__
 
+#include <map>
 #include <memory>
 
 #include "layout.h"
@@ -58,13 +59,14 @@ protected:
     void addVideo(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath);
     void addImage(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath);
     void addAudio(const std::shared_ptr<CdsObject>& obj);
+    std::string mapGenre(const std::string& genre);
 #ifdef SOPCAST
     void addSopCast(const std::shared_ptr<CdsObject>& obj);
 #endif
 #ifdef ATRAILERS
     void addATrailers(const std::shared_ptr<CdsObject>& obj);
 #endif
-
+    std::map<std::string, std::string> genreMap;
 #ifdef ENABLE_PROFILING
     bool profiling_initialized;
     profiling_t layout_profiling;

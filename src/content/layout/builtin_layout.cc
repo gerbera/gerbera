@@ -31,6 +31,8 @@
 
 #include "builtin_layout.h" // API
 
+#include <regex>
+
 #include "config/config_manager.h"
 #include "content/content_manager.h"
 #include "metadata/metadata_handler.h"
@@ -192,10 +194,12 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj)
     meta[MetadataHandler::getMetaFieldName(M_UPNP_DATE)] = albumDate;
 
     std::string genre = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_GENRE));
-    if (!genre.empty())
+    if (!genre.empty()) {
+        genre = mapGenre(genre);
         desc = desc + ", " + genre;
-    else
+    } else {
         genre = "Unknown";
+    }
 
     std::string description = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_DESCRIPTION));
     if (description.empty()) {
@@ -328,6 +332,7 @@ void BuiltinLayout::addATrailers(const std::shared_ptr<CdsObject>& obj)
     auto genreAr = splitString(temp, ',');
     for (auto& genre : genreAr) {
         genre = trimString(genre);
+        genre = mapGenre(genre);
         if (genre.empty())
             continue;
 
@@ -352,9 +357,20 @@ void BuiltinLayout::addATrailers(const std::shared_ptr<CdsObject>& obj)
 BuiltinLayout::BuiltinLayout(std::shared_ptr<ContentManager> content)
     : Layout(std::move(content))
 {
+    genreMap = config->getDictionaryOption(CFG_IMPORT_SCRIPTING_IMPORT_GENRE_MAP);
 #ifdef ENABLE_PROFILING
     PROF_INIT_GLOBAL(layout_profiling, "fallback layout");
 #endif
+}
+
+std::string BuiltinLayout::mapGenre(const std::string& genre)
+{
+    for (const auto& [from, to] : genreMap) {
+        if (std::regex_match(genre, std::regex(from, std::regex::ECMAScript | std::regex::icase))) {
+            return std::regex_replace(genre, std::regex(from, std::regex::ECMAScript | std::regex::icase), to);
+        }
+    }
+    return genre;
 }
 
 void BuiltinLayout::processCdsObject(std::shared_ptr<CdsObject> obj, fs::path rootpath)
