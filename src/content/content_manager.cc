@@ -1300,7 +1300,9 @@ void ContentManager::destroyLayout()
 void ContentManager::reloadLayout()
 {
     destroyLayout();
+    destroyJS();
     initLayout();
+    initJS();
 }
 
 void ContentManager::threadProc()
@@ -1696,12 +1698,14 @@ void ContentManager::setAutoscanDirectory(const std::shared_ptr<AutoscanDirector
         database->addAutoscanDirectory(dir);
         if (dir->getScanMode() == ScanMode::Timed) {
             autoscan_timed->add(dir);
+            reloadLayout();
             timerNotify(dir->getTimerParameter());
         }
 #ifdef HAVE_INOTIFY
         if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
             if (dir->getScanMode() == ScanMode::INotify) {
                 autoscan_inotify->add(dir);
+                reloadLayout();
                 inotify->monitor(dir);
             }
         }
