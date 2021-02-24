@@ -35,6 +35,8 @@
 
 #include "config/config_manager.h"
 
+#define DB_BACKUP_FORMAT "{}.backup"
+
 // updates 1->2
 #define SQLITE3_UPDATE_1_2_1 "DROP INDEX mt_autoscan_obj_id"
 #define SQLITE3_UPDATE_1_2_2 "CREATE UNIQUE INDEX mt_autoscan_obj_id ON mt_autoscan(obj_id)"
@@ -124,6 +126,7 @@ Sqlite3Database::Sqlite3Database(std::shared_ptr<Config> config, std::shared_ptr
     table_quote_end = '"';
     dirty = false;
     dbInitDone = false;
+    hasBackupTimer = false;
 }
 
 void Sqlite3Database::init()
@@ -163,14 +166,27 @@ void Sqlite3Database::init()
     if (!startupError.empty())
         throw DatabaseException("", startupError);
 
+    // try to detect already active database client and terminate before doing any harm
+    try {
+        _exec("PRAGMA locking_mode = EXCLUSIVE");
+        _exec("PRAGMA foreign_keys = ON");
+        int synchronousOption = config->getIntOption(CFG_SERVER_STORAGE_SQLITE_SYNCHRONOUS);
+        std::ostringstream buf;
+        buf << "PRAGMA synchronous = " << synchronousOption;
+        SQLDatabase::exec(buf);
+    } catch (const std::runtime_error& e) {
+        shutdown();
+        throw_std_runtime_error("Sqlite3Database.init: could not open '{}' exclusively", dbFilePath);
+    }
+
     std::string dbVersion;
-    std::string dbFilePathbackup = dbFilePath + ".backup";
+    std::string dbFilePathbackup = fmt::format(DB_BACKUP_FORMAT, dbFilePath);
     try {
         dbVersion = getInternalSetting("db_version");
     } catch (const std::runtime_error& e) {
         log_warning("Sqlite3 database seems to be corrupt or doesn't exist yet.");
         // database seems to be corrupt or nonexistent
-        if (config->getBoolOption(CFG_SERVER_STORAGE_SQLITE_RESTORE)) {
+        if (config->getBoolOption(CFG_SERVER_STORAGE_SQLITE_RESTORE) && sqliteStatus == SQLITE_OK) {
             // try to restore database
 
             // checking for backup file
@@ -211,13 +227,6 @@ void Sqlite3Database::init()
     }
 
     try {
-        _exec("PRAGMA locking_mode = EXCLUSIVE");
-        _exec("PRAGMA foreign_keys = ON");
-        int synchronousOption = config->getIntOption(CFG_SERVER_STORAGE_SQLITE_SYNCHRONOUS);
-        std::ostringstream buf;
-        buf << "PRAGMA synchronous = " << synchronousOption;
-        SQLDatabase::exec(buf);
-
         log_debug("db_version: {}", dbVersion.c_str());
 
         /* --- database upgrades --- */
@@ -292,6 +301,7 @@ void Sqlite3Database::init()
         if (config->getBoolOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED)) {
             int backupInterval = config->getIntOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_INTERVAL);
             timer->addTimerSubscriber(this, backupInterval, nullptr);
+            hasBackupTimer = true;
 
             // do a backup now
             auto btask = std::make_shared<SLBackupTask>(config, false);
@@ -324,14 +334,16 @@ std::string Sqlite3Database::quote(std::string value) const
     return ret;
 }
 
-std::string Sqlite3Database::getError(const std::string& query, const std::string& error, sqlite3* db)
+std::string Sqlite3Database::getError(const std::string& query, const std::string& error, sqlite3* db, int errorCode)
 {
+    sqliteStatus = (errorCode == SQLITE_BUSY || errorCode == SQLITE_LOCKED) ? SQLITE_LOCKED : SQLITE_OK;
     return fmt::format("SQLITE3: ({}, : {}) {}\nQuery: {}\nerror: {}", sqlite3_errcode(db), sqlite3_extended_errcode(db), sqlite3_errmsg(db), query.empty() ? "unknown" : query, error.empty() ? "unknown" : error);
 }
 
 std::shared_ptr<SQLResult> Sqlite3Database::select(const char* query, int length)
 {
     try {
+        log_debug("Adding select to Queue: {}", query);
         auto stask = std::make_shared<SLSelectTask>(query);
         addTask(stask);
         stask->waitForTask();
@@ -365,8 +377,12 @@ int Sqlite3Database::exec(const char* query, int length, bool getLastInsertId)
 void* Sqlite3Database::staticThreadProc(void* arg)
 {
     auto inst = static_cast<Sqlite3Database*>(arg);
-    inst->threadProc();
-    log_debug("Sqlite3Database::staticThreadProc - exiting thread");
+    try {
+        inst->threadProc();
+        log_debug("Sqlite3Database::staticThreadProc - exiting thread");
+    } catch (const std::runtime_error& e) {
+        log_error("Sqlite3Database::staticThreadProc - aborting thread");
+    }
     pthread_exit(nullptr);
 }
 
@@ -378,7 +394,7 @@ void Sqlite3Database::threadProc()
 
     int res = sqlite3_open(dbFilePath.c_str(), &db);
     if (res != SQLITE_OK) {
-        startupError = "Sqlite3Database.init: could not open " + dbFilePath;
+        startupError = fmt::format("Sqlite3Database.init: could not open '{}'", dbFilePath);
         return;
     }
 
@@ -416,8 +432,15 @@ void Sqlite3Database::threadProc()
         task->sendSignal("Sorry, sqlite3 thread is shutting down");
     }
 
-    if (db)
-        sqlite3_close(db);
+    if (db) {
+        log_debug("Sqlite3Database::staticThreadProc - closing database");
+        if (sqlite3_close(db) == SQLITE_OK) {
+            log_debug("Sqlite3Database::staticThreadProc - closed database");
+        } else {
+            log_error("Sqlite3Database::staticThreadProc - closing database failed");
+        }
+        db = nullptr;
+    }
 }
 
 void Sqlite3Database::addTask(const std::shared_ptr<SLTask>& task, bool onlyIfDirty)
@@ -438,17 +461,19 @@ void Sqlite3Database::shutdownDriver()
 {
     log_debug("start");
     AutoLockU lock(sqliteMutex);
-    shutdownFlag = true;
-    if (config->getBoolOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED)) {
-        timer->removeTimerSubscriber(this, nullptr);
+    if (!shutdownFlag) {
+        shutdownFlag = true;
+        if (hasBackupTimer) {
+            timer->removeTimerSubscriber(this, nullptr);
+        }
+        log_debug("signalling...");
+        cond.notify_one();
+        lock.unlock();
+        log_debug("waiting for thread");
+        if (sqliteThread)
+            pthread_join(sqliteThread, nullptr);
+        sqliteThread = 0;
     }
-    log_debug("signalling...");
-    cond.notify_one();
-    lock.unlock();
-    log_debug("waiting for thread");
-    if (sqliteThread)
-        pthread_join(sqliteThread, nullptr);
-    sqliteThread = 0;
     log_debug("end");
 }
 
@@ -536,7 +561,7 @@ void SLInitTask::run(sqlite3** db, Sqlite3Database* sl)
         sqlite3_free(err);
     }
     if (ret != SQLITE_OK) {
-        throw DatabaseException("", sl->getError(sql, error, *db));
+        throw DatabaseException("", sl->getError(sql, error, *db, ret));
     }
     contamination = true;
 }
@@ -568,7 +593,7 @@ void SLSelectTask::run(sqlite3** db, Sqlite3Database* sl)
         sqlite3_free(err);
     }
     if (ret != SQLITE_OK) {
-        throw DatabaseException("", sl->getError(query, error, *db));
+        throw DatabaseException("", sl->getError(query, error, *db, ret));
     }
 
     pres->row = pres->table;
@@ -588,7 +613,7 @@ void SLExecTask::run(sqlite3** db, Sqlite3Database* sl)
 {
     log_debug("{}", query);
     char* err;
-    int res = sqlite3_exec(
+    int ret = sqlite3_exec(
         *db,
         query,
         nullptr,
@@ -599,8 +624,8 @@ void SLExecTask::run(sqlite3** db, Sqlite3Database* sl)
         error = err;
         sqlite3_free(err);
     }
-    if (res != SQLITE_OK) {
-        throw DatabaseException("", sl->getError(query, error, *db));
+    if (ret != SQLITE_OK) {
+        throw DatabaseException("", sl->getError(query, error, *db, ret));
     }
     if (getLastInsertIdFlag)
         lastInsertId = sqlite3_last_insert_rowid(*db);
@@ -622,7 +647,7 @@ void SLBackupTask::run(sqlite3** db, Sqlite3Database* sl)
         try {
             fs::copy(
                 dbFilePath,
-                dbFilePath + ".backup",
+                fmt::format(DB_BACKUP_FORMAT, dbFilePath),
                 fs::copy_options::overwrite_existing);
             log_debug("sqlite3 backup successful");
             decontamination = true;
@@ -634,12 +659,11 @@ void SLBackupTask::run(sqlite3** db, Sqlite3Database* sl)
         sqlite3_close(*db);
         try {
             fs::copy(
-                dbFilePath + ".backup",
+                fmt::format(DB_BACKUP_FORMAT, dbFilePath),
                 dbFilePath,
                 fs::copy_options::overwrite_existing);
-
         } catch (const std::runtime_error& e) {
-            throw DatabaseException(std::string { "Error while restoring sqlite3 backup: " } + e.what(), std::string { "Error while restoring sqlite3 backup: " } + e.what());
+            throw DatabaseException(fmt::format("Error while restoring sqlite3 backup: {}", e.what()), fmt::format("Error while restoring sqlite3 backup: {}", e.what()));
         }
         int res = sqlite3_open(dbFilePath.c_str(), db);
         if (res != SQLITE_OK) {
