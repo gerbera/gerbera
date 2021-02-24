@@ -116,30 +116,31 @@ enum metadata_fields_t {
     M_MAX
 };
 
-constexpr std::array<std::pair<metadata_fields_t, const char*>, M_MAX> mt_keys = { {
-    { M_TITLE, "dc:title" },
-    { M_ARTIST, "upnp:artist" },
-    { M_ALBUM, "upnp:album" },
-    { M_DATE, "dc:date" },
-    { M_UPNP_DATE, "upnp:date" },
-    { M_GENRE, "upnp:genre" },
-    { M_DESCRIPTION, "dc:description" },
-    { M_LONGDESCRIPTION, "upnp:longDescription" },
-    { M_PARTNUMBER, "upnp:episodeSeason" },
-    { M_TRACKNUMBER, "upnp:originalTrackNumber" },
-    { M_ALBUMARTURI, "upnp:albumArtURI" },
-    { M_REGION, "upnp:region" },
-    { M_AUTHOR, "upnp:author" },
-    { M_DIRECTOR, "upnp:director" },
-    { M_PUBLISHER, "dc:publisher" },
-    { M_RATING, "upnp:rating" },
-    { M_ACTOR, "upnp:actor" },
-    { M_PRODUCER, "upnp:producer" },
-    { M_ALBUMARTIST, "upnp:artist@role[AlbumArtist]" },
-    { M_COMPOSER, "upnp:composer" },
-    { M_CONDUCTOR, "upnp:conductor" },
-    { M_ORCHESTRA, "upnp:orchestra" },
-} };
+using mt = std::pair<metadata_fields_t, std::string_view>;
+constexpr auto mt_keys = std::array {
+    mt { M_TITLE, "dc:title" },
+    mt { M_ARTIST, "upnp:artist" },
+    mt { M_ALBUM, "upnp:album" },
+    mt { M_DATE, "dc:date" },
+    mt { M_UPNP_DATE, "upnp:date" },
+    mt { M_GENRE, "upnp:genre" },
+    mt { M_DESCRIPTION, "dc:description" },
+    mt { M_LONGDESCRIPTION, "upnp:longDescription" },
+    mt { M_PARTNUMBER, "upnp:episodeSeason" },
+    mt { M_TRACKNUMBER, "upnp:originalTrackNumber" },
+    mt { M_ALBUMARTURI, "upnp:albumArtURI" },
+    mt { M_REGION, "upnp:region" },
+    mt { M_AUTHOR, "upnp:author" },
+    mt { M_DIRECTOR, "upnp:director" },
+    mt { M_PUBLISHER, "dc:publisher" },
+    mt { M_RATING, "upnp:rating" },
+    mt { M_ACTOR, "upnp:actor" },
+    mt { M_PRODUCER, "upnp:producer" },
+    mt { M_ALBUMARTIST, "upnp:artist@role[AlbumArtist]" },
+    mt { M_COMPOSER, "upnp:composer" },
+    mt { M_CONDUCTOR, "upnp:conductor" },
+    mt { M_ORCHESTRA, "upnp:orchestra" },
+};
 
 // res tag attributes
 enum resource_attributes_t {
@@ -159,21 +160,22 @@ enum resource_attributes_t {
     R_MAX
 };
 
-constexpr std::array<std::pair<resource_attributes_t, const char*>, R_MAX> res_keys = { {
-    { R_SIZE, "size" },
-    { R_DURATION, "duration" },
-    { R_BITRATE, "bitrate" },
-    { R_SAMPLEFREQUENCY, "sampleFrequency" },
-    { R_NRAUDIOCHANNELS, "nrAudioChannels" },
-    { R_RESOLUTION, "resolution" },
-    { R_COLORDEPTH, "colorDepth" },
-    { R_PROTOCOLINFO, "protocolInfo" },
-    { R_RESOURCE_FILE, "resFile" },
-    { R_FANART_OBJ_ID, "fanArtObject" },
-    { R_FANART_RES_ID, "fanArtResource" },
-    { R_BITS_PER_SAMPLE, "bitsPerSample" },
-    { R_TYPE, "type" },
-} };
+using res = std::pair<resource_attributes_t, std::string_view>;
+constexpr auto res_keys = std::array {
+    res { R_SIZE, "size" },
+    res { R_DURATION, "duration" },
+    res { R_BITRATE, "bitrate" },
+    res { R_SAMPLEFREQUENCY, "sampleFrequency" },
+    res { R_NRAUDIOCHANNELS, "nrAudioChannels" },
+    res { R_RESOLUTION, "resolution" },
+    res { R_COLORDEPTH, "colorDepth" },
+    res { R_PROTOCOLINFO, "protocolInfo" },
+    res { R_RESOURCE_FILE, "resFile" },
+    res { R_FANART_OBJ_ID, "fanArtObject" },
+    res { R_FANART_RES_ID, "fanArtResource" },
+    res { R_BITS_PER_SAMPLE, "bitsPerSample" },
+    res { R_TYPE, "type" },
+};
 
 /// \brief This class is responsible for providing access to metadata information
 /// of various media.

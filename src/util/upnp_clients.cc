@@ -34,89 +34,87 @@
 #include <upnp.h>
 
 // table of supported clients (sequence of entries matters!)
-static const auto bultinClientInfo = std::array<ClientInfo, 8> {
-    {
+static const auto bultinClientInfo = std::array {
 
-        // Used for not explicitly listed clients, must be first entry
-        {
-            "Unknown",
-            ClientType::Unknown,
-            QUIRK_FLAG_NONE,
-            ClientMatchType::None,
-            "",
-        },
+    // Used for not explicitly listed clients, must be first entry
+    ClientInfo {
+        "Unknown",
+        ClientType::Unknown,
+        QUIRK_FLAG_NONE,
+        ClientMatchType::None,
+        "",
+    },
 
-        // User-Agent(discovery): Linux/3.18.91-14843133-QB28034466 UPnP/1.0 BubbleUPnP/3.4.4
-        // User-Agent(fileInfo ): BubbleUPnP UPnP/1.1
-        // User-Agent(actionReq): Android/8.0.0 UPnP/1.0 BubbleUPnP/3.4.4
-        {
-            "BubbleUPnP",
-            ClientType::BubbleUPnP,
-            QUIRK_FLAG_NONE,
-            ClientMatchType::UserAgent,
-            "BubbleUPnP",
-        },
+    // User-Agent(discovery): Linux/3.18.91-14843133-QB28034466 UPnP/1.0 BubbleUPnP/3.4.4
+    // User-Agent(fileInfo ): BubbleUPnP UPnP/1.1
+    // User-Agent(actionReq): Android/8.0.0 UPnP/1.0 BubbleUPnP/3.4.4
+    ClientInfo {
+        "BubbleUPnP",
+        ClientType::BubbleUPnP,
+        QUIRK_FLAG_NONE,
+        ClientMatchType::UserAgent,
+        "BubbleUPnP",
+    },
 
-        // This is AllShare running on a PC. We don't want to respond with Samsung capabilities, or Windows (and AllShare) might get grumpy.
-        // User-Agent(actionReq): DLNADOC/1.50 SEC_HHP_[PC]LPC001/1.0  MS-DeviceCaps/1024
-        {
-            "AllShare",
-            ClientType::SamsungAllShare,
-            QUIRK_FLAG_NONE,
-            ClientMatchType::UserAgent,
-            "SEC_HHP_[PC]",
-        },
+    // This is AllShare running on a PC. We don't want to respond with Samsung capabilities, or Windows (and AllShare) might get grumpy.
+    // User-Agent(actionReq): DLNADOC/1.50 SEC_HHP_[PC]LPC001/1.0  MS-DeviceCaps/1024
+    ClientInfo {
+        "AllShare",
+        ClientType::SamsungAllShare,
+        QUIRK_FLAG_NONE,
+        ClientMatchType::UserAgent,
+        "SEC_HHP_[PC]",
+    },
 
-        // User-Agent(actionReq): DLNADOC/1.50 SEC_HHP_[TV] Samsung Q7 Series (49)/1.0
-        {
-            "Samsung Series [Q] TVs",
-            ClientType::SamsungSeriesQ,
-            QUIRK_FLAG_SAMSUNG,
-            ClientMatchType::UserAgent,
-            "SEC_HHP_[TV] Samsung Q",
-        },
+    // User-Agent(actionReq): DLNADOC/1.50 SEC_HHP_[TV] Samsung Q7 Series (49)/1.0
+    ClientInfo {
+        "Samsung Series [Q] TVs",
+        ClientType::SamsungSeriesQ,
+        QUIRK_FLAG_SAMSUNG,
+        ClientMatchType::UserAgent,
+        "SEC_HHP_[TV] Samsung Q",
+    },
 
-        // User-Agent(actionReq): DLNADOC/1.50 SEC_HHP_BD-D5100/1.0
-        {
-            "Samsung Blu-ray Player BD-D5100",
-            ClientType::SamsungBDP,
-            QUIRK_FLAG_SAMSUNG,
-            ClientMatchType::UserAgent,
-            "SEC_HHP_BD",
-        },
+    // User-Agent(actionReq): DLNADOC/1.50 SEC_HHP_BD-D5100/1.0
+    ClientInfo {
+        "Samsung Blu-ray Player BD-D5100",
+        ClientType::SamsungBDP,
+        QUIRK_FLAG_SAMSUNG,
+        ClientMatchType::UserAgent,
+        "SEC_HHP_BD",
+    },
 
-        // User-Agent(actionReq): DLNADOC/1.50 SEC_HHP_[TV]UE40D7000/1.0
-        // User-Agent(actionReq): DLNADOC/1.50 SEC_HHP_ Family TV/1.0
-        // User-Agent(actionReq): DLNADOC/1.50 SEC_HHP_[TV] UE65JU7000/1.0 UPnP/1.0
-        {
-            "Samsung other TVs",
-            ClientType::SamsungSeriesCDE,
-            QUIRK_FLAG_SAMSUNG,
-            ClientMatchType::UserAgent,
-            "SEC_HHP_",
-        },
+    // User-Agent(actionReq): DLNADOC/1.50 SEC_HHP_[TV]UE40D7000/1.0
+    // User-Agent(actionReq): DLNADOC/1.50 SEC_HHP_ Family TV/1.0
+    // User-Agent(actionReq): DLNADOC/1.50 SEC_HHP_[TV] UE65JU7000/1.0 UPnP/1.0
+    ClientInfo {
+        "Samsung other TVs",
+        ClientType::SamsungSeriesCDE,
+        QUIRK_FLAG_SAMSUNG,
+        ClientMatchType::UserAgent,
+        "SEC_HHP_",
+    },
 
-        // User-Agent: ?
-        {
-            "Samsung Blu-ray Player J5500",
-            ClientType::SamsungBDJ5500,
-            QUIRK_FLAG_SAMSUNG,
-            ClientMatchType::UserAgent,
-            "[BD]J5500",
-        },
+    // User-Agent: ?
+    ClientInfo {
+        "Samsung Blu-ray Player J5500",
+        ClientType::SamsungBDJ5500,
+        QUIRK_FLAG_SAMSUNG,
+        ClientMatchType::UserAgent,
+        "[BD]J5500",
+    },
 
-        // Gerbera, FRITZ!Box, Windows 10, etc...
-        // User-Agent(actionReq): Linux/5.4.0-4-amd64, UPnP/1.0, Portable SDK for UPnP devices/1.8.6
-        // User-Agent(actionReq): FRITZ!Box 5490 UPnP/1.0 AVM FRITZ!Box 5490 151.07.12
-        // User-Agent(actionReq): Microsoft-Windows/10.0 UPnP/1.0 Microsoft-DLNA DLNADOC/1.50
-        {
-            "Standard UPnP",
-            ClientType::StandardUPnP,
-            QUIRK_FLAG_NONE,
-            ClientMatchType::UserAgent,
-            "UPnP/1.0",
-        },
-    }
+    // Gerbera, FRITZ!Box, Windows 10, etc...
+    // User-Agent(actionReq): Linux/5.4.0-4-amd64, UPnP/1.0, Portable SDK for UPnP devices/1.8.6
+    // User-Agent(actionReq): FRITZ!Box 5490 UPnP/1.0 AVM FRITZ!Box 5490 151.07.12
+    // User-Agent(actionReq): Microsoft-Windows/10.0 UPnP/1.0 Microsoft-DLNA DLNADOC/1.50
+    ClientInfo {
+        "Standard UPnP",
+        ClientType::StandardUPnP,
+        QUIRK_FLAG_NONE,
+        ClientMatchType::UserAgent,
+        "UPnP/1.0",
+    },
 };
 
 Clients::Clients(const std::shared_ptr<Config>& config)

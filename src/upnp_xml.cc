@@ -122,40 +122,37 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
         std::string upnp_class = obj->getClass();
         log_debug("container is class: {}", upnp_class.c_str());
         auto meta = obj->getMetadata();
+        using albumProp = std::pair<std::string_view, metadata_fields_t>;
         if (upnp_class == UPNP_CLASS_MUSIC_ALBUM) {
-            constexpr auto albumProperties = std::array<std::pair<const char*, metadata_fields_t>, 11> {
-                {
-                    { "dc:creator", M_ALBUMARTIST },
-                    { "upnp:artist", M_ALBUMARTIST },
-                    { "upnp:albumArtist", M_ALBUMARTIST },
-                    { "upnp:composer", M_COMPOSER },
-                    { "upnp:conductor", M_CONDUCTOR },
-                    { "upnp:orchestra", M_ORCHESTRA },
-                    { "upnp:date", M_UPNP_DATE },
-                    { "dc:date", M_UPNP_DATE },
-                    { "upnp:producer", M_PRODUCER },
-                    { "dc:publisher", M_PUBLISHER },
-                    { "upnp:genre", M_GENRE },
-                }
+            constexpr auto albumProperties = std::array {
+                albumProp { "dc:creator", M_ALBUMARTIST },
+                albumProp { "upnp:artist", M_ALBUMARTIST },
+                albumProp { "upnp:albumArtist", M_ALBUMARTIST },
+                albumProp { "upnp:composer", M_COMPOSER },
+                albumProp { "upnp:conductor", M_CONDUCTOR },
+                albumProp { "upnp:orchestra", M_ORCHESTRA },
+                albumProp { "upnp:date", M_UPNP_DATE },
+                albumProp { "dc:date", M_UPNP_DATE },
+                albumProp { "upnp:producer", M_PRODUCER },
+                albumProp { "dc:publisher", M_PUBLISHER },
+                albumProp { "upnp:genre", M_GENRE },
             };
             for (const auto& [tag, field] : albumProperties) {
                 auto value = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(field));
                 if (!value.empty()) {
-                    result.append_child(tag).append_child(pugi::node_pcdata).set_value(value.c_str());
+                    result.append_child(tag.data()).append_child(pugi::node_pcdata).set_value(value.c_str());
                 }
             }
         } else if (upnp_class == UPNP_CLASS_MUSIC_ARTIST) {
-            constexpr auto albumProperties = std::array<std::pair<const char*, metadata_fields_t>, 3> {
-                {
-                    { "upnp:artist", M_ALBUMARTIST },
-                    { "upnp:albumArtist", M_ALBUMARTIST },
-                    { "upnp:genre", M_GENRE },
-                }
+            constexpr auto albumProperties = std::array {
+                albumProp { "upnp:artist", M_ALBUMARTIST },
+                albumProp { "upnp:albumArtist", M_ALBUMARTIST },
+                albumProp { "upnp:genre", M_GENRE },
             };
             for (const auto& [tag, field] : albumProperties) {
                 auto value = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(field));
                 if (!value.empty()) {
-                    result.append_child(tag).append_child(pugi::node_pcdata).set_value(value.c_str());
+                    result.append_child(tag.data()).append_child(pugi::node_pcdata).set_value(value.c_str());
                 }
             }
         }
@@ -247,19 +244,20 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription()
     else
         device.append_child("presentationURL").append_child(pugi::node_pcdata).set_value(presentationURL.c_str());
 
-    constexpr std::array<std::pair<const char*, config_option_t>, 9> deviceProperties { {
+    using deviceProp = std::pair<const char*, config_option_t>;
+    constexpr auto deviceProperties = std::array {
         // { "deviceType", {} },
         // { "presentationURL", {} },
-        { "friendlyName", CFG_SERVER_NAME },
-        { "manufacturer", CFG_SERVER_MANUFACTURER },
-        { "manufacturerURL", CFG_SERVER_MANUFACTURER_URL },
-        { "modelDescription", CFG_SERVER_MODEL_DESCRIPTION },
-        { "modelName", CFG_SERVER_MODEL_NAME },
-        { "modelNumber", CFG_SERVER_MODEL_NUMBER },
-        { "modelURL", CFG_SERVER_MODEL_URL },
-        { "serialNumber", CFG_SERVER_SERIAL_NUMBER },
-        { "UDN", CFG_SERVER_UDN },
-    } };
+        deviceProp { "friendlyName", CFG_SERVER_NAME },
+        deviceProp { "manufacturer", CFG_SERVER_MANUFACTURER },
+        deviceProp { "manufacturerURL", CFG_SERVER_MANUFACTURER_URL },
+        deviceProp { "modelDescription", CFG_SERVER_MODEL_DESCRIPTION },
+        deviceProp { "modelName", CFG_SERVER_MODEL_NAME },
+        deviceProp { "modelNumber", CFG_SERVER_MODEL_NUMBER },
+        deviceProp { "modelURL", CFG_SERVER_MODEL_URL },
+        deviceProp { "serialNumber", CFG_SERVER_SERIAL_NUMBER },
+        deviceProp { "UDN", CFG_SERVER_UDN },
+    };
     for (const auto& [tag, field] : deviceProperties) {
         device.append_child(tag).append_child(pugi::node_pcdata).set_value(config->getOption(field).c_str());
     }
@@ -267,26 +265,27 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription()
     // add icons
     {
         auto iconList = device.append_child("iconList");
+        using icon = std::pair<std::string_view, std::string_view>;
 
-        constexpr std::array<std::pair<const char*, const char*>, 3> iconDims { {
-            { "120", "24" },
-            { "48", "24" },
-            { "32", "8" },
-        } };
+        constexpr auto iconDims = std::array {
+            icon { "120", "24" },
+            icon { "48", "24" },
+            icon { "32", "8" },
+        };
 
-        constexpr std::array<std::pair<const char*, const char*>, 3> iconTypes { {
-            { UPNP_DESC_ICON_PNG_MIMETYPE, ".png" },
-            { UPNP_DESC_ICON_BMP_MIMETYPE, ".bmp" },
-            { UPNP_DESC_ICON_JPG_MIMETYPE, ".jpg" },
-        } };
+        constexpr auto iconTypes = std::array {
+            icon { UPNP_DESC_ICON_PNG_MIMETYPE, ".png" },
+            icon { UPNP_DESC_ICON_BMP_MIMETYPE, ".bmp" },
+            icon { UPNP_DESC_ICON_JPG_MIMETYPE, ".jpg" },
+        };
 
         for (const auto& [dim, depth] : iconDims) {
             for (const auto& [mimetype, ext] : iconTypes) {
                 auto icon = iconList.append_child("icon");
-                icon.append_child("mimetype").append_child(pugi::node_pcdata).set_value(mimetype);
-                icon.append_child("width").append_child(pugi::node_pcdata).set_value(dim);
-                icon.append_child("height").append_child(pugi::node_pcdata).set_value(dim);
-                icon.append_child("depth").append_child(pugi::node_pcdata).set_value(depth);
+                icon.append_child("mimetype").append_child(pugi::node_pcdata).set_value(mimetype.data());
+                icon.append_child("width").append_child(pugi::node_pcdata).set_value(dim.data());
+                icon.append_child("height").append_child(pugi::node_pcdata).set_value(dim.data());
+                icon.append_child("depth").append_child(pugi::node_pcdata).set_value(depth.data());
                 std::string url = fmt::format("/icons/mt-icon{}{}", dim, ext);
                 icon.append_child("url").append_child(pugi::node_pcdata).set_value(url.c_str());
             }
@@ -304,14 +303,14 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription()
             const char* controlURL;
             const char* eventSubURL;
         };
-        constexpr std::array<ServiceInfo, 3> services { {
+        constexpr auto services = std::array {
             // cm
-            { UPNP_DESC_CM_SERVICE_TYPE, UPNP_DESC_CM_SERVICE_ID, UPNP_DESC_CM_SCPD_URL, UPNP_DESC_CM_CONTROL_URL, UPNP_DESC_CM_EVENT_URL },
+            ServiceInfo { UPNP_DESC_CM_SERVICE_TYPE, UPNP_DESC_CM_SERVICE_ID, UPNP_DESC_CM_SCPD_URL, UPNP_DESC_CM_CONTROL_URL, UPNP_DESC_CM_EVENT_URL },
             // cds
-            { UPNP_DESC_CDS_SERVICE_TYPE, UPNP_DESC_CDS_SERVICE_ID, UPNP_DESC_CDS_SCPD_URL, UPNP_DESC_CDS_CONTROL_URL, UPNP_DESC_CDS_EVENT_URL },
+            ServiceInfo { UPNP_DESC_CDS_SERVICE_TYPE, UPNP_DESC_CDS_SERVICE_ID, UPNP_DESC_CDS_SCPD_URL, UPNP_DESC_CDS_CONTROL_URL, UPNP_DESC_CDS_EVENT_URL },
             // media receiver registrar service for the Xbox 360
-            { UPNP_DESC_MRREG_SERVICE_TYPE, UPNP_DESC_MRREG_SERVICE_ID, UPNP_DESC_MRREG_SCPD_URL, UPNP_DESC_MRREG_CONTROL_URL, UPNP_DESC_MRREG_EVENT_URL },
-        } };
+            ServiceInfo { UPNP_DESC_MRREG_SERVICE_TYPE, UPNP_DESC_MRREG_SERVICE_ID, UPNP_DESC_MRREG_SCPD_URL, UPNP_DESC_MRREG_CONTROL_URL, UPNP_DESC_MRREG_EVENT_URL },
+        };
 
         for (auto const& s : services) {
             auto service = serviceList.append_child("service");

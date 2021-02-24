@@ -77,13 +77,14 @@ fs::path MetacontentHandler::getContentPath(const std::vector<std::string>& name
     return "";
 }
 
-static constexpr std::array<std::pair<std::string_view, metadata_fields_t>, 5> metaTags { {
-    { "%album%", M_ALBUM },
-    { "%albumArtist%", M_ALBUMARTIST },
-    { "%artist%", M_ARTIST },
-    { "%genre%", M_GENRE },
-    { "%title%", M_TITLE },
-} };
+using tag = std::pair<std::string_view, metadata_fields_t>;
+static constexpr auto metaTags = std::array {
+    tag { "%album%", M_ALBUM },
+    tag { "%albumArtist%", M_ALBUMARTIST },
+    tag { "%artist%", M_ARTIST },
+    tag { "%genre%", M_GENRE },
+    tag { "%title%", M_TITLE },
+};
 bool MetacontentHandler::caseSensitive = true;
 
 std::string MetacontentHandler::expandName(const std::string& name, const std::shared_ptr<CdsObject>& item)

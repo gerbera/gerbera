@@ -54,17 +54,17 @@
 #include "content/onlineservice/atrailers_content_handler.h"
 #endif
 
-static constexpr std::array<duk_function_list_entry, 9> js_global_functions = { {
-    { "print", js_print, DUK_VARARGS },
-    { "addCdsObject", js_addCdsObject, 3 },
-    { "addContainerTree", js_addContainerTree, 1 },
-    { "copyObject", js_copyObject, 1 },
-    { "f2i", js_f2i, 1 },
-    { "m2i", js_m2i, 1 },
-    { "p2i", js_p2i, 1 },
-    { "j2i", js_j2i, 1 },
-    { nullptr, nullptr, 0 },
-} };
+static constexpr auto js_global_functions = std::array {
+    duk_function_list_entry { "print", js_print, DUK_VARARGS },
+    duk_function_list_entry { "addCdsObject", js_addCdsObject, 3 },
+    duk_function_list_entry { "addContainerTree", js_addContainerTree, 1 },
+    duk_function_list_entry { "copyObject", js_copyObject, 1 },
+    duk_function_list_entry { "f2i", js_f2i, 1 },
+    duk_function_list_entry { "m2i", js_m2i, 1 },
+    duk_function_list_entry { "p2i", js_p2i, 1 },
+    duk_function_list_entry { "j2i", js_j2i, 1 },
+    duk_function_list_entry { nullptr, nullptr, 0 },
+};
 
 std::string Script::getProperty(const std::string& name)
 {
@@ -171,7 +171,7 @@ Script::Script(std::shared_ptr<ContentManager> content,
     /* initialize contstants */
     for (const auto& [field, sym] : ot_names) {
         duk_push_int(ctx, field);
-        duk_put_global_string(ctx, sym);
+        duk_put_global_string(ctx, sym.data());
     }
 #ifdef ONLINE_SERVICES
     duk_push_int(ctx, int(OS_None));
@@ -209,26 +209,26 @@ Script::Script(std::shared_ptr<ContentManager> content,
 #endif //ONLINE_SERVICES
 
     for (const auto& [field, sym] : mt_keys) {
-        duk_push_string(ctx, sym);
+        duk_push_string(ctx, sym.data());
         for (const auto& [f, s] : mt_names) {
             if (f == field) {
-                duk_put_global_string(ctx, s);
+                duk_put_global_string(ctx, s.data());
             }
         }
     }
 
     for (const auto& [field, sym] : res_keys) {
-        duk_push_string(ctx, sym);
+        duk_push_string(ctx, sym.data());
         for (const auto& [f, s] : res_names) {
             if (f == field) {
-                duk_put_global_string(ctx, s);
+                duk_put_global_string(ctx, s.data());
             }
         }
     }
 
     for (const auto& [field, sym] : upnp_classes) {
-        duk_push_string(ctx, field);
-        duk_put_global_string(ctx, sym);
+        duk_push_string(ctx, field.data());
+        duk_put_global_string(ctx, sym.data());
     }
 
     duk_push_object(ctx); // config
@@ -508,7 +508,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         duk_to_object(ctx, -1);
         // only metadata enumerated in mt_keys is allowed
         for (const auto& [sym, upnp] : mt_keys) {
-            val = getProperty(upnp);
+            val = getProperty(std::string(upnp));
             if (!val.empty()) {
                 if (sym == M_TRACKNUMBER) {
                     int j = stoiString(val, 0);
@@ -563,7 +563,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
             for (const auto& res : obj->getResources()) {
                 // only attribute enumerated in res_keys is allowed
                 for (const auto& [key, upnp] : res_keys) {
-                    val = getProperty(resCount == 0 ? upnp : fmt::format("{}-{}", resCount, upnp));
+                    val = getProperty(resCount == 0 ? std::string(upnp) : fmt::format("{}-{}", resCount, upnp));
                     if (!val.empty()) {
                         val = sc->convert(val);
                         res->addAttribute(key, val);
