@@ -87,12 +87,17 @@ void Timer::removeTimerSubscriber(Subscriber* timerSubscriber, std::shared_ptr<P
 {
     log_debug("Removing subscriber...");
     AutoLock lock(mutex);
-    TimerSubscriberElement element(timerSubscriber, 0, std::move(parameter));
-    auto it = std::find(subscribers.begin(), subscribers.end(), element);
-    if (it != subscribers.end()) {
-        subscribers.erase(it);
-        signal();
-    } else if (!dontFail) {
+    if (!subscribers.empty()) {
+        TimerSubscriberElement element(timerSubscriber, 0, std::move(parameter));
+        auto it = std::find(subscribers.begin(), subscribers.end(), element);
+        if (it != subscribers.end()) {
+            subscribers.erase(it);
+            signal();
+            log_debug("Removed subscriber...");
+            return;
+        }
+    }
+    if (!dontFail) {
         throw_std_runtime_error("Tried to remove nonexistent timer");
     }
 }

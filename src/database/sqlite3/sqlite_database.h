@@ -176,7 +176,7 @@ private:
 
     std::string startupError;
 
-    static std::string getError(const std::string& query, const std::string& error, sqlite3* db);
+    std::string getError(const std::string& query, const std::string& error, sqlite3* db, int errorCode);
 
     static void* staticThreadProc(void* arg);
     void threadProc();
@@ -203,6 +203,8 @@ private:
 
     bool dirty;
     bool dbInitDone;
+    bool hasBackupTimer;
+    int sqliteStatus;
 
     friend class SLSelectTask;
     friend class SLExecTask;
