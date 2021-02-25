@@ -466,6 +466,7 @@ protected:
     bool notEmpty = false;
     bool itemNotEmpty = false;
     ArrayInitFunction initArray = nullptr;
+    std::vector<std::string_view> defaultEntries = {};
 
     /// \brief Creates an array of strings from an XML nodeset.
     /// \param element starting element of the nodeset.
@@ -496,10 +497,12 @@ public:
     {
     }
 
-    ConfigArraySetup(config_option_t option, const char* xpath, const char* help, config_option_t nodeOption, config_option_t attrOption, bool notEmpty = false, bool itemNotEmpty = false)
+    ConfigArraySetup(config_option_t option, const char* xpath, const char* help, config_option_t nodeOption, config_option_t attrOption,
+        bool notEmpty = false, bool itemNotEmpty = false, const std::vector<std::string_view>& defaultEntries = {})
         : ConfigSetup(option, xpath, help)
         , notEmpty(notEmpty)
         , itemNotEmpty(itemNotEmpty)
+        , defaultEntries(defaultEntries)
         , nodeOption(nodeOption)
         , attrOption(attrOption)
     {

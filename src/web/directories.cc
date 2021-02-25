@@ -67,23 +67,7 @@ void web::directories::process()
     containers.append_attribute("type") = "filesystem";
 
     // don't bother users with system directorties
-    constexpr auto excludes_fullpath = std::array {
-        "/bin",
-        "/boot",
-        "/dev",
-        "/etc",
-        "/lib",
-        "/lib32",
-        "/lib64",
-        "/libx32",
-        "/proc",
-        "/run",
-        "/sbin",
-        "/sys",
-        "/tmp",
-        "/usr",
-        "/var",
-    };
+    const auto& excludes_fullpath = config->getArrayOption(CFG_IMPORT_SYSTEM_DIRECTORIES);
     // don't bother users with special or config directorties
     constexpr auto excludes_dirname = std::array {
         "lost+found",
