@@ -105,6 +105,8 @@ std::shared_ptr<Config> ConfigManager::getSelf()
     return shared_from_this();
 }
 
+static const std::vector<std::string_view> excludes_fullpath = { "/bin", "/boot", "/dev", "/etc", "/lib", "/lib32", "/lib64", "/libx32", "/proc", "/run", "/sbin", "/sys", "/tmp", "/usr", "/var" };
+
 const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = {
     std::make_shared<ConfigIntSetup>(CFG_SERVER_PORT,
         "/server/port", "config-server.html#port",
@@ -404,6 +406,10 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = 
     std::make_shared<ConfigArraySetup>(CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST,
         "/import/resources/resource", "config-import.html#resources",
         ATTR_IMPORT_RESOURCES_ADD_FILE, ATTR_IMPORT_RESOURCES_NAME),
+    std::make_shared<ConfigArraySetup>(CFG_IMPORT_SYSTEM_DIRECTORIES,
+        "/import/system-directories", "config-import.html#system-directories",
+        ATTR_IMPORT_SYSTEM_DIR_ADD_PATH, ATTR_IMPORT_RESOURCES_NAME, true, true,
+        excludes_fullpath),
 
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED,
@@ -747,6 +753,8 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = 
         "script-option", ""),
     std::make_shared<ConfigSetup>(ATTR_IMPORT_LAYOUT_GENRE,
         "genre", ""),
+    std::make_shared<ConfigSetup>(ATTR_IMPORT_SYSTEM_DIR_ADD_PATH,
+        "add-path", ""),
 };
 
 const std::map<config_option_t, std::vector<config_option_t>> ConfigManager::parentOptions = {
@@ -799,7 +807,7 @@ const std::map<config_option_t, std::vector<config_option_t>> ConfigManager::par
     { ATTR_IMPORT_MAPPINGS_MIMETYPE_FROM, { CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST, CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST, CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST } },
     { ATTR_IMPORT_MAPPINGS_MIMETYPE_TO, { CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST, CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST, CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST } },
 
-    { ATTR_IMPORT_RESOURCES_NAME, { CFG_IMPORT_RESOURCES_FANART_FILE_LIST, CFG_IMPORT_RESOURCES_CONTAINERART_FILE_LIST, CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST, CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST } },
+    { ATTR_IMPORT_RESOURCES_NAME, { CFG_IMPORT_RESOURCES_FANART_FILE_LIST, CFG_IMPORT_RESOURCES_CONTAINERART_FILE_LIST, CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST, CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST, CFG_IMPORT_SYSTEM_DIRECTORIES } },
 
     { ATTR_IMPORT_LAYOUT_MAPPING_FROM, { CFG_IMPORT_LAYOUT_MAPPING, CFG_IMPORT_SCRIPTING_IMPORT_GENRE_MAP } },
     { ATTR_IMPORT_LAYOUT_MAPPING_TO, { CFG_IMPORT_LAYOUT_MAPPING, CFG_IMPORT_SCRIPTING_IMPORT_GENRE_MAP } },
@@ -1222,6 +1230,7 @@ void ConfigManager::load(const fs::path& userHome)
     setOption(root, CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST);
     setOption(root, CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST);
     setOption(root, CFG_IMPORT_DIRECTORIES_LIST);
+    setOption(root, CFG_IMPORT_SYSTEM_DIRECTORIES);
 
     args["trim"] = "false";
     setOption(root, CFG_IMPORT_LIBOPTS_ENTRY_SEP, &args);

@@ -413,6 +413,37 @@
 					]
 				},
 				{
+					"item": "/import/system-directories/add-path",
+					"caption": "System Directories",
+					"type": "List",
+					"editable": true,
+					"children": [
+						{
+							"item": "/import/system-directories/add-path/attribute::name",
+							"caption": "Name",
+							"editable": true
+						}
+					]
+				},
+				{
+					"item": "/import/scripting/virtual-layout/genre-map/genre",
+					"caption": "Genre Map",
+					"type": "List",
+					"editable": true,
+					"children": [
+						{
+							"item": "/import/scripting/virtual-layout/genre-map/genre/attribute::from",
+							"caption": "Name",
+							"editable": true
+						},
+						{
+							"item": "/import/scripting/virtual-layout/genre-map/genre/attribute::to",
+							"caption": "Value",
+							"editable": true
+						}
+					]
+				},
+				{
 					"item": "/import/directories/tweak",
 					"caption": "Directory Tweaks",
 					"type": "List",
@@ -536,24 +567,6 @@
 						},
 						{
 							"item": "/import/scripting/virtual-layout/import-script/script-option/option/attribute::value",
-							"caption": "Value",
-							"editable": true
-						}
-					]
-				},
-				{
-					"item": "/import/scripting/virtual-layout/genre-map/genre",
-					"caption": "Genre Map",
-					"type": "List",
-					"editable": true,
-					"children": [
-						{
-							"item": "/import/scripting/virtual-layout/genre-map/genre/attribute::from",
-							"caption": "Name",
-							"editable": true
-						},
-						{
-							"item": "/import/scripting/virtual-layout/genre-map/genre/attribute::to",
 							"caption": "Value",
 							"editable": true
 						}
