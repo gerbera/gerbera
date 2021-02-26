@@ -383,7 +383,9 @@ void web::configLoad::process()
         CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST,
         CFG_IMPORT_LAYOUT_MAPPING,
         CFG_IMPORT_SCRIPTING_IMPORT_GENRE_MAP,
+#ifdef HAVE_JS
         CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT_OPTIONS,
+#endif
     };
 
     for (const auto& dict_option : dict_options) {
