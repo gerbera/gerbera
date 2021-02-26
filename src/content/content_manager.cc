@@ -1300,9 +1300,13 @@ void ContentManager::destroyLayout()
 void ContentManager::reloadLayout()
 {
     destroyLayout();
+#ifdef HAVE_JS
     destroyJS();
+#endif // HAVE_JS
     initLayout();
+#ifdef HAVE_JS
     initJS();
+#endif // HAVE_JS
 }
 
 void ContentManager::threadProc()
