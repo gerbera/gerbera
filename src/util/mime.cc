@@ -97,7 +97,7 @@ std::string Mime::extensionToMimeType(const fs::path& path, const std::string& d
     if (!extension_map_case_sensitive)
         extension = toLower(extension);
 
-    std::string mimeType = getValueOrDefault(extension_mimetype_map, "");
+    std::string mimeType = getValueOrDefault(extension_mimetype_map, extension, "");
     if (mimeType.empty() && !ignore_unknown_extensions) {
         mimeType = defval.empty() ? extension : defval;
     }
