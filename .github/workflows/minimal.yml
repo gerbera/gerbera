@@ -1,0 +1,57 @@
+name: Minimal
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    container:
+      image: alpine:3.13
+    steps:
+      - name: Install Dependencies
+        run: |
+          apk add --no-cache \
+            cmake \
+            duktape-dev \
+            fmt-dev \
+            g++ \
+            gcc \
+            git \
+            gtest-dev \
+            libupnp-dev \
+            make \
+            pkgconf \
+            pugixml-dev \
+            spdlog-dev \
+            sqlite-dev \
+            util-linux-dev \
+            zlib-dev
+
+      - uses: actions/checkout@v1
+
+      - name: Build
+        run: |
+          cmake -S . -B build \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DWITH_AVCODEC=NO \
+            -DWITH_CURL=NO \
+            -DWITH_DEBUG=YES \
+            -DWITH_EXIF=NO \
+            -DWITH_FFMPEGTHUMBNAILER=NO \
+            -DWITH_JS=NO \
+            -DWITH_LASTFM=NO \
+            -DWITH_MAGIC=NO \
+            -DWITH_MATROSKA=NO \
+            -DWITH_MYSQL=NO \
+            -DWITH_SYSTEMD=NO \
+            -DWITH_TAGLIB=NO \
+            -DWITH_TESTS=YES
+          cmake --build build -j$(nproc)
+
+      - name: Test
+        run: |
+          cd build
+          ctest --output-on-failure
