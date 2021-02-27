@@ -249,7 +249,7 @@ TEST_F(ConfigGeneratorTest, GeneratesOnlineContentWithAppleTrailers)
 #else
 TEST_F(ConfigGeneratorTest, GeneratesOnlineContentEmpty)
 {
-    std::string mockXml = "<online-content/>";
+    std::string mockXml = "<online-content />\n";
 
     subject->generateOnlineContent();
     auto import = subject->getNode("/import");

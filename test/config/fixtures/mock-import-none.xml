@@ -1,5 +1,5 @@
 <import hidden-files="no">
-  <scripting script-charset="UTF-8">
+  <scripting>
     <virtual-layout type="builtin" />
   </scripting>
   <mappings>
