@@ -1,7 +1,183 @@
 ## Gerbera - UPnP AV Mediaserver.
 
-### v1.1.0
+### v1.7.0
 
+- You can now use libnupnp instead of libupnp as the underlying UPnP library
+- Multiple disk albums are now sorted correctly and are disks distinguished by part number field
+- Container images are now possible on containers without files
+- Subtitle resources should now work on Samsung clients
+- Thumbnails, album art and container images now shown in the Web UI Database view
+- Set additional import options per directory on filesystem page
+- You can now edit configuration (most of it) in the Web UI!
+- Charset can be specific to import library (section: import/library options), e g. if your pictures use different encoding than your music
+- Resource configuration can be used for container images (section: import/resources): define image name filters and strategy for container hierarchy
+- Additional metadata stored from import scan
+- Modification time for autoscan directories now reflects sub directories and reduces startup footprint
+- Container images are stored as resources so browsing can return them directly
+- All scripting functions have been moved to common js
+- A custom script file can be set in `config xml`. It may contain additional functions or override the existing.
+- A new builtin script function `addContainerTree` can be used to set container properties
+- Most entries from configuration can be accessed via new global variable `config`.
+- The script file import structured js has been dropped. The layout can now be selected with the configuration attribute audio layout in virtual layout element.
+- Depending on your previous changes script changes adjustments are recommended - although no breaking changes have been made.
+- Internal refactoring and code improvements
+- Many bug fixes
+
+In order to benefit from all these improvements it is recommended to clear your database and rescan your media library.
+
+### v1.6.4
+- Fix regression introduced in 1.6.2 in SQL generation (#1007), thanks @KarlStraussberger
+
+### v1.6.3
+- Fix a regression introduced in 1.6.2 when adding resources (#1004), thanks @KarlStraussberger
+
+### v1.6.2
+- Fixed a regression where some files could be removed from the library on a restart due to a race, thanks @phi-whiterabbit
+- Fixed a crash in ffmpeg hander where metadata date field was non-numeric, thanks @KarlStraussberger
+- Add Samsung X_SetBookmark stub (#996), thanks @whyman
+- Bump jimp (fixes vuln jpeg-js) (#990), thanks @whyman
+- UI: Dont update mimetype to empty (#989), thanks @whyman
+- Fix tests with npupnp (#988), thanks @medoc92
+- fix compilation with libcxx (#983), thanks @neheb
+- libevix2 fixes (#976), thanks @neheb
+- npupnp changes (#952), thanks @neheb
+- doc: add OpenWrt section (#975), thanks @neheb
+- clang-tidy fixes (#973), thanks @neheb
+- cxxopts: update to 2.2.1 (#974), thanks @neheb
+- Update README badges (#972), thanks @whyman
+
+
+### v1.6.1
+- fixed mime type retrieval for symlinks with libmagic (#970), thanks @cdbrendel
+- Drop travis (#968), thanks @whyman
+- Actions: Run docker build on tags too (#967), thanks @whyman
+- Bump js stuff to fix security warnings (#966), thanks @whyman
+- Color folders with children instead of badges saying true (#957), thanks @whyman
+- Improve Resource Handling (#963), thanks @KarlStraussberger
+- Add subtitle as resource and update entries with resources attached, improve ContentHandler (#959), thanks @KarlStraussberger
+- Bump elliptic from 6.5.2 to 6.5.3 in /gerbera-web (#958), thanks @dependabot
+- fix upnp header include (#955), thanks @neheb
+- Build fixes (#954), thanks @ytimenkov
+- std::algorithm conversions (#882), thanks @neheb
+
+
+### v1.6.0
+- Allow configuration of separator for multi-valued tags
+- Show duk script error message on load
+- Show all object details on UI
+- Updated config.xml XSD
+- Added support for Conan package manager
+- Add friendly messages when finding spdlog as library
+- Refactored caching of ffmpeg thumbnails.
+- lots more!
+
+### v1.5.0
+- Client Auto detection and DLNA quirks always enabled.
+- C++ Standardisation
+- UI Enhancements
+- Transcoding Enhancements
+- Expat has been replaced with pugixml
+- Spdlog is now used for logging
+- libfmt is now used for string formatting
+- The latest 1.12.1 version of libupnp is now required.
+
+### v1.4.0
+- Metadata MKV support via libmatroska (#540), thanks @pamapa
+- SQLite: Add migration to v5 schema (#546), thanks @whyman
+- Update web modules (#544), thanks @elmodaddyb
+- Dockerfile: Add MKV support (#543), thanks @whyman
+- README update, minor doc tidy (#537), thanks @whyman
+- Docs: Scripting - tidy (#536), thanks @whyman
+- install-pupnp: Bump to 1.8.6, fix #534 (#535), thanks @whyman
+- remove not used variables (#533), thanks @pamapa
+- Docs: Scripting: remove docs for removed code, fix Note formatting (#527), thanks @whyman
+- Minor UI improvements (#526), thanks @whyman
+
+### v1.3.4/5
+- Fix the build with LibUPnP 1.10 (#523), thanks @whyman
+- Build against libupnp 1.8.5 (#519), thanks @whyman
+- Fedora installation. (#518), thanks @limburgher
+- UI e2e: Bump chromedriver (#515), thanks @whyman
+
+### v1.3.3
+- Remove Storage Cache (#509), thanks @whyman
+- my_bool is not defined with mysql-connector-c 8.0 (#508), thanks @whyman
+- Update config.xml (#507), thanks @1rover1
+- Support inotify kernel driver on illumos/OmniOS (#506), thanks @whorfin
+- Fix up docs and start script now that -P/--pidfile is removed (#502), thanks @whorfin
+- Set language to support xenial & latest chrome (#503), thanks @elmodaddyb
+- Correct add file docs (#501), thanks @whyman
+- Update Web Development Dependencies (#497), thanks @elmodaddyb
+- Dockerfile created (#409), thanks @nemoload
+- SQLite: Turn on foreign key support at runtime (#491), thanks @whyman
+- Fix error in sqlite schema (#490), thanks @whyman
+- Add DeviceDescriptionHandler (#482), thanks @whyman
+- Update lodash (#484), thanks @elmodaddyb
+- Rename handlers to util (#481), thanks @whyman
+- Convert Gerbera UI to ES6 (#472), thanks @elmodaddyb
+
+### v1.3.2
+- Allow to set the manufacturer and the modelURL via config file (#477), thanks @joerg-krause
+- Fix find_program taglib-config when cross-compiling (#476), thanks @joerg-krause
+- Update config-import.rst (#475), thanks @ghlupe2
+- Add Gerbera version to UI (#469), thanks @elmodaddyb
+- cmake/FindFFMPEG: do not quieten messages when using pkg-config (#466), thanks @joerg-krause
+- Fixture upgrade (#465), thanks @elmodaddyb
+- Update js cookie (#464), thanks @elmodaddyb
+- Add virtualUrl to AlbumArt resource for consistent resource URIs (#460), thanks @elmodaddyb
+- Use exiv2 header that include all headers (#457), thanks @nicolas-s
+- Update vendor dependencies (#455), thanks @elmodaddyb
+- Docs: Bump version (#452), thanks @v00d00
+- feat: provide a way to toggle DLNA-seeking with a config (#450), thanks @rtm-ctrlz
+- main: bugfix `interface` CLI option (#451), thanks @edzius
+- Generate config.xml with XML Declaration (#447), thanks @elmodaddyb
+
+
+### v1.3.1
+- Build system improvements, thanks @ffontaine
+- Fixes for DLNA Headers handling
+- Add support for TXXX AuxData extraction from MP3
+- Fix External URL resource generation, thanks @elmodaddyb
+- Latest NPM Updates, thanks @elmodaddyb
+
+### v1.3.0
+- C++17 is now required to build (clang, gcc-7, gcc-8)
+- Improved Samsung DTV Support (Still not entirely complete, but some more models may work)
+- Added FLAC, Wavpack, DSD to default configuration
+- Fixed Transcoding bugs with HTTP Protocol
+- Properly handle upnp:date for Album sorting on UPNP devices
+- Exposed resource options to import scripts (audio channels etc)
+- Added support for Classical music tags: Composer, Conductor, Orchestra
+- Fix UI update bug for macOS
+- Add online-content examples
+- Improve scripted installation
+- Add configurable title for UI Home
+- Fix SQL bugs
+- Create Gerbera Homebrew Tap (for macOS High Sierra & Mojave)
+- Various bug fixes and ongoing refactoring
+- Add CentOS install instructions
+
+### v1.2.0
+- Amazing new web ui
+- UPnP Search implemented
+- Improved Docs: docs.gerbera.io, kindly hosted by Read the Docs.
+- Broken Youtube support removed
+- Fixed AUXDATA truncation with UTF-8 characters.
+- Improved message when libupnp fails to bind correctly.
+- Allow use of FFMpeg to extract AUXDATA
+- Duktape JS scripting errors are now visible in log file
+- Fixed a crash in EXIV2 image handler.
+- Fixed "root path" sometimes missing for scripted layouts.
+
+### v1.1.0
+- Modern UI Preview
+- Raspberry Pi / 32bit fixes
+- Video thumbnail support
+- Protocol Extensions
+- BSD Fixes
+- Album Artist support
+- The --pidfile option has been removed, as we removed the --daemon option in the previous release retaining --pidfile option did not make sense
+- This release supports <=libupnp 1.8.2 due to breaking changes in libupnp master branch, 1.2 will most likely require >=1.8.3.
 
 ### v1.0.0
 - Rebranded as Gerbera, new Logo!
