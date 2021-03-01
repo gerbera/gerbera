@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-PUPNP_VERSION="1.14.0"
+PUPNP_VERSION="1.14.2"
 UNAME=$(uname)
 
 if ! [ "$(id -u)" = 0 ]; then
