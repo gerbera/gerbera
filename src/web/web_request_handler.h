@@ -137,7 +137,7 @@ protected:
 
 public:
     /// \brief Constructor, currently empty.
-    WebRequestHandler(std::shared_ptr<ContentManager> content);
+    explicit WebRequestHandler(std::shared_ptr<ContentManager> content);
 
     /// \brief Returns information about the requested content.
     /// \param filename Requested URL
