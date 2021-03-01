@@ -77,6 +77,18 @@ public:
 
     static std::shared_ptr<ConfigSetup> findConfigSetup(config_option_t option, bool save = false);
     static std::shared_ptr<ConfigSetup> findConfigSetupByPath(const std::string& key, bool save = false, const std::shared_ptr<ConfigSetup>& parent = nullptr);
+    template <class CS>
+    static std::vector<std::shared_ptr<CS>> getConfigSetupList()
+    {
+        std::vector<std::shared_ptr<CS>> result;
+        for (const auto& co : complexOptions) {
+            std::shared_ptr<CS> tco = std::dynamic_pointer_cast<CS>(co);
+            if (tco != nullptr && tco->getValue() != nullptr) {
+                result.emplace_back(tco);
+            }
+        }
+        return result;
+    }
 
     void load(const fs::path& userHome);
     void updateConfigFromDatabase(std::shared_ptr<Database> database) override;

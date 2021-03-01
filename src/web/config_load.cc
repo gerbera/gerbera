@@ -331,66 +331,47 @@ void web::configLoad::process()
         pr++;
     }
 
-#ifdef HAVE_INOTIFY
-    constexpr auto autoscanList = std::array { CFG_IMPORT_AUTOSCAN_TIMED_LIST, CFG_IMPORT_AUTOSCAN_INOTIFY_LIST };
-#else
-    constexpr auto autoscanList = std::array { CFG_IMPORT_AUTOSCAN_TIMED_LIST };
-#endif
-    for (const auto& autoscanOption : autoscanList) {
-        cs = ConfigManager::findConfigSetup(autoscanOption);
-        auto autoscan = cs->getValue()->getAutoscanListOption();
+    for (const auto& ascs : ConfigManager::getConfigSetupList<ConfigAutoscanSetup>()) {
+        auto autoscan = ascs->getValue()->getAutoscanListOption();
         for (size_t i = 0; i < autoscan->size(); i++) {
             const auto& entry = autoscan->get(i);
             const auto& adir = content->getAutoscanDirectory(entry->getLocation());
             auto item = values.append_child("item");
-            createItem(item, cs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_LOCATION), cs->option, ATTR_AUTOSCAN_DIRECTORY_LOCATION);
+            createItem(item, ascs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_LOCATION), ascs->option, ATTR_AUTOSCAN_DIRECTORY_LOCATION);
             setValue(item, adir->getLocation());
 
             item = values.append_child("item");
-            createItem(item, cs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_MODE), cs->option, ATTR_AUTOSCAN_DIRECTORY_MODE);
+            createItem(item, ascs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_MODE), ascs->option, ATTR_AUTOSCAN_DIRECTORY_MODE);
             setValue(item, AutoscanDirectory::mapScanmode(adir->getScanMode()));
 
             item = values.append_child("item");
-            createItem(item, cs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_INTERVAL), cs->option, ATTR_AUTOSCAN_DIRECTORY_INTERVAL);
+            createItem(item, ascs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_INTERVAL), ascs->option, ATTR_AUTOSCAN_DIRECTORY_INTERVAL);
             setValue(item, adir->getInterval());
 
             item = values.append_child("item");
-            createItem(item, cs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_RECURSIVE), cs->option, ATTR_AUTOSCAN_DIRECTORY_RECURSIVE);
+            createItem(item, ascs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_RECURSIVE), ascs->option, ATTR_AUTOSCAN_DIRECTORY_RECURSIVE);
             setValue(item, adir->getRecursive());
 
             item = values.append_child("item");
-            createItem(item, cs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES), cs->option, ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES);
+            createItem(item, ascs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES), ascs->option, ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES);
             setValue(item, adir->getHidden());
 
             item = values.append_child("item");
-            createItem(item, cs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_SCANCOUNT), cs->option, ATTR_AUTOSCAN_DIRECTORY_SCANCOUNT);
+            createItem(item, ascs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_SCANCOUNT), ascs->option, ATTR_AUTOSCAN_DIRECTORY_SCANCOUNT);
             setValue(item, adir->getActiveScanCount());
 
             item = values.append_child("item");
-            createItem(item, cs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_TASKCOUNT), cs->option, ATTR_AUTOSCAN_DIRECTORY_TASKCOUNT);
+            createItem(item, ascs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_TASKCOUNT), ascs->option, ATTR_AUTOSCAN_DIRECTORY_TASKCOUNT);
             setValue(item, adir->getTaskCount());
 
             item = values.append_child("item");
-            createItem(item, cs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_LMT), cs->option, ATTR_AUTOSCAN_DIRECTORY_LMT);
+            createItem(item, ascs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_LMT), ascs->option, ATTR_AUTOSCAN_DIRECTORY_LMT);
             setValue(item, fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(adir->getPreviousLMT(""))));
         }
     }
 
-    constexpr auto dict_options = std::array {
-        CFG_SERVER_UI_ACCOUNT_LIST,
-        CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST,
-        CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST,
-        CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST,
-        CFG_IMPORT_LAYOUT_MAPPING,
-        CFG_IMPORT_SCRIPTING_IMPORT_GENRE_MAP,
-#ifdef HAVE_JS
-        CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT_OPTIONS,
-#endif
-    };
-
-    for (const auto& dict_option : dict_options) {
+    for (const auto& dcs : ConfigManager::getConfigSetupList<ConfigDictionarySetup>()) {
         int i = 0;
-        auto dcs = ConfigSetup::findConfigSetup<ConfigDictionarySetup>(dict_option);
         auto dictionary = dcs->getValue()->getDictionaryOption(true);
         for (const auto& [key, val] : dictionary) {
             auto item = values.append_child("item");
@@ -404,30 +385,7 @@ void web::configLoad::process()
         }
     }
 
-    constexpr auto array_options = std::array {
-        CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN,
-        CFG_IMPORT_RESOURCES_FANART_FILE_LIST,
-        CFG_IMPORT_RESOURCES_CONTAINERART_FILE_LIST,
-        CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST,
-        CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST,
-        CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST,
-        CFG_IMPORT_SYSTEM_DIRECTORIES,
-#ifdef HAVE_LIBEXIF
-        CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST,
-#endif
-#ifdef HAVE_EXIV2
-        CFG_IMPORT_LIBOPTS_EXIV2_AUXDATA_TAGS_LIST,
-#endif
-#ifdef HAVE_TAGLIB
-        CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST,
-#endif
-#ifdef HAVE_FFMPEG
-        CFG_IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST,
-#endif
-    };
-
-    for (auto array_option : array_options) {
-        auto acs = ConfigSetup::findConfigSetup<ConfigArraySetup>(array_option);
+    for (const auto& acs : ConfigManager::getConfigSetupList<ConfigArraySetup>()) {
         auto array = acs->getValue()->getArrayOption(true);
         for (size_t i = 0; i < array.size(); i++) {
             auto entry = array[i];
