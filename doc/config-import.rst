@@ -359,6 +359,40 @@ the removed directory if it becomes available/gets created again.
 
         Allowed values: ``yes`` or ``no``, process hidden files, overrides the hidden-files value in the ``<import/>`` tag.
 
+``system-directories``
+~~~~~~~~~~~~~~~~~~~~~~
+
+::
+
+    <system-directories>
+
+* Optional
+
+Specifies a list of system directories hidden in filesystem web ui.
+
+If the element does not exists, the default list of system directories is set to ``/bin, /boot, /dev, /etc, /lib, /lib32, /lib64, /libx32, /proc, /run, /sbin, /sys, /tmp, /usr, /var``
+
+    **Child tags:**
+
+    ::
+
+        <add-path name="/sys"/>
+
+    * Optional
+
+    Defines a system directory.
+
+    The attributes specify various options:
+
+        ::
+
+            name=...
+
+        * Required
+
+        Absolute path to the directory that shall be hidden.
+
+
 ``layout``
 ~~~~~~~~~~
 

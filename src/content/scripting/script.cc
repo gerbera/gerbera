@@ -242,20 +242,7 @@ Script::Script(std::shared_ptr<ContentManager> content,
         }
     }
 
-    constexpr auto dict_options = std::array {
-        CFG_SERVER_UI_ACCOUNT_LIST,
-        CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST,
-        CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST,
-        CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST,
-        CFG_IMPORT_LAYOUT_MAPPING,
-        CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT_OPTIONS,
-        CFG_IMPORT_SCRIPTING_IMPORT_GENRE_MAP,
-    };
-
-    for (const auto& dict_option : dict_options) {
-        auto dcs = ConfigSetup::findConfigSetup<ConfigDictionarySetup>(dict_option, true);
-        if (dcs == nullptr)
-            continue;
+    for (const auto& dcs : ConfigManager::getConfigSetupList<ConfigDictionarySetup>()) {
         duk_push_object(ctx);
         auto dictionary = dcs->getValue()->getDictionaryOption(true);
         for (const auto& [key, val] : dictionary) {
@@ -264,32 +251,7 @@ Script::Script(std::shared_ptr<ContentManager> content,
         duk_put_prop_string(ctx, -2, dcs->getItemPath(-1).c_str());
     }
 
-    constexpr auto array_options = std::array {
-        CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN,
-        CFG_IMPORT_RESOURCES_FANART_FILE_LIST,
-        CFG_IMPORT_RESOURCES_CONTAINERART_FILE_LIST,
-        CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST,
-        CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST,
-        CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST,
-        CFG_IMPORT_SYSTEM_DIRECTORIES,
-#ifdef HAVE_LIBEXIF
-        CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST,
-#endif
-#ifdef HAVE_EXIV2
-        CFG_IMPORT_LIBOPTS_EXIV2_AUXDATA_TAGS_LIST,
-#endif
-#ifdef HAVE_TAGLIB
-        CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST,
-#endif
-#ifdef HAVE_FFMPEG
-        CFG_IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST,
-#endif
-    };
-
-    for (auto array_option : array_options) {
-        auto acs = ConfigSetup::findConfigSetup<ConfigArraySetup>(array_option, true);
-        if (acs == nullptr)
-            continue;
+    for (const auto& acs : ConfigManager::getConfigSetupList<ConfigArraySetup>()) {
         auto array = acs->getValue()->getArrayOption(true);
         auto duk_array = duk_push_array(ctx);
         for (size_t i = 0; i < array.size(); i++) {
@@ -300,15 +262,9 @@ Script::Script(std::shared_ptr<ContentManager> content,
         duk_put_prop_string(ctx, -2, acs->getItemPath(-1).c_str());
     }
 
-#ifdef HAVE_INOTIFY
-    constexpr auto autoscanList = std::array { CFG_IMPORT_AUTOSCAN_TIMED_LIST, CFG_IMPORT_AUTOSCAN_INOTIFY_LIST };
-#else
-    constexpr auto autoscanList = std::array { CFG_IMPORT_AUTOSCAN_TIMED_LIST };
-#endif
     duk_push_object(ctx); // autoscan
-    std::shared_ptr<ConfigAutoscanSetup> ascs;
-    for (const auto& autoscanOption : autoscanList) {
-        ascs = ConfigSetup::findConfigSetup<ConfigAutoscanSetup>(autoscanOption);
+    std::string autoscanItemPath;
+    for (const auto& ascs : ConfigManager::getConfigSetupList<ConfigAutoscanSetup>()) {
         auto autoscan = ascs->getValue()->getAutoscanListOption();
         for (size_t i = 0; i < autoscan->size(); i++) {
             const auto& entry = autoscan->get(i);
@@ -326,8 +282,9 @@ Script::Script(std::shared_ptr<ContentManager> content,
 
             duk_put_prop_string(ctx, -2, fmt::format("{}", adir->getScanID()).c_str());
         }
+        autoscanItemPath = ascs->getItemPath(-2);
     }
-    duk_put_prop_string(ctx, -2, ascs->getItemPath(-2).c_str()); // autoscan
+    duk_put_prop_string(ctx, -2, autoscanItemPath.c_str()); // autoscan
 
     duk_put_global_string(ctx, "config");
 

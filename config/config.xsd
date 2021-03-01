@@ -294,6 +294,7 @@
                 <xs:element ref="metadata-charset" minOccurs="0"/>
                 <xs:element ref="playlist-charset" minOccurs="0"/>
                 <xs:element ref="autoscan" minOccurs="0"/>
+                <xs:element ref="system-directories" minOccurs="0"/>
                 <xs:element ref="directories" minOccurs="0"/>
                 <xs:element ref="layout" minOccurs="0"/>
                 <xs:element ref="resources" minOccurs="0"/>
@@ -355,6 +356,20 @@
     </xs:element>
 
     <xs:element name="import-script" type="xs:string"/>
+
+    <xs:element name="system-directories">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="add-path" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="add-path">
+        <xs:complexType>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
 
     <xs:element name="script-options">
         <xs:complexType>
@@ -433,7 +448,6 @@
     <xs:element name="tweak">
         <xs:complexType>
             <xs:attribute name="location" type="xs:string" use="required"/>
-
             <xs:attribute name="inherit" type="boolean" use="required"/>
             <xs:attribute name="hidden-files"/>
             <xs:attribute name="recursive" type="boolean"/>
