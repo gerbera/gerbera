@@ -49,9 +49,6 @@
 #include "util/string_converter.h"
 #include "util/tools.h"
 
-using namespace LIBEBML_NAMESPACE;
-using namespace LIBMATROSKA_NAMESPACE;
-
 // file managment
 class file_io_callback : public IOCallback {
 private:
@@ -153,10 +150,10 @@ void MatroskaHandler::parseMKV(const std::shared_ptr<CdsItem>& item, MemIOHandle
     file_io_callback ebml_file(item->getLocation().c_str());
     EbmlStream ebml_stream(ebml_file);
 
-    EbmlElement* el_l0 = ebml_stream.FindNextID(KaxSegment::ClassInfos, ~0);
+    auto el_l0 = ebml_stream.FindNextID(LIBMATROSKA_NAMESPACE::KaxSegment::ClassInfos, ~0);
     while (el_l0 != nullptr) {
         int i_upper_level = 0;
-        EbmlElement* el_l1 = ebml_stream.FindNextElement(el_l0->Generic().Context, i_upper_level, ~0, true);
+        auto el_l1 = ebml_stream.FindNextElement(el_l0->Generic().Context, i_upper_level, ~0, true);
         while (el_l1 != nullptr) {
             parseLevel1Element(item, ebml_stream, el_l1, p_io_handler);
 
@@ -166,10 +163,10 @@ void MatroskaHandler::parseMKV(const std::shared_ptr<CdsItem>& item, MemIOHandle
             el_l1 = ebml_stream.FindNextElement(el_l0->Generic().Context, i_upper_level, ~0, true);
         } // while elementLevel1
 
-        el_l0->SkipData(ebml_stream, KaxSegment_Context);
+        el_l0->SkipData(ebml_stream, LIBMATROSKA_NAMESPACE::KaxSegment_Context);
         delete el_l0;
 
-        el_l0 = ebml_stream.FindNextElement(KaxSegment_Context, i_upper_level, ~0, true);
+        el_l0 = ebml_stream.FindNextElement(LIBMATROSKA_NAMESPACE::KaxSegment_Context, i_upper_level, ~0, true);
     } // while elementLevel0
 
     ebml_file.close();
@@ -182,12 +179,12 @@ void MatroskaHandler::parseLevel1Element(const std::shared_ptr<CdsItem>& item, E
         return;
     auto master = dynamic_cast<EbmlMaster*>(el_l1);
     if (!master) {
-        log_debug("dynamic_cast unexpectedly returned nullpt, seems to be broken");
+        log_debug("dynamic_cast unexpectedly returned nullptr, seems to be broken");
         return;
     }
-    if (EbmlId(*master) == KaxInfo::ClassInfos.GlobalId) {
+    if (EbmlId(*master) == LIBMATROSKA_NAMESPACE::KaxInfo::ClassInfos.GlobalId) {
         parseInfo(item, ebml_stream, master);
-    } else if (EbmlId(*master) == KaxAttachments::ClassInfos.GlobalId) {
+    } else if (EbmlId(*master) == LIBMATROSKA_NAMESPACE::KaxAttachments::ClassInfos.GlobalId) {
         parseAttachments(item, ebml_stream, master, p_io_handler);
     }
 }
@@ -203,8 +200,8 @@ void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream
     auto sc = StringConverter::i2i(config); // sure is sure
 
     for (const auto& el : *info) {
-        if (EbmlId(*el) == KaxTitle::ClassInfos.GlobalId) {
-            auto title_el = dynamic_cast<KaxTitle*>(el);
+        if (EbmlId(*el) == LIBMATROSKA_NAMESPACE::KaxTitle::ClassInfos.GlobalId) {
+            auto title_el = dynamic_cast<LIBMATROSKA_NAMESPACE::KaxTitle*>(el);
             if (title_el == nullptr) {
                 log_error("Malformed MKV file; KaxTitle cast failed!");
                 continue;
@@ -212,14 +209,13 @@ void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream
             std::string title(UTFstring(*title_el).GetUTF8());
             // printf("KaxTitle = %s\n", title.c_str());
             item->setMetadata(M_TITLE, sc->convert(title));
-        } else if (EbmlId(*el) == KaxDateUTC::ClassInfos.GlobalId) {
-            auto date_el = dynamic_cast<KaxDateUTC*>(el);
+        } else if (EbmlId(*el) == LIBMATROSKA_NAMESPACE::KaxDateUTC::ClassInfos.GlobalId) {
+            auto date_el = dynamic_cast<LIBMATROSKA_NAMESPACE::KaxDateUTC*>(el);
             if (date_el == nullptr) {
                 log_error("Malformed MKV file; KaxDateUTC cast failed!");
                 continue;
             }
-            time_t i_date = date_el->GetEpochDate();
-            auto f_date = fmt::format("{:%Y-%m-%d}", fmt::gmtime(i_date));
+            auto f_date = fmt::format("{:%Y-%m-%d}", fmt::gmtime(date_el->GetEpochDate()));
             if (!f_date.empty()) {
                 // fmt::print("KaxDateUTC = %s\n", f_date.c_str());
                 item->setMetadata(M_DATE, sc->convert(f_date));
@@ -235,9 +231,9 @@ void MatroskaHandler::parseAttachments(const std::shared_ptr<CdsItem>& item, Ebm
 
     attachments->Read(ebml_stream, EBML_CONTEXT(attachments), i_upper_level, dummy_el, true);
 
-    auto attachedFile = FindChild<KaxAttached>(*attachments);
+    auto attachedFile = FindChild<LIBMATROSKA_NAMESPACE::KaxAttached>(*attachments);
     while (attachedFile && (attachedFile->GetSize() > 0)) {
-        std::string fileName(UTFstring(GetChild<KaxFileName>(*attachedFile)).GetUTF8());
+        std::string fileName(UTFstring(GetChild<LIBMATROSKA_NAMESPACE::KaxFileName>(*attachedFile)).GetUTF8());
         // printf("KaxFileName = %s\n", fileName.c_str());
 
         bool isCoverArt = false;
@@ -246,7 +242,7 @@ void MatroskaHandler::parseAttachments(const std::shared_ptr<CdsItem>& item, Ebm
         }
 
         if (isCoverArt) {
-            auto& fileData = GetChild<KaxFileData>(*attachedFile);
+            const auto& fileData = GetChild<LIBMATROSKA_NAMESPACE::KaxFileData>(*attachedFile);
             // printf("KaxFileData (size=%ld)\n", fileData.GetSize());
 
             if (p_io_handler != nullptr) {
@@ -260,11 +256,11 @@ void MatroskaHandler::parseAttachments(const std::shared_ptr<CdsItem>& item, Ebm
             }
         }
 
-        attachedFile = &GetNextChild<KaxAttached>(*attachments, *attachedFile);
+        attachedFile = &GetNextChild<LIBMATROSKA_NAMESPACE::KaxAttached>(*attachments, *attachedFile);
     }
 }
 
-std::string MatroskaHandler::getContentTypeFromByteVector(const KaxFileData* data) const
+std::string MatroskaHandler::getContentTypeFromByteVector(const LIBMATROSKA_NAMESPACE::KaxFileData* data) const
 {
     std::string art_mimetype = MIMETYPE_DEFAULT;
 #ifdef HAVE_MAGIC
