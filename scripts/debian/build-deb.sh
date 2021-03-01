@@ -136,10 +136,21 @@ deb_arch=$(dpkg --print-architecture)
 deb_name="gerbera_${deb_version}_${deb_arch}.deb"
 
 if [[ ! -f $deb_name ]]; then
-  cmake ../ -DWITH_MAGIC=ON -DWITH_MYSQL=ON -DWITH_CURL=ON -DWITH_JS=ON \
-      -DWITH_TAGLIB=ON -DWITH_AVCODEC=ON -DWITH_FFMPEGTHUMBNAILER=ON \
-      -DWITH_EXIF=ON -DWITH_LASTFM=OFF -DWITH_SYSTEMD=ON -DWITH_DEBUG=ON \
-      -DSTATIC_LIBUPNP=ON -DCMAKE_BUILD_TYPE=Release
+  cmake ../ \
+    -DWITH_MAGIC=ON \
+    -DWITH_MYSQL=ON \
+    -DWITH_CURL=ON \
+    -DWITH_JS=ON \
+    -DWITH_TAGLIB=ON \
+    -DWITH_AVCODEC=ON \
+    -DWITH_FFMPEGTHUMBNAILER=ON \
+    -DWITH_EXIF=ON \
+    -DWITH_LASTFM=OFF \
+    -DWITH_SYSTEMD=ON \
+    -DWITH_DEBUG=ON \
+    -DSTATIC_LIBUPNP=ON \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/usr
   make "-j$(nproc)"
 
   cpack -G DEB -D CPACK_DEBIAN_PACKAGE_VERSION="$deb_version" -D CPACK_DEBIAN_PACKAGE_ARCHITECTURE="$deb_arch"
