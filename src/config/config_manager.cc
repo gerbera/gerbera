@@ -172,7 +172,7 @@ static const std::map<std::string_view, std::string_view> tr_mt_defaults = {
     { "audio/ogg", "ogg2mp3" },
 };
 
-static const std::map<std::string_view, std::string_view> album_prop_defaults = {
+static const std::map<std::string_view, std::string_view> upnp_album_prop_defaults = {
     { "dc:creator", "M_ALBUMARTIST" },
     { "upnp:artist", "M_ALBUMARTIST" },
     { "upnp:albumArtist", "M_ALBUMARTIST" },
@@ -183,6 +183,12 @@ static const std::map<std::string_view, std::string_view> album_prop_defaults = 
     { "dc:date", "M_UPNP_DATE" },
     { "upnp:producer", "M_PRODUCER" },
     { "dc:publisher", "M_PUBLISHER" },
+    { "upnp:genre", "M_GENRE" },
+};
+
+static const std::map<std::string_view, std::string_view> upnp_artist_prop_defaults = {
+    { "upnp:artist", "M_ALBUMARTIST" },
+    { "upnp:albumArtist", "M_ALBUMARTIST" },
     { "upnp:genre", "M_GENRE" },
 };
 
@@ -814,6 +820,23 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = 
         "attribute::user", "config-server.html#ui",
         ""),
 
+    std::make_shared<ConfigDictionarySetup>(CFG_UPNP_ALBUM_PROPERTIES,
+        "/server/upnp/album-properties", "config-server.html#upnp",
+        ATTR_UPNP_PROPERTIES_PROPERTY, ATTR_UPNP_PROPERTIES_UPNPTAG, ATTR_UPNP_PROPERTIES_METADATA,
+        false, false, true, upnp_album_prop_defaults),
+    std::make_shared<ConfigDictionarySetup>(CFG_UPNP_ARTIST_PROPERTIES,
+        "/server/upnp/artist-properties", "config-server.html#upnp",
+        ATTR_UPNP_PROPERTIES_PROPERTY, ATTR_UPNP_PROPERTIES_UPNPTAG, ATTR_UPNP_PROPERTIES_METADATA,
+        false, false, true, upnp_artist_prop_defaults),
+    std::make_shared<ConfigDictionarySetup>(CFG_UPNP_TITLE_PROPERTIES,
+        "/server/upnp/title-properties", "config-server.html#upnp",
+        ATTR_UPNP_PROPERTIES_PROPERTY, ATTR_UPNP_PROPERTIES_UPNPTAG, ATTR_UPNP_PROPERTIES_METADATA,
+        false, false, false),
+    std::make_shared<ConfigStringSetup>(ATTR_UPNP_PROPERTIES_UPNPTAG,
+        "attribute::upnp-tag", "config-server.html#upnp"),
+    std::make_shared<ConfigStringSetup>(ATTR_UPNP_PROPERTIES_METADATA,
+        "attribute::meta-data", "config-server.html#upnp"),
+
     // simpleOptions
 
     std::make_shared<ConfigSetup>(ATTR_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN_OPTION,
@@ -838,12 +861,19 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = 
         "genre", ""),
     std::make_shared<ConfigSetup>(ATTR_IMPORT_SYSTEM_DIR_ADD_PATH,
         "add-path", ""),
+
+    std::make_shared<ConfigSetup>(ATTR_UPNP_PROPERTIES_PROPERTY,
+        "upnp-property", ""),
 };
 
 const std::map<config_option_t, std::vector<config_option_t>> ConfigManager::parentOptions = {
     { ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED, { CFG_TRANSCODING_PROFILE_LIST } },
     { ATTR_TRANSCODING_PROFILES_PROFLE_ACCURL, { CFG_TRANSCODING_PROFILE_LIST } },
     { ATTR_TRANSCODING_PROFILES_PROFLE_TYPE, { CFG_TRANSCODING_PROFILE_LIST } },
+
+    { ATTR_UPNP_PROPERTIES_PROPERTY, { CFG_UPNP_ALBUM_PROPERTIES, CFG_UPNP_ARTIST_PROPERTIES, CFG_UPNP_TITLE_PROPERTIES } },
+    { ATTR_UPNP_PROPERTIES_UPNPTAG, { CFG_UPNP_ALBUM_PROPERTIES, CFG_UPNP_ARTIST_PROPERTIES, CFG_UPNP_TITLE_PROPERTIES } },
+    { ATTR_UPNP_PROPERTIES_METADATA, { CFG_UPNP_ALBUM_PROPERTIES, CFG_UPNP_ARTIST_PROPERTIES, CFG_UPNP_TITLE_PROPERTIES } },
 
     { ATTR_AUTOSCAN_DIRECTORY_LOCATION, { CFG_IMPORT_AUTOSCAN_TIMED_LIST,
 #ifdef HAVE_INOTIFY
@@ -1113,6 +1143,9 @@ void ConfigManager::load(const fs::path& userHome)
     setOption(root, CFG_SERVER_UI_ACCOUNTS_ENABLED);
     setOption(root, CFG_SERVER_UI_ACCOUNT_LIST);
     setOption(root, CFG_SERVER_UI_SESSION_TIMEOUT);
+    setOption(root, CFG_UPNP_ALBUM_PROPERTIES);
+    setOption(root, CFG_UPNP_ARTIST_PROPERTIES);
+    setOption(root, CFG_UPNP_TITLE_PROPERTIES);
 
     bool cl_en = setOption(root, CFG_CLIENTS_LIST_ENABLED)->getBoolOption();
     args["isEnabled"] = cl_en ? "true" : "false";
