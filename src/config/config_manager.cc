@@ -1321,6 +1321,8 @@ void ConfigManager::load(const fs::path& userHome)
 #ifdef HAVE_INOTIFY
     if (useInotify) {
         setOption(root, CFG_IMPORT_AUTOSCAN_INOTIFY_LIST, &args);
+    } else {
+        setOption({}, CFG_IMPORT_AUTOSCAN_INOTIFY_LIST); // set empty list
     }
 #endif
     args.clear();
