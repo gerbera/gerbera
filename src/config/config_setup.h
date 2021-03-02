@@ -542,6 +542,7 @@ protected:
     bool itemNotEmpty = false;
     DictionaryInitFunction initDict = nullptr;
     bool tolower = false;
+    std::map<std::string_view, std::string_view> defaultEntries = {};
 
     /// \brief Creates a dictionary from an XML nodeset.
     /// \param element starting element of the nodeset.
@@ -567,18 +568,23 @@ public:
     config_option_t keyOption;
     config_option_t valOption;
 
-    explicit ConfigDictionarySetup(config_option_t option, const char* xpath, const char* help, DictionaryInitFunction init = nullptr, bool notEmpty = false, bool itemNotEmpty = false)
-        : ConfigSetup(option, xpath, help)
+    explicit ConfigDictionarySetup(config_option_t option, const char* xpath, const char* help, DictionaryInitFunction init = nullptr,
+        bool notEmpty = false, bool itemNotEmpty = false, bool required = false, const std::map<std::string_view, std::string_view>& defaultEntries = {})
+        : ConfigSetup(option, xpath, help, required && defaultEntries.empty())
         , notEmpty(notEmpty)
         , itemNotEmpty(itemNotEmpty)
         , initDict(init)
+        , defaultEntries(defaultEntries)
     {
     }
 
-    explicit ConfigDictionarySetup(config_option_t option, const char* xpath, const char* help, config_option_t nodeOption, config_option_t keyOption, config_option_t valOption, bool notEmpty = false, bool itemNotEmpty = false)
-        : ConfigSetup(option, xpath, help)
+    explicit ConfigDictionarySetup(config_option_t option, const char* xpath, const char* help,
+        config_option_t nodeOption, config_option_t keyOption, config_option_t valOption,
+        bool notEmpty = false, bool itemNotEmpty = false, bool required = false, const std::map<std::string_view, std::string_view>& defaultEntries = {})
+        : ConfigSetup(option, xpath, help, required && defaultEntries.empty())
         , notEmpty(notEmpty)
         , itemNotEmpty(itemNotEmpty)
+        , defaultEntries(defaultEntries)
         , nodeOption(nodeOption)
         , keyOption(keyOption)
         , valOption(valOption)

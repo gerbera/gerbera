@@ -52,6 +52,7 @@
 #include "config_setup.h"
 #include "content/autoscan.h"
 #include "database/database.h"
+#include "metadata/metadata_handler.h"
 #include "transcoding/transcoding.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
@@ -106,6 +107,84 @@ std::shared_ptr<Config> ConfigManager::getSelf()
 }
 
 static const std::vector<std::string_view> excludes_fullpath = { "/bin", "/boot", "/dev", "/etc", "/lib", "/lib32", "/lib64", "/libx32", "/proc", "/run", "/sbin", "/sys", "/tmp", "/usr", "/var" };
+
+static const std::map<std::string_view, std::string_view> mt_ct_defaults = {
+    { "audio/mpeg", CONTENT_TYPE_MP3 },
+    { "application/ogg", CONTENT_TYPE_OGG },
+    { "audio/ogg", CONTENT_TYPE_OGG },
+    { "audio/x-flac", CONTENT_TYPE_FLAC },
+    { "audio/flac", CONTENT_TYPE_FLAC },
+    { "audio/x-ms-wma", CONTENT_TYPE_WMA },
+    { "audio/x-wavpack", CONTENT_TYPE_WAVPACK },
+    { "image/jpeg", CONTENT_TYPE_JPG },
+    { "audio/x-mpegurl", CONTENT_TYPE_PLAYLIST },
+    { "audio/x-scpls", CONTENT_TYPE_PLAYLIST },
+    { "audio/x-wav", CONTENT_TYPE_PCM },
+    { "audio/L16", CONTENT_TYPE_PCM },
+    { "video/x-msvideo", CONTENT_TYPE_AVI },
+    { "video/mp4", CONTENT_TYPE_MP4 },
+    { "audio/mp4", CONTENT_TYPE_MP4 },
+    { "video/x-matroska", CONTENT_TYPE_MKV },
+    { "audio/x-matroska", CONTENT_TYPE_MKA },
+    { "audio/x-dsd", CONTENT_TYPE_DSD },
+};
+
+static const std::map<std::string_view, std::string_view> mt_upnp_defaults = {
+    { "audio/*", UPNP_CLASS_MUSIC_TRACK },
+    { "video/*", UPNP_CLASS_VIDEO_ITEM },
+    { "image/*", UPNP_CLASS_IMAGE_ITEM },
+    { "application/ogg", UPNP_CLASS_MUSIC_TRACK },
+};
+
+static const std::map<std::string_view, std::string_view> ext_mt_defaults = {
+    { "asf", "video/x-ms-asf" },
+    { "asx", "video/x-ms-asf" },
+    { "dff", "audio/x-dsd" },
+    { "dsf", "audio/x-dsd" },
+    { "flv", "video/x-flv" },
+    { "m2ts", "video/mp2t" }, // LibMagic fails to identify MPEG2 Transport Streams
+    { "m3u", "audio/x-mpegurl" },
+    { "mka", "audio/x-matroska" },
+    { "mkv", "video/x-matroska" },
+    { "mp3", "audio/mpeg" },
+    { "mts", "video/mp2t" }, // LibMagic fails to identify MPEG2 Transport Streams
+    { "oga", "audio/ogg" },
+    { "ogg", "audio/ogg" },
+    { "ogm", "video/ogg" },
+    { "ogv", "video/ogg" },
+    { "ogx", "application/ogg" },
+    { "pls", "audio/x-scpls" },
+    { "ts", "video/mp2t" }, // LibMagic fails to identify MPEG2 Transport Streams
+    { "tsa", "audio/mp2t" }, // LibMagic fails to identify MPEG2 Transport Streams
+    { "tsv", "video/mp2t" }, // LibMagic fails to identify MPEG2 Transport Streams
+    { "wax", "audio/x-ms-wax" },
+    { "wm", "video/x-ms-wm" },
+    { "wma", "audio/x-ms-wma" },
+    { "wmv", "video/x-ms-wmv" },
+    { "wmx", "video/x-ms-wmx" },
+    { "wv", "audio/x-wavpack" },
+    { "wvx", "video/x-ms-wvx" },
+};
+
+static const std::map<std::string_view, std::string_view> tr_mt_defaults = {
+    { "video/x-flv", "vlcmpeg" },
+    { "application/ogg", "vlcmpeg" },
+    { "audio/ogg", "ogg2mp3" },
+};
+
+static const std::map<std::string_view, std::string_view> album_prop_defaults = {
+    { "dc:creator", "M_ALBUMARTIST" },
+    { "upnp:artist", "M_ALBUMARTIST" },
+    { "upnp:albumArtist", "M_ALBUMARTIST" },
+    { "upnp:composer", "M_COMPOSER" },
+    { "upnp:conductor", "M_CONDUCTOR" },
+    { "upnp:orchestra", "M_ORCHESTRA" },
+    { "upnp:date", "M_UPNP_DATE" },
+    { "dc:date", "M_UPNP_DATE" },
+    { "upnp:producer", "M_PRODUCER" },
+    { "dc:publisher", "M_PUBLISHER" },
+    { "upnp:genre", "M_GENRE" },
+};
 
 const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = {
     std::make_shared<ConfigIntSetup>(CFG_SERVER_PORT,
@@ -297,7 +376,8 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = 
         DEFAULT_FOLLOW_SYMLINKS_VALUE),
     std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST,
         "/import/mappings/extension-mimetype", "config-import.html#extension-mimetype",
-        ATTR_IMPORT_MAPPINGS_MIMETYPE_MAP, ATTR_IMPORT_MAPPINGS_MIMETYPE_FROM, ATTR_IMPORT_MAPPINGS_MIMETYPE_TO),
+        ATTR_IMPORT_MAPPINGS_MIMETYPE_MAP, ATTR_IMPORT_MAPPINGS_MIMETYPE_FROM, ATTR_IMPORT_MAPPINGS_MIMETYPE_TO,
+        false, false, true, ext_mt_defaults),
     std::make_shared<ConfigBoolSetup>(CFG_IMPORT_MAPPINGS_IGNORE_UNKNOWN_EXTENSIONS,
         "/import/mappings/extension-mimetype/attribute::ignore-unknown", "config-import.html#extension-mimetype",
         DEFAULT_IGNORE_UNKNOWN_EXTENSIONS),
@@ -306,10 +386,12 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = 
         DEFAULT_CASE_SENSITIVE_EXTENSION_MAPPINGS),
     std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST,
         "/import/mappings/mimetype-upnpclass", "config-import.html#mime-type-upnpclass",
-        ATTR_IMPORT_MAPPINGS_MIMETYPE_MAP, ATTR_IMPORT_MAPPINGS_MIMETYPE_FROM, ATTR_IMPORT_MAPPINGS_MIMETYPE_TO),
+        ATTR_IMPORT_MAPPINGS_MIMETYPE_MAP, ATTR_IMPORT_MAPPINGS_MIMETYPE_FROM, ATTR_IMPORT_MAPPINGS_MIMETYPE_TO,
+        false, false, true, mt_upnp_defaults),
     std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST,
         "/import/mappings/mimetype-contenttype", "config-import.html#mime-type-upnpclass",
-        ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_TREAT, ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_MIMETYPE, ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_AS),
+        ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_TREAT, ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_MIMETYPE, ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_AS,
+        false, false, true, mt_ct_defaults),
     std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_LAYOUT_MAPPING,
         "/import/layout", "config-import.html#layout",
         ATTR_IMPORT_LAYOUT_MAPPING_PATH, ATTR_IMPORT_LAYOUT_MAPPING_FROM, ATTR_IMPORT_LAYOUT_MAPPING_TO),
@@ -630,7 +712,8 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = 
         "-1", ConfigIntSetup::CheckProfileNumberValue),
     std::make_shared<ConfigDictionarySetup>(ATTR_TRANSCODING_MIMETYPE_PROF_MAP,
         "/transcoding/mimetype-profile-mappings", "config-transcode.html#profiles",
-        ATTR_TRANSCODING_MIMETYPE_PROF_MAP_TRANSCODE, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_USING),
+        ATTR_TRANSCODING_MIMETYPE_PROF_MAP_TRANSCODE, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_USING,
+        false, false, false, tr_mt_defaults),
     std::make_shared<ConfigSetup>(ATTR_TRANSCODING_PROFILES_PROFLE,
         "/transcoding/profiles/profile", "config-server.html#ui",
         ""),
