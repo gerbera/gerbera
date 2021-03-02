@@ -32,6 +32,7 @@
 #include "upnp_xml.h" // API
 
 #include "config/config_manager.h"
+#include "content/scripting/script_names.h"
 #include "database/database.h"
 #include "metadata/metadata_handler.h"
 #include "request_handler.h"
@@ -53,6 +54,16 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createResponse(const std::st
     root.append_attribute("xmlns:u") = serviceType.c_str();
 
     return response;
+}
+
+metadata_fields_t remapMetaDataField(const std::string& fieldName)
+{
+    for (const auto& [f, s] : mt_names) {
+        if (s == fieldName) {
+            return f;
+        }
+    }
+    return M_MAX;
 }
 
 void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t stringLimit, pugi::xml_node* parent)
@@ -107,6 +118,13 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
                 }
             }
         }
+        const auto titleProperties = config->getDictionaryOption(CFG_UPNP_TITLE_PROPERTIES);
+        for (const auto& [tag, field] : titleProperties) {
+            auto value = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(remapMetaDataField(field)));
+            if (!value.empty()) {
+                result.append_child(tag.c_str()).append_child(pugi::node_pcdata).set_value(value.c_str());
+            }
+        }
 
         addResources(item, &result);
 
@@ -123,39 +141,19 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
         log_debug("container is class: {}", upnp_class.c_str());
         auto meta = obj->getMetadata();
         if (upnp_class == UPNP_CLASS_MUSIC_ALBUM) {
-            constexpr auto albumProperties = std::array<std::pair<const char*, metadata_fields_t>, 11> {
-                {
-                    { "dc:creator", M_ALBUMARTIST },
-                    { "upnp:artist", M_ALBUMARTIST },
-                    { "upnp:albumArtist", M_ALBUMARTIST },
-                    { "upnp:composer", M_COMPOSER },
-                    { "upnp:conductor", M_CONDUCTOR },
-                    { "upnp:orchestra", M_ORCHESTRA },
-                    { "upnp:date", M_UPNP_DATE },
-                    { "dc:date", M_UPNP_DATE },
-                    { "upnp:producer", M_PRODUCER },
-                    { "dc:publisher", M_PUBLISHER },
-                    { "upnp:genre", M_GENRE },
-                }
-            };
+            const auto albumProperties = config->getDictionaryOption(CFG_UPNP_ALBUM_PROPERTIES);
             for (const auto& [tag, field] : albumProperties) {
-                auto value = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(field));
+                auto value = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(remapMetaDataField(field)));
                 if (!value.empty()) {
-                    result.append_child(tag).append_child(pugi::node_pcdata).set_value(value.c_str());
+                    result.append_child(tag.c_str()).append_child(pugi::node_pcdata).set_value(value.c_str());
                 }
             }
         } else if (upnp_class == UPNP_CLASS_MUSIC_ARTIST) {
-            constexpr auto albumProperties = std::array<std::pair<const char*, metadata_fields_t>, 3> {
-                {
-                    { "upnp:artist", M_ALBUMARTIST },
-                    { "upnp:albumArtist", M_ALBUMARTIST },
-                    { "upnp:genre", M_GENRE },
-                }
-            };
-            for (const auto& [tag, field] : albumProperties) {
-                auto value = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(field));
+            const auto artistProperties = config->getDictionaryOption(CFG_UPNP_ARTIST_PROPERTIES);
+            for (const auto& [tag, field] : artistProperties) {
+                auto value = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(remapMetaDataField(field)));
                 if (!value.empty()) {
-                    result.append_child(tag).append_child(pugi::node_pcdata).set_value(value.c_str());
+                    result.append_child(tag.c_str()).append_child(pugi::node_pcdata).set_value(value.c_str());
                 }
             }
         }
