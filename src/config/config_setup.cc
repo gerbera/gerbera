@@ -714,25 +714,6 @@ bool ConfigDictionarySetup::createDictionaryFromNode(const pugi::xml_node& optVa
                 return false;
             }
         }
-    } else if (option == CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST) {
-        result["audio/mpeg"] = CONTENT_TYPE_MP3;
-        result["audio/mp4"] = CONTENT_TYPE_MP4;
-        result["video/mp4"] = CONTENT_TYPE_MP4;
-        result["application/ogg"] = CONTENT_TYPE_OGG;
-        result["audio/x-flac"] = CONTENT_TYPE_FLAC;
-        result["audio/flac"] = CONTENT_TYPE_FLAC;
-        result["image/jpeg"] = CONTENT_TYPE_JPG;
-        result["audio/x-mpegurl"] = CONTENT_TYPE_PLAYLIST;
-        result["audio/x-scpls"] = CONTENT_TYPE_PLAYLIST;
-        result["audio/x-wav"] = CONTENT_TYPE_PCM;
-        result["audio/wave"] = CONTENT_TYPE_PCM;
-        result["audio/wav"] = CONTENT_TYPE_PCM;
-        result["audio/vnd.wave"] = CONTENT_TYPE_PCM;
-        result["audio/L16"] = CONTENT_TYPE_PCM;
-        result["audio/x-aiff"] = CONTENT_TYPE_AIFF;
-        result["audio/aiff"] = CONTENT_TYPE_AIFF;
-        result["video/x-msvideo"] = CONTENT_TYPE_AVI;
-        result["video/mpeg"] = CONTENT_TYPE_MPEG;
     }
     return true;
 }
@@ -825,9 +806,13 @@ std::map<std::string, std::string> ConfigDictionarySetup::getXmlContent(const pu
             throw_std_runtime_error("Init {} dictionary failed '{}'", xpath, optValue);
         }
     } else {
-        if (!createDictionaryFromNode(optValue, result)) {
+        if (!createDictionaryFromNode(optValue, result) && required) {
             throw_std_runtime_error("Init {} dictionary failed '{}'", xpath, optValue);
         }
+    }
+    if (result.empty()) {
+        log_debug("{} assinging {} default values", xpath, defaultEntries.size());
+        result.insert(defaultEntries.begin(), defaultEntries.end());
     }
     if (notEmpty && result.empty()) {
         throw_std_runtime_error("Invalid dictionary {} empty '{}'", xpath, optValue);
