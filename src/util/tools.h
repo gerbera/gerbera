@@ -34,6 +34,7 @@
 #include <filesystem>
 #include <map>
 #include <memory>
+#include <optional>
 #include <sstream>
 #include <string>
 #include <unordered_set>
