@@ -412,12 +412,16 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, const std::shared_ptr
 {
     TagLib::MPEG::File mp3(roStream, TagLib::ID3v2::FrameFactory::instance());
 
-    if (!mp3.isValid() || !mp3.hasID3v2Tag()) {
-        log_info("TagLibHandler {}: could not open mp3 file",
-            item->getLocation().c_str());
+    if (!mp3.isValid()) {
+        log_info("TagLibHandler {}: does not appear to be a valid mp3 file", item->getLocation().c_str());
         return;
     }
     populateGenericTags(item, mp3);
+
+    if (!mp3.hasID3v2Tag()) {
+        log_debug("{}: has no IDv2 tags", item->getLocation().c_str());
+        return;
+    }
 
     auto sc = StringConverter::i2i(config);
 
@@ -493,11 +497,10 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, const std::shared_ptr
 
 void TagLibHandler::extractOgg(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item) const
 {
-    TagLib::Ogg::Vorbis::File vorbis(item->getLocation().c_str());
+    TagLib::Ogg::Vorbis::File vorbis(roStream);
 
     if (!vorbis.isValid()) {
-        log_info("TagLibHandler {}: could not open ogg file",
-            item->getLocation().c_str());
+        log_info("TagLibHandler {}: does not appear to be a valid ogg file", item->getLocation().c_str());
         return;
     }
     populateGenericTags(item, vorbis);
@@ -528,8 +531,7 @@ void TagLibHandler::extractASF(TagLib::IOStream* roStream, const std::shared_ptr
     TagLib::ASF::File asf(roStream);
 
     if (!asf.isValid()) {
-        log_debug("TagLibHandler {}: could not open asf/wma file",
-            item->getLocation().c_str());
+        log_info("TagLibHandler {}: does not appear to be a valid asf/wma file", item->getLocation().c_str());
         return;
     }
     populateGenericTags(item, asf);
@@ -565,8 +567,7 @@ void TagLibHandler::extractFLAC(TagLib::IOStream* roStream, const std::shared_pt
     TagLib::FLAC::File flac(roStream, TagLib::ID3v2::FrameFactory::instance());
 
     if (!flac.isValid()) {
-        log_info("TagLibHandler {}: could not open flac file",
-            item->getLocation().c_str());
+        log_info("TagLibHandler {}: does not appear to be a valid flac file", item->getLocation().c_str());
         return;
     }
     populateGenericTags(item, flac);
@@ -623,8 +624,7 @@ void TagLibHandler::extractAPE(TagLib::IOStream* roStream, const std::shared_ptr
     TagLib::APE::File ape(roStream);
 
     if (!ape.isValid()) {
-        log_info("TagLibHandler {}: could not open APE file",
-            item->getLocation().c_str());
+        log_info("TagLibHandler {}: does not appear to be a valid APE file", item->getLocation().c_str());
         return;
     }
     populateGenericTags(item, ape);
@@ -642,8 +642,7 @@ void TagLibHandler::extractWavPack(TagLib::IOStream* roStream, const std::shared
     TagLib::WavPack::File wavpack(roStream);
 
     if (!wavpack.isValid()) {
-        log_info("TagLibHandler {}: could not open WavPack file",
-            item->getLocation().c_str());
+        log_info("TagLibHandler {}: does not appear to be a valid WavPack file", item->getLocation().c_str());
         return;
     }
     populateGenericTags(item, wavpack);
@@ -661,7 +660,7 @@ void TagLibHandler::extractMP4(TagLib::IOStream* roStream, const std::shared_ptr
     TagLib::MP4::File mp4(roStream);
 
     if (!mp4.isValid()) {
-        log_info("TagLibHandler {}: could not open mp4 file", item->getLocation().c_str());
+        log_info("TagLibHandler {}: does not appear to be a valid mp4 file", item->getLocation().c_str());
         return;
     }
 
@@ -704,8 +703,7 @@ void TagLibHandler::extractAiff(TagLib::IOStream* roStream, const std::shared_pt
     TagLib::RIFF::AIFF::File aiff(roStream);
 
     if (!aiff.isValid()) {
-        log_info("TagLibHandler {}: could not open AIFF file",
-            item->getLocation().c_str());
+        log_info("TagLibHandler {}: does not appear to be a valid AIFF file", item->getLocation().c_str());
         return;
     }
     populateGenericTags(item, aiff);
