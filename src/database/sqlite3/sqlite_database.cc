@@ -170,10 +170,8 @@ void Sqlite3Database::init()
     try {
         _exec("PRAGMA locking_mode = EXCLUSIVE");
         _exec("PRAGMA foreign_keys = ON");
-        int synchronousOption = config->getIntOption(CFG_SERVER_STORAGE_SQLITE_SYNCHRONOUS);
-        std::ostringstream buf;
-        buf << "PRAGMA synchronous = " << synchronousOption;
-        SQLDatabase::exec(buf);
+        _exec("PRAGMA journal_mode = WAL;");
+        SQLDatabase::exec(fmt::format("PRAGMA synchronous = {}", config->getIntOption(CFG_SERVER_STORAGE_SQLITE_SYNCHRONOUS)));
     } catch (const std::runtime_error& e) {
         shutdown();
         throw_std_runtime_error("Sqlite3Database.init: could not open '{}' exclusively", dbFilePath);
@@ -483,7 +481,7 @@ void Sqlite3Database::storeInternalSetting(const std::string& key, const std::st
     q << "INSERT OR REPLACE INTO " << QTB << INTERNAL_SETTINGS_TABLE << QTE << " (" << QTB << "key" << QTE << ", " << QTB << "value" << QTE << ") "
                                                                                                                                                "VALUES ("
       << quote(key) << ", " << quote(value) << ") ";
-    SQLDatabase::exec(q);
+    SQLDatabase::exec(q.str());
 }
 
 /* SLTask */

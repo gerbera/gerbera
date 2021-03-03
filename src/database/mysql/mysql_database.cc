@@ -389,7 +389,7 @@ void MySQLDatabase::storeInternalSetting(const std::string& key, const std::stri
       << quote(key) << ", " << quotedValue << ") "
                                               "ON DUPLICATE KEY UPDATE `value` = "
       << quotedValue;
-    SQLDatabase::exec(q);
+    SQLDatabase::exec(q.str());
 }
 
 void MySQLDatabase::_exec(const char* query, int length)

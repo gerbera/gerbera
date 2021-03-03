@@ -365,19 +365,17 @@ void SQLDatabase::addObject(std::shared_ptr<CdsObject> obj, int* changedContaine
 {
     if (obj->getID() != INVALID_OBJECT_ID)
         throw_std_runtime_error("tried to add an object with an object ID set");
-    //obj->setID(INVALID_OBJECT_ID);
+
     std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> tables = _addUpdateObject(obj, false, changedContainer);
-
     for (const auto& addUpdateTable : tables) {
-
         auto qb = sqlForInsert(obj, addUpdateTable);
         log_debug("Generated insert: {}", qb->str().c_str());
 
         if (addUpdateTable->getTableName() == CDS_OBJECT_TABLE) {
-            int newId = exec(*qb, true);
+            int newId = exec(qb->str(), true);
             obj->setID(newId);
         } else {
-            exec(*qb, false);
+            exec(qb->str(), false);
         }
     }
 }
@@ -398,6 +396,8 @@ void SQLDatabase::updateObject(std::shared_ptr<CdsObject> obj, int* changedConta
             throw_std_runtime_error("Tried to update an object with a forbidden ID ({})", obj->getID());
         data = _addUpdateObject(obj, true, changedContainer);
     }
+
+    exec("BEGIN TRANSACTION");
     for (const auto& addUpdateTable : data) {
         std::string operation = addUpdateTable->getOperation();
         std::unique_ptr<std::ostringstream> qb;
@@ -410,8 +410,9 @@ void SQLDatabase::updateObject(std::shared_ptr<CdsObject> obj, int* changedConta
         }
 
         log_debug("upd_query: {}", qb->str().c_str());
-        exec(*qb);
+        exec(qb->str());
     }
+    exec("COMMIT");
 }
 
 std::shared_ptr<CdsObject> SQLDatabase::loadObject(int objectID)
@@ -762,7 +763,7 @@ int SQLDatabase::createContainer(int parentID, std::string name, const std::stri
     }
     qb << ')';
 
-    int newId = exec(qb, true); // true = get last id#
+    int newId = exec(qb.str(), true); // true = get last id#
     log_debug("Created object row, id: {}", newId);
 
     if (!itemMetadata.empty()) {
@@ -778,7 +779,7 @@ int SQLDatabase::createContainer(int parentID, std::string name, const std::stri
                << quote(key) << ","
                << quote(val)
                << ")";
-            exec(ib);
+            exec(ib.str());
         }
         log_debug("Wrote metadata for cds_object {}", newId);
     }
@@ -1087,7 +1088,7 @@ std::string SQLDatabase::incrementUpdateIDs(const std::unique_ptr<std::unordered
     bufUpdate << "UPDATE " << TQ(CDS_OBJECT_TABLE) << " SET " << TQ("update_id")
               << '=' << TQ("update_id") << " + 1 WHERE " << TQ("id") << ' ';
     bufUpdate << inBuf.str();
-    exec(bufUpdate);
+    exec(bufUpdate.str());
 
     std::ostringstream bufSelect;
     bufSelect << "SELECT " << TQ("id") << ',' << TQ("update_id") << " FROM "
@@ -1250,7 +1251,7 @@ void SQLDatabase::_removeObjects(const std::vector<int32_t>& objectIDs)
         << " WHERE " << TQD('o', "id")
         << " IN (" << objectIdsStr << ')';
 
-    log_debug("{}", sel.str().c_str());
+    log_debug("{}", sel.str());
 
     auto res = select(sel);
     if (res != nullptr) {
@@ -1266,7 +1267,7 @@ void SQLDatabase::_removeObjects(const std::vector<int32_t>& objectIDs)
                   << " SET " << TQ("obj_id") << "=" SQL_NULL
                   << ',' << TQ("location") << '=' << quote(location)
                   << " WHERE " << TQ("id") << '=' << quote(row->col(0));
-                exec(u);
+                exec(u.str());
             } else {
                 delete_as.emplace_back(row->col_c_str(0));
             }
@@ -1279,7 +1280,7 @@ void SQLDatabase::_removeObjects(const std::vector<int32_t>& objectIDs)
                         << " WHERE " << TQ("id") << " IN ("
                         << join(delete_as, ',')
                         << ')';
-            exec(delAutoscan);
+            exec(delAutoscan.str());
             log_debug("deleting autoscans: {}", delAutoscan.str().c_str());
         }
     }
@@ -1288,7 +1289,7 @@ void SQLDatabase::_removeObjects(const std::vector<int32_t>& objectIDs)
     qObject << "DELETE FROM " << TQ(CDS_OBJECT_TABLE)
             << " WHERE " << TQ("id")
             << " IN (" << objectIdsStr << ')';
-    exec(qObject);
+    exec(qObject.str());
 }
 
 std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObject(int objectID, bool all)
@@ -1617,7 +1618,7 @@ void SQLDatabase::removeConfigValue(const std::string& item)
         del << " WHERE " << TQ("item") << '=' << quote(item);
     }
     log_info("deleting {} item", item);
-    exec(del);
+    exec(del.str());
 }
 
 void SQLDatabase::updateConfigValue(const std::string& key, const std::string& item, const std::string& value, const std::string& status)
@@ -1646,8 +1647,8 @@ void SQLDatabase::updateConfigValue(const std::string& key, const std::string& i
                << quote(value) << ','
                << quote(status)
                << ')';
-        exec(insert);
-        log_info("inserted for {} as {} {}", key, item, value);
+        exec(insert.str());
+        log_debug("inserted for {} as {} {}", key, item, value);
     } else {
         std::ostringstream update;
         update << "UPDATE "
@@ -1656,8 +1657,8 @@ void SQLDatabase::updateConfigValue(const std::string& key, const std::string& i
                << TQ("item_value") << '=' << quote(value)
                << " WHERE "
                << TQ("item") << '=' << quote(item);
-        exec(update);
-        log_info("updated for {} as {} {}", key, item, value);
+        exec(update.str());
+        log_debug("updated for {} as {} {}", key, item, value);
     }
 }
 
@@ -1672,7 +1673,7 @@ void SQLDatabase::updateAutoscanList(ScanMode scanmode, std::shared_ptr<Autoscan
            << TQ("persistent") << '=' << mapBool(true)
            << " AND " << TQ("scan_mode") << '='
            << quote(AutoscanDirectory::mapScanmode(scanmode));
-    exec(update);
+    exec(update.str());
 
     size_t listSize = list->size();
     log_debug("updating/adding persistent autoscans (count: {})", listSize);
@@ -1718,7 +1719,7 @@ void SQLDatabase::updateAutoscanList(ScanMode scanmode, std::shared_ptr<Autoscan
         << " WHERE " << TQ("touched") << '=' << mapBool(false)
         << " AND " << TQ("scan_mode") << '='
         << quote(AutoscanDirectory::mapScanmode(scanmode));
-    exec(del);
+    exec(del.str());
 }
 
 std::shared_ptr<AutoscanList> SQLDatabase::getAutoscanList(ScanMode scanmode)
@@ -1849,7 +1850,7 @@ void SQLDatabase::addAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir)
       << (objectID >= 0 ? SQL_NULL : quote(adir->getLocation())) << ','
       << (pathIds == nullptr ? SQL_NULL : quote("," + toCSV(*pathIds) + ','))
       << ')';
-    adir->setDatabaseID(exec(q, true));
+    adir->setDatabaseID(exec(q.str(), true));
 }
 
 void SQLDatabase::updateAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir)
@@ -1884,7 +1885,7 @@ void SQLDatabase::updateAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adi
       << ',' << TQ("path_ids") << '=' << (pathIds == nullptr ? SQL_NULL : quote("," + toCSV(*pathIds) + ','))
       << ',' << TQ("touched") << '=' << mapBool(true)
       << " WHERE " << TQ("id") << '=' << quote(adir->getDatabaseID());
-    exec(q);
+    exec(q.str());
 }
 
 void SQLDatabase::removeAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir)
@@ -1900,7 +1901,7 @@ void SQLDatabase::_removeAutoscanDirectory(int autoscanID)
     std::ostringstream q;
     q << "DELETE FROM " << TQ(AUTOSCAN_TABLE)
       << " WHERE " << TQ("id") << '=' << quote(autoscanID);
-    exec(q);
+    exec(q.str());
     if (objectID != INVALID_OBJECT_ID)
         _autoscanChangePersistentFlag(objectID, false);
 }
@@ -1931,7 +1932,7 @@ void SQLDatabase::_autoscanChangePersistentFlag(int objectID, bool persistent)
       << (persistent ? " | " : " & ~")
       << OBJECT_FLAG_PERSISTENT_CONTAINER
       << ") WHERE " << TQ("id") << '=' << quote(objectID);
-    exec(q);
+    exec(q.str());
 }
 
 void SQLDatabase::checkOverlappingAutoscans(std::shared_ptr<AutoscanDirectory> adir)
@@ -2016,8 +2017,9 @@ std::unique_ptr<std::vector<int>> SQLDatabase::_checkOverlappingAutoscans(const 
 
     int objectID = std::stoi(row->col(0));
     auto obj = loadObject(objectID);
-    if (obj == nullptr)
+    if (obj == nullptr) {
         throw_std_runtime_error("Referenced object (by Autoscan) not found.");
+    }
     log_error("Overlapping Autoscans are not allowed. There is already a recursive Autoscan set on {}", obj->getLocation().c_str());
     throw_std_runtime_error("Overlapping Autoscans are not allowed. There is already a recursive Autoscan set on {}", obj->getLocation().c_str());
 }
@@ -2078,7 +2080,7 @@ void SQLDatabase::clearFlagInDB(int flag)
        << ") WHERE "
        << TQ("flags")
        << "&" << flag;
-    exec(qb);
+    exec(qb.str());
 }
 
 void SQLDatabase::generateMetadataDBOperations(const std::shared_ptr<CdsObject>& obj, bool isUpdate,
@@ -2262,7 +2264,7 @@ void SQLDatabase::migrateMetadata(const std::shared_ptr<CdsObject>& object)
                << " (" << fields.str()
                << ") VALUES (" << values.str() << ')';
 
-            exec(qb);
+            exec(qb.str());
         }
     } else {
         log_debug("Skipping migration - no metadata for cds object {}", object->getID());

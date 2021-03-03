@@ -102,10 +102,9 @@ public:
         auto s = buf.str();
         return select(s.c_str(), s.length());
     }
-    int exec(const std::ostringstream& buf, bool getLastInsertId = false)
+    int exec(const std::string& query, bool getLastInsertId = false)
     {
-        auto s = buf.str();
-        return exec(s.c_str(), s.length(), getLastInsertId);
+        return exec(query.c_str(), query.length(), getLastInsertId);
     }
 
     void addObject(std::shared_ptr<CdsObject> object, int* changedContainer) override;
