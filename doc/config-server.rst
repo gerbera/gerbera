@@ -638,3 +638,154 @@ Each storage driver has it's own configuration parameters.
     * Default: **Datadir / mysql.sql**
 
     The full path to the init script for the database
+
+
+``upnp``
+~~~~~~~~
+
+::
+
+    <upnp>
+
+* Optional
+
+Modify the settings for UPnP items.
+
+This section defines sets the properties which are send to UPnP clients as part of the response.
+
+    **Child tags:**
+
+    ::
+
+        <album-properties>...</album-properties>
+        <artist-properties>...</artist-properties>
+        <title-properties>...</title-properties>
+
+    * Optional
+
+    Defines the properties to send in the response.
+
+    It contains the following entries.
+
+    ::
+
+        <upnp-property upnp-tag="upnp:artist" meta-data="M_ARTIST"/>
+
+    * Optional
+
+    Defines an UPnP property.
+
+    The attributes specify the property:
+
+        ::
+
+            upnp-tag="..."
+
+        * Required
+
+        UPnP tag to be send. See the UPnP specification for valid entries.
+
+        ::
+
+            meta-data="..."
+
+        * Required
+
+        Name of the metadata tag to export in upnp response. The following values are supported: 
+        M_TITLE, M_ARTIST, M_ALBUM, M_DATE, M_UPNP_DATE, M_GENRE, M_DESCRIPTION, M_LONGDESCRIPTION, 
+        M_PARTNUMBER, M_TRACKNUMBER, M_ALBUMARTURI, M_REGION, M_AUTHOR, M_DIRECTOR, M_PUBLISHER, 
+        M_RATING, M_ACTOR, M_PRODUCER, M_ALBUMARTIST, M_COMPOSER, M_CONDUCTOR, M_ORCHESTRA.
+
+    **Defaults:**
+
+    * Album-Properties
+
+    +----------------------+-------------------+
+    | upnp-tag             | meta-data         |
+    +======================+===================+
+    | ``dc:creator``       | ``M_ALBUMARTIST`` |
+    +----------------------+-------------------+
+    | ``dc:date``          | ``M_UPNP_DATE``   |
+    +----------------------+-------------------+
+    | ``dc:publisher``     | ``M_PUBLISHER``   |
+    +----------------------+-------------------+
+    | ``upnp:artist``      | ``M_ALBUMARTIST`` |
+    +----------------------+-------------------+
+    | ``upnp:albumArtist`` | ``M_ALBUMARTIST`` |
+    +----------------------+-------------------+
+    | ``upnp:composer``    | ``M_COMPOSER``    |
+    +----------------------+-------------------+
+    | ``upnp:conductor``   | ``M_CONDUCTOR``   |
+    +----------------------+-------------------+
+    | ``upnp:date``        | ``M_UPNP_DATE``   |
+    +----------------------+-------------------+
+    | ``upnp:genre``       | ``M_GENRE``       |
+    +----------------------+-------------------+
+    | ``upnp:orchestra``   | ``M_ORCHESTRA``   |
+    +----------------------+-------------------+
+    | ``upnp:producer``    | ``M_PRODUCER``    |
+    +----------------------+-------------------+
+
+    * Artist-Properties
+
+    +----------------------+-------------------+
+    | upnp-tag             | meta-data         |
+    +======================+===================+
+    | ``upnp:artist``      | ``M_ALBUMARTIST`` |
+    +----------------------+-------------------+
+    | ``upnp:albumArtist`` | ``M_ALBUMARTIST`` |
+    +----------------------+-------------------+
+    | ``upnp:genre``       | ``M_GENRE``       |
+    +----------------------+-------------------+
+
+    * Title-Properties
+
+    The title properties cannot be changed, but you may add them under another tag.
+
+    +-----------------------------------+-----------------------+
+    | upnp-tag                          | meta-data             |
+    +===================================+=======================+
+    | ``dc:date``                       | ``M_DATE``            |
+    +-----------------------------------+-----------------------+
+    | ``dc:description``                | ``M_DESCRIPTION``     |
+    +-----------------------------------+-----------------------+
+    | ``dc:publisher``                  | ``M_PUBLISHER``       |
+    +-----------------------------------+-----------------------+
+    | ``dc:title``                      | ``M_TITLE``           |
+    +-----------------------------------+-----------------------+
+    | ``upnp:actor``                    | ``M_ACTOR``           |
+    +-----------------------------------+-----------------------+
+    | ``upnp:album``                    | ``M_ALBUM``           |
+    +-----------------------------------+-----------------------+
+    | ``upnp:albumArtURI``              | ``M_ALBUMARTURI``     |
+    +-----------------------------------+-----------------------+
+    | ``upnp:artist``                   | ``M_ARTIST``          |
+    +-----------------------------------+-----------------------+
+    | ``upnp:artist@role[AlbumArtist]`` | ``M_ALBUMARTIST``     |
+    +-----------------------------------+-----------------------+
+    | ``upnp:author``                   | ``M_AUTHOR``          |
+    +-----------------------------------+-----------------------+
+    | ``upnp:composer``                 | ``M_COMPOSER``        |
+    +-----------------------------------+-----------------------+
+    | ``upnp:conductor``                | ``M_CONDUCTOR``       |
+    +-----------------------------------+-----------------------+
+    | ``upnp:date``                     | ``M_UPNP_DATE``       |
+    +-----------------------------------+-----------------------+
+    | ``upnp:director``                 | ``M_DIRECTOR``        |
+    +-----------------------------------+-----------------------+
+    | ``upnp:episodeSeason``            | ``M_PARTNUMBER``      |
+    +-----------------------------------+-----------------------+
+    | ``upnp:genre``                    | ``M_GENRE``           |
+    +-----------------------------------+-----------------------+
+    | ``upnp:longDescription``          | ``M_LONGDESCRIPTION`` |
+    +-----------------------------------+-----------------------+
+    | ``upnp:orchestra``                | ``M_ORCHESTRA``       |
+    +-----------------------------------+-----------------------+
+    | ``upnp:originalTrackNumber``      | ``M_TRACKNUMBER``     |
+    +-----------------------------------+-----------------------+
+    | ``upnp:producer``                 | ``M_PRODUCER``        |
+    +-----------------------------------+-----------------------+
+    | ``upnp:rating``                   | ``M_RATING``          |
+    +-----------------------------------+-----------------------+
+    | ``upnp:region``                   | ``M_REGION``          |
+    +-----------------------------------+-----------------------+

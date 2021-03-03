@@ -56,7 +56,7 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createResponse(const std::st
     return response;
 }
 
-metadata_fields_t remapMetaDataField(const std::string& fieldName)
+static metadata_fields_t remapMetaDataField(const std::string& fieldName)
 {
     for (const auto& [f, s] : mt_names) {
         if (s == fieldName) {

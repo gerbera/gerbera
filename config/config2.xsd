@@ -82,6 +82,7 @@
                 <xs:element ref="pc-directory" minOccurs="0"/>
                 <xs:element ref="tmpdir" minOccurs="0"/>
                 <xs:element ref="retries-on-timeout" minOccurs="0"/>
+                <xs:element ref="upnp" minOccurs="0"/>
             </xs:all>
         </xs:complexType>
     </xs:element>
@@ -301,7 +302,6 @@
         </xs:complexType>
     </xs:element>
 
-
     <xs:element name="sqlite3">
         <xs:complexType>
             <xs:all>
@@ -362,6 +362,47 @@
     <xs:element name="password" type="xs:string"/>
     <xs:element name="database" type="xs:string" default="localhost"/>
     <xs:element name="socket" type="xs:string"/>
+
+    <xs:element name="upnp">
+        <xs:complexType>
+            <xs:all>
+                <xs:element ref="album-properties" minOccurs="0"/>
+                <xs:element ref="artist-properties" minOccurs="0"/>
+                <xs:element ref="title-properties" minOccurs="0"/>
+            </xs:all>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="album-properties">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="upnp-property" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="artist-properties">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="upnp-property" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="title-properties">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="upnp-property" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="upnp-property">
+        <xs:complexType>
+            <xs:attribute name="upnp-tag" type="xs:string" use="required"/>
+            <xs:attribute name="meta-data" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
 
     <!-- Clients -->
 
