@@ -155,6 +155,7 @@ public:
     Sqlite3Database(std::shared_ptr<Config> config, std::shared_ptr<Timer> timer);
 
 private:
+    void prepare();
     void init() override;
     void shutdownDriver() override;
     std::shared_ptr<Database> getSelf() override;

@@ -129,6 +129,14 @@ Sqlite3Database::Sqlite3Database(std::shared_ptr<Config> config, std::shared_ptr
     hasBackupTimer = false;
 }
 
+void Sqlite3Database::prepare()
+{
+    _exec("PRAGMA locking_mode = EXCLUSIVE");
+    _exec("PRAGMA foreign_keys = ON");
+    _exec("PRAGMA journal_mode = WAL;");
+    SQLDatabase::exec(fmt::format("PRAGMA synchronous = {}", config->getIntOption(CFG_SERVER_STORAGE_SQLITE_SYNCHRONOUS)));
+}
+
 void Sqlite3Database::init()
 {
     dbInitDone = false;
@@ -168,10 +176,7 @@ void Sqlite3Database::init()
 
     // try to detect already active database client and terminate before doing any harm
     try {
-        _exec("PRAGMA locking_mode = EXCLUSIVE");
-        _exec("PRAGMA foreign_keys = ON");
-        _exec("PRAGMA journal_mode = WAL;");
-        SQLDatabase::exec(fmt::format("PRAGMA synchronous = {}", config->getIntOption(CFG_SERVER_STORAGE_SQLITE_SYNCHRONOUS)));
+        prepare();
     } catch (const std::runtime_error& e) {
         shutdown();
         throw_std_runtime_error("Sqlite3Database.init: could not open '{}' exclusively", dbFilePath);
@@ -194,6 +199,7 @@ void Sqlite3Database::init()
                     auto btask = std::make_shared<SLBackupTask>(config, true);
                     this->addTask(btask);
                     btask->waitForTask();
+                    prepare();
                     dbVersion = getInternalSetting("db_version");
                 } catch (const std::runtime_error& e) {
                 }
@@ -211,6 +217,7 @@ void Sqlite3Database::init()
         addTask(itask);
         try {
             itask->waitForTask();
+            prepare();
             dbVersion = getInternalSetting("db_version");
         } catch (const std::runtime_error& e) {
             shutdown();
