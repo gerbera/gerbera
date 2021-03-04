@@ -191,7 +191,7 @@ int main(int argc, char** argv, char** envp)
         bool debug = opts["debug"].as<bool>();
         if (debug) {
             spdlog::set_level(spdlog::level::debug);
-            spdlog::set_pattern("%Y-%m-%d %X %6l: [%s:%#] %!(): %v");
+            spdlog::set_pattern("%Y-%m-%d %X.%e %6l: [%s:%#] %!(): %v");
         } else {
             spdlog::set_level(spdlog::level::info);
             spdlog::set_pattern("%Y-%m-%d %X %6l: %v");
