@@ -266,16 +266,15 @@ void WebRequestHandler::appendTask(const std::shared_ptr<GenericTask>& task, pug
     taskEl.append_attribute("text") = task->getDescription().c_str();
 }
 
-std::string WebRequestHandler::mapAutoscanType(int type)
+std::string_view WebRequestHandler::mapAutoscanType(int type)
 {
     switch (type) {
     case 1:
         return "ui";
     case 2:
         return "persistent";
-    default:
-        return "none";
     }
+    return "none";
 }
 
 } // namespace web

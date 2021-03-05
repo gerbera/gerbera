@@ -79,6 +79,7 @@ public:
 class SQLDatabase : public Database {
 public:
     /* methods to override in subclasses */
+    virtual std::string quote(std::string_view str) const = 0;
     virtual std::string quote(std::string str) const = 0;
     virtual std::string quote(const char* str) const = 0;
     virtual std::string quote(int val) const = 0;

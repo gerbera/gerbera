@@ -143,7 +143,7 @@ public:
     std::shared_ptr<Timer::Parameter> getTimerParameter();
 
     /* helpers for autoscan stuff */
-    static std::string mapScanmode(ScanMode scanmode);
+    static std::string_view mapScanmode(ScanMode scanmode);
     static ScanMode remapScanmode(const std::string& scanmode);
 
 protected:

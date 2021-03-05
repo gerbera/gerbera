@@ -72,7 +72,7 @@ void web::containers::process()
         int childCount = cont->getChildCount();
         ce.append_attribute("child_count") = childCount;
         int autoscanType = cont->getAutoscanType();
-        ce.append_attribute("autoscan_type") = mapAutoscanType(autoscanType).c_str();
+        ce.append_attribute("autoscan_type") = mapAutoscanType(autoscanType).data();
 
         std::string url;
         if (UpnpXMLBuilder::renderContainerImage(server->getVirtualUrl(), cont, url)) {

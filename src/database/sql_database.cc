@@ -1777,7 +1777,7 @@ void SQLDatabase::updateConfigValue(const std::string& key, const std::string& i
 void SQLDatabase::updateAutoscanList(ScanMode scanmode, std::shared_ptr<AutoscanList> list)
 {
 
-    log_debug("setting persistent autoscans untouched - scanmode: {};", AutoscanDirectory::mapScanmode(scanmode).c_str());
+    log_debug("setting persistent autoscans untouched - scanmode: {};", AutoscanDirectory::mapScanmode(scanmode));
     std::ostringstream update;
     update << "UPDATE " << TQ(AUTOSCAN_TABLE)
            << " SET " << TQ("touched") << '=' << mapBool(false)

@@ -83,7 +83,7 @@ void web::edit_load::process()
         lmtEl.append_attribute("editable") = false;
     }
 
-    item.append_child("obj_type").append_child(pugi::node_pcdata).set_value(CdsObject::mapObjectType(obj->getObjectType()).c_str());
+    item.append_child("obj_type").append_child(pugi::node_pcdata).set_value(CdsObject::mapObjectType(obj->getObjectType()).data());
 
     auto metaData = item.append_child("metadata");
     xml2JsonHints->setArrayName(metaData, "metadata");

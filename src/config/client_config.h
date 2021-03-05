@@ -103,8 +103,8 @@ public:
     void copyTo(const std::shared_ptr<ClientConfig>& copy) const;
 
     /* helpers for clientType stuff */
-    static std::string mapClientType(ClientType clientType);
-    static std::string mapMatchType(ClientMatchType matchType);
+    static std::string_view mapClientType(ClientType clientType);
+    static std::string_view mapMatchType(ClientMatchType matchType);
     static ClientType remapClientType(const std::string& clientType);
     static int remapFlag(const std::string& flag);
     static std::string mapFlags(QuirkFlags flags);

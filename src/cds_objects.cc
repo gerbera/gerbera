@@ -236,7 +236,7 @@ void CdsContainer::validate()
         throw_std_runtime_error("validation failed"); */
 }
 
-std::string CdsObject::mapObjectType(unsigned int type)
+std::string_view CdsObject::mapObjectType(unsigned int type)
 {
     if (IS_CDS_CONTAINER(type))
         return STRING_OBJECT_TYPE_CONTAINER;

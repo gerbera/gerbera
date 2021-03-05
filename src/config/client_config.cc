@@ -127,57 +127,40 @@ void ClientConfigList::remove(size_t id, bool edit)
     }
 }
 
-std::string ClientConfig::mapClientType(ClientType clientType)
+std::string_view ClientConfig::mapClientType(ClientType clientType)
 {
-    std::string clientType_str;
     switch (clientType) {
     case ClientType::Unknown:
-        clientType_str = "None";
-        break;
+        return "None";
     case ClientType::BubbleUPnP:
-        clientType_str = "BubbleUPnP";
-        break;
+        return "BubbleUPnP";
     case ClientType::SamsungAllShare:
-        clientType_str = "SamsungAllShare";
-        break;
+        return "SamsungAllShare";
     case ClientType::SamsungSeriesQ:
-        clientType_str = "SamsungSeriesQ";
-        break;
+        return "SamsungSeriesQ";
     case ClientType::SamsungBDP:
-        clientType_str = "SamsungBDP";
-        break;
+        return "SamsungBDP";
     case ClientType::SamsungSeriesCDE:
-        clientType_str = "SamsungSeriesCDE";
-        break;
+        return "SamsungSeriesCDE";
     case ClientType::SamsungBDJ5500:
-        clientType_str = "SamsungBDJ5500";
-        break;
+        return "SamsungBDJ5500";
     case ClientType::StandardUPnP:
-        clientType_str = "StandardUPnP";
-        break;
-    default:
-        throw_std_runtime_error("illegal clientType given to mapClientType()");
+        return "StandardUPnP";
     }
-    return clientType_str;
+    throw_std_runtime_error("illegal clientType given to mapClientType()");
 }
 
-std::string ClientConfig::mapMatchType(ClientMatchType matchType)
+std::string_view ClientConfig::mapMatchType(ClientMatchType matchType)
 {
-    std::string matchType_str;
     switch (matchType) {
     case ClientMatchType::None:
-        matchType_str = "None";
-        break;
+        return "None";
     case ClientMatchType::UserAgent:
-        matchType_str = "UserAgent";
-        break;
+        return "UserAgent";
     case ClientMatchType::IP:
-        matchType_str = "IP";
-        break;
-    default:
-        throw_std_runtime_error("illegal matchType given to mapMatchType()");
+        return "IP";
     }
-    return matchType_str;
+    throw_std_runtime_error("illegal matchType given to mapMatchType()");
 }
 
 ClientType ClientConfig::remapClientType(const std::string& clientType)
