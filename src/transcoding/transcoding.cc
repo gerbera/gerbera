@@ -139,7 +139,6 @@ std::string TranscodingProfile::mapFourCcMode(avi_fourcc_listmode_t mode)
         return "ignore";
     case FCC_Process:
         return "process";
-    default:
-        return "disabled";
     }
+    return "disabled";
 }

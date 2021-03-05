@@ -156,8 +156,6 @@ static void get_jpeg_resolution(const std::unique_ptr<IOHandler>& ioh, int* w, i
             *w = Get16m(Data + 5);
             *h = Get16m(Data + 3);
             return;
-        default:
-            continue;
         }
     }
     throw_std_runtime_error("get_jpeg_resolution: resolution not found");

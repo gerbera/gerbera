@@ -183,9 +183,8 @@ std::unique_ptr<MetadataHandler> MetadataHandler::createHandler(const std::share
         return std::make_unique<SubtitleHandler>(context);
     case CH_RESOURCE:
         return std::make_unique<ResourceHandler>(context);
-    default:
-        throw_std_runtime_error("Unknown content handler ID: {}", handlerType);
     }
+    throw_std_runtime_error("Unknown content handler ID: {}", handlerType);
 }
 
 std::string MetadataHandler::getMimeType()
@@ -230,7 +229,6 @@ const char* MetadataHandler::mapContentHandler2String(int ch)
         return "Subtitle";
     case CH_RESOURCE:
         return "Resource";
-    default:
-        return "Unknown";
     }
+    return "Unknown";
 }

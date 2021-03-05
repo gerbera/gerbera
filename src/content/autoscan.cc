@@ -119,20 +119,15 @@ void AutoscanDirectory::setScanID(int id)
     timer_parameter->setID(id);
 }
 
-std::string AutoscanDirectory::mapScanmode(ScanMode scanmode)
+std::string_view AutoscanDirectory::mapScanmode(ScanMode scanmode)
 {
-    std::string scanmode_str;
     switch (scanmode) {
     case ScanMode::Timed:
-        scanmode_str = "timed";
-        break;
+        return "timed";
     case ScanMode::INotify:
-        scanmode_str = "inotify";
-        break;
-    default:
-        throw_std_runtime_error("Illegal scanmode ({}) given to mapScanmode()", scanmode);
+        return "inotify";
     }
-    return scanmode_str;
+    throw_std_runtime_error("Illegal scanmode ({}) given to mapScanmode()", scanmode);
 }
 
 ScanMode AutoscanDirectory::remapScanmode(const std::string& scanmode)

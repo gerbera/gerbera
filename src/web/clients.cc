@@ -67,7 +67,7 @@ void web::clients::process()
         item.append_attribute("name") = obj.pInfo->name.c_str();
         item.append_attribute("match") = obj.pInfo->match.c_str();
         item.append_attribute("flags") = ClientConfig::mapFlags(obj.pInfo->flags).c_str();
-        item.append_attribute("matchType") = ClientConfig::mapMatchType(obj.pInfo->matchType).c_str();
-        item.append_attribute("clientType") = ClientConfig::mapClientType(obj.pInfo->type).c_str();
+        item.append_attribute("matchType") = ClientConfig::mapMatchType(obj.pInfo->matchType).data();
+        item.append_attribute("clientType") = ClientConfig::mapClientType(obj.pInfo->type).data();
     }
 }

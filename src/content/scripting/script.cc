@@ -272,7 +272,7 @@ Script::Script(std::shared_ptr<ContentManager> content,
 
             duk_push_object(ctx);
             setProperty(ConfigSetup::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_LOCATION), adir->getLocation());
-            setProperty(ConfigSetup::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_MODE), AutoscanDirectory::mapScanmode(adir->getScanMode()));
+            setProperty(ConfigSetup::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_MODE), AutoscanDirectory::mapScanmode(adir->getScanMode()).data());
             setIntProperty(ConfigSetup::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_INTERVAL), adir->getInterval());
             setIntProperty(ConfigSetup::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_RECURSIVE), adir->getRecursive());
             setIntProperty(ConfigSetup::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES), adir->getHidden());
@@ -803,9 +803,10 @@ std::string Script::convertToCharset(const std::string& str, charset_convert_t c
         return _f2i->convert(str);
     case J2I:
         return _j2i->convert(str);
-    default:
+    case I2I:
         return _i2i->convert(str);
     }
+    throw_std_runtime_error("Illegal charset given to convertToCharset(): {}", chr);
 }
 
 std::shared_ptr<CdsObject> Script::getProcessedObject()
