@@ -536,6 +536,9 @@ void ContentManager::_removeObject(const std::shared_ptr<AutoscanDirectory>& adi
             parentRemoved = updateAttachedResources(adir, obj->getLocation().c_str(), parentPath, all);
         }
     }
+    // Removing a file can lead to virtual directories to drop empty and be removed
+    // So current container cache must be invalidated
+    containerMap.clear();
 
     if (!parentRemoved) {
         auto changedContainers = database->removeObject(objectID, all);
@@ -1038,6 +1041,7 @@ int ContentManager::addContainerTree(const std::vector<std::shared_ptr<CdsObject
     std::string tree;
     int result = INVALID_OBJECT_ID;
     std::vector<int> createdIds;
+
     for (const auto& item : chain) {
         if (item->getTitle().empty()) {
             log_error("Received chain item without title");
@@ -1048,9 +1052,14 @@ int ContentManager::addContainerTree(const std::vector<std::shared_ptr<CdsObject
         for (const auto& [key, val] : config->getDictionaryOption(CFG_IMPORT_LAYOUT_MAPPING)) {
             tree = std::regex_replace(tree, std::regex(key), val);
         }
-
-        database->addContainerChain(tree, item->getClass(), INVALID_OBJECT_ID, &result, createdIds, item->getMetadata());
-        assignFanArt({ result }, item);
+        if (containerMap.find(tree) == containerMap.end()) {
+            database->addContainerChain(tree, item->getClass(), INVALID_OBJECT_ID, &result, createdIds, item->getMetadata());
+            auto container = std::dynamic_pointer_cast<CdsContainer>(database->loadObject(result));
+            containerMap[tree] = container;
+        } else {
+            result = containerMap[tree]->getID();
+        }
+        assignFanArt({ containerMap[tree] }, item);
     }
 
     if (!createdIds.empty()) {
@@ -1089,10 +1098,21 @@ int ContentManager::addContainerChain(const std::string& chain, const std::strin
         }
     }
     int containerID = INVALID_OBJECT_ID;
-    database->addContainerChain(newChain, lastClass, lastRefID, &containerID, updateID, lastMetadata);
+    std::vector<std::shared_ptr<CdsContainer>> containerList;
+    if (containerMap.find(newChain) == containerMap.end()) {
+        database->addContainerChain(newChain, lastClass, lastRefID, &containerID, updateID, lastMetadata);
+
+        for (const auto& contId : updateID) {
+            auto container = std::dynamic_pointer_cast<CdsContainer>(database->loadObject(contId));
+            containerMap[container->getLocation()] = container;
+            containerList.emplace_back(container);
+        }
+    } else {
+        containerList.emplace_back(containerMap[newChain]);
+    }
 
     if (!updateID.empty()) {
-        assignFanArt(updateID, origObj);
+        assignFanArt(containerList, origObj);
         update_manager->containerChanged(updateID.back());
         session_manager->containerChangedUI(updateID.back());
     }
@@ -1100,13 +1120,11 @@ int ContentManager::addContainerChain(const std::string& chain, const std::strin
     return containerID;
 }
 
-void ContentManager::assignFanArt(const std::vector<int>& containerIds, const std::shared_ptr<CdsObject>& origObj)
+void ContentManager::assignFanArt(const std::vector<std::shared_ptr<CdsContainer>>& containerList, const std::shared_ptr<CdsObject>& origObj)
 {
     if (origObj != nullptr) {
         int count = 0;
-        for (const auto& contId : containerIds) {
-            auto container = database->loadObject(contId);
-
+        for (auto& container : containerList) {
             const std::vector<std::shared_ptr<CdsResource>>& resources = container->getResources();
             auto fanart = std::find_if(resources.begin(), resources.end(), [=](const auto& res) { return res->isMetaResource(ID3_ALBUM_ART); });
             if (fanart == resources.end()) {

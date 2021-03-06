@@ -321,6 +321,8 @@ protected:
     std::shared_ptr<UpdateManager> update_manager;
     std::shared_ptr<web::SessionManager> session_manager;
     std::shared_ptr<Context> context;
+    ///\brief cache for containers while creating new layout
+    std::map<std::string, std::shared_ptr<CdsContainer>> containerMap;
 
     std::shared_ptr<Timer> timer;
     std::shared_ptr<TaskProcessor> task_processor;
@@ -361,7 +363,7 @@ protected:
     void finishScan(DIR* dir, const std::shared_ptr<AutoscanDirectory>& adir, const std::string& location, time_t lmt);
     static void invalidateAddTask(const std::shared_ptr<GenericTask>& t, const fs::path& path);
 
-    void assignFanArt(const std::vector<int>& containerIds, const std::shared_ptr<CdsObject>& origObj);
+    void assignFanArt(const std::vector<std::shared_ptr<CdsContainer>>& containerList, const std::shared_ptr<CdsObject>& origObj);
 
     template <typename T>
     void updateCdsObject(std::shared_ptr<T>& item, const std::map<std::string, std::string>& parameters);
